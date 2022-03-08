@@ -1,0 +1,53 @@
+{
+  "name": "hyperbook",
+  "version": "0.0.0",
+  "author": "Mike Barkmin",
+  "homepage": "https://github.com/openpatch/hyperbook#readme",
+  "license": "MIT",
+  "bin": {
+    "hyperbook": "./dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/openpatch/hyperbook.git",
+    "directory": "packages/hyperbook"
+  },
+  "bugs": {
+    "url": "https://github.com/openpatch/hyperbook/issues"
+  },
+  "engines": {
+    "node": ">=12.22.0"
+  },
+  "scripts": {
+    "prebuild": "rimraf dist",
+    "version": "pnpm build",
+    "lint": "tsc --noEmit",
+    "test": "jest --env=jsdom --passWithNoTests",
+    "dev": "ncc build ./index.ts -w -o dist/",
+    "build": "ncc build ./index.ts -o ./dist/ --minify --no-cache --no-source-map-register"
+  },
+  "devDependencies": {
+    "@types/async-retry": "^1.4.3",
+    "@types/cross-spawn": "^6.0.2",
+    "@types/prompts": "^2.0.14",
+    "@types/rimraf": "^3.0.2",
+    "@types/tar": "^6.1.1",
+    "@vercel/ncc": "^0.33.3",
+    "async-retry": "^1.3.3",
+    "chalk": "5.0.0",
+    "commander": "^9.0.0",
+    "cpy": "^9.0.1",
+    "cross-spawn": "^7.0.3",
+    "got": "^12.0.1",
+    "prompts": "^2.4.2",
+    "rimraf": "3.0.2",
+    "tar": "^6.1.11",
+    "update-check": "^1.5.4"
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "compilerOptions": {
+    "target": "es2015",
+    "module": "esnext",
+    "lib": ["dom", "esnext"],
+    "noEmitOnError": true,
+    "declaration": true,
+    "declarationMap": false,
+
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+
+    "strict": true,
+    "noFallthroughCasesInSwitch": true,
+    "downlevelIteration": true,
+    "noImplicitAny": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "sourceMap": false,
+    "strictBindCallApply": true,
+    "strictFunctionTypes": true,
+    "strictNullChecks": true,
+    "strictPropertyInitialization": true,
+    "suppressImplicitAnyIndexErrors": true,
+    "jsx": "react-jsx",
+    "jsxImportSource": "@emotion/react",
+
+    "paths": {
+      "@bitflow/*": ["./packages/*"],
+      "@vocab/types": ["./node_modules/@vocab/types/"],
+      "@vocab/core": ["./node_modules/@vocab/core/"]
+    },
+
+    "typeRoots": ["node_modules/@types", "types"],
+
+    "plugins": [
+      {
+        "name": "typescript-styled-plugin"
+      }
+    ]
+  }
+}
