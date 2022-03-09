@@ -56,8 +56,13 @@ export default function BookPage({
       <div className="main-grid">
         <header>
           <div className="mobile-nav">
-            <button className="toggle" onClick={() => setIsOpen(!isOpen)}>
-              X
+            <button
+              className={isOpen ? "toggle change" : "toggle"}
+              onClick={() => setIsOpen(!isOpen)}
+            >
+              <div className="bar1"></div>
+              <div className="bar2"></div>
+              <div className="bar3"></div>
             </button>
             <Drawer
               isOpen={isOpen}

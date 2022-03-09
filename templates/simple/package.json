@@ -9,7 +9,6 @@
   },
   "dependencies": {
     "classnames": "^2.3.1",
-    "focus-trap-react": "^8.9.2",
     "gray-matter": "^4.0.3",
     "next": "12.1.0",
     "react": "17.0.2",

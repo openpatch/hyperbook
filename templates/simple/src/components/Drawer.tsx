@@ -1,6 +1,5 @@
 import { useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
-import FocusTrap from "focus-trap-react";
 import cn from "classnames";
 import { useMountTransition } from "../utils/useMountTransition";
 
@@ -78,20 +77,18 @@ const Drawer = ({
   }
 
   return createPortal(
-    <FocusTrap active={isOpen}>
-      <div
-        aria-hidden={isOpen ? "false" : "true"}
-        className={cn("drawer-container", {
-          open: isOpen,
-          in: isTransitioning,
-        })}
-      >
-        <div className={cn("drawer", position)} role="dialog">
-          {children}
-        </div>
-        <div className="backdrop" onClick={onClose} />
+    <div
+      aria-hidden={isOpen ? "false" : "true"}
+      className={cn("drawer-container", {
+        open: isOpen,
+        in: isTransitioning,
+      })}
+    >
+      <div className={cn("drawer", position)} role="dialog">
+        {children}
       </div>
-    </FocusTrap>,
+      <div className="backdrop" onClick={onClose} />
+    </div>,
     portalRootRef.current
   );
 };

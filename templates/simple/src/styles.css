@@ -64,9 +64,40 @@ a {
 }
 
 .mobile-nav {
+  display: none;
+  margin-left: 16px;
+}
+
+.mobile-nav .toggle {
+  font-size: 42px;
+  border: none;
+  background: none;
   width: 40px;
   height: 40px;
-  display: none;
+}
+.bar1,
+.bar2,
+.bar3 {
+  width: 35px;
+  height: 5px;
+  background-color: var(--color-secondary);
+  margin: 6px 0;
+  transition: 0.4s;
+}
+
+/* Rotate first bar */
+.change .bar1 {
+  transform: rotate(-45deg) translate(-8px, 8px);
+}
+
+/* Fade out the second bar */
+.change .bar2 {
+  opacity: 0;
+}
+
+/* Rotate last bar */
+.change .bar3 {
+  transform: rotate(45deg) translate(-8px, -8px);
 }
 
 @media screen and (max-width: 800px) {
@@ -275,9 +306,10 @@ article {
 header {
   display: flex;
   grid-area: header;
+  align-items: center;
   background: var(--color-primary);
   color: var(--color-secondary);
-  z-index: 99;
+  z-index: 1001;
   box-shadow: rgba(0, 0, 0, 0.24) 0px 1px 4px;
 }
 
@@ -508,43 +540,13 @@ nav > ul {
 }
 
 .drawer.left {
-  top: 0;
+  top: 80px;
   left: 0;
   transform: translateX(-105%);
 }
 
-.drawer.right {
-  top: 0;
-  right: 0;
-  transform: translateX(100%);
-}
-
-.drawer.top {
-  top: 0;
-  left: 0;
-  right: 0;
-  width: 100%;
-  transform: translateY(-100%);
-  height: 40%;
-}
-
-.drawer.bottom {
-  bottom: 0;
-  left: 0;
-  right: 0;
-  width: 100%;
-  transform: translateY(100%);
-  height: 40%;
-}
-
-.drawer-container.in.open .left,
-.drawer-container.in.open .right {
+.drawer-container.in.open .left {
   transform: translateX(0);
-}
-
-.drawer-container.in.open .top,
-.drawer-container.in.open .bottom {
-  transform: translateY(0);
 }
 
 .backdrop {
@@ -555,7 +557,7 @@ nav > ul {
     visibility var(--transition-speed) ease;
   width: 100%;
   height: 100%;
-  top: 0;
+  top: 80px;
   left: 0;
   position: fixed;
   pointer-events: none;
