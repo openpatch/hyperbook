@@ -10,7 +10,7 @@ type P = PageProps & Pick<NavigationProps, "current">;
 const Page = ({ name, href, current }: P) => {
   return (
     <Link href={href}>
-      <a className={current.href === href ? `page active` : "page"}>{name}</a>
+      <a className={current?.href === href ? `page active` : "page"}>{name}</a>
     </Link>
   );
 };
@@ -21,7 +21,9 @@ const Section = ({ name, href, pages, sections, current }: S) => {
   return (
     <div className="section">
       <Link href={href}>
-        <a className={current.href === href ? `name active` : "name"}>{name}</a>
+        <a className={current?.href === href ? `name active` : "name"}>
+          {name}
+        </a>
       </Link>
       <div className="links">
         <ul className="pages">

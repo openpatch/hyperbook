@@ -1,7 +1,12 @@
 import spawn from "cross-spawn";
 import path from "path";
+import { isSetup } from "./helpers/is-setup";
 
 export async function runBuild(): Promise<void> {
+  const setup = isSetup();
+  if (!setup) {
+    return;
+  }
   return new Promise((resolve, reject) => {
     const command = "npm";
     const args = ["run", "build"];

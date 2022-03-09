@@ -10,6 +10,14 @@ a {
   color: var(--color-secondary);
 }
 
+code {
+  background: #f3f3f3;
+  color: #444;
+  font-size: 85%;
+  padding: 0.2em 0.4em;
+  border-radius: 6px;
+}
+
 .main-grid {
   position: absolute;
   top: 0;
@@ -189,7 +197,6 @@ table tr {
 table th,
 table td {
   padding: 0.625em;
-  text-align: center;
 }
 
 table th {
@@ -375,11 +382,12 @@ p.hint.tip {
 }
 
 p.hint.tip::before {
-  content: "?";
+  content: "!";
   background-color: #27ab83;
 }
 
 p.hint.warn {
+  content: "?";
   border-left: 4px solid #f0b429;
 }
 
@@ -458,6 +466,8 @@ a.jump.previous::before {
   border-top: 1px solid var(--color-spacer);
   margin-top: 30px;
   padding-top: 30px;
+  max-width: 980px;
+  margin: 0 auto;
 }
 
 .meta .edit-github {
@@ -569,4 +579,20 @@ nav > ul {
   opacity: 1;
   pointer-events: auto;
   z-index: 999;
+}
+
+.video-container {
+  position: relative;
+  padding-bottom: 56.25%;
+  padding-top: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+.video-container iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
 }

@@ -12,9 +12,10 @@
     "lint": "pnpm -r lint",
     "version-packages": "changeset version",
     "release": "changeset publish",
-    "website:dev": "pnpm --filter website dev",
-    "website:build": "pnpm --filter website build",
-    "website:start": "pnpm --filter website start"
+    "website:dev": "cd website && pnpm hyperbook dev",
+    "website:build": "cd website && pnpm hyperbook build",
+    "website:start": "cd website && pnpm hyperbook start",
+    "website:setup": "cd website && pnpm hyperbook setup"
   },
   "devDependencies": {
     "@changesets/changelog-github": "0.4.3",

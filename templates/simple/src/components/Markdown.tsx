@@ -7,6 +7,7 @@ import remarkGemoji from "remark-gemoji";
 import remarkHint from "remark-hint";
 import rehypeKatex from "rehype-katex";
 import rehypeHighlight from "rehype-highlight";
+import directives from "../components/Directives";
 
 export type MarkdownProps = {
   children: string;
@@ -24,6 +25,11 @@ export const Markdown = (props: MarkdownProps) => {
         remarkGemoji,
         remarkHint,
       ]}
+      components={
+        {
+          ...directives,
+        } as any
+      }
       rehypePlugins={[rehypeKatex, rehypeHighlight]}
     />
   );

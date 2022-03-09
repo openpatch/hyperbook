@@ -21,3 +21,8 @@ $ \frac{1}{\Bigl(\sqrt{\phi \sqrt{5}}-\phi\Bigr) e^{\frac25 \pi}} \equiv 1+\frac
 !> Tip
 
 x> Error
+
+## Glossary
+
+Here are two terms :t[This is a term with a specific id]{#dog}
+:t[This is a auto term]. Both will be linked to the glossary.

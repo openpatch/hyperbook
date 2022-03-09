@@ -44,7 +44,6 @@ export const buildPackage = async (path) => {
     outbase: path + "/src",
     outdir: `${path}/dist`,
     jsxFactory: "jsx",
-    inject: [join(__dirname, "emotion-shim.js")],
     sourcemap: true,
     minify: false,
     bundle: true,

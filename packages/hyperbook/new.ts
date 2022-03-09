@@ -14,7 +14,7 @@ import { runSetup } from "./setup";
 export async function runNew({
   programName,
   bookPath,
-  template = "patches",
+  template,
 }: {
   programName: string;
   bookPath: string;

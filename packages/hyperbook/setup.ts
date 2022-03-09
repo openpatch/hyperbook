@@ -30,7 +30,8 @@ export async function runSetup(
   }
 
   if (!template) {
-    template = "patches";
+    template =
+      "https://github.com/openpatch/hyperbook/tree/main/templates/simple";
   }
 
   if (!repoInfo) {

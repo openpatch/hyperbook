@@ -21,7 +21,7 @@ export type Section = Page & {
 export type Navigation = {
   next: Page | null;
   previous: Page | null;
-  current: Page;
+  current: Page | null;
   pages: Page[];
   sections: Section[];
 };
@@ -127,7 +127,7 @@ export const getNavigation = async (
 
   const next = pageList[i + 1] || null;
   const previous = pageList[i - 1] || null;
-  const current = pageList[i];
+  const current = pageList[i] || null;
 
   return {
     next,
