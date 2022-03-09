@@ -1,13 +1,10 @@
 {
   "name": "Hyperbook Documentation",
   "description": "Documentation for Hyperbook created with Hyperbook",
-  "author": "Mike Barkmin",
+  "author": {
+    "name": "OpenPatch",
+    "url": "https://openpatch.org"
+  },
   "license": "CC-BY-SA",
-  "language": "en",
-  "links": [
-    {
-      "label": "OpenPatch",
-      "href": "https://openpatch.org"
-    }
-  ]
+  "language": "en"
 }

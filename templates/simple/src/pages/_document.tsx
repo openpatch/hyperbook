@@ -4,11 +4,8 @@ export default function Document() {
   return (
     <Html>
       <Head>
-        <link
-          rel="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/katex@0.15.0/dist/katex.min.css"
-          crossOrigin="anonymous"
-        />
+        <link rel="stylesheet" href="/katex/katex.min.css" />
+        <link rel="stylesheet" href="/hljs/hljs.min.css" />
       </Head>
       <body>
         <Main />

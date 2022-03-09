@@ -5,13 +5,12 @@ export type Hyperbook = {
   name: string;
   version: string;
   description?: string;
-  author: string;
+  author?: {
+    name: string;
+    url: string;
+  };
   license: string;
   logo?: string;
-  colors?: {
-    accent?: string;
-    header?: string;
-  };
   repo?: string;
   language: string;
   template?: string;

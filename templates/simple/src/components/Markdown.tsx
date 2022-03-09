@@ -3,9 +3,10 @@ import remarkDirective from "remark-directive";
 import remarkDirectiveRehype from "remark-directive-rehype";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
-import remarkEmoji from "remark-emoji";
+import remarkGemoji from "remark-gemoji";
 import remarkHint from "remark-hint";
 import rehypeKatex from "rehype-katex";
+import rehypeHighlight from "rehype-highlight";
 
 export type MarkdownProps = {
   children: string;
@@ -20,10 +21,10 @@ export const Markdown = (props: MarkdownProps) => {
         remarkDirectiveRehype,
         remarkGfm,
         remarkMath,
-        remarkEmoji,
+        remarkGemoji,
         remarkHint,
       ]}
-      rehypePlugins={[rehypeKatex]}
+      rehypePlugins={[rehypeKatex, rehypeHighlight]}
     />
   );
 };

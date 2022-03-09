@@ -1,0 +1,11 @@
+:root {
+  --color-background: white;
+  --color-text: black;
+  --color-primary: white;
+  --color-secondary: cornflowerblue;
+  --color-nav: whitesmoke;
+  --color-nav-border: grey;
+  --color-author-background: #dcdcdc;
+  --color-author-color: #939393;
+  --color-spacer: lightgrey;
+}

@@ -52,62 +52,76 @@ const getSectionsAndPages = async function (
   for (const file of files) {
     let p = path.join(dirPath, file);
     const { data } = readFile(p);
+    let repo: string | null;
+    if (hyperbook.repo) {
+      repo = hyperbook.repo + "/" + p;
+    }
+
     if (fs.statSync(p).isDirectory()) {
-      const {
-        pages,
-        sections,
-        pageList: pL,
-      } = await getSectionsAndPages(p, hyperbook, pageList);
+      const { pages, sections } = await getSectionsAndPages(
+        p,
+        hyperbook,
+        pageList
+      );
       const section = {
         ...data,
-        href: path.relative("book", p),
+        href: "/" + path.relative("book", p),
         pages,
         sections,
       };
+      if (repo) {
+        section.repo = repo + "/index.md";
+      }
 
       arrayOfSections.push(section);
-
-      pageList = [...pageList, ...pL];
     } else {
-      let repo: string | null;
-      if (hyperbook.repo) {
-        repo = hyperbook.repo + "/" + p;
-      }
-
-      if (p.endsWith("index.md")) {
-        p = p.substring(0, p.length - 8);
-      }
       if (p.endsWith(".md")) {
         p = p.substring(0, p.length - 3);
-      }
-      const page: Page = {
-        ...data,
-        href: "/" + path.relative("book", p),
-      };
-      if (repo) {
-        page.repo = repo;
-      }
+        if (path.relative("book", p) === "index") {
+          p = p.substring(0, p.length - 5);
+        }
+        if (!p.endsWith("index")) {
+          const page: Page = {
+            ...data,
+            href: "/" + path.relative("book", p),
+          };
+          if (repo) {
+            page.repo = repo;
+          }
 
-      arrayOfPages.push(page);
+          arrayOfPages.push(page);
+        }
+      }
     }
   }
 
   arrayOfPages = arrayOfPages.sort((a, b) => a.index - b.index);
-
-  pageList = [...arrayOfPages, ...pageList];
   arrayOfSections = arrayOfSections.sort((a, b) => a.index - b.index);
 
-  return { pages: arrayOfPages, sections: arrayOfSections, pageList };
+  return { pages: arrayOfPages, sections: arrayOfSections };
+};
+
+const getPageList = (sections: Section[], pages: Page[]): Page[] => {
+  let pageList = [...pages];
+
+  for (const section of sections) {
+    pageList = [
+      ...pageList,
+      section,
+      ...getPageList(section.sections, section.pages),
+    ];
+  }
+
+  return pageList;
 };
 
 export const getNavigation = async (
   currPath: string = "/"
 ): Promise<Navigation> => {
   const hyperbook = await getHyperbook();
-  const { sections, pages, pageList } = await getSectionsAndPages(
-    "book",
-    hyperbook
-  );
+  const { sections, pages } = await getSectionsAndPages("book", hyperbook);
+
+  const pageList = getPageList(sections, pages);
 
   const i = pageList.findIndex((p) => p.href === currPath);
 

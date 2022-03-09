@@ -4,14 +4,20 @@ import { GetStaticPaths, GetStaticProps } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import path from "path";
+import { useState } from "react";
+import Drawer from "../components/Drawer";
 import { Markdown } from "../components/Markdown";
+import { Navigation } from "../components/Navigation";
 import { getAllFiles } from "../utils/files";
 import { getHyperbook, Hyperbook } from "../utils/hyperbook";
-import { Page, Navigation, getNavigation } from "../utils/navigation";
+import {
+  Navigation as NavigationProps,
+  getNavigation,
+} from "../utils/navigation";
 
 type PageProps = {
   markdown: string;
-  navigation: Navigation;
+  navigation: NavigationProps;
   hyperbook: Hyperbook;
 };
 
@@ -21,6 +27,7 @@ export default function BookPage({
   navigation,
 }: PageProps) {
   const page = navigation.current;
+  const [isOpen, setIsOpen] = useState(false);
   return (
     <>
       <Head>
@@ -45,17 +52,32 @@ export default function BookPage({
         {page.keywords && (
           <meta name="keywords" content={page.keywords.join(",")} />
         )}
-        <style>
-          {`
-          :root {
-            --accent-color: ${hyperbook.colors?.accent || "cornflowerBlue"};
-            --header-color: ${hyperbook.colors?.header || "#041126"};
-          }`}
-        </style>
       </Head>
       <div className="main-grid">
         <header>
-          <nav className="header"></nav>
+          <div className="mobile-nav">
+            <button className="toggle" onClick={() => setIsOpen(!isOpen)}>
+              X
+            </button>
+            <Drawer
+              isOpen={isOpen}
+              onClose={() => setIsOpen(false)}
+              position="left"
+            >
+              <div id="mobile-sidebar">
+                <Navigation {...navigation} />
+                {hyperbook.author ? (
+                  <a className="author" href={hyperbook.author.url}>
+                    {hyperbook.author.name}
+                  </a>
+                ) : (
+                  <a className="author" href="https://hyperbook.openpatch.org">
+                    Powered by <b>Hyperbook</b>
+                  </a>
+                )}
+              </div>
+            </Drawer>
+          </div>
           <Link href="/">
             <a className="branding">
               {hyperbook.logo && (
@@ -67,7 +89,18 @@ export default function BookPage({
           <div className="header-links"></div>
           <div className="search"></div>
         </header>
-        <nav className="sidebar">nav</nav>
+        <div className="sidebar">
+          <Navigation {...navigation} />
+          {hyperbook.author ? (
+            <a className="author" href={hyperbook.author.url}>
+              {hyperbook.author.name}
+            </a>
+          ) : (
+            <a className="author" href="https://hyperbook.openpatch.org">
+              Powered by <b>Hyperbook</b>
+            </a>
+          )}
+        </div>
         <main>
           <article>
             <Markdown children={markdown} />
