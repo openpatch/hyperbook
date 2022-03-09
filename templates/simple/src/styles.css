@@ -464,10 +464,10 @@ a.jump.previous::before {
 
 .meta {
   border-top: 1px solid var(--color-spacer);
+  margin: 0 auto;
   margin-top: 30px;
   padding-top: 30px;
   max-width: 980px;
-  margin: 0 auto;
 }
 
 .meta .edit-github {
@@ -595,4 +595,22 @@ nav > ul {
   left: 0;
   width: 100%;
   height: 100%;
+}
+
+.glossary .letter {
+  font-size: 24px;
+}
+
+.glossary .term {
+  list-style-type: none;
+  text-decoration: none;
+}
+
+.glossary .terms {
+  padding-left: 1em;
+  border-left: 1px solid var(--color-spacer);
+}
+
+.pages {
+  margin-top: 30px;
 }

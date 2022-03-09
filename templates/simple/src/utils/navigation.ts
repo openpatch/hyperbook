@@ -26,7 +26,7 @@ export type Navigation = {
   sections: Section[];
 };
 
-const readFile = (filePath: string) => {
+export const readFile = (filePath: string) => {
   let source: Buffer;
   filePath = path.join(process.cwd(), filePath);
   try {

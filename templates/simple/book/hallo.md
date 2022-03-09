@@ -4,4 +4,4 @@ hide: false
 index: 1
 ---
 
-Das ist ein Test
+Das ist ein Test :t[dog]

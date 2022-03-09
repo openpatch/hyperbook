@@ -4,9 +4,16 @@ import fs from "fs";
 import { Layout } from "../../components/Layout";
 import { getAllFiles } from "../../utils/files";
 import matter from "gray-matter";
-import { getNavigation, Navigation, Page } from "../../utils/navigation";
+import {
+  getNavigation,
+  Navigation,
+  Page,
+  readFile,
+} from "../../utils/navigation";
 import { getHyperbook, Hyperbook } from "../../utils/hyperbook";
 import { Markdown } from "../../components/Markdown";
+import Link from "next/link";
+import { Fragment } from "react";
 
 type TermProps = {
   markdown: string;
@@ -29,6 +36,16 @@ export default function Term({
     <Layout navigation={navigation} hyperbook={hyperbook} page={term}>
       <article>
         <Markdown children={markdown} />
+        <div className="pages">
+          {term.pages.map((p, i) => (
+            <Fragment key={p.href}>
+              {i > 0 && ", "}
+              <Link href={p.href}>
+                <a>{p.name}</a>
+              </Link>
+            </Fragment>
+          ))}
+        </div>
       </article>
     </Layout>
   );
@@ -49,11 +66,36 @@ export const getStaticProps: GetStaticProps<
   const navigation = await getNavigation(href);
   const hyperbook = await getHyperbook();
 
+  const files = getAllFiles("book");
+  const pages: Page[] = [];
+  for (const file of files) {
+    const { content, data } = readFile(file);
+    const r = new RegExp(
+      `:t\\[.*\\]\\{#${params.term}\\}|:t\\[${params.term}\\]`
+    );
+    const m = content.match(r);
+    if (m) {
+      const relativePath = path
+        .relative("book", file)
+        .replace(/\.mdx?$/, "")
+        .split("/");
+      const isIndex = relativePath[relativePath.length - 1] === "index";
+      if (isIndex) {
+        relativePath.pop();
+      }
+      pages.push({
+        ...data,
+        href: "/" + relativePath.join("/"),
+      });
+    }
+  }
+
   return {
     props: {
       term: {
         ...(data as TermProps["term"]),
         repo: hyperbook.repo + href + ".md",
+        pages,
       },
       markdown: content,
       navigation,

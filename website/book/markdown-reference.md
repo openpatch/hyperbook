@@ -67,6 +67,18 @@ Just like in most chat apps you can insert an emoji by using its name.
 
 ::youtube[Costa Rica]{#LXb3EKWsInQ}
 
+### Glossary
+
+You can keep a glossary of important terms. Just fill the folder
+`glossary` with markdown files. The name of the file will be the key of
+the term. You can then reference the terms like so:
+
+```md
+:t[Object-oriented Programming]{#oop}
+```
+
+:t[Object-oriented Programming]{#oop}
+
 ## Basic Markdown Syntax
 
 ?> The following basic markdown syntax reference was created by [adam-p](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet#inline-html) and is licensed under [CC-BY](https://creativecommons.org/licenses/by/3.0/).
