@@ -83,15 +83,9 @@ export function Layout({ hyperbook, navigation, page, children }: LayoutProps) {
         </header>
         <div className="sidebar">
           <Navigation {...navigation} />
-          {hyperbook.author ? (
-            <a className="author" href={hyperbook.author.url}>
-              {hyperbook.author.name}
-            </a>
-          ) : (
-            <a className="author" href="https://hyperbook.openpatch.org">
-              Powered by <b>Hyperbook</b>
-            </a>
-          )}
+          <a className="author" href="https://hyperbook.openpatch.org">
+            Powered by <b>Hyperbook</b>
+          </a>
         </div>
         <main>
           {children}
@@ -100,6 +94,12 @@ export function Layout({ hyperbook, navigation, page, children }: LayoutProps) {
               <a className="edit-github" href={page.repo}>
                 ✎ GitHub
               </a>
+            )}
+            {hyperbook.author && (
+              <span className="copyright">
+                © Copyright {new Date().getFullYear()}.{" "}
+                <a href={hyperbook.author.url}>{hyperbook.author.name}</a>.
+              </span>
             )}
           </div>
         </main>

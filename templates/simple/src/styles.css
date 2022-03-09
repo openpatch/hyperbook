@@ -10,6 +10,20 @@ a {
   color: var(--color-secondary);
 }
 
+a.heading {
+  position: relative;
+  text-decoration: none;
+}
+
+a.heading:hover::before {
+  position: absolute;
+  content: "📎";
+  font-size: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  left: -16px;
+}
+
 code {
   background: #f3f3f3;
   color: #444;
@@ -314,8 +328,7 @@ header {
   display: flex;
   grid-area: header;
   align-items: center;
-  background: var(--color-primary);
-  color: var(--color-secondary);
+  background: var(--color-secondary);
   z-index: 1001;
   box-shadow: rgba(0, 0, 0, 0.24) 0px 1px 4px;
 }
@@ -324,6 +337,7 @@ header {
   text-decoration: none;
   display: flex;
   padding: 20px;
+  color: var(--color-primary);
   align-items: center;
 }
 
@@ -463,6 +477,7 @@ a.jump.previous::before {
 }
 
 .meta {
+  display: flex;
   border-top: 1px solid var(--color-spacer);
   margin: 0 auto;
   margin-top: 30px;
@@ -472,6 +487,7 @@ a.jump.previous::before {
 
 .meta .edit-github {
   text-decoration: none;
+  flex: 1;
 }
 
 .section ul,
