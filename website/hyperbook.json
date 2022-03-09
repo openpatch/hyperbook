@@ -6,5 +6,6 @@
     "url": "https://openpatch.org"
   },
   "license": "CC-BY-SA",
-  "language": "en"
+  "language": "en",
+  "repo": "https://github.com/openpatch/hyperbook/blob/main/website"
 }
