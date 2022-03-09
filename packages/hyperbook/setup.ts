@@ -78,9 +78,14 @@ export async function runSetup(
 
   rimraf.sync(path.join(nextRoot, "book"));
   rimraf.sync(path.join(nextRoot, "public"));
+  rimraf.sync(path.join(nextRoot, "glossary"));
   rimraf.sync(path.join(nextRoot, "hyperbook.json"));
   await makeSymlink(path.join(root, "book"), path.join(nextRoot, "book"));
   await makeSymlink(path.join(root, "public"), path.join(nextRoot, "public"));
+  await makeSymlink(
+    path.join(root, "glossary"),
+    path.join(nextRoot, "glossary")
+  );
   await makeSymlink(
     path.join(root, "hyperbook.json"),
     path.join(nextRoot, "hyperbook.json")
