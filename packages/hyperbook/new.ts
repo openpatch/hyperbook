@@ -80,21 +80,28 @@ export async function runNew({
 
   process.chdir(root);
 
-  const description = await prompts({
+  const { description } = await prompts({
     type: "text",
     name: "description",
     message: "What is your book about?",
     initial: "",
   });
 
-  const author = await prompts({
+  const { author } = await prompts({
     type: "text",
     name: "author",
     message: "Who is the author of the book?",
     initial: "",
   });
 
-  const language = await prompts({
+  const { authorUrl } = await prompts({
+    type: "text",
+    name: "authorUrl",
+    message: "What is the link to the authors homepage?",
+    initial: "",
+  });
+
+  const { language } = await prompts({
     type: "text",
     name: "language",
     message:
@@ -106,10 +113,12 @@ export async function runNew({
     name: bookName,
     version: "0.0.0",
     description: description,
-    author: author,
+    author: {
+      name: author,
+      url: authorUrl,
+    },
     license: "CC-BY-SA",
     language: language,
-    template,
   };
 
   fs.writeFileSync(
