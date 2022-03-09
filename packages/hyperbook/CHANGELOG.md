@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.1.2
+
+### Patch Changes
+
+- [`c5a3fdb`](https://github.com/openpatch/hyperbook/commit/c5a3fdbff48374b303f3fdd1f65949b955c37613) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add missing files
+
 ## 0.1.1
 
 ### Patch Changes
