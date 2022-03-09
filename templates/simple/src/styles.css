@@ -102,7 +102,7 @@ code {
 .bar3 {
   width: 35px;
   height: 5px;
-  background-color: var(--color-secondary);
+  background-color: var(--color-primary);
   margin: 6px 0;
   transition: 0.4s;
 }
