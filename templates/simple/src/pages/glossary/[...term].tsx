@@ -90,13 +90,18 @@ export const getStaticProps: GetStaticProps<
     }
   }
 
+  const term: TermProps["term"] = {
+    ...(data as TermProps["term"]),
+    pages,
+  };
+
+  if (hyperbook.repo) {
+    term.repo = hyperbook.repo + href + ".md";
+  }
+
   return {
     props: {
-      term: {
-        ...(data as TermProps["term"]),
-        repo: hyperbook.repo + href + ".md",
-        pages,
-      },
+      term,
       markdown: content,
       navigation,
       hyperbook,
