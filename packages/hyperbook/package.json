@@ -27,7 +27,6 @@
   "scripts": {
     "version": "pnpm build",
     "lint": "tsc --noEmit",
-    "test": "jest --env=jsdom --passWithNoTests",
     "dev": "ncc build ./index.ts -w -o dist/",
     "build": "rimraf dist && ncc build ./index.ts -o ./dist/ --minify --no-cache --no-source-map-register"
   },

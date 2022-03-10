@@ -28,8 +28,6 @@ jobs:
         run: pnpm install
       - name: Build packages
         run: pnpm build
-      - name: Test packages
-        run: pnpm test
 
       - name: Create Release Pull Request or Publish to npm
         uses: changesets/action@v1
