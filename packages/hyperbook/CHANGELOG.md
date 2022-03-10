@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.1.3
+
+### Patch Changes
+
+- [`1bf960b`](https://github.com/openpatch/hyperbook/commit/1bf960bf5843777ee5e47ba0848d45a7ea94e200) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add missing template folder to dist directory
+
 ## 0.1.2
 
 ### Patch Changes
