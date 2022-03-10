@@ -12,13 +12,13 @@ export type Page = {
   repo?: string;
   hide?: boolean;
   index?: number;
+  isEmpty?: boolean;
   href: string;
 };
 
 export type Section = Page & {
   pages: Page[]; // md-files
   sections: Section[]; // folders
-  isEmpty?: boolean;
 };
 
 export type Navigation = {
@@ -122,10 +122,11 @@ export const getNavigation = async (
 
   let pageList = getPageList(sections, pages);
 
-  const i = pageList.findIndex((p) => p.href === currPath);
+  let i = pageList.findIndex((p) => p.href === currPath);
   const current = pageList[i] || null;
 
-  pageList = pageList.filter((p) => !p.hide);
+  pageList = pageList.filter((p) => !p.isEmpty);
+  i = pageList.findIndex((p) => p.href === currPath);
 
   const next = pageList[i + 1] || null;
   const previous = pageList[i - 1] || null;
