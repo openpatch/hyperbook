@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.2.0
+
+### Minor Changes
+
+- [`1c8ce7e`](https://github.com/openpatch/hyperbook/commit/1c8ce7e4da5d0707517a8b3e131093d1614df5a7) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add basePath option for deploying to subdirectories.
+
 ## 0.1.3
 
 ### Patch Changes
