@@ -1,6 +1,5 @@
 import Head from "next/head";
 import Link from "next/link";
-import Image from "next/image";
 import { ReactNode, useState } from "react";
 import { Hyperbook } from "../utils/hyperbook";
 import { Navigation as NavigationProps, Page } from "../utils/navigation";
@@ -12,6 +11,23 @@ export type LayoutProps = {
   navigation: NavigationProps;
   page: Pick<Page, "name" | "repo" | "description" | "keywords">;
   children: ReactNode;
+};
+
+const relativeUrl = (url: string, hyperbook: Hyperbook) => {
+  const { basePath } = hyperbook;
+  if (
+    process.env.NODE_ENV !== "production" &&
+    basePath &&
+    url.startsWith("/")
+  ) {
+    if (basePath.endsWith("/")) {
+      return basePath.slice(0, -1) + url;
+    } else {
+      return basePath + url;
+    }
+  } else {
+    return url;
+  }
 };
 
 export function Layout({ hyperbook, navigation, page, children }: LayoutProps) {
@@ -75,11 +91,11 @@ export function Layout({ hyperbook, navigation, page, children }: LayoutProps) {
             <a className="branding">
               {hyperbook.logo && (
                 <div className="logo">
-                  <Image
+                  <img
                     alt="Logo"
-                    width={50}
+                    width="auto"
                     height={50}
-                    src={hyperbook.logo}
+                    src={relativeUrl(hyperbook.logo, hyperbook)}
                   />
                 </div>
               )}

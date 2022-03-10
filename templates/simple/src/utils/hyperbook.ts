@@ -3,16 +3,17 @@ import path from "path";
 
 export type Hyperbook = {
   name: string;
-  version: string;
+  version?: string;
   description?: string;
   author?: {
     name: string;
     url: string;
   };
-  license: string;
+  license?: string;
   logo?: string;
   repo?: string;
-  language: string;
+  language?: string;
+  basePath?: string;
   template?: string;
 };
 
