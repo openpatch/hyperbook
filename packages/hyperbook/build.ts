@@ -1,11 +1,24 @@
 import spawn from "cross-spawn";
 import path from "path";
+import fs from "fs";
 import { isSetup } from "./helpers/is-setup";
+import { readHyperbook } from "./helpers/read-hyperbook";
 
 export async function runBuild(): Promise<void> {
   const setup = isSetup();
   if (!setup) {
     return;
+  }
+  const hyperbook = await readHyperbook();
+  if (hyperbook?.basePath) {
+    fs.writeFileSync(
+      path.join(process.cwd(), ".hyperbook", "next.config.js"),
+      `
+module.exports = {
+    basePath: '${hyperbook.basePath}',
+}
+      `
+    );
   }
   return new Promise((resolve, reject) => {
     const command = "npm";

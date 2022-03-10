@@ -9,9 +9,24 @@ import rehypeKatex from "rehype-katex";
 import rehypeHighlight from "rehype-highlight";
 import directives from "../components/Directives";
 import { Headings } from "./Headings";
+import Link from "next/link";
 
 export type MarkdownProps = {
   children: string;
+};
+
+type MarkdownLinkProps = {
+  href: string;
+  title: string;
+  children: any;
+};
+
+const MarkdownLink = ({ href, title, children }: MarkdownLinkProps) => {
+  return (
+    <Link href={href}>
+      <a title={title}>{children}</a>
+    </Link>
+  );
 };
 
 export const Markdown = (props: MarkdownProps) => {
@@ -30,6 +45,7 @@ export const Markdown = (props: MarkdownProps) => {
       components={
         {
           ...directives,
+          a: MarkdownLink,
           h1: Headings,
           h2: Headings,
           h3: Headings,

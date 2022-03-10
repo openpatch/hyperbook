@@ -4,6 +4,7 @@ import path from "path";
 
 export async function readHyperbook(): Promise<{
   template?: string;
+  basePath?: string;
 }> {
   return new Promise((resolve, reject) => {
     fs.readFile(path.join(process.cwd(), "hyperbook.json"), (err, data) => {

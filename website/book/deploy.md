@@ -40,6 +40,8 @@ Now you have everything setup. Enjoy your Hyperbook!
 
 ## Deploy on GitHub Pages
 
+?> Remember to add a basePath to your [configuration](/configuration), when deploying to GitHub pages.
+
 For GitHub Pages you can use the following action:
 
 ```yaml
