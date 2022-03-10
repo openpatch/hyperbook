@@ -12,6 +12,8 @@ markdown to static pages.
 Hyperbook makes writing interactive workbooks super simple while providing a
 good feature set.
 
+You do not need any coding experience. You only need to create and edit Markdown files.
+
 ## Getting Started
 
 1. Run `npx hyperbook new` and follow the wizard to create your first Hyperbook.
@@ -19,3 +21,11 @@ good feature set.
 1. Modify or add new pages to your Hyperbook.
 1. Run `npx hyperbook build` to create static HTML files.
 1. Upload the static HTML files to your server.
+
+## Support
+
+We are [happy to hear from you](mailto:contact@openpatch.org), if you need custom support or features for your application.
+
+---
+
+Hyperbook is maintained by [OpenPatch](https://openpatch.org), an organization for educational assessments and training. If you need help or create a Hyperbook [get in touch](mailto:contact@openpatch.org).

@@ -5,85 +5,11 @@ index: 2
 
 # Markdown Reference
 
-Here are the Markdown features you can use. Our Markdown syntax is based on
-GitHub's flavored Markdown. First you will see our advanced Markdown syntax and
-further below you can also find a guide for the basic Markdown syntax.
-
-## Advanced Markdown Syntax
-
-### Hints
-
-Hints are a great way to get the attention of a reader.
-
-```md
-x> Error
-?> Warning
-!> Info
-```
-
-x> Error
-
-?> Warning
-
-!> Info
-
-### Math
-
-Sometimes you wished for $ \LaTeX $ but then you remember you are writing in Markdown. No problem, we have added KaTeX support.
-
-```md
-$$
-f(x) = \int_{-\infty}^\infty\hat f(\xi)\,e^{2 \pi i \xi x}\,d\xi
-$$
-```
-
-$$
-f(x) = \int_{-\infty}^\infty\hat f(\xi)\,e^{2 \pi i \xi x}\,d\xi
-$$
-
-You can also use KaTeX inline.
-
-```md
-This is a $ \Delta $. :smiley:
-```
-
-This is a $ \Delta $. :smiley:
-
-### Emoji
-
-Just like in most chat apps you can insert an emoji by using its name.
-
-```md
-:smiley: :apple: :penguin:
-```
-
-:smiley: :apple: :penguin:
-
-### YouTube
-
-```md
-::youtube[Costa Rica]{#LXb3EKWsInQ}
-```
-
-::youtube[Costa Rica]{#LXb3EKWsInQ}
-
-### Glossary
-
-You can keep a glossary of important terms. Just fill the folder
-`glossary` with markdown files. The name of the file will be the key of
-the term. You can then reference the terms like so:
-
-```md
-:t[Object-oriented Programming]{#oop}
-```
-
-:t[Object-oriented Programming]{#oop}
-
-## Basic Markdown Syntax
-
 ?> The following basic markdown syntax reference was created by [adam-p](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet#inline-html) and is licensed under [CC-BY](https://creativecommons.org/licenses/by/3.0/).
 
 This is intended as a quick reference and showcase. For more complete info, see [John Gruber's original spec](http://daringfireball.net/projects/markdown/) and the [Github-flavored Markdown info page](http://github.github.com/github-flavored-markdown/).
+
+For advanced - specific to Hyperbook - Markdown syntax check out the elements category.
 
 ### Headers
 
