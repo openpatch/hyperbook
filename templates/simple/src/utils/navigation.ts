@@ -1,7 +1,9 @@
 import fs from "fs";
 import matter from "gray-matter";
 import path from "path";
-import hyperbook from "../../hyperbook.json";
+import { getHyperbook } from "./hyperbook";
+
+const hyperbook = getHyperbook();
 
 export type Page = {
   name: string;

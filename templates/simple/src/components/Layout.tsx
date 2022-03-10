@@ -1,10 +1,12 @@
 import Head from "next/head";
 import Link from "next/link";
 import { ReactNode, useState } from "react";
+import { getHyperbook } from "../utils/hyperbook";
 import { Navigation as NavigationProps, Page } from "../utils/navigation";
 import Drawer from "./Drawer";
 import { Navigation } from "./Navigation";
-import hyperbook from "../../hyperbook.json";
+
+const hyperbook = getHyperbook();
 
 export type LayoutProps = {
   navigation: NavigationProps;

@@ -1,4 +1,6 @@
-import config from "../../hyperbook.json";
+import { getHyperbook } from "../utils/hyperbook";
+
+const config = getHyperbook();
 
 export const Image = ({ src, title, node, ...props }) => {
   const { basePath } = config;
