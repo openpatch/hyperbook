@@ -6,7 +6,6 @@ import path from "path";
 import { Layout } from "../components/Layout";
 import { Markdown } from "../components/Markdown";
 import { getAllFiles } from "../utils/files";
-import { getHyperbook, Hyperbook } from "../utils/hyperbook";
 import {
   Navigation as NavigationProps,
   getNavigation,
@@ -15,17 +14,12 @@ import {
 type PageProps = {
   markdown: string;
   navigation: NavigationProps;
-  hyperbook: Hyperbook;
 };
 
-export default function BookPage({
-  markdown,
-  hyperbook,
-  navigation,
-}: PageProps) {
+export default function BookPage({ markdown, navigation }: PageProps) {
   const page = navigation.current;
   return (
-    <Layout hyperbook={hyperbook} navigation={navigation} page={page}>
+    <Layout navigation={navigation} page={page}>
       <article>
         <Markdown children={markdown} />
       </article>
@@ -70,13 +64,11 @@ export const getStaticProps: GetStaticProps<
   const { content } = matter(source);
 
   const navigation = await getNavigation(href);
-  const hyperbook = await getHyperbook();
 
   return {
     props: {
       markdown: content,
       navigation,
-      hyperbook,
     },
   };
 };

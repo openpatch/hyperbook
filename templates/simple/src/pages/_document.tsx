@@ -1,8 +1,9 @@
 import { Html, Head, Main, NextScript } from "next/document";
+import config from "../../hyperbook.json";
 
 export default function Document() {
   return (
-    <Html>
+    <Html lang={config.language || "en"}>
       <Head>
         <link
           rel="stylesheet"

@@ -5,10 +5,12 @@ import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 import remarkGemoji from "remark-gemoji";
 import remarkHint from "remark-hint";
+import remarkUnwrapImages from "remark-unwrap-images";
 import rehypeKatex from "rehype-katex";
 import rehypeHighlight from "rehype-highlight";
 import directives from "../components/Directives";
 import { Headings } from "./Headings";
+import { Image } from "./Image";
 import Link from "next/link";
 
 export type MarkdownProps = {
@@ -36,6 +38,7 @@ export const Markdown = (props: MarkdownProps) => {
       remarkPlugins={[
         remarkDirective,
         remarkDirectiveRehype,
+        remarkUnwrapImages,
         remarkGfm,
         remarkMath,
         remarkGemoji,
@@ -52,6 +55,7 @@ export const Markdown = (props: MarkdownProps) => {
           h4: Headings,
           h5: Headings,
           h6: Headings,
+          img: Image,
         } as any
       }
       rehypePlugins={[rehypeKatex, rehypeHighlight]}

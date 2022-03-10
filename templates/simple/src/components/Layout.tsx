@@ -1,19 +1,18 @@
 import Head from "next/head";
 import Link from "next/link";
 import { ReactNode, useState } from "react";
-import { Hyperbook } from "../utils/hyperbook";
 import { Navigation as NavigationProps, Page } from "../utils/navigation";
 import Drawer from "./Drawer";
 import { Navigation } from "./Navigation";
+import hyperbook from "../../hyperbook.json";
 
 export type LayoutProps = {
-  hyperbook: Hyperbook;
   navigation: NavigationProps;
   page: Pick<Page, "name" | "repo" | "description" | "keywords">;
   children: ReactNode;
 };
 
-const relativeUrl = (url: string, hyperbook: Hyperbook) => {
+const relativeUrl = (url: string) => {
   const { basePath } = hyperbook;
   if (
     process.env.NODE_ENV !== "production" &&
@@ -30,7 +29,7 @@ const relativeUrl = (url: string, hyperbook: Hyperbook) => {
   }
 };
 
-export function Layout({ hyperbook, navigation, page, children }: LayoutProps) {
+export function Layout({ navigation, page, children }: LayoutProps) {
   const [isOpen, setIsOpen] = useState(false);
   return (
     <>
@@ -95,7 +94,7 @@ export function Layout({ hyperbook, navigation, page, children }: LayoutProps) {
                     alt="Logo"
                     width="auto"
                     height={50}
-                    src={relativeUrl(hyperbook.logo, hyperbook)}
+                    src={relativeUrl(hyperbook.logo)}
                   />
                 </div>
               )}

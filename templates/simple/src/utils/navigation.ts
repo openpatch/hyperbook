@@ -1,7 +1,7 @@
 import fs from "fs";
 import matter from "gray-matter";
 import path from "path";
-import { getHyperbook, Hyperbook } from "./hyperbook";
+import hyperbook from "../../hyperbook.json";
 
 export type Page = {
   name: string;
@@ -43,7 +43,6 @@ export const readFile = (filePath: string) => {
 
 const getSectionsAndPages = async function (
   dirPath: string,
-  hyperbook: Hyperbook,
   pageList: Page[] = []
 ) {
   const files = fs.readdirSync(path.join(process.cwd(), dirPath));
@@ -58,11 +57,7 @@ const getSectionsAndPages = async function (
     }
 
     if (fs.statSync(p).isDirectory()) {
-      const { pages, sections } = await getSectionsAndPages(
-        p,
-        hyperbook,
-        pageList
-      );
+      const { pages, sections } = await getSectionsAndPages(p, pageList);
       const { content, data } = readFile(p);
       const section = {
         ...data,
@@ -121,8 +116,7 @@ const getPageList = (sections: Section[], pages: Page[]): Page[] => {
 export const getNavigation = async (
   currPath: string = "/"
 ): Promise<Navigation> => {
-  const hyperbook = await getHyperbook();
-  const { sections, pages } = await getSectionsAndPages("book", hyperbook);
+  const { sections, pages } = await getSectionsAndPages("book");
 
   const pageList = getPageList(sections, pages);
 

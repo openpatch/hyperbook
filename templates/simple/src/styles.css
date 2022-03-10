@@ -6,6 +6,19 @@ body {
   color: var(--color-text);
 }
 
+figure {
+  text-align: center;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+figcaption {
+  font-style: italic;
+  font-size: 14px;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
 a {
   color: var(--color-secondary);
 }

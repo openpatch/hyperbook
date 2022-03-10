@@ -10,15 +10,14 @@ import {
   Page,
   readFile,
 } from "../../utils/navigation";
-import { getHyperbook, Hyperbook } from "../../utils/hyperbook";
 import { Markdown } from "../../components/Markdown";
 import Link from "next/link";
 import { Fragment } from "react";
+import hyperbook from "../../../hyperbook.json";
 
 type TermProps = {
   markdown: string;
   navigation: Navigation;
-  hyperbook: Hyperbook;
   term: {
     name: string;
     repo: string;
@@ -26,14 +25,9 @@ type TermProps = {
   };
 };
 
-export default function Term({
-  markdown,
-  navigation,
-  hyperbook,
-  term,
-}: TermProps) {
+export default function Term({ markdown, navigation, term }: TermProps) {
   return (
-    <Layout navigation={navigation} hyperbook={hyperbook} page={term}>
+    <Layout navigation={navigation} page={term}>
       <article>
         <Markdown children={markdown} />
         <div className="pages">
@@ -64,7 +58,6 @@ export const getStaticProps: GetStaticProps<
   const { content, data } = matter(source);
 
   const navigation = await getNavigation(href);
-  const hyperbook = await getHyperbook();
 
   const files = getAllFiles("book");
   const pages: Page[] = [];

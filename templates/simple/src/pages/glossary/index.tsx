@@ -1,11 +1,9 @@
 import { GetStaticProps } from "next";
-import path from "path";
 import fs from "fs";
 import { getAllFiles } from "../../utils/files";
 import matter from "gray-matter";
 import { Layout } from "../../components/Layout";
 import { getNavigation, Navigation } from "../../utils/navigation";
-import { getHyperbook, Hyperbook } from "../../utils/hyperbook";
 import Link from "next/link";
 
 export type Term = {
@@ -16,18 +14,12 @@ export type Term = {
 export type GlossaryProps = {
   navigation: Navigation;
   terms: Record<string, Term[]>;
-  hyperbook: Hyperbook;
 };
 
-export default function Glossary({
-  terms,
-  navigation,
-  hyperbook,
-}: GlossaryProps) {
+export default function Glossary({ terms, navigation }: GlossaryProps) {
   return (
     <Layout
       navigation={navigation}
-      hyperbook={hyperbook}
       page={{
         name: "Glossary",
       }}
@@ -74,8 +66,7 @@ export const getStaticProps: GetStaticProps<{
     });
   }
 
-  const hyperbook = await getHyperbook();
   const navigation = await getNavigation();
 
-  return { props: { terms, hyperbook, navigation } };
+  return { props: { terms, navigation } };
 };
