@@ -130,7 +130,7 @@ export async function runNew({
   /**
    * Copy the files to the target directory.
    */
-  const filesPath = path.join(__dirname);
+  const filesPath = path.join(__dirname, "templates");
   await cpy("default/**", root, {
     cwd: filesPath,
     rename: (name) => {

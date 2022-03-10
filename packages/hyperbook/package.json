@@ -25,12 +25,11 @@
     "node": ">=12.22.0"
   },
   "scripts": {
-    "prebuild": "rimraf dist",
     "version": "pnpm build",
     "lint": "tsc --noEmit",
     "test": "jest --env=jsdom --passWithNoTests",
     "dev": "ncc build ./index.ts -w -o dist/",
-    "build": "ncc build ./index.ts -o ./dist/ --minify --no-cache --no-source-map-register"
+    "build": "rimraf dist && ncc build ./index.ts -o ./dist/ --minify --no-cache --no-source-map-register"
   },
   "devDependencies": {
     "@types/async-retry": "1.4.3",
