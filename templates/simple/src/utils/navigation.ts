@@ -102,13 +102,16 @@ const getSectionsAndPages = async function (
 };
 
 const getPageList = (sections: Section[], pages: Page[]): Page[] => {
-  let pageList = [...pages];
+  let pageList = [...pages.filter((p) => !p.hide)];
 
   for (const section of sections) {
     pageList = [
       ...pageList,
       section,
-      ...getPageList(section.sections, section.pages),
+      ...getPageList(
+        section.sections.filter((s) => !s.hide),
+        section.pages
+      ),
     ];
   }
 
@@ -120,7 +123,10 @@ export const getNavigation = async (
 ): Promise<Navigation> => {
   const { sections, pages } = await getSectionsAndPages("book");
 
-  const pageList = getPageList(sections, pages);
+  const pageList = getPageList(
+    sections.filter((s) => !s.hide),
+    pages.filter((p) => !p.hide)
+  );
 
   const i = pageList.findIndex((p) => p.href === currPath);
 
