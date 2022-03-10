@@ -16,6 +16,7 @@ export type Page = {
 export type Section = Page & {
   pages: Page[]; // md-files
   sections: Section[]; // folders
+  isEmpty?: boolean;
 };
 
 export type Navigation = {
@@ -51,7 +52,7 @@ const getSectionsAndPages = async function (
 
   for (const file of files) {
     let p = path.join(dirPath, file);
-    const { data } = readFile(p);
+    const { content, data } = readFile(p);
     let repo: string | null;
     if (hyperbook.repo) {
       repo = hyperbook.repo + "/" + p;
@@ -66,6 +67,7 @@ const getSectionsAndPages = async function (
       const section = {
         ...data,
         href: "/" + path.relative("book", p),
+        isEmpty: content.trim() === "",
         pages,
         sections,
       };

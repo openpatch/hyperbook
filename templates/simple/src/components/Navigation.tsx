@@ -17,14 +17,18 @@ const Page = ({ name, href, current }: P) => {
 
 type S = SectionProps & Pick<NavigationProps, "current">;
 
-const Section = ({ name, href, pages, sections, current }: S) => {
+const Section = ({ isEmpty, name, href, pages, sections, current }: S) => {
   return (
     <div className="section">
-      <Link href={href}>
-        <a className={current?.href === href ? `name active` : "name"}>
-          {name}
-        </a>
-      </Link>
+      {isEmpty ? (
+        <span className="name empty">{name}</span>
+      ) : (
+        <Link href={href}>
+          <a className={current?.href === href ? `name active` : "name"}>
+            {name}
+          </a>
+        </Link>
+      )}
       <div className="links">
         <ul className="pages">
           {pages.map((p) => (

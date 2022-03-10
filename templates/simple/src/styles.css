@@ -513,10 +513,19 @@ nav > ul {
   color: var(--color-text);
   border: 1px solid var(--color-spacer);
   width: 100%;
+  user-select: none;
+}
+
+.section > .name.empty {
+  color: var(--color-nav-border);
 }
 
 .section > .name:hover {
   background: var(--color-spacer);
+}
+
+.section > .name.empty:hover {
+  background: none;
 }
 
 .section > .name.active {
@@ -533,7 +542,7 @@ nav > ul {
   display: block;
   padding: 10px;
   text-decoration: none;
-  color: var(--color-nav-border);
+  color: var(--color-text);
 }
 
 .page:hover {
