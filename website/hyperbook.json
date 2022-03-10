@@ -7,5 +7,6 @@
   },
   "license": "CC-BY-SA",
   "language": "en",
+  "logo": "/logo.svg",
   "repo": "https://github.com/openpatch/hyperbook/edit/main/website"
 }

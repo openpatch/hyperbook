@@ -1,9 +1,9 @@
 ---
-name: Configuration
-index: 1
+name: Book Configuration
+index: 0
 ---
 
-## Configuration
+# Book Configuration
 
 In your new Hyperbook project you will find a `hyperbook.json` file.
 This file is for configuring Hyperbook. Here is a list of options you

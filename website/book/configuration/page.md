@@ -1,9 +1,9 @@
 ---
-name: Anatomy of a Page
+name: Page Configuration
 index: 1
 ---
 
-## Anatomy of a Page
+# Page Configuration
 
 A page is a markdown file. It consists of a frontmatter and a content.
 
@@ -27,3 +27,4 @@ Here are the properties you can set in the frontmatter:
 | description | Description of the page used for SEO                                                |
 | keywords    | A list of keywords used for SEO                                                     |
 | index       | A number indicating the position in the menu in relation to pages on the same level |
+| hide        | Hides the page from the navigation                                                  |

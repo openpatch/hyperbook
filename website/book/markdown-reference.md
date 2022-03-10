@@ -3,7 +3,7 @@ name: Markdown Reference
 index: 2
 ---
 
-## Markdown Reference
+# Markdown Reference
 
 Here are the Markdown features you can use. Our Markdown syntax is based on
 GitHub's flavored Markdown. First you will see our advanced Markdown syntax and
