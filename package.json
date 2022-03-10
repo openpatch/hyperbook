@@ -13,7 +13,6 @@
     "release": "changeset publish",
     "website:dev": "cd website && pnpm hyperbook dev",
     "website:build": "cd website && pnpm hyperbook build",
-    "website:start": "cd website && pnpm hyperbook start",
     "website:setup": "cd website && pnpm hyperbook setup"
   },
   "devDependencies": {
