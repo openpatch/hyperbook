@@ -191,8 +191,6 @@ details {
 table {
   border: 1px solid #ccc;
   border-collapse: collapse;
-  margin: 0;
-  padding: 0;
   width: 100%;
   table-layout: fixed;
 }
@@ -278,6 +276,11 @@ h6 {
   margin-bottom: 16px;
   font-weight: 600;
   line-height: 1.25;
+}
+
+h1 {
+  font-size: 1.75em;
+  font-weight: 700;
 }
 
 h2 {

@@ -1,5 +1,6 @@
 import Head from "next/head";
 import Link from "next/link";
+import Image from "next/image";
 import { ReactNode, useState } from "react";
 import { Hyperbook } from "../utils/hyperbook";
 import { Navigation as NavigationProps, Page } from "../utils/navigation";
@@ -73,7 +74,14 @@ export function Layout({ hyperbook, navigation, page, children }: LayoutProps) {
           <Link href="/">
             <a className="branding">
               {hyperbook.logo && (
-                <img className="logo" src={hyperbook.logo}></img>
+                <div className="logo">
+                  <Image
+                    alt="Logo"
+                    width={50}
+                    height={50}
+                    src={hyperbook.logo}
+                  />
+                </div>
               )}
               <div className="name">{hyperbook.name}</div>
             </a>

@@ -52,7 +52,6 @@ const getSectionsAndPages = async function (
 
   for (const file of files) {
     let p = path.join(dirPath, file);
-    const { content, data } = readFile(p);
     let repo: string | null;
     if (hyperbook.repo) {
       repo = hyperbook.repo + "/" + p;
@@ -64,6 +63,7 @@ const getSectionsAndPages = async function (
         hyperbook,
         pageList
       );
+      const { content, data } = readFile(p);
       const section = {
         ...data,
         href: "/" + path.relative("book", p),
@@ -77,6 +77,7 @@ const getSectionsAndPages = async function (
 
       arrayOfSections.push(section);
     } else {
+      const { data } = readFile(p);
       if (p.endsWith(".md")) {
         p = p.substring(0, p.length - 3);
         if (path.relative("book", p) === "index") {

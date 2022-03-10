@@ -31,13 +31,17 @@ const Section = ({ isEmpty, name, href, pages, sections, current }: S) => {
       )}
       <div className="links">
         <ul className="pages">
-          {pages.map((p) => (
-            <Page key={p.href} {...p} current={current} />
-          ))}
+          {pages
+            .filter((p) => !p.hide)
+            .map((p) => (
+              <Page key={p.href} {...p} current={current} />
+            ))}
         </ul>
-        {sections.map((s) => (
-          <Section key={s.href} {...s} current={current} />
-        ))}
+        {sections
+          .filter((s) => !s.hide)
+          .map((s) => (
+            <Section key={s.href} {...s} current={current} />
+          ))}
       </div>
     </div>
   );
@@ -51,9 +55,11 @@ export const Navigation = ({ pages, sections, current }: NavigationProps) => {
           <Page key={p.href} {...p} current={current} />
         ))}
       </ul>
-      {sections.map((s) => (
-        <Section key={s.href} {...s} current={current} />
-      ))}
+      {sections
+        .filter((s) => !s.hide)
+        .map((s) => (
+          <Section key={s.href} {...s} current={current} />
+        ))}
     </nav>
   );
 };
