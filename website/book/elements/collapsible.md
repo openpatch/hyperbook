@@ -3,7 +3,7 @@ name: Collapsible
 ---
 
 If you want to show additional content, which should not be seen at
-first glance, you can use a collapsible. Collapsibles are great for hints. They can also be stacked.
+first glance, you can use a collapsible. Collapsibles are great for hints. They can also be nested.
 
 ```md
 ::::collapsible{Hallo}
@@ -44,5 +44,5 @@ This is normal Test in-between.
 ::::
 
 :::alert{warn}
-If you want to nested even further be sure to add more `:` to the outer levels.
+If you want to nest even further be sure to add more `:` to the outer levels.
 :::
