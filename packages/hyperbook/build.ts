@@ -16,6 +16,9 @@ export async function runBuild(): Promise<void> {
       `
 module.exports = {
     basePath: '${hyperbook.basePath}',
+    typescript: {
+      ignoreBuildErrors: true,
+    }
 }
       `
     );
