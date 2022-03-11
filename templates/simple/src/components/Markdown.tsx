@@ -34,14 +34,16 @@ export const Markdown = (props: MarkdownProps) => {
   return (
     <ReactMarkdown
       {...props}
-      remarkPlugins={[
-        remarkDirective,
-        remarkDirectiveRehype,
-        remarkUnwrapImages,
-        remarkGfm,
-        remarkMath,
-        remarkGemoji,
-      ]}
+      remarkPlugins={
+        [
+          remarkDirective,
+          remarkDirectiveRehype,
+          remarkUnwrapImages,
+          remarkGfm,
+          remarkMath,
+          remarkGemoji,
+        ] as any
+      }
       skipHtml={false}
       components={
         {
@@ -56,7 +58,7 @@ export const Markdown = (props: MarkdownProps) => {
           img: Image,
         } as any
       }
-      rehypePlugins={[rehypeKatex, rehypeHighlight]}
+      rehypePlugins={[rehypeKatex, rehypeHighlight] as any}
     />
   );
 };
