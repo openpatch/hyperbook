@@ -48,3 +48,9 @@ Das ist ein Test
 ![](/test.jpg)
 
 ::::
+
+## Bitflow
+
+### Flow
+
+::flow{src="/flow.json"}
