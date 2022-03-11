@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.2.1
+
+### Patch Changes
+
+- [`005d429`](https://github.com/openpatch/hyperbook/commit/005d429a761ee33a29e6804fb2957f3a96038dcc) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Ignore typescript errors when building hyperbook. This should be handled by template authors.
+
 ## 0.2.0
 
 ### Minor Changes
