@@ -3,7 +3,6 @@ import matter from "gray-matter";
 import { GetStaticPaths, GetStaticProps } from "next";
 import Link from "next/link";
 import path from "path";
-import { resetIdCounter } from "react-tabs";
 import { Layout } from "../components/Layout";
 import { Markdown } from "../components/Markdown";
 import { getAllFiles } from "../utils/files";
