@@ -1,5 +1,7 @@
 import { Html, Head, Main, NextScript } from "next/document";
-import config from "../../hyperbook.json";
+import { getHyperbook } from "../utils/hyperbook";
+
+const config = getHyperbook();
 
 export default function Document() {
   return (

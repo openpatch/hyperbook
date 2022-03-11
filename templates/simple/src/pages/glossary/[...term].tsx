@@ -13,7 +13,9 @@ import {
 import { Markdown } from "../../components/Markdown";
 import Link from "next/link";
 import { Fragment } from "react";
-import hyperbook from "../../../hyperbook.json";
+import { getHyperbook } from "../../utils/hyperbook";
+
+const hyperbook = getHyperbook();
 
 type TermProps = {
   markdown: string;
@@ -88,7 +90,7 @@ export const getStaticProps: GetStaticProps<
     pages,
   };
 
-  if (hyperbook.repo) {
+  if (hyperbook?.repo) {
     term.repo = hyperbook.repo + href + ".md";
   }
 
