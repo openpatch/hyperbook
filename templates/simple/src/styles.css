@@ -374,9 +374,11 @@ header {
   width: 200px;
 }
 
-p.hint.tip,
-p.hint.error,
-p.hint.warn {
+.alert > p {
+  margin-bottom: 0;
+}
+
+.alert {
   letter-spacing: 0;
   box-sizing: border-box;
   font-size: inherit;
@@ -385,21 +387,22 @@ p.hint.warn {
   background-color: rgba(238, 238, 238, 0.5);
   border-bottom-right-radius: 2px;
   border-top-right-radius: 2px;
-  padding: 8px 12px 8px 24px;
+  padding: 8px 12px 8px 20px;
   margin-bottom: 16px;
   position: relative;
+  border-left: 4px solid var(--color-nav-border);
 }
 
-p.hint.tip::before,
-p.hint.error::before,
-p.hint.warn::before {
+.alert::before {
   border-radius: 100%;
   color: #fff;
-  content: "!";
   font-size: 14px;
   font-weight: 700;
   left: -12px;
   line-height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   position: absolute;
   height: 20px;
   width: 20px;
@@ -407,29 +410,38 @@ p.hint.warn::before {
   top: 12px;
 }
 
-p.hint.tip {
-  border-left: 4px solid #1e90ff;
+.alert.success {
+  border-left: 4px solid #00c851;
 }
 
-p.hint.tip::before {
-  content: "!";
-  background-color: #1e90ff;
+.alert.success::before {
+  content: "✓";
+  background-color: #00c851;
 }
 
-p.hint.warn {
+.alert.info {
+  border-left: 4px solid #33b5e5;
+}
+
+.alert.info::before {
+  content: "i";
+  background-color: #33b5e5;
+}
+
+.alert.warn {
   border-left: 4px solid #f0b429;
 }
 
-p.hint.warn::before {
-  content: "?";
+.alert.warn::before {
+  content: "!";
   background-color: #f0b429;
 }
 
-p.hint.error {
+.alert.error {
   border-left: 4px solid #ef4e4e;
 }
 
-p.hint.error::before {
+.alert.error::before {
   content: "x";
   background-color: #ef4e4e;
 }
@@ -654,4 +666,100 @@ nav > ul {
 
 .pages {
   margin-top: 30px;
+}
+
+.tabs {
+  display: flex;
+  /* browser decide if x is ok to scroll and show bars on, y hidden */
+  overflow: auto hidden;
+  /* prevent scroll chaining on x scroll */
+  overscroll-behavior-x: contain;
+  /* scrolling should snap children on x */
+  scroll-snap-type: x mandatory;
+  border: 1px solid #ccc;
+  background-color: var(--color-nav);
+  border-top-right-radius: 4px;
+  border-top-left-radius: 4px;
+}
+
+.tabs .tab {
+  background: transparent;
+  display: inline-flex;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  border: none;
+  font-size: 100%;
+  padding: 8px 16px;
+  transition: 0.3s;
+  border-bottom: 4px solid transparent;
+}
+
+.tabs .tab:hover {
+  border-bottom: 4px solid var(--color-spacer);
+  color: var(--color-secondary);
+}
+
+.tabs .tab.active {
+  border-bottom: 4px solid var(--color-secondary);
+  color: var(--color-secondary);
+}
+
+.tabpanel {
+  padding: 6px 12px;
+  padding-top: 12px;
+  border: 1px solid var(--color-spacer);
+  border-top: none;
+  border-bottom-right-radius: 4px;
+  border-bottom-left-radius: 4px;
+}
+
+.collapsible-button {
+  width: 100%;
+  text-align: left;
+  border: 1px solid #ccc;
+  background-color: var(--color-nav);
+  cursor: pointer;
+  user-select: none;
+  font-size: 100%;
+  padding: 8px 16px;
+  transition: 0.3s;
+  border-radius: 4px;
+}
+
+.collapsible-button.active {
+  border-bottom-left-radius: 0px;
+  border-bottom-right-radius: 0px;
+}
+
+.collapsible-button:after {
+  content: "\02795"; /* Unicode character for "plus" sign (+) */
+  font-size: 13px;
+  color: white;
+  float: right;
+  margin-left: 5px;
+}
+
+.collapsible-button.active:after {
+  content: "\2796"; /* Unicode character for "minus" sign (-) */
+}
+
+.collapsible-content {
+  border-top: none;
+  max-height: 0;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.collapsible-content.active {
+  max-height: 100%;
+}
+
+.collapsible-inner {
+  border: 1px solid var(--color-spacer);
+  padding: 6px 12px;
+  padding-top: 12px;
+  border-top: none;
+  border-bottom-right-radius: 4px;
+  border-bottom-left-radius: 4px;
 }

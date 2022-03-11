@@ -4,7 +4,6 @@ import remarkDirectiveRehype from "remark-directive-rehype";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 import remarkGemoji from "remark-gemoji";
-import remarkHint from "remark-hint";
 import remarkUnwrapImages from "remark-unwrap-images";
 import rehypeKatex from "rehype-katex";
 import rehypeHighlight from "rehype-highlight";
@@ -42,7 +41,6 @@ export const Markdown = (props: MarkdownProps) => {
         remarkGfm,
         remarkMath,
         remarkGemoji,
-        remarkHint,
       ]}
       skipHtml={false}
       components={

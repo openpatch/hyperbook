@@ -95,7 +95,6 @@ importers:
       remark-directive-rehype: 0.4.0
       remark-gemoji: 7.0.1
       remark-gfm: 3.0.1
-      remark-hint: 1.0.10
       remark-math: 5.1.1
       remark-unwrap-images: ^3.0.1
       typescript: 4.6.2
@@ -112,7 +111,6 @@ importers:
       remark-directive-rehype: 0.4.0
       remark-gemoji: 7.0.1
       remark-gfm: 3.0.1
-      remark-hint: 1.0.10
       remark-math: 5.1.1
       remark-unwrap-images: 3.0.1
     devDependencies:
@@ -4811,15 +4809,6 @@ packages:
       unified: 10.1.2
     dev: false
 
-  /remark-hint/1.0.10:
-    resolution:
-      {
-        integrity: sha512-oSE1/2zbN76UF3VmKnUJNgpT0IOXTZJyUhMWoejMwxudgDuEKqTQz3Lq6+v8uWhOmkHb3W9IQ/42RVMMYCQwrQ==,
-      }
-    dependencies:
-      unist-builder: 2.0.3
-    dev: false
-
   /remark-math/5.1.1:
     resolution:
       {
@@ -5548,13 +5537,6 @@ packages:
       is-plain-obj: 4.0.0
       trough: 2.1.0
       vfile: 5.3.2
-    dev: false
-
-  /unist-builder/2.0.3:
-    resolution:
-      {
-        integrity: sha512-f98yt5pnlMWlzP539tPc4grGMsFaQQlP/vM396b00jngsiINumNmsY8rkXjfoi1c6QaM8nQ3vaGDuoKWbe/1Uw==,
-      }
     dev: false
 
   /unist-builder/3.0.0:
