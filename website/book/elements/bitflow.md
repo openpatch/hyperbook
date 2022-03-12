@@ -26,10 +26,10 @@ The height of a flow defaults to 400px, but you can set a custom one like so:
 ## Task
 
 ```md
-::flow{src="/task.json"}
+::task{src="/task.json"}
 ```
 
-::flow{src="/task.json"}
+::task{src="/task.json"}
 
 The height of a task defaults to 400px, but you can set a custom one like so:
 
