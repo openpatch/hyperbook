@@ -230,25 +230,25 @@
   resolved "https://registry.yarnpkg.com/@bitflow/core/-/core-0.5.4.tgz#0677d4ffa7a906e85e9a8f3827f1b619b3cf5d60"
   integrity sha512-Jl9frXqXAr9YIbZa0+cjhyFgRpCjTTxXq5X/LtwmCvtlZ+zu5e/86lrrvjaRmFRfAUEBsP3n69xeEm+156prSg==
 
-"@bitflow/do-local@^0.4.4":
-  version "0.4.4"
-  resolved "https://registry.yarnpkg.com/@bitflow/do-local/-/do-local-0.4.4.tgz#e6f951eb4f67015bd8b31bf5229e189e10ae2690"
-  integrity sha512-/15stNBuUPhPpDuhj8BhkcC3z0FQaTnYiG8T16w3vYxAnF8uG7xvWFEB89mkGcgoqz3fVlEEFN/UOEVgatWLaQ==
+"@bitflow/do-local@0.4.5":
+  version "0.4.5"
+  resolved "https://registry.yarnpkg.com/@bitflow/do-local/-/do-local-0.4.5.tgz#e7150a8512e08ce5102aa274e53f10d808a9ac21"
+  integrity sha512-xOfloC/b+EQLdgHJ6lXkFNoQFXdo275yEL6sVca9quN17qo9tQRe6vQVvwgf6H09egYOgVsocwjwVDgGSAnzaQ==
   dependencies:
     "@bitflow/core" "0.5.4"
-    "@bitflow/do" "0.5.4"
+    "@bitflow/do" "0.5.5"
     "@bitflow/flow-engine" "0.4.4"
     "@bitflow/provider" "0.4.4"
 
-"@bitflow/do@0.5.4":
-  version "0.5.4"
-  resolved "https://registry.yarnpkg.com/@bitflow/do/-/do-0.5.4.tgz#30ac4955b2928bf1614eb112ad2e6f09da4c5f96"
-  integrity sha512-AlV8KA4TLeSh7/n8NvqlhWWrX1g5tsXOneK/Y5mLqCLW9bv6rXH51Z1e6HpBXYNLFbrqqeCR6ftAC8Eac1OYGQ==
+"@bitflow/do@0.5.5":
+  version "0.5.5"
+  resolved "https://registry.yarnpkg.com/@bitflow/do/-/do-0.5.5.tgz#a31ac2f7be469fdf309d2880aedd2bf29ed278f4"
+  integrity sha512-IteBMoEJgkx+zKfx1ZBypt//9iznalbeMNqOhaEJy1dtVCeME02zTllR72u4VKygAVHfTHP6+cjeWpB44ItbrQ==
   dependencies:
     "@bitflow/core" "0.5.4"
     "@bitflow/flow-engine" "0.4.4"
     "@bitflow/provider" "0.4.4"
-    "@bitflow/shell" "0.5.4"
+    "@bitflow/shell" "0.6.0"
 
 "@bitflow/end-tries@0.4.5":
   version "0.4.5"
@@ -287,14 +287,6 @@
   dependencies:
     "@bitflow/core" "0.5.4"
     lodash.get "^4.4.2"
-
-"@bitflow/shell@0.5.4":
-  version "0.5.4"
-  resolved "https://registry.yarnpkg.com/@bitflow/shell/-/shell-0.5.4.tgz#bb7007119d264860669d268106db79105e70cac4"
-  integrity sha512-cJXvlcoRBdz/tVPFxkQUdxH4bgqtuQJqGD7l7j31/tPaBmjxJhYqoESJlsUtQOrDiGY/wfKKVXs6DMSuyCm0aQ==
-  dependencies:
-    "@bitflow/core" "0.5.4"
-    immer "^9.0.7"
 
 "@bitflow/shell@0.6.0":
   version "0.6.0"
