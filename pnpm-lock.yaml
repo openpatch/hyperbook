@@ -82,6 +82,7 @@ importers:
 
   templates/simple:
     specifiers:
+<<<<<<< HEAD
       '@babel/core': ^7.17.5
       '@bitflow/bits': 0.0.2
       '@bitflow/core': ^0.5.4
@@ -97,6 +98,24 @@ importers:
       '@vocab/core': ^1.0.3
       '@vocab/react': ^1.1.0
       '@vocab/types': ^1.0.1
+=======
+      "@babel/core": ^7.17.5
+      "@bitflow/bits": ^0.0.2
+      "@bitflow/core": ^0.5.4
+      "@bitflow/do-local": ^0.4.5
+      "@bitflow/provider": ^0.4.4
+      "@bitflow/shell": ^0.6.0
+      "@emotion/cache": ^11.7.1
+      "@emotion/core": ^11.0.0
+      "@emotion/react": ^11.8.2
+      "@emotion/styled": ^11.8.1
+      "@openpatch/patches": ^5.2.0
+      "@types/node": 17.0.21
+      "@types/react": 17.0.40
+      "@vocab/core": ^1.0.3
+      "@vocab/react": ^1.1.0
+      "@vocab/types": ^1.0.1
+>>>>>>> 536a77f (add task directive)
       classnames: 2.3.1
       gray-matter: 4.0.3
       next: 12.1.0
@@ -115,6 +134,7 @@ importers:
       typescript: 4.6.2
       zod: ^3.13.4
     dependencies:
+<<<<<<< HEAD
       '@babel/core': 7.17.5
       '@bitflow/bits': 0.0.2_750ceb671a4c1f5ae18f38a9f8487ac1
       '@bitflow/core': 0.5.4_5852cdcdb6d491b12ed523c2014e0256
@@ -128,6 +148,22 @@ importers:
       '@vocab/core': 1.0.3
       '@vocab/react': 1.1.0_react@17.0.2
       '@vocab/types': 1.0.1
+=======
+      "@babel/core": 7.17.5
+      "@bitflow/bits": 0.0.2_750ceb671a4c1f5ae18f38a9f8487ac1
+      "@bitflow/core": 0.5.4_5852cdcdb6d491b12ed523c2014e0256
+      "@bitflow/do-local": 0.4.5_6bb19d21a904985beca70f6b526bdad9
+      "@bitflow/provider": 0.4.4_0482c4717eca21c9d69e3d7e875386ea
+      "@bitflow/shell": 0.6.0_0482c4717eca21c9d69e3d7e875386ea
+      "@emotion/cache": 11.7.1
+      "@emotion/core": 11.0.0
+      "@emotion/react": 11.8.2_bf389bc9d9c898d23b26c0366b4e1ca7
+      "@emotion/styled": 11.8.1_f003f72b024767ff904b1489bd7777d6
+      "@openpatch/patches": 5.2.0_2c81b40e9871fab53193927f0a115c22
+      "@vocab/core": 1.0.3
+      "@vocab/react": 1.1.0_react@17.0.2
+      "@vocab/types": 1.0.1
+>>>>>>> 536a77f (add task directive)
       classnames: 2.3.1
       gray-matter: 4.0.3
       next: 12.1.0_33bdac975a6e334c49640fab91e2abb4
@@ -372,6 +408,7 @@ packages:
     dev: false
 
   /@bitflow/bits/0.0.2_750ceb671a4c1f5ae18f38a9f8487ac1:
+<<<<<<< HEAD
     resolution: {integrity: sha512-ZHDs7oZtBDELGXDxM62bIttFjd54b/vF/iUA3022Vr7rJL8AL+EHTv7QdKjD5uop/zrZVapRzQPO7PxxWBnxCA==}
     peerDependencies:
       zod: 3.x
@@ -384,6 +421,23 @@ packages:
       '@bitflow/task-input': 0.4.6_795ff57072fa11bbc5a38689cc84201e
       '@bitflow/task-yes-no': 0.4.4_795ff57072fa11bbc5a38689cc84201e
       '@bitflow/title-simple': 0.4.4_795ff57072fa11bbc5a38689cc84201e
+=======
+    resolution:
+      {
+        integrity: sha512-ZHDs7oZtBDELGXDxM62bIttFjd54b/vF/iUA3022Vr7rJL8AL+EHTv7QdKjD5uop/zrZVapRzQPO7PxxWBnxCA==,
+      }
+    peerDependencies:
+      zod: 3.x
+    dependencies:
+      "@bitflow/end-tries": 0.4.5_795ff57072fa11bbc5a38689cc84201e
+      "@bitflow/input-markdown": 0.4.4_795ff57072fa11bbc5a38689cc84201e
+      "@bitflow/start-simple": 0.4.4_795ff57072fa11bbc5a38689cc84201e
+      "@bitflow/task-choice": 0.4.5_795ff57072fa11bbc5a38689cc84201e
+      "@bitflow/task-fill-in-the-blank": 0.4.6_750ceb671a4c1f5ae18f38a9f8487ac1
+      "@bitflow/task-input": 0.4.6_795ff57072fa11bbc5a38689cc84201e
+      "@bitflow/task-yes-no": 0.4.4_795ff57072fa11bbc5a38689cc84201e
+      "@bitflow/title-simple": 0.4.4_795ff57072fa11bbc5a38689cc84201e
+>>>>>>> 536a77f (add task directive)
       zod: 3.13.4
     transitivePeerDependencies:
       - '@emotion/cache'
@@ -420,7 +474,14 @@ packages:
     dev: false
 
   /@bitflow/do-local/0.4.5_6bb19d21a904985beca70f6b526bdad9:
+<<<<<<< HEAD
     resolution: {integrity: sha512-xOfloC/b+EQLdgHJ6lXkFNoQFXdo275yEL6sVca9quN17qo9tQRe6vQVvwgf6H09egYOgVsocwjwVDgGSAnzaQ==}
+=======
+    resolution:
+      {
+        integrity: sha512-xOfloC/b+EQLdgHJ6lXkFNoQFXdo275yEL6sVca9quN17qo9tQRe6vQVvwgf6H09egYOgVsocwjwVDgGSAnzaQ==,
+      }
+>>>>>>> 536a77f (add task directive)
     peerDependencies:
       '@emotion/cache': 11.x
       '@emotion/react': 11.x
@@ -432,6 +493,7 @@ packages:
       react-dom: 17.x
       zod: 3.x
     dependencies:
+<<<<<<< HEAD
       '@bitflow/core': 0.5.4_5852cdcdb6d491b12ed523c2014e0256
       '@bitflow/do': 0.5.5_6bb19d21a904985beca70f6b526bdad9
       '@bitflow/flow-engine': 0.4.4_5852cdcdb6d491b12ed523c2014e0256
@@ -442,6 +504,18 @@ packages:
       '@openpatch/patches': 5.2.0_2c81b40e9871fab53193927f0a115c22
       '@vocab/core': 1.0.3
       '@vocab/react': 1.1.0_react@17.0.2
+=======
+      "@bitflow/core": 0.5.4_5852cdcdb6d491b12ed523c2014e0256
+      "@bitflow/do": 0.5.5_6bb19d21a904985beca70f6b526bdad9
+      "@bitflow/flow-engine": 0.4.4_5852cdcdb6d491b12ed523c2014e0256
+      "@bitflow/provider": 0.4.4_0482c4717eca21c9d69e3d7e875386ea
+      "@emotion/cache": 11.7.1
+      "@emotion/react": 11.8.2_bf389bc9d9c898d23b26c0366b4e1ca7
+      "@emotion/styled": 11.8.1_f003f72b024767ff904b1489bd7777d6
+      "@openpatch/patches": 5.2.0_2c81b40e9871fab53193927f0a115c22
+      "@vocab/core": 1.0.3
+      "@vocab/react": 1.1.0_react@17.0.2
+>>>>>>> 536a77f (add task directive)
       react: 17.0.2
       react-dom: 17.0.2_react@17.0.2
       zod: 3.13.4
@@ -450,7 +524,14 @@ packages:
     dev: false
 
   /@bitflow/do/0.5.5_6bb19d21a904985beca70f6b526bdad9:
+<<<<<<< HEAD
     resolution: {integrity: sha512-IteBMoEJgkx+zKfx1ZBypt//9iznalbeMNqOhaEJy1dtVCeME02zTllR72u4VKygAVHfTHP6+cjeWpB44ItbrQ==}
+=======
+    resolution:
+      {
+        integrity: sha512-IteBMoEJgkx+zKfx1ZBypt//9iznalbeMNqOhaEJy1dtVCeME02zTllR72u4VKygAVHfTHP6+cjeWpB44ItbrQ==,
+      }
+>>>>>>> 536a77f (add task directive)
     peerDependencies:
       '@emotion/cache': 11.x
       '@emotion/react': 11.x
@@ -462,6 +543,7 @@ packages:
       react: 17.x
       react-dom: 17.x
     dependencies:
+<<<<<<< HEAD
       '@bitflow/core': 0.5.4_5852cdcdb6d491b12ed523c2014e0256
       '@bitflow/flow-engine': 0.4.4_5852cdcdb6d491b12ed523c2014e0256
       '@bitflow/provider': 0.4.4_0482c4717eca21c9d69e3d7e875386ea
@@ -473,6 +555,19 @@ packages:
       '@vocab/core': 1.0.3
       '@vocab/react': 1.1.0_react@17.0.2
       '@vocab/types': 1.0.1
+=======
+      "@bitflow/core": 0.5.4_5852cdcdb6d491b12ed523c2014e0256
+      "@bitflow/flow-engine": 0.4.4_5852cdcdb6d491b12ed523c2014e0256
+      "@bitflow/provider": 0.4.4_0482c4717eca21c9d69e3d7e875386ea
+      "@bitflow/shell": 0.6.0_0482c4717eca21c9d69e3d7e875386ea
+      "@emotion/cache": 11.7.1
+      "@emotion/react": 11.8.2_bf389bc9d9c898d23b26c0366b4e1ca7
+      "@emotion/styled": 11.8.1_f003f72b024767ff904b1489bd7777d6
+      "@openpatch/patches": 5.2.0_2c81b40e9871fab53193927f0a115c22
+      "@vocab/core": 1.0.3
+      "@vocab/react": 1.1.0_react@17.0.2
+      "@vocab/types": 1.0.1
+>>>>>>> 536a77f (add task directive)
       react: 17.0.2
       react-dom: 17.0.2_react@17.0.2
     transitivePeerDependencies:
@@ -480,7 +575,14 @@ packages:
     dev: false
 
   /@bitflow/end-tries/0.4.5_795ff57072fa11bbc5a38689cc84201e:
+<<<<<<< HEAD
     resolution: {integrity: sha512-OGQxdRvIPyYb9x/xs1uNvvc2JvBmSiYDejoJDbw9pKWyCO87gN2Lb5DV48svNJRbnq7/TX5n9dVLpJdaZ7ybdw==}
+=======
+    resolution:
+      {
+        integrity: sha512-OGQxdRvIPyYb9x/xs1uNvvc2JvBmSiYDejoJDbw9pKWyCO87gN2Lb5DV48svNJRbnq7/TX5n9dVLpJdaZ7ybdw==,
+      }
+>>>>>>> 536a77f (add task directive)
     peerDependencies:
       '@emotion/cache': 11.x
       '@emotion/react': 11.x
@@ -493,6 +595,7 @@ packages:
       react-hook-form: 7.x
       zod: 3.x
     dependencies:
+<<<<<<< HEAD
       '@bitflow/core': 0.5.4_5852cdcdb6d491b12ed523c2014e0256
       '@bitflow/icons': 0.4.4_fd0099827c9a2cec7b75d8f6785b25d6
       '@bitflow/provider': 0.4.4_0482c4717eca21c9d69e3d7e875386ea
@@ -503,6 +606,18 @@ packages:
       '@openpatch/patches': 5.2.0_2c81b40e9871fab53193927f0a115c22
       '@vocab/core': 1.0.3
       '@vocab/react': 1.1.0_react@17.0.2
+=======
+      "@bitflow/core": 0.5.4_5852cdcdb6d491b12ed523c2014e0256
+      "@bitflow/icons": 0.4.4_fd0099827c9a2cec7b75d8f6785b25d6
+      "@bitflow/provider": 0.4.4_0482c4717eca21c9d69e3d7e875386ea
+      "@bitflow/shell": 0.6.0_0482c4717eca21c9d69e3d7e875386ea
+      "@emotion/cache": 11.7.1
+      "@emotion/react": 11.8.2_bf389bc9d9c898d23b26c0366b4e1ca7
+      "@emotion/styled": 11.8.1_f003f72b024767ff904b1489bd7777d6
+      "@openpatch/patches": 5.2.0_2c81b40e9871fab53193927f0a115c22
+      "@vocab/core": 1.0.3
+      "@vocab/react": 1.1.0_react@17.0.2
+>>>>>>> 536a77f (add task directive)
       react: 17.0.2
       react-dom: 17.0.2_react@17.0.2
       react-hook-form: 7.27.1_react@17.0.2
@@ -600,7 +715,14 @@ packages:
     dev: false
 
   /@bitflow/shell/0.6.0_0482c4717eca21c9d69e3d7e875386ea:
+<<<<<<< HEAD
     resolution: {integrity: sha512-17kO/lBKwBgDk5pY+UjdIPcMHrV6Gof6FLYxKfBMtUinHJVAtI3r4CJBTmh5e90nepFnfwuQtVDlPxnDXApl0Q==}
+=======
+    resolution:
+      {
+        integrity: sha512-17kO/lBKwBgDk5pY+UjdIPcMHrV6Gof6FLYxKfBMtUinHJVAtI3r4CJBTmh5e90nepFnfwuQtVDlPxnDXApl0Q==,
+      }
+>>>>>>> 536a77f (add task directive)
     peerDependencies:
       '@emotion/cache': 11.x
       '@emotion/react': 11.x

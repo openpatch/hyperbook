@@ -1,10 +1,13 @@
-import { Flow } from "@bitflow/core";
+import { Flow as IFlow } from "@bitflow/core";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { getHyperbook } from "../utils/hyperbook";
 
 const Flow = dynamic(() => import("./Bitflow").then((b) => b.Flow), {
+  ssr: false,
+});
+const Task = dynamic(() => import("./Bitflow").then((b) => b.Task), {
   ssr: false,
 });
 //const Flow = () => <div />
@@ -108,7 +111,7 @@ export const Collapsible = ({ children, node, ...props }: any) => {
 };
 
 export const FlowMD = ({ src, height = 400 }) => {
-  const [flow, setFlow] = useState<Flow | null>(null);
+  const [flow, setFlow] = useState<IFlow | null>(null);
   const [err, setErr] = useState<string>();
 
   if (!src) {
@@ -149,6 +152,48 @@ export const FlowMD = ({ src, height = 400 }) => {
   );
 };
 
+export const TaskMD = ({ src, height = 400 }) => {
+  const [task, setTask] = useState<Bitflow.Task | null>(null);
+  const [err, setErr] = useState<string>();
+
+  if (!src) {
+    setErr('You need to provide a src like so: ::task{src="/task.json"}');
+  }
+
+  useEffect(() => {
+    const { basePath } = config;
+
+    if (
+      process.env.NODE_ENV !== "production" &&
+      basePath &&
+      src.startsWith("/")
+    ) {
+      if (basePath.endsWith("/")) {
+        src = basePath.slice(0, -1) + src;
+      } else {
+        src = basePath + src;
+      }
+    }
+
+    fetch(src)
+      .then((r) => r.json())
+      .then((j) => setTask(j))
+      .catch(() => {
+        setErr(`Could not find a task at ${src}. Please check the src.`);
+      });
+  }, [src]);
+
+  if (err) {
+    return err;
+  }
+
+  return (
+    <div className="flow" style={{ height }}>
+      {task ? <Task task={task} /> : "...loading"}
+    </div>
+  );
+};
+
 export default {
   youtube: YouTubeVideo,
   term: Term,
@@ -158,4 +203,5 @@ export default {
   tabs: Tabs,
   collapsible: Collapsible,
   flow: FlowMD,
+  task: TaskMD,
 };

@@ -15,10 +15,26 @@ assessments. It can, for example, be used at the end of a chapter as a check-up.
 
 ::flow{src="/flow.json"}
 
-The height of a flow default to 400px, but you can set a custom one like so:
+The height of a flow defaults to 400px, but you can set a custom one like so:
 
 ```md
 ::flow{src="/flow.json" height="800px"}
 ```
 
 ::flow{src="/flow.json" height="800px"}
+
+## Task
+
+```md
+::flow{src="/task.json"}
+```
+
+::flow{src="/task.json"}
+
+The height of a task defaults to 400px, but you can set a custom one like so:
+
+```md
+::flow{src="/task.json" height="800px"}
+```
+
+::flow{src="/task.json" height="800px"}

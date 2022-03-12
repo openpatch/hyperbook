@@ -1,10 +1,11 @@
 import { PatchesProvider } from "@openpatch/patches";
-import { BitflowProvider } from "@bitflow/provider";
-import { Flow as IFlow } from "@bitflow/core";
+import { BitflowProvider, useBit, useBitTask } from "@bitflow/provider";
+import { Flow as IFlow, FlowTaskNode } from "@bitflow/core";
 import { bits } from "@bitflow/bits";
 import { DoLocal } from "@bitflow/do-local";
-import { FC } from "react";
+import { FC, useState } from "react";
 import { getHyperbook } from "../utils/hyperbook";
+import { TaskShell, TaskShellProps } from "@bitflow/shell";
 
 const hyperbook = getHyperbook();
 
@@ -28,7 +29,11 @@ const getUrl = (src: string) => {
 export const Flow: FC<{ flow: IFlow }> = ({ flow }) => {
   return (
     <PatchesProvider standalone={false}>
-      <BitflowProvider config={{}} bits={bits}>
+      <BitflowProvider
+        locale={hyperbook.language || "en"}
+        config={{}}
+        bits={bits}
+      >
         <DoLocal
           flow={flow}
           config={{
@@ -39,6 +44,44 @@ export const Flow: FC<{ flow: IFlow }> = ({ flow }) => {
               manual: getUrl("/manual.mp3"),
             },
           }}
+        />
+      </BitflowProvider>
+    </PatchesProvider>
+  );
+};
+
+export const Task: FC<{ task: FlowTaskNode["data"] }> = ({ task }) => {
+  const bit = bits.task[task.subtype];
+  const [result, setResult] = useState<Bitflow.TaskResult>();
+  const [key, setKey] = useState<Date>(new Date());
+
+  const evaluate: TaskShellProps["evaluate"] = async (answer) => {
+    const result = await bit.evaluate({ answer, task });
+    setResult(result);
+
+    return result;
+  };
+
+  const retry = async () => {
+    setResult(null);
+    setKey(new Date());
+  };
+
+  return (
+    <PatchesProvider standalone={false}>
+      <BitflowProvider
+        locale={hyperbook.language || "en"}
+        config={{}}
+        bits={bits}
+      >
+        <TaskShell
+          key={key.toString()}
+          task={task}
+          mode={result ? "result" : "default"}
+          evaluate={evaluate}
+          result={result}
+          onRetry={retry}
+          TaskComponent={bit.Task}
         />
       </BitflowProvider>
     </PatchesProvider>

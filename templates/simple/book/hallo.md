@@ -54,3 +54,7 @@ Das ist ein Test
 ### Flow
 
 ::flow{src="/flow.json"}
+
+### Task
+
+::task{src="/task.json"}
