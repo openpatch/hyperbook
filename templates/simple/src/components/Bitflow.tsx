@@ -55,7 +55,7 @@ export const Task: FC<{ task: FlowTaskNode["data"] }> = ({ task }) => {
   const [result, setResult] = useState<Bitflow.TaskResult>();
   const [key, setKey] = useState<Date>(new Date());
 
-  const evaluate: TaskShellProps["evaluate"] = async (answer) => {
+  const evaluate = async (answer: Bitflow.TaskAnswer) => {
     const result = await bit.evaluate({ answer, task });
     setResult(result);
 
