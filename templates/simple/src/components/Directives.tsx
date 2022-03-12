@@ -142,7 +142,7 @@ export const FlowMD = ({ src, height = 400 }) => {
   }, [src]);
 
   if (err) {
-    return err;
+    return <pre>{err}</pre>;
   }
 
   return (
@@ -177,14 +177,16 @@ export const TaskMD = ({ src, height = 400 }) => {
 
     fetch(src)
       .then((r) => r.json())
-      .then((j) => setTask(j))
+      .then((j) => {
+        setTask(j);
+      })
       .catch(() => {
         setErr(`Could not find a task at ${src}. Please check the src.`);
       });
   }, [src]);
 
   if (err) {
-    return err;
+    return <pre>{err}</pre>;
   }
 
   return (

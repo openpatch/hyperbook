@@ -1,11 +1,17 @@
 import { PatchesProvider } from "@openpatch/patches";
-import { BitflowProvider, useBit, useBitTask } from "@bitflow/provider";
+import {
+  BitflowProvider,
+  useBit,
+  useBitTask,
+  useFlow,
+} from "@bitflow/provider";
 import { Flow as IFlow, FlowTaskNode } from "@bitflow/core";
 import { bits } from "@bitflow/bits";
 import { DoLocal } from "@bitflow/do-local";
 import { FC, useState } from "react";
 import { getHyperbook } from "../utils/hyperbook";
 import { TaskShell, TaskShellProps } from "@bitflow/shell";
+import { ZodError } from "zod";
 
 const hyperbook = getHyperbook();
 
@@ -34,26 +40,86 @@ export const Flow: FC<{ flow: IFlow }> = ({ flow }) => {
         config={{}}
         bits={bits}
       >
-        <DoLocal
-          flow={flow}
-          config={{
-            soundUrls: {
-              correct: getUrl("/correct.mp3"),
-              wrong: getUrl("/wrong.mp3"),
-              unknown: getUrl("/unknown.mp3"),
-              manual: getUrl("/manual.mp3"),
-            },
-          }}
-        />
+        <FlowInner flow={flow} />
       </BitflowProvider>
     </PatchesProvider>
   );
 };
 
+const FlowInner: FC<{ flow: IFlow }> = ({ flow }) => {
+  const { FlowSchema } = useFlow();
+
+  try {
+    FlowSchema.parse(flow);
+  } catch (e) {
+    if (e instanceof ZodError) {
+      return (
+        <p>
+          {e.issues
+            .map((i) => i.code + ": " + i.path.join(".") + " " + i.message)
+            .join("\n")}
+        </p>
+      );
+    }
+    return <p>Error</p>;
+  }
+  return (
+    <DoLocal
+      flow={flow}
+      config={{
+        soundUrls: {
+          correct: getUrl("/correct.mp3"),
+          wrong: getUrl("/wrong.mp3"),
+          unknown: getUrl("/unknown.mp3"),
+          manual: getUrl("/manual.mp3"),
+        },
+      }}
+    />
+  );
+};
+
 export const Task: FC<{ task: FlowTaskNode["data"] }> = ({ task }) => {
+  return (
+    <PatchesProvider standalone={false}>
+      <BitflowProvider
+        locale={hyperbook.language || "en"}
+        config={{}}
+        bits={bits}
+      >
+        <TaskInner task={task} />
+      </BitflowProvider>
+    </PatchesProvider>
+  );
+};
+
+export const TaskInner: FC<{ task: FlowTaskNode["data"] }> = ({ task }) => {
   const bit = bits.task[task.subtype];
   const [result, setResult] = useState<Bitflow.TaskResult>();
   const [key, setKey] = useState<Date>(new Date());
+  const { FlowNodeSchema } = useFlow();
+
+  try {
+    FlowNodeSchema.parse({
+      id: "",
+      position: {
+        x: 0,
+        y: 0,
+      },
+      type: "task",
+      data: task,
+    });
+  } catch (e) {
+    if (e instanceof ZodError) {
+      return (
+        <p>
+          {e.issues
+            .map((i) => i.code + ": " + i.path.join(".") + " " + i.message)
+            .join("\n")}
+        </p>
+      );
+    }
+    return <p>"Error"</p>;
+  }
 
   const evaluate = async (answer: Bitflow.TaskAnswer) => {
     const result = await bit.evaluate({ answer, task });
@@ -68,22 +134,14 @@ export const Task: FC<{ task: FlowTaskNode["data"] }> = ({ task }) => {
   };
 
   return (
-    <PatchesProvider standalone={false}>
-      <BitflowProvider
-        locale={hyperbook.language || "en"}
-        config={{}}
-        bits={bits}
-      >
-        <TaskShell
-          key={key.toString()}
-          task={task}
-          mode={result ? "result" : "default"}
-          evaluate={evaluate}
-          result={result}
-          onRetry={retry}
-          TaskComponent={bit.Task}
-        />
-      </BitflowProvider>
-    </PatchesProvider>
+    <TaskShell
+      key={key.toString()}
+      task={task}
+      mode={result ? "result" : "default"}
+      evaluate={evaluate}
+      result={result}
+      onRetry={retry}
+      TaskComponent={bit.Task}
+    />
   );
 };
