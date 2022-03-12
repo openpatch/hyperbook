@@ -21,7 +21,7 @@
   resolved "https://registry.yarnpkg.com/@babel/compat-data/-/compat-data-7.17.0.tgz#86850b8597ea6962089770952075dcaabb8dba34"
   integrity sha512-392byTlpGWXMv4FbyWw3sAZ/FrW/DrwqLGXpy0mbyNe9Taqv1mg9yON5/o0cnr8XYCkFTZbC1eV+c+LAROgrng==
 
-"@babel/core@^7.17.5":
+"@babel/core@7.17.5":
   version "7.17.5"
   resolved "https://registry.yarnpkg.com/@babel/core/-/core-7.17.5.tgz#6cd2e836058c28f06a4ca8ee7ed955bbf37c8225"
   integrity sha512-/BBMw4EvjmyquN5O+t5eh0+YqB3XXJkYD2cjKpYtWOfFy4lQ4UozNSmxAcWT8r2XtZs0ewG+zrfsqeR15i1ajA==
@@ -225,7 +225,7 @@
     "@bitflow/task-yes-no" "0.4.4"
     "@bitflow/title-simple" "0.4.4"
 
-"@bitflow/core@0.5.4", "@bitflow/core@^0.5.4":
+"@bitflow/core@0.5.4":
   version "0.5.4"
   resolved "https://registry.yarnpkg.com/@bitflow/core/-/core-0.5.4.tgz#0677d4ffa7a906e85e9a8f3827f1b619b3cf5d60"
   integrity sha512-Jl9frXqXAr9YIbZa0+cjhyFgRpCjTTxXq5X/LtwmCvtlZ+zu5e/86lrrvjaRmFRfAUEBsP3n69xeEm+156prSg==
@@ -280,7 +280,7 @@
   dependencies:
     "@bitflow/core" "0.5.4"
 
-"@bitflow/provider@0.4.4", "@bitflow/provider@^0.4.4":
+"@bitflow/provider@0.4.4":
   version "0.4.4"
   resolved "https://registry.yarnpkg.com/@bitflow/provider/-/provider-0.4.4.tgz#d24b4af875efd44e779bcdfdb21bac4682aa1841"
   integrity sha512-UQJgbiwtcpXoJjeFHNcTqkjTkP0Mu+89kpS0lNFKhWJc4+nppYYsQXh5UEzrU0LfOLqm2Rote/m+oNfdkGaGtQ==
@@ -581,7 +581,7 @@
     source-map "^0.5.7"
     stylis "4.0.13"
 
-"@emotion/cache@^11.7.1":
+"@emotion/cache@11.7.1", "@emotion/cache@^11.7.1":
   version "11.7.1"
   resolved "https://registry.yarnpkg.com/@emotion/cache/-/cache-11.7.1.tgz#08d080e396a42e0037848214e8aa7bf879065539"
   integrity sha512-r65Zy4Iljb8oyjtLeCuBH8Qjiy107dOYC6SJq7g7GV5UCQWMObY4SJDPGFjiiVpPrOJ2hmJOoBiYTC7hwx9E2A==
@@ -592,7 +592,7 @@
     "@emotion/weak-memoize" "^0.2.5"
     stylis "4.0.13"
 
-"@emotion/core@^11.0.0":
+"@emotion/core@11.0.0":
   version "11.0.0"
   resolved "https://registry.yarnpkg.com/@emotion/core/-/core-11.0.0.tgz#d075867e07864119de7cfd5268c15012bd2d6290"
   integrity sha512-w4sE3AmHmyG6RDKf6mIbtHpgJUSJ2uGvPQb8VXFL7hFjMPibE8IiehG8cMX3Ztm4svfCQV6KqusQbeIOkurBcA==
@@ -614,7 +614,7 @@
   resolved "https://registry.yarnpkg.com/@emotion/memoize/-/memoize-0.7.5.tgz#2c40f81449a4e554e9fc6396910ed4843ec2be50"
   integrity sha512-igX9a37DR2ZPGYtV6suZ6whr8pTFtyHL3K/oLUotxpSVO2ASaprmAe2Dkq7tBo7CRY7MMDrAa9nuQP9/YG8FxQ==
 
-"@emotion/react@^11.8.2":
+"@emotion/react@11.8.2":
   version "11.8.2"
   resolved "https://registry.yarnpkg.com/@emotion/react/-/react-11.8.2.tgz#e51f5e6372e22e82780836c9288da19af4b51e70"
   integrity sha512-+1bcHBaNJv5nkIIgnGKVsie3otS0wF9f1T1hteF3WeVvMNQEtfZ4YyFpnphGoot3ilU/wWMgP2SgIDuHLE/wAA==
@@ -643,7 +643,7 @@
   resolved "https://registry.yarnpkg.com/@emotion/sheet/-/sheet-1.1.0.tgz#56d99c41f0a1cda2726a05aa6a20afd4c63e58d2"
   integrity sha512-u0AX4aSo25sMAygCuQTzS+HsImZFuS8llY8O7b9MDRzbJM0kVJlAz6KNDqcG7pOuQZJmj/8X/rAW+66kMnMW+g==
 
-"@emotion/styled@^11.8.1":
+"@emotion/styled@11.8.1":
   version "11.8.1"
   resolved "https://registry.yarnpkg.com/@emotion/styled/-/styled-11.8.1.tgz#856f6f63aceef0eb783985fa2322e2bf66d04e17"
   integrity sha512-OghEVAYBZMpEquHZwuelXcRjRJQOVayvbmNR0zr174NHdmMgrNkLC6TljKC5h9lZLkN5WGrdUcrKlOJ4phhoTQ==
@@ -866,7 +866,7 @@
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
 
-"@openpatch/patches@^5.2.0":
+"@openpatch/patches@5.2.0":
   version "5.2.0"
   resolved "https://registry.yarnpkg.com/@openpatch/patches/-/patches-5.2.0.tgz#fb3ed87eb3e28ffd125641d0894e20a25682188d"
   integrity sha512-KdU4uv2ZCpqvp5jeb7l3dhRUPTJ243g4V91zqVtSeuqrfE2MykHtd218TrSLcTIIHGtxbw9JbQNhmNuoVdDvIQ==
@@ -1061,7 +1061,7 @@
   resolved "https://registry.yarnpkg.com/@types/unist/-/unist-2.0.6.tgz#250a7b16c3b91f672a24552ec64678eeb1d3a08d"
   integrity sha512-PBjIUxZHOuj0R15/xuwJYjFi+KZdNFrehocChv4g5hu6aFroHue8m0lBP0POdK2nKzbw0cgV1mws8+V/JAcEkQ==
 
-"@vocab/core@^1.0.3":
+"@vocab/core@1.0.3":
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/@vocab/core/-/core-1.0.3.tgz#b9c8f380981992259feda68ab826da6b5be0b4e8"
   integrity sha512-y/imwmy0fOXruDOOrCRGc4zjn6IDF5nn6E36U97rP9DNbwNIH6TloiytHN1bpFU5GpRHYGLkY55xgBmVSxp0gw==
@@ -1077,7 +1077,7 @@
     intl-messageformat "^9.9.0"
     prettier "^2.1.2"
 
-"@vocab/react@^1.1.0":
+"@vocab/react@1.1.0":
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/@vocab/react/-/react-1.1.0.tgz#5166878df10beafe14a92eb64f802cf7e62e44b6"
   integrity sha512-dke37b0WYvaS0W0KL+dQnwO0wVBYVyH0Tce+oR/dlJ3SEhkLTUvNqJARTPP/Bm05Kh5mWaDHLK6hmmHF7VLRBg==
@@ -1085,7 +1085,7 @@
     "@vocab/types" "^1.0.1"
     intl-messageformat "^9.9.0"
 
-"@vocab/types@^1.0.1":
+"@vocab/types@1.0.1", "@vocab/types@^1.0.1":
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/@vocab/types/-/types-1.0.1.tgz#501874c1d0917d75443138abfcd630b2dc06836b"
   integrity sha512-oqcosddvBKf4FF9DKebqMV6iRworemwOcPgEHymJU22CLdeBHRp4yE9eGZ3rbkfCBa4VzN5VHT3oOkPYYM2R3Q==
@@ -2746,7 +2746,7 @@ react-dom@17.0.2:
     object-assign "^4.1.1"
     scheduler "^0.20.2"
 
-react-hook-form@^7.27.1:
+react-hook-form@7.27.1:
   version "7.27.1"
   resolved "https://registry.yarnpkg.com/react-hook-form/-/react-hook-form-7.27.1.tgz#fe5fbcb6bf58751f66d9569e998d671480cc57f6"
   integrity sha512-N3a7A6zIQ8DJeThisVZGtOUabTbJw+7DHJidmB9w8m3chckv2ZWKb5MHps9d2pPJqmCDoWe53Bos56bYmJms5w==
@@ -3022,7 +3022,7 @@ remark-rehype@^8.0.0:
   dependencies:
     mdast-util-to-hast "^10.2.0"
 
-remark-unwrap-images@^3.0.1:
+remark-unwrap-images@3.0.1:
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/remark-unwrap-images/-/remark-unwrap-images-3.0.1.tgz#22a547baa8fa1e2c66c7d087ebd9cf829a74a255"
   integrity sha512-5VUY0n+J9lPTPfkct5S3/SbutryBjp8J/4mbgtlkDrOk3h8jde0hyqdYUJOoJKherZezS08tjd6i4+nnQ+wl5w==
@@ -3484,7 +3484,7 @@ yocto-queue@^0.1.0:
   resolved "https://registry.yarnpkg.com/yocto-queue/-/yocto-queue-0.1.0.tgz#0294eb3dee05028d31ee1a5fa2c556a6aaf10a1b"
   integrity sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==
 
-zod@^3.13.4:
+zod@3.13.4:
   version "3.13.4"
   resolved "https://registry.yarnpkg.com/zod/-/zod-3.13.4.tgz#5d6fe03ef4824a637d7ef50b5441cf6ab3acede0"
   integrity sha512-LZRucWt4j/ru5azOkJxCfpR87IyFDn8h2UODdqvXzZLb3K7bb9chUrUIGTy3BPsr8XnbQYfQ5Md5Hu2OYIo1mg==
