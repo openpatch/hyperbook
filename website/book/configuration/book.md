@@ -32,7 +32,6 @@ Here is an example configuration:
     "url": "https://openpatch.org"
   },
   "logo": "/logo.png",
-  "basePath": "/base",
   "license": "CC-BY-SA",
   "language": "en",
   "basePath": "/hyperbook-github-pages",
