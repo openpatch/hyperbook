@@ -13,4 +13,6 @@ npx hyperbook build
 cp -R .hyperbook/out /var/www/my-website
 ```
 
-?> If you deploy to a subfolder ensure to set the basePath option in your [Hyperbook configuration](/configuration/book).
+:::alert{warn}
+If you deploy to a subfolder ensure to set the basePath option in your [Hyperbook configuration](/configuration/book).
+:::
