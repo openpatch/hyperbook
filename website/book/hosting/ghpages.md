@@ -4,7 +4,9 @@ name: GitHub Pages
 
 # Deploy on GitHub Pages
 
-?> Remember to add a basePath to your [configuration](/configuration/book), when deploying to GitHub pages.
+:::alert{warn}
+Remember to add a basePath to your [configuration](/configuration/book), when deploying to GitHub pages.
+:::
 
 For GitHub Pages you can use the following action:
 
@@ -38,4 +40,6 @@ jobs:
           publish_dir: ./.hyperbook/out
 ```
 
-?> Do not forget to pick a source branch in the GitHub pages settings
+:::alert{warn}
+Do not forget to pick a source branch in the GitHub pages settings
+:::
