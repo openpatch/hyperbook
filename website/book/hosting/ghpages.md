@@ -40,6 +40,8 @@ jobs:
           publish_dir: ./.hyperbook/out
 ```
 
+Example Repository: https://github.com/mikebarkmin/hyperbook-github-pages/
+
 :::alert{warn}
 Do not forget to pick a source branch in the GitHub pages settings
 :::
