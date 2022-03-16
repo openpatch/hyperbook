@@ -233,6 +233,31 @@ const Protect = ({ children, node, password, description }) => {
   );
 };
 
+const Download = ({ children, src }) => {
+  const [isOnline, setIsOnline] = useState(true);
+
+  useEffect(() => {
+    fetch(src, {
+      method: "HEAD",
+    }).then((r) => {
+      if (!r.ok) {
+        setIsOnline(false);
+      }
+    });
+  }, []);
+
+  return (
+    <Link href={src}>
+      <a className="download border">
+        <span className="icon">⏬</span>
+        <span className={!isOnline ? "label offline" : "label"}>
+          {children} {!isOnline && "(Offline)"}
+        </span>
+      </a>
+    </Link>
+  );
+};
+
 export default {
   youtube: YouTubeVideo,
   term: Term,
@@ -244,4 +269,5 @@ export default {
   flow: FlowMD,
   task: TaskMD,
   protect: Protect,
+  download: Download,
 };

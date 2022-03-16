@@ -6,6 +6,12 @@ index: 0
 
 # Getting Started
 
+## Download
+
+:download[Herunterladen]{src="/test.zip"}
+
+:download[Herunterladen]{src="/test.jpg"}
+
 ## Protect
 
 :::protect{password="hall2" description="This is a description"}
