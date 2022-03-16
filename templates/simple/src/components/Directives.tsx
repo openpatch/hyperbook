@@ -236,6 +236,20 @@ const Protect = ({ children, node, password, description }) => {
 const Download = ({ children, src }) => {
   const [isOnline, setIsOnline] = useState(true);
 
+  const { basePath } = config;
+
+  if (
+    process.env.NODE_ENV !== "production" &&
+    basePath &&
+    src.startsWith("/")
+  ) {
+    if (basePath.endsWith("/")) {
+      src = basePath.slice(0, -1) + src;
+    } else {
+      src = basePath + src;
+    }
+  }
+
   useEffect(() => {
     fetch(src, {
       method: "HEAD",
@@ -247,14 +261,17 @@ const Download = ({ children, src }) => {
   }, []);
 
   return (
-    <Link href={src}>
-      <a className="download border" target="_blank" rel="noopener noreferrer">
-        <span className="icon">⏬</span>
-        <span className={!isOnline ? "label offline" : "label"}>
-          {children} {!isOnline && "(Offline)"}
-        </span>
-      </a>
-    </Link>
+    <a
+      href={src}
+      className="download border"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      <span className="icon">⏬</span>
+      <span className={!isOnline ? "label offline" : "label"}>
+        {children} {!isOnline && "(Offline)"}
+      </span>
+    </a>
   );
 };
 
