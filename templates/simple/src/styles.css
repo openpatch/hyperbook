@@ -764,9 +764,46 @@ nav > ul {
   border-bottom-left-radius: 4px;
 }
 
+.border {
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
 .flow {
   position: relative;
   width: 100%;
-  border-radius: 4px;
-  border: 1px solid #ccc;
+}
+
+.password {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100px;
+}
+
+.password > input {
+  text-align: center;
+  background: var(--color-nav);
+  border-radius: 10px;
+  font-size: 18px;
+  border: 1px solid var(--color-spacer);
+}
+
+.password > .icon {
+  position: absolute;
+  user-select: none;
+  left: -14px;
+  background: white;
+  border: 1px solid var(--color-spacer);
+  height: 28px;
+  width: 28px;
+  text-align: center;
+  border-radius: 50%;
+  margin-bottom: 10px;
+}
+
+.password > .description {
+  margin-bottom: 10px;
 }

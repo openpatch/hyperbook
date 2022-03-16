@@ -6,6 +6,12 @@ index: 0
 
 # Getting Started
 
+## Protect
+
+:::protect{password="hall2" description="This is a description"}
+:smile:
+:::
+
 ## Emoji
 
 :smile:

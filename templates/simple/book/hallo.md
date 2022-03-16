@@ -45,6 +45,7 @@ Das ist ein Test
 
 :::collapsible{With an Image}
 
+::task{src="/task.json"}
 ![](/test.jpg)
 
 ::::

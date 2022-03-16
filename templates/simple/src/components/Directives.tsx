@@ -1,8 +1,11 @@
 import { Flow as IFlow } from "@bitflow/core";
+import hash from "object-hash";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { getHyperbook } from "../utils/hyperbook";
+import { useRouter } from "next/router";
+import { useCollapsible, useProtect, useTabs } from "../store";
 
 const Flow = dynamic(() => import("./Bitflow").then((b) => b.Flow), {
   ssr: false,
@@ -10,7 +13,11 @@ const Flow = dynamic(() => import("./Bitflow").then((b) => b.Flow), {
 const Task = dynamic(() => import("./Bitflow").then((b) => b.Task), {
   ssr: false,
 });
-//const Flow = () => <div />
+
+function basename(path: string) {
+  return path.split("/").reverse()[0];
+}
+
 const config = getHyperbook();
 
 export type YouTubeVideoProps = {
@@ -19,7 +26,7 @@ export type YouTubeVideoProps = {
 };
 
 export const YouTubeVideo = ({ id, children }: YouTubeVideoProps) => (
-  <div className="video-container">
+  <div className="video-container" id={`video-${id}`}>
     <iframe
       src={"https://www.youtube.com/embed/" + id}
       frameBorder="0"
@@ -55,7 +62,8 @@ export const Tab = ({ children }: any) => {
 };
 
 export const Tabs = ({ children, node }: any) => {
-  const [active, setActive] = useState(0);
+  const id = hash(node);
+  const [active, setActive] = useTabs(id);
 
   const titles: string[] = node.children?.map((c: any) => {
     return Object.keys(c.properties)?.join(" ") || "";
@@ -63,7 +71,7 @@ export const Tabs = ({ children, node }: any) => {
 
   return (
     <>
-      <div className="tabs">
+      <div className="tabs" id={`tabs-${id}`}>
         {titles.map((title, i) => (
           <button
             className={active === i ? "tab active" : "tab"}
@@ -87,15 +95,17 @@ export const Tabs = ({ children, node }: any) => {
 };
 
 export const Collapsible = ({ children, node, ...props }: any) => {
-  const [active, setActive] = useState(false);
+  const id = hash(node);
+  const [active, toggleActive] = useCollapsible(id);
 
   const title = Object.keys(props).join(" ");
 
   return (
     <>
       <button
+        id={`collapsibel-${id}`}
         className={active ? "collapsible-button active" : "collapsible-button"}
-        onClick={() => setActive((a) => !a)}
+        onClick={() => toggleActive()}
       >
         {title}
       </button>
@@ -146,7 +156,11 @@ export const FlowMD = ({ src, height = 400 }) => {
   }
 
   return (
-    <div className="flow" style={{ height }}>
+    <div
+      className="flow border"
+      id={`flow-${basename(src)}`}
+      style={{ height }}
+    >
       {flow ? <Flow flow={flow} /> : "...loading"}
     </div>
   );
@@ -190,8 +204,31 @@ export const TaskMD = ({ src, height = 400 }) => {
   }
 
   return (
-    <div className="flow" style={{ height }}>
+    <div
+      className="flow border"
+      id={`task-${basename(src)}`}
+      style={{ height }}
+    >
       {task ? <Task task={task} /> : "...loading"}
+    </div>
+  );
+};
+
+const Protect = ({ children, node, password, description }) => {
+  const id = hash(node);
+  const [value, setValue] = useProtect(id);
+
+  return value === password ? (
+    children
+  ) : (
+    <div className="password border">
+      <span className="description">{description}</span>
+      <span className="icon">🔒</span>
+      <input
+        placeholder="..."
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+      />
     </div>
   );
 };
@@ -206,4 +243,5 @@ export default {
   collapsible: Collapsible,
   flow: FlowMD,
   task: TaskMD,
+  protect: Protect,
 };

@@ -1,6 +1,7 @@
 import hb from "../../hyperbook.json";
 
 export type Hyperbook = {
+  version?: string;
   name: string;
   description?: string;
   logo?: string;
