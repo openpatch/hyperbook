@@ -781,6 +781,7 @@ nav > ul {
   align-items: center;
   justify-content: center;
   height: 100px;
+  margin-bottom: 10px;
 }
 
 .password > input {
@@ -806,4 +807,18 @@ nav > ul {
 
 .password > .description {
   margin-bottom: 10px;
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: none;
+  font-size: 32px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--color-nav);
 }
