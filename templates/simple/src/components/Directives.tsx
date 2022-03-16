@@ -248,7 +248,7 @@ const Download = ({ children, src }) => {
 
   return (
     <Link href={src}>
-      <a className="download border">
+      <a className="download border" target="_blank" rel="noopener noreferrer">
         <span className="icon">⏬</span>
         <span className={!isOnline ? "label offline" : "label"}>
           {children} {!isOnline && "(Offline)"}
