@@ -8,6 +8,10 @@ export type Hyperbook = {
   repo?: string;
   language?: string;
   basePath?: string;
+  colors?: {
+    brand?: string;
+    brandText?: string;
+  };
   author?: {
     name: string;
     url?: string;

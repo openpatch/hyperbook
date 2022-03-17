@@ -5,6 +5,10 @@
   "repo": "https://github.com/openpatch/hyperbook/blob/main/templates/simple",
   "language": "en",
   "basePath": "/",
+  "colors": {
+    "brand": "black",
+    "brandText": "white"
+  },
   "author": {
     "name": "OpenPatch",
     "url": "https://openpatch.org"
