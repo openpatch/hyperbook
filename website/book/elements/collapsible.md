@@ -2,6 +2,8 @@
 name: Collapsible
 ---
 
+# Collapsible
+
 If you want to show additional content, which should not be seen at
 first glance, you can use a collapsible. Collapsibles are great for hints. They can also be nested.
 

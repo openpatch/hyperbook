@@ -2,6 +2,8 @@
 name: Tabs
 ---
 
+# Tabs
+
 Tabs are a great way to display alternative content. In Hyperbook you
 can use the `::::tabs` and `:::tab{A Tab Title}`.
 

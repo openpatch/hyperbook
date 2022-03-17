@@ -299,7 +299,9 @@ export const useProtect = (id: string) => {
 
 export const useBookmark = (anchor: string, label: string) => {
   const bookmark = useSelector<HyperbookState, boolean>((state) => {
-    return state.pages?.[state.currentPage]?.bookmarks?.[anchor]?.active;
+    return (
+      state.pages?.[state.currentPage]?.bookmarks?.[anchor]?.active || false
+    );
   });
   const dispatch = useDispatch();
 
