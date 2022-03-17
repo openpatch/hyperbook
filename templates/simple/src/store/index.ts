@@ -8,6 +8,7 @@ import { DoProgress } from "@bitflow/do";
 import { useDispatch, useSelector } from "react-redux";
 import { composeWithDevTools } from "@redux-devtools/extension";
 import { useRouter } from "next/router";
+import pkg from "../../package.json";
 
 const config = getHyperbook();
 
@@ -44,6 +45,7 @@ export type PageState = {
 };
 
 export type HyperbookState = {
+  version: string;
   currentPage: string;
   pages: Record<string, PageState>;
 };
@@ -51,6 +53,7 @@ export type HyperbookState = {
 let store: Store<HyperbookState>;
 
 const defaultState: HyperbookState = {
+  version: pkg.version,
   pages: {},
   currentPage: "/",
 };

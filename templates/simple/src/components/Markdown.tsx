@@ -11,6 +11,8 @@ import directives from "../components/Directives";
 import { Headings } from "./Headings";
 import { Image } from "./Image";
 import Link from "next/link";
+import { MdContentCopy, MdDone } from "react-icons/md";
+import { useRef, useState } from "react";
 
 export type MarkdownProps = {
   children: string;
@@ -27,6 +29,36 @@ const MarkdownLink = ({ href, title, children }: MarkdownLinkProps) => {
     <Link href={href}>
       <a title={title}>{children}</a>
     </Link>
+  );
+};
+
+type CodeProps = {
+  inline?: boolean;
+  className?: string;
+  children: any;
+};
+
+const Code = ({ children, className }: CodeProps) => {
+  const ref = useRef<HTMLElement>();
+  const [copied, setCopied] = useState(false);
+  const copyCode = () => {
+    if (navigator.clipboard && ref.current) {
+      const text = ref.current.innerText;
+      navigator.clipboard.writeText(text);
+
+      setCopied(true);
+
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  return (
+    <code ref={ref} className={className}>
+      {children}
+      <button className="copy" onClick={copyCode}>
+        {copied ? <MdDone /> : <MdContentCopy />}
+      </button>
+    </code>
   );
 };
 
@@ -49,6 +81,7 @@ export const Markdown = (props: MarkdownProps) => {
         {
           ...directives,
           a: MarkdownLink,
+          code: Code,
           h1: Headings,
           h2: Headings,
           h3: Headings,

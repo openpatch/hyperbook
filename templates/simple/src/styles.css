@@ -921,3 +921,32 @@ ul.bookmarks li::before {
   top: 50%;
   transform: translateY(-50%);
 }
+
+pre > code {
+  position: relative;
+}
+
+code {
+  display: inline-flex;
+  align-items: center;
+}
+
+code button.copy {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 4px;
+  background: none;
+  border: none;
+  opacity: 0.8;
+}
+
+code button.copy:hover {
+  opacity: 1;
+}
+
+pre > code button.copy {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+}
