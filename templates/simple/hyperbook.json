@@ -9,6 +9,7 @@
     "brand": "black",
     "brandText": "white"
   },
+  "license": "cc0",
   "author": {
     "name": "OpenPatch",
     "url": "https://openpatch.org"

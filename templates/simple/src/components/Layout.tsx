@@ -14,6 +14,59 @@ export type LayoutProps = {
   children: ReactNode;
 };
 
+const linkLicense = (license: string) => {
+  let href: string;
+  let label: string;
+  console.log(license);
+  switch (license.toLowerCase()) {
+    case "cc0": {
+      href = "https://creativecommons.org/publicdomain/zero/1.0/";
+      label = "CC0";
+      break;
+    }
+    case "cc-by": {
+      href = "https://creativecommons.org/licenses/by/4.0";
+      label = "CC BY";
+      break;
+    }
+    case "cc-by-sa": {
+      href = "https://creativecommons.org/licenses/by-sa/4.0";
+      label = "CC BY-SA";
+      break;
+    }
+    case "cc-by-nd": {
+      href = "https://creativecommons.org/licenses/by-nd/4.0";
+      label = "CC BY-ND";
+      break;
+    }
+    case "cc-by-nc": {
+      href = "https://creativecommons.org/licenses/by-nc/4.0";
+      label = "CC BY-NC";
+      break;
+    }
+    case "cc-by-nc-sa": {
+      href = "https://creativecommons.org/licenses/by-nc-sa/4.0";
+      label = "CC BY-NC-SA";
+      break;
+    }
+    case "cc-by-nc-nd": {
+      href = "https://creativecommons.org/licenses/by-nc-nd/4.0";
+      label = "CC BY-NC-ND";
+      break;
+    }
+  }
+
+  if (href) {
+    return (
+      <Link href={href}>
+        <a rel="license">Licensed under {label}</a>
+      </Link>
+    );
+  }
+
+  return license;
+};
+
 const relativeUrl = (url: string) => {
   const { basePath } = hyperbook;
   if (
@@ -120,12 +173,18 @@ export function Layout({ navigation, page, children }: LayoutProps) {
                 ✎ GitHub
               </a>
             )}
-            {hyperbook.author && (
-              <span className="copyright">
-                © Copyright {new Date().getFullYear()}.{" "}
-                <a href={hyperbook.author.url}>{hyperbook.author.name}</a>.
-              </span>
-            )}
+            <span className="copyright">
+              {hyperbook.license
+                ? linkLicense(hyperbook.license)
+                : `© Copyright ${new Date().getFullYear()}`}
+              {hyperbook.author && (
+                <>
+                  {" by "}
+                  <a href={hyperbook.author.url}>{hyperbook.author.name}</a>
+                </>
+              )}
+              .
+            </span>
           </div>
         </main>
       </div>

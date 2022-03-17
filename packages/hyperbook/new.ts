@@ -101,6 +101,48 @@ export async function runNew({
     initial: "",
   });
 
+  let { license } = await prompts({
+    type: "select",
+    name: "license",
+    message: "Pick a license for your book!",
+    choices: [
+      { title: "Creative Commons Zero (CC0)", value: "cc0" },
+      { title: "Creative Commons Attribution (CC BY)", value: "cc-by" },
+      {
+        title: "Creative Commons Attribution-ShareAlike (CC BY-SA)",
+        value: "cc-by-sa",
+      },
+      {
+        title: "Creative Commons Attribution-NoDerivs (CC BY-ND)",
+        value: "cc-by-nd",
+      },
+      {
+        title: "Creative Commons Attribution-NonCommercial (CC BY-NC)",
+        value: "cc-by-nc",
+      },
+      {
+        title:
+          "Creative Commons Attribution-NonCommercial-ShareAlike (CC BY-NC-SA)",
+        value: "cc-by-nc-sa",
+      },
+      {
+        title:
+          "Creative Commons Attribution-NonCommercial-NoDervis (CC BY-NC-ND)",
+        value: "cc-by-nc-nd",
+      },
+      { title: "Custom", value: "custom" },
+    ],
+  });
+
+  if (license === "custom") {
+    const r = await prompts({
+      type: "text",
+      name: "license",
+      message: "Which custom license you want to use?",
+    });
+    license = r.license;
+  }
+
   const { language } = await prompts({
     type: "text",
     name: "language",
@@ -113,11 +155,11 @@ export async function runNew({
     name: bookName,
     version: "0.0.0",
     description: description,
+    license,
     author: {
       name: author,
       url: authorUrl,
     },
-    license: "CC-BY-SA",
     language: language,
   };
 
