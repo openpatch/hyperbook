@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.4.0
+
+### Minor Changes
+
+- [`3ffbfeb`](https://github.com/openpatch/hyperbook/commit/3ffbfebd78012ad8bf0ca2093a322cacfe80a266) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - add creative commons license chooser
+
 ## 0.3.0
 
 ### Minor Changes
