@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.3.0
+
+### Minor Changes
+
+- [`3c2ad77`](https://github.com/openpatch/hyperbook/commit/3c2ad77c106040c9a58b56d87101e438961d49a3) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add bookmarks to default template
+
 ## 0.2.1
 
 ### Patch Changes
