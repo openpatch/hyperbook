@@ -5,6 +5,7 @@ import Link from "next/link";
 import path from "path";
 import { Layout } from "../components/Layout";
 import { Markdown } from "../components/Markdown";
+import { usePage } from "../store";
 import { getAllFiles } from "../utils/files";
 import {
   Navigation as NavigationProps,
@@ -18,6 +19,7 @@ type PageProps = {
 
 export default function BookPage({ markdown, navigation }: PageProps) {
   const page = navigation.current;
+  usePage();
   return (
     <Layout navigation={navigation} page={page}>
       <article>
@@ -64,7 +66,6 @@ export const getStaticProps: GetStaticProps<
   const { content } = matter(source);
 
   const navigation = await getNavigation(href);
-
   return {
     props: {
       markdown: content,

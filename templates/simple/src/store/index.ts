@@ -264,8 +264,6 @@ export const usePage = () => {
   const router = useRouter();
   const dispatch = useDispatch();
 
-  useScroll();
-
   useEffect(() => {
     dispatch(setCurrentPage(router.asPath || "/"));
   }, [router.asPath]);
