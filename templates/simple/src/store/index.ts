@@ -265,7 +265,7 @@ export const usePage = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(setCurrentPage(router.asPath || "/"));
+    dispatch(setCurrentPage(router.asPath.split("#")?.[0] || "/"));
   }, [router.asPath]);
 };
 export const useTabs = (id: string) => {
