@@ -14,6 +14,7 @@ import { Markdown } from "../../components/Markdown";
 import Link from "next/link";
 import { Fragment } from "react";
 import { getHyperbook } from "../../utils/hyperbook";
+import { usePage } from "../../store";
 
 const hyperbook = getHyperbook();
 
@@ -28,6 +29,7 @@ type TermProps = {
 };
 
 export default function Term({ markdown, navigation, term }: TermProps) {
+  usePage();
   return (
     <Layout navigation={navigation} page={term}>
       <article>

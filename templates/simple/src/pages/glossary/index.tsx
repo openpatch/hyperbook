@@ -5,6 +5,7 @@ import matter from "gray-matter";
 import { Layout } from "../../components/Layout";
 import { getNavigation, Navigation } from "../../utils/navigation";
 import Link from "next/link";
+import { usePage } from "../../store";
 
 export type Term = {
   name: string;
@@ -17,6 +18,7 @@ export type GlossaryProps = {
 };
 
 export default function Glossary({ terms, navigation }: GlossaryProps) {
+  usePage();
   return (
     <Layout
       navigation={navigation}
