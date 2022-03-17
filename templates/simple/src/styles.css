@@ -849,3 +849,75 @@ nav > ul {
 .download > .offline {
   text-decoration: line-through;
 }
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  display: flex;
+  align-items: center;
+}
+
+.bookmark {
+  margin-left: 10px;
+  background: none;
+  border: none;
+  opacity: 0.5;
+  font-size: 16px;
+}
+
+.bookmark:hover {
+  opacity: 1;
+}
+
+.bookmark.active {
+  opacity: 1;
+}
+
+ul.bookmarks {
+  padding-left: 0;
+}
+
+ul.bookmarks li {
+  list-style-type: none;
+}
+
+ul.bookmarks a {
+  display: block;
+  border: 1px solid var(--color-spacer);
+  padding: 10px 12px;
+  padding-left: 32px;
+  position: relative;
+  margin: 0;
+  border-bottom: none;
+}
+
+ul.bookmarks a:hover {
+  background: var(--color-nav);
+}
+
+ul.bookmarks a:first-of-type {
+  border-top-right-radius: 8px;
+  border-top-left-radius: 8px;
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+ul.bookmarks a:last-of-type {
+  border: 1px solid var(--color-spacer);
+  border-top-right-radius: 0;
+  border-top-left-radius: 0;
+  border-bottom-right-radius: 8px;
+  border-bottom-left-radius: 8px;
+}
+
+ul.bookmarks li::before {
+  content: "🔖";
+  position: absolute;
+  font-size: 12px;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+}

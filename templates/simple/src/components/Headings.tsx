@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { useBookmark } from "../store";
 
 type HeadingResolverProps = {
   level: number;
@@ -21,13 +22,25 @@ export const Headings: React.FC<HeadingResolverProps> = ({
   anchor = anchor.replace(/[^a-zA-Z0-9 ]/g, "");
   anchor = anchor.replace(/ /g, "-");
 
+  const label = typeof heading === "string" ? heading : anchor;
+
+  const [bookmark, toggleBookmark] = useBookmark(anchor, label);
+
   // Utility
   const container = (children: React.ReactNode): JSX.Element => (
-    <Link href={`#${anchor}`}>
-      <a className="heading" id={anchor}>
-        <span>{children}</span>
-      </a>
-    </Link>
+    <>
+      <Link href={`#${anchor}`}>
+        <a className="heading" id={anchor}>
+          <span>{children}</span>
+        </a>
+      </Link>
+      <button
+        className={bookmark ? "bookmark active" : "bookmark"}
+        onClick={() => toggleBookmark()}
+      >
+        🔖
+      </button>
+    </>
   );
 
   switch (level) {

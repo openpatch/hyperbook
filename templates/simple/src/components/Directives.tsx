@@ -4,8 +4,7 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { getHyperbook } from "../utils/hyperbook";
-import { useRouter } from "next/router";
-import { useCollapsible, useProtect, useTabs } from "../store";
+import { useBookmarks, useCollapsible, useProtect, useTabs } from "../store";
 
 const Flow = dynamic(() => import("./Bitflow").then((b) => b.Flow), {
   ssr: false,
@@ -275,6 +274,25 @@ const Download = ({ children, src }) => {
   );
 };
 
+const Bookmarks = () => {
+  const bookmarks = useBookmarks();
+
+  return (
+    <ul className="bookmarks">
+      {bookmarks.map((bookmark) => (
+        <Link
+          key={bookmark.href + bookmark.anchor}
+          href={bookmark.href + "#" + bookmark.anchor}
+        >
+          <a>
+            <li>{bookmark.label}</li>
+          </a>
+        </Link>
+      ))}
+    </ul>
+  );
+};
+
 export default {
   youtube: YouTubeVideo,
   term: Term,
@@ -287,4 +305,5 @@ export default {
   task: TaskMD,
   protect: Protect,
   download: Download,
+  bookmarks: Bookmarks,
 };

@@ -11,11 +11,6 @@ import { useRouter } from "next/router";
 
 const config = getHyperbook();
 
-export type Bookmark = {
-  page: string;
-  anchor: string;
-};
-
 export type PageState = {
   scroll: {
     x: number;
@@ -23,6 +18,13 @@ export type PageState = {
   };
   tabs: Record<string, number>;
   collapsibles: Record<string, boolean>;
+  bookmarks: Record<
+    string,
+    {
+      label: string;
+      active: boolean;
+    }
+  >;
   flows: Record<
     string,
     {
@@ -43,7 +45,6 @@ export type PageState = {
 
 export type HyperbookState = {
   currentPage: string;
-  bookmarks: Bookmark[];
   pages: Record<string, PageState>;
 };
 
@@ -51,7 +52,6 @@ let store: Store<HyperbookState>;
 
 const defaultState: HyperbookState = {
   pages: {},
-  bookmarks: [],
   currentPage: "/",
 };
 
@@ -127,11 +127,31 @@ export const setProtect = (id: string, value: string): SetProtectAction => ({
   },
 });
 
+type ToggleBookmarkAction = {
+  type: "TOGGLE_BOOKMARK";
+  payload: {
+    anchor: string;
+    label: string;
+  };
+};
+
+export const toggleBookmark = (
+  anchor: string,
+  label: string
+): ToggleBookmarkAction => ({
+  type: "TOGGLE_BOOKMARK",
+  payload: {
+    anchor,
+    label,
+  },
+});
+
 type Actions =
   | ScrollAction
   | ToggleCollapsibleAction
   | SetTabAction
   | SetProtectAction
+  | ToggleBookmarkAction
   | SetCurrentPageAction;
 
 // REDUCER
@@ -150,6 +170,31 @@ export const reducer: Reducer<HyperbookState, Actions> = (
             protect: {
               ...state.pages?.[state.currentPage]?.protect,
               [action.payload.id]: action.payload.value,
+            },
+          },
+        },
+      };
+    }
+    case "TOGGLE_BOOKMARK": {
+      const b =
+        state.pages?.[state.currentPage]?.bookmarks?.[action.payload.anchor];
+      return {
+        ...state,
+        pages: {
+          ...state.pages,
+          [state.currentPage]: {
+            ...state.pages?.[state.currentPage],
+            bookmarks: {
+              ...state.pages?.[state.currentPage]?.bookmarks,
+              [action.payload.anchor]: b?.active
+                ? {
+                    label: action.payload.label,
+                    active: false,
+                  }
+                : {
+                    label: action.payload.label,
+                    active: true,
+                  },
             },
           },
         },
@@ -250,6 +295,36 @@ export const useProtect = (id: string) => {
   const dispatch = useDispatch();
 
   return [protect, (value: string) => dispatch(setProtect(id, value))] as const;
+};
+
+export const useBookmark = (anchor: string, label: string) => {
+  const bookmark = useSelector<HyperbookState, boolean>((state) => {
+    return state.pages?.[state.currentPage]?.bookmarks?.[anchor]?.active;
+  });
+  const dispatch = useDispatch();
+
+  return [bookmark, () => dispatch(toggleBookmark(anchor, label))] as const;
+};
+
+export const useBookmarks = () => {
+  return useSelector<
+    HyperbookState,
+    { href: string; anchor: string; label: string }[]
+  >((state) => {
+    return Object.entries(state.pages).flatMap(([href, page]) => {
+      if (page) {
+        return Object.entries(page.bookmarks)
+          .filter(([_, value]) => value.active)
+          .flatMap(([anchor, bookmark]) => ({
+            href,
+            anchor,
+            label: bookmark.label,
+          }));
+      }
+
+      return [];
+    });
+  });
 };
 
 export const useScroll = () => {
