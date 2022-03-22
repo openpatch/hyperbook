@@ -112,7 +112,9 @@ export function Layout({ navigation, page, children }: LayoutProps) {
         )}
       </Head>
       <div className="main-grid">
-        <header>
+        <header
+          className={hyperbook?.colors?.inverted ? "inverted" : undefined}
+        >
           <div className="mobile-nav">
             <button
               className={isOpen ? "toggle change" : "toggle"}

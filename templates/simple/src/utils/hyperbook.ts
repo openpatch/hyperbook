@@ -12,6 +12,7 @@ export type Hyperbook = {
   colors?: {
     brand?: string;
     brandText?: string;
+    inverted?: boolea;
   };
   author?: {
     name: string;

@@ -349,12 +349,20 @@ header {
   box-shadow: rgba(0, 0, 0, 0.24) 0px 1px 4px;
 }
 
+header.inverted {
+  background: var(--color-primary);
+}
+
 .branding {
+  color: var(--color-primary);
   text-decoration: none;
   display: flex;
   padding: 20px;
-  color: var(--color-primary);
   align-items: center;
+}
+
+header.inverted > .branding {
+  color: var(--color-secondary);
 }
 
 .branding .logo {
