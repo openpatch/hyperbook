@@ -44,7 +44,7 @@
     "remark-gfm": "3.0.1",
     "remark-math": "5.1.1",
     "remark-unwrap-images": "3.0.1",
-    "zod": "3.14.2"
+    "zod": "3.14.4"
   },
   "devDependencies": {
     "@types/node": "17.0.21",
