@@ -10,19 +10,17 @@ export async function runBuild(): Promise<void> {
     return;
   }
   const hyperbook = await readHyperbook();
-  if (hyperbook?.basePath) {
-    fs.writeFileSync(
-      path.join(process.cwd(), ".hyperbook", "next.config.js"),
-      `
+  fs.writeFileSync(
+    path.join(process.cwd(), ".hyperbook", "next.config.js"),
+    `
 module.exports = {
-    basePath: '${hyperbook.basePath}',
+    ${hyperbook?.basePath ? `basePath: '${hyperbook.basePath}',` : ""}
     typescript: {
       ignoreBuildErrors: true,
     }
 }
       `
-    );
-  }
+  );
   return new Promise((resolve, reject) => {
     const command = "npm";
     const args = ["run", "build"];
