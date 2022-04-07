@@ -55,7 +55,7 @@ program
     await runBuild();
   });
 
-program.parse(process.argv);
+program.parseAsync(process.argv);
 
 const update = checkForUpdate(packageJson).catch(() => null);
 
