@@ -887,10 +887,10 @@
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
 
-"@openpatch/patches@5.2.0":
-  version "5.2.0"
-  resolved "https://registry.yarnpkg.com/@openpatch/patches/-/patches-5.2.0.tgz#fb3ed87eb3e28ffd125641d0894e20a25682188d"
-  integrity sha512-KdU4uv2ZCpqvp5jeb7l3dhRUPTJ243g4V91zqVtSeuqrfE2MykHtd218TrSLcTIIHGtxbw9JbQNhmNuoVdDvIQ==
+"@openpatch/patches@5.2.1":
+  version "5.2.1"
+  resolved "https://registry.yarnpkg.com/@openpatch/patches/-/patches-5.2.1.tgz#a0d9d82af2c9c65f113838b1f11d8bb78930ae19"
+  integrity sha512-cwCxy67miHzJb7D15z8P7l/J40B5tHbN1efgUg2ZvWapVusbCXSItnRItsYofyLy6dkNL55F96989PEgAby3/A==
   dependencies:
     "@codemirror/closebrackets" "^0.19.0"
     "@codemirror/comment" "^0.19.0"
