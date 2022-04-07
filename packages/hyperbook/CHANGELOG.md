@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.4.1
+
+### Patch Changes
+
+- [`1907ed4`](https://github.com/openpatch/hyperbook/commit/1907ed431f636c966e17a20bee2e2bd5725ff17b) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Use parseAsync insted of parse to fix incorrect exit code
+
 ## 0.4.0
 
 ### Minor Changes
