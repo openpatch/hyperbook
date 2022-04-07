@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.4.2
+
+### Patch Changes
+
+- [`e51a573`](https://github.com/openpatch/hyperbook/commit/e51a573f4bedf540ec9adc53e1111bcf0edc5e4b) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add proper error handling and check for updates before each command
+
 ## 0.4.1
 
 ### Patch Changes
