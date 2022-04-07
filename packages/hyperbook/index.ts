@@ -12,7 +12,12 @@ import { runSetup } from "./setup";
 
 const program = new Command();
 
-program.name(packageJson.name).version(packageJson.version);
+program
+  .name(packageJson.name)
+  .version(packageJson.version)
+  .hook("preAction", async () => {
+    await notifyUpdate();
+  });
 
 program
   .command("new")
@@ -28,31 +33,34 @@ program
 `
   )
   .action(async (name, options) => {
-    await notifyUpdate();
     const template =
       typeof options.template === "string" && options.template.trim();
-    await runNew({ programName: program.name(), bookPath: name, template });
+    await runNew({
+      programName: program.name(),
+      bookPath: name,
+      template,
+    }).catch(() => process.exit(1));
   });
 
 program
   .command("dev")
   .description("start the development server for a hyperbook")
   .action(async () => {
-    await runDev();
+    await runDev().catch(() => process.exit(1));
   });
 
 program
   .command("setup")
   .description("downloads the latest version of the template of a hyperbook")
   .action(async () => {
-    await runSetup();
+    await runSetup().catch(() => process.exit(1));
   });
 
 program
   .command("build")
   .description("build a hyperbook")
   .action(async () => {
-    await runBuild();
+    await runBuild().catch(() => process.exit(1));
   });
 
 program.parseAsync(process.argv);
