@@ -17,7 +17,7 @@
   },
   "devDependencies": {
     "@changesets/changelog-github": "0.4.4",
-    "@changesets/cli": "2.21.1",
+    "@changesets/cli": "2.22.0",
     "chalk": "5.0.1",
     "chokidar": "3.5.3",
     "cross-env": "7.0.3",
