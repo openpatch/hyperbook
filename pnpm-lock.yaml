@@ -109,7 +109,7 @@ importers:
       react-dom: 17.0.2
       react-hook-form: 7.28.1
       react-icons: ^4.3.1
-      react-markdown: 8.0.1
+      react-markdown: 8.0.2
       react-redux: ^7.2.8
       redux: ^4.1.2
       redux-persist: ^6.0.0
@@ -148,7 +148,7 @@ importers:
       react-dom: 17.0.2_react@17.0.2
       react-hook-form: 7.28.1_react@17.0.2
       react-icons: 4.3.1_react@17.0.2
-      react-markdown: 8.0.1_c8e45b4eb687790dba17b4e1c4b4273f
+      react-markdown: 8.0.2_c8e45b4eb687790dba17b4e1c4b4273f
       react-redux: 7.2.8_react-dom@17.0.2+react@17.0.2
       redux: 4.1.2
       redux-persist: 6.0.0_redux@4.1.2
@@ -1623,7 +1623,7 @@ packages:
       react: 17.0.2
       react-dom: 17.0.2_react@17.0.2
       react-hook-form: 7.28.1_react@17.0.2
-      react-markdown: 8.0.1_c8e45b4eb687790dba17b4e1c4b4273f
+      react-markdown: 8.0.2_c8e45b4eb687790dba17b4e1c4b4273f
       react-modal: 3.14.4_react-dom@17.0.2+react@17.0.2
       react-syntax-highlighter: 15.4.5_react@17.0.2
       react-tabs: 3.2.3_react@17.0.2
@@ -5007,6 +5007,10 @@ packages:
     resolution: {integrity: sha512-w2GsyukL62IJnlaff/nRegPQR94C/XXamvMWmSHRJ4y7Ts/4ocGRmTHvOs8PSE6pB3dWOrD/nueuU5sduBsQ4w==}
     dev: false
 
+  /react-is/18.0.0:
+    resolution: {integrity: sha512-yUcBYdBBbo3QiPsgYDcfQcIkGZHfxOaoE6HLSnr1sPzMhdyxusbfKOSUbSd/ocGi32dxcj366PsTj+5oggeKKw==}
+    dev: false
+
   /react-lifecycles-compat/3.0.4:
     resolution: {integrity: sha512-fBASbA6LnOU9dOU2eW7aQ8xmYBSXUIWr+UmF9b1efZBazGNO+rcXT/icdKnYm2pTwcRylVUYwW7H1PHfLekVzA==}
     dev: false
@@ -5036,8 +5040,8 @@ packages:
       - supports-color
     dev: false
 
-  /react-markdown/8.0.1_c8e45b4eb687790dba17b4e1c4b4273f:
-    resolution: {integrity: sha512-g78B0KtUk8oDRt59fX9SWhMikn3/qYcQW+aVMxdIulcjCNeecAZNOmR8uXy5p4bhbuPIS8gZly81bF4pAQWYXw==}
+  /react-markdown/8.0.2_c8e45b4eb687790dba17b4e1c4b4273f:
+    resolution: {integrity: sha512-WeXeDlCPFZBbN75AiLVEmN4gC6pNWadsZVWWxWpvrYQnUTHsB3l1PH60I1sbxTJr0oWOQc3zhxTrRQMTceNifw==}
     peerDependencies:
       '@types/react': '>=16'
       react: '>=16'
@@ -5051,7 +5055,7 @@ packages:
       prop-types: 15.8.1
       property-information: 6.1.1
       react: 17.0.2
-      react-is: 17.0.2
+      react-is: 18.0.0
       remark-parse: 10.0.1
       remark-rehype: 10.1.0
       space-separated-tokens: 2.0.1
