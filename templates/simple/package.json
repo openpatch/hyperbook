@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@babel/core": "7.17.9",
-    "@bitflow/bits": "0.0.2",
+    "@bitflow/bits": "0.1.0",
     "@bitflow/core": "0.5.4",
     "@bitflow/do": "^0.5.5",
     "@bitflow/do-local": "0.4.5",

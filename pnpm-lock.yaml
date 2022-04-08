@@ -83,7 +83,7 @@ importers:
   templates/simple:
     specifiers:
       '@babel/core': 7.17.9
-      '@bitflow/bits': 0.0.2
+      '@bitflow/bits': 0.1.0
       '@bitflow/core': 0.5.4
       '@bitflow/do': ^0.5.5
       '@bitflow/do-local': 0.4.5
@@ -125,7 +125,7 @@ importers:
       zod: 3.14.4
     dependencies:
       '@babel/core': 7.17.9
-      '@bitflow/bits': 0.0.2_18a4a2634bb5b5230b771da746a48565
+      '@bitflow/bits': 0.1.0_18a4a2634bb5b5230b771da746a48565
       '@bitflow/core': 0.5.4_b3594e47acd7dd979bc9de16d4e948ef
       '@bitflow/do': 0.5.5_7d971003068653bce3a75dbe16339448
       '@bitflow/do-local': 0.4.5_7d971003068653bce3a75dbe16339448
@@ -381,8 +381,8 @@ packages:
       to-fast-properties: 2.0.0
     dev: false
 
-  /@bitflow/bits/0.0.2_18a4a2634bb5b5230b771da746a48565:
-    resolution: {integrity: sha512-ZHDs7oZtBDELGXDxM62bIttFjd54b/vF/iUA3022Vr7rJL8AL+EHTv7QdKjD5uop/zrZVapRzQPO7PxxWBnxCA==}
+  /@bitflow/bits/0.1.0_18a4a2634bb5b5230b771da746a48565:
+    resolution: {integrity: sha512-MOQHWjGD3HLkF88h6/8IGLYNUnWzayt0LYdVtnc5ZMJBJxQxnURXBFWTddrhAeNmIk6AWPW0csWCOF66/OR5ow==}
     peerDependencies:
       zod: 3.x
     dependencies:
@@ -391,6 +391,7 @@ packages:
       '@bitflow/start-simple': 0.4.4_fc2316297d0673499ef9a0a1cd315d5c
       '@bitflow/task-choice': 0.4.5_fc2316297d0673499ef9a0a1cd315d5c
       '@bitflow/task-fill-in-the-blank': 0.4.6_18a4a2634bb5b5230b771da746a48565
+      '@bitflow/task-highlighting': 0.1.0_fc2316297d0673499ef9a0a1cd315d5c
       '@bitflow/task-input': 0.4.6_fc2316297d0673499ef9a0a1cd315d5c
       '@bitflow/task-yes-no': 0.4.4_fc2316297d0673499ef9a0a1cd315d5c
       '@bitflow/title-simple': 0.4.4_fc2316297d0673499ef9a0a1cd315d5c
@@ -724,6 +725,34 @@ packages:
     transitivePeerDependencies:
       - '@types/react'
       - supports-color
+    dev: false
+
+  /@bitflow/task-highlighting/0.1.0_fc2316297d0673499ef9a0a1cd315d5c:
+    resolution: {integrity: sha512-YhuQimjpXFigeIgmKTZaQEXNg3+Oj+utFkov53fmiPfP0QG372Tn28yvcGyqhE7M9NTAdkq3/BgWu0duN9x1gg==}
+    peerDependencies:
+      '@emotion/cache': 11.x
+      '@emotion/react': 11.x
+      '@emotion/styled': 11.x
+      '@openpatch/patches': 5.x
+      '@vocab/core': 1.x
+      '@vocab/react': 1.x
+      react: 17.x
+      react-dom: 17.x
+      react-hook-form: 7.x
+      zod: 3.x
+    dependencies:
+      '@bitflow/core': 0.5.4_b3594e47acd7dd979bc9de16d4e948ef
+      '@emotion/cache': 11.7.1
+      '@emotion/react': 11.8.2_e6bd7585f4e0972b809c85f7a8594d19
+      '@emotion/styled': 11.8.1_7143198f20fac1b8400f12281de33143
+      '@openpatch/patches': 5.2.1_fd083b9300698dc62b187310c3611fb8
+      '@vocab/core': 1.0.3
+      '@vocab/react': 1.1.0_react@17.0.2
+      immer: 9.0.12
+      react: 17.0.2
+      react-dom: 17.0.2_react@17.0.2
+      react-hook-form: 7.28.1_react@17.0.2
+      zod: 3.14.4
     dev: false
 
   /@bitflow/task-input/0.4.6_fc2316297d0673499ef9a0a1cd315d5c:
