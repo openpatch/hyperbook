@@ -23,7 +23,7 @@
     "@redux-devtools/extension": "^3.2.2",
     "@vocab/core": "1.1.0",
     "@vocab/react": "1.1.0",
-    "@vocab/types": "1.0.1",
+    "@vocab/types": "1.1.0",
     "classnames": "2.3.1",
     "gray-matter": "4.0.3",
     "next": "12.1.4",
