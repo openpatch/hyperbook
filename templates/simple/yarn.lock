@@ -1194,17 +1194,17 @@
     "@vocab/types" "^1.0.1"
     intl-messageformat "^9.9.0"
 
-"@vocab/types@1.0.1", "@vocab/types@^1.0.1":
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/@vocab/types/-/types-1.0.1.tgz#501874c1d0917d75443138abfcd630b2dc06836b"
-  integrity sha512-oqcosddvBKf4FF9DKebqMV6iRworemwOcPgEHymJU22CLdeBHRp4yE9eGZ3rbkfCBa4VzN5VHT3oOkPYYM2R3Q==
-  dependencies:
-    intl-messageformat "^9.9.0"
-
-"@vocab/types@^1.1.0":
+"@vocab/types@1.1.0", "@vocab/types@^1.1.0":
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/@vocab/types/-/types-1.1.0.tgz#628e14685043e9d51e4f2b14a3accb9cd5c5db4e"
   integrity sha512-vurg+b5ljL556mU/f/7+zWnIMadLH+BwDXlCBq1xq4H+yGldH/OxYAj9hBzL109A2plVHXJm834Mtmn30eGQTA==
+  dependencies:
+    intl-messageformat "^9.9.0"
+
+"@vocab/types@^1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@vocab/types/-/types-1.0.1.tgz#501874c1d0917d75443138abfcd630b2dc06836b"
+  integrity sha512-oqcosddvBKf4FF9DKebqMV6iRworemwOcPgEHymJU22CLdeBHRp4yE9eGZ3rbkfCBa4VzN5VHT3oOkPYYM2R3Q==
   dependencies:
     intl-messageformat "^9.9.0"
 

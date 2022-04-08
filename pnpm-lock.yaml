@@ -100,7 +100,7 @@ importers:
       '@types/react': 17.0.44
       '@vocab/core': 1.1.0
       '@vocab/react': 1.1.0
-      '@vocab/types': 1.0.1
+      '@vocab/types': 1.1.0
       classnames: 2.3.1
       gray-matter: 4.0.3
       next: 12.1.4
@@ -127,8 +127,8 @@ importers:
       '@babel/core': 7.17.9
       '@bitflow/bits': 0.1.0_173e9b6ea7b2197e4190e826ed265954
       '@bitflow/core': 0.5.4_9a52e73eec654d2e35ddfb6732653878
-      '@bitflow/do': 0.5.5_5812553d31a4ed3fca4c7f666fee3419
-      '@bitflow/do-local': 0.4.5_5812553d31a4ed3fca4c7f666fee3419
+      '@bitflow/do': 0.5.5_6a075ed5dae2af74133c52943a39b654
+      '@bitflow/do-local': 0.4.5_6a075ed5dae2af74133c52943a39b654
       '@bitflow/provider': 0.4.4_a00234f04ef8c9b698f498e30c5a317d
       '@bitflow/shell': 0.6.0_a00234f04ef8c9b698f498e30c5a317d
       '@emotion/cache': 11.7.1
@@ -139,7 +139,7 @@ importers:
       '@redux-devtools/extension': 3.2.2_redux@4.1.2
       '@vocab/core': 1.1.0
       '@vocab/react': 1.1.0_react@17.0.2
-      '@vocab/types': 1.0.1
+      '@vocab/types': 1.1.0
       classnames: 2.3.1
       gray-matter: 4.0.3
       next: 12.1.4_f370f735164a03a12cea0cc89593cbee
@@ -430,7 +430,7 @@ packages:
       zod: 3.14.4
     dev: false
 
-  /@bitflow/do-local/0.4.5_5812553d31a4ed3fca4c7f666fee3419:
+  /@bitflow/do-local/0.4.5_6a075ed5dae2af74133c52943a39b654:
     resolution: {integrity: sha512-xOfloC/b+EQLdgHJ6lXkFNoQFXdo275yEL6sVca9quN17qo9tQRe6vQVvwgf6H09egYOgVsocwjwVDgGSAnzaQ==}
     peerDependencies:
       '@emotion/cache': 11.x
@@ -444,7 +444,7 @@ packages:
       zod: 3.x
     dependencies:
       '@bitflow/core': 0.5.4_9a52e73eec654d2e35ddfb6732653878
-      '@bitflow/do': 0.5.5_5812553d31a4ed3fca4c7f666fee3419
+      '@bitflow/do': 0.5.5_6a075ed5dae2af74133c52943a39b654
       '@bitflow/flow-engine': 0.4.4_9a52e73eec654d2e35ddfb6732653878
       '@bitflow/provider': 0.4.4_a00234f04ef8c9b698f498e30c5a317d
       '@emotion/cache': 11.7.1
@@ -460,7 +460,7 @@ packages:
       - '@vocab/types'
     dev: false
 
-  /@bitflow/do/0.5.5_5812553d31a4ed3fca4c7f666fee3419:
+  /@bitflow/do/0.5.5_6a075ed5dae2af74133c52943a39b654:
     resolution: {integrity: sha512-IteBMoEJgkx+zKfx1ZBypt//9iznalbeMNqOhaEJy1dtVCeME02zTllR72u4VKygAVHfTHP6+cjeWpB44ItbrQ==}
     peerDependencies:
       '@emotion/cache': 11.x
@@ -483,7 +483,7 @@ packages:
       '@openpatch/patches': 5.2.1_a54ca5c48d0e085ae2ca295b23c53b6d
       '@vocab/core': 1.1.0
       '@vocab/react': 1.1.0_react@17.0.2
-      '@vocab/types': 1.0.1
+      '@vocab/types': 1.1.0
       react: 17.0.2
       react-dom: 17.0.2_react@17.0.2
     transitivePeerDependencies:
@@ -2031,15 +2031,9 @@ packages:
     peerDependencies:
       react: '>=16.3.0'
     dependencies:
-      '@vocab/types': 1.0.1
+      '@vocab/types': 1.1.0
       intl-messageformat: 9.11.4
       react: 17.0.2
-    dev: false
-
-  /@vocab/types/1.0.1:
-    resolution: {integrity: sha512-oqcosddvBKf4FF9DKebqMV6iRworemwOcPgEHymJU22CLdeBHRp4yE9eGZ3rbkfCBa4VzN5VHT3oOkPYYM2R3Q==}
-    dependencies:
-      intl-messageformat: 9.11.4
     dev: false
 
   /@vocab/types/1.1.0:
