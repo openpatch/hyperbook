@@ -111,7 +111,7 @@ importers:
       react-icons: ^4.3.1
       react-markdown: 8.0.2
       react-redux: ^7.2.8
-      redux: ^4.1.2
+      redux: 4.2.0
       redux-persist: ^6.0.0
       rehype-highlight: 5.0.2
       rehype-katex: 6.0.2
@@ -136,7 +136,7 @@ importers:
       '@emotion/react': 11.9.0_e6bd7585f4e0972b809c85f7a8594d19
       '@emotion/styled': 11.8.1_690fbe9e307bc3519937bb562dc3a813
       '@openpatch/patches': 5.2.1_c8992cecc07471160523d50ffcb6e49f
-      '@redux-devtools/extension': 3.2.2_redux@4.1.2
+      '@redux-devtools/extension': 3.2.2_redux@4.2.0
       '@vocab/core': 1.1.0
       '@vocab/react': 1.1.0_react@17.0.2
       '@vocab/types': 1.1.0
@@ -150,8 +150,8 @@ importers:
       react-icons: 4.3.1_react@17.0.2
       react-markdown: 8.0.2_c8e45b4eb687790dba17b4e1c4b4273f
       react-redux: 7.2.8_react-dom@17.0.2+react@17.0.2
-      redux: 4.1.2
-      redux-persist: 6.0.0_redux@4.1.2
+      redux: 4.2.0
+      redux-persist: 6.0.0_redux@4.2.0
       rehype-highlight: 5.0.2
       rehype-katex: 6.0.2
       remark-directive: 2.0.1
@@ -1677,13 +1677,13 @@ packages:
       - supports-color
     dev: false
 
-  /@redux-devtools/extension/3.2.2_redux@4.1.2:
+  /@redux-devtools/extension/3.2.2_redux@4.2.0:
     resolution: {integrity: sha512-fKA2TWNzJF7wXSDwBemwcagBFudaejXCzH5hRszN3Z6B7XEJtEmGD77AjV0wliZpIZjA/fs3U7CejFMQ+ipS7A==}
     peerDependencies:
       redux: ^3.1.0 || ^4.0.0
     dependencies:
       '@babel/runtime': 7.17.2
-      redux: 4.1.2
+      redux: 4.2.0
     dev: false
 
   /@sindresorhus/is/4.6.0:
@@ -1959,7 +1959,7 @@ packages:
       '@types/hoist-non-react-statics': 3.3.1
       '@types/react': 17.0.44
       hoist-non-react-statics: 3.3.2
-      redux: 4.1.2
+      redux: 4.2.0
     dev: false
 
   /@types/react/17.0.44:
@@ -5233,16 +5233,16 @@ packages:
       strip-indent: 3.0.0
     dev: true
 
-  /redux-persist/6.0.0_redux@4.1.2:
+  /redux-persist/6.0.0_redux@4.2.0:
     resolution: {integrity: sha512-71LLMbUq2r02ng2We9S215LtPu3fY0KgaGE0k8WRgl6RkqxtGfl7HUozz1Dftwsb0D/5mZ8dwAaPbtnzfvbEwQ==}
     peerDependencies:
       redux: '>4.0.0'
     dependencies:
-      redux: 4.1.2
+      redux: 4.2.0
     dev: false
 
-  /redux/4.1.2:
-    resolution: {integrity: sha512-SH8PglcebESbd/shgf6mii6EIoRM0zrQyjcuQ+ojmfxjTtE0z9Y8pa62iA/OJ58qjP6j27uyW4kUF4jl/jd6sw==}
+  /redux/4.2.0:
+    resolution: {integrity: sha512-oSBmcKKIuIR4ME29/AeNUnl5L+hvBq7OaJWzaptTQJAntaPvxIJqfnjbaEiCzzaIz+XmVILfqAM3Ob0aXLPfjA==}
     dependencies:
       '@babel/runtime': 7.17.2
     dev: false

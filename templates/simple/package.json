@@ -34,7 +34,7 @@
     "react-icons": "^4.3.1",
     "react-markdown": "8.0.2",
     "react-redux": "^7.2.8",
-    "redux": "^4.1.2",
+    "redux": "4.2.0",
     "redux-persist": "^6.0.0",
     "rehype-highlight": "5.0.2",
     "rehype-katex": "6.0.2",
