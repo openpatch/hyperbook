@@ -109,7 +109,7 @@ importers:
       react-dom: 17.0.2
       react-hook-form: 7.30.0
       react-icons: ^4.3.1
-      react-markdown: 8.0.2
+      react-markdown: 8.0.3
       react-redux: ^7.2.8
       redux: 4.2.0
       redux-persist: ^6.0.0
@@ -148,7 +148,7 @@ importers:
       react-dom: 17.0.2_react@17.0.2
       react-hook-form: 7.30.0_react@17.0.2
       react-icons: 4.3.1_react@17.0.2
-      react-markdown: 8.0.2_c8e45b4eb687790dba17b4e1c4b4273f
+      react-markdown: 8.0.3_c8e45b4eb687790dba17b4e1c4b4273f
       react-redux: 7.2.8_react-dom@17.0.2+react@17.0.2
       redux: 4.2.0
       redux-persist: 6.0.0_redux@4.2.0
@@ -1663,7 +1663,7 @@ packages:
       react: 17.0.2
       react-dom: 17.0.2_react@17.0.2
       react-hook-form: 7.30.0_react@17.0.2
-      react-markdown: 8.0.2_c8e45b4eb687790dba17b4e1c4b4273f
+      react-markdown: 8.0.3_c8e45b4eb687790dba17b4e1c4b4273f
       react-modal: 3.14.4_react-dom@17.0.2+react@17.0.2
       react-syntax-highlighter: 15.4.5_react@17.0.2
       react-tabs: 3.2.3_react@17.0.2
@@ -5073,8 +5073,8 @@ packages:
       - supports-color
     dev: false
 
-  /react-markdown/8.0.2_c8e45b4eb687790dba17b4e1c4b4273f:
-    resolution: {integrity: sha512-WeXeDlCPFZBbN75AiLVEmN4gC6pNWadsZVWWxWpvrYQnUTHsB3l1PH60I1sbxTJr0oWOQc3zhxTrRQMTceNifw==}
+  /react-markdown/8.0.3_c8e45b4eb687790dba17b4e1c4b4273f:
+    resolution: {integrity: sha512-We36SfqaKoVNpN1QqsZwWSv/OZt5J15LNgTLWynwAN5b265hrQrsjMtlRNwUvS+YyR3yDM8HpTNc4pK9H/Gc0A==}
     peerDependencies:
       '@types/react': '>=16'
       react: '>=16'
