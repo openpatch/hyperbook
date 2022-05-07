@@ -151,7 +151,7 @@ importers:
       react-markdown: 8.0.3_3df41e700a554c2356b362be396a0af4
       react-redux: 7.2.8_react-dom@17.0.2+react@17.0.2
       redux: 4.2.0
-      redux-persist: 6.0.0_redux@4.2.0
+      redux-persist: 6.0.0_react@17.0.2+redux@4.2.0
       rehype-highlight: 5.0.2
       rehype-katex: 6.0.2
       remark-directive: 2.0.1
@@ -328,6 +328,8 @@ packages:
     resolution: {integrity: sha512-n2Q6i+fnJqzOaq2VkdXxy2TCPCWQZHiCo0XqmrCvDWcZQKRyZzYi4Z0yxlBuN0w+r2ZHmre+Q087DSrw3pbJDQ==}
     engines: {node: '>=6.0.0'}
     hasBin: true
+    dependencies:
+      '@babel/types': 7.17.10
     dev: false
 
   /@babel/plugin-syntax-jsx/7.16.7_@babel+core@7.17.10:
@@ -5274,11 +5276,16 @@ packages:
       strip-indent: 3.0.0
     dev: true
 
-  /redux-persist/6.0.0_redux@4.2.0:
+  /redux-persist/6.0.0_react@17.0.2+redux@4.2.0:
     resolution: {integrity: sha512-71LLMbUq2r02ng2We9S215LtPu3fY0KgaGE0k8WRgl6RkqxtGfl7HUozz1Dftwsb0D/5mZ8dwAaPbtnzfvbEwQ==}
     peerDependencies:
+      react: '>=16'
       redux: '>4.0.0'
+    peerDependenciesMeta:
+      react:
+        optional: true
     dependencies:
+      react: 17.0.2
       redux: 4.2.0
     dev: false
 
