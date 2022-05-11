@@ -21,7 +21,7 @@
     "chalk": "5.0.1",
     "chokidar": "3.5.3",
     "cross-env": "7.0.3",
-    "esbuild": "0.14.38",
+    "esbuild": "0.14.39",
     "husky": "7.0.4",
     "prettier": "2.6.2",
     "prettier-plugin-sort-json": "0.0.2",
