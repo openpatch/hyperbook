@@ -4,24 +4,71 @@ hide: false
 index: 1
 ---
 
+:::mermaid
+classDiagram
+Animal <|-- Duck
+Animal <|-- Fish
+Animal <|-- Zebra
+Animal : +int age
+Animal : +String gender
+Animal: +isMammal()
+Animal: +mate()
+class Duck{
++String beakColor
++swim()
++quack()
+}
+class Fish{
+-int sizeInFeet
+-canEat()
+}
+class Zebra{
++bool is_wild
++run()
+}
+:::
+
 Das ist ein Test :t[dog]
 
-::::tabs
+::::tabs{id="code"}
 
-:::tab{Hi}
+:::tab{title="Hi" id="python"}
 Here is a tab
 
 Another Test
 :::
 
-:::tab{Huh a super long tab which might cause overflow}
+:::tab{title="Huh a super long tab which might cause overflöw"}
 Another tab with a [link](#)
 
 Other
 
 :::
 
-:::tab{Third}
+:::tab{title="Third"}
+
+Wow
+
+:::
+
+::::
+
+::::tabs{id="code"}
+
+:::tab{title="Hi" id="python"}
+Here is a tab
+
+Another Test
+:::
+
+:::tab{title="Huh a super long tab which might cause overflöw"}
+Another tab with a [link](#)
+
+Other
+
+:::
+
+:::tab{title="Third"}
 
 Wow
 
@@ -31,19 +78,19 @@ Wow
 
 ## Collapsible
 
-::::collapsible{Hallo}
+::::collapsible{title="Hallo" id=1}
 
 This is a panel
 
-:::collapsible{Nested}
+:::collapsible{title="Nested" id=1}
 
-This is a stacked collapsible
+This is a stacked collapsible connected with the parent collapsible
 
 :::
 
 Das ist ein Test
 
-:::collapsible{With an Image}
+:::collapsible{title="With an Image"}
 
 ::task{src="/task.json"}
 ![](/test.jpg)

@@ -2,7 +2,8 @@ import { Flow as IFlow } from "@bitflow/core";
 import hash from "object-hash";
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import mermaid from "mermaid";
+import { useEffect, useLayoutEffect, useState } from "react";
 import { getHyperbook } from "../utils/hyperbook";
 import { useBookmarks, useCollapsible, useProtect, useTabs } from "../store";
 
@@ -60,32 +61,43 @@ export const Tab = ({ children }: any) => {
   return <>{children}</>;
 };
 
-export const Tabs = ({ children, node }: any) => {
-  const id = hash(node);
-  const [active, setActive] = useTabs(id);
+export const Tabs = ({ children, node, id }: any) => {
+  if (!id) {
+    id = hash(node);
+  }
+  let [active, setActive] = useTabs(id);
 
-  const titles: string[] = node.children?.map((c: any) => {
-    return Object.keys(c.properties)?.join(" ") || "";
-  });
+  const tabs: { title: string; id: string; index: number }[] =
+    node.children?.map((c: any, i: number) => {
+      return {
+        title: c.properties?.title || "",
+        id: c.propterties?.id || c.properties?.title,
+        index: i,
+      };
+    });
+
+  if (active === null) {
+    active = tabs?.[0].id;
+  }
 
   return (
     <>
       <div className="tabs" id={`tabs-${id}`}>
-        {titles.map((title, i) => (
+        {tabs.map(({ title, id, index }) => (
           <button
-            className={active === i ? "tab active" : "tab"}
-            key={title}
-            onClick={() => setActive(i)}
+            key={index + id}
+            className={active === id ? "tab active" : "tab"}
+            onClick={() => setActive(id)}
           >
             {title}
           </button>
         ))}
       </div>
-      {titles?.map(
-        (title, i) =>
-          active === i && (
-            <div className="tabpanel" key={title}>
-              {children[i]}
+      {tabs?.map(
+        ({ id, index }) =>
+          active === id && (
+            <div className="tabpanel" key={index + id}>
+              {children[index]}
             </div>
           )
       )}
@@ -93,11 +105,12 @@ export const Tabs = ({ children, node }: any) => {
   );
 };
 
-export const Collapsible = ({ children, node, ...props }: any) => {
-  const id = hash(node);
+export const Collapsible = ({ children, id, title }: any) => {
   const [active, toggleActive] = useCollapsible(id);
 
-  const title = Object.keys(props).join(" ");
+  if (!id) {
+    id = title;
+  }
 
   return (
     <>
@@ -250,13 +263,18 @@ const Download = ({ children, src }) => {
   }
 
   useEffect(() => {
+    let isCancelled = false;
     fetch(src, {
       method: "HEAD",
     }).then((r) => {
-      if (!r.ok) {
+      if (!r.ok && !isCancelled) {
         setIsOnline(false);
       }
     });
+
+    return () => {
+      isCancelled = true;
+    };
   }, []);
 
   return (
@@ -293,6 +311,40 @@ const Bookmarks = () => {
   );
 };
 
+const getNodeText = (node: any) => {
+  if (["string", "number"].includes(typeof node)) return node;
+  if (node instanceof Array) return node.map(getNodeText).join("");
+  if (typeof node === "object" && node) return getNodeText(node.props.children);
+};
+
+let currentId = 0;
+const uuid = () => `mermaid-${(currentId++).toString()}`;
+
+const Mermaid = ({ children }) => {
+  const graphDefinition = getNodeText(children);
+  const [html, setHtml] = useState("");
+  useLayoutEffect(() => {
+    if (graphDefinition) {
+      try {
+        mermaid.mermaidAPI.initialize({
+          startOnLoad: false,
+          theme: "neutral" as any,
+        });
+        mermaid.mermaidAPI.render(uuid(), graphDefinition, (svgCode) =>
+          setHtml(svgCode)
+        );
+      } catch (e) {
+        setHtml("");
+        console.error(e);
+      }
+    }
+  }, [graphDefinition]);
+
+  return graphDefinition ? (
+    <div dangerouslySetInnerHTML={{ __html: html }} />
+  ) : null;
+};
+
 export default {
   youtube: YouTubeVideo,
   term: Term,
@@ -300,6 +352,7 @@ export default {
   alert: Alert,
   tab: Tab,
   tabs: Tabs,
+  mermaid: Mermaid,
   collapsible: Collapsible,
   flow: FlowMD,
   task: TaskMD,

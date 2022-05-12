@@ -17,7 +17,7 @@ export type PageState = {
     x: number;
     y: number;
   };
-  tabs: Record<string, number>;
+  tabs: Record<string, string>;
   collapsibles: Record<string, boolean>;
   bookmarks: Record<
     string,
@@ -90,11 +90,11 @@ type SetTabAction = {
   type: "SET_TAB";
   payload: {
     id: string;
-    tab: number;
+    tab: string;
   };
 };
 
-export const setTab = (id: string, tab: number): SetTabAction => ({
+export const setTab = (id: string, tab: string): SetTabAction => ({
   type: "SET_TAB",
   payload: {
     id,
@@ -272,12 +272,12 @@ export const usePage = () => {
   }, [router.asPath]);
 };
 export const useTabs = (id: string) => {
-  const tab = useSelector<HyperbookState, number>((state) => {
-    return state.pages?.[state.currentPage]?.tabs?.[id] || 0;
+  const tab = useSelector<HyperbookState, string>((state) => {
+    return state.pages?.[state.currentPage]?.tabs?.[id] || null;
   });
   const dispatch = useDispatch();
 
-  return [tab, (tab: number) => dispatch(setTab(id, tab))] as const;
+  return [tab, (tab: string) => dispatch(setTab(id, tab))] as const;
 };
 
 export const useCollapsible = (id: string) => {
