@@ -297,7 +297,7 @@ const Bookmarks = () => {
 
   return (
     <ul className="bookmarks">
-      {bookmarks.map((bookmark) => (
+      {bookmarks?.map((bookmark) => (
         <Link
           key={bookmark.href + bookmark.anchor}
           href={bookmark.href + "#" + bookmark.anchor}
