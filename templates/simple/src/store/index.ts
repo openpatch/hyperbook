@@ -315,7 +315,7 @@ export const useBookmarks = () => {
     { href: string; anchor: string; label: string }[]
   >((state) => {
     return Object.entries(state.pages).flatMap(([href, page]) => {
-      if (page) {
+      if (page && page.bookmarks) {
         return Object.entries(page.bookmarks)
           .filter(([_, value]) => value.active)
           .flatMap(([anchor, bookmark]) => ({
