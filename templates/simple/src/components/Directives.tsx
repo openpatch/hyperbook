@@ -292,6 +292,10 @@ const Download = ({ children, src }) => {
   );
 };
 
+const Archive = ({ name, children }) => {
+  return <Download children={children} src={`/archives/${name}.zip`} />;
+};
+
 const Bookmarks = () => {
   const bookmarks = useBookmarks();
 
@@ -358,5 +362,6 @@ export default {
   task: TaskMD,
   protect: Protect,
   download: Download,
+  archive: Archive,
   bookmarks: Bookmarks,
 };

@@ -3,6 +3,7 @@
 import chalk from "chalk";
 import { Command } from "commander";
 import checkForUpdate from "update-check";
+import { runArchive } from "./archive";
 import { runBuild } from "./build";
 import { runDev } from "./dev";
 import { getPkgManager } from "./helpers/get-pkg-manager";
@@ -60,7 +61,15 @@ program
   .command("build")
   .description("build a hyperbook")
   .action(async () => {
+    await runArchive().catch(() => process.exit(1));
     await runBuild().catch(() => process.exit(1));
+  });
+
+program
+  .command("archive")
+  .description("create archives from archives folder")
+  .action(async () => {
+    await runArchive().catch(() => process.exit(1));
   });
 
 program.parseAsync(process.argv);
