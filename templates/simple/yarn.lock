@@ -1185,10 +1185,10 @@
     intl-messageformat "^9.9.0"
     prettier "^2.1.2"
 
-"@vocab/react@1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@vocab/react/-/react-1.1.0.tgz#5166878df10beafe14a92eb64f802cf7e62e44b6"
-  integrity sha512-dke37b0WYvaS0W0KL+dQnwO0wVBYVyH0Tce+oR/dlJ3SEhkLTUvNqJARTPP/Bm05Kh5mWaDHLK6hmmHF7VLRBg==
+"@vocab/react@1.1.1":
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/@vocab/react/-/react-1.1.1.tgz#5448cc3e3375323cdeb39cbf61a5793fdabf66b4"
+  integrity sha512-pDeaJtvT9Tm2c1tTQ4GNU3byGHJDR6D9wI4xIAPsqCoqkJuf7POVqHASIfWkTj0h6p4oKtFHeHV3XyQEm5ltZA==
   dependencies:
     "@vocab/types" "^1.0.1"
     intl-messageformat "^9.9.0"
