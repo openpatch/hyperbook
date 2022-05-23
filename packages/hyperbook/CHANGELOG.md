@@ -1,5 +1,21 @@
 # hyperbook
 
+## 0.5.0
+
+### Minor Changes
+
+- [`3334df5`](https://github.com/openpatch/hyperbook/commit/3334df5297945b431df01e1f5392db84d7e7d1ff) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add auto archives to supply for example code templates or other files which you
+  want to distribute in bulk in a folder. (Single files can still be put into the
+  public folder)
+
+  You can put folders inside a `archives` folder in the root of your hyperbook.
+  These folders will be zipped and put into the `public` folder. You can easily
+  provide the zipped folders by using the `archive` directive.
+
+  ```
+  :archive[Download me!]{name="project-1"}
+  ```
+
 ## 0.4.3
 
 ### Patch Changes
