@@ -19,8 +19,8 @@ You do not need any coding experience. You only need to create and edit Markdown
 1. Run `npx hyperbook new` and follow the wizard to create your first Hyperbook.
 1. Run `npx hyperbook dev` to start the development server.
 1. Modify or add new pages to your Hyperbook.
-1. Run `npx hyperbook build` to create static HTML files.
-1. Upload the static HTML files to your server.
+1. Run `npx hyperbook build` to create static files.
+1. Upload the static files to your server.
 
 ## Support
 
