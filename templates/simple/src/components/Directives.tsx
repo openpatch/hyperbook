@@ -106,7 +106,7 @@ export const Tabs = ({ children, node, id }: any) => {
 };
 
 export const Collapsible = ({ children, id, title }: any) => {
-  const [active, toggleActive] = useCollapsible(id);
+  const [active, toggleActive] = useCollapsible(id || title);
 
   if (!id) {
     id = title;
