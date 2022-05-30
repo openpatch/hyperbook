@@ -114,7 +114,7 @@ importers:
       react: 17.0.2
       react-dom: 17.0.2
       react-hook-form: 7.31.3
-      react-icons: ^4.3.1
+      react-icons: 4.4.0
       react-markdown: 8.0.3
       react-redux: ^7.2.8
       redux: 4.2.0
@@ -154,7 +154,7 @@ importers:
       react: 17.0.2
       react-dom: 17.0.2_react@17.0.2
       react-hook-form: 7.31.3_react@17.0.2
-      react-icons: 4.3.1_react@17.0.2
+      react-icons: 4.4.0_react@17.0.2
       react-markdown: 8.0.3_3df41e700a554c2356b362be396a0af4
       react-redux: 7.2.8_react-dom@17.0.2+react@17.0.2
       redux: 4.2.0
@@ -5790,8 +5790,8 @@ packages:
     dependencies:
       react: 17.0.2
 
-  /react-icons/4.3.1_react@17.0.2:
-    resolution: {integrity: sha512-cB10MXLTs3gVuXimblAdI71jrJx8njrJZmNMEMC+sQu5B/BIOmlsAjskdqpn81y8UBVEGuHODd7/ci5DvoSzTQ==}
+  /react-icons/4.4.0_react@17.0.2:
+    resolution: {integrity: sha512-fSbvHeVYo/B5/L4VhB7sBA1i2tS8MkT0Hb9t2H1AVPkwGfVHLJCqyr2Py9dKMxsyM63Eng1GkdZfbWj+Fmv8Rg==}
     peerDependencies:
       react: '*'
     dependencies:
