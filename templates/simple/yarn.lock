@@ -261,25 +261,30 @@
     "@babel/helper-validator-identifier" "^7.16.7"
     to-fast-properties "^2.0.0"
 
-"@bitflow/bits@0.1.0":
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/@bitflow/bits/-/bits-0.1.0.tgz#20a68fe83f51ac3514438798eb90e2de605daed7"
-  integrity sha512-MOQHWjGD3HLkF88h6/8IGLYNUnWzayt0LYdVtnc5ZMJBJxQxnURXBFWTddrhAeNmIk6AWPW0csWCOF66/OR5ow==
+"@bitflow/bits@0.2.0":
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/@bitflow/bits/-/bits-0.2.0.tgz#459dfe17f857a4bbea863f52f1c0aa4826dea20c"
+  integrity sha512-LWTtbj5sQvSWtxN7yqqcz2XDic694tlpnk2DrqEi6gKDwgeQsyxorUWxZlI5l9wVkXJI1MwvGQjo1YSQGKtPYQ==
   dependencies:
-    "@bitflow/end-tries" "0.4.5"
-    "@bitflow/input-markdown" "0.4.4"
-    "@bitflow/start-simple" "0.4.4"
-    "@bitflow/task-choice" "0.4.5"
-    "@bitflow/task-fill-in-the-blank" "0.4.6"
-    "@bitflow/task-highlighting" "0.1.0"
-    "@bitflow/task-input" "0.4.6"
-    "@bitflow/task-yes-no" "0.4.4"
-    "@bitflow/title-simple" "0.4.4"
+    "@bitflow/end-tries" "0.5.0"
+    "@bitflow/input-markdown" "0.5.0"
+    "@bitflow/start-simple" "0.5.0"
+    "@bitflow/task-choice" "0.5.0"
+    "@bitflow/task-fill-in-the-blank" "0.5.0"
+    "@bitflow/task-highlighting" "0.2.0"
+    "@bitflow/task-input" "0.5.0"
+    "@bitflow/task-yes-no" "0.5.0"
+    "@bitflow/title-simple" "0.5.0"
 
 "@bitflow/core@0.5.4":
   version "0.5.4"
   resolved "https://registry.yarnpkg.com/@bitflow/core/-/core-0.5.4.tgz#0677d4ffa7a906e85e9a8f3827f1b619b3cf5d60"
   integrity sha512-Jl9frXqXAr9YIbZa0+cjhyFgRpCjTTxXq5X/LtwmCvtlZ+zu5e/86lrrvjaRmFRfAUEBsP3n69xeEm+156prSg==
+
+"@bitflow/core@0.6.0":
+  version "0.6.0"
+  resolved "https://registry.yarnpkg.com/@bitflow/core/-/core-0.6.0.tgz#cf715cfe558b413a21af205dd75b3738eaae08f6"
+  integrity sha512-3oYAGwfiUIj02AgkbsUXpv5ng+NaBbmchqG361If7M3U1Z44jDGbcMA0CTh5hYIiPnIhN4eUqwfgFJCJ897udg==
 
 "@bitflow/do-local@0.4.5":
   version "0.4.5"
@@ -301,15 +306,16 @@
     "@bitflow/provider" "0.4.4"
     "@bitflow/shell" "0.6.0"
 
-"@bitflow/end-tries@0.4.5":
-  version "0.4.5"
-  resolved "https://registry.yarnpkg.com/@bitflow/end-tries/-/end-tries-0.4.5.tgz#4e4edb10da85767b0e82d81f74c20865e9a98a23"
-  integrity sha512-OGQxdRvIPyYb9x/xs1uNvvc2JvBmSiYDejoJDbw9pKWyCO87gN2Lb5DV48svNJRbnq7/TX5n9dVLpJdaZ7ybdw==
+"@bitflow/end-tries@0.5.0":
+  version "0.5.0"
+  resolved "https://registry.yarnpkg.com/@bitflow/end-tries/-/end-tries-0.5.0.tgz#0e140ccba6ddd9f25250528a2d4a77a3171ebdb8"
+  integrity sha512-1GOFj2JR5z3YqDR4pE4GyOKNv8B1JjrzKe6rK5GSEU41j7u9r2nP36EcDugVAimaLEo/gVG3RpbeurjFZBVI7Q==
   dependencies:
-    "@bitflow/core" "0.5.4"
-    "@bitflow/icons" "0.4.4"
-    "@bitflow/provider" "0.4.4"
-    "@bitflow/shell" "0.6.0"
+    "@bitflow/core" "0.6.0"
+    "@bitflow/icons" "0.5.0"
+    "@bitflow/provider" "0.5.0"
+    "@bitflow/shell" "0.7.0"
+    zod "3.17.3"
 
 "@bitflow/flow-engine@0.4.4":
   version "0.4.4"
@@ -319,17 +325,17 @@
     "@bitflow/core" "0.5.4"
     lodash.get "^4.4.2"
 
-"@bitflow/icons@0.4.4":
-  version "0.4.4"
-  resolved "https://registry.yarnpkg.com/@bitflow/icons/-/icons-0.4.4.tgz#7274c3843e9dbfd460084464410d0e588adade00"
-  integrity sha512-upZY6MSQZV8x4YoPYl32tuvJUZVmQuLn+S1R50LfxYaS6KjBoVeewGyPSBFELOHS2T7CxlrZsb7CTvG/f4gzEA==
+"@bitflow/icons@0.5.0":
+  version "0.5.0"
+  resolved "https://registry.yarnpkg.com/@bitflow/icons/-/icons-0.5.0.tgz#f382d99215249c55fd7fb459ba06ffa2befefe63"
+  integrity sha512-n0EvRZB4jMIg6tnIXq4XCMvkbmSt4eF1UAFPzJEIdk3QZPqmnRtYFzzRgbbhIRExGYMf4EUO6Dd74So47YAtfA==
 
-"@bitflow/input-markdown@0.4.4":
-  version "0.4.4"
-  resolved "https://registry.yarnpkg.com/@bitflow/input-markdown/-/input-markdown-0.4.4.tgz#f4806e6106a2406d3ebf3bca27555a6ef3f3238f"
-  integrity sha512-7lwXByTeyqKCokOZayDRZz19ZKmmxkgUfhkpKPxVyRuA+2yQ3D5W7+JS9Iy2bs355XiKn+y71tMQXawb3NTd9A==
+"@bitflow/input-markdown@0.5.0":
+  version "0.5.0"
+  resolved "https://registry.yarnpkg.com/@bitflow/input-markdown/-/input-markdown-0.5.0.tgz#1833353f0e9d1c8d66544abc1b26c52fe0864d1e"
+  integrity sha512-iEpFkygrrDt6KoiPnnFLCVqMInP5tur6cu5Fy1AFFUJFw+bPpUrBtFeFfi/VZOEI1dZGdBjMOZuAdhLmRJPkzg==
   dependencies:
-    "@bitflow/core" "0.5.4"
+    "@bitflow/core" "0.6.0"
 
 "@bitflow/provider@0.4.4":
   version "0.4.4"
@@ -339,6 +345,15 @@
     "@bitflow/core" "0.5.4"
     lodash.get "^4.4.2"
 
+"@bitflow/provider@0.5.0":
+  version "0.5.0"
+  resolved "https://registry.yarnpkg.com/@bitflow/provider/-/provider-0.5.0.tgz#cf77d714658cb2b1bc1a6a741f83c9bbbedb49c3"
+  integrity sha512-qu8GTNS5Y7kxI5ORHuzLWTbm+A1HzdxLnFWgBd0wF/al4x9Ug9dCUQQYD2JVkM+B9FjnYQrIFCgaJVQcggrqPg==
+  dependencies:
+    "@bitflow/core" "0.6.0"
+    lodash.get "^4.4.2"
+    zod "3.17.3"
+
 "@bitflow/shell@0.6.0":
   version "0.6.0"
   resolved "https://registry.yarnpkg.com/@bitflow/shell/-/shell-0.6.0.tgz#29dd74afc5f5553aca77d86641c6c931168835f4"
@@ -347,67 +362,75 @@
     "@bitflow/core" "0.5.4"
     immer "^9.0.7"
 
-"@bitflow/start-simple@0.4.4":
-  version "0.4.4"
-  resolved "https://registry.yarnpkg.com/@bitflow/start-simple/-/start-simple-0.4.4.tgz#048cb29acee0dfaa63149ed1766f7d8f7c61e1ce"
-  integrity sha512-kZRAmkjj2YycQV6yU7xWk9B7fubydjcDSTy1F7X+c+1+zJcAtUGgvdjdRu6r3j/F/i1U+EHYBPaPY4DUClwd2A==
+"@bitflow/shell@0.7.0":
+  version "0.7.0"
+  resolved "https://registry.yarnpkg.com/@bitflow/shell/-/shell-0.7.0.tgz#d4e8b479530b74b18b54076899cb3567d8745482"
+  integrity sha512-54Xa+M/qGHA5vIEMl9tl4ONi8Yd4cos5I5cSoHxCKK+/mqtelt6WzFdsUmIzMkvCFXg1gS6dvEWJt1cxYu5dDg==
   dependencies:
-    "@bitflow/core" "0.5.4"
+    "@bitflow/core" "0.6.0"
+    immer "^9.0.14"
 
-"@bitflow/task-choice@0.4.5":
-  version "0.4.5"
-  resolved "https://registry.yarnpkg.com/@bitflow/task-choice/-/task-choice-0.4.5.tgz#5ac604902d573f48646870ca4f63b8b1058b45b9"
-  integrity sha512-xI2H8Dae82j7aeEPZCGdYKIhSnqcis3gDxIsKzdeB0AfWZeOEUYqV+e//duUM1jYMwOPNfQlWXwbJeLbRaRKdA==
+"@bitflow/start-simple@0.5.0":
+  version "0.5.0"
+  resolved "https://registry.yarnpkg.com/@bitflow/start-simple/-/start-simple-0.5.0.tgz#23b0db064f95be638de2c41d7f09cb43a8cb7721"
+  integrity sha512-pseZ8ne0tpuL0Elf6HRPAObJD0p/MwGDnuATPuqdw2vZ8Bg8evA7Z/gy7/TKOWzwoSlFNXsyoucyxfJumpNEVQ==
   dependencies:
-    "@bitflow/core" "0.5.4"
-    "@bitflow/provider" "0.4.4"
-    "@hookform/resolvers" "^2.8.5"
-    immer "^9.0.7"
+    "@bitflow/core" "0.6.0"
 
-"@bitflow/task-fill-in-the-blank@0.4.6":
-  version "0.4.6"
-  resolved "https://registry.yarnpkg.com/@bitflow/task-fill-in-the-blank/-/task-fill-in-the-blank-0.4.6.tgz#5cc483c360147f1d3f8185c737951064e5850237"
-  integrity sha512-b5NLBCEW5RoJXA2kSZtWYus5iuiv9GXmfa39iMbEQzPE1tJZ0cAc2w6P+NP1n+WEWHRecqTGVRjmeOqPvXyVEQ==
+"@bitflow/task-choice@0.5.0":
+  version "0.5.0"
+  resolved "https://registry.yarnpkg.com/@bitflow/task-choice/-/task-choice-0.5.0.tgz#dabc4f7de4519fe6d7fe3fd7fa21c137e14e71a1"
+  integrity sha512-+qbFoOFWM38Z6SDoepuYaYowkRQeP/LlZdDL0Fiyor+VI7EzyQ+mWHs71JeWovWq+EB07rw/Vv3bvUZI1uhB8g==
   dependencies:
-    "@bitflow/core" "0.5.4"
-    "@hookform/resolvers" "^2.8.5"
-    immer "^9.0.7"
+    "@bitflow/core" "0.6.0"
+    "@bitflow/provider" "0.5.0"
+    "@hookform/resolvers" "^2.8.10"
+    immer "^9.0.14"
+
+"@bitflow/task-fill-in-the-blank@0.5.0":
+  version "0.5.0"
+  resolved "https://registry.yarnpkg.com/@bitflow/task-fill-in-the-blank/-/task-fill-in-the-blank-0.5.0.tgz#fdf61d9ff926a2be3c1f92b875015e4726bfa91c"
+  integrity sha512-6h9b63bCzyC/WVc67P/t7KJZzEnyrn0WiHAqaeGA1ti510rKo3W2R0yuHjU8OT5qP61U1ulyrHHia8YZ1t95dA==
+  dependencies:
+    "@bitflow/core" "0.6.0"
+    "@hookform/resolvers" "^2.8.10"
+    immer "^9.0.14"
     react-markdown "^6.0.3"
     remark-gfm "^1.0.0"
 
-"@bitflow/task-highlighting@0.1.0":
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/@bitflow/task-highlighting/-/task-highlighting-0.1.0.tgz#b5b137705461be1b9bea3f628dcdd7d01638a3c9"
-  integrity sha512-YhuQimjpXFigeIgmKTZaQEXNg3+Oj+utFkov53fmiPfP0QG372Tn28yvcGyqhE7M9NTAdkq3/BgWu0duN9x1gg==
+"@bitflow/task-highlighting@0.2.0":
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/@bitflow/task-highlighting/-/task-highlighting-0.2.0.tgz#df87498858b1ce0093dc4e97008cb81291750284"
+  integrity sha512-gwqnABdiBnVg3kXlrNO2JvZIfrxPZj+0k6bgJ2xmd1REQsWGNuCxzQWuKGGRjmHabDgzElWXxyXJU53N5xnLRg==
   dependencies:
-    "@bitflow/core" "0.5.4"
-    immer "^9.0.3"
+    "@bitflow/core" "0.6.0"
+    immer "^9.0.14"
 
-"@bitflow/task-input@0.4.6":
-  version "0.4.6"
-  resolved "https://registry.yarnpkg.com/@bitflow/task-input/-/task-input-0.4.6.tgz#af864bb7312b41b3f9fefb56ae1e6eab3b34fac7"
-  integrity sha512-FCnf0FLuK8kOMY+AxGTV/Kyj2ebmr9jMIzH6rkVHwCbPfqmeb+ng2NusqXTpiq5aQWbBh2sjvmyC+qxW3F5ZLw==
+"@bitflow/task-input@0.5.0":
+  version "0.5.0"
+  resolved "https://registry.yarnpkg.com/@bitflow/task-input/-/task-input-0.5.0.tgz#20dcc82ed42cc5c227e32b46c12bb185c58051b0"
+  integrity sha512-neGabE7RKtB4uCDoowRzCgEeeP/ZDCLXbV0/kFo2hNqKCx/eAw8GGzL9BqnErDP89xn0r1vkPwSXGQd41/PgRQ==
   dependencies:
-    "@bitflow/core" "0.5.4"
-    "@bitflow/provider" "0.4.4"
-    "@hookform/resolvers" "^2.8.5"
-    immer "^9.0.7"
+    "@bitflow/core" "0.6.0"
+    "@bitflow/provider" "0.5.0"
+    "@hookform/resolvers" "^2.8.10"
+    immer "^9.0.14"
     react-tagcloud "^2.2.0"
 
-"@bitflow/task-yes-no@0.4.4":
-  version "0.4.4"
-  resolved "https://registry.yarnpkg.com/@bitflow/task-yes-no/-/task-yes-no-0.4.4.tgz#7448fa00131f61b47223311fe74eefcd9cc68414"
-  integrity sha512-NNxmYPfbsibj63zUPGSx45iXfwYX2xB8AhcU4bBEBCvWCAMtYihm6xPtqIOWPKw4bbed4q/qjLxM4vm4BcSSmg==
+"@bitflow/task-yes-no@0.5.0":
+  version "0.5.0"
+  resolved "https://registry.yarnpkg.com/@bitflow/task-yes-no/-/task-yes-no-0.5.0.tgz#bbaf5c5117f07a69e96706af8bb153e1fb83d71a"
+  integrity sha512-GXTHr6AIBHmUsSHxjF1ny+Mfj+smNrlhCzpvqzwQVS+hNvUslFMU38znmZBSTKq6YF1ce7rHD4FBDqv7lGnsCg==
   dependencies:
-    "@bitflow/core" "0.5.4"
-    immer "^9.0.7"
+    "@bitflow/core" "0.6.0"
+    immer "^9.0.14"
 
-"@bitflow/title-simple@0.4.4":
-  version "0.4.4"
-  resolved "https://registry.yarnpkg.com/@bitflow/title-simple/-/title-simple-0.4.4.tgz#43c70026609f94970357d268e2a1f12a7fb5bb5a"
-  integrity sha512-P7KwpurS/3Rh2cbA5f2xgXyT6XFZOJp/IAaYAVzjJe2ryOSEEsygyG7BUEV3WJwDkT1udbSmkMurbV1kGrbYPA==
+"@bitflow/title-simple@0.5.0":
+  version "0.5.0"
+  resolved "https://registry.yarnpkg.com/@bitflow/title-simple/-/title-simple-0.5.0.tgz#ef2e7baf5d825156d323eeab55d89924ebfc1596"
+  integrity sha512-DkgVLFp+yhhipeBEjPphBhj+sTVQNYTDQ8zrfG0usVJxVm9N3onqHIM+bWrWYvrypU/ULpVoZLIadhri/hj9lg==
   dependencies:
-    "@bitflow/core" "0.5.4"
+    "@bitflow/core" "0.6.0"
 
 "@braintree/sanitize-url@^6.0.0":
   version "6.0.0"
@@ -783,10 +806,10 @@
   dependencies:
     tslib "^2.1.0"
 
-"@hookform/resolvers@^2.8.5":
-  version "2.8.8"
-  resolved "https://registry.yarnpkg.com/@hookform/resolvers/-/resolvers-2.8.8.tgz#17cf806485435877fdafce9f3bee6ff68f7f87b6"
-  integrity sha512-meAEDur1IJBfKyTo9yPYAuzjIfrxA7m9Ov+1nxaW/YupsqMeseWifoUjWK03+hz/RJizsVQAaUjVxFEkyu0GWg==
+"@hookform/resolvers@^2.8.10":
+  version "2.9.0"
+  resolved "https://registry.yarnpkg.com/@hookform/resolvers/-/resolvers-2.9.0.tgz#0e8c5188fb030f1c21764892db0d04058d5413f0"
+  integrity sha512-fW/buf863gDiU60RxCTKooJRf1YRvcMy0MTXGsyv7y0sutx0iYeZwoFNQRLBtS+hi+lo60ZV3Kf8AdqGY+sZVw==
 
 "@jridgewell/gen-mapping@^0.3.0":
   version "0.3.1"
@@ -2373,7 +2396,12 @@ iconv-lite@0.6:
   dependencies:
     safer-buffer ">= 2.1.2 < 3.0.0"
 
-immer@^9.0.3, immer@^9.0.7:
+immer@^9.0.14:
+  version "9.0.14"
+  resolved "https://registry.yarnpkg.com/immer/-/immer-9.0.14.tgz#e05b83b63999d26382bb71676c9d827831248a48"
+  integrity sha512-ubBeqQutOSLIFCUBN03jGeOS6a3DoYlSYwYJTa+gSKEZKU5redJIqkIdZ3JVv/4RZpfcXdAWH5zCNLWPRv2WDw==
+
+immer@^9.0.7:
   version "9.0.12"
   resolved "https://registry.yarnpkg.com/immer/-/immer-9.0.12.tgz#2d33ddf3ee1d247deab9d707ca472c8c942a0f20"
   integrity sha512-lk7UNmSbAukB5B6dh9fnh5D0bJTOFKxVg2cyJWTYrWRfhLrLMBquONcUs3aFq507hNoIZEDDh8lb8UtOizSMhA==
