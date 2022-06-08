@@ -88,7 +88,7 @@ importers:
     specifiers:
       '@babel/core': 7.18.2
       '@bitflow/bits': 0.2.0
-      '@bitflow/core': 0.5.4
+      '@bitflow/core': 0.6.0
       '@bitflow/do': 0.6.0
       '@bitflow/do-local': 0.5.0
       '@bitflow/provider': 0.4.4
@@ -132,7 +132,7 @@ importers:
     dependencies:
       '@babel/core': 7.18.2
       '@bitflow/bits': 0.2.0_3d554604a67be526a5138633d440deac
-      '@bitflow/core': 0.5.4_8d497aa2d6b8078334455672d17de63e
+      '@bitflow/core': 0.6.0_8d497aa2d6b8078334455672d17de63e
       '@bitflow/do': 0.6.0_d3f4e6104e9f31cf239de26443de1ead
       '@bitflow/do-local': 0.5.0_d3f4e6104e9f31cf239de26443de1ead
       '@bitflow/provider': 0.4.4_1363eee88891661bf6990bc9eb639a92
