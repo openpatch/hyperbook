@@ -12,7 +12,7 @@
     "@bitflow/bits": "0.2.0",
     "@bitflow/core": "0.5.4",
     "@bitflow/do": "^0.5.5",
-    "@bitflow/do-local": "0.4.5",
+    "@bitflow/do-local": "0.5.0",
     "@bitflow/provider": "0.4.4",
     "@bitflow/shell": "0.6.0",
     "@emotion/cache": "11.7.1",
