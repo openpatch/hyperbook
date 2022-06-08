@@ -306,16 +306,6 @@
     "@bitflow/provider" "0.5.0"
     "@bitflow/shell" "0.7.0"
 
-"@bitflow/do@^0.5.5":
-  version "0.5.5"
-  resolved "https://registry.yarnpkg.com/@bitflow/do/-/do-0.5.5.tgz#a31ac2f7be469fdf309d2880aedd2bf29ed278f4"
-  integrity sha512-IteBMoEJgkx+zKfx1ZBypt//9iznalbeMNqOhaEJy1dtVCeME02zTllR72u4VKygAVHfTHP6+cjeWpB44ItbrQ==
-  dependencies:
-    "@bitflow/core" "0.5.4"
-    "@bitflow/flow-engine" "0.4.4"
-    "@bitflow/provider" "0.4.4"
-    "@bitflow/shell" "0.6.0"
-
 "@bitflow/end-tries@0.5.0":
   version "0.5.0"
   resolved "https://registry.yarnpkg.com/@bitflow/end-tries/-/end-tries-0.5.0.tgz#0e140ccba6ddd9f25250528a2d4a77a3171ebdb8"
@@ -326,14 +316,6 @@
     "@bitflow/provider" "0.5.0"
     "@bitflow/shell" "0.7.0"
     zod "3.17.3"
-
-"@bitflow/flow-engine@0.4.4":
-  version "0.4.4"
-  resolved "https://registry.yarnpkg.com/@bitflow/flow-engine/-/flow-engine-0.4.4.tgz#28a0bc71a4357fdc911335d1bd1da6baeb1a1a1a"
-  integrity sha512-Gzch7k480rJ2/5R897QcKEzRBx2pIQLrsiXzA6Fw3jXgN0+AnZ5mXNOCbra8r5XU4SHzBUJYvblETj8wAI35+g==
-  dependencies:
-    "@bitflow/core" "0.5.4"
-    lodash.get "^4.4.2"
 
 "@bitflow/flow-engine@0.5.0":
   version "0.5.0"

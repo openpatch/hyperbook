@@ -89,7 +89,7 @@ importers:
       '@babel/core': 7.18.2
       '@bitflow/bits': 0.2.0
       '@bitflow/core': 0.5.4
-      '@bitflow/do': ^0.5.5
+      '@bitflow/do': 0.6.0
       '@bitflow/do-local': 0.5.0
       '@bitflow/provider': 0.4.4
       '@bitflow/shell': 0.6.0
@@ -133,7 +133,7 @@ importers:
       '@babel/core': 7.18.2
       '@bitflow/bits': 0.2.0_3d554604a67be526a5138633d440deac
       '@bitflow/core': 0.5.4_8d497aa2d6b8078334455672d17de63e
-      '@bitflow/do': 0.5.5_d3f4e6104e9f31cf239de26443de1ead
+      '@bitflow/do': 0.6.0_d3f4e6104e9f31cf239de26443de1ead
       '@bitflow/do-local': 0.5.0_d3f4e6104e9f31cf239de26443de1ead
       '@bitflow/provider': 0.4.4_1363eee88891661bf6990bc9eb639a92
       '@bitflow/shell': 0.6.0_1363eee88891661bf6990bc9eb639a92
@@ -496,36 +496,6 @@ packages:
       - '@vocab/types'
     dev: false
 
-  /@bitflow/do/0.5.5_d3f4e6104e9f31cf239de26443de1ead:
-    resolution: {integrity: sha512-IteBMoEJgkx+zKfx1ZBypt//9iznalbeMNqOhaEJy1dtVCeME02zTllR72u4VKygAVHfTHP6+cjeWpB44ItbrQ==}
-    peerDependencies:
-      '@emotion/cache': 11.x
-      '@emotion/react': 11.x
-      '@emotion/styled': 11.x
-      '@openpatch/patches': 5.x
-      '@vocab/core': 1.x
-      '@vocab/react': 1.x
-      '@vocab/types': 1.x
-      react: 17.x
-      react-dom: 17.x
-    dependencies:
-      '@bitflow/core': 0.5.4_8d497aa2d6b8078334455672d17de63e
-      '@bitflow/flow-engine': 0.4.4_8d497aa2d6b8078334455672d17de63e
-      '@bitflow/provider': 0.4.4_1363eee88891661bf6990bc9eb639a92
-      '@bitflow/shell': 0.6.0_1363eee88891661bf6990bc9eb639a92
-      '@emotion/cache': 11.7.1
-      '@emotion/react': 11.9.0_18de21e7fab10996386cfe15caf5bbaf
-      '@emotion/styled': 11.8.1_ff2143a71a774aac6fa80c6061b14b08
-      '@openpatch/patches': 5.2.1_d3255e33f30c9d12c76ad22ac19c4b01
-      '@vocab/core': 1.1.0
-      '@vocab/react': 1.1.1_react@17.0.2
-      '@vocab/types': 1.1.0
-      react: 17.0.2
-      react-dom: 17.0.2_react@17.0.2
-    transitivePeerDependencies:
-      - zod
-    dev: false
-
   /@bitflow/do/0.6.0_d3f4e6104e9f31cf239de26443de1ead:
     resolution: {integrity: sha512-eDz8mY4TeanOSnhq7sEBfpnuxtGyMHXLRWIN66AjxvBR9v5B75vz30fUutaRHZv5vvI2IgkZN0mkC6noq+Kxeg==}
     peerDependencies:
@@ -583,21 +553,6 @@ packages:
       react-dom: 17.0.2_react@17.0.2
       react-hook-form: 7.31.3_react@17.0.2
       zod: 3.17.3
-    dev: false
-
-  /@bitflow/flow-engine/0.4.4_8d497aa2d6b8078334455672d17de63e:
-    resolution: {integrity: sha512-Gzch7k480rJ2/5R897QcKEzRBx2pIQLrsiXzA6Fw3jXgN0+AnZ5mXNOCbra8r5XU4SHzBUJYvblETj8wAI35+g==}
-    dependencies:
-      '@bitflow/core': 0.5.4_8d497aa2d6b8078334455672d17de63e
-      lodash.get: 4.4.2
-    transitivePeerDependencies:
-      - '@emotion/cache'
-      - '@emotion/react'
-      - '@emotion/styled'
-      - '@openpatch/patches'
-      - react
-      - react-dom
-      - zod
     dev: false
 
   /@bitflow/flow-engine/0.5.0_8d497aa2d6b8078334455672d17de63e:
