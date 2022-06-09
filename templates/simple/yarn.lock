@@ -276,11 +276,6 @@
     "@bitflow/task-yes-no" "0.5.0"
     "@bitflow/title-simple" "0.5.0"
 
-"@bitflow/core@0.5.4":
-  version "0.5.4"
-  resolved "https://registry.yarnpkg.com/@bitflow/core/-/core-0.5.4.tgz#0677d4ffa7a906e85e9a8f3827f1b619b3cf5d60"
-  integrity sha512-Jl9frXqXAr9YIbZa0+cjhyFgRpCjTTxXq5X/LtwmCvtlZ+zu5e/86lrrvjaRmFRfAUEBsP3n69xeEm+156prSg==
-
 "@bitflow/core@0.6.0":
   version "0.6.0"
   resolved "https://registry.yarnpkg.com/@bitflow/core/-/core-0.6.0.tgz#cf715cfe558b413a21af205dd75b3738eaae08f6"
@@ -345,14 +340,6 @@
     "@bitflow/core" "0.6.0"
     lodash.get "^4.4.2"
     zod "3.17.3"
-
-"@bitflow/shell@0.6.0":
-  version "0.6.0"
-  resolved "https://registry.yarnpkg.com/@bitflow/shell/-/shell-0.6.0.tgz#29dd74afc5f5553aca77d86641c6c931168835f4"
-  integrity sha512-17kO/lBKwBgDk5pY+UjdIPcMHrV6Gof6FLYxKfBMtUinHJVAtI3r4CJBTmh5e90nepFnfwuQtVDlPxnDXApl0Q==
-  dependencies:
-    "@bitflow/core" "0.5.4"
-    immer "^9.0.7"
 
 "@bitflow/shell@0.7.0":
   version "0.7.0"
@@ -2392,11 +2379,6 @@ immer@^9.0.14:
   version "9.0.14"
   resolved "https://registry.yarnpkg.com/immer/-/immer-9.0.14.tgz#e05b83b63999d26382bb71676c9d827831248a48"
   integrity sha512-ubBeqQutOSLIFCUBN03jGeOS6a3DoYlSYwYJTa+gSKEZKU5redJIqkIdZ3JVv/4RZpfcXdAWH5zCNLWPRv2WDw==
-
-immer@^9.0.7:
-  version "9.0.12"
-  resolved "https://registry.yarnpkg.com/immer/-/immer-9.0.12.tgz#2d33ddf3ee1d247deab9d707ca472c8c942a0f20"
-  integrity sha512-lk7UNmSbAukB5B6dh9fnh5D0bJTOFKxVg2cyJWTYrWRfhLrLMBquONcUs3aFq507hNoIZEDDh8lb8UtOizSMhA==
 
 import-fresh@^3.1.0:
   version "3.3.0"
