@@ -337,14 +337,6 @@
   dependencies:
     "@bitflow/core" "0.6.0"
 
-"@bitflow/provider@0.4.4":
-  version "0.4.4"
-  resolved "https://registry.yarnpkg.com/@bitflow/provider/-/provider-0.4.4.tgz#d24b4af875efd44e779bcdfdb21bac4682aa1841"
-  integrity sha512-UQJgbiwtcpXoJjeFHNcTqkjTkP0Mu+89kpS0lNFKhWJc4+nppYYsQXh5UEzrU0LfOLqm2Rote/m+oNfdkGaGtQ==
-  dependencies:
-    "@bitflow/core" "0.5.4"
-    lodash.get "^4.4.2"
-
 "@bitflow/provider@0.5.0":
   version "0.5.0"
   resolved "https://registry.yarnpkg.com/@bitflow/provider/-/provider-0.5.0.tgz#cf77d714658cb2b1bc1a6a741f83c9bbbedb49c3"
