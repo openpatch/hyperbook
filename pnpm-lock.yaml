@@ -92,7 +92,7 @@ importers:
       '@bitflow/do': 0.6.0
       '@bitflow/do-local': 0.5.0
       '@bitflow/provider': 0.5.0
-      '@bitflow/shell': 0.6.0
+      '@bitflow/shell': 0.7.0
       '@emotion/cache': 11.7.1
       '@emotion/core': 11.0.0
       '@emotion/react': 11.9.0
@@ -136,7 +136,7 @@ importers:
       '@bitflow/do': 0.6.0_d3f4e6104e9f31cf239de26443de1ead
       '@bitflow/do-local': 0.5.0_d3f4e6104e9f31cf239de26443de1ead
       '@bitflow/provider': 0.5.0_c3d231cb1c4834622583d8e6cc70352b
-      '@bitflow/shell': 0.6.0_1363eee88891661bf6990bc9eb639a92
+      '@bitflow/shell': 0.7.0_1363eee88891661bf6990bc9eb639a92
       '@emotion/cache': 11.7.1
       '@emotion/core': 11.0.0
       '@emotion/react': 11.9.0_18de21e7fab10996386cfe15caf5bbaf
@@ -426,26 +426,6 @@ packages:
       - supports-color
     dev: false
 
-  /@bitflow/core/0.5.4_8d497aa2d6b8078334455672d17de63e:
-    resolution: {integrity: sha512-Jl9frXqXAr9YIbZa0+cjhyFgRpCjTTxXq5X/LtwmCvtlZ+zu5e/86lrrvjaRmFRfAUEBsP3n69xeEm+156prSg==}
-    peerDependencies:
-      '@emotion/cache': 11.x
-      '@emotion/react': 11.x
-      '@emotion/styled': 11.x
-      '@openpatch/patches': 5.x
-      react: 17.x
-      react-dom: 17.x
-      zod: 3.x
-    dependencies:
-      '@emotion/cache': 11.7.1
-      '@emotion/react': 11.9.0_18de21e7fab10996386cfe15caf5bbaf
-      '@emotion/styled': 11.8.1_ff2143a71a774aac6fa80c6061b14b08
-      '@openpatch/patches': 5.2.1_d3255e33f30c9d12c76ad22ac19c4b01
-      react: 17.0.2
-      react-dom: 17.0.2_react@17.0.2
-      zod: 3.17.3
-    dev: false
-
   /@bitflow/core/0.6.0_8d497aa2d6b8078334455672d17de63e:
     resolution: {integrity: sha512-3oYAGwfiUIj02AgkbsUXpv5ng+NaBbmchqG361If7M3U1Z44jDGbcMA0CTh5hYIiPnIhN4eUqwfgFJCJ897udg==}
     peerDependencies:
@@ -642,32 +622,6 @@ packages:
       react: 17.0.2
       react-dom: 17.0.2_react@17.0.2
       zod: 3.17.3
-    dev: false
-
-  /@bitflow/shell/0.6.0_1363eee88891661bf6990bc9eb639a92:
-    resolution: {integrity: sha512-17kO/lBKwBgDk5pY+UjdIPcMHrV6Gof6FLYxKfBMtUinHJVAtI3r4CJBTmh5e90nepFnfwuQtVDlPxnDXApl0Q==}
-    peerDependencies:
-      '@emotion/cache': 11.x
-      '@emotion/react': 11.x
-      '@emotion/styled': 11.x
-      '@openpatch/patches': 5.x
-      '@vocab/core': 1.x
-      '@vocab/react': 1.x
-      react: 17.x
-      react-dom: 17.x
-    dependencies:
-      '@bitflow/core': 0.5.4_8d497aa2d6b8078334455672d17de63e
-      '@emotion/cache': 11.7.1
-      '@emotion/react': 11.9.0_18de21e7fab10996386cfe15caf5bbaf
-      '@emotion/styled': 11.8.1_ff2143a71a774aac6fa80c6061b14b08
-      '@openpatch/patches': 5.2.1_d3255e33f30c9d12c76ad22ac19c4b01
-      '@vocab/core': 1.1.0
-      '@vocab/react': 1.1.1_react@17.0.2
-      immer: 9.0.12
-      react: 17.0.2
-      react-dom: 17.0.2_react@17.0.2
-    transitivePeerDependencies:
-      - zod
     dev: false
 
   /@bitflow/shell/0.7.0_1363eee88891661bf6990bc9eb639a92:
@@ -4235,10 +4189,6 @@ packages:
     resolution: {integrity: sha512-CmxgYGiEPCLhfLnpPp1MoRmifwEIOgjcHXxOBjv7mY96c+eWScsOP9c112ZyLdWHi0FxHjI+4uVhKYp/gcdRmQ==}
     engines: {node: '>= 4'}
     dev: true
-
-  /immer/9.0.12:
-    resolution: {integrity: sha512-lk7UNmSbAukB5B6dh9fnh5D0bJTOFKxVg2cyJWTYrWRfhLrLMBquONcUs3aFq507hNoIZEDDh8lb8UtOizSMhA==}
-    dev: false
 
   /immer/9.0.14:
     resolution: {integrity: sha512-ubBeqQutOSLIFCUBN03jGeOS6a3DoYlSYwYJTa+gSKEZKU5redJIqkIdZ3JVv/4RZpfcXdAWH5zCNLWPRv2WDw==}
