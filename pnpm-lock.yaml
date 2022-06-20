@@ -104,7 +104,7 @@ importers:
       '@types/object-hash': ^2.2.1
       '@types/react': 17.0.47
       '@vocab/core': 1.1.0
-      '@vocab/react': 1.1.1
+      '@vocab/react': 1.1.2
       '@vocab/types': 1.1.0
       classnames: 2.3.1
       gray-matter: 4.0.3
@@ -131,12 +131,12 @@ importers:
       zod: 3.17.3
     dependencies:
       '@babel/core': 7.18.5
-      '@bitflow/bits': 0.2.0_b11cade248c9a8c2acfa43f23d0f3185
+      '@bitflow/bits': 0.2.0_7648955d64e2d91556483574989370da
       '@bitflow/core': 0.6.0_000c315b02c97bb0e0464af1946053f5
-      '@bitflow/do': 0.6.0_b628503f08a31ecd6237ce5ef0643917
-      '@bitflow/do-local': 0.5.0_b628503f08a31ecd6237ce5ef0643917
-      '@bitflow/provider': 0.5.0_4c221e49c86442dbed315522d0e3f9ab
-      '@bitflow/shell': 0.7.0_1f68ad08e47e927583589cfd3ac9e12a
+      '@bitflow/do': 0.6.0_a92e25244fb6c776c4d785a7ea651751
+      '@bitflow/do-local': 0.5.0_a92e25244fb6c776c4d785a7ea651751
+      '@bitflow/provider': 0.5.0_68e111e3b80f45e13116331fb1494e12
+      '@bitflow/shell': 0.7.0_ad68c7d7c3cd6a3d5489699e4459c21c
       '@emotion/cache': 11.9.3
       '@emotion/core': 11.0.0
       '@emotion/react': 11.9.3_8342d3eb196d910d490cb7458a98539d
@@ -144,7 +144,7 @@ importers:
       '@openpatch/patches': 5.2.1_6826415a1d22fd1aa6087534e5e78f49
       '@redux-devtools/extension': 3.2.2_redux@4.2.0
       '@vocab/core': 1.1.0
-      '@vocab/react': 1.1.1_react@17.0.2
+      '@vocab/react': 1.1.2_react@17.0.2
       '@vocab/types': 1.1.0
       classnames: 2.3.1
       gray-matter: 4.0.3
@@ -390,20 +390,20 @@ packages:
       to-fast-properties: 2.0.0
     dev: false
 
-  /@bitflow/bits/0.2.0_b11cade248c9a8c2acfa43f23d0f3185:
+  /@bitflow/bits/0.2.0_7648955d64e2d91556483574989370da:
     resolution: {integrity: sha512-LWTtbj5sQvSWtxN7yqqcz2XDic694tlpnk2DrqEi6gKDwgeQsyxorUWxZlI5l9wVkXJI1MwvGQjo1YSQGKtPYQ==}
     peerDependencies:
       zod: 3.x
     dependencies:
-      '@bitflow/end-tries': 0.5.0_31079c28cfe4551700626418f5f44fcc
-      '@bitflow/input-markdown': 0.5.0_f24f18db4ce0895a607b14d7035381b5
-      '@bitflow/start-simple': 0.5.0_f24f18db4ce0895a607b14d7035381b5
-      '@bitflow/task-choice': 0.5.0_f24f18db4ce0895a607b14d7035381b5
-      '@bitflow/task-fill-in-the-blank': 0.5.0_b11cade248c9a8c2acfa43f23d0f3185
-      '@bitflow/task-highlighting': 0.2.0_f24f18db4ce0895a607b14d7035381b5
-      '@bitflow/task-input': 0.5.0_f24f18db4ce0895a607b14d7035381b5
-      '@bitflow/task-yes-no': 0.5.0_f24f18db4ce0895a607b14d7035381b5
-      '@bitflow/title-simple': 0.5.0_f24f18db4ce0895a607b14d7035381b5
+      '@bitflow/end-tries': 0.5.0_35792964909d90cde3390e4e95bf4e1b
+      '@bitflow/input-markdown': 0.5.0_93ab20bf3593c7a4733c7244ac4e45e7
+      '@bitflow/start-simple': 0.5.0_93ab20bf3593c7a4733c7244ac4e45e7
+      '@bitflow/task-choice': 0.5.0_93ab20bf3593c7a4733c7244ac4e45e7
+      '@bitflow/task-fill-in-the-blank': 0.5.0_7648955d64e2d91556483574989370da
+      '@bitflow/task-highlighting': 0.2.0_93ab20bf3593c7a4733c7244ac4e45e7
+      '@bitflow/task-input': 0.5.0_93ab20bf3593c7a4733c7244ac4e45e7
+      '@bitflow/task-yes-no': 0.5.0_93ab20bf3593c7a4733c7244ac4e45e7
+      '@bitflow/title-simple': 0.5.0_93ab20bf3593c7a4733c7244ac4e45e7
       zod: 3.17.3
     transitivePeerDependencies:
       - '@emotion/cache'
@@ -439,7 +439,7 @@ packages:
       zod: 3.17.3
     dev: false
 
-  /@bitflow/do-local/0.5.0_b628503f08a31ecd6237ce5ef0643917:
+  /@bitflow/do-local/0.5.0_a92e25244fb6c776c4d785a7ea651751:
     resolution: {integrity: sha512-Mfgt0x1f+nOtjCcTj5utLajfyaWXYw8Z76f7TUvMiWxHTNmOFDaXcFAGOdnedgYUdoH+xjgHdr7WEUWjUytdCg==}
     peerDependencies:
       '@emotion/cache': 11.x
@@ -453,15 +453,15 @@ packages:
       zod: 3.x
     dependencies:
       '@bitflow/core': 0.6.0_000c315b02c97bb0e0464af1946053f5
-      '@bitflow/do': 0.6.0_b628503f08a31ecd6237ce5ef0643917
+      '@bitflow/do': 0.6.0_a92e25244fb6c776c4d785a7ea651751
       '@bitflow/flow-engine': 0.5.0_000c315b02c97bb0e0464af1946053f5
-      '@bitflow/provider': 0.5.0_4c221e49c86442dbed315522d0e3f9ab
+      '@bitflow/provider': 0.5.0_68e111e3b80f45e13116331fb1494e12
       '@emotion/cache': 11.9.3
       '@emotion/react': 11.9.3_8342d3eb196d910d490cb7458a98539d
       '@emotion/styled': 11.9.3_de12df8adbbbfbacb2b883f823504dbb
       '@openpatch/patches': 5.2.1_6826415a1d22fd1aa6087534e5e78f49
       '@vocab/core': 1.1.0
-      '@vocab/react': 1.1.1_react@17.0.2
+      '@vocab/react': 1.1.2_react@17.0.2
       react: 17.0.2
       react-dom: 17.0.2_react@17.0.2
       zod: 3.17.3
@@ -469,7 +469,7 @@ packages:
       - '@vocab/types'
     dev: false
 
-  /@bitflow/do/0.6.0_b628503f08a31ecd6237ce5ef0643917:
+  /@bitflow/do/0.6.0_a92e25244fb6c776c4d785a7ea651751:
     resolution: {integrity: sha512-eDz8mY4TeanOSnhq7sEBfpnuxtGyMHXLRWIN66AjxvBR9v5B75vz30fUutaRHZv5vvI2IgkZN0mkC6noq+Kxeg==}
     peerDependencies:
       '@emotion/cache': 11.x
@@ -484,14 +484,14 @@ packages:
     dependencies:
       '@bitflow/core': 0.6.0_000c315b02c97bb0e0464af1946053f5
       '@bitflow/flow-engine': 0.5.0_000c315b02c97bb0e0464af1946053f5
-      '@bitflow/provider': 0.5.0_4c221e49c86442dbed315522d0e3f9ab
-      '@bitflow/shell': 0.7.0_1f68ad08e47e927583589cfd3ac9e12a
+      '@bitflow/provider': 0.5.0_68e111e3b80f45e13116331fb1494e12
+      '@bitflow/shell': 0.7.0_ad68c7d7c3cd6a3d5489699e4459c21c
       '@emotion/cache': 11.9.3
       '@emotion/react': 11.9.3_8342d3eb196d910d490cb7458a98539d
       '@emotion/styled': 11.9.3_de12df8adbbbfbacb2b883f823504dbb
       '@openpatch/patches': 5.2.1_6826415a1d22fd1aa6087534e5e78f49
       '@vocab/core': 1.1.0
-      '@vocab/react': 1.1.1_react@17.0.2
+      '@vocab/react': 1.1.2_react@17.0.2
       '@vocab/types': 1.1.0
       react: 17.0.2
       react-dom: 17.0.2_react@17.0.2
@@ -499,7 +499,7 @@ packages:
       - zod
     dev: false
 
-  /@bitflow/end-tries/0.5.0_31079c28cfe4551700626418f5f44fcc:
+  /@bitflow/end-tries/0.5.0_35792964909d90cde3390e4e95bf4e1b:
     resolution: {integrity: sha512-1GOFj2JR5z3YqDR4pE4GyOKNv8B1JjrzKe6rK5GSEU41j7u9r2nP36EcDugVAimaLEo/gVG3RpbeurjFZBVI7Q==}
     peerDependencies:
       '@emotion/cache': 11.x
@@ -513,15 +513,15 @@ packages:
       react-hook-form: 7.x
     dependencies:
       '@bitflow/core': 0.6.0_000c315b02c97bb0e0464af1946053f5
-      '@bitflow/icons': 0.5.0_4c221e49c86442dbed315522d0e3f9ab
-      '@bitflow/provider': 0.5.0_4c221e49c86442dbed315522d0e3f9ab
-      '@bitflow/shell': 0.7.0_1f68ad08e47e927583589cfd3ac9e12a
+      '@bitflow/icons': 0.5.0_68e111e3b80f45e13116331fb1494e12
+      '@bitflow/provider': 0.5.0_68e111e3b80f45e13116331fb1494e12
+      '@bitflow/shell': 0.7.0_ad68c7d7c3cd6a3d5489699e4459c21c
       '@emotion/cache': 11.9.3
       '@emotion/react': 11.9.3_8342d3eb196d910d490cb7458a98539d
       '@emotion/styled': 11.9.3_de12df8adbbbfbacb2b883f823504dbb
       '@openpatch/patches': 5.2.1_6826415a1d22fd1aa6087534e5e78f49
       '@vocab/core': 1.1.0
-      '@vocab/react': 1.1.1_react@17.0.2
+      '@vocab/react': 1.1.2_react@17.0.2
       react: 17.0.2
       react-dom: 17.0.2_react@17.0.2
       react-hook-form: 7.32.2_react@17.0.2
@@ -543,7 +543,7 @@ packages:
       - zod
     dev: false
 
-  /@bitflow/icons/0.5.0_4c221e49c86442dbed315522d0e3f9ab:
+  /@bitflow/icons/0.5.0_68e111e3b80f45e13116331fb1494e12:
     resolution: {integrity: sha512-n0EvRZB4jMIg6tnIXq4XCMvkbmSt4eF1UAFPzJEIdk3QZPqmnRtYFzzRgbbhIRExGYMf4EUO6Dd74So47YAtfA==}
     peerDependencies:
       '@emotion/cache': 11.x
@@ -560,12 +560,12 @@ packages:
       '@emotion/styled': 11.9.3_de12df8adbbbfbacb2b883f823504dbb
       '@openpatch/patches': 5.2.1_6826415a1d22fd1aa6087534e5e78f49
       '@vocab/core': 1.1.0
-      '@vocab/react': 1.1.1_react@17.0.2
+      '@vocab/react': 1.1.2_react@17.0.2
       react: 17.0.2
       react-dom: 17.0.2_react@17.0.2
     dev: false
 
-  /@bitflow/input-markdown/0.5.0_f24f18db4ce0895a607b14d7035381b5:
+  /@bitflow/input-markdown/0.5.0_93ab20bf3593c7a4733c7244ac4e45e7:
     resolution: {integrity: sha512-iEpFkygrrDt6KoiPnnFLCVqMInP5tur6cu5Fy1AFFUJFw+bPpUrBtFeFfi/VZOEI1dZGdBjMOZuAdhLmRJPkzg==}
     peerDependencies:
       '@emotion/cache': 11.x
@@ -585,14 +585,14 @@ packages:
       '@emotion/styled': 11.9.3_de12df8adbbbfbacb2b883f823504dbb
       '@openpatch/patches': 5.2.1_6826415a1d22fd1aa6087534e5e78f49
       '@vocab/core': 1.1.0
-      '@vocab/react': 1.1.1_react@17.0.2
+      '@vocab/react': 1.1.2_react@17.0.2
       react: 17.0.2
       react-dom: 17.0.2_react@17.0.2
       react-hook-form: 7.32.2_react@17.0.2
       zod: 3.17.3
     dev: false
 
-  /@bitflow/provider/0.5.0_4c221e49c86442dbed315522d0e3f9ab:
+  /@bitflow/provider/0.5.0_68e111e3b80f45e13116331fb1494e12:
     resolution: {integrity: sha512-qu8GTNS5Y7kxI5ORHuzLWTbm+A1HzdxLnFWgBd0wF/al4x9Ug9dCUQQYD2JVkM+B9FjnYQrIFCgaJVQcggrqPg==}
     peerDependencies:
       '@emotion/cache': 11.x
@@ -610,14 +610,14 @@ packages:
       '@emotion/styled': 11.9.3_de12df8adbbbfbacb2b883f823504dbb
       '@openpatch/patches': 5.2.1_6826415a1d22fd1aa6087534e5e78f49
       '@vocab/core': 1.1.0
-      '@vocab/react': 1.1.1_react@17.0.2
+      '@vocab/react': 1.1.2_react@17.0.2
       lodash.get: 4.4.2
       react: 17.0.2
       react-dom: 17.0.2_react@17.0.2
       zod: 3.17.3
     dev: false
 
-  /@bitflow/shell/0.7.0_1f68ad08e47e927583589cfd3ac9e12a:
+  /@bitflow/shell/0.7.0_ad68c7d7c3cd6a3d5489699e4459c21c:
     resolution: {integrity: sha512-54Xa+M/qGHA5vIEMl9tl4ONi8Yd4cos5I5cSoHxCKK+/mqtelt6WzFdsUmIzMkvCFXg1gS6dvEWJt1cxYu5dDg==}
     peerDependencies:
       '@emotion/cache': 11.x
@@ -635,7 +635,7 @@ packages:
       '@emotion/styled': 11.9.3_de12df8adbbbfbacb2b883f823504dbb
       '@openpatch/patches': 5.2.1_6826415a1d22fd1aa6087534e5e78f49
       '@vocab/core': 1.1.0
-      '@vocab/react': 1.1.1_react@17.0.2
+      '@vocab/react': 1.1.2_react@17.0.2
       immer: 9.0.14
       react: 17.0.2
       react-dom: 17.0.2_react@17.0.2
@@ -643,7 +643,7 @@ packages:
       - zod
     dev: false
 
-  /@bitflow/start-simple/0.5.0_f24f18db4ce0895a607b14d7035381b5:
+  /@bitflow/start-simple/0.5.0_93ab20bf3593c7a4733c7244ac4e45e7:
     resolution: {integrity: sha512-pseZ8ne0tpuL0Elf6HRPAObJD0p/MwGDnuATPuqdw2vZ8Bg8evA7Z/gy7/TKOWzwoSlFNXsyoucyxfJumpNEVQ==}
     peerDependencies:
       '@emotion/cache': 11.x
@@ -663,14 +663,14 @@ packages:
       '@emotion/styled': 11.9.3_de12df8adbbbfbacb2b883f823504dbb
       '@openpatch/patches': 5.2.1_6826415a1d22fd1aa6087534e5e78f49
       '@vocab/core': 1.1.0
-      '@vocab/react': 1.1.1_react@17.0.2
+      '@vocab/react': 1.1.2_react@17.0.2
       react: 17.0.2
       react-dom: 17.0.2_react@17.0.2
       react-hook-form: 7.32.2_react@17.0.2
       zod: 3.17.3
     dev: false
 
-  /@bitflow/task-choice/0.5.0_f24f18db4ce0895a607b14d7035381b5:
+  /@bitflow/task-choice/0.5.0_93ab20bf3593c7a4733c7244ac4e45e7:
     resolution: {integrity: sha512-+qbFoOFWM38Z6SDoepuYaYowkRQeP/LlZdDL0Fiyor+VI7EzyQ+mWHs71JeWovWq+EB07rw/Vv3bvUZI1uhB8g==}
     peerDependencies:
       '@emotion/cache': 11.x
@@ -685,14 +685,14 @@ packages:
       zod: 3.x
     dependencies:
       '@bitflow/core': 0.6.0_000c315b02c97bb0e0464af1946053f5
-      '@bitflow/provider': 0.5.0_4c221e49c86442dbed315522d0e3f9ab
+      '@bitflow/provider': 0.5.0_68e111e3b80f45e13116331fb1494e12
       '@emotion/cache': 11.9.3
       '@emotion/react': 11.9.3_8342d3eb196d910d490cb7458a98539d
       '@emotion/styled': 11.9.3_de12df8adbbbfbacb2b883f823504dbb
       '@hookform/resolvers': 2.9.0_react-hook-form@7.32.2
       '@openpatch/patches': 5.2.1_6826415a1d22fd1aa6087534e5e78f49
       '@vocab/core': 1.1.0
-      '@vocab/react': 1.1.1_react@17.0.2
+      '@vocab/react': 1.1.2_react@17.0.2
       immer: 9.0.14
       react: 17.0.2
       react-dom: 17.0.2_react@17.0.2
@@ -700,7 +700,7 @@ packages:
       zod: 3.17.3
     dev: false
 
-  /@bitflow/task-fill-in-the-blank/0.5.0_b11cade248c9a8c2acfa43f23d0f3185:
+  /@bitflow/task-fill-in-the-blank/0.5.0_7648955d64e2d91556483574989370da:
     resolution: {integrity: sha512-6h9b63bCzyC/WVc67P/t7KJZzEnyrn0WiHAqaeGA1ti510rKo3W2R0yuHjU8OT5qP61U1ulyrHHia8YZ1t95dA==}
     peerDependencies:
       '@emotion/cache': 11.x
@@ -721,7 +721,7 @@ packages:
       '@hookform/resolvers': 2.9.0_react-hook-form@7.32.2
       '@openpatch/patches': 5.2.1_6826415a1d22fd1aa6087534e5e78f49
       '@vocab/core': 1.1.0
-      '@vocab/react': 1.1.1_react@17.0.2
+      '@vocab/react': 1.1.2_react@17.0.2
       immer: 9.0.14
       react: 17.0.2
       react-dom: 17.0.2_react@17.0.2
@@ -734,7 +734,7 @@ packages:
       - supports-color
     dev: false
 
-  /@bitflow/task-highlighting/0.2.0_f24f18db4ce0895a607b14d7035381b5:
+  /@bitflow/task-highlighting/0.2.0_93ab20bf3593c7a4733c7244ac4e45e7:
     resolution: {integrity: sha512-gwqnABdiBnVg3kXlrNO2JvZIfrxPZj+0k6bgJ2xmd1REQsWGNuCxzQWuKGGRjmHabDgzElWXxyXJU53N5xnLRg==}
     peerDependencies:
       '@emotion/cache': 11.x
@@ -754,7 +754,7 @@ packages:
       '@emotion/styled': 11.9.3_de12df8adbbbfbacb2b883f823504dbb
       '@openpatch/patches': 5.2.1_6826415a1d22fd1aa6087534e5e78f49
       '@vocab/core': 1.1.0
-      '@vocab/react': 1.1.1_react@17.0.2
+      '@vocab/react': 1.1.2_react@17.0.2
       immer: 9.0.14
       react: 17.0.2
       react-dom: 17.0.2_react@17.0.2
@@ -762,7 +762,7 @@ packages:
       zod: 3.17.3
     dev: false
 
-  /@bitflow/task-input/0.5.0_f24f18db4ce0895a607b14d7035381b5:
+  /@bitflow/task-input/0.5.0_93ab20bf3593c7a4733c7244ac4e45e7:
     resolution: {integrity: sha512-neGabE7RKtB4uCDoowRzCgEeeP/ZDCLXbV0/kFo2hNqKCx/eAw8GGzL9BqnErDP89xn0r1vkPwSXGQd41/PgRQ==}
     peerDependencies:
       '@emotion/cache': 11.x
@@ -777,14 +777,14 @@ packages:
       zod: 3.x
     dependencies:
       '@bitflow/core': 0.6.0_000c315b02c97bb0e0464af1946053f5
-      '@bitflow/provider': 0.5.0_4c221e49c86442dbed315522d0e3f9ab
+      '@bitflow/provider': 0.5.0_68e111e3b80f45e13116331fb1494e12
       '@emotion/cache': 11.9.3
       '@emotion/react': 11.9.3_8342d3eb196d910d490cb7458a98539d
       '@emotion/styled': 11.9.3_de12df8adbbbfbacb2b883f823504dbb
       '@hookform/resolvers': 2.9.0_react-hook-form@7.32.2
       '@openpatch/patches': 5.2.1_6826415a1d22fd1aa6087534e5e78f49
       '@vocab/core': 1.1.0
-      '@vocab/react': 1.1.1_react@17.0.2
+      '@vocab/react': 1.1.2_react@17.0.2
       immer: 9.0.14
       react: 17.0.2
       react-dom: 17.0.2_react@17.0.2
@@ -793,7 +793,7 @@ packages:
       zod: 3.17.3
     dev: false
 
-  /@bitflow/task-yes-no/0.5.0_f24f18db4ce0895a607b14d7035381b5:
+  /@bitflow/task-yes-no/0.5.0_93ab20bf3593c7a4733c7244ac4e45e7:
     resolution: {integrity: sha512-GXTHr6AIBHmUsSHxjF1ny+Mfj+smNrlhCzpvqzwQVS+hNvUslFMU38znmZBSTKq6YF1ce7rHD4FBDqv7lGnsCg==}
     peerDependencies:
       '@emotion/cache': 11.x
@@ -813,7 +813,7 @@ packages:
       '@emotion/styled': 11.9.3_de12df8adbbbfbacb2b883f823504dbb
       '@openpatch/patches': 5.2.1_6826415a1d22fd1aa6087534e5e78f49
       '@vocab/core': 1.1.0
-      '@vocab/react': 1.1.1_react@17.0.2
+      '@vocab/react': 1.1.2_react@17.0.2
       immer: 9.0.14
       react: 17.0.2
       react-dom: 17.0.2_react@17.0.2
@@ -821,7 +821,7 @@ packages:
       zod: 3.17.3
     dev: false
 
-  /@bitflow/title-simple/0.5.0_f24f18db4ce0895a607b14d7035381b5:
+  /@bitflow/title-simple/0.5.0_93ab20bf3593c7a4733c7244ac4e45e7:
     resolution: {integrity: sha512-DkgVLFp+yhhipeBEjPphBhj+sTVQNYTDQ8zrfG0usVJxVm9N3onqHIM+bWrWYvrypU/ULpVoZLIadhri/hj9lg==}
     peerDependencies:
       '@emotion/cache': 11.x
@@ -841,7 +841,7 @@ packages:
       '@emotion/styled': 11.9.3_de12df8adbbbfbacb2b883f823504dbb
       '@openpatch/patches': 5.2.1_6826415a1d22fd1aa6087534e5e78f49
       '@vocab/core': 1.1.0
-      '@vocab/react': 1.1.1_react@17.0.2
+      '@vocab/react': 1.1.2_react@17.0.2
       react: 17.0.2
       react-dom: 17.0.2_react@17.0.2
       react-hook-form: 7.32.2_react@17.0.2
@@ -1379,7 +1379,7 @@ packages:
     resolution: {integrity: sha512-kP/Buv5vVFMAYLHNvvUzr0lwRTU0u2WTy44Tqwku1X3C3lJ5dKqDCYVqA8wL+Y19Bq+MwHgxqd5FZJRCIsLRyQ==}
     dependencies:
       '@formatjs/intl-localematcher': 0.2.24
-      tslib: 2.3.1
+      tslib: 2.4.0
     dev: false
 
   /@formatjs/ecma402-abstract/1.11.4:
@@ -1400,7 +1400,7 @@ packages:
     dependencies:
       '@formatjs/ecma402-abstract': 1.11.3
       '@formatjs/icu-skeleton-parser': 1.3.5
-      tslib: 2.3.1
+      tslib: 2.4.0
     dev: false
 
   /@formatjs/icu-messageformat-parser/2.1.0:
@@ -1415,7 +1415,7 @@ packages:
     resolution: {integrity: sha512-Nhyo2/6kG7ZfgeEfo02sxviOuBcvtzH6SYUharj3DLCDJH3A/4OxkKcmx/2PWGX4bc6iSieh+FA94CsKDxnZBQ==}
     dependencies:
       '@formatjs/ecma402-abstract': 1.11.3
-      tslib: 2.3.1
+      tslib: 2.4.0
     dev: false
 
   /@formatjs/icu-skeleton-parser/1.3.6:
@@ -1428,7 +1428,7 @@ packages:
   /@formatjs/intl-localematcher/0.2.24:
     resolution: {integrity: sha512-K/HRGo6EMnCbhpth/y3u4rW4aXkmQNqRe1L2G+Y5jNr3v0gYhvaucV8WixNju/INAMbPBlbsRBRo/nfjnoOnxQ==}
     dependencies:
-      tslib: 2.3.1
+      tslib: 2.4.0
     dev: false
 
   /@formatjs/intl-localematcher/0.2.25:
@@ -2088,8 +2088,8 @@ packages:
       - supports-color
     dev: false
 
-  /@vocab/react/1.1.1_react@17.0.2:
-    resolution: {integrity: sha512-pDeaJtvT9Tm2c1tTQ4GNU3byGHJDR6D9wI4xIAPsqCoqkJuf7POVqHASIfWkTj0h6p4oKtFHeHV3XyQEm5ltZA==}
+  /@vocab/react/1.1.2_react@17.0.2:
+    resolution: {integrity: sha512-zQhJCKieLO4MV0p0hTq4+d+9kEgx6bbrgtdoDW9UtMvj7B+sxqzvJIFc7+IWbUTKOUjv8eBmr5sh29pBKZaCeA==}
     peerDependencies:
       react: '>=16.3.0'
     dependencies:
@@ -4363,7 +4363,7 @@ packages:
       '@formatjs/ecma402-abstract': 1.11.3
       '@formatjs/fast-memoize': 1.2.1
       '@formatjs/icu-messageformat-parser': 2.0.18
-      tslib: 2.3.1
+      tslib: 2.4.0
     dev: false
 
   /intl-messageformat/9.13.0:
@@ -6992,10 +6992,6 @@ packages:
       v8-compile-cache-lib: 3.0.1
       yn: 3.1.1
     dev: true
-
-  /tslib/2.3.1:
-    resolution: {integrity: sha512-77EbyPPpMz+FRFRuAFlWMtmgUWGe9UOG2Z25NqCwiIjRhOf5iKGuzSe5P2w1laq+FkRy4p+PCuVkJSGkzTEKVw==}
-    dev: false
 
   /tslib/2.4.0:
     resolution: {integrity: sha512-d6xOpEDfsi2CZVlPQzGeux8XMwLT9hssAsaPYExaQMuYskwb+x1x7J371tWlbBdWHroy99KnVB6qIkUbs5X3UQ==}

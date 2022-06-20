@@ -1254,10 +1254,10 @@
     intl-messageformat "^9.9.0"
     prettier "^2.1.2"
 
-"@vocab/react@1.1.1":
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/@vocab/react/-/react-1.1.1.tgz#5448cc3e3375323cdeb39cbf61a5793fdabf66b4"
-  integrity sha512-pDeaJtvT9Tm2c1tTQ4GNU3byGHJDR6D9wI4xIAPsqCoqkJuf7POVqHASIfWkTj0h6p4oKtFHeHV3XyQEm5ltZA==
+"@vocab/react@1.1.2":
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/@vocab/react/-/react-1.1.2.tgz#d8ac6ca7b8d9c68694fce0a90ec4d56838a678a0"
+  integrity sha512-zQhJCKieLO4MV0p0hTq4+d+9kEgx6bbrgtdoDW9UtMvj7B+sxqzvJIFc7+IWbUTKOUjv8eBmr5sh29pBKZaCeA==
   dependencies:
     "@vocab/types" "^1.0.1"
     intl-messageformat "^9.9.0"
