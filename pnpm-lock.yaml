@@ -19,7 +19,7 @@ importers:
       react-dom: 17.0.2
       react-hook-form: 7.33.1
       rimraf: 3.0.2
-      ts-node: 10.8.1
+      ts-node: 10.8.2
       typescript: 4.7.4
       walkdir: 0.4.1
       webpack: 5.73.0
@@ -39,7 +39,7 @@ importers:
       react-dom: 17.0.2_react@17.0.2
       react-hook-form: 7.33.1_react@17.0.2
       rimraf: 3.0.2
-      ts-node: 10.8.1_da8766c067446f9105ba9ad5e249024e
+      ts-node: 10.8.2_da8766c067446f9105ba9ad5e249024e
       typescript: 4.7.4
       walkdir: 0.4.1
       webpack: 5.73.0_esbuild@0.14.48
@@ -6976,8 +6976,8 @@ packages:
     resolution: {integrity: sha512-AqTiAOLcj85xS7vQ8QkAV41hPDIJ71XJB4RCUrzo/1GM2CQwhkJGaf9Hgr7BOugMRpgGUrqRg/DrBDl4H40+8g==}
     dev: false
 
-  /ts-node/10.8.1_da8766c067446f9105ba9ad5e249024e:
-    resolution: {integrity: sha512-Wwsnao4DQoJsN034wePSg5nZiw4YKXf56mPIAeD6wVmiv+RytNSWqc2f3fKvcUoV+Yn2+yocD71VOfQHbmVX4g==}
+  /ts-node/10.8.2_da8766c067446f9105ba9ad5e249024e:
+    resolution: {integrity: sha512-LYdGnoGddf1D6v8REPtIH+5iq/gTDuZqv2/UJUU7tKjuEU8xVZorBM+buCGNjj+pGEud+sOoM4CX3/YzINpENA==}
     hasBin: true
     peerDependencies:
       '@swc/core': '>=1.2.50'
