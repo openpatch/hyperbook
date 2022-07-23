@@ -16,7 +16,7 @@
     "website:setup": "cd website && pnpm hyperbook setup"
   },
   "devDependencies": {
-    "@changesets/changelog-github": "0.4.5",
+    "@changesets/changelog-github": "0.4.6",
     "@changesets/cli": "2.23.2",
     "chalk": "5.0.1",
     "chokidar": "3.5.3",
