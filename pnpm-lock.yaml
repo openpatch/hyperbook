@@ -59,7 +59,7 @@ importers:
       commander: 9.4.0
       cpy: 9.0.1
       cross-spawn: 7.0.3
-      got: 12.2.0
+      got: 12.3.0
       prompts: 2.4.2
       rimraf: 3.0.2
       tar: 6.1.11
@@ -78,7 +78,7 @@ importers:
       commander: 9.4.0
       cpy: 9.0.1
       cross-spawn: 7.0.3
-      got: 12.2.0
+      got: 12.3.0
       prompts: 2.4.2
       rimraf: 3.0.2
       tar: 6.1.11
@@ -4057,8 +4057,8 @@ packages:
       slash: 4.0.0
     dev: true
 
-  /got/12.2.0:
-    resolution: {integrity: sha512-A81ll5Z8wzeCmSdIlWVMDWFKDo82v2nmOaMZDQNHKGInNqDBcle+CSb6BBiZcn/Aiefz/kSpo520WBKi9QAO/A==}
+  /got/12.3.0:
+    resolution: {integrity: sha512-7uK06aluHF0UibYFBX3lFUZ2FG/W0KS4O4EqAIrbWIdbPxIT33r6ZJy7Zy+pdh0CP/ZbF3zBa7Fd9dCn7vGPBg==}
     engines: {node: '>=14.16'}
     dependencies:
       '@sindresorhus/is': 5.3.0
@@ -5666,7 +5666,7 @@ packages:
     dev: true
 
   /once/1.4.0:
-    resolution: {integrity: sha1-WDsap3WWHUsROsF9nFC6753Xa9E=}
+    resolution: {integrity: sha512-lNaJgI+2Q5URQBkccEKHTQOPaXdUxnZZElQTZY0MFUAuaEqe1E+Nyvgdz/aIyNi6Z9MzO5dv1H8n58/GELp3+w==}
     dependencies:
       wrappy: 1.0.2
     dev: true
@@ -7432,7 +7432,7 @@ packages:
     dev: true
 
   /wrappy/1.0.2:
-    resolution: {integrity: sha1-tSQ9jz7BqjXxNkYFvA0QNuMKtp8=}
+    resolution: {integrity: sha512-l4Sp/DRseor9wL6EvV2+TuQn63dMkPjZ/sp9XkghTEbV9KlPS1xUsZ3u7/IQO4wxtcFB4bgpQPRcR3QCvezPcQ==}
     dev: true
 
   /xtend/4.0.2:
