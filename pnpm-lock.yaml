@@ -51,7 +51,7 @@ importers:
       '@types/cross-spawn': 6.0.2
       '@types/prompts': 2.0.14
       '@types/rimraf': 3.0.2
-      '@types/tar': 6.1.1
+      '@types/tar': 6.1.2
       '@vercel/ncc': 0.34.0
       archiver: ^5.3.1
       async-retry: 1.3.3
@@ -70,7 +70,7 @@ importers:
       '@types/cross-spawn': 6.0.2
       '@types/prompts': 2.0.14
       '@types/rimraf': 3.0.2
-      '@types/tar': 6.1.1
+      '@types/tar': 6.1.2
       '@vercel/ncc': 0.34.0
       archiver: 5.3.1
       async-retry: 1.3.3
@@ -1982,12 +1982,6 @@ packages:
     resolution: {integrity: sha512-jhuKLIRrhvCPLqwPcx6INqmKeiA5EWrsCOPhrlFSrbrmU4ZMPjj5Ul/oLCMDO98XRUIwVm78xICz4EPCektzeQ==}
     dev: true
 
-  /@types/minipass/3.1.2:
-    resolution: {integrity: sha512-foLGjgrJkUjLG/o2t2ymlZGEoBNBa/TfoUZ7oCTkOjP1T43UGBJspovJou/l3ZuHvye2ewR5cZNtp2zyWgILMA==}
-    dependencies:
-      '@types/node': 17.0.35
-    dev: true
-
   /@types/ms/0.7.31:
     resolution: {integrity: sha512-iiUgKzV9AuaEkZqkOLDIvlQiL6ltuZd9tGcW3gwpnX8JbuiuhFlEGmmFXEXkN50Cvq7Os88IY2v0dkDqXYWVgA==}
     dev: false
@@ -2077,11 +2071,11 @@ packages:
     resolution: {integrity: sha512-KQf+QAMWKMrtBMsB8/24w53tEsxllMj6TuA80TT/5igJalLI/zm0L3oXRbIAl4Ohfc85gyHX/jhMwsVkmhLU4A==}
     dev: true
 
-  /@types/tar/6.1.1:
-    resolution: {integrity: sha512-8mto3YZfVpqB1CHMaYz1TUYIQfZFbh/QbEq5Hsn6D0ilCfqRVCdalmc89B7vi3jhl9UYIk+dWDABShNfOkv5HA==}
+  /@types/tar/6.1.2:
+    resolution: {integrity: sha512-bnX3RRm70/n1WMwmevdOAeDU4YP7f5JSubgnuU+yrO+xQQjwDboJj3u2NTJI5ngCQhXihqVVAH5h5J8YpdpEvg==}
     dependencies:
-      '@types/minipass': 3.1.2
-      '@types/node': 17.0.8
+      '@types/node': 17.0.35
+      minipass: 3.3.5
     dev: true
 
   /@types/unist/2.0.6:
@@ -3943,7 +3937,7 @@ packages:
     resolution: {integrity: sha512-V/JgOLFCS+R6Vcq0slCuaeWEdNC3ouDlJMNIsacH2VtALiu9mV4LPrHc5cDl8k5aw6J8jwgWWpiTo5RYhmIzvg==}
     engines: {node: '>= 8'}
     dependencies:
-      minipass: 3.1.6
+      minipass: 3.3.5
     dev: true
 
   /fs.realpath/1.0.0:
@@ -5504,11 +5498,18 @@ packages:
       yallist: 4.0.0
     dev: true
 
+  /minipass/3.3.5:
+    resolution: {integrity: sha512-rQ/p+KfKBkeNwo04U15i+hOwoVBVmekmm/HcfTkTN2t9pbQKCMm4eN5gFeqgrrSp/kH/7BYYhTIHOxGqzbBPaA==}
+    engines: {node: '>=8'}
+    dependencies:
+      yallist: 4.0.0
+    dev: true
+
   /minizlib/2.1.2:
     resolution: {integrity: sha512-bAxsR8BVfj60DWXHE3u30oHzfl4G7khkSuPW+qvpd7jFRHm7dLxOjUk1EHACJ/hxLY8phGJ0YhYHZo7jil7Qdg==}
     engines: {node: '>= 8'}
     dependencies:
-      minipass: 3.1.6
+      minipass: 3.3.5
       yallist: 4.0.0
     dev: true
 
