@@ -47,7 +47,7 @@ importers:
   packages/hyperbook:
     specifiers:
       '@types/archiver': ^5.3.1
-      '@types/async-retry': 1.4.3
+      '@types/async-retry': 1.4.4
       '@types/cross-spawn': 6.0.2
       '@types/prompts': 2.0.14
       '@types/rimraf': 3.0.2
@@ -66,7 +66,7 @@ importers:
       update-check: 1.5.4
     devDependencies:
       '@types/archiver': 5.3.1
-      '@types/async-retry': 1.4.3
+      '@types/async-retry': 1.4.4
       '@types/cross-spawn': 6.0.2
       '@types/prompts': 2.0.14
       '@types/rimraf': 3.0.2
@@ -1886,8 +1886,8 @@ packages:
       '@types/glob': 7.2.0
     dev: true
 
-  /@types/async-retry/1.4.3:
-    resolution: {integrity: sha512-B3C9QmmNULVPL2uSJQ088eGWTNPIeUk35hca6CV8rRDJ8GXuQJP5CCVWA1ZUCrb9xYP7Js/RkLqnNNwKhe+Zsw==}
+  /@types/async-retry/1.4.4:
+    resolution: {integrity: sha512-IGT+yESLPYje0MV8MfOpT5V5oH9lAKLwlosQRyq75tYJmntkkWcfEThHLxsgYjGmYXJEY7ZZkYPb4xuW+NA6GA==}
     dependencies:
       '@types/retry': 0.12.1
     dev: true
