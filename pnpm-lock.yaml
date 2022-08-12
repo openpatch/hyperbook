@@ -116,7 +116,7 @@ importers:
       react-hook-form: 7.34.0
       react-icons: 4.4.0
       react-markdown: 8.0.3
-      react-redux: 7.2.8
+      react-redux: 8.0.2
       redux: 4.2.0
       redux-persist: 6.0.0
       rehype-highlight: 5.0.2
@@ -156,7 +156,7 @@ importers:
       react-hook-form: 7.34.0_react@17.0.2
       react-icons: 4.4.0_react@17.0.2
       react-markdown: 8.0.3_92a0b3c40fe0c12d8b3d0f9101b74b82
-      react-redux: 7.2.8_react-dom@17.0.2+react@17.0.2
+      react-redux: 8.0.2_b85cd69caa78190633d6557a225ffe9d
       redux: 4.2.0
       redux-persist: 6.0.0_react@17.0.2+redux@4.2.0
       rehype-highlight: 5.0.2
@@ -2047,15 +2047,6 @@ packages:
   /@types/prop-types/15.7.4:
     resolution: {integrity: sha512-rZ5drC/jWjrArrS8BR6SIr4cWpW09RNTYt9AMZo3Jwwif+iacXAqgVjm0B0Bv/S1jhDXKHqRVNCbACkJ89RAnQ==}
 
-  /@types/react-redux/7.1.23:
-    resolution: {integrity: sha512-D02o3FPfqQlfu2WeEYwh3x2otYd2Dk1o8wAfsA0B1C2AJEFxE663Ozu7JzuWbznGgW248NaOF6wsqCGNq9d3qw==}
-    dependencies:
-      '@types/hoist-non-react-statics': 3.3.1
-      '@types/react': 17.0.48
-      hoist-non-react-statics: 3.3.2
-      redux: 4.2.0
-    dev: false
-
   /@types/react/17.0.48:
     resolution: {integrity: sha512-zJ6IYlJ8cYYxiJfUaZOQee4lh99mFihBoqkOSEGV+dFi9leROW6+PgstzQ+w3gWTnUfskALtQPGHK6dYmPj+2A==}
     dependencies:
@@ -2096,6 +2087,10 @@ packages:
 
   /@types/unist/2.0.6:
     resolution: {integrity: sha512-PBjIUxZHOuj0R15/xuwJYjFi+KZdNFrehocChv4g5hu6aFroHue8m0lBP0POdK2nKzbw0cgV1mws8+V/JAcEkQ==}
+    dev: false
+
+  /@types/use-sync-external-store/0.0.3:
+    resolution: {integrity: sha512-EwmlvuaxPNej9+T4v5AuBPJa2x2UOJVdjCtDHgcDqitUeOtjnJKJ+apYjVcAoBEMjKW1VVFGZLUb5+qqa09XFA==}
     dev: false
 
   /@vercel/ncc/0.34.0:
@@ -6144,26 +6139,37 @@ packages:
       warning: 4.0.3
     dev: false
 
-  /react-redux/7.2.8_react-dom@17.0.2+react@17.0.2:
-    resolution: {integrity: sha512-6+uDjhs3PSIclqoCk0kd6iX74gzrGc3W5zcAjbrFgEdIjRSQObdIwfx80unTkVUYvbQ95Y8Av3OvFHq1w5EOUw==}
+  /react-redux/8.0.2_b85cd69caa78190633d6557a225ffe9d:
+    resolution: {integrity: sha512-nBwiscMw3NoP59NFCXFf02f8xdo+vSHT/uZ1ldDwF7XaTpzm+Phk97VT4urYBl5TYAPNVaFm12UHAEyzkpNzRA==}
     peerDependencies:
-      react: ^16.8.3 || ^17 || ^18
-      react-dom: '*'
-      react-native: '*'
+      '@types/react': ^16.8 || ^17.0 || ^18.0
+      '@types/react-dom': ^16.8 || ^17.0 || ^18.0
+      react: ^16.8 || ^17.0 || ^18.0
+      react-dom: ^16.8 || ^17.0 || ^18.0
+      react-native: '>=0.59'
+      redux: ^4
     peerDependenciesMeta:
+      '@types/react':
+        optional: true
+      '@types/react-dom':
+        optional: true
       react-dom:
         optional: true
       react-native:
         optional: true
+      redux:
+        optional: true
     dependencies:
       '@babel/runtime': 7.18.9
-      '@types/react-redux': 7.1.23
+      '@types/hoist-non-react-statics': 3.3.1
+      '@types/react': 17.0.48
+      '@types/use-sync-external-store': 0.0.3
       hoist-non-react-statics: 3.3.2
-      loose-envify: 1.4.0
-      prop-types: 15.8.1
       react: 17.0.2
       react-dom: 17.0.2_react@17.0.2
-      react-is: 17.0.2
+      react-is: 18.0.0
+      redux: 4.2.0
+      use-sync-external-store: 1.2.0_react@17.0.2
     dev: false
 
   /react-syntax-highlighter/15.4.5_react@17.0.2:
