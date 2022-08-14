@@ -13,7 +13,7 @@ importers:
       esbuild: 0.15.3
       husky: 7.0.4
       prettier: 2.7.1
-      prettier-plugin-sort-json: 0.0.2
+      prettier-plugin-sort-json: 0.0.3
       pretty-quick: 3.1.3
       react: 17.0.2
       react-dom: 17.0.2
@@ -33,7 +33,7 @@ importers:
       esbuild: 0.15.3
       husky: 7.0.4
       prettier: 2.7.1
-      prettier-plugin-sort-json: 0.0.2_prettier@2.7.1
+      prettier-plugin-sort-json: 0.0.3_prettier@2.7.1
       pretty-quick: 3.1.3_prettier@2.7.1
       react: 17.0.2
       react-dom: 17.0.2_react@17.0.2
@@ -5908,10 +5908,11 @@ packages:
       which-pm: 2.0.0
     dev: true
 
-  /prettier-plugin-sort-json/0.0.2_prettier@2.7.1:
-    resolution: {integrity: sha512-St9zu6Alb+cA+FmnIFmjFOrTmBFWohYPReVjcMAI2y9mE0YJcW+RIchjLuOeXkLdh+eQlQtXy+3/6W6ZgyllQw==}
+  /prettier-plugin-sort-json/0.0.3_prettier@2.7.1:
+    resolution: {integrity: sha512-1WLOaeaRJRyVzDmuPif32xRn77+K6J00XIin1O/XuXpD5wy3XX8XyoQH/BSlzwdZ3GpnTOJRyIGXhxDCUb4L9Q==}
+    engines: {node: '>=14.0.0'}
     peerDependencies:
-      prettier: ^2.1.0
+      prettier: ^2.3.2
     dependencies:
       '@types/prettier': 2.4.4
       prettier: 2.7.1
