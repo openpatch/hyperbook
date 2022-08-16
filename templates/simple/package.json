@@ -19,7 +19,7 @@
     "@emotion/core": "11.0.0",
     "@emotion/react": "11.10.0",
     "@emotion/styled": "11.10.0",
-    "@openpatch/patches": "5.2.1",
+    "@openpatch/patches": "6.0.1",
     "@redux-devtools/extension": "3.2.3",
     "@vocab/core": "1.1.0",
     "@vocab/react": "1.1.2",
