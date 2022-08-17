@@ -128,15 +128,15 @@ importers:
       remark-math: 5.1.1
       remark-unwrap-images: 3.0.1
       typescript: 4.7.4
-      zod: 3.17.3
+      zod: 3.18.0
     dependencies:
       '@babel/core': 7.18.10
-      '@bitflow/bits': 0.2.0_684c928ae9610db84b95b89c62f37996
-      '@bitflow/core': 0.6.0_53176ce4176ba8c73d5affad092f6cfb
-      '@bitflow/do': 0.6.0_996767a963e7c414ae070022daea47b9
-      '@bitflow/do-local': 0.5.0_996767a963e7c414ae070022daea47b9
+      '@bitflow/bits': 0.2.0_eb3a575acdc8e13f1d442bbe01c43566
+      '@bitflow/core': 0.6.0_1a25a2ea333fbfb16d39791582a83f14
+      '@bitflow/do': 0.6.0_74c77b5951cf01f23b6e8c3333716370
+      '@bitflow/do-local': 0.5.0_74c77b5951cf01f23b6e8c3333716370
       '@bitflow/provider': 0.5.0_09130623e38282709870447c2d9cbf1e
-      '@bitflow/shell': 0.7.0_1f0895416a36635975ff4e32ce1b65ab
+      '@bitflow/shell': 0.7.0_4a7682b8938f646997f6aa2ff77d68fc
       '@emotion/cache': 11.10.1
       '@emotion/core': 11.0.0
       '@emotion/react': 11.10.0_1a2ff263c60a636abbd3240f7615586f
@@ -167,7 +167,7 @@ importers:
       remark-gfm: 3.0.1
       remark-math: 5.1.1
       remark-unwrap-images: 3.0.1
-      zod: 3.17.3
+      zod: 3.18.0
     devDependencies:
       '@types/mermaid': 8.2.9
       '@types/node': 17.0.35
@@ -403,21 +403,21 @@ packages:
       to-fast-properties: 2.0.0
     dev: false
 
-  /@bitflow/bits/0.2.0_684c928ae9610db84b95b89c62f37996:
+  /@bitflow/bits/0.2.0_eb3a575acdc8e13f1d442bbe01c43566:
     resolution: {integrity: sha512-LWTtbj5sQvSWtxN7yqqcz2XDic694tlpnk2DrqEi6gKDwgeQsyxorUWxZlI5l9wVkXJI1MwvGQjo1YSQGKtPYQ==}
     peerDependencies:
       zod: 3.x
     dependencies:
       '@bitflow/end-tries': 0.5.0_52411a15f11506b7793b7d0673f5c938
-      '@bitflow/input-markdown': 0.5.0_73eea77c6549ab33cbbaa9e1b156ea30
-      '@bitflow/start-simple': 0.5.0_73eea77c6549ab33cbbaa9e1b156ea30
-      '@bitflow/task-choice': 0.5.0_73eea77c6549ab33cbbaa9e1b156ea30
-      '@bitflow/task-fill-in-the-blank': 0.5.0_684c928ae9610db84b95b89c62f37996
-      '@bitflow/task-highlighting': 0.2.0_73eea77c6549ab33cbbaa9e1b156ea30
-      '@bitflow/task-input': 0.5.0_73eea77c6549ab33cbbaa9e1b156ea30
-      '@bitflow/task-yes-no': 0.5.0_73eea77c6549ab33cbbaa9e1b156ea30
-      '@bitflow/title-simple': 0.5.0_73eea77c6549ab33cbbaa9e1b156ea30
-      zod: 3.17.3
+      '@bitflow/input-markdown': 0.5.0_94341b19f6e9a25c39e4b2f64ed7b298
+      '@bitflow/start-simple': 0.5.0_94341b19f6e9a25c39e4b2f64ed7b298
+      '@bitflow/task-choice': 0.5.0_94341b19f6e9a25c39e4b2f64ed7b298
+      '@bitflow/task-fill-in-the-blank': 0.5.0_eb3a575acdc8e13f1d442bbe01c43566
+      '@bitflow/task-highlighting': 0.2.0_94341b19f6e9a25c39e4b2f64ed7b298
+      '@bitflow/task-input': 0.5.0_94341b19f6e9a25c39e4b2f64ed7b298
+      '@bitflow/task-yes-no': 0.5.0_94341b19f6e9a25c39e4b2f64ed7b298
+      '@bitflow/title-simple': 0.5.0_94341b19f6e9a25c39e4b2f64ed7b298
+      zod: 3.18.0
     transitivePeerDependencies:
       - '@emotion/cache'
       - '@emotion/react'
@@ -430,6 +430,26 @@ packages:
       - react-dom
       - react-hook-form
       - supports-color
+    dev: false
+
+  /@bitflow/core/0.6.0_1a25a2ea333fbfb16d39791582a83f14:
+    resolution: {integrity: sha512-3oYAGwfiUIj02AgkbsUXpv5ng+NaBbmchqG361If7M3U1Z44jDGbcMA0CTh5hYIiPnIhN4eUqwfgFJCJ897udg==}
+    peerDependencies:
+      '@emotion/cache': 11.x
+      '@emotion/react': 11.x
+      '@emotion/styled': 11.x
+      '@openpatch/patches': 6.x
+      react: 18.x
+      react-dom: 18.x
+      zod: 3.x
+    dependencies:
+      '@emotion/cache': 11.10.1
+      '@emotion/react': 11.10.0_1a2ff263c60a636abbd3240f7615586f
+      '@emotion/styled': 11.10.0_684bf2c7183a0fe2e987782db4e6ba1f
+      '@openpatch/patches': 5.2.1_1130f6a3c40f155c0753461c34e3a02a
+      react: 17.0.2
+      react-dom: 17.0.2_react@17.0.2
+      zod: 3.18.0
     dev: false
 
   /@bitflow/core/0.6.0_53176ce4176ba8c73d5affad092f6cfb:
@@ -452,7 +472,7 @@ packages:
       zod: 3.17.3
     dev: false
 
-  /@bitflow/do-local/0.5.0_996767a963e7c414ae070022daea47b9:
+  /@bitflow/do-local/0.5.0_74c77b5951cf01f23b6e8c3333716370:
     resolution: {integrity: sha512-Mfgt0x1f+nOtjCcTj5utLajfyaWXYw8Z76f7TUvMiWxHTNmOFDaXcFAGOdnedgYUdoH+xjgHdr7WEUWjUytdCg==}
     peerDependencies:
       '@emotion/cache': 11.x
@@ -465,9 +485,9 @@ packages:
       react-dom: 18.x
       zod: 3.x
     dependencies:
-      '@bitflow/core': 0.6.0_53176ce4176ba8c73d5affad092f6cfb
-      '@bitflow/do': 0.6.0_996767a963e7c414ae070022daea47b9
-      '@bitflow/flow-engine': 0.5.0_53176ce4176ba8c73d5affad092f6cfb
+      '@bitflow/core': 0.6.0_1a25a2ea333fbfb16d39791582a83f14
+      '@bitflow/do': 0.6.0_74c77b5951cf01f23b6e8c3333716370
+      '@bitflow/flow-engine': 0.5.0_1a25a2ea333fbfb16d39791582a83f14
       '@bitflow/provider': 0.5.0_09130623e38282709870447c2d9cbf1e
       '@emotion/cache': 11.10.1
       '@emotion/react': 11.10.0_1a2ff263c60a636abbd3240f7615586f
@@ -477,12 +497,12 @@ packages:
       '@vocab/react': 1.1.2_react@17.0.2
       react: 17.0.2
       react-dom: 17.0.2_react@17.0.2
-      zod: 3.17.3
+      zod: 3.18.0
     transitivePeerDependencies:
       - '@vocab/types'
     dev: false
 
-  /@bitflow/do/0.6.0_996767a963e7c414ae070022daea47b9:
+  /@bitflow/do/0.6.0_74c77b5951cf01f23b6e8c3333716370:
     resolution: {integrity: sha512-eDz8mY4TeanOSnhq7sEBfpnuxtGyMHXLRWIN66AjxvBR9v5B75vz30fUutaRHZv5vvI2IgkZN0mkC6noq+Kxeg==}
     peerDependencies:
       '@emotion/cache': 11.x
@@ -495,10 +515,10 @@ packages:
       react: 18.x
       react-dom: 18.x
     dependencies:
-      '@bitflow/core': 0.6.0_53176ce4176ba8c73d5affad092f6cfb
-      '@bitflow/flow-engine': 0.5.0_53176ce4176ba8c73d5affad092f6cfb
+      '@bitflow/core': 0.6.0_1a25a2ea333fbfb16d39791582a83f14
+      '@bitflow/flow-engine': 0.5.0_1a25a2ea333fbfb16d39791582a83f14
       '@bitflow/provider': 0.5.0_09130623e38282709870447c2d9cbf1e
-      '@bitflow/shell': 0.7.0_1f0895416a36635975ff4e32ce1b65ab
+      '@bitflow/shell': 0.7.0_4a7682b8938f646997f6aa2ff77d68fc
       '@emotion/cache': 11.10.1
       '@emotion/react': 11.10.0_1a2ff263c60a636abbd3240f7615586f
       '@emotion/styled': 11.10.0_684bf2c7183a0fe2e987782db4e6ba1f
@@ -541,10 +561,10 @@ packages:
       zod: 3.17.3
     dev: false
 
-  /@bitflow/flow-engine/0.5.0_53176ce4176ba8c73d5affad092f6cfb:
+  /@bitflow/flow-engine/0.5.0_1a25a2ea333fbfb16d39791582a83f14:
     resolution: {integrity: sha512-AMTTnp1fEbQ0GsjNL5FO43BpEHKv22sUpyaRSNQmGPRfm/YaVOa+VBPNragfK1arPsJLBANLSoLsgIIRVk8BDQ==}
     dependencies:
-      '@bitflow/core': 0.6.0_53176ce4176ba8c73d5affad092f6cfb
+      '@bitflow/core': 0.6.0_1a25a2ea333fbfb16d39791582a83f14
       lodash.get: 4.4.2
     transitivePeerDependencies:
       - '@emotion/cache'
@@ -578,7 +598,7 @@ packages:
       react-dom: 17.0.2_react@17.0.2
     dev: false
 
-  /@bitflow/input-markdown/0.5.0_73eea77c6549ab33cbbaa9e1b156ea30:
+  /@bitflow/input-markdown/0.5.0_94341b19f6e9a25c39e4b2f64ed7b298:
     resolution: {integrity: sha512-iEpFkygrrDt6KoiPnnFLCVqMInP5tur6cu5Fy1AFFUJFw+bPpUrBtFeFfi/VZOEI1dZGdBjMOZuAdhLmRJPkzg==}
     peerDependencies:
       '@emotion/cache': 11.x
@@ -592,7 +612,7 @@ packages:
       react-hook-form: 7.x
       zod: 3.x
     dependencies:
-      '@bitflow/core': 0.6.0_53176ce4176ba8c73d5affad092f6cfb
+      '@bitflow/core': 0.6.0_1a25a2ea333fbfb16d39791582a83f14
       '@emotion/cache': 11.10.1
       '@emotion/react': 11.10.0_1a2ff263c60a636abbd3240f7615586f
       '@emotion/styled': 11.10.0_684bf2c7183a0fe2e987782db4e6ba1f
@@ -602,7 +622,7 @@ packages:
       react: 17.0.2
       react-dom: 17.0.2_react@17.0.2
       react-hook-form: 7.34.2_react@17.0.2
-      zod: 3.17.3
+      zod: 3.18.0
     dev: false
 
   /@bitflow/provider/0.5.0_09130623e38282709870447c2d9cbf1e:
@@ -656,7 +676,33 @@ packages:
       - zod
     dev: false
 
-  /@bitflow/start-simple/0.5.0_73eea77c6549ab33cbbaa9e1b156ea30:
+  /@bitflow/shell/0.7.0_4a7682b8938f646997f6aa2ff77d68fc:
+    resolution: {integrity: sha512-54Xa+M/qGHA5vIEMl9tl4ONi8Yd4cos5I5cSoHxCKK+/mqtelt6WzFdsUmIzMkvCFXg1gS6dvEWJt1cxYu5dDg==}
+    peerDependencies:
+      '@emotion/cache': 11.x
+      '@emotion/react': 11.x
+      '@emotion/styled': 11.x
+      '@openpatch/patches': 6.x
+      '@vocab/core': 1.x
+      '@vocab/react': 1.x
+      react: 18.x
+      react-dom: 18.x
+    dependencies:
+      '@bitflow/core': 0.6.0_1a25a2ea333fbfb16d39791582a83f14
+      '@emotion/cache': 11.10.1
+      '@emotion/react': 11.10.0_1a2ff263c60a636abbd3240f7615586f
+      '@emotion/styled': 11.10.0_684bf2c7183a0fe2e987782db4e6ba1f
+      '@openpatch/patches': 5.2.1_1130f6a3c40f155c0753461c34e3a02a
+      '@vocab/core': 1.1.0
+      '@vocab/react': 1.1.2_react@17.0.2
+      immer: 9.0.14
+      react: 17.0.2
+      react-dom: 17.0.2_react@17.0.2
+    transitivePeerDependencies:
+      - zod
+    dev: false
+
+  /@bitflow/start-simple/0.5.0_94341b19f6e9a25c39e4b2f64ed7b298:
     resolution: {integrity: sha512-pseZ8ne0tpuL0Elf6HRPAObJD0p/MwGDnuATPuqdw2vZ8Bg8evA7Z/gy7/TKOWzwoSlFNXsyoucyxfJumpNEVQ==}
     peerDependencies:
       '@emotion/cache': 11.x
@@ -670,7 +716,7 @@ packages:
       react-hook-form: 7.x
       zod: 3.x
     dependencies:
-      '@bitflow/core': 0.6.0_53176ce4176ba8c73d5affad092f6cfb
+      '@bitflow/core': 0.6.0_1a25a2ea333fbfb16d39791582a83f14
       '@emotion/cache': 11.10.1
       '@emotion/react': 11.10.0_1a2ff263c60a636abbd3240f7615586f
       '@emotion/styled': 11.10.0_684bf2c7183a0fe2e987782db4e6ba1f
@@ -680,10 +726,10 @@ packages:
       react: 17.0.2
       react-dom: 17.0.2_react@17.0.2
       react-hook-form: 7.34.2_react@17.0.2
-      zod: 3.17.3
+      zod: 3.18.0
     dev: false
 
-  /@bitflow/task-choice/0.5.0_73eea77c6549ab33cbbaa9e1b156ea30:
+  /@bitflow/task-choice/0.5.0_94341b19f6e9a25c39e4b2f64ed7b298:
     resolution: {integrity: sha512-+qbFoOFWM38Z6SDoepuYaYowkRQeP/LlZdDL0Fiyor+VI7EzyQ+mWHs71JeWovWq+EB07rw/Vv3bvUZI1uhB8g==}
     peerDependencies:
       '@emotion/cache': 11.x
@@ -697,7 +743,7 @@ packages:
       react-hook-form: 7.x
       zod: 3.x
     dependencies:
-      '@bitflow/core': 0.6.0_53176ce4176ba8c73d5affad092f6cfb
+      '@bitflow/core': 0.6.0_1a25a2ea333fbfb16d39791582a83f14
       '@bitflow/provider': 0.5.0_09130623e38282709870447c2d9cbf1e
       '@emotion/cache': 11.10.1
       '@emotion/react': 11.10.0_1a2ff263c60a636abbd3240f7615586f
@@ -710,10 +756,10 @@ packages:
       react: 17.0.2
       react-dom: 17.0.2_react@17.0.2
       react-hook-form: 7.34.2_react@17.0.2
-      zod: 3.17.3
+      zod: 3.18.0
     dev: false
 
-  /@bitflow/task-fill-in-the-blank/0.5.0_684c928ae9610db84b95b89c62f37996:
+  /@bitflow/task-fill-in-the-blank/0.5.0_eb3a575acdc8e13f1d442bbe01c43566:
     resolution: {integrity: sha512-6h9b63bCzyC/WVc67P/t7KJZzEnyrn0WiHAqaeGA1ti510rKo3W2R0yuHjU8OT5qP61U1ulyrHHia8YZ1t95dA==}
     peerDependencies:
       '@emotion/cache': 11.x
@@ -727,7 +773,7 @@ packages:
       react-hook-form: 7.x
       zod: 3.x
     dependencies:
-      '@bitflow/core': 0.6.0_53176ce4176ba8c73d5affad092f6cfb
+      '@bitflow/core': 0.6.0_1a25a2ea333fbfb16d39791582a83f14
       '@emotion/cache': 11.10.1
       '@emotion/react': 11.10.0_1a2ff263c60a636abbd3240f7615586f
       '@emotion/styled': 11.10.0_684bf2c7183a0fe2e987782db4e6ba1f
@@ -741,13 +787,13 @@ packages:
       react-hook-form: 7.34.2_react@17.0.2
       react-markdown: 6.0.3_92a0b3c40fe0c12d8b3d0f9101b74b82
       remark-gfm: 1.0.0
-      zod: 3.17.3
+      zod: 3.18.0
     transitivePeerDependencies:
       - '@types/react'
       - supports-color
     dev: false
 
-  /@bitflow/task-highlighting/0.2.0_73eea77c6549ab33cbbaa9e1b156ea30:
+  /@bitflow/task-highlighting/0.2.0_94341b19f6e9a25c39e4b2f64ed7b298:
     resolution: {integrity: sha512-gwqnABdiBnVg3kXlrNO2JvZIfrxPZj+0k6bgJ2xmd1REQsWGNuCxzQWuKGGRjmHabDgzElWXxyXJU53N5xnLRg==}
     peerDependencies:
       '@emotion/cache': 11.x
@@ -761,7 +807,7 @@ packages:
       react-hook-form: 7.x
       zod: 3.x
     dependencies:
-      '@bitflow/core': 0.6.0_53176ce4176ba8c73d5affad092f6cfb
+      '@bitflow/core': 0.6.0_1a25a2ea333fbfb16d39791582a83f14
       '@emotion/cache': 11.10.1
       '@emotion/react': 11.10.0_1a2ff263c60a636abbd3240f7615586f
       '@emotion/styled': 11.10.0_684bf2c7183a0fe2e987782db4e6ba1f
@@ -772,10 +818,10 @@ packages:
       react: 17.0.2
       react-dom: 17.0.2_react@17.0.2
       react-hook-form: 7.34.2_react@17.0.2
-      zod: 3.17.3
+      zod: 3.18.0
     dev: false
 
-  /@bitflow/task-input/0.5.0_73eea77c6549ab33cbbaa9e1b156ea30:
+  /@bitflow/task-input/0.5.0_94341b19f6e9a25c39e4b2f64ed7b298:
     resolution: {integrity: sha512-neGabE7RKtB4uCDoowRzCgEeeP/ZDCLXbV0/kFo2hNqKCx/eAw8GGzL9BqnErDP89xn0r1vkPwSXGQd41/PgRQ==}
     peerDependencies:
       '@emotion/cache': 11.x
@@ -789,7 +835,7 @@ packages:
       react-hook-form: 7.x
       zod: 3.x
     dependencies:
-      '@bitflow/core': 0.6.0_53176ce4176ba8c73d5affad092f6cfb
+      '@bitflow/core': 0.6.0_1a25a2ea333fbfb16d39791582a83f14
       '@bitflow/provider': 0.5.0_09130623e38282709870447c2d9cbf1e
       '@emotion/cache': 11.10.1
       '@emotion/react': 11.10.0_1a2ff263c60a636abbd3240f7615586f
@@ -803,10 +849,10 @@ packages:
       react-dom: 17.0.2_react@17.0.2
       react-hook-form: 7.34.2_react@17.0.2
       react-tagcloud: 2.2.0_react@17.0.2
-      zod: 3.17.3
+      zod: 3.18.0
     dev: false
 
-  /@bitflow/task-yes-no/0.5.0_73eea77c6549ab33cbbaa9e1b156ea30:
+  /@bitflow/task-yes-no/0.5.0_94341b19f6e9a25c39e4b2f64ed7b298:
     resolution: {integrity: sha512-GXTHr6AIBHmUsSHxjF1ny+Mfj+smNrlhCzpvqzwQVS+hNvUslFMU38znmZBSTKq6YF1ce7rHD4FBDqv7lGnsCg==}
     peerDependencies:
       '@emotion/cache': 11.x
@@ -820,7 +866,7 @@ packages:
       react-hook-form: 7.x
       zod: 3.x
     dependencies:
-      '@bitflow/core': 0.6.0_53176ce4176ba8c73d5affad092f6cfb
+      '@bitflow/core': 0.6.0_1a25a2ea333fbfb16d39791582a83f14
       '@emotion/cache': 11.10.1
       '@emotion/react': 11.10.0_1a2ff263c60a636abbd3240f7615586f
       '@emotion/styled': 11.10.0_684bf2c7183a0fe2e987782db4e6ba1f
@@ -831,10 +877,10 @@ packages:
       react: 17.0.2
       react-dom: 17.0.2_react@17.0.2
       react-hook-form: 7.34.2_react@17.0.2
-      zod: 3.17.3
+      zod: 3.18.0
     dev: false
 
-  /@bitflow/title-simple/0.5.0_73eea77c6549ab33cbbaa9e1b156ea30:
+  /@bitflow/title-simple/0.5.0_94341b19f6e9a25c39e4b2f64ed7b298:
     resolution: {integrity: sha512-DkgVLFp+yhhipeBEjPphBhj+sTVQNYTDQ8zrfG0usVJxVm9N3onqHIM+bWrWYvrypU/ULpVoZLIadhri/hj9lg==}
     peerDependencies:
       '@emotion/cache': 11.x
@@ -848,7 +894,7 @@ packages:
       react-hook-form: 7.x
       zod: 3.x
     dependencies:
-      '@bitflow/core': 0.6.0_53176ce4176ba8c73d5affad092f6cfb
+      '@bitflow/core': 0.6.0_1a25a2ea333fbfb16d39791582a83f14
       '@emotion/cache': 11.10.1
       '@emotion/react': 11.10.0_1a2ff263c60a636abbd3240f7615586f
       '@emotion/styled': 11.10.0_684bf2c7183a0fe2e987782db4e6ba1f
@@ -858,7 +904,7 @@ packages:
       react: 17.0.2
       react-dom: 17.0.2_react@17.0.2
       react-hook-form: 7.34.2_react@17.0.2
-      zod: 3.17.3
+      zod: 3.18.0
     dev: false
 
   /@braintree/sanitize-url/6.0.0:
@@ -7556,6 +7602,10 @@ packages:
 
   /zod/3.17.3:
     resolution: {integrity: sha512-4oKP5zvG6GGbMlqBkI5FESOAweldEhSOZ6LI6cG+JzUT7ofj1ZOC0PJudpQOpT1iqOFpYYtX5Pw0+o403y4bcg==}
+    dev: false
+
+  /zod/3.18.0:
+    resolution: {integrity: sha512-gwTm8RfUCe8l9rDwN5r2A17DkAa8Ez4Yl4yXqc5VqeGaXaJahzYYXbTwvhroZi0SNBqTwh/bKm2N0mpCzuw4bA==}
     dev: false
 
   /zwitch/1.0.5:
