@@ -592,6 +592,7 @@ nav > ul {
 
 .section > .links {
   border-left: 1px solid var(--color-spacer);
+  padding-top: 6px;
 }
 
 .drawer-container {

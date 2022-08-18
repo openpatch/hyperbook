@@ -17,10 +17,18 @@ const Page = ({ name, href, current }: P) => {
 
 type S = SectionProps & Pick<NavigationProps, "current">;
 
-const Section = ({ isEmpty, name, href, pages, sections, current }: S) => {
+const Section = ({
+  isEmpty,
+  virtual,
+  name,
+  href,
+  pages,
+  sections,
+  current,
+}: S) => {
   return (
-    <div className="section">
-      {isEmpty ? (
+    <div className={virtual ? "" : "section"}>
+      {virtual ? null : isEmpty ? (
         <span className="name empty">{name}</span>
       ) : (
         <Link href={href}>
@@ -30,13 +38,15 @@ const Section = ({ isEmpty, name, href, pages, sections, current }: S) => {
         </Link>
       )}
       <div className="links">
-        <ul className="pages">
-          {pages
-            .filter((p) => !p.hide)
-            .map((p) => (
-              <Page key={p.href} {...p} current={current} />
-            ))}
-        </ul>
+        {pages.length > 0 && (
+          <ul className="pages">
+            {pages
+              .filter((p) => !p.hide)
+              .map((p) => (
+                <Page key={p.href} {...p} current={current} />
+              ))}
+          </ul>
+        )}
         {sections
           .filter((s) => !s.hide)
           .map((s) => (

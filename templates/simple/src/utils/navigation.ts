@@ -16,7 +16,9 @@ export type Page = {
   href: string;
 };
 
-export type Section = Page & {
+export type Section = Omit<Page, "hide"> & {
+  hide?: boolean;
+  virtual?: boolean;
   pages: Page[]; // md-files
   sections: Section[]; // folders
 };

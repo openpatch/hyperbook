@@ -1,6 +1,7 @@
 ---
 name: Test
-hide: true
+hide: false
+virtual: false
 ---
 
 Index
