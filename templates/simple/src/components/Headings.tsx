@@ -1,9 +1,10 @@
 import Link from "next/link";
+import { ReactNode } from "react";
 import { useBookmark } from "../store";
 
 type HeadingResolverProps = {
   level: number;
-  children: JSX.Element[];
+  children: ReactNode[];
 };
 
 export const Headings: React.FC<HeadingResolverProps> = ({

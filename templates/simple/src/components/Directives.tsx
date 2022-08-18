@@ -1,18 +1,11 @@
 import { Flow as IFlow } from "@bitflow/core";
 import hash from "object-hash";
-import dynamic from "next/dynamic";
 import Link from "next/link";
 import mermaid from "mermaid";
 import { useEffect, useLayoutEffect, useState } from "react";
 import { getHyperbook } from "../utils/hyperbook";
 import { useBookmarks, useCollapsible, useProtect, useTabs } from "../store";
-
-const Flow = dynamic(() => import("./Bitflow").then((b) => b.Flow), {
-  ssr: false,
-});
-const Task = dynamic(() => import("./Bitflow").then((b) => b.Task), {
-  ssr: false,
-});
+import { Flow, Task } from "./Bitflow";
 
 function basename(path: string) {
   return path.split("/").reverse()[0];

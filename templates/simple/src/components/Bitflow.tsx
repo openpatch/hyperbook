@@ -33,6 +33,7 @@ export const Flow: FC<{ flow: IFlow }> = ({ flow }) => {
       <BitflowProvider
         locale={hyperbook.language || "en"}
         config={{}}
+        //@ts-ignore
         bits={bits}
       >
         <FlowInner flow={flow} />
@@ -79,6 +80,7 @@ export const Task: FC<{ task: FlowTaskNode["data"] }> = ({ task }) => {
       <BitflowProvider
         locale={hyperbook.language || "en"}
         config={{}}
+        //@ts-ignore
         bits={bits}
       >
         <TaskInner task={task} />
