@@ -35,7 +35,12 @@ export const readFile = (filePath: string) => {
   try {
     source = fs.readFileSync(filePath);
   } catch (e) {
-    source = fs.readFileSync(path.join(filePath, "index") + ".md");
+    try {
+      source = fs.readFileSync(path.join(filePath, "index") + ".md");
+    } catch (e) {
+      source = new Buffer(`---\nname: ${path.basename(filePath)}\n---\n`);
+      fs.writeFileSync(path.join(filePath, "index") + ".md", source);
+    }
   }
 
   const { content, data } = matter(source);
