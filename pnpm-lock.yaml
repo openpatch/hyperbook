@@ -46,7 +46,7 @@ importers:
 
   packages/hyperbook:
     specifiers:
-      '@types/archiver': ^5.3.1
+      '@types/archiver': 5.3.1
       '@types/async-retry': 1.4.4
       '@types/cross-spawn': 6.0.2
       '@types/prompts': 2.0.14
@@ -98,10 +98,10 @@ importers:
       '@emotion/react': 11.10.0
       '@emotion/styled': 11.10.0
       '@openpatch/patches': 6.0.1
-      '@redux-devtools/extension': ^3.2.3
-      '@types/mermaid': ^8.2.9
+      '@redux-devtools/extension': 3.2.3
+      '@types/mermaid': 8.2.9
       '@types/node': 18.7.6
-      '@types/object-hash': ^2.2.1
+      '@types/object-hash': 2.2.1
       '@types/react': 18.0.17
       '@vocab/core': 1.1.1
       '@vocab/react': 1.1.2
@@ -110,13 +110,13 @@ importers:
       gray-matter: 4.0.3
       mermaid: 9.1.6
       next: 12.2.5
-      object-hash: ^3.0.0
+      object-hash: 3.0.0
       react: 18.2.0
       react-dom: 18.2.0
       react-hook-form: 7.34.2
       react-icons: 4.4.0
       react-markdown: 8.0.3
-      react-redux: ^8.0.2
+      react-redux: 8.0.2
       redux: 4.2.0
       redux-persist: 6.0.0
       rehype-highlight: 5.0.2
@@ -408,7 +408,7 @@ packages:
     peerDependencies:
       zod: 3.x
     dependencies:
-      '@bitflow/end-tries': 0.5.0_qxrbjj7rvscoyj77se2rvts5li
+      '@bitflow/end-tries': 0.5.0_uadtrzcthefh4moaueonhadknm
       '@bitflow/input-markdown': 0.5.0_uadtrzcthefh4moaueonhadknm
       '@bitflow/start-simple': 0.5.0_uadtrzcthefh4moaueonhadknm
       '@bitflow/task-choice': 0.5.0_uadtrzcthefh4moaueonhadknm
@@ -532,7 +532,7 @@ packages:
       - zod
     dev: false
 
-  /@bitflow/end-tries/0.5.0_qxrbjj7rvscoyj77se2rvts5li:
+  /@bitflow/end-tries/0.5.0_uadtrzcthefh4moaueonhadknm:
     resolution: {integrity: sha512-1GOFj2JR5z3YqDR4pE4GyOKNv8B1JjrzKe6rK5GSEU41j7u9r2nP36EcDugVAimaLEo/gVG3RpbeurjFZBVI7Q==}
     peerDependencies:
       '@emotion/cache': 11.x
@@ -544,11 +544,12 @@ packages:
       react: 18.x
       react-dom: 18.x
       react-hook-form: 7.x
+      zod: 3.x
     dependencies:
-      '@bitflow/core': 0.6.0_jtrowhoaes24zd7xqmsdr3t444
+      '@bitflow/core': 0.6.0_rvxsqng64fp7cc4wey6m4cri6u
       '@bitflow/icons': 0.5.0_mrr34oarqh22aulsjm6j4anyei
       '@bitflow/provider': 0.5.0_mrr34oarqh22aulsjm6j4anyei
-      '@bitflow/shell': 0.7.0_ithcnbxtlm5ibktxy2xonshv7y
+      '@bitflow/shell': 0.7.0_65yyphclcvelvjvkwdowaksiyq
       '@emotion/cache': 11.10.1
       '@emotion/react': 11.10.0_msmmgljd7hl2w2irtggflhmema
       '@emotion/styled': 11.10.0_5sec57kzpgkzooe4crua5kfcly
@@ -558,7 +559,7 @@ packages:
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
       react-hook-form: 7.34.2_react@18.2.0
-      zod: 3.17.3
+      zod: 3.18.0
     dev: false
 
   /@bitflow/flow-engine/0.5.0_rvxsqng64fp7cc4wey6m4cri6u:
@@ -663,32 +664,6 @@ packages:
       react-dom: 18.x
     dependencies:
       '@bitflow/core': 0.6.0_rvxsqng64fp7cc4wey6m4cri6u
-      '@emotion/cache': 11.10.1
-      '@emotion/react': 11.10.0_msmmgljd7hl2w2irtggflhmema
-      '@emotion/styled': 11.10.0_5sec57kzpgkzooe4crua5kfcly
-      '@openpatch/patches': 6.0.1_rfxv2tpmg55upmgyihc4q5m5re
-      '@vocab/core': 1.1.1
-      '@vocab/react': 1.1.2_react@18.2.0
-      immer: 9.0.14
-      react: 18.2.0
-      react-dom: 18.2.0_react@18.2.0
-    transitivePeerDependencies:
-      - zod
-    dev: false
-
-  /@bitflow/shell/0.7.0_ithcnbxtlm5ibktxy2xonshv7y:
-    resolution: {integrity: sha512-54Xa+M/qGHA5vIEMl9tl4ONi8Yd4cos5I5cSoHxCKK+/mqtelt6WzFdsUmIzMkvCFXg1gS6dvEWJt1cxYu5dDg==}
-    peerDependencies:
-      '@emotion/cache': 11.x
-      '@emotion/react': 11.x
-      '@emotion/styled': 11.x
-      '@openpatch/patches': 6.x
-      '@vocab/core': 1.x
-      '@vocab/react': 1.x
-      react: 18.x
-      react-dom: 18.x
-    dependencies:
-      '@bitflow/core': 0.6.0_jtrowhoaes24zd7xqmsdr3t444
       '@emotion/cache': 11.10.1
       '@emotion/react': 11.10.0_msmmgljd7hl2w2irtggflhmema
       '@emotion/styled': 11.10.0_5sec57kzpgkzooe4crua5kfcly
@@ -1938,7 +1913,7 @@ packages:
     resolution: {integrity: sha512-ZUxbzKl0IfJILTS6t7ip5fQQM/J3TJYubDm3nMbgubNNYS62eXeUpoLUC8/7fJNiFYHTrGPQn7hspDUzIHX3UA==}
     dependencies:
       '@types/minimatch': 3.0.5
-      '@types/node': 17.0.35
+      '@types/node': 18.7.6
     dev: true
 
   /@types/hast/2.3.4:
@@ -2010,10 +1985,6 @@ packages:
 
   /@types/node/12.20.55:
     resolution: {integrity: sha512-J8xLz7q2OFulZ2cyGTLE1TbbZcjpno7FaN6zdJNrgAdrJ+DZzh/uFR6YrTb4C+nXakvud8Q4+rbhoIWlYQbUFQ==}
-    dev: true
-
-  /@types/node/17.0.35:
-    resolution: {integrity: sha512-vu1SrqBjbbZ3J6vwY17jBs8Sr/BKA+/a/WtjRG+whKg1iuLFOosq872EXS0eXWILdO36DHQQeku/ZcL6hz2fpg==}
     dev: true
 
   /@types/node/17.0.8:
@@ -7131,6 +7102,7 @@ packages:
   /unified/9.2.2:
     resolution: {integrity: sha512-Sg7j110mtefBD+qunSLO1lqOEKdrwBFBrR6Qd8f4uwkhWNlbkaqwHse6e7QvD3AP/MNoJdEDLaf8OxYyoWgorQ==}
     dependencies:
+      '@types/unist': 2.0.6
       bail: 1.0.5
       extend: 3.0.2
       is-buffer: 2.0.5
