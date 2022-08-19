@@ -15,15 +15,11 @@ code > .copy {
 .hljs {
   background: var(--color-nav) !important;
   border-color: var(--color-spacer);
-  border-width: 1px;
-  border-style: solid;
 }
 
 p > code {
   background: var(--color-nav) !important;
   border-color: var(--color-spacer);
-  border-width: 1px;
-  border-style: solid;
 }
 
 .sidebar,

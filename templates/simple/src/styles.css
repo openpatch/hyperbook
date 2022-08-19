@@ -876,6 +876,8 @@ pre > code {
 code {
   display: inline-flex;
   align-items: center;
+  border-width: 1px;
+  border-style: solid;
 }
 
 code button.copy {
