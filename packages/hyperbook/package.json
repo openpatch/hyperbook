@@ -32,7 +32,7 @@
   },
   "devDependencies": {
     "@types/archiver": "5.3.1",
-    "@types/async-retry": "1.4.4",
+    "@types/async-retry": "1.4.5",
     "@types/cross-spawn": "6.0.2",
     "@types/prompts": "2.0.14",
     "@types/rimraf": "3.0.2",
