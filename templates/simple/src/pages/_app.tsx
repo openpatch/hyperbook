@@ -6,6 +6,7 @@ import "../dark.css";
 import "../highlightjs.default.min.css";
 import "../github.css";
 import "../github-dark.css";
+import "katex/dist/katex.min.css";
 import { useStore } from "../store";
 import { persistStore } from "redux-persist";
 import { Provider } from "react-redux";
