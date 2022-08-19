@@ -1,0 +1,272 @@
+html,
+body {
+  background: var(--color-background);
+  color: var(--color-text);
+}
+
+a {
+  color: var(--color-brand);
+}
+
+code > .copy {
+  color: var(--color-text);
+}
+
+.hljs {
+  background: var(--color-nav) !important;
+  border-color: var(--color-spacer);
+  border-width: 1px;
+  border-style: solid;
+}
+
+p > code {
+  background: var(--color-nav) !important;
+  border-color: var(--color-spacer);
+  border-width: 1px;
+  border-style: solid;
+}
+
+.sidebar,
+#mobile-sidebar {
+  background: var(--color-nav);
+  border-right-color: var(--color-nav-border);
+}
+
+.sidebar > .author,
+#mobile-sidebar > .author {
+  color: var(--color-author-color);
+  background: var(--color-author-background);
+}
+
+.sidebar > .author:hover,
+#mobile-sidebar > .author:hover {
+  color: var(--color-brand);
+}
+
+/* Three bars for burger menu */
+.bar1,
+.bar2,
+.bar3 {
+  background-color: var(--color-brand-text);
+}
+
+.inverted .bar1,
+.inverted .bar2,
+.inverted .bar3 {
+  background-color: var(--color-brand);
+}
+
+table {
+  border-color: var(--color-spacer);
+}
+
+table tr {
+  background-color: var(--color-nav);
+  border-color: var(--color-spacer);
+}
+
+h2 {
+  border-bottom-color: var(--color-spacer);
+}
+
+header {
+  background: var(--color-brand);
+}
+
+header.inverted {
+  background: var(--color-brand-text);
+}
+
+.branding {
+  color: var(--color-brand-text);
+}
+
+header.inverted > .branding {
+  color: var(--color-brand);
+}
+
+.alert {
+  background-color: var(--color-nav);
+  border-left-color: var(--color-nav-border);
+}
+
+.alert::before {
+  color: #fff;
+}
+
+.alert.success {
+  border-left-color: #00c851;
+}
+
+.alert.success::before {
+  background-color: #00c851;
+}
+
+.alert.info {
+  border-left-color: #33b5e5;
+}
+
+.alert.info::before {
+  background-color: #33b5e5;
+}
+
+.alert.warn {
+  border-left-color: #f0b429;
+}
+
+.alert.warn::before {
+  background-color: #f0b429;
+}
+
+.alert.error {
+  border-left-color: #ef4e4e;
+}
+
+.alert.error::before {
+  background-color: #ef4e4e;
+}
+
+a.jump {
+  border-color: var(--color-brand);
+}
+
+a.jump:hover {
+  background: var(--color-nav);
+}
+
+.meta {
+  border-top-color: var(--color-spacer);
+}
+
+.section > .name {
+  color: var(--color-text);
+  border-color: var(--color-spacer);
+}
+
+.section > .name.empty {
+  color: var(--color-nav-border);
+}
+
+.section > .name:hover {
+  background: var(--color-spacer);
+}
+
+.section > .name.empty:hover {
+  background: none;
+}
+
+.section > .name.active {
+  background: var(--color-background);
+  color: var(--color-brand);
+}
+
+.page {
+  color: var(--color-text);
+}
+
+.page:hover {
+  background: var(--color-spacer);
+}
+
+.page.active {
+  background: var(--color-background);
+  color: var(--color-brand);
+}
+
+.section > .links {
+  border-left-color: var(--color-spacer);
+}
+
+.drawer {
+  background: #fff;
+}
+
+.glossary .terms {
+  border-left-color: var(--color-spacer);
+}
+
+.tabs {
+  background-color: var(--color-nav);
+  border-color: var(--color-nav-border);
+}
+
+.tab {
+  color: var(--color-text);
+}
+
+.tabs .tab:hover {
+  border-bottom-color: var(--color-spacer);
+  color: var(--color-brand);
+}
+
+.tabs .tab.active {
+  border-bottom-color: var(--color-brand);
+  color: var(--color-brand);
+}
+
+.tabpanel {
+  border-color: var(--color-spacer);
+}
+
+.collapsible-button {
+  color: var(--color-text);
+  border-color: var(--color-nav-border);
+  background-color: var(--color-nav);
+}
+
+.collapsible-button:after {
+  color: var(--color-text);
+}
+
+.collapsible-inner {
+  border-color: var(--color-spacer);
+}
+
+.border {
+  border-color: var(--color-spacer);
+}
+
+.password > input {
+  color: var(--color-text);
+  background: var(--color-nav);
+  border-color: var(--color-spacer);
+}
+
+.password > .icon {
+  background: white;
+  border-color: var(--color-spacer);
+}
+
+.loading {
+  background: var(--color-nav);
+}
+
+.download {
+  background: var(--color-nav);
+}
+
+.download > .icon {
+  border-right-color: var(--color-spacer);
+}
+
+ul.bookmarks a {
+  border-color: var(--color-spacer);
+}
+
+ul.bookmarks a:hover {
+  background: var(--color-nav);
+}
+
+ul.bookmarks a:last-of-type {
+  border-color: var(--color-spacer);
+}
+
+.flow {
+  background: white;
+}
+
+@media screen and (max-width: 600px) {
+  table td {
+    border-bottom-color: var(--color-spacer);
+  }
+}

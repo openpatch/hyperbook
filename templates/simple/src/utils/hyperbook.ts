@@ -11,6 +11,7 @@ export type Hyperbook = {
   license?: string;
   colors?: {
     brand?: string;
+    brandDark?: string;
     brandText?: string;
     inverted?: boolean;
   };

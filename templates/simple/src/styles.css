@@ -1,9 +1,7 @@
 html,
 body {
-  background: var(--color-background);
   font-family: sans-serif;
   overflow: hidden;
-  color: var(--color-text);
 }
 
 figure {
@@ -17,10 +15,6 @@ figcaption {
   font-size: 14px;
   max-width: 400px;
   margin: 0 auto;
-}
-
-a {
-  color: var(--color-secondary);
 }
 
 a.heading {
@@ -38,8 +32,6 @@ a.heading:hover::before {
 }
 
 code {
-  background: #f3f3f3;
-  color: #444;
   font-size: 85%;
   padding: 0.2em 0.4em;
   border-radius: 6px;
@@ -64,8 +56,8 @@ code {
   display: flex;
   flex-direction: column;
   grid-area: nav;
-  background: var(--color-nav);
-  border-right: 1px solid var(--color-nav-border);
+  border-right-width: 1px;
+  border-right-style: solid;
   overflow-y: auto;
 }
 
@@ -84,18 +76,11 @@ code {
   text-align: center;
   text-decoration: none;
   padding: 20px;
-  color: var(--color-author-color);
-  background: var(--color-author-background);
 }
 
 .sidebar > .author > b,
 #mobile-sidebar > .author > b {
   font-weight: bold;
-}
-
-.sidebar > .author:hover,
-#mobile-sidebar > .author:hover {
-  color: var(--color-secondary);
 }
 
 .mobile-nav {
@@ -115,7 +100,6 @@ code {
 .bar3 {
   width: 35px;
   height: 5px;
-  background-color: var(--color-primary);
   margin: 6px 0;
   transition: 0.4s;
 }
@@ -202,7 +186,8 @@ details {
 }
 
 table {
-  border: 1px solid #ccc;
+  border-width: 1px;
+  border-style: solid;
   border-collapse: collapse;
   width: 100%;
   table-layout: fixed;
@@ -214,8 +199,8 @@ table caption {
 }
 
 table tr {
-  background-color: #f8f8f8;
-  border: 1px solid #ddd;
+  border-width: 1px;
+  border-style: solid;
   padding: 0.35em;
 }
 
@@ -251,13 +236,14 @@ table th {
   }
 
   table tr {
-    border-bottom: 3px solid #ddd;
+    border-bottom-width: 3px;
     display: block;
     margin-bottom: 0.625em;
   }
 
   table td {
-    border-bottom: 1px solid #ddd;
+    border-bottom-width: 1px;
+    border-bottom-style: solid;
     display: block;
     font-size: 0.8em;
     text-align: right;
@@ -300,7 +286,8 @@ h2 {
   font-weight: 600;
   padding-bottom: 0.3em;
   font-size: 1.5em;
-  border-bottom: 1px solid var(--color-nav-border);
+  border-bottom-width: 1px;
+  border-bottom-style: solid;
 }
 
 h3 {
@@ -344,25 +331,15 @@ header {
   display: flex;
   grid-area: header;
   align-items: center;
-  background: var(--color-secondary);
   z-index: 1001;
   box-shadow: rgba(0, 0, 0, 0.24) 0px 1px 4px;
 }
 
-header.inverted {
-  background: var(--color-primary);
-}
-
 .branding {
-  color: var(--color-primary);
   text-decoration: none;
   display: flex;
   padding: 20px;
   align-items: center;
-}
-
-header.inverted > .branding {
-  color: var(--color-secondary);
 }
 
 .branding .logo {
@@ -392,18 +369,17 @@ header.inverted > .branding {
   font-size: inherit;
   line-height: 1.6rem;
   word-spacing: 0.05rem;
-  background-color: rgba(238, 238, 238, 0.5);
   border-bottom-right-radius: 2px;
   border-top-right-radius: 2px;
   padding: 8px 12px 8px 20px;
   margin-bottom: 16px;
   position: relative;
-  border-left: 4px solid var(--color-nav-border);
+  border-left-width: 4px;
+  border-left-style: solid;
 }
 
 .alert::before {
   border-radius: 100%;
-  color: #fff;
   font-size: 14px;
   font-weight: 700;
   left: -12px;
@@ -419,39 +395,39 @@ header.inverted > .branding {
 }
 
 .alert.success {
-  border-left: 4px solid #00c851;
+  border-left-style: solid;
+  border-left-width: 4px;
 }
 
 .alert.success::before {
   content: "✓";
-  background-color: #00c851;
 }
 
 .alert.info {
-  border-left: 4px solid #33b5e5;
+  border-left-style: solid;
+  border-left-width: 4px;
 }
 
 .alert.info::before {
   content: "i";
-  background-color: #33b5e5;
 }
 
 .alert.warn {
-  border-left: 4px solid #f0b429;
+  border-left-style: solid;
+  border-left-width: 4px;
 }
 
 .alert.warn::before {
   content: "!";
-  background-color: #f0b429;
 }
 
 .alert.error {
-  border-left: 4px solid #ef4e4e;
+  border-left-style: solid;
+  border-left-width: 4px;
 }
 
 .alert.error::before {
   content: "x";
-  background-color: #ef4e4e;
 }
 
 .jump-container {
@@ -469,15 +445,12 @@ a.jump {
   text-decoration: none;
   flex: 1;
   text-align: center;
-  border: 1px solid var(--color-secondary);
+  border-style: solid;
+  border-width: 1px;
   padding: 8px 16px;
   width: 100%;
   border-radius: 8px;
   box-shadow: rgba(0, 0, 0, 0.24) 0px 1px 2px;
-}
-
-a.jump:hover {
-  background: whitesmoke;
 }
 
 a.jump.next {
@@ -514,7 +487,8 @@ a.jump.previous::before {
 
 .meta {
   display: flex;
-  border-top: 1px solid var(--color-spacer);
+  border-top-style: solid;
+  border-top-width: 1px;
   margin: 0 auto;
   margin-top: 30px;
   padding-top: 30px;
@@ -546,27 +520,10 @@ nav > ul {
 .section > .name {
   text-decoration: none;
   padding: 10px;
-  color: var(--color-text);
-  border: 1px solid var(--color-spacer);
+  border-width: 1px;
+  border-style: solid;
   width: 100%;
   user-select: none;
-}
-
-.section > .name.empty {
-  color: var(--color-nav-border);
-}
-
-.section > .name:hover {
-  background: var(--color-spacer);
-}
-
-.section > .name.empty:hover {
-  background: none;
-}
-
-.section > .name.active {
-  background: white;
-  color: var(--color-secondary);
 }
 
 .section .section {
@@ -578,20 +535,11 @@ nav > ul {
   display: block;
   padding: 10px;
   text-decoration: none;
-  color: var(--color-text);
-}
-
-.page:hover {
-  background: var(--color-spacer);
-}
-
-.page.active {
-  background: white;
-  color: var(--color-secondary);
 }
 
 .section > .links {
-  border-left: 1px solid var(--color-spacer);
+  border-left-width: 1px;
+  border-left-style: solid;
   padding-top: 6px;
 }
 
@@ -600,7 +548,6 @@ nav > ul {
 }
 
 .drawer {
-  background: #fff;
   width: 300px;
   height: 100%;
   overflow: auto;
@@ -670,7 +617,8 @@ nav > ul {
 
 .glossary .terms {
   padding-left: 1em;
-  border-left: 1px solid var(--color-spacer);
+  border-left-width: 1px;
+  border-left-style: solid;
 }
 
 .pages {
@@ -685,8 +633,8 @@ nav > ul {
   overscroll-behavior-x: contain;
   /* scrolling should snap children on x */
   scroll-snap-type: x mandatory;
-  border: 1px solid #ccc;
-  background-color: var(--color-nav);
+  border-style: solid;
+  border-width: 1px;
   border-top-right-radius: 4px;
   border-top-left-radius: 4px;
 }
@@ -704,20 +652,11 @@ nav > ul {
   border-bottom: 4px solid transparent;
 }
 
-.tabs .tab:hover {
-  border-bottom: 4px solid var(--color-spacer);
-  color: var(--color-secondary);
-}
-
-.tabs .tab.active {
-  border-bottom: 4px solid var(--color-secondary);
-  color: var(--color-secondary);
-}
-
 .tabpanel {
   padding: 6px 12px;
   padding-top: 12px;
-  border: 1px solid var(--color-spacer);
+  border-style: solid;
+  border-width: 1px;
   border-top: none;
   margin-bottom: 12px;
   border-bottom-right-radius: 4px;
@@ -727,8 +666,8 @@ nav > ul {
 .collapsible-button {
   width: 100%;
   text-align: left;
-  border: 1px solid #ccc;
-  background-color: var(--color-nav);
+  border-style: solid;
+  border-width: 1px;
   cursor: pointer;
   user-select: none;
   font-size: 100%;
@@ -745,7 +684,6 @@ nav > ul {
 .collapsible-button:after {
   content: "\02795"; /* Unicode character for "plus" sign (+) */
   font-size: 13px;
-  color: white;
   float: right;
   margin-left: 5px;
 }
@@ -766,7 +704,8 @@ nav > ul {
 }
 
 .collapsible-inner {
-  border: 1px solid var(--color-spacer);
+  border-style: solid;
+  border-width: 1px;
   padding: 6px 12px;
   padding-top: 12px;
   border-top: none;
@@ -776,7 +715,8 @@ nav > ul {
 
 .border {
   border-radius: 4px;
-  border: 1px solid #ccc;
+  border-style: solid;
+  border-width: 1px;
 }
 
 .flow {
@@ -796,18 +736,18 @@ nav > ul {
 
 .password > input {
   text-align: center;
-  background: var(--color-nav);
   border-radius: 10px;
   font-size: 18px;
-  border: 1px solid var(--color-spacer);
+  border-width: 1px;
+  border-style: solid;
 }
 
 .password > .icon {
   position: absolute;
   user-select: none;
   left: -14px;
-  background: white;
-  border: 1px solid var(--color-spacer);
+  border-width: 1px;
+  border-style: solid;
   height: 28px;
   width: 28px;
   text-align: center;
@@ -830,13 +770,11 @@ nav > ul {
   left: 0;
   right: 0;
   bottom: 0;
-  background: var(--color-nav);
 }
 
 .download {
   display: flex;
   text-decoration: none;
-  background: var(--color-nav);
 }
 
 .download:hover {
@@ -848,7 +786,8 @@ nav > ul {
   align-items: center;
   justify-content: center;
   width: 60px;
-  border-right: 1px solid var(--color-spacer);
+  border-right-style: solid;
+  border-right-width: 1px;
 }
 
 .download > .label {
@@ -896,16 +835,13 @@ ul.bookmarks li {
 
 ul.bookmarks a {
   display: block;
-  border: 1px solid var(--color-spacer);
+  border-style: solid;
+  border-width: 1px;
   padding: 10px 12px;
   padding-left: 32px;
   position: relative;
   margin: 0;
   border-bottom: none;
-}
-
-ul.bookmarks a:hover {
-  background: var(--color-nav);
 }
 
 ul.bookmarks a:first-of-type {
@@ -916,7 +852,8 @@ ul.bookmarks a:first-of-type {
 }
 
 ul.bookmarks a:last-of-type {
-  border: 1px solid var(--color-spacer);
+  border-style: solid;
+  border-width: 1px;
   border-top-right-radius: 0;
   border-top-left-radius: 0;
   border-bottom-right-radius: 8px;

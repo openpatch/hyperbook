@@ -1,6 +1,11 @@
 import "../reset.css";
 import "../styles.css";
+import "../colors.css";
 import "../light.css";
+import "../dark.css";
+import "../highlightjs.default.min.css";
+import "../github.css";
+import "../github-dark.css";
 import { useStore } from "../store";
 import { persistStore } from "redux-persist";
 import { Provider } from "react-redux";

@@ -5,6 +5,9 @@
     "name": "OpenPatch",
     "url": "https://openpatch.org"
   },
+  "colors": {
+    "brandDark": "#2c6f63"
+  },
   "language": "en",
   "logo": "/logo.svg",
   "repo": "https://github.com/openpatch/hyperbook/edit/main/website"

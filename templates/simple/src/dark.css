@@ -1,0 +1,26 @@
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-background: #1e1e1e;
+    --color-text: #b1b1b1;
+    --color-nav: #222222;
+    --color-nav-border: #464646;
+    --color-author-background: #2c2c2c;
+    --color-author-color: #b1b1b1;
+    --color-spacer: #2c2c2c;
+    --color-brand: var(--color-brand-dark);
+  }
+
+  header {
+    background: var(--color-nav);
+  }
+
+  .branding {
+    color: var(--color-brand);
+  }
+
+  .bar1,
+  .bar2,
+  .bar3 {
+    background-color: var(--color-brand);
+  }
+}

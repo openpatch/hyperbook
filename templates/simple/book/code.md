@@ -10,4 +10,4 @@ public class Main {
 }
 ```
 
-`npx code`
+Hello this is a test `npx code` with some inline code. What happens when the text will expand over multiple lines and there is a inline code block in it?

@@ -291,7 +291,7 @@ export const useCollapsible = (id: string) => {
 
 export const useProtect = (id: string) => {
   const protect = useSelector<HyperbookState, string>((state) => {
-    return state.pages?.[state.currentPage]?.protect?.[id];
+    return state.pages?.[state.currentPage]?.protect?.[id] || "";
   });
   const dispatch = useDispatch();
 

@@ -13,14 +13,13 @@ export default function Document() {
           integrity="sha384-MlJdn/WNKDGXveldHDdyRP1R4CTHr3FeuDNfhsLPYrq2t0UBkUdK2jyTnXPEK1NQ"
           crossOrigin="anonymous"
         />
-        <link
-          rel="stylesheet"
-          href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.4.0/styles/default.min.css"
-        />
         <style>
           {`:root {
-            --color-secondary: ${config?.colors?.brand || "#014d40"};
-            --color-primary: ${config?.colors?.brandText || "white"};
+            --color-brand: ${config?.colors?.brand || "#014d40"};
+            --color-brand-dark: ${
+              config?.colors?.brandDark || config?.colors?.brand || "#014d40"
+            };
+            --color-brand-text: ${config?.colors?.brandText || "white"};
           }`}
         </style>
       </Head>

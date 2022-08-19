@@ -4,6 +4,7 @@ import Link from "next/link";
 import mermaid from "mermaid";
 import { useEffect, useLayoutEffect, useState } from "react";
 import { getHyperbook } from "../utils/hyperbook";
+import { usePrefersColorScheme } from "../utils/usePreferesColorScheme";
 import { useBookmarks, useCollapsible, useProtect, useTabs } from "../store";
 import { Flow, Task } from "./Bitflow";
 
@@ -319,13 +320,14 @@ const uuid = () => `mermaid-${(currentId++).toString()}`;
 
 const Mermaid = ({ children }) => {
   const graphDefinition = getNodeText(children);
+  const prefersColorScheme = usePrefersColorScheme();
   const [html, setHtml] = useState("");
   useLayoutEffect(() => {
     if (graphDefinition) {
       try {
         mermaid.mermaidAPI.initialize({
           startOnLoad: false,
-          theme: "neutral" as any,
+          theme: prefersColorScheme == "dark" ? "dark" : ("neutral" as any),
         });
         mermaid.mermaidAPI.render(uuid(), graphDefinition, (svgCode) =>
           setHtml(svgCode)
@@ -335,7 +337,7 @@ const Mermaid = ({ children }) => {
         console.error(e);
       }
     }
-  }, [graphDefinition]);
+  }, [graphDefinition, prefersColorScheme]);
 
   return graphDefinition ? (
     <div dangerouslySetInnerHTML={{ __html: html }} />

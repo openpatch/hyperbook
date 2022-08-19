@@ -6,7 +6,8 @@
   "language": "en",
   "basePath": "/",
   "colors": {
-    "brand": "black",
+    "brand": "pink",
+    "brandDark": "red",
     "brandText": "white"
   },
   "license": "cc0",
