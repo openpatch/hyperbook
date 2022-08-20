@@ -350,14 +350,6 @@ header {
   font-weight: bold;
 }
 
-.header-links {
-  flex: 1;
-}
-
-.search {
-  width: 200px;
-}
-
 .alert > p {
   margin-bottom: 0;
 }

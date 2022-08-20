@@ -23,7 +23,7 @@ export default function MyApp({ Component, pageProps }) {
         loading={<div className="loading">...</div>}
         persistor={persistor}
       >
-        <Component {...pageProps} />;
+        <Component {...pageProps} />
       </PersistGate>
     </Provider>
   );
