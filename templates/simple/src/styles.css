@@ -869,6 +869,12 @@ ul.bookmarks li::before {
   transform: translateY(-50%);
 }
 
+pre code.hljs {
+  display: block;
+  overflow-x: auto;
+  padding: 1em;
+}
+
 pre > code {
   position: relative;
 }

@@ -3,7 +3,6 @@ import "../styles.css";
 import "../colors.css";
 import "../light.css";
 import "../dark.css";
-import "../highlightjs.default.min.css";
 import "../github.css";
 import "../github-dark.css";
 import "katex/dist/katex.min.css";
