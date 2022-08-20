@@ -38,6 +38,7 @@ export const Headings: React.FC<HeadingResolverProps> = ({
       <button
         className={bookmark ? "bookmark active" : "bookmark"}
         onClick={() => toggleBookmark()}
+        title="Bookmark"
       >
         🔖
       </button>

@@ -20,6 +20,8 @@ figcaption {
 a.heading {
   position: relative;
   text-decoration: none;
+  padding-left: 16px;
+  margin-left: -16px;
 }
 
 a.heading:hover::before {
@@ -28,7 +30,7 @@ a.heading:hover::before {
   font-size: 12px;
   top: 50%;
   transform: translateY(-50%);
-  left: -16px;
+  left: 0px;
 }
 
 code {
