@@ -336,3 +336,17 @@ This line is also begins a separate paragraph, but...
 This line is only separated by a single newline, so it's a separate line in the _same paragraph_.
 
 ---
+
+### Comments
+
+Markdown does not provide a native way for comments, but you can use a workaround using the reference style links syntax. Using this syntax, the comments will not be outputted to the resulting HTML.
+
+```
+[]: # (This is a comment)
+[]: # "And this is a comment"
+[]: # 'Also this is a comment'
+[//]: # (Yet another comment)
+[comment]: # (Still another comment)
+```
+
+Source: https://www.jamestharpe.com/markdown-comments/
