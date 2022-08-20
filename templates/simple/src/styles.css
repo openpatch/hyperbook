@@ -56,6 +56,7 @@ code {
   flex-direction: column;
   grid-area: nav;
   border-right-width: 1px;
+  height: calc(100vh - 80px);
   border-right-style: solid;
   overflow-y: auto;
 }
@@ -64,6 +65,7 @@ code {
   display: flex;
   flex-direction: column;
   width: 100%;
+  height: calc(100vh - 80px);
   border-left-width: 1px;
   border-left-style: solid;
   overflow-y: auto;
@@ -953,6 +955,9 @@ pre > button.copy {
   top: 10px;
 }
 
+nav > ul {
+  margin-bottom: 16px;
+}
 nav.toc li {
   margin-bottom: 8px;
 }

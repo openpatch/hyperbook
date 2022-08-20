@@ -4,8 +4,8 @@ export const Toc = ({ headings }: TocProps) => {
   return (
     <nav className="toc">
       <ul>
-        {headings.map((h) => (
-          <li key={h.anchor} className={`level-${h.level}`}>
+        {headings.map((h, i) => (
+          <li key={i} className={`level-${h.level}`}>
             <a href={`#${h.anchor}`}>{h.label}</a>
           </li>
         ))}
