@@ -12,7 +12,7 @@ import { Headings } from "./Headings";
 import { Image } from "./Image";
 import Link from "next/link";
 import { MdContentCopy, MdDone } from "react-icons/md";
-import { useRef, useState } from "react";
+import { Fragment, useRef, useState } from "react";
 
 export type MarkdownProps = {
   children: string;
@@ -53,12 +53,14 @@ const Code = ({ children, className }: CodeProps) => {
   };
 
   return (
-    <code ref={ref} className={className}>
-      {children}
+    <Fragment>
+      <code ref={ref} className={className}>
+        {children}
+      </code>
       <button className="copy" onClick={copyCode}>
         {copied ? <MdDone /> : <MdContentCopy />}
       </button>
-    </code>
+    </Fragment>
   );
 };
 

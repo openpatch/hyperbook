@@ -869,14 +869,14 @@ ul.bookmarks li::before {
   transform: translateY(-50%);
 }
 
+pre {
+  position: relative;
+}
+
 pre code.hljs {
   display: block;
   overflow-x: auto;
   padding: 1em;
-}
-
-pre > code {
-  position: relative;
 }
 
 code {
@@ -886,7 +886,7 @@ code {
   border-style: solid;
 }
 
-code button.copy {
+button.copy {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -896,11 +896,11 @@ code button.copy {
   opacity: 0.8;
 }
 
-code button.copy:hover {
+button.copy:hover {
   opacity: 1;
 }
 
-pre > code button.copy {
+pre > button.copy {
   position: absolute;
   right: 10px;
   top: 10px;

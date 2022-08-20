@@ -8,7 +8,7 @@ a {
   color: var(--color-brand);
 }
 
-code > .copy {
+.copy {
   color: var(--color-text);
 }
 
