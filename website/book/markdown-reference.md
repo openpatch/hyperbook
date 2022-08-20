@@ -5,7 +5,9 @@ index: 2
 
 # Markdown Reference
 
-?> The following basic markdown syntax reference was created by [adam-p](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet#inline-html) and is licensed under [CC-BY](https://creativecommons.org/licenses/by/3.0/).
+:::alert{info}
+The following basic markdown syntax reference was created by [adam-p](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet#inline-html) and is licensed under [CC-BY](https://creativecommons.org/licenses/by/3.0/).
+:::
 
 This is intended as a quick reference and showcase. For more complete info, see [John Gruber's original spec](http://daringfireball.net/projects/markdown/) and the [Github-flavored Markdown info page](http://github.github.com/github-flavored-markdown/).
 
