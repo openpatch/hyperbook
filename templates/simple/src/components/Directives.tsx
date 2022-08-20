@@ -33,14 +33,22 @@ export const YouTubeVideo = ({ id, children }: YouTubeVideoProps) => (
 export type TermProps = {
   id?: string;
   children: string;
+  className?: string;
 };
 
-export const Term = ({ id, children }: TermProps) => {
+export const Term = ({ id, className, children }: TermProps) => {
   if (!id) {
     id = children[0].toLowerCase().replaceAll(" ", "-");
   }
+
+  let href = `/glossary/${id}`;
+
+  if (className && typeof className[0] == "string") {
+    href += `#${className}`;
+  }
+
   return (
-    <Link href={`/glossary/${id}`}>
+    <Link href={href}>
       <a>{children}</a>
     </Link>
   );

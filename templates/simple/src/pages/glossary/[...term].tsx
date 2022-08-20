@@ -68,7 +68,7 @@ export const getStaticProps: GetStaticProps<
   for (const file of files) {
     const { content, data } = readFile(file);
     const r = new RegExp(
-      `:t\\[.*\\]\\{#${params.term}\\}|:t\\[${params.term}\\]`
+      `:t\\[.*\\]\\{#${params.term}(\..*)?\\}|:t\\[${params.term}\\]`
     );
     const m = content.match(r);
     if (m) {

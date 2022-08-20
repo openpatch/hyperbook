@@ -6,3 +6,5 @@ name: Table
 | :----: | :----: |
 |  Cell  |  Cell  |
 |   A    |   B    |
+
+:t[test]{#dig}

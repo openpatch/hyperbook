@@ -13,3 +13,11 @@ the term. You can then reference the terms like so:
 ```
 
 :t[Object-oriented Programming]{#oop}
+
+You can also link directly to a header.
+
+```md
+:t[Object-oriented Programming]{#oop.bluej-by-example}
+```
+
+:t[Object-oriented Programming]{#oop.bluej-by-example}
