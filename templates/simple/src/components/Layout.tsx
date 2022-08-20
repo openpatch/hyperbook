@@ -158,8 +158,6 @@ export function Layout({ navigation, page, children }: LayoutProps) {
               <div className="name">{hyperbook.name}</div>
             </a>
           </Link>
-          <div className="header-links"></div>
-          <div className="search"></div>
         </header>
         <div className="sidebar">
           <Navigation {...navigation} />

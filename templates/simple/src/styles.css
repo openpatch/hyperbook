@@ -38,12 +38,9 @@ code {
 }
 
 .main-grid {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
   display: grid;
+  height: 100vh;
+  width: 100vw;
   grid-template-columns: 300px 1fr;
   grid-template-rows: 80px 1fr;
   grid-template-areas:
@@ -487,6 +484,7 @@ a.jump.previous::before {
 
 .meta {
   display: flex;
+  flex-wrap: wrap;
   border-top-style: solid;
   border-top-width: 1px;
   margin: 0 auto;
@@ -498,6 +496,10 @@ a.jump.previous::before {
 .meta .edit-github {
   text-decoration: none;
   flex: 1;
+}
+
+.meta .copyright {
+  flex: 2;
 }
 
 .section ul,
@@ -891,9 +893,10 @@ button.copy {
   align-items: center;
   justify-content: center;
   margin-left: 4px;
-  background: none;
+  background: var(--color-nav);
   border: none;
-  opacity: 0.8;
+  border-radius: 4px;
+  opacity: 0.9;
 }
 
 button.copy:hover {
