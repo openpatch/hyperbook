@@ -11,17 +11,23 @@ import {
   Navigation as NavigationProps,
   getNavigation,
 } from "../utils/navigation";
+import { getToc, Toc } from "../utils/toc";
 
 type PageProps = {
   markdown: string;
   navigation: NavigationProps;
+  toc: Toc;
 };
 
-export default function BookPage({ markdown, navigation }: PageProps) {
+export default function BookPage({ markdown, navigation, toc }: PageProps) {
   const page = navigation.current;
   usePage();
   return (
-    <Layout navigation={navigation} page={page}>
+    <Layout
+      navigation={navigation}
+      page={page}
+      toc={page.toc == false ? null : toc}
+    >
       <article>
         <Markdown children={markdown} />
       </article>
@@ -69,6 +75,7 @@ export const getStaticProps: GetStaticProps<
   return {
     props: {
       markdown: content,
+      toc: getToc(content),
       navigation,
     },
   };

@@ -1,15 +1,18 @@
 import Head from "next/head";
 import Link from "next/link";
-import { ReactNode, useState } from "react";
+import { Fragment, ReactNode, useState } from "react";
 import { getHyperbook } from "../utils/hyperbook";
 import { Navigation as NavigationProps, Page } from "../utils/navigation";
+import { Toc as TocProps } from "../utils/toc";
 import Drawer from "./Drawer";
 import { Navigation } from "./Navigation";
+import { Toc } from "./Toc";
 
 const hyperbook = getHyperbook();
 
 export type LayoutProps = {
   navigation: NavigationProps;
+  toc?: TocProps;
   page: Pick<Page, "name" | "repo" | "description" | "keywords">;
   children: ReactNode;
 };
@@ -84,8 +87,9 @@ const relativeUrl = (url: string) => {
   }
 };
 
-export function Layout({ navigation, page, children }: LayoutProps) {
-  const [isOpen, setIsOpen] = useState(false);
+export function Layout({ toc, navigation, page, children }: LayoutProps) {
+  const [isNavOpen, setIsNavOpen] = useState(false);
+  const [isTocOpen, setIsTocOpen] = useState(false);
   return (
     <>
       <Head>
@@ -117,16 +121,16 @@ export function Layout({ navigation, page, children }: LayoutProps) {
         >
           <div className="mobile-nav">
             <button
-              className={isOpen ? "toggle change" : "toggle"}
-              onClick={() => setIsOpen(!isOpen)}
+              className={isNavOpen ? "toggle change" : "toggle"}
+              onClick={() => setIsNavOpen(!isNavOpen)}
             >
               <div className="bar1"></div>
               <div className="bar2"></div>
               <div className="bar3"></div>
             </button>
             <Drawer
-              isOpen={isOpen}
-              onClose={() => setIsOpen(false)}
+              isOpen={isNavOpen}
+              onClose={() => setIsNavOpen(false)}
               position="left"
             >
               <div id="mobile-sidebar">
@@ -165,6 +169,29 @@ export function Layout({ navigation, page, children }: LayoutProps) {
             Powered by <b>Hyperbook</b>
           </a>
         </div>
+        {toc && (
+          <Fragment>
+            <button
+              className={isTocOpen ? "toc-toggle open" : "toc-toggle"}
+              onClick={() => setIsTocOpen(!isTocOpen)}
+              title="Table of Contents"
+            >
+              <div className="bar1"></div>
+              <div className="bar2"></div>
+              <div className="bar3"></div>
+              <div className="bar4"></div>
+            </button>
+            <Drawer
+              isOpen={isTocOpen}
+              onClose={() => setIsTocOpen(false)}
+              position="right"
+            >
+              <div id="toc-sidebar">
+                <Toc {...toc} />
+              </div>
+            </Drawer>
+          </Fragment>
+        )}
         <main>
           {children}
           <div className="meta">

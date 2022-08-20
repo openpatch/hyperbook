@@ -1,5 +1,6 @@
 ---
 name: Dig
+toc: true
 ---
 
 # B

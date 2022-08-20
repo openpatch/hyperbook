@@ -18,9 +18,9 @@
     color: var(--color-brand);
   }
 
-  .bar1,
-  .bar2,
-  .bar3 {
+  .toggle > .bar1,
+  .toggle > .bar2,
+  .toggle > .bar3 {
     background-color: var(--color-brand);
   }
 }

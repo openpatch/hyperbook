@@ -28,6 +28,11 @@ p > code {
   border-right-color: var(--color-nav-border);
 }
 
+#toc-sidebar {
+  background: var(--color-nav);
+  border-left-color: var(--color-nav-border);
+}
+
 .sidebar > .author,
 #mobile-sidebar > .author {
   color: var(--color-author-color);
@@ -40,16 +45,28 @@ p > code {
 }
 
 /* Three bars for burger menu */
-.bar1,
-.bar2,
-.bar3 {
+.toggle > .bar1,
+.toggle > .bar2,
+.toggle > .bar3 {
   background-color: var(--color-brand-text);
 }
 
-.inverted .bar1,
-.inverted .bar2,
-.inverted .bar3 {
+.inverted .toggle > .bar1,
+.inverted .toggle > .bar2,
+.inverted .toggle > .bar3 {
   background-color: var(--color-brand);
+}
+
+.toc-toggle > .bar1,
+.toc-toggle > .bar2,
+.toc-toggle > .bar3,
+.toc-toggle > .bar4 {
+  background-color: var(--color-text);
+}
+
+.toc-toggle {
+  background: var(--color-background);
+  border-color: var(--color-nav-border);
 }
 
 table {

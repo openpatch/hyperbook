@@ -2,6 +2,7 @@
 name: Hallo Test
 hide: false
 index: 1
+toc: false
 ---
 
 :::mermaid

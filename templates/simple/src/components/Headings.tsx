@@ -7,6 +7,19 @@ type HeadingResolverProps = {
   children: ReactNode[];
 };
 
+export const makeAnchor = (heading: string) => {
+  // If we have a heading, make it lower case
+  let anchor = heading.toLowerCase();
+
+  // Clean anchor (replace special characters whitespaces).
+  // Alternatively, use encodeURIComponent() if you don't care about
+  // pretty anchor links
+  anchor = anchor.replace(/[^a-zA-Z0-9 ]/g, "");
+  anchor = anchor.replace(/ /g, "-");
+
+  return anchor;
+};
+
 export const Headings: React.FC<HeadingResolverProps> = ({
   level,
   children,
@@ -15,13 +28,7 @@ export const Headings: React.FC<HeadingResolverProps> = ({
   const heading = children[0];
 
   // If we have a heading, make it lower case
-  let anchor = typeof heading === "string" ? heading.toLowerCase() : "";
-
-  // Clean anchor (replace special characters whitespaces).
-  // Alternatively, use encodeURIComponent() if you don't care about
-  // pretty anchor links
-  anchor = anchor.replace(/[^a-zA-Z0-9 ]/g, "");
-  anchor = anchor.replace(/ /g, "-");
+  let anchor = typeof heading === "string" ? makeAnchor(heading) : "";
 
   const label = typeof heading === "string" ? heading : anchor;
 

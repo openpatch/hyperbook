@@ -15,23 +15,30 @@ import Link from "next/link";
 import { Fragment } from "react";
 import { getHyperbook } from "../../utils/hyperbook";
 import { usePage } from "../../store";
+import { getToc, Toc } from "../../utils/toc";
 
 const hyperbook = getHyperbook();
 
 type TermProps = {
   markdown: string;
   navigation: Navigation;
+  toc: Toc;
   term: {
     name: string;
     repo: string;
     pages: Page[];
+    toc?: boolean;
   };
 };
 
-export default function Term({ markdown, navigation, term }: TermProps) {
+export default function Term({ markdown, navigation, term, toc }: TermProps) {
   usePage();
   return (
-    <Layout navigation={navigation} page={term}>
+    <Layout
+      navigation={navigation}
+      page={term}
+      toc={term?.toc === true ? toc : null}
+    >
       <article>
         <Markdown children={markdown} />
         <div className="pages">
@@ -100,6 +107,7 @@ export const getStaticProps: GetStaticProps<
     props: {
       term,
       markdown: content,
+      toc: getToc(content),
       navigation,
       hyperbook,
     },

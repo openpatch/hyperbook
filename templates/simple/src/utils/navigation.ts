@@ -11,6 +11,7 @@ export type Page = {
   keywords?: string[];
   repo?: string;
   hide?: boolean;
+  toc?: boolean;
   index?: number;
   isEmpty?: boolean;
   href: string;
