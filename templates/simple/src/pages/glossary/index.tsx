@@ -2,10 +2,12 @@ import { GetStaticProps } from "next";
 import fs from "fs";
 import { getAllFiles } from "../../utils/files";
 import matter from "gray-matter";
+import chalk from "chalk";
 import { Layout } from "../../components/Layout";
 import { getNavigation, Navigation } from "../../utils/navigation";
 import Link from "next/link";
 import { usePage } from "../../store";
+import path from "path";
 
 export type Term = {
   name: string;
@@ -56,14 +58,23 @@ export const getStaticProps: GetStaticProps<{
     const source = fs.readFileSync(file);
     const { data } = matter(source);
 
-    const letter = data.name[0].toUpperCase();
-
+    let name = path.basename(file, ".md");
+    if (data.name) {
+      name = data.name;
+    } else {
+      console.log(
+        `\n${chalk.yellow(
+          `warn  `
+        )}- Glossary page ${file} does not specify a name. Defaulting to the filename ${name}.`
+      );
+    }
+    const letter = name[0].toUpperCase();
     if (!terms[letter]) {
       terms[letter] = [];
     }
 
     terms[letter].push({
-      name: data.name,
+      name,
       href: file.replace(/\.mdx?$/, ""),
     });
   }
