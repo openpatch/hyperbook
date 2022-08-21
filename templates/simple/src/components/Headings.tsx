@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { ReactNode } from "react";
 import { useBookmark } from "../store";
 
@@ -37,11 +36,9 @@ export const Headings: React.FC<HeadingResolverProps> = ({
   // Utility
   const container = (children: React.ReactNode): JSX.Element => (
     <>
-      <Link href={`#${anchor}`}>
-        <a className="heading" id={anchor}>
-          <span>{children}</span>
-        </a>
-      </Link>
+      <a className="heading" id={anchor} href={`#${anchor}`}>
+        <span>{children}</span>
+      </a>
       <button
         className={bookmark ? "bookmark active" : "bookmark"}
         onClick={() => toggleBookmark()}
