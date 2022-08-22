@@ -18,8 +18,8 @@ async function archiveFolder(name: string): Promise<void> {
       console.log(chalk.green("Archive zipped: ") + name);
       resolve();
     });
-    archive.on("error", () => {
-      reject();
+    archive.on("error", (err) => {
+      throw err;
     });
 
     archive.pipe(output);
