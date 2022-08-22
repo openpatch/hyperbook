@@ -1,5 +1,13 @@
 # hyperbook
 
+## 0.5.1
+
+### Patch Changes
+
+- [`0ce671d`](https://github.com/openpatch/hyperbook/commit/0ce671d61ac57e6526ddecae7e510c06160c174e) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Throw error if archiving fails
+
+* [`d43ec9e`](https://github.com/openpatch/hyperbook/commit/d43ec9e145b1b1b23d2cea5054f9ee0ddd3bc535) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Do not fail if not archives folder is present
+
 ## 0.5.0
 
 ### Minor Changes
