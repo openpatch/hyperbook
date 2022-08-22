@@ -4,6 +4,15 @@ body {
   overflow-x: hidden;
 }
 
+body {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+body::-webkit-scrollbar {
+  display: none;
+}
+
 figure {
   text-align: center;
   margin-top: 10px;
@@ -118,7 +127,7 @@ code {
 .toc-toggle {
   position: fixed;
   top: 90px;
-  right: 10px;
+  right: 20px;
   border-radius: 50%;
   height: 40px;
   width: 40px;
