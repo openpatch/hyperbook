@@ -36,6 +36,10 @@ export async function runArchive(): Promise<void> {
   }
   return new Promise((resolve, reject) => {
     // find folders in archives
+    if (!fs.existsSync(path.join(process.cwd(), "archives"))) {
+      console.log(chalk.blue("info  ") + "- No Archives found");
+      resolve();
+    }
     const dirs = fs
       .readdirSync(path.join(process.cwd(), "archives"), {
         withFileTypes: true,
