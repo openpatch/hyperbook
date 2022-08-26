@@ -20,7 +20,7 @@ importers:
       react-hook-form: 7.34.2
       rimraf: 3.0.2
       ts-node: 10.9.1
-      typescript: 4.7.4
+      typescript: 4.8.2
       walkdir: 0.4.1
       webpack: 5.74.0
     devDependencies:
@@ -39,8 +39,8 @@ importers:
       react-dom: 18.2.0_react@18.2.0
       react-hook-form: 7.34.2_react@18.2.0
       rimraf: 3.0.2
-      ts-node: 10.9.1_z5yog5l5yqinvqran22gqy2vdi
-      typescript: 4.7.4
+      ts-node: 10.9.1_vnsoxmlgtk2egvrupetmxdngm4
+      typescript: 4.8.2
       walkdir: 0.4.1
       webpack: 5.74.0_esbuild@0.15.5
 
@@ -128,7 +128,7 @@ importers:
       remark-gfm: 3.0.1
       remark-math: 5.1.1
       remark-unwrap-images: 3.0.1
-      typescript: 4.7.4
+      typescript: 4.8.2
       zod: 3.18.0
     dependencies:
       '@babel/core': 7.18.13
@@ -175,7 +175,7 @@ importers:
       '@types/object-hash': 2.2.1
       '@types/react': 18.0.17
       chalk: 5.0.1
-      typescript: 4.7.4
+      typescript: 4.8.2
 
 packages:
 
@@ -7010,7 +7010,7 @@ packages:
     resolution: {integrity: sha512-AqTiAOLcj85xS7vQ8QkAV41hPDIJ71XJB4RCUrzo/1GM2CQwhkJGaf9Hgr7BOugMRpgGUrqRg/DrBDl4H40+8g==}
     dev: false
 
-  /ts-node/10.9.1_z5yog5l5yqinvqran22gqy2vdi:
+  /ts-node/10.9.1_vnsoxmlgtk2egvrupetmxdngm4:
     resolution: {integrity: sha512-NtVysVPkxxrwFGUUxGYhfux8k78pQB3JqYBXlLRZgdGUqTO5wU/UyHop5p70iEbGhB7q5KmiZiU0Y3KlJrScEw==}
     hasBin: true
     peerDependencies:
@@ -7036,7 +7036,7 @@ packages:
       create-require: 1.1.1
       diff: 4.0.2
       make-error: 1.3.6
-      typescript: 4.7.4
+      typescript: 4.8.2
       v8-compile-cache-lib: 3.0.1
       yn: 3.1.1
     dev: true
@@ -7074,8 +7074,8 @@ packages:
     engines: {node: '>=8'}
     dev: true
 
-  /typescript/4.7.4:
-    resolution: {integrity: sha512-C0WQT0gezHuw6AdY1M2jxUO83Rjf0HP7Sk1DtXj6j1EwkQNZrHAg2XPWlq62oqEhYvONq5pkC2Y9oPljWToLmQ==}
+  /typescript/4.8.2:
+    resolution: {integrity: sha512-C0I1UsrrDHo2fYI5oaCGbSejwX4ch+9Y5jTQELvovfmFkK3HHSZJB8MSJcWLmCUBzQBchCrZ9rMRV6GuNrvGtw==}
     engines: {node: '>=4.2.0'}
     hasBin: true
     dev: true
