@@ -1,6 +1,6 @@
 ---
 name: Hallo Test
-hide: false
+hide: true
 index: 1
 toc: false
 ---

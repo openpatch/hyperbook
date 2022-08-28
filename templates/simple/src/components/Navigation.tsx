@@ -61,9 +61,11 @@ export const Navigation = ({ pages, sections, current }: NavigationProps) => {
   return (
     <nav>
       <ul>
-        {pages.map((p) => (
-          <Page key={p.href} {...p} current={current} />
-        ))}
+        {pages
+          .filter((p) => !p.hide)
+          .map((p) => (
+            <Page key={p.href} {...p} current={current} />
+          ))}
       </ul>
       {sections
         .filter((s) => !s.hide)
