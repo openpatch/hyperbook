@@ -5,6 +5,8 @@ index: 1
 toc: false
 ---
 
+:t[dig]
+
 :::mermaid
 classDiagram
 Animal <|-- Duck

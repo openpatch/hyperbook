@@ -78,7 +78,7 @@ export const getStaticProps: GetStaticProps<
       `:t\\[.*\\]\\{#${params.term}(\..*)?\\}|:t\\[${params.term}\\]`
     );
     const m = content.match(r);
-    if (m) {
+    if (m && !data.hide && data.name) {
       const relativePath = path
         .relative("book", file)
         .replace(/\.mdx?$/, "")
