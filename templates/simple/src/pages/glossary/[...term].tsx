@@ -10,12 +10,16 @@ import {
   Page,
   readFile,
 } from "../../utils/navigation";
-import { Markdown } from "../../components/Markdown";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { Fragment } from "react";
 import { getHyperbook } from "../../utils/hyperbook";
 import { usePage } from "../../store";
 import { getToc, Toc } from "../../utils/toc";
+
+const Markdown = dynamic(
+  import("../../components/Markdown").then((mod) => mod.Markdown)
+);
 
 const hyperbook = getHyperbook();
 
