@@ -138,6 +138,12 @@ export const TaskInner: FC<{ task: FlowTaskNode["data"] }> = ({ task }) => {
       evaluate={evaluate}
       result={result}
       onRetry={retry}
+      soundUrls={{
+        correct: getUrl("/correct.mp3"),
+        wrong: getUrl("/wrong.mp3"),
+        unknown: getUrl("/unknown.mp3"),
+        manual: getUrl("/manual.mp3"),
+      }}
       TaskComponent={bit.Task}
     />
   );
