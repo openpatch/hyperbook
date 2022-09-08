@@ -1,4 +1,4 @@
-import ReactMarkdown from "react-markdown";
+import ReactMarkdown, { Components } from "react-markdown";
 import remarkDirective from "remark-directive";
 import remarkDirectiveRehype from "remark-directive-rehype";
 import remarkGfm from "remark-gfm";
@@ -18,13 +18,7 @@ export type MarkdownProps = {
   children: string;
 };
 
-type MarkdownLinkProps = {
-  href: string;
-  title: string;
-  children: any;
-};
-
-const MarkdownLink = ({ href, title, children }: MarkdownLinkProps) => {
+const MarkdownLink: Components["a"] = ({ href, title, children }) => {
   return (
     <Link href={href}>
       <a title={title}>{children}</a>
@@ -68,32 +62,28 @@ export const Markdown = (props: MarkdownProps) => {
   return (
     <ReactMarkdown
       {...props}
-      remarkPlugins={
-        [
-          remarkDirective,
-          remarkDirectiveRehype,
-          remarkUnwrapImages,
-          remarkGfm,
-          remarkMath,
-          remarkGemoji,
-        ] as any
-      }
+      remarkPlugins={[
+        remarkDirective,
+        remarkDirectiveRehype,
+        remarkGfm,
+        remarkMath,
+        remarkGemoji,
+        remarkUnwrapImages,
+      ]}
       skipHtml={false}
-      components={
-        {
-          ...directives,
-          a: MarkdownLink,
-          code: Code,
-          h1: Headings,
-          h2: Headings,
-          h3: Headings,
-          h4: Headings,
-          h5: Headings,
-          h6: Headings,
-          img: Image,
-        } as any
-      }
-      rehypePlugins={[rehypeKatex, rehypeHighlight] as any}
+      components={{
+        ...directives,
+        a: MarkdownLink,
+        code: Code,
+        h1: Headings,
+        h2: Headings,
+        h3: Headings,
+        h4: Headings,
+        h5: Headings,
+        h6: Headings,
+        img: Image,
+      }}
+      rehypePlugins={[rehypeKatex, rehypeHighlight]}
     />
   );
 };

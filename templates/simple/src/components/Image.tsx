@@ -1,8 +1,9 @@
+import { Components } from "react-markdown";
 import { getHyperbook } from "../utils/hyperbook";
 
 const config = getHyperbook();
 
-export const Image = ({ src, title, node, ...props }) => {
+export const Image: Components["img"] = ({ src, title, alt }) => {
   const { basePath } = config;
 
   if (
@@ -19,7 +20,7 @@ export const Image = ({ src, title, node, ...props }) => {
 
   return (
     <figure>
-      <img src={src} alt={node?.properties?.alt} />
+      <img src={src} alt={alt} />
       {title && <figcaption>{title}</figcaption>}
     </figure>
   );
