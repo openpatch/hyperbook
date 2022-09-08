@@ -1,12 +1,17 @@
 import { Flow as IFlow } from "@bitflow/core";
 import hash from "object-hash";
 import Link from "next/link";
-import mermaid from "mermaid";
+import dynamic from "next/dynamic";
 import { useEffect, useLayoutEffect, useState } from "react";
 import { getHyperbook } from "../utils/hyperbook";
-import { usePrefersColorScheme } from "../utils/usePreferesColorScheme";
+import {
+  ColorScheme,
+  usePrefersColorScheme,
+} from "../utils/usePreferesColorScheme";
 import { useBookmarks, useCollapsible, useProtect, useTabs } from "../store";
-import { Flow, Task } from "./Bitflow";
+
+const Flow = dynamic(() => import("./Bitflow").then((mod) => mod.Flow));
+const Task = dynamic(() => import("./Bitflow").then((mod) => mod.Task));
 
 function basename(path: string) {
   return path.split("/").reverse()[0];
@@ -326,25 +331,34 @@ const getNodeText = (node: any) => {
 let currentId = 0;
 const uuid = () => `mermaid-${(currentId++).toString()}`;
 
+const renderMermaid = async (
+  graphDefinition: any,
+  prefersColorScheme: ColorScheme
+): Promise<string> => {
+  let html = "";
+  if (graphDefinition) {
+    try {
+      const mermaid = (await import("mermaid")).default;
+      mermaid.mermaidAPI.initialize({
+        startOnLoad: false,
+        theme: prefersColorScheme == "dark" ? "dark" : ("neutral" as any),
+      });
+      mermaid.mermaidAPI.render(uuid(), graphDefinition, (svgCode) => {
+        html = svgCode;
+      });
+    } catch (e) {
+      console.error(e);
+    }
+  }
+  return html;
+};
+
 const Mermaid = ({ children }) => {
   const graphDefinition = getNodeText(children);
   const prefersColorScheme = usePrefersColorScheme();
   const [html, setHtml] = useState("");
   useLayoutEffect(() => {
-    if (graphDefinition) {
-      try {
-        mermaid.mermaidAPI.initialize({
-          startOnLoad: false,
-          theme: prefersColorScheme == "dark" ? "dark" : ("neutral" as any),
-        });
-        mermaid.mermaidAPI.render(uuid(), graphDefinition, (svgCode) =>
-          setHtml(svgCode)
-        );
-      } catch (e) {
-        setHtml("");
-        console.error(e);
-      }
-    }
+    renderMermaid(graphDefinition, prefersColorScheme).then(setHtml);
   }, [graphDefinition, prefersColorScheme]);
 
   return graphDefinition ? (
