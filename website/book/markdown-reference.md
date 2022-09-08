@@ -175,9 +175,11 @@ Some text to show that the reference links can follow later.
 Here's our logo (hover to see the title text):
 
 Inline-style:
+
 ![alt text](https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png "Logo Title Text 1")
 
 Reference-style:
+
 ![alt text][logo]
 
 [logo]: https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png "Logo Title Text 2"
@@ -186,12 +188,18 @@ Reference-style:
 Here's our logo (hover to see the title text):
 
 Inline-style:
+
 ![alt text](https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png "Logo Title Text 1")
 
 Reference-style:
+
 ![alt text][logo]
 
 [logo]: https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png "Logo Title Text 2"
+
+:::alert{warn}
+Be sure to put empty lines around your image, since hyperbook uses the figure environment, which is not allowed to be in a paragraph.
+:::
 
 ### Code and Syntax Highlighting
 
