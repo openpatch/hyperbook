@@ -20,7 +20,6 @@ export type LayoutProps = {
 const linkLicense = (license: string) => {
   let href: string;
   let label: string;
-  console.log(license);
   switch (license.toLowerCase()) {
     case "cc0": {
       href = "https://creativecommons.org/publicdomain/zero/1.0/";
