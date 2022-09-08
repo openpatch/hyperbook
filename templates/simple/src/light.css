@@ -1,6 +1,7 @@
 :root {
   --color-background: white;
   --color-text: black;
+  --color-text-deactivated: dimgrey;
   --color-nav: whitesmoke;
   --color-nav-border: grey;
   --color-author-background: #dcdcdc;

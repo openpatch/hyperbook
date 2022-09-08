@@ -157,7 +157,7 @@ a.jump:hover {
 }
 
 .section > .name.empty {
-  color: var(--color-nav-border);
+  color: var(--color-text-deactivated);
 }
 
 .section > .name:hover {
