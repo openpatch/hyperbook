@@ -262,15 +262,15 @@ a.jump:hover {
   border-right-color: var(--color-spacer);
 }
 
-ul.bookmarks a {
+ul.bookmarks li {
   border-color: var(--color-spacer);
 }
 
-ul.bookmarks a:hover {
+ul.bookmarks li:hover {
   background: var(--color-nav);
 }
 
-ul.bookmarks a:last-of-type {
+ul.bookmarks li:last-of-type {
   border-color: var(--color-spacer);
 }
 

@@ -903,7 +903,7 @@ ul.bookmarks li {
   list-style-type: none;
 }
 
-ul.bookmarks a {
+ul.bookmarks li {
   display: block;
   border-style: solid;
   border-width: 1px;
@@ -914,14 +914,14 @@ ul.bookmarks a {
   border-bottom: none;
 }
 
-ul.bookmarks a:first-of-type {
+ul.bookmarks li:first-of-type {
   border-top-right-radius: 8px;
   border-top-left-radius: 8px;
   border-bottom-right-radius: 0;
   border-bottom-left-radius: 0;
 }
 
-ul.bookmarks a:last-of-type {
+ul.bookmarks li:last-of-type {
   border-style: solid;
   border-width: 1px;
   border-top-right-radius: 0;
@@ -930,7 +930,7 @@ ul.bookmarks a:last-of-type {
   border-bottom-left-radius: 8px;
 }
 
-ul.bookmarks li::before {
+ul.bookmarks a::before {
   content: "🔖";
   position: absolute;
   font-size: 12px;

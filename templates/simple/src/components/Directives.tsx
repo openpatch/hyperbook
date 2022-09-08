@@ -309,18 +309,17 @@ const Bookmarks = () => {
   return (
     <ul className="bookmarks">
       {bookmarks?.map((bookmark) => (
-        <Link
-          key={bookmark.href + bookmark.anchor}
-          scroll={false}
-          href={{
-            pathname: bookmark.href,
-            hash: "#" + bookmark.anchor,
-          }}
-        >
-          <a>
-            <li>{bookmark.label}</li>
-          </a>
-        </Link>
+        <li key={bookmark.href + bookmark.anchor}>
+          <Link
+            scroll={false}
+            href={{
+              pathname: bookmark.href,
+              hash: "#" + bookmark.anchor,
+            }}
+          >
+            <a>{bookmark.label}</a>
+          </Link>
+        </li>
       ))}
     </ul>
   );
