@@ -1,11 +1,8 @@
 {
   "draft": false,
-  "name": "Example",
   "description": "",
   "language": "en",
   "visibility": "public",
-  "zoom": 1,
-  "position": [0, 0],
   "edges": [
     {
       "id": "edge-1",
@@ -18,6 +15,7 @@
       "target": "end-node"
     }
   ],
+  "name": "Example",
   "nodes": [
     {
       "id": "start-node",
