@@ -9,9 +9,13 @@ type P = PageProps & Pick<NavigationProps, "current">;
 
 const Page = ({ name, href, current }: P) => {
   return (
-    <Link href={href}>
-      <a className={current?.href === href ? `page active` : "page"}>{name}</a>
-    </Link>
+    <li>
+      <Link href={href}>
+        <a className={current?.href === href ? `page active` : "page"}>
+          {name}
+        </a>
+      </Link>
+    </li>
   );
 };
 

@@ -561,6 +561,10 @@ nav > ul {
   margin-bottom: 16px;
 }
 
+nav li + li {
+  margin-top: 0px;
+}
+
 .section {
   display: flex;
   flex-direction: column;
