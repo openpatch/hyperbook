@@ -396,7 +396,16 @@ header {
 }
 
 .branding .logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   margin-right: 10px;
+  height: 50px;
+}
+
+.branding .logo img {
+  width: 100%;
+  height: auto;
 }
 
 .branding .name {

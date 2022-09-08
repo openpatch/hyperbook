@@ -152,12 +152,7 @@ export function Layout({ toc, navigation, page, children }: LayoutProps) {
             <a className="branding">
               {hyperbook.logo && (
                 <div className="logo">
-                  <img
-                    alt="Logo"
-                    width="auto"
-                    height={50}
-                    src={relativeUrl(hyperbook.logo)}
-                  />
+                  <img alt="Logo" src={relativeUrl(hyperbook.logo)} />
                 </div>
               )}
               <div className="name">{hyperbook.name}</div>
