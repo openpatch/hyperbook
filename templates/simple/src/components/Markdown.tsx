@@ -26,13 +26,7 @@ const MarkdownLink: Components["a"] = ({ href, title, children }) => {
   );
 };
 
-type CodeProps = {
-  inline?: boolean;
-  className?: string;
-  children: any;
-};
-
-const Code = ({ children, className }: CodeProps) => {
+const Code: Components["code"] = ({ children, className }) => {
   const ref = useRef<HTMLElement>();
   const [copied, setCopied] = useState(false);
   const copyCode = () => {

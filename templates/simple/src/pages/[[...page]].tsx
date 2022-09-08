@@ -3,7 +3,6 @@ import matter from "gray-matter";
 import { GetStaticPaths, GetStaticProps } from "next";
 import Link from "next/link";
 import path from "path";
-import dynamic from "next/dynamic";
 import { Layout } from "../components/Layout";
 import { usePage } from "../store";
 import { getAllFiles } from "../utils/files";
@@ -12,10 +11,7 @@ import {
   getNavigation,
 } from "../utils/navigation";
 import { getToc, Toc } from "../utils/toc";
-
-const Markdown = dynamic(
-  import("../components/Markdown").then((mod) => mod.Markdown)
-);
+import { Markdown } from "../components/Markdown";
 
 type PageProps = {
   markdown: string;

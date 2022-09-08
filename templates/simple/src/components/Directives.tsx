@@ -22,6 +22,7 @@ const config = getHyperbook();
 export type YouTubeVideoProps = {
   id: string;
   children: string;
+  key: string;
 };
 
 export const YouTubeVideo = ({ id, children }: YouTubeVideoProps) => (

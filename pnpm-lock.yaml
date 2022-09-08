@@ -127,7 +127,7 @@ importers:
       remark-gemoji: 7.0.1
       remark-gfm: 3.0.1
       remark-math: 5.1.1
-      remark-unwrap-images: 3.0.1
+      remark-unwrap-images: ^3.0.1
       typescript: 4.8.2
       zod: 3.19.0
     dependencies:
@@ -5926,7 +5926,7 @@ packages:
       "@types/unist": 2.0.6
       hastscript: 7.0.2
       property-information: 6.1.1
-      vfile: 5.3.2
+      vfile: 5.3.4
       vfile-location: 4.0.1
       web-namespaces: 2.0.1
     dev: false
@@ -10330,7 +10330,7 @@ packages:
       is-buffer: 2.0.5
       is-plain-obj: 4.0.0
       trough: 2.1.0
-      vfile: 5.3.2
+      vfile: 5.3.4
     dev: false
 
   /unified/9.2.2:
@@ -10642,7 +10642,7 @@ packages:
       }
     dependencies:
       "@types/unist": 2.0.6
-      vfile: 5.3.2
+      vfile: 5.3.4
     dev: false
 
   /vfile-message/2.0.4:

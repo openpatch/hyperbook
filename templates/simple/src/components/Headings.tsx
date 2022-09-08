@@ -1,10 +1,5 @@
-import { ReactNode } from "react";
+import { Components } from "react-markdown";
 import { useBookmark } from "../store";
-
-type HeadingResolverProps = {
-  level: number;
-  children: ReactNode[];
-};
 
 export const makeAnchor = (heading: string) => {
   // If we have a heading, make it lower case
@@ -19,10 +14,7 @@ export const makeAnchor = (heading: string) => {
   return anchor;
 };
 
-export const Headings: React.FC<HeadingResolverProps> = ({
-  level,
-  children,
-}) => {
+export const Headings: Components["h1"] = ({ level, children }) => {
   // Access actual (string) value of heading
   const heading = children[0];
 
