@@ -121,6 +121,7 @@ export function Layout({ toc, navigation, page, children }: LayoutProps) {
         >
           <div className="mobile-nav">
             <button
+              aria-label="Nav Toggle"
               className={isNavOpen ? "toggle change" : "toggle"}
               onClick={() => setIsNavOpen(!isNavOpen)}
             >

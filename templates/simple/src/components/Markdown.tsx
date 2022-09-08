@@ -57,7 +57,7 @@ const Code = ({ children, className }: CodeProps) => {
       <code ref={ref} className={className}>
         {children}
       </code>
-      <button className="copy" onClick={copyCode}>
+      <button className="copy" onClick={copyCode} aria-label="Copy Code">
         {copied ? <MdDone /> : <MdContentCopy />}
       </button>
     </Fragment>
