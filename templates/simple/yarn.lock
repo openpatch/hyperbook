@@ -304,6 +304,16 @@
     "@bitflow/provider" "0.5.0"
     "@bitflow/shell" "0.7.0"
 
+"@bitflow/do@0.6.1":
+  version "0.6.1"
+  resolved "https://registry.yarnpkg.com/@bitflow/do/-/do-0.6.1.tgz#624f38ead7f791c58daa7a1e488b52f18fe77866"
+  integrity sha512-jI86UuWmi9H4RkGR8DTQ4SHeI/T3LlJ26wjJImaQt2M+o4Z6J55lwfTUl7SVMHHMnryBHRVPq+7Tf/fkqjw6sw==
+  dependencies:
+    "@bitflow/core" "0.6.0"
+    "@bitflow/flow-engine" "0.5.0"
+    "@bitflow/provider" "0.5.0"
+    "@bitflow/shell" "0.7.1"
+
 "@bitflow/end-tries@0.5.1":
   version "0.5.1"
   resolved "https://registry.yarnpkg.com/@bitflow/end-tries/-/end-tries-0.5.1.tgz#05589d157ab4a7339089f2d3a7dca6bd25ea72d9"
