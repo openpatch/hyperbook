@@ -9,9 +9,9 @@ export default function Document() {
       <Head>
         <style>
           {`:root {
-            --color-brand: ${config?.colors?.brand || "#017460"};
+            --color-brand: ${config?.colors?.brand || "#007864"};
             --color-brand-dark: ${
-              config?.colors?.brandDark || config?.colors?.brand || "#CEFBF2"
+              config?.colors?.brandDark || config?.colors?.brand || "#b5e3d8"
             };
             --color-brand-text: ${config?.colors?.brandText || "white"};
           }`}

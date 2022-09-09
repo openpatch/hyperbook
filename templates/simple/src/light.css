@@ -1,10 +1,10 @@
 :root {
   --color-background: white;
   --color-text: black;
-  --color-text-deactivated: dimgrey;
-  --color-nav: whitesmoke;
-  --color-nav-border: grey;
-  --color-author-background: #e3e3e3;
-  --color-author-color: #606060;
-  --color-spacer: lightgrey;
+  --color-text-deactivated: #242428;
+  --color-nav: #f5f5f5;
+  --color-nav-border: #3c3c3c;
+  --color-author-background: #d6d6d6;
+  --color-author-color: #3c3c3c;
+  --color-spacer: #a4a4a4;
 }
