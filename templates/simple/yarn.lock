@@ -264,12 +264,12 @@
     "@babel/helper-validator-identifier" "^7.18.6"
     to-fast-properties "^2.0.0"
 
-"@bitflow/bits@0.2.0":
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/@bitflow/bits/-/bits-0.2.0.tgz#459dfe17f857a4bbea863f52f1c0aa4826dea20c"
-  integrity sha512-LWTtbj5sQvSWtxN7yqqcz2XDic694tlpnk2DrqEi6gKDwgeQsyxorUWxZlI5l9wVkXJI1MwvGQjo1YSQGKtPYQ==
+"@bitflow/bits@0.2.1":
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/@bitflow/bits/-/bits-0.2.1.tgz#c5322341b7d0e5da5de1a5ac1e7af26a2ce0b379"
+  integrity sha512-LfRhtGpyV25iryki8z1ftm3l06ufe3mC6DQCp9dS6C0ds2EObzjAm/Np2aSh5IvyrSmZpAcMwc+5v7SC1mHdrA==
   dependencies:
-    "@bitflow/end-tries" "0.5.0"
+    "@bitflow/end-tries" "0.5.1"
     "@bitflow/input-markdown" "0.5.0"
     "@bitflow/start-simple" "0.5.0"
     "@bitflow/task-choice" "0.5.0"
@@ -304,16 +304,16 @@
     "@bitflow/provider" "0.5.0"
     "@bitflow/shell" "0.7.0"
 
-"@bitflow/end-tries@0.5.0":
-  version "0.5.0"
-  resolved "https://registry.yarnpkg.com/@bitflow/end-tries/-/end-tries-0.5.0.tgz#0e140ccba6ddd9f25250528a2d4a77a3171ebdb8"
-  integrity sha512-1GOFj2JR5z3YqDR4pE4GyOKNv8B1JjrzKe6rK5GSEU41j7u9r2nP36EcDugVAimaLEo/gVG3RpbeurjFZBVI7Q==
+"@bitflow/end-tries@0.5.1":
+  version "0.5.1"
+  resolved "https://registry.yarnpkg.com/@bitflow/end-tries/-/end-tries-0.5.1.tgz#05589d157ab4a7339089f2d3a7dca6bd25ea72d9"
+  integrity sha512-aashXQORgri/PxhHBNjVxMmGhm4ZingTFxNcQsT6JIHa+xHUYUcGdXG6nITM/RH1l3kpwm/dC3HQ0IM1L7ri6g==
   dependencies:
     "@bitflow/core" "0.6.0"
     "@bitflow/icons" "0.5.0"
     "@bitflow/provider" "0.5.0"
-    "@bitflow/shell" "0.7.0"
-    zod "3.17.3"
+    "@bitflow/shell" "0.7.1"
+    zod "3.19.0"
 
 "@bitflow/flow-engine@0.5.0":
   version "0.5.0"
@@ -351,6 +351,14 @@
   dependencies:
     "@bitflow/core" "0.6.0"
     immer "^9.0.14"
+
+"@bitflow/shell@0.7.1":
+  version "0.7.1"
+  resolved "https://registry.yarnpkg.com/@bitflow/shell/-/shell-0.7.1.tgz#5d7c4b1b70149877826f9913f46af8a9557124b0"
+  integrity sha512-mhEwtqSLzsJv/Y2LwmY7qVuCZrwm3Dhy8tPLnN/DobpYrhWcsUXibcu2tlsqygtrN8qUK5Oqok4aCM1KZmwD3Q==
+  dependencies:
+    "@bitflow/core" "0.6.0"
+    immer "^9.0.15"
 
 "@bitflow/start-simple@0.5.0":
   version "0.5.0"
@@ -2511,6 +2519,11 @@ immer@^9.0.14:
   version "9.0.14"
   resolved "https://registry.yarnpkg.com/immer/-/immer-9.0.14.tgz#e05b83b63999d26382bb71676c9d827831248a48"
   integrity sha512-ubBeqQutOSLIFCUBN03jGeOS6a3DoYlSYwYJTa+gSKEZKU5redJIqkIdZ3JVv/4RZpfcXdAWH5zCNLWPRv2WDw==
+
+immer@^9.0.15:
+  version "9.0.15"
+  resolved "https://registry.yarnpkg.com/immer/-/immer-9.0.15.tgz#0b9169e5b1d22137aba7d43f8a81a495dd1b62dc"
+  integrity sha512-2eB/sswms9AEUSkOm4SbV5Y7Vmt/bKRwByd52jfLkW4OLYeaTP3EEiJ9agqU0O/tq6Dk62Zfj+TJSqfm1rLVGQ==
 
 immutable@^4.0.0:
   version "4.1.0"

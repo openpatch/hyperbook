@@ -87,7 +87,7 @@ importers:
   templates/simple:
     specifiers:
       '@babel/core': 7.19.0
-      '@bitflow/bits': 0.2.0
+      '@bitflow/bits': 0.2.1
       '@bitflow/core': 0.6.0
       '@bitflow/do': 0.6.0
       '@bitflow/do-local': 0.5.0
@@ -133,7 +133,7 @@ importers:
       zod: 3.19.0
     dependencies:
       '@babel/core': 7.19.0
-      '@bitflow/bits': 0.2.0_4i7h7wbw7clslami373bh3cu24
+      '@bitflow/bits': 0.2.1_4i7h7wbw7clslami373bh3cu24
       '@bitflow/core': 0.6.0_yhec7ekuwa2igeiuyf77sfbx4q
       '@bitflow/do': 0.6.0_g3fu6zsw767pmtwfmho5lomq64
       '@bitflow/do-local': 0.5.0_g3fu6zsw767pmtwfmho5lomq64
@@ -407,12 +407,12 @@ packages:
       to-fast-properties: 2.0.0
     dev: false
 
-  /@bitflow/bits/0.2.0_4i7h7wbw7clslami373bh3cu24:
-    resolution: {integrity: sha512-LWTtbj5sQvSWtxN7yqqcz2XDic694tlpnk2DrqEi6gKDwgeQsyxorUWxZlI5l9wVkXJI1MwvGQjo1YSQGKtPYQ==}
+  /@bitflow/bits/0.2.1_4i7h7wbw7clslami373bh3cu24:
+    resolution: {integrity: sha512-LfRhtGpyV25iryki8z1ftm3l06ufe3mC6DQCp9dS6C0ds2EObzjAm/Np2aSh5IvyrSmZpAcMwc+5v7SC1mHdrA==}
     peerDependencies:
       zod: 3.x
     dependencies:
-      '@bitflow/end-tries': 0.5.0_zwwlmqofvh6wwxr7qgpfn5htr4
+      '@bitflow/end-tries': 0.5.1_zwwlmqofvh6wwxr7qgpfn5htr4
       '@bitflow/input-markdown': 0.5.0_zwwlmqofvh6wwxr7qgpfn5htr4
       '@bitflow/start-simple': 0.5.0_zwwlmqofvh6wwxr7qgpfn5htr4
       '@bitflow/task-choice': 0.5.0_zwwlmqofvh6wwxr7qgpfn5htr4
@@ -536,8 +536,8 @@ packages:
       - zod
     dev: false
 
-  /@bitflow/end-tries/0.5.0_zwwlmqofvh6wwxr7qgpfn5htr4:
-    resolution: {integrity: sha512-1GOFj2JR5z3YqDR4pE4GyOKNv8B1JjrzKe6rK5GSEU41j7u9r2nP36EcDugVAimaLEo/gVG3RpbeurjFZBVI7Q==}
+  /@bitflow/end-tries/0.5.1_zwwlmqofvh6wwxr7qgpfn5htr4:
+    resolution: {integrity: sha512-aashXQORgri/PxhHBNjVxMmGhm4ZingTFxNcQsT6JIHa+xHUYUcGdXG6nITM/RH1l3kpwm/dC3HQ0IM1L7ri6g==}
     peerDependencies:
       '@emotion/cache': 11.x
       '@emotion/react': 11.x
@@ -553,7 +553,7 @@ packages:
       '@bitflow/core': 0.6.0_yhec7ekuwa2igeiuyf77sfbx4q
       '@bitflow/icons': 0.5.0_6qjclzugjwmzolqvyx4sh7pg3i
       '@bitflow/provider': 0.5.0_6qjclzugjwmzolqvyx4sh7pg3i
-      '@bitflow/shell': 0.7.0_qutcuc2va4of3vstyffgrgdazi
+      '@bitflow/shell': 0.7.1_qutcuc2va4of3vstyffgrgdazi
       '@emotion/cache': 11.10.3
       '@emotion/react': 11.10.4_p6fq7jdyqwnykllwwkx4b6uid4
       '@emotion/styled': 11.10.4_lxst47gwu5lqjtx2guwl7nfnjm
@@ -675,6 +675,32 @@ packages:
       '@vocab/core': 1.1.1
       '@vocab/react': 1.1.2_react@18.2.0
       immer: 9.0.14
+      react: 18.2.0
+      react-dom: 18.2.0_react@18.2.0
+    transitivePeerDependencies:
+      - zod
+    dev: false
+
+  /@bitflow/shell/0.7.1_qutcuc2va4of3vstyffgrgdazi:
+    resolution: {integrity: sha512-mhEwtqSLzsJv/Y2LwmY7qVuCZrwm3Dhy8tPLnN/DobpYrhWcsUXibcu2tlsqygtrN8qUK5Oqok4aCM1KZmwD3Q==}
+    peerDependencies:
+      '@emotion/cache': 11.x
+      '@emotion/react': 11.x
+      '@emotion/styled': 11.x
+      '@openpatch/patches': 6.x
+      '@vocab/core': 1.x
+      '@vocab/react': 1.x
+      react: 18.x
+      react-dom: 18.x
+    dependencies:
+      '@bitflow/core': 0.6.0_yhec7ekuwa2igeiuyf77sfbx4q
+      '@emotion/cache': 11.10.3
+      '@emotion/react': 11.10.4_p6fq7jdyqwnykllwwkx4b6uid4
+      '@emotion/styled': 11.10.4_lxst47gwu5lqjtx2guwl7nfnjm
+      '@openpatch/patches': 6.0.1_7i4eerbqu2bo224dbjxipsw3oi
+      '@vocab/core': 1.1.1
+      '@vocab/react': 1.1.2_react@18.2.0
+      immer: 9.0.15
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
     transitivePeerDependencies:
@@ -4502,6 +4528,10 @@ packages:
     resolution: {integrity: sha512-ubBeqQutOSLIFCUBN03jGeOS6a3DoYlSYwYJTa+gSKEZKU5redJIqkIdZ3JVv/4RZpfcXdAWH5zCNLWPRv2WDw==}
     dev: false
 
+  /immer/9.0.15:
+    resolution: {integrity: sha512-2eB/sswms9AEUSkOm4SbV5Y7Vmt/bKRwByd52jfLkW4OLYeaTP3EEiJ9agqU0O/tq6Dk62Zfj+TJSqfm1rLVGQ==}
+    dev: false
+
   /immutable/4.1.0:
     resolution: {integrity: sha512-oNkuqVTA8jqG1Q6c+UglTOD1xhC1BtjKI7XkCXRkZHrN5m18/XsnUp8Q89GkQO/z+0WjonSvl0FLhDYftp46nQ==}
     dev: false
@@ -5217,7 +5247,7 @@ packages:
       micromark-util-sanitize-uri: 1.0.0
       unist-builder: 3.0.0
       unist-util-generated: 2.0.0
-      unist-util-position: 4.0.1
+      unist-util-position: 4.0.3
       unist-util-visit: 4.1.0
     dev: false
 
@@ -6965,7 +6995,7 @@ packages:
     dev: true
 
   /shuffle-array/1.0.1:
-    resolution: {integrity: sha1-xP88/nTRb5NzBZIwGyXmV3sSiYs=}
+    resolution: {integrity: sha512-0TFRU8zVQaLatWKr0/czo19VyPNgb/a3sBc1GAjVfivfzEGaS54vueNgtAu/8/pW7EM/VF5fwq9zgpLdGyRmVw==}
     dev: false
 
   /side-channel/1.0.4:
@@ -7495,10 +7525,6 @@ packages:
 
   /unist-util-position/3.1.0:
     resolution: {integrity: sha512-w+PkwCbYSFw8vpgWD0v7zRCl1FpY3fjDSQ3/N/wNd9Ffa4gPi8+4keqt99N3XW6F99t/mUzp2xAhNmfKWp95QA==}
-    dev: false
-
-  /unist-util-position/4.0.1:
-    resolution: {integrity: sha512-mgy/zI9fQ2HlbOtTdr2w9lhVaiFUHWQnZrFF2EUoVOqtAUdzqMtNiD99qA5a1IcjWVR8O6aVYE9u7Z2z1v0SQA==}
     dev: false
 
   /unist-util-position/4.0.3:
