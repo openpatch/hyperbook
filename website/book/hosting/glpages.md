@@ -5,7 +5,7 @@ name: GitLab Pages
 # Deploy on GitLab Pages
 
 :::alert{warn}
-Remember to add a basePath to your [configuration](/configuration/book), when deploying to GitHub pages.
+Remember to add a basePath to your [configuration](/configuration/book), when deploying to GitLab pages.
 :::
 
 ```yml
