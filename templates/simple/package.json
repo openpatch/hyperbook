@@ -14,7 +14,7 @@
     "@bitflow/do": "0.6.1",
     "@bitflow/do-local": "0.5.1",
     "@bitflow/provider": "0.5.0",
-    "@bitflow/shell": "0.7.0",
+    "@bitflow/shell": "0.7.1",
     "@emotion/cache": "11.10.3",
     "@emotion/core": "11.0.0",
     "@emotion/react": "11.10.4",

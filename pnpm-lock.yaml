@@ -92,7 +92,7 @@ importers:
       '@bitflow/do': 0.6.1
       '@bitflow/do-local': 0.5.1
       '@bitflow/provider': 0.5.0
-      '@bitflow/shell': 0.7.0
+      '@bitflow/shell': 0.7.1
       '@emotion/cache': 11.10.3
       '@emotion/core': 11.0.0
       '@emotion/react': 11.10.4
@@ -138,7 +138,7 @@ importers:
       '@bitflow/do': 0.6.1_g3fu6zsw767pmtwfmho5lomq64
       '@bitflow/do-local': 0.5.1_g3fu6zsw767pmtwfmho5lomq64
       '@bitflow/provider': 0.5.0_6qjclzugjwmzolqvyx4sh7pg3i
-      '@bitflow/shell': 0.7.0_qutcuc2va4of3vstyffgrgdazi
+      '@bitflow/shell': 0.7.1_qutcuc2va4of3vstyffgrgdazi
       '@emotion/cache': 11.10.3
       '@emotion/core': 11.0.0
       '@emotion/react': 11.10.4_p6fq7jdyqwnykllwwkx4b6uid4
@@ -653,32 +653,6 @@ packages:
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
       zod: 3.17.3
-    dev: false
-
-  /@bitflow/shell/0.7.0_qutcuc2va4of3vstyffgrgdazi:
-    resolution: {integrity: sha512-54Xa+M/qGHA5vIEMl9tl4ONi8Yd4cos5I5cSoHxCKK+/mqtelt6WzFdsUmIzMkvCFXg1gS6dvEWJt1cxYu5dDg==}
-    peerDependencies:
-      '@emotion/cache': 11.x
-      '@emotion/react': 11.x
-      '@emotion/styled': 11.x
-      '@openpatch/patches': 6.x
-      '@vocab/core': 1.x
-      '@vocab/react': 1.x
-      react: 18.x
-      react-dom: 18.x
-    dependencies:
-      '@bitflow/core': 0.6.0_yhec7ekuwa2igeiuyf77sfbx4q
-      '@emotion/cache': 11.10.3
-      '@emotion/react': 11.10.4_p6fq7jdyqwnykllwwkx4b6uid4
-      '@emotion/styled': 11.10.4_lxst47gwu5lqjtx2guwl7nfnjm
-      '@openpatch/patches': 6.0.1_7i4eerbqu2bo224dbjxipsw3oi
-      '@vocab/core': 1.1.1
-      '@vocab/react': 1.1.2_react@18.2.0
-      immer: 9.0.14
-      react: 18.2.0
-      react-dom: 18.2.0_react@18.2.0
-    transitivePeerDependencies:
-      - zod
     dev: false
 
   /@bitflow/shell/0.7.1_qutcuc2va4of3vstyffgrgdazi:
@@ -4523,10 +4497,6 @@ packages:
     resolution: {integrity: sha512-CmxgYGiEPCLhfLnpPp1MoRmifwEIOgjcHXxOBjv7mY96c+eWScsOP9c112ZyLdWHi0FxHjI+4uVhKYp/gcdRmQ==}
     engines: {node: '>= 4'}
     dev: true
-
-  /immer/9.0.14:
-    resolution: {integrity: sha512-ubBeqQutOSLIFCUBN03jGeOS6a3DoYlSYwYJTa+gSKEZKU5redJIqkIdZ3JVv/4RZpfcXdAWH5zCNLWPRv2WDw==}
-    dev: false
 
   /immer/9.0.15:
     resolution: {integrity: sha512-2eB/sswms9AEUSkOm4SbV5Y7Vmt/bKRwByd52jfLkW4OLYeaTP3EEiJ9agqU0O/tq6Dk62Zfj+TJSqfm1rLVGQ==}

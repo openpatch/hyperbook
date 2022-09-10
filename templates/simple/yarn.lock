@@ -344,14 +344,6 @@
     lodash.get "^4.4.2"
     zod "3.17.3"
 
-"@bitflow/shell@0.7.0":
-  version "0.7.0"
-  resolved "https://registry.yarnpkg.com/@bitflow/shell/-/shell-0.7.0.tgz#d4e8b479530b74b18b54076899cb3567d8745482"
-  integrity sha512-54Xa+M/qGHA5vIEMl9tl4ONi8Yd4cos5I5cSoHxCKK+/mqtelt6WzFdsUmIzMkvCFXg1gS6dvEWJt1cxYu5dDg==
-  dependencies:
-    "@bitflow/core" "0.6.0"
-    immer "^9.0.14"
-
 "@bitflow/shell@0.7.1":
   version "0.7.1"
   resolved "https://registry.yarnpkg.com/@bitflow/shell/-/shell-0.7.1.tgz#5d7c4b1b70149877826f9913f46af8a9557124b0"
