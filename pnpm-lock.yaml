@@ -90,7 +90,7 @@ importers:
       '@bitflow/bits': 0.2.1
       '@bitflow/core': 0.6.0
       '@bitflow/do': 0.6.1
-      '@bitflow/do-local': 0.5.0
+      '@bitflow/do-local': 0.5.1
       '@bitflow/provider': 0.5.0
       '@bitflow/shell': 0.7.0
       '@emotion/cache': 11.10.3
@@ -136,7 +136,7 @@ importers:
       '@bitflow/bits': 0.2.1_4i7h7wbw7clslami373bh3cu24
       '@bitflow/core': 0.6.0_yhec7ekuwa2igeiuyf77sfbx4q
       '@bitflow/do': 0.6.1_g3fu6zsw767pmtwfmho5lomq64
-      '@bitflow/do-local': 0.5.0_g3fu6zsw767pmtwfmho5lomq64
+      '@bitflow/do-local': 0.5.1_g3fu6zsw767pmtwfmho5lomq64
       '@bitflow/provider': 0.5.0_6qjclzugjwmzolqvyx4sh7pg3i
       '@bitflow/shell': 0.7.0_qutcuc2va4of3vstyffgrgdazi
       '@emotion/cache': 11.10.3
@@ -476,8 +476,8 @@ packages:
       zod: 3.19.0
     dev: false
 
-  /@bitflow/do-local/0.5.0_g3fu6zsw767pmtwfmho5lomq64:
-    resolution: {integrity: sha512-Mfgt0x1f+nOtjCcTj5utLajfyaWXYw8Z76f7TUvMiWxHTNmOFDaXcFAGOdnedgYUdoH+xjgHdr7WEUWjUytdCg==}
+  /@bitflow/do-local/0.5.1_g3fu6zsw767pmtwfmho5lomq64:
+    resolution: {integrity: sha512-J1Ul3YrbnH4S2xnDTL1mns44dAtb2UlWpzCJtxrQOml4U6OW8BRbiXz0Ikx6cMN1N0/HQARoFyjR9Ymq4dJi2w==}
     peerDependencies:
       '@emotion/cache': 11.x
       '@emotion/react': 11.x
@@ -490,7 +490,7 @@ packages:
       zod: 3.x
     dependencies:
       '@bitflow/core': 0.6.0_yhec7ekuwa2igeiuyf77sfbx4q
-      '@bitflow/do': 0.6.0_g3fu6zsw767pmtwfmho5lomq64
+      '@bitflow/do': 0.6.1_g3fu6zsw767pmtwfmho5lomq64
       '@bitflow/flow-engine': 0.5.0_yhec7ekuwa2igeiuyf77sfbx4q
       '@bitflow/provider': 0.5.0_6qjclzugjwmzolqvyx4sh7pg3i
       '@emotion/cache': 11.10.3
@@ -504,36 +504,6 @@ packages:
       zod: 3.19.0
     transitivePeerDependencies:
       - '@vocab/types'
-    dev: false
-
-  /@bitflow/do/0.6.0_g3fu6zsw767pmtwfmho5lomq64:
-    resolution: {integrity: sha512-eDz8mY4TeanOSnhq7sEBfpnuxtGyMHXLRWIN66AjxvBR9v5B75vz30fUutaRHZv5vvI2IgkZN0mkC6noq+Kxeg==}
-    peerDependencies:
-      '@emotion/cache': 11.x
-      '@emotion/react': 11.x
-      '@emotion/styled': 11.x
-      '@openpatch/patches': 6.x
-      '@vocab/core': 1.x
-      '@vocab/react': 1.x
-      '@vocab/types': 1.x
-      react: 18.x
-      react-dom: 18.x
-    dependencies:
-      '@bitflow/core': 0.6.0_yhec7ekuwa2igeiuyf77sfbx4q
-      '@bitflow/flow-engine': 0.5.0_yhec7ekuwa2igeiuyf77sfbx4q
-      '@bitflow/provider': 0.5.0_6qjclzugjwmzolqvyx4sh7pg3i
-      '@bitflow/shell': 0.7.0_qutcuc2va4of3vstyffgrgdazi
-      '@emotion/cache': 11.10.3
-      '@emotion/react': 11.10.4_p6fq7jdyqwnykllwwkx4b6uid4
-      '@emotion/styled': 11.10.4_lxst47gwu5lqjtx2guwl7nfnjm
-      '@openpatch/patches': 6.0.1_7i4eerbqu2bo224dbjxipsw3oi
-      '@vocab/core': 1.1.1
-      '@vocab/react': 1.1.2_react@18.2.0
-      '@vocab/types': 1.1.0
-      react: 18.2.0
-      react-dom: 18.2.0_react@18.2.0
-    transitivePeerDependencies:
-      - zod
     dev: false
 
   /@bitflow/do/0.6.1_g3fu6zsw767pmtwfmho5lomq64:

@@ -284,25 +284,15 @@
   resolved "https://registry.yarnpkg.com/@bitflow/core/-/core-0.6.0.tgz#cf715cfe558b413a21af205dd75b3738eaae08f6"
   integrity sha512-3oYAGwfiUIj02AgkbsUXpv5ng+NaBbmchqG361If7M3U1Z44jDGbcMA0CTh5hYIiPnIhN4eUqwfgFJCJ897udg==
 
-"@bitflow/do-local@0.5.0":
-  version "0.5.0"
-  resolved "https://registry.yarnpkg.com/@bitflow/do-local/-/do-local-0.5.0.tgz#703bfeac59cdb6391c71578e21ca7d3942ee5789"
-  integrity sha512-Mfgt0x1f+nOtjCcTj5utLajfyaWXYw8Z76f7TUvMiWxHTNmOFDaXcFAGOdnedgYUdoH+xjgHdr7WEUWjUytdCg==
+"@bitflow/do-local@0.5.1":
+  version "0.5.1"
+  resolved "https://registry.yarnpkg.com/@bitflow/do-local/-/do-local-0.5.1.tgz#66e53ebf323dab24de80d2a10c226179f1c7626f"
+  integrity sha512-J1Ul3YrbnH4S2xnDTL1mns44dAtb2UlWpzCJtxrQOml4U6OW8BRbiXz0Ikx6cMN1N0/HQARoFyjR9Ymq4dJi2w==
   dependencies:
     "@bitflow/core" "0.6.0"
-    "@bitflow/do" "0.6.0"
+    "@bitflow/do" "0.6.1"
     "@bitflow/flow-engine" "0.5.0"
     "@bitflow/provider" "0.5.0"
-
-"@bitflow/do@0.6.0":
-  version "0.6.0"
-  resolved "https://registry.yarnpkg.com/@bitflow/do/-/do-0.6.0.tgz#51b5cdc620f95585e2c630508d715257c3293443"
-  integrity sha512-eDz8mY4TeanOSnhq7sEBfpnuxtGyMHXLRWIN66AjxvBR9v5B75vz30fUutaRHZv5vvI2IgkZN0mkC6noq+Kxeg==
-  dependencies:
-    "@bitflow/core" "0.6.0"
-    "@bitflow/flow-engine" "0.5.0"
-    "@bitflow/provider" "0.5.0"
-    "@bitflow/shell" "0.7.0"
 
 "@bitflow/do@0.6.1":
   version "0.6.1"
