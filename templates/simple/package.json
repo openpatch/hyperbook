@@ -51,7 +51,7 @@
     "@types/mermaid": "8.2.9",
     "@types/node": "18.7.6",
     "@types/object-hash": "2.2.1",
-    "@types/react": "18.0.18",
+    "@types/react": "18.0.19",
     "chalk": "5.0.1",
     "next-remote-watch": "1.0.0",
     "typescript": "4.8.3"
