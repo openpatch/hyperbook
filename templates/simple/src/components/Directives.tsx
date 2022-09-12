@@ -357,7 +357,7 @@ const renderMermaid = async (
   return html;
 };
 
-const Mermaid = ({ children }) => {
+export const Mermaid = ({ children }) => {
   const graphDefinition = getNodeText(children);
   const prefersColorScheme = usePrefersColorScheme();
   const [html, setHtml] = useState("");

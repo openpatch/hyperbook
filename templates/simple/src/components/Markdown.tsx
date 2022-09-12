@@ -7,7 +7,7 @@ import remarkGemoji from "remark-gemoji";
 import remarkUnwrapImages from "remark-unwrap-images";
 import rehypeKatex from "rehype-katex";
 import rehypeHighlight from "rehype-highlight";
-import directives from "../components/Directives";
+import directives, { Mermaid } from "../components/Directives";
 import { Headings } from "./Headings";
 import { Image } from "./Image";
 import Link from "next/link";
@@ -27,6 +27,10 @@ const MarkdownLink: Components["a"] = ({ href, title, children }) => {
 };
 
 const Code: Components["code"] = ({ children, className }) => {
+  if (className === "language-mermaid") {
+    return <Mermaid children={children} />;
+  }
+
   const ref = useRef<HTMLElement>();
   const [copied, setCopied] = useState(false);
   const copyCode = () => {
@@ -77,7 +81,10 @@ export const Markdown = (props: MarkdownProps) => {
         h6: Headings,
         img: Image,
       }}
-      rehypePlugins={[rehypeKatex, rehypeHighlight]}
+      rehypePlugins={[
+        rehypeKatex,
+        [rehypeHighlight, { ignoreMissing: true, plainText: ["mermaid"] }],
+      ]}
     />
   );
 };

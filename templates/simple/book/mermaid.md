@@ -32,7 +32,7 @@ classDiagram
 :::
 ```
 
-:::mermaid
+```mermaid
 classDiagram
 Animal <|-- Duck
 Animal <|-- Fish
@@ -54,4 +54,4 @@ class Zebra{
 +bool is_wild
 +run()
 }
-:::
+```
