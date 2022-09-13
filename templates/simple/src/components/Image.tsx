@@ -7,7 +7,7 @@ export const Image: Components["img"] = ({ src, title, alt }) => {
   const { basePath } = config;
 
   if (
-    process.env.NODE_ENV !== "production" &&
+    process.env.NODE_ENV === "production" &&
     basePath &&
     src.startsWith("/")
   ) {
