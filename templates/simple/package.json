@@ -24,7 +24,7 @@
     "@vocab/core": "1.1.1",
     "@vocab/react": "1.1.2",
     "@vocab/types": "1.1.0",
-    "classnames": "2.3.1",
+    "classnames": "2.3.2",
     "gray-matter": "4.0.3",
     "mermaid": "9.1.6",
     "next": "12.3.0",

@@ -107,7 +107,7 @@ importers:
       '@vocab/react': 1.1.2
       '@vocab/types': 1.1.0
       chalk: 5.0.1
-      classnames: 2.3.1
+      classnames: 2.3.2
       gray-matter: 4.0.3
       mermaid: 9.1.6
       next: 12.3.0
@@ -148,7 +148,7 @@ importers:
       '@vocab/core': 1.1.1
       '@vocab/react': 1.1.2_react@18.2.0
       '@vocab/types': 1.1.0
-      classnames: 2.3.1
+      classnames: 2.3.2
       gray-matter: 4.0.3
       mermaid: 9.1.6
       next: 12.3.0_vyk55zyolcaieh7zfm7nf7uva4
@@ -2664,8 +2664,8 @@ packages:
     resolution: {integrity: sha512-xmDt/QIAdeZ9+nfdPsaBCpMvHNLFiLdjj59qjqn+6iPe6YmHGQ35sBnQ8uslRBXFmXkiZQOJRjvQeoGppoTjjg==}
     dev: true
 
-  /classnames/2.3.1:
-    resolution: {integrity: sha512-OlQdbZ7gLfGarSqxesMesDa5uz7KFbID8Kpq/SxIoNGDqY8lSYs0D+hhtBXhcdB3rcbXArFr7vlHheLk1voeNA==}
+  /classnames/2.3.2:
+    resolution: {integrity: sha512-CSbhY4cFEJRe6/GQzIk5qXZ4Jeg5pcsP7b5peFSDpffpe1cqjASH/n9UTjBwOp6XpMSTwQ8Za2K5V02ueA7Tmw==}
     dev: false
 
   /clean-stack/4.1.0:
