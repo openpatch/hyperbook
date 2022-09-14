@@ -10,10 +10,10 @@ support modern standards and runs superfast.
 ## Documentation
 
 If you want to work on the documentation, run the
-development server.
+development server and edit the files in the website server.
 
 ```
-pnpm website:dev
+pnpm template:dev
 ```
 
 ## Maintainer

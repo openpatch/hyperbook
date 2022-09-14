@@ -1,18 +1,1 @@
-{
-  "name": "Hyperbook Simple",
-  "description": "A description",
-  "logo": "/logo.svg",
-  "repo": "https://github.com/openpatch/hyperbook/blob/main/templates/simple",
-  "language": "en",
-  "basePath": "/",
-  "colors": {
-    "brand": "pink",
-    "brandDark": "red",
-    "brandText": "white"
-  },
-  "license": "cc0",
-  "author": {
-    "name": "OpenPatch",
-    "url": "https://openpatch.org"
-  }
-}
+/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/hyperbook.json
