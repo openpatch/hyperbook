@@ -109,7 +109,7 @@ importers:
       chalk: 5.0.1
       classnames: 2.3.2
       gray-matter: 4.0.3
-      mermaid: 9.1.6
+      mermaid: 9.1.7
       next: 12.3.0
       next-remote-watch: 1.0.0
       object-hash: 3.0.0
@@ -150,7 +150,7 @@ importers:
       '@vocab/types': 1.1.0
       classnames: 2.3.2
       gray-matter: 4.0.3
-      mermaid: 9.1.6
+      mermaid: 9.1.7
       next: 12.3.0_vyk55zyolcaieh7zfm7nf7uva4
       object-hash: 3.0.0
       react: 18.2.0
@@ -3516,8 +3516,8 @@ packages:
       path-type: 4.0.0
     dev: true
 
-  /dompurify/2.3.10:
-    resolution: {integrity: sha512-o7Fg/AgC7p/XpKjf/+RC3Ok6k4St5F7Q6q6+Nnm3p2zGWioAY6dh0CbbuwOhH2UcSzKsdniE/YnE2/92JcsA+g==}
+  /dompurify/2.4.0:
+    resolution: {integrity: sha512-Be9tbQMZds4a3C6xTmz68NlMfeONA//4dOavl/1rNw50E+/QO0KVpbcU0PcaW0nsQxurXls9ZocqFxk8R2mWEA==}
     dev: false
 
   /dotenv/8.6.0:
@@ -5290,14 +5290,14 @@ packages:
     resolution: {integrity: sha512-8q7VEgMJW4J8tcfVPy8g09NcQwZdbwFEqhe/WZkoIzjn/3TGDwtOCYtXGxA3O8tPzpczCCDgv+P2P5y00ZJOOg==}
     engines: {node: '>= 8'}
 
-  /mermaid/9.1.6:
-    resolution: {integrity: sha512-oBuQk7s55wQgEgH/AK0GYY8U0kBqOIGK9QlJL+VYxh+1kZQtU9tNwoy0gWCfBJDaFIRdfpc/fm9PagaIXg6XFQ==}
+  /mermaid/9.1.7:
+    resolution: {integrity: sha512-MRVHXy5FLjnUQUG7YS3UN9jEN6FXCJbFCXVGJQjVIbiR6Vhw0j/6pLIjqsiah9xoHmQU6DEaKOvB3S1g/1nBPA==}
     dependencies:
       '@braintree/sanitize-url': 6.0.0
       d3: 7.6.1
       dagre: 0.8.5
       dagre-d3: 0.6.4
-      dompurify: 2.3.10
+      dompurify: 2.4.0
       graphlib: 2.1.8
       khroma: 2.0.0
       moment-mini: 2.24.0
