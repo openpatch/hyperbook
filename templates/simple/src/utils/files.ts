@@ -10,7 +10,7 @@ export const getAllFiles = function (
   files.forEach(function (file) {
     if (fs.statSync(dirPath + "/" + file).isDirectory()) {
       arrayOfFiles = getAllFiles(dirPath + "/" + file, arrayOfFiles);
-    } else {
+    } else if (file.endsWith(".md") || file.endsWith(".mdx")) {
       arrayOfFiles.push(path.join(dirPath, "/", file));
     }
   });
