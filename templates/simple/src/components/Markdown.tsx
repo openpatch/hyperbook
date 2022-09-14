@@ -56,6 +56,32 @@ const Code: Components["code"] = ({ children, className }) => {
   );
 };
 
+let tableHeaders = [];
+let tdIndex = 0;
+
+const Table: Components["table"] = ({ children, style }) => {
+  tableHeaders = [];
+  return <table style={style}>{children}</table>;
+};
+
+const Tr: Components["tr"] = ({ children, style }) => {
+  tdIndex = 0;
+  return <tr style={style}>{children}</tr>;
+};
+
+const Td: Components["td"] = ({ children, style }) => {
+  return (
+    <td data-label={tableHeaders[tdIndex++]} style={style}>
+      {children}
+    </td>
+  );
+};
+
+const Th: Components["th"] = ({ children, style }) => {
+  tableHeaders.push(children);
+  return <th style={style}>{children}</th>;
+};
+
 export const Markdown = (props: MarkdownProps) => {
   return (
     <ReactMarkdown
@@ -72,6 +98,10 @@ export const Markdown = (props: MarkdownProps) => {
       components={{
         ...directives,
         a: MarkdownLink,
+        td: Td,
+        th: Th,
+        table: Table,
+        tr: Tr,
         code: Code,
         h1: Headings,
         h2: Headings,
