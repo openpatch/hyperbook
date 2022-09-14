@@ -3,7 +3,7 @@ name: Getting Started
 index: 0
 ---
 
-## Hyperbook
+# Hyperbook
 
 Hyperbook is a quick and easy way to build interactive workbooks, that
 support modern standards and run superfast. It works by compiling
@@ -21,6 +21,20 @@ You do not need any coding experience. You only need to create and edit Markdown
 1. Modify or add new pages to your Hyperbook.
 1. Run `npx hyperbook build` to create static files.
 1. Upload the static files to your server.
+
+## Update
+
+Update to the latest release of Hyperbook CLI using the following command.
+
+```bash
+npm update hyperbook --global
+```
+
+The Hyperbook template can be updated by running the setup command:
+
+```bash
+hyperbook setup
+```
 
 ## Support
 

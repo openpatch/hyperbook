@@ -38,3 +38,7 @@ If you want to link your image you can use the normal link syntax:
 ```
 
 [![A description](/test.jpg "A caption")](/elements/hints)
+
+:::alert{info}
+If your hyperbook uses the [basePath](/configuration/book) property, the basePath will automatically be prepended.
+:::
