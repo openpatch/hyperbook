@@ -9,6 +9,7 @@ import {
   usePrefersColorScheme,
 } from "../utils/usePreferesColorScheme";
 import { useBookmarks, useCollapsible, useProtect, useTabs } from "../store";
+import { Struktog } from "./Struktog";
 
 const Flow = dynamic(() => import("./Bitflow").then((mod) => mod.Flow));
 const Task = dynamic(() => import("./Bitflow").then((mod) => mod.Task));
@@ -332,6 +333,10 @@ export const Mermaid = ({ children }) => {
   ) : null;
 };
 
+export const StruktogMD = ({ data }) => {
+  return <Struktog data={data} />;
+};
+
 export default {
   youtube: YouTubeVideo,
   term: Term,
@@ -340,6 +345,7 @@ export default {
   tab: Tab,
   tabs: Tabs,
   mermaid: Mermaid,
+  struktog: StruktogMD,
   collapsible: Collapsible,
   flow: FlowMD,
   task: TaskMD,
