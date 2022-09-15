@@ -10,7 +10,7 @@ support modern standards and runs superfast.
 ## Documentation
 
 If you want to work on the documentation, run the
-development server and edit the files in the website server.
+development server and edit the files in the website folder.
 
 ```
 pnpm install
