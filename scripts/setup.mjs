@@ -43,6 +43,11 @@ async function linkWebsiteToTemplate(template) {
     path.join(dir, website, "hyperbook.json"),
     path.join(dir, template, "hyperbook.json")
   );
+
+  await makeSymlink(
+    path.join(dir, template),
+    path.join(dir, website, ".hyperbook")
+  );
 }
 
 linkWebsiteToTemplate("templates/simple");

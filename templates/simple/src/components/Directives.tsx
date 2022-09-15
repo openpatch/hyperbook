@@ -3,7 +3,7 @@ import hash from "object-hash";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { useEffect, useLayoutEffect, useState } from "react";
-import { getHyperbook } from "../utils/hyperbook";
+import { getHyperbookUrl } from "../utils/hyperbook";
 import {
   ColorScheme,
   usePrefersColorScheme,
@@ -16,8 +16,6 @@ const Task = dynamic(() => import("./Bitflow").then((mod) => mod.Task));
 function basename(path: string) {
   return path.split("/").reverse()[0];
 }
-
-const config = getHyperbook();
 
 export type YouTubeVideoProps = {
   id: string;
@@ -149,19 +147,7 @@ export const FlowMD = ({ src, height = 400 }) => {
   }
 
   useEffect(() => {
-    const { basePath } = config;
-
-    if (
-      process.env.NODE_ENV !== "production" &&
-      basePath &&
-      src.startsWith("/")
-    ) {
-      if (basePath.endsWith("/")) {
-        src = basePath.slice(0, -1) + src;
-      } else {
-        src = basePath + src;
-      }
-    }
+    src = getHyperbookUrl(src);
 
     fetch(src)
       .then((r) => r.json())
@@ -195,19 +181,7 @@ export const TaskMD = ({ src, height = 400 }) => {
   }
 
   useEffect(() => {
-    const { basePath } = config;
-
-    if (
-      process.env.NODE_ENV !== "production" &&
-      basePath &&
-      src.startsWith("/")
-    ) {
-      if (basePath.endsWith("/")) {
-        src = basePath.slice(0, -1) + src;
-      } else {
-        src = basePath + src;
-      }
-    }
+    src = getHyperbookUrl(src);
 
     fetch(src)
       .then((r) => r.json())
@@ -256,19 +230,7 @@ const Protect = ({ children, node, password, description }) => {
 const Download = ({ children, src }) => {
   const [isOnline, setIsOnline] = useState(true);
 
-  const { basePath } = config;
-
-  if (
-    process.env.NODE_ENV === "production" &&
-    basePath &&
-    src.startsWith("/")
-  ) {
-    if (basePath.endsWith("/")) {
-      src = basePath.slice(0, -1) + src;
-    } else {
-      src = basePath + src;
-    }
-  }
+  src = getHyperbookUrl(src);
 
   useEffect(() => {
     let isCancelled = false;

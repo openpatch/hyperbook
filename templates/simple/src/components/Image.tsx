@@ -1,22 +1,8 @@
 import { Components } from "react-markdown";
-import { getHyperbook } from "../utils/hyperbook";
-
-const config = getHyperbook();
+import { getHyperbookUrl } from "../utils/hyperbook";
 
 export const Image: Components["img"] = ({ src, title, alt }) => {
-  const { basePath } = config;
-
-  if (
-    process.env.NODE_ENV === "production" &&
-    basePath &&
-    src.startsWith("/")
-  ) {
-    if (basePath.endsWith("/")) {
-      src = basePath.slice(0, -1) + src;
-    } else {
-      src = basePath + src;
-    }
-  }
+  src = getHyperbookUrl(src);
 
   return (
     <figure>

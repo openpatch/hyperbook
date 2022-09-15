@@ -5,6 +5,11 @@
     "name": "OpenPatch",
     "url": "https://openpatch.org"
   },
+  "fonts": {
+    "heading": "/fonts/Montserrat-VariableFont_wght.ttf",
+    "body": "/fonts/Montserrat-VariableFont_wght.ttf",
+    "code": "/fonts/FiraCode-Regular.woff2"
+  },
   "language": "en",
   "logo": "/logo.svg",
   "repo": "https://github.com/openpatch/hyperbook/edit/main/website"
