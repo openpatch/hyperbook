@@ -13,7 +13,9 @@ If you want to work on the documentation, run the
 development server and edit the files in the website server.
 
 ```
-pnpm template:dev
+pnpm install
+pnpm hyperbook:build
+pnpm website:dev
 ```
 
 ## Maintainer
