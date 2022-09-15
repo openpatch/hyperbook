@@ -1010,3 +1010,22 @@ nav.toc li.level-3 {
 nav.toc li.level-3 {
   padding-left: 24px;
 }
+
+.struktog {
+  margin-top: 8px;
+  margin-bottom: 8px;
+  overflow: hidden;
+}
+
+.struktog .error {
+  height: 50px;
+}
+
+.struktog canvas {
+  width: 100%;
+  border-radius: 8px;
+}
+
+.struktog .editor {
+  text-align: right;
+}

@@ -1,3 +1,7 @@
+:root {
+  --internal-color-error: #d26466;
+}
+
 html,
 body {
   background: var(--color-background);
@@ -276,6 +280,16 @@ ul.bookmarks li:last-of-type {
 
 .flow {
   background: white;
+}
+
+.error {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--internal-color-error);
+  color: white;
+  font-weight: bold;
+  border-radius: 8px;
 }
 
 @media screen and (max-width: 600px) {
