@@ -325,7 +325,7 @@ h3,
 h4,
 h5,
 h6 {
-  font-family: hyperbook-title, sans-serif;
+  font-family: hyperbook-heading, sans-serif;
   margin-top: 24px;
   margin-bottom: 16px;
   font-weight: 600;
