@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import { PatchesProvider } from "@openpatch/patches";
 import { BitflowProvider, useFlow } from "@bitflow/provider";
 import { Flow as IFlow, FlowTaskNode } from "@bitflow/core";
