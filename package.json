@@ -12,8 +12,7 @@
     "version-packages": "changeset version",
     "release": "changeset publish",
     "template:dev": "pnpm --filter hyperbook-simple-template dev",
-    "template:build": "pnpm --filter hyperbook-simple-template build",
-    "template:setup": "pnpm --filter hyperbook-simple-template setup"
+    "template:build": "pnpm --filter hyperbook-simple-template build"
   },
   "devDependencies": {
     "@changesets/changelog-github": "0.4.6",
