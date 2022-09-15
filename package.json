@@ -9,10 +9,11 @@
     "dev": "node scripts/watcher.mjs",
     "build": "pnpm -r build",
     "lint": "pnpm -r lint",
+    "hyperbook:build": "pnpm --filter hyperbook build",
     "version-packages": "changeset version",
     "release": "changeset publish",
-    "template:dev": "pnpm --filter hyperbook-simple-template dev",
-    "template:build": "pnpm --filter hyperbook-simple-template build"
+    "website:dev": "cd website && node ../packages/hyperbook/dist/index.js dev",
+    "website:build": "cd website && node ../packages/hyperbook/dist/index.js build"
   },
   "devDependencies": {
     "@changesets/changelog-github": "0.4.6",
