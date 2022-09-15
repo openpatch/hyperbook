@@ -6,7 +6,7 @@ name: Mermaid
 
 [Mermaid](https://mermaid-js.github.io/mermaid) lets you create diagrams and visualizations using text and code.
 
-````
+````mermaid-js
 ```mermaid
 classDiagram
     Animal <|-- Duck
@@ -38,7 +38,7 @@ which is more in line with the other elements of hyperbook. Both support the
 same features, therefore it comes down to your preferences and if you want
 cross-compatability with GitHub, GitLab and others.
 
-```
+```mermaid-js
 :::mermaid
 classDiagram
     Animal <|-- Duck

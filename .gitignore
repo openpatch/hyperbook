@@ -1,3 +1,9 @@
+templates/simple/glossary
+templates/simple/book
+templates/simple/hyperbook.json
+templates/simple/public
+templates/simple/archives
+
 activity
 .env
 storybook-static

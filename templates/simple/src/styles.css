@@ -1,6 +1,6 @@
 html,
 body {
-  font-family: sans-serif;
+  font-family: hyperbook-body, sans-serif;
   overflow-x: hidden;
 }
 
@@ -43,6 +43,7 @@ a.heading:hover::before {
 }
 
 code {
+  font-family: hyperbook-code, monospace;
   font-size: 85%;
   padding: 0.2em 0.4em;
   border-radius: 6px;
@@ -324,6 +325,7 @@ h3,
 h4,
 h5,
 h6 {
+  font-family: hyperbook-title, sans-serif;
   margin-top: 24px;
   margin-bottom: 16px;
   font-weight: 600;

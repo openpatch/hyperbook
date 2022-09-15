@@ -9,6 +9,12 @@ export type Hyperbook = {
   language?: string;
   basePath?: string;
   license?: string;
+  font?: string;
+  fonts?: {
+    heading?: string;
+    body?: string;
+    code?: string;
+  };
   colors?: {
     brand?: string;
     brandDark?: string;
@@ -19,6 +25,22 @@ export type Hyperbook = {
     name: string;
     url?: string;
   };
+};
+
+export const getHyperbookUrl = (src: string): string => {
+  const { basePath } = getHyperbook();
+  if (
+    process.env.NODE_ENV === "production" &&
+    basePath &&
+    src.startsWith("/")
+  ) {
+    if (basePath.endsWith("/")) {
+      src = basePath.slice(0, -1) + src;
+    } else {
+      src = basePath + src;
+    }
+  }
+  return src;
 };
 
 export const getHyperbook = () => {
