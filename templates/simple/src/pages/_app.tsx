@@ -5,6 +5,7 @@ import "../light.css";
 import "../dark.css";
 import "../github.css";
 import "../github-dark.css";
+import "../struktog.css";
 import "katex/dist/katex.min.css";
 import { useStore } from "../store";
 import { persistStore } from "redux-persist";
