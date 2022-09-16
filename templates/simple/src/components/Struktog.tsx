@@ -1,348 +1,575 @@
-import { FC, useEffect, useRef, useState } from "react";
+import { FC, Fragment } from "react";
 import { deserializeState } from "../utils/serge";
 
-function renderTreeAsCanvas(
-  subTree: any,
-  ctx: CanvasRenderingContext2D,
-  x: number,
-  xmax: number,
-  y: number
-) {
-  const printHeight = 32;
-  // uses a recursive structure, termination condition is no definied element to be drawn
-  if (subTree === null) {
-    return y;
+type InsertNode = {
+  id: string;
+  type: "InsertNode";
+  followElement: Node;
+};
+
+type Placeholder = {
+  type: "Placeholder";
+};
+
+type InsertCase = {
+  id: string;
+  text: string;
+  type: "InsertCase";
+  followElement: Node;
+};
+
+type InputNode = {
+  id: string;
+  text: string;
+  type: "InputNode";
+  followElement: Node;
+};
+
+type OutputNode = {
+  id: string;
+  text: string;
+  type: "OutputNode";
+  followElement: Node;
+};
+
+type BranchNode = {
+  id: string;
+  text: string;
+  type: "BranchNode";
+  followElement: Node;
+  trueChild: Node;
+  falseChild: Node;
+};
+
+type TaskNode = {
+  id: string;
+  text: string;
+  type: "TaskNode";
+  followElement: Node;
+};
+
+type TryCatchNode = {
+  id: string;
+  text: string;
+  type: "TryCatchNode";
+  tryChild: Node;
+  catchChild: Node;
+  followElement: Node;
+};
+
+type HeadLoopNode = {
+  id: string;
+  type: "HeadLoopNode";
+  text: string;
+  child: Node;
+  followElement: Node;
+};
+
+type CountLoopNode = {
+  id: string;
+  type: "CountLoopNode";
+  text: string;
+  child: Node;
+  followElement: Node;
+};
+
+type FunctionNode = {
+  id: string;
+  type: "FunctionNode";
+  text: string;
+  parameters: { pos: number; parName: string }[];
+  child: Node;
+  followElement: Node;
+};
+
+type FootLoopNode = {
+  id: string;
+  type: "FootLoopNode";
+  text: string;
+  child: Node;
+  followElement: Node;
+};
+
+type CaseNode = {
+  id: string;
+  type: "CaseNode";
+  text: string;
+  cases: Node[];
+  defaultOn?: boolean;
+  defaultNode: Node;
+  followElement: Node;
+};
+
+type Node =
+  | InsertNode
+  | Placeholder
+  | InsertCase
+  | InputNode
+  | OutputNode
+  | TaskNode
+  | BranchNode
+  | TryCatchNode
+  | HeadLoopNode
+  | CountLoopNode
+  | FunctionNode
+  | FootLoopNode
+  | CaseNode;
+
+const config: Record<Node["type"], { color: string }> = {
+  InsertNode: {
+    color: "rgb(255,255,243)",
+  },
+  Placeholder: {
+    color: "rgb(255,255,243)",
+  },
+  InsertCase: {
+    color: "rgb(250, 218, 209)",
+  },
+  InputNode: {
+    color: "rgb(253, 237, 206)",
+  },
+  OutputNode: {
+    color: "rgb(253, 237, 206)",
+  },
+  TaskNode: {
+    color: "rgb(253, 237, 206)",
+  },
+  CountLoopNode: {
+    color: "rgb(220, 239, 231)",
+  },
+  HeadLoopNode: {
+    color: "rgb(220, 239, 231)",
+  },
+  FootLoopNode: {
+    color: "rgb(220, 239, 231)",
+  },
+  BranchNode: {
+    color: "rgb(250, 218, 209)",
+  },
+  CaseNode: {
+    color: "rgb(250, 218, 209)",
+  },
+  FunctionNode: {
+    color: "rgb(255, 255, 255)",
+  },
+  TryCatchNode: {
+    color: "rgb(250, 218, 209)",
+  },
+};
+
+const InsertNode: FC<InsertNode> = ({ followElement }) => {
+  return followElement && <Node {...followElement} />;
+};
+
+const Placeholder: FC<Placeholder> = () => {
+  return (
+    <div
+      className="vcontainer columnAuto frameTopLeft"
+      style={{ backgroundColor: config.Placeholder.color }}
+    >
+      <div className="container fixedHeight">
+        <div className="placeholder symbolHeight symbol"></div>
+      </div>
+    </div>
+  );
+};
+
+const InsertCase: FC<InsertCase> = ({ text, followElement }) => {
+  return (
+    <Fragment>
+      <div
+        className="vcontainer fixedHeight frameLeft"
+        style={{ backgroundColor: config.InsertCase.color }}
+      >
+        <div className="fixedHeight container">
+          <div className="columnAuto symbol text-center">
+            <div className="padding fullHeight">
+              <span>{text}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      {followElement && <Node {...followElement} />}
+    </Fragment>
+  );
+};
+
+const InputNode: FC<InputNode> = ({ text, followElement }) => {
+  return (
+    <Fragment>
+      <div
+        className="vcontainer columnAuto frameTopLeft"
+        style={{ backgroundColor: config.InputNode.color }}
+      >
+        <div className="fixedHeight container">
+          <div className="columnAuto symbol">
+            <div className="padding fullHeight">
+              <span>E: {text}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      {followElement && <Node {...followElement} />}
+    </Fragment>
+  );
+};
+
+const OutputNode: FC<OutputNode> = ({ text, followElement }) => {
+  return (
+    <Fragment>
+      <div
+        className="vcontainer columnAuto frameTopLeft"
+        style={{ backgroundColor: config.OutputNode.color }}
+      >
+        <div className="fixedHeight container">
+          <div className="columnAuto symbol">
+            <div className="padding fullHeight">
+              <span>A: {text}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      {followElement && <Node {...followElement} />}
+    </Fragment>
+  );
+};
+
+const TaskNode: FC<TaskNode> = ({ followElement, text }) => {
+  return (
+    <Fragment>
+      <div
+        className="vcontainer columnAuto frameTopLeft"
+        style={{ backgroundColor: config.TaskNode.color }}
+      >
+        <div className="fixedHeight container">
+          <div className="columnAuto symbol">
+            <div className="padding fullHeight">
+              <span>{text}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      {followElement && <Node {...followElement} />}
+    </Fragment>
+  );
+};
+
+const BranchNode: FC<BranchNode> = ({
+  text,
+  followElement,
+  falseChild,
+  trueChild,
+}) => {
+  return (
+    <Fragment>
+      <div
+        className="vcontainer columnAuto frameTopLeft"
+        style={{ backgroundColor: config.BranchNode.color }}
+      >
+        <div className="columnAuto vcontainer">
+          <div className="branchSplit vcontainer fixedDoubleHeight">
+            <div className="fixedHeight container">
+              <div className="columnAuto symbol text-center">
+                <div className="padding fullHeight">
+                  <span>{text}</span>
+                </div>
+              </div>
+            </div>
+            <div className="fixedHeight container padding">
+              <div className="columnAuto text-left bottomHeader">Wahr</div>
+              <div className="columnAuto text-right bottomHeader">Falsch</div>
+            </div>
+          </div>
+          <div className="columnAuto branchCenter container">
+            <div className="columnAuto vcontainer ov-hidden">
+              {trueChild && <Node {...trueChild} />}
+            </div>
+            <div className="columnAuto vcontainer ov-hidden">
+              {falseChild && <Node {...falseChild} />}
+            </div>
+          </div>
+        </div>
+      </div>
+      {followElement && <Node {...followElement} />}
+    </Fragment>
+  );
+};
+
+const TryCatchNode: FC<TryCatchNode> = ({
+  tryChild,
+  catchChild,
+  followElement,
+  text,
+}) => {
+  return (
+    <Fragment>
+      <div
+        className="vcontainer columnAuto frameTopLeft"
+        style={{ backgroundColor: config.TryCatchNode.color }}
+      >
+        <div className="columnAuto vcontainer tryCatchNode">
+          <div className="container fixedHeight padding">
+            <div className="symbol">Try</div>
+          </div>
+          <div className="columnAuto container loopShift">
+            <div className="loopWidth vcontainer">
+              {tryChild && <Node {...tryChild} />}
+            </div>
+          </div>
+          <div className="columnAuto container loopShift">
+            <div className="loopWidth vcontainer">
+              <div
+                className="frameLeftBottom"
+                style={{
+                  flex: "0 0 3px",
+                }}
+              ></div>
+            </div>
+          </div>
+        </div>
+        <div className="container fixedHeight padding tryCatchNode">
+          <div className="symbol">Catch</div>
+          <div className="columnAuto symbol">
+            <div className="padding fullHeight">
+              <span>{text}</span>
+            </div>
+          </div>
+        </div>
+        <div className="columnAuto container loopShift">
+          <div className="loopWidth vcontainer">
+            {catchChild && <Node {...catchChild} />}
+          </div>
+        </div>
+      </div>
+      {followElement && <Node {...followElement} />}
+    </Fragment>
+  );
+};
+
+const HeadLoopNode: FC<HeadLoopNode> = ({ followElement, text, child }) => {
+  return (
+    <div
+      className="vcontainer columnAuto frameTopLeft"
+      style={{ backgroundColor: config.CountLoopNode.color }}
+    >
+      <div className="columnAuto vcontainer">
+        <div className="container fixedHeight">
+          <div className="columnAuto symbol">
+            <div className="padding fullHeight">
+              <span>{text}</span>
+            </div>
+          </div>
+        </div>
+        <div className="columnAuto container loopShift">
+          <div className="loopWidth frameLeft vcontainer">
+            {child && <Node {...child} />}
+          </div>
+        </div>
+        {followElement && <Node {...followElement} />}
+      </div>
+    </div>
+  );
+};
+
+const CountLoopNode: FC<CountLoopNode> = ({ followElement, text, child }) => {
+  return (
+    <div
+      className="vcontainer columnAuto frameTopLeft"
+      style={{ backgroundColor: config.CountLoopNode.color }}
+    >
+      <div className="columnAuto vcontainer">
+        <div className="container fixedHeight">
+          <div className="columnAuto symbol">
+            <div className="padding fullHeight">
+              <span>{text}</span>
+            </div>
+          </div>
+        </div>
+        <div className="columnAuto container loopShift">
+          <div className="loopWidth frameLeft vcontainer">
+            {child && <Node {...child} />}
+          </div>
+        </div>
+        {followElement && <Node {...followElement} />}
+      </div>
+    </div>
+  );
+};
+
+const FunctionNode: FC<FunctionNode> = ({
+  followElement,
+  child,
+  text,
+  parameters,
+}) => {
+  return (
+    <Fragment>
+      <div
+        className="vcontainer columnAuto frameTopLeft"
+        style={{ backgroundColor: config.FunctionNode.color }}
+      >
+        <div className="columnAuto vcontainer">
+          <div
+            className="fixedHeight func-box-header padding"
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              paddingTop: "6.5px",
+            }}
+          >
+            function
+            <div style={{ marginRight: "2ch" }}></div>
+            <div className="function-elem">
+              <div className="func-header-text-div">
+                {text} ({parameters.map((p) => p.parName).join(", ")}) {`{`}
+              </div>
+            </div>
+          </div>
+          <div className="columnAuto container loopShift">
+            <div className="loopWidth vcontainer">
+              {child && <Node {...child} />}
+            </div>
+          </div>
+          <div className="columnAuto container loopShift">
+            <div className="loopWidth vcontainer">
+              <div
+                className="frameLeftBottom"
+                style={{ flex: "0 0 3px" }}
+              ></div>
+            </div>
+          </div>
+          <div className="container fixedHeight padding">
+            <div className="symbol">{`}`}</div>
+          </div>
+        </div>
+      </div>
+      {followElement && <Node {...followElement} />}
+    </Fragment>
+  );
+};
+
+const FootLoopNode: FC<FootLoopNode> = ({ child, followElement, text }) => {
+  return (
+    <Fragment>
+      <div
+        className="vcontainer columnAuto frameTopLeft"
+        style={{ backgroundColor: config.FootLoopNode.color }}
+      >
+        <div className="columnAuto vcontainer">
+          <div className="columnAuto container loopShift">
+            <div className="loopWidth frameLeftBottom vcontainer">
+              {child && <Node {...child} />}
+              <div className="borderHeight" />
+            </div>
+          </div>
+          <div className="container fixedHeight">
+            <div className="columnAuto symbol">
+              <div className="padding fullHeight">
+                <span>{text}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {followElement && <Node {...followElement} />}
+    </Fragment>
+  );
+};
+
+const CaseNode: FC<CaseNode> = ({
+  defaultOn,
+  cases,
+  text,
+  defaultNode,
+  followElement,
+}) => {
+  const headClassNames = ["vcontainer", "fixedHeight"];
+  const bodyClassNames = ["columnAuto", "container"];
+
+  let nrCases = cases.length;
+  if (defaultOn) {
+    headClassNames.push(`caseHead-${nrCases}`);
+    bodyClassNames.push(`caseBody-${nrCases}`);
   } else {
-    const defaultMargin = 22;
-    // use for every possible element type a different drawing strategie
-    switch (subTree.type) {
-      case "InsertNode":
-        return renderTreeAsCanvas(subTree.followElement, ctx, x, xmax, y);
-
-      case "Placeholder": {
-        ctx.beginPath();
-        ctx.moveTo(x, y);
-        ctx.lineTo(xmax, y);
-        ctx.moveTo(x, y);
-        ctx.lineTo(x, y + printHeight);
-        ctx.moveTo(xmax, y);
-        ctx.lineTo(xmax, y + printHeight);
-        ctx.stroke();
-
-        ctx.fillStyle = "#fffff3";
-        ctx.rect(x, y, xmax, printHeight);
-        ctx.fill();
-
-        ctx.beginPath();
-        const centerX = x + (xmax - x) / 2;
-        const centerY = y + printHeight / 2;
-        ctx.arc(centerX, centerY, 8, 0, 2 * Math.PI);
-        ctx.moveTo(centerX - 11, centerY + 11);
-        ctx.lineTo(centerX + 11, centerY - 11);
-        ctx.stroke();
-        return y + printHeight;
-      }
-
-      case "InputNode": {
-        ctx.beginPath();
-        ctx.moveTo(x, y);
-        ctx.lineTo(xmax, y);
-        ctx.moveTo(x, y);
-        ctx.lineTo(x, y + printHeight);
-        ctx.moveTo(xmax, y);
-        ctx.lineTo(xmax, y + printHeight);
-        ctx.stroke();
-
-        ctx.fillStyle = "#fcedce";
-        ctx.rect(x, y, xmax, printHeight);
-        ctx.fill();
-
-        ctx.fillStyle = "black";
-        ctx.beginPath();
-        ctx.fillText("E: " + subTree.text, x + 15, y + defaultMargin);
-        ctx.stroke();
-        return renderTreeAsCanvas(
-          subTree.followElement,
-          ctx,
-          x,
-          xmax,
-          y + printHeight
-        );
-      }
-
-      case "OutputNode": {
-        ctx.beginPath();
-        ctx.moveTo(x, y);
-        ctx.lineTo(xmax, y);
-        ctx.moveTo(x, y);
-        ctx.lineTo(x, y + printHeight);
-        ctx.moveTo(xmax, y);
-        ctx.lineTo(xmax, y + printHeight);
-        ctx.stroke();
-
-        ctx.fillStyle = "#fcedce";
-        ctx.rect(x, y, xmax, printHeight);
-        ctx.fill();
-
-        ctx.fillStyle = "black";
-        ctx.beginPath();
-        ctx.fillText("A: " + subTree.text, x + 15, y + defaultMargin);
-        ctx.stroke();
-        return renderTreeAsCanvas(
-          subTree.followElement,
-          ctx,
-          x,
-          xmax,
-          y + printHeight
-        );
-      }
-
-      case "TaskNode": {
-        ctx.beginPath();
-        ctx.moveTo(x, y);
-        ctx.lineTo(xmax, y);
-        ctx.moveTo(x, y);
-        ctx.lineTo(x, y + printHeight);
-        ctx.moveTo(xmax, y);
-        ctx.lineTo(xmax, y + printHeight);
-        ctx.stroke();
-
-        ctx.fillStyle = "#fcedce";
-        ctx.rect(x, y, xmax, printHeight);
-        ctx.fill();
-
-        ctx.fillStyle = "black";
-        ctx.beginPath();
-        ctx.fillText(subTree.text, x + 15, y + defaultMargin);
-        ctx.stroke();
-        return renderTreeAsCanvas(
-          subTree.followElement,
-          ctx,
-          x,
-          xmax,
-          y + printHeight
-        );
-      }
-
-      case "BranchNode": {
-        ctx.fillStyle = "rgb(250, 218, 209)";
-        ctx.beginPath(); // to end open paths
-        ctx.rect(x, y, xmax - x, 2 * printHeight);
-        ctx.fill();
-        ctx.fillStyle = "black";
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(x, y);
-        ctx.lineTo(x + (xmax - x) / 2, y + 2 * printHeight);
-        ctx.moveTo(xmax, y);
-        ctx.lineTo(x + (xmax - x) / 2, y + 2 * printHeight);
-        ctx.stroke();
-        // center the text
-        const textWidth = ctx.measureText(subTree.text);
-        ctx.beginPath();
-        ctx.fillText(
-          subTree.text,
-          x + Math.abs(xmax - x - textWidth.width) / 2,
-          y + defaultMargin
-        );
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.fillText("Wahr", x + 15, y + printHeight + defaultMargin);
-        ctx.fillText(
-          "Falsch",
-          xmax - 15 - ctx.measureText("Falsch").width,
-          y + printHeight + defaultMargin
-        );
-        ctx.stroke();
-        let trueChildY = renderTreeAsCanvas(
-          subTree.trueChild,
-          ctx,
-          x,
-          x + (xmax - x) / 2,
-          y + 2 * printHeight
-        );
-        const falseChildY = renderTreeAsCanvas(
-          subTree.falseChild,
-          ctx,
-          x + (xmax - x) / 2,
-          xmax,
-          y + 2 * printHeight
-        );
-
-        // determine which child sub tree is deeper y wise
-        if (trueChildY < falseChildY) {
-          trueChildY = falseChildY;
-        }
-        ctx.rect(x, y, xmax - x, trueChildY - y);
-        ctx.stroke();
-        return renderTreeAsCanvas(
-          subTree.followElement,
-          ctx,
-          x,
-          xmax,
-          trueChildY
-        );
-      }
-
-      case "CountLoopNode":
-      case "HeadLoopNode": {
-        const childY = renderTreeAsCanvas(
-          subTree.child,
-          ctx,
-          x + (xmax - x) / 12,
-          xmax,
-          y + printHeight
-        );
-        ctx.rect(x, y, xmax - x, childY - y);
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.fillStyle = "rgb(220, 239, 231)";
-        ctx.rect(x, y, xmax, printHeight - 1);
-        ctx.rect(x, y, (xmax - x) / 12 - 1, childY - y + printHeight);
-        ctx.fill();
-
-        ctx.fillStyle = "black";
-        ctx.beginPath();
-        ctx.fillText(subTree.text, x + 15, y + defaultMargin);
-        ctx.stroke();
-        return renderTreeAsCanvas(subTree.followElement, ctx, x, xmax, childY);
-      }
-
-      case "FootLoopNode": {
-        const childY = renderTreeAsCanvas(
-          subTree.child,
-          ctx,
-          x + (xmax - x) / 12,
-          xmax,
-          y
-        );
-        ctx.rect(x, y, xmax - x, childY - y + printHeight);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.fillStyle = "rgb(220, 239, 231)";
-        ctx.rect(x, y, (xmax - x) / 12, childY - y + printHeight);
-        ctx.rect(x, childY, xmax, printHeight);
-        ctx.fill();
-
-        ctx.fillStyle = "black";
-        ctx.beginPath();
-        ctx.fillText(subTree.text, x + 15, childY + defaultMargin);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(x + (xmax - x) / 12, childY);
-        ctx.lineTo(xmax, childY);
-        ctx.stroke();
-        return renderTreeAsCanvas(
-          subTree.followElement,
-          ctx,
-          x,
-          xmax,
-          childY + printHeight
-        );
-      }
-
-      case "CaseNode": {
-        ctx.fillStyle = "rgb(250, 218, 209)";
-        ctx.beginPath();
-        ctx.rect(x, y, xmax - x, 2 * printHeight);
-        ctx.fill();
-        ctx.fillStyle = "black";
-        let caseCount = subTree.cases.length;
-        if (subTree.defaultOn) {
-          caseCount = caseCount + 1;
-        }
-        // calculate the x and y distance between each case
-        // yStep ist used for the positioning of the vertical lines on the diagonal line
-        const xStep = (xmax - x) / caseCount;
-        const yStep = printHeight / subTree.cases.length;
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(x, y);
-        if (subTree.defaultOn) {
-          ctx.lineTo(xmax - xStep, y + printHeight);
-          ctx.lineTo(xmax, y);
-          ctx.moveTo(xmax - xStep, y + printHeight);
-          ctx.lineTo(xmax - xStep, y + 2 * printHeight);
-        } else {
-          ctx.lineTo(xmax, y + printHeight);
-        }
-        ctx.stroke();
-        const textWidth = ctx.measureText(subTree.text);
-        ctx.beginPath();
-        ctx.fillText(
-          subTree.text,
-          xmax - xStep - textWidth.width / 2,
-          y + defaultMargin
-        );
-        ctx.stroke();
-        let xPos = x;
-        // determine the deepest tree by the y coordinate
-        let yFinally = y + 3 * printHeight;
-        for (const element of subTree.cases) {
-          const childY = renderTreeAsCanvas(
-            element,
-            ctx,
-            xPos,
-            xPos + xStep,
-            y + printHeight
-          );
-          if (childY > yFinally) {
-            yFinally = childY;
-          }
-          xPos = xPos + xStep;
-        }
-        if (subTree.defaultOn) {
-          const childY = renderTreeAsCanvas(
-            subTree.defaultNode,
-            ctx,
-            xPos,
-            xmax,
-            y + printHeight
-          );
-          if (childY > yFinally) {
-            yFinally = childY;
-          }
-        }
-        // draw the vertical lines
-        for (let i = 1; i <= subTree.cases.length; i++) {
-          ctx.beginPath();
-          ctx.moveTo(x + i * xStep, y + i * yStep);
-          ctx.lineTo(x + i * xStep, yFinally);
-          ctx.stroke();
-        }
-        return renderTreeAsCanvas(
-          subTree.followElement,
-          ctx,
-          x,
-          xmax,
-          yFinally
-        );
-      }
-
-      case "InsertCase": {
-        const textWidth = ctx.measureText(subTree.text);
-        ctx.beginPath();
-        ctx.fillText(
-          subTree.text,
-          x + Math.abs(xmax - x - textWidth.width) / 2,
-          y + defaultMargin
-        );
-        ctx.stroke();
-        return renderTreeAsCanvas(
-          subTree.followElement,
-          ctx,
-          x,
-          xmax,
-          y + printHeight
-        );
-      }
-    }
+    headClassNames.push(`caseHead-noDefault-${nrCases}`);
+    bodyClassNames.push(`caseBody-${nrCases - 1}`);
+    nrCases = nrCases + 2;
   }
-}
+  return (
+    <Fragment>
+      <div
+        className="vcontainer columnAuto frameTopLeft"
+        style={{ backgroundColor: config.CaseNode.color }}
+      >
+        <div className="columnAuto vcontainer">
+          <div
+            className={headClassNames.join(" ")}
+            style={{ backgroundPosition: "1px 0px" }}
+          >
+            <div className="columnAuto symbol">
+              <div className="padding fullHeight">
+                <span
+                  style={{
+                    marginLeft: `calc(${
+                      (nrCases / (nrCases + 1)) * 100
+                    }% - 2em)`,
+                  }}
+                >
+                  {text}
+                </span>
+              </div>
+            </div>
+          </div>
+          <div className={bodyClassNames.join(" ")}>
+            {cases.map((c, i) => (
+              <div key={i} className="columnAuto vcontainer ov-hidden">
+                <Node {...c} />
+              </div>
+            ))}
+            <div className="columnAuto vcontainer ov-hidden">
+              <Node {...defaultNode} />
+            </div>
+          </div>
+        </div>
+      </div>
+      {followElement && <Node {...followElement} />}
+    </Fragment>
+  );
+};
+
+const Node: FC<Node> = (props) => {
+  switch (props.type) {
+    case "FootLoopNode":
+      return <FootLoopNode {...props} />;
+    case "HeadLoopNode":
+      return <HeadLoopNode {...props} />;
+    case "InputNode":
+      return <InputNode {...props} />;
+    case "InsertCase":
+      return <InsertCase {...props} />;
+    case "CaseNode":
+      return <CaseNode {...props} />;
+    case "FunctionNode":
+      return <FunctionNode {...props} />;
+    case "CountLoopNode":
+      return <CountLoopNode {...props} />;
+    case "TryCatchNode":
+      return <TryCatchNode {...props} />;
+    case "BranchNode":
+      return <BranchNode {...props} />;
+    case "TaskNode":
+      return <TaskNode {...props} />;
+    case "Placeholder":
+      return <Placeholder {...props} />;
+    case "OutputNode":
+      return <OutputNode {...props} />;
+    case "InsertNode":
+      return <InsertNode {...props} />;
+  }
+};
 
 type State = {
-  model: object;
+  model: Node;
   width: number;
   height: number;
 };
@@ -350,27 +577,18 @@ type State = {
 export const Struktog: FC<{ data: string }> = ({ data }) => {
   try {
     data = data.replace(new RegExp("https://struktog.openpatch.org/?#"), "");
-    const { model, width, height } = deserializeState<State>(data);
-    const [lastY, setLastY] = useState(height);
-    const ref = useRef<HTMLCanvasElement>();
-    useEffect(() => {
-      const canvas = ref.current;
-      if (canvas && model) {
-        const ctx = ref.current.getContext("2d");
-
-        ctx.fillStyle = "#fffff3";
-        ctx.fillRect(0, 0, width, height);
-        const lastY = renderTreeAsCanvas(model, ctx, 0, width, 0);
-        ctx.rect(0, 0, width, lastY);
-        ctx.stroke();
-        setLastY(lastY);
-      }
-    }, [model, width, height]);
+    const { model } = deserializeState<State>(data);
 
     return (
-      <div className="struktog">
+      <div className="struktog ">
         <a href={`https://struktog.openpatch.org/#${data}`} target="_blank">
-          <canvas ref={ref} height={lastY} width={width}></canvas>
+          <div className="columnAuto container">
+            <div className="columnAuto">
+              <Node {...model} />
+              <div className="frameTop borderHeight"></div>
+            </div>
+            <div className="frameLeft borderWidth"></div>
+          </div>
         </a>
       </div>
     );
