@@ -282,7 +282,7 @@ ul.bookmarks li:last-of-type {
   background: white;
 }
 
-.error {
+.struktog .error {
   display: flex;
   justify-content: center;
   align-items: center;
