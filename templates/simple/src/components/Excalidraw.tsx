@@ -35,6 +35,15 @@ export const Excalidraw = ({ file, height }: ExcalidrawProps) => {
     });
   }, []);
 
+  useEffect(() => {
+    if (api.current) {
+      api.current.updateScene({
+        appState: { ...api.current.getAppState(), theme: preferedColorScheme },
+        elements: api.current.getSceneElements(),
+      });
+    }
+  }, [preferedColorScheme]);
+
   const loadData = async () => {
     const url = getHyperbookUrl(file);
     return fetch(url)
