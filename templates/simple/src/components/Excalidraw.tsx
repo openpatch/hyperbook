@@ -35,6 +35,18 @@ export const Excalidraw = ({ file, height }: ExcalidrawProps) => {
     });
   }, []);
 
+  const handleScroll = () => {
+    if (api.current) {
+      api.current.refresh();
+    }
+  };
+
+  useEffect(() => {
+    document
+      .getElementsByTagName("main")[0]
+      .addEventListener("scroll", handleScroll);
+  }, []);
+
   useEffect(() => {
     if (api.current) {
       api.current.updateScene({
