@@ -375,6 +375,21 @@ main {
   overflow-y: auto;
 }
 
+.excalidraw main {
+  padding: 0;
+}
+
+.excalidraw-container {
+  border-radius: 8px;
+}
+
+.view .excalidraw .App-toolbar-content,
+.view .excalidraw .App-menu_top,
+.view .excalidraw .help-icon {
+  display: none !important;
+  height: 0;
+}
+
 article {
   max-width: 980px;
   margin: 0 auto;
@@ -1028,4 +1043,41 @@ nav.toc li.level-3 {
 
 .struktog .editor {
   text-align: right;
+}
+
+.development {
+  position: relative;
+  margin-top: 8px;
+  border-style: dashed;
+  padding: 8px;
+  padding-top: 24px;
+  border-width: 1px;
+  border-radius: 4px;
+  background: none;
+  border-color: orange;
+  color: orange;
+}
+
+.development::before {
+  position: absolute;
+  content: "Development";
+  font-size: 0.7em;
+  top: 4px;
+  left: 8px;
+}
+
+.development button {
+  padding: 4px 8px;
+  border-style: solid;
+  border-width: 2px;
+  border-radius: 4px;
+}
+
+.development .toolbar {
+  display: flex;
+  gap: 8px;
+}
+
+.development .toolbar > button {
+  flex: 1;
 }
