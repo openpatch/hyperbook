@@ -10,6 +10,7 @@ import {
 } from "../utils/usePreferesColorScheme";
 import { useBookmarks, useCollapsible, useProtect, useTabs } from "../store";
 import { Struktog } from "./Struktog";
+import { Excalidraw } from "./Excalidraw";
 
 const Flow = dynamic(() => import("./Bitflow").then((mod) => mod.Flow));
 const Task = dynamic(() => import("./Bitflow").then((mod) => mod.Task));
@@ -337,6 +338,10 @@ export const StruktogMD = ({ data }) => {
   return <Struktog data={data} />;
 };
 
+export const ExcalidrawMD = ({ file, height }) => {
+  return <Excalidraw file={file} height={height} />;
+};
+
 export default {
   youtube: YouTubeVideo,
   term: Term,
@@ -344,6 +349,7 @@ export default {
   alert: Alert,
   tab: Tab,
   tabs: Tabs,
+  excalidraw: ExcalidrawMD,
   mermaid: Mermaid,
   struktog: StruktogMD,
   collapsible: Collapsible,
