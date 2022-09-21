@@ -22,6 +22,15 @@ async function ensureDirectoryExistence(filePath: string) {
   }
 }
 
+// not needed in production
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: "32mb",
+    },
+  },
+};
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<ResData>

@@ -51,36 +51,42 @@ export const Excalidraw = ({
     }
   };
 
-  useLayoutEffect(() => {
-    const handleResize = () => {
-      if (containerRef.current && autoZoom == true) {
-        const currentWidth = containerRef.current.clientWidth;
-        const initialWidth = initialData.current?.appState?.width || 0;
+  const getZoom = () => {
+    const initialZoom = initialData.current?.appState?.zoom?.value || 1;
+    console.log(autoZoom);
+    if (containerRef.current && autoZoom == true) {
+      const currentWidth = containerRef.current.clientWidth;
+      const initialWidth = initialData.current?.appState?.width || 0;
+      console.log(initialWidth);
 
-        if (initialWidth > 0) {
-          const widthRatio = currentWidth / initialWidth;
-          const initialZoom = initialData.current?.appState?.zoom?.value || 1;
+      if (initialWidth > 0) {
+        const widthRatio = currentWidth / initialWidth;
 
-          api.current.updateScene({
-            appState: {
-              ...api.current.getAppState(),
-              zoom: {
-                value: (initialZoom * widthRatio) as any,
-              },
-            },
-          });
-        }
+        return initialZoom * widthRatio;
       }
-    };
+    }
+    return initialZoom;
+  };
 
+  const handleResize = useCallback(() => {
+    if (api.current) {
+      api.current.updateScene({
+        appState: {
+          zoom: {
+            value: getZoom(),
+          },
+        },
+      });
+    }
+  }, []);
+
+  useLayoutEffect(() => {
     window.addEventListener("resize", handleResize);
-
-    handleResize();
 
     return () => {
       window.removeEventListener("resize", handleResize);
     };
-  }, [autoZoom]);
+  }, []);
 
   useEffect(() => {
     document
@@ -111,12 +117,16 @@ export const Excalidraw = ({
       })
       .then((data) => {
         initialData.current = data;
+        const zoom = getZoom();
         return {
           ...data,
           appState: {
             ...data?.appState,
             collaborators: [],
             theme: preferedColorScheme,
+            zoom: {
+              value: zoom,
+            },
           },
         };
       });
