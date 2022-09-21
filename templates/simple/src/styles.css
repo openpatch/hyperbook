@@ -383,6 +383,7 @@ main {
   border-radius: 8px;
   border-style: solid;
   border-width: 1px;
+  margin-bottom: 10px;
   border-color: var(--color-spacer);
 }
 
@@ -1051,6 +1052,7 @@ nav.toc li.level-3 {
 .development {
   position: relative;
   margin-top: 8px;
+  margin-bottom: 8px;
   border-style: dashed;
   padding: 8px;
   padding-top: 24px;
