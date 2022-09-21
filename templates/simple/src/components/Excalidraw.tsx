@@ -147,8 +147,6 @@ export const Excalidraw = ({
       .catch(() => {
         setState("saving-failed");
       });
-
-    loadLibraryFromBlob(umlErLibrary);
   };
 
   const handleLinkOpen: EDP["onLinkOpen"] = useCallback((element, event) => {
