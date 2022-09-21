@@ -30,3 +30,7 @@ The Excalidraw element accepts three arguments:
 ::excalidraw{file="/excalidraw/hyperbook.excalidraw" aspectRatio="4/3"}
 
 ::excalidraw{file="/excalidraw/hyperbook.excalidraw" aspectRatio="4/3" autoZoom=false}
+
+## Adding Libraries
+
+If you want to add libraries, you can download one from https://libraries.excalidraw.com and import it by clicking the book icon in the top right corner and then the folder icon to select the library.

@@ -9,7 +9,6 @@ import {
   useEffect,
   useRef,
   useState,
-  useId,
 } from "react";
 import { getHyperbookUrl } from "../utils/hyperbook";
 import { usePrefersColorScheme } from "../utils/usePreferesColorScheme";
@@ -26,7 +25,6 @@ export const Excalidraw = ({
   autoZoom = true,
 }: ExcalidrawProps) => {
   const router = useRouter();
-  const id = useId();
   const [preview, setPreview] = useState(process.env.NODE_ENV == "development");
   const initialData = useRef<EDP["initialData"]>();
   const containerRef = useRef<HTMLDivElement>();
@@ -97,8 +95,7 @@ export const Excalidraw = ({
   useEffect(() => {
     if (api.current) {
       api.current.updateScene({
-        appState: { ...api.current.getAppState(), theme: preferedColorScheme },
-        elements: api.current.getSceneElements(),
+        appState: { theme: preferedColorScheme },
       });
     }
   }, [preferedColorScheme]);
@@ -148,6 +145,8 @@ export const Excalidraw = ({
       .catch(() => {
         setState("saving-failed");
       });
+
+    loadLibraryFromBlob(umlErLibrary);
   };
 
   const handleLinkOpen: EDP["onLinkOpen"] = useCallback((element, event) => {

@@ -387,6 +387,14 @@ main {
   border-color: var(--color-spacer);
 }
 
+.excalidraw .library-menu-browse-button {
+  display: none !important;
+}
+
+.excalidraw .library-menu-items-container__items > div:nth-last-child(-n + 2) {
+  display: none !important;
+}
+
 .view .excalidraw .App-toolbar-content,
 .view .excalidraw .App-menu_top,
 .view .excalidraw .help-icon {
