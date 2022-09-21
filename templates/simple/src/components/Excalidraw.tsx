@@ -53,11 +53,9 @@ export const Excalidraw = ({
 
   const getZoom = () => {
     const initialZoom = initialData.current?.appState?.zoom?.value || 1;
-    console.log(autoZoom);
     if (containerRef.current && autoZoom == true) {
       const currentWidth = containerRef.current.clientWidth;
       const initialWidth = initialData.current?.appState?.width || 0;
-      console.log(initialWidth);
 
       if (initialWidth > 0) {
         const widthRatio = currentWidth / initialWidth;
