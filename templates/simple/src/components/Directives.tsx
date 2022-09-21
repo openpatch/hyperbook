@@ -338,8 +338,10 @@ export const StruktogMD = ({ data }) => {
   return <Struktog data={data} />;
 };
 
-export const ExcalidrawMD = ({ file, height }) => {
-  return <Excalidraw file={file} height={height} />;
+export const ExcalidrawMD = ({ file, aspectRatio, autoZoom }) => {
+  return (
+    <Excalidraw file={file} aspectRatio={aspectRatio} autoZoom={autoZoom} />
+  );
 };
 
 export default {

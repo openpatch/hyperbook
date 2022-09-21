@@ -1,23 +1,35 @@
-import { NonDeletedExcalidrawElement } from "@excalidraw/excalidraw/types/element/types";
 import {
-  AppState,
-  BinaryFiles,
   ExcalidrawImperativeAPI,
   ExcalidrawProps as EDP,
 } from "@excalidraw/excalidraw/types/types";
 import { useRouter } from "next/router";
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useLayoutEffect,
+  useEffect,
+  useRef,
+  useState,
+  useId,
+} from "react";
 import { getHyperbookUrl } from "../utils/hyperbook";
 import { usePrefersColorScheme } from "../utils/usePreferesColorScheme";
 
 type ExcalidrawProps = {
   file: string;
-  height: number;
+  aspectRatio: string;
+  autoZoom: boolean;
 };
 
-export const Excalidraw = ({ file, height }: ExcalidrawProps) => {
+export const Excalidraw = ({
+  file,
+  aspectRatio,
+  autoZoom = true,
+}: ExcalidrawProps) => {
   const router = useRouter();
+  const id = useId();
   const [preview, setPreview] = useState(process.env.NODE_ENV == "development");
+  const initialData = useRef<EDP["initialData"]>();
+  const containerRef = useRef<HTMLDivElement>();
   const [state, setState] = useState<
     "default" | "saving" | "unsaved" | "saving-failed"
   >("default");
@@ -41,10 +53,45 @@ export const Excalidraw = ({ file, height }: ExcalidrawProps) => {
     }
   };
 
+  useLayoutEffect(() => {
+    const handleResize = () => {
+      if (containerRef.current && autoZoom == true) {
+        const currentWidth = containerRef.current.clientWidth;
+        const initialWidth = initialData.current?.appState?.width || 0;
+
+        if (initialWidth > 0) {
+          const widthRatio = currentWidth / initialWidth;
+          const initialZoom = initialData.current?.appState?.zoom?.value || 1;
+
+          api.current.updateScene({
+            appState: {
+              ...api.current.getAppState(),
+              zoom: {
+                value: (initialZoom * widthRatio) as any,
+              },
+            },
+          });
+        }
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, [autoZoom]);
+
   useEffect(() => {
     document
       .getElementsByTagName("main")[0]
       .addEventListener("scroll", handleScroll);
+
+    return () => {
+      document
+        .getElementsByTagName("main")[0]
+        .removeEventListener("scroll", handleScroll);
+    };
   }, []);
 
   useEffect(() => {
@@ -60,17 +107,16 @@ export const Excalidraw = ({ file, height }: ExcalidrawProps) => {
     const url = getHyperbookUrl(file);
     return fetch(url)
       .then((res) => res.json())
-      .then((json) => ({
-        ...json,
-        appState: {
-          ...json?.appState,
-          collaborators: [],
-          theme: preferedColorScheme,
-        },
-      }))
       .catch(() => {
+        return {};
+      })
+      .then((data) => {
+        initialData.current = data;
         return {
+          ...data,
           appState: {
+            ...data?.appState,
+            collaborators: [],
             theme: preferedColorScheme,
           },
         };
@@ -121,11 +167,12 @@ export const Excalidraw = ({ file, height }: ExcalidrawProps) => {
   return (
     <div>
       <div
+        ref={containerRef}
         className={preview ? "edit" : "view"}
         style={{
           width: "100%",
           position: "relative",
-          height,
+          aspectRatio,
         }}
       >
         {Comp && (
@@ -154,3 +201,6 @@ export const Excalidraw = ({ file, height }: ExcalidrawProps) => {
     </div>
   );
 };
+function useLayouEffect(arg0: () => () => void, arg1: undefined[]) {
+  throw new Error("Function not implemented.");
+}
