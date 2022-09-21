@@ -179,6 +179,7 @@ export const Excalidraw = ({
         style={{
           width: "100%",
           position: "relative",
+          marginBottom: 10,
           aspectRatio,
         }}
       >
