@@ -1056,6 +1056,54 @@ nav.toc li.level-3 {
   text-align: right;
 }
 
+.qr {
+  padding: 8px;
+  margin: 0 auto;
+  border-radius: 8px;
+  width: fit-content;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.qr .code {
+  display: flex;
+  background-color: white;
+  border-radius: 8px;
+  width: 100%;
+}
+
+.qr .code.S {
+  padding: 4px;
+  max-width: 64px + 8px;
+}
+
+.qr .code.M {
+  padding: 8px;
+  max-width: 128px + 16px;
+}
+
+.qr .code.L {
+  padding: 12px;
+  max-width: 256px + 24px;
+}
+
+.qr .code.XL {
+  padding: 16px;
+  max-width: 512px + 32px;
+}
+
+.qr svg {
+  border-radius: 8px;
+  width: 100%;
+  height: auto;
+}
+
+.qr .label {
+  margin-top: 8px;
+  text-align: center;
+  font-weight: bold;
+}
+
 .development {
   position: relative;
   margin-top: 8px;

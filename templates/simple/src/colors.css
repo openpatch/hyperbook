@@ -292,6 +292,13 @@ ul.bookmarks li:last-of-type {
   border-radius: 8px;
 }
 
+.qr {
+  background-color: var(--color-nav);
+  border-style: solid;
+  border-width: 1px;
+  border-color: var(--color-nav-border);
+}
+
 @media screen and (max-width: 600px) {
   table td {
     border-bottom-color: var(--color-spacer);

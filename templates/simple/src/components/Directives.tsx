@@ -11,6 +11,7 @@ import {
 import { useBookmarks, useCollapsible, useProtect, useTabs } from "../store";
 import { Struktog } from "./Struktog";
 import { Excalidraw } from "./Excalidraw";
+import { QRCode } from "./QRCode";
 
 const Flow = dynamic(() => import("./Bitflow").then((mod) => mod.Flow));
 const Task = dynamic(() => import("./Bitflow").then((mod) => mod.Task));
@@ -334,16 +335,6 @@ export const Mermaid = ({ children }) => {
   ) : null;
 };
 
-export const StruktogMD = ({ data }) => {
-  return <Struktog data={data} />;
-};
-
-export const ExcalidrawMD = ({ file, aspectRatio, autoZoom }) => {
-  return (
-    <Excalidraw file={file} aspectRatio={aspectRatio} autoZoom={autoZoom} />
-  );
-};
-
 export default {
   youtube: YouTubeVideo,
   term: Term,
@@ -351,12 +342,13 @@ export default {
   alert: Alert,
   tab: Tab,
   tabs: Tabs,
-  excalidraw: ExcalidrawMD,
+  excalidraw: Excalidraw,
   mermaid: Mermaid,
-  struktog: StruktogMD,
+  struktog: Struktog,
   collapsible: Collapsible,
   flow: FlowMD,
   task: TaskMD,
+  qr: QRCode,
   protect: Protect,
   download: Download,
   archive: Archive,
