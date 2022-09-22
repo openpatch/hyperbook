@@ -379,11 +379,19 @@ main {
   padding: 0;
 }
 
+.excalidraw.excalidraw-modal-container {
+  z-index: 1002 !important;
+}
+
 .excalidraw-container {
   border-radius: 8px;
   border-style: solid;
   border-width: 1px;
   border-color: var(--color-spacer);
+}
+
+.excalidraw-container .open {
+  position: absolute;
 }
 
 .excalidraw .library-menu-browse-button {

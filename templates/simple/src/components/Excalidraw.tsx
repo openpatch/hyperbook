@@ -18,6 +18,7 @@ type ExcalidrawProps = {
   aspectRatio: string;
   autoZoom: boolean;
   center: boolean;
+  edit: boolean;
 };
 
 export const Excalidraw = ({
@@ -25,6 +26,7 @@ export const Excalidraw = ({
   aspectRatio,
   autoZoom = true,
   center = false,
+  edit = false,
 }: ExcalidrawProps) => {
   const router = useRouter();
   const [preview, setPreview] = useState(process.env.NODE_ENV == "development");
@@ -185,7 +187,7 @@ export const Excalidraw = ({
     <div>
       <div
         ref={containerRef}
-        className={preview ? "edit" : "view"}
+        className={[preview || edit ? "edit" : "view"].join(" ")}
         style={{
           width: "100%",
           position: "relative",
@@ -198,7 +200,7 @@ export const Excalidraw = ({
             onLinkOpen={handleLinkOpen}
             ref={api}
             initialData={loadData()}
-            viewModeEnabled={!preview}
+            viewModeEnabled={!preview && !edit}
           />
         )}
       </div>
@@ -219,6 +221,3 @@ export const Excalidraw = ({
     </div>
   );
 };
-function useLayouEffect(arg0: () => () => void, arg1: undefined[]) {
-  throw new Error("Function not implemented.");
-}
