@@ -5,7 +5,7 @@ support modern standards and runs superfast.
 
 - **Documentation**: https://hyperbook.openpatch.org
 - **Repository:** https://github.com/openpatch/hyperflow
-- **Community**: https://discord.gg/dCMM4kV
+- **Community**: https://matrix.to/#/#openpatch:matrix.org
 
 ## Documentation
 
