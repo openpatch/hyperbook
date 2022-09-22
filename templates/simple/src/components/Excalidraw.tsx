@@ -137,7 +137,14 @@ export const Excalidraw = ({
     const elements = api.current.getSceneElements();
     const appState = api.current.getAppState();
     const files = api.current.getFiles();
-    const data = { elements, appState, files };
+    const data = {
+      type: "excalidraw",
+      version: 2,
+      source: "https://hyperbook.openpatch.org",
+      elements,
+      appState,
+      files,
+    };
 
     setState("saving");
 
