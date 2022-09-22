@@ -39,6 +39,10 @@ autoZoom does not seems to work, when using a file from excalidraw.com, since th
 
 ::excalidraw{file="/excalidraw/hyperbook.excalidraw" aspectRatio="4/3" autoZoom=false center=true}
 
+:::alert{info}
+Be sure to set the correct language in your hyperbook config file, otherwise Excalidraw will use the English. For example for German use "de".
+:::
+
 ::excalidraw{file="/excalidraw/hyperbook.excalidraw" aspectRatio="4/3" autoZoom=false center=true edit=true}
 
 ## Adding Libraries

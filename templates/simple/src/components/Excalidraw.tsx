@@ -10,7 +10,11 @@ import {
   useRef,
   useState,
 } from "react";
-import { getHyperbookUrl } from "../utils/hyperbook";
+import {
+  getHyperbook,
+  getHyperbookLangCode,
+  getHyperbookUrl,
+} from "../utils/hyperbook";
 import { usePrefersColorScheme } from "../utils/usePreferesColorScheme";
 
 type ExcalidrawProps = {
@@ -197,6 +201,7 @@ export const Excalidraw = ({
       >
         {Comp && (
           <Comp
+            langCode={getHyperbookLangCode()}
             onLinkOpen={handleLinkOpen}
             ref={api}
             initialData={loadData()}

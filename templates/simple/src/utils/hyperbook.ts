@@ -46,3 +46,13 @@ export const getHyperbookUrl = (src: string): string => {
 export const getHyperbook = () => {
   return hb as Hyperbook;
 };
+
+export const getHyperbookLangCode = (): string => {
+  const { language } = getHyperbook();
+
+  if (language == "de") {
+    return "de-DE";
+  }
+
+  return "en";
+};
