@@ -17,12 +17,14 @@ type ExcalidrawProps = {
   file: string;
   aspectRatio: string;
   autoZoom: boolean;
+  center: boolean;
 };
 
 export const Excalidraw = ({
   file,
   aspectRatio,
   autoZoom = true,
+  center = false,
 }: ExcalidrawProps) => {
   const router = useRouter();
   const [preview, setPreview] = useState(process.env.NODE_ENV == "development");
@@ -106,7 +108,7 @@ export const Excalidraw = ({
     }
   }, [preferedColorScheme]);
 
-  const loadData = async () => {
+  const loadData: EDP["initialData"] = async () => {
     const url = getHyperbookUrl(file);
     return fetch(url)
       .then((res) => res.json())
@@ -118,6 +120,7 @@ export const Excalidraw = ({
         const zoom = getZoom();
         return {
           ...data,
+          scrollToContent: center,
           appState: {
             ...data?.appState,
             collaborators: [],

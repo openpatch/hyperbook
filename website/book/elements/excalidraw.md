@@ -20,16 +20,21 @@ The Excalidraw element accepts three arguments:
 - **file**: A path to an Excalidraw file, if it does not exists it will be created, when using the editor in development mode.
 - **aspectRatio**: To keep your Excalidraw nice on every device you need to provide an aspect-ratio, e.g.: "16/9", "4/3", "1/1".
 - **autoZoom**: By default your Excalidraw will auto zoom to look the same even when viewed on a smaller device. You can disable it by passing false to autoZoom.
+- **center**: Centers the Excalidraw.
+
+:::alert{info}
+autoZoom does not seems to work, when using a file from excalidraw.com, since the file does not come with its original dimensions.
+:::
 
 ```
 ::excalidraw{file="/excalidraw/hyperbook.excalidraw" aspectRatio="4/3"}
 
-::excalidraw{file="/excalidraw/hyperbook.excalidraw" aspectRatio="4/3" autoZoom=false}
+::excalidraw{file="/excalidraw/hyperbook.excalidraw" aspectRatio="4/3" autoZoom=false center=true}
 ```
 
 ::excalidraw{file="/excalidraw/hyperbook.excalidraw" aspectRatio="4/3"}
 
-::excalidraw{file="/excalidraw/hyperbook.excalidraw" aspectRatio="4/3" autoZoom=false}
+::excalidraw{file="/excalidraw/hyperbook.excalidraw" aspectRatio="4/3" autoZoom=false center=true}
 
 ## Adding Libraries
 
