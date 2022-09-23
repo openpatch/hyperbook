@@ -38,7 +38,7 @@
     "react-hook-form": "7.36.0",
     "react-icons": "4.4.0",
     "react-markdown": "8.0.3",
-    "react-redux": "8.0.2",
+    "react-redux": "8.0.4",
     "redux": "4.2.0",
     "redux-persist": "6.0.0",
     "rehype-highlight": "5.0.2",

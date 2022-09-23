@@ -123,7 +123,7 @@ importers:
       react-hook-form: 7.36.0
       react-icons: 4.4.0
       react-markdown: 8.0.3
-      react-redux: 8.0.2
+      react-redux: 8.0.4
       redux: 4.2.0
       redux-persist: 6.0.0
       rehype-highlight: 5.0.2
@@ -167,7 +167,7 @@ importers:
       react-hook-form: 7.36.0_react@18.2.0
       react-icons: 4.4.0_react@18.2.0
       react-markdown: 8.0.3_iapumuv4e6jcjznwuxpf4tt22e
-      react-redux: 8.0.2_wr4jmv5xrjbe6vbq33me5wwo2a
+      react-redux: 8.0.4_wr4jmv5xrjbe6vbq33me5wwo2a
       redux: 4.2.0
       redux-persist: 6.0.0_react@18.2.0+redux@4.2.0
       rehype-highlight: 5.0.2
@@ -6411,8 +6411,8 @@ packages:
       warning: 4.0.3
     dev: false
 
-  /react-redux/8.0.2_wr4jmv5xrjbe6vbq33me5wwo2a:
-    resolution: {integrity: sha512-nBwiscMw3NoP59NFCXFf02f8xdo+vSHT/uZ1ldDwF7XaTpzm+Phk97VT4urYBl5TYAPNVaFm12UHAEyzkpNzRA==}
+  /react-redux/8.0.4_wr4jmv5xrjbe6vbq33me5wwo2a:
+    resolution: {integrity: sha512-yMfQ7mX6bWuicz2fids6cR1YT59VTuT8MKyyE310wJQlINKENCeT1UcPdEiX6znI5tF8zXyJ/VYvDgeGuaaNwQ==}
     peerDependencies:
       '@types/react': ^16.8 || ^17.0 || ^18.0
       '@types/react-dom': ^16.8 || ^17.0 || ^18.0
