@@ -19,7 +19,7 @@
     "@emotion/core": "11.0.0",
     "@emotion/react": "11.10.4",
     "@emotion/styled": "11.10.4",
-    "@excalidraw/excalidraw": "0.12.0-8636ef1",
+    "@excalidraw/excalidraw": "0.12.0",
     "@openpatch/patches": "6.0.1",
     "@redux-devtools/extension": "3.2.3",
     "@vocab/core": "1.1.1",
