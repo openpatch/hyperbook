@@ -7,7 +7,7 @@ import { readHyperbook } from "./helpers/read-hyperbook";
 export async function runBuild(): Promise<void> {
   const setup = isSetup();
   if (!setup) {
-    return;
+    throw new Error("no setup");
   }
   const hyperbook = await readHyperbook();
   fs.writeFileSync(

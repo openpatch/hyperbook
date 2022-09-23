@@ -5,7 +5,7 @@ import { isSetup } from "./helpers/is-setup";
 export async function runDev(): Promise<void> {
   const setup = isSetup();
   if (!setup) {
-    return;
+    throw new Error("no setup");
   }
   return new Promise((resolve, reject) => {
     const command = "npm";

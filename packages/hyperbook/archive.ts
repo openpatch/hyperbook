@@ -32,7 +32,7 @@ async function archiveFolder(name: string): Promise<void> {
 export async function runArchive(): Promise<void> {
   const setup = isSetup();
   if (!setup) {
-    return;
+    throw new Error("no setup");
   }
   return new Promise((resolve, reject) => {
     // find folders in archives
