@@ -129,7 +129,7 @@ importers:
       rehype-highlight: 5.0.2
       rehype-katex: 6.0.2
       remark-directive: 2.0.1
-      remark-directive-rehype: 0.4.0
+      remark-directive-rehype: 0.4.1
       remark-gemoji: 7.0.1
       remark-gfm: 3.0.1
       remark-math: 5.1.1
@@ -173,7 +173,7 @@ importers:
       rehype-highlight: 5.0.2
       rehype-katex: 6.0.2
       remark-directive: 2.0.1
-      remark-directive-rehype: 0.4.0
+      remark-directive-rehype: 0.4.1
       remark-gemoji: 7.0.1
       remark-gfm: 3.0.1
       remark-math: 5.1.1
@@ -6667,12 +6667,12 @@ packages:
       unified: 10.1.2
     dev: false
 
-  /remark-directive-rehype/0.4.0:
-    resolution: {integrity: sha512-RrcjHXJ566myykjUIx3UNFxrAfHxFJeGK1jF8uqrxq5sBxO8YRBkg/W4640wqX5NCXny7khrqH23Dag8kYCl5A==}
+  /remark-directive-rehype/0.4.1:
+    resolution: {integrity: sha512-7LJQo9cG/DVApJMni45W3yrrxmzzGhZvkt2i6YIIdh0xnbffDGegkN/3vlu+8qr9ycCUdY9+jP4qHVv9slkf/g==}
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
     dependencies:
       hastscript: 7.0.2
-      unist-util-map: 3.0.0
+      unist-util-map: 3.1.1
     dev: false
 
   /remark-directive/2.0.1:
@@ -7480,8 +7480,8 @@ packages:
     resolution: {integrity: sha512-F5CZ68eYzuSvJjGhCLPL3cYx45IxkqXSetCcRgUXtbcm50X2L9oOWQlfUfDdAf+6Pd27YDblBfdtmsThXmwpbQ==}
     dev: false
 
-  /unist-util-map/3.0.0:
-    resolution: {integrity: sha512-kyPbOAlOPZpytdyquF1g6qYpAjkpMpSPtR7TAj4SOQWSJfQ/LN+IFI2oWBvkxzhsPKxiMKZcgpp5ihZLLvNl6g==}
+  /unist-util-map/3.1.1:
+    resolution: {integrity: sha512-n36sjBn4ibPtAzrFweyT4FOcCI/UdzboaEcsZvwoAyD/gVw5B3OLlMBySePMO6r+uzjxQEyRll2akfVaT4SHhw==}
     dependencies:
       '@types/unist': 2.0.6
     dev: false
