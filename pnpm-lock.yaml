@@ -59,7 +59,7 @@ importers:
       commander: 9.4.0
       cpy: 9.0.1
       cross-spawn: 7.0.3
-      got: 12.5.0
+      got: 12.5.1
       prompts: 2.4.2
       rimraf: 3.0.2
       tar: 6.1.11
@@ -78,7 +78,7 @@ importers:
       commander: 9.4.0
       cpy: 9.0.1
       cross-spawn: 7.0.3
-      got: 12.5.0
+      got: 12.5.1
       prompts: 2.4.2
       rimraf: 3.0.2
       tar: 6.1.11
@@ -1963,6 +1963,10 @@ packages:
       hoist-non-react-statics: 3.3.2
     dev: false
 
+  /@types/http-cache-semantics/4.0.1:
+    resolution: {integrity: sha512-SZs7ekbP8CN0txVG2xVRH6EgKmEm31BOxA07vkFaETzZz1xh+cbt8BcI0slpymvwhx5dlFnQG2rTlPVQn+iRPQ==}
+    dev: true
+
   /@types/is-ci/3.0.0:
     resolution: {integrity: sha512-Q0Op0hdWbYd1iahB+IFNQcWXFq4O0Q5MwQP7uN0souuQ4rPg1vEYcnIOfr1gY+M+6rc8FGoRaBO1mOOvL29sEQ==}
     dependencies:
@@ -2525,15 +2529,16 @@ packages:
     engines: {node: '>= 0.8'}
     dev: true
 
-  /cacheable-lookup/6.1.0:
-    resolution: {integrity: sha512-KJ/Dmo1lDDhmW2XDPMo+9oiy/CeqosPguPCrgcVzKyZrL6pM1gU2GmPY/xo6OQPTUaA/c0kwHuywB4E6nmT9ww==}
-    engines: {node: '>=10.6.0'}
+  /cacheable-lookup/7.0.0:
+    resolution: {integrity: sha512-+qJyx4xiKra8mZrcwhjMRMUhD5NR1R8esPkzIYxX96JiecFoxAXFuz/GpR3+ev4PE1WamHip78wV0vcmPQtp8w==}
+    engines: {node: '>=14.16'}
     dev: true
 
-  /cacheable-request/10.1.2:
-    resolution: {integrity: sha512-N7F4os5ZI+8mWHSbeJmxn+qimf5uK3WU53FD1b298XLGtOLPpSA/1xAchfP4NJlDwqgaviZ0SQfxTQD0K6lr9w==}
+  /cacheable-request/10.2.1:
+    resolution: {integrity: sha512-3tLJyBjGuXw1s5gpKFSG3iS4kaKT4id04dZi98wzHQp/8cqZNweBnrF9J+rrlvrf4M53OdtDGNctNHFias8BEA==}
     engines: {node: '>=14.16'}
     dependencies:
+      '@types/http-cache-semantics': 4.0.1
       get-stream: 6.0.1
       http-cache-semantics: 4.1.0
       keyv: 4.5.0
@@ -4211,14 +4216,14 @@ packages:
       slash: 4.0.0
     dev: true
 
-  /got/12.5.0:
-    resolution: {integrity: sha512-/Bneo/L6bLN1wDyJCeRZ3CLoixvwb9v3rE3IHulFSfTHwP85xSr4QatA8K0c6GlL5+mc4IZ57BzluNZJiXvHIg==}
+  /got/12.5.1:
+    resolution: {integrity: sha512-sD16AK8cCyUoPtKr/NMvLTFFa+T3i3S+zoiuvhq0HP2YiqBZA9AtlBjAdsQBsLBK7slPuvmfE0OxhGi7N5dD4w==}
     engines: {node: '>=14.16'}
     dependencies:
       '@sindresorhus/is': 5.3.0
       '@szmarczak/http-timer': 5.0.1
-      cacheable-lookup: 6.1.0
-      cacheable-request: 10.1.2
+      cacheable-lookup: 7.0.0
+      cacheable-request: 10.2.1
       decompress-response: 6.0.0
       form-data-encoder: 2.1.2
       get-stream: 6.0.1
