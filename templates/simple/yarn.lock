@@ -4045,13 +4045,13 @@ rehype-sanitize@^5.0.1:
     hast-util-sanitize "^4.0.0"
     unified "^10.0.0"
 
-remark-directive-rehype@0.4.1:
-  version "0.4.1"
-  resolved "https://registry.yarnpkg.com/remark-directive-rehype/-/remark-directive-rehype-0.4.1.tgz#98ac6c49fd6d791af89b29eae676eb16e896a7ca"
-  integrity sha512-7LJQo9cG/DVApJMni45W3yrrxmzzGhZvkt2i6YIIdh0xnbffDGegkN/3vlu+8qr9ycCUdY9+jP4qHVv9slkf/g==
+remark-directive-rehype@0.4.2:
+  version "0.4.2"
+  resolved "https://registry.yarnpkg.com/remark-directive-rehype/-/remark-directive-rehype-0.4.2.tgz#044040455523a3281a7be7fdde304714d29021b5"
+  integrity sha512-T6e+IG+BwqU4++MK54vFb+KDFjs3a+tHeK6E0T0ctR1FSyngolfDtAEzqxHWlRzQZqGi2sB4DFXry6oqH87D/g==
   dependencies:
     hastscript "^7.0.2"
-    unist-util-map "^3.1.1"
+    unist-util-map "^3.1.2"
 
 remark-directive@2.0.1:
   version "2.0.1"
@@ -4503,10 +4503,10 @@ unist-util-is@^5.0.0:
   resolved "https://registry.yarnpkg.com/unist-util-is/-/unist-util-is-5.1.1.tgz#e8aece0b102fa9bc097b0fef8f870c496d4a6236"
   integrity sha512-F5CZ68eYzuSvJjGhCLPL3cYx45IxkqXSetCcRgUXtbcm50X2L9oOWQlfUfDdAf+6Pd27YDblBfdtmsThXmwpbQ==
 
-unist-util-map@^3.1.1:
-  version "3.1.1"
-  resolved "https://registry.yarnpkg.com/unist-util-map/-/unist-util-map-3.1.1.tgz#e69e23fc36a9dd6dfebc90ce8c3cc8e426ed2a71"
-  integrity sha512-n36sjBn4ibPtAzrFweyT4FOcCI/UdzboaEcsZvwoAyD/gVw5B3OLlMBySePMO6r+uzjxQEyRll2akfVaT4SHhw==
+unist-util-map@^3.1.2:
+  version "3.1.2"
+  resolved "https://registry.yarnpkg.com/unist-util-map/-/unist-util-map-3.1.2.tgz#c389677fd6ce5c0cc10af44115acaca7944a3569"
+  integrity sha512-WLA2R6x/UaopedG2poaWLShf5LCi+BNa6mMkACdjft23PHou4v85PvZItjbO2XgXvukMP365PlL/DrbuMgr3eg==
   dependencies:
     "@types/unist" "^2.0.0"
 
