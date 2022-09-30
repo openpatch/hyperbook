@@ -44,7 +44,7 @@
     "rehype-highlight": "5.0.2",
     "rehype-katex": "6.0.2",
     "remark-directive": "2.0.1",
-    "remark-directive-rehype": "0.4.1",
+    "remark-directive-rehype": "0.4.2",
     "remark-gemoji": "7.0.1",
     "remark-gfm": "3.0.1",
     "remark-math": "5.1.1",
