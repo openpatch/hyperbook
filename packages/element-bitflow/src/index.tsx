@@ -1,6 +1,6 @@
 import { Flow as IFlow } from "@bitflow/core";
 import { FC, lazy, Suspense, useEffect, useState } from "react";
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice } from "@hyperbook/store";
 import { useFile, useMakeUrl } from "@hyperbook/provider";
 import "./index.css";
 

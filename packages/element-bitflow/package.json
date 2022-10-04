@@ -50,6 +50,7 @@
     "@emotion/react": "11.10.4",
     "@emotion/styled": "11.10.4",
     "@hyperbook/provider": "workspace:*",
+    "@hyperbook/store": "workspace:*",
     "@openpatch/patches": "6.0.1",
     "@vocab/core": "1.1.1",
     "@vocab/react": "1.1.2",
@@ -58,7 +59,6 @@
     "zod": "3.19.1"
   },
   "peerDependencies": {
-    "@reduxjs/toolkit": "1.x",
     "react": "18.x",
     "react-dom": "18.x",
     "react-redux": "8.x"
