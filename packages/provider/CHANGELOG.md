@@ -1,5 +1,14 @@
 # @hyperbook/provider
 
+## 0.1.2
+
+### Patch Changes
+
+- [`2c34554`](https://github.com/openpatch/hyperbook/commit/2c34554f64359fb995190b1465daddfa3e0101c0) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - try to overcome issues with @redux/toolkit not supporting esm modules the way nextjs likes it.
+
+- Updated dependencies [[`2c34554`](https://github.com/openpatch/hyperbook/commit/2c34554f64359fb995190b1465daddfa3e0101c0)]:
+  - @hyperbook/store@0.1.2
+
 ## 0.1.1
 
 ### Patch Changes
