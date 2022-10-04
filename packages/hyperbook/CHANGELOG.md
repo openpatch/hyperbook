@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.5.2
+
+### Patch Changes
+
+- [`84bba40`](https://github.com/openpatch/hyperbook/commit/84bba40a449b01bffe5ec86a7fe484cbd4a064e0) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix bug requiring admin permissions for creating symlinks #294
+
 ## 0.5.1
 
 ### Patch Changes
