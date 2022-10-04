@@ -1,5 +1,15 @@
 # hyperbook-simple-template
 
+## 0.3.4
+
+### Patch Changes
+
+- [`2459c34`](https://github.com/openpatch/hyperbook/commit/2459c343e89f890c10132cfb36bb466b5800133d) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - use default import to be compatible with commonjs
+
+- Updated dependencies [[`2459c34`](https://github.com/openpatch/hyperbook/commit/2459c343e89f890c10132cfb36bb466b5800133d)]:
+  - @hyperbook/element-bitflow@0.1.3
+  - @hyperbook/element-qr@0.1.3
+
 ## 0.3.3
 
 ### Patch Changes

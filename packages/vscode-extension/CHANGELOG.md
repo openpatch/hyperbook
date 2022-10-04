@@ -1,5 +1,13 @@
 # @hyperbook/vscode-extension
 
+## 0.2.3
+
+### Patch Changes
+
+- Updated dependencies [[`2459c34`](https://github.com/openpatch/hyperbook/commit/2459c343e89f890c10132cfb36bb466b5800133d)]:
+  - @hyperbook/element-bitflow@0.1.3
+  - @hyperbook/element-qr@0.1.3
+
 ## 0.2.2
 
 ### Patch Changes
