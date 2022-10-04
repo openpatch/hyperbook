@@ -1,5 +1,11 @@
 # @hyperbook/markdown
 
+## 0.1.3
+
+### Patch Changes
+
+- [`a7be20c`](https://github.com/openpatch/hyperbook/commit/a7be20c426ee96cefdc198e843b30eda32e96c75) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - remove react-icons
+
 ## 0.1.2
 
 ### Patch Changes
