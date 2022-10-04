@@ -32,8 +32,12 @@ export const buildPackage = async (path) => {
     throw new Error(`Entry file missing from ${packageName}`);
   }
 
+  const bundle = JSON.parse(packageJSON).bundle || [];
+
   const external = [
-    ...Object.keys(JSON.parse(packageJSON)?.dependencies || {}),
+    ...Object.keys(JSON.parse(packageJSON)?.dependencies || {}).filter(
+      (p) => !bundle.includes(p)
+    ),
     ...Object.keys(JSON.parse(packageJSON)?.peerDependencies || {}),
   ];
   external.push("path");

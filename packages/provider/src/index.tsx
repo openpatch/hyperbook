@@ -13,7 +13,6 @@ import {
   useDispatch,
   useSelector,
 } from "react-redux";
-import { Slice } from "@reduxjs/toolkit";
 import {
   activePageSlice,
   bookmarksSlice,
@@ -21,10 +20,10 @@ import {
   selectActivePage,
   selectBookmark,
   BookmarksState,
+  Slice,
+  PersistGate,
+  Storage,
 } from "@hyperbook/store";
-import { PersistGate } from "redux-persist/integration/react";
-import defaultStorage from "redux-persist/lib/storage";
-import { Storage } from "redux-persist";
 
 export type RootFolder = "public" | "book" | "glossary";
 
@@ -118,7 +117,7 @@ export const Provider: FC<ProviderProps> = ({
   config = {
     name: "Hyperbook",
   },
-  storage = defaultStorage,
+  storage,
 }) => {
   const directiveReducers: Record<string, Reducer<any, any>> = {};
   let directiveComponents: Record<string, FC<any>> = {};

@@ -40,10 +40,10 @@
   },
   "dependencies": {
     "@hyperbook/provider": "workspace:*",
+    "@hyperbook/store": "workspace:*",
     "object-hash": "3.0.0"
   },
   "peerDependencies": {
-    "@reduxjs/toolkit": "1.x",
     "react": "18.x",
     "react-dom": "18.x",
     "react-redux": "8.x"

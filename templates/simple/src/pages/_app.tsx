@@ -32,7 +32,7 @@ import elementBitflow from "@hyperbook/element-bitflow";
 import "@hyperbook/element-bitflow/index.css";
 import Link from "next/link";
 import { Styles } from "@hyperbook/styles";
-import storage from "redux-persist/lib/storage";
+import { localStorage } from "@hyperbook/store";
 import { useRouter } from "next/router";
 import { getHyperbookUrl } from "../utils/hyperbook";
 import { useEffect } from "react";
@@ -71,7 +71,7 @@ export default function MyApp({ Component, pageProps }) {
         elementExcalidraw,
         elementBitflow,
       ]}
-      storage={storage}
+      storage={localStorage}
       loadFile={async (path) => {
         return fetch(path).then((res) => res.text());
       }}

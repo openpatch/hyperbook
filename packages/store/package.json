@@ -37,12 +37,18 @@
     "build:pkg": "node ../../scripts/build.mjs",
     "build:types": "tsc --project tsconfig.build.json --declaration --emitDeclarationOnly"
   },
+  "bundle": [
+    "@reduxjs/toolkit"
+  ],
+  "dependencies": {
+    "redux-persist": "6.0.0",
+    "redux": "4.2.0"
+  },
   "peerDependencies": {
-    "@reduxjs/toolkit": "1.x",
-    "redux": "4.x",
-    "redux-persist": "6.x"
+    "react": "18.x"
   },
   "devDependencies": {
+    "@reduxjs/toolkit": "1.8.5",
     "@types/react": "^18.0.21"
   }
 }

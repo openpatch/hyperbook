@@ -1,7 +1,6 @@
-import { FC, Fragment, ReactNode } from "react";
-import hash from "object-hash";
+import { FC, ReactNode } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@hyperbook/store";
 import { useActivePageId } from "@hyperbook/provider";
 import "./index.css";
 

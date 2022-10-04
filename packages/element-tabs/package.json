@@ -39,7 +39,6 @@
     "build:types": "tsc --project tsconfig.build.json --declaration --emitDeclarationOnly"
   },
   "peerDependencies": {
-    "@reduxjs/toolkit": "1.x",
     "react": "18.x",
     "react-dom": "18.x",
     "react-redux": "8.x"
@@ -52,6 +51,7 @@
     "react-dom": "18.2.0"
   },
   "dependencies": {
+    "@hyperbook/store": "workspace:*",
     "@hyperbook/provider": "workspace:*",
     "object-hash": "3.0.0"
   }

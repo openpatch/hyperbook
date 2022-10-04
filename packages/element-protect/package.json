@@ -39,6 +39,7 @@
     "build:types": "tsc --project tsconfig.build.json --declaration --emitDeclarationOnly"
   },
   "dependencies": {
+    "@hyperbook/store": "workspace:*",
     "@hyperbook/provider": "workspace:*",
     "object-hash": "3.0.0"
   },

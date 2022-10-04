@@ -1,4 +1,7 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { PayloadAction } from "@reduxjs/toolkit";
+import * as toolkitRaw from "@reduxjs/toolkit";
+const { createSlice } = ((toolkitRaw as any).default ??
+  toolkitRaw) as typeof toolkitRaw;
 
 type ActivePageState = {
   id: string;
