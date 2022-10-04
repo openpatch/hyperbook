@@ -1,5 +1,11 @@
 # @hyperbook/store
 
+## 0.1.1
+
+### Patch Changes
+
+- [`9ea5483`](https://github.com/openpatch/hyperbook/commit/9ea5483512fd5134f6823104a68fecea2c50cb00) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Force package update due to failed pipeline
+
 ## 0.1.0
 
 ### Minor Changes
