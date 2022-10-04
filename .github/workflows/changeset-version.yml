@@ -43,4 +43,4 @@ jobs:
         run: |
           pnpm --filter "@hyperbook/vscode-extension" publish
         env:
-          VSCE_PAT: ${{ secrect.VSCE_TOKEN }}
+          VSCE_PAT: ${{ secrects.VSCE_TOKEN }}
