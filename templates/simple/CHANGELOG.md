@@ -1,5 +1,30 @@
 # hyperbook-simple-template
 
+## 0.3.1
+
+### Patch Changes
+
+- [`9ea5483`](https://github.com/openpatch/hyperbook/commit/9ea5483512fd5134f6823104a68fecea2c50cb00) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Force package update due to failed pipeline
+
+- Updated dependencies [[`9ea5483`](https://github.com/openpatch/hyperbook/commit/9ea5483512fd5134f6823104a68fecea2c50cb00)]:
+  - @hyperbook/element-alert@0.1.1
+  - @hyperbook/element-bitflow@0.1.1
+  - @hyperbook/element-bookmarks@0.1.1
+  - @hyperbook/element-collapsible@0.1.1
+  - @hyperbook/element-excalidraw@0.1.1
+  - @hyperbook/element-mermaid@0.1.1
+  - @hyperbook/element-protect@0.1.1
+  - @hyperbook/element-qr@0.1.1
+  - @hyperbook/element-struktog@0.1.1
+  - @hyperbook/element-tabs@0.1.1
+  - @hyperbook/element-term@0.1.1
+  - @hyperbook/element-youtube@0.1.1
+  - @hyperbook/markdown@0.1.1
+  - @hyperbook/provider@0.1.1
+  - @hyperbook/store@0.1.1
+  - @hyperbook/styles@0.1.1
+  - @hyperbook/element-dl@0.1.1
+
 ## 0.3.0
 
 ### Minor Changes

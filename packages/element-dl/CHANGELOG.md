@@ -1,5 +1,12 @@
 # @hyperbook/element-download
 
+## 0.1.1
+
+### Patch Changes
+
+- Updated dependencies [[`9ea5483`](https://github.com/openpatch/hyperbook/commit/9ea5483512fd5134f6823104a68fecea2c50cb00)]:
+  - @hyperbook/provider@0.1.1
+
 ## 0.1.0
 
 ### Minor Changes
