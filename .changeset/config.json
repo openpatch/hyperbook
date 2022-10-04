@@ -6,6 +6,10 @@
     "@changesets/changelog-github",
     { "repo": "openpatch/hyperbook" }
   ],
+  "privatePackages": {
+    "version": true,
+    "tag": true
+  },
   "commit": false,
   "ignore": [],
   "linked": [],
