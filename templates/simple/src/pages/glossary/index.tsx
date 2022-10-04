@@ -5,9 +5,9 @@ import matter from "gray-matter";
 import chalk from "chalk";
 import { Layout } from "../../components/Layout";
 import { getNavigation, Navigation } from "../../utils/navigation";
-import Link from "next/link";
-import { usePage } from "../../store";
 import path from "path";
+import { getHyperbook } from "../../utils/hyperbook";
+import { useActivePageId, useLink } from "@hyperbook/provider";
 
 export type Term = {
   name: string;
@@ -19,8 +19,11 @@ export type GlossaryProps = {
   terms: Record<string, Term[]>;
 };
 
+const hyperbook = getHyperbook();
+
 export default function Glossary({ terms, navigation }: GlossaryProps) {
-  usePage();
+  const Link = useLink();
+  useActivePageId();
   return (
     <Layout
       navigation={navigation}
@@ -34,11 +37,11 @@ export default function Glossary({ terms, navigation }: GlossaryProps) {
             <div className="letter">{letter}</div>
             <ul className="terms">
               {terms[letter].map((term) => (
-                <Link href={term.href} key={term.href}>
-                  <a className="term">
-                    <li>{term.name}</li>
-                  </a>
-                </Link>
+                <li key={term.href}>
+                  <Link className="term" href={term.href}>
+                    {term.name}
+                  </Link>
+                </li>
               ))}
             </ul>
           </div>
@@ -81,5 +84,11 @@ export const getStaticProps: GetStaticProps<{
 
   const navigation = await getNavigation();
 
-  return { props: { terms, navigation } };
+  return {
+    props: {
+      locale: hyperbook.language,
+      terms,
+      navigation,
+    },
+  };
 };

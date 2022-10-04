@@ -1,0 +1,60 @@
+.hyperbook.element-tabs > .tabs {
+  display: flex;
+  /* browser decide if x is ok to scroll and show bars on, y hidden */
+  overflow: auto hidden;
+  /* prevent scroll chaining on x scroll */
+  overscroll-behavior-x: contain;
+  /* scrolling should snap children on x */
+  scroll-snap-type: x mandatory;
+  border-style: solid;
+  border-width: 1px;
+  border-top-right-radius: 4px;
+  border-top-left-radius: 4px;
+}
+
+.hyperbook.element-tabs > .tabs .tab {
+  background: transparent;
+  display: inline-flex;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  border: none;
+  font-size: 100%;
+  padding: 8px 16px;
+  transition: 0.3s;
+  border-bottom: 4px solid transparent;
+}
+
+.hyperbook.element-tabs > .tabpanel {
+  padding: 6px 12px;
+  padding-top: 12px;
+  border-style: solid;
+  border-width: 1px;
+  border-top: none;
+  margin-bottom: 12px;
+  border-bottom-right-radius: 4px;
+  border-bottom-left-radius: 4px;
+}
+
+.hyperbook.element-tabs .tabs {
+  background-color: var(--color-nav);
+  border-color: var(--color-spacer);
+}
+
+.hyperbook.element-tabs .tab {
+  color: var(--color-text);
+}
+
+.hyperbook.element-tabs .tabs .tab:hover {
+  border-bottom-color: var(--color-spacer);
+  color: var(--color-brand);
+}
+
+.hyperbook.element-tabs .tabs .tab.active {
+  border-bottom-color: var(--color-brand);
+  color: var(--color-brand);
+}
+
+.hyperbook.element-tabs .tabpanel {
+  border-color: var(--color-spacer);
+}

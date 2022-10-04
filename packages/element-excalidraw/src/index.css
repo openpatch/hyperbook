@@ -1,0 +1,74 @@
+.element-excalidraw .development {
+  position: relative;
+  margin-top: 8px;
+  margin-bottom: 8px;
+  border-style: dashed;
+  padding: 8px;
+  padding-top: 24px;
+  border-width: 1px;
+  border-radius: 4px;
+  background: none;
+  border-color: orange;
+  color: orange;
+}
+
+.element-excalidraw .development::before {
+  position: absolute;
+  content: "Development";
+  font-size: 0.7em;
+  top: 4px;
+  left: 8px;
+}
+
+.element-excalidraw .development button {
+  padding: 4px 8px;
+  border-style: solid;
+  border-width: 2px;
+  border-radius: 4px;
+}
+
+.element-excalidraw .development .toolbar {
+  display: flex;
+  gap: 8px;
+}
+
+.element-excalidraw .development .toolbar > button {
+  flex: 1;
+}
+
+.element-excalidraw main {
+  padding: 0;
+}
+
+.element-excalidraw .excalidraw.excalidraw-modal-container {
+  z-index: 1002 !important;
+}
+
+.element-excalidraw .excalidraw-container {
+  border-radius: 8px;
+  border-style: solid;
+  border-width: 1px;
+  border-color: var(--color-spacer);
+}
+
+.element-excalidraw .excalidraw-container .open {
+  position: absolute;
+}
+
+.element-excalidraw .excalidraw .library-menu-browse-button {
+  display: none !important;
+}
+
+.element-excalidraw
+  .excalidraw
+  .library-menu-items-container__items
+  > div:nth-last-child(-n + 2) {
+  display: none !important;
+}
+
+.element-excalidraw .view .excalidraw .App-toolbar-content,
+.element-excalidraw .view .excalidraw .App-menu_top,
+.element-excalidraw .view .excalidraw .help-icon {
+  display: none !important;
+  height: 0;
+}

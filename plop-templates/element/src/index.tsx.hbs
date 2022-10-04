@@ -1,0 +1,30 @@
+import { FC, Fragment, ReactNode } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { useActivePageId } from "@hyperbook/provider";
+import "./index.css"
+
+type Directive{{ properCase name }}Props = {
+  children?: ReactNode;
+}
+
+const Directive{{ properCase name}}: FC<Directive{{ properCase name }}Props> = ({ children }) => {
+  const [activePageId] = useActivePageId();
+
+  return <div>{{ properCase name }} on {activePageId}</div>
+}
+
+type Element{{ properCase name }}State = {}
+
+const initialState: Element{{ properCase name }}State = {}
+
+const slice{{ properCase name }} = createSlice({
+  name: "element.{{ camelCase name }}",
+  initialState,
+  reducers: {}
+})
+
+export default {
+  directives: { {{ camelCase name }}: Directive{{ properCase name }} },
+  slice: slice{{ properCase name }}
+}

@@ -1,4 +1,15 @@
-import { makeAnchor } from "../components/Headings";
+const makeAnchor = (heading: string) => {
+  // If we have a heading, make it lower case
+  let anchor = heading.toLowerCase();
+
+  // Clean anchor (replace special characters whitespaces).
+  // Alternatively, use encodeURIComponent() if you don't care about
+  // pretty anchor links
+  anchor = anchor.replace(/[^a-zA-Z0-9 ]/g, "");
+  anchor = anchor.replace(/ /g, "-");
+
+  return anchor;
+};
 
 export type Toc = {
   headings: { level: number; label: string; anchor: string }[];

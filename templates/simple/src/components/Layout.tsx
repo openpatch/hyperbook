@@ -1,5 +1,5 @@
+import { useLink } from "@hyperbook/provider";
 import Head from "next/head";
-import Link from "next/link";
 import { Fragment, ReactNode, useState } from "react";
 import { getHyperbook } from "../utils/hyperbook";
 import { Navigation as NavigationProps, Page } from "../utils/navigation";
@@ -18,6 +18,7 @@ export type LayoutProps = {
 };
 
 const linkLicense = (license: string) => {
+  const Link = useLink();
   let href: string;
   let label: string;
   switch (license.toLowerCase()) {
@@ -60,8 +61,8 @@ const linkLicense = (license: string) => {
 
   if (href) {
     return (
-      <Link href={href}>
-        <a rel="license">Licensed under {label}</a>
+      <Link href={href} rel="license">
+        Licensed under {label}
       </Link>
     );
   }
@@ -87,6 +88,7 @@ const relativeUrl = (url: string) => {
 };
 
 export function Layout({ toc, navigation, page, children }: LayoutProps) {
+  const Link = useLink();
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [isTocOpen, setIsTocOpen] = useState(false);
   return (
@@ -147,15 +149,13 @@ export function Layout({ toc, navigation, page, children }: LayoutProps) {
               </div>
             </Drawer>
           </div>
-          <Link href="/">
-            <a className="branding">
-              {hyperbook.logo && (
-                <div className="logo">
-                  <img alt="Logo" src={relativeUrl(hyperbook.logo)} />
-                </div>
-              )}
-              <div className="name">{hyperbook.name}</div>
-            </a>
+          <Link className="branding" href="/">
+            {hyperbook.logo && (
+              <div className="logo">
+                <img alt="Logo" src={relativeUrl(hyperbook.logo)} />
+              </div>
+            )}
+            <div className="name">{hyperbook.name}</div>
           </Link>
         </header>
         <div className="sidebar">

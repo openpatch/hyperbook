@@ -1,17 +1,18 @@
 import fs from "fs";
 import matter from "gray-matter";
 import { GetStaticPaths, GetStaticProps } from "next";
-import Link from "next/link";
+import Head from "next/head";
 import path from "path";
 import { Layout } from "../components/Layout";
-import { usePage } from "../store";
 import { getAllFiles } from "../utils/files";
 import {
   Navigation as NavigationProps,
   getNavigation,
 } from "../utils/navigation";
 import { getToc, Toc } from "../utils/toc";
-import { Markdown } from "../components/Markdown";
+import { Markdown } from "@hyperbook/markdown";
+import { useActivePageId, useLink } from "@hyperbook/provider";
+import { getHyperbook } from "../utils/hyperbook";
 
 type PageProps = {
   markdown: string;
@@ -19,35 +20,41 @@ type PageProps = {
   toc: Toc;
 };
 
+const hyperbook = getHyperbook();
+
 export default function BookPage({ markdown, navigation, toc }: PageProps) {
   const page = navigation.current;
-  usePage();
+  const Link = useLink();
+  useActivePageId();
+
   return (
-    <Layout
-      navigation={navigation}
-      page={page}
-      toc={page.toc == false ? null : toc}
-    >
-      <article>
-        <Markdown children={markdown} />
-      </article>
-      <div className="jump-container">
-        {navigation.previous ? (
-          <Link href={navigation.previous.href}>
-            <a className="jump previous">{navigation.previous.name}</a>
-          </Link>
-        ) : (
-          <div className="flex" />
-        )}
-        {navigation.next ? (
-          <Link href={navigation.next.href}>
-            <a className="jump next">{navigation.next.name}</a>
-          </Link>
-        ) : (
-          <div className="flex" />
-        )}
-      </div>
-    </Layout>
+    <>
+      <Layout
+        navigation={navigation}
+        page={page}
+        toc={page.toc == false ? null : toc}
+      >
+        <article>
+          <Markdown children={markdown} />
+        </article>
+        <div className="jump-container">
+          {navigation.previous ? (
+            <Link className="jump previous" href={navigation.previous.href}>
+              {navigation.previous.name}
+            </Link>
+          ) : (
+            <div className="flex" />
+          )}
+          {navigation.next ? (
+            <Link className="jump next" href={navigation.next.href}>
+              {navigation.next.name}
+            </Link>
+          ) : (
+            <div className="flex" />
+          )}
+        </div>
+      </Layout>
+    </>
   );
 }
 
@@ -74,6 +81,7 @@ export const getStaticProps: GetStaticProps<
   const navigation = await getNavigation(href);
   return {
     props: {
+      locale: hyperbook.language,
       markdown: content,
       toc: getToc(content),
       navigation,

@@ -1,0 +1,58 @@
+{
+  "name": "@hyperbook/element-protect",
+  "version": "0.0.0",
+  "author": "Mike Barkmin",
+  "homepage": "https://github.com/openpatch/hyperbook#readme",
+  "license": "MIT",
+  "main": "dist/index.cjs.js",
+  "module": "dist/index.esm.mjs",
+  "types": "dist/index.d.ts",
+  "typings": "dist/index.d.ts",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "require": "./dist/index.cjs.js",
+      "default": "./dist/index.esm.mjs"
+    },
+    "./index.css": "./dist/index.css"
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/openpatch/hyperbook.git",
+    "directory": "packages/element-protect"
+  },
+  "bugs": {
+    "url": "https://github.com/openpatch/hyperbook/issues"
+  },
+  "scripts": {
+    "prebuild": "rimraf dist",
+    "version": "pnpm build",
+    "lint": "tsc --noEmit",
+    "build": "pnpm build:pkg && pnpm build:types",
+    "build:pkg": "node ../../scripts/build.mjs",
+    "build:types": "tsc --project tsconfig.build.json --declaration --emitDeclarationOnly"
+  },
+  "dependencies": {
+    "@hyperbook/provider": "workspace:*",
+    "object-hash": "3.0.0"
+  },
+  "peerDependencies": {
+    "@reduxjs/toolkit": "1.x",
+    "react": "18.x",
+    "react-dom": "18.x",
+    "react-redux": "8.x"
+  },
+  "devDependencies": {
+    "@types/object-hash": "2.2.1",
+    "@types/react": "18.0.15",
+    "@types/react-dom": "18.0.6",
+    "react": "18.2.0",
+    "react-dom": "18.2.0"
+  }
+}

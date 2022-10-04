@@ -43,7 +43,7 @@ export const buildPackage = async (path) => {
     entryPoints: [entry],
     outbase: path + "/src",
     outdir: `${path}/dist`,
-    jsxFactory: "jsx",
+    jsx: "automatic",
     sourcemap: true,
     minify: false,
     bundle: true,

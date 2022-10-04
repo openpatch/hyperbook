@@ -1,0 +1,72 @@
+{
+  "name": "@hyperbook/element-bitflow",
+  "version": "0.0.0",
+  "author": "Mike Barkmin",
+  "homepage": "https://github.com/openpatch/hyperbook#readme",
+  "license": "MIT",
+  "main": "dist/index.cjs.js",
+  "module": "dist/index.esm.mjs",
+  "types": "dist/index.d.ts",
+  "typings": "dist/index.d.ts",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "require": "./dist/index.cjs.js",
+      "default": "./dist/index.esm.mjs"
+    },
+    "./index.css": "./dist/index.css"
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/openpatch/hyperbook.git",
+    "directory": "packages/element-bitflow"
+  },
+  "bugs": {
+    "url": "https://github.com/openpatch/hyperbook/issues"
+  },
+  "scripts": {
+    "prebuild": "rimraf dist",
+    "version": "pnpm build",
+    "lint": "tsc --noEmit",
+    "build": "pnpm build:pkg && pnpm build:types",
+    "build:pkg": "node ../../scripts/build.mjs",
+    "build:types": "tsc --project tsconfig.build.json --declaration --emitDeclarationOnly"
+  },
+  "dependencies": {
+    "@babel/core": "7.19.1",
+    "@bitflow/bits": "0.2.1",
+    "@bitflow/core": "0.6.0",
+    "@bitflow/do-local": "0.5.1",
+    "@bitflow/provider": "0.5.0",
+    "@bitflow/shell": "0.7.1",
+    "@emotion/cache": "11.10.3",
+    "@emotion/core": "11.0.0",
+    "@emotion/react": "11.10.4",
+    "@emotion/styled": "11.10.4",
+    "@hyperbook/provider": "workspace:*",
+    "@openpatch/patches": "6.0.1",
+    "@vocab/core": "1.1.1",
+    "@vocab/react": "1.1.2",
+    "@vocab/types": "1.1.0",
+    "react-hook-form": "7.36.0",
+    "zod": "3.19.1"
+  },
+  "peerDependencies": {
+    "@reduxjs/toolkit": "1.x",
+    "react": "18.x",
+    "react-dom": "18.x",
+    "react-redux": "8.x"
+  },
+  "devDependencies": {
+    "@types/react": "18.0.15",
+    "@types/react-dom": "18.0.6",
+    "react": "18.2.0",
+    "react-dom": "18.2.0"
+  }
+}

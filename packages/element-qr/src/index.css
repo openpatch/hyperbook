@@ -1,0 +1,54 @@
+.element-qr {
+  padding: 8px;
+  margin: 0 auto;
+  border-radius: 8px;
+  width: fit-content;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.element-qr .code {
+  display: flex;
+  background-color: white;
+  border-radius: 8px;
+  width: 100%;
+}
+
+.element-qr .code.S {
+  padding: 4px;
+  max-width: calc(64px - 8px);
+}
+
+.element-qr .code.M {
+  padding: 8px;
+  max-width: calc(128px - 16px);
+}
+
+.element-qr .code.L {
+  padding: 12px;
+  max-width: calc(256px - 24px);
+}
+
+.element-qr .code.XL {
+  padding: 16px;
+  max-width: calc(512px - 32px);
+}
+
+.element-qr svg {
+  border-radius: 8px;
+  width: 100%;
+  height: auto;
+}
+
+.element-qr .label {
+  margin-top: 8px;
+  text-align: center;
+  font-weight: bold;
+}
+
+.element-qr {
+  background-color: var(--color-nav);
+  border-style: solid;
+  border-width: 1px;
+  border-color: var(--color-nav-border);
+}

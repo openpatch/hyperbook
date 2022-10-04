@@ -10,12 +10,11 @@ import {
   Page,
   readFile,
 } from "../../utils/navigation";
-import Link from "next/link";
 import { Fragment } from "react";
 import { getHyperbook } from "../../utils/hyperbook";
-import { usePage } from "../../store";
 import { getToc, Toc } from "../../utils/toc";
-import { Markdown } from "../../components/Markdown";
+import { useActivePageId, useLink } from "@hyperbook/provider";
+import { Markdown } from "@hyperbook/markdown";
 
 const hyperbook = getHyperbook();
 
@@ -32,7 +31,8 @@ type TermProps = {
 };
 
 export default function Term({ markdown, navigation, term, toc }: TermProps) {
-  usePage();
+  const Link = useLink();
+  useActivePageId();
   return (
     <Layout
       navigation={navigation}
@@ -45,9 +45,7 @@ export default function Term({ markdown, navigation, term, toc }: TermProps) {
           {term.pages.map((p, i) => (
             <Fragment key={p.href}>
               {i > 0 && ", "}
-              <Link href={p.href}>
-                <a>{p.name}</a>
-              </Link>
+              <Link href={p.href}>{p.name}</Link>
             </Fragment>
           ))}
         </div>
@@ -105,6 +103,7 @@ export const getStaticProps: GetStaticProps<
 
   return {
     props: {
+      locale: hyperbook.language,
       term,
       markdown: content,
       toc: getToc(content),

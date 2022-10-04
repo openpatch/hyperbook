@@ -27,23 +27,23 @@ The Excalidraw element accepts three arguments:
 autoZoom does not seems to work, when using a file from excalidraw.com, since the file does not come with its original dimensions.
 :::
 
+```md
+::excalidraw{src="/excalidraw/hyperbook.excalidraw" aspectRatio="4/3"}
+
+::excalidraw{src="/excalidraw/hyperbook.excalidraw" aspectRatio="4/3" autoZoom=false center=true}
+
+::excalidraw{src="/excalidraw/hyperbook.excalidraw" aspectRatio="4/3" autoZoom=false center=true edit=true}
 ```
-::excalidraw{file="/excalidraw/hyperbook.excalidraw" aspectRatio="4/3"}
 
-::excalidraw{file="/excalidraw/hyperbook.excalidraw" aspectRatio="4/3" autoZoom=false center=true}
+::excalidraw{src="/excalidraw/hyperbook.excalidraw" aspectRatio="4/3"}
 
-::excalidraw{file="/excalidraw/hyperbook.excalidraw" aspectRatio="4/3" autoZoom=false center=true edit=true}
-```
-
-::excalidraw{file="/excalidraw/hyperbook.excalidraw" aspectRatio="4/3"}
-
-::excalidraw{file="/excalidraw/hyperbook.excalidraw" aspectRatio="4/3" autoZoom=false center=true}
+::excalidraw{src="/excalidraw/hyperbook.excalidraw" aspectRatio="4/3" autoZoom=false center=true}
 
 :::alert{info}
-Be sure to set the correct language in your hyperbook config file, otherwise Excalidraw will use the English. For example for German use "de".
+Be sure to set the correct language in your hyperbook config src, otherwise Excalidraw will use the English. For example for German use "de".
 :::
 
-::excalidraw{file="/excalidraw/hyperbook.excalidraw" aspectRatio="4/3" autoZoom=false center=true edit=true}
+::excalidraw{src="/excalidraw/hyperbook.excalidraw" aspectRatio="4/3" autoZoom=false center=true edit=true}
 
 ## Adding Libraries
 

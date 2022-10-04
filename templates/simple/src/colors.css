@@ -12,20 +12,6 @@ a {
   color: var(--color-brand);
 }
 
-.copy {
-  color: var(--color-text);
-}
-
-.hljs {
-  background: var(--color-nav) !important;
-  border-color: var(--color-spacer);
-}
-
-p > code {
-  background: var(--color-nav) !important;
-  border-color: var(--color-spacer);
-}
-
 .sidebar,
 #mobile-sidebar {
   background: var(--color-nav);
@@ -73,19 +59,6 @@ p > code {
   border-color: var(--color-nav-border);
 }
 
-table {
-  border-color: var(--color-spacer);
-}
-
-table tr {
-  background-color: var(--color-nav);
-  border-color: var(--color-spacer);
-}
-
-h2 {
-  border-bottom-color: var(--color-spacer);
-}
-
 header {
   background: var(--color-brand);
 }
@@ -100,55 +73,6 @@ header.inverted {
 
 header.inverted > .branding {
   color: var(--color-brand);
-}
-
-.alert {
-  background-color: var(--color-nav);
-  border-left-color: var(--color-nav-border);
-}
-
-.alert::before {
-  color: #fff;
-}
-
-.alert.success {
-  border-left-color: #00c851;
-}
-
-.alert.success::before {
-  background-color: #00c851;
-}
-
-.alert.info {
-  border-left-color: #33b5e5;
-}
-
-.alert.info::before {
-  background-color: #33b5e5;
-}
-
-.alert.warn {
-  border-left-color: #f0b429;
-}
-
-.alert.warn::before {
-  background-color: #f0b429;
-}
-
-.alert.error {
-  border-left-color: #ef4e4e;
-}
-
-.alert.error::before {
-  background-color: #ef4e4e;
-}
-
-a.jump {
-  border-color: var(--color-brand);
-}
-
-a.jump:hover {
-  background: var(--color-nav);
 }
 
 .meta {
@@ -194,63 +118,63 @@ a.jump:hover {
   border-left-color: var(--color-spacer);
 }
 
+a.jump {
+  border-color: var(--color-brand);
+}
+
+a.jump:hover {
+  background: var(--color-nav);
+}
+
+a.jump {
+  text-decoration: none;
+  flex: 1;
+  text-align: center;
+  border-style: solid;
+  border-width: 1px;
+  padding: 8px 16px;
+  width: 100%;
+  border-radius: 8px;
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 1px 2px;
+}
+
+a.jump.next {
+  margin-left: 8px;
+}
+
+a.jump.next::after {
+  content: " →";
+}
+
+a.jump.previous {
+  margin-right: 8px;
+}
+
+a.jump.previous::before {
+  content: "← ";
+}
+
+@media screen and (max-width: 800px) {
+  .jump-container {
+    flex-direction: column;
+  }
+
+  a.jump.next {
+    margin-left: 0px;
+    margin-top: 16px;
+  }
+
+  a.jump.previous {
+    margin-right: 0px;
+    margin-top: 16px;
+  }
+}
+
 .drawer {
   background: #fff;
 }
 
-.glossary .terms {
-  border-left-color: var(--color-spacer);
-}
-
-.tabs {
-  background-color: var(--color-nav);
-  border-color: var(--color-nav-border);
-}
-
-.tab {
-  color: var(--color-text);
-}
-
-.tabs .tab:hover {
-  border-bottom-color: var(--color-spacer);
-  color: var(--color-brand);
-}
-
-.tabs .tab.active {
-  border-bottom-color: var(--color-brand);
-  color: var(--color-brand);
-}
-
-.tabpanel {
-  border-color: var(--color-spacer);
-}
-
-.collapsible-button {
-  color: var(--color-text);
-  border-color: var(--color-nav-border);
-  background-color: var(--color-nav);
-}
-
-.collapsible-button:after {
-  color: var(--color-text);
-}
-
-.collapsible-inner {
-  border-color: var(--color-spacer);
-}
-
 .border {
-  border-color: var(--color-spacer);
-}
-
-.password > input {
-  color: var(--color-text);
-  background: var(--color-nav);
-  border-color: var(--color-spacer);
-}
-
-.password > .icon {
-  background: white;
   border-color: var(--color-spacer);
 }
 
@@ -258,49 +182,6 @@ a.jump:hover {
   background: var(--color-nav);
 }
 
-.download {
-  background: var(--color-nav);
-}
-
-.download > .icon {
-  border-right-color: var(--color-spacer);
-}
-
-ul.bookmarks li {
-  border-color: var(--color-spacer);
-}
-
-ul.bookmarks li:hover {
-  background: var(--color-nav);
-}
-
-ul.bookmarks li:last-of-type {
-  border-color: var(--color-spacer);
-}
-
-.flow {
-  background: white;
-}
-
-.struktog .error {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: var(--internal-color-error);
-  color: white;
-  font-weight: bold;
-  border-radius: 8px;
-}
-
-.qr {
-  background-color: var(--color-nav);
-  border-style: solid;
-  border-width: 1px;
-  border-color: var(--color-nav-border);
-}
-
-@media screen and (max-width: 600px) {
-  table td {
-    border-bottom-color: var(--color-spacer);
-  }
+.glossary .terms {
+  border-left-color: var(--color-spacer);
 }

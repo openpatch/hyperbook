@@ -1,0 +1,10 @@
+.element-bitflow {
+  position: relative;
+  width: 100%;
+  background: white;
+  border-color: var(--color-spacer);
+  border-width: 1px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  border-style: solid;
+}

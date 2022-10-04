@@ -8,7 +8,11 @@ const log = console.log.bind(console);
 
 const ignorePackages = [];
 const watcher = chokidar.watch(
-  ["packages/*/src/**/*.ts", "packages/*/src/**/*.tsx"],
+  [
+    "packages/*/src/**/*.ts",
+    "packages/*/src/**/*.tsx",
+    "packages/*/src/**/*.css",
+  ],
   {
     depth: 3,
     persistent: true,
@@ -54,11 +58,9 @@ watcher.on("change", async (filePath) => {
   }
 
   log(chalk.yellow(`Changes detected in ${fileName}`));
-  await buildPackage(join(process.cwd(), `packages/${fileName}`), fileName);
-
-  exec(`pnpm build:types`, { cwd: location }, (err, stdout, stderr) => {
+  exec(`pnpm build`, { cwd: location }, (err, stdout, stderr) => {
     if (!err || err === null) {
-      log(`types ${chalk.green("success")} - ${splitPath[1]}`);
+      log(`build ${chalk.green("success")} - ${splitPath[1]}`);
     } else {
       log(err, stdout, stderr);
     }

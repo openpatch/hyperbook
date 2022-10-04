@@ -5,7 +5,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 type ReqData = {
   path: string;
   content: string;
-  isPublic: boolean;
+  rootFolder: string;
 };
 
 type ResData = {
@@ -38,12 +38,10 @@ export default async function handler(
   if (process.env.NODE_ENV !== "development") {
     res.status(404).json({ status: "failed" });
   }
-  let { path: p, content, isPublic } = req.body as ReqData;
-  if (req.headers["content-type"] == "application/json") {
-    content = JSON.stringify(content);
-  }
-  if (isPublic) {
-    p = path.join("public", p);
+  let { path: p, content, rootFolder } = req.body as ReqData;
+
+  if (rootFolder) {
+    p = path.join(rootFolder, p);
   }
   p = path.join(__dirname, "..", "..", "..", "..", p);
   try {

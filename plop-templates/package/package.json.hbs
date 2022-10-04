@@ -1,0 +1,43 @@
+{
+  "name": "@hyperbook/{{dashCase packageName}}",
+  "version": "0.0.0",
+  "author": "Mike Barkmin",
+  "homepage": "https://github.com/openpatch/hyperbook#readme",
+  "license": "MIT",
+  "main": "dist/index.cjs.js",
+  "module": "dist/index.esm.mjs",
+  "types": "dist/index.d.ts",
+  "typings": "dist/index.d.ts",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "require": "./dist/index.cjs.js",
+      "default": "./dist/index.esm.mjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/openpatch/hyperbook.git",
+    "directory": "packages/{{dashCase packageName}}"
+  },
+  "bugs": {
+    "url": "https://github.com/openpatch/hyperbook/issues"
+  },
+  "scripts": {
+    "prebuild": "rimraf dist",
+    "version": "pnpm build",
+    "lint": "tsc --noEmit",
+    "test": "jest --env=jsdom --passWithNoTests",
+    "build": "pnpm build:pkg && pnpm build:types",
+    "build:pkg": "node ../../scripts/build.mjs",
+    "build:types": "tsc --project tsconfig.build.json --declaration --emitDeclarationOnly"
+  },
+  "dependencies": {
+  }
+}
