@@ -149,7 +149,7 @@ importers:
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
 
-  packages/element-download:
+  packages/element-dl:
     specifiers:
       "@hyperbook/provider": workspace:*
       "@types/react": 18.0.15
@@ -427,7 +427,7 @@ importers:
       "@hyperbook/element-bitflow": workspace:*
       "@hyperbook/element-bookmarks": workspace:*
       "@hyperbook/element-collapsible": workspace:*
-      "@hyperbook/element-download": workspace:*
+      "@hyperbook/element-dl": workspace:*
       "@hyperbook/element-excalidraw": workspace:*
       "@hyperbook/element-mermaid": workspace:*
       "@hyperbook/element-protect": workspace:*
@@ -476,7 +476,7 @@ importers:
       "@hyperbook/element-bitflow": link:../element-bitflow
       "@hyperbook/element-bookmarks": link:../element-bookmarks
       "@hyperbook/element-collapsible": link:../element-collapsible
-      "@hyperbook/element-download": link:../element-download
+      "@hyperbook/element-dl": link:../element-dl
       "@hyperbook/element-excalidraw": link:../element-excalidraw
       "@hyperbook/element-mermaid": link:../element-mermaid
       "@hyperbook/element-protect": link:../element-protect
@@ -540,7 +540,7 @@ importers:
       "@hyperbook/element-bitflow": workspace:*
       "@hyperbook/element-bookmarks": workspace:*
       "@hyperbook/element-collapsible": workspace:*
-      "@hyperbook/element-download": workspace:*
+      "@hyperbook/element-dl": workspace:*
       "@hyperbook/element-excalidraw": workspace:*
       "@hyperbook/element-mermaid": workspace:*
       "@hyperbook/element-protect": workspace:*
@@ -607,7 +607,7 @@ importers:
       "@hyperbook/element-bitflow": link:../../packages/element-bitflow
       "@hyperbook/element-bookmarks": link:../../packages/element-bookmarks
       "@hyperbook/element-collapsible": link:../../packages/element-collapsible
-      "@hyperbook/element-download": link:../../packages/element-download
+      "@hyperbook/element-dl": link:../../packages/element-dl
       "@hyperbook/element-excalidraw": link:../../packages/element-excalidraw
       "@hyperbook/element-mermaid": link:../../packages/element-mermaid
       "@hyperbook/element-protect": link:../../packages/element-protect

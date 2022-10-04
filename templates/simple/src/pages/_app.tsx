@@ -16,8 +16,8 @@ import elementProtect from "@hyperbook/element-protect";
 import "@hyperbook/element-protect/index.css";
 import elementCollapsible from "@hyperbook/element-collapsible";
 import "@hyperbook/element-collapsible/index.css";
-import elementDowload from "@hyperbook/element-download";
-import "@hyperbook/element-download/index.css";
+import elementDl from "@hyperbook/element-dl";
+import "@hyperbook/element-dl/index.css";
 import elementBookmarks from "@hyperbook/element-bookmarks";
 import "@hyperbook/element-bookmarks/index.css";
 import elementStruktog from "@hyperbook/element-struktog";
@@ -63,7 +63,7 @@ export default function MyApp({ Component, pageProps }) {
         elementYoutube,
         elementCollapsible,
         elementProtect,
-        elementDowload,
+        elementDl,
         elementBookmarks,
         elementStruktog,
         elementQr,

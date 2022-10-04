@@ -1,6 +1,6 @@
 {
-  "name": "@hyperbook/element-download",
-  "version": "0.1.0",
+  "name": "@hyperbook/element-dl",
+  "version": "0.0.0",
   "author": "Mike Barkmin",
   "homepage": "https://github.com/openpatch/hyperbook#readme",
   "license": "MIT",
@@ -25,7 +25,7 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/openpatch/hyperbook.git",
-    "directory": "packages/element-download"
+    "directory": "packages/element-dl"
   },
   "bugs": {
     "url": "https://github.com/openpatch/hyperbook/issues"

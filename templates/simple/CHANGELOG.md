@@ -13,7 +13,7 @@
   - @hyperbook/element-bitflow@0.1.0
   - @hyperbook/element-bookmarks@0.1.0
   - @hyperbook/element-collapsible@0.1.0
-  - @hyperbook/element-download@0.1.0
+  - @hyperbook/element-dl0.1.0
   - @hyperbook/element-excalidraw@0.1.0
   - @hyperbook/element-mermaid@0.1.0
   - @hyperbook/element-protect@0.1.0

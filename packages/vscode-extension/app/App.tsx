@@ -7,7 +7,7 @@ import elementTerm from "@hyperbook/element-term";
 import elementYoutube from "@hyperbook/element-youtube";
 import elementProtect from "@hyperbook/element-protect";
 import elementCollapsible from "@hyperbook/element-collapsible";
-import elementDowload from "@hyperbook/element-download";
+import elementDl from "@hyperbook/element-dl";
 import elementBookmarks from "@hyperbook/element-bookmarks";
 import elementStruktog from "@hyperbook/element-struktog";
 import elementQr from "@hyperbook/element-qr";
@@ -98,7 +98,7 @@ export const App = () => {
         elementYoutube,
         elementCollapsible,
         elementProtect,
-        elementDowload,
+        elementDl,
         elementBookmarks,
         elementStruktog,
         elementQr,
