@@ -42,7 +42,6 @@
   },
   "dependencies": {
     "@hyperbook/provider": "workspace:*",
-    "react-icons": "4.4.0",
     "react-markdown": "8.0.3",
     "rehype-highlight": "5.0.2",
     "rehype-katex": "6.0.2",

@@ -355,7 +355,6 @@ importers:
       "@types/unist": ^2.0.6
       react: 18.2.0
       react-dom: 18.2.0
-      react-icons: 4.4.0
       react-markdown: 8.0.3
       rehype-highlight: 5.0.2
       rehype-katex: 6.0.2
@@ -367,7 +366,6 @@ importers:
       remark-unwrap-images: 3.0.1
     dependencies:
       "@hyperbook/provider": link:../provider
-      react-icons: 4.4.0_react@18.2.0
       react-markdown: 8.0.3_3hx2ussxxho4jajbwrd6gq34qe
       rehype-highlight: 5.0.2
       rehype-katex: 6.0.2
