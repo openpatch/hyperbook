@@ -1,7 +1,6 @@
 import fs from "fs";
 import matter from "gray-matter";
 import { GetStaticPaths, GetStaticProps } from "next";
-import Head from "next/head";
 import path from "path";
 import { Layout } from "../components/Layout";
 import { getAllFiles } from "../utils/files";
