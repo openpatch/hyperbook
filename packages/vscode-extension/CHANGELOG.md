@@ -1,5 +1,16 @@
 # @hyperbook/vscode-extension
 
+## 0.2.0
+
+### Minor Changes
+
+- [`09af0c5`](https://github.com/openpatch/hyperbook/commit/09af0c5bee8fc95f04138a660e4a7c2e0e963f17) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - rename download element to dl, since npm does not allow download in the package name.
+
+### Patch Changes
+
+- Updated dependencies [[`09af0c5`](https://github.com/openpatch/hyperbook/commit/09af0c5bee8fc95f04138a660e4a7c2e0e963f17)]:
+  - @hyperbook/element-dl@0.1.0
+
 ## 0.1.0
 
 ### Minor Changes
