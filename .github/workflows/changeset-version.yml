@@ -37,3 +37,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish VS Code extension
+        if: steps.changesets.outputs.published == 'true'
+        run: |
+          pnpm --filter "@hyperbook/vscode-extension" publish
+        env:
+          VSCE_PAT: ${{ secrect.VSCE_TOKEN }}

@@ -1,0 +1,489 @@
+{
+  "scopeName": "markdown.hyperbook",
+  "injectionSelector": "L:text.html.markdown",
+  "patterns": [
+    {
+      "include": "#directive-alert"
+    },
+    {
+      "include": "#directive-archive"
+    },
+    {
+      "include": "#directive-bookmarks"
+    },
+    {
+      "include": "#directive-collapsible"
+    },
+    {
+      "include": "#directive-download"
+    },
+    {
+      "include": "#directive-emoji"
+    },
+    {
+      "include": "#directive-excalidraw"
+    },
+    {
+      "include": "#directive-glossary"
+    },
+    {
+      "include": "#directive-protect"
+    },
+    {
+      "include": "#directive-qr"
+    },
+    {
+      "include": "#directive-struktog"
+    },
+    {
+      "include": "#directive-youtube"
+    },
+    {
+      "include": "#directive-tabs"
+    },
+    {
+      "include": "#directive-bitflow"
+    }
+  ],
+  "repository": {
+    "directive-alert": {
+      "name": "meta.directive.alert.hyperbook",
+      "begin": "(^|\\G)(:{3,})(alert)(?:{(error|success|info|warn)})?\\s*$",
+      "end": "(^|\\G)(\\2)\\s*$",
+      "beginCaptures": {
+        "2": {
+          "name": "punctuation.definition.directive.level.hyperbook"
+        },
+        "3": {
+          "name": "entity.name.function.directive.alert.hyperbook"
+        },
+        "4": {
+          "name": "keyword.directive.alert.severity.hyperbook"
+        }
+      },
+      "endCaptures": {
+        "2": {
+          "name": "punctuation.definition.directive.level.hyperbook"
+        }
+      },
+      "patterns": [
+        {
+          "begin": "(^|\\G)(\\s*)(.*)",
+          "while": "(^|\\G)(?!\\s*(:{3,})\\s*$)",
+          "contentName": "meta.embedded.block.markdown",
+          "patterns": [
+            {
+              "include": "text.html.markdown"
+            }
+          ]
+        }
+      ]
+    },
+    "directive-archive": {
+      "name": "meta.directive.archive.hyperbook",
+      "match": "(^|\\G)(:{1,})(archive)\\[(.+)\\]{(.*)}\\s*$",
+      "captures": {
+        "2": {
+          "name": "punctuation.definition.directive.level.hyperbook"
+        },
+        "3": {
+          "name": "entity.name.function.directive.archive.hyperbook"
+        },
+        "4": {
+          "name": "string.unquoted"
+        },
+        "5": {
+          "patterns": [
+            {
+              "match": "(name)=\"([^\"]*)\"",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.archive.hyperbook"
+                },
+                "2": {
+                  "name": "string.quoted.double.untitled"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "directive-bookmarks": {
+      "name": "entity.name.function.directive.alert.hyperbook",
+      "match": "(^|\\G)(:{2,})(bookmarks)"
+    },
+    "directive-collapsible": {
+      "name": "meta.directive.collapsible.hyperbook",
+      "begin": "(^|\\G)(:{3,})(collapsible){(.*)}\\s*$",
+      "end": "(^|\\G)(\\2)\\s*$",
+      "beginCaptures": {
+        "2": {
+          "name": "punctuation.definition.directive.level.hyperbook"
+        },
+        "3": {
+          "name": "entity.name.function.directive.collapsible.hyperbook"
+        },
+        "4": {
+          "patterns": [
+            {
+              "match": "(title|id)=\"([^\"]*)\"",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.archive.hyperbook"
+                },
+                "2": {
+                  "name": "string.quoted.double.untitled"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "endCaptures": {
+        "2": {
+          "name": "punctuation.definition.directive.level.hyperbook"
+        }
+      },
+      "patterns": [
+        {
+          "begin": "(^|\\G)(\\s*)(.*)",
+          "while": "(^|\\G)(?!\\s*(:{3,}))\\s*$",
+          "contentName": "meta.embedded.block.markdown",
+          "patterns": [
+            {
+              "include": "text.html.markdown"
+            }
+          ]
+        }
+      ]
+    },
+    "directive-download": {
+      "name": "meta.directive.download.hyperbook",
+      "match": "(^|\\G)(:{1,})(download)\\[(.+)\\]{(.*)}\\s*$",
+      "captures": {
+        "2": {
+          "name": "punctuation.definition.directive.level.hyperbook"
+        },
+        "3": {
+          "name": "entity.name.function.directive.download.hyperbook"
+        },
+        "4": {
+          "name": "string.unquoted"
+        },
+        "5": {
+          "patterns": [
+            {
+              "match": "(src)=\"([^\"]*)\"",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.download.hyperbook"
+                },
+                "2": {
+                  "name": "string.quoted.double.untitled"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "directive-emoji": {
+      "name": "meta.directive.emoji.hyperbook",
+      "match": "(:)([a-zA-z]+)(:)",
+      "captures": {
+        "1": {
+          "name": "punctuation.definition.directive.level.hyperbook"
+        },
+        "2": {
+          "name": "entity.name.function.directive.download.hyperbook"
+        },
+        "3": {
+          "name": "punctuation.definition.directive.level.hyperbook"
+        }
+      }
+    },
+    "directive-excalidraw": {
+      "name": "meta.directive.excalidraw.hyperbook",
+      "match": "(^|\\G)(:{2,})(excalidraw){(.*)}\\s*$",
+      "captures": {
+        "2": {
+          "name": "punctuation.definition.directive.level.hyperbook"
+        },
+        "3": {
+          "name": "entity.name.function.directive.excalidraw.hyperbook"
+        },
+        "4": {
+          "patterns": [
+            {
+              "match": "(src|aspectRatio|file)=\"([^\"]*)\"",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.download.hyperbook"
+                },
+                "2": {
+                  "name": "string.quoted.double.untitled"
+                }
+              }
+            },
+            {
+              "match": "(autoZoom|center|edit)=(?:(false)|(true))",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.download.hyperbook"
+                },
+                "2": {
+                  "name": "constant.language.boolean.false"
+                },
+                "3": {
+                  "name": "constant.language.boolean.true"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "directive-glossary": {
+      "name": "meta.directive.glossary.hyperbook",
+      "match": "(^|\\G)(:{1,})(t|term)\\[(.+)\\]{(#[0-9a-zA-z-]+)(\\.[0-9a-zA-z-]+)?}\\s*$",
+      "captures": {
+        "2": {
+          "name": "punctuation.definition.directive.level.hyperbook"
+        },
+        "3": {
+          "name": "entity.name.function.directive.glossary.hyperbook"
+        },
+        "4": {
+          "name": "string.unquoted"
+        },
+        "5": {
+          "name": "string.unquoted"
+        },
+        "6": {
+          "name": "string.unquoted"
+        }
+      }
+    },
+    "directive-protect": {
+      "name": "meta.directive.protect.hyperbook",
+      "match": "(^|\\G)(:{2,})(protect){(.*)}\\s*$",
+      "captures": {
+        "2": {
+          "name": "punctuation.definition.directive.level.hyperbook"
+        },
+        "3": {
+          "name": "entity.name.function.directive.protect.hyperbook"
+        },
+        "4": {
+          "patterns": [
+            {
+              "match": "(password|description)=\"([^\"]*)\"",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.protect.hyperbook"
+                },
+                "2": {
+                  "name": "string.quoted.double.untitled"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "directive-qr": {
+      "name": "meta.directive.qr.hyperbook",
+      "match": "(^|\\G)(:{2,})(qr){(.*)}\\s*$",
+      "captures": {
+        "2": {
+          "name": "punctuation.definition.directive.level.hyperbook"
+        },
+        "3": {
+          "name": "entity.name.function.directive.qr.hyperbook"
+        },
+        "4": {
+          "patterns": [
+            {
+              "match": "(value|size|label)=\"([^\"]*)\"",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.qr.hyperbook"
+                },
+                "2": {
+                  "name": "string.quoted.double.untitled"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "directive-bitflow": {
+      "name": "meta.directive.bitflow.hyperbook",
+      "match": "(^|\\G)(:{2,})(task|flow){(.*)}\\s*$",
+      "captures": {
+        "2": {
+          "name": "punctuation.definition.directive.level.hyperbook"
+        },
+        "3": {
+          "name": "entity.name.function.directive.bitflow.hyperbook"
+        },
+        "4": {
+          "patterns": [
+            {
+              "match": "(src)=\"([^\"]*)\"",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.bitflow.hyperbook"
+                },
+                "2": {
+                  "name": "string.quoted.double.untitled"
+                }
+              }
+            },
+            {
+              "match": "(height)=\"([0-9]+)(px|%)\"",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.bitflow.hyperbook"
+                },
+                "2": {
+                  "name": "constant.numeric"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "directive-struktog": {
+      "name": "meta.directive.struktog.hyperbook",
+      "match": "(^|\\G)(:{2,})(struktog){(.*)}\\s*$",
+      "captures": {
+        "2": {
+          "name": "punctuation.definition.directive.level.hyperbook"
+        },
+        "3": {
+          "name": "entity.name.function.directive.struktog.hyperbook"
+        },
+        "4": {
+          "patterns": [
+            {
+              "match": "(data)=\"([^\"]*)\"",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.struktog.hyperbook"
+                },
+                "2": {
+                  "name": "string.quoted.double.untitled"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "directive-youtube": {
+      "name": "meta.directive.youtube.hyperbook",
+      "match": "(^|\\G)(::)(youtube)\\[(.+)\\]{(#[0-9a-zA-z-]+)}\\s*$",
+      "captures": {
+        "2": {
+          "name": "punctuation.definition.directive.level.hyperbook"
+        },
+        "3": {
+          "name": "entity.name.function.directive.youtube.hyperbook"
+        },
+        "4": {
+          "name": "string.unquoted"
+        },
+        "5": {
+          "name": "string.unquoted"
+        }
+      }
+    },
+    "directive-tabs": {
+      "name": "meta.directive.tabs.hyperbook",
+      "begin": "(^|\\G)(:{4,})(tabs)({.*})?\\s*$",
+      "end": "(^|\\G)(\\2)\\s*$",
+      "beginCaptures": {
+        "2": {
+          "name": "punctuation.definition.directive.level.hyperbook"
+        },
+        "3": {
+          "name": "entity.name.function.directive.tabs.hyperbook"
+        },
+        "4": {
+          "patterns": [
+            {
+              "match": "(id)=\"([a-zA-z0-9-.]+)\"",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.struktog.hyperbook"
+                },
+                "2": {
+                  "name": "string.quoted.double.untitled"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "endCaptures": {
+        "2": {
+          "name": "punctuation.definition.directive.level.hyperbook"
+        }
+      },
+      "patterns": [
+        {
+          "include": "#directive-tab"
+        }
+      ]
+    },
+    "directive-tab": {
+      "name": "meta.directive.tab.hyperbook",
+      "begin": "(^|\\G)(:{3,})(tab)({.*})?\\s*$",
+      "end": "(^|\\G)(\\2|:{3,})\\s*$",
+      "beginCaptures": {
+        "2": {
+          "name": "punctuation.definition.directive.level.hyperbook"
+        },
+        "3": {
+          "name": "entity.name.function.directive.tab.hyperbook"
+        },
+        "4": {
+          "patterns": [
+            {
+              "match": "(id|title)=\"(.*)\"",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.struktog.hyperbook"
+                },
+                "2": {
+                  "name": "string.quoted.double.untitled"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "endCaptures": {
+        "2": {
+          "name": "punctuation.definition.directive.level.hyperbook"
+        }
+      },
+      "patterns": [
+        {
+          "begin": "(^|\\G)(\\s*)(.*)",
+          "while": "(^|\\G)(?!\\s*(:{3,})\\s*$)",
+          "contentName": "meta.embedded.block.markdown",
+          "patterns": [
+            {
+              "include": "text.html.markdown"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,97 @@
+{
+  "Element Download": {
+    "prefix": [":download"],
+    "body": ["::download[${2:title}]{src=\"$1\"}", "$0"]
+  },
+  "Element Archive": {
+    "prefix": [":archive"],
+    "body": ["::archive[${2:title}]{name=\"$1\"}", "$0"]
+  },
+  "Element Bitflow Flow": {
+    "prefix": [":flow"],
+    "body": ["::flow{src=\"$1\" height=400}", "$0"]
+  },
+  "Element Bitflow Task": {
+    "prefix": [":task"],
+    "body": ["::task{src=\"$1\" height=400}", "$0"]
+  },
+  "Element Bookmarks": {
+    "prefix": [":bookmarks"],
+    "body": ["::bookmarks", "", "$0"]
+  },
+  "Element Collapsible": {
+    "prefix": [":collapsible"],
+    "body": [
+      ":::collapsible{title=\"${1:title}\" id=\"${2:RANDOM}\"}",
+      "",
+      "$TM_SELECTED_TEXT",
+      "$0",
+      ":::"
+    ]
+  },
+  "Element Excalidraw": {
+    "prefix": [":excalidraw"],
+    "body": [
+      "::excalidraw{src=\"$1\" aspectRatio=\"${2:1:1}\" autoZoom=${3:true} center=${4:true} edit=${5:false}}",
+      "",
+      "$0"
+    ]
+  },
+  "Element Glossary": {
+    "prefix": [":t", ":term"],
+    "body": [":t[$2]{#${1:id}}$0"]
+  },
+  "Element Mermaid": {
+    "prefix": [":mermaid"],
+    "body": [":::mermaid", "$0", ":::"]
+  },
+  "Element Protect": {
+    "prefix": [":protect"],
+    "body": [
+      ":::protect{password=\"${1:password}\" description=\"${2:description}\"}",
+      "",
+      "$TM_SELECTED_TEXT",
+      "$0",
+      ":::"
+    ]
+  },
+  "Element QR": {
+    "prefix": [":qr"],
+    "body": [
+      "::qr{value=\"$CLIPBOARD\" size=\"${2|S,M,L,XL}\" label=\"$3\"}",
+      "$0"
+    ]
+  },
+  "Element Strugtok": {
+    "prefix": [":struktog"],
+    "body": ["::struktog{data=\"$CLIPBOARD\"}", "$0"]
+  },
+  "Element Tabs": {
+    "prefix": [":tabs"],
+    "body": [
+      "::::tabs{id=\"$RANDOM\"}",
+      "",
+      ":::tab{title=\"${1:Tab 1}\", id=\"$RANDOM\"}",
+      "",
+      "$TM_SELECTED_TEXT",
+      "$0",
+      ":::",
+      "",
+      "::::"
+    ]
+  },
+  "Element Tab": {
+    "prefix": [":tab"],
+    "body": [
+      ":::tab{title=\"${1:title}\" id=\"$RANDOM\"}",
+      "",
+      "$TM_SELECTED_TEXT",
+      "$0",
+      ":::"
+    ]
+  },
+  "Element YouTube": {
+    "prefix": [":youtube"],
+    "body": ["::youtube[${1:title}]{#$CLIPBOARD}", "$0"]
+  }
+}
