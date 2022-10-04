@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.5.4
+
+### Patch Changes
+
+- [`23f451f`](https://github.com/openpatch/hyperbook/commit/23f451f9bd8ed8ea54f4403fabb4e8d09fe1a9a9) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - replace workspace version with the latest on npm
+
 ## 0.5.3
 
 ### Patch Changes

@@ -1,5 +1,12 @@
 # @hyperbook/element-youtube
 
+## 0.1.2
+
+### Patch Changes
+
+- Updated dependencies [[`2c34554`](https://github.com/openpatch/hyperbook/commit/2c34554f64359fb995190b1465daddfa3e0101c0)]:
+  - @hyperbook/provider@0.1.2
+
 ## 0.1.1
 
 ### Patch Changes
