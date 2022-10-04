@@ -12,6 +12,7 @@ import { makeDir } from "./helpers/make-dir";
 import path from "path";
 import { makeSymlink } from "./helpers/make-symlink";
 import { readHyperbook } from "./helpers/read-hyperbook";
+import { preparePackages } from "./helpers/prepare-packages";
 
 export class DownloadError extends Error {}
 
@@ -69,6 +70,9 @@ export async function runSetup(
     }
     throw new DownloadError(isErrorLike(reason) ? reason.message : reason + "");
   }
+  console.log("Prepare packages. Use latest versions.");
+  console.log();
+  await preparePackages(nextRoot);
 
   console.log("Installing packages. This might take a couple of minutes.");
   console.log();
