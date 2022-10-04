@@ -1,5 +1,11 @@
 # hyperbook-simple-template
 
+## 0.3.2
+
+### Patch Changes
+
+- [`f1dc99b`](https://github.com/openpatch/hyperbook/commit/f1dc99b785da1ff8079ad3881ba7eb354c3b2ec0) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Tag templates as well
+
 ## 0.3.1
 
 ### Patch Changes
