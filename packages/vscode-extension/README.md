@@ -1,19 +1,48 @@
-# VSCode Hyperbook Extension
+# Hyperbook Support for Visual Studio Code
 
-## Development
+[![version](https://img.shields.io/vscode-marketplace/v/openpatch.hyperbook.svg?style=flat-square&label=vscode%20marketplace)](https://marketplace.visualstudio.com/items?itemName=openpatch.hyperbook)
+[![installs](https://img.shields.io/vscode-marketplace/d/openpatch.hyperbook.svg?style=flat-square)](https://marketplace.visualstudio.com/items?itemName=openpatch.hyperbook)
+[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/openpatch/hyperbook/CI?style=flat-square)](https://github.com/openpatch/hyperbook/actions)
+[![GitHub stars](https://img.shields.io/github/stars/openpatch/hyperbook.svg?style=flat-square&label=github%20stars)](https://github.com/openpatch/hyperbook)
+[![GitHub Contributors](https://img.shields.io/github/contributors/openpatch/hyperbook.svg?style=flat-square)](https://github.com/openpatch/hyperbook/graphs/contributors)
 
-Install dependencies first.
+All you need for writing Hyperbooks (auto preview, snippets, auto-completion and more).
 
-```bash
-$ npm install
-```
+## Features
 
-After the install process you can press `F5` to "Start Debugging" (or: select in menu **"Debug" -> "Run Extension"**). A new Extension Development Host window will open in which you need to open command palette (`Ctrl/Cmd + Shift + P`) and select **"Webview React: Open Webview"** to open webview.
+### Preview
 
-## Publish
+You can preview your Hyperbook pages by clicking the preview icon in the top right-hand corner or by running the command `Show side preview`.
 
-```
-npm install -g vsce
-vsce package
-vsce publish
-```
+### Hyperbook Config
+
+The `hyperbook.json` is validated against a schema, which presents you
+from making mistakes. It also enables a color picker for your brand
+color.
+
+### Syntax Highlighting
+
+Each element has its own syntax highlighting. So you know when you typed it right.
+
+### Snippets
+
+Each element can be inserted by using a snippet. Type `:` and hit your auto-completion key combo (default Ctrl+Space).
+
+### Auto completion
+
+- Glossary terms
+  - Move your cursor between the curly braces of a term/t element, e.g.: `:t[My term]{`
+  - Type `#` and hit your key combo for auto-completion (Default Ctrl+Space)
+- Link to book pages
+  - For this to work you need to disable `Markdown Suggest Paths` (markdown.suggest.paths.enabled).
+  - Type `/` and hit your key combo for auto-completion (Default Ctrl+Space)
+- Link to files in the public folder
+  - For this to work you need to disable `Markdown Suggest Paths` (markdown.suggest.paths.enabled).
+  - Type `/` and hit your key combo for auto-completion (Default Ctrl+Space)
+- Archives
+  - Move your cursor in the src parameter of an archive element, e.g.: `:archive[My archive]{src="`
+  - Type `/` and hit your key combo for auto-completion (Default Ctrl+Space)
+
+## Changelog
+
+See [CHANGELOG](CHANGELOG.md) for more information.
