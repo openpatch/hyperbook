@@ -558,7 +558,7 @@ importers:
       "@hyperbook/provider": workspace:*
       "@hyperbook/store": workspace:*
       "@hyperbook/styles": workspace:*
-      "@hyperbook/types": workspace:^0.0.0
+      "@hyperbook/types": workspace:*
       "@types/node": 18.7.6
       "@types/react": 18.0.21
       chalk: 5.0.1
