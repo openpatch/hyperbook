@@ -1,5 +1,12 @@
 # @hyperbook/element-tabs
 
+## 0.1.4
+
+### Patch Changes
+
+- Updated dependencies [[`cedb551`](https://github.com/openpatch/hyperbook/commit/cedb55191fd025b5a214df406a53cbab5d1b1bc1)]:
+  - @hyperbook/provider@0.1.4
+
 ## 0.1.3
 
 ### Patch Changes
