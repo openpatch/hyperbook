@@ -1,5 +1,11 @@
 # @hyperbook/vscode-extension
 
+## 0.2.8
+
+### Patch Changes
+
+- [#318](https://github.com/openpatch/hyperbook/pull/318) [`1a6d9cb`](https://github.com/openpatch/hyperbook/commit/1a6d9cbd0799292a65e262b7e81aad8009d585c0) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add trigger character
+
 ## 0.2.7
 
 ### Patch Changes
