@@ -1,5 +1,29 @@
 # hyperbook-simple-template
 
+## 0.3.6
+
+### Patch Changes
+
+- [`c3e747a`](https://github.com/openpatch/hyperbook/commit/c3e747ab7b95c3e526b3800b169aa8f505f9b9a2) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Do not rely on process.env.NODE_ENV and use env prodivded by the provider.
+
+- Updated dependencies [[`9b2b71b`](https://github.com/openpatch/hyperbook/commit/9b2b71b8bbd728294ff4c4c97502e58e99619300), [`c3e747a`](https://github.com/openpatch/hyperbook/commit/c3e747ab7b95c3e526b3800b169aa8f505f9b9a2)]:
+  - @hyperbook/element-qr@0.1.4
+  - @hyperbook/element-excalidraw@0.1.3
+  - @hyperbook/provider@0.1.3
+  - @hyperbook/element-alert@0.1.3
+  - @hyperbook/element-bitflow@0.1.4
+  - @hyperbook/element-bookmarks@0.1.3
+  - @hyperbook/element-collapsible@0.1.3
+  - @hyperbook/element-dl@0.1.3
+  - @hyperbook/element-mermaid@0.1.3
+  - @hyperbook/element-protect@0.1.3
+  - @hyperbook/element-struktog@0.1.3
+  - @hyperbook/element-tabs@0.1.3
+  - @hyperbook/element-term@0.1.3
+  - @hyperbook/element-youtube@0.1.3
+  - @hyperbook/markdown@0.1.4
+  - @hyperbook/styles@0.1.3
+
 ## 0.3.5
 
 ### Patch Changes

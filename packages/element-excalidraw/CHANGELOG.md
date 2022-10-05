@@ -1,5 +1,14 @@
 # @hyperbook/element-excalidraw
 
+## 0.1.3
+
+### Patch Changes
+
+- [`c3e747a`](https://github.com/openpatch/hyperbook/commit/c3e747ab7b95c3e526b3800b169aa8f505f9b9a2) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Do not rely on process.env.NODE_ENV and use env prodivded by the provider.
+
+- Updated dependencies [[`c3e747a`](https://github.com/openpatch/hyperbook/commit/c3e747ab7b95c3e526b3800b169aa8f505f9b9a2)]:
+  - @hyperbook/provider@0.1.3
+
 ## 0.1.2
 
 ### Patch Changes
