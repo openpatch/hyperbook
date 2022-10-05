@@ -9,6 +9,7 @@
 
 .element-qr .code {
   display: flex;
+  margin: 0 auto;
   background-color: white;
   border-radius: 8px;
   width: 100%;
@@ -17,6 +18,16 @@
 .element-qr .code.S {
   padding: 4px;
   max-width: calc(64px - 8px);
+}
+
+.element-qr .code.S canvas,
+.element-qr .code.S svg {
+  border-radius: 2px;
+}
+
+.element-qr .code.M canvas,
+.element-qr .code.M svg {
+  border-radius: 4px;
 }
 
 .element-qr .code.M {
@@ -34,16 +45,25 @@
   max-width: calc(512px - 32px);
 }
 
-.element-qr svg {
+.element-qr svg,
+.element-qr canvas {
   border-radius: 8px;
-  width: 100%;
-  height: auto;
+  width: 100% !important;
+  height: auto !important;
 }
 
 .element-qr .label {
   margin-top: 8px;
   text-align: center;
   font-weight: bold;
+}
+
+.element-qr .label.S {
+  font-size: 12px;
+}
+
+.element-qr .label.M {
+  font-size: 14px;
 }
 
 .element-qr {

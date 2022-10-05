@@ -29,7 +29,7 @@ const DirectiveQr: FC<DirectiveQrProps> = ({ size, value, label }) => {
       </div>
       {label && (
         <div
-          className="label"
+          className={["label", size].join(" ")}
           style={{
             maxWidth: realSizes[size],
           }}
