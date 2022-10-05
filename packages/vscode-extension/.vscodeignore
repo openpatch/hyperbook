@@ -10,4 +10,4 @@ vsc-extension-quickstart.md
 **/*.map
 **/*.ts
 .prettierrc
-screenshot.gif
+screenshots/**

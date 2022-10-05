@@ -1,5 +1,11 @@
 # @hyperbook/vscode-extension
 
+## 0.2.15
+
+### Patch Changes
+
+- add screenshots to README
+
 ## 0.2.14
 
 ### Patch Changes
