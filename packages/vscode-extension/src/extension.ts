@@ -36,9 +36,15 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(disposableStatusBar);
 
   // Completions
+  const DocumentSelectorMarkdown: vscode.DocumentSelector = [
+    {
+      language: "markdown",
+      scheme: "file",
+    },
+  ];
 
   const bookProvider = vscode.languages.registerCompletionItemProvider(
-    "markdown",
+    DocumentSelectorMarkdown,
     {
       provideCompletionItems(document, position, token, context) {
         const linePrefix = document
@@ -72,11 +78,12 @@ export function activate(context: vscode.ExtensionContext) {
             });
           });
       },
-    }
+    },
+    "/"
   );
 
   const publicProvider = vscode.languages.registerCompletionItemProvider(
-    "markdown",
+    DocumentSelectorMarkdown,
     {
       provideCompletionItems(document, position, token, context) {
         const linePrefix = document
@@ -109,11 +116,12 @@ export function activate(context: vscode.ExtensionContext) {
             });
           });
       },
-    }
+    },
+    "/"
   );
 
   const glossaryProvider = vscode.languages.registerCompletionItemProvider(
-    "markdown",
+    DocumentSelectorMarkdown,
     {
       provideCompletionItems(document, position, token, context) {
         const linePrefix = document
@@ -148,11 +156,12 @@ export function activate(context: vscode.ExtensionContext) {
             });
           });
       },
-    }
+    },
+    "#"
   );
 
   const archiveProvider = vscode.languages.registerCompletionItemProvider(
-    "markdown",
+    DocumentSelectorMarkdown,
     {
       provideCompletionItems(document, position, token, context) {
         const linePrefix = document
@@ -185,7 +194,8 @@ export function activate(context: vscode.ExtensionContext) {
               });
           });
       },
-    }
+    },
+    '"'
   );
 
   context.subscriptions.push(

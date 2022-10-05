@@ -33,16 +33,14 @@ Each element can be inserted by using a snippet. Type `:` and hit your auto-comp
 
 - Glossary terms
   - Move your cursor between the curly braces of a term/t element, e.g.: `:t[My term]{`
-  - Type `#` and hit your key combo for auto-completion (Default Ctrl+Space)
+  - Type `#` to trigger the completion
 - Link to book pages
-  - For this to work you need to disable `Markdown Suggest Paths` (markdown.suggest.paths.enabled).
-  - Type `/` and hit your key combo for auto-completion (Default Ctrl+Space)
+  - Type `/` to trigger the completion
 - Link to files in the public folder
-  - For this to work you need to disable `Markdown Suggest Paths` (markdown.suggest.paths.enabled).
-  - Type `/` and hit your key combo for auto-completion (Default Ctrl+Space)
+  - Type `/` to trigger the completion
 - Archives
   - Move your cursor in the src parameter of an archive element, e.g.: `:archive[My archive]{src="`
-  - Type `/` and hit your key combo for auto-completion (Default Ctrl+Space)
+  - Type `/` to trigger the completion
 
 ## Changelog
 
