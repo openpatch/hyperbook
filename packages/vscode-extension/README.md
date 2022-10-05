@@ -1,10 +1,11 @@
 # Hyperbook Support for Visual Studio Code
 
-[![version](https://img.shields.io/vscode-marketplace/v/openpatch.hyperbook.svg?style=flat-square&label=vscode%20marketplace)](https://marketplace.visualstudio.com/items?itemName=openpatch.hyperbook)
-[![installs](https://img.shields.io/vscode-marketplace/d/openpatch.hyperbook.svg?style=flat-square)](https://marketplace.visualstudio.com/items?itemName=openpatch.hyperbook)
-[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/openpatch/hyperbook/CI?style=flat-square)](https://github.com/openpatch/hyperbook/actions)
-[![GitHub stars](https://img.shields.io/github/stars/openpatch/hyperbook.svg?style=flat-square&label=github%20stars)](https://github.com/openpatch/hyperbook)
-[![GitHub Contributors](https://img.shields.io/github/contributors/openpatch/hyperbook.svg?style=flat-square)](https://github.com/openpatch/hyperbook/graphs/contributors)
+[![version](https://img.shields.io/vscode-marketplace/v/openpatch.hyperbook.svg?label=version)](https://marketplace.visualstudio.com/items?itemName=openpatch.hyperbook)
+[![installs](https://img.shields.io/vscode-marketplace/d/openpatch.hyperbook.svg?label=installs)](https://marketplace.visualstudio.com/items?itemName=openpatch.hyperbook)
+[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/openpatch/hyperbook/Create%20Pull%20Request%20or%20Release)](https://github.com/openpatch/hyperbook/actions)
+[![GitHub stars](https://img.shields.io/github/stars/openpatch/hyperbook.svg?label=github%20stars)](https://github.com/openpatch/hyperbook)
+[![GitHub Contributors](https://img.shields.io/github/contributors/openpatch/hyperbook.svg?)](https://github.com/openpatch/hyperbook/graphs/contributors)
+[![License](https://img.shields.io/github/license/openpatch/hyperbook)](https://github.com/openpatch/hyperbook)
 
 All you need for writing Hyperbooks (auto preview, snippets, auto-completion and more).
 
