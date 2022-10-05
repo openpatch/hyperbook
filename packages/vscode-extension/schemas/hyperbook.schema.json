@@ -1,80 +1,88 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "properties": {
-    "author": {
-      "properties": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "properties": {
+        "author": {
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                }
+            },
+            "type": "object"
+        },
+        "basePath": {
+            "type": "string"
+        },
+        "colors": {
+            "properties": {
+                "brand": {
+                    "format": "color-hex",
+                    "type": "string"
+                },
+                "brandDark": {
+                    "format": "color-hex",
+                    "type": "string"
+                },
+                "brandText": {
+                    "format": "color-hex",
+                    "type": "string"
+                },
+                "inverted": {
+                    "type": "boolean"
+                }
+            },
+            "type": "object"
+        },
+        "description": {
+            "type": "string"
+        },
+        "font": {
+            "type": "string"
+        },
+        "fonts": {
+            "properties": {
+                "body": {
+                    "type": "string"
+                },
+                "code": {
+                    "type": "string"
+                },
+                "heading": {
+                    "type": "string"
+                }
+            },
+            "type": "object"
+        },
+        "language": {
+            "enum": [
+                "de",
+                "en",
+                "es",
+                "fr"
+            ],
+            "type": "string"
+        },
+        "license": {
+            "type": "string"
+        },
+        "logo": {
+            "type": "string"
+        },
         "name": {
-          "type": "string"
+            "type": "string"
         },
-        "url": {
-          "type": "string"
+        "repo": {
+            "type": "string"
+        },
+        "template": {
+            "type": "string"
         }
-      },
-      "type": "object"
     },
-    "basePath": {
-      "type": "string"
-    },
-    "colors": {
-      "properties": {
-        "brand": {
-          "format": "color-hex",
-          "type": "string"
-        },
-        "brandDark": {
-          "format": "color-hex",
-          "type": "string"
-        },
-        "brandText": {
-          "format": "color-hex",
-          "type": "string"
-        },
-        "inverted": {
-          "type": "boolean"
-        }
-      },
-      "type": "object"
-    },
-    "description": {
-      "type": "string"
-    },
-    "font": {
-      "type": "string"
-    },
-    "fonts": {
-      "properties": {
-        "body": {
-          "type": "string"
-        },
-        "code": {
-          "type": "string"
-        },
-        "heading": {
-          "type": "string"
-        }
-      },
-      "type": "object"
-    },
-    "language": {
-      "enum": ["de", "en", "es", "fr"],
-      "type": "string"
-    },
-    "license": {
-      "type": "string"
-    },
-    "logo": {
-      "type": "string"
-    },
-    "name": {
-      "type": "string"
-    },
-    "repo": {
-      "type": "string"
-    },
-    "template": {
-      "type": "string"
-    }
-  },
-  "required": ["name"],
-  "type": "object"
+    "required": [
+        "name"
+    ],
+    "type": "object"
 }
+

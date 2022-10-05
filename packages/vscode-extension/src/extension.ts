@@ -72,7 +72,7 @@ export function activate(context: vscode.ExtensionContext) {
               );
               const { dir, name } = path.parse(p);
               return new vscode.CompletionItem(
-                "/" + (name !== "index" ? path.join(dir, name) : dir),
+                name !== "index" ? path.join(dir, name) : dir,
                 vscode.CompletionItemKind.File
               );
             });
@@ -110,7 +110,7 @@ export function activate(context: vscode.ExtensionContext) {
                 f.path
               );
               return new vscode.CompletionItem(
-                "/" + p,
+                p,
                 vscode.CompletionItemKind.File
               );
             });

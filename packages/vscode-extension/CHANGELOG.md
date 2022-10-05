@@ -1,5 +1,11 @@
 # @hyperbook/vscode-extension
 
+## 0.2.11
+
+### Patch Changes
+
+- Remove trigger character from completion
+
 ## 0.2.10
 
 ### Patch Changes
