@@ -39,8 +39,8 @@ Each element can be inserted by using a snippet. Type `:` and hit your auto-comp
 - Link to files in the public folder
   - Type `/` to trigger the completion
 - Archives
-  - Move your cursor in the src parameter of an archive element, e.g.: `:archive[My archive]{src="`
-  - Type `/` to trigger the completion
+  - Move your cursor in the src parameter of an archive element, e.g.: `:archive[My archive]{src=`
+  - Type `"` to trigger the completion
 
 ## Changelog
 
