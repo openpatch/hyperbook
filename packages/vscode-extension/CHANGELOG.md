@@ -1,5 +1,11 @@
 # @hyperbook/vscode-extension
 
+## 0.2.16
+
+### Patch Changes
+
+- use urls for images since vs code marketplace does not load local images
+
 ## 0.2.15
 
 ### Patch Changes
