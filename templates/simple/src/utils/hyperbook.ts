@@ -1,31 +1,5 @@
+import { HyperbookJson } from "@hyperbook/types";
 import hb from "../../hyperbook.json";
-
-export type Hyperbook = {
-  version?: string;
-  name: string;
-  description?: string;
-  logo?: string;
-  repo?: string;
-  language?: string;
-  basePath?: string;
-  license?: string;
-  font?: string;
-  fonts?: {
-    heading?: string;
-    body?: string;
-    code?: string;
-  };
-  colors?: {
-    brand?: string;
-    brandDark?: string;
-    brandText?: string;
-    inverted?: boolean;
-  };
-  author?: {
-    name: string;
-    url?: string;
-  };
-};
 
 export const getHyperbookUrl = (src: string): string => {
   const { basePath } = getHyperbook();
@@ -44,7 +18,7 @@ export const getHyperbookUrl = (src: string): string => {
 };
 
 export const getHyperbook = () => {
-  return hb as Hyperbook;
+  return hb as HyperbookJson;
 };
 
 export const getHyperbookLangCode = (): string => {

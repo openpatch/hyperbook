@@ -18,16 +18,16 @@
     "colors": {
       "properties": {
         "brand": {
-          "type": "string",
-          "format": "color-hex"
+          "format": "color-hex",
+          "type": "string"
         },
         "brandDark": {
-          "type": "string",
-          "format": "color-hex"
+          "format": "color-hex",
+          "type": "string"
         },
         "brandText": {
-          "type": "string",
-          "format": "color-hex"
+          "format": "color-hex",
+          "type": "string"
         }
       },
       "type": "object"
@@ -67,7 +67,11 @@
     },
     "repo": {
       "type": "string"
+    },
+    "template": {
+      "type": "string"
     }
   },
+  "required": ["name"],
   "type": "object"
 }

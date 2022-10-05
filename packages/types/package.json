@@ -1,6 +1,6 @@
 {
-  "name": "@hyperbook/provider",
-  "version": "0.1.3",
+  "name": "@hyperbook/types",
+  "version": "0.0.0",
   "author": "Mike Barkmin",
   "homepage": "https://github.com/openpatch/hyperbook#readme",
   "license": "MIT",
@@ -24,7 +24,7 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/openpatch/hyperbook.git",
-    "directory": "packages/provider"
+    "directory": "packages/types"
   },
   "bugs": {
     "url": "https://github.com/openpatch/hyperbook/issues"
@@ -33,25 +33,9 @@
     "prebuild": "rimraf dist",
     "version": "pnpm build",
     "lint": "tsc --noEmit",
-    "test": "jest --env=jsdom --passWithNoTests",
     "build": "pnpm build:pkg && pnpm build:types",
     "build:pkg": "node ../../scripts/build.mjs",
     "build:types": "tsc --project tsconfig.build.json --declaration --emitDeclarationOnly"
   },
-  "dependencies": {
-    "@hyperbook/store": "workspace:*",
-    "@hyperbook/types": "workspace:*",
-    "redux": "4.2.0"
-  },
-  "peerDependencies": {
-    "react": "18.x",
-    "react-dom": "18.x",
-    "react-redux": "8.x"
-  },
-  "devDependencies": {
-    "@types/react": "18.0.15",
-    "@types/react-dom": "18.0.6",
-    "react": "18.2.0",
-    "react-dom": "18.2.0"
-  }
+  "dependencies": {}
 }
