@@ -28,6 +28,9 @@
         "brandText": {
           "format": "color-hex",
           "type": "string"
+        },
+        "inverted": {
+          "type": "boolean"
         }
       },
       "type": "object"
