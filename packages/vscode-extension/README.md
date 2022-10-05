@@ -1,7 +1,7 @@
 # Hyperbook Support for Visual Studio Code
 
-[![version](https://img.shields.io/vscode-marketplace/v/openpatch.hyperbook.svg?label=version)](https://marketplace.visualstudio.com/items?itemName=openpatch.hyperbook)
-[![installs](https://img.shields.io/vscode-marketplace/d/openpatch.hyperbook.svg?label=installs)](https://marketplace.visualstudio.com/items?itemName=openpatch.hyperbook)
+[![version](https://img.shields.io/vscode-marketplace/v/openpatch.hyperbook-studio.svg?label=version)](https://marketplace.visualstudio.com/items?itemName=openpatch.hyperbook-studio)
+[![installs](https://img.shields.io/vscode-marketplace/d/openpatch.hyperbook-studio.svg?label=installs)](https://marketplace.visualstudio.com/items?itemName=openpatch.hyperbook-studio)
 [![GitHub Workflow Status](https://img.shields.io/github/workflow/status/openpatch/hyperbook/Create%20Pull%20Request%20or%20Release)](https://github.com/openpatch/hyperbook/actions)
 [![GitHub stars](https://img.shields.io/github/stars/openpatch/hyperbook.svg?label=github%20stars)](https://github.com/openpatch/hyperbook)
 [![GitHub Contributors](https://img.shields.io/github/contributors/openpatch/hyperbook.svg?)](https://github.com/openpatch/hyperbook/graphs/contributors)
