@@ -1,5 +1,11 @@
 # @hyperbook/element-tabs
 
+## 0.1.5
+
+### Patch Changes
+
+- Fix error when no tab is present.
+
 ## 0.1.4
 
 ### Patch Changes

@@ -1,5 +1,14 @@
 # @hyperbook/vscode-extension
 
+## 0.2.14
+
+### Patch Changes
+
+- Fix error when no tab is present.
+
+- Updated dependencies []:
+  - @hyperbook/element-tabs@0.1.5
+
 ## 0.2.13
 
 ### Patch Changes

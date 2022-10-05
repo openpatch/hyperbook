@@ -37,7 +37,7 @@ const DirectiveTabs: FC<DirectiveTabsProps> = ({ id, node, children }) => {
   };
 
   if (activeTab == null) {
-    activeTab = tabs?.[0].id;
+    activeTab = tabs?.[0]?.id;
   }
 
   return (
@@ -89,7 +89,7 @@ const sliceTabs = createSlice({
 
 const selectActive =
   (tab: string) => (state: { "element.tabs": ElementTabsState }) => {
-    return state[sliceTabs.name][tab];
+    return state?.[sliceTabs.name]?.[tab];
   };
 
 export default {

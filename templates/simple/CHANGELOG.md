@@ -1,5 +1,12 @@
 # hyperbook-simple-template
 
+## 0.3.9
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @hyperbook/element-tabs@0.1.5
+
 ## 0.3.8
 
 ### Patch Changes

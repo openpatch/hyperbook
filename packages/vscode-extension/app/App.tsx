@@ -52,7 +52,7 @@ export const App = () => {
   }, []);
 
   return (
-    <ErrorBoundary message="You probably have an invalid hyperbook.json file.">
+    <ErrorBoundary message="You have encountered an error.">
       <Provider
         config={config}
         env="development"
