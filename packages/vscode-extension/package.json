@@ -1,5 +1,5 @@
 {
-  "name": "@hyperbook/vscode-extension",
+  "name": "hyperbook",
   "private": true,
   "publisher": "openpatch",
   "displayName": "Hyperbook",
