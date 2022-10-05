@@ -1,11 +1,9 @@
+import { HyperbookJson } from "@hyperbook/types";
 import chalk from "chalk";
 import fs from "fs";
 import path from "path";
 
-export async function readHyperbook(): Promise<{
-  template?: string;
-  basePath?: string;
-}> {
+export async function readHyperbook(): Promise<HyperbookJson> {
   return new Promise((resolve, reject) => {
     fs.readFile(path.join(process.cwd(), "hyperbook.json"), (err, data) => {
       if (err) {
@@ -17,7 +15,7 @@ export async function readHyperbook(): Promise<{
         reject();
       } else {
         const j = JSON.parse(data.toString());
-        resolve(j as any);
+        resolve(j as HyperbookJson);
       }
     });
   });

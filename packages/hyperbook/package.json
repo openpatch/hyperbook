@@ -49,5 +49,8 @@
     "rimraf": "3.0.2",
     "tar": "6.1.11",
     "update-check": "1.5.4"
+  },
+  "dependencies": {
+    "@hyperbook/types": "workspace:*"
   }
 }

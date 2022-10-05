@@ -36,6 +36,7 @@
     "redux-persist": "6.0.0"
   },
   "devDependencies": {
+    "@hyperbook/types": "workspace:*",
     "@types/node": "18.7.6",
     "@types/react": "18.0.21",
     "chalk": "5.0.1",

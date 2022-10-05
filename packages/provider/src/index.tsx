@@ -24,33 +24,9 @@ import {
   PersistGate,
   Storage,
 } from "@hyperbook/store";
+import { HyperbookJson } from "@hyperbook/types";
 
 export type RootFolder = "public" | "book" | "glossary";
-
-export type HyperbookConfig = {
-  name: string;
-  description?: string;
-  logo?: string;
-  author?: {
-    name?: string;
-    url?: string;
-  };
-  font?: string;
-  fonts?: {
-    heading?: string;
-    body?: string;
-    code?: string;
-  };
-  colors?: {
-    brand?: string;
-    brandDark?: string;
-    brandText?: string;
-  };
-  basePath?: string;
-  license?: string;
-  language?: "de" | "en" | "fr" | "es";
-  repo?: string;
-};
 
 type HyperbookContextProps = {
   directives: Record<string, FC<any>>;
@@ -68,7 +44,7 @@ type HyperbookContextProps = {
   loadFile: (path: string, rootFolder?: RootFolder) => Promise<string>;
   makeUrl: (path?: string, rootFolder?: RootFolder) => string;
   getActivePageId: () => Promise<string>;
-  config: HyperbookConfig;
+  config: HyperbookJson;
 };
 
 const HyperbookContext = createContext<HyperbookContextProps>({
