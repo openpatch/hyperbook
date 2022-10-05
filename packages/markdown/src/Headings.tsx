@@ -16,7 +16,7 @@ export const makeAnchor = (heading: string) => {
 
 export const Headings: Components["h1"] = ({ level, children }) => {
   // Access actual (string) value of heading
-  const heading = children[0];
+  const heading = children?.[0] || "";
 
   // If we have a heading, make it lower case
   let anchor = typeof heading === "string" ? makeAnchor(heading) : "";
