@@ -56,6 +56,7 @@ export default function MyApp({ Component, pageProps }) {
     <Provider
       Link={MyLink}
       makeUrl={getHyperbookUrl}
+      env={process.env.NODE_ENV === "production" ? "production" : "development"}
       elements={[
         elementTab,
         elementAlert,

@@ -55,6 +55,7 @@ export type HyperbookConfig = {
 type HyperbookContextProps = {
   directives: Record<string, FC<any>>;
   Link: FC<LinkHTMLAttributes<HTMLAnchorElement>>;
+  env: "development" | "production";
   router: {
     push: (path: string) => Promise<boolean>;
   };
@@ -76,6 +77,7 @@ const HyperbookContext = createContext<HyperbookContextProps>({
   router: {
     push: async () => false,
   },
+  env: "production",
   saveFile: async () => {},
   loadFile: async () => "",
   makeUrl: (url) => url || "",
@@ -100,6 +102,7 @@ export type ProviderProps = {
   makeUrl?: HyperbookContextProps["makeUrl"];
   getActivePageId?: HyperbookContextProps["getActivePageId"];
   config?: HyperbookContextProps["config"];
+  env?: HyperbookContextProps["env"];
   storage?: Storage;
 };
 
@@ -112,6 +115,7 @@ export const Provider: FC<ProviderProps> = ({
   router = {
     push: async () => false,
   },
+  env = "production",
   makeUrl = (url) => url || "",
   getActivePageId = async () => "",
   config = {
@@ -145,6 +149,7 @@ export const Provider: FC<ProviderProps> = ({
           makeUrl,
           getActivePageId,
           config,
+          env,
         }}
       >
         <PersistGate
@@ -156,6 +161,11 @@ export const Provider: FC<ProviderProps> = ({
       </HyperbookContext.Provider>
     </ReduxProvider>
   );
+};
+
+export const useEnv = () => {
+  const data = useContext(HyperbookContext);
+  return data.env;
 };
 
 export const useBookmark = (

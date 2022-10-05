@@ -53,6 +53,7 @@ export const App = () => {
   return (
     <Provider
       config={config}
+      env="development"
       Link={({ href, ...props }) => {
         href = href?.split("#")[0];
         if (href?.startsWith("/")) {

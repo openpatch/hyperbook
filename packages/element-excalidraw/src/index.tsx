@@ -13,6 +13,7 @@ import {
 import {
   useColorScheme,
   useConfig,
+  useEnv,
   useFile,
   useMakeUrl,
   useRouter,
@@ -40,11 +41,12 @@ const DirectiveExcalidraw: FC<DirectiveExcalidrawProps> = ({
     file = src;
   }
 
+  const env = useEnv();
   const [loadFile, saveFile] = useFile();
   const router = useRouter();
   const makeUrl = useMakeUrl();
   const config = useConfig();
-  const [preview, setPreview] = useState(process.env.NODE_ENV == "development");
+  const [preview, setPreview] = useState(env == "development");
   const initialData = useRef<EDP["initialData"]>();
   const containerRef = useRef<HTMLDivElement>(null);
   const [state, setState] = useState<
@@ -231,7 +233,7 @@ const DirectiveExcalidraw: FC<DirectiveExcalidrawProps> = ({
           />
         )}
       </div>
-      {process.env.NODE_ENV === "development" && (
+      {env === "development" && (
         <div className="development">
           <div className="toolbar">
             <button className="save" onClick={() => save()}>
