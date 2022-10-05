@@ -1,5 +1,29 @@
 # hyperbook-simple-template
 
+## 0.3.7
+
+### Patch Changes
+
+- [#316](https://github.com/openpatch/hyperbook/pull/316) [`cedb551`](https://github.com/openpatch/hyperbook/commit/cedb55191fd025b5a214df406a53cbab5d1b1bc1) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Extract Hyperbook types into a separate package
+
+- Updated dependencies [[`cedb551`](https://github.com/openpatch/hyperbook/commit/cedb55191fd025b5a214df406a53cbab5d1b1bc1)]:
+  - @hyperbook/provider@0.1.4
+  - @hyperbook/element-alert@0.1.4
+  - @hyperbook/element-bitflow@0.1.5
+  - @hyperbook/element-bookmarks@0.1.4
+  - @hyperbook/element-collapsible@0.1.4
+  - @hyperbook/element-dl@0.1.4
+  - @hyperbook/element-excalidraw@0.1.4
+  - @hyperbook/element-mermaid@0.1.4
+  - @hyperbook/element-protect@0.1.4
+  - @hyperbook/element-qr@0.1.5
+  - @hyperbook/element-struktog@0.1.4
+  - @hyperbook/element-tabs@0.1.4
+  - @hyperbook/element-term@0.1.4
+  - @hyperbook/element-youtube@0.1.4
+  - @hyperbook/markdown@0.1.5
+  - @hyperbook/styles@0.1.4
+
 ## 0.3.6
 
 ### Patch Changes
