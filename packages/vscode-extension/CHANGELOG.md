@@ -1,5 +1,11 @@
 # @hyperbook/vscode-extension
 
+## 0.2.10
+
+### Patch Changes
+
+- Fix aspectRatio in snippet for excalidraw
+
 ## 0.2.9
 
 ### Patch Changes

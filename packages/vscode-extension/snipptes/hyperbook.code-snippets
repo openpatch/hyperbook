@@ -32,7 +32,7 @@
   "Element Excalidraw": {
     "prefix": [":excalidraw"],
     "body": [
-      "::excalidraw{src=\"$1\" aspectRatio=\"${2:1:1}\" autoZoom=${3:true} center=${4:true} edit=${5:false}}",
+      "::excalidraw{src=\"$1\" aspectRatio=\"${2:16/9}\" autoZoom=${3:true} center=${4:true} edit=${5:false}}",
       "",
       "$0"
     ]
