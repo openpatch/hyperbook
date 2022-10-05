@@ -22,7 +22,7 @@
   "Element Collapsible": {
     "prefix": [":collapsible"],
     "body": [
-      ":::collapsible{title=\"${1:title}\" id=\"${2:RANDOM}\"}",
+      ":::collapsible{title=\"${1:title}\" id=\"${2:$RANDOM}\"}",
       "",
       "$TM_SELECTED_TEXT",
       "$0",
@@ -71,7 +71,7 @@
     "body": [
       "::::tabs{id=\"$RANDOM\"}",
       "",
-      ":::tab{title=\"${1:Tab 1}\", id=\"$RANDOM\"}",
+      ":::tab{title=\"${1:Tab 1}\" id=\"$RANDOM\"}",
       "",
       "$TM_SELECTED_TEXT",
       "$0",

@@ -16,6 +16,7 @@ import elementExcalidraw from "@hyperbook/element-excalidraw";
 import { Markdown } from "@hyperbook/markdown";
 import { Styles } from "@hyperbook/styles";
 import { ChangeMessage, Message } from "../src/messages/messageTypes";
+import { ErrorBoundary } from "./ErrorBoundary";
 
 const initialState = (window as any).initialState as ChangeMessage["payload"];
 const initialConfig = (window as any).initialConfig as ProviderProps["config"];
@@ -51,78 +52,82 @@ export const App = () => {
   }, []);
 
   return (
-    <Provider
-      config={config}
-      env="development"
-      Link={({ href, ...props }) => {
-        href = href?.split("#")[0];
-        if (href?.startsWith("/")) {
-          let rootFolder = "";
-          if (!href.startsWith("/glossary")) {
-            rootFolder = "book";
+    <ErrorBoundary message="You probably have an invalid hyperbook.json file.">
+      <Provider
+        config={config}
+        env="development"
+        Link={({ href, ...props }) => {
+          href = href?.split("#")[0];
+          if (href?.startsWith("/")) {
+            let rootFolder = "";
+            if (!href.startsWith("/glossary")) {
+              rootFolder = "book";
+            }
+            return (
+              <a
+                href="#"
+                onClick={() => {
+                  vscode.postMessage({
+                    type: "OPEN",
+                    payload: {
+                      path: href as string,
+                      rootFolder: rootFolder,
+                    },
+                  });
+                }}
+                {...props}
+              />
+            );
           }
-          return (
-            <a
-              href="#"
-              onClick={() => {
-                vscode.postMessage({
-                  type: "OPEN",
-                  payload: {
-                    path: href as string,
-                    rootFolder: rootFolder,
-                  },
-                });
-              }}
-              {...props}
-            />
-          );
-        }
-        return <a href={href} {...props} />;
-      }}
-      storage={createNoopStorage()}
-      makeUrl={(p, rootFolder) => {
-        if (p?.startsWith("/")) {
-          if (rootFolder) {
-            return workspacePath + "/" + rootFolder + p;
+          return <a href={href} {...props} />;
+        }}
+        storage={createNoopStorage()}
+        makeUrl={(p, rootFolder) => {
+          if (p?.startsWith("/")) {
+            if (rootFolder) {
+              return workspacePath + "/" + rootFolder + p;
+            } else {
+              return workspacePath + p;
+            }
           } else {
-            return workspacePath + p;
+            return p || "";
           }
-        } else {
-          return p || "";
-        }
-      }}
-      elements={[
-        elementTab,
-        elementAlert,
-        elementBitflow,
-        elementTerm,
-        elementYoutube,
-        elementCollapsible,
-        elementProtect,
-        elementDl,
-        elementBookmarks,
-        elementStruktog,
-        elementQr,
-        elementMermaid,
-        elementExcalidraw,
-      ]}
-      loadFile={async (path) => {
-        return fetch(path).then((res) => res.text());
-      }}
-      saveFile={async (path, content, rootFolder) => {
-        return vscode.postMessage({
-          type: "WRITE",
-          payload: {
-            content,
-            path,
-            rootFolder,
-          },
-        });
-      }}
-      getActivePageId={async () => initialState.source || ""}
-    >
-      <Styles />
-      <Markdown children={state?.content || ""} />
-    </Provider>
+        }}
+        elements={[
+          elementTab,
+          elementAlert,
+          elementBitflow,
+          elementTerm,
+          elementYoutube,
+          elementCollapsible,
+          elementProtect,
+          elementDl,
+          elementBookmarks,
+          elementStruktog,
+          elementQr,
+          elementMermaid,
+          elementExcalidraw,
+        ]}
+        loadFile={async (path) => {
+          return fetch(path).then((res) => res.text());
+        }}
+        saveFile={async (path, content, rootFolder) => {
+          return vscode.postMessage({
+            type: "WRITE",
+            payload: {
+              content,
+              path,
+              rootFolder,
+            },
+          });
+        }}
+        getActivePageId={async () => initialState.source || ""}
+      >
+        <Styles />
+        <ErrorBoundary message="You have a syntax error in your markdown file.">
+          <Markdown children={state?.content || ""} />
+        </ErrorBoundary>
+      </Provider>
+    </ErrorBoundary>
   );
 };

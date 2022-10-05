@@ -1,5 +1,17 @@
 # @hyperbook/vscode-extension
 
+## 0.2.13
+
+### Patch Changes
+
+- Catch errors when rendering
+
+## 0.2.12
+
+### Patch Changes
+
+- Fix tabs snippet and syntax
+
 ## 0.2.11
 
 ### Patch Changes
