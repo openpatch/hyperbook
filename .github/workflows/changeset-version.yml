@@ -42,6 +42,6 @@ jobs:
       - name: Publish VS Code extension
         if: steps.changesets.outputs.published == 'true'
         run: |
-          pnpm --filter "@hyperbook/vscode-extension" publish
+          pnpm --filter "@hyperbook/vscode-extension" vscode:publish
         env:
           VSCE_PAT: ${{ secrets.VSCE_TOKEN }}
