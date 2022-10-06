@@ -34,8 +34,10 @@ import Link from "next/link";
 import { Styles } from "@hyperbook/styles";
 import { localStorage } from "@hyperbook/store";
 import { useRouter } from "next/router";
-import { getHyperbookUrl } from "../utils/hyperbook";
+import { getHyperbook, getHyperbookUrl } from "../utils/hyperbook";
 import { useEffect } from "react";
+
+const hb = getHyperbook();
 
 const MyLink: ProviderProps["Link"] = ({ href, children, ...props }) => {
   return (
@@ -55,6 +57,7 @@ export default function MyApp({ Component, pageProps }) {
   return (
     <Provider
       Link={MyLink}
+      config={hb}
       makeUrl={getHyperbookUrl}
       env={process.env.NODE_ENV === "production" ? "production" : "development"}
       elements={[

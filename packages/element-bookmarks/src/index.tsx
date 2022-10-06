@@ -1,5 +1,5 @@
 import { FC, ReactNode } from "react";
-import { useBookmarks, useLink } from "@hyperbook/provider";
+import { useBookmarks, useConfig, useLink } from "@hyperbook/provider";
 import "./index.css";
 
 type DirectiveBookmarksProps = {
@@ -9,6 +9,11 @@ type DirectiveBookmarksProps = {
 const DirectiveBookmarks: FC<DirectiveBookmarksProps> = ({}) => {
   const Link = useLink();
   const bookmarks = useBookmarks();
+  const config = useConfig();
+  const bookmarksConfig = config?.elements?.bookmarks;
+  if (bookmarksConfig === false) {
+    return null;
+  }
 
   return (
     <ul className="element-bookmarks">

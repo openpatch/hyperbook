@@ -1,4 +1,4 @@
-import { useBookmark } from "@hyperbook/provider";
+import { useBookmark, useConfig } from "@hyperbook/provider";
 import { Components } from "react-markdown";
 
 export const makeAnchor = (heading: string) => {
@@ -15,6 +15,8 @@ export const makeAnchor = (heading: string) => {
 };
 
 export const Headings: Components["h1"] = ({ level, children }) => {
+  const config = useConfig();
+  const bookmarksConfig = config?.elements?.bookmarks;
   // Access actual (string) value of heading
   const heading = children?.[0] || "";
 
@@ -31,13 +33,15 @@ export const Headings: Components["h1"] = ({ level, children }) => {
       <a className="heading" id={anchor} href={`#${anchor}`}>
         <span>{children}</span>
       </a>
-      <button
-        className={bookmark ? "bookmark active" : "bookmark"}
-        onClick={() => toggleBookmark()}
-        title="Bookmark"
-      >
-        🔖
-      </button>
+      {bookmarksConfig !== false && (
+        <button
+          className={bookmark ? "bookmark active" : "bookmark"}
+          onClick={() => toggleBookmark()}
+          title="Bookmark"
+        >
+          🔖
+        </button>
+      )}
     </>
   );
 

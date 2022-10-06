@@ -32,7 +32,7 @@ type DirectiveExcalidrawProps = {
 const DirectiveExcalidraw: FC<DirectiveExcalidrawProps> = ({
   file,
   aspectRatio,
-  autoZoom = true,
+  autoZoom,
   center,
   edit,
   src,
@@ -40,12 +40,29 @@ const DirectiveExcalidraw: FC<DirectiveExcalidrawProps> = ({
   if (src) {
     file = src;
   }
+  const config = useConfig();
+  const excalidrawConfig = config?.elements?.excalidraw;
+
+  if (!aspectRatio) {
+    aspectRatio = excalidrawConfig?.aspectRation ?? "16/9";
+  }
+
+  if (!autoZoom) {
+    autoZoom = excalidrawConfig?.autoZoom ?? true;
+  }
+
+  if (!center) {
+    center = excalidrawConfig?.center ?? true;
+  }
+
+  if (!edit) {
+    edit = excalidrawConfig?.edit ?? false;
+  }
 
   const env = useEnv();
   const [loadFile, saveFile] = useFile();
   const router = useRouter();
   const makeUrl = useMakeUrl();
-  const config = useConfig();
   const [preview, setPreview] = useState(env == "development");
   const initialData = useRef<EDP["initialData"]>();
   const containerRef = useRef<HTMLDivElement>(null);

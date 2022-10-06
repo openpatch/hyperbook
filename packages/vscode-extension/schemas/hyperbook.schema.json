@@ -38,6 +38,58 @@
         "description": {
             "type": "string"
         },
+        "elements": {
+            "properties": {
+                "bookmarks": {
+                    "anyOf": [
+                        {
+                            "properties": {
+                                "version": {
+                                    "type": "string"
+                                }
+                            },
+                            "type": "object"
+                        },
+                        {
+                            "enum": [
+                                false
+                            ],
+                            "type": "boolean"
+                        }
+                    ]
+                },
+                "excalidraw": {
+                    "allOf": [
+                        {
+                            "properties": {
+                                "version": {
+                                    "type": "string"
+                                }
+                            },
+                            "type": "object"
+                        },
+                        {
+                            "properties": {
+                                "aspectRation": {
+                                    "type": "string"
+                                },
+                                "autoZoom": {
+                                    "type": "boolean"
+                                },
+                                "center": {
+                                    "type": "boolean"
+                                },
+                                "edit": {
+                                    "type": "boolean"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    ]
+                }
+            },
+            "type": "object"
+        },
         "font": {
             "type": "string"
         },

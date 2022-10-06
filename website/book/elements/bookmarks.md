@@ -13,3 +13,15 @@ use this directive.
 ```
 
 ::bookmarks
+
+## Configuration
+
+You can disable bookmarks by setting it to false in the `hyperbook.json`.
+
+```json
+{
+  "elements": {
+    "bookmarks": false
+  }
+}
+```
