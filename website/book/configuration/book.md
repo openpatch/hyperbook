@@ -27,6 +27,7 @@ can and part wise must set (indicated by a \*).
 | license          | License under the Hyperbook is published.                                                                                                   |
 | language         | The language of the Hyperbook.                                                                                                              |
 | repo             | The link to the GitHub repo. Used for showing an edit button.                                                                               |
+| elements         | Here you can configure the elements. See the element pages for configuration options.                                                       |
 
 Here is an example configuration:
 
@@ -43,6 +44,9 @@ Here is an example configuration:
   "license": "CC-BY-SA",
   "language": "en",
   "basePath": "/hyperbook-github-pages",
-  "repo": "https://github.com/mikebarkmin/hyperbook-github-pages/edit/main"
+  "repo": "https://github.com/mikebarkmin/hyperbook-github-pages/edit/main",
+  "elements": {
+    "bookmarks": false
+  }
 }
 ```

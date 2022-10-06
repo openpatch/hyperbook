@@ -48,3 +48,20 @@ Be sure to set the correct language in your hyperbook config src, otherwise Exca
 ## Adding Libraries
 
 If you want to add libraries, you can download one from https://libraries.excalidraw.com and import it by clicking the book icon in the top right corner and then the folder icon to select the library.
+
+## Configuration
+
+You can configure the default value of the arguments in the `hyperbook.json`. For example:
+
+```json
+{
+  "elements": {
+    "excalidraw": {
+      "aspectRatio": "4/3",
+      "center": false,
+      "autoZoom": true,
+      "edit": false
+    }
+  }
+}
+```

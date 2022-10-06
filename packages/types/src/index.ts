@@ -1,3 +1,7 @@
+type ElementConfig = {
+  version?: string;
+};
+
 export type HyperbookJson = {
   name: string;
   description?: string;
@@ -32,4 +36,13 @@ export type HyperbookJson = {
   license?: string;
   language?: "de" | "en" | "fr" | "es";
   repo?: string;
+  elements?: {
+    bookmarks?: false | ElementConfig;
+    excalidraw?: ElementConfig & {
+      autoZoom?: boolean;
+      center?: boolean;
+      aspectRation?: string;
+      edit?: boolean;
+    };
+  };
 };
