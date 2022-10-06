@@ -1,5 +1,31 @@
 # hyperbook-simple-template
 
+## 0.4.0
+
+### Minor Changes
+
+- [#326](https://github.com/openpatch/hyperbook/pull/326) [`9472583`](https://github.com/openpatch/hyperbook/commit/947258359e33a39362c070f6c7128f214a79c4c5) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add configuration options to the hyperbook.json for the element bookmarks and excalidraw.
+
+### Patch Changes
+
+- Updated dependencies [[`9472583`](https://github.com/openpatch/hyperbook/commit/947258359e33a39362c070f6c7128f214a79c4c5)]:
+  - @hyperbook/element-bookmarks@0.2.0
+  - @hyperbook/element-excalidraw@0.2.0
+  - @hyperbook/markdown@0.2.0
+  - @hyperbook/provider@0.1.5
+  - @hyperbook/element-alert@0.1.5
+  - @hyperbook/element-bitflow@0.1.6
+  - @hyperbook/element-collapsible@0.1.5
+  - @hyperbook/element-dl@0.1.5
+  - @hyperbook/element-mermaid@0.1.5
+  - @hyperbook/element-protect@0.1.5
+  - @hyperbook/element-qr@0.1.6
+  - @hyperbook/element-struktog@0.1.5
+  - @hyperbook/element-tabs@0.1.6
+  - @hyperbook/element-term@0.1.5
+  - @hyperbook/element-youtube@0.1.5
+  - @hyperbook/styles@0.1.5
+
 ## 0.3.9
 
 ### Patch Changes
