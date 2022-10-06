@@ -24,7 +24,7 @@
     "cross-env": "7.0.3",
     "esbuild": "0.15.10",
     "husky": "8.0.1",
-    "plop": "^3.1.1",
+    "plop": "3.1.1",
     "prettier": "2.7.1",
     "prettier-plugin-sort-json": "0.0.3",
     "pretty-quick": "3.1.3",
