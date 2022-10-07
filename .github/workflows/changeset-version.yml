@@ -45,3 +45,4 @@ jobs:
           pnpm --filter "hyperbook-studio" vscode:publish
         env:
           VSCE_PAT: ${{ secrets.VSCE_TOKEN }}
+          OVSX_PAT: ${{ secrets.OVSX_TOKEN }}
