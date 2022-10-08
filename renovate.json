@@ -1,11 +1,11 @@
 {
   "extends": ["config:base", "schedule:nonOfficeHours"],
   "labels": ["dependencies"],
+  "ignoreDeps": ["@types/vscode"],
   "packageRules": [
     {
       "updateTypes": ["minor", "patch", "pin", "digest"],
-      "automerge": true,
-      "excludePackageNames": ["@types/vscode"]
+      "automerge": true
     }
   ]
 }
