@@ -349,9 +349,40 @@ This line is only separated by a single newline, so it's a separate line in the 
 
 ### Comments
 
-Markdown does not provide a native way for comments, but you can use a workaround using the reference style links syntax. Using this syntax, the comments will not be outputted to the resulting HTML.
+You can either use HTML comments or a workaround for "native" Markdown comments.
+
+#### HTML
 
 ```
-[//]: Yet another comment
-[comment]: Still another comment
+<!-- This is a HTML comment -->
+
+<!--
+  It
+  also
+  works
+  across
+  multiple
+  lines
+-->
 ```
+
+<!-- This is a HTML comment -->
+
+<!--
+  It
+  also
+  works
+  across
+  multiple
+  lines
+-->
+
+#### Markdown
+
+```
+[//]: # (Yet another comment)
+[comment]: # (Still another comment)
+```
+
+[//]: # "Yet another comment"
+[comment]: # "Still another comment"

@@ -50,7 +50,9 @@
     "remark-gemoji": "7.0.1",
     "remark-gfm": "3.0.1",
     "remark-math": "5.1.1",
-    "remark-unwrap-images": "3.0.1"
+    "remark-unwrap-images": "3.0.1",
+    "unified": "^10.1.2",
+    "unist-util-visit": "^4.1.1"
   },
   "peerDependencies": {
     "react": "18.x",
