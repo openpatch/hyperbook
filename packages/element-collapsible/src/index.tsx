@@ -24,8 +24,8 @@ const DirectiveCollapsible: FC<DirectiveCollapsibleProps> = ({
   id = activePageId + "." + id;
 
   let active = useSelector(selectActive(id));
-  const { getCollapseProps, getToggleProps } = useCollapse({
-    isExpanded: active,
+  const { getCollapseProps, getToggleProps, isExpanded } = useCollapse({
+    isExpanded: active ? true : false,
   });
 
   const dispatch = useDispatch();
@@ -37,24 +37,24 @@ const DirectiveCollapsible: FC<DirectiveCollapsibleProps> = ({
   return (
     <>
       <button
-        {...getToggleProps({
-          onClick: () => toggleActive(),
-        })}
         className={[
           "element-collapsible",
           "button",
-          active ? "active" : "",
+          isExpanded ? "active" : "",
         ].join(" ")}
+        {...getToggleProps({
+          onClick: () => toggleActive(),
+        })}
       >
         {title}
       </button>
       <div
-        {...getCollapseProps()}
         className={[
           "element-collapsible",
           "content",
-          active ? "active" : "",
+          isExpanded ? "active" : "",
         ].join(" ")}
+        {...getCollapseProps()}
       >
         <div className={"inner"}>{children}</div>
       </div>
