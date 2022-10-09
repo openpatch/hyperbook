@@ -1,5 +1,12 @@
 # hyperbook-simple-template
 
+## 0.5.1
+
+### Patch Changes
+
+- Updated dependencies [[`69e76ae`](https://github.com/openpatch/hyperbook/commit/69e76aec46f3b83ecd4dc9e7e5fceb0fe7fb8148)]:
+  - @hyperbook/element-collapsible@0.2.1
+
 ## 0.5.0
 
 ### Minor Changes
