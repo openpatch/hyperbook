@@ -1,5 +1,18 @@
 # hyperbook-simple-template
 
+## 0.5.0
+
+### Minor Changes
+
+- [#341](https://github.com/openpatch/hyperbook/pull/341) [`b1d976c`](https://github.com/openpatch/hyperbook/commit/b1d976cfcad7d9be760c595d23becc48187d641e) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - The sections can now be opened and closed. The active page will always
+  start opened. For each section you can overwrite the default expanded
+  state by adding `expanded: true` to the frontmatter of the section.
+
+### Patch Changes
+
+- Updated dependencies [[`b1d976c`](https://github.com/openpatch/hyperbook/commit/b1d976cfcad7d9be760c595d23becc48187d641e)]:
+  - @hyperbook/element-collapsible@0.2.0
+
 ## 0.4.1
 
 ### Patch Changes

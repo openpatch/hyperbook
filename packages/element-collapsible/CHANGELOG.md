@@ -1,5 +1,11 @@
 # @hyperbook/element-collapsible
 
+## 0.2.0
+
+### Minor Changes
+
+- [#341](https://github.com/openpatch/hyperbook/pull/341) [`b1d976c`](https://github.com/openpatch/hyperbook/commit/b1d976cfcad7d9be760c595d23becc48187d641e) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - The Element Collapsible now has a little animation when opening and closing.
+
 ## 0.1.5
 
 ### Patch Changes
