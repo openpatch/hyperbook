@@ -1,5 +1,12 @@
 # @hyperbook/vscode-extension
 
+## 0.3.2
+
+### Patch Changes
+
+- Updated dependencies [[`b1d976c`](https://github.com/openpatch/hyperbook/commit/b1d976cfcad7d9be760c595d23becc48187d641e)]:
+  - @hyperbook/element-collapsible@0.2.0
+
 ## 0.3.1
 
 ### Patch Changes
