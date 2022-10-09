@@ -463,7 +463,7 @@ importers:
       "@types/node": 18.8.3
       "@types/react": 18.0.21
       "@types/react-dom": 18.0.6
-      "@types/vscode": 1.72.0
+      "@types/vscode": 1.71.0
       "@typescript-eslint/eslint-plugin": 5.39.0
       "@typescript-eslint/parser": 5.39.0
       copy-webpack-plugin: 11.0.0
@@ -517,7 +517,7 @@ importers:
       "@types/node": 18.8.3
       "@types/react": 18.0.21
       "@types/react-dom": 18.0.6
-      "@types/vscode": 1.72.0
+      "@types/vscode": 1.71.0
       "@typescript-eslint/eslint-plugin": 5.39.0_cfd7h3iktziq6hcwahu2qxhjhy
       "@typescript-eslint/parser": 5.39.0_z4bbprzjrhnsfa24uvmcbu7f5q
       copy-webpack-plugin: 11.0.0_webpack@5.74.0
@@ -3216,10 +3216,10 @@ packages:
         integrity: sha512-EwmlvuaxPNej9+T4v5AuBPJa2x2UOJVdjCtDHgcDqitUeOtjnJKJ+apYjVcAoBEMjKW1VVFGZLUb5+qqa09XFA==,
       }
 
-  /@types/vscode/1.72.0:
+  /@types/vscode/1.71.0:
     resolution:
       {
-        integrity: sha512-WvHluhUo+lQvE3I4wUagRpnkHuysB4qSyOQUyIAS9n9PYMJjepzTUD8Jyks0YeXoPD0UGctjqp2u84/b3v6Ydw==,
+        integrity: sha512-nB50bBC9H/x2CpwW9FzRRRDrTZ7G0/POttJojvN/LiVfzTGfLyQIje1L1QRMdFXK9G41k5UJN/1B9S4of7CSzA==,
       }
     dev: true
 
