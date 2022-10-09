@@ -40,7 +40,7 @@
     "@types/node": "18.7.6",
     "@types/react": "18.0.21",
     "chalk": "5.1.0",
-    "next-remote-watch": "1.0.0",
+    "next-remote-watch": "2.0.0",
     "typescript": "4.8.4"
   }
 }
