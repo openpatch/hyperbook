@@ -219,6 +219,9 @@ header {
   border-top-style: solid;
   border-top-width: 1px;
   margin: 0 auto;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
   margin-top: 30px;
   padding-top: 30px;
   max-width: 980px;
@@ -226,11 +229,18 @@ header {
 
 .meta .edit-github {
   text-decoration: none;
+  display: block;
+  flex: 1;
+}
+
+.meta .vercel {
+  text-align: center;
   flex: 1;
 }
 
 .meta .copyright {
-  flex: 2;
+  text-align: right;
+  flex: 1;
 }
 
 .section ul,

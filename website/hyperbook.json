@@ -12,5 +12,6 @@
   },
   "language": "en",
   "logo": "/logo.svg",
-  "repo": "https://github.com/openpatch/hyperbook/edit/main/website"
+  "repo": "https://github.com/openpatch/hyperbook/edit/main/website",
+  "vercel": true
 }

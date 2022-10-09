@@ -1,5 +1,6 @@
 import { useLink } from "@hyperbook/provider";
 import Head from "next/head";
+import Image from "next/image";
 import { Fragment, ReactNode, useState } from "react";
 import { getHyperbook } from "../utils/hyperbook";
 import { Navigation as NavigationProps, Page } from "../utils/navigation";
@@ -193,6 +194,18 @@ export function Layout({ toc, navigation, page, children }: LayoutProps) {
             {page.repo && (
               <a className="edit-github" href={page.repo}>
                 ✎ GitHub
+              </a>
+            )}
+            {(hyperbook as any).vercel && (
+              <a
+                className="vercel"
+                href="https://vercel.com/?utm_source=openpatch&utm_campaign=oss"
+              >
+                <img
+                  src="https://www.openpatch.org/static/powered-by-vercel-black.svg"
+                  width={212}
+                  height={44}
+                />
               </a>
             )}
             <span className="copyright">
