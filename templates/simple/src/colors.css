@@ -84,7 +84,7 @@ header.inverted > .branding {
   border-color: var(--color-spacer);
 }
 
-.section > .name.empty {
+.section .name.empty {
   color: var(--color-text-deactivated);
 }
 

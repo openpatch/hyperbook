@@ -255,12 +255,24 @@ nav li + li {
 }
 
 .section > .name {
+  display: flex;
   text-decoration: none;
   padding: 10px;
   border-width: 1px;
   border-style: solid;
   width: 100%;
   user-select: none;
+}
+
+.section > .name > .label {
+  flex: 1;
+}
+
+.section > .name > .toggle {
+  text-align: right;
+  background: none;
+  border: none;
+  font-size: 13px;
 }
 
 .section .section {
