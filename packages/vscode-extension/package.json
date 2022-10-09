@@ -136,7 +136,7 @@
     "lint": "eslint src --ext ts"
   },
   "devDependencies": {
-    "@types/glob": "7.2.0",
+    "@types/glob": "8.0.0",
     "@types/mocha": "8.2.3",
     "@types/node": "12.20.55",
     "@types/react": "18.0.21",
@@ -150,7 +150,7 @@
     "eslint": "7.32.0",
     "eslint-plugin-react-hooks": "4.6.0",
     "file-loader": "6.2.0",
-    "glob": "7.2.3",
+    "glob": "8.0.3",
     "mocha": "8.4.0",
     "node-polyfill-webpack-plugin": "2.0.1",
     "npm-run-all": "4.1.5",
