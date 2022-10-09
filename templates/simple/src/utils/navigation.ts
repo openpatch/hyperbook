@@ -20,6 +20,7 @@ export type Page = {
 export type Section = Omit<Page, "hide"> & {
   hide?: boolean;
   virtual?: boolean;
+  expanded?: boolean;
   pages: Page[]; // md-files
   sections: Section[]; // folders
 };

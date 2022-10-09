@@ -19,6 +19,7 @@ To summarize, here are the properties you can set in the frontmatter:
 | :------- | :--------------------------------------------------------------------------------------------------------------------- |
 | ...      | Every Property from a [page](/configuration/page)                                                                      |
 | virtual  | Everything will appear on the same level as the parent. Be aware that the index property does not work across folders. |
+| expanded | Defines whether the section is expanded on page load.                                                                  |
 
 If the `index.md` file only contains a front matter and is otherwise
 empty, it will appear in the navigation as a non-clickable item.

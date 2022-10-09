@@ -1,4 +1,5 @@
 import Link from "next/link";
+import useCollapse from "react-collapsed";
 import {
   Navigation as NavigationProps,
   Section as SectionProps,
@@ -28,20 +29,38 @@ const Section = ({
   href,
   pages,
   sections,
+  expanded,
   current,
 }: S) => {
+  const isActive = current?.href.startsWith(href);
+  const { getCollapseProps, getToggleProps, isExpanded } = useCollapse({
+    defaultExpanded: isActive || expanded,
+  });
   return (
     <div className={virtual ? "" : "section"}>
-      {virtual ? null : isEmpty ? (
-        <span className="name empty">{name}</span>
-      ) : (
-        <Link href={href}>
-          <a className={current?.href === href ? `name active` : "name"}>
-            {name}
-          </a>
-        </Link>
-      )}
-      <div className="links">
+      <div
+        className={[
+          "name",
+          virtual || isEmpty ? "empty" : "",
+          current?.href === href ? "active" : "",
+        ].join(" ")}
+      >
+        {virtual ? null : isEmpty ? (
+          <span className="label">{name}</span>
+        ) : (
+          <Link href={href}>
+            <a className="label">{name}</a>
+          </Link>
+        )}
+        <button
+          className="toggle"
+          {...getToggleProps()}
+          aria-label={isExpanded ? "Close" : "Open"}
+        >
+          {isExpanded ? "➖" : "➕"}
+        </button>
+      </div>
+      <div className="links" {...getCollapseProps()}>
         {pages.length > 0 && (
           <ul className="pages">
             {pages

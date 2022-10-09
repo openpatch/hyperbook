@@ -133,11 +133,13 @@ importers:
       "@types/react-dom": 18.0.6
       object-hash: 3.0.0
       react: 18.2.0
+      react-collapsed: ^3.4.0
       react-dom: 18.2.0
     dependencies:
       "@hyperbook/provider": link:../provider
       "@hyperbook/store": link:../store
       object-hash: 3.0.0
+      react-collapsed: 3.4.0_biqbaboplfbrettd7655fr4n2y
     devDependencies:
       "@types/object-hash": 2.2.1
       "@types/react": 18.0.21
@@ -569,6 +571,7 @@ importers:
       next: 12.3.1
       next-remote-watch: 2.0.0
       react: 18.2.0
+      react-collapsed: ^3.4.0
       react-dom: 18.2.0
       react-icons: 4.4.0
       react-redux: 8.0.4
@@ -597,6 +600,7 @@ importers:
       gray-matter: 4.0.3
       next: 12.3.1_biqbaboplfbrettd7655fr4n2y
       react: 18.2.0
+      react-collapsed: 3.4.0_biqbaboplfbrettd7655fr4n2y
       react-dom: 18.2.0_react@18.2.0
       react-icons: 4.4.0_react@18.2.0
       react-redux: 8.0.4_wr4jmv5xrjbe6vbq33me5wwo2a
@@ -11514,6 +11518,13 @@ packages:
       }
     dev: true
 
+  /performance-now/2.1.0:
+    resolution:
+      {
+        integrity: sha512-7EAHlyLHI56VEIdK57uwHdHKIaAGbnXPiw0yWbarQZOKaKpvUIgW0jWRVLiatnM+XXlSwsanIBH/hzGMJulMow==,
+      }
+    dev: false
+
   /picocolors/1.0.0:
     resolution:
       {
@@ -11951,6 +11962,15 @@ packages:
     engines: { node: ">=10" }
     dev: true
 
+  /raf/3.4.1:
+    resolution:
+      {
+        integrity: sha512-Sq4CW4QhwOHE8ucn6J34MqtZCeWFP2aQSmrlroYgqAV1PjStIhJXxYuTgUIfkEk7zTLjmIjLmU5q+fbD1NnOJA==,
+      }
+    dependencies:
+      performance-now: 2.1.0
+    dev: false
+
   /randombytes/2.1.0:
     resolution:
       {
@@ -12010,6 +12030,21 @@ packages:
       minimist: 1.2.6
       strip-json-comments: 2.0.1
     dev: true
+
+  /react-collapsed/3.4.0_biqbaboplfbrettd7655fr4n2y:
+    resolution:
+      {
+        integrity: sha512-v/xsvxGb7bOGHb+zkAeSjb4VAP+P5CDyvhGkIqKwHuHDHCnEjnFFRHgfPz/y3N4mLsWyOZ1QWH27EDz5/mRHXQ==,
+      }
+    peerDependencies:
+      react: ">=16.8"
+      react-dom: ">=16.8"
+    dependencies:
+      raf: 3.4.1
+      react: 18.2.0
+      react-dom: 18.2.0_react@18.2.0
+      tiny-warning: 1.0.3
+    dev: false
 
   /react-dom/18.2.0_react@18.2.0:
     resolution:
@@ -13875,6 +13910,13 @@ packages:
     dependencies:
       setimmediate: 1.0.5
     dev: true
+
+  /tiny-warning/1.0.3:
+    resolution:
+      {
+        integrity: sha512-lBN9zLN/oAf68o3zNXYrdCt1kP8WsiGW8Oo2ka41b2IM5JL/S1CTyX1rW0mb/zSuJun0ZUrDxx4sqvYS2FWzPA==,
+      }
+    dev: false
 
   /title-case/3.0.3:
     resolution:

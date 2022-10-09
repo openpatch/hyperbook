@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { createSlice, PayloadAction } from "@hyperbook/store";
 import { useActivePageId } from "@hyperbook/provider";
 import "./index.css";
+import useCollapse from "react-collapsed";
 
 type DirectiveCollapsibleProps = {
   children?: ReactNode;
@@ -15,15 +16,18 @@ const DirectiveCollapsible: FC<DirectiveCollapsibleProps> = ({
   id,
   title,
 }) => {
-  const [activePageId] = useActivePageId();
-
   if (!id) {
     id = title;
   }
 
+  const [activePageId] = useActivePageId();
   id = activePageId + "." + id;
 
   let active = useSelector(selectActive(id));
+  const { getCollapseProps, getToggleProps } = useCollapse({
+    isExpanded: active,
+  });
+
   const dispatch = useDispatch();
 
   const toggleActive = () => {
@@ -33,17 +37,19 @@ const DirectiveCollapsible: FC<DirectiveCollapsibleProps> = ({
   return (
     <>
       <button
-        id={`collapsibel-${id}`}
+        {...getToggleProps({
+          onClick: () => toggleActive(),
+        })}
         className={[
           "element-collapsible",
           "button",
           active ? "active" : "",
         ].join(" ")}
-        onClick={() => toggleActive()}
       >
         {title}
       </button>
       <div
+        {...getCollapseProps()}
         className={[
           "element-collapsible",
           "content",
@@ -56,7 +62,7 @@ const DirectiveCollapsible: FC<DirectiveCollapsibleProps> = ({
   );
 };
 
-type ElementCollapsibleState = Record<string, string>;
+type ElementCollapsibleState = Record<string, boolean>;
 
 const initialState: ElementCollapsibleState = {};
 
