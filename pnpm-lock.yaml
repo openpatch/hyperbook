@@ -181,7 +181,7 @@ importers:
   packages/element-mermaid:
     specifiers:
       '@hyperbook/provider': workspace:*
-      '@types/mermaid': 8.2.9
+      '@types/mermaid': 9.1.0
       '@types/react': 18.0.15
       '@types/react-dom': 18.0.6
       mermaid: 9.1.7
@@ -191,7 +191,7 @@ importers:
       '@hyperbook/provider': link:../provider
       mermaid: 9.1.7
     devDependencies:
-      '@types/mermaid': 8.2.9
+      '@types/mermaid': 9.1.0
       '@types/react': 18.0.15
       '@types/react-dom': 18.0.6
       react: 18.2.0
@@ -2474,8 +2474,8 @@ packages:
     resolution: {integrity: sha512-eC4U9MlIcu2q0KQmXszyn5Akca/0jrQmwDRgpAMJai7qBWq4amIQhZyNau4VYGtCeALvW1/NtjzJJ567aZxfKA==}
     dev: false
 
-  /@types/mermaid/8.2.9:
-    resolution: {integrity: sha512-f1i8fNoVFVJXedk+R7GcEk4KoOWzWAU3CzFqlVw1qWKktfsataBERezCz1pOdKy8Ec02ZdPQXGM7NU2lPHABYQ==}
+  /@types/mermaid/9.1.0:
+    resolution: {integrity: sha512-rc8QqhveKAY7PouzY/p8ljS+eBSNCv7o79L97RSub/Ic2SQ34ph1Ng3s8wFLWVjvaEt6RLOWtSCsgYWd95NY8A==}
     dev: true
 
   /@types/minimatch/3.0.5:
