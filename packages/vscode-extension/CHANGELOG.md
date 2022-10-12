@@ -1,5 +1,11 @@
 # @hyperbook/vscode-extension
 
+## 0.4.0
+
+### Minor Changes
+
+- [#354](https://github.com/openpatch/hyperbook/pull/354) [`8d4067c`](https://github.com/openpatch/hyperbook/commit/8d4067c244fddd54e005688429973c33af144fcb) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Make vscode extension compatible with vscode web like vscode.dev or github.dev
+
 ## 0.3.3
 
 ### Patch Changes
