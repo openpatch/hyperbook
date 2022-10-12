@@ -27,7 +27,7 @@ export default class StatusBarItem {
       return;
     }
     // Update status if an markdown file:
-    if (this.previewUtil.checkDocumentIsMarkdown(false)) {
+    if (this.previewUtil.checkDocumentIsHyperbookFile(false)) {
       this.statusBarItem.text =
         Constants.ExtensionConstants.STATUS_BAR_HTML_TEXT;
       this.statusBarItem.command = "hyperbook.sidePreview";

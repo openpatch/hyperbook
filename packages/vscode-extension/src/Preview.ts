@@ -1,8 +1,5 @@
-"use strict";
 import * as vscode from "vscode";
 import * as Constants from "./Constants";
-import * as path from "path";
-import * as fs from "fs";
 import matter from "gray-matter";
 import { htmlTemplate } from "./html-template";
 import { disposeAll } from "./utils/dispose";
@@ -26,8 +23,7 @@ export default class Preview {
     this.context = context;
     this.disableWebViewStyling = false;
     vscode.workspace.onDidSaveTextDocument((e) => {
-      const { name, ext } = path.parse(e.fileName);
-      if (name === "hyperbook" && ext === ".json") {
+      if (e.fileName.endsWith("hyperbook.json")) {
         this.postMessage({
           type: "CONFIG_CHANGE",
           payload: this.parseConfig(e.getText()),
@@ -48,20 +44,23 @@ export default class Preview {
     }
   }
 
-  getConfig() {
-    return this.parseConfig(
-      Buffer.from(
-        fs.readFileSync(
-          path.join(vscode.workspace.rootPath || "", "hyperbook.json")
+  async getConfig() {
+    const config = vscode.workspace.fs
+      .readFile(
+        vscode.Uri.joinPath(
+          vscode.Uri.parse(vscode.workspace.rootPath || ""),
+          "hyperbook.json"
         )
-      ).toString("utf8")
-    );
+      )
+      .toString();
+
+    return this.parseConfig(config);
   }
 
-  getState() {
+  async getState() {
     if (
       vscode.window.activeTextEditor &&
-      this.checkDocumentIsMarkdown(true) &&
+      this.checkDocumentIsHyperbookFile(true) &&
       vscode.window.activeTextEditor.document.languageId === "markdown"
     ) {
       const { content, data } = matter(
@@ -71,7 +70,7 @@ export default class Preview {
         content,
         data,
         source: vscode.window.activeTextEditor?.document.uri.toString(),
-        config: this.getConfig(),
+        config: await this.getConfig(),
       };
       return state;
     }
@@ -86,7 +85,7 @@ export default class Preview {
     this.hyperbookViewerConfig = vscode.workspace.getConfiguration("hyperbook");
     if (
       vscode.window.activeTextEditor &&
-      this.checkDocumentIsMarkdown(true) &&
+      this.checkDocumentIsHyperbookFile(true) &&
       this.panel &&
       this.panel !== undefined
     ) {
@@ -101,7 +100,7 @@ export default class Preview {
       ) {
         this.postMessage({
           type: "CHANGE",
-          payload: this.getState(),
+          payload: await this.getState(),
         });
         this.postMessage({
           type: "SCROLL_FROM_EXTENSION",
@@ -114,13 +113,13 @@ export default class Preview {
     }
   }
 
-  getWebviewContent() {
+  async getWebviewContent() {
     if (this.panel) {
       return htmlTemplate(
         this.context,
         this.panel,
-        this.getState(),
-        this.getConfig()
+        await this.getState(),
+        await this.getConfig()
       );
     } else {
       return "";
@@ -128,29 +127,33 @@ export default class Preview {
   }
 
   getDynamicContentPath(filepath: string) {
-    const onDiskPath = vscode.Uri.file(
-      path.join(vscode.workspace.rootPath || "", "content/media", filepath)
+    const onDiskPath = vscode.Uri.joinPath(
+      vscode.Uri.parse(vscode.workspace.rootPath || ""),
+      "content/media",
+      filepath
     );
     const styleSrc = this.panel?.webview.asWebviewUri(onDiskPath);
     return styleSrc;
   }
 
-  getDocumentType(): string {
-    let languageId =
-      vscode.window.activeTextEditor?.document.languageId.toLowerCase();
-    return languageId || "";
-  }
-
-  checkDocumentIsMarkdown(showWarning: boolean): boolean {
-    let result = this.getDocumentType() === "markdown";
-    if (!result && showWarning) {
-      vscode.window.showInformationMessage(Constants.ErrorMessages.NO_MARKDOWN);
+  checkDocumentIsHyperbookFile(showWarning: boolean): boolean {
+    let isMarkdown =
+      vscode.window.activeTextEditor?.document.languageId.toLowerCase() ===
+      "markdown";
+    let isHyperbookJson =
+      vscode.window.activeTextEditor?.document.fileName.endsWith(
+        "hyperbook.json"
+      );
+    if (!isMarkdown && !isHyperbookJson && showWarning) {
+      vscode.window.showInformationMessage(
+        Constants.ErrorMessages.NO_HYPERBOOK_FILE
+      );
     }
-    return result;
+    return isMarkdown;
   }
 
   async initMarkdownPreview(viewColumn: number) {
-    let proceed = this.checkDocumentIsMarkdown(true);
+    let proceed = this.checkDocumentIsHyperbookFile(true);
     if (proceed) {
       const filePaths =
         vscode.window.activeTextEditor?.document.fileName.split("/") || [];
@@ -166,11 +169,9 @@ export default class Preview {
           retainContextWhenHidden: true,
           // And restrict the webview to only loading content from our extension's `assets` directory.
           localResourceRoots: [
-            vscode.Uri.file(
-              path.join(this.context.extensionPath, "out", "app")
-            ),
-            vscode.Uri.file(path.join(this.context.extensionPath, "assets")),
-            vscode.Uri.file(path.join(vscode.workspace?.rootPath || "")),
+            vscode.Uri.joinPath(this.context.extensionUri, "out", "app"),
+            vscode.Uri.joinPath(this.context.extensionUri, "assets"),
+            vscode.Uri.file(vscode.workspace?.rootPath || ""),
           ],
         }
       );
@@ -178,7 +179,7 @@ export default class Preview {
       this.panel.iconPath = this.iconPath;
       this._disposed = false;
 
-      this.panel.webview.html = this.getWebviewContent();
+      this.panel.webview.html = await this.getWebviewContent();
 
       // And set its HTML content
       this.editor = vscode.window.activeTextEditor;
@@ -227,12 +228,10 @@ export default class Preview {
 
           return vscode.workspace
             .openTextDocument(
-              vscode.Uri.file(
-                path.join(
-                  vscode.workspace.rootPath || "",
-                  m.payload.rootFolder || "",
-                  m.payload.path
-                )
+              vscode.Uri.joinPath(
+                vscode.Uri.parse(vscode.workspace.rootPath || ""),
+                m.payload.rootFolder || "",
+                m.payload.path
               )
             )
             .then((doc) => {
@@ -245,12 +244,10 @@ export default class Preview {
           }
 
           return vscode.workspace.fs.writeFile(
-            vscode.Uri.file(
-              path.join(
-                vscode.workspace.rootPath || "",
-                m.payload.rootFolder || "",
-                m.payload.path
-              )
+            vscode.Uri.joinPath(
+              vscode.Uri.parse(vscode.workspace.rootPath || ""),
+              m.payload.rootFolder || "",
+              m.payload.path
             ),
             Buffer.from(m.payload.content, "utf8")
           );
@@ -289,10 +286,10 @@ export default class Preview {
   }
 
   private get iconPath() {
-    const root = path.join(this.context.extensionPath, "assets/icons");
+    const root = vscode.Uri.joinPath(this.context.extensionUri, "assets/icons");
     return {
-      light: vscode.Uri.file(path.join(root, "Preview.svg")),
-      dark: vscode.Uri.file(path.join(root, "Preview_inverse.svg")),
+      light: vscode.Uri.joinPath(root, "Preview.svg"),
+      dark: vscode.Uri.joinPath(root, "Preview_inverse.svg"),
     };
   }
 
