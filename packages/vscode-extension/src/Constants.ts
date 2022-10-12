@@ -1,6 +1,6 @@
 export module ErrorMessages {
-  export const NO_MARKDOWN =
-    "The current editor doesn't show a Hyperbook Markdown document.";
+  export const NO_HYPERBOOK_FILE =
+    "The current editor doesn't show a Hyperbook document.";
 }
 
 export module ExtensionConstants {

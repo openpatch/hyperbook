@@ -1,5 +1,4 @@
 import * as vscode from "vscode";
-import * as path from "path";
 import { ChangeMessage } from "./messages/messageTypes";
 
 export const htmlTemplate = (
@@ -10,7 +9,7 @@ export const htmlTemplate = (
 ) => {
   const nonce = getNonce();
   const bundleScriptPath = panel.webview.asWebviewUri(
-    vscode.Uri.file(path.join(context.extensionPath, "out", "app", "bundle.js"))
+    vscode.Uri.joinPath(context.extensionUri, "out", "app", "bundle.js")
   );
   const initialState = Buffer.from(JSON.stringify(state)).toString("base64");
   const initialConfig = Buffer.from(JSON.stringify(config)).toString("base64");
@@ -42,14 +41,16 @@ export const htmlTemplate = (
                 <script nonce="${nonce}">
                   window.EXCALIDRAW_ASSET_PATH = "${
                     panel.webview.asWebviewUri(
-                      vscode.Uri.file(
-                        path.join(context.extensionPath, "assets", "excalidraw")
+                      vscode.Uri.joinPath(
+                        context.extensionUri,
+                        "assets",
+                        "excalidraw"
                       )
                     ) + "/"
                   }"
                   window.vscode = acquireVsCodeApi();
                   window.workspacePath = "${panel.webview.asWebviewUri(
-                    vscode.Uri.file(path.join(vscode.workspace?.rootPath || ""))
+                    vscode.Uri.file(vscode.workspace?.rootPath || "")
                   )}";
                   window.initialState = JSON.parse(atob("${initialState}"));
                   window.initialConfig = JSON.parse(atob("${initialConfig}"));
