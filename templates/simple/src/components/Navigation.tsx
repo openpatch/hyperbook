@@ -37,7 +37,7 @@ const Section = ({
     defaultExpanded: isActive || expanded,
   });
   return (
-    <div className={virtual ? "" : "section"}>
+    <div className={virtual ? "virtual-section" : "section"}>
       <div
         className={[
           "name",
@@ -52,15 +52,17 @@ const Section = ({
             <a className="label">{name}</a>
           </Link>
         )}
-        <button
-          className="toggle"
-          {...getToggleProps()}
-          aria-label={isExpanded ? "Close" : "Open"}
-        >
-          {isExpanded ? "➖" : "➕"}
-        </button>
+        {virtual ? null : (
+          <button
+            className="toggle"
+            {...getToggleProps()}
+            aria-label={isExpanded ? "Close" : "Open"}
+          >
+            {isExpanded ? "➖" : "➕"}
+          </button>
+        )}
       </div>
-      <div className="links" {...getCollapseProps()}>
+      <div className="links" {...(virtual ? [] : getCollapseProps())}>
         {pages.length > 0 && (
           <ul className="pages">
             {pages

@@ -244,24 +244,26 @@ header {
 }
 
 .section ul,
+.virtual-section ul,
 nav > ul {
   list-style-type: none;
   margin: 0;
   padding: 0;
 }
 
-nav > ul {
-  margin-bottom: 16px;
-}
-
 nav li + li {
   margin-top: 0px;
 }
 
-.section {
+.section,
+.virtual-section {
   display: flex;
   flex-direction: column;
-  margin-bottom: 16px;
+}
+
+.section {
+  margin-top: 8px;
+  margin-bottom: 8px;
 }
 
 .section > .name {
@@ -394,9 +396,6 @@ nav li + li {
   bottom: 0;
 }
 
-nav > ul {
-  margin-bottom: 16px;
-}
 nav.toc li {
   margin-bottom: 8px;
 }
