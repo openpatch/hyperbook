@@ -325,7 +325,7 @@ importers:
       commander: 9.4.1
       cpy: 9.0.1
       cross-spawn: 7.0.3
-      got: 12.5.1
+      got: 12.5.2
       prompts: 2.4.2
       rimraf: 3.0.2
       tar: 6.1.11
@@ -346,7 +346,7 @@ importers:
       commander: 9.4.1
       cpy: 9.0.1
       cross-spawn: 7.0.3
-      got: 12.5.1
+      got: 12.5.2
       prompts: 2.4.2
       rimraf: 3.0.2
       tar: 6.1.11
@@ -5781,8 +5781,8 @@ packages:
       slash: 4.0.0
     dev: true
 
-  /got/12.5.1:
-    resolution: {integrity: sha512-sD16AK8cCyUoPtKr/NMvLTFFa+T3i3S+zoiuvhq0HP2YiqBZA9AtlBjAdsQBsLBK7slPuvmfE0OxhGi7N5dD4w==}
+  /got/12.5.2:
+    resolution: {integrity: sha512-guHGMSEcsA5m1oPRweXUJnug0vuvlkX9wx5hzOka+ZBrBUOJHU0Z1JcNu3QE5IPGnA5aXUsQHdWOD4eJg9/v3A==}
     engines: {node: '>=14.16'}
     dependencies:
       '@sindresorhus/is': 5.3.0
