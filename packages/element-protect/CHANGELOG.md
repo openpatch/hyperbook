@@ -1,5 +1,11 @@
 # @hyperbook/element-protect
 
+## 0.2.0
+
+### Minor Changes
+
+- [`2574ee6`](https://github.com/openpatch/hyperbook/commit/2574ee6f0f4c70b1f05a70bbd8b1d5ba0eba013f) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - In development mode you can now use the reveal button to reveal the elements under the protect element. This should ease the development. This does not have any effects on the production side.
+
 ## 0.1.5
 
 ### Patch Changes
