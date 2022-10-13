@@ -45,6 +45,9 @@ Here is an example configuration:
   "language": "en",
   "basePath": "/hyperbook-github-pages",
   "repo": "https://github.com/mikebarkmin/hyperbook-github-pages/edit/main",
+  "colors": {
+    "brand": "#FF0000"
+  },
   "elements": {
     "bookmarks": false
   }
