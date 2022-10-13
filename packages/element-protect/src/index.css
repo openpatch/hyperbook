@@ -47,3 +47,15 @@
   background: white;
   border-color: var(--color-spacer);
 }
+
+.element-protect-dev button.reveal {
+  margin-bottom: 10px;
+  width: 100%;
+  padding: 4px 8px;
+  border-style: solid;
+  border-width: 2px;
+  border-radius: 4px;
+  background: none;
+  border-color: orange;
+  color: orange;
+}
