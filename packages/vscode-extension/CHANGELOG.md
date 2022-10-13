@@ -1,5 +1,12 @@
 # @hyperbook/vscode-extension
 
+## 0.4.1
+
+### Patch Changes
+
+- Updated dependencies [[`2574ee6`](https://github.com/openpatch/hyperbook/commit/2574ee6f0f4c70b1f05a70bbd8b1d5ba0eba013f)]:
+  - @hyperbook/element-protect@0.2.0
+
 ## 0.4.0
 
 ### Minor Changes
