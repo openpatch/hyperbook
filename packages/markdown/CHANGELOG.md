@@ -1,5 +1,12 @@
 # @hyperbook/markdown
 
+## 0.3.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @hyperbook/provider@0.1.6
+
 ## 0.3.0
 
 ### Minor Changes
