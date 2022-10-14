@@ -1,5 +1,12 @@
 # @hyperbook/element-bitflow
 
+## 0.1.7
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @hyperbook/provider@0.1.6
+
 ## 0.1.6
 
 ### Patch Changes

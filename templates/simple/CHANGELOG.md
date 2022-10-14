@@ -1,5 +1,31 @@
 # hyperbook-simple-template
 
+## 0.6.0
+
+### Minor Changes
+
+- [#363](https://github.com/openpatch/hyperbook/pull/363) [`5ca2ccf`](https://github.com/openpatch/hyperbook/commit/5ca2ccfec72a841ec9c4e43a03ceb2be68710541) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add custom links support. Custom links can now be configured in your `hyperbook.json`. See the book configuration documentation for more information on how to set them up.
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @hyperbook/provider@0.1.6
+  - @hyperbook/element-alert@0.1.6
+  - @hyperbook/element-bitflow@0.1.7
+  - @hyperbook/element-bookmarks@0.2.1
+  - @hyperbook/element-collapsible@0.2.2
+  - @hyperbook/element-dl@0.1.6
+  - @hyperbook/element-excalidraw@0.2.1
+  - @hyperbook/element-mermaid@0.1.6
+  - @hyperbook/element-protect@0.2.1
+  - @hyperbook/element-qr@0.1.7
+  - @hyperbook/element-struktog@0.1.6
+  - @hyperbook/element-tabs@0.1.7
+  - @hyperbook/element-term@0.1.6
+  - @hyperbook/element-youtube@0.1.6
+  - @hyperbook/markdown@0.3.1
+  - @hyperbook/styles@0.1.6
+
 ## 0.5.2
 
 ### Patch Changes

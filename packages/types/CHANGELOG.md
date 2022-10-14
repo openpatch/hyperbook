@@ -1,5 +1,11 @@
 # @hyperbook/types
 
+## 0.2.0
+
+### Minor Changes
+
+- [#363](https://github.com/openpatch/hyperbook/pull/363) [`5ca2ccf`](https://github.com/openpatch/hyperbook/commit/5ca2ccfec72a841ec9c4e43a03ceb2be68710541) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add custom links support. Custom links can now be configured in your `hyperbook.json`. See the book configuration documentation for more information on how to set them up.
+
 ## 0.1.0
 
 ### Minor Changes

@@ -1,5 +1,12 @@
 # @hyperbook/provider
 
+## 0.1.6
+
+### Patch Changes
+
+- Updated dependencies [[`5ca2ccf`](https://github.com/openpatch/hyperbook/commit/5ca2ccfec72a841ec9c4e43a03ceb2be68710541)]:
+  - @hyperbook/types@0.2.0
+
 ## 0.1.5
 
 ### Patch Changes
