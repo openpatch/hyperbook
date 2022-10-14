@@ -18,7 +18,7 @@ You do not need any coding experience. You only need to create and edit Markdown
 
 You can start working on a Hyperbook in three different ways. Choose the one which suits your style best.
 
-::::tabs{id="options"}
+:::::tabs{id="options"}
 
 :::tab{title="VS Code" id="vscode"}
 
@@ -42,7 +42,7 @@ You need to have [Node](https://nodejs.org/) version 16 or higher installed on y
 
 :::
 
-:::tab{title="Web IDE" id="web-ide"}
+::::tab{title="Web IDE" id="web-ide"}
 
 Most platforms for collaborative version control have an integrated Web IDE like [GitLab](https://docs.gitlab.com/ee/user/project/web_ide/) or [GitHub](https://docs.github.com/en/codespaces/the-githubdev-web-based-editor).
 
@@ -58,9 +58,9 @@ If you use this approach you will not be able to see a representative preview. I
 
 :::
 
-:::
-
 ::::
+
+:::::
 
 ## Deploy
 
