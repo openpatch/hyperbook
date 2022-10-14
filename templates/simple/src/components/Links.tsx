@@ -57,10 +57,11 @@ const MenuLink: FC<LinkWithHrefProps> = ({ label, href, icon }) => {
 
 export const Links: FC<LinksProps> = ({ links }) => {
   const linkRef = useRef<HTMLDivElement>();
-  const isVisible = useOnScreen(linkRef);
+  const containerRef = useRef<HTMLDivElement>();
+  const isVisible = useOnScreen(linkRef, containerRef);
   return (
-    <>
-      <div className={["links", !isVisible ? "" : "hidden"].join(" ")}>
+    <div className="links" ref={containerRef}>
+      {!isVisible ? (
         <Menu
           menuButton={
             <MenuButton className="icon">
@@ -80,8 +81,7 @@ export const Links: FC<LinksProps> = ({ links }) => {
             <Link {...link} key={i} />
           ))}
         </Menu>
-      </div>
-      <div className={["links", !isVisible ? "hidden" : ""].join(" ")}>
+      ) : (
         <div className="container" ref={linkRef}>
           {links.map((link, i) => {
             if ("links" in link) {
@@ -105,7 +105,7 @@ export const Links: FC<LinksProps> = ({ links }) => {
             }
           })}
         </div>
-      </div>
-    </>
+      )}
+    </div>
   );
 };

@@ -180,17 +180,19 @@ header {
 .branding {
   text-decoration: none;
   display: flex;
-  flex: 1;
   padding: 20px;
   align-items: center;
 }
 
 .links {
   padding: 20px;
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
 }
 
 .links .container {
-  display: flex;
+  display: inline-flex;
 }
 
 .links.hidden {
