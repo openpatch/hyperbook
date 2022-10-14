@@ -180,8 +180,21 @@ header {
 .branding {
   text-decoration: none;
   display: flex;
+  flex: 1;
   padding: 20px;
   align-items: center;
+}
+
+.links {
+  padding: 20px;
+}
+
+.links .container {
+  display: flex;
+}
+
+.links.hidden {
+  display: none;
 }
 
 .branding .logo {
@@ -189,7 +202,9 @@ header {
   align-items: center;
   justify-content: center;
   margin-right: 10px;
-  height: 50px;
+  height: 40px;
+  width: auto;
+  min-width: 40px;
 }
 
 .branding .logo img {

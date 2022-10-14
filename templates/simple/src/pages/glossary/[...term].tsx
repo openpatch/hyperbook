@@ -103,7 +103,7 @@ export const getStaticProps: GetStaticProps<
 
   return {
     props: {
-      locale: hyperbook.language,
+      locale: data?.lang || hyperbook.language,
       term,
       markdown: content,
       toc: getToc(content),

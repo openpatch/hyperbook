@@ -2,6 +2,20 @@ type ElementConfig = {
   version?: string;
 };
 
+export type LinkWithLinks = {
+  label: string;
+  icon?: string;
+  links: Link[];
+};
+
+export type LinkWithHref = {
+  label: string;
+  icon?: string;
+  href: string;
+};
+
+export type Link = LinkWithHref | LinkWithLinks;
+
 export type HyperbookJson = {
   name: string;
   description?: string;
@@ -36,6 +50,7 @@ export type HyperbookJson = {
   license?: string;
   language?: "de" | "en" | "fr" | "es";
   repo?: string;
+  links?: Link[];
   elements?: {
     bookmarks?: false | ElementConfig;
     excalidraw?: ElementConfig & {

@@ -28,6 +28,7 @@ can and part wise must set (indicated by a \*).
 | language         | The language of the Hyperbook.                                                                                                              |
 | repo             | The link to the GitHub repo. Used for showing an edit button.                                                                               |
 | elements         | Here you can configure the elements. See the element pages for configuration options.                                                       |
+| links            | Here you can add custom links, which will be shown in the top right corner. See the example below on how to use them.                       |
 
 Here is an example configuration:
 
@@ -50,6 +51,37 @@ Here is an example configuration:
   },
   "elements": {
     "bookmarks": false
-  }
+  },
+  "links": [
+    {
+      "label": "Contact",
+      "links": [
+        {
+          "label": "Mail",
+          "icon": "📧",
+          "href": "mailto:contact@openpatch.org"
+        },
+        {
+          "label": "Twitter",
+          "icon": "🐦",
+          "href": "https://twitter.com/openpatchorg"
+        },
+        {
+          "label": "Mastodon",
+          "icon": "🐘",
+          "href": "https://fosstodon.org/@openpatch"
+        },
+        {
+          "label": "Matrix (Chat)",
+          "icon": "👨‍💻",
+          "href": "https://matrix.to/#/#hyperbook:matrix.org"
+        }
+      ]
+    },
+    {
+      "label": "OpenPatch",
+      "href": "https://openpatch.org"
+    }
+  ]
 }
 ```

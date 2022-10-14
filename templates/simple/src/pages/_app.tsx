@@ -1,6 +1,7 @@
 import "../reset.css";
 import "../styles.css";
 import "../colors.css";
+import "../szh-menu.css";
 import "@hyperbook/markdown/katex.css";
 import "@hyperbook/markdown/index.css";
 import { Provider, ProviderProps } from "@hyperbook/provider";
