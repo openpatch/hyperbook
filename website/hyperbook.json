@@ -10,6 +10,37 @@
     "body": "/fonts/Montserrat-VariableFont_wght.ttf",
     "code": "/fonts/FiraCode-Regular.woff2"
   },
+  "links": [
+    {
+      "label": "Contact",
+      "links": [
+        {
+          "label": "Mail",
+          "icon": "📧",
+          "href": "mailto:contact@openpatch.org"
+        },
+        {
+          "label": "Twitter",
+          "icon": "🐦",
+          "href": "https://twitter.com/openpatchorg"
+        },
+        {
+          "label": "Mastodon",
+          "icon": "🐘",
+          "href": "https://fosstodon.org/@openpatch"
+        },
+        {
+          "label": "Matrix (Chat)",
+          "icon": "👨‍💻",
+          "href": "https://matrix.to/#/#hyperbook:matrix.org"
+        }
+      ]
+    },
+    {
+      "label": "OpenPatch",
+      "href": "https://openpatch.org"
+    }
+  ],
   "language": "en",
   "logo": "/logo.svg",
   "repo": "https://github.com/openpatch/hyperbook/edit/main/website",

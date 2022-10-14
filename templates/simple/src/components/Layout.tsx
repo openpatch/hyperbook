@@ -1,11 +1,11 @@
 import { useLink } from "@hyperbook/provider";
 import Head from "next/head";
-import Image from "next/image";
 import { Fragment, ReactNode, useState } from "react";
 import { getHyperbook } from "../utils/hyperbook";
 import { Navigation as NavigationProps, Page } from "../utils/navigation";
 import { Toc as TocProps } from "../utils/toc";
 import Drawer from "./Drawer";
+import { Links } from "./Links";
 import { Navigation } from "./Navigation";
 import { Toc } from "./Toc";
 
@@ -158,6 +158,7 @@ export function Layout({ toc, navigation, page, children }: LayoutProps) {
             )}
             <div className="name">{hyperbook.name}</div>
           </Link>
+          {hyperbook.links && <Links links={hyperbook.links}></Links>}
         </header>
         <div className="sidebar">
           <Navigation {...navigation} />

@@ -75,12 +75,12 @@ export const getStaticProps: GetStaticProps<
   } catch (e) {
     source = fs.readFileSync(path.join(filePath, "index") + ".md");
   }
-  const { content } = matter(source);
+  const { content, data } = matter(source);
 
   const navigation = await getNavigation(href);
   return {
     props: {
-      locale: hyperbook.language,
+      locale: data?.lang || hyperbook.language,
       markdown: content,
       toc: getToc(content),
       navigation,
