@@ -184,19 +184,15 @@ header {
   align-items: center;
 }
 
-.links {
+.custom-links {
   padding: 20px;
   flex: 1;
   display: flex;
   justify-content: flex-end;
 }
 
-.links .container {
+.custom-links .container {
   display: inline-flex;
-}
-
-.links.hidden {
-  display: none;
 }
 
 .branding .logo {

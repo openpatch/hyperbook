@@ -60,7 +60,7 @@ export const Links: FC<LinksProps> = ({ links }) => {
   const containerRef = useRef<HTMLDivElement>();
   const isVisible = useOnScreen(linkRef, containerRef);
   return (
-    <div className="links" ref={containerRef}>
+    <div className="custom-links" ref={containerRef}>
       {!isVisible ? (
         <Menu
           menuButton={
