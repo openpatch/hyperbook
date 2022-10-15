@@ -579,7 +579,7 @@ importers:
       react: 18.2.0
       react-collapsed: 3.4.0
       react-dom: 18.2.0
-      react-icons: 4.4.0
+      react-icons: 4.6.0
       react-redux: 8.0.4
       redux: 4.2.0
       redux-persist: 6.0.0
@@ -609,7 +609,7 @@ importers:
       react: 18.2.0
       react-collapsed: 3.4.0_biqbaboplfbrettd7655fr4n2y
       react-dom: 18.2.0_react@18.2.0
-      react-icons: 4.4.0_react@18.2.0
+      react-icons: 4.6.0_react@18.2.0
       react-redux: 8.0.4_wr4jmv5xrjbe6vbq33me5wwo2a
       redux: 4.2.0
       redux-persist: 6.0.0_react@18.2.0+redux@4.2.0
@@ -8852,8 +8852,8 @@ packages:
       react: 18.2.0
     dev: false
 
-  /react-icons/4.4.0_react@18.2.0:
-    resolution: {integrity: sha512-fSbvHeVYo/B5/L4VhB7sBA1i2tS8MkT0Hb9t2H1AVPkwGfVHLJCqyr2Py9dKMxsyM63Eng1GkdZfbWj+Fmv8Rg==}
+  /react-icons/4.6.0_react@18.2.0:
+    resolution: {integrity: sha512-rR/L9m9340yO8yv1QT1QurxWQvWpbNHqVX0fzMln2HEb9TEIrQRGsqiNFQfiv9/JEUbyHmHPlNTB2LWm2Ttz0g==}
     peerDependencies:
       react: '*'
     dependencies:
