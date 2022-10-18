@@ -2,6 +2,8 @@ packages:
   # all packages in subdirs of packages/ and components/
   - "packages/*"
   - "templates/*"
+  - "examples/**/.hyperbook"
+  - "website/**/.hyperbook"
   - "website"
   # exclude packages that are inside test directories
   - "!**/test/**"

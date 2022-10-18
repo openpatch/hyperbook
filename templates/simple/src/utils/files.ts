@@ -6,13 +6,13 @@ export const getAllFiles = function (
   arrayOfFiles: string[] = []
 ) {
   try {
-    const files = fs.readdirSync(path.join(process.cwd(), dirPath));
+    const files = fs.readdirSync(dirPath);
 
     files.forEach(function (file) {
-      if (fs.statSync(dirPath + "/" + file).isDirectory()) {
-        arrayOfFiles = getAllFiles(dirPath + "/" + file, arrayOfFiles);
+      if (fs.statSync(path.join(dirPath, file)).isDirectory()) {
+        arrayOfFiles = getAllFiles(path.join(dirPath, file), arrayOfFiles);
       } else if (file.endsWith(".md") || file.endsWith(".mdx")) {
-        arrayOfFiles.push(path.join(dirPath, "/", file));
+        arrayOfFiles.push(path.join(dirPath, file));
       }
     });
 

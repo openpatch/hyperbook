@@ -1,6 +1,6 @@
 {
-  "name": "Hyperbook Documentation",
-  "description": "Documentation for Hyperbook created with Hyperbook",
+  "name": "Hyperbook Dokumenation",
+  "description": "Dokumentation für Hyperbook erstellt mit Hyperbook",
   "author": {
     "name": "OpenPatch",
     "url": "https://openpatch.org"
@@ -12,7 +12,7 @@
   },
   "links": [
     {
-      "label": "Contact",
+      "label": "Kontakt",
       "links": [
         {
           "label": "Mail",
@@ -35,14 +35,10 @@
           "href": "https://matrix.to/#/#hyperbook:matrix.org"
         }
       ]
-    },
-    {
-      "label": "OpenPatch",
-      "href": "https://openpatch.org"
     }
   ],
-  "language": "en",
+  "language": "de",
   "logo": "/logo.svg",
-  "repo": "https://github.com/openpatch/hyperbook/edit/main/website",
+  "repo": "https://github.com/openpatch/hyperbook/edit/main/website/de",
   "vercel": true
 }

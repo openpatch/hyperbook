@@ -6,17 +6,17 @@ import {
   Link as LinkProps,
 } from "@hyperbook/types";
 import { Menu, MenuItem, SubMenu, MenuButton } from "@szhsin/react-menu";
-import { FC, useRef } from "react";
+import { Fragment, FC, useRef } from "react";
 import { useOnScreen } from "../utils/useOnScreen";
 
 export type LinksProps = { links: HyperbookJson["links"] };
 
 const Item: FC<Pick<LinkProps, "label" | "icon">> = ({ label, icon }) => {
   return (
-    <>
+    <Fragment>
       {icon && <div className="icon">{icon}</div>}
       <div className="label">{label}</div>
-    </>
+    </Fragment>
   );
 };
 

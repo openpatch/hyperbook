@@ -35,7 +35,6 @@ export type Navigation = {
 
 export const readFile = (filePath: string) => {
   let source: Buffer;
-  filePath = path.join(process.cwd(), filePath);
   try {
     source = fs.readFileSync(filePath);
   } catch (e) {
@@ -56,7 +55,7 @@ const getSectionsAndPages = async function (
   dirPath: string,
   pageList: Page[] = []
 ) {
-  const files = fs.readdirSync(path.join(process.cwd(), dirPath));
+  const files = fs.readdirSync(dirPath);
   let arrayOfPages: Page[] = [];
   let arrayOfSections: Section[] = [];
 
@@ -72,7 +71,12 @@ const getSectionsAndPages = async function (
       const { content, data } = readFile(p);
       const section = {
         ...data,
-        href: "/" + path.relative("book", p),
+        href:
+          "/" +
+          path.relative(
+            path.join(process.env.root ?? process.cwd(), "book"),
+            p
+          ),
         isEmpty: content.trim() === "",
         pages,
         sections,
@@ -86,13 +90,23 @@ const getSectionsAndPages = async function (
       const { data } = readFile(p);
       if (p.endsWith(".md")) {
         p = p.substring(0, p.length - 3);
-        if (path.relative("book", p) === "index") {
+        if (
+          path.relative(
+            path.join(process.env.root ?? process.cwd(), "book"),
+            p
+          ) === "index"
+        ) {
           p = p.substring(0, p.length - 5);
         }
         if (!p.endsWith("index")) {
           const page: Page = {
             ...data,
-            href: "/" + path.relative("book", p),
+            href:
+              "/" +
+              path.relative(
+                path.join(process.env.root ?? process.cwd(), "book"),
+                p
+              ),
           };
           if (repo) {
             page.repo = repo;
@@ -104,8 +118,18 @@ const getSectionsAndPages = async function (
     }
   }
 
-  arrayOfPages = arrayOfPages.sort((a, b) => a.index - b.index);
-  arrayOfSections = arrayOfSections.sort((a, b) => a.index - b.index);
+  arrayOfPages = arrayOfPages.sort((a, b) => (a.name > b.name ? 1 : -1));
+  arrayOfPages = arrayOfPages.sort((a, b) => {
+    const iIndex = a.index !== undefined ? a.index : 9999;
+    const eIndex = b.index !== undefined ? b.index : 9999;
+    return iIndex - eIndex;
+  });
+  arrayOfSections = arrayOfSections.sort((a, b) => (a.name > b.name ? 1 : -1));
+  arrayOfSections = arrayOfSections.sort((a, b) => {
+    const iIndex = a.index !== undefined ? a.index : 9999;
+    const eIndex = b.index !== undefined ? b.index : 9999;
+    return iIndex - eIndex;
+  });
 
   return { pages: arrayOfPages, sections: arrayOfSections };
 };
@@ -127,7 +151,9 @@ const getPageList = (sections: Section[], pages: Page[]): Page[] => {
 export const getNavigation = async (
   currPath: string = "/"
 ): Promise<Navigation> => {
-  const { sections, pages } = await getSectionsAndPages("book");
+  const { sections, pages } = await getSectionsAndPages(
+    path.join(process.env.root ?? process.cwd(), "book")
+  );
 
   let pageList = getPageList(sections, pages);
 

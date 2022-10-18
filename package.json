@@ -5,14 +5,17 @@
   "private": true,
   "scripts": {
     "preinstall": "npx only-allow pnpm",
-    "prepare": "husky install && node scripts/setup.mjs",
+    "prepare": "husky install",
     "dev": "node scripts/watcher.mjs",
     "build": "pnpm -r build",
     "lint": "pnpm -r lint",
     "hyperbook:build": "pnpm --filter hyperbook build",
     "version-packages": "changeset version",
     "release": "changeset publish",
-    "website:dev": "cd website && node ../packages/hyperbook/dist/index.js dev",
+    "examples:setup": "cd examples && HYPERBOOK_LOCAL_DEV=1 node ../packages/hyperbook/dist/index.js setup",
+    "examples:build": "cd examples && node ../packages/hyperbook/dist/index.js build",
+    "website:setup": "cd website && HYPERBOOK_LOCAL_DEV=1 node ../packages/hyperbook/dist/index.js setup",
+    "website:dev": "cd website/en && node ../packages/hyperbook/dist/index.js dev",
     "website:build": "cd website && node ../packages/hyperbook/dist/index.js build"
   },
   "devDependencies": {

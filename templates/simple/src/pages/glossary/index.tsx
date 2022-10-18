@@ -54,7 +54,9 @@ export default function Glossary({ terms, navigation }: GlossaryProps) {
 export const getStaticProps: GetStaticProps<{
   terms: GlossaryProps["terms"];
 }> = async () => {
-  const files = getAllFiles("glossary");
+  const files = getAllFiles(
+    path.join(process.env.root ?? process.cwd(), "glossary")
+  );
 
   const terms: GlossaryProps["terms"] = {};
   for (const file of files) {

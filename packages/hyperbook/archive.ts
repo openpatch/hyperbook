@@ -2,12 +2,15 @@ import path from "path";
 import { isSetup } from "./helpers/is-setup";
 import fs from "fs";
 import archiver from "archiver";
-import process from "process";
 import chalk from "chalk";
 
-async function archiveFolder(name: string): Promise<void> {
+async function archiveFolder(
+  root: string,
+  name: string,
+  prefix?: string
+): Promise<void> {
   return new Promise((resolve, reject) => {
-    const archivesPath = path.join(process.cwd(), "public", "archives");
+    const archivesPath = path.join(root, "public", "archives");
     if (!fs.existsSync(archivesPath)) {
       fs.mkdirSync(archivesPath, { recursive: true });
     }
@@ -15,7 +18,7 @@ async function archiveFolder(name: string): Promise<void> {
     const output = fs.createWriteStream(outputPath);
     const archive = archiver("zip", { zlib: { level: 9 } });
     archive.on("finish", () => {
-      console.log(chalk.green("Archive zipped: ") + name);
+      console.log(`${chalk.green(`[${prefix}]`)} Archive ${name} zipped.`);
       resolve();
     });
     archive.on("error", (err) => {
@@ -24,36 +27,37 @@ async function archiveFolder(name: string): Promise<void> {
 
     archive.pipe(output);
 
-    archive.directory(path.join(process.cwd(), "archives", name), false);
+    archive.directory(path.join(root, "archives", name), false);
     archive.finalize();
   });
 }
 
-export async function runArchive(): Promise<void> {
-  const setup = isSetup();
+export async function runArchive(root: string, prefix?: string): Promise<void> {
+  const setup = isSetup(root);
   if (!setup) {
     throw new Error("no setup");
   }
   return new Promise((resolve, reject) => {
     // find folders in archives
-    if (!fs.existsSync(path.join(process.cwd(), "archives"))) {
-      console.log(chalk.blue("info  ") + "- No Archives found");
+    if (!fs.existsSync(path.join(root, "archives"))) {
+      console.log(`${chalk.blue(`[${prefix}]`)} No archives found.`);
       resolve();
+    } else {
+      console.log(`${chalk.blue(`[${prefix}]`)} Zipping archives.`);
+      const dirs = fs
+        .readdirSync(path.join(root, "archives"), {
+          withFileTypes: true,
+        })
+        .filter((d) => d.isDirectory());
+
+      Promise.all(dirs.map((d) => archiveFolder(root, d.name, prefix)))
+        .then(() => {
+          resolve();
+        })
+        .catch(() => {
+          reject();
+        });
     }
-    const dirs = fs
-      .readdirSync(path.join(process.cwd(), "archives"), {
-        withFileTypes: true,
-      })
-      .filter((d) => d.isDirectory());
-
-    Promise.all(dirs.map((d) => archiveFolder(d.name)))
-      .then(() => {
-        resolve();
-      })
-      .catch(() => {
-        reject();
-      });
-
     // zip folders in archives to public/archives
   });
 }

@@ -1,7 +1,6 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import chalk from "chalk";
 import spawn from "cross-spawn";
-import path from "path";
 import type { PackageManager } from "./get-pkg-manager";
 
 interface InstallArgs {
@@ -96,7 +95,7 @@ export function install(
      */
     const child = spawn(command, args, {
       stdio: "inherit",
-      cwd: path.join(process.cwd(), ".hyperbook"),
+      cwd: root,
       env: { ...process.env, ADBLOCK: "1", DISABLE_OPENCOLLECTIVE: "1" },
     });
     child.on("close", (code) => {

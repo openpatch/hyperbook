@@ -1,19 +1,25 @@
 import chokidar from "chokidar";
 import chalk from "chalk";
 import { exec } from "child_process";
-import { join } from "path";
-import { buildPackage } from "./buildPackage.mjs";
 
 const log = console.log.bind(console);
 
 const ignorePackages = [];
 const watcher = chokidar.watch(
   [
-    "packages/*/src/**/*.ts",
-    "packages/*/src/**/*.tsx",
-    "packages/*/src/**/*.css",
+    "packages/**/*.ts",
+    "packages/**/*.tsx",
+    "packages/**/*.css",
+    "templates/**/*.ts",
+    "templates/**/*.tsx",
   ],
   {
+    ignored: [
+      "packages/*/dist/**/*.ts",
+      "packages/*/dist/**/*.tsx",
+      "packages/*/dist/**/*.css",
+      "node_modules",
+    ],
     depth: 3,
     persistent: true,
     usePolling: true,

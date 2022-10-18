@@ -3,9 +3,10 @@
   "version": "0.6.0",
   "private": true,
   "scripts": {
-    "dev": "next-remote-watch ./book ./glossary",
-    "build": "next build && next export",
-    "start": "next start"
+    "build": "rimraf dist && node ./esbuild.mjs",
+    "dev": "next dev",
+    "next:dev": "next-hyperbook-watch",
+    "next:build": "next build && next export"
   },
   "dependencies": {
     "@hyperbook/element-alert": "workspace:*",
@@ -38,11 +39,14 @@
     "redux-persist": "6.0.0"
   },
   "devDependencies": {
+    "@hyperbook/next-watch": "workspace:*",
     "@hyperbook/types": "workspace:*",
     "@types/node": "18.8.3",
     "@types/react": "18.0.21",
     "chalk": "5.1.2",
-    "next-remote-watch": "2.0.0",
+    "esbuild": "0.15.10",
+    "glob": "8.0.3",
+    "rimraf": "3.0.2",
     "typescript": "4.8.4"
   }
 }

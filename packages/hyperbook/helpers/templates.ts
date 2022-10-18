@@ -12,43 +12,12 @@ export type RepoInfo = {
   name: string;
   branch: string;
   filePath: string;
+  version: string;
 };
 
 export async function isUrlOk(url: string): Promise<boolean> {
   const res = await got.head(url).catch((e) => e);
   return res.statusCode === 200;
-}
-
-export async function getRepoInfo(
-  url: URL,
-  templatePath?: string
-): Promise<RepoInfo | undefined> {
-  const [, username, name, t, _branch, ...file] = url.pathname.split("/");
-  const filePath = templatePath
-    ? templatePath.replace(/^\//, "")
-    : file.join("/");
-
-  // Support repos whose entire purpose is to be a hyperbook template, e.g.
-  // https://github.com/:username/:my-cool-hyperbook-template-repo-name.
-  if (t === undefined) {
-    const infoResponse = await got(
-      `https://api.github.com/repos/${username}/${name}`
-    ).catch((e) => e);
-    if (infoResponse.statusCode !== 200) {
-      return;
-    }
-    const info = JSON.parse(infoResponse.body);
-    return { username, name, branch: info["default_branch"], filePath };
-  }
-
-  // If templatePath is available, the branch name takes the entire path
-  const branch = templatePath
-    ? `${_branch}/${file.join("/")}`.replace(new RegExp(`/${filePath}|/$`), "")
-    : _branch;
-
-  if (username && name && branch && t === "tree") {
-    return { username, name, branch, filePath };
-  }
 }
 
 export function hasRepo({
@@ -61,6 +30,14 @@ export function hasRepo({
   const packagePath = `${filePath ? `/${filePath}` : ""}/package.json`;
 
   return isUrlOk(contentsUrl + packagePath + `?ref=${branch}`);
+}
+
+export async function getTemplatePackageJson(
+  name: string
+): Promise<{ version: string }> {
+  return await got(
+    `https://raw.githubusercontent.com/openpatch/hyperbook/main/templates/${name}/package.json`
+  ).json<{ version: string }>();
 }
 
 export function hasTemplate(name: string): Promise<boolean> {
@@ -86,9 +63,10 @@ export function downloadAndExtractRepo(
   );
 }
 
-export async function getTemplateInfo(template: string) {
+export async function getTemplateInfo(templateName: string) {
   let repoInfo: RepoInfo | undefined;
-  if (template) {
+  if (templateName) {
+    const template = `https://github.com/openpatch/hyperbook/tree/main/templates/${templateName}`;
     let repoUrl: URL | undefined;
 
     try {
@@ -110,7 +88,13 @@ export async function getTemplateInfo(template: string) {
         process.exit(1);
       }
 
-      repoInfo = await getRepoInfo(repoUrl);
+      repoInfo = {
+        version: (await getTemplatePackageJson(templateName)).version,
+        name: "hyperbook",
+        branch: "main",
+        filePath: `templates/${templateName}`,
+        username: "openpatch",
+      };
 
       if (!repoInfo) {
         console.error(

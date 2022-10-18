@@ -1,0 +1,47 @@
+{
+  "name": "@hyperbook/next-watch",
+  "version": "0.0.0",
+  "author": "Mike Barkmin",
+  "homepage": "https://github.com/openpatch/hyperbook#readme",
+  "license": "MIT",
+  "sideEffects": false,
+  "bin": {
+    "next-hyperbook-watch": "./dist/index.esm.mjs"
+  },
+  "files": [
+    "bin"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/openpatch/hyperbook.git",
+    "directory": "packages/next-watch"
+  },
+  "bugs": {
+    "url": "https://github.com/openpatch/hyperbook/issues"
+  },
+  "scripts": {
+    "prebuild": "rimraf dist",
+    "version": "pnpm build",
+    "lint": "tsc --noEmit",
+    "build": "node ./esbuild.mjs"
+  },
+  "dependencies": {
+    "@hyperbook/types": "workspace:^0.2.0",
+    "chalk": "5.1.2",
+    "chokidar": "3.5.3",
+    "commander": "9.4.1",
+    "express": "^4.18.2"
+  },
+  "peerDependencies": {
+    "next": ">=10"
+  },
+  "devDependencies": {
+    "esbuild": "0.15.10",
+    "next": "12.3.1",
+    "react": "18.2.0",
+    "react-dom": "18.2.0"
+  }
+}

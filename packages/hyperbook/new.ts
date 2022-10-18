@@ -8,17 +8,14 @@ import { isFolderEmpty } from "./helpers/is-folder-empty";
 import { isWriteable } from "./helpers/is-writeable";
 import { makeDir } from "./helpers/make-dir";
 import { tryGitInit } from "./helpers/git";
-import { getTemplateInfo } from "./helpers/templates";
-import { runSetup } from "./setup";
+import { runSetupProject } from "./setup";
 
 export async function runNew({
   programName,
   bookPath,
-  template,
 }: {
   programName: string;
   bookPath: string;
-  template: string;
 }): Promise<void> {
   if (typeof bookPath === "string") {
     bookPath = bookPath.trim();
@@ -52,8 +49,6 @@ export async function runNew({
     );
     process.exit(1);
   }
-
-  let repoInfo = await getTemplateInfo(template);
 
   const root = path.resolve(bookPath);
 
@@ -192,7 +187,11 @@ export async function runNew({
     },
   });
 
-  await runSetup(template, repoInfo, root);
+  await runSetupProject({
+    type: "book",
+    name: bookName,
+    src: root,
+  });
 
   if (tryGitInit(root)) {
     console.log("Initialized a git repository.");
