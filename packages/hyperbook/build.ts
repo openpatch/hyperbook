@@ -129,7 +129,7 @@ module.exports = {
     }, 500);
 
     if (process.env.CI) {
-      process.stdout.write(exportingText + ".");
+      process.stdout.write(exportingText + ".\n");
     }
 
     child.stderr?.on("data", (chunk) => {
