@@ -120,11 +120,17 @@ module.exports = {
 
     let i = 0;
     const loader = setInterval(() => {
-      readline.clearLine(process.stdout, 0);
-      readline.cursorTo(process.stdout, 0);
-      process.stdout.write(exportingText + ".".repeat(i));
-      i = (i + 1) % 5;
+      if (!process.env.CI) {
+        readline.clearLine(process.stdout, 0);
+        readline.cursorTo(process.stdout, 0);
+        process.stdout.write(exportingText + ".".repeat(i));
+        i = (i + 1) % 5;
+      }
     }, 500);
+
+    if (process.env.CI) {
+      process.stdout.write(exportingText + ".");
+    }
 
     child.stderr?.on("data", (chunk) => {
       if (!String(chunk).startsWith("warn")) {
