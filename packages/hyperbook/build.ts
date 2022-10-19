@@ -9,6 +9,7 @@ import { runArchive } from "./archive";
 import { makeDir } from "./helpers/make-dir";
 import rimraf from "rimraf";
 import { Link } from "@hyperbook/types";
+import { makeEnv } from "./helpers/make-env";
 
 export async function runBuildProject(
   project: Project,
@@ -101,10 +102,16 @@ module.exports = {
     console.log(path.join(root, ".hyperbook"));
     const command = "npm";
     const args = ["run", "next:build"];
+    const env = makeEnv();
     const child = spawn(command, args, {
       stdio: "pipe",
       cwd: path.join(root, ".hyperbook"),
-      env: { ...process.env, ADBLOCK: "1", DISABLE_OPENCOLLECTIVE: "1" },
+      env: {
+        ...process.env,
+        ...env,
+        ADBLOCK: "1",
+        DISABLE_OPENCOLLECTIVE: "1",
+      },
     });
 
     const exportingText = `${chalk.blue(`[${prefix}]`)} Exporting HTML files`;

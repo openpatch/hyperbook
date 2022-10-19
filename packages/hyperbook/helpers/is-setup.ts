@@ -19,6 +19,9 @@ export function isSetup(root: string): boolean {
     return false;
   }
 
+  if (process.env.HYPERBOOK_LOCAL_DEV) {
+    return true;
+  }
   const nextBin = path.join(root, ".hyperbook", "node_modules", ".bin", "next");
   try {
     fs.statSync(nextBin);

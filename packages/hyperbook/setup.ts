@@ -55,9 +55,6 @@ export async function runSetupProject(project: Project, rootProject?: Project) {
         2
       )
     );
-
-    const isOnline = await getOnline();
-    await install(root, null, { packageManager: "pnpm", isOnline });
   } else {
     if (!rootProject) {
       const isOnline = await getOnline();

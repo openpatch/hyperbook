@@ -13,10 +13,10 @@
     "version-packages": "changeset version",
     "release": "changeset publish",
     "examples:setup": "cd examples && HYPERBOOK_LOCAL_DEV=1 node ../packages/hyperbook/dist/index.js setup",
-    "examples:build": "cd examples && node ../packages/hyperbook/dist/index.js build",
+    "examples:build": "cd examples && HYPERBOOK_LOCAL_DEV=1 node ../packages/hyperbook/dist/index.js build",
     "website:setup": "cd website && HYPERBOOK_LOCAL_DEV=1 node ../packages/hyperbook/dist/index.js setup",
-    "website:dev": "cd website/en && node ../packages/hyperbook/dist/index.js dev",
-    "website:build": "cd website && node ../packages/hyperbook/dist/index.js build"
+    "website:dev": "cd website/en && HYPERBOOK_LOCAL_DEV=1 node ../../packages/hyperbook/dist/index.js dev",
+    "website:build": "cd website && HYPERBOOK_LOCAL_DEV=1 node ../packages/hyperbook/dist/index.js build"
   },
   "devDependencies": {
     "@changesets/changelog-github": "0.4.7",
