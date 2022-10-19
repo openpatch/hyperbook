@@ -1,6 +1,7 @@
 import spawn from "cross-spawn";
 import path from "path";
 import fs from "fs";
+import readline from "readline";
 import chalk from "chalk";
 import { isSetup } from "./helpers/is-setup";
 import { readHyperbook } from "./helpers/read-hyperbook";
@@ -10,6 +11,7 @@ import { makeDir } from "./helpers/make-dir";
 import rimraf from "rimraf";
 import { Link } from "@hyperbook/types";
 import { makeEnv } from "./helpers/make-env";
+import { stdout } from "process";
 
 export async function runBuildProject(
   project: Project,
@@ -118,8 +120,8 @@ module.exports = {
 
     let i = 0;
     const loader = setInterval(() => {
-      process.stdout.clearLine(0);
-      process.stdout.cursorTo(0);
+      readline.clearLine(process.stdout, 0);
+      readline.cursorTo(process.stdout, 0);
       process.stdout.write(exportingText + ".".repeat(i));
       i = (i + 1) % 5;
     }, 500);
@@ -136,8 +138,8 @@ module.exports = {
         reject({ command: `${command} ${args.join(" ")}` });
         return;
       } else {
-        process.stdout.clearLine(0);
-        process.stdout.cursorTo(0);
+        readline.clearLine(process.stdout, 0);
+        readline.cursorTo(process.stdout, 0);
         const normalOut = path.join(root, ".hyperbook", "out");
         if (!out) {
           process.stdout.write(
