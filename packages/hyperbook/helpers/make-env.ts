@@ -14,8 +14,6 @@ export function makeEnv() {
       "node_modules"
     );
     PATH =
-      PATH +
-      ":" +
       path.join(
         __dirname,
         "..",
@@ -25,7 +23,9 @@ export function makeEnv() {
         "simple",
         "node_modules",
         ".bin"
-      );
+      ) +
+      ":" +
+      PATH;
   }
 
   const env = { NODE_PATH, PATH };
