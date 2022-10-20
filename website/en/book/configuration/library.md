@@ -15,22 +15,22 @@ Hyperlibrary. The menu item 'Translations' is the product of this linkage.
 
 All you have to do is create a `hyperlibrary.json` file.
 
-| Property           | Description                                                                                                             |
-| ------------------ | ----------------------------------------------------------------------------------------------------------------------- |
-| name\*             | Name of the library.                                                                                                    |
-| books[]            | An array of books and libraries.                                                                                        |
-| books[].src\*      | Path to a book or library.                                                                                              |
-| books[].basePath\* | Overwrites the basePath of a book or library.                                                                           |
-| books[].icon       | An icon für the menu.                                                                                                   |
-| books[].name       | A name für the menu. If no name is provided, it will use the one defined in the `hyperbook.json` or `hyperlibrary.json` |
-| basePath           | Defines the basePath of the library.                                                                                    |
+| Property             | Description                                                                                                             |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| name\*               | Name of the library.                                                                                                    |
+| library[]            | An array of books and libraries.                                                                                        |
+| library[].src\*      | Path to a book or library.                                                                                              |
+| library[].basePath\* | Overwrites the basePath of a book or library.                                                                           |
+| library[].icon       | An icon für the menu.                                                                                                   |
+| library[].name       | A name für the menu. If no name is provided, it will use the one defined in the `hyperbook.json` or `hyperlibrary.json` |
+| basePath             | Defines the basePath of the library.                                                                                    |
 
 Here is an example of a `hyperlibrary.json`:
 
 ```json
 {
   "name": "Translations",
-  "books": [
+  "library": [
     { "src": "de", "name": "Deutsch", "basePath": "de", "icon": "🇩🇪" },
     { "src": "en", "name": "English", "basePath": "/", "icon": "🇬🇧" }
   ]
@@ -43,7 +43,7 @@ the `lanauge` option in the corresponding `hyperbook.json`
 ```json
 {
   "name": { "en": "Translations", "de": "Übersetzungen" },
-  "books": [
+  "library": [
     {
       "src": "de",
       "name": { "en": "German", "de": "Deutsch" },

@@ -84,12 +84,22 @@ function collect(root, basePath, label, icon) {
       });
     if (hyperlibraryJson) {
       const projects = yield Promise.all(
-        hyperlibraryJson.books.map((_0) =>
+        hyperlibraryJson.library.map((_0) =>
           __async(
             this,
             [_0],
             function* ({ src, basePath: localBasePath, name, icon: icon2 }) {
               var _a2;
+              if (!localBasePath) {
+                console.log(
+                  chalk.red(
+                    `Missing basePath for book ${name} in library ${path.join(
+                      root,
+                      "hyperlibrary.json"
+                    )}`
+                  )
+                );
+              }
               return collect(
                 path.join(root, src),
                 path.join(

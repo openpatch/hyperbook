@@ -15,6 +15,7 @@ storybook-static
 *.tsbuildinfo
 
 dist
+!packages/next-watch/dist
 # dependencies
 node_modules
 /.pnp

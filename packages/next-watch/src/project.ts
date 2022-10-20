@@ -1,4 +1,10 @@
-import { HyperbookJson, HyperlibraryJson, Link } from "@hyperbook/types";
+import {
+  HyperbookJson,
+  HyperlibraryJson,
+  Language,
+  LanguageString,
+  Link,
+} from "@hyperbook/types";
 import fs from "fs/promises";
 import chalk from "chalk";
 import path from "path";
@@ -9,13 +15,13 @@ export type Book = {
   basePath?: string;
   href: string;
   icon?: string;
-  name: string;
+  name: string | LanguageString;
   template?: string;
 };
 
 export type Library = {
   type: "library";
-  name: string;
+  name: string | LanguageString;
   basePath?: string;
   icon?: string;
   src: string;
@@ -24,16 +30,38 @@ export type Library = {
 
 export type Project = Book | Library;
 
+export function getProjectName(project: Project, language?: Language) {
+  let label = "";
+  if (typeof project.name === "string") {
+    label = project.name;
+  } else {
+    if (language) {
+      label = project.name[language];
+    } else {
+      label = Object.values(project.name)[0];
+    }
+    if (!label) {
+      console.log(
+        chalk.red(
+          `You need to provide a name for language ${language} in ${project.src}`
+        )
+      );
+      throw Error("");
+    }
+  }
+  return label;
+}
+
 export function makeLink(project: Project): Link {
   if (project.type === "library") {
     return {
-      label: project.name,
+      label: getProjectName(project),
       links: project.projects.map(makeLink),
       icon: project.icon,
     };
   } else {
     return {
-      label: project.name,
+      label: getProjectName(project),
       href: project.href,
       icon: project.icon,
     };
@@ -43,7 +71,7 @@ export function makeLink(project: Project): Link {
 export async function collect(
   root: string,
   basePath?: string,
-  label?: string,
+  label?: string | LanguageString,
   icon?: string
 ): Promise<Project> {
   const hyperbookJson = await fs
@@ -88,8 +116,18 @@ export async function collect(
 
   if (hyperlibraryJson) {
     const projects = await Promise.all(
-      hyperlibraryJson.books.map(
+      hyperlibraryJson.library.map(
         async ({ src, basePath: localBasePath, name, icon }) => {
+          if (!localBasePath) {
+            console.log(
+              chalk.red(
+                `Missing basePath for book ${name} in library ${path.join(
+                  root,
+                  "hyperlibrary.json"
+                )}`
+              )
+            );
+          }
           return collect(
             path.join(root, src),
             path.join(

@@ -17,22 +17,22 @@ Hyperlibrary vereint. Der Menüpunkt "Übersetzungen" ist das Produkt dieser Ver
 
 Alles, was du tun musst, ist eine `hyperlibrary.json`-Datei anzulegen.
 
-| Eigenschaft        | Beschreibung                                                                                                                    |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------------------- |
-| name\*             | Name der Bibliothek.                                                                                                            |
-| books[]            | Ein Array von Büchern und Bibliotheken.                                                                                         |
-| books[].src\*      | Pfad zu einer Bibliothek oder zu einem Buch.                                                                                    |
-| books[].basePath\* | Überschreibt den BasePath des Buchs bzw. der Bibliothek.                                                                        |
-| books[].icon       | Ein Icon für das Menü.                                                                                                          |
-| books[].name       | Ein Name für das Menü. Wenn keine angegeben ist, dann wird der Name in der `hyperbook.json` oder `hyperlibrary.json` verwendet. |
-| basePath           | Definiert den basePath der Bibliothek                                                                                           |
+| Eigenschaft          | Beschreibung                                                                                                                    |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| name\*               | Name der Bibliothek.                                                                                                            |
+| library[]            | Ein Array von Büchern und Bibliotheken.                                                                                         |
+| library[].src\*      | Pfad zu einer Bibliothek oder zu einem Buch.                                                                                    |
+| library[].basePath\* | Überschreibt den BasePath des Buchs bzw. der Bibliothek.                                                                        |
+| library[].icon       | Ein Icon für das Menü.                                                                                                          |
+| library[].name       | Ein Name für das Menü. Wenn keine angegeben ist, dann wird der Name in der `hyperbook.json` oder `hyperlibrary.json` verwendet. |
+| basePath             | Definiert den basePath der Bibliothek                                                                                           |
 
 Hier ein Beispiel einer `hyperlibrary.json`:
 
 ```json
 {
   "name": "Translations",
-  "books": [
+  "library": [
     { "src": "de", "name": "Deutsch", "basePath": "de", "icon": "🇩🇪" },
     { "src": "en", "name": "English", "basePath": "/", "icon": "🇬🇧" }
   ]
@@ -46,7 +46,7 @@ Du kannst auch Übersetzungen für die Menüpunkte definieren. Die
 ```json
 {
   "name": { "en": "Translations", "de": "Übersetzungen" },
-  "books": [
+  "library": [
     {
       "src": "de",
       "name": { "en": "German", "de": "Deutsch" },

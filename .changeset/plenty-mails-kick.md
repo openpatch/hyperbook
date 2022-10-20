@@ -17,7 +17,7 @@ Here is an example for connecting different versions.
 ```json
 {
   "name": "Versions",
-  "books": [
+  "library": [
     { "src": "v1", "name": "1.0.0", "basePath": "v1" },
     { "src": "v2", "name": "2.0.0", "basePath": "/" }
   ]

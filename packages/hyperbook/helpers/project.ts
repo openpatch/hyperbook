@@ -117,7 +117,7 @@ export async function collect(
 
   if (hyperlibraryJson) {
     const projects = await Promise.all(
-      hyperlibraryJson.books.map(
+      hyperlibraryJson.library.map(
         async ({ src, basePath: localBasePath, name, icon }) => {
           if (!localBasePath) {
             console.log(

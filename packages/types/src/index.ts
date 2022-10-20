@@ -68,7 +68,7 @@ export type LanguageString = Record<Language, string>;
 
 export type HyperlibraryJson = {
   name: string | LanguageString;
-  books: {
+  library: {
     src: string;
     basePath: string;
     icon?: string;
