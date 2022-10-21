@@ -519,7 +519,7 @@ importers:
       ts-loader: 9.4.1
       typescript: 4.8.4
       typescript-json-schema: 0.54.0
-      vsce: 2.11.0
+      vsce: 2.13.0
       webpack: 5.74.0
       webpack-cli: 4.10.0
     dependencies:
@@ -571,7 +571,7 @@ importers:
       ts-loader: 9.4.1_qqxisngxjbp7lstdk7boexbu3e
       typescript: 4.8.4
       typescript-json-schema: 0.54.0
-      vsce: 2.11.0
+      vsce: 2.13.0
       webpack: 5.74.0_na2qyddqajkdtu6l4otwoergp4
       webpack-cli: 4.10.0_webpack@5.74.0
 
@@ -8202,7 +8202,7 @@ packages:
       is-ci: 2.0.0
       leven: 3.1.0
       tmp: 0.2.1
-      vsce: 2.11.0
+      vsce: 2.13.0
     transitivePeerDependencies:
       - debug
     dev: true
@@ -10875,8 +10875,8 @@ packages:
     resolution: {integrity: sha512-2ham8XPWTONajOR0ohOKOHXkm3+gaBmGut3SRuu75xLd/RRaY6vqgh8NBYYk7+RW3u5AtzPQZG8F10LHkl0lAQ==}
     dev: true
 
-  /vsce/2.11.0:
-    resolution: {integrity: sha512-pr9Y0va/HCer0tTifeqaUrK24JJSpRd6oLeF/PY6FtrY41e+lwxiAq6jfMXx4ShAZglYg2rFKoKROwa7E7SEqQ==}
+  /vsce/2.13.0:
+    resolution: {integrity: sha512-t1otQ2lqyi5Y/G6qUl9BEc561nEIYrZbLT8k+R1SoZaKNa6gaehaLGQG5zvB524YPGZOVvbOBzAXoO7Mor1J5g==}
     engines: {node: '>= 14'}
     hasBin: true
     dependencies:
