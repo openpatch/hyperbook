@@ -4,7 +4,6 @@ import {
   Reducer,
   useContext,
   useEffect,
-  LinkHTMLAttributes,
   useState,
   createContext,
 } from "react";
@@ -30,19 +29,21 @@ export type RootFolder = "public" | "book" | "glossary";
 
 type HyperbookContextProps = {
   directives: Record<string, FC<any>>;
-  Link: FC<LinkHTMLAttributes<HTMLAnchorElement>>;
+  Link: FC<JSX.IntrinsicElements["a"]>;
   env: "development" | "production";
   router: {
     push: (path: string) => Promise<boolean>;
   };
   colorScheme?: "dark" | "light";
   saveFile: (
-    path: string,
-    content: string,
-    rootFolder: RootFolder
-  ) => Promise<void>;
-  loadFile: (path: string, rootFolder?: RootFolder) => Promise<string>;
-  makeUrl: (path?: string, rootFolder?: RootFolder) => string;
+    config: HyperbookJson
+  ) => (path: string, content: string, rootFolder: RootFolder) => Promise<void>;
+  loadFile: (
+    config: HyperbookJson
+  ) => (path: string, rootFolder?: RootFolder) => Promise<string>;
+  makeUrl: (
+    config: HyperbookJson
+  ) => (path?: string, rootFolder?: RootFolder) => string;
   getActivePageId: () => Promise<string>;
   config: HyperbookJson;
 };
@@ -54,9 +55,9 @@ const HyperbookContext = createContext<HyperbookContextProps>({
     push: async () => false,
   },
   env: "production",
-  saveFile: async () => {},
-  loadFile: async () => "",
-  makeUrl: (url) => url || "",
+  saveFile: () => async () => {},
+  loadFile: () => async () => "",
+  makeUrl: () => (url) => url || "",
   getActivePageId: async () => "",
   config: {
     name: "Hyperbook",
@@ -70,7 +71,7 @@ export type Element = {
 
 export type ProviderProps = {
   Link: HyperbookContextProps["Link"];
-  router?: HyperbookContextProps["router"];
+  router: HyperbookContextProps["router"];
   elements?: Element[];
   children?: ReactNode;
   saveFile?: HyperbookContextProps["saveFile"];
@@ -86,13 +87,11 @@ export const Provider: FC<ProviderProps> = ({
   elements = [],
   children,
   Link,
-  saveFile = async () => {},
-  loadFile = async () => "",
-  router = {
-    push: async () => false,
-  },
+  saveFile = () => async () => {},
+  loadFile = () => async () => "",
+  router,
   env = "production",
-  makeUrl = (url) => url || "",
+  makeUrl = () => (url) => url || "",
   getActivePageId = async () => "",
   config = {
     name: "Hyperbook",
@@ -222,13 +221,13 @@ export const useDirectives = () => {
 
 export const useMakeUrl = () => {
   const data = useContext(HyperbookContext);
-  return data.makeUrl;
+  return data.makeUrl(data.config);
 };
 
 export const useFile = () => {
   const data = useContext(HyperbookContext);
 
-  return [data.loadFile, data.saveFile] as const;
+  return [data.loadFile(data.config), data.saveFile(data.config)] as const;
 };
 
 export type ColorScheme = "light" | "dark";

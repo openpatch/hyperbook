@@ -28,9 +28,10 @@
     "version": "pnpm build",
     "lint": "tsc --noEmit",
     "dev": "ncc build ./index.ts -w -o dist/",
-    "build": "rimraf dist && ncc build ./index.ts -o ./dist/ --minify --no-cache --no-source-map-register"
+    "build": "rimraf dist && ncc build ./index.ts -o ./dist/ --minify --no-cache --no-source-map-register && node ./postbuild.mjs"
   },
   "devDependencies": {
+    "@pnpm/exportable-manifest": "^4.0.0",
     "@types/archiver": "5.3.1",
     "@types/async-retry": "1.4.5",
     "@types/cross-spawn": "6.0.2",
@@ -45,6 +46,7 @@
     "cpy": "9.0.1",
     "cross-spawn": "7.0.3",
     "got": "12.5.2",
+    "hyperbook-simple-template": "workspace:*",
     "prompts": "2.4.2",
     "rimraf": "3.0.2",
     "tar": "6.1.11",

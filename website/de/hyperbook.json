@@ -1,0 +1,43 @@
+{
+  "name": "Hyperbook Dokumenation",
+  "description": "Dokumentation für Hyperbook erstellt mit Hyperbook",
+  "author": {
+    "name": "OpenPatch",
+    "url": "https://openpatch.org"
+  },
+  "fonts": {
+    "heading": "/fonts/Montserrat-VariableFont_wght.ttf",
+    "body": "/fonts/Montserrat-VariableFont_wght.ttf",
+    "code": "/fonts/FiraCode-Regular.woff2"
+  },
+  "links": [
+    {
+      "label": "Kontakt",
+      "links": [
+        {
+          "label": "Mail",
+          "icon": "📧",
+          "href": "mailto:contact@openpatch.org"
+        },
+        {
+          "label": "Twitter",
+          "icon": "🐦",
+          "href": "https://twitter.com/openpatchorg"
+        },
+        {
+          "label": "Mastodon",
+          "icon": "🐘",
+          "href": "https://fosstodon.org/@openpatch"
+        },
+        {
+          "label": "Matrix (Chat)",
+          "icon": "👨‍💻",
+          "href": "https://matrix.to/#/#hyperbook:matrix.org"
+        }
+      ]
+    }
+  ],
+  "language": "de",
+  "logo": "/logo.svg",
+  "repo": "https://github.com/openpatch/hyperbook/edit/main/website/de"
+}

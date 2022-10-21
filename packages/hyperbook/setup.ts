@@ -1,97 +1,102 @@
 import rimraf from "rimraf";
 import chalk from "chalk";
-import retry from "async-retry";
-import {
-  downloadAndExtractRepo,
-  getTemplateInfo,
-  RepoInfo,
-} from "./helpers/templates";
+import cpy from "cpy";
+import fs from "fs/promises";
 import { install } from "./helpers/install";
 import { getOnline } from "./helpers/is-online";
 import { makeDir } from "./helpers/make-dir";
 import path from "path";
 import { makeSymlink } from "./helpers/make-symlink";
-import { readHyperbook } from "./helpers/read-hyperbook";
-import { preparePackages } from "./helpers/prepare-packages";
+import { getProjectName, Project } from "./helpers/project";
 
-export class DownloadError extends Error {}
+export async function runSetupProject(project: Project, rootProject?: Project) {
+  const name = getProjectName(project);
+  console.log(`${chalk.blue(`[${name}]`)} Setup Project.`);
+  const projectRoot = path.join(project.src, ".hyperbook");
+  const root = path.join(rootProject?.src || "", ".hyperbook");
 
-export async function runSetup(
-  template?: string,
-  repoInfo?: RepoInfo | undefined,
-  root?: string
-) {
-  if (!root) {
-    root = process.cwd();
-  }
+  rimraf.sync(projectRoot);
+  await makeDir(projectRoot);
 
-  if (!template) {
-    const hyperbook = await readHyperbook();
-    template = hyperbook.template;
-  }
+  const filesPath = path.join(__dirname, "templates");
+  await cpy("default/.hyperbook/**", projectRoot, {
+    cwd: filesPath,
+    followSymbolicLinks: false,
+  });
 
-  if (!template) {
-    template =
-      "https://github.com/openpatch/hyperbook/tree/main/templates/simple";
-  }
+  if (process.env.HYPERBOOK_LOCAL_DEV) {
+    const packageJson = await fs
+      .readFile(
+        path.join(
+          __dirname,
+          "..",
+          "..",
+          "..",
+          "templates",
+          "simple",
+          "package.json"
+        )
+      )
+      .then((f) => JSON.parse(f.toString()));
 
-  if (!repoInfo) {
-    repoInfo = await getTemplateInfo(template);
-  }
-  const nextRoot = path.join(root, ".hyperbook");
-  console.log("Removing old template");
-  rimraf.sync(nextRoot);
-  await makeDir(nextRoot);
-
-  const isOnline = await getOnline();
-  /**
-   * If an template repository is provided, clone it.
-   */
-  try {
-    if (repoInfo) {
-      const repoInfo2 = repoInfo;
-      console.log(
-        `Downloading files from repo ${chalk.cyan(
-          template
-        )}. This might take a moment.`
+    await fs.writeFile(
+      path.join(projectRoot, "package.json"),
+      JSON.stringify(
+        {
+          ...packageJson,
+          name: `@docs/` + name.toLowerCase().replace(" ", "-"),
+          scripts: {
+            "next:dev": "next-hyperbook-watch",
+            "next:build": "next build && next export",
+          },
+        },
+        null,
+        2
+      )
+    );
+  } else {
+    if (!rootProject) {
+      const isOnline = await getOnline();
+      await install(root, null, { packageManager: "npm", isOnline });
+    } else {
+      await makeSymlink(
+        path.join(root, "node_modules"),
+        path.join(projectRoot, "node_modules")
       );
-      console.log();
-      await retry(() => downloadAndExtractRepo(nextRoot, repoInfo2), {
-        retries: 3,
-      });
     }
-  } catch (reason) {
-    function isErrorLike(err: unknown): err is { message: string } {
-      return (
-        typeof err === "object" &&
-        err !== null &&
-        typeof (err as { message?: unknown }).message === "string"
-      );
-    }
-    throw new DownloadError(isErrorLike(reason) ? reason.message : reason + "");
   }
-  console.log("Prepare packages. Use latest versions.");
-  console.log();
-  await preparePackages(nextRoot);
 
-  console.log("Installing packages. This might take a couple of minutes.");
-  console.log();
+  if (project.type === "library") {
+    await makeSymlink(
+      path.join(project.src, "hyperlibrary.json"),
+      path.join(projectRoot, "hyperlibrary.json")
+    );
 
-  await install(nextRoot, null, { packageManager: "npm", isOnline });
-  console.log();
+    for (const p of project.projects) {
+      await runSetupProject(p, rootProject);
+    }
 
-  rimraf.sync(path.join(nextRoot, "book"));
-  rimraf.sync(path.join(nextRoot, "public"));
-  rimraf.sync(path.join(nextRoot, "glossary"));
-  rimraf.sync(path.join(nextRoot, "hyperbook.json"));
-  await makeSymlink(path.join(root, "book"), path.join(nextRoot, "book"));
-  await makeSymlink(path.join(root, "public"), path.join(nextRoot, "public"));
+    return;
+  }
+
   await makeSymlink(
-    path.join(root, "glossary"),
-    path.join(nextRoot, "glossary")
+    path.join(project.src, "archives"),
+    path.join(projectRoot, "archives")
   );
   await makeSymlink(
-    path.join(root, "hyperbook.json"),
-    path.join(nextRoot, "hyperbook.json")
+    path.join(project.src, "book"),
+    path.join(projectRoot, "book")
+  );
+  await makeSymlink(
+    path.join(project.src, "glossary"),
+    path.join(projectRoot, "glossary")
+  );
+  await makeSymlink(
+    path.join(project.src, "public"),
+    path.join(projectRoot, "public")
+  );
+  await makeSymlink(
+    path.join(project.src, "hyperbook.json"),
+    path.join(projectRoot, "hyperbook.json")
   );
 }

@@ -12,6 +12,7 @@ import {
 } from "../../utils/navigation";
 import { Fragment } from "react";
 import { getHyperbook } from "../../utils/hyperbook";
+
 import { getToc, Toc } from "../../utils/toc";
 import { useActivePageId, useLink } from "@hyperbook/provider";
 import { Markdown } from "@hyperbook/markdown";
@@ -60,7 +61,7 @@ export const getStaticProps: GetStaticProps<
     term: string[];
   }
 > = async ({ params }) => {
-  let filePath = path.join(process.cwd(), "glossary");
+  let filePath = path.join(process.env.root ?? process.cwd(), "glossary");
   filePath = path.join(filePath, ...params.term);
   const href = "/glossary/" + path.join(...params.term);
   const source = fs.readFileSync(filePath + ".md");
@@ -68,7 +69,9 @@ export const getStaticProps: GetStaticProps<
 
   const navigation = await getNavigation(href);
 
-  const files = getAllFiles("book");
+  const files = getAllFiles(
+    path.join(process.env.root ?? process.cwd(), "book")
+  );
   const pages: Page[] = [];
   for (const file of files) {
     const { content, data } = readFile(file);
@@ -78,7 +81,7 @@ export const getStaticProps: GetStaticProps<
     const m = content.match(r);
     if (m && !data.hide && data.name) {
       const relativePath = path
-        .relative("book", file)
+        .relative(path.join(process.env.root ?? process.cwd(), "book"), file)
         .replace(/\.mdx?$/, "")
         .split("/");
       const isIndex = relativePath[relativePath.length - 1] === "index";

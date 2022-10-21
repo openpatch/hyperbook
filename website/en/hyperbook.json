@@ -35,14 +35,9 @@
           "href": "https://matrix.to/#/#hyperbook:matrix.org"
         }
       ]
-    },
-    {
-      "label": "OpenPatch",
-      "href": "https://openpatch.org"
     }
   ],
   "language": "en",
   "logo": "/logo.svg",
-  "repo": "https://github.com/openpatch/hyperbook/edit/main/website",
-  "vercel": true
+  "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en"
 }

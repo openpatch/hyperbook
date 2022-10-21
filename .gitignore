@@ -5,6 +5,8 @@ templates/simple/hyperbook.json
 templates/simple/public
 templates/simple/archives
 
+*.zip
+
 activity
 .env
 storybook-static
@@ -13,6 +15,7 @@ storybook-static
 *.tsbuildinfo
 
 dist
+!packages/next-watch/dist
 # dependencies
 node_modules
 /.pnp

@@ -93,7 +93,7 @@ export function Layout({ toc, navigation, page, children }: LayoutProps) {
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [isTocOpen, setIsTocOpen] = useState(false);
   return (
-    <>
+    <Fragment>
       <Head>
         <title>{`${page.name} - ${hyperbook.name}`}</title>
         <meta
@@ -224,6 +224,6 @@ export function Layout({ toc, navigation, page, children }: LayoutProps) {
           </div>
         </main>
       </div>
-    </>
+    </Fragment>
   );
 }

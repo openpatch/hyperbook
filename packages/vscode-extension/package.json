@@ -124,6 +124,7 @@
     "vscode:prepublish": "pnpm compile",
     "vscode:package": "vsce package",
     "vscode:publish": "vsce publish && ovsx publish",
+    "build": "npm-run-all compile:*",
     "compile": "npm-run-all compile:*",
     "compile:extension": "node ./esbuild.js",
     "compile:view": "webpack --mode development",

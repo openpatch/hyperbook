@@ -12,6 +12,7 @@ import { getToc, Toc } from "../utils/toc";
 import { Markdown } from "@hyperbook/markdown";
 import { useActivePageId, useLink } from "@hyperbook/provider";
 import { getHyperbook } from "../utils/hyperbook";
+import { Fragment } from "react";
 
 type PageProps = {
   markdown: string;
@@ -27,7 +28,7 @@ export default function BookPage({ markdown, navigation, toc }: PageProps) {
   useActivePageId();
 
   return (
-    <>
+    <Fragment>
       <Layout
         navigation={navigation}
         page={page}
@@ -53,7 +54,7 @@ export default function BookPage({ markdown, navigation, toc }: PageProps) {
           )}
         </div>
       </Layout>
-    </>
+    </Fragment>
   );
 }
 
@@ -64,7 +65,7 @@ export const getStaticProps: GetStaticProps<
   }
 > = async ({ params }) => {
   let source: Buffer;
-  let filePath = path.join(process.cwd(), "book");
+  let filePath = path.join(process.env.root ?? process.cwd(), "book");
   let href = "/";
   if (params.page) {
     filePath = path.join(filePath, ...params.page);
@@ -91,10 +92,12 @@ export const getStaticProps: GetStaticProps<
 export const getStaticPaths: GetStaticPaths<{
   page: string[];
 }> = async () => {
-  const files = getAllFiles("book");
+  const files = getAllFiles(
+    path.join(process.env.root ?? process.cwd(), "book")
+  );
   const paths = files.map((f) => {
     const relativePath = path
-      .relative("book", f)
+      .relative(path.join(process.env.root ?? process.cwd(), "book"), f)
       .replace(/\.mdx?$/, "")
       .split("/");
     const isIndex = relativePath[relativePath.length - 1] === "index";

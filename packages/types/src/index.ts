@@ -16,6 +16,8 @@ export type LinkWithHref = {
 
 export type Link = LinkWithHref | LinkWithLinks;
 
+export type Language = "de" | "en" | "fr" | "es" | "it" | "pt" | "nl";
+
 export type HyperbookJson = {
   name: string;
   description?: string;
@@ -30,7 +32,6 @@ export type HyperbookJson = {
     body?: string;
     code?: string;
   };
-  template?: string;
   colors?: {
     /**
      * @format color-hex
@@ -48,9 +49,10 @@ export type HyperbookJson = {
   };
   basePath?: string;
   license?: string;
-  language?: "de" | "en" | "fr" | "es";
+  language?: Language;
   repo?: string;
   links?: Link[];
+  template?: string;
   elements?: {
     bookmarks?: false | ElementConfig;
     excalidraw?: ElementConfig & {
@@ -60,4 +62,17 @@ export type HyperbookJson = {
       edit?: boolean;
     };
   };
+};
+
+export type LanguageString = Record<Language, string>;
+
+export type HyperlibraryJson = {
+  name: string | LanguageString;
+  library: {
+    src: string;
+    basePath: string;
+    icon?: string;
+    name?: string | LanguageString;
+  }[];
+  basePath?: string;
 };

@@ -3,9 +3,9 @@ import chalk from "chalk";
 import fs from "fs";
 import path from "path";
 
-export async function readHyperbook(): Promise<HyperbookJson> {
+export async function readHyperbook(root: string): Promise<HyperbookJson> {
   return new Promise((resolve, reject) => {
-    fs.readFile(path.join(process.cwd(), "hyperbook.json"), (err, data) => {
+    fs.readFile(path.join(root, "hyperbook.json"), (err, data) => {
       if (err) {
         console.log(
           chalk.red(
