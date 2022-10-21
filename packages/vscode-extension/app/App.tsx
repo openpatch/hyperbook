@@ -81,6 +81,9 @@ export const App = () => {
           }
           return <a href={href} {...props} />;
         }}
+        router={{
+          push: async () => true,
+        }}
         storage={createNoopStorage()}
         makeUrl={() => (p, rootFolder) => {
           if (p?.startsWith("/")) {
