@@ -1,5 +1,12 @@
 # @hyperbook/element-excalidraw
 
+## 0.2.2
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @hyperbook/provider@0.1.7
+
 ## 0.2.1
 
 ### Patch Changes

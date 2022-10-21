@@ -1,5 +1,12 @@
 # @hyperbook/element-tabs
 
+## 0.1.8
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @hyperbook/provider@0.1.7
+
 ## 0.1.7
 
 ### Patch Changes
