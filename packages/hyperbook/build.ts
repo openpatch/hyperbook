@@ -11,7 +11,6 @@ import { makeDir } from "./helpers/make-dir";
 import rimraf from "rimraf";
 import { Link } from "@hyperbook/types";
 import { makeEnv } from "./helpers/make-env";
-import { stdout } from "process";
 
 export async function runBuildProject(
   project: Project,
@@ -85,23 +84,24 @@ module.exports = {
     } else {
       hyperbookJson.links.push(link);
     }
-
-    fs.cpSync(
-      path.join(root, "hyperbook.json"),
-      path.join(root, ".hyperbook", "hyperbook.json"),
-      {
-        force: true,
-      }
-    );
-
-    fs.writeFileSync(
-      path.join(root, ".hyperbook", "hyperbook.json"),
-      JSON.stringify(hyperbookJson, null, 2)
-    );
   }
 
+  hyperbookJson.basePath = basePath;
+
+  fs.cpSync(
+    path.join(root, "hyperbook.json"),
+    path.join(root, ".hyperbook", "hyperbook.json"),
+    {
+      force: true,
+    }
+  );
+
+  fs.writeFileSync(
+    path.join(root, ".hyperbook", "hyperbook.json"),
+    JSON.stringify(hyperbookJson, null, 2)
+  );
+
   return new Promise((resolve, reject) => {
-    console.log(path.join(root, ".hyperbook"));
     const command = "npm";
     const args = ["run", "next:build"];
     const env = makeEnv();

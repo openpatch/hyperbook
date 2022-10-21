@@ -39,6 +39,5 @@
   ],
   "language": "en",
   "logo": "/logo.svg",
-  "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en",
-  "vercel": true
+  "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en"
 }

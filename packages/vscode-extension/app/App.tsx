@@ -82,7 +82,7 @@ export const App = () => {
           return <a href={href} {...props} />;
         }}
         storage={createNoopStorage()}
-        makeUrl={(p, rootFolder) => {
+        makeUrl={() => (p, rootFolder) => {
           if (p?.startsWith("/")) {
             if (rootFolder) {
               return workspacePath + "/" + rootFolder + p;
@@ -108,10 +108,10 @@ export const App = () => {
           elementMermaid,
           elementExcalidraw,
         ]}
-        loadFile={async (path) => {
+        loadFile={() => async (path) => {
           return fetch(path).then((res) => res.text());
         }}
-        saveFile={async (path, content, rootFolder) => {
+        saveFile={() => async (path, content, rootFolder) => {
           return vscode.postMessage({
             type: "WRITE",
             payload: {

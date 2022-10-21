@@ -1,5 +1,65 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
+    "definitions": {
+        "Language": {
+            "enum": [
+                "de",
+                "en",
+                "es",
+                "fr",
+                "it",
+                "nl",
+                "pt"
+            ],
+            "type": "string"
+        },
+        "Link": {
+            "anyOf": [
+                {
+                    "$ref": "#/definitions/LinkWithLinks"
+                },
+                {
+                    "properties": {
+                        "href": {
+                            "type": "string"
+                        },
+                        "icon": {
+                            "type": "string"
+                        },
+                        "label": {
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "href",
+                        "label"
+                    ],
+                    "type": "object"
+                }
+            ]
+        },
+        "LinkWithLinks": {
+            "properties": {
+                "icon": {
+                    "type": "string"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "links": {
+                    "items": {
+                        "$ref": "#/definitions/Link"
+                    },
+                    "type": "array"
+                }
+            },
+            "required": [
+                "label",
+                "links"
+            ],
+            "type": "object"
+        }
+    },
     "properties": {
         "author": {
             "properties": {
@@ -108,16 +168,16 @@
             "type": "object"
         },
         "language": {
-            "enum": [
-                "de",
-                "en",
-                "es",
-                "fr"
-            ],
-            "type": "string"
+            "$ref": "#/definitions/Language"
         },
         "license": {
             "type": "string"
+        },
+        "links": {
+            "items": {
+                "$ref": "#/definitions/Link"
+            },
+            "type": "array"
         },
         "logo": {
             "type": "string"

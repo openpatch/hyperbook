@@ -35,7 +35,7 @@ import Link from "next/link";
 import { Styles } from "@hyperbook/styles";
 import { localStorage } from "@hyperbook/store";
 import { useRouter } from "next/router";
-import { getHyperbook, getHyperbookUrl } from "../utils/hyperbook";
+import { getHyperbook } from "../utils/hyperbook";
 import { useEffect } from "react";
 
 const hb = getHyperbook();
@@ -48,6 +48,23 @@ const MyLink: ProviderProps["Link"] = ({ href, children, ...props }) => {
   );
 };
 
+const makeUrl: ProviderProps["makeUrl"] =
+  ({ basePath }) =>
+  (path) => {
+    if (
+      process.env.NODE_ENV === "production" &&
+      basePath &&
+      path.startsWith("/")
+    ) {
+      if (basePath.endsWith("/")) {
+        path = basePath.slice(0, -1) + path;
+      } else {
+        path = basePath + path;
+      }
+    }
+    return path;
+  };
+
 export default function MyApp({ Component, pageProps }) {
   const router = useRouter();
 
@@ -59,7 +76,7 @@ export default function MyApp({ Component, pageProps }) {
     <Provider
       Link={MyLink}
       config={hb}
-      makeUrl={getHyperbookUrl}
+      makeUrl={makeUrl}
       env={process.env.NODE_ENV === "production" ? "production" : "development"}
       elements={[
         elementTab,
@@ -76,11 +93,12 @@ export default function MyApp({ Component, pageProps }) {
         elementExcalidraw,
         elementBitflow,
       ]}
+      router={router}
       storage={localStorage}
-      loadFile={async (path) => {
+      loadFile={() => async (path) => {
         return fetch(path).then((res) => res.text());
       }}
-      saveFile={async (path, content, rootFolder) => {
+      saveFile={() => async (path, content, rootFolder) => {
         await fetch("/api/save", {
           method: "POST",
           headers: {

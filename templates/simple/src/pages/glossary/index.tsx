@@ -6,8 +6,8 @@ import chalk from "chalk";
 import { Layout } from "../../components/Layout";
 import { getNavigation, Navigation } from "../../utils/navigation";
 import path from "path";
-import { getHyperbook } from "../../utils/hyperbook";
 import { useActivePageId, useLink } from "@hyperbook/provider";
+import hyperbook from "../../../hyperbook.json";
 
 export type Term = {
   name: string;
@@ -18,8 +18,6 @@ export type GlossaryProps = {
   navigation: Navigation;
   terms: Record<string, Term[]>;
 };
-
-const hyperbook = getHyperbook();
 
 export default function Glossary({ terms, navigation }: GlossaryProps) {
   const Link = useLink();

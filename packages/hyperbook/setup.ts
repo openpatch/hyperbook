@@ -10,7 +10,8 @@ import { makeSymlink } from "./helpers/make-symlink";
 import { getProjectName, Project } from "./helpers/project";
 
 export async function runSetupProject(project: Project, rootProject?: Project) {
-  console.log(`${chalk.blue(`[${project.name}]`)} Setup Project.`);
+  const name = getProjectName(project);
+  console.log(`${chalk.blue(`[${name}]`)} Setup Project.`);
   const projectRoot = path.join(project.src, ".hyperbook");
   const root = path.join(rootProject?.src || "", ".hyperbook");
 
@@ -37,8 +38,6 @@ export async function runSetupProject(project: Project, rootProject?: Project) {
         )
       )
       .then((f) => JSON.parse(f.toString()));
-
-    const name = getProjectName(project);
 
     await fs.writeFile(
       path.join(projectRoot, "package.json"),
