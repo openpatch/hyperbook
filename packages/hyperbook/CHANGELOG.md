@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.6.1
+
+### Patch Changes
+
+- [`b799b7c`](https://github.com/openpatch/hyperbook/commit/b799b7c26710ee1fc5e59551bb710768829d68cf) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix repo links include full local directory
+
 ## 0.6.0
 
 ### Minor Changes
