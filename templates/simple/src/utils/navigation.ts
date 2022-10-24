@@ -63,7 +63,10 @@ const getSectionsAndPages = async function (
     let p = path.join(dirPath, file);
     let repo: string | null;
     if (hyperbook.repo) {
-      repo = hyperbook.repo + "/" + p;
+      repo =
+        hyperbook.repo +
+        "/" +
+        path.relative(path.join(process.env.root ?? process.cwd(), "book"), p);
     }
 
     if (fs.statSync(p).isDirectory()) {
