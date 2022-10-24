@@ -66,7 +66,7 @@ const getSectionsAndPages = async function (
       repo =
         hyperbook.repo +
         "/" +
-        path.relative(path.join(process.env.root ?? process.cwd(), "book"), p);
+        path.relative(path.join(process.env.root ?? process.cwd()), p);
     }
 
     if (fs.statSync(p).isDirectory()) {
