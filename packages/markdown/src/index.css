@@ -232,6 +232,7 @@
     float: left;
     font-weight: bold;
     text-transform: uppercase;
+    margin-right: 8px;
   }
 
   .hyperbook-markdown table td:last-child {
