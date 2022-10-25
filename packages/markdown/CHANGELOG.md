@@ -1,5 +1,11 @@
 # @hyperbook/markdown
 
+## 0.3.3
+
+### Patch Changes
+
+- [`e526943`](https://github.com/openpatch/hyperbook/commit/e526943fec3ef91cfce853af6a0c5cdaf3f22eef) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Column headers of tables now have a margin in mobile view.
+
 ## 0.3.2
 
 ### Patch Changes
