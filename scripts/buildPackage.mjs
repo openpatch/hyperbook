@@ -1,10 +1,7 @@
 import chalk from "chalk";
 import { build } from "esbuild";
 import { existsSync, readFileSync } from "fs";
-import { join, dirname } from "path";
-import { fileURLToPath } from "url";
-
-const __dirname = dirname(fileURLToPath(import.meta.url));
+import { join } from "path";
 
 const ignorePackages = [];
 

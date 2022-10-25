@@ -15,7 +15,8 @@ development server and edit the files in the website folder.
 ```
 pnpm install
 pnpm hyperbook:build
-pnpm website:dev
+pnpm website:dev en
+pnpm website:dev de
 ```
 
 ## Maintainer

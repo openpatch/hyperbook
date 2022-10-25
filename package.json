@@ -15,7 +15,7 @@
     "examples:setup": "cd examples && HYPERBOOK_LOCAL_DEV=1 node ../packages/hyperbook/dist/index.js setup",
     "examples:build": "cd examples && HYPERBOOK_LOCAL_DEV=1 node ../packages/hyperbook/dist/index.js build",
     "website:setup": "cd website && HYPERBOOK_LOCAL_DEV=1 node ../packages/hyperbook/dist/index.js setup",
-    "website:dev": "cd website/en && HYPERBOOK_LOCAL_DEV=1 node ../../packages/hyperbook/dist/index.js dev",
+    "website:dev": "node ./scripts/websiteDev.mjs",
     "website:build": "cd website && HYPERBOOK_LOCAL_DEV=1 node ../packages/hyperbook/dist/index.js build"
   },
   "devDependencies": {
