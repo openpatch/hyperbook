@@ -136,7 +136,7 @@
   },
   "devDependencies": {
     "@types/glob": "8.0.0",
-    "@types/node": "18.8.3",
+    "@types/node": "18.11.5",
     "@types/react": "18.0.22",
     "@types/react-dom": "18.0.7",
     "@types/vscode": "1.71.0",
