@@ -60,7 +60,7 @@
   },
   "devDependencies": {
     "@types/hast": "2.3.4",
-    "@types/react": "18.0.21",
+    "@types/react": "18.0.22",
     "@types/react-dom": "18.0.6",
     "@types/unist": "2.0.6",
     "react": "18.2.0",

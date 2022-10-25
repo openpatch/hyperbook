@@ -42,7 +42,7 @@
     "@hyperbook/next-watch": "workspace:*",
     "@hyperbook/types": "workspace:*",
     "@types/node": "18.8.3",
-    "@types/react": "18.0.21",
+    "@types/react": "18.0.22",
     "chalk": "5.1.2",
     "esbuild": "0.15.12",
     "glob": "8.0.3",
