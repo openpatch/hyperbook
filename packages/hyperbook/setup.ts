@@ -16,9 +16,9 @@ export async function runSetupProject(project: Project, rootProject?: Project) {
   const root = path.join(rootProject?.src || "", ".hyperbook");
 
   rimraf.sync(projectRoot);
-  await makeDir(projectRoot);
 
   const filesPath = path.join(__dirname, "templates");
+  await makeDir(projectRoot);
   await cpy("default/.hyperbook/**", projectRoot, {
     cwd: filesPath,
     followSymbolicLinks: false,
@@ -32,8 +32,8 @@ export async function runSetupProject(project: Project, rootProject?: Project) {
           "..",
           "..",
           "..",
-          "templates",
-          "simple",
+          "platforms",
+          "web",
           "package.json"
         )
       )

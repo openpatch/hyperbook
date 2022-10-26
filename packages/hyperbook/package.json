@@ -53,6 +53,6 @@
   },
   "dependencies": {
     "@hyperbook/types": "workspace:*",
-    "hyperbook-simple-template": "workspace:*"
+    "@platforms/web": "workspace:*"
   }
 }

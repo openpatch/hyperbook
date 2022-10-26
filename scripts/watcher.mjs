@@ -10,8 +10,9 @@ const watcher = chokidar.watch(
     "packages/**/*.ts",
     "packages/**/*.tsx",
     "packages/**/*.css",
-    "templates/**/*.ts",
-    "templates/**/*.tsx",
+    "platforms/**/*.ts",
+    "platforms/**/*.css",
+    "platforms/**/*.tsx",
   ],
   {
     ignored: [

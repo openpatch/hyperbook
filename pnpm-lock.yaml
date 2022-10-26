@@ -312,6 +312,7 @@ importers:
   packages/hyperbook:
     specifiers:
       '@hyperbook/types': workspace:*
+      '@platforms/web': workspace:*
       '@pnpm/exportable-manifest': 4.0.1
       '@types/archiver': 5.3.1
       '@types/async-retry': 1.4.5
@@ -327,14 +328,13 @@ importers:
       cpy: 9.0.1
       cross-spawn: 7.0.3
       got: 12.5.2
-      hyperbook-simple-template: workspace:*
       prompts: 2.4.2
       rimraf: 3.0.2
       tar: 6.1.11
       update-check: 1.5.4
     dependencies:
       '@hyperbook/types': link:../types
-      hyperbook-simple-template: link:../../templates/simple
+      '@platforms/web': link:../../platforms/web
     devDependencies:
       '@pnpm/exportable-manifest': 4.0.1
       '@types/archiver': 5.3.1
@@ -439,6 +439,29 @@ importers:
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
 
+  packages/shell:
+    specifiers:
+      '@hyperbook/provider': workspace:*
+      '@hyperbook/types': workspace:*
+      '@szhsin/react-menu': 3.2.0
+      '@types/react': 18.0.15
+      '@types/react-dom': 18.0.6
+      classnames: 2.3.2
+      react: 18.2.0
+      react-collapsed: ^3.4.0
+      react-dom: 18.2.0
+    dependencies:
+      '@hyperbook/provider': link:../provider
+      '@szhsin/react-menu': 3.2.0_biqbaboplfbrettd7655fr4n2y
+      classnames: 2.3.2
+      react-collapsed: 3.4.0_biqbaboplfbrettd7655fr4n2y
+    devDependencies:
+      '@hyperbook/types': link:../types
+      '@types/react': 18.0.15
+      '@types/react-dom': 18.0.6
+      react: 18.2.0
+      react-dom: 18.2.0_react@18.2.0
+
   packages/store:
     specifiers:
       '@reduxjs/toolkit': 1.8.6
@@ -467,10 +490,22 @@ importers:
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
 
+  packages/toc:
+    specifiers:
+      '@types/react': 18.0.15
+      '@types/react-dom': 18.0.6
+      react: 18.2.0
+      react-dom: 18.2.0
+    devDependencies:
+      '@types/react': 18.0.15
+      '@types/react-dom': 18.0.6
+      react: 18.2.0
+      react-dom: 18.2.0_react@18.2.0
+
   packages/types:
     specifiers: {}
 
-  packages/vscode-extension:
+  platforms/vscode:
     specifiers:
       '@hyperbook/element-alert': workspace:*
       '@hyperbook/element-bitflow': workspace:*
@@ -523,23 +558,23 @@ importers:
       webpack: 5.74.0
       webpack-cli: 4.10.0
     dependencies:
-      '@hyperbook/element-alert': link:../element-alert
-      '@hyperbook/element-bitflow': link:../element-bitflow
-      '@hyperbook/element-bookmarks': link:../element-bookmarks
-      '@hyperbook/element-collapsible': link:../element-collapsible
-      '@hyperbook/element-dl': link:../element-dl
-      '@hyperbook/element-excalidraw': link:../element-excalidraw
-      '@hyperbook/element-mermaid': link:../element-mermaid
-      '@hyperbook/element-protect': link:../element-protect
-      '@hyperbook/element-qr': link:../element-qr
-      '@hyperbook/element-struktog': link:../element-struktog
-      '@hyperbook/element-tabs': link:../element-tabs
-      '@hyperbook/element-term': link:../element-term
-      '@hyperbook/element-youtube': link:../element-youtube
-      '@hyperbook/markdown': link:../markdown
-      '@hyperbook/provider': link:../provider
-      '@hyperbook/store': link:../store
-      '@hyperbook/styles': link:../styles
+      '@hyperbook/element-alert': link:../../packages/element-alert
+      '@hyperbook/element-bitflow': link:../../packages/element-bitflow
+      '@hyperbook/element-bookmarks': link:../../packages/element-bookmarks
+      '@hyperbook/element-collapsible': link:../../packages/element-collapsible
+      '@hyperbook/element-dl': link:../../packages/element-dl
+      '@hyperbook/element-excalidraw': link:../../packages/element-excalidraw
+      '@hyperbook/element-mermaid': link:../../packages/element-mermaid
+      '@hyperbook/element-protect': link:../../packages/element-protect
+      '@hyperbook/element-qr': link:../../packages/element-qr
+      '@hyperbook/element-struktog': link:../../packages/element-struktog
+      '@hyperbook/element-tabs': link:../../packages/element-tabs
+      '@hyperbook/element-term': link:../../packages/element-term
+      '@hyperbook/element-youtube': link:../../packages/element-youtube
+      '@hyperbook/markdown': link:../../packages/markdown
+      '@hyperbook/provider': link:../../packages/provider
+      '@hyperbook/store': link:../../packages/store
+      '@hyperbook/styles': link:../../packages/styles
       fs-plus: 3.1.1
       gray-matter: 4.0.3
       react: 18.2.0
@@ -575,7 +610,7 @@ importers:
       webpack: 5.74.0_na2qyddqajkdtu6l4otwoergp4
       webpack-cli: 4.10.0_webpack@5.74.0
 
-  templates/simple:
+  platforms/web:
     specifiers:
       '@hyperbook/element-alert': workspace:*
       '@hyperbook/element-bitflow': workspace:*
@@ -593,22 +628,20 @@ importers:
       '@hyperbook/markdown': workspace:*
       '@hyperbook/next-watch': workspace:*
       '@hyperbook/provider': workspace:*
+      '@hyperbook/shell': workspace:*
       '@hyperbook/store': workspace:*
       '@hyperbook/styles': workspace:*
+      '@hyperbook/toc': workspace:*
       '@hyperbook/types': workspace:*
-      '@szhsin/react-menu': 3.2.0
       '@types/node': 18.11.7
       '@types/react': 18.0.23
       chalk: 5.1.2
-      classnames: 2.3.2
       esbuild: 0.15.12
       glob: 8.0.3
       gray-matter: 4.0.3
       next: 12.3.1
       react: 18.2.0
-      react-collapsed: 3.4.0
       react-dom: 18.2.0
-      react-icons: 4.6.0
       react-redux: 8.0.4
       redux: 4.2.0
       redux-persist: 6.0.0
@@ -630,16 +663,14 @@ importers:
       '@hyperbook/element-youtube': link:../../packages/element-youtube
       '@hyperbook/markdown': link:../../packages/markdown
       '@hyperbook/provider': link:../../packages/provider
+      '@hyperbook/shell': link:../../packages/shell
       '@hyperbook/store': link:../../packages/store
       '@hyperbook/styles': link:../../packages/styles
-      '@szhsin/react-menu': 3.2.0_biqbaboplfbrettd7655fr4n2y
-      classnames: 2.3.2
+      '@hyperbook/toc': link:../../packages/toc
       gray-matter: 4.0.3
       next: 12.3.1_biqbaboplfbrettd7655fr4n2y
       react: 18.2.0
-      react-collapsed: 3.4.0_biqbaboplfbrettd7655fr4n2y
       react-dom: 18.2.0_react@18.2.0
-      react-icons: 4.6.0_react@18.2.0
       react-redux: 8.0.4_ugomhvxc6vgmj6cf3dom2qmdvu
       redux: 4.2.0
       redux-persist: 6.0.0_react@18.2.0+redux@4.2.0
@@ -2453,7 +2484,7 @@ packages:
   /@types/archiver/5.3.1:
     resolution: {integrity: sha512-wKYZaSXaDvTZuInAWjCeGG7BEAgTWG2zZW0/f7IYFcoHB2X2d9lkVFnrOlXl3W6NrvO6Ml3FLLu8Uksyymcpnw==}
     dependencies:
-      '@types/glob': 7.2.0
+      '@types/glob': 8.0.0
     dev: true
 
   /@types/async-retry/1.4.5:
@@ -2465,7 +2496,7 @@ packages:
   /@types/cross-spawn/6.0.2:
     resolution: {integrity: sha512-KuwNhp3eza+Rhu8IFI5HUXRP0LIhqH5cAjubUvGXXthh4YYBuP2ntwEX+Cz8GJoZUHlKo247wPWOfA9LYEq4cw==}
     dependencies:
-      '@types/node': 18.8.3
+      '@types/node': 18.11.7
     dev: true
 
   /@types/debug/4.1.7:
@@ -2494,13 +2525,6 @@ packages:
 
   /@types/fined/1.1.3:
     resolution: {integrity: sha512-CWYnSRnun3CGbt6taXeVo2lCbuaj4mchVJ4UF/BdU5TSuIn3AmS13pGMwCsBUoehGbhZrBrpNJZSZI5EVilXww==}
-    dev: true
-
-  /@types/glob/7.2.0:
-    resolution: {integrity: sha512-ZUxbzKl0IfJILTS6t7ip5fQQM/J3TJYubDm3nMbgubNNYS62eXeUpoLUC8/7fJNiFYHTrGPQn7hspDUzIHX3UA==}
-    dependencies:
-      '@types/minimatch': 3.0.5
-      '@types/node': 18.11.7
     dev: true
 
   /@types/glob/8.0.0:
@@ -2594,10 +2618,6 @@ packages:
     resolution: {integrity: sha512-LhFTglglr63mNXUSRYD8A+ZAIu5sFqNJ4Y2fPuY7UlrySJH87rRRlhtVmMHplmfk5WkoJGmDjE9oiTfyX94CpQ==}
     dev: true
 
-  /@types/node/18.8.3:
-    resolution: {integrity: sha512-0os9vz6BpGwxGe9LOhgP/ncvYN5Tx1fNcd2TM3rD/aCGBkysb+ZWpXEocG24h6ZzOi13+VB8HndAQFezsSOw1w==}
-    dev: true
-
   /@types/normalize-package-data/2.4.1:
     resolution: {integrity: sha512-Gj7cI7z+98M282Tqmp2K5EIsoouUEzbBJhQQzDE3jSIRk6r9gsz0oUokqIUR4u1R3dMHo0pDHM7sNOHyhulypw==}
     dev: true
@@ -2625,16 +2645,30 @@ packages:
   /@types/prompts/2.4.1:
     resolution: {integrity: sha512-1Mqzhzi9W5KlooNE4o0JwSXGUDeQXKldbGn9NO4tpxwZbHXYd+WcKpCksG2lbhH7U9I9LigfsdVsP2QAY0lNPA==}
     dependencies:
-      '@types/node': 18.8.3
+      '@types/node': 18.11.7
     dev: true
 
   /@types/prop-types/15.7.5:
     resolution: {integrity: sha512-JCB8C6SnDoQf0cNycqd/35A7MjcnK+ZTqE7judS6o7utxUCg6imJg3QK2qzHKszlTjcj2cn+NwMB2i96ubpj7w==}
 
+  /@types/react-dom/18.0.6:
+    resolution: {integrity: sha512-/5OFZgfIPSwy+YuIBP/FgJnQnsxhZhjjrnxudMddeblOouIodEQ75X14Rr4wGSG/bknL+Omy9iWlLo1u/9GzAA==}
+    dependencies:
+      '@types/react': 18.0.23
+    dev: true
+
   /@types/react-dom/18.0.7:
     resolution: {integrity: sha512-HaXc+BbqAZE1RdsK3tC8SbkFy6UL2xF76lT9rQs5JkPrJg3rWA3Ou/Lhw3YJQzEDkBpmJ79nBsfnd05WrBd2QQ==}
     dependencies:
       '@types/react': 18.0.23
+    dev: true
+
+  /@types/react/18.0.15:
+    resolution: {integrity: sha512-iz3BtLuIYH1uWdsv6wXYdhozhqj20oD4/Hk2DNXIn1kFsmp9x8d9QB6FnPhfkbhd2PgEONt9Q1x/ebkwjfFLow==}
+    dependencies:
+      '@types/prop-types': 15.7.5
+      '@types/scheduler': 0.16.2
+      csstype: 3.1.1
     dev: true
 
   /@types/react/18.0.23:
@@ -2651,8 +2685,8 @@ packages:
   /@types/rimraf/3.0.2:
     resolution: {integrity: sha512-F3OznnSLAUxFrCEu/L5PY8+ny8DtcFRjx7fZZ9bycvXRi3KPTRS9HOitGZwvPg0juRhXFWIeKX58cnX5YqLohQ==}
     dependencies:
-      '@types/glob': 7.2.0
-      '@types/node': 18.8.3
+      '@types/glob': 8.0.0
+      '@types/node': 18.11.7
     dev: true
 
   /@types/scheduler/0.16.2:
@@ -2669,7 +2703,7 @@ packages:
   /@types/tar/6.1.3:
     resolution: {integrity: sha512-YzDOr5kdAeqS8dcO6NTTHTMJ44MUCBDoLEIyPtwEn7PssKqUYL49R1iCVJPeiPzPlKi6DbH33eZkpeJ27e4vHg==}
     dependencies:
-      '@types/node': 18.8.3
+      '@types/node': 18.11.7
       minipass: 3.3.5
     dev: true
 
@@ -3249,7 +3283,7 @@ packages:
       es6-object-assign: 1.1.0
       is-nan: 1.3.2
       object-is: 1.1.5
-      util: 0.12.4
+      util: 0.12.5
     dev: true
 
   /async-retry/1.3.3:
@@ -3454,17 +3488,6 @@ packages:
       pako: 1.0.11
     dev: true
 
-  /browserslist/4.21.3:
-    resolution: {integrity: sha512-898rgRXLAyRkM1GryrrBHGkqA5hlpkV5MhtZwg9QXeiyLUYs2k00Un05aX5l2/yJIOObYKOpS2JNo8nJDE7fWQ==}
-    engines: {node: ^6 || ^7 || ^8 || ^9 || ^10 || ^11 || ^12 || >=13.7}
-    hasBin: true
-    dependencies:
-      caniuse-lite: 1.0.30001418
-      electron-to-chromium: 1.4.276
-      node-releases: 2.0.6
-      update-browserslist-db: 1.0.10_browserslist@4.21.3
-    dev: true
-
   /browserslist/4.21.4:
     resolution: {integrity: sha512-CBHJJdDmgjl3daYjN5Cp5kbTf1mUhZoS+beLklHIvkOWscs83YAhLlF3Wsh/lciQYAcbBJgTOD44VtG31ZM4Hw==}
     engines: {node: ^6 || ^7 || ^8 || ^9 || ^10 || ^11 || ^12 || >=13.7}
@@ -3474,7 +3497,6 @@ packages:
       electron-to-chromium: 1.4.276
       node-releases: 2.0.6
       update-browserslist-db: 1.0.10_browserslist@4.21.4
-    dev: false
 
   /buffer-crc32/0.2.13:
     resolution: {integrity: sha512-VO9Ht/+p3SN7SKWqcrgEzjGbRSJYTx+Q1pTQC0wrWqHx0vpJraQ6GtHx8tvcg1rlK1byhU5gccxgOgj7B0TDkQ==}
@@ -3770,14 +3792,6 @@ packages:
       wrap-ansi: 6.2.0
     dev: true
 
-  /cliui/7.0.4:
-    resolution: {integrity: sha512-OcRE68cOsVMXp1Yvonl/fzkQOyjLSu/8bhPDfQt0e0/Eb283TKP20Fs2MqoPsr9SwA595rRCA+QMzYc9nBP+JQ==}
-    dependencies:
-      string-width: 4.2.3
-      strip-ansi: 6.0.1
-      wrap-ansi: 7.0.0
-    dev: true
-
   /cliui/8.0.1:
     resolution: {integrity: sha512-BSeNnyus75C4//NQ9gQt1/csTXyo/8Sb+afLAkzAptFuMsod9HFokGNudZpi/oQV73hnVK+sR+5PVRMd+Dr7YQ==}
     engines: {node: '>=12'}
@@ -3918,7 +3932,7 @@ packages:
     peerDependencies:
       webpack: ^5.1.0
     dependencies:
-      fast-glob: 3.2.11
+      fast-glob: 3.2.12
       glob-parent: 6.0.2
       globby: 13.1.1
       normalize-path: 3.0.0
@@ -4081,7 +4095,7 @@ packages:
       postcss-modules-scope: 3.0.0_postcss@8.4.14
       postcss-modules-values: 4.0.0_postcss@8.4.14
       postcss-value-parser: 4.2.0
-      semver: 7.3.7
+      semver: 7.3.8
       webpack: 5.74.0_na2qyddqajkdtu6l4otwoergp4
     dev: true
 
@@ -5450,6 +5464,7 @@ packages:
       glob-parent: 5.1.2
       merge2: 1.4.1
       micromatch: 4.0.5
+    dev: false
 
   /fast-glob/3.2.12:
     resolution: {integrity: sha512-DVj4CQIYYow0BlaelwK1pHl5n5cRSJfM60UA0zK891sVInoPri2Ekj7+e1CT3/3qxXenpI+nBBmQAcJPJgaj4w==}
@@ -7974,7 +7989,7 @@ packages:
       tty-browserify: 0.0.1
       type-fest: 2.19.0
       url: 0.11.0
-      util: 0.12.4
+      util: 0.12.5
       vm-browserify: 1.1.2
       webpack: 5.74.0_na2qyddqajkdtu6l4otwoergp4
     dev: true
@@ -8011,7 +8026,7 @@ packages:
       timers-browserify: 2.0.12
       tty-browserify: 0.0.1
       url: 0.11.0
-      util: 0.12.4
+      util: 0.12.5
       vm-browserify: 1.1.2
     dev: true
 
@@ -8899,14 +8914,6 @@ packages:
       react: 18.2.0
     dev: false
 
-  /react-icons/4.6.0_react@18.2.0:
-    resolution: {integrity: sha512-rR/L9m9340yO8yv1QT1QurxWQvWpbNHqVX0fzMln2HEb9TEIrQRGsqiNFQfiv9/JEUbyHmHPlNTB2LWm2Ttz0g==}
-    peerDependencies:
-      react: '*'
-    dependencies:
-      react: 18.2.0
-    dev: false
-
   /react-is/16.13.1:
     resolution: {integrity: sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==}
 
@@ -9701,14 +9708,6 @@ packages:
     resolution: {integrity: sha512-b39TBaTSfV6yBrapU89p5fKekE2m/NwnDocOVruQFS1/veMgdzuPcnOM34M6CwxW8jH/lxEa5rBoDeUwu5HHTw==}
     hasBin: true
 
-  /semver/7.3.7:
-    resolution: {integrity: sha512-QlYTucUYOews+WeEujDoEGziz4K6c47V/Bd+LjSSYcA94p+DmINdf7ncaUinThfvZyu13lN9OY1XDxt8C0Tw0g==}
-    engines: {node: '>=10'}
-    hasBin: true
-    dependencies:
-      lru-cache: 6.0.0
-    dev: true
-
   /semver/7.3.8:
     resolution: {integrity: sha512-NB1ctGL5rlHrPJtFDVIVzTyQylMLu9N9VICA6HSFJo8MCGVTMW6gfpicwKmmK/dAjTOrqu5l63JJOpDSrAis3A==}
     engines: {node: '>=10'}
@@ -10226,7 +10225,7 @@ packages:
       schema-utils: 3.1.1
       serialize-javascript: 6.0.0
       terser: 5.14.2
-      webpack: 5.74.0_na2qyddqajkdtu6l4otwoergp4
+      webpack: 5.74.0_esbuild@0.15.12
     dev: true
 
   /terser/5.14.2:
@@ -10322,7 +10321,7 @@ packages:
       chalk: 4.1.2
       enhanced-resolve: 5.10.0
       micromatch: 4.0.5
-      semver: 7.3.7
+      semver: 7.3.8
       typescript: 4.8.4
       webpack: 5.74.0_na2qyddqajkdtu6l4otwoergp4
     dev: true
@@ -10505,7 +10504,7 @@ packages:
       safe-stable-stringify: 2.4.0
       ts-node: 10.9.1_zatg7gq4isvm3eqhbbwlqos4ve
       typescript: 4.6.4
-      yargs: 17.5.1
+      yargs: 17.6.0
     transitivePeerDependencies:
       - '@swc/core'
       - '@swc/wasm'
@@ -10720,17 +10719,6 @@ packages:
     engines: {node: '>= 0.8'}
     dev: false
 
-  /update-browserslist-db/1.0.10_browserslist@4.21.3:
-    resolution: {integrity: sha512-OztqDenkfFkbSG+tRxBeAnCVPckDBcvibKd35yDONx6OU8N7sqgwc7rCbkJ/WcYtVRZ4ba68d6byhC21GFh7sQ==}
-    hasBin: true
-    peerDependencies:
-      browserslist: '>= 4.21.0'
-    dependencies:
-      browserslist: 4.21.3
-      escalade: 3.1.1
-      picocolors: 1.0.0
-    dev: true
-
   /update-browserslist-db/1.0.10_browserslist@4.21.4:
     resolution: {integrity: sha512-OztqDenkfFkbSG+tRxBeAnCVPckDBcvibKd35yDONx6OU8N7sqgwc7rCbkJ/WcYtVRZ4ba68d6byhC21GFh7sQ==}
     hasBin: true
@@ -10740,7 +10728,6 @@ packages:
       browserslist: 4.21.4
       escalade: 3.1.1
       picocolors: 1.0.0
-    dev: false
 
   /update-check/1.5.4:
     resolution: {integrity: sha512-5YHsflzHP4t1G+8WGPlvKbJEbAJGCgw+Em+dGR1KmBUbr1J36SJBqlHLjR7oob7sco5hWHGQVcr9B2poIVDDTQ==}
@@ -10789,14 +10776,13 @@ packages:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
     dev: true
 
-  /util/0.12.4:
-    resolution: {integrity: sha512-bxZ9qtSlGUWSOy9Qa9Xgk11kSslpuZwaxCg4sNIDj6FLucDab2JxnHwyNTCpHMtK1MjoQiWQ6DiUMZYbSrO+Sw==}
+  /util/0.12.5:
+    resolution: {integrity: sha512-kZf/K6hEIrWHI6XqOFUiiMa+79wE/D8Q+NCNAWclkyg3b4d2k7s0QGepNjiABc+aR3N1PAyHL7p6UcLY6LmrnA==}
     dependencies:
       inherits: 2.0.4
       is-arguments: 1.1.1
       is-generator-function: 1.0.10
       is-typed-array: 1.1.9
-      safe-buffer: 5.2.1
       which-typed-array: 1.1.8
     dev: true
 
@@ -11009,7 +10995,7 @@ packages:
       '@webassemblyjs/wasm-parser': 1.11.1
       acorn: 8.8.0
       acorn-import-assertions: 1.8.0_acorn@8.8.0
-      browserslist: 4.21.3
+      browserslist: 4.21.4
       chrome-trace-event: 1.0.3
       enhanced-resolve: 5.10.0
       es-module-lexer: 0.9.3
@@ -11049,7 +11035,7 @@ packages:
       '@webassemblyjs/wasm-parser': 1.11.1
       acorn: 8.8.0
       acorn-import-assertions: 1.8.0_acorn@8.8.0
-      browserslist: 4.21.3
+      browserslist: 4.21.4
       chrome-trace-event: 1.0.3
       enhanced-resolve: 5.10.0
       es-module-lexer: 0.9.3
@@ -11255,19 +11241,6 @@ packages:
       which-module: 2.0.0
       y18n: 4.0.3
       yargs-parser: 18.1.3
-    dev: true
-
-  /yargs/17.5.1:
-    resolution: {integrity: sha512-t6YAJcxDkNX7NFYiVtKvWUz8l+PaKTLiL63mJYWR2GnHq2gjEWISzsLp9wg3aY36dY1j+gfIEL3pIF+XlJJfbA==}
-    engines: {node: '>=12'}
-    dependencies:
-      cliui: 7.0.4
-      escalade: 3.1.1
-      get-caller-file: 2.0.5
-      require-directory: 2.1.1
-      string-width: 4.2.3
-      y18n: 5.0.8
-      yargs-parser: 21.1.1
     dev: true
 
   /yargs/17.6.0:

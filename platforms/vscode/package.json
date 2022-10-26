@@ -1,0 +1,195 @@
+{
+  "name": "hyperbook-studio",
+  "private": true,
+  "publisher": "openpatch",
+  "displayName": "Hyperbook",
+  "description": "Extension for showing markdownfiles using the Hyperbook markdown renderer.",
+  "icon": "assets/images/hyperbook-logo.png",
+  "repository": {
+    "url": "https://github.com/openpatch/hyperbook/",
+    "directory": "packages/vscode-extension"
+  },
+  "homepage": "https://hyperbook.openpatch.org",
+  "main": "./out/main.js",
+  "browser": "./out/browser.js",
+  "version": "0.4.4",
+  "engines": {
+    "vscode": "^1.71.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "vscode",
+    "vscode-extension",
+    "hyperbook"
+  ],
+  "activationEvents": [
+    "workspaceContains:**/.hyperbook.json",
+    "onLanguage:markdown"
+  ],
+  "contributes": {
+    "configuration": {
+      "type": "object",
+      "title": "Hyperbook",
+      "order": 20,
+      "properties": {
+        "hyperbook.preview.scrollPreviewWithEditor": {
+          "type": "boolean",
+          "default": true,
+          "description": "Scroll preview window when you scroll Editor"
+        },
+        "hyperbook.preview.showPreviewOptionInMenuBar": {
+          "type": "boolean",
+          "default": false,
+          "description": "Show 'Preview to Side' option in Menu bar; if false then in Status bar"
+        }
+      }
+    },
+    "commands": [
+      {
+        "command": "hyperbook.sidePreview",
+        "title": "Show side preview",
+        "category": "Hyperbook",
+        "icon": {
+          "light": "./assets/icons/PreviewOnRightPane_16x.svg",
+          "dark": "./assets/icons/PreviewOnRightPane_16x_dark.svg"
+        }
+      },
+      {
+        "command": "hyperbook.fullPreview",
+        "title": "Show full preview",
+        "category": "Hyperbook",
+        "icon": {
+          "light": "./assets/icons/Preview.svg",
+          "dark": "./assets/icons/Preview_inverse.svg"
+        }
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "hyperbook.sidePreview",
+          "when": "editorLangId == markdown && config.hyperbook.preview.showPreviewOptionInMenuBar",
+          "alt": "hyperbook.fullPreview",
+          "group": "navigation"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "hyperbook.sidePreview",
+        "key": "ctrl+q s",
+        "mac": "cmd+q s",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "hyperbook.fullPreview",
+        "key": "ctrl+q f",
+        "mac": "cmd+q f",
+        "when": "editorTextFocus"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "markdown",
+        "path": "./snipptes/hyperbook.code-snippets"
+      }
+    ],
+    "languages": [
+      {
+        "id": "hyperbook-injection"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "hyperbook-injection",
+        "scopeName": "markdown.hyperbook",
+        "path": "./syntaxes/hyperbook.json",
+        "injectTo": [
+          "text.html.markdown"
+        ]
+      }
+    ],
+    "jsonValidation": [
+      {
+        "fileMatch": [
+          "hyperbook.json"
+        ],
+        "url": "./schemas/hyperbook.schema.json"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "pnpm compile",
+    "vscode:package": "vsce package",
+    "vscode:publish": "vsce publish && ovsx publish",
+    "build": "npm-run-all compile:*",
+    "compile": "npm-run-all compile:*",
+    "compile:extension": "node ./esbuild.js",
+    "compile:view": "webpack --mode development",
+    "compile:schema": "typescript-json-schema ../../packages/types/src/index.ts HyperbookJson --out ./schemas/hyperbook.schema.json --required",
+    "watch": "npm-run-all -p watch:*",
+    "watch:view": "webpack --watch --mode development",
+    "pretest": "pnpm compile && pnpm lint",
+    "lint": "eslint src --ext ts"
+  },
+  "devDependencies": {
+    "@types/glob": "8.0.0",
+    "@types/node": "18.11.7",
+    "@types/react": "18.0.23",
+    "@types/react-dom": "18.0.7",
+    "@types/vscode": "1.71.0",
+    "@typescript-eslint/eslint-plugin": "5.41.0",
+    "@typescript-eslint/parser": "5.41.0",
+    "buffer": "6.0.3",
+    "copy-webpack-plugin": "11.0.0",
+    "css-loader": "6.7.1",
+    "esbuild": "0.15.12",
+    "eslint": "8.26.0",
+    "eslint-plugin-react-hooks": "4.6.0",
+    "file-loader": "6.2.0",
+    "glob": "8.0.3",
+    "node-polyfill-webpack-plugin": "2.0.1",
+    "node-stdlib-browser": "1.2.0",
+    "npm-run-all": "4.1.5",
+    "ovsx": "0.5.2",
+    "prettier": "2.7.1",
+    "sass": "1.55.0",
+    "sass-loader": "13.1.0",
+    "style-loader": "3.3.1",
+    "ts-loader": "9.4.1",
+    "typescript": "4.8.4",
+    "typescript-json-schema": "0.54.0",
+    "vsce": "2.13.0",
+    "webpack": "5.74.0",
+    "webpack-cli": "4.10.0"
+  },
+  "dependencies": {
+    "@hyperbook/element-alert": "workspace:*",
+    "@hyperbook/element-bitflow": "workspace:*",
+    "@hyperbook/element-bookmarks": "workspace:*",
+    "@hyperbook/element-collapsible": "workspace:*",
+    "@hyperbook/element-dl": "workspace:*",
+    "@hyperbook/element-excalidraw": "workspace:*",
+    "@hyperbook/element-mermaid": "workspace:*",
+    "@hyperbook/element-protect": "workspace:*",
+    "@hyperbook/element-qr": "workspace:*",
+    "@hyperbook/element-struktog": "workspace:*",
+    "@hyperbook/element-tabs": "workspace:*",
+    "@hyperbook/element-term": "workspace:*",
+    "@hyperbook/element-youtube": "workspace:*",
+    "@hyperbook/markdown": "workspace:*",
+    "@hyperbook/provider": "workspace:*",
+    "@hyperbook/store": "workspace:*",
+    "@hyperbook/styles": "workspace:*",
+    "fs-plus": "3.1.1",
+    "gray-matter": "4.0.3",
+    "react": "18.2.0",
+    "react-dom": "18.2.0"
+  },
+  "vsce": {
+    "dependencies": false,
+    "skipDuplicate": true
+  }
+}
