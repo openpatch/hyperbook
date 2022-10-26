@@ -509,7 +509,7 @@ importers:
       node-polyfill-webpack-plugin: 2.0.1
       node-stdlib-browser: 1.2.0
       npm-run-all: 4.1.5
-      ovsx: 0.5.1
+      ovsx: 0.5.2
       prettier: 2.7.1
       react: 18.2.0
       react-dom: 18.2.0
@@ -563,7 +563,7 @@ importers:
       node-polyfill-webpack-plugin: 2.0.1_webpack@5.74.0
       node-stdlib-browser: 1.2.0
       npm-run-all: 4.1.5
-      ovsx: 0.5.1
+      ovsx: 0.5.2
       prettier: 2.7.1
       sass: 1.55.0
       sass-loader: 13.1.0_sass@1.55.0+webpack@5.74.0
@@ -8197,8 +8197,8 @@ packages:
     resolution: {integrity: sha512-/jHxFIzoMXdqPzTaCpFzAAWhpkSjZPF4Vsn6jAfNpmbH/ymsmd7Qc6VE9BGn0L6YMj6uwpQLxCECpus4ukKS9Q==}
     dev: true
 
-  /ovsx/0.5.1:
-    resolution: {integrity: sha512-3OWq0l7DuVHi2bd2aQe5+QVQlFIqvrcw3/2vGXL404L6Tr+R4QHtzfnYYghv8CCa85xJHjU0RhcaC7pyXkAUbg==}
+  /ovsx/0.5.2:
+    resolution: {integrity: sha512-UbLultRCk46WddeA0Cly4hoRhzBJUiLgbIEViXlgOvV54LbsppClDkMLoCevUUBHoiNdMX2NuiSgURAEXgCZdw==}
     engines: {node: '>= 14'}
     hasBin: true
     dependencies:
