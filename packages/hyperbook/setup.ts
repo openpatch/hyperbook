@@ -7,9 +7,13 @@ import { getOnline } from "./helpers/is-online";
 import { makeDir } from "./helpers/make-dir";
 import path from "path";
 import { makeSymlink } from "./helpers/make-symlink";
-import { getProjectName, Project } from "./helpers/project";
+import { getProjectName } from "@hyperbook/fs";
+import { Hyperproject } from "@hyperbook/types";
 
-export async function runSetupProject(project: Project, rootProject?: Project) {
+export async function runSetupProject(
+  project: Hyperproject,
+  rootProject?: Hyperproject
+) {
   const name = getProjectName(project);
   console.log(`${chalk.blue(`[${name}]`)} Setup Project.`);
   const projectRoot = path.join(project.src, ".hyperbook");

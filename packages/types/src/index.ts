@@ -16,7 +16,55 @@ export type LinkWithHref = {
 
 export type Link = LinkWithHref | LinkWithLinks;
 
+export type Navigation = {
+  next: HyperbookPage | null;
+  previous: HyperbookPage | null;
+  current: HyperbookPage | null;
+  pages: HyperbookPage[];
+  sections: HyperbookSection[];
+};
+
+export type Term = {
+  name: string;
+  href: string;
+};
+
+export type Glossary = Record<string, Term[]>;
+
 export type Language = "de" | "en" | "fr" | "es" | "it" | "pt" | "nl";
+
+export type HyperbookPageFrontmatter = {
+  name: string;
+  lang?: Language;
+  description?: string;
+  keywords?: string[];
+  index?: number;
+  hide?: boolean;
+  toc?: boolean;
+};
+
+export type HyperbookSectionFrontmatter = HyperbookPageFrontmatter & {
+  virtual?: boolean;
+  expanded?: boolean;
+};
+
+export type HyperbookPage = HyperbookPageFrontmatter & {
+  isEmpty?: boolean;
+  href?: string;
+  repo?: string;
+};
+
+export type HyperbookSection = HyperbookSectionFrontmatter & {
+  isEmpty?: boolean;
+  href?: string;
+  pages: HyperbookPage[];
+  sections: HyperbookSection[];
+  repo?: string;
+};
+
+export type HyperbookFrontmatter =
+  | HyperbookPageFrontmatter
+  | HyperbookSectionFrontmatter;
 
 export type HyperbookJson = {
   name: string;
@@ -76,3 +124,10 @@ export type HyperlibraryJson = {
   }[];
   basePath?: string;
 };
+
+export type Hyperproject = {
+  name: string | LanguageString;
+  basePath?: string;
+  icon?: string;
+  src: string;
+} & ({ type: "book" } | { type: "library"; projects: Hyperproject[] });

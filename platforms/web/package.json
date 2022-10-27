@@ -3,7 +3,7 @@
   "version": "0.7.2",
   "private": true,
   "scripts": {
-    "build": "rimraf dist && node ./esbuild.mjs",
+    "build": "rimraf dist && tsc --project tsconfig.json --noEmit && node ./esbuild.mjs",
     "dev": "next dev",
     "next:dev": "next-hyperbook-watch",
     "next:build": "next build && next export"
@@ -22,6 +22,7 @@
     "@hyperbook/element-tabs": "workspace:*",
     "@hyperbook/element-term": "workspace:*",
     "@hyperbook/element-youtube": "workspace:*",
+    "@hyperbook/fs": "workspace:^0.0.0",
     "@hyperbook/markdown": "workspace:*",
     "@hyperbook/provider": "workspace:*",
     "@hyperbook/shell": "workspace:*",

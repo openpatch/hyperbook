@@ -1,35 +1,12 @@
 import { useLink } from "@hyperbook/provider";
+import {
+  HyperbookPage,
+  HyperbookSection,
+  Navigation as NavigationProps,
+} from "@hyperbook/types";
 import useCollapse from "react-collapsed";
 
-export type PageProps = {
-  name: string;
-  description?: string;
-  keywords?: string[];
-  repo?: string;
-  hide?: boolean;
-  toc?: boolean;
-  index?: number;
-  isEmpty?: boolean;
-  href: string;
-};
-
-export type SectionProps = Omit<PageProps, "hide"> & {
-  hide?: boolean;
-  virtual?: boolean;
-  expanded?: boolean;
-  pages: PageProps[]; // md-files
-  sections: SectionProps[]; // folders
-};
-
-export type NavigationProps = {
-  next: PageProps | null;
-  previous: PageProps | null;
-  current: PageProps | null;
-  pages: PageProps[];
-  sections: SectionProps[];
-};
-
-type P = PageProps & Pick<NavigationProps, "current">;
+type P = HyperbookPage & Pick<NavigationProps, "current">;
 
 const Page = ({ name, href, current }: P) => {
   const Link = useLink();
@@ -45,7 +22,7 @@ const Page = ({ name, href, current }: P) => {
   );
 };
 
-type S = SectionProps & Pick<NavigationProps, "current">;
+type S = HyperbookSection & Pick<NavigationProps, "current">;
 
 const Section = ({
   isEmpty,
@@ -58,7 +35,10 @@ const Section = ({
   current,
 }: S) => {
   const Link = useLink();
-  const isActive = current?.href.startsWith(href);
+  let isActive = false;
+  if (current?.href && href) {
+    isActive = current.href.startsWith(href);
+  }
   const { getCollapseProps, getToggleProps, isExpanded } = useCollapse({
     defaultExpanded: isActive || expanded,
   });

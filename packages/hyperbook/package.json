@@ -52,6 +52,7 @@
     "update-check": "1.5.4"
   },
   "dependencies": {
+    "@hyperbook/fs": "workspace:*",
     "@hyperbook/types": "workspace:*",
     "@platforms/web": "workspace:*"
   }

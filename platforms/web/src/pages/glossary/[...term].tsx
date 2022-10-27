@@ -1,18 +1,18 @@
 import { GetStaticPaths, GetStaticProps } from "next";
 import path from "path";
-import fs from "fs";
 import { Shell, ShellProps } from "@hyperbook/shell";
-import { getAllFiles } from "../../utils/files";
-import matter from "gray-matter";
-import { getNavigation, readFile } from "../../utils/navigation";
 import { Fragment } from "react";
-import { getHyperbook } from "../../utils/hyperbook";
 import { parseTocFromMarkdown, TocProps } from "@hyperbook/toc";
 
 import { useActivePageId, useLink } from "@hyperbook/provider";
 import { Markdown } from "@hyperbook/markdown";
-
-const hyperbook = getHyperbook();
+import {
+  readFile,
+  readGlossary,
+  makeNavigationForHyperbook,
+  readHyperbook,
+  listPagesForTerm,
+} from "@hyperbook/fs";
 
 type TermProps = {
   markdown: string;
@@ -56,39 +56,14 @@ export const getStaticProps: GetStaticProps<
     term: string[];
   }
 > = async ({ params }) => {
-  let filePath = path.join(process.env.root ?? process.cwd(), "glossary");
-  filePath = path.join(filePath, ...params.term);
+  const root = process.env.root ?? process.cwd();
+  const filePath = path.join(root, "glossary", ...params.term);
   const href = "/glossary/" + path.join(...params.term);
-  const source = fs.readFileSync(filePath + ".md");
-  const { content, data } = matter(source);
+  const { content, data } = await readFile(filePath + ".md");
 
-  const navigation = await getNavigation(href);
-
-  const files = getAllFiles(
-    path.join(process.env.root ?? process.cwd(), "book")
-  );
-  const pages: ShellProps["navigation"]["pages"] = [];
-  for (const file of files) {
-    const { content, data } = readFile(file);
-    const r = new RegExp(
-      `:t\\[.*\\]\\{#${params.term}(\..*)?\\}|:t\\[${params.term}\\]`
-    );
-    const m = content.match(r);
-    if (m && !data.hide && data.name) {
-      const relativePath = path
-        .relative(path.join(process.env.root ?? process.cwd(), "book"), file)
-        .replace(/\.mdx?$/, "")
-        .split("/");
-      const isIndex = relativePath[relativePath.length - 1] === "index";
-      if (isIndex) {
-        relativePath.pop();
-      }
-      pages.push({
-        ...data,
-        href: "/" + relativePath.join("/"),
-      });
-    }
-  }
+  const navigation = await makeNavigationForHyperbook(root, href);
+  const hyperbook = await readHyperbook(root);
+  const pages = await listPagesForTerm(root, params.term[0]);
 
   const term: TermProps["term"] = {
     ...(data as TermProps["term"]),
@@ -114,11 +89,12 @@ export const getStaticProps: GetStaticProps<
 export const getStaticPaths: GetStaticPaths<{
   term: string[];
 }> = async () => {
-  const files = getAllFiles("glossary");
+  const root = process.env.root ?? process.cwd();
+  const files = await readGlossary(root);
   const paths = files.map((f) => {
     const relativePath = path
-      .relative("glossary", f)
-      .replace(/\.mdx?$/, "")
+      .relative(path.join(root, "glossary"), f)
+      .replace(/\.md$/, "")
       .split("/");
 
     return {

@@ -1,14 +1,15 @@
 import { useLink, useMakeUrl, useHead, useConfig } from "@hyperbook/provider";
 import { FC, Fragment, ReactNode, useState } from "react";
 import { Toc, TocProps } from "@hyperbook/toc";
+import { Navigation as NavigationProps, HyperbookPage } from "@hyperbook/types";
 import { Drawer } from "./Drawer";
 import { Links } from "./Links";
-import { Navigation, NavigationProps, PageProps } from "./Navigation";
+import { Navigation } from "./Navigation";
 
 export type ShellProps = {
   navigation: NavigationProps;
   toc?: TocProps;
-  page: Pick<PageProps, "name" | "repo" | "description" | "keywords">;
+  page: HyperbookPage;
   children?: ReactNode;
 };
 
@@ -74,29 +75,31 @@ export const Shell: FC<ShellProps> = ({ toc, navigation, page, children }) => {
   const [isTocOpen, setIsTocOpen] = useState(false);
   return (
     <Fragment>
-      <Head>
-        <title>{`${page.name} - ${hyperbook.name}`}</title>
-        <meta
-          property="og:title"
-          content={`${page.name} - ${hyperbook.name}`}
-          key="title"
-        />
-        {hyperbook.description && (
-          <>
-            <meta name="description" content={hyperbook.description} />
-            <meta name="og:description" content={hyperbook.description} />
-          </>
-        )}
-        {page.description && (
-          <>
-            <meta name="description" content={page.description} />
-            <meta name="og:description" content={page.description} />
-          </>
-        )}
-        {page.keywords && (
-          <meta name="keywords" content={page.keywords.join(",")} />
-        )}
-      </Head>
+      {page && (
+        <Head>
+          <title>{`${page.name} - ${hyperbook.name}`}</title>
+          <meta
+            property="og:title"
+            content={`${page.name} - ${hyperbook.name}`}
+            key="title"
+          />
+          {hyperbook.description && (
+            <>
+              <meta name="description" content={hyperbook.description} />
+              <meta name="og:description" content={hyperbook.description} />
+            </>
+          )}
+          {page.description && (
+            <>
+              <meta name="description" content={page.description} />
+              <meta name="og:description" content={page.description} />
+            </>
+          )}
+          {page.keywords && (
+            <meta name="keywords" content={page.keywords.join(",")} />
+          )}
+        </Head>
+      )}
       <div className="main-grid">
         <header
           className={hyperbook?.colors?.inverted ? "inverted" : undefined}
@@ -117,7 +120,7 @@ export const Shell: FC<ShellProps> = ({ toc, navigation, page, children }) => {
               position="left"
             >
               <div id="mobile-sidebar">
-                <Navigation {...navigation} />
+                {navigation && <Navigation {...navigation} />}
                 {hyperbook.author ? (
                   <a className="author" href={hyperbook.author.url}>
                     {hyperbook.author.name}
@@ -141,7 +144,7 @@ export const Shell: FC<ShellProps> = ({ toc, navigation, page, children }) => {
           {hyperbook.links && <Links links={hyperbook.links}></Links>}
         </header>
         <div className="sidebar">
-          <Navigation {...navigation} />
+          {navigation && <Navigation {...navigation} />}
           <a className="author" href="https://hyperbook.openpatch.org">
             Powered by <b>Hyperbook</b>
           </a>
@@ -172,7 +175,7 @@ export const Shell: FC<ShellProps> = ({ toc, navigation, page, children }) => {
         <main>
           {children}
           <div className="meta">
-            {page.repo && (
+            {page?.repo && (
               <a className="edit-github" href={page.repo}>
                 ✎ GitHub
               </a>

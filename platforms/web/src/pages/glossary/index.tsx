@@ -1,25 +1,20 @@
 import { GetStaticProps } from "next";
-import fs from "fs";
-import { getAllFiles } from "../../utils/files";
-import matter from "gray-matter";
-import chalk from "chalk";
 import { Shell } from "@hyperbook/shell";
-import { getNavigation, Navigation } from "../../utils/navigation";
-import path from "path";
+import { Glossary as TGlossary } from "@hyperbook/types";
 import { useActivePageId, useLink } from "@hyperbook/provider";
-import hyperbook from "../../../hyperbook.json";
-
-export type Term = {
-  name: string;
-  href: string;
-};
+import { ShellProps } from "@hyperbook/shell";
+import {
+  makeGlossary,
+  makeNavigationForHyperbook,
+  readHyperbook,
+} from "@hyperbook/fs";
 
 export type GlossaryProps = {
-  navigation: Navigation;
-  terms: Record<string, Term[]>;
+  navigation: ShellProps["navigation"];
+  glossary: TGlossary;
 };
 
-export default function Glossary({ terms, navigation }: GlossaryProps) {
+export default function Glossary({ glossary, navigation }: GlossaryProps) {
   const Link = useLink();
   useActivePageId();
   return (
@@ -30,11 +25,11 @@ export default function Glossary({ terms, navigation }: GlossaryProps) {
       }}
     >
       <article className="glossary">
-        {Object.keys(terms).map((letter) => (
+        {Object.keys(glossary).map((letter) => (
           <div key={letter} className="container">
             <div className="letter">{letter}</div>
             <ul className="terms">
-              {terms[letter].map((term) => (
+              {glossary[letter].map((term) => (
                 <li key={term.href}>
                   <Link className="term" href={term.href}>
                     {term.name}
@@ -50,44 +45,18 @@ export default function Glossary({ terms, navigation }: GlossaryProps) {
 }
 
 export const getStaticProps: GetStaticProps<{
-  terms: GlossaryProps["terms"];
+  glossary: GlossaryProps["glossary"];
 }> = async () => {
-  const files = getAllFiles(
-    path.join(process.env.root ?? process.cwd(), "glossary")
-  );
+  const root = process.env.root ?? process.cwd();
 
-  const terms: GlossaryProps["terms"] = {};
-  for (const file of files) {
-    const source = fs.readFileSync(file);
-    const { data } = matter(source);
-
-    let name = path.basename(file, ".md");
-    if (data.name) {
-      name = data.name;
-    } else {
-      console.log(
-        `\n${chalk.yellow(
-          `warn  `
-        )}- Glossary page ${file} does not specify a name. Defaulting to the filename ${name}.`
-      );
-    }
-    const letter = name[0].toUpperCase();
-    if (!terms[letter]) {
-      terms[letter] = [];
-    }
-
-    terms[letter].push({
-      name,
-      href: file.replace(/\.mdx?$/, ""),
-    });
-  }
-
-  const navigation = await getNavigation();
+  const hyperbook = await readHyperbook(root);
+  const glossary = await makeGlossary(root);
+  const navigation = await makeNavigationForHyperbook(root, "/glossary");
 
   return {
     props: {
       locale: hyperbook.language,
-      terms,
+      glossary,
       navigation,
     },
   };

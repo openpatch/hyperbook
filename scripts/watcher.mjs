@@ -15,13 +15,9 @@ const watcher = chokidar.watch(
     "platforms/**/*.tsx",
   ],
   {
-    ignored: [
-      "packages/*/dist/**/*.ts",
-      "packages/*/dist/**/*.tsx",
-      "packages/*/dist/**/*.css",
-      "node_modules",
-    ],
-    depth: 3,
+    ignored: ["packages/**/dist/**"],
+    depth: 6,
+    followSymlinks: false,
     persistent: true,
     usePolling: true,
     interval: 500,

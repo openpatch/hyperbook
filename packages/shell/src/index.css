@@ -6,6 +6,10 @@
   font-family: hyperbook-body, sans-serif;
 }
 
+#drawer-root * {
+  box-sizing: border-box;
+}
+
 .main-grid * {
   box-sizing: border-box;
 }

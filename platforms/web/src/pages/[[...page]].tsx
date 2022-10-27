@@ -3,21 +3,22 @@ import matter from "gray-matter";
 import { GetStaticPaths, GetStaticProps } from "next";
 import path from "path";
 import { Shell, ShellProps } from "@hyperbook/shell";
-import { getAllFiles } from "../utils/files";
-import { getNavigation } from "../utils/navigation";
 import { parseTocFromMarkdown, TocProps } from "@hyperbook/toc";
 import { Markdown } from "@hyperbook/markdown";
 import { useActivePageId, useLink } from "@hyperbook/provider";
-import { getHyperbook } from "../utils/hyperbook";
 import { Fragment } from "react";
+import {
+  makeNavigationForHyperbook,
+  readBook,
+  readFile,
+  readHyperbook,
+} from "@hyperbook/fs";
 
 type PageProps = {
   markdown: string;
   navigation: ShellProps["navigation"];
   toc: TocProps;
 };
-
-const hyperbook = getHyperbook();
 
 export default function BookPage({ markdown, navigation, toc }: PageProps) {
   const page = navigation.current;
@@ -61,21 +62,17 @@ export const getStaticProps: GetStaticProps<
     page: string[];
   }
 > = async ({ params }) => {
-  let source: Buffer;
-  let filePath = path.join(process.env.root ?? process.cwd(), "book");
+  const root = process.env.root ?? process.cwd();
+  let filePath = path.join(root, "book");
   let href = "/";
   if (params.page) {
     filePath = path.join(filePath, ...params.page);
     href = "/" + path.join(...params.page);
   }
-  try {
-    source = fs.readFileSync(filePath + ".md");
-  } catch (e) {
-    source = fs.readFileSync(path.join(filePath, "index") + ".md");
-  }
-  const { content, data } = matter(source);
+  const { content, data } = await readFile(filePath + ".md");
 
-  const navigation = await getNavigation(href);
+  const hyperbook = await readHyperbook(root);
+  const navigation = await makeNavigationForHyperbook(root, href);
   return {
     props: {
       locale: data?.lang || hyperbook.language,
@@ -89,13 +86,12 @@ export const getStaticProps: GetStaticProps<
 export const getStaticPaths: GetStaticPaths<{
   page: string[];
 }> = async () => {
-  const files = getAllFiles(
-    path.join(process.env.root ?? process.cwd(), "book")
-  );
+  const root = process.env.root ?? process.cwd();
+  const files = await readBook(root);
   const paths = files.map((f) => {
     const relativePath = path
-      .relative(path.join(process.env.root ?? process.cwd(), "book"), f)
-      .replace(/\.mdx?$/, "")
+      .relative(path.join(root, "book"), f)
+      .replace(/\.md$/, "")
       .split("/");
     const isIndex = relativePath[relativePath.length - 1] === "index";
     if (isIndex) {
