@@ -33,10 +33,10 @@ export default class Preview {
   constructor(context: vscode.ExtensionContext) {
     this.context = context;
     this.disableWebViewStyling = false;
-    vscode.workspace.onDidSaveTextDocument(async (e) => {
+    vscode.workspace.onDidChangeTextDocument(async (e) => {
       if (
-        e.fileName.endsWith("hyperbook.json") ||
-        e.fileName.endsWith("hyperlibrary.json")
+        e.document.fileName.endsWith("hyperbook.json") ||
+        e.document.fileName.endsWith("hyperlibrary.json")
       ) {
         this.postMessage({
           type: "CONFIG_CHANGE",
@@ -111,7 +111,17 @@ export default class Preview {
       );
       const toc = parseTocFromMarkdown(content);
       const root = await findHyperbookRoot(this._resource.fsPath);
-      const navigation = await makeNavigationForHyperbook(root);
+      let currPath = path.relative(
+        path.join(root, "book"),
+        this._resource.fsPath
+      );
+      if (!currPath.startsWith("/")) {
+        currPath = "/" + currPath;
+      }
+      if (currPath.endsWith(".md")) {
+        currPath = currPath.slice(0, -3);
+      }
+      const navigation = await makeNavigationForHyperbook(root, currPath);
       const state = {
         content,
         data,
