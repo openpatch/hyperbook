@@ -1,5 +1,11 @@
 # @hyperbook/vscode-extension
 
+## 0.5.3
+
+### Patch Changes
+
+- [`5caaf3a`](https://github.com/openpatch/hyperbook/commit/5caaf3aa596ad305b7778ffe588eeea4d07dd266) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Only generate link when hyperlibrary.json is in the root of the workspace.
+
 ## 0.5.2
 
 ### Patch Changes
