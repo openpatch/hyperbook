@@ -62,4 +62,4 @@ Links in your Hyperbook open the corresponding markdown file for faster editing.
 
 ## Changelog
 
-See [CHANGELOG](https://github.com/openpatch/hyperbook/blob/main/packages/vscode-extension/CHANGELOG.md) for more information.
+See [CHANGELOG](https://github.com/openpatch/hyperbook/blob/main/platforms/vscode/CHANGELOG.md) for more information.
