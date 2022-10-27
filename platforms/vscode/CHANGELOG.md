@@ -1,5 +1,13 @@
 # @hyperbook/vscode-extension
 
+## 0.5.2
+
+### Patch Changes
+
+- [`c2d0f6c`](https://github.com/openpatch/hyperbook/commit/c2d0f6c26a157d87ff2bc1a4c859d15780f4d519) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Highlight current page in navigation drawer in preview.
+
+- [`89a23ed`](https://github.com/openpatch/hyperbook/commit/89a23edd783af4d14f223c3f22a32577901812c0) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix clicking on a section does not open the corresponding file.
+
 ## 0.5.1
 
 ### Patch Changes
