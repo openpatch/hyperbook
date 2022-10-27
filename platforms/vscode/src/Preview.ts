@@ -12,7 +12,6 @@ import { htmlTemplate } from "./html-template";
 import { disposeAll } from "./utils/dispose";
 import { ChangeMessage, Message } from "./messages/messageTypes";
 import { parseTocFromMarkdown } from "@hyperbook/toc";
-import { get } from "https";
 import path from "path";
 import { HyperbookJson } from "@hyperbook/types";
 
@@ -118,9 +117,13 @@ export default class Preview {
       if (!currPath.startsWith("/")) {
         currPath = "/" + currPath;
       }
+      if (currPath.endsWith("index.md")) {
+        currPath = currPath.slice(0, -8);
+      }
       if (currPath.endsWith(".md")) {
         currPath = currPath.slice(0, -3);
       }
+
       const navigation = await makeNavigationForHyperbook(root, currPath);
       const state = {
         content,
@@ -307,6 +310,14 @@ export default class Preview {
         if (m.type === "SCROLL_FROM_WEBVIEW") {
           this.onDidScrollPreview(m.payload.line);
         } else if (m.type === "OPEN") {
+          const indexPath = path.join(
+            vscode.workspace.rootPath || "",
+            m.payload.basePath || "",
+            m.payload.rootFolder || "",
+            m.payload.path,
+            "index.md"
+          );
+          const indexFileUri = vscode.Uri.file(indexPath);
           const hasExtension = m.payload.path.split(".").length > 1;
           if (!hasExtension) {
             m.payload.path += ".md";
@@ -320,9 +331,20 @@ export default class Preview {
               m.payload.path
             )
           );
-          return vscode.workspace.openTextDocument(fileUri).then((doc) => {
-            vscode.window.showTextDocument(doc, vscode.ViewColumn.One);
-          });
+          try {
+            await vscode.workspace.fs.stat(fileUri);
+            return vscode.workspace
+              .openTextDocument(fileUri)
+              .then((doc) =>
+                vscode.window.showTextDocument(doc, vscode.ViewColumn.One)
+              );
+          } catch (e) {
+            return vscode.workspace
+              .openTextDocument(indexFileUri)
+              .then((doc) =>
+                vscode.window.showTextDocument(doc, vscode.ViewColumn.One)
+              );
+          }
         } else if (m.type === "WRITE") {
           const hasExtension = m.payload.path.split(".").length > 1;
           if (!hasExtension) {
