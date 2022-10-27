@@ -1,0 +1,51 @@
+{
+  "name": "@platforms/web",
+  "version": "0.7.2",
+  "private": true,
+  "scripts": {
+    "build": "rimraf dist && tsc --project tsconfig.json --noEmit && node ./esbuild.mjs",
+    "dev": "next dev",
+    "next:dev": "next-hyperbook-watch",
+    "next:build": "next build && next export"
+  },
+  "dependencies": {
+    "@hyperbook/element-alert": "workspace:*",
+    "@hyperbook/element-bitflow": "workspace:*",
+    "@hyperbook/element-bookmarks": "workspace:*",
+    "@hyperbook/element-collapsible": "workspace:*",
+    "@hyperbook/element-dl": "workspace:*",
+    "@hyperbook/element-excalidraw": "workspace:*",
+    "@hyperbook/element-mermaid": "workspace:*",
+    "@hyperbook/element-protect": "workspace:*",
+    "@hyperbook/element-qr": "workspace:*",
+    "@hyperbook/element-struktog": "workspace:*",
+    "@hyperbook/element-tabs": "workspace:*",
+    "@hyperbook/element-term": "workspace:*",
+    "@hyperbook/element-youtube": "workspace:*",
+    "@hyperbook/fs": "workspace:^0.0.0",
+    "@hyperbook/markdown": "workspace:*",
+    "@hyperbook/provider": "workspace:*",
+    "@hyperbook/shell": "workspace:*",
+    "@hyperbook/store": "workspace:*",
+    "@hyperbook/styles": "workspace:*",
+    "@hyperbook/toc": "workspace:*",
+    "gray-matter": "4.0.3",
+    "next": "12.3.1",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "react-redux": "8.0.4",
+    "redux": "4.2.0",
+    "redux-persist": "6.0.0"
+  },
+  "devDependencies": {
+    "@hyperbook/next-watch": "workspace:*",
+    "@hyperbook/types": "workspace:*",
+    "@types/node": "18.11.7",
+    "@types/react": "18.0.23",
+    "chalk": "5.1.2",
+    "esbuild": "0.15.12",
+    "glob": "8.0.3",
+    "rimraf": "3.0.2",
+    "typescript": "4.8.4"
+  }
+}

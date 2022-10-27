@@ -30,6 +30,7 @@ export type RootFolder = "public" | "book" | "glossary";
 type HyperbookContextProps = {
   directives: Record<string, FC<any>>;
   Link: FC<JSX.IntrinsicElements["a"]>;
+  Head: FC<{ children?: ReactNode }>;
   env: "development" | "production";
   router: {
     push: (path: string) => Promise<boolean>;
@@ -54,6 +55,7 @@ const HyperbookContext = createContext<HyperbookContextProps>({
   router: {
     push: async () => false,
   },
+  Head: () => null,
   env: "production",
   saveFile: () => async () => {},
   loadFile: () => async () => "",
@@ -71,6 +73,7 @@ export type Element = {
 
 export type ProviderProps = {
   Link: HyperbookContextProps["Link"];
+  Head?: HyperbookContextProps["Head"];
   router: HyperbookContextProps["router"];
   elements?: Element[];
   children?: ReactNode;
@@ -87,6 +90,7 @@ export const Provider: FC<ProviderProps> = ({
   elements = [],
   children,
   Link,
+  Head = () => null,
   saveFile = () => async () => {},
   loadFile = () => async () => "",
   router,
@@ -119,6 +123,7 @@ export const Provider: FC<ProviderProps> = ({
           directives: directiveComponents,
           router,
           Link,
+          Head,
           saveFile,
           loadFile,
           makeUrl,
@@ -205,6 +210,12 @@ export const useLink = () => {
   const data = useContext(HyperbookContext);
 
   return data.Link;
+};
+
+export const useHead = () => {
+  const data = useContext(HyperbookContext);
+
+  return data.Head;
 };
 
 export const useRouter = () => {

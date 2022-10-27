@@ -1,0 +1,31 @@
+@import "@hyperbook/shell/index.css";
+@import "@hyperbook/markdown/katex.css";
+@import "@hyperbook/markdown/index.css";
+@import "@hyperbook/element-excalidraw/index.css";
+@import "@hyperbook/element-tabs/index.css";
+@import "@hyperbook/element-alert/index.css";
+@import "@hyperbook/element-term/index.css";
+@import "@hyperbook/element-youtube/index.css";
+@import "@hyperbook/element-protect/index.css";
+@import "@hyperbook/element-collapsible/index.css";
+@import "@hyperbook/element-dl/index.css";
+@import "@hyperbook/element-bookmarks/index.css";
+@import "@hyperbook/element-struktog/index.css";
+@import "@hyperbook/element-qr/index.css";
+@import "@hyperbook/element-mermaid/index.css";
+@import "@hyperbook/element-bitflow/index.css";
+
+body {
+  padding: 0;
+  margin: 0;
+}
+
+#root {
+  background: var(--color-background);
+}
+
+.error-boundary {
+  text-align: center;
+  margin: 0 auto;
+  color: #ff0000;
+}

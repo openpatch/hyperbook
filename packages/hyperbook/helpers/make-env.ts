@@ -9,8 +9,8 @@ export function makeEnv() {
       "..",
       "..",
       "..",
-      "templates",
-      "simple",
+      "platforms",
+      "web",
       "node_modules"
     );
     PATH =
@@ -19,8 +19,8 @@ export function makeEnv() {
         "..",
         "..",
         "..",
-        "templates",
-        "simple",
+        "platforms",
+        "web",
         "node_modules",
         ".bin"
       ) +

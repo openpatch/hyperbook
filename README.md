@@ -14,9 +14,19 @@ development server and edit the files in the website folder.
 
 ```
 pnpm install
-pnpm hyperbook:build
+pnpm build
 pnpm website:dev en
 pnpm website:dev de
+```
+
+## Platform
+
+If you want to work on a platform, run the following commands:
+
+```
+pnpm install
+pnpm build
+pnpm platform:web:dev
 ```
 
 ## Maintainer

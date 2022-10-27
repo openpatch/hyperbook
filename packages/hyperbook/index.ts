@@ -8,7 +8,7 @@ import { runArchive } from "./archive";
 import { runBuildProject } from "./build";
 import { runDev } from "./dev";
 import { getPkgManager } from "./helpers/get-pkg-manager";
-import { collect } from "./helpers/project";
+import { readProject } from "@hyperbook/fs";
 import { runNew } from "./new";
 import packageJson from "./package.json";
 import { runSetupProject } from "./setup";
@@ -45,7 +45,7 @@ program
   .command("setup")
   .description("downloads the latest version of the template of a hyperbook")
   .action(async () => {
-    const rootProject = await collect(process.cwd()).catch(() => {
+    const rootProject = await readProject(process.cwd()).catch(() => {
       process.exit(1);
     });
 
@@ -58,7 +58,7 @@ program
   .command("build")
   .description("build a hyperbook")
   .action(async () => {
-    const rootProject = await collect(process.cwd()).catch(() => {
+    const rootProject = await readProject(process.cwd()).catch(() => {
       process.exit(1);
     });
     await runBuildProject(rootProject, rootProject).catch(() => {
