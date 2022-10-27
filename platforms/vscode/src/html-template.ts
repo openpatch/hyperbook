@@ -1,3 +1,4 @@
+import { HyperbookJson } from "@hyperbook/types";
 import * as vscode from "vscode";
 import { ChangeMessage } from "./messages/messageTypes";
 
@@ -5,14 +6,12 @@ export const htmlTemplate = (
   context: vscode.ExtensionContext,
   panel: vscode.WebviewPanel,
   state: ChangeMessage["payload"],
-  config: Record<string, any>
+  config: HyperbookJson
 ) => {
   const nonce = getNonce();
   const bundleScriptPath = panel.webview.asWebviewUri(
     vscode.Uri.joinPath(context.extensionUri, "out", "app", "bundle.js")
   );
-  const initialState = Buffer.from(JSON.stringify(state)).toString("base64");
-  const initialConfig = Buffer.from(JSON.stringify(config)).toString("base64");
   return `<!doctype html>
             <html lang="en">
             <head>
@@ -27,12 +26,9 @@ export const htmlTemplate = (
                 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
                 <style>
                 html, body {
-                  width: 100%;
-                  height: 100%;
                   background-color: var(--color-background);
-                  max-width: 980px;
-                  margin: 0 auto;
-                  line-height: 1.5;
+                  margin: 0;
+                  padding: 0;
                 }
                 </style>
             </head>
@@ -49,11 +45,6 @@ export const htmlTemplate = (
                     ) + "/"
                   }"
                   window.vscode = acquireVsCodeApi();
-                  window.workspacePath = "${panel.webview.asWebviewUri(
-                    vscode.Uri.file(vscode.workspace?.rootPath || "")
-                  )}";
-                  window.initialState = JSON.parse(atob("${initialState}"));
-                  window.initialConfig = JSON.parse(atob("${initialConfig}"));
                 </script>
                 <script nonce="${nonce}" src="${bundleScriptPath}"></script>
             </body>

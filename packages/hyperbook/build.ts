@@ -17,8 +17,8 @@ export async function runBuildProject(
   rootProject: Hyperproject,
   out?: string
 ): Promise<void> {
+  const name = getProjectName(project);
   if (project.type === "book") {
-    const name = getProjectName(project);
     console.log(`${chalk.blue(`[${name}]`)} Building Book.`);
     await runBuild(project.src, rootProject, project.basePath, name, out);
   } else {
@@ -26,7 +26,7 @@ export async function runBuildProject(
       out = project.src;
       rimraf.sync(path.join(out, ".hyperbook", "out"));
     }
-    console.log(`${chalk.blue(`[${project.name}]`)} Building Library.`);
+    console.log(`${chalk.blue(`[${name}]`)} Building Library.`);
     for (const p of project.projects) {
       await runBuildProject(p, rootProject, out);
     }

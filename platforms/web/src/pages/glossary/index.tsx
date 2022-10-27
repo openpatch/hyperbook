@@ -18,12 +18,7 @@ export default function Glossary({ glossary, navigation }: GlossaryProps) {
   const Link = useLink();
   useActivePageId();
   return (
-    <Shell
-      navigation={navigation}
-      page={{
-        name: "Glossary",
-      }}
-    >
+    <Shell navigation={navigation}>
       <article className="glossary">
         {Object.keys(glossary).map((letter) => (
           <div key={letter} className="container">

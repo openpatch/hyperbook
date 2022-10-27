@@ -7,9 +7,8 @@ import { Links } from "./Links";
 import { Navigation } from "./Navigation";
 
 export type ShellProps = {
-  navigation: NavigationProps;
+  navigation?: NavigationProps;
   toc?: TocProps;
-  page: HyperbookPage;
   children?: ReactNode;
 };
 
@@ -66,10 +65,11 @@ const linkLicense = (license: string) => {
   return license;
 };
 
-export const Shell: FC<ShellProps> = ({ toc, navigation, page, children }) => {
+export const Shell: FC<ShellProps> = ({ toc, navigation, children }) => {
   const Link = useLink();
   const Head = useHead();
   const hyperbook = useConfig();
+  const page = navigation?.current;
   const makeUrl = useMakeUrl();
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [isTocOpen, setIsTocOpen] = useState(false);
@@ -136,7 +136,7 @@ export const Shell: FC<ShellProps> = ({ toc, navigation, page, children }) => {
           <Link className="branding" href="/">
             {hyperbook.logo && (
               <div className="logo">
-                <img alt="Logo" src={makeUrl(hyperbook.logo)} />
+                <img alt="Logo" src={makeUrl(hyperbook.logo, "public")} />
               </div>
             )}
             <div className="name">{hyperbook.name}</div>

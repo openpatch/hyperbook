@@ -27,11 +27,7 @@ export default function BookPage({ markdown, navigation, toc }: PageProps) {
 
   return (
     <Fragment>
-      <Shell
-        navigation={navigation}
-        page={page}
-        toc={page.toc == false ? null : toc}
-      >
+      <Shell navigation={navigation} toc={page.toc == false ? null : toc}>
         <article>
           <Markdown children={markdown} />
         </article>
@@ -69,7 +65,7 @@ export const getStaticProps: GetStaticProps<
     filePath = path.join(filePath, ...params.page);
     href = "/" + path.join(...params.page);
   }
-  const { content, data } = await readFile(filePath + ".md");
+  const { content, data } = await readFile(filePath);
 
   const hyperbook = await readHyperbook(root);
   const navigation = await makeNavigationForHyperbook(root, href);

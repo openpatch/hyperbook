@@ -118,7 +118,11 @@ export const listPagesForTerm = async (
 export const readFile = async (file: string) => {
   const source = await fs
     .readFile(file)
-    .catch(() => fs.readFile(path.join(file, "index.md")));
+    .catch(() =>
+      fs
+        .readFile(file + ".md")
+        .catch(() => fs.readFile(path.join(file, "index.md")))
+    );
 
   const { content, data } = matter(source);
 
@@ -139,10 +143,28 @@ export const readHyperlibrary = async (root: string) => {
     .then(JSON.parse) as Promise<HyperlibraryJson>;
 };
 
-export const findHyperbook = async (file: string) => {
+export const findHyperbook = async (file: string): Promise<HyperbookJson> => {
   return findUp("hyperbook.json", {
     cwd: file,
-  } as any);
+  } as any)
+    .then((f) => {
+      if (!f) {
+        throw new Error("Could not find hyperbook.json");
+      }
+      return fs.readFile(f);
+    })
+    .then((f) => JSON.parse(f.toString()));
+};
+
+export const findHyperbookRoot = async (file: string): Promise<string> => {
+  return findUp("hyperbook.json", {
+    cwd: file,
+  } as any).then((f) => {
+    if (!f) {
+      throw new Error("Could not find hyperbook.json");
+    }
+    return path.parse(f).dir;
+  });
 };
 
 export const readProject = async (
@@ -198,7 +220,7 @@ export const getProjectName = (project: Hyperproject, language?: Language) => {
     label = project.name;
   } else {
     if (language) {
-      label = project.name[language];
+      label = project.name[language] || "";
     } else {
       label = Object.values(project.name)[0];
     }
@@ -214,9 +236,20 @@ export const getProjectName = (project: Hyperproject, language?: Language) => {
   return label;
 };
 
+type MakeLinkForHyperprojectOptions = {
+  href?: {
+    useSrc?: true;
+    append?: string[];
+    prepend?: string[];
+    relative?: string;
+    protocol?: string;
+  };
+};
+
 export const makeLinkForHyperproject = async (
   project: Hyperproject,
-  language: Language = "en"
+  language: Language = "en",
+  options: MakeLinkForHyperprojectOptions = {}
 ): Promise<Link> => {
   const label = getProjectName(project, language);
 
@@ -224,7 +257,9 @@ export const makeLinkForHyperproject = async (
     return {
       label,
       links: await Promise.all(
-        project.projects.map((p) => makeLinkForHyperproject(p, language))
+        project.projects.map((p) =>
+          makeLinkForHyperproject(p, language, options)
+        )
       ),
       icon: project.icon,
     };
@@ -232,6 +267,25 @@ export const makeLinkForHyperproject = async (
     let href = project.basePath ?? "/";
     if (!href.startsWith("/")) {
       href = "/" + href;
+    }
+
+    if (options.href?.useSrc) {
+      href = project.src;
+    }
+    if (options.href?.relative) {
+      href = path.relative(options.href.relative, href);
+    }
+    if (options.href?.prepend) {
+      href = path.join(...options.href.prepend, href);
+    }
+    if (options.href?.append) {
+      href = path.join(href, ...options.href.append);
+    }
+    if (options.href?.protocol) {
+      if (href.startsWith("/")) {
+        href = href.slice(0, -1);
+      }
+      href = options.href.protocol + href;
     }
 
     if (href.length > 1 && href.endsWith("/")) {

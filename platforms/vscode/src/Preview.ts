@@ -1,9 +1,20 @@
 import * as vscode from "vscode";
 import * as Constants from "./Constants";
 import matter from "gray-matter";
+import {
+  findHyperbook,
+  findHyperbookRoot,
+  makeLinkForHyperproject,
+  makeNavigationForHyperbook,
+  readProject,
+} from "@hyperbook/fs";
 import { htmlTemplate } from "./html-template";
 import { disposeAll } from "./utils/dispose";
-import { Message } from "./messages/messageTypes";
+import { ChangeMessage, Message } from "./messages/messageTypes";
+import { parseTocFromMarkdown } from "@hyperbook/toc";
+import { get } from "https";
+import path from "path";
+import { HyperbookJson } from "@hyperbook/types";
 
 export default class Preview {
   panel: vscode.WebviewPanel | undefined;
@@ -22,11 +33,14 @@ export default class Preview {
   constructor(context: vscode.ExtensionContext) {
     this.context = context;
     this.disableWebViewStyling = false;
-    vscode.workspace.onDidSaveTextDocument((e) => {
-      if (e.fileName.endsWith("hyperbook.json")) {
+    vscode.workspace.onDidSaveTextDocument(async (e) => {
+      if (
+        e.fileName.endsWith("hyperbook.json") ||
+        e.fileName.endsWith("hyperlibrary.json")
+      ) {
         this.postMessage({
           type: "CONFIG_CHANGE",
-          payload: this.parseConfig(e.getText()),
+          payload: await this.getConfig(),
         });
       }
     });
@@ -45,53 +59,73 @@ export default class Preview {
   }
 
   async getConfig() {
-    const startUri = vscode.window.activeTextEditor?.document.uri;
-    let config: string = "{}";
-
-    if (startUri) {
-      async function findHyperbookJson(
-        dir: vscode.Uri
-      ): Promise<vscode.Uri | null> {
-        const stat = await vscode.workspace.fs.stat(
-          vscode.Uri.joinPath(dir, "hyperbook.json")
+    if (vscode.window.activeTextEditor && this._resource) {
+      const startUri = this._resource;
+      const hyperbookRoot = await findHyperbookRoot(startUri?.fsPath).catch(
+        () => ""
+      );
+      const config: HyperbookJson = await findHyperbook(startUri?.fsPath).catch(
+        () =>
+          ({
+            name: "@Hyperbook@",
+          } as const)
+      );
+      if (vscode.workspace.rootPath && config.name !== "@Hyperbook@") {
+        const project = await readProject(vscode.workspace.rootPath);
+        const link = await makeLinkForHyperproject(project, config.language, {
+          href: {
+            useSrc: true,
+            append: ["index.md"],
+            protocol: "file:///",
+            relative: vscode.workspace.rootPath,
+          },
+        });
+        const basePath = path.relative(
+          vscode.workspace.rootPath,
+          hyperbookRoot
         );
-        if (stat.type === vscode.FileType.File) {
-          return vscode.Uri.joinPath(dir, "hyperbook.json");
-        } else {
-          return findHyperbookJson(
-            vscode.Uri.parse(dir.path.split("/").slice(0, -1).join("/"))
-          );
-        }
-      }
 
-      const uri = await findHyperbookJson(startUri);
-      if (uri !== null) {
-        config = vscode.workspace.fs.readFile(uri).toString();
+        return {
+          ...config,
+          basePath,
+          links: [...(config?.links || []), link],
+        } as HyperbookJson;
       }
+      return config;
+    } else {
+      return {
+        name: "Hyperbook",
+      };
     }
-    return this.parseConfig(config);
   }
 
-  async getState() {
+  async getState(): Promise<ChangeMessage["payload"]> {
     if (
       vscode.window.activeTextEditor &&
-      this.checkDocumentIsHyperbookFile(true) &&
-      vscode.window.activeTextEditor.document.languageId === "markdown"
+      this.checkDocumentIsHyperbookFile(false) &&
+      vscode.window.activeTextEditor.document.languageId === "markdown" &&
+      this._resource
     ) {
       const { content, data } = matter(
         vscode.window.activeTextEditor?.document.getText()
       );
+      const toc = parseTocFromMarkdown(content);
+      const root = await findHyperbookRoot(this._resource.fsPath);
+      const navigation = await makeNavigationForHyperbook(root);
       const state = {
         content,
         data,
-        source: vscode.window.activeTextEditor?.document.uri.toString(),
-        config: await this.getConfig(),
+        source: this._resource.toString(),
+        toc,
+        assetsPath: await this.getWorkspacePath(),
+        navigation,
       };
       return state;
     }
     return {
       content: "",
       data: {},
+      assetsPath: "",
       source: "",
     };
   }
@@ -100,7 +134,7 @@ export default class Preview {
     this.hyperbookViewerConfig = vscode.workspace.getConfiguration("hyperbook");
     if (
       vscode.window.activeTextEditor &&
-      this.checkDocumentIsHyperbookFile(true) &&
+      this.checkDocumentIsHyperbookFile(false) &&
       this.panel &&
       this.panel !== undefined
     ) {
@@ -114,10 +148,6 @@ export default class Preview {
         this.hyperbookViewerConfig.get("preview.scrollPreviewWithEditor")
       ) {
         this.postMessage({
-          type: "CHANGE",
-          payload: await this.getState(),
-        });
-        this.postMessage({
           type: "SCROLL_FROM_EXTENSION",
           payload: {
             line: vscode.window.activeTextEditor.visibleRanges,
@@ -125,7 +155,34 @@ export default class Preview {
           },
         });
       }
+      if (vscode.window.activeTextEditor.document.languageId === "markdown") {
+        this.postMessage({
+          type: "CHANGE",
+          payload: await this.getState(),
+        });
+        this.postMessage({
+          type: "CONFIG_CHANGE",
+          payload: await this.getConfig(),
+        });
+      }
     }
+  }
+
+  async getWorkspacePath(): Promise<string> {
+    if (this.panel && this._resource?.fsPath) {
+      let hyperbookRoot = this._resource.fsPath;
+      if (!this._resource.fsPath.endsWith("hyperbook.json")) {
+        hyperbookRoot = await findHyperbookRoot(this._resource.fsPath);
+      }
+
+      const basePath = this.panel.webview
+        .asWebviewUri(vscode.Uri.file(hyperbookRoot))
+        .toString();
+
+      return basePath;
+    }
+
+    return "";
   }
 
   async getWebviewContent() {
@@ -158,17 +215,21 @@ export default class Preview {
     let isHyperbookJson =
       vscode.window.activeTextEditor?.document.fileName.endsWith(
         "hyperbook.json"
-      );
-    if (!isMarkdown && !isHyperbookJson && showWarning) {
+      ) || false;
+    let isHyperlibraryJson =
+      vscode.window.activeTextEditor?.document.fileName.endsWith(
+        "hyperlibrary.json"
+      ) || false;
+    if (!isMarkdown && !isHyperbookJson && showWarning && !isHyperlibraryJson) {
       vscode.window.showInformationMessage(
         Constants.ErrorMessages.NO_HYPERBOOK_FILE
       );
     }
-    return isMarkdown;
+    return isMarkdown || isHyperbookJson || isHyperbookJson;
   }
 
   async initMarkdownPreview(viewColumn: number) {
-    let proceed = this.checkDocumentIsHyperbookFile(true);
+    let proceed = this.checkDocumentIsHyperbookFile(false);
     if (proceed) {
       const filePaths =
         vscode.window.activeTextEditor?.document.fileName.split("/") || [];
@@ -232,7 +293,7 @@ export default class Preview {
         }
       );
 
-      this.panel.webview.onDidReceiveMessage((m: Message) => {
+      this.panel.webview.onDidReceiveMessage(async (m: Message) => {
         if (m.type === "SCROLL_FROM_WEBVIEW") {
           this.onDidScrollPreview(m.payload.line);
         } else if (m.type === "OPEN") {
@@ -241,17 +302,17 @@ export default class Preview {
             m.payload.path += ".md";
           }
 
-          return vscode.workspace
-            .openTextDocument(
-              vscode.Uri.joinPath(
-                vscode.Uri.parse(vscode.workspace.rootPath || ""),
-                m.payload.rootFolder || "",
-                m.payload.path
-              )
+          const fileUri = vscode.Uri.file(
+            path.join(
+              vscode.workspace.rootPath || "",
+              m.payload.basePath || "",
+              m.payload.rootFolder || "",
+              m.payload.path
             )
-            .then((doc) => {
-              vscode.window.showTextDocument(doc);
-            });
+          );
+          return vscode.workspace.openTextDocument(fileUri).then((doc) => {
+            vscode.window.showTextDocument(doc, vscode.ViewColumn.One);
+          });
         } else if (m.type === "WRITE") {
           const hasExtension = m.payload.path.split(".").length > 1;
           if (!hasExtension) {
@@ -259,13 +320,18 @@ export default class Preview {
           }
 
           return vscode.workspace.fs.writeFile(
-            vscode.Uri.joinPath(
-              vscode.Uri.parse(vscode.workspace.rootPath || ""),
-              m.payload.rootFolder || "",
-              m.payload.path
+            vscode.Uri.file(
+              path.join(
+                vscode.workspace.rootPath || "",
+                m.payload.basePath || "",
+                m.payload.rootFolder || "",
+                m.payload.path
+              )
             ),
             Buffer.from(m.payload.content, "utf8")
           );
+        } else if (m.type === "READY") {
+          this.handleTextDocumentChange();
         }
       });
 

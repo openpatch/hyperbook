@@ -30,11 +30,7 @@ export default function Term({ markdown, navigation, term, toc }: TermProps) {
   const Link = useLink();
   useActivePageId();
   return (
-    <Shell
-      navigation={navigation}
-      page={term}
-      toc={term?.toc === true ? toc : null}
-    >
+    <Shell navigation={navigation} toc={term?.toc === true ? toc : null}>
       <article>
         <Markdown children={markdown} />
         <div className="pages">
@@ -59,7 +55,7 @@ export const getStaticProps: GetStaticProps<
   const root = process.env.root ?? process.cwd();
   const filePath = path.join(root, "glossary", ...params.term);
   const href = "/glossary/" + path.join(...params.term);
-  const { content, data } = await readFile(filePath + ".md");
+  const { content, data } = await readFile(filePath);
 
   const navigation = await makeNavigationForHyperbook(root, href);
   const hyperbook = await readHyperbook(root);

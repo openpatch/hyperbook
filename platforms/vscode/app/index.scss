@@ -1,3 +1,4 @@
+@import "@hyperbook/shell/index.css";
 @import "@hyperbook/markdown/katex.css";
 @import "@hyperbook/markdown/index.css";
 @import "@hyperbook/element-excalidraw/index.css";
@@ -20,7 +21,6 @@ body {
 }
 
 #root {
-  padding: 20px;
   background: var(--color-background);
 }
 

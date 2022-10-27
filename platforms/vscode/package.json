@@ -10,8 +10,7 @@
     "directory": "packages/vscode-extension"
   },
   "homepage": "https://hyperbook.openpatch.org",
-  "main": "./out/main.js",
-  "browser": "./out/browser.js",
+  "main": "./out/extension.js",
   "version": "0.4.4",
   "engines": {
     "vscode": "^1.71.0"
@@ -117,6 +116,12 @@
           "hyperbook.json"
         ],
         "url": "./schemas/hyperbook.schema.json"
+      },
+      {
+        "fileMatch": [
+          "hyperlibrary.json"
+        ],
+        "url": "./schemas/hyperlibrary.schema.json"
       }
     ]
   },
@@ -126,15 +131,18 @@
     "vscode:publish": "vsce publish && ovsx publish",
     "build": "npm-run-all compile:*",
     "compile": "npm-run-all compile:*",
-    "compile:extension": "node ./esbuild.js",
-    "compile:view": "webpack --mode development",
-    "compile:schema": "typescript-json-schema ../../packages/types/src/index.ts HyperbookJson --out ./schemas/hyperbook.schema.json --required",
+    "compile:extension": "webpack  --config ./webpack.extension.config.js --mode production",
+    "compile:view": "webpack  --config ./webpack.view.config.js --mode production",
+    "compile:schema-hyperbook": "typescript-json-schema ../../packages/types/src/index.ts HyperbookJson --out ./schemas/hyperbook.schema.json --required",
+    "compile:schema-hyperlibrary": "typescript-json-schema ../../packages/types/src/index.ts HyperlibraryJson --out ./schemas/hyperlibrary.schema.json --required",
     "watch": "npm-run-all -p watch:*",
-    "watch:view": "webpack --watch --mode development",
+    "watch:view": "webpack --config ./webpack.view.config.js --watch --mode development",
+    "watch:extension": "webpack --config ./webpack.extension.config.js --watch --mode development",
     "pretest": "pnpm compile && pnpm lint",
     "lint": "eslint src --ext ts"
   },
   "devDependencies": {
+    "@hyperbook/types": "workspace:^0.3.0",
     "@types/glob": "8.0.0",
     "@types/node": "18.11.7",
     "@types/react": "18.0.23",
@@ -145,16 +153,15 @@
     "buffer": "6.0.3",
     "copy-webpack-plugin": "11.0.0",
     "css-loader": "6.7.1",
-    "esbuild": "0.15.12",
     "eslint": "8.26.0",
     "eslint-plugin-react-hooks": "4.6.0",
     "file-loader": "6.2.0",
     "glob": "8.0.3",
-    "node-polyfill-webpack-plugin": "2.0.1",
-    "node-stdlib-browser": "1.2.0",
+    "node-polyfill-webpack-plugin": "^2.0.1",
     "npm-run-all": "4.1.5",
     "ovsx": "0.5.2",
     "prettier": "2.7.1",
+    "rimraf": "3.0.2",
     "sass": "1.55.0",
     "sass-loader": "13.1.0",
     "style-loader": "3.3.1",
@@ -179,10 +186,13 @@
     "@hyperbook/element-tabs": "workspace:*",
     "@hyperbook/element-term": "workspace:*",
     "@hyperbook/element-youtube": "workspace:*",
+    "@hyperbook/fs": "workspace:*",
     "@hyperbook/markdown": "workspace:*",
     "@hyperbook/provider": "workspace:*",
+    "@hyperbook/shell": "workspace:*",
     "@hyperbook/store": "workspace:*",
     "@hyperbook/styles": "workspace:*",
+    "@hyperbook/toc": "workspace:*",
     "fs-plus": "3.1.1",
     "gray-matter": "4.0.3",
     "react": "18.2.0",

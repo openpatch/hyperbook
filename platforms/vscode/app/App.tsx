@@ -17,10 +17,8 @@ import { Markdown } from "@hyperbook/markdown";
 import { Styles } from "@hyperbook/styles";
 import { ChangeMessage, Message } from "../src/messages/messageTypes";
 import { ErrorBoundary } from "./ErrorBoundary";
+import { Shell } from "@hyperbook/shell";
 
-const initialState = (window as any).initialState as ChangeMessage["payload"];
-const initialConfig = (window as any).initialConfig as ProviderProps["config"];
-const workspacePath = (window as any).workspacePath as string;
 const vscode = (window as any).vscode as VSCode;
 
 const createNoopStorage = () => {
@@ -38,16 +36,21 @@ const createNoopStorage = () => {
 };
 
 export const App = () => {
-  const [state, setState] = useState<ChangeMessage["payload"]>(initialState);
-  const [config, setConfig] = useState<ProviderProps["config"]>(initialConfig);
+  const [state, setState] = useState<ChangeMessage["payload"]>();
+  const [config, setConfig] = useState<ProviderProps["config"]>();
+  const assetsPath = state?.assetsPath ?? "";
 
   useEffect(() => {
     window.addEventListener("message", (event: MessageEvent<Message>) => {
       if (event.data.type === "CHANGE") {
         setState(event.data.payload);
       } else if (event.data.type === "CONFIG_CHANGE") {
-        setConfig(event.data.payload as any);
+        setConfig(event.data.payload);
       }
+    });
+
+    vscode.postMessage({
+      type: "READY",
     });
   }, []);
 
@@ -58,7 +61,25 @@ export const App = () => {
         env="development"
         Link={({ href, ...props }) => {
           href = href?.split("#")[0];
-          if (href?.startsWith("/")) {
+          if (href?.startsWith("file:///")) {
+            return (
+              <a
+                href="#"
+                title={href}
+                onClick={() => {
+                  vscode.postMessage({
+                    type: "OPEN",
+                    payload: {
+                      path: href as string,
+                      rootFolder: "",
+                      basePath: "",
+                    },
+                  });
+                }}
+                {...props}
+              />
+            );
+          } else if (href?.startsWith("/")) {
             let rootFolder = "";
             if (!href.startsWith("/glossary")) {
               rootFolder = "book";
@@ -66,12 +87,14 @@ export const App = () => {
             return (
               <a
                 href="#"
+                title={href}
                 onClick={() => {
                   vscode.postMessage({
                     type: "OPEN",
                     payload: {
                       path: href as string,
                       rootFolder: rootFolder,
+                      basePath: config?.basePath,
                     },
                   });
                 }}
@@ -88,9 +111,9 @@ export const App = () => {
         makeUrl={() => (p, rootFolder) => {
           if (p?.startsWith("/")) {
             if (rootFolder) {
-              return workspacePath + "/" + rootFolder + p;
+              return assetsPath + "/" + rootFolder + p;
             } else {
-              return workspacePath + p;
+              return assetsPath + p;
             }
           } else {
             return p || "";
@@ -121,15 +144,18 @@ export const App = () => {
               content,
               path,
               rootFolder,
+              basePath: config?.basePath,
             },
           });
         }}
-        getActivePageId={async () => initialState.source || ""}
+        getActivePageId={async () => state?.navigation?.current?.href || ""}
       >
         <Styles />
-        <ErrorBoundary message="You have a syntax error in your markdown file.">
-          <Markdown children={state?.content || ""} />
-        </ErrorBoundary>
+        <Shell navigation={state?.navigation} toc={state?.toc}>
+          <ErrorBoundary message="You have a syntax error in your markdown file.">
+            <Markdown children={state?.content || ""} />
+          </ErrorBoundary>
+        </Shell>
       </Provider>
     </ErrorBoundary>
   );

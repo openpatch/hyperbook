@@ -1,4 +1,6 @@
 import { Range } from "vscode";
+import { TocProps } from "@hyperbook/toc";
+import { HyperbookJson, Navigation } from "@hyperbook/types";
 
 export interface WriteMessage {
   type: "WRITE";
@@ -6,6 +8,7 @@ export interface WriteMessage {
     path: string;
     content: string;
     rootFolder?: string;
+    basePath?: string;
   };
 }
 
@@ -15,12 +18,15 @@ export interface ChangeMessage {
     content: string;
     data: Record<string, any>;
     source: string;
+    navigation?: Navigation;
+    assetsPath: string;
+    toc?: TocProps;
   };
 }
 
 export interface ConfigChangeMessage {
   type: "CONFIG_CHANGE";
-  payload: Record<string, any>;
+  payload: HyperbookJson;
 }
 
 export interface OpenMessage {
@@ -28,6 +34,7 @@ export interface OpenMessage {
   payload: {
     path: string;
     rootFolder?: string;
+    basePath?: string;
   };
 }
 
@@ -48,8 +55,13 @@ export interface ScrollFromExtensionMessage {
   };
 }
 
+export interface ReadyMessage {
+  type: "READY";
+}
+
 export type Message =
   | ChangeMessage
+  | ReadyMessage
   | ConfigChangeMessage
   | WriteMessage
   | OpenMessage

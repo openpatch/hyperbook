@@ -112,7 +112,7 @@ export type HyperbookJson = {
   };
 };
 
-export type LanguageString = Record<Language, string>;
+export type LanguageString = Partial<Record<Language, string>>;
 
 export type HyperlibraryJson = {
   name: string | LanguageString;
