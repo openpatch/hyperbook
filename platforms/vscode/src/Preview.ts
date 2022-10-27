@@ -71,14 +71,21 @@ export default class Preview {
       );
       if (vscode.workspace.rootPath && config.name !== "@Hyperbook@") {
         const project = await readProject(vscode.workspace.rootPath);
-        const link = await makeLinkForHyperproject(project, config.language, {
-          href: {
-            useSrc: true,
-            append: ["index.md"],
-            protocol: "file:///",
-            relative: vscode.workspace.rootPath,
-          },
-        });
+        const links = [];
+        if (config.links) {
+          links.push(...config.links);
+        }
+        if (project.type === "library") {
+          const link = await makeLinkForHyperproject(project, config.language, {
+            href: {
+              useSrc: true,
+              append: ["index.md"],
+              protocol: "file:///",
+              relative: vscode.workspace.rootPath,
+            },
+          });
+          links.push(link);
+        }
         const basePath = path.relative(
           vscode.workspace.rootPath,
           hyperbookRoot
@@ -87,7 +94,7 @@ export default class Preview {
         return {
           ...config,
           basePath,
-          links: [...(config?.links || []), link],
+          links,
         } as HyperbookJson;
       }
       return config;
