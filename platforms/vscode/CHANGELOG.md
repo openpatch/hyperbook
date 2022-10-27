@@ -1,5 +1,11 @@
 # @hyperbook/vscode-extension
 
+## 0.5.1
+
+### Patch Changes
+
+- [`93c7bd9`](https://github.com/openpatch/hyperbook/commit/93c7bd963ff99af555af2d4112dded50cc6cb759) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix link to Changelog
+
 ## 0.5.0
 
 ### Minor Changes

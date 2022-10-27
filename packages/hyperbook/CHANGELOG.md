@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.7.1
+
+### Patch Changes
+
+- [`93c7bd9`](https://github.com/openpatch/hyperbook/commit/93c7bd963ff99af555af2d4112dded50cc6cb759) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Move platform web to devDependency
+
 ## 0.7.0
 
 ### Minor Changes
