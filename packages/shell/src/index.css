@@ -403,6 +403,7 @@ header {
 }
 
 .branding .name {
+  font-family: hyperbook-heading, sans-serif;
   font-size: 20px;
   font-weight: bold;
 }
