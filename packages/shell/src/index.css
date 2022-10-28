@@ -12,6 +12,8 @@
 
 .main-grid * {
   box-sizing: border-box;
+  font-size: 16px;
+  line-height: 1.5;
 }
 
 .main-grid {
@@ -89,7 +91,15 @@ header.inverted {
   color: var(--color-brand-text);
 }
 
+.branding:hover {
+  color: var(--color-brand-text);
+}
+
 header.inverted > .branding {
+  color: var(--color-brand);
+}
+
+header.inverted > .branding:hover {
   color: var(--color-brand);
 }
 
@@ -124,6 +134,7 @@ header.inverted > .branding {
 }
 
 .page:hover {
+  color: var(--color-text);
   background: var(--color-spacer);
 }
 
@@ -190,6 +201,7 @@ a.jump.previous::before {
 
 .drawer {
   background: #fff;
+  font-size: 16px;
 }
 
 .border {
@@ -373,6 +385,7 @@ header {
   text-decoration: none;
   display: flex;
   padding: 20px;
+  line-height: normal;
   align-items: center;
 }
 
