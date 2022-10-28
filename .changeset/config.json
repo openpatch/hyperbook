@@ -12,6 +12,6 @@
   },
   "commit": false,
   "ignore": [],
-  "linked": [["@platforms/web", "hyperbook"]],
+  "fixed": [["@platforms/web", "hyperbook"]],
   "updateInternalDependencies": "patch"
 }
