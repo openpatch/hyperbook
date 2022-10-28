@@ -1,5 +1,11 @@
 # @hyperbook/shell
 
+## 0.1.1
+
+### Patch Changes
+
+- [`2e92be1`](https://github.com/openpatch/hyperbook/commit/2e92be1fb5b1128cc43fbf0451aa4a493c6bafd7) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - The Hyperbook title now uses the heading font.
+
 ## 0.1.0
 
 ### Minor Changes

@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.8.1
+
+### Patch Changes
+
+- [`a0c03e2`](https://github.com/openpatch/hyperbook/commit/a0c03e2338fa3ea5e06a0952a0eb6a16ef9cfdb7) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - When platform web has a new version, hyperbook should also get a new version, thus both packages will be released together from now on.
+
 ## 0.7.1
 
 ### Patch Changes
