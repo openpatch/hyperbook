@@ -1,5 +1,15 @@
 # hyperbook-simple-template
 
+## 0.8.1
+
+### Patch Changes
+
+- [`a0c03e2`](https://github.com/openpatch/hyperbook/commit/a0c03e2338fa3ea5e06a0952a0eb6a16ef9cfdb7) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - When platform web has a new version, hyperbook should also get a new version, thus both packages will be released together from now on.
+
+- Updated dependencies [[`2e92be1`](https://github.com/openpatch/hyperbook/commit/2e92be1fb5b1128cc43fbf0451aa4a493c6bafd7), [`b1415aa`](https://github.com/openpatch/hyperbook/commit/b1415aaf8905a0fa7d119074e3b6731167023671)]:
+  - @hyperbook/shell@0.1.1
+  - @hyperbook/element-excalidraw@0.3.0
+
 ## 0.8.0
 
 ### Minor Changes

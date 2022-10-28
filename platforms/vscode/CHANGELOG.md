@@ -1,5 +1,15 @@
 # @hyperbook/vscode-extension
 
+## 0.5.4
+
+### Patch Changes
+
+- [`71ae6d0`](https://github.com/openpatch/hyperbook/commit/71ae6d07271e151ebed4ad33f927a9a67a604199) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix completion when using a hyperlibrary.
+
+- Updated dependencies [[`2e92be1`](https://github.com/openpatch/hyperbook/commit/2e92be1fb5b1128cc43fbf0451aa4a493c6bafd7), [`b1415aa`](https://github.com/openpatch/hyperbook/commit/b1415aaf8905a0fa7d119074e3b6731167023671)]:
+  - @hyperbook/shell@0.1.1
+  - @hyperbook/element-excalidraw@0.3.0
+
 ## 0.5.3
 
 ### Patch Changes
