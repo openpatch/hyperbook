@@ -1,5 +1,11 @@
 # @hyperbook/shell
 
+## 0.1.2
+
+### Patch Changes
+
+- [`2e61eef`](https://github.com/openpatch/hyperbook/commit/2e61eef5ca40446ae28046659cb1eac96fd6ccf1) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Set more default styles, so that Hyperbook looks alike on different platforms.
+
 ## 0.1.1
 
 ### Patch Changes
