@@ -5,7 +5,7 @@ importers:
   .:
     specifiers:
       '@changesets/changelog-github': 0.4.7
-      '@changesets/cli': 2.25.0
+      '@changesets/cli': 2.25.1
       '@types/node': 18.11.7
       chalk: 5.1.2
       chokidar: 3.5.3
@@ -26,7 +26,7 @@ importers:
       webpack: 5.74.0
     devDependencies:
       '@changesets/changelog-github': 0.4.7
-      '@changesets/cli': 2.25.0
+      '@changesets/cli': 2.25.1
       '@types/node': 18.11.7
       chalk: 5.1.2
       chokidar: 3.5.3
@@ -1457,8 +1457,8 @@ packages:
       - encoding
     dev: true
 
-  /@changesets/cli/2.25.0:
-    resolution: {integrity: sha512-Svu5KD2enurVHGEEzCRlaojrHjVYgF9srmMP9VQSy9c1TspX6C9lDPpulsSNIjYY9BuU/oiWpjBgR7RI9eQiAA==}
+  /@changesets/cli/2.25.1:
+    resolution: {integrity: sha512-e65ZJ7QKq7aERV/vAeuG0DTkkuEnTZK8eVNYqnd6wBsc9YTK+5iuuzp8aG0E80AngxeOaI4u77OIfzE9fv2T5Q==}
     hasBin: true
     dependencies:
       '@babel/runtime': 7.19.0
