@@ -40,7 +40,7 @@
   "devDependencies": {
     "@hyperbook/next-watch": "workspace:*",
     "@hyperbook/types": "workspace:*",
-    "@types/node": "18.11.7",
+    "@types/node": "18.11.8",
     "@types/react": "18.0.24",
     "chalk": "5.1.2",
     "esbuild": "0.15.12",
