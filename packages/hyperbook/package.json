@@ -48,7 +48,7 @@
     "got": "12.5.2",
     "prompts": "2.4.2",
     "rimraf": "3.0.2",
-    "tar": "6.1.11",
+    "tar": "6.1.12",
     "update-check": "1.5.4",
     "@platforms/web": "workspace:*"
   },
