@@ -33,7 +33,7 @@
     "next": "12.3.2",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "react-redux": "8.0.4",
+    "react-redux": "8.0.5",
     "redux": "4.2.0",
     "redux-persist": "6.0.0"
   },
