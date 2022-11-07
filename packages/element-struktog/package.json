@@ -41,7 +41,7 @@
   "dependencies": {
     "@hyperbook/provider": "workspace:*",
     "js-base64": "3.7.2",
-    "pako": "2.0.4"
+    "pako": "2.1.0"
   },
   "peerDependencies": {
     "@reduxjs/toolkit": "1.x",
