@@ -295,6 +295,7 @@ a.jump.previous::before {
 
 .toc-toggle {
   position: fixed;
+  padding: 4px;
   top: 90px;
   right: 20px;
   border-radius: 50%;
