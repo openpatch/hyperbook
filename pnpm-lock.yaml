@@ -186,12 +186,12 @@ importers:
       '@types/mermaid': 9.1.0
       '@types/react': 18.0.25
       '@types/react-dom': 18.0.8
-      mermaid: 9.2.1
+      mermaid: 9.2.2
       react: 18.2.0
       react-dom: 18.2.0
     dependencies:
       '@hyperbook/provider': link:../provider
-      mermaid: 9.2.1
+      mermaid: 9.2.2
     devDependencies:
       '@types/mermaid': 9.1.0
       '@types/react': 18.0.25
@@ -7340,8 +7340,8 @@ packages:
     resolution: {integrity: sha512-8q7VEgMJW4J8tcfVPy8g09NcQwZdbwFEqhe/WZkoIzjn/3TGDwtOCYtXGxA3O8tPzpczCCDgv+P2P5y00ZJOOg==}
     engines: {node: '>= 8'}
 
-  /mermaid/9.2.1:
-    resolution: {integrity: sha512-uvlr85RZx+bofBiweljoh2SZvfedSIAd41kew5e8GJFn4E4aFkdGS2oWsv3XIIaxR3JVa0CmNoUpEn6XaCmk+Q==}
+  /mermaid/9.2.2:
+    resolution: {integrity: sha512-6s7eKMqFJGS+0MYjmx8f6ZigqKBJVoSx5ql2gw6a4Aa+WJ49QiEJg7gPwywaBg3DZMs79UP7trESp4+jmaQccw==}
     dependencies:
       '@braintree/sanitize-url': 6.0.0
       d3: 7.6.1
