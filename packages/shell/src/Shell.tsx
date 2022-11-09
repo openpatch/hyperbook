@@ -121,15 +121,9 @@ export const Shell: FC<ShellProps> = ({ toc, navigation, children }) => {
             >
               <div id="mobile-sidebar">
                 {navigation && <Navigation {...navigation} />}
-                {hyperbook.author ? (
-                  <a className="author" href={hyperbook.author.url}>
-                    {hyperbook.author.name}
-                  </a>
-                ) : (
-                  <a className="author" href="https://hyperbook.openpatch.org">
-                    Powered by <b>Hyperbook</b>
-                  </a>
-                )}
+                <a className="author" href="https://hyperbook.openpatch.org">
+                  Powered by <b>Hyperbook</b>
+                </a>
               </div>
             </Drawer>
           </div>
