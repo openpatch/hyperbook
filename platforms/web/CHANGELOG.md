@@ -1,5 +1,11 @@
 # hyperbook-simple-template
 
+## 0.8.4
+
+### Patch Changes
+
+- [`d92c89e`](https://github.com/openpatch/hyperbook/commit/d92c89e099476c0b941ed9fea83ca75fd24c034d) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Anchor tags did not work on initial load. We now wait a little to make sure the markdown content is loaded. Then a smooth scroll to the anchor tag will happen.
+
 ## 0.8.3
 
 ### Patch Changes
