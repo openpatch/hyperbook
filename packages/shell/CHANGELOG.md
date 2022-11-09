@@ -1,5 +1,15 @@
 # @hyperbook/shell
 
+## 0.1.3
+
+### Patch Changes
+
+- [`28b803e`](https://github.com/openpatch/hyperbook/commit/28b803efbeac6835afc0040b7f1fb03c210cc72d) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix toc toggle misaligned bars on iPad
+
+- [`13a8313`](https://github.com/openpatch/hyperbook/commit/13a8313f60a89b697f638845327bbd4ddbae4af8) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Display Powered by Hyperbook in the mobile navigation drawer.
+
+- [`42cf26c`](https://github.com/openpatch/hyperbook/commit/42cf26cacd32026fa95ab850c4d5e8f2b96b9c37) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix height on iOS
+
 ## 0.1.2
 
 ### Patch Changes
