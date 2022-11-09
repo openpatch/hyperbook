@@ -13,6 +13,7 @@ import {
   readHyperbook,
   listPagesForTerm,
 } from "@hyperbook/fs";
+import { useScrollHash } from "../../useScrollHash";
 
 type TermProps = {
   markdown: string;
@@ -29,6 +30,7 @@ type TermProps = {
 export default function Term({ markdown, navigation, term, toc }: TermProps) {
   const Link = useLink();
   useActivePageId();
+  useScrollHash();
   return (
     <Shell navigation={navigation} toc={term?.toc === true ? toc : null}>
       <article>

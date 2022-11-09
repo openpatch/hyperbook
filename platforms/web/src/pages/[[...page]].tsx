@@ -13,6 +13,7 @@ import {
   readFile,
   readHyperbook,
 } from "@hyperbook/fs";
+import { useScrollHash } from "../useScrollHash";
 
 type PageProps = {
   markdown: string;
@@ -24,6 +25,7 @@ export default function BookPage({ markdown, navigation, toc }: PageProps) {
   const page = navigation.current;
   const Link = useLink();
   useActivePageId();
+  useScrollHash();
 
   return (
     <Fragment>

@@ -8,6 +8,7 @@ import {
   makeNavigationForHyperbook,
   readHyperbook,
 } from "@hyperbook/fs";
+import { useScrollHash } from "../../useScrollHash";
 
 export type GlossaryProps = {
   navigation: ShellProps["navigation"];
@@ -17,6 +18,7 @@ export type GlossaryProps = {
 export default function Glossary({ glossary, navigation }: GlossaryProps) {
   const Link = useLink();
   useActivePageId();
+  useScrollHash();
   return (
     <Shell navigation={navigation}>
       <article className="glossary">
