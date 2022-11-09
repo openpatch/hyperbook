@@ -25,10 +25,10 @@ You can also add an alternate description for the image, which can be used by sc
 You can also add a visible caption to your image like so:
 
 ```md
-[![A description](/test.jpg "A caption")](/elements/hints)
+![A description](/test.jpg "A caption")
 ```
 
-[![A description](/test.jpg "A caption")](/elements/hints)
+![A description](/test.jpg "A caption")
 
 If you want to link your image you can use the normal link syntax:
 
