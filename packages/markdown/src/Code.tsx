@@ -48,11 +48,11 @@ export const Code: Components["code"] = ({ children, className }) => {
   const copyCode = () => {
     if (navigator.clipboard && ref.current) {
       const text = ref.current.innerText;
-      navigator.clipboard.writeText(text);
+      navigator.clipboard.writeText(text).then(() => {
+        setCopied(true);
 
-      setCopied(true);
-
-      setTimeout(() => setCopied(false), 2000);
+        setTimeout(() => setCopied(false), 2000);
+      });
     }
   };
 
@@ -61,7 +61,7 @@ export const Code: Components["code"] = ({ children, className }) => {
       <code ref={ref} className={className}>
         {children}
       </code>
-      <button className="copy" onClick={copyCode} aria-label="Copy Code">
+      <button className="copy" onPointerDown={copyCode} aria-label="Copy Code">
         {copied ? <MdDone /> : <MdContentCopy />}
       </button>
     </Fragment>

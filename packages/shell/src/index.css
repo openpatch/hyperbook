@@ -1,5 +1,6 @@
 :root {
   --internal-color-error: #d26466;
+  --app-height: 100%;
 }
 
 #drawer-root {
@@ -219,7 +220,7 @@ a.jump.previous::before {
 .main-grid {
   font-family: hyperbook-body, sans-serif;
   display: grid;
-  height: 100vh;
+  height: var(--app-height);
   width: 100vw;
   grid-template-columns: 300px 1fr;
   grid-template-rows: 80px 1fr;
@@ -234,7 +235,7 @@ a.jump.previous::before {
   flex-direction: column;
   grid-area: nav;
   border-right-width: 1px;
-  height: calc(100vh - 80px);
+  height: calc(var(--app-height) - 80px);
   border-right-style: solid;
   overflow-y: auto;
 }
@@ -243,7 +244,7 @@ a.jump.previous::before {
   display: flex;
   flex-direction: column;
   width: 100%;
-  height: calc(100vh - 80px);
+  height: calc(var(--app-height) - 80px);
   border-left-width: 1px;
   border-left-style: solid;
   overflow-y: auto;
