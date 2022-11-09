@@ -1,5 +1,17 @@
 # @hyperbook/markdown
 
+## 0.4.0
+
+### Minor Changes
+
+- [`c526071`](https://github.com/openpatch/hyperbook/commit/c526071d11e9c248c933bade1ac1298a0fcbeefb) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add lightbox for images. You can now click on an image to display a larger preview.
+
+### Patch Changes
+
+- [`28b803e`](https://github.com/openpatch/hyperbook/commit/28b803efbeac6835afc0040b7f1fb03c210cc72d) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix toc toggle misaligned bars on iPad
+
+- [`42cf26c`](https://github.com/openpatch/hyperbook/commit/42cf26cacd32026fa95ab850c4d5e8f2b96b9c37) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix height on iOS
+
 ## 0.3.4
 
 ### Patch Changes

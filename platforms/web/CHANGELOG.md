@@ -1,5 +1,13 @@
 # hyperbook-simple-template
 
+## 0.8.3
+
+### Patch Changes
+
+- Updated dependencies [[`28b803e`](https://github.com/openpatch/hyperbook/commit/28b803efbeac6835afc0040b7f1fb03c210cc72d), [`13a8313`](https://github.com/openpatch/hyperbook/commit/13a8313f60a89b697f638845327bbd4ddbae4af8), [`42cf26c`](https://github.com/openpatch/hyperbook/commit/42cf26cacd32026fa95ab850c4d5e8f2b96b9c37), [`c526071`](https://github.com/openpatch/hyperbook/commit/c526071d11e9c248c933bade1ac1298a0fcbeefb)]:
+  - @hyperbook/markdown@0.4.0
+  - @hyperbook/shell@0.1.3
+
 ## 0.8.2
 
 ### Patch Changes
