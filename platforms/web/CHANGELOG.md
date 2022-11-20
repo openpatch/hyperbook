@@ -1,5 +1,12 @@
 # hyperbook-simple-template
 
+## 0.8.5
+
+### Patch Changes
+
+- Updated dependencies [[`27032d1`](https://github.com/openpatch/hyperbook/commit/27032d1d76a07b590c18094139ba4a4bf74780c3)]:
+  - @hyperbook/markdown@0.4.1
+
 ## 0.8.4
 
 ### Patch Changes

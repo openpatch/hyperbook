@@ -1,5 +1,14 @@
 # @hyperbook/vscode-extension
 
+## 0.5.7
+
+### Patch Changes
+
+- [#458](https://github.com/openpatch/hyperbook/pull/458) [`27032d1`](https://github.com/openpatch/hyperbook/commit/27032d1d76a07b590c18094139ba4a4bf74780c3) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Optimize line breaks. We now insert an optional word break point into links. So the browser knows when to break it. For this we follow this guide: https://css-tricks.com/better-line-breaks-for-long-urls/. This does also fix issue #451
+
+- Updated dependencies [[`27032d1`](https://github.com/openpatch/hyperbook/commit/27032d1d76a07b590c18094139ba4a4bf74780c3)]:
+  - @hyperbook/markdown@0.4.1
+
 ## 0.5.6
 
 ### Patch Changes
