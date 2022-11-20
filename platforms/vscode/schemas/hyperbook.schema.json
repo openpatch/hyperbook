@@ -16,9 +16,6 @@
         "Link": {
             "anyOf": [
                 {
-                    "$ref": "#/definitions/LinkWithLinks"
-                },
-                {
                     "properties": {
                         "href": {
                             "type": "string"
@@ -35,29 +32,29 @@
                         "label"
                     ],
                     "type": "object"
+                },
+                {
+                    "properties": {
+                        "icon": {
+                            "type": "string"
+                        },
+                        "label": {
+                            "type": "string"
+                        },
+                        "links": {
+                            "items": {
+                                "$ref": "#/definitions/Link"
+                            },
+                            "type": "array"
+                        }
+                    },
+                    "required": [
+                        "label",
+                        "links"
+                    ],
+                    "type": "object"
                 }
             ]
-        },
-        "LinkWithLinks": {
-            "properties": {
-                "icon": {
-                    "type": "string"
-                },
-                "label": {
-                    "type": "string"
-                },
-                "links": {
-                    "items": {
-                        "$ref": "#/definitions/Link"
-                    },
-                    "type": "array"
-                }
-            },
-            "required": [
-                "label",
-                "links"
-            ],
-            "type": "object"
         }
     },
     "properties": {

@@ -6,7 +6,16 @@
 
 .hyperbook-markdown a {
   color: var(--color-brand);
-  word-break: break-all;
+}
+
+/**
+ * IE 8–11 and Prince don’t recognize the `wbr` element,
+ * but a pseudo-element can achieve the same effect with IE 9+ and Prince.
+ */
+.hyperbook-markdown wbr:before {
+  /* Unicode zero width space */
+  content: "\200B";
+  white-space: normal;
 }
 
 .hyperbook-markdown .copy {
