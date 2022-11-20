@@ -646,7 +646,7 @@ importers:
       '@hyperbook/element-tabs': workspace:*
       '@hyperbook/element-term': workspace:*
       '@hyperbook/element-youtube': workspace:*
-      '@hyperbook/fs': workspace:^0.1.0
+      '@hyperbook/fs': workspace:*
       '@hyperbook/markdown': workspace:*
       '@hyperbook/next-watch': workspace:*
       '@hyperbook/provider': workspace:*
