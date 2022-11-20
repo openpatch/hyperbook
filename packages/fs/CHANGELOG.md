@@ -1,5 +1,11 @@
 # @hyperbook/fs
 
+## 0.1.1
+
+### Patch Changes
+
+- [`f906c50`](https://github.com/openpatch/hyperbook/commit/f906c5075ec26263f90fabfa2a8ad556619c86da) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - We fixed links to pages on a glossary page are not relative to book, but relative to the root of the hyperbook, which caused unresolved links.
+
 ## 0.1.0
 
 ### Minor Changes
