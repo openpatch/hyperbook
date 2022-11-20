@@ -98,7 +98,7 @@ export const listPagesForTerm = async (
 
     if (m && !data.hide && data.name) {
       const relativePath = path
-        .relative(root, file)
+        .relative(path.join(root, "book"), file)
         .replace(/\.md$/, "")
         .split("/");
       const isIndex = relativePath[relativePath.length - 1] === "index";
