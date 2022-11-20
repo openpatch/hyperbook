@@ -15,6 +15,7 @@ development server and edit the files in the website folder.
 ```
 pnpm install
 pnpm build
+pnpm website:setup
 pnpm website:dev en
 pnpm website:dev de
 ```
