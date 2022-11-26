@@ -16,7 +16,7 @@ export type TocProps = {
 };
 
 export const parseTocFromMarkdown = (markdown: string): TocProps => {
-  const reg = /(#{1,3})\s(.*)/;
+  const reg = /(#{1,6})\s(.*)/;
   const headings = markdown
     .split("\n")
     .filter((line) => line.match(reg))
