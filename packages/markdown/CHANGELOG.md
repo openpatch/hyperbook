@@ -1,5 +1,11 @@
 # @hyperbook/markdown
 
+## 0.4.2
+
+### Patch Changes
+
+- [`23413c7`](https://github.com/openpatch/hyperbook/commit/23413c74ae0338c063d13f98a78b08ffb8d7f065) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix format title not url of a link.
+
 ## 0.4.1
 
 ### Patch Changes
