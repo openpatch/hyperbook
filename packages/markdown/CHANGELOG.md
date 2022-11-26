@@ -1,5 +1,11 @@
 # @hyperbook/markdown
 
+## 0.4.3
+
+### Patch Changes
+
+- [`5758cf0`](https://github.com/openpatch/hyperbook/commit/5758cf025f81b3ec6e5c33d6309ca47166e6db3a) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix: Move optional break to text instead of title
+
 ## 0.4.2
 
 ### Patch Changes
