@@ -1,8 +1,12 @@
 import { useLink } from "@hyperbook/provider";
+import { ReactNode } from "react";
 import { Components } from "react-markdown";
 
 // see: https://css-tricks.com/better-line-breaks-for-long-urls/
-function formatUrl(url: string) {
+function formatUrl(url: ReactNode) {
+  if (typeof url !== "string") {
+    return url;
+  }
   // Split the URL into an array to distinguish double slashes from single slashes
   var doubleSlash = url.split("//");
 
@@ -27,13 +31,9 @@ function formatUrl(url: string) {
 export const Link: Components["a"] = ({ href, title, children }) => {
   const L = useLink();
 
-  if (title) {
-    title = formatUrl(title);
-  }
-
   return (
     <L href={href} title={title}>
-      {children}
+      {formatUrl(children)}
     </L>
   );
 };
