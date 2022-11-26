@@ -27,8 +27,8 @@ function formatUrl(url: string) {
 export const Link: Components["a"] = ({ href, title, children }) => {
   const L = useLink();
 
-  if (href) {
-    href = formatUrl(href);
+  if (title) {
+    title = formatUrl(title);
   }
 
   return (
