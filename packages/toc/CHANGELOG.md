@@ -1,5 +1,11 @@
 # @hyperbook/toc
 
+## 0.2.0
+
+### Minor Changes
+
+- [`fc4b3fd`](https://github.com/openpatch/hyperbook/commit/fc4b3fd5a56ab69a885299c0d41601cf936a81f7) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Include up to heading 6 into the toc
+
 ## 0.1.0
 
 ### Minor Changes
