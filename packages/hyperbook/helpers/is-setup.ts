@@ -1,8 +1,9 @@
 import fs from "fs";
 import path from "path";
 import chalk from "chalk";
+import { Hyperproject } from "@hyperbook/types";
 
-export function isSetup(root: string): boolean {
+export function isSetup(root: string, rootProject?: Hyperproject): boolean {
   const folder =
     "Could not find .hyperbook folder. Be sure to run `hyperbook setup`.";
   try {
@@ -22,7 +23,14 @@ export function isSetup(root: string): boolean {
   if (process.env.HYPERBOOK_LOCAL_DEV) {
     return true;
   }
-  const nextBin = path.join(root, ".hyperbook", "node_modules", ".bin", "next");
+
+  const nextBin = path.join(
+    rootProject?.src || root,
+    ".hyperbook",
+    "node_modules",
+    ".bin",
+    "next"
+  );
   try {
     fs.statSync(nextBin);
   } catch (e) {

@@ -33,10 +33,6 @@ async function archiveFolder(
 }
 
 export async function runArchive(root: string, prefix?: string): Promise<void> {
-  const setup = isSetup(root);
-  if (!setup) {
-    throw new Error("no setup");
-  }
   return new Promise((resolve, reject) => {
     // find folders in archives
     if (!fs.existsSync(path.join(root, "archives"))) {

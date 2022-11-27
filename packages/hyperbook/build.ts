@@ -40,7 +40,7 @@ async function runBuild(
   prefix?: string,
   out?: string
 ): Promise<void> {
-  const setup = isSetup(root);
+  const setup = isSetup(root, rootProject);
   if (!setup) {
     throw new Error("no setup");
   }
@@ -104,7 +104,7 @@ module.exports = {
   return new Promise((resolve, reject) => {
     const command = "npm";
     const args = ["run", "next:build"];
-    const env = makeEnv();
+    const env = makeEnv(rootProject);
     const child = spawn(command, args, {
       stdio: "pipe",
       cwd: path.join(root, ".hyperbook"),

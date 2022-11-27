@@ -1,3 +1,4 @@
 *.hbs
 hyperbook.schema.json
+hyperlibrary.schema.json
 pnpm-lock.yaml

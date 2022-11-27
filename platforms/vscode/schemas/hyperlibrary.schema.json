@@ -1,76 +1,83 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "definitions": {
-    "Partial<Record<Language,string>>": {
-      "properties": {
-        "de": {
-          "type": "string"
-        },
-        "en": {
-          "type": "string"
-        },
-        "es": {
-          "type": "string"
-        },
-        "fr": {
-          "type": "string"
-        },
-        "it": {
-          "type": "string"
-        },
-        "nl": {
-          "type": "string"
-        },
-        "pt": {
-          "type": "string"
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "definitions": {
+        "Partial<Record<Language,string>>": {
+            "properties": {
+                "de": {
+                    "type": "string"
+                },
+                "en": {
+                    "type": "string"
+                },
+                "es": {
+                    "type": "string"
+                },
+                "fr": {
+                    "type": "string"
+                },
+                "it": {
+                    "type": "string"
+                },
+                "nl": {
+                    "type": "string"
+                },
+                "pt": {
+                    "type": "string"
+                }
+            },
+            "type": "object"
         }
-      },
-      "type": "object"
-    }
-  },
-  "properties": {
-    "basePath": {
-      "type": "string"
     },
-    "library": {
-      "items": {
-        "properties": {
-          "basePath": {
+    "properties": {
+        "basePath": {
             "type": "string"
-          },
-          "icon": {
-            "type": "string"
-          },
-          "name": {
+        },
+        "library": {
+            "items": {
+                "properties": {
+                    "basePath": {
+                        "type": "string"
+                    },
+                    "icon": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/definitions/Partial<Record<Language,string>>"
+                            },
+                            {
+                                "type": "string"
+                            }
+                        ]
+                    },
+                    "src": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "basePath",
+                    "src"
+                ],
+                "type": "object"
+            },
+            "type": "array"
+        },
+        "name": {
             "anyOf": [
-              {
-                "$ref": "#/definitions/Partial<Record<Language,string>>"
-              },
-              {
-                "type": "string"
-              }
+                {
+                    "$ref": "#/definitions/Partial<Record<Language,string>>"
+                },
+                {
+                    "type": "string"
+                }
             ]
-          },
-          "src": {
-            "type": "string"
-          }
-        },
-        "required": ["basePath", "src"],
-        "type": "object"
-      },
-      "type": "array"
-    },
-    "name": {
-      "anyOf": [
-        {
-          "$ref": "#/definitions/Partial<Record<Language,string>>"
-        },
-        {
-          "type": "string"
         }
-      ]
-    }
-  },
-  "required": ["library", "name"],
-  "type": "object"
+    },
+    "required": [
+        "library",
+        "name"
+    ],
+    "type": "object"
 }
+

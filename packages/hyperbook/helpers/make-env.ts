@@ -1,6 +1,7 @@
+import { Hyperproject } from "@hyperbook/types";
 import path from "path";
 
-export function makeEnv() {
+export function makeEnv(rootProject?: Hyperproject) {
   let NODE_PATH = process.env.NODE_PATH;
   let PATH = process.env.PATH;
   if (process.env.HYPERBOOK_LOCAL_DEV) {
@@ -24,6 +25,13 @@ export function makeEnv() {
         "node_modules",
         ".bin"
       ) +
+      ":" +
+      PATH;
+  }
+  if (rootProject) {
+    NODE_PATH = path.join(rootProject.src, ".hyperbook", "node_modules");
+    PATH =
+      path.join(rootProject.src, ".hyperbook", "node_modules", ".bin") +
       ":" +
       PATH;
   }
