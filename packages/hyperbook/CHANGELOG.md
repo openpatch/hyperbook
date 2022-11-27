@@ -1,5 +1,17 @@
 # hyperbook
 
+## 0.9.0
+
+### Minor Changes
+
+- [`82ee685`](https://github.com/openpatch/hyperbook/commit/82ee685443fcffbbcff8537baf123c823b27c1c9) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix: Building hyperlibary with HYPERBOOK_LOCAL_DEV flag.
+
+### Patch Changes
+
+- [`8a3fe07`](https://github.com/openpatch/hyperbook/commit/8a3fe0731dc12e85f89c5905b06f480c1fd1a0ad) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix: Hyperlibrary did not build due to missing setup, even though everything was set up correctly.
+
+- [`4fa6503`](https://github.com/openpatch/hyperbook/commit/4fa650348532f26ff01e4248dab19cb8f47c5ada) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix: hyperbook not building with HYPERBOOK_LOCAL_FLAG
+
 ## 0.8.9
 
 ## 0.8.8
