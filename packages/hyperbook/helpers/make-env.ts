@@ -27,6 +27,12 @@ export function makeEnv(rootProject?: Hyperproject) {
       ) +
       ":" +
       PATH;
+  } else if (rootProject) {
+    NODE_PATH = path.join(rootProject.src, ".hyperbook", "node_modules");
+    PATH =
+      path.join(rootProject.src, ".hyperbook", "node_modules", ".bin") +
+      ":" +
+      PATH;
   }
   if (rootProject) {
     NODE_PATH = path.join(rootProject.src, ".hyperbook", "node_modules");
