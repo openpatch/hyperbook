@@ -21,7 +21,7 @@ const listFiles = async (
   dir: string = "",
   absolute: boolean = true
 ): Promise<string[]> => {
-  const files = await fs.readdir(path.join(root, dir));
+  const files = await fs.readdir(path.join(root, dir)).catch(() => []);
   return Promise.all(
     files.flatMap(async (file) => {
       const stat = await fs.stat(path.join(root, dir, file));
