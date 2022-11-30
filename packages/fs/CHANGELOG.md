@@ -1,5 +1,11 @@
 # @hyperbook/fs
 
+## 0.1.2
+
+### Patch Changes
+
+- [`af4964b`](https://github.com/openpatch/hyperbook/commit/af4964b7c1c12134a1d08f74d387e8b42844b4a5) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix hyperbook not building when glossary folder is not present.
+
 ## 0.1.1
 
 ### Patch Changes
