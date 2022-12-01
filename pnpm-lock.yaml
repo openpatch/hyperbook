@@ -561,7 +561,7 @@ importers:
       gray-matter: 4.0.3
       node-polyfill-webpack-plugin: ^2.0.1
       npm-run-all: 4.1.5
-      ovsx: 0.5.2
+      ovsx: 0.6.0
       prettier: 2.8.0
       react: 18.2.0
       react-dom: 18.2.0
@@ -618,7 +618,7 @@ importers:
       glob: 8.0.3
       node-polyfill-webpack-plugin: 2.0.1_webpack@5.75.0
       npm-run-all: 4.1.5
-      ovsx: 0.5.2
+      ovsx: 0.6.0
       prettier: 2.8.0
       rimraf: 3.0.2
       sass: 1.56.1
@@ -8219,8 +8219,8 @@ packages:
     resolution: {integrity: sha512-/jHxFIzoMXdqPzTaCpFzAAWhpkSjZPF4Vsn6jAfNpmbH/ymsmd7Qc6VE9BGn0L6YMj6uwpQLxCECpus4ukKS9Q==}
     dev: true
 
-  /ovsx/0.5.2:
-    resolution: {integrity: sha512-UbLultRCk46WddeA0Cly4hoRhzBJUiLgbIEViXlgOvV54LbsppClDkMLoCevUUBHoiNdMX2NuiSgURAEXgCZdw==}
+  /ovsx/0.6.0:
+    resolution: {integrity: sha512-E9NvikCLJjv9Ssf04ozSTRi9VXZK0kLgiN59cgO7M/Zt9zyVVf//kNWseZai3OC7SjpvsNK5kzC9s+6iS7jCxA==}
     engines: {node: '>= 14'}
     hasBin: true
     dependencies:
@@ -8229,7 +8229,7 @@ packages:
       is-ci: 2.0.0
       leven: 3.1.0
       tmp: 0.2.1
-      vsce: 2.14.0
+      vsce: 2.7.0
     transitivePeerDependencies:
       - debug
     dev: true
@@ -10933,6 +10933,33 @@ packages:
 
   /vsce/2.14.0:
     resolution: {integrity: sha512-LH0j++sHjcFNT++SYcJ86Zyw49GvyoTRfzYJGmaCgfzTyL7MyMhZeVEnj9K9qKh/m1N3/sdWWNxP+PFS/AvWiA==}
+    engines: {node: '>= 14'}
+    hasBin: true
+    dependencies:
+      azure-devops-node-api: 11.2.0
+      chalk: 2.4.2
+      cheerio: 1.0.0-rc.12
+      commander: 6.2.1
+      glob: 7.2.3
+      hosted-git-info: 4.1.0
+      keytar: 7.9.0
+      leven: 3.1.0
+      markdown-it: 12.3.2
+      mime: 1.6.0
+      minimatch: 3.1.2
+      parse-semver: 1.1.1
+      read: 1.0.7
+      semver: 5.7.1
+      tmp: 0.2.1
+      typed-rest-client: 1.8.9
+      url-join: 4.0.1
+      xml2js: 0.4.23
+      yauzl: 2.10.0
+      yazl: 2.5.1
+    dev: true
+
+  /vsce/2.7.0:
+    resolution: {integrity: sha512-CKU34wrQlbKDeJCRBkd1a8iwF9EvNxcYMg9hAUH6AxFGR6Wo2IKWwt3cJIcusHxx6XdjDHWlfAS/fJN30uvVnA==}
     engines: {node: '>= 14'}
     hasBin: true
     dependencies:
