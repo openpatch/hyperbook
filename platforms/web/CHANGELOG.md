@@ -1,5 +1,16 @@
 # hyperbook-simple-template
 
+## 0.9.2
+
+### Patch Changes
+
+- [`40ec0fd`](https://github.com/openpatch/hyperbook/commit/40ec0fde2cbb2ef823bf11be2b2db365f8c37d9c) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Empty section index pages now correctly link to the first non-empty subpage.
+
+- Updated dependencies [[`60e8fb1`](https://github.com/openpatch/hyperbook/commit/60e8fb1a3a95d7797234a0ba4f64adba65b74792), [`2562e84`](https://github.com/openpatch/hyperbook/commit/2562e847152902cc72d155d760ee87c0a8aff11c), [`40ec0fd`](https://github.com/openpatch/hyperbook/commit/40ec0fde2cbb2ef823bf11be2b2db365f8c37d9c)]:
+  - @hyperbook/markdown@0.5.0
+  - @hyperbook/shell@0.2.0
+  - @hyperbook/fs@0.1.3
+
 ## 0.9.1
 
 ### Patch Changes
