@@ -44,30 +44,42 @@ const Section = ({
   });
   return (
     <div className={virtual ? "virtual-section" : "section"}>
-      <div
-        className={[
-          "name",
-          virtual || isEmpty ? "empty" : "",
-          current?.href === href ? "active" : "",
-        ].join(" ")}
-      >
-        {virtual ? null : isEmpty ? (
-          <span className="label">{name}</span>
-        ) : (
-          <Link href={href} className="label">
-            {name}
-          </Link>
-        )}
-        {virtual ? null : (
-          <button
-            className="toggle"
+      {!virtual &&
+        (isEmpty ? (
+          <div
+            className={[
+              "name",
+              "empty",
+              current?.href === href ? "active" : "",
+            ].join(" ")}
             {...getToggleProps()}
-            aria-label={isExpanded ? "Close" : "Open"}
           >
-            {isExpanded ? "➖" : "➕"}
-          </button>
-        )}
-      </div>
+            <span className="label">{name}</span>
+            <button
+              className="toggle"
+              aria-label={isExpanded ? "Close" : "Open"}
+            >
+              {isExpanded ? "➖" : "➕"}
+            </button>
+          </div>
+        ) : (
+          <div
+            className={["name", current?.href === href ? "active" : ""].join(
+              " "
+            )}
+          >
+            <Link href={href} className="label">
+              {name}
+            </Link>
+            <button
+              className="toggle"
+              {...getToggleProps()}
+              aria-label={isExpanded ? "Close" : "Open"}
+            >
+              {isExpanded ? "➖" : "➕"}
+            </button>
+          </div>
+        ))}
       <div className="links" {...(virtual ? [] : getCollapseProps())}>
         {pages.length > 0 && (
           <ul className="pages">
