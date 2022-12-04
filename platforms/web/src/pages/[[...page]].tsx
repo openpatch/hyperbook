@@ -1,5 +1,3 @@
-import fs from "fs";
-import matter from "gray-matter";
 import { GetStaticPaths, GetStaticProps } from "next";
 import path from "path";
 import { Shell, ShellProps } from "@hyperbook/shell";

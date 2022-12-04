@@ -404,7 +404,9 @@ export const makeNavigationForHyperbook = async (
   let i = pageList.findIndex((p) => p.href === currPath);
   const current = pageList[i] || null;
 
-  pageList = pageList.filter((p) => !p.isEmpty && !p.hide);
+  pageList = pageList.filter(
+    (p) => (!p.isEmpty || p.href === currPath) && !p.hide
+  );
   i = pageList.findIndex((p) => p.href === currPath);
 
   const next = pageList[i + 1] || null;
