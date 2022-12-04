@@ -127,6 +127,19 @@
   border-radius: 6px;
 }
 
+.hyperbook-markdown .inline {
+  display: inline-flex;
+  align-items: center;
+  color: var(--color-text);
+  border-width: 1px;
+  border-style: solid;
+  background: var(--color-nav) !important;
+  border-color: var(--color-spacer);
+  font-family: hyperbook-code, monospace;
+  padding: 0em 0.4em 0em 0em;
+  border-radius: 6px;
+}
+
 .hyperbook-markdown ul,
 .hyperbook-markdown ol {
   margin-top: 0;
@@ -373,7 +386,7 @@
   padding: 1em;
 }
 
-.hyperbook-markdown code {
+.hyperbook-markdown pre code {
   display: inline-flex;
   align-items: center;
   color: var(--color-text);

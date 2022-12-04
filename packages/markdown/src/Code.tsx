@@ -36,7 +36,41 @@ const MdDone = () => {
   );
 };
 
-export const Code: Components["code"] = ({ children, className }) => {
+const copyNoNavigator = (text: string) => {
+  const isIos = navigator.userAgent.match(/ipad|iphone/i);
+  const textarea = document.createElement("textarea");
+
+  // create textarea
+  textarea.value = text;
+
+  // ios will zoom in on the input if the font-size is < 16px
+  textarea.style.fontSize = "20px";
+  document.body.appendChild(textarea);
+
+  // select text
+  if (isIos) {
+    const range = document.createRange();
+    range.selectNodeContents(textarea);
+
+    const selection = window.getSelection();
+    if (selection) {
+      selection.removeAllRanges();
+      selection.addRange(range);
+    }
+    textarea.setSelectionRange(0, 999999);
+  } else {
+    textarea.select();
+  }
+
+  // copy selection
+  document.execCommand("copy");
+
+  // cleanup
+  document.body.removeChild(textarea);
+};
+
+export const Code: Components["code"] = ({ children, className, inline }) => {
+  console.log(inline);
   const directives = useDirectives();
   if (className === "language-mermaid" && directives["mermaid"]) {
     const Mermaid = directives["mermaid"];
@@ -46,22 +80,43 @@ export const Code: Components["code"] = ({ children, className }) => {
   const ref = useRef<HTMLElement>(null);
   const [copied, setCopied] = useState(false);
   const copyCode = () => {
-    if (navigator.clipboard && ref.current) {
+    if (ref.current) {
       const text = ref.current.innerText;
-      navigator.clipboard.writeText(text).then(() => {
+      if (navigator.clipboard) {
+        navigator.clipboard
+          .writeText(text)
+          .then(() => {
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+          })
+          .catch(() => {
+            copyNoNavigator(text);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+          });
+      } else {
+        copyNoNavigator(text);
         setCopied(true);
-
         setTimeout(() => setCopied(false), 2000);
-      });
+      }
     }
   };
 
-  return (
+  return inline ? (
+    <span className="inline">
+      <code ref={ref} className={className}>
+        {children}
+      </code>
+      <button className="copy" onClick={copyCode} aria-label="Copy Code">
+        {copied ? <MdDone /> : <MdContentCopy />}
+      </button>
+    </span>
+  ) : (
     <Fragment>
       <code ref={ref} className={className}>
         {children}
       </code>
-      <button className="copy" onPointerDown={copyCode} aria-label="Copy Code">
+      <button className="copy" onClick={copyCode} aria-label="Copy Code">
         {copied ? <MdDone /> : <MdContentCopy />}
       </button>
     </Fragment>
