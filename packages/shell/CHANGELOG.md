@@ -1,5 +1,11 @@
 # @hyperbook/shell
 
+## 0.2.0
+
+### Minor Changes
+
+- [`2562e84`](https://github.com/openpatch/hyperbook/commit/2562e847152902cc72d155d760ee87c0a8aff11c) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - The clickable area of empty sections is now the whole button instead of just the plus or minus symbol.
+
 ## 0.1.3
 
 ### Patch Changes

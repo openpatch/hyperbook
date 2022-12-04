@@ -1,5 +1,11 @@
 # @hyperbook/fs
 
+## 0.1.3
+
+### Patch Changes
+
+- [`40ec0fd`](https://github.com/openpatch/hyperbook/commit/40ec0fde2cbb2ef823bf11be2b2db365f8c37d9c) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Empty section index pages now correctly link to the first non-empty subpage.
+
 ## 0.1.2
 
 ### Patch Changes

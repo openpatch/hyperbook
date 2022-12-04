@@ -1,5 +1,11 @@
 # @hyperbook/markdown
 
+## 0.5.0
+
+### Minor Changes
+
+- [`60e8fb1`](https://github.com/openpatch/hyperbook/commit/60e8fb1a3a95d7797234a0ba4f64adba65b74792) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Improve code copying behaviour on iOS and improve styling for inline code snippets on every platform.
+
 ## 0.4.3
 
 ### Patch Changes
