@@ -38,7 +38,7 @@
     "build:types": "tsc --project tsconfig.build.json --declaration --emitDeclarationOnly"
   },
   "dependencies": {
-    "chalk": "5.1.2",
+    "chalk": "5.2.0",
     "find-up": "^6.3.0",
     "gray-matter": "4.0.3"
   },
