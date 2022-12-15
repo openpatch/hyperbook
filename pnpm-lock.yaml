@@ -552,7 +552,7 @@ importers:
       '@typescript-eslint/parser': 5.46.1
       buffer: 6.0.3
       copy-webpack-plugin: 11.0.0
-      css-loader: 6.7.2
+      css-loader: 6.7.3
       eslint: 8.29.0
       eslint-plugin-react-hooks: 4.6.0
       file-loader: 6.2.0
@@ -611,7 +611,7 @@ importers:
       '@typescript-eslint/parser': 5.46.1_ha6vam6werchizxrnqvarmz2zu
       buffer: 6.0.3
       copy-webpack-plugin: 11.0.0_webpack@5.75.0
-      css-loader: 6.7.2_webpack@5.75.0
+      css-loader: 6.7.3_webpack@5.75.0
       eslint: 8.29.0
       eslint-plugin-react-hooks: 4.6.0_eslint@8.29.0
       file-loader: 6.2.0_webpack@5.75.0
@@ -4310,8 +4310,8 @@ packages:
       randomfill: 1.0.4
     dev: true
 
-  /css-loader/6.7.2_webpack@5.75.0:
-    resolution: {integrity: sha512-oqGbbVcBJkm8QwmnNzrFrWTnudnRZC+1eXikLJl0n4ljcfotgRifpg2a1lKy8jTrc4/d9A/ap1GFq1jDKG7J+Q==}
+  /css-loader/6.7.3_webpack@5.75.0:
+    resolution: {integrity: sha512-qhOH1KlBMnZP8FzRO6YCH9UHXQhVMcEGLyNdb7Hv2cpcmJbW0YrddO+tG1ab5nT41KpHIYGsbeHqxB9xPu1pKQ==}
     engines: {node: '>= 12.13.0'}
     peerDependencies:
       webpack: ^5.0.0
