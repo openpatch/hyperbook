@@ -98,7 +98,12 @@ export type HyperbookJson = {
   basePath?: string;
   license?: string;
   language?: Language;
-  repo?: string;
+  repo?:
+    | string
+    | {
+        url: string;
+        label: string;
+      };
   links?: Link[];
   template?: string;
   elements?: {

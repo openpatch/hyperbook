@@ -186,7 +186,9 @@ export const Shell: FC<ShellProps> = ({ toc, navigation, children }) => {
           <div className="meta">
             {page?.repo && (
               <a className="edit-github" href={page.repo}>
-                ✎ GitHub
+                {typeof hyperbook.repo == "object" && hyperbook.repo.label
+                  ? hyperbook.repo.label
+                  : "✎ GitHub"}
               </a>
             )}
             {(hyperbook as any).vercel && (

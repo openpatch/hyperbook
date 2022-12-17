@@ -317,8 +317,18 @@ export const makeNavigationForHyperbook = async (
     for (const file of files) {
       let p = path.join(dirPath, file);
       let repo: string | null = null;
-      if (hyperbook.repo) {
-        repo = hyperbook.repo + "/" + path.relative(root, p);
+      if (typeof hyperbook.repo === "string") {
+        if (hyperbook.repo.includes("%path%")) {
+          repo = hyperbook.repo.replace("%path%", path.relative(root, p));
+        } else {
+          repo = hyperbook.repo + "/" + path.relative(root, p);
+        }
+      } else if (hyperbook.repo) {
+        if (hyperbook.repo.url.includes("%path%")) {
+          repo = hyperbook.repo.url.replace("%path%", path.relative(root, p));
+        } else {
+          repo = hyperbook.repo.url + "/" + path.relative(root, p);
+        }
       }
 
       const stat = await fs.stat(p);

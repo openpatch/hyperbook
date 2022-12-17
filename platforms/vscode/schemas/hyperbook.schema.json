@@ -183,7 +183,26 @@
             "type": "string"
         },
         "repo": {
-            "type": "string"
+            "anyOf": [
+                {
+                    "properties": {
+                        "label": {
+                            "type": "string"
+                        },
+                        "url": {
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "label",
+                        "url"
+                    ],
+                    "type": "object"
+                },
+                {
+                    "type": "string"
+                }
+            ]
         },
         "template": {
             "type": "string"

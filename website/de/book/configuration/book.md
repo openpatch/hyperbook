@@ -10,26 +10,28 @@ In deinem neuen Hyperbook-Projekt findest du eine `hyperbook.json` Datei. Diese
 Datei wird verwendet, um dein Hyperbook zu konfigurieren. Hier ist eine Liste
 von Optionen, die du definieren kannst. Optionen mit einem "\*" müssen gesetzt werden.
 
-| Property         | Description                                                                                                                                                  |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| name\*           | Name des Hyperbooks. Wird für den Seitentitel verwendet.                                                                                                     |
-| description      | Beschreibung des Hyperbooks. Wird für SEO verwendet.                                                                                                         |
-| logo             | URL eines Logos. Wird für den Seitentitel verwendet. Diese kann relative zum public-Ordner (z.B.: /mein-logo.png) sein oder ein externes Bild referenzieren. |
-| author.name      | Name des Autors des Hyperbooks. Wird in der Fußzeile verwendet.                                                                                              |
-| author.url       | URL zur Homepage des Autors. Wird in der Fußzeile verwendet.                                                                                                 |
-| font             | URL zu einer Schriftart. Wird für Überschriften und normalen Text verwendet.                                                                                 |
-| fonts.heading    | URL zu einer Schriftart. Wird für Überschriften verwendet.                                                                                                   |
-| fonts.body       | URL zu einer Schriftart. Wird für normalen Text verwendet.                                                                                                   |
-| fonts.code       | URL zu einer Schriftart. Wird für Quelltexte verwendet.                                                                                                      |
-| colors.brand     | Die Farbe der Kopfzeile und von Akzenten z.B. von Links.                                                                                                     |
-| colors.brandDark | Die Farbe der Akzente z.B. von Links. Nur relevant für das dunkle Design. Brand text wird im dunklen Design nicht verwendet.                                 |
-| colors.brandText | Die Farbe für den Text in der Kopfzeile.                                                                                                                     |
-| basePath         | Wenn das Hyperbook aus einem Unterordner bereitgestellt werden soll, muss dieser hier angegeben werden.                                                      |
-| license          | Lizenz unter der das Hyperbook veröffentlicht ist.                                                                                                           |
-| language         | Die Sprach des Hyperbooks.                                                                                                                                   |
-| repo             | Der Link zum Repository. Wird für das Zeigen eines Edit-Buttons verwendet.                                                                                   |
-| elements         | Hier können einzelne Elemente konfiguriert werden. Schaue dazu auf die Elementseiten.                                                                        |
-| links            | Hier können Links hinzugefügt werden, welche in der rechten oberen Ecke angezeigt werden. Schaue dir dazu das untere Beispiel an.                            |
+| Property         | Description                                                                                                                                                                                     |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| name\*           | Name des Hyperbooks. Wird für den Seitentitel verwendet.                                                                                                                                        |
+| description      | Beschreibung des Hyperbooks. Wird für SEO verwendet.                                                                                                                                            |
+| logo             | URL eines Logos. Wird für den Seitentitel verwendet. Diese kann relative zum public-Ordner (z.B.: /mein-logo.png) sein oder ein externes Bild referenzieren.                                    |
+| author.name      | Name des Autors des Hyperbooks. Wird in der Fußzeile verwendet.                                                                                                                                 |
+| author.url       | URL zur Homepage des Autors. Wird in der Fußzeile verwendet.                                                                                                                                    |
+| font             | URL zu einer Schriftart. Wird für Überschriften und normalen Text verwendet.                                                                                                                    |
+| fonts.heading    | URL zu einer Schriftart. Wird für Überschriften verwendet.                                                                                                                                      |
+| fonts.body       | URL zu einer Schriftart. Wird für normalen Text verwendet.                                                                                                                                      |
+| fonts.code       | URL zu einer Schriftart. Wird für Quelltexte verwendet.                                                                                                                                         |
+| colors.brand     | Die Farbe der Kopfzeile und von Akzenten z.B. von Links.                                                                                                                                        |
+| colors.brandDark | Die Farbe der Akzente z.B. von Links. Nur relevant für das dunkle Design. Brand text wird im dunklen Design nicht verwendet.                                                                    |
+| colors.brandText | Die Farbe für den Text in der Kopfzeile.                                                                                                                                                        |
+| basePath         | Wenn das Hyperbook aus einem Unterordner bereitgestellt werden soll, muss dieser hier angegeben werden.                                                                                         |
+| license          | Lizenz unter der das Hyperbook veröffentlicht ist.                                                                                                                                              |
+| language         | Die Sprach des Hyperbooks.                                                                                                                                                                      |
+| repo             | Der Link zum GitHub-Repository. Wird für das Zeigen eines Edit-Buttons verwendet. Der Platzhalter %path% wird durch den aktuellen Pfad ersetzt oder der aktuelle Pfad wird ans Ende angehangen. |
+| repo.url         | Der Link zum Repository. Wird für das Zeigen eines Edit-Buttons verwendet. Der Platzhalter %path% wird durch den aktuellen Pfad ersetzt oder der aktuelle Pfad wird ans Ende angehangen.        |
+| repo.label       | Der Bezeichner für den Repository-Link.                                                                                                                                                         |
+| elements         | Hier können einzelne Elemente konfiguriert werden. Schaue dazu auf die Elementseiten.                                                                                                           |
+| links            | Hier können Links hinzugefügt werden, welche in der rechten oberen Ecke angezeigt werden. Schaue dir dazu das untere Beispiel an.                                                               |
 
 Hier ist eine Beispielkonfiguration:
 
