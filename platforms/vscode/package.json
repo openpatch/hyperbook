@@ -42,6 +42,11 @@
           "type": "boolean",
           "default": false,
           "description": "Show 'Preview to Side' option in Menu bar; if false then in Status bar"
+        },
+        "hyperbook.root": {
+          "type": "string",
+          "default": "",
+          "description": "The root folder of your hyperbook project. You need to set this, if your hyperbook is located in a subfolder of your workspace folder."
         }
       }
     },

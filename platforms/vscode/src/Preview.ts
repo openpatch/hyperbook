@@ -70,7 +70,10 @@ export default class Preview {
           } as const)
       );
       if (vscode.workspace.rootPath && config.name !== "@Hyperbook@") {
-        const project = await readProject(vscode.workspace.rootPath);
+        const projectPath = this.hyperbookViewerConfig.get("root");
+        const project = await readProject(
+          path.join(vscode.workspace.rootPath, projectPath)
+        );
         const links = [];
         if (config.links) {
           links.push(...config.links);
@@ -81,7 +84,6 @@ export default class Preview {
               useSrc: true,
               append: ["index.md"],
               protocol: "file:///",
-              relative: vscode.workspace.rootPath,
             },
           });
           links.push(link);
