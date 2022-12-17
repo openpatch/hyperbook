@@ -1,5 +1,11 @@
 # @hyperbook/vscode-extension
 
+## 0.6.0
+
+### Minor Changes
+
+- [`1b0b6e7`](https://github.com/openpatch/hyperbook/commit/1b0b6e702aacbb39ec8b03e39754f041fe6b35a3) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add option for setting a root path. This allows hyperbook projects to be in a subfolder of the main workspace.
+
 ## 0.5.13
 
 ### Patch Changes
