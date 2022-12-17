@@ -414,7 +414,7 @@ importers:
 
   packages/next-watch:
     specifiers:
-      '@hyperbook/types': workspace:^0.4.0
+      '@hyperbook/types': workspace:*
       chalk: 5.2.0
       chokidar: 3.5.3
       commander: 9.4.1
