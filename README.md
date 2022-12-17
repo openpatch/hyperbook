@@ -40,7 +40,7 @@ We are [happy to hear from you](mailto:contact@openpatch.org), if you need custo
 
 ---
 
-Hyperbook is maintained by [OpenPatch](https://openpatch.org), an organization for educational assessments and training. If you need help or create a Hyperbook [get in touch](mailto:contact@openpatch.org).
+Hyperbook is maintained by [OpenPatch](https://openpatch.org), an organization for educational assessments and training. If you need help or you created a Hyperbook [get in touch](mailto:contact@openpatch.org).
 
 ## Special Thanks
 
