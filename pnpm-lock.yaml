@@ -566,7 +566,7 @@ importers:
       react: 18.2.0
       react-dom: 18.2.0
       rimraf: 3.0.2
-      sass: 1.56.2
+      sass: 1.57.0
       sass-loader: 13.2.0
       style-loader: 3.3.1
       ts-loader: 9.4.2
@@ -621,8 +621,8 @@ importers:
       ovsx: 0.7.1
       prettier: 2.8.1
       rimraf: 3.0.2
-      sass: 1.56.2
-      sass-loader: 13.2.0_sass@1.56.2+webpack@5.75.0
+      sass: 1.57.0
+      sass-loader: 13.2.0_sass@1.57.0+webpack@5.75.0
       style-loader: 3.3.1_webpack@5.75.0
       ts-loader: 9.4.2_3fkjkrd3audxnith3e7fo4fnxi
       typescript: 4.9.4
@@ -9528,7 +9528,7 @@ packages:
   /safer-buffer/2.1.2:
     resolution: {integrity: sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg==}
 
-  /sass-loader/13.2.0_sass@1.56.2+webpack@5.75.0:
+  /sass-loader/13.2.0_sass@1.57.0+webpack@5.75.0:
     resolution: {integrity: sha512-JWEp48djQA4nbZxmgC02/Wh0eroSUutulROUusYJO9P9zltRbNN80JCBHqRGzjd4cmZCa/r88xgfkjGD0TXsHg==}
     engines: {node: '>= 14.15.0'}
     peerDependencies:
@@ -9549,12 +9549,12 @@ packages:
     dependencies:
       klona: 2.0.5
       neo-async: 2.6.2
-      sass: 1.56.2
+      sass: 1.57.0
       webpack: 5.75.0_webpack-cli@4.10.0
     dev: true
 
-  /sass/1.56.2:
-    resolution: {integrity: sha512-ciEJhnyCRwzlBCB+h5cCPM6ie/6f8HrhZMQOf5vlU60Y1bI1rx5Zb0vlDZvaycHsg/MqFfF1Eq2eokAa32iw8w==}
+  /sass/1.57.0:
+    resolution: {integrity: sha512-IZNEJDTK1cF5B1cGA593TPAV/1S0ysUDxq9XHjX/+SMy0QfUny+nfUsq5ZP7wWSl4eEf7wDJcEZ8ABYFmh3m/w==}
     engines: {node: '>=12.0.0'}
     hasBin: true
     dependencies:
