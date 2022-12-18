@@ -20,7 +20,7 @@
     "website:build": "cd website && HYPERBOOK_LOCAL_DEV=1 node ../packages/hyperbook/dist/index.js build"
   },
   "devDependencies": {
-    "@changesets/changelog-github": "0.4.7",
+    "@changesets/changelog-github": "0.4.8",
     "@changesets/cli": "2.25.2",
     "@types/node": "18.11.17",
     "chalk": "5.2.0",
