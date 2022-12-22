@@ -327,7 +327,7 @@ importers:
       '@hyperbook/fs': workspace:*
       '@hyperbook/types': workspace:*
       '@platforms/web': workspace:*
-      '@pnpm/exportable-manifest': 4.0.4
+      '@pnpm/exportable-manifest': 4.0.5
       '@types/archiver': 5.3.1
       '@types/async-retry': 1.4.5
       '@types/cross-spawn': 6.0.2
@@ -351,7 +351,7 @@ importers:
       '@hyperbook/types': link:../types
     devDependencies:
       '@platforms/web': link:../../platforms/web
-      '@pnpm/exportable-manifest': 4.0.4
+      '@pnpm/exportable-manifest': 4.0.5
       '@types/archiver': 5.3.1
       '@types/async-retry': 1.4.5
       '@types/cross-spawn': 6.0.2
@@ -2496,13 +2496,13 @@ packages:
       '@pnpm/constants': 6.1.0
     dev: true
 
-  /@pnpm/exportable-manifest/4.0.4:
-    resolution: {integrity: sha512-EOX6iio6MmxQnJMymf1DbMBZuGQMqrqOEIgsuctsgnS+X3abvjVmr2Mfj1NPMOfyD+ax/aqqRcqdAf+JfASG6w==}
+  /@pnpm/exportable-manifest/4.0.5:
+    resolution: {integrity: sha512-+VBf1uPYWHQDPkSeBddL3VgMDJieqxsFA6t+SIZsNQ//oEL66UGSJyR15US77ebUShPnMocrAClQaMD86bwcnw==}
     engines: {node: '>=14.6'}
     dependencies:
       '@pnpm/error': 4.0.0
-      '@pnpm/read-project-manifest': 4.1.1
-      '@pnpm/types': 8.9.0
+      '@pnpm/read-project-manifest': 4.1.2
+      '@pnpm/types': 8.10.0
       p-map-values: 1.0.0
       ramda: /@pnpm/ramda/0.28.1
     dev: true
@@ -2518,16 +2518,16 @@ packages:
     resolution: {integrity: sha512-zcAG+lvU0fMziNeGXpPyCyCJYp5ZVrPElEE4t14jAmViaihohocZ+dDkcRIyAomox8pQsuZnv1EyHR+pOhmUWw==}
     dev: true
 
-  /@pnpm/read-project-manifest/4.1.1:
-    resolution: {integrity: sha512-jGNoofG8kkUlgAMX8fqbUwRRXYf4WcWdvi/y1Sv1abUfcoVgXW6GdGVm0MIJ+enaong3hXHjaLl/AwmSj6O1Uw==}
+  /@pnpm/read-project-manifest/4.1.2:
+    resolution: {integrity: sha512-i4qdBKd0p6DoUiAvzhazo6KM8y1tHrpJwehaF3Fe9AHxHNfFpjrL32hLnbvUBrbksEe1oRVHIjT6+v4R58WpuA==}
     engines: {node: '>=14.6'}
     dependencies:
       '@gwhitney/detect-indent': 7.0.1
       '@pnpm/error': 4.0.0
       '@pnpm/graceful-fs': 2.0.0
       '@pnpm/text.comments-parser': 1.0.0
-      '@pnpm/types': 8.9.0
-      '@pnpm/write-project-manifest': 4.1.1
+      '@pnpm/types': 8.10.0
+      '@pnpm/write-project-manifest': 4.1.2
       fast-deep-equal: 3.1.3
       is-windows: 1.0.2
       json5: 2.2.1
@@ -2544,17 +2544,17 @@ packages:
       strip-comments-strings: 1.2.0
     dev: true
 
-  /@pnpm/types/8.9.0:
-    resolution: {integrity: sha512-3MYHYm8epnciApn6w5Fzx6sepawmsNU7l6lvIq+ER22/DPSrr83YMhU/EQWnf4lORn2YyiXFj0FJSyJzEtIGmw==}
+  /@pnpm/types/8.10.0:
+    resolution: {integrity: sha512-A4pcNNvFJdkMXArEjTCOIYNL2VxD4uBynWZ6cBIELXb5qJ0tUzwKsaSz4J953I0rQFqnsFpUYqaWIquI10W1sw==}
     engines: {node: '>=14.6'}
     dev: true
 
-  /@pnpm/write-project-manifest/4.1.1:
-    resolution: {integrity: sha512-nRqvPYO8xUVdgy/KhJuaCrWlVT/4uZr97Mpbuizsa6CmvtCQf3NuYnVvOOrpYiKUJcZYtEvm84OooJ8+lJytMQ==}
+  /@pnpm/write-project-manifest/4.1.2:
+    resolution: {integrity: sha512-/C0j7SsE9tGoj++f0dwePIV7zNZHcX8TcYL6pXNvZZCq4HsOMCBsIlcU9oMI/AGe+KMDfHFQSayWPO9QUuGE5w==}
     engines: {node: '>=14.6'}
     dependencies:
       '@pnpm/text.comments-parser': 1.0.0
-      '@pnpm/types': 8.9.0
+      '@pnpm/types': 8.10.0
       json5: 2.2.1
       write-file-atomic: 5.0.0
       write-yaml-file: 4.2.0
