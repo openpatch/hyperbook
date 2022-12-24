@@ -50,14 +50,14 @@ importers:
     specifiers:
       '@hyperbook/provider': workspace:*
       '@types/react': 18.0.26
-      '@types/react-dom': 18.0.9
+      '@types/react-dom': 18.0.10
       react: 18.2.0
       react-dom: 18.2.0
     dependencies:
       '@hyperbook/provider': link:../provider
     devDependencies:
       '@types/react': 18.0.26
-      '@types/react-dom': 18.0.9
+      '@types/react-dom': 18.0.10
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
 
@@ -77,7 +77,7 @@ importers:
       '@hyperbook/store': workspace:*
       '@openpatch/patches': 6.0.1
       '@types/react': 18.0.26
-      '@types/react-dom': 18.0.9
+      '@types/react-dom': 18.0.10
       '@vocab/core': 1.1.1
       '@vocab/react': 1.1.2
       '@vocab/types': 1.1.0
@@ -106,7 +106,7 @@ importers:
       zod: 3.20.2
     devDependencies:
       '@types/react': 18.0.26
-      '@types/react-dom': 18.0.9
+      '@types/react-dom': 18.0.10
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
 
@@ -114,14 +114,14 @@ importers:
     specifiers:
       '@hyperbook/provider': workspace:*
       '@types/react': 18.0.26
-      '@types/react-dom': 18.0.9
+      '@types/react-dom': 18.0.10
       react: 18.2.0
       react-dom: 18.2.0
     dependencies:
       '@hyperbook/provider': link:../provider
     devDependencies:
       '@types/react': 18.0.26
-      '@types/react-dom': 18.0.9
+      '@types/react-dom': 18.0.10
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
 
@@ -131,7 +131,7 @@ importers:
       '@hyperbook/store': workspace:*
       '@types/object-hash': 2.2.1
       '@types/react': 18.0.26
-      '@types/react-dom': 18.0.9
+      '@types/react-dom': 18.0.10
       object-hash: 3.0.0
       react: 18.2.0
       react-collapsed: ^3.4.0
@@ -144,7 +144,7 @@ importers:
     devDependencies:
       '@types/object-hash': 2.2.1
       '@types/react': 18.0.26
-      '@types/react-dom': 18.0.9
+      '@types/react-dom': 18.0.10
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
 
@@ -152,14 +152,14 @@ importers:
     specifiers:
       '@hyperbook/provider': workspace:*
       '@types/react': 18.0.26
-      '@types/react-dom': 18.0.9
+      '@types/react-dom': 18.0.10
       react: 18.2.0
       react-dom: 18.2.0
     dependencies:
       '@hyperbook/provider': link:../provider
     devDependencies:
       '@types/react': 18.0.26
-      '@types/react-dom': 18.0.9
+      '@types/react-dom': 18.0.10
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
 
@@ -168,7 +168,7 @@ importers:
       '@excalidraw/excalidraw': 0.13.0
       '@hyperbook/provider': workspace:*
       '@types/react': 18.0.26
-      '@types/react-dom': 18.0.9
+      '@types/react-dom': 18.0.10
       react: 18.2.0
       react-dom: 18.2.0
     dependencies:
@@ -176,7 +176,7 @@ importers:
       '@hyperbook/provider': link:../provider
     devDependencies:
       '@types/react': 18.0.26
-      '@types/react-dom': 18.0.9
+      '@types/react-dom': 18.0.10
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
 
@@ -185,7 +185,7 @@ importers:
       '@hyperbook/provider': workspace:*
       '@types/mermaid': 9.1.0
       '@types/react': 18.0.26
-      '@types/react-dom': 18.0.9
+      '@types/react-dom': 18.0.10
       mermaid: 9.3.0
       react: 18.2.0
       react-dom: 18.2.0
@@ -195,7 +195,7 @@ importers:
     devDependencies:
       '@types/mermaid': 9.1.0
       '@types/react': 18.0.26
-      '@types/react-dom': 18.0.9
+      '@types/react-dom': 18.0.10
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
 
@@ -205,7 +205,7 @@ importers:
       '@hyperbook/store': workspace:*
       '@types/object-hash': 2.2.1
       '@types/react': 18.0.26
-      '@types/react-dom': 18.0.9
+      '@types/react-dom': 18.0.10
       object-hash: 3.0.0
       react: 18.2.0
       react-dom: 18.2.0
@@ -216,7 +216,7 @@ importers:
     devDependencies:
       '@types/object-hash': 2.2.1
       '@types/react': 18.0.26
-      '@types/react-dom': 18.0.9
+      '@types/react-dom': 18.0.10
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
 
@@ -224,7 +224,7 @@ importers:
     specifiers:
       '@hyperbook/provider': workspace:*
       '@types/react': 18.0.26
-      '@types/react-dom': 18.0.9
+      '@types/react-dom': 18.0.10
       qrcode.react: 3.1.0
       react: 18.2.0
       react-dom: 18.2.0
@@ -233,7 +233,7 @@ importers:
       qrcode.react: 3.1.0_react@18.2.0
     devDependencies:
       '@types/react': 18.0.26
-      '@types/react-dom': 18.0.9
+      '@types/react-dom': 18.0.10
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
 
@@ -242,7 +242,7 @@ importers:
       '@hyperbook/provider': workspace:*
       '@types/pako': 2.0.0
       '@types/react': 18.0.26
-      '@types/react-dom': 18.0.9
+      '@types/react-dom': 18.0.10
       js-base64: 3.7.3
       pako: 2.1.0
       react: 18.2.0
@@ -254,7 +254,7 @@ importers:
     devDependencies:
       '@types/pako': 2.0.0
       '@types/react': 18.0.26
-      '@types/react-dom': 18.0.9
+      '@types/react-dom': 18.0.10
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
 
@@ -264,7 +264,7 @@ importers:
       '@hyperbook/store': workspace:*
       '@types/object-hash': 2.2.1
       '@types/react': 18.0.26
-      '@types/react-dom': 18.0.9
+      '@types/react-dom': 18.0.10
       object-hash: 3.0.0
       react: 18.2.0
       react-dom: 18.2.0
@@ -275,7 +275,7 @@ importers:
     devDependencies:
       '@types/object-hash': 2.2.1
       '@types/react': 18.0.26
-      '@types/react-dom': 18.0.9
+      '@types/react-dom': 18.0.10
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
 
@@ -283,14 +283,14 @@ importers:
     specifiers:
       '@hyperbook/provider': workspace:*
       '@types/react': 18.0.26
-      '@types/react-dom': 18.0.9
+      '@types/react-dom': 18.0.10
       react: 18.2.0
       react-dom: 18.2.0
     dependencies:
       '@hyperbook/provider': link:../provider
     devDependencies:
       '@types/react': 18.0.26
-      '@types/react-dom': 18.0.9
+      '@types/react-dom': 18.0.10
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
 
@@ -298,14 +298,14 @@ importers:
     specifiers:
       '@hyperbook/provider': workspace:*
       '@types/react': 18.0.26
-      '@types/react-dom': 18.0.9
+      '@types/react-dom': 18.0.10
       react: 18.2.0
       react-dom: 18.2.0
     dependencies:
       '@hyperbook/provider': link:../provider
     devDependencies:
       '@types/react': 18.0.26
-      '@types/react-dom': 18.0.9
+      '@types/react-dom': 18.0.10
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
 
@@ -376,7 +376,7 @@ importers:
       '@hyperbook/provider': workspace:*
       '@types/hast': 2.3.4
       '@types/react': 18.0.26
-      '@types/react-dom': 18.0.9
+      '@types/react-dom': 18.0.10
       '@types/unist': 2.0.6
       react: 18.2.0
       react-dom: 18.2.0
@@ -407,7 +407,7 @@ importers:
     devDependencies:
       '@types/hast': 2.3.4
       '@types/react': 18.0.26
-      '@types/react-dom': 18.0.9
+      '@types/react-dom': 18.0.10
       '@types/unist': 2.0.6
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
@@ -440,7 +440,7 @@ importers:
       '@hyperbook/store': workspace:*
       '@hyperbook/types': workspace:*
       '@types/react': 18.0.26
-      '@types/react-dom': 18.0.9
+      '@types/react-dom': 18.0.10
       react: 18.2.0
       react-dom: 18.2.0
       redux: 4.2.0
@@ -450,7 +450,7 @@ importers:
       redux: 4.2.0
     devDependencies:
       '@types/react': 18.0.26
-      '@types/react-dom': 18.0.9
+      '@types/react-dom': 18.0.10
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
 
@@ -460,7 +460,7 @@ importers:
       '@hyperbook/types': workspace:*
       '@szhsin/react-menu': 3.3.1
       '@types/react': 18.0.26
-      '@types/react-dom': 18.0.9
+      '@types/react-dom': 18.0.10
       classnames: 2.3.2
       react: 18.2.0
       react-collapsed: ^3.4.0
@@ -473,7 +473,7 @@ importers:
     devDependencies:
       '@hyperbook/types': link:../types
       '@types/react': 18.0.26
-      '@types/react-dom': 18.0.9
+      '@types/react-dom': 18.0.10
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
 
@@ -494,26 +494,26 @@ importers:
     specifiers:
       '@hyperbook/provider': workspace:*
       '@types/react': 18.0.26
-      '@types/react-dom': 18.0.9
+      '@types/react-dom': 18.0.10
       react: 18.2.0
       react-dom: 18.2.0
     dependencies:
       '@hyperbook/provider': link:../provider
     devDependencies:
       '@types/react': 18.0.26
-      '@types/react-dom': 18.0.9
+      '@types/react-dom': 18.0.10
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
 
   packages/toc:
     specifiers:
       '@types/react': 18.0.26
-      '@types/react-dom': 18.0.9
+      '@types/react-dom': 18.0.10
       react: 18.2.0
       react-dom: 18.2.0
     devDependencies:
       '@types/react': 18.0.26
-      '@types/react-dom': 18.0.9
+      '@types/react-dom': 18.0.10
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
 
@@ -546,7 +546,7 @@ importers:
       '@types/glob': 8.0.0
       '@types/node': 18.11.17
       '@types/react': 18.0.26
-      '@types/react-dom': 18.0.9
+      '@types/react-dom': 18.0.10
       '@types/vscode': 1.71.0
       '@typescript-eslint/eslint-plugin': 5.47.0
       '@typescript-eslint/parser': 5.47.0
@@ -605,7 +605,7 @@ importers:
       '@types/glob': 8.0.0
       '@types/node': 18.11.17
       '@types/react': 18.0.26
-      '@types/react-dom': 18.0.9
+      '@types/react-dom': 18.0.10
       '@types/vscode': 1.71.0
       '@typescript-eslint/eslint-plugin': 5.47.0_ncmi6noazr3nzas7jxykisekym
       '@typescript-eslint/parser': 5.47.0_lzzuuodtsqwxnvqeq4g4likcqa
@@ -2879,8 +2879,8 @@ packages:
   /@types/prop-types/15.7.5:
     resolution: {integrity: sha512-JCB8C6SnDoQf0cNycqd/35A7MjcnK+ZTqE7judS6o7utxUCg6imJg3QK2qzHKszlTjcj2cn+NwMB2i96ubpj7w==}
 
-  /@types/react-dom/18.0.9:
-    resolution: {integrity: sha512-qnVvHxASt/H7i+XG1U1xMiY5t+IHcPGUK7TDMDzom08xa7e86eCeKOiLZezwCKVxJn6NEiiy2ekgX8aQssjIKg==}
+  /@types/react-dom/18.0.10:
+    resolution: {integrity: sha512-E42GW/JA4Qv15wQdqJq8DL4JhNpB3prJgjgapN3qJT9K2zO5IIAQh4VXvCEDupoqAwnz0cY4RlXeC/ajX5SFHg==}
     dependencies:
       '@types/react': 18.0.26
     dev: true
