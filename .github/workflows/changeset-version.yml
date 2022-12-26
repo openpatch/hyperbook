@@ -27,7 +27,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install
       - name: Build packages
-        run: pnpm build
+        run: |
+          pnpm build
+      - name: Build vscode package
+        run: |
+          pnpm --filter "hyperbook-studio" vscode:package
 
       - name: Create Release Pull Request or Publish to npm
         id: changesets
@@ -43,6 +47,7 @@ jobs:
         if: steps.changesets.outputs.published == 'true'
         run: |
           pnpm --filter "hyperbook-studio" vscode:publish
+          pnpm --filter "hyperbook-studio" ovsx:publish
         env:
           VSCE_PAT: ${{ secrets.VSCE_TOKEN }}
           OVSX_PAT: ${{ secrets.OVSX_TOKEN }}

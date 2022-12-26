@@ -133,7 +133,8 @@
   "scripts": {
     "vscode:prepublish": "pnpm compile",
     "vscode:package": "vsce package",
-    "vscode:publish": "vsce publish && ovsx publish",
+    "vscode:publish": "vsce publish --packagePath $(find . -iname *.vsix)",
+    "ovsx:publish": "ovsx publish $(find . -iname *.vsix)",
     "build": "npm-run-all compile:*",
     "compile": "npm-run-all compile:*",
     "compile:extension": "webpack  --config ./webpack.extension.config.js --mode production",
