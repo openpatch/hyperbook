@@ -11,7 +11,7 @@
   },
   "homepage": "https://hyperbook.openpatch.org",
   "main": "./out/extension.js",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "engines": {
     "vscode": "^1.71.0"
   },
@@ -147,7 +147,7 @@
     "lint": "eslint src --ext ts"
   },
   "devDependencies": {
-    "@hyperbook/types": "workspace:^0.4.0",
+    "@hyperbook/types": "workspace:*",
     "@types/glob": "8.0.0",
     "@types/node": "18.11.17",
     "@types/react": "18.0.26",

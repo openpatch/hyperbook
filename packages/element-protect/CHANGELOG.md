@@ -1,5 +1,12 @@
 # @hyperbook/element-protect
 
+## 0.2.4
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @hyperbook/provider@0.2.1
+
 ## 0.2.3
 
 ### Patch Changes
