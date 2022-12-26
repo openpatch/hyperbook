@@ -1,5 +1,29 @@
 # hyperbook-simple-template
 
+## 0.9.3
+
+### Patch Changes
+
+- Updated dependencies [[`104f2de`](https://github.com/openpatch/hyperbook/commit/104f2de6fa054ecadaf19811c5f8c3c560ca5a64)]:
+  - @hyperbook/fs@0.2.0
+  - @hyperbook/shell@0.3.0
+  - @hyperbook/provider@0.2.1
+  - @hyperbook/element-alert@0.1.9
+  - @hyperbook/element-bitflow@0.1.10
+  - @hyperbook/element-bookmarks@0.2.4
+  - @hyperbook/element-collapsible@0.2.5
+  - @hyperbook/element-dl@0.1.9
+  - @hyperbook/element-excalidraw@0.3.1
+  - @hyperbook/element-mermaid@0.1.9
+  - @hyperbook/element-protect@0.2.4
+  - @hyperbook/element-qr@0.1.10
+  - @hyperbook/element-struktog@0.1.9
+  - @hyperbook/element-tabs@0.1.10
+  - @hyperbook/element-term@0.1.9
+  - @hyperbook/element-youtube@0.1.9
+  - @hyperbook/markdown@0.5.1
+  - @hyperbook/styles@0.1.9
+
 ## 0.9.2
 
 ### Patch Changes

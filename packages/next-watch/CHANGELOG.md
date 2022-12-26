@@ -1,5 +1,14 @@
 # @hyperbook/next-watch
 
+## 0.1.2
+
+### Patch Changes
+
+- [`50e5fc2`](https://github.com/openpatch/hyperbook/commit/50e5fc2ab3730bbded82b4b954dc2667724cb1ec) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - use workspace dependency
+
+- Updated dependencies [[`104f2de`](https://github.com/openpatch/hyperbook/commit/104f2de6fa054ecadaf19811c5f8c3c560ca5a64)]:
+  - @hyperbook/types@0.5.0
+
 ## 0.1.1
 
 ### Patch Changes
