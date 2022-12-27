@@ -22,7 +22,7 @@
   "devDependencies": {
     "@changesets/changelog-github": "0.4.8",
     "@changesets/cli": "2.26.0",
-    "@types/node": "18.11.17",
+    "@types/node": "18.11.18",
     "chalk": "5.2.0",
     "chokidar": "3.5.3",
     "cross-env": "7.0.3",
