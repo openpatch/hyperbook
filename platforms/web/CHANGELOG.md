@@ -1,5 +1,22 @@
 # hyperbook-simple-template
 
+## 0.10.0
+
+### Minor Changes
+
+- [`9298af0`](https://github.com/openpatch/hyperbook/commit/9298af040b16836c632e234f6ccbb61d67e1246d) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add the snippet element. Snippets are helpful for making the handling of repeated blocks easiert. For example you can define a protect-block, which uses the same password across your hyperbook in a snippet. If you want to change the password, you can just change it in the snippet. See the documentation for snippets to get a more in detail view on snippets.
+
+- [`ac262ca`](https://github.com/openpatch/hyperbook/commit/ac262ca4a60b313dafbce33e5c0d753fd504f012) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Upgrade to NextJS 13
+
+### Patch Changes
+
+- Updated dependencies [[`ac262ca`](https://github.com/openpatch/hyperbook/commit/ac262ca4a60b313dafbce33e5c0d753fd504f012), [`9298af0`](https://github.com/openpatch/hyperbook/commit/9298af040b16836c632e234f6ccbb61d67e1246d), [`9298af0`](https://github.com/openpatch/hyperbook/commit/9298af040b16836c632e234f6ccbb61d67e1246d), [`ac262ca`](https://github.com/openpatch/hyperbook/commit/ac262ca4a60b313dafbce33e5c0d753fd504f012)]:
+  - @hyperbook/markdown@0.5.2
+  - @hyperbook/element-protect@0.3.0
+  - @hyperbook/fs@0.3.0
+  - @hyperbook/element-collapsible@0.3.0
+  - @hyperbook/shell@0.4.0
+
 ## 0.9.3
 
 ### Patch Changes

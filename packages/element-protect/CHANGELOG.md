@@ -1,5 +1,15 @@
 # @hyperbook/element-protect
 
+## 0.3.0
+
+### Minor Changes
+
+- [`9298af0`](https://github.com/openpatch/hyperbook/commit/9298af040b16836c632e234f6ccbb61d67e1246d) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Allow a protect block to be synced to other protect blocks by using the same id.
+
+### Patch Changes
+
+- [`9298af0`](https://github.com/openpatch/hyperbook/commit/9298af040b16836c632e234f6ccbb61d67e1246d) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add the snippet element. Snippets are helpful for making the handling of repeated blocks easiert. For example you can define a protect-block, which uses the same password across your hyperbook in a snippet. If you want to change the password, you can just change it in the snippet. See the documentation for snippets to get a more in detail view on snippets.
+
 ## 0.2.4
 
 ### Patch Changes

@@ -1,5 +1,16 @@
 # hyperbook
 
+## 0.10.0
+
+### Minor Changes
+
+- [`6f24702`](https://github.com/openpatch/hyperbook/commit/6f24702ccf63ee7c6d16d71f81ed9f86e82b00af) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add support for snippets to the hyperbook cli.
+
+### Patch Changes
+
+- Updated dependencies [[`9298af0`](https://github.com/openpatch/hyperbook/commit/9298af040b16836c632e234f6ccbb61d67e1246d)]:
+  - @hyperbook/fs@0.3.0
+
 ## 0.9.3
 
 ### Patch Changes
