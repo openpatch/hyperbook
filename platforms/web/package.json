@@ -18,6 +18,7 @@
     "@hyperbook/element-mermaid": "workspace:*",
     "@hyperbook/element-protect": "workspace:*",
     "@hyperbook/element-qr": "workspace:*",
+    "@hyperbook/element-scratchblock": "workspace:*",
     "@hyperbook/element-struktog": "workspace:*",
     "@hyperbook/element-tabs": "workspace:*",
     "@hyperbook/element-term": "workspace:*",
@@ -40,6 +41,7 @@
   "devDependencies": {
     "@hyperbook/next-watch": "workspace:*",
     "@hyperbook/types": "workspace:*",
+    "@next/bundle-analyzer": "^13.1.1",
     "@types/node": "18.11.18",
     "@types/react": "18.0.26",
     "chalk": "5.2.0",

@@ -7,6 +7,7 @@ import elementTerm from "@hyperbook/element-term";
 import elementYoutube from "@hyperbook/element-youtube";
 import elementProtect from "@hyperbook/element-protect";
 import elementCollapsible from "@hyperbook/element-collapsible";
+import elementScratchblock from "@hyperbook/element-scratchblock";
 import elementDl from "@hyperbook/element-dl";
 import elementBookmarks from "@hyperbook/element-bookmarks";
 import elementStruktog from "@hyperbook/element-struktog";
@@ -132,6 +133,7 @@ export const App = () => {
           elementStruktog,
           elementQr,
           elementMermaid,
+          elementScratchblock,
           elementExcalidraw,
         ]}
         loadFile={() => async (path) => {

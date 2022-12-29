@@ -29,6 +29,8 @@ import elementExcalidraw from "@hyperbook/element-excalidraw";
 import "@hyperbook/element-excalidraw/index.css";
 import elementBitflow from "@hyperbook/element-bitflow";
 import "@hyperbook/element-bitflow/index.css";
+import elementScratchblock from "@hyperbook/element-scratchblock";
+import "@hyperbook/element-scratchblock/index.css";
 import Link from "next/link";
 import Head from "next/head";
 import { Styles } from "@hyperbook/styles";
@@ -90,6 +92,7 @@ export default function MyApp({ Component, pageProps }) {
         elementQr,
         elementMermaid,
         elementExcalidraw,
+        elementScratchblock,
         elementBitflow,
       ]}
       router={router}
