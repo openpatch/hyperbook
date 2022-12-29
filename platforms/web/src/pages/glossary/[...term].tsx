@@ -12,6 +12,7 @@ import {
   makeNavigationForHyperbook,
   readHyperbook,
   listPagesForTerm,
+  resolveSnippets,
 } from "@hyperbook/fs";
 import { useScrollHash } from "../../useScrollHash";
 
@@ -58,6 +59,7 @@ export const getStaticProps: GetStaticProps<
   const filePath = path.join(root, "glossary", ...params.term);
   const href = "/glossary/" + path.join(...params.term);
   const { content, data } = await readFile(filePath);
+  const contentWithSnippets = await resolveSnippets(root, content);
 
   const navigation = await makeNavigationForHyperbook(root, href);
   const hyperbook = await readHyperbook(root);
@@ -76,8 +78,8 @@ export const getStaticProps: GetStaticProps<
     props: {
       locale: data?.lang || hyperbook.language,
       term,
-      markdown: content,
-      toc: parseTocFromMarkdown(content),
+      markdown: contentWithSnippets,
+      toc: parseTocFromMarkdown(contentWithSnippets),
       navigation,
       hyperbook,
     },

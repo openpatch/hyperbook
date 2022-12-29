@@ -1,4 +1,4 @@
-import { FC, Fragment, ReactNode, useEffect, useState } from "react";
+import { FC, ReactNode, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { createSlice, PayloadAction } from "@hyperbook/store";
 import hash from "object-hash";
@@ -9,6 +9,7 @@ type DirectiveProtectProps = {
   children?: ReactNode;
   password: string;
   description?: string;
+  id?: string;
   node: any;
 };
 
@@ -16,17 +17,22 @@ const DirectiveProtect: FC<DirectiveProtectProps> = ({
   children,
   description,
   node,
+  id,
   password,
 }) => {
   const [activePageId] = useActivePageId();
   const dispatch = useDispatch();
   const env = useEnv();
-  const id = `${activePageId}.${hash(node)}`;
-  const value = useSelector(selectValue(id));
+  let pId: string = `${activePageId}.${hash(node)}`;
+  if (id) {
+    pId = id;
+  }
+
+  const value = useSelector(selectValue(pId));
   const [reveal, setReveal] = useState(false);
 
   const setValue = (value: string) => {
-    dispatch(sliceProtect.actions.set({ id, value }));
+    dispatch(sliceProtect.actions.set({ id: pId, value }));
   };
 
   useEffect(() => {

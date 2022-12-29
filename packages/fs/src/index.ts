@@ -2,6 +2,7 @@ import fs from "fs/promises";
 import path from "path";
 import matter from "gray-matter";
 import chalk from "chalk";
+import handlebars from "handlebars";
 import {
   HyperbookFrontmatter,
   HyperbookJson,
@@ -127,6 +128,55 @@ export const readFile = async (file: string) => {
   const { content, data } = matter(source);
 
   return { content, data: data as HyperbookFrontmatter };
+};
+
+export const resolveSnippets = async (root: string, content: string) => {
+  const reg =
+    /((:+)snippet{#(?<snippet>[a-zA-Z0-9-]+)(?<vars>( +(?<var>[a-zA-Z]+)=(?<value>\d+|false|true|".*"))*) *})/g;
+  const varReg = /(?<var>[a-zA-Z]+)=(?<value>\d+|false|true|".*")/;
+  const snippets = [...content.matchAll(reg)];
+
+  for (const snippet of snippets) {
+    const dots = snippet[2];
+    const snippetId = snippet[3];
+    const snippetFile = await fs.readFile(
+      path.join(root, "snippets", snippetId + ".md.hbs"),
+      { encoding: "utf8" }
+    );
+    const template = handlebars.compile(snippetFile);
+    handlebars.registerHelper("times", (n, block) => {
+      let accum = "";
+      for (let i = 0; i < n; ++i) accum += block.fn(i);
+      return accum;
+    });
+    const vars = {};
+    for (const m of snippet[4].split(" ")) {
+      const r = varReg.exec(m);
+      if (r) {
+        if (r[2].startsWith('"') && r[2].endsWith('"')) {
+          vars[r[1]] = r[2].slice(1, -1);
+        } else if (r[2] === "false") {
+          vars[r[1]] = false;
+        } else if (r[2] === "true") {
+          vars[r[1]] = true;
+        } else {
+          vars[r[1]] = Number(r[2]);
+        }
+      }
+    }
+    if (dots.length > 1) {
+      const r = `${snippet[0]}([\\s\\S]*?)${dots}`;
+      const m = content.match(new RegExp(r, "m"));
+      if (m) {
+        vars["content"] = m[1];
+        content = content.replace(m[0], template(vars));
+      }
+    } else {
+      content = content.replace(snippet[0], template(vars));
+    }
+  }
+
+  return content;
 };
 
 export const readHyperbook = async (root: string) => {

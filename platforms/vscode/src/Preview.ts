@@ -7,6 +7,7 @@ import {
   makeLinkForHyperproject,
   makeNavigationForHyperbook,
   readProject,
+  resolveSnippets,
 } from "@hyperbook/fs";
 import { htmlTemplate } from "./html-template";
 import { disposeAll } from "./utils/dispose";
@@ -119,6 +120,7 @@ export default class Preview {
       );
       const toc = parseTocFromMarkdown(content);
       const root = await findHyperbookRoot(this._resource.fsPath);
+      const contentWithSnippets = await resolveSnippets(root, content);
       let currPath = path.relative(
         path.join(root, "book"),
         this._resource.fsPath
@@ -135,7 +137,7 @@ export default class Preview {
 
       const navigation = await makeNavigationForHyperbook(root, currPath);
       const state = {
-        content,
+        content: contentWithSnippets,
         data,
         source: this._resource.toString(),
         toc,

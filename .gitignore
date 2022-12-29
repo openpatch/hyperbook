@@ -4,6 +4,7 @@ platforms/web/book
 platforms/web/hyperbook.json
 platforms/web/public
 platforms/web/archives
+platforms/web/snippets
 
 *.zip
 

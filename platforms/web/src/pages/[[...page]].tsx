@@ -10,6 +10,7 @@ import {
   readBook,
   readFile,
   readHyperbook,
+  resolveSnippets,
 } from "@hyperbook/fs";
 import { useScrollHash } from "../useScrollHash";
 
@@ -66,14 +67,15 @@ export const getStaticProps: GetStaticProps<
     href = "/" + path.join(...params.page);
   }
   const { content, data } = await readFile(filePath);
+  const contentWithSnippets = await resolveSnippets(root, content);
 
   const hyperbook = await readHyperbook(root);
   const navigation = await makeNavigationForHyperbook(root, href);
   return {
     props: {
       locale: data?.lang || hyperbook.language,
-      markdown: content,
-      toc: parseTocFromMarkdown(content),
+      markdown: contentWithSnippets,
+      toc: parseTocFromMarkdown(contentWithSnippets),
       navigation,
     },
   };

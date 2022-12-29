@@ -27,6 +27,11 @@ async function setup() {
     path.join(process.cwd(), "website", "en", "glossary"),
     path.join(process.cwd(), "platforms", "web", "glossary")
   );
+  rimraf.sync(path.join(process.cwd(), "platforms", "web", "snippets"));
+  await makeSymlink(
+    path.join(process.cwd(), "website", "en", "snippets"),
+    path.join(process.cwd(), "platforms", "web", "snippets")
+  );
   rimraf.sync(path.join(process.cwd(), "platforms", "web", "archives"));
   await makeSymlink(
     path.join(process.cwd(), "website", "en", "archives"),
