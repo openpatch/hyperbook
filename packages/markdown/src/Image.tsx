@@ -8,11 +8,8 @@ export const Image: Components["img"] = ({ src, title, alt }) => {
   src = makeUrl(src, "public");
 
   return (
-    <figure
-      onClick={() => setFull((f) => !f)}
-      className={full ? "lightbox" : undefined}
-    >
-      <img src={src} alt={alt} />
+    <figure className={full ? "lightbox" : undefined}>
+      <img src={src} alt={alt} onClick={() => setFull((f) => !f)} />
       {title && <figcaption>{title}</figcaption>}
     </figure>
   );

@@ -49,13 +49,13 @@
   padding: 1em;
   z-index: 10000;
   margin: 0px;
-  cursor: zoom-out;
   background: rgba(0, 0, 0, 0.5);
 }
 
 .hyperbook-markdown figure.lightbox img {
   min-width: 100%;
   min-height: 100%;
+  cursor: zoom-out;
   object-fit: contain;
 }
 
@@ -94,6 +94,9 @@
   text-align: center;
   margin-top: 10px;
   margin-bottom: 10px;
+}
+
+.hyperbook-markdown figure img {
   cursor: zoom-in;
 }
 
