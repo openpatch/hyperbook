@@ -38,10 +38,10 @@ import { useEffect } from "react";
 
 import hb from "../../hyperbook.json";
 
-const MyLink: ProviderProps["Link"] = ({ href, children, ...props }) => {
+const MyLink: ProviderProps["Link"] = ({ ref, href, children, ...props }) => {
   return (
-    <Link href={href}>
-      <a {...props}>{children}</a>
+    <Link href={href} {...props}>
+      {children}
     </Link>
   );
 };
