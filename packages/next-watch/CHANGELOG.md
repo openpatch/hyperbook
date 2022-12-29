@@ -1,5 +1,11 @@
 # @hyperbook/next-watch
 
+## 0.2.0
+
+### Minor Changes
+
+- [`ac262ca`](https://github.com/openpatch/hyperbook/commit/ac262ca4a60b313dafbce33e5c0d753fd504f012) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Upgrade to NextJS 13
+
 ## 0.1.2
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # @hyperbook/element-collapsible
 
+## 0.3.0
+
+### Minor Changes
+
+- [`ac262ca`](https://github.com/openpatch/hyperbook/commit/ac262ca4a60b313dafbce33e5c0d753fd504f012) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Upgrade react-collapsed to prerelease 4.0.0. This prerelease adds support for React 18. So the warning about unmet peer-dependencies should disappear.
+
 ## 0.2.5
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # @hyperbook/markdown
 
+## 0.5.2
+
+### Patch Changes
+
+- [`ac262ca`](https://github.com/openpatch/hyperbook/commit/ac262ca4a60b313dafbce33e5c0d753fd504f012) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Improve the css for image lightboxes. The cursor now only changes when hovering the image and not the left and right border.
+
 ## 0.5.1
 
 ### Patch Changes
