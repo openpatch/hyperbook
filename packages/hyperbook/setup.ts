@@ -96,6 +96,10 @@ export async function runSetupProject(
     path.join(projectRoot, "glossary")
   );
   await makeSymlink(
+    path.join(project.src, "snippets"),
+    path.join(projectRoot, "snippets")
+  );
+  await makeSymlink(
     path.join(project.src, "public"),
     path.join(projectRoot, "public")
   );
