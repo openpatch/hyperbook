@@ -2,6 +2,8 @@
 name: Scratchblock
 ---
 
+# Scratchblock
+
 The scratchblock element allows to easier inserting of scratch programs. The programs will be rendered as a svg.
 
 As a default your hyperbook language and english are supported.

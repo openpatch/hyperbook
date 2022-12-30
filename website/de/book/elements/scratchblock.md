@@ -1,7 +1,9 @@
 ---
-name: Scratchblock
+name: Scratchblöcke
 lang: de
 ---
+
+# Scratchblöcke
 
 Mit dem Scratchblock-Element kannst du Scratch-Programme darstellen.
 
