@@ -1,5 +1,11 @@
 # @hyperbook/markdown
 
+## 0.5.3
+
+### Patch Changes
+
+- [`0c58ad8`](https://github.com/openpatch/hyperbook/commit/0c58ad80c3c8b145868d2c0303d42478ec0a9978) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix type error in the remove comments plugin for rehype.
+
 ## 0.5.2
 
 ### Patch Changes
