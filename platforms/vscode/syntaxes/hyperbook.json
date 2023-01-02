@@ -33,6 +33,15 @@
       "include": "#directive-qr"
     },
     {
+      "include": "#directive-scratchblock"
+    },
+    {
+      "include": "#directive-snippets-inline"
+    },
+    {
+      "include": "#directive-snippets-block"
+    },
+    {
       "include": "#directive-struktog"
     },
     {
@@ -110,7 +119,7 @@
       }
     },
     "directive-bookmarks": {
-      "name": "entity.name.function.directive.alert.hyperbook",
+      "name": "entity.name.function.directive.bookmarks.hyperbook",
       "match": "(^|\\G)(:{2,})(bookmarks)"
     },
     "directive-collapsible": {
@@ -457,7 +466,52 @@
               "match": "(id|title)=\"([^\"]*)\"",
               "captures": {
                 "1": {
-                  "name": "keyword.parameter.directive.struktog.hyperbook"
+                  "name": "keyword.parameter.directive.tab.hyperbook"
+                },
+                "2": {
+                  "name": "string.quoted.double.untitled"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "endCaptures": {
+        "2": {
+          "name": "punctuation.definition.directive.level.hyperbook"
+        }
+      },
+      "patterns": [
+        {
+          "begin": "(^|\\G)(\\s*)(.*)",
+          "while": "(^|\\G)(?!\\s*(:{3,})\\s*$)",
+          "contentName": "meta.embedded.block.markdown",
+          "patterns": [
+            {
+              "include": "text.html.markdown"
+            }
+          ]
+        }
+      ]
+    },
+    "directive-scratchblock": {
+      "name": "meta.directive.scratchblock.hyperbook",
+      "begin": "(^|\\G)(:{3,})(scratchblock)({.*})?\\s*$",
+      "end": "(^|\\G)(\\2|:{3,})\\s*$",
+      "beginCaptures": {
+        "2": {
+          "name": "punctuation.definition.directive.level.hyperbook"
+        },
+        "3": {
+          "name": "entity.name.function.directive.scratchblock.hyperbook"
+        },
+        "4": {
+          "patterns": [
+            {
+              "match": "(language)=\"([^\"]*)\"",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.scratchblock.hyperbook"
                 },
                 "2": {
                   "name": "string.quoted.double.untitled"

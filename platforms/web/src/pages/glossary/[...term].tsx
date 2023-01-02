@@ -1,46 +1,38 @@
 import { GetStaticPaths, GetStaticProps } from "next";
-import path from "path";
 import { Shell, ShellProps } from "@hyperbook/shell";
 import { Fragment } from "react";
 import { parseTocFromMarkdown, TocProps } from "@hyperbook/toc";
 
 import { useActivePageId, useLink } from "@hyperbook/provider";
 import { Markdown } from "@hyperbook/markdown";
-import {
-  readFile,
-  readGlossary,
-  makeNavigationForHyperbook,
-  readHyperbook,
-  listPagesForTerm,
-  resolveSnippets,
-} from "@hyperbook/fs";
+import { glossary, hyperbook, vfile } from "@hyperbook/fs";
 import { useScrollHash } from "../../useScrollHash";
 
 type TermProps = {
   markdown: string;
   navigation: ShellProps["navigation"];
   toc: TocProps;
-  term: {
-    name: string;
-    repo: string;
-    pages: ShellProps["navigation"]["pages"];
-    toc?: boolean;
-  };
+  references: vfile.VFile[];
 };
 
-export default function Term({ markdown, navigation, term, toc }: TermProps) {
+export default function Term({
+  markdown,
+  navigation,
+  references,
+  toc,
+}: TermProps) {
   const Link = useLink();
   useActivePageId();
   useScrollHash();
   return (
-    <Shell navigation={navigation} toc={term?.toc === true ? toc : null}>
+    <Shell navigation={navigation} toc={toc}>
       <article>
         <Markdown children={markdown} />
         <div className="pages">
-          {term.pages.map((p, i) => (
-            <Fragment key={p.href}>
+          {references.map((p, i) => (
+            <Fragment key={p.path.href}>
               {i > 0 && ", "}
-              <Link href={p.href}>{p.name}</Link>
+              <Link href={p.path.href}>{p.name}</Link>
             </Fragment>
           ))}
         </div>
@@ -56,32 +48,27 @@ export const getStaticProps: GetStaticProps<
   }
 > = async ({ params }) => {
   const root = process.env.root ?? process.cwd();
-  const filePath = path.join(root, "glossary", ...params.term);
-  const href = "/glossary/" + path.join(...params.term);
-  const { content, data } = await readFile(filePath);
-  const contentWithSnippets = await resolveSnippets(root, content);
 
-  const navigation = await makeNavigationForHyperbook(root, href);
-  const hyperbook = await readHyperbook(root);
-  const pages = await listPagesForTerm(root, params.term[0]);
-
-  const term: TermProps["term"] = {
-    ...(data as TermProps["term"]),
-    pages,
-  };
-
-  if (hyperbook?.repo) {
-    term.repo = hyperbook.repo + href + ".md";
+  const file = await vfile.get(
+    root,
+    "glossary",
+    "/glossary/" + params.term.join("/")
+  );
+  if (!file) {
+    throw Error(`Missing file ${file}`);
   }
+  const references = await glossary.getReferences(file);
+  const { content, data } = await vfile.getMarkdown(file);
+  const hyperbookJson = await hyperbook.getJson(root);
+  const navigation = await hyperbook.getNavigation(root, file);
 
   return {
     props: {
-      locale: data?.lang || hyperbook.language,
-      term,
-      markdown: contentWithSnippets,
-      toc: parseTocFromMarkdown(contentWithSnippets),
+      locale: data?.lang || hyperbookJson.language,
+      markdown: content,
+      references,
+      toc: parseTocFromMarkdown(content),
       navigation,
-      hyperbook,
     },
   };
 };
@@ -90,19 +77,12 @@ export const getStaticPaths: GetStaticPaths<{
   term: string[];
 }> = async () => {
   const root = process.env.root ?? process.cwd();
-  const files = await readGlossary(root);
-  const paths = files.map((f) => {
-    const relativePath = path
-      .relative(path.join(root, "glossary"), f)
-      .replace(/\.md$/, "")
-      .split("/");
-
-    return {
-      params: {
-        term: relativePath,
-      },
-    };
-  });
+  const files = await vfile.listForFolder(root, "glossary");
+  const paths = files.map((f) => ({
+    params: {
+      term: f.path.href.slice(10).split("/"),
+    },
+  }));
 
   return {
     paths,

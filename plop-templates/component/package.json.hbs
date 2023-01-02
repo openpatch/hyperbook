@@ -33,7 +33,7 @@
     "prebuild": "rimraf dist",
     "version": "pnpm build",
     "lint": "tsc --noEmit",
-    "test": "jest --env=jsdom --passWithNoTests",
+    "test": "vitest",
     "build": "pnpm build:pkg && pnpm build:types",
     "build:pkg": "node ../../scripts/build.mjs",
     "build:types": "tsc --project tsconfig.build.json --declaration --emitDeclarationOnly"
@@ -47,6 +47,7 @@
     "@types/react": "18.0.15",
     "@types/react-dom": "18.0.6",
     "react": "18.2.0",
-    "react-dom": "18.2.0"
+    "react-dom": "18.2.0",
+    "vitest": "^0.26.3"
   }
 }

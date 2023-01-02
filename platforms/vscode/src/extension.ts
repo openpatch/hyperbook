@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 import * as path from "path";
 import Preview from "./Preview";
 import StatusBarItem from "./StatusBarItem";
-import { findHyperbookRoot } from "@hyperbook/fs";
+import { hyperbook } from "@hyperbook/fs";
 
 export function activate(context: vscode.ExtensionContext) {
   let preview = new Preview(context);
@@ -47,15 +47,15 @@ export function activate(context: vscode.ExtensionContext) {
   const bookProvider = vscode.languages.registerCompletionItemProvider(
     DocumentSelectorMarkdown,
     {
-      async provideCompletionItems(document, position, token, context) {
+      async provideCompletionItems(document, position) {
         const linePrefix = document
           .lineAt(position)
-          .text.substr(0, position.character);
+          .text.slice(0, position.character);
         if (!linePrefix.endsWith("/")) {
           return undefined;
         }
 
-        const workspaceFolder = await findHyperbookRoot(document.uri.fsPath);
+        const workspaceFolder = await hyperbook.findRoot(document.uri.fsPath);
 
         if (!workspaceFolder) {
           return undefined;
@@ -84,15 +84,15 @@ export function activate(context: vscode.ExtensionContext) {
   const publicProvider = vscode.languages.registerCompletionItemProvider(
     DocumentSelectorMarkdown,
     {
-      async provideCompletionItems(document, position, token, context) {
+      async provideCompletionItems(document, position) {
         const linePrefix = document
           .lineAt(position)
-          .text.substr(0, position.character);
+          .text.slice(0, position.character);
         if (!linePrefix.endsWith("/")) {
           return undefined;
         }
 
-        const workspaceFolder = await findHyperbookRoot(document.uri.fsPath);
+        const workspaceFolder = await hyperbook.findRoot(document.uri.fsPath);
 
         if (!workspaceFolder) {
           return undefined;
@@ -120,16 +120,16 @@ export function activate(context: vscode.ExtensionContext) {
   const glossaryProvider = vscode.languages.registerCompletionItemProvider(
     DocumentSelectorMarkdown,
     {
-      async provideCompletionItems(document, position, token, context) {
+      async provideCompletionItems(document, position) {
         const linePrefix = document
           .lineAt(position)
-          .text.substr(0, position.character);
+          .text.slice(0, position.character);
         const findTerm = linePrefix.match(/.*:(t|term)\[.+\]{#/);
         if (findTerm === null) {
           return undefined;
         }
 
-        const workspaceFolder = await findHyperbookRoot(document.uri.fsPath);
+        const workspaceFolder = await hyperbook.findRoot(document.uri.fsPath);
 
         if (!workspaceFolder) {
           return undefined;
@@ -158,16 +158,16 @@ export function activate(context: vscode.ExtensionContext) {
   const archiveProvider = vscode.languages.registerCompletionItemProvider(
     DocumentSelectorMarkdown,
     {
-      async provideCompletionItems(document, position, token, context) {
+      async provideCompletionItems(document, position) {
         const linePrefix = document
           .lineAt(position)
-          .text.substr(0, position.character);
+          .text.slice(0, position.character);
         const findTerm = linePrefix.match(/.*:(archive)\[.+\]{\s*name=\"/);
         if (findTerm === null) {
           return undefined;
         }
 
-        const workspaceFolder = await findHyperbookRoot(document.uri.fsPath);
+        const workspaceFolder = await hyperbook.findRoot(document.uri.fsPath);
 
         if (!workspaceFolder) {
           return undefined;

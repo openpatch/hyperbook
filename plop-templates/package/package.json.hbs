@@ -33,11 +33,14 @@
     "prebuild": "rimraf dist",
     "version": "pnpm build",
     "lint": "tsc --noEmit",
-    "test": "jest --env=jsdom --passWithNoTests",
+    "test": "vitest",
     "build": "pnpm build:pkg && pnpm build:types",
     "build:pkg": "node ../../scripts/build.mjs",
     "build:types": "tsc --project tsconfig.build.json --declaration --emitDeclarationOnly"
   },
   "dependencies": {
+  },
+  "devDependencies": {
+    "vitest": "^0.26.3"
   }
 }

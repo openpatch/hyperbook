@@ -1,26 +1,27 @@
 import { GetStaticPaths, GetStaticProps } from "next";
-import path from "path";
 import { Shell, ShellProps } from "@hyperbook/shell";
 import { parseTocFromMarkdown, TocProps } from "@hyperbook/toc";
 import { Markdown } from "@hyperbook/markdown";
 import { useActivePageId, useLink } from "@hyperbook/provider";
 import { Fragment } from "react";
-import {
-  makeNavigationForHyperbook,
-  readBook,
-  readFile,
-  readHyperbook,
-  resolveSnippets,
-} from "@hyperbook/fs";
+import { vfile, hyperbook } from "@hyperbook/fs";
 import { useScrollHash } from "../useScrollHash";
+import path from "path";
+import { HyperbookPage } from "@hyperbook/types";
 
 type PageProps = {
   markdown: string;
+  data: HyperbookPage;
   navigation: ShellProps["navigation"];
   toc: TocProps;
 };
 
-export default function BookPage({ markdown, navigation, toc }: PageProps) {
+export default function BookPage({
+  markdown,
+  data,
+  navigation,
+  toc,
+}: PageProps) {
   const page = navigation.current;
   const Link = useLink();
   useActivePageId();
@@ -32,22 +33,24 @@ export default function BookPage({ markdown, navigation, toc }: PageProps) {
         <article>
           <Markdown children={markdown} />
         </article>
-        <div className="jump-container">
-          {navigation.previous ? (
-            <Link className="jump previous" href={navigation.previous.href}>
-              {navigation.previous.name}
-            </Link>
-          ) : (
-            <div className="flex" />
-          )}
-          {navigation.next ? (
-            <Link className="jump next" href={navigation.next.href}>
-              {navigation.next.name}
-            </Link>
-          ) : (
-            <div className="flex" />
-          )}
-        </div>
+        {!data.hide && (
+          <div className="jump-container">
+            {navigation.previous ? (
+              <Link className="jump previous" href={navigation.previous.href}>
+                {navigation.previous.name}
+              </Link>
+            ) : (
+              <div className="flex" />
+            )}
+            {navigation.next ? (
+              <Link className="jump next" href={navigation.next.href}>
+                {navigation.next.name}
+              </Link>
+            ) : (
+              <div className="flex" />
+            )}
+          </div>
+        )}
       </Shell>
     </Fragment>
   );
@@ -60,22 +63,26 @@ export const getStaticProps: GetStaticProps<
   }
 > = async ({ params }) => {
   const root = process.env.root ?? process.cwd();
-  let filePath = path.join(root, "book");
-  let href = "/";
-  if (params.page) {
-    filePath = path.join(filePath, ...params.page);
-    href = "/" + path.join(...params.page);
-  }
-  const { content, data } = await readFile(filePath);
-  const contentWithSnippets = await resolveSnippets(root, content);
 
-  const hyperbook = await readHyperbook(root);
-  const navigation = await makeNavigationForHyperbook(root, href);
+  let href = "";
+  if (params.page) {
+    href = path.join(...params.page);
+  }
+  const file = await vfile.get(root, "book", "/" + href);
+  if (!file) {
+    throw Error(`Missing file ${href}`);
+  }
+
+  const { content, data } = await vfile.getMarkdown(file);
+  const hyperbookJson = await hyperbook.getJson(root);
+  const navigation = await hyperbook.getNavigation(root, file);
+
   return {
     props: {
-      locale: data?.lang || hyperbook.language,
-      markdown: contentWithSnippets,
-      toc: parseTocFromMarkdown(contentWithSnippets),
+      locale: data?.lang || hyperbookJson.language,
+      markdown: content,
+      data,
+      toc: parseTocFromMarkdown(content),
       navigation,
     },
   };
@@ -85,19 +92,15 @@ export const getStaticPaths: GetStaticPaths<{
   page: string[];
 }> = async () => {
   const root = process.env.root ?? process.cwd();
-  const files = await readBook(root);
+  const files = await vfile.listForFolder(root, "book");
   const paths = files.map((f) => {
-    const relativePath = path
-      .relative(path.join(root, "book"), f)
-      .replace(/\.md$/, "")
-      .split("/");
-    const isIndex = relativePath[relativePath.length - 1] === "index";
-    if (isIndex) {
-      relativePath.pop();
+    const page = f.path.href.slice(1).split("/");
+    if (f.name === "index") {
+      page.pop();
     }
     return {
       params: {
-        page: relativePath,
+        page,
       },
     };
   });

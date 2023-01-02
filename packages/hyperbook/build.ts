@@ -5,7 +5,7 @@ import readline from "readline";
 import chalk from "chalk";
 import { isSetup } from "./helpers/is-setup";
 import { readHyperbook } from "./helpers/read-hyperbook";
-import { getProjectName, makeLinkForHyperproject } from "@hyperbook/fs";
+import { hyperproject } from "@hyperbook/fs";
 import { runArchive } from "./archive";
 import { makeDir } from "./helpers/make-dir";
 import rimraf from "rimraf";
@@ -17,7 +17,7 @@ export async function runBuildProject(
   rootProject: Hyperproject,
   out?: string
 ): Promise<void> {
-  const name = getProjectName(project);
+  const name = hyperproject.getName(project);
   if (project.type === "book") {
     console.log(`${chalk.blue(`[${name}]`)} Building Book.`);
     await runBuild(project.src, rootProject, project.basePath, name, out);
@@ -76,7 +76,7 @@ module.exports = {
   const hyperbookJson = await readHyperbook(root);
   let link: Link | undefined = undefined;
   if (rootProject.type === "library") {
-    link = await makeLinkForHyperproject(rootProject, hyperbookJson.language);
+    link = await hyperproject.getLink(rootProject, hyperbookJson.language);
   }
   if (link) {
     if (!hyperbookJson.links) {

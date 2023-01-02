@@ -72,10 +72,18 @@ const LinkWithLinks: FC<LinkWithLinksProps> = ({ label, links, icon }) => {
 };
 
 const LinkWithHref: FC<LinkWithHrefProps> = ({ label, icon, href }) => {
+  const Link = useLink();
   return (
-    <MenuItem href={href}>
-      <Item label={label} icon={icon} />
-    </MenuItem>
+    <li role="presentation">
+      <Link
+        href={href}
+        className="szh-menu__item szh-menu__item--anchor"
+        tabIndex={-1}
+        role="menuitem"
+      >
+        <Item label={label} icon={icon} />
+      </Link>
+    </li>
   );
 };
 

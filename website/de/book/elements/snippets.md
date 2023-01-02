@@ -140,3 +140,23 @@ Verwende times, wenn du einen Block mehrmals angezeigt haben möchtest.
   Hi
 {{/times}}
 ```
+
+### file
+
+Verwende file, wenn du den Inhalt einer anderen Datei einbinden möchtest.
+
+```hbs
+{{{file "/archives/project-1/main.c"}}}
+```
+
+Du kannst außerdem auch nur ausgewählte Zeilen einbinden.
+
+```hbs
+{{{file "/archives/project-1/main.c" "1,3-4"}}}
+```
+
+Und du kannst definieren, ob ein Ausblendungssymbol gezeigt werden soll.
+
+```hbs
+{{{file "/archives/project-1/main.c" "1,3-4" "// ..."}}}
+```

@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 
-import { Link } from "@hyperbook/types";
 import chalk from "chalk";
 import { Command } from "commander";
 import checkForUpdate from "update-check";
@@ -8,7 +7,7 @@ import { runArchive } from "./archive";
 import { runBuildProject } from "./build";
 import { runDev } from "./dev";
 import { getPkgManager } from "./helpers/get-pkg-manager";
-import { readProject } from "@hyperbook/fs";
+import { hyperproject } from "@hyperbook/fs";
 import { runNew } from "./new";
 import packageJson from "./package.json";
 import { runSetupProject } from "./setup";
@@ -27,7 +26,7 @@ program
   .description("create a new hyperbook")
   .arguments("<book-directory>")
   .usage(`${chalk.green("<book-directory>")}`)
-  .action(async (name) => {
+  .action(async (name: string) => {
     await runNew({
       programName: program.name(),
       bookPath: name,
@@ -45,7 +44,7 @@ program
   .command("setup")
   .description("downloads the latest version of the template of a hyperbook")
   .action(async () => {
-    const rootProject = await readProject(process.cwd()).catch(() => {
+    const rootProject = await hyperproject.get(process.cwd()).catch(() => {
       process.exit(1);
     });
 
@@ -58,7 +57,7 @@ program
   .command("build")
   .description("build a hyperbook")
   .action(async () => {
-    const rootProject = await readProject(process.cwd()).catch(() => {
+    const rootProject = await hyperproject.get(process.cwd()).catch(() => {
       process.exit(1);
     });
     await runBuildProject(rootProject, rootProject).catch(() => {

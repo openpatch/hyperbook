@@ -1,0 +1,6 @@
+{
+  "template": "template-demo",
+  "name": "Vorlage - Demo",
+  "description": "Hallo ich bin eine Demo für JSON",
+  "src": "/archives/project-1/main.c"
+}

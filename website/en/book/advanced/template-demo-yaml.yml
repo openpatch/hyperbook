@@ -1,0 +1,6 @@
+template: template-demo
+name: Templates - Demo
+src: /archives/project-1/main.c
+description: |
+  Hi I am a template demo
+  for YAML.

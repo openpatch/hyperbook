@@ -70,7 +70,6 @@ const copyNoNavigator = (text: string) => {
 };
 
 export const Code: Components["code"] = ({ children, className, inline }) => {
-  console.log(inline);
   const directives = useDirectives();
   if (className === "language-mermaid" && directives["mermaid"]) {
     const Mermaid = directives["mermaid"];

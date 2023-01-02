@@ -7,14 +7,14 @@ import { getOnline } from "./helpers/is-online";
 import { makeDir } from "./helpers/make-dir";
 import path from "path";
 import { makeSymlink } from "./helpers/make-symlink";
-import { getProjectName } from "@hyperbook/fs";
+import { hyperproject } from "@hyperbook/fs";
 import { Hyperproject } from "@hyperbook/types";
 
 export async function runSetupProject(
   project: Hyperproject,
   rootProject?: Hyperproject
 ) {
-  const name = getProjectName(project);
+  const name = hyperproject.getName(project);
   console.log(`${chalk.blue(`[${name}]`)} Setup Project.`);
   const projectRoot = path.join(project.src, ".hyperbook");
   const root = path.join(rootProject?.src || "", ".hyperbook");
@@ -98,6 +98,10 @@ export async function runSetupProject(
   await makeSymlink(
     path.join(project.src, "snippets"),
     path.join(projectRoot, "snippets")
+  );
+  await makeSymlink(
+    path.join(project.src, "templates"),
+    path.join(projectRoot, "templates")
   );
   await makeSymlink(
     path.join(project.src, "public"),

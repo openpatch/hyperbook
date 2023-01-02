@@ -1,0 +1,2036 @@
+// Vitest Snapshot v1
+
+exports[`extractLines > should extract lines and not add ellipsis on first and last line 1`] = `
+"Line 1
+// ...
+Line 4
+Line 5
+Line 6
+// ...
+Line 10"
+`;
+
+exports[`extractLines > should extract lines by range 1`] = `
+"...
+Line 2
+Line 3
+Line 4
+..."
+`;
+
+exports[`extractLines > should extract lines with custom ellipsis 1`] = `
+"Line 1
+// ...
+Line 4
+Line 5
+Line 6
+// ...
+Line 8
+// ..."
+`;
+
+exports[`extractLines > should extract lines with gaps 1`] = `
+"Line 1
+...
+Line 4
+Line 5
+Line 6
+...
+Line 8
+..."
+`;
+
+exports[`extractLines > should extract lines with no ellipsis 1`] = `
+"Line 1
+Line 4
+Line 5
+Line 6
+Line 8"
+`;
+
+exports[`extractLines > should return full content 1`] = `
+"Line 1
+Line 2
+Line 3
+Line 4
+Line 5
+Line 6
+Line 7
+Line 8
+Line 9
+Line 10"
+`;
+
+exports[`getDirectory > should get directory 1`] = `
+{
+  "directories": [
+    {
+      "directories": [],
+      "files": [
+        {
+          "extension": ".json",
+          "folder": "book",
+          "name": "template-demo-json",
+          "path": {
+            "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/advanced/template-demo-json.json",
+            "directory": "advanced",
+            "href": "/advanced/template-demo-json",
+            "relative": "advanced/template-demo-json.json",
+          },
+          "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+        },
+        {
+          "extension": ".yml",
+          "folder": "book",
+          "name": "template-demo-yaml",
+          "path": {
+            "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/advanced/template-demo-yaml.yml",
+            "directory": "advanced",
+            "href": "/advanced/template-demo-yaml",
+            "relative": "advanced/template-demo-yaml.yml",
+          },
+          "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+        },
+        {
+          "extension": ".md",
+          "folder": "book",
+          "name": "templates",
+          "path": {
+            "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/advanced/templates.md",
+            "directory": "advanced",
+            "href": "/advanced/templates",
+            "relative": "advanced/templates.md",
+          },
+          "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+        },
+      ],
+      "folder": "book",
+      "index": {
+        "extension": ".md",
+        "folder": "book",
+        "name": "index",
+        "path": {
+          "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/advanced/index.md",
+          "directory": "advanced",
+          "href": "/advanced",
+          "relative": "advanced/index.md",
+        },
+        "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+      },
+      "name": "advanced",
+      "path": {
+        "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/advanced",
+        "relative": "advanced",
+      },
+      "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+    },
+    {
+      "directories": [],
+      "files": [
+        {
+          "extension": ".md",
+          "folder": "book",
+          "name": "book",
+          "path": {
+            "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/configuration/book.md",
+            "directory": "configuration",
+            "href": "/configuration/book",
+            "relative": "configuration/book.md",
+          },
+          "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+        },
+        {
+          "extension": ".md",
+          "folder": "book",
+          "name": "library",
+          "path": {
+            "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/configuration/library.md",
+            "directory": "configuration",
+            "href": "/configuration/library",
+            "relative": "configuration/library.md",
+          },
+          "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+        },
+        {
+          "extension": ".md",
+          "folder": "book",
+          "name": "page",
+          "path": {
+            "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/configuration/page.md",
+            "directory": "configuration",
+            "href": "/configuration/page",
+            "relative": "configuration/page.md",
+          },
+          "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+        },
+        {
+          "extension": ".md",
+          "folder": "book",
+          "name": "section",
+          "path": {
+            "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/configuration/section.md",
+            "directory": "configuration",
+            "href": "/configuration/section",
+            "relative": "configuration/section.md",
+          },
+          "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+        },
+      ],
+      "folder": "book",
+      "index": {
+        "extension": ".md",
+        "folder": "book",
+        "name": "index",
+        "path": {
+          "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/configuration/index.md",
+          "directory": "configuration",
+          "href": "/configuration",
+          "relative": "configuration/index.md",
+        },
+        "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+      },
+      "name": "configuration",
+      "path": {
+        "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/configuration",
+        "relative": "configuration",
+      },
+      "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+    },
+    {
+      "directories": [],
+      "files": [
+        {
+          "extension": ".md",
+          "folder": "book",
+          "name": "alert",
+          "path": {
+            "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/elements/alert.md",
+            "directory": "elements",
+            "href": "/elements/alert",
+            "relative": "elements/alert.md",
+          },
+          "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+        },
+        {
+          "extension": ".md",
+          "folder": "book",
+          "name": "archive",
+          "path": {
+            "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/elements/archive.md",
+            "directory": "elements",
+            "href": "/elements/archive",
+            "relative": "elements/archive.md",
+          },
+          "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+        },
+        {
+          "extension": ".md",
+          "folder": "book",
+          "name": "bitflow",
+          "path": {
+            "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/elements/bitflow.md",
+            "directory": "elements",
+            "href": "/elements/bitflow",
+            "relative": "elements/bitflow.md",
+          },
+          "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+        },
+        {
+          "extension": ".md",
+          "folder": "book",
+          "name": "bookmarks",
+          "path": {
+            "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/elements/bookmarks.md",
+            "directory": "elements",
+            "href": "/elements/bookmarks",
+            "relative": "elements/bookmarks.md",
+          },
+          "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+        },
+        {
+          "extension": ".md",
+          "folder": "book",
+          "name": "collapsible",
+          "path": {
+            "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/elements/collapsible.md",
+            "directory": "elements",
+            "href": "/elements/collapsible",
+            "relative": "elements/collapsible.md",
+          },
+          "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+        },
+        {
+          "extension": ".md",
+          "folder": "book",
+          "name": "download",
+          "path": {
+            "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/elements/download.md",
+            "directory": "elements",
+            "href": "/elements/download",
+            "relative": "elements/download.md",
+          },
+          "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+        },
+        {
+          "extension": ".md",
+          "folder": "book",
+          "name": "emoji",
+          "path": {
+            "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/elements/emoji.md",
+            "directory": "elements",
+            "href": "/elements/emoji",
+            "relative": "elements/emoji.md",
+          },
+          "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+        },
+        {
+          "extension": ".md",
+          "folder": "book",
+          "name": "excalidraw",
+          "path": {
+            "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/elements/excalidraw.md",
+            "directory": "elements",
+            "href": "/elements/excalidraw",
+            "relative": "elements/excalidraw.md",
+          },
+          "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+        },
+        {
+          "extension": ".md",
+          "folder": "book",
+          "name": "glossary",
+          "path": {
+            "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/elements/glossary.md",
+            "directory": "elements",
+            "href": "/elements/glossary",
+            "relative": "elements/glossary.md",
+          },
+          "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+        },
+        {
+          "extension": ".md",
+          "folder": "book",
+          "name": "math",
+          "path": {
+            "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/elements/math.md",
+            "directory": "elements",
+            "href": "/elements/math",
+            "relative": "elements/math.md",
+          },
+          "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+        },
+        {
+          "extension": ".md",
+          "folder": "book",
+          "name": "mermaid",
+          "path": {
+            "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/elements/mermaid.md",
+            "directory": "elements",
+            "href": "/elements/mermaid",
+            "relative": "elements/mermaid.md",
+          },
+          "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+        },
+        {
+          "extension": ".md",
+          "folder": "book",
+          "name": "protect",
+          "path": {
+            "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/elements/protect.md",
+            "directory": "elements",
+            "href": "/elements/protect",
+            "relative": "elements/protect.md",
+          },
+          "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+        },
+        {
+          "extension": ".md",
+          "folder": "book",
+          "name": "qr",
+          "path": {
+            "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/elements/qr.md",
+            "directory": "elements",
+            "href": "/elements/qr",
+            "relative": "elements/qr.md",
+          },
+          "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+        },
+        {
+          "extension": ".md",
+          "folder": "book",
+          "name": "scratchblock",
+          "path": {
+            "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/elements/scratchblock.md",
+            "directory": "elements",
+            "href": "/elements/scratchblock",
+            "relative": "elements/scratchblock.md",
+          },
+          "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+        },
+        {
+          "extension": ".md",
+          "folder": "book",
+          "name": "snippets",
+          "path": {
+            "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/elements/snippets.md",
+            "directory": "elements",
+            "href": "/elements/snippets",
+            "relative": "elements/snippets.md",
+          },
+          "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+        },
+        {
+          "extension": ".md",
+          "folder": "book",
+          "name": "struktog",
+          "path": {
+            "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/elements/struktog.md",
+            "directory": "elements",
+            "href": "/elements/struktog",
+            "relative": "elements/struktog.md",
+          },
+          "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+        },
+        {
+          "extension": ".md",
+          "folder": "book",
+          "name": "tabs",
+          "path": {
+            "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/elements/tabs.md",
+            "directory": "elements",
+            "href": "/elements/tabs",
+            "relative": "elements/tabs.md",
+          },
+          "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+        },
+        {
+          "extension": ".md",
+          "folder": "book",
+          "name": "youtube",
+          "path": {
+            "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/elements/youtube.md",
+            "directory": "elements",
+            "href": "/elements/youtube",
+            "relative": "elements/youtube.md",
+          },
+          "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+        },
+      ],
+      "folder": "book",
+      "index": {
+        "extension": ".md",
+        "folder": "book",
+        "name": "index",
+        "path": {
+          "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/elements/index.md",
+          "directory": "elements",
+          "href": "/elements",
+          "relative": "elements/index.md",
+        },
+        "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+      },
+      "name": "elements",
+      "path": {
+        "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/elements",
+        "relative": "elements",
+      },
+      "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+    },
+    {
+      "directories": [],
+      "files": [
+        {
+          "extension": ".md",
+          "folder": "book",
+          "name": "custom",
+          "path": {
+            "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/hosting/custom.md",
+            "directory": "hosting",
+            "href": "/hosting/custom",
+            "relative": "hosting/custom.md",
+          },
+          "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+        },
+        {
+          "extension": ".md",
+          "folder": "book",
+          "name": "edugitpages",
+          "path": {
+            "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/hosting/edugitpages.md",
+            "directory": "hosting",
+            "href": "/hosting/edugitpages",
+            "relative": "hosting/edugitpages.md",
+          },
+          "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+        },
+        {
+          "extension": ".md",
+          "folder": "book",
+          "name": "ghpages",
+          "path": {
+            "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/hosting/ghpages.md",
+            "directory": "hosting",
+            "href": "/hosting/ghpages",
+            "relative": "hosting/ghpages.md",
+          },
+          "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+        },
+        {
+          "extension": ".md",
+          "folder": "book",
+          "name": "glpages",
+          "path": {
+            "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/hosting/glpages.md",
+            "directory": "hosting",
+            "href": "/hosting/glpages",
+            "relative": "hosting/glpages.md",
+          },
+          "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+        },
+        {
+          "extension": ".md",
+          "folder": "book",
+          "name": "vercel",
+          "path": {
+            "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/hosting/vercel.md",
+            "directory": "hosting",
+            "href": "/hosting/vercel",
+            "relative": "hosting/vercel.md",
+          },
+          "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+        },
+      ],
+      "folder": "book",
+      "index": {
+        "extension": ".md",
+        "folder": "book",
+        "name": "index",
+        "path": {
+          "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/hosting/index.md",
+          "directory": "hosting",
+          "href": "/hosting",
+          "relative": "hosting/index.md",
+        },
+        "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+      },
+      "name": "hosting",
+      "path": {
+        "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/hosting",
+        "relative": "hosting",
+      },
+      "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+    },
+    {
+      "directories": [],
+      "files": [
+        {
+          "extension": ".md",
+          "folder": "book",
+          "name": "code",
+          "path": {
+            "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/markdown/code.md",
+            "directory": "markdown",
+            "href": "/markdown/code",
+            "relative": "markdown/code.md",
+          },
+          "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+        },
+        {
+          "extension": ".md",
+          "folder": "book",
+          "name": "comment",
+          "path": {
+            "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/markdown/comment.md",
+            "directory": "markdown",
+            "href": "/markdown/comment",
+            "relative": "markdown/comment.md",
+          },
+          "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+        },
+        {
+          "extension": ".md",
+          "folder": "book",
+          "name": "emphasis",
+          "path": {
+            "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/markdown/emphasis.md",
+            "directory": "markdown",
+            "href": "/markdown/emphasis",
+            "relative": "markdown/emphasis.md",
+          },
+          "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+        },
+        {
+          "extension": ".md",
+          "folder": "book",
+          "name": "header",
+          "path": {
+            "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/markdown/header.md",
+            "directory": "markdown",
+            "href": "/markdown/header",
+            "relative": "markdown/header.md",
+          },
+          "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+        },
+        {
+          "extension": ".md",
+          "folder": "book",
+          "name": "hr",
+          "path": {
+            "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/markdown/hr.md",
+            "directory": "markdown",
+            "href": "/markdown/hr",
+            "relative": "markdown/hr.md",
+          },
+          "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+        },
+        {
+          "extension": ".md",
+          "folder": "book",
+          "name": "image",
+          "path": {
+            "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/markdown/image.md",
+            "directory": "markdown",
+            "href": "/markdown/image",
+            "relative": "markdown/image.md",
+          },
+          "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+        },
+        {
+          "extension": ".md",
+          "folder": "book",
+          "name": "line-break",
+          "path": {
+            "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/markdown/line-break.md",
+            "directory": "markdown",
+            "href": "/markdown/line-break",
+            "relative": "markdown/line-break.md",
+          },
+          "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+        },
+        {
+          "extension": ".md",
+          "folder": "book",
+          "name": "link",
+          "path": {
+            "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/markdown/link.md",
+            "directory": "markdown",
+            "href": "/markdown/link",
+            "relative": "markdown/link.md",
+          },
+          "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+        },
+        {
+          "extension": ".md",
+          "folder": "book",
+          "name": "list",
+          "path": {
+            "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/markdown/list.md",
+            "directory": "markdown",
+            "href": "/markdown/list",
+            "relative": "markdown/list.md",
+          },
+          "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+        },
+        {
+          "extension": ".md",
+          "folder": "book",
+          "name": "quote",
+          "path": {
+            "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/markdown/quote.md",
+            "directory": "markdown",
+            "href": "/markdown/quote",
+            "relative": "markdown/quote.md",
+          },
+          "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+        },
+        {
+          "extension": ".md",
+          "folder": "book",
+          "name": "table",
+          "path": {
+            "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/markdown/table.md",
+            "directory": "markdown",
+            "href": "/markdown/table",
+            "relative": "markdown/table.md",
+          },
+          "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+        },
+      ],
+      "folder": "book",
+      "index": {
+        "extension": ".md",
+        "folder": "book",
+        "name": "index",
+        "path": {
+          "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/markdown/index.md",
+          "directory": "markdown",
+          "href": "/markdown",
+          "relative": "markdown/index.md",
+        },
+        "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+      },
+      "name": "markdown",
+      "path": {
+        "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/markdown",
+        "relative": "markdown",
+      },
+      "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+    },
+  ],
+  "files": [],
+  "folder": "book",
+  "index": {
+    "extension": ".md",
+    "folder": "book",
+    "name": "index",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/index.md",
+      "directory": "",
+      "href": "/",
+      "relative": "index.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  "name": "",
+  "path": {
+    "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book",
+    "relative": "",
+  },
+  "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+}
+`;
+
+exports[`getMarkdown > should get markdown from template 1`] = `
+{
+  "content": "
+# Description
+
+Hi I am a template demo
+for YAML.
+
+
+Templates are preprocessed, so you can use snippets aswell.
+
+:smiley:
+:smiley:
+:smiley:
+:smiley:
+:smiley:
+
+
+# Code Example
+
+\`\`\`c
+// ...
+int main() {
+  printf(\\"Hello World!\\");
+// ...
+#include <stdio.h>
+
+int main() {
+  printf(\\"Hello World!\\");
+  return 0;
+}
+
+\`\`\`
+",
+  "data": {
+    "hide": true,
+    "name": "Templates - Demo",
+  },
+}
+`;
+
+exports[`list > should list all 1`] = `
+[
+  {
+    "extension": ".c",
+    "folder": "archives",
+    "name": "main",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/archives/project-1/main.c",
+      "directory": "project-1",
+      "href": "/archives/project-1.zip",
+      "relative": "project-1/main.c",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "glossary",
+    "name": "oop",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/glossary/oop.md",
+      "directory": "",
+      "href": "/glossary/oop",
+      "relative": "oop.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "index",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/index.md",
+      "directory": "",
+      "href": "/",
+      "relative": "index.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".json",
+    "folder": "book",
+    "name": "template-demo-json",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/advanced/template-demo-json.json",
+      "directory": "advanced",
+      "href": "/advanced/template-demo-json",
+      "relative": "advanced/template-demo-json.json",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".yml",
+    "folder": "book",
+    "name": "template-demo-yaml",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/advanced/template-demo-yaml.yml",
+      "directory": "advanced",
+      "href": "/advanced/template-demo-yaml",
+      "relative": "advanced/template-demo-yaml.yml",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "templates",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/advanced/templates.md",
+      "directory": "advanced",
+      "href": "/advanced/templates",
+      "relative": "advanced/templates.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "index",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/advanced/index.md",
+      "directory": "advanced",
+      "href": "/advanced",
+      "relative": "advanced/index.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "book",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/configuration/book.md",
+      "directory": "configuration",
+      "href": "/configuration/book",
+      "relative": "configuration/book.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "library",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/configuration/library.md",
+      "directory": "configuration",
+      "href": "/configuration/library",
+      "relative": "configuration/library.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "page",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/configuration/page.md",
+      "directory": "configuration",
+      "href": "/configuration/page",
+      "relative": "configuration/page.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "section",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/configuration/section.md",
+      "directory": "configuration",
+      "href": "/configuration/section",
+      "relative": "configuration/section.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "index",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/configuration/index.md",
+      "directory": "configuration",
+      "href": "/configuration",
+      "relative": "configuration/index.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "alert",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/elements/alert.md",
+      "directory": "elements",
+      "href": "/elements/alert",
+      "relative": "elements/alert.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "archive",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/elements/archive.md",
+      "directory": "elements",
+      "href": "/elements/archive",
+      "relative": "elements/archive.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "bitflow",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/elements/bitflow.md",
+      "directory": "elements",
+      "href": "/elements/bitflow",
+      "relative": "elements/bitflow.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "bookmarks",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/elements/bookmarks.md",
+      "directory": "elements",
+      "href": "/elements/bookmarks",
+      "relative": "elements/bookmarks.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "collapsible",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/elements/collapsible.md",
+      "directory": "elements",
+      "href": "/elements/collapsible",
+      "relative": "elements/collapsible.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "download",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/elements/download.md",
+      "directory": "elements",
+      "href": "/elements/download",
+      "relative": "elements/download.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "emoji",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/elements/emoji.md",
+      "directory": "elements",
+      "href": "/elements/emoji",
+      "relative": "elements/emoji.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "excalidraw",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/elements/excalidraw.md",
+      "directory": "elements",
+      "href": "/elements/excalidraw",
+      "relative": "elements/excalidraw.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "glossary",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/elements/glossary.md",
+      "directory": "elements",
+      "href": "/elements/glossary",
+      "relative": "elements/glossary.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "math",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/elements/math.md",
+      "directory": "elements",
+      "href": "/elements/math",
+      "relative": "elements/math.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "mermaid",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/elements/mermaid.md",
+      "directory": "elements",
+      "href": "/elements/mermaid",
+      "relative": "elements/mermaid.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "protect",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/elements/protect.md",
+      "directory": "elements",
+      "href": "/elements/protect",
+      "relative": "elements/protect.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "qr",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/elements/qr.md",
+      "directory": "elements",
+      "href": "/elements/qr",
+      "relative": "elements/qr.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "scratchblock",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/elements/scratchblock.md",
+      "directory": "elements",
+      "href": "/elements/scratchblock",
+      "relative": "elements/scratchblock.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "snippets",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/elements/snippets.md",
+      "directory": "elements",
+      "href": "/elements/snippets",
+      "relative": "elements/snippets.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "struktog",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/elements/struktog.md",
+      "directory": "elements",
+      "href": "/elements/struktog",
+      "relative": "elements/struktog.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "tabs",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/elements/tabs.md",
+      "directory": "elements",
+      "href": "/elements/tabs",
+      "relative": "elements/tabs.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "youtube",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/elements/youtube.md",
+      "directory": "elements",
+      "href": "/elements/youtube",
+      "relative": "elements/youtube.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "index",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/elements/index.md",
+      "directory": "elements",
+      "href": "/elements",
+      "relative": "elements/index.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "custom",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/hosting/custom.md",
+      "directory": "hosting",
+      "href": "/hosting/custom",
+      "relative": "hosting/custom.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "edugitpages",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/hosting/edugitpages.md",
+      "directory": "hosting",
+      "href": "/hosting/edugitpages",
+      "relative": "hosting/edugitpages.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "ghpages",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/hosting/ghpages.md",
+      "directory": "hosting",
+      "href": "/hosting/ghpages",
+      "relative": "hosting/ghpages.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "glpages",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/hosting/glpages.md",
+      "directory": "hosting",
+      "href": "/hosting/glpages",
+      "relative": "hosting/glpages.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "vercel",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/hosting/vercel.md",
+      "directory": "hosting",
+      "href": "/hosting/vercel",
+      "relative": "hosting/vercel.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "index",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/hosting/index.md",
+      "directory": "hosting",
+      "href": "/hosting",
+      "relative": "hosting/index.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "code",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/markdown/code.md",
+      "directory": "markdown",
+      "href": "/markdown/code",
+      "relative": "markdown/code.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "comment",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/markdown/comment.md",
+      "directory": "markdown",
+      "href": "/markdown/comment",
+      "relative": "markdown/comment.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "emphasis",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/markdown/emphasis.md",
+      "directory": "markdown",
+      "href": "/markdown/emphasis",
+      "relative": "markdown/emphasis.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "header",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/markdown/header.md",
+      "directory": "markdown",
+      "href": "/markdown/header",
+      "relative": "markdown/header.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "hr",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/markdown/hr.md",
+      "directory": "markdown",
+      "href": "/markdown/hr",
+      "relative": "markdown/hr.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "image",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/markdown/image.md",
+      "directory": "markdown",
+      "href": "/markdown/image",
+      "relative": "markdown/image.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "line-break",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/markdown/line-break.md",
+      "directory": "markdown",
+      "href": "/markdown/line-break",
+      "relative": "markdown/line-break.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "link",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/markdown/link.md",
+      "directory": "markdown",
+      "href": "/markdown/link",
+      "relative": "markdown/link.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "list",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/markdown/list.md",
+      "directory": "markdown",
+      "href": "/markdown/list",
+      "relative": "markdown/list.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "quote",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/markdown/quote.md",
+      "directory": "markdown",
+      "href": "/markdown/quote",
+      "relative": "markdown/quote.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "table",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/markdown/table.md",
+      "directory": "markdown",
+      "href": "/markdown/table",
+      "relative": "markdown/table.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "index",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/markdown/index.md",
+      "directory": "markdown",
+      "href": "/markdown",
+      "relative": "markdown/index.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".ico",
+    "folder": "public",
+    "name": "favicon",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/public/favicon.ico",
+      "directory": "",
+      "href": "/favicon.ico",
+      "relative": "favicon.ico",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".json",
+    "folder": "public",
+    "name": "flow",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/public/flow.json",
+      "directory": "",
+      "href": "/flow.json",
+      "relative": "flow.json",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".svg",
+    "folder": "public",
+    "name": "logo",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/public/logo.svg",
+      "directory": "",
+      "href": "/logo.svg",
+      "relative": "logo.svg",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".json",
+    "folder": "public",
+    "name": "task",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/public/task.json",
+      "directory": "",
+      "href": "/task.json",
+      "relative": "task.json",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".jpg",
+    "folder": "public",
+    "name": "test",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/public/test.jpg",
+      "directory": "",
+      "href": "/test.jpg",
+      "relative": "test.jpg",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".zip",
+    "folder": "public",
+    "name": "project-1",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/public/archives/project-1.zip",
+      "directory": "archives",
+      "href": "/archives/project-1.zip",
+      "relative": "archives/project-1.zip",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".excalidraw",
+    "folder": "public",
+    "name": "hyperbook",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/public/excalidraw/hyperbook.excalidraw",
+      "directory": "excalidraw",
+      "href": "/excalidraw/hyperbook.excalidraw",
+      "relative": "excalidraw/hyperbook.excalidraw",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".woff2",
+    "folder": "public",
+    "name": "FiraCode-Regular",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/public/fonts/FiraCode-Regular.woff2",
+      "directory": "fonts",
+      "href": "/fonts/FiraCode-Regular.woff2",
+      "relative": "fonts/FiraCode-Regular.woff2",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".ttf",
+    "folder": "public",
+    "name": "Montserrat-VariableFont_wght",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/public/fonts/Montserrat-VariableFont_wght.ttf",
+      "directory": "fonts",
+      "href": "/fonts/Montserrat-VariableFont_wght.ttf",
+      "relative": "fonts/Montserrat-VariableFont_wght.ttf",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".hbs",
+    "folder": "snippets",
+    "name": "password.md",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/snippets/password.md.hbs",
+      "directory": "",
+      "href": null,
+      "relative": "password.md.hbs",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".hbs",
+    "folder": "snippets",
+    "name": "smiley.md",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/snippets/smiley.md.hbs",
+      "directory": "",
+      "href": null,
+      "relative": "smiley.md.hbs",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+]
+`;
+
+exports[`list > should list for folder book 1`] = `
+[
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "index",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/index.md",
+      "directory": "",
+      "href": "/",
+      "relative": "index.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".json",
+    "folder": "book",
+    "name": "template-demo-json",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/advanced/template-demo-json.json",
+      "directory": "advanced",
+      "href": "/advanced/template-demo-json",
+      "relative": "advanced/template-demo-json.json",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".yml",
+    "folder": "book",
+    "name": "template-demo-yaml",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/advanced/template-demo-yaml.yml",
+      "directory": "advanced",
+      "href": "/advanced/template-demo-yaml",
+      "relative": "advanced/template-demo-yaml.yml",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "templates",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/advanced/templates.md",
+      "directory": "advanced",
+      "href": "/advanced/templates",
+      "relative": "advanced/templates.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "index",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/advanced/index.md",
+      "directory": "advanced",
+      "href": "/advanced",
+      "relative": "advanced/index.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "book",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/configuration/book.md",
+      "directory": "configuration",
+      "href": "/configuration/book",
+      "relative": "configuration/book.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "library",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/configuration/library.md",
+      "directory": "configuration",
+      "href": "/configuration/library",
+      "relative": "configuration/library.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "page",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/configuration/page.md",
+      "directory": "configuration",
+      "href": "/configuration/page",
+      "relative": "configuration/page.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "section",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/configuration/section.md",
+      "directory": "configuration",
+      "href": "/configuration/section",
+      "relative": "configuration/section.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "index",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/configuration/index.md",
+      "directory": "configuration",
+      "href": "/configuration",
+      "relative": "configuration/index.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "alert",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/elements/alert.md",
+      "directory": "elements",
+      "href": "/elements/alert",
+      "relative": "elements/alert.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "archive",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/elements/archive.md",
+      "directory": "elements",
+      "href": "/elements/archive",
+      "relative": "elements/archive.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "bitflow",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/elements/bitflow.md",
+      "directory": "elements",
+      "href": "/elements/bitflow",
+      "relative": "elements/bitflow.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "bookmarks",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/elements/bookmarks.md",
+      "directory": "elements",
+      "href": "/elements/bookmarks",
+      "relative": "elements/bookmarks.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "collapsible",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/elements/collapsible.md",
+      "directory": "elements",
+      "href": "/elements/collapsible",
+      "relative": "elements/collapsible.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "download",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/elements/download.md",
+      "directory": "elements",
+      "href": "/elements/download",
+      "relative": "elements/download.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "emoji",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/elements/emoji.md",
+      "directory": "elements",
+      "href": "/elements/emoji",
+      "relative": "elements/emoji.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "excalidraw",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/elements/excalidraw.md",
+      "directory": "elements",
+      "href": "/elements/excalidraw",
+      "relative": "elements/excalidraw.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "glossary",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/elements/glossary.md",
+      "directory": "elements",
+      "href": "/elements/glossary",
+      "relative": "elements/glossary.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "math",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/elements/math.md",
+      "directory": "elements",
+      "href": "/elements/math",
+      "relative": "elements/math.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "mermaid",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/elements/mermaid.md",
+      "directory": "elements",
+      "href": "/elements/mermaid",
+      "relative": "elements/mermaid.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "protect",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/elements/protect.md",
+      "directory": "elements",
+      "href": "/elements/protect",
+      "relative": "elements/protect.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "qr",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/elements/qr.md",
+      "directory": "elements",
+      "href": "/elements/qr",
+      "relative": "elements/qr.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "scratchblock",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/elements/scratchblock.md",
+      "directory": "elements",
+      "href": "/elements/scratchblock",
+      "relative": "elements/scratchblock.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "snippets",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/elements/snippets.md",
+      "directory": "elements",
+      "href": "/elements/snippets",
+      "relative": "elements/snippets.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "struktog",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/elements/struktog.md",
+      "directory": "elements",
+      "href": "/elements/struktog",
+      "relative": "elements/struktog.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "tabs",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/elements/tabs.md",
+      "directory": "elements",
+      "href": "/elements/tabs",
+      "relative": "elements/tabs.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "youtube",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/elements/youtube.md",
+      "directory": "elements",
+      "href": "/elements/youtube",
+      "relative": "elements/youtube.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "index",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/elements/index.md",
+      "directory": "elements",
+      "href": "/elements",
+      "relative": "elements/index.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "custom",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/hosting/custom.md",
+      "directory": "hosting",
+      "href": "/hosting/custom",
+      "relative": "hosting/custom.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "edugitpages",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/hosting/edugitpages.md",
+      "directory": "hosting",
+      "href": "/hosting/edugitpages",
+      "relative": "hosting/edugitpages.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "ghpages",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/hosting/ghpages.md",
+      "directory": "hosting",
+      "href": "/hosting/ghpages",
+      "relative": "hosting/ghpages.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "glpages",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/hosting/glpages.md",
+      "directory": "hosting",
+      "href": "/hosting/glpages",
+      "relative": "hosting/glpages.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "vercel",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/hosting/vercel.md",
+      "directory": "hosting",
+      "href": "/hosting/vercel",
+      "relative": "hosting/vercel.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "index",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/hosting/index.md",
+      "directory": "hosting",
+      "href": "/hosting",
+      "relative": "hosting/index.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "code",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/markdown/code.md",
+      "directory": "markdown",
+      "href": "/markdown/code",
+      "relative": "markdown/code.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "comment",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/markdown/comment.md",
+      "directory": "markdown",
+      "href": "/markdown/comment",
+      "relative": "markdown/comment.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "emphasis",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/markdown/emphasis.md",
+      "directory": "markdown",
+      "href": "/markdown/emphasis",
+      "relative": "markdown/emphasis.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "header",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/markdown/header.md",
+      "directory": "markdown",
+      "href": "/markdown/header",
+      "relative": "markdown/header.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "hr",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/markdown/hr.md",
+      "directory": "markdown",
+      "href": "/markdown/hr",
+      "relative": "markdown/hr.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "image",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/markdown/image.md",
+      "directory": "markdown",
+      "href": "/markdown/image",
+      "relative": "markdown/image.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "line-break",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/markdown/line-break.md",
+      "directory": "markdown",
+      "href": "/markdown/line-break",
+      "relative": "markdown/line-break.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "link",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/markdown/link.md",
+      "directory": "markdown",
+      "href": "/markdown/link",
+      "relative": "markdown/link.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "list",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/markdown/list.md",
+      "directory": "markdown",
+      "href": "/markdown/list",
+      "relative": "markdown/list.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "quote",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/markdown/quote.md",
+      "directory": "markdown",
+      "href": "/markdown/quote",
+      "relative": "markdown/quote.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "table",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/markdown/table.md",
+      "directory": "markdown",
+      "href": "/markdown/table",
+      "relative": "markdown/table.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "index",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/markdown/index.md",
+      "directory": "markdown",
+      "href": "/markdown",
+      "relative": "markdown/index.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+]
+`;

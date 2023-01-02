@@ -24,7 +24,7 @@
     "hyperbook"
   ],
   "activationEvents": [
-    "workspaceContains:**/.hyperbook.json",
+    "workspaceContains:**/hyperbook.json",
     "onLanguage:markdown"
   ],
   "contributes": {
@@ -33,11 +33,6 @@
       "title": "Hyperbook",
       "order": 20,
       "properties": {
-        "hyperbook.preview.scrollPreviewWithEditor": {
-          "type": "boolean",
-          "default": true,
-          "description": "Scroll preview window when you scroll Editor"
-        },
         "hyperbook.preview.showPreviewOptionInMenuBar": {
           "type": "boolean",
           "default": false,

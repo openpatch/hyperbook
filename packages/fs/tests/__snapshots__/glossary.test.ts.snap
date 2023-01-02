@@ -1,0 +1,18 @@
+// Vitest Snapshot v1
+
+exports[`glossary > should get references 1`] = `
+[
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "Glossary",
+    "path": {
+      "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en/book/elements/glossary.md",
+      "directory": "elements",
+      "href": "/elements/glossary",
+      "relative": "elements/glossary.md",
+    },
+    "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/website/en",
+  },
+]
+`;

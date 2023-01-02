@@ -19,7 +19,7 @@ your hyperbook beside the glossary and book folders.
 Here is a simple example of a snippet for using a protect element with
 the same password and id across your hyperbook.
 
-The snippet located in `templates/password.md.hbs`:
+The snippet located in `snippets/password.md.hbs`:
 
 ```md
 :::protect{id="1" password="hyperbook" description="The password is the name of this project."}
@@ -145,4 +145,24 @@ You can use the times helper to repeat block.
 {{#times 10}}
   Hi
 {{/times}}
+```
+
+### file
+
+You can use the file helper to include the content of a file.
+
+```hbs
+{{{file "/archives/project-1/main.c"}}}
+```
+
+You can also only use a few lines of the file.
+
+```hbs
+{{{file "/archives/project-1/main.c" "1,3-4"}}}
+```
+
+And you can define an ellipsis.
+
+```hbs
+{{{file "/archives/project-1/main.c" "1,3-4" "// ..."}}}
 ```

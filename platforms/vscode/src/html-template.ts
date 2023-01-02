@@ -1,12 +1,8 @@
-import { HyperbookJson } from "@hyperbook/types";
 import * as vscode from "vscode";
-import { ChangeMessage } from "./messages/messageTypes";
 
 export const htmlTemplate = (
   context: vscode.ExtensionContext,
-  panel: vscode.WebviewPanel,
-  state: ChangeMessage["payload"],
-  config: HyperbookJson
+  panel: vscode.WebviewPanel
 ) => {
   const nonce = getNonce();
   const bundleScriptPath = panel.webview.asWebviewUri(

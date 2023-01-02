@@ -1,14 +1,6 @@
 import * as vscode from "vscode";
 import * as Constants from "./Constants";
-import matter from "gray-matter";
-import {
-  findHyperbook,
-  findHyperbookRoot,
-  makeLinkForHyperproject,
-  makeNavigationForHyperbook,
-  readProject,
-  resolveSnippets,
-} from "@hyperbook/fs";
+import { hyperbook, hyperproject, VFile, vfile } from "@hyperbook/fs";
 import { htmlTemplate } from "./html-template";
 import { disposeAll } from "./utils/dispose";
 import { ChangeMessage, Message } from "./messages/messageTypes";
@@ -19,20 +11,19 @@ import { HyperbookJson } from "@hyperbook/types";
 export default class Preview {
   panel: vscode.WebviewPanel | undefined;
   editor: any;
-  line: number | undefined;
-  disableWebViewStyling: boolean;
   context: vscode.ExtensionContext;
   hyperbookViewerConfig: any;
+
   private _resource: vscode.Uri | undefined;
+  private _vfile: VFile | undefined;
+
   private readonly disposables: vscode.Disposable[] = [];
   private _disposed: boolean = false;
   private readonly _onDisposeEmitter = new vscode.EventEmitter<void>();
   public readonly onDispose = this._onDisposeEmitter.event;
 
-  //returns true if an html document is open
   constructor(context: vscode.ExtensionContext) {
     this.context = context;
-    this.disableWebViewStyling = false;
     vscode.workspace.onDidChangeTextDocument(async (e) => {
       if (
         e.document.fileName.endsWith("hyperbook.json") ||
@@ -59,20 +50,21 @@ export default class Preview {
   }
 
   async getConfig() {
-    if (vscode.window.activeTextEditor && this._resource) {
-      const startUri = this._resource;
-      const hyperbookRoot = await findHyperbookRoot(startUri?.fsPath).catch(
-        () => ""
-      );
-      const config: HyperbookJson = await findHyperbook(startUri?.fsPath).catch(
-        () =>
-          ({
-            name: "@Hyperbook@",
-          } as const)
-      );
-      if (vscode.workspace.rootPath && config.name !== "@Hyperbook@") {
+    if (this._resource) {
+      const hyperbookRoot = await hyperbook
+        .findRoot(this._resource.fsPath)
+        .catch(() => "");
+      const config: HyperbookJson = await hyperbook
+        .find(this._resource.fsPath)
+        .catch(
+          () =>
+            ({
+              name: "@Hyperbook@",
+            } as const)
+        );
+      if (vscode.workspace.rootPath) {
         const projectPath = this.hyperbookViewerConfig.get("root");
-        const project = await readProject(
+        const project = await hyperproject.get(
           path.join(vscode.workspace.rootPath, projectPath)
         );
         const links = [];
@@ -80,10 +72,10 @@ export default class Preview {
           links.push(...config.links);
         }
         if (project.type === "library") {
-          const link = await makeLinkForHyperproject(project, config.language, {
+          const link = await hyperproject.getLink(project, config.language, {
             href: {
               useSrc: true,
-              append: ["index.md"],
+              append: ["book/index.md"],
               protocol: "file:///",
             },
           });
@@ -112,44 +104,31 @@ export default class Preview {
     if (
       vscode.window.activeTextEditor &&
       this.checkDocumentIsHyperbookFile(false) &&
-      vscode.window.activeTextEditor.document.languageId === "markdown" &&
       this._resource
     ) {
-      const { content, data } = matter(
-        vscode.window.activeTextEditor?.document.getText()
-      );
-      const toc = parseTocFromMarkdown(content);
-      const root = await findHyperbookRoot(this._resource.fsPath);
-      const contentWithSnippets = await resolveSnippets(root, content);
-      let currPath = path.relative(
-        path.join(root, "book"),
-        this._resource.fsPath
-      );
-      if (!currPath.startsWith("/")) {
-        currPath = "/" + currPath;
-      }
-      if (currPath.endsWith("index.md")) {
-        currPath = currPath.slice(0, -8);
-      }
-      if (currPath.endsWith(".md")) {
-        currPath = currPath.slice(0, -3);
-      }
+      if (this._vfile) {
+        const { content, data } = await vfile.getMarkdown(this._vfile);
+        const navigation = await hyperbook.getNavigation(
+          this._vfile.root,
+          this._vfile
+        );
+        const toc = parseTocFromMarkdown(content);
 
-      const navigation = await makeNavigationForHyperbook(root, currPath);
-      const state = {
-        content: contentWithSnippets,
-        data,
-        source: this._resource.toString(),
-        toc,
-        assetsPath: await this.getWorkspacePath(),
-        navigation,
-      };
-      return state;
+        const state = {
+          content,
+          data,
+          source: this._resource.toString(),
+          toc,
+          assetsPath: await this.getWorkspacePath(),
+          navigation,
+        };
+        return state;
+      }
     }
     return {
       content: "",
       data: {},
-      assetsPath: "",
+      assetsPath: await this.getWorkspacePath(),
       source: "",
     };
   }
@@ -167,19 +146,14 @@ export default class Preview {
       const fileName = filePaths[filePaths.length - 1];
       this.panel.title = `[Preview] ${fileName}`;
       this._resource = vscode.window.activeTextEditor.document.uri;
-      if (
-        vscode.window.activeTextEditor.document.languageId === "markdown" &&
-        this.hyperbookViewerConfig.get("preview.scrollPreviewWithEditor")
-      ) {
-        this.postMessage({
-          type: "SCROLL_FROM_EXTENSION",
-          payload: {
-            line: vscode.window.activeTextEditor.visibleRanges,
-            source: vscode.window.activeTextEditor.document,
-          },
-        });
-      }
-      if (vscode.window.activeTextEditor.document.languageId === "markdown") {
+      const hyperbookRoot = await hyperbook.findRoot(this._resource.fsPath);
+      this._vfile = await vfile.getByAbsolutePath(
+        hyperbookRoot,
+        null,
+        this._resource.fsPath
+      );
+
+      if (this.checkDocumentIsHyperbookFile(false)) {
         this.postMessage({
           type: "CHANGE",
           payload: await this.getState(),
@@ -196,7 +170,9 @@ export default class Preview {
     if (this.panel && this._resource?.fsPath) {
       let hyperbookRoot = this._resource.fsPath;
       if (!this._resource.fsPath.endsWith("hyperbook.json")) {
-        hyperbookRoot = await findHyperbookRoot(this._resource.fsPath);
+        hyperbookRoot = await hyperbook.findRoot(this._resource.fsPath);
+      } else {
+        hyperbookRoot = path.dirname(this._resource.fsPath);
       }
 
       const basePath = this.panel.webview
@@ -211,12 +187,7 @@ export default class Preview {
 
   async getWebviewContent() {
     if (this.panel) {
-      return htmlTemplate(
-        this.context,
-        this.panel,
-        await this.getState(),
-        await this.getConfig()
-      );
+      return htmlTemplate(this.context, this.panel);
     } else {
       return "";
     }
@@ -233,31 +204,29 @@ export default class Preview {
   }
 
   checkDocumentIsHyperbookFile(showWarning: boolean): boolean {
-    let isMarkdown =
-      vscode.window.activeTextEditor?.document.languageId.toLowerCase() ===
-      "markdown";
-    let isHyperbookJson =
-      vscode.window.activeTextEditor?.document.fileName.endsWith(
-        "hyperbook.json"
-      ) || false;
-    let isHyperlibraryJson =
-      vscode.window.activeTextEditor?.document.fileName.endsWith(
-        "hyperlibrary.json"
-      ) || false;
-    if (!isMarkdown && !isHyperbookJson && showWarning && !isHyperlibraryJson) {
+    const supportedLanguages = ["markdown", "yaml", "json"];
+    const supportedFiles = ["hyperbook.json", "hyperlibrary.json"];
+    const fileName = path.basename(
+      vscode.window.activeTextEditor?.document.fileName || ""
+    );
+    const languageId =
+      vscode.window.activeTextEditor?.document.languageId.toLowerCase() || "";
+    let isSupported =
+      supportedLanguages.includes(languageId) ||
+      supportedFiles.includes(fileName);
+    if (!isSupported && showWarning) {
       vscode.window.showInformationMessage(
         Constants.ErrorMessages.NO_HYPERBOOK_FILE
       );
     }
-    return isMarkdown || isHyperbookJson || isHyperbookJson;
+    return isSupported;
   }
 
   async initMarkdownPreview(viewColumn: number) {
     let proceed = this.checkDocumentIsHyperbookFile(false);
     if (proceed) {
-      const filePaths =
-        vscode.window.activeTextEditor?.document.fileName.split("/") || [];
-      const fileName = filePaths[filePaths.length - 1];
+      const filePaths = vscode.window.activeTextEditor?.document.fileName || "";
+      const fileName = path.basename(filePaths);
       // Create and show a new webview
       this.panel = vscode.window.createWebviewPanel(
         "liveHTMLPreviewer",
@@ -298,60 +267,23 @@ export default class Preview {
         this.handleTextDocumentChange.bind(this)
       );
 
-      vscode.window.onDidChangeTextEditorVisibleRanges(
-        ({ textEditor, visibleRanges }) => {
-          this.hyperbookViewerConfig =
-            vscode.workspace.getConfiguration("hyperbook");
-          if (
-            textEditor.document.languageId === "markdown" &&
-            this.hyperbookViewerConfig.get("preview.scrollPreviewWithEditor")
-          ) {
-            this.postMessage({
-              type: "SCROLL_FROM_EXTENSION",
-              payload: {
-                line: visibleRanges,
-                source: textEditor.document,
-              },
-            });
-          }
-        }
-      );
-
       this.panel.webview.onDidReceiveMessage(async (m: Message) => {
-        if (m.type === "SCROLL_FROM_WEBVIEW") {
-          this.onDidScrollPreview(m.payload.line);
-        } else if (m.type === "OPEN") {
-          const indexPath = path.join(
-            vscode.workspace.rootPath || "",
-            m.payload.basePath || "",
-            m.payload.rootFolder || "",
-            m.payload.path,
-            "index.md"
-          );
-          const indexFileUri = vscode.Uri.file(indexPath);
-          const hasExtension = m.payload.path.split(".").length > 1;
-          if (!hasExtension) {
-            m.payload.path += ".md";
-          }
-
-          const fileUri = vscode.Uri.file(
-            path.join(
-              vscode.workspace.rootPath || "",
-              m.payload.basePath || "",
-              m.payload.rootFolder || "",
-              m.payload.path
-            )
-          );
-          try {
-            await vscode.workspace.fs.stat(fileUri);
+        if (m.type === "OPEN" && this._vfile) {
+          if (m.payload.path.startsWith("file")) {
+            const fileUri = vscode.Uri.parse(m.payload.path);
             return vscode.workspace
               .openTextDocument(fileUri)
               .then((doc) =>
                 vscode.window.showTextDocument(doc, vscode.ViewColumn.One)
               );
-          } catch (e) {
+          }
+
+          const file = await vfile.get(this._vfile.root, null, m.payload.path);
+
+          if (file) {
+            const fileUri = vscode.Uri.file(file.path.absolute);
             return vscode.workspace
-              .openTextDocument(indexFileUri)
+              .openTextDocument(fileUri)
               .then((doc) =>
                 vscode.window.showTextDocument(doc, vscode.ViewColumn.One)
               );
@@ -386,27 +318,6 @@ export default class Preview {
         this.disposables
       );
     }
-  }
-
-  private onDidScrollPreview(line: number) {
-    this.line = line;
-    for (const editor of vscode.window.visibleTextEditors) {
-      if (!this.isPreviewOf(editor.document.uri)) {
-        continue;
-      }
-      const sourceLine = Math.floor(line);
-      const fraction = line - sourceLine;
-      const text = editor.document.lineAt(sourceLine).text;
-      const start = Math.floor(fraction * text.length);
-      editor.revealRange(
-        new vscode.Range(sourceLine, start, sourceLine + 1, 0),
-        vscode.TextEditorRevealType.AtTop
-      );
-    }
-  }
-
-  private isPreviewOf(resource: vscode.Uri): boolean {
-    return this._resource?.fsPath === resource.fsPath;
   }
 
   private get iconPath() {

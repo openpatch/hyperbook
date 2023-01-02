@@ -1,0 +1,291 @@
+// Vitest Snapshot v1
+
+exports[`hyperbook > should get navigation 1`] = `
+{
+  "current": {
+    "href": "/markdown/image",
+    "name": "Image",
+    "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/markdown/image.md",
+  },
+  "next": {
+    "href": "/markdown/line-break",
+    "name": "Line Break",
+    "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/markdown/line-break.md",
+  },
+  "pages": [
+    {
+      "href": "/",
+      "index": 0,
+      "name": "Getting Started",
+      "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/index.md",
+    },
+  ],
+  "previous": {
+    "href": "/markdown/hr",
+    "name": "Horizontal Rule",
+    "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/markdown/hr.md",
+  },
+  "sections": [
+    {
+      "href": "/markdown",
+      "index": 0,
+      "isEmpty": true,
+      "name": "Markdown Reference",
+      "pages": [
+        {
+          "href": "/markdown/code",
+          "name": "Code",
+          "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/markdown/code.md",
+        },
+        {
+          "href": "/markdown/comment",
+          "name": "Comment",
+          "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/markdown/comment.md",
+        },
+        {
+          "href": "/markdown/emphasis",
+          "name": "Emphasis",
+          "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/markdown/emphasis.md",
+        },
+        {
+          "href": "/markdown/header",
+          "name": "Header",
+          "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/markdown/header.md",
+        },
+        {
+          "href": "/markdown/hr",
+          "name": "Horizontal Rule",
+          "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/markdown/hr.md",
+        },
+        {
+          "href": "/markdown/image",
+          "name": "Image",
+          "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/markdown/image.md",
+        },
+        {
+          "href": "/markdown/line-break",
+          "name": "Line Break",
+          "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/markdown/line-break.md",
+        },
+        {
+          "href": "/markdown/link",
+          "name": "Link",
+          "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/markdown/link.md",
+        },
+        {
+          "href": "/markdown/list",
+          "name": "List",
+          "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/markdown/list.md",
+        },
+        {
+          "href": "/markdown/quote",
+          "name": "Quote",
+          "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/markdown/quote.md",
+        },
+        {
+          "href": "/markdown/table",
+          "name": "Table",
+          "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/markdown/table.md",
+        },
+      ],
+      "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/markdown/index.md",
+      "sections": [],
+    },
+    {
+      "href": "/configuration",
+      "index": 1,
+      "isEmpty": true,
+      "name": "Configuration",
+      "pages": [
+        {
+          "href": "/configuration/book",
+          "index": 0,
+          "name": "Book Configuration",
+          "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/configuration/book.md",
+        },
+        {
+          "href": "/configuration/page",
+          "index": 1,
+          "name": "Page Configuration",
+          "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/configuration/page.md",
+        },
+        {
+          "href": "/configuration/section",
+          "index": 2,
+          "name": "Section Configuration",
+          "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/configuration/section.md",
+        },
+        {
+          "href": "/configuration/library",
+          "name": "Library Configuration",
+          "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/configuration/library.md",
+        },
+      ],
+      "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/configuration/index.md",
+      "sections": [],
+    },
+    {
+      "href": "/elements",
+      "index": 2,
+      "isEmpty": true,
+      "name": "Elements",
+      "pages": [
+        {
+          "href": "/elements/alert",
+          "name": "Alert",
+          "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/elements/alert.md",
+        },
+        {
+          "href": "/elements/archive",
+          "name": "Archive",
+          "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/elements/archive.md",
+        },
+        {
+          "href": "/elements/bitflow",
+          "name": "Bitflow",
+          "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/elements/bitflow.md",
+        },
+        {
+          "href": "/elements/bookmarks",
+          "name": "Bookmarks",
+          "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/elements/bookmarks.md",
+        },
+        {
+          "href": "/elements/collapsible",
+          "name": "Collapsible",
+          "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/elements/collapsible.md",
+        },
+        {
+          "href": "/elements/download",
+          "name": "Download",
+          "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/elements/download.md",
+        },
+        {
+          "href": "/elements/emoji",
+          "name": "Emoji",
+          "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/elements/emoji.md",
+        },
+        {
+          "href": "/elements/excalidraw",
+          "name": "Excalidraw",
+          "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/elements/excalidraw.md",
+        },
+        {
+          "href": "/elements/glossary",
+          "name": "Glossary",
+          "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/elements/glossary.md",
+        },
+        {
+          "href": "/elements/math",
+          "name": "Math",
+          "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/elements/math.md",
+        },
+        {
+          "href": "/elements/mermaid",
+          "name": "Mermaid",
+          "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/elements/mermaid.md",
+        },
+        {
+          "href": "/elements/protect",
+          "name": "Protect",
+          "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/elements/protect.md",
+        },
+        {
+          "href": "/elements/qr",
+          "name": "QR Code",
+          "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/elements/qr.md",
+        },
+        {
+          "href": "/elements/scratchblock",
+          "name": "Scratchblock",
+          "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/elements/scratchblock.md",
+        },
+        {
+          "href": "/elements/snippets",
+          "name": "Snippets",
+          "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/elements/snippets.md",
+        },
+        {
+          "href": "/elements/struktog",
+          "name": "Struktog",
+          "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/elements/struktog.md",
+        },
+        {
+          "href": "/elements/tabs",
+          "name": "Tabs",
+          "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/elements/tabs.md",
+        },
+        {
+          "href": "/elements/youtube",
+          "name": "YouTube",
+          "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/elements/youtube.md",
+        },
+      ],
+      "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/elements/index.md",
+      "sections": [],
+    },
+    {
+      "href": "/hosting",
+      "index": 3,
+      "isEmpty": true,
+      "name": "Hosting",
+      "pages": [
+        {
+          "href": "/hosting/custom",
+          "name": "Custom",
+          "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/hosting/custom.md",
+        },
+        {
+          "href": "/hosting/edugitpages",
+          "name": "EduGit Pages",
+          "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/hosting/edugitpages.md",
+        },
+        {
+          "href": "/hosting/ghpages",
+          "name": "GitHub Pages",
+          "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/hosting/ghpages.md",
+        },
+        {
+          "href": "/hosting/glpages",
+          "name": "GitLab Pages",
+          "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/hosting/glpages.md",
+        },
+        {
+          "href": "/hosting/vercel",
+          "name": "Vercel",
+          "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/hosting/vercel.md",
+        },
+      ],
+      "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/hosting/index.md",
+      "sections": [],
+    },
+    {
+      "href": "/advanced",
+      "index": 10,
+      "isEmpty": true,
+      "name": "Advanced Features",
+      "pages": [
+        {
+          "href": "/advanced/templates",
+          "name": "Templates",
+          "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/advanced/templates.md",
+        },
+        {
+          "hide": true,
+          "href": "/advanced/template-demo-yaml",
+          "name": "Templates - Demo",
+          "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/advanced/template-demo-yaml.yml",
+        },
+        {
+          "hide": true,
+          "href": "/advanced/template-demo-json",
+          "name": "Templates - Demo",
+          "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/advanced/template-demo-json.json",
+        },
+      ],
+      "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/advanced/index.md",
+      "sections": [],
+    },
+  ],
+}
+`;
