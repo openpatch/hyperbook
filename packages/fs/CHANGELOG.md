@@ -1,5 +1,13 @@
 # @hyperbook/fs
 
+## 0.4.0
+
+### Minor Changes
+
+- [`0c58ad8`](https://github.com/openpatch/hyperbook/commit/0c58ad80c3c8b145868d2c0303d42478ec0a9978) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Implement use a virtual file system. This allow for an abstraction layer, which enables us to implement a template system.
+
+- [`0c58ad8`](https://github.com/openpatch/hyperbook/commit/0c58ad80c3c8b145868d2c0303d42478ec0a9978) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add templates to Hyperbook. Templates allow for resuing a layout. See the documentation for more details.
+
 ## 0.3.0
 
 ### Minor Changes

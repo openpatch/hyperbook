@@ -1,6 +1,6 @@
 {
   "name": "@platforms/web",
-  "version": "0.11.0",
+  "version": "0.12.0",
   "private": true,
   "scripts": {
     "build": "rimraf dist && tsc --project tsconfig.json --noEmit && node ./esbuild.mjs",
