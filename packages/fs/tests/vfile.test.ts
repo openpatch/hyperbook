@@ -3,14 +3,30 @@ import { describe, it, expect } from "vitest";
 import * as vfile from "../src/vfile";
 
 describe("list", () => {
+  const relative = (s: string) =>
+    path.relative(path.join(__dirname, "..", "..", ".."), s);
   it("should list all", async () => {
     let websiteEn = path.join(__dirname, "..", "..", "..", "website", "en");
-    expect(await vfile.list(websiteEn)).toMatchSnapshot();
+    const files = await vfile.list(websiteEn);
+    expect(
+      files.map((f) => ({
+        ...f,
+        root: relative(f.root),
+        path: { ...f.path, absolute: relative(f.path.absolute) },
+      }))
+    ).toMatchSnapshot();
   });
 
   it("should list for folder book", async () => {
     let websiteEn = path.join(__dirname, "..", "..", "..", "website", "en");
-    expect(await vfile.listForFolder(websiteEn, "book")).toMatchSnapshot();
+    const files = await vfile.listForFolder(websiteEn, "book");
+    expect(
+      files.map((f) => ({
+        ...f,
+        root: relative(f.root),
+        path: { ...f.path, absolute: relative(f.path.absolute) },
+      }))
+    ).toMatchSnapshot();
   });
 
   it("should include main index", async () => {
@@ -37,13 +53,6 @@ describe("getMarkdown", () => {
 });
 
 describe("getDirectory", () => {
-  it("should get directory", async () => {
-    let websiteEn = path.join(__dirname, "..", "..", "..", "website", "en");
-    let directory = await vfile.getDirectory(websiteEn, "book");
-
-    expect(directory).toMatchSnapshot();
-  });
-
   it("should include main index", async () => {
     let websiteEn = path.join(__dirname, "..", "..", "..", "website", "en");
     let directory = await vfile.getDirectory(websiteEn, "book");

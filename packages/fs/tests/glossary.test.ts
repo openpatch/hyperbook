@@ -3,6 +3,8 @@ import { glossary, vfile } from "../src";
 import { describe, it, expect } from "vitest";
 
 describe("glossary", () => {
+  const relative = (s: string) =>
+    path.relative(path.join(__dirname, "..", "..", ".."), s);
   it("should get references", async () => {
     let websiteEn = path.join(__dirname, "..", "..", "..", "website", "en");
     let files = await vfile.list(websiteEn);
@@ -13,6 +15,13 @@ describe("glossary", () => {
       throw Error("Glossary file not found");
     }
 
-    expect(await glossary.getReferences(glossaryFile)).toMatchSnapshot();
+    const references = await glossary.getReferences(glossaryFile);
+    expect(
+      references.map((f) => ({
+        ...f,
+        root: relative(f.root),
+        path: { ...f.path, absolute: relative(f.path.absolute) },
+      }))
+    ).toMatchSnapshot();
   });
 });
