@@ -3,15 +3,9 @@ import matter from "gray-matter";
 import fs from "fs/promises";
 import fsD from "fs";
 import { HyperbookFrontmatter } from "@hyperbook/types";
-//@ts-ignore
-import handlebars from "handlebars/dist/cjs/handlebars";
 import yaml from "yaml";
-
-handlebars.registerHelper("times", (n: number, block: any) => {
-  let accum = "";
-  for (let i = 0; i < n; ++i) accum += block.fn(i);
-  return accum;
-});
+import { handlebars } from "./handlebars";
+import { lookup } from "mime-types";
 
 export type VFile = {
   root: string;
@@ -245,6 +239,15 @@ export const getMarkdown = async (
       `Unsupported file location. Only files from book and glossary are supported for reading their markdown content.`
     );
   }
+
+  handlebars.registerHelper("base64", (src: string) => {
+    const fileDataBase64 = fsD.readFileSync(
+      path.join(file.root, src),
+      "base64"
+    );
+    const mime = lookup(path.join(file.root, src));
+    return `data:${mime};base64,${fileDataBase64}`;
+  });
 
   handlebars.registerHelper(
     "file",

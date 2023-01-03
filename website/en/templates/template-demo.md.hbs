@@ -11,9 +11,13 @@ Templates are preprocessed, so you can use snippets aswell.
 
 :snippet{#smiley n=5}
 
+# Embedded Image
+
+![Embedded Image]({{ base64 "/public/test.jpg" }})
+
 # Code Example
 
 ```c
-{{{ file src "3-4" "// ..." }}}
-{{{ file src }}}
+{{{ file (concat "/archives/project-1/" src) "3-4" "// ..." }}}
+{{{ file (concat "/archives/project-1/" src) }}}
 ```

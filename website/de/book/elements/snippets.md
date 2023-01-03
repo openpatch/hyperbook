@@ -160,3 +160,81 @@ Und du kannst definieren, ob ein Ausblendungssymbol gezeigt werden soll.
 ```hbs
 {{{file "/archives/project-1/main.c" "1,3-4" "// ..."}}}
 ```
+
+### base64
+
+Du kannst auch Mediendateien einbetten.
+
+```hbs
+{{base64 "path/relative/to/root/folder"}}
+```
+
+Dies funktioniert am besten mit dem image Block:
+
+```hbs
+![]({{base64 "path/relative/to/root/folder"}})
+```
+
+### concat
+
+```hbs
+{{concat "Hi" " there"}}
+```
+
+Hi there
+
+### camelcase
+
+```hbs
+{{camcelcase "This is a test"}}
+```
+
+thisIsATest
+
+### pascalcase
+
+```hbs
+{{pascalcase "This is a test"}}
+```
+
+ThisIsATest
+
+### dashcase
+
+```hbs
+{{dashcase "This is a test"}}
+```
+
+This-is-a-test
+
+### lowercase
+
+```hbs
+{{lowercase "This is a test"}}
+```
+
+this is a test
+
+### uppercase
+
+```hbs
+{{lowercase "This is a test"}}
+```
+
+THIS IS A TEST
+
+### replace
+
+```hbs
+{{replace "Give me Banana Banana" "Banana" "Apple"}}
+```
+
+Give me Apple Banana
+
+### replaceAll
+
+```hbs
+{{replaceAll "Give me Banana Banana" "Banana" "Apple"}}
+```
+
+Give me Apple Apple

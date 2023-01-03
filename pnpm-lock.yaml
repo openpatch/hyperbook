@@ -327,19 +327,23 @@ importers:
   packages/fs:
     specifiers:
       '@hyperbook/types': workspace:*
+      '@types/mime-types': ^2.1.1
       chalk: 5.2.0
       find-up: ^6.3.0
       gray-matter: 4.0.3
       handlebars: ^4.7.7
+      mime-types: ^2.1.35
       vitest: ^0.26.3
       yaml: ^2.2.1
     dependencies:
       chalk: 5.2.0
       find-up: 6.3.0
       gray-matter: 4.0.3
+      mime-types: 2.1.35
       yaml: 2.2.1
     devDependencies:
       '@hyperbook/types': link:../types
+      '@types/mime-types': 2.1.1
       handlebars: 4.7.7
       vitest: 0.26.3
 
@@ -2854,6 +2858,10 @@ packages:
   /@types/mdurl/1.0.2:
     resolution: {integrity: sha512-eC4U9MlIcu2q0KQmXszyn5Akca/0jrQmwDRgpAMJai7qBWq4amIQhZyNau4VYGtCeALvW1/NtjzJJ567aZxfKA==}
     dev: false
+
+  /@types/mime-types/2.1.1:
+    resolution: {integrity: sha512-vXOTGVSLR2jMw440moWTC7H19iUyLtP3Z1YTj7cSsubOICinjMxFeb/V57v9QdyyPGbbWolUFSSmSiRSn94tFw==}
+    dev: true
 
   /@types/minimatch/3.0.5:
     resolution: {integrity: sha512-Klz949h02Gz2uZCMGwDUSDS1YBlTdDDgbWHi+81l29tQALUtvz4rAYi5uoVhE5Lagoq6DeqAUlbrHvW/mXDgdQ==}

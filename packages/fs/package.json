@@ -45,11 +45,13 @@
     "chalk": "5.2.0",
     "find-up": "^6.3.0",
     "gray-matter": "4.0.3",
+    "mime-types": "^2.1.35",
     "yaml": "^2.2.1"
   },
   "devDependencies": {
-    "handlebars": "^4.7.7",
     "@hyperbook/types": "workspace:*",
+    "@types/mime-types": "^2.1.1",
+    "handlebars": "^4.7.7",
     "vitest": "^0.26.3"
   },
   "type": "module"

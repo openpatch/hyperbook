@@ -2,5 +2,5 @@
   "template": "template-demo",
   "name": "Templates - Demo",
   "description": "Hi I am a template demo\n for JSON",
-  "src": "/archives/project-1/main.c"
+  "src": "main.c"
 }
