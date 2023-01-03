@@ -1,5 +1,16 @@
 # hyperbook
 
+## 0.13.0
+
+### Minor Changes
+
+- [`b134e02`](https://github.com/openpatch/hyperbook/commit/b134e027db1b11cbd0a7e46858dfa60b93c05653) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add more helpers for templates and snippets. See documentation of snippets for more details.
+
+### Patch Changes
+
+- Updated dependencies [[`b134e02`](https://github.com/openpatch/hyperbook/commit/b134e027db1b11cbd0a7e46858dfa60b93c05653)]:
+  - @hyperbook/fs@0.5.0
+
 ## 0.12.0
 
 ### Minor Changes
