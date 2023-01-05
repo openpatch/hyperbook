@@ -11,7 +11,7 @@ importers:
       chokidar: 3.5.3
       cross-env: 7.0.3
       esbuild: 0.16.14
-      husky: 8.0.2
+      husky: 8.0.3
       plop: 3.1.1
       prettier: 2.8.1
       prettier-plugin-sort-json: 1.0.0
@@ -32,7 +32,7 @@ importers:
       chokidar: 3.5.3
       cross-env: 7.0.3
       esbuild: 0.16.14
-      husky: 8.0.2
+      husky: 8.0.3
       plop: 3.1.1
       prettier: 2.8.1
       prettier-plugin-sort-json: 1.0.0_prettier@2.8.1
@@ -6185,8 +6185,8 @@ packages:
     engines: {node: '>=8.12.0'}
     dev: true
 
-  /husky/8.0.2:
-    resolution: {integrity: sha512-Tkv80jtvbnkK3mYWxPZePGFpQ/tT3HNSs/sasF9P2YfkMezDl3ON37YN6jUUI4eTg5LcyVynlb6r4eyvOmspvg==}
+  /husky/8.0.3:
+    resolution: {integrity: sha512-+dQSyqPh4x1hlO1swXBiNb2HzTDN1I2IGLQx1GrBuiqFJfoMrnZWwVmatvSiO+Iz8fBUnf+lekwNo4c2LlXItg==}
     engines: {node: '>=14'}
     hasBin: true
     dev: true
