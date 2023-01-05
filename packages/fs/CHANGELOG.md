@@ -1,5 +1,11 @@
 # @hyperbook/fs
 
+## 0.6.0
+
+### Minor Changes
+
+- [`56a42f6`](https://github.com/openpatch/hyperbook/commit/56a42f6a4b67de082fc90b812a248c5b7e004c31) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add ability to extract lines based on a regex.
+
 ## 0.5.0
 
 ### Minor Changes
