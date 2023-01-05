@@ -757,18 +757,6 @@ exports[`list > should list all 1`] = `
     "root": "website/en",
   },
   {
-    "extension": ".zip",
-    "folder": "public",
-    "name": "project-1",
-    "path": {
-      "absolute": "website/en/public/archives/project-1.zip",
-      "directory": "archives",
-      "href": "/archives/project-1.zip",
-      "relative": "archives/project-1.zip",
-    },
-    "root": "website/en",
-  },
-  {
     "extension": ".excalidraw",
     "folder": "public",
     "name": "hyperbook",
