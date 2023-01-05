@@ -87,4 +87,64 @@ describe("extractLines", () => {
     const extractedLines = vfile.extractLines(text);
     expect(extractedLines).toMatchSnapshot();
   });
+  it("should extract lines matching a regex", () => {
+    const source = `
+import org.openpatch.scratch.Sprite;
+import org.openpatch.scratch.Stage;
+import org.openpatch.scratch.extensions.GifRecorder;
+
+public class SpriteGetCurrentCostumeIndex {
+    public SpriteGetCurrentCostumeIndex() {
+        Stage myStage = new Stage(256, 100);
+        Sprite mySprite = new Sprite("zeta", "examples/java/assets/zeta_green_badge.png");
+        mySprite.addCostume("gamma", "examples/java/assets/gamma_purple_badge.png");
+        mySprite.changeY(20);
+        myStage.add(mySprite);
+        mySprite.think("Index: " + mySprite.getCurrentCostumeIndex());
+        GifRecorder recorder = new GifRecorder("examples/java/" + this.getClass().getName() + ".gif");
+        recorder.start();
+
+        myStage.wait(2000);
+        mySprite.nextCostume();
+        mySprite.think("Index: " + mySprite.getCurrentCostumeIndex());
+        myStage.wait(2000);
+
+        recorder.stop();
+        System.exit(0);
+    }
+
+    public static void main(String[] args) {
+        new SpriteGetCurrentCostumeIndex();
+    }
+}
+`;
+    const extracted = `
+import org.openpatch.scratch.Sprite;
+import org.openpatch.scratch.Stage;
+
+public class SpriteGetCurrentCostumeIndex {
+    public SpriteGetCurrentCostumeIndex() {
+        Stage myStage = new Stage(256, 100);
+        Sprite mySprite = new Sprite("zeta", "examples/java/assets/zeta_green_badge.png");
+        mySprite.addCostume("gamma", "examples/java/assets/gamma_purple_badge.png");
+        mySprite.changeY(20);
+        myStage.add(mySprite);
+        mySprite.think("Index: " + mySprite.getCurrentCostumeIndex());
+
+        myStage.wait(2000);
+        mySprite.nextCostume();
+        mySprite.think("Index: " + mySprite.getCurrentCostumeIndex());
+        myStage.wait(2000);
+
+        System.exit(0);
+    }
+
+    public static void main(String[] args) {
+        new SpriteGetCurrentCostumeIndex();
+    }
+}
+`;
+    const result = vfile.extractLines(source, "reg:[Rr]ecorder");
+    expect(result).toEqual(extracted);
+  });
 });

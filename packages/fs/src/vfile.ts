@@ -202,30 +202,37 @@ export const extractLines = (
   if (!lines || typeof lines !== "string") {
     return content;
   }
-  const lineNumbers: number[] = [];
-  for (const line of lines.split(",")) {
-    if (line.includes("-")) {
-      const [start, end] = line.split("-");
-      for (let i = Number(start); i <= Number(end); i++) {
-        lineNumbers.push(i);
-      }
-    } else {
-      lineNumbers.push(Number(line));
-    }
-  }
 
-  const contentLines = content.split("\n");
   let extractedLines: string[] = [];
-  let lastLineNumber = 0;
-  for (const lineNumber of lineNumbers) {
-    if (lineNumber - lastLineNumber > 1 && ellipsis) {
+  if (!lines.startsWith("reg:")) {
+    const lineNumbers: number[] = [];
+    for (const line of lines.split(",")) {
+      if (line.includes("-")) {
+        const [start, end] = line.split("-");
+        for (let i = Number(start); i <= Number(end); i++) {
+          lineNumbers.push(i);
+        }
+      } else {
+        lineNumbers.push(Number(line));
+      }
+    }
+
+    const contentLines = content.split("\n");
+    let lastLineNumber = 0;
+    for (const lineNumber of lineNumbers) {
+      if (lineNumber - lastLineNumber > 1 && ellipsis) {
+        extractedLines.push(ellipsis);
+      }
+      extractedLines.push(contentLines[lineNumber - 1]);
+      lastLineNumber = lineNumber;
+    }
+    if (lastLineNumber < contentLines.length - 1 && ellipsis) {
       extractedLines.push(ellipsis);
     }
-    extractedLines.push(contentLines[lineNumber - 1]);
-    lastLineNumber = lineNumber;
-  }
-  if (lastLineNumber < contentLines.length - 1 && ellipsis) {
-    extractedLines.push(ellipsis);
+  } else {
+    const contentLines = content.split("\n");
+    const reg = new RegExp(lines.slice(4));
+    extractedLines = contentLines.filter((c) => !reg.test(c));
   }
 
   return extractedLines.join("\n");
