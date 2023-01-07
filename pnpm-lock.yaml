@@ -587,7 +587,7 @@ importers:
       gray-matter: 4.0.3
       node-polyfill-webpack-plugin: ^2.0.1
       npm-run-all: 4.1.5
-      ovsx: 0.7.1
+      ovsx: 0.8.0
       prettier: 2.8.1
       react: 18.2.0
       react-dom: 18.2.0
@@ -645,7 +645,7 @@ importers:
       glob: 8.0.3
       node-polyfill-webpack-plugin: 2.0.1_webpack@5.75.0
       npm-run-all: 4.1.5
-      ovsx: 0.7.1
+      ovsx: 0.8.0
       prettier: 2.8.1
       rimraf: 3.0.2
       sass: 1.57.1
@@ -4216,7 +4216,7 @@ packages:
     dev: true
 
   /concat-map/0.0.1:
-    resolution: {integrity: sha1-2Klr13/Wjfd5OnMDajug1UBdR3s=}
+    resolution: {integrity: sha512-/Srv4dswyQNBfohGpz9o6Yb3Gz3SrUDqBH5rTuhGR7ahtlbYKnVxw2bCFMRljaA7EXHaXZ8wsHdodFvbkhKmqg==}
 
   /console-browserify/1.2.0:
     resolution: {integrity: sha512-ZMkYO/LkF17QvCPqM0gxw8yUzigAOZOSWSHg91FH6orS7vcEj5dVZTidN2fQ14yBSdg97RqhSNwLUXInd52OTA==}
@@ -8236,8 +8236,8 @@ packages:
     resolution: {integrity: sha512-/jHxFIzoMXdqPzTaCpFzAAWhpkSjZPF4Vsn6jAfNpmbH/ymsmd7Qc6VE9BGn0L6YMj6uwpQLxCECpus4ukKS9Q==}
     dev: true
 
-  /ovsx/0.7.1:
-    resolution: {integrity: sha512-+izXZcujPH+Amq0vGPl0JTeG3m4z9Lfjh0X2DsCoe6ora1eFp+Y3VoJJfngTGWfK01cBxQumqDZvb6psICtuDA==}
+  /ovsx/0.8.0:
+    resolution: {integrity: sha512-W1U7lgBIbhSB1DcqyGKeenKzmwWYY78SkWd+BUKKyLyqN6w39Uekdr0PKAM7dyBGb0JLtLE7d86A1jJVn8bEng==}
     engines: {node: '>= 14'}
     hasBin: true
     dependencies:
