@@ -1,5 +1,13 @@
 # @hyperbook/fs
 
+## 0.6.1
+
+### Patch Changes
+
+- [`e4712b2`](https://github.com/openpatch/hyperbook/commit/e4712b20601a96e8e6c2c748a3bd3c9719a6d523) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix bug when no repo is defined.
+
+- [`cad9962`](https://github.com/openpatch/hyperbook/commit/cad99629cae32de462f1145b082f6cc11cbf3cb3) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - fix pages not in navigation
+
 ## 0.6.0
 
 ### Minor Changes
