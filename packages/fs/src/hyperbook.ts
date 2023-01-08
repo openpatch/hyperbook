@@ -127,7 +127,7 @@ export const getNavigation = async (
       if (file.path.href) {
         page.href = file.path.href;
       }
-      arrayOfPages.push();
+      arrayOfPages.push(page);
     }
 
     arrayOfPages = arrayOfPages.sort((a, b) => (a.name > b.name ? 1 : -1));
