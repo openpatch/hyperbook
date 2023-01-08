@@ -1,5 +1,12 @@
 # hyperbook
 
+## 0.13.2
+
+### Patch Changes
+
+- Updated dependencies [[`e4712b2`](https://github.com/openpatch/hyperbook/commit/e4712b20601a96e8e6c2c748a3bd3c9719a6d523), [`cad9962`](https://github.com/openpatch/hyperbook/commit/cad99629cae32de462f1145b082f6cc11cbf3cb3)]:
+  - @hyperbook/fs@0.6.1
+
 ## 0.13.1
 
 ### Patch Changes
