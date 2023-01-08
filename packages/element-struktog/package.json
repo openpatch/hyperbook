@@ -40,7 +40,7 @@
   },
   "dependencies": {
     "@hyperbook/provider": "workspace:*",
-    "js-base64": "3.7.3",
+    "js-base64": "3.7.4",
     "pako": "2.1.0"
   },
   "peerDependencies": {
