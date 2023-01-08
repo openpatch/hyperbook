@@ -75,4 +75,11 @@ handlebars.registerHelper("replace", (s: string, a: string, b: string) => {
   return s.replace(a, b);
 });
 
+handlebars.registerHelper("replace", (s: string, a: string, b: string) => {
+  if (!isString(s)) return "";
+  if (!isString(a)) return s;
+  if (!isString(b)) b = "";
+  return s.replace(a, b);
+});
+
 export { handlebars };

@@ -92,11 +92,16 @@ export const getNavigation = async (
         section = {
           ...markdown.data,
           isEmpty: markdown.content.trim() === "",
-          repo: makeRepoLink(hyperbook.repo, directory.index) ?? undefined,
-          href: directory.index.path.href ?? undefined,
           pages: [],
           sections: [],
         };
+        const repo = makeRepoLink(hyperbook.repo, directory.index);
+        if (repo) {
+          section.repo = repo;
+        }
+        if (directory.index.path.href) {
+          section.href = directory.index.path.href;
+        }
       }
       const { pages, sections } = await getSectionsAndPages(directory);
       arrayOfSections.push({
@@ -112,11 +117,17 @@ export const getNavigation = async (
 
     for (const file of files) {
       const { data } = await vfile.getMarkdown(file);
-      arrayOfPages.push({
+      const page: HyperbookPage = {
         ...data,
-        repo: makeRepoLink(hyperbook.repo, file) ?? undefined,
-        href: file.path.href ?? undefined,
-      });
+      };
+      const repo = makeRepoLink(hyperbook.repo, file);
+      if (repo) {
+        page.repo = repo;
+      }
+      if (file.path.href) {
+        page.href = file.path.href;
+      }
+      arrayOfPages.push();
     }
 
     arrayOfPages = arrayOfPages.sort((a, b) => (a.name > b.name ? 1 : -1));
