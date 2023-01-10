@@ -92,7 +92,11 @@ export const getStaticPaths: GetStaticPaths<{
   page: string[];
 }> = async () => {
   const root = process.env.root ?? process.cwd();
-  const files = await vfile.listForFolder(root, "book");
+  const files = await vfile.listForFolder(
+    root,
+    "book",
+    hyperbook.allowedBookFiles
+  );
   const paths = files.map((f) => {
     const page = f.path.href.slice(1).split("/");
     if (f.name === "index") {

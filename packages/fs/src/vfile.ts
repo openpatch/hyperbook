@@ -76,7 +76,8 @@ export function getHref(vfile: {
 
 export async function getDirectory(
   root: string,
-  folder: VFile["folder"]
+  folder: VFile["folder"],
+  extensions?: string[]
 ): Promise<VDirectory> {
   async function getTree(directory: VDirectory): Promise<VDirectory> {
     const files = await fs
@@ -100,6 +101,10 @@ export async function getDirectory(
         directory.directories.push(await getTree(d));
       } else {
         const { ext, name } = path.parse(file);
+        console.log(extensions, ext);
+        if (extensions && !extensions.includes(ext)) {
+          continue;
+        }
         let vfile: VFile = {
           folder: folder as VFile["folder"],
           path: {
@@ -156,15 +161,19 @@ export const flatDirectory = async ({
 
 export async function listForFolder(
   root: string,
-  folder: VFile["folder"]
+  folder: VFile["folder"],
+  extension?: string[]
 ): Promise<VFile[]> {
-  const directory = await getDirectory(root, folder);
+  const directory = await getDirectory(root, folder, extension);
   return flatDirectory(directory);
 }
 
-export const list = async (root: string): Promise<VFile[]> => {
+export const list = async (
+  root: string,
+  extension?: string[]
+): Promise<VFile[]> => {
   return Promise.all(
-    folders.flatMap((folder) => listForFolder(root, folder))
+    folders.flatMap((folder) => listForFolder(root, folder, extension))
   ).then((f) => f.flat());
 };
 

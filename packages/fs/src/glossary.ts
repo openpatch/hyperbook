@@ -1,9 +1,12 @@
 import { Glossary } from "@hyperbook/types";
+import { allowedBookFiles } from "./hyperbook";
 import { getMarkdown, listForFolder, VFile } from "./vfile";
+
+export const allowedGlossaryFiles = [".md", ".json", ".yml"];
 
 export const get = async (root: string): Promise<Glossary> => {
   const glossary: Glossary = {};
-  const files = await listForFolder(root, "glossary");
+  const files = await listForFolder(root, "glossary", allowedGlossaryFiles);
   for (const file of files) {
     const { data } = await getMarkdown(file);
     let name = data.name;
@@ -29,7 +32,7 @@ export const get = async (root: string): Promise<Glossary> => {
 };
 
 export const getReferences = async (file: VFile): Promise<VFile[]> => {
-  const bookFiles = await listForFolder(file.root, "book");
+  const bookFiles = await listForFolder(file.root, "book", allowedBookFiles);
   const vfiles: VFile[] = [];
   for (const bookFile of bookFiles) {
     const { content, data } = await getMarkdown(bookFile);

@@ -7,6 +7,7 @@ import { useActivePageId, useLink } from "@hyperbook/provider";
 import { Markdown } from "@hyperbook/markdown";
 import { glossary, hyperbook, vfile } from "@hyperbook/fs";
 import { useScrollHash } from "../../useScrollHash";
+import { allowedGlossaryFiles } from "@hyperbook/fs";
 
 type TermProps = {
   markdown: string;
@@ -77,7 +78,11 @@ export const getStaticPaths: GetStaticPaths<{
   term: string[];
 }> = async () => {
   const root = process.env.root ?? process.cwd();
-  const files = await vfile.listForFolder(root, "glossary");
+  const files = await vfile.listForFolder(
+    root,
+    "glossary",
+    glossary.allowedGlossaryFiles
+  );
   const paths = files.map((f) => ({
     params: {
       term: f.path.href.slice(10).split("/"),
