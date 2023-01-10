@@ -1,5 +1,10 @@
 //@ts-ignore
 import handlebars from "handlebars/dist/cjs/handlebars";
+import { findUpSync } from "find-up";
+import { lookup } from "mime-types";
+import fs from "fs";
+import path from "path";
+import { extractLines } from "./vfile";
 
 const isString = (s: any): s is string => {
   return typeof s === "string";
@@ -81,5 +86,32 @@ handlebars.registerHelper("replace", (s: string, a: string, b: string) => {
   if (!isString(b)) b = "";
   return s.replace(a, b);
 });
+
+handlebars.registerHelper("rbase64", (src: string) => {
+  const gitRoot = findUpSync(".git");
+  if (!gitRoot) {
+    return "Outside is only applicable in git projects.";
+  }
+  let p = path.join(gitRoot, src);
+  const fileDataBase64 = fs.readFileSync(p, "base64");
+  const mime = lookup(p);
+  return `data:${mime};base64,${fileDataBase64}`;
+});
+
+handlebars.registerHelper(
+  "rfile",
+  (src: string, lines?: string, ellipsis?: string) => {
+    if (!src) {
+      throw Error("file needs a path to a file");
+    }
+    const gitRoot = findUpSync(".git");
+    if (!gitRoot) {
+      return "Outside is only applicable in git projects.";
+    }
+    let p = path.join(gitRoot, src);
+    const content = fs.readFileSync(p, "utf8");
+    return extractLines(content, lines, ellipsis);
+  }
+);
 
 export { handlebars };

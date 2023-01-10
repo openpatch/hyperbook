@@ -256,11 +256,9 @@ export const getMarkdown = async (
   }
 
   handlebars.registerHelper("base64", (src: string) => {
-    const fileDataBase64 = fsD.readFileSync(
-      path.join(file.root, src),
-      "base64"
-    );
-    const mime = lookup(path.join(file.root, src));
+    let p = path.join(file.root, src);
+    const fileDataBase64 = fsD.readFileSync(p, "base64");
+    const mime = lookup(p);
     return `data:${mime};base64,${fileDataBase64}`;
   });
 
@@ -270,7 +268,8 @@ export const getMarkdown = async (
       if (!src) {
         throw Error("file needs a path to a file");
       }
-      const content = fsD.readFileSync(path.join(file.root, src), "utf8");
+      let p = path.join(file.root, src);
+      const content = fsD.readFileSync(p, "utf8");
       return extractLines(content, lines, ellipsis);
     }
   );
