@@ -1,5 +1,11 @@
 # @hyperbook/fs
 
+## 0.6.2
+
+### Patch Changes
+
+- [`1614352`](https://github.com/openpatch/hyperbook/commit/16143528449b1bfd2d70ab781df66f945b14f3ea) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix hyperbook not buidling when an unsupported file is present in the book or glossary folder.
+
 ## 0.6.1
 
 ### Patch Changes
