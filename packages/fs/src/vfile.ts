@@ -101,7 +101,6 @@ export async function getDirectory(
         directory.directories.push(await getTree(d));
       } else {
         const { ext, name } = path.parse(file);
-        console.log(extensions, ext);
         if (extensions && !extensions.includes(ext)) {
           continue;
         }
