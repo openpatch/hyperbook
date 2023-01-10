@@ -1,5 +1,11 @@
 # @hyperbook/fs
 
+## 0.6.3
+
+### Patch Changes
+
+- [`6e3fcd5`](https://github.com/openpatch/hyperbook/commit/6e3fcd5616af81f41fb1ff412066f94660ea5cfd) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Remove console.log statement
+
 ## 0.6.2
 
 ### Patch Changes
