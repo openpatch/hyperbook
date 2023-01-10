@@ -1,5 +1,16 @@
 # hyperbook-simple-template
 
+## 0.13.3
+
+### Patch Changes
+
+- [`1614352`](https://github.com/openpatch/hyperbook/commit/16143528449b1bfd2d70ab781df66f945b14f3ea) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix hyperbook not buidling when an unsupported file is present in the book or glossary folder.
+
+- [`c4f7617`](https://github.com/openpatch/hyperbook/commit/c4f76176e69e1be9aa9a6392fd982dcd27520912) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Remove unexported
+
+- Updated dependencies [[`1614352`](https://github.com/openpatch/hyperbook/commit/16143528449b1bfd2d70ab781df66f945b14f3ea)]:
+  - @hyperbook/fs@0.6.2
+
 ## 0.13.2
 
 ### Patch Changes
