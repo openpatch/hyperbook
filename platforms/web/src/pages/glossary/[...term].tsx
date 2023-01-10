@@ -7,7 +7,6 @@ import { useActivePageId, useLink } from "@hyperbook/provider";
 import { Markdown } from "@hyperbook/markdown";
 import { glossary, hyperbook, vfile } from "@hyperbook/fs";
 import { useScrollHash } from "../../useScrollHash";
-import { allowedGlossaryFiles } from "@hyperbook/fs";
 
 type TermProps = {
   markdown: string;
