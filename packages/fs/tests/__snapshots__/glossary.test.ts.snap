@@ -5,14 +5,14 @@ exports[`glossary > should get references 1`] = `
   {
     "extension": ".md",
     "folder": "book",
-    "name": "Glossary",
+    "name": "Paradigms",
     "path": {
-      "absolute": "website/en/book/elements/glossary.md",
-      "directory": "elements",
-      "href": "/elements/glossary",
-      "relative": "elements/glossary.md",
+      "absolute": "single-hyperbook/book/paradigms.md",
+      "directory": "",
+      "href": "/paradigms",
+      "relative": "paradigms.md",
     },
-    "root": "website/en",
+    "root": "single-hyperbook",
   },
 ]
 `;

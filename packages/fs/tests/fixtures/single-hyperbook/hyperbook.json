@@ -1,0 +1,37 @@
+{
+  "name": "Hyperbook Documentation",
+  "description": "Documentation for Hyperbook created with Hyperbook",
+  "author": {
+    "name": "OpenPatch",
+    "url": "https://openpatch.org"
+  },
+  "links": [
+    {
+      "label": "Contact",
+      "links": [
+        {
+          "label": "Mail",
+          "icon": "📧",
+          "href": "mailto:contact@openpatch.org"
+        },
+        {
+          "label": "Twitter",
+          "icon": "🐦",
+          "href": "https://twitter.com/openpatchorg"
+        },
+        {
+          "label": "Mastodon",
+          "icon": "🐘",
+          "href": "https://fosstodon.org/@openpatch"
+        },
+        {
+          "label": "Matrix (Chat)",
+          "icon": "👨‍💻",
+          "href": "https://matrix.to/#/#hyperbook:matrix.org"
+        }
+      ]
+    }
+  ],
+  "language": "en",
+  "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en"
+}

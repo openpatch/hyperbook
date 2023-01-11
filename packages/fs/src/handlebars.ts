@@ -88,11 +88,14 @@ handlebars.registerHelper("replace", (s: string, a: string, b: string) => {
 });
 
 handlebars.registerHelper("rbase64", (src: string) => {
-  const gitRoot = findUpSync(".git");
+  let gitRoot = findUpSync(".git");
   if (!gitRoot) {
-    return "Outside is only applicable in git projects.";
+    gitRoot = findUpSync(".git", { type: "directory" });
+    if (!gitRoot) {
+      return "Outside is only applicable in git projects.";
+    }
   }
-  let p = path.join(gitRoot, src);
+  let p = path.join(path.dirname(gitRoot), src);
   const fileDataBase64 = fs.readFileSync(p, "base64");
   const mime = lookup(p);
   return `data:${mime};base64,${fileDataBase64}`;
@@ -104,11 +107,14 @@ handlebars.registerHelper(
     if (!src) {
       throw Error("file needs a path to a file");
     }
-    const gitRoot = findUpSync(".git");
+    let gitRoot = findUpSync(".git");
     if (!gitRoot) {
-      return "Outside is only applicable in git projects.";
+      gitRoot = findUpSync(".git", { type: "directory" });
+      if (!gitRoot) {
+        return "Outside is only applicable in git projects.";
+      }
     }
-    let p = path.join(gitRoot, src);
+    let p = path.join(path.dirname(gitRoot), src);
     const content = fs.readFileSync(p, "utf8");
     return extractLines(content, lines, ellipsis);
   }

@@ -4,10 +4,10 @@ import * as vfile from "../src/vfile";
 
 describe("list", () => {
   const relative = (s: string) =>
-    path.relative(path.join(__dirname, "..", "..", ".."), s);
+    path.relative(path.join(__dirname, "fixtures"), s);
   it("should list all", async () => {
-    let websiteEn = path.join(__dirname, "..", "..", "..", "website", "en");
-    const files = await vfile.list(websiteEn);
+    let hyperbookPath = path.join(__dirname, "fixtures", "single-hyperbook");
+    const files = await vfile.list(hyperbookPath);
     expect(
       files.map((f) => ({
         ...f,
@@ -18,8 +18,8 @@ describe("list", () => {
   });
 
   it("should list for folder book", async () => {
-    let websiteEn = path.join(__dirname, "..", "..", "..", "website", "en");
-    const files = await vfile.listForFolder(websiteEn, "book");
+    let hyperbookPath = path.join(__dirname, "fixtures", "single-hyperbook");
+    const files = await vfile.listForFolder(hyperbookPath, "book");
     expect(
       files.map((f) => ({
         ...f,
@@ -30,8 +30,8 @@ describe("list", () => {
   });
 
   it("should include main index", async () => {
-    let websiteEn = path.join(__dirname, "..", "..", "..", "website", "en");
-    const files = await vfile.listForFolder(websiteEn, "book");
+    let hyperbookPath = path.join(__dirname, "fixtures", "single-hyperbook");
+    const files = await vfile.listForFolder(hyperbookPath, "book");
     const file = files.find((f) => f.path.href === "/");
     expect(file).toBeDefined();
   });
@@ -39,10 +39,10 @@ describe("list", () => {
 
 describe("getMarkdown", () => {
   it("should get markdown from template", async () => {
-    let websiteEn = path.join(__dirname, "..", "..", "..", "website", "en");
-    let files = await vfile.list(websiteEn);
+    let hyperbookPath = path.join(__dirname, "fixtures", "single-hyperbook");
+    let files = await vfile.list(hyperbookPath);
     let templateFile = files.find(
-      (f) => f.name === "template-demo-yaml" && f.folder === "book"
+      (f) => f.name === "use-template1" && f.folder === "book"
     );
     if (!templateFile) {
       throw Error("Template not found");
@@ -54,8 +54,8 @@ describe("getMarkdown", () => {
 
 describe("getDirectory", () => {
   it("should include main index", async () => {
-    let websiteEn = path.join(__dirname, "..", "..", "..", "website", "en");
-    let directory = await vfile.getDirectory(websiteEn, "book");
+    let hyperbookPath = path.join(__dirname, "fixtures", "single-hyperbook");
+    let directory = await vfile.getDirectory(hyperbookPath, "book");
     expect(directory.index).toBeDefined();
   });
 });
