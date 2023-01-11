@@ -1,5 +1,11 @@
 # @hyperbook/fs
 
+## 0.7.1
+
+### Patch Changes
+
+- [`6fa6eba`](https://github.com/openpatch/hyperbook/commit/6fa6eba7b6753ed434c3aa94c713bb9486189c1a) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix rbase and rfile including .git in the path, which lead to files not found.
+
 ## 0.7.0
 
 ### Minor Changes
