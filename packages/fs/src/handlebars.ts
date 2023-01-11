@@ -1,6 +1,6 @@
 //@ts-ignore
 import handlebars from "handlebars/dist/cjs/handlebars";
-import { findUpSync } from "find-up";
+import { findUpSync, Options } from "find-up";
 import { lookup } from "mime-types";
 import fs from "fs";
 import path from "path";
@@ -90,7 +90,7 @@ handlebars.registerHelper("replace", (s: string, a: string, b: string) => {
 handlebars.registerHelper("rbase64", (src: string) => {
   let gitRoot = findUpSync(".git");
   if (!gitRoot) {
-    gitRoot = findUpSync(".git", { type: "directory" });
+    gitRoot = findUpSync(".git", { type: "directory" } as Options);
     if (!gitRoot) {
       return "Outside is only applicable in git projects.";
     }
@@ -109,7 +109,7 @@ handlebars.registerHelper(
     }
     let gitRoot = findUpSync(".git");
     if (!gitRoot) {
-      gitRoot = findUpSync(".git", { type: "directory" });
+      gitRoot = findUpSync(".git", { type: "directory" } as Options);
       if (!gitRoot) {
         return "Outside is only applicable in git projects.";
       }
