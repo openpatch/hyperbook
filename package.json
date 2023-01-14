@@ -27,7 +27,7 @@
     "chalk": "5.2.0",
     "chokidar": "3.5.3",
     "cross-env": "7.0.3",
-    "esbuild": "0.16.17",
+    "esbuild": "0.17.0",
     "husky": "8.0.3",
     "plop": "3.1.1",
     "prettier": "2.8.3",
