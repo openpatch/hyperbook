@@ -39,6 +39,16 @@ exports[`hyperbook > should get navigation 1`] = `
           "name": "Use Template1 with YAML",
           "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/subsection/use-template1.yml",
         },
+        {
+          "href": "/subsection/empty",
+          "name": "empty",
+          "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/subsection/empty.json",
+        },
+        {
+          "href": "/subsection/invalid",
+          "name": "invalid",
+          "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/subsection/invalid.json",
+        },
       ],
       "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/subsection/index.md",
       "sections": [],

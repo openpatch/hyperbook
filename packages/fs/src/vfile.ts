@@ -280,33 +280,36 @@ export const getMarkdown = async (
       .readFile(file.path.absolute)
       .then((f) => yaml.parse(f.toString()));
     if (!j.template) {
-      throw Error(
+      console.log(
         `Yaml files need a template. You need to define a template property in your yaml file: ${file.path.absolute}`
       );
+    } else {
+      const templateSource = await fs.readFile(
+        path.join(file.root, "templates", j.template + ".md.hbs")
+      );
+      const template = handlebars.compile(templateSource.toString());
+      markdown = template(j);
     }
-    const templateSource = await fs.readFile(
-      path.join(file.root, "templates", j.template + ".md.hbs")
-    );
-    const template = handlebars.compile(templateSource.toString());
-    markdown = template(j);
   } else if (file.extension === ".json") {
     const j = await fs
       .readFile(file.path.absolute)
-      .then((f) => JSON.parse(f.toString()));
+      .then((f) => JSON.parse(f.toString()))
+      .catch(() => ({}));
     if (!j.template) {
-      throw Error(
+      console.log(
         `JSON files need a template. You need to define a template property in your json file: ${file.path.absolute}`
       );
+    } else {
+      const templateSource = await fs.readFile(
+        path.join(file.root, "templates", j.template + ".md.hbs")
+      );
+      const template = handlebars.compile(templateSource.toString());
+      markdown = template(j);
     }
-    const templateSource = await fs.readFile(
-      path.join(file.root, "templates", j.template + ".md.hbs")
-    );
-    const template = handlebars.compile(templateSource.toString());
-    markdown = template(j);
   } else if (file.extension === ".md") {
     markdown = await fs.readFile(file.path.absolute).then((f) => f.toString());
   } else {
-    throw Error(
+    console.log(
       `Unsupported file extension. Only .md, .yml and .json files are supported.`
     );
   }

@@ -119,6 +119,9 @@ export const getNavigation = async (
 
     for (const file of files) {
       const { data } = await vfile.getMarkdown(file);
+      if (!data.name) {
+        data.name = file.name;
+      }
       const page: HyperbookPage = {
         ...data,
       };

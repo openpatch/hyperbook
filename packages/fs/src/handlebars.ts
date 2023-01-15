@@ -88,7 +88,7 @@ handlebars.registerHelper("replace", (s: string, a: string, b: string) => {
 });
 
 handlebars.registerHelper("rbase64", (src: string) => {
-  let gitRoot = findUpSync(".git");
+  let gitRoot = findUpSync(".git", { type: "file" } as Options);
   if (!gitRoot) {
     gitRoot = findUpSync(".git", { type: "directory" } as Options);
     if (!gitRoot) {
@@ -107,7 +107,7 @@ handlebars.registerHelper(
     if (!src) {
       throw Error("file needs a path to a file");
     }
-    let gitRoot = findUpSync(".git");
+    let gitRoot = findUpSync(".git", { type: "file" } as Options);
     if (!gitRoot) {
       gitRoot = findUpSync(".git", { type: "directory" } as Options);
       if (!gitRoot) {
