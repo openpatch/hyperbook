@@ -4,7 +4,7 @@ import fs from "fs/promises";
 import fsD from "fs";
 import { HyperbookFrontmatter } from "@hyperbook/types";
 import yaml from "yaml";
-import { handlebars } from "./handlebars";
+import { handlebars, registerHelpers } from "./handlebars";
 import { lookup } from "mime-types";
 
 export type VFile = {
@@ -255,24 +255,7 @@ export const getMarkdown = async (
     );
   }
 
-  handlebars.registerHelper("base64", (src: string) => {
-    let p = path.join(file.root, src);
-    const fileDataBase64 = fsD.readFileSync(p, "base64");
-    const mime = lookup(p);
-    return `data:${mime};base64,${fileDataBase64}`;
-  });
-
-  handlebars.registerHelper(
-    "file",
-    (src: string, lines?: string, ellipsis?: string) => {
-      if (!src) {
-        throw Error("file needs a path to a file");
-      }
-      let p = path.join(file.root, src);
-      const content = fsD.readFileSync(p, "utf8");
-      return extractLines(content, lines, ellipsis);
-    }
-  );
+  registerHelpers(handlebars, { file });
 
   let markdown = "";
   if (file.extension === ".yml") {

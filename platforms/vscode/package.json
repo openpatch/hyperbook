@@ -139,6 +139,7 @@
     "watch": "npm-run-all -p watch:*",
     "watch:view": "webpack --config ./webpack.view.config.js --watch --mode development",
     "watch:extension": "webpack --config ./webpack.extension.config.js --watch --mode development",
+    "open": "code --extensionDevelopmentPath=$PWD",
     "pretest": "pnpm compile && pnpm lint",
     "lint": "eslint src --ext ts"
   },

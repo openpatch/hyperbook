@@ -4,7 +4,11 @@ import { findUpSync, Options } from "find-up";
 import { lookup } from "mime-types";
 import fs from "fs";
 import path from "path";
-import { extractLines } from "./vfile";
+import { extractLines, VFile } from "./vfile";
+
+declare global {
+  var workspaceRoot: string;
+}
 
 const isString = (s: any): s is string => {
   return typeof s === "string";
@@ -30,94 +34,127 @@ const changecase = (str: string, fn: (s: string) => string): string => {
   });
 };
 
-handlebars.registerHelper("times", (n: number, block: any) => {
-  let accum = "";
-  for (let i = 0; i < n; ++i) accum += block.fn(i);
-  return accum;
-});
+const registerHelpers = (handlebars: any, options?: { file: VFile }) => {
+  const cwd = options?.file.root ?? process.cwd();
+  handlebars.registerHelper("times", (n: number, block: any) => {
+    let accum = "";
+    for (let i = 0; i < n; ++i) accum += block.fn(i);
+    return accum;
+  });
 
-handlebars.registerHelper("concat", (s1: string, s2: string) => {
-  return s1 + s2;
-});
+  handlebars.registerHelper("concat", (s1: string, s2: string) => {
+    return s1 + s2;
+  });
 
-handlebars.registerHelper("camelcase", (s: string) => {
-  if (!isString(s)) return "";
-  return changecase(s, (c) => c.toUpperCase());
-});
+  handlebars.registerHelper("camelcase", (s: string) => {
+    if (!isString(s)) return "";
+    return changecase(s, (c) => c.toUpperCase());
+  });
 
-handlebars.registerHelper("dashcase", (s: string) => {
-  if (!isString(s)) return "";
-  return changecase(s, (c) => "-" + c);
-});
+  handlebars.registerHelper("dashcase", (s: string) => {
+    if (!isString(s)) return "";
+    return changecase(s, (c) => "-" + c);
+  });
 
-handlebars.registerHelper("lowercase", (s: string) => {
-  if (!isString(s)) return "";
-  return s.toLowerCase();
-});
+  handlebars.registerHelper("lowercase", (s: string) => {
+    if (!isString(s)) return "";
+    return s.toLowerCase();
+  });
 
-handlebars.registerHelper("uppercase", (s: string) => {
-  if (!isString(s)) return "";
-  return s.toUpperCase();
-});
+  handlebars.registerHelper("uppercase", (s: string) => {
+    if (!isString(s)) return "";
+    return s.toUpperCase();
+  });
 
-handlebars.registerHelper("pascalcase", (s: string) => {
-  if (!isString(s)) return "";
-  s = changecase(s, (c) => c.toUpperCase());
-  return s.charAt(0).toUpperCase() + s.slice(1);
-});
+  handlebars.registerHelper("pascalcase", (s: string) => {
+    if (!isString(s)) return "";
+    s = changecase(s, (c) => c.toUpperCase());
+    return s.charAt(0).toUpperCase() + s.slice(1);
+  });
 
-handlebars.registerHelper("replaceAll", (s: string, a: string, b: string) => {
-  if (!isString(s)) return "";
-  if (!isString(a)) return s;
-  if (!isString(b)) b = "";
-  return s.replaceAll(a, b);
-});
+  handlebars.registerHelper("replaceAll", (s: string, a: string, b: string) => {
+    if (!isString(s)) return "";
+    if (!isString(a)) return s;
+    if (!isString(b)) b = "";
+    return s.replaceAll(a, b);
+  });
 
-handlebars.registerHelper("replace", (s: string, a: string, b: string) => {
-  if (!isString(s)) return "";
-  if (!isString(a)) return s;
-  if (!isString(b)) b = "";
-  return s.replace(a, b);
-});
+  handlebars.registerHelper("replace", (s: string, a: string, b: string) => {
+    if (!isString(s)) return "";
+    if (!isString(a)) return s;
+    if (!isString(b)) b = "";
+    return s.replace(a, b);
+  });
 
-handlebars.registerHelper("replace", (s: string, a: string, b: string) => {
-  if (!isString(s)) return "";
-  if (!isString(a)) return s;
-  if (!isString(b)) b = "";
-  return s.replace(a, b);
-});
+  handlebars.registerHelper("replace", (s: string, a: string, b: string) => {
+    if (!isString(s)) return "";
+    if (!isString(a)) return s;
+    if (!isString(b)) b = "";
+    return s.replace(a, b);
+  });
 
-handlebars.registerHelper("rbase64", (src: string) => {
-  let gitRoot = findUpSync(".git", { type: "file" } as Options);
-  if (!gitRoot) {
-    gitRoot = findUpSync(".git", { type: "directory" } as Options);
+  handlebars.registerHelper("rbase64", (src: string) => {
+    let gitRoot = findUpSync(".git", { type: "file", cwd: cwd } as Options);
     if (!gitRoot) {
-      return "Outside is only applicable in git projects.";
-    }
-  }
-  let p = path.join(path.dirname(gitRoot), src);
-  const fileDataBase64 = fs.readFileSync(p, "base64");
-  const mime = lookup(p);
-  return `data:${mime};base64,${fileDataBase64}`;
-});
-
-handlebars.registerHelper(
-  "rfile",
-  (src: string, lines?: string, ellipsis?: string) => {
-    if (!src) {
-      throw Error("file needs a path to a file");
-    }
-    let gitRoot = findUpSync(".git", { type: "file" } as Options);
-    if (!gitRoot) {
-      gitRoot = findUpSync(".git", { type: "directory" } as Options);
+      gitRoot = findUpSync(".git", { type: "directory", cwd: cwd } as Options);
       if (!gitRoot) {
-        return "Outside is only applicable in git projects.";
+        return `rbase64 is only applicable in git projects. No .git was found in ${cwd} and above.`;
       }
     }
     let p = path.join(path.dirname(gitRoot), src);
-    const content = fs.readFileSync(p, "utf8");
-    return extractLines(content, lines, ellipsis);
-  }
-);
+    try {
+      const fileDataBase64 = fs.readFileSync(p, "base64");
+      const mime = lookup(p);
+      return `data:${mime};base64,${fileDataBase64}`;
+    } catch (e) {
+      return `File at ${src} is missing.`;
+    }
+  });
 
-export { handlebars };
+  handlebars.registerHelper(
+    "rfile",
+    (src: string, lines?: string, ellipsis?: string) => {
+      if (!src) {
+        throw Error("file needs a path to a file");
+      }
+      let gitRoot = findUpSync(".git", { type: "file", cwd: cwd } as Options);
+      if (!gitRoot) {
+        gitRoot = findUpSync(".git", {
+          type: "directory",
+          cwd: cwd,
+        } as Options);
+        if (!gitRoot) {
+          return `rfile is only applicable in git projects. No .git was found in ${cwd} and above`;
+        }
+      }
+      let p = path.join(path.dirname(gitRoot), src);
+      try {
+        const content = fs.readFileSync(p, "utf8");
+        return extractLines(content, lines, ellipsis);
+      } catch (e) {
+        return `File ${src} is missing.`;
+      }
+    }
+  );
+
+  handlebars.registerHelper("base64", (src: string) => {
+    let p = path.join(cwd, src);
+    const fileDataBase64 = fs.readFileSync(p, "base64");
+    const mime = lookup(p);
+    return `data:${mime};base64,${fileDataBase64}`;
+  });
+
+  handlebars.registerHelper(
+    "file",
+    (src: string, lines?: string, ellipsis?: string) => {
+      if (!src) {
+        throw Error("file needs a path to a file");
+      }
+      let p = path.join(cwd, src);
+      const content = fs.readFileSync(p, "utf8");
+      return extractLines(content, lines, ellipsis);
+    }
+  );
+};
+
+export { registerHelpers, handlebars };
