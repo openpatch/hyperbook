@@ -165,14 +165,14 @@ importers:
 
   packages/element-excalidraw:
     specifiers:
-      '@excalidraw/excalidraw': 0.14.0
+      '@excalidraw/excalidraw': 0.14.1
       '@hyperbook/provider': workspace:*
       '@types/react': 18.0.26
       '@types/react-dom': 18.0.10
       react: 18.2.0
       react-dom: 18.2.0
     dependencies:
-      '@excalidraw/excalidraw': 0.14.0_biqbaboplfbrettd7655fr4n2y
+      '@excalidraw/excalidraw': 0.14.1_biqbaboplfbrettd7655fr4n2y
       '@hyperbook/provider': link:../provider
     devDependencies:
       '@types/react': 18.0.26
@@ -2318,8 +2318,8 @@ packages:
       - supports-color
     dev: true
 
-  /@excalidraw/excalidraw/0.14.0_biqbaboplfbrettd7655fr4n2y:
-    resolution: {integrity: sha512-bQsaS8YFqmy5FF9Dk6QbCXESaU0xAU8JpdhjkQrr9NworPlz+3Ue/Aa2cchVOMMPbGNcYdybYrfWU4TV0mwdag==}
+  /@excalidraw/excalidraw/0.14.1_biqbaboplfbrettd7655fr4n2y:
+    resolution: {integrity: sha512-npCoKWqC8YeqPXu5+vPqP9bxywFxwv2uJUxieJs94wHPhOH/wV4Nsr6TiTFiXg6DZkrf72iUiLx2hJFA5gCBjw==}
     peerDependencies:
       react: ^17.0.2 || ^18.2.0
       react-dom: ^17.0.2 || ^18.2.0
