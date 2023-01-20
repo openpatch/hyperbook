@@ -42,7 +42,7 @@ export const App = () => {
   }, []);
 
   if (!state) {
-    return "...";
+    return <div>...</div>;
   }
 
   return (

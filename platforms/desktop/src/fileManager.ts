@@ -76,8 +76,10 @@ export class FileManager {
     this.emitFileChangedEvent();
   }
   async onAdd() {
-    this._vfiles = await vfile.list(this._activeRoot);
-    this.emitFileChangedEvent();
+    if (this._activeRoot) {
+      this._vfiles = await vfile.list(this._activeRoot);
+      this.emitFileChangedEvent();
+    }
   }
 
   async emitConfigChangedEvent() {
@@ -99,7 +101,7 @@ export class FileManager {
     }
   }
   async emitFileChangedEvent() {
-    if (this._vfile) {
+    if (this._vfile && this._activeRoot) {
       const { content, data } = await vfile.getMarkdown(this._vfile);
       const navigation = await hyperbook.getNavigation(
         this._activeRoot,
