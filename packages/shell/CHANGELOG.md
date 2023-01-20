@@ -1,5 +1,11 @@
 # @hyperbook/shell
 
+## 0.4.2
+
+### Patch Changes
+
+- [`70e4131`](https://github.com/openpatch/hyperbook/commit/70e4131de7d3e2c81061dba8afe87c16e80372b4) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix some css did overwrite the heading font sizes, which lead to wrong sizes.
+
 ## 0.4.1
 
 ### Patch Changes
