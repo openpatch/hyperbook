@@ -7,8 +7,6 @@ export const remarkRemoveComments: () => Transformer = () => (tree) => {
   const htmlCommentRegex = /<!--([\s\S]*?)-->/g;
 
   const handler: BuildVisitor = (node, index, parent) => {
-    console.log(node);
-    console.log(parent);
     const isComment = node.value.match(htmlCommentRegex);
 
     if (isComment) {

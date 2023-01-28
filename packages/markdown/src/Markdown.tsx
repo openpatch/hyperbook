@@ -16,6 +16,7 @@ import { Image } from "./Image";
 
 import "./index.css";
 import { remarkRemoveComments } from "./remarkRemoveComments";
+import { remarkCustomHeadingIds } from "./remarkCustomHeadingIds";
 
 export type MarkdownProps = {
   children: string;
@@ -45,6 +46,7 @@ export const Markdown = ({ children }: MarkdownProps) => {
       }}
       remarkPlugins={[
         remarkRemoveComments,
+        remarkCustomHeadingIds,
         remarkDirective,
         remarkDirectiveRehype,
         remarkGfm,
