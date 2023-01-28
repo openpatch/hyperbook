@@ -1,5 +1,15 @@
 # @hyperbook/markdown
 
+## 0.6.0
+
+### Minor Changes
+
+- [`764a681`](https://github.com/openpatch/hyperbook/commit/764a681e4a8b0135ffa83f0a30c4cda23b79babd) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - You can now add customs ids to headings. This allow for stable links even if the content of the heading changes.
+
+### Patch Changes
+
+- [`fa2719e`](https://github.com/openpatch/hyperbook/commit/fa2719ebb2bd535aa09a9358ebb53c5c277ad630) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix use custom id in heading component.
+
 ## 0.5.3
 
 ### Patch Changes
