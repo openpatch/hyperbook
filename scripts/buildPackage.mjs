@@ -35,6 +35,9 @@ export const buildPackage = async (path) => {
     ...Object.keys(JSON.parse(packageJSON)?.dependencies || {}).filter(
       (p) => !bundle.includes(p)
     ),
+    ...Object.keys(JSON.parse(packageJSON)?.devDependencies || {}).filter(
+      (p) => !bundle.includes(p)
+    ),
     ...Object.keys(JSON.parse(packageJSON)?.peerDependencies || {}),
   ];
   external.push("path");
