@@ -512,7 +512,7 @@ importers:
 
   packages/store:
     specifiers:
-      '@reduxjs/toolkit': 1.9.1
+      '@reduxjs/toolkit': 1.9.2
       '@types/react': 18.0.27
       redux: 4.2.0
       redux-persist: 6.0.0
@@ -520,7 +520,7 @@ importers:
       redux: 4.2.0
       redux-persist: 6.0.0_redux@4.2.0
     devDependencies:
-      '@reduxjs/toolkit': 1.9.1
+      '@reduxjs/toolkit': 1.9.2
       '@types/react': 18.0.27
 
   packages/styles:
@@ -2777,8 +2777,8 @@ packages:
     resolution: {integrity: sha512-a5Sab1C4/icpTZVzZc5Ghpz88yQtGOyNqYXcZgOssB2uuAr+wF/MvN6bgtW32q7HHrvBki+BsZ0OuNv6EV3K9g==}
     dev: true
 
-  /@reduxjs/toolkit/1.9.1:
-    resolution: {integrity: sha512-HikrdY+IDgRfRYlCTGUQaiCxxDDgM1mQrRbZ6S1HFZX5ZYuJ4o8EstNmhTwHdPl2rTmLxzwSu0b3AyeyTlR+RA==}
+  /@reduxjs/toolkit/1.9.2:
+    resolution: {integrity: sha512-5ZAZ7hwAKWSii5T6NTPmgIBUqyVdlDs+6JjThz6J6dmHLDm6zCzv2OjHIFAi3Vvs1qjmXU0bm6eBojukYXjVMQ==}
     peerDependencies:
       react: ^16.9.0 || ^17.0.0 || ^18
       react-redux: ^7.2.1 || ^8.0.2
