@@ -14,7 +14,7 @@ export const makeAnchor = (heading: string) => {
   return anchor;
 };
 
-export const Headings: Components["h1"] = ({ level, children }) => {
+export const Headings: Components["h1"] = ({ level, children, id }) => {
   const config = useConfig();
   const bookmarksConfig = config?.elements?.bookmarks;
   // Access actual (string) value of heading
@@ -30,7 +30,7 @@ export const Headings: Components["h1"] = ({ level, children }) => {
   // Utility
   const container = (children: React.ReactNode): JSX.Element => (
     <>
-      <a className="heading" id={anchor} href={`#${anchor}`}>
+      <a className="heading" id={id ?? anchor} href={`#${id ?? anchor}`}>
         <span>{children}</span>
       </a>
       {bookmarksConfig !== false && (
