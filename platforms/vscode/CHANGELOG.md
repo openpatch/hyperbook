@@ -1,5 +1,11 @@
 # @hyperbook/vscode-extension
 
+## 0.11.11
+
+### Patch Changes
+
+- [`dcdbfef`](https://github.com/openpatch/hyperbook/commit/dcdbfef0927b224c25392083e078d6c226e2bca1) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Reduce unnecessary updates
+
 ## 0.11.10
 
 ### Patch Changes
