@@ -40,7 +40,7 @@
   "dependencies": {
     "@hyperbook/store": "workspace:*",
     "@hyperbook/types": "workspace:*",
-    "redux": "4.2.0"
+    "redux": "4.2.1"
   },
   "peerDependencies": {
     "react": "18.x",
