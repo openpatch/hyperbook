@@ -44,6 +44,7 @@ export const App = () => {
   useEffect(() => {
     window.addEventListener("message", (event: MessageEvent<Message>) => {
       if (event.data.type === "CHANGE") {
+        console.log("Change");
         setState(event.data.payload);
       } else if (event.data.type === "CONFIG_CHANGE") {
         setConfig(event.data.payload);
@@ -54,6 +55,10 @@ export const App = () => {
       type: "READY",
     });
   }, []);
+
+  if (!state) {
+    return <div>...</div>;
+  }
 
   return (
     <ErrorBoundary message="You have encountered an error.">

@@ -17,7 +17,6 @@ export interface ChangeMessage {
   payload: {
     content: string;
     data: Record<string, any>;
-    source: string;
     navigation?: Navigation;
     assetsPath: string;
     toc?: TocProps;

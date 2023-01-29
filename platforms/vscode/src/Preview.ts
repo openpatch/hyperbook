@@ -6,7 +6,7 @@ import { disposeAll } from "./utils/dispose";
 import { ChangeMessage, Message } from "./messages/messageTypes";
 import { parseTocFromMarkdown } from "@hyperbook/toc";
 import path from "path";
-import { HyperbookJson } from "@hyperbook/types";
+import { HyperbookJson, Navigation } from "@hyperbook/types";
 
 export default class Preview {
   panel: vscode.WebviewPanel | undefined;
@@ -16,6 +16,7 @@ export default class Preview {
 
   private _resource: vscode.Uri | undefined;
   private _vfile: VFile | undefined;
+  private _navigation: Navigation | undefined;
 
   private readonly disposables: vscode.Disposable[] = [];
   private _disposed: boolean = false;
@@ -35,10 +36,6 @@ export default class Preview {
         });
       }
     });
-  }
-
-  async handleTextDocumentChange() {
-    return this.postUpdate();
   }
 
   parseConfig(config: string) {
@@ -100,40 +97,46 @@ export default class Preview {
     }
   }
 
-  async getState(): Promise<ChangeMessage["payload"]> {
+  async getState(refreshNavigation = false): Promise<ChangeMessage["payload"]> {
     if (
       vscode.window.activeTextEditor &&
       this.checkDocumentIsHyperbookFile(false) &&
-      this._resource
+      this._vfile &&
+      this.panel
     ) {
-      if (this._vfile) {
-        const { content, data } = await vfile.getMarkdown(this._vfile);
-        const navigation = await hyperbook.getNavigation(
+      const { content, data } = await vfile.getMarkdown(this._vfile);
+      if (!this._navigation || refreshNavigation) {
+        this._navigation = await hyperbook.getNavigation(
           this._vfile.root,
           this._vfile
         );
-        const toc = parseTocFromMarkdown(content);
-
-        const state = {
-          content,
-          data,
-          source: this._resource.toString(),
-          toc,
-          assetsPath: await this.getWorkspacePath(),
-          navigation,
-        };
-        return state;
       }
+
+      const assetsPath = this.panel.webview
+        .asWebviewUri(vscode.Uri.file(this._vfile.root))
+        .toString();
+      const toc = parseTocFromMarkdown(content);
+
+      const state = {
+        content,
+        data,
+        toc,
+        assetsPath,
+        navigation: this._navigation,
+      };
+      return state;
     }
     return {
       content: "",
       data: {},
-      assetsPath: await this.getWorkspacePath(),
-      source: "",
+      assetsPath: "",
     };
   }
 
-  async postUpdate() {
+  /*
+   * Update everything including the navigation
+   */
+  async fullUpdate() {
     this.hyperbookViewerConfig = vscode.workspace.getConfiguration("hyperbook");
     if (
       vscode.window.activeTextEditor &&
@@ -141,6 +144,7 @@ export default class Preview {
       this.panel &&
       this.panel !== undefined
     ) {
+      console.log("Full update");
       const filePaths =
         vscode.window.activeTextEditor.document.fileName.split("/");
       const fileName = filePaths[filePaths.length - 1];
@@ -153,36 +157,34 @@ export default class Preview {
         this._resource.fsPath
       );
 
-      if (this.checkDocumentIsHyperbookFile(false)) {
-        this.postMessage({
-          type: "CHANGE",
-          payload: await this.getState(),
-        });
-        this.postMessage({
-          type: "CONFIG_CHANGE",
-          payload: await this.getConfig(),
-        });
-      }
+      this.postMessage({
+        type: "CHANGE",
+        payload: await this.getState(true),
+      });
+      this.postMessage({
+        type: "CONFIG_CHANGE",
+        payload: await this.getConfig(),
+      });
     }
   }
 
-  async getWorkspacePath(): Promise<string> {
-    if (this.panel && this._resource?.fsPath) {
-      let hyperbookRoot = this._resource.fsPath;
-      if (!this._resource.fsPath.endsWith("hyperbook.json")) {
-        hyperbookRoot = await hyperbook.findRoot(this._resource.fsPath);
-      } else {
-        hyperbookRoot = path.dirname(this._resource.fsPath);
-      }
-
-      const basePath = this.panel.webview
-        .asWebviewUri(vscode.Uri.file(hyperbookRoot))
-        .toString();
-
-      return basePath;
+  /*
+   * Only update the content and data
+   */
+  async partialUpdate() {
+    this.hyperbookViewerConfig = vscode.workspace.getConfiguration("hyperbook");
+    if (
+      vscode.window.activeTextEditor &&
+      this.checkDocumentIsHyperbookFile(false) &&
+      this.panel &&
+      this._vfile
+    ) {
+      console.log("Partial update");
+      this.postMessage({
+        type: "CHANGE",
+        payload: await this.getState(false),
+      });
     }
-
-    return "";
   }
 
   async getWebviewContent() {
@@ -252,20 +254,12 @@ export default class Preview {
 
       // And set its HTML content
       this.editor = vscode.window.activeTextEditor;
-      await this.handleTextDocumentChange.call(this);
+      await this.fullUpdate.call(this);
 
-      vscode.workspace.onDidChangeTextDocument(
-        this.handleTextDocumentChange.bind(this)
-      );
-      vscode.workspace.onDidChangeConfiguration(
-        this.handleTextDocumentChange.bind(this)
-      );
-      vscode.workspace.onDidSaveTextDocument(
-        this.handleTextDocumentChange.bind(this)
-      );
-      vscode.window.onDidChangeActiveTextEditor(
-        this.handleTextDocumentChange.bind(this)
-      );
+      vscode.workspace.onDidChangeTextDocument(this.partialUpdate.bind(this));
+      vscode.workspace.onDidChangeConfiguration(this.partialUpdate.bind(this));
+      vscode.workspace.onDidSaveTextDocument(this.partialUpdate.bind(this));
+      vscode.window.onDidChangeActiveTextEditor(this.fullUpdate.bind(this));
 
       this.panel.webview.onDidReceiveMessage(async (m: Message) => {
         if (m.type === "OPEN" && this._vfile) {
@@ -306,7 +300,7 @@ export default class Preview {
             Buffer.from(m.payload.content, "utf8")
           );
         } else if (m.type === "READY") {
-          this.handleTextDocumentChange();
+          this.fullUpdate();
         }
       });
 
