@@ -476,11 +476,11 @@ importers:
       '@types/react-dom': 18.0.10
       react: 18.2.0
       react-dom: 18.2.0
-      redux: 4.2.0
+      redux: 4.2.1
     dependencies:
       '@hyperbook/store': link:../store
       '@hyperbook/types': link:../types
-      redux: 4.2.0
+      redux: 4.2.1
     devDependencies:
       '@types/react': 18.0.27
       '@types/react-dom': 18.0.10
@@ -514,11 +514,11 @@ importers:
     specifiers:
       '@reduxjs/toolkit': 1.9.2
       '@types/react': 18.0.27
-      redux: 4.2.0
+      redux: 4.2.1
       redux-persist: 6.0.0
     dependencies:
-      redux: 4.2.0
-      redux-persist: 6.0.0_redux@4.2.0
+      redux: 4.2.1
+      redux-persist: 6.0.0_redux@4.2.1
     devDependencies:
       '@reduxjs/toolkit': 1.9.2
       '@types/react': 18.0.27
@@ -702,7 +702,7 @@ importers:
       react: 18.2.0
       react-dom: 18.2.0
       react-redux: 8.0.5
-      redux: 4.2.0
+      redux: 4.2.1
       redux-persist: 6.0.0
       rimraf: 3.0.2
       typescript: 4.9.4
@@ -732,9 +732,9 @@ importers:
       next: 13.1.6_biqbaboplfbrettd7655fr4n2y
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
-      react-redux: 8.0.5_kufecmwnbxuzgclmdapv3oizgm
-      redux: 4.2.0
-      redux-persist: 6.0.0_react@18.2.0+redux@4.2.0
+      react-redux: 8.0.5_7lqvh3ci3dfnk3gopjbbc46hl4
+      redux: 4.2.1
+      redux-persist: 6.0.0_react@18.2.0+redux@4.2.1
     devDependencies:
       '@hyperbook/next-watch': link:../../packages/next-watch
       '@hyperbook/types': link:../../packages/types
@@ -2789,8 +2789,8 @@ packages:
         optional: true
     dependencies:
       immer: 9.0.19
-      redux: 4.2.0
-      redux-thunk: 2.4.2_redux@4.2.0
+      redux: 4.2.1
+      redux-thunk: 2.4.2_redux@4.2.1
       reselect: 4.1.7
     dev: true
 
@@ -9224,6 +9224,39 @@ packages:
       warning: 4.0.3
     dev: false
 
+  /react-redux/8.0.5_7lqvh3ci3dfnk3gopjbbc46hl4:
+    resolution: {integrity: sha512-Q2f6fCKxPFpkXt1qNRZdEDLlScsDWyrgSj0mliK59qU6W5gvBiKkdMEG2lJzhd1rCctf0hb6EtePPLZ2e0m1uw==}
+    peerDependencies:
+      '@types/react': ^16.8 || ^17.0 || ^18.0
+      '@types/react-dom': ^16.8 || ^17.0 || ^18.0
+      react: ^16.8 || ^17.0 || ^18.0
+      react-dom: ^16.8 || ^17.0 || ^18.0
+      react-native: '>=0.59'
+      redux: ^4
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+      '@types/react-dom':
+        optional: true
+      react-dom:
+        optional: true
+      react-native:
+        optional: true
+      redux:
+        optional: true
+    dependencies:
+      '@babel/runtime': 7.20.13
+      '@types/hoist-non-react-statics': 3.3.1
+      '@types/react': 18.0.27
+      '@types/use-sync-external-store': 0.0.3
+      hoist-non-react-statics: 3.3.2
+      react: 18.2.0
+      react-dom: 18.2.0_react@18.2.0
+      react-is: 18.2.0
+      redux: 4.2.1
+      use-sync-external-store: 1.2.0_react@18.2.0
+    dev: false
+
   /react-redux/8.0.5_biqbaboplfbrettd7655fr4n2y:
     resolution: {integrity: sha512-Q2f6fCKxPFpkXt1qNRZdEDLlScsDWyrgSj0mliK59qU6W5gvBiKkdMEG2lJzhd1rCctf0hb6EtePPLZ2e0m1uw==}
     peerDependencies:
@@ -9254,39 +9287,6 @@ packages:
       react-is: 18.2.0
       use-sync-external-store: 1.2.0_react@18.2.0
     dev: true
-
-  /react-redux/8.0.5_kufecmwnbxuzgclmdapv3oizgm:
-    resolution: {integrity: sha512-Q2f6fCKxPFpkXt1qNRZdEDLlScsDWyrgSj0mliK59qU6W5gvBiKkdMEG2lJzhd1rCctf0hb6EtePPLZ2e0m1uw==}
-    peerDependencies:
-      '@types/react': ^16.8 || ^17.0 || ^18.0
-      '@types/react-dom': ^16.8 || ^17.0 || ^18.0
-      react: ^16.8 || ^17.0 || ^18.0
-      react-dom: ^16.8 || ^17.0 || ^18.0
-      react-native: '>=0.59'
-      redux: ^4
-    peerDependenciesMeta:
-      '@types/react':
-        optional: true
-      '@types/react-dom':
-        optional: true
-      react-dom:
-        optional: true
-      react-native:
-        optional: true
-      redux:
-        optional: true
-    dependencies:
-      '@babel/runtime': 7.20.13
-      '@types/hoist-non-react-statics': 3.3.1
-      '@types/react': 18.0.27
-      '@types/use-sync-external-store': 0.0.3
-      hoist-non-react-statics: 3.3.2
-      react: 18.2.0
-      react-dom: 18.2.0_react@18.2.0
-      react-is: 18.2.0
-      redux: 4.2.0
-      use-sync-external-store: 1.2.0_react@18.2.0
-    dev: false
 
   /react-syntax-highlighter/15.5.0_react@18.2.0:
     resolution: {integrity: sha512-+zq2myprEnQmH5yw6Gqc8lD55QHnpKaU8TOcFeC/Lg/MQSs8UknEA0JC4nTZGFAXC2J2Hyj/ijJ7NlabyPi2gg==}
@@ -9468,7 +9468,7 @@ packages:
       strip-indent: 3.0.0
     dev: true
 
-  /redux-persist/6.0.0_react@18.2.0+redux@4.2.0:
+  /redux-persist/6.0.0_react@18.2.0+redux@4.2.1:
     resolution: {integrity: sha512-71LLMbUq2r02ng2We9S215LtPu3fY0KgaGE0k8WRgl6RkqxtGfl7HUozz1Dftwsb0D/5mZ8dwAaPbtnzfvbEwQ==}
     peerDependencies:
       react: '>=16'
@@ -9478,10 +9478,10 @@ packages:
         optional: true
     dependencies:
       react: 18.2.0
-      redux: 4.2.0
+      redux: 4.2.1
     dev: false
 
-  /redux-persist/6.0.0_redux@4.2.0:
+  /redux-persist/6.0.0_redux@4.2.1:
     resolution: {integrity: sha512-71LLMbUq2r02ng2We9S215LtPu3fY0KgaGE0k8WRgl6RkqxtGfl7HUozz1Dftwsb0D/5mZ8dwAaPbtnzfvbEwQ==}
     peerDependencies:
       react: '>=16'
@@ -9490,19 +9490,19 @@ packages:
       react:
         optional: true
     dependencies:
-      redux: 4.2.0
+      redux: 4.2.1
     dev: false
 
-  /redux-thunk/2.4.2_redux@4.2.0:
+  /redux-thunk/2.4.2_redux@4.2.1:
     resolution: {integrity: sha512-+P3TjtnP0k/FEjcBL5FZpoovtvrTNT/UXd4/sluaSyrURlSlhLSzEdfsTBW7WsKB6yPvgd7q/iZPICFjW4o57Q==}
     peerDependencies:
       redux: ^4
     dependencies:
-      redux: 4.2.0
+      redux: 4.2.1
     dev: true
 
-  /redux/4.2.0:
-    resolution: {integrity: sha512-oSBmcKKIuIR4ME29/AeNUnl5L+hvBq7OaJWzaptTQJAntaPvxIJqfnjbaEiCzzaIz+XmVILfqAM3Ob0aXLPfjA==}
+  /redux/4.2.1:
+    resolution: {integrity: sha512-LAUYz4lc+Do8/g7aeRa8JkyDErK6ekstQaqWQrNRW//MY1TvCEpMtpTWvlQ+FPbWCx+Xixu/6SHt5N0HR+SB4w==}
     dependencies:
       '@babel/runtime': 7.20.13
 
