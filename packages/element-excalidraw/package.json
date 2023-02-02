@@ -39,7 +39,7 @@
     "build:types": "tsc --project tsconfig.build.json --declaration --emitDeclarationOnly"
   },
   "dependencies": {
-    "@excalidraw/excalidraw": "0.14.1",
+    "@excalidraw/excalidraw": "0.14.2",
     "@hyperbook/provider": "workspace:*"
   },
   "peerDependencies": {
