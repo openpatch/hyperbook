@@ -258,13 +258,13 @@ importers:
       '@types/pako': 2.0.0
       '@types/react': 18.0.27
       '@types/react-dom': 18.0.10
-      js-base64: 3.7.4
+      js-base64: 3.7.5
       pako: 2.1.0
       react: 18.2.0
       react-dom: 18.2.0
     dependencies:
       '@hyperbook/provider': link:../provider
-      js-base64: 3.7.4
+      js-base64: 3.7.5
       pako: 2.1.0
     devDependencies:
       '@types/pako': 2.0.0
@@ -6885,8 +6885,8 @@ packages:
       supports-color: 8.1.1
     dev: true
 
-  /js-base64/3.7.4:
-    resolution: {integrity: sha512-wpM/wi20Tl+3ifTyi0RdDckS4YTD4Lf953mBRrpG8547T7hInHNPEj8+ck4gB8VDcGyeAWFK++Wb/fU1BeavKQ==}
+  /js-base64/3.7.5:
+    resolution: {integrity: sha512-3MEt5DTINKqfScXKfJFrRbxkrnk2AxPWGBL/ycjz4dK8iqiSJ06UxD8jh8xuh6p10TX4t2+7FsBYVxxQbMg+qA==}
     dev: false
 
   /js-sdsl/4.3.0:
