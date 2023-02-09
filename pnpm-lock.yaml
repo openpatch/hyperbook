@@ -352,7 +352,7 @@ importers:
       '@hyperbook/fs': workspace:*
       '@hyperbook/types': workspace:*
       '@platforms/web': workspace:*
-      '@pnpm/exportable-manifest': 4.0.6
+      '@pnpm/exportable-manifest': 4.0.7
       '@types/archiver': 5.3.1
       '@types/async-retry': 1.4.5
       '@types/cross-spawn': 6.0.2
@@ -376,7 +376,7 @@ importers:
       '@hyperbook/types': link:../types
     devDependencies:
       '@platforms/web': link:../../platforms/web
-      '@pnpm/exportable-manifest': 4.0.6
+      '@pnpm/exportable-manifest': 4.0.7
       '@types/archiver': 5.3.1
       '@types/async-retry': 1.4.5
       '@types/cross-spawn': 6.0.2
@@ -2709,8 +2709,8 @@ packages:
       '@pnpm/constants': 6.2.0
     dev: true
 
-  /@pnpm/exportable-manifest/4.0.6:
-    resolution: {integrity: sha512-isvTiBg1EquRIqfE/vi1gIZkB/0KDiTSnWD8+YEyO3hXnpjyc1cCtAv0LOycBBbtYxK8e1fTUjG9bInf9qC0gQ==}
+  /@pnpm/exportable-manifest/4.0.7:
+    resolution: {integrity: sha512-v75uRAXUtSknrhGbgH5D3/UwBfU73ZtC3RYrKLrAozmTN00qGAWLbOyCPPd48WiHwvdd+eaJyARa+urFEgluEw==}
     engines: {node: '>=14.6'}
     dependencies:
       '@pnpm/error': 4.0.1
