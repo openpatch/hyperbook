@@ -43,7 +43,7 @@
     "@hyperbook/types": "workspace:*",
     "@next/bundle-analyzer": "^13.1.1",
     "@types/node": "18.13.0",
-    "@types/react": "18.0.27",
+    "@types/react": "18.0.28",
     "chalk": "5.2.0",
     "esbuild": "0.17.7",
     "glob": "8.1.0",

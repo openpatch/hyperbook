@@ -49,6 +49,6 @@
   },
   "devDependencies": {
     "@reduxjs/toolkit": "1.9.2",
-    "@types/react": "18.0.27"
+    "@types/react": "18.0.28"
   }
 }
