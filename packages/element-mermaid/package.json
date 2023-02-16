@@ -40,7 +40,7 @@
   },
   "dependencies": {
     "@hyperbook/provider": "workspace:*",
-    "mermaid": "9.3.0"
+    "mermaid": "9.4.0"
   },
   "peerDependencies": {
     "@reduxjs/toolkit": "1.x",
