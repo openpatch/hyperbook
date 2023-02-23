@@ -577,7 +577,7 @@ importers:
       '@hyperbook/styles': workspace:*
       '@hyperbook/toc': workspace:*
       '@hyperbook/types': workspace:*
-      '@types/glob': 8.0.1
+      '@types/glob': 8.1.0
       '@types/node': 18.14.0
       '@types/react': 18.0.28
       '@types/react-dom': 18.0.11
@@ -637,7 +637,7 @@ importers:
       react-dom: 18.2.0_react@18.2.0
     devDependencies:
       '@hyperbook/types': link:../../packages/types
-      '@types/glob': 8.0.1
+      '@types/glob': 8.1.0
       '@types/node': 18.14.0
       '@types/react': 18.0.28
       '@types/react-dom': 18.0.11
@@ -2947,6 +2947,13 @@ packages:
 
   /@types/glob/8.0.1:
     resolution: {integrity: sha512-8bVUjXZvJacUFkJXHdyZ9iH1Eaj5V7I8c4NdH5sQJsdXkqT4CA5Dhb4yb4VE/3asyx4L9ayZr1NIhTsWHczmMw==}
+    dependencies:
+      '@types/minimatch': 5.1.2
+      '@types/node': 18.14.0
+    dev: true
+
+  /@types/glob/8.1.0:
+    resolution: {integrity: sha512-IO+MJPVhoqz+28h1qLAcBEH2+xHMK6MTyHJc7MTnnYb6wsoLR29POVGJ7LycmVXIqyy/4/2ShP5sUwTXuOwb/w==}
     dependencies:
       '@types/minimatch': 5.1.2
       '@types/node': 18.14.0
