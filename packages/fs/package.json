@@ -52,7 +52,7 @@
     "@hyperbook/types": "workspace:*",
     "@types/mime-types": "^2.1.1",
     "handlebars": "^4.7.7",
-    "vitest": "^0.28.0"
+    "vitest": "^0.29.0"
   },
   "type": "module"
 }
