@@ -491,7 +491,7 @@ importers:
     specifiers:
       '@hyperbook/provider': workspace:*
       '@hyperbook/types': workspace:*
-      '@szhsin/react-menu': 3.4.1
+      '@szhsin/react-menu': 3.5.0
       '@types/react': 18.0.28
       '@types/react-dom': 18.0.11
       classnames: 2.3.2
@@ -500,7 +500,7 @@ importers:
       react-dom: 18.2.0
     dependencies:
       '@hyperbook/provider': link:../provider
-      '@szhsin/react-menu': 3.4.1_biqbaboplfbrettd7655fr4n2y
+      '@szhsin/react-menu': 3.5.0_biqbaboplfbrettd7655fr4n2y
       classnames: 2.3.2
       react-collapsed: 4.0.0_biqbaboplfbrettd7655fr4n2y
     devDependencies:
@@ -2855,8 +2855,8 @@ packages:
     dependencies:
       tslib: 2.5.0
 
-  /@szhsin/react-menu/3.4.1_biqbaboplfbrettd7655fr4n2y:
-    resolution: {integrity: sha512-Pxt7Kyp3yuX7zkT5tjdLRJGNFMa5Tx4BP+01gJ/dnMmHQpI1H2or9gEC0X+t3cLldO3LGmm4ViGypNCmQLv/4A==}
+  /@szhsin/react-menu/3.5.0_biqbaboplfbrettd7655fr4n2y:
+    resolution: {integrity: sha512-vX82o43V+g9MavB9fKFKFx+fNOTEmvagu2U3+IfvYXbfj08aTHOFVt0tKv9+nLAIW5z2Mb50xE6GczM5FZPQfQ==}
     peerDependencies:
       react: '>=16.14.0'
       react-dom: '>=16.14.0'
