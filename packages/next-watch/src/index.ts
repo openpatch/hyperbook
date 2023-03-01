@@ -11,45 +11,52 @@ const createNextApp = async (root: string, basePath?: string) => {
   const app = next({
     dev: true,
     dir: root,
+    hostname: "localhost",
+    port: Number(process.env.PORT) || 3000,
+    /*
     conf: {
       basePath,
       env: {
         root,
       },
     },
+    */
   });
 
-  return app.prepare().then(() => {
-    // if directories are provided, watch them for changes and trigger reload
-    chokidar
-      .watch(["./book", "./glossary", "./hyperbook.json", "./public"], {
-        usePolling: false,
-        cwd: root,
-      })
-      .on("change", async (filePath) => {
-        // @ts-ignore
-        app.server.hotReloader.send("building");
+  return app
+    .prepare()
+    .then(() => {
+      // if directories are provided, watch them for changes and trigger reload
+      chokidar
+        .watch(["./book", "./glossary", "./hyperbook.json", "./public"], {
+          usePolling: false,
+          cwd: root,
+        })
+        .on("change", async (filePath) => {
+          // @ts-ignore
+          app.server.hotReloader.send("building");
 
-        const global =
-          filePath.startsWith("hyperbook.json") ||
-          filePath.startsWith("public");
+          const global =
+            filePath.startsWith("hyperbook.json") ||
+            filePath.startsWith("public");
 
-        const pages = [];
-        if (filePath.startsWith("book") || global) {
-          pages.push("/[[...page]]");
-        } else if (filePath.startsWith("glossary") || global) {
-          pages.push("/glossary/[...term]", "/glossary");
-        }
+          const pages = [];
+          if (filePath.startsWith("book") || global) {
+            pages.push("/[[...page]]");
+          } else if (filePath.startsWith("glossary") || global) {
+            pages.push("/glossary/[...term]", "/glossary");
+          }
 
-        // @ts-ignore
-        // https://github.com/hashicorp/next-remote-watch/issues/42
-        app.server.hotReloader.send({
-          event: "serverOnlyChanges",
-          pages,
+          // @ts-ignore
+          // https://github.com/hashicorp/next-remote-watch/issues/42
+          app.server.hotReloader.send({
+            event: "serverOnlyChanges",
+            pages,
+          });
         });
-      });
-    return app;
-  });
+      return app;
+    })
+    .catch((e) => console.log(e));
 };
 
 const handleProject = (server: Express) => async (project: Project) => {
@@ -78,6 +85,7 @@ const handleProject = (server: Express) => async (project: Project) => {
 };
 
 async function run() {
+  console.log(`> Starting dev server ...`);
   const root = path.join(process.cwd(), "..");
   const project = await collect(root);
   if (project.type === "library") {

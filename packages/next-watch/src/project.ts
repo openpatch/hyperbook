@@ -36,7 +36,7 @@ export function getProjectName(project: Project, language?: Language) {
     label = project.name;
   } else {
     if (language) {
-      label = project.name[language];
+      label = project.name[language] || "en";
     } else {
       label = Object.values(project.name)[0];
     }
