@@ -1,5 +1,11 @@
 # @hyperbook/next-watch
 
+## 0.2.1
+
+### Patch Changes
+
+- [`1a91dcb`](https://github.com/openpatch/hyperbook/commit/1a91dcb3d78f8567c8616e3239d6b771b71d874e) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix dev server not starting. With the upgrade to NextJS 13 the parsing of conf property to the next function changed. At the moment we do not need the custom conf, but in the future we probably need to create next.config.js files.
+
 ## 0.2.0
 
 ### Minor Changes
