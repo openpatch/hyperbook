@@ -52,7 +52,7 @@
     "@hyperbook/provider": "workspace:*",
     "@hyperbook/store": "workspace:*",
     "@openpatch/patches": "6.0.1",
-    "@vocab/core": "1.2.0",
+    "@vocab/core": "1.2.1",
     "@vocab/react": "1.1.4",
     "@vocab/types": "1.1.2",
     "react-hook-form": "7.43.3",
