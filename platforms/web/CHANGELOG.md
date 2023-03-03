@@ -1,5 +1,7 @@
 # hyperbook-simple-template
 
+## 0.13.11
+
 ## 0.13.10
 
 ### Patch Changes

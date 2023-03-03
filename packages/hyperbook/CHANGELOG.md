@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.13.11
+
+### Patch Changes
+
+- [`5bc887d`](https://github.com/openpatch/hyperbook/commit/5bc887dccbeebde8dc0794581d313cc1b35147c7) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix dev mode exiting silently.
+
 ## 0.13.10
 
 ## 0.13.9
