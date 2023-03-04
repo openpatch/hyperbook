@@ -39,7 +39,7 @@
     "next": ">=10"
   },
   "devDependencies": {
-    "esbuild": "0.17.10",
+    "esbuild": "0.17.11",
     "next": "13.2.3",
     "react": "18.2.0",
     "react-dom": "18.2.0"
