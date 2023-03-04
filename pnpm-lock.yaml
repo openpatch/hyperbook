@@ -366,7 +366,7 @@ importers:
       commander: 9.5.0
       cpy: 9.0.1
       cross-spawn: 7.0.3
-      got: 12.5.3
+      got: 12.6.0
       prompts: 2.4.2
       rimraf: 3.0.2
       tar: 6.1.13
@@ -390,7 +390,7 @@ importers:
       commander: 9.5.0
       cpy: 9.0.1
       cross-spawn: 7.0.3
-      got: 12.5.3
+      got: 12.6.0
       prompts: 2.4.2
       rimraf: 3.0.2
       tar: 6.1.13
@@ -4034,8 +4034,8 @@ packages:
     engines: {node: '>=14.16'}
     dev: true
 
-  /cacheable-request/10.2.5:
-    resolution: {integrity: sha512-5RwYYCfzjNPsyJxb/QpaM0bfzx+kw5/YpDhZPm9oMIDntHFQ9YXeyV47ZvzlTE0XrrrbyO2UITJH4GF9eRLdXQ==}
+  /cacheable-request/10.2.8:
+    resolution: {integrity: sha512-IDVO5MJ4LItE6HKFQTqT2ocAQsisOoCTUDu1ddCmnhyiwFQjXNPp4081Xj23N4tO+AFEFNzGuNEf/c8Gwwt15A==}
     engines: {node: '>=14.16'}
     dependencies:
       '@types/http-cache-semantics': 4.0.1
@@ -6119,14 +6119,14 @@ packages:
       get-intrinsic: 1.2.0
     dev: true
 
-  /got/12.5.3:
-    resolution: {integrity: sha512-8wKnb9MGU8IPGRIo+/ukTy9XLJBwDiCpIf5TVzQ9Cpol50eMTpBq2GAuDsuDIz7hTYmZgMgC1e9ydr6kSDWs3w==}
+  /got/12.6.0:
+    resolution: {integrity: sha512-WTcaQ963xV97MN3x0/CbAriXFZcXCfgxVp91I+Ze6pawQOa7SgzwSx2zIJJsX+kTajMnVs0xcFD1TxZKFqhdnQ==}
     engines: {node: '>=14.16'}
     dependencies:
       '@sindresorhus/is': 5.3.0
       '@szmarczak/http-timer': 5.0.1
       cacheable-lookup: 7.0.0
-      cacheable-request: 10.2.5
+      cacheable-request: 10.2.8
       decompress-response: 6.0.0
       form-data-encoder: 2.1.4
       get-stream: 6.0.1
