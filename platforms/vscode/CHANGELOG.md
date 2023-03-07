@@ -1,5 +1,11 @@
 # @hyperbook/vscode-extension
 
+## 0.11.12
+
+### Patch Changes
+
+- [`80b90df`](https://github.com/openpatch/hyperbook/commit/80b90df51f37e67a6296c79b379f3bb5910f161c) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix: Link to glossary not working
+
 ## 0.11.11
 
 ### Patch Changes
