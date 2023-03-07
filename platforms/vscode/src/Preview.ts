@@ -49,10 +49,10 @@ export default class Preview {
   async getConfig() {
     if (this._resource) {
       const hyperbookRoot = await hyperbook
-        .findRoot(this._resource.fsPath)
+        .findRoot(this._resource.path)
         .catch(() => "");
       const config: HyperbookJson = await hyperbook
-        .find(this._resource.fsPath)
+        .find(this._resource.path)
         .catch(
           () =>
             ({
@@ -150,11 +150,11 @@ export default class Preview {
       const fileName = filePaths[filePaths.length - 1];
       this.panel.title = `[Preview] ${fileName}`;
       this._resource = vscode.window.activeTextEditor.document.uri;
-      const hyperbookRoot = await hyperbook.findRoot(this._resource.fsPath);
+      const hyperbookRoot = await hyperbook.findRoot(this._resource.path);
       this._vfile = await vfile.getByAbsolutePath(
         hyperbookRoot,
         null,
-        this._resource.fsPath
+        this._resource.path
       );
 
       this.postMessage({

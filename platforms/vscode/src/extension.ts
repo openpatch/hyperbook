@@ -55,7 +55,7 @@ export function activate(context: vscode.ExtensionContext) {
           return undefined;
         }
 
-        const workspaceFolder = await hyperbook.findRoot(document.uri.fsPath);
+        const workspaceFolder = await hyperbook.findRoot(document.uri.path);
 
         if (!workspaceFolder) {
           return undefined;
@@ -92,7 +92,7 @@ export function activate(context: vscode.ExtensionContext) {
           return undefined;
         }
 
-        const workspaceFolder = await hyperbook.findRoot(document.uri.fsPath);
+        const workspaceFolder = await hyperbook.findRoot(document.uri.path);
 
         if (!workspaceFolder) {
           return undefined;
@@ -129,7 +129,7 @@ export function activate(context: vscode.ExtensionContext) {
           return undefined;
         }
 
-        const workspaceFolder = await hyperbook.findRoot(document.uri.fsPath);
+        const workspaceFolder = await hyperbook.findRoot(document.uri.path);
 
         if (!workspaceFolder) {
           return undefined;
@@ -167,7 +167,7 @@ export function activate(context: vscode.ExtensionContext) {
           return undefined;
         }
 
-        const workspaceFolder = await hyperbook.findRoot(document.uri.fsPath);
+        const workspaceFolder = await hyperbook.findRoot(document.uri.path);
 
         if (!workspaceFolder) {
           return undefined;
