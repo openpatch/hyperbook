@@ -87,7 +87,9 @@ export const App = () => {
             );
           } else if (href?.startsWith("/")) {
             let rootFolder = "";
-            if (!href.startsWith("/glossary")) {
+            if (href.startsWith("/glossary")) {
+              rootFolder = "glossary";
+            } else {
               rootFolder = "book";
             }
             return (
