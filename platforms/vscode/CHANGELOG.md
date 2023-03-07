@@ -1,5 +1,11 @@
 # @hyperbook/vscode-extension
 
+## 0.11.13
+
+### Patch Changes
+
+- [`0e8778a`](https://github.com/openpatch/hyperbook/commit/0e8778a069615ca133f8476d05ae27a425ece036) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Change fsPath to platform independent path
+
 ## 0.11.12
 
 ### Patch Changes
