@@ -54,7 +54,7 @@
     "@openpatch/patches": "6.0.1",
     "@vocab/core": "1.2.3",
     "@vocab/react": "1.1.4",
-    "@vocab/types": "1.1.2",
+    "@vocab/types": "1.2.0",
     "react-hook-form": "7.43.5",
     "zod": "3.21.4"
   },
