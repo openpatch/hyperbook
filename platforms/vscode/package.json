@@ -155,7 +155,7 @@
     "buffer": "6.0.3",
     "copy-webpack-plugin": "11.0.0",
     "css-loader": "6.7.3",
-    "eslint": "8.35.0",
+    "eslint": "8.36.0",
     "eslint-plugin-react-hooks": "4.6.0",
     "file-loader": "6.2.0",
     "glob": "8.1.0",
