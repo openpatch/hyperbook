@@ -32,7 +32,7 @@
   },
   "devDependencies": {
     "@pnpm/exportable-manifest": "4.0.7",
-    "@types/archiver": "5.3.1",
+    "@types/archiver": "5.3.2",
     "@types/async-retry": "1.4.5",
     "@types/cross-spawn": "6.0.2",
     "@types/prompts": "2.4.2",

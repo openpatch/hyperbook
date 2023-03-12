@@ -353,7 +353,7 @@ importers:
       '@hyperbook/types': workspace:*
       '@platforms/web': workspace:*
       '@pnpm/exportable-manifest': 4.0.7
-      '@types/archiver': 5.3.1
+      '@types/archiver': 5.3.2
       '@types/async-retry': 1.4.5
       '@types/cross-spawn': 6.0.2
       '@types/prompts': 2.4.2
@@ -377,7 +377,7 @@ importers:
     devDependencies:
       '@platforms/web': link:../../platforms/web
       '@pnpm/exportable-manifest': 4.0.7
-      '@types/archiver': 5.3.1
+      '@types/archiver': 5.3.2
       '@types/async-retry': 1.4.5
       '@types/cross-spawn': 6.0.2
       '@types/prompts': 2.4.2
@@ -2910,10 +2910,10 @@ packages:
     resolution: {integrity: sha512-yOlFc+7UtL/89t2ZhjPvvB/DeAr3r+Dq58IgzsFkOAvVC6NMJXmCGjbptdXdR9qsX7pKcTL+s87FtYREi2dEEQ==}
     dev: true
 
-  /@types/archiver/5.3.1:
-    resolution: {integrity: sha512-wKYZaSXaDvTZuInAWjCeGG7BEAgTWG2zZW0/f7IYFcoHB2X2d9lkVFnrOlXl3W6NrvO6Ml3FLLu8Uksyymcpnw==}
+  /@types/archiver/5.3.2:
+    resolution: {integrity: sha512-IctHreBuWE5dvBDz/0WeKtyVKVRs4h75IblxOACL92wU66v+HGAfEYAOyXkOFphvRJMhuXdI9huDXpX0FC6lCw==}
     dependencies:
-      '@types/glob': 8.0.1
+      '@types/readdir-glob': 1.1.0
     dev: true
 
   /@types/async-retry/1.4.5:
@@ -3114,6 +3114,12 @@ packages:
       '@types/prop-types': 15.7.5
       '@types/scheduler': 0.16.2
       csstype: 3.1.1
+
+  /@types/readdir-glob/1.1.0:
+    resolution: {integrity: sha512-taqbpEGEu0Vx6+9PQ4XtqAUAMRyLCE7H6p4Pkp+R/90y/phddtCwb7XRLa8MYf1OxmiL2ZqXwZF1gOT7LyGGCg==}
+    dependencies:
+      '@types/node': 18.15.0
+    dev: true
 
   /@types/retry/0.12.2:
     resolution: {integrity: sha512-XISRgDJ2Tc5q4TRqvgJtzsRkFYNJzZrhTdtMoGVBttwzzQJkPnS3WWTFc7kuDRoPtPakl+T+OfdEUjYJj7Jbow==}
