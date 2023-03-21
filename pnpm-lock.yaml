@@ -405,7 +405,7 @@ importers:
       '@types/unist': 2.0.6
       react: 18.2.0
       react-dom: 18.2.0
-      react-markdown: 8.0.5
+      react-markdown: 8.0.6
       rehype-highlight: 5.0.2
       rehype-katex: 6.0.2
       rehype-stringify: ^9.0.3
@@ -422,7 +422,7 @@ importers:
       vitest: ^0.29.0
     dependencies:
       '@hyperbook/provider': link:../provider
-      react-markdown: 8.0.5_pmekkgnqduwlme35zpnqhenc34
+      react-markdown: 8.0.6_pmekkgnqduwlme35zpnqhenc34
       rehype-highlight: 5.0.2
       rehype-katex: 6.0.2
       remark-directive: 2.0.1
@@ -9254,6 +9254,33 @@ packages:
 
   /react-markdown/8.0.5_pmekkgnqduwlme35zpnqhenc34:
     resolution: {integrity: sha512-jGJolWWmOWAvzf+xMdB9zwStViODyyFQhNB/bwCerbBKmrTmgmA599CGiOlP58OId1IMoIRsA8UdI1Lod4zb5A==}
+    peerDependencies:
+      '@types/react': '>=16'
+      react: '>=16'
+    dependencies:
+      '@types/hast': 2.3.4
+      '@types/prop-types': 15.7.5
+      '@types/react': 18.0.28
+      '@types/unist': 2.0.6
+      comma-separated-tokens: 2.0.3
+      hast-util-whitespace: 2.0.1
+      prop-types: 15.8.1
+      property-information: 6.2.0
+      react: 18.2.0
+      react-is: 18.2.0
+      remark-parse: 10.0.1
+      remark-rehype: 10.1.0
+      space-separated-tokens: 2.0.2
+      style-to-object: 0.4.1
+      unified: 10.1.2
+      unist-util-visit: 4.1.2
+      vfile: 5.3.6
+    transitivePeerDependencies:
+      - supports-color
+    dev: false
+
+  /react-markdown/8.0.6_pmekkgnqduwlme35zpnqhenc34:
+    resolution: {integrity: sha512-KgPWsYgHuftdx510wwIzpwf+5js/iHqBR+fzxefv8Khk3mFbnioF1bmL2idHN3ler0LMQmICKeDrWnZrX9mtbQ==}
     peerDependencies:
       '@types/react': '>=16'
       react: '>=16'
