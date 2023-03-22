@@ -1,5 +1,11 @@
 # @hyperbook/fs
 
+## 0.7.4
+
+### Patch Changes
+
+- [`e581f06`](https://github.com/openpatch/hyperbook/commit/e581f06ddb5291528d46ba8c797f5cf8f54072e1) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix bug index not found when no other sibling directories are present.
+
 ## 0.7.3
 
 ### Patch Changes
