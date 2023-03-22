@@ -1,4 +1,4 @@
-// Vitest Snapshot v1
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`hyperbook > should get navigation 1`] = `
 {
@@ -8,9 +8,25 @@ exports[`hyperbook > should get navigation 1`] = `
     "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/paradigms.md",
   },
   "next": {
-    "href": "/subsection/use-template1",
+    "href": "/subsection3",
+    "isEmpty": false,
     "name": "Use Template1 with YAML",
-    "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/subsection/use-template1.yml",
+    "pages": [],
+    "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/subsection3/index.yml",
+    "sections": [
+      {
+        "isEmpty": true,
+        "name": "subsection31",
+        "pages": [
+          {
+            "href": "/subsection3/subsection31/test",
+            "name": "Test",
+            "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/subsection3/subsection31/test.md",
+          },
+        ],
+        "sections": [],
+      },
+    ],
   },
   "pages": [
     {
@@ -30,6 +46,41 @@ exports[`hyperbook > should get navigation 1`] = `
     "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/index.md",
   },
   "sections": [
+    {
+      "href": "/subsection3",
+      "isEmpty": false,
+      "name": "Use Template1 with YAML",
+      "pages": [],
+      "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/subsection3/index.yml",
+      "sections": [
+        {
+          "isEmpty": true,
+          "name": "subsection31",
+          "pages": [
+            {
+              "href": "/subsection3/subsection31/test",
+              "name": "Test",
+              "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/subsection3/subsection31/test.md",
+            },
+          ],
+          "sections": [],
+        },
+      ],
+    },
+    {
+      "href": "/subsection2",
+      "isEmpty": false,
+      "name": "Use Template1 with YAML",
+      "pages": [
+        {
+          "href": "/subsection2/test",
+          "name": "Test",
+          "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/subsection2/test.md",
+        },
+      ],
+      "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/subsection2/index.yml",
+      "sections": [],
+    },
     {
       "href": "/subsection",
       "isEmpty": true,

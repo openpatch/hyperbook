@@ -1,4 +1,4 @@
-// Vitest Snapshot v1
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`extractLines > should extract lines and not add ellipsis on first and last line 1`] = `
 "Line 1
@@ -62,6 +62,17 @@ Line 10"
 `;
 
 exports[`getMarkdown > should get markdown from template 1`] = `
+{
+  "content": "
+Example use of a template.
+",
+  "data": {
+    "name": "Use Template1 with YAML",
+  },
+}
+`;
+
+exports[`getMarkdown > should get markdown from template for index 1`] = `
 {
   "content": "
 Example use of a template.
@@ -170,6 +181,54 @@ exports[`list > should list all 1`] = `
     },
     "root": "single-hyperbook",
   },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "test",
+    "path": {
+      "absolute": "single-hyperbook/book/subsection2/test.md",
+      "directory": "subsection2",
+      "href": "/subsection2/test",
+      "relative": "subsection2/test.md",
+    },
+    "root": "single-hyperbook",
+  },
+  {
+    "extension": ".yml",
+    "folder": "book",
+    "name": "index",
+    "path": {
+      "absolute": "single-hyperbook/book/subsection2/index.yml",
+      "directory": "subsection2",
+      "href": "/subsection2",
+      "relative": "subsection2/index.yml",
+    },
+    "root": "single-hyperbook",
+  },
+  {
+    "extension": ".yml",
+    "folder": "book",
+    "name": "index",
+    "path": {
+      "absolute": "single-hyperbook/book/subsection3/index.yml",
+      "directory": "subsection3",
+      "href": "/subsection3",
+      "relative": "subsection3/index.yml",
+    },
+    "root": "single-hyperbook",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "test",
+    "path": {
+      "absolute": "single-hyperbook/book/subsection3/subsection31/test.md",
+      "directory": "subsection3/subsection31",
+      "href": "/subsection3/subsection31/test",
+      "relative": "subsection3/subsection31/test.md",
+    },
+    "root": "single-hyperbook",
+  },
 ]
 `;
 
@@ -256,6 +315,54 @@ exports[`list > should list for folder book 1`] = `
       "directory": "subsection",
       "href": "/subsection",
       "relative": "subsection/index.md",
+    },
+    "root": "single-hyperbook",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "test",
+    "path": {
+      "absolute": "single-hyperbook/book/subsection2/test.md",
+      "directory": "subsection2",
+      "href": "/subsection2/test",
+      "relative": "subsection2/test.md",
+    },
+    "root": "single-hyperbook",
+  },
+  {
+    "extension": ".yml",
+    "folder": "book",
+    "name": "index",
+    "path": {
+      "absolute": "single-hyperbook/book/subsection2/index.yml",
+      "directory": "subsection2",
+      "href": "/subsection2",
+      "relative": "subsection2/index.yml",
+    },
+    "root": "single-hyperbook",
+  },
+  {
+    "extension": ".yml",
+    "folder": "book",
+    "name": "index",
+    "path": {
+      "absolute": "single-hyperbook/book/subsection3/index.yml",
+      "directory": "subsection3",
+      "href": "/subsection3",
+      "relative": "subsection3/index.yml",
+    },
+    "root": "single-hyperbook",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "name": "test",
+    "path": {
+      "absolute": "single-hyperbook/book/subsection3/subsection31/test.md",
+      "directory": "subsection3/subsection31",
+      "href": "/subsection3/subsection31/test",
+      "relative": "subsection3/subsection31/test.md",
     },
     "root": "single-hyperbook",
   },

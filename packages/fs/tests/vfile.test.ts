@@ -50,6 +50,19 @@ describe("getMarkdown", () => {
 
     expect(await vfile.getMarkdown(templateFile)).toMatchSnapshot();
   });
+
+  it("should get markdown from template for index", async () => {
+    let hyperbookPath = path.join(__dirname, "fixtures", "single-hyperbook");
+    let files = await vfile.list(hyperbookPath);
+    let templateFile = files.find(
+      (f) => f.path.relative === "subsection2/index.yml" && f.folder === "book"
+    );
+    if (!templateFile) {
+      throw Error("Template not found");
+    }
+
+    expect(await vfile.getMarkdown(templateFile)).toMatchSnapshot();
+  });
 });
 
 describe("getDirectory", () => {

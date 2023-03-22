@@ -99,7 +99,7 @@ export const getStaticPaths: GetStaticPaths<{
   );
   const paths = files.map((f) => {
     const page = f.path.href.slice(1).split("/");
-    if (f.name === "index") {
+    if (f.name === "index" && f.path.directory === "") {
       page.pop();
     }
     return {
