@@ -1,5 +1,12 @@
 # @hyperbook/vscode-extension
 
+## 0.11.15
+
+### Patch Changes
+
+- Updated dependencies [[`f1d2219`](https://github.com/openpatch/hyperbook/commit/f1d2219791491e6ae7579503864b3795f5bf7dc9)]:
+  - @hyperbook/element-dl@0.1.10
+
 ## 0.11.14
 
 ### Patch Changes
