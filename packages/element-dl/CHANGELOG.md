@@ -1,5 +1,11 @@
 # @hyperbook/element-download
 
+## 0.1.10
+
+### Patch Changes
+
+- [`f1d2219`](https://github.com/openpatch/hyperbook/commit/f1d2219791491e6ae7579503864b3795f5bf7dc9) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add margin to download
+
 ## 0.1.9
 
 ### Patch Changes
