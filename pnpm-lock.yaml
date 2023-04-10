@@ -356,7 +356,7 @@ importers:
       '@types/archiver': 5.3.2
       '@types/async-retry': 1.4.5
       '@types/cross-spawn': 6.0.2
-      '@types/prompts': 2.4.3
+      '@types/prompts': 2.4.4
       '@types/rimraf': 3.0.2
       '@types/tar': 6.1.4
       '@vercel/ncc': 0.36.1
@@ -380,7 +380,7 @@ importers:
       '@types/archiver': 5.3.2
       '@types/async-retry': 1.4.5
       '@types/cross-spawn': 6.0.2
-      '@types/prompts': 2.4.3
+      '@types/prompts': 2.4.4
       '@types/rimraf': 3.0.2
       '@types/tar': 6.1.4
       '@vercel/ncc': 0.36.1
@@ -3065,10 +3065,6 @@ packages:
     resolution: {integrity: sha512-QH+37Qds3E0eDlReeboBxfHbX9omAcBCXEzswCu6jySP642jiM3cYSIkU/REqwhCUqXdonHFuBfJDiAJxMNhaQ==}
     dev: true
 
-  /@types/node/18.15.0:
-    resolution: {integrity: sha512-z6nr0TTEOBGkzLGmbypWOGnpSpSIBorEhC4L+4HeQ2iezKCi4f77kyslRwvHeNitymGQ+oFyIWGP96l/DPSV9w==}
-    dev: true
-
   /@types/node/18.15.11:
     resolution: {integrity: sha512-E5Kwq2n4SbMzQOn6wnmBjuK9ouqlURrcZDVfbo9ftDDTFt3nk7ZKK4GMOzoYgnpQJKcxwQw+lGaBvvlMo0qN/Q==}
     dev: true
@@ -3096,10 +3092,10 @@ packages:
     resolution: {integrity: sha512-KufADq8uQqo1pYKVIYzfKbJfBAc0sOeXqGbFaSpv8MRmC/zXgowNZmFcbngndGk922QDmOASEXUZCaY48gs4cg==}
     dev: true
 
-  /@types/prompts/2.4.3:
-    resolution: {integrity: sha512-qpzXlxoPv67TCtTCS+SwYmz1M+G5ARTrE5YVlrZPy/xBD36dzLqiJLDzOzsMXkcJYq6+6UkWqFwtLAOjsfec5Q==}
+  /@types/prompts/2.4.4:
+    resolution: {integrity: sha512-p5N9uoTH76lLvSAaYSZtBCdEXzpOOufsRjnhjVSrZGXikVGHX9+cc9ERtHRV4hvBKHyZb1bg4K+56Bd2TqUn4A==}
     dependencies:
-      '@types/node': 18.15.0
+      '@types/node': 18.15.11
       kleur: 3.0.3
     dev: true
 

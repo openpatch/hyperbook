@@ -35,7 +35,7 @@
     "@types/archiver": "5.3.2",
     "@types/async-retry": "1.4.5",
     "@types/cross-spawn": "6.0.2",
-    "@types/prompts": "2.4.3",
+    "@types/prompts": "2.4.4",
     "@types/rimraf": "3.0.2",
     "@types/tar": "6.1.4",
     "@vercel/ncc": "0.36.1",
