@@ -39,7 +39,7 @@
     "build:types": "tsc --project tsconfig.build.json --declaration --emitDeclarationOnly"
   },
   "dependencies": {
-    "@babel/core": "7.21.3",
+    "@babel/core": "7.21.4",
     "@bitflow/bits": "0.2.1",
     "@bitflow/core": "0.6.0",
     "@bitflow/do-local": "0.5.1",
