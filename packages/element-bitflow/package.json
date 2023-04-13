@@ -55,7 +55,7 @@
     "@vocab/core": "1.2.5",
     "@vocab/react": "1.1.4",
     "@vocab/types": "1.2.0",
-    "react-hook-form": "7.43.8",
+    "react-hook-form": "7.43.9",
     "zod": "3.21.4"
   },
   "peerDependencies": {
