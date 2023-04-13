@@ -42,7 +42,7 @@
   },
   "dependencies": {
     "@hyperbook/provider": "workspace:*",
-    "react-markdown": "8.0.6",
+    "react-markdown": "8.0.7",
     "rehype-highlight": "5.0.2",
     "rehype-katex": "6.0.2",
     "remark-directive": "2.0.1",
