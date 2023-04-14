@@ -605,7 +605,7 @@ importers:
       style-loader: 3.3.2
       ts-loader: 9.4.2
       typescript: 4.9.5
-      typescript-json-schema: 0.55.0
+      typescript-json-schema: 0.56.0
       vsce: 2.15.0
       webpack: 5.77.0
       webpack-cli: 4.10.0
@@ -661,7 +661,7 @@ importers:
       style-loader: 3.3.2_webpack@5.77.0
       ts-loader: 9.4.2_lmihoaokjodojihym2ybosltk4
       typescript: 4.9.5
-      typescript-json-schema: 0.55.0
+      typescript-json-schema: 0.56.0
       vsce: 2.15.0
       webpack: 5.77.0_webpack-cli@4.10.0
       webpack-cli: 4.10.0_webpack@5.77.0
@@ -10759,7 +10759,7 @@ packages:
       webpack: 5.77.0_webpack-cli@4.10.0
     dev: true
 
-  /ts-node/10.9.1_fuvgya3hcdoxlfgft445xm6sbq:
+  /ts-node/10.9.1_iedef3djpnfxdpbmfr4x6l3blq:
     resolution: {integrity: sha512-NtVysVPkxxrwFGUUxGYhfux8k78pQB3JqYBXlLRZgdGUqTO5wU/UyHop5p70iEbGhB7q5KmiZiU0Y3KlJrScEw==}
     hasBin: true
     peerDependencies:
@@ -10785,7 +10785,7 @@ packages:
       create-require: 1.1.1
       diff: 4.0.2
       make-error: 1.3.6
-      typescript: 4.8.4
+      typescript: 4.9.5
       v8-compile-cache-lib: 3.0.1
       yn: 3.1.1
     dev: true
@@ -10939,8 +10939,8 @@ packages:
       is-typedarray: 1.0.0
     dev: true
 
-  /typescript-json-schema/0.55.0:
-    resolution: {integrity: sha512-BXaivYecUdiXWWNiUqXgY6A9cMWerwmhtO+lQE7tDZGs7Mf38sORDeQZugfYOZOHPZ9ulsD+w0LWjFDOQoXcwg==}
+  /typescript-json-schema/0.56.0:
+    resolution: {integrity: sha512-k/aSEqx89YR2z/f2y3VwoOGzlKTWern0EIey2qqEpMRP7HL4CI8udPElzJs4eFVkPowCLJ1yVBSzuIWIUF+mMA==}
     hasBin: true
     dependencies:
       '@types/json-schema': 7.0.11
@@ -10948,18 +10948,12 @@ packages:
       glob: 7.2.3
       path-equal: 1.2.5
       safe-stable-stringify: 2.4.2
-      ts-node: 10.9.1_fuvgya3hcdoxlfgft445xm6sbq
-      typescript: 4.8.4
+      ts-node: 10.9.1_iedef3djpnfxdpbmfr4x6l3blq
+      typescript: 4.9.5
       yargs: 17.6.2
     transitivePeerDependencies:
       - '@swc/core'
       - '@swc/wasm'
-    dev: true
-
-  /typescript/4.8.4:
-    resolution: {integrity: sha512-QCh+85mCy+h0IGff8r5XWzOVSbBO+KfeYrMQh7NJ58QujwcE22u+NUSmUxqF+un70P9GXKxa2HCNiTTMJknyjQ==}
-    engines: {node: '>=4.2.0'}
-    hasBin: true
     dev: true
 
   /typescript/4.9.5:
