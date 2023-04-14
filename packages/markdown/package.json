@@ -68,6 +68,6 @@
     "remark-parse": "^10.0.1",
     "remark-rehype": "^10.1.0",
     "unified": "^10.1.2",
-    "vitest": "^0.29.0"
+    "vitest": "^0.30.0"
   }
 }
