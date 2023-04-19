@@ -1,5 +1,12 @@
 # @hyperbook/vscode-extension
 
+## 0.11.16
+
+### Patch Changes
+
+- Updated dependencies [[`e087609`](https://github.com/openpatch/hyperbook/commit/e087609de23c4d2868793fec65deee8beb144a78)]:
+  - @hyperbook/element-excalidraw@0.4.0
+
 ## 0.11.15
 
 ### Patch Changes

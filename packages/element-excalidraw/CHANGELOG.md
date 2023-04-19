@@ -1,5 +1,11 @@
 # @hyperbook/element-excalidraw
 
+## 0.4.0
+
+### Minor Changes
+
+- [`e087609`](https://github.com/openpatch/hyperbook/commit/e087609de23c4d2868793fec65deee8beb144a78) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - upgrade excalidraw to version 0.15.0
+
 ## 0.3.1
 
 ### Patch Changes
