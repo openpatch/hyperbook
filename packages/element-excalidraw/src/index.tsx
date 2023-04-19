@@ -1,5 +1,6 @@
 import {
   ExcalidrawImperativeAPI,
+  ExcalidrawInitialDataState,
   ExcalidrawProps as EDP,
 } from "@excalidraw/excalidraw/types/types";
 import {
@@ -64,7 +65,7 @@ const DirectiveExcalidraw: FC<DirectiveExcalidrawProps> = ({
   const router = useRouter();
   const makeUrl = useMakeUrl();
   const [preview, setPreview] = useState(env == "development");
-  const initialData = useRef<EDP["initialData"]>();
+  const initialData = useRef<ExcalidrawInitialDataState>();
   const containerRef = useRef<HTMLDivElement>(null);
   const [state, setState] = useState<
     "default" | "saving" | "unsaved" | "saving-failed"
@@ -102,41 +103,6 @@ const DirectiveExcalidraw: FC<DirectiveExcalidrawProps> = ({
     };
   }, []);
 
-  const getZoom = () => {
-    const initialZoom = initialData.current?.appState?.zoom?.value || 1;
-    if (containerRef.current && autoZoom == true) {
-      const currentWidth = containerRef.current.clientWidth;
-      const initialWidth = initialData.current?.appState?.width || 0;
-
-      if (initialWidth > 0) {
-        const widthRatio = currentWidth / initialWidth;
-
-        return initialZoom * widthRatio;
-      }
-    }
-    return initialZoom;
-  };
-
-  const handleResize = useCallback(() => {
-    if (api.current) {
-      api.current.updateScene({
-        appState: {
-          zoom: {
-            value: getZoom(),
-          },
-        },
-      });
-    }
-  }, []);
-
-  useLayoutEffect(() => {
-    window?.addEventListener("resize", handleResize);
-
-    return () => {
-      window?.removeEventListener("resize", handleResize);
-    };
-  }, []);
-
   useLayoutEffect(() => {
     document
       .getElementsByTagName("main")?.[0]
@@ -157,13 +123,19 @@ const DirectiveExcalidraw: FC<DirectiveExcalidrawProps> = ({
     }
   }, [preferedColorScheme]);
 
-  const loadData: EDP["initialData"] = async () => {
+  useEffect(() => {
+    if (!api) {
+      return;
+    }
+    api.current?.scrollToContent(undefined, { fitToContent: autoZoom });
+  }, [api]);
+
+  const loadData = async (): Promise<ExcalidrawInitialDataState> => {
     const url = makeUrl(file, "public");
     return loadFile(url)
       .then((text) => JSON.parse(text))
       .then((data) => {
         initialData.current = data;
-        const zoom = getZoom();
         return {
           ...data,
           scrollToContent: center,
@@ -171,9 +143,6 @@ const DirectiveExcalidraw: FC<DirectiveExcalidrawProps> = ({
             ...data?.appState,
             collaborators: [],
             theme: preferedColorScheme,
-            zoom: {
-              value: zoom,
-            },
           },
         };
       })
