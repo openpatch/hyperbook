@@ -50,6 +50,7 @@ export const buildPackage = async (path) => {
     jsx: "automatic",
     sourcemap: true,
     minify: false,
+    loader: { ".png": "file" },
     bundle: true,
     external,
   };

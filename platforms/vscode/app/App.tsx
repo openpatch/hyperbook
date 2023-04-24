@@ -14,6 +14,7 @@ import elementStruktog from "@hyperbook/element-struktog";
 import elementQr from "@hyperbook/element-qr";
 import elementMermaid from "@hyperbook/element-mermaid";
 import elementExcalidraw from "@hyperbook/element-excalidraw";
+import elementOnlineIde from "@hyperbook/element-online-ide";
 import { Markdown } from "@hyperbook/markdown";
 import { Styles } from "@hyperbook/styles";
 import { ChangeMessage, Message } from "../src/messages/messageTypes";
@@ -138,6 +139,7 @@ export const App = () => {
           elementDl,
           elementBookmarks,
           elementStruktog,
+          elementOnlineIde,
           elementQr,
           elementMermaid,
           elementScratchblock,
