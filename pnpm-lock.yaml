@@ -48,7 +48,7 @@ importers:
         version: 18.2.0(react@18.2.0)
       react-redux:
         specifier: 8.0.5
-        version: 8.0.5(@types/react-dom@18.0.11)(@types/react@18.0.35)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
+        version: 8.0.5(@types/react-dom@18.0.6)(@types/react@18.0.15)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
       rimraf:
         specifier: 3.0.2
         version: 3.0.2
@@ -145,7 +145,7 @@ importers:
         version: 7.43.9(react@18.2.0)
       react-redux:
         specifier: 8.x
-        version: 8.0.5(@types/react-dom@18.0.11)(@types/react@18.0.35)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
+        version: 8.0.5(@types/react-dom@18.0.6)(@types/react@18.0.15)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
       zod:
         specifier: 3.21.4
         version: 3.21.4
@@ -204,7 +204,7 @@ importers:
         version: 4.0.0(react-dom@18.2.0)(react@18.2.0)
       react-redux:
         specifier: 8.x
-        version: 8.0.5(@types/react-dom@18.0.11)(@types/react@18.0.35)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
+        version: 8.0.5(@types/react-dom@18.0.6)(@types/react@18.0.15)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
     devDependencies:
       '@types/object-hash':
         specifier: 3.0.2
@@ -474,7 +474,7 @@ importers:
         version: 3.0.0
       react-redux:
         specifier: 8.x
-        version: 8.0.5(@types/react-dom@18.0.11)(@types/react@18.0.35)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
+        version: 8.0.5(@types/react-dom@18.0.6)(@types/react@18.0.15)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
     devDependencies:
       '@types/object-hash':
         specifier: 3.0.2
@@ -881,6 +881,9 @@ importers:
       '@hyperbook/element-mermaid':
         specifier: workspace:*
         version: link:../../packages/element-mermaid
+      '@hyperbook/element-online-ide':
+        specifier: workspace:*
+        version: link:../../packages/element-online-ide
       '@hyperbook/element-protect':
         specifier: workspace:*
         version: link:../../packages/element-protect
@@ -1106,7 +1109,7 @@ importers:
         version: 18.2.0(react@18.2.0)
       react-redux:
         specifier: 8.0.5
-        version: 8.0.5(@types/react-dom@18.0.11)(@types/react@18.0.35)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
+        version: 8.0.5(@types/react-dom@18.0.6)(@types/react@18.0.15)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
       redux:
         specifier: 4.2.1
         version: 4.2.1
@@ -9787,7 +9790,6 @@ packages:
       react-is: 18.2.0
       redux: 4.2.1
       use-sync-external-store: 1.2.0(react@18.2.0)
-    dev: false
 
   /react-syntax-highlighter@15.5.0(react@18.2.0):
     resolution: {integrity: sha512-+zq2myprEnQmH5yw6Gqc8lD55QHnpKaU8TOcFeC/Lg/MQSs8UknEA0JC4nTZGFAXC2J2Hyj/ijJ7NlabyPi2gg==}
