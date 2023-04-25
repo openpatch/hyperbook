@@ -15,10 +15,9 @@ komplett im Browser ausgeführt wird.
 
 Tipps werden in einer einfachen Markdown-Syntax
 verfasst, die **Fettschrift** u.ä. ermöglicht, aber
-auch Syntax-Highlighting im Fließtext (`class Quadrat extends Rectangle { }`)
-und in ganzen Absätzen:
+auch Syntax-Highlighting im Fließtext (`class Quadrat extends Rectangle { }`) und in ganzen Absätzen:
 
-/``` (den / weglassen!)
+```
 
 double v = Math.random()\*8 + 2; // Betrag der Geschwindigkeit zwischen 2 und 10
 
@@ -27,7 +26,7 @@ double w = Math.random()*2*Math.PI; // Winkel zwischen 0 und 2\*PI
 vx = v \* Math.cos(w);
 
 vy = v \* Math.sin(w);
-/``` (den / weglassen!)
+```
 ````
 
 ```java Feuerwerk.java
@@ -88,18 +87,17 @@ class Funke extends Circle {
 
 :::
 
-````markdown
+`````markdown
 :::onlineide
 
 ````markdown A Hint
 ## Tip:
 
-Tips are written in a simple Markdown syntax which
-which allows **boldface** and the like, but also syntax
-syntax highlighting in body text (`class square extends rectangle { }`)
-and in whole paragraphs:
+Tipps werden in einer einfachen Markdown-Syntax
+verfasst, die **Fettschrift** u.ä. ermöglicht, aber
+auch Syntax-Highlighting im Fließtext (`class Quadrat extends Rectangle { }`) und in ganzen Absätzen:
 
-/``` (omit the /!)
+```
 
 double v = Math.random()\*8 + 2; // Amount of speed between 2 and 10
 
@@ -109,7 +107,7 @@ vx = v \* Math.cos(w);
 
 vy = v \* Math.sin(w);
 
-/``` (omit the /!)
+```
 ````
 
 ```java Feuerwerk.java
@@ -169,4 +167,4 @@ class Funke extends Circle {
 ```
 
 :::
-````
+`````
