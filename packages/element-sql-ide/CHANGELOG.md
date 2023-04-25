@@ -1,5 +1,11 @@
 # @hyperbook/element-online-ide
 
+## 0.2.0
+
+### Minor Changes
+
+- [`cb65222`](https://github.com/openpatch/hyperbook/commit/cb652224860a718149be4c34234eeb8dcdfbfc91) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - add element sql ide
+
 ## 0.1.0
 
 ### Minor Changes
