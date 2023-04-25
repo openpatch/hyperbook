@@ -42,7 +42,7 @@
     "@hyperbook/provider": "workspace:*",
     "@hyperbook/store": "workspace:*",
     "object-hash": "3.0.0",
-    "react-collapsed": "4.0.0"
+    "react-collapsed": "4.0.2"
   },
   "peerDependencies": {
     "react": "18.x",
