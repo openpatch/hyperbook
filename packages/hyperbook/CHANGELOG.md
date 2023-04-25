@@ -1,5 +1,16 @@
 # hyperbook
 
+## 0.14.0
+
+### Minor Changes
+
+- [`086019c`](https://github.com/openpatch/hyperbook/commit/086019c276dc42d1262dc104c894065b89203b24) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add element online ide for java
+
+### Patch Changes
+
+- Updated dependencies [[`cf58c13`](https://github.com/openpatch/hyperbook/commit/cf58c13ca19aaba8e20e6e1cb27ab3ebbfb74d37)]:
+  - @hyperbook/fs@0.7.5
+
 ## 0.13.14
 
 ## 0.13.13

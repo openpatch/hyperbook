@@ -1,5 +1,11 @@
 # @hyperbook/toc
 
+## 0.2.1
+
+### Patch Changes
+
+- [`cf58c13`](https://github.com/openpatch/hyperbook/commit/cf58c13ca19aaba8e20e6e1cb27ab3ebbfb74d37) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - update dependencies
+
 ## 0.2.0
 
 ### Minor Changes
