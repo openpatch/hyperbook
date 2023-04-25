@@ -1,5 +1,39 @@
 # hyperbook-simple-template
 
+## 0.14.0
+
+### Minor Changes
+
+- [`086019c`](https://github.com/openpatch/hyperbook/commit/086019c276dc42d1262dc104c894065b89203b24) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add element online ide for java
+
+### Patch Changes
+
+- [`cf58c13`](https://github.com/openpatch/hyperbook/commit/cf58c13ca19aaba8e20e6e1cb27ab3ebbfb74d37) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - update dependencies
+
+- Updated dependencies [[`086019c`](https://github.com/openpatch/hyperbook/commit/086019c276dc42d1262dc104c894065b89203b24), [`cf58c13`](https://github.com/openpatch/hyperbook/commit/cf58c13ca19aaba8e20e6e1cb27ab3ebbfb74d37), [`bf7d452`](https://github.com/openpatch/hyperbook/commit/bf7d452cc1608507166a9e0c499d2db42740a307)]:
+  - @hyperbook/element-online-ide@0.1.0
+  - @hyperbook/element-scratchblock@0.1.1
+  - @hyperbook/element-collapsible@0.3.1
+  - @hyperbook/element-excalidraw@0.4.1
+  - @hyperbook/element-bookmarks@0.2.5
+  - @hyperbook/element-struktog@0.1.10
+  - @hyperbook/element-bitflow@0.1.11
+  - @hyperbook/element-mermaid@0.1.10
+  - @hyperbook/element-protect@0.3.1
+  - @hyperbook/element-youtube@0.1.10
+  - @hyperbook/element-alert@0.1.10
+  - @hyperbook/element-tabs@0.1.11
+  - @hyperbook/element-term@0.1.10
+  - @hyperbook/element-dl@0.1.11
+  - @hyperbook/element-qr@0.1.11
+  - @hyperbook/markdown@0.6.1
+  - @hyperbook/provider@0.2.2
+  - @hyperbook/styles@0.1.10
+  - @hyperbook/shell@0.4.3
+  - @hyperbook/store@0.1.3
+  - @hyperbook/toc@0.2.1
+  - @hyperbook/fs@0.7.5
+
 ## 0.13.14
 
 ### Patch Changes
