@@ -1,5 +1,14 @@
 # @hyperbook/element-bookmarks
 
+## 0.2.5
+
+### Patch Changes
+
+- [`cf58c13`](https://github.com/openpatch/hyperbook/commit/cf58c13ca19aaba8e20e6e1cb27ab3ebbfb74d37) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - update dependencies
+
+- Updated dependencies [[`cf58c13`](https://github.com/openpatch/hyperbook/commit/cf58c13ca19aaba8e20e6e1cb27ab3ebbfb74d37)]:
+  - @hyperbook/provider@0.2.2
+
 ## 0.2.4
 
 ### Patch Changes
