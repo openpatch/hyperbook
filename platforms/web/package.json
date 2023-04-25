@@ -17,6 +17,7 @@
     "@hyperbook/element-excalidraw": "workspace:*",
     "@hyperbook/element-mermaid": "workspace:*",
     "@hyperbook/element-online-ide": "workspace:*",
+    "@hyperbook/element-sql-ide": "workspace:*",
     "@hyperbook/element-protect": "workspace:*",
     "@hyperbook/element-qr": "workspace:*",
     "@hyperbook/element-scratchblock": "workspace:*",
