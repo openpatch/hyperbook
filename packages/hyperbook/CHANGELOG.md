@@ -1,5 +1,15 @@
 # hyperbook
 
+## 0.15.0
+
+### Minor Changes
+
+- [`cb65222`](https://github.com/openpatch/hyperbook/commit/cb652224860a718149be4c34234eeb8dcdfbfc91) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - add element sql ide
+
+### Patch Changes
+
+- [`5385f57`](https://github.com/openpatch/hyperbook/commit/5385f57a0bac3242eb0166d522c031495d4e79be) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - fix missing import
+
 ## 0.14.1
 
 ## 0.14.0

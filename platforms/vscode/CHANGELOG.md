@@ -1,5 +1,16 @@
 # @hyperbook/vscode-extension
 
+## 0.13.0
+
+### Minor Changes
+
+- [`cb65222`](https://github.com/openpatch/hyperbook/commit/cb652224860a718149be4c34234eeb8dcdfbfc91) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - add element sql ide
+
+### Patch Changes
+
+- Updated dependencies [[`cb65222`](https://github.com/openpatch/hyperbook/commit/cb652224860a718149be4c34234eeb8dcdfbfc91)]:
+  - @hyperbook/element-sql-ide@0.2.0
+
 ## 0.12.1
 
 ### Patch Changes
