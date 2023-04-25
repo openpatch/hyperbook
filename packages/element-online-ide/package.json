@@ -43,16 +43,14 @@
     "object-hash": "3.0.0"
   },
   "peerDependencies": {
-    "@reduxjs/toolkit": "1.x",
     "react": "18.x",
     "react-dom": "18.x",
     "react-redux": "8.x"
   },
   "devDependencies": {
-    "@reduxjs/toolkit": "1.9.3",
     "@types/object-hash": "3.0.2",
-    "@types/react": "18.0.15",
-    "@types/react-dom": "18.0.6",
+    "@types/react": "18.0.38",
+    "@types/react-dom": "18.0.11",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "vitest": "^0.26.3"

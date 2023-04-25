@@ -44,7 +44,7 @@
     "@hyperbook/provider": "workspace:*",
     "react-markdown": "8.0.7",
     "rehype-highlight": "5.0.2",
-    "rehype-katex": "6.0.2",
+    "rehype-katex": "6.0.3",
     "remark-directive": "2.0.1",
     "remark-directive-rehype": "0.4.2",
     "remark-gemoji": "7.0.1",
@@ -58,7 +58,7 @@
   },
   "devDependencies": {
     "@types/hast": "2.3.4",
-    "@types/react": "18.0.35",
+    "@types/react": "18.0.38",
     "@types/react-dom": "18.0.11",
     "@types/unist": "2.0.6",
     "react": "18.2.0",

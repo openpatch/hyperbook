@@ -29,7 +29,6 @@ const DirectiveOnlineIde: FC<DirectiveOnlineIdeProps> = ({
       return n.children
         ?.filter((n: any) => n.tagName === "code")
         .map((n: any) => {
-          console.log(n);
           return {
             title: n.data.meta || "",
             code: nodeToText(n) || "",

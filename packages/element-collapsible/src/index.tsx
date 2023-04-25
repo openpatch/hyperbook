@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { createSlice, PayloadAction } from "@hyperbook/store";
 import { useActivePageId } from "@hyperbook/provider";
 import "./index.css";
-import useCollapse from "react-collapsed";
+import { useCollapse } from "react-collapsed";
 
 type DirectiveCollapsibleProps = {
   children?: ReactNode;

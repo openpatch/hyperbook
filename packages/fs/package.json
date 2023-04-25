@@ -46,7 +46,7 @@
     "find-up": "^6.3.0",
     "gray-matter": "4.0.3",
     "mime-types": "^2.1.35",
-    "yaml": "^2.2.1"
+    "yaml": "^2.2.2"
   },
   "devDependencies": {
     "@hyperbook/types": "workspace:*",

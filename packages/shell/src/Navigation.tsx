@@ -4,7 +4,7 @@ import {
   HyperbookSection,
   Navigation as NavigationProps,
 } from "@hyperbook/types";
-import useCollapse from "react-collapsed";
+import { useCollapse } from "react-collapsed";
 
 type P = HyperbookPage & Pick<NavigationProps, "current">;
 
