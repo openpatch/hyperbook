@@ -29,6 +29,8 @@ import elementExcalidraw from "@hyperbook/element-excalidraw";
 import "@hyperbook/element-excalidraw/index.css";
 import elementOnlineIde from "@hyperbook/element-online-ide";
 import "@hyperbook/element-online-ide/index.css";
+import elementSqlIde from "@hyperbook/element-sql-ide";
+import "@hyperbook/element-sql-ide/index.css";
 import elementBitflow from "@hyperbook/element-bitflow";
 import "@hyperbook/element-bitflow/index.css";
 import elementScratchblock from "@hyperbook/element-scratchblock";
@@ -92,6 +94,7 @@ export default function MyApp({ Component, pageProps }) {
         elementBookmarks,
         elementStruktog,
         elementOnlineIde,
+        elementSqlIde,
         elementQr,
         elementMermaid,
         elementExcalidraw,

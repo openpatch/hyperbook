@@ -2,10 +2,7 @@
 name: SQL IDE
 ---
 
-Java-like programming language (compiler, interpreter, debugger) with IDE that
-runs entirely in the browser.
-
-The Online-IDE element accepts three arguments:
+The SQL-IDE element accepts the following arguments:
 
 - **db**: An url to a sqlite file.
 - **height**: Height of the editor. Defaults to 600px.
