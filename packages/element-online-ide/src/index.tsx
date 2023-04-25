@@ -7,6 +7,13 @@ type DirectiveOnlineIdeProps = {
   node: any;
   url?: string;
   id: string;
+  fileList?: boolean;
+  console?: boolean;
+  pCode?: boolean;
+  errorList?: boolean;
+  bottomPanel?: boolean;
+  speed?: number;
+  height?: string | number;
 };
 
 const nodeToText = (n: any): string => {
@@ -18,6 +25,13 @@ const nodeToText = (n: any): string => {
 const DirectiveOnlineIde: FC<DirectiveOnlineIdeProps> = ({
   node,
   url = "https://onlineide.openpatch.org",
+  height = "600px",
+  fileList = true,
+  console: con = true,
+  pCode = false,
+  bottomPanel = true,
+  errorList = true,
+  speed = 1000,
   id,
 }) => {
   if (!id) {
@@ -44,13 +58,14 @@ const DirectiveOnlineIde: FC<DirectiveOnlineIdeProps> = ({
         ${c.code}
         </script>`;
   });
-  let html = `{'id': '${id}', 'speed': 1000, 'withBottomPanel': true ,'withPCode': false ,'withConsole': false ,'withFileList': true ,'withErrorList': false}`;
+  let html = `{'id': '${id}', 'speed': ${speed}, 'withBottomPanel': ${bottomPanel},'withPCode': ${pCode},'withConsole': ${con},'withFileList': ${fileList},'withErrorList': ${errorList}}`;
   html = html + "\n" + scripts.join("\n");
 
   return (
     <div className="online-ide">
       <iframe
         srcDoc={`<script>window.jo_doc = window.frameElement.textContent;</script><script src='${url}/js/includeide/includeIDE.js'></script>`}
+        height={height}
         frameBorder="0"
         dangerouslySetInnerHTML={{
           __html: html,

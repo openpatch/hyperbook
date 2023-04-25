@@ -5,9 +5,19 @@ name: Online IDE
 Java-like programming language (compiler, interpreter, debugger) with IDE that
 runs entirely in the browser.
 
+The Online-IDE element accepts three arguments:
+
+- **fileList**: With file list on the left.
+- **console**: With console tab in the bottom panel.
+- **pCode**: With PCode tab in the bottom panel.
+- **bottomPanel**: With bottom panel.
+- **errorList**: With error list in the bottom panel.
+- **height**: Height of the editor. Defaults to 600px.
+- **speed**: Speed of the execution. Defaults to 1000.
+
 (See: https://github.com/martin-pabst/Online-IDE).
 
-:::onlineide
+:::onlineide{height=500 console=false}
 
 ````markdown A Hint
 ## Tip:
@@ -89,7 +99,7 @@ class Funke extends Circle {
 :::
 
 `````markdown
-:::onlineide
+:::onlineide{height=500 console=false}
 
 ````markdown A Hint
 ## Tip:

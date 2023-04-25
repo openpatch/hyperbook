@@ -6,6 +6,16 @@ lang: de
 Java-ähnliche Programmiersprache (Compiler, Interpreter, Debugger) mit IDE, die
 komplett im Browser ausgeführt wird.
 
+Das Online-IDE element akzeptiert folgende Parameter:
+
+- **fileList**: Dateiliste links.
+- **console**: falls mit unterem Panel: mit/ohne Console-Tab.
+- **pCode**: falls mit unterem Panel: mit/ohne PCode-Tab.
+- **bottomPanel**: mit unterem Panel.
+- **errorList**: falls mit unterem Panel: mit/ohne Fehlerliste.
+- **height**: Höhe des Editors. Standardwert 600px.
+- **speed**: Geschwindigkeit in Steps/s. Standardwert 1000.
+
 (See: https://github.com/martin-pabst/Online-IDE).
 
 :::onlineide
