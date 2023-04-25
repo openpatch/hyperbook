@@ -1,5 +1,11 @@
 # @hyperbook/element-online-ide
 
+## 0.2.0
+
+### Minor Changes
+
+- [`8da1b46`](https://github.com/openpatch/hyperbook/commit/8da1b46c9462aee8432e8697aee88628b0531ed8) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - add parameters to online ide element
+
 ## 0.1.0
 
 ### Minor Changes
