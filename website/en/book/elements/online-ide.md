@@ -99,7 +99,7 @@ which allows **boldface** and the like, but also syntax
 syntax highlighting in body text (`class square extends rectangle { }`)
 and in whole paragraphs:
 
-/``` (omit the /!)
+```
 
 double v = Math.random()\*8 + 2; // Amount of speed between 2 and 10
 
@@ -109,9 +109,8 @@ vx = v \* Math.cos(w);
 
 vy = v \* Math.sin(w);
 
-/``` (omit the /!)
+```
 ````
-`````
 
 ```java Feuerwerk.java
 
@@ -170,3 +169,4 @@ class Funke extends Circle {
 ```
 
 :::
+`````
