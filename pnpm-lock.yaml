@@ -571,8 +571,8 @@ importers:
         specifier: 8.0.7
         version: 8.0.7(@types/react@18.0.38)(react@18.2.0)
       rehype-highlight:
-        specifier: 5.0.2
-        version: 5.0.2
+        specifier: 6.0.0
+        version: 6.0.0
       rehype-katex:
         specifier: 6.0.3
         version: 6.0.3
@@ -10010,8 +10010,8 @@ packages:
       rc: 1.2.8
     dev: true
 
-  /rehype-highlight@5.0.2:
-    resolution: {integrity: sha512-ZNm8V8BQUDn05cJPzAu/PjiloaFFrh+Pt3bY+NCcdCggI7Uyl5mW0FGR7RATeIz5/ECUd1D8Kvjt4HaLPmnOMw==}
+  /rehype-highlight@6.0.0:
+    resolution: {integrity: sha512-q7UtlFicLhetp7K48ZgZiJgchYscMma7XjzX7t23bqEJF8m6/s+viXQEe4oHjrATTIZpX7RG8CKD7BlNZoh9gw==}
     dependencies:
       '@types/hast': 2.3.4
       hast-util-to-text: 3.1.2
