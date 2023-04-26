@@ -1,5 +1,12 @@
 # @hyperbook/element-collapsible
 
+## 0.3.2
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @hyperbook/provider@0.2.3
+
 ## 0.3.1
 
 ### Patch Changes

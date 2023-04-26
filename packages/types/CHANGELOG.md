@@ -1,5 +1,11 @@
 # @hyperbook/types
 
+## 0.6.0
+
+### Minor Changes
+
+- [`4221fe1`](https://github.com/openpatch/hyperbook/commit/4221fe145a6dfffd9f97459fa2d2694da4b5d78e) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - add global configuration options for onlineide and sqlide
+
 ## 0.5.0
 
 ### Minor Changes

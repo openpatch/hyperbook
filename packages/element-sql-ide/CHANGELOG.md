@@ -1,5 +1,16 @@
 # @hyperbook/element-online-ide
 
+## 0.3.0
+
+### Minor Changes
+
+- [`4221fe1`](https://github.com/openpatch/hyperbook/commit/4221fe145a6dfffd9f97459fa2d2694da4b5d78e) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - add global configuration options for onlineide and sqlide
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @hyperbook/provider@0.2.3
+
 ## 0.2.0
 
 ### Minor Changes

@@ -1,5 +1,32 @@
 # @hyperbook/vscode-extension
 
+## 0.15.1
+
+### Patch Changes
+
+- Updated dependencies [[`4221fe1`](https://github.com/openpatch/hyperbook/commit/4221fe145a6dfffd9f97459fa2d2694da4b5d78e)]:
+  - @hyperbook/element-online-ide@0.3.0
+  - @hyperbook/element-sql-ide@0.3.0
+  - @hyperbook/fs@0.7.5
+  - @hyperbook/provider@0.2.3
+  - @hyperbook/shell@0.4.4
+  - @hyperbook/element-alert@0.1.11
+  - @hyperbook/element-bitflow@0.1.12
+  - @hyperbook/element-bookmarks@0.2.6
+  - @hyperbook/element-collapsible@0.3.2
+  - @hyperbook/element-dl@0.1.12
+  - @hyperbook/element-excalidraw@0.4.2
+  - @hyperbook/element-mermaid@0.1.11
+  - @hyperbook/element-protect@0.3.2
+  - @hyperbook/element-qr@0.1.12
+  - @hyperbook/element-scratchblock@0.1.2
+  - @hyperbook/element-struktog@0.1.11
+  - @hyperbook/element-tabs@0.1.12
+  - @hyperbook/element-term@0.1.11
+  - @hyperbook/element-youtube@0.1.11
+  - @hyperbook/markdown@0.6.2
+  - @hyperbook/styles@0.1.11
+
 ## 0.15.0
 
 ### Minor Changes
