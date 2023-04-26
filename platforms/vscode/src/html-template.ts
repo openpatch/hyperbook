@@ -13,7 +13,7 @@ export const htmlTemplate = (
             <head>
                 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; frame-src http: https:; img-src ${
                   panel.webview.cspSource
-                } 'self' 'unsafe-inline' data: *; script-src * 'nonce-${nonce}' 'unsafe-eval'; style-src ${
+                } 'self' 'unsafe-inline' data: *; script-src * 'unsafe-inline' 'unsafe-eval'; style-src ${
     panel.webview.cspSource
   } 'self' 'unsafe-inline'; font-src ${
     panel.webview.cspSource
