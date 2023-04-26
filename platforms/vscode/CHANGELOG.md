@@ -1,5 +1,11 @@
 # @hyperbook/vscode-extension
 
+## 0.15.0
+
+### Minor Changes
+
+- [`f3ee6cd`](https://github.com/openpatch/hyperbook/commit/f3ee6cd24cadf4856c72403cb76c53d5b1973006) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Allow all external content. This is necessary for the Online IDE and SQL IDE elements
+
 ## 0.14.0
 
 ### Minor Changes
