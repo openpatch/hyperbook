@@ -1,6 +1,7 @@
 import { FC, ReactNode } from "react";
 import hash from "object-hash";
 import "./index.css";
+import { useConfig } from "@hyperbook/provider";
 
 type DirectiveOnlineIdeProps = {
   children?: ReactNode;
@@ -37,6 +38,17 @@ const DirectiveOnlineIde: FC<DirectiveOnlineIdeProps> = ({
   if (!id) {
     id = hash(node);
   }
+  const config = useConfig();
+  const ideConfig = config?.elements?.onlineide;
+
+  if (ideConfig?.url) {
+    url = ideConfig.url;
+  }
+
+  if (ideConfig?.height) {
+    height = ideConfig.height;
+  }
+
   const codes: { title: string; code: string; hint?: boolean }[] = node.children
     ?.filter((n: any) => n.tagName === "pre")
     .flatMap((n: any) => {

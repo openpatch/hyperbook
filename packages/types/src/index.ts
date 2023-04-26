@@ -114,6 +114,15 @@ export type HyperbookJson = {
       aspectRation?: string;
       edit?: boolean;
     };
+    onlineide?: ElementConfig & {
+      url?: string;
+      height?: string | number;
+    };
+    sqlide?: ElementConfig & {
+      url?: string;
+      db?: string;
+      height?: string | number;
+    };
   };
 };
 
