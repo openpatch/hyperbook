@@ -11,13 +11,16 @@ export const htmlTemplate = (
   return `<!doctype html>
             <html lang="en">
             <head>
-                <meta http-equiv="Content-Security-Policy" content="default-src 'none'; frame-src http: https:; img-src ${
-                  panel.webview.cspSource
-                } 'self' 'unsafe-inline' data: *; script-src * 'unsafe-inline' 'unsafe-eval'; style-src ${
-    panel.webview.cspSource
-  } 'self' 'unsafe-inline'; font-src ${
-    panel.webview.cspSource
-  }; connect-src *;">
+                <meta http-equiv="Content-Security-Policy" content="
+default-src *  data: blob: filesystem: about: ws: wss: 'unsafe-inline' 'unsafe-eval' 'unsafe-dynamic';
+script-src * data: blob: 'unsafe-inline' 'unsafe-eval';
+connect-src * data: blob: 'unsafe-inline';
+img-src * data: blob: 'unsafe-inline';
+frame-src * data: blob: ;
+style-src * data: blob: 'unsafe-inline';
+font-src * data: blob: 'unsafe-inline';
+frame-ancestors * data: blob: 'unsafe-inline';
+">
                 <meta charset="utf-8">
                 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
                 <style>
