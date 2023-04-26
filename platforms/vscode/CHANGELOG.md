@@ -1,5 +1,11 @@
 # @hyperbook/vscode-extension
 
+## 0.14.0
+
+### Minor Changes
+
+- [`3efd112`](https://github.com/openpatch/hyperbook/commit/3efd1121fe4052fcff083b17ecb9cc6f716e33aa) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - allow all external scripts
+
 ## 0.13.0
 
 ### Minor Changes
