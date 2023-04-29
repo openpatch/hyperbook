@@ -1028,11 +1028,11 @@ importers:
         specifier: 3.0.2
         version: 3.0.2
       sass:
-        specifier: 1.62.0
-        version: 1.62.0
+        specifier: 1.62.1
+        version: 1.62.1
       sass-loader:
         specifier: 13.2.2
-        version: 13.2.2(sass@1.62.0)(webpack@5.79.0)
+        version: 13.2.2(sass@1.62.1)(webpack@5.79.0)
       style-loader:
         specifier: 3.3.2
         version: 3.3.2(webpack@5.79.0)
@@ -10395,7 +10395,7 @@ packages:
   /safer-buffer@2.1.2:
     resolution: {integrity: sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg==}
 
-  /sass-loader@13.2.2(sass@1.62.0)(webpack@5.79.0):
+  /sass-loader@13.2.2(sass@1.62.1)(webpack@5.79.0):
     resolution: {integrity: sha512-nrIdVAAte3B9icfBiGWvmMhT/D+eCDwnk+yA7VE/76dp/WkHX+i44Q/pfo71NYbwj0Ap+PGsn0ekOuU1WFJ2AA==}
     engines: {node: '>= 14.15.0'}
     peerDependencies:
@@ -10416,12 +10416,12 @@ packages:
     dependencies:
       klona: 2.0.6
       neo-async: 2.6.2
-      sass: 1.62.0
+      sass: 1.62.1
       webpack: 5.79.0(esbuild@0.17.18)(webpack-cli@4.10.0)
     dev: true
 
-  /sass@1.62.0:
-    resolution: {integrity: sha512-Q4USplo4pLYgCi+XlipZCWUQz5pkg/ruSSgJ0WRDSb/+3z9tXUOkQ7QPYn4XrhZKYAK4HlpaQecRwKLJX6+DBg==}
+  /sass@1.62.1:
+    resolution: {integrity: sha512-NHpxIzN29MXvWiuswfc1W3I0N8SXBd8UR26WntmDlRYf0bSADnwnOjsyMZ3lMezSlArD33Vs3YFhp7dWvL770A==}
     engines: {node: '>=14.0.0'}
     hasBin: true
     dependencies:
