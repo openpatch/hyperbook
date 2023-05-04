@@ -10,7 +10,7 @@ import { findUp } from "find-up";
 import { vfile } from ".";
 import { VDirectory, VFile } from "./vfile";
 
-export const allowedBookFiles = [".md", ".json", ".yml"];
+export const allowedBookFiles = [".md", ".md.hbs", ".json", ".yml"];
 
 export const getJson = async (root: string): Promise<HyperbookJson> => {
   return fs
