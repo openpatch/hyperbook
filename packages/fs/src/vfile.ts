@@ -100,7 +100,11 @@ export async function getDirectory(
         };
         directory.directories.push(await getTree(d));
       } else {
-        const { ext, name } = path.parse(file);
+        let { ext, name } = path.parse(file);
+        if (ext == ".hbs" && file.endsWith(".md.hbs")) {
+          ext = ".md.hbs";
+          name = name.slice(0, name.length - 3);
+        }
         if (extensions && !extensions.includes(ext)) {
           continue;
         }
@@ -291,9 +295,15 @@ export const getMarkdown = async (
     }
   } else if (file.extension === ".md") {
     markdown = await fs.readFile(file.path.absolute).then((f) => f.toString());
+  } else if (file.extension === ".md.hbs") {
+    const templateString = await fs
+      .readFile(file.path.absolute)
+      .then((f) => f.toString());
+    const template = handlebars.compile(templateString);
+    markdown = template();
   } else {
     console.log(
-      `Unsupported file extension. Only .md, .yml and .json files are supported.`
+      `Unsupported file extension ${file.extension}. Only .md, .yml, .json and .md.hbs files are supported.`
     );
   }
   let { content, data } = matter(markdown);

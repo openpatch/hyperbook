@@ -61,6 +61,18 @@ Line 9
 Line 10"
 `;
 
+exports[`getMarkdown > should get markdown for single use template 1`] = `
+{
+  "content": "# Single Use Template
+
+TEST
+
+Hi!
+",
+  "data": {},
+}
+`;
+
 exports[`getMarkdown > should get markdown from template 1`] = `
 {
   "content": "
@@ -206,6 +218,18 @@ exports[`list > should list all 1`] = `
     "root": "single-hyperbook",
   },
   {
+    "extension": ".md.hbs",
+    "folder": "book",
+    "name": "single-template",
+    "path": {
+      "absolute": "single-hyperbook/book/subsection3/single-template.md.hbs",
+      "directory": "subsection3",
+      "href": "/subsection3/single-template",
+      "relative": "subsection3/single-template.md.hbs",
+    },
+    "root": "single-hyperbook",
+  },
+  {
     "extension": ".yml",
     "folder": "book",
     "name": "index",
@@ -339,6 +363,18 @@ exports[`list > should list for folder book 1`] = `
       "directory": "subsection2",
       "href": "/subsection2",
       "relative": "subsection2/index.yml",
+    },
+    "root": "single-hyperbook",
+  },
+  {
+    "extension": ".md.hbs",
+    "folder": "book",
+    "name": "single-template",
+    "path": {
+      "absolute": "single-hyperbook/book/subsection3/single-template.md.hbs",
+      "directory": "subsection3",
+      "href": "/subsection3/single-template",
+      "relative": "subsection3/single-template.md.hbs",
     },
     "root": "single-hyperbook",
   },

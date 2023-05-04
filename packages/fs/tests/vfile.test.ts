@@ -63,6 +63,21 @@ describe("getMarkdown", () => {
 
     expect(await vfile.getMarkdown(templateFile)).toMatchSnapshot();
   });
+
+  it("should get markdown for single use template", async () => {
+    let hyperbookPath = path.join(__dirname, "fixtures", "single-hyperbook");
+    let files = await vfile.list(hyperbookPath);
+    let templateFile = files.find(
+      (f) =>
+        f.path.relative === "subsection3/single-template.md.hbs" &&
+        f.folder === "book"
+    );
+    if (!templateFile) {
+      throw Error("Template not found");
+    }
+
+    expect(await vfile.getMarkdown(templateFile)).toMatchSnapshot();
+  });
 });
 
 describe("getDirectory", () => {
