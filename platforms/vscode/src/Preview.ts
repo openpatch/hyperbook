@@ -206,7 +206,7 @@ export default class Preview {
   }
 
   checkDocumentIsHyperbookFile(showWarning: boolean): boolean {
-    const supportedLanguages = ["markdown", "yaml", "json"];
+    const supportedLanguages = ["markdown", "yaml", "json", "handlebars"];
     const supportedFiles = ["hyperbook.json", "hyperlibrary.json"];
     const fileName = path.basename(
       vscode.window.activeTextEditor?.document.fileName || ""
