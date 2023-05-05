@@ -1,5 +1,11 @@
 # @hyperbook/vscode-extension
 
+## 0.15.3
+
+### Patch Changes
+
+- [`c9792c8`](https://github.com/openpatch/hyperbook/commit/c9792c873b1e435deb238829ce08ff017e7949e4) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix handlebars not in allow file types
+
 ## 0.15.2
 
 ### Patch Changes
