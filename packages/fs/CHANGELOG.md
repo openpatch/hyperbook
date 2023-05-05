@@ -1,5 +1,15 @@
 # @hyperbook/fs
 
+## 0.8.0
+
+### Minor Changes
+
+- [`511f497`](https://github.com/openpatch/hyperbook/commit/511f497e3e19c4294ddacb4e2b98cb47f35901d9) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add single use templates. Every page can now be a template, where you can use all the helper functions defined in the snippets documentation (https://hyperbook.openpatch.org/elements/snippets#helpers). You only have to use the file extension `.md.hbs`.
+
+### Patch Changes
+
+- [`13bfad5`](https://github.com/openpatch/hyperbook/commit/13bfad58f5a16d2d54b4043ce855cf6c3bc397a0) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix .md.hbs not in allowed file extensions.
+
 ## 0.7.5
 
 ### Patch Changes
