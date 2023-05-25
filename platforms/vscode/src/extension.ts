@@ -42,6 +42,10 @@ export function activate(context: vscode.ExtensionContext) {
       language: "markdown",
       scheme: "file",
     },
+    {
+      language: "handlebars",
+      scheme: "file",
+    },
   ];
 
   const bookProvider = vscode.languages.registerCompletionItemProvider(

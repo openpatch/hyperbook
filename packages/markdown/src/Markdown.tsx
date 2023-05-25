@@ -7,6 +7,7 @@ import remarkGemoji from "remark-gemoji";
 import remarkUnwrapImages from "remark-unwrap-images";
 import rehypeKatex from "rehype-katex";
 import rehypeHighlight from "rehype-highlight";
+import rehypeRaw from "rehype-raw";
 import { useDirectives } from "@hyperbook/provider";
 import { Code } from "./Code";
 import { Link } from "./Link";
@@ -55,6 +56,7 @@ export const Markdown = ({ children }: MarkdownProps) => {
         remarkUnwrapImages,
       ]}
       rehypePlugins={[
+        rehypeRaw,
         rehypeKatex,
         [rehypeHighlight, { ignoreMissing: true, plainText: ["mermaid"] }],
       ]}

@@ -143,6 +143,61 @@
                             "type": "object"
                         }
                     ]
+                },
+                "onlineide": {
+                    "allOf": [
+                        {
+                            "properties": {
+                                "version": {
+                                    "type": "string"
+                                }
+                            },
+                            "type": "object"
+                        },
+                        {
+                            "properties": {
+                                "height": {
+                                    "type": [
+                                        "string",
+                                        "number"
+                                    ]
+                                },
+                                "url": {
+                                    "type": "string"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    ]
+                },
+                "sqlide": {
+                    "allOf": [
+                        {
+                            "properties": {
+                                "version": {
+                                    "type": "string"
+                                }
+                            },
+                            "type": "object"
+                        },
+                        {
+                            "properties": {
+                                "db": {
+                                    "type": "string"
+                                },
+                                "height": {
+                                    "type": [
+                                        "string",
+                                        "number"
+                                    ]
+                                },
+                                "url": {
+                                    "type": "string"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    ]
                 }
             },
             "type": "object"

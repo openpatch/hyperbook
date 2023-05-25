@@ -1,6 +1,5 @@
 {
   "scopeName": "markdown.hyperbook",
-  "injectionSelector": "L:text.html.markdown",
   "patterns": [
     {
       "include": "#directive-alert"

@@ -25,7 +25,8 @@
   ],
   "activationEvents": [
     "workspaceContains:**/hyperbook.json",
-    "onLanguage:markdown"
+    "onLanguage:markdown",
+    "onLanguage:handlebars"
   ],
   "contributes": {
     "configuration": {
@@ -69,7 +70,7 @@
       "editor/title": [
         {
           "command": "hyperbook.sidePreview",
-          "when": "editorLangId == markdown && config.hyperbook.preview.showPreviewOptionInMenuBar",
+          "when": "(editorLangId == markdown || editorLangId == handlebars ) && config.hyperbook.preview.showPreviewOptionInMenuBar",
           "alt": "hyperbook.fullPreview",
           "group": "navigation"
         }
@@ -93,6 +94,10 @@
       {
         "language": "markdown",
         "path": "./snipptes/hyperbook.code-snippets"
+      },
+      {
+        "language": "handlebars",
+        "path": "./snipptes/hyperbook.code-snippets"
       }
     ],
     "languages": [
@@ -106,7 +111,8 @@
         "scopeName": "markdown.hyperbook",
         "path": "./syntaxes/hyperbook.json",
         "injectTo": [
-          "text.html.markdown"
+          "text.html.markdown",
+          "text.html.handlebars"
         ]
       }
     ],
