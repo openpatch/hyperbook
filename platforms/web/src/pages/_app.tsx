@@ -27,6 +27,8 @@ import elementMermaid from "@hyperbook/element-mermaid";
 import "@hyperbook/element-mermaid/index.css";
 import elementExcalidraw from "@hyperbook/element-excalidraw";
 import "@hyperbook/element-excalidraw/index.css";
+import elementEmbed from "@hyperbook/element-embed";
+import "@hyperbook/element-embed/index.css";
 import elementOnlineIde from "@hyperbook/element-online-ide";
 import "@hyperbook/element-online-ide/index.css";
 import elementSqlIde from "@hyperbook/element-sql-ide";
@@ -91,6 +93,7 @@ export default function MyApp({ Component, pageProps }) {
         elementCollapsible,
         elementProtect,
         elementDl,
+        elementEmbed,
         elementBookmarks,
         elementStruktog,
         elementOnlineIde,

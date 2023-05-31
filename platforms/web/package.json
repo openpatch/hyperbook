@@ -14,6 +14,7 @@
     "@hyperbook/element-bookmarks": "workspace:*",
     "@hyperbook/element-collapsible": "workspace:*",
     "@hyperbook/element-dl": "workspace:*",
+    "@hyperbook/element-embed": "workspace:*",
     "@hyperbook/element-excalidraw": "workspace:*",
     "@hyperbook/element-mermaid": "workspace:*",
     "@hyperbook/element-online-ide": "workspace:*",

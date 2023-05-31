@@ -13,6 +13,7 @@ import elementBookmarks from "@hyperbook/element-bookmarks";
 import elementStruktog from "@hyperbook/element-struktog";
 import elementQr from "@hyperbook/element-qr";
 import elementMermaid from "@hyperbook/element-mermaid";
+import elementEmbed from "@hyperbook/element-embed";
 import elementExcalidraw from "@hyperbook/element-excalidraw";
 import elementOnlineIde from "@hyperbook/element-online-ide";
 import elementSqlIde from "@hyperbook/element-sql-ide";
@@ -138,6 +139,7 @@ export const App = () => {
           elementCollapsible,
           elementProtect,
           elementDl,
+          elementEmbed,
           elementBookmarks,
           elementStruktog,
           elementOnlineIde,

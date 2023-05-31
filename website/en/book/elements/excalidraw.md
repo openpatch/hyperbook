@@ -15,7 +15,7 @@ hyperbook in development mode, you see two buttons below an Excalidraw
 whiteboard and all editor options. You can edit your whiteboard here and just
 hit save. The Excalidraw will be saved at the place which you have defined.
 
-The Excalidraw element accepts three arguments:
+The Excalidraw element accepts these arguments:
 
 - **file**: A path to an Excalidraw file, if it does not exists it will be created, when using the editor in development mode.
 - **aspectRatio**: To keep your Excalidraw nice on every device you need to provide an aspect-ratio, e.g.: "16/9", "4/3", "1/1".
