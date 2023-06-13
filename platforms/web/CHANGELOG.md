@@ -1,5 +1,41 @@
 # hyperbook-simple-template
 
+## 0.17.0
+
+### Minor Changes
+
+- [`f98c89e`](https://github.com/openpatch/hyperbook/commit/f98c89ed582a155d5b005ec72a04ae2619c35c47) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add element embed. This elements allow embedding content like GeoGebra Applets, LearningApps etc.
+
+### Patch Changes
+
+- [`832678b`](https://github.com/openpatch/hyperbook/commit/832678b39f6a1a6e5cdd361c9c384d341762c09e) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - update packages
+
+- Updated dependencies [[`f98c89e`](https://github.com/openpatch/hyperbook/commit/f98c89ed582a155d5b005ec72a04ae2619c35c47), [`832678b`](https://github.com/openpatch/hyperbook/commit/832678b39f6a1a6e5cdd361c9c384d341762c09e)]:
+  - @hyperbook/element-embed@0.1.0
+  - @hyperbook/element-alert@0.1.12
+  - @hyperbook/element-bitflow@0.1.13
+  - @hyperbook/element-bookmarks@0.2.7
+  - @hyperbook/element-collapsible@0.3.3
+  - @hyperbook/element-dl@0.1.13
+  - @hyperbook/element-excalidraw@0.4.3
+  - @hyperbook/element-mermaid@0.1.12
+  - @hyperbook/element-online-ide@0.3.1
+  - @hyperbook/element-protect@0.3.3
+  - @hyperbook/element-qr@0.1.13
+  - @hyperbook/element-scratchblock@0.1.3
+  - @hyperbook/element-sql-ide@0.3.1
+  - @hyperbook/element-struktog@0.1.12
+  - @hyperbook/element-tabs@0.1.13
+  - @hyperbook/element-term@0.1.12
+  - @hyperbook/element-youtube@0.1.12
+  - @hyperbook/fs@0.8.1
+  - @hyperbook/markdown@0.6.3
+  - @hyperbook/provider@0.2.4
+  - @hyperbook/shell@0.4.5
+  - @hyperbook/store@0.1.4
+  - @hyperbook/styles@0.1.12
+  - @hyperbook/toc@0.2.2
+
 ## 0.16.0
 
 ### Patch Changes

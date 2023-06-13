@@ -1,5 +1,14 @@
 # @hyperbook/element-mermaid
 
+## 0.1.12
+
+### Patch Changes
+
+- [`832678b`](https://github.com/openpatch/hyperbook/commit/832678b39f6a1a6e5cdd361c9c384d341762c09e) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - update packages
+
+- Updated dependencies [[`832678b`](https://github.com/openpatch/hyperbook/commit/832678b39f6a1a6e5cdd361c9c384d341762c09e)]:
+  - @hyperbook/provider@0.2.4
+
 ## 0.1.11
 
 ### Patch Changes
