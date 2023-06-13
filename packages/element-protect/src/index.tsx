@@ -36,10 +36,8 @@ const DirectiveProtect: FC<DirectiveProtectProps> = ({
   };
 
   useEffect(() => {
-    if (value === password) {
-      setReveal(true);
-    }
-  }, [value]);
+    setReveal(value === password);
+  }, [value, password]);
 
   return (
     <>
