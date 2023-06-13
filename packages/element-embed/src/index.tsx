@@ -20,14 +20,8 @@ const DirectiveEmbed: FC<DirectiveEmbedProps> = ({
   aspectRatio,
 }) => {
   return (
-    <div className="element-embed" style={{ aspectRatio }}>
-      <iframe
-        src={src}
-        title={title}
-        width={width}
-        height={height}
-        allowFullScreen={allowFullScreen}
-      />
+    <div className="element-embed" style={{ aspectRatio, width, height }}>
+      <iframe src={src} title={title} allowFullScreen={allowFullScreen} />
     </div>
   );
 };
