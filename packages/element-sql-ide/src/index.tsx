@@ -1,7 +1,7 @@
 import { FC, ReactNode } from "react";
 import hash from "object-hash";
 import "./index.css";
-import { useConfig } from "@hyperbook/provider";
+import { useConfig, useMakeUrl } from "@hyperbook/provider";
 
 type DirectiveSqlIdeProps = {
   children?: ReactNode;
@@ -29,6 +29,7 @@ const DirectiveSqlIde: FC<DirectiveSqlIdeProps> = ({
     id = hash(node);
   }
 
+  const makeUrl = useMakeUrl();
   const config = useConfig();
   const ideConfig = config?.elements?.sqlide;
 
@@ -41,7 +42,7 @@ const DirectiveSqlIde: FC<DirectiveSqlIdeProps> = ({
   }
 
   if (ideConfig?.db) {
-    db = ideConfig.db;
+    db = makeUrl(ideConfig.db, "public");
   }
   const codes: { title: string; code: string; hint?: boolean }[] = node.children
     ?.filter((n: any) => n.tagName === "pre")
