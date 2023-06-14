@@ -48,7 +48,7 @@ importers:
         version: 18.2.0(react@18.2.0)
       react-redux:
         specifier: 8.1.0
-        version: 8.1.0(@types/react@18.2.12)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
+        version: 8.1.0(react-dom@18.2.0)(react@18.2.0)
       rimraf:
         specifier: 3.0.2
         version: 3.0.2
@@ -63,16 +63,13 @@ importers:
         version: 0.4.1
       webpack:
         specifier: 5.81.0
-        version: 5.81.0(esbuild@0.17.18)(webpack-cli@4.10.0)
+        version: 5.81.0(esbuild@0.17.18)
 
   packages/element-alert:
     dependencies:
       '@hyperbook/provider':
         specifier: workspace:*
         version: link:../provider
-      react-redux:
-        specifier: 8.x
-        version: 8.0.5(@types/react-dom@18.2.5)(@types/react@18.2.12)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
     devDependencies:
       '@types/react':
         specifier: 18.2.12
@@ -140,9 +137,6 @@ importers:
       react-hook-form:
         specifier: 7.44.3
         version: 7.44.3(react@18.2.0)
-      react-redux:
-        specifier: 8.x
-        version: 8.0.5(@types/react-dom@18.2.5)(@types/react@18.2.12)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
       zod:
         specifier: 3.21.4
         version: 3.21.4
@@ -165,12 +159,6 @@ importers:
       '@hyperbook/provider':
         specifier: workspace:*
         version: link:../provider
-      '@reduxjs/toolkit':
-        specifier: 1.x
-        version: 1.9.5(react-redux@8.0.5)(react@18.2.0)
-      react-redux:
-        specifier: 8.x
-        version: 8.0.5(@types/react-dom@18.2.5)(@types/react@18.2.12)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
     devDependencies:
       '@types/react':
         specifier: 18.2.12
@@ -199,9 +187,6 @@ importers:
       react-collapsed:
         specifier: 4.0.2
         version: 4.0.2(react-dom@18.2.0)(react@18.2.0)
-      react-redux:
-        specifier: 8.x
-        version: 8.0.5(@types/react-dom@18.2.5)(@types/react@18.2.12)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
     devDependencies:
       '@types/object-hash':
         specifier: 3.0.2
@@ -224,12 +209,6 @@ importers:
       '@hyperbook/provider':
         specifier: workspace:*
         version: link:../provider
-      '@reduxjs/toolkit':
-        specifier: 1.x
-        version: 1.9.5(react-redux@8.0.5)(react@18.2.0)
-      react-redux:
-        specifier: 8.x
-        version: 8.0.5(@types/react-dom@18.2.5)(@types/react@18.2.12)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
     devDependencies:
       '@types/react':
         specifier: 18.2.12
@@ -249,12 +228,6 @@ importers:
       '@hyperbook/provider':
         specifier: workspace:*
         version: link:../provider
-      '@reduxjs/toolkit':
-        specifier: 1.x
-        version: 1.9.5(react-redux@8.0.5)(react@18.2.0)
-      react-redux:
-        specifier: 8.x
-        version: 8.0.5(@types/react-dom@18.2.5)(@types/react@18.2.12)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
     devDependencies:
       '@types/react':
         specifier: 18.2.12
@@ -280,12 +253,6 @@ importers:
       '@hyperbook/provider':
         specifier: workspace:*
         version: link:../provider
-      '@reduxjs/toolkit':
-        specifier: 1.x
-        version: 1.9.5(react-redux@8.0.5)(react@18.2.0)
-      react-redux:
-        specifier: 8.x
-        version: 8.0.5(@types/react-dom@18.2.5)(@types/react@18.2.12)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
     devDependencies:
       '@types/react':
         specifier: 18.2.12
@@ -305,15 +272,9 @@ importers:
       '@hyperbook/provider':
         specifier: workspace:*
         version: link:../provider
-      '@reduxjs/toolkit':
-        specifier: 1.x
-        version: 1.9.5(react-redux@8.0.5)(react@18.2.0)
       mermaid:
         specifier: 9.4.3
         version: 9.4.3
-      react-redux:
-        specifier: 8.x
-        version: 8.0.5(@types/react-dom@18.2.5)(@types/react@18.2.12)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
     devDependencies:
       '@types/react':
         specifier: 18.2.12
@@ -336,9 +297,6 @@ importers:
       object-hash:
         specifier: 3.0.0
         version: 3.0.0
-      react-redux:
-        specifier: 8.x
-        version: 8.0.5(@types/react-dom@18.2.5)(@types/react@18.2.12)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
     devDependencies:
       '@types/object-hash':
         specifier: 3.0.2
@@ -367,15 +325,9 @@ importers:
       '@hyperbook/store':
         specifier: workspace:*
         version: link:../store
-      '@reduxjs/toolkit':
-        specifier: 1.x
-        version: 1.9.5(react-redux@8.0.5)(react@18.2.0)
       object-hash:
         specifier: 3.0.0
         version: 3.0.0
-      react-redux:
-        specifier: 8.x
-        version: 8.0.5(@types/react-dom@18.2.5)(@types/react@18.2.12)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
     devDependencies:
       '@types/object-hash':
         specifier: 3.0.2
@@ -398,15 +350,9 @@ importers:
       '@hyperbook/provider':
         specifier: workspace:*
         version: link:../provider
-      '@reduxjs/toolkit':
-        specifier: 1.x
-        version: 1.9.5(react-redux@8.0.5)(react@18.2.0)
       qrcode.react:
         specifier: 3.1.0
         version: 3.1.0(react@18.2.0)
-      react-redux:
-        specifier: 8.x
-        version: 8.0.5(@types/react-dom@18.2.5)(@types/react@18.2.12)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
     devDependencies:
       '@types/react':
         specifier: 18.2.12
@@ -426,12 +372,6 @@ importers:
       '@hyperbook/provider':
         specifier: workspace:*
         version: link:../provider
-      '@reduxjs/toolkit':
-        specifier: 1.x
-        version: 1.9.5(react-redux@8.0.5)(react@18.2.0)
-      react-redux:
-        specifier: 8.x
-        version: 8.0.5(@types/react-dom@18.2.5)(@types/react@18.2.12)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
       scratchblocks:
         specifier: ^3.6.1
         version: 3.6.1
@@ -457,9 +397,6 @@ importers:
       object-hash:
         specifier: 3.0.0
         version: 3.0.0
-      react-redux:
-        specifier: 8.x
-        version: 8.0.5(@types/react-dom@18.2.5)(@types/react@18.2.12)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
     devDependencies:
       '@types/object-hash':
         specifier: 3.0.2
@@ -485,18 +422,12 @@ importers:
       '@hyperbook/provider':
         specifier: workspace:*
         version: link:../provider
-      '@reduxjs/toolkit':
-        specifier: 1.x
-        version: 1.9.5(react-redux@8.0.5)(react@18.2.0)
       js-base64:
         specifier: 3.7.5
         version: 3.7.5
       pako:
         specifier: 2.1.0
         version: 2.1.0
-      react-redux:
-        specifier: 8.x
-        version: 8.0.5(@types/react-dom@18.2.5)(@types/react@18.2.12)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
     devDependencies:
       '@types/pako':
         specifier: 2.0.0
@@ -525,9 +456,6 @@ importers:
       object-hash:
         specifier: 3.0.0
         version: 3.0.0
-      react-redux:
-        specifier: 8.x
-        version: 8.0.5(@types/react-dom@18.2.5)(@types/react@18.2.12)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
     devDependencies:
       '@types/object-hash':
         specifier: 3.0.2
@@ -550,12 +478,6 @@ importers:
       '@hyperbook/provider':
         specifier: workspace:*
         version: link:../provider
-      '@reduxjs/toolkit':
-        specifier: 1.x
-        version: 1.9.5(react-redux@8.0.5)(react@18.2.0)
-      react-redux:
-        specifier: 8.x
-        version: 8.0.5(@types/react-dom@18.2.5)(@types/react@18.2.12)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
     devDependencies:
       '@types/react':
         specifier: 18.2.12
@@ -575,12 +497,6 @@ importers:
       '@hyperbook/provider':
         specifier: workspace:*
         version: link:../provider
-      '@reduxjs/toolkit':
-        specifier: 1.x
-        version: 1.9.5(react-redux@8.0.5)(react@18.2.0)
-      react-redux:
-        specifier: 8.x
-        version: 8.0.5(@types/react-dom@18.2.5)(@types/react@18.2.12)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
     devDependencies:
       '@types/react':
         specifier: 18.2.12
@@ -808,9 +724,6 @@ importers:
       '@hyperbook/types':
         specifier: workspace:*
         version: link:../types
-      react-redux:
-        specifier: 8.x
-        version: 8.0.5(@types/react-dom@18.2.5)(@types/react@18.2.12)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
       redux:
         specifier: 4.2.1
         version: 4.2.1
@@ -861,19 +774,16 @@ importers:
 
   packages/store:
     dependencies:
-      react:
-        specifier: 18.x
-        version: 18.2.0
       redux:
         specifier: 4.2.1
         version: 4.2.1
       redux-persist:
         specifier: 6.0.0
-        version: 6.0.0(react@18.2.0)(redux@4.2.1)
+        version: 6.0.0(redux@4.2.1)
     devDependencies:
       '@reduxjs/toolkit':
         specifier: 1.9.5
-        version: 1.9.5(react-redux@8.1.0)(react@18.2.0)
+        version: 1.9.5
       '@types/react':
         specifier: 18.2.12
         version: 18.2.12
@@ -1087,10 +997,10 @@ importers:
         version: 2.15.0
       webpack:
         specifier: 5.81.0
-        version: 5.81.0(esbuild@0.17.18)(webpack-cli@4.10.0)
+        version: 5.81.0(webpack-cli@5.1.4)
       webpack-cli:
-        specifier: 4.10.0
-        version: 4.10.0(webpack@5.81.0)
+        specifier: 5.1.4
+        version: 5.1.4(webpack@5.81.0)
 
   platforms/web:
     dependencies:
@@ -3217,7 +3127,7 @@ packages:
     resolution: {integrity: sha512-a5Sab1C4/icpTZVzZc5Ghpz88yQtGOyNqYXcZgOssB2uuAr+wF/MvN6bgtW32q7HHrvBki+BsZ0OuNv6EV3K9g==}
     dev: true
 
-  /@reduxjs/toolkit@1.9.5(react-redux@8.0.5)(react@18.2.0):
+  /@reduxjs/toolkit@1.9.5:
     resolution: {integrity: sha512-Rt97jHmfTeaxL4swLRNPD/zV4OxTes4la07Xc4hetpUW/vc75t5m1ANyxG6ymnEQ2FsLQsoMlYB2vV1sO3m8tQ==}
     peerDependencies:
       react: ^16.9.0 || ^17.0.0 || ^18
@@ -3229,27 +3139,6 @@ packages:
         optional: true
     dependencies:
       immer: 9.0.21
-      react: 18.2.0
-      react-redux: 8.0.5(@types/react-dom@18.2.5)(@types/react@18.2.12)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
-      redux: 4.2.1
-      redux-thunk: 2.4.2(redux@4.2.1)
-      reselect: 4.1.8
-    dev: false
-
-  /@reduxjs/toolkit@1.9.5(react-redux@8.1.0)(react@18.2.0):
-    resolution: {integrity: sha512-Rt97jHmfTeaxL4swLRNPD/zV4OxTes4la07Xc4hetpUW/vc75t5m1ANyxG6ymnEQ2FsLQsoMlYB2vV1sO3m8tQ==}
-    peerDependencies:
-      react: ^16.9.0 || ^17.0.0 || ^18
-      react-redux: ^7.2.1 || ^8.0.2
-    peerDependenciesMeta:
-      react:
-        optional: true
-      react-redux:
-        optional: true
-    dependencies:
-      immer: 9.0.21
-      react: 18.2.0
-      react-redux: 8.1.0(@types/react@18.2.12)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
       redux: 4.2.1
       redux-thunk: 2.4.2(redux@4.2.1)
       reselect: 4.1.8
@@ -3984,35 +3873,41 @@ packages:
       '@xtuc/long': 4.2.2
     dev: true
 
-  /@webpack-cli/configtest@1.2.0(webpack-cli@4.10.0)(webpack@5.81.0):
-    resolution: {integrity: sha512-4FB8Tj6xyVkyqjj1OaTqCjXYULB9FMkqQ8yGrZjRDrYh0nOE+7Lhs45WioWQQMV+ceFlE368Ukhe6xdvJM9Egg==}
+  /@webpack-cli/configtest@2.1.1(webpack-cli@5.1.4)(webpack@5.81.0):
+    resolution: {integrity: sha512-wy0mglZpDSiSS0XHrVR+BAdId2+yxPSoJW8fsna3ZpYSlufjvxnP4YbKTCBZnNIcGN4r6ZPXV55X4mYExOfLmw==}
+    engines: {node: '>=14.15.0'}
     peerDependencies:
-      webpack: 4.x.x || 5.x.x
-      webpack-cli: 4.x.x
+      webpack: 5.x.x
+      webpack-cli: 5.x.x
     dependencies:
-      webpack: 5.81.0(esbuild@0.17.18)(webpack-cli@4.10.0)
-      webpack-cli: 4.10.0(webpack@5.81.0)
+      webpack: 5.81.0(webpack-cli@5.1.4)
+      webpack-cli: 5.1.4(webpack@5.81.0)
     dev: true
 
-  /@webpack-cli/info@1.5.0(webpack-cli@4.10.0):
-    resolution: {integrity: sha512-e8tSXZpw2hPl2uMJY6fsMswaok5FdlGNRTktvFk2sD8RjH0hE2+XistawJx1vmKteh4NmGmNUrp+Tb2w+udPcQ==}
+  /@webpack-cli/info@2.0.2(webpack-cli@5.1.4)(webpack@5.81.0):
+    resolution: {integrity: sha512-zLHQdI/Qs1UyT5UBdWNqsARasIA+AaF8t+4u2aS2nEpBQh2mWIVb8qAklq0eUENnC5mOItrIB4LiS9xMtph18A==}
+    engines: {node: '>=14.15.0'}
     peerDependencies:
-      webpack-cli: 4.x.x
+      webpack: 5.x.x
+      webpack-cli: 5.x.x
     dependencies:
-      envinfo: 7.8.1
-      webpack-cli: 4.10.0(webpack@5.81.0)
+      webpack: 5.81.0(webpack-cli@5.1.4)
+      webpack-cli: 5.1.4(webpack@5.81.0)
     dev: true
 
-  /@webpack-cli/serve@1.7.0(webpack-cli@4.10.0):
-    resolution: {integrity: sha512-oxnCNGj88fL+xzV+dacXs44HcDwf1ovs3AuEzvP7mqXw7fQntqIhQ1BRmynh4qEKQSSSRSWVyXRjmTbZIX9V2Q==}
+  /@webpack-cli/serve@2.0.5(webpack-cli@5.1.4)(webpack@5.81.0):
+    resolution: {integrity: sha512-lqaoKnRYBdo1UgDX8uF24AfGMifWK19TxPmM5FHc2vAGxrJ/qtyUyFBWoY1tISZdelsQ5fBcOusifo5o5wSJxQ==}
+    engines: {node: '>=14.15.0'}
     peerDependencies:
-      webpack-cli: 4.x.x
+      webpack: 5.x.x
+      webpack-cli: 5.x.x
       webpack-dev-server: '*'
     peerDependenciesMeta:
       webpack-dev-server:
         optional: true
     dependencies:
-      webpack-cli: 4.10.0(webpack@5.81.0)
+      webpack: 5.81.0(webpack-cli@5.1.4)
+      webpack-cli: 5.1.4(webpack@5.81.0)
     dev: true
 
   /@xtuc/ieee754@1.2.0:
@@ -4081,10 +3976,8 @@ packages:
       indent-string: 5.0.0
     dev: true
 
-  /ajv-formats@2.1.1(ajv@8.12.0):
+  /ajv-formats@2.1.1:
     resolution: {integrity: sha512-Wx0Kx52hxE7C18hkMEggYlEifqWZtYaRgouJor+WMdPnQyEK13vgEWyVNup7SoeeoLMsr4kf5h6dOW11I15MUA==}
-    peerDependencies:
-      ajv: ^8.0.0
     peerDependenciesMeta:
       ajv:
         optional: true
@@ -4876,6 +4769,11 @@ packages:
   /comma-separated-tokens@2.0.3:
     resolution: {integrity: sha512-Fu4hJdvzeylCfQPp9SGWidpzrMs7tTrlu6Vb8XGaRGck8QSNZJJp538Wrb60Lax4fPwR64ViY468OIUTbRlGZg==}
 
+  /commander@10.0.1:
+    resolution: {integrity: sha512-y4Mg2tXshplEbSGzx7amzPwKKOCGuoSRP/CjEdwwk0FOGlUbq6lKuoyDZTNZkmxHdJtp54hdfY/JUrdL7Xfdug==}
+    engines: {node: '>=14'}
+    dev: true
+
   /commander@2.20.3:
     resolution: {integrity: sha512-GpVkmM8vF2vQUkj2LvZmD35JxeJOLCwJ9cUkugyk2nuhbv3+mJvpLYYt+0+USMxE+oj+ey/lJEnhZw75x/OMcQ==}
     dev: true
@@ -4978,7 +4876,7 @@ packages:
       normalize-path: 3.0.0
       schema-utils: 4.0.0
       serialize-javascript: 6.0.1
-      webpack: 5.81.0(esbuild@0.17.18)(webpack-cli@4.10.0)
+      webpack: 5.81.0(webpack-cli@5.1.4)
     dev: true
 
   /core-util-is@1.0.3:
@@ -5148,7 +5046,7 @@ packages:
       postcss-modules-values: 4.0.0(postcss@8.4.21)
       postcss-value-parser: 4.2.0
       semver: 7.3.8
-      webpack: 5.81.0(esbuild@0.17.18)(webpack-cli@4.10.0)
+      webpack: 5.81.0(webpack-cli@5.1.4)
     dev: true
 
   /css-select@5.1.0:
@@ -6267,7 +6165,7 @@ packages:
     dependencies:
       loader-utils: 2.0.4
       schema-utils: 3.1.1
-      webpack: 5.81.0(esbuild@0.17.18)(webpack-cli@4.10.0)
+      webpack: 5.81.0(webpack-cli@5.1.4)
     dev: true
 
   /fill-range@7.0.1:
@@ -7117,6 +7015,11 @@ packages:
   /interpret@2.2.0:
     resolution: {integrity: sha512-Ju0Bz/cEia55xDwUWEa8+olFpCiQoypjnQySseKtmjNrnps3P+xfpUmGr90T7yjlVJmOtybRvPXhKMbHr+fWnw==}
     engines: {node: '>= 0.10'}
+    dev: true
+
+  /interpret@3.1.1:
+    resolution: {integrity: sha512-6xwYfHbajpoF0xLW+iwLkhwgvLoZDfjYfoFNu8ftMoXINzwuymNLd9u/KmwtdT2GbR+/Cz66otEGEVVUHX9QLQ==}
+    engines: {node: '>=10.13.0'}
     dev: true
 
   /intl-messageformat@10.3.4:
@@ -8834,7 +8737,7 @@ packages:
       url: 0.11.0
       util: 0.12.5
       vm-browserify: 1.1.2
-      webpack: 5.81.0(esbuild@0.17.18)(webpack-cli@4.10.0)
+      webpack: 5.81.0(webpack-cli@5.1.4)
     dev: true
 
   /node-releases@2.0.8:
@@ -9869,40 +9772,6 @@ packages:
       warning: 4.0.3
     dev: false
 
-  /react-redux@8.0.5(@types/react-dom@18.2.5)(@types/react@18.2.12)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1):
-    resolution: {integrity: sha512-Q2f6fCKxPFpkXt1qNRZdEDLlScsDWyrgSj0mliK59qU6W5gvBiKkdMEG2lJzhd1rCctf0hb6EtePPLZ2e0m1uw==}
-    peerDependencies:
-      '@types/react': ^16.8 || ^17.0 || ^18.0
-      '@types/react-dom': ^16.8 || ^17.0 || ^18.0
-      react: ^16.8 || ^17.0 || ^18.0
-      react-dom: ^16.8 || ^17.0 || ^18.0
-      react-native: '>=0.59'
-      redux: ^4
-    peerDependenciesMeta:
-      '@types/react':
-        optional: true
-      '@types/react-dom':
-        optional: true
-      react-dom:
-        optional: true
-      react-native:
-        optional: true
-      redux:
-        optional: true
-    dependencies:
-      '@babel/runtime': 7.20.13
-      '@types/hoist-non-react-statics': 3.3.1
-      '@types/react': 18.2.12
-      '@types/react-dom': 18.2.5
-      '@types/use-sync-external-store': 0.0.3
-      hoist-non-react-statics: 3.3.2
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-      react-is: 18.2.0
-      redux: 4.2.1
-      use-sync-external-store: 1.2.0(react@18.2.0)
-    dev: false
-
   /react-redux@8.1.0(@types/react-dom@18.2.5)(@types/react@18.2.12)(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-CtHZzAOxi7GQvTph4dVLWwZHAWUjV2kMEQtk50OrN8z3gKxpWg3Tz7JfDw32N3Rpd7fh02z73cF6yZkK467gbQ==}
     peerDependencies:
@@ -9973,6 +9842,41 @@ packages:
       react-is: 18.2.0
       redux: 4.2.1
       use-sync-external-store: 1.2.0(react@18.2.0)
+    dev: false
+
+  /react-redux@8.1.0(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-CtHZzAOxi7GQvTph4dVLWwZHAWUjV2kMEQtk50OrN8z3gKxpWg3Tz7JfDw32N3Rpd7fh02z73cF6yZkK467gbQ==}
+    peerDependencies:
+      '@reduxjs/toolkit': ^1 || ^2.0.0-beta.0
+      '@types/react': ^16.8 || ^17.0 || ^18.0
+      '@types/react-dom': ^16.8 || ^17.0 || ^18.0
+      react: ^16.8 || ^17.0 || ^18.0
+      react-dom: ^16.8 || ^17.0 || ^18.0
+      react-native: '>=0.59'
+      redux: ^4 || ^5.0.0-beta.0
+    peerDependenciesMeta:
+      '@reduxjs/toolkit':
+        optional: true
+      '@types/react':
+        optional: true
+      '@types/react-dom':
+        optional: true
+      react-dom:
+        optional: true
+      react-native:
+        optional: true
+      redux:
+        optional: true
+    dependencies:
+      '@babel/runtime': 7.22.5
+      '@types/hoist-non-react-statics': 3.3.1
+      '@types/use-sync-external-store': 0.0.3
+      hoist-non-react-statics: 3.3.2
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+      react-is: 18.2.0
+      use-sync-external-store: 1.2.0(react@18.2.0)
+    dev: true
 
   /react-syntax-highlighter@15.5.0(react@18.2.0):
     resolution: {integrity: sha512-+zq2myprEnQmH5yw6Gqc8lD55QHnpKaU8TOcFeC/Lg/MQSs8UknEA0JC4nTZGFAXC2J2Hyj/ijJ7NlabyPi2gg==}
@@ -10132,13 +10036,6 @@ packages:
     dependencies:
       picomatch: 2.3.1
 
-  /rechoir@0.7.1:
-    resolution: {integrity: sha512-/njmZ8s1wVeR6pjTZ+0nCnv8SpZNRMT2D1RLOJQESlYFDBvwpTA4KWJpZ+sBJ4+vhjILRcK7JIFdGCdxEAAitg==}
-    engines: {node: '>= 0.10'}
-    dependencies:
-      resolve: 1.22.1
-    dev: true
-
   /rechoir@0.8.0:
     resolution: {integrity: sha512-/vxpCXddiX8NGfGO/mTafwjq4aFa/71pvamip0++IQk3zG8cbCj0fifNPrjjF1XMXUne91jL9OoxmdykoEtifQ==}
     engines: {node: '>= 10.13.0'}
@@ -10167,12 +10064,25 @@ packages:
       redux: 4.2.1
     dev: false
 
+  /redux-persist@6.0.0(redux@4.2.1):
+    resolution: {integrity: sha512-71LLMbUq2r02ng2We9S215LtPu3fY0KgaGE0k8WRgl6RkqxtGfl7HUozz1Dftwsb0D/5mZ8dwAaPbtnzfvbEwQ==}
+    peerDependencies:
+      react: '>=16'
+      redux: '>4.0.0'
+    peerDependenciesMeta:
+      react:
+        optional: true
+    dependencies:
+      redux: 4.2.1
+    dev: false
+
   /redux-thunk@2.4.2(redux@4.2.1):
     resolution: {integrity: sha512-+P3TjtnP0k/FEjcBL5FZpoovtvrTNT/UXd4/sluaSyrURlSlhLSzEdfsTBW7WsKB6yPvgd7q/iZPICFjW4o57Q==}
     peerDependencies:
       redux: ^4
     dependencies:
       redux: 4.2.1
+    dev: true
 
   /redux@4.2.1:
     resolution: {integrity: sha512-LAUYz4lc+Do8/g7aeRa8JkyDErK6ekstQaqWQrNRW//MY1TvCEpMtpTWvlQ+FPbWCx+Xixu/6SHt5N0HR+SB4w==}
@@ -10373,6 +10283,7 @@ packages:
 
   /reselect@4.1.8:
     resolution: {integrity: sha512-ab9EmR80F/zQTMNeneUr4cv+jSwPJgIlvEmVwLerwrWVbpLlBuls9XHzIeTFy4cegU2NHBp3va0LKOzU5qFEYQ==}
+    dev: true
 
   /resolve-alpn@1.2.1:
     resolution: {integrity: sha512-0a1F4l73/ZFZOakJnQ3FvkJ2+gSTQWz/r2KE5OdDY0TxPm5h4GkqkWWfM47T7HsbnOtcJVEF4epCVy6u7Q3K+g==}
@@ -10546,7 +10457,7 @@ packages:
       klona: 2.0.6
       neo-async: 2.6.2
       sass: 1.62.1
-      webpack: 5.81.0(esbuild@0.17.18)(webpack-cli@4.10.0)
+      webpack: 5.81.0(webpack-cli@5.1.4)
     dev: true
 
   /sass@1.62.1:
@@ -10592,7 +10503,7 @@ packages:
     dependencies:
       '@types/json-schema': 7.0.11
       ajv: 8.12.0
-      ajv-formats: 2.1.1(ajv@8.12.0)
+      ajv-formats: 2.1.1
       ajv-keywords: 5.1.0(ajv@8.12.0)
     dev: true
 
@@ -11030,7 +10941,7 @@ packages:
     peerDependencies:
       webpack: ^5.0.0
     dependencies:
-      webpack: 5.81.0(esbuild@0.17.18)(webpack-cli@4.10.0)
+      webpack: 5.81.0(webpack-cli@5.1.4)
     dev: true
 
   /style-mod@4.0.0:
@@ -11178,7 +11089,31 @@ packages:
       schema-utils: 3.1.2
       serialize-javascript: 6.0.1
       terser: 5.16.9
-      webpack: 5.81.0(esbuild@0.17.18)(webpack-cli@4.10.0)
+      webpack: 5.81.0(esbuild@0.17.18)
+    dev: true
+
+  /terser-webpack-plugin@5.3.7(webpack@5.81.0):
+    resolution: {integrity: sha512-AfKwIktyP7Cu50xNjXF/6Qb5lBNzYaWpU6YfoX3uZicTx0zTy0stDDCsvjDapKsSDvOeWo5MEq4TmdBy2cNoHw==}
+    engines: {node: '>= 10.13.0'}
+    peerDependencies:
+      '@swc/core': '*'
+      esbuild: '*'
+      uglify-js: '*'
+      webpack: ^5.1.0
+    peerDependenciesMeta:
+      '@swc/core':
+        optional: true
+      esbuild:
+        optional: true
+      uglify-js:
+        optional: true
+    dependencies:
+      '@jridgewell/trace-mapping': 0.3.17
+      jest-worker: 27.5.1
+      schema-utils: 3.1.2
+      serialize-javascript: 6.0.1
+      terser: 5.16.9
+      webpack: 5.81.0(webpack-cli@5.1.4)
     dev: true
 
   /terser@5.16.9:
@@ -11317,7 +11252,7 @@ packages:
       micromatch: 4.0.5
       semver: 7.3.8
       typescript: 4.9.5
-      webpack: 5.81.0(esbuild@0.17.18)(webpack-cli@4.10.0)
+      webpack: 5.81.0(webpack-cli@5.1.4)
     dev: true
 
   /ts-node@10.9.1(@types/node@16.18.24)(typescript@4.9.5):
@@ -12159,20 +12094,17 @@ packages:
       - utf-8-validate
     dev: true
 
-  /webpack-cli@4.10.0(webpack@5.81.0):
-    resolution: {integrity: sha512-NLhDfH/h4O6UOy+0LSso42xvYypClINuMNBVVzX4vX98TmTaTUxwRbXdhucbFMd2qLaCTcLq/PdYrvi8onw90w==}
-    engines: {node: '>=10.13.0'}
+  /webpack-cli@5.1.4(webpack@5.81.0):
+    resolution: {integrity: sha512-pIDJHIEI9LR0yxHXQ+Qh95k2EvXpWzZ5l+d+jIo+RdSm9MiHfzazIxwwni/p7+x4eJZuvG1AJwgC4TNQ7NRgsg==}
+    engines: {node: '>=14.15.0'}
     hasBin: true
     peerDependencies:
       '@webpack-cli/generators': '*'
-      '@webpack-cli/migrate': '*'
-      webpack: 4.x.x || 5.x.x
+      webpack: 5.x.x
       webpack-bundle-analyzer: '*'
       webpack-dev-server: '*'
     peerDependenciesMeta:
       '@webpack-cli/generators':
-        optional: true
-      '@webpack-cli/migrate':
         optional: true
       webpack-bundle-analyzer:
         optional: true
@@ -12180,17 +12112,18 @@ packages:
         optional: true
     dependencies:
       '@discoveryjs/json-ext': 0.5.7
-      '@webpack-cli/configtest': 1.2.0(webpack-cli@4.10.0)(webpack@5.81.0)
-      '@webpack-cli/info': 1.5.0(webpack-cli@4.10.0)
-      '@webpack-cli/serve': 1.7.0(webpack-cli@4.10.0)
+      '@webpack-cli/configtest': 2.1.1(webpack-cli@5.1.4)(webpack@5.81.0)
+      '@webpack-cli/info': 2.0.2(webpack-cli@5.1.4)(webpack@5.81.0)
+      '@webpack-cli/serve': 2.0.5(webpack-cli@5.1.4)(webpack@5.81.0)
       colorette: 2.0.19
-      commander: 7.2.0
+      commander: 10.0.1
       cross-spawn: 7.0.3
+      envinfo: 7.8.1
       fastest-levenshtein: 1.0.16
       import-local: 3.1.0
-      interpret: 2.2.0
-      rechoir: 0.7.1
-      webpack: 5.81.0(esbuild@0.17.18)(webpack-cli@4.10.0)
+      interpret: 3.1.1
+      rechoir: 0.8.0
+      webpack: 5.81.0(webpack-cli@5.1.4)
       webpack-merge: 5.8.0
     dev: true
 
@@ -12207,7 +12140,7 @@ packages:
     engines: {node: '>=10.13.0'}
     dev: true
 
-  /webpack@5.81.0(esbuild@0.17.18)(webpack-cli@4.10.0):
+  /webpack@5.81.0(esbuild@0.17.18):
     resolution: {integrity: sha512-AAjaJ9S4hYCVODKLQTgG5p5e11hiMawBwV2v8MYLE0C/6UAGLuAF4n1qa9GOwdxnicaP+5k6M5HrLmD4+gIB8Q==}
     engines: {node: '>=10.13.0'}
     hasBin: true
@@ -12240,7 +12173,47 @@ packages:
       tapable: 2.2.1
       terser-webpack-plugin: 5.3.7(esbuild@0.17.18)(webpack@5.81.0)
       watchpack: 2.4.0
-      webpack-cli: 4.10.0(webpack@5.81.0)
+      webpack-sources: 3.2.3
+    transitivePeerDependencies:
+      - '@swc/core'
+      - esbuild
+      - uglify-js
+    dev: true
+
+  /webpack@5.81.0(webpack-cli@5.1.4):
+    resolution: {integrity: sha512-AAjaJ9S4hYCVODKLQTgG5p5e11hiMawBwV2v8MYLE0C/6UAGLuAF4n1qa9GOwdxnicaP+5k6M5HrLmD4+gIB8Q==}
+    engines: {node: '>=10.13.0'}
+    hasBin: true
+    peerDependencies:
+      webpack-cli: '*'
+    peerDependenciesMeta:
+      webpack-cli:
+        optional: true
+    dependencies:
+      '@types/eslint-scope': 3.7.4
+      '@types/estree': 1.0.0
+      '@webassemblyjs/ast': 1.11.5
+      '@webassemblyjs/wasm-edit': 1.11.5
+      '@webassemblyjs/wasm-parser': 1.11.5
+      acorn: 8.8.2
+      acorn-import-assertions: 1.8.0(acorn@8.8.2)
+      browserslist: 4.21.4
+      chrome-trace-event: 1.0.3
+      enhanced-resolve: 5.13.0
+      es-module-lexer: 1.2.1
+      eslint-scope: 5.1.1
+      events: 3.3.0
+      glob-to-regexp: 0.4.1
+      graceful-fs: 4.2.10
+      json-parse-even-better-errors: 2.3.1
+      loader-runner: 4.3.0
+      mime-types: 2.1.35
+      neo-async: 2.6.2
+      schema-utils: 3.1.2
+      tapable: 2.2.1
+      terser-webpack-plugin: 5.3.7(webpack@5.81.0)
+      watchpack: 2.4.0
+      webpack-cli: 5.1.4(webpack@5.81.0)
       webpack-sources: 3.2.3
     transitivePeerDependencies:
       - '@swc/core'
