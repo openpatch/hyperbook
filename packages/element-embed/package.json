@@ -39,10 +39,10 @@
     "build:types": "tsc --project tsconfig.build.json --declaration --emitDeclarationOnly"
   },
   "dependencies": {
-    "@hyperbook/provider": "workspace:*"
+    "@hyperbook/provider": "workspace:*",
+    "@hyperbook/store": "workspace:*"
   },
   "peerDependencies": {
-    "@reduxjs/toolkit": "1.x",
     "react": "18.x",
     "react-dom": "18.x",
     "react-redux": "8.x"

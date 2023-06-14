@@ -1,5 +1,5 @@
 import { FC } from "react";
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice } from "@hyperbook/store";
 import "./index.css";
 
 type DirectiveEmbedProps = {
