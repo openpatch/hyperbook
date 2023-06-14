@@ -249,9 +249,9 @@ importers:
       '@hyperbook/provider':
         specifier: workspace:*
         version: link:../provider
-      '@reduxjs/toolkit':
-        specifier: 1.x
-        version: 1.9.5(react-redux@8.0.5)(react@18.2.0)
+      '@hyperbook/store':
+        specifier: workspace:*
+        version: link:../store
       react-redux:
         specifier: 8.x
         version: 8.0.5(@types/react-dom@18.2.5)(@types/react@18.2.12)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
