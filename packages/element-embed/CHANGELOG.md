@@ -1,5 +1,16 @@
 # @hyperbook/element-embed
 
+## 0.1.1
+
+### Patch Changes
+
+- [`aa0d719`](https://github.com/openpatch/hyperbook/commit/aa0d7197aa78e7d42b2393d8850c6983c3681f07) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - fix width and height
+
+- [`edf8e94`](https://github.com/openpatch/hyperbook/commit/edf8e943e9b9c393121cfc1d859dc91e44af30c1) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - fix data not defined
+
+- Updated dependencies [[`edf8e94`](https://github.com/openpatch/hyperbook/commit/edf8e943e9b9c393121cfc1d859dc91e44af30c1)]:
+  - @hyperbook/provider@0.2.5
+
 ## 0.1.0
 
 ### Minor Changes

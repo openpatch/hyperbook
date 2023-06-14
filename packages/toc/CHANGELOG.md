@@ -1,5 +1,11 @@
 # @hyperbook/toc
 
+## 0.2.3
+
+### Patch Changes
+
+- [`edf8e94`](https://github.com/openpatch/hyperbook/commit/edf8e943e9b9c393121cfc1d859dc91e44af30c1) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - fix data not defined
+
 ## 0.2.2
 
 ### Patch Changes

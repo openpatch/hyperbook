@@ -1,5 +1,36 @@
 # @hyperbook/vscode-extension
 
+## 0.16.1
+
+### Patch Changes
+
+- [`edf8e94`](https://github.com/openpatch/hyperbook/commit/edf8e943e9b9c393121cfc1d859dc91e44af30c1) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - fix data not defined
+
+- Updated dependencies [[`aa0d719`](https://github.com/openpatch/hyperbook/commit/aa0d7197aa78e7d42b2393d8850c6983c3681f07), [`edf8e94`](https://github.com/openpatch/hyperbook/commit/edf8e943e9b9c393121cfc1d859dc91e44af30c1), [`ed5a41d`](https://github.com/openpatch/hyperbook/commit/ed5a41d3c324e55e932a3c375d9daf89ebd6b675)]:
+  - @hyperbook/element-embed@0.1.1
+  - @hyperbook/element-scratchblock@0.1.4
+  - @hyperbook/element-collapsible@0.3.4
+  - @hyperbook/element-excalidraw@0.4.4
+  - @hyperbook/element-online-ide@0.3.2
+  - @hyperbook/element-bookmarks@0.2.8
+  - @hyperbook/element-struktog@0.1.13
+  - @hyperbook/element-bitflow@0.1.14
+  - @hyperbook/element-mermaid@0.1.13
+  - @hyperbook/element-protect@0.3.4
+  - @hyperbook/element-sql-ide@0.3.2
+  - @hyperbook/element-youtube@0.1.13
+  - @hyperbook/element-alert@0.1.13
+  - @hyperbook/element-tabs@0.1.14
+  - @hyperbook/element-term@0.1.13
+  - @hyperbook/element-dl@0.1.14
+  - @hyperbook/element-qr@0.1.14
+  - @hyperbook/markdown@0.6.4
+  - @hyperbook/provider@0.2.5
+  - @hyperbook/styles@0.1.13
+  - @hyperbook/shell@0.4.6
+  - @hyperbook/store@0.1.5
+  - @hyperbook/toc@0.2.3
+
 ## 0.16.0
 
 ### Minor Changes
