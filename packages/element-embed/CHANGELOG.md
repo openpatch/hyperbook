@@ -1,5 +1,11 @@
 # @hyperbook/element-embed
 
+## 0.1.2
+
+### Patch Changes
+
+- [`9977ab2`](https://github.com/openpatch/hyperbook/commit/9977ab26b3e75727acfc33e969ca70df544ad183) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - fix createSlice not found
+
 ## 0.1.1
 
 ### Patch Changes
