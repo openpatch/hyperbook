@@ -1,5 +1,16 @@
 # @hyperbook/element-online-ide
 
+## 0.3.2
+
+### Patch Changes
+
+- [`edf8e94`](https://github.com/openpatch/hyperbook/commit/edf8e943e9b9c393121cfc1d859dc91e44af30c1) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - fix data not defined
+
+- [`ed5a41d`](https://github.com/openpatch/hyperbook/commit/ed5a41d3c324e55e932a3c375d9daf89ebd6b675) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - add makeurl for supporting relative db urls
+
+- Updated dependencies [[`edf8e94`](https://github.com/openpatch/hyperbook/commit/edf8e943e9b9c393121cfc1d859dc91e44af30c1)]:
+  - @hyperbook/provider@0.2.5
+
 ## 0.3.1
 
 ### Patch Changes

@@ -1,5 +1,15 @@
 # @hyperbook/element-bitflow
 
+## 0.1.14
+
+### Patch Changes
+
+- [`edf8e94`](https://github.com/openpatch/hyperbook/commit/edf8e943e9b9c393121cfc1d859dc91e44af30c1) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - fix data not defined
+
+- Updated dependencies [[`edf8e94`](https://github.com/openpatch/hyperbook/commit/edf8e943e9b9c393121cfc1d859dc91e44af30c1)]:
+  - @hyperbook/provider@0.2.5
+  - @hyperbook/store@0.1.5
+
 ## 0.1.13
 
 ### Patch Changes
