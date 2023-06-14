@@ -31,7 +31,7 @@
     "build": "rimraf dist && ncc build ./index.ts -o ./dist/ -e \"hyperbook-simple-template\" --minify --no-cache --no-source-map-register && node ./postbuild.mjs"
   },
   "devDependencies": {
-    "@pnpm/exportable-manifest": "4.0.8",
+    "@pnpm/exportable-manifest": "5.0.3",
     "@types/archiver": "5.3.2",
     "@types/async-retry": "1.4.5",
     "@types/cross-spawn": "6.0.2",
