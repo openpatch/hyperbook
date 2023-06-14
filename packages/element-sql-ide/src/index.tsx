@@ -51,7 +51,7 @@ const DirectiveSqlIde: FC<DirectiveSqlIdeProps> = ({
         ?.filter((n: any) => n.tagName === "code")
         .map((n: any) => {
           return {
-            title: n.data.meta || "",
+            title: n.data?.meta || "",
             code: nodeToText(n) || "",
             hint: n?.properties?.className?.[1] === "language-markdown",
           };
