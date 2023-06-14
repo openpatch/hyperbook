@@ -6,6 +6,7 @@ import { HyperbookFrontmatter } from "@hyperbook/types";
 import yaml from "yaml";
 import { handlebars, registerHelpers } from "./handlebars";
 import { lookup } from "mime-types";
+import { allowedBookFiles } from "./hyperbook";
 
 export type VFile = {
   root: string;
@@ -169,6 +170,22 @@ export async function listForFolder(
 ): Promise<VFile[]> {
   const directory = await getDirectory(root, folder, extension);
   return flatDirectory(directory);
+}
+
+export async function listForCache(root: string) {
+  const extension = allowedBookFiles;
+  const bookDirectory = await getDirectory(root, "book", extension);
+  const glossaryDirectory = await getDirectory(root, "glossary", extension);
+  const bookFiles = await flatDirectory(bookDirectory);
+  const glossaryFiles = await flatDirectory(glossaryDirectory);
+  const filesWithMarkdown = Promise.all(
+    [...bookFiles, ...glossaryFiles].map(async (f) => ({
+      ...f,
+      markkdown: await getMarkdown(f),
+    }))
+  );
+
+  return filesWithMarkdown;
 }
 
 export const list = async (

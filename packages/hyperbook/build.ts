@@ -5,7 +5,7 @@ import readline from "readline";
 import chalk from "chalk";
 import { isSetup } from "./helpers/is-setup";
 import { readHyperbook } from "./helpers/read-hyperbook";
-import { hyperproject } from "@hyperbook/fs";
+import { glossary, hyperbook as hb, hyperproject, vfile } from "@hyperbook/fs";
 import { runArchive } from "./archive";
 import { makeDir } from "./helpers/make-dir";
 import rimraf from "rimraf";
@@ -66,6 +66,7 @@ async function runBuild(
     `
 module.exports = {
     ${basePath ? `basePath: '${basePath}',` : ""}
+    output: 'export',
     typescript: {
       ignoreBuildErrors: true,
     }
@@ -99,6 +100,27 @@ module.exports = {
   fs.writeFileSync(
     path.join(root, ".hyperbook", "hyperbook.json"),
     JSON.stringify(hyperbookJson, null, 2)
+  );
+
+  // cache vfiles
+  const vfileData = await vfile.listForCache(root);
+  fs.writeFileSync(
+    path.join(root, ".hyperbook", "vfiles.json"),
+    JSON.stringify(vfileData)
+  );
+
+  // cache glossary
+  const glossaryData = await glossary.get(root);
+  fs.writeFileSync(
+    path.join(root, ".hyperbook", "glossary.json"),
+    JSON.stringify(glossaryData)
+  );
+
+  // cache navigation
+  const navigationData = await hb.getNavigation(root);
+  fs.writeFileSync(
+    path.join(root, ".hyperbook", "navigation.json"),
+    JSON.stringify(navigationData)
   );
 
   return new Promise((resolve, reject) => {
