@@ -13,8 +13,8 @@ type DirectiveEmbedProps = {
 
 const DirectiveEmbed: FC<DirectiveEmbedProps> = ({
   src,
-  width,
-  height,
+  width = "100%",
+  height = "400px",
   title,
   allowFullScreen = true,
   aspectRatio,
