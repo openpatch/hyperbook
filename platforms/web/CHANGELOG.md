@@ -1,5 +1,12 @@
 # hyperbook-simple-template
 
+## 0.17.3
+
+### Patch Changes
+
+- Updated dependencies [[`a3496b4`](https://github.com/openpatch/hyperbook/commit/a3496b4676376f16697306869733a780f9d15a56)]:
+  - @hyperbook/element-embed@0.1.3
+
 ## 0.17.2
 
 ### Patch Changes

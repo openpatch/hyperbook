@@ -1,5 +1,11 @@
 # @hyperbook/element-embed
 
+## 0.1.3
+
+### Patch Changes
+
+- [`a3496b4`](https://github.com/openpatch/hyperbook/commit/a3496b4676376f16697306869733a780f9d15a56) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - fix width and height having no defaults
+
 ## 0.1.2
 
 ### Patch Changes
