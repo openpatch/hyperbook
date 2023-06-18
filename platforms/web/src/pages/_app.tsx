@@ -11,6 +11,8 @@ import elementTerm from "@hyperbook/element-term";
 import "@hyperbook/element-term/index.css";
 import elementYoutube from "@hyperbook/element-youtube";
 import "@hyperbook/element-youtube/index.css";
+import elementPlantuml from "@hyperbook/element-plantuml";
+import "@hyperbook/element-plantuml/index.css";
 import elementProtect from "@hyperbook/element-protect";
 import "@hyperbook/element-protect/index.css";
 import elementCollapsible from "@hyperbook/element-collapsible";
@@ -91,6 +93,7 @@ export default function MyApp({ Component, pageProps }) {
         elementTerm,
         elementYoutube,
         elementCollapsible,
+        elementPlantuml,
         elementProtect,
         elementDl,
         elementEmbed,

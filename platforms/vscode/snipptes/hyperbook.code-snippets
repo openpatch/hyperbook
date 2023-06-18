@@ -93,5 +93,33 @@
   "Element YouTube": {
     "prefix": [":youtube"],
     "body": ["::youtube[${1:title}]{#$CLIPBOARD}", "$0"]
+  },
+  "Element Embed": {
+    "prefix": [":embed"],
+    "body": ["::embed{src=\"#$CLIPBOARD\"}", "$0"]
+  },
+  "Element Online-IDE": {
+    "prefix": [":onlineide"],
+    "body": [
+      ":::onlineide{id=\"$RANDOM\"}",
+      "",
+      "$TM_SELECTED_TEXT",
+      "$0",
+      ":::"
+    ]
+  },
+  "Element SQL-IDE": {
+    "prefix": [":sqlide"],
+    "body": [
+      ":::onlineide{id=\"$RANDOM\"}",
+      "",
+      "$TM_SELECTED_TEXT",
+      "$0",
+      ":::"
+    ]
+  },
+  "Element PlantUML": {
+    "prefix": [":plantuml"],
+    "body": [":::plantuml", "", "$TM_SELECTED_TEXT", "$0", ":::"]
   }
 }

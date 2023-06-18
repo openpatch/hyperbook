@@ -5,6 +5,7 @@ import elementAlert from "@hyperbook/element-alert";
 import elementBitflow from "@hyperbook/element-bitflow";
 import elementTerm from "@hyperbook/element-term";
 import elementYoutube from "@hyperbook/element-youtube";
+import elementPlantuml from "@hyperbook/element-plantuml";
 import elementProtect from "@hyperbook/element-protect";
 import elementCollapsible from "@hyperbook/element-collapsible";
 import elementScratchblock from "@hyperbook/element-scratchblock";
@@ -137,6 +138,7 @@ export const App = () => {
           elementTerm,
           elementYoutube,
           elementCollapsible,
+          elementPlantuml,
           elementProtect,
           elementDl,
           elementEmbed,

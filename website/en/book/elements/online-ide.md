@@ -5,7 +5,7 @@ name: Online IDE
 Java-like programming language (compiler, interpreter, debugger) with IDE that
 runs entirely in the browser.
 
-The Online-IDE element accepts three arguments:
+The Online-IDE element accepts these arguments:
 
 - **fileList**: With file list on the left.
 - **console**: With console tab in the bottom panel.

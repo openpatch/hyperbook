@@ -51,6 +51,18 @@
     },
     {
       "include": "#directive-bitflow"
+    },
+    {
+      "include": "#directive-onlineide"
+    },
+    {
+      "include": "#directive-sqlide"
+    },
+    {
+      "include": "#directive-embed"
+    },
+    {
+      "include": "#directive-plantuml"
     }
   ],
   "repository": {
@@ -533,6 +545,243 @@
           "patterns": [
             {
               "include": "text.html.markdown"
+            }
+          ]
+        }
+      ]
+    },
+    "directive-onlineide": {
+      "name": "meta.directive.onlineide.hyperbook",
+      "begin": "(^|\\G)(:{3,})(onlineide)({.*})?\\s*$",
+      "end": "(^|\\G)(\\2|:{3,})\\s*$",
+      "beginCaptures": {
+        "2": {
+          "name": "punctuation.definition.directive.level.hyperbook"
+        },
+        "3": {
+          "name": "entity.name.function.directive.onlineide.hyperbook"
+        },
+        "4": {
+          "patterns": [
+            {
+              "match": "(url|id)=\"([^\"]*)\"",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.scratchblock.hyperbook"
+                },
+                "2": {
+                  "name": "string.quoted.double.untitled"
+                }
+              }
+            },
+            {
+              "match": "(height)=\"([0-9]+)(px|%)\"",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.bitflow.hyperbook"
+                },
+                "2": {
+                  "name": "constant.numeric"
+                }
+              }
+            },
+            {
+              "match": "(fileList|console|pCode|errorList|bottomPanel)=(?:(false)|(true))",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.onlineide.hyperbook"
+                },
+                "2": {
+                  "name": "constant.language.boolean.false"
+                },
+                "3": {
+                  "name": "constant.language.boolean.true"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "endCaptures": {
+        "2": {
+          "name": "punctuation.definition.directive.level.hyperbook"
+        }
+      },
+      "patterns": [
+        {
+          "begin": "(^|\\G)(\\s*)(.*)",
+          "while": "(^|\\G)(?!\\s*(:{3,})\\s*$)",
+          "contentName": "meta.embedded.block.markdown",
+          "patterns": [
+            {
+              "include": "text.html.markdown"
+            }
+          ]
+        }
+      ]
+    },
+    "directive-sqlide": {
+      "name": "meta.directive.sqlide.hyperbook",
+      "begin": "(^|\\G)(:{3,})(sqlide)({.*})?\\s*$",
+      "end": "(^|\\G)(\\2|:{3,})\\s*$",
+      "beginCaptures": {
+        "2": {
+          "name": "punctuation.definition.directive.level.hyperbook"
+        },
+        "3": {
+          "name": "entity.name.function.directive.sqlide.hyperbook"
+        },
+        "4": {
+          "patterns": [
+            {
+              "match": "(url|id|db)=\"([^\"]*)\"",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.scratchblock.hyperbook"
+                },
+                "2": {
+                  "name": "string.quoted.double.untitled"
+                }
+              }
+            },
+            {
+              "match": "(height)=\"([0-9]+)(px|%)\"",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.bitflow.hyperbook"
+                },
+                "2": {
+                  "name": "constant.numeric"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "endCaptures": {
+        "2": {
+          "name": "punctuation.definition.directive.level.hyperbook"
+        }
+      },
+      "patterns": [
+        {
+          "begin": "(^|\\G)(\\s*)(.*)",
+          "while": "(^|\\G)(?!\\s*(:{3,})\\s*$)",
+          "contentName": "meta.embedded.block.markdown",
+          "patterns": [
+            {
+              "include": "text.html.markdown"
+            }
+          ]
+        }
+      ]
+    },
+    "directive-embed": {
+      "name": "meta.directive.embed.hyperbook",
+      "match": "(^|\\G)(:{1,})(embed)\\[(.+)\\]{(.*)}\\s*$",
+      "captures": {
+        "2": {
+          "name": "punctuation.definition.directive.level.hyperbook"
+        },
+        "3": {
+          "name": "entity.name.function.directive.embed.hyperbook"
+        },
+        "4": {
+          "name": "string.unquoted"
+        },
+        "5": {
+          "patterns": [
+            {
+              "match": "(src|title|aspectRatio)=\"([^\"]*)\"",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.download.hyperbook"
+                },
+                "2": {
+                  "name": "string.quoted.double.untitled"
+                }
+              }
+            },
+            {
+              "match": "(height|width)=\"([0-9]+)(px|%)\"",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.bitflow.hyperbook"
+                },
+                "2": {
+                  "name": "constant.numeric"
+                }
+              }
+            },
+            {
+              "match": "(allowFullScreen)=(?:(false)|(true))",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.onlineide.hyperbook"
+                },
+                "2": {
+                  "name": "constant.language.boolean.false"
+                },
+                "3": {
+                  "name": "constant.language.boolean.true"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "directive-plantuml": {
+      "name": "meta.directive.plantuml.hyperbook",
+      "begin": "(^|\\G)(:{3,})(plantuml)({.*})?\\s*$",
+      "end": "(^|\\G)(\\2|:{3,})\\s*$",
+      "beginCaptures": {
+        "2": {
+          "name": "punctuation.definition.directive.level.hyperbook"
+        },
+        "3": {
+          "name": "entity.name.function.directive.plantuml.hyperbook"
+        },
+        "4": {
+          "patterns": [
+            {
+              "match": "(alt)=\"([^\"]*)\"",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.scratchblock.hyperbook"
+                },
+                "2": {
+                  "name": "string.quoted.double.untitled"
+                }
+              }
+            },
+            {
+              "match": "(width)=\"([0-9]+)(px|%)\"",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.bitflow.hyperbook"
+                },
+                "2": {
+                  "name": "constant.numeric"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "endCaptures": {
+        "2": {
+          "name": "punctuation.definition.directive.level.hyperbook"
+        }
+      },
+      "patterns": [
+        {
+          "begin": "(^|\\G)(\\s*)(.*)",
+          "while": "(^|\\G)(?!\\s*(:{3,})\\s*$)",
+          "contentName": "meta.embedded.block.plantuml",
+          "patterns": [
+            {
+              "include": "source.wsd"
             }
           ]
         }

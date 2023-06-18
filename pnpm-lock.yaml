@@ -359,6 +359,43 @@ importers:
         specifier: ^0.26.3
         version: 0.26.3
 
+  packages/element-plantuml:
+    dependencies:
+      '@hyperbook/provider':
+        specifier: workspace:*
+        version: link:../provider
+      '@hyperbook/store':
+        specifier: workspace:*
+        version: link:../store
+      '@types/pako':
+        specifier: 2.0.0
+        version: 2.0.0
+      js-base64:
+        specifier: '3'
+        version: 3.7.5
+      pako:
+        specifier: 2.1.0
+        version: 2.1.0
+      react-redux:
+        specifier: 8.x
+        version: 8.1.0(@types/react-dom@18.0.6)(@types/react@18.0.15)(react-dom@18.2.0)(react@18.2.0)
+    devDependencies:
+      '@types/react':
+        specifier: 18.0.15
+        version: 18.0.15
+      '@types/react-dom':
+        specifier: 18.0.6
+        version: 18.0.6
+      react:
+        specifier: 18.2.0
+        version: 18.2.0
+      react-dom:
+        specifier: 18.2.0
+        version: 18.2.0(react@18.2.0)
+      vitest:
+        specifier: ^0.26.3
+        version: 0.26.3
+
   packages/element-protect:
     dependencies:
       '@hyperbook/provider':
@@ -943,6 +980,9 @@ importers:
       '@hyperbook/element-online-ide':
         specifier: workspace:*
         version: link:../../packages/element-online-ide
+      '@hyperbook/element-plantuml':
+        specifier: workspace:*
+        version: link:../../packages/element-plantuml
       '@hyperbook/element-protect':
         specifier: workspace:*
         version: link:../../packages/element-protect
@@ -1121,6 +1161,9 @@ importers:
       '@hyperbook/element-online-ide':
         specifier: workspace:*
         version: link:../../packages/element-online-ide
+      '@hyperbook/element-plantuml':
+        specifier: workspace:*
+        version: link:../../packages/element-plantuml
       '@hyperbook/element-protect':
         specifier: workspace:*
         version: link:../../packages/element-protect
@@ -3554,7 +3597,6 @@ packages:
 
   /@types/pako@2.0.0:
     resolution: {integrity: sha512-10+iaz93qR5WYxTo+PMifD5TSxiOtdRaxBf7INGGXMQgTCu8Z/7GYWYFUOS3q/G0nE5boj1r4FEB+WSy7s5gbA==}
-    dev: true
 
   /@types/parse-json@4.0.0:
     resolution: {integrity: sha512-//oorEZjL6sbPcKUaCdIGlIUeH26mgzimjBB77G6XRgnDl/L5wOnpyBGRe/Mmf5CVW3PwEBE1NjiMZ/ssFh4wA==}
@@ -3577,10 +3619,22 @@ packages:
   /@types/prop-types@15.7.5:
     resolution: {integrity: sha512-JCB8C6SnDoQf0cNycqd/35A7MjcnK+ZTqE7judS6o7utxUCg6imJg3QK2qzHKszlTjcj2cn+NwMB2i96ubpj7w==}
 
+  /@types/react-dom@18.0.6:
+    resolution: {integrity: sha512-/5OFZgfIPSwy+YuIBP/FgJnQnsxhZhjjrnxudMddeblOouIodEQ75X14Rr4wGSG/bknL+Omy9iWlLo1u/9GzAA==}
+    dependencies:
+      '@types/react': 18.2.12
+
   /@types/react-dom@18.2.5:
     resolution: {integrity: sha512-sRQsOS/sCLnpQhR4DSKGTtWFE3FZjpQa86KPVbhUqdYMRZ9FEFcfAytKhR/vUG2rH1oFbOOej6cuD7MFSobDRQ==}
     dependencies:
       '@types/react': 18.2.12
+
+  /@types/react@18.0.15:
+    resolution: {integrity: sha512-iz3BtLuIYH1uWdsv6wXYdhozhqj20oD4/Hk2DNXIn1kFsmp9x8d9QB6FnPhfkbhd2PgEONt9Q1x/ebkwjfFLow==}
+    dependencies:
+      '@types/prop-types': 15.7.5
+      '@types/scheduler': 0.16.3
+      csstype: 3.1.2
 
   /@types/react@18.2.12:
     resolution: {integrity: sha512-ndmBMLCgn38v3SntMeoJaIrO6tGHYKMEBohCUmw8HoLLQdRMOIGXfeYaBTLe2lsFaSB3MOK1VXscYFnmLtTSmw==}
@@ -9900,6 +9954,42 @@ packages:
       react-dom: 18.2.0(react@18.2.0)
       react-is: 18.2.0
       redux: 4.2.1
+      use-sync-external-store: 1.2.0(react@18.2.0)
+    dev: false
+
+  /react-redux@8.1.0(@types/react-dom@18.0.6)(@types/react@18.0.15)(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-CtHZzAOxi7GQvTph4dVLWwZHAWUjV2kMEQtk50OrN8z3gKxpWg3Tz7JfDw32N3Rpd7fh02z73cF6yZkK467gbQ==}
+    peerDependencies:
+      '@reduxjs/toolkit': ^1 || ^2.0.0-beta.0
+      '@types/react': ^16.8 || ^17.0 || ^18.0
+      '@types/react-dom': ^16.8 || ^17.0 || ^18.0
+      react: ^16.8 || ^17.0 || ^18.0
+      react-dom: ^16.8 || ^17.0 || ^18.0
+      react-native: '>=0.59'
+      redux: ^4 || ^5.0.0-beta.0
+    peerDependenciesMeta:
+      '@reduxjs/toolkit':
+        optional: true
+      '@types/react':
+        optional: true
+      '@types/react-dom':
+        optional: true
+      react-dom:
+        optional: true
+      react-native:
+        optional: true
+      redux:
+        optional: true
+    dependencies:
+      '@babel/runtime': 7.22.5
+      '@types/hoist-non-react-statics': 3.3.1
+      '@types/react': 18.0.15
+      '@types/react-dom': 18.0.6
+      '@types/use-sync-external-store': 0.0.3
+      hoist-non-react-statics: 3.3.2
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+      react-is: 18.2.0
       use-sync-external-store: 1.2.0(react@18.2.0)
     dev: false
 
