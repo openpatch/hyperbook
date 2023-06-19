@@ -9,6 +9,7 @@
     "next:build": "next build && next export"
   },
   "dependencies": {
+    "@hyperbook/element-audio": "workspace:*",
     "@hyperbook/element-alert": "workspace:*",
     "@hyperbook/element-bitflow": "workspace:*",
     "@hyperbook/element-bookmarks": "workspace:*",

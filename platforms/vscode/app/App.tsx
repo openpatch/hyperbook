@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Provider, ProviderProps } from "@hyperbook/provider";
 import elementTab from "@hyperbook/element-tabs";
+import elementAudio from "@hyperbook/element-audio";
 import elementAlert from "@hyperbook/element-alert";
 import elementBitflow from "@hyperbook/element-bitflow";
 import elementTerm from "@hyperbook/element-term";
@@ -133,6 +134,7 @@ export const App = () => {
         }}
         elements={[
           elementTab,
+          elementAudio,
           elementAlert,
           elementBitflow,
           elementTerm,

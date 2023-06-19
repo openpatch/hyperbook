@@ -5,6 +5,8 @@ import "@hyperbook/markdown/index.css";
 import { Provider, ProviderProps } from "@hyperbook/provider";
 import elementTab from "@hyperbook/element-tabs";
 import "@hyperbook/element-tabs/index.css";
+import elementAudio from "@hyperbook/element-audio";
+import "@hyperbook/element-audio/index.css";
 import elementAlert from "@hyperbook/element-alert";
 import "@hyperbook/element-alert/index.css";
 import elementTerm from "@hyperbook/element-term";
@@ -89,6 +91,7 @@ export default function MyApp({ Component, pageProps }) {
       env={process.env.NODE_ENV === "production" ? "production" : "development"}
       elements={[
         elementTab,
+        elementAudio,
         elementAlert,
         elementTerm,
         elementYoutube,

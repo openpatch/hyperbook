@@ -87,6 +87,40 @@ importers:
         specifier: 18.2.0
         version: 18.2.0(react@18.2.0)
 
+  packages/element-audio:
+    dependencies:
+      '@hyperbook/provider':
+        specifier: workspace:*
+        version: link:../provider
+      '@hyperbook/store':
+        specifier: workspace:*
+        version: link:../store
+      '@types/wavesurfer.js':
+        specifier: ^6.0.6
+        version: 6.0.6
+      react-redux:
+        specifier: 8.x
+        version: 8.1.0(@types/react-dom@18.0.6)(@types/react@18.0.15)(react-dom@18.2.0)(react@18.2.0)
+      wavesurfer.js:
+        specifier: ^6.6.4
+        version: 6.6.4
+    devDependencies:
+      '@types/react':
+        specifier: 18.0.15
+        version: 18.0.15
+      '@types/react-dom':
+        specifier: 18.0.6
+        version: 18.0.6
+      react:
+        specifier: 18.2.0
+        version: 18.2.0
+      react-dom:
+        specifier: 18.2.0
+        version: 18.2.0(react@18.2.0)
+      vitest:
+        specifier: ^0.26.3
+        version: 0.26.3
+
   packages/element-bitflow:
     dependencies:
       '@babel/core':
@@ -956,6 +990,9 @@ importers:
       '@hyperbook/element-alert':
         specifier: workspace:*
         version: link:../../packages/element-alert
+      '@hyperbook/element-audio':
+        specifier: workspace:*
+        version: link:../../packages/element-audio
       '@hyperbook/element-bitflow':
         specifier: workspace:*
         version: link:../../packages/element-bitflow
@@ -1137,6 +1174,9 @@ importers:
       '@hyperbook/element-alert':
         specifier: workspace:*
         version: link:../../packages/element-alert
+      '@hyperbook/element-audio':
+        specifier: workspace:*
+        version: link:../../packages/element-audio
       '@hyperbook/element-bitflow':
         specifier: workspace:*
         version: link:../../packages/element-bitflow
@@ -3448,6 +3488,10 @@ packages:
       '@types/node': 18.11.18
     dev: true
 
+  /@types/debounce@1.2.1:
+    resolution: {integrity: sha512-epMsEE85fi4lfmJUH/89/iV/LI+F5CvNIvmgs5g5jYFPfhO2S/ae8WSsLOKWdwtoaZw9Q2IhJ4tQ5tFCcS/4HA==}
+    dev: false
+
   /@types/debug@4.1.7:
     resolution: {integrity: sha512-9AonUzyTjXXhEOa0DnqpzZi6VHlqKMswga9EXjpXnnqxwLtdvPPtlO8evrI5D9S6asFRCQ6v+wpiUKbw+vKqyg==}
     dependencies:
@@ -3693,6 +3737,12 @@ packages:
   /@types/vscode@1.71.0:
     resolution: {integrity: sha512-nB50bBC9H/x2CpwW9FzRRRDrTZ7G0/POttJojvN/LiVfzTGfLyQIje1L1QRMdFXK9G41k5UJN/1B9S4of7CSzA==}
     dev: true
+
+  /@types/wavesurfer.js@6.0.6:
+    resolution: {integrity: sha512-fD54o0RXZXxkOb+69Rt6rGViaHpIc1Mmde2aOX9qPhlQhrCPepybGnsekiG407+7scPlaK+hmuPez5AnnmlzGg==}
+    dependencies:
+      '@types/debounce': 1.2.1
+    dev: false
 
   /@typescript-eslint/eslint-plugin@5.59.2(@typescript-eslint/parser@5.59.2)(eslint@8.39.0)(typescript@4.9.5):
     resolution: {integrity: sha512-yVrXupeHjRxLDcPKL10sGQ/QlVrA8J5IYOEWVqk0lJaSZP7X5DfnP7Ns3cc74/blmbipQ1htFNVGsHX6wsYm0A==}
@@ -12212,6 +12262,10 @@ packages:
     dependencies:
       glob-to-regexp: 0.4.1
       graceful-fs: 4.2.11
+
+  /wavesurfer.js@6.6.4:
+    resolution: {integrity: sha512-nBbc0pD/3FdClxKUKL1UW2V9AJPL+JOjC8T6/YF9/FCAn4uo+H6Y8VBkXo9UJXIHoBewoc7iXj3tPeL0UCJhjA==}
+    dev: false
 
   /wcwidth@1.0.1:
     resolution: {integrity: sha512-XHPEwS0q6TaxcvG85+8EYkbiCux2XtWG2mkc47Ng2A77BQu9+DqIOJldST4HgPkuea7dvKSj5VgX3P1d4rW8Tg==}
