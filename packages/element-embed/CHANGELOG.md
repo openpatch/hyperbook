@@ -1,5 +1,11 @@
 # @hyperbook/element-embed
 
+## 0.1.4
+
+### Patch Changes
+
+- [`fcc3033`](https://github.com/openpatch/hyperbook/commit/fcc30337f4ef68842e25b5a914de46af38d5e196) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - add visible border around embed elements
+
 ## 0.1.3
 
 ### Patch Changes
