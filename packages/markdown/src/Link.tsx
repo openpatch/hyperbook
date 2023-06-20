@@ -1,5 +1,5 @@
-import { useLink } from "@hyperbook/provider";
-import { ReactNode } from "react";
+import { useConfig, useLink } from "@hyperbook/provider";
+import { ReactNode, useEffect, useState } from "react";
 import { Components } from "react-markdown";
 
 // see: https://css-tricks.com/better-line-breaks-for-long-urls/
@@ -30,6 +30,31 @@ function formatUrl(url: ReactNode) {
 
 export const Link: Components["a"] = ({ href, title, children }) => {
   const L = useLink();
+  const config = useConfig();
+  const [isExternal, setIsExternal] = useState(false);
+
+  useEffect(() => {
+    if (href) {
+      const tmp = document.createElement("a");
+      tmp.href = href;
+      if (tmp.host !== window.location.host) {
+        setIsExternal(true);
+      } else if (
+        config.basePath &&
+        !window.location.pathname.startsWith(config.basePath)
+      ) {
+        setIsExternal(true);
+      } else {
+        setIsExternal(false);
+      }
+    }
+  }, [href, config]);
+
+  if (isExternal) {
+    <L href={href} title={title} target="_blank">
+      {formatUrl(children)}
+    </L>;
+  }
 
   return (
     <L href={href} title={title}>
