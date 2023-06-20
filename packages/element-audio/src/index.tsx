@@ -38,8 +38,8 @@ const DirectiveAudio: FC<DirectiveAudioProps> = ({
   position = "left",
 }) => {
   const makeUrl = useMakeUrl();
-  src = makeUrl(src);
-  thumbnail = makeUrl(thumbnail);
+  src = makeUrl(src, "public");
+  thumbnail = makeUrl(thumbnail, "public");
 
   const containerRef = useRef<HTMLDivElement>(null);
   const wavesurferRef = useRef<Wavesurfer>();
