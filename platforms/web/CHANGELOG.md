@@ -1,5 +1,12 @@
 # hyperbook-simple-template
 
+## 0.19.1
+
+### Patch Changes
+
+- Updated dependencies [[`b6f842d`](https://github.com/openpatch/hyperbook/commit/b6f842d222af821346382feff5c5f698a1d93e7e)]:
+  - @hyperbook/element-audio@0.1.1
+
 ## 0.19.0
 
 ### Minor Changes
