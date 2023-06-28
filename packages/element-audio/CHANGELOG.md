@@ -1,5 +1,12 @@
 # @hyperbook/element-audio
 
+## 0.1.2
+
+### Patch Changes
+
+- Updated dependencies [[`902c0b3`](https://github.com/openpatch/hyperbook/commit/902c0b30a0aa97984350cfd58ad88d38ef7b4cd6)]:
+  - @hyperbook/provider@0.3.0
+
 ## 0.1.1
 
 ### Patch Changes

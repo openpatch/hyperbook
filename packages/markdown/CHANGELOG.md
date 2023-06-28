@@ -1,5 +1,18 @@
 # @hyperbook/markdown
 
+## 0.7.0
+
+### Minor Changes
+
+- [`4e264d1`](https://github.com/openpatch/hyperbook/commit/4e264d166684ba476460fd48fedfae2f7e2a3195) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - open external links in a new window or tab
+
+- [`902c0b3`](https://github.com/openpatch/hyperbook/commit/902c0b30a0aa97984350cfd58ad88d38ef7b4cd6) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Improve static site generation
+
+### Patch Changes
+
+- Updated dependencies [[`902c0b3`](https://github.com/openpatch/hyperbook/commit/902c0b30a0aa97984350cfd58ad88d38ef7b4cd6)]:
+  - @hyperbook/provider@0.3.0
+
 ## 0.6.4
 
 ### Patch Changes
