@@ -1,8 +1,11 @@
 import { useMakeUrl } from "@hyperbook/provider";
-import { useState } from "react";
-import { Components } from "react-markdown";
+import { ComponentType, useState } from "react";
 
-export const Image: Components["img"] = ({ src, title, alt }) => {
+export const Image: ComponentType<JSX.IntrinsicElements["img"]> = ({
+  src,
+  title,
+  alt,
+}) => {
   const makeUrl = useMakeUrl();
   const [full, setFull] = useState(false);
   src = makeUrl(src, "public");

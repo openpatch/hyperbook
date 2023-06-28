@@ -1,5 +1,5 @@
 import { useLink, useMakeUrl, useHead, useConfig } from "@hyperbook/provider";
-import { FC, Fragment, ReactNode, useLayoutEffect, useState } from "react";
+import { FC, Fragment, ReactNode, useEffect, useState } from "react";
 import { Toc, TocProps } from "@hyperbook/toc";
 import { Navigation as NavigationProps, HyperbookPage } from "@hyperbook/types";
 import { Drawer } from "./Drawer";
@@ -74,7 +74,7 @@ export const Shell: FC<ShellProps> = ({ toc, navigation, children }) => {
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [isTocOpen, setIsTocOpen] = useState(false);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     const appHeight = () => {
       const doc = document.documentElement;
       doc.style.setProperty(`--app-height`, `${window.innerHeight}px`);

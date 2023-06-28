@@ -39,8 +39,8 @@
     "build:types": "tsc --project tsconfig.build.json --declaration --emitDeclarationOnly"
   },
   "dependencies": {
-    "@hyperbook/provider": "workspace:*",
-    "qrcode.react": "3.1.0"
+    "@devmehq/react-qr-code": "^1.0.8",
+    "@hyperbook/provider": "workspace:*"
   },
   "peerDependencies": {
     "@reduxjs/toolkit": "1.x",

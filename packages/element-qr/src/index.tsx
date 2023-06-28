@@ -1,4 +1,4 @@
-import QRCodeSVG from "qrcode.react";
+import { ReactQrCode } from "@devmehq/react-qr-code";
 import { FC } from "react";
 import "./index.css";
 
@@ -19,7 +19,7 @@ const DirectiveQr: FC<DirectiveQrProps> = ({ size, value, label }) => {
   return (
     <div className="element-qr">
       <div className={["code", size].join(" ")}>
-        <QRCodeSVG
+        <ReactQrCode
           value={value}
           size={realSizes[size]}
           bgColor={"#ffffff"}

@@ -1,6 +1,5 @@
 import { useDirectives } from "@hyperbook/provider";
-import { Fragment, useRef, useState } from "react";
-import { Components } from "react-markdown";
+import { ComponentType, Fragment, useRef, useState } from "react";
 
 const MdContentCopy = () => {
   return (
@@ -69,7 +68,10 @@ const copyNoNavigator = (text: string) => {
   document.body.removeChild(textarea);
 };
 
-export const Code: Components["code"] = ({ children, className, inline }) => {
+export const Code: ComponentType<JSX.IntrinsicElements["code"]> = ({
+  children,
+  className,
+}) => {
   const directives = useDirectives();
   if (className === "language-mermaid" && directives["mermaid"]) {
     const Mermaid = directives["mermaid"];
@@ -101,7 +103,7 @@ export const Code: Components["code"] = ({ children, className, inline }) => {
     }
   };
 
-  return inline ? (
+  return !className ? (
     <span className="inline">
       <code ref={ref} className={className}>
         {children}

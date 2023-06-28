@@ -132,12 +132,7 @@ export const Provider: FC<ProviderProps> = ({
           env,
         }}
       >
-        <PersistGate
-          loading={<div className="hyperbook loading">...</div>}
-          persistor={persistor}
-        >
-          {children}
-        </PersistGate>
+        {children}
       </HyperbookContext.Provider>
     </ReduxProvider>
   );

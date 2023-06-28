@@ -96,9 +96,9 @@ export const Styles = () => {
     color: var(--color-brand);
   }
 
-  .toggle > .bar1,
-  .toggle > .bar2,
-  .toggle > .bar3 {
+  .toggle .bar1,
+  .toggle .bar2,
+  .toggle .bar3 {
     background-color: var(--color-brand);
   }
 }`}

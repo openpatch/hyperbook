@@ -1,4 +1,3 @@
-import ReactMarkdown from "react-markdown";
 import remarkDirective from "remark-directive";
 import remarkDirectiveRehype from "remark-directive-rehype";
 import remarkGfm from "remark-gfm";
@@ -7,7 +6,6 @@ import remarkGemoji from "remark-gemoji";
 import remarkUnwrapImages from "remark-unwrap-images";
 import rehypeKatex from "rehype-katex";
 import rehypeHighlight from "rehype-highlight";
-import rehypeRaw from "rehype-raw";
 import { useDirectives } from "@hyperbook/provider";
 import { Code } from "./Code";
 import { Link } from "./Link";
@@ -18,6 +16,7 @@ import { Image } from "./Image";
 import "./index.css";
 import { remarkRemoveComments } from "./remarkRemoveComments";
 import { remarkCustomHeadingIds } from "./remarkCustomHeadingIds";
+import { useRemarkSync } from "./useRemarkSync";
 
 export type MarkdownProps = {
   children: string;
@@ -26,10 +25,10 @@ export type MarkdownProps = {
 export const Markdown = ({ children }: MarkdownProps) => {
   const directives = useDirectives();
 
-  return (
-    <ReactMarkdown
-      className="hyperbook-markdown"
-      components={{
+  const reactContent = useRemarkSync(children, {
+    rehypeReactOptions: {
+      passNode: true,
+      components: {
         ...directives,
         a: Link,
         code: Code,
@@ -37,32 +36,30 @@ export const Markdown = ({ children }: MarkdownProps) => {
         th: Th,
         table: Table,
         tr: Tr,
-        h1: Headings,
-        h2: Headings,
-        h3: Headings,
-        h4: Headings,
-        h5: Headings,
-        h6: Headings,
+        h1: Headings(1),
+        h2: Headings(2),
+        h3: Headings(3),
+        h4: Headings(4),
+        h5: Headings(5),
+        h6: Headings(6),
         img: Image,
-      }}
-      remarkPlugins={[
-        remarkRemoveComments,
-        remarkCustomHeadingIds,
-        remarkDirective,
-        remarkDirectiveRehype,
-        remarkGfm,
-        remarkMath,
-        remarkGemoji,
-        remarkUnwrapImages,
-      ]}
-      rehypePlugins={[
-        rehypeRaw,
-        rehypeKatex,
-        [rehypeHighlight, { ignoreMissing: true, plainText: ["mermaid"] }],
-      ]}
-      skipHtml={false}
-    >
-      {children}
-    </ReactMarkdown>
-  );
+      },
+    },
+    remarkPlugins: [
+      remarkRemoveComments,
+      remarkCustomHeadingIds,
+      remarkGfm,
+      remarkDirective,
+      remarkDirectiveRehype,
+      remarkMath,
+      remarkGemoji,
+      remarkUnwrapImages,
+    ],
+    rehypePlugins: [
+      rehypeKatex,
+      [rehypeHighlight, { ignoreMissing: true, plainText: ["mermaid"] }],
+    ],
+  });
+
+  return <div className="hyperbook-markdown">{reactContent}</div>;
 };

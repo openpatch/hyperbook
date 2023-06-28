@@ -44,7 +44,7 @@ import "@hyperbook/element-scratchblock/index.css";
 import Link from "next/link";
 import Head from "next/head";
 import { Styles } from "@hyperbook/styles";
-import { localStorage } from "@hyperbook/store";
+import { localStorage, noopStorage } from "@hyperbook/store";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
 
@@ -64,7 +64,7 @@ const makeUrl: ProviderProps["makeUrl"] =
     if (
       process.env.NODE_ENV === "production" &&
       basePath &&
-      path.startsWith("/")
+      path?.startsWith("/")
     ) {
       if (basePath.endsWith("/")) {
         path = basePath.slice(0, -1) + path;
@@ -111,7 +111,7 @@ export default function MyApp({ Component, pageProps }) {
         elementBitflow,
       ]}
       router={router}
-      storage={localStorage}
+      storage={typeof window !== "undefined" ? localStorage : noopStorage}
       loadFile={() => async (path) => {
         return fetch(path).then((res) => res.text());
       }}
