@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.20.0
+
+### Minor Changes
+
+- [`902c0b3`](https://github.com/openpatch/hyperbook/commit/902c0b30a0aa97984350cfd58ad88d38ef7b4cd6) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Improve static site generation
+
 ## 0.19.1
 
 ## 0.19.0
