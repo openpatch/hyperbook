@@ -67,6 +67,7 @@ async function runBuild(
 module.exports = {
     ${basePath ? `basePath: '${basePath}',` : ""}
     output: 'export',
+    poweredByHeader: false,
     typescript: {
       ignoreBuildErrors: true,
     }

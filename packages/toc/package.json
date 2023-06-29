@@ -42,9 +42,18 @@
     "react-dom": "18.x"
   },
   "devDependencies": {
+    "@types/hast": "2.3.4",
+    "@types/mdast": "^3.0.11",
     "@types/react": "18.2.12",
     "@types/react-dom": "18.2.5",
     "react": "18.2.0",
     "react-dom": "18.2.0"
+  },
+  "dependencies": {
+    "mdast-util-to-string": "^3.2.0",
+    "remark-parse": "^10.0.1",
+    "remark-stringify": "^10.0.3",
+    "unified": "^10.1.2",
+    "unist-util-visit": "^4.1.1"
   }
 }

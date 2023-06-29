@@ -5,7 +5,7 @@ export const useScrollHash = () => {
     const hash = window.location.hash;
     if (hash) {
       setTimeout(() => {
-        document.querySelector(hash).scrollIntoView({ behavior: "smooth" });
+        document.querySelector(hash)?.scrollIntoView({ behavior: "smooth" });
       }, 100);
     }
   });

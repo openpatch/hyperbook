@@ -1,6 +1,6 @@
 import { GetStaticPaths, GetStaticProps } from "next";
 import { Shell, ShellProps } from "@hyperbook/shell";
-import { parseTocFromMarkdown, TocProps } from "@hyperbook/toc";
+import { getToc, parseTocFromMarkdown, TocProps } from "@hyperbook/toc";
 import { Markdown } from "@hyperbook/markdown";
 import { useActivePageId, useLink } from "@hyperbook/provider";
 import { Fragment } from "react";
@@ -82,7 +82,7 @@ export const getStaticProps: GetStaticProps<
       locale: data?.lang || hyperbookJson.language,
       markdown: content,
       data,
-      toc: parseTocFromMarkdown(content),
+      toc: getToc(content),
       navigation,
     },
   };
