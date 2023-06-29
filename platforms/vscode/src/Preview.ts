@@ -1,10 +1,10 @@
 import * as vscode from "vscode";
 import * as Constants from "./Constants";
 import { hyperbook, hyperproject, VFile, vfile } from "@hyperbook/fs";
+import { getToc } from "@hyperbook/markdown";
 import { htmlTemplate } from "./html-template";
 import { disposeAll } from "./utils/dispose";
 import { ChangeMessage, Message } from "./messages/messageTypes";
-import { parseTocFromMarkdown } from "@hyperbook/toc";
 import path from "path";
 import { HyperbookJson, Navigation } from "@hyperbook/types";
 
@@ -115,7 +115,7 @@ export default class Preview {
       const assetsPath = this.panel.webview
         .asWebviewUri(vscode.Uri.file(this._vfile.root))
         .toString();
-      const toc = parseTocFromMarkdown(content);
+      const toc = { headings: getToc(content) };
 
       const state = {
         content,
