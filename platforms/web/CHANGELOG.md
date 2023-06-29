@@ -1,5 +1,16 @@
 # hyperbook-simple-template
 
+## 0.21.0
+
+### Minor Changes
+
+- [`77c5ef4`](https://github.com/openpatch/hyperbook/commit/77c5ef42ecdb693c27b3eeeca098c712e0bf05b6) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Improve generating the table of content for a page. Headings in code block will now be ignored.
+
+### Patch Changes
+
+- Updated dependencies [[`77c5ef4`](https://github.com/openpatch/hyperbook/commit/77c5ef42ecdb693c27b3eeeca098c712e0bf05b6)]:
+  - @hyperbook/toc@0.3.0
+
 ## 0.20.0
 
 ### Minor Changes
