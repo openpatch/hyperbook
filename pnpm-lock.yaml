@@ -775,6 +775,9 @@ importers:
       mdast-util-to-hast:
         specifier: ^12.3.0
         version: 12.3.0
+      mdast-util-to-string:
+        specifier: ^3.2.0
+        version: 3.2.0
       rehype-highlight:
         specifier: 5.0.2
         version: 5.0.2

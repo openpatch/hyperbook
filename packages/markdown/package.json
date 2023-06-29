@@ -43,6 +43,7 @@
   "dependencies": {
     "@hyperbook/provider": "workspace:*",
     "mdast-util-to-hast": "^12.3.0",
+    "mdast-util-to-string": "^3.2.0",
     "rehype-highlight": "5.0.2",
     "rehype-katex": "6.0.3",
     "rehype-parse": "^8.0.4",
