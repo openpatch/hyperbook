@@ -1,4 +1,4 @@
-import { FC, ReactNode, useLayoutEffect, useState } from "react";
+import { FC, ReactNode, useEffect, useState } from "react";
 import { ColorScheme, useColorScheme } from "@hyperbook/provider";
 import "./index.css";
 
@@ -42,7 +42,7 @@ const DirectiveMermaid: FC<DirectiveMermaidProps> = ({ children }) => {
   const graphDefinition = getNodeText(children);
   const [prefersColorScheme] = useColorScheme();
   const [html, setHtml] = useState("");
-  useLayoutEffect(() => {
+  useEffect(() => {
     renderMermaid(graphDefinition, prefersColorScheme).then(setHtml);
   }, [graphDefinition, prefersColorScheme]);
 

@@ -10,8 +10,8 @@
   },
   "dependencies": {
     "@hyperbook/drawer": "workspace:*",
-    "@hyperbook/element-audio": "workspace:*",
     "@hyperbook/element-alert": "workspace:*",
+    "@hyperbook/element-audio": "workspace:*",
     "@hyperbook/element-bitflow": "workspace:*",
     "@hyperbook/element-bookmarks": "workspace:*",
     "@hyperbook/element-collapsible": "workspace:*",
@@ -50,7 +50,7 @@
     "@types/node": "18.16.3",
     "@types/react": "18.2.12",
     "chalk": "5.2.0",
-    "esbuild": "0.17.18",
+    "esbuild": "0.18.17",
     "glob": "8.1.0",
     "rimraf": "3.0.2",
     "typescript": "4.9.5"

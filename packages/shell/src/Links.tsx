@@ -1,4 +1,4 @@
-import { RefObject, useLayoutEffect, useState } from "react";
+import { RefObject, useEffect, useState } from "react";
 import { useLink } from "@hyperbook/provider";
 import {
   HyperbookJson,
@@ -31,7 +31,7 @@ export const useOnScreen = <T extends HTMLElement>(
     }
   };
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (ref.current) {
       const bounds = ref.current.getBoundingClientRect();
 

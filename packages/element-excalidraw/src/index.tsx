@@ -3,14 +3,7 @@ import {
   ExcalidrawInitialDataState,
   ExcalidrawProps as EDP,
 } from "@excalidraw/excalidraw/types/types";
-import {
-  FC,
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from "react";
+import { FC, useCallback, useEffect, useRef, useState } from "react";
 import {
   useColorScheme,
   useConfig,
@@ -103,7 +96,7 @@ const DirectiveExcalidraw: FC<DirectiveExcalidrawProps> = ({
     };
   }, []);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     document
       .getElementsByTagName("main")?.[0]
       ?.addEventListener("scroll", handleScroll);
