@@ -1,5 +1,13 @@
 # hyperbook
 
+## 0.22.3
+
+### Patch Changes
+
+- [`c6c7d1f`](https://github.com/openpatch/hyperbook/commit/c6c7d1f3dda16879166398916792025545e344ea) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - fix unified package wrong export error
+
+- [`9851b21`](https://github.com/openpatch/hyperbook/commit/9851b21db8d19c849110eca623bfc450c76e06b9) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - bundle unified to handle wrong import
+
 ## 0.22.2
 
 ### Patch Changes
