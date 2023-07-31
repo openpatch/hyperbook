@@ -1,5 +1,11 @@
 # @hyperbook/element-qr
 
+## 0.2.1
+
+### Patch Changes
+
+- [`19af1f3`](https://github.com/openpatch/hyperbook/commit/19af1f3baae82508091b2f49541449464d88bb28) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix qr package causing an error when building
+
 ## 0.2.0
 
 ### Minor Changes
