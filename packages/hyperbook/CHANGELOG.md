@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.22.1
+
+### Patch Changes
+
+- [`2dcc07c`](https://github.com/openpatch/hyperbook/commit/2dcc07ce540e5c3a08a394b739450d7524b2a40c) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Use real names instead of file names for the glossary.
+
 ## 0.22.0
 
 ### Minor Changes
