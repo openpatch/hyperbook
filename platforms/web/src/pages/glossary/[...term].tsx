@@ -12,7 +12,7 @@ type TermProps = {
   markdown: string;
   data: HyperbookPage;
   navigation: ShellProps["navigation"];
-  references: vfile.VFile[];
+  references: vfile.VFileBook[];
 };
 
 export default function Term({
@@ -32,7 +32,7 @@ export default function Term({
           {references.map((p, i) => (
             <Fragment key={p.path.href}>
               {i > 0 && ", "}
-              <Link href={p.path.href}>{p.name}</Link>
+              <Link href={p.path.href}>{p.markdown?.data?.name ?? p.name}</Link>
             </Fragment>
           ))}
         </div>
