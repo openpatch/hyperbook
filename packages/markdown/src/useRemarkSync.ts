@@ -1,5 +1,5 @@
 import { Fragment, ReactElement, createElement } from "react";
-import { unified, PluggableList } from "unified";
+import unified, { PluggableList } from "unified";
 import remarkParse from "remark-parse";
 import { Options as RemarkRehypeOptions } from "mdast-util-to-hast";
 import remarkToRehype from "remark-rehype";
@@ -23,7 +23,8 @@ export const useRemarkSync = (
     rehypePlugins = [],
   }: UseRemarkSyncOptions = {}
 ): ReactElement =>
-  unified()
+  unified
+    .unified()
     .use(remarkParse)
     .use(remarkPlugins)
     .use(remarkToRehype, remarkToRehypeOptions)
