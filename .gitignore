@@ -5,6 +5,12 @@ platforms/web/hyperbook.json
 platforms/web/public
 platforms/web/archives
 platforms/web/snippets
+vdirectory.book.json
+vdirectory.snippets.json
+vdirectory.archives.json
+vdirectory.glossary.json
+vdirectory.public.json
+vfiles.json
 
 *.zip
 

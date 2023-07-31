@@ -1,6 +1,6 @@
 {
-  "name": "@hyperbook/toc",
-  "version": "0.3.0",
+  "name": "@hyperbook/drawer",
+  "version": "0.0.0",
   "author": "Mike Barkmin",
   "homepage": "https://github.com/openpatch/hyperbook#readme",
   "license": "MIT",
@@ -13,7 +13,8 @@
     ".": {
       "require": "./dist/index.cjs.js",
       "default": "./dist/index.esm.mjs"
-    }
+    },
+    "./index.css": "./dist/index.css"
   },
   "files": [
     "dist"
@@ -24,7 +25,7 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/openpatch/hyperbook.git",
-    "directory": "packages/toc"
+    "directory": "packages/drawer"
   },
   "bugs": {
     "url": "https://github.com/openpatch/hyperbook/issues"
@@ -33,19 +34,23 @@
     "prebuild": "rimraf dist",
     "version": "pnpm build",
     "lint": "tsc --noEmit",
+    "test": "vitest",
     "build": "pnpm build:pkg && pnpm build:types",
     "build:pkg": "node ../../scripts/build.mjs",
     "build:types": "tsc --project tsconfig.build.json --declaration --emitDeclarationOnly"
+  },
+  "dependencies": {
+    "classnames": "2.3.2"
   },
   "peerDependencies": {
     "react": "18.x",
     "react-dom": "18.x"
   },
   "devDependencies": {
-    "@types/react": "18.2.12",
-    "@types/react-dom": "18.2.5",
+    "@types/react": "18.0.15",
+    "@types/react-dom": "18.0.6",
     "react": "18.2.0",
-    "react-dom": "18.2.0"
-  },
-  "dependencies": {}
+    "react-dom": "18.2.0",
+    "vitest": "^0.26.3"
+  }
 }

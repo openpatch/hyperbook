@@ -1,5 +1,6 @@
 import "../index.css";
 import "@hyperbook/shell/index.css";
+import "@hyperbook/drawer/index.css";
 import "@hyperbook/markdown/katex.css";
 import "@hyperbook/markdown/index.css";
 import { Provider, ProviderProps } from "@hyperbook/provider";

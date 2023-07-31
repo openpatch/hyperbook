@@ -95,11 +95,17 @@ Example use of a template.
 }
 `;
 
-exports[`list > should list all 1`] = `
+exports[`list > should get references 1`] = `
 [
   {
     "extension": ".md",
     "folder": "glossary",
+    "markdown": {
+      "content": "",
+      "data": {
+        "name": "OOP",
+      },
+    },
     "name": "oop",
     "path": {
       "absolute": "single-hyperbook/glossary/oop.md",
@@ -107,23 +113,98 @@ exports[`list > should list all 1`] = `
       "href": "/glossary/oop",
       "relative": "oop.md",
     },
+    "references": [
+      {
+        "extension": ".md",
+        "folder": "book",
+        "markdown": {
+          "content": "
+:t[OOP]{#oop}
+",
+          "data": {
+            "name": "Paradigms",
+          },
+        },
+        "name": "paradigms",
+        "path": {
+          "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/packages/fs/tests/fixtures/single-hyperbook/book/paradigms.md",
+          "directory": "",
+          "href": "/paradigms",
+          "relative": "paradigms.md",
+        },
+        "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/packages/fs/tests/fixtures/single-hyperbook",
+      },
+    ],
     "root": "single-hyperbook",
   },
+]
+`;
+
+exports[`list > should list all 1`] = `
+[
   {
-    "extension": "",
-    "folder": "book",
-    "name": ".gitkeep",
+    "extension": ".zip",
+    "folder": "archives",
+    "name": "archive-1",
     "path": {
-      "absolute": "single-hyperbook/book/.gitkeep",
+      "absolute": "single-hyperbook/archives/archive-1",
       "directory": "",
-      "href": "/.gitkeep",
-      "relative": ".gitkeep",
+      "href": "/archives/archive-1.zip",
+      "relative": "archive-1",
     },
     "root": "single-hyperbook",
   },
   {
     "extension": ".md",
+    "folder": "glossary",
+    "markdown": {
+      "content": "",
+      "data": {
+        "name": "OOP",
+      },
+    },
+    "name": "oop",
+    "path": {
+      "absolute": "single-hyperbook/glossary/oop.md",
+      "directory": "",
+      "href": "/glossary/oop",
+      "relative": "oop.md",
+    },
+    "references": [
+      {
+        "extension": ".md",
+        "folder": "book",
+        "markdown": {
+          "content": "
+:t[OOP]{#oop}
+",
+          "data": {
+            "name": "Paradigms",
+          },
+        },
+        "name": "paradigms",
+        "path": {
+          "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/packages/fs/tests/fixtures/single-hyperbook/book/paradigms.md",
+          "directory": "",
+          "href": "/paradigms",
+          "relative": "paradigms.md",
+        },
+        "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/packages/fs/tests/fixtures/single-hyperbook",
+      },
+    ],
+    "root": "single-hyperbook",
+  },
+  {
+    "extension": ".md",
     "folder": "book",
+    "markdown": {
+      "content": "
+:t[OOP]{#oop}
+",
+      "data": {
+        "name": "Paradigms",
+      },
+    },
     "name": "paradigms",
     "path": {
       "absolute": "single-hyperbook/book/paradigms.md",
@@ -136,6 +217,12 @@ exports[`list > should list all 1`] = `
   {
     "extension": ".md",
     "folder": "book",
+    "markdown": {
+      "content": "",
+      "data": {
+        "name": "Home",
+      },
+    },
     "name": "index",
     "path": {
       "absolute": "single-hyperbook/book/index.md",
@@ -148,6 +235,10 @@ exports[`list > should list all 1`] = `
   {
     "extension": ".json",
     "folder": "book",
+    "markdown": {
+      "content": "",
+      "data": {},
+    },
     "name": "empty",
     "path": {
       "absolute": "single-hyperbook/book/subsection/empty.json",
@@ -160,6 +251,10 @@ exports[`list > should list all 1`] = `
   {
     "extension": ".json",
     "folder": "book",
+    "markdown": {
+      "content": "",
+      "data": {},
+    },
     "name": "invalid",
     "path": {
       "absolute": "single-hyperbook/book/subsection/invalid.json",
@@ -172,6 +267,14 @@ exports[`list > should list all 1`] = `
   {
     "extension": ".yml",
     "folder": "book",
+    "markdown": {
+      "content": "
+Example use of a template.
+",
+      "data": {
+        "name": "Use Template1 with YAML",
+      },
+    },
     "name": "use-template1",
     "path": {
       "absolute": "single-hyperbook/book/subsection/use-template1.yml",
@@ -184,6 +287,12 @@ exports[`list > should list all 1`] = `
   {
     "extension": ".md",
     "folder": "book",
+    "markdown": {
+      "content": "",
+      "data": {
+        "virtual": true,
+      },
+    },
     "name": "index",
     "path": {
       "absolute": "single-hyperbook/book/subsection/index.md",
@@ -196,6 +305,14 @@ exports[`list > should list all 1`] = `
   {
     "extension": ".md",
     "folder": "book",
+    "markdown": {
+      "content": "
+# Test
+",
+      "data": {
+        "name": "Test",
+      },
+    },
     "name": "test",
     "path": {
       "absolute": "single-hyperbook/book/subsection2/test.md",
@@ -208,6 +325,14 @@ exports[`list > should list all 1`] = `
   {
     "extension": ".yml",
     "folder": "book",
+    "markdown": {
+      "content": "
+Example use of a template.
+",
+      "data": {
+        "name": "Use Template1 with YAML",
+      },
+    },
     "name": "index",
     "path": {
       "absolute": "single-hyperbook/book/subsection2/index.yml",
@@ -220,6 +345,15 @@ exports[`list > should list all 1`] = `
   {
     "extension": ".md.hbs",
     "folder": "book",
+    "markdown": {
+      "content": "# Single Use Template
+
+TEST
+
+Hi!
+",
+      "data": {},
+    },
     "name": "single-template",
     "path": {
       "absolute": "single-hyperbook/book/subsection3/single-template.md.hbs",
@@ -232,6 +366,14 @@ exports[`list > should list all 1`] = `
   {
     "extension": ".yml",
     "folder": "book",
+    "markdown": {
+      "content": "
+Example use of a template.
+",
+      "data": {
+        "name": "Use Template1 with YAML",
+      },
+    },
     "name": "index",
     "path": {
       "absolute": "single-hyperbook/book/subsection3/index.yml",
@@ -244,6 +386,219 @@ exports[`list > should list all 1`] = `
   {
     "extension": ".md",
     "folder": "book",
+    "markdown": {
+      "content": "",
+      "data": {
+        "name": "Test",
+      },
+    },
+    "name": "test",
+    "path": {
+      "absolute": "single-hyperbook/book/subsection3/subsection31/test.md",
+      "directory": "subsection3/subsection31",
+      "href": "/subsection3/subsection31/test",
+      "relative": "subsection3/subsection31/test.md",
+    },
+    "root": "single-hyperbook",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "markdown": {
+      "content": "
+:t[OOP]{#oop}
+",
+      "data": {
+        "name": "Paradigms",
+      },
+    },
+    "name": "paradigms",
+    "path": {
+      "absolute": "single-hyperbook/book/paradigms.md",
+      "directory": "",
+      "href": "/paradigms",
+      "relative": "paradigms.md",
+    },
+    "root": "single-hyperbook",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "markdown": {
+      "content": "",
+      "data": {
+        "name": "Home",
+      },
+    },
+    "name": "index",
+    "path": {
+      "absolute": "single-hyperbook/book/index.md",
+      "directory": "",
+      "href": "/",
+      "relative": "index.md",
+    },
+    "root": "single-hyperbook",
+  },
+  {
+    "extension": ".json",
+    "folder": "book",
+    "markdown": {
+      "content": "",
+      "data": {},
+    },
+    "name": "empty",
+    "path": {
+      "absolute": "single-hyperbook/book/subsection/empty.json",
+      "directory": "subsection",
+      "href": "/subsection/empty",
+      "relative": "subsection/empty.json",
+    },
+    "root": "single-hyperbook",
+  },
+  {
+    "extension": ".json",
+    "folder": "book",
+    "markdown": {
+      "content": "",
+      "data": {},
+    },
+    "name": "invalid",
+    "path": {
+      "absolute": "single-hyperbook/book/subsection/invalid.json",
+      "directory": "subsection",
+      "href": "/subsection/invalid",
+      "relative": "subsection/invalid.json",
+    },
+    "root": "single-hyperbook",
+  },
+  {
+    "extension": ".yml",
+    "folder": "book",
+    "markdown": {
+      "content": "
+Example use of a template.
+",
+      "data": {
+        "name": "Use Template1 with YAML",
+      },
+    },
+    "name": "use-template1",
+    "path": {
+      "absolute": "single-hyperbook/book/subsection/use-template1.yml",
+      "directory": "subsection",
+      "href": "/subsection/use-template1",
+      "relative": "subsection/use-template1.yml",
+    },
+    "root": "single-hyperbook",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "markdown": {
+      "content": "",
+      "data": {
+        "virtual": true,
+      },
+    },
+    "name": "index",
+    "path": {
+      "absolute": "single-hyperbook/book/subsection/index.md",
+      "directory": "subsection",
+      "href": "/subsection",
+      "relative": "subsection/index.md",
+    },
+    "root": "single-hyperbook",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "markdown": {
+      "content": "
+# Test
+",
+      "data": {
+        "name": "Test",
+      },
+    },
+    "name": "test",
+    "path": {
+      "absolute": "single-hyperbook/book/subsection2/test.md",
+      "directory": "subsection2",
+      "href": "/subsection2/test",
+      "relative": "subsection2/test.md",
+    },
+    "root": "single-hyperbook",
+  },
+  {
+    "extension": ".yml",
+    "folder": "book",
+    "markdown": {
+      "content": "
+Example use of a template.
+",
+      "data": {
+        "name": "Use Template1 with YAML",
+      },
+    },
+    "name": "index",
+    "path": {
+      "absolute": "single-hyperbook/book/subsection2/index.yml",
+      "directory": "subsection2",
+      "href": "/subsection2",
+      "relative": "subsection2/index.yml",
+    },
+    "root": "single-hyperbook",
+  },
+  {
+    "extension": ".md.hbs",
+    "folder": "book",
+    "markdown": {
+      "content": "# Single Use Template
+
+TEST
+
+Hi!
+",
+      "data": {},
+    },
+    "name": "single-template",
+    "path": {
+      "absolute": "single-hyperbook/book/subsection3/single-template.md.hbs",
+      "directory": "subsection3",
+      "href": "/subsection3/single-template",
+      "relative": "subsection3/single-template.md.hbs",
+    },
+    "root": "single-hyperbook",
+  },
+  {
+    "extension": ".yml",
+    "folder": "book",
+    "markdown": {
+      "content": "
+Example use of a template.
+",
+      "data": {
+        "name": "Use Template1 with YAML",
+      },
+    },
+    "name": "index",
+    "path": {
+      "absolute": "single-hyperbook/book/subsection3/index.yml",
+      "directory": "subsection3",
+      "href": "/subsection3",
+      "relative": "subsection3/index.yml",
+    },
+    "root": "single-hyperbook",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "markdown": {
+      "content": "",
+      "data": {
+        "name": "Test",
+      },
+    },
     "name": "test",
     "path": {
       "absolute": "single-hyperbook/book/subsection3/subsection31/test.md",
@@ -259,20 +614,16 @@ exports[`list > should list all 1`] = `
 exports[`list > should list for folder book 1`] = `
 [
   {
-    "extension": "",
-    "folder": "book",
-    "name": ".gitkeep",
-    "path": {
-      "absolute": "single-hyperbook/book/.gitkeep",
-      "directory": "",
-      "href": "/.gitkeep",
-      "relative": ".gitkeep",
-    },
-    "root": "single-hyperbook",
-  },
-  {
     "extension": ".md",
     "folder": "book",
+    "markdown": {
+      "content": "
+:t[OOP]{#oop}
+",
+      "data": {
+        "name": "Paradigms",
+      },
+    },
     "name": "paradigms",
     "path": {
       "absolute": "single-hyperbook/book/paradigms.md",
@@ -285,6 +636,12 @@ exports[`list > should list for folder book 1`] = `
   {
     "extension": ".md",
     "folder": "book",
+    "markdown": {
+      "content": "",
+      "data": {
+        "name": "Home",
+      },
+    },
     "name": "index",
     "path": {
       "absolute": "single-hyperbook/book/index.md",
@@ -297,6 +654,10 @@ exports[`list > should list for folder book 1`] = `
   {
     "extension": ".json",
     "folder": "book",
+    "markdown": {
+      "content": "",
+      "data": {},
+    },
     "name": "empty",
     "path": {
       "absolute": "single-hyperbook/book/subsection/empty.json",
@@ -309,6 +670,10 @@ exports[`list > should list for folder book 1`] = `
   {
     "extension": ".json",
     "folder": "book",
+    "markdown": {
+      "content": "",
+      "data": {},
+    },
     "name": "invalid",
     "path": {
       "absolute": "single-hyperbook/book/subsection/invalid.json",
@@ -321,6 +686,14 @@ exports[`list > should list for folder book 1`] = `
   {
     "extension": ".yml",
     "folder": "book",
+    "markdown": {
+      "content": "
+Example use of a template.
+",
+      "data": {
+        "name": "Use Template1 with YAML",
+      },
+    },
     "name": "use-template1",
     "path": {
       "absolute": "single-hyperbook/book/subsection/use-template1.yml",
@@ -333,6 +706,12 @@ exports[`list > should list for folder book 1`] = `
   {
     "extension": ".md",
     "folder": "book",
+    "markdown": {
+      "content": "",
+      "data": {
+        "virtual": true,
+      },
+    },
     "name": "index",
     "path": {
       "absolute": "single-hyperbook/book/subsection/index.md",
@@ -345,6 +724,14 @@ exports[`list > should list for folder book 1`] = `
   {
     "extension": ".md",
     "folder": "book",
+    "markdown": {
+      "content": "
+# Test
+",
+      "data": {
+        "name": "Test",
+      },
+    },
     "name": "test",
     "path": {
       "absolute": "single-hyperbook/book/subsection2/test.md",
@@ -357,6 +744,14 @@ exports[`list > should list for folder book 1`] = `
   {
     "extension": ".yml",
     "folder": "book",
+    "markdown": {
+      "content": "
+Example use of a template.
+",
+      "data": {
+        "name": "Use Template1 with YAML",
+      },
+    },
     "name": "index",
     "path": {
       "absolute": "single-hyperbook/book/subsection2/index.yml",
@@ -369,6 +764,15 @@ exports[`list > should list for folder book 1`] = `
   {
     "extension": ".md.hbs",
     "folder": "book",
+    "markdown": {
+      "content": "# Single Use Template
+
+TEST
+
+Hi!
+",
+      "data": {},
+    },
     "name": "single-template",
     "path": {
       "absolute": "single-hyperbook/book/subsection3/single-template.md.hbs",
@@ -381,6 +785,14 @@ exports[`list > should list for folder book 1`] = `
   {
     "extension": ".yml",
     "folder": "book",
+    "markdown": {
+      "content": "
+Example use of a template.
+",
+      "data": {
+        "name": "Use Template1 with YAML",
+      },
+    },
     "name": "index",
     "path": {
       "absolute": "single-hyperbook/book/subsection3/index.yml",
@@ -393,6 +805,12 @@ exports[`list > should list for folder book 1`] = `
   {
     "extension": ".md",
     "folder": "book",
+    "markdown": {
+      "content": "",
+      "data": {
+        "name": "Test",
+      },
+    },
     "name": "test",
     "path": {
       "absolute": "single-hyperbook/book/subsection3/subsection31/test.md",

@@ -1,7 +1,13 @@
 import * as vscode from "vscode";
 import * as Constants from "./Constants";
-import { hyperbook, hyperproject, VFile, vfile } from "@hyperbook/fs";
-import { getToc } from "@hyperbook/markdown";
+import {
+  hyperbook,
+  hyperproject,
+  VFileBook,
+  VFileGlossary,
+  vfile,
+  VFile,
+} from "@hyperbook/fs";
 import { htmlTemplate } from "./html-template";
 import { disposeAll } from "./utils/dispose";
 import { ChangeMessage, Message } from "./messages/messageTypes";
@@ -15,7 +21,7 @@ export default class Preview {
   hyperbookViewerConfig: any;
 
   private _resource: vscode.Uri | undefined;
-  private _vfile: VFile | undefined;
+  private _vfile: VFileBook | VFileGlossary | undefined;
   private _navigation: Navigation | undefined;
 
   private readonly disposables: vscode.Disposable[] = [];
@@ -104,8 +110,8 @@ export default class Preview {
       this._vfile &&
       this.panel
     ) {
-      const { content, data } = await vfile.getMarkdown(this._vfile);
       if (!this._navigation || refreshNavigation) {
+        await vfile.clean(this._vfile.root);
         this._navigation = await hyperbook.getNavigation(
           this._vfile.root,
           this._vfile
@@ -115,12 +121,10 @@ export default class Preview {
       const assetsPath = this.panel.webview
         .asWebviewUri(vscode.Uri.file(this._vfile.root))
         .toString();
-      const toc = { headings: getToc(content) };
 
       const state = {
-        content,
-        data,
-        toc,
+        content: this._vfile.markdown.content,
+        data: this._vfile.markdown.data,
         assetsPath,
         navigation: this._navigation,
       };
@@ -128,7 +132,7 @@ export default class Preview {
     }
     return {
       content: "",
-      data: {},
+      data: {} as any,
       assetsPath: "",
     };
   }
@@ -151,11 +155,20 @@ export default class Preview {
       this.panel.title = `[Preview] ${fileName}`;
       this._resource = vscode.window.activeTextEditor.document.uri;
       const hyperbookRoot = await hyperbook.findRoot(this._resource.path);
-      this._vfile = await vfile.getByAbsolutePath(
+      this._vfile = await vfile.get(
         hyperbookRoot,
-        null,
-        this._resource.path
+        "book",
+        this._resource.path,
+        "absolute"
       );
+      if (!this._vfile) {
+        this._vfile = await vfile.get(
+          hyperbookRoot,
+          "glossary",
+          this._resource.path,
+          "absolute"
+        );
+      }
 
       this.postMessage({
         type: "CHANGE",
@@ -272,7 +285,18 @@ export default class Preview {
               );
           }
 
-          const file = await vfile.get(this._vfile.root, null, m.payload.path);
+          let file: VFile = await vfile.get(
+            this._vfile.root,
+            "book",
+            m.payload.path
+          );
+          if (!file) {
+            file = await vfile.get(
+              this._vfile.root,
+              "glossary",
+              m.payload.path
+            );
+          }
 
           if (file) {
             const fileUri = vscode.Uri.file(file.path.absolute);

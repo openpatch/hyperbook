@@ -8,9 +8,7 @@ import {
 } from "@hyperbook/types";
 import { findUp } from "find-up";
 import { vfile } from ".";
-import { VDirectory, VFile } from "./vfile";
-
-export const allowedBookFiles = [".md", ".md.hbs", ".json", ".yml"];
+import { VDirectoryBook, VFile } from "./vfile";
 
 export const getJson = async (root: string): Promise<HyperbookJson> => {
   return fs
@@ -69,13 +67,13 @@ export const getNavigation = async (
   currentFile?: VFile
 ): Promise<Navigation> => {
   const hyperbook = await getJson(root);
-  const directory = await vfile.getDirectory(root, "book", allowedBookFiles);
+  const directory = await vfile.getDirectory(root, "book");
 
   const getSectionsAndPages = async function ({
     directories,
     files,
     index,
-  }: VDirectory): Promise<{
+  }: VDirectoryBook): Promise<{
     pages: HyperbookPage[];
     sections: HyperbookSection[];
   }> {

@@ -1,33 +1,33 @@
 import { GetStaticPaths, GetStaticProps } from "next";
 import { Shell, ShellProps } from "@hyperbook/shell";
 import { Fragment } from "react";
-import { TocProps } from "@hyperbook/toc";
 
 import { useActivePageId, useLink } from "@hyperbook/provider";
-import { getToc, Markdown } from "@hyperbook/markdown";
-import { glossary, hyperbook, vfile } from "@hyperbook/fs";
+import { Markdown } from "@hyperbook/markdown";
+import { hyperbook, vfile } from "@hyperbook/fs";
 import { useScrollHash } from "../../useScrollHash";
+import { HyperbookPage } from "@hyperbook/types";
 
 type TermProps = {
   markdown: string;
+  data: HyperbookPage;
   navigation: ShellProps["navigation"];
-  toc: TocProps;
   references: vfile.VFile[];
 };
 
 export default function Term({
   markdown,
   navigation,
+  data,
   references,
-  toc,
 }: TermProps) {
   const Link = useLink();
   useActivePageId();
   useScrollHash();
   return (
-    <Shell navigation={navigation} toc={toc}>
+    <Shell navigation={navigation}>
       <article>
-        <Markdown children={markdown} />
+        <Markdown children={markdown} showToc={data.toc !== false} />
         <div className="pages">
           {references.map((p, i) => (
             <Fragment key={p.path.href}>
@@ -57,7 +57,6 @@ export const getStaticProps: GetStaticProps<
   if (!file) {
     throw Error(`Missing file ${file}`);
   }
-  const references = await glossary.getReferences(file);
   const { content, data } = await vfile.getMarkdown(file);
   const hyperbookJson = await hyperbook.getJson(root);
   const navigation = await hyperbook.getNavigation(root, file);
@@ -66,8 +65,8 @@ export const getStaticProps: GetStaticProps<
     props: {
       locale: data?.lang || hyperbookJson.language,
       markdown: content,
-      references,
-      toc: { headings: getToc(content) },
+      data,
+      references: file.references,
       navigation,
     },
   };
@@ -77,11 +76,7 @@ export const getStaticPaths: GetStaticPaths<{
   term: string[];
 }> = async () => {
   const root = process.env.root ?? process.cwd();
-  const files = await vfile.listForFolder(
-    root,
-    "glossary",
-    glossary.allowedGlossaryFiles
-  );
+  const files = await vfile.listForFolder(root, "glossary");
   const paths = files.map((f) => ({
     params: {
       term: f.path.href.slice(10).split("/"),

@@ -5,8 +5,10 @@ import * as vfile from "../src/vfile";
 describe("list", () => {
   const relative = (s: string) =>
     path.relative(path.join(__dirname, "fixtures"), s);
+  let hyperbookPath = path.join(__dirname, "fixtures", "single-hyperbook");
+  vfile.clean(hyperbookPath);
+
   it("should list all", async () => {
-    let hyperbookPath = path.join(__dirname, "fixtures", "single-hyperbook");
     const files = await vfile.list(hyperbookPath);
     expect(
       files.map((f) => ({
@@ -18,7 +20,6 @@ describe("list", () => {
   });
 
   it("should list for folder book", async () => {
-    let hyperbookPath = path.join(__dirname, "fixtures", "single-hyperbook");
     const files = await vfile.listForFolder(hyperbookPath, "book");
     expect(
       files.map((f) => ({
@@ -30,16 +31,27 @@ describe("list", () => {
   });
 
   it("should include main index", async () => {
-    let hyperbookPath = path.join(__dirname, "fixtures", "single-hyperbook");
     const files = await vfile.listForFolder(hyperbookPath, "book");
     const file = files.find((f) => f.path.href === "/");
     expect(file).toBeDefined();
   });
+
+  it("should get references", async () => {
+    const files = await vfile.listForFolder(hyperbookPath, "glossary");
+    expect(
+      files.map((f) => ({
+        ...f,
+        root: relative(f.root),
+        path: { ...f.path, absolute: relative(f.path.absolute) },
+      }))
+    ).toMatchSnapshot();
+  });
 });
 
 describe("getMarkdown", () => {
+  let hyperbookPath = path.join(__dirname, "fixtures", "single-hyperbook");
+  vfile.clean(hyperbookPath);
   it("should get markdown from template", async () => {
-    let hyperbookPath = path.join(__dirname, "fixtures", "single-hyperbook");
     let files = await vfile.list(hyperbookPath);
     let templateFile = files.find(
       (f) => f.name === "use-template1" && f.folder === "book"
@@ -52,7 +64,6 @@ describe("getMarkdown", () => {
   });
 
   it("should get markdown from template for index", async () => {
-    let hyperbookPath = path.join(__dirname, "fixtures", "single-hyperbook");
     let files = await vfile.list(hyperbookPath);
     let templateFile = files.find(
       (f) => f.path.relative === "subsection2/index.yml" && f.folder === "book"
@@ -65,7 +76,6 @@ describe("getMarkdown", () => {
   });
 
   it("should get markdown for single use template", async () => {
-    let hyperbookPath = path.join(__dirname, "fixtures", "single-hyperbook");
     let files = await vfile.list(hyperbookPath);
     let templateFile = files.find(
       (f) =>
@@ -81,8 +91,9 @@ describe("getMarkdown", () => {
 });
 
 describe("getDirectory", () => {
+  let hyperbookPath = path.join(__dirname, "fixtures", "single-hyperbook");
+  vfile.clean(hyperbookPath);
   it("should include main index", async () => {
-    let hyperbookPath = path.join(__dirname, "fixtures", "single-hyperbook");
     let directory = await vfile.getDirectory(hyperbookPath, "book");
     expect(directory.index).toBeDefined();
   });

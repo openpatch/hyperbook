@@ -170,9 +170,12 @@ export const App = () => {
         getActivePageId={async () => state?.navigation?.current?.href || ""}
       >
         <Styles />
-        <Shell navigation={state?.navigation} toc={state?.toc}>
+        <Shell navigation={state?.navigation}>
           <ErrorBoundary message="You have a syntax error in your markdown file.">
-            <Markdown children={state?.content || ""} />
+            <Markdown
+              children={state?.content || ""}
+              showToc={state.data.toc !== false}
+            />
           </ErrorBoundary>
         </Shell>
       </Provider>

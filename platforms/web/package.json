@@ -9,6 +9,7 @@
     "next:build": "next build && next export"
   },
   "dependencies": {
+    "@hyperbook/drawer": "workspace:*",
     "@hyperbook/element-audio": "workspace:*",
     "@hyperbook/element-alert": "workspace:*",
     "@hyperbook/element-bitflow": "workspace:*",
@@ -34,7 +35,6 @@
     "@hyperbook/shell": "workspace:*",
     "@hyperbook/store": "workspace:*",
     "@hyperbook/styles": "workspace:*",
-    "@hyperbook/toc": "workspace:*",
     "gray-matter": "4.0.3",
     "next": "13.4.5",
     "react": "18.2.0",

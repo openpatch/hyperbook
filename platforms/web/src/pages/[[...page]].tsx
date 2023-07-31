@@ -1,7 +1,6 @@
 import { GetStaticPaths, GetStaticProps } from "next";
 import { Shell, ShellProps } from "@hyperbook/shell";
-import { TocProps } from "@hyperbook/toc";
-import { getToc, Markdown } from "@hyperbook/markdown";
+import { Markdown } from "@hyperbook/markdown";
 import { useActivePageId, useLink } from "@hyperbook/provider";
 import { Fragment } from "react";
 import { vfile, hyperbook } from "@hyperbook/fs";
@@ -13,25 +12,18 @@ type PageProps = {
   markdown: string;
   data: HyperbookPage;
   navigation: ShellProps["navigation"];
-  toc: TocProps;
 };
 
-export default function BookPage({
-  markdown,
-  data,
-  navigation,
-  toc,
-}: PageProps) {
-  const page = navigation.current;
+export default function BookPage({ markdown, data, navigation }: PageProps) {
   const Link = useLink();
   useActivePageId();
   useScrollHash();
 
   return (
     <Fragment>
-      <Shell navigation={navigation} toc={page.toc == false ? null : toc}>
+      <Shell navigation={navigation}>
         <article>
-          <Markdown children={markdown} />
+          <Markdown children={markdown} showToc={data.toc !== false} />
         </article>
         {!data.hide && (
           <div className="jump-container">
@@ -69,10 +61,6 @@ export const getStaticProps: GetStaticProps<
     href = path.join(...params.page);
   }
   const file = await vfile.get(root, "book", "/" + href);
-  if (!file) {
-    throw Error(`Missing file ${href}`);
-  }
-
   const { content, data } = await vfile.getMarkdown(file);
   const hyperbookJson = await hyperbook.getJson(root);
   const navigation = await hyperbook.getNavigation(root, file);
@@ -82,7 +70,6 @@ export const getStaticProps: GetStaticProps<
       locale: data?.lang || hyperbookJson.language,
       markdown: content,
       data,
-      toc: { headings: getToc(content) },
       navigation,
     },
   };
@@ -92,11 +79,7 @@ export const getStaticPaths: GetStaticPaths<{
   page: string[];
 }> = async () => {
   const root = process.env.root ?? process.cwd();
-  const files = await vfile.listForFolder(
-    root,
-    "book",
-    hyperbook.allowedBookFiles
-  );
+  const files = await vfile.listForFolder(root, "book");
   const paths = files.map((f) => {
     const page = f.path.href.slice(1).split("/");
     if (f.name === "index" && f.path.directory === "") {

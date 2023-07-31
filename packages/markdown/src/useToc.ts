@@ -4,7 +4,7 @@ import { unified } from "unified";
 import { remarkCustomHeadingIds } from "./remarkCustomHeadingIds";
 import { Heading, remarkHeadings } from "./remarkHeadings";
 
-export const getToc = (markdown: string): Heading[] => {
+export const useToc = (markdown: string): Heading[] => {
   return unified()
     .use(remarkCustomHeadingIds)
     .use(remarkParse)

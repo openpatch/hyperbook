@@ -4,7 +4,7 @@ import { findUpSync, Options } from "find-up";
 import { lookup } from "mime-types";
 import fs from "fs";
 import path from "path";
-import { extractLines, VFile } from "./vfile";
+import { extractLines, VFileBase } from "./vfile";
 
 declare global {
   var workspaceRoot: string;
@@ -34,7 +34,7 @@ const changecase = (str: string, fn: (s: string) => string): string => {
   });
 };
 
-const registerHelpers = (handlebars: any, options?: { file: VFile }) => {
+const registerHelpers = (handlebars: any, options?: { file: VFileBase }) => {
   const cwd = options?.file.root ?? process.cwd();
   handlebars.registerHelper("times", (n: number, block: any) => {
     let accum = "";

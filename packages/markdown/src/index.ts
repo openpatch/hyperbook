@@ -1,2 +1,2 @@
 export * from "./Markdown";
-export * from "./helper";
+export * from "./useToc";

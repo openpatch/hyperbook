@@ -1,6 +1,9 @@
 import { Range } from "vscode";
-import { TocProps } from "@hyperbook/toc";
-import { HyperbookJson, Navigation } from "@hyperbook/types";
+import {
+  HyperbookFrontmatter,
+  HyperbookJson,
+  Navigation,
+} from "@hyperbook/types";
 
 export interface WriteMessage {
   type: "WRITE";
@@ -16,10 +19,9 @@ export interface ChangeMessage {
   type: "CHANGE";
   payload: {
     content: string;
-    data: Record<string, any>;
+    data: HyperbookFrontmatter;
     navigation?: Navigation;
     assetsPath: string;
-    toc?: TocProps;
   };
 }
 

@@ -1,14 +1,12 @@
 import { useLink, useMakeUrl, useHead, useConfig } from "@hyperbook/provider";
 import { FC, Fragment, ReactNode, useEffect, useState } from "react";
-import { Toc, TocProps } from "@hyperbook/toc";
-import { Navigation as NavigationProps, HyperbookPage } from "@hyperbook/types";
-import { Drawer } from "./Drawer";
+import { Navigation as NavigationProps } from "@hyperbook/types";
 import { Links } from "./Links";
 import { Navigation } from "./Navigation";
+import { Drawer } from "@hyperbook/drawer";
 
 export type ShellProps = {
   navigation?: NavigationProps;
-  toc?: TocProps;
   children?: ReactNode;
 };
 
@@ -65,14 +63,13 @@ const linkLicense = (license: string) => {
   return license;
 };
 
-export const Shell: FC<ShellProps> = ({ toc, navigation, children }) => {
+export const Shell: FC<ShellProps> = ({ navigation, children }) => {
   const Link = useLink();
   const Head = useHead();
   const hyperbook = useConfig();
   const page = navigation?.current;
   const makeUrl = useMakeUrl();
   const [isNavOpen, setIsNavOpen] = useState(false);
-  const [isTocOpen, setIsTocOpen] = useState(false);
 
   useEffect(() => {
     const appHeight = () => {
@@ -158,29 +155,6 @@ export const Shell: FC<ShellProps> = ({ toc, navigation, children }) => {
             Powered by <b>Hyperbook</b>
           </a>
         </div>
-        {toc && (
-          <Fragment>
-            <button
-              className={isTocOpen ? "toc-toggle open" : "toc-toggle"}
-              onClick={() => setIsTocOpen(!isTocOpen)}
-              title="Table of Contents"
-            >
-              <div className="bar1"></div>
-              <div className="bar2"></div>
-              <div className="bar3"></div>
-              <div className="bar4"></div>
-            </button>
-            <Drawer
-              isOpen={isTocOpen}
-              onClose={() => setIsTocOpen(false)}
-              position="right"
-            >
-              <div id="toc-sidebar">
-                <Toc {...toc} />
-              </div>
-            </Drawer>
-          </Fragment>
-        )}
         <main>
           {children}
           <div className="meta">

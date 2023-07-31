@@ -3,7 +3,7 @@ import { Shell } from "@hyperbook/shell";
 import { Glossary as TGlossary } from "@hyperbook/types";
 import { useActivePageId, useLink } from "@hyperbook/provider";
 import { ShellProps } from "@hyperbook/shell";
-import { glossary, hyperbook } from "@hyperbook/fs";
+import { hyperbook, vfile } from "@hyperbook/fs";
 import { useScrollHash } from "../../useScrollHash";
 
 export type GlossaryProps = {
@@ -42,7 +42,7 @@ export const getStaticProps: GetStaticProps<{
 }> = async () => {
   const root = process.env.root ?? process.cwd();
 
-  const glossaryData = await glossary.get(root);
+  const glossaryData = await vfile.getGlossary(root);
   const hyperbookJson = await hyperbook.getJson(root);
   const navigation = await hyperbook.getNavigation(root);
 

@@ -5,7 +5,7 @@ import readline from "readline";
 import chalk from "chalk";
 import { isSetup } from "./helpers/is-setup";
 import { readHyperbook } from "./helpers/read-hyperbook";
-import { glossary, hyperbook as hb, hyperproject, vfile } from "@hyperbook/fs";
+import { hyperproject, vfile } from "@hyperbook/fs";
 import { runArchive } from "./archive";
 import { makeDir } from "./helpers/make-dir";
 import rimraf from "rimraf";
@@ -75,6 +75,8 @@ module.exports = {
       `
   );
 
+  vfile.clean(root);
+
   const hyperbookJson = await readHyperbook(root);
   let link: Link | undefined = undefined;
   if (rootProject.type === "library") {
@@ -101,27 +103,6 @@ module.exports = {
   fs.writeFileSync(
     path.join(root, ".hyperbook", "hyperbook.json"),
     JSON.stringify(hyperbookJson, null, 2)
-  );
-
-  // cache vfiles
-  const vfileData = await vfile.listForCache(root);
-  fs.writeFileSync(
-    path.join(root, ".hyperbook", "vfiles.json"),
-    JSON.stringify(vfileData)
-  );
-
-  // cache glossary
-  const glossaryData = await glossary.get(root);
-  fs.writeFileSync(
-    path.join(root, ".hyperbook", "glossary.json"),
-    JSON.stringify(glossaryData)
-  );
-
-  // cache navigation
-  const navigationData = await hb.getNavigation(root);
-  fs.writeFileSync(
-    path.join(root, ".hyperbook", "navigation.json"),
-    JSON.stringify(navigationData)
   );
 
   return new Promise((resolve, reject) => {

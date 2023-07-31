@@ -11,7 +11,13 @@ exports[`hyperbook > should get navigation 1`] = `
     "href": "/subsection3",
     "isEmpty": false,
     "name": "Use Template1 with YAML",
-    "pages": [],
+    "pages": [
+      {
+        "href": "/subsection3/single-template",
+        "name": "single-template",
+        "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/subsection3/single-template.md.hbs",
+      },
+    ],
     "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/subsection3/index.yml",
     "sections": [
       {
@@ -50,7 +56,13 @@ exports[`hyperbook > should get navigation 1`] = `
       "href": "/subsection3",
       "isEmpty": false,
       "name": "Use Template1 with YAML",
-      "pages": [],
+      "pages": [
+        {
+          "href": "/subsection3/single-template",
+          "name": "single-template",
+          "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/subsection3/single-template.md.hbs",
+        },
+      ],
       "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/subsection3/index.yml",
       "sections": [
         {
