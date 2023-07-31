@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.23.1
+
+### Patch Changes
+
+- [`75a3227`](https://github.com/openpatch/hyperbook/commit/75a322721e2e0af3c248ab12fb72cca357d6f4d8) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - add missing type
+
 ## 0.23.0
 
 ### Minor Changes

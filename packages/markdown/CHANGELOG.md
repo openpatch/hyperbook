@@ -1,5 +1,12 @@
 # @hyperbook/markdown
 
+## 0.9.1
+
+### Patch Changes
+
+- Updated dependencies [[`75a3227`](https://github.com/openpatch/hyperbook/commit/75a322721e2e0af3c248ab12fb72cca357d6f4d8)]:
+  - @hyperbook/drawer@0.1.1
+
 ## 0.9.0
 
 ### Minor Changes
