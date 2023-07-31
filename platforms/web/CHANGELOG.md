@@ -1,5 +1,18 @@
 # hyperbook-simple-template
 
+## 0.22.0
+
+### Minor Changes
+
+- [`ff0e867`](https://github.com/openpatch/hyperbook/commit/ff0e86788d967194d442026b49d23082960c66da) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Improve the build of hyperbooks and the generation of the toc.
+
+### Patch Changes
+
+- Updated dependencies [[`ff0e867`](https://github.com/openpatch/hyperbook/commit/ff0e86788d967194d442026b49d23082960c66da)]:
+  - @hyperbook/markdown@0.8.0
+  - @hyperbook/shell@0.6.0
+  - @hyperbook/fs@0.9.0
+
 ## 0.21.0
 
 ### Minor Changes
