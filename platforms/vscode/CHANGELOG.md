@@ -1,5 +1,12 @@
 # @hyperbook/vscode-extension
 
+## 0.19.1
+
+### Patch Changes
+
+- Updated dependencies [[`19af1f3`](https://github.com/openpatch/hyperbook/commit/19af1f3baae82508091b2f49541449464d88bb28)]:
+  - @hyperbook/element-qr@0.2.1
+
 ## 0.19.0
 
 ### Minor Changes
