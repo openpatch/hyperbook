@@ -21,11 +21,13 @@
 }
 
 .element-qr .code.S canvas,
+.element-qr .code.S img,
 .element-qr .code.S svg {
   border-radius: 2px;
 }
 
 .element-qr .code.M canvas,
+.element-qr .code.M img,
 .element-qr .code.M svg {
   border-radius: 4px;
 }
@@ -46,6 +48,7 @@
 }
 
 .element-qr svg,
+.element-qr img,
 .element-qr canvas {
   border-radius: 8px;
   width: 100% !important;

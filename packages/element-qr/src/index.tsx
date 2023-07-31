@@ -1,5 +1,5 @@
-import { ReactQrCode } from "@devmehq/react-qr-code";
-import { FC } from "react";
+import QRCode from "qrcode";
+import { FC, useEffect, useState } from "react";
 import "./index.css";
 
 type DirectiveQrProps = {
@@ -15,17 +15,32 @@ const realSizes = {
   XL: 512,
 } as const;
 
-const DirectiveQr: FC<DirectiveQrProps> = ({ size, value, label }) => {
+const DirectiveQr: FC<DirectiveQrProps> = ({ size = "M", value, label }) => {
+  const [data, setData] = useState("");
+
+  useEffect(() => {
+    QRCode.toDataURL(
+      value,
+      {
+        width: realSizes[size],
+        errorCorrectionLevel: "Q",
+        margin: 0,
+        color: {
+          dark: "#000",
+          light: "#FFF",
+        },
+      },
+      (err, url) => {
+        if (err) return;
+        setData(url);
+      }
+    );
+  }, [size, value]);
+
   return (
     <div className="element-qr">
       <div className={["code", size].join(" ")}>
-        <ReactQrCode
-          value={value}
-          size={realSizes[size]}
-          bgColor={"#ffffff"}
-          fgColor={"#000000"}
-          level={"Q"}
-        />
+        <img src={data} />
       </div>
       {label && (
         <div

@@ -39,8 +39,8 @@
     "build:types": "tsc --project tsconfig.build.json --declaration --emitDeclarationOnly"
   },
   "dependencies": {
-    "@devmehq/react-qr-code": "^1.0.8",
-    "@hyperbook/provider": "workspace:*"
+    "@hyperbook/provider": "workspace:*",
+    "qrcode": "^1.5.3"
   },
   "peerDependencies": {
     "@reduxjs/toolkit": "1.x",
@@ -49,6 +49,7 @@
     "react-redux": "8.x"
   },
   "devDependencies": {
+    "@types/qrcode": "^1.5.1",
     "@types/react": "18.2.12",
     "@types/react-dom": "18.2.5",
     "react": "18.2.0",
