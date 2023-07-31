@@ -846,6 +846,9 @@ importers:
       remark-unwrap-images:
         specifier: 3.0.1
         version: 3.0.1
+      unified:
+        specifier: ^10.1.2
+        version: 10.1.2
       unist-util-visit:
         specifier: ^4.1.1
         version: 4.1.2
@@ -883,9 +886,6 @@ importers:
       remark-rehype:
         specifier: ^10.1.0
         version: 10.1.0
-      unified:
-        specifier: ^10.1.2
-        version: 10.1.2
       vitest:
         specifier: ^0.30.0
         version: 0.30.1

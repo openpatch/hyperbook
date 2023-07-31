@@ -54,21 +54,21 @@ export const buildPackage = async (path) => {
     external,
   };
 
-  await build({
-    ...commonConfig,
-    outExtension: {
-      ".js": ".cjs.js",
-    },
-    format: "cjs",
-  }).catch((e) => {
-    throw new Error(`CJS Build failed for ${packageName} \n ${e}`);
-  });
+  // await build({
+  //   ...commonConfig,
+  //   outExtension: {
+  //     ".js": ".cjs.js",
+  //   },
+  //   format: "cjs",
+  // }).catch((e) => {
+  //   throw new Error(`CJS Build failed for ${packageName} \n ${e}`);
+  // });
 
   await build({
     ...commonConfig,
-    outExtension: {
-      ".js": ".esm.mjs",
-    },
+    // outExtension: {
+    //   ".js": ".esm.mjs",
+    // },
     format: "esm",
   }).catch((e) => {
     throw new Error(`ESM Build failed for ${packageName} \n ${e}`);

@@ -4,24 +4,17 @@
   "author": "Mike Barkmin",
   "homepage": "https://github.com/openpatch/hyperbook#readme",
   "license": "MIT",
-  "main": "dist/index.cjs.js",
-  "module": "dist/index.esm.mjs",
+  "type": "module",
+  "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "typings": "dist/index.d.ts",
   "sideEffects": false,
   "exports": {
-    ".": {
-      "require": "./dist/index.cjs.js",
-      "default": "./dist/index.esm.mjs"
-    },
-    "./katex.css": "./dist/assets/katex.min.css",
-    "./index.css": "./dist/index.css"
+    ".": "./dist/index.js",
+    "./index.css": "./dist/index.css",
+    "./katex.css": "./dist/assets/katex.min.css"
   },
   "files": [
     "dist"
-  ],
-  "bundle": [
-    "unified"
   ],
   "publishConfig": {
     "access": "public"
@@ -35,11 +28,10 @@
     "url": "https://github.com/openpatch/hyperbook/issues"
   },
   "scripts": {
-    "prebuild": "rimraf dist",
     "version": "pnpm build",
     "lint": "tsc --noEmit",
     "test": "vitest",
-    "build": "pnpm build:pkg && pnpm build:types",
+    "build": "rimraf dist && pnpm build:pkg && pnpm build:types",
     "build:pkg": "node ../../scripts/build.mjs && cp -r assets dist/",
     "build:types": "tsc --project tsconfig.build.json --declaration --emitDeclarationOnly"
   },
@@ -59,7 +51,8 @@
     "remark-math": "5.1.1",
     "remark-stringify": "^10.0.3",
     "remark-unwrap-images": "3.0.1",
-    "unist-util-visit": "^4.1.1"
+    "unist-util-visit": "^4.1.1",
+    "unified": "^10.1.2"
   },
   "peerDependencies": {
     "react": "18.x",
@@ -77,7 +70,6 @@
     "remark-gfm": "3.0.1",
     "remark-parse": "^10.0.1",
     "remark-rehype": "^10.1.0",
-    "unified": "^10.1.2",
     "vitest": "^0.30.0"
   }
 }

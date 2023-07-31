@@ -23,10 +23,9 @@
     "url": "https://github.com/openpatch/hyperbook/issues"
   },
   "scripts": {
-    "prebuild": "rimraf dist",
     "version": "pnpm build",
     "lint": "tsc --noEmit",
-    "build": "node ./esbuild.mjs"
+    "build": "rimraf dist && node ./esbuild.mjs"
   },
   "dependencies": {
     "@hyperbook/types": "workspace:*",
