@@ -1,5 +1,15 @@
 # @hyperbook/vscode-extension
 
+## 0.19.5
+
+### Patch Changes
+
+- Updated dependencies [[`bfa3016`](https://github.com/openpatch/hyperbook/commit/bfa30169bf2e6377385c6a1adb5aa625db7d1b68), [`e84275a`](https://github.com/openpatch/hyperbook/commit/e84275a11949e455be4a00742528541b969d52f1), [`42ab56f`](https://github.com/openpatch/hyperbook/commit/42ab56f0e07a5adca5e7485a61d21d59d41ad100)]:
+  - @hyperbook/markdown@0.9.2
+  - @hyperbook/element-excalidraw@0.5.1
+  - @hyperbook/element-mermaid@0.2.1
+  - @hyperbook/shell@0.7.2
+
 ## 0.19.4
 
 ### Patch Changes

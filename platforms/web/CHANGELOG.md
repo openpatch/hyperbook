@@ -1,5 +1,21 @@
 # hyperbook-simple-template
 
+## 0.23.2
+
+### Patch Changes
+
+- [`d5dfc57`](https://github.com/openpatch/hyperbook/commit/d5dfc57ba96d9de2cbb7c61be20910b33844731c) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Do not minify
+
+- [`e84275a`](https://github.com/openpatch/hyperbook/commit/e84275a11949e455be4a00742528541b969d52f1) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - update dependencies
+
+- [`cd72873`](https://github.com/openpatch/hyperbook/commit/cd72873f64b99da4f07a19d0516faeb5b41107d8) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Explicit import React
+
+- Updated dependencies [[`bfa3016`](https://github.com/openpatch/hyperbook/commit/bfa30169bf2e6377385c6a1adb5aa625db7d1b68), [`e84275a`](https://github.com/openpatch/hyperbook/commit/e84275a11949e455be4a00742528541b969d52f1), [`42ab56f`](https://github.com/openpatch/hyperbook/commit/42ab56f0e07a5adca5e7485a61d21d59d41ad100)]:
+  - @hyperbook/markdown@0.9.2
+  - @hyperbook/element-excalidraw@0.5.1
+  - @hyperbook/element-mermaid@0.2.1
+  - @hyperbook/shell@0.7.2
+
 ## 0.23.1
 
 ### Patch Changes
