@@ -51,7 +51,6 @@
     "remark-math": "5.1.1",
     "remark-parse": "^10.0.2",
     "remark-rehype": "^10.1.0",
-    "remark-stringify": "^10.0.3",
     "remark-unwrap-images": "3.0.1",
     "unified": "^10.1.2",
     "unist-util-visit": "^5.0.0"

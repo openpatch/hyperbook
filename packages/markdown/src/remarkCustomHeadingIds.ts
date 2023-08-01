@@ -1,9 +1,10 @@
 import { visit } from "unist-util-visit";
 import { Transformer } from "unified";
+import { Heading } from "mdast";
 
 export const remarkCustomHeadingIds: () => Transformer = () => {
   return function (node) {
-    visit(node, "heading", (node) => {
+    visit(node, "heading", (node: Heading) => {
       let lastChild = node.children[node.children.length - 1];
       if (lastChild && lastChild.type === "text") {
         let string = lastChild.value.replace(/ +$/, "");
