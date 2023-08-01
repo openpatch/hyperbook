@@ -1,3 +1,4 @@
+import React from "react";
 import { GetStaticPaths, GetStaticProps } from "next";
 import { Shell, ShellProps } from "@hyperbook/shell";
 import { Fragment } from "react";

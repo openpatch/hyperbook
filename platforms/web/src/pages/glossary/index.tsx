@@ -1,3 +1,4 @@
+import React from "react";
 import { GetStaticProps } from "next";
 import { Shell } from "@hyperbook/shell";
 import { Glossary as TGlossary } from "@hyperbook/types";

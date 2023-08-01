@@ -1,3 +1,4 @@
+import React from "react";
 import "../index.css";
 import "@hyperbook/shell/index.css";
 import "@hyperbook/drawer/index.css";
