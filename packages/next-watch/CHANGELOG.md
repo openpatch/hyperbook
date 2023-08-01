@@ -1,5 +1,13 @@
 # @hyperbook/next-watch
 
+## 0.5.1
+
+### Patch Changes
+
+- [`bfa3016`](https://github.com/openpatch/hyperbook/commit/bfa30169bf2e6377385c6a1adb5aa625db7d1b68) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix bug with remark
+
+- [`e84275a`](https://github.com/openpatch/hyperbook/commit/e84275a11949e455be4a00742528541b969d52f1) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - update dependencies
+
 ## 0.5.0
 
 ### Minor Changes

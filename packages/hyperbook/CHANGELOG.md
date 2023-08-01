@@ -1,5 +1,19 @@
 # hyperbook
 
+## 0.23.2
+
+### Patch Changes
+
+- [`d5dfc57`](https://github.com/openpatch/hyperbook/commit/d5dfc57ba96d9de2cbb7c61be20910b33844731c) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Do not minify
+
+- [`bfa3016`](https://github.com/openpatch/hyperbook/commit/bfa30169bf2e6377385c6a1adb5aa625db7d1b68) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix bug with remark
+
+- [`e84275a`](https://github.com/openpatch/hyperbook/commit/e84275a11949e455be4a00742528541b969d52f1) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - update dependencies
+
+- [`cd72873`](https://github.com/openpatch/hyperbook/commit/cd72873f64b99da4f07a19d0516faeb5b41107d8) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Explicit import React
+
+- [`42ab56f`](https://github.com/openpatch/hyperbook/commit/42ab56f0e07a5adca5e7485a61d21d59d41ad100) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - fix missing package
+
 ## 0.23.1
 
 ### Patch Changes
