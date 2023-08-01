@@ -14,7 +14,7 @@ try {
     outdir: "dist",
     sourcemap: false,
     outbase: ".",
-    minify: true,
+    minify: false,
     bundle: false,
     format: "esm",
   });
