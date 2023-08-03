@@ -1,5 +1,11 @@
 # @hyperbook/element-online-ide
 
+## 0.5.0
+
+### Minor Changes
+
+- [`81c6d9e`](https://github.com/openpatch/hyperbook/commit/81c6d9e7b5df239db6fc240b7d75221f88587f31) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - update base urls for the online ide
+
 ## 0.4.0
 
 ### Minor Changes
