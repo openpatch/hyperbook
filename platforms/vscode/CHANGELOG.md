@@ -1,5 +1,12 @@
 # @hyperbook/vscode-extension
 
+## 0.19.6
+
+### Patch Changes
+
+- Updated dependencies [[`81c6d9e`](https://github.com/openpatch/hyperbook/commit/81c6d9e7b5df239db6fc240b7d75221f88587f31)]:
+  - @hyperbook/element-online-ide@0.5.0
+
 ## 0.19.5
 
 ### Patch Changes
