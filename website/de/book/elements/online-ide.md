@@ -15,6 +15,7 @@ Das Online-IDE element akzeptiert folgende Parameter:
 - **errorList**: falls mit unterem Panel: mit/ohne Fehlerliste.
 - **height**: Höhe des Editors. Standardwert 600px.
 - **speed**: Geschwindigkeit in Steps/s. Standardwert 1000.
+- **url**: Die Basis-URL für die Dateien der Online IDE. Standardwert https://onlineide.openpatch.org.
 
 (See: https://github.com/martin-pabst/Online-IDE).
 
@@ -178,3 +179,31 @@ class Funke extends Circle {
 
 :::
 `````
+
+## Mit einer anderen URL
+
+In dieser Variante ist die Online IDE speziell für das Bundesland NRW angepasst.
+
+:::onlineide{height=500 console=false url="https://nrw.onlineide.openpatch.org"}
+
+```java Test.java
+
+var l = new List<Integer>();
+l.append(1);
+
+```
+
+:::
+
+````
+:::onlineide{height=500 console=false url="https://nrw.onlineide.openpatch.org"}
+
+```java Test.java
+
+var l = new List<Integer>();
+l.append(1);
+
+```
+
+:::
+````

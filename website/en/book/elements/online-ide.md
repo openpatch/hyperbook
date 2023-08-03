@@ -14,6 +14,7 @@ The Online-IDE element accepts these arguments:
 - **errorList**: With error list in the bottom panel.
 - **height**: Height of the editor. Defaults to 600px.
 - **speed**: Speed of the execution. Defaults to 1000.
+- **url**: The base URL of the embedded files for the Online IDE. Defaults to onlineide.openpatch.org.
 
 (See: https://github.com/martin-pabst/Online-IDE).
 
@@ -180,3 +181,29 @@ class Funke extends Circle {
 
 :::
 `````
+
+## With a custom URL
+
+:::onlineide{height=500 console=false url="https://nrw.onlineide.openpatch.org"}
+
+```java Test.java
+
+var l = new List<Integer>();
+l.append(1);
+
+```
+
+:::
+
+````
+:::onlineide{height=500 console=false url="https://nrw.onlineide.openpatch.org"}
+
+```java Test.java
+
+var l = new List<Integer>();
+l.append(1);
+
+```
+
+:::
+````

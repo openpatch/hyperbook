@@ -72,11 +72,19 @@ const DirectiveOnlineIde: FC<DirectiveOnlineIdeProps> = ({
   });
   let html = `{'id': '${id}', 'speed': ${speed}, 'withBottomPanel': ${bottomPanel},'withPCode': ${pCode},'withConsole': ${con},'withFileList': ${fileList},'withErrorList': ${errorList}}`;
   html = html + "\n" + scripts.join("\n");
+  html =
+    html +
+    "\n" +
+    `<style>
+.joe_javaOnlineDiv {
+  box-shadow: none;
+}
+</style>`;
 
   return (
     <div className="online-ide">
       <iframe
-        srcDoc={`<script>window.jo_doc = window.frameElement.textContent;</script><script src='${url}/js/includeide/includeIDE.js'></script>`}
+        srcDoc={`<script>window.jo_doc = window.frameElement.textContent;</script><script src='${url}/includeIDE.js'></script>`}
         height={height}
         frameBorder="0"
         dangerouslySetInnerHTML={{
