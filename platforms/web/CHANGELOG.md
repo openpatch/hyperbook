@@ -1,5 +1,13 @@
 # hyperbook-simple-template
 
+## 0.25.0
+
+### Patch Changes
+
+- Updated dependencies [[`9cf8f9c`](https://github.com/openpatch/hyperbook/commit/9cf8f9c028c315b63770495b97d0567da0f69c1b)]:
+  - @hyperbook/element-online-ide@0.6.0
+  - @hyperbook/element-sql-ide@0.5.0
+
 ## 0.24.0
 
 ### Patch Changes
