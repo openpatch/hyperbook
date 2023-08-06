@@ -200,7 +200,7 @@ l.append(1);
 
 ```java Test.java
 
-var l = new List<Integer>();
+var l = new NRWList<Integer>();
 l.append(1);
 
 ```

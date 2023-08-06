@@ -1,4 +1,4 @@
-import { FC, ReactNode } from "react";
+import { FC, ReactNode, useRef } from "react";
 import hash from "object-hash";
 import "./index.css";
 import { useConfig } from "@hyperbook/provider";
@@ -38,6 +38,7 @@ const DirectiveOnlineIde: FC<DirectiveOnlineIdeProps> = ({
   if (!id) {
     id = hash(node);
   }
+  const iframeRef = useRef<HTMLIFrameElement>(null);
   const config = useConfig();
   const ideConfig = config?.elements?.onlineide;
 
@@ -48,6 +49,12 @@ const DirectiveOnlineIde: FC<DirectiveOnlineIdeProps> = ({
   if (ideConfig?.height) {
     height = ideConfig.height;
   }
+
+  const openInFullscreen = () => {
+    if (iframeRef.current?.requestFullscreen) {
+      iframeRef.current.requestFullscreen();
+    }
+  };
 
   const codes: { title: string; code: string; hint?: boolean }[] = node.children
     ?.filter((n: any) => n.tagName === "pre")
@@ -78,19 +85,28 @@ const DirectiveOnlineIde: FC<DirectiveOnlineIdeProps> = ({
     `<style>
 .joe_javaOnlineDiv {
   box-shadow: none;
+  margin: 0!important;
+  top: 0!important;
+  width: 100%!important;
+  height: calc(100% - 5px) !important;
+  border: none !important;
 }
 </style>`;
 
   return (
     <div className="online-ide">
       <iframe
-        srcDoc={`<script>window.jo_doc = window.frameElement.textContent;</script><script src='${url}/includeIDE.js'></script>`}
         height={height}
+        ref={iframeRef}
+        srcDoc={`<script>window.jo_doc = window.frameElement.textContent;</script><script src='${url}/includeIDE.js'></script>`}
         frameBorder="0"
         dangerouslySetInnerHTML={{
           __html: html,
         }}
       ></iframe>
+      <div className="menu">
+        <button onClick={openInFullscreen}>Fullscreen</button>
+      </div>
     </div>
   );
 };

@@ -1,4 +1,4 @@
-import { FC, ReactNode } from "react";
+import { FC, ReactNode, useRef } from "react";
 import hash from "object-hash";
 import "./index.css";
 import { useConfig, useMakeUrl } from "@hyperbook/provider";
@@ -29,6 +29,7 @@ const DirectiveSqlIde: FC<DirectiveSqlIdeProps> = ({
     id = hash(node);
   }
 
+  const iframeRef = useRef<HTMLIFrameElement>(null);
   const makeUrl = useMakeUrl();
   const config = useConfig();
   const ideConfig = config?.elements?.sqlide;
@@ -44,6 +45,13 @@ const DirectiveSqlIde: FC<DirectiveSqlIdeProps> = ({
   if (ideConfig?.db) {
     db = makeUrl(ideConfig.db, "public");
   }
+
+  const openInFullscreen = () => {
+    if (iframeRef.current?.requestFullscreen) {
+      iframeRef.current.requestFullscreen();
+    }
+  };
+
   const codes: { title: string; code: string; hint?: boolean }[] = node.children
     ?.filter((n: any) => n.tagName === "pre")
     .flatMap((n: any) => {
@@ -67,10 +75,24 @@ const DirectiveSqlIde: FC<DirectiveSqlIdeProps> = ({
   });
   let html = `{'id': '${id}', 'databaseURL': '${db}'}`;
   html = html + "\n" + scripts.join("\n");
+  html =
+    html +
+    "\n" +
+    `<style>
+.joe_javaOnlineDiv {
+  box-shadow: none;
+  margin: 0!important;
+  top: 0!important;
+  width: 100%!important;
+  height: calc(100% - 5px) !important;
+  border: none !important;
+}
+</style>`;
 
   return (
     <div className="sql-ide">
       <iframe
+        ref={iframeRef}
         srcDoc={`<script>window.jo_doc = window.frameElement.textContent;</script><script src='${url}/js/includeide/includeIDE.js'></script>`}
         height={height}
         frameBorder="0"
@@ -78,6 +100,9 @@ const DirectiveSqlIde: FC<DirectiveSqlIdeProps> = ({
           __html: html,
         }}
       ></iframe>
+      <div className="menu">
+        <button onClick={openInFullscreen}>Fullscreen</button>
+      </div>
     </div>
   );
 };
