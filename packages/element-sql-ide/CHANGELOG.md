@@ -1,5 +1,11 @@
 # @hyperbook/element-online-ide
 
+## 0.5.0
+
+### Minor Changes
+
+- [`9cf8f9c`](https://github.com/openpatch/hyperbook/commit/9cf8f9c028c315b63770495b97d0567da0f69c1b) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add fullscreen button to the Online IDE and SQL IDE elements.
+
 ## 0.4.0
 
 ### Minor Changes
