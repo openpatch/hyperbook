@@ -465,28 +465,36 @@ export async function getDirectory(
   folder: VDirectory["folder"]
 ): Promise<VDirectory> {
   const cache = path.join(root, `vdirectory.${folder}.json`);
-  if (fsD.existsSync(cache)) {
+  if (process.env.HYPERBOOK_CACHE && fsD.existsSync(cache)) {
     return JSON.parse(fsD.readFileSync(cache, "utf8"));
   }
   switch (folder) {
     case "glossary": {
       const dir = await getDirectoryGlossary(root);
-      fsD.writeFileSync(cache, JSON.stringify(dir));
+      if (process.env.HYPERBOOK_CACHE) {
+        fsD.writeFileSync(cache, JSON.stringify(dir));
+      }
       return dir;
     }
     case "archives": {
       const dir = await getDirectoryArchives(root);
-      fsD.writeFileSync(cache, JSON.stringify(dir));
+      if (process.env.HYPERBOOK_CACHE) {
+        fsD.writeFileSync(cache, JSON.stringify(dir));
+      }
       return dir;
     }
     case "public": {
       const dir = await getDirectoryPublic(root);
-      fsD.writeFileSync(cache, JSON.stringify(dir));
+      if (process.env.HYPERBOOK_CACHE) {
+        fsD.writeFileSync(cache, JSON.stringify(dir));
+      }
       return dir;
     }
     default: {
       const dir = await getDirectoryBook(root);
-      fsD.writeFileSync(cache, JSON.stringify(dir));
+      if (process.env.HYPERBOOK_CACHE) {
+        fsD.writeFileSync(cache, JSON.stringify(dir));
+      }
       return dir;
     }
   }
@@ -541,13 +549,15 @@ export async function listForFolder(
 
 export const list = async (root: string): Promise<VFile[]> => {
   const cache = path.join(root, "vfiles.json");
-  if (fsD.existsSync(cache)) {
+  if (process.env.HYPERBOOK_CACHE && fsD.existsSync(cache)) {
     return JSON.parse(fsD.readFileSync(cache, "utf8"));
   }
   const vfiles = await Promise.all(
     folders.flatMap((folder) => listForFolder(root, folder as any))
   ).then((f) => f.flat());
-  fsD.writeFileSync(cache, JSON.stringify(vfiles));
+  if (process.env.HYPERBOOK_CACHE) {
+    fsD.writeFileSync(cache, JSON.stringify(vfiles));
+  }
   return vfiles;
 };
 

@@ -17,7 +17,7 @@ const lang = process.argv[2];
 
 spawn(`node`, [hyperbook, "dev"], {
   stdio: "inherit",
-  cwd: path.join(__dirname, "..", "website", lang),
+  cwd: path.join(__dirname, "..", "website"),
   env: {
     ...process.env,
     HYPERBOOK_LOCAL_DEV: true,

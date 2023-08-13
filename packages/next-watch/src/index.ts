@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 import chokidar from "chokidar";
 import chalk from "chalk";
-import express, { Express } from "express";
+import express from "express";
+import * as core from "express-serve-static-core";
 import next from "next";
 import path from "path";
 import { parse } from "url";
@@ -13,53 +14,91 @@ const createNextApp = async (root: string, basePath?: string) => {
     dir: root,
     hostname: "localhost",
     port: Number(process.env.PORT) || 3000,
-    /*
     conf: {
       basePath,
       env: {
         root,
       },
     },
-    */
   });
 
-  return app
-    .prepare()
-    .then(() => {
-      // if directories are provided, watch them for changes and trigger reload
-      chokidar
-        .watch(["./book", "./glossary", "./hyperbook.json", "./public"], {
-          usePolling: false,
-          cwd: root,
-        })
-        .on("change", async (filePath) => {
-          // @ts-ignore
-          app.server.hotReloader.send("building");
+  return app.prepare().then(async () => {
+    // if directories are provided, watch them for changes and trigger reload
+    const appServer: any =
+      (app as any).server || (await (app as any).getServer());
+    chokidar
+      .watch(["./book", "./glossary", "./hyperbook.json", "./public"], {
+        usePolling: false,
+        cwd: root,
+      })
+      .on("add", async (filePath) => {
+        appServer.hotReloader.send("building");
 
-          const global =
-            filePath.startsWith("hyperbook.json") ||
-            filePath.startsWith("public");
+        const global =
+          filePath.startsWith("hyperbook.json") ||
+          filePath.startsWith("public");
 
-          const pages = [];
-          if (filePath.startsWith("book") || global) {
-            pages.push("/[[...page]]");
-          } else if (filePath.startsWith("glossary") || global) {
-            pages.push("/glossary/[...term]", "/glossary");
-          }
+        const pages = [];
+        if (filePath.startsWith("book") || global) {
+          pages.push("/[[...page]]");
+        } else if (filePath.startsWith("glossary") || global) {
+          pages.push("/glossary/[...term]", "/glossary");
+        }
 
-          // @ts-ignore
-          // https://github.com/hashicorp/next-remote-watch/issues/42
-          app.server.hotReloader.send({
-            event: "serverOnlyChanges",
-            pages,
-          });
+        // @ts-ignore
+        // https://github.com/hashicorp/next-remote-watch/issues/42
+        appServer.hotReloader.send({
+          event: "serverOnlyChanges",
+          pages,
         });
-      return app;
-    })
-    .catch((e) => console.log(e));
+      })
+      .on("unlink", async (filePath) => {
+        appServer.hotReloader.send("building");
+
+        const global =
+          filePath.startsWith("hyperbook.json") ||
+          filePath.startsWith("public");
+
+        const pages = [];
+        if (filePath.startsWith("book") || global) {
+          pages.push("/[[...page]]");
+        } else if (filePath.startsWith("glossary") || global) {
+          pages.push("/glossary/[...term]", "/glossary");
+        }
+
+        // @ts-ignore
+        // https://github.com/hashicorp/next-remote-watch/issues/42
+        appServer.hotReloader.send({
+          event: "serverOnlyChanges",
+          pages,
+        });
+      })
+      .on("change", async (filePath) => {
+        appServer.hotReloader.send("building");
+
+        const global =
+          filePath.startsWith("hyperbook.json") ||
+          filePath.startsWith("public");
+
+        const pages = [];
+        if (filePath.startsWith("book") || global) {
+          pages.push("/[[...page]]");
+        } else if (filePath.startsWith("glossary") || global) {
+          pages.push("/glossary/[...term]", "/glossary");
+        }
+
+        // @ts-ignore
+        // https://github.com/hashicorp/next-remote-watch/issues/42
+        appServer.hotReloader.send({
+          event: "serverOnlyChanges",
+          pages,
+        });
+      });
+    return app;
+  });
 };
 
-const handleProject = (server: Express) => async (project: Project) => {
+const handleProject = (server: core.Express) => async (project: Project) => {
   if (project.type === "book") {
     const root = path.join(project.src, ".hyperbook");
     let basePath = project.basePath;
@@ -77,7 +116,7 @@ const handleProject = (server: Express) => async (project: Project) => {
     // handle all other routes with next.js
     const paths = [project.href, path.join(project.href, "*")];
     server.all(paths, (req, res) => {
-      handle(req, res, parse(req.url, true));
+      handle(req as any, res, parse(req.url, true));
     });
   } else if (project.type === "library") {
     await Promise.all(project.projects.map(handleProject(server)));
@@ -88,7 +127,7 @@ async function run() {
   console.log(`> Starting dev server ...`);
   const root = path.join(process.cwd(), "..");
   const project = await collect(root);
-  if (project.type === "library") {
+  if (project.type !== "library") {
     console.log(
       chalk.red(
         `\`hyperbook dev\` is currently not supported for libraries. You have to run \`hyperbook dev\` in a folder containing a book.`
