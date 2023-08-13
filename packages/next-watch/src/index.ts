@@ -114,7 +114,10 @@ const handleProject = (server: core.Express) => async (project: Project) => {
     const app = await createNextApp(root, basePath);
     const handle = app.getRequestHandler();
     // handle all other routes with next.js
-    const paths = [project.href, path.join(project.href, "*")];
+    const paths = [
+      project.href,
+      project.href.endsWith("/") ? project.href + "*" : project.href + "/*",
+    ];
     server.all(paths, (req, res) => {
       handle(req as any, res, parse(req.url, true));
     });
