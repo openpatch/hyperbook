@@ -1,5 +1,11 @@
 # @hyperbook/element-excalidraw
 
+## 0.5.2
+
+### Patch Changes
+
+- [`f5ddc0c`](https://github.com/openpatch/hyperbook/commit/f5ddc0c53564ea426d31aff69695e8fc91dfa0e9) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix auto zoom for excalidraw elements.
+
 ## 0.5.1
 
 ### Patch Changes
