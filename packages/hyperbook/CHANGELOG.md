@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.26.3
+
+### Patch Changes
+
+- [`a4e4f61`](https://github.com/openpatch/hyperbook/commit/a4e4f61e44d2b9acd7b7a465b793baf3546e3fb3) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix dev server for windows
+
 ## 0.26.2
 
 ### Patch Changes
