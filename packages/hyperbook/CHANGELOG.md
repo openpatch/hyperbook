@@ -1,5 +1,16 @@
 # hyperbook
 
+## 0.26.0
+
+### Minor Changes
+
+- [`2e67754`](https://github.com/openpatch/hyperbook/commit/2e67754670a45ce19d4974c80294bff18713f433) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Disable caching, which caused problems. Enable the dev server to serve libraries aswell as individual book.
+
+### Patch Changes
+
+- Updated dependencies [[`2e67754`](https://github.com/openpatch/hyperbook/commit/2e67754670a45ce19d4974c80294bff18713f433)]:
+  - @hyperbook/fs@0.11.0
+
 ## 0.25.0
 
 ### Minor Changes

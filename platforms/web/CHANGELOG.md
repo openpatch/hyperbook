@@ -1,5 +1,12 @@
 # hyperbook-simple-template
 
+## 0.26.0
+
+### Patch Changes
+
+- Updated dependencies [[`2e67754`](https://github.com/openpatch/hyperbook/commit/2e67754670a45ce19d4974c80294bff18713f433)]:
+  - @hyperbook/fs@0.11.0
+
 ## 0.25.0
 
 ### Patch Changes
