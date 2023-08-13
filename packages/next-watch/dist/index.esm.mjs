@@ -2,7 +2,6 @@
 
 // src/index.ts
 import chokidar from "chokidar";
-import chalk2 from "chalk";
 import express from "express";
 import next from "next";
 import path2 from "path";
@@ -186,14 +185,6 @@ async function run() {
   console.log(`> Starting dev server ...`);
   const root = path2.join(process.cwd(), "..");
   const project = await collect(root);
-  if (project.type !== "library") {
-    console.log(
-      chalk2.red(
-        `\`hyperbook dev\` is currently not supported for libraries. You have to run \`hyperbook dev\` in a folder containing a book.`
-      )
-    );
-    return;
-  }
   const server = express();
   await handleProject(server)(project);
   process.chdir(root);

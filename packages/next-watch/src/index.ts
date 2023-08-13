@@ -127,14 +127,14 @@ async function run() {
   console.log(`> Starting dev server ...`);
   const root = path.join(process.cwd(), "..");
   const project = await collect(root);
-  if (project.type !== "library") {
-    console.log(
-      chalk.red(
-        `\`hyperbook dev\` is currently not supported for libraries. You have to run \`hyperbook dev\` in a folder containing a book.`
-      )
-    );
-    return;
-  }
+  //if (project.type !== "library") {
+  //  console.log(
+  //    chalk.red(
+  //      `\`hyperbook dev\` is currently not supported for libraries. You have to run \`hyperbook dev\` in a folder containing a book.`
+  //    )
+  //  );
+  //  return;
+  //}
   // create an express server
   const server = express();
   await handleProject(server)(project);
