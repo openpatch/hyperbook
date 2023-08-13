@@ -335,8 +335,8 @@ importers:
   packages/element-excalidraw:
     dependencies:
       '@excalidraw/excalidraw':
-        specifier: 0.15.2
-        version: 0.15.2(react-dom@18.2.0)(react@18.2.0)
+        specifier: 0.15.2-6546-3398d86
+        version: 0.15.2-6546-3398d86(react-dom@18.2.0)(react@18.2.0)
       '@hyperbook/provider':
         specifier: workspace:*
         version: link:../provider
@@ -2913,8 +2913,8 @@ packages:
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
     dev: true
 
-  /@excalidraw/excalidraw@0.15.2(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-rTI02kgWSTXiUdIkBxt9u/581F3eXcqQgJdIxmz54TFtG3ughoxO5fr4t7Fr2LZIturBPqfocQHGKZ0t2KLKgw==}
+  /@excalidraw/excalidraw@0.15.2-6546-3398d86(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-Tzq6qighJUytXRA8iMzQ8onoGclo9CuvPSw7DMvPxME8nxAxn5CeK/gsxIs3zwooj9CC6XF42BSrx0+n+fPxaQ==}
     peerDependencies:
       react: ^17.0.2 || ^18.2.0
       react-dom: ^17.0.2 || ^18.2.0

@@ -18,17 +18,15 @@ type DirectiveExcalidrawProps = {
   src: string;
   file: string;
   aspectRatio: string;
-  autoZoom: boolean;
-  center: boolean;
-  edit: boolean;
+  autoZoom: string;
+  edit: string;
 };
 
 const DirectiveExcalidraw: FC<DirectiveExcalidrawProps> = ({
   file,
   aspectRatio,
-  autoZoom,
-  center,
-  edit,
+  autoZoom: autoZoomS,
+  edit: editS,
   src,
 }) => {
   if (src) {
@@ -37,20 +35,23 @@ const DirectiveExcalidraw: FC<DirectiveExcalidrawProps> = ({
   const config = useConfig();
   const excalidrawConfig = config?.elements?.excalidraw;
 
+  let autoZoom = excalidrawConfig?.autoZoom ?? true;
+  let edit = excalidrawConfig?.edit ?? false;
+
+  if (autoZoomS == "false") {
+    autoZoom = false;
+  } else if (autoZoomS == "true") {
+    autoZoom = true;
+  }
+
+  if (editS == "false") {
+    edit = false;
+  } else if (editS == "true") {
+    edit = true;
+  }
+
   if (!aspectRatio) {
     aspectRatio = excalidrawConfig?.aspectRation ?? "16/9";
-  }
-
-  if (!autoZoom) {
-    autoZoom = excalidrawConfig?.autoZoom ?? true;
-  }
-
-  if (!center) {
-    center = excalidrawConfig?.center ?? true;
-  }
-
-  if (!edit) {
-    edit = excalidrawConfig?.edit ?? false;
   }
 
   const env = useEnv();
@@ -73,13 +74,32 @@ const DirectiveExcalidraw: FC<DirectiveExcalidrawProps> = ({
 
   useEffect(() => {
     import("@excalidraw/excalidraw").then((comp) => {
-      setComp(comp.Excalidraw as any);
+      setComp(comp.Excalidraw);
     });
   }, []);
 
   const handleScroll = () => {
     if (api.current) {
       api.current.refresh();
+    }
+  };
+
+  const debounce = (func: Function, timeout = 300) => {
+    let timer: NodeJS.Timer;
+    return (...args: any) => {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        func.apply(this, args);
+      }, timeout);
+    };
+  };
+
+  const handleResize = () => {
+    if (autoZoom) {
+      api.current?.scrollToContent(undefined, {
+        fitToViewport: true,
+        viewportZoomFactor: 0.9,
+      });
     }
   };
 
@@ -109,6 +129,15 @@ const DirectiveExcalidraw: FC<DirectiveExcalidrawProps> = ({
   }, []);
 
   useEffect(() => {
+    const debounceResize = debounce(handleResize, 300);
+    window.addEventListener("resize", debounceResize);
+
+    return () => {
+      window.removeEventListener("resize", debounceResize);
+    };
+  }, [autoZoom]);
+
+  useEffect(() => {
     if (api.current) {
       api.current.updateScene({
         appState: { theme: preferedColorScheme },
@@ -117,11 +146,15 @@ const DirectiveExcalidraw: FC<DirectiveExcalidrawProps> = ({
   }, [preferedColorScheme]);
 
   useEffect(() => {
-    if (!api) {
-      return;
+    if (autoZoom) {
+      setTimeout(() => {
+        api.current?.scrollToContent(undefined, {
+          fitToViewport: true,
+          viewportZoomFactor: 0.9,
+        });
+      }, 2000);
     }
-    api.current?.scrollToContent(undefined, { fitToContent: autoZoom });
-  }, [api]);
+  }, [api, autoZoom]);
 
   const loadData = async (): Promise<ExcalidrawInitialDataState> => {
     const url = makeUrl(file, "public");
@@ -131,7 +164,7 @@ const DirectiveExcalidraw: FC<DirectiveExcalidrawProps> = ({
         initialData.current = data;
         return {
           ...data,
-          scrollToContent: center,
+          scrollToContent: autoZoom,
           appState: {
             ...data?.appState,
             collaborators: [],

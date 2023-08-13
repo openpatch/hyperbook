@@ -18,7 +18,6 @@ Das Excalidraw Element akzeptiert drei Argumente:
 - **file**: Der Pfad zur Excalidraw-Datei.
 - **aspectRatio**: Um dein Excalidraw auf jedem Gerät schön anzeigen zu lassen, musst du ein Seitenverhältnis definieren. Zum Beispiel: "16/9", "4/3", "1/1".
 - **autoZoom**: Standardmäßig wird dein Excalidraw so anzeigt, dass alles zu sehen ist, damit auch auf kleinen Geräten dein Excalidraw gut funktioniert. Diese Verhalten kannst du hier deaktivieren.
-- **center**: Zentriert dein Excalidraw.
 - **edit**: Erlaubt das Bearbeiten des Excalidraw.
 
 :::alert{info}
@@ -28,20 +27,20 @@ autoZoom funktioniert nicht, wenn du deine Datei von excalidraw.com heruntergela
 ```md
 ::excalidraw{src="/excalidraw/hyperbook.excalidraw" aspectRatio="4/3"}
 
-::excalidraw{src="/excalidraw/hyperbook.excalidraw" aspectRatio="4/3" autoZoom=false center=true}
+::excalidraw{src="/excalidraw/hyperbook.excalidraw" aspectRatio="4/3" autoZoom=false}
 
-::excalidraw{src="/excalidraw/hyperbook.excalidraw" aspectRatio="4/3" autoZoom=false center=true edit=true}
+::excalidraw{src="/excalidraw/hyperbook.excalidraw" aspectRatio="4/3" autoZoom=false edit=true}
 ```
 
 ::excalidraw{src="/excalidraw/hyperbook.excalidraw" aspectRatio="4/3"}
 
-::excalidraw{src="/excalidraw/hyperbook.excalidraw" aspectRatio="4/3" autoZoom=false center=true}
+::excalidraw{src="/excalidraw/hyperbook.excalidraw" aspectRatio="4/3" autoZoom=false}
 
 :::alert{info}
 Versichere dich, dass du die richtige Sprache in der `hyperbook.json` gesetzt hast, anderenfalls wird Excalidraw auf Englisch angezeigt.
 :::
 
-::excalidraw{src="/excalidraw/hyperbook.excalidraw" aspectRatio="4/3" autoZoom=false center=true edit=true}
+::excalidraw{src="/excalidraw/hyperbook.excalidraw" aspectRatio="4/3" autoZoom=false edit=true}
 
 ## Bibliotheken hinzufügen
 
@@ -56,7 +55,6 @@ Du kannst die Standardwerte des Excalidraw-Elements in der `hyperbook.json` änd
   "elements": {
     "excalidraw": {
       "aspectRatio": "4/3",
-      "center": false,
       "autoZoom": true,
       "edit": false
     }
