@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.26.2
+
+### Patch Changes
+
+- [`fd877cf`](https://github.com/openpatch/hyperbook/commit/fd877cfce2f3052e129ca27e7bb85e2209b40111) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix bug in dev mode
+
 ## 0.26.1
 
 ### Patch Changes
