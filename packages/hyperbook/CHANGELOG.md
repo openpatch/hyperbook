@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.26.4
+
+### Patch Changes
+
+- [`183bb32`](https://github.com/openpatch/hyperbook/commit/183bb3253256342882a167332a1ac7209740ab43) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix zoom on iPads
+
 ## 0.26.3
 
 ### Patch Changes
