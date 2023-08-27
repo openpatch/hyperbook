@@ -1,5 +1,5 @@
 import { useLink, useMakeUrl, useHead, useConfig } from "@hyperbook/provider";
-import { FC, Fragment, ReactNode, useEffect, useState } from "react";
+import { FC, Fragment, ReactNode, useState } from "react";
 import { Navigation as NavigationProps } from "@hyperbook/types";
 import { Links } from "./Links";
 import { Navigation } from "./Navigation";
@@ -71,20 +71,6 @@ export const Shell: FC<ShellProps> = ({ navigation, children }) => {
   const makeUrl = useMakeUrl();
   const [isNavOpen, setIsNavOpen] = useState(false);
 
-  useEffect(() => {
-    const appHeight = () => {
-      const doc = document.documentElement;
-      doc.style.setProperty(`--app-height`, `${window.innerHeight}px`);
-    };
-
-    appHeight();
-
-    window.addEventListener("resize", appHeight);
-
-    return () => {
-      window.removeEventListener("resize", appHeight);
-    };
-  }, []);
   return (
     <Fragment>
       {page && (

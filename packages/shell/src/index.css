@@ -1,6 +1,6 @@
 :root {
   --internal-color-error: #d26466;
-  --app-height: 100%;
+  --app-height: 100dvh;
 }
 
 .main-grid * {
@@ -196,7 +196,7 @@ a.jump.previous::before {
   font-family: hyperbook-body, sans-serif;
   display: grid;
   height: var(--app-height);
-  width: 100vw;
+  width: 100dvw;
   grid-template-columns: 300px 1fr;
   grid-template-rows: 80px 1fr;
   grid-template-areas:
@@ -245,6 +245,8 @@ a.jump.previous::before {
 .mobile-nav .toggle {
   font-size: 42px;
   border: none;
+  padding: 0;
+  margin: 0;
   background: none;
   width: 40px;
   height: 40px;
@@ -273,7 +275,7 @@ a.jump.previous::before {
   transform: rotate(45deg) translate(-8px, -8px);
 }
 
-@media screen and (max-width: 800px) {
+@media screen and (max-width: 1280px) {
   .main-grid {
     grid-template-columns: 1fr;
     grid-template-rows: 80px 1fr;
@@ -308,6 +310,8 @@ article {
 header {
   display: flex;
   grid-area: header;
+  margin: 0;
+  padding: 0;
   align-items: center;
   z-index: 1001;
   box-shadow: rgba(0, 0, 0, 0.24) 0px 1px 4px;
