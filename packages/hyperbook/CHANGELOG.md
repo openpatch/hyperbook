@@ -1,5 +1,7 @@
 # hyperbook
 
+## 0.26.5
+
 ## 0.26.4
 
 ### Patch Changes

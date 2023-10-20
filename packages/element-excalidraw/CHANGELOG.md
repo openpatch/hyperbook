@@ -1,5 +1,11 @@
 # @hyperbook/element-excalidraw
 
+## 0.6.0
+
+### Minor Changes
+
+- [`2b94605`](https://github.com/openpatch/hyperbook/commit/2b9460574a23fcecc66c0a187a56d236891482fe) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - update mermaind and excalidraw packages
+
 ## 0.5.2
 
 ### Patch Changes
