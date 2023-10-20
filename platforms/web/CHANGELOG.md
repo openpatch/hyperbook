@@ -1,5 +1,13 @@
 # hyperbook-simple-template
 
+## 0.26.5
+
+### Patch Changes
+
+- Updated dependencies [[`2b94605`](https://github.com/openpatch/hyperbook/commit/2b9460574a23fcecc66c0a187a56d236891482fe)]:
+  - @hyperbook/element-excalidraw@0.6.0
+  - @hyperbook/element-mermaid@0.3.0
+
 ## 0.26.4
 
 ### Patch Changes
