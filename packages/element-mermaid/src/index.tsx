@@ -28,9 +28,8 @@ const renderMermaid = async (
         startOnLoad: false,
         theme: prefersColorScheme == "dark" ? "dark" : ("neutral" as any),
       });
-      mermaid.mermaidAPI.render(uuid(), graphDefinition, (svgCode: string) => {
-        html = svgCode;
-      });
+      const { svg } = await mermaid.mermaidAPI.render(uuid(), graphDefinition);
+      return svg;
     } catch (e) {
       console.error(e);
     }

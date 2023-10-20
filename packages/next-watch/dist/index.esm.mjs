@@ -173,7 +173,10 @@ var handleProject = (server) => async (project) => {
     }
     const app = await createNextApp(root, basePath);
     const handle = app.getRequestHandler();
-    const paths = [project.href, path2.join(project.href, "*")];
+    const paths = [
+      project.href,
+      project.href.endsWith("/") ? project.href + "*" : project.href + "/*",
+    ];
     server.all(paths, (req, res) => {
       handle(req, res, parse(req.url, true));
     });
