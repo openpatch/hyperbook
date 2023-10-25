@@ -24,9 +24,9 @@ const renderMermaid = async (
   if (graphDefinition) {
     try {
       const mermaid = (await import("mermaid")).default;
-      mermaid.mermaidAPI.initialize({
-        startOnLoad: false,
+      mermaid.mermaidAPI.setConfig({
         theme: prefersColorScheme == "dark" ? "dark" : ("neutral" as any),
+        logLevel: 0,
       });
       const { svg } = await mermaid.mermaidAPI.render(uuid(), graphDefinition);
       return svg;
