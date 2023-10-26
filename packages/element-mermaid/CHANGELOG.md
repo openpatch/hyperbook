@@ -1,5 +1,13 @@
 # @hyperbook/element-mermaid
 
+## 0.3.1
+
+### Patch Changes
+
+- [`52b7fad`](https://github.com/openpatch/hyperbook/commit/52b7fad9129bbf1c0f3f192eddfb7c7ed07dc561) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix mermaid error diagram already registered
+
+- [`4042bc1`](https://github.com/openpatch/hyperbook/commit/4042bc1d1e54f6c81d76243b96e8a933d40fea7d) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix mermaid bug, which lead to showing an error banner.
+
 ## 0.3.0
 
 ### Minor Changes

@@ -1,5 +1,11 @@
 # @hyperbook/next-watch
 
+## 0.6.3
+
+### Patch Changes
+
+- [`4042bc1`](https://github.com/openpatch/hyperbook/commit/4042bc1d1e54f6c81d76243b96e8a933d40fea7d) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix mermaid bug, which lead to showing an error banner.
+
 ## 0.6.2
 
 ### Patch Changes
