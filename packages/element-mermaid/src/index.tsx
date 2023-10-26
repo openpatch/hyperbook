@@ -1,5 +1,6 @@
 import { FC, ReactNode, useEffect, useState } from "react";
 import { ColorScheme, useColorScheme } from "@hyperbook/provider";
+import mermaid from "mermaid";
 import "./index.css";
 
 type DirectiveMermaidProps = {
@@ -23,12 +24,10 @@ const renderMermaid = async (
   let html = "";
   if (graphDefinition) {
     try {
-      const mermaid = (await import("mermaid")).default;
-      mermaid.mermaidAPI.setConfig({
-        theme: prefersColorScheme == "dark" ? "dark" : ("neutral" as any),
-        logLevel: 0,
+      mermaid.mermaidAPI.initialize({
+        theme: prefersColorScheme == "dark" ? "dark" : "neutral",
       });
-      const { svg } = await mermaid.mermaidAPI.render(uuid(), graphDefinition);
+      const { svg } = await mermaid.render(uuid(), graphDefinition);
       return svg;
     } catch (e) {
       console.error(e);
