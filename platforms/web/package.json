@@ -12,6 +12,7 @@
     "@hyperbook/drawer": "workspace:*",
     "@hyperbook/element-alert": "workspace:*",
     "@hyperbook/element-audio": "workspace:*",
+    "@hyperbook/element-video": "workspace:*",
     "@hyperbook/element-bitflow": "workspace:*",
     "@hyperbook/element-bookmarks": "workspace:*",
     "@hyperbook/element-collapsible": "workspace:*",

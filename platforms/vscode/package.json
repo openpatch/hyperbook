@@ -182,6 +182,7 @@
   },
   "dependencies": {
     "@hyperbook/element-audio": "workspace:*",
+    "@hyperbook/element-video": "workspace:*",
     "@hyperbook/element-alert": "workspace:*",
     "@hyperbook/element-bitflow": "workspace:*",
     "@hyperbook/element-bookmarks": "workspace:*",
