@@ -90,6 +90,18 @@
       ":::"
     ]
   },
+  "Element Tiles": {
+    "prefix": [":tiles"],
+    "body": [
+      ":::tiles",
+      "",
+      "::tile{title=\"${1:Tab 1}\" href=\"$RANDOM\"}",
+      "",
+      "$0",
+      "",
+      ":::"
+    ]
+  },
   "Element YouTube": {
     "prefix": [":youtube"],
     "body": ["::youtube[${1:title}]{#$CLIPBOARD}", "$0"]

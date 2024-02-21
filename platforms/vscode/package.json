@@ -199,6 +199,7 @@
     "@hyperbook/element-struktog": "workspace:*",
     "@hyperbook/element-tabs": "workspace:*",
     "@hyperbook/element-term": "workspace:*",
+    "@hyperbook/element-tiles": "workspace:*",
     "@hyperbook/element-youtube": "workspace:*",
     "@hyperbook/fs": "workspace:*",
     "@hyperbook/markdown": "workspace:*",

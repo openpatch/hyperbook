@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Provider, ProviderProps } from "@hyperbook/provider";
 import elementTab from "@hyperbook/element-tabs";
+import elementTiles from "@hyperbook/element-tiles";
 import elementAudio from "@hyperbook/element-audio";
 import elementAlert from "@hyperbook/element-alert";
 import elementBitflow from "@hyperbook/element-bitflow";
@@ -152,6 +153,7 @@ export const App = () => {
           elementMermaid,
           elementScratchblock,
           elementExcalidraw,
+          elementTiles,
         ]}
         loadFile={() => async (path) => {
           return fetch(path).then((res) => res.text());
