@@ -1110,6 +1110,9 @@ importers:
       '@hyperbook/element-term':
         specifier: workspace:*
         version: link:../../packages/element-term
+      '@hyperbook/element-tiles':
+        specifier: workspace:*
+        version: link:../../packages/element-tiles
       '@hyperbook/element-youtube':
         specifier: workspace:*
         version: link:../../packages/element-youtube
