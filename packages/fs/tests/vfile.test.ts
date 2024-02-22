@@ -8,39 +8,35 @@ describe("list", () => {
   let hyperbookPath = path.join(__dirname, "fixtures", "single-hyperbook");
   vfile.clean(hyperbookPath);
 
-  it("should list all", async () => {
-    const files = await vfile.list(hyperbookPath);
-    const relativeFiles = files.map((f) => {
-      if ("references" in f) {
-        return {
-          ...f,
-          root: relative(f.root),
-          path: { ...f.path, absolute: relative(f.path.absolute) },
-          references: f.references.map((f) => ({
-            ...f,
-            root: relative(f.root),
-            path: { ...f.path, absolute: relative(f.path.absolute) },
-          })),
-        } as vfile.VFileGlossary;
-      }
+  const makeFileRelative = (f: vfile.VFile) => {
+    if ("references" in f) {
       return {
         ...f,
         root: relative(f.root),
         path: { ...f.path, absolute: relative(f.path.absolute) },
-      };
-    });
+        references: f.references.map((f) => ({
+          ...f,
+          root: relative(f.root),
+          path: { ...f.path, absolute: relative(f.path.absolute) },
+        })),
+      } as vfile.VFileGlossary;
+    }
+    return {
+      ...f,
+      root: relative(f.root),
+      path: { ...f.path, absolute: relative(f.path.absolute) },
+    };
+  };
+
+  it("should list all", async () => {
+    const files = await vfile.list(hyperbookPath);
+    const relativeFiles = files.map(makeFileRelative);
     expect(relativeFiles).toMatchSnapshot();
   });
 
   it("should list for folder book", async () => {
     const files = await vfile.listForFolder(hyperbookPath, "book");
-    expect(
-      files.map((f) => ({
-        ...f,
-        root: relative(f.root),
-        path: { ...f.path, absolute: relative(f.path.absolute) },
-      }))
-    ).toMatchSnapshot();
+    expect(files.map(makeFileRelative)).toMatchSnapshot();
   });
 
   it("should include main index", async () => {
@@ -51,13 +47,7 @@ describe("list", () => {
 
   it("should get references", async () => {
     const files = await vfile.listForFolder(hyperbookPath, "glossary");
-    expect(
-      files.map((f) => ({
-        ...f,
-        root: relative(f.root),
-        path: { ...f.path, absolute: relative(f.path.absolute) },
-      }))
-    ).toMatchSnapshot();
+    expect(files.map(makeFileRelative)).toMatchSnapshot();
   });
 });
 
