@@ -9,6 +9,8 @@ import elementTab from "@hyperbook/element-tabs";
 import "@hyperbook/element-tabs/index.css";
 import elementAudio from "@hyperbook/element-audio";
 import "@hyperbook/element-audio/index.css";
+import elementVideo from "@hyperbook/element-video";
+import "@hyperbook/element-video/index.css";
 import elementAlert from "@hyperbook/element-alert";
 import "@hyperbook/element-alert/index.css";
 import elementTerm from "@hyperbook/element-term";
@@ -96,6 +98,7 @@ export default function MyApp({ Component, pageProps }) {
       elements={[
         elementTab,
         elementAudio,
+        elementVideo,
         elementAlert,
         elementTerm,
         elementYoutube,
