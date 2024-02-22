@@ -18,10 +18,10 @@ The video element accepts these arguments:
 ## Local file
 
 ```markdown
-::video{src="/ForBiggerMeltdowns.mp4" poster="/ForBiggerMeltdowns.png" title="For Bigger Meltdowns" author="By Google"}
+::video{src="/clouds.mp4" poster="/clouds.jpg" title="Morgenwolken" author="Natureclip (CC-BY 3.0)"}
 ```
 
-::video{src="/ForBiggerMeltdowns.mp4" poster="/ForBiggerMeltdowns.png" title="For Bigger Meltdowns" author="By Google"}
+::video{src="/clouds.mp4" poster="/clouds.jpg" title="Morgenwolken" author="Natureclip (CC-BY 3.0)"}
 
 ## Remote file
 

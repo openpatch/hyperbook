@@ -23,7 +23,6 @@ const DirectiveVideo: FC<DirectiveVideoProps> = ({
   return (
     <div className="element-video">
       <div className="player">
-        {/* Thumbnail e posição lógica */}
         <video controls src={src} poster={poster} width="100%">
           Your browser does not support videos.
         </video>
