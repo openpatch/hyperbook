@@ -127,12 +127,12 @@ exports[`list > should get references 1`] = `
         },
         "name": "paradigms",
         "path": {
-          "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/packages/fs/tests/fixtures/single-hyperbook/book/paradigms.md",
+          "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/packages/fs/tests/fixtures/single-hyperbook/book/paradigms.md",
           "directory": "",
           "href": "/paradigms",
           "relative": "paradigms.md",
         },
-        "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/packages/fs/tests/fixtures/single-hyperbook",
+        "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/packages/fs/tests/fixtures/single-hyperbook",
       },
     ],
     "root": "single-hyperbook",
@@ -142,18 +142,6 @@ exports[`list > should get references 1`] = `
 
 exports[`list > should list all 1`] = `
 [
-  {
-    "extension": ".zip",
-    "folder": "archives",
-    "name": "archive-1",
-    "path": {
-      "absolute": "single-hyperbook/archives/archive-1",
-      "directory": "",
-      "href": "/archives/archive-1.zip",
-      "relative": "archive-1",
-    },
-    "root": "single-hyperbook",
-  },
   {
     "extension": ".md",
     "folder": "glossary",
@@ -184,12 +172,12 @@ exports[`list > should list all 1`] = `
         },
         "name": "paradigms",
         "path": {
-          "absolute": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/packages/fs/tests/fixtures/single-hyperbook/book/paradigms.md",
+          "absolute": "single-hyperbook/book/paradigms.md",
           "directory": "",
           "href": "/paradigms",
           "relative": "paradigms.md",
         },
-        "root": "/var/home/mbarkmin/Sources/openpatch/hyperbook/main/packages/fs/tests/fixtures/single-hyperbook",
+        "root": "single-hyperbook",
       },
     ],
     "root": "single-hyperbook",

@@ -10,13 +10,26 @@ describe("list", () => {
 
   it("should list all", async () => {
     const files = await vfile.list(hyperbookPath);
-    expect(
-      files.map((f) => ({
+    const relativeFiles = files.map((f) => {
+      if ("references" in f) {
+        return {
+          ...f,
+          root: relative(f.root),
+          path: { ...f.path, absolute: relative(f.path.absolute) },
+          references: f.references.map((f) => ({
+            ...f,
+            root: relative(f.root),
+            path: { ...f.path, absolute: relative(f.path.absolute) },
+          })),
+        } as vfile.VFileGlossary;
+      }
+      return {
         ...f,
         root: relative(f.root),
         path: { ...f.path, absolute: relative(f.path.absolute) },
-      }))
-    ).toMatchSnapshot();
+      };
+    });
+    expect(relativeFiles).toMatchSnapshot();
   });
 
   it("should list for folder book", async () => {
