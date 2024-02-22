@@ -11,7 +11,7 @@
   },
   "homepage": "https://hyperbook.openpatch.org",
   "main": "./out/extension.js",
-  "version": "0.19.12",
+  "version": "0.20.1",
   "engines": {
     "vscode": "^1.71.0"
   },
@@ -200,6 +200,7 @@
     "@hyperbook/element-struktog": "workspace:*",
     "@hyperbook/element-tabs": "workspace:*",
     "@hyperbook/element-term": "workspace:*",
+    "@hyperbook/element-tiles": "workspace:*",
     "@hyperbook/element-youtube": "workspace:*",
     "@hyperbook/fs": "workspace:*",
     "@hyperbook/markdown": "workspace:*",

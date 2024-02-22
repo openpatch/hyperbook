@@ -670,6 +670,34 @@ importers:
         specifier: 18.2.0
         version: 18.2.0(react@18.2.0)
 
+  packages/element-tiles:
+    dependencies:
+      '@hyperbook/provider':
+        specifier: workspace:*
+        version: link:../provider
+      '@hyperbook/store':
+        specifier: workspace:*
+        version: link:../store
+      react-redux:
+        specifier: 8.x
+        version: 8.1.0(@types/react-dom@18.0.6)(@types/react@18.0.15)(react-dom@18.2.0)(react@18.2.0)
+    devDependencies:
+      '@types/react':
+        specifier: 18.0.15
+        version: 18.0.15
+      '@types/react-dom':
+        specifier: 18.0.6
+        version: 18.0.6
+      react:
+        specifier: 18.2.0
+        version: 18.2.0
+      react-dom:
+        specifier: 18.2.0
+        version: 18.2.0(react@18.2.0)
+      vitest:
+        specifier: ^0.26.3
+        version: 0.26.3
+
   packages/element-video:
     dependencies:
       '@hyperbook/provider':
@@ -1116,6 +1144,9 @@ importers:
       '@hyperbook/element-term':
         specifier: workspace:*
         version: link:../../packages/element-term
+      '@hyperbook/element-tiles':
+        specifier: workspace:*
+        version: link:../../packages/element-tiles
       '@hyperbook/element-video':
         specifier: workspace:*
         version: link:../../packages/element-video
@@ -1303,6 +1334,9 @@ importers:
       '@hyperbook/element-term':
         specifier: workspace:*
         version: link:../../packages/element-term
+      '@hyperbook/element-tiles':
+        specifier: workspace:*
+        version: link:../../packages/element-tiles
       '@hyperbook/element-video':
         specifier: workspace:*
         version: link:../../packages/element-video
@@ -8142,6 +8176,7 @@ packages:
 
   /loupe@2.3.6:
     resolution: {integrity: sha512-RaPMZKiMy8/JruncMU5Bt6na1eftNoo++R4Y+N2FrxkDVTrGvcyzFTsaGif4QTeKESheMGegbhw6iUAq+5A8zA==}
+    deprecated: Please upgrade to 2.3.7 which fixes GHSA-4q6p-r6v2-jvc5
     dependencies:
       get-func-name: 2.0.0
     dev: true

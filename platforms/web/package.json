@@ -1,6 +1,6 @@
 {
   "name": "@platforms/web",
-  "version": "0.26.6",
+  "version": "0.27.1",
   "private": true,
   "scripts": {
     "build": "rimraf dist && tsc --project tsconfig.json --noEmit && node ./esbuild.mjs",
@@ -29,6 +29,7 @@
     "@hyperbook/element-struktog": "workspace:*",
     "@hyperbook/element-tabs": "workspace:*",
     "@hyperbook/element-term": "workspace:*",
+    "@hyperbook/element-tiles": "workspace:*",
     "@hyperbook/element-youtube": "workspace:*",
     "@hyperbook/fs": "workspace:*",
     "@hyperbook/markdown": "workspace:*",

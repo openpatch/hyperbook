@@ -1,5 +1,17 @@
 # hyperbook
 
+## 0.27.1
+
+### Patch Changes
+
+- [`add7313`](https://github.com/openpatch/hyperbook/commit/add7313099754952f27a5de4534607b55043f898) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - use type module for tiles package
+
+## 0.27.0
+
+### Minor Changes
+
+- [`1e92522`](https://github.com/openpatch/hyperbook/commit/1e925225fb8329ddc7b26317ec7779ee008da6a2) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - add tiles
+
 ## 0.26.6
 
 ### Patch Changes
