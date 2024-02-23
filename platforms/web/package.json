@@ -1,6 +1,6 @@
 {
   "name": "@platforms/web",
-  "version": "0.27.1",
+  "version": "0.28.0",
   "private": true,
   "scripts": {
     "build": "rimraf dist && tsc --project tsconfig.json --noEmit && node ./esbuild.mjs",
@@ -12,6 +12,7 @@
     "@hyperbook/drawer": "workspace:*",
     "@hyperbook/element-alert": "workspace:*",
     "@hyperbook/element-audio": "workspace:*",
+    "@hyperbook/element-video": "workspace:*",
     "@hyperbook/element-bitflow": "workspace:*",
     "@hyperbook/element-bookmarks": "workspace:*",
     "@hyperbook/element-collapsible": "workspace:*",

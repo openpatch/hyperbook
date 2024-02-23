@@ -52,7 +52,7 @@ importers:
         version: 18.2.0(react@18.2.0)
       react-redux:
         specifier: 8.1.0
-        version: 8.1.0(@types/react@18.2.12)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
+        version: 8.1.0(@reduxjs/toolkit@1.9.5)(@types/react-dom@18.2.5)(@types/react@18.2.12)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
       rimraf:
         specifier: 3.0.2
         version: 3.0.2
@@ -98,7 +98,7 @@ importers:
         version: link:../provider
       react-redux:
         specifier: 8.x
-        version: 8.0.5(@types/react-dom@18.2.5)(@types/react@18.2.12)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
+        version: 8.1.0(@reduxjs/toolkit@1.9.5)(@types/react-dom@18.2.5)(@types/react@18.2.12)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
     devDependencies:
       '@types/react':
         specifier: 18.2.12
@@ -202,7 +202,7 @@ importers:
         version: 7.44.3(react@18.2.0)
       react-redux:
         specifier: 8.x
-        version: 8.0.5(@types/react-dom@18.2.5)(@types/react@18.2.12)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
+        version: 8.1.0(@reduxjs/toolkit@1.9.5)(@types/react-dom@18.2.5)(@types/react@18.2.12)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
       zod:
         specifier: 3.21.4
         version: 3.21.4
@@ -227,10 +227,10 @@ importers:
         version: link:../provider
       '@reduxjs/toolkit':
         specifier: 1.x
-        version: 1.9.5(react-redux@8.0.5)(react@18.2.0)
+        version: 1.9.5(react-redux@8.1.0)(react@18.2.0)
       react-redux:
         specifier: 8.x
-        version: 8.0.5(@types/react-dom@18.2.5)(@types/react@18.2.12)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
+        version: 8.1.0(@reduxjs/toolkit@1.9.5)(@types/react-dom@18.2.5)(@types/react@18.2.12)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
     devDependencies:
       '@types/react':
         specifier: 18.2.12
@@ -261,7 +261,7 @@ importers:
         version: 4.0.2(react-dom@18.2.0)(react@18.2.0)
       react-redux:
         specifier: 8.x
-        version: 8.0.5(@types/react-dom@18.2.5)(@types/react@18.2.12)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
+        version: 8.1.0(@reduxjs/toolkit@1.9.5)(@types/react-dom@18.2.5)(@types/react@18.2.12)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
     devDependencies:
       '@types/object-hash':
         specifier: 3.0.2
@@ -286,10 +286,10 @@ importers:
         version: link:../provider
       '@reduxjs/toolkit':
         specifier: 1.x
-        version: 1.9.5(react-redux@8.0.5)(react@18.2.0)
+        version: 1.9.5(react-redux@8.1.0)(react@18.2.0)
       react-redux:
         specifier: 8.x
-        version: 8.0.5(@types/react-dom@18.2.5)(@types/react@18.2.12)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
+        version: 8.1.0(@reduxjs/toolkit@1.9.5)(@types/react-dom@18.2.5)(@types/react@18.2.12)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
     devDependencies:
       '@types/react':
         specifier: 18.2.12
@@ -314,7 +314,7 @@ importers:
         version: link:../store
       react-redux:
         specifier: 8.x
-        version: 8.0.5(@types/react-dom@18.2.5)(@types/react@18.2.12)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
+        version: 8.1.0(@reduxjs/toolkit@1.9.5)(@types/react-dom@18.2.5)(@types/react@18.2.12)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
     devDependencies:
       '@types/react':
         specifier: 18.2.12
@@ -342,10 +342,10 @@ importers:
         version: link:../provider
       '@reduxjs/toolkit':
         specifier: 1.x
-        version: 1.9.5(react-redux@8.0.5)(react@18.2.0)
+        version: 1.9.5(react-redux@8.1.0)(react@18.2.0)
       react-redux:
         specifier: 8.x
-        version: 8.0.5(@types/react-dom@18.2.5)(@types/react@18.2.12)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
+        version: 8.1.0(@reduxjs/toolkit@1.9.5)(@types/react-dom@18.2.5)(@types/react@18.2.12)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
     devDependencies:
       '@types/react':
         specifier: 18.2.12
@@ -367,13 +367,13 @@ importers:
         version: link:../provider
       '@reduxjs/toolkit':
         specifier: 1.x
-        version: 1.9.5(react-redux@8.0.5)(react@18.2.0)
+        version: 1.9.5(react-redux@8.1.0)(react@18.2.0)
       mermaid:
         specifier: 10.5.0
         version: 10.5.0
       react-redux:
         specifier: 8.x
-        version: 8.0.5(@types/react-dom@18.2.5)(@types/react@18.2.12)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
+        version: 8.1.0(@reduxjs/toolkit@1.9.5)(@types/react-dom@18.2.5)(@types/react@18.2.12)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
     devDependencies:
       '@types/react':
         specifier: 18.2.12
@@ -398,7 +398,7 @@ importers:
         version: 3.0.0
       react-redux:
         specifier: 8.x
-        version: 8.0.5(@types/react-dom@18.2.5)(@types/react@18.2.12)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
+        version: 8.1.0(@reduxjs/toolkit@1.9.5)(@types/react-dom@18.2.5)(@types/react@18.2.12)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
     devDependencies:
       '@types/object-hash':
         specifier: 3.0.2
@@ -466,13 +466,13 @@ importers:
         version: link:../store
       '@reduxjs/toolkit':
         specifier: 1.x
-        version: 1.9.5(react-redux@8.0.5)(react@18.2.0)
+        version: 1.9.5(react-redux@8.1.0)(react@18.2.0)
       object-hash:
         specifier: 3.0.0
         version: 3.0.0
       react-redux:
         specifier: 8.x
-        version: 8.0.5(@types/react-dom@18.2.5)(@types/react@18.2.12)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
+        version: 8.1.0(@reduxjs/toolkit@1.9.5)(@types/react-dom@18.2.5)(@types/react@18.2.12)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
     devDependencies:
       '@types/object-hash':
         specifier: 3.0.2
@@ -497,13 +497,13 @@ importers:
         version: link:../provider
       '@reduxjs/toolkit':
         specifier: 1.x
-        version: 1.9.5(react-redux@8.0.5)(react@18.2.0)
+        version: 1.9.5(react-redux@8.1.0)(react@18.2.0)
       qrcode:
         specifier: ^1.5.3
         version: 1.5.3
       react-redux:
         specifier: 8.x
-        version: 8.0.5(@types/react-dom@18.2.5)(@types/react@18.2.12)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
+        version: 8.1.0(@reduxjs/toolkit@1.9.5)(@types/react-dom@18.2.5)(@types/react@18.2.12)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
     devDependencies:
       '@types/qrcode':
         specifier: ^1.5.1
@@ -528,10 +528,10 @@ importers:
         version: link:../provider
       '@reduxjs/toolkit':
         specifier: 1.x
-        version: 1.9.5(react-redux@8.0.5)(react@18.2.0)
+        version: 1.9.5(react-redux@8.1.0)(react@18.2.0)
       react-redux:
         specifier: 8.x
-        version: 8.0.5(@types/react-dom@18.2.5)(@types/react@18.2.12)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
+        version: 8.1.0(@reduxjs/toolkit@1.9.5)(@types/react-dom@18.2.5)(@types/react@18.2.12)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
       scratchblocks:
         specifier: ^3.6.1
         version: 3.6.1
@@ -559,7 +559,7 @@ importers:
         version: 3.0.0
       react-redux:
         specifier: 8.x
-        version: 8.0.5(@types/react-dom@18.2.5)(@types/react@18.2.12)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
+        version: 8.1.0(@reduxjs/toolkit@1.9.5)(@types/react-dom@18.2.5)(@types/react@18.2.12)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
     devDependencies:
       '@types/object-hash':
         specifier: 3.0.2
@@ -587,7 +587,7 @@ importers:
         version: link:../provider
       '@reduxjs/toolkit':
         specifier: 1.x
-        version: 1.9.5(react-redux@8.0.5)(react@18.2.0)
+        version: 1.9.5(react-redux@8.1.0)(react@18.2.0)
       js-base64:
         specifier: 3.7.5
         version: 3.7.5
@@ -596,7 +596,7 @@ importers:
         version: 2.1.0
       react-redux:
         specifier: 8.x
-        version: 8.0.5(@types/react-dom@18.2.5)(@types/react@18.2.12)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
+        version: 8.1.0(@reduxjs/toolkit@1.9.5)(@types/react-dom@18.2.5)(@types/react@18.2.12)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
     devDependencies:
       '@types/pako':
         specifier: 2.0.0
@@ -627,7 +627,7 @@ importers:
         version: 3.0.0
       react-redux:
         specifier: 8.x
-        version: 8.0.5(@types/react-dom@18.2.5)(@types/react@18.2.12)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
+        version: 8.1.0(@reduxjs/toolkit@1.9.5)(@types/react-dom@18.2.5)(@types/react@18.2.12)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
     devDependencies:
       '@types/object-hash':
         specifier: 3.0.2
@@ -652,10 +652,10 @@ importers:
         version: link:../provider
       '@reduxjs/toolkit':
         specifier: 1.x
-        version: 1.9.5(react-redux@8.0.5)(react@18.2.0)
+        version: 1.9.5(react-redux@8.1.0)(react@18.2.0)
       react-redux:
         specifier: 8.x
-        version: 8.0.5(@types/react-dom@18.2.5)(@types/react@18.2.12)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
+        version: 8.1.0(@reduxjs/toolkit@1.9.5)(@types/react-dom@18.2.5)(@types/react@18.2.12)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
     devDependencies:
       '@types/react':
         specifier: 18.2.12
@@ -698,6 +698,40 @@ importers:
         specifier: ^0.26.3
         version: 0.26.3
 
+  packages/element-video:
+    dependencies:
+      '@hyperbook/provider':
+        specifier: workspace:*
+        version: link:../provider
+      '@hyperbook/store':
+        specifier: workspace:*
+        version: link:../store
+      '@types/wavesurfer.js':
+        specifier: ^6.0.6
+        version: 6.0.6
+      react-redux:
+        specifier: 8.x
+        version: 8.1.0(@types/react-dom@18.0.6)(@types/react@18.0.15)(react-dom@18.2.0)(react@18.2.0)
+      wavesurfer.js:
+        specifier: ^6.6.4
+        version: 6.6.4
+    devDependencies:
+      '@types/react':
+        specifier: 18.0.15
+        version: 18.0.15
+      '@types/react-dom':
+        specifier: 18.0.6
+        version: 18.0.6
+      react:
+        specifier: 18.2.0
+        version: 18.2.0
+      react-dom:
+        specifier: 18.2.0
+        version: 18.2.0(react@18.2.0)
+      vitest:
+        specifier: ^0.26.3
+        version: 0.26.3
+
   packages/element-youtube:
     dependencies:
       '@hyperbook/provider':
@@ -705,10 +739,10 @@ importers:
         version: link:../provider
       '@reduxjs/toolkit':
         specifier: 1.x
-        version: 1.9.5(react-redux@8.0.5)(react@18.2.0)
+        version: 1.9.5(react-redux@8.1.0)(react@18.2.0)
       react-redux:
         specifier: 8.x
-        version: 8.0.5(@types/react-dom@18.2.5)(@types/react@18.2.12)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
+        version: 8.1.0(@reduxjs/toolkit@1.9.5)(@types/react-dom@18.2.5)(@types/react@18.2.12)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
     devDependencies:
       '@types/react':
         specifier: 18.2.12
@@ -965,7 +999,7 @@ importers:
         version: link:../types
       react-redux:
         specifier: 8.x
-        version: 8.0.5(@types/react-dom@18.2.5)(@types/react@18.2.12)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
+        version: 8.1.0(@reduxjs/toolkit@1.9.5)(@types/react-dom@18.2.5)(@types/react@18.2.12)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
       redux:
         specifier: 4.2.1
         version: 4.2.1
@@ -1113,6 +1147,9 @@ importers:
       '@hyperbook/element-tiles':
         specifier: workspace:*
         version: link:../../packages/element-tiles
+      '@hyperbook/element-video':
+        specifier: workspace:*
+        version: link:../../packages/element-video
       '@hyperbook/element-youtube':
         specifier: workspace:*
         version: link:../../packages/element-youtube
@@ -1148,7 +1185,7 @@ importers:
         version: 18.2.0(react@18.2.0)
       react-redux:
         specifier: 8.1.0
-        version: 8.1.0(@types/react-dom@18.2.5)(@types/react@18.2.12)(react-dom@18.2.0)(react@18.2.0)
+        version: 8.1.0(@reduxjs/toolkit@1.9.5)(@types/react-dom@18.2.5)(@types/react@18.2.12)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
     devDependencies:
       '@hyperbook/types':
         specifier: workspace:*
@@ -1300,6 +1337,9 @@ importers:
       '@hyperbook/element-tiles':
         specifier: workspace:*
         version: link:../../packages/element-tiles
+      '@hyperbook/element-video':
+        specifier: workspace:*
+        version: link:../../packages/element-video
       '@hyperbook/element-youtube':
         specifier: workspace:*
         version: link:../../packages/element-youtube
@@ -1335,7 +1375,7 @@ importers:
         version: 18.2.0(react@18.2.0)
       react-redux:
         specifier: 8.1.0
-        version: 8.1.0(@types/react@18.2.12)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
+        version: 8.1.0(@reduxjs/toolkit@1.9.5)(@types/react-dom@18.2.5)(@types/react@18.2.12)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
       redux:
         specifier: 4.2.1
         version: 4.2.1
@@ -3379,25 +3419,6 @@ packages:
     resolution: {integrity: sha512-a5Sab1C4/icpTZVzZc5Ghpz88yQtGOyNqYXcZgOssB2uuAr+wF/MvN6bgtW32q7HHrvBki+BsZ0OuNv6EV3K9g==}
     dev: true
 
-  /@reduxjs/toolkit@1.9.5(react-redux@8.0.5)(react@18.2.0):
-    resolution: {integrity: sha512-Rt97jHmfTeaxL4swLRNPD/zV4OxTes4la07Xc4hetpUW/vc75t5m1ANyxG6ymnEQ2FsLQsoMlYB2vV1sO3m8tQ==}
-    peerDependencies:
-      react: ^16.9.0 || ^17.0.0 || ^18
-      react-redux: ^7.2.1 || ^8.0.2
-    peerDependenciesMeta:
-      react:
-        optional: true
-      react-redux:
-        optional: true
-    dependencies:
-      immer: 9.0.21
-      react: 18.2.0
-      react-redux: 8.0.5(@types/react-dom@18.2.5)(@types/react@18.2.12)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
-      redux: 4.2.1
-      redux-thunk: 2.4.2(redux@4.2.1)
-      reselect: 4.1.8
-    dev: false
-
   /@reduxjs/toolkit@1.9.5(react-redux@8.1.0)(react@18.2.0):
     resolution: {integrity: sha512-Rt97jHmfTeaxL4swLRNPD/zV4OxTes4la07Xc4hetpUW/vc75t5m1ANyxG6ymnEQ2FsLQsoMlYB2vV1sO3m8tQ==}
     peerDependencies:
@@ -3411,11 +3432,10 @@ packages:
     dependencies:
       immer: 9.0.21
       react: 18.2.0
-      react-redux: 8.1.0(@types/react@18.2.12)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
+      react-redux: 8.1.0(@reduxjs/toolkit@1.9.5)(@types/react-dom@18.2.5)(@types/react@18.2.12)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
       redux: 4.2.1
       redux-thunk: 2.4.2(redux@4.2.1)
       reselect: 4.1.8
-    dev: true
 
   /@sindresorhus/is@5.3.0:
     resolution: {integrity: sha512-CX6t4SYQ37lzxicAqsBtxA3OseeoVrh9cSJ5PFYam0GksYlupRfy1A+Q4aYD3zvcfECLc0zO2u+ZnR2UYKvCrw==}
@@ -10493,16 +10513,19 @@ packages:
       warning: 4.0.3
     dev: false
 
-  /react-redux@8.0.5(@types/react-dom@18.2.5)(@types/react@18.2.12)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1):
-    resolution: {integrity: sha512-Q2f6fCKxPFpkXt1qNRZdEDLlScsDWyrgSj0mliK59qU6W5gvBiKkdMEG2lJzhd1rCctf0hb6EtePPLZ2e0m1uw==}
+  /react-redux@8.1.0(@reduxjs/toolkit@1.9.5)(@types/react-dom@18.2.5)(@types/react@18.2.12)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1):
+    resolution: {integrity: sha512-CtHZzAOxi7GQvTph4dVLWwZHAWUjV2kMEQtk50OrN8z3gKxpWg3Tz7JfDw32N3Rpd7fh02z73cF6yZkK467gbQ==}
     peerDependencies:
+      '@reduxjs/toolkit': ^1 || ^2.0.0-beta.0
       '@types/react': ^16.8 || ^17.0 || ^18.0
       '@types/react-dom': ^16.8 || ^17.0 || ^18.0
       react: ^16.8 || ^17.0 || ^18.0
       react-dom: ^16.8 || ^17.0 || ^18.0
       react-native: '>=0.59'
-      redux: ^4
+      redux: ^4 || ^5.0.0-beta.0
     peerDependenciesMeta:
+      '@reduxjs/toolkit':
+        optional: true
       '@types/react':
         optional: true
       '@types/react-dom':
@@ -10514,7 +10537,8 @@ packages:
       redux:
         optional: true
     dependencies:
-      '@babel/runtime': 7.20.13
+      '@babel/runtime': 7.22.5
+      '@reduxjs/toolkit': 1.9.5(react-redux@8.1.0)(react@18.2.0)
       '@types/hoist-non-react-statics': 3.3.1
       '@types/react': 18.2.12
       '@types/react-dom': 18.2.5
@@ -10525,7 +10549,6 @@ packages:
       react-is: 18.2.0
       redux: 4.2.1
       use-sync-external-store: 1.2.0(react@18.2.0)
-    dev: false
 
   /react-redux@8.1.0(@types/react-dom@18.0.6)(@types/react@18.0.15)(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-CtHZzAOxi7GQvTph4dVLWwZHAWUjV2kMEQtk50OrN8z3gKxpWg3Tz7JfDw32N3Rpd7fh02z73cF6yZkK467gbQ==}
@@ -10562,77 +10585,6 @@ packages:
       react-is: 18.2.0
       use-sync-external-store: 1.2.0(react@18.2.0)
     dev: false
-
-  /react-redux@8.1.0(@types/react-dom@18.2.5)(@types/react@18.2.12)(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-CtHZzAOxi7GQvTph4dVLWwZHAWUjV2kMEQtk50OrN8z3gKxpWg3Tz7JfDw32N3Rpd7fh02z73cF6yZkK467gbQ==}
-    peerDependencies:
-      '@reduxjs/toolkit': ^1 || ^2.0.0-beta.0
-      '@types/react': ^16.8 || ^17.0 || ^18.0
-      '@types/react-dom': ^16.8 || ^17.0 || ^18.0
-      react: ^16.8 || ^17.0 || ^18.0
-      react-dom: ^16.8 || ^17.0 || ^18.0
-      react-native: '>=0.59'
-      redux: ^4 || ^5.0.0-beta.0
-    peerDependenciesMeta:
-      '@reduxjs/toolkit':
-        optional: true
-      '@types/react':
-        optional: true
-      '@types/react-dom':
-        optional: true
-      react-dom:
-        optional: true
-      react-native:
-        optional: true
-      redux:
-        optional: true
-    dependencies:
-      '@babel/runtime': 7.22.5
-      '@types/hoist-non-react-statics': 3.3.1
-      '@types/react': 18.2.12
-      '@types/react-dom': 18.2.5
-      '@types/use-sync-external-store': 0.0.3
-      hoist-non-react-statics: 3.3.2
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-      react-is: 18.2.0
-      use-sync-external-store: 1.2.0(react@18.2.0)
-    dev: false
-
-  /react-redux@8.1.0(@types/react@18.2.12)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1):
-    resolution: {integrity: sha512-CtHZzAOxi7GQvTph4dVLWwZHAWUjV2kMEQtk50OrN8z3gKxpWg3Tz7JfDw32N3Rpd7fh02z73cF6yZkK467gbQ==}
-    peerDependencies:
-      '@reduxjs/toolkit': ^1 || ^2.0.0-beta.0
-      '@types/react': ^16.8 || ^17.0 || ^18.0
-      '@types/react-dom': ^16.8 || ^17.0 || ^18.0
-      react: ^16.8 || ^17.0 || ^18.0
-      react-dom: ^16.8 || ^17.0 || ^18.0
-      react-native: '>=0.59'
-      redux: ^4 || ^5.0.0-beta.0
-    peerDependenciesMeta:
-      '@reduxjs/toolkit':
-        optional: true
-      '@types/react':
-        optional: true
-      '@types/react-dom':
-        optional: true
-      react-dom:
-        optional: true
-      react-native:
-        optional: true
-      redux:
-        optional: true
-    dependencies:
-      '@babel/runtime': 7.22.5
-      '@types/hoist-non-react-statics': 3.3.1
-      '@types/react': 18.2.12
-      '@types/use-sync-external-store': 0.0.3
-      hoist-non-react-statics: 3.3.2
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-      react-is: 18.2.0
-      redux: 4.2.1
-      use-sync-external-store: 1.2.0(react@18.2.0)
 
   /react-syntax-highlighter@15.5.0(react@18.2.0):
     resolution: {integrity: sha512-+zq2myprEnQmH5yw6Gqc8lD55QHnpKaU8TOcFeC/Lg/MQSs8UknEA0JC4nTZGFAXC2J2Hyj/ijJ7NlabyPi2gg==}

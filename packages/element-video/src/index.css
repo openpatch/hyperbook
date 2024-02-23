@@ -1,0 +1,26 @@
+.element-video {
+  margin-bottom: 16px;
+}
+
+.element-video .information {
+  margin-top: 4px;
+  text-align: center;
+  font-style: italic;
+}
+
+.element-video .description {
+  margin-top: 10px;
+  text-align: center;
+}
+
+.element-video .player {
+  display: flex;
+  overflow: hidden;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-nav);
+  border-radius: 8px;
+  border-style: solid;
+  border-width: 1px;
+  border-color: var(--color-nav-border);
+}
