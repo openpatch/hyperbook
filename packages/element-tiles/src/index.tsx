@@ -1,6 +1,7 @@
-import { FC, Fragment, ReactNode } from "react";
+import { FC, ReactNode } from "react";
 import { createSlice } from "@hyperbook/store";
 import "./index.css";
+import { useMakeUrl } from "@hyperbook/provider";
 
 type DirectiveTilesProps = {
   children?: ReactNode;
@@ -28,6 +29,9 @@ const DirectiveTile: FC<DirectiveTileProps> = ({
   href,
   icon,
 }) => {
+  const makeUrl = useMakeUrl();
+  href = makeUrl(href, "public");
+  icon = makeUrl(icon, "public");
   return (
     <li className={`tile ${size} ${href ? "link" : ""}`}>
       <a className="tile-title" href={href}>
