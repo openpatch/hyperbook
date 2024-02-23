@@ -1,5 +1,13 @@
 # hyperbook-simple-template
 
+## 0.28.1
+
+### Patch Changes
+
+- Updated dependencies [[`2eca214`](https://github.com/openpatch/hyperbook/commit/2eca214b355e3cdfec59f21cc067539666cdf5f7)]:
+  - @hyperbook/element-tiles@0.1.2
+  - @hyperbook/element-video@0.2.1
+
 ## 0.28.0
 
 ### Minor Changes

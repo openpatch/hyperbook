@@ -1,5 +1,11 @@
 # @hyperbook/element-video
 
+## 0.2.1
+
+### Patch Changes
+
+- Fix not using baseUrl
+
 ## 0.2.0
 
 ### Minor Changes

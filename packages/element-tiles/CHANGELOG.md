@@ -1,5 +1,11 @@
 # @hyperbook/element-tiles
 
+## 0.1.2
+
+### Patch Changes
+
+- [`2eca214`](https://github.com/openpatch/hyperbook/commit/2eca214b355e3cdfec59f21cc067539666cdf5f7) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix not using baseUrl
+
 ## 0.1.1
 
 ### Patch Changes
