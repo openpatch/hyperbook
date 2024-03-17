@@ -10,6 +10,7 @@ export {
   VFilePublic,
   VFileArchive,
   VFileSnippet,
+  getMarkdown,
 } from "./vfile";
 
 export { hyperlibrary, hyperbook, hyperproject, vfile };

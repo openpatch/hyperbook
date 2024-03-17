@@ -1,3 +1,4 @@
+@import "@hyperbook/drawer/index.css";
 @import "@hyperbook/shell/index.css";
 @import "@hyperbook/markdown/katex.css";
 @import "@hyperbook/markdown/index.css";
@@ -23,9 +24,20 @@
 @import "@hyperbook/element-online-ide/index.css";
 @import "@hyperbook/element-sql-ide/index.css";
 
+html,
 body {
   padding: 0;
   margin: 0;
+  overflow: hidden;
+}
+
+body {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+body::-webkit-scrollbar {
+  display: none;
 }
 
 #root {

@@ -181,6 +181,7 @@
     "webpack-cli": "4.10.0"
   },
   "dependencies": {
+    "@hyperbook/drawer": "workspace:*",
     "@hyperbook/element-audio": "workspace:*",
     "@hyperbook/element-video": "workspace:*",
     "@hyperbook/element-alert": "workspace:*",

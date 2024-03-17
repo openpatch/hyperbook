@@ -14,6 +14,7 @@
     "version-packages": "changeset version",
     "release": "changeset publish",
     "platform:web:dev": "pnpm --filter @platforms/web dev",
+    "platform:vscode:dev": "pnpm --filter hyperbook-studio watch",
     "examples:setup": "cd examples && HYPERBOOK_LOCAL_DEV=1 node ../packages/hyperbook/dist/index.js setup",
     "examples:build": "cd examples && HYPERBOOK_LOCAL_DEV=1 node ../packages/hyperbook/dist/index.js build",
     "website:setup": "cd website && HYPERBOOK_LOCAL_DEV=1 node ../packages/hyperbook/dist/index.js setup",

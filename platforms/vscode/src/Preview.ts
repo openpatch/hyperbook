@@ -7,6 +7,7 @@ import {
   VFileGlossary,
   vfile,
   VFile,
+  getMarkdown,
 } from "@hyperbook/fs";
 import { htmlTemplate } from "./html-template";
 import { disposeAll } from "./utils/dispose";
@@ -193,6 +194,12 @@ export default class Preview {
       this._vfile
     ) {
       console.log("Partial update");
+
+      this._vfile = {
+        ...this._vfile,
+        markdown: await getMarkdown(this._vfile),
+      };
+
       this.postMessage({
         type: "CHANGE",
         payload: await this.getState(false),

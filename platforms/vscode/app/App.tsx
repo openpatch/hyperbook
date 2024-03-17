@@ -64,7 +64,7 @@ export const App = () => {
   }, []);
 
   if (!state) {
-    return <div>...</div>;
+    return <div>...Loading</div>;
   }
 
   return (

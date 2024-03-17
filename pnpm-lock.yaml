@@ -1090,6 +1090,9 @@ importers:
 
   platforms/vscode:
     dependencies:
+      '@hyperbook/drawer':
+        specifier: workspace:*
+        version: link:../../packages/drawer
       '@hyperbook/element-alert':
         specifier: workspace:*
         version: link:../../packages/element-alert
