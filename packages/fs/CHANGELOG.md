@@ -1,5 +1,11 @@
 # @hyperbook/fs
 
+## 0.11.1
+
+### Patch Changes
+
+- [`cfdb112`](https://github.com/openpatch/hyperbook/commit/cfdb112f3c845db5607f681e4bb2ac521523d292) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix drawer in hyperbook-studio
+
 ## 0.11.0
 
 ### Minor Changes
