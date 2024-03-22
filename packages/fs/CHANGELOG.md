@@ -1,5 +1,11 @@
 # @hyperbook/fs
 
+## 0.11.2
+
+### Patch Changes
+
+- [`5792288`](https://github.com/openpatch/hyperbook/commit/57922883e159929aba257f8411fd122f0e804daf) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - fix snippets not respecting whitespace
+
 ## 0.11.1
 
 ### Patch Changes
