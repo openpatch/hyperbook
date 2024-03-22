@@ -690,7 +690,7 @@ export const getMarkdown = async (
     );
     const template = handlebars.compile(snippetFile);
     const vars = {};
-    for (const m of snippet[4].split(" ")) {
+    for (const m of snippet[4].match(/(?:[^\s"]+|"[^"]*")+/g) || []) {
       const r = varReg.exec(m);
       if (r) {
         if (r[2].startsWith('"') && r[2].endsWith('"')) {

@@ -8,31 +8,9 @@ exports[`hyperbook > should get navigation 1`] = `
     "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/paradigms.md",
   },
   "next": {
-    "href": "/subsection3",
-    "isEmpty": false,
-    "name": "Use Template1 with YAML",
-    "pages": [
-      {
-        "href": "/subsection3/single-template",
-        "name": "single-template",
-        "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/subsection3/single-template.md.hbs",
-      },
-    ],
-    "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/subsection3/index.yml",
-    "sections": [
-      {
-        "isEmpty": true,
-        "name": "subsection31",
-        "pages": [
-          {
-            "href": "/subsection3/subsection31/test",
-            "name": "Test",
-            "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/subsection3/subsection31/test.md",
-          },
-        ],
-        "sections": [],
-      },
-    ],
+    "href": "/whitespace-test",
+    "name": "whitespace-test",
+    "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/whitespace-test.md",
   },
   "pages": [
     {
@@ -44,6 +22,11 @@ exports[`hyperbook > should get navigation 1`] = `
       "href": "/paradigms",
       "name": "Paradigms",
       "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/paradigms.md",
+    },
+    {
+      "href": "/whitespace-test",
+      "name": "whitespace-test",
+      "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/whitespace-test.md",
     },
   ],
   "previous": {

@@ -95,6 +95,17 @@ Example use of a template.
 }
 `;
 
+exports[`getMarkdown > should render snippet with whitespace 1`] = `
+{
+  "content": "\\"My Title\\"
+
+This is a test description!
+
+",
+  "data": {},
+}
+`;
+
 exports[`list > should get references 1`] = `
 [
   {
@@ -199,6 +210,26 @@ exports[`list > should list all 1`] = `
       "directory": "",
       "href": "/paradigms",
       "relative": "paradigms.md",
+    },
+    "root": "single-hyperbook",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "markdown": {
+      "content": "\\"My Title\\"
+
+This is a test description!
+
+",
+      "data": {},
+    },
+    "name": "whitespace-test",
+    "path": {
+      "absolute": "single-hyperbook/book/whitespace-test.md",
+      "directory": "",
+      "href": "/whitespace-test",
+      "relative": "whitespace-test.md",
     },
     "root": "single-hyperbook",
   },
@@ -406,6 +437,26 @@ Example use of a template.
       "directory": "",
       "href": "/paradigms",
       "relative": "paradigms.md",
+    },
+    "root": "single-hyperbook",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "markdown": {
+      "content": "\\"My Title\\"
+
+This is a test description!
+
+",
+      "data": {},
+    },
+    "name": "whitespace-test",
+    "path": {
+      "absolute": "single-hyperbook/book/whitespace-test.md",
+      "directory": "",
+      "href": "/whitespace-test",
+      "relative": "whitespace-test.md",
     },
     "root": "single-hyperbook",
   },
@@ -618,6 +669,26 @@ exports[`list > should list for folder book 1`] = `
       "directory": "",
       "href": "/paradigms",
       "relative": "paradigms.md",
+    },
+    "root": "single-hyperbook",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "markdown": {
+      "content": "\\"My Title\\"
+
+This is a test description!
+
+",
+      "data": {},
+    },
+    "name": "whitespace-test",
+    "path": {
+      "absolute": "single-hyperbook/book/whitespace-test.md",
+      "directory": "",
+      "href": "/whitespace-test",
+      "relative": "whitespace-test.md",
     },
     "root": "single-hyperbook",
   },

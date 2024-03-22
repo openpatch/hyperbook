@@ -66,6 +66,17 @@ describe("getMarkdown", () => {
     expect(await vfile.getMarkdown(templateFile)).toMatchSnapshot();
   });
 
+  it("should render snippet with whitespace", async () => {
+    let files = await vfile.list(hyperbookPath);
+    let whitespaceTest = files.find(
+      (f) => f.path.relative === "whitespace-test.md" && f.folder === "book"
+    );
+    if (!whitespaceTest) {
+      throw Error("File not found");
+    }
+    expect(await vfile.getMarkdown(whitespaceTest)).toMatchSnapshot();
+  });
+
   it("should get markdown from template for index", async () => {
     let files = await vfile.list(hyperbookPath);
     let templateFile = files.find(
