@@ -47,6 +47,8 @@ import elementScratchblock from "@hyperbook/element-scratchblock";
 import "@hyperbook/element-scratchblock/index.css";
 import elementTiles from "@hyperbook/element-tiles";
 import "@hyperbook/element-tiles/index.css";
+import elementSlideshow from "@hyperbook/element-slideshow";
+import "@hyperbook/element-slideshow/index.css";
 import Link from "next/link";
 import Head from "next/head";
 import { Styles } from "@hyperbook/styles";
@@ -117,6 +119,7 @@ export default function MyApp({ Component, pageProps }) {
         elementScratchblock,
         elementBitflow,
         elementTiles,
+        elementSlideshow,
       ]}
       router={router}
       storage={typeof window !== "undefined" ? localStorage : noopStorage}

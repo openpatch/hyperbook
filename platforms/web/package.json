@@ -26,6 +26,7 @@
     "@hyperbook/element-qr": "workspace:*",
     "@hyperbook/element-scratchblock": "workspace:*",
     "@hyperbook/element-sql-ide": "workspace:*",
+    "@hyperbook/element-slideshow": "workspace:*",
     "@hyperbook/element-struktog": "workspace:*",
     "@hyperbook/element-tabs": "workspace:*",
     "@hyperbook/element-term": "workspace:*",

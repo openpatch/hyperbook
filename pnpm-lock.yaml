@@ -549,6 +549,34 @@ importers:
         specifier: 18.2.0
         version: 18.2.0(react@18.2.0)
 
+  packages/element-slideshow:
+    dependencies:
+      '@hyperbook/provider':
+        specifier: workspace:*
+        version: link:../provider
+      '@hyperbook/store':
+        specifier: workspace:*
+        version: link:../store
+      react-redux:
+        specifier: 8.x
+        version: 8.1.0(@types/react-dom@18.0.6)(@types/react@18.0.15)(react-dom@18.2.0)(react@18.2.0)
+    devDependencies:
+      '@types/react':
+        specifier: 18.0.15
+        version: 18.0.15
+      '@types/react-dom':
+        specifier: 18.0.6
+        version: 18.0.6
+      react:
+        specifier: 18.2.0
+        version: 18.2.0
+      react-dom:
+        specifier: 18.2.0
+        version: 18.2.0(react@18.2.0)
+      vitest:
+        specifier: ^0.26.3
+        version: 0.26.3
+
   packages/element-sql-ide:
     dependencies:
       '@hyperbook/provider':
@@ -1325,6 +1353,9 @@ importers:
       '@hyperbook/element-scratchblock':
         specifier: workspace:*
         version: link:../../packages/element-scratchblock
+      '@hyperbook/element-slideshow':
+        specifier: workspace:*
+        version: link:../../packages/element-slideshow
       '@hyperbook/element-sql-ide':
         specifier: workspace:*
         version: link:../../packages/element-sql-ide

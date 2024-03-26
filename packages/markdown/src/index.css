@@ -90,17 +90,17 @@
   }
 }
 
-.hyperbook-markdown figure {
+.hyperbook-markdown figure.normal {
   text-align: center;
   margin-top: 10px;
   margin-bottom: 10px;
 }
 
-.hyperbook-markdown figure img {
+.hyperbook-markdown figure.normal img {
   cursor: zoom-in;
 }
 
-.hyperbook-markdown figcaption {
+.hyperbook-markdown figure.normal figcaption {
   font-style: italic;
   font-size: 14px;
   max-width: 400px;

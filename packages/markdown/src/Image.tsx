@@ -11,9 +11,17 @@ export const Image: ComponentType<JSX.IntrinsicElements["img"]> = ({
   src = makeUrl(src, "public");
 
   return (
-    <figure className={full ? "lightbox" : undefined}>
-      <img src={src} alt={alt} onClick={() => setFull((f) => !f)} />
-      {title && <figcaption>{title}</figcaption>}
-    </figure>
+    <>
+      {full && (
+        <figure className={"lightbox"}>
+          <img src={src} alt={alt} onClick={() => setFull((f) => !f)} />
+          {title && <figcaption>{title}</figcaption>}
+        </figure>
+      )}
+      <figure className={"normal"}>
+        <img src={src} alt={alt} onClick={() => setFull((f) => !f)} />
+        {title && <figcaption>{title}</figcaption>}
+      </figure>
+    </>
   );
 };
