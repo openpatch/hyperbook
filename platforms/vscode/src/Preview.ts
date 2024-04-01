@@ -66,10 +66,11 @@ export default class Preview {
               name: "@Hyperbook@",
             } as const)
         );
-      if (vscode.workspace.rootPath) {
+      const rootPath = vscode.workspace.getWorkspaceFolder(this._resource);
+      if (rootPath) {
         const projectPath = this.hyperbookViewerConfig.get("root");
         const project = await hyperproject.get(
-          path.join(vscode.workspace.rootPath, projectPath)
+          path.join(rootPath.uri.path, projectPath)
         );
         const links = [];
         if (config.links) {
@@ -85,10 +86,7 @@ export default class Preview {
           });
           links.push(link);
         }
-        const basePath = path.relative(
-          vscode.workspace.rootPath,
-          hyperbookRoot
-        );
+        const basePath = path.relative(rootPath.uri.path, hyperbookRoot);
 
         return {
           ...config,
@@ -156,20 +154,12 @@ export default class Preview {
       this.panel.title = `[Preview] ${fileName}`;
       this._resource = vscode.window.activeTextEditor.document.uri;
       const hyperbookRoot = await hyperbook.findRoot(this._resource.path);
-      this._vfile = await vfile.get(
-        hyperbookRoot,
-        "book",
-        this._resource.path,
-        "absolute"
-      );
-      if (!this._vfile) {
-        this._vfile = await vfile.get(
-          hyperbookRoot,
-          "glossary",
-          this._resource.path,
-          "absolute"
-        );
-      }
+      const resourcePath = this._resource.path;
+      this._vfile = await vfile
+        .get(hyperbookRoot, "book", resourcePath, "absolute")
+        .catch(async () => {
+          return vfile.get(hyperbookRoot, "glossary", resourcePath, "absolute");
+        });
 
       this.postMessage({
         type: "CHANGE",
@@ -213,16 +203,6 @@ export default class Preview {
     } else {
       return "";
     }
-  }
-
-  getDynamicContentPath(filepath: string) {
-    const onDiskPath = vscode.Uri.joinPath(
-      vscode.Uri.parse(vscode.workspace.rootPath || ""),
-      "content/media",
-      filepath
-    );
-    const styleSrc = this.panel?.webview.asWebviewUri(onDiskPath);
-    return styleSrc;
   }
 
   checkDocumentIsHyperbookFile(showWarning: boolean): boolean {
@@ -283,6 +263,7 @@ export default class Preview {
 
       this.panel.webview.onDidReceiveMessage(async (m: Message) => {
         if (m.type === "OPEN" && this._vfile) {
+          console.log(m);
           if (m.payload.path.startsWith("file")) {
             const fileUri = vscode.Uri.parse(m.payload.path);
             return vscode.workspace
@@ -294,16 +275,9 @@ export default class Preview {
 
           let file: VFile = await vfile.get(
             this._vfile.root,
-            "book",
+            (m.payload.rootFolder as any) || "book",
             m.payload.path
           );
-          if (!file) {
-            file = await vfile.get(
-              this._vfile.root,
-              "glossary",
-              m.payload.path
-            );
-          }
 
           if (file) {
             const fileUri = vscode.Uri.file(file.path.absolute);

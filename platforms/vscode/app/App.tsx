@@ -21,6 +21,7 @@ import elementEmbed from "@hyperbook/element-embed";
 import elementExcalidraw from "@hyperbook/element-excalidraw";
 import elementOnlineIde from "@hyperbook/element-online-ide";
 import elementSqlIde from "@hyperbook/element-sql-ide";
+import elementSlideshow from "@hyperbook/element-slideshow";
 import { Markdown } from "@hyperbook/markdown";
 import { Styles } from "@hyperbook/styles";
 import { ChangeMessage, Message } from "../src/messages/messageTypes";
@@ -156,6 +157,7 @@ export const App = () => {
           elementScratchblock,
           elementExcalidraw,
           elementTiles,
+          elementSlideshow,
         ]}
         loadFile={() => async (path) => {
           return fetch(path).then((res) => res.text());

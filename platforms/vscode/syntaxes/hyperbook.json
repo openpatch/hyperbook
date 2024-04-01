@@ -1,5 +1,7 @@
 {
+  "name": "hyperbook",
   "scopeName": "markdown.hyperbook",
+  "injectionSelector": "L:text.html",
   "patterns": [
     {
       "include": "#directive-alert"
@@ -63,6 +65,18 @@
     },
     {
       "include": "#directive-plantuml"
+    },
+    {
+      "include": "#directive-slideshow"
+    },
+    {
+      "include": "#directive-audio"
+    },
+    {
+      "include": "#directive-tiles"
+    },
+    {
+      "include": "#directive-video"
     }
   ],
   "repository": {
@@ -88,14 +102,7 @@
       },
       "patterns": [
         {
-          "begin": "(^|\\G)(\\s*)(.*)",
-          "while": "(^|\\G)(?!\\s*(:{3,})\\s*$)",
-          "contentName": "meta.embedded.block.markdown",
-          "patterns": [
-            {
-              "include": "text.html.markdown"
-            }
-          ]
+          "include": "text.html.markdown"
         }
       ]
     },
@@ -135,7 +142,7 @@
     },
     "directive-collapsible": {
       "name": "meta.directive.collapsible.hyperbook",
-      "begin": "(^|\\G)(:{3,})(collapsible){(.*)}\\s*$",
+      "begin": "(^|\\G)(:{3,})(collapsible)({.*})?\\s*$",
       "end": "(^|\\G)(\\2)\\s*$",
       "beginCaptures": {
         "2": {
@@ -167,14 +174,7 @@
       },
       "patterns": [
         {
-          "begin": "(^|\\G)(\\s*)(.*)",
-          "while": "(^|\\G)(?!\\s*(:{3,}))\\s*$",
-          "contentName": "meta.embedded.block.markdown",
-          "patterns": [
-            {
-              "include": "text.html.markdown"
-            }
-          ]
+          "include": "text.html.markdown"
         }
       ]
     },
@@ -287,8 +287,9 @@
     },
     "directive-protect": {
       "name": "meta.directive.protect.hyperbook",
-      "match": "(^|\\G)(:{2,})(protect){(.*)}\\s*$",
-      "captures": {
+      "begin": "(^|\\G)(:{3,})(protect){(.*)}\\s*$",
+      "end": "(^|\\G)(\\2)\\s*$",
+      "beginCaptures": {
         "2": {
           "name": "punctuation.definition.directive.level.hyperbook"
         },
@@ -310,7 +311,17 @@
             }
           ]
         }
-      }
+      },
+      "endCaptures": {
+        "2": {
+          "name": "punctuation.definition.directive.level.hyperbook"
+        }
+      },
+      "patterns": [
+        {
+          "include": "text.html.markdown"
+        }
+      ]
     },
     "directive-qr": {
       "name": "meta.directive.qr.hyperbook",
@@ -439,7 +450,7 @@
               "match": "(id)=\"([a-zA-z0-9-.]+)\"",
               "captures": {
                 "1": {
-                  "name": "keyword.parameter.directive.struktog.hyperbook"
+                  "name": "keyword.parameter.directive.tabs.hyperbook"
                 },
                 "2": {
                   "name": "string.quoted.double.untitled"
@@ -494,14 +505,7 @@
       },
       "patterns": [
         {
-          "begin": "(^|\\G)(\\s*)(.*)",
-          "while": "(^|\\G)(?!\\s*(:{3,})\\s*$)",
-          "contentName": "meta.embedded.block.markdown",
-          "patterns": [
-            {
-              "include": "text.html.markdown"
-            }
-          ]
+          "include": "text.html.markdown"
         }
       ]
     },
@@ -539,14 +543,7 @@
       },
       "patterns": [
         {
-          "begin": "(^|\\G)(\\s*)(.*)",
-          "while": "(^|\\G)(?!\\s*(:{3,})\\s*$)",
-          "contentName": "meta.embedded.block.markdown",
-          "patterns": [
-            {
-              "include": "text.html.markdown"
-            }
-          ]
+          "include": "text.html.markdown"
         }
       ]
     },
@@ -567,7 +564,7 @@
               "match": "(url|id)=\"([^\"]*)\"",
               "captures": {
                 "1": {
-                  "name": "keyword.parameter.directive.scratchblock.hyperbook"
+                  "name": "keyword.parameter.directive.onlineide.hyperbook"
                 },
                 "2": {
                   "name": "string.quoted.double.untitled"
@@ -578,7 +575,18 @@
               "match": "(height)=\"([0-9]+)(px|%)\"",
               "captures": {
                 "1": {
-                  "name": "keyword.parameter.directive.bitflow.hyperbook"
+                  "name": "keyword.parameter.directive.onlineide.hyperbook"
+                },
+                "2": {
+                  "name": "string.quoted.double.untitled"
+                }
+              }
+            },
+            {
+              "match": "(height)=([0-9]+)",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.onlineide.hyperbook"
                 },
                 "2": {
                   "name": "constant.numeric"
@@ -609,14 +617,7 @@
       },
       "patterns": [
         {
-          "begin": "(^|\\G)(\\s*)(.*)",
-          "while": "(^|\\G)(?!\\s*(:{3,})\\s*$)",
-          "contentName": "meta.embedded.block.markdown",
-          "patterns": [
-            {
-              "include": "text.html.markdown"
-            }
-          ]
+          "include": "text.html.markdown"
         }
       ]
     },
@@ -637,7 +638,7 @@
               "match": "(url|id|db)=\"([^\"]*)\"",
               "captures": {
                 "1": {
-                  "name": "keyword.parameter.directive.scratchblock.hyperbook"
+                  "name": "keyword.parameter.directive.onlineide.hyperbook"
                 },
                 "2": {
                   "name": "string.quoted.double.untitled"
@@ -648,7 +649,18 @@
               "match": "(height)=\"([0-9]+)(px|%)\"",
               "captures": {
                 "1": {
-                  "name": "keyword.parameter.directive.bitflow.hyperbook"
+                  "name": "keyword.parameter.directive.onlineide.hyperbook"
+                },
+                "2": {
+                  "name": "constant.numeric"
+                }
+              }
+            },
+            {
+              "match": "(height)=([0-9]+)",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.onlineide.hyperbook"
                 },
                 "2": {
                   "name": "constant.numeric"
@@ -665,20 +677,13 @@
       },
       "patterns": [
         {
-          "begin": "(^|\\G)(\\s*)(.*)",
-          "while": "(^|\\G)(?!\\s*(:{3,})\\s*$)",
-          "contentName": "meta.embedded.block.markdown",
-          "patterns": [
-            {
-              "include": "text.html.markdown"
-            }
-          ]
+          "include": "text.html.markdown"
         }
       ]
     },
     "directive-embed": {
       "name": "meta.directive.embed.hyperbook",
-      "match": "(^|\\G)(:{1,})(embed)\\[(.+)\\]{(.*)}\\s*$",
+      "match": "(^|\\G)(:{1,})(embed){(.*)}\\s*$",
       "captures": {
         "2": {
           "name": "punctuation.definition.directive.level.hyperbook"
@@ -695,7 +700,7 @@
               "match": "(src|title|aspectRatio)=\"([^\"]*)\"",
               "captures": {
                 "1": {
-                  "name": "keyword.parameter.directive.download.hyperbook"
+                  "name": "keyword.parameter.directive.embed.hyperbook"
                 },
                 "2": {
                   "name": "string.quoted.double.untitled"
@@ -706,7 +711,18 @@
               "match": "(height|width)=\"([0-9]+)(px|%)\"",
               "captures": {
                 "1": {
-                  "name": "keyword.parameter.directive.bitflow.hyperbook"
+                  "name": "keyword.parameter.directive.embed.hyperbook"
+                },
+                "2": {
+                  "name": "string.quoted.double.untitled"
+                }
+              }
+            },
+            {
+              "match": "(height|width)=([0-9]+)",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.embed.hyperbook"
                 },
                 "2": {
                   "name": "constant.numeric"
@@ -714,10 +730,10 @@
               }
             },
             {
-              "match": "(allowFullScreen)=(?:(false)|(true))",
+              "match": "(allowFullscreen)=(?:(false)|(true))",
               "captures": {
                 "1": {
-                  "name": "keyword.parameter.directive.onlineide.hyperbook"
+                  "name": "keyword.parameter.directive.embed.hyperbook"
                 },
                 "2": {
                   "name": "constant.language.boolean.false"
@@ -748,7 +764,7 @@
               "match": "(alt)=\"([^\"]*)\"",
               "captures": {
                 "1": {
-                  "name": "keyword.parameter.directive.scratchblock.hyperbook"
+                  "name": "keyword.parameter.directive.plantuml.hyperbook"
                 },
                 "2": {
                   "name": "string.quoted.double.untitled"
@@ -759,7 +775,7 @@
               "match": "(width)=\"([0-9]+)(px|%)\"",
               "captures": {
                 "1": {
-                  "name": "keyword.parameter.directive.bitflow.hyperbook"
+                  "name": "keyword.parameter.directive.plantuml.hyperbook"
                 },
                 "2": {
                   "name": "constant.numeric"
@@ -776,16 +792,162 @@
       },
       "patterns": [
         {
-          "begin": "(^|\\G)(\\s*)(.*)",
-          "while": "(^|\\G)(?!\\s*(:{3,})\\s*$)",
-          "contentName": "meta.embedded.block.plantuml",
+          "include": "source.wsd"
+        }
+      ]
+    },
+    "directive-slideshow": {
+      "name": "meta.directive.slideshow.hyperbook",
+      "begin": "(^|\\G)(:{3,})(slideshow)({.*})?\\s*$",
+      "end": "(^|\\G)(\\2)\\s*$",
+      "beginCaptures": {
+        "2": {
+          "name": "punctuation.definition.directive.level.hyperbook"
+        },
+        "3": {
+          "name": "entity.name.function.directive.slideshow.hyperbook"
+        },
+        "4": {
           "patterns": [
             {
-              "include": "source.wsd"
+              "match": "(height)=([0-9]+)",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.slideshow.hyperbook"
+                },
+                "2": {
+                  "name": "string.quoted.double.untitled"
+                }
+              }
             }
           ]
         }
+      },
+      "endCaptures": {
+        "2": {
+          "name": "punctuation.definition.directive.level.hyperbook"
+        }
+      },
+      "patterns": [
+        {
+          "include": "text.html.markdown"
+        }
       ]
+    },
+    "directive-audio": {
+      "name": "meta.directive.audio.hyperbook",
+      "match": "(^|\\G)(:{1,})(audio){(.*)}\\s*$",
+      "captures": {
+        "2": {
+          "name": "punctuation.definition.directive.level.hyperbook"
+        },
+        "3": {
+          "name": "entity.name.function.directive.audio.hyperbook"
+        },
+        "4": {
+          "patterns": [
+            {
+              "match": "(src|thumbnail|title|author)=\"([^\"]*)\"",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.audio.hyperbook"
+                },
+                "2": {
+                  "name": "string.quoted.double.untitled"
+                }
+              }
+            },
+            {
+              "match": "(position)=\"(left|right)\"",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.audio.hyperbook"
+                },
+                "2": {
+                  "name": "string.quoted.double.untitled"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "directive-tiles": {
+      "name": "meta.directive.tiles.hyperbook",
+      "begin": "(^|\\G)(:{3,})(tiles)\\s*$",
+      "end": "(^|\\G)(\\2)\\s*$",
+      "beginCaptures": {
+        "2": {
+          "name": "punctuation.definition.directive.level.hyperbook"
+        },
+        "3": {
+          "name": "entity.name.function.directive.tiles.hyperbook"
+        }
+      },
+      "endCaptures": {
+        "2": {
+          "name": "punctuation.definition.directive.level.hyperbook"
+        }
+      },
+      "patterns": [
+        {
+          "include": "#directive-tile"
+        }
+      ]
+    },
+    "directive-tile": {
+      "name": "meta.directive.tile.hyperbook",
+      "match": "(^|\\G)(:{2,})(tile)({.*})?\\s*$",
+      "captures": {
+        "2": {
+          "name": "punctuation.definition.directive.level.hyperbook"
+        },
+        "3": {
+          "name": "entity.name.function.directive.tile.hyperbook"
+        },
+        "4": {
+          "patterns": [
+            {
+              "match": "(title|href|size|icon)=\"([^\"]*)\"",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.tile.hyperbook"
+                },
+                "2": {
+                  "name": "string.quoted.double.untitled"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "directive-video": {
+      "name": "meta.directive.video.hyperbook",
+      "match": "(^|\\G)(:{2,})(video){(.*)}\\s*$",
+      "captures": {
+        "2": {
+          "name": "punctuation.definition.directive.level.hyperbook"
+        },
+        "3": {
+          "name": "entity.name.function.directive.video.hyperbook"
+        },
+        "4": {
+          "patterns": [
+            {
+              "match": "(src|poster|title|author)=\"([^\"]*)\"",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.video.hyperbook"
+                },
+                "2": {
+                  "name": "string.quoted.double.untitled"
+                }
+              }
+            }
+          ]
+        }
+      }
     }
   }
 }

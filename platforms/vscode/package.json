@@ -34,11 +34,6 @@
       "title": "Hyperbook",
       "order": 20,
       "properties": {
-        "hyperbook.preview.showPreviewOptionInMenuBar": {
-          "type": "boolean",
-          "default": false,
-          "description": "Show 'Preview to Side' option in Menu bar; if false then in Status bar"
-        },
         "hyperbook.root": {
           "type": "string",
           "default": "",
@@ -55,15 +50,6 @@
           "light": "./assets/icons/PreviewOnRightPane_16x.svg",
           "dark": "./assets/icons/PreviewOnRightPane_16x_dark.svg"
         }
-      },
-      {
-        "command": "hyperbook.fullPreview",
-        "title": "Show full preview",
-        "category": "Hyperbook",
-        "icon": {
-          "light": "./assets/icons/Preview.svg",
-          "dark": "./assets/icons/Preview_inverse.svg"
-        }
       }
     ],
     "menus": {
@@ -71,7 +57,6 @@
         {
           "command": "hyperbook.sidePreview",
           "when": "(editorLangId == markdown || editorLangId == handlebars ) && config.hyperbook.preview.showPreviewOptionInMenuBar",
-          "alt": "hyperbook.fullPreview",
           "group": "navigation"
         }
       ]
@@ -81,12 +66,6 @@
         "command": "hyperbook.sidePreview",
         "key": "ctrl+q s",
         "mac": "cmd+q s",
-        "when": "editorTextFocus"
-      },
-      {
-        "command": "hyperbook.fullPreview",
-        "key": "ctrl+q f",
-        "mac": "cmd+q f",
         "when": "editorTextFocus"
       }
     ],
@@ -100,14 +79,8 @@
         "path": "./snipptes/hyperbook.code-snippets"
       }
     ],
-    "languages": [
-      {
-        "id": "hyperbook-injection"
-      }
-    ],
     "grammars": [
       {
-        "language": "hyperbook-injection",
         "scopeName": "markdown.hyperbook",
         "path": "./syntaxes/hyperbook.json",
         "injectTo": [
@@ -197,6 +170,7 @@
     "@hyperbook/element-protect": "workspace:*",
     "@hyperbook/element-qr": "workspace:*",
     "@hyperbook/element-scratchblock": "workspace:*",
+    "@hyperbook/element-slideshow": "workspace:*",
     "@hyperbook/element-sql-ide": "workspace:*",
     "@hyperbook/element-struktog": "workspace:*",
     "@hyperbook/element-tabs": "workspace:*",
