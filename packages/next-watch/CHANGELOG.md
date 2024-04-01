@@ -1,5 +1,11 @@
 # @hyperbook/next-watch
 
+## 0.7.0
+
+### Minor Changes
+
+- [`5c90434`](https://github.com/openpatch/hyperbook/commit/5c90434bd37a4067cdc400a394f7caea2b18a33f) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add slideshow element
+
 ## 0.6.4
 
 ### Patch Changes
