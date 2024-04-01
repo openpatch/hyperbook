@@ -1,4 +1,14 @@
 {
+  "Element Alert": {
+    "prefix": [":alert"],
+    "body": [
+      ":::alert{${1|info,success,error,warn|}}",
+      "",
+      "$TM_SELECTED_TEXT$0",
+      "",
+      ":::"
+    ]
+  },
   "Element Download": {
     "prefix": [":download"],
     "body": ["::download[${2:title}]{src=\"$1\"}", "$0"]
@@ -50,8 +60,8 @@
     "body": [
       ":::protect{password=\"${1:password}\" description=\"${2:description}\"}",
       "",
-      "$TM_SELECTED_TEXT",
-      "$0",
+      "$TM_SELECTED_TEXT$0",
+      "",
       ":::"
     ]
   },
@@ -62,7 +72,7 @@
       "$0"
     ]
   },
-  "Element Strugtok": {
+  "Element Struktog": {
     "prefix": [":struktog"],
     "body": ["::struktog{data=\"$CLIPBOARD\"}", "$0"]
   },
@@ -73,8 +83,8 @@
       "",
       ":::tab{title=\"${1:Tab 1}\" id=\"$RANDOM\"}",
       "",
-      "$TM_SELECTED_TEXT",
-      "$0",
+      "$TM_SELECTED_TEXT$0",
+      "",
       ":::",
       "",
       "::::"
@@ -85,8 +95,8 @@
     "body": [
       ":::tab{title=\"${1:title}\" id=\"$RANDOM\"}",
       "",
-      "$TM_SELECTED_TEXT",
-      "$0",
+      "$TM_SELECTED_TEXT$0",
+      "",
       ":::"
     ]
   },
@@ -115,8 +125,8 @@
     "body": [
       ":::onlineide{id=\"$RANDOM\"}",
       "",
-      "$TM_SELECTED_TEXT",
-      "$0",
+      "$TM_SELECTED_TEXT$0",
+      "",
       ":::"
     ]
   },
@@ -125,13 +135,25 @@
     "body": [
       ":::onlineide{id=\"$RANDOM\"}",
       "",
-      "$TM_SELECTED_TEXT",
-      "$0",
+      "$TM_SELECTED_TEXT$0",
+      "",
       ":::"
     ]
   },
   "Element PlantUML": {
     "prefix": [":plantuml"],
-    "body": [":::plantuml", "", "$TM_SELECTED_TEXT", "$0", ":::"]
+    "body": [":::plantuml", "", "$TM_SELECTED_TEXT$0", "", ":::"]
+  },
+  "Element Slideshow": {
+    "prefix": [":slideshow"],
+    "body": [":::slideshow{height=300}", "", "$TM_SELECTED_TEXT$0", "", ":::"]
+  },
+  "Element Audio": {
+    "prefix": [":audio"],
+    "body": ["::audio{src=\"$1\"}", "$0"]
+  },
+  "Element Video": {
+    "prefix": [":video"],
+    "body": ["::video{src=\"$1\"}", "$0"]
   }
 }

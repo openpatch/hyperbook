@@ -1163,6 +1163,9 @@ importers:
       '@hyperbook/element-scratchblock':
         specifier: workspace:*
         version: link:../../packages/element-scratchblock
+      '@hyperbook/element-slideshow':
+        specifier: workspace:*
+        version: link:../../packages/element-slideshow
       '@hyperbook/element-sql-ide':
         specifier: workspace:*
         version: link:../../packages/element-sql-ide

@@ -23,17 +23,9 @@ export function activate(context: vscode.ExtensionContext) {
     }
   );
 
-  let disposableStandalonePreview = vscode.commands.registerCommand(
-    "hyperbook.fullPreview",
-    async () => {
-      await preview.initMarkdownPreview(vscode.ViewColumn.One);
-    }
-  );
-
   // push to subscriptions list so that they are disposed automatically
   // HTML Preview:
   context.subscriptions.push(disposableSidePreview);
-  context.subscriptions.push(disposableStandalonePreview);
   context.subscriptions.push(disposableStatusBar);
 
   // Completions
