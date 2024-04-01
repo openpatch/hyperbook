@@ -20,7 +20,7 @@ export const Headings =
     const config = useConfig();
     const bookmarksConfig = config?.elements?.bookmarks;
     // Access actual (string) value of heading
-    const heading = children?.[0] || "";
+    const heading = (children as any)?.[0] || "";
 
     // If we have a heading, make it lower case
     let anchor = typeof heading === "string" ? makeAnchor(heading) : "";

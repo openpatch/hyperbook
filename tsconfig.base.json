@@ -22,7 +22,6 @@
     "strictFunctionTypes": true,
     "strictNullChecks": true,
     "strictPropertyInitialization": true,
-    "suppressImplicitAnyIndexErrors": true,
     "jsx": "react-jsx",
 
     "preserveSymlinks": true,

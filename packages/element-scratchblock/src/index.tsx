@@ -19,7 +19,7 @@ const renderScratchblock = async (
   options: any
 ): Promise<SVGElement> => {
   const scratchblocks = (await import("scratchblocks")).default;
-  const languages = {};
+  const languages: Record<string, any> = {};
   for (let language of options.languages) {
     try {
       const l = (await import(`scratchblocks/locales/${language}.json`))

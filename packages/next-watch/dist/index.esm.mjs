@@ -12,15 +12,12 @@ import fs from "fs/promises";
 import chalk from "chalk";
 import path from "path";
 async function collect(root, basePath, label, icon) {
-  const hyperbookJson = await fs
-    .readFile(path.join(root, "hyperbook.json"))
-    .then((data) => JSON.parse(data.toString()))
-    .catch((e) => {
-      if (e instanceof SyntaxError) {
-        console.error(e);
-      }
-      return null;
-    });
+  const hyperbookJson = await fs.readFile(path.join(root, "hyperbook.json")).then((data) => JSON.parse(data.toString())).catch((e) => {
+    if (e instanceof SyntaxError) {
+      console.error(e);
+    }
+    return null;
+  });
   if (hyperbookJson) {
     let href = basePath ?? hyperbookJson.basePath ?? "/";
     if (!href.startsWith("/")) {
@@ -36,18 +33,15 @@ async function collect(root, basePath, label, icon) {
       basePath: basePath ?? hyperbookJson.basePath,
       template: hyperbookJson.template,
       name: label ?? hyperbookJson.name,
-      icon,
+      icon
     };
   }
-  const hyperlibraryJson = await fs
-    .readFile(path.join(root, "hyperlibrary.json"))
-    .then((data) => JSON.parse(data.toString()))
-    .catch((e) => {
-      if (e instanceof SyntaxError) {
-        console.error(e);
-      }
-      return null;
-    });
+  const hyperlibraryJson = await fs.readFile(path.join(root, "hyperlibrary.json")).then((data) => JSON.parse(data.toString())).catch((e) => {
+    if (e instanceof SyntaxError) {
+      console.error(e);
+    }
+    return null;
+  });
   if (hyperlibraryJson) {
     const projects = await Promise.all(
       hyperlibraryJson.library.map(
@@ -80,7 +74,7 @@ async function collect(root, basePath, label, icon) {
       basePath: basePath ?? hyperlibraryJson.basePath,
       src: root,
       icon,
-      projects,
+      projects
     };
   }
   console.log(
@@ -99,65 +93,55 @@ var createNextApp = async (root, basePath) => {
     conf: {
       basePath,
       env: {
-        root,
-      },
-    },
+        root
+      }
+    }
   });
   return app.prepare().then(async () => {
-    const appServer = app.server || (await app.getServer());
-    chokidar
-      .watch(["./book", "./glossary", "./hyperbook.json", "./public"], {
-        usePolling: false,
-        cwd: root,
-      })
-      .on("add", async (filePath) => {
-        appServer.hotReloader.send("building");
-        const global =
-          filePath.startsWith("hyperbook.json") ||
-          filePath.startsWith("public");
-        const pages = [];
-        if (filePath.startsWith("book") || global) {
-          pages.push("/[[...page]]");
-        } else if (filePath.startsWith("glossary") || global) {
-          pages.push("/glossary/[...term]", "/glossary");
-        }
-        appServer.hotReloader.send({
-          event: "serverOnlyChanges",
-          pages,
-        });
-      })
-      .on("unlink", async (filePath) => {
-        appServer.hotReloader.send("building");
-        const global =
-          filePath.startsWith("hyperbook.json") ||
-          filePath.startsWith("public");
-        const pages = [];
-        if (filePath.startsWith("book") || global) {
-          pages.push("/[[...page]]");
-        } else if (filePath.startsWith("glossary") || global) {
-          pages.push("/glossary/[...term]", "/glossary");
-        }
-        appServer.hotReloader.send({
-          event: "serverOnlyChanges",
-          pages,
-        });
-      })
-      .on("change", async (filePath) => {
-        appServer.hotReloader.send("building");
-        const global =
-          filePath.startsWith("hyperbook.json") ||
-          filePath.startsWith("public");
-        const pages = [];
-        if (filePath.startsWith("book") || global) {
-          pages.push("/[[...page]]");
-        } else if (filePath.startsWith("glossary") || global) {
-          pages.push("/glossary/[...term]", "/glossary");
-        }
-        appServer.hotReloader.send({
-          event: "serverOnlyChanges",
-          pages,
-        });
+    const appServer = app.server || await app.getServer();
+    chokidar.watch(["./book", "./glossary", "./hyperbook.json", "./public"], {
+      usePolling: false,
+      cwd: root
+    }).on("add", async (filePath) => {
+      appServer.hotReloader.send("building");
+      const global = filePath.startsWith("hyperbook.json") || filePath.startsWith("public");
+      const pages = [];
+      if (filePath.startsWith("book") || global) {
+        pages.push("/[[...page]]");
+      } else if (filePath.startsWith("glossary") || global) {
+        pages.push("/glossary/[...term]", "/glossary");
+      }
+      appServer.hotReloader.send({
+        event: "serverOnlyChanges",
+        pages
       });
+    }).on("unlink", async (filePath) => {
+      appServer.hotReloader.send("building");
+      const global = filePath.startsWith("hyperbook.json") || filePath.startsWith("public");
+      const pages = [];
+      if (filePath.startsWith("book") || global) {
+        pages.push("/[[...page]]");
+      } else if (filePath.startsWith("glossary") || global) {
+        pages.push("/glossary/[...term]", "/glossary");
+      }
+      appServer.hotReloader.send({
+        event: "serverOnlyChanges",
+        pages
+      });
+    }).on("change", async (filePath) => {
+      appServer.hotReloader.send("building");
+      const global = filePath.startsWith("hyperbook.json") || filePath.startsWith("public");
+      const pages = [];
+      if (filePath.startsWith("book") || global) {
+        pages.push("/[[...page]]");
+      } else if (filePath.startsWith("glossary") || global) {
+        pages.push("/glossary/[...term]", "/glossary");
+      }
+      appServer.hotReloader.send({
+        event: "serverOnlyChanges",
+        pages
+      });
+    });
     return app;
   });
 };
@@ -175,7 +159,7 @@ var handleProject = (server) => async (project) => {
     const handle = app.getRequestHandler();
     const paths = [
       project.href,
-      project.href.endsWith("/") ? project.href + "*" : project.href + "/*",
+      project.href.endsWith("/") ? project.href + "*" : project.href + "/*"
     ];
     server.all(paths, (req, res) => {
       handle(req, res, parse(req.url, true));

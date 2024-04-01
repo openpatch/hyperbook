@@ -689,7 +689,7 @@ export const getMarkdown = async (
       { encoding: "utf8" }
     );
     const template = handlebars.compile(snippetFile);
-    const vars = {};
+    const vars: Record<string, any> = {};
     for (const m of snippet[4].match(/(?:[^\s"]+|"[^"]*")+/g) || []) {
       const r = varReg.exec(m);
       if (r) {

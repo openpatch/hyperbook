@@ -57,7 +57,7 @@ const DirectiveTabs: FC<DirectiveTabsProps> = ({ id, node, children }) => {
         ({ id, index }) =>
           activeTab === id && (
             <div className="tabpanel" key={index + id}>
-              {children?.[index]}
+              {(children as any)?.[index]}
             </div>
           )
       )}

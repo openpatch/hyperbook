@@ -11,7 +11,7 @@ type DirectiveTermProps = {
 const DirectiveTerm: FC<DirectiveTermProps> = ({ id, children, className }) => {
   const Link = useLink();
   if (!id) {
-    id = children?.[0].toLowerCase().replaceAll(" ", "-");
+    id = (children as any)?.[0].toLowerCase().replaceAll(" ", "-");
   }
 
   let href = `/glossary/${id}`;
