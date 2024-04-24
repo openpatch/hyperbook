@@ -1,5 +1,11 @@
 # @hyperbook/element-mermaid
 
+## 0.3.2
+
+### Patch Changes
+
+- [`a4284b6`](https://github.com/openpatch/hyperbook/commit/a4284b63b13fc3ce8b57cc3d9ce11f0d075c2c7d) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Pin cytoscape which is causing issues since version 3.29.0
+
 ## 0.3.1
 
 ### Patch Changes

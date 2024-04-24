@@ -1,5 +1,12 @@
 # hyperbook-simple-template
 
+## 0.29.1
+
+### Patch Changes
+
+- Updated dependencies [[`a4284b6`](https://github.com/openpatch/hyperbook/commit/a4284b63b13fc3ce8b57cc3d9ce11f0d075c2c7d)]:
+  - @hyperbook/element-mermaid@0.3.2
+
 ## 0.29.0
 
 ### Minor Changes
