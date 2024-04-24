@@ -46,6 +46,12 @@
     "redux": "4.2.1",
     "redux-persist": "6.0.0"
   },
+  "resolutions": {
+    "cytoscape": "3.28.1"
+  },
+  "overrides": {
+    "cytoscape": "3.28.1"
+  },
   "devDependencies": {
     "@hyperbook/next-watch": "workspace:*",
     "@hyperbook/types": "workspace:*",
