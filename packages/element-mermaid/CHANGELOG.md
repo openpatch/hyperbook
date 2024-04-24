@@ -1,5 +1,11 @@
 # @hyperbook/element-mermaid
 
+## 0.3.3
+
+### Patch Changes
+
+- [`3905268`](https://github.com/openpatch/hyperbook/commit/390526881c0c74763ca791f225bb01edbe5ab959) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Make pinning cytoscape work for hyperbook web
+
 ## 0.3.2
 
 ### Patch Changes
