@@ -1,5 +1,12 @@
 # @hyperbook/vscode-extension
 
+## 0.22.3
+
+### Patch Changes
+
+- Updated dependencies [[`919e9a5`](https://github.com/openpatch/hyperbook/commit/919e9a534bc34a31085fb7cb6c472fe686dbfe51)]:
+  - @hyperbook/element-mermaid@0.3.4
+
 ## 0.22.2
 
 ### Patch Changes
