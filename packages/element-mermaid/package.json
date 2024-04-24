@@ -40,6 +40,9 @@
   "resolutions": {
     "cytoscape": "3.28.1"
   },
+  "overrides": {
+    "cytoscape": "3.28.1"
+  },
   "peerDependencies": {
     "@reduxjs/toolkit": "1.x",
     "react": "18.x",
