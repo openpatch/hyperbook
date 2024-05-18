@@ -1,5 +1,15 @@
 # @hyperbook/vscode-extension
 
+## 0.22.4
+
+### Patch Changes
+
+- [`d723aaf`](https://github.com/openpatch/hyperbook/commit/d723aafed2eab1ebef7eda5055ba59f2d4e16a9b) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix fs module for windows. This should also fix the vscode extension on windows.
+
+- Updated dependencies [[`d723aaf`](https://github.com/openpatch/hyperbook/commit/d723aafed2eab1ebef7eda5055ba59f2d4e16a9b)]:
+  - @hyperbook/markdown@0.9.3
+  - @hyperbook/fs@0.11.3
+
 ## 0.22.3
 
 ### Patch Changes

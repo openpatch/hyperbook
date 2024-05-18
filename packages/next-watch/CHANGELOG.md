@@ -1,5 +1,11 @@
 # @hyperbook/next-watch
 
+## 0.7.1
+
+### Patch Changes
+
+- [`d723aaf`](https://github.com/openpatch/hyperbook/commit/d723aafed2eab1ebef7eda5055ba59f2d4e16a9b) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix fs module for windows. This should also fix the vscode extension on windows.
+
 ## 0.7.0
 
 ### Minor Changes
