@@ -32,7 +32,7 @@
     "lint": "tsc --noEmit",
     "test": "vitest",
     "build": "rimraf dist && pnpm build:pkg && pnpm build:types",
-    "build:pkg": "node ../../scripts/build.mjs && cp -r assets dist/",
+    "build:pkg": "node ../../scripts/build.mjs && ncp assets dist/assets",
     "build:types": "tsc --project tsconfig.build.json --declaration --emitDeclarationOnly"
   },
   "dependencies": {
@@ -68,6 +68,7 @@
     "@types/unist": "2.0.6",
     "mdast-util-to-hast": "^13.0.0",
     "mdast-util-to-string": "^4.0.0",
+    "ncp": "^2.0.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "vitest": "^0.30.0"

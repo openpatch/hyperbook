@@ -1,6 +1,7 @@
 import chokidar from "chokidar";
 import chalk from "chalk";
 import { exec } from "child_process";
+import path from "path";
 
 const log = console.log.bind(console);
 
@@ -27,8 +28,8 @@ const watcher = chokidar.watch(
 log(chalk.yellow.bold("Watching all files... 👀"));
 
 watcher.on("change", async (filePath) => {
-  const splitPath = filePath.split("/");
-  const location = `${splitPath[0]}/${splitPath[1]}/`;
+  const splitPath = filePath.split(path.sep);
+  const location = `${splitPath[0]}${path.sep}${splitPath[1]}${path.sep}`;
   const fileName = splitPath[1];
 
   if (ignorePackages.includes(fileName)) {

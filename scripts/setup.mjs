@@ -6,13 +6,25 @@ import rimraf from "rimraf";
 async function makeSymlink(src, dst) {
   const type = os.platform() == "win32" ? "junction" : null;
   return new Promise((resolve, reject) => {
-    fs.symlink(src, dst, type, (err) => {
-      if (err) {
-        reject();
-      } else {
-        resolve();
-      }
-    });
+
+    if (os.platform() == "win32" && fs.statSync(src).isFile()) {
+      fs.link(src, dst, (err) => {
+        if (err) {
+          console.log(err);
+          reject();
+        } else {
+          resolve();
+        }
+      });
+    } else {
+      fs.symlink(src, dst, type, (err) => {
+        if (err) {
+          reject();
+        } else {
+          resolve();
+        }
+      });
+    }
   });
 }
 

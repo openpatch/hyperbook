@@ -35,6 +35,7 @@ export const findRoot = async (file: string): Promise<string> => {
     cwd: file,
   } as any).then((f) => {
     if (!f) {
+      console.log(file);
       throw new Error("Could not find hyperbook.json");
     }
     return path.parse(f).dir;
@@ -45,7 +46,7 @@ export const makeRepoLink = (
   repoTemplate: HyperbookJson["repo"],
   vfile: VFile
 ): string | null => {
-  const relative = path.join(vfile.folder, vfile.path.relative);
+  const relative = path.posix.join(vfile.folder.replaceAll(path.sep, "/"), vfile.path.relative.replaceAll(path.sep, "/"));
   if (typeof repoTemplate === "string") {
     if (repoTemplate.includes("%path%")) {
       return repoTemplate.replace("%path%", relative);

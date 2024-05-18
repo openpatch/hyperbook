@@ -1,4 +1,5 @@
 import path from "path";
+import url from "url";
 import matter from "gray-matter";
 import fs from "fs/promises";
 import fsD from "fs";
@@ -198,10 +199,10 @@ async function getDirectoryBook(root: string): Promise<VDirectoryBook> {
 
         let href = "/";
         if (vfile.path.directory) {
-          href = path.join(href, vfile.path.directory);
+          href = path.posix.join(href, vfile.path.directory);
         }
         if (vfile.name !== "index") {
-          href = path.join(href, vfile.name);
+          href = path.posix.join(href, vfile.name);
         }
         vfile.path.href = href.trim();
         if (name === "index") {
@@ -291,10 +292,10 @@ async function getDirectoryGlossary(root: string): Promise<VDirectoryGlossary> {
         };
         let href = "/glossary";
         if (vfile.path.directory) {
-          href = path.join(href, vfile.path.directory);
+          href = path.posix.join(href, vfile.path.directory);
         }
         if (vfile.name !== "index") {
-          href = path.join(href, vfile.name);
+          href = path.posix.join(href, vfile.name);
         }
         vfile.path.href = href.trim();
         directory.files.push(vfile);
@@ -346,7 +347,7 @@ async function getDirectoryPublic(root: string): Promise<VDirectoryPublic> {
             directory: directory.path.relative,
             absolute: path.join(directory.path.absolute, file),
             relative: path.join(directory.path.relative, file),
-            href: "/" + path.join(directory.path.relative, file),
+            href: "/" + path.posix.join(directory.path.relative, file),
           },
           name,
           root,
