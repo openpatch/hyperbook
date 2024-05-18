@@ -1,5 +1,11 @@
 # @hyperbook/vscode-extension
 
+## 0.23.0
+
+### Minor Changes
+
+- [`bc1849c`](https://github.com/openpatch/hyperbook/commit/bc1849c54b13f714f10171dfcec53c5f6fb20047) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Bring VS Code extension inline with the web platfrom.
+
 ## 0.22.4
 
 ### Patch Changes
