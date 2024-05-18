@@ -1,5 +1,28 @@
 # hyperbook-simple-template
 
+## 0.29.3
+
+### Patch Changes
+
+- [`919e9a5`](https://github.com/openpatch/hyperbook/commit/919e9a534bc34a31085fb7cb6c472fe686dbfe51) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Another try fixing the cytoscope bug
+
+- Updated dependencies [[`919e9a5`](https://github.com/openpatch/hyperbook/commit/919e9a534bc34a31085fb7cb6c472fe686dbfe51)]:
+  - @hyperbook/element-mermaid@0.3.4
+
+## 0.29.2
+
+### Patch Changes
+
+- Updated dependencies [[`3905268`](https://github.com/openpatch/hyperbook/commit/390526881c0c74763ca791f225bb01edbe5ab959)]:
+  - @hyperbook/element-mermaid@0.3.3
+
+## 0.29.1
+
+### Patch Changes
+
+- Updated dependencies [[`a4284b6`](https://github.com/openpatch/hyperbook/commit/a4284b63b13fc3ce8b57cc3d9ce11f0d075c2c7d)]:
+  - @hyperbook/element-mermaid@0.3.2
+
 ## 0.29.0
 
 ### Minor Changes
