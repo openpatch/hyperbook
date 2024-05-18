@@ -1,9 +1,11 @@
 import { Range } from "vscode";
 import {
-  HyperbookFrontmatter,
   HyperbookJson,
+  HyperbookPage,
+  Language,
   Navigation,
 } from "@hyperbook/types";
+import { vfile } from "@hyperbook/fs";
 
 export interface WriteMessage {
   type: "WRITE";
@@ -15,12 +17,25 @@ export interface WriteMessage {
   };
 }
 
-export interface ChangeMessage {
-  type: "CHANGE";
+export interface ChangeBookFileMessage {
+  type: "CHANGE_BOOK_FILE";
   payload: {
-    content: string;
-    data: HyperbookFrontmatter;
-    navigation?: Navigation;
+    locale: Language;
+    markdown: string;
+    data: HyperbookPage;
+    navigation: Navigation;
+    assetsPath: string;
+  };
+}
+
+export interface ChangeGlossaryFileMessage {
+  type: "CHANGE_GLOSSARY_FILE";
+  payload: {
+    locale: Language;
+    markdown: string;
+    data: HyperbookPage;
+    references: vfile.VFileBook[];
+    navigation: Navigation;
     assetsPath: string;
   };
 }
@@ -61,7 +76,8 @@ export interface ReadyMessage {
 }
 
 export type Message =
-  | ChangeMessage
+  | ChangeBookFileMessage
+  | ChangeGlossaryFileMessage
   | ReadyMessage
   | ConfigChangeMessage
   | WriteMessage

@@ -15,13 +15,15 @@ All you need for writing Hyperbooks (auto preview, snippets, auto-completion and
 
 You can preview your Hyperbook pages by clicking the preview icon in the top right-hand corner or by running the command `Show side preview`.
 
-![Preview](https://github.com/openpatch/hyperbook/raw/main/platforms/vscode/screenshots/preview.png)
+![Preview](https://github.com/openpatch/hyperbook/raw/main/platforms/vscode/screenshots/preview.gif)
 
 ### Hyperbook Config
 
 The `hyperbook.json` is validated against a schema, which presents you
 from making mistakes. It also enables a color picker for your brand
 color.
+
+![Config](https://github.com/openpatch/hyperbook/raw/main/platforms/vscode/screenshots/config.gif)
 
 ### Syntax Highlighting
 
@@ -35,30 +37,20 @@ Each element can be inserted by using a snippet. Type `:` and hit your auto-comp
 
 ### Auto completion
 
+![](https://github.com/openpatch/hyperbook/raw/main/platforms/vscode/screenshots/autocomplete.gif)
+
 - Glossary terms
+
   - Move your cursor between the curly braces of a term/t element, e.g.: `:t[My term]{`
   - Type `#` to trigger the completion
-
-![](https://github.com/openpatch/hyperbook/raw/main/platforms/vscode/screenshots/auto-complete-glossary.gif)
 
 - Link to book pages
   - Type `/` to trigger the completion
 - Link to files in the public folder
   - Type `/` to trigger the completion
-
-![](https://github.com/openpatch/hyperbook/raw/main/platforms/vscode/screenshots/auto-complete-book.gif)
-
 - Archives
   - Move your cursor in the src parameter of an archive element, e.g.: `:archive[My archive]{src=`
   - Type `"` to trigger the completion
-
-![](https://github.com/openpatch/hyperbook/raw/main/platforms/vscode/screenshots/auto-complete-archive.gif)
-
-## Interactive Links
-
-Links in your Hyperbook open the corresponding markdown file for faster editing.
-
-![](https://github.com/openpatch/hyperbook/raw/main/platforms/vscode/screenshots/links.gif)
 
 ## Changelog
 

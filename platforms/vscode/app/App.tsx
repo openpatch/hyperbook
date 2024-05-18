@@ -24,9 +24,15 @@ import elementSqlIde from "@hyperbook/element-sql-ide";
 import elementSlideshow from "@hyperbook/element-slideshow";
 import { Markdown } from "@hyperbook/markdown";
 import { Styles } from "@hyperbook/styles";
-import { ChangeMessage, Message } from "../src/messages/messageTypes";
+import {
+  ChangeBookFileMessage,
+  ChangeGlossaryFileMessage,
+  Message,
+} from "../src/messages/messageTypes";
 import { ErrorBoundary } from "./ErrorBoundary";
 import { Shell } from "@hyperbook/shell";
+import { Page } from "./Page";
+import { Term } from "./Term";
 
 const vscode = (window as any).vscode as VSCode;
 
@@ -45,15 +51,19 @@ const createNoopStorage = () => {
 };
 
 export const App = () => {
-  const [state, setState] = useState<ChangeMessage["payload"]>();
+  const [state, setState] = useState<
+    ChangeBookFileMessage | ChangeGlossaryFileMessage
+  >();
   const [config, setConfig] = useState<ProviderProps["config"]>();
-  const assetsPath = state?.assetsPath ?? "";
+  const assetsPath = state?.payload.assetsPath ?? "";
 
   useEffect(() => {
     window.addEventListener("message", (event: MessageEvent<Message>) => {
-      if (event.data.type === "CHANGE") {
-        console.log("Change");
-        setState(event.data.payload);
+      if (
+        event.data.type === "CHANGE_BOOK_FILE" ||
+        event.data.type === "CHANGE_GLOSSARY_FILE"
+      ) {
+        setState(event.data);
       } else if (event.data.type === "CONFIG_CHANGE") {
         setConfig(event.data.payload);
       }
@@ -173,17 +183,15 @@ export const App = () => {
             },
           });
         }}
-        getActivePageId={async () => state?.navigation?.current?.href || ""}
+        getActivePageId={async () =>
+          state?.payload.navigation?.current?.href || ""
+        }
       >
         <Styles />
-        <Shell navigation={state?.navigation}>
-          <ErrorBoundary message="You have a syntax error in your markdown file.">
-            <Markdown
-              children={state?.content || ""}
-              showToc={state.data.toc !== false}
-            />
-          </ErrorBoundary>
-        </Shell>
+        <ErrorBoundary message="You have a syntax error in your markdown file.">
+          {state.type === "CHANGE_BOOK_FILE" && <Page {...state.payload} />}
+          {state.type === "CHANGE_GLOSSARY_FILE" && <Term {...state.payload} />}
+        </ErrorBoundary>
       </Provider>
     </ErrorBoundary>
   );

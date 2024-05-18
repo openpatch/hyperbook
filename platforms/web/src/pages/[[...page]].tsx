@@ -62,7 +62,7 @@ export const getStaticProps: GetStaticProps<
     href = path.join(...params.page);
   }
   const file = await vfile.get(root, "book", "/" + href);
-  const { content, data } = await vfile.getMarkdown(file);
+  const { content, data } = file.markdown;
   const hyperbookJson = await hyperbook.getJson(root);
   const navigation = await hyperbook.getNavigation(root, file);
 

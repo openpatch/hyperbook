@@ -11,7 +11,11 @@ import {
 } from "@hyperbook/fs";
 import { htmlTemplate } from "./html-template";
 import { disposeAll } from "./utils/dispose";
-import { ChangeMessage, Message } from "./messages/messageTypes";
+import {
+  ChangeBookFileMessage,
+  ChangeGlossaryFileMessage,
+  Message,
+} from "./messages/messageTypes";
 import path from "path";
 import { HyperbookJson, Navigation } from "@hyperbook/types";
 
@@ -102,7 +106,9 @@ export default class Preview {
     }
   }
 
-  async getState(refreshNavigation = false): Promise<ChangeMessage["payload"]> {
+  async getPageProps(
+    refreshNavigation = false
+  ): Promise<ChangeBookFileMessage["payload"]> {
     if (
       vscode.window.activeTextEditor &&
       this.checkDocumentIsHyperbookFile(false) &&
@@ -116,23 +122,76 @@ export default class Preview {
           this._vfile
         );
       }
-
       const assetsPath = this.panel.webview
         .asWebviewUri(vscode.Uri.file(this._vfile.root))
         .toString();
 
-      const state = {
-        content: this._vfile.markdown.content,
-        data: this._vfile.markdown.data,
-        assetsPath,
+      return {
         navigation: this._navigation,
+        data: this._vfile.markdown.data,
+        markdown: this._vfile.markdown.content,
+        locale: this._vfile.markdown.data.lang || "en",
+        assetsPath,
       };
-      return state;
     }
     return {
-      content: "",
-      data: {} as any,
+      navigation: {
+        current: null,
+        next: null,
+        pages: [],
+        previous: null,
+        sections: [],
+      },
       assetsPath: "",
+      data: { name: "Not Found" },
+      locale: "en",
+      markdown: "",
+    };
+  }
+
+  async getTermProps(
+    refreshNavigation = false
+  ): Promise<ChangeGlossaryFileMessage["payload"]> {
+    if (
+      vscode.window.activeTextEditor &&
+      this.checkDocumentIsHyperbookFile(false) &&
+      this._vfile &&
+      this._vfile.folder === "glossary" &&
+      this.panel
+    ) {
+      if (!this._navigation || refreshNavigation) {
+        await vfile.clean(this._vfile.root);
+        this._navigation = await hyperbook.getNavigation(
+          this._vfile.root,
+          this._vfile
+        );
+      }
+      const assetsPath = this.panel.webview
+        .asWebviewUri(vscode.Uri.file(this._vfile.root))
+        .toString();
+
+      return {
+        references: this._vfile.references,
+        navigation: this._navigation,
+        data: this._vfile.markdown.data,
+        markdown: this._vfile.markdown.content,
+        locale: this._vfile.markdown.data.lang || "en",
+        assetsPath,
+      };
+    }
+    return {
+      references: [],
+      navigation: {
+        current: null,
+        next: null,
+        pages: [],
+        previous: null,
+        sections: [],
+      },
+      assetsPath: "",
+      data: { name: "Not Found" },
+      locale: "en",
+      markdown: "",
     };
   }
 
@@ -147,7 +206,6 @@ export default class Preview {
       this.panel &&
       this.panel !== undefined
     ) {
-      console.log("Full update");
       const filePaths =
         vscode.window.activeTextEditor.document.fileName.split("/");
       const fileName = filePaths[filePaths.length - 1];
@@ -161,10 +219,19 @@ export default class Preview {
           return vfile.get(hyperbookRoot, "glossary", resourcePath, "absolute");
         });
 
-      this.postMessage({
-        type: "CHANGE",
-        payload: await this.getState(true),
-      });
+      if (this._vfile.folder === "glossary") {
+        console.log("Full glossary update");
+        this.postMessage({
+          type: "CHANGE_GLOSSARY_FILE",
+          payload: await this.getTermProps(true),
+        });
+      } else {
+        console.log("Full book update");
+        this.postMessage({
+          type: "CHANGE_BOOK_FILE",
+          payload: await this.getPageProps(true),
+        });
+      }
       this.postMessage({
         type: "CONFIG_CHANGE",
         payload: await this.getConfig(),
@@ -190,10 +257,17 @@ export default class Preview {
         markdown: await getMarkdown(this._vfile),
       };
 
-      this.postMessage({
-        type: "CHANGE",
-        payload: await this.getState(false),
-      });
+      if (this._vfile.folder === "glossary") {
+        this.postMessage({
+          type: "CHANGE_GLOSSARY_FILE",
+          payload: await this.getTermProps(true),
+        });
+      } else {
+        this.postMessage({
+          type: "CHANGE_BOOK_FILE",
+          payload: await this.getPageProps(true),
+        });
+      }
     }
   }
 
