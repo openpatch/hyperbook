@@ -1,5 +1,12 @@
 # hyperbook
 
+## 0.29.4
+
+### Patch Changes
+
+- Updated dependencies [[`d723aaf`](https://github.com/openpatch/hyperbook/commit/d723aafed2eab1ebef7eda5055ba59f2d4e16a9b)]:
+  - @hyperbook/fs@0.11.3
+
 ## 0.29.3
 
 ## 0.29.2
