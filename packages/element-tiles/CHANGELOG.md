@@ -1,5 +1,12 @@
 # @hyperbook/element-tiles
 
+## 0.1.3
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @hyperbook/provider@0.4.1
+
 ## 0.1.2
 
 ### Patch Changes

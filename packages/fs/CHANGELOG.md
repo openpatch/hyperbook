@@ -1,5 +1,11 @@
 # @hyperbook/fs
 
+## 0.12.0
+
+### Minor Changes
+
+- [`90c99bd`](https://github.com/openpatch/hyperbook/commit/90c99bd0edc9ea8da5e1c6376e09d1977f881870) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add prev and next properties to pages. This will allow you to set the prev and next buttons to an individual page by using the absolute path to the page.
+
 ## 0.11.3
 
 ### Patch Changes
