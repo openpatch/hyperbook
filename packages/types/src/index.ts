@@ -70,6 +70,7 @@ export type HyperbookFrontmatter =
 
 export type HyperbookJson = {
   name: string;
+  trailingSlash?: boolean;
   description?: string;
   logo?: string;
   author?: {
@@ -107,7 +108,6 @@ export type HyperbookJson = {
         label: string;
       };
   links?: Link[];
-  template?: string;
   elements?: {
     bookmarks?: false | ElementConfig;
     excalidraw?: ElementConfig & {

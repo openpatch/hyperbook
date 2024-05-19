@@ -32,6 +32,7 @@ von Optionen, die du definieren kannst. Optionen mit einem "\*" müssen gesetzt 
 | repo.label       | Der Bezeichner für den Repository-Link.                                                                                                                                                         |
 | elements         | Hier können einzelne Elemente konfiguriert werden. Schaue dazu auf die Elementseiten.                                                                                                           |
 | links            | Hier können Links hinzugefügt werden, welche in der rechten oberen Ecke angezeigt werden. Schaue dir dazu das untere Beispiel an.                                                               |
+| trailingSlash    | Exportiert alle Datei in eigene Verzeichnisse und erzeugt nur index.html Dateien.                                                                                                               |
 
 Hier ist eine Beispielkonfiguration:
 

@@ -259,8 +259,8 @@
                 }
             ]
         },
-        "template": {
-            "type": "string"
+        "trailingSlash": {
+            "type": "boolean"
         }
     },
     "required": [

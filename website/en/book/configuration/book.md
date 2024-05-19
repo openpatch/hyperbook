@@ -31,6 +31,7 @@ can and part wise must set (indicated by a \*).
 | repo.label       | The label for the repo link.                                                                                                                                    |
 | elements         | Here you can configure the elements. See the element pages for configuration options.                                                                           |
 | links            | Here you can add custom links, which will be shown in the top right corner. See the example below on how to use them.                                           |
+| trailingSlash    | Outputs all files into ther own folders and produces only index.html files.                                                                                     |
 
 Here is an example configuration:
 
