@@ -41,6 +41,8 @@ export type HyperbookPageFrontmatter = {
   index?: number;
   hide?: boolean;
   toc?: boolean;
+  next?: string;
+  prev?: string;
 };
 
 export type HyperbookSectionFrontmatter = HyperbookPageFrontmatter & {

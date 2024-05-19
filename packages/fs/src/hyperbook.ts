@@ -46,7 +46,10 @@ export const makeRepoLink = (
   repoTemplate: HyperbookJson["repo"],
   vfile: VFile
 ): string | null => {
-  const relative = path.posix.join(vfile.folder.replaceAll(path.sep, "/"), vfile.path.relative.replaceAll(path.sep, "/"));
+  const relative = path.posix.join(
+    vfile.folder.replaceAll(path.sep, "/"),
+    vfile.path.relative.replaceAll(path.sep, "/")
+  );
   if (typeof repoTemplate === "string") {
     if (repoTemplate.includes("%path%")) {
       return repoTemplate.replace("%path%", relative);
@@ -185,8 +188,17 @@ export const getNavigation = async (
     );
     i = pageList.findIndex((p) => p.href === currentFile.path.href);
 
-    next = pageList[i + 1] || null;
-    previous = pageList[i - 1] || null;
+    if (current !== null && current.next !== undefined) {
+      next = pageList.find((p) => p.href === current?.next) || null;
+    } else {
+      next = pageList[i + 1] || null;
+    }
+
+    if (current !== null && current.prev !== undefined) {
+      previous = pageList.find((p) => p.href === current?.prev) || null;
+    } else {
+      previous = pageList[i - 1] || null;
+    }
   }
 
   return {
