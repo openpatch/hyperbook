@@ -16,10 +16,10 @@ can and part wise must set (indicated by a \*).
 | logo             | URL to a logo. Used for the page title. Can be relative to the public folder or an absolute URL                                                                 |
 | author.name      | Author name of your Hyperbook. Used in the footer.                                                                                                              |
 | author.url       | Used to link the author name in the footer.                                                                                                                     |
-| font             | URL to a font. Used for headings and body.                                                                                                                      |
-| fonts.heading    | URL to a font. Used for headings.                                                                                                                               |
-| fonts.body       | URL to a font. Used for body.                                                                                                                                   |
-| fonts.code       | URL to a font. Used for code.                                                                                                                                   |
+| font             | URL to a font. Used for headings and body. You can add ":90%" for adjusting the font size.                                                                      |
+| fonts.heading    | URL to a font. Used for headings. You can add ":90%" for adjusting the font size.                                                                               |
+| fonts.body       | URL to a font. Used for body. You can add ":90%" for adjusting the font size.                                                                                   |
+| fonts.code       | URL to a font. Used for code. You can add ":90%" for adjusting the font size.                                                                                   |
 | colors.brand     | The color for the header and the accents for example on links.                                                                                                  |
 | colors.brandDark | The color for the header and the accents for example on links, if the user prefers a dark theme. Brand text is not used for the dark theme.                     |
 | colors.brandText | The color for the text in the header                                                                                                                            |
@@ -42,7 +42,7 @@ Here is an example configuration:
     "name": "OpenPatch",
     "url": "https://openpatch.org"
   },
-  "font": "/fonts/my-font.woff2",
+  "font": "/fonts/my-font.woff2:90%",
   "logo": "/logo.png",
   "license": "CC-BY-SA",
   "language": "en",

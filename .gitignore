@@ -5,6 +5,7 @@ platforms/web/hyperbook.json
 platforms/web/public
 platforms/web/archives
 platforms/web/snippets
+platforms/web/templates
 vdirectory.book.json
 vdirectory.snippets.json
 vdirectory.archives.json

@@ -17,10 +17,10 @@ von Optionen, die du definieren kannst. Optionen mit einem "\*" müssen gesetzt 
 | logo             | URL eines Logos. Wird für den Seitentitel verwendet. Diese kann relative zum public-Ordner (z.B.: /mein-logo.png) sein oder ein externes Bild referenzieren.                                    |
 | author.name      | Name des Autors des Hyperbooks. Wird in der Fußzeile verwendet.                                                                                                                                 |
 | author.url       | URL zur Homepage des Autors. Wird in der Fußzeile verwendet.                                                                                                                                    |
-| font             | URL zu einer Schriftart. Wird für Überschriften und normalen Text verwendet.                                                                                                                    |
-| fonts.heading    | URL zu einer Schriftart. Wird für Überschriften verwendet.                                                                                                                                      |
-| fonts.body       | URL zu einer Schriftart. Wird für normalen Text verwendet.                                                                                                                                      |
-| fonts.code       | URL zu einer Schriftart. Wird für Quelltexte verwendet.                                                                                                                                         |
+| font             | URL zu einer Schriftart. Wird für Überschriften und normalen Text verwendet. Du kannst ":90%" hinzufügen um die Schriftgröße anzupassen.                                                        |
+| fonts.heading    | URL zu einer Schriftart. Wird für Überschriften verwendet. Du kannst ":90%" hinzufügen um die Schriftgröße anzupassen.                                                                          |
+| fonts.body       | URL zu einer Schriftart. Wird für normalen Text verwendet. Du kannst ":90%" hinzufügen um die Schriftgröße anzupassen.                                                                          |
+| fonts.code       | URL zu einer Schriftart. Wird für Quelltexte verwendet. Du kannst ":90%" hinzufügen um die Schriftgröße anzupassen.                                                                             |
 | colors.brand     | Die Farbe der Kopfzeile und von Akzenten z.B. von Links.                                                                                                                                        |
 | colors.brandDark | Die Farbe der Akzente z.B. von Links. Nur relevant für das dunkle Design. Brand text wird im dunklen Design nicht verwendet.                                                                    |
 | colors.brandText | Die Farbe für den Text in der Kopfzeile.                                                                                                                                                        |
@@ -43,7 +43,7 @@ Hier ist eine Beispielkonfiguration:
     "name": "OpenPatch",
     "url": "https://openpatch.org"
   },
-  "font": "/fonts/my-font.woff2",
+  "font": "/fonts/my-font.woff2:90%",
   "logo": "/logo.png",
   "license": "CC-BY-SA",
   "language": "en",

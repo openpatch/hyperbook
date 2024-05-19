@@ -1,6 +1,15 @@
 import { useConfig, useMakeUrl } from "@hyperbook/provider";
 import { Fragment } from "react";
 
+function parseFont(font: string): [string, string] {
+  const parts = font.split(":");
+  if (parts.length == 2) {
+    return [parts[0], parts[1]];
+  }
+
+  return [parts[0], "100%"];
+}
+
 export const Styles = () => {
   const { colors, font, fonts } = useConfig();
   const makeUrl = useMakeUrl();
@@ -20,11 +29,13 @@ export const Styles = () => {
           {`
 @font-face {
   font-family: hyperbook-heading;
-  src: url(${makeUrl(font, "public")});
+  src: url(${makeUrl(parseFont(font)[0], "public")});
+  size-adjust: ${parseFont(font)[1]};
 }
 @font-face {
   font-family: hyperbook-body;
-  src: url(${makeUrl(font, "public")});
+  src: url(${makeUrl(parseFont(font)[0], "public")});
+  size-adjust: ${parseFont(font)[1]};
 }
 `}
         </style>
@@ -34,7 +45,8 @@ export const Styles = () => {
           {`
 @font-face {
   font-family: hyperbook-body;
-  src: url(${makeUrl(fonts.body, "public")});
+  src: url(${makeUrl(parseFont(fonts.body)[0], "public")});
+  size-adjust: ${parseFont(fonts.body)[1]};
 }
 `}
         </style>
@@ -44,7 +56,8 @@ export const Styles = () => {
           {`
 @font-face {
   font-family: hyperbook-heading;
-  src: url(${makeUrl(fonts.heading, "public")});
+  src: url(${makeUrl(parseFont(fonts.heading)[0], "public")});
+  size-adjust: ${parseFont(fonts.heading)[1]};
 }
 `}
         </style>
@@ -54,7 +67,8 @@ export const Styles = () => {
           {`
 @font-face {
   font-family: hyperbook-code;
-  src: url(${makeUrl(fonts.code, "public")});
+  src: url(${makeUrl(parseFont(fonts.code)[0], "public")});
+  size-adjust: ${parseFont(fonts.code)[1]};
 }
 `}
         </style>
