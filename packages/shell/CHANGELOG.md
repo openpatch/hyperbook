@@ -1,5 +1,12 @@
 # @hyperbook/shell
 
+## 0.7.4
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @hyperbook/provider@0.4.1
+
 ## 0.7.3
 
 ### Patch Changes
