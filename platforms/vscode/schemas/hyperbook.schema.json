@@ -108,9 +108,7 @@
                             "type": "object"
                         },
                         {
-                            "enum": [
-                                false
-                            ],
+                            "const": false,
                             "type": "boolean"
                         }
                     ]

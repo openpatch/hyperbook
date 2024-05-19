@@ -52,7 +52,7 @@ importers:
         version: 18.2.0(react@18.2.0)
       react-redux:
         specifier: 8.1.0
-        version: 8.1.0(@reduxjs/toolkit@1.9.5)(@types/react-dom@18.2.5)(@types/react@18.2.12)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
+        version: 8.1.0(@reduxjs/toolkit@2.2.5)(@types/react-dom@18.3.0)(@types/react@18.3.2)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(redux@5.0.1)
       rimraf:
         specifier: 3.0.2
         version: 3.0.2
@@ -67,7 +67,7 @@ importers:
         version: 0.4.1
       webpack:
         specifier: 5.81.0
-        version: 5.81.0(esbuild@0.18.17)(webpack-cli@4.10.0)
+        version: 5.81.0(esbuild@0.18.17)
 
   packages/drawer:
     dependencies:
@@ -89,7 +89,7 @@ importers:
         version: 18.2.0(react@18.2.0)
       vitest:
         specifier: ^0.26.3
-        version: 0.26.3
+        version: 0.26.3(sass@1.77.2)(terser@5.31.0)
 
   packages/element-alert:
     dependencies:
@@ -145,7 +145,7 @@ importers:
         version: 18.2.0(react@18.2.0)
       vitest:
         specifier: ^0.26.3
-        version: 0.26.3
+        version: 0.26.3(sass@1.77.2)(terser@5.31.0)
 
   packages/element-bitflow:
     dependencies:
@@ -154,19 +154,19 @@ importers:
         version: 7.21.8
       '@bitflow/bits':
         specifier: 0.2.1
-        version: 0.2.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8)(@emotion/styled@11.10.8)(@openpatch/patches@6.0.1)(@types/react@18.2.12)(@vocab/core@1.3.1)(@vocab/react@1.1.6)(react-dom@18.2.0)(react-hook-form@7.44.3)(react@18.2.0)(zod@3.21.4)
+        version: 0.2.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@openpatch/patches@6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0))(@types/react@18.2.12)(@vocab/core@1.3.1)(@vocab/react@1.1.6(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0)(zod@3.21.4)
       '@bitflow/core':
         specifier: 0.6.0
-        version: 0.6.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8)(@emotion/styled@11.10.8)(@openpatch/patches@6.0.1)(react-dom@18.2.0)(react@18.2.0)(zod@3.21.4)
+        version: 0.6.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@openpatch/patches@6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(zod@3.21.4)
       '@bitflow/do-local':
         specifier: 0.5.1
-        version: 0.5.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8)(@emotion/styled@11.10.8)(@openpatch/patches@6.0.1)(@vocab/core@1.3.1)(@vocab/react@1.1.6)(@vocab/types@1.3.0)(react-dom@18.2.0)(react@18.2.0)(zod@3.21.4)
+        version: 0.5.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@openpatch/patches@6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0))(@vocab/core@1.3.1)(@vocab/react@1.1.6(react@18.2.0))(@vocab/types@1.3.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(zod@3.21.4)
       '@bitflow/provider':
         specifier: 0.5.0
-        version: 0.5.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8)(@emotion/styled@11.10.8)(@openpatch/patches@6.0.1)(@vocab/core@1.3.1)(@vocab/react@1.1.6)(react-dom@18.2.0)(react@18.2.0)
+        version: 0.5.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@openpatch/patches@6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0))(@vocab/core@1.3.1)(@vocab/react@1.1.6(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@bitflow/shell':
         specifier: 0.7.1
-        version: 0.7.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8)(@emotion/styled@11.10.8)(@openpatch/patches@6.0.1)(@vocab/core@1.3.1)(@vocab/react@1.1.6)(react-dom@18.2.0)(react@18.2.0)(zod@3.21.4)
+        version: 0.7.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@openpatch/patches@6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0))(@vocab/core@1.3.1)(@vocab/react@1.1.6(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(zod@3.21.4)
       '@emotion/cache':
         specifier: 11.10.8
         version: 11.10.8
@@ -178,7 +178,7 @@ importers:
         version: 11.10.8(@types/react@18.2.12)(react@18.2.0)
       '@emotion/styled':
         specifier: 11.10.8
-        version: 11.10.8(@emotion/react@11.10.8)(@types/react@18.2.12)(react@18.2.0)
+        version: 11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0)
       '@hyperbook/provider':
         specifier: workspace:*
         version: link:../provider
@@ -187,7 +187,7 @@ importers:
         version: link:../store
       '@openpatch/patches':
         specifier: 6.0.1
-        version: 6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8)(@emotion/styled@11.10.8)(@types/react@18.2.12)(react-dom@18.2.0)(react-hook-form@7.44.3)(react@18.2.0)
+        version: 6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0)
       '@vocab/core':
         specifier: 1.3.1
         version: 1.3.1
@@ -258,7 +258,7 @@ importers:
         version: 3.0.0
       react-collapsed:
         specifier: 4.0.2
-        version: 4.0.2(react-dom@18.2.0)(react@18.2.0)
+        version: 4.0.2(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       react-redux:
         specifier: 8.x
         version: 8.1.0(@reduxjs/toolkit@1.9.5)(@types/react-dom@18.2.5)(@types/react@18.2.12)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
@@ -330,13 +330,13 @@ importers:
         version: 18.2.0(react@18.2.0)
       vitest:
         specifier: ^0.26.3
-        version: 0.26.3
+        version: 0.26.3(sass@1.77.2)(terser@5.31.0)
 
   packages/element-excalidraw:
     dependencies:
       '@excalidraw/excalidraw':
         specifier: 0.16.1
-        version: 0.16.1(react-dom@18.2.0)(react@18.2.0)
+        version: 0.16.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@hyperbook/provider':
         specifier: workspace:*
         version: link:../provider
@@ -417,7 +417,7 @@ importers:
         version: 18.2.0(react@18.2.0)
       vitest:
         specifier: ^0.26.3
-        version: 0.26.3
+        version: 0.26.3(sass@1.77.2)(terser@5.31.0)
 
   packages/element-plantuml:
     dependencies:
@@ -454,7 +454,7 @@ importers:
         version: 18.2.0(react@18.2.0)
       vitest:
         specifier: ^0.26.3
-        version: 0.26.3
+        version: 0.26.3(sass@1.77.2)(terser@5.31.0)
 
   packages/element-protect:
     dependencies:
@@ -575,7 +575,7 @@ importers:
         version: 18.2.0(react@18.2.0)
       vitest:
         specifier: ^0.26.3
-        version: 0.26.3
+        version: 0.26.3(sass@1.77.2)(terser@5.31.0)
 
   packages/element-sql-ide:
     dependencies:
@@ -606,7 +606,7 @@ importers:
         version: 18.2.0(react@18.2.0)
       vitest:
         specifier: ^0.26.3
-        version: 0.26.3
+        version: 0.26.3(sass@1.77.2)(terser@5.31.0)
 
   packages/element-struktog:
     dependencies:
@@ -724,7 +724,7 @@ importers:
         version: 18.2.0(react@18.2.0)
       vitest:
         specifier: ^0.26.3
-        version: 0.26.3
+        version: 0.26.3(sass@1.77.2)(terser@5.31.0)
 
   packages/element-video:
     dependencies:
@@ -758,7 +758,7 @@ importers:
         version: 18.2.0(react@18.2.0)
       vitest:
         specifier: ^0.26.3
-        version: 0.26.3
+        version: 0.26.3(sass@1.77.2)(terser@5.31.0)
 
   packages/element-youtube:
     dependencies:
@@ -817,7 +817,7 @@ importers:
         version: 2.1.3
       vitest:
         specifier: ^0.30.0
-        version: 0.30.1
+        version: 0.30.1(sass@1.77.2)(terser@5.31.0)
 
   packages/hyperbook:
     dependencies:
@@ -981,7 +981,7 @@ importers:
         version: 18.2.0(react@18.2.0)
       vitest:
         specifier: ^0.30.0
-        version: 0.30.1
+        version: 0.30.1(sass@1.77.2)(terser@5.31.0)
 
   packages/next-watch:
     dependencies:
@@ -1012,7 +1012,7 @@ importers:
         version: 0.1.1
       next:
         specifier: 13.4.5
-        version: 13.4.5(react-dom@18.2.0)(react@18.2.0)
+        version: 13.4.5(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(sass@1.77.2)
       react:
         specifier: 18.2.0
         version: 18.2.0
@@ -1058,10 +1058,10 @@ importers:
         version: link:../provider
       '@szhsin/react-menu':
         specifier: 3.5.3
-        version: 3.5.3(react-dom@18.2.0)(react@18.2.0)
+        version: 3.5.3(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       react-collapsed:
         specifier: 4.0.2
-        version: 4.0.2(react-dom@18.2.0)(react@18.2.0)
+        version: 4.0.2(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
     devDependencies:
       '@hyperbook/types':
         specifier: workspace:*
@@ -1083,17 +1083,17 @@ importers:
     dependencies:
       react:
         specifier: 18.x
-        version: 18.2.0
+        version: 18.3.1
       redux:
         specifier: 4.2.1
         version: 4.2.1
       redux-persist:
         specifier: 6.0.0
-        version: 6.0.0(react@18.2.0)(redux@4.2.1)
+        version: 6.0.0(react@18.3.1)(redux@4.2.1)
     devDependencies:
       '@reduxjs/toolkit':
         specifier: 1.9.5
-        version: 1.9.5(react-redux@8.1.0)(react@18.2.0)
+        version: 1.9.5(react-redux@9.1.2(@types/react@18.2.12)(react@18.3.1)(redux@4.2.1))(react@18.3.1)
       '@types/react':
         specifier: 18.2.12
         version: 18.2.12
@@ -1222,7 +1222,7 @@ importers:
         version: 18.2.0(react@18.2.0)
       react-redux:
         specifier: 8.1.0
-        version: 8.1.0(@reduxjs/toolkit@1.9.5)(@types/react-dom@18.2.5)(@types/react@18.2.12)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
+        version: 8.1.0(@reduxjs/toolkit@2.2.5)(@types/react-dom@18.2.5)(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(redux@5.0.1)
     devDependencies:
       '@hyperbook/types':
         specifier: workspace:*
@@ -1244,7 +1244,7 @@ importers:
         version: 1.71.0
       '@typescript-eslint/eslint-plugin':
         specifier: 5.59.2
-        version: 5.59.2(@typescript-eslint/parser@5.59.2)(eslint@8.39.0)(typescript@4.9.5)
+        version: 5.59.2(@typescript-eslint/parser@5.59.2(eslint@8.39.0)(typescript@4.9.5))(eslint@8.39.0)(typescript@4.9.5)
       '@typescript-eslint/parser':
         specifier: 5.59.2
         version: 5.59.2(eslint@8.39.0)(typescript@4.9.5)
@@ -1253,10 +1253,10 @@ importers:
         version: 6.0.3
       copy-webpack-plugin:
         specifier: 11.0.0
-        version: 11.0.0(webpack@5.81.0)
+        version: 11.0.0(webpack@5.81.0(esbuild@0.18.17)(webpack-cli@4.10.0))
       css-loader:
         specifier: 6.7.3
-        version: 6.7.3(webpack@5.81.0)
+        version: 6.7.3(webpack@5.81.0(esbuild@0.18.17)(webpack-cli@4.10.0))
       eslint:
         specifier: 8.39.0
         version: 8.39.0
@@ -1265,13 +1265,13 @@ importers:
         version: 4.6.0(eslint@8.39.0)
       file-loader:
         specifier: 6.2.0
-        version: 6.2.0(webpack@5.81.0)
+        version: 6.2.0(webpack@5.81.0(esbuild@0.18.17)(webpack-cli@4.10.0))
       glob:
         specifier: 8.1.0
         version: 8.1.0
       node-polyfill-webpack-plugin:
         specifier: ^2.0.1
-        version: 2.0.1(webpack@5.81.0)
+        version: 2.0.1(webpack@5.81.0(esbuild@0.18.17)(webpack-cli@4.10.0))
       npm-run-all:
         specifier: 4.1.5
         version: 4.1.5
@@ -1289,19 +1289,19 @@ importers:
         version: 1.62.1
       sass-loader:
         specifier: 13.2.2
-        version: 13.2.2(sass@1.62.1)(webpack@5.81.0)
+        version: 13.2.2(sass@1.62.1)(webpack@5.81.0(esbuild@0.18.17)(webpack-cli@4.10.0))
       style-loader:
         specifier: 3.3.2
-        version: 3.3.2(webpack@5.81.0)
+        version: 3.3.2(webpack@5.81.0(esbuild@0.18.17)(webpack-cli@4.10.0))
       ts-loader:
         specifier: 9.4.2
-        version: 9.4.2(typescript@4.9.5)(webpack@5.81.0)
+        version: 9.4.2(typescript@4.9.5)(webpack@5.81.0(esbuild@0.18.17)(webpack-cli@4.10.0))
       typescript:
         specifier: 4.9.5
         version: 4.9.5
       typescript-json-schema:
-        specifier: 0.56.0
-        version: 0.56.0
+        specifier: 0.63.0
+        version: 0.63.0
       vsce:
         specifier: 2.15.0
         version: 2.15.0
@@ -1406,7 +1406,7 @@ importers:
         version: 4.0.3
       next:
         specifier: 13.4.5
-        version: 13.4.5(react-dom@18.2.0)(react@18.2.0)
+        version: 13.4.5(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(sass@1.77.2)
       react:
         specifier: 18.2.0
         version: 18.2.0
@@ -1415,7 +1415,7 @@ importers:
         version: 18.2.0(react@18.2.0)
       react-redux:
         specifier: 8.1.0
-        version: 8.1.0(@reduxjs/toolkit@1.9.5)(@types/react-dom@18.2.5)(@types/react@18.2.12)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
+        version: 8.1.0(@reduxjs/toolkit@2.2.5)(@types/react-dom@18.3.0)(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(redux@4.2.1)
       redux:
         specifier: 4.2.1
         version: 4.2.1
@@ -2255,22 +2255,43 @@ packages:
     resolution: {integrity: sha512-mh65xKQAzI6iBcFzwv28KVWSmCkdRBWoOh+bYQGW3+6OZvbbN3TqMGo5hqYxQniRcH9F2VZIoJCm4pa3BPDK/A==}
     engines: {node: '>=6.0.0'}
 
+  '@jridgewell/gen-mapping@0.3.5':
+    resolution: {integrity: sha512-IzL8ZoEDIBRWEzlCcRhOaCupYyN5gdIK+Q6fbFdPDg6HqX6jpkItn7DFIpW9LQzXG6Df9sA7+OKnq0qlz/GaQg==}
+    engines: {node: '>=6.0.0'}
+
   '@jridgewell/resolve-uri@3.1.0':
     resolution: {integrity: sha512-F2msla3tad+Mfht5cJq7LSXcdudKTWCVYUgw6pLFOOHSTtZlj6SWNYAp+AhuqLmWdBO2X5hPrLcu8cVP8fy28w==}
+    engines: {node: '>=6.0.0'}
+
+  '@jridgewell/resolve-uri@3.1.2':
+    resolution: {integrity: sha512-bRISgCIjP20/tbWSPWMEi54QVPRZExkuD9lJL+UIxUKtwVJA8wW1Trb1jMs1RFXo1CBTNZ/5hpC9QvmKWdopKw==}
     engines: {node: '>=6.0.0'}
 
   '@jridgewell/set-array@1.1.2':
     resolution: {integrity: sha512-xnkseuNADM0gt2bs+BvhO0p78Mk762YnZdsuzFV018NoG1Sj1SCQvpSqa7XUaTam5vAGasABV9qXASMKnFMwMw==}
     engines: {node: '>=6.0.0'}
 
+  '@jridgewell/set-array@1.2.1':
+    resolution: {integrity: sha512-R8gLRTZeyp03ymzP/6Lil/28tGeGEzhx1q2k703KGWRAI1VdvPIXdG70VJc2pAMw3NA6JKL5hhFu1sJX0Mnn/A==}
+    engines: {node: '>=6.0.0'}
+
   '@jridgewell/source-map@0.3.2':
     resolution: {integrity: sha512-m7O9o2uR8k2ObDysZYzdfhb08VuEml5oWGiosa1VdaPZ/A6QyPkAJuwN0Q1lhULOf6B7MtQmHENS743hWtCrgw==}
+
+  '@jridgewell/source-map@0.3.6':
+    resolution: {integrity: sha512-1ZJTZebgqllO79ue2bm3rIGud/bOe0pP5BjSRCRxxYkEZS8STV7zN84UBbiYu7jy+eCKSnVIUgoWWE/tt+shMQ==}
 
   '@jridgewell/sourcemap-codec@1.4.14':
     resolution: {integrity: sha512-XPSJHWmi394fuUuzDnGz1wiKqWfo1yXecHQMRf2l6hztTO+nPru658AyDngaBe7isIxEkRsPR3FZh+s7iVa4Uw==}
 
+  '@jridgewell/sourcemap-codec@1.4.15':
+    resolution: {integrity: sha512-eF2rxCRulEKXHTRiDrDy6erMYWqNw4LPdQ8UQA4huuxaQsVeRPFl2oM8oDGxMFhJUWZf9McpLtJasDDZb/Bpeg==}
+
   '@jridgewell/trace-mapping@0.3.17':
     resolution: {integrity: sha512-MCNzAp77qzKca9+W/+I0+sEpaUnZoeasnghNeVc41VZCEKaCH73Vq3BZZ/SzWIgrqE4H4ceI+p+b6C0mHf9T4g==}
+
+  '@jridgewell/trace-mapping@0.3.25':
+    resolution: {integrity: sha512-vNk6aEwybGtawWmy/PzwnGDOjCkLWSD2wqvjGGAgOAwCGWySYXfYoxt00IJkTF+8Lb57DwOb3Aa0o9CApepiYQ==}
 
   '@jridgewell/trace-mapping@0.3.9':
     resolution: {integrity: sha512-3Belt6tdc8bPgAtbcmdtNJlirVoTmEb5e2gC94PnkwEW9jI6CAHUeoG85tjWP5WquqfavoMtMwiG4P926ZKKuQ==}
@@ -2443,6 +2464,17 @@ packages:
       react-redux:
         optional: true
 
+  '@reduxjs/toolkit@2.2.5':
+    resolution: {integrity: sha512-aeFA/s5NCG7NoJe/MhmwREJxRkDs0ZaSqt0MxhWUrwCf1UQXpwR87RROJEql0uAkLI6U7snBOYOcKw83ew3FPg==}
+    peerDependencies:
+      react: ^16.9.0 || ^17.0.0 || ^18
+      react-redux: ^7.2.1 || ^8.1.3 || ^9.0.0
+    peerDependenciesMeta:
+      react:
+        optional: true
+      react-redux:
+        optional: true
+
   '@sindresorhus/is@5.3.0':
     resolution: {integrity: sha512-CX6t4SYQ37lzxicAqsBtxA3OseeoVrh9cSJ5PFYam0GksYlupRfy1A+Q4aYD3zvcfECLc0zO2u+ZnR2UYKvCrw==}
     engines: {node: '>=14.16'}
@@ -2499,6 +2531,9 @@ packages:
     resolution: {integrity: sha512-+PmQX0PiAYPMeVYe237LJAYvOMYW1j2rH5YROyS3b4CTVJum34HfRvKvAzozHAQG0TnHNdUfY9nCeUyRAs//cw==}
     engines: {node: '>=14.16'}
 
+  '@tsconfig/node10@1.0.11':
+    resolution: {integrity: sha512-DcRjDCujK/kCk/cUe8Xz8ZSpm8mS3mNNpta+jGCA6USEDfktlNvm1+IuZ9eTcDbNk41BHwpHHeW+N1lKCz4zOw==}
+
   '@tsconfig/node10@1.0.9':
     resolution: {integrity: sha512-jNsYVVxU8v5g43Erja32laIDHXeoNvFEpX33OK4d6hljo3jDhCBDhx5dhCCTMWUojscpAagGiRkBKxpdl9fxqA==}
 
@@ -2510,6 +2545,9 @@ packages:
 
   '@tsconfig/node16@1.0.3':
     resolution: {integrity: sha512-yOlFc+7UtL/89t2ZhjPvvB/DeAr3r+Dq58IgzsFkOAvVC6NMJXmCGjbptdXdR9qsX7pKcTL+s87FtYREi2dEEQ==}
+
+  '@tsconfig/node16@1.0.4':
+    resolution: {integrity: sha512-vxhUy4J8lyeyinH7Azl1pdd43GJhZH/tP2weN8TntQblOY+A0XbT8DJk1/oCPuOOyg/Ja757rG0CgHcWC8OfMA==}
 
   '@types/archiver@5.3.2':
     resolution: {integrity: sha512-IctHreBuWE5dvBDz/0WeKtyVKVRs4h75IblxOACL92wU66v+HGAfEYAOyXkOFphvRJMhuXdI9huDXpX0FC6lCw==}
@@ -2598,6 +2636,9 @@ packages:
   '@types/json-schema@7.0.11':
     resolution: {integrity: sha512-wOuvG1SN4Us4rez+tylwwwCV1psiNVOkJeM3AUWUNWg/jDQY2+HE/444y5gc+jBmRqASOm2Oeh5c1axHobwRKQ==}
 
+  '@types/json-schema@7.0.15':
+    resolution: {integrity: sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==}
+
   '@types/katex@0.11.1':
     resolution: {integrity: sha512-DUlIj2nk0YnJdlWgsFuVKcX27MLW0KbKmGVoUHmFr+74FYYNUDAaj9ZqTADvsbE8rfxuVmSFc7KczYn5Y09ozg==}
 
@@ -2643,8 +2684,8 @@ packages:
   '@types/node@12.20.55':
     resolution: {integrity: sha512-J8xLz7q2OFulZ2cyGTLE1TbbZcjpno7FaN6zdJNrgAdrJ+DZzh/uFR6YrTb4C+nXakvud8Q4+rbhoIWlYQbUFQ==}
 
-  '@types/node@16.18.24':
-    resolution: {integrity: sha512-zvSN2Esek1aeLdKDYuntKAYjti9Z2oT4I8bfkLLhIxHlv3dwZ5vvATxOc31820iYm4hQRCwjUgDpwSMFjfTUnw==}
+  '@types/node@16.18.97':
+    resolution: {integrity: sha512-4muilE1Lbfn57unR+/nT9AFjWk0MtWi5muwCEJqnOvfRQDbSfLCUdN7vCIg8TYuaANfhLOV85ve+FNpiUsbSRg==}
 
   '@types/node@18.11.18':
     resolution: {integrity: sha512-DHQpWGjyQKSHj3ebjFI/wRKcqQcdR+MoFBygntYOZytCqNfkd2ZC4ARDJ2DQqhjH5p85Nnd3jhUJIXrszFX/JA==}
@@ -2682,6 +2723,9 @@ packages:
   '@types/prompts@2.4.4':
     resolution: {integrity: sha512-p5N9uoTH76lLvSAaYSZtBCdEXzpOOufsRjnhjVSrZGXikVGHX9+cc9ERtHRV4hvBKHyZb1bg4K+56Bd2TqUn4A==}
 
+  '@types/prop-types@15.7.12':
+    resolution: {integrity: sha512-5zvhXYtRNRluoE/jAp4GVsSduVUzNWKkOZrCDBWYtE7biZywwdC2AcEzg+cSMLFRfVgeAFqpfNabiPjxFddV1Q==}
+
   '@types/prop-types@15.7.5':
     resolution: {integrity: sha512-JCB8C6SnDoQf0cNycqd/35A7MjcnK+ZTqE7judS6o7utxUCg6imJg3QK2qzHKszlTjcj2cn+NwMB2i96ubpj7w==}
 
@@ -2700,11 +2744,17 @@ packages:
   '@types/react-dom@18.2.5':
     resolution: {integrity: sha512-sRQsOS/sCLnpQhR4DSKGTtWFE3FZjpQa86KPVbhUqdYMRZ9FEFcfAytKhR/vUG2rH1oFbOOej6cuD7MFSobDRQ==}
 
+  '@types/react-dom@18.3.0':
+    resolution: {integrity: sha512-EhwApuTmMBmXuFOikhQLIBUn6uFg81SwLMOAUgodJF14SOBOCMdU04gDoYi0WOJJHD144TL32z4yDqCW3dnkQg==}
+
   '@types/react@18.0.15':
     resolution: {integrity: sha512-iz3BtLuIYH1uWdsv6wXYdhozhqj20oD4/Hk2DNXIn1kFsmp9x8d9QB6FnPhfkbhd2PgEONt9Q1x/ebkwjfFLow==}
 
   '@types/react@18.2.12':
     resolution: {integrity: sha512-ndmBMLCgn38v3SntMeoJaIrO6tGHYKMEBohCUmw8HoLLQdRMOIGXfeYaBTLe2lsFaSB3MOK1VXscYFnmLtTSmw==}
+
+  '@types/react@18.3.2':
+    resolution: {integrity: sha512-Btgg89dAnqD4vV7R3hlwOxgqobUQKgx3MmrQRi0yYbs/P0ym8XozIAlkqVilPqHQwXs4e9Tf63rrCgl58BcO4w==}
 
   '@types/readdir-glob@1.1.0':
     resolution: {integrity: sha512-taqbpEGEu0Vx6+9PQ4XtqAUAMRyLCE7H6p4Pkp+R/90y/phddtCwb7XRLa8MYf1OxmiL2ZqXwZF1gOT7LyGGCg==}
@@ -2942,6 +2992,15 @@ packages:
   acorn-walk@8.2.0:
     resolution: {integrity: sha512-k+iyHEuPgSw6SbuDpGQM+06HQUa04DZ3o+F6CSzXMvvI5KMvnaEqXe+YVe555R9nn6GPt404fos4wcgpw12SDA==}
     engines: {node: '>=0.4.0'}
+
+  acorn-walk@8.3.2:
+    resolution: {integrity: sha512-cjkyv4OtNCIeqhHrfS81QWXoCBPExR/J62oyEqepVw8WaQeSqpW2uhuLPh1m9eWhDuOo/jUXVTlifvesOWp/4A==}
+    engines: {node: '>=0.4.0'}
+
+  acorn@8.11.3:
+    resolution: {integrity: sha512-Y9rRfJG5jcKOE0CLisYbojUjIrIEE7AGMzA/Sm4BslANhbS+cDMpgBdcPT91oJ7OuJ9hYJBx59RjbhxVnrF8Xg==}
+    engines: {node: '>=0.4.0'}
+    hasBin: true
 
   acorn@8.8.2:
     resolution: {integrity: sha512-xjIYgE8HBrkpd/sJqOGNspf8uHG+NOHGOw6a/Urj8taM2EXfdNAH2oFcPeIFfsv3+kz/mJrS5VuMqbNLjCa2vw==}
@@ -3309,6 +3368,10 @@ packages:
     resolution: {integrity: sha512-Dr3sfKRP6oTcjf2JmUmFJfeVMvXBdegxB0iVQ5eb2V10uFJUCAS8OByZdVAyVb8xXNz3GjjTgj9kLWsZTqE6kw==}
     engines: {node: '>= 8.10.0'}
 
+  chokidar@3.6.0:
+    resolution: {integrity: sha512-7VT13fmjotKpGipCW9JEQAusEPE+Ei8nl6/g4FBAmIm0GOOLMua9NDDo/DWp0ZAxCr3cPq5ZpBqmPAQgDda2Pw==}
+    engines: {node: '>= 8.10.0'}
+
   chownr@1.1.4:
     resolution: {integrity: sha512-jJ0bqzaylmJtVnNgzTeSOs8DPavpbYgEr/b0YL8/2GO3xJEhInFmhKMUnEJQjZumK7KXGFhUy89PrsJWlakBVg==}
 
@@ -3548,6 +3611,9 @@ packages:
 
   csstype@3.1.2:
     resolution: {integrity: sha512-I7K1Uu0MBPzaFKg4nI5Q7Vs2t+3gWWW648spaF+Rg7pI9ds18Ugn+lvg4SHczUdKlHI5LWBXyqfS8+DufyBsgQ==}
+
+  csstype@3.1.3:
+    resolution: {integrity: sha512-M1uQkMl8rQK/szD0LNhtqxIPLpimGm8sOBwU7lLnCpSbTyY3yeU1Vc7l4KT5zT4s/yOxHH5O7tIuuLOCnLADRw==}
 
   csv-generate@3.4.3:
     resolution: {integrity: sha512-w/T+rqR0vwvHqWs/1ZyMDWtHHSJaN06klRqJXBEpDJaM/+dZkso0OKh1VcuuYvK3XM53KysVNq8Ko/epCK8wOw==}
@@ -3962,6 +4028,10 @@ packages:
     resolution: {integrity: sha512-k0er2gUkLf8O0zKJiAhmkTnJlTvINGv7ygDNPbeIsX/TJjGJZHuh9B2UxbsaEkmlEo9MfhrSzmhIlhRlI2GXnw==}
     engines: {node: '>=6'}
 
+  escalade@3.1.2:
+    resolution: {integrity: sha512-ErCHMCae19vR8vQGe50xIsVomy19rg6gFu3+r3jkEO46suLMWBksvVyoGgQV+jOfl84ZSOSlmv6Gxa89PmTGmA==}
+    engines: {node: '>=6'}
+
   escape-html@1.0.3:
     resolution: {integrity: sha512-NiSupZ4OeuGwr68lGIeym/ksIZMJodUGOSCZ/FSnTxcrekbvqrgdUxlJOMpijaKZVjAJrWrGs/6Jy8OMuyj9ow==}
 
@@ -4237,6 +4307,11 @@ packages:
 
   fsevents@2.3.2:
     resolution: {integrity: sha512-xiqMQR4xAeHTuB9uWm+fFRcIOgKBMiOBP+eXiyT7jsgVCq1bkVygt00oASowB7EdtpOHaaPgKt812P9ab+DDKA==}
+    engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
+    os: [darwin]
+
+  fsevents@2.3.3:
+    resolution: {integrity: sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==}
     engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
     os: [darwin]
 
@@ -4529,6 +4604,9 @@ packages:
     resolution: {integrity: sha512-MAb38BcSbH0eHNBxn7ql2NH/kX33OkB3lZ1BNdh7ENeRChHTYsTvWrMubiIAMNS2llXEEgZ1MUOBtXChP3kaFQ==}
     engines: {node: '>= 4'}
 
+  immer@10.1.1:
+    resolution: {integrity: sha512-s2MPrmjovJcoMaHtx6K11Ra7oD05NT97w1IC5zpMkT6Atjr7H8LjaDd81iIxUYpMKSRRNMJE703M1Fhr/TctHw==}
+
   immer@9.0.19:
     resolution: {integrity: sha512-eY+Y0qcsB4TZKwgQzLaE/lqYMlKhv5J9dyd2RhhtGhNo2njPXDqU9XPfcNfa3MIDsdtZt5KlkIsirlo4dHsWdQ==}
 
@@ -4537,6 +4615,9 @@ packages:
 
   immutable@4.2.2:
     resolution: {integrity: sha512-fTMKDwtbvO5tldky9QZ2fMX7slR0mYpY5nbnFWYp0fOzDhHqhgIw9KoYgxLWsoNTS9ZHGauHj18DTyEw6BK3Og==}
+
+  immutable@4.3.6:
+    resolution: {integrity: sha512-Ju0+lEMyzMVZarkTn/gqRpdqd5dOPaz1mCZ0SH3JV6iFw81PldE/PEB1hWVEA288HPt4WXW8O7AWxB10M+03QQ==}
 
   import-fresh@3.3.0:
     resolution: {integrity: sha512-veYYhQa+D1QBKznvhUHxb8faxlrwUnxseDAbAp457E0wLNio2bOSKnjYDhMj+YiAq61xrMGhQk9iXVk5FzgQMw==}
@@ -6152,6 +6233,18 @@ packages:
       redux:
         optional: true
 
+  react-redux@9.1.2:
+    resolution: {integrity: sha512-0OA4dhM1W48l3uzmv6B7TXPCGmokUU4p1M44DGN2/D9a1FjVPukVjER1PcPX97jIg6aUeLq1XJo1IpfbgULn0w==}
+    peerDependencies:
+      '@types/react': ^18.2.25
+      react: ^18.0
+      redux: ^5.0.0
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+      redux:
+        optional: true
+
   react-syntax-highlighter@15.5.0:
     resolution: {integrity: sha512-+zq2myprEnQmH5yw6Gqc8lD55QHnpKaU8TOcFeC/Lg/MQSs8UknEA0JC4nTZGFAXC2J2Hyj/ijJ7NlabyPi2gg==}
     peerDependencies:
@@ -6181,6 +6274,10 @@ packages:
 
   react@18.2.0:
     resolution: {integrity: sha512-/3IjMdb2L9QbBdWiW5e3P2/npwMBaU9mHCSCUzNln0ZCYbcfTsGbTJrU/kGemdH2IWmB2ioZ+zkxtmq6g09fGQ==}
+    engines: {node: '>=0.10.0'}
+
+  react@18.3.1:
+    resolution: {integrity: sha512-wS+hAgJShR0KhEvPJArfuPVN1+Hz1t0Y6n5jLrGQbkb4urgPE/0Rve+1kMB1v/oWgHgm4WIcV+i7F2pTVj+2iQ==}
     engines: {node: '>=0.10.0'}
 
   read-pkg-up@7.0.1:
@@ -6251,8 +6348,16 @@ packages:
     peerDependencies:
       redux: ^4
 
+  redux-thunk@3.1.0:
+    resolution: {integrity: sha512-NW2r5T6ksUKXCabzhL9z+h206HQw/NJkcLm1GPImRQ8IzfXwRGqjVhKJGauHirT0DAuyy6hjdnMZaRoAcy0Klw==}
+    peerDependencies:
+      redux: ^5.0.0
+
   redux@4.2.1:
     resolution: {integrity: sha512-LAUYz4lc+Do8/g7aeRa8JkyDErK6ekstQaqWQrNRW//MY1TvCEpMtpTWvlQ+FPbWCx+Xixu/6SHt5N0HR+SB4w==}
+
+  redux@5.0.1:
+    resolution: {integrity: sha512-M9/ELqF6fy8FwmkpnF0S3YKOqMyoWJ4+CS5Efg2ct3oY9daQvd/Pc71FpGZsVsbl3Cpb+IIcjBDUnnyBdQbq4w==}
 
   refractor@3.6.0:
     resolution: {integrity: sha512-MY9W41IOWxxk31o+YvFCNyNzdkc9M20NoZK5vq6jkv4I/uh2zkWcfudj0Q1fovjUQJrNewS9NMzeTtqPf+n5EA==}
@@ -6352,6 +6457,9 @@ packages:
   reselect@4.1.8:
     resolution: {integrity: sha512-ab9EmR80F/zQTMNeneUr4cv+jSwPJgIlvEmVwLerwrWVbpLlBuls9XHzIeTFy4cegU2NHBp3va0LKOzU5qFEYQ==}
 
+  reselect@5.1.0:
+    resolution: {integrity: sha512-aw7jcGLDpSgNDyWBQLv2cedml85qd95/iszJjN988zX1t7AVRJi19d9kto5+W7oCfQ94gyo40dVbT6g2k4/kXg==}
+
   resolve-alpn@1.2.1:
     resolution: {integrity: sha512-0a1F4l73/ZFZOakJnQ3FvkJ2+gSTQWz/r2KE5OdDY0TxPm5h4GkqkWWfM47T7HsbnOtcJVEF4epCVy6u7Q3K+g==}
 
@@ -6440,8 +6548,8 @@ packages:
   safe-regex-test@1.0.0:
     resolution: {integrity: sha512-JBUUzyOgEwXQY1NuPtvcj/qcBDbDmEvWufhlnXZIm75DEHp+afM1r1ujJpJsV/gSM4t59tpDyPi1sd6ZaPFfsA==}
 
-  safe-stable-stringify@2.4.2:
-    resolution: {integrity: sha512-gMxvPJYhP0O9n2pvcfYfIuYgbledAOJFcqRThtPRmjscaipiwcwPPKLytpVzMkG2HAN87Qmo2d4PtGiri1dSLA==}
+  safe-stable-stringify@2.4.3:
+    resolution: {integrity: sha512-e2bDA2WJT0wxseVd4lsDP4+3ONX6HpMXQa1ZhFQ7SU+GjvORCmShbCMltrtIDfkYhVHrOcPtj+KhmDBdPdZD1g==}
     engines: {node: '>=10'}
 
   safer-buffer@2.1.2:
@@ -6468,6 +6576,11 @@ packages:
 
   sass@1.62.1:
     resolution: {integrity: sha512-NHpxIzN29MXvWiuswfc1W3I0N8SXBd8UR26WntmDlRYf0bSADnwnOjsyMZ3lMezSlArD33Vs3YFhp7dWvL770A==}
+    engines: {node: '>=14.0.0'}
+    hasBin: true
+
+  sass@1.77.2:
+    resolution: {integrity: sha512-eb4GZt1C3avsX3heBNlrc7I09nyT00IUuo4eFhAbeXWU2fvA7oXI53SxODVAA+zgZCk9aunAZgO+losjR3fAwA==}
     engines: {node: '>=14.0.0'}
     hasBin: true
 
@@ -6609,6 +6722,10 @@ packages:
 
   source-map-js@1.0.2:
     resolution: {integrity: sha512-R0XvVJ9WusLiqTCEiGCmICCMplcCkIwwR11mOSD9CR5u+IXYdiseeEuXCVAjS54zqwkLcPNnmU4OeJ6tUrWhDw==}
+    engines: {node: '>=0.10.0'}
+
+  source-map-js@1.2.0:
+    resolution: {integrity: sha512-itJW8lvSA0TXEphiRoawsCksnlf8SyvmFzIhltqAHluXd88pkCd+cXJVHTDwdCr0IzwptSm035IHQktUu1QUMg==}
     engines: {node: '>=0.10.0'}
 
   source-map-support@0.5.21:
@@ -6827,6 +6944,11 @@ packages:
     engines: {node: '>=10'}
     hasBin: true
 
+  terser@5.31.0:
+    resolution: {integrity: sha512-Q1JFAoUKE5IMfI4Z/lkE/E6+SwgzO+x4tq4v1AyBLRj8VSYvRO6A/rQrPg1yud4g0En9EKI1TvFRF2tQFcoUkg==}
+    engines: {node: '>=10'}
+    hasBin: true
+
   text-table@0.2.0:
     resolution: {integrity: sha512-N+8UisAXDGk8PFXP4HAzVR9nbfmVJ3zYLAWiTIoqC5v5isinhr+r5uaO8+7r3BMfuNIufIsA7RdpVgacC2cSpw==}
 
@@ -6931,6 +7053,20 @@ packages:
       '@swc/wasm':
         optional: true
 
+  ts-node@10.9.2:
+    resolution: {integrity: sha512-f0FFpIdcHgn8zcPSbf1dRevwt047YMnaiJM3u2w2RewrB+fob/zePZcrOyQoLMMO7aBIddLcQIEK5dYjkLnGrQ==}
+    hasBin: true
+    peerDependencies:
+      '@swc/core': '>=1.2.50'
+      '@swc/wasm': '>=1.2.50'
+      '@types/node': '*'
+      typescript: '>=2.7'
+    peerDependenciesMeta:
+      '@swc/core':
+        optional: true
+      '@swc/wasm':
+        optional: true
+
   tslib@1.14.1:
     resolution: {integrity: sha512-Xni35NKzjgMrwevysHTCArtLDpPvye8zV/0E4EyYn43P7/7qvQwPh9BGkHewbMulVntbigmcT7rdX3BNo9wRJg==}
 
@@ -7006,13 +7142,18 @@ packages:
   typedarray-to-buffer@3.1.5:
     resolution: {integrity: sha512-zdu8XMNEDepKKR+XYOXAVPtWui0ly0NtohUscw+UmaHiAWT8hrV1rr//H6V+0DvJ3OQ19S979M0laLfX8rm82Q==}
 
-  typescript-json-schema@0.56.0:
-    resolution: {integrity: sha512-k/aSEqx89YR2z/f2y3VwoOGzlKTWern0EIey2qqEpMRP7HL4CI8udPElzJs4eFVkPowCLJ1yVBSzuIWIUF+mMA==}
+  typescript-json-schema@0.63.0:
+    resolution: {integrity: sha512-vBfMBq4U/rZ5FIRi7u4o/YAdeRHsSabdGHogUlCPi0cYU0CGvS4Bdu8bSzyUsF+Kf5PTQUGh2TictJuQTDK6eQ==}
     hasBin: true
 
   typescript@4.9.5:
     resolution: {integrity: sha512-1FXk9E2Hm+QzZQ7z+McJiHL4NW1F2EzMu9Nq9i3zAaGqibafqYwCVU6WyWAuyQRRzOlxou8xZSyXLEN8oKj24g==}
     engines: {node: '>=4.2.0'}
+    hasBin: true
+
+  typescript@5.1.6:
+    resolution: {integrity: sha512-zaWCozRZ6DLEWAWFrVDz1H6FVXzUSfTy5FUMWsQlU8Ym5JP9eO4xkTIROFCQvhQf61z6O/G6ugw3SgAnvvm+HA==}
+    engines: {node: '>=14.17'}
     hasBin: true
 
   uc.micro@1.0.6:
@@ -7148,6 +7289,11 @@ packages:
 
   use-sync-external-store@1.2.0:
     resolution: {integrity: sha512-eEgnFxGQ1Ife9bzYs6VLi8/4X6CObHMw9Qr9tPY43iKwsPw8xE8+EFsf/2cFZ5S3esXgpWgtSCtLNS41F+sKPA==}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0
+
+  use-sync-external-store@1.2.2:
+    resolution: {integrity: sha512-PElTlVMwpblvbNqQ82d2n6RjStvdSoNe9FG28kNfz3WiXilJm4DdNkEzRhCZuIDwY8U08WVihhGR5iRqAwfDiw==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
 
@@ -7499,6 +7645,10 @@ packages:
     resolution: {integrity: sha512-1/9UrdHjDZc0eOU0HxOHoS78C69UD3JRMvzlJ7S79S2nTaWRA/whGCTV8o9e/N/1Va9YIV7Q4sOxD8VV4pCWOw==}
     engines: {node: '>=12'}
 
+  yargs@17.7.2:
+    resolution: {integrity: sha512-7dSzzRQ++CKnNI/krKnYRV7JKKPUXMEh61soaHKg9mrWEhzFWhFnxPxGl+69cD1Ou63C13NUPCnmIcrvqCuM6w==}
+    engines: {node: '>=12'}
+
   yauzl@2.10.0:
     resolution: {integrity: sha512-p4a9I6X6nu6IhoGmBqAcbJy1mlC4j27vEPZX9F4L4/vZT3Lyq1VkFHw/V/PUcB9Buo+DG3iHkT0x3Qya58zc3g==}
 
@@ -7677,17 +7827,17 @@ snapshots:
       '@babel/helper-validator-identifier': 7.19.1
       to-fast-properties: 2.0.0
 
-  '@bitflow/bits@0.2.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8)(@emotion/styled@11.10.8)(@openpatch/patches@6.0.1)(@types/react@18.2.12)(@vocab/core@1.3.1)(@vocab/react@1.1.6)(react-dom@18.2.0)(react-hook-form@7.44.3)(react@18.2.0)(zod@3.21.4)':
+  '@bitflow/bits@0.2.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@openpatch/patches@6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0))(@types/react@18.2.12)(@vocab/core@1.3.1)(@vocab/react@1.1.6(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0)(zod@3.21.4)':
     dependencies:
-      '@bitflow/end-tries': 0.5.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8)(@emotion/styled@11.10.8)(@openpatch/patches@6.0.1)(@vocab/core@1.3.1)(@vocab/react@1.1.6)(react-dom@18.2.0)(react-hook-form@7.44.3)(react@18.2.0)(zod@3.21.4)
-      '@bitflow/input-markdown': 0.5.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8)(@emotion/styled@11.10.8)(@openpatch/patches@6.0.1)(@vocab/core@1.3.1)(@vocab/react@1.1.6)(react-dom@18.2.0)(react-hook-form@7.44.3)(react@18.2.0)(zod@3.21.4)
-      '@bitflow/start-simple': 0.5.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8)(@emotion/styled@11.10.8)(@openpatch/patches@6.0.1)(@vocab/core@1.3.1)(@vocab/react@1.1.6)(react-dom@18.2.0)(react-hook-form@7.44.3)(react@18.2.0)(zod@3.21.4)
-      '@bitflow/task-choice': 0.5.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8)(@emotion/styled@11.10.8)(@openpatch/patches@6.0.1)(@vocab/core@1.3.1)(@vocab/react@1.1.6)(react-dom@18.2.0)(react-hook-form@7.44.3)(react@18.2.0)(zod@3.21.4)
-      '@bitflow/task-fill-in-the-blank': 0.5.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8)(@emotion/styled@11.10.8)(@openpatch/patches@6.0.1)(@types/react@18.2.12)(@vocab/core@1.3.1)(@vocab/react@1.1.6)(react-dom@18.2.0)(react-hook-form@7.44.3)(react@18.2.0)(zod@3.21.4)
-      '@bitflow/task-highlighting': 0.2.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8)(@emotion/styled@11.10.8)(@openpatch/patches@6.0.1)(@vocab/core@1.3.1)(@vocab/react@1.1.6)(react-dom@18.2.0)(react-hook-form@7.44.3)(react@18.2.0)(zod@3.21.4)
-      '@bitflow/task-input': 0.5.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8)(@emotion/styled@11.10.8)(@openpatch/patches@6.0.1)(@vocab/core@1.3.1)(@vocab/react@1.1.6)(react-dom@18.2.0)(react-hook-form@7.44.3)(react@18.2.0)(zod@3.21.4)
-      '@bitflow/task-yes-no': 0.5.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8)(@emotion/styled@11.10.8)(@openpatch/patches@6.0.1)(@vocab/core@1.3.1)(@vocab/react@1.1.6)(react-dom@18.2.0)(react-hook-form@7.44.3)(react@18.2.0)(zod@3.21.4)
-      '@bitflow/title-simple': 0.5.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8)(@emotion/styled@11.10.8)(@openpatch/patches@6.0.1)(@vocab/core@1.3.1)(@vocab/react@1.1.6)(react-dom@18.2.0)(react-hook-form@7.44.3)(react@18.2.0)(zod@3.21.4)
+      '@bitflow/end-tries': 0.5.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@openpatch/patches@6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0))(@vocab/core@1.3.1)(@vocab/react@1.1.6(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0)(zod@3.21.4)
+      '@bitflow/input-markdown': 0.5.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@openpatch/patches@6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0))(@vocab/core@1.3.1)(@vocab/react@1.1.6(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0)(zod@3.21.4)
+      '@bitflow/start-simple': 0.5.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@openpatch/patches@6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0))(@vocab/core@1.3.1)(@vocab/react@1.1.6(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0)(zod@3.21.4)
+      '@bitflow/task-choice': 0.5.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@openpatch/patches@6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0))(@vocab/core@1.3.1)(@vocab/react@1.1.6(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0)(zod@3.21.4)
+      '@bitflow/task-fill-in-the-blank': 0.5.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@openpatch/patches@6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0))(@types/react@18.2.12)(@vocab/core@1.3.1)(@vocab/react@1.1.6(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0)(zod@3.21.4)
+      '@bitflow/task-highlighting': 0.2.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@openpatch/patches@6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0))(@vocab/core@1.3.1)(@vocab/react@1.1.6(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0)(zod@3.21.4)
+      '@bitflow/task-input': 0.5.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@openpatch/patches@6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0))(@vocab/core@1.3.1)(@vocab/react@1.1.6(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0)(zod@3.21.4)
+      '@bitflow/task-yes-no': 0.5.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@openpatch/patches@6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0))(@vocab/core@1.3.1)(@vocab/react@1.1.6(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0)(zod@3.21.4)
+      '@bitflow/title-simple': 0.5.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@openpatch/patches@6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0))(@vocab/core@1.3.1)(@vocab/react@1.1.6(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0)(zod@3.21.4)
       zod: 3.21.4
     transitivePeerDependencies:
       - '@emotion/cache'
@@ -7702,36 +7852,36 @@ snapshots:
       - react-hook-form
       - supports-color
 
-  '@bitflow/core@0.6.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8)(@emotion/styled@11.10.8)(@openpatch/patches@6.0.1)(react-dom@18.2.0)(react@18.2.0)(zod@3.17.3)':
+  '@bitflow/core@0.6.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@openpatch/patches@6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(zod@3.17.3)':
     dependencies:
       '@emotion/cache': 11.10.8
       '@emotion/react': 11.10.8(@types/react@18.2.12)(react@18.2.0)
-      '@emotion/styled': 11.10.8(@emotion/react@11.10.8)(@types/react@18.2.12)(react@18.2.0)
-      '@openpatch/patches': 6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8)(@emotion/styled@11.10.8)(@types/react@18.2.12)(react-dom@18.2.0)(react-hook-form@7.44.3)(react@18.2.0)
+      '@emotion/styled': 11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0)
+      '@openpatch/patches': 6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0)
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
       zod: 3.17.3
 
-  '@bitflow/core@0.6.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8)(@emotion/styled@11.10.8)(@openpatch/patches@6.0.1)(react-dom@18.2.0)(react@18.2.0)(zod@3.21.4)':
+  '@bitflow/core@0.6.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@openpatch/patches@6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(zod@3.21.4)':
     dependencies:
       '@emotion/cache': 11.10.8
       '@emotion/react': 11.10.8(@types/react@18.2.12)(react@18.2.0)
-      '@emotion/styled': 11.10.8(@emotion/react@11.10.8)(@types/react@18.2.12)(react@18.2.0)
-      '@openpatch/patches': 6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8)(@emotion/styled@11.10.8)(@types/react@18.2.12)(react-dom@18.2.0)(react-hook-form@7.44.3)(react@18.2.0)
+      '@emotion/styled': 11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0)
+      '@openpatch/patches': 6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0)
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
       zod: 3.21.4
 
-  '@bitflow/do-local@0.5.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8)(@emotion/styled@11.10.8)(@openpatch/patches@6.0.1)(@vocab/core@1.3.1)(@vocab/react@1.1.6)(@vocab/types@1.3.0)(react-dom@18.2.0)(react@18.2.0)(zod@3.21.4)':
+  '@bitflow/do-local@0.5.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@openpatch/patches@6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0))(@vocab/core@1.3.1)(@vocab/react@1.1.6(react@18.2.0))(@vocab/types@1.3.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(zod@3.21.4)':
     dependencies:
-      '@bitflow/core': 0.6.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8)(@emotion/styled@11.10.8)(@openpatch/patches@6.0.1)(react-dom@18.2.0)(react@18.2.0)(zod@3.21.4)
-      '@bitflow/do': 0.6.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8)(@emotion/styled@11.10.8)(@openpatch/patches@6.0.1)(@vocab/core@1.3.1)(@vocab/react@1.1.6)(@vocab/types@1.3.0)(react-dom@18.2.0)(react@18.2.0)(zod@3.21.4)
-      '@bitflow/flow-engine': 0.5.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8)(@emotion/styled@11.10.8)(@openpatch/patches@6.0.1)(react-dom@18.2.0)(react@18.2.0)(zod@3.21.4)
-      '@bitflow/provider': 0.5.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8)(@emotion/styled@11.10.8)(@openpatch/patches@6.0.1)(@vocab/core@1.3.1)(@vocab/react@1.1.6)(react-dom@18.2.0)(react@18.2.0)
+      '@bitflow/core': 0.6.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@openpatch/patches@6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(zod@3.21.4)
+      '@bitflow/do': 0.6.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@openpatch/patches@6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0))(@vocab/core@1.3.1)(@vocab/react@1.1.6(react@18.2.0))(@vocab/types@1.3.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(zod@3.21.4)
+      '@bitflow/flow-engine': 0.5.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@openpatch/patches@6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(zod@3.21.4)
+      '@bitflow/provider': 0.5.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@openpatch/patches@6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0))(@vocab/core@1.3.1)(@vocab/react@1.1.6(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@emotion/cache': 11.10.8
       '@emotion/react': 11.10.8(@types/react@18.2.12)(react@18.2.0)
-      '@emotion/styled': 11.10.8(@emotion/react@11.10.8)(@types/react@18.2.12)(react@18.2.0)
-      '@openpatch/patches': 6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8)(@emotion/styled@11.10.8)(@types/react@18.2.12)(react-dom@18.2.0)(react-hook-form@7.44.3)(react@18.2.0)
+      '@emotion/styled': 11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0)
+      '@openpatch/patches': 6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0)
       '@vocab/core': 1.3.1
       '@vocab/react': 1.1.6(react@18.2.0)
       react: 18.2.0
@@ -7740,16 +7890,16 @@ snapshots:
     transitivePeerDependencies:
       - '@vocab/types'
 
-  '@bitflow/do@0.6.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8)(@emotion/styled@11.10.8)(@openpatch/patches@6.0.1)(@vocab/core@1.3.1)(@vocab/react@1.1.6)(@vocab/types@1.3.0)(react-dom@18.2.0)(react@18.2.0)(zod@3.21.4)':
+  '@bitflow/do@0.6.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@openpatch/patches@6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0))(@vocab/core@1.3.1)(@vocab/react@1.1.6(react@18.2.0))(@vocab/types@1.3.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(zod@3.21.4)':
     dependencies:
-      '@bitflow/core': 0.6.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8)(@emotion/styled@11.10.8)(@openpatch/patches@6.0.1)(react-dom@18.2.0)(react@18.2.0)(zod@3.21.4)
-      '@bitflow/flow-engine': 0.5.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8)(@emotion/styled@11.10.8)(@openpatch/patches@6.0.1)(react-dom@18.2.0)(react@18.2.0)(zod@3.21.4)
-      '@bitflow/provider': 0.5.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8)(@emotion/styled@11.10.8)(@openpatch/patches@6.0.1)(@vocab/core@1.3.1)(@vocab/react@1.1.6)(react-dom@18.2.0)(react@18.2.0)
-      '@bitflow/shell': 0.7.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8)(@emotion/styled@11.10.8)(@openpatch/patches@6.0.1)(@vocab/core@1.3.1)(@vocab/react@1.1.6)(react-dom@18.2.0)(react@18.2.0)(zod@3.21.4)
+      '@bitflow/core': 0.6.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@openpatch/patches@6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(zod@3.21.4)
+      '@bitflow/flow-engine': 0.5.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@openpatch/patches@6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(zod@3.21.4)
+      '@bitflow/provider': 0.5.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@openpatch/patches@6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0))(@vocab/core@1.3.1)(@vocab/react@1.1.6(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      '@bitflow/shell': 0.7.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@openpatch/patches@6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0))(@vocab/core@1.3.1)(@vocab/react@1.1.6(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(zod@3.21.4)
       '@emotion/cache': 11.10.8
       '@emotion/react': 11.10.8(@types/react@18.2.12)(react@18.2.0)
-      '@emotion/styled': 11.10.8(@emotion/react@11.10.8)(@types/react@18.2.12)(react@18.2.0)
-      '@openpatch/patches': 6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8)(@emotion/styled@11.10.8)(@types/react@18.2.12)(react-dom@18.2.0)(react-hook-form@7.44.3)(react@18.2.0)
+      '@emotion/styled': 11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0)
+      '@openpatch/patches': 6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0)
       '@vocab/core': 1.3.1
       '@vocab/react': 1.1.6(react@18.2.0)
       '@vocab/types': 1.3.0
@@ -7758,16 +7908,16 @@ snapshots:
     transitivePeerDependencies:
       - zod
 
-  '@bitflow/end-tries@0.5.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8)(@emotion/styled@11.10.8)(@openpatch/patches@6.0.1)(@vocab/core@1.3.1)(@vocab/react@1.1.6)(react-dom@18.2.0)(react-hook-form@7.44.3)(react@18.2.0)(zod@3.21.4)':
+  '@bitflow/end-tries@0.5.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@openpatch/patches@6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0))(@vocab/core@1.3.1)(@vocab/react@1.1.6(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0)(zod@3.21.4)':
     dependencies:
-      '@bitflow/core': 0.6.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8)(@emotion/styled@11.10.8)(@openpatch/patches@6.0.1)(react-dom@18.2.0)(react@18.2.0)(zod@3.21.4)
-      '@bitflow/icons': 0.5.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8)(@emotion/styled@11.10.8)(@openpatch/patches@6.0.1)(@vocab/core@1.3.1)(@vocab/react@1.1.6)(react-dom@18.2.0)(react@18.2.0)
-      '@bitflow/provider': 0.5.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8)(@emotion/styled@11.10.8)(@openpatch/patches@6.0.1)(@vocab/core@1.3.1)(@vocab/react@1.1.6)(react-dom@18.2.0)(react@18.2.0)
-      '@bitflow/shell': 0.7.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8)(@emotion/styled@11.10.8)(@openpatch/patches@6.0.1)(@vocab/core@1.3.1)(@vocab/react@1.1.6)(react-dom@18.2.0)(react@18.2.0)(zod@3.21.4)
+      '@bitflow/core': 0.6.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@openpatch/patches@6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(zod@3.21.4)
+      '@bitflow/icons': 0.5.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@openpatch/patches@6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0))(@vocab/core@1.3.1)(@vocab/react@1.1.6(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      '@bitflow/provider': 0.5.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@openpatch/patches@6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0))(@vocab/core@1.3.1)(@vocab/react@1.1.6(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      '@bitflow/shell': 0.7.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@openpatch/patches@6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0))(@vocab/core@1.3.1)(@vocab/react@1.1.6(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(zod@3.21.4)
       '@emotion/cache': 11.10.8
       '@emotion/react': 11.10.8(@types/react@18.2.12)(react@18.2.0)
-      '@emotion/styled': 11.10.8(@emotion/react@11.10.8)(@types/react@18.2.12)(react@18.2.0)
-      '@openpatch/patches': 6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8)(@emotion/styled@11.10.8)(@types/react@18.2.12)(react-dom@18.2.0)(react-hook-form@7.44.3)(react@18.2.0)
+      '@emotion/styled': 11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0)
+      '@openpatch/patches': 6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0)
       '@vocab/core': 1.3.1
       '@vocab/react': 1.1.6(react@18.2.0)
       react: 18.2.0
@@ -7775,9 +7925,9 @@ snapshots:
       react-hook-form: 7.44.3(react@18.2.0)
       zod: 3.21.4
 
-  '@bitflow/flow-engine@0.5.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8)(@emotion/styled@11.10.8)(@openpatch/patches@6.0.1)(react-dom@18.2.0)(react@18.2.0)(zod@3.21.4)':
+  '@bitflow/flow-engine@0.5.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@openpatch/patches@6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(zod@3.21.4)':
     dependencies:
-      '@bitflow/core': 0.6.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8)(@emotion/styled@11.10.8)(@openpatch/patches@6.0.1)(react-dom@18.2.0)(react@18.2.0)(zod@3.21.4)
+      '@bitflow/core': 0.6.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@openpatch/patches@6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(zod@3.21.4)
       lodash.get: 4.4.2
     transitivePeerDependencies:
       - '@emotion/cache'
@@ -7788,24 +7938,24 @@ snapshots:
       - react-dom
       - zod
 
-  '@bitflow/icons@0.5.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8)(@emotion/styled@11.10.8)(@openpatch/patches@6.0.1)(@vocab/core@1.3.1)(@vocab/react@1.1.6)(react-dom@18.2.0)(react@18.2.0)':
+  '@bitflow/icons@0.5.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@openpatch/patches@6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0))(@vocab/core@1.3.1)(@vocab/react@1.1.6(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
       '@emotion/cache': 11.10.8
       '@emotion/react': 11.10.8(@types/react@18.2.12)(react@18.2.0)
-      '@emotion/styled': 11.10.8(@emotion/react@11.10.8)(@types/react@18.2.12)(react@18.2.0)
-      '@openpatch/patches': 6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8)(@emotion/styled@11.10.8)(@types/react@18.2.12)(react-dom@18.2.0)(react-hook-form@7.44.3)(react@18.2.0)
+      '@emotion/styled': 11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0)
+      '@openpatch/patches': 6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0)
       '@vocab/core': 1.3.1
       '@vocab/react': 1.1.6(react@18.2.0)
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
 
-  '@bitflow/input-markdown@0.5.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8)(@emotion/styled@11.10.8)(@openpatch/patches@6.0.1)(@vocab/core@1.3.1)(@vocab/react@1.1.6)(react-dom@18.2.0)(react-hook-form@7.44.3)(react@18.2.0)(zod@3.21.4)':
+  '@bitflow/input-markdown@0.5.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@openpatch/patches@6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0))(@vocab/core@1.3.1)(@vocab/react@1.1.6(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0)(zod@3.21.4)':
     dependencies:
-      '@bitflow/core': 0.6.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8)(@emotion/styled@11.10.8)(@openpatch/patches@6.0.1)(react-dom@18.2.0)(react@18.2.0)(zod@3.21.4)
+      '@bitflow/core': 0.6.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@openpatch/patches@6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(zod@3.21.4)
       '@emotion/cache': 11.10.8
       '@emotion/react': 11.10.8(@types/react@18.2.12)(react@18.2.0)
-      '@emotion/styled': 11.10.8(@emotion/react@11.10.8)(@types/react@18.2.12)(react@18.2.0)
-      '@openpatch/patches': 6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8)(@emotion/styled@11.10.8)(@types/react@18.2.12)(react-dom@18.2.0)(react-hook-form@7.44.3)(react@18.2.0)
+      '@emotion/styled': 11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0)
+      '@openpatch/patches': 6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0)
       '@vocab/core': 1.3.1
       '@vocab/react': 1.1.6(react@18.2.0)
       react: 18.2.0
@@ -7813,13 +7963,13 @@ snapshots:
       react-hook-form: 7.44.3(react@18.2.0)
       zod: 3.21.4
 
-  '@bitflow/provider@0.5.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8)(@emotion/styled@11.10.8)(@openpatch/patches@6.0.1)(@vocab/core@1.3.1)(@vocab/react@1.1.6)(react-dom@18.2.0)(react@18.2.0)':
+  '@bitflow/provider@0.5.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@openpatch/patches@6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0))(@vocab/core@1.3.1)(@vocab/react@1.1.6(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
-      '@bitflow/core': 0.6.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8)(@emotion/styled@11.10.8)(@openpatch/patches@6.0.1)(react-dom@18.2.0)(react@18.2.0)(zod@3.17.3)
+      '@bitflow/core': 0.6.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@openpatch/patches@6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(zod@3.17.3)
       '@emotion/cache': 11.10.8
       '@emotion/react': 11.10.8(@types/react@18.2.12)(react@18.2.0)
-      '@emotion/styled': 11.10.8(@emotion/react@11.10.8)(@types/react@18.2.12)(react@18.2.0)
-      '@openpatch/patches': 6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8)(@emotion/styled@11.10.8)(@types/react@18.2.12)(react-dom@18.2.0)(react-hook-form@7.44.3)(react@18.2.0)
+      '@emotion/styled': 11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0)
+      '@openpatch/patches': 6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0)
       '@vocab/core': 1.3.1
       '@vocab/react': 1.1.6(react@18.2.0)
       lodash.get: 4.4.2
@@ -7827,13 +7977,13 @@ snapshots:
       react-dom: 18.2.0(react@18.2.0)
       zod: 3.17.3
 
-  '@bitflow/shell@0.7.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8)(@emotion/styled@11.10.8)(@openpatch/patches@6.0.1)(@vocab/core@1.3.1)(@vocab/react@1.1.6)(react-dom@18.2.0)(react@18.2.0)(zod@3.21.4)':
+  '@bitflow/shell@0.7.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@openpatch/patches@6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0))(@vocab/core@1.3.1)(@vocab/react@1.1.6(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(zod@3.21.4)':
     dependencies:
-      '@bitflow/core': 0.6.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8)(@emotion/styled@11.10.8)(@openpatch/patches@6.0.1)(react-dom@18.2.0)(react@18.2.0)(zod@3.21.4)
+      '@bitflow/core': 0.6.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@openpatch/patches@6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(zod@3.21.4)
       '@emotion/cache': 11.10.8
       '@emotion/react': 11.10.8(@types/react@18.2.12)(react@18.2.0)
-      '@emotion/styled': 11.10.8(@emotion/react@11.10.8)(@types/react@18.2.12)(react@18.2.0)
-      '@openpatch/patches': 6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8)(@emotion/styled@11.10.8)(@types/react@18.2.12)(react-dom@18.2.0)(react-hook-form@7.44.3)(react@18.2.0)
+      '@emotion/styled': 11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0)
+      '@openpatch/patches': 6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0)
       '@vocab/core': 1.3.1
       '@vocab/react': 1.1.6(react@18.2.0)
       immer: 9.0.19
@@ -7842,13 +7992,13 @@ snapshots:
     transitivePeerDependencies:
       - zod
 
-  '@bitflow/start-simple@0.5.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8)(@emotion/styled@11.10.8)(@openpatch/patches@6.0.1)(@vocab/core@1.3.1)(@vocab/react@1.1.6)(react-dom@18.2.0)(react-hook-form@7.44.3)(react@18.2.0)(zod@3.21.4)':
+  '@bitflow/start-simple@0.5.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@openpatch/patches@6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0))(@vocab/core@1.3.1)(@vocab/react@1.1.6(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0)(zod@3.21.4)':
     dependencies:
-      '@bitflow/core': 0.6.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8)(@emotion/styled@11.10.8)(@openpatch/patches@6.0.1)(react-dom@18.2.0)(react@18.2.0)(zod@3.21.4)
+      '@bitflow/core': 0.6.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@openpatch/patches@6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(zod@3.21.4)
       '@emotion/cache': 11.10.8
       '@emotion/react': 11.10.8(@types/react@18.2.12)(react@18.2.0)
-      '@emotion/styled': 11.10.8(@emotion/react@11.10.8)(@types/react@18.2.12)(react@18.2.0)
-      '@openpatch/patches': 6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8)(@emotion/styled@11.10.8)(@types/react@18.2.12)(react-dom@18.2.0)(react-hook-form@7.44.3)(react@18.2.0)
+      '@emotion/styled': 11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0)
+      '@openpatch/patches': 6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0)
       '@vocab/core': 1.3.1
       '@vocab/react': 1.1.6(react@18.2.0)
       react: 18.2.0
@@ -7856,15 +8006,15 @@ snapshots:
       react-hook-form: 7.44.3(react@18.2.0)
       zod: 3.21.4
 
-  '@bitflow/task-choice@0.5.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8)(@emotion/styled@11.10.8)(@openpatch/patches@6.0.1)(@vocab/core@1.3.1)(@vocab/react@1.1.6)(react-dom@18.2.0)(react-hook-form@7.44.3)(react@18.2.0)(zod@3.21.4)':
+  '@bitflow/task-choice@0.5.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@openpatch/patches@6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0))(@vocab/core@1.3.1)(@vocab/react@1.1.6(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0)(zod@3.21.4)':
     dependencies:
-      '@bitflow/core': 0.6.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8)(@emotion/styled@11.10.8)(@openpatch/patches@6.0.1)(react-dom@18.2.0)(react@18.2.0)(zod@3.21.4)
-      '@bitflow/provider': 0.5.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8)(@emotion/styled@11.10.8)(@openpatch/patches@6.0.1)(@vocab/core@1.3.1)(@vocab/react@1.1.6)(react-dom@18.2.0)(react@18.2.0)
+      '@bitflow/core': 0.6.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@openpatch/patches@6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(zod@3.21.4)
+      '@bitflow/provider': 0.5.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@openpatch/patches@6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0))(@vocab/core@1.3.1)(@vocab/react@1.1.6(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@emotion/cache': 11.10.8
       '@emotion/react': 11.10.8(@types/react@18.2.12)(react@18.2.0)
-      '@emotion/styled': 11.10.8(@emotion/react@11.10.8)(@types/react@18.2.12)(react@18.2.0)
-      '@hookform/resolvers': 2.9.10(react-hook-form@7.44.3)
-      '@openpatch/patches': 6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8)(@emotion/styled@11.10.8)(@types/react@18.2.12)(react-dom@18.2.0)(react-hook-form@7.44.3)(react@18.2.0)
+      '@emotion/styled': 11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0)
+      '@hookform/resolvers': 2.9.10(react-hook-form@7.44.3(react@18.2.0))
+      '@openpatch/patches': 6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0)
       '@vocab/core': 1.3.1
       '@vocab/react': 1.1.6(react@18.2.0)
       immer: 9.0.21
@@ -7873,14 +8023,14 @@ snapshots:
       react-hook-form: 7.44.3(react@18.2.0)
       zod: 3.21.4
 
-  '@bitflow/task-fill-in-the-blank@0.5.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8)(@emotion/styled@11.10.8)(@openpatch/patches@6.0.1)(@types/react@18.2.12)(@vocab/core@1.3.1)(@vocab/react@1.1.6)(react-dom@18.2.0)(react-hook-form@7.44.3)(react@18.2.0)(zod@3.21.4)':
+  '@bitflow/task-fill-in-the-blank@0.5.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@openpatch/patches@6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0))(@types/react@18.2.12)(@vocab/core@1.3.1)(@vocab/react@1.1.6(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0)(zod@3.21.4)':
     dependencies:
-      '@bitflow/core': 0.6.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8)(@emotion/styled@11.10.8)(@openpatch/patches@6.0.1)(react-dom@18.2.0)(react@18.2.0)(zod@3.21.4)
+      '@bitflow/core': 0.6.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@openpatch/patches@6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(zod@3.21.4)
       '@emotion/cache': 11.10.8
       '@emotion/react': 11.10.8(@types/react@18.2.12)(react@18.2.0)
-      '@emotion/styled': 11.10.8(@emotion/react@11.10.8)(@types/react@18.2.12)(react@18.2.0)
-      '@hookform/resolvers': 2.9.10(react-hook-form@7.44.3)
-      '@openpatch/patches': 6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8)(@emotion/styled@11.10.8)(@types/react@18.2.12)(react-dom@18.2.0)(react-hook-form@7.44.3)(react@18.2.0)
+      '@emotion/styled': 11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0)
+      '@hookform/resolvers': 2.9.10(react-hook-form@7.44.3(react@18.2.0))
+      '@openpatch/patches': 6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0)
       '@vocab/core': 1.3.1
       '@vocab/react': 1.1.6(react@18.2.0)
       immer: 9.0.21
@@ -7894,13 +8044,13 @@ snapshots:
       - '@types/react'
       - supports-color
 
-  '@bitflow/task-highlighting@0.2.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8)(@emotion/styled@11.10.8)(@openpatch/patches@6.0.1)(@vocab/core@1.3.1)(@vocab/react@1.1.6)(react-dom@18.2.0)(react-hook-form@7.44.3)(react@18.2.0)(zod@3.21.4)':
+  '@bitflow/task-highlighting@0.2.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@openpatch/patches@6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0))(@vocab/core@1.3.1)(@vocab/react@1.1.6(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0)(zod@3.21.4)':
     dependencies:
-      '@bitflow/core': 0.6.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8)(@emotion/styled@11.10.8)(@openpatch/patches@6.0.1)(react-dom@18.2.0)(react@18.2.0)(zod@3.21.4)
+      '@bitflow/core': 0.6.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@openpatch/patches@6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(zod@3.21.4)
       '@emotion/cache': 11.10.8
       '@emotion/react': 11.10.8(@types/react@18.2.12)(react@18.2.0)
-      '@emotion/styled': 11.10.8(@emotion/react@11.10.8)(@types/react@18.2.12)(react@18.2.0)
-      '@openpatch/patches': 6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8)(@emotion/styled@11.10.8)(@types/react@18.2.12)(react-dom@18.2.0)(react-hook-form@7.44.3)(react@18.2.0)
+      '@emotion/styled': 11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0)
+      '@openpatch/patches': 6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0)
       '@vocab/core': 1.3.1
       '@vocab/react': 1.1.6(react@18.2.0)
       immer: 9.0.21
@@ -7909,15 +8059,15 @@ snapshots:
       react-hook-form: 7.44.3(react@18.2.0)
       zod: 3.21.4
 
-  '@bitflow/task-input@0.5.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8)(@emotion/styled@11.10.8)(@openpatch/patches@6.0.1)(@vocab/core@1.3.1)(@vocab/react@1.1.6)(react-dom@18.2.0)(react-hook-form@7.44.3)(react@18.2.0)(zod@3.21.4)':
+  '@bitflow/task-input@0.5.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@openpatch/patches@6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0))(@vocab/core@1.3.1)(@vocab/react@1.1.6(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0)(zod@3.21.4)':
     dependencies:
-      '@bitflow/core': 0.6.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8)(@emotion/styled@11.10.8)(@openpatch/patches@6.0.1)(react-dom@18.2.0)(react@18.2.0)(zod@3.21.4)
-      '@bitflow/provider': 0.5.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8)(@emotion/styled@11.10.8)(@openpatch/patches@6.0.1)(@vocab/core@1.3.1)(@vocab/react@1.1.6)(react-dom@18.2.0)(react@18.2.0)
+      '@bitflow/core': 0.6.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@openpatch/patches@6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(zod@3.21.4)
+      '@bitflow/provider': 0.5.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@openpatch/patches@6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0))(@vocab/core@1.3.1)(@vocab/react@1.1.6(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@emotion/cache': 11.10.8
       '@emotion/react': 11.10.8(@types/react@18.2.12)(react@18.2.0)
-      '@emotion/styled': 11.10.8(@emotion/react@11.10.8)(@types/react@18.2.12)(react@18.2.0)
-      '@hookform/resolvers': 2.9.10(react-hook-form@7.44.3)
-      '@openpatch/patches': 6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8)(@emotion/styled@11.10.8)(@types/react@18.2.12)(react-dom@18.2.0)(react-hook-form@7.44.3)(react@18.2.0)
+      '@emotion/styled': 11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0)
+      '@hookform/resolvers': 2.9.10(react-hook-form@7.44.3(react@18.2.0))
+      '@openpatch/patches': 6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0)
       '@vocab/core': 1.3.1
       '@vocab/react': 1.1.6(react@18.2.0)
       immer: 9.0.21
@@ -7927,13 +8077,13 @@ snapshots:
       react-tagcloud: 2.3.1(react@18.2.0)
       zod: 3.21.4
 
-  '@bitflow/task-yes-no@0.5.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8)(@emotion/styled@11.10.8)(@openpatch/patches@6.0.1)(@vocab/core@1.3.1)(@vocab/react@1.1.6)(react-dom@18.2.0)(react-hook-form@7.44.3)(react@18.2.0)(zod@3.21.4)':
+  '@bitflow/task-yes-no@0.5.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@openpatch/patches@6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0))(@vocab/core@1.3.1)(@vocab/react@1.1.6(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0)(zod@3.21.4)':
     dependencies:
-      '@bitflow/core': 0.6.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8)(@emotion/styled@11.10.8)(@openpatch/patches@6.0.1)(react-dom@18.2.0)(react@18.2.0)(zod@3.21.4)
+      '@bitflow/core': 0.6.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@openpatch/patches@6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(zod@3.21.4)
       '@emotion/cache': 11.10.8
       '@emotion/react': 11.10.8(@types/react@18.2.12)(react@18.2.0)
-      '@emotion/styled': 11.10.8(@emotion/react@11.10.8)(@types/react@18.2.12)(react@18.2.0)
-      '@openpatch/patches': 6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8)(@emotion/styled@11.10.8)(@types/react@18.2.12)(react-dom@18.2.0)(react-hook-form@7.44.3)(react@18.2.0)
+      '@emotion/styled': 11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0)
+      '@openpatch/patches': 6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0)
       '@vocab/core': 1.3.1
       '@vocab/react': 1.1.6(react@18.2.0)
       immer: 9.0.21
@@ -7942,13 +8092,13 @@ snapshots:
       react-hook-form: 7.44.3(react@18.2.0)
       zod: 3.21.4
 
-  '@bitflow/title-simple@0.5.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8)(@emotion/styled@11.10.8)(@openpatch/patches@6.0.1)(@vocab/core@1.3.1)(@vocab/react@1.1.6)(react-dom@18.2.0)(react-hook-form@7.44.3)(react@18.2.0)(zod@3.21.4)':
+  '@bitflow/title-simple@0.5.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@openpatch/patches@6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0))(@vocab/core@1.3.1)(@vocab/react@1.1.6(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0)(zod@3.21.4)':
     dependencies:
-      '@bitflow/core': 0.6.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8)(@emotion/styled@11.10.8)(@openpatch/patches@6.0.1)(react-dom@18.2.0)(react@18.2.0)(zod@3.21.4)
+      '@bitflow/core': 0.6.0(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@openpatch/patches@6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(zod@3.21.4)
       '@emotion/cache': 11.10.8
       '@emotion/react': 11.10.8(@types/react@18.2.12)(react@18.2.0)
-      '@emotion/styled': 11.10.8(@emotion/react@11.10.8)(@types/react@18.2.12)(react@18.2.0)
-      '@openpatch/patches': 6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8)(@emotion/styled@11.10.8)(@types/react@18.2.12)(react-dom@18.2.0)(react-hook-form@7.44.3)(react@18.2.0)
+      '@emotion/styled': 11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0)
+      '@openpatch/patches': 6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0)
       '@vocab/core': 1.3.1
       '@vocab/react': 1.1.6(react@18.2.0)
       react: 18.2.0
@@ -8253,9 +8403,10 @@ snapshots:
       '@emotion/use-insertion-effect-with-fallbacks': 1.0.0(react@18.2.0)
       '@emotion/utils': 1.2.0
       '@emotion/weak-memoize': 0.3.0
-      '@types/react': 18.2.12
       hoist-non-react-statics: 3.3.2
       react: 18.2.0
+    optionalDependencies:
+      '@types/react': 18.2.12
 
   '@emotion/serialize@1.1.1':
     dependencies:
@@ -8267,7 +8418,7 @@ snapshots:
 
   '@emotion/sheet@1.2.1': {}
 
-  '@emotion/styled@11.10.8(@emotion/react@11.10.8)(@types/react@18.2.12)(react@18.2.0)':
+  '@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0)':
     dependencies:
       '@babel/runtime': 7.20.13
       '@emotion/babel-plugin': 11.10.8
@@ -8276,8 +8427,9 @@ snapshots:
       '@emotion/serialize': 1.1.1
       '@emotion/use-insertion-effect-with-fallbacks': 1.0.0(react@18.2.0)
       '@emotion/utils': 1.2.0
-      '@types/react': 18.2.12
       react: 18.2.0
+    optionalDependencies:
+      '@types/react': 18.2.12
 
   '@emotion/unitless@0.8.0': {}
 
@@ -8444,7 +8596,7 @@ snapshots:
 
   '@eslint/js@8.39.0': {}
 
-  '@excalidraw/excalidraw@0.16.1(react-dom@18.2.0)(react@18.2.0)':
+  '@excalidraw/excalidraw@0.16.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
@@ -8475,7 +8627,7 @@ snapshots:
 
   '@gwhitney/detect-indent@7.0.1': {}
 
-  '@hookform/resolvers@2.9.10(react-hook-form@7.44.3)':
+  '@hookform/resolvers@2.9.10(react-hook-form@7.44.3(react@18.2.0))':
     dependencies:
       react-hook-form: 7.44.3(react@18.2.0)
 
@@ -8502,21 +8654,49 @@ snapshots:
       '@jridgewell/sourcemap-codec': 1.4.14
       '@jridgewell/trace-mapping': 0.3.17
 
+  '@jridgewell/gen-mapping@0.3.5':
+    dependencies:
+      '@jridgewell/set-array': 1.2.1
+      '@jridgewell/sourcemap-codec': 1.4.15
+      '@jridgewell/trace-mapping': 0.3.25
+    optional: true
+
   '@jridgewell/resolve-uri@3.1.0': {}
 
+  '@jridgewell/resolve-uri@3.1.2':
+    optional: true
+
   '@jridgewell/set-array@1.1.2': {}
+
+  '@jridgewell/set-array@1.2.1':
+    optional: true
 
   '@jridgewell/source-map@0.3.2':
     dependencies:
       '@jridgewell/gen-mapping': 0.3.2
       '@jridgewell/trace-mapping': 0.3.17
 
+  '@jridgewell/source-map@0.3.6':
+    dependencies:
+      '@jridgewell/gen-mapping': 0.3.5
+      '@jridgewell/trace-mapping': 0.3.25
+    optional: true
+
   '@jridgewell/sourcemap-codec@1.4.14': {}
+
+  '@jridgewell/sourcemap-codec@1.4.15':
+    optional: true
 
   '@jridgewell/trace-mapping@0.3.17':
     dependencies:
       '@jridgewell/resolve-uri': 3.1.0
       '@jridgewell/sourcemap-codec': 1.4.14
+
+  '@jridgewell/trace-mapping@0.3.25':
+    dependencies:
+      '@jridgewell/resolve-uri': 3.1.2
+      '@jridgewell/sourcemap-codec': 1.4.15
+    optional: true
 
   '@jridgewell/trace-mapping@0.3.9':
     dependencies:
@@ -8631,7 +8811,7 @@ snapshots:
       '@nodelib/fs.scandir': 2.1.5
       fastq: 1.15.0
 
-  '@openpatch/patches@6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8)(@emotion/styled@11.10.8)(@types/react@18.2.12)(react-dom@18.2.0)(react-hook-form@7.44.3)(react@18.2.0)':
+  '@openpatch/patches@6.0.1(@emotion/cache@11.10.8)(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@emotion/styled@11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.44.3(react@18.2.0))(react@18.2.0)':
     dependencies:
       '@codemirror/autocomplete': 0.20.3
       '@codemirror/lang-java': 0.20.1
@@ -8644,17 +8824,17 @@ snapshots:
       '@codemirror/view': 0.20.7
       '@emotion/cache': 11.10.8
       '@emotion/react': 11.10.8(@types/react@18.2.12)(react@18.2.0)
-      '@emotion/styled': 11.10.8(@emotion/react@11.10.8)(@types/react@18.2.12)(react@18.2.0)
+      '@emotion/styled': 11.10.8(@emotion/react@11.10.8(@types/react@18.2.12)(react@18.2.0))(@types/react@18.2.12)(react@18.2.0)
       lodash: 4.17.21
       polished: 4.2.2
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
       react-hook-form: 7.44.3(react@18.2.0)
       react-markdown: 8.0.5(@types/react@18.2.12)(react@18.2.0)
-      react-modal: 3.16.1(react-dom@18.2.0)(react@18.2.0)
+      react-modal: 3.16.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       react-syntax-highlighter: 15.5.0(react@18.2.0)
       react-tabs: 5.2.0(react@18.2.0)
-      react-toastify: 9.1.1(react-dom@18.2.0)(react@18.2.0)
+      react-toastify: 9.1.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       rehype-raw: 6.1.1
       rehype-sanitize: 5.0.1
       remark-gfm: 3.0.1
@@ -8724,6 +8904,27 @@ snapshots:
       redux-thunk: 2.4.2(redux@4.2.1)
       reselect: 4.1.8
 
+  '@reduxjs/toolkit@1.9.5(react-redux@9.1.2(@types/react@18.2.12)(react@18.3.1)(redux@4.2.1))(react@18.3.1)':
+    dependencies:
+      immer: 9.0.21
+      redux: 4.2.1
+      redux-thunk: 2.4.2(redux@4.2.1)
+      reselect: 4.1.8
+    optionalDependencies:
+      react: 18.3.1
+      react-redux: 9.1.2(@types/react@18.2.12)(react@18.3.1)(redux@4.2.1)
+
+  '@reduxjs/toolkit@2.2.5(react-redux@8.1.0)(react@18.2.0)':
+    dependencies:
+      immer: 10.1.1
+      redux: 5.0.1
+      redux-thunk: 3.1.0(redux@5.0.1)
+      reselect: 5.1.0
+    optionalDependencies:
+      react: 18.2.0
+      react-redux: 8.1.0(@reduxjs/toolkit@2.2.5)(@types/react-dom@18.3.0)(@types/react@18.3.2)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(redux@5.0.1)
+    optional: true
+
   '@sindresorhus/is@5.3.0': {}
 
   '@styled-system/background@5.1.2':
@@ -8781,16 +8982,18 @@ snapshots:
     dependencies:
       tslib: 2.5.3
 
-  '@szhsin/react-menu@3.5.3(react-dom@18.2.0)(react@18.2.0)':
+  '@szhsin/react-menu@3.5.3(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
       prop-types: 15.8.1
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
-      react-transition-state: 1.1.5(react-dom@18.2.0)(react@18.2.0)
+      react-transition-state: 1.1.5(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
 
   '@szmarczak/http-timer@5.0.1':
     dependencies:
       defer-to-connect: 2.0.1
+
+  '@tsconfig/node10@1.0.11': {}
 
   '@tsconfig/node10@1.0.9': {}
 
@@ -8799,6 +9002,8 @@ snapshots:
   '@tsconfig/node14@1.0.3': {}
 
   '@tsconfig/node16@1.0.3': {}
+
+  '@tsconfig/node16@1.0.4': {}
 
   '@types/archiver@5.3.2':
     dependencies:
@@ -8910,6 +9115,8 @@ snapshots:
 
   '@types/json-schema@7.0.11': {}
 
+  '@types/json-schema@7.0.15': {}
+
   '@types/katex@0.11.1': {}
 
   '@types/katex@0.14.0': {}
@@ -8949,7 +9156,7 @@ snapshots:
 
   '@types/node@12.20.55': {}
 
-  '@types/node@16.18.24': {}
+  '@types/node@16.18.97': {}
 
   '@types/node@18.11.18': {}
 
@@ -8978,6 +9185,9 @@ snapshots:
       '@types/node': 18.15.11
       kleur: 3.0.3
 
+  '@types/prop-types@15.7.12':
+    optional: true
+
   '@types/prop-types@15.7.5': {}
 
   '@types/qrcode@1.5.1':
@@ -8996,6 +9206,11 @@ snapshots:
     dependencies:
       '@types/react': 18.2.12
 
+  '@types/react-dom@18.3.0':
+    dependencies:
+      '@types/react': 18.3.2
+    optional: true
+
   '@types/react@18.0.15':
     dependencies:
       '@types/prop-types': 15.7.5
@@ -9007,6 +9222,12 @@ snapshots:
       '@types/prop-types': 15.7.5
       '@types/scheduler': 0.16.3
       csstype: 3.1.2
+
+  '@types/react@18.3.2':
+    dependencies:
+      '@types/prop-types': 15.7.12
+      csstype: 3.1.3
+    optional: true
 
   '@types/readdir-glob@1.1.0':
     dependencies:
@@ -9059,7 +9280,7 @@ snapshots:
     dependencies:
       '@types/debounce': 1.2.1
 
-  '@typescript-eslint/eslint-plugin@5.59.2(@typescript-eslint/parser@5.59.2)(eslint@8.39.0)(typescript@4.9.5)':
+  '@typescript-eslint/eslint-plugin@5.59.2(@typescript-eslint/parser@5.59.2(eslint@8.39.0)(typescript@4.9.5))(eslint@8.39.0)(typescript@4.9.5)':
     dependencies:
       '@eslint-community/regexpp': 4.4.0
       '@typescript-eslint/parser': 5.59.2(eslint@8.39.0)(typescript@4.9.5)
@@ -9073,6 +9294,7 @@ snapshots:
       natural-compare-lite: 1.4.0
       semver: 7.3.8
       tsutils: 3.21.0(typescript@4.9.5)
+    optionalDependencies:
       typescript: 4.9.5
     transitivePeerDependencies:
       - supports-color
@@ -9084,6 +9306,7 @@ snapshots:
       '@typescript-eslint/typescript-estree': 5.59.2(typescript@4.9.5)
       debug: 4.3.4
       eslint: 8.39.0
+    optionalDependencies:
       typescript: 4.9.5
     transitivePeerDependencies:
       - supports-color
@@ -9100,6 +9323,7 @@ snapshots:
       debug: 4.3.4
       eslint: 8.39.0
       tsutils: 3.21.0(typescript@4.9.5)
+    optionalDependencies:
       typescript: 4.9.5
     transitivePeerDependencies:
       - supports-color
@@ -9115,6 +9339,7 @@ snapshots:
       is-glob: 4.0.3
       semver: 7.3.8
       tsutils: 3.21.0(typescript@4.9.5)
+    optionalDependencies:
       typescript: 4.9.5
     transitivePeerDependencies:
       - supports-color
@@ -9300,17 +9525,17 @@ snapshots:
       '@webassemblyjs/ast': 1.11.5
       '@xtuc/long': 4.2.2
 
-  '@webpack-cli/configtest@1.2.0(webpack-cli@4.10.0)(webpack@5.81.0)':
+  '@webpack-cli/configtest@1.2.0(webpack-cli@4.10.0(webpack@5.81.0))(webpack@5.81.0(esbuild@0.18.17)(webpack-cli@4.10.0))':
     dependencies:
       webpack: 5.81.0(esbuild@0.18.17)(webpack-cli@4.10.0)
       webpack-cli: 4.10.0(webpack@5.81.0)
 
-  '@webpack-cli/info@1.5.0(webpack-cli@4.10.0)':
+  '@webpack-cli/info@1.5.0(webpack-cli@4.10.0(webpack@5.81.0))':
     dependencies:
       envinfo: 7.8.1
       webpack-cli: 4.10.0(webpack@5.81.0)
 
-  '@webpack-cli/serve@1.7.0(webpack-cli@4.10.0)':
+  '@webpack-cli/serve@1.7.0(webpack-cli@4.10.0(webpack@5.81.0))':
     dependencies:
       webpack-cli: 4.10.0(webpack@5.81.0)
 
@@ -9337,6 +9562,10 @@ snapshots:
 
   acorn-walk@8.2.0: {}
 
+  acorn-walk@8.3.2: {}
+
+  acorn@8.11.3: {}
+
   acorn@8.8.2: {}
 
   aggregate-error@3.1.0:
@@ -9350,7 +9579,7 @@ snapshots:
       indent-string: 5.0.0
 
   ajv-formats@2.1.1(ajv@8.12.0):
-    dependencies:
+    optionalDependencies:
       ajv: 8.12.0
 
   ajv-keywords@3.5.2(ajv@6.12.6):
@@ -9778,6 +10007,19 @@ snapshots:
     optionalDependencies:
       fsevents: 2.3.2
 
+  chokidar@3.6.0:
+    dependencies:
+      anymatch: 3.1.3
+      braces: 3.0.2
+      glob-parent: 5.1.2
+      is-binary-path: 2.1.0
+      is-glob: 4.0.3
+      normalize-path: 3.0.0
+      readdirp: 3.6.0
+    optionalDependencies:
+      fsevents: 2.3.3
+    optional: true
+
   chownr@1.1.4: {}
 
   chownr@2.0.0: {}
@@ -9907,7 +10149,7 @@ snapshots:
 
   cookie@0.5.0: {}
 
-  copy-webpack-plugin@11.0.0(webpack@5.81.0):
+  copy-webpack-plugin@11.0.0(webpack@5.81.0(esbuild@0.18.17)(webpack-cli@4.10.0)):
     dependencies:
       fast-glob: 3.2.12
       glob-parent: 6.0.2
@@ -10024,7 +10266,7 @@ snapshots:
       randombytes: 2.1.0
       randomfill: 1.0.4
 
-  css-loader@6.7.3(webpack@5.81.0):
+  css-loader@6.7.3(webpack@5.81.0(esbuild@0.18.17)(webpack-cli@4.10.0)):
     dependencies:
       icss-utils: 5.1.0(postcss@8.4.21)
       postcss: 8.4.21
@@ -10049,6 +10291,9 @@ snapshots:
   cssesc@3.0.0: {}
 
   csstype@3.1.2: {}
+
+  csstype@3.1.3:
+    optional: true
 
   csv-generate@3.4.3: {}
 
@@ -10547,6 +10792,8 @@ snapshots:
 
   escalade@3.1.1: {}
 
+  escalade@3.1.2: {}
+
   escape-html@1.0.3: {}
 
   escape-string-regexp@1.0.5: {}
@@ -10765,7 +11012,7 @@ snapshots:
     dependencies:
       flat-cache: 3.0.4
 
-  file-loader@6.2.0(webpack@5.81.0):
+  file-loader@6.2.0(webpack@5.81.0(esbuild@0.18.17)(webpack-cli@4.10.0)):
     dependencies:
       loader-utils: 2.0.4
       schema-utils: 3.1.1
@@ -10883,6 +11130,9 @@ snapshots:
   fs.realpath@1.0.0: {}
 
   fsevents@2.3.2:
+    optional: true
+
+  fsevents@2.3.3:
     optional: true
 
   function-bind@1.1.1: {}
@@ -11264,11 +11514,17 @@ snapshots:
 
   ignore@5.2.4: {}
 
+  immer@10.1.1:
+    optional: true
+
   immer@9.0.19: {}
 
   immer@9.0.21: {}
 
   immutable@4.2.2: {}
+
+  immutable@4.3.6:
+    optional: true
 
   import-fresh@3.3.0:
     dependencies:
@@ -12552,7 +12808,7 @@ snapshots:
 
   nested-error-stacks@2.1.1: {}
 
-  next@13.4.5(react-dom@18.2.0)(react@18.2.0):
+  next@13.4.5(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(sass@1.77.2):
     dependencies:
       '@next/env': 13.4.5
       '@swc/helpers': 0.5.1
@@ -12574,6 +12830,7 @@ snapshots:
       '@next/swc-win32-arm64-msvc': 13.4.5
       '@next/swc-win32-ia32-msvc': 13.4.5
       '@next/swc-win32-x64-msvc': 13.4.5
+      sass: 1.77.2
     transitivePeerDependencies:
       - '@babel/core'
       - babel-plugin-macros
@@ -12611,7 +12868,7 @@ snapshots:
       title-case: 3.0.3
       upper-case: 2.0.2
 
-  node-polyfill-webpack-plugin@2.0.1(webpack@5.81.0):
+  node-polyfill-webpack-plugin@2.0.1(webpack@5.81.0(esbuild@0.18.17)(webpack-cli@4.10.0)):
     dependencies:
       assert: 2.0.0
       browserify-zlib: 0.2.0
@@ -13189,7 +13446,7 @@ snapshots:
       minimist: 1.2.7
       strip-json-comments: 2.0.1
 
-  react-collapsed@4.0.2(react-dom@18.2.0)(react@18.2.0):
+  react-collapsed@4.0.2(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
     dependencies:
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
@@ -13255,7 +13512,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  react-modal@3.16.1(react-dom@18.2.0)(react@18.2.0):
+  react-modal@3.16.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
     dependencies:
       exenv: 1.2.2
       prop-types: 15.8.1
@@ -13279,6 +13536,54 @@ snapshots:
       redux: 4.2.1
       use-sync-external-store: 1.2.0(react@18.2.0)
 
+  react-redux@8.1.0(@reduxjs/toolkit@2.2.5)(@types/react-dom@18.2.5)(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(redux@5.0.1):
+    dependencies:
+      '@babel/runtime': 7.22.5
+      '@types/hoist-non-react-statics': 3.3.1
+      '@types/use-sync-external-store': 0.0.3
+      hoist-non-react-statics: 3.3.2
+      react: 18.2.0
+      react-is: 18.2.0
+      use-sync-external-store: 1.2.0(react@18.2.0)
+    optionalDependencies:
+      '@reduxjs/toolkit': 2.2.5(react-redux@8.1.0)(react@18.2.0)
+      '@types/react': 18.2.12
+      '@types/react-dom': 18.2.5
+      react-dom: 18.2.0(react@18.2.0)
+      redux: 5.0.1
+
+  react-redux@8.1.0(@reduxjs/toolkit@2.2.5)(@types/react-dom@18.3.0)(@types/react@18.2.12)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(redux@4.2.1):
+    dependencies:
+      '@babel/runtime': 7.22.5
+      '@types/hoist-non-react-statics': 3.3.1
+      '@types/use-sync-external-store': 0.0.3
+      hoist-non-react-statics: 3.3.2
+      react: 18.2.0
+      react-is: 18.2.0
+      use-sync-external-store: 1.2.0(react@18.2.0)
+    optionalDependencies:
+      '@reduxjs/toolkit': 2.2.5(react-redux@8.1.0)(react@18.2.0)
+      '@types/react': 18.2.12
+      '@types/react-dom': 18.3.0
+      react-dom: 18.2.0(react@18.2.0)
+      redux: 4.2.1
+
+  react-redux@8.1.0(@reduxjs/toolkit@2.2.5)(@types/react-dom@18.3.0)(@types/react@18.3.2)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(redux@5.0.1):
+    dependencies:
+      '@babel/runtime': 7.22.5
+      '@types/hoist-non-react-statics': 3.3.1
+      '@types/use-sync-external-store': 0.0.3
+      hoist-non-react-statics: 3.3.2
+      react: 18.2.0
+      react-is: 18.2.0
+      use-sync-external-store: 1.2.0(react@18.2.0)
+    optionalDependencies:
+      '@reduxjs/toolkit': 2.2.5(react-redux@8.1.0)(react@18.2.0)
+      '@types/react': 18.3.2
+      '@types/react-dom': 18.3.0
+      react-dom: 18.2.0(react@18.2.0)
+      redux: 5.0.1
+
   react-redux@8.1.0(@types/react-dom@18.0.6)(@types/react@18.0.15)(react-dom@18.2.0)(react@18.2.0):
     dependencies:
       '@babel/runtime': 7.22.5
@@ -13291,6 +13596,16 @@ snapshots:
       react-dom: 18.2.0(react@18.2.0)
       react-is: 18.2.0
       use-sync-external-store: 1.2.0(react@18.2.0)
+
+  react-redux@9.1.2(@types/react@18.2.12)(react@18.3.1)(redux@4.2.1):
+    dependencies:
+      '@types/use-sync-external-store': 0.0.3
+      react: 18.3.1
+      use-sync-external-store: 1.2.2(react@18.3.1)
+    optionalDependencies:
+      '@types/react': 18.2.12
+      redux: 4.2.1
+    optional: true
 
   react-syntax-highlighter@15.5.0(react@18.2.0):
     dependencies:
@@ -13315,18 +13630,22 @@ snapshots:
       seedrandom: 3.0.5
       shuffle-array: 1.0.1
 
-  react-toastify@9.1.1(react-dom@18.2.0)(react@18.2.0):
+  react-toastify@9.1.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
     dependencies:
       clsx: 1.2.1
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
 
-  react-transition-state@1.1.5(react-dom@18.2.0)(react@18.2.0):
+  react-transition-state@1.1.5(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
     dependencies:
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
 
   react@18.2.0:
+    dependencies:
+      loose-envify: 1.4.0
+
+  react@18.3.1:
     dependencies:
       loose-envify: 1.4.0
 
@@ -13411,16 +13730,31 @@ snapshots:
 
   redux-persist@6.0.0(react@18.2.0)(redux@4.2.1):
     dependencies:
-      react: 18.2.0
       redux: 4.2.1
+    optionalDependencies:
+      react: 18.2.0
+
+  redux-persist@6.0.0(react@18.3.1)(redux@4.2.1):
+    dependencies:
+      redux: 4.2.1
+    optionalDependencies:
+      react: 18.3.1
 
   redux-thunk@2.4.2(redux@4.2.1):
     dependencies:
       redux: 4.2.1
 
+  redux-thunk@3.1.0(redux@5.0.1):
+    dependencies:
+      redux: 5.0.1
+    optional: true
+
   redux@4.2.1:
     dependencies:
       '@babel/runtime': 7.20.13
+
+  redux@5.0.1:
+    optional: true
 
   refractor@3.6.0:
     dependencies:
@@ -13594,6 +13928,9 @@ snapshots:
 
   reselect@4.1.8: {}
 
+  reselect@5.1.0:
+    optional: true
+
   resolve-alpn@1.2.1: {}
 
   resolve-cwd@3.0.0:
@@ -13678,22 +14015,30 @@ snapshots:
       get-intrinsic: 1.2.0
       is-regex: 1.1.4
 
-  safe-stable-stringify@2.4.2: {}
+  safe-stable-stringify@2.4.3: {}
 
   safer-buffer@2.1.2: {}
 
-  sass-loader@13.2.2(sass@1.62.1)(webpack@5.81.0):
+  sass-loader@13.2.2(sass@1.62.1)(webpack@5.81.0(esbuild@0.18.17)(webpack-cli@4.10.0)):
     dependencies:
       klona: 2.0.6
       neo-async: 2.6.2
-      sass: 1.62.1
       webpack: 5.81.0(esbuild@0.18.17)(webpack-cli@4.10.0)
+    optionalDependencies:
+      sass: 1.62.1
 
   sass@1.62.1:
     dependencies:
       chokidar: 3.5.3
       immutable: 4.2.2
       source-map-js: 1.0.2
+
+  sass@1.77.2:
+    dependencies:
+      chokidar: 3.6.0
+      immutable: 4.3.6
+      source-map-js: 1.2.0
+    optional: true
 
   sax@1.2.4: {}
 
@@ -13855,6 +14200,9 @@ snapshots:
 
   source-map-js@1.0.2: {}
 
+  source-map-js@1.2.0:
+    optional: true
+
   source-map-support@0.5.21:
     dependencies:
       buffer-from: 1.1.2
@@ -13980,7 +14328,7 @@ snapshots:
     dependencies:
       acorn: 8.8.2
 
-  style-loader@3.3.2(webpack@5.81.0):
+  style-loader@3.3.2(webpack@5.81.0(esbuild@0.18.17)(webpack-cli@4.10.0)):
     dependencies:
       webpack: 5.81.0(esbuild@0.18.17)(webpack-cli@4.10.0)
 
@@ -14061,15 +14409,27 @@ snapshots:
 
   term-size@2.2.1: {}
 
-  terser-webpack-plugin@5.3.7(esbuild@0.18.17)(webpack@5.81.0):
+  terser-webpack-plugin@5.3.7(esbuild@0.18.17)(webpack@5.81.0(esbuild@0.18.17)(webpack-cli@4.10.0)):
     dependencies:
       '@jridgewell/trace-mapping': 0.3.17
-      esbuild: 0.18.17
       jest-worker: 27.5.1
       schema-utils: 3.1.2
       serialize-javascript: 6.0.1
       terser: 5.16.9
       webpack: 5.81.0(esbuild@0.18.17)(webpack-cli@4.10.0)
+    optionalDependencies:
+      esbuild: 0.18.17
+
+  terser-webpack-plugin@5.3.7(esbuild@0.18.17)(webpack@5.81.0(esbuild@0.18.17)):
+    dependencies:
+      '@jridgewell/trace-mapping': 0.3.17
+      jest-worker: 27.5.1
+      schema-utils: 3.1.2
+      serialize-javascript: 6.0.1
+      terser: 5.16.9
+      webpack: 5.81.0(esbuild@0.18.17)
+    optionalDependencies:
+      esbuild: 0.18.17
 
   terser@5.16.9:
     dependencies:
@@ -14077,6 +14437,14 @@ snapshots:
       acorn: 8.8.2
       commander: 2.20.3
       source-map-support: 0.5.21
+
+  terser@5.31.0:
+    dependencies:
+      '@jridgewell/source-map': 0.3.6
+      acorn: 8.11.3
+      commander: 2.20.3
+      source-map-support: 0.5.21
+    optional: true
 
   text-table@0.2.0: {}
 
@@ -14134,7 +14502,7 @@ snapshots:
 
   ts-dedent@2.2.0: {}
 
-  ts-loader@9.4.2(typescript@4.9.5)(webpack@5.81.0):
+  ts-loader@9.4.2(typescript@4.9.5)(webpack@5.81.0(esbuild@0.18.17)(webpack-cli@4.10.0)):
     dependencies:
       chalk: 4.1.2
       enhanced-resolve: 5.12.0
@@ -14142,24 +14510,6 @@ snapshots:
       semver: 7.3.8
       typescript: 4.9.5
       webpack: 5.81.0(esbuild@0.18.17)(webpack-cli@4.10.0)
-
-  ts-node@10.9.1(@types/node@16.18.24)(typescript@4.9.5):
-    dependencies:
-      '@cspotcode/source-map-support': 0.8.1
-      '@tsconfig/node10': 1.0.9
-      '@tsconfig/node12': 1.0.11
-      '@tsconfig/node14': 1.0.3
-      '@tsconfig/node16': 1.0.3
-      '@types/node': 16.18.24
-      acorn: 8.8.2
-      acorn-walk: 8.2.0
-      arg: 4.1.3
-      create-require: 1.1.1
-      diff: 4.0.2
-      make-error: 1.3.6
-      typescript: 4.9.5
-      v8-compile-cache-lib: 3.0.1
-      yn: 3.1.1
 
   ts-node@10.9.1(@types/node@18.16.3)(typescript@4.9.5):
     dependencies:
@@ -14176,6 +14526,24 @@ snapshots:
       diff: 4.0.2
       make-error: 1.3.6
       typescript: 4.9.5
+      v8-compile-cache-lib: 3.0.1
+      yn: 3.1.1
+
+  ts-node@10.9.2(@types/node@16.18.97)(typescript@5.1.6):
+    dependencies:
+      '@cspotcode/source-map-support': 0.8.1
+      '@tsconfig/node10': 1.0.11
+      '@tsconfig/node12': 1.0.11
+      '@tsconfig/node14': 1.0.3
+      '@tsconfig/node16': 1.0.4
+      '@types/node': 16.18.97
+      acorn: 8.11.3
+      acorn-walk: 8.3.2
+      arg: 4.1.3
+      create-require: 1.1.1
+      diff: 4.0.2
+      make-error: 1.3.6
+      typescript: 5.1.6
       v8-compile-cache-lib: 3.0.1
       yn: 3.1.1
 
@@ -14247,21 +14615,23 @@ snapshots:
     dependencies:
       is-typedarray: 1.0.0
 
-  typescript-json-schema@0.56.0:
+  typescript-json-schema@0.63.0:
     dependencies:
-      '@types/json-schema': 7.0.11
-      '@types/node': 16.18.24
+      '@types/json-schema': 7.0.15
+      '@types/node': 16.18.97
       glob: 7.2.3
       path-equal: 1.2.5
-      safe-stable-stringify: 2.4.2
-      ts-node: 10.9.1(@types/node@16.18.24)(typescript@4.9.5)
-      typescript: 4.9.5
-      yargs: 17.6.2
+      safe-stable-stringify: 2.4.3
+      ts-node: 10.9.2(@types/node@16.18.97)(typescript@5.1.6)
+      typescript: 5.1.6
+      yargs: 17.7.2
     transitivePeerDependencies:
       - '@swc/core'
       - '@swc/wasm'
 
   typescript@4.9.5: {}
+
+  typescript@5.1.6: {}
 
   uc.micro@1.0.6: {}
 
@@ -14434,6 +14804,11 @@ snapshots:
     dependencies:
       react: 18.2.0
 
+  use-sync-external-store@1.2.2(react@18.3.1):
+    dependencies:
+      react: 18.3.1
+    optional: true
+
   util-deprecate@1.0.2: {}
 
   util@0.12.5:
@@ -14495,14 +14870,14 @@ snapshots:
       unist-util-stringify-position: 3.0.3
       vfile-message: 3.1.4
 
-  vite-node@0.26.3(@types/node@18.16.3):
+  vite-node@0.26.3(@types/node@18.16.3)(sass@1.77.2)(terser@5.31.0):
     dependencies:
       debug: 4.3.4
       mlly: 1.2.0
       pathe: 0.2.0
       source-map: 0.6.1
       source-map-support: 0.5.21
-      vite: 4.0.4(@types/node@18.16.3)
+      vite: 4.0.4(@types/node@18.16.3)(sass@1.77.2)(terser@5.31.0)
     transitivePeerDependencies:
       - '@types/node'
       - less
@@ -14512,14 +14887,14 @@ snapshots:
       - supports-color
       - terser
 
-  vite-node@0.30.1(@types/node@18.16.0):
+  vite-node@0.30.1(@types/node@18.16.0)(sass@1.77.2)(terser@5.31.0):
     dependencies:
       cac: 6.7.14
       debug: 4.3.4
       mlly: 1.2.0
       pathe: 1.1.0
       picocolors: 1.0.0
-      vite: 4.0.4(@types/node@18.16.0)
+      vite: 4.0.4(@types/node@18.16.0)(sass@1.77.2)(terser@5.31.0)
     transitivePeerDependencies:
       - '@types/node'
       - less
@@ -14529,27 +14904,31 @@ snapshots:
       - supports-color
       - terser
 
-  vite@4.0.4(@types/node@18.16.0):
+  vite@4.0.4(@types/node@18.16.0)(sass@1.77.2)(terser@5.31.0):
     dependencies:
+      esbuild: 0.16.17
+      postcss: 8.4.21
+      resolve: 1.22.1
+      rollup: 3.12.0
+    optionalDependencies:
       '@types/node': 18.16.0
-      esbuild: 0.16.17
-      postcss: 8.4.21
-      resolve: 1.22.1
-      rollup: 3.12.0
-    optionalDependencies:
       fsevents: 2.3.2
+      sass: 1.77.2
+      terser: 5.31.0
 
-  vite@4.0.4(@types/node@18.16.3):
+  vite@4.0.4(@types/node@18.16.3)(sass@1.77.2)(terser@5.31.0):
     dependencies:
-      '@types/node': 18.16.3
       esbuild: 0.16.17
       postcss: 8.4.21
       resolve: 1.22.1
       rollup: 3.12.0
     optionalDependencies:
+      '@types/node': 18.16.3
       fsevents: 2.3.2
+      sass: 1.77.2
+      terser: 5.31.0
 
-  vitest@0.26.3:
+  vitest@0.26.3(sass@1.77.2)(terser@5.31.0):
     dependencies:
       '@types/chai': 4.3.4
       '@types/chai-subset': 1.3.3
@@ -14564,8 +14943,8 @@ snapshots:
       tinybench: 2.4.0
       tinypool: 0.3.1
       tinyspy: 1.1.1
-      vite: 4.0.4(@types/node@18.16.3)
-      vite-node: 0.26.3(@types/node@18.16.3)
+      vite: 4.0.4(@types/node@18.16.3)(sass@1.77.2)(terser@5.31.0)
+      vite-node: 0.26.3(@types/node@18.16.3)(sass@1.77.2)(terser@5.31.0)
     transitivePeerDependencies:
       - less
       - sass
@@ -14574,7 +14953,7 @@ snapshots:
       - supports-color
       - terser
 
-  vitest@0.30.1:
+  vitest@0.30.1(sass@1.77.2)(terser@5.31.0):
     dependencies:
       '@types/chai': 4.3.4
       '@types/chai-subset': 1.3.3
@@ -14599,8 +14978,8 @@ snapshots:
       strip-literal: 1.0.1
       tinybench: 2.4.0
       tinypool: 0.4.0
-      vite: 4.0.4(@types/node@18.16.0)
-      vite-node: 0.30.1(@types/node@18.16.0)
+      vite: 4.0.4(@types/node@18.16.0)(sass@1.77.2)(terser@5.31.0)
+      vite-node: 0.30.1(@types/node@18.16.0)(sass@1.77.2)(terser@5.31.0)
       why-is-node-running: 2.2.2
     transitivePeerDependencies:
       - less
@@ -14678,9 +15057,9 @@ snapshots:
   webpack-cli@4.10.0(webpack@5.81.0):
     dependencies:
       '@discoveryjs/json-ext': 0.5.7
-      '@webpack-cli/configtest': 1.2.0(webpack-cli@4.10.0)(webpack@5.81.0)
-      '@webpack-cli/info': 1.5.0(webpack-cli@4.10.0)
-      '@webpack-cli/serve': 1.7.0(webpack-cli@4.10.0)
+      '@webpack-cli/configtest': 1.2.0(webpack-cli@4.10.0(webpack@5.81.0))(webpack@5.81.0(esbuild@0.18.17)(webpack-cli@4.10.0))
+      '@webpack-cli/info': 1.5.0(webpack-cli@4.10.0(webpack@5.81.0))
+      '@webpack-cli/serve': 1.7.0(webpack-cli@4.10.0(webpack@5.81.0))
       colorette: 2.0.19
       commander: 7.2.0
       cross-spawn: 7.0.3
@@ -14697,6 +15076,37 @@ snapshots:
       wildcard: 2.0.0
 
   webpack-sources@3.2.3: {}
+
+  webpack@5.81.0(esbuild@0.18.17):
+    dependencies:
+      '@types/eslint-scope': 3.7.4
+      '@types/estree': 1.0.0
+      '@webassemblyjs/ast': 1.11.5
+      '@webassemblyjs/wasm-edit': 1.11.5
+      '@webassemblyjs/wasm-parser': 1.11.5
+      acorn: 8.8.2
+      acorn-import-assertions: 1.8.0(acorn@8.8.2)
+      browserslist: 4.21.4
+      chrome-trace-event: 1.0.3
+      enhanced-resolve: 5.13.0
+      es-module-lexer: 1.2.1
+      eslint-scope: 5.1.1
+      events: 3.3.0
+      glob-to-regexp: 0.4.1
+      graceful-fs: 4.2.10
+      json-parse-even-better-errors: 2.3.1
+      loader-runner: 4.3.0
+      mime-types: 2.1.35
+      neo-async: 2.6.2
+      schema-utils: 3.1.2
+      tapable: 2.2.1
+      terser-webpack-plugin: 5.3.7(esbuild@0.18.17)(webpack@5.81.0(esbuild@0.18.17))
+      watchpack: 2.4.0
+      webpack-sources: 3.2.3
+    transitivePeerDependencies:
+      - '@swc/core'
+      - esbuild
+      - uglify-js
 
   webpack@5.81.0(esbuild@0.18.17)(webpack-cli@4.10.0):
     dependencies:
@@ -14721,10 +15131,11 @@ snapshots:
       neo-async: 2.6.2
       schema-utils: 3.1.2
       tapable: 2.2.1
-      terser-webpack-plugin: 5.3.7(esbuild@0.18.17)(webpack@5.81.0)
+      terser-webpack-plugin: 5.3.7(esbuild@0.18.17)(webpack@5.81.0(esbuild@0.18.17)(webpack-cli@4.10.0))
       watchpack: 2.4.0
-      webpack-cli: 4.10.0(webpack@5.81.0)
       webpack-sources: 3.2.3
+    optionalDependencies:
+      webpack-cli: 4.10.0(webpack@5.81.0)
     transitivePeerDependencies:
       - '@swc/core'
       - esbuild
@@ -14861,6 +15272,16 @@ snapshots:
     dependencies:
       cliui: 8.0.1
       escalade: 3.1.1
+      get-caller-file: 2.0.5
+      require-directory: 2.1.1
+      string-width: 4.2.3
+      y18n: 5.0.8
+      yargs-parser: 21.1.1
+
+  yargs@17.7.2:
+    dependencies:
+      cliui: 8.0.1
+      escalade: 3.1.2
       get-caller-file: 2.0.5
       require-directory: 2.1.1
       string-width: 4.2.3
