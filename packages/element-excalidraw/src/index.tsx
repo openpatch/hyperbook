@@ -85,7 +85,7 @@ const DirectiveExcalidraw: FC<DirectiveExcalidrawProps> = ({
   };
 
   const debounce = (func: Function, timeout = 300) => {
-    let timer: NodeJS.Timer;
+    let timer: NodeJS.Timeout;
     return (...args: any) => {
       clearTimeout(timer);
       timer = setTimeout(() => {
@@ -220,7 +220,7 @@ const DirectiveExcalidraw: FC<DirectiveExcalidrawProps> = ({
         }
       }
     },
-    []
+    [],
   );
 
   return (

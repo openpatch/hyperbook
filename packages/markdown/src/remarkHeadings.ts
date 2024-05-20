@@ -12,8 +12,8 @@ export interface Heading {
 
 const getAnchor = (heading: AstHeading): string => {
   // If we have a heading, make it lower case
-  if (heading?.data?.id) {
-    return heading.data.id as string;
+  if ((heading?.data as any)?.id) {
+    return (heading.data as any).id as string;
   }
 
   let anchor = toString(heading, { includeImageAlt: false }).toLowerCase();

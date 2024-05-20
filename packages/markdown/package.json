@@ -61,17 +61,17 @@
     "react-dom": "18.x"
   },
   "devDependencies": {
-    "@types/hast": "3.0.0",
-    "@types/mdast": "^4.0.0",
+    "@types/hast": "3.0.4",
+    "@types/mdast": "^4.0.4",
     "@types/react": "18.3.2",
     "@types/react-dom": "18.3.0",
-    "@types/unist": "2.0.6",
+    "@types/unist": "3.0.2",
     "hast-util-to-jsx-runtime": "^2.3.0",
-    "mdast-util-to-hast": "^13.0.0",
+    "mdast-util-to-hast": "^13.1.0",
     "mdast-util-to-string": "^4.0.0",
     "ncp": "^2.0.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "vitest": "^0.30.0"
+    "vitest": "^1.6.0"
   }
 }

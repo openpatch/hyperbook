@@ -19,7 +19,7 @@ export const remarkCustomHeadingIds: () => Transformer = () => {
             if (!node.data.hProperties) {
               node.data.hProperties = {};
             }
-            node.data.id = node.data.hProperties.id = id;
+            (node.data as any).id = node.data.hProperties.id = id;
 
             string = string.substring(0, matched.index);
             lastChild.value = string;

@@ -1,6 +1,6 @@
 import chalk from "chalk";
 import { buildSync } from "esbuild";
-import glob from "glob";
+import { glob } from "glob";
 import fs from "fs";
 import path from "path";
 
