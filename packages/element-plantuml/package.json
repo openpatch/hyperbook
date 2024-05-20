@@ -36,20 +36,22 @@
   "dependencies": {
     "@hyperbook/provider": "workspace:*",
     "@hyperbook/store": "workspace:*",
-    "@types/pako": "2.0.0",
-    "js-base64": "3",
+    "@types/pako": "2.0.3",
+    "js-base64": "^3.7.7",
     "pako": "2.1.0"
   },
   "peerDependencies": {
     "react": "18.x",
     "react-dom": "18.x",
-    "react-redux": "8.x"
+    "react-redux": "9.x"
   },
   "devDependencies": {
     "@types/react": "18.3.2",
     "@types/react-dom": "18.3.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "vitest": "^0.26.3"
+    "vitest": "^0.26.3",
+    "react-redux": "9.1.2",
+    "@reduxjs/toolkit": "2.2.5"
   }
 }

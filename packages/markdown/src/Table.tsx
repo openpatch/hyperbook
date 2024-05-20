@@ -1,28 +1,20 @@
-import { ComponentType, ReactNode } from "react";
+import { ReactNode } from "react";
+import type { Components } from "hast-util-to-jsx-runtime";
 
 let tableHeaders: ReactNode[] = [];
 let tdIndex = 0;
 
-export const Table: ComponentType<JSX.IntrinsicElements["table"]> = ({
-  children,
-  style,
-}) => {
+export const Table: Components["table"] = ({ children, style }) => {
   tableHeaders = [];
   return <table style={style}>{children}</table>;
 };
 
-export const Tr: ComponentType<JSX.IntrinsicElements["tr"]> = ({
-  children,
-  style,
-}) => {
+export const Tr: Components["tr"] = ({ children, style }) => {
   tdIndex = 0;
   return <tr style={style}>{children}</tr>;
 };
 
-export const Td: ComponentType<JSX.IntrinsicElements["td"]> = ({
-  children,
-  style,
-}) => {
+export const Td: Components["td"] = ({ children, style }) => {
   return (
     <td data-label={tableHeaders[tdIndex++]} style={style}>
       {children}
@@ -30,10 +22,7 @@ export const Td: ComponentType<JSX.IntrinsicElements["td"]> = ({
   );
 };
 
-export const Th: ComponentType<JSX.IntrinsicElements["th"]> = ({
-  children,
-  style,
-}) => {
+export const Th: Components["th"] = ({ children, style }) => {
   tableHeaders.push(children);
   return <th style={style}>{children}</th>;
 };

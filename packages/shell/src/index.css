@@ -457,7 +457,6 @@ nav li + li {
 .section > .links {
   border-left-width: 1px;
   border-left-style: solid;
-  padding-top: 6px;
 }
 
 .glossary .letter {

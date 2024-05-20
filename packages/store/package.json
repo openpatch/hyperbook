@@ -36,14 +36,14 @@
     "@reduxjs/toolkit"
   ],
   "dependencies": {
-    "redux": "4.2.1",
+    "redux": "5.0.1",
     "redux-persist": "6.0.0"
   },
   "peerDependencies": {
     "react": "18.x"
   },
   "devDependencies": {
-    "@reduxjs/toolkit": "1.9.5",
+    "@reduxjs/toolkit": "2.2.5",
     "@types/react": "18.3.2"
   }
 }

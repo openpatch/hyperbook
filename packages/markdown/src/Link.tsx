@@ -1,5 +1,6 @@
 import { useConfig, useLink } from "@hyperbook/provider";
-import { ComponentType, ReactNode, useEffect, useState } from "react";
+import type { Components } from "hast-util-to-jsx-runtime";
+import { ReactNode, useEffect, useState } from "react";
 
 // see: https://css-tricks.com/better-line-breaks-for-long-urls/
 function formatUrl(url: ReactNode) {
@@ -27,11 +28,7 @@ function formatUrl(url: ReactNode) {
   return formatted;
 }
 
-export const Link: ComponentType<JSX.IntrinsicElements["a"]> = ({
-  href,
-  title,
-  children,
-}) => {
+export const Link: Components["a"] = ({ href, title, children }) => {
   const L = useLink();
   const config = useConfig();
   const [isExternal, setIsExternal] = useState(false);

@@ -12,7 +12,7 @@ Inline `code` has `back-ticks around` it.
 
 Multiline code block are fenced by lines with three back-ticks ```.
 
-````
+````md
 ```python
 s = "Python syntax highlighting"
 print s

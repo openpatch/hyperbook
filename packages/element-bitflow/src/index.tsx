@@ -1,5 +1,6 @@
 import { Flow as IFlow } from "@bitflow/core";
 import { FC, lazy, Suspense, useEffect, useState } from "react";
+import type { Slice } from "@reduxjs/toolkit";
 import { createSlice } from "@hyperbook/store";
 import { useFile, useMakeUrl } from "@hyperbook/provider";
 import "./index.css";
@@ -99,5 +100,5 @@ const sliceBitflow = createSlice({
 
 export default {
   directives: { flow: DirectiveFlow, task: DirectiveTask },
-  slice: sliceBitflow,
+  slice: sliceBitflow as Slice,
 };

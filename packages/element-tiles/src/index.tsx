@@ -1,5 +1,6 @@
 import { FC, ReactNode } from "react";
 import { createSlice } from "@hyperbook/store";
+import type { Slice } from "@reduxjs/toolkit";
 import "./index.css";
 import { useMakeUrl } from "@hyperbook/provider";
 
@@ -54,5 +55,5 @@ const sliceTiles = createSlice({
 
 export default {
   directives: { tiles: DirectiveTiles, tile: DirectiveTile },
-  slice: sliceTiles,
+  slice: sliceTiles as Slice,
 };

@@ -1,5 +1,5 @@
 import { useBookmark, useConfig } from "@hyperbook/provider";
-import { ComponentType } from "react";
+import type { Components } from "hast-util-to-jsx-runtime";
 
 export const makeAnchor = (heading: string) => {
   // If we have a heading, make it lower case
@@ -15,7 +15,7 @@ export const makeAnchor = (heading: string) => {
 };
 
 export const Headings =
-  (level: number): ComponentType<JSX.IntrinsicElements["h1"]> =>
+  (level: number): Components["h1"] =>
   ({ children, id }) => {
     const config = useConfig();
     const bookmarksConfig = config?.elements?.bookmarks;

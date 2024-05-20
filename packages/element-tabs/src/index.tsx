@@ -1,5 +1,6 @@
 import { FC, Fragment, ReactNode } from "react";
-import { createSlice, PayloadAction } from "@hyperbook/store";
+import { createSlice } from "@hyperbook/store";
+import type { Slice, PayloadAction } from "@reduxjs/toolkit";
 import { useActivePageId } from "@hyperbook/provider";
 import hash from "object-hash";
 import { useDispatch, useSelector } from "react-redux";
@@ -94,5 +95,5 @@ const selectActive =
 
 export default {
   directives: { tabs: DirectiveTabs, tab: DirectiveTab },
-  slice: sliceTabs,
+  slice: sliceTabs as Slice,
 };

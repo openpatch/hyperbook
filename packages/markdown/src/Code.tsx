@@ -1,5 +1,6 @@
 import { useDirectives } from "@hyperbook/provider";
-import { ComponentType, Fragment, useRef, useState } from "react";
+import { Fragment, useRef, useState } from "react";
+import type { Components } from "hast-util-to-jsx-runtime";
 
 const MdContentCopy = () => {
   return (
@@ -68,9 +69,11 @@ const copyNoNavigator = (text: string) => {
   document.body.removeChild(textarea);
 };
 
-export const Code: ComponentType<JSX.IntrinsicElements["code"]> = ({
+export const Code: Components["code"] = ({
   children,
   className,
+  node,
+  ...props
 }) => {
   const directives = useDirectives();
   if (className === "language-mermaid" && directives["mermaid"]) {
@@ -103,7 +106,7 @@ export const Code: ComponentType<JSX.IntrinsicElements["code"]> = ({
     }
   };
 
-  return !className ? (
+  return className === undefined ? (
     <span className="inline">
       <code ref={ref} className={className}>
         {children}

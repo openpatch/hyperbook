@@ -1,6 +1,7 @@
 import { FC, Fragment, ReactNode } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { createSlice } from "@hyperbook/store";
+import type {Slice} from "@reduxjs/toolkit";
 import { useActivePageId } from "@hyperbook/provider";
 import "./index.css"
 
@@ -26,5 +27,5 @@ const slice{{ properCase name }} = createSlice({
 
 export default {
   directives: { {{ camelCase name }}: Directive{{ properCase name }} },
-  slice: slice{{ properCase name }}
+  slice: slice{{ properCase name }} as Slice
 }

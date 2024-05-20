@@ -32,7 +32,7 @@
     "chalk": "5.2.0",
     "chokidar": "3.5.3",
     "commander": "9.5.0",
-    "express": "4.18.2"
+    "express": "4.19.2"
   },
   "peerDependencies": {
     "next": ">=12"

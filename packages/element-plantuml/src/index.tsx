@@ -2,6 +2,7 @@ import { FC, ReactNode } from "react";
 import { createSlice } from "@hyperbook/store";
 import "./index.css";
 import { encode } from "./encode";
+import type { Slice } from "@reduxjs/toolkit";
 
 const getNodeText = (node: any): string => {
   if (["string", "number"].includes(typeof node)) return node;
@@ -43,5 +44,5 @@ const slicePlantuml = createSlice({
 
 export default {
   directives: { plantuml: DirectivePlantuml },
-  slice: slicePlantuml,
+  slice: slicePlantuml as Slice,
 };

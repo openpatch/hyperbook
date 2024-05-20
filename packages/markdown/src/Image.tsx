@@ -1,11 +1,8 @@
 import { useMakeUrl } from "@hyperbook/provider";
-import { ComponentType, useState } from "react";
+import { useState } from "react";
+import type { Components } from "hast-util-to-jsx-runtime";
 
-export const Image: ComponentType<JSX.IntrinsicElements["img"]> = ({
-  src,
-  title,
-  alt,
-}) => {
+export const Image: Components["img"] = ({ src, title, alt }) => {
   const makeUrl = useMakeUrl();
   const [full, setFull] = useState(false);
   src = makeUrl(src, "public");

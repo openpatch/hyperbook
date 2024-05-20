@@ -19,10 +19,10 @@ import {
   selectActivePage,
   selectBookmark,
   BookmarksState,
-  Slice,
   PersistGate,
   Storage,
 } from "@hyperbook/store";
+import type { Slice } from "@reduxjs/toolkit";
 import { HyperbookJson } from "@hyperbook/types";
 
 export type RootFolder = "public" | "book" | "glossary";

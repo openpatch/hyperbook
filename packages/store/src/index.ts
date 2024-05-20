@@ -1,6 +1,5 @@
 import { combineReducers } from "redux";
 import { persistReducer, persistStore, Storage } from "redux-persist";
-export type { Slice, PayloadAction } from "@reduxjs/toolkit";
 export { createSlice } from "@reduxjs/toolkit";
 import { configureStore } from "@reduxjs/toolkit";
 import { Reducer } from "react";

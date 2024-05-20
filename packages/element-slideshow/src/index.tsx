@@ -8,6 +8,7 @@ import {
   useState,
 } from "react";
 import { createSlice } from "@hyperbook/store";
+import type { Slice } from "@reduxjs/toolkit";
 import "./index.css";
 
 type DirectiveSlideshowProps = {
@@ -87,5 +88,5 @@ const sliceSlideshow = createSlice({
 
 export default {
   directives: { slideshow: DirectiveSlideshow },
-  slice: sliceSlideshow,
+  slice: sliceSlideshow as Slice,
 };

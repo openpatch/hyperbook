@@ -1,5 +1,6 @@
 import { FC, useEffect, useRef, useState } from "react";
 import { createSlice } from "@hyperbook/store";
+import type { Slice } from "@reduxjs/toolkit";
 import { useMakeUrl } from "@hyperbook/provider";
 import type Wavesurfer from "wavesurfer.js";
 import PlayIcon from "./play";
@@ -57,7 +58,6 @@ const DirectiveAudio: FC<DirectiveAudioProps> = ({
           barGap: 5,
           barRadius: 2,
           height: 64,
-          responsive: true,
         });
         ws.load(src);
         ws.on("ready", () => {
@@ -148,5 +148,5 @@ const sliceAudio = createSlice({
 
 export default {
   directives: { audio: DirectiveAudio },
-  slice: sliceAudio,
+  slice: sliceAudio as Slice,
 };

@@ -35,20 +35,22 @@
   },
   "dependencies": {
     "@hyperbook/provider": "workspace:*",
-    "js-base64": "3.7.5",
+    "js-base64": "3.7.7",
     "pako": "2.1.0"
   },
   "peerDependencies": {
-    "@reduxjs/toolkit": "1.x",
+    "@reduxjs/toolkit": "2.x",
     "react": "18.x",
     "react-dom": "18.x",
-    "react-redux": "8.x"
+    "react-redux": "9.x"
   },
   "devDependencies": {
-    "@types/pako": "2.0.0",
+    "@types/pako": "2.0.3",
     "@types/react": "18.3.2",
     "@types/react-dom": "18.3.0",
     "react": "18.3.1",
-    "react-dom": "18.3.1"
+    "react-dom": "18.3.1",
+    "react-redux": "9.1.2",
+    "@reduxjs/toolkit": "2.2.5"
   }
 }

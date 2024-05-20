@@ -146,11 +146,11 @@
     "sass": "1.62.1",
     "sass-loader": "13.2.2",
     "style-loader": "3.3.2",
-    "ts-loader": "9.4.2",
-    "typescript": "4.9.5",
+    "ts-loader": "9.5.1",
+    "typescript": "5.4.5",
     "typescript-json-schema": "0.63.0",
     "vsce": "2.15.0",
-    "webpack": "5.81.0",
+    "webpack": "5.91.0",
     "webpack-cli": "4.10.0"
   },
   "dependencies": {
@@ -187,7 +187,7 @@
     "gray-matter": "4.0.3",
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "react-redux": "8.1.0"
+    "react-redux": "9.1.2"
   },
   "vsce": {
     "dependencies": false,

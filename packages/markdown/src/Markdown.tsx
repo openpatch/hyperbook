@@ -63,7 +63,10 @@ export const Markdown = ({ children, showToc = true }: MarkdownProps) => {
     ],
     rehypePlugins: [
       rehypeKatex,
-      [rehypeHighlight, { ignoreMissing: true, plainText: ["mermaid"] }],
+      [
+        rehypeHighlight,
+        { ignoreMissing: true, plainText: ["mermaid"], detect: true },
+      ],
     ],
   });
 

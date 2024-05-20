@@ -1,4 +1,5 @@
-import { Fragment, ReactElement, createElement } from "react";
+import * as prod from "react/jsx-runtime";
+import { ReactElement, createElement } from "react";
 import { PluggableList, unified } from "unified";
 import remarkParse from "remark-parse";
 import { Options as RemarkRehypeOptions } from "mdast-util-to-hast";
@@ -9,7 +10,10 @@ type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 
 export interface UseRemarkSyncOptions {
   remarkToRehypeOptions?: RemarkRehypeOptions;
-  rehypeReactOptions?: PartialBy<RehypeReactOptions, "createElement">;
+  rehypeReactOptions?: PartialBy<
+    RehypeReactOptions,
+    "Fragment" | "jsx" | "jsxs"
+  >;
   remarkPlugins?: PluggableList;
   rehypePlugins?: PluggableList;
 }
@@ -29,8 +33,9 @@ export const useRemarkSync = (
     .use(remarkToRehype, remarkToRehypeOptions)
     .use(rehypePlugins)
     .use(rehypeReact, {
-      createElement,
-      Fragment,
+      Fragment: prod.Fragment,
+      jsx: prod.jsx,
+      jsxs: prod.jsxs,
       ...rehypeReactOptions,
     } as RehypeReactOptions)
-    .processSync(source).result as ReactElement;
+    .processSync(source).result;

@@ -1,5 +1,6 @@
 import { FC } from "react";
 import { createSlice } from "@hyperbook/store";
+import type { Slice } from "@reduxjs/toolkit";
 import { useMakeUrl } from "@hyperbook/provider";
 import "./index.css";
 
@@ -48,5 +49,5 @@ const sliceVideo = createSlice({
 
 export default {
   directives: { video: DirectiveVideo },
-  slice: sliceVideo,
+  slice: sliceVideo as Slice,
 };

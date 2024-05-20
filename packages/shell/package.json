@@ -36,8 +36,8 @@
   "dependencies": {
     "@hyperbook/drawer": "workspace:*",
     "@hyperbook/provider": "workspace:*",
-    "@szhsin/react-menu": "3.5.3",
-    "react-collapsed": "4.0.2"
+    "@szhsin/react-menu": "4.1.0",
+    "react-collapsed": "4.1.2"
   },
   "peerDependencies": {
     "react": "18.x",

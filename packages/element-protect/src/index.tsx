@@ -1,6 +1,7 @@
 import { FC, ReactNode, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { createSlice, PayloadAction } from "@hyperbook/store";
+import { createSlice } from "@hyperbook/store";
+import type { Slice, PayloadAction } from "@reduxjs/toolkit";
 import hash from "object-hash";
 import { useActivePageId, useEnv } from "@hyperbook/provider";
 import "./index.css";
@@ -87,5 +88,5 @@ const selectValue =
 
 export default {
   directives: { protect: DirectiveProtect },
-  slice: sliceProtect,
+  slice: sliceProtect as Slice,
 };

@@ -1,5 +1,6 @@
 import { FC } from "react";
 import { createSlice } from "@hyperbook/store";
+import type { Slice } from "@reduxjs/toolkit";
 import "./index.css";
 
 type DirectiveEmbedProps = {
@@ -38,5 +39,5 @@ const sliceEmbed = createSlice({
 
 export default {
   directives: { embed: DirectiveEmbed },
-  slice: sliceEmbed,
+  slice: sliceEmbed as Slice,
 };

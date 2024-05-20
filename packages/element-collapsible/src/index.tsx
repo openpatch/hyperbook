@@ -1,6 +1,7 @@
 import { FC, ReactNode } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { createSlice, PayloadAction } from "@hyperbook/store";
+import { createSlice } from "@hyperbook/store";
+import type { PayloadAction } from "@reduxjs/toolkit";
 import { useActivePageId } from "@hyperbook/provider";
 import "./index.css";
 import { useCollapse } from "react-collapsed";
