@@ -1,4 +1,4 @@
-import rimraf from "rimraf";
+import { rimraf } from "rimraf";
 import chalk from "chalk";
 import cpy from "cpy";
 import fs from "fs/promises";
@@ -12,14 +12,14 @@ import { Hyperproject } from "@hyperbook/types";
 
 export async function runSetupProject(
   project: Hyperproject,
-  rootProject?: Hyperproject
+  rootProject?: Hyperproject,
 ) {
   const name = hyperproject.getName(project);
   console.log(`${chalk.blue(`[${name}]`)} Setup Project.`);
   const projectRoot = path.join(project.src, ".hyperbook");
   const root = path.join(rootProject?.src || "", ".hyperbook");
 
-  rimraf.sync(projectRoot);
+  await rimraf(projectRoot);
 
   const filesPath = path.join(__dirname, "templates");
   await makeDir(projectRoot);
@@ -38,8 +38,8 @@ export async function runSetupProject(
           "..",
           "platforms",
           "web",
-          "package.json"
-        )
+          "package.json",
+        ),
       )
       .then((f) => JSON.parse(f.toString()));
 
@@ -55,8 +55,8 @@ export async function runSetupProject(
           },
         },
         null,
-        2
-      )
+        2,
+      ),
     );
   } else {
     if (!rootProject) {
@@ -65,7 +65,7 @@ export async function runSetupProject(
     } else {
       await makeSymlink(
         path.join(root, "node_modules"),
-        path.join(projectRoot, "node_modules")
+        path.join(projectRoot, "node_modules"),
       );
     }
   }
@@ -73,7 +73,7 @@ export async function runSetupProject(
   if (project.type === "library") {
     await makeSymlink(
       path.join(project.src, "hyperlibrary.json"),
-      path.join(projectRoot, "hyperlibrary.json")
+      path.join(projectRoot, "hyperlibrary.json"),
     );
 
     for (const p of project.projects) {
@@ -85,30 +85,30 @@ export async function runSetupProject(
 
   await makeSymlink(
     path.join(project.src, "archives"),
-    path.join(projectRoot, "archives")
+    path.join(projectRoot, "archives"),
   );
   await makeSymlink(
     path.join(project.src, "book"),
-    path.join(projectRoot, "book")
+    path.join(projectRoot, "book"),
   );
   await makeSymlink(
     path.join(project.src, "glossary"),
-    path.join(projectRoot, "glossary")
+    path.join(projectRoot, "glossary"),
   );
   await makeSymlink(
     path.join(project.src, "snippets"),
-    path.join(projectRoot, "snippets")
+    path.join(projectRoot, "snippets"),
   );
   await makeSymlink(
     path.join(project.src, "templates"),
-    path.join(projectRoot, "templates")
+    path.join(projectRoot, "templates"),
   );
   await makeSymlink(
     path.join(project.src, "public"),
-    path.join(projectRoot, "public")
+    path.join(projectRoot, "public"),
   );
   await makeSymlink(
     path.join(project.src, "hyperbook.json"),
-    path.join(projectRoot, "hyperbook.json")
+    path.join(projectRoot, "hyperbook.json"),
   );
 }

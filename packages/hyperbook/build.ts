@@ -8,14 +8,14 @@ import { readHyperbook } from "./helpers/read-hyperbook";
 import { hyperproject, vfile } from "@hyperbook/fs";
 import { runArchive } from "./archive";
 import { makeDir } from "./helpers/make-dir";
-import rimraf from "rimraf";
+import { rimraf } from "rimraf";
 import { Link, Hyperproject } from "@hyperbook/types";
 import { makeEnv } from "./helpers/make-env";
 
 export async function runBuildProject(
   project: Hyperproject,
   rootProject: Hyperproject,
-  out?: string
+  out?: string,
 ): Promise<void> {
   const name = hyperproject.getName(project);
   if (project.type === "book") {
@@ -24,7 +24,7 @@ export async function runBuildProject(
   } else {
     if (!out) {
       out = project.src;
-      rimraf.sync(path.join(out, ".hyperbook", "out"));
+      await rimraf(path.join(out, ".hyperbook", "out"));
     }
     console.log(`${chalk.blue(`[${name}]`)} Building Library.`);
     for (const p of project.projects) {
@@ -38,7 +38,7 @@ async function runBuild(
   rootProject: Hyperproject,
   basePath?: string,
   prefix?: string,
-  out?: string
+  out?: string,
 ): Promise<void> {
   const setup = isSetup(root, rootProject);
   if (!setup) {
@@ -73,7 +73,7 @@ module.exports = {
       ignoreBuildErrors: true,
     }
 }
-      `
+      `,
   );
 
   vfile.clean(root);
@@ -98,12 +98,12 @@ module.exports = {
     path.join(root, ".hyperbook", "hyperbook.json"),
     {
       force: true,
-    }
+    },
   );
 
   fs.writeFileSync(
     path.join(root, ".hyperbook", "hyperbook.json"),
-    JSON.stringify(hyperbookJson, null, 2)
+    JSON.stringify(hyperbookJson, null, 2),
   );
 
   return new Promise((resolve, reject) => {
@@ -155,8 +155,8 @@ module.exports = {
         if (!out) {
           process.stdout.write(
             `${chalk.green(
-              `[${prefix}]`
-            )} Export successful. Files written to ${normalOut}.\n`
+              `[${prefix}]`,
+            )} Export successful. Files written to ${normalOut}.\n`,
           );
           resolve();
         } else {
@@ -166,8 +166,8 @@ module.exports = {
               fs.cpSync(normalOut, newOut, { recursive: true, force: true });
               process.stdout.write(
                 `${chalk.green(
-                  `[${prefix}]`
-                )} Export successful. Files written to ${newOut}.\n`
+                  `[${prefix}]`,
+                )} Export successful. Files written to ${newOut}.\n`,
               );
               resolve();
             })
