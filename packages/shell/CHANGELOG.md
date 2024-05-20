@@ -1,5 +1,15 @@
 # @hyperbook/shell
 
+## 0.7.5
+
+### Patch Changes
+
+- [`4a3a21f`](https://github.com/openpatch/hyperbook/commit/4a3a21f40c0355c308e8dcb723234c0434aced23) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - update dependencies
+
+- Updated dependencies [[`4a3a21f`](https://github.com/openpatch/hyperbook/commit/4a3a21f40c0355c308e8dcb723234c0434aced23)]:
+  - @hyperbook/drawer@0.1.2
+  - @hyperbook/provider@0.4.2
+
 ## 0.7.4
 
 ### Patch Changes

@@ -1,5 +1,14 @@
 # @hyperbook/next-watch
 
+## 0.7.3
+
+### Patch Changes
+
+- [`4a3a21f`](https://github.com/openpatch/hyperbook/commit/4a3a21f40c0355c308e8dcb723234c0434aced23) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - update dependencies
+
+- Updated dependencies [[`4a3a21f`](https://github.com/openpatch/hyperbook/commit/4a3a21f40c0355c308e8dcb723234c0434aced23)]:
+  - @hyperbook/types@0.8.1
+
 ## 0.7.2
 
 ### Patch Changes

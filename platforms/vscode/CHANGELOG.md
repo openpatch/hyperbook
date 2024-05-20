@@ -1,5 +1,48 @@
 # @hyperbook/vscode-extension
 
+## 0.24.0
+
+### Minor Changes
+
+- [`147be5e`](https://github.com/openpatch/hyperbook/commit/147be5ee75becec9d7d790cf9ab6ddf23b6ca455) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - update lock file
+
+### Patch Changes
+
+- [`32848c3`](https://github.com/openpatch/hyperbook/commit/32848c3ce55c5eee41ad77ea16040d7f38838621) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - use correct vscode version
+
+- [`4a3a21f`](https://github.com/openpatch/hyperbook/commit/4a3a21f40c0355c308e8dcb723234c0434aced23) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - update dependencies
+
+- Updated dependencies [[`4a3a21f`](https://github.com/openpatch/hyperbook/commit/4a3a21f40c0355c308e8dcb723234c0434aced23), [`8da55e5`](https://github.com/openpatch/hyperbook/commit/8da55e5d20f8b924e016b60ff36c461f7be1e2c2)]:
+  - @hyperbook/drawer@0.1.2
+  - @hyperbook/element-alert@0.2.2
+  - @hyperbook/element-audio@0.2.2
+  - @hyperbook/element-bitflow@0.2.2
+  - @hyperbook/element-bookmarks@0.3.2
+  - @hyperbook/element-collapsible@0.4.2
+  - @hyperbook/element-dl@0.2.2
+  - @hyperbook/element-embed@0.2.2
+  - @hyperbook/element-excalidraw@0.6.2
+  - @hyperbook/element-mermaid@0.3.6
+  - @hyperbook/element-online-ide@0.6.2
+  - @hyperbook/element-plantuml@0.2.2
+  - @hyperbook/element-protect@0.4.2
+  - @hyperbook/element-qr@0.3.2
+  - @hyperbook/element-scratchblock@0.2.2
+  - @hyperbook/element-slideshow@0.0.2
+  - @hyperbook/element-sql-ide@0.5.2
+  - @hyperbook/element-struktog@0.2.2
+  - @hyperbook/element-tabs@0.2.2
+  - @hyperbook/element-term@0.2.2
+  - @hyperbook/element-tiles@0.1.4
+  - @hyperbook/element-video@0.2.3
+  - @hyperbook/element-youtube@0.2.2
+  - @hyperbook/fs@0.12.1
+  - @hyperbook/markdown@0.9.5
+  - @hyperbook/provider@0.4.2
+  - @hyperbook/shell@0.7.5
+  - @hyperbook/store@0.2.1
+  - @hyperbook/styles@0.4.0
+
 ## 0.23.1
 
 ### Patch Changes

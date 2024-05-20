@@ -1,5 +1,18 @@
 # @hyperbook/styles
 
+## 0.4.0
+
+### Minor Changes
+
+- [`8da55e5`](https://github.com/openpatch/hyperbook/commit/8da55e5d20f8b924e016b60ff36c461f7be1e2c2) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Allow for adjusting the size of the fonts by setting a percentage after the font path. For example, "FireSans.ttf:110%", would increase the default size to 110%.
+
+### Patch Changes
+
+- [`4a3a21f`](https://github.com/openpatch/hyperbook/commit/4a3a21f40c0355c308e8dcb723234c0434aced23) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - update dependencies
+
+- Updated dependencies [[`4a3a21f`](https://github.com/openpatch/hyperbook/commit/4a3a21f40c0355c308e8dcb723234c0434aced23)]:
+  - @hyperbook/provider@0.4.2
+
 ## 0.3.1
 
 ### Patch Changes
