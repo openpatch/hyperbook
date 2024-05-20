@@ -1,5 +1,46 @@
 # hyperbook-simple-template
 
+## 0.31.0
+
+### Minor Changes
+
+- [`8da55e5`](https://github.com/openpatch/hyperbook/commit/8da55e5d20f8b924e016b60ff36c461f7be1e2c2) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Allow for adjusting the size of the fonts by setting a percentage after the font path. For example, "FireSans.ttf:110%", would increase the default size to 110%.
+
+### Patch Changes
+
+- [`4a3a21f`](https://github.com/openpatch/hyperbook/commit/4a3a21f40c0355c308e8dcb723234c0434aced23) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - update dependencies
+
+- Updated dependencies [[`4a3a21f`](https://github.com/openpatch/hyperbook/commit/4a3a21f40c0355c308e8dcb723234c0434aced23), [`8da55e5`](https://github.com/openpatch/hyperbook/commit/8da55e5d20f8b924e016b60ff36c461f7be1e2c2)]:
+  - @hyperbook/drawer@0.1.2
+  - @hyperbook/element-alert@0.2.2
+  - @hyperbook/element-audio@0.2.2
+  - @hyperbook/element-bitflow@0.2.2
+  - @hyperbook/element-bookmarks@0.3.2
+  - @hyperbook/element-collapsible@0.4.2
+  - @hyperbook/element-dl@0.2.2
+  - @hyperbook/element-embed@0.2.2
+  - @hyperbook/element-excalidraw@0.6.2
+  - @hyperbook/element-mermaid@0.3.6
+  - @hyperbook/element-online-ide@0.6.2
+  - @hyperbook/element-plantuml@0.2.2
+  - @hyperbook/element-protect@0.4.2
+  - @hyperbook/element-qr@0.3.2
+  - @hyperbook/element-scratchblock@0.2.2
+  - @hyperbook/element-slideshow@0.0.2
+  - @hyperbook/element-sql-ide@0.5.2
+  - @hyperbook/element-struktog@0.2.2
+  - @hyperbook/element-tabs@0.2.2
+  - @hyperbook/element-term@0.2.2
+  - @hyperbook/element-tiles@0.1.4
+  - @hyperbook/element-video@0.2.3
+  - @hyperbook/element-youtube@0.2.2
+  - @hyperbook/fs@0.12.1
+  - @hyperbook/markdown@0.9.5
+  - @hyperbook/provider@0.4.2
+  - @hyperbook/shell@0.7.5
+  - @hyperbook/store@0.2.1
+  - @hyperbook/styles@0.4.0
+
 ## 0.30.1
 
 ### Patch Changes

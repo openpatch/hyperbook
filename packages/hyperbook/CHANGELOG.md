@@ -1,5 +1,17 @@
 # hyperbook
 
+## 0.31.0
+
+### Patch Changes
+
+- [`88d13ce`](https://github.com/openpatch/hyperbook/commit/88d13ceaf38a293739ad98e1384c91cf6e2bb5c4) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - fix error when running setup and build
+
+- [`4a3a21f`](https://github.com/openpatch/hyperbook/commit/4a3a21f40c0355c308e8dcb723234c0434aced23) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - update dependencies
+
+- Updated dependencies [[`4a3a21f`](https://github.com/openpatch/hyperbook/commit/4a3a21f40c0355c308e8dcb723234c0434aced23)]:
+  - @hyperbook/fs@0.12.1
+  - @hyperbook/types@0.8.1
+
 ## 0.30.1
 
 ### Patch Changes

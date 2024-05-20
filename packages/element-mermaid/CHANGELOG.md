@@ -1,5 +1,14 @@
 # @hyperbook/element-mermaid
 
+## 0.3.6
+
+### Patch Changes
+
+- [`4a3a21f`](https://github.com/openpatch/hyperbook/commit/4a3a21f40c0355c308e8dcb723234c0434aced23) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - update dependencies
+
+- Updated dependencies [[`4a3a21f`](https://github.com/openpatch/hyperbook/commit/4a3a21f40c0355c308e8dcb723234c0434aced23)]:
+  - @hyperbook/provider@0.4.2
+
 ## 0.3.5
 
 ### Patch Changes
