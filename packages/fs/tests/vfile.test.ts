@@ -14,6 +14,7 @@ describe("list", () => {
         ...f,
         root: relative(f.root),
         path: { ...f.path, absolute: relative(f.path.absolute) },
+        elements: [],
         references: f.references.map((f) => ({
           ...f,
           root: relative(f.root),

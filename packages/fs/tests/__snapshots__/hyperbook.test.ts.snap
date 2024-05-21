@@ -78,7 +78,7 @@ exports[`hyperbook > should get navigation 1`] = `
     },
     {
       "href": "/subsection",
-      "isEmpty": true,
+      "isEmpty": false,
       "pages": [
         {
           "href": "/subsection/use-template1",

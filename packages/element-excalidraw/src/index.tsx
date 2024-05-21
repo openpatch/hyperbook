@@ -1,4 +1,4 @@
-import {
+import type {
   ExcalidrawImperativeAPI,
   ExcalidrawInitialDataState,
   ExcalidrawProps as EDP,

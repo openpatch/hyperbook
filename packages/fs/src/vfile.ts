@@ -1,11 +1,14 @@
-import path from "path";
-import url from "url";
 import matter from "gray-matter";
 import fs from "fs/promises";
 import fsD from "fs";
+import path from "path";
 import { Glossary, HyperbookFrontmatter } from "@hyperbook/types";
 import yaml from "yaml";
 import { handlebars, registerHelpers } from "./handlebars";
+import { fromMarkdown } from "mdast-util-from-markdown";
+import { directive } from "micromark-extension-directive";
+import { directiveFromMarkdown } from "mdast-util-directive";
+import { visit } from "unist-util-visit";
 
 export type VFileBase = {
   root: string;
@@ -33,6 +36,7 @@ export type VFileGlossary = VFileBase & {
   markdown: {
     content: string;
     data: HyperbookFrontmatter;
+    elements: string[];
   };
   references: VFileBook[];
 };
@@ -43,6 +47,7 @@ export type VFileBook = VFileBase & {
   markdown: {
     content: string;
     data: HyperbookFrontmatter;
+    elements: string[];
   };
 };
 
@@ -230,7 +235,7 @@ async function getDirectoryBook(root: string): Promise<VDirectoryBook> {
 async function getDirectoryGlossary(root: string): Promise<VDirectoryGlossary> {
   const bookFiles: VFileBook[] = (await listForFolder(root, "book")) as any;
   async function getTree(
-    directory: VDirectoryGlossary
+    directory: VDirectoryGlossary,
   ): Promise<VDirectoryGlossary> {
     const files = await fs
       .readdir(path.join(directory.path.absolute))
@@ -276,7 +281,7 @@ async function getDirectoryGlossary(root: string): Promise<VDirectoryGlossary> {
         for (const bookFile of bookFiles) {
           const content = bookFile.markdown.content;
           const r = new RegExp(
-            `:t\\[.*\\]\\{#${name}(\..*)?\\}|:t\\[${name}\\]`
+            `:t\\[.*\\]\\{#${name}(\..*)?\\}|:t\\[${name}\\]`,
           );
           const m = content.match(r);
           if (m && !bookFile.markdown.data.hide) {
@@ -318,7 +323,7 @@ async function getDirectoryGlossary(root: string): Promise<VDirectoryGlossary> {
 
 async function getDirectoryPublic(root: string): Promise<VDirectoryPublic> {
   async function getTree(
-    directory: VDirectoryPublic
+    directory: VDirectoryPublic,
   ): Promise<VDirectoryPublic> {
     const files = await fs
       .readdir(path.join(directory.path.absolute))
@@ -401,37 +406,37 @@ export async function get(
   root: string,
   folder: "book",
   path: string,
-  by?: keyof VFile["path"]
+  by?: keyof VFile["path"],
 ): Promise<VFileBook>;
 export async function get(
   root: string,
   folder: "snippets",
   path: string,
-  by?: keyof VFile["path"]
+  by?: keyof VFile["path"],
 ): Promise<VFileSnippet>;
 export async function get(
   root: string,
   folder: "archives",
   path: string,
-  by?: keyof VFile["path"]
+  by?: keyof VFile["path"],
 ): Promise<VFileArchive>;
 export async function get(
   root: string,
   folder: "public",
   path: string,
-  by?: keyof VFile["path"]
+  by?: keyof VFile["path"],
 ): Promise<VFilePublic>;
 export async function get(
   root: string,
   folder: "glossary",
   path: string,
-  by?: keyof VFile["path"]
+  by?: keyof VFile["path"],
 ): Promise<VFileGlossary>;
 export async function get(
   root: string,
   folder: VDirectory["folder"],
   path: string,
-  by: keyof VFile["path"] = "href"
+  by: keyof VFile["path"] = "href",
 ): Promise<VFile> {
   const files = await listForFolder(root, folder as any);
   const file = files.find((f) => f.path[by] == path);
@@ -443,27 +448,27 @@ export async function get(
 
 export async function getDirectory(
   root: string,
-  folder: "book"
+  folder: "book",
 ): Promise<VDirectoryBook>;
 export async function getDirectory(
   root: string,
-  folder: "archives"
+  folder: "archives",
 ): Promise<VDirectoryArchive>;
 export async function getDirectory(
   root: string,
-  folder: "glossary"
+  folder: "glossary",
 ): Promise<VDirectoryGlossary>;
 export async function getDirectory(
   root: string,
-  folder: "public"
+  folder: "public",
 ): Promise<VDirectoryPublic>;
 export async function getDirectory(
   root: string,
-  folder: "snippets"
+  folder: "snippets",
 ): Promise<VDirectorySnippets>;
 export async function getDirectory(
   root: string,
-  folder: VDirectory["folder"]
+  folder: VDirectory["folder"],
 ): Promise<VDirectory> {
   const cache = path.join(root, `vdirectory.${folder}.json`);
   if (process.env.HYPERBOOK_CACHE && fsD.existsSync(cache)) {
@@ -522,27 +527,27 @@ const flatDirectory = async (directory: VDirectory): Promise<VFile[]> => {
 
 export async function listForFolder(
   root: string,
-  folder: "book"
+  folder: "book",
 ): Promise<VFileBook[]>;
 export async function listForFolder(
   root: string,
-  folder: "snippets"
+  folder: "snippets",
 ): Promise<VFileSnippet[]>;
 export async function listForFolder(
   root: string,
-  folder: "archives"
+  folder: "archives",
 ): Promise<VFileArchive[]>;
 export async function listForFolder(
   root: string,
-  folder: "public"
+  folder: "public",
 ): Promise<VFilePublic[]>;
 export async function listForFolder(
   root: string,
-  folder: "glossary"
+  folder: "glossary",
 ): Promise<VFileGlossary[]>;
 export async function listForFolder(
   root: string,
-  folder: VDirectory["folder"]
+  folder: VDirectory["folder"],
 ): Promise<VFile[]> {
   const directory = await getDirectory(root, folder as any);
   return flatDirectory(directory);
@@ -554,7 +559,7 @@ export const list = async (root: string): Promise<VFile[]> => {
     return JSON.parse(fsD.readFileSync(cache, "utf8"));
   }
   const vfiles = await Promise.all(
-    folders.flatMap((folder) => listForFolder(root, folder as any))
+    folders.flatMap((folder) => listForFolder(root, folder as any)),
   ).then((f) => f.flat());
   if (process.env.HYPERBOOK_CACHE) {
     fsD.writeFileSync(cache, JSON.stringify(vfiles));
@@ -578,7 +583,7 @@ export const clean = async (root: string): Promise<void> => {
 export const extractLines = (
   content: string,
   lines?: string,
-  ellipsis?: string
+  ellipsis?: string,
 ): string => {
   if (!lines || typeof lines !== "string") {
     return content;
@@ -620,11 +625,11 @@ export const extractLines = (
 };
 
 export const getMarkdown = async (
-  file: VFileBase
-): Promise<{ content: string; data: HyperbookFrontmatter }> => {
+  file: VFileBase,
+): Promise<VFileBook["markdown"]> => {
   if (file.folder !== "book" && file.folder !== "glossary") {
     throw Error(
-      `Unsupported file location. Only files from book and glossary are supported for reading their markdown content.`
+      `Unsupported file location. Only files from book and glossary are supported for reading their markdown content.`,
     );
   }
 
@@ -637,11 +642,11 @@ export const getMarkdown = async (
       .then((f) => yaml.parse(f.toString()));
     if (!j.template) {
       console.log(
-        `Yaml files need a template. You need to define a template property in your yaml file: ${file.path.absolute}`
+        `Yaml files need a template. You need to define a template property in your yaml file: ${file.path.absolute}`,
       );
     } else {
       const templateSource = await fs.readFile(
-        path.join(file.root, "templates", j.template + ".md.hbs")
+        path.join(file.root, "templates", j.template + ".md.hbs"),
       );
       const template = handlebars.compile(templateSource.toString());
       markdown = template(j);
@@ -653,11 +658,11 @@ export const getMarkdown = async (
       .catch(() => ({}));
     if (!j.template) {
       console.log(
-        `JSON files need a template. You need to define a template property in your json file: ${file.path.absolute}`
+        `JSON files need a template. You need to define a template property in your json file: ${file.path.absolute}`,
       );
     } else {
       const templateSource = await fs.readFile(
-        path.join(file.root, "templates", j.template + ".md.hbs")
+        path.join(file.root, "templates", j.template + ".md.hbs"),
       );
       const template = handlebars.compile(templateSource.toString());
       markdown = template(j);
@@ -672,7 +677,7 @@ export const getMarkdown = async (
     markdown = template();
   } else {
     console.log(
-      `Unsupported file extension ${file.extension}. Only .md, .yml, .json and .md.hbs files are supported.`
+      `Unsupported file extension ${file.extension}. Only .md, .yml, .json and .md.hbs files are supported.`,
     );
   }
   let { content, data } = matter(markdown);
@@ -687,7 +692,7 @@ export const getMarkdown = async (
     const snippetId = snippet[3];
     const snippetFile = await fs.readFile(
       path.join(file.root, "snippets", snippetId + ".md.hbs"),
-      { encoding: "utf8" }
+      { encoding: "utf8" },
     );
     const template = handlebars.compile(snippetFile);
     const vars: Record<string, any> = {};
@@ -717,5 +722,21 @@ export const getMarkdown = async (
     }
   }
 
-  return { content, data: { ...data } as HyperbookFrontmatter };
+  const tree = fromMarkdown(content, {
+    extensions: [directive()],
+    mdastExtensions: [directiveFromMarkdown()],
+  });
+
+  const elements = new Set<string>([]);
+  visit(tree, function (node) {
+    if (
+      node &&
+      node.type.endsWith("Directive") &&
+      typeof node.name === "string"
+    ) {
+      elements.add(node.name);
+    }
+  });
+
+  return { content, data: { ...data } as HyperbookFrontmatter, elements: [...elements] };
 };

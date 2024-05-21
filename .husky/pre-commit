@@ -1,3 +1,1 @@
-[ -n "$CI" ] && exit 0
-
-pnpm exec -- pretty-quick --staged
+npm test

@@ -12,6 +12,7 @@ export const buildPackage = async (path) => {
     return;
   }
 
+  const entries = [];
   let entry = `${path}/src/index.ts`;
 
   if (!existsSync(entry)) {
@@ -28,6 +29,7 @@ export const buildPackage = async (path) => {
   if (!isEntryExists || !packageJSON) {
     throw new Error(`Entry file missing from ${packageName}`);
   }
+  entries.push(entry);
 
   const bundle = JSON.parse(packageJSON).bundle || [];
 
@@ -44,7 +46,7 @@ export const buildPackage = async (path) => {
   external.push("fs");
 
   const commonConfig = {
-    entryPoints: [entry],
+    entryPoints: entries,
     outbase: path + "/src",
     outdir: `${path}/dist`,
     jsx: "automatic",

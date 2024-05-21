@@ -6,7 +6,8 @@
     "build": "rimraf dist && tsc --project tsconfig.json --noEmit && node ./esbuild.mjs",
     "dev": "next dev",
     "next:dev": "next-hyperbook-watch",
-    "next:build": "next build && next export"
+    "next:build": "next build",
+    "next:analyze": "ANALYZE=true next build"
   },
   "dependencies": {
     "@hyperbook/drawer": "workspace:*",
