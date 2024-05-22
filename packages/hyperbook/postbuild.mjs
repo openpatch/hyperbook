@@ -21,7 +21,7 @@ async function postbuild() {
     ...publishManifest,
     scripts: {
       "next:dev": "next-hyperbook-watch",
-      "next:build": "next build && next export",
+      "next:build": "next build",
     },
     devDependencies: {
       "@hyperbook/next-watch":
