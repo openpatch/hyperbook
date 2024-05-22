@@ -1,5 +1,16 @@
 # @hyperbook/vscode-extension
 
+## 0.24.1
+
+### Patch Changes
+
+- [`e9359e1`](https://github.com/openpatch/hyperbook/commit/e9359e1e8d51be1d2a71d76e74940e0eb844a74c) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix peer dependencies
+
+- Updated dependencies [[`e9359e1`](https://github.com/openpatch/hyperbook/commit/e9359e1e8d51be1d2a71d76e74940e0eb844a74c), [`c500196`](https://github.com/openpatch/hyperbook/commit/c500196fe68bd9af55086fd16f74b202f53b23ec)]:
+  - @hyperbook/element-bookmarks@0.3.3
+  - @hyperbook/element-dl@0.2.3
+  - @hyperbook/fs@0.13.0
+
 ## 0.24.0
 
 ### Minor Changes

@@ -1,5 +1,11 @@
 # @hyperbook/element-download
 
+## 0.2.3
+
+### Patch Changes
+
+- [`e9359e1`](https://github.com/openpatch/hyperbook/commit/e9359e1e8d51be1d2a71d76e74940e0eb844a74c) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix peer dependencies
+
 ## 0.2.2
 
 ### Patch Changes
