@@ -867,6 +867,55 @@ importers:
         specifier: ^1.6.0
         version: 1.6.0(@types/node@20.12.12)(sass@1.77.2)(terser@5.31.0)
 
+  packages/fs-vscodify:
+    dependencies:
+      chalk:
+        specifier: 5.3.0
+        version: 5.3.0
+      find-up:
+        specifier: ^7.0.0
+        version: 7.0.0
+      gray-matter:
+        specifier: 4.0.3
+        version: 4.0.3
+      mdast-util-directive:
+        specifier: ^3.0.0
+        version: 3.0.0
+      mdast-util-from-markdown:
+        specifier: ^2.0.0
+        version: 2.0.0
+      micromark-extension-directive:
+        specifier: ^3.0.0
+        version: 3.0.0
+      mime-types:
+        specifier: ^2.1.35
+        version: 2.1.35
+      unist-util-visit:
+        specifier: ^5.0.0
+        version: 5.0.0
+      yaml:
+        specifier: ^2.4.2
+        version: 2.4.2
+    devDependencies:
+      '@hyperbook/types':
+        specifier: workspace:*
+        version: link:../types
+      '@types/mdast':
+        specifier: ^4.0.4
+        version: 4.0.4
+      '@types/mime-types':
+        specifier: ^2.1.4
+        version: 2.1.4
+      handlebars:
+        specifier: ^4.7.8
+        version: 4.7.8
+      ms:
+        specifier: ^2.1.3
+        version: 2.1.3
+      vitest:
+        specifier: ^1.6.0
+        version: 1.6.0(@types/node@20.12.12)(sass@1.77.2)(terser@5.31.0)
+
   packages/hyperbook:
     dependencies:
       '@hyperbook/fs':
@@ -1259,9 +1308,6 @@ importers:
       '@hyperbook/styles':
         specifier: workspace:*
         version: link:../../packages/styles
-      fs-plus:
-        specifier: 3.1.1
-        version: 3.1.1
       gray-matter:
         specifier: 4.0.3
         version: 4.0.3
@@ -3234,9 +3280,6 @@ packages:
   async-retry@1.3.3:
     resolution: {integrity: sha512-wfr/jstw9xNi/0teMHrRW7dsz3Lt5ARhYNZ2ewpadnhaIp5mbALhOAP+EAdsC7t4Z6wqsDVv9+W6gm1Dk9mEyw==}
 
-  async@1.5.2:
-    resolution: {integrity: sha512-nSVgobk4rv61R9PUSDtYt7mPVB2olxNR5RWJcAsH676/ef11bUZwvu7+RGYrYauVdDPcO519v68wRhXQtxsV9w==}
-
   async@3.2.5:
     resolution: {integrity: sha512-baNZyqaaLhyLVKm/DlvdW051MSgO6b8eVfIezl9E5PqWxFgzLm/wQntEW4zOytVburDEr0JlALEpdOFwvErLsg==}
 
@@ -4485,9 +4528,6 @@ packages:
   fs-minipass@2.1.0:
     resolution: {integrity: sha512-V/JgOLFCS+R6Vcq0slCuaeWEdNC3ouDlJMNIsacH2VtALiu9mV4LPrHc5cDl8k5aw6J8jwgWWpiTo5RYhmIzvg==}
     engines: {node: '>= 8'}
-
-  fs-plus@3.1.1:
-    resolution: {integrity: sha512-Se2PJdOWXqos1qVTkvqqjb0CSnfBnwwD+pq+z4ksT+e97mEShod/hrNg0TRCCsXPbJzcIq+NuzQhigunMWMJUA==}
 
   fs.realpath@1.0.0:
     resolution: {integrity: sha512-OO0pH2lK6a0hZnAdau5ItzHPI6pUlvI7jMVnxUQRtw4owF2wk8lOSabtGDCTP4Ggrg2MbGnWO9X8K1t4+fGMDw==}
@@ -5916,10 +5956,6 @@ packages:
   mkdirp-classic@0.5.3:
     resolution: {integrity: sha512-gKLcREMhtuZRwRAfqP3RFW+TK4JqApVBtOIftVgjuABpAtpxhPGaDcfvbhNvD0B8iD1oUr/txX35NjcaY6Ns/A==}
 
-  mkdirp@0.5.6:
-    resolution: {integrity: sha512-FP+p8RB8OWpF3YZBCrP5gtADmtXApB5AMLn+vdyA+PyxCjrCs00mjyUozssO33cwDeT3wNGdLxJ5M//YqtHAJw==}
-    hasBin: true
-
   mkdirp@1.0.4:
     resolution: {integrity: sha512-vVqVZQyf3WLx2Shd0qJ9xuvqgAyKPLAiqITEtqW0oIUjzo3PePDd6fW9iFz30ef7Ysp/oiWqbhszeGWW2T6Gzw==}
     engines: {node: '>=10'}
@@ -6915,10 +6951,6 @@ packages:
     resolution: {integrity: sha512-U9nH88a3fc/ekCF1l0/UP1IosiuIjyTh7hBvXVMHYgVcfGvt897Xguj2UOLDeI5BG2m7/uwyaLVT6fbtCwTyzw==}
     engines: {iojs: '>=1.0.0', node: '>=0.10.0'}
 
-  rimraf@2.7.1:
-    resolution: {integrity: sha512-uWjbaKIK3T1OSVptzX7Nl6PvQ3qAGtKEtVRjRuazjfL3Bx5eI409VZSqgND+4UNnmzLVdPj9FqFJNPqBZFve4w==}
-    hasBin: true
-
   rimraf@3.0.2:
     resolution: {integrity: sha512-JZkJMZkAGFFPP2YqXZXPbMlMBgsxzE8ILs4lMIX/2o0L9UBw9O/Y3o6wFw/i9YLapcUJWwqbi3kdxIPdC62TIA==}
     hasBin: true
@@ -7627,9 +7659,6 @@ packages:
   unc-path-regex@0.1.2:
     resolution: {integrity: sha512-eXL4nmJT7oCpkZsHZUOJo8hcX3GbsiDOa0Qu9F646fi8dT3XuSVopVqAcEiVzSKKH7UoDti23wNX3qGFxcW5Qg==}
     engines: {node: '>=0.10.0'}
-
-  underscore-plus@1.7.0:
-    resolution: {integrity: sha512-A3BEzkeicFLnr+U/Q3EyWwJAQPbA19mtZZ4h+lLq3ttm9kn8WC4R3YpuJZEXmWdLjYP47Zc8aLZm9kwdv+zzvA==}
 
   underscore@1.13.6:
     resolution: {integrity: sha512-+A5Sja4HP1M08MaXya7p5LvjuM7K6q/2EaC0+iovj/wOcMsTzMvDFbasi/oSapiwOlt252IqsKqPjCl7huKS0A==}
@@ -10172,8 +10201,6 @@ snapshots:
     dependencies:
       retry: 0.13.1
 
-  async@1.5.2: {}
-
   async@3.2.5: {}
 
   asynckit@0.4.0: {}
@@ -11701,13 +11728,6 @@ snapshots:
   fs-minipass@2.1.0:
     dependencies:
       minipass: 3.3.6
-
-  fs-plus@3.1.1:
-    dependencies:
-      async: 1.5.2
-      mkdirp: 0.5.6
-      rimraf: 2.7.1
-      underscore-plus: 1.7.0
 
   fs.realpath@1.0.0: {}
 
@@ -13750,10 +13770,6 @@ snapshots:
   mkdirp-classic@0.5.3:
     optional: true
 
-  mkdirp@0.5.6:
-    dependencies:
-      minimist: 1.2.7
-
   mkdirp@1.0.4: {}
 
   mlly@1.7.0:
@@ -14479,7 +14495,7 @@ snapshots:
     dependencies:
       deep-extend: 0.6.0
       ini: 1.3.8
-      minimist: 1.2.7
+      minimist: 1.2.8
       strip-json-comments: 2.0.1
 
   react-collapsed@4.1.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
@@ -14946,10 +14962,6 @@ snapshots:
   retry@0.13.1: {}
 
   reusify@1.0.4: {}
-
-  rimraf@2.7.1:
-    dependencies:
-      glob: 7.2.3
 
   rimraf@3.0.2:
     dependencies:
@@ -15739,10 +15751,6 @@ snapshots:
       which-boxed-primitive: 1.0.2
 
   unc-path-regex@0.1.2: {}
-
-  underscore-plus@1.7.0:
-    dependencies:
-      underscore: 1.13.6
 
   underscore@1.13.6: {}
 
