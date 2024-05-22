@@ -1,5 +1,11 @@
 # @hyperbook/fs
 
+## 0.13.0
+
+### Minor Changes
+
+- [`c500196`](https://github.com/openpatch/hyperbook/commit/c500196fe68bd9af55086fd16f74b202f53b23ec) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add elements to vfile. In the future this can be used only include elements which are needed for a given page.
+
 ## 0.12.1
 
 ### Patch Changes
