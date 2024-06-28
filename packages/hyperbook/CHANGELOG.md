@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.31.2
+
+### Patch Changes
+
+- [`cc2fb44`](https://github.com/openpatch/hyperbook/commit/cc2fb449b4c7894bf78bafcec27dbe37a8f6b697) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - remove unnecessary export
+
 ## 0.31.1
 
 ### Patch Changes
