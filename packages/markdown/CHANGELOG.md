@@ -1,5 +1,11 @@
 # @hyperbook/markdown
 
+## 0.9.6
+
+### Patch Changes
+
+- Fix wbr visible on page
+
 ## 0.9.5
 
 ### Patch Changes
