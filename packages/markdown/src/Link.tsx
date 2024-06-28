@@ -3,10 +3,7 @@ import type { Components } from "hast-util-to-jsx-runtime";
 import { ReactNode, useEffect, useState } from "react";
 
 // see: https://css-tricks.com/better-line-breaks-for-long-urls/
-function formatUrl(url: ReactNode) {
-  if (typeof url !== "string") {
-    return url;
-  }
+function formatUrl(url: string): string {
   // Split the URL into an array to distinguish double slashes from single slashes
   var doubleSlash = url.split("//");
 
@@ -20,7 +17,7 @@ function formatUrl(url: ReactNode) {
           // Before a single slash, tilde, period, comma, hyphen, underline, question mark, number sign, or percent symbol
           .replace(/(?<before>[/~.,\-_?#%])/giu, "<wbr>$1")
           // Before and after an equals sign or ampersand
-          .replace(/(?<beforeAndAfter>[=&])/giu, "<wbr>$1<wbr>")
+          .replace(/(?<beforeAndAfter>[=&])/giu, "<wbr>$1<wbr>"),
       // Reconnect the strings with word break opportunities after double slashes
     )
     .join("//<wbr>");
@@ -50,15 +47,22 @@ export const Link: Components["a"] = ({ href, title, children }) => {
     }
   }, [href, config]);
 
-  if (isExternal) {
-    <L href={href} title={title} target="_blank">
-      {formatUrl(children)}
-    </L>;
+  if (typeof children !== "string") {
+    return (
+      <L href={href} title={title} target={isExternal ? "_blank" : undefined}>
+        {children}
+      </L>
+    );
   }
 
   return (
-    <L href={href} title={title}>
-      {formatUrl(children)}
-    </L>
+    <L
+      href={href}
+      title={title}
+      dangerouslySetInnerHTML={{
+        __html: formatUrl(children),
+      }}
+      target={isExternal ? "_blank" : undefined}
+    />
   );
 };
