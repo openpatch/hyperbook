@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.33.2
+
+### Patch Changes
+
+- [`617d70a`](https://github.com/openpatch/hyperbook/commit/617d70ab41503f4f225eecdb537e41999435ea76) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix hyperbook.json already present, which leads to build errors in docker container.
+
 ## 0.33.1
 
 ### Patch Changes
