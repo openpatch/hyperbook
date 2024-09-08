@@ -44,11 +44,13 @@ program
   .command("setup")
   .description("downloads the latest version of the template of a hyperbook")
   .action(async () => {
-    const rootProject = await hyperproject.get(process.cwd()).catch(() => {
+    const rootProject = await hyperproject.get(process.cwd()).catch((e) => {
+      console.error(e);
       process.exit(1);
     });
 
-    await runSetupProject(rootProject).catch(() => {
+    await runSetupProject(rootProject).catch((e) => {
+      console.error(e);
       process.exit(1);
     });
   });
@@ -57,10 +59,12 @@ program
   .command("build")
   .description("build a hyperbook")
   .action(async () => {
-    const rootProject = await hyperproject.get(process.cwd()).catch(() => {
+    const rootProject = await hyperproject.get(process.cwd()).catch((e) => {
+      console.error(e);
       process.exit(1);
     });
-    await runBuildProject(rootProject, rootProject).catch(() => {
+    await runBuildProject(rootProject, rootProject).catch((e) => {
+      console.error(e);
       process.exit(1);
     });
   });
@@ -69,7 +73,10 @@ program
   .command("archive")
   .description("create archives from archives folder")
   .action(async () => {
-    await runArchive(process.cwd()).catch(() => process.exit(1));
+    await runArchive(process.cwd()).catch((e) => {
+      console.error(e);
+      process.exit(1);
+    });
   });
 
 program.parseAsync(process.argv);
@@ -84,15 +91,15 @@ async function notifyUpdate(): Promise<void> {
 
       console.log();
       console.log(
-        chalk.yellow.bold("A new version of `hyperbook` is available!")
+        chalk.yellow.bold("A new version of `hyperbook` is available!"),
       );
       console.log(
         "You can update by running: " +
           chalk.cyan(
             pkgManager === "yarn"
               ? "yarn global add hyperbook"
-              : `${pkgManager} install --global hyperbook`
-          )
+              : `${pkgManager} install --global hyperbook`,
+          ),
       );
       console.log();
     }
