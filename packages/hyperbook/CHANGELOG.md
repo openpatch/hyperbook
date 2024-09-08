@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.32.0
+
+### Minor Changes
+
+- [`59a484c`](https://github.com/openpatch/hyperbook/commit/59a484c6dc2d566dac0a4fa3384a593a137cef1f) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Report errors when failing a command
+
 ## 0.31.3
 
 ## 0.31.2
