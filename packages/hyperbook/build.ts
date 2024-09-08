@@ -94,11 +94,12 @@ module.exports = {
 
   hyperbookJson.basePath = basePath;
 
-  console.log(`${chalk.blue(`[${prefix}]`)} Creating hyperbook.json into temporary directory.`);
-
+  const orig = path.join(root, "hyperbook.json");
+  const temp = path.join(root, ".hyperbook", "hyperbook.json");
+  console.log(`${chalk.blue(`[${prefix}]`)} Copying hyperbook.json from ${orig} to ${temp}.`);
   fs.cpSync(
-    path.join(root, "hyperbook.json"),
-    path.join(root, ".hyperbook", "hyperbook.json"),
+    orig,
+    temp,
     {
       force: true,
     },

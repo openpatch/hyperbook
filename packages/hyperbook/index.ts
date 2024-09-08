@@ -63,6 +63,7 @@ program
       console.error(e);
       process.exit(1);
     });
+    console.log(`${chalk.blue(`[${rootProject.name}]`)} Building Project: ${rootProject.src}.`);
     await runBuildProject(rootProject, rootProject).catch((e) => {
       console.error(e);
       process.exit(1);
