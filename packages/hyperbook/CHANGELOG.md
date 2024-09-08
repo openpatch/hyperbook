@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.33.0
+
+### Minor Changes
+
+- [`556d732`](https://github.com/openpatch/hyperbook/commit/556d7329ad3ca575cca21ac0b497d78e7c6dceac) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add more status messages when building
+
 ## 0.32.0
 
 ### Minor Changes
