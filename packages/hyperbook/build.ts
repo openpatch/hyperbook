@@ -96,16 +96,19 @@ module.exports = {
 
   const orig = path.join(root, "hyperbook.json");
   const temp = path.join(root, ".hyperbook", "hyperbook.json");
-  console.log(`${chalk.blue(`[${prefix}]`)} Copying hyperbook.json from ${orig} to ${temp}.`);
-  fs.cpSync(
-    orig,
-    temp,
-    {
-      force: true,
-    },
+  console.log(
+    `${chalk.blue(`[${prefix}]`)} Copying hyperbook.json from ${orig} to ${temp}.`,
   );
+  fs.rmSync(temp, {
+    force: true,
+  });
+  fs.cpSync(orig, temp, {
+    force: true,
+  });
 
-  console.log(`${chalk.blue(`[${prefix}]`)} Updating temporarily created hyperbook.json.`);
+  console.log(
+    `${chalk.blue(`[${prefix}]`)} Updating temporarily created hyperbook.json.`,
+  );
   fs.writeFileSync(
     path.join(root, ".hyperbook", "hyperbook.json"),
     JSON.stringify(hyperbookJson, null, 2),
