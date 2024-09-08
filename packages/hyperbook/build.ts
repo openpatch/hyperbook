@@ -78,6 +78,7 @@ module.exports = {
 
   vfile.clean(root);
 
+  console.log(`${chalk.blue(`[${prefix}]`)} Reading hyperbook.json.`);
   const hyperbookJson = await readHyperbook(root);
   let link: Link | undefined = undefined;
   if (rootProject.type === "library") {
@@ -93,6 +94,8 @@ module.exports = {
 
   hyperbookJson.basePath = basePath;
 
+  console.log(`${chalk.blue(`[${prefix}]`)} Creating hyperbook.json into temporary directory.`);
+
   fs.cpSync(
     path.join(root, "hyperbook.json"),
     path.join(root, ".hyperbook", "hyperbook.json"),
@@ -101,6 +104,7 @@ module.exports = {
     },
   );
 
+  console.log(`${chalk.blue(`[${prefix}]`)} Updating temporarily created hyperbook.json.`);
   fs.writeFileSync(
     path.join(root, ".hyperbook", "hyperbook.json"),
     JSON.stringify(hyperbookJson, null, 2),
