@@ -1,5 +1,12 @@
 # hyperbook-simple-template
 
+## 0.31.3
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @hyperbook/markdown@0.9.6
+
 ## 0.31.2
 
 ## 0.31.1
