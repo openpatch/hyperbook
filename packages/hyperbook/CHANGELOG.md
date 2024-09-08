@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.33.1
+
+### Patch Changes
+
+- [`983144f`](https://github.com/openpatch/hyperbook/commit/983144f1dc28db06146264b1e5c7a7a0ec5dd95c) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - add path to log
+
 ## 0.33.0
 
 ### Minor Changes
