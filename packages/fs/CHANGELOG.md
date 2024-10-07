@@ -1,5 +1,11 @@
 # @hyperbook/fs
 
+## 0.13.1
+
+### Patch Changes
+
+- [`2bfe682`](https://github.com/openpatch/hyperbook/commit/2bfe6828e578399c405bf4fc52fb1845efe2fb6a) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - update packages
+
 ## 0.13.0
 
 ### Minor Changes

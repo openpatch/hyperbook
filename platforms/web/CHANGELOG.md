@@ -1,5 +1,19 @@
 # hyperbook-simple-template
 
+## 0.33.3
+
+### Patch Changes
+
+- Updated dependencies [[`2bfe682`](https://github.com/openpatch/hyperbook/commit/2bfe6828e578399c405bf4fc52fb1845efe2fb6a)]:
+  - @hyperbook/element-bitflow@0.2.3
+  - @hyperbook/element-mermaid@0.3.7
+  - @hyperbook/element-audio@0.2.3
+  - @hyperbook/element-video@0.2.4
+  - @hyperbook/element-qr@0.3.3
+  - @hyperbook/markdown@0.9.7
+  - @hyperbook/shell@0.7.6
+  - @hyperbook/fs@0.13.1
+
 ## 0.33.2
 
 ## 0.33.1
