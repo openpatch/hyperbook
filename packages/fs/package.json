@@ -42,11 +42,11 @@
     "find-up": "^7.0.0",
     "gray-matter": "4.0.3",
     "mdast-util-directive": "^3.0.0",
-    "mdast-util-from-markdown": "^2.0.0",
-    "micromark-extension-directive": "^3.0.0",
+    "mdast-util-from-markdown": "^2.0.1",
+    "micromark-extension-directive": "^3.0.2",
     "mime-types": "^2.1.35",
     "unist-util-visit": "^5.0.0",
-    "yaml": "^2.4.2"
+    "yaml": "^2.5.1"
   },
   "devDependencies": {
     "@hyperbook/types": "workspace:*",

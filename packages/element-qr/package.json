@@ -35,7 +35,7 @@
   },
   "dependencies": {
     "@hyperbook/provider": "workspace:*",
-    "qrcode": "^1.5.3"
+    "qrcode": "^1.5.4"
   },
   "peerDependencies": {
     "@reduxjs/toolkit": "2.x",

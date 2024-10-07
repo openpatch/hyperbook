@@ -37,7 +37,7 @@
     "@hyperbook/provider": "workspace:*",
     "@hyperbook/store": "workspace:*",
     "@types/wavesurfer.js": "^6.0.12",
-    "wavesurfer.js": "^7.7.15"
+    "wavesurfer.js": "^7.8.6"
   },
   "peerDependencies": {
     "react": "18.x",
