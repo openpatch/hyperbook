@@ -1,6 +1,7 @@
 import path, { posix } from "path";
 import fs, { cp, mkdir } from "fs/promises";
 import chalk from "chalk";
+import readline from "readline";
 import { hyperproject, vfile, hyperbook } from "@hyperbook/fs";
 import { runArchive } from "./archive";
 import { makeDir } from "./helpers/make-dir";
@@ -164,8 +165,8 @@ async function runBuild(
       recursive: true,
     });
     await fs.writeFile(fileOut, result.value);
-    process.stdout.clearLine(0);
-    process.stdout.cursorTo(0);
+    readline.clearLine(process.stdout, 0);
+    readline.cursorTo(process.stdout, 0);
     process.stdout.write(
       `${chalk.blue(`[${prefix}]`)} Buildung book: [${i++}/${bookFiles.length}]`,
     );
@@ -202,8 +203,8 @@ async function runBuild(
       recursive: true,
     });
     await fs.writeFile(fileOut, result.value);
-    process.stdout.clearLine(0);
-    process.stdout.cursorTo(0);
+    readline.clearLine(process.stdout, 0);
+    readline.cursorTo(process.stdout, 0);
     process.stdout.write(
       `${chalk.blue(`[${prefix}]`)} Buildung glossary: [${i++}/${glossaryFiles.length}]`,
     );
@@ -221,8 +222,8 @@ async function runBuild(
       const fileOut = path.join(rootOut, file.path.href);
       await cp(file.path.absolute, fileOut);
     }
-    process.stdout.clearLine(0);
-    process.stdout.cursorTo(0);
+    readline.clearLine(process.stdout, 0);
+    readline.cursorTo(process.stdout, 0);
     process.stdout.write(
       `${chalk.blue(`[${prefix}]`)} Copying public files: [${i++}/${otherFiles.length}]`,
     );
@@ -239,8 +240,8 @@ async function runBuild(
   for (let directive of directives) {
     const assetsDirectivePath = path.join(assetsPath, `directive-${directive}`);
     const assetsDirectiveOut = path.join(assetsOut, `directive-${directive}`);
-    process.stdout.clearLine(0);
-    process.stdout.cursorTo(0);
+    readline.clearLine(process.stdout, 0);
+    readline.cursorTo(process.stdout, 0);
     process.stdout.write(
       `${chalk.blue(`[${prefix}]`)} Copying directive assets: [${i++}/${directives.size}]`,
     );
@@ -268,8 +269,8 @@ async function runBuild(
     if (stat.isFile()) {
       await cp(assetPath, assetOut, { recursive: true });
     }
-    process.stdout.clearLine(0);
-    process.stdout.cursorTo(0);
+    readline.clearLine(process.stdout, 0);
+    readline.cursorTo(process.stdout, 0);
     process.stdout.write(
       `${chalk.blue(`[${prefix}]`)} Copying hyperbook assets: [${i++}/${mainAssets.length}]`,
     );
