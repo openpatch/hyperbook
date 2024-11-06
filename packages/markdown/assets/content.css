@@ -1,0 +1,434 @@
+figure {
+  margin: 0;
+  padding: 0;
+}
+
+.hyperbook-markdown {
+  background: var(--color-background);
+  color: var(--color-text);
+  font-family: hyperbook-body, sans-serif;
+}
+
+.hyperbook-markdown a {
+  color: var(--color-brand);
+}
+
+/**
+ * IE 8–11 and Prince don’t recognize the `wbr` element,
+ * but a pseudo-element can achieve the same effect with IE 9+ and Prince.
+ */
+.hyperbook-markdown wbr:before {
+  /* Unicode zero width space */
+  content: "\200B";
+  white-space: normal;
+}
+
+.hyperbook-markdown img {
+  max-width: 100%;
+}
+
+.hyperbook-markdown figure.lightbox {
+  position: fixed;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 1em;
+  z-index: 10000;
+  margin: 0px;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.hyperbook-markdown figure.lightbox img {
+  min-width: 100%;
+  min-height: 100%;
+  cursor: zoom-out;
+  object-fit: contain;
+}
+
+.hyperbook-markdown table {
+  border-color: var(--color-spacer);
+}
+
+.hyperbook-markdown table tr {
+  background-color: var(--color-nav);
+  border-color: var(--color-spacer);
+}
+
+.hyperbook-markdown h2 {
+  border-bottom-color: var(--color-spacer);
+}
+
+.hyperbook-markdown ul.bookmarks li {
+  border-color: var(--color-spacer);
+}
+
+.hyperbook-markdown ul.bookmarks li:hover {
+  background: var(--color-nav);
+}
+
+.hyperbook-markdown ul.bookmarks li:last-of-type {
+  border-color: var(--color-spacer);
+}
+
+@media screen and (max-width: 600px) {
+  .hyperbook-markdown table td {
+    border-bottom-color: var(--color-spacer);
+  }
+}
+
+.hyperbook-markdown figure.normal {
+  text-align: center;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.hyperbook-markdown figure.normal img {
+  cursor: zoom-in;
+}
+
+.hyperbook-markdown figure.normal figcaption {
+  font-style: italic;
+  font-size: 14px;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.hyperbook-markdown a.heading {
+  position: relative;
+  text-decoration: none;
+  padding-left: 16px;
+  margin-left: -16px;
+}
+
+.hyperbook-markdown a.heading:hover::before {
+  position: absolute;
+  content: "📎";
+  font-size: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  left: 0px;
+}
+
+.hyperbook-markdown .inline {
+  display: inline-flex;
+  align-items: center;
+  color: var(--color-text);
+  border-width: 1px;
+  border-style: solid;
+  background: var(--color-nav) !important;
+  border-color: var(--color-spacer);
+  font-family: hyperbook-code, monospace;
+  padding: 0em 0.4em 0em 0em;
+  border-radius: 6px;
+}
+
+.hyperbook-markdown ul,
+.hyperbook-markdown ol {
+  margin-top: 0;
+  margin-bottom: 0;
+  padding-left: 2em;
+}
+
+.hyperbook-markdown ol ol,
+.hyperbook-markdown ul ol {
+  list-style-type: lower-roman;
+}
+
+.hyperbook-markdown ul ul ol,
+.hyperbook-markdown ul ol ol,
+.hyperbook-markdown ol ul ol,
+.hyperbook-markdown ol ol ol {
+  list-style-type: lower-alpha;
+}
+
+.hyperbook-markdown ul ul,
+.hyperbook-markdown ul ol,
+.hyperbook-markdown ol ol,
+.hyperbook-markdown ol ul {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.hyperbook-markdown li+li {
+  margin-top: 0.25em;
+}
+
+.hyperbook-markdown li>p {
+  margin-top: 16px;
+}
+
+.hyperbook-markdown p,
+.hyperbook-markdown blockquote,
+.hyperbook-markdown ol,
+.hyperbook-markdown ul,
+.hyperbook-markdown table,
+.hyperbook-markdown pre,
+.hyperbook-markdown details {
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+.hyperbook-markdown blockquote {
+  width: 90%;
+  margin: 20px auto;
+  font-style: italic;
+  padding: 1.2em 30px 1.2em 75px;
+  border-left: 8px solid var(--color-brand);
+  line-height: 1.5;
+  position: relative;
+  background: var(--color-nav);
+}
+
+.hyperbook-markdown blockquote::before {
+  content: "\201C";
+  color: var(--color-brand);
+  font-size: 4em;
+  position: absolute;
+  left: 10px;
+  top: -10px;
+}
+
+.hyperbook-markdown blockquote::after {
+  content: "";
+}
+
+.hyperbook-markdown table {
+  border-width: 1px;
+  border-style: solid;
+  border-collapse: collapse;
+  width: 100%;
+  table-layout: fixed;
+}
+
+.hyperbook-markdown table caption {
+  font-size: 1.5em;
+  margin: 0.5em 0 0.75em;
+}
+
+.hyperbook-markdown table tr {
+  border-width: 1px;
+  border-style: solid;
+  padding: 0.35em;
+}
+
+.hyperbook-markdown table th,
+.hyperbook-markdown table td {
+  padding: 0.625em;
+}
+
+.hyperbook-markdown table th {
+  font-size: 0.85em;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+@media screen and (max-width: 600px) {
+  .hyperbook-markdown table {
+    border: 0;
+  }
+
+  .hyperbook-markdown table caption {
+    font-size: 1.3em;
+  }
+
+  .hyperbook-markdown table thead {
+    border: none;
+    clip: rect(0 0 0 0);
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    padding: 0;
+    position: absolute;
+    width: 1px;
+  }
+
+  .hyperbook-markdown table tr {
+    border-bottom-width: 3px;
+    display: block;
+    margin-bottom: 0.625em;
+  }
+
+  .hyperbook-markdown table td {
+    border-bottom-width: 1px;
+    border-bottom-style: solid;
+    display: block;
+    font-size: 0.8em;
+    text-align: right;
+  }
+
+  .hyperbook-markdown table td::before {
+    /*
+    * aria-label has no advantage, it won't be read inside a table
+    content: attr(aria-label);
+    */
+    content: attr(data-label);
+    float: left;
+    font-weight: bold;
+    text-transform: uppercase;
+    margin-right: 8px;
+  }
+
+  .hyperbook-markdown table td:last-child {
+    border-bottom: 0;
+  }
+}
+
+.hyperbook-markdown h1,
+.hyperbook-markdown h2,
+.hyperbook-markdown h3,
+.hyperbook-markdown h4,
+.hyperbook-markdown h5,
+.hyperbook-markdown h6 {
+  font-family: hyperbook-heading, sans-serif;
+  margin-top: 24px;
+  margin-bottom: 16px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.hyperbook-markdown h1 {
+  font-size: 1.75em;
+  font-weight: 700;
+}
+
+.hyperbook-markdown h2 {
+  font-weight: 600;
+  padding-bottom: 0.3em;
+  font-size: 1.5em;
+  border-bottom-width: 1px;
+  border-bottom-style: solid;
+}
+
+.hyperbook-markdown h3 {
+  font-weight: 600;
+  font-size: 1.25em;
+}
+
+.hyperbook-markdown h4 {
+  font-weight: 600;
+  font-size: 1em;
+}
+
+.hyperbook-markdown h5 {
+  font-weight: 600;
+  font-size: 0.875em;
+}
+
+.hyperbook-markdown h6 {
+  font-weight: 600;
+  font-size: 0.85em;
+}
+
+.hyperbook-markdown p {
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+.hyperbook-markdown h1,
+.hyperbook-markdown h2,
+.hyperbook-markdown h3,
+.hyperbook-markdown h4,
+.hyperbook-markdown h5,
+.hyperbook-markdown h6 {
+  display: flex;
+  align-items: center;
+}
+
+.hyperbook-markdown .bookmark {
+  margin-left: 10px;
+  background: none;
+  border: none;
+  opacity: 0.5;
+  font-size: 16px;
+}
+
+.hyperbook-markdown .bookmark:hover {
+  opacity: 1;
+}
+
+.hyperbook-markdown .bookmark.active {
+  opacity: 1;
+}
+
+.hyperbook-markdown ul.bookmarks {
+  padding-left: 0;
+}
+
+.hyperbook-markdown ul.bookmarks li {
+  list-style-type: none;
+}
+
+.hyperbook-markdown #toc-toggle>.bar1,
+.hyperbook-markdown #toc-toggle>.bar2,
+.hyperbook-markdown #toc-toggle>.bar3,
+.hyperbook-markdown #toc-toggle>.bar4 {
+  background-color: var(--color-text);
+}
+
+.hyperbook-markdown #toc-toggle {
+  background: var(--color-background);
+  border-color: var(--color-nav-border);
+  cursor: pointer;
+}
+
+#toc-drawer {
+  overflow-y: auto;
+  background: var(--color-nav);
+}
+
+.toc-drawer-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.toc-drawer-content>nav {
+  padding: 20px;
+  flex: 1;
+}
+
+.toc-drawer-content>nav li a {
+  display: block;
+}
+
+.toc-drawer-content>nav li a:hover {
+  text-decoration: underline;
+}
+
+.hyperbook-markdown #toc-toggle {
+  position: fixed;
+  padding: 4px;
+  top: 90px;
+  right: 20px;
+  border-radius: 50%;
+  height: 40px;
+  width: 40px;
+  border-style: solid;
+  border-width: 1px;
+  opacity: 0.7;
+  z-index: 1000;
+}
+
+.hyperbook-markdown #toc-toggle:hover {
+  opacity: 1;
+}
+
+.hyperbook-markdown #toc-toggle>.bar1,
+.hyperbook-markdown #toc-toggle>.bar3 {
+  width: 20px;
+  height: 2px;
+  margin: 2px 3px;
+  transition: 0.4s;
+}
+
+.hyperbook-markdown #toc-toggle>.bar2,
+.hyperbook-markdown #toc-toggle>.bar4 {
+  width: 25px;
+  height: 2px;
+  margin: 2px 3px;
+  transition: 0.4s;
+}

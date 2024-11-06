@@ -32,27 +32,33 @@ export const buildPackage = async (path) => {
   entries.push(entry);
 
   const bundle = JSON.parse(packageJSON).bundle || [];
-
-  const external = [
-    ...Object.keys(JSON.parse(packageJSON)?.dependencies || {}).filter(
-      (p) => !bundle.includes(p)
-    ),
-    ...Object.keys(JSON.parse(packageJSON)?.devDependencies || {}).filter(
-      (p) => !bundle.includes(p)
-    ),
-    ...Object.keys(JSON.parse(packageJSON)?.peerDependencies || {}),
-  ];
+  const external = [];
+  if (bundle !== "all") {
+    external.push(
+      ...[
+        ...Object.keys(JSON.parse(packageJSON)?.dependencies || {}).filter(
+          (p) => !bundle.includes(p),
+        ),
+        ...Object.keys(JSON.parse(packageJSON)?.devDependencies || {}).filter(
+          (p) => !bundle.includes(p),
+        ),
+        ...Object.keys(JSON.parse(packageJSON)?.peerDependencies || {}),
+      ],
+    );
+  }
   external.push("path");
   external.push("fs");
+
+  const platform = JSON.parse(packageJSON)?.platform || "browser";
 
   const commonConfig = {
     entryPoints: entries,
     outbase: path + "/src",
     outdir: `${path}/dist`,
-    jsx: "automatic",
     sourcemap: true,
     minify: false,
     bundle: true,
+    platform,
     external,
   };
 

@@ -113,6 +113,48 @@
                         }
                     ]
                 },
+                "code": {
+                    "allOf": [
+                        {
+                            "properties": {
+                                "version": {
+                                    "type": "string"
+                                }
+                            },
+                            "type": "object"
+                        },
+                        {
+                            "properties": {
+                                "showLineNumbers": {
+                                    "type": "boolean"
+                                },
+                                "theme": {
+                                    "anyOf": [
+                                        {
+                                            "properties": {
+                                                "dark": {
+                                                    "type": "string"
+                                                },
+                                                "light": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "dark",
+                                                "light"
+                                            ],
+                                            "type": "object"
+                                        },
+                                        {
+                                            "type": "string"
+                                        }
+                                    ]
+                                }
+                            },
+                            "type": "object"
+                        }
+                    ]
+                },
                 "excalidraw": {
                     "allOf": [
                         {
@@ -256,9 +298,6 @@
                     "type": "string"
                 }
             ]
-        },
-        "trailingSlash": {
-            "type": "boolean"
         }
     },
     "required": [

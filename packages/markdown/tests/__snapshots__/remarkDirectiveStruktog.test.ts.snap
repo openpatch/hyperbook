@@ -1,0 +1,99 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`remarkDirectiveStruktog > should transform 1`] = `
+"
+<div class="directive-struktog"><a href="https://struktog.openpatch.org/#pako:eNqtVcuKG0kQ_Jc-T0LWu0pX433AsjZ42YvxIasycyS2LQ2jFrYx-rO97Y85ZcaWXzOM8F6aoqiKjIyKjH4_vd6xzNPq_bThaTW1mJsvrkHrtYLr3kPj4iA535CKTFfT8u5G7OTv273cLn_abdvT3Tzv3jyd5bVsl89gymGU7Bhq9gmyFoSGnoAaNS8xnMF-E-I_drubO7hF3hrK9Ot__87L5vof2Sz7LrzZXh-21_dWS46U-UQ4lQiqsYMEzDA4U4tdH0d9e5jn49U01puZz9DVe3EpAqoGsGWH5nMAdSQj5XaRKkFboSwIclJlZMNpjgx2sKKpdQZ7dlhuDsvXmvwl--Ve6NpYqXCEUYdAiGOAaBTowXOvOVzEM4Zhj4XNeMYK2M0FvfluVsCSg9Qz2BPay9cs_6bbDfX5fnCh0kNhg-waoWDI4DEPY0ou1xEueiwWpcO8PNtOq-X2IJ83Pl76VDG3EQdmBa9NIRNWCJgqpFJ9NhLfVjw1dW7oxW77gO7dY2lMA2rnAolbARQOwClbazE9Vve7Q89nGrLezSy30_F4cqNx2U-rl3flRo_RzD7MiWT-Tk6Bo5iNsldF5Idb-YXm-d5OqCZ1Lpw6cQGCjgY9mTlHtcnCkC5yUJUaGuYCPvUBhuqhOjolQRg6HH0J9p3Rn9q4U3_AQY1i6cOiaQyF5NlipmQD55obar7AQSeNP006itbavXVtbLuTCmSPC2zNY8X0E9J6CqWkEAAxM3huCMUXhpDMmL6Vy0LE5id1HpDtLmA1VV3qFbplSomU_99oVQo-mg-AQjbWQT0oi4VL6yOmx_4VfhitmD1jlwbVYhGitmFeywQdixYm_3Ojczy--vi1smvZXK_tqMd4Nb3Z8LKeVi254wfMXCkO" target="_blank"><div class="columnAuto container">
+      <div class="columnAuto">
+        <div class="vcontainer columnAuto frameTopLeft" style="background-color: rgb(220, 239, 231)">
+          <div class="columnAuto vcontainer">
+            <div class="container fixedHeight">
+              <div class="columnAuto symbol">
+                <div class="padding fullHeight"><span>Gültigkeitsbedingung</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="columnAuto container loopShift">
+            <div class="loopWidth frameLeft vcontainer">
+              <div class="vcontainer columnAuto frameTopLeft" style="background-color: rgb(253, 237, 206)">
+                <div class="fixedHeight container">
+                  <div class="columnAuto symbol">
+                    <div class="padding fullHeight"><span>A: Test</span></div>
+                  </div>
+                </div>
+              </div>
+              <div class="vcontainer columnAuto frameTopLeft" style="background-color: rgb(250, 218, 209)">
+                <div class="columnAuto vcontainer">
+                  <div class="vcontainer fixedHeight caseHead-2" style="background-position: 1px 0px">
+                    <div class="columnAuto symbol">
+                      <div class="padding fullHeight"><span style="margin-left: calc(66.66666666666666% - 2em)">Variable</span></div>
+                    </div>
+                  </div>
+                  <div class="columnAuto container caseBody-2">
+                    <div class="columnAuto vcontainer ov-hidden">
+                      <div class="vcontainer fixedHeight frameLeft" style="background-color: rgb(250, 218, 209)">
+                        <div class="fixedHeight container">
+                          <div class="columnAuto symbol text-center">
+                            <div class="padding fullHeight"><span>Fall</span></div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="vcontainer columnAuto frameTopLeft" style="background-color: rgb(253, 237, 206)">
+                        <div class="fixedHeight container">
+                          <div class="columnAuto symbol">
+                            <div class="padding fullHeight"><span>E: Eingabe</span></div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="columnAuto vcontainer ov-hidden">
+                      <div class="vcontainer fixedHeight frameLeft" style="background-color: rgb(250, 218, 209)">
+                        <div class="fixedHeight container">
+                          <div class="columnAuto symbol text-center">
+                            <div class="padding fullHeight"><span>Fall</span></div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="vcontainer columnAuto frameTopLeft" style="background-color: rgb(220, 239, 231)">
+                        <div class="columnAuto vcontainer">
+                          <div class="container fixedHeight">
+                            <div class="columnAuto symbol">
+                              <div class="padding fullHeight"><span>Gültigkeitsbedingung</span></div>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="columnAuto container loopShift">
+                          <div class="loopWidth frameLeft vcontainer">
+                            <div class="vcontainer columnAuto frameTopLeft" style="background-color: rgb(255,255,243);">
+                              <div class="container fixedHeight">
+                                <div class="placeholder symbolHeight symbol"></div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="columnAuto vcontainer ov-hidden">
+                      <div class="vcontainer fixedHeight frameLeft" style="background-color: rgb(250, 218, 209)">
+                        <div class="fixedHeight container">
+                          <div class="columnAuto symbol text-center">
+                            <div class="padding fullHeight"><span>Sonst</span></div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="vcontainer columnAuto frameTopLeft" style="background-color: rgb(255,255,243);">
+                        <div class="container fixedHeight">
+                          <div class="placeholder symbolHeight symbol"></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="frameTop borderHeight"></div>
+      </div>
+    </div></a></div>
+"
+`;

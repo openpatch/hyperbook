@@ -1,0 +1,28 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`remarkDirectiveTabs > should transform 1`] = `
+"
+<div class="directive-tabs">
+  <div class="tabs" data-tabs-id="code"><button data-tab-id="java" data-tabs-id="code" class="tab active">Java</button><button data-tab-id="python" data-tabs-id="code" class="tab">Python</button></div>
+  <div class="tabpanel active" data-tab-id="java" data-tabs-id="code">
+    <p>Java</p>
+  </div>
+  <div class="tabpanel" data-tab-id="python" data-tabs-id="code">
+    <p>Python</p>
+  </div>
+</div>
+<p>Another tabs cluster with the same ids.</p>
+<div class="directive-tabs">
+  <div class="tabs" data-tabs-id="code"><button data-tab-id="2990934dbcfd5acd0b539d89a9953b6d79d2f6aa2eef5c9033ee8b9f04795cf7" data-tabs-id="code" class="tab active">Java</button><button data-tab-id="python" data-tabs-id="code" class="tab">Python</button><button data-tab-id="c" data-tabs-id="code" class="tab">C</button></div>
+  <div class="tabpanel active" data-tab-id="2990934dbcfd5acd0b539d89a9953b6d79d2f6aa2eef5c9033ee8b9f04795cf7" data-tabs-id="code">
+    <p>Java</p>
+  </div>
+  <div class="tabpanel" data-tab-id="python" data-tabs-id="code">
+    <p>Python</p>
+  </div>
+  <div class="tabpanel" data-tab-id="c" data-tabs-id="code">
+    <p>C</p>
+  </div>
+</div>
+"
+`;

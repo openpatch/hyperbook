@@ -4,14 +4,13 @@
   "author": "Mike Barkmin",
   "homepage": "https://github.com/openpatch/hyperbook#readme",
   "license": "MIT",
+  "platform": "node",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "sideEffects": false,
   "exports": {
-    ".": "./dist/index.js",
-    "./index.css": "./dist/index.css",
-    "./katex.css": "./dist/assets/katex.min.css"
+    ".": "./dist/index.js"
   },
   "files": [
     "dist"
@@ -30,19 +29,29 @@
   "scripts": {
     "version": "pnpm build",
     "lint": "tsc --noEmit",
+    "dev": "node devWatcher.mjs",
+    "dev:build": "node devBuild.mjs && node postbuild.mjs",
     "test": "vitest",
-    "build": "rimraf dist && pnpm build:pkg && pnpm build:types",
+    "build": "rimraf dist && pnpm build:pkg && pnpm build:types && node postbuild.mjs",
     "build:pkg": "node ../../scripts/build.mjs && ncp assets dist/assets",
     "build:types": "tsc --project tsconfig.build.json --declaration --emitDeclarationOnly"
   },
+  "bundle": "all",
   "dependencies": {
-    "@hyperbook/drawer": "workspace:*",
-    "@hyperbook/provider": "workspace:*",
-    "rehype-highlight": "7.0.0",
+    "@rehype-pretty/transformers": "^0.13.2",
+    "decircular": "^1.0.0",
+    "handlebars": "^4.7.8",
+    "is-obj": "^3.0.0",
+    "js-base64": "^3.7.7",
+    "mdast-util-directive": "^3.0.0",
+    "mdast-util-from-markdown": "^2.0.1",
+    "mdast-util-to-hast": "^13.1.0",
+    "mdast-util-to-string": "^4.0.0",
+    "pako": "2.1.0",
+    "qrcode-svg": "^1.1.0",
+    "rehype-format": "^5.0.1",
     "rehype-katex": "7.0.1",
-    "rehype-parse": "^9.0.1",
-    "rehype-raw": "^7.0.0",
-    "rehype-react": "^8.0.0",
+    "rehype-pretty-code": "^0.14.0",
     "rehype-stringify": "^10.0.1",
     "remark-directive": "3.0.0",
     "remark-directive-rehype": "0.4.2",
@@ -51,27 +60,29 @@
     "remark-math": "6.0.0",
     "remark-parse": "^11.0.0",
     "remark-rehype": "^11.1.1",
-    "remark-stringify": "^11.0.0",
     "remark-unwrap-images": "4.0.0",
+    "sort-keys": "^5.1.0",
     "unified": "^11.0.5",
-    "unist-util-visit": "^5.0.0"
-  },
-  "peerDependencies": {
-    "react": "18.x",
-    "react-dom": "18.x"
+    "unist-util-visit": "^5.0.0",
+    "unist-util-visit-parents": "^6.0.1"
   },
   "devDependencies": {
+    "@excalidraw/excalidraw": "0.17.6",
+    "@hyperbook/types": "workspace:*",
+    "@hyperbook/web-component-excalidraw": "workspace:*",
     "@types/hast": "3.0.4",
     "@types/mdast": "^4.0.4",
-    "@types/react": "18.3.2",
-    "@types/react-dom": "18.3.0",
-    "@types/unist": "3.0.2",
-    "hast-util-to-jsx-runtime": "^2.3.0",
-    "mdast-util-to-hast": "^13.1.0",
-    "mdast-util-to-string": "^4.0.0",
+    "@types/object-hash": "3.0.6",
+    "@types/pako": "2.0.3",
+    "@types/qrcode-svg": "^1.1.5",
+    "chalk": "^5.3.0",
+    "chokidar": "3.6.0",
+    "live-server": "^1.2.2",
+    "mermaid": "11.3.0",
     "ncp": "^2.0.0",
-    "react": "18.3.1",
-    "react-dom": "18.3.1",
-    "vitest": "^1.6.0"
+    "scratchblocks": "^3.6.4",
+    "vfile": "^6.0.3",
+    "vitest": "^1.6.0",
+    "wavesurfer.js": "^7.8.8"
   }
 }

@@ -1,0 +1,56 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`remarkDirectiveVideo > should transform with author 1`] = `
+"
+<div class="directive-video">
+  <div class="player">
+    <video controls src="/public/clouds.mp4" poster="/public/clouds.jpg" width="100%">Your browser does not support videos.</video>
+  </div>
+  <div class="information"><span class="author">Natureclip (CC-BY 3.0)</span></div>
+</div>
+"
+`;
+
+exports[`remarkDirectiveVideo > should transform with author and title 1`] = `
+"
+<div class="directive-video">
+  <div class="player">
+    <video controls src="/public/clouds.mp4" poster="/public/clouds.jpg" width="100%">Your browser does not support videos.</video>
+  </div>
+  <div class="information"><span class="title">Morgenwolken</span><span class="spacer">-</span><span class="author">Natureclip (CC-BY 3.0)</span></div>
+</div>
+"
+`;
+
+exports[`remarkDirectiveVideo > should transform with missing src 1`] = `
+"
+<div class="directive-video">
+  <div class="player">
+    <video controls poster="/public/clouds.jpg" width="100%">Your browser does not support videos.</video>
+  </div>
+  <div class="information"><span class="title">Morgenwolken</span></div>
+</div>
+"
+`;
+
+exports[`remarkDirectiveVideo > should transform with missing src 2`] = `
+"
+<div class="directive-video">
+  <div class="player">
+    <video controls poster="/public/clouds.jpg" width="100%">Your browser does not support videos.</video>
+  </div>
+  <div class="information"><span class="title">Morgenwolken</span></div>
+</div>
+"
+`;
+
+exports[`remarkDirectiveVideo > should transform with title 1`] = `
+"
+<div class="directive-video">
+  <div class="player">
+    <video controls src="/public/clouds.mp4" poster="/public/clouds.jpg" width="100%">Your browser does not support videos.</video>
+  </div>
+  <div class="information"><span class="title">Morgenwolken</span></div>
+</div>
+"
+`;

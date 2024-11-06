@@ -22,6 +22,7 @@ export type Navigation = {
   current: HyperbookPage | null;
   pages: HyperbookPage[];
   sections: HyperbookSection[];
+  glossary: HyperbookPage[];
 };
 
 export type Term = {
@@ -70,7 +71,6 @@ export type HyperbookFrontmatter =
 
 export type HyperbookJson = {
   name: string;
-  trailingSlash?: boolean;
   description?: string;
   logo?: string;
   author?: {
@@ -110,6 +110,15 @@ export type HyperbookJson = {
   links?: Link[];
   elements?: {
     bookmarks?: false | ElementConfig;
+    code?: ElementConfig & {
+      theme?:
+        | {
+            dark: string;
+            light: string;
+          }
+        | string;
+      showLineNumbers?: boolean;
+    };
     excalidraw?: ElementConfig & {
       autoZoom?: boolean;
       center?: boolean;
@@ -147,3 +156,15 @@ export type Hyperproject = {
   icon?: string;
   src: string;
 } & ({ type: "book" } | { type: "library"; projects: Hyperproject[] });
+
+export interface HyperbookContext {
+  root: string;
+  config: HyperbookJson;
+  library?: HyperlibraryJson;
+  project?: Hyperproject;
+  makeUrl(
+    path: string | string[],
+    base: "public" | "book" | "archive" | "glossary" | "assets",
+  ): string;
+  navigation: Navigation;
+}

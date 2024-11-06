@@ -1,5 +1,5 @@
 ---
-name: Mathmathik
+name: Mathmatik
 lang: de
 ---
 

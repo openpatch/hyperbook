@@ -77,6 +77,9 @@
     },
     {
       "include": "#directive-video"
+    },
+    {
+      "include": "#directive-pagelist"
     }
   ],
   "repository": {
@@ -939,6 +942,33 @@
               "captures": {
                 "1": {
                   "name": "keyword.parameter.directive.video.hyperbook"
+                },
+                "2": {
+                  "name": "string.quoted.double.untitled"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "directive-pagelist": {
+      "name": "meta.directive.pagelist.hyperbook",
+      "match": "(^|\\G)(:{2,})(pagelist){(.*)}\\s*$",
+      "captures": {
+        "2": {
+          "name": "punctuation.definition.directive.level.hyperbook"
+        },
+        "3": {
+          "name": "entity.name.function.directive.pagelist.hyperbook"
+        },
+        "4": {
+          "patterns": [
+            {
+              "match": "(source|orderBy|format)=\"([^\"]*)\"",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.pagelist.hyperbook"
                 },
                 "2": {
                   "name": "string.quoted.double.untitled"

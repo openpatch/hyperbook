@@ -1,0 +1,27 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`remarkLink > should transform image link 1`] = `
+VFile {
+  "cwd": "/home/mike/Sources/openpatch/hyperbook/packages/markdown",
+  "data": {},
+  "history": [],
+  "messages": [],
+  "value": "
+<p>
+  <img src="/public/test.jpg" alt="A description">
+</p>
+",
+}
+`;
+
+exports[`remarkLink > should transform link 1`] = `
+VFile {
+  "cwd": "/home/mike/Sources/openpatch/hyperbook/packages/markdown",
+  "data": {},
+  "history": [],
+  "messages": [],
+  "value": "
+<p><a href="/public/test.jpg">A description</a></p>
+",
+}
+`;

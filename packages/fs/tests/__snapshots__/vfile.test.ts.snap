@@ -70,7 +70,6 @@ TEST
 Hi!
 ",
   "data": {},
-  "elements": [],
 }
 `;
 
@@ -82,7 +81,6 @@ Example use of a template.
   "data": {
     "name": "Use Template1 with YAML",
   },
-  "elements": [],
 }
 `;
 
@@ -94,7 +92,6 @@ Example use of a template.
   "data": {
     "name": "Use Template1 with YAML",
   },
-  "elements": [],
 }
 `;
 
@@ -106,7 +103,6 @@ This is a test description!
 
 ",
   "data": {},
-  "elements": [],
 }
 `;
 
@@ -121,7 +117,6 @@ exports[`list > should get references 1`] = `
       "data": {
         "name": "OOP",
       },
-      "elements": [],
     },
     "name": "oop",
     "path": {
@@ -141,9 +136,6 @@ exports[`list > should get references 1`] = `
           "data": {
             "name": "Paradigms",
           },
-          "elements": [
-            "t",
-          ],
         },
         "name": "paradigms",
         "path": {
@@ -169,11 +161,6 @@ exports[`list > should get references 1`] = `
           "data": {
             "virtual": true,
           },
-          "elements": [
-            "excalidraw",
-            "youtube",
-            "t",
-          ],
         },
         "name": "index",
         "path": {
@@ -201,7 +188,6 @@ exports[`list > should list all 1`] = `
       "data": {
         "name": "OOP",
       },
-      "elements": [],
     },
     "name": "oop",
     "path": {
@@ -221,9 +207,6 @@ exports[`list > should list all 1`] = `
           "data": {
             "name": "Paradigms",
           },
-          "elements": [
-            "t",
-          ],
         },
         "name": "paradigms",
         "path": {
@@ -249,11 +232,6 @@ exports[`list > should list all 1`] = `
           "data": {
             "virtual": true,
           },
-          "elements": [
-            "excalidraw",
-            "youtube",
-            "t",
-          ],
         },
         "name": "index",
         "path": {
@@ -277,9 +255,6 @@ exports[`list > should list all 1`] = `
       "data": {
         "name": "Paradigms",
       },
-      "elements": [
-        "t",
-      ],
     },
     "name": "paradigms",
     "path": {
@@ -300,7 +275,6 @@ This is a test description!
 
 ",
       "data": {},
-      "elements": [],
     },
     "name": "whitespace-test",
     "path": {
@@ -319,7 +293,6 @@ This is a test description!
       "data": {
         "name": "Home",
       },
-      "elements": [],
     },
     "name": "index",
     "path": {
@@ -336,7 +309,6 @@ This is a test description!
     "markdown": {
       "content": "",
       "data": {},
-      "elements": [],
     },
     "name": "empty",
     "path": {
@@ -353,7 +325,6 @@ This is a test description!
     "markdown": {
       "content": "",
       "data": {},
-      "elements": [],
     },
     "name": "invalid",
     "path": {
@@ -374,7 +345,6 @@ Example use of a template.
       "data": {
         "name": "Use Template1 with YAML",
       },
-      "elements": [],
     },
     "name": "use-template1",
     "path": {
@@ -400,11 +370,6 @@ Example use of a template.
       "data": {
         "virtual": true,
       },
-      "elements": [
-        "excalidraw",
-        "youtube",
-        "t",
-      ],
     },
     "name": "index",
     "path": {
@@ -425,7 +390,6 @@ Example use of a template.
       "data": {
         "name": "Test",
       },
-      "elements": [],
     },
     "name": "test",
     "path": {
@@ -446,7 +410,6 @@ Example use of a template.
       "data": {
         "name": "Use Template1 with YAML",
       },
-      "elements": [],
     },
     "name": "index",
     "path": {
@@ -468,7 +431,6 @@ TEST
 Hi!
 ",
       "data": {},
-      "elements": [],
     },
     "name": "single-template",
     "path": {
@@ -489,7 +451,6 @@ Example use of a template.
       "data": {
         "name": "Use Template1 with YAML",
       },
-      "elements": [],
     },
     "name": "index",
     "path": {
@@ -508,7 +469,6 @@ Example use of a template.
       "data": {
         "name": "Test",
       },
-      "elements": [],
     },
     "name": "test",
     "path": {
@@ -529,9 +489,6 @@ Example use of a template.
       "data": {
         "name": "Paradigms",
       },
-      "elements": [
-        "t",
-      ],
     },
     "name": "paradigms",
     "path": {
@@ -552,7 +509,6 @@ This is a test description!
 
 ",
       "data": {},
-      "elements": [],
     },
     "name": "whitespace-test",
     "path": {
@@ -571,7 +527,6 @@ This is a test description!
       "data": {
         "name": "Home",
       },
-      "elements": [],
     },
     "name": "index",
     "path": {
@@ -588,7 +543,6 @@ This is a test description!
     "markdown": {
       "content": "",
       "data": {},
-      "elements": [],
     },
     "name": "empty",
     "path": {
@@ -605,7 +559,6 @@ This is a test description!
     "markdown": {
       "content": "",
       "data": {},
-      "elements": [],
     },
     "name": "invalid",
     "path": {
@@ -626,7 +579,6 @@ Example use of a template.
       "data": {
         "name": "Use Template1 with YAML",
       },
-      "elements": [],
     },
     "name": "use-template1",
     "path": {
@@ -652,11 +604,6 @@ Example use of a template.
       "data": {
         "virtual": true,
       },
-      "elements": [
-        "excalidraw",
-        "youtube",
-        "t",
-      ],
     },
     "name": "index",
     "path": {
@@ -677,7 +624,6 @@ Example use of a template.
       "data": {
         "name": "Test",
       },
-      "elements": [],
     },
     "name": "test",
     "path": {
@@ -698,7 +644,6 @@ Example use of a template.
       "data": {
         "name": "Use Template1 with YAML",
       },
-      "elements": [],
     },
     "name": "index",
     "path": {
@@ -720,7 +665,6 @@ TEST
 Hi!
 ",
       "data": {},
-      "elements": [],
     },
     "name": "single-template",
     "path": {
@@ -741,7 +685,6 @@ Example use of a template.
       "data": {
         "name": "Use Template1 with YAML",
       },
-      "elements": [],
     },
     "name": "index",
     "path": {
@@ -760,7 +703,6 @@ Example use of a template.
       "data": {
         "name": "Test",
       },
-      "elements": [],
     },
     "name": "test",
     "path": {
@@ -786,9 +728,6 @@ exports[`list > should list for folder book 1`] = `
       "data": {
         "name": "Paradigms",
       },
-      "elements": [
-        "t",
-      ],
     },
     "name": "paradigms",
     "path": {
@@ -809,7 +748,6 @@ This is a test description!
 
 ",
       "data": {},
-      "elements": [],
     },
     "name": "whitespace-test",
     "path": {
@@ -828,7 +766,6 @@ This is a test description!
       "data": {
         "name": "Home",
       },
-      "elements": [],
     },
     "name": "index",
     "path": {
@@ -845,7 +782,6 @@ This is a test description!
     "markdown": {
       "content": "",
       "data": {},
-      "elements": [],
     },
     "name": "empty",
     "path": {
@@ -862,7 +798,6 @@ This is a test description!
     "markdown": {
       "content": "",
       "data": {},
-      "elements": [],
     },
     "name": "invalid",
     "path": {
@@ -883,7 +818,6 @@ Example use of a template.
       "data": {
         "name": "Use Template1 with YAML",
       },
-      "elements": [],
     },
     "name": "use-template1",
     "path": {
@@ -909,11 +843,6 @@ Example use of a template.
       "data": {
         "virtual": true,
       },
-      "elements": [
-        "excalidraw",
-        "youtube",
-        "t",
-      ],
     },
     "name": "index",
     "path": {
@@ -934,7 +863,6 @@ Example use of a template.
       "data": {
         "name": "Test",
       },
-      "elements": [],
     },
     "name": "test",
     "path": {
@@ -955,7 +883,6 @@ Example use of a template.
       "data": {
         "name": "Use Template1 with YAML",
       },
-      "elements": [],
     },
     "name": "index",
     "path": {
@@ -977,7 +904,6 @@ TEST
 Hi!
 ",
       "data": {},
-      "elements": [],
     },
     "name": "single-template",
     "path": {
@@ -998,7 +924,6 @@ Example use of a template.
       "data": {
         "name": "Use Template1 with YAML",
       },
-      "elements": [],
     },
     "name": "index",
     "path": {
@@ -1017,7 +942,6 @@ Example use of a template.
       "data": {
         "name": "Test",
       },
-      "elements": [],
     },
     "name": "test",
     "path": {

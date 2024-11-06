@@ -44,11 +44,11 @@ export const findRoot = async (file: string): Promise<string> => {
 
 export const makeRepoLink = (
   repoTemplate: HyperbookJson["repo"],
-  vfile: VFile
+  vfile: VFile,
 ): string | null => {
   const relative = path.posix.join(
     vfile.folder.replaceAll(path.sep, "/"),
-    vfile.path.relative.replaceAll(path.sep, "/")
+    vfile.path.relative.replaceAll(path.sep, "/"),
   );
   if (typeof repoTemplate === "string") {
     if (repoTemplate.includes("%path%")) {
@@ -66,12 +66,49 @@ export const makeRepoLink = (
   return null;
 };
 
-export const getNavigation = async (
+export const getNavigationForFile = async (
+  pageList: HyperbookPage[],
+  currentFile?: VFile,
+): Promise<Pick<Navigation, "current" | "next" | "previous">> => {
+  let current: HyperbookPage | null = null;
+  let next: HyperbookPage | null = null;
+  let previous: HyperbookPage | null = null;
+
+  if (currentFile) {
+    let i = pageList.findIndex((p) => p.href === currentFile.path.href);
+    current = pageList[i] || null;
+
+    pageList = pageList.filter(
+      (p) => (!p.isEmpty || p.href === currentFile.path.href) && !p.hide,
+    );
+    i = pageList.findIndex((p) => p.href === currentFile.path.href);
+
+    if (current !== null && current.next !== undefined) {
+      next = pageList.find((p) => p.href === current?.next) || null;
+    } else {
+      next = pageList[i + 1] || null;
+    }
+
+    if (current !== null && current.prev !== undefined) {
+      previous = pageList.find((p) => p.href === current?.prev) || null;
+    } else {
+      previous = pageList[i - 1] || null;
+    }
+  }
+
+  return {
+    current,
+    next,
+    previous,
+  };
+};
+
+export const getPagesAndSections = async (
   root: string,
-  currentFile?: VFile
-): Promise<Navigation> => {
+): Promise<Pick<Navigation, "pages" | "sections" | "glossary">> => {
   const hyperbook = await getJson(root);
   const directory = await vfile.getDirectory(root, "book");
+  const glossary = await vfile.listForFolder(root, "glossary");
 
   const getSectionsAndPages = async function ({
     directories,
@@ -120,7 +157,7 @@ export const getNavigation = async (
     }
 
     for (const file of files) {
-      const { data } = await vfile.getMarkdown(file);
+      const data = file.markdown.data;
       if (!data.name) {
         data.name = file.name;
       }
@@ -144,7 +181,7 @@ export const getNavigation = async (
       return iIndex - eIndex;
     });
     arrayOfSections = arrayOfSections.sort((a, b) =>
-      a.name > b.name ? 1 : -1
+      a.name > b.name ? 1 : -1,
     );
     arrayOfSections = arrayOfSections.sort((a, b) => {
       const iIndex = a.index !== undefined ? a.index : 9999;
@@ -152,60 +189,42 @@ export const getNavigation = async (
       return iIndex - eIndex;
     });
 
-    return { pages: arrayOfPages, sections: arrayOfSections };
-  };
-
-  const getPageList = (
-    sections: HyperbookSection[],
-    pages: HyperbookPage[]
-  ): HyperbookPage[] => {
-    let pageList = [...pages];
-
-    for (const section of sections) {
-      pageList = [
-        ...pageList,
-        section,
-        ...getPageList(section.sections, section.pages),
-      ];
-    }
-
-    return pageList;
+    return {
+      pages: arrayOfPages,
+      sections: arrayOfSections,
+    };
   };
 
   const { sections, pages } = await getSectionsAndPages(directory);
 
-  let pageList = getPageList(sections, pages);
-  let current: HyperbookPage | null = null;
-  let next: HyperbookPage | null = null;
-  let previous: HyperbookPage | null = null;
-
-  if (currentFile) {
-    let i = pageList.findIndex((p) => p.href === currentFile.path.href);
-    current = pageList[i] || null;
-
-    pageList = pageList.filter(
-      (p) => (!p.isEmpty || p.href === currentFile.path.href) && !p.hide
-    );
-    i = pageList.findIndex((p) => p.href === currentFile.path.href);
-
-    if (current !== null && current.next !== undefined) {
-      next = pageList.find((p) => p.href === current?.next) || null;
-    } else {
-      next = pageList[i + 1] || null;
-    }
-
-    if (current !== null && current.prev !== undefined) {
-      previous = pageList.find((p) => p.href === current?.prev) || null;
-    } else {
-      previous = pageList[i - 1] || null;
-    }
-  }
-
   return {
-    next,
-    current,
-    previous,
     sections,
     pages,
+    glossary: glossary.map(
+      (g) =>
+        ({
+          href: g.path.href,
+          ...g.markdown.data,
+          name: g.markdown.data?.name || g.name,
+          repo: makeRepoLink(hyperbook.repo, g),
+        }) as HyperbookPage,
+    ),
   };
+};
+
+export const getPageList = (
+  sections: HyperbookSection[],
+  pages: HyperbookPage[],
+): HyperbookPage[] => {
+  let pageList = [...pages];
+
+  for (const section of sections) {
+    pageList = [
+      ...pageList,
+      section,
+      ...getPageList(section.sections, section.pages),
+    ];
+  }
+
+  return pageList;
 };

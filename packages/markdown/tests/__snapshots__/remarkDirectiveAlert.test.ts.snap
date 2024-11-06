@@ -1,0 +1,21 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`remarkDirectiveAlert > should transform 1`] = `
+"
+<div class="directive-alert">
+  <p>Default</p>
+</div>
+<div class="directive-alert error">
+  <p>Error</p>
+</div>
+<div class="directive-alert success">
+  <p>Success</p>
+</div>
+<div class="directive-alert info">
+  <p>Info</p>
+</div>
+<div class="directive-alert warn">
+  <p>Warn</p>
+</div>
+"
+`;

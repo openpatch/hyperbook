@@ -1,16 +1,16 @@
 import path from "path";
-import { isSetup } from "./helpers/is-setup";
 import fs from "fs";
 import archiver from "archiver";
 import chalk from "chalk";
 
 async function archiveFolder(
   root: string,
+  out: string,
   name: string,
-  prefix?: string
+  prefix?: string,
 ): Promise<void> {
   return new Promise((resolve, reject) => {
-    const archivesPath = path.join(root, "public", "archives");
+    const archivesPath = path.join(out, "archives");
     if (!fs.existsSync(archivesPath)) {
       fs.mkdirSync(archivesPath, { recursive: true });
     }
@@ -18,7 +18,7 @@ async function archiveFolder(
     const output = fs.createWriteStream(outputPath);
     const archive = archiver("zip", { zlib: { level: 9 } });
     archive.on("finish", () => {
-      console.log(`${chalk.green(`[${prefix}]`)} Archive ${name} zipped.`);
+      console.log(`${chalk.blue(`[${prefix}]`)} Archive ${name} zipped.`);
       resolve();
     });
     archive.on("error", (err) => {
@@ -32,7 +32,11 @@ async function archiveFolder(
   });
 }
 
-export async function runArchive(root: string, prefix?: string): Promise<void> {
+export async function runArchive(
+  root: string,
+  out: string,
+  prefix?: string,
+): Promise<void> {
   return new Promise((resolve, reject) => {
     // find folders in archives
     if (!fs.existsSync(path.join(root, "archives"))) {
@@ -46,7 +50,7 @@ export async function runArchive(root: string, prefix?: string): Promise<void> {
         })
         .filter((d) => d.isDirectory());
 
-      Promise.all(dirs.map((d) => archiveFolder(root, d.name, prefix)))
+      Promise.all(dirs.map((d) => archiveFolder(root, out, d.name, prefix)))
         .then(() => {
           resolve();
         })

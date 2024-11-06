@@ -1,5 +1,4 @@
-//@ts-ignore
-import handlebars from "handlebars/dist/cjs/handlebars";
+import handlebars from "handlebars";
 import { findUpSync, Options } from "find-up";
 import { lookup } from "mime-types";
 import fs from "fs";
@@ -134,7 +133,7 @@ const registerHelpers = (handlebars: any, options?: { file: VFileBase }) => {
       } catch (e) {
         return `File ${src} is missing.`;
       }
-    }
+    },
   );
 
   handlebars.registerHelper("base64", (src: string) => {
@@ -153,7 +152,7 @@ const registerHelpers = (handlebars: any, options?: { file: VFileBase }) => {
       let p = path.join(cwd, src);
       const content = fs.readFileSync(p, "utf8");
       return extractLines(content, lines, ellipsis);
-    }
+    },
   );
 };
 

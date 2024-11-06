@@ -1,0 +1,27 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`remarkDirectiveSqlIde > should transform 1`] = `
+"
+<div class="directive-sqlide">
+  <iframe class="player" srcdoc="<script>window.jo_doc = window.frameElement.textContent;</script><script src='https://embed.learn-sql.de/include/js/includeide/includeIDE.js'></script>" frameborder="0" height="500">{'id': 'b7737fd581ffacd2dd802ad79b5c2f004f8c96ecd9eb8ba32e91cef31e3c5af8', 'databaseURL': 'https://embed.learn-sql.de/include/assets/databases/world1.sqLite'}
+    <script type="plain/text" title="Statements.sql">
+SELECT * from fluss;
+</script>
+    <script type="plain/text" title="A Hint" data-type="hint">
+Do this
+</script>
+    <style>
+.joe_javaOnlineDiv {
+  box-shadow: none;
+  margin: 0!important;
+  top: 0!important;
+  width: 100%!important;
+  height: calc(100% - 5px) !important;
+  border: none !important;
+}
+</style>
+  </iframe>
+  <div class="menu"><button onclick="hyperbook.sqlide.openFullscreen(this)">Fullscreen</button></div>
+</div>
+"
+`;

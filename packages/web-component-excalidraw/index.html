@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Excalidraw</title>
+	<script src="./dist/index.umd.js"></script>
+	<link href="css/style.css" rel="stylesheet">
+	<script>
+		function onopen(link) {
+			console.log(link);
+		}
+	</script>
+</head>
+
+<body>
+	<hyperbook-excalidraw auto-zoom=true edit=true onlinkopen="onopen"></hyperbook-excalidraw>
+	<hyperbook-excalidraw auto-zoom=true onlinkopen="onopen"></hyperbook-excalidraw>
+</body>
+
+</html>

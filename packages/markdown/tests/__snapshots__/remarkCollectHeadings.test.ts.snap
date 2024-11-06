@@ -1,0 +1,33 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`remarkCollectHeadings > should collect 1`] = `
+{
+  "headings": [
+    {
+      "anchor": "h1",
+      "label": "H1",
+      "level": 1,
+    },
+    {
+      "anchor": "h2a",
+      "label": "H2a",
+      "level": 2,
+    },
+    {
+      "anchor": "h3b",
+      "label": "H3b",
+      "level": 3,
+    },
+    {
+      "anchor": "h2b",
+      "label": "H2b",
+      "level": 2,
+    },
+    {
+      "anchor": "h3b",
+      "label": "H3b",
+      "level": 3,
+    },
+  ],
+}
+`;

@@ -1,0 +1,54 @@
+.directive-protect .password-input {
+  border-color: var(--color-spacer);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100px;
+  margin-bottom: 10px;
+  border-radius: 4px;
+  border-style: solid;
+  border-width: 1px;
+}
+
+.directive-protect .password-input>input {
+  text-align: center;
+  border-radius: 10px;
+  font-size: 18px;
+  border-width: 1px;
+  border-style: solid;
+}
+
+.directive-protect .password-input>.icon {
+  position: absolute;
+  user-select: none;
+  left: -14px;
+  border-width: 1px;
+  border-style: solid;
+  height: 28px;
+  width: 28px;
+  text-align: center;
+  border-radius: 50%;
+  margin-bottom: 10px;
+}
+
+.directive-protect .password-input>.description {
+  margin-bottom: 10px;
+}
+
+.directive-protect .password-input>input {
+  color: var(--color-text);
+  background: var(--color-nav);
+  border-color: var(--color-spacer);
+}
+
+.directive-protect .password-input>.icon {
+  background: white;
+  border-color: var(--color-spacer);
+}
+
+.directive-protect .hidden {
+  visibility: hidden;
+  display: none;
+}

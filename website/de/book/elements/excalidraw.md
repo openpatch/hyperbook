@@ -15,7 +15,7 @@ Excalidraw Element erstellen (siehe unten).
 
 Das Excalidraw Element akzeptiert drei Argumente:
 
-- **file**: Der Pfad zur Excalidraw-Datei.
+- **src**: Der Pfad zur Excalidraw-Datei.
 - **aspectRatio**: Um dein Excalidraw auf jedem Gerät schön anzeigen zu lassen, musst du ein Seitenverhältnis definieren. Zum Beispiel: "16/9", "4/3", "1/1".
 - **autoZoom**: Standardmäßig wird dein Excalidraw so anzeigt, dass alles zu sehen ist, damit auch auf kleinen Geräten dein Excalidraw gut funktioniert. Diese Verhalten kannst du hier deaktivieren.
 - **edit**: Erlaubt das Bearbeiten des Excalidraw.

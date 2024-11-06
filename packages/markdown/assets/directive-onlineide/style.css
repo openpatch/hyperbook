@@ -1,0 +1,24 @@
+.directive-onlineide {
+  margin-bottom: 10px;
+  border: 1px solid var(--color-spacer);
+  border-radius: 8px;
+  background: #1e1e1e;
+  overflow: hidden;
+}
+
+.directive-onlineide iframe {
+  width: 100%;
+}
+
+.directive-onlineide .menu {
+  display: flex;
+  border-top: 1px solid var(--color-spacer);
+}
+
+.directive-onlineide .menu button {
+  flex: 1;
+  background: var(--color-nav);
+  color: var(--color-text);
+  border: none;
+  cursor: pointer;
+}

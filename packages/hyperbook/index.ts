@@ -3,14 +3,12 @@
 import chalk from "chalk";
 import { Command } from "commander";
 import checkForUpdate from "update-check";
-import { runArchive } from "./archive";
 import { runBuildProject } from "./build";
 import { runDev } from "./dev";
 import { getPkgManager } from "./helpers/get-pkg-manager";
 import { hyperproject } from "@hyperbook/fs";
 import { runNew } from "./new";
 import packageJson from "./package.json";
-import { runSetupProject } from "./setup";
 
 const program = new Command();
 
@@ -36,22 +34,10 @@ program
 program
   .command("dev")
   .description("start the development server for a hyperbook")
-  .action(async () => {
-    await runDev();
-  });
-
-program
-  .command("setup")
-  .description("downloads the latest version of the template of a hyperbook")
-  .action(async () => {
-    const rootProject = await hyperproject.get(process.cwd()).catch((e) => {
-      console.error(e);
-      process.exit(1);
-    });
-
-    await runSetupProject(rootProject).catch((e) => {
-      console.error(e);
-      process.exit(1);
+  .option("-p --port <number>", "set a specific port")
+  .action(async (name, options) => {
+    await runDev({
+      port: options.port,
     });
   });
 
@@ -63,18 +49,11 @@ program
       console.error(e);
       process.exit(1);
     });
-    console.log(`${chalk.blue(`[${rootProject.name}]`)} Building Project: ${rootProject.src}.`);
+    let name = hyperproject.getName(rootProject);
+    console.log(
+      `${chalk.blue(`[${name}]`)} Building Project: ${rootProject.src}.`,
+    );
     await runBuildProject(rootProject, rootProject).catch((e) => {
-      console.error(e);
-      process.exit(1);
-    });
-  });
-
-program
-  .command("archive")
-  .description("create archives from archives folder")
-  .action(async () => {
-    await runArchive(process.cwd()).catch((e) => {
       console.error(e);
       process.exit(1);
     });
