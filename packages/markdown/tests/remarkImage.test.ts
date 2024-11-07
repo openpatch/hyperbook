@@ -20,7 +20,7 @@ export const toHtml = (md: string, ctx: HyperbookContext) => {
       allowDangerousCharacters: true,
       allowDangerousHtml: true,
     })
-    .processSync(md);
+    .processSync(md).value;
 };
 
 describe("remarkImage", () => {
