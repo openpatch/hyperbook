@@ -29,7 +29,6 @@ jobs:
 
       - name: Setup and Build
         run: |
-          npx hyperbook setup
           npx hyperbook build
 
       - name: Deploy

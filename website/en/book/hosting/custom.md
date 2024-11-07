@@ -7,7 +7,6 @@ name: Custom
 You just need to copy the output folder after running the setup and build command.
 
 ```
-npx hyperbook setup
 npx hyperbook build
 
 cp -R .hyperbook/out /var/www/my-website

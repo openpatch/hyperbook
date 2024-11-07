@@ -29,10 +29,4 @@ For the `output directory` you should use:
 .hyperbook/out
 ```
 
-For the `install command` you should use:
-
-```
-npx hyperbook setup
-```
-
 Now you have everything setup. Enjoy your Hyperbook!

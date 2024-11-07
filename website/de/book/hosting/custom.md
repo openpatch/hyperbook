@@ -5,10 +5,9 @@ lang: de
 
 # Auf eigenen Server bereitstellen
 
-Du muss nur den Ausgabeordner auf deinen Server kopieren, nachdem du den setup und build Befehl ausgeführt hast.
+Du muss nur den Ausgabeordner auf deinen Server kopieren, nachdem du den build Befehl ausgeführt hast.
 
 ```
-npx hyperbook setup
 npx hyperbook build
 
 cp -R .hyperbook/out /var/www/my-website
