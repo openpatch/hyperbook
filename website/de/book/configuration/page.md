@@ -41,3 +41,5 @@ Hier sind die Eigenschaften, die im Frontmatter gesetzt werden können:
 | next        | Ein absoluter Pfad zur nächsten Seite. Dies überschreibt index und hide. Du kannst außerdem nichts setzen, sodass der Button versteckt wird.   |
 | hide        | Verstecke die Seite von der Navigation.                                                                                                        |
 | toc         | Zeige ein Inhaltsverzeichnis. Diese ist standardmäßig aktiviert für Seiten und deaktiviert für Begriffe im Glossar.                            |
+| styles            | Hier können Links zu eigenen CSS-Styles gesetzt werden. |
+| scripts            | Hier können Links zu eigenen JavaScript-Dateien gesetzt werden. |

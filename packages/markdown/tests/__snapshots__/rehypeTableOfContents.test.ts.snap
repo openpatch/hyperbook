@@ -1,0 +1,26 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`remarkTableOfContents > should generate toc 1`] = `
+"
+<div class="hyperbook-markdown"><button id="toc-toggle" onclick="hyperbook.tocToggle()" title="Table of Contents"><div class="bar1"></div><div class="bar2"></div><div class="bar3"></div><div class="bar4"></div></button>
+  <side-drawer id="toc-drawer" right>
+    <div class="toc-drawer-content">
+      <nav class="toc">
+        <ul>
+          <li class="level-1"><a href="#h1">H1</a></li>
+          <li class="level-2"><a href="#h2a">H2a</a></li>
+          <li class="level-3"><a href="#h3b">H3b</a></li>
+          <li class="level-2"><a href="#h2b">H2b</a></li>
+          <li class="level-3"><a href="#h3b">H3b</a></li>
+        </ul>
+      </nav>
+    </div>
+  </side-drawer>
+  <h1>H1</h1>
+  <h2>H2a</h2>
+  <h3>H3b</h3>
+  <h2>H2b</h2>
+  <h3>H3b</h3>
+</div>
+"
+`;

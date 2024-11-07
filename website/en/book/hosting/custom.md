@@ -4,10 +4,9 @@ name: Custom
 
 # Deploy on Your Server
 
-You just need to copy the output folder after running the setup and build command.
+You just need to copy the output folder after running build command.
 
 ```
-npx hyperbook setup
 npx hyperbook build
 
 cp -R .hyperbook/out /var/www/my-website

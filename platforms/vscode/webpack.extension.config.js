@@ -1,4 +1,5 @@
 const path = require("path");
+const CopyPlugin = require("copy-webpack-plugin");
 
 module.exports = {
   target: "node",
@@ -16,6 +17,23 @@ module.exports = {
   externals: {
     vscode: "commonjs vscode", // the vscode-module is created on-the-fly and must be excluded. Add other modules that cannot be webpack'ed, 📖 -> https://webpack.js.org/configuration/externals/
   },
+  plugins: [
+    new CopyPlugin({
+      patterns: [
+        {
+          from: path.resolve(
+            __dirname,
+            "node_modules",
+            "@hyperbook",
+            "markdown",
+            "dist",
+            "assets",
+          ),
+          to: path.resolve(__dirname, "assets", "hyperbook"),
+        },
+      ],
+    }),
+  ],
   module: {
     rules: [
       {

@@ -5,10 +5,6 @@ import path from "path";
 import { Glossary, HyperbookFrontmatter } from "@hyperbook/types";
 import yaml from "yaml";
 import { handlebars, registerHelpers } from "./handlebars";
-import { fromMarkdown } from "mdast-util-from-markdown";
-import { directive } from "micromark-extension-directive";
-import { directiveFromMarkdown } from "mdast-util-directive";
-import { visit } from "unist-util-visit";
 
 export type VFileBase = {
   root: string;
@@ -36,7 +32,6 @@ export type VFileGlossary = VFileBase & {
   markdown: {
     content: string;
     data: HyperbookFrontmatter;
-    elements: string[];
   };
   references: VFileBook[];
 };
@@ -47,7 +42,6 @@ export type VFileBook = VFileBase & {
   markdown: {
     content: string;
     data: HyperbookFrontmatter;
-    elements: string[];
   };
 };
 
@@ -674,7 +668,7 @@ export const getMarkdown = async (
       .readFile(file.path.absolute)
       .then((f) => f.toString());
     const template = handlebars.compile(templateString);
-    markdown = template();
+    markdown = template({});
   } else {
     console.log(
       `Unsupported file extension ${file.extension}. Only .md, .yml, .json and .md.hbs files are supported.`,
@@ -722,21 +716,8 @@ export const getMarkdown = async (
     }
   }
 
-  const tree = fromMarkdown(content, {
-    extensions: [directive()],
-    mdastExtensions: [directiveFromMarkdown()],
-  });
-
-  const elements = new Set<string>([]);
-  visit(tree, function (node) {
-    if (
-      node &&
-      node.type.endsWith("Directive") &&
-      typeof node.name === "string"
-    ) {
-      elements.add(node.name);
-    }
-  });
-
-  return { content, data: { ...data } as HyperbookFrontmatter, elements: [...elements] };
+  return {
+    content,
+    data: { ...data } as HyperbookFrontmatter,
+  };
 };

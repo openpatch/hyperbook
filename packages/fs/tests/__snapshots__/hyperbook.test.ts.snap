@@ -12,94 +12,10 @@ exports[`hyperbook > should get navigation 1`] = `
     "name": "whitespace-test",
     "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/whitespace-test.md",
   },
-  "pages": [
-    {
-      "href": "/",
-      "name": "Home",
-      "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/index.md",
-    },
-    {
-      "href": "/paradigms",
-      "name": "Paradigms",
-      "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/paradigms.md",
-    },
-    {
-      "href": "/whitespace-test",
-      "name": "whitespace-test",
-      "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/whitespace-test.md",
-    },
-  ],
   "previous": {
     "href": "/",
     "name": "Home",
     "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/index.md",
   },
-  "sections": [
-    {
-      "href": "/subsection3",
-      "isEmpty": false,
-      "name": "Use Template1 with YAML",
-      "pages": [
-        {
-          "href": "/subsection3/single-template",
-          "name": "single-template",
-          "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/subsection3/single-template.md.hbs",
-        },
-      ],
-      "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/subsection3/index.yml",
-      "sections": [
-        {
-          "isEmpty": true,
-          "name": "subsection31",
-          "pages": [
-            {
-              "href": "/subsection3/subsection31/test",
-              "name": "Test",
-              "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/subsection3/subsection31/test.md",
-            },
-          ],
-          "sections": [],
-        },
-      ],
-    },
-    {
-      "href": "/subsection2",
-      "isEmpty": false,
-      "name": "Use Template1 with YAML",
-      "pages": [
-        {
-          "href": "/subsection2/test",
-          "name": "Test",
-          "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/subsection2/test.md",
-        },
-      ],
-      "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/subsection2/index.yml",
-      "sections": [],
-    },
-    {
-      "href": "/subsection",
-      "isEmpty": false,
-      "pages": [
-        {
-          "href": "/subsection/use-template1",
-          "name": "Use Template1 with YAML",
-          "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/subsection/use-template1.yml",
-        },
-        {
-          "href": "/subsection/empty",
-          "name": "empty",
-          "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/subsection/empty.json",
-        },
-        {
-          "href": "/subsection/invalid",
-          "name": "invalid",
-          "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/subsection/invalid.json",
-        },
-      ],
-      "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/subsection/index.md",
-      "sections": [],
-      "virtual": true,
-    },
-  ],
 }
 `;

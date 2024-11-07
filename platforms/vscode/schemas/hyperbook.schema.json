@@ -58,6 +58,9 @@
         }
     },
     "properties": {
+        "allowDangerousHtml": {
+            "type": "boolean"
+        },
         "author": {
             "properties": {
                 "name": {
@@ -110,6 +113,48 @@
                         {
                             "const": false,
                             "type": "boolean"
+                        }
+                    ]
+                },
+                "code": {
+                    "allOf": [
+                        {
+                            "properties": {
+                                "version": {
+                                    "type": "string"
+                                }
+                            },
+                            "type": "object"
+                        },
+                        {
+                            "properties": {
+                                "showLineNumbers": {
+                                    "type": "boolean"
+                                },
+                                "theme": {
+                                    "anyOf": [
+                                        {
+                                            "properties": {
+                                                "dark": {
+                                                    "type": "string"
+                                                },
+                                                "light": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "dark",
+                                                "light"
+                                            ],
+                                            "type": "object"
+                                        },
+                                        {
+                                            "type": "string"
+                                        }
+                                    ]
+                                }
+                            },
+                            "type": "object"
                         }
                     ]
                 },
@@ -257,8 +302,17 @@
                 }
             ]
         },
-        "trailingSlash": {
-            "type": "boolean"
+        "scripts": {
+            "items": {
+                "type": "string"
+            },
+            "type": "array"
+        },
+        "styles": {
+            "items": {
+                "type": "string"
+            },
+            "type": "array"
         }
     },
     "required": [

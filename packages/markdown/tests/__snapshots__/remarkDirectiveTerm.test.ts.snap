@@ -1,0 +1,19 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`remarkDirectiveTerm > should infer id from text 1`] = `
+"
+<p><a href="/glossary/object-oriented-programming">Object-oriented Programming</a></p>
+"
+`;
+
+exports[`remarkDirectiveTerm > should render 1`] = `
+"
+<p><a href="/glossary/oop#bluej-by-example">Object-oriented Programming</a></p>
+"
+`;
+
+exports[`remarkDirectiveTerm > should work with term 1`] = `
+"
+<p><a href="/glossary/object-oriented-programming">Object-oriented Programming</a></p>
+"
+`;

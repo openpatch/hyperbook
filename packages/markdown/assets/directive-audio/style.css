@@ -1,0 +1,56 @@
+.directive-audio {
+  margin-bottom: 16px;
+}
+
+.directive-audio .information {
+  margin-top: 4px;
+  text-align: center;
+  font-style: italic;
+}
+
+.directive-audio .player .thumbnail {
+  width: 64px;
+  height: 64px;
+  background-size: cover;
+  background-position: center;
+  border-right: 1px solid;
+  border-right-color: var(--color-nav-border);
+}
+
+.directive-audio .player .thumbnail.right {
+  border-right: none;
+  border-left: 1px solid;
+  border-left-color: var(--color-nav-border);
+}
+
+.directive-audio .player {
+  display: flex;
+  overflow: hidden;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-nav);
+  border-radius: 8px;
+  border-style: solid;
+  border-width: 1px;
+  border-color: var(--color-nav-border);
+}
+
+.directive-audio .player .wave {
+  flex: 1;
+}
+
+.directive-audio .player .play {
+  width: 64px;
+  height: 64px;
+  border: none;
+  mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 -960 960 960" fill="currentColor"><path d="M320-203v-560l440 280-440 280Z"></path></svg>');
+  mask-size: 32px;
+  mask-position: center;
+  mask-repeat: no-repeat;
+  background-color: var(--color-text);
+  padding: 0;
+}
+
+.directive-audio .player .play.playing {
+  mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 -960 960 960" fill="currentColor"><path d="M555-200v-560h175v560H555Zm-325 0v-560h175v560H230Z"></path></svg>');
+}

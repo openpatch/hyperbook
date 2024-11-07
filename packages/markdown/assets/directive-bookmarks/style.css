@@ -1,0 +1,55 @@
+ul.directive-bookmarks {
+  padding-left: 0;
+}
+
+ul.directive-bookmarks li {
+  list-style-type: none;
+}
+
+ul.directive-bookmarks li {
+  display: block;
+  border-style: solid;
+  border-width: 1px;
+  padding: 10px 12px;
+  padding-left: 32px;
+  position: relative;
+  margin: 0;
+  border-bottom: none;
+}
+
+ul.directive-bookmarks li:first-of-type {
+  border-top-right-radius: 8px;
+  border-top-left-radius: 8px;
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+ul.directive-bookmarks li:last-of-type {
+  border-style: solid;
+  border-width: 1px;
+  border-top-right-radius: 0;
+  border-top-left-radius: 0;
+  border-bottom-right-radius: 8px;
+  border-bottom-left-radius: 8px;
+}
+
+ul.directive-bookmarks a::before {
+  content: "🔖";
+  position: absolute;
+  font-size: 12px;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+ul.directive-bookmarks li {
+  border-color: var(--color-spacer);
+}
+
+ul.directive-bookmarks li:hover {
+  background: var(--color-nav);
+}
+
+ul.directive-bookmarks li:last-of-type {
+  border-color: var(--color-spacer);
+}

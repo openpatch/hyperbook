@@ -1,22 +1,37 @@
-import { Plugin } from "unified";
-import { Root as MdastRoot, Heading as AstHeading } from "mdast";
-import { Root as HastRoot } from "hast";
 import { visit } from "unist-util-visit";
+import { Root } from "mdast";
+import { Heading } from "mdast";
+import { HyperbookContext } from "@hyperbook/types";
+import { VFile } from "vfile";
 import { toString } from "mdast-util-to-string";
 
-export interface Heading {
-  level: number;
-  label: string;
-  anchor: string;
-}
+const customHeading = (node: Heading) => {
+  let lastChild = node.children[node.children.length - 1];
+  if (lastChild && lastChild.type === "text") {
+    let string = lastChild.value.replace(/ +$/, "");
+    let matched = string.match(/ {#([^]+?)}$/);
 
-const getAnchor = (heading: AstHeading): string => {
-  // If we have a heading, make it lower case
-  if ((heading?.data as any)?.id) {
-    return (heading.data as any).id as string;
+    if (matched) {
+      let id = matched[1];
+      if (!!id.length) {
+        if (!node.data) {
+          node.data = {};
+        }
+        if (!node.data.hProperties) {
+          node.data.hProperties = {};
+        }
+        (node.data as any).id = node.data.hProperties.id = id;
+
+        string = string.substring(0, matched.index);
+        lastChild.value = string;
+      }
+    }
   }
+};
 
-  let anchor = toString(heading, { includeImageAlt: false }).toLowerCase();
+export const makeAnchor = (heading: string) => {
+  // If we have a heading, make it lower case
+  let anchor = heading.toLowerCase().trim();
 
   // Clean anchor (replace special characters whitespaces).
   // Alternatively, use encodeURIComponent() if you don't care about
@@ -27,24 +42,73 @@ const getAnchor = (heading: AstHeading): string => {
   return anchor;
 };
 
-const headings = (root: MdastRoot) => {
-  const headingList: Heading[] = [];
+export default ({
+    config,
+    makeUrl,
+    navigation: { current },
+  }: HyperbookContext) =>
+  () => {
+    return function (tree: Root, file: VFile) {
+      visit(tree, "heading", (node: Heading) => {
+        customHeading(node);
+        const value = toString(node);
+        const anchor = makeAnchor(value);
+        const label = value || anchor;
 
-  visit(root, "heading", (node: AstHeading) => {
-    const heading: Heading = {
-      level: node.depth,
-      label: toString(node, { includeImageAlt: false }),
-      anchor: getAnchor(node),
+        if (!node.data) {
+          node.data = {};
+        }
+        node.data.id = anchor;
+        node.data.hProperties = {
+          id: anchor,
+        };
+
+        let key = "#" + anchor;
+        if (current?.href) {
+          key = makeUrl(current.href, "book") + key;
+        }
+
+        node.data.hChildren = [
+          {
+            type: "element",
+            tagName: "a",
+            properties: {
+              href: `#${anchor}`,
+              class: "heading",
+            },
+            children: [
+              {
+                type: "element",
+                tagName: "span",
+                properties: {},
+                children: [
+                  {
+                    type: "text",
+                    value,
+                  },
+                ],
+              },
+            ],
+          },
+        ];
+        if (config.elements?.bookmarks !== false) {
+          node.data.hChildren?.push({
+            type: "element",
+            tagName: "button",
+            properties: {
+              class: "bookmark",
+              onclick: `hyperbook.toggleBookmark("${key}", "${label}")`,
+              title: "Bookmark",
+              "data-key": key,
+            },
+            children: [
+              {
+                type: "text",
+                value: "🔖",
+              },
+            ],
+          });
+        }
+      });
     };
-
-    headingList.push(heading);
-  });
-
-  return headingList;
-};
-
-export const remarkHeadings: Plugin<[], MdastRoot, HastRoot> = () => {
-  return (tree, file) => {
-    file.data.headings = headings(tree);
   };
-};

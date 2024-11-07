@@ -1,0 +1,128 @@
+import rehypeKatex from "rehype-katex";
+import rehypeStringify from "rehype-stringify";
+import rehypePrettyCode from "rehype-pretty-code";
+import { transformerCopyButton } from "@rehype-pretty/transformers";
+import remarkParse from "remark-parse";
+import remarkToRehype from "remark-rehype";
+import { unified, PluggableList } from "unified";
+import { remarkRemoveComments } from "./remarkRemoveComments";
+import remarkGfm from "remark-gfm";
+import remarkDirective from "remark-directive";
+import remarkDirectiveRehype from "remark-directive-rehype";
+import remarkMath from "remark-math";
+import remarkGemoji from "remark-gemoji";
+import remarkUnwrapImages from "remark-unwrap-images";
+import remarkDirectiveVideo from "./remarkDirectiveVideo";
+import remarkDirectiveYoutube from "./remarkDirectiveYoutube";
+import remarkDirectiveTiles from "./remarkDirectiveTiles";
+import remarkDirectiveTabs from "./remarkDirectiveTabs";
+import remarkDirectiveSqlIde from "./remarkDirectiveSqlIde";
+import { HyperbookContext } from "@hyperbook/types";
+import remarkDirectiveSlideshow from "./remarkDirectiveSlideshow";
+import remarkCollectHeadings from "./remarkCollectHeadings";
+import rehypeTableOfContents from "./rehypeTableOfContents";
+import rehypeFormat from "rehype-format";
+import rehypeHtmlStructure from "./rehypeHtmlStructure";
+import rehypeShell from "./rehypeShell";
+import remarkHeadings from "./remarkHeadings";
+import remarkDirectiveBookmarks from "./remarkDirectiveBookmarks";
+import remarkImage from "./remarkImage";
+import remarkCode from "./remarkCode";
+import remarkDirectiveAlert from "./remarkDirectiveAlert";
+import remarkDirectiveAudio from "./remarkDirectiveAudio";
+import remarkDirectiveCollapsible from "./remarkDirectiveCollapsible";
+import remarkDirectiveArchive from "./remarkDirectiveArchive";
+import remarkDirectiveDownload from "./remarkDirectiveDownload";
+import remarkDirectiveEmbed from "./remarkDirectiveEmbed";
+import remarkDirectiveProtect from "./remarkDirectiveProtect";
+import remarkDirectiveQr from "./remarkDirectiveQr";
+import remarkDirectiveExcalidraw from "./remarkDirectiveExcalidraw";
+import remarkDirectiveScratchblock from "./remarkDirectiveScratchblock";
+import remarkDirectiveMermaid from "./remarkDirectiveMermaid";
+import remarkDirectivePlantuml from "./remarkDirectivePlantuml";
+import remarkDirectiveOnlineIde from "./remarkDirectiveOnlineIde";
+import remarkDirectiveStruktog from "./remarkDirectiveStruktog";
+import remarkDirectiveTerm from "./remarkDirectiveTerm";
+import remarkLink from "./remarkLink";
+import remarkDirectivePagelist from "./remarkDirectivePagelist";
+
+const remark = (ctx: HyperbookContext) => {
+  const remarkPlugins: PluggableList = [
+    remarkRemoveComments,
+    remarkDirective,
+    remarkDirectiveRehype,
+    remarkDirectivePagelist(ctx),
+    remarkLink(ctx),
+    remarkHeadings(ctx),
+    remarkImage(ctx),
+    remarkGfm,
+    remarkCode(ctx),
+    remarkDirectiveTerm(ctx),
+    remarkDirectiveEmbed(ctx),
+    remarkDirectiveArchive(ctx),
+    remarkDirectiveQr(ctx),
+    remarkDirectiveDownload(ctx),
+    remarkDirectiveAudio(ctx),
+    remarkDirectiveAlert(ctx),
+    remarkDirectiveBookmarks(ctx),
+    remarkDirectiveCollapsible(ctx),
+    remarkDirectiveVideo(ctx),
+    remarkDirectiveYoutube(ctx),
+    remarkDirectiveTiles(ctx),
+    remarkDirectiveTabs(ctx),
+    remarkDirectiveSqlIde(ctx),
+    remarkDirectiveOnlineIde(ctx),
+    remarkDirectivePlantuml(ctx),
+    remarkDirectiveSlideshow(ctx),
+    remarkDirectiveScratchblock(ctx),
+    remarkDirectiveMermaid(ctx),
+    remarkDirectiveExcalidraw(ctx),
+    remarkDirectiveStruktog(ctx),
+    remarkCollectHeadings(ctx),
+    remarkMath,
+    remarkGemoji,
+    remarkUnwrapImages,
+    /* needs to be last directive */
+    remarkDirectiveProtect(ctx),
+  ];
+
+  const rehypePlugins: PluggableList = [
+    rehypeTableOfContents(ctx),
+    rehypeKatex,
+    [
+      rehypePrettyCode,
+      {
+        transformers: [
+          transformerCopyButton({
+            visibility: "always",
+            feedbackDuration: 3_000,
+          }),
+        ],
+        defaultLang: "plaintext",
+        theme: ctx.config.elements?.code?.theme || {
+          dark: `github-dark`,
+          light: `github-light`,
+        },
+      },
+    ],
+    rehypeFormat,
+  ];
+
+  return unified()
+    .use(remarkParse)
+    .use(remarkPlugins)
+    .use(remarkToRehype, {
+      allowDangerousHtml: ctx.config.allowDangerousHtml || false,
+    })
+    .use(rehypePlugins)
+    .use(rehypeShell(ctx))
+    .use(rehypeHtmlStructure(ctx))
+    .use(rehypeStringify, {
+      allowDangerousCharacters: true,
+      allowDangerousHtml: ctx.config.allowDangerousHtml || false,
+    });
+};
+
+export const process = (md: string, ctx: HyperbookContext) => {
+  return remark(ctx).process(md);
+};

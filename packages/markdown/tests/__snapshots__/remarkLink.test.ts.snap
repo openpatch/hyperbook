@@ -1,0 +1,15 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`remarkLink > should transform image link 1`] = `
+"
+<p>
+  <img src="/public/test.jpg" alt="A description">
+</p>
+"
+`;
+
+exports[`remarkLink > should transform link 1`] = `
+"
+<p><a href="/public/test.jpg">A description</a></p>
+"
+`;

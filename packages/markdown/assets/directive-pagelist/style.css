@@ -1,0 +1,18 @@
+.directive-pagelist .terms {
+  border-left-color: var(--color-spacer);
+}
+
+.directive-pagelist .letter {
+  font-size: 24px;
+}
+
+.directive-pagelist .term {
+  list-style-type: none;
+  text-decoration: none;
+}
+
+.directive-pagelist .terms {
+  padding-left: 1em;
+  border-left-width: 1px;
+  border-left-style: solid;
+}

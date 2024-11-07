@@ -5,6 +5,7 @@
     "name": "OpenPatch",
     "url": "https://openpatch.org"
   },
+  "allowDangerousHtml": true,
   "fonts": {
     "heading": "/fonts/Montserrat-VariableFont_wght.ttf",
     "body": "/fonts/Montserrat-VariableFont_wght.ttf",

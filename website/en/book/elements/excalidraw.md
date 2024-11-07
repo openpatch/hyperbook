@@ -17,7 +17,7 @@ hit save. The Excalidraw will be saved at the place which you have defined.
 
 The Excalidraw element accepts these arguments:
 
-- **file**: A path to an Excalidraw file, if it does not exists it will be created, when using the editor in development mode.
+- **src**: A path to an Excalidraw file, if it does not exists it will be created, when using the editor in development mode.
 - **aspectRatio**: To keep your Excalidraw nice on every device you need to provide an aspect-ratio, e.g.: "16/9", "4/3", "1/1".
 - **autoZoom**: By default your Excalidraw will auto zoom to look the same even when viewed on a smaller device. You can disable it by passing false to autoZoom.
 - **edit**: Allows to edit the Excalidraw.

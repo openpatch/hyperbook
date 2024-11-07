@@ -8,7 +8,6 @@ import { isFolderEmpty } from "./helpers/is-folder-empty";
 import { isWriteable } from "./helpers/is-writeable";
 import { makeDir } from "./helpers/make-dir";
 import { tryGitInit } from "./helpers/git";
-import { runSetupProject } from "./setup";
 
 export async function runNew({
   programName,
@@ -38,14 +37,14 @@ export async function runNew({
     console.log();
     console.log("Please specify the book directory:");
     console.log(
-      `  ${chalk.cyan(programName)} ${chalk.green("<book-directory>")}`
+      `  ${chalk.cyan(programName)} ${chalk.green("<book-directory>")}`,
     );
     console.log();
     console.log("For example:");
     console.log(`  ${chalk.cyan(programName)} ${chalk.green("my-new-book")}`);
     console.log();
     console.log(
-      `Run ${chalk.cyan(`${programName} --help`)} to see all options.`
+      `Run ${chalk.cyan(`${programName} --help`)} to see all options.`,
     );
     process.exit(1);
   }
@@ -54,10 +53,10 @@ export async function runNew({
 
   if (!(await isWriteable(path.dirname(root)))) {
     console.error(
-      "The book path is not writable, please check folder permissions and try again."
+      "The book path is not writable, please check folder permissions and try again.",
     );
     console.error(
-      "It is likely you do not have write permissions for this folder."
+      "It is likely you do not have write permissions for this folder.",
     );
     process.exit(1);
   }
@@ -160,7 +159,7 @@ export async function runNew({
 
   fs.writeFileSync(
     path.join(root, "hyperbook.json"),
-    JSON.stringify(hyperbookJson, null, 2) + os.EOL
+    JSON.stringify(hyperbookJson, null, 2) + os.EOL,
   );
 
   console.log();
@@ -185,12 +184,6 @@ export async function runNew({
         }
       }
     },
-  });
-
-  await runSetupProject({
-    type: "book",
-    name: bookName,
-    src: root,
   });
 
   if (tryGitInit(root)) {

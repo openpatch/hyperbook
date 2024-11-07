@@ -8,10 +8,10 @@ describe("handlebars", () => {
     registerHelpers(handlebars);
     const t = handlebars.compile("{{{ rfile src }}}");
     const prettierFile = await fs.readFile(
-      path.join(__dirname, "..", "..", "..", "prettier.config.js"),
-      "utf8"
+      path.join(__dirname, "..", "..", "..", "prettier.config.json"),
+      "utf8",
     );
-    const markdown = t({ src: "/prettier.config.js" });
+    const markdown = t({ src: "/prettier.config.json" });
     expect(markdown).toEqual(prettierFile);
   });
   it("should resolve rbase64", async () => {

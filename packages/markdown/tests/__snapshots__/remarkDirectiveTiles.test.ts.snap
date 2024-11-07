@@ -1,0 +1,17 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`remarkDirectiveTiles > should transform 1`] = `
+"
+<div class="directive-tiles">
+  <ul class="tiles">
+    <li class="tile M "><a class="tile-title">Hallo</a></li>
+    <li class="tile M link"><a class="tile-title" href="/public/openpatch.org">A tile with a link</a></li>
+    <li class="tile L "><a class="tile-title">A large tile</a></li>
+    <li class="tile S "><a class="tile-title">A small tile</a></li>
+    <li class="tile M "><a class="tile-title">A icon tile</a>
+      <img class="tile-icon" src="/public/https:/www.inf-schule.de/assets/img/icons/icon_algorithmen.png">
+    </li>
+  </ul>
+</div>
+"
+`;

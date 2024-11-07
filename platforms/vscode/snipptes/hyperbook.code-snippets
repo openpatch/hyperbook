@@ -156,4 +156,8 @@
     "prefix": [":video"],
     "body": ["::video{src=\"$1\"}", "$0"]
   }
+  "Element Pagelist": {
+    "prefix": [":pagelist"],
+    "body": ["::pagelist{source=\"$1\"}", "$0"]
+  }
 }

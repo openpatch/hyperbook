@@ -1,0 +1,77 @@
+.directive-qr {
+  padding: 8px;
+  margin: 0 auto;
+  border-radius: 8px;
+  width: fit-content;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.directive-qr .code {
+  display: flex;
+  margin: 0 auto;
+  background-color: white;
+  border-radius: 8px;
+  width: 100%;
+}
+
+.directive-qr .code.S {
+  padding: 4px;
+  max-width: calc(64px + 8px);
+}
+
+.directive-qr .code.S canvas,
+.directive-qr .code.S img,
+.directive-qr .code.S svg {
+  border-radius: 2px;
+}
+
+.directive-qr .code.M canvas,
+.directive-qr .code.M img,
+.directive-qr .code.M svg {
+  border-radius: 4px;
+}
+
+.directive-qr .code.M {
+  padding: 8px;
+  max-width: calc(128px + 16px);
+}
+
+.directive-qr .code.L {
+  padding: 12px;
+  max-width: calc(256px + 24px);
+}
+
+.directive-qr .code.XL {
+  padding: 16px;
+  max-width: calc(512px + 32px);
+}
+
+.directive-qr svg,
+.directive-qr img,
+.directive-qr canvas {
+  border-radius: 8px;
+  width: 100% !important;
+  height: auto !important;
+}
+
+.directive-qr .label {
+  margin-top: 8px;
+  text-align: center;
+  font-weight: bold;
+}
+
+.directive-qr .label.S {
+  font-size: 12px;
+}
+
+.directive-qr .label.M {
+  font-size: 14px;
+}
+
+.directive-qr {
+  background-color: var(--color-nav);
+  border-style: solid;
+  border-width: 1px;
+  border-color: var(--color-nav-border);
+}

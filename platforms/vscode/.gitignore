@@ -4,4 +4,4 @@ node_modules
 *.vsix
 .DS_Store
 .history
-assets/excalidraw
+assets/hyperbook

@@ -13,14 +13,14 @@ export function activate(context: vscode.ExtensionContext) {
   let disposableStatusBar = vscode.window.onDidChangeActiveTextEditor(
     statusBarItem.updateStatusbar,
     statusBarItem,
-    context.subscriptions
+    context.subscriptions,
   );
 
   let disposableSidePreview = vscode.commands.registerCommand(
     "hyperbook.sidePreview",
     async () => {
-      await preview.initMarkdownPreview(vscode.ViewColumn.Two);
-    }
+      await preview.initMarkdownPreview(vscode.ViewColumn.Beside);
+    },
   );
 
   // push to subscriptions list so that they are disposed automatically
@@ -63,18 +63,18 @@ export function activate(context: vscode.ExtensionContext) {
             return files.map((f) => {
               const p = path.relative(
                 path.join(workspaceFolder, "book"),
-                f.path
+                f.path,
               );
               const { dir, name } = path.parse(p);
               return new vscode.CompletionItem(
                 name !== "index" ? path.join(dir, name) : dir,
-                vscode.CompletionItemKind.File
+                vscode.CompletionItemKind.File,
               );
             });
           });
       },
     },
-    "/"
+    "/",
   );
 
   const publicProvider = vscode.languages.registerCompletionItemProvider(
@@ -100,17 +100,17 @@ export function activate(context: vscode.ExtensionContext) {
             return files.map((f) => {
               const p = path.relative(
                 path.join(workspaceFolder, "public"),
-                f.path
+                f.path,
               );
               return new vscode.CompletionItem(
                 p,
-                vscode.CompletionItemKind.File
+                vscode.CompletionItemKind.File,
               );
             });
           });
       },
     },
-    "/"
+    "/",
   );
 
   const glossaryProvider = vscode.languages.registerCompletionItemProvider(
@@ -137,18 +137,18 @@ export function activate(context: vscode.ExtensionContext) {
             return files.map((f) => {
               const p = path.relative(
                 path.join(workspaceFolder, "glossary"),
-                f.path
+                f.path,
               );
               const { name } = path.parse(p);
               return new vscode.CompletionItem(
                 name,
-                vscode.CompletionItemKind.File
+                vscode.CompletionItemKind.File,
               );
             });
           });
       },
     },
-    "#"
+    "#",
   );
 
   const archiveProvider = vscode.languages.registerCompletionItemProvider(
@@ -171,7 +171,7 @@ export function activate(context: vscode.ExtensionContext) {
 
         return vscode.workspace.fs
           .readDirectory(
-            vscode.Uri.parse(path.join(workspaceFolder, "archives"))
+            vscode.Uri.parse(path.join(workspaceFolder, "archives")),
           )
           .then((files) => {
             return files
@@ -180,20 +180,20 @@ export function activate(context: vscode.ExtensionContext) {
                 const { name } = path.parse(file);
                 return new vscode.CompletionItem(
                   name,
-                  vscode.CompletionItemKind.Folder
+                  vscode.CompletionItemKind.Folder,
                 );
               });
           });
       },
     },
-    '"'
+    '"',
   );
 
   context.subscriptions.push(
     bookProvider,
     publicProvider,
     glossaryProvider,
-    archiveProvider
+    archiveProvider,
   );
 }
 

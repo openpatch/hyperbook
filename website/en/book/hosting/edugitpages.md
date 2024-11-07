@@ -22,7 +22,6 @@ image: node:latest
 pages:
   stage: deploy
   script:
-    - npx hyperbook setup
     - npx hyperbook build
     - mkdir .public
     - cp -r ./.hyperbook/out/* .public

@@ -11,6 +11,7 @@ const watcher = chokidar.watch(
     "packages/**/*.ts",
     "packages/**/*.tsx",
     "packages/**/*.css",
+    "packages/markdown/assets/**/*",
     "platforms/**/*.ts",
     "platforms/**/*.css",
     "platforms/**/*.tsx",
@@ -22,7 +23,7 @@ const watcher = chokidar.watch(
     persistent: true,
     usePolling: true,
     interval: 500,
-  }
+  },
 );
 
 log(chalk.yellow.bold("Watching all files... 👀"));
