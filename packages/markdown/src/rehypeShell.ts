@@ -428,9 +428,10 @@ const makeHeaderElements = (ctx: HyperbookContext): ElementContent[] => {
   if (ctx.config.links) {
     elements.push({
       type: "element",
-      tagName: "nav",
+      tagName: "div",
       properties: {
-        id: "custom-links-menu",
+        id: "custom-links-header",
+        class: "custom-links-menu",
       },
       children: [
         {
@@ -636,8 +637,19 @@ const makeSidebar = (ctx: HyperbookContext): ElementContent[] => {
       },
       children: [
         {
-          type: "raw",
-          value: "Powered by <b>Hyperbook</b>",
+          type: "text",
+          value: "Powered by ",
+        },
+        {
+          type: "element",
+          tagName: "b",
+          properties: {},
+          children: [
+            {
+              type: "text",
+              value: "Hyperbook",
+            },
+          ],
         },
       ],
     },
@@ -653,6 +665,145 @@ const makeSidebar = (ctx: HyperbookContext): ElementContent[] => {
       children: elements,
     },
   ];
+};
+
+const makeCustomLinksFooter = (ctx: HyperbookContext) => {
+  const elements: ElementContent[] = [];
+  if (ctx.config.links) {
+    elements.push({
+      type: "element",
+      tagName: "div",
+      properties: {
+        id: "custom-links-footer",
+      },
+      children: ctx.config.links.map((link) => {
+        let href = "#";
+        if ("href" in link) {
+          href = link.href;
+        }
+        let submenu: ElementContent[] = [];
+        if ("links" in link) {
+          const links: ElementContent[] = link.links.map((link) => {
+            let icon: ElementContent[] = [];
+            if (link.icon) {
+              icon.push({
+                type: "element",
+                tagName: "div",
+                properties: {
+                  class: "icon",
+                },
+                children: [
+                  {
+                    type: "text",
+                    value: link.icon || "",
+                  },
+                ],
+              });
+            }
+            return {
+              type: "element",
+              tagName: "li",
+              properties: {
+                class: "links-item",
+              },
+              children: [
+                {
+                  type: "element",
+                  tagName: "a",
+                  properties: {
+                    href: "href" in link ? link.href : "#",
+                  },
+                  children: [
+                    ...icon,
+                    {
+                      type: "element",
+                      tagName: "div",
+                      properties: {
+                        class: "label",
+                      },
+                      children: [
+                        {
+                          type: "text",
+                          value: link.label || "",
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            };
+          });
+          submenu.push({
+            type: "element",
+            tagName: "ul",
+            properties: {
+              class: "links-sub-menu",
+            },
+            children: links,
+          });
+        }
+
+        const icon: ElementContent[] = [];
+        if (link.icon) {
+          icon.push({
+            type: "element",
+            tagName: "div",
+            properties: {
+              class: "icon",
+            },
+            children: [
+              {
+                type: "text",
+                value: link.icon || "",
+              },
+            ],
+          });
+        }
+        return {
+          type: "element",
+          tagName: "ul",
+          properties: {
+            class: ["links-item", submenu.length > 0 ? "sub" : ""].join(" "),
+          },
+          children: [
+            {
+              type: "element",
+              tagName: "li",
+              properties: {},
+              children: [
+                {
+                  type: "element",
+                  tagName: "a",
+                  properties: {
+                    href: href,
+                  },
+                  children: [
+                    ...icon,
+                    {
+                      type: "element",
+                      tagName: "div",
+                      properties: {
+                        class: "label",
+                      },
+                      children: [
+                        {
+                          type: "text",
+                          value: link.label || "",
+                        },
+                      ],
+                    },
+                  ],
+                },
+                ...submenu,
+              ],
+            },
+          ],
+        };
+      }),
+    });
+  }
+
+  return elements;
 };
 
 export default (ctx: HyperbookContext) => () => {
@@ -681,6 +832,7 @@ export default (ctx: HyperbookContext) => () => {
               },
               ...makeJump(ctx),
               ...makeMetaElements(ctx),
+              ...makeCustomLinksFooter(ctx),
             ],
           },
         ],

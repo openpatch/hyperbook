@@ -39,6 +39,26 @@ const result = await process(markdown, {
           },
         ],
       },
+      {
+        label: "Kontakt 2",
+        icon: "🐦",
+      },
+      {
+        label: "Kontakt 2",
+        icon: "🐦",
+      },
+      {
+        label: "Kontakt 2",
+        icon: "🐦",
+      },
+      {
+        label: "Kontakt 2",
+        icon: "🐦",
+      },
+      {
+        label: "Kontakt 2",
+        icon: "🐦",
+      },
     ],
     repo: "https://github.com/openpatch/hyperbook/edit/main/website/de",
   },
