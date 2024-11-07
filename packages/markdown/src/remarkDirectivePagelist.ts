@@ -144,7 +144,7 @@ export default (ctx: HyperbookContext) => () => {
 
           data.hChildren = [
             toHast(fromMarkdown(content), {
-              allowDangerousHtml: true,
+              allowDangerousHtml: ctx.config.allowDangerousHtml || false,
             }) as Element,
           ];
         } else if (format === "ul") {

@@ -45,8 +45,11 @@ export default (ctx: HyperbookContext) => () => {
             properties: {
               class: "hidden",
             },
-            children: (toHast(node, { allowDangerousHtml: true }) as Element)
-              ?.children,
+            children: (
+              toHast(node, {
+                allowDangerousHtml: ctx.config.allowDangerousHtml || false,
+              }) as Element
+            )?.children,
           },
           {
             type: "element",

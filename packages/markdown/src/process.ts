@@ -112,14 +112,14 @@ const remark = (ctx: HyperbookContext) => {
     .use(remarkParse)
     .use(remarkPlugins)
     .use(remarkToRehype, {
-      allowDangerousHtml: true,
+      allowDangerousHtml: ctx.config.allowDangerousHtml || false,
     })
     .use(rehypePlugins)
     .use(rehypeShell(ctx))
     .use(rehypeHtmlStructure(ctx))
     .use(rehypeStringify, {
       allowDangerousCharacters: true,
-      allowDangerousHtml: true,
+      allowDangerousHtml: ctx.config.allowDangerousHtml || false,
     });
 };
 
