@@ -27,7 +27,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Setup and Build
+      - name: Build
         run: |
           npx hyperbook build
 

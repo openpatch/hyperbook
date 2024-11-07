@@ -102,12 +102,6 @@ Update to the latest release of Hyperbook CLI using the following command.
 npm update hyperbook --global
 ```
 
-The Hyperbook template can be updated by running the setup command:
-
-```bash
-hyperbook setup
-```
-
 :::
 
 :::tab{title="Web IDE" id="web-ide"}
