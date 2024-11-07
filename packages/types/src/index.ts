@@ -39,6 +39,8 @@ export type HyperbookPageFrontmatter = {
   lang?: Language;
   description?: string;
   keywords?: string[];
+  scripts?: string[];
+  styles?: string[];
   index?: number;
   hide?: boolean;
   toc?: boolean;
@@ -84,6 +86,8 @@ export type HyperbookJson = {
     body?: string;
     code?: string;
   };
+  scripts?: string[];
+  styles?: string[];
   colors?: {
     /**
      * @format color-hex

@@ -356,8 +356,19 @@ const makeHeaderElements = (ctx: HyperbookContext): ElementContent[] => {
                 },
                 children: [
                   {
-                    type: "raw",
-                    value: "Powered by <b>Hyperbook</b>",
+                    type: "text",
+                    value: "Powered by ",
+                  },
+                  {
+                    type: "element",
+                    tagName: "b",
+                    properties: {},
+                    children: [
+                      {
+                        type: "text",
+                        value: "Hyperbook",
+                      },
+                    ],
                   },
                 ],
               },

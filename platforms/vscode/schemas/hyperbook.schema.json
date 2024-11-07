@@ -58,6 +58,9 @@
         }
     },
     "properties": {
+        "allowDangerousHtml": {
+            "type": "boolean"
+        },
         "author": {
             "properties": {
                 "name": {
@@ -298,6 +301,18 @@
                     "type": "string"
                 }
             ]
+        },
+        "scripts": {
+            "items": {
+                "type": "string"
+            },
+            "type": "array"
+        },
+        "styles": {
+            "items": {
+                "type": "string"
+            },
+            "type": "array"
         }
     },
     "required": [

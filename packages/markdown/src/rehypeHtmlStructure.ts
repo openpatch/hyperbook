@@ -280,6 +280,34 @@ export default (ctx: HyperbookContext) => () => {
                 },
                 children: [],
               },
+              ...(ctx.config.styles || []).map(
+                (style) =>
+                  ({
+                    type: "element",
+                    tagName: "link",
+                    properties: {
+                      rel: "stylesheet",
+                      href: style.includes("://")
+                        ? style
+                        : makeUrl(style, "public"),
+                    },
+                    children: [],
+                  }) as ElementContent,
+              ),
+              ...(ctx.navigation.current?.styles || []).map(
+                (style) =>
+                  ({
+                    type: "element",
+                    tagName: "link",
+                    properties: {
+                      rel: "stylesheet",
+                      href: style.includes("://")
+                        ? style
+                        : makeUrl(style, "public"),
+                    },
+                    children: [],
+                  }) as ElementContent,
+              ),
               {
                 type: "element",
                 tagName: "script",
@@ -310,7 +338,7 @@ HYPERBOOK_ASSETS = "${makeUrl("/", "assets")}"
                       tagName: "link",
                       properties: {
                         rel: "stylesheet",
-                        href: style.startsWith("http")
+                        href: style.includes("://")
                           ? style
                           : makeUrl(
                               ["directive-" + directive, style],
@@ -345,7 +373,7 @@ HYPERBOOK_ASSETS = "${makeUrl("/", "assets")}"
                         type: "element",
                         tagName: "script",
                         properties: {
-                          src: script.startsWith("http")
+                          src: script.includes("://")
                             ? script
                             : makeUrl(
                                 ["directive-" + directive, script],
@@ -355,6 +383,32 @@ HYPERBOOK_ASSETS = "${makeUrl("/", "assets")}"
                         children: [],
                       }) as ElementContent,
                   ),
+              ),
+              ...(ctx.config.scripts || []).map(
+                (script) =>
+                  ({
+                    type: "element",
+                    tagName: "script",
+                    properties: {
+                      src: script.includes("://")
+                        ? script
+                        : makeUrl(script, "public"),
+                    },
+                    children: [],
+                  }) as ElementContent,
+              ),
+              ...(ctx.navigation.current?.scripts || []).map(
+                (script) =>
+                  ({
+                    type: "element",
+                    tagName: "script",
+                    properties: {
+                      src: script.includes("://")
+                        ? script
+                        : makeUrl(script, "public"),
+                    },
+                    children: [],
+                  }) as ElementContent,
               ),
             ],
           },

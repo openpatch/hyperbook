@@ -31,6 +31,8 @@ can and part wise must set (indicated by a \*).
 | repo.label       | The label for the repo link.                                                                                                                                    |
 | elements         | Here you can configure the elements. See the element pages for configuration options.                                                                           |
 | links            | Here you can add custom links, which will be shown in the top right corner. See the example below on how to use them.                                           |
+| styles            | Here you can add Links to custom CSS files. |
+| scripts            | Here you can add links to custom JavaScript files. |
 | allowDangerousHtml      | Allow HTML. This can lead to incompatibilities in future versions. |
 
 Here is an example configuration:
