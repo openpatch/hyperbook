@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.34.2
+
+### Patch Changes
+
+- [`0fde9fb`](https://github.com/openpatch/hyperbook/commit/0fde9fb26c7a9794dc8bdd9d431d96ce761926d7) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - fix md files in root directory getting ignored
+
 ## 0.34.1
 
 ### Patch Changes
