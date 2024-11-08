@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.34.1
+
+### Patch Changes
+
+- [`368e461`](https://github.com/openpatch/hyperbook/commit/368e461eb1ea009eb4eac3463c74d82bbbe590c6) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - fix out folder not correct
+
 ## 0.34.0
 
 ### Minor Changes
