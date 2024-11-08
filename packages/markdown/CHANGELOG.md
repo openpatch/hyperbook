@@ -1,5 +1,11 @@
 # @hyperbook/markdown
 
+## 0.10.1
+
+### Patch Changes
+
+- [`5588011`](https://github.com/openpatch/hyperbook/commit/5588011c3819816de125a3bea3513f8539f650f8) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - fix submenu not staying open on page reload
+
 ## 0.10.0
 
 ### Minor Changes
