@@ -80,7 +80,9 @@ const makeNavigationSectionElement = (
         class: [
           "collapsible",
           "name",
-          ctx.navigation.current?.href === section.href ? "active" : "",
+          ctx.navigation.current?.href?.includes(section.href || "")
+            ? "active"
+            : "",
         ].join(" "),
       },
       children: [
