@@ -84,10 +84,10 @@ async function runBuild(
     }
   }
 
-  if (!out) {
-    out = root;
+  let rootOut = path.join(root, ".hyperbook", "out");
+  if (out) {
+    rootOut = path.join(out, ".hyperbook", "out", basePath || "");
   }
-  let rootOut = path.join(out, ".hyperbook", "out", basePath || "");
   console.log(
     `${chalk.blue(`[${prefix}]`)} Cleaning output folder ${rootOut}.`,
   );
