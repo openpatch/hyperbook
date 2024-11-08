@@ -153,9 +153,7 @@ async function runBuild(
 
     const directoryOut = path.join(rootOut, file.path.directory);
     let href: string;
-    if (file.path.directory === "") {
-      href = "index.html";
-    } else if (file.name === "index") {
+    if (file.name === "index") {
       href = path.posix.join(file.path.href || "", "index.html");
     } else {
       href = file.path.href + ".html";
