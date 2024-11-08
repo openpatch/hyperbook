@@ -9,6 +9,7 @@ import { getPkgManager } from "./helpers/get-pkg-manager";
 import { hyperproject } from "@hyperbook/fs";
 import { runNew } from "./new";
 import packageJson from "./package.json";
+import { deprecate } from "util";
 
 const program = new Command();
 
@@ -30,6 +31,10 @@ program
       bookPath: name,
     }).catch(() => process.exit(1));
   });
+
+program.command("setup").action(async () => {
+  console.log(`${chalk.yellow("hyperbook setup is deprecated.")}`);
+});
 
 program
   .command("dev")
