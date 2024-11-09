@@ -1,5 +1,11 @@
 # @hyperbook/fs
 
+## 0.14.1
+
+### Patch Changes
+
+- [`2074212`](https://github.com/openpatch/hyperbook/commit/20742126a69229186a01ed7384b7c9ff5af483bd) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Sometimes snippets were not resolved correctly. This should fix the issue.
+
 ## 0.14.0
 
 ### Minor Changes
