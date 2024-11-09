@@ -418,12 +418,19 @@ figure {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 8px;
 }
 
-#qrcode-dialog .info {
+#qrcode-dialog .name {
   color: var(--color-text);
+  text-align: center;
+  font-size: 2rem;
+}
+
+#qrcode-dialog .url {
+  color: var(--color-text);
+  text-align: center;
   font-size: 1.25rem;
-  margin-top: 8px;
 }
 
 #qrcode-dialog .close {

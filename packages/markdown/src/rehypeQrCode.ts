@@ -61,17 +61,30 @@ export default (ctx: HyperbookContext) => () => {
               class: "container",
             },
             children: [
+              {
+                type: "element",
+                tagName: "div",
+                properties: {
+                  class: "name",
+                },
+                children: [
+                  {
+                    type: "text",
+                    value: ctx.navigation.current.name || ctx.config.name,
+                  },
+                ],
+              },
               ...(fromHtml(qr).children as any),
               {
                 type: "element",
                 tagName: "div",
                 properties: {
-                  class: "info",
+                  class: "url",
                 },
                 children: [
                   {
                     type: "text",
-                    value: `${ctx.config.name}: ${ctx.makeUrl(
+                    value: `${ctx.makeUrl(
                       ctx.navigation.current?.href || "",
                       "public",
                     )}`,
