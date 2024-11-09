@@ -192,12 +192,14 @@ const makeMetaElements = (ctx: HyperbookContext): ElementContent[] => {
   }
 
   const copyrightChildren: ElementContent[] = [];
-  copyrightChildren.push({
-    type: "raw",
-    value: ctx.config.license
-      ? linkLicense(ctx)
-      : `© Copyright ${new Date().getFullYear()}`,
-  });
+  if (ctx.config.license) {
+    copyrightChildren.push(linkLicense(ctx));
+  } else {
+    copyrightChildren.push({
+      type: "text",
+      value: `© Copyright ${new Date().getFullYear()}`,
+    });
+  }
   if (ctx.config.author) {
     copyrightChildren.push({
       type: "text",
@@ -239,9 +241,9 @@ const makeMetaElements = (ctx: HyperbookContext): ElementContent[] => {
   ];
 };
 
-const linkLicense = (ctx: HyperbookContext) => {
+const linkLicense = (ctx: HyperbookContext): ElementContent => {
   const license = ctx.config.license;
-  if (!license) return "";
+  if (!license) return { type: "text", value: "" };
   let href: string | null = null;
   let label: string | null = "";
   switch (license.toLowerCase()) {
@@ -283,10 +285,25 @@ const linkLicense = (ctx: HyperbookContext) => {
   }
 
   if (href) {
-    return `<a href="${href}">${label}</a>`;
+    return {
+      type: "element",
+      tagName: "a",
+      properties: {
+        href,
+      },
+      children: [
+        {
+          type: "text",
+          value: label,
+        },
+      ],
+    };
   }
 
-  return license;
+  return {
+    type: "raw",
+    value: license,
+  };
 };
 
 const makeHeaderElements = (ctx: HyperbookContext): ElementContent[] => {
