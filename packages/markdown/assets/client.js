@@ -33,6 +33,17 @@ var hyperbook = (function () {
     const tocDrawerEl = document.getElementById("toc-drawer");
     tocDrawerEl.open = !tocDrawerEl.open;
   }
+
+  function qrcodeOpen() {
+    const qrCodeDialog = document.getElementById("qrcode-dialog");
+    qrCodeDialog.showModal();
+  }
+
+  function qrcodeClose() {
+    const qrCodeDialog = document.getElementById("qrcode-dialog");
+    qrCodeDialog.close();
+  }
+
   function navToggle() {
     const navDrawerEl = document.getElementById("nav-drawer");
     navDrawerEl.open = !navDrawerEl.open;
@@ -83,5 +94,7 @@ var hyperbook = (function () {
     toggleBookmark,
     navToggle,
     tocToggle,
+    qrcodeOpen,
+    qrcodeClose,
   };
 })();

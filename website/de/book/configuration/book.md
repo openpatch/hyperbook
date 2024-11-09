@@ -34,7 +34,8 @@ von Optionen, die du definieren kannst. Optionen mit einem "\*" müssen gesetzt 
 | links            | Hier können Links hinzugefügt werden, welche in der rechten oberen Ecke angezeigt werden. Schaue dir dazu das untere Beispiel an.                                                               |
 | styles            | Hier können Links zu eigenen CSS-Styles gesetzt werden. |
 | scripts            | Hier können Links zu eigenen JavaScript-Dateien gesetzt werden. |
-| allowDangerousHtml      | Erlaube HTML im Hyperbook. Dies kann zu inkompatibilität in zukünftigen Versionen führen.                                                                                                                                            |
+| allowDangerousHtml      | Erlaube HTML im Hyperbook. Dies kann zu Inkompatibilität in zukünftigen Versionen führen.                                                                                                                                            |
+| qrcode | Zeigt ein Icon, um einen QR-Code zur aktuellen Seite anzuzeigen. |
 
 Hier ist eine Beispielkonfiguration:
 

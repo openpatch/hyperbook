@@ -34,3 +34,4 @@ Here are the properties you can set in the frontmatter:
 | toc         | Show or hide a table of content for the page. This is on for pages and off for glossary entries by default                          |
 | styles            | Here you can add Links to custom CSS files. |
 | scripts            | Here you can add links to custom JavaScript files. |
+| qrcode | Shows an icon, which opens a qr code to this page. |

@@ -1,5 +1,6 @@
 {
   "name": "Hyperbook Documentation",
+  "qrcode": true,
   "description": "Documentation for Hyperbook created with Hyperbook",
   "author": {
     "name": "OpenPatch",

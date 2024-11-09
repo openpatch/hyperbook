@@ -11,6 +11,10 @@ export default (ctx: HyperbookContext) => () => {
     const headings = file.data.headings || [];
     const originalChildren = tree.children as ElementContent[];
 
+    if (!showToc) {
+      return;
+    }
+
     const tocSidebar: ElementContent[] = [
       {
         type: "element",
