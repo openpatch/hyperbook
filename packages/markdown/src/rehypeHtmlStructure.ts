@@ -201,7 +201,9 @@ export default (ctx: HyperbookContext) => () => {
                 children: [
                   {
                     type: "text",
-                    value: `${currentPage?.name} - ${config.name}`,
+                    value: currentPage?.name
+                      ? `${currentPage?.name} - ${config.name}`
+                      : config.name,
                   },
                 ],
               },
@@ -210,7 +212,9 @@ export default (ctx: HyperbookContext) => () => {
                 tagName: "meta",
                 properties: {
                   property: "og:title",
-                  content: `${currentPage?.name} - ${config.name}`,
+                  value: currentPage?.name
+                    ? `${currentPage?.name} - ${config.name}`
+                    : config.name,
                 },
                 children: [],
               },
