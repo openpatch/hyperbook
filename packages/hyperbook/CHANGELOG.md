@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.34.3
+
+### Patch Changes
+
+- [`c95321a`](https://github.com/openpatch/hyperbook/commit/c95321aaf18462f1b2bd2363f386c6fc54dcd83b) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - readd setup command and print a deprecated message.
+
 ## 0.34.2
 
 ### Patch Changes
