@@ -1,5 +1,17 @@
 # @hyperbook/markdown
 
+## 0.11.0
+
+### Minor Changes
+
+- [`cfb27a1`](https://github.com/openpatch/hyperbook/commit/cfb27a112ede0ac7850bddd10474d23485f9f052) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Improve ouput for CI environments and make failure message clearer.
+
+### Patch Changes
+
+- [`4fe7d11`](https://github.com/openpatch/hyperbook/commit/4fe7d1127f79936a9479877d264f4988073f8859) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - fix sections not expanded on reload
+
+- [`e73a321`](https://github.com/openpatch/hyperbook/commit/e73a321f46eb8de4002361e259de8080266f35c1) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - fix license not rendering as a link
+
 ## 0.10.1
 
 ### Patch Changes
