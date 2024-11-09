@@ -41,8 +41,10 @@ const makeNavigationSectionElement = (
   ctx: HyperbookContext,
   section: HyperbookSection,
 ): ElementContent => {
-  const { virtual, isEmpty, href, name, pages, sections } = section;
+  const { virtual, isEmpty, href, name, pages, sections, expanded } = section;
   const children: ElementContent[] = [];
+  let isExpanded =
+    ctx.navigation.current?.href?.startsWith(href || "") || expanded;
 
   if (!virtual && isEmpty) {
     children.push({
@@ -53,7 +55,8 @@ const makeNavigationSectionElement = (
           "collapsible",
           "name",
           "empty",
-          ctx.navigation.current?.href?.includes(href || "") ? "active" : "",
+          ctx.navigation.current?.href === href ? "active" : "",
+          isExpanded ? "expanded" : "",
         ].join(" "),
       },
       children: [
@@ -80,9 +83,8 @@ const makeNavigationSectionElement = (
         class: [
           "collapsible",
           "name",
-          ctx.navigation.current?.href?.includes(section.href || "")
-            ? "active"
-            : "",
+          ctx.navigation.current?.href === href ? "active" : "",
+          isExpanded ? "expanded" : "",
         ].join(" "),
       },
       children: [

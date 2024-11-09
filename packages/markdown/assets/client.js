@@ -4,7 +4,7 @@ var hyperbook = (function () {
   const calcMaxHeight = (elem) => {
     const content = elem.nextElementSibling;
     if (content) {
-      if (elem.classList.contains("active")) {
+      if (elem.classList.contains("expanded")) {
         content.style.maxHeight = content.scrollHeight + "px";
       } else {
         content.style.maxHeight = "0";
@@ -20,9 +20,13 @@ var hyperbook = (function () {
   };
   for (let collapsible of collapsibles) {
     collapsible.addEventListener("click", () => {
-      collapsible.classList.toggle("active");
+      collapsible.classList.toggle("expanded");
       calcMaxHeight(collapsible);
     });
+
+    if (collapsible.classList.contains("expanded")) {
+      calcMaxHeight(collapsible);
+    }
   }
 
   function tocToggle() {

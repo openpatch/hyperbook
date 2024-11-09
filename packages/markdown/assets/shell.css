@@ -615,11 +615,11 @@ nav li+li {
   margin-left: 5px;
 }
 
-.collapsible.active:after {
+.collapsible.expanded:after {
   content: "\2212";
 }
 
-.collapsible.active+.collapsible-content {
+.collapsible.expanded+.collapsible-content {
   max-height: 9999px;
 }
 

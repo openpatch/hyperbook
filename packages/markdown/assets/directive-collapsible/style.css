@@ -11,7 +11,7 @@
   margin-bottom: 10px;
 }
 
-.directive-collapsible button.active {
+.directive-collapsible button.expanded {
   border-bottom-left-radius: 0px;
   border-bottom-right-radius: 0px;
   margin-bottom: 0px;
@@ -25,7 +25,7 @@
   margin-left: 5px;
 }
 
-.directive-collapsible button.active:after {
+.directive-collapsible button.expanded:after {
   content: "\2796";
   /* Unicode character for "minus" sign (-) */
 }
@@ -39,7 +39,7 @@
   display: none;
 }
 
-.directive-collapsible button.active+.collapsible-content {
+.directive-collapsible button.expanded+.collapsible-content {
   display: block;
   border-style: solid;
   border-width: 1px;
