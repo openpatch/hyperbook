@@ -163,11 +163,16 @@ async function runBuild(
       recursive: true,
     });
     await fs.writeFile(fileOut, result.value);
-    readline.clearLine(process.stdout, 0);
-    readline.cursorTo(process.stdout, 0);
+    if (!process.env.CI) {
+      readline.clearLine(process.stdout, 0);
+      readline.cursorTo(process.stdout, 0);
+    }
     process.stdout.write(
       `${chalk.blue(`[${prefix}]`)} Buildung book: [${i++}/${bookFiles.length}]`,
     );
+    if (process.env.CI) {
+      process.stdout.write("\n");
+    }
   }
   process.stdout.write("\n");
 
@@ -201,11 +206,16 @@ async function runBuild(
       recursive: true,
     });
     await fs.writeFile(fileOut, result.value);
-    readline.clearLine(process.stdout, 0);
-    readline.cursorTo(process.stdout, 0);
+    if (!process.env.CI) {
+      readline.clearLine(process.stdout, 0);
+      readline.cursorTo(process.stdout, 0);
+    }
     process.stdout.write(
       `${chalk.blue(`[${prefix}]`)} Buildung glossary: [${i++}/${glossaryFiles.length}]`,
     );
+    if (process.env.CI) {
+      process.stdout.write("\n");
+    }
   }
   process.stdout.write("\n");
 
@@ -220,11 +230,16 @@ async function runBuild(
       const fileOut = path.join(rootOut, file.path.href);
       await cp(file.path.absolute, fileOut);
     }
-    readline.clearLine(process.stdout, 0);
-    readline.cursorTo(process.stdout, 0);
+    if (!process.env.CI) {
+      readline.clearLine(process.stdout, 0);
+      readline.cursorTo(process.stdout, 0);
+    }
     process.stdout.write(
       `${chalk.blue(`[${prefix}]`)} Copying public files: [${i++}/${otherFiles.length}]`,
     );
+    if (process.env.CI) {
+      process.stdout.write("\n");
+    }
   }
   process.stdout.write("\n");
 
@@ -238,11 +253,16 @@ async function runBuild(
   for (let directive of directives) {
     const assetsDirectivePath = path.join(assetsPath, `directive-${directive}`);
     const assetsDirectiveOut = path.join(assetsOut, `directive-${directive}`);
-    readline.clearLine(process.stdout, 0);
-    readline.cursorTo(process.stdout, 0);
+    if (!process.env.CI) {
+      readline.clearLine(process.stdout, 0);
+      readline.cursorTo(process.stdout, 0);
+    }
     process.stdout.write(
       `${chalk.blue(`[${prefix}]`)} Copying directive assets: [${i++}/${directives.size}]`,
     );
+    if (process.env.CI) {
+      process.stdout.write("\n");
+    }
     try {
       await fs.access(assetsDirectivePath);
       await mkdir(assetsDirectiveOut, {
@@ -254,6 +274,7 @@ async function runBuild(
       process.stdout.write(
         `${chalk.red(`[${prefix}]`)} Failed copying directive assets: ${directive}`,
       );
+      process.stdout.write("\n");
     }
   }
   process.stdout.write("\n");
@@ -267,11 +288,16 @@ async function runBuild(
     if (stat.isFile()) {
       await cp(assetPath, assetOut, { recursive: true });
     }
-    readline.clearLine(process.stdout, 0);
-    readline.cursorTo(process.stdout, 0);
+    if (!process.env.CI) {
+      readline.clearLine(process.stdout, 0);
+      readline.cursorTo(process.stdout, 0);
+    }
     process.stdout.write(
       `${chalk.blue(`[${prefix}]`)} Copying hyperbook assets: [${i++}/${mainAssets.length}]`,
     );
+    if (process.env.CI) {
+      process.stdout.write("\n");
+    }
   }
   process.stdout.write("\n");
 

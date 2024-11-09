@@ -39,9 +39,11 @@ export default (ctx: HyperbookContext) => () => {
             expectLeafDirective(node, file, "tile");
 
             if (!title) {
-              file.fail("A title is required", node);
+              file.fail(
+                `[tiles] A title is required (${ctx.navigation.current?.href})`,
+                node,
+              );
             }
-            registerDirective(file, "tile");
 
             const tileChildren: (Text | Comment | Element | Raw)[] = [
               {

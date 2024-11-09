@@ -21,7 +21,7 @@ export default (ctx: HyperbookContext) => () => {
 
         if (node.children[0]?.type !== "text") {
           file.fail(
-            "Only plain text is supported, use :term[my text]{#my-id}",
+            `[term] Only plain text is supported, use :term[my text]{#my-id} (${ctx.navigation.current?.href})`,
             node,
           );
         }

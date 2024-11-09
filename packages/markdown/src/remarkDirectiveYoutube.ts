@@ -11,7 +11,7 @@ import {
   registerDirective,
 } from "./remarkHelper";
 
-export default (_: HyperbookContext) => () => {
+export default (ctx: HyperbookContext) => () => {
   const name = "youtube";
   return (tree: Root, file: VFile) => {
     visit(tree, function (node) {
@@ -25,7 +25,10 @@ export default (_: HyperbookContext) => () => {
         expectLeafDirective(node, file, name);
 
         if (id == null) {
-          file.fail(`Missing id, use ::youtube{#iasd}`, node);
+          file.fail(
+            `[youtube] Missing id, use ::youtube{#iasd} (${ctx.navigation.current?.href})`,
+            node,
+          );
         }
 
         registerDirective(file, name, [], ["style.css"]);
