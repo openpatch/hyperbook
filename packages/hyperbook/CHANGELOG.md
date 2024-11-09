@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.35.0
+
+### Minor Changes
+
+- [`cfb27a1`](https://github.com/openpatch/hyperbook/commit/cfb27a112ede0ac7850bddd10474d23485f9f052) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Improve ouput for CI environments and make failure message clearer.
+
 ## 0.34.3
 
 ### Patch Changes
