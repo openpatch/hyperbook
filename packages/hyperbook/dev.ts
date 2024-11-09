@@ -53,6 +53,8 @@ socket.addEventListener("message", (event) => {
 
     const url = new URL(request.url, `http://${request.headers.host}`);
     let pathname = url.pathname;
+    const basePath = rootProject.basePath || "";
+    pathname = pathname.slice(basePath.length);
 
     // If the pathname ends with '/', append 'index.html'.
     if (pathname.endsWith("/")) {
