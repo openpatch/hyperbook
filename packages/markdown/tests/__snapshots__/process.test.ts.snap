@@ -93,6 +93,101 @@ HYPERBOOK_ASSETS = "assets/"
 </article><div class="jump-container"><a class="jump previous" href="/configuration/library">Bibliothek Konfiguration</a><a class="jump next" href="/markdown/image">Bild</a></div><div class="meta"><a class="edit-github" href="https://github.com/openpatch/hyperbook/edit/main/website/de/book/markdown/index.md">✎ GitHub</a><span class="copyright">© Copyright 2024 by <a href="https://openpatch.org">OpenPatch</a></span></div><div id="custom-links-footer"><ul class="links-item sub"><li><a href="#"><div class="icon">🐦</div><div class="label">Kontakt</div></a><ul class="links-sub-menu"><li class="links-item"><a href="mailto:contact@openpatch.org"><div class="label">Mail</div></a></li><li class="links-item"><a href="https://twitter.com/openpatchorg"><div class="icon">🐦</div><div class="label">Twitter</div></a></li><li class="links-item"><a href="https://fosstodon.org/@openpatch"><div class="icon">🐘</div><div class="label">Mastodon</div></a></li><li class="links-item"><a href="https://matrix.to/#/#hyperbook:matrix.org"><div class="icon">👨‍💻</div><div class="label">Matrix (Chat)</div></a></li></ul></li></ul></div></main></div><script src="assets/client.js"></script></body></html>"
 `;
 
+exports[`process > should result in two link 1`] = `
+"<!doctype html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Hi - My Hyperbook</title><meta property="og:title" content="Hi - My Hyperbook"><meta property="description" content="undefined"><meta property="og:description" content="undefined"><meta property="keywords"><link rel="stylesheet" href="/assets/normalize.css"><style>
+html,
+body {
+  overflow-x: hidden;
+  margin: 0;
+}
+
+body {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+body::-webkit-scrollbar {
+  display: none;
+}
+
+:root {
+  --color-brand: #007864;
+  --color-brand-dark: #b5e3d8;
+  --color-brand-text: white;
+}
+:root {
+  --color-background: white;
+  --color-text: black;
+  --color-text-deactivated: #242428;
+  --color-nav: #f5f5f5;
+  --color-nav-border: #3c3c3c;
+  --color-author-background: #d6d6d6;
+  --color-author-color: #3c3c3c;
+  --color-spacer: #a4a4a4;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-background: #1e1e1e;
+    --color-text: #f5f5f5;
+    --color-text-deactivated: #d6d6d6;
+    --color-nav: #222222;
+    --color-nav-border: #464646;
+    --color-author-background: #2c2c2c;
+    --color-author-color: #d6d6d6;
+    --color-spacer: #3c3c3c;
+    --color-brand: var(--color-brand-dark);
+  }
+
+  header {
+    background: var(--color-nav)!important;
+  }
+
+  .branding {
+    color: var(--color-brand)!important;
+  }
+
+  .toggle .bar1,
+  .toggle .bar2,
+  .toggle .bar3 {
+    background-color: var(--color-brand)!important;
+  }
+}
+
+body {
+  overscroll-behavior-x: none;
+  background-color: transparent;
+  color: var(--color-text);
+  font-family: hyperbook-body;
+  font-weight: normal;
+  font-size: 16px;
+  margin: 0;
+  padding: 0;
+}
+
+</style><link rel="stylesheet" href="/assets/shell.css"><link rel="stylesheet" href="/assets/content.css"><link rel="stylesheet" href="/assets/code.css"><script>
+HYPERBOOK_ASSETS = "/assets/"
+</script><script type="module" src="/assets/side-drawer.js"></script></head><body><div class="main-grid"><header><div class="mobile-nav"><button aria-label="Nav Toggle" class="toggle" onclick="hyperbook.navToggle()"><div class="bar1"></div><div class="bar2"></div><div class="bar3"></div></button><side-drawer id="nav-drawer"><div class="nav-drawer-content"><nav><ul></ul></nav><a class="author" href="https://hyperbook.openpatch.org">Powered by <b>Hyperbook</b></a></div></side-drawer></div><a class="branding" href="/book/"><div class="name">My Hyperbook</div></a></header><div class="sidebar"><nav><ul></ul></nav><a class="author" href="https://hyperbook.openpatch.org">Powered by <b>Hyperbook</b></a></div><main><article>
+<div class="hyperbook-markdown"><button id="toc-toggle" onclick="hyperbook.tocToggle()" title="Table of Contents"><div class="bar1"></div><div class="bar2"></div><div class="bar3"></div><div class="bar4"></div></button>
+  <side-drawer id="toc-drawer" right>
+    <div class="toc-drawer-content">
+      <nav class="toc">
+        <ul></ul>
+      </nav>
+    </div>
+  </side-drawer>
+  <p>
+    Du kannst das Programm am schnellsten per
+    <a href="/public/https:/de.wikipedia.org/Kopieren_und_Einf%C3%BCgen">Kopieren und Einfügen</a>
+    in den Editor übernehmen. Du musst aber aufpassen: Wie du weißt
+    sind die Einrückungen (Leer- und <a href="/public/https:/de.wikipedia.org/Tabulatorzeichen">Tabulatorzeichen</a>
+    )
+    in Python Teil des Programms .
+  </p>
+</div>
+</article><div class="jump-container"></div><div class="meta"><span class="copyright">© Copyright 2024</span></div></main></div><script src="/assets/client.js"></script></body></html>"
+`;
+
 exports[`process > should transform 1`] = `
 "<!doctype html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Hi - My Hyperbook</title><meta property="og:title" content="Hi - My Hyperbook"><meta property="description" content="undefined"><meta property="og:description" content="undefined"><meta property="keywords"><link rel="stylesheet" href="/assets/normalize.css"><style>
 html,

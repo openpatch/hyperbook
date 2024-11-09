@@ -101,4 +101,18 @@ def func():
     );
     expect(result.value).toContain("catppuccin-frappe").toContain("dracula");
   });
+  it("should result in two link", async () => {
+    const result = await process(
+      `
+Du kannst das Programm am schnellsten per 
+[Kopieren und Einfügen](https://de.wikipedia.org/Kopieren_und_Einfügen)
+in den Editor übernehmen. Du musst aber aufpassen: Wie du weißt 
+sind die Einrückungen (Leer- und [Tabulatorzeichen](https://de.wikipedia.org/Tabulatorzeichen)
+) 
+in Python Teil des Programms .
+`,
+      ctx,
+    );
+    expect(result.value).toMatchSnapshot();
+  });
 });
