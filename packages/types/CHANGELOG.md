@@ -1,5 +1,11 @@
 # @hyperbook/types
 
+## 0.10.0
+
+### Minor Changes
+
+- [#894](https://github.com/openpatch/hyperbook/pull/894) [`8536870`](https://github.com/openpatch/hyperbook/commit/8536870623eb21bfaeffc0c65022584c26ea75c9) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - add option to show a qr code to the current page
+
 ## 0.9.0
 
 ### Minor Changes
