@@ -1,5 +1,11 @@
 # @hyperbook/markdown
 
+## 0.11.1
+
+### Patch Changes
+
+- [`440abf8`](https://github.com/openpatch/hyperbook/commit/440abf80ffcbcf70a0aed053ce58e0a36034eec1) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - fix mermaid not rendering when using angled brackets
+
 ## 0.11.0
 
 ### Minor Changes
