@@ -1,28 +1,34 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`remarkDirectiveMermaid > should render complex diagram 1`] = `
+"
+<pre class="directive-mermaid mermaid" data-mermaid="Y2xhc3NEaWFncmFtCiAgICBBbmltYWwgPHwtLSBEdWNrCiAgICBBbmltYWwgPHwtLSBGaXNoCiAgICBBbmltYWwgPHwtLSBaZWJyYQogICAgQW5pbWFsIDogK2ludCBhZ2UKICAgIEFuaW1hbCA6ICtTdHJpbmcgZ2VuZGVyCiAgICBBbmltYWw6ICtpc01hbW1hbCgpCiAgICBBbmltYWw6ICttYXRlKCkKICAgIGNsYXNzIER1Y2t7CiAgICAgICtTdHJpbmcgYmVha0NvbG9yCiAgICAgICtzd2ltKCkKICAgICAgK3F1YWNrKCkKICAgIH0KICAgIGNsYXNzIEZpc2h7CiAgICAgIC1pbnQgc2l6ZUluRmVldAogICAgICAtY2FuRWF0KCkKICAgIH0KICAgIGNsYXNzIFplYnJhewogICAgICArYm9vbCBpc1dpbGQKICAgICAgK3J1bigpCiAgICB9">classDiagram
+    Animal &#x3C;|-- Duck
+    Animal &#x3C;|-- Fish
+    Animal &#x3C;|-- Zebra
+    Animal : +int age
+    Animal : +String gender
+    Animal: +isMammal()
+    Animal: +mate()
+    class Duck{
+      +String beakColor
+      +swim()
+      +quack()
+    }
+    class Fish{
+      -int sizeInFeet
+      -canEat()
+    }
+    class Zebra{
+      +bool isWild
+      +run()
+    }</pre>
+"
+`;
+
 exports[`remarkDirectiveMermaid > should transform 1`] = `
 "
-<pre class="directive-mermaid mermaid" data-mermaid="classDiagram
-Animal <|-- Duck
-Animal <|-- Fish
-Animal <|-- Zebra
-Animal : +int age
-Animal : +String gender
-Animal: +isMammal()
-Animal: +mate()
-class Duck{
-+String beakColor
-+swim()
-+quack()
-}
-class Fish{
--int sizeInFeet
--canEat()
-}
-class Zebra{
-+bool is_wild
-+run()
-}">classDiagram
+<pre class="directive-mermaid mermaid" data-mermaid="Y2xhc3NEaWFncmFtCkFuaW1hbCA8fC0tIER1Y2sKQW5pbWFsIDx8LS0gRmlzaApBbmltYWwgPHwtLSBaZWJyYQpBbmltYWwgOiAraW50IGFnZQpBbmltYWwgOiArU3RyaW5nIGdlbmRlcgpBbmltYWw6ICtpc01hbW1hbCgpCkFuaW1hbDogK21hdGUoKQpjbGFzcyBEdWNreworU3RyaW5nIGJlYWtDb2xvcgorc3dpbSgpCitxdWFjaygpCn0KY2xhc3MgRmlzaHsKLWludCBzaXplSW5GZWV0Ci1jYW5FYXQoKQp9CmNsYXNzIFplYnJheworYm9vbCBpc193aWxkCitydW4oKQp9">classDiagram
 Animal &#x3C;|-- Duck
 Animal &#x3C;|-- Fish
 Animal &#x3C;|-- Zebra
@@ -48,27 +54,7 @@ class Zebra{
 
 exports[`remarkDirectiveMermaid > should transform code 1`] = `
 "
-<pre class="directive-mermaid mermaid" data-mermaid="classDiagram
-    Animal <|-- Duck
-    Animal <|-- Fish
-    Animal <|-- Zebra
-    Animal : +int age
-    Animal : +String gender
-    Animal: +isMammal()
-    Animal: +mate()
-    class Duck{
-      +String beakColor
-      +swim()
-      +quack()
-    }
-    class Fish{
-      -int sizeInFeet
-      -canEat()
-    }
-    class Zebra{
-      +bool is_wild
-      +run()
-    }">classDiagram
+<pre class="directive-mermaid mermaid" data-mermaid="Y2xhc3NEaWFncmFtCiAgICBBbmltYWwgPHwtLSBEdWNrCiAgICBBbmltYWwgPHwtLSBGaXNoCiAgICBBbmltYWwgPHwtLSBaZWJyYQogICAgQW5pbWFsIDogK2ludCBhZ2UKICAgIEFuaW1hbCA6ICtTdHJpbmcgZ2VuZGVyCiAgICBBbmltYWw6ICtpc01hbW1hbCgpCiAgICBBbmltYWw6ICttYXRlKCkKICAgIGNsYXNzIER1Y2t7CiAgICAgICtTdHJpbmcgYmVha0NvbG9yCiAgICAgICtzd2ltKCkKICAgICAgK3F1YWNrKCkKICAgIH0KICAgIGNsYXNzIEZpc2h7CiAgICAgIC1pbnQgc2l6ZUluRmVldAogICAgICAtY2FuRWF0KCkKICAgIH0KICAgIGNsYXNzIFplYnJhewogICAgICArYm9vbCBpc193aWxkCiAgICAgICtydW4oKQogICAgfQ==">classDiagram
     Animal &#x3C;|-- Duck
     Animal &#x3C;|-- Fish
     Animal &#x3C;|-- Zebra

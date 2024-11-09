@@ -12,7 +12,15 @@ hyperbook.mermaid = (function () {
         els.forEach((element) => {
           if (element.getAttribute("data-mermaid") != null) {
             element.removeAttribute("data-processed");
-            element.innerHTML = element.getAttribute("data-mermaid");
+            const data = atob(element.getAttribute("data-mermaid"));
+            const escapedData = data
+              .replace(/&/g, "&amp;")
+              .replace(/</g, "&lt;")
+              .replace(/>/g, "&gt;")
+              .replace(/"/g, "&quot;")
+              .replace(/'/g, "&#39;");
+            element.innerHTML = escapedData;
+            console.log(element.innerHTML);
           }
           count--;
           if (count == 0) {

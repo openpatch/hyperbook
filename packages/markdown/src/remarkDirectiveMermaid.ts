@@ -32,12 +32,12 @@ export default (ctx: HyperbookContext) => () => {
           ["style.css"],
         );
 
-        const value = toString(node.children) || node.value;
+        const value = node.value || toString(node.children);
         const {} = node.attributes || {};
         data.hName = "pre";
         data.hProperties = {
           class: "directive-mermaid mermaid",
-          "data-mermaid": value,
+          "data-mermaid": Buffer.from(value).toString("base64"),
         };
         data.hChildren = [
           {
