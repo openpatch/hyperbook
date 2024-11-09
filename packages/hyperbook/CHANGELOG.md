@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.35.1
+
+### Patch Changes
+
+- [`f584ddb`](https://github.com/openpatch/hyperbook/commit/f584ddba3d152c8aabb444bfc5a5552fcf9504e4) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - fix dev server not finding files when using a basePath
+
 ## 0.35.0
 
 ### Minor Changes
