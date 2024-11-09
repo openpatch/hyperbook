@@ -1,5 +1,11 @@
 # @hyperbook/markdown
 
+## 0.11.2
+
+### Patch Changes
+
+- [`6347d43`](https://github.com/openpatch/hyperbook/commit/6347d4392318e6bc8f52c4543fc65da7317f7d13) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - fix title showing undefined if page has no name
+
 ## 0.11.1
 
 ### Patch Changes
