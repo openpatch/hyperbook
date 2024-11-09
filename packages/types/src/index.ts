@@ -37,6 +37,7 @@ export type Language = "de" | "en" | "fr" | "es" | "it" | "pt" | "nl";
 export type HyperbookPageFrontmatter = {
   name: string;
   lang?: Language;
+  qrcode?: boolean;
   description?: string;
   keywords?: string[];
   scripts?: string[];
@@ -76,6 +77,7 @@ export type HyperbookJson = {
   description?: string;
   logo?: string;
   allowDangerousHtml?: boolean;
+  qrcode?: boolean;
   author?: {
     name?: string;
     url?: string;

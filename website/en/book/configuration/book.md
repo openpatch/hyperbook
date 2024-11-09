@@ -34,6 +34,7 @@ can and part wise must set (indicated by a \*).
 | styles            | Here you can add Links to custom CSS files. |
 | scripts            | Here you can add links to custom JavaScript files. |
 | allowDangerousHtml      | Allow HTML. This can lead to incompatibilities in future versions. |
+| qrcode | Shows an icon, which opens a qr code to the current page. |
 
 Here is an example configuration:
 

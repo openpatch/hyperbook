@@ -370,7 +370,8 @@ figure {
   background-color: var(--color-text);
 }
 
-.hyperbook-markdown #toc-toggle {
+.hyperbook-markdown #toc-toggle,
+.hyperbook-markdown #qrcode-open {
   background: var(--color-background);
   border-color: var(--color-nav-border);
   cursor: pointer;
@@ -399,7 +400,84 @@ figure {
   text-decoration: underline;
 }
 
-.hyperbook-markdown #toc-toggle {
+.hyperbook-markdown #qrcode-dialog {
+  background: var(--color-background);
+  border: 1px solid var(--color-brand);
+  width: 100%;
+  height: 100%;
+}
+
+#qrcode-dialog .container {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+#qrcode-dialog .name {
+  color: var(--color-text);
+  text-align: center;
+  font-size: 2rem;
+}
+
+#qrcode-dialog .url {
+  color: var(--color-text);
+  text-align: center;
+  font-size: 1.25rem;
+}
+
+#qrcode-dialog .close {
+  background: none;
+  border: none;
+  font-size: 2rem;
+  color: var(--color-text);
+  cursor: pointer;
+  position: absolute;
+  font: monospace;
+  top: 0px;
+  right: 0px;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: var(--color-background);
+  border-radius: 8px;
+}
+
+#qrcode-dialog .close:hover .close-icon {
+  background-color: var(--color-brand);
+}
+
+.hyperbook-markdown #qrcode-dialog svg {
+  width: 100%;
+  max-width: 512px;
+  margin: 0 auto;
+}
+
+.hyperbook-markdown .close-icon {
+  background-color: var(--color-text);
+  width: 32px;
+  height: 32px;
+  mask-image: url('data:image/svg+xml,<svg width="32px" height="32px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M5.29289 5.29289C5.68342 4.90237 6.31658 4.90237 6.70711 5.29289L12 10.5858L17.2929 5.29289C17.6834 4.90237 18.3166 4.90237 18.7071 5.29289C19.0976 5.68342 19.0976 6.31658 18.7071 6.70711L13.4142 12L18.7071 17.2929C19.0976 17.6834 19.0976 18.3166 18.7071 18.7071C18.3166 19.0976 17.6834 19.0976 17.2929 18.7071L12 13.4142L6.70711 18.7071C6.31658 19.0976 5.68342 19.0976 5.29289 18.7071C4.90237 18.3166 4.90237 17.6834 5.29289 17.2929L10.5858 12L5.29289 6.70711C4.90237 6.31658 4.90237 5.68342 5.29289 5.29289Z" fill="%230F1729"/></svg>');
+}
+
+.hyperbook-markdown .qrcode-icon {
+  background-color: var(--color-text);
+  width: 32px;
+  height: 32px;
+  mask-image: url('data:image/svg+xml,<svg width="32px" height="32px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 9h6V3H3zm1-5h4v4H4zm1 1h2v2H5zm10 4h6V3h-6zm1-5h4v4h-4zm1 1h2v2h-2zM3 21h6v-6H3zm1-5h4v4H4zm1 1h2v2H5zm15 2h1v2h-2v-3h1zm0-3h1v1h-1zm0-1v1h-1v-1zm-10 2h1v4h-1v-4zm-4-7v2H4v-1H3v-1h3zm4-3h1v1h-1zm3-3v2h-1V3h2v1zm-3 0h1v1h-1zm10 8h1v2h-2v-1h1zm-1-2v1h-2v2h-2v-1h1v-2h3zm-7 4h-1v-1h-1v-1h2v2zm6 2h1v1h-1zm2-5v1h-1v-1zm-9 3v1h-1v-1zm6 5h1v2h-2v-2zm-3 0h1v1h-1v1h-2v-1h1v-1zm0-1v-1h2v1zm0-5h1v3h-1v1h-1v1h-1v-2h-1v-1h3v-1h-1v-1zm-9 0v1H4v-1zm12 4h-1v-1h1zm1-2h-2v-1h2zM8 10h1v1H8v1h1v2H8v-1H7v1H6v-2h1v-2zm3 0V8h3v3h-2v-1h1V9h-1v1zm0-4h1v1h-1zm-1 4h1v1h-1zm3-3V6h1v1z"/><path fill="none" d="M0 0h24v24H0z"/></svg>');
+}
+
+.hyperbook-markdown #toc-toggle,
+.hyperbook-markdown #qrcode-open {
   position: fixed;
   padding: 4px;
   top: 90px;
@@ -413,7 +491,12 @@ figure {
   z-index: 1000;
 }
 
-.hyperbook-markdown #toc-toggle:hover {
+.hyperbook-markdown #qrcode-open {
+  top: 140px;
+}
+
+.hyperbook-markdown #toc-toggle:hover,
+.hyperbook-markdown #qrcode-toggle:hover {
   opacity: 1;
 }
 
