@@ -52,7 +52,7 @@ canvas {
 }
 </style>
 ${(code.scripts ? [cdnLibraryUrl, ...code.scripts] : []).map((src) => `<script type="text/javascript" src="${src}"></script>`).join("\n")}
-<body>Hallo</body>
+<body></body>
 <script id="code" type="text/javascript">${wrapSketch(code.js) || ""}</script>
 ${
   (code.scripts?.length ?? 0) > 0

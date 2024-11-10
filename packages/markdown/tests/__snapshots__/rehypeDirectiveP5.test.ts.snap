@@ -17,7 +17,7 @@ canvas {
 </style>
 <script type=&#x22;text/javascript&#x22; src=&#x22;/assets/directive-p5/p5.min.js&#x22;></script>
 <script type=&#x22;text/javascript&#x22; src=&#x22;/assets/directive-p5/p5.sound.min.js&#x22;></script>
-<body>Hallo</body>
+<body></body>
 <script id=&#x22;code&#x22; type=&#x22;text/javascript&#x22;>function setup() {
   createCanvas(720, 200);
   background(0);
