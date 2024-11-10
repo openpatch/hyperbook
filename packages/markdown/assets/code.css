@@ -2,6 +2,19 @@ pre {
   overflow-x: auto;
 }
 
+pre:has(code) {
+  position: relative;
+}
+
+pre code:not(:where(.not-content *)) {
+  all: unset;
+}
+
+pre>code {
+  counter-reset: line !important;
+  overflow-x: auto !important;
+}
+
 figure[data-rehype-pretty-code-figure] pre {
   font-size: 85%;
   border-color: var(--color-spacer);
