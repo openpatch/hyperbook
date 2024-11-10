@@ -1,5 +1,17 @@
 # hyperbook
 
+## 0.36.0
+
+### Minor Changes
+
+- [`d9f0b71`](https://github.com/openpatch/hyperbook/commit/d9f0b711775195fc56d9706dc196edf577591b2e) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Allow permaids to be set in the frontmatter of a page. The permaids can be use in links and in the frontmatter for next and prev. See the page configuration documentation for details. All pages with permaids are available at /@/[permaid].
+
+### Patch Changes
+
+- Updated dependencies [[`d9f0b71`](https://github.com/openpatch/hyperbook/commit/d9f0b711775195fc56d9706dc196edf577591b2e)]:
+  - @hyperbook/types@0.11.0
+  - @hyperbook/fs@0.15.0
+
 ## 0.35.3
 
 ### Patch Changes
