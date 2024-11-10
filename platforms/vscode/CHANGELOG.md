@@ -1,5 +1,14 @@
 # @hyperbook/vscode-extension
 
+## 0.25.7
+
+### Patch Changes
+
+- [`eb6c5a3`](https://github.com/openpatch/hyperbook/commit/eb6c5a3ae05721fee0a657ccb63124d6e1194d22) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - move qr code generation to the client
+
+- Updated dependencies [[`eb6c5a3`](https://github.com/openpatch/hyperbook/commit/eb6c5a3ae05721fee0a657ccb63124d6e1194d22)]:
+  - @hyperbook/markdown@0.12.1
+
 ## 0.25.6
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # @hyperbook/markdown
 
+## 0.12.1
+
+### Patch Changes
+
+- [`eb6c5a3`](https://github.com/openpatch/hyperbook/commit/eb6c5a3ae05721fee0a657ccb63124d6e1194d22) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - move qr code generation to the client
+
 ## 0.12.0
 
 ### Minor Changes
