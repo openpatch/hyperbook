@@ -1,5 +1,11 @@
 # @hyperbook/markdown
 
+## 0.12.2
+
+### Patch Changes
+
+- [`d5bcb38`](https://github.com/openpatch/hyperbook/commit/d5bcb38e2b641a292bae161ee3b1893d80b14360) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - fix position of copy button in code blocks
+
 ## 0.12.1
 
 ### Patch Changes
