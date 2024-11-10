@@ -1,5 +1,7 @@
 ---
 name: Alert
+permaid: alert
+prev:
 ---
 
 # Alert

@@ -162,6 +162,14 @@ async function runBuild(
     await makeDir(directoryOut, {
       recursive: true,
     });
+    if (file.markdown.data.permaid) {
+      const permaOut = path.join(rootOut, "@");
+      await makeDir(permaOut, {
+        recursive: true,
+      });
+      const permaFileOut = path.join(permaOut, file.markdown.data.permaid);
+      await fs.writeFile(permaFileOut, result.value);
+    }
     await fs.writeFile(fileOut, result.value);
     if (!process.env.CI) {
       readline.clearLine(process.stdout, 0);

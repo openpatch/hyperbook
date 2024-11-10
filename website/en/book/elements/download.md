@@ -1,5 +1,6 @@
 ---
 name: Download
+permaid: download
 ---
 
 # Download

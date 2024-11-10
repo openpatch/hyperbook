@@ -1,5 +1,6 @@
 ---
 name: Audio
+permaid: audio
 ---
 
 ```markdown

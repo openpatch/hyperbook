@@ -1,5 +1,6 @@
 ---
 name: Emoji
+permaid: emoji
 ---
 
 # Emoji

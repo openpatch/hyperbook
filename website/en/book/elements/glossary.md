@@ -1,5 +1,6 @@
 ---
 name: Glossary
+permaid: glossary
 ---
 
 # Glossary

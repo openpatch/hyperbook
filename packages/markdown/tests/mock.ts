@@ -15,6 +15,7 @@ export const ctx: HyperbookContext = {
   navigation: {
     current: {
       name: "Hi",
+      permaid: "p",
     },
     next: null,
     previous: null,
@@ -101,6 +102,7 @@ export const realCtx: HyperbookContext = {
       isEmpty: true,
       repo: "https://github.com/openpatch/hyperbook/edit/main/website/de/book/markdown/index.md",
       href: "/markdown",
+      permaid: "md",
     },
     previous: {
       name: "Bibliothek Konfiguration",

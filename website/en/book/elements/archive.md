@@ -1,5 +1,6 @@
 ---
 name: Archive
+permaid: archive
 ---
 
 # Archive

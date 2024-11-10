@@ -86,6 +86,7 @@ const result = await process(markdown, {
     },
     current: {
       name: "Markdown Referenz",
+      permaid: "md",
       index: 0,
       isEmpty: true,
       pages: [

@@ -1,5 +1,7 @@
 ---
 name: Code
+permaid: code
+prev:
 ---
 
 # Code

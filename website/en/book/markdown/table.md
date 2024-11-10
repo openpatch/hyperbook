@@ -1,5 +1,7 @@
 ---
 name: Table
+permaid: table
+next:
 ---
 
 # Table

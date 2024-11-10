@@ -1,5 +1,6 @@
 ---
 name: Slideshow
+permaid: slideshow
 ---
 
 # Slideshow

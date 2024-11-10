@@ -4,7 +4,6 @@
 import { HyperbookContext } from "@hyperbook/types";
 import { ElementContent, Root } from "hast";
 import { VFile } from "vfile";
-import { fromHtml } from "hast-util-from-html";
 
 export default (ctx: HyperbookContext) => () => {
   const qrcode = ctx.config.qrcode || ctx.navigation.current?.qrcode || true;
@@ -13,6 +12,28 @@ export default (ctx: HyperbookContext) => () => {
 
     if (!qrcode || !ctx.navigation.current?.href) {
       return;
+    }
+
+    const urls: ElementContent[] = [
+      {
+        type: "element",
+        tagName: "div",
+        properties: {
+          "data-href": `${ctx.makeUrl(ctx.navigation.current?.href || "", "public")}`,
+        },
+        children: [],
+      },
+    ];
+
+    if (ctx.navigation.current.permaid) {
+      urls.push({
+        type: "element",
+        tagName: "div",
+        properties: {
+          "data-href": `${ctx.makeUrl(["/", "@", ctx.navigation.current.permaid || ""], "public")}`,
+        },
+        children: [],
+      });
     }
 
     const qrcodeDialog: ElementContent[] = [
@@ -76,15 +97,7 @@ export default (ctx: HyperbookContext) => () => {
                 properties: {
                   class: "url",
                 },
-                children: [
-                  {
-                    type: "text",
-                    value: `${ctx.makeUrl(
-                      ctx.navigation.current?.href || "",
-                      "public",
-                    )}`,
-                  },
-                ],
+                children: urls,
               },
             ],
           },

@@ -1,5 +1,6 @@
 ---
 name: PlantUML
+permaid: plantuml
 ---
 
 [PlantUML](https://www.plantuml.com/) lets you create diagrams and

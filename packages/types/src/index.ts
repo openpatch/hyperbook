@@ -36,6 +36,7 @@ export type Language = "de" | "en" | "fr" | "es" | "it" | "pt" | "nl";
 
 export type HyperbookPageFrontmatter = {
   name: string;
+  permaid?: string;
   lang?: Language;
   qrcode?: boolean;
   description?: string;

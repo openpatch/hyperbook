@@ -1,5 +1,6 @@
 ---
 name: Scratchblock
+permaid: scratchblock
 ---
 
 # Scratchblock

@@ -1,6 +1,7 @@
 ---
 name: Pagelist
 lang: en
+permaid: pagelist
 ---
 
 # Pagelist

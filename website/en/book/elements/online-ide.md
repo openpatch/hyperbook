@@ -1,5 +1,6 @@
 ---
 name: Online IDE
+permaid: online-ide
 ---
 
 Java-like programming language (compiler, interpreter, debugger) with IDE that

@@ -1,5 +1,6 @@
 ---
 name: Excalidraw
+permaid: excalidraw
 ---
 
 # Excalidraw

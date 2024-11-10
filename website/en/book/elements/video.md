@@ -1,5 +1,6 @@
 ---
 name: Video
+permaid: video
 ---
 
 # Video

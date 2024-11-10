@@ -35,10 +35,11 @@ Hier sind die Eigenschaften, die im Frontmatter gesetzt werden können:
 | :---------- | :--------------------------------------------------------------------------------------------------------------------------------------------- |
 | name        | Name der Seite. Wird in der Navigation verwendet.                                                                                              |
 | description | Beschreibung der Seite. Wird für SEO verwendet.                                                                                                |
+| permaid     | Eine id, welche die Seite auch unter zum Beispiel /@/audio verfügbar macht, wenn die permaid auf audio gesetzt wurde. |
 | keywords    | Eine Liste von Schlüsselwörter. Wird für SEO verwendet.                                                                                        |
 | index       | Eine Zahl, die die Position relative zu anderen Seiten auf dieser Navigationsebene angibt. Kleine Zahlen erscheinen zuerst in der Navigation.  |
-| prev        | Ein absoluter Pfad zur vorherigen Seite. Dies überschreibt index und hide. Du kannst außerdem nichts setzen, sodass der Button versteckt wird. |
-| next        | Ein absoluter Pfad zur nächsten Seite. Dies überschreibt index und hide. Du kannst außerdem nichts setzen, sodass der Button versteckt wird.   |
+| prev        | Ein absoluter Pfad zur vorherigen Seite or ein absoluter Pfad zur permaid z. B. /@/audio. Dies überschreibt index und hide. Du kannst außerdem nichts setzen, sodass der Button versteckt wird. |
+| next        | Ein absoluter Pfad zur nächsten Seite or ein absoluter Pfad zur permaid z. B. /@/audio. Dies überschreibt index und hide. Du kannst außerdem nichts setzen, sodass der Button versteckt wird.   |
 | hide        | Verstecke die Seite von der Navigation.                                                                                                        |
 | toc         | Zeige ein Inhaltsverzeichnis. Diese ist standardmäßig aktiviert für Seiten und deaktiviert für Begriffe im Glossar.                            |
 | qrcode | Zeigt ein Icon, um einen QR-Code zur Seite anzuzeigen |

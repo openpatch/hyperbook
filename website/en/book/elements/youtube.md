@@ -1,5 +1,7 @@
 ---
 name: YouTube
+permaid: youtube
+next:
 ---
 
 # YouTube

@@ -93,7 +93,10 @@ HYPERBOOK_ASSETS = "assets/"
     <div class="container">
       <div class="name">Markdown Referenz</div>
       <div class="make-qrcode"></div>
-      <div class="url">/markdown</div>
+      <div class="url">
+        <div data-href="/markdown"></div>
+        <div data-href="/@/md"></div>
+      </div>
     </div><button class="close" onclick="hyperbook.qrcodeClose()"><div class="close-icon"></div></button>
   </dialog>
 </div>
@@ -396,7 +399,10 @@ HYPERBOOK_ASSETS = "assets/"
     <div class="container">
       <div class="name">Markdown Referenz</div>
       <div class="make-qrcode"></div>
-      <div class="url">/markdown</div>
+      <div class="url">
+        <div data-href="/markdown"></div>
+        <div data-href="/@/md"></div>
+      </div>
     </div><button class="close" onclick="hyperbook.qrcodeClose()"><div class="close-icon"></div></button>
   </dialog>
 </div>

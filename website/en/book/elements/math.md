@@ -1,5 +1,6 @@
 ---
 name: Math
+permaid: math
 ---
 
 # Math

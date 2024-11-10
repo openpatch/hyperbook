@@ -1,5 +1,6 @@
 ---
 name: Snippets
+permaid: snippets
 ---
 
 # Snippets

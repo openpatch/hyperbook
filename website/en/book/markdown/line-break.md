@@ -1,5 +1,6 @@
 ---
 name: Line Break
+permaid: line-break
 ---
 
 # Line Break

@@ -50,7 +50,10 @@ var hyperbook = (function () {
       ecl: "M",
     });
     qrcodeEl.innerHTML = qrcode.svg();
-    urlEl.innerHTML = window.location.href;
+    for (let urlEl of urlEls[0].children) {
+      const href = urlEl.getAttribute("data-href");
+      urlEl.innerHTML = `${window.location.origin}${href}`;
+    }
 
     qrCodeDialog.showModal();
   }
