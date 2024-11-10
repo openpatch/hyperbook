@@ -456,10 +456,14 @@ figure {
   background-color: var(--color-brand);
 }
 
-.hyperbook-markdown #qrcode-dialog svg {
+.hyperbook-markdown #qrcode-dialog .make-qrcode {
   width: 100%;
   max-width: 512px;
   margin: 0 auto;
+}
+
+.hyperbook-markdown #qrcode-dialog svg {
+  width: 100%;
 }
 
 .hyperbook-markdown .close-icon {

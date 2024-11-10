@@ -36,6 +36,22 @@ var hyperbook = (function () {
 
   function qrcodeOpen() {
     const qrCodeDialog = document.getElementById("qrcode-dialog");
+    const qrcodeEls = qrCodeDialog.getElementsByClassName("make-qrcode");
+    const urlEls = qrCodeDialog.getElementsByClassName("url");
+    const qrcodeEl = qrcodeEls[0];
+    const urlEl = urlEls[0];
+    const qrcode = new window.QRCode({
+      content: window.location.href,
+      padding: 0,
+      join: true,
+      color: "var(--color-text)",
+      container: "svg-viewbox",
+      background: "var(--color-background)",
+      ecl: "M",
+    });
+    qrcodeEl.innerHTML = qrcode.svg();
+    urlEl.innerHTML = window.location.href;
+
     qrCodeDialog.showModal();
   }
 

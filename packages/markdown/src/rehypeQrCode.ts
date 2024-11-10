@@ -4,7 +4,6 @@
 import { HyperbookContext } from "@hyperbook/types";
 import { ElementContent, Root } from "hast";
 import { VFile } from "vfile";
-import QRCode from "qrcode-svg";
 import { fromHtml } from "hast-util-from-html";
 
 export default (ctx: HyperbookContext) => () => {
@@ -15,17 +14,6 @@ export default (ctx: HyperbookContext) => () => {
     if (!qrcode || !ctx.navigation.current?.href) {
       return;
     }
-
-    const qr = new QRCode({
-      content: ctx.navigation.current.href,
-      padding: 0,
-      width: 512,
-      height: 512,
-      color: "var(--color-text)",
-      container: "svg-viewbox",
-      background: "var(--color-background)",
-      ecl: "M",
-    }).svg();
 
     const qrcodeDialog: ElementContent[] = [
       {
@@ -74,7 +62,14 @@ export default (ctx: HyperbookContext) => () => {
                   },
                 ],
               },
-              ...(fromHtml(qr).children as any),
+              {
+                type: "element",
+                tagName: "div",
+                properties: {
+                  class: "make-qrcode",
+                },
+                children: [],
+              },
               {
                 type: "element",
                 tagName: "div",

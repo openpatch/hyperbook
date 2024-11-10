@@ -331,6 +331,16 @@ HYPERBOOK_ASSETS = "${makeUrl("/", "assets")}"
                 properties: {
                   type: "module",
                   src: makeUrl(["side-drawer.js"], "assets"),
+                  async: true,
+                },
+                children: [],
+              },
+              {
+                type: "element",
+                tagName: "script",
+                properties: {
+                  src: makeUrl(["qrcode.js"], "assets"),
+                  async: true,
                 },
                 children: [],
               },

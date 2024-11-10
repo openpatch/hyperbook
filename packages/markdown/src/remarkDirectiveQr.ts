@@ -40,6 +40,8 @@ export default (ctx: HyperbookContext) => () => {
           padding: 0,
           width: realSizes[safeSize],
           height: realSizes[safeSize],
+          join: true,
+          container: "svg-viewbox",
           color: "#000000",
           background: "#ffffff",
           ecl: "M",

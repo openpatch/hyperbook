@@ -280,6 +280,9 @@
         "name": {
             "type": "string"
         },
+        "qrcode": {
+            "type": "boolean"
+        },
         "repo": {
             "anyOf": [
                 {
