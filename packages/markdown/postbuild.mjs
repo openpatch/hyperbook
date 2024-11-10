@@ -79,6 +79,20 @@ async function postbuild() {
         "hyperbook-excalidraw.umd.js",
       ),
     },
+    {
+      src: path.join("./node_modules", "p5", "lib", "p5.min.js"),
+      dst: path.join("./dist", "assets", "directive-p5", "p5.min.js"),
+    },
+    {
+      src: path.join(
+        "./node_modules",
+        "p5",
+        "lib",
+        "addons",
+        "p5.sound.min.js",
+      ),
+      dst: path.join("./dist", "assets", "directive-p5", "p5.sound.min.js"),
+    },
   ];
 
   for (let asset of assets) {

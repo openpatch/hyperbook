@@ -323,6 +323,9 @@ importers:
       ncp:
         specifier: ^2.0.0
         version: 2.0.0
+      p5:
+        specifier: ^1.11.1
+        version: 1.11.1
       scratchblocks:
         specifier: ^3.6.4
         version: 3.6.4
@@ -4884,6 +4887,9 @@ packages:
   p-try@2.2.0:
     resolution: {integrity: sha512-R4nPAVTAU0B9D35/Gk3uJf/7XYbQcyohSKdvAxIRSNghFl4e71hVoGnBNQz9cWaXxO2I10KTC+3jMdvvoKw6dQ==}
     engines: {node: '>=6'}
+
+  p5@1.11.1:
+    resolution: {integrity: sha512-JWvOwAgInsuSOjzMwAtaiN8gMLzhR1jcyosytNeftH0vnTkywfIyFfVYFfsLSsh6B+DYuqJYu1SVcfkuvrYi1Q==}
 
   package-json-from-dist@1.0.1:
     resolution: {integrity: sha512-UEZIS3/by4OC8vL3P2dTXRETpebLI2NiI5vIrjaD/5UtrkFX/tNbwjTSRAGC/+7CAo2pIcBaRgWmcBBHcsaCIw==}
@@ -11992,6 +11998,8 @@ snapshots:
   p-timeout@6.1.2: {}
 
   p-try@2.2.0: {}
+
+  p5@1.11.1: {}
 
   package-json-from-dist@1.0.1: {}
 

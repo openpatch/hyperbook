@@ -81,6 +81,7 @@
     "live-server": "^1.2.2",
     "mermaid": "11.3.0",
     "ncp": "^2.0.0",
+    "p5": "^1.11.1",
     "scratchblocks": "^3.6.4",
     "vfile": "^6.0.3",
     "vitest": "^1.6.0",

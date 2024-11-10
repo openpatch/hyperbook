@@ -46,6 +46,7 @@ import remarkDirectiveTerm from "./remarkDirectiveTerm";
 import remarkLink from "./remarkLink";
 import remarkDirectivePagelist from "./remarkDirectivePagelist";
 import rehypeQrCode from "./rehypeQrCode";
+import rehypeDirectiveP5 from "./rehypeDirectiveP5";
 
 const remark = (ctx: HyperbookContext) => {
   const remarkPlugins: PluggableList = [
@@ -107,6 +108,7 @@ const remark = (ctx: HyperbookContext) => {
         },
       },
     ],
+    rehypeDirectiveP5(ctx),
     rehypeFormat,
   ];
 
