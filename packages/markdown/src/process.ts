@@ -47,7 +47,7 @@ import remarkLink from "./remarkLink";
 import remarkDirectivePagelist from "./remarkDirectivePagelist";
 import rehypeQrCode from "./rehypeQrCode";
 
-const remark = (ctx: HyperbookContext) => {
+export const remark = (ctx: HyperbookContext) => {
   const remarkPlugins: PluggableList = [
     remarkRemoveComments,
     remarkDirective,
@@ -116,15 +116,16 @@ const remark = (ctx: HyperbookContext) => {
     .use(remarkToRehype, {
       allowDangerousHtml: ctx.config.allowDangerousHtml || false,
     })
-    .use(rehypePlugins)
+    .use(rehypePlugins);
+};
+
+export const process = (md: string, ctx: HyperbookContext) => {
+  return remark(ctx)
     .use(rehypeShell(ctx))
     .use(rehypeHtmlStructure(ctx))
     .use(rehypeStringify, {
       allowDangerousCharacters: true,
       allowDangerousHtml: ctx.config.allowDangerousHtml || false,
-    });
-};
-
-export const process = (md: string, ctx: HyperbookContext) => {
-  return remark(ctx).process(md);
+    })
+    .process(md);
 };

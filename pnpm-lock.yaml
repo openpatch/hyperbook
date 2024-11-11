@@ -229,6 +229,9 @@ importers:
       mdast-util-to-string:
         specifier: ^4.0.0
         version: 4.0.0
+      micromark-extension-directive:
+        specifier: ^3.0.2
+        version: 3.0.2
       pako:
         specifier: 2.1.0
         version: 2.1.0

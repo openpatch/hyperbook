@@ -9,12 +9,14 @@ import remarkDirective from "remark-directive";
 import remarkDirectiveRehype from "remark-directive-rehype";
 import { realCtx } from "./mock";
 import remarkDirectivePagelist from "../src/remarkDirectivePagelist";
+import remarkDirectiveTiles from "../src/remarkDirectiveTiles";
 
 export const toHtml = (md: string, ctx: HyperbookContext) => {
   const remarkPlugins: PluggableList = [
     remarkDirective,
     remarkDirectiveRehype,
     remarkDirectivePagelist(ctx),
+    remarkDirectiveTiles(ctx),
   ];
 
   return unified()
@@ -149,5 +151,15 @@ describe("remarkDirectiveEmbed", () => {
         realCtx,
       ).data.directives?.["pagelist"],
     ).toBeDefined();
+  });
+  it("should transform directive in snippet", async () => {
+    expect(
+      toHtml(
+        `
+::pagelist{format="#portal" source="href(/elements/.*)" orderBy="index"}
+`,
+        realCtx,
+      ),
+    ).toMatchSnapshot();
   });
 });
