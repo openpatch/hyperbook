@@ -6,6 +6,7 @@ vdirectory.public.json
 vfiles.json
 
 packages/markdown/index.html
+packages/markdown/public
 
 *.zip
 
