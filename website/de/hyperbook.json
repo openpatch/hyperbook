@@ -39,6 +39,11 @@
       ]
     }
   ],
+  "elements": {
+    "code": {
+      "showLineNumbers": true
+    }
+  },
   "language": "de",
   "logo": "/logo.svg",
   "repo": "https://github.com/openpatch/hyperbook/edit/main/website/de"
