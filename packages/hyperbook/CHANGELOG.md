@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.36.1
+
+### Patch Changes
+
+- [`331d74f`](https://github.com/openpatch/hyperbook/commit/331d74fd4000b11fbf5f63a98382f2c0ab547a46) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - bump version
+
 ## 0.36.0
 
 ### Minor Changes
