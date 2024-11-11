@@ -159,7 +159,7 @@ describe("remarkDirectiveEmbed", () => {
 ::pagelist{format="#portal" source="href(/elements/.*)" orderBy="index"}
 `,
         realCtx,
-      ),
+      ).value,
     ).toMatchSnapshot();
   });
 });

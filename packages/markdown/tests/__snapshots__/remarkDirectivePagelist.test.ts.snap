@@ -308,27 +308,7 @@ exports[`remarkDirectiveEmbed > should transform 1`] = `
 `;
 
 exports[`remarkDirectiveEmbed > should transform directive in snippet 1`] = `
-VFile {
-  "cwd": "/home/mike/Sources/openpatch/hyperbook/packages/markdown",
-  "data": {
-    "directives": {
-      "pagelist": {
-        "scripts": [],
-        "styles": [
-          "style.css",
-        ],
-      },
-      "tiles": {
-        "scripts": [],
-        "styles": [
-          "style.css",
-        ],
-      },
-    },
-  },
-  "history": [],
-  "messages": [],
-  "value": "
+"
 <div class="directive-pagelist">
   <div class="directive-tiles">
     <ul class="tiles">
@@ -361,6 +341,5 @@ VFile {
     </ul>
   </div>
 </div>
-",
-}
+"
 `;
