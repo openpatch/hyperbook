@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.36.2
+
+### Patch Changes
+
+- [`2ab94ae`](https://github.com/openpatch/hyperbook/commit/2ab94aea525c2b67c156313f13d9662efad5d8a6) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - fix pagelist snippets not parsed correctly
+
 ## 0.36.1
 
 ### Patch Changes
