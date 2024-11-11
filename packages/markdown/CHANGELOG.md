@@ -1,5 +1,11 @@
 # @hyperbook/markdown
 
+## 0.13.1
+
+### Patch Changes
+
+- [`300e589`](https://github.com/openpatch/hyperbook/commit/300e589f9de4fa6dc5ed76e4649240c93a8eae6c) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - fix online ide has wrong file names when using showLineNumbers in hyperbook config.
+
 ## 0.13.0
 
 ### Minor Changes
