@@ -1,0 +1,5 @@
+---
+"hyperbook": patch
+---
+
+bump version
