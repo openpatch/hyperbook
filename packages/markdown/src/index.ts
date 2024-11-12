@@ -1,4 +1,4 @@
-import { process } from "./process";
+import { process, remark } from "./process";
 
 declare module "vfile" {
   interface DataMap {
@@ -14,6 +14,13 @@ declare module "vfile" {
       anchor: string;
       label: string;
     }[];
+    searchDocuments: {
+      description: string;
+      keywords: string[];
+      heading: string;
+      content: string;
+      href: string;
+    }[];
   }
 }
 
@@ -23,4 +30,4 @@ declare module "mdast" {
   }
 }
 
-export { process };
+export { process, remark };

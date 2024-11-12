@@ -24,23 +24,13 @@ li {
   margin: 0;
 }
 
+side-drawer {
+  position: absolute;
+}
+
 #nav-drawer {
   background: var(--color-nav);
   border-right-color: var(--color-nav-border);
-}
-
-side-drawer {
-  position: absolute;
-  display: block;
-  visibility: hidden;
-  max-width: 0;
-  max-height: 0;
-}
-
-side-drawer[open] {
-  visibility: visible;
-  max-width: 350px;
-  max-height: initial;
 }
 
 .sidebar>.author,
@@ -77,6 +67,7 @@ header.inverted {
 
 .branding {
   color: var(--color-brand-text);
+  flex: 1;
 }
 
 .branding:hover {

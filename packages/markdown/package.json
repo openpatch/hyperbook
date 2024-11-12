@@ -42,6 +42,7 @@
     "decircular": "^1.0.0",
     "handlebars": "^4.7.8",
     "hast-util-from-html": "^2.0.3",
+    "hast-util-to-text": "^4.0.2",
     "is-obj": "^3.0.0",
     "js-base64": "^3.7.7",
     "mdast-util-directive": "^3.0.0",
@@ -65,6 +66,7 @@
     "remark-unwrap-images": "4.0.0",
     "sort-keys": "^5.1.0",
     "unified": "^11.0.5",
+    "unist-util-find-after": "^5.0.0",
     "unist-util-visit": "^5.0.0",
     "unist-util-visit-parents": "^6.0.1"
   },
@@ -80,6 +82,7 @@
     "chalk": "^5.3.0",
     "chokidar": "3.6.0",
     "live-server": "^1.2.2",
+    "lunr": "^2.3.9",
     "mermaid": "11.3.0",
     "ncp": "^2.0.0",
     "scratchblocks": "^3.6.4",

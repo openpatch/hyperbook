@@ -222,7 +222,7 @@ export default (ctx: HyperbookContext) => () => {
                 type: "element",
                 tagName: "meta",
                 properties: {
-                  property: "description",
+                  name: "description",
                   content: `${currentPage?.description || config.description}`,
                 },
                 children: [],
@@ -240,7 +240,7 @@ export default (ctx: HyperbookContext) => () => {
                 type: "element",
                 tagName: "meta",
                 properties: {
-                  property: "keywords",
+                  name: "keywords",
                   content: currentPage?.keywords
                     ? `${currentPage?.keywords.join("")}`
                     : undefined,
@@ -335,6 +335,28 @@ HYPERBOOK_ASSETS = "${makeUrl("/", "assets")}"
                 },
                 children: [],
               },
+              ...(ctx.config.search
+                ? [
+                    {
+                      type: "element",
+                      tagName: "script",
+                      properties: {
+                        src: makeUrl(["lunr.min.js"], "assets"),
+                        async: true,
+                      },
+                      children: [],
+                    } as ElementContent,
+                    {
+                      type: "element",
+                      tagName: "script",
+                      properties: {
+                        src: makeUrl(["search.js"], "assets"),
+                        async: true,
+                      },
+                      children: [],
+                    } as ElementContent,
+                  ]
+                : []),
               {
                 type: "element",
                 tagName: "script",

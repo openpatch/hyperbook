@@ -12,9 +12,10 @@ import {
   HyperbookContext,
   Navigation,
 } from "@hyperbook/types";
+import lunr from "lunr";
 import { process as hyperbookProcess } from "@hyperbook/markdown";
 
-const ASSETS_FOLDER = "__hyperbook_assets";
+export const ASSETS_FOLDER = "__hyperbook_assets";
 
 export async function runBuildProject(
   project: Hyperproject,
@@ -129,6 +130,7 @@ async function runBuild(
     pagesAndSections.sections,
     pagesAndSections.pages,
   );
+  const searchDocuments: any[] = [];
 
   let bookFiles = await vfile.listForFolder(root, "book");
   if (filter) {
@@ -147,6 +149,7 @@ async function runBuild(
       navigation,
     };
     const result = await hyperbookProcess(file.markdown.content, ctx);
+    searchDocuments.push(...(result.data.searchDocuments || []));
     for (let directive of Object.keys(result.data.directives || {})) {
       directives.add(directive);
     }
@@ -204,6 +207,7 @@ async function runBuild(
       navigation,
     };
     const result = await hyperbookProcess(file.markdown.content, ctx);
+    searchDocuments.push(...(result.data.searchDocuments || []));
     for (let directive of Object.keys(result.data.directives || {})) {
       directives.add(directive);
     }
@@ -308,6 +312,34 @@ async function runBuild(
     }
   }
   process.stdout.write("\n");
+
+  if (hyperbookJson.search) {
+    const documents: Record<string, any> = {};
+    const idx = lunr(function () {
+      this.ref("href");
+      this.field("description");
+      this.field("keywords");
+      this.field("heading");
+      this.field("content");
+
+      searchDocuments.forEach((doc) => {
+        const href = baseCtx.makeUrl(doc.href, "book");
+        const docWithBase = {
+          ...doc,
+          href,
+        };
+        this.add(docWithBase);
+        documents[href] = docWithBase;
+      });
+    });
+
+    const js = `
+const LUNR_INDEX = ${JSON.stringify(idx)};
+const SEARCH_DOCUMENTS = ${JSON.stringify(documents)};
+`;
+
+    await fs.writeFile(path.join(rootOut, ASSETS_FOLDER, "search.js"), js);
+  }
 
   console.log(`${chalk.green(`[${prefix}]`)} Build success: ${rootOut}`);
 }

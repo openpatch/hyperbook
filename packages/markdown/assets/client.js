@@ -33,13 +33,60 @@ var hyperbook = (function () {
     const tocDrawerEl = document.getElementById("toc-drawer");
     tocDrawerEl.open = !tocDrawerEl.open;
   }
+  // search
+
+  const searchInputEl = document.getElementById("search-input");
+  searchInputEl.addEventListener("keypress", (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      search();
+    }
+  });
+
+  function searchToggle() {
+    const searchDrawerEl = document.getElementById("search-drawer");
+    searchDrawerEl.open = !searchDrawerEl.open;
+  }
+
+  function search() {
+    const resultsEl = document.getElementById("search-results");
+    resultsEl.innerHTML = "";
+    const query = searchInputEl.value;
+    const idx = window.lunr.Index.load(LUNR_INDEX);
+    const documents = SEARCH_DOCUMENTS;
+    const results = idx.search(query);
+    for (let result of results) {
+      const doc = documents[result.ref];
+
+      const container = document.createElement("a");
+      container.href = doc.href;
+      container.classList.add("search-result");
+      const heading = document.createElement("div");
+      heading.textContent = doc.heading;
+      heading.classList.add("search-result-heading");
+      const content = document.createElement("div");
+      content.classList.add("search-result-content");
+      const href = document.createElement("div");
+      href.classList.add("search-result-href");
+      href.textContent = doc.href;
+      if (doc.content.length > 200) {
+        content.textContent = doc.content.slice(0, 197) + "...";
+      } else {
+        content.textContent = doc.content;
+      }
+
+      container.appendChild(heading);
+      container.appendChild(content);
+      container.appendChild(href);
+      resultsEl.appendChild(container);
+    }
+  }
 
   function qrcodeOpen() {
     const qrCodeDialog = document.getElementById("qrcode-dialog");
     const qrcodeEls = qrCodeDialog.getElementsByClassName("make-qrcode");
     const urlEls = qrCodeDialog.getElementsByClassName("url");
     const qrcodeEl = qrcodeEls[0];
-    const urlEl = urlEls[0];
     const qrcode = new window.QRCode({
       content: window.location.href,
       padding: 0,
@@ -113,6 +160,8 @@ var hyperbook = (function () {
     toggleBookmark,
     navToggle,
     tocToggle,
+    searchToggle,
+    search,
     qrcodeOpen,
     qrcodeClose,
   };

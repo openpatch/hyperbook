@@ -1,6 +1,7 @@
 {
   "name": "Hyperbook Dokumenation",
   "qrcode": true,
+  "search": true,
   "description": "Dokumentation für Hyperbook erstellt mit Hyperbook",
   "author": {
     "name": "OpenPatch",

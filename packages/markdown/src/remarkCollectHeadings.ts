@@ -2,9 +2,9 @@
 /// <reference types="mdast-util-directive" />
 //
 import { HyperbookContext } from "@hyperbook/types";
-import { Root } from "mdast";
+import { Node, Root } from "mdast";
 import { visit } from "unist-util-visit";
-import { VFile } from "vfile";
+import { VFile, VFileData } from "vfile";
 import { Root as MdastRoot, Heading as AstHeading } from "mdast";
 import { toString } from "mdast-util-to-string";
 
@@ -15,7 +15,7 @@ export default (ctx: HyperbookContext) => () => {
   };
 };
 
-const getAnchor = (heading: AstHeading): string => {
+export const getAnchor = (heading: AstHeading): string => {
   // If we have a heading, make it lower case
   if ((heading?.data as any)?.id) {
     return (heading.data as any).id as string;
@@ -32,12 +32,8 @@ const getAnchor = (heading: AstHeading): string => {
   return anchor;
 };
 
-const getHeadings = (root: MdastRoot) => {
-  const headingList: {
-    level: 1 | 2 | 3 | 4 | 5 | 6;
-    label: string;
-    anchor: string;
-  }[] = [];
+const getHeadings = (root: MdastRoot): VFileData["headings"] => {
+  const headingList: VFileData["headings"] = [];
 
   visit(root, "heading", (node: AstHeading) => {
     const heading = {
