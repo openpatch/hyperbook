@@ -296,8 +296,7 @@ async function runBuild(
   for (let asset of mainAssets) {
     const assetPath = path.join(assetsPath, asset);
     const assetOut = path.join(assetsOut, asset);
-    const stat = await fs.stat(assetPath);
-    if (stat.isFile()) {
+    if (!asset.startsWith("directive-")) {
       await cp(assetPath, assetOut, { recursive: true });
     }
     if (!process.env.CI) {
@@ -321,6 +320,7 @@ async function runBuild(
       this.field("keywords");
       this.field("heading");
       this.field("content");
+      this.metadataWhitelist = ["position"];
 
       searchDocuments.forEach((doc) => {
         const href = baseCtx.makeUrl(doc.href, "book");

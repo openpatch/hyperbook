@@ -69,11 +69,32 @@ var hyperbook = (function () {
       const href = document.createElement("div");
       href.classList.add("search-result-href");
       href.textContent = doc.href;
-      if (doc.content.length > 200) {
-        content.textContent = doc.content.slice(0, 197) + "...";
-      } else {
-        content.textContent = doc.content;
+
+      let contentHTML = "";
+      const terms = Object.keys(result.matchData.metadata);
+      const term = terms[0];
+      if (result?.matchData?.metadata?.[term]?.content?.position?.length > 0) {
+        const pos = result.matchData.metadata[term].content.position[0];
+        const start = pos[0];
+        const len = pos[1];
+        let cutoffBefore = start - 50;
+        if (cutoffBefore < 0) {
+          cutoffBefore = 0;
+        } else {
+          contentHTML += "...";
+        }
+        contentHTML += doc.content.slice(cutoffBefore, start);
+
+        contentHTML += `<mark>${doc.content.slice(start, start + len)}</mark>`;
+        let cutoffAfter = start + len + 50;
+
+        contentHTML += doc.content.slice(start + len, cutoffAfter);
+        if (cutoffAfter < doc.content.length) {
+          contentHTML += "...";
+        }
       }
+
+      content.innerHTML = contentHTML;
 
       container.appendChild(heading);
       container.appendChild(content);
