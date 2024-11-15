@@ -262,6 +262,15 @@ export default (ctx: HyperbookContext) => () => {
                 tagName: "link",
                 properties: {
                   rel: "stylesheet",
+                  href: makeUrl(["math", "katex.min.css"], "assets"),
+                },
+                children: [],
+              },
+              {
+                type: "element",
+                tagName: "link",
+                properties: {
+                  rel: "stylesheet",
                   href: makeUrl(["shell.css"], "assets"),
                 },
                 children: [],
@@ -342,7 +351,7 @@ HYPERBOOK_ASSETS = "${makeUrl("/", "assets")}"
                       tagName: "script",
                       properties: {
                         src: makeUrl(["lunr.min.js"], "assets"),
-                        async: true,
+                        defer: true,
                       },
                       children: [],
                     } as ElementContent,
@@ -351,7 +360,7 @@ HYPERBOOK_ASSETS = "${makeUrl("/", "assets")}"
                       tagName: "script",
                       properties: {
                         src: makeUrl(["search.js"], "assets"),
-                        async: true,
+                        defer: true,
                       },
                       children: [],
                     } as ElementContent,
@@ -398,6 +407,7 @@ HYPERBOOK_ASSETS = "${makeUrl("/", "assets")}"
                 tagName: "script",
                 properties: {
                   src: makeUrl(["client.js"], "assets"),
+                  defer: true,
                 },
                 children: [],
               },
@@ -415,6 +425,7 @@ HYPERBOOK_ASSETS = "${makeUrl("/", "assets")}"
                                 ["directive-" + directive, script],
                                 "assets",
                               ),
+                          defer: true,
                         },
                         children: [],
                       }) as ElementContent,
@@ -429,6 +440,7 @@ HYPERBOOK_ASSETS = "${makeUrl("/", "assets")}"
                       src: script.includes("://")
                         ? script
                         : makeUrl(script, "public"),
+                      defer: true,
                     },
                     children: [],
                   }) as ElementContent,
@@ -442,6 +454,7 @@ HYPERBOOK_ASSETS = "${makeUrl("/", "assets")}"
                       src: script.includes("://")
                         ? script
                         : makeUrl(script, "public"),
+                      defer: true,
                     },
                     children: [],
                   }) as ElementContent,
