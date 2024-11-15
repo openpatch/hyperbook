@@ -1,5 +1,17 @@
 # hyperbook
 
+## 0.37.0
+
+### Minor Changes
+
+- [#907](https://github.com/openpatch/hyperbook/pull/907) [`eaeaf29`](https://github.com/openpatch/hyperbook/commit/eaeaf293532494607385f4e8d927ffb3716dcc6f) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add option to enable search. Just set the search key to true in your hyperbook config and a search icon will be visible in the top right hand corner.
+
+### Patch Changes
+
+- Updated dependencies [[`eaeaf29`](https://github.com/openpatch/hyperbook/commit/eaeaf293532494607385f4e8d927ffb3716dcc6f)]:
+  - @hyperbook/types@0.12.0
+  - @hyperbook/fs@0.15.0
+
 ## 0.36.2
 
 ### Patch Changes
