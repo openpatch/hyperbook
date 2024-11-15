@@ -14,6 +14,7 @@ von Optionen, die du definieren kannst. Optionen mit einem "\*" müssen gesetzt 
 | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | name\*           | Name des Hyperbooks. Wird für den Seitentitel verwendet.                                                                                                                                        |
 | description      | Beschreibung des Hyperbooks. Wird für SEO verwendet.                                                                                                                                            |
+| search           | Erlaubt es im Hyperbook zu suchen. |
 | logo             | URL eines Logos. Wird für den Seitentitel verwendet. Diese kann relative zum public-Ordner (z.B.: /mein-logo.png) sein oder ein externes Bild referenzieren.                                    |
 | author.name      | Name des Autors des Hyperbooks. Wird in der Fußzeile verwendet.                                                                                                                                 |
 | author.url       | URL zur Homepage des Autors. Wird in der Fußzeile verwendet.                                                                                                                                    |
@@ -43,6 +44,8 @@ Hier ist eine Beispielkonfiguration:
 {
   "name": "Hyperbook Documentation",
   "description": "Documentation for Hyperbook created with Hyperbook",
+  "search": true,
+  "qrcode": false,
   "author": {
     "name": "OpenPatch",
     "url": "https://openpatch.org"

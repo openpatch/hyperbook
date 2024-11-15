@@ -79,6 +79,14 @@ async function postbuild() {
         "hyperbook-excalidraw.umd.js",
       ),
     },
+    {
+      src: path.join("./node_modules", "lunr", "lunr.min.js"),
+      dst: path.join("./dist", "assets", "lunr.min.js"),
+    },
+    {
+      src: path.join("./node_modules", "lunr-languages", "min"),
+      dst: path.join("./dist", "assets", "lunr-languages"),
+    },
   ];
 
   for (let asset of assets) {

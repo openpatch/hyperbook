@@ -12,9 +12,10 @@ import {
   HyperbookContext,
   Navigation,
 } from "@hyperbook/types";
+import lunr from "lunr";
 import { process as hyperbookProcess } from "@hyperbook/markdown";
 
-const ASSETS_FOLDER = "__hyperbook_assets";
+export const ASSETS_FOLDER = "__hyperbook_assets";
 
 export async function runBuildProject(
   project: Hyperproject,
@@ -129,6 +130,7 @@ async function runBuild(
     pagesAndSections.sections,
     pagesAndSections.pages,
   );
+  const searchDocuments: any[] = [];
 
   let bookFiles = await vfile.listForFolder(root, "book");
   if (filter) {
@@ -147,6 +149,7 @@ async function runBuild(
       navigation,
     };
     const result = await hyperbookProcess(file.markdown.content, ctx);
+    searchDocuments.push(...(result.data.searchDocuments || []));
     for (let directive of Object.keys(result.data.directives || {})) {
       directives.add(directive);
     }
@@ -204,6 +207,7 @@ async function runBuild(
       navigation,
     };
     const result = await hyperbookProcess(file.markdown.content, ctx);
+    searchDocuments.push(...(result.data.searchDocuments || []));
     for (let directive of Object.keys(result.data.directives || {})) {
       directives.add(directive);
     }
@@ -292,9 +296,22 @@ async function runBuild(
   for (let asset of mainAssets) {
     const assetPath = path.join(assetsPath, asset);
     const assetOut = path.join(assetsOut, asset);
-    const stat = await fs.stat(assetPath);
-    if (stat.isFile()) {
-      await cp(assetPath, assetOut, { recursive: true });
+    if (!asset.startsWith("directive-")) {
+      await cp(assetPath, assetOut, {
+        recursive: true,
+        filter: (src) => {
+          if (src.includes("lunr-languages")) {
+            return (
+              hyperbookJson.language !== undefined &&
+              hyperbookJson.language !== "en" &&
+              (src.endsWith("lunr-languages") ||
+                src.endsWith(`lunr.${hyperbookJson.language}.min.js`) ||
+                src.endsWith(`lunr.stemmer.support.min.js`))
+            );
+          }
+          return true;
+        },
+      });
     }
     if (!process.env.CI) {
       readline.clearLine(process.stdout, 0);
@@ -308,6 +325,53 @@ async function runBuild(
     }
   }
   process.stdout.write("\n");
+
+  if (hyperbookJson.search) {
+    const documents: Record<string, any> = {};
+    console.log(`${chalk.blue(`[${prefix}]`)} Building search index`);
+
+    let foundLanguage = false;
+    if (hyperbookJson.language && hyperbookJson.language !== "en") {
+      try {
+        require("lunr-languages/lunr.stemmer.support.js")(lunr);
+        require(`lunr-languages/lunr.${hyperbookJson.language}.js`)(lunr);
+        foundLanguage = true;
+      } catch (e) {
+        console.log(
+          `${chalk.yellow(`[${prefix}]`)} ${hyperbookJson.language} is no valid value for the lanuage key. See https://github.com/MihaiValentin/lunr-languages for possible values. Falling back to English.`,
+        );
+      }
+    }
+    const idx = lunr(function () {
+      if (foundLanguage) {
+        // @ts-ignore
+        this.use(lunr[hyperbookJson.language]);
+      }
+      this.ref("href");
+      this.field("description");
+      this.field("keywords");
+      this.field("heading");
+      this.field("content");
+      this.metadataWhitelist = ["position"];
+
+      searchDocuments.forEach((doc) => {
+        const href = baseCtx.makeUrl(doc.href, "book");
+        const docWithBase = {
+          ...doc,
+          href,
+        };
+        this.add(docWithBase);
+        documents[href] = docWithBase;
+      });
+    });
+
+    const js = `
+const LUNR_INDEX = ${JSON.stringify(idx)};
+const SEARCH_DOCUMENTS = ${JSON.stringify(documents)};
+`;
+
+    await fs.writeFile(path.join(rootOut, ASSETS_FOLDER, "search.js"), js);
+  }
 
   console.log(`${chalk.green(`[${prefix}]`)} Build success: ${rootOut}`);
 }

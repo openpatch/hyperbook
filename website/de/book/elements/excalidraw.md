@@ -1,6 +1,8 @@
 ---
 name: Excalidraw
 lang: de
+keywords:
+  - excalidraw
 ---
 
 # Excalidraw

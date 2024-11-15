@@ -13,6 +13,7 @@ can and part wise must set (indicated by a \*).
 | ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | name\*           | Name of your Hyperbook. Used for the page header.                                                                                                               |
 | description      | Description of your Hyperbook. Used for SEO.                                                                                                                    |
+| search | Allows searching your hyperbook |
 | logo             | URL to a logo. Used for the page title. Can be relative to the public folder or an absolute URL                                                                 |
 | author.name      | Author name of your Hyperbook. Used in the footer.                                                                                                              |
 | author.url       | Used to link the author name in the footer.                                                                                                                     |
@@ -42,6 +43,8 @@ Here is an example configuration:
 {
   "name": "Hyperbook Documentation",
   "description": "Documentation for Hyperbook created with Hyperbook",
+  "search": true,
+  "qrcode": false,
   "author": {
     "name": "OpenPatch",
     "url": "https://openpatch.org"

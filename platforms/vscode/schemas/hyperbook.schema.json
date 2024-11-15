@@ -311,6 +311,9 @@
             },
             "type": "array"
         },
+        "search": {
+            "type": "boolean"
+        },
         "styles": {
             "items": {
                 "type": "string"

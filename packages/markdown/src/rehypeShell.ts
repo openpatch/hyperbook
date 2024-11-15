@@ -585,6 +585,81 @@ const makeHeaderElements = (ctx: HyperbookContext): ElementContent[] => {
     });
   }
 
+  if (ctx.config.search) {
+    elements.push({
+      type: "element",
+      tagName: "button",
+      properties: {
+        id: "search-toggle",
+        onclick: "hyperbook.searchToggle()",
+        title: "Search",
+      },
+      children: [],
+    });
+    elements.push({
+      type: "element",
+      tagName: "side-drawer",
+      properties: {
+        id: "search-drawer",
+        right: true,
+      },
+      children: [
+        {
+          type: "element",
+          tagName: "div",
+          properties: {
+            class: "search-drawer-content",
+          },
+          children: [
+            {
+              type: "element",
+              tagName: "div",
+              properties: {
+                class: "search-input",
+              },
+              children: [
+                {
+                  type: "element",
+                  tagName: "div",
+                  properties: {
+                    class: "search-icon",
+                  },
+                  children: [],
+                },
+                {
+                  type: "element",
+                  tagName: "input",
+                  properties: {
+                    id: "search-input",
+                    placerholder: "...",
+                  },
+                  children: [],
+                },
+                {
+                  type: "element",
+                  tagName: "button",
+                  properties: {
+                    class: "search-button",
+                    onclick: "hyperbook.search()",
+                  },
+                  children: [],
+                },
+              ],
+            },
+            {
+              type: "element",
+              tagName: "div",
+              properties: {
+                id: "search-results",
+              },
+              children: [],
+            },
+          ],
+        },
+      ],
+    });
+  }
+
   return [
     {
       type: "element",

@@ -6,10 +6,11 @@ const markdown = await fs.readFile("dev.md", "utf8");
 
 const result = await process(markdown, {
   root: "",
-  qrcode: true,
   config: {
     name: "Hyperbook Dokumenation",
     description: "Dokumentation für Hyperbook erstellt mit Hyperbook",
+    qrcode: true,
+    search: true,
     author: {
       name: "OpenPatch",
       url: "https://openpatch.org",

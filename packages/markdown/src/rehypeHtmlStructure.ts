@@ -14,6 +14,59 @@ function parseFont(font: string): [string, string] {
   return [parts[0], "100%"];
 }
 
+const makeSearchScripts = (ctx: HyperbookContext): ElementContent[] => {
+  const elements: ElementContent[] = [];
+  if (ctx.config.search) {
+    elements.push({
+      type: "element",
+      tagName: "script",
+      properties: {
+        src: ctx.makeUrl(["lunr.min.js"], "assets"),
+        defer: true,
+      },
+      children: [],
+    });
+
+    if (ctx.config.language && ctx.config.language !== "en") {
+      elements.push({
+        type: "element",
+        tagName: "script",
+        properties: {
+          src: ctx.makeUrl(
+            ["lunr-languages", "lunr.stemmer.support.min.js"],
+            "assets",
+          ),
+          defer: true,
+        },
+        children: [],
+      });
+      elements.push({
+        type: "element",
+        tagName: "script",
+        properties: {
+          src: ctx.makeUrl(
+            ["lunr-languages", `lunr.${ctx.config.language}.min.js`],
+            "assets",
+          ),
+          defer: true,
+        },
+        children: [],
+      });
+    }
+    elements.push({
+      type: "element",
+      tagName: "script",
+      properties: {
+        src: ctx.makeUrl(["search.js"], "assets"),
+        defer: true,
+      },
+      children: [],
+    });
+  }
+
+  return elements;
+};
+
 const makeRootCssElement = ({
   makeUrl,
   config: { colors, font, fonts },
@@ -222,7 +275,7 @@ export default (ctx: HyperbookContext) => () => {
                 type: "element",
                 tagName: "meta",
                 properties: {
-                  property: "description",
+                  name: "description",
                   content: `${currentPage?.description || config.description}`,
                 },
                 children: [],
@@ -240,7 +293,7 @@ export default (ctx: HyperbookContext) => () => {
                 type: "element",
                 tagName: "meta",
                 properties: {
-                  property: "keywords",
+                  name: "keywords",
                   content: currentPage?.keywords
                     ? `${currentPage?.keywords.join("")}`
                     : undefined,
@@ -257,6 +310,15 @@ export default (ctx: HyperbookContext) => () => {
                 children: [],
               },
               makeRootCssElement(ctx),
+              {
+                type: "element",
+                tagName: "link",
+                properties: {
+                  rel: "stylesheet",
+                  href: makeUrl(["math", "katex.min.css"], "assets"),
+                },
+                children: [],
+              },
               {
                 type: "element",
                 tagName: "link",
@@ -335,6 +397,7 @@ HYPERBOOK_ASSETS = "${makeUrl("/", "assets")}"
                 },
                 children: [],
               },
+              ...makeSearchScripts(ctx),
               {
                 type: "element",
                 tagName: "script",
@@ -376,6 +439,7 @@ HYPERBOOK_ASSETS = "${makeUrl("/", "assets")}"
                 tagName: "script",
                 properties: {
                   src: makeUrl(["client.js"], "assets"),
+                  defer: true,
                 },
                 children: [],
               },
@@ -393,6 +457,7 @@ HYPERBOOK_ASSETS = "${makeUrl("/", "assets")}"
                                 ["directive-" + directive, script],
                                 "assets",
                               ),
+                          defer: true,
                         },
                         children: [],
                       }) as ElementContent,
@@ -407,6 +472,7 @@ HYPERBOOK_ASSETS = "${makeUrl("/", "assets")}"
                       src: script.includes("://")
                         ? script
                         : makeUrl(script, "public"),
+                      defer: true,
                     },
                     children: [],
                   }) as ElementContent,
@@ -420,6 +486,7 @@ HYPERBOOK_ASSETS = "${makeUrl("/", "assets")}"
                       src: script.includes("://")
                         ? script
                         : makeUrl(script, "public"),
+                      defer: true,
                     },
                     children: [],
                   }) as ElementContent,
