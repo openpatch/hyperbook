@@ -14,6 +14,59 @@ function parseFont(font: string): [string, string] {
   return [parts[0], "100%"];
 }
 
+const makeSearchScripts = (ctx: HyperbookContext): ElementContent[] => {
+  const elements: ElementContent[] = [];
+  if (ctx.config.search) {
+    elements.push({
+      type: "element",
+      tagName: "script",
+      properties: {
+        src: ctx.makeUrl(["lunr.min.js"], "assets"),
+        defer: true,
+      },
+      children: [],
+    });
+
+    if (ctx.config.language && ctx.config.language !== "en") {
+      elements.push({
+        type: "element",
+        tagName: "script",
+        properties: {
+          src: ctx.makeUrl(
+            ["lunr-languages", "lunr.stemmer.support.min.js"],
+            "assets",
+          ),
+          defer: true,
+        },
+        children: [],
+      });
+      elements.push({
+        type: "element",
+        tagName: "script",
+        properties: {
+          src: ctx.makeUrl(
+            ["lunr-languages", `lunr.${ctx.config.language}.min.js`],
+            "assets",
+          ),
+          defer: true,
+        },
+        children: [],
+      });
+    }
+    elements.push({
+      type: "element",
+      tagName: "script",
+      properties: {
+        src: ctx.makeUrl(["search.js"], "assets"),
+        defer: true,
+      },
+      children: [],
+    });
+  }
+
+  return elements;
+};
+
 const makeRootCssElement = ({
   makeUrl,
   config: { colors, font, fonts },
@@ -344,28 +397,7 @@ HYPERBOOK_ASSETS = "${makeUrl("/", "assets")}"
                 },
                 children: [],
               },
-              ...(ctx.config.search
-                ? [
-                    {
-                      type: "element",
-                      tagName: "script",
-                      properties: {
-                        src: makeUrl(["lunr.min.js"], "assets"),
-                        defer: true,
-                      },
-                      children: [],
-                    } as ElementContent,
-                    {
-                      type: "element",
-                      tagName: "script",
-                      properties: {
-                        src: makeUrl(["search.js"], "assets"),
-                        defer: true,
-                      },
-                      children: [],
-                    } as ElementContent,
-                  ]
-                : []),
+              ...makeSearchScripts(ctx),
               {
                 type: "element",
                 tagName: "script",

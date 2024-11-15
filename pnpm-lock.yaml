@@ -190,6 +190,9 @@ importers:
       lunr:
         specifier: ^2.3.9
         version: 2.3.9
+      lunr-languages:
+        specifier: ^1.14.0
+        version: 1.14.0
       mime:
         specifier: ^4.0.4
         version: 4.0.4
@@ -341,6 +344,9 @@ importers:
       lunr:
         specifier: ^2.3.9
         version: 2.3.9
+      lunr-languages:
+        specifier: ^1.14.0
+        version: 1.14.0
       mermaid:
         specifier: 11.3.0
         version: 11.3.0
@@ -4289,6 +4295,9 @@ packages:
   lru-cache@6.0.0:
     resolution: {integrity: sha512-Jo6dJ04CmSjuznwJSS3pUeWmd/H0ffTlkXXgwZi+eq1UCmqQwCh+eLsYOYCwY991i2Fah4h1BEMCx4qThGbsiA==}
     engines: {node: '>=10'}
+
+  lunr-languages@1.14.0:
+    resolution: {integrity: sha512-hWUAb2KqM3L7J5bcrngszzISY4BxrXn/Xhbb9TTCJYEGqlR1nG67/M14sp09+PTIRklobrn57IAxcdcO/ZFyNA==}
 
   lunr@2.3.9:
     resolution: {integrity: sha512-zTU3DaZaF3Rt9rhN3uBMGQD3dD2/vFQqnvZCDv4dl5iOzq2IZQqTxu90r4E5J+nP70J3ilqVCrbho2eWaeW8Ow==}
@@ -11114,6 +11123,8 @@ snapshots:
   lru-cache@6.0.0:
     dependencies:
       yallist: 4.0.0
+
+  lunr-languages@1.14.0: {}
 
   lunr@2.3.9: {}
 

@@ -297,7 +297,21 @@ async function runBuild(
     const assetPath = path.join(assetsPath, asset);
     const assetOut = path.join(assetsOut, asset);
     if (!asset.startsWith("directive-")) {
-      await cp(assetPath, assetOut, { recursive: true });
+      await cp(assetPath, assetOut, {
+        recursive: true,
+        filter: (src) => {
+          if (src.includes("lunr-languages")) {
+            return (
+              hyperbookJson.language !== undefined &&
+              hyperbookJson.language !== "en" &&
+              (src.endsWith("lunr-languages") ||
+                src.endsWith(`lunr.${hyperbookJson.language}.min.js`) ||
+                src.endsWith(`lunr.stemmer.support.min.js`))
+            );
+          }
+          return true;
+        },
+      });
     }
     if (!process.env.CI) {
       readline.clearLine(process.stdout, 0);
@@ -314,7 +328,25 @@ async function runBuild(
 
   if (hyperbookJson.search) {
     const documents: Record<string, any> = {};
+    console.log(`${chalk.blue(`[${prefix}]`)} Building search index`);
+
+    let foundLanguage = false;
+    if (hyperbookJson.language && hyperbookJson.language !== "en") {
+      try {
+        require("lunr-languages/lunr.stemmer.support.js")(lunr);
+        require(`lunr-languages/lunr.${hyperbookJson.language}.js`)(lunr);
+        foundLanguage = true;
+      } catch (e) {
+        console.log(
+          `${chalk.yellow(`[${prefix}]`)} ${hyperbookJson.language} is no valid value for the lanuage key. See https://github.com/MihaiValentin/lunr-languages for possible values. Falling back to English.`,
+        );
+      }
+    }
     const idx = lunr(function () {
+      if (foundLanguage) {
+        // @ts-ignore
+        this.use(lunr[hyperbookJson.language]);
+      }
       this.ref("href");
       this.field("description");
       this.field("keywords");

@@ -83,6 +83,7 @@
     "chokidar": "3.6.0",
     "live-server": "^1.2.2",
     "lunr": "^2.3.9",
+    "lunr-languages": "^1.14.0",
     "mermaid": "11.3.0",
     "ncp": "^2.0.0",
     "scratchblocks": "^3.6.4",
