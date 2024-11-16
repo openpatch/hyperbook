@@ -170,7 +170,10 @@ async function runBuild(
       await makeDir(permaOut, {
         recursive: true,
       });
-      const permaFileOut = path.join(permaOut, file.markdown.data.permaid);
+      const permaFileOut = path.join(
+        permaOut,
+        file.markdown.data.permaid + ".html",
+      );
       await fs.writeFile(permaFileOut, result.value);
     }
     await fs.writeFile(fileOut, result.value);
