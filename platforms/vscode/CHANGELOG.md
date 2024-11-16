@@ -1,5 +1,16 @@
 # @hyperbook/vscode-extension
 
+## 0.27.0
+
+### Minor Changes
+
+- [#909](https://github.com/openpatch/hyperbook/pull/909) [`88071bd`](https://github.com/openpatch/hyperbook/commit/88071bd13ca297a32f110e322e7142e7b0406736) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add GeoGebra element.
+
+### Patch Changes
+
+- Updated dependencies [[`88071bd`](https://github.com/openpatch/hyperbook/commit/88071bd13ca297a32f110e322e7142e7b0406736)]:
+  - @hyperbook/markdown@0.15.0
+
 ## 0.26.0
 
 ### Minor Changes

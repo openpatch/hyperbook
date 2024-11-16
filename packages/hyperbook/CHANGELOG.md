@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.38.0
+
+### Minor Changes
+
+- [#909](https://github.com/openpatch/hyperbook/pull/909) [`88071bd`](https://github.com/openpatch/hyperbook/commit/88071bd13ca297a32f110e322e7142e7b0406736) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add GeoGebra element.
+
 ## 0.37.0
 
 ### Minor Changes
