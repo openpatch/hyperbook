@@ -47,6 +47,7 @@ import remarkLink from "./remarkLink";
 import remarkDirectivePagelist from "./remarkDirectivePagelist";
 import rehypeQrCode from "./rehypeQrCode";
 import remarkCollectSearchDocuments from "./remarkCollectSearchDocuments";
+import remarkDirectiveGeogebra from "./remarkDirectiveGeogebra";
 
 export const remark = (ctx: HyperbookContext) => {
   const remarkPlugins: PluggableList = [
@@ -79,6 +80,7 @@ export const remark = (ctx: HyperbookContext) => {
     remarkDirectiveMermaid(ctx),
     remarkDirectiveExcalidraw(ctx),
     remarkDirectiveStruktog(ctx),
+    remarkDirectiveGeogebra(ctx),
     remarkCode(ctx),
     remarkMath,
     remarkGemoji,
