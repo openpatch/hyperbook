@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.38.1
+
+### Patch Changes
+
+- [`d1e977c`](https://github.com/openpatch/hyperbook/commit/d1e977c1e1414cb49c1b88623948a73e5c51995d) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add html extensions to permaid files
+
 ## 0.38.0
 
 ### Minor Changes
