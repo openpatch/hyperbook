@@ -10,17 +10,19 @@ GeoGebra applets can be embedded in various ways.
 On one hand, GeoGebra instructions can be passed directly.
 
 ```md
-:::geogebra{height=400 width=700 coordsystem="-10,10,-2,8"}
+:::geogebra{perspective="G" height=400 width=700 coordsystem="-10,10,-2,8"}
 
 a = Slider[-5,5]
+SetCoords(a, 450, 370)
 f_a(x) = x^2 * a + a * x
 
 :::
 ```
 
-:::geogebra{height=400 width=700 coordsystem="-10,10,-2,8"}
+:::geogebra{perspective="G" height=400 width=700 coordsystem="-10,10,-2,8"}
 
 a = Slider[-5,5]
+SetCoords(a, 450, 370)
 f_a(x) = x^2 * a + a * x
 
 :::

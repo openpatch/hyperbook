@@ -11,17 +11,19 @@ GeoGebra Applets können auf unterschiedle Art und Weise eingebunden werden.
 Zum einen können GeoGebra Anweisungen direkt übergeben werden.
 
 ```md
-:::geogebra{height=400 width=700 coordsystem="-10,10,-2,8"}
+:::geogebra{perspective="G" height=400 width=700 coordsystem="-10,10,-2,8"}
 
 a = Slider[-5,5]
+SetCoords(a, 450, 370)
 f_a(x) = x^2 * a + a * x
 
 :::
 ```
 
-:::geogebra{height=400 width=700 coordsystem="-10,10,-2,8"}
+:::geogebra{perspective="G" height=400 width=700 coordsystem="-10,10,-2,8"}
 
 a = Slider[-5,5]
+SetCoords(a, 450, 370)
 f_a(x) = x^2 * a + a * x
 
 :::
