@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.38.2
+
+### Patch Changes
+
+- [`3cdf623`](https://github.com/openpatch/hyperbook/commit/3cdf6235fc52061977e856f5df99df1f68a25742) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - fix searchEl not found
+
 ## 0.38.1
 
 ### Patch Changes
