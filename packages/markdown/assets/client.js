@@ -36,12 +36,14 @@ var hyperbook = (function () {
   // search
 
   const searchInputEl = document.getElementById("search-input");
-  searchInputEl.addEventListener("keypress", (event) => {
-    if (event.key === "Enter") {
-      event.preventDefault();
-      search();
-    }
-  });
+  if (searchInputEl) {
+    searchInputEl.addEventListener("keypress", (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        search();
+      }
+    });
+  }
 
   function searchToggle() {
     const searchDrawerEl = document.getElementById("search-drawer");
