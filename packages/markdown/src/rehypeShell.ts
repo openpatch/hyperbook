@@ -46,64 +46,66 @@ const makeNavigationSectionElement = (
   let isExpanded =
     ctx.navigation.current?.href?.startsWith(href || "") || expanded;
 
-  if (!virtual && isEmpty) {
-    children.push({
-      type: "element",
-      tagName: "div",
-      properties: {
-        class: [
-          "collapsible",
-          "name",
-          "empty",
-          ctx.navigation.current?.href === href ? "active" : "",
-          isExpanded ? "expanded" : "",
-        ].join(" "),
-      },
-      children: [
-        {
-          type: "element",
-          tagName: "span",
-          properties: {
-            class: "label",
-          },
-          children: [
-            {
-              type: "text",
-              value: name,
-            },
-          ],
+  if (!virtual) {
+    if (isEmpty) {
+      children.push({
+        type: "element",
+        tagName: "div",
+        properties: {
+          class: [
+            "collapsible",
+            "name",
+            "empty",
+            ctx.navigation.current?.href === href ? "active" : "",
+            isExpanded ? "expanded" : "",
+          ].join(" "),
         },
-      ],
-    });
-  } else {
-    children.push({
-      type: "element",
-      tagName: "div",
-      properties: {
-        class: [
-          "collapsible",
-          "name",
-          ctx.navigation.current?.href === href ? "active" : "",
-          isExpanded ? "expanded" : "",
-        ].join(" "),
-      },
-      children: [
-        {
-          type: "element",
-          tagName: "a",
-          properties: {
-            href: href,
-            class: "label",
-          },
-          children: [
-            {
-              type: "text",
-              value: name,
+        children: [
+          {
+            type: "element",
+            tagName: "span",
+            properties: {
+              class: "label",
             },
-          ],
+            children: [
+              {
+                type: "text",
+                value: name,
+              },
+            ],
+          },
+        ],
+      });
+    } else {
+      children.push({
+        type: "element",
+        tagName: "div",
+        properties: {
+          class: [
+            "collapsible",
+            "name",
+            ctx.navigation.current?.href === href ? "active" : "",
+            isExpanded ? "expanded" : "",
+          ].join(" "),
         },
-      ],
-    });
+        children: [
+          {
+            type: "element",
+            tagName: "a",
+            properties: {
+              href: href,
+              class: "label",
+            },
+            children: [
+              {
+                type: "text",
+                value: name,
+              },
+            ],
+          },
+        ],
+      });
+    }
   }
 
   const pagesElements: ElementContent[] = pages
