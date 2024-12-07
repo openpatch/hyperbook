@@ -14,6 +14,7 @@ import {
 } from "@hyperbook/types";
 import lunr from "lunr";
 import { process as hyperbookProcess } from "@hyperbook/markdown";
+import packageJson from "./package.json";
 
 export const ASSETS_FOLDER = "__hyperbook_assets";
 
@@ -118,7 +119,7 @@ async function runBuild(
         case "archive":
           return posix.join("/", basePath || "", "archives", ...path);
         case "assets":
-          return posix.join("/", basePath || "", ASSETS_FOLDER, ...path);
+          return `${posix.join("/", basePath || "", ASSETS_FOLDER, ...path)}?version=${packageJson.version}`;
       }
     },
     project: rootProject,
