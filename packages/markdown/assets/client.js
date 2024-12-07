@@ -2,6 +2,7 @@ var hyperbook = (function () {
   const collapsibles = document.getElementsByClassName("collapsible");
   const animationDelay = 100;
   const calcMaxHeight = (elem) => {
+    if (!elem) return;
     const content = elem.nextElementSibling;
     if (content) {
       if (elem.classList.contains("expanded")) {

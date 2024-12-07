@@ -133,7 +133,7 @@ const makeNavigationSectionElement = (
     type: "element",
     tagName: "div",
     properties: {
-      class: "collapsible-content links",
+      class: virtual ? "links" :  "collapsible-content links",
     },
     children: linksElements,
   });
