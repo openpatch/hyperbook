@@ -1,5 +1,13 @@
 # hyperbook
 
+## 0.39.0
+
+### Minor Changes
+
+- [`05b75d7`](https://github.com/openpatch/hyperbook/commit/05b75d7f59c8492fdbf4c422b35e85b740429e90) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add ?version= at the end of an asset url to refresh the cache if a new hyperbook version is released.
+
+- [`28d5912`](https://github.com/openpatch/hyperbook/commit/28d5912d977c6eb4eb57d5f222a96d3fc5387282) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Remove menu animation for better experience
+
 ## 0.38.4
 
 ### Patch Changes
