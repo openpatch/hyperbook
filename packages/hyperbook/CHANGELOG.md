@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.38.4
+
+### Patch Changes
+
+- [`d4876f7`](https://github.com/openpatch/hyperbook/commit/d4876f7db102a98da1d37f10a3e15633f396ce1f) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - fix virtual section not rendering
+
 ## 0.38.3
 
 ### Patch Changes
