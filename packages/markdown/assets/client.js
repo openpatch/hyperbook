@@ -1,33 +1,10 @@
 var hyperbook = (function () {
   const collapsibles = document.getElementsByClassName("collapsible");
-  const animationDelay = 100;
-  const calcMaxHeight = (elem) => {
-    if (!elem) return;
-    const content = elem.nextElementSibling;
-    if (content) {
-      if (elem.classList.contains("expanded")) {
-        content.style.maxHeight = content.scrollHeight + "px";
-      } else {
-        content.style.maxHeight = "0";
-      }
-    }
-    const nextParentContent = elem.closest(".collapsible-content");
-    if (nextParentContent !== null) {
-      const nextParentCollapsible = nextParentContent.previousElementSibling;
-      setTimeout(function () {
-        calcMaxHeight(nextParentCollapsible);
-      }, animationDelay);
-    }
-  };
+
   for (let collapsible of collapsibles) {
     collapsible.addEventListener("click", () => {
       collapsible.classList.toggle("expanded");
-      calcMaxHeight(collapsible);
     });
-
-    if (collapsible.classList.contains("expanded")) {
-      calcMaxHeight(collapsible);
-    }
   }
 
   function tocToggle() {
