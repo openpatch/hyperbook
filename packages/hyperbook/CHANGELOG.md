@@ -1,5 +1,14 @@
 # hyperbook
 
+## 0.39.1
+
+### Patch Changes
+
+- [`698acbb`](https://github.com/openpatch/hyperbook/commit/698acbb5189453e25c295acaba59be87202e7d09) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix hyperbook double rebuilding in dev mode
+
+- Updated dependencies [[`27d2f47`](https://github.com/openpatch/hyperbook/commit/27d2f47e0e669b3738f62206bed767d29abce18a)]:
+  - @hyperbook/fs@0.16.0
+
 ## 0.39.0
 
 ### Minor Changes
