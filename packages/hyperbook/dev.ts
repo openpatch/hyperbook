@@ -122,6 +122,7 @@ socket.addEventListener("message", (event) => {
   const rebuild = async (file: string) => {
     console.log(file);
     if (!rebuilding) {
+      rebuilding = true;
       const rootProject = await hyperproject.get(process.cwd());
       await runBuildProject(rootProject, rootProject);
       reloadServer.emit("reload");
