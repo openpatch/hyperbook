@@ -41,8 +41,8 @@ const registerHelpers = (handlebars: any, options?: { file: VFileBase }) => {
     return accum;
   });
 
-  handlebars.registerHelper("concat", (s1: string, s2: string) => {
-    return s1 + s2;
+  handlebars.registerHelper("concat", (...s: string[]) => {
+    return s.filter(s => typeof s !== "object").join("");
   });
 
   handlebars.registerHelper("camelcase", (s: string) => {
