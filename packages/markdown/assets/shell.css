@@ -16,6 +16,11 @@ a {
   color: var(--color-brand);
 }
 
+#dark-mode-toggle {
+  margin-right: 16px;
+  line-height: 1;
+}
+
 ul,
 ol,
 li {

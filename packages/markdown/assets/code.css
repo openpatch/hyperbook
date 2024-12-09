@@ -134,33 +134,9 @@ pre button.rehype-pretty-copy {
   font-weight: 700;
 }
 
-[data-chars-id="r"] {
-  color: #9f123980 !important;
-  background-color: rgb(249, 168, 212) !important;
-}
-
-[data-chars-id="y"] {
-  color: #854d0e80 !important;
-  background-color: rgb(253, 224, 71) !important;
-}
-
-[data-chars-id="l"] {
-  color: #6b21a880 !important;
-  background-color: rgb(233, 213, 255) !important;
-}
-
-
-figure[data-rehype-pretty-code-figure] pre,
-code[data-theme*=" "],
-code[data-theme*=" "] span {
-  color: var(--shiki-light);
-  background-color: var(--shiki-light-bg);
-}
-
 [data-rehype-pretty-code-title] {
   border-top-left-radius: .5rem;
   border-top-right-radius: .5rem;
-  border-color: var(--color-spacer);
   border-style: solid;
   border-width: 1px;
   border-bottom: none;
@@ -168,17 +144,6 @@ code[data-theme*=" "] span {
   font-size: .875rem;
   line-height: 1.25rem;
   font-weight: 600;
-  color: var(--color-text);
-}
-
-[data-rehype-pretty-code-title] {
-  color: var(--color-text);
-  background-color: var(--color-nav);
-  border-color: var(--color-spacer);
-}
-
-[data-highlighted-line] {
-  background: var(--color-nav) !important;
 }
 
 figure[data-rehype-pretty-code-figure]:has(>[data-rehype-pretty-code-title]) pre {
@@ -212,48 +177,4 @@ code[data-line-numbers-max-digits="3"]>[data-line]::before {
 
 code[data-line-numbers-max-digits="4"]>[data-line]::before {
   width: 2.25rem;
-}
-
-@media (prefers-color-scheme: dark) {
-
-  figure[data-rehype-pretty-code-figure] pre,
-  code[data-theme*=" "],
-  code[data-theme*=" "] span {
-    color: var(--shiki-dark);
-    background-color: var(--shiki-dark-bg);
-  }
-
-  [data-highlighted-chars] {
-    background-color: var(--color-spacer) !important;
-  }
-
-  [data-rehype-pretty-code-title] {
-    color: var(--color-text);
-    background-color: var(--color-spacer);
-    border-color: var(--color-spacer);
-  }
-
-  [data-highlighted-line] {
-    background: var(--color-spacer) !important;
-  }
-
-  [data-char-id] {
-    background-color: var(--color-spacer);
-  }
-
-  [data-chars-id="r"] {
-    background-color: #9f123980 !important;
-    color: rgb(249, 168, 212) !important;
-  }
-
-  [data-chars-id="y"] {
-    background-color: #854d0e80 !important;
-    color: rgb(253, 224, 71) !important;
-  }
-
-  [data-chars-id="l"] {
-    background-color: #6b21a880 !important;
-    color: rgb(233, 213, 255) !important;
-  }
-
 }

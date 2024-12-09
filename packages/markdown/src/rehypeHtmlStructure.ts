@@ -34,7 +34,7 @@ const makeSearchScripts = (ctx: HyperbookContext): ElementContent[] => {
         properties: {
           src: ctx.makeUrl(
             ["lunr-languages", "lunr.stemmer.support.min.js"],
-            "assets",
+            "assets"
           ),
           defer: true,
         },
@@ -46,7 +46,7 @@ const makeSearchScripts = (ctx: HyperbookContext): ElementContent[] => {
         properties: {
           src: ctx.makeUrl(
             ["lunr-languages", `lunr.${ctx.config.language}.min.js`],
-            "assets",
+            "assets"
           ),
           defer: true,
         },
@@ -138,45 +138,6 @@ body::-webkit-scrollbar {
   }
 
   rootCss += `
-:root {
-  --color-background: white;
-  --color-text: black;
-  --color-text-deactivated: #242428;
-  --color-nav: #f5f5f5;
-  --color-nav-border: #3c3c3c;
-  --color-author-background: #d6d6d6;
-  --color-author-color: #3c3c3c;
-  --color-spacer: #a4a4a4;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-background: #1e1e1e;
-    --color-text: #f5f5f5;
-    --color-text-deactivated: #d6d6d6;
-    --color-nav: #222222;
-    --color-nav-border: #464646;
-    --color-author-background: #2c2c2c;
-    --color-author-color: #d6d6d6;
-    --color-spacer: #3c3c3c;
-    --color-brand: var(--color-brand-dark);
-  }
-
-  header {
-    background: var(--color-nav)!important;
-  }
-
-  .branding {
-    color: var(--color-brand)!important;
-  }
-
-  .toggle .bar1,
-  .toggle .bar2,
-  .toggle .bar3 {
-    background-color: var(--color-brand)!important;
-  }
-}
-
 body {
   overscroll-behavior-x: none;
   background-color: transparent;
@@ -312,6 +273,52 @@ export default (ctx: HyperbookContext) => () => {
               makeRootCssElement(ctx),
               {
                 type: "element",
+                tagName: "noscript",
+                properties: {
+                  id: "dark-mode-toggle-stylesheets"
+                },
+                children: [
+                  {
+                    type: "element",
+                    tagName: "link",
+                    properties: {
+                      rel: "stylesheet",
+                      href: makeUrl(["light.css"], "assets"),
+                      media: "(prefers-color-scheme: light)",
+                    },
+                    children: [],
+                  },
+                  {
+                    type: "element",
+                    tagName: "link",
+                    properties: {
+                      rel: "stylesheet",
+                      href: makeUrl(["dark.css"], "assets"),
+                      media: "(prefers-color-scheme: dark)",
+                    },
+                    children: [],
+                  },
+                ],
+              },
+              {
+                type: "element",
+                tagName: "script",
+                properties: {
+                  src: makeUrl(["dark-mode-toggle-stylesheets-loader.js"], "assets"),
+                },
+                children: []
+              },
+              {
+                type: "element",
+                tagName: "script",
+                properties: {
+                  type: "module",
+                  src: makeUrl(["dark-mode-toggle.mjs"], "assets"),
+                },
+                children: []
+              },
+              {
+                type: "element",
                 tagName: "link",
                 properties: {
                   rel: "stylesheet",
@@ -358,7 +365,7 @@ export default (ctx: HyperbookContext) => () => {
                         : makeUrl(style, "public"),
                     },
                     children: [],
-                  }) as ElementContent,
+                  }) as ElementContent
               ),
               ...(ctx.navigation.current?.styles || []).map(
                 (style) =>
@@ -372,7 +379,7 @@ export default (ctx: HyperbookContext) => () => {
                         : makeUrl(style, "public"),
                     },
                     children: [],
-                  }) as ElementContent,
+                  }) as ElementContent
               ),
               {
                 type: "element",
@@ -419,12 +426,12 @@ HYPERBOOK_ASSETS = "${makeUrl("/", "assets")}"
                           ? style
                           : makeUrl(
                               ["directive-" + directive, style],
-                              "assets",
+                              "assets"
                             ),
                       },
                       children: [],
-                    }) as ElementContent,
-                ),
+                    }) as ElementContent
+                )
               ),
             ],
           },
@@ -455,13 +462,13 @@ HYPERBOOK_ASSETS = "${makeUrl("/", "assets")}"
                             ? script
                             : makeUrl(
                                 ["directive-" + directive, script],
-                                "assets",
+                                "assets"
                               ),
                           defer: true,
                         },
                         children: [],
-                      }) as ElementContent,
-                  ),
+                      }) as ElementContent
+                  )
               ),
               ...(ctx.config.scripts || []).map(
                 (script) =>
@@ -475,7 +482,7 @@ HYPERBOOK_ASSETS = "${makeUrl("/", "assets")}"
                       defer: true,
                     },
                     children: [],
-                  }) as ElementContent,
+                  }) as ElementContent
               ),
               ...(ctx.navigation.current?.scripts || []).map(
                 (script) =>
@@ -489,7 +496,7 @@ HYPERBOOK_ASSETS = "${makeUrl("/", "assets")}"
                       defer: true,
                     },
                     children: [],
-                  }) as ElementContent,
+                  }) as ElementContent
               ),
             ],
           },

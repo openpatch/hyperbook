@@ -662,6 +662,18 @@ const makeHeaderElements = (ctx: HyperbookContext): ElementContent[] => {
     });
   }
 
+  elements.push({
+    type: "element",
+    tagName: "dark-mode-toggle",
+    properties: {
+      id: "dark-mode-toggle",
+      appearence: "switch",
+      permanent: true
+    },
+    children: [],
+  })
+
+
   return [
     {
       type: "element",

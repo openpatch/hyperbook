@@ -1,5 +1,13 @@
 # Test Site
 
+```java
+class Test {
+  public void test() {
+
+  }
+}
+```
+
 
 ```mermaid
 classDiagram

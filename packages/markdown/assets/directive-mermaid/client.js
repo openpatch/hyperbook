@@ -33,24 +33,20 @@ hyperbook.mermaid = (function () {
   };
 
   const init = () => {
-    const colorSchemeQueryList = window.matchMedia(
-      "(prefers-color-scheme: dark)",
-    );
-
-    const setColorScheme = (e) => {
-      if (e.matches) {
-        resetProcessed().then(loadMermaid("dark")).catch(console.error);
-      } else {
-        resetProcessed().then(loadMermaid("default")).catch(console.error);
-      }
-    };
-
-    if (colorSchemeQueryList.matches) {
+    const toggle = document.querySelector("dark-mode-toggle");
+    if (toggle?.mode == "dark") {
       resetProcessed().then(loadMermaid("dark")).catch(console.error);
     } else {
       resetProcessed().then(loadMermaid("default")).catch(console.error);
     }
-    colorSchemeQueryList.addEventListener("change", setColorScheme);
+
+    document.addEventListener("colorschemechange", (e) => {
+      if (e.detail.colorScheme === "dark") {
+        resetProcessed().then(loadMermaid("dark")).catch(console.error);
+      } else {
+        resetProcessed().then(loadMermaid("default")).catch(console.error);
+      }
+    });
   };
 
   init();
