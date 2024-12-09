@@ -1,5 +1,17 @@
 # @hyperbook/markdown
 
+## 0.17.0
+
+### Minor Changes
+
+- [`05b262a`](https://github.com/openpatch/hyperbook/commit/05b262af61d920ed4b0dc4d3b3e88c85424e74cf) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add dark mode toggle
+
+### Patch Changes
+
+- [`7126cb7`](https://github.com/openpatch/hyperbook/commit/7126cb7349b3ad54d1593bce72dc364b14a27e68) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - improve css
+
+- [`769228e`](https://github.com/openpatch/hyperbook/commit/769228eea963ba58147747362aa50ffc4c8fba3c) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix search results not visually pleasing in light mode
+
 ## 0.16.0
 
 ### Minor Changes
