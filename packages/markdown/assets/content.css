@@ -445,7 +445,9 @@ figure {
   color: var(--color-text);
   font-size: 1rem;
   border-radius: 8px;
-  background-color: var(--color-nav-border);
+  border-color: var(--color-nav-border);
+  border-style: solid;
+  border-width: 1px;
   padding: 8px;
 }
 
