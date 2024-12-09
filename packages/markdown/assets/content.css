@@ -378,17 +378,14 @@ figure {
 }
 
 #search-toggle {
-  background-color: var(--color-text);
+  background-color: var(--color-brand-text);
   width: 24px;
   height: 24px;
   cursor: pointer;
   margin-right: 16px;
   mask-repeat: no-repeat;
+  cursor: pointer;
   mask-image: url('data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/PjxzdmcgY2xhc3M9ImZlYXRoZXIgZmVhdGhlci1zZWFyY2giIGZpbGw9Im5vbmUiIGhlaWdodD0iMjQiIHN0cm9rZT0iY3VycmVudENvbG9yIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIHN0cm9rZS13aWR0aD0iMiIgdmlld0JveD0iMCAwIDI0IDI0IiB3aWR0aD0iMjQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMTEiIGN5PSIxMSIgcj0iOCIvPjxsaW5lIHgxPSIyMSIgeDI9IjE2LjY1IiB5MT0iMjEiIHkyPSIxNi42NSIvPjwvc3ZnPg==')
-}
-
-#search-toggle:hover {
-  background-color: var(--color-brand);
 }
 
 #search-drawer {
@@ -474,7 +471,7 @@ figure {
   display: flex;
   flex-direction: column;
   padding: 8px;
-  height: calc(var(--app-height));
+  height: 100%;
   overflow-y: auto;
   gap: 8px;
 }
@@ -487,7 +484,7 @@ figure {
 .toc-drawer-content {
   display: flex;
   flex-direction: column;
-  height: calc(var(--app-height));
+  height: 100%;
 }
 
 .toc-drawer-content>nav {

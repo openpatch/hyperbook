@@ -20,7 +20,6 @@ hyperbook.mermaid = (function () {
               .replace(/"/g, "&quot;")
               .replace(/'/g, "&#39;");
             element.innerHTML = escapedData;
-            console.log(element.innerHTML);
           }
           count--;
           if (count == 0) {

@@ -1,6 +1,5 @@
 :root {
   --internal-color-error: #d26466;
-  --app-height: 100dvh;
 }
 
 .main-grid * {
@@ -190,8 +189,11 @@ a.jump.previous::before {
 .main-grid {
   font-family: hyperbook-body, sans-serif;
   display: grid;
-  height: var(--app-height);
-  width: 100dvw;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
   grid-template-columns: 300px 1fr;
   grid-template-rows: 80px 1fr;
   grid-template-areas:
@@ -202,8 +204,8 @@ a.jump.previous::before {
 .nav-drawer-content {
   display: flex;
   flex-direction: column;
+  height: 100%;
   grid-area: nav;
-  height: calc(var(--app-height));
   overflow-y: auto;
 }
 
@@ -211,7 +213,6 @@ a.jump.previous::before {
   display: flex;
   flex-direction: column;
   grid-area: nav;
-  height: calc(var(--app-height) - 80px);
   overflow-y: auto;
   border-right-style: solid;
   border-right-width: 1px;
