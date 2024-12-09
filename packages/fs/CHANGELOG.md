@@ -1,5 +1,11 @@
 # @hyperbook/fs
 
+## 0.16.0
+
+### Minor Changes
+
+- [`27d2f47`](https://github.com/openpatch/hyperbook/commit/27d2f47e0e669b3738f62206bed767d29abce18a) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Improve concat function to accept many strings
+
 ## 0.15.0
 
 ### Minor Changes
