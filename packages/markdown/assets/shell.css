@@ -194,7 +194,7 @@ a.jump.previous::before {
 .main-grid {
   font-family: hyperbook-body, sans-serif;
   display: grid;
-  position: absolute;
+  position: fixed;
   left: 0;
   right: 0;
   top: 0;

@@ -74,8 +74,10 @@ const makeRootCssElement = ({
   let rootCss = `
 html,
 body {
-  overflow-x: hidden;
+  overflow: hidden;
   margin: 0;
+  height: 100dvh;
+  width: 100dvw;
 }
 
 body {
