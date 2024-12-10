@@ -1,5 +1,11 @@
 # @hyperbook/markdown
 
+## 0.17.1
+
+### Patch Changes
+
+- [`124f573`](https://github.com/openpatch/hyperbook/commit/124f573acddab763617f6bdfd261d64aca516f26) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - fix ios white box issue
+
 ## 0.17.0
 
 ### Minor Changes
