@@ -8,6 +8,16 @@ class Test {
 }
 ```
 
+::::tabs{id="323318"}
+
+:::tab{title="Tab 1       Hallo  :ukraine:" id="881149"}
+
+:smile:
+
+:::
+
+::::
+
 
 ```mermaid
 classDiagram

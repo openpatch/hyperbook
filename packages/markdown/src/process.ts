@@ -52,6 +52,7 @@ import remarkDirectiveGeogebra from "./remarkDirectiveGeogebra";
 export const remark = (ctx: HyperbookContext) => {
   const remarkPlugins: PluggableList = [
     remarkRemoveComments,
+    remarkGemoji,
     remarkDirective,
     remarkDirectiveRehype,
     remarkDirectivePagelist(ctx),
@@ -83,7 +84,6 @@ export const remark = (ctx: HyperbookContext) => {
     remarkDirectiveGeogebra(ctx),
     remarkCode(ctx),
     remarkMath,
-    remarkGemoji,
     remarkUnwrapImages,
     /* needs to be last directive */
     remarkDirectiveProtect(ctx),

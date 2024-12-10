@@ -12,7 +12,9 @@ import {
   registerDirective,
 } from "./remarkHelper";
 import { toHast } from "mdast-util-to-hast";
+import {remark} from "./process";
 import hash from "./objectHash";
+import remarkGemoji from "remark-gemoji";
 
 export default (ctx: HyperbookContext) => () => {
   return (tree: Root, file: VFile) => {
@@ -44,8 +46,16 @@ export default (ctx: HyperbookContext) => () => {
           let first = true;
           node.children.filter(isDirective).forEach((node) => {
             expectContainerDirective(node, file, "tab");
-            let { title, id: tabId = hash(node) } = node.attributes || {};
+            let { title = "", id: tabId = hash(node) } = node.attributes || {};
 
+            let tree = remark(ctx).parse(title as string);
+            remarkGemoji()(tree);
+            let hastTree = toHast(tree);
+            if (hastTree.type === "root" && hastTree.children[0]?.type === "element" && hastTree.children[0]?.tagName === "p") {
+              hastTree = hastTree.children[0];
+              hastTree.tagName = "span";
+            }
+            console.log(JSON.stringify(hastTree, null, 2));
             tabTitleElements.push({
               type: "element",
               tagName: "button",
@@ -54,12 +64,7 @@ export default (ctx: HyperbookContext) => () => {
                 "data-tabs-id": tabsId,
                 class: "tab" + (first ? " active" : ""),
               },
-              children: [
-                {
-                  type: "text",
-                  value: title || "",
-                },
-              ],
+              children: (hastTree as Element).children || [],
             });
 
             tabContentElements.push({
