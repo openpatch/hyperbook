@@ -4,7 +4,7 @@ name: Changelog
 
 # Changelog
 
-The entire release archive of Retype is available on [NPM](https://www.npmjs.com/package/hyperbook)
+The entire release archive of hyperbook is available on [NPM](https://www.npmjs.com/package/hyperbook)
 
 :::alert{info}
 
