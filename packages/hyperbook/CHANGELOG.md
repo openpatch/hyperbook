@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.42.0
+
+### Minor Changes
+
+- [`8d23c1a`](https://github.com/openpatch/hyperbook/commit/8d23c1a80c1f344a7c5bf2a43d7ebaf90d816d0c) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add abc music element. For displaying and creating music with notes.
+
 ## 0.41.0
 
 ### Minor Changes
