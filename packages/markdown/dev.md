@@ -1,55 +1,21 @@
 # Test Site
 
-```java
-class Test {
-  public void test() {
-
-  }
-}
+```abcjs
+X: 1
+T: Cooley's
+M: 4/4
+L: 1/8
+K: Emin
+|:D2|EB{c}BA B2 EB|~B2 AB dBAG|FDAD BDAD|FDAD dAFD|
 ```
 
-::::tabs{id="323318"}
-
-:::tab{title="Tab 1       Hallo  :ukraine:" id="881149"}
-
-:smile:
-
-:::
-
-::::
-
-
-```mermaid
-classDiagram
-    Kryptomat <|-- Caesar
-    Kryptomat <|-- Vigenere
-    <<Abstract>> Kryptomat
-    Kryptomat: -String gt
-    Kryptomat: -String kt
-    Kryptomat: +Kryptomat()
-    Kryptomat: +verschluesseln()*
-    Kryptomat: +entschlüsseln()*
-    Kryptomat: -zahlenZuBuchstaben(int pWert) char
-    Kryptomat: -buchstabenZuZahlen(char pWert) int
-    Kryptomat: +getGt() String
-    Kryptomat: +setGt(String pGt) void
-    Kryptomat: +getKt() String
-    Kryptomat: +setKt(String pKt) void
-
-    class Caesar{
-      -int schluessel
-      +Caesar()
-      +getSchluessel() int
-      +setSchluessel(int pSchluessel) void 
-      +verschluesseln() void
-      +entschluesseln() void
-    }
-    class Vigenere{
-      -String schluessel
-      +Vigenere()
-      +getSchluessel() String
-      +setSchluessel(String pSchluessel) void
-      +verschluesseln() void
-      +entschluesseln() void
-    }
+```abcjs editor
+X:1
+T: Cooley's Long
+M: 4/4
+L: 1/8\nR: reel\nK: Emin
+D2|:"Em"EB{c}BA B2 EB|~B2 AB dBAG|"D"FDAD BDAD|FDAD dAFD|
+"Em"EBBA B2 EB|B2 AB defg|"D"afe^c dBAF|1"Em"DEFD E2 D2:|2"Em"DEFD E2 gf||
+|:"Em"eB B2 efge|eB B2 gedB|"D"A2 FA DAFA|A2 FA defg|
+"Em"eB B2 eBgB|eB B2 defg|"D"afe^c dBAF|1"Em"DEFD E2 gf:|2"Em"DEFD E4|]
 ```

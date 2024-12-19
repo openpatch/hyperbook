@@ -332,6 +332,9 @@ importers:
       '@types/qrcode-svg':
         specifier: ^1.1.5
         version: 1.1.5
+      abcjs:
+        specifier: ^6.4.4
+        version: 6.4.4
       chalk:
         specifier: ^5.3.0
         version: 5.3.0
@@ -1767,6 +1770,9 @@ packages:
   '@xtuc/long@4.2.2':
     resolution: {integrity: sha512-NuHqBY1PB/D8xU6s/thBgOAiAP7HOYDQ32+BFZILJ8ivkUkAHQnWfn6WhL79Owj1qmUnoN/YPhktdIoucipkAQ==}
 
+  abcjs@6.4.4:
+    resolution: {integrity: sha512-dT3Z2vb8yihbiPMzSoup0JOcvO2je4qpFNlTD+kS5VBelE3AASAs18dS5qeMWkZeqCz7kI/hz62B2lpMDugWLA==}
+
   abort-controller@3.0.0:
     resolution: {integrity: sha512-h8lQ8tacZYnR3vNQTgibj+tODHI5/+l06Au2Pcriv/Gmet0eaj4TwWH41sO9wnHDiQsEj19q0drzdWdeAHtweg==}
     engines: {node: '>=6.5'}
@@ -1777,6 +1783,7 @@ packages:
 
   acorn-import-assertions@1.9.0:
     resolution: {integrity: sha512-cmMwop9x+8KFhxvKrKfPYmN6/pKTYYHBqLa0DfvVZcKMJWNyWLnaqND7dx/qn66R7ewM1UX5XMaDVP5wlVTaVA==}
+    deprecated: package has been renamed to acorn-import-attributes
     peerDependencies:
       acorn: ^8
 
@@ -8163,6 +8170,8 @@ snapshots:
   '@xtuc/ieee754@1.2.0': {}
 
   '@xtuc/long@4.2.2': {}
+
+  abcjs@6.4.4: {}
 
   abort-controller@3.0.0:
     dependencies:

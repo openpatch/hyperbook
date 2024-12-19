@@ -38,6 +38,18 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.42.0
+
+::::tabs
+
+:::tab{title="New :rocket:" id="new"}
+
+- Add abc-music element for creating and listing to note written in the abcnotation. [Learn more](/elements/abc-music)
+
+:::
+
+::::
+
 ## v0.41.0
 
 ::::tabs
