@@ -1,5 +1,6 @@
 ---
 name: Bookmarks
+permaid: bookmarks
 ---
 
 # Bookmarks

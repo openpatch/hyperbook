@@ -1,5 +1,6 @@
 ---
 name: Quote
+permaid: quote
 ---
 
 # Quote

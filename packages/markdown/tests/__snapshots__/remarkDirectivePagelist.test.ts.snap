@@ -3,14 +3,12 @@
 exports[`remarkDirectiveEmbed > should filter by keyword 1`] = `
 "
 <div class="directive-pagelist">
-  
-    <ul>
-      <li><a href="/elements/youtube">YouTube</a></li>
-      <li><a href="/advanced/template-demo-yaml">Vorlagen - Demo</a></li>
-      <li><a href="/advanced/templates">Vorlagen</a></li>
-      <li><a href="/elements/video">Video</a></li>
-    </ul>
-  
+  <ul>
+    <li><a href="/elements/youtube">YouTube</a></li>
+    <li><a href="/advanced/template-demo-yaml">Vorlagen - Demo</a></li>
+    <li><a href="/advanced/templates">Vorlagen</a></li>
+    <li><a href="/elements/video">Video</a></li>
+  </ul>
 </div>
 "
 `;
@@ -18,12 +16,10 @@ exports[`remarkDirectiveEmbed > should filter by keyword 1`] = `
 exports[`remarkDirectiveEmbed > should filter by name 1`] = `
 "
 <div class="directive-pagelist">
-  
-    <ul>
-      <li><a href="/elements/online-ide">Online IDE</a></li>
-      <li><a href="/elements/sql-ide">SQL IDE</a></li>
-    </ul>
-  
+  <ul>
+    <li><a href="/elements/online-ide">Online IDE</a></li>
+    <li><a href="/elements/sql-ide">SQL IDE</a></li>
+  </ul>
 </div>
 "
 `;
@@ -31,12 +27,10 @@ exports[`remarkDirectiveEmbed > should filter by name 1`] = `
 exports[`remarkDirectiveEmbed > should filter by one keyword and a href 1`] = `
 "
 <div class="directive-pagelist">
-  
-    <ul>
-      <li><a href="/elements/youtube">YouTube</a></li>
-      <li><a href="/elements/video">Video</a></li>
-    </ul>
-  
+  <ul>
+    <li><a href="/elements/youtube">YouTube</a></li>
+    <li><a href="/elements/video">Video</a></li>
+  </ul>
 </div>
 "
 `;
@@ -44,11 +38,9 @@ exports[`remarkDirectiveEmbed > should filter by one keyword and a href 1`] = `
 exports[`remarkDirectiveEmbed > should filter by two keywords 1`] = `
 "
 <div class="directive-pagelist">
-  
-    <ul>
-      <li><a href="/advanced/template-demo-yaml">Vorlagen - Demo</a></li>
-    </ul>
-  
+  <ul>
+    <li><a href="/advanced/template-demo-yaml">Vorlagen - Demo</a></li>
+  </ul>
 </div>
 "
 `;
@@ -56,11 +48,9 @@ exports[`remarkDirectiveEmbed > should filter by two keywords 1`] = `
 exports[`remarkDirectiveEmbed > should filter glossary 1`] = `
 "
 <div class="directive-pagelist">
-  
-    <ul>
-      <li><a href="/glossary/oop">OOP</a></li>
-    </ul>
-  
+  <ul>
+    <li><a href="/glossary/oop">OOP</a></li>
+  </ul>
 </div>
 "
 `;
@@ -213,37 +203,35 @@ exports[`remarkDirectiveEmbed > should format as ul 1`] = `
 exports[`remarkDirectiveEmbed > should sort by name asc 1`] = `
 "
 <div class="directive-pagelist">
-  
-    <ul>
-      <li><a href="/elements/archive">Archiv</a></li>
-      <li><a href="/elements/audio">Audio</a></li>
-      <li><a href="/elements/bitflow">Bitflow</a></li>
-      <li><a href="/elements/download">Download</a></li>
-      <li><a href="/elements">Elemente</a></li>
-      <li><a href="/elements/embed">Embed</a></li>
-      <li><a href="/elements/emoji">Emoji</a></li>
-      <li><a href="/elements/excalidraw">Excalidraw</a></li>
-      <li><a href="/elements/protect">Geschützer Bereich</a></li>
-      <li><a href="/elements/glossary">Glossar</a></li>
-      <li><a href="/elements/alert">Hinweise</a></li>
-      <li><a href="/elements/tiles">Kacheln</a></li>
-      <li><a href="/elements/collapsible">Klappkasten</a></li>
-      <li><a href="/elements/bookmarks">Lesezeichen</a></li>
-      <li><a href="/elements/math">Mathmathik</a></li>
-      <li><a href="/elements/mermaid">Mermaid</a></li>
-      <li><a href="/elements/online-ide">Online IDE</a></li>
-      <li><a href="/elements/plantuml">PlantUML</a></li>
-      <li><a href="/elements/qr">QR Code</a></li>
-      <li><a href="/elements/tabs">Reiter</a></li>
-      <li><a href="/elements/scratchblock">Scratchblöcke</a></li>
-      <li><a href="/elements/slideshow">Slideshow</a></li>
-      <li><a href="/elements/snippets">Snippets</a></li>
-      <li><a href="/elements/sql-ide">SQL IDE</a></li>
-      <li><a href="/elements/struktog">Struktog</a></li>
-      <li><a href="/elements/video">Video</a></li>
-      <li><a href="/elements/youtube">YouTube</a></li>
-    </ul>
-  
+  <ul>
+    <li><a href="/elements/archive">Archiv</a></li>
+    <li><a href="/elements/audio">Audio</a></li>
+    <li><a href="/elements/bitflow">Bitflow</a></li>
+    <li><a href="/elements/download">Download</a></li>
+    <li><a href="/elements">Elemente</a></li>
+    <li><a href="/elements/embed">Embed</a></li>
+    <li><a href="/elements/emoji">Emoji</a></li>
+    <li><a href="/elements/excalidraw">Excalidraw</a></li>
+    <li><a href="/elements/protect">Geschützer Bereich</a></li>
+    <li><a href="/elements/glossary">Glossar</a></li>
+    <li><a href="/elements/alert">Hinweise</a></li>
+    <li><a href="/elements/tiles">Kacheln</a></li>
+    <li><a href="/elements/collapsible">Klappkasten</a></li>
+    <li><a href="/elements/bookmarks">Lesezeichen</a></li>
+    <li><a href="/elements/math">Mathmathik</a></li>
+    <li><a href="/elements/mermaid">Mermaid</a></li>
+    <li><a href="/elements/online-ide">Online IDE</a></li>
+    <li><a href="/elements/plantuml">PlantUML</a></li>
+    <li><a href="/elements/qr">QR Code</a></li>
+    <li><a href="/elements/tabs">Reiter</a></li>
+    <li><a href="/elements/scratchblock">Scratchblöcke</a></li>
+    <li><a href="/elements/slideshow">Slideshow</a></li>
+    <li><a href="/elements/snippets">Snippets</a></li>
+    <li><a href="/elements/sql-ide">SQL IDE</a></li>
+    <li><a href="/elements/struktog">Struktog</a></li>
+    <li><a href="/elements/video">Video</a></li>
+    <li><a href="/elements/youtube">YouTube</a></li>
+  </ul>
 </div>
 "
 `;
@@ -251,36 +239,34 @@ exports[`remarkDirectiveEmbed > should sort by name asc 1`] = `
 exports[`remarkDirectiveEmbed > should sort by name desc 1`] = `
 "
 <div class="directive-pagelist">
-  
-    <ul>
-      <li><a href="/elements/youtube">YouTube</a></li>
-      <li><a href="/elements/video">Video</a></li>
-      <li><a href="/elements/struktog">Struktog</a></li>
-      <li><a href="/elements/sql-ide">SQL IDE</a></li>
-      <li><a href="/elements/snippets">Snippets</a></li>
-      <li><a href="/elements/slideshow">Slideshow</a></li>
-      <li><a href="/elements/scratchblock">Scratchblöcke</a></li>
-      <li><a href="/elements/tabs">Reiter</a></li>
-      <li><a href="/elements/qr">QR Code</a></li>
-      <li><a href="/elements/plantuml">PlantUML</a></li>
-      <li><a href="/elements/online-ide">Online IDE</a></li>
-      <li><a href="/elements/mermaid">Mermaid</a></li>
-      <li><a href="/elements/math">Mathmathik</a></li>
-      <li><a href="/elements/bookmarks">Lesezeichen</a></li>
-      <li><a href="/elements/collapsible">Klappkasten</a></li>
-      <li><a href="/elements/tiles">Kacheln</a></li>
-      <li><a href="/elements/alert">Hinweise</a></li>
-      <li><a href="/elements/glossary">Glossar</a></li>
-      <li><a href="/elements/protect">Geschützer Bereich</a></li>
-      <li><a href="/elements/excalidraw">Excalidraw</a></li>
-      <li><a href="/elements/emoji">Emoji</a></li>
-      <li><a href="/elements/embed">Embed</a></li>
-      <li><a href="/elements/download">Download</a></li>
-      <li><a href="/elements/bitflow">Bitflow</a></li>
-      <li><a href="/elements/audio">Audio</a></li>
-      <li><a href="/elements/archive">Archiv</a></li>
-    </ul>
-  
+  <ul>
+    <li><a href="/elements/youtube">YouTube</a></li>
+    <li><a href="/elements/video">Video</a></li>
+    <li><a href="/elements/struktog">Struktog</a></li>
+    <li><a href="/elements/sql-ide">SQL IDE</a></li>
+    <li><a href="/elements/snippets">Snippets</a></li>
+    <li><a href="/elements/slideshow">Slideshow</a></li>
+    <li><a href="/elements/scratchblock">Scratchblöcke</a></li>
+    <li><a href="/elements/tabs">Reiter</a></li>
+    <li><a href="/elements/qr">QR Code</a></li>
+    <li><a href="/elements/plantuml">PlantUML</a></li>
+    <li><a href="/elements/online-ide">Online IDE</a></li>
+    <li><a href="/elements/mermaid">Mermaid</a></li>
+    <li><a href="/elements/math">Mathmathik</a></li>
+    <li><a href="/elements/bookmarks">Lesezeichen</a></li>
+    <li><a href="/elements/collapsible">Klappkasten</a></li>
+    <li><a href="/elements/tiles">Kacheln</a></li>
+    <li><a href="/elements/alert">Hinweise</a></li>
+    <li><a href="/elements/glossary">Glossar</a></li>
+    <li><a href="/elements/protect">Geschützer Bereich</a></li>
+    <li><a href="/elements/excalidraw">Excalidraw</a></li>
+    <li><a href="/elements/emoji">Emoji</a></li>
+    <li><a href="/elements/embed">Embed</a></li>
+    <li><a href="/elements/download">Download</a></li>
+    <li><a href="/elements/bitflow">Bitflow</a></li>
+    <li><a href="/elements/audio">Audio</a></li>
+    <li><a href="/elements/archive">Archiv</a></li>
+  </ul>
 </div>
 "
 `;
@@ -288,37 +274,72 @@ exports[`remarkDirectiveEmbed > should sort by name desc 1`] = `
 exports[`remarkDirectiveEmbed > should transform 1`] = `
 "
 <div class="directive-pagelist">
-  
-    <ul>
-      <li><a href="/elements/archive">Archiv</a></li>
-      <li><a href="/elements/audio">Audio</a></li>
-      <li><a href="/elements/bitflow">Bitflow</a></li>
-      <li><a href="/elements/download">Download</a></li>
-      <li><a href="/elements">Elemente</a></li>
-      <li><a href="/elements/embed">Embed</a></li>
-      <li><a href="/elements/emoji">Emoji</a></li>
-      <li><a href="/elements/excalidraw">Excalidraw</a></li>
-      <li><a href="/elements/protect">Geschützer Bereich</a></li>
-      <li><a href="/elements/glossary">Glossar</a></li>
-      <li><a href="/elements/alert">Hinweise</a></li>
-      <li><a href="/elements/tiles">Kacheln</a></li>
-      <li><a href="/elements/collapsible">Klappkasten</a></li>
-      <li><a href="/elements/bookmarks">Lesezeichen</a></li>
-      <li><a href="/elements/math">Mathmathik</a></li>
-      <li><a href="/elements/mermaid">Mermaid</a></li>
-      <li><a href="/elements/online-ide">Online IDE</a></li>
-      <li><a href="/elements/plantuml">PlantUML</a></li>
-      <li><a href="/elements/qr">QR Code</a></li>
-      <li><a href="/elements/tabs">Reiter</a></li>
-      <li><a href="/elements/scratchblock">Scratchblöcke</a></li>
-      <li><a href="/elements/slideshow">Slideshow</a></li>
-      <li><a href="/elements/snippets">Snippets</a></li>
-      <li><a href="/elements/sql-ide">SQL IDE</a></li>
-      <li><a href="/elements/struktog">Struktog</a></li>
-      <li><a href="/elements/video">Video</a></li>
-      <li><a href="/elements/youtube">YouTube</a></li>
+  <ul>
+    <li><a href="/elements/archive">Archiv</a></li>
+    <li><a href="/elements/audio">Audio</a></li>
+    <li><a href="/elements/bitflow">Bitflow</a></li>
+    <li><a href="/elements/download">Download</a></li>
+    <li><a href="/elements">Elemente</a></li>
+    <li><a href="/elements/embed">Embed</a></li>
+    <li><a href="/elements/emoji">Emoji</a></li>
+    <li><a href="/elements/excalidraw">Excalidraw</a></li>
+    <li><a href="/elements/protect">Geschützer Bereich</a></li>
+    <li><a href="/elements/glossary">Glossar</a></li>
+    <li><a href="/elements/alert">Hinweise</a></li>
+    <li><a href="/elements/tiles">Kacheln</a></li>
+    <li><a href="/elements/collapsible">Klappkasten</a></li>
+    <li><a href="/elements/bookmarks">Lesezeichen</a></li>
+    <li><a href="/elements/math">Mathmathik</a></li>
+    <li><a href="/elements/mermaid">Mermaid</a></li>
+    <li><a href="/elements/online-ide">Online IDE</a></li>
+    <li><a href="/elements/plantuml">PlantUML</a></li>
+    <li><a href="/elements/qr">QR Code</a></li>
+    <li><a href="/elements/tabs">Reiter</a></li>
+    <li><a href="/elements/scratchblock">Scratchblöcke</a></li>
+    <li><a href="/elements/slideshow">Slideshow</a></li>
+    <li><a href="/elements/snippets">Snippets</a></li>
+    <li><a href="/elements/sql-ide">SQL IDE</a></li>
+    <li><a href="/elements/struktog">Struktog</a></li>
+    <li><a href="/elements/video">Video</a></li>
+    <li><a href="/elements/youtube">YouTube</a></li>
+  </ul>
+</div>
+"
+`;
+
+exports[`remarkDirectiveEmbed > should transform directive in snippet 1`] = `
+"
+<div class="directive-pagelist">
+  <div class="directive-tiles">
+    <ul class="tiles">
+      <li class="tile M link"><a class="tile-title" href="/elements/archive">Archiv</a></li>
+      <li class="tile M link"><a class="tile-title" href="/elements/audio">Audio</a></li>
+      <li class="tile M link"><a class="tile-title" href="/elements/bitflow">Bitflow</a></li>
+      <li class="tile M link"><a class="tile-title" href="/elements/download">Download</a></li>
+      <li class="tile M link"><a class="tile-title" href="/elements/embed">Embed</a></li>
+      <li class="tile M link"><a class="tile-title" href="/elements/emoji">Emoji</a></li>
+      <li class="tile M link"><a class="tile-title" href="/elements/excalidraw">Excalidraw</a></li>
+      <li class="tile M link"><a class="tile-title" href="/elements/protect">Geschützer Bereich</a></li>
+      <li class="tile M link"><a class="tile-title" href="/elements/glossary">Glossar</a></li>
+      <li class="tile M link"><a class="tile-title" href="/elements/alert">Hinweise</a></li>
+      <li class="tile M link"><a class="tile-title" href="/elements/tiles">Kacheln</a></li>
+      <li class="tile M link"><a class="tile-title" href="/elements/collapsible">Klappkasten</a></li>
+      <li class="tile M link"><a class="tile-title" href="/elements/bookmarks">Lesezeichen</a></li>
+      <li class="tile M link"><a class="tile-title" href="/elements/math">Mathmathik</a></li>
+      <li class="tile M link"><a class="tile-title" href="/elements/mermaid">Mermaid</a></li>
+      <li class="tile M link"><a class="tile-title" href="/elements/online-ide">Online IDE</a></li>
+      <li class="tile M link"><a class="tile-title" href="/elements/plantuml">PlantUML</a></li>
+      <li class="tile M link"><a class="tile-title" href="/elements/qr">QR Code</a></li>
+      <li class="tile M link"><a class="tile-title" href="/elements/tabs">Reiter</a></li>
+      <li class="tile M link"><a class="tile-title" href="/elements/sql-ide">SQL IDE</a></li>
+      <li class="tile M link"><a class="tile-title" href="/elements/scratchblock">Scratchblöcke</a></li>
+      <li class="tile M link"><a class="tile-title" href="/elements/slideshow">Slideshow</a></li>
+      <li class="tile M link"><a class="tile-title" href="/elements/snippets">Snippets</a></li>
+      <li class="tile M link"><a class="tile-title" href="/elements/struktog">Struktog</a></li>
+      <li class="tile M link"><a class="tile-title" href="/elements/video">Video</a></li>
+      <li class="tile M link"><a class="tile-title" href="/elements/youtube">YouTube</a></li>
     </ul>
-  
+  </div>
 </div>
 "
 `;

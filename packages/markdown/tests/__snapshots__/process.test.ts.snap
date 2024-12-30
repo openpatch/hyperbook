@@ -1,11 +1,13 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`process > should add showLineNumbers 1`] = `
-"<!doctype html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Markdown Referenz - Hyperbook Dokumenation</title><meta property="og:title" value="Markdown Referenz - Hyperbook Dokumenation"><meta property="description" content="Dokumentation für Hyperbook erstellt mit Hyperbook"><meta property="og:description" content="Dokumentation für Hyperbook erstellt mit Hyperbook"><meta property="keywords"><link rel="stylesheet" href="assets/normalize.css"><style>
+"<!doctype html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Markdown Referenz - Hyperbook Dokumenation</title><meta property="og:title" value="Markdown Referenz - Hyperbook Dokumenation"><meta name="description" content="Dokumentation für Hyperbook erstellt mit Hyperbook"><meta property="og:description" content="Dokumentation für Hyperbook erstellt mit Hyperbook"><meta name="keywords"><link rel="stylesheet" href="assets/normalize.css"><style>
 html,
 body {
-  overflow-x: hidden;
+  overflow: hidden;
   margin: 0;
+  height: 100dvh;
+  width: 100dvw;
 }
 
 body {
@@ -22,45 +24,6 @@ body::-webkit-scrollbar {
   --color-brand-dark: #b5e3d8;
   --color-brand-text: white;
 }
-:root {
-  --color-background: white;
-  --color-text: black;
-  --color-text-deactivated: #242428;
-  --color-nav: #f5f5f5;
-  --color-nav-border: #3c3c3c;
-  --color-author-background: #d6d6d6;
-  --color-author-color: #3c3c3c;
-  --color-spacer: #a4a4a4;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-background: #1e1e1e;
-    --color-text: #f5f5f5;
-    --color-text-deactivated: #d6d6d6;
-    --color-nav: #222222;
-    --color-nav-border: #464646;
-    --color-author-background: #2c2c2c;
-    --color-author-color: #d6d6d6;
-    --color-spacer: #3c3c3c;
-    --color-brand: var(--color-brand-dark);
-  }
-
-  header {
-    background: var(--color-nav)!important;
-  }
-
-  .branding {
-    color: var(--color-brand)!important;
-  }
-
-  .toggle .bar1,
-  .toggle .bar2,
-  .toggle .bar3 {
-    background-color: var(--color-brand)!important;
-  }
-}
-
 body {
   overscroll-behavior-x: none;
   background-color: transparent;
@@ -72,9 +35,9 @@ body {
   padding: 0;
 }
 
-</style><link rel="stylesheet" href="assets/shell.css"><link rel="stylesheet" href="assets/content.css"><link rel="stylesheet" href="assets/code.css"><script>
+</style><noscript id="dark-mode-toggle-stylesheets"><link rel="stylesheet" href="assets/light.css" media="(prefers-color-scheme: light)"><link rel="stylesheet" href="assets/dark.css" media="(prefers-color-scheme: dark)"></noscript><script src="assets/dark-mode-toggle-stylesheets-loader.js"></script><script type="module" src="assets/dark-mode-toggle.mjs"></script><link rel="stylesheet" href="assets/math/katex.min.css"><link rel="stylesheet" href="assets/shell.css"><link rel="stylesheet" href="assets/content.css"><link rel="stylesheet" href="assets/code.css"><script>
 HYPERBOOK_ASSETS = "assets/"
-</script><script type="module" src="assets/side-drawer.js" async></script><script src="assets/qrcode.js" async></script></head><body><div class="main-grid"><header><div class="mobile-nav"><button aria-label="Nav Toggle" class="toggle" onclick="hyperbook.navToggle()"><div class="bar1"></div><div class="bar2"></div><div class="bar3"></div></button><side-drawer id="nav-drawer"><div class="nav-drawer-content"><nav><ul><li><a class="page" href="/">Los Gehts</a></li></ul><div class="section"><div class="collapsible name empty  "><span class="label">Konfiguration</span></div><div class="collapsible-content links"><ul class="pages"><li><a class="page" href="/configuration/book">Buch Konfiguration</a></li><li><a class="page" href="/configuration/page">Seiten Konfiguration</a></li><li><a class="page" href="/configuration/section">Bereich Konfiguration</a></li><li><a class="page" href="/configuration/library">Bibliothek Konfiguration</a></li></ul></div></div><div class="section"><div class="collapsible name empty active expanded"><span class="label">Markdown Referenz</span></div><div class="collapsible-content links"><ul class="pages"><li><a class="page" href="/markdown/image">Bild</a></li><li><a class="page" href="/markdown/emphasis">Hervorhebung</a></li><li><a class="page" href="/markdown/hr">Horizontale Linie</a></li><li><a class="page" href="/markdown/comment">Kommentar</a></li><li><a class="page" href="/markdown/link">Link</a></li><li><a class="page" href="/markdown/list">Liste</a></li><li><a class="page" href="/markdown/code">Quelltext</a></li><li><a class="page" href="/markdown/table">Tabelle</a></li><li><a class="page" href="/markdown/line-break">Zeilenumbruch</a></li><li><a class="page" href="/markdown/quote">Zitat</a></li><li><a class="page" href="/markdown/header">Überschriften</a></li></ul></div></div><div class="section"><div class="collapsible name empty  "><span class="label">Elemente</span></div><div class="collapsible-content links"><ul class="pages"><li><a class="page" href="/elements/archive">Archiv</a></li><li><a class="page" href="/elements/audio">Audio</a></li><li><a class="page" href="/elements/bitflow">Bitflow</a></li><li><a class="page" href="/elements/download">Download</a></li><li><a class="page" href="/elements/embed">Embed</a></li><li><a class="page" href="/elements/emoji">Emoji</a></li><li><a class="page" href="/elements/excalidraw">Excalidraw</a></li><li><a class="page" href="/elements/protect">Geschützer Bereich</a></li><li><a class="page" href="/elements/glossary">Glossar</a></li><li><a class="page" href="/elements/alert">Hinweise</a></li><li><a class="page" href="/elements/tiles">Kacheln</a></li><li><a class="page" href="/elements/collapsible">Klappkasten</a></li><li><a class="page" href="/elements/bookmarks">Lesezeichen</a></li><li><a class="page" href="/elements/math">Mathmathik</a></li><li><a class="page" href="/elements/mermaid">Mermaid</a></li><li><a class="page" href="/elements/online-ide">Online IDE</a></li><li><a class="page" href="/elements/plantuml">PlantUML</a></li><li><a class="page" href="/elements/qr">QR Code</a></li><li><a class="page" href="/elements/tabs">Reiter</a></li><li><a class="page" href="/elements/sql-ide">SQL IDE</a></li><li><a class="page" href="/elements/scratchblock">Scratchblöcke</a></li><li><a class="page" href="/elements/slideshow">Slideshow</a></li><li><a class="page" href="/elements/snippets">Snippets</a></li><li><a class="page" href="/elements/struktog">Struktog</a></li><li><a class="page" href="/elements/video">Video</a></li><li><a class="page" href="/elements/youtube">YouTube</a></li></ul></div></div><div class="section"><div class="collapsible name empty  "><span class="label">Fortgeschrittene Features</span></div><div class="collapsible-content links"><ul class="pages"><li><a class="page" href="/advanced/single-use-templates">Einweg Vorlagen</a></li><li><a class="page" href="/advanced/templates">Vorlagen</a></li></ul></div></div><div class="section"><div class="collapsible name empty  "><span class="label">Hosting</span></div><div class="collapsible-content links"><ul class="pages"><li><a class="page" href="/hosting/edugitpages">EduGit Pages</a></li><li><a class="page" href="/hosting/custom">Eigene Lösung</a></li><li><a class="page" href="/hosting/ghpages">GitHub Pages</a></li><li><a class="page" href="/hosting/glpages">GitLab Pages</a></li><li><a class="page" href="/hosting/vercel">Vercel</a></li></ul></div></div></nav><a class="author" href="https://hyperbook.openpatch.org">Powered by <b>Hyperbook</b></a></div></side-drawer></div><a class="branding" href="/"><div class="name">Hyperbook Dokumenation</div></a><div id="custom-links-header" class="custom-links-menu"><ul class="links-menu"><li class="links-item sub"><a href="#"><div class="icon">🐦</div><div class="label">Kontakt</div></a><ul class="links-sub-menu"><li class="links-item"><a href="mailto:contact@openpatch.org"><div class="label">Mail</div></a></li><li class="links-item"><a href="https://twitter.com/openpatchorg"><div class="icon">🐦</div><div class="label">Twitter</div></a></li><li class="links-item"><a href="https://fosstodon.org/@openpatch"><div class="icon">🐘</div><div class="label">Mastodon</div></a></li><li class="links-item"><a href="https://matrix.to/#/#hyperbook:matrix.org"><div class="icon">👨‍💻</div><div class="label">Matrix (Chat)</div></a></li></ul></li></ul></div></header><div class="sidebar"><nav><ul><li><a class="page" href="/">Los Gehts</a></li></ul><div class="section"><div class="collapsible name empty  "><span class="label">Konfiguration</span></div><div class="collapsible-content links"><ul class="pages"><li><a class="page" href="/configuration/book">Buch Konfiguration</a></li><li><a class="page" href="/configuration/page">Seiten Konfiguration</a></li><li><a class="page" href="/configuration/section">Bereich Konfiguration</a></li><li><a class="page" href="/configuration/library">Bibliothek Konfiguration</a></li></ul></div></div><div class="section"><div class="collapsible name empty active expanded"><span class="label">Markdown Referenz</span></div><div class="collapsible-content links"><ul class="pages"><li><a class="page" href="/markdown/image">Bild</a></li><li><a class="page" href="/markdown/emphasis">Hervorhebung</a></li><li><a class="page" href="/markdown/hr">Horizontale Linie</a></li><li><a class="page" href="/markdown/comment">Kommentar</a></li><li><a class="page" href="/markdown/link">Link</a></li><li><a class="page" href="/markdown/list">Liste</a></li><li><a class="page" href="/markdown/code">Quelltext</a></li><li><a class="page" href="/markdown/table">Tabelle</a></li><li><a class="page" href="/markdown/line-break">Zeilenumbruch</a></li><li><a class="page" href="/markdown/quote">Zitat</a></li><li><a class="page" href="/markdown/header">Überschriften</a></li></ul></div></div><div class="section"><div class="collapsible name empty  "><span class="label">Elemente</span></div><div class="collapsible-content links"><ul class="pages"><li><a class="page" href="/elements/archive">Archiv</a></li><li><a class="page" href="/elements/audio">Audio</a></li><li><a class="page" href="/elements/bitflow">Bitflow</a></li><li><a class="page" href="/elements/download">Download</a></li><li><a class="page" href="/elements/embed">Embed</a></li><li><a class="page" href="/elements/emoji">Emoji</a></li><li><a class="page" href="/elements/excalidraw">Excalidraw</a></li><li><a class="page" href="/elements/protect">Geschützer Bereich</a></li><li><a class="page" href="/elements/glossary">Glossar</a></li><li><a class="page" href="/elements/alert">Hinweise</a></li><li><a class="page" href="/elements/tiles">Kacheln</a></li><li><a class="page" href="/elements/collapsible">Klappkasten</a></li><li><a class="page" href="/elements/bookmarks">Lesezeichen</a></li><li><a class="page" href="/elements/math">Mathmathik</a></li><li><a class="page" href="/elements/mermaid">Mermaid</a></li><li><a class="page" href="/elements/online-ide">Online IDE</a></li><li><a class="page" href="/elements/plantuml">PlantUML</a></li><li><a class="page" href="/elements/qr">QR Code</a></li><li><a class="page" href="/elements/tabs">Reiter</a></li><li><a class="page" href="/elements/sql-ide">SQL IDE</a></li><li><a class="page" href="/elements/scratchblock">Scratchblöcke</a></li><li><a class="page" href="/elements/slideshow">Slideshow</a></li><li><a class="page" href="/elements/snippets">Snippets</a></li><li><a class="page" href="/elements/struktog">Struktog</a></li><li><a class="page" href="/elements/video">Video</a></li><li><a class="page" href="/elements/youtube">YouTube</a></li></ul></div></div><div class="section"><div class="collapsible name empty  "><span class="label">Fortgeschrittene Features</span></div><div class="collapsible-content links"><ul class="pages"><li><a class="page" href="/advanced/single-use-templates">Einweg Vorlagen</a></li><li><a class="page" href="/advanced/templates">Vorlagen</a></li></ul></div></div><div class="section"><div class="collapsible name empty  "><span class="label">Hosting</span></div><div class="collapsible-content links"><ul class="pages"><li><a class="page" href="/hosting/edugitpages">EduGit Pages</a></li><li><a class="page" href="/hosting/custom">Eigene Lösung</a></li><li><a class="page" href="/hosting/ghpages">GitHub Pages</a></li><li><a class="page" href="/hosting/glpages">GitLab Pages</a></li><li><a class="page" href="/hosting/vercel">Vercel</a></li></ul></div></div></nav><a class="author" href="https://hyperbook.openpatch.org">Powered by <b>Hyperbook</b></a></div><main><article>
+</script><script type="module" src="assets/side-drawer.js" async></script><script src="assets/qrcode.js" async></script></head><body><div class="main-grid"><header><div class="mobile-nav"><button aria-label="Nav Toggle" class="toggle" onclick="hyperbook.navToggle()"><div class="bar1"></div><div class="bar2"></div><div class="bar3"></div></button><side-drawer id="nav-drawer"><div class="nav-drawer-content"><nav><ul><li><a class="page" href="/">Los Gehts</a></li></ul><div class="section"><div class="collapsible name empty  "><span class="label">Konfiguration</span></div><div class="collapsible-content links"><ul class="pages"><li><a class="page" href="/configuration/book">Buch Konfiguration</a></li><li><a class="page" href="/configuration/page">Seiten Konfiguration</a></li><li><a class="page" href="/configuration/section">Bereich Konfiguration</a></li><li><a class="page" href="/configuration/library">Bibliothek Konfiguration</a></li></ul></div></div><div class="section"><div class="collapsible name empty active expanded"><span class="label">Markdown Referenz</span></div><div class="collapsible-content links"><ul class="pages"><li><a class="page" href="/markdown/image">Bild</a></li><li><a class="page" href="/markdown/emphasis">Hervorhebung</a></li><li><a class="page" href="/markdown/hr">Horizontale Linie</a></li><li><a class="page" href="/markdown/comment">Kommentar</a></li><li><a class="page" href="/markdown/link">Link</a></li><li><a class="page" href="/markdown/list">Liste</a></li><li><a class="page" href="/markdown/code">Quelltext</a></li><li><a class="page" href="/markdown/table">Tabelle</a></li><li><a class="page" href="/markdown/line-break">Zeilenumbruch</a></li><li><a class="page" href="/markdown/quote">Zitat</a></li><li><a class="page" href="/markdown/header">Überschriften</a></li></ul></div></div><div class="section"><div class="collapsible name empty  "><span class="label">Elemente</span></div><div class="collapsible-content links"><ul class="pages"><li><a class="page" href="/elements/archive">Archiv</a></li><li><a class="page" href="/elements/audio">Audio</a></li><li><a class="page" href="/elements/bitflow">Bitflow</a></li><li><a class="page" href="/elements/download">Download</a></li><li><a class="page" href="/elements/embed">Embed</a></li><li><a class="page" href="/elements/emoji">Emoji</a></li><li><a class="page" href="/elements/excalidraw">Excalidraw</a></li><li><a class="page" href="/elements/protect">Geschützer Bereich</a></li><li><a class="page" href="/elements/glossary">Glossar</a></li><li><a class="page" href="/elements/alert">Hinweise</a></li><li><a class="page" href="/elements/tiles">Kacheln</a></li><li><a class="page" href="/elements/collapsible">Klappkasten</a></li><li><a class="page" href="/elements/bookmarks">Lesezeichen</a></li><li><a class="page" href="/elements/math">Mathmathik</a></li><li><a class="page" href="/elements/mermaid">Mermaid</a></li><li><a class="page" href="/elements/online-ide">Online IDE</a></li><li><a class="page" href="/elements/plantuml">PlantUML</a></li><li><a class="page" href="/elements/qr">QR Code</a></li><li><a class="page" href="/elements/tabs">Reiter</a></li><li><a class="page" href="/elements/sql-ide">SQL IDE</a></li><li><a class="page" href="/elements/scratchblock">Scratchblöcke</a></li><li><a class="page" href="/elements/slideshow">Slideshow</a></li><li><a class="page" href="/elements/snippets">Snippets</a></li><li><a class="page" href="/elements/struktog">Struktog</a></li><li><a class="page" href="/elements/video">Video</a></li><li><a class="page" href="/elements/youtube">YouTube</a></li></ul></div></div><div class="section"><div class="collapsible name empty  "><span class="label">Fortgeschrittene Features</span></div><div class="collapsible-content links"><ul class="pages"><li><a class="page" href="/advanced/single-use-templates">Einweg Vorlagen</a></li><li><a class="page" href="/advanced/templates">Vorlagen</a></li></ul></div></div><div class="section"><div class="collapsible name empty  "><span class="label">Hosting</span></div><div class="collapsible-content links"><ul class="pages"><li><a class="page" href="/hosting/edugitpages">EduGit Pages</a></li><li><a class="page" href="/hosting/custom">Eigene Lösung</a></li><li><a class="page" href="/hosting/ghpages">GitHub Pages</a></li><li><a class="page" href="/hosting/glpages">GitLab Pages</a></li><li><a class="page" href="/hosting/vercel">Vercel</a></li></ul></div></div></nav><a class="author" href="https://hyperbook.openpatch.org">Powered by <b>Hyperbook</b></a></div></side-drawer></div><a class="branding" href="/"><div class="name">Hyperbook Dokumenation</div></a><div id="custom-links-header" class="custom-links-menu"><ul class="links-menu"><li class="links-item sub"><a href="#"><div class="icon">🐦</div><div class="label">Kontakt</div></a><ul class="links-sub-menu"><li class="links-item"><a href="mailto:contact@openpatch.org"><div class="label">Mail</div></a></li><li class="links-item"><a href="https://twitter.com/openpatchorg"><div class="icon">🐦</div><div class="label">Twitter</div></a></li><li class="links-item"><a href="https://fosstodon.org/@openpatch"><div class="icon">🐘</div><div class="label">Mastodon</div></a></li><li class="links-item"><a href="https://matrix.to/#/#hyperbook:matrix.org"><div class="icon">👨‍💻</div><div class="label">Matrix (Chat)</div></a></li></ul></li></ul></div><dark-mode-toggle id="dark-mode-toggle" appearence="switch" permanent></dark-mode-toggle></header><div class="sidebar"><nav><ul><li><a class="page" href="/">Los Gehts</a></li></ul><div class="section"><div class="collapsible name empty  "><span class="label">Konfiguration</span></div><div class="collapsible-content links"><ul class="pages"><li><a class="page" href="/configuration/book">Buch Konfiguration</a></li><li><a class="page" href="/configuration/page">Seiten Konfiguration</a></li><li><a class="page" href="/configuration/section">Bereich Konfiguration</a></li><li><a class="page" href="/configuration/library">Bibliothek Konfiguration</a></li></ul></div></div><div class="section"><div class="collapsible name empty active expanded"><span class="label">Markdown Referenz</span></div><div class="collapsible-content links"><ul class="pages"><li><a class="page" href="/markdown/image">Bild</a></li><li><a class="page" href="/markdown/emphasis">Hervorhebung</a></li><li><a class="page" href="/markdown/hr">Horizontale Linie</a></li><li><a class="page" href="/markdown/comment">Kommentar</a></li><li><a class="page" href="/markdown/link">Link</a></li><li><a class="page" href="/markdown/list">Liste</a></li><li><a class="page" href="/markdown/code">Quelltext</a></li><li><a class="page" href="/markdown/table">Tabelle</a></li><li><a class="page" href="/markdown/line-break">Zeilenumbruch</a></li><li><a class="page" href="/markdown/quote">Zitat</a></li><li><a class="page" href="/markdown/header">Überschriften</a></li></ul></div></div><div class="section"><div class="collapsible name empty  "><span class="label">Elemente</span></div><div class="collapsible-content links"><ul class="pages"><li><a class="page" href="/elements/archive">Archiv</a></li><li><a class="page" href="/elements/audio">Audio</a></li><li><a class="page" href="/elements/bitflow">Bitflow</a></li><li><a class="page" href="/elements/download">Download</a></li><li><a class="page" href="/elements/embed">Embed</a></li><li><a class="page" href="/elements/emoji">Emoji</a></li><li><a class="page" href="/elements/excalidraw">Excalidraw</a></li><li><a class="page" href="/elements/protect">Geschützer Bereich</a></li><li><a class="page" href="/elements/glossary">Glossar</a></li><li><a class="page" href="/elements/alert">Hinweise</a></li><li><a class="page" href="/elements/tiles">Kacheln</a></li><li><a class="page" href="/elements/collapsible">Klappkasten</a></li><li><a class="page" href="/elements/bookmarks">Lesezeichen</a></li><li><a class="page" href="/elements/math">Mathmathik</a></li><li><a class="page" href="/elements/mermaid">Mermaid</a></li><li><a class="page" href="/elements/online-ide">Online IDE</a></li><li><a class="page" href="/elements/plantuml">PlantUML</a></li><li><a class="page" href="/elements/qr">QR Code</a></li><li><a class="page" href="/elements/tabs">Reiter</a></li><li><a class="page" href="/elements/sql-ide">SQL IDE</a></li><li><a class="page" href="/elements/scratchblock">Scratchblöcke</a></li><li><a class="page" href="/elements/slideshow">Slideshow</a></li><li><a class="page" href="/elements/snippets">Snippets</a></li><li><a class="page" href="/elements/struktog">Struktog</a></li><li><a class="page" href="/elements/video">Video</a></li><li><a class="page" href="/elements/youtube">YouTube</a></li></ul></div></div><div class="section"><div class="collapsible name empty  "><span class="label">Fortgeschrittene Features</span></div><div class="collapsible-content links"><ul class="pages"><li><a class="page" href="/advanced/single-use-templates">Einweg Vorlagen</a></li><li><a class="page" href="/advanced/templates">Vorlagen</a></li></ul></div></div><div class="section"><div class="collapsible name empty  "><span class="label">Hosting</span></div><div class="collapsible-content links"><ul class="pages"><li><a class="page" href="/hosting/edugitpages">EduGit Pages</a></li><li><a class="page" href="/hosting/custom">Eigene Lösung</a></li><li><a class="page" href="/hosting/ghpages">GitHub Pages</a></li><li><a class="page" href="/hosting/glpages">GitLab Pages</a></li><li><a class="page" href="/hosting/vercel">Vercel</a></li></ul></div></div></nav><a class="author" href="https://hyperbook.openpatch.org">Powered by <b>Hyperbook</b></a></div><main><article>
 <div class="hyperbook-markdown"><button id="toc-toggle" onclick="hyperbook.tocToggle()" title="Table of Contents"><div class="bar1"></div><div class="bar2"></div><div class="bar3"></div><div class="bar4"></div></button>
   <side-drawer id="toc-drawer" right>
     <div class="toc-drawer-content">
@@ -93,19 +56,24 @@ HYPERBOOK_ASSETS = "assets/"
     <div class="container">
       <div class="name">Markdown Referenz</div>
       <div class="make-qrcode"></div>
-      <div class="url">/markdown</div>
+      <div class="url">
+        <div data-href="/markdown"></div>
+        <div data-href="/@/md"></div>
+      </div>
     </div><button class="close" onclick="hyperbook.qrcodeClose()"><div class="close-icon"></div></button>
   </dialog>
 </div>
-</article><div class="jump-container"><a class="jump previous" href="/configuration/library">Bibliothek Konfiguration</a><a class="jump next" href="/markdown/image">Bild</a></div><div class="meta"><a class="edit-github" href="https://github.com/openpatch/hyperbook/edit/main/website/de/book/markdown/index.md">✎ GitHub</a><span class="copyright">© Copyright 2024 by <a href="https://openpatch.org">OpenPatch</a></span></div><div id="custom-links-footer"><ul class="links-item sub"><li><a href="#"><div class="icon">🐦</div><div class="label">Kontakt</div></a><ul class="links-sub-menu"><li class="links-item"><a href="mailto:contact@openpatch.org"><div class="label">Mail</div></a></li><li class="links-item"><a href="https://twitter.com/openpatchorg"><div class="icon">🐦</div><div class="label">Twitter</div></a></li><li class="links-item"><a href="https://fosstodon.org/@openpatch"><div class="icon">🐘</div><div class="label">Mastodon</div></a></li><li class="links-item"><a href="https://matrix.to/#/#hyperbook:matrix.org"><div class="icon">👨‍💻</div><div class="label">Matrix (Chat)</div></a></li></ul></li></ul></div></main></div><script src="assets/client.js"></script></body></html>"
+</article><div class="jump-container"><a class="jump previous" href="/configuration/library">Bibliothek Konfiguration</a><a class="jump next" href="/markdown/image">Bild</a></div><div class="meta"><a class="edit-github" href="https://github.com/openpatch/hyperbook/edit/main/website/de/book/markdown/index.md">✎ GitHub</a><span class="copyright">© Copyright 2024 by <a href="https://openpatch.org">OpenPatch</a></span></div><div id="custom-links-footer"><ul class="links-item sub"><li><a href="#"><div class="icon">🐦</div><div class="label">Kontakt</div></a><ul class="links-sub-menu"><li class="links-item"><a href="mailto:contact@openpatch.org"><div class="label">Mail</div></a></li><li class="links-item"><a href="https://twitter.com/openpatchorg"><div class="icon">🐦</div><div class="label">Twitter</div></a></li><li class="links-item"><a href="https://fosstodon.org/@openpatch"><div class="icon">🐘</div><div class="label">Mastodon</div></a></li><li class="links-item"><a href="https://matrix.to/#/#hyperbook:matrix.org"><div class="icon">👨‍💻</div><div class="label">Matrix (Chat)</div></a></li></ul></li></ul></div></main></div><script src="assets/client.js" defer></script></body></html>"
 `;
 
 exports[`process > should result in two link 1`] = `
-"<!doctype html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Hi - My Hyperbook</title><meta property="og:title" value="Hi - My Hyperbook"><meta property="description" content="undefined"><meta property="og:description" content="undefined"><meta property="keywords"><link rel="stylesheet" href="/assets/normalize.css"><style>
+"<!doctype html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Hi - My Hyperbook</title><meta property="og:title" value="Hi - My Hyperbook"><meta name="description" content="undefined"><meta property="og:description" content="undefined"><meta name="keywords"><link rel="stylesheet" href="/assets/normalize.css"><style>
 html,
 body {
-  overflow-x: hidden;
+  overflow: hidden;
   margin: 0;
+  height: 100dvh;
+  width: 100dvw;
 }
 
 body {
@@ -122,45 +90,6 @@ body::-webkit-scrollbar {
   --color-brand-dark: #b5e3d8;
   --color-brand-text: white;
 }
-:root {
-  --color-background: white;
-  --color-text: black;
-  --color-text-deactivated: #242428;
-  --color-nav: #f5f5f5;
-  --color-nav-border: #3c3c3c;
-  --color-author-background: #d6d6d6;
-  --color-author-color: #3c3c3c;
-  --color-spacer: #a4a4a4;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-background: #1e1e1e;
-    --color-text: #f5f5f5;
-    --color-text-deactivated: #d6d6d6;
-    --color-nav: #222222;
-    --color-nav-border: #464646;
-    --color-author-background: #2c2c2c;
-    --color-author-color: #d6d6d6;
-    --color-spacer: #3c3c3c;
-    --color-brand: var(--color-brand-dark);
-  }
-
-  header {
-    background: var(--color-nav)!important;
-  }
-
-  .branding {
-    color: var(--color-brand)!important;
-  }
-
-  .toggle .bar1,
-  .toggle .bar2,
-  .toggle .bar3 {
-    background-color: var(--color-brand)!important;
-  }
-}
-
 body {
   overscroll-behavior-x: none;
   background-color: transparent;
@@ -172,9 +101,9 @@ body {
   padding: 0;
 }
 
-</style><link rel="stylesheet" href="/assets/shell.css"><link rel="stylesheet" href="/assets/content.css"><link rel="stylesheet" href="/assets/code.css"><script>
+</style><noscript id="dark-mode-toggle-stylesheets"><link rel="stylesheet" href="/assets/light.css" media="(prefers-color-scheme: light)"><link rel="stylesheet" href="/assets/dark.css" media="(prefers-color-scheme: dark)"></noscript><script src="/assets/dark-mode-toggle-stylesheets-loader.js"></script><script type="module" src="/assets/dark-mode-toggle.mjs"></script><link rel="stylesheet" href="/assets/math/katex.min.css"><link rel="stylesheet" href="/assets/shell.css"><link rel="stylesheet" href="/assets/content.css"><link rel="stylesheet" href="/assets/code.css"><script>
 HYPERBOOK_ASSETS = "/assets/"
-</script><script type="module" src="/assets/side-drawer.js" async></script><script src="/assets/qrcode.js" async></script></head><body><div class="main-grid"><header><div class="mobile-nav"><button aria-label="Nav Toggle" class="toggle" onclick="hyperbook.navToggle()"><div class="bar1"></div><div class="bar2"></div><div class="bar3"></div></button><side-drawer id="nav-drawer"><div class="nav-drawer-content"><nav><ul></ul></nav><a class="author" href="https://hyperbook.openpatch.org">Powered by <b>Hyperbook</b></a></div></side-drawer></div><a class="branding" href="/book/"><div class="name">My Hyperbook</div></a></header><div class="sidebar"><nav><ul></ul></nav><a class="author" href="https://hyperbook.openpatch.org">Powered by <b>Hyperbook</b></a></div><main><article>
+</script><script type="module" src="/assets/side-drawer.js" async></script><script src="/assets/qrcode.js" async></script></head><body><div class="main-grid"><header><div class="mobile-nav"><button aria-label="Nav Toggle" class="toggle" onclick="hyperbook.navToggle()"><div class="bar1"></div><div class="bar2"></div><div class="bar3"></div></button><side-drawer id="nav-drawer"><div class="nav-drawer-content"><nav><ul></ul></nav><a class="author" href="https://hyperbook.openpatch.org">Powered by <b>Hyperbook</b></a></div></side-drawer></div><a class="branding" href="/book/"><div class="name">My Hyperbook</div></a><dark-mode-toggle id="dark-mode-toggle" appearence="switch" permanent></dark-mode-toggle></header><div class="sidebar"><nav><ul></ul></nav><a class="author" href="https://hyperbook.openpatch.org">Powered by <b>Hyperbook</b></a></div><main><article>
 <div class="hyperbook-markdown"><button id="toc-toggle" onclick="hyperbook.tocToggle()" title="Table of Contents"><div class="bar1"></div><div class="bar2"></div><div class="bar3"></div><div class="bar4"></div></button>
   <side-drawer id="toc-drawer" right>
     <div class="toc-drawer-content">
@@ -192,15 +121,17 @@ HYPERBOOK_ASSETS = "/assets/"
     in Python Teil des Programms .
   </p>
 </div>
-</article><div class="jump-container"></div><div class="meta"><span class="copyright">© Copyright 2024</span></div></main></div><script src="/assets/client.js"></script></body></html>"
+</article><div class="jump-container"></div><div class="meta"><span class="copyright">© Copyright 2024</span></div></main></div><script src="/assets/client.js" defer></script></body></html>"
 `;
 
 exports[`process > should transform 1`] = `
-"<!doctype html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Hi - My Hyperbook</title><meta property="og:title" value="Hi - My Hyperbook"><meta property="description" content="undefined"><meta property="og:description" content="undefined"><meta property="keywords"><link rel="stylesheet" href="/assets/normalize.css"><style>
+"<!doctype html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Hi - My Hyperbook</title><meta property="og:title" value="Hi - My Hyperbook"><meta name="description" content="undefined"><meta property="og:description" content="undefined"><meta name="keywords"><link rel="stylesheet" href="/assets/normalize.css"><style>
 html,
 body {
-  overflow-x: hidden;
+  overflow: hidden;
   margin: 0;
+  height: 100dvh;
+  width: 100dvw;
 }
 
 body {
@@ -217,45 +148,6 @@ body::-webkit-scrollbar {
   --color-brand-dark: #b5e3d8;
   --color-brand-text: white;
 }
-:root {
-  --color-background: white;
-  --color-text: black;
-  --color-text-deactivated: #242428;
-  --color-nav: #f5f5f5;
-  --color-nav-border: #3c3c3c;
-  --color-author-background: #d6d6d6;
-  --color-author-color: #3c3c3c;
-  --color-spacer: #a4a4a4;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-background: #1e1e1e;
-    --color-text: #f5f5f5;
-    --color-text-deactivated: #d6d6d6;
-    --color-nav: #222222;
-    --color-nav-border: #464646;
-    --color-author-background: #2c2c2c;
-    --color-author-color: #d6d6d6;
-    --color-spacer: #3c3c3c;
-    --color-brand: var(--color-brand-dark);
-  }
-
-  header {
-    background: var(--color-nav)!important;
-  }
-
-  .branding {
-    color: var(--color-brand)!important;
-  }
-
-  .toggle .bar1,
-  .toggle .bar2,
-  .toggle .bar3 {
-    background-color: var(--color-brand)!important;
-  }
-}
-
 body {
   overscroll-behavior-x: none;
   background-color: transparent;
@@ -267,9 +159,9 @@ body {
   padding: 0;
 }
 
-</style><link rel="stylesheet" href="/assets/shell.css"><link rel="stylesheet" href="/assets/content.css"><link rel="stylesheet" href="/assets/code.css"><script>
+</style><noscript id="dark-mode-toggle-stylesheets"><link rel="stylesheet" href="/assets/light.css" media="(prefers-color-scheme: light)"><link rel="stylesheet" href="/assets/dark.css" media="(prefers-color-scheme: dark)"></noscript><script src="/assets/dark-mode-toggle-stylesheets-loader.js"></script><script type="module" src="/assets/dark-mode-toggle.mjs"></script><link rel="stylesheet" href="/assets/math/katex.min.css"><link rel="stylesheet" href="/assets/shell.css"><link rel="stylesheet" href="/assets/content.css"><link rel="stylesheet" href="/assets/code.css"><script>
 HYPERBOOK_ASSETS = "/assets/"
-</script><script type="module" src="/assets/side-drawer.js" async></script><script src="/assets/qrcode.js" async></script><link rel="stylesheet" href="/assets/directive-youtube/style.css"><link rel="stylesheet" href="/assets/directive-tabs/style.css"></head><body><div class="main-grid"><header><div class="mobile-nav"><button aria-label="Nav Toggle" class="toggle" onclick="hyperbook.navToggle()"><div class="bar1"></div><div class="bar2"></div><div class="bar3"></div></button><side-drawer id="nav-drawer"><div class="nav-drawer-content"><nav><ul></ul></nav><a class="author" href="https://hyperbook.openpatch.org">Powered by <b>Hyperbook</b></a></div></side-drawer></div><a class="branding" href="/book/"><div class="name">My Hyperbook</div></a></header><div class="sidebar"><nav><ul></ul></nav><a class="author" href="https://hyperbook.openpatch.org">Powered by <b>Hyperbook</b></a></div><main><article>
+</script><script type="module" src="/assets/side-drawer.js" async></script><script src="/assets/qrcode.js" async></script><link rel="stylesheet" href="/assets/directive-youtube/style.css"><link rel="stylesheet" href="/assets/directive-tabs/style.css"></head><body><div class="main-grid"><header><div class="mobile-nav"><button aria-label="Nav Toggle" class="toggle" onclick="hyperbook.navToggle()"><div class="bar1"></div><div class="bar2"></div><div class="bar3"></div></button><side-drawer id="nav-drawer"><div class="nav-drawer-content"><nav><ul></ul></nav><a class="author" href="https://hyperbook.openpatch.org">Powered by <b>Hyperbook</b></a></div></side-drawer></div><a class="branding" href="/book/"><div class="name">My Hyperbook</div></a><dark-mode-toggle id="dark-mode-toggle" appearence="switch" permanent></dark-mode-toggle></header><div class="sidebar"><nav><ul></ul></nav><a class="author" href="https://hyperbook.openpatch.org">Powered by <b>Hyperbook</b></a></div><main><article>
 <div class="hyperbook-markdown"><button id="toc-toggle" onclick="hyperbook.tocToggle()" title="Table of Contents"><div class="bar1"></div><div class="bar2"></div><div class="bar3"></div><div class="bar4"></div></button>
   <side-drawer id="toc-drawer" right>
     <div class="toc-drawer-content">
@@ -306,15 +198,17 @@ HYPERBOOK_ASSETS = "/assets/"
     </div>
   </div>
 </div>
-</article><div class="jump-container"></div><div class="meta"><span class="copyright">© Copyright 2024</span></div></main></div><script src="/assets/client.js"></script><script src="/assets/directive-tabs/client.js"></script></body></html>"
+</article><div class="jump-container"></div><div class="meta"><span class="copyright">© Copyright 2024</span></div></main></div><script src="/assets/client.js" defer></script><script src="/assets/directive-tabs/client.js" defer></script></body></html>"
 `;
 
 exports[`process > should transfrom complex context 1`] = `
-"<!doctype html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Markdown Referenz - Hyperbook Dokumenation</title><meta property="og:title" value="Markdown Referenz - Hyperbook Dokumenation"><meta property="description" content="Dokumentation für Hyperbook erstellt mit Hyperbook"><meta property="og:description" content="Dokumentation für Hyperbook erstellt mit Hyperbook"><meta property="keywords"><link rel="stylesheet" href="assets/normalize.css"><style>
+"<!doctype html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Markdown Referenz - Hyperbook Dokumenation</title><meta property="og:title" value="Markdown Referenz - Hyperbook Dokumenation"><meta name="description" content="Dokumentation für Hyperbook erstellt mit Hyperbook"><meta property="og:description" content="Dokumentation für Hyperbook erstellt mit Hyperbook"><meta name="keywords"><link rel="stylesheet" href="assets/normalize.css"><style>
 html,
 body {
-  overflow-x: hidden;
+  overflow: hidden;
   margin: 0;
+  height: 100dvh;
+  width: 100dvw;
 }
 
 body {
@@ -331,45 +225,6 @@ body::-webkit-scrollbar {
   --color-brand-dark: #b5e3d8;
   --color-brand-text: white;
 }
-:root {
-  --color-background: white;
-  --color-text: black;
-  --color-text-deactivated: #242428;
-  --color-nav: #f5f5f5;
-  --color-nav-border: #3c3c3c;
-  --color-author-background: #d6d6d6;
-  --color-author-color: #3c3c3c;
-  --color-spacer: #a4a4a4;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-background: #1e1e1e;
-    --color-text: #f5f5f5;
-    --color-text-deactivated: #d6d6d6;
-    --color-nav: #222222;
-    --color-nav-border: #464646;
-    --color-author-background: #2c2c2c;
-    --color-author-color: #d6d6d6;
-    --color-spacer: #3c3c3c;
-    --color-brand: var(--color-brand-dark);
-  }
-
-  header {
-    background: var(--color-nav)!important;
-  }
-
-  .branding {
-    color: var(--color-brand)!important;
-  }
-
-  .toggle .bar1,
-  .toggle .bar2,
-  .toggle .bar3 {
-    background-color: var(--color-brand)!important;
-  }
-}
-
 body {
   overscroll-behavior-x: none;
   background-color: transparent;
@@ -381,9 +236,9 @@ body {
   padding: 0;
 }
 
-</style><link rel="stylesheet" href="assets/shell.css"><link rel="stylesheet" href="assets/content.css"><link rel="stylesheet" href="assets/code.css"><script>
+</style><noscript id="dark-mode-toggle-stylesheets"><link rel="stylesheet" href="assets/light.css" media="(prefers-color-scheme: light)"><link rel="stylesheet" href="assets/dark.css" media="(prefers-color-scheme: dark)"></noscript><script src="assets/dark-mode-toggle-stylesheets-loader.js"></script><script type="module" src="assets/dark-mode-toggle.mjs"></script><link rel="stylesheet" href="assets/math/katex.min.css"><link rel="stylesheet" href="assets/shell.css"><link rel="stylesheet" href="assets/content.css"><link rel="stylesheet" href="assets/code.css"><script>
 HYPERBOOK_ASSETS = "assets/"
-</script><script type="module" src="assets/side-drawer.js" async></script><script src="assets/qrcode.js" async></script></head><body><div class="main-grid"><header><div class="mobile-nav"><button aria-label="Nav Toggle" class="toggle" onclick="hyperbook.navToggle()"><div class="bar1"></div><div class="bar2"></div><div class="bar3"></div></button><side-drawer id="nav-drawer"><div class="nav-drawer-content"><nav><ul><li><a class="page" href="/">Los Gehts</a></li></ul><div class="section"><div class="collapsible name empty  "><span class="label">Konfiguration</span></div><div class="collapsible-content links"><ul class="pages"><li><a class="page" href="/configuration/book">Buch Konfiguration</a></li><li><a class="page" href="/configuration/page">Seiten Konfiguration</a></li><li><a class="page" href="/configuration/section">Bereich Konfiguration</a></li><li><a class="page" href="/configuration/library">Bibliothek Konfiguration</a></li></ul></div></div><div class="section"><div class="collapsible name empty active expanded"><span class="label">Markdown Referenz</span></div><div class="collapsible-content links"><ul class="pages"><li><a class="page" href="/markdown/image">Bild</a></li><li><a class="page" href="/markdown/emphasis">Hervorhebung</a></li><li><a class="page" href="/markdown/hr">Horizontale Linie</a></li><li><a class="page" href="/markdown/comment">Kommentar</a></li><li><a class="page" href="/markdown/link">Link</a></li><li><a class="page" href="/markdown/list">Liste</a></li><li><a class="page" href="/markdown/code">Quelltext</a></li><li><a class="page" href="/markdown/table">Tabelle</a></li><li><a class="page" href="/markdown/line-break">Zeilenumbruch</a></li><li><a class="page" href="/markdown/quote">Zitat</a></li><li><a class="page" href="/markdown/header">Überschriften</a></li></ul></div></div><div class="section"><div class="collapsible name empty  "><span class="label">Elemente</span></div><div class="collapsible-content links"><ul class="pages"><li><a class="page" href="/elements/archive">Archiv</a></li><li><a class="page" href="/elements/audio">Audio</a></li><li><a class="page" href="/elements/bitflow">Bitflow</a></li><li><a class="page" href="/elements/download">Download</a></li><li><a class="page" href="/elements/embed">Embed</a></li><li><a class="page" href="/elements/emoji">Emoji</a></li><li><a class="page" href="/elements/excalidraw">Excalidraw</a></li><li><a class="page" href="/elements/protect">Geschützer Bereich</a></li><li><a class="page" href="/elements/glossary">Glossar</a></li><li><a class="page" href="/elements/alert">Hinweise</a></li><li><a class="page" href="/elements/tiles">Kacheln</a></li><li><a class="page" href="/elements/collapsible">Klappkasten</a></li><li><a class="page" href="/elements/bookmarks">Lesezeichen</a></li><li><a class="page" href="/elements/math">Mathmathik</a></li><li><a class="page" href="/elements/mermaid">Mermaid</a></li><li><a class="page" href="/elements/online-ide">Online IDE</a></li><li><a class="page" href="/elements/plantuml">PlantUML</a></li><li><a class="page" href="/elements/qr">QR Code</a></li><li><a class="page" href="/elements/tabs">Reiter</a></li><li><a class="page" href="/elements/sql-ide">SQL IDE</a></li><li><a class="page" href="/elements/scratchblock">Scratchblöcke</a></li><li><a class="page" href="/elements/slideshow">Slideshow</a></li><li><a class="page" href="/elements/snippets">Snippets</a></li><li><a class="page" href="/elements/struktog">Struktog</a></li><li><a class="page" href="/elements/video">Video</a></li><li><a class="page" href="/elements/youtube">YouTube</a></li></ul></div></div><div class="section"><div class="collapsible name empty  "><span class="label">Fortgeschrittene Features</span></div><div class="collapsible-content links"><ul class="pages"><li><a class="page" href="/advanced/single-use-templates">Einweg Vorlagen</a></li><li><a class="page" href="/advanced/templates">Vorlagen</a></li></ul></div></div><div class="section"><div class="collapsible name empty  "><span class="label">Hosting</span></div><div class="collapsible-content links"><ul class="pages"><li><a class="page" href="/hosting/edugitpages">EduGit Pages</a></li><li><a class="page" href="/hosting/custom">Eigene Lösung</a></li><li><a class="page" href="/hosting/ghpages">GitHub Pages</a></li><li><a class="page" href="/hosting/glpages">GitLab Pages</a></li><li><a class="page" href="/hosting/vercel">Vercel</a></li></ul></div></div></nav><a class="author" href="https://hyperbook.openpatch.org">Powered by <b>Hyperbook</b></a></div></side-drawer></div><a class="branding" href="/"><div class="name">Hyperbook Dokumenation</div></a><div id="custom-links-header" class="custom-links-menu"><ul class="links-menu"><li class="links-item sub"><a href="#"><div class="icon">🐦</div><div class="label">Kontakt</div></a><ul class="links-sub-menu"><li class="links-item"><a href="mailto:contact@openpatch.org"><div class="label">Mail</div></a></li><li class="links-item"><a href="https://twitter.com/openpatchorg"><div class="icon">🐦</div><div class="label">Twitter</div></a></li><li class="links-item"><a href="https://fosstodon.org/@openpatch"><div class="icon">🐘</div><div class="label">Mastodon</div></a></li><li class="links-item"><a href="https://matrix.to/#/#hyperbook:matrix.org"><div class="icon">👨‍💻</div><div class="label">Matrix (Chat)</div></a></li></ul></li></ul></div></header><div class="sidebar"><nav><ul><li><a class="page" href="/">Los Gehts</a></li></ul><div class="section"><div class="collapsible name empty  "><span class="label">Konfiguration</span></div><div class="collapsible-content links"><ul class="pages"><li><a class="page" href="/configuration/book">Buch Konfiguration</a></li><li><a class="page" href="/configuration/page">Seiten Konfiguration</a></li><li><a class="page" href="/configuration/section">Bereich Konfiguration</a></li><li><a class="page" href="/configuration/library">Bibliothek Konfiguration</a></li></ul></div></div><div class="section"><div class="collapsible name empty active expanded"><span class="label">Markdown Referenz</span></div><div class="collapsible-content links"><ul class="pages"><li><a class="page" href="/markdown/image">Bild</a></li><li><a class="page" href="/markdown/emphasis">Hervorhebung</a></li><li><a class="page" href="/markdown/hr">Horizontale Linie</a></li><li><a class="page" href="/markdown/comment">Kommentar</a></li><li><a class="page" href="/markdown/link">Link</a></li><li><a class="page" href="/markdown/list">Liste</a></li><li><a class="page" href="/markdown/code">Quelltext</a></li><li><a class="page" href="/markdown/table">Tabelle</a></li><li><a class="page" href="/markdown/line-break">Zeilenumbruch</a></li><li><a class="page" href="/markdown/quote">Zitat</a></li><li><a class="page" href="/markdown/header">Überschriften</a></li></ul></div></div><div class="section"><div class="collapsible name empty  "><span class="label">Elemente</span></div><div class="collapsible-content links"><ul class="pages"><li><a class="page" href="/elements/archive">Archiv</a></li><li><a class="page" href="/elements/audio">Audio</a></li><li><a class="page" href="/elements/bitflow">Bitflow</a></li><li><a class="page" href="/elements/download">Download</a></li><li><a class="page" href="/elements/embed">Embed</a></li><li><a class="page" href="/elements/emoji">Emoji</a></li><li><a class="page" href="/elements/excalidraw">Excalidraw</a></li><li><a class="page" href="/elements/protect">Geschützer Bereich</a></li><li><a class="page" href="/elements/glossary">Glossar</a></li><li><a class="page" href="/elements/alert">Hinweise</a></li><li><a class="page" href="/elements/tiles">Kacheln</a></li><li><a class="page" href="/elements/collapsible">Klappkasten</a></li><li><a class="page" href="/elements/bookmarks">Lesezeichen</a></li><li><a class="page" href="/elements/math">Mathmathik</a></li><li><a class="page" href="/elements/mermaid">Mermaid</a></li><li><a class="page" href="/elements/online-ide">Online IDE</a></li><li><a class="page" href="/elements/plantuml">PlantUML</a></li><li><a class="page" href="/elements/qr">QR Code</a></li><li><a class="page" href="/elements/tabs">Reiter</a></li><li><a class="page" href="/elements/sql-ide">SQL IDE</a></li><li><a class="page" href="/elements/scratchblock">Scratchblöcke</a></li><li><a class="page" href="/elements/slideshow">Slideshow</a></li><li><a class="page" href="/elements/snippets">Snippets</a></li><li><a class="page" href="/elements/struktog">Struktog</a></li><li><a class="page" href="/elements/video">Video</a></li><li><a class="page" href="/elements/youtube">YouTube</a></li></ul></div></div><div class="section"><div class="collapsible name empty  "><span class="label">Fortgeschrittene Features</span></div><div class="collapsible-content links"><ul class="pages"><li><a class="page" href="/advanced/single-use-templates">Einweg Vorlagen</a></li><li><a class="page" href="/advanced/templates">Vorlagen</a></li></ul></div></div><div class="section"><div class="collapsible name empty  "><span class="label">Hosting</span></div><div class="collapsible-content links"><ul class="pages"><li><a class="page" href="/hosting/edugitpages">EduGit Pages</a></li><li><a class="page" href="/hosting/custom">Eigene Lösung</a></li><li><a class="page" href="/hosting/ghpages">GitHub Pages</a></li><li><a class="page" href="/hosting/glpages">GitLab Pages</a></li><li><a class="page" href="/hosting/vercel">Vercel</a></li></ul></div></div></nav><a class="author" href="https://hyperbook.openpatch.org">Powered by <b>Hyperbook</b></a></div><main><article>
+</script><script type="module" src="assets/side-drawer.js" async></script><script src="assets/qrcode.js" async></script></head><body><div class="main-grid"><header><div class="mobile-nav"><button aria-label="Nav Toggle" class="toggle" onclick="hyperbook.navToggle()"><div class="bar1"></div><div class="bar2"></div><div class="bar3"></div></button><side-drawer id="nav-drawer"><div class="nav-drawer-content"><nav><ul><li><a class="page" href="/">Los Gehts</a></li></ul><div class="section"><div class="collapsible name empty  "><span class="label">Konfiguration</span></div><div class="collapsible-content links"><ul class="pages"><li><a class="page" href="/configuration/book">Buch Konfiguration</a></li><li><a class="page" href="/configuration/page">Seiten Konfiguration</a></li><li><a class="page" href="/configuration/section">Bereich Konfiguration</a></li><li><a class="page" href="/configuration/library">Bibliothek Konfiguration</a></li></ul></div></div><div class="section"><div class="collapsible name empty active expanded"><span class="label">Markdown Referenz</span></div><div class="collapsible-content links"><ul class="pages"><li><a class="page" href="/markdown/image">Bild</a></li><li><a class="page" href="/markdown/emphasis">Hervorhebung</a></li><li><a class="page" href="/markdown/hr">Horizontale Linie</a></li><li><a class="page" href="/markdown/comment">Kommentar</a></li><li><a class="page" href="/markdown/link">Link</a></li><li><a class="page" href="/markdown/list">Liste</a></li><li><a class="page" href="/markdown/code">Quelltext</a></li><li><a class="page" href="/markdown/table">Tabelle</a></li><li><a class="page" href="/markdown/line-break">Zeilenumbruch</a></li><li><a class="page" href="/markdown/quote">Zitat</a></li><li><a class="page" href="/markdown/header">Überschriften</a></li></ul></div></div><div class="section"><div class="collapsible name empty  "><span class="label">Elemente</span></div><div class="collapsible-content links"><ul class="pages"><li><a class="page" href="/elements/archive">Archiv</a></li><li><a class="page" href="/elements/audio">Audio</a></li><li><a class="page" href="/elements/bitflow">Bitflow</a></li><li><a class="page" href="/elements/download">Download</a></li><li><a class="page" href="/elements/embed">Embed</a></li><li><a class="page" href="/elements/emoji">Emoji</a></li><li><a class="page" href="/elements/excalidraw">Excalidraw</a></li><li><a class="page" href="/elements/protect">Geschützer Bereich</a></li><li><a class="page" href="/elements/glossary">Glossar</a></li><li><a class="page" href="/elements/alert">Hinweise</a></li><li><a class="page" href="/elements/tiles">Kacheln</a></li><li><a class="page" href="/elements/collapsible">Klappkasten</a></li><li><a class="page" href="/elements/bookmarks">Lesezeichen</a></li><li><a class="page" href="/elements/math">Mathmathik</a></li><li><a class="page" href="/elements/mermaid">Mermaid</a></li><li><a class="page" href="/elements/online-ide">Online IDE</a></li><li><a class="page" href="/elements/plantuml">PlantUML</a></li><li><a class="page" href="/elements/qr">QR Code</a></li><li><a class="page" href="/elements/tabs">Reiter</a></li><li><a class="page" href="/elements/sql-ide">SQL IDE</a></li><li><a class="page" href="/elements/scratchblock">Scratchblöcke</a></li><li><a class="page" href="/elements/slideshow">Slideshow</a></li><li><a class="page" href="/elements/snippets">Snippets</a></li><li><a class="page" href="/elements/struktog">Struktog</a></li><li><a class="page" href="/elements/video">Video</a></li><li><a class="page" href="/elements/youtube">YouTube</a></li></ul></div></div><div class="section"><div class="collapsible name empty  "><span class="label">Fortgeschrittene Features</span></div><div class="collapsible-content links"><ul class="pages"><li><a class="page" href="/advanced/single-use-templates">Einweg Vorlagen</a></li><li><a class="page" href="/advanced/templates">Vorlagen</a></li></ul></div></div><div class="section"><div class="collapsible name empty  "><span class="label">Hosting</span></div><div class="collapsible-content links"><ul class="pages"><li><a class="page" href="/hosting/edugitpages">EduGit Pages</a></li><li><a class="page" href="/hosting/custom">Eigene Lösung</a></li><li><a class="page" href="/hosting/ghpages">GitHub Pages</a></li><li><a class="page" href="/hosting/glpages">GitLab Pages</a></li><li><a class="page" href="/hosting/vercel">Vercel</a></li></ul></div></div></nav><a class="author" href="https://hyperbook.openpatch.org">Powered by <b>Hyperbook</b></a></div></side-drawer></div><a class="branding" href="/"><div class="name">Hyperbook Dokumenation</div></a><div id="custom-links-header" class="custom-links-menu"><ul class="links-menu"><li class="links-item sub"><a href="#"><div class="icon">🐦</div><div class="label">Kontakt</div></a><ul class="links-sub-menu"><li class="links-item"><a href="mailto:contact@openpatch.org"><div class="label">Mail</div></a></li><li class="links-item"><a href="https://twitter.com/openpatchorg"><div class="icon">🐦</div><div class="label">Twitter</div></a></li><li class="links-item"><a href="https://fosstodon.org/@openpatch"><div class="icon">🐘</div><div class="label">Mastodon</div></a></li><li class="links-item"><a href="https://matrix.to/#/#hyperbook:matrix.org"><div class="icon">👨‍💻</div><div class="label">Matrix (Chat)</div></a></li></ul></li></ul></div><dark-mode-toggle id="dark-mode-toggle" appearence="switch" permanent></dark-mode-toggle></header><div class="sidebar"><nav><ul><li><a class="page" href="/">Los Gehts</a></li></ul><div class="section"><div class="collapsible name empty  "><span class="label">Konfiguration</span></div><div class="collapsible-content links"><ul class="pages"><li><a class="page" href="/configuration/book">Buch Konfiguration</a></li><li><a class="page" href="/configuration/page">Seiten Konfiguration</a></li><li><a class="page" href="/configuration/section">Bereich Konfiguration</a></li><li><a class="page" href="/configuration/library">Bibliothek Konfiguration</a></li></ul></div></div><div class="section"><div class="collapsible name empty active expanded"><span class="label">Markdown Referenz</span></div><div class="collapsible-content links"><ul class="pages"><li><a class="page" href="/markdown/image">Bild</a></li><li><a class="page" href="/markdown/emphasis">Hervorhebung</a></li><li><a class="page" href="/markdown/hr">Horizontale Linie</a></li><li><a class="page" href="/markdown/comment">Kommentar</a></li><li><a class="page" href="/markdown/link">Link</a></li><li><a class="page" href="/markdown/list">Liste</a></li><li><a class="page" href="/markdown/code">Quelltext</a></li><li><a class="page" href="/markdown/table">Tabelle</a></li><li><a class="page" href="/markdown/line-break">Zeilenumbruch</a></li><li><a class="page" href="/markdown/quote">Zitat</a></li><li><a class="page" href="/markdown/header">Überschriften</a></li></ul></div></div><div class="section"><div class="collapsible name empty  "><span class="label">Elemente</span></div><div class="collapsible-content links"><ul class="pages"><li><a class="page" href="/elements/archive">Archiv</a></li><li><a class="page" href="/elements/audio">Audio</a></li><li><a class="page" href="/elements/bitflow">Bitflow</a></li><li><a class="page" href="/elements/download">Download</a></li><li><a class="page" href="/elements/embed">Embed</a></li><li><a class="page" href="/elements/emoji">Emoji</a></li><li><a class="page" href="/elements/excalidraw">Excalidraw</a></li><li><a class="page" href="/elements/protect">Geschützer Bereich</a></li><li><a class="page" href="/elements/glossary">Glossar</a></li><li><a class="page" href="/elements/alert">Hinweise</a></li><li><a class="page" href="/elements/tiles">Kacheln</a></li><li><a class="page" href="/elements/collapsible">Klappkasten</a></li><li><a class="page" href="/elements/bookmarks">Lesezeichen</a></li><li><a class="page" href="/elements/math">Mathmathik</a></li><li><a class="page" href="/elements/mermaid">Mermaid</a></li><li><a class="page" href="/elements/online-ide">Online IDE</a></li><li><a class="page" href="/elements/plantuml">PlantUML</a></li><li><a class="page" href="/elements/qr">QR Code</a></li><li><a class="page" href="/elements/tabs">Reiter</a></li><li><a class="page" href="/elements/sql-ide">SQL IDE</a></li><li><a class="page" href="/elements/scratchblock">Scratchblöcke</a></li><li><a class="page" href="/elements/slideshow">Slideshow</a></li><li><a class="page" href="/elements/snippets">Snippets</a></li><li><a class="page" href="/elements/struktog">Struktog</a></li><li><a class="page" href="/elements/video">Video</a></li><li><a class="page" href="/elements/youtube">YouTube</a></li></ul></div></div><div class="section"><div class="collapsible name empty  "><span class="label">Fortgeschrittene Features</span></div><div class="collapsible-content links"><ul class="pages"><li><a class="page" href="/advanced/single-use-templates">Einweg Vorlagen</a></li><li><a class="page" href="/advanced/templates">Vorlagen</a></li></ul></div></div><div class="section"><div class="collapsible name empty  "><span class="label">Hosting</span></div><div class="collapsible-content links"><ul class="pages"><li><a class="page" href="/hosting/edugitpages">EduGit Pages</a></li><li><a class="page" href="/hosting/custom">Eigene Lösung</a></li><li><a class="page" href="/hosting/ghpages">GitHub Pages</a></li><li><a class="page" href="/hosting/glpages">GitLab Pages</a></li><li><a class="page" href="/hosting/vercel">Vercel</a></li></ul></div></div></nav><a class="author" href="https://hyperbook.openpatch.org">Powered by <b>Hyperbook</b></a></div><main><article>
 <div class="hyperbook-markdown"><button id="toc-toggle" onclick="hyperbook.tocToggle()" title="Table of Contents"><div class="bar1"></div><div class="bar2"></div><div class="bar3"></div><div class="bar4"></div></button>
   <side-drawer id="toc-drawer" right>
     <div class="toc-drawer-content">
@@ -396,9 +251,12 @@ HYPERBOOK_ASSETS = "assets/"
     <div class="container">
       <div class="name">Markdown Referenz</div>
       <div class="make-qrcode"></div>
-      <div class="url">/markdown</div>
+      <div class="url">
+        <div data-href="/markdown"></div>
+        <div data-href="/@/md"></div>
+      </div>
     </div><button class="close" onclick="hyperbook.qrcodeClose()"><div class="close-icon"></div></button>
   </dialog>
 </div>
-</article><div class="jump-container"><a class="jump previous" href="/configuration/library">Bibliothek Konfiguration</a><a class="jump next" href="/markdown/image">Bild</a></div><div class="meta"><a class="edit-github" href="https://github.com/openpatch/hyperbook/edit/main/website/de/book/markdown/index.md">✎ GitHub</a><span class="copyright">© Copyright 2024 by <a href="https://openpatch.org">OpenPatch</a></span></div><div id="custom-links-footer"><ul class="links-item sub"><li><a href="#"><div class="icon">🐦</div><div class="label">Kontakt</div></a><ul class="links-sub-menu"><li class="links-item"><a href="mailto:contact@openpatch.org"><div class="label">Mail</div></a></li><li class="links-item"><a href="https://twitter.com/openpatchorg"><div class="icon">🐦</div><div class="label">Twitter</div></a></li><li class="links-item"><a href="https://fosstodon.org/@openpatch"><div class="icon">🐘</div><div class="label">Mastodon</div></a></li><li class="links-item"><a href="https://matrix.to/#/#hyperbook:matrix.org"><div class="icon">👨‍💻</div><div class="label">Matrix (Chat)</div></a></li></ul></li></ul></div></main></div><script src="assets/client.js"></script></body></html>"
+</article><div class="jump-container"><a class="jump previous" href="/configuration/library">Bibliothek Konfiguration</a><a class="jump next" href="/markdown/image">Bild</a></div><div class="meta"><a class="edit-github" href="https://github.com/openpatch/hyperbook/edit/main/website/de/book/markdown/index.md">✎ GitHub</a><span class="copyright">© Copyright 2024 by <a href="https://openpatch.org">OpenPatch</a></span></div><div id="custom-links-footer"><ul class="links-item sub"><li><a href="#"><div class="icon">🐦</div><div class="label">Kontakt</div></a><ul class="links-sub-menu"><li class="links-item"><a href="mailto:contact@openpatch.org"><div class="label">Mail</div></a></li><li class="links-item"><a href="https://twitter.com/openpatchorg"><div class="icon">🐦</div><div class="label">Twitter</div></a></li><li class="links-item"><a href="https://fosstodon.org/@openpatch"><div class="icon">🐘</div><div class="label">Mastodon</div></a></li><li class="links-item"><a href="https://matrix.to/#/#hyperbook:matrix.org"><div class="icon">👨‍💻</div><div class="label">Matrix (Chat)</div></a></li></ul></li></ul></div></main></div><script src="assets/client.js" defer></script></body></html>"
 `;

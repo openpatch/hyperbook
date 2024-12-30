@@ -9,7 +9,6 @@ import { getPkgManager } from "./helpers/get-pkg-manager";
 import { hyperproject } from "@hyperbook/fs";
 import { runNew } from "./new";
 import packageJson from "./package.json";
-import { deprecate } from "util";
 
 const program = new Command();
 

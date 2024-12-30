@@ -8,20 +8,16 @@ import {
 } from "@hyperbook/types";
 import handlebars from "handlebars";
 import fs from "fs";
-import { Root } from "mdast";
-import { fromMarkdown } from "mdast-util-from-markdown";
+import path from "path";
+import { Node, Root } from "mdast";
 import { visit } from "unist-util-visit";
 import { VFile } from "vfile";
-import { Element } from "hast";
 import {
   expectLeafDirective,
   isDirective,
   registerDirective,
 } from "./remarkHelper";
-import path from "path";
-import { toHast } from "mdast-util-to-hast";
-import { type } from "os";
-import { table } from "console";
+import { remark } from "./process";
 
 const getPageList = (
   sections: HyperbookSection[],
@@ -141,12 +137,8 @@ export default (ctx: HyperbookContext) => () => {
           );
           const template = handlebars.compile(snippetFile);
           const content = template({ pages: filteredPages });
-
-          data.hChildren = [
-            toHast(fromMarkdown(content), {
-              allowDangerousHtml: ctx.config.allowDangerousHtml || false,
-            }) as Element,
-          ];
+          const contentTree = remark(ctx).parse(content);
+          node.children = contentTree.children as any;
         } else if (format === "ul") {
           data.hChildren = [
             {

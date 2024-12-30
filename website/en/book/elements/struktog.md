@@ -1,5 +1,6 @@
 ---
 name: Struktog
+permaid: struktog
 ---
 
 # Struktog

@@ -1,5 +1,6 @@
 ---
 name: Tabs
+permaid: tabs
 ---
 
 # Tabs

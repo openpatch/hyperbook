@@ -1,5 +1,6 @@
 ---
 name: Collapsible
+permaid: collapsible
 ---
 
 # Collapsible

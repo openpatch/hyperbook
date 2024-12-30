@@ -1,5 +1,6 @@
 ---
 name: Link
+permaid: link
 ---
 
 # Link

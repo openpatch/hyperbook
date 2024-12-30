@@ -1,5 +1,6 @@
 ---
 name: Mermaid
+permaid: mermaid
 ---
 
 # Mermaid

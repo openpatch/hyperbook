@@ -93,6 +93,18 @@ async function postbuild() {
       ),
       dst: path.join("./dist", "assets", "directive-p5", "p5.sound.min.js"),
     },
+    {
+      src: path.join("./node_modules", "lunr", "lunr.min.js"),
+      dst: path.join("./dist", "assets", "lunr.min.js"),
+    },
+    {
+      src: path.join("./node_modules", "lunr-languages", "min"),
+      dst: path.join("./dist", "assets", "lunr-languages"),
+    },
+    {
+      src: path.join("./node_modules", "abcjs", "dist", "abcjs-basic-min.js"),
+      dst: path.join("./dist", "assets", "directive-abc-music", "abcjs-basic-min.js"),
+    }
   ];
 
   for (let asset of assets) {

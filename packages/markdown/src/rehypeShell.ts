@@ -46,64 +46,66 @@ const makeNavigationSectionElement = (
   let isExpanded =
     ctx.navigation.current?.href?.startsWith(href || "") || expanded;
 
-  if (!virtual && isEmpty) {
-    children.push({
-      type: "element",
-      tagName: "div",
-      properties: {
-        class: [
-          "collapsible",
-          "name",
-          "empty",
-          ctx.navigation.current?.href === href ? "active" : "",
-          isExpanded ? "expanded" : "",
-        ].join(" "),
-      },
-      children: [
-        {
-          type: "element",
-          tagName: "span",
-          properties: {
-            class: "label",
-          },
-          children: [
-            {
-              type: "text",
-              value: name,
-            },
-          ],
+  if (!virtual) {
+    if (isEmpty) {
+      children.push({
+        type: "element",
+        tagName: "div",
+        properties: {
+          class: [
+            "collapsible",
+            "name",
+            "empty",
+            ctx.navigation.current?.href === href ? "active" : "",
+            isExpanded ? "expanded" : "",
+          ].join(" "),
         },
-      ],
-    });
-  } else {
-    children.push({
-      type: "element",
-      tagName: "div",
-      properties: {
-        class: [
-          "collapsible",
-          "name",
-          ctx.navigation.current?.href === href ? "active" : "",
-          isExpanded ? "expanded" : "",
-        ].join(" "),
-      },
-      children: [
-        {
-          type: "element",
-          tagName: "a",
-          properties: {
-            href: href,
-            class: "label",
-          },
-          children: [
-            {
-              type: "text",
-              value: name,
+        children: [
+          {
+            type: "element",
+            tagName: "span",
+            properties: {
+              class: "label",
             },
-          ],
+            children: [
+              {
+                type: "text",
+                value: name,
+              },
+            ],
+          },
+        ],
+      });
+    } else {
+      children.push({
+        type: "element",
+        tagName: "div",
+        properties: {
+          class: [
+            "collapsible",
+            "name",
+            ctx.navigation.current?.href === href ? "active" : "",
+            isExpanded ? "expanded" : "",
+          ].join(" "),
         },
-      ],
-    });
+        children: [
+          {
+            type: "element",
+            tagName: "a",
+            properties: {
+              href: href,
+              class: "label",
+            },
+            children: [
+              {
+                type: "text",
+                value: name,
+              },
+            ],
+          },
+        ],
+      });
+    }
   }
 
   const pagesElements: ElementContent[] = pages
@@ -131,7 +133,7 @@ const makeNavigationSectionElement = (
     type: "element",
     tagName: "div",
     properties: {
-      class: "collapsible-content links",
+      class: virtual ? "links" :  "collapsible-content links",
     },
     children: linksElements,
   });
@@ -584,6 +586,93 @@ const makeHeaderElements = (ctx: HyperbookContext): ElementContent[] => {
       ],
     });
   }
+
+  if (ctx.config.search) {
+    elements.push({
+      type: "element",
+      tagName: "button",
+      properties: {
+        id: "search-toggle",
+        onclick: "hyperbook.searchToggle()",
+        title: "Search",
+      },
+      children: [],
+    });
+    elements.push({
+      type: "element",
+      tagName: "side-drawer",
+      properties: {
+        id: "search-drawer",
+        right: true,
+      },
+      children: [
+        {
+          type: "element",
+          tagName: "div",
+          properties: {
+            class: "search-drawer-content",
+          },
+          children: [
+            {
+              type: "element",
+              tagName: "div",
+              properties: {
+                class: "search-input",
+              },
+              children: [
+                {
+                  type: "element",
+                  tagName: "div",
+                  properties: {
+                    class: "search-icon",
+                  },
+                  children: [],
+                },
+                {
+                  type: "element",
+                  tagName: "input",
+                  properties: {
+                    id: "search-input",
+                    placerholder: "...",
+                  },
+                  children: [],
+                },
+                {
+                  type: "element",
+                  tagName: "button",
+                  properties: {
+                    class: "search-button",
+                    onclick: "hyperbook.search()",
+                  },
+                  children: [],
+                },
+              ],
+            },
+            {
+              type: "element",
+              tagName: "div",
+              properties: {
+                id: "search-results",
+              },
+              children: [],
+            },
+          ],
+        },
+      ],
+    });
+  }
+
+  elements.push({
+    type: "element",
+    tagName: "dark-mode-toggle",
+    properties: {
+      id: "dark-mode-toggle",
+      appearence: "switch",
+      permanent: true
+    },
+    children: [],
+  })
+
 
   return [
     {

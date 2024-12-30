@@ -47,10 +47,14 @@ import remarkLink from "./remarkLink";
 import remarkDirectivePagelist from "./remarkDirectivePagelist";
 import rehypeQrCode from "./rehypeQrCode";
 import rehypeDirectiveP5 from "./rehypeDirectiveP5";
+import remarkCollectSearchDocuments from "./remarkCollectSearchDocuments";
+import remarkDirectiveGeogebra from "./remarkDirectiveGeogebra";
+import remarkDirectiveAbcMusic from "./remarkDirectiveAbcMusic";
 
-const remark = (ctx: HyperbookContext) => {
+export const remark = (ctx: HyperbookContext) => {
   const remarkPlugins: PluggableList = [
     remarkRemoveComments,
+    remarkGemoji,
     remarkDirective,
     remarkDirectiveRehype,
     remarkDirectivePagelist(ctx),
@@ -58,7 +62,6 @@ const remark = (ctx: HyperbookContext) => {
     remarkHeadings(ctx),
     remarkImage(ctx),
     remarkGfm,
-    remarkCode(ctx),
     remarkDirectiveTerm(ctx),
     remarkDirectiveEmbed(ctx),
     remarkDirectiveArchive(ctx),
@@ -78,14 +81,17 @@ const remark = (ctx: HyperbookContext) => {
     remarkDirectiveSlideshow(ctx),
     remarkDirectiveScratchblock(ctx),
     remarkDirectiveMermaid(ctx),
+    remarkDirectiveAbcMusic(ctx),
     remarkDirectiveExcalidraw(ctx),
     remarkDirectiveStruktog(ctx),
-    remarkCollectHeadings(ctx),
+    remarkDirectiveGeogebra(ctx),
+    remarkCode(ctx),
     remarkMath,
-    remarkGemoji,
     remarkUnwrapImages,
     /* needs to be last directive */
     remarkDirectiveProtect(ctx),
+    remarkCollectHeadings(ctx),
+    remarkCollectSearchDocuments(ctx),
   ];
 
   const rehypePlugins: PluggableList = [
@@ -118,15 +124,16 @@ const remark = (ctx: HyperbookContext) => {
     .use(remarkToRehype, {
       allowDangerousHtml: ctx.config.allowDangerousHtml || false,
     })
-    .use(rehypePlugins)
+    .use(rehypePlugins);
+};
+
+export const process = (md: string, ctx: HyperbookContext) => {
+  return remark(ctx)
     .use(rehypeShell(ctx))
     .use(rehypeHtmlStructure(ctx))
     .use(rehypeStringify, {
       allowDangerousCharacters: true,
       allowDangerousHtml: ctx.config.allowDangerousHtml || false,
-    });
-};
-
-export const process = (md: string, ctx: HyperbookContext) => {
-  return remark(ctx).process(md);
+    })
+    .process(md);
 };

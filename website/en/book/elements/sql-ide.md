@@ -1,5 +1,6 @@
 ---
 name: SQL IDE
+permaid: sql-ide
 ---
 
 The SQL-IDE element accepts the following arguments:

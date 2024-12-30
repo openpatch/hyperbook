@@ -1,5 +1,6 @@
 ---
 name: Emphasis
+permaid: emphasis
 ---
 
 # Emphasis

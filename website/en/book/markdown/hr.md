@@ -1,5 +1,6 @@
 ---
 name: Horizontal Rule
+permaid: hr
 ---
 
 # Horizontal Rule

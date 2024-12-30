@@ -1,5 +1,95 @@
 # @hyperbook/markdown
 
+## 0.19.0
+
+### Minor Changes
+
+- [`8d23c1a`](https://github.com/openpatch/hyperbook/commit/8d23c1a80c1f344a7c5bf2a43d7ebaf90d816d0c) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add abc music element. For displaying and creating music with notes.
+
+## 0.18.0
+
+### Minor Changes
+
+- [`7af5dd0`](https://github.com/openpatch/hyperbook/commit/7af5dd0c41bf47f0bbd2ff4f4d16a5411e7ccccb) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Allow emojis in tabs
+
+## 0.17.1
+
+### Patch Changes
+
+- [`124f573`](https://github.com/openpatch/hyperbook/commit/124f573acddab763617f6bdfd261d64aca516f26) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - fix ios white box issue
+
+## 0.17.0
+
+### Minor Changes
+
+- [`05b262a`](https://github.com/openpatch/hyperbook/commit/05b262af61d920ed4b0dc4d3b3e88c85424e74cf) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add dark mode toggle
+
+### Patch Changes
+
+- [`7126cb7`](https://github.com/openpatch/hyperbook/commit/7126cb7349b3ad54d1593bce72dc364b14a27e68) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - improve css
+
+- [`769228e`](https://github.com/openpatch/hyperbook/commit/769228eea963ba58147747362aa50ffc4c8fba3c) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix search results not visually pleasing in light mode
+
+## 0.16.0
+
+### Minor Changes
+
+- [`28d5912`](https://github.com/openpatch/hyperbook/commit/28d5912d977c6eb4eb57d5f222a96d3fc5387282) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Remove menu animation for better experience
+
+## 0.15.3
+
+### Patch Changes
+
+- [`d4876f7`](https://github.com/openpatch/hyperbook/commit/d4876f7db102a98da1d37f10a3e15633f396ce1f) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - fix virtual section not rendering
+
+## 0.15.2
+
+### Patch Changes
+
+- [`a63ee6b`](https://github.com/openpatch/hyperbook/commit/a63ee6b3cefac39f90ba6f368886a7ed73d9f40c) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - fix virtual section is visible
+
+## 0.15.1
+
+### Patch Changes
+
+- [`3cdf623`](https://github.com/openpatch/hyperbook/commit/3cdf6235fc52061977e856f5df99df1f68a25742) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - fix searchEl not found
+
+## 0.15.0
+
+### Minor Changes
+
+- [#909](https://github.com/openpatch/hyperbook/pull/909) [`88071bd`](https://github.com/openpatch/hyperbook/commit/88071bd13ca297a32f110e322e7142e7b0406736) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add GeoGebra element.
+
+## 0.14.0
+
+### Minor Changes
+
+- [#907](https://github.com/openpatch/hyperbook/pull/907) [`eaeaf29`](https://github.com/openpatch/hyperbook/commit/eaeaf293532494607385f4e8d927ffb3716dcc6f) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add option to enable search. Just set the search key to true in your hyperbook config and a search icon will be visible in the top right hand corner.
+
+## 0.13.2
+
+### Patch Changes
+
+- [`2ab94ae`](https://github.com/openpatch/hyperbook/commit/2ab94aea525c2b67c156313f13d9662efad5d8a6) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - fix pagelist snippets not parsed correctly
+
+## 0.13.1
+
+### Patch Changes
+
+- [`300e589`](https://github.com/openpatch/hyperbook/commit/300e589f9de4fa6dc5ed76e4649240c93a8eae6c) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - fix online ide has wrong file names when using showLineNumbers in hyperbook config.
+
+## 0.13.0
+
+### Minor Changes
+
+- [`d9f0b71`](https://github.com/openpatch/hyperbook/commit/d9f0b711775195fc56d9706dc196edf577591b2e) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Allow permaids to be set in the frontmatter of a page. The permaids can be use in links and in the frontmatter for next and prev. See the page configuration documentation for details. All pages with permaids are available at /@/[permaid].
+
+## 0.12.2
+
+### Patch Changes
+
+- [`d5bcb38`](https://github.com/openpatch/hyperbook/commit/d5bcb38e2b641a292bae161ee3b1893d80b14360) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - fix position of copy button in code blocks
+
 ## 0.12.1
 
 ### Patch Changes

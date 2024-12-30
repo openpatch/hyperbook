@@ -1,5 +1,6 @@
 ---
 name: QR Code
+permaid: qr
 ---
 
 # QR Code

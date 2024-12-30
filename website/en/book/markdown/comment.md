@@ -1,5 +1,6 @@
 ---
 name: Comment
+permaid: comment
 ---
 
 # Comment

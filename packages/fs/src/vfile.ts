@@ -14,6 +14,7 @@ export type VFileBase = {
     relative: string;
     absolute: string;
     href: string | null;
+    permalink: string | null;
   };
   name: string;
   extension: string;
@@ -123,6 +124,7 @@ async function getDirectoryArchives(root: string): Promise<VDirectoryArchive> {
           name,
           path: {
             href: "/archives/" + name + ".zip",
+            permalink: null,
             absolute: path.join(root, "archives", file),
             relative: file,
             directory: "",
@@ -180,6 +182,7 @@ async function getDirectoryBook(root: string): Promise<VDirectoryBook> {
         let vfileBase: VFileBase = {
           folder: "book",
           path: {
+            permalink: null,
             directory: directory.path.relative,
             absolute: path.join(directory.path.absolute, file),
             relative: path.join(directory.path.relative, file),
@@ -189,11 +192,18 @@ async function getDirectoryBook(root: string): Promise<VDirectoryBook> {
           name,
           root,
         };
+        const markdown = await getMarkdown(vfileBase);
         let vfile: VFileBook = {
           ...vfileBase,
+          path: {
+            ...vfileBase.path,
+            permalink: markdown.data.permaid
+              ? `/@/${markdown.data.permaid}`
+              : null,
+          },
           folder: "book",
           extension: ext as (typeof pageExtensions)[number],
-          markdown: await getMarkdown(vfileBase),
+          markdown,
         };
 
         let href = "/";
@@ -262,6 +272,7 @@ async function getDirectoryGlossary(root: string): Promise<VDirectoryGlossary> {
         let vfilebase: VFileBase = {
           folder: "glossary",
           path: {
+            permalink: null,
             directory: directory.path.relative,
             absolute: path.join(directory.path.absolute, file),
             relative: path.join(directory.path.relative, file),
@@ -343,6 +354,7 @@ async function getDirectoryPublic(root: string): Promise<VDirectoryPublic> {
         let vfile: VFilePublic = {
           folder: "public",
           path: {
+            permalink: null,
             directory: directory.path.relative,
             absolute: path.join(directory.path.absolute, file),
             relative: path.join(directory.path.relative, file),

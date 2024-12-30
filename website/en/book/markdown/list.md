@@ -1,5 +1,6 @@
 ---
 name: List
+permaid: list
 ---
 
 # List

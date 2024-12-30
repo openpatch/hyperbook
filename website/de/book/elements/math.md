@@ -1,9 +1,9 @@
 ---
-name: Mathmatik
+name: Mathematik
 lang: de
 ---
 
-# Mathemathik
+# Mathematik
 
 Manchmal wünschst du dir $ \LaTeX $, aber du schreibst ja nur Markdown-Dateien. Kein Problem, Hyperbook unterstützt KaTeX.
 

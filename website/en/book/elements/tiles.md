@@ -1,5 +1,6 @@
 ---
 name: Tiles
+permaid: tiles
 ---
 
 # Tiles

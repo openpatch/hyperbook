@@ -1,6 +1,7 @@
 {
   "name": "Hyperbook Dokumenation",
   "qrcode": true,
+  "search": true,
   "description": "Dokumentation für Hyperbook erstellt mit Hyperbook",
   "author": {
     "name": "OpenPatch",
@@ -13,6 +14,10 @@
     "code": "/fonts/FiraCode-Regular.woff2"
   },
   "links": [
+    {
+      "label": "Changelog",
+      "href": "/changelog"
+    },
     {
       "label": "Kontakt",
       "links": [
@@ -39,6 +44,11 @@
       ]
     }
   ],
+  "elements": {
+    "code": {
+      "showLineNumbers": true
+    }
+  },
   "language": "de",
   "logo": "/logo.svg",
   "repo": "https://github.com/openpatch/hyperbook/edit/main/website/de"

@@ -1,5 +1,6 @@
 ---
 name: Embed
+permaid: embed
 ---
 
 # Embed

@@ -1,5 +1,116 @@
 # hyperbook
 
+## 0.42.0
+
+### Minor Changes
+
+- [`8d23c1a`](https://github.com/openpatch/hyperbook/commit/8d23c1a80c1f344a7c5bf2a43d7ebaf90d816d0c) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add abc music element. For displaying and creating music with notes.
+
+## 0.41.0
+
+### Minor Changes
+
+- [`7af5dd0`](https://github.com/openpatch/hyperbook/commit/7af5dd0c41bf47f0bbd2ff4f4d16a5411e7ccccb) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Allow emojis in tabs
+
+## 0.40.1
+
+### Patch Changes
+
+- [`124f573`](https://github.com/openpatch/hyperbook/commit/124f573acddab763617f6bdfd261d64aca516f26) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - fix ios white box issue
+
+## 0.40.0
+
+### Minor Changes
+
+- [`05b262a`](https://github.com/openpatch/hyperbook/commit/05b262af61d920ed4b0dc4d3b3e88c85424e74cf) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add dark mode toggle
+
+### Patch Changes
+
+- [`7126cb7`](https://github.com/openpatch/hyperbook/commit/7126cb7349b3ad54d1593bce72dc364b14a27e68) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - improve css
+
+## 0.39.1
+
+### Patch Changes
+
+- [`698acbb`](https://github.com/openpatch/hyperbook/commit/698acbb5189453e25c295acaba59be87202e7d09) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix hyperbook double rebuilding in dev mode
+
+- Updated dependencies [[`27d2f47`](https://github.com/openpatch/hyperbook/commit/27d2f47e0e669b3738f62206bed767d29abce18a)]:
+  - @hyperbook/fs@0.16.0
+
+## 0.39.0
+
+### Minor Changes
+
+- [`05b75d7`](https://github.com/openpatch/hyperbook/commit/05b75d7f59c8492fdbf4c422b35e85b740429e90) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add ?version= at the end of an asset url to refresh the cache if a new hyperbook version is released.
+
+- [`28d5912`](https://github.com/openpatch/hyperbook/commit/28d5912d977c6eb4eb57d5f222a96d3fc5387282) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Remove menu animation for better experience
+
+## 0.38.4
+
+### Patch Changes
+
+- [`d4876f7`](https://github.com/openpatch/hyperbook/commit/d4876f7db102a98da1d37f10a3e15633f396ce1f) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - fix virtual section not rendering
+
+## 0.38.3
+
+### Patch Changes
+
+- [`a63ee6b`](https://github.com/openpatch/hyperbook/commit/a63ee6b3cefac39f90ba6f368886a7ed73d9f40c) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - fix virtual section is visible
+
+## 0.38.2
+
+### Patch Changes
+
+- [`3cdf623`](https://github.com/openpatch/hyperbook/commit/3cdf6235fc52061977e856f5df99df1f68a25742) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - fix searchEl not found
+
+## 0.38.1
+
+### Patch Changes
+
+- [`d1e977c`](https://github.com/openpatch/hyperbook/commit/d1e977c1e1414cb49c1b88623948a73e5c51995d) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add html extensions to permaid files
+
+## 0.38.0
+
+### Minor Changes
+
+- [#909](https://github.com/openpatch/hyperbook/pull/909) [`88071bd`](https://github.com/openpatch/hyperbook/commit/88071bd13ca297a32f110e322e7142e7b0406736) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add GeoGebra element.
+
+## 0.37.0
+
+### Minor Changes
+
+- [#907](https://github.com/openpatch/hyperbook/pull/907) [`eaeaf29`](https://github.com/openpatch/hyperbook/commit/eaeaf293532494607385f4e8d927ffb3716dcc6f) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add option to enable search. Just set the search key to true in your hyperbook config and a search icon will be visible in the top right hand corner.
+
+### Patch Changes
+
+- Updated dependencies [[`eaeaf29`](https://github.com/openpatch/hyperbook/commit/eaeaf293532494607385f4e8d927ffb3716dcc6f)]:
+  - @hyperbook/types@0.12.0
+  - @hyperbook/fs@0.15.0
+
+## 0.36.2
+
+### Patch Changes
+
+- [`2ab94ae`](https://github.com/openpatch/hyperbook/commit/2ab94aea525c2b67c156313f13d9662efad5d8a6) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - fix pagelist snippets not parsed correctly
+
+## 0.36.1
+
+### Patch Changes
+
+- [`331d74f`](https://github.com/openpatch/hyperbook/commit/331d74fd4000b11fbf5f63a98382f2c0ab547a46) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - bump version
+
+## 0.36.0
+
+### Minor Changes
+
+- [`d9f0b71`](https://github.com/openpatch/hyperbook/commit/d9f0b711775195fc56d9706dc196edf577591b2e) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Allow permaids to be set in the frontmatter of a page. The permaids can be use in links and in the frontmatter for next and prev. See the page configuration documentation for details. All pages with permaids are available at /@/[permaid].
+
+### Patch Changes
+
+- Updated dependencies [[`d9f0b71`](https://github.com/openpatch/hyperbook/commit/d9f0b711775195fc56d9706dc196edf577591b2e)]:
+  - @hyperbook/types@0.11.0
+  - @hyperbook/fs@0.15.0
+
 ## 0.35.3
 
 ### Patch Changes

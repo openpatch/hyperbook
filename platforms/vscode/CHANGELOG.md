@@ -1,5 +1,122 @@
 # @hyperbook/vscode-extension
 
+## 0.27.9
+
+### Patch Changes
+
+- Updated dependencies [[`8d23c1a`](https://github.com/openpatch/hyperbook/commit/8d23c1a80c1f344a7c5bf2a43d7ebaf90d816d0c)]:
+  - @hyperbook/markdown@0.19.0
+
+## 0.27.8
+
+### Patch Changes
+
+- Updated dependencies [[`7af5dd0`](https://github.com/openpatch/hyperbook/commit/7af5dd0c41bf47f0bbd2ff4f4d16a5411e7ccccb)]:
+  - @hyperbook/markdown@0.18.0
+
+## 0.27.7
+
+### Patch Changes
+
+- Updated dependencies [[`124f573`](https://github.com/openpatch/hyperbook/commit/124f573acddab763617f6bdfd261d64aca516f26)]:
+  - @hyperbook/markdown@0.17.1
+
+## 0.27.6
+
+### Patch Changes
+
+- Updated dependencies [[`05b262a`](https://github.com/openpatch/hyperbook/commit/05b262af61d920ed4b0dc4d3b3e88c85424e74cf), [`7126cb7`](https://github.com/openpatch/hyperbook/commit/7126cb7349b3ad54d1593bce72dc364b14a27e68), [`769228e`](https://github.com/openpatch/hyperbook/commit/769228eea963ba58147747362aa50ffc4c8fba3c)]:
+  - @hyperbook/markdown@0.17.0
+
+## 0.27.5
+
+### Patch Changes
+
+- Updated dependencies [[`27d2f47`](https://github.com/openpatch/hyperbook/commit/27d2f47e0e669b3738f62206bed767d29abce18a)]:
+  - @hyperbook/fs@0.16.0
+
+## 0.27.4
+
+### Patch Changes
+
+- Updated dependencies [[`28d5912`](https://github.com/openpatch/hyperbook/commit/28d5912d977c6eb4eb57d5f222a96d3fc5387282)]:
+  - @hyperbook/markdown@0.16.0
+
+## 0.27.3
+
+### Patch Changes
+
+- Updated dependencies [[`d4876f7`](https://github.com/openpatch/hyperbook/commit/d4876f7db102a98da1d37f10a3e15633f396ce1f)]:
+  - @hyperbook/markdown@0.15.3
+
+## 0.27.2
+
+### Patch Changes
+
+- Updated dependencies [[`a63ee6b`](https://github.com/openpatch/hyperbook/commit/a63ee6b3cefac39f90ba6f368886a7ed73d9f40c)]:
+  - @hyperbook/markdown@0.15.2
+
+## 0.27.1
+
+### Patch Changes
+
+- [`3cdf623`](https://github.com/openpatch/hyperbook/commit/3cdf6235fc52061977e856f5df99df1f68a25742) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - fix searchEl not found
+
+- Updated dependencies [[`3cdf623`](https://github.com/openpatch/hyperbook/commit/3cdf6235fc52061977e856f5df99df1f68a25742)]:
+  - @hyperbook/markdown@0.15.1
+
+## 0.27.0
+
+### Minor Changes
+
+- [#909](https://github.com/openpatch/hyperbook/pull/909) [`88071bd`](https://github.com/openpatch/hyperbook/commit/88071bd13ca297a32f110e322e7142e7b0406736) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add GeoGebra element.
+
+### Patch Changes
+
+- Updated dependencies [[`88071bd`](https://github.com/openpatch/hyperbook/commit/88071bd13ca297a32f110e322e7142e7b0406736)]:
+  - @hyperbook/markdown@0.15.0
+
+## 0.26.0
+
+### Minor Changes
+
+- [#907](https://github.com/openpatch/hyperbook/pull/907) [`eaeaf29`](https://github.com/openpatch/hyperbook/commit/eaeaf293532494607385f4e8d927ffb3716dcc6f) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add option to enable search. Just set the search key to true in your hyperbook config and a search icon will be visible in the top right hand corner.
+
+### Patch Changes
+
+- Updated dependencies [[`eaeaf29`](https://github.com/openpatch/hyperbook/commit/eaeaf293532494607385f4e8d927ffb3716dcc6f)]:
+  - @hyperbook/markdown@0.14.0
+  - @hyperbook/fs@0.15.0
+
+## 0.25.11
+
+### Patch Changes
+
+- Updated dependencies [[`2ab94ae`](https://github.com/openpatch/hyperbook/commit/2ab94aea525c2b67c156313f13d9662efad5d8a6)]:
+  - @hyperbook/markdown@0.13.2
+
+## 0.25.10
+
+### Patch Changes
+
+- Updated dependencies [[`300e589`](https://github.com/openpatch/hyperbook/commit/300e589f9de4fa6dc5ed76e4649240c93a8eae6c)]:
+  - @hyperbook/markdown@0.13.1
+
+## 0.25.9
+
+### Patch Changes
+
+- Updated dependencies [[`d9f0b71`](https://github.com/openpatch/hyperbook/commit/d9f0b711775195fc56d9706dc196edf577591b2e)]:
+  - @hyperbook/markdown@0.13.0
+  - @hyperbook/fs@0.15.0
+
+## 0.25.8
+
+### Patch Changes
+
+- Updated dependencies [[`d5bcb38`](https://github.com/openpatch/hyperbook/commit/d5bcb38e2b641a292bae161ee3b1893d80b14360)]:
+  - @hyperbook/markdown@0.12.2
+
 ## 0.25.7
 
 ### Patch Changes
