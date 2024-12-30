@@ -3,7 +3,6 @@ hyperbook.abc = (function () {
   window.codeInput?.registerTemplate(
     "abc-highlighted",
     codeInput.templates.prism(window.Prism, [
-      new codeInput.plugins.AutoCloseBrackets(),
       new codeInput.plugins.Indent(true, 2),
     ])
   );
