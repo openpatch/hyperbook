@@ -27,7 +27,7 @@ hyperbook.p5 = (function () {
     const frame = elem.getElementsByTagName("iframe")[0];
     const template = elem.getAttribute("data-template");
 
-    update.addEventListener("click", () => {
+    update?.addEventListener("click", () => {
       const code = editor.value;
       frame.srcdoc = template.replace("###SLOT###", wrapSketch(code));
     });
