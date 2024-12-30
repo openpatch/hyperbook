@@ -9,9 +9,11 @@ import { visit } from "unist-util-visit";
 import { VFile } from "vfile";
 import {
   expectContainerDirective,
-  isDirective,
   registerDirective,
+  requestCSS,
+  requestJS,
 } from "./remarkHelper";
+import { toText } from "./mdastUtilToText";
 
 interface CodeBundle {
   js?: string;
@@ -22,7 +24,7 @@ export default (ctx: HyperbookContext) => () => {
   const name = "p5";
   const cdnLibraryUrl = ctx.makeUrl(
     path.posix.join("directive-p5", "p5.min.js"),
-    "assets",
+    "assets"
   );
 
   const wrapSketch = (sketchCode?: string) => {
@@ -38,7 +40,7 @@ export default (ctx: HyperbookContext) => () => {
   };
 
   // see https://github.com/processing/p5.js-website/blob/main/src/components/CodeEmbed/frame.tsx
-  const wrapInMarkup = (code: CodeBundle) =>
+  const makeWrapInMarkupTemplate = (code: CodeBundle) =>
     `<!DOCTYPE html>
 <meta charset="utf8" />
 <base href="${ctx.makeUrl("", "public")}" />
@@ -49,73 +51,110 @@ html, body {
 }
 canvas {
   display: block;
+  margin: 0 auto;
 }
 </style>
 ${(code.scripts ? [cdnLibraryUrl, ...code.scripts] : []).map((src) => `<script type="text/javascript" src="${src}"></script>`).join("\n")}
 <body></body>
-<script id="code" type="text/javascript">${wrapSketch(code.js) || ""}</script>
-${
-  (code.scripts?.length ?? 0) > 0
-    ? ""
-    : `
-<script type="text/javascript">
-  // Listen for p5.min.js text content and include in iframe's head as script
-  window.addEventListener("message", event => {
-    // Include check to prevent p5.min.js from being loaded twice
-    const scriptExists = !!document.getElementById("p5ScriptTagInIframe");
-    if (!scriptExists && event.data?.sender === '${cdnLibraryUrl}') {
-      const p5ScriptElement = document.createElement('script');
-      p5ScriptElement.id = "p5ScriptTagInIframe";
-      p5ScriptElement.type = 'text/javascript';
-      p5ScriptElement.textContent = event.data.message;
-      document.head.appendChild(p5ScriptElement);
-    }
-  })
-</script>
-`
-}
+<script id="code" type="text/javascript">###SLOT###</script>
 `.replace(/\u00A0/g, " ");
 
   return (tree: Root, file: VFile) => {
     visit(tree, function (node) {
       if (node.type === "element" && node.tagName === "p5") {
-        const { src = "" } = node.properties || {};
+        const {
+          src = "",
+          height = 100,
+          editor = false,
+        } = node.properties || {};
 
         expectContainerDirective(node, file, name);
-        registerDirective(file, name, [], ["style.css"]);
+        registerDirective(file, name, ["client.js"], ["style.css"]);
+        requestJS(file, ["code-input", "code-input.min.js"]);
+        requestCSS(file, ["code-input", "code-input.min.css"]);
+        requestJS(file, ["code-input", "auto-close-brackets.min.js"]);
+        requestJS(file, ["code-input", "indent.min.js"]);
 
-        const srcFile = fs.readFileSync(
-          path.join(ctx.root, "public", String(src)),
-          "utf8",
-        );
+        let srcFile = "";
 
-        const srcdoc = wrapInMarkup({
-          js: srcFile,
+        if (src) {
+          srcFile = fs.readFileSync(
+            path.join(ctx.root, "public", String(src)),
+            "utf8"
+          );
+        } else if (node.children?.length > 0) {
+          srcFile = toText(node.children);
+        }
+
+        const template = makeWrapInMarkupTemplate({
           scripts: [
             ctx.makeUrl(
               path.posix.join("directive-p5", "p5.sound.min.js"),
-              "assets",
+              "assets"
             ),
           ],
         });
+        const srcdoc = template.replace("###SLOT###", wrapSketch(srcFile));
         node.tagName = "div";
         node.properties = {
           class: "directive-p5",
+          "data-template": template,
         };
         node.children = [
           {
             type: "element",
-            tagName: "iframe",
+            tagName: "div",
             properties: {
-              srcdoc: srcdoc,
-              loading: "eager",
-              sandbox:
-                "allow-scripts allow-popups allow-modals allow-forms allow-same-origin",
-              "aria-label": "Code Preview",
-              title: "Code Preview",
+              class: "container",
+              style: `height: ${height}px;`,
             },
-            children: [],
+            children: [
+              {
+                type: "element",
+                tagName: "iframe",
+                properties: {
+                  srcdoc: srcdoc,
+                  loading: "eager",
+                  sandbox:
+                    "allow-scripts allow-popups allow-modals allow-forms allow-same-origin",
+                  "aria-label": "Code Preview",
+                  title: "Code Preview",
+                },
+                children: [],
+              },
+            ],
           },
+          ...(editor
+            ? [
+                {
+                  type: "element",
+                  tagName: "button",
+                  properties: {
+                    class: "update",
+                  },
+                  children: [
+                    {
+                      type: "text",
+                      value: "Update",
+                    },
+                  ],
+                },
+                {
+                  type: "element",
+                  tagName: "code-input",
+                  properties: {
+                    class: "editor",
+                    language: "javascript",
+                  },
+                  children: [
+                    {
+                      type: "raw",
+                      value: srcFile,
+                    },
+                  ],
+                },
+              ]
+            : []),
         ];
       }
     });

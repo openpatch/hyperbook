@@ -21,7 +21,7 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/openpatch/hyperbook.git",
-    "directory": "packages/element-excalidraw"
+    "directory": "packages/web-component-excalidraw"
   },
   "bugs": {
     "url": "https://github.com/openpatch/hyperbook/issues"

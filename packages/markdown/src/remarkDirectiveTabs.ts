@@ -55,7 +55,6 @@ export default (ctx: HyperbookContext) => () => {
               hastTree = hastTree.children[0];
               hastTree.tagName = "span";
             }
-            console.log(JSON.stringify(hastTree, null, 2));
             tabTitleElements.push({
               type: "element",
               tagName: "button",

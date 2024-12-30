@@ -98,6 +98,7 @@ export const remark = (ctx: HyperbookContext) => {
     rehypeTableOfContents(ctx),
     rehypeQrCode(ctx),
     rehypeKatex,
+    rehypeDirectiveP5(ctx),
     [
       rehypePrettyCode,
       {
@@ -114,7 +115,6 @@ export const remark = (ctx: HyperbookContext) => {
         },
       },
     ],
-    rehypeDirectiveP5(ctx),
     rehypeFormat,
   ];
 
