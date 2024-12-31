@@ -1,5 +1,11 @@
 # @hyperbook/markdown
 
+## 0.20.0
+
+### Minor Changes
+
+- [#897](https://github.com/openpatch/hyperbook/pull/897) [`33724b8`](https://github.com/openpatch/hyperbook/commit/33724b8c46c588d30bce661c32244fc34896209f) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add p5 element
+
 ## 0.19.0
 
 ### Minor Changes
