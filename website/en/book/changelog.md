@@ -38,6 +38,18 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.44.0
+
+::::tabs
+
+:::tab{title="New :rocket:" id="new"}
+
+- A new element pyide that allows you to run python in your browser. [Learn more](/elements/pyide)
+
+:::
+
+::::
+
 ## v0.43.0
 
 ::::tabs
