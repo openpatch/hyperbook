@@ -41,6 +41,26 @@ export const registerDirective = (
   };
 };
 
+export const requestJS = (file: VFile, js: string[]) => {
+  if (!file.data.js) {
+    file.data.js = [];
+  }
+
+  if (!file.data.js.find(s => JSON.stringify(s) === JSON.stringify(js))) {
+    file.data.js.push(js);
+  }
+}
+
+export const requestCSS = (file: VFile, css: string[]) => {
+  if (!file.data.css) {
+    file.data.css = [];
+  }
+
+  if (!file.data.css.find(s => JSON.stringify(s) === JSON.stringify(css))) {
+    file.data.css.push(css);
+  }
+}
+
 export const isImage = (node: Node): node is Image => {
   return node.type === "image";
 };

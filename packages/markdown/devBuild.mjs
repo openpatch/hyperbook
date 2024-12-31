@@ -45,22 +45,6 @@ const result = await process(markdown, {
         label: "Kontakt 2",
         icon: "🐦",
       },
-      {
-        label: "Kontakt 2",
-        icon: "🐦",
-      },
-      {
-        label: "Kontakt 2",
-        icon: "🐦",
-      },
-      {
-        label: "Kontakt 2",
-        icon: "🐦",
-      },
-      {
-        label: "Kontakt 2",
-        icon: "🐦",
-      },
     ],
     repo: "https://github.com/openpatch/hyperbook/edit/main/website/de",
   },
@@ -69,8 +53,10 @@ const result = await process(markdown, {
     if (typeof p === "string") {
       p = [p];
     }
-    if (base === "public" || base === "book") {
-      return path.posix.join("", ...p);
+    if (base === "public") {
+      return path.posix.join("/public", ...p);
+    } else if (base === "book") {
+      return path.posix.join("/", ...p);
     }
     if (base === "assets") {
       return path.posix.join("/dist", base, ...p);

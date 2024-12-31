@@ -9,6 +9,8 @@ import { toString } from "mdast-util-to-string";
 import {
   expectContainerDirective,
   registerDirective,
+  requestCSS,
+  requestJS,
 } from "./remarkHelper";
 import hash from "./objectHash";
 
@@ -30,12 +32,13 @@ export default (ctx: HyperbookContext) => () => {
           ["abcjs-basic-min.js", "client.js"],
           ["style.css"]
         );
+        requestJS(file, ["code-input", "code-input.min.js"]);
+        requestCSS(file, ["code-input", "code-input.min.css"]);
+        requestJS(file, ["code-input", "indent.min.js"]);
 
-        console.log(node)
         const value = node.value || toString(node.children);
         const editor = node.meta?.includes("editor");
 
-        console.log(editor);
         data.hName = "div";
         data.hProperties = {
           class: "directive-abc-music",
@@ -50,22 +53,25 @@ export default (ctx: HyperbookContext) => () => {
               class: "tune",
             },
             children: [
-              {
-                type: "text",
-                value,
-              },
             ],
           },
           ...(editor
             ? [
                 {
                   type: "element",
-                  tagName: "textarea",
+                  tagName: "code-input",
                   properties: {
                     class: "editor",
                     id: hash(node),
-                    spellcheck: "false",
+                    template: "abc-highlighted",
+                    language: "javascript"
                   },
+                  children: [
+                    {
+                      type: "raw",
+                      value: value,
+                    }
+                  ]
                 },
               ]
             : []),

@@ -46,6 +46,7 @@ import remarkDirectiveTerm from "./remarkDirectiveTerm";
 import remarkLink from "./remarkLink";
 import remarkDirectivePagelist from "./remarkDirectivePagelist";
 import rehypeQrCode from "./rehypeQrCode";
+import rehypeDirectiveP5 from "./rehypeDirectiveP5";
 import remarkCollectSearchDocuments from "./remarkCollectSearchDocuments";
 import remarkDirectiveGeogebra from "./remarkDirectiveGeogebra";
 import remarkDirectiveAbcMusic from "./remarkDirectiveAbcMusic";
@@ -97,6 +98,7 @@ export const remark = (ctx: HyperbookContext) => {
     rehypeTableOfContents(ctx),
     rehypeQrCode(ctx),
     rehypeKatex,
+    rehypeDirectiveP5(ctx),
     [
       rehypePrettyCode,
       {

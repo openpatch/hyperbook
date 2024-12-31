@@ -1,0 +1,79 @@
+.directive-p5 {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  margin-bottom: 16px;
+  overflow: hidden;
+  gap: 8px;
+}
+
+code-input {
+  margin: 0;
+}
+
+.directive-p5 .container {
+  width: 100%;
+  border: 1px solid var(--color-spacer);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.directive-p5 .editor-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  height: 400px;
+}
+
+.directive-p5 .editor {
+  width: 100%;
+  border: 1px solid var(--color-spacer);
+  border-radius: 8px;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  flex: 1;
+}
+
+.directive-p5 button {
+  padding: 8px 16px;
+  border: 1px solid var(--color-spacer);
+  border-radius: 8px;
+  border-bottom: none;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  background-color: var(--color--background);
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.directive-p5 button:hover {
+  background-color: var(--color-spacer);
+}
+
+.directive-p5 iframe {
+  border: none;
+  width: 100%;
+  height: 100%;
+}
+
+.directive-p5 iframe canvas {
+  margin: 0 auto;
+}
+
+@media screen and (min-width: 1024px) {
+  .directive-p5:not(.standalone) {
+    flex-direction: row;
+    height: calc(100dvh - 128px);
+    .container {
+      flex: 1;
+      height: 100% !important;
+    }
+
+    .editor-container {
+      flex: 2;
+      height: 100%;
+      overflow: hidden;
+    }
+  }
+}

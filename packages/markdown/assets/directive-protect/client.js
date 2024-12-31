@@ -70,7 +70,6 @@ hyperbook.protect = (function () {
       onUpdateToast(inputEl, el, hiddenEL);
       inputEl.addEventListener("input", () => onInputToast(inputEl, el));
       inputEl.addEventListener("check", () => {
-        console.log("update");
         onUpdateToast(inputEl, el, hiddenEL);
       });
     }

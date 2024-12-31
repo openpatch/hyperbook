@@ -150,7 +150,6 @@ body {
   margin: 0;
   padding: 0;
 }
-
 `;
 
   return {
@@ -174,6 +173,8 @@ export default (ctx: HyperbookContext) => () => {
   } = ctx;
   return (tree: Root, file: VFile) => {
     const directives = file.data.directives || {};
+    const js = file.data.js || [];
+    const css = file.data.css || [];
     const originalChildren = tree.children as ElementContent[];
 
     tree.children = [
@@ -206,7 +207,7 @@ export default (ctx: HyperbookContext) => () => {
                 tagName: "meta",
                 properties: {
                   name: "viewport",
-                  content: "width=device-width, initial-scale=1",
+                  content: "width=device-width, initial-scale=1,, interactive-widget=resizes-content",
                 },
                 children: [],
               },
@@ -277,7 +278,7 @@ export default (ctx: HyperbookContext) => () => {
                 type: "element",
                 tagName: "noscript",
                 properties: {
-                  id: "dark-mode-toggle-stylesheets"
+                  id: "dark-mode-toggle-stylesheets",
                 },
                 children: [
                   {
@@ -306,9 +307,12 @@ export default (ctx: HyperbookContext) => () => {
                 type: "element",
                 tagName: "script",
                 properties: {
-                  src: makeUrl(["dark-mode-toggle-stylesheets-loader.js"], "assets"),
+                  src: makeUrl(
+                    ["dark-mode-toggle-stylesheets-loader.js"],
+                    "assets"
+                  ),
                 },
-                children: []
+                children: [],
               },
               {
                 type: "element",
@@ -317,7 +321,63 @@ export default (ctx: HyperbookContext) => () => {
                   type: "module",
                   src: makeUrl(["dark-mode-toggle.mjs"], "assets"),
                 },
-                children: []
+                children: [],
+              },
+              {
+                type: "element",
+                tagName: "script",
+                properties: {},
+                children: [
+                  {
+                    type: "raw",
+                    value: `
+window.Prism = window.Prism || {};
+window.Prism.manual = true;`,
+                  },
+                ],
+              },
+              {
+                type: "element",
+                tagName: "script",
+                properties: {
+                  src: makeUrl(["prism", "prism.js"], "assets"),
+                },
+                children: [],
+              },
+              {
+                type: "element",
+                tagName: "link",
+                properties: {
+                  rel: "stylesheet",
+                  href: makeUrl(["prism", "prism.css"], "assets"),
+                },
+                children: [],
+              },
+              {
+                type: "element",
+                tagName: "link",
+                properties: {
+                  rel: "stylesheet",
+                  href: makeUrl(
+                    ["prism", "prism-theme-github-dark.css"],
+                    "assets"
+                  ),
+                  media: "(prefers-color-scheme: dark)",
+                },
+                children: [],
+              },
+              {
+                type: "element",
+                tagName: "link",
+                properties: {
+                  rel: "stylesheet",
+                  href: makeUrl(
+                    ["prism", "prism-theme-github-light.css"],
+                    "assets"
+                  ),
+                  media: "(prefers-color-scheme: light)",
+                },
+                children: [],
               },
               {
                 type: "element",
@@ -355,6 +415,18 @@ export default (ctx: HyperbookContext) => () => {
                 },
                 children: [],
               },
+              ...css.map(
+                (style) =>
+                  ({
+                    type: "element",
+                    tagName: "link",
+                    properties: {
+                      rel: "stylesheet",
+                      href: makeUrl(style, "assets"),
+                    },
+                    children: [],
+                  }) as ElementContent
+              ),
               ...(ctx.config.styles || []).map(
                 (style) =>
                   ({
@@ -416,6 +488,17 @@ HYPERBOOK_ASSETS = "${makeUrl("/", "assets")}"
                 },
                 children: [],
               },
+              ...js.map(
+                (script) =>
+                  ({
+                    type: "element",
+                    tagName: "script",
+                    properties: {
+                      src: makeUrl(script, "assets"),
+                    },
+                    children: [],
+                  }) as ElementContent
+              ),
               ...Object.entries(directives).flatMap(([directive, { styles }]) =>
                 styles.map(
                   (style) =>

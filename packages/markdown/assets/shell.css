@@ -309,7 +309,7 @@ main {
 }
 
 article {
-  max-width: 980px;
+  max-width: 1280px;
   margin: 0 auto;
   grid-area: article;
   line-height: 1.5;

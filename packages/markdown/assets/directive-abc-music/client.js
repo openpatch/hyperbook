@@ -1,5 +1,11 @@
 hyperbook.abc = (function () {
   const els = document.querySelectorAll(".directive-abc-music");
+  window.codeInput?.registerTemplate(
+    "abc-highlighted",
+    codeInput.templates.prism(window.Prism, [
+      new codeInput.plugins.Indent(true, 2),
+    ])
+  );
 
   for (let el of els) {
     const tuneEl = el.getElementsByClassName("tune")[0];
@@ -10,21 +16,33 @@ hyperbook.abc = (function () {
 
     if (editor == "true") {
       const editorEl = el.getElementsByClassName("editor")[0];
-      editorEl.value = tune;
-      let editor = new ABCJS.Editor(editorEl.id, {
-        canvas_id: tuneEl,
-        synth: {
-            el: playerEl,
-            options: {
+
+      const setupEditor = () => {
+        try {
+          new ABCJS.Editor(editorEl.id, {
+            canvas_id: tuneEl,
+            synth: {
+              el: playerEl,
+              options: {
                 displayRestart: true,
                 displayPlay: true,
                 displayProgress: true,
+              },
             },
-        },
-        abcjsParams: {
-          responsive: "resize",
-        },
-      });
+            abcjsParams: {
+              responsive: "resize",
+              selectTypes: false,
+              selectionColor: "currentColor"
+            },
+          });
+        } catch (e) {
+          setTimeout(() => {
+            setupEditor();
+          }, 1000);
+        }
+      };
+
+      setupEditor();
     } else {
       const visualObj = ABCJS.renderAbc(tuneEl, tune, {
         responsive: "resize",
