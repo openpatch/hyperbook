@@ -7,7 +7,7 @@ The `pyide` element represents a Python Integrated Development Environment (IDE)
 It is used to embed a Python coding environment within the hyperbook website.
 This element allows users to write, edit, and execute Python code directly in the browser.
 
-```md
+````md
 :::pyide
 
 
@@ -18,7 +18,7 @@ print(a)
 :::
 
 
-```
+````
 
 :::pyide
 
@@ -32,7 +32,7 @@ print(a)
 
 You can also use any package listed here: https://pyodide.org/en/stable/usage/packages-in-pyodide.html
 
-```md
+````md
 :::pyide
 
 
@@ -44,7 +44,7 @@ print(a)
 ```
 
 :::
-```
+````
 
 :::pyide
 
