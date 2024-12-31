@@ -1,5 +1,11 @@
 # @hyperbook/markdown
 
+## 0.21.0
+
+### Minor Changes
+
+- [#923](https://github.com/openpatch/hyperbook/pull/923) [`3da49ba`](https://github.com/openpatch/hyperbook/commit/3da49baf31f414d8c1de7e4c4fcdac6b8556674f) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add pyide
+
 ## 0.20.0
 
 ### Minor Changes
