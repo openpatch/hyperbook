@@ -80,6 +80,9 @@
     },
     {
       "include": "#directive-pagelist"
+    },
+    {
+      "include": "#directive-p5"
     }
   ],
   "repository": {
@@ -978,6 +981,121 @@
           ]
         }
       }
+    },
+    "directive-p5-inline": {
+      "name": "meta.directive.p5inline.hyperbook",
+      "match": "(^|\\G)(:{2,})(p5){(.*)}\\s*$",
+      "captures": {
+        "2": {
+          "name": "punctuation.definition.directive.level.hyperbook"
+        },
+        "3": {
+          "name": "entity.name.function.directive.p5.hyperbook"
+        },
+        "4": {
+          "patterns": [
+            {
+              "match": "(src)=\"([^\"]*)\"",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.p5.hyperbook"
+                },
+                "2": {
+                  "name": "string.quoted.double.untitled"
+                }
+              }
+            },
+            {
+              "match": "(height)=([0-9]+)",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.p5.hyperbook"
+                },
+                "2": {
+                  "name": "constant.numeric"
+                }
+              }
+            },
+            {
+              "match": "(editor)=(?:(false)|(true))",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.p5.hyperbook"
+                },
+                "2": {
+                  "name": "constant.language.boolean.false"
+                },
+                "3": {
+                  "name": "constant.language.boolean.true"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "directive-p5": {
+      "name": "meta.directive.p5.hyperbook",
+      "begin": "(^|\\G)(:{3,})(p5)({.*})?\\s*$",
+      "end": "(^|\\G)(\\2|:{3,})\\s*$",
+      "beginCaptures": {
+        "2": {
+          "name": "punctuation.definition.directive.level.hyperbook"
+        },
+        "3": {
+          "name": "entity.name.function.directive.p5.hyperbook"
+        },
+        "4": {
+          "patterns": [
+            {
+              "match": "(src)=\"([^\"]*)\"",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.p5.hyperbook"
+                },
+                "2": {
+                  "name": "string.quoted.double.untitled"
+                }
+              }
+            },
+            {
+              "match": "(height)=([0-9]+)",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.p5.hyperbook"
+                },
+                "2": {
+                  "name": "constant.numeric"
+                }
+              }
+            },
+            {
+              "match": "(editor)=(?:(false)|(true))",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.p5.hyperbook"
+                },
+                "2": {
+                  "name": "constant.language.boolean.false"
+                },
+                "3": {
+                  "name": "constant.language.boolean.true"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "endCaptures": {
+        "2": {
+          "name": "punctuation.definition.directive.level.hyperbook"
+        }
+      },
+      "patterns": [
+        {
+          "include": "text.html.markdown"
+        }
+      ]
     }
   }
 }
