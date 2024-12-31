@@ -150,7 +150,6 @@ body {
   margin: 0;
   padding: 0;
 }
-
 `;
 
   return {
@@ -208,7 +207,7 @@ export default (ctx: HyperbookContext) => () => {
                 tagName: "meta",
                 properties: {
                   name: "viewport",
-                  content: "width=device-width, initial-scale=1",
+                  content: "width=device-width, initial-scale=1,, interactive-widget=resizes-content",
                 },
                 children: [],
               },

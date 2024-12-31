@@ -10,9 +10,9 @@ html, body {
   margin: 0;
   padding: 0;
 }
+
 canvas {
   display: block;
-  margin: 0 auto;
 }
 </style>
 <script type=&#x22;text/javascript&#x22; src=&#x22;/assets/directive-p5/p5.min.js&#x22;></script>
@@ -29,9 +29,9 @@ html, body {
   margin: 0;
   padding: 0;
 }
+
 canvas {
   display: block;
-  margin: 0 auto;
 }
 </style>
 <script type=&#x22;text/javascript&#x22; src=&#x22;/assets/directive-p5/p5.min.js&#x22;></script>
@@ -47,6 +47,7 @@ function draw() {
 </script>
 " loading="eager" sandbox="allow-scripts allow-popups allow-modals allow-forms allow-same-origin" aria-label="Code Preview" title="Code Preview"></iframe>
   </div>
+  <div class="editor-container"></div>
 </div>
 "
 `;

@@ -49,9 +49,9 @@ html, body {
   margin: 0;
   padding: 0;
 }
+
 canvas {
   display: block;
-  margin: 0 auto;
 }
 </style>
 ${(code.scripts ? [cdnLibraryUrl, ...code.scripts] : []).map((src) => `<script type="text/javascript" src="${src}"></script>`).join("\n")}
@@ -97,7 +97,7 @@ ${(code.scripts ? [cdnLibraryUrl, ...code.scripts] : []).map((src) => `<script t
         const srcdoc = template.replace("###SLOT###", wrapSketch(srcFile));
         node.tagName = "div";
         node.properties = {
-          class: "directive-p5",
+          class: ["directive-p5"].join(" "),
           "data-template": template,
         };
         node.children = [
@@ -124,37 +124,46 @@ ${(code.scripts ? [cdnLibraryUrl, ...code.scripts] : []).map((src) => `<script t
               },
             ],
           },
-          ...(editor
-            ? [
-                {
-                  type: "element",
-                  tagName: "button",
-                  properties: {
-                    class: "update",
-                  },
-                  children: [
+          {
+            type: "element",
+            tagName: "div",
+            properties: {
+              class: "editor-container",
+            },
+            children: [
+              ...(editor
+                ? [
                     {
-                      type: "text",
-                      value: "Update",
+                      type: "element",
+                      tagName: "button",
+                      properties: {
+                        class: "update",
+                      },
+                      children: [
+                        {
+                          type: "text",
+                          value: "Update",
+                        },
+                      ],
                     },
-                  ],
-                },
-                {
-                  type: "element",
-                  tagName: "code-input",
-                  properties: {
-                    class: "editor",
-                    language: "javascript",
-                  },
-                  children: [
                     {
-                      type: "raw",
-                      value: srcFile,
+                      type: "element",
+                      tagName: "code-input",
+                      properties: {
+                        class: "editor",
+                        language: "javascript",
+                      },
+                      children: [
+                        {
+                          type: "raw",
+                          value: srcFile,
+                        },
+                      ],
                     },
-                  ],
-                },
-              ]
-            : []),
+                  ]
+                : []),
+            ],
+          },
         ];
       }
     });
