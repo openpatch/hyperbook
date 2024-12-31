@@ -1,0 +1,86 @@
+.directive-pyide {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  margin-bottom: 16px;
+  overflow: hidden;
+  gap: 8px;
+}
+
+.directive-pyide code-input {
+  margin: 0;
+}
+
+.directive-pyide .container {
+  width: 100%;
+  border: 1px solid var(--color-spacer);
+  border-radius: 8px;
+  overflow: hidden;
+  padding: 10px;
+}
+
+.directive-pyide .output {
+    height: 200px;
+    white-space: pre;
+}
+
+.directive-pyide .editor-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  height: 400px;
+}
+
+.directive-pyide .editor {
+  width: 100%;
+  border: 1px solid var(--color-spacer);
+  border-radius: 8px;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  flex: 1;
+}
+
+.directive-pyide button {
+  padding: 8px 16px;
+  border: 1px solid var(--color-spacer);
+  border-radius: 8px;
+  border-bottom: none;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  background-color: var(--color--background);
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.directive-pyide button:hover {
+  background-color: var(--color-spacer);
+}
+
+.directive-pyide button.running {
+    pointer-events: none;
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+@media screen and (min-width: 1024px) {
+  .directive-pyide {
+    flex-direction: row;
+    height: calc(100dvh - 128px);
+
+    .output {
+        height: 100%;
+    }
+
+    .container {
+      flex: 1;
+      height: 100% !important;
+    }
+
+    .editor-container {
+      flex: 3;
+      height: 100%;
+      overflow: hidden;
+    }
+  }
+}

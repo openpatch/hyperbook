@@ -119,7 +119,11 @@ async function runBuild(
         case "archive":
           return posix.join("/", basePath || "", "archives", ...path);
         case "assets":
-          return `${posix.join("/", basePath || "", ASSETS_FOLDER, ...path)}?version=${packageJson.version}`;
+          if (path.length === 1 && path[0] === "/") {
+            return `${posix.join("/", basePath || "", ASSETS_FOLDER, ...path)}`;
+          } else {
+            return `${posix.join("/", basePath || "", ASSETS_FOLDER, ...path)}?version=${packageJson.version}`;
+          }
       }
     },
     project: rootProject,

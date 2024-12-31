@@ -50,6 +50,7 @@ import rehypeDirectiveP5 from "./rehypeDirectiveP5";
 import remarkCollectSearchDocuments from "./remarkCollectSearchDocuments";
 import remarkDirectiveGeogebra from "./remarkDirectiveGeogebra";
 import remarkDirectiveAbcMusic from "./remarkDirectiveAbcMusic";
+import remarkDirectivePyide from "./remarkDirectivePyide";
 
 export const remark = (ctx: HyperbookContext) => {
   const remarkPlugins: PluggableList = [
@@ -76,6 +77,7 @@ export const remark = (ctx: HyperbookContext) => {
     remarkDirectiveTiles(ctx),
     remarkDirectiveTabs(ctx),
     remarkDirectiveSqlIde(ctx),
+    remarkDirectivePyide(ctx),
     remarkDirectiveOnlineIde(ctx),
     remarkDirectivePlantuml(ctx),
     remarkDirectiveSlideshow(ctx),
