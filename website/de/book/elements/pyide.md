@@ -1,5 +1,5 @@
 ---
-name: Schützen
+name: Pyide
 permaid: pyide
 lang: de
 ---

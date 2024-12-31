@@ -1,5 +1,5 @@
 ---
-name: Protect
+name: Pyide
 permaid: pyide
 ---
 
