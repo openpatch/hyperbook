@@ -38,6 +38,19 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.43.0
+
+::::tabs
+
+:::tab{title="New :rocket:" id="new"}
+
+- A new element p5 that allows you to create p5.js sketches was added. [Learn more](/elements/p5)
+
+:::
+
+::::
+
+
 ## v0.42.0
 
 ::::tabs
