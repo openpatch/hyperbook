@@ -1,6 +1,6 @@
 # Test Site
 
-:::p5{height=400 editor=true editorHeight=800 editorBeside=true}
+:::p5{height=400 editor=true}
 
 ```js
 let circleX = 200;

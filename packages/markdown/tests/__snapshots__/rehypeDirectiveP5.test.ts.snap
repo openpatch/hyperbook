@@ -2,7 +2,7 @@
 
 exports[`remarkDirectiveEmbed > should transform 1`] = `
 "
-<div class="directive-p5" data-template="<!DOCTYPE html>
+<div class="directive-p5 standalone" data-template="<!DOCTYPE html>
 <meta charset=&#x22;utf8&#x22; />
 <base href=&#x22;/public&#x22; />
 <style type='text/css'>
@@ -13,6 +13,7 @@ html, body {
 
 canvas {
   display: block;
+  margin: 0 auto;
 }
 </style>
 <script type=&#x22;text/javascript&#x22; src=&#x22;/assets/directive-p5/p5.min.js&#x22;></script>
@@ -32,6 +33,7 @@ html, body {
 
 canvas {
   display: block;
+  margin: 0 auto;
 }
 </style>
 <script type=&#x22;text/javascript&#x22; src=&#x22;/assets/directive-p5/p5.min.js&#x22;></script>
@@ -47,7 +49,6 @@ function draw() {
 </script>
 " loading="eager" sandbox="allow-scripts allow-popups allow-modals allow-forms allow-same-origin" aria-label="Code Preview" title="Code Preview"></iframe>
   </div>
-  <div class="editor-container"></div>
 </div>
 "
 `;

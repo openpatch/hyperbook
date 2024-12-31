@@ -62,19 +62,18 @@ code-input {
 }
 
 @media screen and (min-width: 1024px) {
-  .directive-p5 {
+  .directive-p5:not(.standalone) {
     flex-direction: row;
     height: calc(100dvh - 128px);
-  }
+    .container {
+      flex: 1;
+      height: 100% !important;
+    }
 
-  .directive-p5 .container {
-    flex: 1;
-    height: 100% !important;
-  }
-
-  .directive-p5 .editor-container {
-    flex: 2;
-    height: 100%;
-    overflow: hidden;
+    .editor-container {
+      flex: 2;
+      height: 100%;
+      overflow: hidden;
+    }
   }
 }

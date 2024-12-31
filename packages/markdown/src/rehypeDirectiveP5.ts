@@ -52,6 +52,7 @@ html, body {
 
 canvas {
   display: block;
+  margin: 0 auto;
 }
 </style>
 ${(code.scripts ? [cdnLibraryUrl, ...code.scripts] : []).map((src) => `<script type="text/javascript" src="${src}"></script>`).join("\n")}
@@ -97,7 +98,7 @@ ${(code.scripts ? [cdnLibraryUrl, ...code.scripts] : []).map((src) => `<script t
         const srcdoc = template.replace("###SLOT###", wrapSketch(srcFile));
         node.tagName = "div";
         node.properties = {
-          class: ["directive-p5"].join(" "),
+          class: ["directive-p5", editor ? "" : "standalone"].join(" "),
           "data-template": template,
         };
         node.children = [
@@ -124,15 +125,15 @@ ${(code.scripts ? [cdnLibraryUrl, ...code.scripts] : []).map((src) => `<script t
               },
             ],
           },
-          {
-            type: "element",
-            tagName: "div",
-            properties: {
-              class: "editor-container",
-            },
-            children: [
-              ...(editor
-                ? [
+          ...(editor
+            ? [
+                {
+                  type: "element",
+                  tagName: "div",
+                  properties: {
+                    class: "editor-container",
+                  },
+                  children: [
                     {
                       type: "element",
                       tagName: "button",
@@ -160,10 +161,10 @@ ${(code.scripts ? [cdnLibraryUrl, ...code.scripts] : []).map((src) => `<script t
                         },
                       ],
                     },
-                  ]
-                : []),
-            ],
-          },
+                  ],
+                },
+              ]
+            : []),
         ];
       }
     });
