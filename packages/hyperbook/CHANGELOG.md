@@ -1,5 +1,13 @@
 # hyperbook
 
+## 0.45.0
+
+### Minor Changes
+
+- [#925](https://github.com/openpatch/hyperbook/pull/925) [`b0a1d3e`](https://github.com/openpatch/hyperbook/commit/b0a1d3e08118a3c3ba6406ec8bf9aec0683a3df5) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add pyide
+
+- [#925](https://github.com/openpatch/hyperbook/pull/925) [`b0a1d3e`](https://github.com/openpatch/hyperbook/commit/b0a1d3e08118a3c3ba6406ec8bf9aec0683a3df5) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add input and tests to pyide
+
 ## 0.44.0
 
 ### Minor Changes
