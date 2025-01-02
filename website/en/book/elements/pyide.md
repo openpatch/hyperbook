@@ -56,7 +56,6 @@ a = np.arange(15).reshape(3, 5)
 print(a)
 ```
 
-<<<<<<< HEAD
 :::
 
 ## Add test cases
@@ -79,14 +78,14 @@ print("Fail")
 #SCRIPT#
 r = check_palindrom("test")
 if not r:
-print("Pass")
+    print("Pass")
 else:
-print("Fail")
+    print("Fail")
 ```
 
 ```python
 def check_palindrom(s):
-return True
+    return True
 ```
 
 :::
@@ -99,23 +98,23 @@ return True
 #SCRIPT#
 r = check_palindrom("uhu")
 if r:
-print("Pass")
+    print("Pass")
 else:
-print("Fail")
+    print("Fail")
 ```
 
 ```python test
 #SCRIPT#
 r = check_palindrom("test")
 if not r:
-print("Pass")
+    print("Pass")
 else:
-print("Fail")
+    print("Fail")
 ```
 
 ```python
 def check_palindrom(s):
-return True
+    return True
 ```
 
 :::
@@ -162,6 +161,4 @@ print(input())
 print(input())
 ```
 
-=======
->>>>>>> main
 :::
