@@ -162,3 +162,13 @@ print(input())
 ```
 
 :::
+
+## Stopping the execution
+
+:::alert{warn}
+Stopping an infinite loop or a long lasting process is only possible by refreshing the page or by setting these two headers on your server:
+```
+'Cross-Origin-Embedder-Policy': 'require-corp'
+'Cross-Origin-Opener-Policy': 'same-origin'
+```
+:::

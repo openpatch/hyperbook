@@ -157,3 +157,13 @@ print(input())
 ```
 
 :::
+
+## Ausführung stoppen
+
+:::alert{warn}
+Das Stoppen einer Endlosschleife oder eines lang andauernden Prozesses ist nur durch Aktualisieren der Seite oder durch Setzen dieser beiden Header auf Ihrem Server möglich:
+```
+'Cross-Origin-Embedder-Policy': 'require-corp'
+'Cross-Origin-Opener-Policy': 'same-origin'
+```
+:::
