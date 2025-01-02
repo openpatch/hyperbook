@@ -16,6 +16,8 @@ import {
 } from "./remarkHelper";
 import { toText } from "./mdastUtilToText";
 import hash from "./objectHash";
+import { Code } from "mdast-util-from-markdown/lib";
+import { ElementContent } from "hast";
 
 export default (ctx: HyperbookContext) => () => {
   const name = "pyide";
@@ -36,19 +38,42 @@ export default (ctx: HyperbookContext) => () => {
 
         let srcFile = "";
 
+        let tests: {
+          code: string;
+        }[] = [];
+
+        let input = "";
+
         if (src) {
           srcFile = fs.readFileSync(
             path.join(ctx.root, "public", String(src)),
             "utf8"
           );
         } else if (node.children?.length > 0) {
-          srcFile = toText(node.children);
+          tests = node.children
+            .filter((c) => c.type === "code")
+            .filter((c) => (c as Code).meta?.includes("test"))
+            .map((c,i) => ({
+              code: (c as Code).value,
+              name: `${i}`
+            }));
+          input = toText(
+            node.children.find(
+              (c) => c.type === "code" && c.lang === "input"
+            ) as Code
+          )
+          srcFile = toText(
+            node.children.find(
+              (c) => c.type === "code" && c.lang === "python" && !(c as Code).meta?.includes("test")
+            ) as Code
+          );
         }
 
         data.hName = "div";
         data.hProperties = {
           class: "directive-pyide",
-          id: id || hash(node)
+          id: id || hash(node),
+          "data-tests": Buffer.from(JSON.stringify(tests)).toString("base64"),
         };
         data.hChildren = [
           {
@@ -60,11 +85,57 @@ export default (ctx: HyperbookContext) => () => {
             children: [
               {
                 type: "element",
+                tagName: "div",
+                properties: {
+                  class: "buttons",
+                },
+                children: [
+                  {
+                    type: "element",
+                    tagName: "button",
+                    properties: {
+                      class: "output-btn active",
+                    },
+                    children: [
+                      {
+                        type: "text",
+                        value: "Output",
+                      },
+                    ],
+                  },
+                  {
+                    type: "element",
+                    tagName: "button",
+                    properties: {
+                      class: "input-btn",
+                    },
+                    children: [
+                      {
+                        type: "text",
+                        value: "Input",
+                      },
+                    ],
+                  },
+                ],
+              },
+              {
+                type: "element",
                 tagName: "pre",
                 properties: {
                   class: "output",
                 },
                 children: [],
+              },
+              {
+                type: "element",
+                tagName: "code-input",
+                properties: {
+                  class: "input hidden",
+                },
+                children: [{
+                  type: "raw",
+                  value: input || ""
+                }],
               },
             ],
           },
@@ -77,22 +148,48 @@ export default (ctx: HyperbookContext) => () => {
             children: [
               {
                 type: "element",
-                tagName: "button",
+                tagName: "div",
                 properties: {
-                  class: "run",
+                  class: "buttons",
                 },
                 children: [
                   {
-                    type: "text",
-                    value: "Run",
+                    type: "element",
+                    tagName: "button",
+                    properties: {
+                      class: "run",
+                    },
+                    children: [
+                      {
+                        type: "text",
+                        value: "Run",
+                      },
+                    ],
                   },
+                  ...(tests.length > 0
+                    ? [
+                        {
+                          type: "element",
+                          tagName: "button",
+                          properties: {
+                            class: "test",
+                          },
+                          children: [
+                            {
+                              type: "text",
+                              value: "Test",
+                            },
+                          ],
+                        } as ElementContent,
+                      ]
+                    : []),
                 ],
               },
               {
                 type: "element",
                 tagName: "code-input",
                 properties: {
-                  class: "editor",
+                  class: "editor line-numbers",
                   language: "python",
                   template: "pyide-highlighted",
                 },
