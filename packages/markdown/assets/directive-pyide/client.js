@@ -39,14 +39,14 @@ hyperbook.python = (function () {
     });
   }
 
-  const asyncRun = (id) => {
+  const asyncRun = (id, type) => {
     if (callback) return;
 
     interruptBuffer[0] = 0;
     return (script, context) => {
       return new Promise((onSuccess) => {
         callback = onSuccess;
-        updateRunning(id);
+        updateRunning(id, type);
         pyodideWorker.postMessage({
           type: "run",
           payload: {
@@ -169,7 +169,7 @@ hyperbook.python = (function () {
         heading.classList.add("test-heading");
         output.appendChild(heading);
 
-        await asyncRun(id)(testCode, {})
+        await asyncRun(id, "test")(testCode, {})
           .then(({ results, error }) => {
             if (results) {
               output.textContent += results;
@@ -194,7 +194,7 @@ hyperbook.python = (function () {
 
       const script = editor.value;
       output.innerHTML = "";
-      asyncRun(id)(script, {
+      asyncRun(id, "run")(script, {
         inputs: input.value.split("\n"),
       })
         .then(({ results, error }) => {
