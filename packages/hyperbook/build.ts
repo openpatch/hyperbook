@@ -22,7 +22,7 @@ export async function runBuildProject(
   project: Hyperproject,
   rootProject: Hyperproject,
   out?: string,
-  filter?: string,
+  filter?: string
 ): Promise<void> {
   const name = hyperproject.getName(project);
   if (project.type === "book") {
@@ -33,7 +33,7 @@ export async function runBuildProject(
       project.basePath,
       name,
       out,
-      filter,
+      filter
     );
   } else {
     console.log(`${chalk.cyan(`[${name}]`)} Building Library.`);
@@ -53,7 +53,7 @@ async function runBuild(
   basePath?: string,
   prefix?: string,
   out?: string,
-  filter?: string,
+  filter?: string
 ): Promise<void> {
   console.log(`${chalk.blue(`[${prefix}]`)} Reading hyperbook.json.`);
   const hyperbookJson = await hyperbook.getJson(root);
@@ -91,7 +91,7 @@ async function runBuild(
     rootOut = path.join(out, ".hyperbook", "out", basePath || "");
   }
   console.log(
-    `${chalk.blue(`[${prefix}]`)} Cleaning output folder ${rootOut}.`,
+    `${chalk.blue(`[${prefix}]`)} Cleaning output folder ${rootOut}.`
   );
 
   await runArchive(root, rootOut, prefix);
@@ -133,7 +133,7 @@ async function runBuild(
   const pagesAndSections = await hyperbook.getPagesAndSections(root);
   const pageList = hyperbook.getPageList(
     pagesAndSections.sections,
-    pagesAndSections.pages,
+    pagesAndSections.pages
   );
   const searchDocuments: any[] = [];
 
@@ -159,9 +159,12 @@ async function runBuild(
       directives.add(directive);
     }
 
-    const directoryOut = path.join(rootOut, file.path.directory);
+    let directoryOut = path.join(rootOut, file.path.directory);
     let href: string;
     if (file.name === "index") {
+      href = path.posix.join(file.path.href || "", "index.html");
+    } else if (hyperbookJson.trailingSlash) {
+      directoryOut = path.join(directoryOut, file.name);
       href = path.posix.join(file.path.href || "", "index.html");
     } else {
       href = file.path.href + ".html";
@@ -177,7 +180,7 @@ async function runBuild(
       });
       const permaFileOut = path.join(
         permaOut,
-        file.markdown.data.permaid + ".html",
+        file.markdown.data.permaid + ".html"
       );
       await fs.writeFile(permaFileOut, result.value);
     }
@@ -187,7 +190,7 @@ async function runBuild(
       readline.cursorTo(process.stdout, 0);
     }
     process.stdout.write(
-      `${chalk.blue(`[${prefix}]`)} Buildung book: [${i++}/${bookFiles.length}]`,
+      `${chalk.blue(`[${prefix}]`)} Buildung book: [${i++}/${bookFiles.length}]`
     );
     if (process.env.CI) {
       process.stdout.write("\n");
@@ -199,7 +202,7 @@ async function runBuild(
   const glossaryOut = path.join(rootOut, "glossary");
   if (filter) {
     glossaryFiles = glossaryFiles.filter((f) =>
-      f.path.absolute?.endsWith(filter),
+      f.path.absolute?.endsWith(filter)
     );
   }
 
@@ -220,18 +223,26 @@ async function runBuild(
       directives.add(directive);
     }
 
-    const href = file.path.href + ".html";
-    const fileOut = path.join(rootOut, href);
-    await makeDir(glossaryOut, {
-      recursive: true,
-    });
+    let href = file.path.href + ".html";
+    let fileOut = path.join(rootOut, href);
+    if (hyperbookJson.trailingSlash) {
+      href = path.posix.join(file.path.href || "", "index.html");
+      fileOut = path.join(rootOut, file.path.href || "", "index.html");
+      await makeDir(path.join(rootOut, file.path.href || ""), {
+        recursive: true,
+      });
+    } else {
+      await makeDir(glossaryOut, {
+        recursive: true,
+      });
+    }
     await fs.writeFile(fileOut, result.value);
     if (!process.env.CI) {
       readline.clearLine(process.stdout, 0);
       readline.cursorTo(process.stdout, 0);
     }
     process.stdout.write(
-      `${chalk.blue(`[${prefix}]`)} Buildung glossary: [${i++}/${glossaryFiles.length}]`,
+      `${chalk.blue(`[${prefix}]`)} Buildung glossary: [${i++}/${glossaryFiles.length}]`
     );
     if (process.env.CI) {
       process.stdout.write("\n");
@@ -255,7 +266,7 @@ async function runBuild(
       readline.cursorTo(process.stdout, 0);
     }
     process.stdout.write(
-      `${chalk.blue(`[${prefix}]`)} Copying public files: [${i++}/${otherFiles.length}]`,
+      `${chalk.blue(`[${prefix}]`)} Copying public files: [${i++}/${otherFiles.length}]`
     );
     if (process.env.CI) {
       process.stdout.write("\n");
@@ -278,7 +289,7 @@ async function runBuild(
       readline.cursorTo(process.stdout, 0);
     }
     process.stdout.write(
-      `${chalk.blue(`[${prefix}]`)} Copying directive assets: [${i++}/${directives.size}]`,
+      `${chalk.blue(`[${prefix}]`)} Copying directive assets: [${i++}/${directives.size}]`
     );
     if (process.env.CI) {
       process.stdout.write("\n");
@@ -292,7 +303,7 @@ async function runBuild(
     } catch (e) {
       process.stdout.write("\n");
       process.stdout.write(
-        `${chalk.red(`[${prefix}]`)} Failed copying directive assets: ${directive}`,
+        `${chalk.red(`[${prefix}]`)} Failed copying directive assets: ${directive}`
       );
       process.stdout.write("\n");
     }
@@ -326,7 +337,7 @@ async function runBuild(
       readline.cursorTo(process.stdout, 0);
     }
     process.stdout.write(
-      `${chalk.blue(`[${prefix}]`)} Copying hyperbook assets: [${i++}/${mainAssets.length}]`,
+      `${chalk.blue(`[${prefix}]`)} Copying hyperbook assets: [${i++}/${mainAssets.length}]`
     );
     if (process.env.CI) {
       process.stdout.write("\n");
@@ -346,7 +357,7 @@ async function runBuild(
         foundLanguage = true;
       } catch (e) {
         console.log(
-          `${chalk.yellow(`[${prefix}]`)} ${hyperbookJson.language} is no valid value for the lanuage key. See https://github.com/MihaiValentin/lunr-languages for possible values. Falling back to English.`,
+          `${chalk.yellow(`[${prefix}]`)} ${hyperbookJson.language} is no valid value for the lanuage key. See https://github.com/MihaiValentin/lunr-languages for possible values. Falling back to English.`
         );
       }
     }

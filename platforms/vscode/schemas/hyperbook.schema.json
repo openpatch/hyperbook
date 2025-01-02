@@ -319,6 +319,9 @@
                 "type": "string"
             },
             "type": "array"
+        },
+        "trailingSlash": {
+            "type": "boolean"
         }
     },
     "required": [

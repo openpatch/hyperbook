@@ -38,6 +38,18 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.46.0
+
+::::tabs
+
+:::tab{title="New :rocket:" id="new"}
+
+- Add `trailingSlash` option. When this option is enabled only directories and `index.html` files will be produced, when building the hyperbook. [Learn more](/configuration/book)
+
+:::
+
+::::
+
 ## v0.45.0
 
 ::::tabs
