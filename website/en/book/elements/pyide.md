@@ -56,6 +56,7 @@ a = np.arange(15).reshape(3, 5)
 print(a)
 ```
 
+<<<<<<< HEAD
 :::
 
 ## Add test cases
@@ -161,4 +162,6 @@ print(input())
 print(input())
 ```
 
+=======
+>>>>>>> main
 :::
