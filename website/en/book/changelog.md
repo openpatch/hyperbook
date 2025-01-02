@@ -38,6 +38,18 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.45.0
+
+::::tabs
+
+:::tab{title="New :rocket:" id="new"}
+
+- You can now add inputs and tests to your pyide element. [Learn more](/elements/pyide)
+
+:::
+
+::::
+
 ## v0.44.0
 
 ::::tabs
