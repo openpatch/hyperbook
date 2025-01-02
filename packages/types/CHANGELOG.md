@@ -1,5 +1,11 @@
 # @hyperbook/types
 
+## 0.13.0
+
+### Minor Changes
+
+- [`cd6535e`](https://github.com/openpatch/hyperbook/commit/cd6535e236f8ae64b28003dd196f37413a50e5a3) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add trailingSlash back
+
 ## 0.12.0
 
 ### Minor Changes

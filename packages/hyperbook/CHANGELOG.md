@@ -1,5 +1,17 @@
 # hyperbook
 
+## 0.46.0
+
+### Minor Changes
+
+- [`cd6535e`](https://github.com/openpatch/hyperbook/commit/cd6535e236f8ae64b28003dd196f37413a50e5a3) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add trailingSlash back
+
+### Patch Changes
+
+- Updated dependencies [[`cd6535e`](https://github.com/openpatch/hyperbook/commit/cd6535e236f8ae64b28003dd196f37413a50e5a3)]:
+  - @hyperbook/types@0.13.0
+  - @hyperbook/fs@0.16.0
+
 ## 0.45.0
 
 ### Minor Changes

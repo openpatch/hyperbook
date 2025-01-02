@@ -1,5 +1,17 @@
 # @hyperbook/vscode-extension
 
+## 0.28.0
+
+### Minor Changes
+
+- [`cd6535e`](https://github.com/openpatch/hyperbook/commit/cd6535e236f8ae64b28003dd196f37413a50e5a3) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add trailingSlash back
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @hyperbook/fs@0.16.0
+  - @hyperbook/markdown@0.22.0
+
 ## 0.27.12
 
 ### Patch Changes
