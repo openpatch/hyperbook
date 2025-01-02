@@ -64,7 +64,7 @@ HYPERBOOK_ASSETS = "assets/"
     </div><button class="close" onclick="hyperbook.qrcodeClose()"><div class="close-icon"></div></button>
   </dialog>
 </div>
-</article><div class="jump-container"><a class="jump previous" href="/configuration/library">Bibliothek Konfiguration</a><a class="jump next" href="/markdown/image">Bild</a></div><div class="meta"><a class="edit-github" href="https://github.com/openpatch/hyperbook/edit/main/website/de/book/markdown/index.md">✎ GitHub</a><span class="copyright">© Copyright 2024 by <a href="https://openpatch.org">OpenPatch</a></span></div><div id="custom-links-footer"><ul class="links-item sub"><li><a href="#"><div class="icon">🐦</div><div class="label">Kontakt</div></a><ul class="links-sub-menu"><li class="links-item"><a href="mailto:contact@openpatch.org"><div class="label">Mail</div></a></li><li class="links-item"><a href="https://twitter.com/openpatchorg"><div class="icon">🐦</div><div class="label">Twitter</div></a></li><li class="links-item"><a href="https://fosstodon.org/@openpatch"><div class="icon">🐘</div><div class="label">Mastodon</div></a></li><li class="links-item"><a href="https://matrix.to/#/#hyperbook:matrix.org"><div class="icon">👨‍💻</div><div class="label">Matrix (Chat)</div></a></li></ul></li></ul></div></main></div><script src="assets/client.js" defer></script></body></html>"
+</article><div class="jump-container"><a class="jump previous" href="/configuration/library">Bibliothek Konfiguration</a><a class="jump next" href="/markdown/image">Bild</a></div><div class="meta"><a class="edit-github" href="https://github.com/openpatch/hyperbook/edit/main/website/de/book/markdown/index.md">✎ GitHub</a><span class="copyright">© Copyright 2025 by <a href="https://openpatch.org">OpenPatch</a></span></div><div id="custom-links-footer"><ul class="links-item sub"><li><a href="#"><div class="icon">🐦</div><div class="label">Kontakt</div></a><ul class="links-sub-menu"><li class="links-item"><a href="mailto:contact@openpatch.org"><div class="label">Mail</div></a></li><li class="links-item"><a href="https://twitter.com/openpatchorg"><div class="icon">🐦</div><div class="label">Twitter</div></a></li><li class="links-item"><a href="https://fosstodon.org/@openpatch"><div class="icon">🐘</div><div class="label">Mastodon</div></a></li><li class="links-item"><a href="https://matrix.to/#/#hyperbook:matrix.org"><div class="icon">👨‍💻</div><div class="label">Matrix (Chat)</div></a></li></ul></li></ul></div></main></div><script src="assets/client.js" defer></script></body></html>"
 `;
 
 exports[`process > should result in two link 1`] = `
@@ -123,7 +123,7 @@ HYPERBOOK_ASSETS = "/assets/"
     in Python Teil des Programms .
   </p>
 </div>
-</article><div class="jump-container"></div><div class="meta"><span class="copyright">© Copyright 2024</span></div></main></div><script src="/assets/client.js" defer></script></body></html>"
+</article><div class="jump-container"></div><div class="meta"><span class="copyright">© Copyright 2025</span></div></main></div><script src="/assets/client.js" defer></script></body></html>"
 `;
 
 exports[`process > should transform 1`] = `
@@ -201,7 +201,7 @@ HYPERBOOK_ASSETS = "/assets/"
     </div>
   </div>
 </div>
-</article><div class="jump-container"></div><div class="meta"><span class="copyright">© Copyright 2024</span></div></main></div><script src="/assets/client.js" defer></script><script src="/assets/directive-tabs/client.js" defer></script></body></html>"
+</article><div class="jump-container"></div><div class="meta"><span class="copyright">© Copyright 2025</span></div></main></div><script src="/assets/client.js" defer></script><script src="/assets/directive-tabs/client.js" defer></script></body></html>"
 `;
 
 exports[`process > should transfrom complex context 1`] = `
@@ -262,5 +262,5 @@ HYPERBOOK_ASSETS = "assets/"
     </div><button class="close" onclick="hyperbook.qrcodeClose()"><div class="close-icon"></div></button>
   </dialog>
 </div>
-</article><div class="jump-container"><a class="jump previous" href="/configuration/library">Bibliothek Konfiguration</a><a class="jump next" href="/markdown/image">Bild</a></div><div class="meta"><a class="edit-github" href="https://github.com/openpatch/hyperbook/edit/main/website/de/book/markdown/index.md">✎ GitHub</a><span class="copyright">© Copyright 2024 by <a href="https://openpatch.org">OpenPatch</a></span></div><div id="custom-links-footer"><ul class="links-item sub"><li><a href="#"><div class="icon">🐦</div><div class="label">Kontakt</div></a><ul class="links-sub-menu"><li class="links-item"><a href="mailto:contact@openpatch.org"><div class="label">Mail</div></a></li><li class="links-item"><a href="https://twitter.com/openpatchorg"><div class="icon">🐦</div><div class="label">Twitter</div></a></li><li class="links-item"><a href="https://fosstodon.org/@openpatch"><div class="icon">🐘</div><div class="label">Mastodon</div></a></li><li class="links-item"><a href="https://matrix.to/#/#hyperbook:matrix.org"><div class="icon">👨‍💻</div><div class="label">Matrix (Chat)</div></a></li></ul></li></ul></div></main></div><script src="assets/client.js" defer></script></body></html>"
+</article><div class="jump-container"><a class="jump previous" href="/configuration/library">Bibliothek Konfiguration</a><a class="jump next" href="/markdown/image">Bild</a></div><div class="meta"><a class="edit-github" href="https://github.com/openpatch/hyperbook/edit/main/website/de/book/markdown/index.md">✎ GitHub</a><span class="copyright">© Copyright 2025 by <a href="https://openpatch.org">OpenPatch</a></span></div><div id="custom-links-footer"><ul class="links-item sub"><li><a href="#"><div class="icon">🐦</div><div class="label">Kontakt</div></a><ul class="links-sub-menu"><li class="links-item"><a href="mailto:contact@openpatch.org"><div class="label">Mail</div></a></li><li class="links-item"><a href="https://twitter.com/openpatchorg"><div class="icon">🐦</div><div class="label">Twitter</div></a></li><li class="links-item"><a href="https://fosstodon.org/@openpatch"><div class="icon">🐘</div><div class="label">Mastodon</div></a></li><li class="links-item"><a href="https://matrix.to/#/#hyperbook:matrix.org"><div class="icon">👨‍💻</div><div class="label">Matrix (Chat)</div></a></li></ul></li></ul></div></main></div><script src="assets/client.js" defer></script></body></html>"
 `;

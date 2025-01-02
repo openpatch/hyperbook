@@ -183,3 +183,20 @@ code[data-line-numbers-max-digits="4"]>[data-line]::before {
 code-input:not(.code-input_registered)::before {
   content: "..."!important;
 }
+
+/**
+ * Allows code-input elements to be used with the Prism.js line-numbers plugin, as long as the code-input element 
+ * or a parent element of it has the CSS class `line-numbers`.
+ * https://prismjs.com/plugins/line-numbers/
+ * Files: prism-line-numbers.css
+ */
+/* Update padding to match line-numbers plugin */
+code-input.line-numbers textarea, code-input.line-numbers.code-input_pre-element-styled pre,
+.line-numbers code-input textarea, .line-numbers code-input.code-input_pre-element-styled pre {
+  padding-left: max(3.8em, var(--padding, 16px))!important;
+}
+
+/* Ensure pre code/textarea just wide enough to give 100% width with line numbers */
+code-input.line-numbers, .line-numbers code-input {
+  grid-template-columns: calc(100% - max(0em, calc(3.8em - var(--padding, 16px))));
+}

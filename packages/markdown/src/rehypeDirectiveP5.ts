@@ -151,7 +151,7 @@ ${(code.scripts ? [cdnLibraryUrl, ...code.scripts] : []).map((src) => `<script t
                       type: "element",
                       tagName: "code-input",
                       properties: {
-                        class: "editor",
+                        class: "editor line-numbers",
                         language: "javascript",
                       },
                       children: [
