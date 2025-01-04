@@ -56,8 +56,12 @@ hyperbook.protect = (function () {
     localStorage.setItem("protect", JSON.stringify(protect));
   }
 
-  function init() {
-    const els = document.getElementsByClassName("directive-protect");
+  /**
+   * Initialize elements within the given root element.
+   * @param {HTMLElement} root - The root element to initialize.
+   */
+  function init(root) {
+    const els = root.getElementsByClassName("directive-protect");
     for (let el of els) {
       const inputEl = el.getElementsByTagName("input")[0];
 
@@ -75,5 +79,25 @@ hyperbook.protect = (function () {
     }
   }
 
-  init();
+  // Initialize existing elements on document load
+  document.addEventListener("DOMContentLoaded", () => {
+    init(document);
+  });
+
+  // Observe for new elements added to the DOM
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      mutation.addedNodes.forEach((node) => {
+        if (node.nodeType === 1) { // Element node
+          init(node);
+        }
+      });
+    });
+  });
+
+  observer.observe(document.body, { childList: true, subtree: true });
+
+  return {
+    init,
+  };
 })();

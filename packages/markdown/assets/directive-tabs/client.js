@@ -1,14 +1,15 @@
 hyperbook.tabs = (function () {
-  let allTabs = document.querySelectorAll(".directive-tabs .tab[data-tabs-id]");
-
-  allTabs.forEach((tab) =>
-    tab.addEventListener("click", () => {
-      selectTab(
-        tab.getAttribute("data-tabs-id"),
-        tab.getAttribute("data-tab-id"),
-      );
-    }),
-  );
+  const init = (root) => {
+    let allTabs = root.querySelectorAll(".directive-tabs .tab[data-tabs-id]");
+    allTabs.forEach((tab) =>
+      tab.addEventListener("click", () => {
+        selectTab(
+          tab.getAttribute("data-tabs-id"),
+          tab.getAttribute("data-tab-id"),
+        );
+      }),
+    );
+  };
 
   function selectTab(tabsId, tabId) {
     let relevantTabButtons = document.querySelectorAll(
@@ -31,7 +32,23 @@ hyperbook.tabs = (function () {
     });
   }
 
+  init(document.body);
+
+  // Observe for new tabs added to the DOM
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      mutation.addedNodes.forEach((node) => {
+        if (node.nodeType === 1) { // Element node
+          init(node);
+        }
+      });
+    });
+  });
+
+  observer.observe(document.body, { childList: true, subtree: true });
+
   return {
     selectTab,
+    init,
   };
 })();

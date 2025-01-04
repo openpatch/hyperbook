@@ -1,6 +1,6 @@
 hyperbook.download = (function () {
-  function init() {
-    const els = document.getElementsByClassName("directive-download");
+  const init = (root) => {
+    const els = root.getElementsByClassName("directive-download");
     for (let el of els) {
       const labelEl = el.getElementsByClassName("label")[0];
 
@@ -17,7 +17,27 @@ hyperbook.download = (function () {
         }
       });
     }
-  }
+  };
 
-  init();
+  // Initialize existing elements on document load
+  document.addEventListener("DOMContentLoaded", () => {
+    init(document);
+  });
+
+  // Observe for new elements added to the DOM
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      mutation.addedNodes.forEach((node) => {
+        if (node.nodeType === 1) { // Element node
+          init(node);
+        }
+      });
+    });
+  });
+
+  observer.observe(document.body, { childList: true, subtree: true });
+
+  return {
+    init,
+  };
 })();

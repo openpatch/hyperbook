@@ -1,33 +1,61 @@
 var hyperbook = (function () {
-  const collapsibles = document.getElementsByClassName("collapsible");
+  /**
+   * Initialize elements within the given root element.
+   * @param {HTMLElement} root - The root element to initialize.
+   */
+  const init = (root) => {
+    const collapsibles = root.getElementsByClassName("collapsible");
+    for (let collapsible of collapsibles) {
+      collapsible.addEventListener("click", () => {
+        const id = collapsible.parentElement.getAttribute("data-id");
+        collapsible.classList.toggle("expanded");
+        const expanded = collapsible.classList.contains("expanded");
+        if (id) {
+          [...collapsibles]
+            .filter((c) => c.parentElement.getAttribute("data-id") === id)
+            .forEach((c) => {
+              if (expanded) {
+                c.classList.add("expanded");
+              } else {
+                c.classList.remove("expanded");
+              }
+            });
+        }
+      });
+    }
 
-  for (let collapsible of collapsibles) {
-    collapsible.addEventListener("click", () => {
-      collapsible.classList.toggle("expanded");
-    });
-  }
+    const searchInputEl = root.querySelector("#search-input");
+    if (searchInputEl) {
+      searchInputEl.addEventListener("keypress", (event) => {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          search();
+        }
+      });
+    }
 
+    initBookmarks(root);
+  };
+
+  /**
+   * Toggle the table of contents drawer.
+   */
   function tocToggle() {
     const tocDrawerEl = document.getElementById("toc-drawer");
     tocDrawerEl.open = !tocDrawerEl.open;
   }
-  // search
 
-  const searchInputEl = document.getElementById("search-input");
-  if (searchInputEl) {
-    searchInputEl.addEventListener("keypress", (event) => {
-      if (event.key === "Enter") {
-        event.preventDefault();
-        search();
-      }
-    });
-  }
-
+  /**
+   * Toggle the search drawer.
+   */
   function searchToggle() {
     const searchDrawerEl = document.getElementById("search-drawer");
     searchDrawerEl.open = !searchDrawerEl.open;
   }
 
+  /**
+   * Perform a search and display the results.
+   */
   function search() {
     const resultsEl = document.getElementById("search-results");
     resultsEl.innerHTML = "";
@@ -83,6 +111,9 @@ var hyperbook = (function () {
     }
   }
 
+  /**
+   * Open the QR code dialog.
+   */
   function qrcodeOpen() {
     const qrCodeDialog = document.getElementById("qrcode-dialog");
     const qrcodeEls = qrCodeDialog.getElementsByClassName("make-qrcode");
@@ -106,19 +137,26 @@ var hyperbook = (function () {
     qrCodeDialog.showModal();
   }
 
+  /**
+   * Close the QR code dialog.
+   */
   function qrcodeClose() {
     const qrCodeDialog = document.getElementById("qrcode-dialog");
     qrCodeDialog.close();
   }
 
+  /**
+   * Toggle the navigation drawer.
+   */
   function navToggle() {
     const navDrawerEl = document.getElementById("nav-drawer");
     navDrawerEl.open = !navDrawerEl.open;
   }
 
   /**
-   * @param {string} key
-   * @param {string} label
+   * Toggle a bookmark.
+   * @param {string} key - The key of the bookmark.
+   * @param {string} label - The label of the bookmark.
    */
   function toggleBookmark(key, label) {
     const bookmarks = JSON.parse(localStorage.getItem("bookmarks") || "{}");
@@ -137,8 +175,12 @@ var hyperbook = (function () {
     }
   }
 
-  function initBookmarks() {
-    const bookmarkEls = document.getElementsByClassName("bookmark");
+  /**
+   * Initialize bookmarks within the given root element.
+   * @param {HTMLElement} [root=document] - The root element to initialize.
+   */
+  function initBookmarks(root = document) {
+    const bookmarkEls = root.getElementsByClassName("bookmark");
     const bookmarks = JSON.parse(localStorage.getItem("bookmarks") || "{}");
     for (let bookmarkEl of bookmarkEls) {
       const key = bookmarkEl.getAttribute("data-key");
@@ -147,15 +189,35 @@ var hyperbook = (function () {
       }
     }
   }
-  initBookmarks();
 
   /**
-   * @param {HTMLElement} el
+   * Toggle the lightbox view of an element.
+   * @param {HTMLElement} el - The element to toggle.
    */
   function toggleLightbox(el) {
     el.parentElement.classList.toggle("lightbox");
     el.parentElement.classList.toggle("normal");
   }
+
+  // Initialize existing elements on document load
+  document.addEventListener("DOMContentLoaded", () => {
+    init(document);
+  });
+
+  // Observe for new elements added to the DOM
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      mutation.addedNodes.forEach((node) => {
+        if (node.nodeType === 1) {
+          // Element node
+          init(node);
+        }
+      });
+    });
+  });
+
+  observer.observe(document.body, { childList: true, subtree: true });
+
   return {
     toggleLightbox,
     toggleBookmark,
@@ -165,5 +227,6 @@ var hyperbook = (function () {
     search,
     qrcodeOpen,
     qrcodeClose,
+    init,
   };
 })();

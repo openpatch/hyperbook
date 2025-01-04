@@ -1,5 +1,5 @@
 hyperbook.scratchblock = (function () {
-  function init() {
+  const init = () => {
     scratchblocks.renderMatching("pre.directive-scratchblock", {
       style: "scratch3",
       languages: [
@@ -24,7 +24,22 @@ hyperbook.scratchblock = (function () {
       ],
       scale: 1,
     });
-  }
+  };
 
-  init();
+  document.addEventListener("DOMContentLoaded", () => {
+    init();
+  });
+
+  // Observe for new elements
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      mutation.addedNodes.forEach((node) => {
+        if (node.nodeType === 1 && node.matches("pre.directive-scratchblock")) {
+          init();
+        }
+      });
+    });
+  });
+
+  observer.observe(document.body, { childList: true, subtree: true });
 })();

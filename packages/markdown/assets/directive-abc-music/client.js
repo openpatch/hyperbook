@@ -1,5 +1,4 @@
 hyperbook.abc = (function () {
-  const els = document.querySelectorAll(".directive-abc-music");
   window.codeInput?.registerTemplate(
     "abc-highlighted",
     codeInput.templates.prism(window.Prism, [
@@ -7,7 +6,7 @@ hyperbook.abc = (function () {
     ])
   );
 
-  for (let el of els) {
+  const initABC = (el) => {
     const tuneEl = el.getElementsByClassName("tune")[0];
     const playerEl = el.getElementsByClassName("player")[0];
 
@@ -60,5 +59,32 @@ hyperbook.abc = (function () {
           "<div class='audio-error'>Audio is not supported in this browser.</div>";
       }
     }
-  }
+  };
+
+  const init = (root) => {
+    const els = root.querySelectorAll(".directive-abc-music");
+    els.forEach(initABC);
+  };
+
+  // Initialize existing elements on document load
+  document.addEventListener("DOMContentLoaded", () => {
+    init(document);
+  });
+
+  // Observe for new elements added to the DOM
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      mutation.addedNodes.forEach((node) => {
+        if (node.nodeType === 1 && node.classList.contains("directive-abc-music")) {
+          initABC(node);
+        }
+      });
+    });
+  });
+
+  observer.observe(document.body, { childList: true, subtree: true });
+
+  return {
+    init,
+  };
 })();

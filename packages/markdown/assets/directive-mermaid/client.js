@@ -1,9 +1,11 @@
 hyperbook.mermaid = (function () {
   const elementCode = ".directive-mermaid";
+
   const loadMermaid = function (theme) {
     window.mermaid.initialize({ theme });
     window.mermaid.init({ theme }, document.querySelectorAll(elementCode));
   };
+
   const resetProcessed = function () {
     return new Promise((resolve, reject) => {
       try {
@@ -35,19 +37,54 @@ hyperbook.mermaid = (function () {
   const init = () => {
     const toggle = document.querySelector("dark-mode-toggle");
     if (toggle?.mode == "dark") {
-      resetProcessed().then(loadMermaid("dark")).catch(console.error);
+      resetProcessed()
+        .then(() => loadMermaid("dark"))
+        .catch(console.error);
     } else {
-      resetProcessed().then(loadMermaid("default")).catch(console.error);
+      resetProcessed()
+        .then(() => loadMermaid("default"))
+        .catch(console.error);
     }
 
     document.addEventListener("colorschemechange", (e) => {
       if (e.detail.colorScheme === "dark") {
-        resetProcessed().then(loadMermaid("dark")).catch(console.error);
+        resetProcessed()
+          .then(() => loadMermaid("dark"))
+          .catch(console.error);
       } else {
-        resetProcessed().then(loadMermaid("default")).catch(console.error);
+        resetProcessed()
+          .then(() => loadMermaid("default"))
+          .catch(console.error);
       }
     });
   };
 
   init();
+
+  // Observe for new elements added to the DOM
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      mutation.addedNodes.forEach((node) => {
+        if (node.nodeType === 1 && node.hasAttribute("data-mermaid")) {
+          // Element node
+          const toggle = document.querySelector("dark-mode-toggle");
+          if (toggle?.mode == "dark") {
+            resetProcessed()
+              .then(() => loadMermaid("dark"))
+              .catch(console.error);
+          } else {
+            resetProcessed()
+              .then(() => loadMermaid("default"))
+              .catch(console.error);
+          }
+        }
+      });
+    });
+  });
+
+  observer.observe(document.body, { childList: true, subtree: true });
+
+  return {
+    init,
+  };
 })();

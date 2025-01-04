@@ -65,6 +65,7 @@ hyperbook.python = (function () {
   }
 
   const updateRunning = (id, type) => {
+    const elems = document.getElementsByClassName("directive-pyide");
     for (let elem of elems) {
       const run = elem.getElementsByClassName("run")[0];
       const test = elem.getElementsByClassName("test")[0];
@@ -121,55 +122,83 @@ hyperbook.python = (function () {
     }
   };
 
-  const elems = document.getElementsByClassName("directive-pyide");
+  const init = (root) => {
+    const elems = root.getElementsByClassName("directive-pyide");
 
-  for (let elem of elems) {
-    const editor = elem.getElementsByClassName("editor")[0];
-    const run = elem.getElementsByClassName("run")[0];
-    const test = elem.getElementsByClassName("test")[0];
-    const output = elem.getElementsByClassName("output")[0];
-    const input = elem.getElementsByClassName("input")[0];
-    const outputBtn = elem.getElementsByClassName("output-btn")[0];
-    const inputBtn = elem.getElementsByClassName("input-btn")[0];
-    const id = elem.id;
-    let tests = [];
-    try {
-      tests = JSON.parse(atob(elem.getAttribute("data-tests")));
-    } catch (e) {}
+    for (let elem of elems) {
+      const editor = elem.getElementsByClassName("editor")[0];
+      const run = elem.getElementsByClassName("run")[0];
+      const test = elem.getElementsByClassName("test")[0];
+      const output = elem.getElementsByClassName("output")[0];
+      const input = elem.getElementsByClassName("input")[0];
+      const outputBtn = elem.getElementsByClassName("output-btn")[0];
+      const inputBtn = elem.getElementsByClassName("input-btn")[0];
+      const id = elem.id;
+      let tests = [];
+      try {
+        tests = JSON.parse(atob(elem.getAttribute("data-tests")));
+      } catch (e) {}
 
-    function showInput() {
-      outputBtn.classList.remove("active");
-      inputBtn.classList.add("active");
-      output.classList.add("hidden");
-      input.classList.remove("hidden");
-    }
-    function showOutput() {
-      outputBtn.classList.add("active");
-      inputBtn.classList.remove("active");
-      output.classList.remove("hidden");
-      input.classList.add("hidden");
-    }
+      function showInput() {
+        outputBtn.classList.remove("active");
+        inputBtn.classList.add("active");
+        output.classList.add("hidden");
+        input.classList.remove("hidden");
+      }
+      function showOutput() {
+        outputBtn.classList.add("active");
+        inputBtn.classList.remove("active");
+        output.classList.remove("hidden");
+        input.classList.add("hidden");
+      }
 
-    outputBtn?.addEventListener("click", showOutput);
-    inputBtn?.addEventListener("click", showInput);
+      outputBtn?.addEventListener("click", showOutput);
+      inputBtn?.addEventListener("click", showInput);
 
-    test?.addEventListener("click", async () => {
-      showOutput();
-      if (callback) return;
+      test?.addEventListener("click", async () => {
+        showOutput();
+        if (callback) return;
 
-      output.innerHTML = "";
+        output.innerHTML = "";
 
-      const script = editor.value;
-      for (let test of tests) {
-        const testCode = test.code.replace("#SCRIPT#", script);
+        const script = editor.value;
+        for (let test of tests) {
+          const testCode = test.code.replace("#SCRIPT#", script);
 
-        const heading = document.createElement("div");
-        console.log(test);
-        heading.innerHTML = `== Test ${test.name} ==`;
-        heading.classList.add("test-heading");
-        output.appendChild(heading);
+          const heading = document.createElement("div");
+          console.log(test);
+          heading.innerHTML = `== Test ${test.name} ==`;
+          heading.classList.add("test-heading");
+          output.appendChild(heading);
 
-        await asyncRun(id, "test")(testCode, {})
+          await asyncRun(id, "test")(testCode, {})
+            .then(({ results, error }) => {
+              if (results) {
+                output.textContent += results;
+              } else if (error) {
+                output.textContent += error;
+              }
+              callback = null;
+              updateRunning(id, "test");
+            })
+            .catch((e) => {
+              output.textContent = `Error: ${e}`;
+              console.log(e);
+              callback = null;
+              updateRunning(id, "test");
+            });
+        }
+      });
+
+      run?.addEventListener("click", async () => {
+        showOutput();
+        if (callback) return;
+
+        const script = editor.value;
+        output.innerHTML = "";
+        asyncRun(id, "run")(script, {
+          inputs: input.value.split("\n"),
+        })
           .then(({ results, error }) => {
             if (results) {
               output.textContent += results;
@@ -177,41 +206,33 @@ hyperbook.python = (function () {
               output.textContent += error;
             }
             callback = null;
-            updateRunning(id, "test");
+            updateRunning(id, "run");
           })
           .catch((e) => {
             output.textContent = `Error: ${e}`;
             console.log(e);
             callback = null;
-            updateRunning(id, "test");
+            updateRunning(id, "run");
           });
+      });
+    }
+  };
+
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      if (mutation.addedNodes.length) {
+        mutation.addedNodes.forEach((node) => {
+          if (node.type === 1 && node.classList?.contains("directive-pyide")) {
+            init(node);
+          }
+        });
       }
     });
+  });
 
-    run?.addEventListener("click", async () => {
-      showOutput();
-      if (callback) return;
+  observer.observe(document.body, { childList: true, subtree: true });
 
-      const script = editor.value;
-      output.innerHTML = "";
-      asyncRun(id, "run")(script, {
-        inputs: input.value.split("\n"),
-      })
-        .then(({ results, error }) => {
-          if (results) {
-            output.textContent += results;
-          } else if (error) {
-            output.textContent += error;
-          }
-          callback = null;
-          updateRunning(id, "run");
-        })
-        .catch((e) => {
-          output.textContent = `Error: ${e}`;
-          console.log(e);
-          callback = null;
-          updateRunning(id, "run");
-        });
-    });
-  }
+  document.addEventListener("DOMContentLoaded", () => {
+    init(document);
+  });
 })();
