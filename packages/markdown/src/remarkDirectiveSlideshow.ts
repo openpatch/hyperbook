@@ -15,6 +15,8 @@ import {
 } from "./remarkHelper";
 import { toHast } from "mdast-util-to-hast";
 import hash from "./objectHash";
+import { i18n } from "./i18n";
+import { title } from "process";
 
 export default (_: HyperbookContext) => () => {
   return (tree: Root, file: VFile) => {
@@ -42,7 +44,6 @@ export default (_: HyperbookContext) => () => {
             properties: {
               class: "slideshow fade",
               style: `height: ${isNaN(Number(height)) ? height : height + "px"}`,
-              "data-active": 0,
               "data-id": id,
             },
             children: images.map((image, i) => ({
@@ -62,6 +63,7 @@ export default (_: HyperbookContext) => () => {
             properties: {
               class: "prev",
               onclick: `hyperbook.slideshow.moveBy('${id}', -1)`,
+              title: i18n.get("slideshow-previous"),
             },
             children: [
               {
@@ -76,6 +78,7 @@ export default (_: HyperbookContext) => () => {
             properties: {
               class: "next",
               onclick: `hyperbook.slideshow.moveBy('${id}', 1)`,
+              title: i18n.get("slideshow-next"),
             },
             children: [
               {
@@ -98,6 +101,7 @@ export default (_: HyperbookContext) => () => {
                 "data-index": i,
                 "data-id": id,
                 onclick: `hyperbook.slideshow.setActive('${id}', ${i})`,
+                title: i18n.get("slideshow-jump-to", { index: `${i + 1}` }),
               },
               children: [],
             })),

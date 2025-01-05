@@ -5,12 +5,14 @@ hyperbook.protect = (function () {
    */
   function onInputToast(inputEl, el) {
     const value = inputEl.value;
-    setLocalStorage(el.getAttribute("data-id"), value);
+    const id = el.getAttribute("data-id");
 
-    const els = document.querySelectorAll(
-      `input[data-id="${el.getAttribute("data-id")}"]`,
-    );
-    els.forEach((el) => el.dispatchEvent(new Event("check")));
+    store.protect.put({ id, passwordHash: btoa(value) }).then(() => {
+      const els = document.querySelectorAll(
+        `input[data-id="${el.getAttribute("data-id")}"]`
+      );
+      els.forEach((el) => el.dispatchEvent(new Event("check")));
+    });
   }
 
   /**
@@ -19,50 +21,42 @@ hyperbook.protect = (function () {
    * @param {HTMLElement} hiddenEl
    */
   function onUpdateToast(inputEl, el, hiddenEl) {
-    const value = getLocalStorage(el.getAttribute("data-id"));
-    const toast = atob(el.getAttribute("data-toast"));
-    if (value) {
-      inputEl.value = value;
-    }
-    if (toast === value) {
-      while (el.lastElementChild) {
-        el.removeChild(el.lastElementChild);
+    const id = el.getAttribute("data-id");
+    store.protect.get(id).then((result) => {
+      if (result) {
+        const value = atob(result.passwordHash);
+        inputEl.value = value;
+        const toast = atob(el.getAttribute("data-toast"));
+
+        if (toast === value) {
+          while (el.lastElementChild) {
+            el.removeChild(el.lastElementChild);
+          }
+          hiddenEl.classList.remove("hidden");
+          el.appendChild(hiddenEl);
+        }
       }
-      hiddenEl.classList.remove("hidden");
-      el.appendChild(hiddenEl);
-    }
+    });
   }
 
-  /*
-   * @param {string} id
-   * @return {string | undefined} value
+  /**
+   * Initialize elements within the given root element.
+   * @param {HTMLElement} root - The root element to initialize.
    */
-  function getLocalStorage(id) {
-    const protect = JSON.parse(localStorage.getItem("protect") || "{}");
-    const value = protect[id];
-    if (value) {
-      return atob(value);
-    }
-    return undefined;
-  }
-
-  /*
-   * @param {string} id
-   * @param {string} value
-   */
-  function setLocalStorage(id, value) {
-    const protect = JSON.parse(localStorage.getItem("protect") || "{}");
-    protect[id] = btoa(value);
-    localStorage.setItem("protect", JSON.stringify(protect));
-  }
-
-  function init() {
-    const els = document.getElementsByClassName("directive-protect");
+  function init(root) {
+    const els = root.getElementsByClassName("directive-protect");
     for (let el of els) {
       const inputEl = el.getElementsByTagName("input")[0];
+      const id = el.getAttribute("data-id");
 
       if (!inputEl) continue;
-      inputEl.value = getLocalStorage(el.getAttribute("data-id")) || "";
+      store.protect.get(id).then((result) => {
+        if (result) {
+          inputEl.value = atob(result.passwordHash);
+        } else {
+          inputEl.value = "";
+        }
+      });
 
       const hiddenEL = el.getElementsByClassName("hidden")[0];
       el.removeChild(hiddenEL);
@@ -75,5 +69,26 @@ hyperbook.protect = (function () {
     }
   }
 
-  init();
+  // Initialize existing elements on document load
+  document.addEventListener("DOMContentLoaded", () => {
+    init(document);
+  });
+
+  // Observe for new elements added to the DOM
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      mutation.addedNodes.forEach((node) => {
+        if (node.nodeType === 1) {
+          // Element node
+          init(node);
+        }
+      });
+    });
+  });
+
+  observer.observe(document.body, { childList: true, subtree: true });
+
+  return {
+    init,
+  };
 })();

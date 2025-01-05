@@ -8,10 +8,11 @@ import {
 } from "@hyperbook/types";
 import { ElementContent, Root } from "hast";
 import { VFile } from "vfile";
+import { i18n } from "./i18n";
 
 const makeNavigationPageElement = (
   ctx: HyperbookContext,
-  page: HyperbookPage,
+  page: HyperbookPage
 ): ElementContent => {
   return {
     type: "element",
@@ -39,7 +40,7 @@ const makeNavigationPageElement = (
 
 const makeNavigationSectionElement = (
   ctx: HyperbookContext,
-  section: HyperbookSection,
+  section: HyperbookSection
 ): ElementContent => {
   const { virtual, isEmpty, href, name, pages, sections, expanded } = section;
   const children: ElementContent[] = [];
@@ -133,7 +134,7 @@ const makeNavigationSectionElement = (
     type: "element",
     tagName: "div",
     properties: {
-      class: virtual ? "links" :  "collapsible-content links",
+      class: virtual ? "links" : "collapsible-content links",
     },
     children: linksElements,
   });
@@ -141,6 +142,7 @@ const makeNavigationSectionElement = (
     type: "element",
     tagName: "div",
     properties: {
+      "data-id": `_nav:${href}`,
       class: virtual ? "virtual-section" : "section",
     },
     children,
@@ -192,6 +194,66 @@ const makeMetaElements = (ctx: HyperbookContext): ElementContent[] => {
       ],
     });
   }
+
+  if (ctx.config.importExport) {
+    elements.push({
+      type: "element",
+      tagName: "a",
+      properties: {
+        href: "#",
+        onclick: "hyperbookExport()",
+      },
+      children: [
+        {
+          type: "element",
+          tagName: "span",
+          properties: {
+            class: "export-icon",
+            title: i18n.get("shell-export-hyperbook")
+          },
+          children: [],
+        },
+      ],
+    });
+    elements.push({
+      type: "element",
+      tagName: "a",
+      properties: {
+        href: "#",
+        onclick: "hyperbookImport()",
+      },
+      children: [
+        {
+          type: "element",
+          tagName: "span",
+          properties: {
+            class: "import-icon",
+            title: i18n.get("shell-import-hyperbook")
+          },
+          children: [],
+        },
+      ],
+    });
+  }
+  elements.push({
+    type: "element",
+    tagName: "a",
+    properties: {
+      href: "#",
+      onclick: "hyperbookReset()",
+    },
+    children: [
+        {
+          type: "element",
+          tagName: "span",
+          properties: {
+            class: "reset-icon",
+            title: i18n.get("shell-reset-hyperbook")
+          },
+          children: [],
+        },
+    ],
+  });
 
   const copyrightChildren: ElementContent[] = [];
   if (ctx.config.license) {
@@ -551,7 +613,7 @@ const makeHeaderElements = (ctx: HyperbookContext): ElementContent[] => {
               tagName: "li",
               properties: {
                 class: ["links-item", submenu.length > 0 ? "sub" : ""].join(
-                  " ",
+                  " "
                 ),
               },
               children: [
@@ -594,7 +656,7 @@ const makeHeaderElements = (ctx: HyperbookContext): ElementContent[] => {
       properties: {
         id: "search-toggle",
         onclick: "hyperbook.searchToggle()",
-        title: "Search",
+        title: i18n.get("shell-search"),
       },
       children: [],
     });
@@ -668,11 +730,11 @@ const makeHeaderElements = (ctx: HyperbookContext): ElementContent[] => {
     properties: {
       id: "dark-mode-toggle",
       appearence: "switch",
-      permanent: true
+      title: i18n.get("shell-toggle-dark-mode"),
+      permanent: true,
     },
     children: [],
-  })
-
+  });
 
   return [
     {

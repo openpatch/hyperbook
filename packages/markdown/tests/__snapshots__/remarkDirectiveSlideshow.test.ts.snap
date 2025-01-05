@@ -3,15 +3,15 @@
 exports[`remarkDirectiveSlideshow > should transform 1`] = `
 "
 <div class="directive-slideshow">
-  <div class="slideshow fade" style="height: 300px" data-active="0" data-id="1eb598f542133fb0428988ac0b3143eb037799bf8c6f98b6177344018e5e7c7b">
+  <div class="slideshow fade" style="height: 300px" data-id="1eb598f542133fb0428988ac0b3143eb037799bf8c6f98b6177344018e5e7c7b">
     <div class="image-container" data-index="0" data-id="1eb598f542133fb0428988ac0b3143eb037799bf8c6f98b6177344018e5e7c7b">
       <img src="/test.jpg" alt="Test" title="A caption">
     </div>
     <div class="image-container" data-index="1" data-id="1eb598f542133fb0428988ac0b3143eb037799bf8c6f98b6177344018e5e7c7b">
       <img src="/clouds.jpg" alt="Clouds" title="Another caption">
     </div>
-  </div><a class="prev" onclick="hyperbook.slideshow.moveBy('1eb598f542133fb0428988ac0b3143eb037799bf8c6f98b6177344018e5e7c7b', -1)">&#10094;</a><a class="next" onclick="hyperbook.slideshow.moveBy('1eb598f542133fb0428988ac0b3143eb037799bf8c6f98b6177344018e5e7c7b', 1)">&#10095;</a>
-  <div class="dots-container"><span class="dot" data-index="0" data-id="1eb598f542133fb0428988ac0b3143eb037799bf8c6f98b6177344018e5e7c7b" onclick="hyperbook.slideshow.setActive('1eb598f542133fb0428988ac0b3143eb037799bf8c6f98b6177344018e5e7c7b', 0)"></span><span class="dot" data-index="1" data-id="1eb598f542133fb0428988ac0b3143eb037799bf8c6f98b6177344018e5e7c7b" onclick="hyperbook.slideshow.setActive('1eb598f542133fb0428988ac0b3143eb037799bf8c6f98b6177344018e5e7c7b', 1)"></span></div>
+  </div><a class="prev" onclick="hyperbook.slideshow.moveBy('1eb598f542133fb0428988ac0b3143eb037799bf8c6f98b6177344018e5e7c7b', -1)" title="slideshow-previous">&#10094;</a><a class="next" onclick="hyperbook.slideshow.moveBy('1eb598f542133fb0428988ac0b3143eb037799bf8c6f98b6177344018e5e7c7b', 1)" title="slideshow-next">&#10095;</a>
+  <div class="dots-container"><span class="dot" data-index="0" data-id="1eb598f542133fb0428988ac0b3143eb037799bf8c6f98b6177344018e5e7c7b" onclick="hyperbook.slideshow.setActive('1eb598f542133fb0428988ac0b3143eb037799bf8c6f98b6177344018e5e7c7b', 0)" title="slideshow-jump-to"></span><span class="dot" data-index="1" data-id="1eb598f542133fb0428988ac0b3143eb037799bf8c6f98b6177344018e5e7c7b" onclick="hyperbook.slideshow.setActive('1eb598f542133fb0428988ac0b3143eb037799bf8c6f98b6177344018e5e7c7b', 1)" title="slideshow-jump-to"></span></div>
 </div>
 "
 `;

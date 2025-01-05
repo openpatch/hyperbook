@@ -14,6 +14,8 @@ import {
   requestJS,
 } from "./remarkHelper";
 import { toText } from "./mdastUtilToText";
+import hash from "./objectHash";
+import { i18n } from "./i18n";
 
 interface CodeBundle {
   js?: string;
@@ -26,6 +28,14 @@ export default (ctx: HyperbookContext) => () => {
     path.posix.join("directive-p5", "p5.min.js"),
     "assets"
   );
+
+  const escape = (s: string) => {
+    return s
+      .replace(/&/g, "&amp;")
+      .replace(/"/g, "&quot;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+  };
 
   const wrapSketch = (sketchCode?: string) => {
     if (sketchCode !== "" && !sketchCode?.includes("setup")) {
@@ -58,7 +68,7 @@ canvas {
 ${(code.scripts ? [cdnLibraryUrl, ...code.scripts] : []).map((src) => `<script type="text/javascript" src="${src}"></script>`).join("\n")}
 <body></body>
 <script id="code" type="text/javascript">###SLOT###</script>
-`.replace(/\u00A0/g, " ");
+`;
 
   return (tree: Root, file: VFile) => {
     visit(tree, function (node) {
@@ -67,6 +77,7 @@ ${(code.scripts ? [cdnLibraryUrl, ...code.scripts] : []).map((src) => `<script t
           src = "",
           height = 100,
           editor = false,
+          id = hash(node),
         } = node.properties || {};
 
         expectContainerDirective(node, file, name);
@@ -95,11 +106,14 @@ ${(code.scripts ? [cdnLibraryUrl, ...code.scripts] : []).map((src) => `<script t
             ),
           ],
         });
-        const srcdoc = template.replace("###SLOT###", wrapSketch(srcFile));
+        const srcdoc = template
+          .replace("###SLOT###", wrapSketch(srcFile))
+          .replace(/\u00A0/g, " ");
         node.tagName = "div";
         node.properties = {
           class: ["directive-p5", editor ? "" : "standalone"].join(" "),
-          "data-template": template,
+          "data-template": template.replace(/\u00A0/g, " "),
+          "data-id": id,
         };
         node.children = [
           {
@@ -118,8 +132,8 @@ ${(code.scripts ? [cdnLibraryUrl, ...code.scripts] : []).map((src) => `<script t
                   loading: "eager",
                   sandbox:
                     "allow-scripts allow-popups allow-modals allow-forms allow-same-origin",
-                  "aria-label": "Code Preview",
-                  title: "Code Preview",
+                  "aria-label": i18n.get("p5-code-preview"),
+                  title: i18n.get("p5-code-preview"),
                 },
                 children: [],
               },
@@ -136,14 +150,23 @@ ${(code.scripts ? [cdnLibraryUrl, ...code.scripts] : []).map((src) => `<script t
                   children: [
                     {
                       type: "element",
-                      tagName: "button",
+                      tagName: "div",
                       properties: {
-                        class: "update",
+                        class: "buttons",
                       },
                       children: [
                         {
-                          type: "text",
-                          value: "Update",
+                          type: "element",
+                          tagName: "button",
+                          properties: {
+                            class: "update",
+                          },
+                          children: [
+                            {
+                              type: "text",
+                              value: i18n.get("p5-update"),
+                            },
+                          ],
                         },
                       ],
                     },
@@ -158,6 +181,54 @@ ${(code.scripts ? [cdnLibraryUrl, ...code.scripts] : []).map((src) => `<script t
                         {
                           type: "raw",
                           value: srcFile,
+                        },
+                      ],
+                    },
+                    {
+                      type: "element",
+                      tagName: "div",
+                      properties: {
+                        class: "buttons bottom",
+                      },
+                      children: [
+                        {
+                          type: "element",
+                          tagName: "button",
+                          properties: {
+                            class: "reset",
+                          },
+                          children: [
+                            {
+                              type: "text",
+                              value: i18n.get("p5-reset"),
+                            },
+                          ],
+                        },
+                        {
+                          type: "element",
+                          tagName: "button",
+                          properties: {
+                            class: "copy",
+                          },
+                          children: [
+                            {
+                              type: "text",
+                              value: i18n.get("p5-copy"),
+                            },
+                          ],
+                        },
+                        {
+                          type: "element",
+                          tagName: "button",
+                          properties: {
+                            class: "download",
+                          },
+                          children: [
+                            {
+                              type: "text",
+                              value: i18n.get("p5-download"),
+                            },
+                          ],
                         },
                       ],
                     },

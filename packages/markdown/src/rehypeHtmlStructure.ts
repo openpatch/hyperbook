@@ -326,6 +326,38 @@ export default (ctx: HyperbookContext) => () => {
               {
                 type: "element",
                 tagName: "script",
+                properties: {
+                  src: makeUrl(["i18n.js"], "assets"),
+                },
+                children: [],
+              },
+              {
+                type: "element",
+                tagName: "script",
+                properties: {
+                  src: makeUrl(["dexie.min.js"], "assets"),
+                },
+                children: [],
+              },
+              {
+                type: "element",
+                tagName: "script",
+                properties: {
+                  src: makeUrl(["dexie-export-import.js"], "assets"),
+                },
+                children: [],
+              },
+              {
+                type: "element",
+                tagName: "script",
+                properties: {
+                  src: makeUrl(["store.js"], "assets"),
+                },
+                children: [],
+              },
+              {
+                type: "element",
+                tagName: "script",
                 properties: {},
                 children: [
                   {

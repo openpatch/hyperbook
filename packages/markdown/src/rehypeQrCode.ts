@@ -4,6 +4,7 @@
 import { HyperbookContext } from "@hyperbook/types";
 import { ElementContent, Root } from "hast";
 import { VFile } from "vfile";
+import { i18n } from "./i18n";
 
 export default (ctx: HyperbookContext) => () => {
   const qrcode = ctx.config.qrcode || ctx.navigation.current?.qrcode || true;
@@ -43,7 +44,7 @@ export default (ctx: HyperbookContext) => () => {
         properties: {
           id: "qrcode-open",
           onclick: "hyperbook.qrcodeOpen()",
-          title: "QR-Code",
+          title: i18n.get("qr-code"),
         },
         children: [
           {

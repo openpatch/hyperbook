@@ -13,14 +13,13 @@ import {
   requestJS,
 } from "./remarkHelper";
 import hash from "./objectHash";
+import { i18n } from "./i18n";
 
 export default (ctx: HyperbookContext) => () => {
   const name = "abc-music";
   return (tree: Root, file: VFile) => {
     visit(tree, function (node) {
-      if (
-        (node.type === "code" && node.lang === "abcjs")
-      ) {
+      if (node.type === "code" && node.lang === "abcjs") {
         const data = node.data || (node.data = {});
         node.type = "directive";
         node.lang = "";
@@ -52,26 +51,82 @@ export default (ctx: HyperbookContext) => () => {
             properties: {
               class: "tune",
             },
-            children: [
-            ],
+            children: [],
           },
           ...(editor
             ? [
                 {
                   type: "element",
-                  tagName: "code-input",
+                  tagName: "div",
                   properties: {
-                    class: "editor",
-                    id: hash(node),
-                    template: "abc-highlighted",
-                    language: "javascript"
+                    class: "editor-container",
                   },
                   children: [
                     {
-                      type: "raw",
-                      value: value,
-                    }
-                  ]
+                      type: "element",
+                      tagName: "code-input",
+                      properties: {
+                        class: "editor",
+                        id: hash(node),
+                        template: "abc-highlighted",
+                        language: "javascript",
+                      },
+                      children: [
+                        {
+                          type: "raw",
+                          value: value,
+                        },
+                      ],
+                    },
+                    {
+                      type: "element",
+                      tagName: "div",
+                      properties: {
+                        class: "buttons bottom",
+                      },
+                      children: [
+                        {
+                          type: "element",
+                          tagName: "button",
+                          properties: {
+                            class: "reset",
+                          },
+                          children: [
+                            {
+                              type: "text",
+                              value: i18n.get("abc-music-reset"),
+                            },
+                          ],
+                        },
+                        {
+                          type: "element",
+                          tagName: "button",
+                          properties: {
+                            class: "copy",
+                          },
+                          children: [
+                            {
+                              type: "text",
+                              value: i18n.get("abc-music-copy"),
+                            },
+                          ],
+                        },
+                        {
+                          type: "element",
+                          tagName: "button",
+                          properties: {
+                            class: "download",
+                          },
+                          children: [
+                            {
+                              type: "text",
+                              value: i18n.get("abc-music-download"),
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                  ],
                 },
               ]
             : []),

@@ -4,6 +4,7 @@
 import { HyperbookContext } from "@hyperbook/types";
 import { ElementContent, Root } from "hast";
 import { VFile } from "vfile";
+import { i18n } from "./i18n";
 
 export default (ctx: HyperbookContext) => () => {
   const showToc = ctx.navigation.current?.toc || true;
@@ -22,7 +23,7 @@ export default (ctx: HyperbookContext) => () => {
         properties: {
           id: "toc-toggle",
           onclick: "hyperbook.tocToggle()",
-          title: "Table of Contents",
+          title: i18n.get("table-of-contents"),
         },
         children: [
           {

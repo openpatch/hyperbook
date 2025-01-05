@@ -392,5 +392,21 @@ const SEARCH_DOCUMENTS = ${JSON.stringify(documents)};
     await fs.writeFile(path.join(rootOut, ASSETS_FOLDER, "search.js"), js);
   }
 
+  const supportLanguages = await fs
+    .readdir(path.join(__dirname, "locales"))
+    .then((files) => files.map((file) => file.split(".")[0]));
+  let language = "en";
+  if (hyperbookJson.language && supportLanguages.includes(hyperbookJson.language)) {
+    language = hyperbookJson.language;
+  }
+
+  const i18nJS = await fs.readFile(path.join(rootOut, ASSETS_FOLDER, "i18n.js"), "utf-8");
+  const locales = await fs.readFile(path.join(__dirname, "locales", `${language}.json`), "utf-8");
+  await fs.writeFile(path.join(rootOut, ASSETS_FOLDER, "i18n.js"), i18nJS.replace(/\/\/[\s]*LOCALES[\s\S]*?[\s]*\/\/[\s]*LOCALES/g, `
+  // GENERATED
+  const locales = ${locales};
+`));
+
+
   console.log(`${chalk.green(`[${prefix}]`)} Build success: ${rootOut}`);
 }

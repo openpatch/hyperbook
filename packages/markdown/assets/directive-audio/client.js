@@ -18,6 +18,9 @@ hyperbook.audio = (function () {
     return tm + ":" + ts;
   }
 
+  /**
+   * @type {Record<string, import("wavesurfer.js").WaveSurfer>}
+   */
   const wavesurferInstances = {};
 
   function init() {
@@ -41,6 +44,12 @@ hyperbook.audio = (function () {
       wavesurfer.on("finish", () => update(id));
       wavesurfer.on("play", () => update(id));
       wavesurferInstances[id] = wavesurfer;
+
+      store.audio.get(id).then((result) => {
+        if (result) {
+          wavesurfer.setTime(result.time);
+        }
+      });
     }
   }
 
@@ -68,6 +77,8 @@ hyperbook.audio = (function () {
     } else {
       playEl.classList.remove("playing");
     }
+
+    store.audio.put({ id, time });
 
     durationEl.innerHTML = ` ${secondsToTimestamp(time)}/${secondsToTimestamp(duration)}`;
   }

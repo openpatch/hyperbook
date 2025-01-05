@@ -344,6 +344,12 @@ importers:
       chokidar:
         specifier: 3.6.0
         version: 3.6.0
+      dexie:
+        specifier: ^4.0.10
+        version: 4.0.10
+      dexie-export-import:
+        specifier: ^4.1.4
+        version: 4.1.4(dexie@4.0.10)
       live-server:
         specifier: ^1.2.2
         version: 1.2.2
@@ -2911,6 +2917,14 @@ packages:
 
   devlop@1.1.0:
     resolution: {integrity: sha512-RWmIqhcFf1lRYBvNmr7qTNuyCt/7/ns2jbpp1+PalgE/rDQcBT0fioSMUpJ93irlUhC5hrg4cYqe6U+0ImW0rA==}
+
+  dexie-export-import@4.1.4:
+    resolution: {integrity: sha512-3bw171qUuOTWSYLXI7C/0M6p1X65Rho3tu1IvD9By8jn0+3t3dLSkDlZ1BC6MbABl3kRlhtGigzC+SF+qcS5Og==}
+    peerDependencies:
+      dexie: ^2.0.4 || ^3.0.0 || ^4.0.1
+
+  dexie@4.0.10:
+    resolution: {integrity: sha512-eM2RzuR3i+M046r2Q0Optl3pS31qTWf8aFuA7H9wnsHTwl8EPvroVLwvQene/6paAs39Tbk6fWZcn2aZaHkc/w==}
 
   diff-sequences@29.6.3:
     resolution: {integrity: sha512-EjePK1srD3P08o2j4f0ExnylqRs5B9tJjcp9t1krH2qRi8CCdsYfwe9JgSLurFBWwq4uOlipzfk5fHNvwFKr8Q==}
@@ -9591,6 +9605,12 @@ snapshots:
   devlop@1.1.0:
     dependencies:
       dequal: 2.0.3
+
+  dexie-export-import@4.1.4(dexie@4.0.10):
+    dependencies:
+      dexie: 4.0.10
+
+  dexie@4.0.10: {}
 
   diff-sequences@29.6.3: {}
 

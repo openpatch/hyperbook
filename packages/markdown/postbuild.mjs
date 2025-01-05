@@ -4,6 +4,14 @@ import { cp } from "fs/promises";
 async function postbuild() {
   const assets = [
     {
+      src: path.join("./node_modules", "dexie", "dist", "dexie.min.js"),
+      dst: path.join("./dist", "assets", "dexie.min.js"),
+    },
+    {
+      src: path.join("./node_modules", "dexie-export-import", "dist", "dexie-export-import.js"),
+      dst: path.join("./dist", "assets", "dexie-export-import.js"),
+    },
+    {
       src: path.join("./node_modules", "mermaid", "dist", "mermaid.min.js"),
       dst: path.join("./dist", "assets", "directive-mermaid", "mermaid.min.js"),
     },
@@ -126,5 +134,7 @@ async function postbuild() {
   for (let asset of assets) {
     await cp(asset.src, asset.dst, { recursive: true });
   }
+
+  await cp("locales", "./dist/locales", { recursive: true });
 }
 postbuild();

@@ -12,6 +12,7 @@ import {
 } from "./remarkHelper";
 import { ElementContent } from "hast";
 import hash from "./objectHash";
+import { i18n } from "./i18n";
 
 export default (ctx: HyperbookContext) => () => {
   const name = "audio";
@@ -62,6 +63,7 @@ export default (ctx: HyperbookContext) => () => {
             properties: {
               class: "play",
               onclick: `hyperbook.audio.togglePlayPause("${id}")`,
+              title: i18n.get("audio-play"),
             },
             children: [],
           });
@@ -84,6 +86,7 @@ export default (ctx: HyperbookContext) => () => {
             properties: {
               class: "play",
               onclick: `hyperbook.audio.togglePlayPause("${id}")`,
+              title: i18n.get("audio-play"),
             },
             children: [],
           });

@@ -37,6 +37,7 @@ can and part wise must set (indicated by a \*).
 | allowDangerousHtml | Allow HTML. This can lead to incompatibilities in future versions.                                                                                              |
 | qrcode             | Shows an icon, which opens a qr code to the current page.                                                                                                       |
 | trailingSlash      | Outputs all files into ther own folders and produces only index.html files.                                                                                     |
+| importExport       | Allows to import and export the state of the Hyperbook as a file. Buttons for importing and exporting will be at the bottom of the page.                        |
 
 Here is an example configuration:
 

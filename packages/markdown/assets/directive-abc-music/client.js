@@ -1,5 +1,4 @@
 hyperbook.abc = (function () {
-  const els = document.querySelectorAll(".directive-abc-music");
   window.codeInput?.registerTemplate(
     "abc-highlighted",
     codeInput.templates.prism(window.Prism, [
@@ -7,7 +6,7 @@ hyperbook.abc = (function () {
     ])
   );
 
-  for (let el of els) {
+  const initABC = async (el) => {
     const tuneEl = el.getElementsByClassName("tune")[0];
     const playerEl = el.getElementsByClassName("player")[0];
 
@@ -15,34 +14,68 @@ hyperbook.abc = (function () {
     const editor = el.getAttribute("data-editor");
 
     if (editor == "true") {
+      /**
+       * @type {HTMLTextAreaElement}
+       */
       const editorEl = el.getElementsByClassName("editor")[0];
+      const id = editorEl.id;
 
-      const setupEditor = () => {
+      const copyEl = el.getElementsByClassName("copy")[0];
+      const resetEl = el.getElementsByClassName("reset")[0];
+      const downloadEl = el.getElementsByClassName("download")[0];
+
+      copyEl?.addEventListener("click", async () => {
         try {
-          new ABCJS.Editor(editorEl.id, {
-            canvas_id: tuneEl,
-            synth: {
-              el: playerEl,
-              options: {
-                displayRestart: true,
-                displayPlay: true,
-                displayProgress: true,
-              },
-            },
-            abcjsParams: {
-              responsive: "resize",
-              selectTypes: false,
-              selectionColor: "currentColor"
-            },
-          });
-        } catch (e) {
-          setTimeout(() => {
-            setupEditor();
-          }, 1000);
+          await navigator.clipboard.writeText(editor.value);
+        } catch (error) {
+          console.error(error.message);
         }
-      };
+      });
 
-      setupEditor();
+      resetEl?.addEventListener("click", () => {
+        store.abcMusic.delete(id);
+        window.location.reload();
+      });
+
+      downloadEl?.addEventListener("click", () => {
+        const a = document.createElement("a");
+        const blob = new Blob([editor.value], { type: "text/plain" });
+        a.href = URL.createObjectURL(blob);
+        a.download = `tones-${id}.abc`;
+        a.click();
+      });
+
+      editorEl.addEventListener("code-input_load", async () => {
+        const storeResult = await store.abcMusic
+          .where("id")
+          .equals(editorEl.id)
+          .first();
+        editorEl.value = storeResult?.tune || tune;
+
+        new ABCJS.Editor(editorEl.id, {
+          canvas_id: tuneEl,
+          synth: {
+            el: playerEl,
+            options: {
+              displayRestart: true,
+              displayPlay: true,
+              displayProgress: true,
+            },
+          },
+          abcjsParams: {
+            responsive: "resize",
+            selectTypes: false,
+            selectionColor: "currentColor",
+          },
+        });
+
+        editorEl.addEventListener("change", () => {
+          store.abcMusic.put({
+            id: editorEl.id,
+            tune: editorEl.value,
+          });
+        });
+      });
     } else {
       const visualObj = ABCJS.renderAbc(tuneEl, tune, {
         responsive: "resize",
@@ -60,5 +93,35 @@ hyperbook.abc = (function () {
           "<div class='audio-error'>Audio is not supported in this browser.</div>";
       }
     }
-  }
+  };
+
+  const init = (root) => {
+    const els = root.querySelectorAll(".directive-abc-music");
+    els.forEach(initABC);
+  };
+
+  // Initialize existing elements on document load
+  document.addEventListener("DOMContentLoaded", () => {
+    init(document);
+  });
+
+  // Observe for new elements added to the DOM
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      mutation.addedNodes.forEach((node) => {
+        if (
+          node.nodeType === 1 &&
+          node.classList.contains("directive-abc-music")
+        ) {
+          initABC(node);
+        }
+      });
+    });
+  });
+
+  observer.observe(document.body, { childList: true, subtree: true });
+
+  return {
+    init,
+  };
 })();

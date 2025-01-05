@@ -79,6 +79,7 @@ export type HyperbookJson = {
   logo?: string;
   allowDangerousHtml?: boolean;
   trailingSlash?: boolean;
+  importExport?: boolean;
   search?: boolean;
   qrcode?: boolean;
   author?: {

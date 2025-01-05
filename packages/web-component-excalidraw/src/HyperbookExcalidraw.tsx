@@ -3,10 +3,11 @@ import {
   type ExcalidrawProps as EDP,
   ExcalidrawInitialDataState,
 } from "@excalidraw/excalidraw/types/types";
-import { Excalidraw } from "@excalidraw/excalidraw"
+import { Excalidraw } from "@excalidraw/excalidraw";
 import { FC, useCallback, useEffect, useState } from "react";
 
 type HyperbookExcalidrawProps = {
+  id: string;
   lang: string;
   autoZoom: boolean;
   edit: boolean;
@@ -15,13 +16,16 @@ type HyperbookExcalidrawProps = {
 };
 
 export const HyperbookExcalidraw: FC<HyperbookExcalidrawProps> = ({
+  id,
   lang = "en",
   autoZoom = true,
   edit = false,
   src,
-  onlinkopen = () => { }
+  onlinkopen = () => {},
 }) => {
-  const [api, setApi] = useState<ExcalidrawImperativeAPI>()
+  const [api, setApi] = useState<ExcalidrawImperativeAPI>();
+
+  if (!id) id = src;
 
   const debounce = (func: Function, timeout = 300) => {
     let timer: NodeJS.Timeout;
@@ -73,11 +77,10 @@ export const HyperbookExcalidraw: FC<HyperbookExcalidrawProps> = ({
       api?.updateScene({
         appState: { theme: "light" },
       });
-
     }
-  }
+  };
   const colorSchemeQueryList = window.matchMedia(
-    "(prefers-color-scheme: dark)",
+    "(prefers-color-scheme: dark)"
   );
 
   useEffect(() => {
@@ -85,10 +88,8 @@ export const HyperbookExcalidraw: FC<HyperbookExcalidrawProps> = ({
 
     return () => {
       colorSchemeQueryList.removeEventListener("change", updateTheme);
-    }
-
-  }, [api])
-
+    };
+  }, [api]);
 
   useEffect(() => {
     if (autoZoom) {
@@ -115,28 +116,55 @@ export const HyperbookExcalidraw: FC<HyperbookExcalidrawProps> = ({
         }
       }
     },
-    [],
+    []
   );
 
   const loadData = async (): Promise<ExcalidrawInitialDataState> => {
-    return fetch(src).then(res => res.json()).then(data => ({
-      ...data,
-      scrollToContent: autoZoom,
-      appState: {
-        ...data?.appState,
-        collaborators: [],
-        theme: colorSchemeQueryList.matches ? "dark" : "light"
+    if (edit && id) {
+      const store = (window as any).store;
+      const result = await store.excalidraw.get(id);
+      if (result) {
+        return {
+          ...result,
+          scrollToContent: autoZoom,
+          appState: {
+            ...result?.appState,
+            collaborators: [],
+            theme: colorSchemeQueryList.matches ? "dark" : "light",
+          },
+        };
       }
-    })).catch(() => ({}))
-  }
+    }
+
+    return fetch(src)
+      .then((res) => res.json())
+      .then((data) => ({
+        ...data,
+        scrollToContent: autoZoom,
+        appState: {
+          ...data?.appState,
+          collaborators: [],
+          theme: colorSchemeQueryList.matches ? "dark" : "light",
+        },
+      }))
+      .catch(() => ({}));
+  };
+
+  const handleChange: EDP["onChange"] = async (elements, state, files) => {
+    if (edit && id) {
+      const store = (window as any).store;
+      store.excalidraw.put({ id, elements, state, files });
+    }
+  };
 
   return (
     <Excalidraw
-      excalidrawAPI={api => setApi(api)}
+      excalidrawAPI={(api) => setApi(api)}
       langCode={lang}
       onLinkOpen={handleLinkOpen}
       initialData={loadData()}
       viewModeEnabled={!edit}
+      onChange={handleChange}
     />
   );
 };

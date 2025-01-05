@@ -4,6 +4,7 @@ import { Heading } from "mdast";
 import { HyperbookContext } from "@hyperbook/types";
 import { VFile } from "vfile";
 import { toString } from "mdast-util-to-string";
+import { i18n } from "./i18n";
 
 const customHeading = (node: Heading) => {
   let lastChild = node.children[node.children.length - 1];
@@ -98,7 +99,7 @@ export default ({
             properties: {
               class: "bookmark",
               onclick: `hyperbook.toggleBookmark("${key}", "${label}")`,
-              title: "Bookmark",
+              title: i18n.get("toggle-bookmark"),
               "data-key": key,
             },
             children: [

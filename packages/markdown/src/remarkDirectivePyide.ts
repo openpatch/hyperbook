@@ -18,6 +18,7 @@ import { toText } from "./mdastUtilToText";
 import hash from "./objectHash";
 import { Code } from "mdast-util-from-markdown/lib";
 import { ElementContent } from "hast";
+import { i18n } from "./i18n";
 
 export default (ctx: HyperbookContext) => () => {
   const name = "pyide";
@@ -27,7 +28,7 @@ export default (ctx: HyperbookContext) => () => {
         if (node.name !== name) return;
 
         const data = node.data || (node.data = {});
-        const { src = "", id } = node.attributes || {};
+        const { src = "", id = hash(node) } = node.attributes || {};
 
         expectContainerDirective(node, file, name);
         registerDirective(file, name, ["client.js"], ["style.css"]);
@@ -53,18 +54,21 @@ export default (ctx: HyperbookContext) => () => {
           tests = node.children
             .filter((c) => c.type === "code")
             .filter((c) => (c as Code).meta?.includes("test"))
-            .map((c,i) => ({
+            .map((c, i) => ({
               code: (c as Code).value,
-              name: `${i}`
+              name: `${i}`,
             }));
           input = toText(
             node.children.find(
               (c) => c.type === "code" && c.lang === "input"
             ) as Code
-          )
+          );
           srcFile = toText(
             node.children.find(
-              (c) => c.type === "code" && c.lang === "python" && !(c as Code).meta?.includes("test")
+              (c) =>
+                c.type === "code" &&
+                c.lang === "python" &&
+                !(c as Code).meta?.includes("test")
             ) as Code
           );
         }
@@ -72,7 +76,7 @@ export default (ctx: HyperbookContext) => () => {
         data.hName = "div";
         data.hProperties = {
           class: "directive-pyide",
-          id: id || hash(node),
+          id: id,
           "data-tests": Buffer.from(JSON.stringify(tests)).toString("base64"),
         };
         data.hChildren = [
@@ -99,7 +103,7 @@ export default (ctx: HyperbookContext) => () => {
                     children: [
                       {
                         type: "text",
-                        value: "Output",
+                        value: i18n.get("pyide-output"),
                       },
                     ],
                   },
@@ -112,7 +116,7 @@ export default (ctx: HyperbookContext) => () => {
                     children: [
                       {
                         type: "text",
-                        value: "Input",
+                        value: i18n.get("pyide-input"),
                       },
                     ],
                   },
@@ -132,10 +136,12 @@ export default (ctx: HyperbookContext) => () => {
                 properties: {
                   class: "input hidden",
                 },
-                children: [{
-                  type: "raw",
-                  value: input || ""
-                }],
+                children: [
+                  {
+                    type: "raw",
+                    value: input || "",
+                  },
+                ],
               },
             ],
           },
@@ -162,7 +168,7 @@ export default (ctx: HyperbookContext) => () => {
                     children: [
                       {
                         type: "text",
-                        value: "Run",
+                        value: i18n.get("pyide-run"),
                       },
                     ],
                   },
@@ -177,7 +183,7 @@ export default (ctx: HyperbookContext) => () => {
                           children: [
                             {
                               type: "text",
-                              value: "Test",
+                              value: i18n.get("pyide-test"),
                             },
                           ],
                         } as ElementContent,
@@ -197,6 +203,54 @@ export default (ctx: HyperbookContext) => () => {
                   {
                     type: "raw",
                     value: srcFile,
+                  },
+                ],
+              },
+              {
+                type: "element",
+                tagName: "div",
+                properties: {
+                  class: "buttons bottom",
+                },
+                children: [
+                  {
+                    type: "element",
+                    tagName: "button",
+                    properties: {
+                      class: "reset",
+                    },
+                    children: [
+                      {
+                        type: "text",
+                        value: i18n.get("pyide-reset"),
+                      },
+                    ],
+                  },
+                  {
+                    type: "element",
+                    tagName: "button",
+                    properties: {
+                      class: "copy",
+                    },
+                    children: [
+                      {
+                        type: "text",
+                        value: i18n.get("pyide-copy"),
+                      },
+                    ],
+                  },
+                  {
+                    type: "element",
+                    tagName: "button",
+                    properties: {
+                      class: "download",
+                    },
+                    children: [
+                      {
+                        type: "text",
+                        value: i18n.get("pyide-download"),
+                      },
+                    ],
                   },
                 ],
               },

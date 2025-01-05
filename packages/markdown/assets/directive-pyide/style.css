@@ -50,9 +50,6 @@
 .directive-pyide .editor {
   width: 100%;
   border: 1px solid var(--color-spacer);
-  border-radius: 8px;
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
   flex: 1;
 }
 
@@ -63,6 +60,14 @@
   border-bottom: none;
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
+}
+
+.directive-pyide .buttons.bottom {
+  border: 1px solid var(--color-spacer);
+  border-radius: 8px;
+  border-top: none;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
 }
 
 .directive-pyide .test-heading {

@@ -51,6 +51,7 @@ import remarkCollectSearchDocuments from "./remarkCollectSearchDocuments";
 import remarkDirectiveGeogebra from "./remarkDirectiveGeogebra";
 import remarkDirectiveAbcMusic from "./remarkDirectiveAbcMusic";
 import remarkDirectivePyide from "./remarkDirectivePyide";
+import { i18n } from "./i18n";
 
 export const remark = (ctx: HyperbookContext) => {
   const remarkPlugins: PluggableList = [
@@ -130,6 +131,7 @@ export const remark = (ctx: HyperbookContext) => {
 };
 
 export const process = (md: string, ctx: HyperbookContext) => {
+  i18n.init(ctx.config.language || "en");
   return remark(ctx)
     .use(rehypeShell(ctx))
     .use(rehypeHtmlStructure(ctx))

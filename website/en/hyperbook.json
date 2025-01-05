@@ -1,6 +1,7 @@
 {
   "name": "Hyperbook Documentation",
   "qrcode": true,
+  "importExport": true,
   "search": true,
   "description": "Documentation for Hyperbook created with Hyperbook",
   "author": {

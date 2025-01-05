@@ -37,6 +37,33 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 
 ::::
 -->
+## v0.47.0
+
+::::tabs
+
+:::tab{title="New :rocket:" id="new"}
+
+- Save every state of the hyperbook and make it available for download. To enable this feature, set `importExport` to `true` in the configuration file. The buttons for importing and exporting will be at the bottom of the page. The state of the hyperbook will be saved as a JSON file. The file can be imported again to restore the state of the hyperbook. 
+- The code of the editor for the elements P5, Pyide, ABC-Music can now be copied, download or resetted.
+- Add i18n support. Currently, only `en` and `de` are supported. You need to set the `language` in the configuration file. [Learn more](/configuration/book) 
+    - If you want to contribute a new language, please create a pull-request and add a new locale in `packages/markdown/locales`.
+
+:::
+
+::::
+
+## v0.46.1
+
+::::tabs
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+- Resolved an issue where interactive elements failed to initialize correctly after being revealed within the protect element.
+- Fixed an issue where collapsibles with the same ID were not synchronized.
+
+:::
+
+::::
 
 ## v0.46.0
 

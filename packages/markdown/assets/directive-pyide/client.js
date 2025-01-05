@@ -22,11 +22,6 @@ hyperbook.python = (function () {
   let stdinBuffer;
   if (window.crossOriginIsolated) {
     interruptBuffer = new Uint8Array(new SharedArrayBuffer(1));
-    stdinBuffer = new Int32Array(new SharedArrayBuffer(1024));
-    pyodideWorker.postMessage({
-      type: "setStdinBuffer",
-      payload: { stdinBuffer },
-    });
     pyodideWorker.postMessage({
       type: "setInterruptBuffer",
       payload: { interruptBuffer },
@@ -65,16 +60,27 @@ hyperbook.python = (function () {
   }
 
   const updateRunning = (id, type) => {
+    const elems = document.getElementsByClassName("directive-pyide");
     for (let elem of elems) {
       const run = elem.getElementsByClassName("run")[0];
       const test = elem.getElementsByClassName("test")[0];
       if (callback) {
         if (elem.id === id && type === "run") {
-          run.textContent = "Running (Click to stop) ...";
-          run.addEventListener("click", interruptExecution);
+          if (window.crossOriginIsolated) {
+            run.textContent = i18n.get("pyide-running-click-to-stop");
+            run.addEventListener("click", interruptExecution);
+          } else {
+            run.textContent = i18n.get("pyide-running-refresh-to-stop");
+            run.addEventListener("click", () => window.location.reload());
+          }
         } else if (test && elem.id === id && type === "test") {
-          test.textContent = "Testing (Click to stop) ...";
-          test.addEventListener("click", interruptExecution);
+          if (window.crossOriginIsolated) {
+            test.textContent = i18n.get("pyide-testing-click-to-stop");
+            test.addEventListener("click", interruptExecution);
+          } else {
+            test.textContent = i18n.get("pyide-testing-refresh-to-stop");
+            test.addEventListener("click", () => window.location.reload());
+          }
         } else {
           run.classList.add("running");
           run.disabled = true;
@@ -85,12 +91,12 @@ hyperbook.python = (function () {
         }
       } else {
         run.classList.remove("running");
-        run.textContent = "Run";
+        run.textContent = i18n.get("pyide-run");
         run.disabled = false;
         run.removeEventListener("click", interruptExecution);
         if (test) {
           test.classList.remove("running");
-          test.textContent = "Test";
+          test.textContent = i18n.get("pyide-test");
           test.disabled = false;
           test.removeEventListener("click", interruptExecution);
         }
@@ -121,55 +127,120 @@ hyperbook.python = (function () {
     }
   };
 
-  const elems = document.getElementsByClassName("directive-pyide");
+  const init = (root) => {
+    const elems = root.getElementsByClassName("directive-pyide");
 
-  for (let elem of elems) {
-    const editor = elem.getElementsByClassName("editor")[0];
-    const run = elem.getElementsByClassName("run")[0];
-    const test = elem.getElementsByClassName("test")[0];
-    const output = elem.getElementsByClassName("output")[0];
-    const input = elem.getElementsByClassName("input")[0];
-    const outputBtn = elem.getElementsByClassName("output-btn")[0];
-    const inputBtn = elem.getElementsByClassName("input-btn")[0];
-    const id = elem.id;
-    let tests = [];
-    try {
-      tests = JSON.parse(atob(elem.getAttribute("data-tests")));
-    } catch (e) {}
+    for (let elem of elems) {
+      const editor = elem.getElementsByClassName("editor")[0];
+      const run = elem.getElementsByClassName("run")[0];
+      const test = elem.getElementsByClassName("test")[0];
+      const output = elem.getElementsByClassName("output")[0];
+      const input = elem.getElementsByClassName("input")[0];
+      const outputBtn = elem.getElementsByClassName("output-btn")[0];
+      const inputBtn = elem.getElementsByClassName("input-btn")[0];
 
-    function showInput() {
-      outputBtn.classList.remove("active");
-      inputBtn.classList.add("active");
-      output.classList.add("hidden");
-      input.classList.remove("hidden");
-    }
-    function showOutput() {
-      outputBtn.classList.add("active");
-      inputBtn.classList.remove("active");
-      output.classList.remove("hidden");
-      input.classList.add("hidden");
-    }
+      const copyEl = elem.getElementsByClassName("copy")[0];
+      const resetEl = elem.getElementsByClassName("reset")[0];
+      const downloadEl = elem.getElementsByClassName("download")[0];
 
-    outputBtn?.addEventListener("click", showOutput);
-    inputBtn?.addEventListener("click", showInput);
+      const id = elem.id;
 
-    test?.addEventListener("click", async () => {
-      showOutput();
-      if (callback) return;
+      copyEl?.addEventListener("click", async () => {
+        try {
+          await navigator.clipboard.writeText(editor.value);
+        } catch (error) {
+          console.error(error.message);
+        }
+      });
 
-      output.innerHTML = "";
+      resetEl?.addEventListener("click", () => {
+        store.pyide.delete(id);
+        window.location.reload();
+      });
 
-      const script = editor.value;
-      for (let test of tests) {
-        const testCode = test.code.replace("#SCRIPT#", script);
+      downloadEl?.addEventListener("click", () => {
+        const a = document.createElement("a");
+        const blob = new Blob([editor.value], { type: "text/plain" });
+        a.href = URL.createObjectURL(blob);
+        a.download = `script-${id}.py`;
+        a.click();
+      });
+      let tests = [];
+      try {
+        tests = JSON.parse(atob(elem.getAttribute("data-tests")));
+      } catch (e) {}
 
-        const heading = document.createElement("div");
-        console.log(test);
-        heading.innerHTML = `== Test ${test.name} ==`;
-        heading.classList.add("test-heading");
-        output.appendChild(heading);
+      function showInput() {
+        outputBtn.classList.remove("active");
+        inputBtn.classList.add("active");
+        output.classList.add("hidden");
+        input.classList.remove("hidden");
+      }
+      function showOutput() {
+        outputBtn.classList.add("active");
+        inputBtn.classList.remove("active");
+        output.classList.remove("hidden");
+        input.classList.add("hidden");
+      }
 
-        await asyncRun(id, "test")(testCode, {})
+      outputBtn?.addEventListener("click", showOutput);
+      inputBtn?.addEventListener("click", showInput);
+
+      editor.addEventListener("code-input_load", async () => {
+        const result = await store.pyide.get(id);
+        if (result) {
+          editor.value = result.script;
+        }
+      });
+
+      editor.addEventListener("input", () => {
+        store.pyide.put({ id, script: editor.value });
+      });
+
+      test?.addEventListener("click", async () => {
+        showOutput();
+        if (callback) return;
+
+        output.innerHTML = "";
+
+        const script = editor.value;
+        for (let test of tests) {
+          const testCode = test.code.replace("#SCRIPT#", script);
+
+          const heading = document.createElement("div");
+          console.log(test);
+          heading.innerHTML = `== Test ${test.name} ==`;
+          heading.classList.add("test-heading");
+          output.appendChild(heading);
+
+          await asyncRun(id, "test")(testCode, {})
+            .then(({ results, error }) => {
+              if (results) {
+                output.textContent += results;
+              } else if (error) {
+                output.textContent += error;
+              }
+              callback = null;
+              updateRunning(id, "test");
+            })
+            .catch((e) => {
+              output.textContent = `Error: ${e}`;
+              console.log(e);
+              callback = null;
+              updateRunning(id, "test");
+            });
+        }
+      });
+
+      run?.addEventListener("click", async () => {
+        showOutput();
+        if (callback) return;
+
+        const script = editor.value;
+        output.innerHTML = "";
+        asyncRun(id, "run")(script, {
+          inputs: input.value.split("\n"),
+        })
           .then(({ results, error }) => {
             if (results) {
               output.textContent += results;
@@ -177,41 +248,33 @@ hyperbook.python = (function () {
               output.textContent += error;
             }
             callback = null;
-            updateRunning(id, "test");
+            updateRunning(id, "run");
           })
           .catch((e) => {
             output.textContent = `Error: ${e}`;
             console.log(e);
             callback = null;
-            updateRunning(id, "test");
+            updateRunning(id, "run");
           });
+      });
+    }
+  };
+
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      if (mutation.addedNodes.length) {
+        mutation.addedNodes.forEach((node) => {
+          if (node.type === 1 && node.classList?.contains("directive-pyide")) {
+            init(node);
+          }
+        });
       }
     });
+  });
 
-    run?.addEventListener("click", async () => {
-      showOutput();
-      if (callback) return;
+  observer.observe(document.body, { childList: true, subtree: true });
 
-      const script = editor.value;
-      output.innerHTML = "";
-      asyncRun(id, "run")(script, {
-        inputs: input.value.split("\n"),
-      })
-        .then(({ results, error }) => {
-          if (results) {
-            output.textContent += results;
-          } else if (error) {
-            output.textContent += error;
-          }
-          callback = null;
-          updateRunning(id, "run");
-        })
-        .catch((e) => {
-          output.textContent = `Error: ${e}`;
-          console.log(e);
-          callback = null;
-          updateRunning(id, "run");
-        });
-    });
-  }
+  document.addEventListener("DOMContentLoaded", () => {
+    init(document);
+  });
 })();

@@ -52,7 +52,7 @@ export default (ctx: HyperbookContext) => () => {
         if (node.name !== name) return;
 
         const data = node.data || (node.data = {});
-        const { title = "" } = node.data.hProperties || {};
+        const { title = "", id } = node.data.hProperties || {};
 
         expectContainerDirective(node, file, name);
         registerDirective(file, name, [], ["style.css"]);
@@ -61,6 +61,7 @@ export default (ctx: HyperbookContext) => () => {
         data.hName = "div";
         data.hProperties = {
           class: "directive-collapsible",
+          "data-id": id,
         };
         const children = (toHast(node) as Element)?.children.flatMap(
           transformCollapsible,
