@@ -1,5 +1,12 @@
 # @hyperbook/element-excalidraw
 
+## 0.3.0
+
+### Minor Changes
+
+- [`b5a41e0`](https://github.com/openpatch/hyperbook/commit/b5a41e00a014a77dd13a5e8d13009c5c2462cb15) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - - Save every state of the hyperbook and make it available for download. To enable this feature, set `importExport` to `true` in the configuration file. The buttons for importing and exporting will be at the bottom of the page. The state of the hyperbook will be saved as a JSON file. The file can be imported again to restore the state of the hyperbook.
+  - The code of the editor for the elements P5, Pyide, ABC-Music can now be copied, download or resetted.
+
 ## 0.2.1
 
 ### Patch Changes
