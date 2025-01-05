@@ -71,6 +71,7 @@ hyperbook.python = (function () {
             run.addEventListener("click", interruptExecution);
           } else {
             run.textContent = i18n.get("pyide-running-refresh-to-stop");
+
             run.addEventListener("click", () => window.location.reload());
           }
         } else if (test && elem.id === id && type === "test") {

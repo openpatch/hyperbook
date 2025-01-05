@@ -1,5 +1,12 @@
 # @hyperbook/markdown
 
+## 0.22.1
+
+### Patch Changes
+
+- [`2ed165e`](https://github.com/openpatch/hyperbook/commit/2ed165ef62341d7dd4fa073a4f913dd352da809e) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix bug when protecting an interactive element. Now the elements are initialized after being reveled.
+  Fix that collapsibles with the same id were not synced.
+
 ## 0.22.0
 
 ### Minor Changes

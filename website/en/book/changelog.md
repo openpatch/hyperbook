@@ -65,6 +65,19 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 
 ::::
 
+## v0.46.1
+
+::::tabs
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+- Resolved an issue where interactive elements failed to initialize correctly after being revealed within the protect element.
+- Fixed an issue where collapsibles with the same ID were not synchronized.
+
+:::
+
+::::
+
 ## v0.46.0
 
 ::::tabs
