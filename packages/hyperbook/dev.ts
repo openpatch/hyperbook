@@ -28,7 +28,7 @@ export async function runDev({ port = 8080 }: { port: number }): Promise<void> {
     }
 
     // Special Case: GET '/client.js'
-    if (request.url === "/client.js") {
+    if (request.url === "/__hyperbook_dev.js") {
       const responseBody = `
 const socket = new WebSocket("ws://localhost:${port}");
 socket.addEventListener("message", (event) => {
@@ -81,7 +81,7 @@ socket.addEventListener("message", (event) => {
         responseBody = Buffer.from(
           responseBody
             .toString()
-            .replace("</body>", '<script src="/client.js"></script></body>'),
+            .replace(/(<\/body>)(?![\s\S]*\1)/, '<script src="/__hyperbook_dev.js"></script></body>'),
         );
       }
 
