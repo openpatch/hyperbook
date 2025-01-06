@@ -1,5 +1,11 @@
 # @hyperbook/markdown
 
+## 0.23.1
+
+### Patch Changes
+
+- [`e46f8ae`](https://github.com/openpatch/hyperbook/commit/e46f8ae9fce8915a08de3f3c5a880dbe1bfa1150) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix reload listener not being remove in pyide
+
 ## 0.23.0
 
 ### Minor Changes

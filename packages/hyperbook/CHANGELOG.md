@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.47.1
+
+### Patch Changes
+
+- [`78ccf8c`](https://github.com/openpatch/hyperbook/commit/78ccf8cde8f49804673183eb65df771616ac4a84) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix devserver injecting reload script at the wrong place.
+
 ## 0.47.0
 
 ### Minor Changes
