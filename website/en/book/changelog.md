@@ -37,6 +37,20 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 
 ::::
 -->
+
+## v0.47.1
+
+::::tabs
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+- Development server injected the reload script at the wrong place, if there was an additional body tag. Thus, leading to unwanted behavior e.g. for the p5-element.
+- Pyide: The event listener for the run button was not removed, which lead to refreshing the page when the run button was clicked multiple times.
+
+:::
+
+::::
+
 ## v0.47.0
 
 ::::tabs

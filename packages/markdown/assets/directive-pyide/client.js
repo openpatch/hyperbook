@@ -59,6 +59,10 @@ hyperbook.python = (function () {
     interruptBuffer[0] = 2;
   }
 
+  function reload() {
+    window.location.reload();
+  }
+
   const updateRunning = (id, type) => {
     const elems = document.getElementsByClassName("directive-pyide");
     for (let elem of elems) {
@@ -72,7 +76,7 @@ hyperbook.python = (function () {
           } else {
             run.textContent = i18n.get("pyide-running-refresh-to-stop");
 
-            run.addEventListener("click", () => window.location.reload());
+            run.addEventListener("click", reload);
           }
         } else if (test && elem.id === id && type === "test") {
           if (window.crossOriginIsolated) {
@@ -80,7 +84,7 @@ hyperbook.python = (function () {
             test.addEventListener("click", interruptExecution);
           } else {
             test.textContent = i18n.get("pyide-testing-refresh-to-stop");
-            test.addEventListener("click", () => window.location.reload());
+            test.addEventListener("click", reload);
           }
         } else {
           run.classList.add("running");
@@ -95,11 +99,13 @@ hyperbook.python = (function () {
         run.textContent = i18n.get("pyide-run");
         run.disabled = false;
         run.removeEventListener("click", interruptExecution);
+        run.removeEventListener("click", reload);
         if (test) {
           test.classList.remove("running");
           test.textContent = i18n.get("pyide-test");
           test.disabled = false;
           test.removeEventListener("click", interruptExecution);
+          test.removeEventListener("click", reload);
         }
       }
     }
