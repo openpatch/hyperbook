@@ -1,9 +1,19 @@
 hyperbook.mermaid = (function () {
   const elementCode = ".directive-mermaid";
 
-  const loadMermaid = function (theme) {
-    window.mermaid.initialize({ theme });
-    window.mermaid.init({ theme }, document.querySelectorAll(elementCode));
+  const loadMermaid = async function (theme) {
+    window.mermaid.initialize({ theme, startOnLoad: false });
+    let i = 0;
+    for (const el of document.querySelectorAll(elementCode)) {
+      if (el.getAttribute("data-processed")) return;
+
+      el.setAttribute("data-processed", true);
+      let id = `graph-` + Date.now() + i++;
+
+      mermaid.render(id, el.innerText).then(({ svg }) => {
+        el.innerHTML = svg;
+      });
+    }
   };
 
   const resetProcessed = function () {

@@ -12,16 +12,29 @@ import {
   registerDirective,
 } from "./remarkHelper";
 import { toHast } from "mdast-util-to-hast";
-import {remark} from "./process";
+import { remark } from "./process";
 import hash from "./objectHash";
 import remarkGemoji from "remark-gemoji";
+import { Processor } from "unified";
+import { LeafDirective, TextDirective } from "mdast-util-directive/lib";
+import { ContainerDirective } from "mdast-util-directive";
 
-export default (ctx: HyperbookContext) => () => {
-  return (tree: Root, file: VFile) => {
-    visit(tree, function (node) {
-      if (isDirective(node)) {
-        if (node.name !== "tabs") return;
+export default function (ctx: HyperbookContext) {
+  return function (this: Processor) {
+    const self = this;
+    return async (tree: Root, file: VFile) => {
+      const tabsNodes: (TextDirective | ContainerDirective | LeafDirective)[] =
+        [];
+      visit(tree, function (node) {
+        if (isDirective(node)) {
+          if (node.name !== "tabs") return;
 
+          tabsNodes.push(node);
+          return;
+        }
+      });
+
+      for (const node of tabsNodes) {
         const data = node.data || (node.data = {});
 
         if (node.name === "tabs") {
@@ -44,14 +57,19 @@ export default (ctx: HyperbookContext) => () => {
           const tabTitleElements: Element[] = [];
 
           let first = true;
-          node.children.filter(isDirective).forEach((node) => {
-            expectContainerDirective(node, file, "tab");
-            let { title = "", id: tabId = hash(node) } = node.attributes || {};
+
+          for (const tabNode of node.children.filter(isDirective)) {
+            expectContainerDirective(tabNode, file, "tab");
+            let { title = "", id: tabId = hash(tabNode) } = tabNode.attributes || {};
 
             let tree = remark(ctx).parse(title as string);
             remarkGemoji()(tree);
             let hastTree = toHast(tree);
-            if (hastTree.type === "root" && hastTree.children[0]?.type === "element" && hastTree.children[0]?.tagName === "p") {
+            if (
+              hastTree.type === "root" &&
+              hastTree.children[0]?.type === "element" &&
+              hastTree.children[0]?.tagName === "p"
+            ) {
               hastTree = hastTree.children[0];
               hastTree.tagName = "span";
             }
@@ -66,6 +84,7 @@ export default (ctx: HyperbookContext) => () => {
               children: (hastTree as Element).children || [],
             });
 
+            const tabContent = await remark(ctx).run(tabNode);
             tabContentElements.push({
               type: "element",
               tagName: "div",
@@ -74,11 +93,12 @@ export default (ctx: HyperbookContext) => () => {
                 "data-tab-id": tabId,
                 "data-tabs-id": tabsId,
               },
-              children: (toHast(node) as Element)?.children,
+              children: [tabContent],
             });
 
             first = false;
-          });
+          }
+
           data.hChildren = [
             {
               type: "element",
@@ -93,6 +113,6 @@ export default (ctx: HyperbookContext) => () => {
           ];
         }
       }
-    });
+    };
   };
-};
+}

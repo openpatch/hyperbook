@@ -10,7 +10,7 @@ import remarkDirectiveRehype from "remark-directive-rehype";
 import { ctx } from "./mock";
 import remarkDirectiveCollapsible from "../src/remarkDirectiveCollapsible";
 
-export const toHtml = (md: string, ctx: HyperbookContext) => {
+export const toHtml = async (md: string, ctx: HyperbookContext) => {
   const remarkPlugins: PluggableList = [
     remarkDirective,
     remarkDirectiveRehype,
@@ -26,14 +26,15 @@ export const toHtml = (md: string, ctx: HyperbookContext) => {
       allowDangerousCharacters: true,
       allowDangerousHtml: true,
     })
-    .processSync(md);
+    .process(md);
 };
 
 describe("remarkDirectiveCollapsible", () => {
   it("should transform", async () => {
     expect(
-      toHtml(
-        `
+      (
+        await toHtml(
+          `
 ::::collapsible{title="Hallo"}
 
 This is a panel
@@ -58,14 +59,16 @@ This is normal Test in-between.
 
 ::::
 `,
-        ctx,
-      ).value,
+          ctx
+        )
+      ).value
     ).toMatchSnapshot();
   });
   it("should register directives", async () => {
     expect(
-      toHtml(
-        `
+      (
+        await toHtml(
+          `
 :::collapsible{title="Nested"}
 
 This is a stacked collapsible
@@ -74,8 +77,9 @@ This is a stacked collapsible
 
 :::
 `,
-        ctx,
-      ).data.directives?.["collapsible"],
+          ctx
+        )
+      ).data.directives?.["collapsible"]
     ).toBeDefined();
   });
 });

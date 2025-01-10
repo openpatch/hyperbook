@@ -1,88 +1,72 @@
 # Test Site
 
-:::pyide
+:::alert
 
-```input
-test
-bla
-```
-
-```python test
-a = 5
-_i = -1
-_values = ["test", "bla"]
-def input():
-    global _i
-    global _values
-    _i += 1
-    return _values[_i]
-#SCRIPT#
-if a == 5:
-    print("a is 5")
-else:
-    print("a is not 5")
-```
-
-```python test
-a = 5
-_i = -1
-_values = ["test", "bla"]
-def input():
-    global _i
-    global _values
-    _i += 1
-    return _values[_i]
-#SCRIPT#
-if a == 5:
-    print("a is 7")
-else:
-    print("a is not 7")
-```
-
-```python
-a += 2
-print(a)
-print(input())
+```mermaid
+classDiagram
+    Animal <|-- Duk
+    Animal <|-- Fish
+    Animal <|-- Zebra
+    Animal : +int age
+    Animal : +String gender
+    Animal: +isMammal()
+    Animal: +mate()
+    class Duck{
+      +String beakColor
+      +swim()
+      +quack()
+    }
+    class Fish{
+      -int sizeInFeet
+      -canEat()
+    }
+    class Zebra{
+      +bool is_wild
+      +run()
+    }
 ```
 
 :::
 
+::::::tabs{id="771225"}
 
-:::pyide
+:::::tab{title="Tab 1 :rocket:" id="008436"}
 
-```python test
-#SCRIPT#
-r = check_palindrom("uhu")
-if r:
-    print("Pass")
-else:
-    print("Fail")
+
+::::tabs{id="633243"}
+
+:::tab{title="Tab 1" id="339398"}
+
+```mermaid
+classDiagram
+    Animal <|-- Duck
+    Animal <|-- Fish
+    Animal <|-- Zebra
+    Animal : +int age
+    Animal : +String gender
+    Animal: +isMammal()
+    Animal: +mate()
+    class Duck{
+      +String beakColor
+      +swim()
+      +quack()
+    }
+    class Fish{
+      -int sizeInFeet
+      -canEat()
+    }
+    class Zebra{
+      +bool is_wild
+      +run()
+    }
 ```
 
-```python test
-#SCRIPT#
-r = check_palindrom("test")
-if not r:
-    print("Pass")
-else:
-    print("Fail")
-```
-
-```python
-def check_palindrom(s):
-    return True
-```
 
 :::
 
-:::pyide
+::::
 
 
-```python
-import numpy as np
+:::::
 
-a = np.arange(15).reshape(3, 5)
-print(a)
-```
-
-:::
+:::::::

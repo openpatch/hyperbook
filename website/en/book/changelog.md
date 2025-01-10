@@ -38,6 +38,18 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.47.2
+
+::::tabs
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+- Fix tabs and collapsibles not rendering hyperbook elements.
+
+:::
+
+::::
+
 ## v0.47.1
 
 ::::tabs

@@ -10,7 +10,7 @@ import remarkDirectiveRehype from "remark-directive-rehype";
 import remarkDirectiveTabs from "../src/remarkDirectiveTabs";
 import { ctx } from "./mock";
 
-export const toHtml = (md: string, ctx: HyperbookContext) => {
+export const toHtml = async (md: string, ctx: HyperbookContext) => {
   const remarkPlugins: PluggableList = [
     remarkDirective,
     remarkDirectiveRehype,
@@ -26,14 +26,15 @@ export const toHtml = (md: string, ctx: HyperbookContext) => {
       allowDangerousCharacters: true,
       allowDangerousHtml: true,
     })
-    .processSync(md);
+    .process(md);
 };
 
 describe("remarkDirectiveTabs", () => {
   it("should transform", async () => {
     expect(
-      toHtml(
-        `::::tabs{id="code"}
+      (
+        await toHtml(
+          `::::tabs{id="code"}
 :::tab{title="Java" id="java"}
 Java
 :::
@@ -54,14 +55,16 @@ C
 :::
 ::::
 `,
-        ctx,
-      ).value,
+          ctx
+        )
+      ).value
     ).toMatchSnapshot();
   });
   it("should register directives", async () => {
     expect(
-      toHtml(
-        `::::tabs{id="code"}
+      (
+        await toHtml(
+          `::::tabs{id="code"}
 :::tab{title="Java" id="java"}
 Java
 :::
@@ -82,8 +85,9 @@ C
 :::
 ::::
 `,
-        ctx,
-      ).data.directives?.["tabs"],
+          ctx
+        )
+      ).data.directives?.["tabs"]
     ).toBeDefined();
   });
 });

@@ -176,28 +176,40 @@ HYPERBOOK_ASSETS = "/assets/"
   <div class="directive-tabs">
     <div class="tabs" data-tabs-id="code"><button data-tab-id="java" data-tabs-id="code" class="tab active">Java</button><button data-tab-id="python" data-tabs-id="code" class="tab">Python</button></div>
     <div class="tabpanel active" data-tab-id="java" data-tabs-id="code">
-      <p>Java</p>
+      <tab title="Java" id="java">
+        <p>Java</p>
+      </tab>
     </div>
     <div class="tabpanel" data-tab-id="python" data-tabs-id="code">
-      <p>Python</p>
+      <tab title="Python" id="python">
+        <p>Python</p>
+      </tab>
     </div>
   </div>
   <p>Another tabs cluster with the same ids.</p>
   <div class="directive-tabs">
     <div class="tabs" data-tabs-id="code"><button data-tab-id="2990934dbcfd5acd0b539d89a9953b6d79d2f6aa2eef5c9033ee8b9f04795cf7" data-tabs-id="code" class="tab active">Java</button><button data-tab-id="python" data-tabs-id="code" class="tab">Python</button><button data-tab-id="c" data-tabs-id="code" class="tab">C</button><button data-tab-id="c" data-tabs-id="code" class="tab">YouTube</button></div>
     <div class="tabpanel active" data-tab-id="2990934dbcfd5acd0b539d89a9953b6d79d2f6aa2eef5c9033ee8b9f04795cf7" data-tabs-id="code">
-      <p>Java</p>
+      <tab title="Java">
+        <p>Java</p>
+      </tab>
     </div>
     <div class="tabpanel" data-tab-id="python" data-tabs-id="code">
-      <p>Python</p>
+      <tab title="Python" id="python">
+        <p>Python</p>
+      </tab>
     </div>
     <div class="tabpanel" data-tab-id="c" data-tabs-id="code">
-      <p>C</p>
+      <tab title="C" id="c">
+        <p>C</p>
+      </tab>
     </div>
     <div class="tabpanel" data-tab-id="c" data-tabs-id="code">
-      <div class="directive-youtube" id="video-1234">
-        <iframe class="player" src="https://www.youtube.com/embed/1234" frameborder="0" title="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"></iframe>
-      </div>
+      <tab title="YouTube" id="c">
+        <div class="directive-youtube" id="video-1234">
+          <iframe class="player" src="https://www.youtube.com/embed/1234" frameborder="0" title="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"></iframe>
+        </div>
+      </tab>
     </div>
   </div>
 </div>

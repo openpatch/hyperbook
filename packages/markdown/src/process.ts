@@ -97,6 +97,17 @@ export const remark = (ctx: HyperbookContext) => {
     remarkCollectSearchDocuments(ctx),
   ];
 
+  return unified()
+    .use(remarkParse)
+    .use(remarkPlugins)
+    .use(remarkToRehype, {
+      allowDangerousHtml: ctx.config.allowDangerousHtml || false,
+    })
+};
+
+export const process = (md: string, ctx: HyperbookContext) => {
+  i18n.init(ctx.config.language || "en");
+
   const rehypePlugins: PluggableList = [
     rehypeTableOfContents(ctx),
     rehypeQrCode(ctx),
@@ -121,18 +132,8 @@ export const remark = (ctx: HyperbookContext) => {
     rehypeFormat,
   ];
 
-  return unified()
-    .use(remarkParse)
-    .use(remarkPlugins)
-    .use(remarkToRehype, {
-      allowDangerousHtml: ctx.config.allowDangerousHtml || false,
-    })
-    .use(rehypePlugins);
-};
-
-export const process = (md: string, ctx: HyperbookContext) => {
-  i18n.init(ctx.config.language || "en");
   return remark(ctx)
+    .use(rehypePlugins)
     .use(rehypeShell(ctx))
     .use(rehypeHtmlStructure(ctx))
     .use(rehypeStringify, {

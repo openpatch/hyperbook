@@ -5,16 +5,30 @@ exports[`remarkDirectiveCollapsible > should transform 1`] = `
 <div class="directive-collapsible"><button class="collapsible">Hallo</button>
   <div class="collapsible-content">
     <p>This is a panel</p>
-    <audio src="/Free_Test_Data_1MB_MP3.mp3" thumbnail="/group-people.png" title="Hallo" author="Max Mustermann"></audio><button class="collapsible">Nested</button>
-    <div class="collapsible-content">
-      <p>This is a stacked collapsible</p>
-      <youtube id="124">Test</youtube>
+    <div class="directive-audio">
+      <div class="player">
+        <div class="thumbnail" style="background-image: url(&#x22;/public/group-people.png&#x22;)"></div><button class="play" onclick="hyperbook.audio.togglePlayPause(&#x22;f877d1f0ff50bf344794f9bd20e8df025b5189c193d15f71e173a67e3fd0bb78&#x22;)" title="audio-play"></button>
+        <div class="wave" id="f877d1f0ff50bf344794f9bd20e8df025b5189c193d15f71e173a67e3fd0bb78" data-src="/Free_Test_Data_1MB_MP3.mp3"></div>
+      </div>
+      <div class="information"><span class="title">Hallo</span><span class="spacer"> - </span><span class="author">Max Mustermann</span><span class="duration"></span></div>
     </div>
-    <p>This is normal Test in-between.</p><button class="collapsible">With an Image</button>
-    <div class="collapsible-content">
-      <p>
-        <img src="/test.jpg" alt="">
-      </p>
+    <div class="directive-collapsible"><button class="collapsible">Nested</button>
+      <div class="collapsible-content">
+        <p>This is a stacked collapsible</p>
+        <div class="directive-youtube" id="video-124">
+          <iframe class="player" src="https://www.youtube.com/embed/124" frameborder="0" title="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"></iframe>
+        </div>
+      </div>
+    </div>
+    <p>This is normal Test in-between.</p>
+    <div class="directive-collapsible"><button class="collapsible">With an Image</button>
+      <div class="collapsible-content">
+        <p>
+          <figure src="/public/public/test.jpg" alt="" class="normal">
+            <img src="/public/public/test.jpg" alt="" onclick="hyperbook.toggleLightbox(this)">
+          </figure>
+        </p>
+      </div>
     </div>
   </div>
 </div>
