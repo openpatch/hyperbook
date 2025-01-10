@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.47.2
+
+### Patch Changes
+
+- [`8019a88`](https://github.com/openpatch/hyperbook/commit/8019a88ce03f80a8e8a8bbce6671f6589da38442) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix tabs and collapsibles not rendering hyperbook elements
+
 ## 0.47.1
 
 ### Patch Changes
