@@ -29,14 +29,6 @@ export default (ctx: HyperbookContext) => () => {
     "assets"
   );
 
-  const escape = (s: string) => {
-    return s
-      .replace(/&/g, "&amp;")
-      .replace(/"/g, "&quot;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;");
-  };
-
   const wrapSketch = (sketchCode?: string) => {
     if (sketchCode !== "" && !sketchCode?.includes("setup")) {
       return `

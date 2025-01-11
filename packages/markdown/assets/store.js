@@ -23,6 +23,7 @@ store.version(1).stores({
   slideshow: `id,active`,
   tabs: `id,active`,
   excalidraw: `id,excalidrawElements,appState,files`,
+  webide: `id,html,css,js`
 });
 var sqlIdeDB = new Dexie("SQL-IDE");
 sqlIdeDB.version(0.1).stores({

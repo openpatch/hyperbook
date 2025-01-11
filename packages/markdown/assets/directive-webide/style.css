@@ -1,0 +1,125 @@
+.directive-webide {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  margin-bottom: 16px;
+  overflow: hidden;
+  gap: 8px;
+}
+
+code-input {
+  margin: 0;
+}
+
+.directive-webide .container {
+  width: 100%;
+  border: 1px solid var(--color-spacer);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.directive-webide .container-title {
+  border-bottom: 1px solid var(--color-spacer);
+  padding: 8px 16px;
+  padding-left: 0px;
+  overflow: hidden;
+  white-space:nowrap;
+  text-overflow: ellipsis;
+  background-color: var(--color-background);
+  color: var(--color-text);
+}
+
+.directive-webide .container-title::before {
+  content: "";
+  margin-right: 4.4rem;
+  display: inline-block;
+  aspect-ratio: 1 / 1;
+  height: 0.75rem;
+  border-radius: 9999px;
+  opacity: 0.3;
+  box-shadow:
+    0.8em 0,
+    2.2em 0,
+    3.6em 0;
+}
+
+.directive-webide .editor-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  height: 400px;
+}
+
+.directive-webide .editor {
+  width: 100%;
+  border: 1px solid var(--color-spacer);
+  flex: 1;
+}
+
+.directive-webide .editor:not(.active) {
+  display: none;
+}
+
+.directive-webide .buttons {
+  display: flex;
+  border: 1px solid var(--color-spacer);
+  border-radius: 8px;
+  border-bottom: none;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.directive-webide .buttons.bottom {
+  border: 1px solid var(--color-spacer);
+  border-radius: 8px;
+  border-top: none;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+.directive-webide button {
+  flex: 1;
+  padding: 8px 16px;
+  border: none;
+  border-right: 1px solid var(--color-spacer);
+  background-color: var(--color--background);
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.directive-webide button:not(.active) {
+  opacity: 0.6;
+}
+
+.directive-webide .buttons:last-child {
+  border-right: none;
+}
+
+.directive-webide button:hover {
+  background-color: var(--color-spacer);
+}
+
+.directive-webide iframe {
+  border: none;
+  width: 100%;
+  height: 100%;
+  background-color: white;
+}
+
+@media screen and (min-width: 1024px) {
+  .directive-webide:not(.standalone) {
+    flex-direction: row;
+    height: calc(100dvh - 128px);
+    .container {
+      flex: 1;
+      height: 100% !important;
+    }
+
+    .editor-container {
+      flex: 1;
+      height: 100%;
+      overflow: hidden;
+    }
+  }
+}

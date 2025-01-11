@@ -36,5 +36,13 @@
     "slideshow-previous": "Zurück",
     "slideshow-next": "Weiter",
     "slideshow-jump-to": "Springe zu {{index}}",
-    "toggle-bookmark": "Lesezeichen umschalten"
+    "toggle-bookmark": "Lesezeichen umschalten",
+    "webide-code-preview": "Code-Vorschau",
+    "webide-html": "HTML",
+    "webide-css": "CSS",
+    "webide-js": "JS",
+    "webide-reset": "Zurücksetzen",
+    "webide-reset-prompt": "Sind Sie sicher, dass Sie den Code zurücksetzen möchten?",
+    "webide-copy": "Kopieren",
+    "webide-download": "Herunterladen"
 }

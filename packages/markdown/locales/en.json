@@ -36,5 +36,13 @@
     "slideshow-previous": "Previous",
     "slideshow-next": "Next",
     "slideshow-jump-to": "Jump to {{index}}",
-    "toggle-bookmark": "Toggle Bookmark"
+    "toggle-bookmark": "Toggle Bookmark",
+    "webide-code-preview": "Code Preview",
+    "webide-html": "HTML",
+    "webide-css": "CSS",
+    "webide-js": "JS",
+    "webide-reset": "Reset",
+    "webide-reset-prompt": "Are you sure you want to reset the code?",
+    "webide-copy": "Copy",
+    "webide-download": "Download"
 }

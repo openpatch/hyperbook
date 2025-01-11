@@ -52,6 +52,7 @@ import remarkDirectiveGeogebra from "./remarkDirectiveGeogebra";
 import remarkDirectiveAbcMusic from "./remarkDirectiveAbcMusic";
 import remarkDirectivePyide from "./remarkDirectivePyide";
 import { i18n } from "./i18n";
+import remarkDirectiveWebide from "./remarkDirectiveWebide";
 
 export const remark = (ctx: HyperbookContext) => {
   const remarkPlugins: PluggableList = [
@@ -88,6 +89,7 @@ export const remark = (ctx: HyperbookContext) => {
     remarkDirectiveExcalidraw(ctx),
     remarkDirectiveStruktog(ctx),
     remarkDirectiveGeogebra(ctx),
+    remarkDirectiveWebide(ctx),
     remarkCode(ctx),
     remarkMath,
     remarkUnwrapImages,

@@ -38,6 +38,18 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.48.0
+
+::::tabs
+
+:::tab{title="New :rocket:" id="new"}
+
+- The webide element allows you to embed a web-based integrated development environment (IDE) directly into your hyperbook. This feature is particularly useful for interactive coding tutorials and exercises, enabling users to write and run code within the book itself. [Learn more](/elements/webide)
+
+:::
+
+::::
+
 ## v0.47.2
 
 ::::tabs
