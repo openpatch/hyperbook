@@ -1,5 +1,14 @@
 # @hyperbook/vscode-extension
 
+## 0.28.6
+
+### Patch Changes
+
+- [`c0f47d9`](https://github.com/openpatch/hyperbook/commit/c0f47d9a55c696740bb10c2e99270369d6feabe5) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix collapsible button selector not bleeding into other buttons
+
+- Updated dependencies [[`c0f47d9`](https://github.com/openpatch/hyperbook/commit/c0f47d9a55c696740bb10c2e99270369d6feabe5)]:
+  - @hyperbook/markdown@0.24.1
+
 ## 0.28.5
 
 ### Patch Changes
