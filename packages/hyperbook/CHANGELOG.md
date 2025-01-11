@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.48.1
+
+### Patch Changes
+
+- [`c0f47d9`](https://github.com/openpatch/hyperbook/commit/c0f47d9a55c696740bb10c2e99270369d6feabe5) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix collapsible button selector not bleeding into other buttons
+
 ## 0.48.0
 
 ### Minor Changes
