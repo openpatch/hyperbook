@@ -1,5 +1,11 @@
 # @hyperbook/markdown
 
+## 0.24.0
+
+### Minor Changes
+
+- [`79ea7bb`](https://github.com/openpatch/hyperbook/commit/79ea7bb3c8a80776aa7a9aef1698d87145d8cc09) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add webide element
+
 ## 0.23.2
 
 ### Patch Changes
