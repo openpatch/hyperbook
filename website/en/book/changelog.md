@@ -38,6 +38,18 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.48.1
+
+::::tabs
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+- Fix collapsible button styles bleeding into other button styles.
+
+:::
+
+::::
+
 ## v0.48.0
 
 ::::tabs

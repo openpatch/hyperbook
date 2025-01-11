@@ -11,7 +11,6 @@ import {
   isDirective,
   registerDirective,
 } from "./remarkHelper";
-import { toHast } from "mdast-util-to-hast";
 import {
   ContainerDirective,
   LeafDirective,

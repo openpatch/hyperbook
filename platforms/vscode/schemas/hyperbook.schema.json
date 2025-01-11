@@ -262,6 +262,9 @@
             },
             "type": "object"
         },
+        "importExport": {
+            "type": "boolean"
+        },
         "language": {
             "$ref": "#/definitions/Language"
         },
