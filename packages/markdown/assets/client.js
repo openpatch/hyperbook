@@ -81,6 +81,7 @@ var hyperbook = (function () {
   function search() {
     const resultsEl = document.getElementById("search-results");
     resultsEl.innerHTML = "";
+    const searchInputEl = root.querySelector("#search-input");
     const query = searchInputEl.value;
     const idx = window.lunr.Index.load(LUNR_INDEX);
     const documents = SEARCH_DOCUMENTS;
