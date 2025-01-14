@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.48.2
+
+### Patch Changes
+
+- [`e9ffcd2`](https://github.com/openpatch/hyperbook/commit/e9ffcd2b190fce63a9db7d15519201cd8cb8ef55) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix search not working.
+
 ## 0.48.1
 
 ### Patch Changes

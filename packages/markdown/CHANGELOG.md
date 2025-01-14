@@ -1,5 +1,13 @@
 # @hyperbook/markdown
 
+## 0.24.2
+
+### Patch Changes
+
+- [`049053a`](https://github.com/openpatch/hyperbook/commit/049053ab19afac0d6379b33e49a7290a2e5132a2) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - wrong query
+
+- [`e9ffcd2`](https://github.com/openpatch/hyperbook/commit/e9ffcd2b190fce63a9db7d15519201cd8cb8ef55) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix search not working.
+
 ## 0.24.1
 
 ### Patch Changes
