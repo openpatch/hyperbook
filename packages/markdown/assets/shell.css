@@ -95,9 +95,18 @@ header.inverted > .branding:hover {
   border-color: var(--color-spacer);
 }
 
+.section > .name > .label {
+  color: var(--color-text);
+}
+
+.section > .name.active > .label {
+  color: var(--color-text);
+}
+
 .section .name.empty {
   color: var(--color-text-deactivated);
   cursor: pointer;
+  font-style: italic;
 }
 
 .section > .name:hover {

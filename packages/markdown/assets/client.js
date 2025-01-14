@@ -39,7 +39,7 @@ var hyperbook = (function () {
           const expanded = collapsibles.some((c) => c.id === id);
           if (expanded) {
             collapsibleEl.classList.add("expanded");
-          } else {
+          } else if (!id.startsWith("_nav:")) {
             collapsibleEl.classList.remove("expanded");
           }
         }
