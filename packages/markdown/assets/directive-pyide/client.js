@@ -215,7 +215,6 @@ hyperbook.python = (function () {
           const testCode = test.code.replace("#SCRIPT#", script);
 
           const heading = document.createElement("div");
-          console.log(test);
           heading.innerHTML = `== Test ${test.name} ==`;
           heading.classList.add("test-heading");
           output.appendChild(heading);

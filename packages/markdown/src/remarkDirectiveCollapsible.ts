@@ -86,8 +86,6 @@ export default (ctx: HyperbookContext) => () => {
         collapsibleContent.push(await remark(ctx).run(child))
       }
 
-      console.log(collapsibleContent)
-
       data.hChildren = [
         {
           type: "element",

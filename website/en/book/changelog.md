@@ -38,6 +38,18 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.48.3
+
+::::tabs
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+- Remove unwanted `console.log`.
+
+:::
+
+::::
+
 ## v0.48.2
 
 ::::tabs
