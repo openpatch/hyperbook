@@ -1,5 +1,12 @@
 # @hyperbook/markdown
 
+## 0.24.3
+
+### Patch Changes
+
+- [`327a4e9`](https://github.com/openpatch/hyperbook/commit/327a4e98cc52c0ac073a3a0b0c13ce5d4cecc6c8) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - - fix section not expanded after reload
+  - fix styling of sections
+
 ## 0.24.2
 
 ### Patch Changes
