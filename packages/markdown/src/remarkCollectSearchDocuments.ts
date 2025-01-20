@@ -23,6 +23,7 @@ export default (ctx: HyperbookContext) => () => {
         const isEnd = (node: Node) =>
           (node.type === "heading" && node.depth <= depth) ||
           node.type === "export";
+        if (!parent) return;
         const end = findAfter(parent, start, isEnd);
         const endIndex = parent.children.indexOf(end);
 
