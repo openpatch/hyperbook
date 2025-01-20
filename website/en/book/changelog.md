@@ -38,6 +38,18 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.48.4
+
+::::tabs
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+- Fix build breaking, when a heading is in a collapsible.
+
+:::
+
+::::
+
 ## v0.48.3
 
 ::::tabs
