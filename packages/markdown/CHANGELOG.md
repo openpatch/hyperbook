@@ -1,5 +1,11 @@
 # @hyperbook/markdown
 
+## 0.24.4
+
+### Patch Changes
+
+- [`f36eb85`](https://github.com/openpatch/hyperbook/commit/f36eb85b025b654dd2e217f40b7d598ae2b9c2d3) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - remove unwanted console.log
+
 ## 0.24.3
 
 ### Patch Changes

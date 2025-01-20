@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.48.3
+
+### Patch Changes
+
+- [`f36eb85`](https://github.com/openpatch/hyperbook/commit/f36eb85b025b654dd2e217f40b7d598ae2b9c2d3) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - remove unwanted console.log
+
 ## 0.48.2
 
 ### Patch Changes
