@@ -1,5 +1,11 @@
 # @hyperbook/markdown
 
+## 0.24.5
+
+### Patch Changes
+
+- [`dcda048`](https://github.com/openpatch/hyperbook/commit/dcda048737044f38ec7a6c5a64e122acd0932a28) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - fix heading in collapsible breaking the build
+
 ## 0.24.4
 
 ### Patch Changes
