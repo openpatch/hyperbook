@@ -12,7 +12,7 @@ import { i18n } from "./i18n";
 
 const makeNavigationPageElement = (
   ctx: HyperbookContext,
-  page: HyperbookPage
+  page: HyperbookPage,
 ): ElementContent => {
   return {
     type: "element",
@@ -40,7 +40,7 @@ const makeNavigationPageElement = (
 
 const makeNavigationSectionElement = (
   ctx: HyperbookContext,
-  section: HyperbookSection
+  section: HyperbookSection,
 ): ElementContent => {
   const { virtual, isEmpty, href, name, pages, sections, expanded } = section;
   const children: ElementContent[] = [];
@@ -94,7 +94,7 @@ const makeNavigationSectionElement = (
             type: "element",
             tagName: "a",
             properties: {
-              href: href,
+              href: ctx.makeUrl(href || "", "book"),
               class: "label",
             },
             children: [
@@ -209,7 +209,7 @@ const makeMetaElements = (ctx: HyperbookContext): ElementContent[] => {
           tagName: "span",
           properties: {
             class: "export-icon",
-            title: i18n.get("shell-export-hyperbook")
+            title: i18n.get("shell-export-hyperbook"),
           },
           children: [],
         },
@@ -228,7 +228,7 @@ const makeMetaElements = (ctx: HyperbookContext): ElementContent[] => {
           tagName: "span",
           properties: {
             class: "import-icon",
-            title: i18n.get("shell-import-hyperbook")
+            title: i18n.get("shell-import-hyperbook"),
           },
           children: [],
         },
@@ -243,15 +243,15 @@ const makeMetaElements = (ctx: HyperbookContext): ElementContent[] => {
       onclick: "hyperbookReset()",
     },
     children: [
-        {
-          type: "element",
-          tagName: "span",
-          properties: {
-            class: "reset-icon",
-            title: i18n.get("shell-reset-hyperbook")
-          },
-          children: [],
+      {
+        type: "element",
+        tagName: "span",
+        properties: {
+          class: "reset-icon",
+          title: i18n.get("shell-reset-hyperbook"),
         },
+        children: [],
+      },
     ],
   });
 
@@ -613,7 +613,7 @@ const makeHeaderElements = (ctx: HyperbookContext): ElementContent[] => {
               tagName: "li",
               properties: {
                 class: ["links-item", submenu.length > 0 ? "sub" : ""].join(
-                  " "
+                  " ",
                 ),
               },
               children: [

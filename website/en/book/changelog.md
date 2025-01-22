@@ -38,6 +38,18 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.48.5
+
+::::tabs
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+- Fix link to section not including the basePath.
+
+:::
+
+::::
+
 ## v0.48.4
 
 ::::tabs
