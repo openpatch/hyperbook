@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.48.7
+
+### Patch Changes
+
+- [`b28e9d5`](https://github.com/openpatch/hyperbook/commit/b28e9d5359b22bae30df0fb0665a03da3f889653) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix styling and collapsibles for the main navigation
+
 ## 0.48.6
 
 ### Patch Changes
