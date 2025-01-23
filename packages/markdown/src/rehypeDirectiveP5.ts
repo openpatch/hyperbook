@@ -26,7 +26,7 @@ export default (ctx: HyperbookContext) => () => {
   const name = "p5";
   const cdnLibraryUrl = ctx.makeUrl(
     path.posix.join("directive-p5", "p5.min.js"),
-    "assets"
+    "assets",
   );
 
   const wrapSketch = (sketchCode?: string) => {
@@ -44,6 +44,7 @@ export default (ctx: HyperbookContext) => () => {
   // see https://github.com/processing/p5.js-website/blob/main/src/components/CodeEmbed/frame.tsx
   const makeWrapInMarkupTemplate = (code: CodeBundle) =>
     `<!DOCTYPE html>
+<head>
 <meta charset="utf8" />
 <base href="${ctx.makeUrl("", "public")}" />
 <style type='text/css'>
@@ -58,6 +59,7 @@ canvas {
 }
 </style>
 ${(code.scripts ? [cdnLibraryUrl, ...code.scripts] : []).map((src) => `<script type="text/javascript" src="${src}"></script>`).join("\n")}
+</head>
 <body></body>
 <script id="code" type="text/javascript">###SLOT###</script>
 `;
@@ -84,7 +86,7 @@ ${(code.scripts ? [cdnLibraryUrl, ...code.scripts] : []).map((src) => `<script t
         if (src) {
           srcFile = fs.readFileSync(
             path.join(ctx.root, "public", String(src)),
-            "utf8"
+            "utf8",
           );
         } else if (node.children?.length > 0) {
           srcFile = toText(node.children);
@@ -92,10 +94,12 @@ ${(code.scripts ? [cdnLibraryUrl, ...code.scripts] : []).map((src) => `<script t
 
         const template = makeWrapInMarkupTemplate({
           scripts: [
+            /**
             ctx.makeUrl(
               path.posix.join("directive-p5", "p5.sound.min.js"),
-              "assets"
+              "assets",
             ),
+            */
           ],
         });
         const srcdoc = template

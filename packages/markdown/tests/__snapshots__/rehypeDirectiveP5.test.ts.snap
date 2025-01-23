@@ -3,6 +3,7 @@
 exports[`remarkDirectiveEmbed > should transform 1`] = `
 "
 <div class="directive-p5 standalone" data-template="<!DOCTYPE html>
+<head>
 <meta charset=&#x22;utf8&#x22; />
 <base href=&#x22;/public&#x22; />
 <style type='text/css'>
@@ -17,12 +18,13 @@ canvas {
 }
 </style>
 <script type=&#x22;text/javascript&#x22; src=&#x22;/assets/directive-p5/p5.min.js&#x22;></script>
-<script type=&#x22;text/javascript&#x22; src=&#x22;/assets/directive-p5/p5.sound.min.js&#x22;></script>
+</head>
 <body></body>
 <script id=&#x22;code&#x22; type=&#x22;text/javascript&#x22;>###SLOT###</script>
 " data-id="75cdf8b7911ccb1acf7563021378641adb954be794bd67bc63cde5abe10da43c">
   <div class="container" style="height: 100px;">
     <iframe srcdoc="<!DOCTYPE html>
+<head>
 <meta charset=&#x22;utf8&#x22; />
 <base href=&#x22;/public&#x22; />
 <style type='text/css'>
@@ -37,7 +39,7 @@ canvas {
 }
 </style>
 <script type=&#x22;text/javascript&#x22; src=&#x22;/assets/directive-p5/p5.min.js&#x22;></script>
-<script type=&#x22;text/javascript&#x22; src=&#x22;/assets/directive-p5/p5.sound.min.js&#x22;></script>
+</head>
 <body></body>
 <script id=&#x22;code&#x22; type=&#x22;text/javascript&#x22;>function setup() {
   createCanvas(720, 200);

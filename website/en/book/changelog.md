@@ -38,6 +38,18 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.48.6
+
+::::tabs
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+- Remove p5.sound. The library caused the p5-element to stay in the loading stage in Safari for iOS and MacOS.
+
+:::
+
+::::
+
 ## v0.48.5
 
 ::::tabs

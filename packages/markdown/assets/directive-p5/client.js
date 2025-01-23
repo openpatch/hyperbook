@@ -4,7 +4,7 @@ hyperbook.p5 = (function () {
     codeInput.templates.prism(window.Prism, [
       new codeInput.plugins.AutoCloseBrackets(),
       new codeInput.plugins.Indent(true, 2),
-    ])
+    ]),
   );
 
   const elems = document.getElementsByClassName("directive-p5");
@@ -31,6 +31,13 @@ hyperbook.p5 = (function () {
     const copyEl = elem.getElementsByClassName("copy")[0];
     const resetEl = elem.getElementsByClassName("reset")[0];
     const downloadEl = elem.getElementsByClassName("download")[0];
+
+    if (frame) {
+      frame.srcdoc = frame.srcdoc.replaceAll(
+        "###ORIGIN###",
+        window.location.origin,
+      );
+    }
 
     copyEl?.addEventListener("click", async () => {
       try {
@@ -61,6 +68,7 @@ hyperbook.p5 = (function () {
           const code = result.sketch;
           frame.srcdoc = template
             .replace("###SLOT###", wrapSketch(code))
+            .replaceAll("###ORIGIN###", window.location.origin)
             .replace(/\u00A0/g, " ");
         }
 
@@ -71,7 +79,9 @@ hyperbook.p5 = (function () {
 
       update?.addEventListener("click", () => {
         const code = editor.value;
-        frame.srcdoc = template.replace("###SLOT###", wrapSketch(code));
+        frame.srcdoc = template
+          .replace("###SLOT###", wrapSketch(code))
+          .replaceAll("###ORIGIN###", window.location.origin);
       });
     });
   }
