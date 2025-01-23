@@ -1,5 +1,11 @@
 # @hyperbook/markdown
 
+## 0.24.6
+
+### Patch Changes
+
+- [`8adce9d`](https://github.com/openpatch/hyperbook/commit/8adce9d3dc345886f0b3e7a2fd3e4d848b00e183) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix link to section not including the basePath
+
 ## 0.24.5
 
 ### Patch Changes
