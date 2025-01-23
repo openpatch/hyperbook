@@ -6,9 +6,16 @@ var hyperbook = (function () {
   const initCollapsibles = (root) => {
     const collapsibleEls = root.getElementsByClassName("collapsible");
     for (let collapsible of collapsibleEls) {
+      const id = collapsible.parentElement.getAttribute("data-id");
+
+      if (id.startsWith("_nav:") && !collapsible.classList.contains("empty")) {
+        const link = collapsible.querySelector("a");
+        link?.addEventListener("click", (event) => {
+          event.stopPropagation();
+        });
+      }
       collapsible.addEventListener("click", () => {
         collapsible.classList.toggle("expanded");
-        const id = collapsible.parentElement.getAttribute("data-id");
         if (id) {
           store.collapsibles.get(id).then((result) => {
             if (!result) {
@@ -28,7 +35,7 @@ var hyperbook = (function () {
   };
 
   /**
-   * @param {HTMLElement} root 
+   * @param {HTMLElement} root
    */
   const updateCollapsibles = (root) => {
     store.collapsibles.toArray().then((collapsibles) => {

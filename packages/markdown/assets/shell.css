@@ -37,27 +37,27 @@ side-drawer {
   border-right-color: var(--color-nav-border);
 }
 
-.sidebar > .author,
-.nav-drawer-content > .author {
+.sidebar>.author,
+.nav-drawer-content>.author {
   color: var(--color-author-color);
   background: var(--color-author-background);
 }
 
-.sidebar > .author:hover,
-.nav-drawer-content > .author:hover {
+.sidebar>.author:hover,
+.nav-drawer-content>.author:hover {
   color: var(--color-brand);
 }
 
 /* Three bars for burger menu */
-.toggle > .bar1,
-.toggle > .bar2,
-.toggle > .bar3 {
+.toggle>.bar1,
+.toggle>.bar2,
+.toggle>.bar3 {
   background-color: var(--color-brand-text);
 }
 
-.inverted .toggle > .bar1,
-.inverted .toggle > .bar2,
-.inverted .toggle > .bar3 {
+.inverted .toggle>.bar1,
+.inverted .toggle>.bar2,
+.inverted .toggle>.bar3 {
   background-color: var(--color-brand);
 }
 
@@ -78,11 +78,11 @@ header.inverted {
   color: var(--color-brand-text);
 }
 
-header.inverted > .branding {
+header.inverted>.branding {
   color: var(--color-brand);
 }
 
-header.inverted > .branding:hover {
+header.inverted>.branding:hover {
   color: var(--color-brand);
 }
 
@@ -90,17 +90,17 @@ header.inverted > .branding:hover {
   border-top-color: var(--color-spacer);
 }
 
-.section > .name {
+.section>.name {
   color: var(--color-text);
   border-color: var(--color-spacer);
 }
 
-.section > .name > .label {
+.section>.name>.label {
   color: var(--color-text);
 }
 
-.section > .name.active > .label {
-  color: var(--color-text);
+.section>.name.active>.label {
+  color: var(--color-brand);
 }
 
 .section .name.empty {
@@ -109,15 +109,15 @@ header.inverted > .branding:hover {
   font-style: italic;
 }
 
-.section > .name:hover {
+.section>.name:hover {
   background: var(--color-spacer);
 }
 
-.section > .name.empty:hover {
+.section>.name.empty:hover {
   background: none;
 }
 
-.section > .name.active {
+.section>.name.active {
   background: var(--color-background);
   color: var(--color-brand);
 }
@@ -136,7 +136,7 @@ header.inverted > .branding:hover {
   color: var(--color-brand);
 }
 
-.section > .links {
+.section>.links {
   border-left-color: var(--color-spacer);
 }
 
@@ -234,21 +234,21 @@ a.jump.previous::before {
   border-right-color: var(--color-nav-border);
 }
 
-.sidebar > nav,
-.nav-drawer-content > nav {
+.sidebar>nav,
+.nav-drawer-content>nav {
   padding: 20px;
   flex: 1;
 }
 
-.sidebar > .author,
-.nav-drawer-content > .author {
+.sidebar>.author,
+.nav-drawer-content>.author {
   text-align: center;
   text-decoration: none;
   padding: 20px;
 }
 
-.sidebar > .author,
-.nav-drawer-content > .author > b {
+.sidebar>.author,
+.nav-drawer-content>.author>b {
   font-weight: bold;
 }
 
@@ -268,9 +268,9 @@ a.jump.previous::before {
   cursor: pointer;
 }
 
-.toggle > .bar1,
-.toggle > .bar2,
-.toggle > .bar3 {
+.toggle>.bar1,
+.toggle>.bar2,
+.toggle>.bar3 {
   width: 35px;
   height: 5px;
   margin: 6px 0;
@@ -386,7 +386,7 @@ header {
   margin-right: 8px;
 }
 
-#custom-links-footer > .links-item {
+#custom-links-footer>.links-item {
   border-radius: 8px;
   padding: 8px;
   border: 1px solid var(--color-nav-border);
@@ -565,13 +565,13 @@ header {
 
 .section ul,
 .virtual-section ul,
-nav > ul {
+nav>ul {
   list-style-type: none;
   margin: 0;
   padding: 0;
 }
 
-nav li + li {
+nav li+li {
   margin-top: 0px;
 }
 
@@ -585,7 +585,7 @@ nav li + li {
   margin-top: 8px;
 }
 
-.section > .name {
+.section>.name {
   display: flex;
   text-decoration: none;
   padding: 10px;
@@ -595,12 +595,12 @@ nav li + li {
   user-select: none;
 }
 
-.section > .name > .label {
+.section>.name>.label {
   flex: 1;
   text-decoration: none;
 }
 
-.section > .name > .toggle {
+.section>.name>.toggle {
   text-align: right;
   background: none;
   border: none;
@@ -613,8 +613,10 @@ nav li + li {
 
 .collapsible:after {
   content: "\002B";
+  width: 1.2rem;
   color: var(--color-text);
   font-weight: bold;
+  text-align: right;
   float: right;
   margin-left: 5px;
 }
@@ -628,7 +630,7 @@ nav li + li {
   opacity: 0;
 }
 
-.collapsible.expanded + .collapsible-content {
+.collapsible.expanded+.collapsible-content {
   display: block;
   opacity: 1;
 }
@@ -644,7 +646,7 @@ nav li + li {
   text-decoration: none;
 }
 
-.section > .links {
+.section>.links {
   border-left-width: 1px;
   border-left-style: solid;
 }
@@ -676,12 +678,12 @@ nav.toc li {
   margin-bottom: 8px;
 }
 
-nav.toc li > a {
+nav.toc li>a {
   color: var(--color-text);
   text-decoration: none;
 }
 
-nav.toc li > a:hover {
+nav.toc li>a:hover {
   color: var(--color-brand);
 }
 
