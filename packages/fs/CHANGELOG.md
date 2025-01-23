@@ -1,5 +1,11 @@
 # @hyperbook/fs
 
+## 0.16.1
+
+### Patch Changes
+
+- [`e9bfec9`](https://github.com/openpatch/hyperbook/commit/e9bfec9f06eccabb119f8800274c69d14b2c0211) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix parsing of snippets parameters.
+
 ## 0.16.0
 
 ### Minor Changes

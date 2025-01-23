@@ -1,5 +1,11 @@
 # @hyperbook/markdown
 
+## 0.24.7
+
+### Patch Changes
+
+- [`de22a0c`](https://github.com/openpatch/hyperbook/commit/de22a0cad0cad1b8ae9ff216b1c710a03f4a3b5b) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Remove p5.sound. The library caused the p5-element to not load on Safari.
+
 ## 0.24.6
 
 ### Patch Changes
