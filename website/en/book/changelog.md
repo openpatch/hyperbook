@@ -38,18 +38,6 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
-## v0.48.7
-
-::::tabs
-
-:::tab{title="Fixed :bug:" id="fixed"}
-
-- Fix the parsing of snippet parameters. Snippet parameters can now include parentheses and other symbols.
-
-:::
-
-::::
-
 ## v0.48.6
 
 ::::tabs
@@ -57,6 +45,7 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 :::tab{title="Fixed :bug:" id="fixed"}
 
 - Remove p5.sound. The library caused the p5-element to stay in the loading stage in Safari for iOS and MacOS.
+- Fix the parsing of snippet parameters. Snippet parameters can now include parentheses and other symbols.
 
 :::
 
