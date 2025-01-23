@@ -8,9 +8,9 @@ exports[`hyperbook > should get navigation 1`] = `
     "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/paradigms.md",
   },
   "next": {
-    "href": "/whitespace-test",
-    "name": "whitespace-test",
-    "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/whitespace-test.md",
+    "href": "/parentheses-test",
+    "name": "parentheses-test",
+    "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/parentheses-test.md",
   },
   "previous": {
     "href": "/",

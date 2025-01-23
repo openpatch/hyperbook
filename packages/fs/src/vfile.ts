@@ -689,8 +689,8 @@ export const getMarkdown = async (
   let { content, data } = matter(markdown);
   // apply Snippets
   const reg =
-    /((:+)snippet{#(?<snippet>[a-zA-Z0-9-]+)(?<vars>( +(?<var>[a-zA-Z]+)=(?<value>\d+|false|true|".*?"))*) *})/g;
-  const varReg = /(?<var>[a-zA-Z]+)=(?<value>\d+|false|true|".*")/;
+    /((:+)snippet{#([a-zA-Z0-9-]+)(( +([a-zA-Z]+)=(\d+|false|true|".*?"))*) *})/g;
+  const varReg = /([a-zA-Z]+)=(\d+|false|true|".*")/;
   const snippets = [...content.matchAll(reg)];
 
   for (const snippet of snippets) {
@@ -717,7 +717,7 @@ export const getMarkdown = async (
       }
     }
     if (dots.length > 2) {
-      const r = `${snippet[0]}([\\s\\S]*?)${dots}`;
+      const r = `${snippet[0].replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&")}([\\s\\S]*?)${dots}`;
       const m = content.match(new RegExp(r, "m"));
       if (m) {
         vars["content"] = m[1];

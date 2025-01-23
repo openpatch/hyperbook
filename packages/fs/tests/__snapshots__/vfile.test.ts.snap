@@ -95,6 +95,26 @@ Example use of a template.
 }
 `;
 
+exports[`getMarkdown > should render snippet with parentheses 1`] = `
+{
+  "content": "<div style="background:var(--color-block); border: 1px solid black;">
+    
+Weit hinten, hinter den Wortbergen, fern der Länder Vokalien und Konsonantien leben die Blindtexte. 
+
+</div>
+
+
+<div style="background:red; border: 1px solid black;">
+    
+Weit hinten, hinter den Wortbergen, fern der Länder Vokalien und Konsonantien leben die Blindtexte. 
+
+</div>
+
+",
+  "data": {},
+}
+`;
+
 exports[`getMarkdown > should render snippet with whitespace 1`] = `
 {
   "content": ""My Title"
@@ -269,6 +289,36 @@ exports[`list > should list all 1`] = `
       "href": "/paradigms",
       "permalink": null,
       "relative": "paradigms.md",
+    },
+    "root": "single-hyperbook",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "markdown": {
+      "content": "<div style="background:var(--color-block); border: 1px solid black;">
+    
+Weit hinten, hinter den Wortbergen, fern der Länder Vokalien und Konsonantien leben die Blindtexte. 
+
+</div>
+
+
+<div style="background:red; border: 1px solid black;">
+    
+Weit hinten, hinter den Wortbergen, fern der Länder Vokalien und Konsonantien leben die Blindtexte. 
+
+</div>
+
+",
+      "data": {},
+    },
+    "name": "parentheses-test",
+    "path": {
+      "absolute": "single-hyperbook/book/parentheses-test.md",
+      "directory": "",
+      "href": "/parentheses-test",
+      "permalink": null,
+      "relative": "parentheses-test.md",
     },
     "root": "single-hyperbook",
   },
@@ -540,6 +590,36 @@ Example use of a template.
       "href": "/paradigms",
       "permalink": null,
       "relative": "paradigms.md",
+    },
+    "root": "single-hyperbook",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "markdown": {
+      "content": "<div style="background:var(--color-block); border: 1px solid black;">
+    
+Weit hinten, hinter den Wortbergen, fern der Länder Vokalien und Konsonantien leben die Blindtexte. 
+
+</div>
+
+
+<div style="background:red; border: 1px solid black;">
+    
+Weit hinten, hinter den Wortbergen, fern der Länder Vokalien und Konsonantien leben die Blindtexte. 
+
+</div>
+
+",
+      "data": {},
+    },
+    "name": "parentheses-test",
+    "path": {
+      "absolute": "single-hyperbook/book/parentheses-test.md",
+      "directory": "",
+      "href": "/parentheses-test",
+      "permalink": null,
+      "relative": "parentheses-test.md",
     },
     "root": "single-hyperbook",
   },
@@ -816,6 +896,36 @@ exports[`list > should list for folder book 1`] = `
       "href": "/paradigms",
       "permalink": null,
       "relative": "paradigms.md",
+    },
+    "root": "single-hyperbook",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "markdown": {
+      "content": "<div style="background:var(--color-block); border: 1px solid black;">
+    
+Weit hinten, hinter den Wortbergen, fern der Länder Vokalien und Konsonantien leben die Blindtexte. 
+
+</div>
+
+
+<div style="background:red; border: 1px solid black;">
+    
+Weit hinten, hinter den Wortbergen, fern der Länder Vokalien und Konsonantien leben die Blindtexte. 
+
+</div>
+
+",
+      "data": {},
+    },
+    "name": "parentheses-test",
+    "path": {
+      "absolute": "single-hyperbook/book/parentheses-test.md",
+      "directory": "",
+      "href": "/parentheses-test",
+      "permalink": null,
+      "relative": "parentheses-test.md",
     },
     "root": "single-hyperbook",
   },

@@ -58,7 +58,7 @@ describe("getMarkdown", () => {
   it("should get markdown from template", async () => {
     let files = await vfile.list(hyperbookPath);
     let templateFile = files.find(
-      (f) => f.name === "use-template1" && f.folder === "book"
+      (f) => f.name === "use-template1" && f.folder === "book",
     );
     if (!templateFile) {
       throw Error("Template not found");
@@ -70,7 +70,7 @@ describe("getMarkdown", () => {
   it("should render snippet with whitespace", async () => {
     let files = await vfile.list(hyperbookPath);
     let whitespaceTest = files.find(
-      (f) => f.path.relative === "whitespace-test.md" && f.folder === "book"
+      (f) => f.path.relative === "whitespace-test.md" && f.folder === "book",
     );
     if (!whitespaceTest) {
       throw Error("File not found");
@@ -78,10 +78,21 @@ describe("getMarkdown", () => {
     expect(await vfile.getMarkdown(whitespaceTest)).toMatchSnapshot();
   });
 
+  it("should render snippet with parentheses", async () => {
+    let files = await vfile.list(hyperbookPath);
+    let parenthesesTest = files.find(
+      (f) => f.path.relative === "parentheses-test.md" && f.folder === "book",
+    );
+    if (!parenthesesTest) {
+      throw Error("File not found");
+    }
+    expect(await vfile.getMarkdown(parenthesesTest)).toMatchSnapshot();
+  });
+
   it("should get markdown from template for index", async () => {
     let files = await vfile.list(hyperbookPath);
     let templateFile = files.find(
-      (f) => f.path.relative === "subsection2/index.yml" && f.folder === "book"
+      (f) => f.path.relative === "subsection2/index.yml" && f.folder === "book",
     );
     if (!templateFile) {
       throw Error("Template not found");
@@ -95,7 +106,7 @@ describe("getMarkdown", () => {
     let templateFile = files.find(
       (f) =>
         f.path.relative === "subsection3/single-template.md.hbs" &&
-        f.folder === "book"
+        f.folder === "book",
     );
     if (!templateFile) {
       throw Error("Template not found");
