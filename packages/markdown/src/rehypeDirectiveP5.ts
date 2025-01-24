@@ -74,6 +74,8 @@ ${(code.scripts ? [cdnLibraryUrl, ...code.scripts] : []).map((src) => `<script t
           id = hash(node),
         } = node.properties || {};
 
+        let bEditor = editor === "true";
+
         expectContainerDirective(node, file, name);
         registerDirective(file, name, ["client.js"], ["style.css"]);
         requestJS(file, ["code-input", "code-input.min.js"]);
@@ -107,7 +109,7 @@ ${(code.scripts ? [cdnLibraryUrl, ...code.scripts] : []).map((src) => `<script t
           .replace(/\u00A0/g, " ");
         node.tagName = "div";
         node.properties = {
-          class: ["directive-p5", editor ? "" : "standalone"].join(" "),
+          class: ["directive-p5", bEditor ? "" : "standalone"].join(" "),
           "data-template": template.replace(/\u00A0/g, " "),
           "data-id": id,
         };
@@ -135,7 +137,7 @@ ${(code.scripts ? [cdnLibraryUrl, ...code.scripts] : []).map((src) => `<script t
               },
             ],
           },
-          ...(editor
+          ...(bEditor
             ? [
                 {
                   type: "element",

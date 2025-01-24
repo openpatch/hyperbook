@@ -38,6 +38,18 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.48.8
+
+::::tabs
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+- Fix p5 element not accepting editor=false.
+
+:::
+
+::::
+
 ## v0.48.7
 
 ::::tabs
