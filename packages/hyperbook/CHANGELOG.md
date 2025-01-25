@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.49.0
+
+### Minor Changes
+
+- [`847e151`](https://github.com/openpatch/hyperbook/commit/847e1516ef0b0c3f4ca4f06fac1ea5e16cbbe175) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Make hyperbook config accessible in snippets
+
 ## 0.48.8
 
 ### Patch Changes
