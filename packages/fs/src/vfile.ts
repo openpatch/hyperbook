@@ -2,9 +2,20 @@ import matter from "gray-matter";
 import fs from "fs/promises";
 import fsD from "fs";
 import path from "path";
-import { Glossary, HyperbookFrontmatter } from "@hyperbook/types";
+import {
+  Glossary,
+  HyperbookFrontmatter,
+  HyperbookJson,
+} from "@hyperbook/types";
 import yaml from "yaml";
 import { handlebars, registerHelpers } from "./handlebars";
+
+export const getJson = async (root: string): Promise<HyperbookJson> => {
+  return fs
+    .readFile(path.join(root, "hyperbook.json"))
+    .then((f) => f.toString())
+    .then(JSON.parse);
+};
 
 export type VFileBase = {
   root: string;
@@ -693,6 +704,7 @@ export const getMarkdown = async (
   const varReg = /([a-zA-Z]+)=(\d+|false|true|".*")/;
   const snippets = [...content.matchAll(reg)];
 
+  const hyperbook = await getJson(file.root);
   for (const snippet of snippets) {
     const dots = snippet[2];
     const snippetId = snippet[3];
@@ -701,7 +713,10 @@ export const getMarkdown = async (
       { encoding: "utf8" },
     );
     const template = handlebars.compile(snippetFile);
-    const vars: Record<string, any> = {};
+
+    const vars: Record<string, any> = {
+      hyperbook,
+    };
     for (const m of snippet[4].match(/(?:[^\s"]+|"[^"]*")+/g) || []) {
       const r = varReg.exec(m);
       if (r) {

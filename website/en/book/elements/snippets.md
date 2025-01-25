@@ -13,6 +13,8 @@ Snippet files need to be placed in the `snippets` folder at the root of
 your hyperbook beside the glossary and book folders.
 :::
 
+You can access your hyperbook config in your snippets like so: `{{{ hyperbook.name }}}`.
+
 ## Examples
 
 ### Example 1: Block

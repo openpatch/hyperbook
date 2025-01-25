@@ -95,6 +95,17 @@ Example use of a template.
 }
 `;
 
+exports[`getMarkdown > should render snippet with hyperbook 1`] = `
+{
+  "content": "Hyperbook Documentation
+
+https://github.com/openpatch/hyperbook/edit/main/website/en
+
+",
+  "data": {},
+}
+`;
+
 exports[`getMarkdown > should render snippet with parentheses 1`] = `
 {
   "content": "<div style="background:var(--color-block); border: 1px solid black;">
@@ -269,6 +280,27 @@ exports[`list > should list all 1`] = `
         "root": "single-hyperbook",
       },
     ],
+    "root": "single-hyperbook",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "markdown": {
+      "content": "Hyperbook Documentation
+
+https://github.com/openpatch/hyperbook/edit/main/website/en
+
+",
+      "data": {},
+    },
+    "name": "hyperbook-test",
+    "path": {
+      "absolute": "single-hyperbook/book/hyperbook-test.md",
+      "directory": "",
+      "href": "/hyperbook-test",
+      "permalink": null,
+      "relative": "hyperbook-test.md",
+    },
     "root": "single-hyperbook",
   },
   {
@@ -569,6 +601,27 @@ Example use of a template.
       "href": "/subsection3/subsection31/test",
       "permalink": "/@/01",
       "relative": "subsection3/subsection31/test.md",
+    },
+    "root": "single-hyperbook",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "markdown": {
+      "content": "Hyperbook Documentation
+
+https://github.com/openpatch/hyperbook/edit/main/website/en
+
+",
+      "data": {},
+    },
+    "name": "hyperbook-test",
+    "path": {
+      "absolute": "single-hyperbook/book/hyperbook-test.md",
+      "directory": "",
+      "href": "/hyperbook-test",
+      "permalink": null,
+      "relative": "hyperbook-test.md",
     },
     "root": "single-hyperbook",
   },
@@ -878,6 +931,27 @@ Example use of a template.
 
 exports[`list > should list for folder book 1`] = `
 [
+  {
+    "extension": ".md",
+    "folder": "book",
+    "markdown": {
+      "content": "Hyperbook Documentation
+
+https://github.com/openpatch/hyperbook/edit/main/website/en
+
+",
+      "data": {},
+    },
+    "name": "hyperbook-test",
+    "path": {
+      "absolute": "single-hyperbook/book/hyperbook-test.md",
+      "directory": "",
+      "href": "/hyperbook-test",
+      "permalink": null,
+      "relative": "hyperbook-test.md",
+    },
+    "root": "single-hyperbook",
+  },
   {
     "extension": ".md",
     "folder": "book",

@@ -11,6 +11,8 @@ Manchmal möchte mal Elemente wiederhole oder ein eigenes Element erstellen, um 
 Snippets müssen im Ordner `snippets` neben dem `book` und `glossary` Ordner platziert werden. Sie haben die Endung `.md.hbs`.
 :::
 
+Du kannst in deinen Snippets auf die Hyperbook-Konfiguration zugreifen, indem du z.B. `{{{ hyperbook.name }}}` verwendest.
+
 ## Beispiel
 
 ### Beispiel 1: Block

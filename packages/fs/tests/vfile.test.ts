@@ -89,6 +89,17 @@ describe("getMarkdown", () => {
     expect(await vfile.getMarkdown(parenthesesTest)).toMatchSnapshot();
   });
 
+  it("should render snippet with hyperbook", async () => {
+    let files = await vfile.list(hyperbookPath);
+    let parenthesesTest = files.find(
+      (f) => f.path.relative === "hyperbook-test.md" && f.folder === "book",
+    );
+    if (!parenthesesTest) {
+      throw Error("File not found");
+    }
+    expect(await vfile.getMarkdown(parenthesesTest)).toMatchSnapshot();
+  });
+
   it("should get markdown from template for index", async () => {
     let files = await vfile.list(hyperbookPath);
     let templateFile = files.find(
