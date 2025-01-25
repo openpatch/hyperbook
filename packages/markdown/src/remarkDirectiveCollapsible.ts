@@ -3,7 +3,7 @@
 //
 import { HyperbookContext } from "@hyperbook/types";
 import { Root } from "mdast";
-import { Element, ElementContent } from "hast";
+import { ElementContent } from "hast";
 import { visit } from "unist-util-visit";
 import { VFile } from "vfile";
 import {
@@ -17,6 +17,7 @@ import {
   TextDirective,
 } from "mdast-util-directive";
 import { remark } from "./process";
+import hash from "./objectHash";
 
 export default (ctx: HyperbookContext) => () => {
   const name = "collapsible";
@@ -68,7 +69,7 @@ export default (ctx: HyperbookContext) => () => {
 
     for (const node of collapsibleNodes) {
       const data = node.data || (node.data = {});
-      const { title = "", id } = node.data.hProperties || {};
+      const { title = "", id = hash(node) } = node.data.hProperties || {};
 
       expectContainerDirective(node, file, name);
       registerDirective(file, name, [], ["style.css"]);
@@ -83,7 +84,7 @@ export default (ctx: HyperbookContext) => () => {
       const collapsibleContent = [];
 
       for (const child of node.children) {
-        collapsibleContent.push(await remark(ctx).run(child))
+        collapsibleContent.push(await remark(ctx).run(child));
       }
 
       data.hChildren = [

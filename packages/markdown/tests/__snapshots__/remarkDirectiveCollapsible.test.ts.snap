@@ -2,7 +2,7 @@
 
 exports[`remarkDirectiveCollapsible > should transform 1`] = `
 "
-<div class="directive-collapsible"><button class="collapsible">Hallo</button>
+<div class="directive-collapsible" data-id="48a91852d8b55f194376022d3c14c87e99166e435eaab279a0c2d92523d39aec"><button class="collapsible">Hallo</button>
   <div class="collapsible-content">
     <p>This is a panel</p>
     <div class="directive-audio">
@@ -12,7 +12,7 @@ exports[`remarkDirectiveCollapsible > should transform 1`] = `
       </div>
       <div class="information"><span class="title">Hallo</span><span class="spacer"> - </span><span class="author">Max Mustermann</span><span class="duration"></span></div>
     </div>
-    <div class="directive-collapsible"><button class="collapsible">Nested</button>
+    <div class="directive-collapsible" data-id="13caa90143e8b1bb873970593700aa49da40b6c2c3ecf175995eba4b14ff9ee7"><button class="collapsible">Nested</button>
       <div class="collapsible-content">
         <p>This is a stacked collapsible</p>
         <div class="directive-youtube" id="video-124">
@@ -21,7 +21,7 @@ exports[`remarkDirectiveCollapsible > should transform 1`] = `
       </div>
     </div>
     <p>This is normal Test in-between.</p>
-    <div class="directive-collapsible"><button class="collapsible">With an Image</button>
+    <div class="directive-collapsible" data-id="72cbff5fe173a436e74f4f647e4e9fd213f689c49cb2c5983e7ca26d0d35c74c"><button class="collapsible">With an Image</button>
       <div class="collapsible-content">
         <p>
           <figure src="/public/public/test.jpg" alt="" class="normal">

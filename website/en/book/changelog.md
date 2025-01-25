@@ -38,6 +38,18 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.49.1
+
+::::tabs
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+- Fix collapsibles not having a default id and therefore not working correctly.
+
+:::
+
+::::
+
 ## v0.49.0
 
 ::::tabs
