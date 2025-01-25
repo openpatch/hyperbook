@@ -1,5 +1,11 @@
 # @hyperbook/fs
 
+## 0.17.0
+
+### Minor Changes
+
+- [`69328bb`](https://github.com/openpatch/hyperbook/commit/69328bb8b52cb683246a0d553941e249d89a7bf6) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Make hyperbook config accessible in snippets
+
 ## 0.16.1
 
 ### Patch Changes
