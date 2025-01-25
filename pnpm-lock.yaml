@@ -119,17 +119,16 @@ importers:
         version: 1.6.0(@types/node@22.7.4)(lightningcss@1.28.2)(sass@1.79.4)(terser@5.34.1)
 
   packages/hyperbook:
-    dependencies:
+    devDependencies:
       '@hyperbook/fs':
         specifier: workspace:*
         version: link:../fs
-      '@hyperbook/types':
-        specifier: workspace:*
-        version: link:../types
-    devDependencies:
       '@hyperbook/markdown':
         specifier: workspace:*
         version: link:../markdown
+      '@hyperbook/types':
+        specifier: workspace:*
+        version: link:../types
       '@pnpm/exportable-manifest':
         specifier: 6.0.1
         version: 6.0.1
