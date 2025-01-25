@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.49.1
+
+### Patch Changes
+
+- [`e2e97e7`](https://github.com/openpatch/hyperbook/commit/e2e97e7cc602da2fd8bb3bfba22c0ec7a1dd4cc9) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - fix collapsibles not having an id
+
 ## 0.49.0
 
 ### Minor Changes
