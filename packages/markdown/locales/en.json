@@ -1,4 +1,7 @@
 {
+    "footnote-label": "Footnotes",
+    "footnote-back-label": "Back to reference {{index}}",
+    "footnote-back-label-many": "Back to reference {{from}}-{{to}}",
     "store-different-origin": "The Hyperbook file is from a different origin {{origin}}. Do you want to import it anyways?",
     "store-import-successful": "The Hyperbook file has been imported successfully.",
     "store-not-supported-file-version": "The Hyperbook file has an unsupported version {{version}}.",

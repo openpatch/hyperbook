@@ -38,6 +38,18 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.49.2
+
+::::tabs
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+- Add footnote translation for german.
+
+:::
+
+::::
+
 ## v0.49.1
 
 ::::tabs

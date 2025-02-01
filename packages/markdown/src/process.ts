@@ -55,6 +55,7 @@ import { i18n } from "./i18n";
 import remarkDirectiveWebide from "./remarkDirectiveWebide";
 
 export const remark = (ctx: HyperbookContext) => {
+  i18n.init(ctx.config.language || "en");
   const remarkPlugins: PluggableList = [
     remarkRemoveComments,
     remarkGemoji,
@@ -104,7 +105,19 @@ export const remark = (ctx: HyperbookContext) => {
     .use(remarkPlugins)
     .use(remarkToRehype, {
       allowDangerousHtml: ctx.config.allowDangerousHtml || false,
-    })
+      footnoteLabel: i18n.get("footnote-label"),
+      footnoteBackLabel(referenceIndex, rereferenceIndex) {
+        if (rereferenceIndex > 1) {
+          return i18n.get("footnote-back-label-many", {
+            index: `${referenceIndex + 1}`,
+          });
+        }
+        return i18n.get("footnote-back-label-many", {
+          from: `${referenceIndex + 1}`,
+          to: `${rereferenceIndex}`,
+        });
+      },
+    });
 };
 
 export const process = (md: string, ctx: HyperbookContext) => {
