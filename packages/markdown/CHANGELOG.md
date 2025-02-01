@@ -1,5 +1,11 @@
 # @hyperbook/markdown
 
+## 0.24.11
+
+### Patch Changes
+
+- [`08bde20`](https://github.com/openpatch/hyperbook/commit/08bde20e5a832f6777963fc478a8987b86ee2921) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add footnote translation for german
+
 ## 0.24.10
 
 ### Patch Changes
