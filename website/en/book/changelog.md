@@ -38,6 +38,19 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.49.3
+
+::::tabs
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+- Fix missing right border in the struktog element
+
+:::
+
+::::
+
+
 ## v0.49.2
 
 ::::tabs

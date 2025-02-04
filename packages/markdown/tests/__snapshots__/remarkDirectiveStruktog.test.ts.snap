@@ -94,6 +94,7 @@ exports[`remarkDirectiveStruktog > should transform 1`] = `
         </div>
         <div class="frameTop borderHeight"></div>
       </div>
+      <div class="borderWidth frameLeft"></div>
     </div></a></div>
 "
 `;

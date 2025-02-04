@@ -1358,6 +1358,14 @@ export default (ctx: HyperbookContext) => () => {
                       },
                     ],
                   },
+                  {
+                    type: "element",
+                    tagName: "div",
+                    properties: {
+                      class: "borderWidth frameLeft",
+                    },
+                    children: [],
+                  },
                 ],
               },
             ],
