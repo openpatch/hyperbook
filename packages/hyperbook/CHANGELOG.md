@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.49.4
+
+### Patch Changes
+
+- [`e1720b5`](https://github.com/openpatch/hyperbook/commit/e1720b5eec08da070bd76881e47c23b6850bb880) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Update dependencies
+
 ## 0.49.3
 
 ### Patch Changes
