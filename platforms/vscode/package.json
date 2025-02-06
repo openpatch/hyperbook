@@ -124,7 +124,7 @@
     "@hyperbook/types": "workspace:*",
     "@types/glob": "8.1.0",
     "@types/node": "20.12.12",
-    "@types/vscode": "1.97.0",
+    "@types/vscode": "1.71.0",
     "@typescript-eslint/eslint-plugin": "8.23.0",
     "@typescript-eslint/parser": "8.23.0",
     "@vscode/vsce": "3.2.2",
