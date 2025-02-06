@@ -16,7 +16,7 @@ import { remark } from "./process";
 import hash from "./objectHash";
 import remarkGemoji from "remark-gemoji";
 import { Processor } from "unified";
-import { LeafDirective, TextDirective } from "mdast-util-directive/lib";
+import { LeafDirective, TextDirective } from "mdast-util-directive";
 import { ContainerDirective } from "mdast-util-directive";
 
 export default function (ctx: HyperbookContext) {
@@ -60,7 +60,8 @@ export default function (ctx: HyperbookContext) {
 
           for (const tabNode of node.children.filter(isDirective)) {
             expectContainerDirective(tabNode, file, "tab");
-            let { title = "", id: tabId = hash(tabNode) } = tabNode.attributes || {};
+            let { title = "", id: tabId = hash(tabNode) } =
+              tabNode.attributes || {};
 
             let tree = remark(ctx).parse(title as string);
             remarkGemoji()(tree);

@@ -2,7 +2,7 @@
 /// <reference types="mdast-util-directive" />
 //
 import { HyperbookContext } from "@hyperbook/types";
-import { Root } from "mdast";
+import { Code, Root } from "mdast";
 import fs from "fs";
 import path from "path";
 import { visit } from "unist-util-visit";
@@ -16,7 +16,6 @@ import {
 } from "./remarkHelper";
 import { toText } from "./mdastUtilToText";
 import hash from "./objectHash";
-import { Code } from "mdast-util-from-markdown/lib";
 import { ElementContent } from "hast";
 import { i18n } from "./i18n";
 
@@ -48,7 +47,7 @@ export default (ctx: HyperbookContext) => () => {
         if (src) {
           srcFile = fs.readFileSync(
             path.join(ctx.root, "public", String(src)),
-            "utf8"
+            "utf8",
           );
         } else if (node.children?.length > 0) {
           tests = node.children
@@ -60,16 +59,16 @@ export default (ctx: HyperbookContext) => () => {
             }));
           input = toText(
             node.children.find(
-              (c) => c.type === "code" && c.lang === "input"
-            ) as Code
+              (c) => c.type === "code" && c.lang === "input",
+            ) as Code,
           );
           srcFile = toText(
             node.children.find(
               (c) =>
                 c.type === "code" &&
                 c.lang === "python" &&
-                !(c as Code).meta?.includes("test")
-            ) as Code
+                !(c as Code).meta?.includes("test"),
+            ) as Code,
           );
         }
 

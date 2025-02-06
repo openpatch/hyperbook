@@ -38,6 +38,20 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.49.4
+
+::::tabs
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+- Update mermaid to 11.4.1
+- Update p5 to 1.11.3
+- Update wavesurfer.js to 7.9.0
+
+:::
+
+::::
+
 ## v0.49.3
 
 ::::tabs

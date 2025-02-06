@@ -38,15 +38,15 @@
     "handlebars"
   ],
   "dependencies": {
-    "chalk": "5.3.0",
+    "chalk": "5.4.1",
     "find-up": "^7.0.0",
     "gray-matter": "4.0.3",
-    "mdast-util-directive": "^3.0.0",
-    "mdast-util-from-markdown": "^2.0.1",
+    "mdast-util-directive": "^3.1.0",
+    "mdast-util-from-markdown": "^2.0.2",
     "micromark-extension-directive": "^3.0.2",
     "mime-types": "^2.1.35",
     "unist-util-visit": "^5.0.0",
-    "yaml": "^2.5.1"
+    "yaml": "^2.7.0"
   },
   "devDependencies": {
     "@hyperbook/types": "workspace:*",
@@ -54,6 +54,6 @@
     "@types/mime-types": "^2.1.4",
     "handlebars": "^4.7.8",
     "ms": "^2.1.3",
-    "vitest": "^1.6.0"
+    "vitest": "^3.0.5"
   }
 }

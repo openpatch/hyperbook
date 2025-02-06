@@ -81,7 +81,10 @@ socket.addEventListener("message", (event) => {
         responseBody = Buffer.from(
           responseBody
             .toString()
-            .replace(/(<\/body>)(?![\s\S]*\1)/, '<script src="/__hyperbook_dev.js"></script></body>'),
+            .replace(
+              /(<\/body>)(?![\s\S]*\1)/,
+              '<script src="/__hyperbook_dev.js"></script></body>',
+            ),
         );
       }
 
@@ -142,7 +145,7 @@ socket.addEventListener("message", (event) => {
   ////////////////////
 
   chokidar
-    .watch("**/*", {
+    .watch(".", {
       ignoreInitial: true,
       cwd: root,
       usePolling: true,

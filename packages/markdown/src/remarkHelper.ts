@@ -1,8 +1,11 @@
 // Register directive nodes in mdast:
 /// <reference types="mdast-util-directive" />
 import { Code, Image } from "mdast";
-import { ContainerDirective } from "mdast-util-directive";
-import { LeafDirective, TextDirective } from "mdast-util-directive/lib";
+import {
+  ContainerDirective,
+  LeafDirective,
+  TextDirective,
+} from "mdast-util-directive";
 import { Node } from "unified/lib";
 import { VFile } from "vfile";
 
@@ -46,20 +49,20 @@ export const requestJS = (file: VFile, js: string[]) => {
     file.data.js = [];
   }
 
-  if (!file.data.js.find(s => JSON.stringify(s) === JSON.stringify(js))) {
+  if (!file.data.js.find((s) => JSON.stringify(s) === JSON.stringify(js))) {
     file.data.js.push(js);
   }
-}
+};
 
 export const requestCSS = (file: VFile, css: string[]) => {
   if (!file.data.css) {
     file.data.css = [];
   }
 
-  if (!file.data.css.find(s => JSON.stringify(s) === JSON.stringify(css))) {
+  if (!file.data.css.find((s) => JSON.stringify(s) === JSON.stringify(css))) {
     file.data.css.push(css);
   }
-}
+};
 
 export const isImage = (node: Node): node is Image => {
   return node.type === "image";

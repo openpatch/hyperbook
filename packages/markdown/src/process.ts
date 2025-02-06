@@ -1,6 +1,7 @@
 import rehypeKatex from "rehype-katex";
 import rehypeStringify from "rehype-stringify";
 import rehypePrettyCode from "rehype-pretty-code";
+import rehypeUnwrapImages from "rehype-unwrap-images";
 import { transformerCopyButton } from "@rehype-pretty/transformers";
 import remarkParse from "remark-parse";
 import remarkToRehype from "remark-rehype";
@@ -11,7 +12,6 @@ import remarkDirective from "remark-directive";
 import remarkDirectiveRehype from "remark-directive-rehype";
 import remarkMath from "remark-math";
 import remarkGemoji from "remark-gemoji";
-import remarkUnwrapImages from "remark-unwrap-images";
 import remarkDirectiveVideo from "./remarkDirectiveVideo";
 import remarkDirectiveYoutube from "./remarkDirectiveYoutube";
 import remarkDirectiveTiles from "./remarkDirectiveTiles";
@@ -93,7 +93,6 @@ export const remark = (ctx: HyperbookContext) => {
     remarkDirectiveWebide(ctx),
     remarkCode(ctx),
     remarkMath,
-    remarkUnwrapImages,
     /* needs to be last directive */
     remarkDirectiveProtect(ctx),
     remarkCollectHeadings(ctx),
@@ -106,7 +105,7 @@ export const remark = (ctx: HyperbookContext) => {
     .use(remarkToRehype, {
       allowDangerousHtml: ctx.config.allowDangerousHtml || false,
       footnoteLabel: i18n.get("footnote-label"),
-      footnoteBackLabel(referenceIndex, rereferenceIndex) {
+      footnoteBackLabel(referenceIndex: number, rereferenceIndex: number) {
         if (rereferenceIndex > 1) {
           return i18n.get("footnote-back-label-many", {
             index: `${referenceIndex + 1}`,
@@ -124,6 +123,7 @@ export const process = (md: string, ctx: HyperbookContext) => {
   i18n.init(ctx.config.language || "en");
 
   const rehypePlugins: PluggableList = [
+    rehypeUnwrapImages,
     rehypeTableOfContents(ctx),
     rehypeQrCode(ctx),
     rehypeKatex,
