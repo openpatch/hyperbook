@@ -382,20 +382,20 @@ importers:
         specifier: ^2.0.4
         version: 2.0.4(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       react:
-        specifier: 18.2.0
+        specifier: ^18.2.0
         version: 18.2.0
       react-dom:
-        specifier: 18.2.0
+        specifier: ^18.2.0
         version: 18.2.0(react@18.2.0)
     devDependencies:
       '@rollup/plugin-typescript':
         specifier: ^12.1.2
         version: 12.1.2(rollup@4.34.4)(tslib@2.8.1)(typescript@5.7.3)
       '@types/react':
-        specifier: 18.2.0
+        specifier: ^18.2.0
         version: 18.2.0
       '@types/react-dom':
-        specifier: 18.2.0
+        specifier: ^18.2.0
         version: 18.2.0
       '@vitejs/plugin-react':
         specifier: ^4.3.4
@@ -423,8 +423,8 @@ importers:
         specifier: 20.12.12
         version: 20.12.12
       '@types/vscode':
-        specifier: 1.97.0
-        version: 1.97.0
+        specifier: 1.71.0
+        version: 1.71.0
       '@typescript-eslint/eslint-plugin':
         specifier: 8.23.0
         version: 8.23.0(@typescript-eslint/parser@8.23.0(eslint@9.19.0)(typescript@5.7.3))(eslint@9.19.0)(typescript@5.7.3)
@@ -1626,8 +1626,8 @@ packages:
   '@types/unist@3.0.3':
     resolution: {integrity: sha512-ko/gIFJRv177XgZsZcBwnqJN5x/Gien8qNOn0D5bQU/zAzVf9Zt3BlcUiLqhV9y4ARk0GbT3tnUiPNgnTXzc/Q==}
 
-  '@types/vscode@1.97.0':
-    resolution: {integrity: sha512-ueE73loeOTe7olaVyqP9mrRI54kVPJifUPjblZo9fYcv1CuVLPOEKEkqW0GkqPC454+nCEoigLWnC2Pp7prZ9w==}
+  '@types/vscode@1.71.0':
+    resolution: {integrity: sha512-nB50bBC9H/x2CpwW9FzRRRDrTZ7G0/POttJojvN/LiVfzTGfLyQIje1L1QRMdFXK9G41k5UJN/1B9S4of7CSzA==}
 
   '@types/ws@8.5.14':
     resolution: {integrity: sha512-bd/YFLW+URhBzMXurx7lWByOu+xzU9+kb3RboOteXYDfW+tr+JZa99OyNmPINEGB/ahzKrEuc8rcv4gnpJmxTw==}
@@ -7882,7 +7882,7 @@ snapshots:
 
   '@types/unist@3.0.3': {}
 
-  '@types/vscode@1.97.0': {}
+  '@types/vscode@1.71.0': {}
 
   '@types/ws@8.5.14':
     dependencies:
