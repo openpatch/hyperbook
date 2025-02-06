@@ -1,5 +1,11 @@
 # @hyperbook/markdown
 
+## 0.24.12
+
+### Patch Changes
+
+- [`2641bc4`](https://github.com/openpatch/hyperbook/commit/2641bc4a15b3b93d33ded59f3983847943bd1b81) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - fix missing right border
+
 ## 0.24.11
 
 ### Patch Changes
