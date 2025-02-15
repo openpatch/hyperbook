@@ -1,0 +1,11 @@
+.directive-h5p .h5p-frame {
+  border: 1px solid var(--color-spacer);
+  border-radius: 8px;
+  overflow: hidden;
+  padding: 8px;
+  background-color: #fefefe;
+}
+
+.directive-h5p {
+  margin-bottom: 8px;
+}

@@ -51,6 +51,7 @@
     "cpy": "11.1.0",
     "cross-spawn": "7.0.6",
     "domutils": "^3.2.2",
+    "extract-zip": "^2.0.1",
     "got": "12.6.0",
     "htmlparser2": "^10.0.0",
     "lunr": "^2.3.9",

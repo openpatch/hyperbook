@@ -189,11 +189,51 @@ export function activate(context: vscode.ExtensionContext) {
     '"',
   );
 
+  const h5pProvider = vscode.languages.registerCompletionItemProvider(
+    DocumentSelectorMarkdown,
+    {
+      async provideCompletionItems(document, position) {
+        const linePrefix = document
+          .lineAt(position)
+          .text.slice(0, position.character);
+        const findTerm = linePrefix.match(/.*:(h5p)\[.+\]{\s*src=\"/);
+        if (findTerm === null) {
+          return undefined;
+        }
+
+        const workspaceFolder = await hyperbook.findRoot(document.uri.path);
+
+        if (!workspaceFolder) {
+          return undefined;
+        }
+
+        return vscode.workspace
+          .findFiles(new vscode.RelativePattern(workspaceFolder, "public/**"))
+          .then((files) => {
+            return files
+              .filter((f) => f.path.endsWith(".h5p"))
+              .map((f) => {
+                const p = path.relative(
+                  path.join(workspaceFolder, "public"),
+                  f.path,
+                );
+                return new vscode.CompletionItem(
+                  p,
+                  vscode.CompletionItemKind.File,
+                );
+              });
+          });
+      },
+    },
+    '"',
+  );
+
   context.subscriptions.push(
     bookProvider,
     publicProvider,
     glossaryProvider,
     archiveProvider,
+    h5pProvider,
   );
 }
 
