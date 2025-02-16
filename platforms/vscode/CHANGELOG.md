@@ -1,5 +1,16 @@
 # @hyperbook/vscode-extension
 
+## 0.29.0
+
+### Minor Changes
+
+- [#964](https://github.com/openpatch/hyperbook/pull/964) [`6557bb3`](https://github.com/openpatch/hyperbook/commit/6557bb3116aff3c2091922998c34d7559fa3c863) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add h5p element
+
+### Patch Changes
+
+- Updated dependencies [[`6557bb3`](https://github.com/openpatch/hyperbook/commit/6557bb3116aff3c2091922998c34d7559fa3c863)]:
+  - @hyperbook/markdown@0.25.0
+
 ## 0.28.19
 
 ### Patch Changes
