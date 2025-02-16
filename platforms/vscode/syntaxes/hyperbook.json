@@ -19,6 +19,9 @@
       "include": "#directive-download"
     },
     {
+      "include": "#directive-h5p"
+    },
+    {
       "include": "#directive-emoji"
     },
     {
@@ -204,6 +207,33 @@
               "captures": {
                 "1": {
                   "name": "keyword.parameter.directive.download.hyperbook"
+                },
+                "2": {
+                  "name": "string.quoted.double.untitled"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "directive-h5p": {
+      "name": "meta.directive.h5p.hyperbook",
+      "match": "(^|\\G)(:{1,})(h5p){(.*)}\\s*$",
+      "captures": {
+        "2": {
+          "name": "punctuation.definition.directive.level.hyperbook"
+        },
+        "3": {
+          "name": "entity.name.function.directive.h5p.hyperbook"
+        },
+        "4": {
+          "patterns": [
+            {
+              "match": "(src)=\"([^\"]*)\"",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.h5p.hyperbook"
                 },
                 "2": {
                   "name": "string.quoted.double.untitled"

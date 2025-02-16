@@ -6,6 +6,7 @@ import { hyperproject, vfile, hyperbook } from "@hyperbook/fs";
 import { runArchive } from "./archive";
 import { makeDir } from "./helpers/make-dir";
 import { rimraf } from "rimraf";
+import extractZip from "extract-zip";
 import {
   Link,
   Hyperproject,
@@ -22,7 +23,7 @@ export async function runBuildProject(
   project: Hyperproject,
   rootProject: Hyperproject,
   out?: string,
-  filter?: string
+  filter?: string,
 ): Promise<void> {
   const name = hyperproject.getName(project);
   if (project.type === "book") {
@@ -33,7 +34,7 @@ export async function runBuildProject(
       project.basePath,
       name,
       out,
-      filter
+      filter,
     );
   } else {
     console.log(`${chalk.cyan(`[${name}]`)} Building Library.`);
@@ -53,7 +54,7 @@ async function runBuild(
   basePath?: string,
   prefix?: string,
   out?: string,
-  filter?: string
+  filter?: string,
 ): Promise<void> {
   console.log(`${chalk.blue(`[${prefix}]`)} Reading hyperbook.json.`);
   const hyperbookJson = await hyperbook.getJson(root);
@@ -91,7 +92,7 @@ async function runBuild(
     rootOut = path.join(out, ".hyperbook", "out", basePath || "");
   }
   console.log(
-    `${chalk.blue(`[${prefix}]`)} Cleaning output folder ${rootOut}.`
+    `${chalk.blue(`[${prefix}]`)} Cleaning output folder ${rootOut}.`,
   );
 
   await runArchive(root, rootOut, prefix);
@@ -133,7 +134,7 @@ async function runBuild(
   const pagesAndSections = await hyperbook.getPagesAndSections(root);
   const pageList = hyperbook.getPageList(
     pagesAndSections.sections,
-    pagesAndSections.pages
+    pagesAndSections.pages,
   );
   const searchDocuments: any[] = [];
 
@@ -180,7 +181,7 @@ async function runBuild(
       });
       const permaFileOut = path.join(
         permaOut,
-        file.markdown.data.permaid + ".html"
+        file.markdown.data.permaid + ".html",
       );
       await fs.writeFile(permaFileOut, result.value);
     }
@@ -190,7 +191,7 @@ async function runBuild(
       readline.cursorTo(process.stdout, 0);
     }
     process.stdout.write(
-      `${chalk.blue(`[${prefix}]`)} Buildung book: [${i++}/${bookFiles.length}]`
+      `${chalk.blue(`[${prefix}]`)} Buildung book: [${i++}/${bookFiles.length}]`,
     );
     if (process.env.CI) {
       process.stdout.write("\n");
@@ -202,7 +203,7 @@ async function runBuild(
   const glossaryOut = path.join(rootOut, "glossary");
   if (filter) {
     glossaryFiles = glossaryFiles.filter((f) =>
-      f.path.absolute?.endsWith(filter)
+      f.path.absolute?.endsWith(filter),
     );
   }
 
@@ -242,31 +243,7 @@ async function runBuild(
       readline.cursorTo(process.stdout, 0);
     }
     process.stdout.write(
-      `${chalk.blue(`[${prefix}]`)} Buildung glossary: [${i++}/${glossaryFiles.length}]`
-    );
-    if (process.env.CI) {
-      process.stdout.write("\n");
-    }
-  }
-  process.stdout.write("\n");
-
-  let otherFiles = await vfile.listForFolder(root, "public");
-  i = 1;
-  for (let file of otherFiles) {
-    const directoryOut = path.join(rootOut, file.path.directory);
-    await makeDir(directoryOut, {
-      recursive: true,
-    });
-    if (file.path.href) {
-      const fileOut = path.join(rootOut, file.path.href);
-      await cp(file.path.absolute, fileOut);
-    }
-    if (!process.env.CI) {
-      readline.clearLine(process.stdout, 0);
-      readline.cursorTo(process.stdout, 0);
-    }
-    process.stdout.write(
-      `${chalk.blue(`[${prefix}]`)} Copying public files: [${i++}/${otherFiles.length}]`
+      `${chalk.blue(`[${prefix}]`)} Buildung glossary: [${i++}/${glossaryFiles.length}]`,
     );
     if (process.env.CI) {
       process.stdout.write("\n");
@@ -280,6 +257,54 @@ async function runBuild(
     recursive: true,
   });
 
+  let otherFiles = await vfile.listForFolder(root, "public");
+  i = 1;
+  for (let file of otherFiles) {
+    const directoryOut = path.join(rootOut, file.path.directory);
+    await makeDir(directoryOut, {
+      recursive: true,
+    });
+    if (file.path.href && file.extension !== ".h5p") {
+      const fileOut = path.join(rootOut, file.path.href);
+      await cp(file.path.absolute, fileOut);
+    } else if (file.path.href && file.extension === ".h5p") {
+      const fileOut = path.join(rootOut, file.path.href);
+      await extractZip(file.path.absolute, {
+        dir: fileOut,
+      });
+
+      const h5pLibraries = path.join(assetsOut, "directive-h5p", "libraries");
+      await makeDir(h5pLibraries, { recursive: true });
+
+      const files = await fs.readdir(fileOut);
+      const libraryFolders = files.filter(
+        (file) => !["content", "h5p.json"].includes(file),
+      );
+      for (const libraryFolder of libraryFolders) {
+        await cp(
+          path.join(fileOut, libraryFolder),
+          path.join(h5pLibraries, libraryFolder),
+          {
+            recursive: true,
+            force: true,
+          },
+        );
+        await rimraf(path.join(fileOut, libraryFolder));
+      }
+    }
+    if (!process.env.CI) {
+      readline.clearLine(process.stdout, 0);
+      readline.cursorTo(process.stdout, 0);
+    }
+    process.stdout.write(
+      `${chalk.blue(`[${prefix}]`)} Copying public files: [${i++}/${otherFiles.length}]`,
+    );
+    if (process.env.CI) {
+      process.stdout.write("\n");
+    }
+  }
+  process.stdout.write("\n");
+
   i = 1;
   for (let directive of directives) {
     const assetsDirectivePath = path.join(assetsPath, `directive-${directive}`);
@@ -289,7 +314,7 @@ async function runBuild(
       readline.cursorTo(process.stdout, 0);
     }
     process.stdout.write(
-      `${chalk.blue(`[${prefix}]`)} Copying directive assets: [${i++}/${directives.size}]`
+      `${chalk.blue(`[${prefix}]`)} Copying directive assets: [${i++}/${directives.size}]`,
     );
     if (process.env.CI) {
       process.stdout.write("\n");
@@ -303,7 +328,7 @@ async function runBuild(
     } catch (e) {
       process.stdout.write("\n");
       process.stdout.write(
-        `${chalk.red(`[${prefix}]`)} Failed copying directive assets: ${directive}`
+        `${chalk.red(`[${prefix}]`)} Failed copying directive assets: ${directive}`,
       );
       process.stdout.write("\n");
     }
@@ -337,7 +362,7 @@ async function runBuild(
       readline.cursorTo(process.stdout, 0);
     }
     process.stdout.write(
-      `${chalk.blue(`[${prefix}]`)} Copying hyperbook assets: [${i++}/${mainAssets.length}]`
+      `${chalk.blue(`[${prefix}]`)} Copying hyperbook assets: [${i++}/${mainAssets.length}]`,
     );
     if (process.env.CI) {
       process.stdout.write("\n");
@@ -357,7 +382,7 @@ async function runBuild(
         foundLanguage = true;
       } catch (e) {
         console.log(
-          `${chalk.yellow(`[${prefix}]`)} ${hyperbookJson.language} is no valid value for the lanuage key. See https://github.com/MihaiValentin/lunr-languages for possible values. Falling back to English.`
+          `${chalk.yellow(`[${prefix}]`)} ${hyperbookJson.language} is no valid value for the lanuage key. See https://github.com/MihaiValentin/lunr-languages for possible values. Falling back to English.`,
         );
       }
     }
@@ -396,17 +421,31 @@ const SEARCH_DOCUMENTS = ${JSON.stringify(documents)};
     .readdir(path.join(__dirname, "locales"))
     .then((files) => files.map((file) => file.split(".")[0]));
   let language = "en";
-  if (hyperbookJson.language && supportLanguages.includes(hyperbookJson.language)) {
+  if (
+    hyperbookJson.language &&
+    supportLanguages.includes(hyperbookJson.language)
+  ) {
     language = hyperbookJson.language;
   }
 
-  const i18nJS = await fs.readFile(path.join(rootOut, ASSETS_FOLDER, "i18n.js"), "utf-8");
-  const locales = await fs.readFile(path.join(__dirname, "locales", `${language}.json`), "utf-8");
-  await fs.writeFile(path.join(rootOut, ASSETS_FOLDER, "i18n.js"), i18nJS.replace(/\/\/[\s]*LOCALES[\s\S]*?[\s]*\/\/[\s]*LOCALES/g, `
+  const i18nJS = await fs.readFile(
+    path.join(rootOut, ASSETS_FOLDER, "i18n.js"),
+    "utf-8",
+  );
+  const locales = await fs.readFile(
+    path.join(__dirname, "locales", `${language}.json`),
+    "utf-8",
+  );
+  await fs.writeFile(
+    path.join(rootOut, ASSETS_FOLDER, "i18n.js"),
+    i18nJS.replace(
+      /\/\/[\s]*LOCALES[\s\S]*?[\s]*\/\/[\s]*LOCALES/g,
+      `
   // GENERATED
   const locales = ${locales};
-`));
-
+`,
+    ),
+  );
 
   console.log(`${chalk.green(`[${prefix}]`)} Build success: ${rootOut}`);
 }

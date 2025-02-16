@@ -13,17 +13,13 @@
     "prefix": [":download"],
     "body": ["::download[${2:title}]{src=\"$1\"}", "$0"]
   },
+  "Element H5P": {
+    "prefix": [":h5p"],
+    "body": ["::h5p{src=\"$1\"}", "$0"]
+  },
   "Element Archive": {
     "prefix": [":archive"],
     "body": ["::archive[${2:title}]{name=\"$1\"}", "$0"]
-  },
-  "Element Bitflow Flow": {
-    "prefix": [":flow"],
-    "body": ["::flow{src=\"$1\" height=400}", "$0"]
-  },
-  "Element Bitflow Task": {
-    "prefix": [":task"],
-    "body": ["::task{src=\"$1\" height=400}", "$0"]
   },
   "Element Bookmarks": {
     "prefix": [":bookmarks"],
