@@ -50,11 +50,12 @@ export default (ctx: HyperbookContext) => () => {
             tagName: "hyperbook-geogebra",
             properties: {
               ...props,
+              height: height,
+              width: width,
               borderRadius: 8,
               material: src ? ctx.makeUrl(src, "public") : undefined,
               language: ctx.config.language || "en",
               "data-id": id,
-              autoHeight: true,
               scaleContainerClass: "directive-geogebra",
               allowUpscale: true,
               showResetIcon: true,
