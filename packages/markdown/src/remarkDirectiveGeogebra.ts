@@ -22,6 +22,8 @@ export default (ctx: HyperbookContext) => () => {
           id = hash(node),
           height = 600,
           width = 800,
+          showFullscreenButton = true,
+          showResetIcon = true,
           ...props
         } = node.attributes || {};
 
@@ -56,9 +58,10 @@ export default (ctx: HyperbookContext) => () => {
               material: src ? ctx.makeUrl(src, "public") : undefined,
               language: ctx.config.language || "en",
               "data-id": id,
+              showFullscreenButton,
               scaleContainerClass: "directive-geogebra",
               allowUpscale: true,
-              showResetIcon: true,
+              showResetIcon,
             },
             children: [
               {
