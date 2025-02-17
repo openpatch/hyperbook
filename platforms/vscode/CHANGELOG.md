@@ -1,5 +1,14 @@
 # @hyperbook/vscode-extension
 
+## 0.29.1
+
+### Patch Changes
+
+- [`ba25548`](https://github.com/openpatch/hyperbook/commit/ba255486bb005b5c1836354e8ca9292b4f3a859d) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Improve responsive scaling of the geogebra element and save/load its current state.
+
+- Updated dependencies [[`549b9d8`](https://github.com/openpatch/hyperbook/commit/549b9d8947a5c860bf8029a6c20a1ab86d2549df), [`ba25548`](https://github.com/openpatch/hyperbook/commit/ba255486bb005b5c1836354e8ca9292b4f3a859d)]:
+  - @hyperbook/markdown@0.25.1
+
 ## 0.29.0
 
 ### Minor Changes
