@@ -5,4 +5,8 @@ permaid: webide
 
 ## H5P
 
-::h5p{src="h5p-test"}
+:::geogebra{showAlgebra}
+
+a = Point({1, 2})
+
+:::

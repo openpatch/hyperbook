@@ -38,6 +38,19 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.50.1
+
+::::tabs
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+- Improve responsive scaling of the GeoGebra element.
+- Save and load the state of the GeoGebra element.
+
+:::
+
+::::
+
 ## v0.50.0
 
 ::::tabs

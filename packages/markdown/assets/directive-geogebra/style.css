@@ -1,10 +1,4 @@
 .directive-geogebra {
-  display: flex;
-  justify-content: center;
+  margin: 0 auto;
   margin-bottom: 12px;
-}
-
-.directive-geogebra hyperbook-geogebra {
-  overflow: hidden;
-  border-radius: 8px;
 }

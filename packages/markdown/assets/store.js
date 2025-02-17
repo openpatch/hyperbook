@@ -25,6 +25,7 @@ store.version(1).stores({
   excalidraw: `id,excalidrawElements,appState,files`,
   webide: `id,html,css,js`,
   h5p: `id,userData`,
+  geogebra: `id,state`,
 });
 var sqlIdeDB = new Dexie("SQL-IDE");
 sqlIdeDB.version(0.1).stores({
@@ -130,7 +131,7 @@ async function hyperbookImport() {
         alert(
           i18n.get("store-not-supported-file-version", {
             version: data.version,
-          })
+          }),
         );
         return;
       }

@@ -7,6 +7,7 @@ import { visit } from "unist-util-visit";
 import { VFile } from "vfile";
 import { isDirective, registerDirective } from "./remarkHelper";
 import { toText } from "./mdastUtilToText";
+import hash from "./objectHash";
 
 export default (ctx: HyperbookContext) => () => {
   const name = "geogebra";
@@ -16,6 +17,13 @@ export default (ctx: HyperbookContext) => () => {
         if (node.name !== name) return;
 
         const data = node.data || (node.data = {});
+        const {
+          src = "",
+          id = hash(node),
+          height = 600,
+          width = 800,
+          ...props
+        } = node.attributes || {};
 
         registerDirective(
           file,
@@ -23,24 +31,17 @@ export default (ctx: HyperbookContext) => () => {
           [
             "https://www.geogebra.org/apps/deployggb.js",
             "geogebra-web-component.js",
+            "client.js",
           ],
           ["style.css"],
         );
 
-        const { src, ...props } = node.attributes || {};
-
         data.hName = "div";
+
         data.hProperties = {
           class: "directive-geogebra",
+          style: `max-height: ${height}px; max-width: ${width}px; aspect-ratio: ${width}/${height};`,
         };
-
-        if (!src && !props.width) {
-          props.width = "800";
-        }
-
-        if (!src && !props.height) {
-          props.height = "600";
-        }
 
         const value = toText(node);
         data.hChildren = [
@@ -51,6 +52,12 @@ export default (ctx: HyperbookContext) => () => {
               ...props,
               borderRadius: 8,
               material: src ? ctx.makeUrl(src, "public") : undefined,
+              language: ctx.config.language || "en",
+              "data-id": id,
+              autoHeight: true,
+              scaleContainerClass: "directive-geogebra",
+              allowUpscale: true,
+              showResetIcon: true,
             },
             children: [
               {
