@@ -1,5 +1,11 @@
 # @hyperbook/markdown
 
+## 0.25.3
+
+### Patch Changes
+
+- [`86714e6`](https://github.com/openpatch/hyperbook/commit/86714e6838547ccb1e779fb9ba765168c93bd37f) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fire resize event after the collapsible is expanded.
+
 ## 0.25.2
 
 ### Patch Changes
