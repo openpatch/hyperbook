@@ -38,6 +38,18 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.50.2
+
+::::tabs
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+- Fix GeoGebra element not resize correctly in collapsibles.
+
+:::
+
+::::
+
 ## v0.50.1
 
 ::::tabs
