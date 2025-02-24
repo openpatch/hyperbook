@@ -1,5 +1,11 @@
 # @hyperbook/markdown
 
+## 0.25.2
+
+### Patch Changes
+
+- [`8712ab5`](https://github.com/openpatch/hyperbook/commit/8712ab5557f00ef85a782f9219829e1f1eba5973) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - fire resize event when a collapsible is opened. This is need for GeoGebra to resize the applet.
+
 ## 0.25.1
 
 ### Patch Changes
