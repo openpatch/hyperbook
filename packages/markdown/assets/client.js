@@ -15,7 +15,6 @@ var hyperbook = (function () {
         });
       }
       collapsible.addEventListener("click", () => {
-        window.dispatchEvent(new Event("resize")); // geogebra new this in order resize the applet
         collapsible.classList.toggle("expanded");
         if (id) {
           store.collapsibles.get(id).then((result) => {
@@ -30,6 +29,10 @@ var hyperbook = (function () {
             }
           });
         }
+
+        setTimeout(() => {
+          window.dispatchEvent(new Event("resize")); // geogebra new this in order resize the applet
+        }, 100);
       });
     }
     updateCollapsibles(root);
