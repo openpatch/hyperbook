@@ -38,6 +38,18 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.50.4
+
+::::tabs
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+- The GeoGebra reset button now resets the GeoGebra element to its initial state.
+
+:::
+
+::::
+
 ## v0.50.3
 
 ::::tabs

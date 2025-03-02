@@ -745,9 +745,12 @@ class GeogebraElement extends HTMLElement {
       app.registerClientListener((detail) => {
         this.dispatchEvent(new CustomEvent(detail.type, { detail: detail }));
       });
-      app.registerClearListener(() =>
-        this.dispatchEvent(new CustomEvent("clear")),
-      );
+      app.registerClearListener(() => {
+        if (this.init_commands) {
+          app.evalCommand(this.init_commands);
+        }
+        this.dispatchEvent(new CustomEvent("clear"));
+      });
       const other_events = ["Add", "Click", "Remove", "Rename", "Update"];
       other_events.forEach((event_name) => {
         app[`register${event_name}Listener`]((name) => {
