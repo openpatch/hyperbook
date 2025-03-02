@@ -1,5 +1,14 @@
 # @hyperbook/vscode-extension
 
+## 0.29.4
+
+### Patch Changes
+
+- [`660d949`](https://github.com/openpatch/hyperbook/commit/660d9491198ffaeeda9141f4d634bfda202a8963) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - The reset button for GeoGebra did not rerun the initial commands.
+
+- Updated dependencies [[`660d949`](https://github.com/openpatch/hyperbook/commit/660d9491198ffaeeda9141f4d634bfda202a8963)]:
+  - @hyperbook/markdown@0.25.4
+
 ## 0.29.3
 
 ### Patch Changes
