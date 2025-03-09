@@ -31,7 +31,7 @@ pnpm --filter hyperbook-studio open
 
 ## Maintainer
 
-Mike Barkmin • [Twitter](https://twitter.com/mikebarkmin) • [GitHub](https://github.com/mikebarkmin/)
+Mike Barkmin • [Mastodon](https://bildung.social/@mikebarkmin) • [GitHub](https://github.com/mikebarkmin/)
 
 ## Support
 
