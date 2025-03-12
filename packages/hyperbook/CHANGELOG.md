@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.50.5
+
+### Patch Changes
+
+- [`9671fff`](https://github.com/openpatch/hyperbook/commit/9671fffd2f52d272e346a70f2727ed7ad9c894f7) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - The development server does not crash anymore, when an error occurs.
+
 ## 0.50.4
 
 ### Patch Changes

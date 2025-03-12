@@ -1,5 +1,14 @@
 # @hyperbook/vscode-extension
 
+## 0.29.5
+
+### Patch Changes
+
+- [`9671fff`](https://github.com/openpatch/hyperbook/commit/9671fffd2f52d272e346a70f2727ed7ad9c894f7) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - The development server does not crash anymore, when an error occurs.
+
+- Updated dependencies [[`9671fff`](https://github.com/openpatch/hyperbook/commit/9671fffd2f52d272e346a70f2727ed7ad9c894f7)]:
+  - @hyperbook/fs@0.17.2
+
 ## 0.29.4
 
 ### Patch Changes
