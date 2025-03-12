@@ -38,6 +38,18 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.50.5
+
+::::tabs
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+- The development server does not crash anymore, when an error occurs.
+
+:::
+
+::::
+
 ## v0.50.4
 
 ::::tabs

@@ -48,7 +48,7 @@ export const get = async (
     };
   }
 
-  throw Error(`Missing book or library for path ${root}`);
+  throw Error(`Missing or invalid hyperbook.json/hyperlibray.json ${root}`);
 };
 
 export const getName = (project: Hyperproject, language?: Language) => {

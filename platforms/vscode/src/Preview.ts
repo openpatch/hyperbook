@@ -215,9 +215,6 @@ export default class Preview {
       this.editor = vscode.window.activeTextEditor;
       await this.handleTextDocumentChange.call(this);
 
-      vscode.workspace.onDidChangeTextDocument(
-        this.handleTextDocumentChange.bind(this),
-      );
       vscode.workspace.onDidChangeConfiguration(
         this.handleTextDocumentChange.bind(this),
       );

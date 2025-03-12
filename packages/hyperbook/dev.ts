@@ -83,8 +83,8 @@ socket.addEventListener("message", (event) => {
             .toString()
             .replace(
               /(<\/body>)(?![\s\S]*\1)/,
-              '<script src="/__hyperbook_dev.js"></script></body>',
-            ),
+              '<script src="/__hyperbook_dev.js"></script></body>'
+            )
         );
       }
 
@@ -122,21 +122,30 @@ socket.addEventListener("message", (event) => {
   });
 
   let rebuilding = false;
-  const rebuild = async (file: string) => {
-    console.log(file);
+  const rebuild = (status: string) => async (file: string) => {
     if (!rebuilding) {
+      console.log(`${chalk.yellow(`[Rebuilding ${status}]`)}: ${file}.`);
       rebuilding = true;
-      const rootProject = await hyperproject.get(process.cwd());
-      await runBuildProject(rootProject, rootProject);
-      reloadServer.emit("reload");
+      try {
+        const rootProject = await hyperproject.get(process.cwd());
+        await runBuildProject(rootProject, rootProject);
+        console.log(`${chalk.yellow(`[Reloading]`)}: Website`);
+        reloadServer.emit("reload");
+      } catch (e) {
+        if (e instanceof Error) {
+          console.error(`${chalk.red(`[Error]`)}: ${e.message}.`);
+        } else {
+          console.error(`${chalk.red(`[Error]`)}: ${e}.`);
+        }
+      }
       rebuilding = false;
     }
   };
-  await rebuild("");
+  await rebuild("(Initialize)")("");
 
   server.listen(port, () => {
     console.log(
-      `${chalk.yellow(`[DEV-SERVER]`)} is running at http://localhost:${port}`,
+      `${chalk.yellow(`[DEV-SERVER]`)} is running at http://localhost:${port}`
     );
   });
 
@@ -152,6 +161,7 @@ socket.addEventListener("message", (event) => {
       interval: 600,
       ignored: [outDir, path.join("archives", "*.zip")],
     })
-    .on("add", rebuild)
-    .on("change", rebuild);
+    .on("add", rebuild("(Added)"))
+    .on("change", rebuild("(Changed)"))
+    .on("unlink", rebuild("(Deleted)"));
 }
