@@ -86,6 +86,7 @@
     "dexie": "^4.0.11",
     "dexie-export-import": "^4.1.4",
     "h5p-standalone": "^3.8.0",
+    "jsxgraph": "^1.11.1",
     "live-server": "^1.2.2",
     "lunr": "^2.3.9",
     "lunr-languages": "^1.14.0",

@@ -170,6 +170,19 @@ async function postbuild() {
       src: path.join("./node_modules", "h5p-standalone", "dist"),
       dst: path.join("./dist", "assets", "directive-h5p"),
     },
+    {
+      src: path.join("./node_modules", "jsxgraph", "distrib", "jsxgraph.css"),
+      dst: path.join("./dist", "assets", "directive-jsxgraph", "jsxgraph.css"),
+    },
+    {
+      src: path.join(
+        "./node_modules",
+        "jsxgraph",
+        "distrib",
+        "jsxgraphcore.js",
+      ),
+      dst: path.join("./dist", "assets", "directive-jsxgraph", "jsxgraphcore.js"),
+    },
   ];
 
   for (let asset of assets) {

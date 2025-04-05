@@ -54,6 +54,7 @@ import remarkDirectivePyide from "./remarkDirectivePyide";
 import { i18n } from "./i18n";
 import remarkDirectiveWebide from "./remarkDirectiveWebide";
 import remarkDirectiveH5P from "./remarkDirectiveH5P";
+import remarkDirectiveJSXGraph from "./remarkDirectiveJSXGraph";
 
 export const remark = (ctx: HyperbookContext) => {
   i18n.init(ctx.config.language || "en");
@@ -93,6 +94,7 @@ export const remark = (ctx: HyperbookContext) => {
     remarkDirectiveGeogebra(ctx),
     remarkDirectiveWebide(ctx),
     remarkDirectiveH5P(ctx),
+    remarkDirectiveJSXGraph(ctx),
     remarkCode(ctx),
     remarkMath,
     /* needs to be last directive */

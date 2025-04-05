@@ -38,6 +38,18 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.51.0
+
+::::tabs
+
+:::tab{title="Improved :+1:" id="improved"}
+
+- In addition to GeoGebra you can now use JSXGraph for creating math visualizations. [Learn more](/elements/jsxgraph)
+
+:::
+
+::::
+
 ## v0.50.5
 
 ::::tabs
