@@ -1,5 +1,11 @@
 # @hyperbook/markdown
 
+## 0.26.0
+
+### Minor Changes
+
+- [`ff50422`](https://github.com/openpatch/hyperbook/commit/ff504220e5c57607d51f858e5c9a46dde252f8fc) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add jsxgraph element
+
 ## 0.25.4
 
 ### Patch Changes
