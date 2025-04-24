@@ -38,6 +38,18 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.52.0
+
+::::tabs
+
+:::tab{title="Improved :+1:" id="improved"}
+- A new element multievent that allows you to handle multiple events in a single interactive component. This feature is particularly useful for creating quizzes and other complex interactive scenarios where a single user's answers are evaluated directly with immediate feedback on whether they are correct or not. [Learn more](/elements/multievent)
+:::
+
+:::
+
+::::
+
 ## v0.51.1
 
 ::::tabs

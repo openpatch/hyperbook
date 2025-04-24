@@ -4,6 +4,9 @@
   "injectionSelector": "L:text.html",
   "patterns": [
     {
+      "include": "#directive-multievent"
+    },
+    {
       "include": "#directive-alert"
     },
     {
@@ -89,6 +92,29 @@
     }
   ],
   "repository": {
+    "directive-multievent": {
+      "name": "meta.directive.multievent",
+      "begin": ":::multievent",
+      "end": ":::",
+      "patterns": [
+        {
+          "name": "keyword.control.multievent.syntax",
+          "match": "\\{([rRcCaAkKlLtTzSvwyYBWnX]{1}[0-9]*)?\\{"
+        },
+        {
+          "name": "keyword.control.multievent.correct",
+          "match": "!\\w+"
+        },
+        {
+          "name": "string.unquoted.multievent.content",
+          "match": "[^{}\\n]+(?=\\}\\})"
+        },
+        {
+          "name": "punctuation.definition.multievent",
+          "match": "[{}|~]+"
+        }
+      ]
+    },
     "directive-alert": {
       "name": "meta.directive.alert.hyperbook",
       "begin": "(^|\\G)(:{3,})(alert)(?:{(error|success|info|warn)})?\\s*$",

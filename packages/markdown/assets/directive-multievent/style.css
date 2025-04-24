@@ -1,0 +1,53 @@
+.directive-multievent table {
+  width: auto;
+}
+
+.directive-multievent table td {
+  display: table-cell;
+  vertical-align: middle;
+}
+
+.directive-multievent {
+
+  .MECheckbox:not(first-child),
+  .MERadio:not(first-child) {
+    margin-left: 8px;
+  }
+
+  .MECheckbox,
+  .MERadio {
+    margin-right: 4px;
+  }
+
+  .MeChLabel~.MECheckbox,
+  .MeRaLabel~.MERadio {
+    margin-right: 8px;
+  }
+
+  .MeChLabel~.MECheckbox:not(first-child),
+  .MeRaLabel~.MERadio:not(first-child) {
+    margin-left: 4px;
+  }
+
+  table.MultiKwrTable,
+  table.MultiEvSuchTable {
+    background-color: transparent;
+    border: none;
+  }
+
+  table.MultiKwrTable *,
+  table.MultiEvSuchTable * {
+    line-height: 1;
+  }
+
+  .MultiKwrTable tr,
+  .MultiEvSuchTable tr {
+    background-color: transparent;
+    border: none;
+  }
+
+  .MultiKwrTable td,
+  .MultiEvSuchTable td {
+    padding: 0;
+  }
+}

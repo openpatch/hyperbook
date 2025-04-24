@@ -157,13 +157,22 @@
     "body": ["::pagelist{source=\"$1\"}", "$0"]
   },
   "Element P5": {
-    "prefix": [":sqlide"],
+    "prefix": [":p5"],
     "body": [
       ":::p5{height=400}",
       "",
       "```javascript",
       "$TM_SELECTED_TEXT$0",
       "```",
+      "",
+      ":::"
+    ]
+  },
+  "Element Multievent": {
+    "prefix": [":multievent"],
+    "body": [
+      ":::multievent",
+      "",
       "",
       ":::"
     ]

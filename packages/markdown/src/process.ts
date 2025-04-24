@@ -55,10 +55,13 @@ import { i18n } from "./i18n";
 import remarkDirectiveWebide from "./remarkDirectiveWebide";
 import remarkDirectiveH5P from "./remarkDirectiveH5P";
 import remarkDirectiveJSXGraph from "./remarkDirectiveJSXGraph";
+import remarkDirectiveMultievent from "./remarkDirectiveMultievent";
+import remarkSubSup from "./remarkSubSup";
 
 export const remark = (ctx: HyperbookContext) => {
   i18n.init(ctx.config.language || "en");
   const remarkPlugins: PluggableList = [
+    remarkSubSup,
     remarkRemoveComments,
     remarkGemoji,
     remarkDirective,
@@ -95,6 +98,7 @@ export const remark = (ctx: HyperbookContext) => {
     remarkDirectiveWebide(ctx),
     remarkDirectiveH5P(ctx),
     remarkDirectiveJSXGraph(ctx),
+    remarkDirectiveMultievent(ctx),
     remarkCode(ctx),
     remarkMath,
     /* needs to be last directive */
