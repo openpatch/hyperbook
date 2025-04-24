@@ -3,6 +3,8 @@ name: Multievent
 permaid: multievent
 ---
 
+# Multievent
+
 :::alert{info}
 The Multievent library originates from [Aufgabenfuchs](https://www.aufgabenfuchs.de/sonstiges/multievent.shtml) and has been adapted for Hyperbook.
 :::
