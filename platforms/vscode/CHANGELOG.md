@@ -1,5 +1,16 @@
 # @hyperbook/vscode-extension
 
+## 0.30.1
+
+### Patch Changes
+
+- [`8545973`](https://github.com/openpatch/hyperbook/commit/8545973ded8a8da94bda1485f5560a5f62c64153) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Styling Improvements:
+  - Increased the width of the navigation to utilize more horizontal space.
+  - Reduced base font size to 14px for improved readability and a more compact layout.
+  - Decreased header height to 60px to maximize vertical content space.
+- Updated dependencies [[`8545973`](https://github.com/openpatch/hyperbook/commit/8545973ded8a8da94bda1485f5560a5f62c64153)]:
+  - @hyperbook/markdown@0.27.0
+
 ## 0.30.0
 
 ### Minor Changes
