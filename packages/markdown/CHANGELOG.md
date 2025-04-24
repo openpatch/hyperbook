@@ -1,5 +1,11 @@
 # @hyperbook/markdown
 
+## 0.28.0
+
+### Minor Changes
+
+- [`9938ddd`](https://github.com/openpatch/hyperbook/commit/9938ddd3fe0876f7e69507593349d8f6d090934e) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add multievent element
+
 ## 0.27.0
 
 ### Minor Changes
