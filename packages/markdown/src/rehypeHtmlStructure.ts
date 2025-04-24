@@ -34,7 +34,7 @@ const makeSearchScripts = (ctx: HyperbookContext): ElementContent[] => {
         properties: {
           src: ctx.makeUrl(
             ["lunr-languages", "lunr.stemmer.support.min.js"],
-            "assets"
+            "assets",
           ),
           defer: true,
         },
@@ -46,7 +46,7 @@ const makeSearchScripts = (ctx: HyperbookContext): ElementContent[] => {
         properties: {
           src: ctx.makeUrl(
             ["lunr-languages", `lunr.${ctx.config.language}.min.js`],
-            "assets"
+            "assets",
           ),
           defer: true,
         },
@@ -94,6 +94,11 @@ body::-webkit-scrollbar {
   --color-brand: ${colors?.brand || "#007864"};
   --color-brand-dark: ${colors?.brandDark || colors?.brand || "#b5e3d8"};
   --color-brand-text: ${colors?.brandText || "white"};
+  --main-width: 980px;
+  --header-height: 60px;
+  --nav-width: minmax(300px, 0.33fr);
+  --nav-font-size: 0.9rem;
+  --body-font-size: 14px;
 }`;
 
   if (font) {
@@ -146,7 +151,7 @@ body {
   color: var(--color-text);
   font-family: hyperbook-body;
   font-weight: normal;
-  font-size: 16px;
+  font-size: var(--body-font-size);
   margin: 0;
   padding: 0;
 }
@@ -207,7 +212,8 @@ export default (ctx: HyperbookContext) => () => {
                 tagName: "meta",
                 properties: {
                   name: "viewport",
-                  content: "width=device-width, initial-scale=1,, interactive-widget=resizes-content",
+                  content:
+                    "width=device-width, initial-scale=1,, interactive-widget=resizes-content",
                 },
                 children: [],
               },
@@ -309,7 +315,7 @@ export default (ctx: HyperbookContext) => () => {
                 properties: {
                   src: makeUrl(
                     ["dark-mode-toggle-stylesheets-loader.js"],
-                    "assets"
+                    "assets",
                   ),
                 },
                 children: [],
@@ -392,7 +398,7 @@ window.Prism.manual = true;`,
                   rel: "stylesheet",
                   href: makeUrl(
                     ["prism", "prism-theme-github-dark.css"],
-                    "assets"
+                    "assets",
                   ),
                   media: "(prefers-color-scheme: dark)",
                 },
@@ -405,7 +411,7 @@ window.Prism.manual = true;`,
                   rel: "stylesheet",
                   href: makeUrl(
                     ["prism", "prism-theme-github-light.css"],
-                    "assets"
+                    "assets",
                   ),
                   media: "(prefers-color-scheme: light)",
                 },
@@ -457,7 +463,7 @@ window.Prism.manual = true;`,
                       href: makeUrl(style, "assets"),
                     },
                     children: [],
-                  }) as ElementContent
+                  }) as ElementContent,
               ),
               ...(ctx.config.styles || []).map(
                 (style) =>
@@ -471,7 +477,7 @@ window.Prism.manual = true;`,
                         : makeUrl(style, "public"),
                     },
                     children: [],
-                  }) as ElementContent
+                  }) as ElementContent,
               ),
               ...(ctx.navigation.current?.styles || []).map(
                 (style) =>
@@ -485,7 +491,7 @@ window.Prism.manual = true;`,
                         : makeUrl(style, "public"),
                     },
                     children: [],
-                  }) as ElementContent
+                  }) as ElementContent,
               ),
               {
                 type: "element",
@@ -529,7 +535,7 @@ HYPERBOOK_ASSETS = "${makeUrl("/", "assets")}"
                       src: makeUrl(script, "assets"),
                     },
                     children: [],
-                  }) as ElementContent
+                  }) as ElementContent,
               ),
               ...Object.entries(directives).flatMap(([directive, { styles }]) =>
                 styles.map(
@@ -543,12 +549,12 @@ HYPERBOOK_ASSETS = "${makeUrl("/", "assets")}"
                           ? style
                           : makeUrl(
                               ["directive-" + directive, style],
-                              "assets"
+                              "assets",
                             ),
                       },
                       children: [],
-                    }) as ElementContent
-                )
+                    }) as ElementContent,
+                ),
               ),
             ],
           },
@@ -579,13 +585,13 @@ HYPERBOOK_ASSETS = "${makeUrl("/", "assets")}"
                             ? script
                             : makeUrl(
                                 ["directive-" + directive, script],
-                                "assets"
+                                "assets",
                               ),
                           defer: true,
                         },
                         children: [],
-                      }) as ElementContent
-                  )
+                      }) as ElementContent,
+                  ),
               ),
               ...(ctx.config.scripts || []).map(
                 (script) =>
@@ -599,7 +605,7 @@ HYPERBOOK_ASSETS = "${makeUrl("/", "assets")}"
                       defer: true,
                     },
                     children: [],
-                  }) as ElementContent
+                  }) as ElementContent,
               ),
               ...(ctx.navigation.current?.scripts || []).map(
                 (script) =>
@@ -613,7 +619,7 @@ HYPERBOOK_ASSETS = "${makeUrl("/", "assets")}"
                       defer: true,
                     },
                     children: [],
-                  }) as ElementContent
+                  }) as ElementContent,
               ),
             ],
           },

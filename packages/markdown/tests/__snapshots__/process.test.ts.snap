@@ -23,6 +23,11 @@ body::-webkit-scrollbar {
   --color-brand: #007864;
   --color-brand-dark: #b5e3d8;
   --color-brand-text: white;
+  --main-width: 980px;
+  --header-height: 60px;
+  --nav-width: minmax(300px, 0.33fr);
+  --nav-font-size: 0.9rem;
+  --body-font-size: 14px;
 }
 body {
   overscroll-behavior-x: none;
@@ -30,7 +35,7 @@ body {
   color: var(--color-text);
   font-family: hyperbook-body;
   font-weight: normal;
-  font-size: 16px;
+  font-size: var(--body-font-size);
   margin: 0;
   padding: 0;
 }
@@ -90,6 +95,11 @@ body::-webkit-scrollbar {
   --color-brand: #007864;
   --color-brand-dark: #b5e3d8;
   --color-brand-text: white;
+  --main-width: 980px;
+  --header-height: 60px;
+  --nav-width: minmax(300px, 0.33fr);
+  --nav-font-size: 0.9rem;
+  --body-font-size: 14px;
 }
 body {
   overscroll-behavior-x: none;
@@ -97,7 +107,7 @@ body {
   color: var(--color-text);
   font-family: hyperbook-body;
   font-weight: normal;
-  font-size: 16px;
+  font-size: var(--body-font-size);
   margin: 0;
   padding: 0;
 }
@@ -149,6 +159,11 @@ body::-webkit-scrollbar {
   --color-brand: #007864;
   --color-brand-dark: #b5e3d8;
   --color-brand-text: white;
+  --main-width: 980px;
+  --header-height: 60px;
+  --nav-width: minmax(300px, 0.33fr);
+  --nav-font-size: 0.9rem;
+  --body-font-size: 14px;
 }
 body {
   overscroll-behavior-x: none;
@@ -156,7 +171,7 @@ body {
   color: var(--color-text);
   font-family: hyperbook-body;
   font-weight: normal;
-  font-size: 16px;
+  font-size: var(--body-font-size);
   margin: 0;
   padding: 0;
 }
@@ -239,6 +254,11 @@ body::-webkit-scrollbar {
   --color-brand: #007864;
   --color-brand-dark: #b5e3d8;
   --color-brand-text: white;
+  --main-width: 980px;
+  --header-height: 60px;
+  --nav-width: minmax(300px, 0.33fr);
+  --nav-font-size: 0.9rem;
+  --body-font-size: 14px;
 }
 body {
   overscroll-behavior-x: none;
@@ -246,7 +266,7 @@ body {
   color: var(--color-text);
   font-family: hyperbook-body;
   font-weight: normal;
-  font-size: 16px;
+  font-size: var(--body-font-size);
   margin: 0;
   padding: 0;
 }

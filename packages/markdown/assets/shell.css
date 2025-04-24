@@ -30,6 +30,7 @@ li {
 
 side-drawer {
   position: absolute;
+  width: 500px;
 }
 
 #nav-drawer {
@@ -208,8 +209,8 @@ a.jump.previous::before {
   right: 0;
   top: 0;
   bottom: 0;
-  grid-template-columns: 300px 1fr;
-  grid-template-rows: 80px 1fr;
+  grid-template-columns: var(--nav-width) 1fr;
+  grid-template-rows: var(--header-height) 1fr;
   grid-template-areas:
     "header header header"
     "nav article article";
@@ -224,10 +225,12 @@ a.jump.previous::before {
 }
 
 .sidebar {
+  font-size: var(--nav-font-size);
   display: flex;
   flex-direction: column;
   grid-area: nav;
   overflow-y: auto;
+  scrollbar-width: thin;
   border-right-style: solid;
   border-right-width: 1px;
   background: var(--color-nav);
@@ -271,8 +274,8 @@ a.jump.previous::before {
 .toggle>.bar1,
 .toggle>.bar2,
 .toggle>.bar3 {
-  width: 35px;
-  height: 5px;
+  width: 30px;
+  height: 4px;
   margin: 6px 0;
   transition: 0.4s;
 }
@@ -295,7 +298,6 @@ a.jump.previous::before {
 @media screen and (max-width: 1280px) {
   .main-grid {
     grid-template-columns: 1fr;
-    grid-template-rows: 80px 1fr;
     grid-template-areas:
       "header"
       "article";
@@ -318,7 +320,7 @@ main {
 }
 
 article {
-  max-width: 1280px;
+  max-width: var(--main-width);
   margin: 0 auto;
   grid-area: article;
   line-height: 1.5;
@@ -518,13 +520,13 @@ header {
 
 .branding .name {
   font-family: hyperbook-heading, sans-serif;
-  font-size: 20px;
+  font-size: 1.1rem;
   font-weight: bold;
 }
 
 .jump-container {
   display: flex;
-  max-width: 980px;
+  max-width: var(--main-width);
   margin: 0 auto;
   margin-top: 40px;
 }
@@ -544,7 +546,7 @@ header {
   gap: 16px;
   margin-top: 30px;
   padding-top: 30px;
-  max-width: 980px;
+  max-width: var(--main-width);
 }
 
 .meta .edit-github {
@@ -582,7 +584,7 @@ nav li+li {
 }
 
 .section {
-  margin-top: 8px;
+  margin-top: 4px;
 }
 
 .section>.name {
