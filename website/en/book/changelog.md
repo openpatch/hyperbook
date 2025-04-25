@@ -38,6 +38,21 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.52.1
+
+::::tabs
+
+:::tab{title="Improved :+1:" id="improved"}
+- Update dependencies
+    - P5 to version 2.0.0
+    - Excalidraw to version 0.18.0
+    - Mermaid to version 11.6.0
+:::
+
+:::
+
+::::
+
 ## v0.52.0
 
 ::::tabs
