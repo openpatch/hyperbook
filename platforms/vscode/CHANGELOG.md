@@ -1,5 +1,17 @@
 # @hyperbook/vscode-extension
 
+## 0.31.1
+
+### Patch Changes
+
+- [`38fb9b5`](https://github.com/openpatch/hyperbook/commit/38fb9b565ec8eb865507401d07cd04eee4909a53) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - fix syntax for multievent
+
+- [`b4b9593`](https://github.com/openpatch/hyperbook/commit/b4b9593aa46c33b47aa311e6aa7c8d0117bd753b) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - update dependencies
+
+- Updated dependencies [[`b4b9593`](https://github.com/openpatch/hyperbook/commit/b4b9593aa46c33b47aa311e6aa7c8d0117bd753b)]:
+  - @hyperbook/markdown@0.28.1
+  - @hyperbook/fs@0.17.3
+
 ## 0.31.0
 
 ### Minor Changes
