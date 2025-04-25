@@ -94,24 +94,36 @@
   "repository": {
     "directive-multievent": {
       "name": "meta.directive.multievent",
-      "begin": ":::multievent",
-      "end": ":::",
+      "begin": "(^|\\G)(:{3,})(multievent)\\s*$",
+      "end": "(^|\\G)(\\2)\\s*$",
       "patterns": [
         {
-          "name": "keyword.control.multievent.syntax",
-          "match": "\\{([rRcCaAkKlLtTzSvwyYBWnX]{1}[0-9]*)?\\{"
+          "name": "meta.multievent.nested",
+          "begin": "\\{([rRcCaBbAkKlLtTzSvwyYBWnXhH]{1}[0-9]*)\\{",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.control.multievent.nested.identifier"
+            }
+          },
+          "end": "\\}\\}",
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.definition.multievent.nested.end"
+            }
+          },
+          "patterns": [
+            {
+              "name": "string.unquoted.multievent.nested.content",
+              "match": "[^{}~\\n]+"
+            },
+            {
+              "name": "punctuation.definition.multievent.nested",
+              "match": "[{}|~]+"
+            }
+          ]
         },
         {
-          "name": "keyword.control.multievent.correct",
-          "match": "!\\w+"
-        },
-        {
-          "name": "string.unquoted.multievent.content",
-          "match": "[^{}\\n]+(?=\\}\\})"
-        },
-        {
-          "name": "punctuation.definition.multievent",
-          "match": "[{}|~]+"
+          "include": "hyperbook"
         }
       ]
     },
@@ -137,7 +149,7 @@
       },
       "patterns": [
         {
-          "include": "text.html.markdown"
+          "include": "hyperbook"
         }
       ]
     },
@@ -209,7 +221,7 @@
       },
       "patterns": [
         {
-          "include": "text.html.markdown"
+          "include": "hyperbook"
         }
       ]
     },
@@ -381,7 +393,7 @@
       },
       "patterns": [
         {
-          "include": "text.html.markdown"
+          "include": "hyperbook"
         }
       ]
     },
@@ -567,7 +579,7 @@
       },
       "patterns": [
         {
-          "include": "text.html.markdown"
+          "include": "hyperbook"
         }
       ]
     },
