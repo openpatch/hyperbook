@@ -43,10 +43,10 @@
     "gray-matter": "4.0.3",
     "mdast-util-directive": "^3.1.0",
     "mdast-util-from-markdown": "^2.0.2",
-    "micromark-extension-directive": "^3.0.2",
-    "mime-types": "^2.1.35",
+    "micromark-extension-directive": "^4.0.0",
+    "mime-types": "^3.0.1",
     "unist-util-visit": "^5.0.0",
-    "yaml": "^2.7.0"
+    "yaml": "^2.7.1"
   },
   "devDependencies": {
     "@hyperbook/types": "workspace:*",

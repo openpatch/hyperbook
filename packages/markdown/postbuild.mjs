@@ -68,13 +68,30 @@ async function postbuild() {
         "@excalidraw",
         "excalidraw",
         "dist",
-        "excalidraw-assets",
+        "prod",
+        "fonts"
       ),
       dst: path.join(
         "./dist",
         "assets",
         "directive-excalidraw",
-        "excalidraw-assets",
+        "fonts"
+      ),
+    },
+    {
+      src: path.join(
+        "./node_modules",
+        "@excalidraw",
+        "excalidraw",
+        "dist",
+        "prod",
+        "index.css"
+      ),
+      dst: path.join(
+        "./dist",
+        "assets",
+        "directive-excalidraw",
+        "excalidraw.css"
       ),
     },
     {
@@ -95,16 +112,6 @@ async function postbuild() {
     {
       src: path.join("./node_modules", "p5", "lib", "p5.min.js"),
       dst: path.join("./dist", "assets", "directive-p5", "p5.min.js"),
-    },
-    {
-      src: path.join(
-        "./node_modules",
-        "p5",
-        "lib",
-        "addons",
-        "p5.sound.min.js",
-      ),
-      dst: path.join("./dist", "assets", "directive-p5", "p5.sound.min.js"),
     },
     {
       src: path.join("./node_modules", "lunr", "lunr.min.js"),

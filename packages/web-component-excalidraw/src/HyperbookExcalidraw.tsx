@@ -1,10 +1,10 @@
+import { Excalidraw, CaptureUpdateAction } from "@excalidraw/excalidraw";
+import { FC, useCallback, useEffect, useState } from "react";
 import {
-  type ExcalidrawImperativeAPI,
+  ExcalidrawImperativeAPI,
   type ExcalidrawProps as EDP,
   ExcalidrawInitialDataState,
-} from "@excalidraw/excalidraw/types/types";
-import { Excalidraw } from "@excalidraw/excalidraw";
-import { FC, useCallback, useEffect, useState } from "react";
+} from "@excalidraw/excalidraw/dist/types/excalidraw/types";
 
 type HyperbookExcalidrawProps = {
   id: string;
@@ -68,26 +68,20 @@ export const HyperbookExcalidraw: FC<HyperbookExcalidrawProps> = ({
     };
   }, [api, autoZoom]);
 
-  const updateTheme = (e: any) => {
-    if (e.matches) {
-      api?.updateScene({
-        appState: { theme: "dark" },
-      });
-    } else {
-      api?.updateScene({
-        appState: { theme: "light" },
-      });
-    }
+  const darkModeToggle = document.querySelector("dark-mode-toggle") as any;
+
+  const updateTheme = () => {
+    api?.updateScene({
+      appState: { theme: darkModeToggle.mode },
+      captureUpdate: CaptureUpdateAction.NEVER,
+    });
   };
-  const colorSchemeQueryList = window.matchMedia(
-    "(prefers-color-scheme: dark)"
-  );
 
   useEffect(() => {
-    colorSchemeQueryList.addEventListener("change", updateTheme);
+    document.addEventListener("colorschemechange", updateTheme);
 
     return () => {
-      colorSchemeQueryList.removeEventListener("change", updateTheme);
+      document.removeEventListener("colorschemechange", updateTheme);
     };
   }, [api]);
 
@@ -130,7 +124,7 @@ export const HyperbookExcalidraw: FC<HyperbookExcalidrawProps> = ({
           appState: {
             ...result?.appState,
             collaborators: [],
-            theme: colorSchemeQueryList.matches ? "dark" : "light",
+            theme: darkModeToggle.mode,
           },
         };
       }
@@ -144,7 +138,7 @@ export const HyperbookExcalidraw: FC<HyperbookExcalidrawProps> = ({
         appState: {
           ...data?.appState,
           collaborators: [],
-          theme: colorSchemeQueryList.matches ? "dark" : "light",
+          theme: darkModeToggle.mode,
         },
       }))
       .catch(() => ({}));

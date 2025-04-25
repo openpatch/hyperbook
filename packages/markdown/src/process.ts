@@ -2,6 +2,7 @@ import rehypeKatex from "rehype-katex";
 import rehypeStringify from "rehype-stringify";
 import rehypePrettyCode from "rehype-pretty-code";
 import rehypeUnwrapImages from "rehype-unwrap-images";
+import { getSingletonHighlighter } from "shiki";
 import { transformerCopyButton } from "@rehype-pretty/transformers";
 import remarkParse from "remark-parse";
 import remarkToRehype from "remark-rehype";

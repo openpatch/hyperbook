@@ -1,5 +1,6 @@
 import r2wc from "@r2wc/react-to-web-component";
 import { HyperbookExcalidraw } from "./HyperbookExcalidraw";
+import "@excalidraw/excalidraw/index.css";
 
 customElements.define(
   "hyperbook-excalidraw",
