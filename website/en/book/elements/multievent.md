@@ -11,6 +11,22 @@ The Multievent library originates from [Aufgabenfuchs](https://www.aufgabenfuchs
 
 With Multievent, 26 different interactive event formats can be implemented on a webpage. This JavaScript searches the document for areas enclosed in double curly braces {{…}}. The enclosed content is transformed into an interactive element. Characters between the opening curly braces determine the result. Below is a list of formats and the corresponding character sequences. For example, a small {r{…}} creates an evaluable radio button in front of the enclosed term (see below).
 
+## Feedback
+
+For tasks that are evaluated, the following encodings can be added:
+
+```md
+:::multievent
+{H{Hint displayed after evaluation if the task is correctly evaluated.}}
+{h{Hint displayed after evaluation if the task is incorrectly evaluated.}}
+:::
+```
+
+:::multievent
+{H{Hint displayed after evaluation if the task is correctly evaluated.}}
+{h{Hint displayed after evaluation if the task is incorrectly evaluated.}}
+:::
+
 ## Task 1
 
 Click on the fastest land animal in the world.

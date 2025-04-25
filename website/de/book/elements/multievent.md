@@ -12,6 +12,22 @@ Die Multievent Biblothek stammt von [Aufgabenfuchs](https://www.aufgabenfuchs.de
 
 Mit Multievent können 26 unterschiedliche, interaktive Ereignisformate in einer Webseite implementiert werden. Dieses JavaScript macht sich im Dokument auf die Suche nach Bereichen, die von doppelt geschweiften Klammern umrahmt sind {{…}}. Der so umklammerte Zwischenraum wird in ein interaktives Element umgewandelt. Zeichen zwischen den beiden öffnenden geschweiften Klammern bestimmen das Ergebnis. Unten ist aufgelistet, welche Formate durch welche Zeichenfolgen erzeugt werden. Beispielsweise bewirkt ein kleines {r{…}}, dass ein auswertbarer Radiobutton vor dem eingeklammerten Begriff entsteht (siehe unten).
 
+## Feedback
+
+Für Aufgaben, die ausgewertet werden, können folgende Codierungen hinzugefügt werden:
+
+```md
+:::multievent
+{H{Hinweis, der nach der Auswertung angezeigt wird, wenn die Aufgabe korrekt gelöst wurde.}}
+{h{Hinweis, der nach der Auswertung angezeigt wird, wenn die Aufgabe falsch gelöst wurde.}}
+:::
+```
+
+:::multievent
+{H{Hinweis, der nach der Auswertung angezeigt wird, wenn die Aufgabe korrekt gelöst wurde.}}
+{h{Hinweis, der nach der Auswertung angezeigt wird, wenn die Aufgabe falsch gelöst wurde.}}
+:::
+
 ## Aufgabe 1
 
 Klick das schnellste Landtier der Welt an?
