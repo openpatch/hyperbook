@@ -75,12 +75,6 @@ figure {
   border-color: var(--color-spacer);
 }
 
-@media screen and (max-width: 600px) {
-  .hyperbook-markdown table td {
-    border-bottom-color: var(--color-spacer);
-  }
-}
-
 .hyperbook-markdown figure.normal {
   text-align: center;
   margin-top: 10px;
@@ -154,11 +148,11 @@ figure {
   margin-bottom: 0;
 }
 
-.hyperbook-markdown li+li {
+.hyperbook-markdown li + li {
   margin-top: 0.25em;
 }
 
-.hyperbook-markdown li>p {
+.hyperbook-markdown li > p {
   margin-top: 16px;
 }
 
@@ -198,11 +192,11 @@ figure {
 }
 
 .hyperbook-markdown table {
-  border-width: 1px;
-  border-style: solid;
+  display: block;
   border-collapse: collapse;
-  width: 100%;
-  table-layout: fixed;
+  width: max-content;
+  max-width: 100%;
+  overflow: auto;
 }
 
 .hyperbook-markdown table caption {
@@ -224,58 +218,6 @@ figure {
 .hyperbook-markdown table th {
   font-size: 0.85em;
   letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-
-@media screen and (max-width: 600px) {
-  .hyperbook-markdown table {
-    border: 0;
-  }
-
-  .hyperbook-markdown table caption {
-    font-size: 1.3em;
-  }
-
-  .hyperbook-markdown table thead {
-    border: none;
-    clip: rect(0 0 0 0);
-    height: 1px;
-    margin: -1px;
-    overflow: hidden;
-    padding: 0;
-    position: absolute;
-    width: 1px;
-  }
-
-  .hyperbook-markdown table tr {
-    border-bottom-width: 3px;
-    display: block;
-    margin-bottom: 0.625em;
-  }
-
-  .hyperbook-markdown table td {
-    border-bottom-width: 1px;
-    border-bottom-style: solid;
-    display: block;
-    font-size: 0.8em;
-    text-align: right;
-  }
-
-  .hyperbook-markdown table td::before {
-    /*
-    * aria-label has no advantage, it won't be read inside a table
-    content: attr(aria-label);
-    */
-    content: attr(data-label);
-    float: left;
-    font-weight: bold;
-    text-transform: uppercase;
-    margin-right: 8px;
-  }
-
-  .hyperbook-markdown table td:last-child {
-    border-bottom: 0;
-  }
 }
 
 .hyperbook-markdown h1,
@@ -363,10 +305,10 @@ figure {
   list-style-type: none;
 }
 
-.hyperbook-markdown #toc-toggle>.bar1,
-.hyperbook-markdown #toc-toggle>.bar2,
-.hyperbook-markdown #toc-toggle>.bar3,
-.hyperbook-markdown #toc-toggle>.bar4 {
+.hyperbook-markdown #toc-toggle > .bar1,
+.hyperbook-markdown #toc-toggle > .bar2,
+.hyperbook-markdown #toc-toggle > .bar3,
+.hyperbook-markdown #toc-toggle > .bar4 {
   background-color: var(--color-text);
 }
 
@@ -385,7 +327,7 @@ figure {
   margin-right: 16px;
   mask-repeat: no-repeat;
   cursor: pointer;
-  mask-image: url('data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/PjxzdmcgY2xhc3M9ImZlYXRoZXIgZmVhdGhlci1zZWFyY2giIGZpbGw9Im5vbmUiIGhlaWdodD0iMjQiIHN0cm9rZT0iY3VycmVudENvbG9yIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIHN0cm9rZS13aWR0aD0iMiIgdmlld0JveD0iMCAwIDI0IDI0IiB3aWR0aD0iMjQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMTEiIGN5PSIxMSIgcj0iOCIvPjxsaW5lIHgxPSIyMSIgeDI9IjE2LjY1IiB5MT0iMjEiIHkyPSIxNi42NSIvPjwvc3ZnPg==')
+  mask-image: url("data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/PjxzdmcgY2xhc3M9ImZlYXRoZXIgZmVhdGhlci1zZWFyY2giIGZpbGw9Im5vbmUiIGhlaWdodD0iMjQiIHN0cm9rZT0iY3VycmVudENvbG9yIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIHN0cm9rZS13aWR0aD0iMiIgdmlld0JveD0iMCAwIDI0IDI0IiB3aWR0aD0iMjQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMTEiIGN5PSIxMSIgcj0iOCIvPjxsaW5lIHgxPSIyMSIgeDI9IjE2LjY1IiB5MT0iMjEiIHkyPSIxNi42NSIvPjwvc3ZnPg==");
 }
 
 #search-drawer {
@@ -410,7 +352,7 @@ figure {
   background-color: var(--color-text);
   width: 24px;
   height: 24px;
-  mask-image: url('data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/PjxzdmcgY2xhc3M9ImZlYXRoZXIgZmVhdGhlci1zZWFyY2giIGZpbGw9Im5vbmUiIGhlaWdodD0iMjQiIHN0cm9rZT0iY3VycmVudENvbG9yIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIHN0cm9rZS13aWR0aD0iMiIgdmlld0JveD0iMCAwIDI0IDI0IiB3aWR0aD0iMjQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMTEiIGN5PSIxMSIgcj0iOCIvPjxsaW5lIHgxPSIyMSIgeDI9IjE2LjY1IiB5MT0iMjEiIHkyPSIxNi42NSIvPjwvc3ZnPg==');
+  mask-image: url("data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/PjxzdmcgY2xhc3M9ImZlYXRoZXIgZmVhdGhlci1zZWFyY2giIGZpbGw9Im5vbmUiIGhlaWdodD0iMjQiIHN0cm9rZT0iY3VycmVudENvbG9yIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIHN0cm9rZS13aWR0aD0iMiIgdmlld0JveD0iMCAwIDI0IDI0IiB3aWR0aD0iMjQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMTEiIGN5PSIxMSIgcj0iOCIvPjxsaW5lIHgxPSIyMSIgeDI9IjE2LjY1IiB5MT0iMjEiIHkyPSIxNi42NSIvPjwvc3ZnPg==");
   mask-repeat: no-repeat;
 }
 
@@ -428,7 +370,7 @@ figure {
   height: 24px;
   cursor: pointer;
   mask-repeat: no-repeat;
-  mask-image: url('data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/PjxzdmcgY2xhc3M9ImZlYXRoZXIgZmVhdGhlci1hcnJvdy1yaWdodCIgZmlsbD0ibm9uZSIgaGVpZ2h0PSIyNCIgc3Ryb2tlPSJjdXJyZW50Q29sb3IiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgc3Ryb2tlLXdpZHRoPSIyIiB2aWV3Qm94PSIwIDAgMjQgMjQiIHdpZHRoPSIyNCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48bGluZSB4MT0iNSIgeDI9IjE5IiB5MT0iMTIiIHkyPSIxMiIvPjxwb2x5bGluZSBwb2ludHM9IjEyIDUgMTkgMTIgMTIgMTkiLz48L3N2Zz4=')
+  mask-image: url("data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/PjxzdmcgY2xhc3M9ImZlYXRoZXIgZmVhdGhlci1hcnJvdy1yaWdodCIgZmlsbD0ibm9uZSIgaGVpZ2h0PSIyNCIgc3Ryb2tlPSJjdXJyZW50Q29sb3IiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgc3Ryb2tlLXdpZHRoPSIyIiB2aWV3Qm94PSIwIDAgMjQgMjQiIHdpZHRoPSIyNCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48bGluZSB4MT0iNSIgeDI9IjE5IiB5MT0iMTIiIHkyPSIxMiIvPjxwb2x5bGluZSBwb2ludHM9IjEyIDUgMTkgMTIgMTIgMTkiLz48L3N2Zz4=");
 }
 
 #search-results {
@@ -489,16 +431,16 @@ figure {
   height: 100%;
 }
 
-.toc-drawer-content>nav {
+.toc-drawer-content > nav {
   padding: 20px;
   flex: 1;
 }
 
-.toc-drawer-content>nav li a {
+.toc-drawer-content > nav li a {
   display: block;
 }
 
-.toc-drawer-content>nav li a:hover {
+.toc-drawer-content > nav li a:hover {
   text-decoration: underline;
 }
 
@@ -605,16 +547,16 @@ figure {
   opacity: 1;
 }
 
-.hyperbook-markdown #toc-toggle>.bar1,
-.hyperbook-markdown #toc-toggle>.bar3 {
+.hyperbook-markdown #toc-toggle > .bar1,
+.hyperbook-markdown #toc-toggle > .bar3 {
   width: 20px;
   height: 2px;
   margin: 2px 3px;
   transition: 0.4s;
 }
 
-.hyperbook-markdown #toc-toggle>.bar2,
-.hyperbook-markdown #toc-toggle>.bar4 {
+.hyperbook-markdown #toc-toggle > .bar2,
+.hyperbook-markdown #toc-toggle > .bar4 {
   width: 25px;
   height: 2px;
   margin: 2px 3px;

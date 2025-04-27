@@ -38,6 +38,18 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.52.2
+
+::::tabs
+
+:::tab{title="Improved :+1:" id="improved"}
+  - Improve table responsive design.
+:::
+
+:::
+
+::::
+
 ## v0.52.1
 
 ::::tabs

@@ -99,7 +99,7 @@
       "patterns": [
         {
           "name": "meta.multievent.nested",
-          "begin": "\\{([rRcCaBbAkKlLtTzSvwyYBWnXhH]{1}[0-9]*)\\{",
+          "begin": "\\{([rRcCaBbAkKlLtTzSvwyYBWnXhHZ]{1}[0-9]*)\\{",
           "beginCaptures": {
             "1": {
               "name": "keyword.control.multievent.nested.identifier"
