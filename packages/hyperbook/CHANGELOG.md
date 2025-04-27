@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.52.2
+
+### Patch Changes
+
+- [`7910a8e`](https://github.com/openpatch/hyperbook/commit/7910a8ee4a002c54dafc1d5d29d0e5f0b49b04e8) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Improve table responsive design.
+
 ## 0.52.1
 
 ### Patch Changes
