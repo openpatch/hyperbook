@@ -1,5 +1,14 @@
 # @hyperbook/vscode-extension
 
+## 0.31.2
+
+### Patch Changes
+
+- [`7910a8e`](https://github.com/openpatch/hyperbook/commit/7910a8ee4a002c54dafc1d5d29d0e5f0b49b04e8) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Improve table responsive design.
+
+- Updated dependencies [[`7910a8e`](https://github.com/openpatch/hyperbook/commit/7910a8ee4a002c54dafc1d5d29d0e5f0b49b04e8)]:
+  - @hyperbook/markdown@0.28.2
+
 ## 0.31.1
 
 ### Patch Changes
