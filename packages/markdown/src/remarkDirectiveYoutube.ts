@@ -44,7 +44,7 @@ export default (ctx: HyperbookContext) => () => {
             tagName: "iframe",
             properties: {
               class: "player",
-              src: "https://www.youtube.com/embed/" + id,
+              src: "https://www.youtube-nocookie.com/embed/" + id,
               frameBorder: "0",
               title: typeof data.hChildren === "string" ? data.hChildren : "",
               allow:

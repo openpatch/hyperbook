@@ -38,6 +38,18 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.52.3
+
+::::tabs
+
+:::tab{title="Improved :+1:" id="improved"}
+  - Default to youtube-nocookie for youtube videos.
+:::
+
+:::
+
+::::
+
 ## v0.52.2
 
 ::::tabs

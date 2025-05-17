@@ -3,7 +3,7 @@
 exports[`remarkDirectiveYoutube > should render 1`] = `
 "
 <div class="directive-youtube" id="video-LXb3EKWsInQ">
-  <iframe class="player" src="https://www.youtube.com/embed/LXb3EKWsInQ" frameborder="0" title="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"></iframe>
+  <iframe class="player" src="https://www.youtube-nocookie.com/embed/LXb3EKWsInQ" frameborder="0" title="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"></iframe>
 </div>
 "
 `;

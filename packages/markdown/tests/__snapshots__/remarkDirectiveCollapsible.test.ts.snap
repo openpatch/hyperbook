@@ -16,7 +16,7 @@ exports[`remarkDirectiveCollapsible > should transform 1`] = `
       <div class="collapsible-content">
         <p>This is a stacked collapsible</p>
         <div class="directive-youtube" id="video-124">
-          <iframe class="player" src="https://www.youtube.com/embed/124" frameborder="0" title="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"></iframe>
+          <iframe class="player" src="https://www.youtube-nocookie.com/embed/124" frameborder="0" title="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"></iframe>
         </div>
       </div>
     </div>
