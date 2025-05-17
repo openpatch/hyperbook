@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.52.3
+
+### Patch Changes
+
+- [`5544ee7`](https://github.com/openpatch/hyperbook/commit/5544ee723a8b3b201509480718aa55c4868c9cf3) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Default to youtube-nocookie
+
 ## 0.52.2
 
 ### Patch Changes
