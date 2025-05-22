@@ -163,6 +163,14 @@ Und du kannst definieren, ob ein Ausblendungssymbol gezeigt werden soll.
 {{{file "/archives/project-1/main.c" "1,3-4" "// ..."}}}
 ```
 
+### rfile
+
+rfile funktioniert wie file, aber die Datei wird von der Wurzel eines git-Repository gelesen.
+
+```hbs
+{{{rfile "/path/to/file"}}}
+```
+
 ### base64
 
 Du kannst auch Mediendateien einbetten.

@@ -170,6 +170,14 @@ And you can define an ellipsis.
 {{{file "/archives/project-1/main.c" "1,3-4" "// ..."}}}
 ```
 
+### rfile
+
+rfile work like file, but will read from root of a git repository. This is useful, when your hyperbook is in a subdirectory and you want to reference files from the root of the repository.
+
+```hbs
+{{{rfile "/path/to/file"}}}
+```
+
 ### base64
 
 You can use the bae64 helper to embedded media, even from external folders.
