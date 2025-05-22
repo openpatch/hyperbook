@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.52.4
+
+### Patch Changes
+
+- [`b1fa62c`](https://github.com/openpatch/hyperbook/commit/b1fa62c447ef079c395ed09d25d87da0ea20ddfc) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix dev server not respecting basePath
+
 ## 0.52.3
 
 ### Patch Changes
