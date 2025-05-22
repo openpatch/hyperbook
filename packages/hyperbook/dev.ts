@@ -54,7 +54,12 @@ socket.addEventListener("message", (event) => {
     const url = new URL(request.url, `http://${request.headers.host}`);
     let pathname = url.pathname;
     const basePath = rootProject.basePath || "";
-    pathname = pathname.slice(basePath.length);
+
+    if (pathname.startsWith("/")) {
+      pathname = pathname.slice(basePath.length + 1);
+    } else {
+      pathname = pathname.slice(basePath.length);
+    }
 
     // If the pathname ends with '/', append 'index.html'.
     if (pathname.endsWith("/")) {
@@ -83,8 +88,8 @@ socket.addEventListener("message", (event) => {
             .toString()
             .replace(
               /(<\/body>)(?![\s\S]*\1)/,
-              '<script src="/__hyperbook_dev.js"></script></body>'
-            )
+              '<script src="/__hyperbook_dev.js"></script></body>',
+            ),
         );
       }
 
@@ -145,7 +150,7 @@ socket.addEventListener("message", (event) => {
 
   server.listen(port, () => {
     console.log(
-      `${chalk.yellow(`[DEV-SERVER]`)} is running at http://localhost:${port}`
+      `${chalk.yellow(`[DEV-SERVER]`)} is running at http://localhost:${port}`,
     );
   });
 
