@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.52.5
+
+### Patch Changes
+
+- [`0c0d297`](https://github.com/openpatch/hyperbook/commit/0c0d29753efb2aec37c819ba12091c393cb2b17e) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - fix cli argument port not used
+
 ## 0.52.4
 
 ### Patch Changes
