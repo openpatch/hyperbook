@@ -38,12 +38,24 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
-## v0.52.4
+## v0.52.5
 
 ::::tabs
 
 :::tab{title="Fixed :bug:" id="fixed"}
     - CLI argument port was not used. Now it is working again. For example: `hyperbook dev --port 3000`
+:::
+
+:::
+
+::::
+
+## v0.52.4
+
+::::tabs
+
+:::tab{title="Fixed :bug:" id="fixed"}
+    - Dev server was not respecting the `basePath` configuration option. Now it is working again.
 :::
 
 :::
