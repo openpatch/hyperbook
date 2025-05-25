@@ -38,8 +38,8 @@ program.command("setup").action(async () => {
 program
   .command("dev")
   .description("start the development server for a hyperbook")
-  .option("-p --port <number>", "set a specific port")
-  .action(async (name, options) => {
+  .option("-p, --port <number>", "set a specific port")
+  .action(async (options) => {
     await runDev({
       port: options.port,
     });
