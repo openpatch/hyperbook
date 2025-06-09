@@ -43,6 +43,18 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::tabs
 
 :::tab{title="Fixed :bug:" id="fixed"}
+  - Fix QR Code not showing correctly, because escaped characters were used.
+:::
+
+:::
+
+::::
+
+## v0.52.5
+
+::::tabs
+
+:::tab{title="Fixed :bug:" id="fixed"}
   - CLI argument port was not used. Now it is working again. For example: `hyperbook dev --port 3000`
 :::
 

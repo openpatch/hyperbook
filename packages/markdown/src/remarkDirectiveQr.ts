@@ -47,6 +47,8 @@ export default (ctx: HyperbookContext) => () => {
           ecl: "M",
         }).svg();
 
+        console.log(qr);
+
         const labelElement: ElementContent[] = [];
         if (label) {
           labelElement.push({

@@ -162,7 +162,7 @@ export const process = (md: string, ctx: HyperbookContext) => {
     .use(rehypeHtmlStructure(ctx))
     .use(rehypeStringify, {
       allowDangerousCharacters: true,
-      allowDangerousHtml: ctx.config.allowDangerousHtml || false,
+      allowDangerousHtml: true,
     })
     .process(md);
 };
