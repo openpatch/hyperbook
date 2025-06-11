@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.52.7
+
+### Patch Changes
+
+- [`829d71d`](https://github.com/openpatch/hyperbook/commit/829d71dc228d2fd4ba1d75d0c58095326afcfaa6) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Do not parse e.g. :1 as a element. Only parse the documented elements.
+
 ## 0.52.6
 
 ### Patch Changes
