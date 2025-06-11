@@ -31,7 +31,7 @@ export default (ctx: HyperbookContext) => () => {
           );
         }
 
-        registerDirective(file, name, [], ["style.css"]);
+        registerDirective(file, name, [], ["style.css"], []);
 
         data.hName = "div";
         data.hProperties = {

@@ -71,7 +71,7 @@ export default (ctx: HyperbookContext) => () => {
         } = attributes;
 
         expectLeafDirective(node, file, name);
-        registerDirective(file, name, [], ["style.css"]);
+        registerDirective(file, name, [], ["style.css"], []);
 
         data.hName = "div";
         data.hProperties = {

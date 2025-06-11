@@ -26,6 +26,7 @@ export default (ctx: HyperbookContext) => () => {
           name,
           ["main.bundle.js", "client.js"],
           ["style.css"],
+          [],
         );
 
         const {} = node.attributes || {};

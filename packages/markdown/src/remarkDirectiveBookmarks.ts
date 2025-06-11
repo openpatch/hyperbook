@@ -21,7 +21,7 @@ export default (ctx: HyperbookContext) => () => {
         const data = node.data || (node.data = {});
 
         expectLeafDirective(node, file, name);
-        registerDirective(file, name, ["client.js"], ["style.css"]);
+        registerDirective(file, name, ["client.js"], ["style.css"], []);
 
         data.hName = "ul";
         data.hProperties = {

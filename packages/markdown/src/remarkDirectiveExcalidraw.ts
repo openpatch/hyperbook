@@ -26,6 +26,7 @@ export default (ctx: HyperbookContext) => () => {
           name,
           ["client.js", "hyperbook-excalidraw.umd.js"],
           ["style.css", "excalidraw.css"],
+          [],
         );
 
         const {

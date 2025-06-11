@@ -7,6 +7,7 @@ declare module "vfile" {
       {
         scripts: string[];
         styles: string[];
+        addditionalDirective: string[];
       }
     >;
     js: string[][];

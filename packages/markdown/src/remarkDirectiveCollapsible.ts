@@ -72,7 +72,7 @@ export default (ctx: HyperbookContext) => () => {
       const { title = "", id = hash(node) } = node.data.hProperties || {};
 
       expectContainerDirective(node, file, name);
-      registerDirective(file, name, [], ["style.css"]);
+      registerDirective(file, name, [], ["style.css"], []);
 
       node.attributes = {};
       data.hName = "div";

@@ -36,6 +36,7 @@ export default (ctx: HyperbookContext) => () => {
           name,
           ["wavesurfer.min.js", "client.js"],
           ["style.css"],
+          [],
         );
         const id = hash(node);
 

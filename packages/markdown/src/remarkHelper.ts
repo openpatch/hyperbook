@@ -34,6 +34,7 @@ export const registerDirective = (
   directive: string,
   scripts: string[] = [],
   styles: string[] = [],
+  additionalDirective: string[] = [],
 ) => {
   if (!file.data.directives) {
     file.data.directives = {};
@@ -41,6 +42,7 @@ export const registerDirective = (
   file.data.directives[directive] = {
     scripts,
     styles,
+    addditionalDirective: additionalDirective || [],
   };
 };
 

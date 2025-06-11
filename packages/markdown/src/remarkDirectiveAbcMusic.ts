@@ -29,7 +29,8 @@ export default (ctx: HyperbookContext) => () => {
           file,
           name,
           ["abcjs-basic-min.js", "client.js"],
-          ["style.css"]
+          ["style.css"],
+          [],
         );
         requestJS(file, ["code-input", "code-input.min.js"]);
         requestCSS(file, ["code-input", "code-input.min.css"]);

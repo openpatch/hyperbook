@@ -23,7 +23,7 @@ export default (ctx: HyperbookContext) => () => {
         const data = node.data || (node.data = {});
 
         expectTextDirective(node, file, name);
-        registerDirective(file, name, ["client.js"], ["style.css"]);
+        registerDirective(file, name, ["client.js"], ["style.css"], []);
 
         const { src = "" } = node.attributes || {};
         data.hName = "a";

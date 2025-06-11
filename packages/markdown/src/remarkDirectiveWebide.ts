@@ -44,7 +44,7 @@ html, body {
         const data = node.data || (node.data = {});
 
         expectContainerDirective(node, file, name);
-        registerDirective(file, name, ["client.js"], ["style.css"]);
+        registerDirective(file, name, ["client.js"], ["style.css"], []);
         requestJS(file, ["code-input", "code-input.min.js"]);
         requestCSS(file, ["code-input", "code-input.min.css"]);
         requestJS(file, ["code-input", "auto-close-brackets.min.js"]);
@@ -56,16 +56,17 @@ html, body {
         let template = makeWrapInMarkupTemplate();
 
         let jsNode = node.children.find(
-          (n) => n.type === "code" && n.lang === "js"
+          (n) => n.type === "code" && n.lang === "js",
         ) as Code;
         let cssNode = node.children.find(
-          (n) => n.type === "code" && n.lang === "css"
+          (n) => n.type === "code" && n.lang === "css",
         ) as Code;
         let htmlNode = node.children.find(
-          (n) => n.type === "code" && n.lang === "html" && n.meta === null
+          (n) => n.type === "code" && n.lang === "html" && n.meta === null,
         ) as Code;
         let templateNode = node.children.find(
-          (n) => n.type === "code" && n.lang === "html" && n.meta === "template"
+          (n) =>
+            n.type === "code" && n.lang === "html" && n.meta === "template",
         ) as Code;
 
         const buttons: Element[] = [];

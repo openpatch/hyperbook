@@ -31,7 +31,7 @@ export default (ctx: HyperbookContext) => () => {
         const data = node.data || (node.data = {});
 
         expectContainerDirective(node, file, name);
-        registerDirective(file, name, [], ["style.css"]);
+        registerDirective(file, name, [], ["style.css"], []);
 
         const text = toString(node.children);
         const url = `https://kroki.io/plantuml/svg/${encode(text)}`;

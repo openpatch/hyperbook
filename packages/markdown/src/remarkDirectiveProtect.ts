@@ -25,7 +25,7 @@ export default (ctx: HyperbookContext) => () => {
         const data = node.data || (node.data = {});
 
         expectContainerDirective(node, file, name);
-        registerDirective(file, name, ["client.js"], ["style.css"]);
+        registerDirective(file, name, ["client.js"], ["style.css"], []);
 
         const {
           password = "",

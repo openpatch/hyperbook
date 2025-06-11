@@ -35,7 +35,8 @@ export default (ctx: HyperbookContext) => () => {
           file,
           name,
           ["client.js"],
-          ["jsxgraph.css", "style.css"]
+          ["jsxgraph.css", "style.css"],
+          [],
         );
 
         requestJS(file, ["directive-jsxgraph", "jsxgraphcore.js"]);

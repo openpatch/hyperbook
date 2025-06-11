@@ -28,7 +28,7 @@ export default (ctx: HyperbookContext) => () => {
           data.hProperties = {
             class: "directive-tiles",
           };
-          registerDirective(file, "tiles", [], ["style.css"]);
+          registerDirective(file, "tiles", [], ["style.css"], ["tile"]);
 
           const tilesChildren: (Text | Comment | Element | Raw)[] = [];
           node.children.filter(isDirective).forEach((node) => {

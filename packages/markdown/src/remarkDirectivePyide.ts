@@ -30,7 +30,7 @@ export default (ctx: HyperbookContext) => () => {
         const { src = "", id = hash(node) } = node.attributes || {};
 
         expectContainerDirective(node, file, name);
-        registerDirective(file, name, ["client.js"], ["style.css"]);
+        registerDirective(file, name, ["client.js"], ["style.css"], []);
         requestJS(file, ["code-input", "code-input.min.js"]);
         requestCSS(file, ["code-input", "code-input.min.css"]);
         requestJS(file, ["code-input", "auto-close-brackets.min.js"]);

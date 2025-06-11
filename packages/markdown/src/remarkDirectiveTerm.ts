@@ -25,7 +25,7 @@ export default (ctx: HyperbookContext) => () => {
             node,
           );
         }
-        registerDirective(file, "term", [], ["style.css"]);
+        registerDirective(file, "term", [], ["style.css"], ["t"]);
 
         const value = node.children[0].value;
 

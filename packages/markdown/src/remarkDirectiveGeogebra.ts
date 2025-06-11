@@ -36,6 +36,7 @@ export default (ctx: HyperbookContext) => () => {
             "client.js",
           ],
           ["style.css"],
+          [],
         );
 
         data.hName = "div";

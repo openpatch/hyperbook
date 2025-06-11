@@ -25,7 +25,7 @@ export default (ctx: HyperbookContext) => () => {
         const { src, title, author, poster } = attributes;
 
         expectLeafDirective(node, file, name);
-        registerDirective(file, name, [], ["style.css"]);
+        registerDirective(file, name, [], ["style.css"], []);
 
         const information: (Text | Comment | Element | Raw)[] = [];
         if (title) {

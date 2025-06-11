@@ -26,6 +26,7 @@ export default (ctx: HyperbookContext) => () => {
           name,
           ["scratchblocks.min.js", "translations.js", "client.js"],
           ["style.css"],
+          [],
         );
 
         data.hName = "pre";

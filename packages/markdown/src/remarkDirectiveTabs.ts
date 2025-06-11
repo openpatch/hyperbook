@@ -27,6 +27,15 @@ export default function (ctx: HyperbookContext) {
         [];
       visit(tree, function (node) {
         if (isDirective(node)) {
+          if (node.name == "tab") {
+            registerDirective(
+              file,
+              "tabs",
+              ["client.js"],
+              ["style.css"],
+              ["tab"],
+            );
+          }
           if (node.name !== "tabs") return;
 
           tabsNodes.push(node);
@@ -46,7 +55,13 @@ export default function (ctx: HyperbookContext) {
             tabsId = hash(node);
           }
 
-          registerDirective(file, "tabs", ["client.js"], ["style.css"]);
+          registerDirective(
+            file,
+            "tabs",
+            ["client.js"],
+            ["style.css"],
+            ["tab"],
+          );
 
           data.hName = "div";
           data.hProperties = {

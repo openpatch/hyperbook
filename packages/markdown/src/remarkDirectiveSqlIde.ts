@@ -33,7 +33,7 @@ export default (ctx: HyperbookContext) => () => {
         } = attributes;
 
         expectContainerDirective(node, file, name);
-        registerDirective(file, name, ["client.js"], ["style.css"]);
+        registerDirective(file, name, ["client.js"], ["style.css"], []);
 
         const codes: ElementContent[] = node.children
           ?.filter(isCode)

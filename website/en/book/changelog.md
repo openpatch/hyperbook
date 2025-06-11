@@ -38,7 +38,20 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
-## v0.52.5
+## v0.52.7
+
+::::tabs
+
+:::tab{title="Fixed :bug:" id="fixed"}
+- Do not parse e.g. :1 as a element. Only parse the documented elements.
+:::
+
+:::
+
+::::
+
+
+## v0.52.6
 
 ::::tabs
 

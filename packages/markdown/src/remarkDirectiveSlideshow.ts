@@ -28,7 +28,7 @@ export default (_: HyperbookContext) => () => {
         const { height = "300px", id = hash(node) } = node.attributes || {};
 
         expectContainerDirective(node, file, "slideshow");
-        registerDirective(file, "slideshow", ["client.js"], ["style.css"]);
+        registerDirective(file, "slideshow", ["client.js"], ["style.css"], []);
 
         const images = findFlat(node, isImage);
 

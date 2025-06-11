@@ -2,7 +2,6 @@ import rehypeKatex from "rehype-katex";
 import rehypeStringify from "rehype-stringify";
 import rehypePrettyCode from "rehype-pretty-code";
 import rehypeUnwrapImages from "rehype-unwrap-images";
-import { getSingletonHighlighter } from "shiki";
 import { transformerCopyButton } from "@rehype-pretty/transformers";
 import remarkParse from "remark-parse";
 import remarkToRehype from "remark-rehype";
@@ -58,6 +57,7 @@ import remarkDirectiveH5P from "./remarkDirectiveH5P";
 import remarkDirectiveJSXGraph from "./remarkDirectiveJSXGraph";
 import remarkDirectiveMultievent from "./remarkDirectiveMultievent";
 import remarkSubSup from "./remarkSubSup";
+import remarkDirectiveUnpack from "./remarkDirectiveUnpack";
 
 export const remark = (ctx: HyperbookContext) => {
   i18n.init(ctx.config.language || "en");
@@ -104,6 +104,8 @@ export const remark = (ctx: HyperbookContext) => {
     remarkMath,
     /* needs to be last directive */
     remarkDirectiveProtect(ctx),
+    /* needs to be after all directives */
+    remarkDirectiveUnpack(ctx),
     remarkCollectHeadings(ctx),
     remarkCollectSearchDocuments(ctx),
   ];

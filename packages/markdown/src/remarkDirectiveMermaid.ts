@@ -30,6 +30,7 @@ export default (ctx: HyperbookContext) => () => {
           name,
           ["mermaid.min.js", "client.js"],
           ["style.css"],
+          [],
         );
 
         const value = node.value || toString(node.children);
