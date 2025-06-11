@@ -45,11 +45,11 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 :::tab{title="New :rocket:" id="new"}
 You can now collocate images, videos, and other additional files directly within your book directory. This means you can reference media using relative paths, making it much easier to:
 
-Organize your content intuitively
+- Organize your content intuitively
 
-Collaborate with others
+- Collaborate with others
 
-Share or version-control your Hyperbook with media included
+- Share or version-control your Hyperbook with media included
 
 Example usage:
 
