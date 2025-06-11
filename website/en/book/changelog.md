@@ -46,10 +46,7 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 - Do not parse e.g. :1 as a element. Only parse the documented elements.
 :::
 
-:::
-
 ::::
-
 
 ## v0.52.6
 
@@ -57,8 +54,6 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 
 :::tab{title="Fixed :bug:" id="fixed"}
   - Fix QR Code not showing correctly, because escaped characters were used.
-:::
-
 :::
 
 ::::
@@ -71,8 +66,6 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
   - CLI argument port was not used. Now it is working again. For example: `hyperbook dev --port 3000`
 :::
 
-:::
-
 ::::
 
 ## v0.52.4
@@ -81,8 +74,6 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 
 :::tab{title="Fixed :bug:" id="fixed"}
   - Dev server was not respecting the `basePath` configuration option. Now it is working again.
-:::
-
 :::
 
 ::::
@@ -95,8 +86,6 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
   - Default to youtube-nocookie for youtube videos.
 :::
 
-:::
-
 ::::
 
 ## v0.52.2
@@ -105,8 +94,6 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 
 :::tab{title="Improved :+1:" id="improved"}
   - Improve table responsive design.
-:::
-
 :::
 
 ::::

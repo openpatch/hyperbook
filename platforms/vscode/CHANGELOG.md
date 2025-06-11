@@ -1,5 +1,14 @@
 # @hyperbook/vscode-extension
 
+## 0.31.4
+
+### Patch Changes
+
+- [`d2a02f5`](https://github.com/openpatch/hyperbook/commit/d2a02f502f69f1f216750ffd33ef84bcbab72d94) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix qr codes not showing correctly
+
+- Updated dependencies [[`d2a02f5`](https://github.com/openpatch/hyperbook/commit/d2a02f502f69f1f216750ffd33ef84bcbab72d94)]:
+  - @hyperbook/markdown@0.28.4
+
 ## 0.31.3
 
 ### Patch Changes
