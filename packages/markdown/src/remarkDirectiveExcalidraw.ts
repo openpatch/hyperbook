@@ -50,7 +50,11 @@ export default (ctx: HyperbookContext) => () => {
             properties: {
               "auto-zoom": autoZoom,
               edit,
-              src: ctx.makeUrl(src as string, "public"),
+              src: ctx.makeUrl(
+                src as string,
+                "public",
+                ctx.navigation.current || undefined,
+              ),
               onlinkopen,
             },
             children: [],

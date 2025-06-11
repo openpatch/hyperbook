@@ -53,7 +53,11 @@ export default (ctx: HyperbookContext) => () => {
               tagName: "div",
               properties: {
                 class: "thumbnail",
-                style: `background-image: url("${ctx.makeUrl(thumbnail, "public")}")`,
+                style: `background-image: url("${ctx.makeUrl(
+                  thumbnail,
+                  "public",
+                  ctx.navigation.current || undefined,
+                )}")`,
               },
               children: [],
             });
@@ -75,7 +79,11 @@ export default (ctx: HyperbookContext) => () => {
           properties: {
             class: "wave",
             id,
-            "data-src": src,
+            "data-src": ctx.makeUrl(
+              (src as string) || "",
+              "public",
+              ctx.navigation.current || undefined,
+            ),
           },
           children: [],
         });
@@ -97,7 +105,11 @@ export default (ctx: HyperbookContext) => () => {
               tagName: "div",
               properties: {
                 class: "thumbnail",
-                style: `background-image: url("${ctx.makeUrl(thumbnail, "public")}")`,
+                style: `background-image: url("${ctx.makeUrl(
+                  thumbnail,
+                  "public",
+                  ctx.navigation.current || undefined,
+                )}")`,
               },
               children: [],
             });

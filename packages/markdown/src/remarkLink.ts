@@ -15,7 +15,11 @@ export default (ctx: HyperbookContext) => () => {
           node.type === "definition")
       ) {
         if (node.url) {
-          node.url = ctx.makeUrl(node.url, "public");
+          node.url = ctx.makeUrl(
+            node.url,
+            "public",
+            ctx.navigation.current || undefined,
+          );
         }
       }
     });

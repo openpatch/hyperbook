@@ -33,7 +33,9 @@ export default (ctx: HyperbookContext) => () => {
         data.hName = "div";
         data.hProperties = {
           class: "directive-h5p",
-          "data-src": src ? ctx.makeUrl(src, "public") : undefined,
+          "data-src": src
+            ? ctx.makeUrl(src, "public", ctx.navigation.current || undefined)
+            : undefined,
           "data-id": id,
         };
         data.hChildren = [

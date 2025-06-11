@@ -38,6 +38,31 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.53.0
+
+::::tabs
+
+:::tab{title="New :rocket:" id="new"}
+You can now collocate images, videos, and other additional files directly within your book directory. This means you can reference media using relative paths, making it much easier to:
+
+Organize your content intuitively
+
+Collaborate with others
+
+Share or version-control your Hyperbook with media included
+
+Example usage:
+
+```md
+![Image in the same directory as this markdown file](./image.png)
+![Image one directory up relative to this markdown file](../image.png)
+```
+
+This improvement enables a more seamless and portable authoring experience—no more managing separate static folders or absolute paths.
+:::
+
+::::
+
 ## v0.52.7
 
 ::::tabs

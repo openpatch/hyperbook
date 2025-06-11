@@ -31,7 +31,11 @@ export default (ctx: HyperbookContext) => () => {
           class: "directive-download",
           target: "_blank",
           rel: "noopener noreferrer",
-          href: ctx.makeUrl(src as string, "public"),
+          href: ctx.makeUrl(
+            src as string,
+            "public",
+            ctx.navigation.current || undefined,
+          ),
         };
         data.hChildren = [
           {

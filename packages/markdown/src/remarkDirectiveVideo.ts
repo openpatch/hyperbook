@@ -91,8 +91,20 @@ export default (ctx: HyperbookContext) => () => {
                 tagName: "video",
                 properties: {
                   controls: true,
-                  src: src ? ctx.makeUrl(src, "public") : undefined,
-                  poster: poster ? ctx.makeUrl(poster, "public") : undefined,
+                  src: src
+                    ? ctx.makeUrl(
+                        src,
+                        "public",
+                        ctx.navigation.current || undefined,
+                      )
+                    : undefined,
+                  poster: poster
+                    ? ctx.makeUrl(
+                        poster,
+                        "public",
+                        ctx.navigation.current || undefined,
+                      )
+                    : undefined,
                   width: "100%",
                 },
                 children: [

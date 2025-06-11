@@ -56,7 +56,13 @@ export default (ctx: HyperbookContext) => () => {
               height: height,
               width: width,
               borderRadius: 8,
-              material: src ? ctx.makeUrl(src, "public") : undefined,
+              material: src
+                ? ctx.makeUrl(
+                    src,
+                    "public",
+                    ctx.navigation.current || undefined,
+                  )
+                : undefined,
               language: ctx.config.language || "en",
               "data-id": id,
               showFullscreenButton,

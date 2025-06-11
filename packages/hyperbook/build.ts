@@ -97,19 +97,54 @@ async function runBuild(
 
   await runArchive(root, rootOut, prefix);
 
+  // Helper function to resolve relative paths
+  const resolveRelativePath = (
+    path: string,
+    currentPageHref: string,
+  ): string => {
+    // If path is absolute, return as-is
+    if (path.startsWith("/")) {
+      return path;
+    }
+
+    // Get the directory of the current page
+    const currentPageDir = posix.dirname(currentPageHref);
+
+    // Resolve the relative path and normalize
+    return posix.normalize(posix.resolve(currentPageDir, path));
+  };
+
   const baseCtx: Pick<
     HyperbookContext,
     "config" | "makeUrl" | "project" | "root"
   > = {
     root,
     config: hyperbookJson,
-    makeUrl: (path, base) => {
+    makeUrl: (path, base, page) => {
       if (typeof path === "string") {
+        // Handle absolute URLs
         if (path.includes("://")) {
           return path;
         }
+
+        // Handle relative paths when we have a current page context
+        if (page?.href && !path.startsWith("/")) {
+          path = resolveRelativePath(path, page.href);
+        }
+
         path = [path];
       }
+
+      // Handle array paths - resolve relative segments
+      if (Array.isArray(path) && page?.href) {
+        path = path.map((segment) => {
+          if (typeof segment === "string" && !segment.startsWith("/")) {
+            return resolveRelativePath(segment, page.href || "");
+          }
+          return segment;
+        });
+      }
+
       switch (base) {
         case "glossary":
           return posix.join("/", basePath || "", "glossary", ...path);
@@ -258,8 +293,9 @@ async function runBuild(
   });
 
   let otherFiles = await vfile.listForFolder(root, "public");
+  let bookOtherFiles = await vfile.listForFolder(root, "book-public");
   i = 1;
-  for (let file of otherFiles) {
+  for (let file of [...otherFiles, ...bookOtherFiles]) {
     const directoryOut = path.join(rootOut, file.path.directory);
     await makeDir(directoryOut, {
       recursive: true,

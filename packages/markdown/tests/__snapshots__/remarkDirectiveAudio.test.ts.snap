@@ -4,7 +4,7 @@ exports[`remarkDirectiveAudio > should transform 1`] = `
 "
 <div class="directive-audio">
   <div class="player">
-    <div class="wave" id="8761a7a0deb6dd71ee824d8055781175502c134a294825a529d879b1c6da4c89" data-src="/Free_Test_Data_1MB_MP3.mp3"></div><button class="play" onclick="hyperbook.audio.togglePlayPause(&#x22;8761a7a0deb6dd71ee824d8055781175502c134a294825a529d879b1c6da4c89&#x22;)" title="audio-play"></button>
+    <div class="wave" id="8761a7a0deb6dd71ee824d8055781175502c134a294825a529d879b1c6da4c89" data-src="/public/Free_Test_Data_1MB_MP3.mp3"></div><button class="play" onclick="hyperbook.audio.togglePlayPause(&#x22;8761a7a0deb6dd71ee824d8055781175502c134a294825a529d879b1c6da4c89&#x22;)" title="audio-play"></button>
     <div class="thumbnail" style="background-image: url(&#x22;/public/group-people.png&#x22;)"></div>
   </div>
   <div class="information"><span class="title">Hallo</span><span class="spacer"> - </span><span class="author">Max Mustermann</span><span class="duration"></span></div>

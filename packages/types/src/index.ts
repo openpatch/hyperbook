@@ -176,6 +176,7 @@ export interface HyperbookContext {
   makeUrl(
     path: string | string[],
     base: "public" | "book" | "archive" | "glossary" | "assets",
+    page?: HyperbookPage,
   ): string;
   navigation: Navigation;
 }
