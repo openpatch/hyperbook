@@ -1,5 +1,14 @@
 # @hyperbook/vscode-extension
 
+## 0.31.5
+
+### Patch Changes
+
+- [`829d71d`](https://github.com/openpatch/hyperbook/commit/829d71dc228d2fd4ba1d75d0c58095326afcfaa6) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Do not parse e.g. :1 as a element. Only parse the documented elements.
+
+- Updated dependencies [[`829d71d`](https://github.com/openpatch/hyperbook/commit/829d71dc228d2fd4ba1d75d0c58095326afcfaa6)]:
+  - @hyperbook/markdown@0.28.5
+
 ## 0.31.4
 
 ### Patch Changes
