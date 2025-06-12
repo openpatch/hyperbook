@@ -28,7 +28,7 @@
     "version": "pnpm build",
     "lint": "tsc --noEmit",
     "dev": "ncc build ./index.ts -w -o dist/",
-    "build": "rimraf dist && ncc build ./index.ts -o ./dist/ --minify --no-cache --no-source-map-register && node postbuild.mjs"
+    "build": "rimraf dist && ncc build ./index.ts -o ./dist/ --no-cache --no-source-map-register && node postbuild.mjs"
   },
   "devDependencies": {
     "@hyperbook/fs": "workspace:*",

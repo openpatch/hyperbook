@@ -38,6 +38,26 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.53.2
+
+::::tabs
+
+:::tab{title="Fixed :bug:" id="fixed"}
+- Build does not crash anymore, when an empty index.md is present.
+:::
+
+::::
+
+## v0.53.1
+
+::::tabs
+
+:::tab{title="Fixed :bug:" id="fixed"}
+- Fix sections need an index.md. Folders without an index.md are now ignored.
+:::
+
+::::
+
 ## v0.53.0
 
 ::::tabs

@@ -144,6 +144,7 @@ export const getPagesAndSections = async (
         const markdown = await vfile.getMarkdown(directory.index);
         section = {
           ...markdown.data,
+          name: markdown.data?.name || directory.name,
           isEmpty: markdown.content.trim() === "",
           pages: [],
           sections: [],
