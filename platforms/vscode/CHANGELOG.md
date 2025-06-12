@@ -1,5 +1,14 @@
 # @hyperbook/vscode-extension
 
+## 0.32.1
+
+### Patch Changes
+
+- [`e93c807`](https://github.com/openpatch/hyperbook/commit/e93c807db31d22bdc1b30d88bece90f1f7360912) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix sections need a index.md
+
+- Updated dependencies [[`e93c807`](https://github.com/openpatch/hyperbook/commit/e93c807db31d22bdc1b30d88bece90f1f7360912)]:
+  - @hyperbook/fs@0.18.1
+
 ## 0.32.0
 
 ### Minor Changes
