@@ -36,7 +36,17 @@ export type VFileArchive = VFileBase & {
   extension: ".zip";
 };
 
-export const pageExtensions = [".md", ".md.hbs", ".json", ".yml"] as const;
+export const pageExtensions = [
+  ".md",
+  ".md.hbs",
+  ".md.json",
+  ".md.yml",
+] as const;
+
+// this function checks if a file has a page extension. It also does work for two points like ".md.json", ".md.yml" or ".md.hbs" in the extension name, which path.extname does not.
+function hasPageExtension(file: string): boolean {
+  return pageExtensions.some((ext) => file.endsWith(ext));
+}
 
 export type VFileGlossary = VFileBase & {
   folder: "glossary";
@@ -67,6 +77,11 @@ export type VFileBookPublic = VFileBase & {
   extension: string;
 };
 
+export type VFileGlossaryPublic = VFileBase & {
+  folder: "glossary-public";
+  extension: string;
+};
+
 export type VFileSnippet = VFileBase & {
   folder: "snippets";
   extension: ".hbs";
@@ -78,6 +93,7 @@ export type VFile =
   | VFileBook
   | VFilePublic
   | VFileBookPublic
+  | VFileGlossaryPublic
   | VFileSnippet;
 
 export type VDirectoryBase = {
@@ -118,6 +134,11 @@ export type VDirectoryBookPublic = VDirectoryBase & {
   files: VFileBookPublic[];
   directories: VDirectoryBookPublic[];
 };
+export type VDirectoryGlossaryPublic = VDirectoryBase & {
+  folder: "glossary-public";
+  files: VFileGlossaryPublic[];
+  directories: VDirectoryGlossaryPublic[];
+};
 
 export type VDirectorySnippets = VDirectoryBase & {
   folder: "snippets";
@@ -130,6 +151,7 @@ export type VDirectory =
   | VDirectoryBook
   | VDirectoryPublic
   | VDirectoryBookPublic
+  | VDirectoryGlossaryPublic
   | VDirectorySnippets;
 
 const folders = ["archives", "glossary", "book", "public", "snippets"] as const;
@@ -199,8 +221,14 @@ async function getDirectoryBook(root: string): Promise<VDirectoryBook> {
         if (ext == ".hbs" && file.endsWith(".md.hbs")) {
           ext = ".md.hbs";
           name = name.slice(0, name.length - 3);
+        } else if (ext == ".json" && file.endsWith(".md.json")) {
+          ext = ".md.json";
+          name = name.slice(0, name.length - 3);
+        } else if (ext == ".yml" && file.endsWith(".md.yml")) {
+          ext = ".md.yml";
+          name = name.slice(0, name.length - 3);
         }
-        if (!pageExtensions.includes(ext as any)) {
+        if (!hasPageExtension(file)) {
           continue;
         }
         let vfileBase: VFileBase = {
@@ -212,7 +240,7 @@ async function getDirectoryBook(root: string): Promise<VDirectoryBook> {
             relative: path.join(directory.path.relative, file),
             href: "",
           },
-          extension: ext as (typeof pageExtensions)[number],
+          extension: ext,
           name,
           root,
         };
@@ -290,7 +318,7 @@ async function getDirectoryGlossary(root: string): Promise<VDirectoryGlossary> {
           ext = ".md.hbs";
           name = name.slice(0, name.length - 3);
         }
-        if (!pageExtensions.includes(ext as any)) {
+        if (!hasPageExtension(file)) {
           continue;
         }
         let vfilebase: VFileBase = {
@@ -304,7 +332,7 @@ async function getDirectoryGlossary(root: string): Promise<VDirectoryGlossary> {
           },
           name,
           root,
-          extension: ext as (typeof pageExtensions)[number],
+          extension: ext,
         };
         const references: VFileBook[] = [];
         for (const bookFile of bookFiles) {
@@ -345,6 +373,65 @@ async function getDirectoryGlossary(root: string): Promise<VDirectoryGlossary> {
     },
     name: "",
     folder: "glossary",
+    directories: [],
+    files: [],
+  });
+}
+
+async function getDirectoryGlossaryPublic(
+  root: string,
+): Promise<VDirectoryGlossaryPublic> {
+  async function getTree(
+    directory: VDirectoryGlossaryPublic,
+  ): Promise<VDirectoryGlossaryPublic> {
+    const files = await fs
+      .readdir(path.join(directory.path.absolute))
+      .catch(() => []);
+    for (const file of files) {
+      const stat = await fs.stat(path.join(directory.path.absolute, file));
+      if (stat.isDirectory()) {
+        const { name } = path.parse(file);
+        const d: VDirectoryGlossaryPublic = {
+          name,
+          root,
+          folder: "glossary-public",
+          directories: [],
+          files: [],
+          path: {
+            absolute: path.join(directory.path.absolute, file),
+            relative: path.join(directory.path.relative, file),
+          },
+        };
+        directory.directories.push(await getTree(d));
+      } else {
+        let { ext, name } = path.parse(file);
+        if (hasPageExtension(file)) continue;
+        let vfile: VFileGlossaryPublic = {
+          folder: "glossary-public",
+          path: {
+            permalink: null,
+            directory: directory.path.relative,
+            absolute: path.join(directory.path.absolute, file),
+            relative: path.join(directory.path.relative, file),
+            href: "/" + path.posix.join(directory.path.relative, file),
+          },
+          name,
+          root,
+          extension: ext,
+        };
+        directory.files.push(vfile);
+      }
+    }
+    return directory;
+  }
+  return getTree({
+    root,
+    path: {
+      relative: "glossary",
+      absolute: path.join(root, "glossary"),
+    },
+    name: "",
+    folder: "glossary-public",
     directories: [],
     files: [],
   });
@@ -433,7 +520,7 @@ async function getDirectoryBookPublic(
         directory.directories.push(await getTree(d));
       } else {
         let { ext, name } = path.parse(file);
-        if (pageExtensions.includes(ext as any)) continue;
+        if (hasPageExtension(file)) continue;
         let vfile: VFileBookPublic = {
           folder: "book-public",
           path: {
@@ -554,7 +641,11 @@ export async function getDirectory(
 export async function getDirectory(
   root: string,
   folder: "book-public",
-): Promise<VDirectoryPublic>;
+): Promise<VDirectoryBookPublic>;
+export async function getDirectory(
+  root: string,
+  folder: "glossary-public",
+): Promise<VDirectoryGlossaryPublic>;
 export async function getDirectory(
   root: string,
   folder: "snippets",
@@ -591,6 +682,10 @@ export async function getDirectory(
     }
     case "book-public": {
       const dir = await getDirectoryBookPublic(root);
+      return dir;
+    }
+    case "glossary-public": {
+      const dir = await getDirectoryGlossaryPublic(root);
       return dir;
     }
     default: {
@@ -641,7 +736,11 @@ export async function listForFolder(
 export async function listForFolder(
   root: string,
   folder: "book-public",
-): Promise<VFilePublic[]>;
+): Promise<VFileBookPublic[]>;
+export async function listForFolder(
+  root: string,
+  folder: "glossary-public",
+): Promise<VFileGlossaryPublic[]>;
 export async function listForFolder(
   root: string,
   folder: "glossary",
@@ -737,7 +836,7 @@ export const getMarkdown = async (
   registerHelpers(handlebars, { file });
 
   let markdown = "";
-  if (file.extension === ".yml") {
+  if (file.extension === ".md.yml") {
     const j = await fs
       .readFile(file.path.absolute)
       .then((f) => yaml.parse(f.toString()));
@@ -752,7 +851,7 @@ export const getMarkdown = async (
       const template = handlebars.compile(templateSource.toString());
       markdown = template(j);
     }
-  } else if (file.extension === ".json") {
+  } else if (file.extension === ".md.json") {
     const j = await fs
       .readFile(file.path.absolute)
       .then((f) => JSON.parse(f.toString()))
@@ -778,7 +877,7 @@ export const getMarkdown = async (
     markdown = template({});
   } else {
     console.log(
-      `Unsupported file extension ${file.extension}. Only .md, .yml, .json and .md.hbs files are supported.`,
+      `Unsupported file extension ${file.extension}. Only .md, .md.yml, .md.json and .md.hbs files are supported.`,
     );
   }
   let { content, data } = matter(markdown);

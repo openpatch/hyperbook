@@ -43,22 +43,36 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::tabs
 
 :::tab{title="New :rocket:" id="new"}
-You can now collocate images, videos, and other additional files directly within your book directory. This means you can reference media using relative paths, making it much easier to:
+You can now include images, videos, and other files directly within your book directory, making it easy to reference them using relative paths. This greatly improves your ability to:
 
-- Organize your content intuitively
+- Organize content intuitively
 
 - Collaborate with others
 
-- Share or version-control your Hyperbook with media included
+- Share Hyperbook pages with media included
 
 Example usage:
 
 ```md
-![Image in the same directory as this markdown file](./image.png)
-![Image one directory up relative to this markdown file](../image.png)
+![Image in the same directory](./image.png)  
+![Image one directory up](../image.png)
 ```
 
-This improvement enables a more seamless and portable authoring experience—no more managing separate static folders or absolute paths.
+This change enables a more seamless and portable authoring experience—no need to manage separate static folders or rely on absolute paths.
+
+**🧩 Smarter Link Handling**
+You can now link to files with .md, .md.json, and .md.yml extensions. This improves compatibility with editor-based file completion, making navigation and linking easier during editing.
+
+**⚠️ BREAKING CHANGE**
+To support these features, the template file extension format has changed:
+If a book page is defined in YAML or JSON, it must now use:
+
+- .md.yml instead of .yml
+
+- .md.json instead of .json
+
+This ensures the markdown parser can correctly process the content and resolve relative paths to media.
+
 :::
 
 ::::

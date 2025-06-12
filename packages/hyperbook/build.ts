@@ -123,8 +123,16 @@ async function runBuild(
     makeUrl: (path, base, page) => {
       if (typeof path === "string") {
         // Handle absolute URLs
-        if (path.includes("://")) {
+        if (path.includes("://") || path.startsWith("data:")) {
           return path;
+        }
+
+        if (path.endsWith(".md")) {
+          path = path.slice(0, -3);
+        } else if (path.endsWith(".md.json")) {
+          path = path.slice(0, -8);
+        } else if (path.endsWith(".md.yml")) {
+          path = path.slice(0, -7);
         }
 
         // Handle relative paths when we have a current page context
@@ -294,8 +302,9 @@ async function runBuild(
 
   let otherFiles = await vfile.listForFolder(root, "public");
   let bookOtherFiles = await vfile.listForFolder(root, "book-public");
+  let glossaryOtherFiles = await vfile.listForFolder(root, "glossary-public");
   i = 1;
-  for (let file of [...otherFiles, ...bookOtherFiles]) {
+  for (let file of [...otherFiles, ...bookOtherFiles, ...glossaryOtherFiles]) {
     const directoryOut = path.join(rootOut, file.path.directory);
     await makeDir(directoryOut, {
       recursive: true,

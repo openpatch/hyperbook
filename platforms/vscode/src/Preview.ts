@@ -9,8 +9,22 @@ import {
 } from "@hyperbook/fs";
 import { process } from "@hyperbook/markdown";
 import { disposeAll } from "./utils/dispose";
-import path from "path";
+import path, { posix } from "path";
 import { HyperbookContext, HyperbookJson, Navigation } from "@hyperbook/types";
+
+// Helper function to resolve relative paths
+const resolveRelativePath = (path: string, currentPageHref: string): string => {
+  // If path is absolute, return as-is
+  if (path.startsWith("/")) {
+    return path;
+  }
+
+  // Get the directory of the current page
+  const currentPageDir = posix.dirname(currentPageHref);
+
+  // Resolve the relative path and normalize
+  return posix.normalize(posix.resolve(currentPageDir, path));
+};
 
 export default class Preview {
   panel: vscode.WebviewPanel | undefined;
@@ -120,49 +134,137 @@ export default class Preview {
         ...fileNav,
       };
       const files = await vfile.list(this._vfile.root);
+      const publicFiles = await vfile.listForFolder(this._vfile.root, "public");
+      const publicBookFiles = await vfile.listForFolder(
+        this._vfile.root,
+        "book-public",
+      );
+      const publicGlossaryFiles = await vfile.listForFolder(
+        this._vfile.root,
+        "glossary-public",
+      );
+      const otherFiles = [
+        ...publicFiles,
+        ...publicBookFiles,
+        ...publicGlossaryFiles,
+      ];
       const config = await this.getConfig();
 
       const ctx: HyperbookContext = {
         root: this._vfile.root,
         config,
         navigation,
-        makeUrl: (p, base) => {
-          if (typeof p === "string") {
-            if (p.includes("://")) return p;
-            p = [p];
+        makeUrl: (path, base, page) => {
+          if (typeof path === "string") {
+            // Handle absolute URLs
+            if (path.includes("://") || path.startsWith("data:")) {
+              return path;
+            }
+
+            // Handle relative paths when we have a current page context
+            if (page?.href && !path.startsWith("/")) {
+              path = resolveRelativePath(path, page.href);
+            }
+
+            path = [path];
           }
 
-          if (base === "assets") {
-            const vsExtensionPath =
-              this.panel?.webview
-                .asWebviewUri(
-                  vscode.Uri.joinPath(
-                    this.context.extensionUri,
-                    "assets",
-                    "hyperbook",
-                  ),
-                )
-                .toString() || "";
-            return path.posix.join(vsExtensionPath, ...p);
-          } else if (base === "public") {
-            const vsPath =
-              this.panel?.webview
-                .asWebviewUri(vscode.Uri.file(this._vfile?.root || ""))
-                .toString() || "";
-            return path.posix.join(vsPath, "public", ...p);
+          // Handle array paths - resolve relative segments
+          if (Array.isArray(path) && page?.href) {
+            path = path.map((segment) => {
+              if (typeof segment === "string" && !segment.startsWith("/")) {
+                return resolveRelativePath(segment, page.href || "");
+              }
+              return segment;
+            });
           }
 
-          // hbs, yaml and json is missing
-          const file = files.find((f) => f.path.href === p.join("/"));
-          if (file) {
-            const fileUri = {
-              scheme: "file",
-              path: file?.path.absolute || "",
-              authority: "",
-            };
-            return `command:vscode.open?${encodeURIComponent(JSON.stringify(fileUri))}`;
+          switch (base) {
+            case "assets":
+              const vsExtensionPath =
+                this.panel?.webview
+                  .asWebviewUri(
+                    vscode.Uri.joinPath(
+                      this.context.extensionUri,
+                      "assets",
+                      "hyperbook",
+                    ),
+                  )
+                  .toString() || "";
+
+              return posix.join(vsExtensionPath, ...path);
+
+            case "public":
+              const otherFile = otherFiles.find(
+                (f) => f.path.href === path.join("/"),
+              );
+              const vsPath =
+                this.panel?.webview
+                  .asWebviewUri(vscode.Uri.file(this._vfile?.root || ""))
+                  .toString() || "";
+              let directory = otherFile?.path.directory || "";
+              if (otherFile?.folder === "public") {
+                directory = "public";
+              } else if (otherFile?.folder === "book-public") {
+                directory = "book";
+              } else if (otherFile?.folder === "glossary-public") {
+                directory = "glossary";
+              }
+              return posix.join(
+                vsPath,
+                directory,
+                otherFile?.path.relative || "",
+              );
+
+            case "glossary":
+              // For glossary links in VSCode, try to find the file and open it
+              const glossaryPath = posix.join("glossary", ...path);
+              const glossaryFile = files.find(
+                (f) => f.path.href === glossaryPath,
+              );
+              if (glossaryFile) {
+                const fileUri = {
+                  scheme: "file",
+                  path: glossaryFile?.path.absolute || "",
+                  authority: "",
+                };
+                return `command:vscode.open?${encodeURIComponent(JSON.stringify(fileUri))}`;
+              }
+              return "#";
+
+            case "book":
+            case "archive":
+              // For book and archive links, try to find the file and open it
+              const targetPath =
+                base === "archive"
+                  ? posix.join("archives", ...path)
+                  : path.join("/");
+              const file = files.find((f) => f.path.href === targetPath);
+              if (file) {
+                const fileUri = {
+                  scheme: "file",
+                  path: file?.path.absolute || "",
+                  authority: "",
+                };
+                return `command:vscode.open?${encodeURIComponent(JSON.stringify(fileUri))}`;
+              }
+              return "#";
+
+            default:
+              // Fallback for any other base types
+              const defaultFile = files.find(
+                (f) => f.path.href === path.join("/"),
+              );
+              if (defaultFile) {
+                const fileUri = {
+                  scheme: "file",
+                  path: defaultFile?.path.absolute || "",
+                  authority: "",
+                };
+                return `command:vscode.open?${encodeURIComponent(JSON.stringify(fileUri))}`;
+              }
+              return "#";
           }
-          return "#";
         },
       };
       const result = await process(this._vfile.markdown.content, ctx);

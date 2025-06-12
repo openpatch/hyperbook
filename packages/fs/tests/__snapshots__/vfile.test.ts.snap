@@ -419,7 +419,7 @@ in Python Teil des Programms .
     "root": "single-hyperbook",
   },
   {
-    "extension": ".json",
+    "extension": ".md.json",
     "folder": "book",
     "markdown": {
       "content": "",
@@ -427,33 +427,16 @@ in Python Teil des Programms .
     },
     "name": "empty",
     "path": {
-      "absolute": "single-hyperbook/book/subsection/empty.json",
+      "absolute": "single-hyperbook/book/subsection/empty.md.json",
       "directory": "subsection",
       "href": "/subsection/empty",
       "permalink": null,
-      "relative": "subsection/empty.json",
+      "relative": "subsection/empty.md.json",
     },
     "root": "single-hyperbook",
   },
   {
-    "extension": ".json",
-    "folder": "book",
-    "markdown": {
-      "content": "",
-      "data": {},
-    },
-    "name": "invalid",
-    "path": {
-      "absolute": "single-hyperbook/book/subsection/invalid.json",
-      "directory": "subsection",
-      "href": "/subsection/invalid",
-      "permalink": null,
-      "relative": "subsection/invalid.json",
-    },
-    "root": "single-hyperbook",
-  },
-  {
-    "extension": ".yml",
+    "extension": ".md.yml",
     "folder": "book",
     "markdown": {
       "content": "
@@ -465,11 +448,11 @@ Example use of a template.
     },
     "name": "use-template1",
     "path": {
-      "absolute": "single-hyperbook/book/subsection/use-template1.yml",
+      "absolute": "single-hyperbook/book/subsection/use-template1.md.yml",
       "directory": "subsection",
       "href": "/subsection/use-template1",
       "permalink": null,
-      "relative": "subsection/use-template1.yml",
+      "relative": "subsection/use-template1.md.yml",
     },
     "root": "single-hyperbook",
   },
@@ -521,7 +504,7 @@ Example use of a template.
     "root": "single-hyperbook",
   },
   {
-    "extension": ".yml",
+    "extension": ".md.yml",
     "folder": "book",
     "markdown": {
       "content": "
@@ -533,11 +516,11 @@ Example use of a template.
     },
     "name": "index",
     "path": {
-      "absolute": "single-hyperbook/book/subsection2/index.yml",
+      "absolute": "single-hyperbook/book/subsection2/index.md.yml",
       "directory": "subsection2",
       "href": "/subsection2",
       "permalink": null,
-      "relative": "subsection2/index.yml",
+      "relative": "subsection2/index.md.yml",
     },
     "root": "single-hyperbook",
   },
@@ -564,7 +547,7 @@ Hi!
     "root": "single-hyperbook",
   },
   {
-    "extension": ".yml",
+    "extension": ".md.yml",
     "folder": "book",
     "markdown": {
       "content": "
@@ -576,11 +559,11 @@ Example use of a template.
     },
     "name": "index",
     "path": {
-      "absolute": "single-hyperbook/book/subsection3/index.yml",
+      "absolute": "single-hyperbook/book/subsection3/index.md.yml",
       "directory": "subsection3",
       "href": "/subsection3",
       "permalink": null,
-      "relative": "subsection3/index.yml",
+      "relative": "subsection3/index.md.yml",
     },
     "root": "single-hyperbook",
   },
@@ -741,7 +724,7 @@ in Python Teil des Programms .
     "root": "single-hyperbook",
   },
   {
-    "extension": ".json",
+    "extension": ".md.json",
     "folder": "book",
     "markdown": {
       "content": "",
@@ -749,33 +732,16 @@ in Python Teil des Programms .
     },
     "name": "empty",
     "path": {
-      "absolute": "single-hyperbook/book/subsection/empty.json",
+      "absolute": "single-hyperbook/book/subsection/empty.md.json",
       "directory": "subsection",
       "href": "/subsection/empty",
       "permalink": null,
-      "relative": "subsection/empty.json",
+      "relative": "subsection/empty.md.json",
     },
     "root": "single-hyperbook",
   },
   {
-    "extension": ".json",
-    "folder": "book",
-    "markdown": {
-      "content": "",
-      "data": {},
-    },
-    "name": "invalid",
-    "path": {
-      "absolute": "single-hyperbook/book/subsection/invalid.json",
-      "directory": "subsection",
-      "href": "/subsection/invalid",
-      "permalink": null,
-      "relative": "subsection/invalid.json",
-    },
-    "root": "single-hyperbook",
-  },
-  {
-    "extension": ".yml",
+    "extension": ".md.yml",
     "folder": "book",
     "markdown": {
       "content": "
@@ -787,11 +753,11 @@ Example use of a template.
     },
     "name": "use-template1",
     "path": {
-      "absolute": "single-hyperbook/book/subsection/use-template1.yml",
+      "absolute": "single-hyperbook/book/subsection/use-template1.md.yml",
       "directory": "subsection",
       "href": "/subsection/use-template1",
       "permalink": null,
-      "relative": "subsection/use-template1.yml",
+      "relative": "subsection/use-template1.md.yml",
     },
     "root": "single-hyperbook",
   },
@@ -843,7 +809,7 @@ Example use of a template.
     "root": "single-hyperbook",
   },
   {
-    "extension": ".yml",
+    "extension": ".md.yml",
     "folder": "book",
     "markdown": {
       "content": "
@@ -855,11 +821,11 @@ Example use of a template.
     },
     "name": "index",
     "path": {
-      "absolute": "single-hyperbook/book/subsection2/index.yml",
+      "absolute": "single-hyperbook/book/subsection2/index.md.yml",
       "directory": "subsection2",
       "href": "/subsection2",
       "permalink": null,
-      "relative": "subsection2/index.yml",
+      "relative": "subsection2/index.md.yml",
     },
     "root": "single-hyperbook",
   },
@@ -886,7 +852,7 @@ Hi!
     "root": "single-hyperbook",
   },
   {
-    "extension": ".yml",
+    "extension": ".md.yml",
     "folder": "book",
     "markdown": {
       "content": "
@@ -898,11 +864,11 @@ Example use of a template.
     },
     "name": "index",
     "path": {
-      "absolute": "single-hyperbook/book/subsection3/index.yml",
+      "absolute": "single-hyperbook/book/subsection3/index.md.yml",
       "directory": "subsection3",
       "href": "/subsection3",
       "permalink": null,
-      "relative": "subsection3/index.yml",
+      "relative": "subsection3/index.md.yml",
     },
     "root": "single-hyperbook",
   },
@@ -1068,7 +1034,7 @@ in Python Teil des Programms .
     "root": "single-hyperbook",
   },
   {
-    "extension": ".json",
+    "extension": ".md.json",
     "folder": "book",
     "markdown": {
       "content": "",
@@ -1076,33 +1042,16 @@ in Python Teil des Programms .
     },
     "name": "empty",
     "path": {
-      "absolute": "single-hyperbook/book/subsection/empty.json",
+      "absolute": "single-hyperbook/book/subsection/empty.md.json",
       "directory": "subsection",
       "href": "/subsection/empty",
       "permalink": null,
-      "relative": "subsection/empty.json",
+      "relative": "subsection/empty.md.json",
     },
     "root": "single-hyperbook",
   },
   {
-    "extension": ".json",
-    "folder": "book",
-    "markdown": {
-      "content": "",
-      "data": {},
-    },
-    "name": "invalid",
-    "path": {
-      "absolute": "single-hyperbook/book/subsection/invalid.json",
-      "directory": "subsection",
-      "href": "/subsection/invalid",
-      "permalink": null,
-      "relative": "subsection/invalid.json",
-    },
-    "root": "single-hyperbook",
-  },
-  {
-    "extension": ".yml",
+    "extension": ".md.yml",
     "folder": "book",
     "markdown": {
       "content": "
@@ -1114,11 +1063,11 @@ Example use of a template.
     },
     "name": "use-template1",
     "path": {
-      "absolute": "single-hyperbook/book/subsection/use-template1.yml",
+      "absolute": "single-hyperbook/book/subsection/use-template1.md.yml",
       "directory": "subsection",
       "href": "/subsection/use-template1",
       "permalink": null,
-      "relative": "subsection/use-template1.yml",
+      "relative": "subsection/use-template1.md.yml",
     },
     "root": "single-hyperbook",
   },
@@ -1170,7 +1119,7 @@ Example use of a template.
     "root": "single-hyperbook",
   },
   {
-    "extension": ".yml",
+    "extension": ".md.yml",
     "folder": "book",
     "markdown": {
       "content": "
@@ -1182,11 +1131,11 @@ Example use of a template.
     },
     "name": "index",
     "path": {
-      "absolute": "single-hyperbook/book/subsection2/index.yml",
+      "absolute": "single-hyperbook/book/subsection2/index.md.yml",
       "directory": "subsection2",
       "href": "/subsection2",
       "permalink": null,
-      "relative": "subsection2/index.yml",
+      "relative": "subsection2/index.md.yml",
     },
     "root": "single-hyperbook",
   },
@@ -1213,7 +1162,7 @@ Hi!
     "root": "single-hyperbook",
   },
   {
-    "extension": ".yml",
+    "extension": ".md.yml",
     "folder": "book",
     "markdown": {
       "content": "
@@ -1225,11 +1174,11 @@ Example use of a template.
     },
     "name": "index",
     "path": {
-      "absolute": "single-hyperbook/book/subsection3/index.yml",
+      "absolute": "single-hyperbook/book/subsection3/index.md.yml",
       "directory": "subsection3",
       "href": "/subsection3",
       "permalink": null,
-      "relative": "subsection3/index.yml",
+      "relative": "subsection3/index.md.yml",
     },
     "root": "single-hyperbook",
   },
