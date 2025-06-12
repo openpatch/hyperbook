@@ -155,13 +155,14 @@ export const getPagesAndSections = async (
         if (directory.index.path.href) {
           section.href = directory.index.path.href;
         }
+        const { pages, sections } = await getSectionsAndPages(directory);
+
+        arrayOfSections.push({
+          ...section,
+          pages,
+          sections,
+        });
       }
-      const { pages, sections } = await getSectionsAndPages(directory);
-      arrayOfSections.push({
-        ...section,
-        pages,
-        sections,
-      });
     }
 
     if (index && index.path.href == "/") {
