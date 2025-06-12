@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.53.1
+
+### Patch Changes
+
+- [`e93c807`](https://github.com/openpatch/hyperbook/commit/e93c807db31d22bdc1b30d88bece90f1f7360912) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix sections need a index.md
+
 ## 0.53.0
 
 ### Minor Changes
