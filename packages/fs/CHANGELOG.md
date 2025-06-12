@@ -1,5 +1,11 @@
 # @hyperbook/fs
 
+## 0.18.2
+
+### Patch Changes
+
+- [`91587c4`](https://github.com/openpatch/hyperbook/commit/91587c465412956142c0798a65258ebbfb8986bf) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix build crashes if index.md is empty
+
 ## 0.18.1
 
 ### Patch Changes
