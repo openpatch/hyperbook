@@ -1,5 +1,24 @@
 # @hyperbook/types
 
+## 0.15.0
+
+### Minor Changes
+
+- [`b914f85`](https://github.com/openpatch/hyperbook/commit/b914f8580aaae9969cb2be97b5ab6f1e7ce8564f) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - You can now collocate images, videos, and other additional files directly within your book directory. This means you can reference media using relative paths, making it much easier to:
+
+  - Organize your content intuitively
+  - Collaborate with others
+  - Share or version-control your Hyperbook with media included
+
+  Example usage:
+
+  ```md
+  ![Image in the same directory as this markdown file](./image.png)
+  ![Image one directory up relative to this markdown file](../image.png)
+  ```
+
+  This improvement enables a more seamless and portable authoring experience—no more managing separate static folders or absolute paths.
+
 ## 0.14.0
 
 ### Minor Changes
