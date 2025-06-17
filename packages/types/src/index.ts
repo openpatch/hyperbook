@@ -128,6 +128,7 @@ export type HyperbookJson = {
             light: string;
           }
         | string;
+      bypassInline?: boolean;
       showLineNumbers?: boolean;
     };
     excalidraw?: ElementConfig & {

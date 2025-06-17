@@ -4,13 +4,14 @@ permaid: webide
 lang: de 
 ---
 
-## QR
+# 1:1 Beziehung
 
-<bold>test</bold>
-:::collapsible{title="QR Code"}
+1:1
 
-::qr{value="https://hyperbook.openpatch.org" size="XL"}
+`inline`
 
-:::
-
-::qr{value="https://hyperbook.openpatch.org" size="XL"}
+```js
+function test() {
+  console.log("Hello, World!");
+}
+```

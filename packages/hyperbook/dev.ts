@@ -68,6 +68,8 @@ socket.addEventListener("message", (event) => {
 
     try {
       // Try to read the given resource into a Buffer.
+      pathname = decodeURIComponent(pathname);
+      console.log(pathname);
       let resourcePath = path.join(outDir, pathname);
       let responseBody: Buffer;
       responseBody = await fs.promises

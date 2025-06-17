@@ -33,9 +33,7 @@ describe("remarkHeadingId", () => {
 
   it("should parse well which contains inline syntax", async () => {
     let file = await unified()
-      .data("settings", {
-        position: false,
-      })
+      .data("settings", {})
       .use(remarkParse)
       .use(remarkHeadings(ctx))
       .use(remarkGfm)
@@ -54,5 +52,22 @@ describe("remarkHeadingId", () => {
       <h2 id="cus-head2"><a href="#cus-head2" class="heading"><span>cus head2</span></a><button class="bookmark" onclick="hyperbook.toggleBookmark(&#x22;#cus-head2&#x22;, &#x22;cus head2&#x22;)" title="toggle-bookmark" data-key="#cus-head2">🔖</button></h2>
       <h2 id="cus-head2"><a href="#cus-head2" class="heading"><span>cus head2 </span></a><button class="bookmark" onclick="hyperbook.toggleBookmark(&#x22;#cus-head2&#x22;, &#x22;cus head2 &#x22;)" title="toggle-bookmark" data-key="#cus-head2">🔖</button></h2>"
     `);
+  });
+
+  it("should result in a heading with a colon", async () => {
+    let file = await unified()
+      .use(remarkParse)
+      .use(remarkHeadings(ctx))
+      .use(remarkGfm)
+      .use(remarkRehype)
+      .use(rehypeStringify, {
+        allowDangerousCharacters: true,
+        allowDangerousHtml: true,
+      }).process(`# Heading 1:1
+      `);
+
+    expect(String(file)).toMatchInlineSnapshot(
+      `"<h1 id="heading-11"><a href="#heading-11" class="heading"><span>Heading 1:1</span></a><button class="bookmark" onclick="hyperbook.toggleBookmark(&#x22;#heading-11&#x22;, &#x22;Heading 1:1&#x22;)" title="toggle-bookmark" data-key="#heading-11">🔖</button></h1>"`,
+    );
   });
 });

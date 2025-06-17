@@ -52,7 +52,7 @@ export default ({
     return function (tree: Root, file: VFile) {
       visit(tree, "heading", (node: Heading) => {
         customHeading(node);
-        const value = toString(node);
+        const value = toString(node, { includeImageAlt: false });
         const anchor = makeAnchor(value);
         const label = value || anchor;
 

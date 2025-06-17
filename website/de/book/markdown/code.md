@@ -39,6 +39,8 @@ dann wir `plain` gesetzt.
 
 Du kannst die Standardwerte der Quelltextblöcke in der `hyperbook.json` ändern. Gültige Werte für die Themes findest du hier: https://shiki.style/themes#themes.
 
+bypassInline ist standardmäßig `false`, wenn du es auf `true` setzt, dann wird inline Quelltext nicht verarbeitet. Das heißt, dass kein Kopieren-Button angezeigt wird und auch kein Syntax-Highlighting angewendet wird.
+
 ```json
 {
   "elements": {
@@ -47,7 +49,8 @@ Du kannst die Standardwerte der Quelltextblöcke in der `hyperbook.json` ändern
       "theme": {
          "dark": "dracula",
          "light": "evergreen"
-      }
+      },
+      "bypassInline": true
     }
   }
 }

@@ -2,7 +2,6 @@ import rehypeKatex from "rehype-katex";
 import rehypeStringify from "rehype-stringify";
 import rehypePrettyCode from "rehype-pretty-code";
 import rehypeUnwrapImages from "rehype-unwrap-images";
-import { transformerCopyButton } from "@rehype-pretty/transformers";
 import remarkParse from "remark-parse";
 import remarkToRehype from "remark-rehype";
 import { unified, PluggableList } from "unified";
@@ -58,6 +57,7 @@ import remarkDirectiveJSXGraph from "./remarkDirectiveJSXGraph";
 import remarkDirectiveMultievent from "./remarkDirectiveMultievent";
 import remarkSubSup from "./remarkSubSup";
 import remarkDirectiveUnpack from "./remarkDirectiveUnpack";
+import { makeTransformerCopyButton } from "./rehypePrettyCodeCopyButton";
 
 export const remark = (ctx: HyperbookContext) => {
   i18n.init(ctx.config.language || "en");
@@ -69,7 +69,6 @@ export const remark = (ctx: HyperbookContext) => {
     remarkDirectiveRehype,
     remarkDirectivePagelist(ctx),
     remarkLink(ctx),
-    remarkHeadings(ctx),
     remarkImage(ctx),
     remarkGfm,
     remarkDirectiveTerm(ctx),
@@ -106,6 +105,7 @@ export const remark = (ctx: HyperbookContext) => {
     remarkDirectiveProtect(ctx),
     /* needs to be after all directives */
     remarkDirectiveUnpack(ctx),
+    remarkHeadings(ctx),
     remarkCollectHeadings(ctx),
     remarkCollectSearchDocuments(ctx),
   ];
@@ -142,8 +142,12 @@ export const process = (md: string, ctx: HyperbookContext) => {
     [
       rehypePrettyCode,
       {
+        bypassInlineCode:
+          ctx.config.elements?.code?.bypassInline == undefined
+            ? false
+            : ctx.config.elements?.code?.bypassInline,
         transformers: [
-          transformerCopyButton({
+          makeTransformerCopyButton(ctx)({
             visibility: "always",
             feedbackDuration: 3_000,
           }),

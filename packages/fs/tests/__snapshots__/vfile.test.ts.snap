@@ -286,6 +286,23 @@ exports[`list > should list all 1`] = `
     "extension": ".md",
     "folder": "book",
     "markdown": {
+      "content": "",
+      "data": {},
+    },
+    "name": "Has Spaces",
+    "path": {
+      "absolute": "single-hyperbook/book/Has Spaces.md",
+      "directory": "",
+      "href": "/Has Spaces",
+      "permalink": null,
+      "relative": "Has Spaces.md",
+    },
+    "root": "single-hyperbook",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "markdown": {
       "content": "Hyperbook Documentation
 
 https://github.com/openpatch/hyperbook/edit/main/website/en
@@ -584,6 +601,23 @@ Example use of a template.
       "href": "/subsection3/subsection31/test",
       "permalink": "/@/01",
       "relative": "subsection3/subsection31/test.md",
+    },
+    "root": "single-hyperbook",
+  },
+  {
+    "extension": ".md",
+    "folder": "book",
+    "markdown": {
+      "content": "",
+      "data": {},
+    },
+    "name": "Has Spaces",
+    "path": {
+      "absolute": "single-hyperbook/book/Has Spaces.md",
+      "directory": "",
+      "href": "/Has Spaces",
+      "permalink": null,
+      "relative": "Has Spaces.md",
     },
     "root": "single-hyperbook",
   },
@@ -897,6 +931,23 @@ Example use of a template.
 
 exports[`list > should list for folder book 1`] = `
 [
+  {
+    "extension": ".md",
+    "folder": "book",
+    "markdown": {
+      "content": "",
+      "data": {},
+    },
+    "name": "Has Spaces",
+    "path": {
+      "absolute": "single-hyperbook/book/Has Spaces.md",
+      "directory": "",
+      "href": "/Has Spaces",
+      "permalink": null,
+      "relative": "Has Spaces.md",
+    },
+    "root": "single-hyperbook",
+  },
   {
     "extension": ".md",
     "folder": "book",

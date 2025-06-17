@@ -47,6 +47,11 @@ const result = await process(markdown, {
       },
     ],
     repo: "https://github.com/openpatch/hyperbook/edit/main/website/de",
+    elements: {
+      code: {
+        bypassInline: false,
+      },
+    },
   },
   makeUrl: (p, base) => {
     if (p.includes("://")) return p;

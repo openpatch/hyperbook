@@ -115,4 +115,40 @@ in Python Teil des Programms .
     );
     expect(result.value).toMatchSnapshot();
   });
+
+  it("should result in a heading with a colon", async () => {
+    const result = await process(
+      `
+# Heading 1:1
+`,
+      ctx,
+    );
+    expect(result.value).toMatchSnapshot();
+  });
+  it("should not include copy button for inline code", async () => {
+    const result = await process("`test this inline code`", {
+      ...ctx,
+      config: {
+        ...ctx.config,
+        elements: {
+          code: {
+            bypassInline: true,
+          },
+        },
+      },
+    });
+    expect(result.value).toMatchSnapshot();
+  });
+  it("should include copy button for inline code", async () => {
+    const result = await process("`test this inline code`", ctx);
+    expect(result.value).toMatchSnapshot();
+  });
+  it("should include copy button for block code", async () => {
+    const result = await process("```\ntest this block code\n```", ctx);
+    expect(result.value).toMatchSnapshot();
+  });
+  it("should hide copy button for block code", async () => {
+    const result = await process("```js\nhide this block code\n```", ctx);
+    expect(result.value).toMatchSnapshot();
+  });
 });
