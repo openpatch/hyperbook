@@ -1,5 +1,11 @@
 # @hyperbook/markdown
 
+## 0.29.1
+
+### Patch Changes
+
+- [`c18ba75`](https://github.com/openpatch/hyperbook/commit/c18ba75d415e3d23eb1fafb7ebe69eac082457e0) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix colons in headings not working. Fix spaces in filenames causing trouble. Add option to disable code highlighting and copy button for inline code blocks.
+
 ## 0.29.0
 
 ### Minor Changes
