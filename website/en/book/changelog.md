@@ -38,6 +38,24 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.53.3
+
+::::tabs
+
+:::tab{title="Fixed :bug:" id="fixed"}
+- Fix headings with colons did not display correctly.
+- Fix files with spacing in the name did not work correctly.
+:::
+
+:::tab{title="Improved :+1:" id="improved"}
+
+- Allow syntax highlighting and copy code to be disabled for inline code blocks. For this you have to set the `bypassInline` options in your `hyperbook.json` to `true`.
+
+:::
+
+
+::::
+
 ## v0.53.2
 
 ::::tabs
