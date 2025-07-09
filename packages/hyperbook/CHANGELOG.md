@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.53.4
+
+### Patch Changes
+
+- [#992](https://github.com/openpatch/hyperbook/pull/992) [`a30a565`](https://github.com/openpatch/hyperbook/commit/a30a565778ae53b377d7da5c85f2d22f949d4a92) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Update emoji shortcodes.
+
 ## 0.53.3
 
 ### Patch Changes
