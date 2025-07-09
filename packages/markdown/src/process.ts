@@ -10,7 +10,6 @@ import remarkGfm from "remark-gfm";
 import remarkDirective from "remark-directive";
 import remarkDirectiveRehype from "remark-directive-rehype";
 import remarkMath from "remark-math";
-import remarkGemoji from "remark-gemoji";
 import remarkDirectiveVideo from "./remarkDirectiveVideo";
 import remarkDirectiveYoutube from "./remarkDirectiveYoutube";
 import remarkDirectiveTiles from "./remarkDirectiveTiles";
@@ -58,13 +57,14 @@ import remarkDirectiveMultievent from "./remarkDirectiveMultievent";
 import remarkSubSup from "./remarkSubSup";
 import remarkDirectiveUnpack from "./remarkDirectiveUnpack";
 import { makeTransformerCopyButton } from "./rehypePrettyCodeCopyButton";
+import { remarkGithubEmoji } from "./remarkGithubEmoji";
 
 export const remark = (ctx: HyperbookContext) => {
   i18n.init(ctx.config.language || "en");
   const remarkPlugins: PluggableList = [
+    remarkGithubEmoji,
     remarkSubSup,
     remarkRemoveComments,
-    remarkGemoji,
     remarkDirective,
     remarkDirectiveRehype,
     remarkDirectivePagelist(ctx),

@@ -38,6 +38,19 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.53.4
+
+::::tabs
+
+:::tab{title="Improved :+1:" id="improved"}
+
+- Update emoji shortscodes to match GitHub's emoji shortcodes. This means that you can now use the same shortcodes as on GitHub, e.g. `:smile:` for 😄.
+
+:::
+
+
+::::
+
 ## v0.53.3
 
 ::::tabs
