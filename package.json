@@ -17,7 +17,8 @@
     "platform:vscode:dev": "pnpm --filter hyperbook-studio watch",
     "examples:build": "cd examples && node ../packages/hyperbook/dist/index.js build",
     "website:dev": "cd website && node ../packages/hyperbook/dist/index.js dev",
-    "website:build": "cd website && node ../packages/hyperbook/dist/index.js build"
+    "website:build": "cd website && node ../packages/hyperbook/dist/index.js build",
+    "website:diff": "node scripts/diffFolders.mjs ./website/en ./website/de"
   },
   "devDependencies": {
     "@changesets/changelog-github": "0.5.0",

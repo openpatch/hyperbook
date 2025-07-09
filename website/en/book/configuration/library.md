@@ -59,7 +59,3 @@ the `lanauge` option in the corresponding `hyperbook.json`
   ]
 }
 ```
-
-:::alert{warn}
-`hyperbook dev` funktioniert noch nicht mit Hyperlibrary. Der aktuelle Workaround besteht darin, die Hyperbook separat mit `hyperbook dev` zu starten. Daher fehlt bei der lokalen Entwicklung das verknüpfende Menü.
-:::
