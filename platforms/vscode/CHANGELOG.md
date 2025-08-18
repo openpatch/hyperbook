@@ -1,5 +1,15 @@
 # @hyperbook/vscode-extension
 
+## 0.32.5
+
+### Patch Changes
+
+- [`29a1464`](https://github.com/openpatch/hyperbook/commit/29a146441bf28fe85c2e755c7119da1a7d39340e) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix toc and qrcode configurations not working correct.
+
+- Updated dependencies [[`29a1464`](https://github.com/openpatch/hyperbook/commit/29a146441bf28fe85c2e755c7119da1a7d39340e)]:
+  - @hyperbook/markdown@0.29.3
+  - @hyperbook/fs@0.18.3
+
 ## 0.32.4
 
 ### Patch Changes
