@@ -7,7 +7,7 @@ import { VFile } from "vfile";
 import { i18n } from "./i18n";
 
 export default (ctx: HyperbookContext) => () => {
-  const qrcode = ctx.config.qrcode || ctx.navigation.current?.qrcode || true;
+  const qrcode = ctx.config.qrcode && (ctx.navigation.current?.qrcode ?? true);
   return (tree: Root, file: VFile) => {
     const originalChildren = tree.children as ElementContent[];
 

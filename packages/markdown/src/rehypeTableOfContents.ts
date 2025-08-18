@@ -7,14 +7,11 @@ import { VFile } from "vfile";
 import { i18n } from "./i18n";
 
 export default (ctx: HyperbookContext) => () => {
-  const showToc = ctx.navigation.current?.toc || true;
+  const showToc =
+    (ctx.config.toc ?? true) || (ctx.navigation.current?.toc ?? false);
   return (tree: Root, file: VFile) => {
     const headings = file.data.headings || [];
     const originalChildren = tree.children as ElementContent[];
-
-    if (!showToc) {
-      return;
-    }
 
     const tocSidebar: ElementContent[] = [
       {
@@ -124,7 +121,7 @@ export default (ctx: HyperbookContext) => () => {
         properties: {
           class: "hyperbook-markdown",
         },
-        children: [...tocSidebar, ...originalChildren],
+        children: [...(showToc ? tocSidebar : []), ...originalChildren],
       },
     ];
   };

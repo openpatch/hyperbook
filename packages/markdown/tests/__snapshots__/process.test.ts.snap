@@ -57,17 +57,7 @@ HYPERBOOK_ASSETS = "assets/"
     <pre style="--shiki-dark:#e1e4e8;--shiki-light:#24292e;--shiki-dark-bg:#24292e;--shiki-light-bg:#fff" tabindex="0" data-language="python" data-theme="github-dark github-light"><code data-line-numbers="" data-language="python" data-theme="github-dark github-light" style="display: grid;" data-line-numbers-max-digits="1"><span data-line="" data-highlighted-line=""><span style="--shiki-dark:#F97583;--shiki-light:#D73A49">def</span><span style="--shiki-dark:#B392F0;--shiki-light:#6F42C1"> func</span><span style="--shiki-dark:#E1E4E8;--shiki-light:#24292E">():</span></span>
 <span data-line=""><span style="--shiki-dark:#F97583;--shiki-light:#D73A49">  pass</span></span><button type="button" data="def func():
   pass" title="Copy code" aria-label="Copy code" class="rehype-pretty-copy" data-name="rehype-pretty-copy-button" onclick="navigator.clipboard.writeText(this.attributes.data.value);this.classList.add('rehype-pretty-copied');window.setTimeout(() => this.classList.remove('rehype-pretty-copied'), 3000);"><span class="ready"></span><span class="success"></span></button><style>:root {--copy-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath fill='%23adadad' d='M16.187 9.5H12.25a1.75 1.75 0 0 0-1.75 1.75v28.5c0 .967.784 1.75 1.75 1.75h23.5a1.75 1.75 0 0 0 1.75-1.75v-28.5a1.75 1.75 0 0 0-1.75-1.75h-3.937a4.25 4.25 0 0 1-4.063 3h-7.5a4.25 4.25 0 0 1-4.063-3M31.813 7h3.937A4.25 4.25 0 0 1 40 11.25v28.5A4.25 4.25 0 0 1 35.75 44h-23.5A4.25 4.25 0 0 1 8 39.75v-28.5A4.25 4.25 0 0 1 12.25 7h3.937a4.25 4.25 0 0 1 4.063-3h7.5a4.25 4.25 0 0 1 4.063 3M18.5 8.25c0 .966.784 1.75 1.75 1.75h7.5a1.75 1.75 0 1 0 0-3.5h-7.5a1.75 1.75 0 0 0-1.75 1.75'/%3E%3C/svg%3E");--success-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%2366ff85' d='M9 16.17L5.53 12.7a.996.996 0 1 0-1.41 1.41l4.18 4.18c.39.39 1.02.39 1.41 0L20.29 7.71a.996.996 0 1 0-1.41-1.41z'/%3E%3C/svg%3E");}pre:has(code) {position: relative;}button[data='<span>'] {width: 0;height: 0;display: none;visibility: hidden;}pre button.rehype-pretty-copy {right: 1px;padding: 0;width: 24px;height: 24px;display: flex;margin-top: 2px;margin-right: 8px;position: absolute;border-radius: 25%;& span {width: 100%;aspect-ratio: 1 / 1;}& .ready {background-image: var(--copy-icon);}& .success {display: none; background-image: var(--success-icon);}}&.rehype-pretty-copied {& .success {display: block;} & .ready {display: none;}}pre button.rehype-pretty-copy.rehype-pretty-copied {opacity: 1;& .ready { display: none; }& .success { display: block; }}</style></code></pre>
-  </figure><button id="qrcode-open" onclick="hyperbook.qrcodeOpen()" title="QR Code"><div class="qrcode-icon"></div></button>
-  <dialog id="qrcode-dialog">
-    <div class="container">
-      <div class="name">Markdown Referenz</div>
-      <div class="make-qrcode"></div>
-      <div class="url">
-        <div data-href="/markdown"></div>
-        <div data-href="/@/md"></div>
-      </div>
-    </div><button class="close" onclick="hyperbook.qrcodeClose()"><div class="close-icon"></div></button>
-  </dialog>
+  </figure>
 </div>
 </article><div class="jump-container"><a class="jump previous" href="/configuration/library">Bibliothek Konfiguration</a><a class="jump next" href="/markdown/image">Bild</a></div><div class="meta"><a class="edit-github" href="https://github.com/openpatch/hyperbook/edit/main/website/de/book/markdown/index.md">✎ GitHub</a><a href="#" onclick="hyperbookReset()"><span class="reset-icon" title="Reset Hyperbook"></span></a><span class="copyright">© Copyright 2025 by <a href="https://openpatch.org">OpenPatch</a></span></div><div id="custom-links-footer"><ul class="links-item sub"><li><a href="#"><div class="icon">🐦</div><div class="label">Kontakt</div></a><ul class="links-sub-menu"><li class="links-item"><a href="mailto:contact@openpatch.org"><div class="label">Mail</div></a></li><li class="links-item"><a href="https://twitter.com/openpatchorg"><div class="icon">🐦</div><div class="label">Twitter</div></a></li><li class="links-item"><a href="https://fosstodon.org/@openpatch"><div class="icon">🐘</div><div class="label">Mastodon</div></a></li><li class="links-item"><a href="https://matrix.to/#/#hyperbook:matrix.org"><div class="icon">👨‍💻</div><div class="label">Matrix (Chat)</div></a></li></ul></li></ul></div></main></div><script src="assets/client.js" defer></script></body></html>"
 `;
@@ -573,17 +563,7 @@ HYPERBOOK_ASSETS = "assets/"
         <ul></ul>
       </nav>
     </div>
-  </side-drawer><button id="qrcode-open" onclick="hyperbook.qrcodeOpen()" title="QR Code"><div class="qrcode-icon"></div></button>
-  <dialog id="qrcode-dialog">
-    <div class="container">
-      <div class="name">Markdown Referenz</div>
-      <div class="make-qrcode"></div>
-      <div class="url">
-        <div data-href="/markdown"></div>
-        <div data-href="/@/md"></div>
-      </div>
-    </div><button class="close" onclick="hyperbook.qrcodeClose()"><div class="close-icon"></div></button>
-  </dialog>
+  </side-drawer>
 </div>
 </article><div class="jump-container"><a class="jump previous" href="/configuration/library">Bibliothek Konfiguration</a><a class="jump next" href="/markdown/image">Bild</a></div><div class="meta"><a class="edit-github" href="https://github.com/openpatch/hyperbook/edit/main/website/de/book/markdown/index.md">✎ GitHub</a><a href="#" onclick="hyperbookReset()"><span class="reset-icon" title="Reset Hyperbook"></span></a><span class="copyright">© Copyright 2025 by <a href="https://openpatch.org">OpenPatch</a></span></div><div id="custom-links-footer"><ul class="links-item sub"><li><a href="#"><div class="icon">🐦</div><div class="label">Kontakt</div></a><ul class="links-sub-menu"><li class="links-item"><a href="mailto:contact@openpatch.org"><div class="label">Mail</div></a></li><li class="links-item"><a href="https://twitter.com/openpatchorg"><div class="icon">🐦</div><div class="label">Twitter</div></a></li><li class="links-item"><a href="https://fosstodon.org/@openpatch"><div class="icon">🐘</div><div class="label">Mastodon</div></a></li><li class="links-item"><a href="https://matrix.to/#/#hyperbook:matrix.org"><div class="icon">👨‍💻</div><div class="label">Matrix (Chat)</div></a></li></ul></li></ul></div></main></div><script src="assets/client.js" defer></script></body></html>"
 `;

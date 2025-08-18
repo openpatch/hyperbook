@@ -36,6 +36,7 @@ can and part wise must set (indicated by a \*).
 | scripts            | Here you can add links to custom JavaScript files.                                                                                                              |
 | allowDangerousHtml | Allow HTML. This can lead to incompatibilities in future versions.                                                                                              |
 | qrcode             | Shows an icon, which opens a qr code to the current page.                                                                                                       |
+| toc         | Show or hide a table of content for the page. This is on for pages and off for glossary entries by default                          |
 | trailingSlash      | Outputs all files into ther own folders and produces only index.html files.                                                                                     |
 | importExport       | Allows to import and export the state of the Hyperbook as a file. Buttons for importing and exporting will be at the bottom of the page.                        |
 
