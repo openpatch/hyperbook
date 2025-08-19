@@ -1,5 +1,14 @@
 # @hyperbook/vscode-extension
 
+## 0.32.6
+
+### Patch Changes
+
+- [`cc0aad9`](https://github.com/openpatch/hyperbook/commit/cc0aad93558dfce8072c31549bd7c8d9e5a927b6) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - fix toc configuration one more time
+
+- Updated dependencies [[`cc0aad9`](https://github.com/openpatch/hyperbook/commit/cc0aad93558dfce8072c31549bd7c8d9e5a927b6)]:
+  - @hyperbook/markdown@0.29.4
+
 ## 0.32.5
 
 ### Patch Changes
