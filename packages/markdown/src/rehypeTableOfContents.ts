@@ -8,7 +8,7 @@ import { i18n } from "./i18n";
 
 export default (ctx: HyperbookContext) => () => {
   const showToc =
-    (ctx.config.toc ?? true) || (ctx.navigation.current?.toc ?? false);
+    (ctx.config.toc ?? true) && (ctx.navigation.current?.toc ?? true);
   return (tree: Root, file: VFile) => {
     const headings = file.data.headings || [];
     const originalChildren = tree.children as ElementContent[];

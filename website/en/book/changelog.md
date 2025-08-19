@@ -38,6 +38,17 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.53.6
+
+::::tabs
+
+:::tab{title="Fixed :bug:" id="fixed"}
+- Fix toc configuration not working correctly.
+:::
+
+
+::::
+
 ## v0.53.5
 
 ::::tabs
