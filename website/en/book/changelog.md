@@ -38,6 +38,18 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.53.7
+
+::::tabs
+
+:::tab{title="Fixed :bug:" id="fixed"}
+- Fix sub and superscript interfering with links and other markdown syntax.
+- Convert mjs to js for better compatibility.
+:::
+
+
+::::
+
 ## v0.53.6
 
 ::::tabs
