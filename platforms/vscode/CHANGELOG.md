@@ -1,5 +1,16 @@
 # @hyperbook/vscode-extension
 
+## 0.32.7
+
+### Patch Changes
+
+- [`e3d104d`](https://github.com/openpatch/hyperbook/commit/e3d104d8d6154ef35474a919e7d995bdc579ad67) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Use js extension instead of mjs to improve compatability with common servers.
+
+- [`bfd5fd0`](https://github.com/openpatch/hyperbook/commit/bfd5fd0a58f7a19a4a3b22e82fc0e2b16c43fe73) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix sub and superscript interfering with links.
+
+- Updated dependencies [[`e3d104d`](https://github.com/openpatch/hyperbook/commit/e3d104d8d6154ef35474a919e7d995bdc579ad67), [`bfd5fd0`](https://github.com/openpatch/hyperbook/commit/bfd5fd0a58f7a19a4a3b22e82fc0e2b16c43fe73)]:
+  - @hyperbook/markdown@0.29.5
+
 ## 0.32.6
 
 ### Patch Changes
