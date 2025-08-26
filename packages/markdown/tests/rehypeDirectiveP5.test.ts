@@ -1,7 +1,6 @@
 import { HyperbookContext } from "@hyperbook/types/dist";
 import { describe, expect, it } from "vitest";
 import rehypeStringify from "rehype-stringify";
-import remarkParse from "remark-parse";
 import remarkToRehype from "remark-rehype";
 import rehypeFormat from "rehype-format";
 import { unified, PluggableList } from "unified";
@@ -9,6 +8,7 @@ import remarkDirective from "remark-directive";
 import remarkDirectiveRehype from "remark-directive-rehype";
 import { ctx } from "./mock";
 import rehypeDirectiveP5 from "../src/rehypeDirectiveP5";
+import remarkParse from "../src/remarkParse";
 
 export const toHtml = (md: string, ctx: HyperbookContext) => {
   const remarkPlugins: PluggableList = [remarkDirective, remarkDirectiveRehype];

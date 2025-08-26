@@ -1,7 +1,6 @@
 import { HyperbookContext } from "@hyperbook/types/dist";
 import { describe, expect, it } from "vitest";
 import rehypeStringify from "rehype-stringify";
-import remarkParse from "remark-parse";
 import remarkToRehype from "remark-rehype";
 import rehypeFormat from "rehype-format";
 import { unified, PluggableList } from "unified";
@@ -9,6 +8,7 @@ import remarkDirective from "remark-directive";
 import remarkDirectiveRehype from "remark-directive-rehype";
 import remarkDirectiveTabs from "../src/remarkDirectiveTabs";
 import { ctx } from "./mock";
+import remarkParse from "../src/remarkParse";
 
 export const toHtml = async (md: string, ctx: HyperbookContext) => {
   const remarkPlugins: PluggableList = [
@@ -55,9 +55,9 @@ C
 :::
 ::::
 `,
-          ctx
+          ctx,
         )
-      ).value
+      ).value,
     ).toMatchSnapshot();
   });
   it("should register directives", async () => {
@@ -85,9 +85,9 @@ C
 :::
 ::::
 `,
-          ctx
+          ctx,
         )
-      ).data.directives?.["tabs"]
+      ).data.directives?.["tabs"],
     ).toBeDefined();
   });
 });

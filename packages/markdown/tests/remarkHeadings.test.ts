@@ -1,11 +1,11 @@
 import { describe, it, expect } from "vitest";
 import { unified } from "unified";
-import remarkParse from "remark-parse";
 import remarkRehype from "remark-rehype";
 import remarkGfm from "remark-gfm";
 import rehypeStringify from "rehype-stringify";
 import { ctx } from "./mock";
 import remarkHeadings from "../src/remarkHeadings";
+import remarkParse from "../src/remarkParse";
 
 describe("remarkHeadingId", () => {
   it("should parse well", async () => {

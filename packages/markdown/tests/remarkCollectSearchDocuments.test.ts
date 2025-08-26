@@ -1,11 +1,11 @@
 import { HyperbookContext } from "@hyperbook/types/dist";
 import { describe, expect, it } from "vitest";
-import remarkParse from "remark-parse";
 import remarkToRehype from "remark-rehype";
 import { unified } from "unified";
 import { realCtx } from "./mock";
 import remarkCollectSearchDocuments from "../src/remarkCollectSearchDocuments";
 import rehypeStringify from "rehype-stringify";
+import remarkParse from "../src/remarkParse";
 
 export const toData = (md: string, ctx: HyperbookContext) => {
   return unified()

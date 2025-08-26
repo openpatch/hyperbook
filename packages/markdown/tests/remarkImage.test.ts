@@ -1,13 +1,13 @@
 import { HyperbookContext } from "@hyperbook/types/dist";
 import { describe, expect, it } from "vitest";
 import rehypeStringify from "rehype-stringify";
-import remarkParse from "remark-parse";
 import remarkToRehype from "remark-rehype";
 import { unified } from "unified";
 import rehypeFormat from "rehype-format";
 import { ctx } from "./mock";
 import remarkImage from "../src/remarkImage";
 import remarkLink from "../src/remarkLink";
+import remarkParse from "../src/remarkParse";
 
 export const toHtml = (md: string, ctx: HyperbookContext) => {
   return unified()

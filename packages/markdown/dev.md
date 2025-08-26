@@ -4,14 +4,14 @@ permaid: webide
 lang: de 
 ---
 
-# 1:1 Beziehung
+[https://docs.nextcloud.com/server/latest/user\\_manual/en/groupware/sync\\_android.html#with-the-nextcloud-mobile-app](https://docs.nextcloud.com/server/latest/user_manual/en/groupware/sync_android.html#with-the-nextcloud-mobile-app) hallo 2
 
-1:1
+[https://docs.nextcloud.com/server/latest/user\_manual/en/groupware/sync\_android.html#with-the-nextcloud-mobile-app](https://docs.nextcloud.com/server/latest/user_manual/en/groupware/sync_android.html#with-the-nextcloud-mobile-app) hallo 2
 
-`inline`
+[https://docs.nextcloud.com/server/latest/user_manual/en/groupware/sync_android.html#with-the-nextcloud-mobile-app](https://docs.nextcloud.com/server/latest/user_manual/en/groupware/sync_android.html#with-the-nextcloud-mobile-app) hallo 2
 
-```js
-function test() {
-  console.log("Hello, World!");
-}
-```
+user\~manual\~test
+
+user~~manual~~test
+
+user~manual~test

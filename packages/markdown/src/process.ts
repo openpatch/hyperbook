@@ -2,7 +2,6 @@ import rehypeKatex from "rehype-katex";
 import rehypeStringify from "rehype-stringify";
 import rehypePrettyCode from "rehype-pretty-code";
 import rehypeUnwrapImages from "rehype-unwrap-images";
-import remarkParse from "remark-parse";
 import remarkToRehype from "remark-rehype";
 import { unified, PluggableList } from "unified";
 import { remarkRemoveComments } from "./remarkRemoveComments";
@@ -54,16 +53,16 @@ import remarkDirectiveWebide from "./remarkDirectiveWebide";
 import remarkDirectiveH5P from "./remarkDirectiveH5P";
 import remarkDirectiveJSXGraph from "./remarkDirectiveJSXGraph";
 import remarkDirectiveMultievent from "./remarkDirectiveMultievent";
-import remarkSubSup from "./remarkSubSup";
 import remarkDirectiveUnpack from "./remarkDirectiveUnpack";
 import { makeTransformerCopyButton } from "./rehypePrettyCodeCopyButton";
 import { remarkGithubEmoji } from "./remarkGithubEmoji";
+import remarkParse from "./remarkParse";
+import remarkSubSup from "./remarkSubSup";
 
 export const remark = (ctx: HyperbookContext) => {
   i18n.init(ctx.config.language || "en");
   const remarkPlugins: PluggableList = [
     remarkGithubEmoji,
-    remarkSubSup,
     remarkRemoveComments,
     remarkDirective,
     remarkDirectiveRehype,
@@ -71,6 +70,7 @@ export const remark = (ctx: HyperbookContext) => {
     remarkLink(ctx),
     remarkImage(ctx),
     remarkGfm,
+    remarkSubSup,
     remarkDirectiveTerm(ctx),
     remarkDirectiveEmbed(ctx),
     remarkDirectiveArchive(ctx),
