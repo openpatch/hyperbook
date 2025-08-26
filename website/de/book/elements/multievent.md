@@ -1037,5 +1037,5 @@ Wähle alle irrationalen Zahlen aus.
 Wähle den richtigen Exponenten.
 
 :::multievent
-2^{a{2|3|!4|8}}^=16
+2^{{a{2|3|!4|8}}}=16
 :::

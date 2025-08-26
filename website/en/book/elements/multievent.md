@@ -526,5 +526,5 @@ Select all irrational numbers.
 Select the correct exponent.
 
 :::multievent
-2^{a{2|3|!4|8}}^=16
+2^{{a{2|3|!4|8}}}=16
 :::
