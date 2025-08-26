@@ -325,7 +325,7 @@ export default (ctx: HyperbookContext) => () => {
                 tagName: "script",
                 properties: {
                   type: "module",
-                  src: makeUrl(["dark-mode-toggle.mjs"], "assets"),
+                  src: makeUrl(["dark-mode-toggle.js"], "assets"),
                 },
                 children: [],
               },
