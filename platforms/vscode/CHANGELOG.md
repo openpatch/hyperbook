@@ -1,5 +1,16 @@
 # @hyperbook/vscode-extension
 
+## 0.33.0
+
+### Minor Changes
+
+- [`3f6ac8c`](https://github.com/openpatch/hyperbook/commit/3f6ac8cc3009d5eb7a1085119d046a5602b277b9) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add image positioning and styling options
+
+### Patch Changes
+
+- Updated dependencies [[`3f6ac8c`](https://github.com/openpatch/hyperbook/commit/3f6ac8cc3009d5eb7a1085119d046a5602b277b9)]:
+  - @hyperbook/markdown@0.30.0
+
 ## 0.32.7
 
 ### Patch Changes
