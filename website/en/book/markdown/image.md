@@ -42,3 +42,39 @@ If you want to link your image you can use the normal link syntax:
 :::alert{info}
 If your Hyperbook uses the [basePath](/configuration/book) property, the basePath will automatically be prepended.
 :::
+
+## Customize position and styling
+
+You can customize the position and styling of your images by adding special characters before or after the image markdown.
+
+Custom classes and attributes can be added by using curly braces `{}` after the image markdown.
+
+```md
+
+![](/test.jpg){#hero .rounded width="200"}
+
+```
+
+This will add an image with the ID `hero`, the class `rounded` and a width of `200px`.
+
+:::alert{info}
+
+This is best used with custom css styles.
+
+:::
+
+You can also align your image to the left, right or center by adding special characters before or after the image markdown.
+
+center: `![](/test.jpg)`
+
+left: `-![](/test.jpg)`
+
+leftplus: `--![](/test.jpg)`
+
+right: `![](/test.jpg)-`
+
+rightplus: `![](/test.jpg)--`
+
+centerplus: `--![](/test.jpg)--`
+
+You can check all options on this [example page](./image-styling).

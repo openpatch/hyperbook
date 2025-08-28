@@ -58,6 +58,7 @@ import { makeTransformerCopyButton } from "./rehypePrettyCodeCopyButton";
 import { remarkGithubEmoji } from "./remarkGithubEmoji";
 import remarkParse from "./remarkParse";
 import remarkSubSup from "./remarkSubSup";
+import remarkImageAttrs from "./remarkImageAttrs";
 
 export const remark = (ctx: HyperbookContext) => {
   i18n.init(ctx.config.language || "en");
@@ -68,6 +69,7 @@ export const remark = (ctx: HyperbookContext) => {
     remarkDirectiveRehype,
     remarkDirectivePagelist(ctx),
     remarkLink(ctx),
+    remarkImageAttrs(ctx),
     remarkImage(ctx),
     remarkGfm,
     remarkSubSup,

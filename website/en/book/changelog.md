@@ -38,6 +38,31 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.54.0
+
+::::tabs
+
+:::tab{title="New :rocket:" id="new"}
+
+- Add custom image attributes support using curly brace syntax `{}`. Example: `![](/image.jpg){#hero .rounded width="200"}` adds ID `hero`, class `rounded`, and sets width to 200px.
+- Add enhanced image alignment options with special characters:
+  - `![](/image.jpg)` - Center (default)
+  - `-![](/image.jpg)` - Left aligned
+  - `--![](/image.jpg)` - Left aligned with extended spacing
+  - `![](/image.jpg)-` - Right aligned  
+  - `![](/image.jpg)--` - Right aligned with extended spacing
+  - `--![](/image.jpg)--` - Center with extended spacing
+- Add comprehensive image styling documentation with live examples.
+
+:::
+
+:::tab{title="Improved :+1:" id="improved"}
+- Improve lightbox to eliminate layout shifts when opening/closing.
+- Improve lightbox rendering performance and smoother transitions.
+:::
+
+::::
+
 ## v0.53.7
 
 ::::tabs

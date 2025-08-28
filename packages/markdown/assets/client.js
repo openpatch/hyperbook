@@ -230,8 +230,42 @@ var hyperbook = (function () {
    * @param {HTMLElement} el - The element to toggle.
    */
   function toggleLightbox(el) {
-    el.parentElement.classList.toggle("lightbox");
-    el.parentElement.classList.toggle("normal");
+    const overlay = document.createElement("div");
+    overlay.classList.add("lightbox-overlay");
+
+    const captionText =
+      el.parentElement.querySelector("figcaption")?.textContent || "";
+
+    // container for image + caption
+    const content = document.createElement("div");
+    content.classList.add("lightbox-content");
+
+    // image container fills remaining space
+    const imgContainer = document.createElement("div");
+    imgContainer.classList.add("lightbox-image-container");
+
+    const lightboxImg = document.createElement("img");
+    lightboxImg.src = el.src;
+    imgContainer.appendChild(lightboxImg);
+
+    content.appendChild(imgContainer);
+
+    // add caption if exists
+    if (captionText) {
+      const caption = document.createElement("div");
+      caption.classList.add("caption");
+      caption.textContent = captionText;
+      content.appendChild(caption);
+    }
+
+    overlay.appendChild(content);
+
+    overlay.addEventListener("click", () => {
+      document.body.removeChild(overlay);
+    });
+
+    document.body.appendChild(overlay);
+    overlay.style.display = "flex";
   }
 
   function init(root) {

@@ -28,14 +28,16 @@ export default (ctx: HyperbookContext) => () => {
         });
       }
       node.data.hName = "figure";
+      let figureProps = node.data.hProperties;
       node.data.hProperties = {
-        class: "normal",
+        class: "normal " + figureProps?.class,
       };
       node.data.hChildren = [
         {
           type: "element",
           tagName: "img",
           properties: {
+            ...figureProps,
             src: node.url,
             alt: node.alt,
             onclick: `hyperbook.toggleLightbox(this)`,

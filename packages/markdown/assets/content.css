@@ -27,27 +27,42 @@ figure {
   max-width: 100%;
 }
 
-.hyperbook-markdown figure.lightbox {
-  position: fixed;
-  display: flex;
-  justify-content: center;
-  flex-direction: column;
-  align-items: center;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  padding: 1em;
-  z-index: 10000;
-  margin: 0px;
-  background: rgba(0, 0, 0, 0.5);
+.hyperbook-markdown figure.align-left {
+  display: table;
+  float: left;
+  margin-right: 1.75rem;
 }
 
-.hyperbook-markdown figure.lightbox img {
-  min-width: 100%;
-  min-height: 100%;
-  cursor: zoom-out;
-  object-fit: contain;
+.hyperbook-markdown figure.align-right {
+  display: table;
+  float: right;
+  margin-left: 1.75rem;
+}
+
+.hyperbook-markdown figure.align-rightplus {
+  display: table;
+  float: right;
+  margin-left: 1.75rem;
+  margin-right: -1.5rem;
+}
+
+.hyperbook-markdown figure.align-leftplus {
+  display: table;
+  float: left;
+  margin-right: 1.75rem;
+  margin-left: -1.5rem;
+}
+
+.hyperbook-markdown figure.align-centerplus {
+  display: grid;
+  justify-items: center;
+  clear: both;
+  margin-left: -1.5rem;
+  margin-right: -1.5rem;
+
+  img {
+    width: 100%;
+  }
 }
 
 .hyperbook-markdown table {
@@ -76,12 +91,16 @@ figure {
 }
 
 .hyperbook-markdown figure.normal {
-  text-align: center;
+  display: grid;
+  clear: both;
+  justify-items: center;
+  align-content: center;
   margin-top: 10px;
   margin-bottom: 10px;
 }
 
 .hyperbook-markdown figure.normal img {
+  display: inline-block;
   cursor: zoom-in;
 }
 
@@ -148,11 +167,11 @@ figure {
   margin-bottom: 0;
 }
 
-.hyperbook-markdown li + li {
+.hyperbook-markdown li+li {
   margin-top: 0.25em;
 }
 
-.hyperbook-markdown li > p {
+.hyperbook-markdown li>p {
   margin-top: 16px;
 }
 
@@ -226,6 +245,7 @@ figure {
 .hyperbook-markdown h4,
 .hyperbook-markdown h5,
 .hyperbook-markdown h6 {
+  clear: both;
   font-family: hyperbook-heading, sans-serif;
   margin-top: 24px;
   margin-bottom: 16px;
@@ -305,10 +325,10 @@ figure {
   list-style-type: none;
 }
 
-.hyperbook-markdown #toc-toggle > .bar1,
-.hyperbook-markdown #toc-toggle > .bar2,
-.hyperbook-markdown #toc-toggle > .bar3,
-.hyperbook-markdown #toc-toggle > .bar4 {
+.hyperbook-markdown #toc-toggle>.bar1,
+.hyperbook-markdown #toc-toggle>.bar2,
+.hyperbook-markdown #toc-toggle>.bar3,
+.hyperbook-markdown #toc-toggle>.bar4 {
   background-color: var(--color-text);
 }
 
@@ -431,16 +451,16 @@ figure {
   height: 100%;
 }
 
-.toc-drawer-content > nav {
+.toc-drawer-content>nav {
   padding: 20px;
   flex: 1;
 }
 
-.toc-drawer-content > nav li a {
+.toc-drawer-content>nav li a {
   display: block;
 }
 
-.toc-drawer-content > nav li a:hover {
+.toc-drawer-content>nav li a:hover {
   text-decoration: underline;
 }
 
@@ -547,16 +567,16 @@ figure {
   opacity: 1;
 }
 
-.hyperbook-markdown #toc-toggle > .bar1,
-.hyperbook-markdown #toc-toggle > .bar3 {
+.hyperbook-markdown #toc-toggle>.bar1,
+.hyperbook-markdown #toc-toggle>.bar3 {
   width: 20px;
   height: 2px;
   margin: 2px 3px;
   transition: 0.4s;
 }
 
-.hyperbook-markdown #toc-toggle > .bar2,
-.hyperbook-markdown #toc-toggle > .bar4 {
+.hyperbook-markdown #toc-toggle>.bar2,
+.hyperbook-markdown #toc-toggle>.bar4 {
   width: 25px;
   height: 2px;
   margin: 2px 3px;
