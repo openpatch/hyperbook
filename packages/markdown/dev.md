@@ -21,13 +21,19 @@ Info
 :::
 
 :::alert{warn}
-Warn
+## Hallo 
+
+**das ist dick** und _kursiv_
 :::
 
 :::alert{color="#FF00FF" label="🚀"}
-D
+## Hallo 
+
+**das ist dick** und _kursiv_
 :::
 
 :::alert{color="#3300FF" label="A"}
-D
+## Hallo 
+
+**das ist dick** und _kursiv_
 :::

@@ -24,6 +24,15 @@
   border-left-color: var(--alert-color);
   border-left-style: solid;
   border-left-width: 4px;
+
+  a,
+  strong {
+    color: var(--alert-color);
+  }
+
+  :first-child {
+    margin-top: 0;
+  }
 }
 
 .directive-alert.icon::before {
