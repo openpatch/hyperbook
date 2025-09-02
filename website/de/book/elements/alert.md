@@ -1,6 +1,7 @@
 ---
 name: Hinweise
 lang: de
+permaid: alert
 ---
 
 # Hinweise
@@ -47,4 +48,22 @@ Info
 
 :::alert{warn}
 Warn
+:::
+
+## Eigene Hinweise
+
+Es können auch Hinweise mit eigenen Farben und Bezeichnungen genutzt werden.
+
+```md
+:::alert{color="#FF00FF" label="💡"}
+Mein eigener Hinweis
+:::
+```
+
+:::alert{color="#FF00FF" label="💡"}
+Mein eigener Hinweis
+:::
+
+:::alert{info}
+Es bietet sich an die eigenen Hinweise in ein [Snippet](@snippets) auszulagern.
 :::

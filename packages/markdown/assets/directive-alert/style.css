@@ -1,3 +1,8 @@
+:root {
+  --alert-color: var(--color-nav-border);
+  --alert-content: "";
+}
+
 .directive-alert>p {
   margin-bottom: 0;
 }
@@ -15,97 +20,45 @@
   position: relative;
   border-left-width: 4px;
   border-left-style: solid;
+  background-color: var(--color-nav);
+  border-left-color: var(--alert-color);
+  border-left-style: solid;
+  border-left-width: 4px;
 }
 
-.directive-alert::before {
+.directive-alert.icon::before {
   border-radius: 100%;
   font-size: 14px;
   font-weight: 700;
-  left: -12px;
-  line-height: 20px;
+  left: -14px;
   display: flex;
   align-items: center;
   justify-content: center;
   position: absolute;
-  height: 20px;
-  width: 20px;
-  text-align: center;
-  top: 12px;
-}
-
-.directive-alert.success {
-  border-left-style: solid;
-  border-left-width: 4px;
-}
-
-.directive-alert.success::before {
-  content: "✓";
-}
-
-.directive-alert.info {
-  border-left-style: solid;
-  border-left-width: 4px;
-}
-
-.directive-alert.info::before {
-  content: "i";
-}
-
-.directive-alert.warn {
-  border-left-style: solid;
-  border-left-width: 4px;
-}
-
-.directive-alert.warn::before {
-  content: "!";
-}
-
-.directive-alert.error {
-  border-left-style: solid;
-  border-left-width: 4px;
-}
-
-.directive-alert.error::before {
-  content: "x";
-}
-
-.directive-alert {
-  background-color: var(--color-nav);
-  border-left-color: var(--color-nav-border);
-}
-
-.directive-alert::before {
+  height: 24px;
+  width: 24px;
+  top: 8px;
   color: #fff;
+  content: var(--alert-content);
+  background-color: var(--alert-color);
 }
 
 .directive-alert.success {
-  border-left-color: #00c851;
-}
-
-.directive-alert.success::before {
-  background-color: #00c851;
+  --alert-color: #00c851;
+  --alert-content: "✓";
 }
 
 .directive-alert.info {
-  border-left-color: #33b5e5;
-}
-
-.directive-alert.info::before {
-  background-color: #33b5e5;
+  --alert-color: #33b5e5;
+  --alert-content: "i";
 }
 
 .directive-alert.warn {
-  border-left-color: #f0b429;
-}
-
-.directive-alert.warn::before {
-  background-color: #f0b429;
+  --alert-color: #f0b429;
+  --alert-content: "!";
 }
 
 .directive-alert.error {
-  border-left-color: #ef4e4e;
-}
-
-.directive-alert.error::before {
-  background-color: #ef4e4e;
+  --alert-color: #ef4e4e;
+  --alert-content: "x";
 }

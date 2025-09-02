@@ -1,7 +1,6 @@
 ---
 name: Alert
 permaid: alert
-prev:
 ---
 
 # Alert
@@ -48,4 +47,19 @@ Info
 
 :::alert{warn}
 Warn
+:::
+
+## Custom Alert
+Alerts with custom colors and labels can also be used.
+```md
+:::alert{color="#FF00FF" label="💡"}
+My custom note
+:::
+```
+:::alert{color="#FF00FF" label="💡"}
+My custom note
+:::
+
+:::alert{info}
+It is good practice to place your custom alerts in a [snippet](@snippets)
 :::

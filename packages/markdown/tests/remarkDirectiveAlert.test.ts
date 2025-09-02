@@ -58,6 +58,24 @@ Warn
       ).value,
     ).toMatchSnapshot();
   });
+  it("should use color and label attributes", async () => {
+    expect(
+      toHtml(
+        `
+:::alert{color="#FF00FF" label="D"}
+Warn
+:::
+`,
+        ctx,
+      ).value,
+    ).toMatchInlineSnapshot(`
+      "
+      <div class="directive-alert color label icon" style="--alert-color: #FF00FF; --alert-content: 'D';">
+        <p>Warn</p>
+      </div>
+      "
+    `);
+  });
   it("should register directives", async () => {
     expect(
       toHtml(

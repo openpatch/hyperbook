@@ -38,6 +38,19 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.55.0
+
+::::tabs
+
+:::tab{title="New :rocket:" id="new"}
+
+- Custom alerts can now be defined. See the documentation for [alerts](@alerts).
+
+:::
+
+
+::::
+
 ## v0.54.0
 
 ::::tabs
