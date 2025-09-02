@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.55.0
+
+### Minor Changes
+
+- [`e6dabb8`](https://github.com/openpatch/hyperbook/commit/e6dabb8e4a47930c21ae479cabc25c6727215206) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add custom alerts
+
 ## 0.54.0
 
 ### Minor Changes
