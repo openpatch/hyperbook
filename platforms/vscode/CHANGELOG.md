@@ -1,5 +1,16 @@
 # @hyperbook/vscode-extension
 
+## 0.35.0
+
+### Minor Changes
+
+- [`f9e5bb7`](https://github.com/openpatch/hyperbook/commit/f9e5bb7be1970a6e1fb9fa444f4b6063dfa5fbd6) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Use alert color for headings, links and bold text
+
+### Patch Changes
+
+- Updated dependencies [[`f9e5bb7`](https://github.com/openpatch/hyperbook/commit/f9e5bb7be1970a6e1fb9fa444f4b6063dfa5fbd6)]:
+  - @hyperbook/markdown@0.32.0
+
 ## 0.34.0
 
 ### Minor Changes
