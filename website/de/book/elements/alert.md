@@ -65,5 +65,5 @@ Mein eigener Hinweis
 :::
 
 :::alert{info}
-Es bietet sich an die eigenen Hinweise in ein [Snippet](@snippets) auszulagern.
+Es bietet sich an die eigenen Hinweise in ein [Snippet](/@snippets) auszulagern.
 :::

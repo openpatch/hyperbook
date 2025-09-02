@@ -61,5 +61,5 @@ My custom note
 :::
 
 :::alert{info}
-It is good practice to place your custom alerts in a [snippet](@snippets)
+It is good practice to place your custom alerts in a [snippet](/@snippets).
 :::
