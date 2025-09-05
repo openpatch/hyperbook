@@ -3,11 +3,31 @@
 exports[`remarkDirectiveAudio > should transform 1`] = `
 "
 <div class="directive-audio">
-  <div class="player">
-    <div class="wave" id="8761a7a0deb6dd71ee824d8055781175502c134a294825a529d879b1c6da4c89" data-src="/public/Free_Test_Data_1MB_MP3.mp3"></div><button class="play" onclick="hyperbook.audio.togglePlayPause(&#x22;8761a7a0deb6dd71ee824d8055781175502c134a294825a529d879b1c6da4c89&#x22;)" title="audio-play"></button>
-    <div class="thumbnail" style="background-image: url(&#x22;/public/group-people.png&#x22;)"></div>
+  <div class="head">
+    <div class="player">
+      <div class="wave" id="8761a7a0deb6dd71ee824d8055781175502c134a294825a529d879b1c6da4c89" data-src="/public/Free_Test_Data_1MB_MP3.mp3"></div><button class="play" onclick="hyperbook.audio.togglePlayPause(&#x22;8761a7a0deb6dd71ee824d8055781175502c134a294825a529d879b1c6da4c89&#x22;)" title="audio-play"></button>
+      <div class="thumbnail" style="background-image: url(&#x22;/public/group-people.png&#x22;)"></div>
+    </div>
+    <div class="information"><span class="title">Hallo</span><span class="spacer"> - </span><span class="author">Max Mustermann</span><span class="duration"></span></div>
   </div>
-  <div class="information"><span class="title">Hallo</span><span class="spacer"> - </span><span class="author">Max Mustermann</span><span class="duration"></span></div>
+</div>
+"
+`;
+
+exports[`remarkDirectiveAudio > should transform with content 1`] = `
+"
+<div class="directive-audio">
+  <div class="head">
+    <div class="player"><button class="play" onclick="hyperbook.audio.togglePlayPause(&#x22;295d589953942d87f3c0d2ea6bd1c6e1ae36046ee41884979288dd5a460d0325&#x22;)" title="audio-play"></button>
+      <div class="wave" id="295d589953942d87f3c0d2ea6bd1c6e1ae36046ee41884979288dd5a460d0325" data-src="/public/lesson.mp3"></div>
+    </div>
+    <div class="information"><span class="duration"></span></div>
+  </div>
+  <div class="read-along"><p>Das ist eine Funktion <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mo>=</mo><msup><mi>x</mi><mn>2</mn></msup></mrow><annotation encoding="application/x-tex">f(x) = x^2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.10764em;">f</span><span class="mopen">(</span><span class="mord mathnormal">x</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.8141em;"></span><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span></span></span></span>.</p>
+<span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mtable rowspacing="0.25em" columnalign="right left" columnspacing="0em"><mtr><mtd class="mtr-glue"></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mi>f</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo></mrow></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mi>a</mi><msup><mi>x</mi><mn>2</mn></msup><mo>+</mo><mi>b</mi><mi>x</mi><mo>+</mo><mi>c</mi></mrow></mstyle></mtd><mtd class="mtr-glue"></mtd><mtd class="mml-eqn-num"></mtd></mtr></mtable><annotation encoding="application/x-tex">\\begin{align}
+f(x) &#x26;= ax^2 + bx + c
+\\end{align}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.5241em;vertical-align:-0.5121em;"></span><span class="mtable"><span class="col-align-r"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.0121em;"><span style="top:-3.1479em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.10764em;">f</span><span class="mopen">(</span><span class="mord mathnormal">x</span><span class="mclose">)</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.5121em;"><span></span></span></span></span></span><span class="col-align-l"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.0121em;"><span style="top:-3.1479em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mord mathnormal">a</span><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8641em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mord mathnormal">b</span><span class="mord mathnormal">x</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mord mathnormal">c</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.5121em;"><span></span></span></span></span></span></span></span><span class="tag"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.0121em;"><span style="top:-3.0121em;"><span class="pstrut" style="height:2.8641em;"></span><span class="eqn-num"></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.5121em;"><span></span></span></span></span></span></span></span></span>
+<p><img src="/graph.png" alt="Diagram"></p></div>
 </div>
 "
 `;

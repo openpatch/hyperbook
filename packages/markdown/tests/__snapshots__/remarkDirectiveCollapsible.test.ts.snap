@@ -6,11 +6,13 @@ exports[`remarkDirectiveCollapsible > should transform 1`] = `
   <div class="collapsible-content">
     <p>This is a panel</p>
     <div class="directive-audio">
-      <div class="player">
-        <div class="thumbnail" style="background-image: url(&#x22;/public/group-people.png&#x22;)"></div><button class="play" onclick="hyperbook.audio.togglePlayPause(&#x22;f877d1f0ff50bf344794f9bd20e8df025b5189c193d15f71e173a67e3fd0bb78&#x22;)" title="Play/Pause"></button>
-        <div class="wave" id="f877d1f0ff50bf344794f9bd20e8df025b5189c193d15f71e173a67e3fd0bb78" data-src="/public/Free_Test_Data_1MB_MP3.mp3"></div>
+      <div class="head">
+        <div class="player">
+          <div class="thumbnail" style="background-image: url(&#x22;/public/group-people.png&#x22;)"></div><button class="play" onclick="hyperbook.audio.togglePlayPause(&#x22;f877d1f0ff50bf344794f9bd20e8df025b5189c193d15f71e173a67e3fd0bb78&#x22;)" title="Play/Pause"></button>
+          <div class="wave" id="f877d1f0ff50bf344794f9bd20e8df025b5189c193d15f71e173a67e3fd0bb78" data-src="/public/Free_Test_Data_1MB_MP3.mp3"></div>
+        </div>
+        <div class="information"><span class="title">Hallo</span><span class="spacer"> - </span><span class="author">Max Mustermann</span><span class="duration"></span></div>
       </div>
-      <div class="information"><span class="title">Hallo</span><span class="spacer"> - </span><span class="author">Max Mustermann</span><span class="duration"></span></div>
     </div>
     <div class="directive-collapsible" data-id="13caa90143e8b1bb873970593700aa49da40b6c2c3ecf175995eba4b14ff9ee7"><button class="collapsible">Nested</button>
       <div class="collapsible-content">

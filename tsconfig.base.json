@@ -1,16 +1,17 @@
 {
   "compilerOptions": {
-    "target": "es2015",
+    "target": "es2018",
     "module": "esnext",
-    "lib": ["dom", "esnext"],
+    "lib": [
+      "dom",
+      "esnext"
+    ],
     "noEmitOnError": true,
     "declaration": true,
     "declarationMap": false,
-
     "moduleResolution": "node",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-
     "strict": true,
     "noFallthroughCasesInSwitch": true,
     "downlevelIteration": true,
@@ -23,13 +24,15 @@
     "strictNullChecks": true,
     "strictPropertyInitialization": true,
     "jsx": "react-jsx",
-
     "preserveSymlinks": true,
-
     "paths": {
-      "@hyperbook/*": ["./packages/*"]
+      "@hyperbook/*": [
+        "./packages/*"
+      ]
     },
-
-    "typeRoots": ["./node_modules/@types", "./types"]
+    "typeRoots": [
+      "./node_modules/@types",
+      "./types"
+    ]
   }
 }

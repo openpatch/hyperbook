@@ -10,7 +10,7 @@ import { ctx } from "./mock";
 import remarkDirectiveAudio from "../src/remarkDirectiveAudio";
 import remarkParse from "../src/remarkParse";
 
-export const toHtml = (md: string, ctx: HyperbookContext) => {
+export const toHtml = async (md: string, ctx: HyperbookContext) => {
   const remarkPlugins: PluggableList = [
     remarkDirective,
     remarkDirectiveRehype,
@@ -26,28 +26,47 @@ export const toHtml = (md: string, ctx: HyperbookContext) => {
       allowDangerousCharacters: true,
       allowDangerousHtml: true,
     })
-    .processSync(md);
+    .process(md);
 };
 
 describe("remarkDirectiveAudio", () => {
   it("should transform", async () => {
-    expect(
-      toHtml(
-        `
+    const html = await toHtml(
+      `
 ::audio{src="/Free_Test_Data_1MB_MP3.mp3" thumbnail="/group-people.png" title="Hallo" author="Max Mustermann" position="right"}
 `,
-        ctx,
-      ).value,
-    ).toMatchSnapshot();
+      ctx,
+    );
+    expect(html.value).toMatchSnapshot();
   });
   it("should register directives", async () => {
-    expect(
-      toHtml(
-        `
+    const processed = await toHtml(
+      `
 ::audio{src="/Free_Test_Data_1MB_MP3.mp3" thumbnail="/group-people.png" title="Hallo" author="Max Mustermann" position="right"}
 `,
-        ctx,
-      ).data.directives?.["audio"],
-    ).toBeDefined();
+      ctx,
+    );
+    expect(processed.data.directives?.["audio"]).toBeDefined();
+  });
+
+  it("should transform with content", async () => {
+    const processed = await toHtml(
+      `
+:::audio{src="/lesson.mp3" language="de"}
+Das ist eine Funktion $f(x) = x^2$<!-- f von x gleich x Quadrat -->.
+
+$$
+\\begin{align}
+f(x) &= ax^2 + bx + c
+\\end{align}
+$$
+<!-- Diese Gleichung zeigt die allgemeine Form einer quadratischen Funktion -->
+
+![Diagram](/graph.png)<!-- Das Diagramm zeigt den Verlauf der Funktion -->
+:::
+`,
+      ctx,
+    );
+    expect(processed.value).toMatchSnapshot();
   });
 });
