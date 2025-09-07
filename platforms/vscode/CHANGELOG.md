@@ -1,5 +1,14 @@
 # @hyperbook/vscode-extension
 
+## 0.36.1
+
+### Patch Changes
+
+- [`b585d55`](https://github.com/openpatch/hyperbook/commit/b585d55638e4efb97ef71def8619dd8fd979845d) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix alignment when using a block element after an image.
+
+- Updated dependencies [[`b585d55`](https://github.com/openpatch/hyperbook/commit/b585d55638e4efb97ef71def8619dd8fd979845d)]:
+  - @hyperbook/markdown@0.33.1
+
 ## 0.36.0
 
 ### Minor Changes
