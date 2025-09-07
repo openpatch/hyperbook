@@ -38,6 +38,18 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.57.0
+
+::::tabs
+
+:::tab{title="Improved :+1:" id="improved"}
+
+- Auto load math display libraries in all h5p elements.
+
+:::
+
+::::
+
 ## v0.56.0
 
 ::::tabs

@@ -318,6 +318,34 @@ async function runBuild(
         dir: fileOut,
       });
 
+      // Read and modify h5p.json to ensure MathDisplay dependency is present
+      const h5pJsonPath = path.join(fileOut, "h5p.json");
+      const h5pJson = JSON.parse(await fs.readFile(h5pJsonPath, "utf8"));
+
+      // Check if H5P.MathDisplay dependency already exists
+      const hasMathDisplay = h5pJson.preloadedDependencies?.some(
+        (dep: any) => dep.machineName === "H5P.MathDisplay",
+      );
+
+      // Add MathDisplay dependency if not present
+      if (!hasMathDisplay) {
+        const mathDisplayDependency = {
+          machineName: "H5P.MathDisplay",
+          majorVersion: 1,
+          minorVersion: 0,
+        };
+
+        // Initialize preloadedDependencies array if it doesn't exist
+        if (!h5pJson.preloadedDependencies) {
+          h5pJson.preloadedDependencies = [];
+        }
+
+        h5pJson.preloadedDependencies.push(mathDisplayDependency);
+
+        // Write the modified h5p.json back to file
+        await fs.writeFile(h5pJsonPath, JSON.stringify(h5pJson, null, 2));
+      }
+
       const h5pLibraries = path.join(assetsOut, "directive-h5p", "libraries");
       await makeDir(h5pLibraries, { recursive: true });
 

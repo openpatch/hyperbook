@@ -69,14 +69,9 @@ async function postbuild() {
         "excalidraw",
         "dist",
         "prod",
-        "fonts"
+        "fonts",
       ),
-      dst: path.join(
-        "./dist",
-        "assets",
-        "directive-excalidraw",
-        "fonts"
-      ),
+      dst: path.join("./dist", "assets", "directive-excalidraw", "fonts"),
     },
     {
       src: path.join(
@@ -85,13 +80,13 @@ async function postbuild() {
         "excalidraw",
         "dist",
         "prod",
-        "index.css"
+        "index.css",
       ),
       dst: path.join(
         "./dist",
         "assets",
         "directive-excalidraw",
-        "excalidraw.css"
+        "excalidraw.css",
       ),
     },
     {
@@ -188,7 +183,12 @@ async function postbuild() {
         "distrib",
         "jsxgraphcore.js",
       ),
-      dst: path.join("./dist", "assets", "directive-jsxgraph", "jsxgraphcore.js"),
+      dst: path.join(
+        "./dist",
+        "assets",
+        "directive-jsxgraph",
+        "jsxgraphcore.js",
+      ),
     },
   ];
 

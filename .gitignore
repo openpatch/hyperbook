@@ -17,7 +17,7 @@ storybook-static
 *.tsbuildinfo
 
 dist
-!packages/next-watch/dist
+!packages/markdown/assets/directive-h5p/libraries/H5P.MathDisplay-1.0/dist
 # dependencies
 node_modules
 /.pnp
