@@ -9,6 +9,8 @@ Manchmal möchte mal Elemente wiederhole oder ein eigenes Element erstellen, um 
 
 :::alert{warn}
 Snippets müssen im Ordner `snippets` neben dem `book` und `glossary` Ordner platziert werden. Sie haben die Endung `.md.hbs`.
+
+Hier wird ein großes S für snippet verwendet. Du musst ein kleines s verwenden.
 :::
 
 Du kannst in deinen Snippets auf die Hyperbook-Konfiguration zugreifen, indem du z.B. `{{{ hyperbook.name }}}` verwendest.
@@ -16,48 +18,63 @@ Du kannst in deinen Snippets auf die Hyperbook-Konfiguration zugreifen, indem du
 ## Beispiel
 
 ### Beispiel 1: Block
-
-Hier ist ein einfaches Beispiel eines Snippets für einen geschützen Bereich mit demselben Passwort.
-
-Das Snippet ist platziert in `templates/password.md.hbs`:
-
+Hier ist ein einfaches Beispiel für ein Snippet zur Verwendung eines Protect-Elements mit
+demselben Passwort und derselben ID in Ihrem Hyperbook.
+Das Snippet in `snippets/password.md.hbs`:
 ```md
-:::protect{id="1" password="hyperbook" description="The password is the name of this project."}
-
+:::protect{id="1" password="hyperbook" description="Das Passwort ist der Name dieses Projekts."}
 {{{ content }}}
-
 :::
-
 {{#if hint}}
-
 :::alert{info}
-
-Hyperbook is the password.
-
+Hyperbook ist das Passwort.
 :::
-
 {{/if}}
 ```
-
-Diesen Markdown-Block musst du in deinem Hyperbook platzieren.
-
+Das Markdown, das Sie in Ihr Hyperbook einfügen müssen:
 ```md
 :::Snippet{#password}
-
 :smiley:
-
 :::
 ```
-
-Das ist das Ergebnis:
-
+Das Ergebnis:
 :::snippet{#password}
-
 :smiley:
-
 :::
 
-### Example 2: Block mit Parameter
+### Beispiel 2: Dynamische Doppelpunkt-Ebenen
+Snippets stellen automatisch Variablen für verschiedene Doppelpunkt-Ebenen bereit, um ordnungsgemäße Verschachtelung zu handhaben:
+
+Das Snippet in `snippets/alert.md.hbs`:
+```md
+{{{ c1 }}}alert{label="Info" color="#3B82F6"}
+{{{ content }}}
+{{{ c1 }}}
+```
+
+Verfügbare Doppelpunkt-Ebenen-Variablen:
+- `c` - Gleiche Anzahl von Doppelpunkten wie der Snippet-Block
+- `c1`, `c2`, `c3`, `c4` - Ein bis vier **mehr** Doppelpunkte (für tiefere Verschachtelung)
+- `l1`, `l2`, `l3`, `l4` - Ein bis vier **weniger** Doppelpunkte (für oberflächlichere Verschachtelung)
+
+Beispielverwendung mit verschiedenen Verschachtelungsebenen:
+```md
+::::Snippet{#alert}
+Dies wird in einem 5-Doppelpunkt-Alert-Block umschlossen.
+::::
+
+::Snippet{#alert}
+Dies wird in einem 3-Doppelpunkt-Alert-Block umschlossen.
+::
+```
+
+Ergebnis:
+- Erster Fall: `:::::alert{...}` (4 + 1 = 5 Doppelpunkte mit `c1`)
+- Zweiter Fall: `:::alert{...}` (2 + 1 = 3 Doppelpunkte mit `c1`)
+
+Dies gewährleistet ordnungsgemäße Verschachtelung, unabhängig davon, wie tief Ihr Snippet in anderen Markdown-Blöcken verschachtelt ist.
+
+### Example 3: Block mit Parameter
 
 Du kannst auch Parameter für deine Snippets definieren, um sie dynamisch zu machen. Zum Beispiel kann man userem Passwort-Snippet den hint-Parameter übergeben. Wenn dieser übergeben wird, dann wird ein Hinweis gezeigt.
 
@@ -75,7 +92,7 @@ Du kannst auch Parameter für deine Snippets definieren, um sie dynamisch zu mac
 
 :::
 
-### Example 3: Im Text
+### Example 4: Im Text
 
 ```hbs
 {{#times n}}

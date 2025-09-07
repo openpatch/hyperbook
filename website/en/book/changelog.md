@@ -45,6 +45,7 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 :::tab{title="Improved :+1:" id="improved"}
 
 - Auto load math display libraries in all h5p elements.
+- Add c and l variables to allow for dynamic amount of colons in snippets.
 
 :::
 

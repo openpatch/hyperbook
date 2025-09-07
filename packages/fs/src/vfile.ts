@@ -899,6 +899,15 @@ export const getMarkdown = async (
 
     const vars: Record<string, any> = {
       hyperbook,
+      c: dots, // same level
+      c1: dots + ":", // one more colon
+      c2: dots + "::", // two more colons
+      c3: dots + ":::", // three more colons
+      c4: dots + "::::", // four more colons
+      l1: dots.length > 1 ? dots.slice(1) : ":", // one less colon (l = less)
+      l2: dots.length > 2 ? dots.slice(2) : ":", // two less colons
+      l3: dots.length > 3 ? dots.slice(3) : ":", // three less colons
+      l4: dots.length > 4 ? dots.slice(4) : ":", // four less colons
     };
     for (const m of snippet[4].match(/(?:[^\s"]+|"[^"]*")+/g) || []) {
       const r = varReg.exec(m);

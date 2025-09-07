@@ -11,6 +11,8 @@ your own element. Snippets allow you to do exactly that.
 :::alert{warn}
 Snippet files need to be placed in the `snippets` folder at the root of
 your hyperbook beside the glossary and book folders.
+
+Here we use a capital S for snippet. You need to use a small s.
 :::
 
 You can access your hyperbook config in your snippets like so: `{{{ hyperbook.name }}}`.
@@ -18,49 +20,63 @@ You can access your hyperbook config in your snippets like so: `{{{ hyperbook.na
 ## Examples
 
 ### Example 1: Block
-
 Here is a simple example of a snippet for using a protect element with
 the same password and id across your hyperbook.
-
 The snippet located in `snippets/password.md.hbs`:
-
 ```md
 :::protect{id="1" password="hyperbook" description="The password is the name of this project."}
-
 {{{ content }}}
-
 :::
-
 {{#if hint}}
-
 :::alert{info}
-
 Hyperbook is the password.
-
 :::
-
 {{/if}}
 ```
-
 The markdown you need to place in your hyperbook:
-
 ```md
 :::Snippet{#password}
-
 :smiley:
-
 :::
 ```
-
 The result:
-
 :::snippet{#password}
-
 :smiley:
-
 :::
 
-### Example 2: Block with Parameter
+### Example 2: Dynamic Colon Levels
+Snippets automatically provide variables for different colon levels to handle proper nesting:
+
+The snippet located in `snippets/alert.md.hbs`:
+```md
+{{{ c1 }}}alert{label="Info" color="#3B82F6"}
+{{{ content }}}
+{{{ c1 }}}
+```
+
+Available colon level variables:
+- `c` - Same number of colons as the snippet block
+- `c1`, `c2`, `c3`, `c4` - One to four **more** colons (for deeper nesting)
+- `l1`, `l2`, `l3`, `l4` - One to four **fewer** colons (for shallower nesting)
+
+Example usage with different nesting levels:
+```md
+::::Snippet{#alert}
+This will be wrapped in a 5-colon alert block.
+::::
+
+::Snippet{#alert}
+This will be wrapped in a 3-colon alert block.
+::
+```
+
+Results in:
+- First case: `:::::alert{...}` (4 + 1 = 5 colons using `c1`)
+- Second case: `:::alert{...}` (2 + 1 = 3 colons using `c1`)
+
+This ensures proper nesting regardless of how deeply your snippet is nested within other markdown blocks.
+
+### Example 3: Block with Parameter
 
 You can also pass parameters to your snippet to make them dynamic. For
 example our password snippet from above allows to pass a hint
@@ -80,7 +96,7 @@ parameter. If the hint parameter is true, a alert element will be shown.
 
 :::
 
-### Example 3: Inline
+### Example 4: Inline
 
 ```hbs
 {{#times n}}
