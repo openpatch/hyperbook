@@ -1,6 +1,7 @@
 ---
 name: Snippets
 lang: de
+id: snippets
 ---
 
 # Snippets
