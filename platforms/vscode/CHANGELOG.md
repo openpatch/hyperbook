@@ -1,5 +1,19 @@
 # @hyperbook/vscode-extension
 
+## 0.36.0
+
+### Minor Changes
+
+- [`287dd41`](https://github.com/openpatch/hyperbook/commit/287dd41e1bece7b5ba1295c4f9db19934c34b611) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Autoload math display libraries in all h5p elements.
+
+- [`7ef905d`](https://github.com/openpatch/hyperbook/commit/7ef905d4f19828034d57af230a0ab2335689d9a3) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add c and l variables to snippets to allow for dynamic amount of colons.
+
+### Patch Changes
+
+- Updated dependencies [[`287dd41`](https://github.com/openpatch/hyperbook/commit/287dd41e1bece7b5ba1295c4f9db19934c34b611), [`7ef905d`](https://github.com/openpatch/hyperbook/commit/7ef905d4f19828034d57af230a0ab2335689d9a3)]:
+  - @hyperbook/markdown@0.33.0
+  - @hyperbook/fs@0.19.0
+
 ## 0.35.0
 
 ### Minor Changes

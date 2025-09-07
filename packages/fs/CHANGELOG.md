@@ -1,5 +1,11 @@
 # @hyperbook/fs
 
+## 0.19.0
+
+### Minor Changes
+
+- [`7ef905d`](https://github.com/openpatch/hyperbook/commit/7ef905d4f19828034d57af230a0ab2335689d9a3) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add c and l variables to snippets to allow for dynamic amount of colons.
+
 ## 0.18.3
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # @hyperbook/markdown
 
+## 0.33.0
+
+### Minor Changes
+
+- [`287dd41`](https://github.com/openpatch/hyperbook/commit/287dd41e1bece7b5ba1295c4f9db19934c34b611) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Autoload math display libraries in all h5p elements.
+
 ## 0.32.0
 
 ### Minor Changes
