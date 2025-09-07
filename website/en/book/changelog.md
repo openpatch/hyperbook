@@ -38,6 +38,19 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.57.1
+
+::::tabs
+
+:::tab{title="Improved :+1:" id="improved"}
+
+- Horizontal rule not break image aligment.
+- Collapsibles and alerts work better with image alignment.
+
+:::
+
+::::
+
 ## v0.57.0
 
 ::::tabs

@@ -13,6 +13,11 @@ figure {
   color: var(--color-brand);
 }
 
+.hyperbook-markdown hr {
+  clear: both;
+  border: none;
+}
+
 /**
  * IE 8–11 and Prince don’t recognize the `wbr` element,
  * but a pseudo-element can achieve the same effect with IE 9+ and Prince.

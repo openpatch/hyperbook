@@ -529,6 +529,7 @@ header {
   max-width: var(--main-width);
   margin: 0 auto;
   margin-top: 40px;
+  clear: both;
 }
 
 .flex {

@@ -8,6 +8,7 @@
 }
 
 .directive-alert {
+  display: flow-root;
   letter-spacing: 0;
   box-sizing: border-box;
   font-size: inherit;

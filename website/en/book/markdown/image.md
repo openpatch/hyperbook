@@ -77,4 +77,6 @@ rightplus: `![](/test.jpg)--`
 
 centerplus: `--![](/test.jpg)--`
 
+You can use the horizontal rule to stop text flowing around the image.
+
 You can check all options on this [example page](./image-styling).

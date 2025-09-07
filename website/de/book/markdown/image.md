@@ -73,4 +73,6 @@ rechts erweitert: `![](/test.jpg)--`
 
 zentriert erweitert: `--![](/test.jpg)--`
 
+Du kannst die horizontale Linie verwenden, um das Ausrichten abzuschließen.
+
 Du kannst alle Optionen auf dieser [Beispielseite](./image-styling) überprüfen.

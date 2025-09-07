@@ -1,4 +1,8 @@
-.directive-collapsible > button {
+.directive-collapsible {
+  display: flow-root;
+}
+
+.directive-collapsible>button {
   width: 100%;
   text-align: left;
   border-style: solid;
@@ -11,13 +15,13 @@
   margin-bottom: 10px;
 }
 
-.directive-collapsible > button.expanded {
+.directive-collapsible>button.expanded {
   border-bottom-left-radius: 0px;
   border-bottom-right-radius: 0px;
   margin-bottom: 0px;
 }
 
-.directive-collapsible > button:after {
+.directive-collapsible>button:after {
   content: "\02795";
   /* Unicode character for "plus" sign (+) */
   font-size: 13px;
@@ -25,7 +29,7 @@
   margin-left: 5px;
 }
 
-.directive-collapsible > button.expanded:after {
+.directive-collapsible>button.expanded:after {
   content: "\2796";
   /* Unicode character for "minus" sign (-) */
 }
@@ -39,7 +43,7 @@
   display: none;
 }
 
-.directive-collapsible > button.expanded+.collapsible-content {
+.directive-collapsible>button.expanded+.collapsible-content {
   display: block;
   border-style: solid;
   border-width: 1px;
@@ -51,13 +55,13 @@
   border-bottom-right-radius: 4px;
 }
 
-.directive-collapsible > button {
+.directive-collapsible>button {
   color: var(--color-text);
   border-color: var(--color-spacer);
   background-color: var(--color-nav);
 }
 
-.directive-collapsible > button:after {
+.directive-collapsible>button:after {
   color: var(--color-text);
 }
 
