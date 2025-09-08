@@ -38,6 +38,18 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.57.2
+
+::::tabs
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+- Fixed alert element not working correctly in container elements like tabs.
+
+:::
+
+::::
+
 ## v0.57.1
 
 ::::tabs

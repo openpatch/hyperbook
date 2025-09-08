@@ -30,8 +30,6 @@ export default (ctx: HyperbookContext) => () => {
           .trim();
         const icon = content || type;
 
-        delete node.attributes?.color;
-        delete node.attributes?.label;
         data.hName = "div";
         data.hProperties = {
           class: `directive-alert ${type} ${icon ? "icon" : ""}`.trim(),
