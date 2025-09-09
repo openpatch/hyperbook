@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.57.3
+
+### Patch Changes
+
+- [`5c65176`](https://github.com/openpatch/hyperbook/commit/5c65176472e27865696574ec398d5480899b96df) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix all IDEs not showing the correct code
+
 ## 0.57.2
 
 ### Patch Changes
