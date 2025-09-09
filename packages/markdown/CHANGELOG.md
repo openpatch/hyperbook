@@ -1,5 +1,11 @@
 # @hyperbook/markdown
 
+## 0.33.2
+
+### Patch Changes
+
+- [`6f41f96`](https://github.com/openpatch/hyperbook/commit/6f41f963ad592c2aa45e122a7c4fd89c3f596a75) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix alert not working correctly in other container elements
+
 ## 0.33.1
 
 ### Patch Changes
