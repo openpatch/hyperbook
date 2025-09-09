@@ -22,6 +22,14 @@ interface CodeBundle {
   scripts?: string[];
 }
 
+function htmlEntities(str: string) {
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
 export default (ctx: HyperbookContext) => () => {
   const name = "p5";
   const cdnLibraryUrl = ctx.makeUrl(
@@ -178,7 +186,7 @@ ${(code.scripts ? [cdnLibraryUrl, ...code.scripts] : []).map((src) => `<script t
                       children: [
                         {
                           type: "raw",
-                          value: srcFile,
+                          value: htmlEntities(srcFile),
                         },
                       ],
                     },

@@ -38,6 +38,18 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.57.3
+
+::::tabs
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+- Fixed IDEs not showing all characters correctly.
+
+:::
+
+::::
+
 ## v0.57.2
 
 ::::tabs

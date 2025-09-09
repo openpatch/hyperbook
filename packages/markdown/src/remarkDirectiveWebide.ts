@@ -16,6 +16,14 @@ import hash from "./objectHash";
 import { i18n } from "./i18n";
 import { Element } from "hast";
 
+function htmlEntities(str: string) {
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
 export default (ctx: HyperbookContext) => () => {
   const name = "webide";
 
@@ -73,7 +81,6 @@ html, body {
         const editors: Element[] = [];
 
         if (htmlNode) {
-          html = htmlNode.value;
           buttons.push({
             type: "element",
             tagName: "button",
@@ -98,7 +105,7 @@ html, body {
             children: [
               {
                 type: "raw",
-                value: html,
+                value: htmlEntities(htmlNode.value),
               },
             ],
           });
@@ -129,7 +136,7 @@ html, body {
             children: [
               {
                 type: "raw",
-                value: css,
+                value: htmlEntities(css),
               },
             ],
           });
@@ -160,7 +167,7 @@ html, body {
             children: [
               {
                 type: "raw",
-                value: js,
+                value: htmlEntities(js),
               },
             ],
           });

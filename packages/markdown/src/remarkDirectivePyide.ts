@@ -19,6 +19,14 @@ import hash from "./objectHash";
 import { ElementContent } from "hast";
 import { i18n } from "./i18n";
 
+function htmlEntities(str: string) {
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
 export default (ctx: HyperbookContext) => () => {
   const name = "pyide";
   return (tree: Root, file: VFile) => {
@@ -201,7 +209,7 @@ export default (ctx: HyperbookContext) => () => {
                 children: [
                   {
                     type: "raw",
-                    value: srcFile,
+                    value: htmlEntities(srcFile),
                   },
                 ],
               },

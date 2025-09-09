@@ -4,7 +4,7 @@ hyperbook.webide = (function () {
     codeInput.templates.prism(window.Prism, [
       new codeInput.plugins.AutoCloseBrackets(),
       new codeInput.plugins.Indent(true, 2),
-    ])
+    ]),
   );
 
   const elems = document.getElementsByClassName("directive-webide");
@@ -71,7 +71,9 @@ hyperbook.webide = (function () {
 
     const load = async () => {
       const result = await store.webide.get(id);
-      if (!result) return;
+      if (!result) {
+        return;
+      }
       const website = template
         .replace("###HTML###", result.html)
         .replace("###CSS###", result.css)
@@ -94,7 +96,7 @@ hyperbook.webide = (function () {
         .replace("###JS###", editorJS?.value);
       frame.srcdoc = website;
     };
-    
+
     frame.addEventListener("load", () => {
       title.textContent = frame.contentDocument.title;
     });
@@ -104,6 +106,8 @@ hyperbook.webide = (function () {
       if (result) {
         editorHTML.value = result.html;
       }
+
+      update();
 
       editorHTML.addEventListener("input", () => {
         update();
@@ -116,6 +120,8 @@ hyperbook.webide = (function () {
         editorCSS.value = result.css;
       }
 
+      update();
+
       editorCSS.addEventListener("input", () => {
         update();
       });
@@ -126,6 +132,8 @@ hyperbook.webide = (function () {
       if (result) {
         editorJS.value = result.js;
       }
+
+      update();
 
       editorJS.addEventListener("input", () => {
         update();
