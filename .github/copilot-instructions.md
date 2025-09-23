@@ -33,11 +33,11 @@ pnpm --version  # Should be 8+
 pnpm install
 
 # 2. Build packages in dependency order
-# If full build fails due to network issues, build individually:
-cd packages/types && pnpm build        # No dependencies
-cd packages/fs && pnpm build           # Depends on types
-cd packages/markdown && rm -rf dist && pnpm build:pkg && pnpm build:types && cp -r locales dist/  # Skip network-dependent prebuild
-cd packages/hyperbook && pnpm build    # Depends on fs, markdown, types
+cd packages/types && pnpm build                          # No dependencies
+cd packages/fs && pnpm build                             # Depends on types
+cd packages/web-component-excalidraw && pnpm build       # No dependencies, needed by markdown
+cd packages/markdown && pnpm build                       # Depends on types, includes emoji prebuild
+cd packages/hyperbook && pnpm build                      # Depends on fs, markdown, types
 
 # 3. Full monorepo build (after individual packages work)
 pnpm build
@@ -50,11 +50,6 @@ pnpm lint  # May have TypeScript errors in excalidraw package (non-blocking)
 ```
 
 ### Known Build Issues and Workarounds
-
-**Network Dependency Issue (Common)**:
-- The `packages/markdown/prebuild.mjs` script fetches GitHub emoji data and may fail
-- **Workaround**: Create empty `packages/markdown/src/emojis.json` file with `{}` content
-- **Alternative**: Skip prebuild with `cd packages/markdown && rm -rf dist && pnpm build:pkg && pnpm build:types && cp -r locales dist/`
 
 **TypeScript Errors in web-component-excalidraw**:
 - External dependency issues with @excalidraw packages
