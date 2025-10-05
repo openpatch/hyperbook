@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.58.0
+
+### Minor Changes
+
+- [`25a216f`](https://github.com/openpatch/hyperbook/commit/25a216f4f3d4b63f2c1db89880e7e0ee29d84da8) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add learningmap element
+
 ## 0.57.3
 
 ### Patch Changes
