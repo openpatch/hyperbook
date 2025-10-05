@@ -59,6 +59,7 @@ import { remarkGithubEmoji } from "./remarkGithubEmoji";
 import remarkParse from "./remarkParse";
 import remarkSubSup from "./remarkSubSup";
 import remarkImageAttrs from "./remarkImageAttrs";
+import remarkDirectiveLearningmap from "./remarkDirectiveLearningmap";
 
 export const remark = (ctx: HyperbookContext) => {
   i18n.init(ctx.config.language || "en");
@@ -101,6 +102,7 @@ export const remark = (ctx: HyperbookContext) => {
     remarkDirectiveH5P(ctx),
     remarkDirectiveJSXGraph(ctx),
     remarkDirectiveMultievent(ctx),
+    remarkDirectiveLearningmap(ctx),
     remarkCode(ctx),
     remarkMath,
     /* needs to be last directive */

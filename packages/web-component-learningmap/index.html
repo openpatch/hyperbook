@@ -1,12 +1,20 @@
----
-name: Web IDE
-permaid: webide
-lang: de 
----
+<!doctype html>
+<html lang="en">
 
-:::learningmap
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Learningmap</title>
+  <link href="./dist/web-component-learningmap.css" rel="stylesheet" />
+  <script src="./dist/index.umd.js"></script>
+</head>
 
-```yaml
+<body>
+  <hyperbook-learningmap id="learningmap" language="de" roadmap-data=""></hyperbook-learningmap>
+
+  <script>
+    // Example YAML roadmap data
+    const roadmapYaml = `
 title: Modern Web Development Roadmap
 background:
   color: '#f8fafc'
@@ -121,7 +129,7 @@ nodes:
   - id: '7'
     type: topic
     data:
-      label: "Advanced Topic: Responsive Design"
+      label: Advanced Topic: Responsive Design
       description: |
         Learn how to make your web pages look great on any device.
       duration: 2 hours
@@ -143,7 +151,7 @@ nodes:
   - id: '8'
     type: topic
     data:
-      label: "Bonus: Unlock with Password"
+      label: Bonus: Unlock with Password
       description: | 
         Access bonus content by entering the password.
       duration: 1 hour
@@ -157,6 +165,25 @@ nodes:
       resources:
         - label: Bonus Content
           url: https://developer.mozilla.org/en-US/docs/Web/Guide
-```
+`;
 
-:::
+    // Set YAML string as attribute so the web component parses it automatically
+    const learningMapElement = document.getElementById("learningmap");
+    learningMapElement.setAttribute("roadmap-data", roadmapYaml);
+
+    // Example for nodeState usage
+    // Example nodeState object for restoring progress
+    const nodeState = {
+    };
+    // Set nodeState as property on the web component
+    learningMapElement.nodeState = nodeState;
+
+    // Listen for changes to save progress using custom event
+    learningMapElement.addEventListener("change", (event) => {
+      console.log("Node state changed:", event.detail);
+      // Save event.detail to localStorage, backend, etc.
+    });
+  </script>
+</body>
+
+</html>

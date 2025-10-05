@@ -1,0 +1,52 @@
+{
+  "name": "@hyperbook/web-component-learningmap",
+  "version": "0.0.1",
+  "author": "Mike Barkmin",
+  "homepage": "https://github.com/openpatch/hyperbook#readme",
+  "license": "MIT",
+  "type": "module",
+  "main": "dist/index.umd.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "require": "./dist/index.umd.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/openpatch/hyperbook.git",
+    "directory": "packages/web-component-learningmap"
+  },
+  "bugs": {
+    "url": "https://github.com/openpatch/hyperbook/issues"
+  },
+  "scripts": {
+    "version": "pnpm build",
+    "lint": "tsc --noEmit",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "@excalidraw/excalidraw": "0.18.0",
+    "@r2wc/react-to-web-component": "^2.0.4",
+    "@xyflow/react": "^12.8.6",
+    "elkjs": "^0.11.0",
+    "js-yaml": "^4.1.0",
+    "lucide-react": "^0.544.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@rollup/plugin-typescript": "^12.1.2",
+    "@types/js-yaml": "^4.0.9",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^4.3.4",
+    "vite": "^6.1.0"
+  }
+}

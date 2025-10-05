@@ -1,0 +1,379 @@
+.learningmap-footer {
+  width: 100%;
+  background: var(--color-nav);
+  border-top: 1px solid var(--color-nav-border);
+  padding: 8px 32px 16px 32px;
+  z-index: 10;
+  position: relative;
+  box-sizing: border-box;
+}
+
+@media (max-width: 600px) {
+  .learningmap-footer {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+}
+
+/* Container */
+
+.hyperbook-learningmap-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+
+.learningmap-header {
+  width: 100%;
+  background: var(--color-nav);
+  border-bottom: 1px solid var(--color-nav-border);
+  padding: 24px 32px 16px 32px;
+  z-index: 10;
+  position: relative;
+  box-sizing: border-box;
+  overflow-x: auto;
+}
+
+@media (max-width: 600px) {
+  .learningmap-header {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+}
+
+.learningmap-roadmap {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  width: 100%;
+  background: transparent;
+}
+
+/* Learning Node */
+.learning-node {
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  border: 2px solid;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+  background: white;
+}
+
+.react-flow__node-background img {
+  max-width: none;
+}
+
+.react-flow__node-task .learning-node {
+  background: #f0f7ff;
+  border-color: #3b82f6;
+  border-radius: 16px;
+}
+
+.react-flow__node-topic .learning-node {
+  background: #fffbe6;
+  border-color: #f59e42;
+  border-radius: 8px;
+  font-size: 16px;
+  /* slightly larger for emphasis */
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(245, 158, 66, 0.08);
+  padding-left: 18px;
+}
+
+.learning-node.optional {
+  border: 2px dashed #38bdf8;
+}
+
+.react-flow__node-topic .learning-node {
+  border-left: 12px solid #f59e42;
+}
+
+.learning-node.locked {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+}
+
+.learning-node.completed {
+  background: #f0fdf4;
+  border-color: #22c55e;
+}
+
+.learning-node.available {
+  background: white;
+  border-color: #60a5fa;
+  cursor: pointer;
+}
+
+.learning-node.available:hover {
+  border-color: #2563eb;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.node-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.node-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.learning-node.completed .node-icon {
+  color: #16a34a;
+}
+
+.learning-node.available .node-icon {
+  color: #3b82f6;
+}
+
+.learning-node.started .node-icon {
+  color: #f59e42;
+}
+
+.learning-node.locked .node-icon {
+  color: #a1a1aa;
+}
+
+.node-label {
+  font-weight: 600;
+  font-size: 14px;
+  color: #1f2937;
+}
+
+
+.star-counter {
+  font-weight: 600;
+  color: #f59e42;
+  font-size: 14px;
+}
+
+/* Progress Panel */
+.progress-panel {
+  padding: 16px;
+  margin: 16px;
+}
+
+.progress-section {
+  margin-bottom: 8px;
+}
+
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.progress-label {
+  color: var(--color-text);
+}
+
+.progress-value {
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.progress-bar-container {
+  width: 100%;
+  background-color: var(--color-spacer);
+  border: 1px solid var(--color-nav-border);
+  border-radius: 9999px;
+  height: 8px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  background-color: var(--color-brand);
+  height: 100%;
+  border-radius: 9999px;
+  transition: width 0.3s ease;
+}
+
+.progress-text {
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+/* Legend Panel */
+.legend-panel {
+  border-radius: 0;
+  box-shadow: none;
+  padding: 12px 0 0 0;
+  margin: 0;
+  font-size: 12px;
+  color: var(--color-text);
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 24px;
+  justify-content: center;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.legend-icon-available {
+  color: #3b82f6;
+}
+
+.legend-icon-locked {
+  color: #9ca3af;
+}
+
+/* Drawer Styles */
+.drawer-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 1002;
+  animation: fadeIn 0.2s ease;
+}
+
+/* Password Input Visibility Fix */
+.drawer-password-input {
+  background: none;
+  color: var(--color-text);
+  border: 1px solid var(--color-nav-border);
+  border-radius: 6px;
+  padding: 10px 36px 10px 12px;
+  font-size: 16px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Hide React Flow Handles */
+.react-flow__handle {
+  opacity: 0 !important;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+  }
+
+  to {
+    transform: translateX(0);
+  }
+}
+
+.drawer {
+  position: fixed;
+  top: 0px;
+  right: 0;
+  bottom: 0;
+  width: 500px;
+  max-width: 90vw;
+  background: var(--color-nav);
+  box-shadow: -4px 0 12px rgba(0, 0, 0, 0.1);
+  z-index: 1003;
+  display: flex;
+  flex-direction: column;
+  animation: slideIn 0.3s ease;
+}
+
+.drawer iframe {
+  border: none;
+}
+
+.drawer-header {
+  padding: 24px;
+  border-bottom: 1px solid var(--color-nav-border);
+}
+
+.drawer-header h2 {
+  border: none;
+  margin: 0;
+}
+
+.drawer-title {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0 0 4px 0;
+}
+
+.drawer-duration {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.drawer-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+}
+
+.drawer-footer {
+  padding: 24px;
+  border-top: 1px solid var(--color-nav-border);
+}
+
+.complete-button {
+  width: 100%;
+  padding: 14px;
+  border: none;
+
+  .legend-icon-completed {
+    color: #16a34a !important;
+  }
+
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s;
+}
+
+.complete-button:not(.locked):not(.completed) {
+  background: #3b82f6;
+  color: white;
+}
+
+.complete-button:not(.locked):not(.completed):hover {
+  background: #2563eb;
+}
+
+.complete-button.completed {
+  background: #22c55e;
+  color: white;
+}
+
+.complete-button.completed:hover {
+  background: #16a34a;
+}
+
+.complete-button.locked {
+  background: #f3f4f6;
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+.react-flow__controls-button {
+  color: #000 !important;
+}

@@ -190,6 +190,36 @@ async function postbuild() {
         "jsxgraphcore.js",
       ),
     },
+    {
+      src: path.join(
+        "./node_modules",
+        "@hyperbook",
+        "web-component-learningmap",
+        "dist",
+        "index.umd.js",
+      ),
+      dst: path.join(
+        "./dist",
+        "assets",
+        "directive-learningmap",
+        "hyperbook-learningmap.umd.js",
+      ),
+    },
+    {
+      src: path.join(
+        "./node_modules",
+        "@hyperbook",
+        "web-component-learningmap",
+        "dist",
+        "web-component-learningmap.css",
+      ),
+      dst: path.join(
+        "./dist",
+        "assets",
+        "directive-learningmap",
+        "web-component-learningmap.css",
+      ),
+    },
   ];
 
   for (let asset of assets) {
