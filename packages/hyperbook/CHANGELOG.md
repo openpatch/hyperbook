@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.58.2
+
+### Patch Changes
+
+- [`fa3ecfa`](https://github.com/openpatch/hyperbook/commit/fa3ecfa082f6f13c292f504d4260910a0425c3bb) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Retain scroll position in dev-mode when the page reloads.
+
 ## 0.58.1
 
 ### Patch Changes
