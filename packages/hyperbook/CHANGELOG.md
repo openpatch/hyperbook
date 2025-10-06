@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.58.1
+
+### Patch Changes
+
+- [`44f6627`](https://github.com/openpatch/hyperbook/commit/44f6627748f55bc49d10a59455a500c006334c93) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix url not prefixed correctly in learningmaps
+
 ## 0.58.0
 
 ### Minor Changes
