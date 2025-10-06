@@ -38,6 +38,18 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.58.1
+
+::::tabs
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+- Fix url in learningmaps not prefixed with basePath.
+
+:::
+
+::::
+
 ## v0.58.0
 
 ::::tabs
