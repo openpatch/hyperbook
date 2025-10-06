@@ -33,9 +33,21 @@ export async function runDev({ port = 8080 }: { port: number }): Promise<void> {
 const socket = new WebSocket("ws://localhost:${port}");
 socket.addEventListener("message", (event) => {
   if (event.data === "RELOAD") {
+    const main = document.querySelector("main");
+    if (main) {
+      localStorage.setItem("__hyperbook_dev_scroll", main.scrollTop);
+    }
     window.location.reload();
   }
 });
+window.onload = () => {
+  const main = document.querySelector("main");
+  const scrollTop = localStorage.getItem("__hyperbook_dev_scroll");
+  if (main && scrollTop !== null) {
+    main.scrollTop = parseInt(scrollTop, 10);
+    localStorage.removeItem("__hyperbook_dev_scroll");
+  }
+};
 `;
 
       response.writeHead(200, {

@@ -12,7 +12,7 @@ The `learningmap` element lets you embed interactive learning roadmaps directly 
 To add a learning map, use the following Markdown block:
 
 ````markdown
-:::learningmap
+:::learningmap{id="learningmap-example"}
 
 ```yaml
 title: Modern Web Development Roadmap
@@ -76,7 +76,7 @@ nodes:
 :::
 ````
 
-:::learningmap
+:::learningmap{id="learningmap-example"}
 
 ```yaml
 title: Modern Web Development Roadmap
@@ -252,6 +252,9 @@ unlock:
 
 - Users can mark nodes as started or completed.
 - Progress is shown at the top of the map.
+- The progress is saved in your browser. If a id is provided, this will be used
+as a key. If no id is provided the content will be hased and an id will be
+generated.
 
 ## Resources and Videos
 

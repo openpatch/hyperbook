@@ -252,6 +252,7 @@ unlock:
 
 - Benutzer können Knoten als gestartet oder abgeschlossen markieren.
 - Der Fortschritt wird oben auf der Karte angezeigt.
+- Der Fortschritt wird in deinem Browser gespeichert. Falls eine ID angegeben wird, wird diese als Schlüssel verwendet. Wenn keine ID angegeben wird, wird der Inhalt gehasht und eine ID generiert.
 
 ## Ressourcen und Videos
 

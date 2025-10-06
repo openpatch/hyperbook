@@ -38,6 +38,18 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.58.2
+
+::::tabs
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+- Retain scroll position in dev-mode when the page is reloaded.
+
+:::
+
+::::
+
 ## v0.58.1
 
 ::::tabs
