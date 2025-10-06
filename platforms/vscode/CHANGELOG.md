@@ -1,5 +1,14 @@
 # @hyperbook/vscode-extension
 
+## 0.37.1
+
+### Patch Changes
+
+- [`44f6627`](https://github.com/openpatch/hyperbook/commit/44f6627748f55bc49d10a59455a500c006334c93) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix url not prefixed correctly in learningmaps
+
+- Updated dependencies [[`44f6627`](https://github.com/openpatch/hyperbook/commit/44f6627748f55bc49d10a59455a500c006334c93)]:
+  - @hyperbook/markdown@0.34.1
+
 ## 0.37.0
 
 ### Minor Changes
