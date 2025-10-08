@@ -56,23 +56,30 @@
   border-color: #2563eb;
 }
 
+.toolbar-button.active {
+  background: var(--color-brand, #3b82f6);
+  color: white;
+  border-color: var(--color-brand, #3b82f6);
+}
+
+.toolbar-button.active:hover {
+  background: #2563eb;
+  border-color: #2563eb;
+}
+
+.toolbar-button:disabled {
+  background: var(--color-nav, #f3f4f6);
+  color: var(--color-text, #9ca3af);
+  border-color: var(--color-nav-border, #e5e7eb);
+  cursor: not-allowed;
+}
+
 /* Editor Canvas */
 .editor-canvas {
   flex: 1;
   min-height: 0;
   position: relative;
   width: 100%;
-}
-
-/* Editor Nodes */
-.editor-node {
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.editor-node:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
 }
 
 .react-flow__node-background img {
@@ -95,6 +102,7 @@
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -104,6 +112,7 @@
   from {
     transform: translateX(100%);
   }
+
   to {
     transform: translateX(0);
   }
@@ -194,6 +203,10 @@
   color: var(--color-text, #1f2937);
   box-sizing: border-box;
   transition: border-color 0.2s;
+}
+
+.form-group input[type="color"] {
+  height: 64px;
 }
 
 .form-group input:focus,
@@ -293,4 +306,110 @@
   height: 10px;
   background: var(--color-brand, #3b82f6);
   border: 2px solid white;
+}
+
+.react-flow__edge.selected {
+  stroke: var(--color-brand, #3b82f6);
+  stroke-width: 4px;
+}
+
+.react-flow__node-image img {
+  width: 100%;
+}
+
+.react-flow__node-task {
+  padding: 16px 24px;
+  border-radius: 16px;
+  border: 2px solid;
+  border-color: #3b82f6;
+  background: #f0f7ff;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+
+  .check-icon {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    fill: #fff;
+    stroke: #3b82f6;
+  }
+
+}
+
+.react-flow__node-topic {
+  padding: 16px 24px;
+  border-radius: 16px;
+  border: 2px solid;
+  border-color: #f59e42;
+  background: #fffbe6;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.react-flow__node-topic.black,
+.react-flow__node-task.black {
+  border-color: #374151;
+  background: #f3f4f6;
+
+  .check-icon {
+    stroke: #374151;
+  }
+}
+
+.react-flow__node-topic.white,
+.react-flow__node-task.white {
+  border-color: #9ca3af;
+  background: #f9fafb;
+
+  .check-icon {
+    stroke: #9ca3af;
+  }
+}
+
+.react-flow__node-topic.lila,
+.react-flow__node-task.lila {
+  border-color: #9e86ed;
+  background: #f3e8ff;
+
+  .check-icon {
+    stroke: #9e86ed;
+  }
+}
+
+.react-flow__node-topic.green,
+.react-flow__node-task.green {
+  border-color: #10b981;
+  background: #ecfdf5;
+
+  .check-icon {
+    stroke: #10b981;
+  }
+}
+
+.react-flow__node-topic.yellow,
+.react-flow__node-task.yellow {
+  border-color: #f59e42;
+  background: #fffbeb;
+
+  .check-icon {
+    stroke: #f59e42;
+  }
+}
+
+.react-flow__node-topic.red,
+.react-flow__node-task.red {
+  border-color: #ef4444;
+  background: #fef2f2;
+
+  .check-icon {
+    stroke: #ef4444;
+  }
+}
+
+.react-flow__node-topic.blue,
+.react-flow__node-task.blue {
+  border-color: #3b82f6;
+  background: #eff6ff;
+
+  .check-icon {
+    stroke: #3b82f6;
+  }
 }

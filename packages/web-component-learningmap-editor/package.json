@@ -33,9 +33,9 @@
   },
   "dependencies": {
     "@r2wc/react-to-web-component": "^2.0.4",
+    "@szhsin/react-menu": "^4.5.0",
     "@xyflow/react": "^12.8.6",
     "elkjs": "^0.11.0",
-    "js-yaml": "^4.1.0",
     "lucide-react": "^0.544.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
@@ -43,7 +43,6 @@
   },
   "devDependencies": {
     "@rollup/plugin-typescript": "^12.1.2",
-    "@types/js-yaml": "^4.0.9",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@vitejs/plugin-react": "^4.3.4",

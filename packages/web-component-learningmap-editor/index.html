@@ -1,55 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Learningmap Editor Test</title>
+  <link rel="stylesheet" href="./dist/web-component-learningmap-editor.css">
   <style>
     body {
       margin: 0;
       padding: 0;
       font-family: system-ui, -apple-system, sans-serif;
     }
+
     hyperbook-learningmap-editor {
       display: block;
       width: 100vw;
       height: 100vh;
     }
-    #output {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background: white;
-      border: 2px solid #333;
-      padding: 10px;
-      max-width: 400px;
-      max-height: 300px;
-      overflow: auto;
-      z-index: 10000;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }
-    #output pre {
-      margin: 0;
-      white-space: pre-wrap;
-      word-wrap: break-word;
-    }
   </style>
 </head>
-<body>
-  <hyperbook-learningmap-editor
-    id="editor"
-    language="en"
-  ></hyperbook-learningmap-editor>
 
-  <div id="output">
-    <h4>Last Save:</h4>
-    <pre id="data">No data yet. Click Save in the editor.</pre>
-  </div>
+<body>
+  <hyperbook-learningmap-editor id="editor" language="en"></hyperbook-learningmap-editor>
 
   <script src="./dist/index.umd.js"></script>
   <script>
     const editor = document.getElementById('editor');
-    const dataDisplay = document.getElementById('data');
 
     // Initialize with sample data
     const initialData = {
@@ -57,25 +34,27 @@
         {
           id: "node1",
           type: "task",
-          position: { x: 100, y: 100 },
+          position: {x: 100, y: 100},
+          className: "red",
           data: {
             label: "Getting Started",
             summary: "Introduction to the topic",
             description: "Learn the fundamentals",
             resources: [
-              { label: "Documentation", url: "https://example.com/docs" }
+              {label: "Documentation", url: "https://example.com/docs"}
             ]
           }
         },
         {
           id: "node2",
           type: "topic",
-          position: { x: 100, y: 300 },
+          className: "blue",
+          position: {x: 100, y: 300},
           data: {
             label: "Advanced Topics",
             summary: "Deep dive into advanced concepts",
             completion: {
-              needs: [{ id: "node1" }]
+              needs: ["node1"]
             }
           }
         }
@@ -91,8 +70,8 @@
     // Listen for save events
     editor.addEventListener('change', (event) => {
       console.log('Roadmap changed:', event.detail);
-      dataDisplay.textContent = JSON.stringify(event.detail, null, 2);
     });
   </script>
 </body>
+
 </html>
