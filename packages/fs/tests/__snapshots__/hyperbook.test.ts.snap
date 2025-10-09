@@ -6,7 +6,7 @@ exports[`hyperbook > should get navigation 1`] = `
     "href": "/paradigms",
     "name": "Paradigms",
     "path": {
-      "absolute": "/home/mike/Sources/openpatch/hyperbook/packages/fs/tests/fixtures/single-hyperbook/book/paradigms.md",
+      "absolute": "single-hyperbook/book/paradigms.md",
       "directory": "",
       "href": "/paradigms",
       "permalink": null,
@@ -18,7 +18,7 @@ exports[`hyperbook > should get navigation 1`] = `
     "href": "/hyperbook-test",
     "name": "hyperbook-test",
     "path": {
-      "absolute": "/home/mike/Sources/openpatch/hyperbook/packages/fs/tests/fixtures/single-hyperbook/book/hyperbook-test.md",
+      "absolute": "single-hyperbook/book/hyperbook-test.md",
       "directory": "",
       "href": "/hyperbook-test",
       "permalink": null,
@@ -30,7 +30,7 @@ exports[`hyperbook > should get navigation 1`] = `
     "href": "/",
     "name": "Home",
     "path": {
-      "absolute": "/home/mike/Sources/openpatch/hyperbook/packages/fs/tests/fixtures/single-hyperbook/book/index.md",
+      "absolute": "single-hyperbook/book/index.md",
       "directory": "",
       "href": "/",
       "permalink": null,
