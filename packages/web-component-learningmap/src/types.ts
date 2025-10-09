@@ -55,6 +55,7 @@ export interface BackgroundConfig {
 export interface Settings {
   title?: string;
   background?: BackgroundConfig;
+  language?: string;
 }
 
 export interface EdgeConfig {

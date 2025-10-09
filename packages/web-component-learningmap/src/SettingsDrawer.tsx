@@ -55,6 +55,16 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
             />
           </div>
           <div className="form-group">
+            <label>{t.languageLabel}</label>
+            <select
+              value={localSettings?.language || "en"}
+              onChange={(e) => setLocalSettings(settings => ({ ...settings, language: e.target.value }))}
+            >
+              <option value="en">{t.languageEnglish}</option>
+              <option value="de">{t.languageGerman}</option>
+            </select>
+          </div>
+          <div className="form-group">
             <ColorSelector
               label={t.backgroundColor}
               value={localSettings?.background?.color || "#ffffff"}
