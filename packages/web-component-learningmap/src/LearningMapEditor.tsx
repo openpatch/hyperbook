@@ -36,6 +36,7 @@ import { LearningMap } from "./LearningMap";
 import { Info, Redo, Undo, RotateCw, ShieldAlert } from "lucide-react";
 import useUndoable from "./useUndoable";
 import { MultiNodePanel } from "./MultiNodePanel";
+import { getTranslations } from "./translations";
 
 const nodeTypes = {
   topic: TopicNode,
@@ -58,19 +59,21 @@ export function LearningMapEditor({
   language?: string;
   onChange?: (data: RoadmapData) => void;
 }) {
+  const t = getTranslations(language);
+  
   const keyboardShortcuts = [
-    { action: "Save", shortcut: "Ctrl+S" },
-    { action: "Undo", shortcut: "Ctrl+Z" },
-    { action: "Redo", shortcut: "Ctrl+Y or Ctrl+Shift+Z" },
-    { action: "Add Task Node", shortcut: "Ctrl+A" },
-    { action: "Add Topic Node", shortcut: "Ctrl+O" },
-    { action: "Add Image Node", shortcut: "Ctrl+I" },
-    { action: "Add Text Node", shortcut: "Ctrl+X" },
-    { action: "Delete Node/Edge", shortcut: "Delete" },
-    { action: "Toggle Preview Mode", shortcut: "Ctrl+P" },
-    { action: "Toggle Debug Mode", shortcut: "Ctrl+D" },
-    { action: "Select Multiple Nodes", shortcut: "Ctrl+Click or Shift+Drag" },
-    { action: "Show Help", shortcut: "Ctrl+? or Help Button" },
+    { action: t.shortcuts.save, shortcut: "Ctrl+S" },
+    { action: t.shortcuts.undo, shortcut: "Ctrl+Z" },
+    { action: t.shortcuts.redo, shortcut: "Ctrl+Y or Ctrl+Shift+Z" },
+    { action: t.shortcuts.addTaskNode, shortcut: "Ctrl+A" },
+    { action: t.shortcuts.addTopicNode, shortcut: "Ctrl+O" },
+    { action: t.shortcuts.addImageNode, shortcut: "Ctrl+I" },
+    { action: t.shortcuts.addTextNode, shortcut: "Ctrl+X" },
+    { action: t.shortcuts.deleteNodeEdge, shortcut: "Delete" },
+    { action: t.shortcuts.togglePreviewMode, shortcut: "Ctrl+P" },
+    { action: t.shortcuts.toggleDebugMode, shortcut: "Ctrl+D" },
+    { action: t.shortcuts.selectMultipleNodes, shortcut: "Ctrl+Click or Shift+Drag" },
+    { action: t.shortcuts.showHelp, shortcut: "Ctrl+? or Help Button" },
   ];
 
   const { screenToFlowPosition, getViewport, setViewport } = useReactFlow();
@@ -286,7 +289,7 @@ export function LearningMapEditor({
           type,
           position: centerPos,
           data: {
-            label: `New ${type}`,
+            label: t.newTask,
             summary: "",
             description: "",
           },
@@ -299,7 +302,7 @@ export function LearningMapEditor({
           type,
           position: centerPos,
           data: {
-            label: `New ${type}`,
+            label: t.newTopic,
             summary: "",
             description: "",
           },
@@ -326,7 +329,7 @@ export function LearningMapEditor({
           position: centerPos,
           zIndex: -1,
           data: {
-            text: "Background Text",
+            text: t.backgroundTextDefault,
             fontSize: 32,
             color: "#e5e7eb",
           },
@@ -336,7 +339,7 @@ export function LearningMapEditor({
       }
       setSaved(false);
     },
-    [nextNodeId, screenToFlowPosition, setNodes, setSaved]
+    [nextNodeId, screenToFlowPosition, setNodes, setSaved, t]
   );
 
   const handleSave = useCallback(() => {
@@ -435,9 +438,9 @@ export function LearningMapEditor({
 
       // Restore old viewport
     }).catch((err) => {
-      alert("Failed to export SVG: " + err.message);
+      alert(t.failedToExportSVG + err.message);
     });
-  }, [nodes, roadmapState]);
+  }, [nodes, roadmapState, t]);
 
   const handleOpen = useCallback(() => {
     const input = document.createElement('input');
@@ -447,7 +450,7 @@ export function LearningMapEditor({
       const file = e.target.files[0];
       if (!file) return;
 
-      if (!window.confirm("Opening a file will replace your current map. Continue?")) {
+      if (!window.confirm(t.openFileWarning)) {
         return;
       }
 
@@ -461,13 +464,13 @@ export function LearningMapEditor({
             loadRoadmapStateIntoReactFlowState(json);
           }
         } catch (err) {
-          alert('Failed to load the file. Please make sure it is a valid roadmap JSON file.');
+          alert(t.failedToLoadFile);
         }
       };
       reader.readAsText(file);
     };
     input.click();
-  }, [setRoadmapState, setDidUndoRedo]);
+  }, [setRoadmapState, setDidUndoRedo, t]);
 
   // Toolbar handler wrappers for EditorToolbar props
   const handleOpenSettingsDrawer = useCallback(() => setSettingsDrawerOpen(true), []);
@@ -610,6 +613,7 @@ export function LearningMapEditor({
         onDownlad={handleDownload}
         onOpen={handleOpen}
         onExportSVG={handleExportSVG}
+        language={language}
       />
       {previewMode && <LearningMap roadmapData={roadmapState} language={language} />}
       {!previewMode && <>
@@ -651,20 +655,20 @@ export function LearningMapEditor({
           >
             <Background />
             <Controls>
-              <ControlButton title="Undo" disabled={!canUndo} onClick={handleUndo}>
+              <ControlButton title={t.undo} disabled={!canUndo} onClick={handleUndo}>
                 <Undo />
               </ControlButton>
-              <ControlButton title="Redo" disabled={!canRedo} onClick={handleRedo}>
+              <ControlButton title={t.redo} disabled={!canRedo} onClick={handleRedo}>
                 <Redo />
               </ControlButton>
-              <ControlButton title="Reset" onClick={handleReset}>
+              <ControlButton title={t.reset} onClick={handleReset}>
                 <RotateCw />
               </ControlButton>
-              <ControlButton title="Help" onClick={() => setHelpOpen(true)}>
+              <ControlButton title={t.help} onClick={() => setHelpOpen(true)}>
                 <Info />
               </ControlButton>
             </Controls>
-            {!saved && <Panel position="top-right" title="Unsaved Changes (Click to save or press Ctrl+S)" onClick={() => { handleSave(); }}>
+            {!saved && <Panel position="top-right" title={t.unsavedChanges} onClick={() => { handleSave(); }}>
               <ShieldAlert size={32} color="red" />
             </Panel>}
             {selectedNodeIds.length > 1 && <MultiNodePanel nodes={nodes.filter(n => selectedNodeIds.includes(n.id))} onUpdate={updateNodes} />}
@@ -676,6 +680,7 @@ export function LearningMapEditor({
           onClose={closeDrawer}
           onUpdate={updateNode}
           onDelete={deleteNode}
+          language={language}
         />
         <EdgeDrawer
           edge={selectedEdge}
@@ -683,24 +688,26 @@ export function LearningMapEditor({
           onClose={closeDrawer}
           onUpdate={updateEdge}
           onDelete={deleteEdge}
+          language={language}
         />
         <SettingsDrawer
           isOpen={settingsDrawerOpen}
           onClose={closeDrawer}
           settings={settings}
           onUpdate={setSettings}
+          language={language}
         />
         <dialog
           className="help"
           open={helpOpen}
           onClose={() => setHelpOpen(false)}
         >
-          <h2>Keyboard Shortcuts</h2>
+          <h2>{t.keyboardShortcuts}</h2>
           <table>
             <thead>
               <tr>
-                <th>Action</th>
-                <th>Shortcut</th>
+                <th>{t.action}</th>
+                <th>{t.shortcut}</th>
               </tr>
             </thead>
             <tbody>
@@ -712,7 +719,7 @@ export function LearningMapEditor({
               ))}
             </tbody>
           </table>
-          <button className="primary-button" onClick={() => setHelpOpen(false)}>Close</button>
+          <button className="primary-button" onClick={() => setHelpOpen(false)}>{t.close}</button>
         </dialog>
       </>
       }

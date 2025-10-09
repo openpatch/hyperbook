@@ -1,6 +1,7 @@
 import { Node } from "@xyflow/react";
 import { Plus, Trash2 } from "lucide-react";
 import { NodeData } from "./types";
+import { getTranslations } from "./translations";
 
 interface Props {
   localNode: Node<NodeData>;
@@ -18,6 +19,7 @@ interface Props {
   handleCompletionOptionalChange: (idx: number, id: string) => void;
   addCompletionOptional: () => void;
   removeCompletionOptional: (idx: number) => void;
+  language?: string;
 }
 
 export function EditorDrawerTaskContent({
@@ -36,17 +38,20 @@ export function EditorDrawerTaskContent({
   handleCompletionOptionalChange,
   addCompletionOptional,
   removeCompletionOptional,
+  language = "en",
 }: Props) {
+  const t = getTranslations(language);
+  
   // Color options for the dropdown
   const colorOptions = [
-    { value: "blue", label: "Blue", className: "react-flow__node-topic blue" },
-    { value: "yellow", label: "Yellow", className: "react-flow__node-topic yellow" },
-    { value: "lila", label: "Lila", className: "react-flow__node-topic lila" },
-    { value: "pink", label: "Pink", className: "react-flow__node-topic pink" },
-    { value: "teal", label: "Teal", className: "react-flow__node-topic teal" },
-    { value: "red", label: "Red", className: "react-flow__node-topic red" },
-    { value: "black", label: "Black", className: "react-flow__node-topic black" },
-    { value: "white", label: "White", className: "react-flow__node-topic white" },
+    { value: "blue", label: t.blue, className: "react-flow__node-topic blue" },
+    { value: "yellow", label: t.yellow, className: "react-flow__node-topic yellow" },
+    { value: "lila", label: t.lila, className: "react-flow__node-topic lila" },
+    { value: "pink", label: t.pink, className: "react-flow__node-topic pink" },
+    { value: "teal", label: t.teal, className: "react-flow__node-topic teal" },
+    { value: "red", label: t.red, className: "react-flow__node-topic red" },
+    { value: "black", label: t.black, className: "react-flow__node-topic black" },
+    { value: "white", label: t.white, className: "react-flow__node-topic white" },
   ];
 
   // Determine default color based on node type
@@ -56,7 +61,7 @@ export function EditorDrawerTaskContent({
   return (
     <div className="drawer-content">
       <div className="form-group">
-        <label>Node Color</label>
+        <label>{t.nodeColor}</label>
         <div style={{ display: "flex", gap: 12, marginTop: 8 }}>
           {colorOptions.map(opt => (
             <button
@@ -80,34 +85,34 @@ export function EditorDrawerTaskContent({
         </div>
       </div>
       <div className="form-group">
-        <label>Label *</label>
+        <label>{t.labelRequired}</label>
         <input
           type="text"
           value={localNode.data?.label || ""}
           onChange={(e) => handleFieldChange("label", e.target.value)}
-          placeholder="Node label"
+          placeholder={t.placeholderNodeLabel}
         />
       </div>
       <div className="form-group">
-        <label>Summary</label>
+        <label>{t.summary}</label>
         <input
           type="text"
           value={localNode.data.summary || ""}
           onChange={(e) => handleFieldChange("summary", e.target.value)}
-          placeholder="Short summary"
+          placeholder={t.placeholderShortSummary}
         />
       </div>
       <div className="form-group">
-        <label>Description</label>
+        <label>{t.description}</label>
         <textarea
           value={localNode.data.description || ""}
           onChange={(e) => handleFieldChange("description", e.target.value)}
-          placeholder="Detailed description"
+          placeholder={t.placeholderDetailedDescription}
           rows={4}
         />
       </div>
       <div className="form-group">
-        <label>Duration</label>
+        <label>{t.duration}</label>
         <input
           type="text"
           value={localNode.data.duration || ""}
@@ -116,30 +121,30 @@ export function EditorDrawerTaskContent({
         />
       </div>
       <div className="form-group">
-        <label>Video URL</label>
+        <label>{t.videoURL}</label>
         <input
           type="text"
           value={localNode.data.video || ""}
           onChange={(e) => handleFieldChange("video", e.target.value)}
-          placeholder="YouTube or video URL"
+          placeholder={t.placeholderVideoURL}
         />
       </div>
       <div className="form-group">
-        <label>Resources</label>
+        <label>{t.resources}</label>
         {(localNode.data.resources || []).map((resource: { label: string; url: string }, idx: number) => (
           <div key={idx} style={{ display: "flex", gap: "8px", marginBottom: "8px" }}>
             <input
               type="text"
               value={resource.label || ""}
               onChange={(e) => handleResourceChange(idx, "label", e.target.value)}
-              placeholder="Label"
+              placeholder={t.placeholderLabel}
               style={{ flex: 1 }}
             />
             <input
               type="text"
               value={resource.url || ""}
               onChange={(e) => handleResourceChange(idx, "url", e.target.value)}
-              placeholder="URL"
+              placeholder={t.placeholderURL}
               style={{ flex: 2 }}
             />
             <button onClick={() => removeResource(idx)} className="icon-button">
@@ -148,20 +153,20 @@ export function EditorDrawerTaskContent({
           </div>
         ))}
         <button onClick={addResource} className="secondary-button">
-          <Plus size={16} /> Add Resource
+          <Plus size={16} /> {t.addResource}
         </button>
       </div>
       <div className="form-group">
-        <label>Unlock Password</label>
+        <label>{t.unlockPassword}</label>
         <input
           type="text"
           value={localNode.data.unlock?.password || ""}
           onChange={(e) => handleFieldChange("unlock", { ...(localNode.data.unlock || {}), password: e.target.value })}
-          placeholder="Optional password"
+          placeholder={t.placeholderOptionalPassword}
         />
       </div>
       <div className="form-group">
-        <label>Unlock Date</label>
+        <label>{t.unlockDate}</label>
         <input
           type="date"
           value={localNode.data.unlock?.date || ""}
@@ -169,7 +174,7 @@ export function EditorDrawerTaskContent({
         />
       </div>
       <div className="form-group">
-        <label>Unlock After</label>
+        <label>{t.unlockAfter}</label>
         {(localNode.data.unlock?.after || []).map((id: string, idx: number) => (
           <div key={idx} style={{ display: "flex", gap: "8px", marginBottom: "8px" }}>
             {renderNodeSelect(id, newId => handleUnlockAfterChange(idx, newId))}
@@ -179,11 +184,11 @@ export function EditorDrawerTaskContent({
           </div>
         ))}
         <button onClick={addUnlockAfter} className="secondary-button">
-          <Plus size={16} /> Add Unlock After
+          <Plus size={16} /> {t.unlockAfter}
         </button>
       </div>
       {localNode.type === "topic" && <div className="form-group">
-        <label>Completion Needs</label>
+        <label>{t.completionNeeds}</label>
         {(localNode.data.completion?.needs || []).map((need: string, idx: number) => (
           <div key={idx} style={{ display: "flex", gap: "8px", marginBottom: "8px" }}>
             {renderNodeSelect(need, newId => handleCompletionNeedsChange(idx, newId))}
@@ -193,11 +198,11 @@ export function EditorDrawerTaskContent({
           </div>
         ))}
         <button onClick={addCompletionNeed} className="secondary-button">
-          <Plus size={16} /> Add Need
+          <Plus size={16} /> {t.completionNeeds}
         </button>
       </div>}
       {localNode.type === "topic" && <div className="form-group">
-        <label>Completion Optional</label>
+        <label>{t.completionOptional}</label>
         {(localNode.data.completion?.optional || []).map((opt: string, idx: number) => (
           <div key={idx} style={{ display: "flex", gap: "8px", marginBottom: "8px" }}>
             {renderNodeSelect(opt, newId => handleCompletionOptionalChange(idx, newId))}
@@ -207,7 +212,7 @@ export function EditorDrawerTaskContent({
           </div>
         ))}
         <button onClick={addCompletionOptional} className="secondary-button">
-          <Plus size={16} /> Add Optional
+          <Plus size={16} /> {t.completionOptional}
         </button>
       </div>}
     </div>

@@ -2,12 +2,14 @@ import React, { useState, useEffect } from "react";
 import { X, Save } from "lucide-react";
 import { Settings } from "./types";
 import { ColorSelector } from "./ColorSelector";
+import { getTranslations } from "./translations";
 
 interface SettingsDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   settings: Settings;
   onUpdate: (s: Settings) => void;
+  language?: string;
 }
 
 export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
@@ -15,7 +17,9 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
   onClose,
   settings,
   onUpdate,
+  language = "en",
 }) => {
+  const t = getTranslations(language);
   const [localSettings, setLocalSettings] = useState<Settings>(settings);
 
   useEffect(() => {
@@ -34,7 +38,7 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
       <div className="drawer-overlay" onClick={onClose} />
       <div className="drawer">
         <div className="drawer-header">
-          <h2 className="drawer-title">Background Settings</h2>
+          <h2 className="drawer-title">{t.backgroundSettings}</h2>
           <button onClick={onClose} className="close-button">
             <X size={20} />
           </button>
@@ -42,17 +46,17 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
 
         <div className="drawer-content">
           <div className="form-group">
-            <label>Label *</label>
+            <label>{t.labelRequired}</label>
             <input
               type="text"
               value={localSettings?.title || ""}
               onChange={(e) => setLocalSettings(settings => ({ ...settings, title: e.target.value }))}
-              placeholder="Node label"
+              placeholder={t.placeholderNodeLabel}
             />
           </div>
           <div className="form-group">
             <ColorSelector
-              label="Background Color"
+              label={t.backgroundColor}
               value={localSettings?.background?.color || "#ffffff"}
               onChange={color => setLocalSettings(settings => ({ ...settings, background: { ...settings.background, color } }))}
             />
@@ -61,7 +65,7 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
 
         <div className="drawer-footer">
           <button onClick={handleSave} className="primary-button">
-            <Save size={16} /> Save Changes
+            <Save size={16} /> {t.saveChanges}
           </button>
         </div>
       </div>

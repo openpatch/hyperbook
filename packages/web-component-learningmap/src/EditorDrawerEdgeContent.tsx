@@ -1,21 +1,25 @@
 import { ColorSelector } from "./ColorSelector";
-
 import { Edge } from "@xyflow/react";
+import { getTranslations } from "./translations";
 
 interface Props {
   localEdge: Edge;
   handleFieldChange: (field: string, value: any) => void;
+  language?: string;
 }
 
 export function EditorDrawerEdgeContent({
   localEdge,
-  handleFieldChange
+  handleFieldChange,
+  language = "en",
 }: Props) {
+  const t = getTranslations(language);
+  
   return (
     <div className="drawer-content">
       <div className="form-group">
         <ColorSelector
-          label="Color"
+          label={t.edgeColor}
           value={localEdge.style?.stroke || "#222222"}
           onChange={color => handleFieldChange("color", color)}
         />
@@ -27,19 +31,19 @@ export function EditorDrawerEdgeContent({
             checked={!!localEdge.animated}
             onChange={e => handleFieldChange("animated", e.target.checked)}
           />
-          Animated
+          {t.animated}
         </label>
       </div>
       <div className="form-group">
-        <label>Type</label>
+        <label>{t.edgeType}</label>
         <select
           value={localEdge.type || "default"}
           onChange={e => handleFieldChange("type", e.target.value)}
         >
-          <option value="default">Default</option>
-          <option value="straight">Straight</option>
-          <option value="step">Step</option>
-          <option value="smoothstep">Smoothstep</option>
+          <option value="default">{t.default}</option>
+          <option value="straight">{t.straight}</option>
+          <option value="step">{t.step}</option>
+          <option value="smoothstep">{t.smoothstep}</option>
           <option value="simplebezier">Simple Bezier</option>
         </select>
       </div>

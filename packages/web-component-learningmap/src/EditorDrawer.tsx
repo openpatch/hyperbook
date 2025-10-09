@@ -6,6 +6,7 @@ import { EditorDrawerTopicContent } from "./EditorDrawerTopicContent";
 import { EditorDrawerImageContent } from "./EditorDrawerImageContent";
 import { EditorDrawerTextContent } from "./EditorDrawerTextContent";
 import { NodeData } from "./types";
+import { getTranslations } from "./translations";
 
 interface EditorDrawerProps {
   node: Node<NodeData> | null;
@@ -13,6 +14,7 @@ interface EditorDrawerProps {
   onClose: () => void;
   onUpdate: (node: Node<NodeData>) => void;
   onDelete: () => void;
+  language?: string;
 }
 
 export const EditorDrawer: React.FC<EditorDrawerProps> = ({
@@ -21,7 +23,9 @@ export const EditorDrawer: React.FC<EditorDrawerProps> = ({
   onClose,
   onUpdate,
   onDelete,
+  language = "en",
 }) => {
+  const t = getTranslations(language);
   const [localNode, setLocalNode] = useState<Node<NodeData> | null>(node);
   const { getNodes } = useReactFlow();
   const allNodes = getNodes();
@@ -38,7 +42,7 @@ export const EditorDrawer: React.FC<EditorDrawerProps> = ({
   // Helper for dropdowns
   const renderNodeSelect = (value: string, onChange: (id: string) => void) => (
     <select value={value} onChange={e => onChange(e.target.value)}>
-      <option value="">Select node...</option>
+      <option value="">{t.selectNode}</option>
       {nodeOptions.map(n => (
         <option key={n.id} value={n.id}>
           {n.data.label || n.id}
@@ -138,7 +142,7 @@ export const EditorDrawer: React.FC<EditorDrawerProps> = ({
     content = (
       <>
         <div className="drawer-header">
-          <h2 className="drawer-title">Edit Task</h2>
+          <h2 className="drawer-title">{t.editTask}</h2>
           <button onClick={onClose} className="close-button">
             <X size={20} />
           </button>
@@ -159,6 +163,7 @@ export const EditorDrawer: React.FC<EditorDrawerProps> = ({
           handleCompletionOptionalChange={handleCompletionOptionalChange}
           addCompletionOptional={addCompletionOptional}
           removeCompletionOptional={removeCompletionOptional}
+          language={language}
         />
       </>
     );
@@ -166,7 +171,7 @@ export const EditorDrawer: React.FC<EditorDrawerProps> = ({
     content = (
       <>
         <div className="drawer-header">
-          <h2 className="drawer-title">Edit Topic</h2>
+          <h2 className="drawer-title">{t.editTopic}</h2>
           <button onClick={onClose} className="close-button">
             <X size={20} />
           </button>
@@ -187,6 +192,7 @@ export const EditorDrawer: React.FC<EditorDrawerProps> = ({
           handleCompletionOptionalChange={handleCompletionOptionalChange}
           addCompletionOptional={addCompletionOptional}
           removeCompletionOptional={removeCompletionOptional}
+          language={language}
         />
       </>
     );
@@ -194,7 +200,7 @@ export const EditorDrawer: React.FC<EditorDrawerProps> = ({
     content = (
       <>
         <div className="drawer-header">
-          <h2 className="drawer-title">Edit Image</h2>
+          <h2 className="drawer-title">{t.editImage}</h2>
           <button onClick={onClose} className="close-button">
             <X size={20} />
           </button>
@@ -202,6 +208,7 @@ export const EditorDrawer: React.FC<EditorDrawerProps> = ({
         <EditorDrawerImageContent
           localNode={localNode}
           handleFieldChange={handleFieldChange}
+          language={language}
         />
       </>
     );
@@ -209,7 +216,7 @@ export const EditorDrawer: React.FC<EditorDrawerProps> = ({
     content = (
       <>
         <div className="drawer-header">
-          <h2 className="drawer-title">Edit Text</h2>
+          <h2 className="drawer-title">{t.editText}</h2>
           <button onClick={onClose} className="close-button">
             <X size={20} />
           </button>
@@ -217,6 +224,7 @@ export const EditorDrawer: React.FC<EditorDrawerProps> = ({
         <EditorDrawerTextContent
           localNode={localNode}
           handleFieldChange={handleFieldChange}
+          language={language}
         />
       </>
     );
@@ -229,10 +237,10 @@ export const EditorDrawer: React.FC<EditorDrawerProps> = ({
         {content}
         <div className="drawer-footer">
           <button onClick={onDelete} className="danger-button">
-            <Trash2 size={16} /> Delete Node
+            <Trash2 size={16} /> {t.deleteNode}
           </button>
           <button onClick={handleSave} className="primary-button">
-            <Save size={16} /> Save Changes
+            <Save size={16} /> {t.saveChanges}
           </button>
         </div>
       </div>
