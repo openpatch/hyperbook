@@ -36,6 +36,7 @@
     "@szhsin/react-menu": "^4.5.0",
     "@xyflow/react": "^12.8.6",
     "elkjs": "^0.11.0",
+    "html-to-image": "1.11.11",
     "lucide-react": "^0.544.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

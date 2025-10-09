@@ -1,12 +1,13 @@
-import { Controls, Edge, Node, ReactFlow, useEdgesState, useNodesState } from "@xyflow/react";
+import { Controls, Edge, Node, Panel, ReactFlow, useEdgesState, useNodesState, useReactFlow } from "@xyflow/react";
 import { ImageNode } from "./nodes/ImageNode";
 import { TaskNode } from "./nodes/TaskNode";
 import { TextNode } from "./nodes/TextNode";
 import { TopicNode } from "./nodes/TopicNode";
-import { BackgroundConfig, EdgeConfig, NodeData, RoadmapData } from "./types";
+import { NodeData, RoadmapData, Settings } from "./types";
 import { useCallback, useEffect, useState } from "react";
 import { parseRoadmapData } from "./helper";
 import { Drawer } from "./Drawer";
+import { ProgressTracker } from "./ProgressTracker";
 
 const nodeTypes = {
   topic: TopicNode,
@@ -86,6 +87,24 @@ const isInteractableNode = (node: Node) => {
   return node.type === "task" || node.type === "topic";
 }
 
+const countCompletedNodes = (nodes: Node<NodeData>[]) => {
+  let completed = 0;
+  let mastered = 0;
+  let total = 0;
+  nodes.forEach(n => {
+    if (n.type === "task" || n.type === "topic") {
+      total++;
+      if (n.data?.state === 'completed') {
+        completed++;
+      }
+      else if (n.data?.state === 'mastered') {
+        completed++;
+        mastered++;
+      }
+    }
+  });
+  return { completed, mastered, total };
+}
 
 export function LearningMap({
   roadmapData,
@@ -100,8 +119,10 @@ export function LearningMap({
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
   const [selectedNode, setSelectedNode] = useState<Node<NodeData> | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [background, setBackground] = useState<BackgroundConfig>({ color: "#ffffff" });
-  const [edgeConfig, setEdgeConfig] = useState<EdgeConfig>({});
+  const [settings, setSettings] = useState<Settings>();
+  const { fitView } = useReactFlow();
+
+  const { completed, mastered, total } = countCompletedNodes(nodes);
 
   const parsedRoadmap = parseRoadmapData(roadmapData);
 
@@ -110,8 +131,7 @@ export function LearningMap({
       const nodesArr = Array.isArray(parsedRoadmap?.nodes) ? parsedRoadmap.nodes : [];
       const edgesArr = Array.isArray(parsedRoadmap?.edges) ? parsedRoadmap.edges : [];
 
-      setBackground(parsedRoadmap?.background || { color: "#ffffff" });
-      setEdgeConfig(parsedRoadmap?.edgeConfig || {});
+      setSettings(parsedRoadmap?.settings || {});
 
       let rawNodes = nodesArr.map((n) => ({
         ...n,
@@ -129,11 +149,15 @@ export function LearningMap({
     loadRoadmap();
   }, [roadmapData]);
 
-  const onNodeClick = useCallback((_: any, node: Node) => {
+  const onNodeClick = useCallback((_: any, node: Node, focus: boolean = false) => {
     if (!isInteractableNode(node)) return;
     setSelectedNode(node);
     setDrawerOpen(true);
-  }, []);
+
+    if (focus) {
+      fitView({ nodes: [node], duration: 150 });
+    }
+  }, [fitView]);
 
   const closeDrawer = useCallback(() => {
     setDrawerOpen(false);
@@ -171,19 +195,19 @@ export function LearningMap({
   }, [nodes]);
 
   const defaultEdgeOptions = {
-    animated: edgeConfig.animated ?? false,
+    animated: false,
     style: {
-      stroke: edgeConfig.color ?? "#94a3b8",
-      strokeWidth: edgeConfig.width ?? 2,
+      stroke: "#94a3b8",
+      strokeWidth: 2,
     },
-    type: edgeConfig.type ?? "default",
+    type: "default",
   };
 
   return (
     <div
       className="editor-canvas"
       style={{
-        backgroundColor: background?.color || "#ffffff",
+        backgroundColor: settings?.background?.color || "#ffffff",
       }}
     >
       <ReactFlow
@@ -195,6 +219,7 @@ export function LearningMap({
           className.push(n.data?.state);
           return {
             ...n,
+            selected: selectedNode?.id === n.id,
             className: className.join(" "),
           };
         })}
@@ -210,9 +235,19 @@ export function LearningMap({
         nodesDraggable={false}
         nodesConnectable={false}
       >
+        {settings?.title && (
+          <Panel position="bottom-right">
+            <div className="map-title">
+              {settings.title}
+            </div>
+          </Panel>
+        )}
+        <Panel position="top-center" className="progress-panel">
+          <ProgressTracker completed={completed} total={total} mastered={mastered} />
+        </Panel>
         <Controls showInteractive={false} />
       </ReactFlow>
-      <Drawer node={selectedNode} open={drawerOpen} onClose={closeDrawer} onUpdate={updateNode} />
+      <Drawer node={selectedNode} open={drawerOpen} onClose={closeDrawer} onUpdate={updateNode} nodes={nodes} onNodeClick={onNodeClick} />
     </div>
   )
 }

@@ -52,6 +52,11 @@ export interface BackgroundConfig {
   nodes?: Node<BackgroundNodeData>[];
 }
 
+export interface Settings {
+  title?: string;
+  background?: BackgroundConfig;
+}
+
 export interface EdgeConfig {
   animated?: boolean;
   color?: string;
@@ -62,8 +67,8 @@ export interface EdgeConfig {
 export interface RoadmapData {
   nodes?: Node<NodeData>[];
   edges?: Edge[];
-  background?: BackgroundConfig;
-  edgeConfig?: EdgeConfig;
+  settings: Settings;
+  version: number;
 }
 
 export type Orientation = "horizontal" | "vertical";

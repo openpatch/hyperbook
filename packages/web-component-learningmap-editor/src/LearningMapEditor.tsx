@@ -14,20 +14,24 @@ import {
   ControlButton,
   OnNodesChange,
   OnEdgesChange,
+  getNodesBounds,
+  getViewportForBounds,
+  Panel,
 } from "@xyflow/react";
+import { toSvg } from "html-to-image";
 import { EditorDrawer } from "./EditorDrawer";
 import { EdgeDrawer } from "./EdgeDrawer";
 import { TaskNode } from "./nodes/TaskNode";
 import { TopicNode } from "./nodes/TopicNode";
 import { ImageNode } from "./nodes/ImageNode";
 import { TextNode } from "./nodes/TextNode";
-import { RoadmapData, NodeData, ImageNodeData, TextNodeData, BackgroundConfig, EdgeConfig } from "./types";
-import { BackgroundDrawer } from "./BackgroundDrawer";
+import { RoadmapData, NodeData, ImageNodeData, TextNodeData, Settings } from "./types";
+import { SettingsDrawer } from "./SettingsDrawer";
 import FloatingEdge from "./FloatingEdge";
 import { EditorToolbar } from "./EditorToolbar";
 import { parseRoadmapData } from "./helper";
 import { LearningMap } from "./LearningMap";
-import { Info, Redo, Undo, RotateCw } from "lucide-react";
+import { Info, Redo, Undo, RotateCw, ShieldAlert } from "lucide-react";
 import useUndoable from "./useUndoable";
 
 const nodeTypes = {
@@ -65,7 +69,7 @@ export function LearningMapEditor({
     { action: "Show Help", shortcut: "Ctrl+? or Help Button" },
   ];
 
-  const { screenToFlowPosition } = useReactFlow();
+  const { screenToFlowPosition, getViewport, setViewport } = useReactFlow();
   const parsedRoadmap = parseRoadmapData(roadmapData);
   const [roadmapState, setRoadmapState, { undo, redo, canUndo, canRedo, reset }] = useUndoable(parsedRoadmap);
 
@@ -75,14 +79,13 @@ export function LearningMapEditor({
   const [debugMode, setDebugMode] = useState(false);
   const [nodes, setNodes, onNodesChange] = useNodesState<NodeData>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
-  const [background, setBackground] = useState<BackgroundConfig>({ color: "#ffffff" });
-  const [edgeConfig, setEdgeConfig] = useState<EdgeConfig>({});
+  const [settings, setSettings] = useState<Settings>({ background: { color: "#ffffff" } });
 
   const [helpOpen, setHelpOpen] = useState(false);
   const [colorMode] = useState<ColorMode>("light");
   const [selectedNode, setSelectedNode] = useState<Node<NodeData> | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [backgroundDrawerOpen, setBackgroundDrawerOpen] = useState(false);
+  const [settingsDrawerOpen, setSettingsDrawerOpen] = useState(false);
   const [nextNodeId, setNextNodeId] = useState(1);
 
   // Debug settings state
@@ -97,12 +100,11 @@ export function LearningMapEditor({
   // Track Shift key state
   const [shiftPressed, setShiftPressed] = useState(false);
 
-  const loadRoadmapStateIntoReactFlowState = useCallback(() => {
+  const loadRoadmapStateIntoReactFlowState = useCallback((roadmapState: RoadmapData) => {
     const nodesArr = Array.isArray(roadmapState?.nodes) ? roadmapState.nodes : [];
     const edgesArr = Array.isArray(roadmapState?.edges) ? roadmapState.edges : [];
 
-    setBackground(roadmapState?.background || { color: "#ffffff" });
-    setEdgeConfig(roadmapState?.edgeConfig || {});
+    setSettings(roadmapState?.settings || { background: { color: "#ffffff" } });
 
     const rawNodes = nodesArr.map((n) => ({
       ...n,
@@ -122,16 +124,16 @@ export function LearningMapEditor({
       );
       setNextNodeId(maxId + 1);
     }
-  }, [roadmapState, setNodes, setEdges, setBackground, setEdgeConfig]);
+  }, [setNodes, setEdges, setSettings]);
 
   useEffect(() => {
-    loadRoadmapStateIntoReactFlowState();
+    loadRoadmapStateIntoReactFlowState(parsedRoadmap);
   }, []);
 
   useEffect(() => {
     if (didUndoRedo) {
       setDidUndoRedo(false);
-      loadRoadmapStateIntoReactFlowState();
+      loadRoadmapStateIntoReactFlowState(roadmapState);
     }
   }, [roadmapState, didUndoRedo, loadRoadmapStateIntoReactFlowState]);
 
@@ -208,23 +210,12 @@ export function LearningMapEditor({
     setDebugMode((mode) => !mode);
   }, [setDebugMode]);
 
-  const togglePreviewMode = useCallback(() => {
-    setPreviewMode((mode) => {
-      const newMode = !mode;
-      if (newMode) {
-        setDebugMode(false);
-        closeDrawer();
-      }
-      return newMode;
-    });
-  }, [setPreviewMode]);
-
   const closeDrawer = useCallback(() => {
     setDrawerOpen(false);
     setSelectedNode(null);
     setEdgeDrawerOpen(false);
     setSelectedEdge(null);
-    setBackgroundDrawerOpen(false)
+    setSettingsDrawerOpen(false)
   }, []);
 
   const updateNode = useCallback(
@@ -348,8 +339,8 @@ export function LearningMapEditor({
           type: e.type,
           style: e.style,
         })),
-      background,
-      edgeConfig,
+      settings,
+      version: 1
     };
 
     setRoadmapState(roadmapData);
@@ -364,19 +355,103 @@ export function LearningMapEditor({
         root.dispatchEvent(new CustomEvent("change", { detail: roadmapData }));
       }
     }
-  }, [nodes, edges, background, edgeConfig]);
+  }, [nodes, edges, settings]);
+
+  const togglePreviewMode = useCallback(() => {
+    handleSave();
+    setPreviewMode((mode) => {
+      const newMode = !mode;
+      if (newMode) {
+        setDebugMode(false);
+        closeDrawer();
+      }
+      return newMode;
+    });
+  }, [setPreviewMode, handleSave]);
+
+  const handleDownload = useCallback(() => {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(roadmapState, null, 2));
+    const downloadAnchorNode = document.createElement('a');
+    downloadAnchorNode.setAttribute("href", dataStr);
+    downloadAnchorNode.setAttribute("download", "roadmap.json");
+    document.body.appendChild(downloadAnchorNode); // required for firefox
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
+  }, [roadmapState]);
 
   const defaultEdgeOptions = {
-    animated: edgeConfig.animated ?? false,
+    animated: false,
     style: {
-      stroke: edgeConfig.color ?? "#94a3b8",
-      strokeWidth: edgeConfig.width ?? 2,
+      stroke: "#94a3b8",
+      strokeWidth: 2,
     },
-    type: edgeConfig.type ?? "default",
+    type: "default",
   };
 
+  const handleExportSVG = useCallback(async () => {
+    const nodesBounds = getNodesBounds(nodes);
+    const imageWidth = nodesBounds.width;
+    const imageHeight = nodesBounds.height;
+    let viewport = getViewportForBounds(nodesBounds, imageWidth, imageHeight, 0.1, 5);
+
+    const dom = document.querySelector(".react-flow__viewport") as HTMLElement;
+    if (!dom) return;
+
+    toSvg(dom, {
+      backgroundColor: settings?.background?.color || "#ffffff",
+      width: imageWidth,
+      height: imageHeight,
+      style: {
+        transform: `translate(${viewport.x / 2.0}px, ${viewport.y / 2.0}px) scale(${viewport.zoom})`,
+        width: `${imageWidth}px`,
+        height: `${imageHeight}px`,
+      }
+    }).then((dataUrl) => {
+      const downloadAnchorNode = document.createElement('a');
+      downloadAnchorNode.setAttribute("href", dataUrl);
+      downloadAnchorNode.setAttribute("download", "roadmap.svg");
+      document.body.appendChild(downloadAnchorNode); // required for firefox
+      downloadAnchorNode.click();
+      downloadAnchorNode.remove();
+
+      // Restore old viewport
+    }).catch((err) => {
+      alert("Failed to export SVG: " + err.message);
+    });
+  }, [nodes, roadmapState]);
+
+  const handleOpen = useCallback(() => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json,application/json';
+    input.onchange = (e: any) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      if (!window.confirm("Opening a file will replace your current map. Continue?")) {
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        try {
+          const content = evt.target?.result;
+          if (typeof content === 'string') {
+            const json = JSON.parse(content);
+            setRoadmapState(json);
+            loadRoadmapStateIntoReactFlowState(json);
+          }
+        } catch (err) {
+          alert('Failed to load the file. Please make sure it is a valid roadmap JSON file.');
+        }
+      };
+      reader.readAsText(file);
+    };
+    input.click();
+  }, [setRoadmapState, setDidUndoRedo]);
+
   // Toolbar handler wrappers for EditorToolbar props
-  const handleOpenBackgroundDrawer = useCallback(() => setBackgroundDrawerOpen(true), []);
+  const handleOpenSettingsDrawer = useCallback(() => setSettingsDrawerOpen(true), []);
   const handleSetShowCompletionNeeds = useCallback((checked: boolean) => setShowCompletionNeeds(checked), []);
   const handleSetShowCompletionOptional = useCallback((checked: boolean) => setShowCompletionOptional(checked), []);
   const handleSetShowUnlockAfter = useCallback((checked: boolean) => setShowUnlockAfter(checked), []);
@@ -500,15 +575,18 @@ export function LearningMapEditor({
         onSetShowCompletionOptional={handleSetShowCompletionOptional}
         onSetShowUnlockAfter={handleSetShowUnlockAfter}
         onAddNewNode={addNewNode}
-        onOpenBackgroundDrawer={handleOpenBackgroundDrawer}
+        onOpenSettingsDrawer={handleOpenSettingsDrawer}
         onSave={handleSave}
+        onDownlad={handleDownload}
+        onOpen={handleOpen}
+        onExportSVG={handleExportSVG}
       />
-      {previewMode && <LearningMap roadmapData={{ nodes, edges, background, edgeConfig }} language={language} />}
+      {previewMode && <LearningMap roadmapData={roadmapState} language={language} />}
       {!previewMode && <>
         <div
           className="editor-canvas"
           style={{
-            backgroundColor: background?.color || "#ffffff",
+            backgroundColor: settings?.background?.color || "#ffffff",
           }}
         >
           <ReactFlow
@@ -536,6 +614,7 @@ export function LearningMapEditor({
             proOptions={{ hideAttribution: true }}
             defaultEdgeOptions={defaultEdgeOptions}
             nodesDraggable={true}
+            elevateNodesOnSelect={false}
             nodesConnectable={true}
             colorMode={colorMode}
           >
@@ -554,6 +633,9 @@ export function LearningMapEditor({
                 <Info />
               </ControlButton>
             </Controls>
+            {!saved && <Panel position="top-right" title="Unsaved Changes (Click to save or press Ctrl+S)" onClick={() => { handleSave(); }}>
+              <ShieldAlert size={32} color="red" />
+            </Panel>}
           </ReactFlow>
         </div>
         <EditorDrawer
@@ -570,11 +652,11 @@ export function LearningMapEditor({
           onUpdate={updateEdge}
           onDelete={deleteEdge}
         />
-        <BackgroundDrawer
-          isOpen={backgroundDrawerOpen}
+        <SettingsDrawer
+          isOpen={settingsDrawerOpen}
           onClose={closeDrawer}
-          background={background}
-          onUpdate={setBackground}
+          settings={settings}
+          onUpdate={setSettings}
         />
         <dialog
           className="help"

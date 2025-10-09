@@ -1,31 +1,31 @@
 import React, { useState, useEffect } from "react";
 import { X, Save } from "lucide-react";
-import { BackgroundConfig } from "./types";
+import { Settings } from "./types";
 import { ColorSelector } from "./ColorSelector";
 
-interface BackgroundDrawerProps {
+interface SettingsDrawerProps {
   isOpen: boolean;
   onClose: () => void;
-  background: BackgroundConfig;
-  onUpdate: (bg: BackgroundConfig) => void;
+  settings: Settings;
+  onUpdate: (s: Settings) => void;
 }
 
-export const BackgroundDrawer: React.FC<BackgroundDrawerProps> = ({
+export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
   isOpen,
   onClose,
-  background,
+  settings,
   onUpdate,
 }) => {
-  const [localBg, setLocalBg] = useState<BackgroundConfig>(background);
+  const [localSettings, setLocalSettings] = useState<Settings>(settings);
 
   useEffect(() => {
-    setLocalBg(background);
-  }, [background]);
+    setLocalSettings(settings);
+  }, [settings]);
 
   if (!isOpen) return null;
 
   const handleSave = () => {
-    onUpdate(localBg);
+    onUpdate(localSettings);
     onClose();
   };
 
@@ -44,8 +44,8 @@ export const BackgroundDrawer: React.FC<BackgroundDrawerProps> = ({
           <div className="form-group">
             <ColorSelector
               label="Background Color"
-              value={localBg?.color || "#ffffff"}
-              onChange={color => setLocalBg({ ...localBg, color })}
+              value={localSettings?.background?.color || "#ffffff"}
+              onChange={color => setLocalSettings(settings => ({ ...settings, background: { ...settings.background, color } }))}
             />
           </div>
         </div>

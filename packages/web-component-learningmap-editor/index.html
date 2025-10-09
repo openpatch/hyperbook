@@ -30,6 +30,12 @@
 
     // Initialize with sample data
     const initialData = {
+      settings: {
+        title: "Sample Learning Roadmap",
+        background: {
+          color: "#f0f9ff"
+        }
+      },
       nodes: [
         {
           id: "node1",
@@ -63,9 +69,6 @@
         }
       ],
       edges: [],
-      background: {
-        color: "#f0f9ff"
-      }
     };
 
     editor.setAttribute('roadmap-data', JSON.stringify(initialData));

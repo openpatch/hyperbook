@@ -2,7 +2,7 @@ import React from "react";
 import { Menu, MenuButton, MenuItem, SubMenu } from "@szhsin/react-menu";
 import "@szhsin/react-menu/dist/index.css";
 import '@szhsin/react-menu/dist/transitions/zoom.css';
-import { Save, Plus, Bug, Settings, Eye, Menu as MenuI } from "lucide-react";
+import { Save, Plus, Bug, Settings, Eye, Menu as MenuI, FolderOpen, Download, ImageDown } from "lucide-react";
 
 interface EditorToolbarProps {
   saved: boolean;
@@ -17,8 +17,11 @@ interface EditorToolbarProps {
   onSetShowCompletionOptional: (checked: boolean) => void;
   onSetShowUnlockAfter: (checked: boolean) => void;
   onAddNewNode: (type: "task" | "topic" | "image" | "text") => void;
-  onOpenBackgroundDrawer: () => void;
+  onOpenSettingsDrawer: () => void;
   onSave: () => void;
+  onDownlad: () => void;
+  onOpen: () => void;
+  onExportSVG: () => void;
 }
 
 export const EditorToolbar: React.FC<EditorToolbarProps> = ({
@@ -34,8 +37,11 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
   onSetShowCompletionOptional,
   onSetShowUnlockAfter,
   onAddNewNode,
-  onOpenBackgroundDrawer,
+  onOpenSettingsDrawer,
   onSave,
+  onDownlad,
+  onOpen,
+  onExportSVG
 }) => (
   <div className="editor-toolbar">
     <div className="toolbar-group">
@@ -45,8 +51,8 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
         <MenuItem onClick={() => onAddNewNode("image")}>Add Image</MenuItem>
         <MenuItem onClick={() => onAddNewNode("text")}>Add Text</MenuItem>
       </Menu>
-      <button disabled={previewMode} onClick={onOpenBackgroundDrawer} className="toolbar-button">
-        <Settings size={16} /> <span className="toolbar-label">Background</span>
+      <button disabled={previewMode} onClick={onOpenSettingsDrawer} className="toolbar-button">
+        <Settings size={16} /> <span className="toolbar-label">Settings</span>
       </button>
     </div>
     <div className="toolbar-group">
@@ -71,6 +77,15 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
         <MenuItem onClick={onSave} className={!saved ? "active" : ""} disabled={saved}>
           <Save size={16} /> <span>Save{!saved ? "*" : ""}</span>
         </MenuItem>
+        <MenuItem onClick={onDownlad}>
+          <Download size={16} /> <span>Download</span>
+        </MenuItem>
+        <MenuItem onClick={onOpen}>
+          <FolderOpen size={16} /> <span>Open</span>
+        </MenuItem>
+        {false && <MenuItem onClick={onExportSVG}>
+          <ImageDown size={16} /> <span>Export as SVG</span>
+        </MenuItem>}
       </Menu>
     </div>
   </div>

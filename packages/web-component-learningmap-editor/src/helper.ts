@@ -81,6 +81,6 @@ export const parseRoadmapData = (
     return JSON.parse(roadmapData);
   } catch (err) {
     console.error("Failed to parse roadmap data:", err);
-    return {};
+    return { settings: { title: "New Roadmap" }, version: 1 };
   }
 };
