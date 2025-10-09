@@ -149,6 +149,11 @@ export interface Translations {
   mastered: string;
   completedTitle: string;
   masteredTitle: string;
+  
+  // Language settings
+  languageLabel: string;
+  languageEnglish: string;
+  languageGerman: string;
 }
 
 const en: Translations = {
@@ -300,6 +305,11 @@ const en: Translations = {
   mastered: "Mastered",
   completedTitle: "Completed",
   masteredTitle: "Mastered",
+  
+  // Language settings
+  languageLabel: "Language",
+  languageEnglish: "English",
+  languageGerman: "German",
 };
 
 const de: Translations = {
@@ -451,6 +461,11 @@ const de: Translations = {
   mastered: "Gemeistert",
   completedTitle: "Abgeschlossen",
   masteredTitle: "Gemeistert",
+  
+  // Language settings
+  languageLabel: "Sprache",
+  languageEnglish: "Englisch",
+  languageGerman: "Deutsch",
 };
 
 export const translations: Record<string, Translations> = {

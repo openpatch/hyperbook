@@ -59,7 +59,23 @@ export function LearningMapEditor({
   language?: string;
   onChange?: (data: RoadmapData) => void;
 }) {
-  const t = getTranslations(language);
+  const { screenToFlowPosition, getViewport, setViewport } = useReactFlow();
+  const [roadmapState, setRoadmapState, { undo, redo, canUndo, canRedo, reset, resetInitialState }] = useUndoable<RoadmapData>({
+    settings: {},
+    version: 1,
+  });
+
+  const [saved, setSaved] = useState(true);
+  const [didUndoRedo, setDidUndoRedo] = useState(false);
+  const [previewMode, setPreviewMode] = useState(false);
+  const [debugMode, setDebugMode] = useState(false);
+  const [nodes, setNodes, onNodesChange] = useNodesState<NodeData>([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
+  const [settings, setSettings] = useState<Settings>({ background: { color: "#ffffff" } });
+
+  // Use language from settings if available, otherwise use prop
+  const effectiveLanguage = settings?.language || language;
+  const t = getTranslations(effectiveLanguage);
   
   const keyboardShortcuts = [
     { action: t.shortcuts.save, shortcut: "Ctrl+S" },
@@ -75,20 +91,6 @@ export function LearningMapEditor({
     { action: t.shortcuts.selectMultipleNodes, shortcut: "Ctrl+Click or Shift+Drag" },
     { action: t.shortcuts.showHelp, shortcut: "Ctrl+? or Help Button" },
   ];
-
-  const { screenToFlowPosition, getViewport, setViewport } = useReactFlow();
-  const [roadmapState, setRoadmapState, { undo, redo, canUndo, canRedo, reset, resetInitialState }] = useUndoable<RoadmapData>({
-    settings: {},
-    version: 1,
-  });
-
-  const [saved, setSaved] = useState(true);
-  const [didUndoRedo, setDidUndoRedo] = useState(false);
-  const [previewMode, setPreviewMode] = useState(false);
-  const [debugMode, setDebugMode] = useState(false);
-  const [nodes, setNodes, onNodesChange] = useNodesState<NodeData>([]);
-  const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
-  const [settings, setSettings] = useState<Settings>({ background: { color: "#ffffff" } });
 
   const [helpOpen, setHelpOpen] = useState(false);
   const [colorMode] = useState<ColorMode>("light");
@@ -613,9 +615,9 @@ export function LearningMapEditor({
         onDownlad={handleDownload}
         onOpen={handleOpen}
         onExportSVG={handleExportSVG}
-        language={language}
+        language={effectiveLanguage}
       />
-      {previewMode && <LearningMap roadmapData={roadmapState} language={language} />}
+      {previewMode && <LearningMap roadmapData={roadmapState} language={effectiveLanguage} />}
       {!previewMode && <>
         <div
           className="editor-canvas"
@@ -680,7 +682,7 @@ export function LearningMapEditor({
           onClose={closeDrawer}
           onUpdate={updateNode}
           onDelete={deleteNode}
-          language={language}
+          language={effectiveLanguage}
         />
         <EdgeDrawer
           edge={selectedEdge}
@@ -688,14 +690,14 @@ export function LearningMapEditor({
           onClose={closeDrawer}
           onUpdate={updateEdge}
           onDelete={deleteEdge}
-          language={language}
+          language={effectiveLanguage}
         />
         <SettingsDrawer
           isOpen={settingsDrawerOpen}
           onClose={closeDrawer}
           settings={settings}
           onUpdate={setSettings}
-          language={language}
+          language={effectiveLanguage}
         />
         <dialog
           className="help"
