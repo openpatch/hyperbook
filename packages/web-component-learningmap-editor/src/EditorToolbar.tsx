@@ -1,10 +1,11 @@
 import React from "react";
-import { Menu, MenuButton, MenuItem } from "@szhsin/react-menu";
+import { Menu, MenuButton, MenuItem, SubMenu } from "@szhsin/react-menu";
 import "@szhsin/react-menu/dist/index.css";
 import '@szhsin/react-menu/dist/transitions/zoom.css';
-import { Save, Plus, Bug, Settings, Eye } from "lucide-react";
+import { Save, Plus, Bug, Settings, Eye, Menu as MenuI } from "lucide-react";
 
 interface EditorToolbarProps {
+  saved: boolean;
   debugMode: boolean;
   previewMode: boolean;
   showCompletionNeeds: boolean;
@@ -21,6 +22,7 @@ interface EditorToolbarProps {
 }
 
 export const EditorToolbar: React.FC<EditorToolbarProps> = ({
+  saved,
   debugMode,
   previewMode,
   showCompletionNeeds,
@@ -48,26 +50,28 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
       </button>
     </div>
     <div className="toolbar-group">
-      <Menu menuButton={<MenuButton disabled={previewMode} className={`toolbar-button${debugMode ? " active" : ""}`} title="Debug"><Bug size={16} /> <span className="toolbar-label">Debug</span></MenuButton>}>
-        <MenuItem type="checkbox" checked={debugMode} onClick={onToggleDebugMode}>
-          Enable Debug Mode
+      <Menu menuButton={<MenuButton className="toolbar-button"><MenuI /></MenuButton>}>
+        <SubMenu className={`${debugMode ? "active" : ""}`} label={<><Bug size={16} /> <span>Debug</span></>}>
+          <MenuItem type="checkbox" checked={debugMode} onClick={onToggleDebugMode}>
+            Enable Debug Mode
+          </MenuItem>
+          <MenuItem type="checkbox" checked={showCompletionNeeds} onClick={e => onSetShowCompletionNeeds(e.checked ?? false)} disabled={!debugMode}>
+            Show Completion Needs Edges
+          </MenuItem>
+          <MenuItem type="checkbox" checked={showCompletionOptional} onClick={e => onSetShowCompletionOptional(e.checked ?? false)} disabled={!debugMode}>
+            Show Completion Optional Edges
+          </MenuItem>
+          <MenuItem type="checkbox" checked={showUnlockAfter} onClick={e => onSetShowUnlockAfter(e.checked ?? false)} disabled={!debugMode}>
+            Show Unlock After Edges
+          </MenuItem>
+        </SubMenu>
+        <MenuItem onClick={onTogglePreviewMode} className={`${previewMode ? "active" : ""}`}>
+          <Eye size={16} /> <span>Preview</span>
         </MenuItem>
-        <MenuItem type="checkbox" checked={showCompletionNeeds} onClick={e => onSetShowCompletionNeeds(e.checked ?? false)} disabled={!debugMode}>
-          Show Completion Needs Edges
-        </MenuItem>
-        <MenuItem type="checkbox" checked={showCompletionOptional} onClick={e => onSetShowCompletionOptional(e.checked ?? false)} disabled={!debugMode}>
-          Show Completion Optional Edges
-        </MenuItem>
-        <MenuItem type="checkbox" checked={showUnlockAfter} onClick={e => onSetShowUnlockAfter(e.checked ?? false)} disabled={!debugMode}>
-          Show Unlock After Edges
+        <MenuItem onClick={onSave} className={!saved ? "active" : ""} disabled={saved}>
+          <Save size={16} /> <span>Save{!saved ? "*" : ""}</span>
         </MenuItem>
       </Menu>
-      <button onClick={onTogglePreviewMode} className={`toolbar-button${previewMode ? " active" : ""}`}>
-        <Eye size={16} /> <span className="toolbar-label">Preview</span>
-      </button>
-      <button onClick={onSave} className="toolbar-button primary">
-        <Save size={16} /> <span className="toolbar-label">Save</span>
-      </button>
     </div>
   </div>
 );

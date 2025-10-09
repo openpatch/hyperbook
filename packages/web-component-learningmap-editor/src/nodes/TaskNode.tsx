@@ -3,11 +3,10 @@ import { NodeData } from "../types";
 import { CircleCheck } from "lucide-react";
 
 export const TaskNode = ({ data, selected, isConnectable, ...props }: Node<NodeData>) => {
-  console.log(props);
   return (
     <>
       {isConnectable && <NodeResizer isVisible={selected} />}
-      <CircleCheck className="check-icon" />
+      <CircleCheck className="icon" />
       <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
         <div style={{ fontWeight: 600, fontSize: "14px" }}>
           {data.label || "Untitled"}

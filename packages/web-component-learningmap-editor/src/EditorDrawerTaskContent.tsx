@@ -42,10 +42,11 @@ export function EditorDrawerTaskContent({
     { value: "blue", label: "Blue", className: "react-flow__node-topic blue" },
     { value: "yellow", label: "Yellow", className: "react-flow__node-topic yellow" },
     { value: "lila", label: "Lila", className: "react-flow__node-topic lila" },
-    { value: "green", label: "Green", className: "react-flow__node-topic green" },
+    { value: "pink", label: "Pink", className: "react-flow__node-topic pink" },
+    { value: "teal", label: "Teal", className: "react-flow__node-topic teal" },
     { value: "red", label: "Red", className: "react-flow__node-topic red" },
     { value: "black", label: "Black", className: "react-flow__node-topic black" },
-    { value: "white", label: "White", className: "react-flow__node-topic white", border: "1px solid #d1d5db" },
+    { value: "white", label: "White", className: "react-flow__node-topic white" },
   ];
 
   // Determine default color based on node type

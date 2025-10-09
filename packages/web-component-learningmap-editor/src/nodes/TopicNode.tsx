@@ -1,10 +1,12 @@
 import { Handle, Node, NodeResizer, Position } from "@xyflow/react";
 import { NodeData } from "../types";
+import StarCircle from "../icons/StarCircle";
 
 export const TopicNode = ({ data, selected, isConnectable }: Node<NodeData>) => {
   return (
     <>
       {isConnectable && <NodeResizer isVisible={selected} />}
+      {data.state === "mastered" && <StarCircle className="icon" />}
       <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
         <div style={{ fontWeight: 600, fontSize: "14px" }}>
           {data.label || "Untitled"}

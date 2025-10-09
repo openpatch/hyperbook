@@ -11,6 +11,9 @@ import {
   Connection,
   Edge,
   Background,
+  ControlButton,
+  OnNodesChange,
+  OnEdgesChange,
 } from "@xyflow/react";
 import { EditorDrawer } from "./EditorDrawer";
 import { EdgeDrawer } from "./EdgeDrawer";
@@ -24,6 +27,8 @@ import FloatingEdge from "./FloatingEdge";
 import { EditorToolbar } from "./EditorToolbar";
 import { parseRoadmapData } from "./helper";
 import { LearningMap } from "./LearningMap";
+import { Info, Redo, Undo, RotateCw } from "lucide-react";
+import useUndoable from "./useUndoable";
 
 const nodeTypes = {
   topic: TopicNode,
@@ -39,23 +44,45 @@ const edgeTypes = {
 
 export function LearningMapEditor({
   roadmapData,
-  language = "en"
+  language = "en",
+  onChange,
 }: {
   roadmapData: string | RoadmapData;
   language?: string;
+  onChange?: (data: RoadmapData) => void;
 }) {
-  const { screenToFlowPosition } = useReactFlow();
+  const keyboardShortcuts = [
+    { action: "Save", shortcut: "Ctrl+S" },
+    { action: "Undo", shortcut: "Ctrl+Z" },
+    { action: "Redo", shortcut: "Ctrl+Y or Ctrl+Shift+Z" },
+    { action: "Add Task Node", shortcut: "Ctrl+A" },
+    { action: "Add Topic Node", shortcut: "Ctrl+O" },
+    { action: "Add Image Node", shortcut: "Ctrl+I" },
+    { action: "Add Text Node", shortcut: "Ctrl+X" },
+    { action: "Delete Node/Edge", shortcut: "Delete" },
+    { action: "Toggle Preview Mode", shortcut: "Ctrl+P" },
+    { action: "Toggle Debug Mode", shortcut: "Ctrl+D" },
+    { action: "Show Help", shortcut: "Ctrl+? or Help Button" },
+  ];
 
+  const { screenToFlowPosition } = useReactFlow();
+  const parsedRoadmap = parseRoadmapData(roadmapData);
+  const [roadmapState, setRoadmapState, { undo, redo, canUndo, canRedo, reset }] = useUndoable(parsedRoadmap);
+
+  const [saved, setSaved] = useState(true);
+  const [didUndoRedo, setDidUndoRedo] = useState(false);
   const [previewMode, setPreviewMode] = useState(false);
   const [debugMode, setDebugMode] = useState(false);
   const [nodes, setNodes, onNodesChange] = useNodesState<NodeData>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
+  const [background, setBackground] = useState<BackgroundConfig>({ color: "#ffffff" });
+  const [edgeConfig, setEdgeConfig] = useState<EdgeConfig>({});
+
+  const [helpOpen, setHelpOpen] = useState(false);
   const [colorMode] = useState<ColorMode>("light");
   const [selectedNode, setSelectedNode] = useState<Node<NodeData> | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [backgroundDrawerOpen, setBackgroundDrawerOpen] = useState(false);
-  const [background, setBackground] = useState<BackgroundConfig>({ color: "#ffffff" });
-  const [edgeConfig, setEdgeConfig] = useState<EdgeConfig>({});
   const [nextNodeId, setNextNodeId] = useState(1);
 
   // Debug settings state
@@ -69,53 +96,44 @@ export function LearningMapEditor({
 
   // Track Shift key state
   const [shiftPressed, setShiftPressed] = useState(false);
+
+  const loadRoadmapStateIntoReactFlowState = useCallback(() => {
+    const nodesArr = Array.isArray(roadmapState?.nodes) ? roadmapState.nodes : [];
+    const edgesArr = Array.isArray(roadmapState?.edges) ? roadmapState.edges : [];
+
+    setBackground(roadmapState?.background || { color: "#ffffff" });
+    setEdgeConfig(roadmapState?.edgeConfig || {});
+
+    const rawNodes = nodesArr.map((n) => ({
+      ...n,
+      draggable: true,
+      data: { ...n.data },
+    }));
+
+    setEdges(edgesArr);
+    setNodes(rawNodes);
+
+    // Calculate next node ID
+    if (nodesArr.length > 0) {
+      const maxId = Math.max(
+        ...nodesArr
+          .map((n) => parseInt(n.id.replace(/\D/g, ""), 10))
+          .filter((id) => !isNaN(id))
+      );
+      setNextNodeId(maxId + 1);
+    }
+  }, [roadmapState, setNodes, setEdges, setBackground, setEdgeConfig]);
+
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Shift") setShiftPressed(true);
-    };
-    const handleKeyUp = (e: KeyboardEvent) => {
-      if (e.key === "Shift") setShiftPressed(false);
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    window.addEventListener("keyup", handleKeyUp);
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-      window.removeEventListener("keyup", handleKeyUp);
-    };
+    loadRoadmapStateIntoReactFlowState();
   }, []);
 
-  const parsedRoadmap = parseRoadmapData(roadmapData);
-
-  // Initialize from roadmap data
   useEffect(() => {
-    async function loadRoadmap() {
-      const nodesArr = Array.isArray(parsedRoadmap?.nodes) ? parsedRoadmap.nodes : [];
-      const edgesArr = Array.isArray(parsedRoadmap?.edges) ? parsedRoadmap.edges : [];
-
-      setBackground(parsedRoadmap?.background || { color: "#ffffff" });
-      setEdgeConfig(parsedRoadmap?.edgeConfig || {});
-
-      const rawNodes = nodesArr.map((n) => ({
-        ...n,
-        draggable: true,
-        data: { ...n.data },
-      }));
-
-      setEdges(edgesArr);
-      setNodes(rawNodes);
-
-      // Calculate next node ID
-      if (nodesArr.length > 0) {
-        const maxId = Math.max(
-          ...nodesArr
-            .map((n) => parseInt(n.id.replace(/\D/g, ""), 10))
-            .filter((id) => !isNaN(id))
-        );
-        setNextNodeId(maxId + 1);
-      }
+    if (didUndoRedo) {
+      setDidUndoRedo(false);
+      loadRoadmapStateIntoReactFlowState();
     }
-    loadRoadmap();
-  }, [roadmapData]);
+  }, [roadmapState, didUndoRedo, loadRoadmapStateIntoReactFlowState]);
 
   useEffect(() => {
     const newEdges: Edge[] = edges.filter((e) => !e.id.startsWith("debug-"));
@@ -181,8 +199,9 @@ export function LearningMapEditor({
   const onConnect = useCallback(
     (connection: Connection) => {
       setEdges((eds) => addEdge(connection, eds));
+      setSaved(false);
     },
-    [setEdges]
+    [setEdges, setSaved]
   );
 
   const toggleDebugMode = useCallback(() => {
@@ -190,7 +209,14 @@ export function LearningMapEditor({
   }, [setDebugMode]);
 
   const togglePreviewMode = useCallback(() => {
-    setPreviewMode((mode) => !mode);
+    setPreviewMode((mode) => {
+      const newMode = !mode;
+      if (newMode) {
+        setDebugMode(false);
+        closeDrawer();
+      }
+      return newMode;
+    });
   }, [setPreviewMode]);
 
   const closeDrawer = useCallback(() => {
@@ -207,8 +233,9 @@ export function LearningMapEditor({
         nds.map((n) => (n.id === updatedNode.id ? updatedNode : n))
       );
       setSelectedNode(updatedNode);
+      setSaved(false);
     },
-    [setNodes]
+    [setNodes, setSelectedNode, setSaved]
   );
 
   const updateEdge = useCallback(
@@ -217,14 +244,16 @@ export function LearningMapEditor({
         eds.map((e) => (e.id === updatedEdge.id ? { ...e, ...updatedEdge } : e))
       );
       setSelectedEdge(updatedEdge);
+      setSaved(false);
     },
-    [setEdges]
+    [setEdges, setSelectedEdge, setSaved]
   );
 
   // Delete selected edge
   const deleteEdge = useCallback(() => {
     if (!selectedEdge) return;
     setEdges((eds) => eds.filter((e) => e.id !== selectedEdge.id));
+    setSaved(false);
     closeDrawer();
   }, [selectedEdge, setEdges, closeDrawer]);
 
@@ -234,16 +263,18 @@ export function LearningMapEditor({
     setEdges((eds) =>
       eds.filter((e) => e.source !== selectedNode.id && e.target !== selectedNode.id)
     );
+    setSaved(false);
     closeDrawer();
-  }, [selectedNode, setNodes, setEdges, closeDrawer]);
+  }, [selectedNode, setNodes, setEdges, closeDrawer, setSaved]);
 
   const addNewNode = useCallback(
     (type: "task" | "topic" | "image" | "text") => {
+      const centerPos = screenToFlowPosition({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
       if (type === "task") {
         const newNode: Node<NodeData> = {
           id: `node${nextNodeId}`,
           type,
-          position: screenToFlowPosition({ x: 100, y: 100 }),
+          position: centerPos,
           data: {
             label: `New ${type}`,
             summary: "",
@@ -256,7 +287,7 @@ export function LearningMapEditor({
         const newNode: Node<NodeData> = {
           id: `node${nextNodeId}`,
           type,
-          position: screenToFlowPosition({ x: 100, y: 100 }),
+          position: centerPos,
           data: {
             label: `New ${type}`,
             summary: "",
@@ -271,7 +302,7 @@ export function LearningMapEditor({
           id: `background-node${nextNodeId}`,
           type,
           zIndex: -2,
-          position: screenToFlowPosition({ x: 100, y: 100 }),
+          position: centerPos,
           data: {
             src: "",
           },
@@ -282,7 +313,7 @@ export function LearningMapEditor({
         const newNode: Node<TextNodeData> = {
           id: `background-node${nextNodeId}`,
           type,
-          position: screenToFlowPosition({ x: 100, y: 100 }),
+          position: centerPos,
           zIndex: -1,
           data: {
             text: "Background Text",
@@ -293,8 +324,9 @@ export function LearningMapEditor({
         setNodes((nds) => [...nds, newNode]);
         setNextNodeId((id) => id + 1);
       }
+      setSaved(false);
     },
-    [nextNodeId, screenToFlowPosition, setNodes]
+    [nextNodeId, screenToFlowPosition, setNodes, setSaved]
   );
 
   const handleSave = useCallback(() => {
@@ -320,9 +352,17 @@ export function LearningMapEditor({
       edgeConfig,
     };
 
-    const root = document.querySelector("hyperbook-learningmap-editor");
-    if (root) {
-      root.dispatchEvent(new CustomEvent("change", { detail: roadmapData }));
+    setRoadmapState(roadmapData);
+    setSaved(true);
+
+    if (onChange) {
+      onChange(roadmapData);
+      return;
+    } else {
+      const root = document.querySelector("hyperbook-learningmap-editor");
+      if (root) {
+        root.dispatchEvent(new CustomEvent("change", { detail: roadmapData }));
+      }
     }
   }, [nodes, edges, background, edgeConfig]);
 
@@ -341,9 +381,114 @@ export function LearningMapEditor({
   const handleSetShowCompletionOptional = useCallback((checked: boolean) => setShowCompletionOptional(checked), []);
   const handleSetShowUnlockAfter = useCallback((checked: boolean) => setShowUnlockAfter(checked), []);
 
+  const handleNodesChange: OnNodesChange = useCallback(
+    (changes) => {
+      setSaved(false);
+      onNodesChange(changes);
+    },
+    [onNodesChange, setSaved]
+  );
+
+  const handleEdgesChange: OnEdgesChange = useCallback(
+    (changes) => {
+      setSaved(false);
+      onEdgesChange(changes);
+    },
+    [onEdgesChange, setSaved]
+  );
+
+  const handleUndo = useCallback(() => {
+    if (canUndo) {
+      undo();
+      setDidUndoRedo(true);
+    }
+  }, [canUndo, undo]);
+
+  const handleRedo = useCallback(() => {
+    if (canRedo) {
+      redo();
+      setDidUndoRedo(true);
+    }
+  }, [canRedo, redo]);
+
+  const handleReset = useCallback(() => {
+    reset();
+    setDidUndoRedo(true);
+  }, [reset]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Shift") setShiftPressed(true);
+      //save shortcut
+      if ((e.ctrlKey || e.metaKey) && e.key === 's' && !e.shiftKey) {
+        e.preventDefault();
+        handleSave();
+      }
+      // undo shortcut
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+        e.preventDefault();
+        handleUndo();
+      }
+      // redo shortcut
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.shiftKey && e.key === 'Z'))) {
+        e.preventDefault();
+        handleRedo();
+      }
+      // add task node shortcut
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'a' && !e.shiftKey) {
+        e.preventDefault();
+        addNewNode("task");
+      }
+      // add topic node shortcut
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'o' && !e.shiftKey) {
+        e.preventDefault();
+        addNewNode("topic");
+      }
+      // add image node shortcut
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'i' && !e.shiftKey) {
+        e.preventDefault();
+        addNewNode("image");
+      }
+      // add text node shortcut
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'x' && !e.shiftKey) {
+        e.preventDefault();
+        addNewNode("text");
+      }
+
+      if ((e.ctrlKey || e.metaKey) && (e.key === '?' || (e.shiftKey && e.key === '/'))) {
+        e.preventDefault();
+        setHelpOpen(h => !h);
+      }
+      //preview toggle shortcut
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'p' && !e.shiftKey) {
+        e.preventDefault();
+        togglePreviewMode();
+      }
+      //debug toggle shortcut
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'd' && !e.shiftKey) {
+        e.preventDefault();
+        toggleDebugMode();
+      }
+      // Dismiss with Escape
+      if (helpOpen && e.key === 'Escape') {
+        setHelpOpen(false);
+      }
+    };
+    const handleKeyUp = (e: KeyboardEvent) => {
+      if (e.key === "Shift") setShiftPressed(false);
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keyup", handleKeyUp);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keyup", handleKeyUp);
+    };
+  }, [handleSave, handleUndo, handleRedo, addNewNode, helpOpen, setHelpOpen, togglePreviewMode, toggleDebugMode]);
+
   return (
     <div className="hyperbook-learningmap-editor-container">
       <EditorToolbar
+        saved={saved}
         debugMode={debugMode}
         previewMode={previewMode}
         showCompletionNeeds={showCompletionNeeds}
@@ -378,10 +523,10 @@ export function LearningMapEditor({
               };
             })}
             edges={edges}
-            onEdgesChange={onEdgesChange}
-            onNodeClick={onNodeClick}
-            onEdgeClick={onEdgeClick}
-            onNodesChange={onNodesChange}
+            onEdgesChange={handleEdgesChange}
+            onNodeDoubleClick={onNodeClick}
+            onEdgeDoubleClick={onEdgeClick}
+            onNodesChange={handleNodesChange}
             onConnect={onConnect}
             nodeTypes={nodeTypes}
             edgeTypes={edgeTypes}
@@ -395,7 +540,20 @@ export function LearningMapEditor({
             colorMode={colorMode}
           >
             <Background />
-            <Controls />
+            <Controls>
+              <ControlButton title="Undo" disabled={!canUndo} onClick={handleUndo}>
+                <Undo />
+              </ControlButton>
+              <ControlButton title="Redo" disabled={!canRedo} onClick={handleRedo}>
+                <Redo />
+              </ControlButton>
+              <ControlButton title="Reset" onClick={handleReset}>
+                <RotateCw />
+              </ControlButton>
+              <ControlButton title="Help" onClick={() => setHelpOpen(true)}>
+                <Info />
+              </ControlButton>
+            </Controls>
           </ReactFlow>
         </div>
         <EditorDrawer
@@ -418,6 +576,30 @@ export function LearningMapEditor({
           background={background}
           onUpdate={setBackground}
         />
+        <dialog
+          className="help"
+          open={helpOpen}
+          onClose={() => setHelpOpen(false)}
+        >
+          <h2>Keyboard Shortcuts</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Action</th>
+                <th>Shortcut</th>
+              </tr>
+            </thead>
+            <tbody>
+              {keyboardShortcuts.map((item) => (
+                <tr key={item.action}>
+                  <td>{item.action}</td>
+                  <td>{item.shortcut}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <button className="primary-button" onClick={() => setHelpOpen(false)}>Close</button>
+        </dialog>
       </>
       }
     </div>
