@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.59.0
+
+### Minor Changes
+
+- [#1011](https://github.com/openpatch/hyperbook/pull/1011) [`f6f1b25`](https://github.com/openpatch/hyperbook/commit/f6f1b25f7a07e2cfcd8c2cfeb1807788aaa6c307) Thanks [@copilot-swe-agent](https://github.com/apps/copilot-swe-agent)! - Vastly improved learningmap element
+
 ## 0.58.2
 
 ### Patch Changes

@@ -1,5 +1,17 @@
 # @hyperbook/vscode-extension
 
+## 0.38.0
+
+### Minor Changes
+
+- [#1011](https://github.com/openpatch/hyperbook/pull/1011) [`f6f1b25`](https://github.com/openpatch/hyperbook/commit/f6f1b25f7a07e2cfcd8c2cfeb1807788aaa6c307) Thanks [@copilot-swe-agent](https://github.com/apps/copilot-swe-agent)! - Vastly improved learningmap element
+
+### Patch Changes
+
+- Updated dependencies [[`f6f1b25`](https://github.com/openpatch/hyperbook/commit/f6f1b25f7a07e2cfcd8c2cfeb1807788aaa6c307)]:
+  - @hyperbook/markdown@0.35.0
+  - @hyperbook/fs@0.20.0
+
 ## 0.37.2
 
 ### Patch Changes
