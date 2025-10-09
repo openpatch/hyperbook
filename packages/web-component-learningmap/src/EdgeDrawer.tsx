@@ -2,6 +2,7 @@ import React from "react";
 import { X, Trash2, Save } from "lucide-react";
 import { Edge } from "@xyflow/react";
 import { EditorDrawerEdgeContent } from "./EditorDrawerEdgeContent";
+import { getTranslations } from "./translations";
 
 interface EdgeDrawerProps {
   edge: Edge | null;
@@ -9,6 +10,7 @@ interface EdgeDrawerProps {
   onClose: () => void;
   onUpdate: (edge: Edge) => void;
   onDelete: () => void;
+  language?: string;
 }
 
 export const EdgeDrawer: React.FC<EdgeDrawerProps> = ({
@@ -17,14 +19,17 @@ export const EdgeDrawer: React.FC<EdgeDrawerProps> = ({
   onClose: closeDrawer,
   onUpdate: updateEdge,
   onDelete: deleteEdge,
+  language = "en",
 }) => {
+  const t = getTranslations(language);
+  
   if (!selectedEdge || !edgeDrawerOpen) return null;
   return (
     <div>
       <div className="drawer-overlay" onClick={closeDrawer} />
       <div className="drawer">
         <div className="drawer-header">
-          <h2 className="drawer-title">Edit Edge</h2>
+          <h2 className="drawer-title">{t.editEdge}</h2>
           <button onClick={closeDrawer} className="close-button">
             <X size={20} />
           </button>
@@ -45,13 +50,14 @@ export const EdgeDrawer: React.FC<EdgeDrawerProps> = ({
             }
             updateEdge(updated);
           }}
+          language={language}
         />
         <div className="drawer-footer">
           <button onClick={deleteEdge} className="danger-button">
-            <Trash2 size={16} /> Delete Edge
+            <Trash2 size={16} /> {t.deleteEdge}
           </button>
           <button onClick={closeDrawer} className="primary-button">
-            <Save size={16} /> Save Changes
+            <Save size={16} /> {t.saveChanges}
           </button>
         </div>
       </div>

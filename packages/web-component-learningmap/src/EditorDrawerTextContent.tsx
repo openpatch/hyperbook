@@ -2,26 +2,30 @@ import { Node } from "@xyflow/react";
 import { TextNodeData } from "./types";
 import { ColorSelector } from "./ColorSelector";
 import { RotationInput } from "./RotationInput";
+import { getTranslations } from "./translations";
 
 interface Props {
   localNode: Node<TextNodeData>;
   handleFieldChange: (field: string, value: any) => void;
+  language?: string;
 }
 
-export function EditorDrawerTextContent({ localNode, handleFieldChange }: Props) {
+export function EditorDrawerTextContent({ localNode, handleFieldChange, language = "en" }: Props) {
+  const t = getTranslations(language);
+  
   return (
     <div className="drawer-content">
       <div className="form-group">
-        <label>Text</label>
+        <label>{t.text}</label>
         <input
           type="text"
           value={localNode.data.text || ""}
           onChange={e => handleFieldChange("text", e.target.value)}
-          placeholder="Background Text"
+          placeholder={t.placeholderBackgroundText}
         />
       </div>
       <div className="form-group">
-        <label>Font Size</label>
+        <label>{t.fontSize}</label>
         <input
           type="number"
           value={localNode.data.fontSize || 32}
@@ -30,7 +34,7 @@ export function EditorDrawerTextContent({ localNode, handleFieldChange }: Props)
       </div>
       <div className="form-group">
         <ColorSelector
-          label="Color"
+          label={t.color}
           value={localNode.data.color || "#e5e7eb"}
           onChange={color => handleFieldChange("color", color)}
         />
