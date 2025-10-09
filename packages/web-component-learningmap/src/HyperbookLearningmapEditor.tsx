@@ -1,32 +1,27 @@
 import {
   ReactFlowProvider,
 } from "@xyflow/react";
-import { LearningMap } from "./LearningMap";
-import { RoadmapData, RoadmapState } from "./types";
+import { LearningMapEditor } from "./LearningMapEditor";
+import { RoadmapData } from "./types";
 
-export function HyperbookLearningmap({
+export function HyperbookLearningmapEditor({
   roadmapData,
   language,
-  onChange,
-  initialState
+  onChange
 }: {
   roadmapData: string | RoadmapData;
   language?: string;
-  onChange?: (state: RoadmapState) => void;
-  initialState?: RoadmapState;
-
+  onChange?: (data: RoadmapData) => void;
 }) {
   return (
     <div className="hyperbook-learningmap-container">
       <ReactFlowProvider>
-        <LearningMap
+        <LearningMapEditor
           language={language}
           roadmapData={roadmapData}
           onChange={onChange}
-          initialState={initialState}
         />
       </ReactFlowProvider>
     </div>
   );
 }
-

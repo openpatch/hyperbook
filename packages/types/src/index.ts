@@ -58,6 +58,13 @@ export type HyperbookSectionFrontmatter = HyperbookPageFrontmatter & {
 export type HyperbookPage = HyperbookPageFrontmatter & {
   isEmpty?: boolean;
   href?: string;
+  path?: {
+    directory: string;
+    relative: string;
+    absolute: string;
+    href: string | null;
+    permalink: string | null;
+  };
   repo?: string;
 };
 

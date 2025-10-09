@@ -177,6 +177,7 @@ export const getPagesAndSections = async (
       }
       const page: HyperbookPage = {
         ...data,
+        path: file.path,
       };
       const repo = makeRepoLink(hyperbook.repo, file);
       if (repo) {

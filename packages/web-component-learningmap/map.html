@@ -13,7 +13,7 @@
       font-family: system-ui, -apple-system, sans-serif;
     }
 
-    hyperbook-learningmap-editor {
+    hyperbook-learningmap {
       display: block;
       width: 100vw;
       height: 100vh;
@@ -22,11 +22,11 @@
 </head>
 
 <body>
-  <hyperbook-learningmap-editor id="editor" language="en"></hyperbook-learningmap-editor>
+  <hyperbook-learningmap id="map" language="en"></hyperbook-learningmap>
 
   <script src="./dist/index.umd.js"></script>
   <script>
-    const editor = document.getElementById('editor');
+    const map = document.getElementById('map');
 
     // Initialize with sample data
     const initialData = {
@@ -71,12 +71,17 @@
       edges: [],
     };
 
-    editor.setAttribute('roadmap-data', JSON.stringify(initialData));
+    map.setAttribute('roadmap-data', JSON.stringify(initialData));
 
     // Listen for save events
-    editor.addEventListener('change', (event) => {
+    map.addEventListener('change', (event) => {
       console.log('Roadmap changed:', event.detail);
     });
+
+    const initialState = {
+      nodes: {node1: {state: "started"}}
+    }
+    map.setAttribute('initial-state', JSON.stringify(initialState));
   </script>
 </body>
 
