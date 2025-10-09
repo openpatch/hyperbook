@@ -392,7 +392,7 @@ export function LearningMapEditor({
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(roadmapState, null, 2));
     const downloadAnchorNode = document.createElement('a');
     downloadAnchorNode.setAttribute("href", dataStr);
-    downloadAnchorNode.setAttribute("download", "roadmap.json");
+    downloadAnchorNode.setAttribute("download", `${roadmapState.settings.title ?? new Date().toString()}.learningmap.json`);
     document.body.appendChild(downloadAnchorNode); // required for firefox
     downloadAnchorNode.click();
     downloadAnchorNode.remove();

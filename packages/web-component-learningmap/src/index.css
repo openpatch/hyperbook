@@ -133,9 +133,12 @@
   animation: slideIn 0.3s ease;
 }
 
+header.drawer-header {
+  background: none;
+}
+
 .drawer-header {
   padding: 24px;
-  border-bottom: 1px solid var(--color-nav-border, #e5e7eb);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -145,7 +148,11 @@
   font-size: 24px;
   font-weight: 700;
   margin: 0;
-  border: none;
+
+  h2 {
+    text-decoration: none;
+    border: none;
+  }
 }
 
 .drawer-footer button {

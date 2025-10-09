@@ -6,29 +6,14 @@ hyperbook.learningmap = (function () {
       const map = elem.getElementsByTagName("hyperbook-learningmap")[0];
       if (map) {
         const result = await store.learningmap.get(elem.id);
-        if (result && result.nodeState) {
-          map.nodeState = result.nodeState;
-          map.x = result.x || 0;
-          map.y = result.y || 0;
-          map.zoom = result.zoom || 1;
+        if (result) {
+          map.initialState = result;
         }
         map.addEventListener("change", function (event) {
           store.learningmap
             .update(elem.id, {
-              nodeState: event.detail,
-            })
-            .then((updated) => {
-              if (updated == 0) {
-                store.learningmap.put({
-                  id: elem.id,
-                  nodeState: event.detail,
-                });
-              }
-            });
-        });
-        map.addEventListener("viewport-change", function (event) {
-          store.learningmap
-            .update(elem.id, {
+              id: elem.id,
+              nodes: event.detail.nodes,
               x: event.detail.x,
               y: event.detail.y,
               zoom: event.detail.zoom,
@@ -37,6 +22,7 @@ hyperbook.learningmap = (function () {
               if (updated == 0) {
                 store.learningmap.put({
                   id: elem.id,
+                  nodes: event.detail.nodes,
                   x: event.detail.x,
                   y: event.detail.y,
                   zoom: event.detail.zoom,

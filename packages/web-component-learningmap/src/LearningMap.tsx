@@ -137,17 +137,26 @@ export function LearningMap({
 
       setSettings(parsedRoadmap?.settings || {});
 
-      let rawNodes = nodesArr.map((n) => ({
-        ...n,
-        draggable: false,
-        connectable: false,
-        selectable: isInteractableNode(n),
-        focusable: isInteractableNode(n),
-        data: {
-          ...n.data,
-          state: initialState?.nodes?.[n.id]?.state,
+      let rawNodes = nodesArr.map((n) => {
+        let zIndex;
+        if (n.type === "image") {
+          zIndex = -2
+        } else if (n.type === "text") {
+          zIndex = -1
         }
-      }));
+        return {
+          ...n,
+          draggable: false,
+          connectable: false,
+          selectable: isInteractableNode(n),
+          focusable: isInteractableNode(n),
+          zIndex,
+          data: {
+            ...n.data,
+            state: initialState?.nodes?.[n.id]?.state,
+          }
+        }
+      });
 
       rawNodes = updateNodesStates(rawNodes);
 
@@ -194,7 +203,7 @@ export function LearningMap({
     const viewport = getViewport();
     const minimalState: RoadmapState = { nodes: {}, x: viewport.x, y: viewport.y, zoom: viewport.zoom };
     nodes.forEach((n) => {
-      if (n.data.state) {
+      if (n.data.state && n.type === "task") {
         minimalState.nodes[n.id] = { state: n.data.state };
       }
     });

@@ -3,8 +3,6 @@
 //
 import { HyperbookContext } from "@hyperbook/types";
 import { Code, Root } from "mdast";
-import fs from "fs";
-import path from "path";
 import { visit } from "unist-util-visit";
 import { VFile } from "vfile";
 import {
@@ -18,6 +16,7 @@ import { toText } from "./mdastUtilToText";
 import hash from "./objectHash";
 import { ElementContent } from "hast";
 import { i18n } from "./i18n";
+import { readFile } from "./helper";
 
 function htmlEntities(str: string) {
   return String(str)
@@ -53,10 +52,7 @@ export default (ctx: HyperbookContext) => () => {
         let input = "";
 
         if (src) {
-          srcFile = fs.readFileSync(
-            path.join(ctx.root, "public", String(src)),
-            "utf8",
-          );
+          srcFile = readFile(src, ctx);
         } else if (node.children?.length > 0) {
           tests = node.children
             .filter((c) => c.type === "code")

@@ -10,9 +10,8 @@ import {
   isDirective,
   registerDirective,
 } from "./remarkHelper";
-import { toText } from "./mdastUtilToText";
 import hash from "./objectHash";
-import * as yaml from "js-yaml";
+import { readFile } from "./helper";
 
 export default (ctx: HyperbookContext) => () => {
   const name = "learningmap";
@@ -32,52 +31,27 @@ export default (ctx: HyperbookContext) => () => {
           [],
         );
 
-        const { height = "calc(100vh - 80px)", id = hash(node) } =
-          node.attributes || {};
+        const {
+          height = "calc(100vh - 80px)",
+          id = hash(node),
+          src = "",
+        } = node.attributes || {};
 
-        const roadmapData = toText(
-          node.children.find(
-            (c) =>
-              c.type === "code" && (c.lang === "yaml" || c.lang === "json"),
-          ),
-        );
+        if (!src) return SKIP;
 
-        let parsedRoadmapData: {
-          background?: {
-            image?: { src: string };
-          };
-          nodes?: {
-            video?: string;
-            resources: { url: string }[];
-          }[];
-        };
-
-        try {
-          parsedRoadmapData = JSON.parse(roadmapData) as any;
-        } catch {
-          try {
-            parsedRoadmapData = yaml.load(roadmapData) as any;
-          } catch (err) {
-            console.error("Failed to parse roadmap data:", err);
-            return SKIP;
-          }
+        let srcFile = readFile(src, ctx);
+        if (!srcFile) {
+          file.message(`File not found: ${src}`, node);
+          return SKIP;
         }
 
-        if (parsedRoadmapData.background?.image?.src) {
-          const url = ctx.makeUrl(
-            parsedRoadmapData.background.image.src,
-            "public",
-            ctx.navigation.current || undefined,
-          );
-          parsedRoadmapData.background.image.src = url;
-        }
-
-        parsedRoadmapData.nodes?.forEach((node) => {
+        let parsedRoadmapData = JSON.parse(srcFile) as any;
+        parsedRoadmapData.nodes?.forEach((node: any) => {
           if (node.video) {
             node.video = ctx.makeUrl(node.video, "public");
           }
           if (node.resources) {
-            node.resources = node.resources.map((res) => ({
+            node.resources = node.resources.map((res: any) => ({
               ...res,
               url: ctx.makeUrl(res.url, "public"),
             }));

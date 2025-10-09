@@ -3,7 +3,6 @@
 //
 import { HyperbookContext } from "@hyperbook/types";
 import { Root } from "mdast";
-import fs from "fs";
 import path from "path";
 import { visit } from "unist-util-visit";
 import { VFile } from "vfile";
@@ -16,6 +15,7 @@ import {
 import { toText } from "./mdastUtilToText";
 import hash from "./objectHash";
 import { i18n } from "./i18n";
+import { readFile } from "./helper";
 
 interface CodeBundle {
   js?: string;
@@ -94,10 +94,7 @@ ${(code.scripts ? [cdnLibraryUrl, ...code.scripts] : []).map((src) => `<script t
         let srcFile = "";
 
         if (src) {
-          srcFile = fs.readFileSync(
-            path.join(ctx.root, "public", String(src)),
-            "utf8",
-          );
+          srcFile = readFile(src, ctx);
         } else if (node.children?.length > 0) {
           srcFile = toText(node.children);
         }
