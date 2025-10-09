@@ -38,6 +38,18 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.59.0
+
+::::tabs
+
+:::tab{title="New :rocket:" id="new"}
+
+- Vastly improved learningmap element for displaying interactive learning maps. [Learn more](/elements/learningmap)
+
+:::
+
+::::
+
 ## v0.58.2
 
 ::::tabs
