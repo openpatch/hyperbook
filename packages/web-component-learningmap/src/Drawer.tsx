@@ -3,6 +3,7 @@ import { NodeData } from "./types";
 import { X, Lock, CheckCircle } from "lucide-react";
 import { Video } from "./Video";
 import StarCircle from "./icons/StarCircle";
+import { getTranslations } from "./translations";
 
 interface DrawerProps {
   open: boolean;
@@ -11,6 +12,7 @@ interface DrawerProps {
   node: Node<NodeData>;
   nodes: Node<NodeData>[];
   onNodeClick: (_: any, node: Node<NodeData>, focus: boolean) => void;
+  language?: string;
 }
 
 function getUnlockConditions(node: Node<NodeData>, nodes: Node<NodeData>[]): Node<NodeData>[] {
@@ -39,7 +41,9 @@ function getCompletionNeeds(node: Node<NodeData>, nodes: Node<NodeData>[]): Node
   return unmetNeeds;
 }
 
-export function Drawer({ open, onClose, onUpdate, node, nodes, onNodeClick }: DrawerProps) {
+export function Drawer({ open, onClose, onUpdate, node, nodes, onNodeClick, language = "en" }: DrawerProps) {
+  const t = getTranslations(language);
+  
   if (!open) return null;
 
   const locked = node.data?.state === 'locked' || false;
@@ -83,7 +87,7 @@ export function Drawer({ open, onClose, onUpdate, node, nodes, onNodeClick }: Dr
           </div>}
           {node.data?.resources && node.data?.resources.length > 0 && (
             <div className="drawer-resources" style={{ marginBottom: 16 }}>
-              <div style={{ fontWeight: 600, marginBottom: 8 }}>Resources:</div>
+              <div style={{ fontWeight: 600, marginBottom: 8 }}>{t.resourcesLabel}</div>
               <ul>
                 {node.data?.resources.map((r: any) => (
                   <li key={r.url}><a href={r.url} target="_blank" rel="noopener noreferrer">{r.label}</a></li>
@@ -93,7 +97,7 @@ export function Drawer({ open, onClose, onUpdate, node, nodes, onNodeClick }: Dr
           )}
           {unlockConditions.length > 0 && (
             <div className="drawer-unlock-conditions" style={{ marginBottom: 16 }}>
-              <div style={{ fontWeight: 600, marginBottom: 8 }}>Complete the following nodes first to unlock this one:</div>
+              <div style={{ fontWeight: 600, marginBottom: 8 }}>{t.unlockConditionsMessage}</div>
               <ul>
                 {unlockConditions.map(n => (
                   <li key={n.id}>
@@ -107,7 +111,7 @@ export function Drawer({ open, onClose, onUpdate, node, nodes, onNodeClick }: Dr
           )}
           {!locked && completionNeeds.length > 0 && (
             <div className="drawer-completion-needs" style={{ marginBottom: 16 }}>
-              <div style={{ fontWeight: 600, marginBottom: 8 }}>The following nodes need to be completed or mastered before this one is completed:</div>
+              <div style={{ fontWeight: 600, marginBottom: 8 }}>{t.completionNeedsMessage}</div>
               <ul>
                 {completionNeeds.map(n => (
                   <li key={n.id}>
@@ -122,19 +126,19 @@ export function Drawer({ open, onClose, onUpdate, node, nodes, onNodeClick }: Dr
         </div>
         <div className="drawer-footer">
           {locked &&
-            <button className="drawer-button locked"><Lock /> Locked</button>
+            <button className="drawer-button locked"><Lock /> {t.locked}</button>
           }
           {unlocked && (
-            <button className="drawer-button unlocked" onClick={handleStateChange("started")}>Mark as Started</button>
+            <button className="drawer-button unlocked" onClick={handleStateChange("started")}>{t.markAsStarted}</button>
           )}
           {started && (
-            <button className="drawer-button started" onClick={handleStateChange("completed")}>Mark as Completed</button>
+            <button className="drawer-button started" onClick={handleStateChange("completed")}>{t.markAsCompleted}</button>
           )}
           {completed && (
-            <button className="drawer-button completed" disabled><CheckCircle /> Completed</button>
+            <button className="drawer-button completed" disabled><CheckCircle /> {t.completedLabel}</button>
           )}
           {mastered && (
-            <button className="drawer-button mastered" disabled><StarCircle /> Mastered</button>
+            <button className="drawer-button mastered" disabled><StarCircle /> {t.mastered}</button>
           )}
         </div>
       </aside>

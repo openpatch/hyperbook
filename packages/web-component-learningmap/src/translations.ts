@@ -137,6 +137,18 @@ export interface Translations {
   step: string;
   smoothstep: string;
   floating: string;
+  
+  // Viewer component (LearningMap)
+  resourcesLabel: string;
+  unlockConditionsMessage: string;
+  completionNeedsMessage: string;
+  locked: string;
+  markAsStarted: string;
+  markAsCompleted: string;
+  completedLabel: string;
+  mastered: string;
+  completedTitle: string;
+  masteredTitle: string;
 }
 
 const en: Translations = {
@@ -276,6 +288,18 @@ const en: Translations = {
   step: "Step",
   smoothstep: "Smooth Step",
   floating: "Floating",
+  
+  // Viewer component (LearningMap)
+  resourcesLabel: "Resources:",
+  unlockConditionsMessage: "Complete the following nodes first to unlock this one:",
+  completionNeedsMessage: "The following nodes need to be completed or mastered before this one is completed:",
+  locked: "Locked",
+  markAsStarted: "Mark as Started",
+  markAsCompleted: "Mark as Completed",
+  completedLabel: "Completed",
+  mastered: "Mastered",
+  completedTitle: "Completed",
+  masteredTitle: "Mastered",
 };
 
 const de: Translations = {
@@ -415,6 +439,18 @@ const de: Translations = {
   step: "Stufe",
   smoothstep: "Weiche Stufe",
   floating: "Schwebend",
+  
+  // Viewer component (LearningMap)
+  resourcesLabel: "Ressourcen:",
+  unlockConditionsMessage: "Vervollständige zuerst die folgenden Knoten, um diesen freizuschalten:",
+  completionNeedsMessage: "Die folgenden Knoten müssen abgeschlossen oder gemeistert werden, bevor dieser abgeschlossen ist:",
+  locked: "Gesperrt",
+  markAsStarted: "Als begonnen markieren",
+  markAsCompleted: "Als abgeschlossen markieren",
+  completedLabel: "Abgeschlossen",
+  mastered: "Gemeistert",
+  completedTitle: "Abgeschlossen",
+  masteredTitle: "Gemeistert",
 };
 
 export const translations: Record<string, Translations> = {

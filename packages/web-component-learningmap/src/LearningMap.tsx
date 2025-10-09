@@ -8,6 +8,7 @@ import { useCallback, useEffect, useState } from "react";
 import { parseRoadmapData } from "./helper";
 import { Drawer } from "./Drawer";
 import { ProgressTracker } from "./ProgressTracker";
+import { getTranslations } from "./translations";
 
 const nodeTypes = {
   topic: TopicNode,
@@ -117,6 +118,7 @@ export function LearningMap({
   onChange?: (state: RoadmapState) => void;
   initialState?: RoadmapState;
 }) {
+  const t = getTranslations(language);
   const [nodes, setNodes, onNodesChange] = useNodesState<NodeData>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
   const [selectedNode, setSelectedNode] = useState<Node<NodeData> | null>(null);
@@ -265,11 +267,11 @@ export function LearningMap({
           </Panel>
         )}
         <Panel position="top-center" className="progress-panel">
-          <ProgressTracker completed={completed} total={total} mastered={mastered} />
+          <ProgressTracker completed={completed} total={total} mastered={mastered} language={language} />
         </Panel>
         <Controls showInteractive={false} />
       </ReactFlow>
-      <Drawer node={selectedNode} open={drawerOpen} onClose={closeDrawer} onUpdate={updateNode} nodes={nodes} onNodeClick={onNodeClick} />
+      <Drawer node={selectedNode} open={drawerOpen} onClose={closeDrawer} onUpdate={updateNode} nodes={nodes} onNodeClick={onNodeClick} language={language} />
     </div>
   )
 }
