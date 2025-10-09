@@ -118,13 +118,16 @@ export function LearningMap({
   onChange?: (state: RoadmapState) => void;
   initialState?: RoadmapState;
 }) {
-  const t = getTranslations(language);
   const [nodes, setNodes, onNodesChange] = useNodesState<NodeData>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
   const [selectedNode, setSelectedNode] = useState<Node<NodeData> | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [settings, setSettings] = useState<Settings>();
   const { fitView, getViewport, setViewport } = useReactFlow();
+
+  // Use language from settings if available, otherwise use prop
+  const effectiveLanguage = settings?.language || language;
+  const t = getTranslations(effectiveLanguage);
 
   const { completed, mastered, total } = countCompletedNodes(nodes);
 
@@ -267,11 +270,11 @@ export function LearningMap({
           </Panel>
         )}
         <Panel position="top-center" className="progress-panel">
-          <ProgressTracker completed={completed} total={total} mastered={mastered} language={language} />
+          <ProgressTracker completed={completed} total={total} mastered={mastered} language={effectiveLanguage} />
         </Panel>
         <Controls showInteractive={false} />
       </ReactFlow>
-      <Drawer node={selectedNode} open={drawerOpen} onClose={closeDrawer} onUpdate={updateNode} nodes={nodes} onNodeClick={onNodeClick} language={language} />
+      <Drawer node={selectedNode} open={drawerOpen} onClose={closeDrawer} onUpdate={updateNode} nodes={nodes} onNodeClick={onNodeClick} language={effectiveLanguage} />
     </div>
   )
 }
