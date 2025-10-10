@@ -378,6 +378,46 @@ async function runBuild(
   }
   process.stdout.write("\n");
 
+  // Generate favicons if logo exists and no favicon.ico is present
+  const faviconPath = path.join(rootOut, "favicon.ico");
+  let faviconExists = false;
+  try {
+    await fs.access(faviconPath);
+    faviconExists = true;
+  } catch (e) {
+    // Favicon doesn't exist
+  }
+
+  if (!faviconExists && hyperbookJson.logo) {
+    console.log(`${chalk.blue(`[${prefix}]`)} Generating favicons from logo.`);
+    // Resolve logo path - it can be relative to public folder or absolute URL
+    let logoPath = hyperbookJson.logo;
+    
+    // If logo starts with /, it's in the public folder
+    if (logoPath.startsWith("/")) {
+      logoPath = path.join(root, "public", logoPath);
+    } else if (!logoPath.includes("://")) {
+      // Relative path
+      logoPath = path.join(root, logoPath);
+    }
+    
+    // Only generate if logo is a local file (not a URL)
+    if (!hyperbookJson.logo.includes("://")) {
+      try {
+        await fs.access(logoPath);
+        const { generateFavicons } = await import("./helpers/generate-favicons");
+        await generateFavicons(logoPath, rootOut);
+        console.log(
+          `${chalk.green(`[${prefix}]`)} Favicons generated successfully.`,
+        );
+      } catch (e) {
+        console.log(
+          `${chalk.yellow(`[${prefix}]`)} Warning: Could not generate favicons. Logo file not found: ${logoPath}`,
+        );
+      }
+    }
+  }
+
   i = 1;
   for (let directive of directives) {
     const assetsDirectivePath = path.join(assetsPath, `directive-${directive}`);

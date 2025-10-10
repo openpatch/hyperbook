@@ -274,6 +274,16 @@ export default (ctx: HyperbookContext) => () => {
                 type: "element",
                 tagName: "link",
                 properties: {
+                  rel: "icon",
+                  type: "image/x-icon",
+                  href: makeUrl(["favicon.ico"], "public"),
+                },
+                children: [],
+              },
+              {
+                type: "element",
+                tagName: "link",
+                properties: {
                   rel: "stylesheet",
                   href: makeUrl(["normalize.css"], "assets"),
                 },
