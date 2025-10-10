@@ -1,8 +1,7 @@
 import * as vscode from "vscode";
-import * as path from "path";
 import Preview from "./Preview";
 import StatusBarItem from "./StatusBarItem";
-import { hyperbook } from "@hyperbook/fs";
+import { hyperbook, getPathAdapter } from "@hyperbook/fs";
 import { initializeAdapters } from "./adapter-init";
 
 export function activate(context: vscode.ExtensionContext) {
@@ -48,6 +47,7 @@ export function activate(context: vscode.ExtensionContext) {
     DocumentSelectorMarkdown,
     {
       async provideCompletionItems(document, position) {
+        const path = getPathAdapter();
         const linePrefix = document
           .lineAt(position)
           .text.slice(0, position.character);
@@ -85,6 +85,7 @@ export function activate(context: vscode.ExtensionContext) {
     DocumentSelectorMarkdown,
     {
       async provideCompletionItems(document, position) {
+        const path = getPathAdapter();
         const linePrefix = document
           .lineAt(position)
           .text.slice(0, position.character);
@@ -121,6 +122,7 @@ export function activate(context: vscode.ExtensionContext) {
     DocumentSelectorMarkdown,
     {
       async provideCompletionItems(document, position) {
+        const path = getPathAdapter();
         const linePrefix = document
           .lineAt(position)
           .text.slice(0, position.character);
@@ -159,6 +161,7 @@ export function activate(context: vscode.ExtensionContext) {
     DocumentSelectorMarkdown,
     {
       async provideCompletionItems(document, position) {
+        const path = getPathAdapter();
         const linePrefix = document
           .lineAt(position)
           .text.slice(0, position.character);

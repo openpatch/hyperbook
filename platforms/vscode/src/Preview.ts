@@ -6,24 +6,26 @@ import {
   vfile,
   VFileBook,
   VFileGlossary,
+  getPathAdapter,
 } from "@hyperbook/fs";
 import { process } from "@hyperbook/markdown";
 import { disposeAll } from "./utils/dispose";
-import path, { posix } from "path";
 import { HyperbookContext, HyperbookJson, Navigation } from "@hyperbook/types";
 
 // Helper function to resolve relative paths
-const resolveRelativePath = (path: string, currentPageHref: string): string => {
+const resolveRelativePath = (pathStr: string, currentPageHref: string): string => {
+  const path = getPathAdapter();
+  
   // If path is absolute, return as-is
-  if (path.startsWith("/")) {
-    return path;
+  if (pathStr.startsWith("/")) {
+    return pathStr;
   }
 
   // Get the directory of the current page
-  const currentPageDir = posix.dirname(currentPageHref);
+  const currentPageDir = path.posix.dirname(currentPageHref);
 
   // Resolve the relative path and normalize
-  return posix.normalize(posix.resolve(currentPageDir, path));
+  return path.posix.normalize(path.posix.resolve(currentPageDir, pathStr));
 };
 
 export default class Preview {
@@ -68,6 +70,7 @@ export default class Preview {
         );
       const rootPath = vscode.workspace.getWorkspaceFolder(this._resource);
       if (rootPath) {
+        const path = getPathAdapter();
         const projectPath = this.hyperbookViewerConfig.get("root");
         const project = await hyperproject.get(
           path.join(rootPath.uri.fsPath, projectPath),
@@ -274,6 +277,7 @@ export default class Preview {
   }
 
   checkDocumentIsHyperbookFile(showWarning: boolean): boolean {
+    const path = getPathAdapter();
     const supportedLanguages = ["markdown", "yaml", "json", "handlebars"];
     const supportedFiles = ["hyperbook.json", "hyperlibrary.json"];
     const fileName = path.basename(
@@ -294,6 +298,7 @@ export default class Preview {
 
   async initMarkdownPreview(viewColumn: number) {
     if (this.checkDocumentIsHyperbookFile(true)) {
+      const path = getPathAdapter();
       const filePaths = vscode.window.activeTextEditor?.document.fileName || "";
       const fileName = path.basename(filePaths);
       this.panel = vscode.window.createWebviewPanel(
