@@ -2,7 +2,7 @@
 
 ## Current Status
 
-The Hyperbook VS Code extension has been partially prepared for web extension support with the following infrastructure in place:
+The Hyperbook VS Code extension has been partially prepared for web extension support with the following infrastructure in place. **The web build is currently disabled in the default build scripts** to ensure the Node.js extension builds successfully.
 
 ### Completed
 - ✅ Filesystem abstraction layer in `@hyperbook/fs` package
@@ -11,6 +11,19 @@ The Hyperbook VS Code extension has been partially prepared for web extension su
 - ✅ Browser-compatible path operations  
 - ✅ Webpack configuration for web bundle
 - ✅ Package.json configured with `browser` entry point and `extensionKind`
+
+### Building the Extension
+
+**Node.js/Desktop Extension (default):**
+```bash
+pnpm build              # Builds Node.js extension only
+pnpm compile:extension  # Or build just the extension
+```
+
+**Web Extension (experimental - will fail):**
+```bash
+pnpm compile:extension-web  # Attempts web build (currently fails)
+```
 
 ### Limitations
 
@@ -62,4 +75,5 @@ To test the current Node.js implementation:
 2. Open VS Code and load the extension
 3. Test with a Hyperbook project
 
-The web bundle can be built but will not function due to the limitations above.
+The web bundle configuration exists for future reference but is not included in the default build.
+
