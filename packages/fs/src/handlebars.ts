@@ -1,8 +1,8 @@
 import handlebars from "handlebars";
-import { findUpSync, Options } from "find-up";
 import { lookup } from "mime-types";
 import { getFileSystemAdapter, getPathAdapter } from "./fs-adapter";
 import { extractLines, VFileBase } from "./vfile";
+import { findUpSync } from "./find-up";
 
 const fs = () => getFileSystemAdapter();
 const path = () => getPathAdapter();
@@ -95,9 +95,9 @@ const registerHelpers = (handlebars: any, options?: { file: VFileBase }) => {
   });
 
   handlebars.registerHelper("rbase64", (src: string) => {
-    let gitRoot = findUpSync(".git", { type: "file", cwd: cwd } as Options);
+    let gitRoot = findUpSync(".git", { type: "file", cwd: cwd });
     if (!gitRoot) {
-      gitRoot = findUpSync(".git", { type: "directory", cwd: cwd } as Options);
+      gitRoot = findUpSync(".git", { type: "directory", cwd: cwd });
       if (!gitRoot) {
         return `rbase64 is only applicable in git projects. No .git was found in ${cwd} and above.`;
       }
@@ -118,12 +118,12 @@ const registerHelpers = (handlebars: any, options?: { file: VFileBase }) => {
       if (!src) {
         throw Error("file needs a path to a file");
       }
-      let gitRoot = findUpSync(".git", { type: "file", cwd: cwd } as Options);
+      let gitRoot = findUpSync(".git", { type: "file", cwd: cwd });
       if (!gitRoot) {
         gitRoot = findUpSync(".git", {
           type: "directory",
           cwd: cwd,
-        } as Options);
+        });
         if (!gitRoot) {
           return `rfile is only applicable in git projects. No .git was found in ${cwd} and above`;
         }

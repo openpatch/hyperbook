@@ -25,4 +25,6 @@ export {
 export { nodeFileSystemAdapter, nodePathAdapter } from "./fs-adapter-node";
 export { vscodeFileSystemAdapter, vscodePathAdapter, setVSCodeWorkspaceFs } from "./fs-adapter-vscode";
 
+export { findUp, findUpSync, FindUpOptions } from "./find-up";
+
 export { hyperlibrary, hyperbook, hyperproject, vfile };

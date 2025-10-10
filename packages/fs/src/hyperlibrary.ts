@@ -3,7 +3,7 @@ const fs = () => getFileSystemAdapter();
 const path = () => getPathAdapter();
 
 import { HyperlibraryJson } from "@hyperbook/types";
-import { findUp } from "find-up";
+import { findUp } from "./find-up";
 
 export const getJson = async (root: string): Promise<HyperlibraryJson> => {
   return fs()
@@ -15,7 +15,7 @@ export const getJson = async (root: string): Promise<HyperlibraryJson> => {
 export const find = async (file: string): Promise<HyperlibraryJson> => {
   return findUp("hyperlibrary.json", {
     cwd: file,
-  } as any)
+  })
     .then((f) => {
       if (!f) {
         throw new Error("Could not find hyperlibrary.json");
@@ -28,7 +28,7 @@ export const find = async (file: string): Promise<HyperlibraryJson> => {
 export const findRoot = async (file: string): Promise<string> => {
   return findUp("hyperlibrary.json", {
     cwd: file,
-  } as any).then((f) => {
+  }).then((f) => {
     if (!f) {
       throw new Error("Could not find hyperlibrary.json");
     }
