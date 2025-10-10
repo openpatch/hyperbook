@@ -7,8 +7,7 @@ import {
   HyperbookSection,
 } from "@hyperbook/types";
 import handlebars from "handlebars";
-import fs from "fs";
-import path from "path";
+import { getFileSystemAdapter, getPathAdapter } from "@hyperbook/fs";
 import { Node, Root } from "mdast";
 import { visit } from "unist-util-visit";
 import { VFile } from "vfile";
@@ -130,10 +129,12 @@ export default (ctx: HyperbookContext) => () => {
         }));
 
         if (format?.startsWith("#")) {
+          const fs = getFileSystemAdapter();
+          const path = getPathAdapter();
           const snippetId = format.slice(1);
           const snippetFile = fs.readFileSync(
             path.join(ctx.root, "snippets", snippetId + ".md.hbs"),
-            { encoding: "utf8" },
+            "utf8",
           );
           const template = handlebars.compile(snippetFile);
           const content = template({ pages: filteredPages });

@@ -1,8 +1,10 @@
 import { HyperbookContext } from "@hyperbook/types";
-import path from "path";
-import fs from "fs";
+import { getPathAdapter, getFileSystemAdapter } from "@hyperbook/fs";
 
 export const readFile = (src: string, ctx: HyperbookContext) => {
+  const path = getPathAdapter();
+  const fs = getFileSystemAdapter();
+  
   let srcFile = null;
   try {
     srcFile = fs.readFileSync(path.join(ctx.root, "public", src), "utf-8");

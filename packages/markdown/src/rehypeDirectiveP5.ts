@@ -3,7 +3,7 @@
 //
 import { HyperbookContext } from "@hyperbook/types";
 import { Root } from "mdast";
-import path from "path";
+import { getPathAdapter } from "@hyperbook/fs";
 import { visit } from "unist-util-visit";
 import { VFile } from "vfile";
 import {
@@ -31,6 +31,7 @@ function htmlEntities(str: string) {
 }
 
 export default (ctx: HyperbookContext) => () => {
+  const path = getPathAdapter();
   const name = "p5";
   const cdnLibraryUrl = ctx.makeUrl(
     path.posix.join("directive-p5", "p5.min.js"),
