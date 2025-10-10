@@ -1,5 +1,6 @@
 const path = require("path");
 const CopyPlugin = require("copy-webpack-plugin");
+const webpack = require("webpack");
 
 module.exports = {
   target: "webworker", // VS Code web extensions run in a webworker context
@@ -14,6 +15,18 @@ module.exports = {
       "net": false,
       "tls": false,
       "dns": false,
+      "url": false,
+      "buffer": require.resolve("buffer/"),
+      "stream": require.resolve("stream-browserify"),
+      "util": require.resolve("util/"),
+      "assert": require.resolve("assert/"),
+      "process": require.resolve("process/browser"),
+    },
+    alias: {
+      // Map node: protocol imports to regular imports
+      "node:process": "process/browser",
+      "node:buffer": "buffer",
+      "node:url": false, 
     }
   },
   output: {
@@ -27,6 +40,10 @@ module.exports = {
     vscode: "commonjs vscode",
   },
   plugins: [
+    new webpack.ProvidePlugin({
+      process: "process/browser",
+      Buffer: ["buffer", "Buffer"],
+    }),
     new CopyPlugin({
       patterns: [
         {
