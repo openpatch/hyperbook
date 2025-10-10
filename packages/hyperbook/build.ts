@@ -439,7 +439,7 @@ async function runBuild(
       if (logoPath) {
         try {
           const { generateFavicons } = await import("./helpers/generate-favicons");
-          await generateFavicons(logoPath, rootOut);
+          await generateFavicons(logoPath, rootOut, hyperbookJson, ASSETS_FOLDER);
           console.log(
             `${chalk.green(`[${prefix}]`)} Favicons generated successfully.`,
           );

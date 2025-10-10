@@ -284,6 +284,25 @@ export default (ctx: HyperbookContext) => () => {
                 type: "element",
                 tagName: "link",
                 properties: {
+                  rel: "apple-touch-icon",
+                  sizes: "180x180",
+                  href: makeUrl(["favicons", "apple-touch-icon.png"], "assets"),
+                },
+                children: [],
+              },
+              {
+                type: "element",
+                tagName: "link",
+                properties: {
+                  rel: "manifest",
+                  href: makeUrl(["favicons", "manifest.webmanifest"], "assets"),
+                },
+                children: [],
+              },
+              {
+                type: "element",
+                tagName: "link",
+                properties: {
                   rel: "stylesheet",
                   href: makeUrl(["normalize.css"], "assets"),
                 },
