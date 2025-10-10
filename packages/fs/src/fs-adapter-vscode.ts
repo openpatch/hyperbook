@@ -4,11 +4,15 @@
  */
 import { FileSystemAdapter, PathAdapter, FileStats } from "./fs-adapter";
 
-// This will be provided by the VS Code extension context
+// These will be provided by the VS Code extension context
 let vscodeWorkspaceFs: any = null;
+let vscodeUri: any = null;
 
-export function setVSCodeWorkspaceFs(fs: any) {
+export function setVSCodeWorkspaceFs(fs: any, Uri?: any) {
   vscodeWorkspaceFs = fs;
+  if (Uri) {
+    vscodeUri = Uri;
+  }
 }
 
 class VSCodeFileStats implements FileStats {
@@ -29,8 +33,11 @@ function uriFromPath(path: string): any {
   if (!vscodeWorkspaceFs) {
     throw new Error('VS Code workspace.fs not initialized');
   }
-  // In VS Code Web, we need to use the Uri.file() or Uri.parse()
-  // This is a simplified version - the extension will handle proper URI creation
+  // Use vscode.Uri if available, otherwise create a simple object
+  if (vscodeUri && vscodeUri.file) {
+    return vscodeUri.file(path);
+  }
+  // Fallback for simple path handling
   return { fsPath: path, path };
 }
 

@@ -538,6 +538,9 @@ importers:
       ovsx:
         specifier: 0.10.1
         version: 0.10.1
+      path-browserify:
+        specifier: 1.0.1
+        version: 1.0.1
       prettier:
         specifier: 3.4.2
         version: 3.4.2

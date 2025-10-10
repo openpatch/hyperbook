@@ -3,8 +3,12 @@ import * as path from "path";
 import Preview from "./Preview";
 import StatusBarItem from "./StatusBarItem";
 import { hyperbook } from "@hyperbook/fs";
+import { initializeAdapters } from "./adapter-init";
 
 export function activate(context: vscode.ExtensionContext) {
+  // Initialize filesystem adapters based on environment (Node vs Web)
+  initializeAdapters();
+  
   let preview = new Preview(context);
   let statusBarItem = new StatusBarItem(context, preview);
   statusBarItem.updateStatusbar();

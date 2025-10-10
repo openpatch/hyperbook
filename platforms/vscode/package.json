@@ -11,10 +11,15 @@
   },
   "homepage": "https://hyperbook.openpatch.org",
   "main": "./out/extension.js",
+  "browser": "./out/extension.web.js",
   "version": "0.38.1",
   "engines": {
     "vscode": "^1.71.0"
   },
+  "extensionKind": [
+    "ui",
+    "workspace"
+  ],
   "categories": [
     "Other"
   ],
@@ -111,11 +116,13 @@
     "ovsx:publish": "ovsx publish $(find . -iname *.vsix)",
     "build": "npm-run-all compile:*",
     "compile": "npm-run-all compile:*",
-    "compile:extension": "webpack  --config ./webpack.extension.config.js --mode production",
+    "compile:extension": "webpack --config ./webpack.extension.config.js --mode production",
+    "compile:extension-web": "webpack --config ./webpack.web.config.js --mode production",
     "compile:schema-hyperbook": "typescript-json-schema ../../packages/types/src/index.ts HyperbookJson --out ./schemas/hyperbook.schema.json --required",
     "compile:schema-hyperlibrary": "typescript-json-schema ../../packages/types/src/index.ts HyperlibraryJson --out ./schemas/hyperlibrary.schema.json --required",
     "watch": "npm-run-all -p watch:*",
     "watch:extension": "webpack --config ./webpack.extension.config.js --watch --mode development",
+    "watch:extension-web": "webpack --config ./webpack.web.config.js --watch --mode development",
     "open": "code --extensionDevelopmentPath=$PWD",
     "pretest": "pnpm compile && pnpm lint",
     "lint": "eslint src --ext ts"
@@ -137,6 +144,7 @@
     "node-polyfill-webpack-plugin": "^4.1.0",
     "npm-run-all": "4.1.5",
     "ovsx": "0.10.1",
+    "path-browserify": "1.0.1",
     "prettier": "3.4.2",
     "sass": "1.84.0",
     "sass-loader": "16.0.4",
