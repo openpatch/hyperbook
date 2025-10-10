@@ -1,5 +1,20 @@
 # @hyperbook/markdown
 
+## 0.35.1
+
+### Patch Changes
+
+- [#1013](https://github.com/openpatch/hyperbook/pull/1013) [`9c96045`](https://github.com/openpatch/hyperbook/commit/9c96045020c45dc06cc2da8e86de2fa6c2ba2a32) Thanks [@copilot-swe-agent](https://github.com/apps/copilot-swe-agent)! - Add automatic favicon and PWA icon generation from logo
+
+  When building a Hyperbook project, if no favicon.ico exists and a logo is defined in hyperbook.json, a complete set of favicons and PWA assets are automatically generated:
+
+  - Generates 60+ files including favicon.ico, Android icons, Apple touch icons, and Apple startup images
+  - Creates web manifest with full PWA metadata (theme color, scope, language, developer info)
+  - Smart logo path resolution: checks root folder, book folder, and public folder
+  - Adds favicon, Apple touch icon, and manifest links to all HTML pages
+  - Uses hyperbook.json metadata: name, description, colors.brand, basePath, language, author
+  - Backward compatible: copies favicon.ico to root for browsers expecting it there
+
 ## 0.35.0
 
 ### Minor Changes
