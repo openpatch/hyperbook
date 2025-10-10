@@ -110,6 +110,10 @@ importers:
         version: 3.0.5(@types/debug@4.1.12)(@types/node@22.13.1)(lightningcss@1.28.2)(sass@1.84.0)(terser@5.38.1)(yaml@2.7.1)
 
   packages/hyperbook:
+    dependencies:
+      favicons:
+        specifier: ^7.2.0
+        version: 7.2.0
     devDependencies:
       '@hyperbook/fs':
         specifier: workspace:*
@@ -174,9 +178,6 @@ importers:
       extract-zip:
         specifier: ^2.0.1
         version: 2.0.1
-      favicons:
-        specifier: ^7.2.0
-        version: 7.2.0
       got:
         specifier: 12.6.0
         version: 12.6.0
@@ -8550,7 +8551,7 @@ snapshots:
   '@eslint/config-array@0.19.2':
     dependencies:
       '@eslint/object-schema': 2.1.6
-      debug: 4.4.0
+      debug: 4.4.1
       minimatch: 3.1.2
     transitivePeerDependencies:
       - supports-color
@@ -8562,7 +8563,7 @@ snapshots:
   '@eslint/eslintrc@3.2.0':
     dependencies:
       ajv: 6.12.6
-      debug: 4.4.0
+      debug: 4.4.1
       espree: 10.3.0
       globals: 14.0.0
       ignore: 5.3.2
@@ -8676,7 +8677,7 @@ snapshots:
       '@antfu/install-pkg': 1.0.0
       '@antfu/utils': 8.1.1
       '@iconify/types': 2.0.0
-      debug: 4.4.0
+      debug: 4.4.1
       globals: 15.15.0
       kolorist: 1.8.0
       local-pkg: 1.1.1
@@ -9762,7 +9763,7 @@ snapshots:
     dependencies:
       '@typescript-eslint/typescript-estree': 8.23.0(typescript@5.7.3)
       '@typescript-eslint/utils': 8.23.0(eslint@9.19.0)(typescript@5.7.3)
-      debug: 4.4.0
+      debug: 4.4.1
       eslint: 9.19.0
       ts-api-utils: 2.0.1(typescript@5.7.3)
       typescript: 5.7.3
@@ -16156,7 +16157,7 @@ snapshots:
   vite-node@3.0.5(@types/node@20.5.1)(lightningcss@1.28.2)(sass@1.84.0)(terser@5.38.1)(yaml@2.7.1):
     dependencies:
       cac: 6.7.14
-      debug: 4.4.0
+      debug: 4.4.1
       es-module-lexer: 1.6.0
       pathe: 2.0.2
       vite: 6.1.0(@types/node@20.5.1)(lightningcss@1.28.2)(sass@1.84.0)(terser@5.38.1)(yaml@2.7.1)
@@ -16177,7 +16178,7 @@ snapshots:
   vite-node@3.0.5(@types/node@22.13.1)(lightningcss@1.28.2)(sass@1.84.0)(terser@5.38.1)(yaml@2.7.1):
     dependencies:
       cac: 6.7.14
-      debug: 4.4.0
+      debug: 4.4.1
       es-module-lexer: 1.6.0
       pathe: 2.0.2
       vite: 6.1.0(@types/node@22.13.1)(lightningcss@1.28.2)(sass@1.84.0)(terser@5.38.1)(yaml@2.7.1)
