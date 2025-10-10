@@ -4,7 +4,9 @@ import {
   Language,
   Link,
 } from "@hyperbook/types";
-import path from "path";
+import { getFileSystemAdapter, getPathAdapter } from "./fs-adapter";
+const fs = () => getFileSystemAdapter();
+const path = () => getPathAdapter();
 import * as hyperbook from "./hyperbook";
 import * as hyperlibrary from "./hyperlibrary";
 
@@ -13,7 +15,7 @@ export const get = async (
   libraryEntry?: HyperlibraryJson["library"][0]
 ): Promise<Hyperproject> => {
   if (libraryEntry?.src) {
-    root = path.join(root, libraryEntry.src);
+    root = path().join(root, libraryEntry.src);
   }
   const hyperbookJson = await hyperbook.getJson(root).catch(() => null);
   if (hyperbookJson) {
@@ -37,7 +39,7 @@ export const get = async (
         hyperlibraryJson.library.map((p) =>
           get(root, {
             ...p,
-            basePath: path.join(
+            basePath: path().join(
               libraryEntry?.basePath ?? hyperlibraryJson.basePath ?? "",
               p.basePath
             ),
@@ -105,13 +107,13 @@ export const getLink = async (
       href = project.src;
     }
     if (options.href?.relative) {
-      href = path.relative(options.href.relative, href);
+      href = path().relative(options.href.relative, href);
     }
     if (options.href?.prepend) {
-      href = path.join(...options.href.prepend, href);
+      href = path().join(...options.href.prepend, href);
     }
     if (options.href?.append) {
-      href = path.join(href, ...options.href.append);
+      href = path().join(href, ...options.href.append);
     }
     if (options.href?.protocol) {
       if (href.startsWith("/")) {

@@ -13,4 +13,16 @@ export {
   getMarkdown,
 } from "./vfile";
 
+export {
+  FileSystemAdapter,
+  PathAdapter,
+  setFileSystemAdapter,
+  setPathAdapter,
+  getFileSystemAdapter,
+  getPathAdapter,
+} from "./fs-adapter";
+
+export { nodeFileSystemAdapter, nodePathAdapter } from "./fs-adapter-node";
+export { vscodeFileSystemAdapter, vscodePathAdapter, setVSCodeWorkspaceFs } from "./fs-adapter-vscode";
+
 export { hyperlibrary, hyperbook, hyperproject, vfile };

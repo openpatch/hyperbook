@@ -1,9 +1,11 @@
 import handlebars from "handlebars";
 import { findUpSync, Options } from "find-up";
 import { lookup } from "mime-types";
-import fs from "fs";
-import path from "path";
+import { getFileSystemAdapter, getPathAdapter } from "./fs-adapter";
 import { extractLines, VFileBase } from "./vfile";
+
+const fs = () => getFileSystemAdapter();
+const path = () => getPathAdapter();
 
 declare global {
   var workspaceRoot: string;
@@ -100,9 +102,9 @@ const registerHelpers = (handlebars: any, options?: { file: VFileBase }) => {
         return `rbase64 is only applicable in git projects. No .git was found in ${cwd} and above.`;
       }
     }
-    let p = path.join(path.dirname(gitRoot), src);
+    let p = path().join(path().dirname(gitRoot), src);
     try {
-      const fileDataBase64 = fs.readFileSync(p, "base64");
+      const fileDataBase64 = fs().readFileSync(p, "base64");
       const mime = lookup(p);
       return `data:${mime};base64,${fileDataBase64}`;
     } catch (e) {
@@ -126,9 +128,9 @@ const registerHelpers = (handlebars: any, options?: { file: VFileBase }) => {
           return `rfile is only applicable in git projects. No .git was found in ${cwd} and above`;
         }
       }
-      let p = path.join(path.dirname(gitRoot), src);
+      let p = path().join(path().dirname(gitRoot), src);
       try {
-        const content = fs.readFileSync(p, "utf8");
+        const content = fs().readFileSync(p, "utf8");
         return extractLines(content, lines, ellipsis);
       } catch (e) {
         return `File ${src} is missing.`;
@@ -137,8 +139,8 @@ const registerHelpers = (handlebars: any, options?: { file: VFileBase }) => {
   );
 
   handlebars.registerHelper("base64", (src: string) => {
-    let p = path.join(cwd, src);
-    const fileDataBase64 = fs.readFileSync(p, "base64");
+    let p = path().join(cwd, src);
+    const fileDataBase64 = fs().readFileSync(p, "base64");
     const mime = lookup(p);
     return `data:${mime};base64,${fileDataBase64}`;
   });
@@ -149,8 +151,8 @@ const registerHelpers = (handlebars: any, options?: { file: VFileBase }) => {
       if (!src) {
         throw Error("file needs a path to a file");
       }
-      let p = path.join(cwd, src);
-      const content = fs.readFileSync(p, "utf8");
+      let p = path().join(cwd, src);
+      const content = fs().readFileSync(p, "utf8");
       return extractLines(content, lines, ellipsis);
     },
   );

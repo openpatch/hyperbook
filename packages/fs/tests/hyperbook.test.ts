@@ -1,7 +1,15 @@
 import path from "path";
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, beforeAll } from "vitest";
 import { hyperbook, vfile } from "../src";
 import { HyperbookPage } from "@hyperbook/types/dist";
+import { setFileSystemAdapter, setPathAdapter } from "../src/fs-adapter";
+import { nodeFileSystemAdapter, nodePathAdapter } from "../src/fs-adapter-node";
+
+// Initialize adapters for Node environment
+beforeAll(() => {
+  setFileSystemAdapter(nodeFileSystemAdapter);
+  setPathAdapter(nodePathAdapter);
+});
 
 describe("hyperbook", () => {
   const relative = (s: string) =>

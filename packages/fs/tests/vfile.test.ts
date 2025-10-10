@@ -1,12 +1,23 @@
 import path from "path";
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, beforeAll } from "vitest";
 import * as vfile from "../src/vfile";
+import { setFileSystemAdapter, setPathAdapter } from "../src/fs-adapter";
+import { nodeFileSystemAdapter, nodePathAdapter } from "../src/fs-adapter-node";
+
+// Initialize adapters for Node environment
+beforeAll(() => {
+  setFileSystemAdapter(nodeFileSystemAdapter);
+  setPathAdapter(nodePathAdapter);
+});
 
 describe("list", () => {
   const relative = (s: string) =>
     path.relative(path.join(__dirname, "fixtures"), s);
   let hyperbookPath = path.join(__dirname, "fixtures", "single-hyperbook");
-  vfile.clean(hyperbookPath);
+  
+  beforeAll(async () => {
+    await vfile.clean(hyperbookPath);
+  });
 
   const makeFileRelative = (f: vfile.VFile) => {
     if ("references" in f) {
@@ -54,7 +65,11 @@ describe("list", () => {
 
 describe("getMarkdown", () => {
   let hyperbookPath = path.join(__dirname, "fixtures", "single-hyperbook");
-  vfile.clean(hyperbookPath);
+  
+  beforeAll(async () => {
+    await vfile.clean(hyperbookPath);
+  });
+  
   it("should get markdown from template", async () => {
     let files = await vfile.list(hyperbookPath);
     let templateFile = files.find(
@@ -130,7 +145,11 @@ describe("getMarkdown", () => {
 
 describe("getDirectory", () => {
   let hyperbookPath = path.join(__dirname, "fixtures", "single-hyperbook");
-  vfile.clean(hyperbookPath);
+  
+  beforeAll(async () => {
+    await vfile.clean(hyperbookPath);
+  });
+  
   it("should include main index", async () => {
     let directory = await vfile.getDirectory(hyperbookPath, "book");
     expect(directory.index).toBeDefined();

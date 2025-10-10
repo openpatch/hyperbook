@@ -1,7 +1,15 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, beforeAll } from "vitest";
 import fs from "fs/promises";
 import { handlebars, registerHelpers } from "../src/handlebars";
 import path from "path";
+import { setFileSystemAdapter, setPathAdapter } from "../src/fs-adapter";
+import { nodeFileSystemAdapter, nodePathAdapter } from "../src/fs-adapter-node";
+
+// Initialize adapters for Node environment
+beforeAll(() => {
+  setFileSystemAdapter(nodeFileSystemAdapter);
+  setPathAdapter(nodePathAdapter);
+});
 
 describe("handlebars", () => {
   it("should resolve rfile", async () => {

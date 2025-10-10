@@ -1,7 +1,5 @@
 import matter from "gray-matter";
-import fs from "fs/promises";
-import fsD from "fs";
-import path from "path";
+import { getFileSystemAdapter, getPathAdapter } from "./fs-adapter";
 import {
   Glossary,
   HyperbookFrontmatter,
@@ -10,9 +8,13 @@ import {
 import yaml from "yaml";
 import { handlebars, registerHelpers } from "./handlebars";
 
+// Helper functions to access adapters with shorter names
+const fs = () => getFileSystemAdapter();
+const path = () => getPathAdapter();
+
 export const getJson = async (root: string): Promise<HyperbookJson> => {
-  return fs
-    .readFile(path.join(root, "hyperbook.json"))
+  return fs()
+    .readFile(path().join(root, "hyperbook.json"))
     .then((f) => f.toString())
     .then(JSON.parse);
 };
@@ -160,18 +162,18 @@ async function getDirectoryArchives(root: string): Promise<VDirectoryArchive> {
   const vfiles: VFileArchive[] = [];
 
   try {
-    const files = await fs.readdir(path.join(root, "archives"));
+    const files = await fs().readdir(path().join(root, "archives"));
     for (const file of files) {
-      const stat = await fs.stat(path.join(root, "archives", file));
+      const stat = await fs().stat(path().join(root, "archives", file));
       if (stat.isDirectory()) {
-        const { name } = path.parse(file);
+        const { name } = path().parse(file);
         const vfile: VFileArchive = {
           folder: "archives",
           name,
           path: {
             href: "/archives/" + name + ".zip",
             permalink: null,
-            absolute: path.join(root, "archives", file),
+            absolute: path().join(root, "archives", file),
             relative: file,
             directory: "",
           },
@@ -188,7 +190,7 @@ async function getDirectoryArchives(root: string): Promise<VDirectoryArchive> {
     root,
     path: {
       relative: "archives",
-      absolute: path.join(root, "archives"),
+      absolute: path().join(root, "archives"),
     },
     folder: "archives",
     files: vfiles,
@@ -197,13 +199,13 @@ async function getDirectoryArchives(root: string): Promise<VDirectoryArchive> {
 
 async function getDirectoryBook(root: string): Promise<VDirectoryBook> {
   async function getTree(directory: VDirectoryBook): Promise<VDirectoryBook> {
-    const files = await fs
-      .readdir(path.join(directory.path.absolute))
+    const files = await fs()
+      .readdir(path().join(directory.path.absolute))
       .catch(() => []);
     for (const file of files) {
-      const stat = await fs.stat(path.join(directory.path.absolute, file));
+      const stat = await fs().stat(path().join(directory.path.absolute, file));
       if (stat.isDirectory()) {
-        const { name } = path.parse(file);
+        const { name } = path().parse(file);
         const d: VDirectoryBook = {
           name,
           root,
@@ -211,13 +213,13 @@ async function getDirectoryBook(root: string): Promise<VDirectoryBook> {
           directories: [],
           files: [],
           path: {
-            absolute: path.join(directory.path.absolute, file),
-            relative: path.join(directory.path.relative, file),
+            absolute: path().join(directory.path.absolute, file),
+            relative: path().join(directory.path.relative, file),
           },
         };
         directory.directories.push(await getTree(d));
       } else {
-        let { ext, name } = path.parse(file);
+        let { ext, name } = path().parse(file);
         if (ext == ".hbs" && file.endsWith(".md.hbs")) {
           ext = ".md.hbs";
           name = name.slice(0, name.length - 3);
@@ -236,8 +238,8 @@ async function getDirectoryBook(root: string): Promise<VDirectoryBook> {
           path: {
             permalink: null,
             directory: directory.path.relative,
-            absolute: path.join(directory.path.absolute, file),
-            relative: path.join(directory.path.relative, file),
+            absolute: path().join(directory.path.absolute, file),
+            relative: path().join(directory.path.relative, file),
             href: "",
           },
           extension: ext,
@@ -260,10 +262,10 @@ async function getDirectoryBook(root: string): Promise<VDirectoryBook> {
 
         let href = "/";
         if (vfile.path.directory) {
-          href = path.posix.join(href, vfile.path.directory);
+          href = path().posix.join(href, vfile.path.directory);
         }
         if (vfile.name !== "index") {
-          href = path.posix.join(href, vfile.name);
+          href = path().posix.join(href, vfile.name);
         }
         vfile.path.href = href.trim();
         if (name === "index") {
@@ -279,7 +281,7 @@ async function getDirectoryBook(root: string): Promise<VDirectoryBook> {
     root,
     path: {
       relative: "",
-      absolute: path.join(root, "book"),
+      absolute: path().join(root, "book"),
     },
     name: "",
     folder: "book",
@@ -293,13 +295,13 @@ async function getDirectoryGlossary(root: string): Promise<VDirectoryGlossary> {
   async function getTree(
     directory: VDirectoryGlossary,
   ): Promise<VDirectoryGlossary> {
-    const files = await fs
-      .readdir(path.join(directory.path.absolute))
+    const files = await fs()
+      .readdir(path().join(directory.path.absolute))
       .catch(() => []);
     for (const file of files) {
-      const stat = await fs.stat(path.join(directory.path.absolute, file));
+      const stat = await fs().stat(path().join(directory.path.absolute, file));
       if (stat.isDirectory()) {
-        const { name } = path.parse(file);
+        const { name } = path().parse(file);
         const d: VDirectoryGlossary = {
           name,
           root,
@@ -307,13 +309,13 @@ async function getDirectoryGlossary(root: string): Promise<VDirectoryGlossary> {
           directories: [],
           files: [],
           path: {
-            absolute: path.join(directory.path.absolute, file),
-            relative: path.join(directory.path.relative, file),
+            absolute: path().join(directory.path.absolute, file),
+            relative: path().join(directory.path.relative, file),
           },
         };
         directory.directories.push(await getTree(d));
       } else {
-        let { ext, name } = path.parse(file);
+        let { ext, name } = path().parse(file);
         if (ext == ".hbs" && file.endsWith(".md.hbs")) {
           ext = ".md.hbs";
           name = name.slice(0, name.length - 3);
@@ -326,8 +328,8 @@ async function getDirectoryGlossary(root: string): Promise<VDirectoryGlossary> {
           path: {
             permalink: null,
             directory: directory.path.relative,
-            absolute: path.join(directory.path.absolute, file),
-            relative: path.join(directory.path.relative, file),
+            absolute: path().join(directory.path.absolute, file),
+            relative: path().join(directory.path.relative, file),
             href: "",
           },
           name,
@@ -354,10 +356,10 @@ async function getDirectoryGlossary(root: string): Promise<VDirectoryGlossary> {
         };
         let href = "/glossary";
         if (vfile.path.directory) {
-          href = path.posix.join(href, vfile.path.directory);
+          href = path().posix.join(href, vfile.path.directory);
         }
         if (vfile.name !== "index") {
-          href = path.posix.join(href, vfile.name);
+          href = path().posix.join(href, vfile.name);
         }
         vfile.path.href = href.trim();
         directory.files.push(vfile);
@@ -369,7 +371,7 @@ async function getDirectoryGlossary(root: string): Promise<VDirectoryGlossary> {
     root,
     path: {
       relative: "",
-      absolute: path.join(root, "glossary"),
+      absolute: path().join(root, "glossary"),
     },
     name: "",
     folder: "glossary",
@@ -384,13 +386,13 @@ async function getDirectoryGlossaryPublic(
   async function getTree(
     directory: VDirectoryGlossaryPublic,
   ): Promise<VDirectoryGlossaryPublic> {
-    const files = await fs
-      .readdir(path.join(directory.path.absolute))
+    const files = await fs()
+      .readdir(path().join(directory.path.absolute))
       .catch(() => []);
     for (const file of files) {
-      const stat = await fs.stat(path.join(directory.path.absolute, file));
+      const stat = await fs().stat(path().join(directory.path.absolute, file));
       if (stat.isDirectory()) {
-        const { name } = path.parse(file);
+        const { name } = path().parse(file);
         const d: VDirectoryGlossaryPublic = {
           name,
           root,
@@ -398,22 +400,22 @@ async function getDirectoryGlossaryPublic(
           directories: [],
           files: [],
           path: {
-            absolute: path.join(directory.path.absolute, file),
-            relative: path.join(directory.path.relative, file),
+            absolute: path().join(directory.path.absolute, file),
+            relative: path().join(directory.path.relative, file),
           },
         };
         directory.directories.push(await getTree(d));
       } else {
-        let { ext, name } = path.parse(file);
+        let { ext, name } = path().parse(file);
         if (hasPageExtension(file)) continue;
         let vfile: VFileGlossaryPublic = {
           folder: "glossary-public",
           path: {
             permalink: null,
             directory: directory.path.relative,
-            absolute: path.join(directory.path.absolute, file),
-            relative: path.join(directory.path.relative, file),
-            href: "/" + path.posix.join(directory.path.relative, file),
+            absolute: path().join(directory.path.absolute, file),
+            relative: path().join(directory.path.relative, file),
+            href: "/" + path().posix.join(directory.path.relative, file),
           },
           name,
           root,
@@ -428,7 +430,7 @@ async function getDirectoryGlossaryPublic(
     root,
     path: {
       relative: "glossary",
-      absolute: path.join(root, "glossary"),
+      absolute: path().join(root, "glossary"),
     },
     name: "",
     folder: "glossary-public",
@@ -441,13 +443,13 @@ async function getDirectoryPublic(root: string): Promise<VDirectoryPublic> {
   async function getTree(
     directory: VDirectoryPublic,
   ): Promise<VDirectoryPublic> {
-    const files = await fs
-      .readdir(path.join(directory.path.absolute))
+    const files = await fs()
+      .readdir(path().join(directory.path.absolute))
       .catch(() => []);
     for (const file of files) {
-      const stat = await fs.stat(path.join(directory.path.absolute, file));
+      const stat = await fs().stat(path().join(directory.path.absolute, file));
       if (stat.isDirectory()) {
-        const { name } = path.parse(file);
+        const { name } = path().parse(file);
         const d: VDirectoryPublic = {
           name,
           root,
@@ -455,21 +457,21 @@ async function getDirectoryPublic(root: string): Promise<VDirectoryPublic> {
           directories: [],
           files: [],
           path: {
-            absolute: path.join(directory.path.absolute, file),
-            relative: path.join(directory.path.relative, file),
+            absolute: path().join(directory.path.absolute, file),
+            relative: path().join(directory.path.relative, file),
           },
         };
         directory.directories.push(await getTree(d));
       } else {
-        let { ext, name } = path.parse(file);
+        let { ext, name } = path().parse(file);
         let vfile: VFilePublic = {
           folder: "public",
           path: {
             permalink: null,
             directory: directory.path.relative,
-            absolute: path.join(directory.path.absolute, file),
-            relative: path.join(directory.path.relative, file),
-            href: "/" + path.posix.join(directory.path.relative, file),
+            absolute: path().join(directory.path.absolute, file),
+            relative: path().join(directory.path.relative, file),
+            href: "/" + path().posix.join(directory.path.relative, file),
           },
           name,
           root,
@@ -484,7 +486,7 @@ async function getDirectoryPublic(root: string): Promise<VDirectoryPublic> {
     root,
     path: {
       relative: "",
-      absolute: path.join(root, "public"),
+      absolute: path().join(root, "public"),
     },
     name: "",
     folder: "public",
@@ -499,13 +501,13 @@ async function getDirectoryBookPublic(
   async function getTree(
     directory: VDirectoryBookPublic,
   ): Promise<VDirectoryBookPublic> {
-    const files = await fs
-      .readdir(path.join(directory.path.absolute))
+    const files = await fs()
+      .readdir(path().join(directory.path.absolute))
       .catch(() => []);
     for (const file of files) {
-      const stat = await fs.stat(path.join(directory.path.absolute, file));
+      const stat = await fs().stat(path().join(directory.path.absolute, file));
       if (stat.isDirectory()) {
-        const { name } = path.parse(file);
+        const { name } = path().parse(file);
         const d: VDirectoryBookPublic = {
           name,
           root,
@@ -513,22 +515,22 @@ async function getDirectoryBookPublic(
           directories: [],
           files: [],
           path: {
-            absolute: path.join(directory.path.absolute, file),
-            relative: path.join(directory.path.relative, file),
+            absolute: path().join(directory.path.absolute, file),
+            relative: path().join(directory.path.relative, file),
           },
         };
         directory.directories.push(await getTree(d));
       } else {
-        let { ext, name } = path.parse(file);
+        let { ext, name } = path().parse(file);
         if (hasPageExtension(file)) continue;
         let vfile: VFileBookPublic = {
           folder: "book-public",
           path: {
             permalink: null,
             directory: directory.path.relative,
-            absolute: path.join(directory.path.absolute, file),
-            relative: path.join(directory.path.relative, file),
-            href: "/" + path.posix.join(directory.path.relative, file),
+            absolute: path().join(directory.path.absolute, file),
+            relative: path().join(directory.path.relative, file),
+            href: "/" + path().posix.join(directory.path.relative, file),
           },
           name,
           root,
@@ -543,7 +545,7 @@ async function getDirectoryBookPublic(
     root,
     path: {
       relative: "",
-      absolute: path.join(root, "book"),
+      absolute: path().join(root, "book"),
     },
     name: "",
     folder: "book-public",
@@ -654,29 +656,29 @@ export async function getDirectory(
   root: string,
   folder: VDirectory["folder"],
 ): Promise<VDirectory> {
-  const cache = path.join(root, `vdirectory.${folder}.json`);
-  if (process.env.HYPERBOOK_CACHE && fsD.existsSync(cache)) {
-    return JSON.parse(fsD.readFileSync(cache, "utf8"));
+  const cache = path().join(root, `vdirectory.${folder}.json`);
+  if (process.env.HYPERBOOK_CACHE && fs().existsSync(cache)) {
+    return JSON.parse(fs().readFileSync(cache, "utf8"));
   }
   switch (folder) {
     case "glossary": {
       const dir = await getDirectoryGlossary(root);
       if (process.env.HYPERBOOK_CACHE) {
-        fsD.writeFileSync(cache, JSON.stringify(dir));
+        fs().writeFileSync(cache, JSON.stringify(dir));
       }
       return dir;
     }
     case "archives": {
       const dir = await getDirectoryArchives(root);
       if (process.env.HYPERBOOK_CACHE) {
-        fsD.writeFileSync(cache, JSON.stringify(dir));
+        fs().writeFileSync(cache, JSON.stringify(dir));
       }
       return dir;
     }
     case "public": {
       const dir = await getDirectoryPublic(root);
       if (process.env.HYPERBOOK_CACHE) {
-        fsD.writeFileSync(cache, JSON.stringify(dir));
+        fs().writeFileSync(cache, JSON.stringify(dir));
       }
       return dir;
     }
@@ -691,7 +693,7 @@ export async function getDirectory(
     default: {
       const dir = await getDirectoryBook(root);
       if (process.env.HYPERBOOK_CACHE) {
-        fsD.writeFileSync(cache, JSON.stringify(dir));
+        fs().writeFileSync(cache, JSON.stringify(dir));
       }
       return dir;
     }
@@ -754,28 +756,28 @@ export async function listForFolder(
 }
 
 export const list = async (root: string): Promise<VFile[]> => {
-  const cache = path.join(root, "vfiles.json");
-  if (process.env.HYPERBOOK_CACHE && fsD.existsSync(cache)) {
-    return JSON.parse(fsD.readFileSync(cache, "utf8"));
+  const cache = path().join(root, "vfiles.json");
+  if (process.env.HYPERBOOK_CACHE && fs().existsSync(cache)) {
+    return JSON.parse(fs().readFileSync(cache, "utf8"));
   }
   const vfiles = await Promise.all(
     folders.flatMap((folder) => listForFolder(root, folder as any)),
   ).then((f) => f.flat());
   if (process.env.HYPERBOOK_CACHE) {
-    fsD.writeFileSync(cache, JSON.stringify(vfiles));
+    fs().writeFileSync(cache, JSON.stringify(vfiles));
   }
   return vfiles;
 };
 
 export const clean = async (root: string): Promise<void> => {
-  const cache = path.join(root, "vfiles.json");
-  if (fsD.existsSync(cache)) {
-    fsD.rmSync(cache);
+  const cache = path().join(root, "vfiles.json");
+  if (fs().existsSync(cache)) {
+    fs().rmSync?.(cache);
   }
   folders.forEach((folder) => {
-    const cache = path.join(root, `vdirectory.${folder}.json`);
-    if (fsD.existsSync(cache)) {
-      fsD.rmSync(cache);
+    const cache = path().join(root, `vdirectory.${folder}.json`);
+    if (fs().existsSync(cache)) {
+      fs().rmSync?.(cache);
     }
   });
 };
@@ -837,42 +839,42 @@ export const getMarkdown = async (
 
   let markdown = "";
   if (file.extension === ".md.yml") {
-    const j = await fs
+    const j = await fs()
       .readFile(file.path.absolute)
-      .then((f) => yaml.parse(f.toString()));
+      .then((f: string) => yaml.parse(f.toString()));
     if (!j.template) {
       console.log(
         `Yaml files need a template. You need to define a template property in your yaml file: ${file.path.absolute}`,
       );
     } else {
-      const templateSource = await fs.readFile(
-        path.join(file.root, "templates", j.template + ".md.hbs"),
+      const templateSource = await fs().readFile(
+        path().join(file.root, "templates", j.template + ".md.hbs"),
       );
       const template = handlebars.compile(templateSource.toString());
       markdown = template(j);
     }
   } else if (file.extension === ".md.json") {
-    const j = await fs
+    const j = await fs()
       .readFile(file.path.absolute)
-      .then((f) => JSON.parse(f.toString()))
+      .then((f: string) => JSON.parse(f))
       .catch(() => ({}));
     if (!j.template) {
       console.log(
         `JSON files need a template. You need to define a template property in your json file: ${file.path.absolute}`,
       );
     } else {
-      const templateSource = await fs.readFile(
-        path.join(file.root, "templates", j.template + ".md.hbs"),
+      const templateSource = await fs().readFile(
+        path().join(file.root, "templates", j.template + ".md.hbs"),
       );
       const template = handlebars.compile(templateSource.toString());
       markdown = template(j);
     }
   } else if (file.extension === ".md") {
-    markdown = await fs.readFile(file.path.absolute).then((f) => f.toString());
+    markdown = await fs().readFile(file.path.absolute).then((f) => f.toString());
   } else if (file.extension === ".md.hbs") {
-    const templateString = await fs
+    const templateString = await fs()
       .readFile(file.path.absolute)
-      .then((f) => f.toString());
+      .then((f: string) => f);
     const template = handlebars.compile(templateString);
     markdown = template({});
   } else {
@@ -891,9 +893,9 @@ export const getMarkdown = async (
   for (const snippet of snippets) {
     const dots = snippet[2];
     const snippetId = snippet[3];
-    const snippetFile = await fs.readFile(
-      path.join(file.root, "snippets", snippetId + ".md.hbs"),
-      { encoding: "utf8" },
+    const snippetFile = await fs().readFile(
+      path().join(file.root, "snippets", snippetId + ".md.hbs"),
+      "utf8",
     );
     const template = handlebars.compile(snippetFile);
 

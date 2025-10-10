@@ -1,5 +1,4 @@
-import path from "path";
-import fs from "fs/promises";
+import { getFileSystemAdapter, getPathAdapter } from "./fs-adapter";
 import {
   HyperbookJson,
   HyperbookPage,
@@ -10,9 +9,12 @@ import { findUp } from "find-up";
 import { vfile } from ".";
 import { VDirectoryBook, VFile } from "./vfile";
 
+const fs = () => getFileSystemAdapter();
+const path = () => getPathAdapter();
+
 export const getJson = async (root: string): Promise<HyperbookJson> => {
-  return fs
-    .readFile(path.join(root, "hyperbook.json"))
+  return fs()
+    .readFile(path().join(root, "hyperbook.json"))
     .then((f) => f.toString())
     .then(JSON.parse);
 };
@@ -25,7 +27,7 @@ export const find = async (file: string): Promise<HyperbookJson> => {
       if (!f) {
         throw new Error("Could not find hyperbook.json");
       }
-      return fs.readFile(f);
+      return fs().readFile(f);
     })
     .then((f) => JSON.parse(f.toString()));
 };
@@ -38,7 +40,7 @@ export const findRoot = async (file: string): Promise<string> => {
       console.log(file);
       throw new Error("Could not find hyperbook.json");
     }
-    return path.parse(f).dir;
+    return path().parse(f).dir;
   });
 };
 
@@ -46,9 +48,9 @@ export const makeRepoLink = (
   repoTemplate: HyperbookJson["repo"],
   vfile: VFile,
 ): string | null => {
-  const relative = path.posix.join(
-    vfile.folder.replaceAll(path.sep, "/"),
-    vfile.path.relative.replaceAll(path.sep, "/"),
+  const relative = path().posix.join(
+    vfile.folder.replaceAll(path().sep, "/"),
+    vfile.path.relative.replaceAll(path().sep, "/"),
   );
   if (typeof repoTemplate === "string") {
     if (repoTemplate.includes("%path%")) {
