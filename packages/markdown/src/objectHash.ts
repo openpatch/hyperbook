@@ -1,4 +1,3 @@
-import crypto from "node:crypto";
 import isObject from "is-obj";
 import sortKeys from "sort-keys";
 import decircular from "decircular";
@@ -20,17 +19,37 @@ function normalizeObject(object: object): object {
   return object;
 }
 
+/**
+ * Simple FNV-1a hash implementation (32-bit)
+ * Browser-compatible alternative to Node.js crypto
+ * https://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function
+ */
+function fnv1aHash(str: string): string {
+  let hash = 2166136261; // FNV offset basis (32-bit)
+  
+  for (let i = 0; i < str.length; i++) {
+    hash ^= str.charCodeAt(i);
+    // FNV prime (32-bit): 16777619
+    hash = Math.imul(hash, 16777619);
+  }
+  
+  // Convert to unsigned 32-bit and format as hex
+  return (hash >>> 0).toString(16).padStart(8, '0');
+}
+
+/**
+ * Create a hash from an object
+ * Uses FNV-1a algorithm for browser compatibility
+ * @param object - The object to hash
+ * @returns A hex string hash
+ */
 export default function hash(object: any) {
   if (!isObject(object)) {
     throw new TypeError("Expected an object");
   }
 
   const normalizedObject = normalizeObject(decircular(object));
-
-  const hash = crypto
-    .createHash("sha256")
-    .update(JSON.stringify(sortKeys(normalizedObject, { deep: true })), "utf8")
-    .digest("hex");
-
-  return hash;
+  const jsonString = JSON.stringify(sortKeys(normalizedObject, { deep: true }));
+  
+  return fnv1aHash(jsonString);
 }
