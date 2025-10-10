@@ -45,6 +45,7 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 :::tab{title="New :rocket:" id="new"}
 
 - Vastly improved learningmap element for displaying interactive learning maps. [Learn more](/elements/learningmap)
+- **Automatic Favicon and PWA Icon Generation**: When building a Hyperbook project, if no `favicon.ico` exists and a `logo` is defined in `hyperbook.json`, a complete set of favicons and PWA assets are automatically generated (60+ files including Android icons, Apple touch icons, Apple startup images, and web manifest with full metadata). The system intelligently searches for logos in the root folder, book folder, or public folder, and uses metadata from `hyperbook.json` (name, description, theme color, language, author) to create a professional PWA-ready icon set.
 
 :::
 
