@@ -378,6 +378,84 @@ async function runBuild(
   }
   process.stdout.write("\n");
 
+  // Generate favicons if logo exists and no favicon.ico is present
+  const faviconPath = path.join(rootOut, "favicon.ico");
+  let faviconExists = false;
+  try {
+    await fs.access(faviconPath);
+    faviconExists = true;
+  } catch (e) {
+    // Favicon doesn't exist
+  }
+
+  if (!faviconExists && hyperbookJson.logo) {
+    console.log(`${chalk.blue(`[${prefix}]`)} Generating favicons from logo.`);
+    
+    // Only generate if logo is a local file (not a URL)
+    if (!hyperbookJson.logo.includes("://")) {
+      let logoPath: string | null = null;
+      
+      // Resolve logo path by checking multiple locations
+      if (hyperbookJson.logo.startsWith("/")) {
+        // Absolute path starting with / - check book folder, then public folder
+        const bookPath = path.join(root, "book", hyperbookJson.logo);
+        const publicPath = path.join(root, "public", hyperbookJson.logo);
+        
+        try {
+          await fs.access(bookPath);
+          logoPath = bookPath;
+        } catch (e) {
+          try {
+            await fs.access(publicPath);
+            logoPath = publicPath;
+          } catch (e2) {
+            // Not found in either location
+          }
+        }
+      } else {
+        // Relative path - check root folder, then book folder, then public folder
+        const rootPath = path.join(root, hyperbookJson.logo);
+        const bookPath = path.join(root, "book", hyperbookJson.logo);
+        const publicPath = path.join(root, "public", hyperbookJson.logo);
+        
+        try {
+          await fs.access(rootPath);
+          logoPath = rootPath;
+        } catch (e) {
+          try {
+            await fs.access(bookPath);
+            logoPath = bookPath;
+          } catch (e2) {
+            try {
+              await fs.access(publicPath);
+              logoPath = publicPath;
+            } catch (e3) {
+              // Not found in any location
+            }
+          }
+        }
+      }
+      
+      if (logoPath) {
+        try {
+          const { generateFavicons } = await import("./helpers/generate-favicons");
+          await generateFavicons(logoPath, rootOut, hyperbookJson, ASSETS_FOLDER);
+          console.log(
+            `${chalk.green(`[${prefix}]`)} Favicons generated successfully.`,
+          );
+        } catch (e) {
+          console.log(
+            `${chalk.yellow(`[${prefix}]`)} Warning: Could not generate favicons. Error: ${e instanceof Error ? e.message : String(e)}`,
+          );
+        }
+      } else {
+        console.log(
+          `${chalk.yellow(`[${prefix}]`)} Warning: Could not generate favicons. Logo file not found: ${hyperbookJson.logo}`,
+        );
+      }
+    }
+  }
+
   i = 1;
   for (let directive of directives) {
     const assetsDirectivePath = path.join(assetsPath, `directive-${directive}`);

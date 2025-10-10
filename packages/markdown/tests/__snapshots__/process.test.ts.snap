@@ -1,7 +1,7 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`process > should add showLineNumbers 1`] = `
-"<!doctype html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1,, interactive-widget=resizes-content"><title>Markdown Referenz - Hyperbook Dokumenation</title><meta property="og:title" value="Markdown Referenz - Hyperbook Dokumenation"><meta name="description" content="Dokumentation für Hyperbook erstellt mit Hyperbook"><meta property="og:description" content="Dokumentation für Hyperbook erstellt mit Hyperbook"><meta name="keywords"><link rel="stylesheet" href="assets/normalize.css"><style>
+"<!doctype html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1,, interactive-widget=resizes-content"><title>Markdown Referenz - Hyperbook Dokumenation</title><meta property="og:title" value="Markdown Referenz - Hyperbook Dokumenation"><meta name="description" content="Dokumentation für Hyperbook erstellt mit Hyperbook"><meta property="og:description" content="Dokumentation für Hyperbook erstellt mit Hyperbook"><meta name="keywords"><link rel="icon" type="image/x-icon" href="favicon.ico"><link rel="apple-touch-icon" sizes="180x180" href="assets/favicons/apple-touch-icon.png"><link rel="manifest" href="assets/favicons/manifest.webmanifest"><link rel="stylesheet" href="assets/normalize.css"><style>
 html,
 body {
   overflow: hidden;
@@ -63,7 +63,7 @@ HYPERBOOK_ASSETS = "assets/"
 `;
 
 exports[`process > should hide copy button for block code 1`] = `
-"<!doctype html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1,, interactive-widget=resizes-content"><title>Hi - My Hyperbook</title><meta property="og:title" value="Hi - My Hyperbook"><meta name="description" content="undefined"><meta property="og:description" content="undefined"><meta name="keywords"><link rel="stylesheet" href="/assets/normalize.css"><style>
+"<!doctype html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1,, interactive-widget=resizes-content"><title>Hi - My Hyperbook</title><meta property="og:title" value="Hi - My Hyperbook"><meta name="description" content="undefined"><meta property="og:description" content="undefined"><meta name="keywords"><link rel="icon" type="image/x-icon" href="/public/favicon.ico"><link rel="apple-touch-icon" sizes="180x180" href="/assets/favicons/apple-touch-icon.png"><link rel="manifest" href="/assets/favicons/manifest.webmanifest"><link rel="stylesheet" href="/assets/normalize.css"><style>
 html,
 body {
   overflow: hidden;
@@ -122,7 +122,7 @@ HYPERBOOK_ASSETS = "/assets/"
 `;
 
 exports[`process > should include copy button for block code 1`] = `
-"<!doctype html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1,, interactive-widget=resizes-content"><title>Hi - My Hyperbook</title><meta property="og:title" value="Hi - My Hyperbook"><meta name="description" content="undefined"><meta property="og:description" content="undefined"><meta name="keywords"><link rel="stylesheet" href="/assets/normalize.css"><style>
+"<!doctype html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1,, interactive-widget=resizes-content"><title>Hi - My Hyperbook</title><meta property="og:title" value="Hi - My Hyperbook"><meta name="description" content="undefined"><meta property="og:description" content="undefined"><meta name="keywords"><link rel="icon" type="image/x-icon" href="/public/favicon.ico"><link rel="apple-touch-icon" sizes="180x180" href="/assets/favicons/apple-touch-icon.png"><link rel="manifest" href="/assets/favicons/manifest.webmanifest"><link rel="stylesheet" href="/assets/normalize.css"><style>
 html,
 body {
   overflow: hidden;
@@ -181,7 +181,7 @@ HYPERBOOK_ASSETS = "/assets/"
 `;
 
 exports[`process > should include copy button for inline code 1`] = `
-"<!doctype html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1,, interactive-widget=resizes-content"><title>Hi - My Hyperbook</title><meta property="og:title" value="Hi - My Hyperbook"><meta name="description" content="undefined"><meta property="og:description" content="undefined"><meta name="keywords"><link rel="stylesheet" href="/assets/normalize.css"><style>
+"<!doctype html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1,, interactive-widget=resizes-content"><title>Hi - My Hyperbook</title><meta property="og:title" value="Hi - My Hyperbook"><meta name="description" content="undefined"><meta property="og:description" content="undefined"><meta name="keywords"><link rel="icon" type="image/x-icon" href="/public/favicon.ico"><link rel="apple-touch-icon" sizes="180x180" href="/assets/favicons/apple-touch-icon.png"><link rel="manifest" href="/assets/favicons/manifest.webmanifest"><link rel="stylesheet" href="/assets/normalize.css"><style>
 html,
 body {
   overflow: hidden;
@@ -238,7 +238,7 @@ HYPERBOOK_ASSETS = "/assets/"
 `;
 
 exports[`process > should not include copy button for inline code 1`] = `
-"<!doctype html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1,, interactive-widget=resizes-content"><title>Hi - My Hyperbook</title><meta property="og:title" value="Hi - My Hyperbook"><meta name="description" content="undefined"><meta property="og:description" content="undefined"><meta name="keywords"><link rel="stylesheet" href="/assets/normalize.css"><style>
+"<!doctype html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1,, interactive-widget=resizes-content"><title>Hi - My Hyperbook</title><meta property="og:title" value="Hi - My Hyperbook"><meta name="description" content="undefined"><meta property="og:description" content="undefined"><meta name="keywords"><link rel="icon" type="image/x-icon" href="/public/favicon.ico"><link rel="apple-touch-icon" sizes="180x180" href="/assets/favicons/apple-touch-icon.png"><link rel="manifest" href="/assets/favicons/manifest.webmanifest"><link rel="stylesheet" href="/assets/normalize.css"><style>
 html,
 body {
   overflow: hidden;
@@ -295,7 +295,7 @@ HYPERBOOK_ASSETS = "/assets/"
 `;
 
 exports[`process > should result in a heading with a colon 1`] = `
-"<!doctype html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1,, interactive-widget=resizes-content"><title>Hi - My Hyperbook</title><meta property="og:title" value="Hi - My Hyperbook"><meta name="description" content="undefined"><meta property="og:description" content="undefined"><meta name="keywords"><link rel="stylesheet" href="/assets/normalize.css"><style>
+"<!doctype html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1,, interactive-widget=resizes-content"><title>Hi - My Hyperbook</title><meta property="og:title" value="Hi - My Hyperbook"><meta name="description" content="undefined"><meta property="og:description" content="undefined"><meta name="keywords"><link rel="icon" type="image/x-icon" href="/public/favicon.ico"><link rel="apple-touch-icon" sizes="180x180" href="/assets/favicons/apple-touch-icon.png"><link rel="manifest" href="/assets/favicons/manifest.webmanifest"><link rel="stylesheet" href="/assets/normalize.css"><style>
 html,
 body {
   overflow: hidden;
@@ -354,7 +354,7 @@ HYPERBOOK_ASSETS = "/assets/"
 `;
 
 exports[`process > should result in two link 1`] = `
-"<!doctype html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1,, interactive-widget=resizes-content"><title>Hi - My Hyperbook</title><meta property="og:title" value="Hi - My Hyperbook"><meta name="description" content="undefined"><meta property="og:description" content="undefined"><meta name="keywords"><link rel="stylesheet" href="/assets/normalize.css"><style>
+"<!doctype html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1,, interactive-widget=resizes-content"><title>Hi - My Hyperbook</title><meta property="og:title" value="Hi - My Hyperbook"><meta name="description" content="undefined"><meta property="og:description" content="undefined"><meta name="keywords"><link rel="icon" type="image/x-icon" href="/public/favicon.ico"><link rel="apple-touch-icon" sizes="180x180" href="/assets/favicons/apple-touch-icon.png"><link rel="manifest" href="/assets/favicons/manifest.webmanifest"><link rel="stylesheet" href="/assets/normalize.css"><style>
 html,
 body {
   overflow: hidden;
@@ -418,7 +418,7 @@ HYPERBOOK_ASSETS = "/assets/"
 `;
 
 exports[`process > should transform 1`] = `
-"<!doctype html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1,, interactive-widget=resizes-content"><title>Hi - My Hyperbook</title><meta property="og:title" value="Hi - My Hyperbook"><meta name="description" content="undefined"><meta property="og:description" content="undefined"><meta name="keywords"><link rel="stylesheet" href="/assets/normalize.css"><style>
+"<!doctype html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1,, interactive-widget=resizes-content"><title>Hi - My Hyperbook</title><meta property="og:title" value="Hi - My Hyperbook"><meta name="description" content="undefined"><meta property="og:description" content="undefined"><meta name="keywords"><link rel="icon" type="image/x-icon" href="/public/favicon.ico"><link rel="apple-touch-icon" sizes="180x180" href="/assets/favicons/apple-touch-icon.png"><link rel="manifest" href="/assets/favicons/manifest.webmanifest"><link rel="stylesheet" href="/assets/normalize.css"><style>
 html,
 body {
   overflow: hidden;
@@ -513,7 +513,7 @@ HYPERBOOK_ASSETS = "/assets/"
 `;
 
 exports[`process > should transfrom complex context 1`] = `
-"<!doctype html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1,, interactive-widget=resizes-content"><title>Markdown Referenz - Hyperbook Dokumenation</title><meta property="og:title" value="Markdown Referenz - Hyperbook Dokumenation"><meta name="description" content="Dokumentation für Hyperbook erstellt mit Hyperbook"><meta property="og:description" content="Dokumentation für Hyperbook erstellt mit Hyperbook"><meta name="keywords"><link rel="stylesheet" href="assets/normalize.css"><style>
+"<!doctype html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1,, interactive-widget=resizes-content"><title>Markdown Referenz - Hyperbook Dokumenation</title><meta property="og:title" value="Markdown Referenz - Hyperbook Dokumenation"><meta name="description" content="Dokumentation für Hyperbook erstellt mit Hyperbook"><meta property="og:description" content="Dokumentation für Hyperbook erstellt mit Hyperbook"><meta name="keywords"><link rel="icon" type="image/x-icon" href="favicon.ico"><link rel="apple-touch-icon" sizes="180x180" href="assets/favicons/apple-touch-icon.png"><link rel="manifest" href="assets/favicons/manifest.webmanifest"><link rel="stylesheet" href="assets/normalize.css"><style>
 html,
 body {
   overflow: hidden;
