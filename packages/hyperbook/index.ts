@@ -6,9 +6,13 @@ import checkForUpdate from "update-check";
 import { runBuildProject } from "./build";
 import { runDev } from "./dev";
 import { getPkgManager } from "./helpers/get-pkg-manager";
-import { hyperproject } from "@hyperbook/fs";
+import { hyperproject, setFileSystemAdapter, setPathAdapter, nodeFileSystemAdapter, nodePathAdapter } from "@hyperbook/fs";
 import { runNew } from "./new";
 import packageJson from "./package.json";
+
+// Initialize filesystem adapters for Node.js environment
+setFileSystemAdapter(nodeFileSystemAdapter);
+setPathAdapter(nodePathAdapter);
 
 const program = new Command();
 
