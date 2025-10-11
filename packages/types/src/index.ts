@@ -34,7 +34,7 @@ export type Glossary = Record<string, Term[]>;
 
 export type Language = "de" | "en" | "fr" | "es" | "it" | "pt" | "nl";
 
-export type Layout = "default" | "wide";
+export type Layout = "default" | "wide" | "standalone";
 
 export type HyperbookPageFrontmatter = {
   name: string;

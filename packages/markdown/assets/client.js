@@ -274,9 +274,21 @@ var hyperbook = (function () {
     initBookmarks(root);
   }
 
+  // Check for standalone layout URL parameter
+  function checkStandaloneMode() {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('standalone') === 'true') {
+      const mainGrid = document.querySelector('.main-grid');
+      if (mainGrid && !mainGrid.classList.contains('layout-standalone')) {
+        mainGrid.classList.add('layout-standalone');
+      }
+    }
+  }
+
   // Initialize existing elements on document load
   document.addEventListener("DOMContentLoaded", () => {
     init(document);
+    checkStandaloneMode();
   });
 
   // Observe for new elements added to the DOM

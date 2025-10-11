@@ -42,7 +42,7 @@ Hier sind die Eigenschaften, die im Frontmatter gesetzt werden können:
 | next        | Ein absoluter Pfad zur nächsten Seite or ein absoluter Pfad zur permaid z. B. /@/audio. Dies überschreibt index und hide. Du kannst außerdem nichts setzen, sodass der Button versteckt wird.   |
 | hide        | Verstecke die Seite von der Navigation.                                                                                                        |
 | toc         | Zeige ein Inhaltsverzeichnis. Diese ist standardmäßig aktiviert für Seiten und deaktiviert für Begriffe im Glossar.                            |
-| layout      | Wähle das Seitenlayout. Optionen: `default` (Standardlayout mit Seitenleiste) oder `wide` (Inhalt in voller Breite mit Navigation immer im Drawer-Modus) |
+| layout      | Wähle das Seitenlayout. Optionen: `default` (Standardlayout mit Seitenleiste), `wide` (Inhalt in voller Breite mit Navigation im Drawer-Modus) oder `standalone` (nur Inhalt, versteckt alle Navigation - ideal für iframe-Einbettung). Das standalone Layout kann auch über URL-Parameter aktiviert werden: `?standalone=true` |
 | qrcode | Zeigt ein Icon, um einen QR-Code zur Seite anzuzeigen |
 | styles            | Hier können Links zu eigenen CSS-Styles gesetzt werden. |
 | scripts            | Hier können Links zu eigenen JavaScript-Dateien gesetzt werden. |

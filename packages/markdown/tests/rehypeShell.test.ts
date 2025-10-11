@@ -62,6 +62,7 @@ describe("rehypeShell", () => {
     const value = toHtml("", defaultCtx).value;
     expect(value).toContain('class="main-grid"');
     expect(value).not.toContain("layout-wide");
+    expect(value).not.toContain("layout-standalone");
   });
 
   it("should apply wide layout class when layout is set to wide", () => {
@@ -93,5 +94,21 @@ describe("rehypeShell", () => {
     const value = toHtml("", defaultExplicitCtx).value;
     expect(value).toContain('class="main-grid"');
     expect(value).not.toContain("layout-wide");
+    expect(value).not.toContain("layout-standalone");
+  });
+
+  it("should apply standalone layout class when layout is set to standalone", () => {
+    const standaloneCtx: HyperbookContext = {
+      ...ctx,
+      navigation: {
+        ...ctx.navigation,
+        current: {
+          ...ctx.navigation.current!,
+          layout: "standalone",
+        },
+      },
+    };
+    const value = toHtml("", standaloneCtx).value;
+    expect(value).toContain('class="main-grid layout-standalone"');
   });
 });

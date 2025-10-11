@@ -830,3 +830,25 @@ nav.toc li.level-3 {
   padding: 20px 40px;
   max-width: 100%;
 }
+
+/* Standalone layout: content only, no navigation or header (for iframe embedding) */
+.main-grid.layout-standalone {
+  grid-template-columns: 1fr;
+  grid-template-areas: "article";
+}
+
+.main-grid.layout-standalone header,
+.main-grid.layout-standalone .sidebar {
+  display: none;
+}
+
+.main-grid.layout-standalone main {
+  padding: 20px 40px;
+  max-width: 100%;
+}
+
+.main-grid.layout-standalone .jump-container,
+.main-grid.layout-standalone .meta,
+.main-grid.layout-standalone #custom-links-footer {
+  display: none;
+}

@@ -33,7 +33,7 @@ Here are the properties you can set in the frontmatter:
 | next        | The absoulte path to the next page or a absolute path to a permaid e.g. /@/audio. This overrides index and hide. You can also set it to nothing and it will hide the next button. |
 | hide        | Hides the page from the navigation                                                                                                  |
 | toc         | Show or hide a table of content for the page. This is on for pages and off for glossary entries by default                          |
-| layout      | Choose the page layout. Options: `default` (standard layout with sidebar) or `wide` (full-width content with navigation always in drawer mode) |
+| layout      | Choose the page layout. Options: `default` (standard layout with sidebar), `wide` (full-width content with navigation in drawer mode), or `standalone` (content only, hides all navigation - ideal for iframe embedding). The standalone layout can also be activated via URL parameter: `?standalone=true` |
 | styles            | Here you can add Links to custom CSS files. |
 | scripts            | Here you can add links to custom JavaScript files. |
 | qrcode | Shows an icon, which opens a qr code to this page. |

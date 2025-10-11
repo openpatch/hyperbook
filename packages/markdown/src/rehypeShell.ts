@@ -982,7 +982,12 @@ export default (ctx: HyperbookContext) => () => {
   return (tree: Root, file: VFile) => {
     const originalChildren = tree.children as ElementContent[];
     const layout = ctx.navigation.current?.layout || "default";
-    const mainGridClass = layout === "wide" ? "main-grid layout-wide" : "main-grid";
+    let mainGridClass = "main-grid";
+    if (layout === "wide") {
+      mainGridClass = "main-grid layout-wide";
+    } else if (layout === "standalone") {
+      mainGridClass = "main-grid layout-standalone";
+    }
     
     tree.children = [
       {
