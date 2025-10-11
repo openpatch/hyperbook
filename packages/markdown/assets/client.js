@@ -274,9 +274,38 @@ var hyperbook = (function () {
     initBookmarks(root);
   }
 
+  // Check for standalone layout URL parameter or iframe context
+  function checkStandaloneMode() {
+    // Check if explicitly requested via URL parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const standaloneParam = urlParams.get('standalone') === 'true';
+    
+    // Check if page is inside an iframe
+    const isInIframe = window.self !== window.top;
+    
+    if (standaloneParam || isInIframe) {
+      const mainGrid = document.querySelector('.main-grid');
+      if (mainGrid && !mainGrid.classList.contains('layout-standalone')) {
+        mainGrid.classList.add('layout-standalone');
+      }
+      
+      // Hide TOC and QR code buttons when in standalone mode
+      const tocToggle = document.getElementById('toc-toggle');
+      if (tocToggle) {
+        tocToggle.style.display = 'none';
+      }
+      
+      const qrcodeOpen = document.getElementById('qrcode-open');
+      if (qrcodeOpen) {
+        qrcodeOpen.style.display = 'none';
+      }
+    }
+  }
+
   // Initialize existing elements on document load
   document.addEventListener("DOMContentLoaded", () => {
     init(document);
+    checkStandaloneMode();
   });
 
   // Observe for new elements added to the DOM

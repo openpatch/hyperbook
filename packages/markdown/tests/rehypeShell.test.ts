@@ -47,4 +47,68 @@ describe("rehypeShell", () => {
     expect(value).toContain("__I_AM_HERE");
     expect(value).not.toContain("__I_AM_NOT_HERE");
   });
+
+  it("should apply default layout class when no layout is specified", () => {
+    const defaultCtx: HyperbookContext = {
+      ...ctx,
+      navigation: {
+        ...ctx.navigation,
+        current: {
+          ...ctx.navigation.current!,
+          layout: undefined,
+        },
+      },
+    };
+    const value = toHtml("", defaultCtx).value;
+    expect(value).toContain('class="main-grid"');
+    expect(value).not.toContain("layout-wide");
+    expect(value).not.toContain("layout-standalone");
+  });
+
+  it("should apply wide layout class when layout is set to wide", () => {
+    const wideCtx: HyperbookContext = {
+      ...ctx,
+      navigation: {
+        ...ctx.navigation,
+        current: {
+          ...ctx.navigation.current!,
+          layout: "wide",
+        },
+      },
+    };
+    const value = toHtml("", wideCtx).value;
+    expect(value).toContain('class="main-grid layout-wide"');
+  });
+
+  it("should apply default layout class when layout is explicitly set to default", () => {
+    const defaultExplicitCtx: HyperbookContext = {
+      ...ctx,
+      navigation: {
+        ...ctx.navigation,
+        current: {
+          ...ctx.navigation.current!,
+          layout: "default",
+        },
+      },
+    };
+    const value = toHtml("", defaultExplicitCtx).value;
+    expect(value).toContain('class="main-grid"');
+    expect(value).not.toContain("layout-wide");
+    expect(value).not.toContain("layout-standalone");
+  });
+
+  it("should apply standalone layout class when layout is set to standalone", () => {
+    const standaloneCtx: HyperbookContext = {
+      ...ctx,
+      navigation: {
+        ...ctx.navigation,
+        current: {
+          ...ctx.navigation.current!,
+          layout: "standalone",
+        },
+      },
+    };
+    const value = toHtml("", standaloneCtx).value;
+    expect(value).toContain('class="main-grid layout-standalone"');
+  });
 });

@@ -38,6 +38,25 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.61.0
+
+::::tabs
+
+:::tab{title="New :rocket:" id="new"}
+
+- **Page Layout Options**: Added three layout options for Hyperbook pages:
+  - **Default Layout**: Standard layout with visible sidebar (unchanged behavior for existing pages)
+  - **Wide Layout**: Full-width content with drawer-only navigation, ideal for data tables, code examples, and galleries. [Learn more](/advanced/layouts)
+  - **Standalone Layout**: Content-only display (no header, sidebar, footer) perfect for iframe embedding. [Learn more](/advanced/layouts)
+- **Automatic Iframe Detection**: Pages automatically switch to standalone mode when embedded in iframes - zero configuration needed!
+- **Three Activation Methods for Standalone**: Can be activated via frontmatter (`layout: standalone`), URL parameter (`?standalone=true`), or automatic iframe detection
+- **Smart UI Hiding**: TOC toggle and QR code buttons automatically hide in standalone mode for cleaner embedded experience
+- **Backward Compatible**: All existing pages work unchanged without any configuration
+
+:::
+
+::::
+
 ## v0.60.0
 
 ::::tabs
