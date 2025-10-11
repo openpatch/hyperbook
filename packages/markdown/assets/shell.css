@@ -814,6 +814,9 @@ nav.toc li.level-3 {
   grid-template-areas:
     "header"
     "article";
+
+
+  --main-width: 100%;
 }
 
 .main-grid.layout-wide .sidebar {
@@ -836,6 +839,16 @@ nav.toc li.level-3 {
   grid-template-columns: 1fr;
   grid-template-rows: 1fr;
   grid-template-areas: "article";
+
+  --main-width: 100%;
+
+  #toc-toggle {
+    top: inherit;
+  }
+
+  #qrcode-open {
+    top: 90px;
+  }
 }
 
 .main-grid.layout-standalone header,
