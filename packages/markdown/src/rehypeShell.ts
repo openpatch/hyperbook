@@ -981,12 +981,20 @@ const makeCustomLinksFooter = (ctx: HyperbookContext) => {
 export default (ctx: HyperbookContext) => () => {
   return (tree: Root, file: VFile) => {
     const originalChildren = tree.children as ElementContent[];
+    const layout = ctx.navigation.current?.layout || "default";
+    let mainGridClass = "main-grid";
+    if (layout === "wide") {
+      mainGridClass = "main-grid layout-wide";
+    } else if (layout === "standalone") {
+      mainGridClass = "main-grid layout-standalone";
+    }
+    
     tree.children = [
       {
         type: "element",
         tagName: "div",
         properties: {
-          class: "main-grid",
+          class: mainGridClass,
         },
         children: [
           ...makeHeaderElements(ctx),
