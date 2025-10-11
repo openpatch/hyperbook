@@ -1,7 +1,7 @@
 ---
 name: Wide Layout Demo
 layout: wide
-index: 10
+hide: true
 lang: de
 ---
 

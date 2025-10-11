@@ -1,7 +1,7 @@
 ---
 name: Standalone Layout Demo
 layout: standalone
-index: 11
+hide: true
 lang: de
 ---
 
