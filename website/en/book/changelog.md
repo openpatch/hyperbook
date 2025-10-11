@@ -38,6 +38,20 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.61.1
+
+::::tabs
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+- Fixed an issue where the width and height of nodes were not being saved correctly in Learning Maps.
+- Improved button labels for topics in Learning Maps for better clarity and usability.
+- Resolved a bug that prevented the "needs" and "optional" properties from being set in the Learning Maps editor.
+
+:::
+
+::::
+
 ## v0.61.0
 
 ::::tabs
