@@ -69,8 +69,9 @@ Nur-Inhalts-Anzeige mit allen versteckten Navigations- und UI-Elementen, perfekt
 **Merkmale:**
 - Keine Header-, Seitenleisten- oder Footer-Elemente
 - Saubere, ablenkungsfreie Inhalte
-- Kann über Frontmatter oder URL-Parameter aktiviert werden
+- Kann über Frontmatter, URL-Parameter oder automatisch in iframes aktiviert werden
 - Entwickelt für die Einbettung in externe Seiten
+- Versteckt automatisch TOC- und QR-Code-Buttons
 
 **Verwendungsmethode 1: Frontmatter**
 ```md
@@ -85,7 +86,16 @@ layout: standalone
 <iframe src="https://ihr-hyperbook.com/beliebige-seite?standalone=true"></iframe>
 ```
 
-Die URL-Parameter-Methode ermöglicht die Einbettung jeder Hyperbook-Seite ohne Änderung der Quelle.
+**Verwendungsmethode 3: Automatische Erkennung** (iframe-Einbettung)
+
+Wenn eine Hyperbook-Seite in einem iframe eingebettet wird, wechselt sie automatisch in den Standalone-Modus - keine Konfiguration erforderlich! Dies ermöglicht eine nahtlose Einbettung ohne URL-Parameter oder Frontmatter-Änderungen.
+
+```html
+<!-- Betten Sie einfach eine beliebige Seite ein - Standalone-Modus wird automatisch aktiviert -->
+<iframe src="https://ihr-hyperbook.com/beliebige-seite"></iframe>
+```
+
+Die automatische Erkennung sorgt für saubere, ablenkungsfreie Inhalte bei iframe-Einbettungen und behält gleichzeitig die volle Funktionalität bei, wenn Seiten direkt aufgerufen werden.
 
 **Am besten für:**
 - Lernmanagementsystem (LMS) Integration

@@ -68,8 +68,9 @@ Content-only display with all navigation and UI elements hidden, perfect for ifr
 **Features:**
 - No header, sidebar, or footer elements
 - Clean, distraction-free content
-- Can be activated via frontmatter or URL parameter
+- Can be activated via frontmatter, URL parameter, or automatically when in iframe
 - Designed for embedding in external sites
+- Automatically hides TOC and QR code buttons
 
 **Usage Method 1: Frontmatter**
 ```md
@@ -84,7 +85,16 @@ layout: standalone
 <iframe src="https://your-hyperbook.com/any-page?standalone=true"></iframe>
 ```
 
-The URL parameter method allows embedding any Hyperbook page without modifying its source.
+**Usage Method 3: Automatic Detection** (iframe embedding)
+
+When a Hyperbook page is embedded in an iframe, it automatically switches to standalone mode - no configuration needed! This provides seamless embedding without requiring URL parameters or frontmatter changes.
+
+```html
+<!-- Just embed any page - standalone mode activates automatically -->
+<iframe src="https://your-hyperbook.com/any-page"></iframe>
+```
+
+The automatic detection ensures clean, distraction-free content for iframe embeds while maintaining full functionality when pages are accessed directly.
 
 **Best for:**
 - Learning Management System (LMS) integration
