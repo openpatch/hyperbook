@@ -834,6 +834,7 @@ nav.toc li.level-3 {
 /* Standalone layout: content only, no navigation or header (for iframe embedding) */
 .main-grid.layout-standalone {
   grid-template-columns: 1fr;
+  grid-template-rows: 1fr;
   grid-template-areas: "article";
 }
 
