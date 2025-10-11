@@ -807,3 +807,26 @@ nav.toc li.level-3 {
   flex-shrink: 0;
   /* Prevent caption from shrinking */
 }
+
+/* Wide layout: full width content with drawer-only navigation */
+.main-grid.layout-wide {
+  grid-template-columns: 1fr;
+  grid-template-areas:
+    "header"
+    "article";
+}
+
+.main-grid.layout-wide .sidebar {
+  display: none;
+}
+
+.main-grid.layout-wide .mobile-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.main-grid.layout-wide main {
+  padding: 20px 40px;
+  max-width: 100%;
+}

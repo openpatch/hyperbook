@@ -34,6 +34,8 @@ export type Glossary = Record<string, Term[]>;
 
 export type Language = "de" | "en" | "fr" | "es" | "it" | "pt" | "nl";
 
+export type Layout = "default" | "wide";
+
 export type HyperbookPageFrontmatter = {
   name: string;
   permaid?: string;
@@ -48,6 +50,7 @@ export type HyperbookPageFrontmatter = {
   toc?: boolean;
   next?: string;
   prev?: string;
+  layout?: Layout;
 };
 
 export type HyperbookSectionFrontmatter = HyperbookPageFrontmatter & {
