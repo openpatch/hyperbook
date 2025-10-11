@@ -1,5 +1,11 @@
 # @hyperbook/web-component-learningmap
 
+## 0.2.1
+
+### Patch Changes
+
+- [`e7fa21c`](https://github.com/openpatch/hyperbook/commit/e7fa21c76bc94b80542141daae2e0b83ce1074c4) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix saving width and height in learningmaps
+
 ## 0.2.0
 
 ### Minor Changes
