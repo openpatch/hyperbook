@@ -5,7 +5,7 @@ import { EditorDrawerTaskContent } from "./EditorDrawerTaskContent";
 import { EditorDrawerTopicContent } from "./EditorDrawerTopicContent";
 import { EditorDrawerImageContent } from "./EditorDrawerImageContent";
 import { EditorDrawerTextContent } from "./EditorDrawerTextContent";
-import { NodeData } from "./types";
+import { Completion, NodeData } from "./types";
 import { getTranslations } from "./translations";
 
 interface EditorDrawerProps {
@@ -54,31 +54,31 @@ export const EditorDrawer: React.FC<EditorDrawerProps> = ({
   // Completion Needs
   const handleCompletionNeedsChange = (idx: number, id: string) => {
     if (!localNode) return;
-    const needs = [...(localNode.data.completion?.needs || [])];
-    needs[idx] = { id };
+    const needs: Completion["needs"] = [...(localNode.data.completion?.needs || [])];
+    needs[idx] = id;
     handleFieldChange("completion", { ...(localNode.data.completion || {}), needs });
   };
   const addCompletionNeed = () => {
     if (!localNode) return;
-    const needs = [...(localNode.data.completion?.needs || []), { id: "" }];
+    const needs: Completion["needs"] = [...(localNode.data.completion?.needs || []), ""];
     handleFieldChange("completion", { ...(localNode.data.completion || {}), needs });
   };
   const removeCompletionNeed = (idx: number) => {
     if (!localNode) return;
-    const needs = (localNode.data.completion?.needs || []).filter((_: any, i: number) => i !== idx);
+    const needs: Completion["needs"] = (localNode.data.completion?.needs || []).filter((_: any, i: number) => i !== idx);
     handleFieldChange("completion", { ...(localNode.data.completion || {}), needs });
   };
 
   // Completion Optional
   const handleCompletionOptionalChange = (idx: number, id: string) => {
     if (!localNode) return;
-    const optional = [...(localNode.data.completion?.optional || [])];
-    optional[idx] = { id };
+    const optional: Completion["optional"] = [...(localNode.data.completion?.optional || [])];
+    optional[idx] = id;
     handleFieldChange("completion", { ...(localNode.data.completion || {}), optional });
   };
   const addCompletionOptional = () => {
     if (!localNode) return;
-    const optional = [...(localNode.data.completion?.optional || []), { id: "" }];
+    const optional: Completion["optional"] = [...(localNode.data.completion?.optional || []), ""];
     handleFieldChange("completion", { ...(localNode.data.completion || {}), optional });
   };
   const removeCompletionOptional = (idx: number) => {

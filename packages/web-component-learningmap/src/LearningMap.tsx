@@ -133,8 +133,6 @@ export function LearningMap({
 
   const parsedRoadmap = parseRoadmapData(roadmapData);
 
-  console.log(initialState);
-
   useEffect(() => {
     async function loadRoadmap() {
       const nodesArr = Array.isArray(parsedRoadmap?.nodes) ? parsedRoadmap.nodes : [];
@@ -143,19 +141,12 @@ export function LearningMap({
       setSettings(parsedRoadmap?.settings || {});
 
       let rawNodes = nodesArr.map((n) => {
-        let zIndex;
-        if (n.type === "image") {
-          zIndex = -2
-        } else if (n.type === "text") {
-          zIndex = -1
-        }
         return {
           ...n,
           draggable: false,
           connectable: false,
           selectable: isInteractableNode(n),
           focusable: isInteractableNode(n),
-          zIndex,
           data: {
             ...n.data,
             state: initialState?.nodes?.[n.id]?.state,

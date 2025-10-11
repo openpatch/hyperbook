@@ -18,14 +18,14 @@ export interface Translations {
   download: string;
   open: string;
   exportAsSVG: string;
-  
+
   // Control buttons
   undo: string;
   redo: string;
   reset: string;
   help: string;
   unsavedChanges: string;
-  
+
   // Keyboard shortcuts
   keyboardShortcuts: string;
   action: string;
@@ -45,7 +45,7 @@ export interface Translations {
     selectMultipleNodes: string;
     showHelp: string;
   };
-  
+
   // Drawer titles
   editTask: string;
   editTopic: string;
@@ -53,7 +53,7 @@ export interface Translations {
   editText: string;
   backgroundSettings: string;
   editEdge: string;
-  
+
   // Form labels
   nodeColor: string;
   label: string;
@@ -82,7 +82,7 @@ export interface Translations {
   edgeWidth: string;
   edgeType: string;
   animated: string;
-  
+
   // Placeholders
   placeholderNodeLabel: string;
   placeholderShortSummary: string;
@@ -93,17 +93,17 @@ export interface Translations {
   placeholderOptionalPassword: string;
   placeholderBackgroundText: string;
   selectNode: string;
-  
+
   // Buttons
   deleteNode: string;
   saveChanges: string;
   deleteEdge: string;
-  
+
   // Messages
   openFileWarning: string;
   failedToLoadFile: string;
   failedToExportSVG: string;
-  
+
   // Color options
   blue: string;
   yellow: string;
@@ -113,14 +113,14 @@ export interface Translations {
   red: string;
   black: string;
   white: string;
-  
+
   // Node defaults
   newTask: string;
   newTopic: string;
   backgroundTextDefault: string;
   noText: string;
   untitled: string;
-  
+
   // Multi-node panel
   alignLeftHorizontal: string;
   alignCenterHorizontal: string;
@@ -130,14 +130,14 @@ export interface Translations {
   alignBottomVertical: string;
   distributeHorizontally: string;
   distributeVertically: string;
-  
+
   // Edge types
   default: string;
   straight: string;
   step: string;
   smoothstep: string;
   floating: string;
-  
+
   // Viewer component (LearningMap)
   resourcesLabel: string;
   unlockConditionsMessage: string;
@@ -149,7 +149,11 @@ export interface Translations {
   mastered: string;
   completedTitle: string;
   masteredTitle: string;
-  
+
+  // Topic node automatic buttons
+  finishNeedsToComplete: string;
+  finishOptionalToMaster: string;
+
   // Language settings
   languageLabel: string;
   languageEnglish: string;
@@ -174,14 +178,14 @@ const en: Translations = {
   download: "Download",
   open: "Open",
   exportAsSVG: "Export as SVG",
-  
+
   // Control buttons
   undo: "Undo",
   redo: "Redo",
   reset: "Reset",
   help: "Help",
   unsavedChanges: "Unsaved Changes (Click to save or press Ctrl+S)",
-  
+
   // Keyboard shortcuts
   keyboardShortcuts: "Keyboard Shortcuts",
   action: "Action",
@@ -201,7 +205,7 @@ const en: Translations = {
     selectMultipleNodes: "Select Multiple Nodes",
     showHelp: "Show Help",
   },
-  
+
   // Drawer titles
   editTask: "Edit Task",
   editTopic: "Edit Topic",
@@ -209,7 +213,7 @@ const en: Translations = {
   editText: "Edit Text",
   backgroundSettings: "Background Settings",
   editEdge: "Edit Edge",
-  
+
   // Form labels
   nodeColor: "Node Color",
   label: "Label",
@@ -238,7 +242,7 @@ const en: Translations = {
   edgeWidth: "Width",
   edgeType: "Type",
   animated: "Animated",
-  
+
   // Placeholders
   placeholderNodeLabel: "Node label",
   placeholderShortSummary: "Short summary",
@@ -249,17 +253,18 @@ const en: Translations = {
   placeholderOptionalPassword: "Optional password",
   placeholderBackgroundText: "Background Text",
   selectNode: "Select node...",
-  
+
   // Buttons
   deleteNode: "Delete Node",
   saveChanges: "Save Changes",
   deleteEdge: "Delete Edge",
-  
+
   // Messages
   openFileWarning: "Opening a file will replace your current map. Continue?",
-  failedToLoadFile: "Failed to load the file. Please make sure it is a valid roadmap JSON file.",
+  failedToLoadFile:
+    "Failed to load the file. Please make sure it is a valid roadmap JSON file.",
   failedToExportSVG: "Failed to export SVG: ",
-  
+
   // Color options
   blue: "Blue",
   yellow: "Yellow",
@@ -269,14 +274,14 @@ const en: Translations = {
   red: "Red",
   black: "Black",
   white: "White",
-  
+
   // Node defaults
   newTask: "New task",
   newTopic: "New topic",
   backgroundTextDefault: "Background Text",
   noText: "No Text",
   untitled: "Untitled",
-  
+
   // Multi-node panel
   alignLeftHorizontal: "Align Left Horizontal",
   alignCenterHorizontal: "Align Center Horizontal",
@@ -286,18 +291,20 @@ const en: Translations = {
   alignBottomVertical: "Align Bottom Vertical",
   distributeHorizontally: "Distribute Horizontally",
   distributeVertically: "Distribute Vertically",
-  
+
   // Edge types
   default: "Default",
   straight: "Straight",
   step: "Step",
   smoothstep: "Smooth Step",
   floating: "Floating",
-  
+
   // Viewer component (LearningMap)
   resourcesLabel: "Resources:",
-  unlockConditionsMessage: "Complete the following nodes first to unlock this one:",
-  completionNeedsMessage: "The following nodes need to be completed or mastered before this one is completed:",
+  unlockConditionsMessage:
+    "Complete the following nodes first to unlock this one:",
+  completionNeedsMessage:
+    "The following nodes need to be completed or mastered before this one is completed:",
   locked: "Locked",
   markAsStarted: "Mark as Started",
   markAsCompleted: "Mark as Completed",
@@ -305,7 +312,11 @@ const en: Translations = {
   mastered: "Mastered",
   completedTitle: "Completed",
   masteredTitle: "Mastered",
-  
+
+  // Topic node automatic buttons
+  finishNeedsToComplete: "Finish needs to complete",
+  finishOptionalToMaster: "Finish optional to master",
+
   // Language settings
   languageLabel: "Language",
   languageEnglish: "English",
@@ -330,14 +341,15 @@ const de: Translations = {
   download: "Herunterladen",
   open: "Öffnen",
   exportAsSVG: "Als SVG exportieren",
-  
+
   // Control buttons
   undo: "Rückgängig",
   redo: "Wiederholen",
   reset: "Zurücksetzen",
   help: "Hilfe",
-  unsavedChanges: "Ungespeicherte Änderungen (Klicken zum Speichern oder Strg+S drücken)",
-  
+  unsavedChanges:
+    "Ungespeicherte Änderungen (Klicken zum Speichern oder Strg+S drücken)",
+
   // Keyboard shortcuts
   keyboardShortcuts: "Tastaturkürzel",
   action: "Aktion",
@@ -357,7 +369,7 @@ const de: Translations = {
     selectMultipleNodes: "Mehrere Knoten auswählen",
     showHelp: "Hilfe anzeigen",
   },
-  
+
   // Drawer titles
   editTask: "Aufgabe bearbeiten",
   editTopic: "Thema bearbeiten",
@@ -365,7 +377,7 @@ const de: Translations = {
   editText: "Text bearbeiten",
   backgroundSettings: "Hintergrund-Einstellungen",
   editEdge: "Kante bearbeiten",
-  
+
   // Form labels
   nodeColor: "Knotenfarbe",
   label: "Bezeichnung",
@@ -394,7 +406,7 @@ const de: Translations = {
   edgeWidth: "Breite",
   edgeType: "Typ",
   animated: "Animiert",
-  
+
   // Placeholders
   placeholderNodeLabel: "Knotenbezeichnung",
   placeholderShortSummary: "Kurze Zusammenfassung",
@@ -405,17 +417,19 @@ const de: Translations = {
   placeholderOptionalPassword: "Optionales Passwort",
   placeholderBackgroundText: "Hintergrundtext",
   selectNode: "Knoten auswählen...",
-  
+
   // Buttons
   deleteNode: "Knoten löschen",
   saveChanges: "Änderungen speichern",
   deleteEdge: "Kante löschen",
-  
+
   // Messages
-  openFileWarning: "Das Öffnen einer Datei ersetzt Ihre aktuelle Karte. Fortfahren?",
-  failedToLoadFile: "Datei konnte nicht geladen werden. Bitte stellen Sie sicher, dass es sich um eine gültige Roadmap-JSON-Datei handelt.",
+  openFileWarning:
+    "Das Öffnen einer Datei ersetzt Ihre aktuelle Karte. Fortfahren?",
+  failedToLoadFile:
+    "Datei konnte nicht geladen werden. Bitte stellen Sie sicher, dass es sich um eine gültige Roadmap-JSON-Datei handelt.",
   failedToExportSVG: "SVG-Export fehlgeschlagen: ",
-  
+
   // Color options
   blue: "Blau",
   yellow: "Gelb",
@@ -425,14 +439,14 @@ const de: Translations = {
   red: "Rot",
   black: "Schwarz",
   white: "Weiß",
-  
+
   // Node defaults
   newTask: "Neue Aufgabe",
   newTopic: "Neues Thema",
   backgroundTextDefault: "Hintergrundtext",
   noText: "Kein Text",
   untitled: "Ohne Titel",
-  
+
   // Multi-node panel
   alignLeftHorizontal: "Horizontal links ausrichten",
   alignCenterHorizontal: "Horizontal zentrieren",
@@ -442,18 +456,20 @@ const de: Translations = {
   alignBottomVertical: "Vertikal unten ausrichten",
   distributeHorizontally: "Horizontal verteilen",
   distributeVertically: "Vertikal verteilen",
-  
+
   // Edge types
   default: "Standard",
   straight: "Gerade",
   step: "Stufe",
   smoothstep: "Weiche Stufe",
   floating: "Schwebend",
-  
+
   // Viewer component (LearningMap)
   resourcesLabel: "Ressourcen:",
-  unlockConditionsMessage: "Vervollständige zuerst die folgenden Knoten, um diesen freizuschalten:",
-  completionNeedsMessage: "Die folgenden Knoten müssen abgeschlossen oder gemeistert werden, bevor dieser abgeschlossen ist:",
+  unlockConditionsMessage:
+    "Vervollständige zuerst die folgenden Knoten, um diesen freizuschalten:",
+  completionNeedsMessage:
+    "Die folgenden Knoten müssen abgeschlossen oder gemeistert werden, bevor dieser abgeschlossen ist:",
   locked: "Gesperrt",
   markAsStarted: "Als begonnen markieren",
   markAsCompleted: "Als abgeschlossen markieren",
@@ -461,7 +477,11 @@ const de: Translations = {
   mastered: "Gemeistert",
   completedTitle: "Abgeschlossen",
   masteredTitle: "Gemeistert",
-  
+
+  // Topic node automatic buttons
+  finishNeedsToComplete: "Benötigtes abschließen",
+  finishOptionalToMaster: "Optionale zum Meistern abschließen",
+
   // Language settings
   languageLabel: "Sprache",
   languageEnglish: "Englisch",

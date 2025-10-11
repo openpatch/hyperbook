@@ -41,9 +41,22 @@ function getCompletionNeeds(node: Node<NodeData>, nodes: Node<NodeData>[]): Node
   return unmetNeeds;
 }
 
+function getCompletionOptional(node: Node<NodeData>, nodes: Node<NodeData>[]): Node<NodeData>[] {
+  const unmetOptional: Node<NodeData>[] = [];
+  if (node.data?.completion?.optional) {
+    node.data.completion.optional.forEach((optId: string) => {
+      const optNode = nodes.find(n => n.id === optId);
+      if (optNode && optNode.data?.state !== 'completed' && optNode.data?.state !== 'mastered') {
+        unmetOptional.push(optNode);
+      }
+    });
+  }
+  return unmetOptional;
+}
+
 export function Drawer({ open, onClose, onUpdate, node, nodes, onNodeClick, language = "en" }: DrawerProps) {
   const t = getTranslations(language);
-  
+
   if (!open) return null;
 
   const locked = node.data?.state === 'locked' || false;
@@ -54,6 +67,7 @@ export function Drawer({ open, onClose, onUpdate, node, nodes, onNodeClick, lang
 
   const unlockConditions = getUnlockConditions(node, nodes);
   const completionNeeds = getCompletionNeeds(node, nodes);
+  const completionOptional = getCompletionOptional(node, nodes);
 
   const handleStateChange = (newState: 'locked' | 'unlocked' | 'started' | 'completed') => () => {
     if (node.type === "topic" || locked) return;
@@ -125,20 +139,39 @@ export function Drawer({ open, onClose, onUpdate, node, nodes, onNodeClick, lang
           )}
         </div>
         <div className="drawer-footer">
-          {locked &&
-            <button className="drawer-button locked"><Lock /> {t.locked}</button>
-          }
-          {unlocked && (
-            <button className="drawer-button unlocked" onClick={handleStateChange("started")}>{t.markAsStarted}</button>
-          )}
-          {started && (
-            <button className="drawer-button started" onClick={handleStateChange("completed")}>{t.markAsCompleted}</button>
-          )}
-          {completed && (
-            <button className="drawer-button completed" disabled><CheckCircle /> {t.completedLabel}</button>
-          )}
-          {mastered && (
-            <button className="drawer-button mastered" disabled><StarCircle /> {t.mastered}</button>
+          {node.type === "topic" ? (
+            <>
+              {!locked && completionNeeds.length > 0 && (
+                <button className="drawer-button needs" disabled>{t.finishNeedsToComplete}</button>
+              )}
+              {!locked && completionNeeds.length === 0 && completionOptional.length > 0 && (
+                <button className="drawer-button optional" disabled>{t.finishOptionalToMaster}</button>
+              )}
+              {!locked && completionNeeds.length === 0 && completionOptional.length === 0 && (
+                <button className="drawer-button completed" disabled><CheckCircle /> {t.mastered}</button>
+              )}
+              {locked && (
+                <button className="drawer-button locked"><Lock /> {t.locked}</button>
+              )}
+            </>
+          ) : (
+            <>
+              {locked &&
+                <button className="drawer-button locked"><Lock /> {t.locked}</button>
+              }
+              {unlocked && (
+                <button className="drawer-button unlocked" onClick={handleStateChange("started")}>{t.markAsStarted}</button>
+              )}
+              {started && (
+                <button className="drawer-button started" onClick={handleStateChange("completed")}>{t.markAsCompleted}</button>
+              )}
+              {completed && (
+                <button className="drawer-button completed" disabled><CheckCircle /> {t.completedLabel}</button>
+              )}
+              {mastered && (
+                <button className="drawer-button mastered" disabled><StarCircle /> {t.mastered}</button>
+              )}
+            </>
           )}
         </div>
       </aside>

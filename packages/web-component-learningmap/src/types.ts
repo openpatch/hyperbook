@@ -10,15 +10,9 @@ export interface UnlockCondition {
   password?: string;
 }
 
-export interface CompletionNeed {
-  id: string;
-  source?: string;
-  target?: string;
-}
-
 export interface Completion {
-  needs?: CompletionNeed[];
-  optional?: CompletionNeed[];
+  needs?: string[];
+  optional?: string[];
 }
 
 export interface NodeData {

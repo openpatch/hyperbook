@@ -59,7 +59,7 @@ export function LearningMapEditor({
   language?: string;
   onChange?: (data: RoadmapData) => void;
 }) {
-  const { screenToFlowPosition, getViewport, setViewport } = useReactFlow();
+  const { screenToFlowPosition } = useReactFlow();
   const [roadmapState, setRoadmapState, { undo, redo, canUndo, canRedo, reset, resetInitialState }] = useUndoable<RoadmapData>({
     settings: {},
     version: 1,
@@ -76,7 +76,7 @@ export function LearningMapEditor({
   // Use language from settings if available, otherwise use prop
   const effectiveLanguage = settings?.language || language;
   const t = getTranslations(effectiveLanguage);
-  
+
   const keyboardShortcuts = [
     { action: t.shortcuts.save, shortcut: "Ctrl+S" },
     { action: t.shortcuts.undo, shortcut: "Ctrl+Z" },
@@ -350,6 +350,9 @@ export function LearningMapEditor({
         id: n.id,
         type: n.type,
         position: n.position,
+        width: n.width,
+        height: n.height,
+        zIndex: n.zIndex,
         data: n.data,
       })),
       edges: edges.filter((e) => !e.id.startsWith("debug-"))
