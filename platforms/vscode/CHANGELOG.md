@@ -1,5 +1,14 @@
 # @hyperbook/vscode-extension
 
+## 0.38.4
+
+### Patch Changes
+
+- [`0bfb0bd`](https://github.com/openpatch/hyperbook/commit/0bfb0bdfc3a2f4b8d5645765953784373de55ebf) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix GeoGebra not loading the correct file
+
+- Updated dependencies [[`0bfb0bd`](https://github.com/openpatch/hyperbook/commit/0bfb0bdfc3a2f4b8d5645765953784373de55ebf)]:
+  - @hyperbook/markdown@0.36.1
+
 ## 0.38.3
 
 ### Patch Changes

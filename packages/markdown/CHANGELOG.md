@@ -1,5 +1,11 @@
 # @hyperbook/markdown
 
+## 0.36.1
+
+### Patch Changes
+
+- [`0bfb0bd`](https://github.com/openpatch/hyperbook/commit/0bfb0bdfc3a2f4b8d5645765953784373de55ebf) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix GeoGebra not loading the correct file
+
 ## 0.36.0
 
 ### Minor Changes
