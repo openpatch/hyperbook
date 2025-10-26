@@ -46,6 +46,22 @@ export default (ctx: HyperbookContext) => () => {
           style: `max-height: ${height}px; max-width: ${width}px; aspect-ratio: ${width}/${height};`,
         };
 
+        let material: string | undefined = undefined;
+        let filename: string | undefined = undefined;
+        if (
+          src &&
+          src.startsWith("https://www.geogebra.org/") &&
+          !src.endsWith(".ggb")
+        ) {
+          material = src;
+        } else if (src) {
+          filename = ctx.makeUrl(
+            src,
+            "public",
+            ctx.navigation.current || undefined,
+          );
+        }
+
         const value = toText(node);
         data.hChildren = [
           {
@@ -56,13 +72,8 @@ export default (ctx: HyperbookContext) => () => {
               height: height,
               width: width,
               borderRadius: 8,
-              filename: src
-                ? ctx.makeUrl(
-                    src,
-                    "public",
-                    ctx.navigation.current || undefined,
-                  )
-                : undefined,
+              material: material,
+              filename: filename,
               language: ctx.config.language || "en",
               "data-id": id,
               showFullscreenButton,

@@ -38,6 +38,18 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.61.3
+
+::::tabs
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+- Changed last fix to keep backward compatibility.
+
+:::
+
+::::
+
 ## v0.61.2
 
 ::::tabs
