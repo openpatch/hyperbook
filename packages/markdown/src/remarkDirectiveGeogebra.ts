@@ -56,7 +56,7 @@ export default (ctx: HyperbookContext) => () => {
               height: height,
               width: width,
               borderRadius: 8,
-              material: src
+              filename: src
                 ? ctx.makeUrl(
                     src,
                     "public",

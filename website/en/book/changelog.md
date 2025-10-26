@@ -38,6 +38,18 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.61.2
+
+::::tabs
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+- Fixed GeoGebra not loading the correct file.
+
+:::
+
+::::
+
 ## v0.61.1
 
 ::::tabs
