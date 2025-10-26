@@ -1,5 +1,14 @@
 # @hyperbook/vscode-extension
 
+## 0.38.5
+
+### Patch Changes
+
+- [`18ef87a`](https://github.com/openpatch/hyperbook/commit/18ef87abfa7e98ed93e6c174040b4954add08cfc) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Change last fix to keep backward-compatability
+
+- Updated dependencies [[`18ef87a`](https://github.com/openpatch/hyperbook/commit/18ef87abfa7e98ed93e6c174040b4954add08cfc)]:
+  - @hyperbook/markdown@0.36.2
+
 ## 0.38.4
 
 ### Patch Changes

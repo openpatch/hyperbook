@@ -1,5 +1,11 @@
 # @hyperbook/markdown
 
+## 0.36.2
+
+### Patch Changes
+
+- [`18ef87a`](https://github.com/openpatch/hyperbook/commit/18ef87abfa7e98ed93e6c174040b4954add08cfc) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Change last fix to keep backward-compatability
+
 ## 0.36.1
 
 ### Patch Changes
