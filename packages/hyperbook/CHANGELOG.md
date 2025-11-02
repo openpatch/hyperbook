@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.62.0
+
+### Minor Changes
+
+- [`5373ec3`](https://github.com/openpatch/hyperbook/commit/5373ec312c2ede462422003300e325d3d8439dad) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Use learningmap web component for the real project
+
 ## 0.61.3
 
 ### Patch Changes
