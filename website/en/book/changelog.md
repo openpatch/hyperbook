@@ -38,6 +38,18 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.62.0
+
+::::tabs
+
+:::tab{title="New :rocket:" id="new"}
+
+- Use Learningmap web component from the new "@learningmap/web-component" package. This is best used together with the new Learningmap editor. [Learn more](/elements/learningmap)
+
+:::
+
+::::
+
 ## v0.61.3
 
 ::::tabs

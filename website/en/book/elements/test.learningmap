@@ -44,6 +44,7 @@
     {
       "id": "background-node3",
       "type": "image",
+      "zIndex": -1,
       "position": {
         "x": -180,
         "y": -45

@@ -26,7 +26,7 @@ export default (ctx: HyperbookContext) => () => {
         registerDirective(
           file,
           name,
-          ["client.js", "hyperbook-learningmap.umd.js"],
+          ["client.js", "learningmap.umd.js"],
           ["style.css", "web-component-learningmap.css"],
           [],
         );

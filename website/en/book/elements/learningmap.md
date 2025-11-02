@@ -12,10 +12,10 @@ The `learningmap` element lets you embed interactive learning roadmaps directly 
 To add a learning map, use the following Markdown block:
 
 ````markdown
-::learningmap{id="learningmap-example" height="600px" src="test.learningmap.json"}
+::learningmap{id="learningmap-example" height="600px" src="test.learningmap"}
 ````
 
-::learningmap{id="learningmap-example" height="600px" src="test.learningmap.json"}
+::learningmap{id="learningmap-example" height="600px" src="test.learningmap"}
 
 ## Attributes
 
@@ -27,4 +27,7 @@ To add a learning map, use the following Markdown block:
 
 You should use the learningmap editor to create and manage your learning maps. The editor provides a user-friendly interface to design your learning paths and export them as JSON files.
 
-[Open Learningmap Editor](https://learningmap.openpatch.org/editor)
+[Open Learningmap Editor](https://learningmap.app/create)
+
+You could also install the VSCode extension for Learningmap for editing learning maps on the fly.
+[Learningmap VSCode Extension](https://marketplace.visualstudio.com/items?itemName=openpatch.learningmap-studio)

@@ -193,8 +193,8 @@ async function postbuild() {
     {
       src: path.join(
         "./node_modules",
-        "@hyperbook",
-        "web-component-learningmap",
+        "@learningmap",
+        "web-component",
         "dist",
         "index.umd.js",
       ),
@@ -202,16 +202,16 @@ async function postbuild() {
         "./dist",
         "assets",
         "directive-learningmap",
-        "hyperbook-learningmap.umd.js",
+        "learningmap.umd.js",
       ),
     },
     {
       src: path.join(
         "./node_modules",
-        "@hyperbook",
-        "web-component-learningmap",
+        "@learningmap",
+        "web-component",
         "dist",
-        "web-component-learningmap.css",
+        "web-component.css",
       ),
       dst: path.join(
         "./dist",

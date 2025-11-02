@@ -12,10 +12,10 @@ Das `learningmap`-Element ermöglicht es dir, interaktive Lernpfade direkt in de
 Um eine Lernkarte hinzuzufügen, verwende folgenden Markdown-Block:
 
 ````markdown
-::learningmap{id="learningmap-example" height="600px" src="test.learningmap.json"}
+::learningmap{id="learningmap-example" height="600px" src="test.learningmap"}
 ````
 
-::learningmap{id="learningmap-example" height="600px" src="test.learningmap.json"}
+::learningmap{id="learningmap-example" height="600px" src="test.learningmap"}
 
 ## Attribute
 
@@ -27,4 +27,7 @@ Um eine Lernkarte hinzuzufügen, verwende folgenden Markdown-Block:
 
 Du solltest den Learningmap-Editor verwenden, um deine Lernkarten zu erstellen und zu verwalten. Der Editor bietet eine benutzerfreundliche Oberfläche, um Lernpfade zu gestalten und sie als JSON-Dateien zu exportieren.
 
-[Learningmap Editor öffnen](https://learningmap.openpatch.org/editor)
+[Learningmap Editor öffnen](https://learningmap.app/create)
+
+Du kannst auch die VSCode-Erweiterung für Learningmap installieren, um Lernkarten direkt in Visual Studio Code zu bearbeiten.
+[Learningmap VSCode-Erweiterung](https://marketplace.visualstudio.com/items?itemName=openpatch.learningmap-studio)
