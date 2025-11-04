@@ -33,14 +33,14 @@ async function generateLlmsTxt(
   version: string,
 ): Promise<void> {
   const lines: string[] = [];
-  
+
   // Add header with book name and version
   lines.push(`<SYSTEM>${hyperbookJson.name} - Version ${version}</SYSTEM>`);
   lines.push(""); // Empty line after header
-  
+
   // Get all book files once to avoid repeated file system operations
   const allFiles = await vfile.listForFolder(root, "book");
-  
+
   // Helper function to recursively process sections and pages
   const processSection = async (
     section: HyperbookSection,
@@ -50,7 +50,7 @@ async function generateLlmsTxt(
     if (section.hide) {
       return;
     }
-    
+
     // Add section header if it has content
     if (section.href && !section.isEmpty) {
       const file = allFiles.find((f) => f.path.href === section.href);
@@ -58,7 +58,7 @@ async function generateLlmsTxt(
         // Add section name as a header
         lines.push(`# ${section.name}`);
         lines.push("");
-        
+
         // Get the markdown content without frontmatter
         const content = file.markdown.content.trim();
         if (content) {
@@ -67,14 +67,14 @@ async function generateLlmsTxt(
         }
       }
     }
-    
+
     // Process nested pages
     if (section.pages) {
       for (const page of section.pages) {
         await processPage(page);
       }
     }
-    
+
     // Process nested sections
     if (section.sections) {
       for (const subsection of section.sections) {
@@ -82,20 +82,20 @@ async function generateLlmsTxt(
       }
     }
   };
-  
+
   const processPage = async (page: HyperbookPage): Promise<void> => {
     // Skip if hidden or empty
     if (page.hide || page.isEmpty) {
       return;
     }
-    
+
     if (page.href) {
       const file = allFiles.find((f) => f.path.href === page.href);
       if (file) {
         // Add page name as a header
         lines.push(`# ${page.name}`);
         lines.push("");
-        
+
         // Get the markdown content without frontmatter
         const content = file.markdown.content.trim();
         if (content) {
@@ -105,18 +105,52 @@ async function generateLlmsTxt(
       }
     }
   };
-  
+
   // Process root-level pages first
   for (const page of pagesAndSections.pages) {
     await processPage(page);
   }
-  
+
   // Process sections
   for (const section of pagesAndSections.sections) {
     await processSection(section);
   }
-  
+
   // Write the llms.txt file
+  lines.push(`
+When you are writing a hyperbook syntax you must use markdown plus the documented elements, also keep track of colons. Colons act like parentheses in programming languages. Every opening colon must have a closing colon. For example, in the syntax :bold text: the first colon opens the bold formatting and the second colon closes it. If there is a missing colon, it can lead to formatting errors or unexpected behavior in the rendered output. Always ensure that colons are properly paired to maintain the intended structure and appearance of your hyperbook content.
+
+Single colons are inline elements.
+
+Example: :t[Test]
+
+Double colons are block elements.
+
+Example: ::p5{src="sketch.js"}
+
+Triple colons are special elements that can contain other elements inside them.
+
+Example:
+
+:::::alert{info}
+
+::::tabs
+
+:::tab{title="JavaScript"}
+
+Hi
+
+:::
+
+
+::::
+
+:::::
+
+When you want to nest elements you need to increase the number of colons by one for each level of nesting. The outer level should have the most colons.
+
+Also you need to use unique ids when the element supports it.
+`);
   const llmsTxtContent = lines.join("\n");
   await fs.writeFile(path.join(rootOut, "llms.txt"), llmsTxtContent);
 }
@@ -492,17 +526,17 @@ async function runBuild(
 
   if (!faviconExists && hyperbookJson.logo) {
     console.log(`${chalk.blue(`[${prefix}]`)} Generating favicons from logo.`);
-    
+
     // Only generate if logo is a local file (not a URL)
     if (!hyperbookJson.logo.includes("://")) {
       let logoPath: string | null = null;
-      
+
       // Resolve logo path by checking multiple locations
       if (hyperbookJson.logo.startsWith("/")) {
         // Absolute path starting with / - check book folder, then public folder
         const bookPath = path.join(root, "book", hyperbookJson.logo);
         const publicPath = path.join(root, "public", hyperbookJson.logo);
-        
+
         try {
           await fs.access(bookPath);
           logoPath = bookPath;
@@ -519,7 +553,7 @@ async function runBuild(
         const rootPath = path.join(root, hyperbookJson.logo);
         const bookPath = path.join(root, "book", hyperbookJson.logo);
         const publicPath = path.join(root, "public", hyperbookJson.logo);
-        
+
         try {
           await fs.access(rootPath);
           logoPath = rootPath;
@@ -537,11 +571,18 @@ async function runBuild(
           }
         }
       }
-      
+
       if (logoPath) {
         try {
-          const { generateFavicons } = await import("./helpers/generate-favicons");
-          await generateFavicons(logoPath, rootOut, hyperbookJson, ASSETS_FOLDER);
+          const { generateFavicons } = await import(
+            "./helpers/generate-favicons"
+          );
+          await generateFavicons(
+            logoPath,
+            rootOut,
+            hyperbookJson,
+            ASSETS_FOLDER,
+          );
           console.log(
             `${chalk.green(`[${prefix}]`)} Favicons generated successfully.`,
           );
