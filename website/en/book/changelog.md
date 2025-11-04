@@ -38,6 +38,18 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.62.1
+
+::::tabs
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+- Fix SQLIde not loading custom database files.
+
+:::
+
+::::
+
 ## v0.62.0
 
 ::::tabs

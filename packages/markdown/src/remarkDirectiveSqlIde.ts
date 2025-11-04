@@ -71,7 +71,7 @@ export default (ctx: HyperbookContext) => () => {
             children: [
               {
                 type: "raw",
-                value: `{'id': '${id}', 'databaseURL': '${db}'}`,
+                value: `{'id': '${id}', 'databaseURL': '${ctx.makeUrl(db || "", "public")}'}`,
               },
               ...codes,
               {
