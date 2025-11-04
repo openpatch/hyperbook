@@ -11,6 +11,9 @@ import {
   Link,
   Hyperproject,
   HyperbookContext,
+  HyperbookJson,
+  HyperbookPage,
+  HyperbookSection,
   Navigation,
 } from "@hyperbook/types";
 import lunr from "lunr";
@@ -25,7 +28,7 @@ export const ASSETS_FOLDER = "__hyperbook_assets";
 async function generateLlmsTxt(
   root: string,
   rootOut: string,
-  hyperbookJson: any,
+  hyperbookJson: HyperbookJson,
   pagesAndSections: Pick<Navigation, "pages" | "sections" | "glossary">,
   version: string,
 ): Promise<void> {
@@ -35,9 +38,12 @@ async function generateLlmsTxt(
   lines.push(`<SYSTEM>${hyperbookJson.name} - Version ${version}</SYSTEM>`);
   lines.push(""); // Empty line after header
   
+  // Get all book files once to avoid repeated file system operations
+  const allFiles = await vfile.listForFolder(root, "book");
+  
   // Helper function to recursively process sections and pages
   const processSection = async (
-    section: any,
+    section: HyperbookSection,
     level: number = 0,
   ): Promise<void> => {
     // Skip if hidden
@@ -47,8 +53,7 @@ async function generateLlmsTxt(
     
     // Add section header if it has content
     if (section.href && !section.isEmpty) {
-      const files = await vfile.listForFolder(root, "book");
-      const file = files.find((f) => f.path.href === section.href);
+      const file = allFiles.find((f) => f.path.href === section.href);
       if (file) {
         // Add section name as a header
         lines.push(`# ${section.name}`);
@@ -78,15 +83,14 @@ async function generateLlmsTxt(
     }
   };
   
-  const processPage = async (page: any): Promise<void> => {
+  const processPage = async (page: HyperbookPage): Promise<void> => {
     // Skip if hidden or empty
     if (page.hide || page.isEmpty) {
       return;
     }
     
     if (page.href) {
-      const files = await vfile.listForFolder(root, "book");
-      const file = files.find((f) => f.path.href === page.href);
+      const file = allFiles.find((f) => f.path.href === page.href);
       if (file) {
         // Add page name as a header
         lines.push(`# ${page.name}`);
