@@ -93,6 +93,7 @@ export type HyperbookJson = {
   search?: boolean;
   qrcode?: boolean;
   toc?: boolean;
+  llms?: boolean;
   author?: {
     name?: string;
     url?: string;

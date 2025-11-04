@@ -280,6 +280,9 @@
             },
             "type": "array"
         },
+        "llms": {
+            "type": "boolean"
+        },
         "logo": {
             "type": "string"
         },

@@ -19,6 +19,104 @@ import packageJson from "./package.json";
 
 export const ASSETS_FOLDER = "__hyperbook_assets";
 
+/**
+ * Generates an llms.txt file by combining all markdown files in order
+ */
+async function generateLlmsTxt(
+  root: string,
+  rootOut: string,
+  hyperbookJson: any,
+  pagesAndSections: Pick<Navigation, "pages" | "sections" | "glossary">,
+  version: string,
+): Promise<void> {
+  const lines: string[] = [];
+  
+  // Add header with book name and version
+  lines.push(`<SYSTEM>${hyperbookJson.name} - Version ${version}</SYSTEM>`);
+  lines.push(""); // Empty line after header
+  
+  // Helper function to recursively process sections and pages
+  const processSection = async (
+    section: any,
+    level: number = 0,
+  ): Promise<void> => {
+    // Skip if hidden
+    if (section.hide) {
+      return;
+    }
+    
+    // Add section header if it has content
+    if (section.href && !section.isEmpty) {
+      const files = await vfile.listForFolder(root, "book");
+      const file = files.find((f) => f.path.href === section.href);
+      if (file) {
+        // Add section name as a header
+        lines.push(`# ${section.name}`);
+        lines.push("");
+        
+        // Get the markdown content without frontmatter
+        const content = file.markdown.content.trim();
+        if (content) {
+          lines.push(content);
+          lines.push(""); // Empty line after content
+        }
+      }
+    }
+    
+    // Process nested pages
+    if (section.pages) {
+      for (const page of section.pages) {
+        await processPage(page);
+      }
+    }
+    
+    // Process nested sections
+    if (section.sections) {
+      for (const subsection of section.sections) {
+        await processSection(subsection, level + 1);
+      }
+    }
+  };
+  
+  const processPage = async (page: any): Promise<void> => {
+    // Skip if hidden or empty
+    if (page.hide || page.isEmpty) {
+      return;
+    }
+    
+    if (page.href) {
+      const files = await vfile.listForFolder(root, "book");
+      const file = files.find((f) => f.path.href === page.href);
+      if (file) {
+        // Add page name as a header
+        lines.push(`# ${page.name}`);
+        lines.push("");
+        
+        // Get the markdown content without frontmatter
+        const content = file.markdown.content.trim();
+        if (content) {
+          lines.push(content);
+          lines.push(""); // Empty line after content
+        }
+      }
+    }
+  };
+  
+  // Process root-level pages first
+  for (const page of pagesAndSections.pages) {
+    await processPage(page);
+  }
+  
+  // Process sections
+  for (const section of pagesAndSections.sections) {
+    await processSection(section);
+  }
+  
+  // Write the llms.txt file
+  const llmsTxtContent = lines.join("\n");
+  await fs.writeFile(path.join(rootOut, "llms.txt"), llmsTxtContent);
+}
+
 export async function runBuildProject(
   project: Hyperproject,
   rootProject: Hyperproject,
@@ -597,6 +695,18 @@ const SEARCH_DOCUMENTS = ${JSON.stringify(documents)};
 `,
     ),
   );
+
+  // Generate llms.txt if enabled
+  if (hyperbookJson.llms) {
+    console.log(`${chalk.blue(`[${prefix}]`)} Generating llms.txt`);
+    await generateLlmsTxt(
+      root,
+      rootOut,
+      hyperbookJson,
+      pagesAndSections,
+      packageJson.version,
+    );
+  }
 
   console.log(`${chalk.green(`[${prefix}]`)} Build success: ${rootOut}`);
 }
