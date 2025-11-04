@@ -38,6 +38,7 @@ von Optionen, die du definieren kannst. Optionen mit einem "\*" müssen gesetzt 
 | allowDangerousHtml | Erlaube HTML im Hyperbook. Dies kann zu Inkompatibilität in zukünftigen Versionen führen.                                                                                                       |
 | qrcode             | Zeigt ein Icon, um einen QR-Code zur aktuellen Seite anzuzeigen.                                                                                                                                |
 | toc         | Zeige ein Inhaltsverzeichnis. Diese ist standardmäßig aktiviert für Seiten und deaktiviert für Begriffe im Glossar.                            |
+| llms               | Wenn auf true gesetzt, wird eine llms.txt-Datei generiert, die alle Markdown-Dateien in Reihenfolge kombiniert. Die Datei enthält den Buchnamen und die Version im Header-Format.              |
 | trailingSlash      | Exportiert alle Datei in eigene Verzeichnisse und erzeugt nur index.html Dateien.                                                                                                               |
 | importExport       | Ermöglicht das Importieren und Exportieren des Zustands des Hyperbooks als Datei. Schaltflächen zum Importieren und Exportieren befinden sich am unteren Rand der Seite.                        |
 
