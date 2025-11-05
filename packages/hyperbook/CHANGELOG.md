@@ -1,5 +1,21 @@
 # hyperbook
 
+## 0.64.0
+
+### Minor Changes
+
+- [#1027](https://github.com/openpatch/hyperbook/pull/1027) [`cf0b13a`](https://github.com/openpatch/hyperbook/commit/cf0b13abb37ead597a3b7b961fd9a347b2e89bd6) Thanks [@copilot-swe-agent](https://github.com/apps/copilot-swe-agent)! - Add new textinput directive for persistent text input with Dexie store integration
+
+  This adds a new `::textinput` markdown directive that creates interactive text input areas with automatic persistence to the browser's Dexie database.
+
+  Features:
+
+  - Customizable placeholder and height attributes
+  - Automatic save with debouncing for performance
+  - Multiple independent inputs via custom IDs
+  - Full light and dark mode support
+  - Responsive design with error handling
+
 ## 0.63.2
 
 ### Patch Changes
