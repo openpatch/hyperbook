@@ -38,6 +38,18 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.62.2
+
+::::tabs
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+- Fix relative urls for sqlite.
+
+:::
+
+::::
+
 ## v0.62.1
 
 ::::tabs

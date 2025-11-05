@@ -3,7 +3,7 @@
 exports[`remarkImage > should render as link 1`] = `
 "
 <p><a href="/public/elements/hints"><figure src="/public/test.jpg" alt="A description" title="A caption" class="normal undefined">
-      <img src="/public/test.jpg" alt="A description" onclick="hyperbook.toggleLightbox(this)">
+      <img src="/public/public/test.jpg" alt="A description" onclick="hyperbook.toggleLightbox(this)">
       <figcaption>A caption</figcaption>
     </figure></a></p>
 "
@@ -13,7 +13,7 @@ exports[`remarkImage > should render image with caption 1`] = `
 "
 <p>
   <figure src="/public/test.jpg" alt="A description" title="A caption" class="normal undefined">
-    <img src="/public/test.jpg" alt="A description" onclick="hyperbook.toggleLightbox(this)">
+    <img src="/public/public/test.jpg" alt="A description" onclick="hyperbook.toggleLightbox(this)">
     <figcaption>A caption</figcaption>
   </figure>
 </p>
@@ -24,7 +24,7 @@ exports[`remarkImage > should render image with description 1`] = `
 "
 <p>
   <figure src="/public/test.jpg" alt="A description" class="normal undefined">
-    <img src="/public/test.jpg" alt="A description" onclick="hyperbook.toggleLightbox(this)">
+    <img src="/public/public/test.jpg" alt="A description" onclick="hyperbook.toggleLightbox(this)">
   </figure>
 </p>
 "

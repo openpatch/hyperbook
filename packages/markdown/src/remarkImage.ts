@@ -38,7 +38,11 @@ export default (ctx: HyperbookContext) => () => {
           tagName: "img",
           properties: {
             ...figureProps,
-            src: node.url,
+            src: ctx.makeUrl(
+              node.url,
+              "public",
+              ctx.navigation.current || undefined,
+            ),
             alt: node.alt,
             onclick: `hyperbook.toggleLightbox(this)`,
           },

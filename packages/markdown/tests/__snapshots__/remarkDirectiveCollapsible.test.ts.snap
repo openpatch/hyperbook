@@ -21,11 +21,11 @@ exports[`remarkDirectiveCollapsible > should transform 1`] = `
       </div>
     </div>
     <p>This is normal Test in-between.</p>
-    <div class="directive-collapsible" data-id="f6163f300c1b01fb3c2b0b552e42ee77b46b12f1051084fa3cd6ca39a4af5cdb"><button class="collapsible">With an Image</button>
+    <div class="directive-collapsible" data-id="5e314c682fb81e94539c9c595e18c33ebdeb8ab22615a03ae0c4da3bcc26e928"><button class="collapsible">With an Image</button>
       <div class="collapsible-content">
         <p>
           <figure src="/public/public/test.jpg" alt="" class="normal normal undefined">
-            <img class="normal undefined" src="/public/public/test.jpg" alt="" onclick="hyperbook.toggleLightbox(this)">
+            <img class="normal undefined" src="/public/public/public/test.jpg" alt="" onclick="hyperbook.toggleLightbox(this)">
           </figure>
         </p>
       </div>
