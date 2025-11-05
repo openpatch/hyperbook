@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.63.1
+
+### Patch Changes
+
+- [`4048965`](https://github.com/openpatch/hyperbook/commit/4048965a0071ccf874c31c99375ec549a7170a3f) Thanks [@github-actions[bot]](https://github.com/github-actions%5Bbot%5D)! - Fix sqlide custom db not using the correct url
+
 ## 0.63.0
 
 ### Minor Changes
