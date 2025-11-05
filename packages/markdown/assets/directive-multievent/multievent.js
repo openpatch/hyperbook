@@ -1113,6 +1113,7 @@ var multievent = {
       var inp = inputs[i];
       var inputState = {
         id: inp.id,
+        index: i,  // Add index for inputs without IDs (like crosswords)
         className: inp.className,
         disabled: inp.disabled
       };
@@ -1155,7 +1156,7 @@ var multievent = {
       inputStates.push(inputState);
     }
     
-    // Collect select values with styles and context
+    // Collect select values with styles, context, and full innerHTML
     var selects = SK[classNr].getElementsByTagName("select");
     var selectStates = [];
     for (var i = 0; i < selects.length; i++) {
@@ -1169,7 +1170,8 @@ var multievent = {
         bgSize: selects[i].style.backgroundSize,
         className: selects[i].className,
         dataWertIst: selects[i].getAttribute("data-wertIst"),
-        dataSelNr: selects[i].getAttribute("data-SelNr")
+        dataSelNr: selects[i].getAttribute("data-SelNr"),
+        innerHTML: selects[i].innerHTML  // Save full options HTML
       });
     }
     
@@ -1291,9 +1293,22 @@ var multievent = {
     
     // Restore input values with all attributes
     if (state.inputs) {
+      var inputs = SK[classNr].getElementsByTagName("input");
       for (var i = 0; i < state.inputs.length; i++) {
         var inpState = state.inputs[i];
-        var inp = document.getElementById(inpState.id);
+        // Try to get by ID first, then by index (for crosswords without IDs)
+        var inp = inpState.id ? document.getElementById(inpState.id) : inputs[inpState.index];
+        
+        // For crossword inputs without IDs, find by data-Sprungmarke
+        if (!inp && inpState.dataSprungmarke) {
+          for (var j = 0; j < inputs.length; j++) {
+            if (inputs[j].getAttribute("data-Sprungmarke") === inpState.dataSprungmarke) {
+              inp = inputs[j];
+              break;
+            }
+          }
+        }
+        
         if (inp) {
           if (inpState.type === "text") {
             inp.value = inpState.value;
@@ -1349,12 +1364,16 @@ var multievent = {
       }
     }
     
-    // Restore select values with styles and proper selection
+    // Restore select values with styles, proper selection, and full options
     if (state.selects) {
       var selects = SK[classNr].getElementsByTagName("select");
       for (var i = 0; i < state.selects.length; i++) {
         var sel = selects[state.selects[i].index];
         if (sel) {
+          // Restore full innerHTML to get all options back
+          if (state.selects[i].innerHTML) {
+            sel.innerHTML = state.selects[i].innerHTML;
+          }
           // Try to restore by selectedIndex first (more reliable)
           if (state.selects[i].selectedIndex !== undefined) {
             sel.selectedIndex = state.selects[i].selectedIndex;
