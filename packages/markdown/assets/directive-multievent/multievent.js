@@ -1106,45 +1106,88 @@ var multievent = {
     
     var id = multievent.getInstanceId(classNr);
     
-    // Collect all input values
+    // Collect all input values with full state
     var inputs = SK[classNr].getElementsByTagName("input");
     var inputStates = [];
     for (var i = 0; i < inputs.length; i++) {
       var inp = inputs[i];
+      var inputState = {
+        id: inp.id,
+        className: inp.className,
+        disabled: inp.disabled
+      };
+      
       if (inp.type === "text") {
-        inputStates.push({
-          id: inp.id,
-          value: inp.value,
-          disabled: inp.disabled
-        });
+        inputState.type = "text";
+        inputState.value = inp.value;
+        // Save special data attributes for crossword and hangman
+        if (inp.className.indexOf("MultiKwrInp") !== -1) {
+          inputState.dataSprungmarke = inp.getAttribute("data-Sprungmarke");
+          inputState.dataWert = inp.getAttribute("data-wert");
+          inputState.dataStyle = inp.getAttribute("data-style");
+        } else if (inp.className.indexOf("MulEvHaManInp") !== -1) {
+          inputState.dataMulEvHaMan = inp.getAttribute("data-MulEvHaMan");
+          inputState.dataNummer = inp.getAttribute("data-Nummer");
+          inputState.dataBuchstSind = inp.getAttribute("data-BuchstSind");
+          inputState.dataFehler = inp.getAttribute("data-Fehler");
+          inputState.dataBegriffeSind = inp.getAttribute("data-BegriffeSind");
+        } else if (inp.getAttribute("data-Wert")) {
+          inputState.dataWert = inp.getAttribute("data-Wert");
+          inputState.dataStyle = inp.getAttribute("data-style");
+          inputState.dataGemischt = inp.getAttribute("data-gemischt");
+        }
       } else if (inp.type === "checkbox" || inp.type === "radio") {
-        inputStates.push({
-          id: inp.id,
-          checked: inp.checked,
-          disabled: inp.disabled
-        });
+        inputState.type = inp.type;
+        inputState.checked = inp.checked;
+        // Save parent styles for checkboxes/radios
+        if (inp.parentNode && inp.parentNode.style) {
+          inputState.parentBgColor = inp.parentNode.style.backgroundColor;
+          inputState.parentBgImage = inp.parentNode.style.backgroundImage;
+        }
       }
+      inputStates.push(inputState);
     }
     
-    // Collect select values
+    // Collect select values with styles
     var selects = SK[classNr].getElementsByTagName("select");
     var selectStates = [];
     for (var i = 0; i < selects.length; i++) {
       selectStates.push({
         index: i,
         value: selects[i].value,
-        disabled: selects[i].disabled
+        disabled: selects[i].disabled,
+        bgColor: selects[i].style.backgroundColor,
+        bgImage: selects[i].style.backgroundImage
       });
     }
     
-    // Collect button states
+    // Collect button states with styles
     var buttons = SK[classNr].getElementsByClassName("butAnAus");
     var buttonStates = [];
     for (var i = 0; i < buttons.length; i++) {
       buttonStates.push({
         id: buttons[i].id,
         markiert: buttons[i].getAttribute("data-markiert"),
-        gewertet: buttons[i].getAttribute("data-gewertet")
+        gewertet: buttons[i].getAttribute("data-gewertet"),
+        bgColor: buttons[i].style.backgroundColor,
+        bgImage: buttons[i].style.backgroundImage,
+        display: buttons[i].style.display,
+        outline: buttons[i].style.outline
+      });
+    }
+    
+    // Collect suchsel (word search) button states
+    var suchselButtons = SK[classNr].getElementsByClassName("MuEvSuBut");
+    var suchselStates = [];
+    for (var i = 0; i < suchselButtons.length; i++) {
+      suchselStates.push({
+        id: suchselButtons[i].id,
+        markiert: suchselButtons[i].getAttribute("data-markiert"),
+        gewertet: suchselButtons[i].getAttribute("data-gewertet"),
+        spielAus: suchselButtons[i].getAttribute("data-spielAus"),
+        outline: suchselButtons[i].style.outline,
+        bgColor: suchselButtons[i].style.backgroundColor,
+        fontWeight: suchselButtons[i].style.fontWeight
       });
     }
     
@@ -1158,6 +1201,18 @@ var multievent = {
       });
     }
     
+    // Collect hangman output states
+    var hangmanOutputs = SK[classNr].getElementsByClassName("MulEvHaManAusg");
+    var hangmanErrors = SK[classNr].getElementsByClassName("MulEvHaManFehl");
+    var hangmanStates = [];
+    for (var i = 0; i < hangmanOutputs.length; i++) {
+      hangmanStates.push({
+        index: i,
+        ausgHTML: hangmanOutputs[i].innerHTML,
+        fehlHTML: hangmanErrors[i] ? hangmanErrors[i].innerHTML : ""
+      });
+    }
+    
     var state = {
       vNr: multievent.vNr[classNr],
       gesamtwertung: multievent.gesamtwertung[classNr],
@@ -1165,7 +1220,9 @@ var multievent = {
       inputs: inputStates,
       selects: selectStates,
       buttons: buttonStates,
-      textareas: textareaStates
+      suchsel: suchselStates,
+      textareas: textareaStates,
+      hangman: hangmanStates
     };
     
     if (typeof store !== "undefined") {
@@ -1217,40 +1274,117 @@ var multievent = {
     var SK = document.getElementsByClassName("multievent");
     if (!SK[classNr] || !state) return;
     
-    // Restore input values
+    // Restore input values with all attributes
     if (state.inputs) {
       for (var i = 0; i < state.inputs.length; i++) {
-        var inp = document.getElementById(state.inputs[i].id);
+        var inpState = state.inputs[i];
+        var inp = document.getElementById(inpState.id);
         if (inp) {
-          if (inp.type === "text") {
-            inp.value = state.inputs[i].value;
-            inp.disabled = state.inputs[i].disabled;
-          } else if (inp.type === "checkbox" || inp.type === "radio") {
-            inp.checked = state.inputs[i].checked;
-            inp.disabled = state.inputs[i].disabled;
+          if (inpState.type === "text") {
+            inp.value = inpState.value;
+            inp.disabled = inpState.disabled;
+            // Restore crossword data
+            if (inpState.dataSprungmarke) {
+              inp.setAttribute("data-Sprungmarke", inpState.dataSprungmarke);
+            }
+            if (inpState.dataWert) {
+              inp.setAttribute("data-wert", inpState.dataWert);
+            }
+            if (inpState.dataStyle) {
+              inp.setAttribute("data-style", inpState.dataStyle);
+            }
+            // Restore hangman data
+            if (inpState.dataMulEvHaMan) {
+              inp.setAttribute("data-MulEvHaMan", inpState.dataMulEvHaMan);
+            }
+            if (inpState.dataNummer !== undefined) {
+              inp.setAttribute("data-Nummer", inpState.dataNummer);
+            }
+            if (inpState.dataBuchstSind) {
+              inp.setAttribute("data-BuchstSind", inpState.dataBuchstSind);
+            }
+            if (inpState.dataFehler !== undefined) {
+              inp.setAttribute("data-Fehler", inpState.dataFehler);
+            }
+            if (inpState.dataBegriffeSind) {
+              inp.setAttribute("data-BegriffeSind", inpState.dataBegriffeSind);
+            }
+            if (inpState.dataGemischt) {
+              inp.setAttribute("data-gemischt", inpState.dataGemischt);
+            }
+          } else if (inpState.type === "checkbox" || inpState.type === "radio") {
+            inp.checked = inpState.checked;
+            inp.disabled = inpState.disabled;
+            // Restore parent styles
+            if (inpState.parentBgColor && inp.parentNode) {
+              inp.parentNode.style.backgroundColor = inpState.parentBgColor;
+            }
+            if (inpState.parentBgImage && inp.parentNode) {
+              inp.parentNode.style.backgroundImage = inpState.parentBgImage;
+            }
           }
         }
       }
     }
     
-    // Restore select values
+    // Restore select values with styles
     if (state.selects) {
       var selects = SK[classNr].getElementsByTagName("select");
       for (var i = 0; i < state.selects.length; i++) {
-        if (selects[state.selects[i].index]) {
-          selects[state.selects[i].index].value = state.selects[i].value;
-          selects[state.selects[i].index].disabled = state.selects[i].disabled;
+        var sel = selects[state.selects[i].index];
+        if (sel) {
+          sel.value = state.selects[i].value;
+          sel.disabled = state.selects[i].disabled;
+          if (state.selects[i].bgColor) {
+            sel.style.backgroundColor = state.selects[i].bgColor;
+          }
+          if (state.selects[i].bgImage) {
+            sel.style.backgroundImage = state.selects[i].bgImage;
+          }
         }
       }
     }
     
-    // Restore button states
+    // Restore button states with styles
     if (state.buttons) {
       for (var i = 0; i < state.buttons.length; i++) {
         var btn = document.getElementById(state.buttons[i].id);
         if (btn) {
           btn.setAttribute("data-markiert", state.buttons[i].markiert);
           btn.setAttribute("data-gewertet", state.buttons[i].gewertet);
+          if (state.buttons[i].bgColor) {
+            btn.style.backgroundColor = state.buttons[i].bgColor;
+          }
+          if (state.buttons[i].bgImage) {
+            btn.style.backgroundImage = state.buttons[i].bgImage;
+          }
+          if (state.buttons[i].display) {
+            btn.style.display = state.buttons[i].display;
+          }
+          if (state.buttons[i].outline) {
+            btn.style.outline = state.buttons[i].outline;
+          }
+        }
+      }
+    }
+    
+    // Restore suchsel button states
+    if (state.suchsel) {
+      for (var i = 0; i < state.suchsel.length; i++) {
+        var sBtn = document.getElementById(state.suchsel[i].id);
+        if (sBtn) {
+          sBtn.setAttribute("data-markiert", state.suchsel[i].markiert);
+          sBtn.setAttribute("data-gewertet", state.suchsel[i].gewertet);
+          sBtn.setAttribute("data-spielAus", state.suchsel[i].spielAus);
+          if (state.suchsel[i].outline) {
+            sBtn.style.outline = state.suchsel[i].outline;
+          }
+          if (state.suchsel[i].bgColor) {
+            sBtn.style.backgroundColor = state.suchsel[i].bgColor;
+          }
+          if (state.suchsel[i].fontWeight) {
+            sBtn.style.fontWeight = state.suchsel[i].fontWeight;
+          }
         }
       }
     }
@@ -1265,12 +1399,36 @@ var multievent = {
       }
     }
     
+    // Restore hangman output states
+    if (state.hangman) {
+      var hangmanOutputs = SK[classNr].getElementsByClassName("MulEvHaManAusg");
+      var hangmanErrors = SK[classNr].getElementsByClassName("MulEvHaManFehl");
+      for (var i = 0; i < state.hangman.length; i++) {
+        if (hangmanOutputs[state.hangman[i].index]) {
+          hangmanOutputs[state.hangman[i].index].innerHTML = state.hangman[i].ausgHTML;
+        }
+        if (hangmanErrors[state.hangman[i].index]) {
+          hangmanErrors[state.hangman[i].index].innerHTML = state.hangman[i].fehlHTML;
+        }
+      }
+    }
+    
     // Update attempt counter display
     if (state.gesamtwertung !== undefined && state.gesamtwertung > 0) {
       var versuche = document.getElementById("MultieventVersuche" + classNr);
       if (versuche) {
         versuche.innerHTML = state.gesamtwertung;
       }
+    }
+    
+    // If task was evaluated, re-evaluate to show visual state
+    if (state.gewertet && state.gewertet > 0) {
+      // Set gewertet to 0 temporarily so Auswertung will run
+      multievent.gewertet[classNr] = 0;
+      // Run evaluation to restore visual feedback
+      setTimeout(function() {
+        multievent.Auswertung(classNr);
+      }, 100);
     }
   },
   blende: function (BlID) {
