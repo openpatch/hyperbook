@@ -7,11 +7,13 @@
   padding: 0.75rem;
   font-family: inherit;
   font-size: 1rem;
-  border: 1px solid #ccc;
+  border: 1px solid var(--color-nav-border, #ccc);
   border-radius: 4px;
   resize: vertical;
   box-sizing: border-box;
   transition: border-color 0.2s;
+  background-color: var(--color-background, white);
+  color: var(--color-text, black);
 }
 
 .directive-textinput textarea:focus {
@@ -20,23 +22,6 @@
 }
 
 .directive-textinput textarea::placeholder {
-  color: #999;
+  color: var(--color-text-deactivated, #999);
   opacity: 1;
-}
-
-/* Dark mode support */
-@media (prefers-color-scheme: dark) {
-  .directive-textinput textarea {
-    background-color: #2a2a2a;
-    color: #e0e0e0;
-    border-color: #555;
-  }
-
-  .directive-textinput textarea::placeholder {
-    color: #777;
-  }
-
-  .directive-textinput textarea:focus {
-    border-color: var(--color-brand-dark, #b5e3d8);
-  }
 }
