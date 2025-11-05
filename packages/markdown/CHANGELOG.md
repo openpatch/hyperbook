@@ -1,5 +1,13 @@
 # @hyperbook/markdown
 
+## 0.37.2
+
+### Patch Changes
+
+- [`08b5a56`](https://github.com/openpatch/hyperbook/commit/08b5a56a3a34f55af81b0094070f8760de7fcc88) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix favicon path
+
+- Fix relative path
+
 ## 0.37.1
 
 ### Patch Changes
