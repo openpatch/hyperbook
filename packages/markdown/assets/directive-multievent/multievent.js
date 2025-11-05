@@ -61,16 +61,43 @@ var multievent = {
 
     var SK = document.getElementsByClassName("multievent");
     for (var i = 0; i < SK.length; i++) {
+      // Add unique ID if not present
+      if (!SK[i].getAttribute("data-id")) {
+        SK[i].setAttribute("data-id", "multievent-" + i);
+      }
       multievent.orig[i] = SK[i].innerHTML;
       var VersNr = multievent.zZahl(-1, 9);
       multievent.vNr[i] = parseInt(VersNr);
-      multievent.los(i);
+      
+      // Try to load state asynchronously
+      (function(index) {
+        multievent.loadState(index).then(function(state) {
+          if (state) {
+            // State exists, use loaded vNr
+            multievent.los(index, state);
+          } else {
+            // No state, start fresh
+            multievent.los(index, null);
+          }
+        });
+      })(i);
     }
   },
-  los: function (clNr) {
+  los: function (clNr, savedState) {
     multievent.gesamtwertung[clNr] = 0;
     var SK = document.getElementsByClassName("multievent"); /*Suchklasse*/
-    multievent.vNr[clNr]++;
+    
+    // Only increment version if we're not restoring state
+    if (!savedState) {
+      multievent.vNr[clNr]++;
+      
+      // Clear saved state when resetting manually
+      var id = SK[clNr] && SK[clNr].getAttribute("data-id") || "multievent-" + clNr;
+      if (typeof store !== "undefined") {
+        store.multievent.delete(id);
+      }
+    }
+    
     multievent.gewertet[clNr] = 0;
     var IN = multievent.orig[clNr]
       .replace(/\{(.)\{\s*/gms, "{$1{")
@@ -569,6 +596,14 @@ var multievent = {
     }
 
     SK[clNr].style.display = "block";
+    
+    // Restore saved state if available
+    if (savedState) {
+      // Use setTimeout to ensure DOM is ready
+      setTimeout(function() {
+        multievent.restoreState(clNr, savedState);
+      }, 0);
+    }
   },
   inpGemEing: function (WertIst, GemID) {
     var vIst = WertIst.replace(/\s/g, "");
@@ -1046,6 +1081,9 @@ var multievent = {
         "<div style='font-size:large;'>" + GesWert + "</div>";
       multievent.ErgAn();
     }
+    
+    // Save state after evaluation
+    multievent.saveState(classNr);
   },
   ErgAus: function () {
     document.getElementById("MultieventErgebnisse").style.display = "none";
@@ -1055,6 +1093,173 @@ var multievent = {
   },
   gesamtwertung: [],
   gewertet: [],
+  saveState: function (classNr) {
+    var SK = document.getElementsByClassName("multievent");
+    if (!SK[classNr]) return;
+    
+    var id = SK[classNr].getAttribute("data-id") || "multievent-" + classNr;
+    
+    // Collect all input values
+    var inputs = SK[classNr].getElementsByTagName("input");
+    var inputStates = [];
+    for (var i = 0; i < inputs.length; i++) {
+      var inp = inputs[i];
+      if (inp.type === "text") {
+        inputStates.push({
+          id: inp.id,
+          value: inp.value,
+          disabled: inp.disabled
+        });
+      } else if (inp.type === "checkbox" || inp.type === "radio") {
+        inputStates.push({
+          id: inp.id,
+          checked: inp.checked,
+          disabled: inp.disabled
+        });
+      }
+    }
+    
+    // Collect select values
+    var selects = SK[classNr].getElementsByTagName("select");
+    var selectStates = [];
+    for (var i = 0; i < selects.length; i++) {
+      selectStates.push({
+        index: i,
+        value: selects[i].value,
+        disabled: selects[i].disabled
+      });
+    }
+    
+    // Collect button states
+    var buttons = SK[classNr].getElementsByClassName("butAnAus");
+    var buttonStates = [];
+    for (var i = 0; i < buttons.length; i++) {
+      buttonStates.push({
+        id: buttons[i].id,
+        markiert: buttons[i].getAttribute("data-markiert"),
+        gewertet: buttons[i].getAttribute("data-gewertet")
+      });
+    }
+    
+    // Collect textarea values
+    var textareas = SK[classNr].getElementsByTagName("textarea");
+    var textareaStates = [];
+    for (var i = 0; i < textareas.length; i++) {
+      textareaStates.push({
+        index: i,
+        value: textareas[i].value
+      });
+    }
+    
+    var state = {
+      vNr: multievent.vNr[classNr],
+      gesamtwertung: multievent.gesamtwertung[classNr],
+      gewertet: multievent.gewertet[classNr],
+      inputs: inputStates,
+      selects: selectStates,
+      buttons: buttonStates,
+      textareas: textareaStates
+    };
+    
+    if (typeof store !== "undefined") {
+      store.multievent.put({ id: id, state: state });
+    }
+  },
+  loadState: async function (classNr) {
+    var SK = document.getElementsByClassName("multievent");
+    if (!SK[classNr]) return false;
+    
+    var id = SK[classNr].getAttribute("data-id") || "multievent-" + classNr;
+    
+    if (typeof store !== "undefined") {
+      try {
+        var result = await store.multievent.get(id);
+        if (result && result.state) {
+          var state = result.state;
+          
+          // Restore version number
+          if (state.vNr !== undefined) {
+            multievent.vNr[classNr] = state.vNr;
+          }
+          
+          // Restore gesamtwertung
+          if (state.gesamtwertung !== undefined) {
+            multievent.gesamtwertung[classNr] = state.gesamtwertung;
+          }
+          
+          // Restore gewertet
+          if (state.gewertet !== undefined) {
+            multievent.gewertet[classNr] = state.gewertet;
+          }
+          
+          return state;
+        }
+      } catch (e) {
+        console.error("Error loading multievent state:", e);
+      }
+    }
+    return false;
+  },
+  restoreState: function (classNr, state) {
+    var SK = document.getElementsByClassName("multievent");
+    if (!SK[classNr] || !state) return;
+    
+    // Restore input values
+    if (state.inputs) {
+      for (var i = 0; i < state.inputs.length; i++) {
+        var inp = document.getElementById(state.inputs[i].id);
+        if (inp) {
+          if (inp.type === "text") {
+            inp.value = state.inputs[i].value;
+            inp.disabled = state.inputs[i].disabled;
+          } else if (inp.type === "checkbox" || inp.type === "radio") {
+            inp.checked = state.inputs[i].checked;
+            inp.disabled = state.inputs[i].disabled;
+          }
+        }
+      }
+    }
+    
+    // Restore select values
+    if (state.selects) {
+      var selects = SK[classNr].getElementsByTagName("select");
+      for (var i = 0; i < state.selects.length; i++) {
+        if (selects[state.selects[i].index]) {
+          selects[state.selects[i].index].value = state.selects[i].value;
+          selects[state.selects[i].index].disabled = state.selects[i].disabled;
+        }
+      }
+    }
+    
+    // Restore button states
+    if (state.buttons) {
+      for (var i = 0; i < state.buttons.length; i++) {
+        var btn = document.getElementById(state.buttons[i].id);
+        if (btn) {
+          btn.setAttribute("data-markiert", state.buttons[i].markiert);
+          btn.setAttribute("data-gewertet", state.buttons[i].gewertet);
+        }
+      }
+    }
+    
+    // Restore textarea values
+    if (state.textareas) {
+      var textareas = SK[classNr].getElementsByTagName("textarea");
+      for (var i = 0; i < state.textareas.length; i++) {
+        if (textareas[state.textareas[i].index]) {
+          textareas[state.textareas[i].index].value = state.textareas[i].value;
+        }
+      }
+    }
+    
+    // Update attempt counter display
+    if (state.gesamtwertung !== undefined && state.gesamtwertung > 0) {
+      var versuche = document.getElementById("MultieventVersuche" + classNr);
+      if (versuche) {
+        versuche.innerHTML = state.gesamtwertung;
+      }
+    }
+  },
   blende: function (BlID) {
     var Auge = document.getElementById(BlID);
     if (Auge.nextSibling.style.display == "table-cell") {
