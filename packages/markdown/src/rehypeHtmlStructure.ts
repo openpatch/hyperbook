@@ -276,7 +276,7 @@ export default (ctx: HyperbookContext) => () => {
                 properties: {
                   rel: "icon",
                   type: "image/x-icon",
-                  href: makeUrl(["favicon.ico"], "public"),
+                  href: makeUrl(["/favicon.ico"], "public"),
                 },
                 children: [],
               },
