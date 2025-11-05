@@ -10,6 +10,7 @@ import {
   isDirective,
   registerDirective,
 } from "./remarkHelper";
+import hash from "./objectHash";
 
 export default (ctx: HyperbookContext) => () => {
   const name = "multievent";
@@ -23,9 +24,13 @@ export default (ctx: HyperbookContext) => () => {
         expectContainerDirective(node, file, name);
         registerDirective(file, name, ["multievent.js"], ["style.css"], []);
 
+        // Generate a unique ID for this multievent instance based on node content
+        const id = hash(node);
+
         data.hName = "div";
         data.hProperties = {
           class: "directive-multievent multievent",
+          "data-id": id,
         };
       }
     });
