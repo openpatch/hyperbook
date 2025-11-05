@@ -4,7 +4,7 @@
 }
 
 .directive-alert>p {
-  margin-bottom: 0;
+  margin-bottom: 10px;
 }
 
 .directive-alert {
@@ -33,6 +33,10 @@
 
   :first-child {
     margin-top: 0;
+  }
+
+  :first-child.p {
+    margin-top: 10px;
   }
 }
 
