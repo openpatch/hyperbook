@@ -33,6 +33,13 @@ var multievent = {
     return MischObj;
   },
   orig: [],
+  getInstanceId: function(classNr) {
+    var SK = document.getElementsByClassName("multievent");
+    if (SK[classNr]) {
+      return SK[classNr].getAttribute("data-id") || "multievent-" + classNr;
+    }
+    return "multievent-" + classNr;
+  },
   butAnAus: function (butID) {
     var but = document.getElementById(butID);
     var markiert = but.getAttribute("data-markiert");
@@ -69,9 +76,9 @@ var multievent = {
       var VersNr = multievent.zZahl(-1, 9);
       multievent.vNr[i] = parseInt(VersNr);
       
-      // Try to load state asynchronously
+      // Try to load state using callback
       (function(index) {
-        multievent.loadState(index).then(function(state) {
+        multievent.loadState(index, function(state) {
           if (state) {
             // State exists, use loaded vNr
             multievent.los(index, state);
@@ -92,7 +99,7 @@ var multievent = {
       multievent.vNr[clNr]++;
       
       // Clear saved state when resetting manually
-      var id = SK[clNr] && SK[clNr].getAttribute("data-id") || "multievent-" + clNr;
+      var id = multievent.getInstanceId(clNr);
       if (typeof store !== "undefined") {
         store.multievent.delete(id);
       }
@@ -1097,7 +1104,7 @@ var multievent = {
     var SK = document.getElementsByClassName("multievent");
     if (!SK[classNr]) return;
     
-    var id = SK[classNr].getAttribute("data-id") || "multievent-" + classNr;
+    var id = multievent.getInstanceId(classNr);
     
     // Collect all input values
     var inputs = SK[classNr].getElementsByTagName("input");
@@ -1165,15 +1172,17 @@ var multievent = {
       store.multievent.put({ id: id, state: state });
     }
   },
-  loadState: async function (classNr) {
+  loadState: function (classNr, callback) {
     var SK = document.getElementsByClassName("multievent");
-    if (!SK[classNr]) return false;
+    if (!SK[classNr]) {
+      callback(false);
+      return;
+    }
     
-    var id = SK[classNr].getAttribute("data-id") || "multievent-" + classNr;
+    var id = multievent.getInstanceId(classNr);
     
     if (typeof store !== "undefined") {
-      try {
-        var result = await store.multievent.get(id);
+      store.multievent.get(id).then(function(result) {
         if (result && result.state) {
           var state = result.state;
           
@@ -1192,13 +1201,17 @@ var multievent = {
             multievent.gewertet[classNr] = state.gewertet;
           }
           
-          return state;
+          callback(state);
+        } else {
+          callback(false);
         }
-      } catch (e) {
-        console.error("Error loading multievent state:", e);
-      }
+      }).catch(function(e) {
+        console.error("Error loading multievent state for " + id + ":", e);
+        callback(false);
+      });
+    } else {
+      callback(false);
     }
-    return false;
   },
   restoreState: function (classNr, state) {
     var SK = document.getElementsByClassName("multievent");
