@@ -1,4 +1,17 @@
 hyperbook.textinput = (function () {
+  // Debounce helper to reduce database writes
+  const debounce = (func, wait) => {
+    let timeout;
+    return function executedFunction(...args) {
+      const later = () => {
+        clearTimeout(timeout);
+        func(...args);
+      };
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+    };
+  };
+
   const init = (root) => {
     let allTextInputs = root.querySelectorAll(".directive-textinput textarea[data-id]");
     
@@ -10,15 +23,21 @@ hyperbook.textinput = (function () {
         if (result && result.text) {
           textarea.value = result.text;
         }
+      }).catch((error) => {
+        console.error("Failed to load textinput from store:", error);
       });
       
-      // Save text to store on input
-      textarea.addEventListener("input", () => {
+      // Save text to store on input with debouncing
+      const saveToStore = debounce(() => {
         store.textinput.put({
           id: id,
           text: textarea.value,
+        }).catch((error) => {
+          console.error("Failed to save textinput to store:", error);
         });
-      });
+      }, 500);
+      
+      textarea.addEventListener("input", saveToStore);
     });
   };
 
