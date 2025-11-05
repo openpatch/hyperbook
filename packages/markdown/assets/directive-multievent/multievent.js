@@ -1144,24 +1144,36 @@ var multievent = {
           inputState.parentBgColor = inp.parentNode.style.backgroundColor;
           inputState.parentBgImage = inp.parentNode.style.backgroundImage;
         }
+        // Save sibling content for error indicators
+        if (inp.nextSibling) {
+          inputState.nextSiblingHTML = inp.nextSibling.innerHTML;
+        }
+        if (inp.previousSibling) {
+          inputState.previousSiblingHTML = inp.previousSibling.innerHTML;
+        }
       }
       inputStates.push(inputState);
     }
     
-    // Collect select values with styles
+    // Collect select values with styles and context
     var selects = SK[classNr].getElementsByTagName("select");
     var selectStates = [];
     for (var i = 0; i < selects.length; i++) {
       selectStates.push({
         index: i,
         value: selects[i].value,
+        selectedIndex: selects[i].selectedIndex,
         disabled: selects[i].disabled,
         bgColor: selects[i].style.backgroundColor,
-        bgImage: selects[i].style.backgroundImage
+        bgImage: selects[i].style.backgroundImage,
+        bgSize: selects[i].style.backgroundSize,
+        className: selects[i].className,
+        dataWertIst: selects[i].getAttribute("data-wertIst"),
+        dataSelNr: selects[i].getAttribute("data-SelNr")
       });
     }
     
-    // Collect button states with styles
+    // Collect button states with styles and sibling content
     var buttons = SK[classNr].getElementsByClassName("butAnAus");
     var buttonStates = [];
     for (var i = 0; i < buttons.length; i++) {
@@ -1172,7 +1184,10 @@ var multievent = {
         bgColor: buttons[i].style.backgroundColor,
         bgImage: buttons[i].style.backgroundImage,
         display: buttons[i].style.display,
-        outline: buttons[i].style.outline
+        outline: buttons[i].style.outline,
+        color: buttons[i].style.color,
+        border: buttons[i].style.border,
+        nextSiblingHTML: buttons[i].nextSibling ? buttons[i].nextSibling.innerHTML : ""
       });
     }
     
@@ -1322,18 +1337,32 @@ var multievent = {
             if (inpState.parentBgImage && inp.parentNode) {
               inp.parentNode.style.backgroundImage = inpState.parentBgImage;
             }
+            // Restore sibling content for error indicators
+            if (inpState.nextSiblingHTML !== undefined && inp.nextSibling) {
+              inp.nextSibling.innerHTML = inpState.nextSiblingHTML;
+            }
+            if (inpState.previousSiblingHTML !== undefined && inp.previousSibling) {
+              inp.previousSibling.innerHTML = inpState.previousSiblingHTML;
+            }
           }
         }
       }
     }
     
-    // Restore select values with styles
+    // Restore select values with styles and proper selection
     if (state.selects) {
       var selects = SK[classNr].getElementsByTagName("select");
       for (var i = 0; i < state.selects.length; i++) {
         var sel = selects[state.selects[i].index];
         if (sel) {
-          sel.value = state.selects[i].value;
+          // Try to restore by selectedIndex first (more reliable)
+          if (state.selects[i].selectedIndex !== undefined) {
+            sel.selectedIndex = state.selects[i].selectedIndex;
+          }
+          // Fallback to value
+          if (state.selects[i].value) {
+            sel.value = state.selects[i].value;
+          }
           sel.disabled = state.selects[i].disabled;
           if (state.selects[i].bgColor) {
             sel.style.backgroundColor = state.selects[i].bgColor;
@@ -1341,11 +1370,14 @@ var multievent = {
           if (state.selects[i].bgImage) {
             sel.style.backgroundImage = state.selects[i].bgImage;
           }
+          if (state.selects[i].bgSize) {
+            sel.style.backgroundSize = state.selects[i].bgSize;
+          }
         }
       }
     }
     
-    // Restore button states with styles
+    // Restore button states with styles and sibling content
     if (state.buttons) {
       for (var i = 0; i < state.buttons.length; i++) {
         var btn = document.getElementById(state.buttons[i].id);
@@ -1363,6 +1395,16 @@ var multievent = {
           }
           if (state.buttons[i].outline) {
             btn.style.outline = state.buttons[i].outline;
+          }
+          if (state.buttons[i].color) {
+            btn.style.color = state.buttons[i].color;
+          }
+          if (state.buttons[i].border) {
+            btn.style.border = state.buttons[i].border;
+          }
+          // Restore nextSibling content (error indicators)
+          if (state.buttons[i].nextSiblingHTML !== undefined && btn.nextSibling) {
+            btn.nextSibling.innerHTML = state.buttons[i].nextSiblingHTML;
           }
         }
       }
