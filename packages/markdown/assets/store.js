@@ -27,6 +27,7 @@ store.version(1).stores({
   h5p: `id,userData`,
   geogebra: `id,state`,
   learningmap: `id,nodes,x,y,zoom`,
+  textinput: `id,text`,
 });
 var sqlIdeDB = new Dexie("SQL-IDE");
 sqlIdeDB.version(0.1).stores({

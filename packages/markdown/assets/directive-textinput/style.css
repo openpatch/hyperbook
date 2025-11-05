@@ -1,0 +1,27 @@
+.directive-textinput {
+  margin: 1rem 0;
+}
+
+.directive-textinput textarea {
+  width: 100%;
+  padding: 0.75rem;
+  font-family: inherit;
+  font-size: 1rem;
+  border: 1px solid var(--color-nav-border, #ccc);
+  border-radius: 4px;
+  resize: vertical;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+  background-color: var(--color-background, white);
+  color: var(--color-text, black);
+}
+
+.directive-textinput textarea:focus {
+  outline: none;
+  border-color: var(--color-brand, #007864);
+}
+
+.directive-textinput textarea::placeholder {
+  color: var(--color-text-deactivated, #999);
+  opacity: 1;
+}

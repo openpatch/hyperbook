@@ -38,6 +38,18 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.63.0
+
+::::tabs
+
+:::tab{title="New :rocket:" id="new"}
+
+- Add new `::textinput` directive for persistent text input. This directive creates interactive text input areas that automatically save to the browser's local storage using Dexie. Supports customizable placeholder and height attributes, multiple independent inputs via custom IDs, and full light/dark mode theming. [Learn more](/elements/textinput)
+
+:::
+
+::::
+
 ## v0.62.2
 
 ::::tabs

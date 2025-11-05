@@ -1,0 +1,7 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`remarkDirectiveTextinput > should create snapshot 1`] = `
+"
+<div class="directive-textinput" data-id="a5a1fe0002881e0355d3924ad776e6bf7bdc5755d9eb56e709ffcc078f8790b9"><textarea class="textinput" data-id="a5a1fe0002881e0355d3924ad776e6bf7bdc5755d9eb56e709ffcc078f8790b9" placeholder="Write your answer" style="height: 250px"></textarea></div>
+"
+`;
