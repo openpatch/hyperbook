@@ -1,5 +1,7 @@
 ---
 "@hyperbook/markdown": minor
+hyperbook: minor
+"hyperbook-studio": minor
 ---
 
 Add new textinput directive for persistent text input with Dexie store integration
