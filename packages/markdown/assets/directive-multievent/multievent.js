@@ -1100,7 +1100,13 @@ var multievent = {
   },
   gesamtwertung: [],
   gewertet: [],
+  isRestoring: false,  // Flag to prevent save during state restoration
   saveState: function (classNr) {
+    // Don't save if we're currently restoring state
+    if (multievent.isRestoring) {
+      return;
+    }
+    
     var SK = document.getElementsByClassName("multievent");
     if (!SK[classNr]) return;
     
@@ -1484,11 +1490,21 @@ var multievent = {
     
     // If task was evaluated, re-evaluate to show visual state
     if (state.gewertet && state.gewertet > 0) {
+      // Set flag to prevent saving during restoration
+      multievent.isRestoring = true;
+      // Save the original gewertet value to restore it
+      var originalGewertet = state.gewertet;
       // Set gewertet to 0 temporarily so Auswertung will run
       multievent.gewertet[classNr] = 0;
       // Run evaluation to restore visual feedback
       setTimeout(function() {
         multievent.Auswertung(classNr);
+        // Restore the original gewertet value (in case it was marked as evaluated but incorrect)
+        multievent.gewertet[classNr] = originalGewertet;
+        // Clear flag after evaluation completes
+        setTimeout(function() {
+          multievent.isRestoring = false;
+        }, 50);
       }, 100);
     }
   },
