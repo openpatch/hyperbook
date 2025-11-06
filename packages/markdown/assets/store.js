@@ -179,7 +179,7 @@ async function hyperbookReset() {
     };
 
     const cancelButton = document.createElement("button");
-    cancelButton.textContent = "Cancel";
+    cancelButton.textContent = i18n.get("store-reset-cancel");
     cancelButton.style.cssText = `
       padding: 10px 20px;
       border: 1px solid var(--color-text, #333);
@@ -219,7 +219,7 @@ async function hyperbookReset() {
       await clearTable(store);
       await clearTable(learnJDB);
       await clearTable(sqlIdeDB);
-      alert(i18n.get("store-reset-sucessful"));
+      alert(i18n.get("store-reset-successful"));
       window.location.reload();
       resolve();
     };

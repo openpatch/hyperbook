@@ -12,6 +12,7 @@
     "store-reset-whole-hyperbook": "Gesamtes Hyperbook",
     "store-reset-whole-confirm": "Sind Sie sicher, dass Sie das gesamte Hyperbook zurücksetzen möchten? Dies ist unwiderruflich und löscht alle Ihre Daten dauerhaft.",
     "store-reset-page-successful": "Die aktuelle Seite wurde erfolgreich zurückgesetzt.",
+    "store-reset-cancel": "Abbrechen",
     "shell-search": "Suche",
     "shell-toggle-dark-mode": "Zwischen Dunkel- und Hellmodus wechseln",
     "shell-reset-hyperbook": "Das Hyperbook zurücksetzen",
