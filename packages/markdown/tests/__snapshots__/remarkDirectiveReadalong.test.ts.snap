@@ -1,0 +1,62 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`remarkDirectiveReadalong > should handle multiple paragraphs 1`] = `
+"
+<div class="directive-readalong" data-id="bac2816bd97cb45b4f9402d1a9206c4235bd4a92eb25cc4c404f3531309a0dda">
+  <div class="readalong-controls"><button class="play-pause" onclick="hyperbook.readalong.togglePlayPause(&#x22;bac2816bd97cb45b4f9402d1a9206c4235bd4a92eb25cc4c404f3531309a0dda&#x22;)" title="Play/Pause"></button>
+    <div class="time-display"><span class="current-time">0:00</span> / <span class="total-time">0:00</span></div>
+  </div>
+  <div class="readalong-text" data-id="bac2816bd97cb45b4f9402d1a9206c4235bd4a92eb25cc4c404f3531309a0dda">
+    <p>First paragraph of text.</p>
+    <p>Second paragraph of text.</p>
+  </div>
+  <audio class="readalong-audio" src="/public/audio.mp3" preload="metadata"></audio>
+  <script type="application/json" class="readalong-config">{"id":"bac2816bd97cb45b4f9402d1a9206c4235bd4a92eb25cc4c404f3531309a0dda","timestamps":null,"autoGenerate":false,"speed":150,"text":"First paragraph of text.\\n\\nSecond paragraph of text."}</script>
+</div>
+"
+`;
+
+exports[`remarkDirectiveReadalong > should transform with audio source 1`] = `
+"
+<div class="directive-readalong" data-id="d73a6f0f59bdb466c3797380e68f926bd6e3cffcbbc8afbb61758d7bc02e9c3e">
+  <div class="readalong-controls"><button class="play-pause" onclick="hyperbook.readalong.togglePlayPause(&#x22;d73a6f0f59bdb466c3797380e68f926bd6e3cffcbbc8afbb61758d7bc02e9c3e&#x22;)" title="Play/Pause"></button>
+    <div class="time-display"><span class="current-time">0:00</span> / <span class="total-time">0:00</span></div>
+  </div>
+  <div class="readalong-text" data-id="d73a6f0f59bdb466c3797380e68f926bd6e3cffcbbc8afbb61758d7bc02e9c3e">
+    <p>This is a test sentence for read-along functionality.</p>
+  </div>
+  <audio class="readalong-audio" src="/public/audio.mp3" preload="metadata"></audio>
+  <script type="application/json" class="readalong-config">{"id":"d73a6f0f59bdb466c3797380e68f926bd6e3cffcbbc8afbb61758d7bc02e9c3e","timestamps":null,"autoGenerate":false,"speed":150,"text":"This is a test sentence for read-along functionality."}</script>
+</div>
+"
+`;
+
+exports[`remarkDirectiveReadalong > should transform with auto-generation enabled 1`] = `
+"
+<div class="directive-readalong" data-id="8f1328f6dc2ab963a24d0d82beaae996f2744e76dfb97e02d72e2426c271ab5d">
+  <div class="readalong-controls"><button class="play-pause" onclick="hyperbook.readalong.togglePlayPause(&#x22;8f1328f6dc2ab963a24d0d82beaae996f2744e76dfb97e02d72e2426c271ab5d&#x22;)" title="Play/Pause"></button>
+    <div class="time-display"><span class="current-time">0:00</span> / <span class="total-time">0:00</span></div>
+  </div>
+  <div class="readalong-text" data-id="8f1328f6dc2ab963a24d0d82beaae996f2744e76dfb97e02d72e2426c271ab5d">
+    <p>This is a test sentence for read-along functionality.</p>
+  </div>
+  <audio class="readalong-audio" src="/public/audio.mp3" preload="metadata"></audio>
+  <script type="application/json" class="readalong-config">{"id":"8f1328f6dc2ab963a24d0d82beaae996f2744e76dfb97e02d72e2426c271ab5d","timestamps":null,"autoGenerate":true,"speed":120,"text":"This is a test sentence for read-along functionality."}</script>
+</div>
+"
+`;
+
+exports[`remarkDirectiveReadalong > should transform with timestamps 1`] = `
+"
+<div class="directive-readalong" data-id="805945bbd18a2896fb2e6b5f2cc4f54fcb031d7daf366c72f2e8a9cba2f2fe23">
+  <div class="readalong-controls"><button class="play-pause" onclick="hyperbook.readalong.togglePlayPause(&#x22;805945bbd18a2896fb2e6b5f2cc4f54fcb031d7daf366c72f2e8a9cba2f2fe23&#x22;)" title="Play/Pause"></button>
+    <div class="time-display"><span class="current-time">0:00</span> / <span class="total-time">0:00</span></div>
+  </div>
+  <div class="readalong-text" data-id="805945bbd18a2896fb2e6b5f2cc4f54fcb031d7daf366c72f2e8a9cba2f2fe23">
+    <p>This is a test sentence for read-along functionality.</p>
+  </div>
+  <audio class="readalong-audio" src="/public/audio.mp3" preload="metadata"></audio>
+  <script type="application/json" class="readalong-config">{"id":"805945bbd18a2896fb2e6b5f2cc4f54fcb031d7daf366c72f2e8a9cba2f2fe23","timestamps":[{"word":"This","start":0,"end":0.5},{"word":"is","start":0.5,"end":0.8},{"word":"a","start":0.8,"end":1},{"word":"test","start":1,"end":1.5}],"autoGenerate":false,"speed":150,"text":"This is a test sentence for read-along functionality."}</script>
+</div>
+"
+`;
