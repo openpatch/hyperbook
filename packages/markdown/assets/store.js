@@ -100,16 +100,144 @@ async function hyperbookReset() {
     }
   }
 
-  if (!confirm(i18n.get("store-reset-confirm"))) {
-    return;
-  }
+  // Show custom dialog with two options
+  return new Promise((resolve) => {
+    const overlay = document.createElement("div");
+    overlay.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+    `;
 
-  clearTable(store);
-  clearTable(learnJDB);
-  clearTable(sqlIdeDB);
+    const dialog = document.createElement("div");
+    dialog.style.cssText = `
+      background: var(--color-background, white);
+      color: var(--color-text, black);
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      max-width: 400px;
+      text-align: center;
+    `;
 
-  alert(i18n.get("store-reset-sucessful"));
-  window.location.reload();
+    const message = document.createElement("p");
+    message.textContent = i18n.get("store-reset-page-or-all");
+    message.style.cssText = `
+      margin-bottom: 20px;
+      font-size: 16px;
+    `;
+
+    const buttonContainer = document.createElement("div");
+    buttonContainer.style.cssText = `
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+    `;
+
+    const pageButton = document.createElement("button");
+    pageButton.textContent = i18n.get("store-reset-this-page");
+    pageButton.style.cssText = `
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      background: var(--color-brand, #007bff);
+      color: white;
+      cursor: pointer;
+      font-size: 14px;
+    `;
+    pageButton.onmouseover = () => {
+      pageButton.style.opacity = "0.9";
+    };
+    pageButton.onmouseout = () => {
+      pageButton.style.opacity = "1";
+    };
+
+    const allButton = document.createElement("button");
+    allButton.textContent = i18n.get("store-reset-whole-hyperbook");
+    allButton.style.cssText = `
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      background: #dc3545;
+      color: white;
+      cursor: pointer;
+      font-size: 14px;
+    `;
+    allButton.onmouseover = () => {
+      allButton.style.opacity = "0.9";
+    };
+    allButton.onmouseout = () => {
+      allButton.style.opacity = "1";
+    };
+
+    const cancelButton = document.createElement("button");
+    cancelButton.textContent = "Cancel";
+    cancelButton.style.cssText = `
+      padding: 10px 20px;
+      border: 1px solid var(--color-text, #333);
+      border-radius: 4px;
+      background: transparent;
+      color: var(--color-text, black);
+      cursor: pointer;
+      font-size: 14px;
+    `;
+    cancelButton.onmouseover = () => {
+      cancelButton.style.opacity = "0.7";
+    };
+    cancelButton.onmouseout = () => {
+      cancelButton.style.opacity = "1";
+    };
+
+    pageButton.onclick = async () => {
+      document.body.removeChild(overlay);
+      // Reset only bookmarks for current page
+      const currentPath = window.location.pathname;
+      const bookmarks = await store.bookmarks.where("path").equals(currentPath).toArray();
+      for (const bookmark of bookmarks) {
+        await store.bookmarks.delete(bookmark.path);
+      }
+      alert(i18n.get("store-reset-page-successful"));
+      window.location.reload();
+      resolve();
+    };
+
+    allButton.onclick = async () => {
+      document.body.removeChild(overlay);
+      // Show additional confirmation for whole hyperbook
+      if (!confirm(i18n.get("store-reset-whole-confirm"))) {
+        resolve();
+        return;
+      }
+      await clearTable(store);
+      await clearTable(learnJDB);
+      await clearTable(sqlIdeDB);
+      alert(i18n.get("store-reset-sucessful"));
+      window.location.reload();
+      resolve();
+    };
+
+    cancelButton.onclick = () => {
+      document.body.removeChild(overlay);
+      resolve();
+    };
+
+    buttonContainer.appendChild(pageButton);
+    buttonContainer.appendChild(allButton);
+    buttonContainer.appendChild(cancelButton);
+
+    dialog.appendChild(message);
+    dialog.appendChild(buttonContainer);
+    overlay.appendChild(dialog);
+    document.body.appendChild(overlay);
+  });
 }
 
 async function hyperbookImport() {
