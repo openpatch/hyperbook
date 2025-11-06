@@ -68,20 +68,7 @@
 .directive-readalong .readalong-word.active {
   background-color: var(--color-primary);
   color: var(--color-text-on-primary);
-  font-weight: 600;
-  animation: pulse 0.3s ease-in-out;
-}
-
-@keyframes pulse {
-  0% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.05);
-  }
-  100% {
-    transform: scale(1);
-  }
+  box-shadow: 0 0 0 2px var(--color-primary);
 }
 
 .directive-readalong .readalong-audio {
