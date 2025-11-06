@@ -94,9 +94,17 @@ async function hyperbookExport() {
 }
 
 async function hyperbookReset() {
+  // Z-index higher than typical modal overlays (navigation is typically 1000-9000)
+  const OVERLAY_Z_INDEX = 10000;
+  
   async function clearTable(db) {
-    for (const table of db.tables) {
-      await table.clear();
+    try {
+      for (const table of db.tables) {
+        await table.clear();
+      }
+    } catch (error) {
+      console.error("Error clearing table:", error);
+      throw error;
     }
   }
 
@@ -113,7 +121,7 @@ async function hyperbookReset() {
       display: flex;
       align-items: center;
       justify-content: center;
-      z-index: 10000;
+      z-index: ${OVERLAY_Z_INDEX};
     `;
 
     const dialog = document.createElement("div");
@@ -198,14 +206,20 @@ async function hyperbookReset() {
 
     pageButton.onclick = async () => {
       document.body.removeChild(overlay);
-      // Reset only bookmarks for current page
-      const currentPath = window.location.pathname;
-      const bookmarks = await store.bookmarks.where("path").equals(currentPath).toArray();
-      for (const bookmark of bookmarks) {
-        await store.bookmarks.delete(bookmark.path);
+      try {
+        // Reset only bookmarks for current page
+        // Note: 'path' is the primary key for bookmarks table
+        const currentPath = window.location.pathname;
+        const bookmarks = await store.bookmarks.where("path").equals(currentPath).toArray();
+        for (const bookmark of bookmarks) {
+          await store.bookmarks.delete(bookmark.path);
+        }
+        alert(i18n.get("store-reset-page-successful"));
+        window.location.reload();
+      } catch (error) {
+        console.error("Error resetting page:", error);
+        alert("Failed to reset page. Please try again.");
       }
-      alert(i18n.get("store-reset-page-successful"));
-      window.location.reload();
       resolve();
     };
 
@@ -216,11 +230,16 @@ async function hyperbookReset() {
         resolve();
         return;
       }
-      await clearTable(store);
-      await clearTable(learnJDB);
-      await clearTable(sqlIdeDB);
-      alert(i18n.get("store-reset-successful"));
-      window.location.reload();
+      try {
+        await clearTable(store);
+        await clearTable(learnJDB);
+        await clearTable(sqlIdeDB);
+        alert(i18n.get("store-reset-successful"));
+        window.location.reload();
+      } catch (error) {
+        console.error("Error resetting hyperbook:", error);
+        alert("Failed to reset hyperbook. Please try again.");
+      }
       resolve();
     };
 
