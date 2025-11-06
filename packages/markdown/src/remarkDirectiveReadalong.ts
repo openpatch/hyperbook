@@ -45,6 +45,7 @@ export default (ctx: HyperbookContext) => () => {
         timestamps,
         autoGenerate = false,
         speed = 150, // words per minute for auto-generation
+        mode = "manual", // "manual" or "tts"
       } = node.attributes || {};
 
       expectContainerDirective(node, file, name);
@@ -140,10 +141,11 @@ export default (ctx: HyperbookContext) => () => {
         ],
       };
 
-      data.hChildren = [
-        controls,
-        textWrapper,
-        {
+      // Build children array - audio element only for manual mode
+      const children: ElementContent[] = [controls, textWrapper];
+      
+      if (mode !== "tts") {
+        children.push({
           type: "element",
           tagName: "audio",
           properties: {
@@ -158,28 +160,32 @@ export default (ctx: HyperbookContext) => () => {
             preload: "metadata",
           },
           children: [],
+        });
+      }
+      
+      children.push({
+        type: "element",
+        tagName: "script",
+        properties: {
+          type: "application/json",
+          class: "readalong-config",
         },
-        {
-          type: "element",
-          tagName: "script",
-          properties: {
-            type: "application/json",
-            class: "readalong-config",
+        children: [
+          {
+            type: "text",
+            value: JSON.stringify({
+              id,
+              mode: mode || "manual",
+              timestamps: timestampData,
+              autoGenerate: autoGenerate === "true",
+              speed: typeof speed === "string" ? parseInt(speed) : speed,
+              text: textContent,
+            }),
           },
-          children: [
-            {
-              type: "text",
-              value: JSON.stringify({
-                id,
-                timestamps: timestampData,
-                autoGenerate: autoGenerate === "true",
-                speed: typeof speed === "string" ? parseInt(speed) : speed,
-                text: textContent,
-              }),
-            },
-          ],
-        },
-      ];
+        ],
+      });
+
+      data.hChildren = children;
     }
   };
 };

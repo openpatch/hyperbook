@@ -9,6 +9,7 @@ hyperbook.readalong = (function () {
   /**
    * @typedef {Object} ReadalongConfig
    * @property {string} id
+   * @property {string} mode
    * @property {WordTimestamp[]} timestamps
    * @property {boolean} autoGenerate
    * @property {number} speed
@@ -23,6 +24,9 @@ hyperbook.readalong = (function () {
    * @property {ReadalongConfig} config
    * @property {number} currentWordIndex
    * @property {number} intervalId
+   * @property {SpeechSynthesisUtterance} utterance
+   * @property {number} startTime
+   * @property {boolean} isPlaying
    */
 
   /**
@@ -89,8 +93,9 @@ hyperbook.readalong = (function () {
    * Wrap each word in the text container with a span
    * @param {HTMLElement} textContainer
    * @param {WordTimestamp[]} timestamps
+   * @param {string} mode
    */
-  function wrapWords(textContainer, timestamps) {
+  function wrapWords(textContainer, timestamps, mode) {
     // Get all text nodes
     const walker = document.createTreeWalker(
       textContainer,
@@ -123,15 +128,41 @@ hyperbook.readalong = (function () {
             span.setAttribute("data-end", timestamps[timestampIndex].end.toString());
             span.setAttribute("data-index", timestampIndex.toString());
             
+            // For TTS mode, store character index
+            if (mode === "tts" && timestamps[timestampIndex].charIndex !== undefined) {
+              span.setAttribute("data-char-index", timestamps[timestampIndex].charIndex.toString());
+            }
+            
             // Make word clickable
             span.style.cursor = "pointer";
             span.onclick = function() {
-              const start = parseFloat(this.getAttribute("data-start") || "0");
               const instance = instances[textContainer.getAttribute("data-id")];
-              if (instance && instance.audio) {
-                instance.audio.currentTime = start;
-                if (instance.audio.paused) {
-                  instance.audio.play();
+              if (!instance) return;
+              
+              if (mode === "tts") {
+                // For TTS, restart from this word
+                const charIndex = parseInt(this.getAttribute("data-char-index") || "0");
+                if (instance.utterance) {
+                  speechSynthesis.cancel();
+                }
+                // Create new utterance starting from this character
+                const text = instance.config.text;
+                const remainingText = text.substring(charIndex);
+                instance.utterance = new SpeechSynthesisUtterance(remainingText);
+                instance.utterance.rate = instance.config.speed / 150;
+                instance.startTime = Date.now();
+                instance.isPlaying = true;
+                speechSynthesis.speak(instance.utterance);
+                const button = instance.container.querySelector(".play-pause");
+                button.classList.add("playing");
+              } else {
+                // For manual mode, seek to timestamp
+                const start = parseFloat(this.getAttribute("data-start") || "0");
+                if (instance.audio) {
+                  instance.audio.currentTime = start;
+                  if (instance.audio.paused) {
+                    instance.audio.play();
+                  }
                 }
               }
             };
@@ -205,11 +236,149 @@ hyperbook.readalong = (function () {
     const currentTimeEl = instance.container.querySelector(".current-time");
     const totalTimeEl = instance.container.querySelector(".total-time");
     
-    if (currentTimeEl) {
-      currentTimeEl.textContent = formatTime(instance.audio.currentTime);
+    if (instance.config.mode === "tts") {
+      // For TTS, calculate elapsed time
+      if (currentTimeEl && instance.isPlaying) {
+        const elapsed = (Date.now() - instance.startTime) / 1000;
+        currentTimeEl.textContent = formatTime(elapsed);
+      }
+      // Total time is estimated based on word count and speed
+      if (totalTimeEl && !totalTimeEl.textContent.includes(":")) {
+        const words = instance.config.text.match(/\S+/g) || [];
+        const estimatedDuration = (words.length / instance.config.speed) * 60;
+        totalTimeEl.textContent = formatTime(estimatedDuration);
+      }
+    } else {
+      // For audio files
+      if (currentTimeEl) {
+        currentTimeEl.textContent = formatTime(instance.audio.currentTime);
+      }
+      if (totalTimeEl && !isNaN(instance.audio.duration)) {
+        totalTimeEl.textContent = formatTime(instance.audio.duration);
+      }
     }
-    if (totalTimeEl && !isNaN(instance.audio.duration)) {
-      totalTimeEl.textContent = formatTime(instance.audio.duration);
+  }
+
+  /**
+   * Generate timestamps from TTS word boundaries
+   * @param {string} text
+   * @returns {Promise<WordTimestamp[]>}
+   */
+  function generateTTSTimestamps(text) {
+    return new Promise((resolve, reject) => {
+      if (!('speechSynthesis' in window)) {
+        reject(new Error('Speech synthesis not supported'));
+        return;
+      }
+
+      const words = text.match(/\S+/g) || [];
+      const timestamps = [];
+      let wordIndex = 0;
+      
+      const utterance = new SpeechSynthesisUtterance(text);
+      
+      utterance.onboundary = function(event) {
+        if (event.name === 'word' && wordIndex < words.length) {
+          const start = event.elapsedTime / 1000;
+          timestamps.push({
+            word: words[wordIndex],
+            start: start,
+            end: start + 0.5, // Approximate end time
+            charIndex: event.charIndex,
+          });
+          wordIndex++;
+        }
+      };
+
+      utterance.onend = function() {
+        // Update end times based on next word's start
+        for (let i = 0; i < timestamps.length - 1; i++) {
+          timestamps[i].end = timestamps[i + 1].start;
+        }
+        // Last word gets a reasonable end time
+        if (timestamps.length > 0) {
+          const lastTs = timestamps[timestamps.length - 1];
+          lastTs.end = lastTs.start + 0.5;
+        }
+        resolve(timestamps);
+      };
+
+      utterance.onerror = function(event) {
+        reject(event);
+      };
+
+      // Run speech synthesis silently to get timing
+      utterance.volume = 0;
+      speechSynthesis.speak(utterance);
+    });
+  }
+
+  /**
+   * Toggle play/pause for TTS mode
+   * @param {string} id
+   */
+  function togglePlayPauseTTS(id) {
+    const instance = instances[id];
+    if (!instance) return;
+
+    const button = instance.container.querySelector(".play-pause");
+    
+    if (instance.isPlaying) {
+      // Pause
+      speechSynthesis.cancel();
+      instance.isPlaying = false;
+      button.classList.remove("playing");
+    } else {
+      // Play
+      if (!instance.utterance) {
+        instance.utterance = new SpeechSynthesisUtterance(instance.config.text);
+        instance.utterance.rate = instance.config.speed / 150; // Adjust rate based on speed
+        
+        instance.utterance.onboundary = function(event) {
+          if (event.name === 'word') {
+            // Highlight current word
+            const words = instance.textContainer.querySelectorAll(".readalong-word");
+            words.forEach((word, index) => {
+              const charIndex = parseInt(word.getAttribute("data-char-index") || "-1");
+              if (charIndex === event.charIndex) {
+                word.classList.add("active");
+                if (!isInViewport(word)) {
+                  word.scrollIntoView({ behavior: "smooth", block: "center" });
+                }
+              } else {
+                word.classList.remove("active");
+              }
+            });
+          }
+        };
+
+        instance.utterance.onend = function() {
+          instance.isPlaying = false;
+          button.classList.remove("playing");
+          const words = instance.textContainer.querySelectorAll(".readalong-word");
+          words.forEach(word => word.classList.remove("active"));
+        };
+
+        instance.utterance.onerror = function(event) {
+          console.error("TTS error:", event);
+          instance.isPlaying = false;
+          button.classList.remove("playing");
+        };
+      }
+      
+      instance.startTime = Date.now();
+      instance.isPlaying = true;
+      button.classList.add("playing");
+      speechSynthesis.speak(instance.utterance);
+      
+      // Update time display while speaking
+      const updateInterval = setInterval(() => {
+        if (!instance.isPlaying) {
+          clearInterval(updateInterval);
+          return;
+        }
+        updateTimeDisplay(id);
+      }, 100);
     }
   }
 
@@ -221,6 +390,13 @@ hyperbook.readalong = (function () {
     const instance = instances[id];
     if (!instance) return;
 
+    // Use TTS mode if configured
+    if (instance.config.mode === "tts") {
+      togglePlayPauseTTS(id);
+      return;
+    }
+
+    // Manual mode with audio file
     const button = instance.container.querySelector(".play-pause");
     
     if (instance.audio.paused) {
@@ -244,7 +420,7 @@ hyperbook.readalong = (function () {
     const textContainer = container.querySelector(".readalong-text");
     const configEl = container.querySelector(".readalong-config");
     
-    if (!audio || !textContainer || !configEl) return;
+    if (!textContainer || !configEl) return;
 
     let config;
     try {
@@ -261,9 +437,38 @@ hyperbook.readalong = (function () {
       config,
       currentWordIndex: -1,
       intervalId: null,
+      utterance: null,
+      startTime: 0,
+      isPlaying: false,
     };
 
     instances[id] = instance;
+
+    // Handle TTS mode
+    if (config.mode === "tts") {
+      // Check if speech synthesis is supported
+      if (!('speechSynthesis' in window)) {
+        console.error("Speech synthesis not supported in this browser");
+        return;
+      }
+
+      // Generate timestamps from TTS
+      generateTTSTimestamps(config.text)
+        .then(timestamps => {
+          if (timestamps && timestamps.length > 0) {
+            wrapWords(textContainer, timestamps, "tts");
+          }
+          updateTimeDisplay(id);
+        })
+        .catch(err => {
+          console.error("Failed to generate TTS timestamps:", err);
+        });
+      
+      return;
+    }
+
+    // Manual mode with audio file
+    if (!audio) return;
 
     // Wait for audio metadata to load
     audio.addEventListener("loadedmetadata", function() {
@@ -279,7 +484,7 @@ hyperbook.readalong = (function () {
       }
 
       if (timestamps && timestamps.length > 0) {
-        wrapWords(textContainer, timestamps);
+        wrapWords(textContainer, timestamps, "manual");
       }
 
       updateTimeDisplay(id);

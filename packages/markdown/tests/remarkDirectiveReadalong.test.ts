@@ -113,4 +113,19 @@ Second paragraph of text.
       ).value,
     ).toMatchSnapshot();
   });
+
+  it("should transform with TTS mode", async () => {
+    expect(
+      (
+        await toHtml(
+          `
+:::readalong{mode="tts"}
+This is a test using text-to-speech synthesis.
+:::
+`,
+          ctx,
+        )
+      ).value,
+    ).toMatchSnapshot();
+  });
 });
