@@ -18,7 +18,7 @@ import {
 } from "mdast-util-directive";
 import { remark } from "./process";
 import hash from "./objectHash";
-import { toText } from "hast-util-to-text";
+import { toText as mdastToText } from "./mdastUtilToText";
 
 export default (ctx: HyperbookContext) => () => {
   const name = "readalong";
@@ -66,6 +66,9 @@ export default (ctx: HyperbookContext) => () => {
         contentChildren.push(processedChild as ElementContent);
       }
 
+      // Extract text for auto-generation before creating HAST (more efficient)
+      const textContent = mdastToText(node.children);
+
       // Create a wrapper for the text content
       const textWrapper: ElementContent = {
         type: "element",
@@ -76,9 +79,6 @@ export default (ctx: HyperbookContext) => () => {
         },
         children: contentChildren,
       };
-
-      // Extract text for auto-generation if needed
-      const textContent = toText(textWrapper);
       
       // Parse timestamps if provided
       let timestampData = null;

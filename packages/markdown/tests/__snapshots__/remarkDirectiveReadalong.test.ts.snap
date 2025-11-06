@@ -11,7 +11,7 @@ exports[`remarkDirectiveReadalong > should handle multiple paragraphs 1`] = `
     <p>Second paragraph of text.</p>
   </div>
   <audio class="readalong-audio" src="/public/audio.mp3" preload="metadata"></audio>
-  <script type="application/json" class="readalong-config">{"id":"bac2816bd97cb45b4f9402d1a9206c4235bd4a92eb25cc4c404f3531309a0dda","timestamps":null,"autoGenerate":false,"speed":150,"text":"First paragraph of text.\\n\\nSecond paragraph of text."}</script>
+  <script type="application/json" class="readalong-config">{"id":"bac2816bd97cb45b4f9402d1a9206c4235bd4a92eb25cc4c404f3531309a0dda","timestamps":null,"autoGenerate":false,"speed":150,"text":"First paragraph of text. Second paragraph of text."}</script>
 </div>
 "
 `;

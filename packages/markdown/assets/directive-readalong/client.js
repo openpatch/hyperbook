@@ -71,6 +71,17 @@ hyperbook.readalong = (function () {
       currentTime += wordDuration;
     }
     
+    // Scale timestamps to fit audio duration if provided
+    if (duration && duration > 0) {
+      const calculatedDuration = currentTime / 1000;
+      const scale = duration / calculatedDuration;
+      
+      timestamps.forEach(ts => {
+        ts.start *= scale;
+        ts.end *= scale;
+      });
+    }
+    
     return timestamps;
   }
 

@@ -20,7 +20,6 @@
   height: 48px;
   border: none;
   border-radius: 50%;
-  background-color: var(--color-primary);
   cursor: pointer;
   transition: transform 0.2s, background-color 0.2s;
   mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 -960 960 960" fill="currentColor"><path d="M320-203v-560l440 280-440 280Z"></path></svg>');
