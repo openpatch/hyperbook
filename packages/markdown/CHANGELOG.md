@@ -1,5 +1,11 @@
 # @hyperbook/markdown
 
+## 0.39.0
+
+### Minor Changes
+
+- [`4a94df7`](https://github.com/openpatch/hyperbook/commit/4a94df7c951e8dc0e4bbaf0cbfff03a87decd230) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Open external links in a new tab
+
 ## 0.38.0
 
 ### Minor Changes
