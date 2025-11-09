@@ -407,9 +407,9 @@ HYPERBOOK_ASSETS = "/assets/"
   </side-drawer>
   <p>
     Du kannst das Programm am schnellsten per
-    <a href="/public/https:/de.wikipedia.org/Kopieren_und_Einf%C3%BCgen">Kopieren und Einfügen</a>
+    <a href="/public/https:/de.wikipedia.org/Kopieren_und_Einf%C3%BCgen" target="_blank" rel="noopener noreferrer">Kopieren und Einfügen</a>
     in den Editor übernehmen. Du musst aber aufpassen: Wie du weißt
-    sind die Einrückungen (Leer- und <a href="/public/https:/de.wikipedia.org/Tabulatorzeichen">Tabulatorzeichen</a>
+    sind die Einrückungen (Leer- und <a href="/public/https:/de.wikipedia.org/Tabulatorzeichen" target="_blank" rel="noopener noreferrer">Tabulatorzeichen</a>
     )
     in Python Teil des Programms .
   </p>

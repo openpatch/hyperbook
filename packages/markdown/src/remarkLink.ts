@@ -15,6 +15,13 @@ export default (ctx: HyperbookContext) => () => {
           node.type === "definition")
       ) {
         if (node.url) {
+          // make link target blank for external links
+          if (node.type === "link" && /^https?:\/\//.test(node.url)) {
+            if (!node.data) node.data = {};
+            if (!node.data.hProperties) node.data.hProperties = {};
+            node.data.hProperties.target = "_blank";
+            node.data.hProperties.rel = "noopener noreferrer";
+          }
           node.url = ctx.makeUrl(
             node.url,
             "public",
