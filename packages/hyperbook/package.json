@@ -34,6 +34,7 @@
     "favicons": "^7.2.0"
   },
   "devDependencies": {
+    "@hyperbook/create": "workspace:*",
     "@hyperbook/fs": "workspace:*",
     "@hyperbook/markdown": "workspace:*",
     "@hyperbook/types": "workspace:*",

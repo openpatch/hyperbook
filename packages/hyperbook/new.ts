@@ -1,13 +1,6 @@
-import os from "os";
 import chalk from "chalk";
-import cpy from "cpy";
-import path from "path";
-import fs from "fs";
 import prompts from "prompts";
-import { isFolderEmpty } from "./helpers/is-folder-empty";
-import { isWriteable } from "./helpers/is-writeable";
-import { makeDir } from "./helpers/make-dir";
-import { tryGitInit } from "./helpers/git";
+import { createHyperbook } from "@hyperbook/create";
 
 export async function runNew({
   programName,
@@ -48,31 +41,6 @@ export async function runNew({
     );
     process.exit(1);
   }
-
-  const root = path.resolve(bookPath);
-
-  if (!(await isWriteable(path.dirname(root)))) {
-    console.error(
-      "The book path is not writable, please check folder permissions and try again.",
-    );
-    console.error(
-      "It is likely you do not have write permissions for this folder.",
-    );
-    process.exit(1);
-  }
-
-  const bookName = path.basename(root);
-
-  await makeDir(root);
-  if (!isFolderEmpty(root, bookName)) {
-    process.exit(1);
-  }
-  const originalDirectory = process.cwd();
-
-  console.log(`Creating a new hyperbook in ${chalk.green(root)}.`);
-  console.log();
-
-  process.chdir(root);
 
   const { description } = await prompts({
     type: "text",
@@ -145,59 +113,42 @@ export async function runNew({
     initial: "en",
   });
 
-  const hyperbookJson = {
-    name: bookName,
-    version: "0.0.0",
-    description: description,
-    license,
-    author: {
-      name: author,
-      url: authorUrl,
-    },
-    language: language,
-  };
-
-  fs.writeFileSync(
-    path.join(root, "hyperbook.json"),
-    JSON.stringify(hyperbookJson, null, 2) + os.EOL,
-  );
-
-  console.log();
-  /**
-   * Copy the files to the target directory.
-   */
-  const filesPath = path.join(__dirname, "templates");
-  await cpy("default/**", root, {
-    cwd: filesPath,
-    rename: (name) => {
-      switch (name) {
-        case "gitignore": {
-          return ".".concat(name);
-        }
-        // README.md is ignored by webpack-asset-relocator-loader used by ncc:
-        // https://github.com/vercel/webpack-asset-relocator-loader/blob/e9308683d47ff507253e37c9bcbb99474603192b/src/asset-relocator.js#L227
-        case "README-template.md": {
-          return "README.md";
-        }
-        default: {
-          return name;
-        }
-      }
-    },
+  const { platform } = await prompts({
+    type: "select",
+    name: "platform",
+    message: "Where do you plan to publish your book?",
+    choices: [
+      { title: "GitHub", value: "github" },
+      { title: "GitLab", value: "gitlab" },
+      { title: "EduGit", value: "edugit" },
+      { title: "Vercel", value: "vercel" },
+      { title: "Custom/Other", value: "custom" },
+    ],
+    initial: 0,
   });
 
-  if (tryGitInit(root)) {
-    console.log("Initialized a git repository.");
-    console.log();
-  }
-  let cdpath: string;
-  if (path.join(originalDirectory, bookName) === bookPath) {
-    cdpath = bookName;
-  } else {
-    cdpath = bookPath;
+  console.log();
+  console.log(`Creating a new hyperbook...`);
+  console.log();
+
+  const result = await createHyperbook({
+    bookPath,
+    description,
+    author,
+    authorUrl,
+    license,
+    language,
+    platform,
+  });
+
+  if (!result.success) {
+    console.error(chalk.red("Error creating hyperbook:"), result.error);
+    process.exit(1);
   }
 
-  console.log(`${chalk.green("Success!")} Created ${bookName} at ${bookPath}`);
+  console.log(
+    `${chalk.green("Success!")} Created ${result.bookName} at ${result.root}`,
+  );
   console.log("Inside that directory, you can run several commands:");
   console.log();
   console.log(chalk.cyan(`  hyperbook dev`));
@@ -208,6 +159,14 @@ export async function runNew({
   console.log();
   console.log("We suggest that you begin by typing:");
   console.log();
+  const originalDirectory = process.cwd();
+  const bookName = result.bookName;
+  let cdpath: string;
+  if (originalDirectory && result.root.startsWith(originalDirectory)) {
+    cdpath = bookName;
+  } else {
+    cdpath = result.root;
+  }
   console.log(chalk.cyan("  cd"), cdpath);
   console.log(`  ${chalk.cyan(`hyperbook dev`)}`);
   console.log();

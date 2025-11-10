@@ -60,6 +60,22 @@ importers:
         specifier: 5.97.1
         version: 5.97.1(@swc/core@1.10.4)(esbuild@0.24.2)
 
+  packages/create:
+    dependencies:
+      '@hyperbook/types':
+        specifier: workspace:*
+        version: link:../types
+    devDependencies:
+      rimraf:
+        specifier: 6.0.1
+        version: 6.0.1
+      typescript:
+        specifier: 5.7.3
+        version: 5.7.3
+      vitest:
+        specifier: 3.0.5
+        version: 3.0.5(@types/debug@4.1.12)(@types/node@22.13.1)(lightningcss@1.28.2)(sass@1.84.0)(terser@5.38.1)(yaml@2.7.1)
+
   packages/fs:
     dependencies:
       chalk:
@@ -115,6 +131,9 @@ importers:
         specifier: ^7.2.0
         version: 7.2.0
     devDependencies:
+      '@hyperbook/create':
+        specifier: workspace:*
+        version: link:../create
       '@hyperbook/fs':
         specifier: workspace:*
         version: link:../fs
@@ -437,6 +456,9 @@ importers:
 
   platforms/vscode:
     dependencies:
+      '@hyperbook/create':
+        specifier: workspace:*
+        version: link:../../packages/create
       '@hyperbook/fs':
         specifier: workspace:*
         version: link:../../packages/fs
@@ -470,22 +492,22 @@ importers:
         version: 6.0.3
       copy-webpack-plugin:
         specifier: 12.0.2
-        version: 12.0.2(webpack@5.97.1)
+        version: 12.0.2(webpack@5.97.1(@swc/core@1.10.4)(esbuild@0.24.2)(webpack-cli@6.0.1))
       css-loader:
         specifier: 7.1.2
-        version: 7.1.2(webpack@5.97.1)
+        version: 7.1.2(webpack@5.97.1(@swc/core@1.10.4)(esbuild@0.24.2)(webpack-cli@6.0.1))
       eslint:
         specifier: 9.19.0
         version: 9.19.0
       file-loader:
         specifier: 6.2.0
-        version: 6.2.0(webpack@5.97.1)
+        version: 6.2.0(webpack@5.97.1(@swc/core@1.10.4)(esbuild@0.24.2)(webpack-cli@6.0.1))
       glob:
         specifier: 11.0.1
         version: 11.0.1
       node-polyfill-webpack-plugin:
         specifier: ^4.1.0
-        version: 4.1.0(webpack@5.97.1)
+        version: 4.1.0(webpack@5.97.1(@swc/core@1.10.4)(esbuild@0.24.2)(webpack-cli@6.0.1))
       npm-run-all:
         specifier: 4.1.5
         version: 4.1.5
@@ -500,13 +522,13 @@ importers:
         version: 1.84.0
       sass-loader:
         specifier: 16.0.4
-        version: 16.0.4(sass@1.84.0)(webpack@5.97.1)
+        version: 16.0.4(sass@1.84.0)(webpack@5.97.1(@swc/core@1.10.4)(esbuild@0.24.2)(webpack-cli@6.0.1))
       style-loader:
         specifier: 4.0.0
-        version: 4.0.0(webpack@5.97.1)
+        version: 4.0.0(webpack@5.97.1(@swc/core@1.10.4)(esbuild@0.24.2)(webpack-cli@6.0.1))
       ts-loader:
         specifier: 9.5.2
-        version: 9.5.2(typescript@5.7.3)(webpack@5.97.1)
+        version: 9.5.2(typescript@5.7.3)(webpack@5.97.1(@swc/core@1.10.4)(esbuild@0.24.2)(webpack-cli@6.0.1))
       typescript:
         specifier: 5.7.3
         version: 5.7.3
@@ -10398,17 +10420,17 @@ snapshots:
 
   '@webcoder49/code-input@2.2.1': {}
 
-  '@webpack-cli/configtest@3.0.1(webpack-cli@6.0.1)(webpack@5.97.1)':
+  '@webpack-cli/configtest@3.0.1(webpack-cli@6.0.1(webpack@5.97.1))(webpack@5.97.1(@swc/core@1.10.4)(esbuild@0.24.2)(webpack-cli@6.0.1))':
     dependencies:
       webpack: 5.97.1(@swc/core@1.10.4)(esbuild@0.24.2)(webpack-cli@6.0.1)
       webpack-cli: 6.0.1(webpack@5.97.1)
 
-  '@webpack-cli/info@3.0.1(webpack-cli@6.0.1)(webpack@5.97.1)':
+  '@webpack-cli/info@3.0.1(webpack-cli@6.0.1(webpack@5.97.1))(webpack@5.97.1(@swc/core@1.10.4)(esbuild@0.24.2)(webpack-cli@6.0.1))':
     dependencies:
       webpack: 5.97.1(@swc/core@1.10.4)(esbuild@0.24.2)(webpack-cli@6.0.1)
       webpack-cli: 6.0.1(webpack@5.97.1)
 
-  '@webpack-cli/serve@3.0.1(webpack-cli@6.0.1)(webpack@5.97.1)':
+  '@webpack-cli/serve@3.0.1(webpack-cli@6.0.1(webpack@5.97.1))(webpack@5.97.1(@swc/core@1.10.4)(esbuild@0.24.2)(webpack-cli@6.0.1))':
     dependencies:
       webpack: 5.97.1(@swc/core@1.10.4)(esbuild@0.24.2)(webpack-cli@6.0.1)
       webpack-cli: 6.0.1(webpack@5.97.1)
@@ -11197,7 +11219,7 @@ snapshots:
       graceful-fs: 4.2.11
       p-event: 6.0.1
 
-  copy-webpack-plugin@12.0.2(webpack@5.97.1):
+  copy-webpack-plugin@12.0.2(webpack@5.97.1(@swc/core@1.10.4)(esbuild@0.24.2)(webpack-cli@6.0.1)):
     dependencies:
       fast-glob: 3.3.2
       glob-parent: 6.0.2
@@ -11319,7 +11341,7 @@ snapshots:
       randombytes: 2.1.0
       randomfill: 1.0.4
 
-  css-loader@7.1.2(webpack@5.97.1):
+  css-loader@7.1.2(webpack@5.97.1(@swc/core@1.10.4)(esbuild@0.24.2)(webpack-cli@6.0.1)):
     dependencies:
       icss-utils: 5.1.0(postcss@8.5.1)
       postcss: 8.5.1
@@ -12145,7 +12167,7 @@ snapshots:
     dependencies:
       flat-cache: 4.0.1
 
-  file-loader@6.2.0(webpack@5.97.1):
+  file-loader@6.2.0(webpack@5.97.1(@swc/core@1.10.4)(esbuild@0.24.2)(webpack-cli@6.0.1)):
     dependencies:
       loader-utils: 2.0.4
       schema-utils: 3.1.1
@@ -14462,7 +14484,7 @@ snapshots:
       title-case: 3.0.3
       upper-case: 2.0.2
 
-  node-polyfill-webpack-plugin@4.1.0(webpack@5.97.1):
+  node-polyfill-webpack-plugin@4.1.0(webpack@5.97.1(@swc/core@1.10.4)(esbuild@0.24.2)(webpack-cli@6.0.1)):
     dependencies:
       node-stdlib-browser: 1.3.1
       type-fest: 4.33.0
@@ -15624,7 +15646,7 @@ snapshots:
 
   safer-buffer@2.1.2: {}
 
-  sass-loader@16.0.4(sass@1.84.0)(webpack@5.97.1):
+  sass-loader@16.0.4(sass@1.84.0)(webpack@5.97.1(@swc/core@1.10.4)(esbuild@0.24.2)(webpack-cli@6.0.1)):
     dependencies:
       neo-async: 2.6.2
     optionalDependencies:
@@ -16096,7 +16118,7 @@ snapshots:
 
   strip-json-comments@3.1.1: {}
 
-  style-loader@4.0.0(webpack@5.97.1):
+  style-loader@4.0.0(webpack@5.97.1(@swc/core@1.10.4)(esbuild@0.24.2)(webpack-cli@6.0.1)):
     dependencies:
       webpack: 5.97.1(@swc/core@1.10.4)(esbuild@0.24.2)(webpack-cli@6.0.1)
 
@@ -16152,6 +16174,18 @@ snapshots:
 
   term-size@2.2.1: {}
 
+  terser-webpack-plugin@5.3.11(@swc/core@1.10.4)(esbuild@0.24.2)(webpack@5.97.1(@swc/core@1.10.4)(esbuild@0.24.2)(webpack-cli@6.0.1)):
+    dependencies:
+      '@jridgewell/trace-mapping': 0.3.25
+      jest-worker: 27.5.1
+      schema-utils: 4.3.0
+      serialize-javascript: 6.0.2
+      terser: 5.38.1
+      webpack: 5.97.1(@swc/core@1.10.4)(esbuild@0.24.2)(webpack-cli@6.0.1)
+    optionalDependencies:
+      '@swc/core': 1.10.4
+      esbuild: 0.24.2
+
   terser-webpack-plugin@5.3.11(@swc/core@1.10.4)(esbuild@0.24.2)(webpack@5.97.1(@swc/core@1.10.4)(esbuild@0.24.2)):
     dependencies:
       '@jridgewell/trace-mapping': 0.3.25
@@ -16160,18 +16194,6 @@ snapshots:
       serialize-javascript: 6.0.2
       terser: 5.38.1
       webpack: 5.97.1(@swc/core@1.10.4)(esbuild@0.24.2)
-    optionalDependencies:
-      '@swc/core': 1.10.4
-      esbuild: 0.24.2
-
-  terser-webpack-plugin@5.3.11(@swc/core@1.10.4)(esbuild@0.24.2)(webpack@5.97.1):
-    dependencies:
-      '@jridgewell/trace-mapping': 0.3.25
-      jest-worker: 27.5.1
-      schema-utils: 4.3.0
-      serialize-javascript: 6.0.2
-      terser: 5.38.1
-      webpack: 5.97.1(@swc/core@1.10.4)(esbuild@0.24.2)(webpack-cli@6.0.1)
     optionalDependencies:
       '@swc/core': 1.10.4
       esbuild: 0.24.2
@@ -16253,7 +16275,7 @@ snapshots:
 
   ts-dedent@2.2.0: {}
 
-  ts-loader@9.5.2(typescript@5.7.3)(webpack@5.97.1):
+  ts-loader@9.5.2(typescript@5.7.3)(webpack@5.97.1(@swc/core@1.10.4)(esbuild@0.24.2)(webpack-cli@6.0.1)):
     dependencies:
       chalk: 4.1.2
       enhanced-resolve: 5.18.1
@@ -16625,7 +16647,7 @@ snapshots:
       cac: 6.7.14
       debug: 4.4.1
       es-module-lexer: 1.6.0
-      pathe: 2.0.2
+      pathe: 2.0.3
       vite: 6.1.0(@types/node@20.5.1)(lightningcss@1.28.2)(sass@1.84.0)(terser@5.38.1)(yaml@2.7.1)
     transitivePeerDependencies:
       - '@types/node'
@@ -16646,7 +16668,7 @@ snapshots:
       cac: 6.7.14
       debug: 4.4.1
       es-module-lexer: 1.6.0
-      pathe: 2.0.2
+      pathe: 2.0.3
       vite: 6.1.0(@types/node@22.13.1)(lightningcss@1.28.2)(sass@1.84.0)(terser@5.38.1)(yaml@2.7.1)
     transitivePeerDependencies:
       - '@types/node'
@@ -16698,10 +16720,10 @@ snapshots:
       '@vitest/spy': 3.0.5
       '@vitest/utils': 3.0.5
       chai: 5.1.2
-      debug: 4.4.0
+      debug: 4.4.1
       expect-type: 1.1.0
       magic-string: 0.30.17
-      pathe: 2.0.2
+      pathe: 2.0.3
       std-env: 3.8.0
       tinybench: 2.9.0
       tinyexec: 0.3.2
@@ -16737,10 +16759,10 @@ snapshots:
       '@vitest/spy': 3.0.5
       '@vitest/utils': 3.0.5
       chai: 5.1.2
-      debug: 4.4.0
+      debug: 4.4.1
       expect-type: 1.1.0
       magic-string: 0.30.17
-      pathe: 2.0.2
+      pathe: 2.0.3
       std-env: 3.8.0
       tinybench: 2.9.0
       tinyexec: 0.3.2
@@ -16809,9 +16831,9 @@ snapshots:
   webpack-cli@6.0.1(webpack@5.97.1):
     dependencies:
       '@discoveryjs/json-ext': 0.6.3
-      '@webpack-cli/configtest': 3.0.1(webpack-cli@6.0.1)(webpack@5.97.1)
-      '@webpack-cli/info': 3.0.1(webpack-cli@6.0.1)(webpack@5.97.1)
-      '@webpack-cli/serve': 3.0.1(webpack-cli@6.0.1)(webpack@5.97.1)
+      '@webpack-cli/configtest': 3.0.1(webpack-cli@6.0.1(webpack@5.97.1))(webpack@5.97.1(@swc/core@1.10.4)(esbuild@0.24.2)(webpack-cli@6.0.1))
+      '@webpack-cli/info': 3.0.1(webpack-cli@6.0.1(webpack@5.97.1))(webpack@5.97.1(@swc/core@1.10.4)(esbuild@0.24.2)(webpack-cli@6.0.1))
+      '@webpack-cli/serve': 3.0.1(webpack-cli@6.0.1(webpack@5.97.1))(webpack@5.97.1(@swc/core@1.10.4)(esbuild@0.24.2)(webpack-cli@6.0.1))
       colorette: 2.0.20
       commander: 12.1.0
       cross-spawn: 7.0.6
@@ -16883,7 +16905,7 @@ snapshots:
       neo-async: 2.6.2
       schema-utils: 3.3.0
       tapable: 2.2.1
-      terser-webpack-plugin: 5.3.11(@swc/core@1.10.4)(esbuild@0.24.2)(webpack@5.97.1)
+      terser-webpack-plugin: 5.3.11(@swc/core@1.10.4)(esbuild@0.24.2)(webpack@5.97.1(@swc/core@1.10.4)(esbuild@0.24.2)(webpack-cli@6.0.1))
       watchpack: 2.4.2
       webpack-sources: 3.2.3
     optionalDependencies:

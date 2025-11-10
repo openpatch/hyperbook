@@ -3,6 +3,7 @@ import * as path from "path";
 import Preview from "./Preview";
 import StatusBarItem from "./StatusBarItem";
 import { hyperbook } from "@hyperbook/fs";
+import { createNewHyperbook } from "./NewCommand";
 
 export function activate(context: vscode.ExtensionContext) {
   let preview = new Preview(context);
@@ -23,10 +24,18 @@ export function activate(context: vscode.ExtensionContext) {
     },
   );
 
+  let disposableNew = vscode.commands.registerCommand(
+    "hyperbook.new",
+    async () => {
+      await createNewHyperbook(context);
+    },
+  );
+
   // push to subscriptions list so that they are disposed automatically
   // HTML Preview:
   context.subscriptions.push(disposableSidePreview);
   context.subscriptions.push(disposableStatusBar);
+  context.subscriptions.push(disposableNew);
 
   // Completions
   const DocumentSelectorMarkdown: vscode.DocumentSelector = [
