@@ -24,6 +24,7 @@
     "hyperbook"
   ],
   "activationEvents": [
+    "onStartupFinished",
     "workspaceContains:**/hyperbook.json",
     "onLanguage:markdown",
     "onLanguage:handlebars"
