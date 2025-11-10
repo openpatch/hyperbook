@@ -50,6 +50,11 @@
           "light": "./assets/icons/PreviewOnRightPane_16x.svg",
           "dark": "./assets/icons/PreviewOnRightPane_16x_dark.svg"
         }
+      },
+      {
+        "command": "hyperbook.new",
+        "title": "Create new Hyperbook",
+        "category": "Hyperbook"
       }
     ],
     "menus": {
@@ -148,6 +153,7 @@
     "webpack-cli": "6.0.1"
   },
   "dependencies": {
+    "@hyperbook/create": "workspace:*",
     "@hyperbook/fs": "workspace:*",
     "@hyperbook/markdown": "workspace:*"
   },

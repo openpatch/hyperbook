@@ -1,0 +1,25 @@
+{
+  "name": "@hyperbook/create",
+  "version": "0.1.0",
+  "description": "Shared logic for creating new Hyperbook projects",
+  "platform": "node",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "templates"
+  ],
+  "scripts": {
+    "build": "rimraf dist && pnpm build:pkg && pnpm build:types",
+    "build:pkg": "node ../../scripts/build.mjs",
+    "build:types": "tsc --project tsconfig.build.json --declaration --emitDeclarationOnly"
+  },
+  "dependencies": {
+    "@hyperbook/types": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "5.7.3",
+    "rimraf": "6.0.1",
+    "vitest": "3.0.5"
+  }
+}
