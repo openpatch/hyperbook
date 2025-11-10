@@ -11,6 +11,22 @@ All you need for writing Hyperbooks (auto preview, snippets, auto-completion and
 
 ## Features
 
+### Create New Hyperbook
+
+You can create a new Hyperbook project directly from VS Code by running the command `Create new Hyperbook` from the Command Palette (Ctrl+Shift+P / Cmd+Shift+P).
+
+The command will guide you through a multi-step wizard to:
+1. Select the parent folder where your Hyperbook will be created
+2. Choose a name for your book
+3. Provide a description (optional)
+4. Enter the author's name
+5. Set the author's homepage URL (optional)
+6. Select a license (Creative Commons, Custom, etc.)
+7. Choose the book's language
+8. Select a publishing platform (GitHub, GitLab, EduGit, Vercel, or Custom)
+
+After completion, you can open the newly created Hyperbook folder in VS Code.
+
 ### Preview
 
 You can preview your Hyperbook pages by clicking the preview icon in the top right-hand corner or by running the command `Show side preview`.
