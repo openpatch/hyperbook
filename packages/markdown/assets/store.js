@@ -29,6 +29,7 @@ store.version(1).stores({
   learningmap: `id,nodes,x,y,zoom`,
   textinput: `id,text`,
   custom: `id,payload`,
+  multievent: `id,state`,
 });
 var sqlIdeDB = new Dexie("SQL-IDE");
 sqlIdeDB.version(0.1).stores({

@@ -33,6 +33,392 @@ var multievent = {
     return MischObj;
   },
   orig: [],
+  saveState: async function (clNr) {
+    var SK = document.getElementsByClassName("multievent")[clNr];
+    if (!SK) return;
+    
+    var state = {
+      vNr: multievent.vNr[clNr],
+      gesamtwertung: multievent.gesamtwertung[clNr],
+      gewertet: multievent.gewertet[clNr],
+      inputs: [],
+      buttons: [],
+      textareas: []
+    };
+    
+    // Save input values and states
+    var inputs = SK.getElementsByTagName("input");
+    for (var i = 0; i < inputs.length; i++) {
+      state.inputs.push({
+        type: inputs[i].type,
+        value: inputs[i].value,
+        checked: inputs[i].checked,
+        disabled: inputs[i].disabled,
+        id: inputs[i].id,
+        name: inputs[i].getAttribute("name"),
+        dataAttributes: {
+          markiert: inputs[i].getAttribute("data-markiert"),
+          gemischt: inputs[i].getAttribute("data-gemischt"),
+          BuchstSind: inputs[i].getAttribute("data-BuchstSind"),
+          Nummer: inputs[i].getAttribute("data-Nummer"),
+          BegriffeSind: inputs[i].getAttribute("data-BegriffeSind"),
+          Fehler: inputs[i].getAttribute("data-Fehler")
+        },
+        style: {
+          backgroundColor: inputs[i].style.backgroundColor,
+          backgroundImage: inputs[i].style.backgroundImage,
+          backgroundSize: inputs[i].style.backgroundSize,
+          color: inputs[i].style.color
+        },
+        parentStyle: inputs[i].parentNode ? {
+          backgroundColor: inputs[i].parentNode.style.backgroundColor,
+          backgroundImage: inputs[i].parentNode.style.backgroundImage,
+          backgroundSize: inputs[i].parentNode.style.backgroundSize
+        } : null,
+        siblingHTML: {
+          prev: inputs[i].previousSibling ? inputs[i].previousSibling.innerHTML : null,
+          next: inputs[i].nextSibling ? inputs[i].nextSibling.innerHTML : null
+        }
+      });
+    }
+    
+    // Save button states
+    var buttons = SK.getElementsByClassName("butAnAus");
+    for (var i = 0; i < buttons.length; i++) {
+      state.buttons.push({
+        id: buttons[i].id,
+        markiert: buttons[i].getAttribute("data-markiert"),
+        gewertet: buttons[i].getAttribute("data-gewertet"),
+        style: {
+          backgroundColor: buttons[i].style.backgroundColor,
+          backgroundImage: buttons[i].style.backgroundImage,
+          color: buttons[i].style.color,
+          border: buttons[i].style.border,
+          outline: buttons[i].style.outline,
+          outlineOffset: buttons[i].style.outlineOffset,
+          display: buttons[i].style.display
+        },
+        nextSiblingHTML: buttons[i].nextSibling ? buttons[i].nextSibling.innerHTML : null
+      });
+    }
+    
+    // Save word search button states
+    var suchButtons = SK.getElementsByClassName("MuEvSuBut");
+    state.suchButtons = [];
+    for (var i = 0; i < suchButtons.length; i++) {
+      state.suchButtons.push({
+        id: suchButtons[i].id,
+        markiert: suchButtons[i].getAttribute("data-markiert"),
+        gewertet: suchButtons[i].getAttribute("data-gewertet"),
+        spielAus: suchButtons[i].getAttribute("data-spielAus"),
+        style: {
+          backgroundColor: suchButtons[i].style.backgroundColor,
+          fontWeight: suchButtons[i].style.fontWeight,
+          border: suchButtons[i].style.border,
+          outline: suchButtons[i].style.outline,
+          outlineOffset: suchButtons[i].style.outlineOffset,
+          borderRadius: suchButtons[i].style.borderRadius
+        },
+        parentStyle: suchButtons[i].parentNode ? {
+          backgroundColor: suchButtons[i].parentNode.style.backgroundColor
+        } : null
+      });
+    }
+    
+    // Save HangMan (Hangman) display elements
+    var haManAusg = SK.getElementsByClassName("MulEvHaManAusg");
+    state.haManAusg = [];
+    for (var i = 0; i < haManAusg.length; i++) {
+      state.haManAusg.push({
+        id: haManAusg[i].id,
+        innerHTML: haManAusg[i].innerHTML
+      });
+    }
+    
+    var haManFehl = SK.getElementsByClassName("MulEvHaManFehl");
+    state.haManFehl = [];
+    for (var i = 0; i < haManFehl.length; i++) {
+      state.haManFehl.push({
+        id: haManFehl[i].id,
+        innerHTML: haManFehl[i].innerHTML,
+        style: {
+          textDecoration: haManFehl[i].style.textDecoration
+        }
+      });
+    }
+    
+    // Save evaluation button state
+    var evalButton = document.getElementById("MuEvAuswButB" + clNr);
+    if (evalButton) {
+      state.evalButton = {
+        borderStyle: evalButton.style.border,
+        borderRadius: evalButton.style.borderRadius
+      };
+    }
+    
+    var versucheSpan = document.getElementById("MultieventVersuche" + clNr);
+    if (versucheSpan) {
+      state.versucheStyle = {
+        fontWeight: versucheSpan.style.fontWeight
+      };
+    }
+    
+    // Save hint visibility
+    var hinweisRichtig = SK.getElementsByClassName("MultieventhinweisRichtig" + clNr);
+    state.hinweisRichtig = [];
+    for (var i = 0; i < hinweisRichtig.length; i++) {
+      state.hinweisRichtig.push({
+        display: hinweisRichtig[i].style.display
+      });
+    }
+    
+    var hinweisFalsch = SK.getElementsByClassName("MultieventhinweisFalsch" + clNr);
+    state.hinweisFalsch = [];
+    for (var i = 0; i < hinweisFalsch.length; i++) {
+      state.hinweisFalsch.push({
+        display: hinweisFalsch[i].style.display
+      });
+    }
+    
+    // Save textarea values
+    var textareas = SK.getElementsByTagName("textarea");
+    for (var i = 0; i < textareas.length; i++) {
+      state.textareas.push({
+        value: textareas[i].value
+      });
+    }
+    
+    // Save select values
+    var selects = SK.getElementsByTagName("select");
+    state.selects = [];
+    for (var i = 0; i < selects.length; i++) {
+      state.selects.push({
+        selectedIndex: selects[i].selectedIndex,
+        disabled: selects[i].disabled,
+        style: {
+          backgroundColor: selects[i].style.backgroundColor,
+          backgroundImage: selects[i].style.backgroundImage,
+          backgroundSize: selects[i].style.backgroundSize,
+          color: selects[i].style.color
+        }
+      });
+    }
+    
+    await store.multievent.put({
+      id: "multievent_" + clNr + "_" + window.location.pathname,
+      state: JSON.stringify(state)
+    });
+  },
+  loadState: async function (clNr) {
+    try {
+      var record = await store.multievent.get("multievent_" + clNr + "_" + window.location.pathname);
+      if (!record) return false;
+      
+      var state = JSON.parse(record.state);
+      var SK = document.getElementsByClassName("multievent")[clNr];
+      if (!SK) return false;
+      
+      // Restore version number and evaluation state
+      if (state.vNr !== undefined) multievent.vNr[clNr] = state.vNr;
+      if (state.gesamtwertung !== undefined) multievent.gesamtwertung[clNr] = state.gesamtwertung;
+      if (state.gewertet !== undefined) multievent.gewertet[clNr] = state.gewertet;
+      
+      // Restore inputs
+      var inputs = SK.getElementsByTagName("input");
+      for (var i = 0; i < inputs.length && i < state.inputs.length; i++) {
+        if (state.inputs[i].type === inputs[i].type) {
+          inputs[i].value = state.inputs[i].value;
+          inputs[i].checked = state.inputs[i].checked;
+          inputs[i].disabled = state.inputs[i].disabled;
+          
+          // Restore data attributes
+          if (state.inputs[i].dataAttributes) {
+            var attrs = state.inputs[i].dataAttributes;
+            if (attrs.markiert) inputs[i].setAttribute("data-markiert", attrs.markiert);
+            if (attrs.gemischt) inputs[i].setAttribute("data-gemischt", attrs.gemischt);
+            if (attrs.BuchstSind) inputs[i].setAttribute("data-BuchstSind", attrs.BuchstSind);
+            if (attrs.Nummer) inputs[i].setAttribute("data-Nummer", attrs.Nummer);
+            if (attrs.BegriffeSind) inputs[i].setAttribute("data-BegriffeSind", attrs.BegriffeSind);
+            if (attrs.Fehler) inputs[i].setAttribute("data-Fehler", attrs.Fehler);
+          }
+          
+          // Restore input styles
+          if (state.inputs[i].style) {
+            if (state.inputs[i].style.backgroundColor) inputs[i].style.backgroundColor = state.inputs[i].style.backgroundColor;
+            if (state.inputs[i].style.backgroundImage) inputs[i].style.backgroundImage = state.inputs[i].style.backgroundImage;
+            if (state.inputs[i].style.backgroundSize) inputs[i].style.backgroundSize = state.inputs[i].style.backgroundSize;
+            if (state.inputs[i].style.color) inputs[i].style.color = state.inputs[i].style.color;
+          }
+          
+          // Restore parent node styles (for radio/checkbox groups)
+          if (state.inputs[i].parentStyle && inputs[i].parentNode) {
+            if (state.inputs[i].parentStyle.backgroundColor) 
+              inputs[i].parentNode.style.backgroundColor = state.inputs[i].parentStyle.backgroundColor;
+            if (state.inputs[i].parentStyle.backgroundImage) 
+              inputs[i].parentNode.style.backgroundImage = state.inputs[i].parentStyle.backgroundImage;
+            if (state.inputs[i].parentStyle.backgroundSize) 
+              inputs[i].parentNode.style.backgroundSize = state.inputs[i].parentStyle.backgroundSize;
+          }
+          
+          // Restore sibling HTML (for error indicators)
+          if (state.inputs[i].siblingHTML) {
+            if (state.inputs[i].siblingHTML.prev !== null && inputs[i].previousSibling) {
+              inputs[i].previousSibling.innerHTML = state.inputs[i].siblingHTML.prev;
+            }
+            if (state.inputs[i].siblingHTML.next !== null && inputs[i].nextSibling) {
+              inputs[i].nextSibling.innerHTML = state.inputs[i].siblingHTML.next;
+            }
+          }
+        }
+      }
+      
+      // Restore buttons
+      var buttons = SK.getElementsByClassName("butAnAus");
+      for (var i = 0; i < buttons.length && i < state.buttons.length; i++) {
+        if (state.buttons[i].id === buttons[i].id) {
+          buttons[i].setAttribute("data-markiert", state.buttons[i].markiert);
+          buttons[i].setAttribute("data-gewertet", state.buttons[i].gewertet);
+          
+          // Restore button styles
+          if (state.buttons[i].style) {
+            if (state.buttons[i].style.backgroundColor) buttons[i].style.backgroundColor = state.buttons[i].style.backgroundColor;
+            if (state.buttons[i].style.backgroundImage) buttons[i].style.backgroundImage = state.buttons[i].style.backgroundImage;
+            if (state.buttons[i].style.color) buttons[i].style.color = state.buttons[i].style.color;
+            if (state.buttons[i].style.border) buttons[i].style.border = state.buttons[i].style.border;
+            if (state.buttons[i].style.outline) buttons[i].style.outline = state.buttons[i].style.outline;
+            if (state.buttons[i].style.outlineOffset) buttons[i].style.outlineOffset = state.buttons[i].style.outlineOffset;
+            if (state.buttons[i].style.display) buttons[i].style.display = state.buttons[i].style.display;
+          }
+          
+          // Restore next sibling HTML
+          if (state.buttons[i].nextSiblingHTML !== null && buttons[i].nextSibling) {
+            buttons[i].nextSibling.innerHTML = state.buttons[i].nextSiblingHTML;
+          }
+        }
+      }
+      
+      // Restore textareas
+      var textareas = SK.getElementsByTagName("textarea");
+      for (var i = 0; i < textareas.length && i < state.textareas.length; i++) {
+        textareas[i].value = state.textareas[i].value;
+      }
+      
+      // Restore selects
+      var selects = SK.getElementsByTagName("select");
+      if (state.selects) {
+        for (var i = 0; i < selects.length && i < state.selects.length; i++) {
+          selects[i].selectedIndex = state.selects[i].selectedIndex;
+          selects[i].disabled = state.selects[i].disabled;
+          
+          // Restore select styles
+          if (state.selects[i].style) {
+            if (state.selects[i].style.backgroundColor) selects[i].style.backgroundColor = state.selects[i].style.backgroundColor;
+            if (state.selects[i].style.backgroundImage) selects[i].style.backgroundImage = state.selects[i].style.backgroundImage;
+            if (state.selects[i].style.backgroundSize) selects[i].style.backgroundSize = state.selects[i].style.backgroundSize;
+            if (state.selects[i].style.color) selects[i].style.color = state.selects[i].style.color;
+          }
+        }
+      }
+      
+      // Restore word search buttons
+      if (state.suchButtons) {
+        var suchButtons = SK.getElementsByClassName("MuEvSuBut");
+        for (var i = 0; i < suchButtons.length && i < state.suchButtons.length; i++) {
+          if (state.suchButtons[i].id === suchButtons[i].id) {
+            suchButtons[i].setAttribute("data-markiert", state.suchButtons[i].markiert);
+            suchButtons[i].setAttribute("data-gewertet", state.suchButtons[i].gewertet);
+            suchButtons[i].setAttribute("data-spielAus", state.suchButtons[i].spielAus);
+            
+            // Restore word search button styles
+            if (state.suchButtons[i].style) {
+              if (state.suchButtons[i].style.backgroundColor) suchButtons[i].style.backgroundColor = state.suchButtons[i].style.backgroundColor;
+              if (state.suchButtons[i].style.fontWeight) suchButtons[i].style.fontWeight = state.suchButtons[i].style.fontWeight;
+              if (state.suchButtons[i].style.border) suchButtons[i].style.border = state.suchButtons[i].style.border;
+              if (state.suchButtons[i].style.outline) suchButtons[i].style.outline = state.suchButtons[i].style.outline;
+              if (state.suchButtons[i].style.outlineOffset) suchButtons[i].style.outlineOffset = state.suchButtons[i].style.outlineOffset;
+              if (state.suchButtons[i].style.borderRadius) suchButtons[i].style.borderRadius = state.suchButtons[i].style.borderRadius;
+            }
+            
+            // Restore parent styles
+            if (state.suchButtons[i].parentStyle && suchButtons[i].parentNode) {
+              if (state.suchButtons[i].parentStyle.backgroundColor) 
+                suchButtons[i].parentNode.style.backgroundColor = state.suchButtons[i].parentStyle.backgroundColor;
+            }
+          }
+        }
+      }
+      
+      // Restore HangMan display elements
+      if (state.haManAusg) {
+        var haManAusg = SK.getElementsByClassName("MulEvHaManAusg");
+        for (var i = 0; i < haManAusg.length && i < state.haManAusg.length; i++) {
+          if (state.haManAusg[i].id === haManAusg[i].id) {
+            haManAusg[i].innerHTML = state.haManAusg[i].innerHTML;
+          }
+        }
+      }
+      
+      if (state.haManFehl) {
+        var haManFehl = SK.getElementsByClassName("MulEvHaManFehl");
+        for (var i = 0; i < haManFehl.length && i < state.haManFehl.length; i++) {
+          if (state.haManFehl[i].id === haManFehl[i].id) {
+            haManFehl[i].innerHTML = state.haManFehl[i].innerHTML;
+            if (state.haManFehl[i].style && state.haManFehl[i].style.textDecoration) {
+              haManFehl[i].style.textDecoration = state.haManFehl[i].style.textDecoration;
+            }
+          }
+        }
+      }
+      
+      // Restore evaluation button state
+      if (state.evalButton) {
+        var evalButton = document.getElementById("MuEvAuswButB" + clNr);
+        if (evalButton) {
+          if (state.evalButton.borderStyle) evalButton.style.border = state.evalButton.borderStyle;
+          if (state.evalButton.borderRadius) evalButton.style.borderRadius = state.evalButton.borderRadius;
+        }
+      }
+      
+      if (state.versucheStyle) {
+        var versucheSpan = document.getElementById("MultieventVersuche" + clNr);
+        if (versucheSpan && state.versucheStyle.fontWeight) {
+          versucheSpan.style.fontWeight = state.versucheStyle.fontWeight;
+        }
+      }
+      
+      // Restore hint visibility
+      if (state.hinweisRichtig) {
+        var hinweisRichtig = SK.getElementsByClassName("MultieventhinweisRichtig" + clNr);
+        for (var i = 0; i < hinweisRichtig.length && i < state.hinweisRichtig.length; i++) {
+          if (state.hinweisRichtig[i].display) {
+            hinweisRichtig[i].style.display = state.hinweisRichtig[i].display;
+          }
+        }
+      }
+      
+      if (state.hinweisFalsch) {
+        var hinweisFalsch = SK.getElementsByClassName("MultieventhinweisFalsch" + clNr);
+        for (var i = 0; i < hinweisFalsch.length && i < state.hinweisFalsch.length; i++) {
+          if (state.hinweisFalsch[i].display) {
+            hinweisFalsch[i].style.display = state.hinweisFalsch[i].display;
+          }
+        }
+      }
+      
+      // Update attempt counter display
+      if (state.gesamtwertung !== undefined && state.gesamtwertung > 0) {
+        var versucheEl = document.getElementById("MultieventVersuche" + clNr);
+        if (versucheEl) {
+          versucheEl.innerHTML = state.gesamtwertung;
+        }
+      }
+      
+      return true;
+    } catch (e) {
+      console.error("Error loading multievent state:", e);
+      return false;
+    }
+  },
   butAnAus: function (butID) {
     var but = document.getElementById(butID);
     var markiert = but.getAttribute("data-markiert");
@@ -46,6 +432,13 @@ var multievent = {
       } else {
         but.style.outline = "none";
         but.setAttribute("data-markiert", "0");
+      }
+      
+      // Save state after button toggle
+      var clIndex = but.closest(".multievent");
+      if (clIndex) {
+        var index = Array.from(document.getElementsByClassName("multievent")).indexOf(clIndex);
+        multievent.saveState(index);
       }
     }
   },
@@ -64,10 +457,12 @@ var multievent = {
       multievent.orig[i] = SK[i].innerHTML;
       var VersNr = multievent.zZahl(-1, 9);
       multievent.vNr[i] = parseInt(VersNr);
-      multievent.los(i);
+      multievent.los(i).then(function(index) {
+        return multievent.loadState(index);
+      }.bind(null, i));
     }
   },
-  los: function (clNr) {
+  los: async function (clNr) {
     multievent.gesamtwertung[clNr] = 0;
     var SK = document.getElementsByClassName("multievent"); /*Suchklasse*/
     multievent.vNr[clNr]++;
@@ -569,6 +964,40 @@ var multievent = {
     }
 
     SK[clNr].style.display = "block";
+    
+    // Add event listeners to save state on changes
+    var allInputs = SK[clNr].getElementsByTagName("input");
+    for (var j = 0; j < allInputs.length; j++) {
+      allInputs[j].addEventListener("change", function() {
+        var clIndex = this.closest(".multievent");
+        if (clIndex) {
+          var index = Array.from(document.getElementsByClassName("multievent")).indexOf(clIndex);
+          multievent.saveState(index);
+        }
+      });
+    }
+    
+    var allTextareas = SK[clNr].getElementsByTagName("textarea");
+    for (var j = 0; j < allTextareas.length; j++) {
+      allTextareas[j].addEventListener("input", function() {
+        var clIndex = this.closest(".multievent");
+        if (clIndex) {
+          var index = Array.from(document.getElementsByClassName("multievent")).indexOf(clIndex);
+          multievent.saveState(index);
+        }
+      });
+    }
+    
+    var allSelects = SK[clNr].getElementsByTagName("select");
+    for (var j = 0; j < allSelects.length; j++) {
+      allSelects[j].addEventListener("change", function() {
+        var clIndex = this.closest(".multievent");
+        if (clIndex) {
+          var index = Array.from(document.getElementsByClassName("multievent")).indexOf(clIndex);
+          multievent.saveState(index);
+        }
+      });
+    }
   },
   inpGemEing: function (WertIst, GemID) {
     var vIst = WertIst.replace(/\s/g, "");
@@ -1046,6 +1475,9 @@ var multievent = {
         "<div style='font-size:large;'>" + GesWert + "</div>";
       multievent.ErgAn();
     }
+    
+    // Save state after evaluation
+    multievent.saveState(classNr);
   },
   ErgAus: function () {
     document.getElementById("MultieventErgebnisse").style.display = "none";
@@ -1100,6 +1532,13 @@ var multievent = {
         }
       }
       document.getElementById(SuID).setAttribute("data-move", "0");
+      
+      // Save state after marking word search letters
+      var clIndex = document.getElementById(SuID).closest(".multievent");
+      if (clIndex) {
+        var index = Array.from(document.getElementsByClassName("multievent")).indexOf(clIndex);
+        multievent.saveState(index);
+      }
     }
   },
   tastensprung: function (Kennung, Wert) {
