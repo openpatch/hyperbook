@@ -1,5 +1,25 @@
 # hyperbook
 
+## 0.66.0
+
+### Minor Changes
+
+- Thanks [@copilot-swe-agent](https://github.com/apps/copilot-swe-agent)! - Add custom data table to Dexie store for user-managed state persistence
+
+  This adds a new `custom` table to the Hyperbook Dexie store, enabling users to persist arbitrary JSON data in the browser's IndexedDB.
+
+  Features:
+
+  - New `custom` table with schema `id, payload` for storing user-defined data
+  - Comprehensive documentation in the advanced section showing how to use the API
+  - Automatic inclusion in existing export/import functionality
+  - Full support for storing and retrieving JSON data using `store.custom.put()` and `store.custom.get()`
+
+### Patch Changes
+
+- Updated dependencies:
+  - @hyperbook/markdown@0.40.0
+
 ## 0.65.0
 
 ### Minor Changes
