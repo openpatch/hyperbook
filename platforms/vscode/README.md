@@ -9,6 +9,21 @@
 
 All you need for writing Hyperbooks (auto preview, snippets, auto-completion and more).
 
+## Getting Started
+
+New to Hyperbook? Open the **Getting Started** walkthrough to learn the basics:
+
+1. Open the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`)
+2. Run "Welcome: Open Walkthrough..."
+3. Select "Getting Started with Hyperbook"
+
+The walkthrough will guide you through:
+- Creating your first Hyperbook
+- Editing pages
+- Using snippets
+- Customizing frontmatter
+- And more!
+
 ## Features
 
 ### Preview
