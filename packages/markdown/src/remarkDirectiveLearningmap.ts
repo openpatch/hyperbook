@@ -39,11 +39,7 @@ export default (ctx: HyperbookContext) => () => {
 
         if (!src) return SKIP;
 
-        let srcFile = readFile(
-          ctx.makeUrl(src, "public", ctx.navigation.current || undefined),
-          ctx,
-        );
-
+        let srcFile = readFile(src, ctx);
         if (!srcFile) {
           file.message(`File not found: ${src}`, node);
           return SKIP;
