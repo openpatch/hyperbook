@@ -128,7 +128,14 @@ export default class Preview {
       const pagesAndSections = await hyperbook.getPagesAndSections(
         this._vfile.root,
       );
-      const fileNav = await hyperbook.getNavigationForFile(this._vfile as any);
+      const pageList = hyperbook.getPageList(
+        pagesAndSections.sections,
+        pagesAndSections.pages,
+      );
+      const fileNav = await hyperbook.getNavigationForFile(
+        pageList,
+        this._vfile,
+      );
       const navigation: Navigation = {
         ...pagesAndSections,
         ...fileNav,

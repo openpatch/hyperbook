@@ -45,6 +45,7 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 :::tab{title="Fixed :bug:" id="fixed"}
 
 - Learningmaps not loading from relative urls.
+- **VSCode Extension (v0.44.1)**: Fix learningmap with relative src not loading in VSCode extension preview. The extension now properly resolves relative paths by correctly passing navigation context to the markdown processor.
 
 :::
 
