@@ -1,5 +1,16 @@
 # @hyperbook/vscode-extension
 
+## 0.44.3
+
+### Patch Changes
+
+- [`8766f62`](https://github.com/openpatch/hyperbook/commit/8766f62c2450b8fc3fa1dae49323ec9cb2ae2a12) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix images have doubled base paths
+
+- [`8766f62`](https://github.com/openpatch/hyperbook/commit/8766f62c2450b8fc3fa1dae49323ec9cb2ae2a12) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix vscode always showing pages in standalone mode.
+
+- Updated dependencies [[`8766f62`](https://github.com/openpatch/hyperbook/commit/8766f62c2450b8fc3fa1dae49323ec9cb2ae2a12)]:
+  - @hyperbook/markdown@0.42.2
+
 ## 0.44.2
 
 ### Patch Changes
