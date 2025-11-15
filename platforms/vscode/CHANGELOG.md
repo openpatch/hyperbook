@@ -1,5 +1,11 @@
 # @hyperbook/vscode-extension
 
+## 0.44.2
+
+### Patch Changes
+
+- [`ec71ba3`](https://github.com/openpatch/hyperbook/commit/ec71ba3916fdb690203e471a5568643a9ff95cb7) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix learningmap with relative src not loading in VSCode extension
+
 ## 0.44.1
 
 ### Patch Changes
