@@ -94,7 +94,7 @@ ${(code.scripts ? [cdnLibraryUrl, ...code.scripts] : []).map((src) => `<script t
         let srcFile = "";
 
         if (src) {
-          srcFile = readFile(src, ctx);
+          srcFile = readFile(src, ctx) || "";
         } else if (node.children?.length > 0) {
           srcFile = toText(node.children);
         }

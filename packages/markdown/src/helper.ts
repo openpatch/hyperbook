@@ -10,15 +10,20 @@ export const readFile = (src: string, ctx: HyperbookContext) => {
     try {
       srcFile = fs.readFileSync(path.join(ctx.root, "book", src), "utf-8");
     } catch (e) {
-      srcFile = fs.readFileSync(
-        path.join(
-          ctx.root,
-          "book",
-          ctx.navigation.current?.path?.directory || "",
-          src,
-        ),
-        "utf-8",
-      );
+      try {
+        srcFile = fs.readFileSync(
+          path.join(
+            ctx.root,
+            "book",
+            ctx.navigation.current?.path?.directory || "",
+            src,
+          ),
+          "utf-8",
+        );
+      } catch (e) {
+        // File not found in any location
+        return null;
+      }
     }
   }
   return srcFile;

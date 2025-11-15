@@ -52,7 +52,7 @@ export default (ctx: HyperbookContext) => () => {
         let input = "";
 
         if (src) {
-          srcFile = readFile(src, ctx);
+          srcFile = readFile(src, ctx) || "";
         } else if (node.children?.length > 0) {
           tests = node.children
             .filter((c) => c.type === "code")
