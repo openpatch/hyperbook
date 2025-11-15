@@ -280,8 +280,9 @@ var hyperbook = (function () {
     const urlParams = new URLSearchParams(window.location.search);
     const standaloneParam = urlParams.get('standalone') === 'true';
     
-    // Check if page is inside an iframe
-    const isInIframe = window.self !== window.top;
+    // Check if page is inside an iframe (but not VSCode webview)
+    const isVSCodeWebview = typeof acquireVsCodeApi !== 'undefined';
+    const isInIframe = window.self !== window.top && !isVSCodeWebview;
     
     if (standaloneParam || isInIframe) {
       const mainGrid = document.querySelector('.main-grid');

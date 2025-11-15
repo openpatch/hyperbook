@@ -38,7 +38,7 @@ describe("remarkImageAttrs", () => {
       "
       <p>
         <figure src="/public/left.jpg" alt="Alt" class="normal align-left">
-          <img class="align-left" src="/public/public/left.jpg" alt="Alt" onclick="hyperbook.toggleLightbox(this)">
+          <img class="align-left" src="/public/left.jpg" alt="Alt" onclick="hyperbook.toggleLightbox(this)">
         </figure>
       </p>
       "
@@ -56,7 +56,7 @@ describe("remarkImageAttrs", () => {
       "
       <p>
         <figure src="/public/leftplus.jpg" alt="Alt" class="normal align-leftplus">
-          <img class="align-leftplus" src="/public/public/leftplus.jpg" alt="Alt" onclick="hyperbook.toggleLightbox(this)">
+          <img class="align-leftplus" src="/public/leftplus.jpg" alt="Alt" onclick="hyperbook.toggleLightbox(this)">
         </figure>
       </p>
       "
@@ -74,7 +74,7 @@ describe("remarkImageAttrs", () => {
       "
       <p>
         <figure src="/public/right.jpg" alt="Alt" class="normal align-right">
-          <img class="align-right" src="/public/public/right.jpg" alt="Alt" onclick="hyperbook.toggleLightbox(this)">
+          <img class="align-right" src="/public/right.jpg" alt="Alt" onclick="hyperbook.toggleLightbox(this)">
         </figure>
       </p>
       "
@@ -92,7 +92,7 @@ describe("remarkImageAttrs", () => {
       "
       <p>
         <figure src="/public/rightplus.jpg" alt="Alt" class="normal align-rightplus">
-          <img class="align-rightplus" src="/public/public/rightplus.jpg" alt="Alt" onclick="hyperbook.toggleLightbox(this)">
+          <img class="align-rightplus" src="/public/rightplus.jpg" alt="Alt" onclick="hyperbook.toggleLightbox(this)">
         </figure>
       </p>
       "
@@ -110,7 +110,7 @@ describe("remarkImageAttrs", () => {
       "
       <p>
         <figure src="/public/centerplus.jpg" alt="Alt" class="normal align-centerplus">
-          <img class="align-centerplus" src="/public/public/centerplus.jpg" alt="Alt" onclick="hyperbook.toggleLightbox(this)">
+          <img class="align-centerplus" src="/public/centerplus.jpg" alt="Alt" onclick="hyperbook.toggleLightbox(this)">
         </figure>
       </p>
       "
@@ -128,7 +128,7 @@ describe("remarkImageAttrs", () => {
       "
       <p>
         <figure src="/public/normal.jpg" alt="" class="normal rounded">
-          <img width="200" id="hero" class="rounded" src="/public/public/normal.jpg" alt="" onclick="hyperbook.toggleLightbox(this)">
+          <img width="200" id="hero" class="rounded" src="/public/normal.jpg" alt="" onclick="hyperbook.toggleLightbox(this)">
         </figure>
       </p>
       "
