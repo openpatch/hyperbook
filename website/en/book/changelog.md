@@ -38,6 +38,18 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.68.1
+
+::::tabs
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+- Learningmaps not loading from relative urls.
+
+:::
+
+::::
+
 ## v0.68.0
 
 ::::tabs
