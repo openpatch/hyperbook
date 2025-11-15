@@ -1,5 +1,14 @@
 # @hyperbook/vscode-extension
 
+## 0.44.1
+
+### Patch Changes
+
+- [`601c959`](https://github.com/openpatch/hyperbook/commit/601c959da43b7437378f590e6e92fb8b7a6a3baa) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix learningmap not learning from relative path
+
+- Updated dependencies [[`601c959`](https://github.com/openpatch/hyperbook/commit/601c959da43b7437378f590e6e92fb8b7a6a3baa)]:
+  - @hyperbook/markdown@0.42.1
+
 ## 0.44.0
 
 ### Minor Changes
