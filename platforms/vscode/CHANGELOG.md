@@ -1,5 +1,11 @@
 # @hyperbook/vscode-extension
 
+## 0.45.0
+
+### Minor Changes
+
+- [`79edf2d`](https://github.com/openpatch/hyperbook/commit/79edf2d6593a68f801d274e84113fa13be002d4e) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Improve completion providers and preview rendering
+
 ## 0.44.3
 
 ### Patch Changes
