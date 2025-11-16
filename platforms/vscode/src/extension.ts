@@ -84,9 +84,26 @@ export function activate(context: vscode.ExtensionContext) {
     publicFolder: string,
     bookFolder: string,
     addPrefix: boolean = false,
+    position?: vscode.Position,
+    linePrefix?: string,
   ): vscode.CompletionItem[] {
     const items: vscode.CompletionItem[] = [];
     const currentDir = path.dirname(currentDocPath);
+
+    // Calculate the range to replace if position and linePrefix are provided
+    let replaceRange: vscode.Range | undefined;
+    if (position && linePrefix) {
+      const srcMatch = linePrefix.match(/(?:src|thumbnail|poster)=\"([^"]*)$/);
+      if (srcMatch) {
+        const startChar = position.character - srcMatch[1].length;
+        replaceRange = new vscode.Range(
+          position.line,
+          startChar,
+          position.line,
+          position.character
+        );
+      }
+    }
 
     files.forEach((f) => {
       const filePath = f.path;
@@ -101,6 +118,9 @@ export function activate(context: vscode.ExtensionContext) {
         item.detail = `Public: /${publicRel}`;
         item.insertText = addPrefix ? "/" + publicRel : publicRel;
         item.sortText = "0_" + publicRel; // Sort public paths first
+        if (replaceRange) {
+          item.range = replaceRange;
+        }
         items.push(item);
       }
       
@@ -114,6 +134,9 @@ export function activate(context: vscode.ExtensionContext) {
         item.detail = `Book: /${bookRel}`;
         item.insertText = addPrefix ? "/" + bookRel : bookRel;
         item.sortText = "1_" + bookRel;
+        if (replaceRange) {
+          item.range = replaceRange;
+        }
         items.push(item);
       }
       
@@ -129,6 +152,9 @@ export function activate(context: vscode.ExtensionContext) {
           item.detail = `Relative: ${normalizedRel}`;
           item.insertText = normalizedRel;
           item.sortText = "2_" + relPath;
+          if (replaceRange) {
+            item.range = replaceRange;
+          }
           items.push(item);
         }
       }
@@ -214,7 +240,9 @@ export function activate(context: vscode.ExtensionContext) {
             workspaceFolder,
             path.join(workspaceFolder, "public"),
             path.join(workspaceFolder, "book"),
-            true
+            true,
+            position,
+            linePrefix
           );
         } else {
           // Only show absolute paths
@@ -446,7 +474,9 @@ export function activate(context: vscode.ExtensionContext) {
           workspaceFolder,
           path.join(workspaceFolder, "public"),
           path.join(workspaceFolder, "book"),
-          true
+          true,
+          position,
+          linePrefix
         );
       },
     },
@@ -491,7 +521,9 @@ export function activate(context: vscode.ExtensionContext) {
           workspaceFolder,
           path.join(workspaceFolder, "public"),
           path.join(workspaceFolder, "book"),
-          true
+          true,
+          position,
+          linePrefix
         );
       },
     },
@@ -534,7 +566,9 @@ export function activate(context: vscode.ExtensionContext) {
           workspaceFolder,
           path.join(workspaceFolder, "public"),
           path.join(workspaceFolder, "book"),
-          true
+          true,
+          position,
+          linePrefix
         );
       },
     },
