@@ -1,5 +1,11 @@
 # @hyperbook/vscode-extension
 
+## 0.45.1
+
+### Patch Changes
+
+- [`39f323c`](https://github.com/openpatch/hyperbook/commit/39f323c88062ec28700c659aa44d2766232f8d38) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix completion including duplicated beginning
+
 ## 0.45.0
 
 ### Minor Changes
