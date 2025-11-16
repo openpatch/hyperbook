@@ -173,8 +173,101 @@
     "body": [
       ":::multievent",
       "",
+      "$TM_SELECTED_TEXT$0",
       "",
       ":::"
     ]
   },
+  "Element ABC Music": {
+    "prefix": [":abc", ":abcjs"],
+    "body": [
+      "```abcjs",
+      "X: 1",
+      "T: ${1:Title}",
+      "M: 4/4",
+      "L: 1/8",
+      "K: ${2:Emin}",
+      "$TM_SELECTED_TEXT$0",
+      "```"
+    ]
+  },
+  "Element ABC Music Editor": {
+    "prefix": [":abc-editor", ":abcjs-editor"],
+    "body": [
+      "```abcjs editor",
+      "X: 1",
+      "T: ${1:Title}",
+      "M: 4/4",
+      "L: 1/8",
+      "K: ${2:Emin}",
+      "$TM_SELECTED_TEXT$0",
+      "```"
+    ]
+  },
+  "Element GeoGebra": {
+    "prefix": [":geogebra"],
+    "body": [
+      ":::geogebra{perspective=\"${1:G}\" height=${2:400} width=${3:700}}",
+      "",
+      "$TM_SELECTED_TEXT$0",
+      "",
+      ":::"
+    ]
+  },
+  "Element GeoGebra Inline": {
+    "prefix": [":geogebra-inline"],
+    "body": [
+      "::geogebra{src=\"${1:https://www.geogebra.org/m/}\"}"
+    ]
+  },
+  "Element JSXGraph": {
+    "prefix": [":jsxgraph"],
+    "body": [
+      ":::jsxgraph{height=\"${1:500}\" width=\"${2:600}\" boundingbox=\"${3:[-10,10,10,-10]}\"}",
+      "",
+      "```js",
+      "$TM_SELECTED_TEXT$0",
+      "```",
+      "",
+      ":::"
+    ]
+  },
+  "Element Learningmap": {
+    "prefix": [":learningmap"],
+    "body": [
+      "::learningmap{id=\"${1:$RANDOM}\" height=\"${2:600px}\" src=\"${3:map.learningmap}\"}"
+    ]
+  },
+  "Element Textinput": {
+    "prefix": [":textinput"],
+    "body": [
+      "::textinput{placeholder=\"${1:Enter text here}\" height=\"${2:200px}\" id=\"${3:$RANDOM}\"}"
+    ]
+  },
+  "Element Webide": {
+    "prefix": [":webide"],
+    "body": [
+      ":::webide{height=${1:500}}",
+      "",
+      "$TM_SELECTED_TEXT$0",
+      "",
+      ":::"
+    ]
+  },
+  "Element Snippet": {
+    "prefix": [":snippet", ":Snippet"],
+    "body": [
+      ":::Snippet{#${1:snippet-name}}",
+      "",
+      "$TM_SELECTED_TEXT$0",
+      "",
+      ":::"
+    ]
+  },
+  "Element Snippet Inline": {
+    "prefix": [":snippet-inline"],
+    "body": [
+      ":Snippet{#${1:snippet-name}}"
+    ]
+  }
 }

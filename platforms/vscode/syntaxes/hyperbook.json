@@ -7,6 +7,9 @@
       "include": "#directive-multievent"
     },
     {
+      "include": "#directive-abc-music"
+    },
+    {
       "include": "#directive-alert"
     },
     {
@@ -31,7 +34,16 @@
       "include": "#directive-excalidraw"
     },
     {
+      "include": "#directive-geogebra"
+    },
+    {
       "include": "#directive-glossary"
+    },
+    {
+      "include": "#directive-jsxgraph"
+    },
+    {
+      "include": "#directive-learningmap"
     },
     {
       "include": "#directive-protect"
@@ -52,10 +64,16 @@
       "include": "#directive-struktog"
     },
     {
+      "include": "#directive-textinput"
+    },
+    {
       "include": "#directive-youtube"
     },
     {
       "include": "#directive-tabs"
+    },
+    {
+      "include": "#directive-mermaid"
     },
     {
       "include": "#directive-bitflow"
@@ -89,6 +107,9 @@
     },
     {
       "include": "#directive-p5"
+    },
+    {
+      "include": "#directive-webide"
     }
   ],
   "repository": {
@@ -1152,6 +1173,264 @@
               }
             }
           ]
+        }
+      },
+      "endCaptures": {
+        "2": {
+          "name": "punctuation.definition.directive.level.hyperbook"
+        }
+      },
+      "patterns": [
+        {
+          "include": "text.html.markdown"
+        }
+      ]
+    },
+    "directive-abc-music": {
+      "name": "meta.directive.abc-music.hyperbook",
+      "match": "(^|\\G)```(abcjs)(\\s+editor)?\\s*$",
+      "captures": {
+        "2": {
+          "name": "entity.name.function.directive.abc-music.hyperbook"
+        },
+        "3": {
+          "name": "keyword.parameter.directive.abc-music.hyperbook"
+        }
+      }
+    },
+    "directive-geogebra": {
+      "name": "meta.directive.geogebra.hyperbook",
+      "begin": "(^|\\G)(:{2,})(geogebra)({.*})?\\s*$",
+      "end": "(^|\\G)(\\2|:{2,})\\s*$",
+      "beginCaptures": {
+        "2": {
+          "name": "punctuation.definition.directive.level.hyperbook"
+        },
+        "3": {
+          "name": "entity.name.function.directive.geogebra.hyperbook"
+        },
+        "4": {
+          "patterns": [
+            {
+              "match": "(src|perspective|coordsystem|axislabels|xaxislabel|yaxislabel|zaxislabel|algebraInputPosition)=\"([^\"]*)\"",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.geogebra.hyperbook"
+                },
+                "2": {
+                  "name": "string.quoted.double.untitled"
+                }
+              }
+            },
+            {
+              "match": "(height|width)=([0-9]+)",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.geogebra.hyperbook"
+                },
+                "2": {
+                  "name": "constant.numeric"
+                }
+              }
+            },
+            {
+              "match": "(showToolBar|showAlgebraInput|enableUndoRedo|showMenuBar|enableFileFeatures|showZoomButtons|showFullscreenButton|showResetIcon|hidecursorwhendragging|repaintingactive|errordialogsactive)",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.geogebra.hyperbook"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "endCaptures": {
+        "2": {
+          "name": "punctuation.definition.directive.level.hyperbook"
+        }
+      },
+      "patterns": [
+        {
+          "include": "text.html.markdown"
+        }
+      ]
+    },
+    "directive-jsxgraph": {
+      "name": "meta.directive.jsxgraph.hyperbook",
+      "begin": "(^|\\G)(:{3,})(jsxgraph)({.*})?\\s*$",
+      "end": "(^|\\G)(\\2|:{3,})\\s*$",
+      "beginCaptures": {
+        "2": {
+          "name": "punctuation.definition.directive.level.hyperbook"
+        },
+        "3": {
+          "name": "entity.name.function.directive.jsxgraph.hyperbook"
+        },
+        "4": {
+          "patterns": [
+            {
+              "match": "(id|boundingbox)=\"([^\"]*)\"",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.jsxgraph.hyperbook"
+                },
+                "2": {
+                  "name": "string.quoted.double.untitled"
+                }
+              }
+            },
+            {
+              "match": "(height|width)=([0-9]+)",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.jsxgraph.hyperbook"
+                },
+                "2": {
+                  "name": "constant.numeric"
+                }
+              }
+            },
+            {
+              "match": "(axis|grid|showNavigation|zoom|pan|keyboard|keepaspetcratio)=(?:(false)|(true))",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.jsxgraph.hyperbook"
+                },
+                "2": {
+                  "name": "constant.language.boolean.false"
+                },
+                "3": {
+                  "name": "constant.language.boolean.true"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "endCaptures": {
+        "2": {
+          "name": "punctuation.definition.directive.level.hyperbook"
+        }
+      },
+      "patterns": [
+        {
+          "include": "text.html.markdown"
+        }
+      ]
+    },
+    "directive-learningmap": {
+      "name": "meta.directive.learningmap.hyperbook",
+      "match": "(^|\\G)(:{2,})(learningmap){(.*)}\\s*$",
+      "captures": {
+        "2": {
+          "name": "punctuation.definition.directive.level.hyperbook"
+        },
+        "3": {
+          "name": "entity.name.function.directive.learningmap.hyperbook"
+        },
+        "4": {
+          "patterns": [
+            {
+              "match": "(src|id|height)=\"([^\"]*)\"",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.learningmap.hyperbook"
+                },
+                "2": {
+                  "name": "string.quoted.double.untitled"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "directive-textinput": {
+      "name": "meta.directive.textinput.hyperbook",
+      "match": "(^|\\G)(:{2,})(textinput){(.*)}\\s*$",
+      "captures": {
+        "2": {
+          "name": "punctuation.definition.directive.level.hyperbook"
+        },
+        "3": {
+          "name": "entity.name.function.directive.textinput.hyperbook"
+        },
+        "4": {
+          "patterns": [
+            {
+              "match": "(placeholder|id|height)=\"([^\"]*)\"",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.textinput.hyperbook"
+                },
+                "2": {
+                  "name": "string.quoted.double.untitled"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "directive-webide": {
+      "name": "meta.directive.webide.hyperbook",
+      "begin": "(^|\\G)(:{3,})(webide)({.*})?\\s*$",
+      "end": "(^|\\G)(\\2|:{3,})\\s*$",
+      "beginCaptures": {
+        "2": {
+          "name": "punctuation.definition.directive.level.hyperbook"
+        },
+        "3": {
+          "name": "entity.name.function.directive.webide.hyperbook"
+        },
+        "4": {
+          "patterns": [
+            {
+              "match": "(url|id)=\"([^\"]*)\"",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.webide.hyperbook"
+                },
+                "2": {
+                  "name": "string.quoted.double.untitled"
+                }
+              }
+            },
+            {
+              "match": "(height)=([0-9]+)",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.webide.hyperbook"
+                },
+                "2": {
+                  "name": "constant.numeric"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "endCaptures": {
+        "2": {
+          "name": "punctuation.definition.directive.level.hyperbook"
+        }
+      },
+      "patterns": [
+        {
+          "include": "text.html.markdown"
+        }
+      ]
+    },
+    "directive-mermaid": {
+      "name": "meta.directive.mermaid.hyperbook",
+      "begin": "(^|\\G)(:{3,})(mermaid)\\s*$",
+      "end": "(^|\\G)(\\2)\\s*$",
+      "beginCaptures": {
+        "2": {
+          "name": "punctuation.definition.directive.level.hyperbook"
+        },
+        "3": {
+          "name": "entity.name.function.directive.mermaid.hyperbook"
         }
       },
       "endCaptures": {

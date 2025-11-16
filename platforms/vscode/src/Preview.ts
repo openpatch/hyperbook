@@ -306,7 +306,7 @@ export default class Preview {
       this.panel = vscode.window.createWebviewPanel(
         "liveHTMLPreview",
         "[Preview]" + fileName,
-        viewColumn,
+        { viewColumn, preserveFocus: false },
         {
           enableScripts: true,
           retainContextWhenHidden: true,
@@ -326,12 +326,33 @@ export default class Preview {
 
       vscode.workspace.onDidChangeConfiguration(
         this.handleTextDocumentChange.bind(this),
+        null,
+        this.disposables,
       );
+      
+      const fileWatcher = vscode.workspace.createFileSystemWatcher("**/*");
+      fileWatcher.onDidChange(
+        async (uri) => {
+          if (this._resource && this.panel) {
+            const hyperbookRoot = await hyperbook.findRoot(this._resource.fsPath).catch(() => "");
+            if (hyperbookRoot && uri.fsPath.startsWith(hyperbookRoot)) {
+              await this.handleTextDocumentChange();
+            }
+          }
+        },
+        null,
+        this.disposables,
+      );
+      
       vscode.workspace.onDidSaveTextDocument(
         this.handleTextDocumentChange.bind(this),
+        null,
+        this.disposables,
       );
       vscode.window.onDidChangeActiveTextEditor(
         this.handleTextDocumentChange.bind(this),
+        null,
+        this.disposables,
       );
 
       this.panel.onDidDispose(
