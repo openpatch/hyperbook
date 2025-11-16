@@ -1,5 +1,11 @@
 # @hyperbook/vscode-extension
 
+## 0.45.2
+
+### Patch Changes
+
+- [`93f4966`](https://github.com/openpatch/hyperbook/commit/93f496654b2730d955ce2ddb766dfd98fefd9c68) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix glossary pages not using custom scripts and styles
+
 ## 0.45.1
 
 ### Patch Changes
