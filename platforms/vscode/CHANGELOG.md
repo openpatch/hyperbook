@@ -1,5 +1,14 @@
 # @hyperbook/vscode-extension
 
+## 0.45.3
+
+### Patch Changes
+
+- [`3b9cef9`](https://github.com/openpatch/hyperbook/commit/3b9cef9fb15c3be43fbc967736f9cbfec0e67e25) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix scripts and styles not working in vs code
+
+- Updated dependencies [[`3b9cef9`](https://github.com/openpatch/hyperbook/commit/3b9cef9fb15c3be43fbc967736f9cbfec0e67e25)]:
+  - @hyperbook/markdown@0.42.3
+
 ## 0.45.2
 
 ### Patch Changes
