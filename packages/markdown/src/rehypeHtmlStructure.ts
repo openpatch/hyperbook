@@ -517,7 +517,7 @@ window.Prism.manual = true;`,
                       rel: "stylesheet",
                       href: style.includes("://")
                         ? style
-                        : makeUrl(style, "public"),
+                        : makeUrl(style, "public", currentPage || undefined),
                     },
                     children: [],
                   }) as ElementContent,
@@ -644,7 +644,7 @@ HYPERBOOK_ASSETS = "${makeUrl("/", "assets")}"
                     properties: {
                       src: script.includes("://")
                         ? script
-                        : makeUrl(script, "public"),
+                        : makeUrl(script, "public", currentPage || undefined),
                       defer: true,
                     },
                     children: [],
