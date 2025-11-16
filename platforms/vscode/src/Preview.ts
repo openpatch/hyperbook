@@ -140,6 +140,24 @@ export default class Preview {
         ...pagesAndSections,
         ...fileNav,
       };
+      
+      // If current is null (glossary page not in pageList), create it from file frontmatter
+      if (!navigation.current && this._vfile.markdown.data) {
+        navigation.current = {
+          name: this._vfile.markdown.data.name || this._vfile.name,
+          href: this._vfile.path.href || undefined,
+          path: this._vfile.path,
+          scripts: this._vfile.markdown.data.scripts,
+          styles: this._vfile.markdown.data.styles,
+          description: this._vfile.markdown.data.description,
+          keywords: this._vfile.markdown.data.keywords,
+          lang: this._vfile.markdown.data.lang,
+          qrcode: this._vfile.markdown.data.qrcode,
+          toc: this._vfile.markdown.data.toc,
+          layout: this._vfile.markdown.data.layout,
+        };
+      }
+      
       const files = await vfile.list(this._vfile.root);
       const publicFiles = await vfile.listForFolder(this._vfile.root, "public");
       const publicBookFiles = await vfile.listForFolder(

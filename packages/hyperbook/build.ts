@@ -393,6 +393,24 @@ async function runBuild(
       ...n1,
       ...pagesAndSections,
     };
+    
+    // If current is null (glossary page not in pageList), create it from file frontmatter
+    if (!navigation.current && file.markdown.data) {
+      navigation.current = {
+        name: file.markdown.data.name || file.name,
+        href: file.path.href || undefined,
+        path: file.path,
+        scripts: file.markdown.data.scripts,
+        styles: file.markdown.data.styles,
+        description: file.markdown.data.description,
+        keywords: file.markdown.data.keywords,
+        lang: file.markdown.data.lang,
+        qrcode: file.markdown.data.qrcode,
+        toc: file.markdown.data.toc,
+        layout: file.markdown.data.layout,
+      };
+    }
+    
     const ctx: HyperbookContext = {
       ...baseCtx,
       navigation,
