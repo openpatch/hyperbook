@@ -751,7 +751,7 @@ const makeHeaderElements = (ctx: HyperbookContext): ElementContent[] => {
 const makeJump = (ctx: HyperbookContext): ElementContent[] => {
   const elements: ElementContent[] = [];
 
-  if (ctx.navigation.previous && !ctx.navigation.previous.hide) {
+  if (ctx.navigation.previous) {
     elements.push({
       type: "element",
       tagName: "a",
@@ -768,7 +768,7 @@ const makeJump = (ctx: HyperbookContext): ElementContent[] => {
     });
   }
 
-  if (ctx.navigation.next && !ctx.navigation.next.hide) {
+  if (ctx.navigation.next) {
     elements.push({
       type: "element",
       tagName: "a",
@@ -988,7 +988,7 @@ export default (ctx: HyperbookContext) => () => {
     } else if (layout === "standalone") {
       mainGridClass = "main-grid layout-standalone";
     }
-    
+
     tree.children = [
       {
         type: "element",

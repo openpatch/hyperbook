@@ -38,6 +38,21 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.69.0
+
+::::tabs
+
+:::tab{title="Improved :+1:" id="improved"}
+
+- The previous and next button are now always enabled, even if hide is true. You have to manually disable them in the frontmatter like so:
+
+```yaml
+prev:
+next:
+```
+
+:::
+
 ## v0.68.2
 
 ::::tabs
