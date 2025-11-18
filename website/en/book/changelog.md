@@ -38,6 +38,21 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.70.0
+
+::::tabs
+
+:::tab{title="Improved :+1:" id="improved"}
+
+- Support relative links for prev and next in the frontmatter. You can now use relative links for the previous and next buttons in the frontmatter like so:
+
+```yaml
+prev: ../previous-page.md
+next: ./next-page.md
+```
+
+:::
+
 ## v0.69.0
 
 ::::tabs

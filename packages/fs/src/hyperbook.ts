@@ -78,33 +78,39 @@ export const getNavigationForFile = async (
     let i = pageList.findIndex((p) => p.href === currentFile.path.href);
     current = pageList[i] || null;
 
-    pageList = pageList.filter(
+    const allPages = pageList;
+    const filteredPageList = pageList.filter(
       (p) => (!p.isEmpty || p.href === currentFile.path.href) && !p.hide,
     );
-    i = pageList.findIndex((p) => p.href === currentFile.path.href);
+    i = filteredPageList.findIndex((p) => p.href === currentFile.path.href);
+
+    const resolveLink = (link: string): HyperbookPage | null => {
+      if (link.startsWith("/@/")) {
+        return (
+          allPages.find((p) => p.permaid === link.split("/@/")[1].trim()) ||
+          null
+        );
+      } else if (link.startsWith("./") || link.startsWith("../")) {
+        const currentDir = path.posix.dirname(currentFile.path.href || "/");
+        const resolvedHref = path.posix.normalize(
+          path.posix.join(currentDir, link),
+        );
+        return allPages.find((p) => p.href === resolvedHref) || null;
+      } else {
+        return allPages.find((p) => p.href === link) || null;
+      }
+    };
 
     if (current !== null && current.next !== undefined) {
-      next =
-        pageList.find((p) => {
-          if (current?.next?.startsWith("/@/")) {
-            return p.permaid === current.next.split("/@/")[1].trim();
-          }
-          return p.href === current?.next;
-        }) || null;
+      next = resolveLink(current.next);
     } else {
-      next = pageList[i + 1] || null;
+      next = filteredPageList[i + 1] || null;
     }
 
     if (current !== null && current.prev !== undefined) {
-      previous =
-        pageList.find((p) => {
-          if (current?.prev?.startsWith("/@/")) {
-            return p.permaid === current.prev.split("/@/")[1].trim();
-          }
-          return p.href === current?.prev;
-        }) || null;
+      previous = resolveLink(current.prev);
     } else {
-      previous = pageList[i - 1] || null;
+      previous = filteredPageList[i - 1] || null;
     }
   }
 
