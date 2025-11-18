@@ -1,5 +1,16 @@
 # @hyperbook/vscode-extension
 
+## 0.47.0
+
+### Minor Changes
+
+- [`159473a`](https://github.com/openpatch/hyperbook/commit/159473aa378de2596eb0f0d493a3a6a48dc007f1) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Support relative links in next and prev of the frontmatter
+
+### Patch Changes
+
+- Updated dependencies [[`159473a`](https://github.com/openpatch/hyperbook/commit/159473aa378de2596eb0f0d493a3a6a48dc007f1)]:
+  - @hyperbook/fs@0.21.0
+
 ## 0.46.0
 
 ### Minor Changes
