@@ -38,6 +38,22 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.70.1
+
+::::tabs
+
+:::tab{title="Improved :+1:" id="improved"}
+
+- Update dependencies:
+  - learningmap to 0.3.0
+  - abcjs to 6.5.2
+  - jsxgraph to 1.12.0
+  - mermaid to 11.12.1
+  - p5 to 2.1.1
+  - wavesurfer.js to 7.11.1
+
+:::
+
 ## v0.70.0
 
 ::::tabs
