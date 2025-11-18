@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.70.1
+
+### Patch Changes
+
+- [`9a36558`](https://github.com/openpatch/hyperbook/commit/9a36558b0f90b05c972071953ce5f36203e93016) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Update dependencies
+
 ## 0.70.0
 
 ### Minor Changes
