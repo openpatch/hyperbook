@@ -85,6 +85,9 @@ export const getNavigationForFile = async (
     i = filteredPageList.findIndex((p) => p.href === currentFile.path.href);
 
     const resolveLink = (link: string): HyperbookPage | null => {
+      if (!link) {
+        return null;
+      }
       if (link.startsWith("/@/")) {
         return (
           allPages.find((p) => p.permaid === link.split("/@/")[1].trim()) ||
