@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.69.0
+
+### Minor Changes
+
+- [`64f904b`](https://github.com/openpatch/hyperbook/commit/64f904b59afe0cd480887fc88205676fa45bef1d) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Prev and next buttons are now visible even in if hide is true. You have to manually disable them with prev: and next: .
+
 ## 0.68.4
 
 ### Patch Changes
