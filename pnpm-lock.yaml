@@ -318,8 +318,8 @@ importers:
         specifier: workspace:*
         version: link:../web-component-excalidraw
       '@learningmap/web-component':
-        specifier: ^0.3.0
-        version: 0.3.0(@types/react@19.1.2)(use-sync-external-store@1.6.0(react@19.2.0))
+        specifier: ^0.3.1
+        version: 0.3.1(@types/react@19.1.2)(use-sync-external-store@1.6.0(react@19.2.0))
       '@shikijs/types':
         specifier: ^3.6.0
         version: 3.6.0
@@ -1247,11 +1247,11 @@ packages:
   '@jridgewell/trace-mapping@0.3.9':
     resolution: {integrity: sha512-3Belt6tdc8bPgAtbcmdtNJlirVoTmEb5e2gC94PnkwEW9jI6CAHUeoG85tjWP5WquqfavoMtMwiG4P926ZKKuQ==}
 
-  '@learningmap/learningmap@0.3.0':
-    resolution: {integrity: sha512-8PwcWuURe5uB6ljGhd/R4U41MYfrCZRjccAd+fC5rBS+GRtBa4AEvoO8qdbp05X8FRtROiKS4Dlvlojr5HviAQ==}
+  '@learningmap/learningmap@0.3.1':
+    resolution: {integrity: sha512-Ay2IK+oEzh2Tyl2kozQvcL74Eo5NUpQCS3Dou9MYh02HokhjxL1jfqMaOOiJNDHTa4Zn1zleQDEAkBH9t8xkww==}
 
-  '@learningmap/web-component@0.3.0':
-    resolution: {integrity: sha512-Hocj5d6MQeoFjBjxQZNad8Oq4Cpf22yAm23oavAsPo0v8FiPScEQ9rMPTR1QTYuJMueJXf5ia/jKrk9xLqJujA==}
+  '@learningmap/web-component@0.3.1':
+    resolution: {integrity: sha512-i++GXdisg3nZOONu/+ixI6DHiaGLw+sSN6GIDZpXURPoOIwSnRSqcCfxslT77YIkkrtamJsziLw4apndKfOUMg==}
 
   '@manypkg/find-root@1.1.0':
     resolution: {integrity: sha512-mki5uBvhHzO8kYYix/WRy2WX8S3B5wdVSc9D6KcU5lQNglP2yt58/VfLuAK49glRXChosY8ap2oJ1qgma3GUVA==}
@@ -8920,7 +8920,7 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.4.15
 
-  '@learningmap/learningmap@0.3.0(@types/react@19.1.2)(use-sync-external-store@1.6.0(react@19.2.0))':
+  '@learningmap/learningmap@0.3.1(@types/react@19.1.2)(use-sync-external-store@1.6.0(react@19.2.0))':
     dependencies:
       '@szhsin/react-menu': 4.5.0(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       '@types/dompurify': 3.2.0
@@ -8942,9 +8942,9 @@ snapshots:
       - immer
       - use-sync-external-store
 
-  '@learningmap/web-component@0.3.0(@types/react@19.1.2)(use-sync-external-store@1.6.0(react@19.2.0))':
+  '@learningmap/web-component@0.3.1(@types/react@19.1.2)(use-sync-external-store@1.6.0(react@19.2.0))':
     dependencies:
-      '@learningmap/learningmap': 0.3.0(@types/react@19.1.2)(use-sync-external-store@1.6.0(react@19.2.0))
+      '@learningmap/learningmap': 0.3.1(@types/react@19.1.2)(use-sync-external-store@1.6.0(react@19.2.0))
       '@r2wc/react-to-web-component': 2.1.0(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       react: 19.2.0
       react-dom: 19.2.0(react@19.2.0)

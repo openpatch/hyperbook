@@ -75,7 +75,7 @@
     "@excalidraw/excalidraw": "0.18.0",
     "@hyperbook/types": "workspace:*",
     "@hyperbook/web-component-excalidraw": "workspace:*",
-    "@learningmap/web-component": "^0.3.0",
+    "@learningmap/web-component": "^0.3.1",
     "@shikijs/types": "^3.6.0",
     "@types/hast": "3.0.4",
     "@types/js-yaml": "^4.0.9",
