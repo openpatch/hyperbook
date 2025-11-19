@@ -1,5 +1,14 @@
 # @hyperbook/vscode-extension
 
+## 0.47.2
+
+### Patch Changes
+
+- [`129dd60`](https://github.com/openpatch/hyperbook/commit/129dd60eb5a871de0d5ed9b4610e9b342c459a98) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Update learningmap
+
+- Updated dependencies [[`129dd60`](https://github.com/openpatch/hyperbook/commit/129dd60eb5a871de0d5ed9b4610e9b342c459a98)]:
+  - @hyperbook/markdown@0.43.2
+
 ## 0.47.1
 
 ### Patch Changes
