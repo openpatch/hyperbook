@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.71.1
+
+### Patch Changes
+
+- [`e4ad15c`](https://github.com/openpatch/hyperbook/commit/e4ad15caffd749df450201bc664b34a18081c8a2) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add lunr languages to dist
+
 ## 0.71.0
 
 ### Minor Changes
