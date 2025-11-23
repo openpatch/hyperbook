@@ -1,5 +1,11 @@
 # create-hyperbook
 
+## 0.3.0
+
+### Minor Changes
+
+- [`0888090`](https://github.com/openpatch/hyperbook/commit/088809075420a86cf14ade8f162eaf2cd99c9012) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix output format of create hyperbook
+
 ## 0.2.0
 
 ### Minor Changes
