@@ -6,9 +6,6 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
 async function run() {
   console.log();
   console.log(chalk.bold("Welcome to Hyperbook!"));
@@ -120,9 +117,10 @@ async function run() {
   });
 
   // Get available templates
-  const templatesDir = path.join(__dirname, "templates");
+  //
+  const templatesDir = path.join(fileURLToPath(import.meta.url), "templates");
   let availableTemplates: string[] = ["default"];
-  
+
   try {
     if (fs.existsSync(templatesDir)) {
       availableTemplates = fs
@@ -136,7 +134,7 @@ async function run() {
   }
 
   let template = "default";
-  
+
   if (availableTemplates.length > 1) {
     const { selectedTemplate } = await prompts({
       type: "select",

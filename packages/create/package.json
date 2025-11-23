@@ -6,7 +6,7 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "bin": {
-    "create-hyperbook": "./dist/create-hyperbook.mjs"
+    "create-hyperbook": "./dist/create-hyperbook.js"
   },
   "files": [
     "dist",
