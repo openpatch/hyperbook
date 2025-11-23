@@ -38,6 +38,20 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.71.0
+
+::::tabs
+
+:::tab{title="Improved :+1:" id="improved"}
+
+- Improve the new command and make it accessible via `npx create hyperbook` and in the vs code extension.
+
+:::
+
+
+::::
+
+
 ## v0.70.1
 
 ::::tabs

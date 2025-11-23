@@ -24,6 +24,7 @@
     "hyperbook"
   ],
   "activationEvents": [
+    "onStartupFinished",
     "workspaceContains:**/hyperbook.json",
     "onLanguage:markdown",
     "onLanguage:handlebars"
@@ -44,12 +45,37 @@
     "commands": [
       {
         "command": "hyperbook.sidePreview",
-        "title": "Show side preview",
+        "title": "Show Side Preview",
         "category": "Hyperbook",
         "icon": {
           "light": "./assets/icons/PreviewOnRightPane_16x.svg",
           "dark": "./assets/icons/PreviewOnRightPane_16x_dark.svg"
         }
+      },
+      {
+        "command": "hyperbook.startDevServer",
+        "title": "Start Dev Server",
+        "category": "Hyperbook"
+      },
+      {
+        "command": "hyperbook.new",
+        "title": "Create New Hyperbook",
+        "category": "Hyperbook"
+      },
+      {
+        "command": "hyperbook.openIndexMd",
+        "title": "Open book/index.md",
+        "category": "Hyperbook"
+      },
+      {
+        "command": "hyperbook.createNewPage",
+        "title": "Create New Page in Book Folder",
+        "category": "Hyperbook"
+      },
+      {
+        "command": "hyperbook.openDocumentation",
+        "title": "Open Hyperbook Documentation",
+        "category": "Hyperbook"
       }
     ],
     "menus": {
@@ -102,6 +128,69 @@
         ],
         "url": "./schemas/hyperlibrary.schema.json"
       }
+    ],
+    "walkthroughs": [
+      {
+        "id": "hyperbook.gettingStarted",
+        "title": "Getting Started with Hyperbook",
+        "description": "Learn how to create and edit your first Hyperbook.",
+        "steps": [
+          {
+            "id": "createHyperbook",
+            "title": "Create a new Hyperbook",
+            "description": "Create your first Hyperbook project with all necessary files and folders.\n[Create Hyperbook](command:hyperbook.new)",
+            "media": {
+              "markdown": "assets/walkthrough/create-hyperbook.md"
+            }
+          },
+          {
+            "id": "editIndexMd",
+            "title": "Edit index.md",
+            "description": "Open and edit the main page of your book. This is the first page users will see.\n[Open index.md](command:hyperbook.openIndexMd)",
+            "media": {
+              "markdown": "assets/walkthrough/edit-index.md"
+            },
+            "completionEvents": [
+              "onCommand:hyperbook.openIndexMd"
+            ]
+          },
+          {
+            "id": "createNewPage",
+            "title": "Create a new page",
+            "description": "Add a new page to your book to organize your content.\n[Create new page](command:hyperbook.createNewPage)",
+            "media": {
+              "markdown": "assets/walkthrough/create-page.md"
+            },
+            "completionEvents": [
+              "onCommand:hyperbook.createNewPage"
+            ]
+          },
+          {
+            "id": "insertSnippet",
+            "title": "Insert a snippet",
+            "description": "Use snippets to quickly add Hyperbook elements like alerts, videos, and more. Type `:` in a markdown file to see available snippets.\n[Open Snippet Documentation](https://hyperbook.openpatch.org)",
+            "media": {
+              "markdown": "assets/walkthrough/insert-snippet.md"
+            }
+          },
+          {
+            "id": "changeFrontmatter",
+            "title": "Change page frontmatter",
+            "description": "Customize your page by editing the frontmatter at the top of any markdown file. You can set the title, description, and more.",
+            "media": {
+              "markdown": "assets/walkthrough/frontmatter.md"
+            }
+          },
+          {
+            "id": "done",
+            "title": "You're all set! 🎉",
+            "description": "Congratulations! You've learned the basics of Hyperbook. Now you can:\n- Use the preview to see your changes\n- Explore more snippets and elements\n- Deploy your Hyperbook online\n[Open Documentation](command:hyperbook.openDocumentation)",
+            "media": {
+              "markdown": "assets/walkthrough/done.md"
+            }
+          }
+        ]
+      }
     ]
   },
   "scripts": {
@@ -148,6 +237,7 @@
     "webpack-cli": "6.0.1"
   },
   "dependencies": {
+    "create-hyperbook": "workspace:*",
     "@hyperbook/fs": "workspace:*",
     "@hyperbook/markdown": "workspace:*"
   },

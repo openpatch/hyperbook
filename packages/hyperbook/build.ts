@@ -393,7 +393,7 @@ async function runBuild(
       ...n1,
       ...pagesAndSections,
     };
-    
+
     // If current is null (glossary page not in pageList), create it from file frontmatter
     if (!navigation.current && file.markdown.data) {
       navigation.current = {
@@ -410,7 +410,7 @@ async function runBuild(
         layout: file.markdown.data.layout,
       };
     }
-    
+
     const ctx: HyperbookContext = {
       ...baseCtx,
       navigation,
@@ -693,6 +693,7 @@ async function runBuild(
         require(`lunr-languages/lunr.${hyperbookJson.language}.js`)(lunr);
         foundLanguage = true;
       } catch (e) {
+        console.log(e);
         console.log(
           `${chalk.yellow(`[${prefix}]`)} ${hyperbookJson.language} is no valid value for the lanuage key. See https://github.com/MihaiValentin/lunr-languages for possible values. Falling back to English.`,
         );

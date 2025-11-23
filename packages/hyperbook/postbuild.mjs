@@ -8,6 +8,12 @@ async function postbuild() {
   const distAssets = path.join(...["./dist", "assets"]);
   await cp(markdownAssets, distAssets, { recursive: true });
 
+  const templates = path.join(
+    ...["./node_modules", "create-hyperbook", "dist", "templates"],
+  );
+  const distTemplates = path.join(...["./dist", "templates"]);
+  await cp(templates, distTemplates, { recursive: true });
+
   const distLocales = path.join(...["./dist", "locales"]);
   const markdownLocales = path.join(
     ...["./node_modules", "@hyperbook", "markdown", "dist", "locales"],

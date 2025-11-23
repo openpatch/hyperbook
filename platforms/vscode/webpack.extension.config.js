@@ -31,6 +31,16 @@ module.exports = {
           ),
           to: path.resolve(__dirname, "assets", "hyperbook"),
         },
+        {
+          from: path.resolve(
+            __dirname,
+            "node_modules",
+            "create-hyperbook",
+            "dist",
+            "templates",
+          ),
+          to: path.resolve(__dirname, "out", "templates"),
+        },
       ],
     }),
   ],

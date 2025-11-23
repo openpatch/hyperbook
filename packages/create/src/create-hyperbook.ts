@@ -1,14 +1,21 @@
+#!/usr/bin/env node
 import chalk from "chalk";
 import prompts from "prompts";
-import { createHyperbook } from "create-hyperbook";
+import { createHyperbook } from "./index.js";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 
-export async function runNew({
-  programName,
-  bookPath,
-}: {
-  programName: string;
-  bookPath: string;
-}): Promise<void> {
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+async function run() {
+  console.log();
+  console.log(chalk.bold("Welcome to Hyperbook!"));
+  console.log();
+
+  let bookPath = process.argv[2];
+
   if (typeof bookPath === "string") {
     bookPath = bookPath.trim();
   }
@@ -30,15 +37,14 @@ export async function runNew({
     console.log();
     console.log("Please specify the book directory:");
     console.log(
-      `  ${chalk.cyan(programName)} ${chalk.green("<book-directory>")}`,
+      `  ${chalk.cyan("npm create hyperbook")} ${chalk.green("<book-directory>")}`,
     );
     console.log();
     console.log("For example:");
-    console.log(`  ${chalk.cyan(programName)} ${chalk.green("my-new-book")}`);
-    console.log();
     console.log(
-      `Run ${chalk.cyan(`${programName} --help`)} to see all options.`,
+      `  ${chalk.cyan("npm create hyperbook")} ${chalk.green("my-new-book")}`,
     );
+    console.log();
     process.exit(1);
   }
 
@@ -113,6 +119,38 @@ export async function runNew({
     initial: "en",
   });
 
+  // Get available templates
+  const templatesDir = path.join(__dirname, "templates");
+  let availableTemplates: string[] = ["default"];
+  
+  try {
+    if (fs.existsSync(templatesDir)) {
+      availableTemplates = fs
+        .readdirSync(templatesDir, { withFileTypes: true })
+        .filter((dirent) => dirent.isDirectory())
+        .map((dirent) => dirent.name);
+    }
+  } catch (err) {
+    // Fallback to default if we can't read templates
+    availableTemplates = ["default"];
+  }
+
+  let template = "default";
+  
+  if (availableTemplates.length > 1) {
+    const { selectedTemplate } = await prompts({
+      type: "select",
+      name: "selectedTemplate",
+      message: "Which template would you like to use?",
+      choices: availableTemplates.map((t) => ({
+        title: t.charAt(0).toUpperCase() + t.slice(1),
+        value: t,
+      })),
+      initial: 0,
+    });
+    template = selectedTemplate || "default";
+  }
+
   console.log();
   console.log(`Creating a new hyperbook...`);
   console.log();
@@ -124,6 +162,7 @@ export async function runNew({
     authorUrl,
     license,
     language,
+    template,
   });
 
   if (!result.success) {
@@ -156,3 +195,8 @@ export async function runNew({
   console.log(`  ${chalk.cyan(`hyperbook dev`)}`);
   console.log();
 }
+
+run().catch((error) => {
+  console.error(chalk.red("An error occurred:"), error);
+  process.exit(1);
+});

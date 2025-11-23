@@ -3,6 +3,7 @@ import * as path from "path";
 import Preview from "./Preview";
 import StatusBarItem from "./StatusBarItem";
 import { hyperbook } from "@hyperbook/fs";
+import { createNewHyperbook } from "./NewCommand";
 
 export function activate(context: vscode.ExtensionContext) {
   let preview = new Preview(context);
@@ -23,9 +24,165 @@ export function activate(context: vscode.ExtensionContext) {
     },
   );
 
+  let disposableDevServer = vscode.commands.registerCommand(
+    "hyperbook.startDevServer",
+    async () => {
+      const terminal = vscode.window.createTerminal("Hyperbook");
+      terminal.show();
+      terminal.sendText("npx hyperbook dev");
+    },
+  );
+
+  // Command: Open index.md
+  let disposableOpenIndexMd = vscode.commands.registerCommand(
+    "hyperbook.openIndexMd",
+    async () => {
+      const workspaceFolders = vscode.workspace.workspaceFolders;
+      if (!workspaceFolders) {
+        vscode.window.showErrorMessage(
+          "No workspace folder open. Please open a Hyperbook project first.",
+        );
+        return;
+      }
+
+      const workspaceFolder = workspaceFolders[0];
+      const hyperbookRoot = await hyperbook.findRoot(
+        workspaceFolder.uri.fsPath,
+      );
+
+      if (!hyperbookRoot) {
+        vscode.window.showErrorMessage(
+          "No Hyperbook project found. Please create one first using 'Create new Hyperbook'.",
+        );
+        return;
+      }
+
+      const indexPath = path.join(hyperbookRoot, "book", "index.md");
+      try {
+        const doc = await vscode.workspace.openTextDocument(indexPath);
+        await vscode.window.showTextDocument(doc);
+      } catch (error) {
+        vscode.window.showErrorMessage(
+          `Could not open index.md: ${error instanceof Error ? error.message : String(error)}`,
+        );
+      }
+    },
+  );
+
+  // Command: Create new page
+  let disposableCreateNewPage = vscode.commands.registerCommand(
+    "hyperbook.createNewPage",
+    async () => {
+      const workspaceFolders = vscode.workspace.workspaceFolders;
+      if (!workspaceFolders) {
+        vscode.window.showErrorMessage(
+          "No workspace folder open. Please open a Hyperbook project first.",
+        );
+        return;
+      }
+
+      const workspaceFolder = workspaceFolders[0];
+      const hyperbookRoot = await hyperbook.findRoot(
+        workspaceFolder.uri.fsPath,
+      );
+
+      if (!hyperbookRoot) {
+        vscode.window.showErrorMessage(
+          "No Hyperbook project found. Please create one first using 'Create new Hyperbook'.",
+        );
+        return;
+      }
+
+      const pageName = await vscode.window.showInputBox({
+        prompt:
+          "Enter the name for your new page (e.g., 'getting-started' or 'chapter1/section1')",
+        placeHolder: "page-name",
+        validateInput: (value) => {
+          if (!value) {
+            return "Page name cannot be empty";
+          }
+          if (!/^[a-z0-9\-\/]+$/i.test(value)) {
+            return "Page name can only contain letters, numbers, hyphens, and forward slashes";
+          }
+          return null;
+        },
+      });
+
+      if (!pageName) {
+        return;
+      }
+
+      const bookPath = path.join(hyperbookRoot, "book");
+      const fullPath = path.join(bookPath, `${pageName}.md`);
+      const dirPath = path.dirname(fullPath);
+
+      try {
+        // Create directory if it doesn't exist
+        await vscode.workspace.fs.createDirectory(vscode.Uri.file(dirPath));
+
+        // Create the file with a basic template
+        const template = `---
+name: ${path
+          .basename(pageName)
+          .split("-")
+          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(" ")}
+---
+
+# ${path
+          .basename(pageName)
+          .split("-")
+          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(" ")}
+
+Start writing your content here...
+`;
+
+        await vscode.workspace.fs.writeFile(
+          vscode.Uri.file(fullPath),
+          Buffer.from(template, "utf8"),
+        );
+
+        // Open the newly created file
+        const doc = await vscode.workspace.openTextDocument(fullPath);
+        await vscode.window.showTextDocument(doc);
+
+        vscode.window.showInformationMessage(
+          `Created new page: ${pageName}.md`,
+        );
+      } catch (error) {
+        vscode.window.showErrorMessage(
+          `Could not create page: ${error instanceof Error ? error.message : String(error)}`,
+        );
+      }
+    },
+  );
+
+  // Command: Open documentation
+  let disposableOpenDocumentation = vscode.commands.registerCommand(
+    "hyperbook.openDocumentation",
+    () => {
+      vscode.env.openExternal(
+        vscode.Uri.parse("https://hyperbook.openpatch.org"),
+      );
+    },
+  );
+
+  let disposableNew = vscode.commands.registerCommand(
+    "hyperbook.new",
+    async () => {
+      await createNewHyperbook(context);
+    },
+  );
+
   // push to subscriptions list so that they are disposed automatically
   // HTML Preview:
   context.subscriptions.push(disposableSidePreview);
+  context.subscriptions.push(disposableDevServer);
+  context.subscriptions.push(disposableNew);
+  context.subscriptions.push(disposableOpenIndexMd);
+  context.subscriptions.push(disposableCreateNewPage);
+  context.subscriptions.push(disposableOpenDocumentation);
   context.subscriptions.push(disposableStatusBar);
 
   // Completions
@@ -42,7 +199,9 @@ export function activate(context: vscode.ExtensionContext) {
 
   // Helper function to get hyperbook root with caching
   const rootCache = new Map<string, string>();
-  async function getHyperbookRoot(docPath: string): Promise<string | undefined> {
+  async function getHyperbookRoot(
+    docPath: string,
+  ): Promise<string | undefined> {
     if (rootCache.has(docPath)) {
       return rootCache.get(docPath);
     }
@@ -63,15 +222,18 @@ export function activate(context: vscode.ExtensionContext) {
       const p = path.relative(baseFolder, f.path);
       const { dir, name, ext } = path.parse(p);
       const item = new vscode.CompletionItem(
-        stripExtension && name !== "index" 
-          ? path.join(dir, name) 
-          : p,
+        stripExtension && name !== "index" ? path.join(dir, name) : p,
         vscode.CompletionItemKind.File,
       );
       item.detail = stripExtension ? `Page: ${p}` : `File: ${p}`;
-      item.insertText = stripExtension && name !== "index" 
-        ? (dir ? path.join(dir, name) : name)
-        : (dir && name === "index" ? dir : p);
+      item.insertText =
+        stripExtension && name !== "index"
+          ? dir
+            ? path.join(dir, name)
+            : name
+          : dir && name === "index"
+            ? dir
+            : p;
       return item;
     });
   }
@@ -100,14 +262,14 @@ export function activate(context: vscode.ExtensionContext) {
           position.line,
           startChar,
           position.line,
-          position.character
+          position.character,
         );
       }
     }
 
     files.forEach((f) => {
       const filePath = f.path;
-      
+
       // Relative to public (absolute path with /)
       if (filePath.startsWith(publicFolder)) {
         const publicRel = path.relative(publicFolder, filePath);
@@ -123,7 +285,7 @@ export function activate(context: vscode.ExtensionContext) {
         }
         items.push(item);
       }
-      
+
       // Relative to book (absolute path with /)
       if (filePath.startsWith(bookFolder)) {
         const bookRel = path.relative(bookFolder, filePath);
@@ -139,12 +301,17 @@ export function activate(context: vscode.ExtensionContext) {
         }
         items.push(item);
       }
-      
+
       // Relative to current document (./  or ../)
       if (filePath.startsWith(bookFolder)) {
         const relPath = path.relative(currentDir, filePath);
-        if (!relPath.startsWith('..') || relPath.split(path.sep).filter(s => s === '..').length <= 3) {
-          const normalizedRel = relPath.startsWith('.') ? relPath : './' + relPath;
+        if (
+          !relPath.startsWith("..") ||
+          relPath.split(path.sep).filter((s) => s === "..").length <= 3
+        ) {
+          const normalizedRel = relPath.startsWith(".")
+            ? relPath
+            : "./" + relPath;
           const item = new vscode.CompletionItem(
             normalizedRel,
             vscode.CompletionItemKind.File,
@@ -170,11 +337,11 @@ export function activate(context: vscode.ExtensionContext) {
         const linePrefix = document
           .lineAt(position)
           .text.slice(0, position.character);
-        
+
         // Trigger on / for paths and after [ for links
         const isPath = linePrefix.endsWith("/");
         const isLink = linePrefix.match(/\[[^\]]*$/);
-        
+
         if (!isPath && !isLink) {
           return undefined;
         }
@@ -185,13 +352,13 @@ export function activate(context: vscode.ExtensionContext) {
         }
 
         const files = await vscode.workspace.findFiles(
-          new vscode.RelativePattern(workspaceFolder, "book/**/*.md")
+          new vscode.RelativePattern(workspaceFolder, "book/**/*.md"),
         );
-        
+
         return createFileCompletionItems(
           files,
           path.join(workspaceFolder, "book"),
-          true
+          true,
         );
       },
     },
@@ -206,11 +373,11 @@ export function activate(context: vscode.ExtensionContext) {
         const linePrefix = document
           .lineAt(position)
           .text.slice(0, position.character);
-        
+
         // Match various src patterns
         const srcMatch = linePrefix.match(/(?:src|thumbnail|poster)=\"([^"]*)/);
         const isSlash = linePrefix.endsWith("/");
-        
+
         if (!srcMatch && !isSlash) {
           return undefined;
         }
@@ -221,18 +388,18 @@ export function activate(context: vscode.ExtensionContext) {
         }
 
         // Determine if we should show relative paths based on context
-        const showRelative = srcMatch && !srcMatch[1].startsWith('/');
+        const showRelative = srcMatch && !srcMatch[1].startsWith("/");
 
         // Search in both public and book folders
         const publicFiles = await vscode.workspace.findFiles(
-          new vscode.RelativePattern(workspaceFolder, "public/**")
+          new vscode.RelativePattern(workspaceFolder, "public/**"),
         );
         const bookFiles = await vscode.workspace.findFiles(
-          new vscode.RelativePattern(workspaceFolder, "book/**")
+          new vscode.RelativePattern(workspaceFolder, "book/**"),
         );
-        
+
         const allFiles = [...publicFiles, ...bookFiles];
-        
+
         if (showRelative) {
           return createMultiPathCompletionItems(
             allFiles,
@@ -242,14 +409,14 @@ export function activate(context: vscode.ExtensionContext) {
             path.join(workspaceFolder, "book"),
             true,
             position,
-            linePrefix
+            linePrefix,
           );
         } else {
           // Only show absolute paths
           const items = allFiles.map((f) => {
             let p: string;
             let detail: string;
-            
+
             if (f.path.startsWith(path.join(workspaceFolder, "public"))) {
               p = path.relative(path.join(workspaceFolder, "public"), f.path);
               detail = `Public: /${p}`;
@@ -257,27 +424,29 @@ export function activate(context: vscode.ExtensionContext) {
               p = path.relative(path.join(workspaceFolder, "book"), f.path);
               detail = `Book: /${p}`;
             }
-            
+
             const item = new vscode.CompletionItem(
               "/" + p,
               vscode.CompletionItemKind.File,
             );
             item.detail = detail;
             item.insertText = "/" + p;
-            
+
             // Add file type icons
             const ext = path.extname(p).toLowerCase();
-            if (['.jpg', '.jpeg', '.png', '.gif', '.svg', '.webp'].includes(ext)) {
+            if (
+              [".jpg", ".jpeg", ".png", ".gif", ".svg", ".webp"].includes(ext)
+            ) {
               item.kind = vscode.CompletionItemKind.Color;
-            } else if (['.mp3', '.wav', '.ogg'].includes(ext)) {
+            } else if ([".mp3", ".wav", ".ogg"].includes(ext)) {
               item.kind = vscode.CompletionItemKind.Event;
-            } else if (['.mp4', '.webm', '.ogv'].includes(ext)) {
+            } else if ([".mp4", ".webm", ".ogv"].includes(ext)) {
               item.kind = vscode.CompletionItemKind.Event;
             }
-            
+
             return item;
           });
-          
+
           return items;
         }
       },
@@ -304,17 +473,20 @@ export function activate(context: vscode.ExtensionContext) {
         }
 
         const files = await vscode.workspace.findFiles(
-          new vscode.RelativePattern(workspaceFolder, "glossary/**/*.md")
+          new vscode.RelativePattern(workspaceFolder, "glossary/**/*.md"),
         );
-        
+
         return files.map((f) => {
-          const p = path.relative(path.join(workspaceFolder, "glossary"), f.path);
+          const p = path.relative(
+            path.join(workspaceFolder, "glossary"),
+            f.path,
+          );
           const { name, dir } = path.parse(p);
           const item = new vscode.CompletionItem(
             name,
             vscode.CompletionItemKind.Reference,
           );
-          item.detail = `Glossary term: ${dir ? dir + '/' : ''}${name}`;
+          item.detail = `Glossary term: ${dir ? dir + "/" : ""}${name}`;
           item.insertText = name;
           return item;
         });
@@ -341,9 +513,11 @@ export function activate(context: vscode.ExtensionContext) {
         }
 
         try {
-          const archivePath = vscode.Uri.file(path.join(workspaceFolder, "archives"));
+          const archivePath = vscode.Uri.file(
+            path.join(workspaceFolder, "archives"),
+          );
           const files = await vscode.workspace.fs.readDirectory(archivePath);
-          
+
           return files
             .filter(([_, type]) => type === vscode.FileType.Directory)
             .map(([file]) => {
@@ -381,9 +555,9 @@ export function activate(context: vscode.ExtensionContext) {
         }
 
         const files = await vscode.workspace.findFiles(
-          new vscode.RelativePattern(workspaceFolder, "public/**/*.h5p")
+          new vscode.RelativePattern(workspaceFolder, "public/**/*.h5p"),
         );
-        
+
         return files.map((f) => {
           const p = path.relative(path.join(workspaceFolder, "public"), f.path);
           const item = new vscode.CompletionItem(
@@ -419,21 +593,24 @@ export function activate(context: vscode.ExtensionContext) {
 
         // Search in both public and book folders
         const publicFiles = await vscode.workspace.findFiles(
-          new vscode.RelativePattern(workspaceFolder, "public/**/*.learningmap")
+          new vscode.RelativePattern(
+            workspaceFolder,
+            "public/**/*.learningmap",
+          ),
         );
         const bookFiles = await vscode.workspace.findFiles(
-          new vscode.RelativePattern(workspaceFolder, "book/**/*.learningmap")
+          new vscode.RelativePattern(workspaceFolder, "book/**/*.learningmap"),
         );
-        
+
         const allFiles = [...publicFiles, ...bookFiles];
-        
+
         return createMultiPathCompletionItems(
           allFiles,
           document.uri.path,
           workspaceFolder,
           path.join(workspaceFolder, "public"),
           path.join(workspaceFolder, "book"),
-          true
+          true,
         );
       },
     },
@@ -460,14 +637,14 @@ export function activate(context: vscode.ExtensionContext) {
 
         // Search in both public and book folders
         const publicFiles = await vscode.workspace.findFiles(
-          new vscode.RelativePattern(workspaceFolder, "public/**/*.excalidraw")
+          new vscode.RelativePattern(workspaceFolder, "public/**/*.excalidraw"),
         );
         const bookFiles = await vscode.workspace.findFiles(
-          new vscode.RelativePattern(workspaceFolder, "book/**/*.excalidraw")
+          new vscode.RelativePattern(workspaceFolder, "book/**/*.excalidraw"),
         );
-        
+
         const allFiles = [...publicFiles, ...bookFiles];
-        
+
         return createMultiPathCompletionItems(
           allFiles,
           document.uri.path,
@@ -476,7 +653,7 @@ export function activate(context: vscode.ExtensionContext) {
           path.join(workspaceFolder, "book"),
           true,
           position,
-          linePrefix
+          linePrefix,
         );
       },
     },
@@ -491,7 +668,9 @@ export function activate(context: vscode.ExtensionContext) {
         const linePrefix = document
           .lineAt(position)
           .text.slice(0, position.character);
-        const match = linePrefix.match(/:(audio|video)(?:\[[^\]]*\])?\{[^}]*(?:src|thumbnail|poster)=\"/);
+        const match = linePrefix.match(
+          /:(audio|video)(?:\[[^\]]*\])?\{[^}]*(?:src|thumbnail|poster)=\"/,
+        );
         if (!match) {
           return undefined;
         }
@@ -501,20 +680,27 @@ export function activate(context: vscode.ExtensionContext) {
           return undefined;
         }
 
-        const mediaExtensions = match[1] === 'audio' 
-          ? '**/*.{mp3,wav,ogg,m4a,flac}'
-          : '**/*.{mp4,webm,ogv,mov}';
-        
+        const mediaExtensions =
+          match[1] === "audio"
+            ? "**/*.{mp3,wav,ogg,m4a,flac}"
+            : "**/*.{mp4,webm,ogv,mov}";
+
         // Search in both public and book folders
         const publicFiles = await vscode.workspace.findFiles(
-          new vscode.RelativePattern(workspaceFolder, `public/${mediaExtensions}`)
+          new vscode.RelativePattern(
+            workspaceFolder,
+            `public/${mediaExtensions}`,
+          ),
         );
         const bookFiles = await vscode.workspace.findFiles(
-          new vscode.RelativePattern(workspaceFolder, `book/${mediaExtensions}`)
+          new vscode.RelativePattern(
+            workspaceFolder,
+            `book/${mediaExtensions}`,
+          ),
         );
-        
+
         const allFiles = [...publicFiles, ...bookFiles];
-        
+
         return createMultiPathCompletionItems(
           allFiles,
           document.uri.path,
@@ -523,7 +709,7 @@ export function activate(context: vscode.ExtensionContext) {
           path.join(workspaceFolder, "book"),
           true,
           position,
-          linePrefix
+          linePrefix,
         );
       },
     },
@@ -550,16 +736,16 @@ export function activate(context: vscode.ExtensionContext) {
 
         // Search in both public and book folders
         const publicFiles = await vscode.workspace.findFiles(
-          new vscode.RelativePattern(workspaceFolder, "public/**")
+          new vscode.RelativePattern(workspaceFolder, "public/**"),
         );
         const bookFiles = await vscode.workspace.findFiles(
-          new vscode.RelativePattern(workspaceFolder, "book/**")
+          new vscode.RelativePattern(workspaceFolder, "book/**"),
         );
-        
-        const allFiles = [...publicFiles, ...bookFiles].filter(f => 
-          !f.path.endsWith('.md') && !f.path.endsWith('.hbs')
+
+        const allFiles = [...publicFiles, ...bookFiles].filter(
+          (f) => !f.path.endsWith(".md") && !f.path.endsWith(".hbs"),
         );
-        
+
         return createMultiPathCompletionItems(
           allFiles,
           document.uri.path,
@@ -568,7 +754,7 @@ export function activate(context: vscode.ExtensionContext) {
           path.join(workspaceFolder, "book"),
           true,
           position,
-          linePrefix
+          linePrefix,
         );
       },
     },
