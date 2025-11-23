@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.71.2
+
+### Patch Changes
+
+- [`098aab3`](https://github.com/openpatch/hyperbook/commit/098aab3c1ec1520a07e255bddaec433bc6798323) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix lunr path
+
 ## 0.71.1
 
 ### Patch Changes
