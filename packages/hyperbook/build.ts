@@ -690,9 +690,7 @@ async function runBuild(
     if (hyperbookJson.language && hyperbookJson.language !== "en") {
       try {
         require("./lunr-languages/lunr.stemmer.support.min.js")(lunr);
-        require(`./lunr-languages/min/lunr.${hyperbookJson.language}.min.js`)(
-          lunr,
-        );
+        require(`./lunr-languages/lunr.${hyperbookJson.language}.min.js`)(lunr);
         foundLanguage = true;
       } catch (e) {
         console.log(e);
