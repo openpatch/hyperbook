@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import * as path from "path";
-import { createHyperbook, CreateHyperbookOptions } from "@hyperbook/create";
+import { createHyperbook, CreateHyperbookOptions } from "create-hyperbook";
 
 interface State {
   title: string;
