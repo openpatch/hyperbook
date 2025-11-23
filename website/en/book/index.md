@@ -35,9 +35,9 @@ You can start working on a Hyperbook in three different ways. Choose the one whi
 
 You need to have [Node](https://nodejs.org/) version 16 or higher installed on your system.
 
-1. Run `npx hyperbook new my-new-hyperbook` and follow the wizard to create your first Hyperbook.
+1. Run `npm create hyperbook` and follow the wizard to create your first Hyperbook.
 1. Run `npx hyperbook dev` to start the development server.
-1. Visit https://localhost:3000 with your favorite web browser.
+1. Visit https://localhost:8080 with your favorite web browser.
 1. Modify or add new pages to your Hyperbook by using your favorite editor.
 
 :::

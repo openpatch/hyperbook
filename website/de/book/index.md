@@ -31,9 +31,9 @@ Du kannst mit der Erstellung deines Hyperbook auf drei Arten starten. Wähle die
 
 Du benötigst [Node](https://nodejs.org/) version 16 oder höherer auf deinem System.
 
-1. Führe `npx hyperbook new my-new-hyperbook` aus und folge den Anweisungen, um dein erstes Hyperbook zu erstellen.
+1. Führe `npm create hyperbook` aus und folge den Anweisungen, um dein erstes Hyperbook zu erstellen.
 1. Führe `npx hyperbook dev` aus, um den Entwicklungsserver zu starten.
-1. Besuche https://localhost:3000 mit deinem Lieblingsbrowser.
+1. Besuche https://localhost:8080 mit deinem Lieblingsbrowser.
 1. Modifiziere oder füge neue Seiten zu deinen Hyperbook hinzu mit deinem Lieblingseditor.
 
 :::
@@ -97,12 +97,6 @@ Um die neuste Version des Hyperbook CLI zu bekommen, benutzte den folgenden Befe
 ```bash
 npm update hyperbook --global
 ```
-
-:::
-
-:::tab{title="Web IDE" id="web-ide"}
-
-Keine Integration und daher auch keine Updates.
 
 :::
 
