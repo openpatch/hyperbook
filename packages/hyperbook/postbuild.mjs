@@ -19,5 +19,11 @@ async function postbuild() {
     ...["./node_modules", "@hyperbook", "markdown", "dist", "locales"],
   );
   await cp(markdownLocales, distLocales, { recursive: true });
+
+  const distLunrLanguages = path.join(...["./dist", "lunr-languages"]);
+  const lunrLanguages = path.join(
+    ...["./node_modules", "lunr-languages", "min"],
+  );
+  await cp(lunrLanguages, distLunrLanguages, { recursive: true });
 }
 postbuild();
