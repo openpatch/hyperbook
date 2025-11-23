@@ -13,7 +13,7 @@
     "templates"
   ],
   "scripts": {
-    "build": "rimraf dist && pnpm build:pkg && pnpm build:create && pnpm build:types && node postbuild.mjs",
+    "build": "rimraf dist && pnpm build:create && pnpm build:pkg  && pnpm build:types && node postbuild.mjs",
     "build:pkg": "node ../../scripts/build.mjs",
     "build:create": "tsdown",
     "build:types": "tsc --project tsconfig.build.json --declaration --emitDeclarationOnly"

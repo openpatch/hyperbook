@@ -166,6 +166,7 @@ export async function createHyperbook(
   const hyperbookJson = {
     name: bookName,
     version: "0.0.0",
+    logo: "/logo.png",
     description: description,
     license,
     author: {
