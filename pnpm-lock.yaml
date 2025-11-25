@@ -349,8 +349,8 @@ importers:
         specifier: workspace:*
         version: link:../web-component-excalidraw
       '@learningmap/web-component':
-        specifier: ^0.3.1
-        version: 0.3.1(@types/react@19.1.2)(use-sync-external-store@1.6.0(react@19.2.0))
+        specifier: ^0.3.3
+        version: 0.3.3(@types/react@19.1.2)(use-sync-external-store@1.6.0(react@19.2.0))
       '@shikijs/types':
         specifier: ^3.6.0
         version: 3.6.0
@@ -1317,11 +1317,11 @@ packages:
   '@jridgewell/trace-mapping@0.3.9':
     resolution: {integrity: sha512-3Belt6tdc8bPgAtbcmdtNJlirVoTmEb5e2gC94PnkwEW9jI6CAHUeoG85tjWP5WquqfavoMtMwiG4P926ZKKuQ==}
 
-  '@learningmap/learningmap@0.3.1':
-    resolution: {integrity: sha512-Ay2IK+oEzh2Tyl2kozQvcL74Eo5NUpQCS3Dou9MYh02HokhjxL1jfqMaOOiJNDHTa4Zn1zleQDEAkBH9t8xkww==}
+  '@learningmap/learningmap@0.4.0':
+    resolution: {integrity: sha512-rgOjtAvCJXQcK6ATLE1/NwzzDjckO+KJDKh/Q+Udfc+QaqYBnBGCIukArccNjnajLHaGQpWI0JQRwmE7DzfCjw==}
 
-  '@learningmap/web-component@0.3.1':
-    resolution: {integrity: sha512-i++GXdisg3nZOONu/+ixI6DHiaGLw+sSN6GIDZpXURPoOIwSnRSqcCfxslT77YIkkrtamJsziLw4apndKfOUMg==}
+  '@learningmap/web-component@0.3.3':
+    resolution: {integrity: sha512-6hvt93lQLRaQ86OVnK4Z28scgWMEjaGOhtOGKj+Qt+rn7iCXsCEvrHNYyTY2gGdP7D2wEdSQb+zTen+BWhu76g==}
 
   '@manypkg/find-root@1.1.0':
     resolution: {integrity: sha512-mki5uBvhHzO8kYYix/WRy2WX8S3B5wdVSc9D6KcU5lQNglP2yt58/VfLuAK49glRXChosY8ap2oJ1qgma3GUVA==}
@@ -2097,8 +2097,8 @@ packages:
   '@swc/types@0.1.25':
     resolution: {integrity: sha512-iAoY/qRhNH8a/hBvm3zKj9qQ4oc2+3w1unPJa2XvTK3XjeLXtzcCingVPw/9e5mn1+0yPqxcBGp9Jf0pkfMb1g==}
 
-  '@szhsin/react-menu@4.5.0':
-    resolution: {integrity: sha512-fblZBPxFGjg+QxSbdDsWk3H8brupuQG+ayYXElwg+FdCxwLQLvrHG9K6O9+4pE8qLyDy5REn/2HmffPXcBZviA==}
+  '@szhsin/react-menu@4.5.1':
+    resolution: {integrity: sha512-kRTS7Pq0YdkucQexXVy5HkpzKsJdXbAhpmzve0wPokpsaG+4Ca3cphEn6WkRCWXfn1gZXosxcZCeb34ocmUPDw==}
     peerDependencies:
       react: '>=16.14.0'
       react-dom: '>=16.14.0'
@@ -4669,8 +4669,8 @@ packages:
     resolution: {integrity: sha512-lks+lVC8dgGyh97jxvxeYTWQFvh4uw4yC12gVl63Cg30sjPX4wuGcdkICVXDAESr6OJGjqGA8Iz5mkeN6zlD7A==}
     engines: {node: '>= 0.6'}
 
-  http-errors@2.0.0:
-    resolution: {integrity: sha512-FtwrG/euBzaEjYeRqOgly7G0qviiXoJWnvEH2Z1plBdXgbyjv34pHTSb9zoeHMyDy33+DWy5Wt9Wo+TURtOYSQ==}
+  http-errors@2.0.1:
+    resolution: {integrity: sha512-4FbRdAX+bSdmo4AUFuS0WNiPz8NgFt+r8ThgNWmlrjQjt1Q7ZR9+zTlce2859x4KSXrwIsaeTqDoKQmtP8pLmQ==}
     engines: {node: '>= 0.8'}
 
   http-parser-js@0.5.8:
@@ -5794,6 +5794,10 @@ packages:
   mime-types@3.0.1:
     resolution: {integrity: sha512-xRc4oEhT6eaBpU1XF7AjpOFD+xQmXNB5OVKwp4tqCuBpHLS/ZbBDrc07mYTDqVMg6PfxUjjNp85O6Cd2Z/5HWA==}
     engines: {node: '>= 0.6'}
+
+  mime-types@3.0.2:
+    resolution: {integrity: sha512-Lbgzdk0h4juoQ9fCKXW4by0UJqj+nOOrI9MJ1sSj4nI8aI2eo1qmvQEie4VD1glsS250n15LsWsYtCugiStS5A==}
+    engines: {node: '>=18'}
 
   mime@1.6.0:
     resolution: {integrity: sha512-x0Vn8spI+wuJ1O6S7gnbaQg8Pxh4NNHb7KSINmEWKiPE4RKOplvijn+NkmYmmRgP68mc70j2EbeTFRsrswaQeg==}
@@ -7296,10 +7300,6 @@ packages:
   statuses@1.5.0:
     resolution: {integrity: sha512-OpZ3zP+jT1PI7I8nemJX4AKmAX070ZkYPVWV/AaKTJl+tXCTGyVdC1a4SL8RUQYEwk/f34ZX8UTykN68FwrqAA==}
     engines: {node: '>= 0.6'}
-
-  statuses@2.0.1:
-    resolution: {integrity: sha512-RwNA9Z/7PrK06rYLIzFMlaF+l73iwpzsqRIFgbMLbTcLD6cOao82TaWefPXQvB2fOC4AjuYSEndS7N/mTCbkdQ==}
-    engines: {node: '>= 0.8'}
 
   statuses@2.0.2:
     resolution: {integrity: sha512-DvEy55V3DB7uknRo+4iOGT5fP1slR8wQohVdknigZPMpMstaKJQWhwiYBACJE3Ul2pTnATihhBYnRhZQHGBiRw==}
@@ -9264,9 +9264,9 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.4.15
 
-  '@learningmap/learningmap@0.3.1(@types/react@19.1.2)(use-sync-external-store@1.6.0(react@19.2.0))':
+  '@learningmap/learningmap@0.4.0(@types/react@19.1.2)(use-sync-external-store@1.6.0(react@19.2.0))':
     dependencies:
-      '@szhsin/react-menu': 4.5.0(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+      '@szhsin/react-menu': 4.5.1(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       '@types/dompurify': 3.2.0
       '@xyflow/react': 12.9.3(@types/react@19.1.2)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       dompurify: 3.3.0
@@ -9286,9 +9286,9 @@ snapshots:
       - immer
       - use-sync-external-store
 
-  '@learningmap/web-component@0.3.1(@types/react@19.1.2)(use-sync-external-store@1.6.0(react@19.2.0))':
+  '@learningmap/web-component@0.3.3(@types/react@19.1.2)(use-sync-external-store@1.6.0(react@19.2.0))':
     dependencies:
-      '@learningmap/learningmap': 0.3.1(@types/react@19.1.2)(use-sync-external-store@1.6.0(react@19.2.0))
+      '@learningmap/learningmap': 0.4.0(@types/react@19.1.2)(use-sync-external-store@1.6.0(react@19.2.0))
       '@r2wc/react-to-web-component': 2.1.0(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       react: 19.2.0
       react-dom: 19.2.0(react@19.2.0)
@@ -10249,7 +10249,7 @@ snapshots:
       '@swc/counter': 0.1.3
     optional: true
 
-  '@szhsin/react-menu@4.5.0(react-dom@19.2.0(react@19.2.0))(react@19.2.0)':
+  '@szhsin/react-menu@4.5.1(react-dom@19.2.0(react@19.2.0))(react@19.2.0)':
     dependencies:
       react: 19.2.0
       react-dom: 19.2.0(react@19.2.0)
@@ -13314,12 +13314,12 @@ snapshots:
       setprototypeof: 1.1.0
       statuses: 1.5.0
 
-  http-errors@2.0.0:
+  http-errors@2.0.1:
     dependencies:
       depd: 2.0.0
       inherits: 2.0.4
       setprototypeof: 1.2.0
-      statuses: 2.0.1
+      statuses: 2.0.2
       toidentifier: 1.0.1
 
   http-parser-js@0.5.8: {}
@@ -14786,6 +14786,10 @@ snapshots:
     dependencies:
       mime-db: 1.54.0
 
+  mime-types@3.0.2:
+    dependencies:
+      mime-db: 1.54.0
+
   mime@1.6.0: {}
 
   mime@4.0.6: {}
@@ -16241,8 +16245,8 @@ snapshots:
       escape-html: 1.0.3
       etag: 1.8.1
       fresh: 2.0.0
-      http-errors: 2.0.0
-      mime-types: 3.0.1
+      http-errors: 2.0.1
+      mime-types: 3.0.2
       ms: 2.1.3
       on-finished: 2.4.1
       range-parser: 1.2.1
@@ -16527,8 +16531,6 @@ snapshots:
       object-copy: 0.1.0
 
   statuses@1.5.0: {}
-
-  statuses@2.0.1: {}
 
   statuses@2.0.2: {}
 

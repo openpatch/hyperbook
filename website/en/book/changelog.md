@@ -38,6 +38,19 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.71.3
+
+::::tabs
+
+:::tab{title="Improved :+1:" id="improved"}
+
+- Update learningmap
+
+:::
+
+
+::::
+
 ## v0.71.0
 
 ::::tabs

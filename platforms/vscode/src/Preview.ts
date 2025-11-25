@@ -44,6 +44,7 @@ export default class Preview {
     this.context = context;
 
     vscode.workspace.onDidChangeTextDocument(async (e) => {
+      // Only refresh when hyperbook config files change
       if (
         e.document.fileName.endsWith("hyperbook.json") ||
         e.document.fileName.endsWith("hyperlibrary.json")
@@ -351,8 +352,11 @@ export default class Preview {
       const fileWatcher = vscode.workspace.createFileSystemWatcher("**/*");
       fileWatcher.onDidChange(
         async (uri) => {
-          if (this._resource && this.panel) {
-            const hyperbookRoot = await hyperbook.findRoot(this._resource.fsPath).catch(() => "");
+          if (this.panel) {
+            // If the changed file is within the current hyperbook root, refresh preview
+            const hyperbookRoot = this._resource
+              ? await hyperbook.findRoot(this._resource.fsPath).catch(() => "")
+              : "";
             if (hyperbookRoot && uri.fsPath.startsWith(hyperbookRoot)) {
               await this.handleTextDocumentChange();
             }
