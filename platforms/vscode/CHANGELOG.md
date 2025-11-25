@@ -1,5 +1,14 @@
 # @hyperbook/vscode-extension
 
+## 0.48.2
+
+### Patch Changes
+
+- [`cfcd5da`](https://github.com/openpatch/hyperbook/commit/cfcd5da9e82099ea8169ba7ec95099d3eafbc93a) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Update learningmap
+
+- Updated dependencies [[`cfcd5da`](https://github.com/openpatch/hyperbook/commit/cfcd5da9e82099ea8169ba7ec95099d3eafbc93a)]:
+  - @hyperbook/markdown@0.43.3
+
 ## 0.48.1
 
 ### Patch Changes
