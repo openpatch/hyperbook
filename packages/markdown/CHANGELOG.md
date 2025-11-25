@@ -1,5 +1,11 @@
 # @hyperbook/markdown
 
+## 0.43.3
+
+### Patch Changes
+
+- [`cfcd5da`](https://github.com/openpatch/hyperbook/commit/cfcd5da9e82099ea8169ba7ec95099d3eafbc93a) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Update learningmap
+
 ## 0.43.2
 
 ### Patch Changes
