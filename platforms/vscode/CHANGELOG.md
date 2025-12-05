@@ -1,5 +1,14 @@
 # @hyperbook/vscode-extension
 
+## 0.48.4
+
+### Patch Changes
+
+- [`208b695`](https://github.com/openpatch/hyperbook/commit/208b695f7a8eab8def611f7b94ffaf5b9988aded) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Update pyodide to version 0.29.0
+
+- Updated dependencies [[`208b695`](https://github.com/openpatch/hyperbook/commit/208b695f7a8eab8def611f7b94ffaf5b9988aded)]:
+  - @hyperbook/markdown@0.43.5
+
 ## 0.48.3
 
 ### Patch Changes
