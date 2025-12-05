@@ -1,7 +1,7 @@
 // Setup your project to serve `py-worker.js`. You should also serve
 // `pyodide.js`, and all its associated `.asm.js`, `.json`,
 // and `.wasm` files as well:
-importScripts("https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js");
+importScripts("https://cdn.jsdelivr.net/pyodide/v0.29.0/full/pyodide.js");
 
 class StdinHandler {
   constructor(results, options) {
