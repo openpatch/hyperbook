@@ -85,6 +85,32 @@ layout: standalone
 <iframe src="https://your-hyperbook.com/any-page?standalone=true"></iframe>
 ```
 
+**Usage Method 2a: Sections Filter** (filter specific content)
+
+You can combine standalone mode with a `sections` parameter to show only specific sections by their header IDs:
+
+```html
+<iframe src="https://your-hyperbook.com/any-page?standalone=true&sections=aufgabe-1-ebene-in-koordinatenform"></iframe>
+```
+
+The `sections` parameter accepts:
+- Single section ID: `sections=my-header-id`
+- Multiple sections (comma-separated): `sections=section-1,section-2,section-3`
+
+When a section is specified, only the header with that ID and all content until the next header of the same or higher level will be shown. Lower-level headers (subsections) are included automatically.
+
+**Finding Header IDs**: Header IDs are automatically generated from the heading text by converting to lowercase and replacing spaces with hyphens. Special characters are removed. For example:
+- `## My Section Title` → `my-section-title`
+- `### Aufgabe 1: Ebene in Koordinatenform` → `aufgabe-1-ebene-in-koordinatenform`
+
+You can also define custom IDs using the `{#custom-id}` syntax in your markdown: `## My Section {#custom-section-id}`
+
+**Share Button**: Every page includes a share button (🔗 icon) in the header that opens a dialog to easily create shareable URLs with:
+- Standalone mode toggle
+- Section selection checkboxes (table of contents view)
+- Live URL preview
+- One-click copy to clipboard
+
 **Usage Method 3: Automatic Detection** (iframe embedding)
 
 When a Hyperbook page is embedded in an iframe, it automatically switches to standalone mode - no configuration needed! This provides seamless embedding without requiring URL parameters or frontmatter changes.
@@ -104,6 +130,8 @@ The automatic detection ensures clean, distraction-free content for iframe embed
 - Presentations
 
 **[View Standalone Layout Demo →](/advanced/standalone-layout-demo)**
+
+**[View Sections Filter Demo →](/advanced/sections-filter-demo)**
 
 ---
 

@@ -124,13 +124,28 @@ export default (ctx: HyperbookContext) => () => {
       },
     ];
 
+    // Add QR code button to floating buttons container, dialog goes at root level
+    const qrcodeButton = qrcodeDialog[0]; // The button
+    const qrcodeDialogElement = qrcodeDialog[1]; // The dialog element
+    
     if (
       originalChildren[0].type === "element" &&
       originalChildren[0].tagName === "div"
     ) {
-      originalChildren[0].children.push(...qrcodeDialog);
+      // Find the floating buttons container and add the QR button to it
+      const floatingContainer = originalChildren[0].children.find(
+        (child: any) => child.type === "element" && child.properties?.id === "floating-buttons-container"
+      );
+      
+      if (floatingContainer && floatingContainer.type === "element") {
+        floatingContainer.children.push(qrcodeButton);
+      } else {
+        // Fallback: add directly to content if container not found
+        originalChildren[0].children.push(qrcodeButton);
+      }
     }
 
-    tree.children = originalChildren;
+    // Add dialog at root level so it's not hidden when sections are filtered
+    tree.children = [...originalChildren, qrcodeDialogElement];
   };
 };

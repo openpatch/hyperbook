@@ -726,6 +726,27 @@ const makeHeaderElements = (ctx: HyperbookContext): ElementContent[] => {
 
   elements.push({
     type: "element",
+    tagName: "button",
+    properties: {
+      id: "share-button",
+      class: "icon-button",
+      title: i18n.get("shell-share"),
+      onclick: "hyperbook.shareOpen()",
+    },
+    children: [
+      {
+        type: "element",
+        tagName: "div",
+        properties: {
+          class: "share-icon",
+        },
+        children: [],
+      },
+    ],
+  });
+
+  elements.push({
+    type: "element",
     tagName: "dark-mode-toggle",
     properties: {
       id: "dark-mode-toggle",

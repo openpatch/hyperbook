@@ -86,6 +86,32 @@ layout: standalone
 <iframe src="https://ihr-hyperbook.com/beliebige-seite?standalone=true"></iframe>
 ```
 
+**Verwendungsmethode 2a: Sections-Filter** (spezifische Inhalte filtern)
+
+Sie können den Standalone-Modus mit einem `sections` Parameter kombinieren, um nur bestimmte Abschnitte anhand ihrer Header-IDs anzuzeigen:
+
+```html
+<iframe src="https://ihr-hyperbook.com/beliebige-seite?standalone=true&sections=aufgabe-1-ebene-in-koordinatenform"></iframe>
+```
+
+Der `sections` Parameter akzeptiert:
+- Einzelne Abschnitts-ID: `sections=meine-header-id`
+- Mehrere Abschnitte (kommagetrennt): `sections=abschnitt-1,abschnitt-2,abschnitt-3`
+
+Wenn ein Abschnitt angegeben wird, werden nur die Überschrift mit dieser ID und alle Inhalte bis zur nächsten Überschrift der gleichen oder höheren Ebene angezeigt. Überschriften niedrigerer Ebenen (Unterabschnitte) werden automatisch eingeschlossen.
+
+**Header-IDs finden**: Header-IDs werden automatisch aus dem Überschriftentext generiert, indem dieser in Kleinbuchstaben umgewandelt und Leerzeichen durch Bindestriche ersetzt werden. Sonderzeichen werden entfernt. Zum Beispiel:
+- `## Mein Abschnittstitel` → `mein-abschnittstitel`
+- `### Aufgabe 1: Ebene in Koordinatenform` → `aufgabe-1-ebene-in-koordinatenform`
+
+Sie können auch benutzerdefinierte IDs mit der `{#custom-id}` Syntax in Ihrem Markdown definieren: `## Mein Abschnitt {#benutzerdefinierte-id}`
+
+**Teilen-Button**: Jede Seite enthält einen Teilen-Button (🔗 Symbol) im Header, der einen Dialog öffnet, um einfach teilbare URLs zu erstellen mit:
+- Standalone-Modus Umschalter
+- Abschnittsauswahl per Checkboxen (Inhaltsverzeichnis-Ansicht)
+- Live-URL-Vorschau
+- Ein-Klick-Kopieren in die Zwischenablage
+
 **Verwendungsmethode 3: Automatische Erkennung** (iframe-Einbettung)
 
 Wenn eine Hyperbook-Seite in einem iframe eingebettet wird, wechselt sie automatisch in den Standalone-Modus - keine Konfiguration erforderlich! Dies ermöglicht eine nahtlose Einbettung ohne URL-Parameter oder Frontmatter-Änderungen.
@@ -105,6 +131,8 @@ Die automatische Erkennung sorgt für saubere, ablenkungsfreie Inhalte bei ifram
 - Präsentationen
 
 **[Standalone Layout Demo ansehen →](/de/advanced/standalone-layout-demo)**
+
+**[Sections-Filter Demo ansehen →](/de/advanced/sections-filter-demo)**
 
 ---
 

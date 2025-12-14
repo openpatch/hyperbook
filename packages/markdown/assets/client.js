@@ -180,6 +180,68 @@ var hyperbook = (function () {
   }
 
   /**
+   * Open the share dialog.
+   */
+  function shareOpen() {
+    const shareDialog = document.getElementById("share-dialog");
+    shareUpdatePreview();
+    shareDialog.showModal();
+  }
+
+  /**
+   * Close the share dialog.
+   */
+  function shareClose() {
+    const shareDialog = document.getElementById("share-dialog");
+    shareDialog.close();
+  }
+
+  /**
+   * Update the URL preview in the share dialog.
+   */
+  function shareUpdatePreview() {
+    const standaloneCheckbox = document.getElementById("share-standalone-checkbox");
+    const sectionCheckboxes = document.querySelectorAll("#share-dialog input[data-anchor]");
+    const previewEl = document.getElementById("share-url-preview");
+    
+    const baseUrl = window.location.origin + window.location.pathname;
+    const params = new URLSearchParams();
+    
+    if (standaloneCheckbox && standaloneCheckbox.checked) {
+      params.append("standalone", "true");
+    }
+    
+    const selectedSections = Array.from(sectionCheckboxes)
+      .filter(cb => cb.checked)
+      .map(cb => cb.getAttribute("data-anchor"));
+    
+    if (selectedSections.length > 0) {
+      params.append("sections", selectedSections.join(","));
+    }
+    
+    const finalUrl = params.toString() ? `${baseUrl}?${params.toString()}` : baseUrl;
+    previewEl.textContent = finalUrl;
+  }
+
+  /**
+   * Copy the shareable URL to clipboard.
+   */
+  function shareCopyUrl() {
+    const previewEl = document.getElementById("share-url-preview");
+    const url = previewEl.textContent;
+    
+    navigator.clipboard.writeText(url).then(() => {
+      const button = document.querySelector("#share-dialog .copy-button");
+      const originalText = button.textContent;
+      button.textContent = window.i18n.get("share-dialog-url-copied");
+      
+      setTimeout(() => {
+        button.textContent = originalText;
+      }, 2000);
+    });
+  }
+
+  /**
    * Toggle the navigation drawer.
    */
   function navToggle() {
@@ -274,6 +336,103 @@ var hyperbook = (function () {
     initBookmarks(root);
   }
 
+  /**
+   * Hide TOC toggle button when sections are filtered
+   */
+  function hideTocWhenFiltered() {
+    const tocToggle = document.getElementById('toc-toggle');
+    
+    if (tocToggle) {
+      tocToggle.style.display = 'none';
+    }
+  }
+
+  // Filter sections based on query parameter
+  function filterSections() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const sectionsParam = urlParams.get('sections');
+    
+    if (!sectionsParam) {
+      return; // No filtering needed
+    }
+    
+    // Parse sections parameter (comma-separated list of IDs)
+    const sectionIds = sectionsParam.split(',').map(id => id.trim()).filter(id => id);
+    
+    if (sectionIds.length === 0) {
+      return; // No valid IDs provided
+    }
+    
+    // Get all headings in the document
+    const allHeadings = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
+    const headingsArray = Array.from(allHeadings);
+    
+    // Build a map of which elements should be visible
+    const visibleElements = new Set();
+    
+    sectionIds.forEach(sectionId => {
+      // Find the heading with this ID
+      const heading = document.getElementById(sectionId);
+      if (!heading) {
+        return; // ID not found
+      }
+      
+      // Get the heading level (h1 = 1, h2 = 2, etc.)
+      const headingLevel = parseInt(heading.tagName.substring(1));
+      
+      // Mark this heading as visible
+      visibleElements.add(heading);
+      
+      // Find the index of this heading
+      const headingIndex = headingsArray.indexOf(heading);
+      if (headingIndex === -1) {
+        return;
+      }
+      
+      // Collect all elements until the next heading of the same or higher level
+      let currentElement = heading.nextElementSibling;
+      
+      while (currentElement) {
+        // Check if this is a heading
+        const isHeading = /^H[1-6]$/.test(currentElement.tagName);
+        
+        if (isHeading) {
+          const currentLevel = parseInt(currentElement.tagName.substring(1));
+          
+          // Stop if we hit a heading of the same or higher level (lower number)
+          if (currentLevel <= headingLevel) {
+            break;
+          }
+          
+          // Include lower-level headings (subsections)
+          visibleElements.add(currentElement);
+        } else {
+          // Include non-heading elements
+          visibleElements.add(currentElement);
+        }
+        
+        currentElement = currentElement.nextElementSibling;
+      }
+    });
+    
+    // Hide all elements that are not in visibleElements
+    const markdownDiv = document.querySelector('main article .hyperbook-markdown');
+    if (markdownDiv) {
+      Array.from(markdownDiv.children).forEach(element => {
+        // Don't hide UI elements (floating buttons container, side drawers)
+        const isUIElement = element.id === 'floating-buttons-container' || 
+                           element.tagName === 'SIDE-DRAWER';
+        
+        if (!visibleElements.has(element) && !isUIElement) {
+          element.style.display = 'none';
+        }
+      });
+      
+      // Hide TOC toggle when sections are filtered
+      hideTocWhenFiltered();
+    }
+  }
+
   // Check for standalone layout URL parameter or iframe context
   function checkStandaloneMode() {
     // Check if explicitly requested via URL parameter
@@ -307,6 +466,7 @@ var hyperbook = (function () {
   document.addEventListener("DOMContentLoaded", () => {
     init(document);
     checkStandaloneMode();
+    filterSections();
   });
 
   // Observe for new elements added to the DOM
@@ -332,6 +492,10 @@ var hyperbook = (function () {
     search,
     qrcodeOpen,
     qrcodeClose,
+    shareOpen,
+    shareClose,
+    shareUpdatePreview,
+    shareCopyUrl,
     init,
   };
 })();

@@ -43,6 +43,7 @@ import remarkDirectiveTerm from "./remarkDirectiveTerm";
 import remarkLink from "./remarkLink";
 import remarkDirectivePagelist from "./remarkDirectivePagelist";
 import rehypeQrCode from "./rehypeQrCode";
+import rehypeShareDialog from "./rehypeShareDialog";
 import rehypeDirectiveP5 from "./rehypeDirectiveP5";
 import remarkCollectSearchDocuments from "./remarkCollectSearchDocuments";
 import remarkDirectiveGeogebra from "./remarkDirectiveGeogebra";
@@ -143,6 +144,7 @@ export const process = (md: string, ctx: HyperbookContext) => {
     rehypeUnwrapImages,
     rehypeTableOfContents(ctx),
     rehypeQrCode(ctx),
+    rehypeShareDialog(ctx),
     rehypeKatex,
     rehypeDirectiveP5(ctx),
     [

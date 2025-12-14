@@ -2,7 +2,8 @@
 
 exports[`remarkTableOfContents > should generate toc 1`] = `
 "
-<div class="hyperbook-markdown"><button id="toc-toggle" onclick="hyperbook.tocToggle()" title="table-of-contents"><div class="bar1"></div><div class="bar2"></div><div class="bar3"></div><div class="bar4"></div></button>
+<div class="hyperbook-markdown">
+  <div class="floating-buttons-container" id="floating-buttons-container"><button id="toc-toggle" onclick="hyperbook.tocToggle()" title="table-of-contents"><div class="bar1"></div><div class="bar2"></div><div class="bar3"></div><div class="bar4"></div></button></div>
   <side-drawer id="toc-drawer" right>
     <div class="toc-drawer-content">
       <nav class="toc">

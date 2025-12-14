@@ -469,11 +469,15 @@ figure {
   text-decoration: underline;
 }
 
-.hyperbook-markdown #qrcode-dialog {
+#qrcode-dialog {
   background: var(--color-background);
   border: 1px solid var(--color-brand);
   width: 100%;
   height: 100%;
+}
+
+#qrcode-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.5);
 }
 
 #qrcode-dialog .container {
@@ -524,13 +528,13 @@ figure {
   background-color: var(--color-brand);
 }
 
-.hyperbook-markdown #qrcode-dialog .make-qrcode {
+#qrcode-dialog .make-qrcode {
   width: 100%;
   max-width: 512px;
   margin: 0 auto;
 }
 
-.hyperbook-markdown #qrcode-dialog svg {
+#qrcode-dialog svg {
   width: 100%;
 }
 
@@ -548,23 +552,25 @@ figure {
   mask-image: url('data:image/svg+xml,<svg width="32px" height="32px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 9h6V3H3zm1-5h4v4H4zm1 1h2v2H5zm10 4h6V3h-6zm1-5h4v4h-4zm1 1h2v2h-2zM3 21h6v-6H3zm1-5h4v4H4zm1 1h2v2H5zm15 2h1v2h-2v-3h1zm0-3h1v1h-1zm0-1v1h-1v-1zm-10 2h1v4h-1v-4zm-4-7v2H4v-1H3v-1h3zm4-3h1v1h-1zm3-3v2h-1V3h2v1zm-3 0h1v1h-1zm10 8h1v2h-2v-1h1zm-1-2v1h-2v2h-2v-1h1v-2h3zm-7 4h-1v-1h-1v-1h2v2zm6 2h1v1h-1zm2-5v1h-1v-1zm-9 3v1h-1v-1zm6 5h1v2h-2v-2zm-3 0h1v1h-1v1h-2v-1h1v-1zm0-1v-1h2v1zm0-5h1v3h-1v1h-1v1h-1v-2h-1v-1h3v-1h-1v-1zm-9 0v1H4v-1zm12 4h-1v-1h1zm1-2h-2v-1h2zM8 10h1v1H8v1h1v2H8v-1H7v1H6v-2h1v-2zm3 0V8h3v3h-2v-1h1V9h-1v1zm0-4h1v1h-1zm-1 4h1v1h-1zm3-3V6h1v1z"/><path fill="none" d="M0 0h24v24H0z"/></svg>');
 }
 
-.hyperbook-markdown #toc-toggle,
-.hyperbook-markdown #qrcode-open {
+.floating-buttons-container {
   position: fixed;
-  padding: 4px;
   top: 90px;
   right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 1000;
+}
+
+#toc-toggle,
+#qrcode-open {
+  padding: 4px;
   border-radius: 50%;
   height: 40px;
   width: 40px;
   border-style: solid;
   border-width: 1px;
   opacity: 0.7;
-  z-index: 1000;
-}
-
-.hyperbook-markdown #qrcode-open {
-  top: 140px;
 }
 
 .hyperbook-markdown #toc-toggle:hover,
@@ -586,4 +592,190 @@ figure {
   height: 2px;
   margin: 2px 3px;
   transition: 0.4s;
+}
+
+/* Share button and dialog styles */
+#share-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  margin-right: 16px;
+  padding: 8px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#share-button:hover {
+  opacity: 0.8;
+}
+
+.share-icon {
+  background-color: var(--color-brand-text);
+  width: 24px;
+  height: 24px;
+  mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>');
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
+}
+
+header.inverted .share-icon {
+  background-color: var(--color-brand);
+}
+
+#share-dialog {
+  background: var(--color-background);
+  border: 1px solid var(--color-brand);
+  max-width: 600px;
+  max-height: 80vh;
+  padding: 0;
+  color: var(--color-text);
+}
+
+#share-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+#share-dialog .container {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-height: calc(80vh - 48px);
+  overflow-y: auto;
+}
+
+#share-dialog .title {
+  color: var(--color-text);
+  font-size: 1.5rem;
+  margin: 0;
+}
+
+#share-dialog .standalone-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-text);
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 8px;
+  background: var(--color-nav);
+  border-radius: 4px;
+}
+
+#share-dialog .sections-title {
+  color: var(--color-text);
+  font-size: 1.1rem;
+  margin: 8px 0 4px 0;
+}
+
+#share-dialog .sections-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid var(--color-spacer);
+  border-radius: 4px;
+  padding: 8px;
+}
+
+#share-dialog .heading-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-text);
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+#share-dialog .heading-item:hover {
+  background: var(--color-nav);
+}
+
+#share-dialog .heading-item.level-1 {
+  font-weight: bold;
+  padding-left: 8px;
+}
+
+#share-dialog .heading-item.level-2 {
+  padding-left: 24px;
+}
+
+#share-dialog .heading-item.level-3 {
+  padding-left: 40px;
+  font-size: 0.95rem;
+}
+
+#share-dialog .heading-item.level-4 {
+  padding-left: 56px;
+  font-size: 0.9rem;
+}
+
+#share-dialog .heading-item.level-5 {
+  padding-left: 72px;
+  font-size: 0.85rem;
+}
+
+#share-dialog .heading-item.level-6 {
+  padding-left: 88px;
+  font-size: 0.8rem;
+}
+
+#share-dialog .url-preview {
+  background: var(--color-nav);
+  color: var(--color-text);
+  padding: 12px;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 0.9rem;
+  word-break: break-all;
+  min-height: 40px;
+}
+
+#share-dialog .copy-button {
+  background: var(--color-brand);
+  color: var(--color-brand-text);
+  border: none;
+  padding: 12px 24px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: bold;
+  transition: opacity 0.2s;
+}
+
+#share-dialog .copy-button:hover {
+  opacity: 0.9;
+}
+
+#share-dialog .close {
+  background: none;
+  border: none;
+  font-size: 2rem;
+  color: var(--color-text);
+  cursor: pointer;
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 8px;
+}
+
+#share-dialog .close:hover .close-icon {
+  background-color: var(--color-brand);
+}
+
+#share-dialog .close .close-icon {
+  background-color: var(--color-text);
+  width: 32px;
+  height: 32px;
+  mask-image: url('data:image/svg+xml,<svg width="32px" height="32px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M5.29289 5.29289C5.68342 4.90237 6.31658 4.90237 6.70711 5.29289L12 10.5858L17.2929 5.29289C17.6834 4.90237 18.3166 4.90237 18.7071 5.29289C19.0976 5.68342 19.0976 6.31658 18.7071 6.70711L13.4142 12L18.7071 17.2929C19.0976 17.6834 19.0976 18.3166 18.7071 18.7071C18.3166 19.0976 17.6834 19.0976 17.2929 18.7071L12 13.4142L6.70711 18.7071C6.31658 19.0976 5.68342 19.0976 5.29289 18.7071C4.90237 18.3166 4.90237 17.6834 5.29289 17.2929L10.5858 12L5.29289 6.70711C4.90237 6.31658 4.90237 5.68342 5.29289 5.29289Z" fill="%230F1729"/></svg>');
 }
