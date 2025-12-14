@@ -964,6 +964,8 @@ var multievent = {
     }
 
     SK[clNr].style.display = "block";
+    SK[clNr].style.visibility = "visible";
+    SK[clNr].style.opacity = "1";
     
     // Add event listeners to save state on changes
     var allInputs = SK[clNr].getElementsByTagName("input");

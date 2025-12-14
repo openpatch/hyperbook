@@ -26,6 +26,7 @@ export default (ctx: HyperbookContext) => () => {
         data.hName = "div";
         data.hProperties = {
           class: "directive-multievent multievent",
+          style: "visibility: hidden; opacity: 0;",
         };
       }
     });

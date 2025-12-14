@@ -54,6 +54,13 @@ Add shareable URL builder with sections filter
 - Floating action buttons (TOC, QR code) now use dynamic flexbox positioning
 - Both share and QR dialogs moved outside content area to remain visible when filtering
 
+
+:::
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+- Multievent is hidden on page load and gets shown when the javascript is loaded, thus not revealing the solutions.
+
 :::
 
 ::::
