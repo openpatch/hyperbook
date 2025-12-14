@@ -1,5 +1,23 @@
 # @hyperbook/markdown
 
+## 0.44.0
+
+### Minor Changes
+
+- [`28ec20e`](https://github.com/openpatch/hyperbook/commit/28ec20ee0da8d31ca166023b9fc645c047bb0a1a) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add shareable URL builder with sections filter
+
+  - Added share button (🔗 icon) in header that opens a dialog for creating shareable URLs
+  - Implemented sections filter query parameter to show only specific content sections
+  - Added live URL preview with standalone mode toggle and section selection checkboxes
+  - QR code now includes all query parameters in the generated code
+  - TOC toggle hides automatically when sections are filtered
+  - Floating action buttons (TOC, QR code) now use dynamic flexbox positioning
+  - Both share and QR dialogs moved outside content area to remain visible when filtering
+
+### Patch Changes
+
+- [`5c6def7`](https://github.com/openpatch/hyperbook/commit/5c6def7d6a740fac7a0dc75b1172fd71b1de57c9) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Hide multieventy element on page load to not reveal the solutions.
+
 ## 0.43.5
 
 ### Patch Changes
