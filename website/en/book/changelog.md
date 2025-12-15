@@ -38,6 +38,24 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.72.1
+
+::::tabs
+
+:::tab{title="Improved :+1:" id="improved"}
+
+Performance optimizations
+
+- Added `font-display: swap` to all font-face declarations for better page load performance
+- Added `defer` attribute to script tags to improve page load speed
+- Minified dexie-export-import.js bundle to reduce file size
+- Added explicit height attribute to logo image for better CLS scores
+
+:::
+
+::::
+
+
 ## v0.72.0
 
 ::::tabs
@@ -53,7 +71,6 @@ Add shareable URL builder with sections filter
 - TOC toggle hides automatically when sections are filtered
 - Floating action buttons (TOC, QR code) now use dynamic flexbox positioning
 - Both share and QR dialogs moved outside content area to remain visible when filtering
-
 
 :::
 

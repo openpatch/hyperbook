@@ -1,5 +1,6 @@
 import path from "path";
-import { cp } from "fs/promises";
+import { cp, readFile, writeFile } from "fs/promises";
+import { minify } from "terser";
 
 async function postbuild() {
   const assets = [
@@ -15,6 +16,7 @@ async function postbuild() {
         "dexie-export-import.js",
       ),
       dst: path.join("./dist", "assets", "dexie-export-import.js"),
+      minify: true,
     },
     {
       src: path.join("./node_modules", "mermaid", "dist", "mermaid.min.js"),
@@ -223,7 +225,16 @@ async function postbuild() {
   ];
 
   for (let asset of assets) {
-    await cp(asset.src, asset.dst, { recursive: true });
+    if (asset.minify) {
+      const code = await readFile(asset.src, "utf8");
+      const result = await minify(code, {
+        compress: true,
+        mangle: true,
+      });
+      await writeFile(asset.dst, result.code);
+    } else {
+      await cp(asset.src, asset.dst, { recursive: true });
+    }
   }
 
   await cp("locales", "./dist/locales", { recursive: true });

@@ -100,6 +100,7 @@
     "node-fetch": "^3.3.2",
     "p5": "^2.1.1",
     "scratchblocks": "^3.6.4",
+    "terser": "^5.44.1",
     "vfile": "^6.0.3",
     "vitest": "^3.0.5",
     "wavesurfer.js": "^7.11.1"

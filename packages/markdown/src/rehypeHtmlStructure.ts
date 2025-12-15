@@ -107,11 +107,13 @@ body::-webkit-scrollbar {
   font-family: hyperbook-heading;
   src: url(${makeUrl(parseFont(font)[0], "public")});
   size-adjust: ${parseFont(font)[1]};
+  font-display: swap;
 }
 @font-face {
   font-family: hyperbook-body;
   src: url(${makeUrl(parseFont(font)[0], "public")});
   size-adjust: ${parseFont(font)[1]};
+  font-display: swap;
 }
 `;
   }
@@ -121,6 +123,7 @@ body::-webkit-scrollbar {
   font-family: hyperbook-body;
   src: url(${makeUrl(parseFont(fonts.body)[0], "public")});
   size-adjust: ${parseFont(fonts.body)[1]};
+  font-display: swap;
 }
 `;
   }
@@ -130,6 +133,7 @@ body::-webkit-scrollbar {
   font-family: hyperbook-heading;
   src: url(${makeUrl(parseFont(fonts.heading)[0], "public")});
   size-adjust: ${parseFont(fonts.heading)[1]};
+  font-display: swap;
 }
 `;
   }
@@ -140,6 +144,7 @@ body::-webkit-scrollbar {
   font-family: hyperbook-code;
   src: url(${makeUrl(parseFont(fonts.code)[0], "public")});
   size-adjust: ${parseFont(fonts.code)[1]};
+  font-display: swap;
 }
 `;
   }
@@ -363,6 +368,7 @@ export default (ctx: HyperbookContext) => () => {
                 tagName: "script",
                 properties: {
                   src: makeUrl(["i18n.js"], "assets"),
+                  defer: true,
                 },
                 children: [],
               },
@@ -371,6 +377,7 @@ export default (ctx: HyperbookContext) => () => {
                 tagName: "script",
                 properties: {
                   src: makeUrl(["dexie.min.js"], "assets"),
+                  defer: true,
                 },
                 children: [],
               },
@@ -379,6 +386,7 @@ export default (ctx: HyperbookContext) => () => {
                 tagName: "script",
                 properties: {
                   src: makeUrl(["dexie-export-import.js"], "assets"),
+                  defer: true,
                 },
                 children: [],
               },
@@ -387,6 +395,7 @@ export default (ctx: HyperbookContext) => () => {
                 tagName: "script",
                 properties: {
                   src: makeUrl(["store.js"], "assets"),
+                  defer: true,
                 },
                 children: [],
               },
@@ -408,6 +417,7 @@ window.Prism.manual = true;`,
                 tagName: "script",
                 properties: {
                   src: makeUrl(["prism", "prism.js"], "assets"),
+                  defer: true,
                 },
                 children: [],
               },

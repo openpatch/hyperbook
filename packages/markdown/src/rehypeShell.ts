@@ -479,6 +479,7 @@ const makeHeaderElements = (ctx: HyperbookContext): ElementContent[] => {
           properties: {
             alt: "logo",
             src: ctx.makeUrl(ctx.config.logo, "public"),
+            height: "40",
           },
           children: [],
         },
