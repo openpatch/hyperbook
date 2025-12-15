@@ -1,5 +1,16 @@
 # hyperbook
 
+## 0.72.1
+
+### Patch Changes
+
+- [`d2b1c7c`](https://github.com/openpatch/hyperbook/commit/d2b1c7c453c8c81486727aa8b2f07cb0f0d268ef) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Performance and optimization improvements
+
+  - Added `font-display: swap` to all font-face declarations for better page load performance
+  - Added `defer` attribute to script tags to improve page load speed
+  - Minified dexie-export-import.js bundle to reduce file size
+  - Added explicit height attribute to logo image for better CLS scores
+
 ## 0.72.0
 
 ### Minor Changes
