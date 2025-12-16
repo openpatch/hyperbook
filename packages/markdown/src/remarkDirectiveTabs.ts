@@ -55,6 +55,10 @@ export default function (ctx: HyperbookContext) {
             tabsId = hash(node);
           }
 
+          // Generate a unique instance ID for this specific tab group
+          // This ensures radio button names are unique per instance
+          const instanceId = hash(node);
+
           registerDirective(
             file,
             "tabs",
@@ -89,10 +93,30 @@ export default function (ctx: HyperbookContext) {
               hastTree = hastTree.children[0];
               hastTree.tagName = "span";
             }
+
+            // Add hidden radio input for CSS-only tab switching
+            // Use instanceId for unique radio names, tabsId for syncing across instances
             tabTitleElements.push({
               type: "element",
-              tagName: "button",
+              tagName: "input",
               properties: {
+                type: "radio",
+                name: `tabs-${instanceId}`,
+                id: `tab-${instanceId}-${tabId}`,
+                "data-tab-id": tabId,
+                "data-tabs-id": tabsId,
+                class: "tab-input",
+                checked: first,
+              },
+              children: [],
+            });
+
+            // Add label that acts as the tab button
+            tabTitleElements.push({
+              type: "element",
+              tagName: "label",
+              properties: {
+                for: `tab-${instanceId}-${tabId}`,
                 "data-tab-id": tabId,
                 "data-tabs-id": tabsId,
                 class: "tab" + (first ? " active" : ""),
@@ -115,7 +139,17 @@ export default function (ctx: HyperbookContext) {
             first = false;
           }
 
+          // Separate radio inputs from labels
+          const radioInputs: Element[] = [];
+          const labelElements: Element[] = [];
+          
+          for (let i = 0; i < tabTitleElements.length; i += 2) {
+            radioInputs.push(tabTitleElements[i]); // inputs
+            labelElements.push(tabTitleElements[i + 1]); // labels
+          }
+
           data.hChildren = [
+            ...radioInputs, // Radio inputs as direct children
             {
               type: "element",
               tagName: "div",
@@ -123,7 +157,7 @@ export default function (ctx: HyperbookContext) {
                 class: "tabs",
                 "data-tabs-id": tabsId,
               },
-              children: tabTitleElements,
+              children: labelElements, // Only labels in tabs div
             },
             ...tabContentElements,
           ];

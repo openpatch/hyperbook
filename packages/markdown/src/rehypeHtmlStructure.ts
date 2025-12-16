@@ -197,6 +197,7 @@ export default (ctx: HyperbookContext) => () => {
         tagName: "html",
         properties: {
           lang: config.language || "es",
+          class: "no-js",
         },
         children: [
           {
@@ -340,6 +341,19 @@ export default (ctx: HyperbookContext) => () => {
                       media: "(prefers-color-scheme: dark)",
                     },
                     children: [],
+                  },
+                ],
+              },
+              {
+                type: "element",
+                tagName: "script",
+                properties: {},
+                children: [
+                  {
+                    type: "raw",
+                    value: `
+// Remove no-js class as soon as JavaScript is available
+document.documentElement.classList.remove('no-js');`,
                   },
                 ],
               },

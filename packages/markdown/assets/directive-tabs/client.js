@@ -1,41 +1,45 @@
 hyperbook.tabs = (function () {
   const init = (root) => {
-    let allTabs = root.querySelectorAll(".directive-tabs .tab[data-tabs-id]");
-    allTabs.forEach((tab) => {
-      const tabsId = tab.getAttribute("data-tabs-id");
-      const tabId = tab.getAttribute("data-tab-id");
-      tab.addEventListener("click", () => {
-        store.tabs.put({
-          id: tabsId,
-          active: tabId,
-        });
-        selectTab(tabsId, tabId);
+    // Find all radio inputs for tabs
+    let allTabInputs = root.querySelectorAll(".directive-tabs .tab-input[data-tabs-id]");
+    allTabInputs.forEach((input) => {
+      const tabsId = input.getAttribute("data-tabs-id");
+      const tabId = input.getAttribute("data-tab-id");
+      
+      // Listen for changes on radio inputs
+      input.addEventListener("change", () => {
+        if (input.checked) {
+          store.tabs.put({
+            id: tabsId,
+            active: tabId,
+          });
+          
+          // Sync all radio inputs with the same tabs-id and tab-id
+          syncAllTabs(tabsId, tabId);
+        }
       });
     });
+    
+    // Restore saved tab selections
     store.tabs.each((result) => {
       selectTab(result.id, result.active);
     });
   };
 
+  function syncAllTabs(tabsId, tabId) {
+    // Find all radio inputs with the same tabs-id and tab-id across the page
+    const allMatchingInputs = document.querySelectorAll(
+      `.directive-tabs .tab-input[data-tabs-id="${tabsId}"][data-tab-id="${tabId}"]`
+    );
+    
+    allMatchingInputs.forEach((input) => {
+      input.checked = true;
+    });
+  }
+
   function selectTab(tabsId, tabId) {
-    let relevantTabButtons = document.querySelectorAll(
-      `.directive-tabs .tab[data-tabs-id="${tabsId}"]`
-    );
-    relevantTabButtons.forEach((e) => {
-      e.className = e.className.replace(" active", "");
-      if (e.getAttribute("data-tab-id") == tabId) {
-        e.className += " active";
-      }
-    });
-    let relevantTabPanels = document.querySelectorAll(
-      `.directive-tabs .tabpanel[data-tabs-id="${tabsId}"]`
-    );
-    relevantTabPanels.forEach((e) => {
-      e.className = e.className.replace(" active", "");
-      if (e.getAttribute("data-tab-id") == tabId) {
-        e.className += " active";
-      }
-    });
+    // Sync all tabs with this combination
+    syncAllTabs(tabsId, tabId);
   }
 
   init(document.body);

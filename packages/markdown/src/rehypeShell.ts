@@ -43,71 +43,8 @@ const makeNavigationSectionElement = (
   section: HyperbookSection,
 ): ElementContent => {
   const { virtual, isEmpty, href, name, pages, sections, expanded } = section;
-  const children: ElementContent[] = [];
   let isExpanded =
     ctx.navigation.current?.href?.startsWith(href || "") || expanded;
-
-  if (!virtual) {
-    if (isEmpty) {
-      children.push({
-        type: "element",
-        tagName: "div",
-        properties: {
-          class: [
-            "collapsible",
-            "name",
-            "empty",
-            ctx.navigation.current?.href === href ? "active" : "",
-            isExpanded ? "expanded" : "",
-          ].join(" "),
-        },
-        children: [
-          {
-            type: "element",
-            tagName: "span",
-            properties: {
-              class: "label",
-            },
-            children: [
-              {
-                type: "text",
-                value: name,
-              },
-            ],
-          },
-        ],
-      });
-    } else {
-      children.push({
-        type: "element",
-        tagName: "div",
-        properties: {
-          class: [
-            "collapsible",
-            "name",
-            ctx.navigation.current?.href === href ? "active" : "",
-            isExpanded ? "expanded" : "",
-          ].join(" "),
-        },
-        children: [
-          {
-            type: "element",
-            tagName: "a",
-            properties: {
-              href: ctx.makeUrl(href || "", "book"),
-              class: "label",
-            },
-            children: [
-              {
-                type: "text",
-                value: name,
-              },
-            ],
-          },
-        ],
-      });
-    }
-  }
 
   const pagesElements: ElementContent[] = pages
     .filter((page) => !page.hide)
@@ -130,22 +67,91 @@ const makeNavigationSectionElement = (
     .map((s) => makeNavigationSectionElement(ctx, s));
   linksElements.push(...sectionElements);
 
-  children.push({
-    type: "element",
-    tagName: "div",
-    properties: {
-      class: virtual ? "links" : "collapsible-content links",
-    },
-    children: linksElements,
-  });
+  // For virtual sections, just render the links without a container
+  if (virtual) {
+    return {
+      type: "element",
+      tagName: "div",
+      properties: {
+        class: "virtual-section",
+      },
+      children: [
+        {
+          type: "element",
+          tagName: "div",
+          properties: {
+            class: "links",
+          },
+          children: linksElements,
+        },
+      ],
+    };
+  }
+
+  // Use native <details> element for collapsible sections
+  const summaryChildren: ElementContent[] = [];
+  
+  if (isEmpty) {
+    summaryChildren.push({
+      type: "element",
+      tagName: "span",
+      properties: {
+        class: "label",
+      },
+      children: [
+        {
+          type: "text",
+          value: name,
+        },
+      ],
+    });
+  } else {
+    summaryChildren.push({
+      type: "element",
+      tagName: "a",
+      properties: {
+        href: ctx.makeUrl(href || "", "book"),
+        class: "label",
+      },
+      children: [
+        {
+          type: "text",
+          value: name,
+        },
+      ],
+    });
+  }
+
   return {
     type: "element",
-    tagName: "div",
+    tagName: "details",
     properties: {
       "data-id": `_nav:${href}`,
-      class: virtual ? "virtual-section" : "section",
+      class: [
+        "section",
+        ctx.navigation.current?.href === href ? "active" : "",
+        isEmpty ? "empty" : "",
+      ].join(" "),
+      open: isExpanded,
     },
-    children,
+    children: [
+      {
+        type: "element",
+        tagName: "summary",
+        properties: {
+          class: "name",
+        },
+        children: summaryChildren,
+      },
+      {
+        type: "element",
+        tagName: "div",
+        properties: {
+          class: "links",
+        },
+        children: linksElements,
+      },
+    ],
   };
 };
 

@@ -4,34 +4,39 @@ var hyperbook = (function () {
    * @param {HTMLElement} root - The root element to initialize.
    */
   const initCollapsibles = (root) => {
-    const collapsibleEls = root.getElementsByClassName("collapsible");
-    for (let collapsible of collapsibleEls) {
-      const id = collapsible.parentElement.getAttribute("data-id");
+    // Handle both navigation sections and directive-collapsible elements
+    const detailsEls = root.querySelectorAll("details.section, details.directive-collapsible");
+    for (let details of detailsEls) {
+      const id = details.getAttribute("data-id");
 
-      if (id.startsWith("_nav:") && !collapsible.classList.contains("empty")) {
-        const link = collapsible.querySelector("a");
+      // Prevent link clicks from toggling the details element in navigation
+      if (id && id.startsWith("_nav:") && !details.classList.contains("empty")) {
+        const link = details.querySelector("summary a");
         link?.addEventListener("click", (event) => {
           event.stopPropagation();
         });
       }
-      collapsible.addEventListener("click", () => {
-        collapsible.classList.toggle("expanded");
+
+      // Listen for toggle events to persist state and sync with other elements
+      details.addEventListener("toggle", () => {
         if (id) {
-          store.collapsibles.get(id).then((result) => {
-            if (!result) {
-              store.collapsibles.put({ id }).then(() => {
-                updateCollapsibles(root);
-              });
-            } else {
-              store.collapsibles.delete(id).then(() => {
-                updateCollapsibles(root);
-              });
+          if (details.open) {
+            store.collapsibles.put({ id });
+          } else {
+            store.collapsibles.delete(id);
+          }
+
+          // Sync all elements with the same ID
+          const allWithSameId = document.querySelectorAll(`[data-id="${id}"]`);
+          for (let el of allWithSameId) {
+            if (el !== details && el.tagName === "DETAILS") {
+              el.open = details.open;
             }
-          });
+          }
         }
 
         setTimeout(() => {
-          window.dispatchEvent(new Event("resize")); // geogebra new this in order resize the applet
+          window.dispatchEvent(new Event("resize")); // geogebra needs this to resize the applet
         }, 100);
       });
     }
@@ -43,15 +48,15 @@ var hyperbook = (function () {
    */
   const updateCollapsibles = (root) => {
     store.collapsibles.toArray().then((collapsibles) => {
-      const collapsibleEls = root.getElementsByClassName("collapsible");
-      for (let collapsibleEl of collapsibleEls) {
-        const id = collapsibleEl.parentElement.getAttribute("data-id");
+      const detailsEls = root.querySelectorAll("details.section, details.directive-collapsible");
+      for (let details of detailsEls) {
+        const id = details.getAttribute("data-id");
         if (id) {
-          const expanded = collapsibles.some((c) => c.id === id);
-          if (expanded) {
-            collapsibleEl.classList.add("expanded");
-          } else if (!id.startsWith("_nav:")) {
-            collapsibleEl.classList.remove("expanded");
+          const shouldBeOpen = collapsibles.some((c) => c.id === id);
+          // Only update if state differs and it's not a navigation section
+          // (navigation sections are auto-expanded based on current page)
+          if (!id.startsWith("_nav:") && details.open !== shouldBeOpen) {
+            details.open = shouldBeOpen;
           }
         }
       }

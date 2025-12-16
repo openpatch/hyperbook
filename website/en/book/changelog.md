@@ -38,6 +38,35 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.73.0
+
+::::tabs
+
+:::tab{title="Improved :+1:" id="improved"}
+
+**Improved Accessibility and No-JavaScript Support**
+
+Your Hyperbook now works even when JavaScript is disabled or unavailable, making it more accessible and reliable.
+
+**What's New**
+- Navigation, collapsibles, and tabs now work without JavaScript
+- Cleaner interface when JavaScript is disabled - unnecessary buttons are hidden
+- Improved keyboard navigation throughout the site
+- Better compatibility with screen readers and assistive technologies
+
+**Benefits for Your Readers**
+- ✅ Content always accessible, even with JavaScript disabled
+- ✅ Better experience for users with slow connections
+- ✅ Improved SEO - search engines can see all your content
+- ✅ Enhanced accessibility for users with disabilities
+- ✅ Faster initial page load
+- ✅ More reliable navigation
+
+:::
+
+::::
+
+
 ## v0.72.1
 
 ::::tabs

@@ -27,10 +27,8 @@ export default (ctx: HyperbookContext) => () => {
       return [
         {
           type: "element",
-          tagName: "button",
-          properties: {
-            class: "collapsible",
-          },
+          tagName: "summary",
+          properties: {},
           children: [
             {
               type: "text",
@@ -42,7 +40,7 @@ export default (ctx: HyperbookContext) => () => {
           type: "element",
           tagName: "div",
           properties: {
-            class: "collapsible-content",
+            class: "content",
           },
           children: element.children.flatMap(transformCollapsible),
         },
@@ -75,7 +73,7 @@ export default (ctx: HyperbookContext) => () => {
       registerDirective(file, name, [], ["style.css"], []);
 
       node.attributes = {};
-      data.hName = "div";
+      data.hName = "details";
       data.hProperties = {
         class: "directive-collapsible",
         "data-id": id,
@@ -90,10 +88,8 @@ export default (ctx: HyperbookContext) => () => {
       data.hChildren = [
         {
           type: "element",
-          tagName: "button",
-          properties: {
-            class: "collapsible",
-          },
+          tagName: "summary",
+          properties: {},
           children: [
             {
               type: "text",
@@ -105,7 +101,7 @@ export default (ctx: HyperbookContext) => () => {
           type: "element",
           tagName: "div",
           properties: {
-            class: "collapsible-content",
+            class: "content",
           },
           children: collapsibleContent,
         },

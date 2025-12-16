@@ -33,6 +33,43 @@ side-drawer {
   width: 500px;
 }
 
+/* Hide side-drawer when JavaScript is disabled */
+.no-js side-drawer {
+  display: none;
+}
+
+/* Hide mobile nav toggle when JavaScript is disabled */
+.no-js .mobile-nav .toggle {
+  display: none;
+}
+
+/* Hide TOC toggle when JavaScript is disabled */
+.no-js #toc-toggle {
+  display: none;
+}
+
+/* Hide search button when JavaScript is disabled */
+.no-js #search-toggle {
+  display: none;
+}
+
+/* Hide share button when JavaScript is disabled */
+.no-js #share-button {
+  display: none;
+}
+
+/* Hide QR code button when JavaScript is disabled */
+.no-js #qrcode-open {
+  display: none;
+}
+
+/* Hide export/import/reset links when JavaScript is disabled */
+.no-js .export-icon,
+.no-js .import-icon,
+.no-js .reset-icon {
+  display: none;
+}
+
 #nav-drawer {
   background: var(--color-nav);
   border-right-color: var(--color-nav-border);
@@ -588,7 +625,7 @@ nav li+li {
   margin-top: 4px;
 }
 
-.section>.name {
+.section summary.name {
   display: flex;
   text-decoration: none;
   padding: 10px;
@@ -596,46 +633,42 @@ nav li+li {
   border-style: solid;
   width: 100%;
   user-select: none;
+  cursor: pointer;
+  list-style: none;
 }
 
-.section>.name>.label {
+.section summary.name::-webkit-details-marker {
+  display: none;
+}
+
+.section summary.name::marker {
+  display: none;
+}
+
+.section summary.name>.label {
   flex: 1;
   text-decoration: none;
 }
 
-.section>.name>.toggle {
-  text-align: right;
-  background: none;
-  border: none;
-  font-size: 13px;
+.section.empty summary.name {
+  cursor: default;
 }
 
-.collapsible {
-  cursor: pointer;
+.section.empty summary.name .label {
+  font-style: italic;
 }
 
-.collapsible:after {
+.section summary.name:after {
   content: "\002B";
   width: 1.2rem;
   color: var(--color-text);
   font-weight: bold;
   text-align: right;
-  float: right;
   margin-left: 5px;
 }
 
-.collapsible.expanded:after {
+.section[open] summary.name:after {
   content: "\2212";
-}
-
-.collapsible-content {
-  display: none;
-  opacity: 0;
-}
-
-.collapsible.expanded+.collapsible-content {
-  display: block;
-  opacity: 1;
 }
 
 .section .section {

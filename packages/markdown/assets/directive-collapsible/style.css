@@ -2,7 +2,7 @@
   display: flow-root;
 }
 
-.directive-collapsible>button {
+.directive-collapsible>summary {
   width: 100%;
   text-align: left;
   border-style: solid;
@@ -13,37 +13,46 @@
   padding: 8px 16px;
   border-radius: 4px;
   margin-bottom: 10px;
+  list-style: none;
+  color: var(--color-text);
+  border-color: var(--color-spacer);
+  background-color: var(--color-nav);
 }
 
-.directive-collapsible>button.expanded {
+.directive-collapsible>summary::-webkit-details-marker {
+  display: none;
+}
+
+.directive-collapsible>summary::marker {
+  display: none;
+}
+
+.directive-collapsible[open]>summary {
   border-bottom-left-radius: 0px;
   border-bottom-right-radius: 0px;
   margin-bottom: 0px;
 }
 
-.directive-collapsible>button:after {
+.directive-collapsible>summary:after {
   content: "\02795";
   /* Unicode character for "plus" sign (+) */
   font-size: 13px;
   float: right;
   margin-left: 5px;
+  color: var(--color-text);
 }
 
-.directive-collapsible>button.expanded:after {
+.directive-collapsible[open]>summary:after {
   content: "\2796";
   /* Unicode character for "minus" sign (-) */
 }
 
-.directive-collapsible .collapsible-content {
+.directive-collapsible .content {
   border-top: none;
   margin-bottom: 10px;
 }
 
-.directive-collapsible .collapsible-content {
-  display: none;
-}
-
-.directive-collapsible>button.expanded+.collapsible-content {
+.directive-collapsible[open] .content {
   display: block;
   border-style: solid;
   border-width: 1px;
@@ -53,18 +62,5 @@
   margin-bottom: 10px;
   border-bottom-left-radius: 4px;
   border-bottom-right-radius: 4px;
-}
-
-.directive-collapsible>button {
-  color: var(--color-text);
-  border-color: var(--color-spacer);
-  background-color: var(--color-nav);
-}
-
-.directive-collapsible>button:after {
-  color: var(--color-text);
-}
-
-.directive-collapsible .collapsible-content {
   border-color: var(--color-spacer);
 }
