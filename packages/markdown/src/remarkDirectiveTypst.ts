@@ -31,7 +31,7 @@ export default (ctx: HyperbookContext) => () => {
   return (tree: Root, file: VFile) => {
     visit(tree, function (node) {
       if (isDirective(node) && node.name === name) {
-        const { height = 400, id = hash(node), mode = "preview", src = "" } = node.attributes || {};
+        const { height, id = hash(node), mode = "preview", src = "" } = node.attributes || {};
         const data = node.data || (node.data = {});
 
         expectContainerDirective(node, file, name);
@@ -60,6 +60,16 @@ export default (ctx: HyperbookContext) => () => {
         const isEditMode = mode === "edit";
         const isPreviewMode = mode === "preview" || !isEditMode;
 
+        // Determine container height based on mode and custom height
+        let containerHeight: string;
+        if (height) {
+          // Custom height provided - use as-is if string, add px if number
+          containerHeight = typeof height === "number" || /^\d+$/.test(height) ? `${height}px` : height;
+        } else {
+          // Default heights: auto for preview, calc(100dvh - 128px) for edit
+          containerHeight = isPreviewMode ? "auto" : "calc(100dvh - 128px)";
+        }
+
         data.hName = "div";
         data.hProperties = {
           class: ["directive-typst", isPreviewMode ? "preview-only" : ""].join(" ").trim(),
@@ -71,7 +81,7 @@ export default (ctx: HyperbookContext) => () => {
           tagName: "div",
           properties: {
             class: "preview-container",
-            style: `height: ${height}px;`,
+            style: `height: ${containerHeight};`,
           },
           children: [
             {

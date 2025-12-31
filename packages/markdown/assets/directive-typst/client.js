@@ -104,6 +104,7 @@ hyperbook.typst = (function () {
     if (!svgElem || !original) return;
 
     const containerWidth = container.clientWidth - 32; // Account for padding
+    const containerHeight = container.clientHeight - 32; // Account for padding
     
     let newWidth, newHeight;
     
@@ -112,9 +113,12 @@ hyperbook.typst = (function () {
       newWidth = containerWidth;
       newHeight = (original.height * containerWidth) / original.width;
     } else if (scaleState.mode === "full-page") {
-      // Show at 100% original size
-      newWidth = original.width;
-      newHeight = original.height;
+      // Fit entire page in container without cut-offs
+      const scaleX = containerWidth / original.width;
+      const scaleY = containerHeight / original.height;
+      const scale = Math.min(scaleX, scaleY);
+      newWidth = original.width * scale;
+      newHeight = original.height * scale;
     } else {
       // Manual scale
       newWidth = original.width * scaleState.scale;

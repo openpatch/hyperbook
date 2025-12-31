@@ -80,7 +80,7 @@ $ sum_(i=1)^n i = (n(n+1))/2 $
 | Option | Beschreibung | Standard |
 |--------|--------------|----------|
 | `mode` | Anzeigemodus: `preview` (nur Ansicht) oder `edit` (mit Editor) | `preview` |
-| `height` | Höhe des Vorschau-Containers in Pixel | `400` |
+| `height` | Höhe des Vorschau-Containers. Akzeptiert CSS-Werte wie `100px`, `50vh`, `calc(100dvh - 200px)` | `auto` für preview, `calc(100dvh - 128px)` für edit |
 | `src` | Pfad zu einer externen `.typ`-Datei | - |
 
 ### Laden aus externer Datei
