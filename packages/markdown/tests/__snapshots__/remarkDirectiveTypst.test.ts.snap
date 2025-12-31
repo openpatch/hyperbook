@@ -9,7 +9,7 @@ exports[`remarkDirectiveTypst > should default to preview mode 1`] = `
     </div>
     <div class="typst-preview"></div>
   </div>
-  <div class="buttons-container"><button class="zoom-out">typst-zoom-out</button><button class="zoom-in">typst-zoom-in</button><button class="fit-width">typst-fit-width</button><button class="full-page">typst-full-page</button><button class="copy">typst-copy</button><button class="download-pdf">typst-download-pdf</button></div><textarea class="typst-source hidden" style="display: none;">= Default Mode</textarea>
+  <div class="buttons-container"><button class="copy">typst-copy</button><button class="download-pdf">typst-download-pdf</button></div><textarea class="typst-source hidden" style="display: none;">= Default Mode</textarea>
 </div>
 "
 `;
@@ -23,7 +23,7 @@ exports[`remarkDirectiveTypst > should handle typst language code block 1`] = `
     </div>
     <div class="typst-preview"></div>
   </div>
-  <div class="buttons-container"><button class="zoom-out">typst-zoom-out</button><button class="zoom-in">typst-zoom-in</button><button class="fit-width">typst-fit-width</button><button class="full-page">typst-full-page</button><button class="copy">typst-copy</button><button class="download-pdf">typst-download-pdf</button></div><textarea class="typst-source hidden" style="display: none;">= Using typst language</textarea>
+  <div class="buttons-container"><button class="copy">typst-copy</button><button class="download-pdf">typst-download-pdf</button></div><textarea class="typst-source hidden" style="display: none;">= Using typst language</textarea>
 </div>
 "
 `;
@@ -57,7 +57,7 @@ exports[`remarkDirectiveTypst > should transform preview mode 1`] = `
     </div>
     <div class="typst-preview"></div>
   </div>
-  <div class="buttons-container"><button class="zoom-out">typst-zoom-out</button><button class="zoom-in">typst-zoom-in</button><button class="fit-width">typst-fit-width</button><button class="full-page">typst-full-page</button><button class="copy">typst-copy</button><button class="download-pdf">typst-download-pdf</button></div><textarea class="typst-source hidden" style="display: none;">= Hello World!</textarea>
+  <div class="buttons-container"><button class="copy">typst-copy</button><button class="download-pdf">typst-download-pdf</button></div><textarea class="typst-source hidden" style="display: none;">= Hello World!</textarea>
 </div>
 "
 `;
