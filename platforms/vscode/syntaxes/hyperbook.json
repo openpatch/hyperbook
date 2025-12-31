@@ -110,6 +110,9 @@
     },
     {
       "include": "#directive-webide"
+    },
+    {
+      "include": "#directive-typst"
     }
   ],
   "repository": {
@@ -1431,6 +1434,55 @@
         },
         "3": {
           "name": "entity.name.function.directive.mermaid.hyperbook"
+        }
+      },
+      "endCaptures": {
+        "2": {
+          "name": "punctuation.definition.directive.level.hyperbook"
+        }
+      },
+      "patterns": [
+        {
+          "include": "text.html.markdown"
+        }
+      ]
+    },
+    "directive-typst": {
+      "name": "meta.directive.typst.hyperbook",
+      "begin": "(^|\\G)(:{3,})(typst)({.*})?\\s*$",
+      "end": "(^|\\G)(\\2|:{3,})\\s*$",
+      "beginCaptures": {
+        "2": {
+          "name": "punctuation.definition.directive.level.hyperbook"
+        },
+        "3": {
+          "name": "entity.name.function.directive.typst.hyperbook"
+        },
+        "4": {
+          "patterns": [
+            {
+              "match": "(mode)=\"([^\"]*)\"",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.typst.hyperbook"
+                },
+                "2": {
+                  "name": "string.quoted.double.untitled"
+                }
+              }
+            },
+            {
+              "match": "(height)=([0-9]+)",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.typst.hyperbook"
+                },
+                "2": {
+                  "name": "constant.numeric"
+                }
+              }
+            }
+          ]
         }
       },
       "endCaptures": {

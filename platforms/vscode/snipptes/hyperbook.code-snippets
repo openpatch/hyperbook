@@ -269,5 +269,17 @@
     "body": [
       ":Snippet{#${1:snippet-name}}"
     ]
+  },
+  "Element Typst": {
+    "prefix": [":typst"],
+    "body": [
+      ":::typst{mode=\"${1|preview,edit|}\"}",
+      "",
+      "```typ",
+      "$TM_SELECTED_TEXT$0",
+      "```",
+      "",
+      ":::"
+    ]
   }
 }

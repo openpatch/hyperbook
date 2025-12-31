@@ -28,6 +28,7 @@ store.version(1).stores({
   geogebra: `id,state`,
   learningmap: `id,nodes,x,y,zoom`,
   textinput: `id,text`,
+  typst: `id,code`,
   custom: `id,payload`,
   multievent: `id,state`,
 });

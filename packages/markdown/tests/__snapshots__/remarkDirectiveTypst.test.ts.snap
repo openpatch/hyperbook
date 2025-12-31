@@ -1,0 +1,51 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`remarkDirectiveTypst > should default to preview mode 1`] = `
+"
+<div class="directive-typst preview-only" data-id="07c1e09cc86bf1d9ef908477a45d38832547cfc9eb687dace3b4cd749872ef1f">
+  <div class="preview-container" style="height: 400px;">
+    <div class="typst-preview"></div>
+  </div>
+  <div class="buttons-container"><button class="download-pdf">typst-download-pdf</button></div><textarea class="typst-source hidden" style="display: none;">= Default Mode</textarea>
+</div>
+"
+`;
+
+exports[`remarkDirectiveTypst > should handle typst language code block 1`] = `
+"
+<div class="directive-typst preview-only" data-id="f9ee3f2b370e3b804b7640e9f59e78db5ada5d1e6a3ed2326fcee946f8263cf1">
+  <div class="preview-container" style="height: 400px;">
+    <div class="typst-preview"></div>
+  </div>
+  <div class="buttons-container"><button class="download-pdf">typst-download-pdf</button></div><textarea class="typst-source hidden" style="display: none;">= Using typst language</textarea>
+</div>
+"
+`;
+
+exports[`remarkDirectiveTypst > should transform edit mode 1`] = `
+"
+<div class="directive-typst" data-id="998fd54d980ddf3cbb5abd9509d85e58db6664643d052de106c7f1bbf0d4e317">
+  <div class="preview-container" style="height: 400px;">
+    <div class="typst-preview"></div>
+  </div>
+  <div class="editor-container">
+    <div class="buttons"><button class="typst">typst-code</button></div>
+    <code-input class="editor typst active line-numbers" language="typst" template="typst-highlighted">= Hello World!
+
+This is editable content.</code-input>
+    <div class="buttons bottom"><button class="reset">typst-reset</button><button class="download-pdf">typst-download-pdf</button></div>
+  </div>
+</div>
+"
+`;
+
+exports[`remarkDirectiveTypst > should transform preview mode 1`] = `
+"
+<div class="directive-typst preview-only" data-id="39e82b1737a92205d5c1c8c0d03f279a122831490b6eb448cad82b5d5575a62d">
+  <div class="preview-container" style="height: 400px;">
+    <div class="typst-preview"></div>
+  </div>
+  <div class="buttons-container"><button class="download-pdf">typst-download-pdf</button></div><textarea class="typst-source hidden" style="display: none;">= Hello World!</textarea>
+</div>
+"
+`;
