@@ -8,6 +8,10 @@
   gap: 8px;
 }
 
+.directive-typst.preview-only {
+  gap: 0;
+}
+
 code-input {
   margin: 0;
 }
@@ -16,6 +20,9 @@ code-input {
   width: 100%;
   border: 1px solid var(--color-spacer);
   border-radius: 8px;
+  border-bottom: none;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
   overflow: auto;
   background-color: white;
 }
@@ -31,6 +38,8 @@ code-input {
 .directive-typst .typst-preview svg {
   max-width: 100%;
   height: auto;
+  border-radius: 8px;
+  box-shadow: rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.16) 0px 3px 6px;
 }
 
 .directive-typst .typst-loading {
@@ -104,8 +113,12 @@ code-input {
 
 .directive-typst .buttons-container {
   display: flex;
-  justify-content: center;
   width: 100%;
+  border: 1px solid var(--color-spacer);
+  border-radius: 8px;
+  border-top: none;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
 }
 
 .directive-typst button {
@@ -118,6 +131,10 @@ code-input {
   cursor: pointer;
 }
 
+.directive-typst button:last-child {
+  border-right: none;
+}
+
 .directive-typst button:not(.active) {
   opacity: 0.6;
 }
@@ -128,13 +145,6 @@ code-input {
 
 .directive-typst button:hover {
   background-color: var(--color-spacer);
-}
-
-.directive-typst .buttons-container button {
-  flex: none;
-  border: 1px solid var(--color-spacer);
-  border-radius: 8px;
-  padding: 8px 24px;
 }
 
 .directive-typst .hidden {
