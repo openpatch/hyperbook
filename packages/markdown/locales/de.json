@@ -58,5 +58,7 @@
     "typst-reset": "Zurücksetzen",
     "typst-reset-prompt": "Sind Sie sicher, dass Sie den Code zurücksetzen möchten?",
     "typst-download-pdf": "PDF herunterladen",
-    "typst-pdf-error": "Fehler beim PDF-Export"
+    "typst-pdf-error": "Fehler beim PDF-Export",
+    "typst-copy": "Kopieren",
+    "typst-loading": "Typst wird geladen..."
 }

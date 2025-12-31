@@ -58,7 +58,12 @@ hyperbook.typst = (function () {
   };
 
   // Render typst code to SVG
-  const renderTypst = async (code, container) => {
+  const renderTypst = async (code, container, loadingIndicator) => {
+    // Show loading indicator
+    if (loadingIndicator) {
+      loadingIndicator.style.display = "flex";
+    }
+
     await loadTypst();
     
     try {
@@ -79,6 +84,11 @@ hyperbook.typst = (function () {
     } catch (error) {
       container.innerHTML = `<div class="typst-error">${error.message || "Error rendering Typst"}</div>`;
       console.error("Typst rendering error:", error);
+    } finally {
+      // Hide loading indicator
+      if (loadingIndicator) {
+        loadingIndicator.style.display = "none";
+      }
     }
   };
 
@@ -103,8 +113,10 @@ hyperbook.typst = (function () {
   for (let elem of elems) {
     const id = elem.getAttribute("data-id");
     const preview = elem.querySelector(".typst-preview");
+    const loadingIndicator = elem.querySelector(".typst-loading");
     const editor = elem.querySelector(".editor.typst");
     const downloadBtn = elem.querySelector(".download-pdf");
+    const copyBtn = elem.querySelector(".copy");
     const resetBtn = elem.querySelector(".reset");
     const sourceTextarea = elem.querySelector(".typst-source");
 
@@ -120,19 +132,19 @@ hyperbook.typst = (function () {
           editor.value = result.code;
         }
         initialCode = editor.value;
-        renderTypst(initialCode, preview);
+        renderTypst(initialCode, preview, loadingIndicator);
 
         // Listen for input changes
         editor.addEventListener("input", () => {
           store.typst?.put({ id, code: editor.value });
-          renderTypst(editor.value, preview);
+          renderTypst(editor.value, preview, loadingIndicator);
         });
       });
     } else if (sourceTextarea) {
       // Preview mode - code is in hidden textarea
       initialCode = sourceTextarea.value;
       loadTypst().then(() => {
-        renderTypst(initialCode, preview);
+        renderTypst(initialCode, preview, loadingIndicator);
       });
     }
 
@@ -140,6 +152,16 @@ hyperbook.typst = (function () {
     downloadBtn?.addEventListener("click", async () => {
       const code = editor ? editor.value : initialCode;
       await exportPdf(code, id);
+    });
+
+    // Copy button
+    copyBtn?.addEventListener("click", async () => {
+      const code = editor ? editor.value : initialCode;
+      try {
+        await navigator.clipboard.writeText(code);
+      } catch (error) {
+        console.error("Copy error:", error);
+      }
     });
 
     // Reset button (edit mode only)

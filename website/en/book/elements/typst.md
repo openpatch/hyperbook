@@ -81,6 +81,21 @@ $ sum_(i=1)^n i = (n(n+1))/2 $
 |--------|-------------|---------|
 | `mode` | Display mode: `preview` (view only) or `edit` (with editor) | `preview` |
 | `height` | Height of the preview container in pixels | `400` |
+| `src` | Path to an external `.typ` file to load | - |
+
+### Loading from External File
+
+You can load Typst code from an external file using the `src` attribute:
+
+````md
+:::typst{mode="preview" src="document.typ"}
+:::
+````
+
+The file is searched in the following locations (in order):
+1. `public/` directory
+2. `book/` directory
+3. Current page's directory
 
 ## Examples
 

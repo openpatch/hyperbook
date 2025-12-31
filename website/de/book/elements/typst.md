@@ -81,6 +81,21 @@ $ sum_(i=1)^n i = (n(n+1))/2 $
 |--------|--------------|----------|
 | `mode` | Anzeigemodus: `preview` (nur Ansicht) oder `edit` (mit Editor) | `preview` |
 | `height` | Höhe des Vorschau-Containers in Pixel | `400` |
+| `src` | Pfad zu einer externen `.typ`-Datei | - |
+
+### Laden aus externer Datei
+
+Sie können Typst-Code aus einer externen Datei laden, indem Sie das `src`-Attribut verwenden:
+
+````md
+:::typst{mode="preview" src="dokument.typ"}
+:::
+````
+
+Die Datei wird in folgenden Verzeichnissen gesucht (in dieser Reihenfolge):
+1. `public/`-Verzeichnis
+2. `book/`-Verzeichnis
+3. Verzeichnis der aktuellen Seite
 
 ## Beispiele
 

@@ -15,6 +15,7 @@ import {
 import hash from "./objectHash";
 import { i18n } from "./i18n";
 import { Element, ElementContent } from "hast";
+import { readFile } from "./helper";
 
 function htmlEntities(str: string) {
   return String(str)
@@ -30,7 +31,7 @@ export default (ctx: HyperbookContext) => () => {
   return (tree: Root, file: VFile) => {
     visit(tree, function (node) {
       if (isDirective(node) && node.name === name) {
-        const { height = 400, id = hash(node), mode = "preview" } = node.attributes || {};
+        const { height = 400, id = hash(node), mode = "preview", src = "" } = node.attributes || {};
         const data = node.data || (node.data = {});
 
         expectContainerDirective(node, file, name);
@@ -42,13 +43,18 @@ export default (ctx: HyperbookContext) => () => {
 
         let typstCode = "";
 
-        // Find typst code block inside the directive
-        const typstNode = node.children.find(
-          (n) => n.type === "code" && (n.lang === "typ" || n.lang === "typst"),
-        ) as Code;
+        // Load from external file if src is provided
+        if (src) {
+          typstCode = readFile(src, ctx) || "";
+        } else {
+          // Find typst code block inside the directive
+          const typstNode = node.children.find(
+            (n) => n.type === "code" && (n.lang === "typ" || n.lang === "typst"),
+          ) as Code;
 
-        if (typstNode) {
-          typstCode = typstNode.value;
+          if (typstNode) {
+            typstCode = typstNode.value;
+          }
         }
 
         const isEditMode = mode === "edit";
@@ -72,6 +78,34 @@ export default (ctx: HyperbookContext) => () => {
               type: "element",
               tagName: "div",
               properties: {
+                class: "typst-loading",
+              },
+              children: [
+                {
+                  type: "element",
+                  tagName: "div",
+                  properties: {
+                    class: "typst-spinner",
+                  },
+                  children: [],
+                },
+                {
+                  type: "element",
+                  tagName: "span",
+                  properties: {},
+                  children: [
+                    {
+                      type: "text",
+                      value: i18n.get("typst-loading"),
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              type: "element",
+              tagName: "div",
+              properties: {
                 class: "typst-preview",
               },
               children: [],
@@ -89,6 +123,20 @@ export default (ctx: HyperbookContext) => () => {
             {
               type: "text",
               value: i18n.get("typst-download-pdf"),
+            },
+          ],
+        };
+
+        const copyButton: Element = {
+          type: "element",
+          tagName: "button",
+          properties: {
+            class: "copy",
+          },
+          children: [
+            {
+              type: "text",
+              value: i18n.get("typst-copy"),
             },
           ],
         };
@@ -161,6 +209,7 @@ export default (ctx: HyperbookContext) => () => {
                         },
                       ],
                     },
+                    copyButton,
                     downloadButton,
                   ],
                 },
@@ -177,7 +226,7 @@ export default (ctx: HyperbookContext) => () => {
               properties: {
                 class: "buttons-container",
               },
-              children: [downloadButton],
+              children: [copyButton, downloadButton],
             },
             {
               type: "element",
