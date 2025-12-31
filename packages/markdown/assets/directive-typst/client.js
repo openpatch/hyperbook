@@ -57,8 +57,11 @@ hyperbook.typst = (function () {
     return typstLoadPromise;
   };
 
+  // Store original SVG dimensions
+  const svgOriginalDimensions = new Map();
+
   // Render typst code to SVG
-  const renderTypst = async (code, container, loadingIndicator) => {
+  const renderTypst = async (code, container, loadingIndicator, scaleState) => {
     // Show loading indicator
     if (loadingIndicator) {
       loadingIndicator.style.display = "flex";
@@ -70,16 +73,17 @@ hyperbook.typst = (function () {
       const svg = await $typst.svg({ mainContent: code });
       container.innerHTML = svg;
 
-      // Scale SVG to fit container
+      // Store original dimensions and apply scale
       const svgElem = container.firstElementChild;
       if (svgElem) {
-        const width = Number.parseFloat(svgElem.getAttribute("width"));
-        const height = Number.parseFloat(svgElem.getAttribute("height"));
-        const containerWidth = container.clientWidth - 20;
-        if (width > 0 && containerWidth > 0) {
-          svgElem.setAttribute("width", containerWidth);
-          svgElem.setAttribute("height", (height * containerWidth) / width);
-        }
+        const originalWidth = Number.parseFloat(svgElem.getAttribute("width"));
+        const originalHeight = Number.parseFloat(svgElem.getAttribute("height"));
+        
+        // Store original dimensions
+        svgOriginalDimensions.set(container, { width: originalWidth, height: originalHeight });
+        
+        // Apply current scale
+        applyScale(container, scaleState);
       }
     } catch (error) {
       container.innerHTML = `<div class="typst-error">${error.message || "Error rendering Typst"}</div>`;
@@ -90,6 +94,35 @@ hyperbook.typst = (function () {
         loadingIndicator.style.display = "none";
       }
     }
+  };
+
+  // Apply scale to SVG
+  const applyScale = (container, scaleState) => {
+    const svgElem = container.firstElementChild;
+    const original = svgOriginalDimensions.get(container);
+    
+    if (!svgElem || !original) return;
+
+    const containerWidth = container.clientWidth - 32; // Account for padding
+    
+    let newWidth, newHeight;
+    
+    if (scaleState.mode === "fit-width") {
+      // Fit to container width
+      newWidth = containerWidth;
+      newHeight = (original.height * containerWidth) / original.width;
+    } else if (scaleState.mode === "full-page") {
+      // Show at 100% original size
+      newWidth = original.width;
+      newHeight = original.height;
+    } else {
+      // Manual scale
+      newWidth = original.width * scaleState.scale;
+      newHeight = original.height * scaleState.scale;
+    }
+    
+    svgElem.setAttribute("width", newWidth);
+    svgElem.setAttribute("height", newHeight);
   };
 
   // Export to PDF
@@ -118,7 +151,17 @@ hyperbook.typst = (function () {
     const downloadBtn = elem.querySelector(".download-pdf");
     const copyBtn = elem.querySelector(".copy");
     const resetBtn = elem.querySelector(".reset");
+    const zoomInBtn = elem.querySelector(".zoom-in");
+    const zoomOutBtn = elem.querySelector(".zoom-out");
+    const fitWidthBtn = elem.querySelector(".fit-width");
+    const fullPageBtn = elem.querySelector(".full-page");
     const sourceTextarea = elem.querySelector(".typst-source");
+
+    // Scale state for this element
+    const scaleState = {
+      scale: 1.0,
+      mode: "fit-width" // "fit-width", "full-page", or "manual"
+    };
 
     // Get initial code
     let initialCode = "";
@@ -132,21 +175,47 @@ hyperbook.typst = (function () {
           editor.value = result.code;
         }
         initialCode = editor.value;
-        renderTypst(initialCode, preview, loadingIndicator);
+        renderTypst(initialCode, preview, loadingIndicator, scaleState);
 
         // Listen for input changes
         editor.addEventListener("input", () => {
           store.typst?.put({ id, code: editor.value });
-          renderTypst(editor.value, preview, loadingIndicator);
+          renderTypst(editor.value, preview, loadingIndicator, scaleState);
         });
       });
     } else if (sourceTextarea) {
       // Preview mode - code is in hidden textarea
       initialCode = sourceTextarea.value;
       loadTypst().then(() => {
-        renderTypst(initialCode, preview, loadingIndicator);
+        renderTypst(initialCode, preview, loadingIndicator, scaleState);
       });
     }
+
+    // Zoom in button
+    zoomInBtn?.addEventListener("click", () => {
+      scaleState.mode = "manual";
+      scaleState.scale = Math.min(scaleState.scale + 0.25, 5.0);
+      applyScale(preview, scaleState);
+    });
+
+    // Zoom out button
+    zoomOutBtn?.addEventListener("click", () => {
+      scaleState.mode = "manual";
+      scaleState.scale = Math.max(scaleState.scale - 0.25, 0.25);
+      applyScale(preview, scaleState);
+    });
+
+    // Fit width button
+    fitWidthBtn?.addEventListener("click", () => {
+      scaleState.mode = "fit-width";
+      applyScale(preview, scaleState);
+    });
+
+    // Full page button
+    fullPageBtn?.addEventListener("click", () => {
+      scaleState.mode = "full-page";
+      applyScale(preview, scaleState);
+    });
 
     // Download PDF button
     downloadBtn?.addEventListener("click", async () => {

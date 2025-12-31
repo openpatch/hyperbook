@@ -141,6 +141,62 @@ export default (ctx: HyperbookContext) => () => {
           ],
         };
 
+        const zoomInButton: Element = {
+          type: "element",
+          tagName: "button",
+          properties: {
+            class: "zoom-in",
+          },
+          children: [
+            {
+              type: "text",
+              value: i18n.get("typst-zoom-in"),
+            },
+          ],
+        };
+
+        const zoomOutButton: Element = {
+          type: "element",
+          tagName: "button",
+          properties: {
+            class: "zoom-out",
+          },
+          children: [
+            {
+              type: "text",
+              value: i18n.get("typst-zoom-out"),
+            },
+          ],
+        };
+
+        const fitWidthButton: Element = {
+          type: "element",
+          tagName: "button",
+          properties: {
+            class: "fit-width",
+          },
+          children: [
+            {
+              type: "text",
+              value: i18n.get("typst-fit-width"),
+            },
+          ],
+        };
+
+        const fullPageButton: Element = {
+          type: "element",
+          tagName: "button",
+          properties: {
+            class: "full-page",
+          },
+          children: [
+            {
+              type: "text",
+              value: i18n.get("typst-full-page"),
+            },
+          ],
+        };
+
         if (isEditMode) {
           // Edit mode: show editor and preview side by side
           data.hChildren = [
@@ -226,7 +282,7 @@ export default (ctx: HyperbookContext) => () => {
               properties: {
                 class: "buttons-container",
               },
-              children: [copyButton, downloadButton],
+              children: [zoomOutButton, zoomInButton, fitWidthButton, fullPageButton, copyButton, downloadButton],
             },
             {
               type: "element",

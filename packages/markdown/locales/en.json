@@ -60,5 +60,9 @@
     "typst-download-pdf": "Download PDF",
     "typst-pdf-error": "Error exporting PDF",
     "typst-copy": "Copy",
-    "typst-loading": "Loading Typst..."
+    "typst-loading": "Loading Typst...",
+    "typst-zoom-in": "+",
+    "typst-zoom-out": "-",
+    "typst-fit-width": "Fit Width",
+    "typst-full-page": "Full Page"
 }
