@@ -2,7 +2,7 @@
  * @type {import("dexie").Dexie}
  */
 var store = new Dexie("Hyperbook");
-store.version(1).stores({
+store.version(2).stores({
   currentState: `
             id,
             path,
@@ -30,6 +30,7 @@ store.version(1).stores({
   textinput: `id,text`,
   custom: `id,payload`,
   multievent: `id,state`,
+  typst: `id,code`,
 });
 var sqlIdeDB = new Dexie("SQL-IDE");
 sqlIdeDB.version(0.1).stores({
