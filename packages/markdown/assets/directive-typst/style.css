@@ -1,0 +1,176 @@
+.directive-typst {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  margin-bottom: 16px;
+  overflow: hidden;
+  gap: 8px;
+  height: calc(100dvh - 128px);
+}
+
+code-input {
+  margin: 0;
+}
+
+.directive-typst .preview-container {
+  width: 100%;
+  border: 1px solid var(--color-spacer);
+  border-radius: 8px;
+  overflow: auto;
+  background-color: white;
+}
+
+.directive-typst .typst-preview {
+  padding: 16px;
+  min-height: 100px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.directive-typst.preview-only {
+  gap: 0px;
+  align-items: normal;
+  height: auto;
+
+  .download-pdf {
+    border-right: none;
+  }
+
+  .preview-container {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+}
+
+.directive-typst .typst-preview svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.directive-typst .typst-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  gap: 12px;
+  color: var(--color-text);
+}
+
+.directive-typst .typst-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--color-spacer);
+  border-top-color: var(--color-primary, #3b82f6);
+  border-radius: 50%;
+  animation: typst-spin 1s linear infinite;
+}
+
+@keyframes typst-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.directive-typst .typst-error {
+  color: #dc2626;
+  padding: 16px;
+  background-color: #fef2f2;
+  border-radius: 4px;
+  font-family: monospace;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.directive-typst .editor-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  height: 400px;
+}
+
+.directive-typst .editor {
+  width: 100%;
+  border: 1px solid var(--color-spacer);
+  flex: 1;
+}
+
+.directive-typst .editor:not(.active) {
+  display: none;
+}
+
+.directive-typst .buttons {
+  display: flex;
+  border: 1px solid var(--color-spacer);
+  border-radius: 8px;
+  border-bottom: none;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.directive-typst .buttons.bottom {
+  border: 1px solid var(--color-spacer);
+  border-radius: 8px;
+  border-top: none;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+.directive-typst .buttons-container {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.directive-typst button {
+  flex: 1;
+  padding: 8px 16px;
+  border: none;
+  border-right: 1px solid var(--color-spacer);
+  background-color: var(--color--background);
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.directive-typst button:not(.active) {
+  opacity: 0.6;
+}
+
+.directive-typst .buttons:last-child {
+  border-right: none;
+}
+
+.directive-typst button:hover {
+  background-color: var(--color-spacer);
+}
+
+.directive-typst .buttons-container button {
+  flex: none;
+  border: 1px solid var(--color-spacer);
+  border-radius: 8px;
+  padding: 8px 24px;
+}
+
+.directive-typst .hidden {
+  display: none !important;
+}
+
+@media screen and (min-width: 1024px) {
+  .directive-typst:not(.preview-only) {
+    flex-direction: row;
+    height: calc(100dvh - 128px);
+
+    .preview-container {
+      flex: 1;
+      height: 100% !important;
+    }
+
+    .editor-container {
+      flex: 1;
+      height: 100%;
+      overflow: hidden;
+    }
+  }
+}

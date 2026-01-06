@@ -53,5 +53,12 @@
     "webide-reset": "Reset",
     "webide-reset-prompt": "Are you sure you want to reset the code?",
     "webide-copy": "Copy",
-    "webide-download": "Download"
+    "webide-download": "Download", 
+    "typst-code": "Typst",
+    "typst-reset": "Reset",
+    "typst-reset-prompt": "Are you sure you want to reset the code?",
+    "typst-download-pdf": "Download PDF",
+    "typst-pdf-error": "Error exporting PDF",
+    "typst-download-project": "Download Project",
+    "typst-loading": "Loading Typst..."
 }
