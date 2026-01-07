@@ -437,6 +437,15 @@ window.Prism.manual = true;`,
               },
               {
                 type: "element",
+                tagName: "script",
+                properties: {
+                  src: makeUrl(["prism", "prism-typst.js"], "assets"),
+                  defer: true,
+                },
+                children: [],
+              },
+              {
+                type: "element",
                 tagName: "link",
                 properties: {
                   rel: "stylesheet",

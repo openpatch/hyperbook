@@ -62,6 +62,7 @@ import remarkSubSup from "./remarkSubSup";
 import remarkImageAttrs from "./remarkImageAttrs";
 import remarkDirectiveLearningmap from "./remarkDirectiveLearningmap";
 import remarkDirectiveTextinput from "./remarkDirectiveTextinput";
+import remarkDirectiveTypst from "./remarkDirectiveTypst";
 
 export const remark = (ctx: HyperbookContext) => {
   i18n.init(ctx.config.language || "en");
@@ -106,6 +107,7 @@ export const remark = (ctx: HyperbookContext) => {
     remarkDirectiveMultievent(ctx),
     remarkDirectiveLearningmap(ctx),
     remarkDirectiveTextinput(ctx),
+    remarkDirectiveTypst(ctx),
     remarkCode(ctx),
     remarkMath,
     /* needs to be last directive */

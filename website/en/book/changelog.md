@@ -38,6 +38,35 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.73.0
+
+::::tabs
+
+:::tab{title="New :rocket:" id="new"}
+
+**Typst Directive**
+
+Write and preview Typst documents directly in your Hyperbook with a powerful interactive editor.
+
+**Features**
+- Interactive editor with syntax highlighting
+- Live preview with automatic rendering
+- Multi-file project support with tab interface
+- Binary file upload for images, fonts, and other assets
+- Export to PDF
+- Download entire project as ZIP
+- State persistence across page reloads
+
+**Smart Error Handling**
+- Error messages display as dismissible overlays in the preview
+- Last successful render is preserved when errors occur
+- Clean, readable error messages extracted from Typst compiler output
+- Smooth animations with visual feedback
+
+:::
+
+::::
+
 ## v0.72.2
 
 ::::tabs
