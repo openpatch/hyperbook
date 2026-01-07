@@ -1,5 +1,11 @@
 # @hyperbook/markdown
 
+## 0.46.0
+
+### Minor Changes
+
+- [#1063](https://github.com/openpatch/hyperbook/pull/1063) [`66a7234`](https://github.com/openpatch/hyperbook/commit/66a72340b367920e12349c988104fda6ebbcf3fc) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add Typst directive with interactive editor and improved error handling. The new Typst directive enables users to write and preview Typst documents directly in Hyperbook with support for multiple files, binary assets, and PDF export. Errors display as dismissible overlays preserving the last successful render, with clean error messages parsed from the Rust SourceDiagnostic format.
+
 ## 0.45.0
 
 ### Minor Changes

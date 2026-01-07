@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.73.0
+
+### Minor Changes
+
+- [`c0a5249`](https://github.com/openpatch/hyperbook/commit/c0a5249eb7598418e57866c941fee9b8323f56b8) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - add typst
+
 ## 0.72.2
 
 ### Patch Changes
