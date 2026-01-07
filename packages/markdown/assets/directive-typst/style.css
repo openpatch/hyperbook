@@ -19,6 +19,7 @@ code-input {
   border-radius: 8px;
   overflow: auto;
   background-color: white;
+  position: relative;
 }
 
 .directive-typst .typst-preview {
@@ -63,7 +64,7 @@ code-input {
   width: 32px;
   height: 32px;
   border: 3px solid var(--color-spacer);
-  border-top-color: var(--color-primary, #3b82f6);
+  border-top-color: var(--color-brand, #3b82f6);
   border-radius: 50%;
   animation: typst-spin 1s linear infinite;
 }
@@ -84,11 +85,300 @@ code-input {
   word-break: break-word;
 }
 
+.directive-typst .typst-error-overlay {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  right: 16px;
+  z-index: 100;
+  animation: typst-error-slide-in 0.3s ease-out;
+}
+
+@keyframes typst-error-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.directive-typst .typst-error-content {
+  background-color: #fef2f2;
+  border: 2px solid #dc2626;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+}
+
+.directive-typst .typst-error-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background-color: #dc2626;
+  color: white;
+}
+
+.directive-typst .typst-error-title {
+  font-weight: 600;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.directive-typst .typst-error-close {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 24px;
+  line-height: 1;
+  padding: 0;
+  margin: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+  flex: none;
+}
+
+.directive-typst .typst-error-close:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.directive-typst .typst-error-message {
+  padding: 16px;
+  color: #dc2626;
+  font-family: monospace;
+  font-size: 13px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.5;
+}
+
 .directive-typst .editor-container {
   width: 100%;
   display: flex;
   flex-direction: column;
   height: 400px;
+}
+
+.directive-typst .file-tabs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background-color: var(--color--background);
+  border: 1px solid var(--color-spacer);
+  border-bottom: none;
+  border-radius: 8px 8px 0 0;
+  padding: 4px;
+  overflow-x: auto;
+}
+
+.directive-typst .tabs-list {
+  display: flex;
+  gap: 4px;
+  flex: 1;
+  overflow-x: auto;
+  padding: 2px;
+}
+
+.directive-typst .file-tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background-color: var(--color--background);
+  border: 1px solid var(--color-spacer);
+  border-radius: 4px;
+  cursor: pointer;
+  white-space: nowrap;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.directive-typst .file-tab:hover {
+  background-color: var(--color-spacer);
+}
+
+.directive-typst .file-tab.active {
+  background-color: var(--color-brand, #3b82f6);
+  color: var(--color-brand-text);
+  border-color: var(--color-brand, #3b82f6);
+}
+
+.directive-typst .tab-name {
+  flex: 1;
+}
+
+.directive-typst .tab-delete {
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  padding: 0;
+  margin: 0;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.directive-typst .tab-delete:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.directive-typst .file-tab.active .tab-delete:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.directive-typst .add-source-file {
+  padding: 6px 12px;
+  font-size: 16px;
+  flex: none;
+  font-weight: bold;
+  white-space: nowrap;
+  border: 1px solid var(--color-spacer);
+  border-radius: 4px;
+  background-color: var(--color--background);
+  color: var(--color-text);
+  cursor: pointer;
+  min-width: 32px;
+}
+
+.directive-typst .add-source-file:hover {
+  background-color: var(--color-spacer);
+}
+
+.directive-typst .binary-files-section {
+  border: 1px solid var(--color-spacer);
+  border-top: none;
+  border-bottom: none;
+  background-color: var(--color--background);
+  margin-bottom: 0;
+}
+
+.directive-typst .binary-files-section summary {
+  padding: 8px 12px;
+  cursor: pointer;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  user-select: none;
+  background-color: var(--color--background);
+  list-style: none;
+}
+
+.directive-typst .binary-files-section summary::-webkit-details-marker {
+  display: none;
+}
+
+.directive-typst .binary-files-section summary .summary-text {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.directive-typst .binary-files-section summary .summary-indicator {
+  transition: transform 0.2s;
+  display: inline-block;
+  font-size: 12px;
+}
+
+.directive-typst .binary-files-section[open] summary .summary-indicator {
+  transform: rotate(90deg);
+}
+
+.directive-typst .binary-files-section summary:hover {
+  background-color: var(--color-spacer);
+}
+
+.directive-typst .add-binary-file {
+  padding: 6px 12px;
+  font-size: 14px;
+  border: 1px solid var(--color-spacer);
+  border-radius: 4px;
+  background-color: var(--color--background);
+  color: var(--color-text);
+  cursor: pointer;
+  width: 100%;
+}
+
+.directive-typst .add-binary-file:hover {
+  background-color: var(--color-spacer);
+}
+
+.directive-typst .binary-files-actions {
+  padding: 8px;
+}
+
+.directive-typst .binary-files-list {
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.directive-typst .binary-files-empty {
+  padding: 12px;
+  text-align: center;
+  color: var(--color-text);
+  opacity: 0.6;
+  font-style: italic;
+  font-size: 14px;
+}
+
+.directive-typst .binary-file-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  font-size: 14px;
+}
+
+.directive-typst .binary-file-icon {
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.directive-typst .binary-file-name {
+  flex: 1;
+  word-break: break-all;
+}
+
+.directive-typst .binary-file-delete {
+  background: none;
+  border: none;
+  color: var(--color-text);
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  padding: 0;
+  margin: 0;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 2px;
+  flex: none;
+}
+
+.directive-typst .binary-file-delete:hover {
+  background-color: rgba(220, 38, 38, 0.1);
+  color: #dc2626;
 }
 
 .directive-typst .editor {

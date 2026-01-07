@@ -247,19 +247,101 @@ export default (ctx: HyperbookContext) => () => {
                   type: "element",
                   tagName: "div",
                   properties: {
-                    class: "buttons",
+                    class: "file-tabs",
                   },
                   children: [
                     {
                       type: "element",
+                      tagName: "div",
+                      properties: {
+                        class: "tabs-list",
+                      },
+                      children: [],
+                    },
+                    {
+                      type: "element",
                       tagName: "button",
                       properties: {
-                        class: "typst",
+                        class: "add-source-file",
+                        title: i18n.get("typst-add-source-file"),
                       },
                       children: [
                         {
                           type: "text",
-                          value: i18n.get("typst-code"),
+                          value: "+",
+                        },
+                      ],
+                    },
+                  ],
+                },
+                {
+                  type: "element",
+                  tagName: "details",
+                  properties: {
+                    class: "binary-files-section",
+                  },
+                  children: [
+                    {
+                      type: "element",
+                      tagName: "summary",
+                      properties: {},
+                      children: [
+                        {
+                          type: "element",
+                          tagName: "span",
+                          properties: {
+                            class: "summary-text",
+                          },
+                          children: [
+                            {
+                              type: "element",
+                              tagName: "span",
+                              properties: {
+                                class: "summary-indicator",
+                              },
+                              children: [
+                                {
+                                  type: "text",
+                                  value: "▶",
+                                },
+                              ],
+                            },
+                            {
+                              type: "text",
+                              value: i18n.get("typst-binary-files"),
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                    {
+                      type: "element",
+                      tagName: "div",
+                      properties: {
+                        class: "binary-files-list",
+                      },
+                      children: [],
+                    },
+                    {
+                      type: "element",
+                      tagName: "div",
+                      properties: {
+                        class: "binary-files-actions",
+                      },
+                      children: [
+                        {
+                          type: "element",
+                          tagName: "button",
+                          properties: {
+                            class: "add-binary-file",
+                            title: i18n.get("typst-add-binary-file"),
+                          },
+                          children: [
+                            {
+                              type: "text",
+                              value: "+ " + i18n.get("typst-add"),
+                            },
+                          ],
                         },
                       ],
                     },

@@ -60,5 +60,18 @@
     "typst-download-pdf": "PDF herunterladen",
     "typst-pdf-error": "Fehler beim PDF-Export",
     "typst-download-project": "Projekt herunterladen",
-    "typst-loading": "Typst wird geladen..."
+    "typst-loading": "Typst wird geladen...",
+    "typst-add-source-file": "Quelldatei hinzufügen",
+    "typst-add-binary-file": "Binärdatei hinzufügen",
+    "typst-source": "Quelle",
+    "typst-binary": "Binär",
+    "typst-add": "Hinzufügen",
+    "typst-delete-file": "Datei löschen",
+    "typst-delete-confirm": "Löschen",
+    "typst-filename-prompt": "Dateiname eingeben (z.B. helper.typ):",
+    "typst-filename-error": "Dateiname muss auf .typ oder .typst enden",
+    "typst-filename-exists": "Datei existiert bereits",
+    "typst-file-replace": "Existierende Datei ersetzen?",
+    "typst-binary-files": "Binärdateien",
+    "typst-no-binary-files": "Keine Binärdateien"
 }
