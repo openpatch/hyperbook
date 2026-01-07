@@ -1,0 +1,5 @@
+---
+"hyperbook": minor
+---
+
+add typst
