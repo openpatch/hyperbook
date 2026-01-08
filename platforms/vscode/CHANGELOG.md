@@ -1,5 +1,14 @@
 # @hyperbook/vscode-extension
 
+## 0.48.10
+
+### Patch Changes
+
+- [`c5ae1cc`](https://github.com/openpatch/hyperbook/commit/c5ae1cc46e8b552e8c85725f94f197999da4fe5f) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix path resolving when having an index.md in a directory.
+
+- Updated dependencies [[`c5ae1cc`](https://github.com/openpatch/hyperbook/commit/c5ae1cc46e8b552e8c85725f94f197999da4fe5f)]:
+  - @hyperbook/fs@0.21.1
+
 ## 0.48.9
 
 ### Patch Changes
