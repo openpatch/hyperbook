@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.73.5
+
+### Patch Changes
+
+- [`b7cc012`](https://github.com/openpatch/hyperbook/commit/b7cc0127cce919291fa2984f3dd76a8d220b0ab8) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add emoji example to tiles documentation
+
 ## 0.73.4
 
 ### Patch Changes
