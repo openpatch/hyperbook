@@ -1,5 +1,11 @@
 # @hyperbook/markdown
 
+## 0.46.1
+
+### Patch Changes
+
+- [`0cc1647`](https://github.com/openpatch/hyperbook/commit/0cc164760073bc95656e76c647fdeba7a187f3f0) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix typst preview styling
+
 ## 0.46.0
 
 ### Minor Changes
