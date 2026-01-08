@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.73.3
+
+### Patch Changes
+
+- [`b0ebc52`](https://github.com/openpatch/hyperbook/commit/b0ebc52bccd63ced735757709013ed6c37adca0a) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Another fix for the index.md in directory problem
+
 ## 0.73.2
 
 ### Patch Changes
