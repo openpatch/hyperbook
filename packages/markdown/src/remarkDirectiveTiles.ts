@@ -13,6 +13,7 @@ import {
   registerDirective,
 } from "./remarkHelper";
 import { Raw } from "mdast-util-to-hast";
+import githubEmojiMap from "./github-emojis.json";
 
 export default (ctx: HyperbookContext) => () => {
   return (tree: Root, file: VFile) => {
@@ -63,15 +64,35 @@ export default (ctx: HyperbookContext) => () => {
             ];
 
             if (icon) {
-              tileChildren.push({
-                type: "element",
-                tagName: "img",
-                properties: {
-                  class: "tile-icon",
-                  src: ctx.makeUrl(icon, "public"),
-                },
-                children: [],
-              });
+              const emojiMatch = icon.match(/^:([+\w-]+):$/);
+              if (emojiMatch) {
+                const emojiName = emojiMatch[1];
+                // @ts-ignore
+                const emoji = githubEmojiMap[emojiName] ?? icon;
+                tileChildren.push({
+                  type: "element",
+                  tagName: "span",
+                  properties: {
+                    class: "tile-icon tile-icon-emoji",
+                  },
+                  children: [
+                    {
+                      type: "text",
+                      value: emoji,
+                    },
+                  ],
+                });
+              } else {
+                tileChildren.push({
+                  type: "element",
+                  tagName: "img",
+                  properties: {
+                    class: "tile-icon",
+                    src: ctx.makeUrl(icon, "public"),
+                  },
+                  children: [],
+                });
+              }
             }
 
             tilesChildren.push({

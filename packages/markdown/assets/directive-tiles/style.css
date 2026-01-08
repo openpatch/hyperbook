@@ -88,5 +88,7 @@
   width: 3rem;
   bottom: 0.5rem;
   right: 0.5rem;
+  font-size: 2rem;
+  pointer-events: none;
 }
 

@@ -38,6 +38,18 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.73.5
+
+::::tabs
+
+:::tab{title="Improved :+1:" id="improved"}
+
+- Add emoji support to tiles.
+
+:::
+
+::::
+
 ## v0.73.4
 
 ::::tabs

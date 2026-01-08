@@ -21,6 +21,8 @@ Kacheln sind eine schöne visuelle Möglichkeit für Startseiten oder
 
 ::tile{title="Eine Kachel mit einem Icon" icon="https://www.inf-schule.de/assets/img/icons/icon_algorithmen.png"}
 
+::tile{title="Eine Kachel mit einem Emoji" icon=":rocket:"}
+
 :::
 ```
 
@@ -35,5 +37,7 @@ Kacheln sind eine schöne visuelle Möglichkeit für Startseiten oder
 ::tile{title="Eine kleine Kachel" size="S"}
 
 ::tile{title="Eine Kachel mit einem Icon" icon="https://www.inf-schule.de/assets/img/icons/icon_algorithmen.png"}
+
+::tile{title="Eine Kachel mit einem Emoji" icon=":rocket:"}
 
 :::

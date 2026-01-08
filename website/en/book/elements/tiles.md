@@ -21,6 +21,8 @@ your users an overview.
 
 ::tile{title="A icon tile" icon="https://www.inf-schule.de/assets/img/icons/icon_algorithmen.png"}
 
+::tile{title="An emoji tile" icon=":rocket:"}
+
 :::
 ```
 
@@ -35,5 +37,7 @@ your users an overview.
 ::tile{title="A small tile" size="S"}
 
 ::tile{title="A icon tile" icon="https://www.inf-schule.de/assets/img/icons/icon_algorithmen.png"}
+
+::tile{title="An emoji tile" icon=":rocket:"}
 
 :::

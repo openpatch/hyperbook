@@ -1,5 +1,16 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`remarkDirectiveTiles > should support emoji icons 1`] = `
+"
+<div class="directive-tiles">
+  <ul class="tiles">
+    <li class="tile M "><a class="tile-title">Smiley tile</a><span class="tile-icon tile-icon-emoji">😃</span></li>
+    <li class="tile M "><a class="tile-title">Rocket tile</a><span class="tile-icon tile-icon-emoji">🚀</span></li>
+  </ul>
+</div>
+"
+`;
+
 exports[`remarkDirectiveTiles > should transform 1`] = `
 "
 <div class="directive-tiles">

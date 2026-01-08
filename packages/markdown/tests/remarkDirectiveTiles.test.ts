@@ -72,4 +72,19 @@ describe("remarkDirectiveTiles", () => {
       ).data.directives?.["tiles"],
     ).toBeDefined();
   });
+  it("should support emoji icons", async () => {
+    expect(
+      toHtml(
+        `:::tiles
+
+::tile{title="Smiley tile" icon=":smiley:"}
+
+::tile{title="Rocket tile" icon=":rocket:"}
+
+:::
+`,
+        ctx,
+      ).value,
+    ).toMatchSnapshot();
+  });
 });
