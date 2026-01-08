@@ -10,17 +10,23 @@ import {
 import { process } from "@hyperbook/markdown";
 import { disposeAll } from "./utils/dispose";
 import path, { posix } from "path";
-import { HyperbookContext, HyperbookJson, Navigation } from "@hyperbook/types";
+import { HyperbookContext, HyperbookJson, HyperbookPage, Navigation } from "@hyperbook/types";
 
 // Helper function to resolve relative paths
-const resolveRelativePath = (path: string, currentPageHref: string): string => {
+const resolveRelativePath = (path: string, page: HyperbookPage): string => {
   // If path is absolute, return as-is
   if (path.startsWith("/")) {
     return path;
   }
 
   // Get the directory of the current page
-  const currentPageDir = posix.dirname(currentPageHref);
+  // Use page.path.directory if available, otherwise derive from href
+  let currentPageDir: string;
+  if (page.path?.directory) {
+    currentPageDir = posix.join("/", page.path.directory);
+  } else {
+    currentPageDir = posix.dirname(page.href || "/");
+  }
 
   // Resolve the relative path and normalize
   return posix.normalize(posix.resolve(currentPageDir, path));
@@ -188,18 +194,18 @@ export default class Preview {
             }
 
             // Handle relative paths when we have a current page context
-            if (page?.href && !path.startsWith("/")) {
-              path = resolveRelativePath(path, page.href);
+            if (page && !path.startsWith("/")) {
+              path = resolveRelativePath(path, page);
             }
 
             path = [path];
           }
 
           // Handle array paths - resolve relative segments
-          if (Array.isArray(path) && page?.href) {
+          if (Array.isArray(path) && page) {
             path = path.map((segment) => {
               if (typeof segment === "string" && !segment.startsWith("/")) {
-                return resolveRelativePath(segment, page.href || "");
+                return resolveRelativePath(segment, page);
               }
               return segment;
             });

@@ -94,7 +94,10 @@ export const getNavigationForFile = async (
           null
         );
       } else if (link.startsWith("./") || link.startsWith("../")) {
-        const currentDir = path.posix.dirname(currentFile.path.href || "/");
+        // Use directory from path if available, otherwise derive from href
+        const currentDir = currentFile.path.directory
+          ? path.posix.join("/", currentFile.path.directory)
+          : path.posix.dirname(currentFile.path.href || "/");
         const resolvedHref = path.posix.normalize(
           path.posix.join(currentDir, link),
         );
