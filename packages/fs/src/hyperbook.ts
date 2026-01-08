@@ -178,7 +178,7 @@ export const getPagesAndSections = async (
       }
     }
 
-    if (index && index.path.href == "/") {
+    if (index) {
       files.push(index);
     }
 
@@ -248,7 +248,6 @@ export const getPageList = (
   for (const section of sections) {
     pageList = [
       ...pageList,
-      section,
       ...getPageList(section.sections, section.pages),
     ];
   }

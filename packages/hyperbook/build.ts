@@ -253,7 +253,8 @@ async function runBuild(
     }
 
     // Resolve the relative path and normalize
-    return posix.normalize(posix.resolve(currentPageDir, path));
+    const resolvedPath = posix.normalize(posix.resolve(currentPageDir, path));
+    return resolvedPath;
   };
 
   const baseCtx: Pick<
@@ -321,6 +322,7 @@ async function runBuild(
     pagesAndSections.sections,
     pagesAndSections.pages,
   );
+
   const searchDocuments: any[] = [];
 
   let bookFiles = await vfile.listForFolder(root, "book");
