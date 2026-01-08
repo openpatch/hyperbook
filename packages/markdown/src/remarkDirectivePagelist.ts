@@ -28,7 +28,6 @@ const getPageList = (
   for (const section of sections) {
     pageList = [
       ...pageList,
-      section,
       ...getPageList(section.sections, section.pages),
     ];
   }

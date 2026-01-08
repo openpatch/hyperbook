@@ -38,6 +38,43 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.73.4
+
+::::tabs
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+- Fix duplicate entries in pagelist.
+
+:::
+
+::::
+
+## v0.73.3
+
+::::tabs
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+- Fix resolving relative files, when using an index.md in a directory.
+
+:::
+
+::::
+
+## v0.73.1
+
+::::tabs
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+- Fix Typst styling. Only the page is now colored white.
+
+:::
+
+::::
+
+
 ## v0.73.0
 
 ::::tabs
