@@ -212,3 +212,13 @@ The snippet is located in the `snippets` folder with the name `list.md.hbs`
 ```
 
 ::pagelist{format="#list" source="name(^V.*)"}
+
+:::alert{warn}
+When using custom snippets with pagelist, the file-related helpers are **not available**:
+- `file`
+- `rfile`
+- `base64`
+- `rbase64`
+
+All other helpers (like `dateformat`, `truncate`, `truncateWords`, etc.) work normally.
+:::

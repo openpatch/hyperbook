@@ -38,6 +38,22 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.75.1
+
+::::tabs
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+**Handlebars helpers in pagelist snippets**
+
+Fixed an issue where handlebars helpers like `dateformat`, `truncate`, and `truncateWords` were not available when using custom snippets with the pagelist directive.
+
+Note: File-related helpers (`file`, `rfile`, `base64`, `rbase64`) are not available in pagelist snippets.
+
+:::
+
+::::
+
 ## v0.75.0
 
 ::::tabs

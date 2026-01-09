@@ -13,4 +13,6 @@ export {
   getMarkdown,
 } from "./vfile";
 
+export { registerBasicHelpers } from "./handlebars";
+
 export { hyperlibrary, hyperbook, hyperproject, vfile };

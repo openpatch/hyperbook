@@ -342,6 +342,9 @@ importers:
       '@excalidraw/excalidraw':
         specifier: 0.18.0
         version: 0.18.0(@types/react-dom@19.1.2(@types/react@19.1.2))(@types/react@19.1.2)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+      '@hyperbook/fs':
+        specifier: workspace:*
+        version: link:../fs
       '@hyperbook/types':
         specifier: workspace:*
         version: link:../types

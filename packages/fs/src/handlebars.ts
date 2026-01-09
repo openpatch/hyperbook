@@ -33,129 +33,67 @@ const changecase = (str: string, fn: (s: string) => string): string => {
   });
 };
 
-const registerHelpers = (handlebars: any, options?: { file: VFileBase }) => {
-  const cwd = options?.file.root ?? process.cwd();
-  handlebars.registerHelper("times", (n: number, block: any) => {
+let basicHelpersRegistered = false;
+
+/**
+ * Register basic handlebars helpers that don't require file context.
+ * Safe to call multiple times - will only register once.
+ */
+const registerBasicHelpers = (hbs: typeof handlebars) => {
+  if (basicHelpersRegistered) return;
+  basicHelpersRegistered = true;
+
+  hbs.registerHelper("times", (n: number, block: any) => {
     let accum = "";
     for (let i = 0; i < n; ++i) accum += block.fn(i);
     return accum;
   });
 
-  handlebars.registerHelper("concat", (...s: string[]) => {
-    return s.filter(s => typeof s !== "object").join("");
+  hbs.registerHelper("concat", function (...args: unknown[]) {
+    return args.filter((s) => typeof s === "string").join("");
   });
 
-  handlebars.registerHelper("camelcase", (s: string) => {
+  hbs.registerHelper("camelcase", (s: string) => {
     if (!isString(s)) return "";
     return changecase(s, (c) => c.toUpperCase());
   });
 
-  handlebars.registerHelper("dashcase", (s: string) => {
+  hbs.registerHelper("dashcase", (s: string) => {
     if (!isString(s)) return "";
     return changecase(s, (c) => "-" + c);
   });
 
-  handlebars.registerHelper("lowercase", (s: string) => {
+  hbs.registerHelper("lowercase", (s: string) => {
     if (!isString(s)) return "";
     return s.toLowerCase();
   });
 
-  handlebars.registerHelper("uppercase", (s: string) => {
+  hbs.registerHelper("uppercase", (s: string) => {
     if (!isString(s)) return "";
     return s.toUpperCase();
   });
 
-  handlebars.registerHelper("pascalcase", (s: string) => {
+  hbs.registerHelper("pascalcase", (s: string) => {
     if (!isString(s)) return "";
     s = changecase(s, (c) => c.toUpperCase());
     return s.charAt(0).toUpperCase() + s.slice(1);
   });
 
-  handlebars.registerHelper("replaceAll", (s: string, a: string, b: string) => {
+  hbs.registerHelper("replaceAll", (s: string, a: string, b: string) => {
     if (!isString(s)) return "";
     if (!isString(a)) return s;
     if (!isString(b)) b = "";
     return s.replaceAll(a, b);
   });
 
-  handlebars.registerHelper("replace", (s: string, a: string, b: string) => {
+  hbs.registerHelper("replace", (s: string, a: string, b: string) => {
     if (!isString(s)) return "";
     if (!isString(a)) return s;
     if (!isString(b)) b = "";
     return s.replace(a, b);
   });
 
-  handlebars.registerHelper("replace", (s: string, a: string, b: string) => {
-    if (!isString(s)) return "";
-    if (!isString(a)) return s;
-    if (!isString(b)) b = "";
-    return s.replace(a, b);
-  });
-
-  handlebars.registerHelper("rbase64", (src: string) => {
-    let gitRoot = findUpSync(".git", { type: "file", cwd: cwd } as Options);
-    if (!gitRoot) {
-      gitRoot = findUpSync(".git", { type: "directory", cwd: cwd } as Options);
-      if (!gitRoot) {
-        return `rbase64 is only applicable in git projects. No .git was found in ${cwd} and above.`;
-      }
-    }
-    let p = path.join(path.dirname(gitRoot), src);
-    try {
-      const fileDataBase64 = fs.readFileSync(p, "base64");
-      const mime = lookup(p);
-      return `data:${mime};base64,${fileDataBase64}`;
-    } catch (e) {
-      return `File at ${src} is missing.`;
-    }
-  });
-
-  handlebars.registerHelper(
-    "rfile",
-    (src: string, lines?: string, ellipsis?: string) => {
-      if (!src) {
-        throw Error("file needs a path to a file");
-      }
-      let gitRoot = findUpSync(".git", { type: "file", cwd: cwd } as Options);
-      if (!gitRoot) {
-        gitRoot = findUpSync(".git", {
-          type: "directory",
-          cwd: cwd,
-        } as Options);
-        if (!gitRoot) {
-          return `rfile is only applicable in git projects. No .git was found in ${cwd} and above`;
-        }
-      }
-      let p = path.join(path.dirname(gitRoot), src);
-      try {
-        const content = fs.readFileSync(p, "utf8");
-        return extractLines(content, lines, ellipsis);
-      } catch (e) {
-        return `File ${src} is missing.`;
-      }
-    },
-  );
-
-  handlebars.registerHelper("base64", (src: string) => {
-    let p = path.join(cwd, src);
-    const fileDataBase64 = fs.readFileSync(p, "base64");
-    const mime = lookup(p);
-    return `data:${mime};base64,${fileDataBase64}`;
-  });
-
-  handlebars.registerHelper(
-    "file",
-    (src: string, lines?: string, ellipsis?: string) => {
-      if (!src) {
-        throw Error("file needs a path to a file");
-      }
-      let p = path.join(cwd, src);
-      const content = fs.readFileSync(p, "utf8");
-      return extractLines(content, lines, ellipsis);
-    },
-  );
-
-  handlebars.registerHelper(
+  hbs.registerHelper(
     "truncate",
     (str: string, limit: number, suffix: string) => {
       if (!isString(str)) return "";
@@ -166,7 +104,7 @@ const registerHelpers = (handlebars: any, options?: { file: VFileBase }) => {
     },
   );
 
-  handlebars.registerHelper(
+  hbs.registerHelper(
     "truncateWords",
     (str: string, limit: number, suffix: string) => {
       if (!isString(str)) return "";
@@ -178,7 +116,7 @@ const registerHelpers = (handlebars: any, options?: { file: VFileBase }) => {
     },
   );
 
-  handlebars.registerHelper(
+  hbs.registerHelper(
     "dateformat",
     (date: string | Date, format: string) => {
       const d = date instanceof Date ? date : new Date(date);
@@ -210,4 +148,77 @@ const registerHelpers = (handlebars: any, options?: { file: VFileBase }) => {
   );
 };
 
-export { registerHelpers, handlebars };
+/**
+ * Register all handlebars helpers including file-dependent ones.
+ * Calls registerBasicHelpers internally.
+ */
+const registerHelpers = (hbs: typeof handlebars, options?: { file: VFileBase }) => {
+  const cwd = options?.file.root ?? process.cwd();
+
+  registerBasicHelpers(hbs);
+
+  hbs.registerHelper("rbase64", (src: string) => {
+    let gitRoot = findUpSync(".git", { type: "file", cwd: cwd } as Options);
+    if (!gitRoot) {
+      gitRoot = findUpSync(".git", { type: "directory", cwd: cwd } as Options);
+      if (!gitRoot) {
+        return `rbase64 is only applicable in git projects. No .git was found in ${cwd} and above.`;
+      }
+    }
+    let p = path.join(path.dirname(gitRoot), src);
+    try {
+      const fileDataBase64 = fs.readFileSync(p, "base64");
+      const mime = lookup(p);
+      return `data:${mime};base64,${fileDataBase64}`;
+    } catch (e) {
+      return `File at ${src} is missing.`;
+    }
+  });
+
+  hbs.registerHelper(
+    "rfile",
+    (src: string, lines?: string, ellipsis?: string) => {
+      if (!src) {
+        throw Error("file needs a path to a file");
+      }
+      let gitRoot = findUpSync(".git", { type: "file", cwd: cwd } as Options);
+      if (!gitRoot) {
+        gitRoot = findUpSync(".git", {
+          type: "directory",
+          cwd: cwd,
+        } as Options);
+        if (!gitRoot) {
+          return `rfile is only applicable in git projects. No .git was found in ${cwd} and above`;
+        }
+      }
+      let p = path.join(path.dirname(gitRoot), src);
+      try {
+        const content = fs.readFileSync(p, "utf8");
+        return extractLines(content, lines, ellipsis);
+      } catch (e) {
+        return `File ${src} is missing.`;
+      }
+    },
+  );
+
+  hbs.registerHelper("base64", (src: string) => {
+    let p = path.join(cwd, src);
+    const fileDataBase64 = fs.readFileSync(p, "base64");
+    const mime = lookup(p);
+    return `data:${mime};base64,${fileDataBase64}`;
+  });
+
+  hbs.registerHelper(
+    "file",
+    (src: string, lines?: string, ellipsis?: string) => {
+      if (!src) {
+        throw Error("file needs a path to a file");
+      }
+      let p = path.join(cwd, src);
+      const content = fs.readFileSync(p, "utf8");
+      return extractLines(content, lines, ellipsis);
+    },
+  );
+};
+
+export { registerHelpers, registerBasicHelpers, handlebars };

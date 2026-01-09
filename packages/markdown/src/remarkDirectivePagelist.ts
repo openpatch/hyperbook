@@ -6,6 +6,7 @@ import {
   HyperbookPage,
   HyperbookSection,
 } from "@hyperbook/types";
+import { registerBasicHelpers } from "@hyperbook/fs";
 import handlebars from "handlebars";
 import fs from "fs";
 import path from "path";
@@ -102,6 +103,7 @@ export default (ctx: HyperbookContext) => () => {
             path.join(ctx.root, "snippets", snippetId + ".md.hbs"),
             { encoding: "utf8" },
           );
+          registerBasicHelpers(handlebars);
           const template = handlebars.compile(snippetFile);
           const content = template({ pages: filteredPages });
           const contentTree = remark(ctx).parse(content);
