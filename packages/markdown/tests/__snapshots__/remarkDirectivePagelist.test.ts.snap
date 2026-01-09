@@ -1,5 +1,57 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`remarkDirectiveEmbed > should combine custom frontmatter with standard fields 1`] = `
+"
+<div class="directive-pagelist">
+  <ul>
+    <li><a href="/elements/youtube">YouTube</a></li>
+  </ul>
+</div>
+"
+`;
+
+exports[`remarkDirectiveEmbed > should filter by custom frontmatter array field 1`] = `
+"
+<div class="directive-pagelist">
+  <ul>
+    <li><a href="/elements/video">Video</a></li>
+    <li><a href="/elements/youtube">YouTube</a></li>
+  </ul>
+</div>
+"
+`;
+
+exports[`remarkDirectiveEmbed > should filter by custom frontmatter field 1`] = `
+"
+<div class="directive-pagelist">
+  <ul>
+    <li><a href="/elements/video">Video</a></li>
+  </ul>
+</div>
+"
+`;
+
+exports[`remarkDirectiveEmbed > should filter by custom frontmatter with NOT 1`] = `
+"
+<div class="directive-pagelist">
+  <ul>
+    <li><a href="/elements/youtube">YouTube</a></li>
+  </ul>
+</div>
+"
+`;
+
+exports[`remarkDirectiveEmbed > should filter by custom frontmatter with OR 1`] = `
+"
+<div class="directive-pagelist">
+  <ul>
+    <li><a href="/elements/video">Video</a></li>
+    <li><a href="/elements/youtube">YouTube</a></li>
+  </ul>
+</div>
+"
+`;
+
 exports[`remarkDirectiveEmbed > should filter by keyword 1`] = `
 "
 <div class="directive-pagelist">
@@ -64,6 +116,120 @@ exports[`remarkDirectiveEmbed > should filter glossary and format as glossary 1`
       <li><a class="term" href="/glossary/oop">OOP</a></li>
     </ul>
   </div>
+</div>
+"
+`;
+
+exports[`remarkDirectiveEmbed > should filter with NOT operator 1`] = `
+"
+<div class="directive-pagelist">
+  <ul>
+    <li><a href="/elements/archive">Archiv</a></li>
+    <li><a href="/elements/audio">Audio</a></li>
+    <li><a href="/elements/bitflow">Bitflow</a></li>
+    <li><a href="/elements/download">Download</a></li>
+    <li><a href="/elements/embed">Embed</a></li>
+    <li><a href="/elements/emoji">Emoji</a></li>
+    <li><a href="/elements/excalidraw">Excalidraw</a></li>
+    <li><a href="/elements/protect">Geschützer Bereich</a></li>
+    <li><a href="/elements/glossary">Glossar</a></li>
+    <li><a href="/elements/alert">Hinweise</a></li>
+    <li><a href="/elements/tiles">Kacheln</a></li>
+    <li><a href="/elements/collapsible">Klappkasten</a></li>
+    <li><a href="/elements/bookmarks">Lesezeichen</a></li>
+    <li><a href="/elements/math">Mathmathik</a></li>
+    <li><a href="/elements/mermaid">Mermaid</a></li>
+    <li><a href="/elements/online-ide">Online IDE</a></li>
+    <li><a href="/elements/plantuml">PlantUML</a></li>
+    <li><a href="/elements/qr">QR Code</a></li>
+    <li><a href="/elements/tabs">Reiter</a></li>
+    <li><a href="/elements/scratchblock">Scratchblöcke</a></li>
+    <li><a href="/elements/slideshow">Slideshow</a></li>
+    <li><a href="/elements/snippets">Snippets</a></li>
+    <li><a href="/elements/sql-ide">SQL IDE</a></li>
+    <li><a href="/elements/struktog">Struktog</a></li>
+    <li><a href="/elements/youtube">YouTube</a></li>
+  </ul>
+</div>
+"
+`;
+
+exports[`remarkDirectiveEmbed > should filter with OR operator 1`] = `
+"
+<div class="directive-pagelist">
+  <ul>
+    <li><a href="/elements/audio">Audio</a></li>
+    <li><a href="/elements/video">Video</a></li>
+  </ul>
+</div>
+"
+`;
+
+exports[`remarkDirectiveEmbed > should filter with multiple OR conditions 1`] = `
+"
+<div class="directive-pagelist">
+  <ul>
+    <li><a href="/elements/audio">Audio</a></li>
+    <li><a href="/elements/embed">Embed</a></li>
+    <li><a href="/elements/video">Video</a></li>
+  </ul>
+</div>
+"
+`;
+
+exports[`remarkDirectiveEmbed > should filter with standalone NOT 1`] = `
+"
+<div class="directive-pagelist">
+  <ul>
+    <li><a href="/elements/archive">Archiv</a></li>
+    <li><a href="/elements/audio">Audio</a></li>
+    <li><a href="/configuration/section">Bereich Konfiguration</a></li>
+    <li><a href="/configuration/library">Bibliothek Konfiguration</a></li>
+    <li><a href="/markdown/image">Bild</a></li>
+    <li><a href="/elements/bitflow">Bitflow</a></li>
+    <li><a href="/configuration/book">Buch Konfiguration</a></li>
+    <li><a href="/elements/download">Download</a></li>
+    <li><a href="/hosting/edugitpages">EduGit Pages</a></li>
+    <li><a href="/hosting/custom">Eigene Lösung</a></li>
+    <li><a href="/advanced/single-use-templates">Einweg Vorlagen</a></li>
+    <li><a href="/elements/embed">Embed</a></li>
+    <li><a href="/elements/emoji">Emoji</a></li>
+    <li><a href="/elements/excalidraw">Excalidraw</a></li>
+    <li><a href="/elements/protect">Geschützer Bereich</a></li>
+    <li><a href="/hosting/ghpages">GitHub Pages</a></li>
+    <li><a href="/hosting/glpages">GitLab Pages</a></li>
+    <li><a href="/elements/glossary">Glossar</a></li>
+    <li><a href="/markdown/emphasis">Hervorhebung</a></li>
+    <li><a href="/elements/alert">Hinweise</a></li>
+    <li><a href="/markdown/hr">Horizontale Linie</a></li>
+    <li><a href="/elements/tiles">Kacheln</a></li>
+    <li><a href="/elements/collapsible">Klappkasten</a></li>
+    <li><a href="/markdown/comment">Kommentar</a></li>
+    <li><a href="/elements/bookmarks">Lesezeichen</a></li>
+    <li><a href="/markdown/link">Link</a></li>
+    <li><a href="/markdown/list">Liste</a></li>
+    <li><a href="/">Los Gehts</a></li>
+    <li><a href="/elements/math">Mathmathik</a></li>
+    <li><a href="/elements/mermaid">Mermaid</a></li>
+    <li><a href="/elements/online-ide">Online IDE</a></li>
+    <li><a href="/glossary/oop">OOP</a></li>
+    <li><a href="/elements/plantuml">PlantUML</a></li>
+    <li><a href="/elements/qr">QR Code</a></li>
+    <li><a href="/markdown/code">Quelltext</a></li>
+    <li><a href="/elements/tabs">Reiter</a></li>
+    <li><a href="/elements/scratchblock">Scratchblöcke</a></li>
+    <li><a href="/configuration/page">Seiten Konfiguration</a></li>
+    <li><a href="/elements/slideshow">Slideshow</a></li>
+    <li><a href="/elements/snippets">Snippets</a></li>
+    <li><a href="/elements/sql-ide">SQL IDE</a></li>
+    <li><a href="/elements/struktog">Struktog</a></li>
+    <li><a href="/markdown/table">Tabelle</a></li>
+    <li><a href="/markdown/header">Überschriften</a></li>
+    <li><a href="/hosting/vercel">Vercel</a></li>
+    <li><a href="/advanced/template-demo-json">Vorlage - Demo</a></li>
+    <li><a href="/markdown/line-break">Zeilenumbruch</a></li>
+    <li><a href="/markdown/quote">Zitat</a></li>
+  </ul>
 </div>
 "
 `;
@@ -190,6 +356,28 @@ exports[`remarkDirectiveEmbed > should format as ul 1`] = `
 "
 `;
 
+exports[`remarkDirectiveEmbed > should order by custom frontmatter field asc 1`] = `
+"
+<div class="directive-pagelist">
+  <ul>
+    <li><a href="/elements/video">Video</a></li>
+    <li><a href="/elements/youtube">YouTube</a></li>
+  </ul>
+</div>
+"
+`;
+
+exports[`remarkDirectiveEmbed > should order by custom frontmatter field desc 1`] = `
+"
+<div class="directive-pagelist">
+  <ul>
+    <li><a href="/elements/youtube">YouTube</a></li>
+    <li><a href="/elements/video">Video</a></li>
+  </ul>
+</div>
+"
+`;
+
 exports[`remarkDirectiveEmbed > should sort by name asc 1`] = `
 "
 <div class="directive-pagelist">
@@ -255,6 +443,30 @@ exports[`remarkDirectiveEmbed > should sort by name desc 1`] = `
     <li><a href="/elements/bitflow">Bitflow</a></li>
     <li><a href="/elements/audio">Audio</a></li>
     <li><a href="/elements/archive">Archiv</a></li>
+  </ul>
+</div>
+"
+`;
+
+exports[`remarkDirectiveEmbed > should support complex nested expressions 1`] = `
+"
+<div class="directive-pagelist">
+  <ul>
+    <li><a href="/elements/video">Video</a></li>
+    <li><a href="/advanced/templates">Vorlagen</a></li>
+    <li><a href="/advanced/template-demo-yaml">Vorlagen - Demo</a></li>
+    <li><a href="/elements/youtube">YouTube</a></li>
+  </ul>
+</div>
+"
+`;
+
+exports[`remarkDirectiveEmbed > should support parentheses for grouping 1`] = `
+"
+<div class="directive-pagelist">
+  <ul>
+    <li><a href="/elements/audio">Audio</a></li>
+    <li><a href="/elements/video">Video</a></li>
   </ul>
 </div>
 "

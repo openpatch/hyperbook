@@ -162,4 +162,152 @@ describe("remarkDirectiveEmbed", () => {
       ).value,
     ).toMatchSnapshot();
   });
+
+  // OR operator tests
+  it("should filter with OR operator", async () => {
+    expect(
+      toHtml(
+        `
+::pagelist{format="#list" source="name(Video) OR name(Audio)" orderBy="name:asc"}
+`,
+        realCtx,
+      ).value,
+    ).toMatchSnapshot();
+  });
+
+  it("should filter with multiple OR conditions", async () => {
+    expect(
+      toHtml(
+        `
+::pagelist{format="#list" source="name(Video) OR name(Audio) OR name(Embed)" orderBy="name:asc"}
+`,
+        realCtx,
+      ).value,
+    ).toMatchSnapshot();
+  });
+
+  // NOT operator tests
+  it("should filter with NOT operator", async () => {
+    expect(
+      toHtml(
+        `
+::pagelist{format="#list" source="href(/elements/.*) AND NOT name(Video)" orderBy="name:asc"}
+`,
+        realCtx,
+      ).value,
+    ).toMatchSnapshot();
+  });
+
+  it("should filter with standalone NOT", async () => {
+    expect(
+      toHtml(
+        `
+::pagelist{format="#list" source="NOT keyword(test)" orderBy="name:asc"}
+`,
+        realCtx,
+      ).value,
+    ).toMatchSnapshot();
+  });
+
+  // Parentheses for grouping
+  it("should support parentheses for grouping", async () => {
+    expect(
+      toHtml(
+        `
+::pagelist{format="#list" source="href(/elements/.*) AND (name(Video) OR name(Audio))" orderBy="name:asc"}
+`,
+        realCtx,
+      ).value,
+    ).toMatchSnapshot();
+  });
+
+  it("should support complex nested expressions", async () => {
+    expect(
+      toHtml(
+        `
+::pagelist{format="#list" source="(href(/elements/.*) OR href(/advanced/.*)) AND keyword(test)" orderBy="name:asc"}
+`,
+        realCtx,
+      ).value,
+    ).toMatchSnapshot();
+  });
+
+  // Custom frontmatter tests
+  it("should filter by custom frontmatter field", async () => {
+    expect(
+      toHtml(
+        `
+::pagelist{format="#list" source="difficulty(beginner)" orderBy="name:asc"}
+`,
+        realCtx,
+      ).value,
+    ).toMatchSnapshot();
+  });
+
+  it("should filter by custom frontmatter array field", async () => {
+    expect(
+      toHtml(
+        `
+::pagelist{format="#list" source="tags(media)" orderBy="name:asc"}
+`,
+        realCtx,
+      ).value,
+    ).toMatchSnapshot();
+  });
+
+  it("should combine custom frontmatter with standard fields", async () => {
+    expect(
+      toHtml(
+        `
+::pagelist{format="#list" source="difficulty(intermediate) AND keyword(test)" orderBy="name:asc"}
+`,
+        realCtx,
+      ).value,
+    ).toMatchSnapshot();
+  });
+
+  it("should filter by custom frontmatter with OR", async () => {
+    expect(
+      toHtml(
+        `
+::pagelist{format="#list" source="difficulty(beginner) OR difficulty(intermediate)" orderBy="name:asc"}
+`,
+        realCtx,
+      ).value,
+    ).toMatchSnapshot();
+  });
+
+  it("should filter by custom frontmatter with NOT", async () => {
+    expect(
+      toHtml(
+        `
+::pagelist{format="#list" source="tags(media) AND NOT difficulty(beginner)" orderBy="name:asc"}
+`,
+        realCtx,
+      ).value,
+    ).toMatchSnapshot();
+  });
+
+  // Custom frontmatter orderBy tests
+  it("should order by custom frontmatter field asc", async () => {
+    expect(
+      toHtml(
+        `
+::pagelist{format="#list" source="tags(media)" orderBy="difficulty:asc"}
+`,
+        realCtx,
+      ).value,
+    ).toMatchSnapshot();
+  });
+
+  it("should order by custom frontmatter field desc", async () => {
+    expect(
+      toHtml(
+        `
+::pagelist{format="#list" source="tags(media)" orderBy="difficulty:desc"}
+`,
+        realCtx,
+      ).value,
+    ).toMatchSnapshot();
+  });
 });

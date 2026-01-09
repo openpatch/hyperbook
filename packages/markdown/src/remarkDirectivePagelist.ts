@@ -18,12 +18,13 @@ import {
   registerDirective,
 } from "./remarkHelper";
 import { remark } from "./process";
+import { parseQuery, evaluateQuery, createPageSorter } from "./queryParser";
 
 const getPageList = (
   sections: HyperbookSection[],
   pages: HyperbookPage[],
 ): HyperbookPage[] => {
-  let pageList = [...pages];
+  let pageList = [...pages.filter(p => !p.isEmpty)];
 
   for (const section of sections) {
     pageList = [
@@ -67,6 +68,7 @@ export default (ctx: HyperbookContext) => () => {
           format = "ul",
           orderBy = "name:asc",
           source = "href(.*)",
+          limit = null,
         } = attributes;
 
         expectLeafDirective(node, file, name);
@@ -77,51 +79,17 @@ export default (ctx: HyperbookContext) => () => {
           class: "directive-pagelist",
         };
 
-        const sources = (source?.split(" AND ") || []).map((s) => ({
-          type: s.split("(")[0],
-          regex: s.split("(")[1].split(")")[0] || "",
-        }));
+        // Parse and evaluate the query
+        const query = parseQuery(source || "href(.*)");
+        let filteredPages = pageList.filter((p) => evaluateQuery(query, p as HyperbookPage & Record<string, unknown>));
 
-        let filteredPages = pageList.filter((p) => {
-          let accept = true;
-          for (let source of sources) {
-            if (source.type === "href") {
-              accept = accept && p.href?.match(source.regex) !== null;
-            } else if (source.type === "name") {
-              accept = accept && p.name.match(source.regex) !== null;
-            } else if (source.type === "keyword") {
-              let foundOne = false;
-              for (let keyword of p.keywords || []) {
-                if (keyword.match(source.regex)) {
-                  foundOne = true;
-                  break;
-                }
-              }
-              accept = accept && foundOne;
-            }
-          }
-          return accept;
-        });
+        // Sort pages
+        const sorter = createPageSorter(orderBy || "name:asc");
+        filteredPages = filteredPages.sort((p1, p2) => sorter(p1 as Record<string, unknown>, p2 as Record<string, unknown>));
 
-        const orderByKey = orderBy?.split(":")[0] || "name";
-        const orderByMode = orderBy?.split(":")[1] || "desc";
-
-        filteredPages = filteredPages.sort((p1, p2) => {
-          let result = 0;
-          if (orderByKey === "name") {
-            result = p1.name.localeCompare(p2.name);
-          } else if (orderByKey === "href") {
-            result = (p1.href || "").localeCompare(p2.href || "");
-          } else if (orderByKey === "index") {
-            result = (p1.index || 0) - (p2.index || 0);
-          }
-
-          if (orderByMode === "desc") {
-            return result * -1;
-          }
-
-          return result;
-        });
+        if (limit !== null) {
+          filteredPages = filteredPages.slice(0, Number(limit));
+        }
 
         filteredPages = filteredPages.map((p) => ({
           ...p,
