@@ -154,6 +154,60 @@ const registerHelpers = (handlebars: any, options?: { file: VFileBase }) => {
       return extractLines(content, lines, ellipsis);
     },
   );
+
+  handlebars.registerHelper(
+    "truncate",
+    (str: string, limit: number, suffix: string) => {
+      if (!isString(str)) return "";
+      if (typeof limit !== "number") limit = 100;
+      if (!isString(suffix)) suffix = "...";
+      if (str.length <= limit) return str;
+      return str.slice(0, limit) + suffix;
+    },
+  );
+
+  handlebars.registerHelper(
+    "truncateWords",
+    (str: string, limit: number, suffix: string) => {
+      if (!isString(str)) return "";
+      if (typeof limit !== "number") limit = 10;
+      if (!isString(suffix)) suffix = "...";
+      const words = str.split(/\s+/);
+      if (words.length <= limit) return str;
+      return words.slice(0, limit).join(" ") + suffix;
+    },
+  );
+
+  handlebars.registerHelper(
+    "dateformat",
+    (date: string | Date, format: string) => {
+      const d = date instanceof Date ? date : new Date(date);
+      if (isNaN(d.getTime())) return "";
+      if (!isString(format)) format = "YYYY-MM-DD";
+
+      const pad = (n: number, len = 2) => String(n).padStart(len, "0");
+      const year = d.getFullYear();
+      const month = d.getMonth() + 1;
+      const day = d.getDate();
+      const hours = d.getHours();
+      const minutes = d.getMinutes();
+      const seconds = d.getSeconds();
+
+      return format
+        .replace(/YYYY/g, String(year))
+        .replace(/YY/g, String(year).slice(-2))
+        .replace(/MM/g, pad(month))
+        .replace(/M/g, String(month))
+        .replace(/DD/g, pad(day))
+        .replace(/D/g, String(day))
+        .replace(/HH/g, pad(hours))
+        .replace(/H/g, String(hours))
+        .replace(/mm/g, pad(minutes))
+        .replace(/m/g, String(minutes))
+        .replace(/ss/g, pad(seconds))
+        .replace(/s/g, String(seconds));
+    },
+  );
 };
 
 export { registerHelpers, handlebars };

@@ -271,3 +271,63 @@ Give me Apple Banana
 ```
 
 Give me Apple Apple
+
+### dateformat
+
+Format a date string or Date object using a format pattern.
+
+```hbs
+{{dateformat "2026-01-09T19:29:01.557Z" "YYYY-MM-DD"}}
+```
+
+2026-01-09
+
+Supported format tokens:
+- `YYYY` - 4-digit year
+- `YY` - 2-digit year
+- `MM` - padded month (01-12)
+- `M` - month (1-12)
+- `DD` - padded day (01-31)
+- `D` - day (1-31)
+- `HH` - padded hours (00-23)
+- `H` - hours (0-23)
+- `mm` - padded minutes (00-59)
+- `m` - minutes (0-59)
+- `ss` - padded seconds (00-59)
+- `s` - seconds (0-59)
+
+```hbs
+{{dateformat "2026-01-09T19:29:01.557Z" "DD.MM.YYYY HH:mm:ss"}}
+```
+
+09.01.2026 19:29:01
+
+### truncate
+
+Truncate a string to a specified character limit with a suffix.
+
+```hbs
+{{truncate "Hello World, this is a long string" 11 "..."}}
+```
+
+Hello World...
+
+Parameters:
+- `str` - the string to truncate
+- `limit` - maximum number of characters (default: 100)
+- `suffix` - string to append when truncated (default: "...")
+
+### truncateWords
+
+Truncate a string to a specified word limit with a suffix.
+
+```hbs
+{{truncateWords "one two three four five six" 3 "..."}}
+```
+
+one two three...
+
+Parameters:
+- `str` - the string to truncate
+- `limit` - maximum number of words (default: 10)
+- `suffix` - string to append when truncated (default: "...")

@@ -38,6 +38,36 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.75.0
+
+::::tabs
+
+:::tab{title="New :rocket:" id="new"}
+
+**New Handlebars Helpers**
+
+Three new helpers for snippets and templates:
+
+- **dateformat**: Format dates with customizable patterns
+  ```hbs
+  {{dateformat "2026-01-09" "DD.MM.YYYY"}}  → 09.01.2026
+  ```
+  Supports: `YYYY`, `YY`, `MM`, `M`, `DD`, `D`, `HH`, `H`, `mm`, `m`, `ss`, `s`
+
+- **truncate**: Truncate strings by character limit
+  ```hbs
+  {{truncate "Hello World" 5 "..."}}  → Hello...
+  ```
+
+- **truncateWords**: Truncate strings by word count
+  ```hbs
+  {{truncateWords "one two three four" 2 "..."}}  → one two...
+  ```
+
+:::
+
+::::
+
 ## v0.74.0
 
 ::::tabs
