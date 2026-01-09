@@ -1,6 +1,6 @@
 {
   "name": "create-hyperbook",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Shared logic for creating new Hyperbook projects",
   "platform": "node",
   "main": "./dist/index.js",
