@@ -667,7 +667,7 @@ nav li+li {
   margin-left: 5px;
 }
 
-.section[open] summary.name:after {
+.section[open] > summary.name:after {
   content: "\2212";
 }
 

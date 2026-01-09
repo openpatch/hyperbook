@@ -25,6 +25,7 @@ Here are the properties you can set in the frontmatter:
 | Property    | Description                                                                                                                         |
 | :---------- | :---------------------------------------------------------------------------------------------------------------------------------- |
 | name        | Name of the page used in the navigation                                                                                             |
+| title       | Alternative to `name` for compatibility with other tools like MkDocs. If both are set, `name` takes precedence                     |
 | description | Description of the page used for SEO                                                                                                |
 | permaid     | An id which will make the page also available at e.g. /@/audio, when setting permaid to audio |
 | keywords    | A list of keywords used for SEO                                                                                                     |

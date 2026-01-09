@@ -156,7 +156,7 @@ export const getPagesAndSections = async (
         const markdown = await vfile.getMarkdown(directory.index);
         section = {
           ...markdown.data,
-          name: markdown.data?.name || directory.name,
+          name: markdown.data?.name || markdown.data?.title || directory.name,
           isEmpty: markdown.content.trim() === "",
           pages: [],
           sections: [],
@@ -185,7 +185,7 @@ export const getPagesAndSections = async (
     for (const file of files) {
       const data = file.markdown.data;
       if (!data.name) {
-        data.name = file.name;
+        data.name = data.title || file.name;
       }
       const page: HyperbookPage = {
         ...data,
@@ -232,7 +232,7 @@ export const getPagesAndSections = async (
         ({
           href: g.path.href,
           ...g.markdown.data,
-          name: g.markdown.data?.name || g.name,
+          name: g.markdown.data?.name || g.markdown.data?.title || g.name,
           repo: makeRepoLink(hyperbook.repo, g),
         }) as HyperbookPage,
     ),

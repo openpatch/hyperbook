@@ -38,6 +38,36 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.76.0
+
+::::tabs
+
+:::tab{title="New :rocket:" id="new"}
+
+**Title as Alternative to Name**
+
+You can now use `title` as an alternative to `name` in page and section frontmatter. This improves compatibility with other documentation tools like MkDocs that use `title` in their frontmatter.
+
+```yaml
+---
+title: My Page Title
+---
+```
+
+If both `name` and `title` are present, `name` takes precedence.
+
+:::
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+**Navigation Collapsible Symbol Fix**
+
+Fixed an issue where nested collapsible sections in the navigation incorrectly showed a minus symbol (`-`) instead of a plus symbol (`+`) when they were not expanded.
+
+:::
+
+::::
+
 ## v0.75.1
 
 ::::tabs

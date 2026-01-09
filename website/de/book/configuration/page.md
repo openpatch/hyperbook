@@ -34,6 +34,7 @@ Hier sind die Eigenschaften, die im Frontmatter gesetzt werden können:
 | Eigenschaft | Beschreibung                                                                                                                                   |
 | :---------- | :--------------------------------------------------------------------------------------------------------------------------------------------- |
 | name        | Name der Seite. Wird in der Navigation verwendet.                                                                                              |
+| title       | Alternative zu `name` für Kompatibilität mit anderen Tools wie MkDocs. Wenn beide gesetzt sind, hat `name` Vorrang                            |
 | description | Beschreibung der Seite. Wird für SEO verwendet.                                                                                                |
 | permaid     | Eine id, welche die Seite auch unter zum Beispiel /@/audio verfügbar macht, wenn die permaid auf audio gesetzt wurde. |
 | keywords    | Eine Liste von Schlüsselwörter. Wird für SEO verwendet.                                                                                        |

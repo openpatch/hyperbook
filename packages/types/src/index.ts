@@ -38,6 +38,7 @@ export type Layout = "default" | "wide" | "standalone";
 
 export type HyperbookPageFrontmatter = {
   name: string;
+  title?: string;
   permaid?: string;
   lang?: Language;
   qrcode?: boolean;

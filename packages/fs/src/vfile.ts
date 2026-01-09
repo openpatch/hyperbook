@@ -562,7 +562,7 @@ export async function getGlossary(root: string): Promise<Glossary> {
     }
 
     const { data } = file.markdown;
-    const name = data.name ?? file.name;
+    const name = data.name ?? data.title ?? file.name;
 
     const letter = name[0].toUpperCase();
     if (!glossary[letter]) {
