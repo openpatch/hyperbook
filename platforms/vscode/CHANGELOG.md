@@ -1,5 +1,22 @@
 # @hyperbook/vscode-extension
 
+## 0.48.15
+
+### Patch Changes
+
+- [`6fb2e9a`](https://github.com/openpatch/hyperbook/commit/6fb2e9a117ed251aeacbe16ffb3cae3d838bbf27) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix various typos and bugs:
+  - Fix "Buildung" typo in build progress messages (should be "Building")
+  - Fix "lanuage" typo in error message (should be "language")
+  - Fix incorrect MIME type "plain/text" to "text/plain" in dev server
+  - Fix "aspectRation" typo to "aspectRatio" in types and VSCode schema
+  - Fix CSS property "aspectRatio:" to "aspect-ratio:" in embed directive
+  - Fix incorrect repository URL in README (openpath → openpatch)
+  - Update minimum Node.js version from 12.22.0 to 18
+- Updated dependencies [[`8f3efe1`](https://github.com/openpatch/hyperbook/commit/8f3efe19ff44fde0b174cc50c0904b8bd09b753f), [`db806c9`](https://github.com/openpatch/hyperbook/commit/db806c9f23fbac79bb23c14629efce74cfd8f08f), [`6fb2e9a`](https://github.com/openpatch/hyperbook/commit/6fb2e9a117ed251aeacbe16ffb3cae3d838bbf27)]:
+  - @hyperbook/fs@0.23.0
+  - @hyperbook/markdown@0.47.1
+  - create-hyperbook@0.3.1
+
 ## 0.48.14
 
 ### Patch Changes

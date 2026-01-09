@@ -1,5 +1,15 @@
 # @hyperbook/fs
 
+## 0.23.0
+
+### Minor Changes
+
+- [`8f3efe1`](https://github.com/openpatch/hyperbook/commit/8f3efe19ff44fde0b174cc50c0904b8bd09b753f) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add `title` as an alternative to `name` in page and section frontmatter for better compatibility with other documentation tools like MkDocs. When both are present, `name` takes precedence.
+
+### Patch Changes
+
+- [`db806c9`](https://github.com/openpatch/hyperbook/commit/db806c9f23fbac79bb23c14629efce74cfd8f08f) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix missing handlebars helpers (like `dateformat`) in pagelist custom snippets. The basic helpers are now properly registered when using custom snippet templates with the pagelist directive.
+
 ## 0.22.0
 
 ### Minor Changes
