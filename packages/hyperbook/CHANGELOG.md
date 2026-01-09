@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.76.1
+
+### Patch Changes
+
+- [`47d6a00`](https://github.com/openpatch/hyperbook/commit/47d6a00a7c5d2304afcbd218ac4c349fe235b590) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Change base font size to 1rem for improved accessibility. This allows the browser's default font size settings to take effect, respecting user preferences.
+
 ## 0.76.0
 
 ### Minor Changes
