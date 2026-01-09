@@ -34,7 +34,7 @@ export default (ctx: HyperbookContext) => () => {
         data.hName = "div";
         data.hProperties = {
           class: "directive-embed",
-          style: `aspectRatio: ${aspectRatio}; height: ${height}; width: ${width}`,
+          style: `aspect-ratio: ${aspectRatio}; height: ${height}; width: ${width}`,
         };
         data.hChildren = [
           {

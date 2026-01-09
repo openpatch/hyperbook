@@ -4,7 +4,7 @@ Hyperbook is a quick and easy way to build interactive workbooks, that
 support modern standards and runs superfast.
 
 - **Documentation**: https://hyperbook.openpatch.org
-- **Repository:** https://github.com/openpath/hyperbook
+- **Repository:** https://github.com/openpatch/hyperbook
 - **Community**: https://matrix.to/#/#openpatch:matrix.org
 
 ## Documentation

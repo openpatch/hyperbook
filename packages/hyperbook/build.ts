@@ -378,7 +378,7 @@ async function runBuild(
       readline.cursorTo(process.stdout, 0);
     }
     process.stdout.write(
-      `${chalk.blue(`[${prefix}]`)} Buildung book: [${i++}/${bookFiles.length}]`,
+      `${chalk.blue(`[${prefix}]`)} Building book: [${i++}/${bookFiles.length}]`,
     );
     if (process.env.CI) {
       process.stdout.write("\n");
@@ -448,7 +448,7 @@ async function runBuild(
       readline.cursorTo(process.stdout, 0);
     }
     process.stdout.write(
-      `${chalk.blue(`[${prefix}]`)} Buildung glossary: [${i++}/${glossaryFiles.length}]`,
+      `${chalk.blue(`[${prefix}]`)} Building glossary: [${i++}/${glossaryFiles.length}]`,
     );
     if (process.env.CI) {
       process.stdout.write("\n");
@@ -703,7 +703,7 @@ async function runBuild(
       } catch (e) {
         console.log(e);
         console.log(
-          `${chalk.yellow(`[${prefix}]`)} ${hyperbookJson.language} is no valid value for the lanuage key. See https://github.com/MihaiValentin/lunr-languages for possible values. Falling back to English.`,
+          `${chalk.yellow(`[${prefix}]`)} ${hyperbookJson.language} is not a valid value for the language key. See https://github.com/MihaiValentin/lunr-languages for possible values. Falling back to English.`,
         );
       }
     }

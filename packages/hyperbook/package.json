@@ -22,7 +22,7 @@
     "url": "https://github.com/openpatch/hyperbook/issues"
   },
   "engines": {
-    "node": ">=12.22.0"
+    "node": ">=18"
   },
   "scripts": {
     "version": "pnpm build",

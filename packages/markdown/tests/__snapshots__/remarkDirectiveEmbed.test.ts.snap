@@ -2,7 +2,7 @@
 
 exports[`remarkDirectiveEmbed > should transform 1`] = `
 "
-<div class="directive-embed" style="aspectRatio: undefined; height: 400px; width: 100%">
+<div class="directive-embed" style="aspect-ratio: undefined; height: 400px; width: 100%">
   <iframe src="https://learningapps.org/watch?app=15767435" allowfullscreen></iframe>
 </div>
 "

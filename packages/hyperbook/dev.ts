@@ -20,7 +20,7 @@ export async function runDev({ port = 8080 }: { port: number }): Promise<void> {
       const responseBody = `Forbidden Method: ${request.method}`;
 
       response.writeHead(403, {
-        "Content-Type": "plain/text",
+        "Content-Type": "text/plain",
         "Content-Length": Buffer.byteLength(responseBody),
       });
 
@@ -117,7 +117,7 @@ window.onload = () => {
       const responseBody = `Cannot GET resource: ${pathname}`;
 
       response.writeHead(404, {
-        "Content-Type": "plain/text",
+        "Content-Type": "text/plain",
         "Content-Length": Buffer.byteLength(responseBody),
       });
 

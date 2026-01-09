@@ -64,6 +64,16 @@ If both `name` and `title` are present, `name` takes precedence.
 
 Fixed an issue where nested collapsible sections in the navigation incorrectly showed a minus symbol (`-`) instead of a plus symbol (`+`) when they were not expanded.
 
+**Typos and Bug Fixes**
+
+- Fixed "Buildung" typo in build progress messages (now correctly shows "Building")
+- Fixed "lanuage" typo in error message when an invalid language is configured
+- Fixed incorrect MIME type `plain/text` to `text/plain` in development server error responses
+- Fixed `aspectRation` typo to `aspectRatio` in excalidraw element configuration types
+- Fixed CSS property `aspectRatio:` to `aspect-ratio:` in embed directive (was using JavaScript property name instead of CSS property name)
+- Fixed incorrect repository URL in README (`openpath` → `openpatch`)
+- Updated minimum Node.js version requirement from 12.22.0 to 18 to match actual requirements
+
 :::
 
 ::::

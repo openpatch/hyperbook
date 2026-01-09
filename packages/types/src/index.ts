@@ -147,7 +147,7 @@ export type HyperbookJson = {
     excalidraw?: ElementConfig & {
       autoZoom?: boolean;
       center?: boolean;
-      aspectRation?: string;
+      aspectRatio?: string;
       edit?: boolean;
     };
     onlineide?: ElementConfig & {
