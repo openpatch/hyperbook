@@ -38,6 +38,40 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.74.0
+
+::::tabs
+
+:::tab{title="New :rocket:" id="new"}
+
+**Enhanced Pagelist Query Language**
+
+The pagelist element now supports a powerful query language for filtering pages:
+
+- **Boolean operators**: Combine conditions with `AND`, `OR`, `NOT`
+- **Parentheses**: Group conditions for complex queries like `(href(/blog/.*) OR href(/news/.*)) AND keyword(featured)`
+- **Custom frontmatter fields**: Query any frontmatter field like `difficulty(beginner)` or `tags(tutorial)`
+- **Operator precedence**: `NOT` > `AND` > `OR`
+
+**New Parameters:**
+- `limit`: Limit the number of results (e.g., `limit="5"`)
+- `orderBy`: Sort by any field including custom frontmatter (e.g., `orderBy="date:desc"`)
+
+**Example:**
+```md
+::pagelist{source="href(/blog/.*) AND date(.*)" orderBy="date:desc" limit="5"}
+```
+
+:::
+
+:::tab{title="Improved :+1:" id="improved"}
+
+- Date objects from YAML frontmatter (e.g., `date: 2025-01-09` without quotes) now work correctly for filtering and sorting in pagelist.
+
+:::
+
+::::
+
 ## v0.73.5
 
 ::::tabs

@@ -204,6 +204,8 @@ export const evaluateCondition = (field: string, regex: string, page: HyperbookP
       return re.test(value);
     } else if (typeof value === "number" || typeof value === "boolean") {
       return re.test(String(value));
+    } else if (value instanceof Date) {
+      return re.test(value.toISOString());
     } else if (Array.isArray(value)) {
       return value.some((v) => {
         if (typeof v === "string") {
@@ -235,6 +237,12 @@ export const compareValues = (val1: unknown, val2: unknown): number => {
     return val1 - val2;
   } else if (typeof val1 === "boolean" && typeof val2 === "boolean") {
     return (val1 ? 1 : 0) - (val2 ? 1 : 0);
+  } else if (val1 instanceof Date && val2 instanceof Date) {
+    return val1.getTime() - val2.getTime();
+  } else if (val1 instanceof Date) {
+    return val1.getTime() - new Date(String(val2)).getTime();
+  } else if (val2 instanceof Date) {
+    return new Date(String(val1)).getTime() - val2.getTime();
   } else {
     // Fallback: convert to string and compare
     return String(val1).localeCompare(String(val2));
