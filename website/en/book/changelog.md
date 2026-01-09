@@ -38,11 +38,27 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.76.1
+
+::::tabs
+
+:::tab{title="New :rocket:" id="new"}
+
+- use 1rem as the base font size for better accessibility
+
+:::
+
+
+::::
+
+
 ## v0.76.0
 
 ::::tabs
 
 :::tab{title="New :rocket:" id="new"}
+
+
 
 **Title as Alternative to Name**
 

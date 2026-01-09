@@ -36,7 +36,7 @@ ul.directive-bookmarks li:last-of-type {
 ul.directive-bookmarks a::before {
   content: "🔖";
   position: absolute;
-  font-size: 12px;
+  font-size: 0.75rem;
   left: 12px;
   top: 50%;
   transform: translateY(-50%);

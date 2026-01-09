@@ -62,11 +62,11 @@
 }
 
 .directive-qr .label.S {
-  font-size: 12px;
+  font-size: 0.75rem;
 }
 
 .directive-qr .label.M {
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 
 .directive-qr {

@@ -36,7 +36,7 @@
 .directive-collapsible>summary:after {
   content: "\02795";
   /* Unicode character for "plus" sign (+) */
-  font-size: 13px;
+  font-size: 0.8125rem;
   float: right;
   margin-left: 5px;
   color: var(--color-text);

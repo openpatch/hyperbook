@@ -98,7 +98,6 @@ body::-webkit-scrollbar {
   --header-height: 60px;
   --nav-width: minmax(300px, 0.33fr);
   --nav-font-size: 0.9rem;
-  --body-font-size: 14px;
 }`;
 
   if (font) {
@@ -156,7 +155,7 @@ body {
   color: var(--color-text);
   font-family: hyperbook-body;
   font-weight: normal;
-  font-size: var(--body-font-size);
+  font-size: 1rem;
   margin: 0;
   padding: 0;
 }

@@ -111,7 +111,7 @@ figure {
 
 .hyperbook-markdown figure.normal figcaption {
   font-style: italic;
-  font-size: 14px;
+  font-size: 0.875rem;
   max-width: 400px;
   margin: 0 auto;
 }
@@ -126,7 +126,7 @@ figure {
 .hyperbook-markdown a.heading:hover::before {
   position: absolute;
   content: "📎";
-  font-size: 12px;
+  font-size: 0.75rem;
   top: 50%;
   transform: translateY(-50%);
   left: 0px;
@@ -311,7 +311,7 @@ figure {
   background: none;
   border: none;
   opacity: 0.5;
-  font-size: 16px;
+  font-size: 1rem;
 }
 
 .hyperbook-markdown .bookmark:hover {

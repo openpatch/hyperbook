@@ -42,7 +42,7 @@
 
 .directive-alert.icon::before {
   border-radius: 100%;
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 700;
   left: -14px;
   display: flex;

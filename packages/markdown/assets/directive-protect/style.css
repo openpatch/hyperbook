@@ -15,7 +15,7 @@
 .directive-protect .password-input>input {
   text-align: center;
   border-radius: 10px;
-  font-size: 18px;
+  font-size: 1.125rem;
   border-width: 1px;
   border-style: solid;
 }
