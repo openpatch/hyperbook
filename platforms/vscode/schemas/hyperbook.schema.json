@@ -75,6 +75,24 @@
         "basePath": {
             "type": "string"
         },
+        "breadcrumb": {
+            "anyOf": [
+                {
+                    "properties": {
+                        "home": {
+                            "type": "string"
+                        },
+                        "separator": {
+                            "type": "string"
+                        }
+                    },
+                    "type": "object"
+                },
+                {
+                    "type": "boolean"
+                }
+            ]
+        },
         "colors": {
             "properties": {
                 "brand": {

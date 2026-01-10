@@ -111,4 +111,159 @@ describe("rehypeShell", () => {
     const value = toHtml("", standaloneCtx).value;
     expect(value).toContain('class="main-grid layout-standalone"');
   });
+
+  it("should render breadcrumb when enabled globally", () => {
+    const breadcrumbCtx: HyperbookContext = {
+      ...ctx,
+      config: {
+        ...ctx.config,
+        breadcrumb: true,
+      },
+      navigation: {
+        ...ctx.navigation,
+        current: {
+          name: "Test Page",
+          href: "/section/page",
+        },
+        sections: [
+          {
+            name: "Section",
+            href: "/section",
+            isEmpty: false,
+            pages: [
+              {
+                name: "Test Page",
+                href: "/section/page",
+              },
+            ],
+            sections: [],
+          },
+        ],
+        pages: [],
+      },
+    };
+    const value = toHtml("", breadcrumbCtx).value;
+    expect(value).toContain('class="breadcrumb"');
+    expect(value).toContain('class="breadcrumb-home"');
+    expect(value).toContain('class="breadcrumb-separator"');
+    expect(value).toContain("Section");
+    expect(value).toContain("Test Page");
+  });
+
+  it("should render breadcrumb with custom home and separator", () => {
+    const breadcrumbCtx: HyperbookContext = {
+      ...ctx,
+      config: {
+        ...ctx.config,
+        breadcrumb: {
+          home: ":star:",
+          separator: "→",
+        },
+      },
+      navigation: {
+        ...ctx.navigation,
+        current: {
+          name: "Test Page",
+          href: "/page",
+        },
+        sections: [],
+        pages: [
+          {
+            name: "Test Page",
+            href: "/page",
+          },
+        ],
+      },
+    };
+    const value = toHtml("", breadcrumbCtx).value;
+    expect(value).toContain("⭐");
+    expect(value).toContain("→");
+  });
+
+  it("should not render breadcrumb when disabled", () => {
+    const noBreadcrumbCtx: HyperbookContext = {
+      ...ctx,
+      config: {
+        ...ctx.config,
+        breadcrumb: false,
+      },
+      navigation: {
+        ...ctx.navigation,
+        current: {
+          name: "Test Page",
+          href: "/page",
+        },
+        sections: [],
+        pages: [
+          {
+            name: "Test Page",
+            href: "/page",
+          },
+        ],
+      },
+    };
+    const value = toHtml("", noBreadcrumbCtx).value;
+    expect(value).not.toContain('class="breadcrumb"');
+  });
+
+  it("should render empty section without link in breadcrumb", () => {
+    const breadcrumbCtx: HyperbookContext = {
+      ...ctx,
+      config: {
+        ...ctx.config,
+        breadcrumb: true,
+      },
+      navigation: {
+        ...ctx.navigation,
+        current: {
+          name: "Test Page",
+          href: "/section/page",
+        },
+        sections: [
+          {
+            name: "Empty Section",
+            href: "/section",
+            isEmpty: true,
+            pages: [
+              {
+                name: "Test Page",
+                href: "/section/page",
+              },
+            ],
+            sections: [],
+          },
+        ],
+        pages: [],
+      },
+    };
+    const value = toHtml("", breadcrumbCtx).value;
+    expect(value).toContain('class="breadcrumb-item breadcrumb-empty"');
+    expect(value).toContain("Empty Section");
+  });
+
+  it("should not render breadcrumb on root index page", () => {
+    const rootCtx: HyperbookContext = {
+      ...ctx,
+      config: {
+        ...ctx.config,
+        breadcrumb: true,
+      },
+      navigation: {
+        ...ctx.navigation,
+        current: {
+          name: "Home",
+          href: "/",
+        },
+        sections: [],
+        pages: [
+          {
+            name: "Home",
+            href: "/",
+          },
+        ],
+      },
+    };
+    const value = toHtml("", rootCtx).value;
+    expect(value).not.toContain('class="breadcrumb"');
+  });
 });

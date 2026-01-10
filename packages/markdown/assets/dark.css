@@ -24,6 +24,18 @@ header {
   background-color: var(--color-brand) !important;
 }
 
+nav.breadcrumb {
+  color: color-mix(in srgb, var(--color-text), black 35%) !important;
+}
+
+nav.breadcrumb a {
+  color: color-mix(in srgb, var(--color-text), black 35%) !important;
+}
+
+nav.breadcrumb a:hover {
+  color: var(--color-brand) !important;
+}
+
 figure[data-rehype-pretty-code-figure] pre,
 code[data-theme*=" "],
 code[data-theme*=" "] span {
@@ -63,3 +75,4 @@ color: rgb(253, 224, 71) !important;
 background-color: #6b21a880 !important;
 color: rgb(233, 213, 255) !important;
 }
+

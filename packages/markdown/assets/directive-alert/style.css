@@ -4,7 +4,11 @@
 }
 
 .directive-alert>p {
-  margin-bottom: 10px;
+  margin-bottom: 0;
+}
+
+.directive-alert>p:last-child {
+  margin-bottom: 0;
 }
 
 .directive-alert {
@@ -14,17 +18,16 @@
   font-size: inherit;
   line-height: 1.6rem;
   word-spacing: 0.05rem;
-  border-bottom-right-radius: 2px;
-  border-top-right-radius: 2px;
-  padding: 8px 12px 8px 20px;
-  margin-bottom: 16px;
+  border-bottom-right-radius: 0.16rem;
+  border-top-right-radius: 0.16rem;
+  padding: 0.5rem 0.7rem 0.5rem 1.2rem;
   position: relative;
-  border-left-width: 4px;
+  border-left-width: 0.25rem;
   border-left-style: solid;
   background-color: var(--color-nav);
   border-left-color: var(--alert-color);
   border-left-style: solid;
-  border-left-width: 4px;
+  border-left-width: 0.25rem;
 
   a,
   strong {
@@ -44,14 +47,14 @@
   border-radius: 100%;
   font-size: 0.875rem;
   font-weight: 700;
-  left: -14px;
+  left: -0.9rem;
   display: flex;
   align-items: center;
   justify-content: center;
   position: absolute;
-  height: 24px;
-  width: 24px;
-  top: 8px;
+  height: 1.5rem;
+  width: 1.5rem;
+  top: 0.5rem;
   color: #fff;
   content: var(--alert-content);
   background-color: var(--alert-color);

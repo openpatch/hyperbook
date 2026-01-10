@@ -95,9 +95,10 @@ body::-webkit-scrollbar {
   --color-brand-dark: ${colors?.brandDark || colors?.brand || "#b5e3d8"};
   --color-brand-text: ${colors?.brandText || "white"};
   --main-width: 980px;
-  --header-height: 60px;
+  --header-height: 3.75rem;
   --nav-width: minmax(300px, 0.33fr);
   --nav-font-size: 0.9rem;
+  --element-gap: 1.5rem;
 }`;
 
   if (font) {

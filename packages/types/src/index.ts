@@ -36,6 +36,11 @@ export type Language = "de" | "en" | "fr" | "es" | "it" | "pt" | "nl";
 
 export type Layout = "default" | "wide" | "standalone";
 
+export type BreadcrumbConfig = {
+  home?: string;
+  separator?: string;
+};
+
 export type HyperbookPageFrontmatter = {
   name: string;
   title?: string;
@@ -52,6 +57,7 @@ export type HyperbookPageFrontmatter = {
   next?: string;
   prev?: string;
   layout?: Layout;
+  breadcrumb?: boolean | BreadcrumbConfig;
 };
 
 export type HyperbookSectionFrontmatter = HyperbookPageFrontmatter & {
@@ -95,6 +101,7 @@ export type HyperbookJson = {
   qrcode?: boolean;
   toc?: boolean;
   llms?: boolean;
+  breadcrumb?: boolean | BreadcrumbConfig;
   author?: {
     name?: string;
     url?: string;

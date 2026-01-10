@@ -2,6 +2,7 @@
 /// <reference types="mdast-util-directive" />
 //
 import {
+  BreadcrumbConfig,
   HyperbookContext,
   HyperbookPage,
   HyperbookSection,
@@ -9,6 +10,209 @@ import {
 import { ElementContent, Root } from "hast";
 import { VFile } from "vfile";
 import { i18n } from "./i18n";
+import githubEmojiMap from "./github-emojis.json";
+
+// Helper to resolve emoji shortcuts like :house: to actual emoji
+const resolveEmoji = (text: string): string => {
+  return text.replace(/:([+\w-]+):/g, (_, name) => {
+    // @ts-ignore
+    return githubEmojiMap[name] ?? `:${name}:`;
+  });
+};
+
+type BreadcrumbItem = {
+  name: string;
+  href: string | null;
+  isEmpty: boolean;
+  hide?: boolean;
+};
+
+// Build breadcrumb path from root to current page
+const buildBreadcrumbPath = (
+  ctx: HyperbookContext,
+): BreadcrumbItem[] => {
+  const currentHref = ctx.navigation.current?.href;
+  if (!currentHref) return [];
+
+  const path: BreadcrumbItem[] = [];
+
+  // Helper to search for the current page in sections recursively
+  const findPath = (
+    sections: HyperbookSection[],
+    pages: HyperbookPage[],
+    currentPath: BreadcrumbItem[],
+  ): BreadcrumbItem[] | null => {
+    // Check pages at this level
+    for (const page of pages) {
+      if (page.href === currentHref) {
+        return [...currentPath, { 
+          name: page.name, 
+          href: page.href || null, 
+          isEmpty: page.isEmpty || false,
+          hide: page.hide,
+        }];
+      }
+    }
+
+    // Check sections
+    for (const section of sections) {
+      const sectionItem: BreadcrumbItem = {
+        name: section.name,
+        href: section.href || null,
+        isEmpty: section.isEmpty || false,
+        hide: section.hide,
+      };
+
+      // Check if current page is the section index itself
+      if (section.href === currentHref) {
+        return [...currentPath, sectionItem];
+      }
+
+      // Search in nested sections and pages
+      const result = findPath(
+        section.sections,
+        section.pages,
+        [...currentPath, sectionItem],
+      );
+      if (result) return result;
+    }
+
+    return null;
+  };
+
+  const result = findPath(
+    ctx.navigation.sections,
+    ctx.navigation.pages,
+    [],
+  );
+
+  return result || [];
+};
+
+const makeBreadcrumbElements = (ctx: HyperbookContext): ElementContent[] => {
+  // Don't show breadcrumb on root index page
+  const currentHref = ctx.navigation.current?.href;
+  if (!currentHref || currentHref === "/") return [];
+
+  // Determine if breadcrumb is enabled and get config
+  const pageBreadcrumb = ctx.navigation.current?.breadcrumb;
+  const globalBreadcrumb = ctx.config.breadcrumb;
+
+  // Page-level setting overrides global, false disables
+  let breadcrumbEnabled: boolean | BreadcrumbConfig | undefined;
+  if (pageBreadcrumb !== undefined) {
+    breadcrumbEnabled = pageBreadcrumb;
+  } else {
+    breadcrumbEnabled = globalBreadcrumb;
+  }
+
+  if (!breadcrumbEnabled) return [];
+
+  // Get config values
+  let home = "🏠";
+  let separator = ">";
+  
+  if (typeof breadcrumbEnabled === "object") {
+    if (breadcrumbEnabled.home !== undefined) {
+      home = resolveEmoji(breadcrumbEnabled.home);
+    }
+    if (breadcrumbEnabled.separator !== undefined) {
+      separator = resolveEmoji(breadcrumbEnabled.separator);
+    }
+  }
+
+  const breadcrumbPath = buildBreadcrumbPath(ctx);
+  if (breadcrumbPath.length === 0) return [];
+
+  const elements: ElementContent[] = [];
+
+  // Add home link
+  elements.push({
+    type: "element",
+    tagName: "a",
+    properties: {
+      class: "breadcrumb-home",
+      href: ctx.makeUrl("/", "book"),
+      "aria-label": i18n.get("breadcrumb-home"),
+    },
+    children: [
+      {
+        type: "text",
+        value: home,
+      },
+    ],
+  });
+
+  // Add breadcrumb items
+  for (let i = 0; i < breadcrumbPath.length; i++) {
+    const item = breadcrumbPath[i];
+    const isLast = i === breadcrumbPath.length - 1;
+
+    // Add separator
+    elements.push({
+      type: "element",
+      tagName: "span",
+      properties: {
+        class: "breadcrumb-separator",
+        "aria-hidden": "true",
+      },
+      children: [
+        {
+          type: "text",
+          value: separator,
+        },
+      ],
+    });
+
+    // Add breadcrumb item - only link if not empty and not hidden
+    if (item.isEmpty || item.hide || !item.href) {
+      // Render as span (not clickable)
+      elements.push({
+        type: "element",
+        tagName: "span",
+        properties: {
+          class: isLast ? "breadcrumb-item breadcrumb-current" : "breadcrumb-item breadcrumb-empty",
+          "aria-current": isLast ? "page" : undefined,
+        },
+        children: [
+          {
+            type: "text",
+            value: item.name,
+          },
+        ],
+      });
+    } else {
+      // Render as link
+      elements.push({
+        type: "element",
+        tagName: "a",
+        properties: {
+          class: isLast ? "breadcrumb-item breadcrumb-current" : "breadcrumb-item",
+          href: ctx.makeUrl(item.href, "book"),
+          "aria-current": isLast ? "page" : undefined,
+        },
+        children: [
+          {
+            type: "text",
+            value: item.name,
+          },
+        ],
+      });
+    }
+  }
+
+  return [
+    {
+      type: "element",
+      tagName: "nav",
+      properties: {
+        class: "breadcrumb",
+        "aria-label": i18n.get("breadcrumb-navigation"),
+      },
+      children: elements,
+    },
+  ];
+};
 
 const makeNavigationPageElement = (
   ctx: HyperbookContext,
@@ -1032,6 +1236,7 @@ export default (ctx: HyperbookContext) => () => {
             tagName: "main",
             properties: {},
             children: [
+              ...makeBreadcrumbElements(ctx),
               {
                 type: "element",
                 tagName: "article",

@@ -1,6 +1,7 @@
 {
   "name": "Hyperbook Documentation",
   "qrcode": true,
+  "breadcrumb": true,
   "llms": true,
   "importExport": true,
   "search": true,

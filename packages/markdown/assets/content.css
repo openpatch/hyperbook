@@ -100,8 +100,8 @@ figure {
   clear: both;
   justify-items: center;
   align-content: center;
-  margin-top: 10px;
-  margin-bottom: 10px;
+  margin-top: 0;
+  margin-bottom: var(--element-gap);
 }
 
 .hyperbook-markdown figure.normal img {
@@ -177,7 +177,7 @@ figure {
 }
 
 .hyperbook-markdown li>p {
-  margin-top: 16px;
+  margin: 0;
 }
 
 .hyperbook-markdown p,
@@ -188,12 +188,23 @@ figure {
 .hyperbook-markdown pre,
 .hyperbook-markdown details {
   margin-top: 0;
-  margin-bottom: 10px;
+  margin-bottom: var(--element-gap);
+}
+
+.hyperbook-markdown figure[data-rehype-pretty-code-figure] {
+  margin-top: 0;
+  margin-bottom: var(--element-gap);
+}
+
+.hyperbook-markdown [class^="directive-"],
+.hyperbook-markdown [class*=" directive-"] {
+  margin-top: 0;
+  margin-bottom: var(--element-gap);
 }
 
 .hyperbook-markdown blockquote {
   width: 90%;
-  margin: 20px auto;
+  margin: 0 auto var(--element-gap) auto;
   font-style: italic;
   padding: 1.2em 30px 1.2em 75px;
   border-left: 8px solid var(--color-brand);
@@ -213,6 +224,10 @@ figure {
 
 .hyperbook-markdown blockquote::after {
   content: "";
+}
+
+.hyperbook-markdown blockquote p:last-child {
+  margin-bottom: 0;
 }
 
 .hyperbook-markdown table {
@@ -252,8 +267,8 @@ figure {
 .hyperbook-markdown h6 {
   clear: both;
   font-family: hyperbook-heading, sans-serif;
-  margin-top: 24px;
-  margin-bottom: 16px;
+  margin-top: 0;
+  margin-bottom: var(--element-gap);
   font-weight: 600;
   line-height: 1.25;
 }
@@ -293,7 +308,7 @@ figure {
 
 .hyperbook-markdown p {
   margin-top: 0;
-  margin-bottom: 10px;
+  margin-bottom: var(--element-gap);
 }
 
 .hyperbook-markdown h1,

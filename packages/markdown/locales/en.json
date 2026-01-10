@@ -12,6 +12,8 @@
     "shell-reset-hyperbook": "Reset Hyperbook",
     "shell-import-hyperbook": "Import Hyperbook from a file",
     "shell-export-hyperbook": "Export Hyperbook to a file",
+    "breadcrumb-navigation": "Breadcrumb",
+    "breadcrumb-home": "Home",
     "qr-code": "QR Code",
     "p5-update": "Update",
     "p5-code-preview": "Code Preview",

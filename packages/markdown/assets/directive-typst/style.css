@@ -3,7 +3,6 @@
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  margin-bottom: 16px;
   overflow: hidden;
   gap: 8px;
   height: calc(100dvh - 128px);
