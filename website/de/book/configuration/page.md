@@ -41,7 +41,8 @@ Hier sind die Eigenschaften, die im Frontmatter gesetzt werden können:
 | index       | Eine Zahl, die die Position relative zu anderen Seiten auf dieser Navigationsebene angibt. Kleine Zahlen erscheinen zuerst in der Navigation.  |
 | prev        | Ein absoluter Pfad zur vorherigen Seite or ein absoluter Pfad zur permaid z. B. /@/audio. Dies überschreibt index und hide. Du kannst außerdem nichts setzen, sodass der Button versteckt wird. |
 | next        | Ein absoluter Pfad zur nächsten Seite or ein absoluter Pfad zur permaid z. B. /@/audio. Dies überschreibt index und hide. Du kannst außerdem nichts setzen, sodass der Button versteckt wird.   |
-| hide        | Verstecke die Seite von der Navigation.                                                                                                        |
+| hide        | Verstecke die Seite von der Navigation. (veraltet, verwende stattdessen `navigation: hidden`)                                                  |
+| navigation  | Steuert wie die Seite in der Navigation angezeigt wird. Optionen: `default` (normale Anzeige), `hidden` (versteckt in der Navigation)          |
 | toc         | Zeige ein Inhaltsverzeichnis. Diese ist standardmäßig aktiviert für Seiten und deaktiviert für Begriffe im Glossar.                            |
 | layout      | Wähle das Seitenlayout. Optionen: `default` (Standardlayout mit Seitenleiste), `wide` (Inhalt in voller Breite mit Navigation im Drawer-Modus) oder `standalone` (nur Inhalt, versteckt alle Navigation - ideal für iframe-Einbettung). Das standalone Layout kann auch über URL-Parameter aktiviert werden: `?standalone=true` |
 | qrcode | Zeigt ein Icon, um einen QR-Code zur Seite anzuzeigen |

@@ -242,16 +242,48 @@ const makeNavigationPageElement = (
   };
 };
 
+const makeNavigationSectionAsPageElement = (
+  ctx: HyperbookContext,
+  section: HyperbookSection,
+): ElementContent => {
+  const { href, name } = section;
+  return {
+    type: "element",
+    tagName: "li",
+    properties: {},
+    children: [
+      {
+        type: "element",
+        tagName: "a",
+        properties: {
+          class:
+            ctx.navigation.current?.href === href ? "page active" : "page",
+          href: ctx.makeUrl(href || "", "book"),
+        },
+        children: [
+          {
+            type: "text",
+            value: name,
+          },
+        ],
+      },
+    ],
+  };
+};
+
 const makeNavigationSectionElement = (
   ctx: HyperbookContext,
   section: HyperbookSection,
 ): ElementContent => {
-  const { virtual, isEmpty, href, name, pages, sections, expanded } = section;
-  let isExpanded =
-    ctx.navigation.current?.href?.startsWith(href || "") || expanded;
+  const { virtual, isEmpty, href, name, pages, sections, expanded, navigation } = section;
+  
+  // Determine effective navigation mode (new field takes precedence over legacy fields)
+  const isVirtual = navigation === "virtual" || (navigation === undefined && virtual);
+  const isExpanded = navigation === "expanded" || (navigation === undefined && expanded) || 
+    ctx.navigation.current?.href?.startsWith(href || "");
 
   const pagesElements: ElementContent[] = pages
-    .filter((page) => !page.hide && page.href !== href)
+    .filter((page) => !page.hide && page.navigation !== "hidden" && page.href !== href)
     .map((page) => makeNavigationPageElement(ctx, page));
 
   const linksElements: ElementContent[] = [];
@@ -266,13 +298,55 @@ const makeNavigationSectionElement = (
     });
   }
 
+  // Handle page-mode sections - they should be rendered as pages in the pages list
+  const pageModeChildSections = sections
+    .filter((s) => !s.hide && s.navigation !== "hidden" && s.navigation === "page" && !s.isEmpty);
+  
+  // Merge pages and page-mode sections, sort by index
+  if (pageModeChildSections.length > 0) {
+    // We need to combine the existing pages with page-mode sections
+    const combinedItems: { index?: number; name: string; element: ElementContent }[] = [
+      ...pages
+        .filter((page) => !page.hide && page.navigation !== "hidden" && page.href !== href)
+        .map((page) => ({ 
+          index: page.index, 
+          name: page.name, 
+          element: makeNavigationPageElement(ctx, page) 
+        })),
+      ...pageModeChildSections.map((s) => ({ 
+        index: s.index, 
+        name: s.name, 
+        element: makeNavigationSectionAsPageElement(ctx, s) 
+      })),
+    ].sort((a, b) => {
+      const aIndex = a.index !== undefined ? a.index : 9999;
+      const bIndex = b.index !== undefined ? b.index : 9999;
+      if (aIndex !== bIndex) return aIndex - bIndex;
+      return a.name > b.name ? 1 : -1;
+    });
+
+    // Replace pagesElements with combined sorted elements
+    linksElements.length = 0; // Clear existing
+    if (combinedItems.length > 0) {
+      linksElements.push({
+        type: "element",
+        tagName: "ul",
+        properties: {
+          class: "pages",
+        },
+        children: combinedItems.map((item) => item.element),
+      });
+    }
+  }
+
+  // Regular sections (not page-mode)
   const sectionElements: ElementContent[] = sections
-    .filter((s) => !s.hide)
+    .filter((s) => !s.hide && s.navigation !== "hidden" && s.navigation !== "page")
     .map((s) => makeNavigationSectionElement(ctx, s));
   linksElements.push(...sectionElements);
 
   // For virtual sections, just render the links without a container
-  if (virtual) {
+  if (isVirtual) {
     return {
       type: "element",
       tagName: "div",
@@ -359,7 +433,32 @@ const makeNavigationSectionElement = (
   };
 };
 
+// Helper type for navigation items that can be sorted together
+type NavigationItem = 
+  | { type: "page"; item: HyperbookPage }
+  | { type: "section"; item: HyperbookSection };
+
 const makeNavigationElements = (ctx: HyperbookContext): ElementContent[] => {
+  // Collect all navigation items (pages and sections in "page" mode go to pages list)
+  const pageItems: NavigationItem[] = ctx.navigation.pages
+    .filter((p) => !p.hide && p.navigation !== "hidden")
+    .map((p) => ({ type: "page" as const, item: p }));
+  
+  const pageModeSecions: NavigationItem[] = ctx.navigation.sections
+    .filter((s) => !s.hide && s.navigation !== "hidden" && s.navigation === "page" && !s.isEmpty)
+    .map((s) => ({ type: "section" as const, item: s }));
+  
+  const regularSections = ctx.navigation.sections
+    .filter((s) => !s.hide && s.navigation !== "hidden" && s.navigation !== "page");
+
+  // Merge pages and page-mode sections, then sort by index
+  const combinedItems = [...pageItems, ...pageModeSecions].sort((a, b) => {
+    const aIndex = a.item.index !== undefined ? a.item.index : 9999;
+    const bIndex = b.item.index !== undefined ? b.item.index : 9999;
+    if (aIndex !== bIndex) return aIndex - bIndex;
+    return a.item.name > b.item.name ? 1 : -1;
+  });
+
   return [
     {
       type: "element",
@@ -370,13 +469,16 @@ const makeNavigationElements = (ctx: HyperbookContext): ElementContent[] => {
           type: "element",
           tagName: "ul",
           properties: {},
-          children: ctx.navigation.pages
-            .filter((p) => !p.hide)
-            .map((p) => makeNavigationPageElement(ctx, p)),
+          children: combinedItems.map((navItem) => {
+            if (navItem.type === "page") {
+              return makeNavigationPageElement(ctx, navItem.item);
+            } else {
+              // Render section in page mode as a page element
+              return makeNavigationSectionAsPageElement(ctx, navItem.item);
+            }
+          }),
         },
-        ...ctx.navigation.sections
-          .filter((s) => !s.hide)
-          .map((s) => makeNavigationSectionElement(ctx, s)),
+        ...regularSections.map((s) => makeNavigationSectionElement(ctx, s)),
       ],
     },
   ];

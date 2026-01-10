@@ -41,6 +41,10 @@ export type BreadcrumbConfig = {
   separator?: string;
 };
 
+export type PageNavigation = "default" | "hidden";
+
+export type SectionNavigation = "default" | "hidden" | "virtual" | "page" | "expanded";
+
 export type HyperbookPageFrontmatter = {
   name: string;
   title?: string;
@@ -58,11 +62,13 @@ export type HyperbookPageFrontmatter = {
   prev?: string;
   layout?: Layout;
   breadcrumb?: boolean | BreadcrumbConfig;
+  navigation?: PageNavigation;
 };
 
-export type HyperbookSectionFrontmatter = HyperbookPageFrontmatter & {
+export type HyperbookSectionFrontmatter = Omit<HyperbookPageFrontmatter, 'navigation'> & {
   virtual?: boolean;
   expanded?: boolean;
+  navigation?: SectionNavigation;
 };
 
 export type HyperbookPage = HyperbookPageFrontmatter & {

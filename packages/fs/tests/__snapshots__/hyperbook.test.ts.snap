@@ -5,6 +5,7 @@ exports[`hyperbook > should get navigation 1`] = `
   "current": {
     "href": "/paradigms",
     "name": "Paradigms",
+    "navigation": undefined,
     "path": {
       "absolute": "single-hyperbook/book/paradigms.md",
       "directory": "",
@@ -17,6 +18,7 @@ exports[`hyperbook > should get navigation 1`] = `
   "next": {
     "href": "/hyperbook-test",
     "name": "hyperbook-test",
+    "navigation": undefined,
     "path": {
       "absolute": "single-hyperbook/book/hyperbook-test.md",
       "directory": "",
@@ -29,6 +31,7 @@ exports[`hyperbook > should get navigation 1`] = `
   "previous": {
     "href": "/",
     "name": "Home",
+    "navigation": undefined,
     "path": {
       "absolute": "single-hyperbook/book/index.md",
       "directory": "",

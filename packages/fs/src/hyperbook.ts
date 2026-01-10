@@ -5,6 +5,7 @@ import {
   HyperbookPage,
   HyperbookSection,
   Navigation,
+  PageNavigation,
 } from "@hyperbook/types";
 import { findUp } from "find-up";
 import { vfile } from ".";
@@ -187,8 +188,14 @@ export const getPagesAndSections = async (
       if (!data.name) {
         data.name = data.title || file.name;
       }
+      // Filter navigation to only valid PageNavigation values
+      const pageNavigation: PageNavigation | undefined = 
+        data.navigation === "default" || data.navigation === "hidden" 
+          ? data.navigation 
+          : undefined;
       const page: HyperbookPage = {
         ...data,
+        navigation: pageNavigation,
         path: file.path,
       };
       const repo = makeRepoLink(hyperbook.repo, file);

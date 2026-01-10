@@ -32,7 +32,8 @@ Here are the properties you can set in the frontmatter:
 | index       | A number indicating the position in the menu in relation to pages on the same level                                                 |
 | prev        | The absolute path to the prev page or a absolute path to a permaid e.g. /@/audio. This overrides index and hide. You can also set it to nothing and it will hide the prev button. |
 | next        | The absoulte path to the next page or a absolute path to a permaid e.g. /@/audio. This overrides index and hide. You can also set it to nothing and it will hide the next button. |
-| hide        | Hides the page from the navigation                                                                                                  |
+| hide        | Hides the page from the navigation (deprecated, use `navigation: hidden` instead)                                                  |
+| navigation  | Controls how the page appears in navigation. Options: `default` (normal display), `hidden` (hides from navigation)                 |
 | toc         | Show or hide a table of content for the page. This is on for pages and off for glossary entries by default                          |
 | layout      | Choose the page layout. Options: `default` (standard layout with sidebar), `wide` (full-width content with navigation in drawer mode), or `standalone` (content only, hides all navigation - ideal for iframe embedding). The standalone layout can also be activated via URL parameter: `?standalone=true` |
 | styles            | Here you can add Links to custom CSS files. |
