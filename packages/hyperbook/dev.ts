@@ -8,6 +8,7 @@ import mime from "mime";
 import { WebSocketServer } from "ws";
 import { OutgoingHttpHeaders } from "http2";
 import chalk from "chalk";
+import { rimraf } from "rimraf";
 
 export async function runDev({ port = 8080 }: { port: number }): Promise<void> {
   const root = process.cwd();
@@ -140,12 +141,18 @@ window.onload = () => {
   });
 
   let rebuilding = false;
-  const rebuild = (status: string) => async (file: string) => {
+  const rebuild = (status: string, shouldClean: boolean = false) => async (file: string) => {
     if (!rebuilding) {
       console.log(`${chalk.yellow(`[Rebuilding ${status}]`)}: ${file}.`);
       rebuilding = true;
       try {
         const rootProject = await hyperproject.get(process.cwd());
+        // Clean output folder when files are deleted or renamed to avoid stale files
+        if (shouldClean) {
+          const cleanOutDir = path.join(rootProject.src, ".hyperbook", "out");
+          console.log(`${chalk.yellow(`[Cleaning]`)}: ${cleanOutDir}`);
+          await rimraf(cleanOutDir);
+        }
         await runBuildProject(rootProject, rootProject);
         console.log(`${chalk.yellow(`[Reloading]`)}: Website`);
         reloadServer.emit("reload");
@@ -181,5 +188,5 @@ window.onload = () => {
     })
     .on("add", rebuild("(Added)"))
     .on("change", rebuild("(Changed)"))
-    .on("unlink", rebuild("(Deleted)"));
+    .on("unlink", rebuild("(Deleted)", true));
 }

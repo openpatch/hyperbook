@@ -38,6 +38,88 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.77.0
+
+::::tabs
+
+:::tab{title="New :rocket:" id="new"}
+
+**New `navigation` Field for Pages and Sections**
+
+A new `navigation` field has been added to control how pages and sections appear in the navigation sidebar.
+
+**For Pages:**
+- `navigation: default` - Normal display in navigation
+- `navigation: hidden` - Hides the page from navigation (replaces deprecated `hide` field)
+
+**For Sections:**
+- `navigation: default` - Collapsible section (default behavior)
+- `navigation: hidden` - Hides the section from navigation
+- `navigation: virtual` - Items appear at parent level (replaces deprecated `virtual` field)
+- `navigation: page` - Renders as a regular page link without showing children - perfect for blog sections!
+- `navigation: expanded` - Section is expanded by default (replaces deprecated `expanded` field)
+
+**Example - Blog Section:**
+```yaml
+---
+name: Blog
+index: 5
+navigation: page
+---
+```
+
+This renders the blog section as a simple page link in the navigation, respecting the `index` for ordering, while the blog posts inside won't clutter the navigation.
+
+**Breadcrumb Navigation**
+
+A new breadcrumb navigation feature has been added to help users understand their location within the hyperbook structure.
+
+**Global Configuration** in `hyperbook.json`:
+```json
+{
+  "breadcrumb": true
+}
+```
+
+Or with custom options:
+```json
+{
+  "breadcrumb": {
+    "home": ":house:",
+    "separator": ">"
+  }
+}
+```
+
+**Per-Page Configuration** in frontmatter:
+```yaml
+---
+breadcrumb: true
+---
+```
+
+Or disable on specific pages:
+```yaml
+---
+breadcrumb: false
+---
+```
+
+The breadcrumb supports emoji shortcodes for the home icon and separator (e.g., `:house:`, `:arrow_right:`).
+
+:::
+
+:::tab{title="Improved :+1:" id="improved"}
+
+**Styling Improvements**
+
+- More coherent styling across the hyperbook interface
+- Dev server now cleans output folder when files are deleted, preventing stale files from remaining
+
+:::
+
+::::
+
 ## v0.76.1
 
 ::::tabs

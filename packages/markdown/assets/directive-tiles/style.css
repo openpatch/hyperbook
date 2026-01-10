@@ -89,6 +89,8 @@
   bottom: 0.5rem;
   right: 0.5rem;
   font-size: 2rem;
+  line-height: normal;
+  text-align: center;
   pointer-events: none;
 }
 

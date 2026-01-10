@@ -81,7 +81,7 @@ export const getNavigationForFile = async (
 
     const allPages = pageList;
     const filteredPageList = pageList.filter(
-      (p) => (!p.isEmpty || p.href === currentFile.path.href) && !p.hide,
+      (p) => (!p.isEmpty || p.href === currentFile.path.href) && !p.hide && p.navigation !== "hidden",
     );
     i = filteredPageList.findIndex((p) => p.href === currentFile.path.href);
 
