@@ -30,11 +30,12 @@
     "version": "pnpm build",
     "lint": "tsc --noEmit",
     "dev": "node devWatcher.mjs",
-    "dev:build": "node prebuild.mjs && node devBuild.mjs && node postbuild.mjs",
+    "dev:build": "node devBuild.mjs && node postbuild.mjs",
     "test": "vitest",
-    "build": "rimraf dist && node prebuild.mjs && pnpm build:pkg && pnpm build:types && node postbuild.mjs",
+    "build": "rimraf dist && pnpm build:pkg && pnpm build:types && node postbuild.mjs",
     "build:pkg": "node ../../scripts/build.mjs && ncp assets dist/assets",
-    "build:types": "tsc --project tsconfig.build.json --declaration --emitDeclarationOnly"
+    "build:types": "tsc --project tsconfig.build.json --declaration --emitDeclarationOnly",
+    "emojis:update": "node updateEmojis.mjs"
   },
   "bundle": "all",
   "dependencies": {
