@@ -1,5 +1,11 @@
 # @hyperbook/markdown
 
+## 0.48.1
+
+### Patch Changes
+
+- [`ca5d844`](https://github.com/openpatch/hyperbook/commit/ca5d8441084ed4adf295f19556a5cc5d29a0e07f) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - fix emojis not present. Switch to manual updates.
+
 ## 0.48.0
 
 ### Minor Changes
