@@ -1,5 +1,11 @@
 # @hyperbook/types
 
+## 0.20.0
+
+### Minor Changes
+
+- [`a51613f`](https://github.com/openpatch/hyperbook/commit/a51613fe7a8a0ac2b8f521bdae1405e18193f62f) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add new `navigation` field for pages and sections, and improve styling coherence.
+
 ## 0.19.0
 
 ### Minor Changes

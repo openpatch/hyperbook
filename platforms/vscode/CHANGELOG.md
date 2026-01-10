@@ -1,5 +1,18 @@
 # @hyperbook/vscode-extension
 
+## 0.49.0
+
+### Minor Changes
+
+- [`a51613f`](https://github.com/openpatch/hyperbook/commit/a51613fe7a8a0ac2b8f521bdae1405e18193f62f) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add new `navigation` field for pages and sections, and improve styling coherence.
+
+### Patch Changes
+
+- Updated dependencies [[`a51613f`](https://github.com/openpatch/hyperbook/commit/a51613fe7a8a0ac2b8f521bdae1405e18193f62f)]:
+  - @hyperbook/fs@0.24.0
+  - @hyperbook/markdown@0.48.0
+  - create-hyperbook@0.3.2
+
 ## 0.48.16
 
 ### Patch Changes
