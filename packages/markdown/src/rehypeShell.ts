@@ -251,7 +251,7 @@ const makeNavigationSectionElement = (
     ctx.navigation.current?.href?.startsWith(href || "") || expanded;
 
   const pagesElements: ElementContent[] = pages
-    .filter((page) => !page.hide)
+    .filter((page) => !page.hide && page.href !== href)
     .map((page) => makeNavigationPageElement(ctx, page));
 
   const linksElements: ElementContent[] = [];
