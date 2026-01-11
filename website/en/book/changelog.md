@@ -38,6 +38,66 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.77.5
+
+::::tabs
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+- Normalize line-height in code blocks.
+
+:::
+
+::::
+
+## v0.77.4
+
+::::tabs
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+- Fix empty pages show up in prev and next navigation
+
+:::
+
+::::
+
+## v0.77.3
+
+::::tabs
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+- Hide floating buttons in standalone mode
+
+:::
+
+::::
+
+## v0.77.2
+
+::::tabs
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+- Fix wide styling and line-height
+
+:::
+
+::::
+
+## v0.77.1
+
+::::tabs
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+- Fix emojis not present. Switch to manual updates.
+
+:::
+
+::::
+
 ## v0.77.0
 
 ::::tabs

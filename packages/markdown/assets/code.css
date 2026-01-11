@@ -39,7 +39,6 @@ span>code {
 
 code {
   font-family: hyperbook-code, monospace;
-  line-height: 2rem;
 }
 
 pre code [data-line] {
