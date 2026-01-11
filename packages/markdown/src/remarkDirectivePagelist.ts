@@ -25,7 +25,7 @@ const getPageList = (
   sections: HyperbookSection[],
   pages: HyperbookPage[],
 ): HyperbookPage[] => {
-  let pageList = [...pages.filter(p => !p.isEmpty)];
+  let pageList = [...pages];
 
   for (const section of sections) {
     pageList = [

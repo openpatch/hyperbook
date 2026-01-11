@@ -4,6 +4,7 @@ exports[`hyperbook > should get navigation 1`] = `
 {
   "current": {
     "href": "/paradigms",
+    "isEmpty": false,
     "name": "Paradigms",
     "navigation": undefined,
     "path": {
@@ -17,6 +18,7 @@ exports[`hyperbook > should get navigation 1`] = `
   },
   "next": {
     "href": "/hyperbook-test",
+    "isEmpty": false,
     "name": "hyperbook-test",
     "navigation": undefined,
     "path": {
@@ -28,18 +30,6 @@ exports[`hyperbook > should get navigation 1`] = `
     },
     "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/hyperbook-test.md",
   },
-  "previous": {
-    "href": "/",
-    "name": "Home",
-    "navigation": undefined,
-    "path": {
-      "absolute": "single-hyperbook/book/index.md",
-      "directory": "",
-      "href": "/",
-      "permalink": null,
-      "relative": "index.md",
-    },
-    "repo": "https://github.com/openpatch/hyperbook/edit/main/website/en/book/index.md",
-  },
+  "previous": null,
 }
 `;

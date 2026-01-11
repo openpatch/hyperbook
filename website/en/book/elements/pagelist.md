@@ -32,6 +32,7 @@ A query expression to filter pages. Supports:
 - `name(regex)`: Match the page name
 - `keyword(regex)`: Match any of the page's keywords
 - `description(regex)`: Match the page description
+- `isEmpty(true|false)`: Check if the page has no content
 - `<customField>(regex)`: Match any custom frontmatter field
 
 **Operators:**

@@ -81,7 +81,10 @@ export const getNavigationForFile = async (
 
     const allPages = pageList;
     const filteredPageList = pageList.filter(
-      (p) => (!p.isEmpty || p.href === currentFile.path.href) && !p.hide && p.navigation !== "hidden",
+      (p) =>
+        (!p.isEmpty || p.href === currentFile.path.href) &&
+        !p.hide &&
+        p.navigation !== "hidden",
     );
     i = filteredPageList.findIndex((p) => p.href === currentFile.path.href);
 
@@ -189,12 +192,13 @@ export const getPagesAndSections = async (
         data.name = data.title || file.name;
       }
       // Filter navigation to only valid PageNavigation values
-      const pageNavigation: PageNavigation | undefined = 
-        data.navigation === "default" || data.navigation === "hidden" 
-          ? data.navigation 
+      const pageNavigation: PageNavigation | undefined =
+        data.navigation === "default" || data.navigation === "hidden"
+          ? data.navigation
           : undefined;
       const page: HyperbookPage = {
         ...data,
+        isEmpty: file.markdown.content.trim() === "",
         navigation: pageNavigation,
         path: file.path,
       };
@@ -253,10 +257,7 @@ export const getPageList = (
   let pageList = [...pages];
 
   for (const section of sections) {
-    pageList = [
-      ...pageList,
-      ...getPageList(section.sections, section.pages),
-    ];
+    pageList = [...pageList, ...getPageList(section.sections, section.pages)];
   }
 
   return pageList;
