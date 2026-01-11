@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.77.3
+
+### Patch Changes
+
+- [`503080e`](https://github.com/openpatch/hyperbook/commit/503080e0a8f1ede496e000e59802fcfad9d9ebc1) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Hide floating buttons in standalone mode
+
 ## 0.77.2
 
 ### Patch Changes
