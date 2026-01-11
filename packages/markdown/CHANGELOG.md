@@ -1,5 +1,11 @@
 # @hyperbook/markdown
 
+## 0.48.2
+
+### Patch Changes
+
+- [`9857116`](https://github.com/openpatch/hyperbook/commit/9857116239e8e0ccef14979605b937f17620cd1b) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix wide styling and line-height
+
 ## 0.48.1
 
 ### Patch Changes

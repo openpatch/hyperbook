@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.77.2
+
+### Patch Changes
+
+- [`9857116`](https://github.com/openpatch/hyperbook/commit/9857116239e8e0ccef14979605b937f17620cd1b) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix wide styling and line-height
+
 ## 0.77.1
 
 ### Patch Changes
