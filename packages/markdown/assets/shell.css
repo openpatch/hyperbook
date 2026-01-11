@@ -919,6 +919,9 @@ nav.toc li.level-3 {
 }
 
 .main-grid.layout-standalone header,
+.main-grid.layout-standalone .floating-buttons-container {
+  display: none;
+}
 .main-grid.layout-standalone .sidebar {
   display: none;
 }
