@@ -1,5 +1,11 @@
 # @hyperbook/markdown
 
+## 0.48.4
+
+### Patch Changes
+
+- [`f8d67df`](https://github.com/openpatch/hyperbook/commit/f8d67df980e25ed17c88d80d0ffb36ef71f0b633) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix empty pages show up in prev and next navigation
+
 ## 0.48.3
 
 ### Patch Changes
