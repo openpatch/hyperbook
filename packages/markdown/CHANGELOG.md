@@ -1,5 +1,11 @@
 # @hyperbook/markdown
 
+## 0.48.5
+
+### Patch Changes
+
+- [`1d4f6df`](https://github.com/openpatch/hyperbook/commit/1d4f6df7e35ebc54b56dee024249e969da3856fe) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Normalize line-height for code blocks
+
 ## 0.48.4
 
 ### Patch Changes
