@@ -59,7 +59,7 @@
 }
 
 .directive-tiles .tile {
-  line-height: 1.2em;
+  line-height: 1.2;
   min-height: 6rem;
   background: var(--color-nav);
   transition: all 300ms;
@@ -89,7 +89,7 @@
   bottom: 0.5rem;
   right: 0.5rem;
   font-size: 2rem;
-  line-height: normal;
+  line-height: 1.2;
   text-align: center;
   pointer-events: none;
 }
