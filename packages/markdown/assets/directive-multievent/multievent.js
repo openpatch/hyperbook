@@ -934,16 +934,16 @@ var multievent = {
             s.width = "1.2em";
           }
           if (IB == 2) {
-            s.width = "1.8em";
+            s.width = "2.4em";
           }
           if (IB == 3) {
-            s.width = "2.3em";
+            s.width = "3.6em";
           }
           if (IB == 4) {
-            s.width = "3.2em";
+            s.width = "4.8em";
           }
           if (IB > 4) {
-            s.width = IB * 0.75 + "em";
+            s.width = IB * 1.2 + "em";
           }
         }
       }
