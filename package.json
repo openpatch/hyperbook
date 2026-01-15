@@ -8,7 +8,7 @@
     "prepare": "husky",
     "dev": "node scripts/watcher.mjs",
     "build": "pnpm -r build",
-    "build:vercel": "pnpm --filter=!hyperbook-studio build",
+    "build:vercel": "pnpm --filter=!hyperbook-studio build && pnpm --filter=playground build:vercel",
     "test": "CI=true pnpm -r test",
     "lint": "pnpm -r lint",
     "hyperbook:build": "pnpm --filter hyperbook build",
