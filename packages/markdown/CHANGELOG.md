@@ -1,5 +1,11 @@
 # @hyperbook/markdown
 
+## 0.48.6
+
+### Patch Changes
+
+- [`2298714`](https://github.com/openpatch/hyperbook/commit/22987149f801f5e1372ad0aaf89aea601172238f) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix input width of multievent input
+
 ## 0.48.5
 
 ### Patch Changes
