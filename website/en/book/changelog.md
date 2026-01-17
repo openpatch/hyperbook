@@ -38,13 +38,25 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
-## v0.77.6
+## v0.77.7
 
 ::::tabs
 
 :::tab{title="Improved :+1:" id="improved"}
 
 - Dev command now detects port conflicts and prompts users to automatically find a free port when the specified port is already in use.
+
+:::
+
+::::
+
+## v0.77.6
+
+::::tabs
+
+:::tab{title="Improved :+1:" id="improved"}
+
+- Fix input width of multievent input
 
 :::
 
