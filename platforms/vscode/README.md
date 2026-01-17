@@ -7,6 +7,8 @@
 [![GitHub Contributors](https://img.shields.io/github/contributors/openpatch/hyperbook.svg?)](https://github.com/openpatch/hyperbook/graphs/contributors)
 [![License](https://img.shields.io/github/license/openpatch/hyperbook)](https://github.com/openpatch/hyperbook)
 
+Complete tooling for authoring Hyperbooks in Visual Studio Code. This extension provides live preview, snippets, auto-completion, syntax highlighting, and schema validation for Hyperbook projects.
+
 All you need for writing Hyperbooks (auto preview, snippets, auto-completion and more).
 
 ## Features

@@ -7,6 +7,26 @@ support modern standards and runs superfast.
 - **Repository:** https://github.com/openpatch/hyperbook
 - **Community**: https://matrix.to/#/#openpatch:matrix.org
 
+## Packages
+
+This monorepo contains the following packages:
+
+### Core Packages
+
+- **[hyperbook](packages/hyperbook)** - Main CLI tool for creating, building, and serving Hyperbook projects
+- **[@hyperbook/markdown](packages/markdown)** - Markdown processing engine with 30+ custom directives
+- **[@hyperbook/fs](packages/fs)** - File system utilities for managing Hyperbook projects
+- **[@hyperbook/types](packages/types)** - TypeScript type definitions for the Hyperbook ecosystem
+- **[create-hyperbook](packages/create)** - Interactive CLI for scaffolding new Hyperbook projects
+
+### Components
+
+- **[@hyperbook/web-component-excalidraw](packages/web-component-excalidraw)** - Excalidraw web component for diagrams
+
+### Platforms
+
+- **[hyperbook-studio](platforms/vscode)** - Visual Studio Code extension with preview, snippets, and validation
+
 ## Documentation
 
 If you want to work on the documentation, run the

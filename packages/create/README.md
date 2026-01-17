@@ -1,9 +1,11 @@
 # create-hyperbook <a href="https://npmjs.com/package/create-hyperbook"><img src="https://img.shields.io/npm/v/create-hyperbook" alt="npm package"></a>
 
+CLI tool for scaffolding new Hyperbook projects. This package provides an interactive prompt-based setup that creates a new Hyperbook project with sample content and configuration.
+
 ## Scaffolding Your First Hyperbook Project
 
 > **Compatibility Note:**
-> Hyperbook requires [Node.js](https://nodejs.org/en/) version 20+. Please upgrade if your package manager warns about it.
+> Hyperbook requires [Node.js](https://nodejs.org/en/) version 18+. Please upgrade if your package manager warns about it.
 
 With NPM:
 
