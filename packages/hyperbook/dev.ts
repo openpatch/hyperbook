@@ -9,8 +9,68 @@ import { WebSocketServer } from "ws";
 import { OutgoingHttpHeaders } from "http2";
 import chalk from "chalk";
 import { rimraf } from "rimraf";
+import prompts from "prompts";
+import net from "net";
+
+async function isPortAvailable(port: number): Promise<boolean> {
+  return new Promise((resolve) => {
+    const server = net.createServer();
+    
+    server.once('error', (err: NodeJS.ErrnoException) => {
+      if (err.code === 'EADDRINUSE') {
+        resolve(false);
+      } else {
+        resolve(false);
+      }
+    });
+    
+    server.once('listening', () => {
+      server.close();
+      resolve(true);
+    });
+    
+    server.listen(port);
+  });
+}
+
+async function findFreePort(startPort: number): Promise<number> {
+  let port = startPort;
+  while (port < 65535) {
+    if (await isPortAvailable(port)) {
+      return port;
+    }
+    port++;
+  }
+  throw new Error('No free ports available');
+}
 
 export async function runDev({ port = 8080 }: { port: number }): Promise<void> {
+  // Check if the port is available
+  const portAvailable = await isPortAvailable(port);
+  
+  if (!portAvailable) {
+    console.log(chalk.yellow(`Port ${port} is already in use.`));
+    
+    const response = await prompts({
+      type: 'confirm',
+      name: 'findFreePort',
+      message: 'Would you like to find and use a free port?',
+      initial: true
+    });
+    
+    if (!response.findFreePort) {
+      console.log(chalk.red('Exiting dev server.'));
+      process.exit(0);
+    }
+    
+    try {
+      port = await findFreePort(port + 1);
+      console.log(chalk.green(`Found free port: ${port}`));
+    } catch (error) {
+      console.error(chalk.red('Could not find a free port.'));
+      process.exit(1);
+    }
+  }
   const root = process.cwd();
   const rootProject = await hyperproject.get(root);
   const outDir = path.join(rootProject.src, ".hyperbook", "out");
