@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.77.7
+
+### Patch Changes
+
+- [`da524b2`](https://github.com/openpatch/hyperbook/commit/da524b2665802417d518b25e2ba1ff726cdc699d) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add port conflict detection to dev command. When the specified port is already in use, users are now prompted to automatically find and use a free port or exit.
+
 ## 0.77.6
 
 ### Patch Changes
