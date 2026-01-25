@@ -257,7 +257,22 @@ export const getPageList = (
   let pageList = [...pages];
 
   for (const section of sections) {
-    pageList = [...pageList, ...getPageList(section.sections, section.pages)];
+    // Check if section is virtual or not
+    const isVirtual = section.virtual || section.navigation === "virtual";
+    
+    if (!isVirtual && section.href) {
+      // For non-virtual sections with an href, add the index page first
+      const indexPage = section.pages.find(p => p.href === section.href);
+      const otherPages = section.pages.filter(p => p.href !== section.href);
+      
+      if (indexPage) {
+        pageList.push(indexPage);
+      }
+      pageList = [...pageList, ...getPageList(section.sections, otherPages)];
+    } else {
+      // For virtual sections or sections without href, add all pages normally
+      pageList = [...pageList, ...getPageList(section.sections, section.pages)];
+    }
   }
 
   return pageList;

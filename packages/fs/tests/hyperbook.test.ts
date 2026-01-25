@@ -284,4 +284,124 @@ describe("hyperbook", () => {
       expect(navigation.previous).toBeNull();
     });
   });
+
+  describe("getPageList", () => {
+    it("should place section index page first for non-virtual sections", () => {
+      const sections: any[] = [
+        {
+          name: "Normal Section",
+          href: "/section",
+          virtual: false,
+          navigation: "default",
+          pages: [
+            { name: "Page A", href: "/section/page-a" },
+            { name: "Section Index", href: "/section" },
+            { name: "Page B", href: "/section/page-b" },
+          ],
+          sections: [],
+        },
+      ];
+      const pages: any[] = [];
+
+      const pageList = hyperbook.getPageList(sections, pages);
+
+      expect(pageList[0].href).toBe("/section");
+      expect(pageList[1].href).toBe("/section/page-a");
+      expect(pageList[2].href).toBe("/section/page-b");
+    });
+
+    it("should not reorder pages for virtual sections", () => {
+      const sections: any[] = [
+        {
+          name: "Virtual Section",
+          href: "/virtual",
+          virtual: true,
+          pages: [
+            { name: "Page A", href: "/virtual/page-a" },
+            { name: "Index", href: "/virtual" },
+            { name: "Page B", href: "/virtual/page-b" },
+          ],
+          sections: [],
+        },
+      ];
+      const pages: any[] = [];
+
+      const pageList = hyperbook.getPageList(sections, pages);
+
+      expect(pageList[0].href).toBe("/virtual/page-a");
+      expect(pageList[1].href).toBe("/virtual");
+      expect(pageList[2].href).toBe("/virtual/page-b");
+    });
+
+    it("should place section index first when navigation is virtual", () => {
+      const sections: any[] = [
+        {
+          name: "Virtual Nav Section",
+          href: "/virt-nav",
+          navigation: "virtual",
+          pages: [
+            { name: "Page A", href: "/virt-nav/page-a" },
+            { name: "Index", href: "/virt-nav" },
+          ],
+          sections: [],
+        },
+      ];
+      const pages: any[] = [];
+
+      const pageList = hyperbook.getPageList(sections, pages);
+
+      // Virtual navigation should not reorder
+      expect(pageList[0].href).toBe("/virt-nav/page-a");
+      expect(pageList[1].href).toBe("/virt-nav");
+    });
+
+    it("should handle sections without href", () => {
+      const sections: any[] = [
+        {
+          name: "No Href Section",
+          pages: [
+            { name: "Page A", href: "/section/page-a" },
+            { name: "Page B", href: "/section/page-b" },
+          ],
+          sections: [],
+        },
+      ];
+      const pages: any[] = [];
+
+      const pageList = hyperbook.getPageList(sections, pages);
+
+      expect(pageList[0].href).toBe("/section/page-a");
+      expect(pageList[1].href).toBe("/section/page-b");
+    });
+
+    it("should handle nested sections correctly", () => {
+      const sections: any[] = [
+        {
+          name: "Parent Section",
+          href: "/parent",
+          pages: [
+            { name: "Parent Index", href: "/parent" },
+          ],
+          sections: [
+            {
+              name: "Child Section",
+              href: "/parent/child",
+              pages: [
+                { name: "Child Page", href: "/parent/child/page" },
+                { name: "Child Index", href: "/parent/child" },
+              ],
+              sections: [],
+            },
+          ],
+        },
+      ];
+      const pages: any[] = [];
+
+      const pageList = hyperbook.getPageList(sections, pages);
+
+      expect(pageList[0].href).toBe("/parent");
+      expect(pageList[1].href).toBe("/parent/child");
+      expect(pageList[2].href).toBe("/parent/child/page");
+    });
+  });
 });
