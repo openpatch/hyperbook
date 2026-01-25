@@ -1,5 +1,11 @@
 # @hyperbook/fs
 
+## 0.24.2
+
+### Patch Changes
+
+- [`28097df`](https://github.com/openpatch/hyperbook/commit/28097dfc6f7544d363789aa6368cd43935225886) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Convert navigation bug test to proper Vitest test suite. The standalone test-navigation-bug.js has been converted to a comprehensive test file (navigation-bug.test.ts) that validates navigation behavior with proper assertions and integration with the existing test infrastructure.
+
 ## 0.24.1
 
 ### Patch Changes
