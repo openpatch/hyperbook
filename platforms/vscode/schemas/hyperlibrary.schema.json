@@ -44,7 +44,7 @@
                     "name": {
                         "anyOf": [
                             {
-                                "$ref": "#/definitions/Partial<Record<Language,string>>"
+                                "$ref": "#/definitions/Partial%3CRecord%3CLanguage%2Cstring%3E%3E"
                             },
                             {
                                 "type": "string"
@@ -66,7 +66,7 @@
         "name": {
             "anyOf": [
                 {
-                    "$ref": "#/definitions/Partial<Record<Language,string>>"
+                    "$ref": "#/definitions/Partial%3CRecord%3CLanguage%2Cstring%3E%3E"
                 },
                 {
                     "type": "string"

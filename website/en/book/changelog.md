@@ -38,11 +38,29 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
-## v0.77.8
+## v0.77.9
 
 ::::tabs
 
 :::tab{title="Improved :+1:" id="improved"}
+
+- Update dependencies:
+  - p5 to version 2.2.0
+  - mermaid to version 11.12.2
+  - wavesurfer.js to version 7.12.1
+  - @learningmap/web-component to version 0.3.7
+  - abcjs to version 6.6.0
+  - jsxgraph to version 1.12.2
+
+:::
+
+::::
+
+## v0.77.8
+
+::::tabs
+
+:::tab{title="Fixed :bug:" id="fixed"}
 
 - Fix previous and next buttons.
 

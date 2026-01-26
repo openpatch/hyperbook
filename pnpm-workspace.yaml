@@ -4,5 +4,10 @@ packages:
   - platforms/*
   - '!**/test/**'
 
+ignoredBuiltDependencies:
+  - esbuild
+
 onlyBuiltDependencies:
+  - '@parcel/watcher'
+  - '@vscode/vsce-sign'
   - sharp
