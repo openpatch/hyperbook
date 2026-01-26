@@ -1,5 +1,11 @@
 # @hyperbook/markdown
 
+## 0.48.7
+
+### Patch Changes
+
+- [`3e9f9a9`](https://github.com/openpatch/hyperbook/commit/3e9f9a9a7b6dc48222ee10cb07ba4fa20fae5cb3) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Update all dependencies
+
 ## 0.48.6
 
 ### Patch Changes
