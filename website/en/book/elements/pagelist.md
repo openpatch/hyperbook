@@ -30,7 +30,7 @@ A query expression to filter pages. Supports:
 **Fields:**
 - `href(regex)`: Match the page URL
 - `name(regex)`: Match the page name
-- `keyword(regex)`: Match any of the page's keywords
+- `keyword(value)`: Match any of the page's keywords (exact match by default; use `^regex$` for regex matching)
 - `description(regex)`: Match the page description
 - `isEmpty(true|false)`: Check if the page has no content
 - `<customField>(regex)`: Match any custom frontmatter field
@@ -76,7 +76,8 @@ Limit the number of results returned.
 ```md
 ::pagelist{source="href(/elements/.*)"}
 ::pagelist{source="name(.*IDE.*)"}
-::pagelist{source="keyword(tutorial)"}
+::pagelist{source="keyword(tutorial)"}  <!-- Exact match -->
+::pagelist{source="keyword(^.*tutorial.*$)"}  <!-- Regex match -->
 ```
 
 ### AND - Both conditions must match

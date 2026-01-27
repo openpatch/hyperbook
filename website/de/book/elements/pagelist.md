@@ -29,7 +29,7 @@ Ein Abfrageausdruck zum Filtern von Seiten. Unterstützt:
 **Felder:**
 - `href(regex)`: Filtert nach der Seiten-URL
 - `name(regex)`: Filtert nach dem Seitennamen
-- `keyword(regex)`: Filtert nach Schlüsselwörtern der Seite
+- `keyword(wert)`: Filtert nach Schlüsselwörtern der Seite (exakte Übereinstimmung standardmäßig; `^regex$` für Regex-Matching)
 - `description(regex)`: Filtert nach der Seitenbeschreibung
 - `<customField>(regex)`: Filtert nach beliebigen Frontmatter-Feldern
 
@@ -74,7 +74,8 @@ Begrenzt die Anzahl der zurückgegebenen Ergebnisse.
 ```md
 ::pagelist{source="href(/elements/.*)"}
 ::pagelist{source="name(.*IDE.*)"}
-::pagelist{source="keyword(tutorial)"}
+::pagelist{source="keyword(tutorial)"}  <!-- Exakte Übereinstimmung -->
+::pagelist{source="keyword(^.*tutorial.*$)"}  <!-- Regex-Übereinstimmung -->
 ```
 
 ### AND - Beide Bedingungen müssen zutreffen

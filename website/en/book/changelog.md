@@ -38,6 +38,18 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.78.0
+
+::::tabs
+
+:::tab{title="Improved :+1:" id="improved"}
+
+- Update pagelist element to match excatly by default.
+
+:::
+
+::::
+
 ## v0.77.9
 
 ::::tabs

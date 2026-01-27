@@ -191,7 +191,15 @@ export const evaluateCondition = (field: string, regex: string, page: HyperbookP
     if (!page.keywords || !Array.isArray(page.keywords)) {
       return false;
     }
-    return page.keywords.some((k: string) => re.test(k));
+    // Default to exact match unless regex is explicitly used
+    if (/^\^.*\$$/.test(regex)) {
+      // Regex: starts with ^ and ends with $
+      const re = new RegExp(regex);
+      return page.keywords.some((k: string) => re.test(k));
+    } else {
+      // Exact match
+      return page.keywords.includes(regex);
+    }
   } else if (field === "description") {
     return page.description ? re.test(page.description) : false;
   } else {
