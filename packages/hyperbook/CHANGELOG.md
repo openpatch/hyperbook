@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.78.0
+
+### Minor Changes
+
+- [`54963f2`](https://github.com/openpatch/hyperbook/commit/54963f2e022cb90de6c74d1d28b80e34b51cb2bd) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Update pagelist directive to match exactly as default.
+
 ## 0.77.9
 
 ### Patch Changes
