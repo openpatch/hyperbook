@@ -1,4 +1,17 @@
 hyperbook.typst = (function () {
+  // Debounce utility function
+  const debounce = (func, wait) => {
+    let timeout;
+    return function executedFunction(...args) {
+      const later = () => {
+        clearTimeout(timeout);
+        func(...args);
+      };
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+    };
+  };
+
   // Register code-input template for typst syntax highlighting
   window.codeInput?.registerTemplate(
     "typst-highlighted",
@@ -67,6 +80,85 @@ hyperbook.typst = (function () {
     return typstLoadPromise;
   };
 
+  // Asset cache for server-loaded images
+  const assetCache = new Map(); // filepath -> Uint8Array
+
+  // Extract relative image paths from typst source
+  const extractRelImagePaths = (src) => {
+    const paths = new Set();
+    const re = /image\s*\(\s*(['"])([^'"]+)\1/gi;
+    let m;
+    while ((m = re.exec(src))) {
+      const p = m[2];
+      // Skip absolute URLs, data URLs, blob URLs, and paths starting with "/"
+      if (/^(https?:|data:|blob:|\/)/i.test(p)) continue;
+      paths.add(p);
+    }
+    return [...paths];
+  };
+
+  // Fetch assets from server using base path
+  const fetchAssets = async (paths, basePath) => {
+    const misses = paths.filter(p => !assetCache.has(p));
+    await Promise.all(misses.map(async (p) => {
+      try {
+        // Construct URL using base path
+        const url = basePath ? `${basePath}/${p}`.replace(/\/+/g, '/') : p;
+        const res = await fetch(url);
+        if (!res.ok) {
+          console.warn(`Image not found: ${p} at ${url} (HTTP ${res.status})`);
+          assetCache.set(p, null); // Mark as failed
+          return;
+        }
+        const buf = await res.arrayBuffer();
+        assetCache.set(p, new Uint8Array(buf));
+      } catch (error) {
+        console.warn(`Error loading image ${p}:`, error);
+        assetCache.set(p, null); // Mark as failed
+      }
+    }));
+  };
+
+  // Build typst preamble with inlined assets
+  const buildAssetsPreamble = () => {
+    if (assetCache.size === 0) return '';
+    const entries = [...assetCache.entries()]
+      .filter(([name, u8]) => u8 !== null) // Skip failed images
+      .map(([name, u8]) => {
+        const nums = Array.from(u8).join(',');
+        return `  "${name}": bytes((${nums}))`;
+      }).join(',\n');
+    if (!entries) return '';
+    return `#let __assets = (\n${entries}\n)\n\n`;
+  };
+
+  // Rewrite image() calls to use inlined assets
+  const rewriteImageCalls = (src) => {
+    if (assetCache.size === 0) return src;
+    return src.replace(/image\s*\(\s*(['"])([^'"]+)\1/g, (m, q, fname) => {
+      if (assetCache.has(fname)) {
+        const asset = assetCache.get(fname);
+        if (asset === null) {
+          // Image not found – replace with error text
+          return `[Image not found: _${fname}_]`;
+        }
+        return `image(__assets.at("${fname}")`;
+      }
+      return m;
+    });
+  };
+
+  // Prepare typst source with server-loaded assets
+  const prepareTypstSourceWithAssets = async (src, basePath) => {
+    const relPaths = extractRelImagePaths(src);
+    if (relPaths.length > 0) {
+      await fetchAssets(relPaths, basePath);
+      const preamble = buildAssetsPreamble();
+      return preamble + rewriteImageCalls(src);
+    }
+    return src;
+  };
+
   // Parse error message from SourceDiagnostic format
   const parseTypstError = (errorMessage) => {
     try {
@@ -82,7 +174,7 @@ hyperbook.typst = (function () {
   };
 
   // Render typst code to SVG
-  const renderTypst = async (code, container, loadingIndicator, sourceFiles, binaryFiles, id, previewContainer) => {
+  const renderTypst = async (code, container, loadingIndicator, sourceFiles, binaryFiles, id, previewContainer, basePath) => {
     // Queue this render to ensure only one compilation runs at a time
     return queueRender(async () => {
       // Show loading indicator
@@ -95,6 +187,9 @@ hyperbook.typst = (function () {
       try {
         // Reset shadow files for this render
         $typst.resetShadow();
+
+        // Prepare code with server-loaded assets
+        const preparedCode = await prepareTypstSourceWithAssets(code, basePath);
 
         // Add source files
         for (const { filename, content } of sourceFiles) {
@@ -128,7 +223,7 @@ hyperbook.typst = (function () {
           }
         }
 
-        const svg = await $typst.svg({ mainContent: code });
+        const svg = await $typst.svg({ mainContent: preparedCode });
         
         // Remove any existing error overlay from preview-container
         if (previewContainer) {
@@ -204,7 +299,7 @@ hyperbook.typst = (function () {
   };
 
   // Export to PDF
-  const exportPdf = async (code, id, sourceFiles, binaryFiles) => {
+  const exportPdf = async (code, id, sourceFiles, binaryFiles, basePath) => {
     // Queue this export to ensure only one compilation runs at a time
     return queueRender(async () => {
       await loadTypst();
@@ -212,6 +307,9 @@ hyperbook.typst = (function () {
       try {
         // Reset shadow files for this export
         $typst.resetShadow();
+
+        // Prepare code with server-loaded assets
+        const preparedCode = await prepareTypstSourceWithAssets(code, basePath);
 
         // Add source files
         for (const { filename, content } of sourceFiles) {
@@ -244,7 +342,7 @@ hyperbook.typst = (function () {
           }
         }
 
-        const pdfData = await $typst.pdf({ mainContent: code });
+        const pdfData = await $typst.pdf({ mainContent: preparedCode });
         const pdfFile = new Blob([pdfData], { type: "application/pdf" });
         const link = document.createElement("a");
         link.href = URL.createObjectURL(pdfFile);
@@ -276,6 +374,12 @@ hyperbook.typst = (function () {
     // Parse source files and binary files from data attributes
     const sourceFilesData = elem.getAttribute("data-source-files");
     const binaryFilesData = elem.getAttribute("data-binary-files");
+    let basePath = elem.getAttribute("data-base-path") || "";
+    
+    // Ensure basePath starts with / for absolute paths
+    if (basePath && !basePath.startsWith('/')) {
+      basePath = '/' + basePath;
+    }
     
     let sourceFiles = sourceFilesData 
       ? JSON.parse(atob(sourceFilesData))
@@ -440,9 +544,12 @@ hyperbook.typst = (function () {
         
         const mainFile = sourceFiles.find(f => f.filename === "main.typ" || f.filename === "main.typst");
         const mainCode = mainFile ? mainFile.content : "";
-        renderTypst(mainCode, preview, loadingIndicator, sourceFiles, binaryFiles, id, previewContainer);
+        renderTypst(mainCode, preview, loadingIndicator, sourceFiles, binaryFiles, id, previewContainer, basePath);
       }
     };
+
+    // Create debounced version of rerenderTypst for input events (500ms delay)
+    const debouncedRerenderTypst = debounce(rerenderTypst, 500);
 
     // Add source file button
     addSourceFileBtn?.addEventListener("click", () => {
@@ -548,14 +655,14 @@ hyperbook.typst = (function () {
         // Listen for input changes
         editor.addEventListener("input", () => {
           saveState();
-          rerenderTypst();
+          debouncedRerenderTypst();
         });
       });
     } else if (sourceTextarea) {
       // Preview mode - code is in hidden textarea
       initialCode = sourceTextarea.value;
       loadTypst().then(() => {
-        renderTypst(initialCode, preview, loadingIndicator, sourceFiles, binaryFiles, id, previewContainer);
+        renderTypst(initialCode, preview, loadingIndicator, sourceFiles, binaryFiles, id, previewContainer, basePath);
       });
     }
 
@@ -564,7 +671,7 @@ hyperbook.typst = (function () {
       // Get the main file content
       const mainFile = sourceFiles.find(f => f.filename === "main.typ" || f.filename === "main.typst");
       const code = mainFile ? mainFile.content : (editor ? editor.value : initialCode);
-      await exportPdf(code, id, sourceFiles, binaryFiles);
+      await exportPdf(code, id, sourceFiles, binaryFiles, basePath);
     });
 
     // Download Project button (ZIP with all files)
@@ -590,7 +697,7 @@ hyperbook.typst = (function () {
           if (url.startsWith('data:')) {
             const response = await fetch(url);
             arrayBuffer = await response.arrayBuffer();
-          } else {
+          } else if (url.startsWith('http://') || url.startsWith('https://')) {
             // External URL
             const response = await fetch(url);
             if (response.ok) {
@@ -599,12 +706,47 @@ hyperbook.typst = (function () {
               console.warn(`Failed to load binary file: ${url}`);
               continue;
             }
+          } else {
+            // Relative URL - use basePath to construct full URL
+            const fullUrl = basePath ? `${basePath}/${url}`.replace(/\/+/g, '/') : url;
+            const response = await fetch(fullUrl);
+            if (response.ok) {
+              arrayBuffer = await response.arrayBuffer();
+            } else {
+              console.warn(`Failed to load binary file: ${url} at ${fullUrl}`);
+              continue;
+            }
           }
           
           const path = dest.startsWith('/') ? dest.substring(1) : dest;
           zipFiles[path] = new Uint8Array(arrayBuffer);
         } catch (error) {
           console.warn(`Error loading binary file ${url}:`, error);
+        }
+      }
+
+      // Also include assets loaded from image() calls in the code
+      const relImagePaths = extractRelImagePaths(code);
+      for (const imagePath of relImagePaths) {
+        // Skip if already in zipFiles or already handled as binary file
+        const normalizedPath = imagePath.startsWith('/') ? imagePath.substring(1) : imagePath;
+        if (zipFiles[normalizedPath]) continue;
+        
+        // Skip absolute URLs, data URLs, and blob URLs
+        if (/^(https?:|data:|blob:)/i.test(imagePath)) continue;
+        
+        try {
+          // Construct URL using basePath
+          const url = basePath ? `${basePath}/${imagePath}`.replace(/\/+/g, '/') : imagePath;
+          const response = await fetch(url);
+          if (response.ok) {
+            const arrayBuffer = await response.arrayBuffer();
+            zipFiles[normalizedPath] = new Uint8Array(arrayBuffer);
+          } else {
+            console.warn(`Failed to load image asset: ${imagePath} at ${url}`);
+          }
+        } catch (error) {
+          console.warn(`Error loading image asset ${imagePath}:`, error);
         }
       }
 

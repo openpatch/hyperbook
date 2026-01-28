@@ -143,6 +143,9 @@ export default (ctx: HyperbookContext) => () => {
         const isEditMode = mode === "edit";
         const isPreviewMode = mode === "preview" || !isEditMode;
 
+        // Get base path from current page directory
+        const basePath = ctx.navigation.current?.path?.directory || "";
+
         data.hName = "div";
         data.hProperties = {
           class: ["directive-typst", isPreviewMode ? "preview-only" : ""]
@@ -155,6 +158,7 @@ export default (ctx: HyperbookContext) => () => {
           "data-binary-files": Buffer.from(
             JSON.stringify(binaryFiles),
           ).toString("base64"),
+          "data-base-path": basePath,
         };
 
         const previewContainer: Element = {

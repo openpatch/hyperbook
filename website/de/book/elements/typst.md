@@ -123,7 +123,11 @@ Verwende die `@source`-Direktive, um Typst-Quelldateien zu laden, die in dein Ha
 
 #### Laden von Binärdateien
 
-Verwende die `@file`-Direktive, um Binärdateien wie Bilder zu laden:
+Es gibt zwei Möglichkeiten, Binärdateien wie Bilder in Typst zu laden:
+
+**Methode 1: Mit `@file`-Direktive (explizite Deklaration)**
+
+Verwende die `@file`-Direktive, um Binärdateien explizit zu deklarieren:
 
 ````md
 :::typst{mode="preview"}
@@ -141,9 +145,35 @@ Verwende die `@file`-Direktive, um Binärdateien wie Bilder zu laden:
 :::
 ````
 
+**Methode 2: Direkter Verweis in `image()`-Aufrufen (automatisches Laden)**
+
+Du kannst Bilder auch direkt in deinem Typst-Code referenzieren, ohne `@file` zu verwenden. Die Bilder werden automatisch vom Server geladen:
+
+````md
+:::typst{mode="preview"}
+
+```typ
+= Dokument mit Bild
+
+#figure(
+  image("my-image.jpg", width: 80%),
+  caption: "Mein Bild"
+)
+```
+:::
+````
+
+Bei Verwendung direkter Bildverweise (Methode 2) sind die Bildpfade relativ und werden automatisch in denselben Speicherorten wie `@file`-Quellen gesucht.
+
+:::alert{info}
+
+**Empfehlung**: Verwende Methode 2 (direkte Verweise) für einfacheren Code, wenn du nur Bilder anzeigen möchtest. Verwende Methode 1 (`@file`-Direktive), wenn du explizite Kontrolle über Dateipfade benötigst oder Abhängigkeiten klar machen möchtest.
+
+:::
+
 #### Suchpfade für Dateien
 
-Dateien, die in `src`-Attributen referenziert werden, werden in den folgenden Speicherorten gesucht (in dieser Reihenfolge):
+Dateien, die in `src`-Attributen (für `@file`- und `@source`-Direktiven) referenziert werden, sowie Bilder, die direkt in `image()`-Aufrufen referenziert werden, werden in den folgenden Speicherorten gesucht (in dieser Reihenfolge):
 1. `public/`-Verzeichnis
 2. `book/`-Verzeichnis  
 3. Verzeichnis der aktuellen Seite

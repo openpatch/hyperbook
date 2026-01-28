@@ -19,6 +19,13 @@ The Typst directive allows you to render [Typst](https://typst.app/) documents d
 
 - **Multiple Typst Blocks**: When multiple Typst blocks are present on the same page, they render sequentially (one at a time) to ensure file isolation. Each block maintains its own independent file system during rendering.
 - **File Isolation**: Files loaded in one Typst block (via `@source` or `@file`) are completely isolated from other blocks on the same page. This means you can use the same filename (e.g., `other.typ`) in different blocks without conflicts.
+- **Project Download**: When downloading a Typst project as ZIP, all referenced assets are automatically included:
+  - Source files defined with named code blocks (e.g., `main.typ`, `helper.typ`)
+  - Binary files loaded via `@file` directive
+  - Images referenced in `image()` calls that are loaded from relative URLs
+  - User-uploaded files (stored as data URLs)
+  
+  The downloaded ZIP contains a complete, standalone Typst project that can be opened and compiled locally.
 
 
 ## Usage
@@ -123,7 +130,11 @@ Use the `@source` directive to load Typst source files that can be included in y
 
 #### Loading Binary Files
 
-Use the `@file` directive to load binary files like images:
+There are two ways to load binary files like images in Typst:
+
+**Method 1: Using `@file` directive (explicit declaration)**
+
+Use the `@file` directive to explicitly declare binary files:
 
 ````md
 :::typst{mode="preview"}
@@ -141,9 +152,35 @@ Use the `@file` directive to load binary files like images:
 :::
 ````
 
+**Method 2: Direct reference in `image()` calls (automatic loading)**
+
+You can also reference images directly in your Typst code without using `@file`. The images will be automatically loaded from the server:
+
+````md
+:::typst{mode="preview"}
+
+```typ
+= Document with Image
+
+#figure(
+  image("my-image.jpg", width: 80%),
+  caption: "My image"
+)
+```
+:::
+````
+
+When using direct image references (Method 2), the image paths are relative and will be automatically searched in the same locations as `@file` sources.
+
+:::alert{info}
+
+**Recommendation**: Use Method 2 (direct references) for simpler code when you only need to display images. Use Method 1 (`@file` directive) when you need explicit control over file paths or want to make dependencies clear.
+
+:::
+
 #### File Search Locations
 
-Files referenced in `src` attributes are searched in the following locations (in order):
+Files referenced in `src` attributes (for `@file` and `@source` directives) and images referenced directly in `image()` calls are searched in the following locations (in order):
 1. `public/` directory
 2. `book/` directory  
 3. Current page's directory

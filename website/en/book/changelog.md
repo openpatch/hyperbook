@@ -38,6 +38,19 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.79.0
+
+::::tabs
+
+:::tab{title="Improved :+1:" id="improved"}
+
+- Typst now loads images and other assets from the server when using relative paths.
+- Added debounce to Typst rendering to improve performance when typing quickly.
+
+:::
+
+::::
+
 ## v0.78.0
 
 ::::tabs
