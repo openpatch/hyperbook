@@ -1,5 +1,11 @@
 # @hyperbook/markdown
 
+## 0.50.0
+
+### Minor Changes
+
+- [`291f477`](https://github.com/openpatch/hyperbook/commit/291f4772664aabaf5d5cd8a553ba1b1757855641) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Automatic loading of images and other assets in Typst documents.
+
 ## 0.49.0
 
 ### Minor Changes
