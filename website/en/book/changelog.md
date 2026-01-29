@@ -38,6 +38,18 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.79.1
+
+::::tabs
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+- Fix the table of contents drawer was visible on first load and refresh for a short period of time.
+
+:::
+
+::::
+
 ## v0.79.0
 
 ::::tabs

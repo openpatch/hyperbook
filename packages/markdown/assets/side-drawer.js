@@ -30,6 +30,7 @@ dialog {
     transform 0.25s ease-out
   );
   visibility: hidden;
+  opacity: 0;
 }
 
 :host([right]) dialog {
@@ -67,6 +68,7 @@ dialog::backdrop {
 
 dialog[open] {
   visibility: visible;
+  opacity: 1;
 }
 
 :host([open]) dialog[open],
