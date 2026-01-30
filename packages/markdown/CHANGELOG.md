@@ -1,5 +1,11 @@
 # @hyperbook/markdown
 
+## 0.51.0
+
+### Minor Changes
+
+- [`b28ca89`](https://github.com/openpatch/hyperbook/commit/b28ca894f26084fdf2e644e33d546efd7e55434f) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Support loading other files aswell in typst.
+
 ## 0.50.1
 
 ### Patch Changes
