@@ -1,5 +1,11 @@
 # @hyperbook/markdown
 
+## 0.50.1
+
+### Patch Changes
+
+- [`aca86a0`](https://github.com/openpatch/hyperbook/commit/aca86a0be14cc351a27ba998ac86e52dc9332a43) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix side-drawer flashing on refresh / first load
+
 ## 0.50.0
 
 ### Minor Changes
