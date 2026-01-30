@@ -38,6 +38,18 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.80.0
+
+::::tabs
+
+:::tab{title="Improved :+1:" id="improved"}
+
+- Typst now loads csv, json, xml, yaml and other files.
+
+:::
+
+::::
+
 ## v0.79.1
 
 ::::tabs
