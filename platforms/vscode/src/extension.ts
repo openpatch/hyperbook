@@ -4,6 +4,7 @@ import Preview from "./Preview";
 import StatusBarItem from "./StatusBarItem";
 import { hyperbook } from "@hyperbook/fs";
 import { createNewHyperbook } from "./NewCommand";
+import { HyperbookFoldingProvider } from "./FoldingProvider";
 
 export function activate(context: vscode.ExtensionContext) {
   let preview = new Preview(context);
@@ -761,6 +762,15 @@ Start writing your content here...
     '"',
   );
 
+  // Register folding provider for Hyperbook directive blocks
+  const foldingProvider = vscode.languages.registerFoldingRangeProvider(
+    [
+      { language: "markdown", scheme: "file" },
+      { language: "handlebars", scheme: "file" },
+    ],
+    new HyperbookFoldingProvider(),
+  );
+
   context.subscriptions.push(
     bookProvider,
     publicProvider,
@@ -771,6 +781,7 @@ Start writing your content here...
     excalidrawProvider,
     mediaProvider,
     downloadProvider,
+    foldingProvider,
   );
 }
 

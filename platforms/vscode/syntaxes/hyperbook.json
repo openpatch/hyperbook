@@ -110,6 +110,18 @@
     },
     {
       "include": "#directive-webide"
+    },
+    {
+      "include": "#directive-pyide"
+    },
+    {
+      "include": "#directive-term"
+    },
+    {
+      "include": "#directive-typst"
+    },
+    {
+      "include": "#directive-unpack"
     }
   ],
   "repository": {
@@ -1431,6 +1443,125 @@
         },
         "3": {
           "name": "entity.name.function.directive.mermaid.hyperbook"
+        }
+      },
+      "endCaptures": {
+        "2": {
+          "name": "punctuation.definition.directive.level.hyperbook"
+        }
+      },
+      "patterns": [
+        {
+          "include": "text.html.markdown"
+        }
+      ]
+    },
+    "directive-pyide": {
+      "name": "meta.directive.pyide.hyperbook",
+      "begin": "(^|\\G)(:{3,})(pyide)({.*})?\\s*$",
+      "end": "(^|\\G)(\\2|:{3,})\\s*$",
+      "beginCaptures": {
+        "2": {
+          "name": "punctuation.definition.directive.level.hyperbook"
+        },
+        "3": {
+          "name": "entity.name.function.directive.pyide.hyperbook"
+        },
+        "4": {
+          "patterns": [
+            {
+              "match": "(url|id)=\"([^\"]*)\"",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.pyide.hyperbook"
+                },
+                "2": {
+                  "name": "string.quoted.double.untitled"
+                }
+              }
+            },
+            {
+              "match": "(height)=([0-9]+)",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.pyide.hyperbook"
+                },
+                "2": {
+                  "name": "constant.numeric"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "endCaptures": {
+        "2": {
+          "name": "punctuation.definition.directive.level.hyperbook"
+        }
+      },
+      "patterns": [
+        {
+          "include": "text.html.markdown"
+        }
+      ]
+    },
+    "directive-term": {
+      "name": "meta.directive.term.hyperbook",
+      "match": "(^|\\G)(:{1,})(t|term)\\[(.+)\\]{(#[0-9a-zA-z-]+)(\\.[0-9a-zA-z-]+)?}\\s*$",
+      "captures": {
+        "2": {
+          "name": "punctuation.definition.directive.level.hyperbook"
+        },
+        "3": {
+          "name": "entity.name.function.directive.term.hyperbook"
+        },
+        "4": {
+          "name": "string.unquoted"
+        },
+        "5": {
+          "name": "string.unquoted"
+        },
+        "6": {
+          "name": "string.unquoted"
+        }
+      }
+    },
+    "directive-typst": {
+      "name": "meta.directive.typst.hyperbook",
+      "begin": "(^|\\G)(:{3,})(typst)\\s*$",
+      "end": "(^|\\G)(\\2)\\s*$",
+      "beginCaptures": {
+        "2": {
+          "name": "punctuation.definition.directive.level.hyperbook"
+        },
+        "3": {
+          "name": "entity.name.function.directive.typst.hyperbook"
+        }
+      },
+      "endCaptures": {
+        "2": {
+          "name": "punctuation.definition.directive.level.hyperbook"
+        }
+      },
+      "patterns": [
+        {
+          "include": "text.html.markdown"
+        }
+      ]
+    },
+    "directive-unpack": {
+      "name": "meta.directive.unpack.hyperbook",
+      "begin": "(^|\\G)(:{1,3})(\\w+)({.*})?\\s*$",
+      "end": "(^|\\G)(\\2)\\s*$",
+      "beginCaptures": {
+        "2": {
+          "name": "punctuation.definition.directive.level.hyperbook"
+        },
+        "3": {
+          "name": "entity.name.function.directive.unpack.hyperbook"
+        },
+        "4": {
+          "name": "meta.directive.unpack.attributes.hyperbook"
         }
       },
       "endCaptures": {
