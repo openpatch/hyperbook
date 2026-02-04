@@ -1,5 +1,40 @@
 hyperbook.typst = (function () {
-  // Debounce utility function
+  'use strict';
+
+  // ============================================================================
+  // CONSTANTS AND CONFIGURATION
+  // ============================================================================
+  
+  const CONFIG = {
+    TYPST_COMPILER_URL: "https://cdn.jsdelivr.net/npm/@myriaddreamin/typst-ts-web-compiler/pkg/typst_ts_web_compiler_bg.wasm",
+    TYPST_RENDERER_URL: "https://cdn.jsdelivr.net/npm/@myriaddreamin/typst-ts-renderer/pkg/typst_ts_renderer_bg.wasm",
+    TYPST_BUNDLE_URL: "https://cdn.jsdelivr.net/npm/@myriaddreamin/typst.ts/dist/esm/contrib/all-in-one-lite.bundle.js",
+    DEBOUNCE_DELAY: 500,
+    TYPST_CHECK_INTERVAL: 50,
+    CONTAINER_PADDING: 20,
+  };
+
+  const REGEX_PATTERNS = {
+    READ: /#read\s*\(\s*(['"])([^'"]+)\1[^)]*\)/gi,
+    CSV: /csv\s*\(\s*(['"])([^'"]+)\1[^)]*\)/gi,
+    JSON: /json\s*\(\s*(['"])([^'"]+)\1[^)]*\)/gi,
+    YAML: /yaml\s*\(\s*(['"])([^'"]+)\1[^)]*\)/gi,
+    XML: /xml\s*\(\s*(['"])([^'"]+)\1[^)]*\)/gi,
+    IMAGE: /image\s*\(\s*(['"])([^'"]+)\1[^)]*\)/gi,
+    ABSOLUTE_URL: /^(https?:|data:|blob:)/i,
+    ERROR_MESSAGE: /message:\s*"([^"]+)"/,
+  };
+
+  // ============================================================================
+  // UTILITY FUNCTIONS
+  // ============================================================================
+
+  /**
+   * Debounce utility function
+   * @param {Function} func - Function to debounce
+   * @param {number} wait - Wait time in milliseconds
+   * @returns {Function} Debounced function
+   */
   const debounce = (func, wait) => {
     let timeout;
     return function executedFunction(...args) {
@@ -12,874 +47,779 @@ hyperbook.typst = (function () {
     };
   };
 
-  // Register code-input template for typst syntax highlighting
-  window.codeInput?.registerTemplate(
-    "typst-highlighted",
-    codeInput.templates.prism(window.Prism, [
-      new codeInput.plugins.AutoCloseBrackets(),
-      new codeInput.plugins.Indent(true, 2),
-    ]),
-  );
-
-  const elems = document.getElementsByClassName("directive-typst");
-
-  // Typst WASM module URLs
-  const TYPST_COMPILER_URL =
-    "https://cdn.jsdelivr.net/npm/@myriaddreamin/typst-ts-web-compiler/pkg/typst_ts_web_compiler_bg.wasm";
-  const TYPST_RENDERER_URL =
-    "https://cdn.jsdelivr.net/npm/@myriaddreamin/typst-ts-renderer/pkg/typst_ts_renderer_bg.wasm";
-
-  // Load typst all-in-one bundle
-  let typstLoaded = false;
-  let typstLoadPromise = null;
-
-  // Rendering queue to ensure only one render at a time
-  let renderQueue = Promise.resolve();
-
-  const queueRender = (renderFn) => {
-    renderQueue = renderQueue.then(renderFn).catch((error) => {
-      console.error("Queued render error:", error);
-    });
-    return renderQueue;
+  /**
+   * Normalize path to ensure it starts with /
+   * @param {string} path - Path to normalize
+   * @returns {string} Normalized path
+   */
+  const normalizePath = (path) => {
+    if (!path) return '/';
+    return path.startsWith('/') ? path : `/${path}`;
   };
 
-  // Font cache to avoid loading the same font multiple times
-  const loadedFonts = new Set();
-
-  const loadTypst = ({ fontFiles = [] }) => {
-    if (typstLoaded) {
-      return Promise.resolve();
+  /**
+   * Construct full URL from base path and relative path
+   * @param {string} path - Relative or absolute path
+   * @param {string} basePath - Base path for absolute paths
+   * @param {string} pagePath - Page path for relative paths
+   * @returns {string} Full URL
+   */
+  const constructUrl = (path, basePath, pagePath) => {
+    if (path.startsWith('/')) {
+      return basePath ? `${basePath}${path}`.replace(/\/+/g, '/') : path;
     }
-    if (typstLoadPromise) {
-      return typstLoadPromise;
-    }
-
-    typstLoadPromise = new Promise((resolve, reject) => {
-      const script = document.createElement("script");
-      script.src =
-        "https://cdn.jsdelivr.net/npm/@myriaddreamin/typst.ts/dist/esm/contrib/all-in-one-lite.bundle.js";
-      script.type = "module";
-      script.id = "typst-loader";
-      script.onload = () => {
-        // Wait a bit for the module to initialize
-        const checkTypst = async () => {
-          if (typeof $typst !== "undefined") {
-            // Initialize the Typst compiler and renderer
-            const fonts = TypstCompileModule.loadFonts(
-              fontFiles.map((f) => f.url),
-            );
-            $typst.setCompilerInitOptions({
-              beforeBuild: [fonts],
-              getModule: () => TYPST_COMPILER_URL,
-            });
-            $typst.setRendererInitOptions({
-              beforeBuild: [fonts],
-              getModule: () => TYPST_RENDERER_URL,
-            });
-            typstLoaded = true;
-            resolve();
-          } else {
-            setTimeout(checkTypst, 50);
-          }
-        };
-        checkTypst();
-      };
-      script.onerror = reject;
-      document.head.appendChild(script);
-    });
-
-    return typstLoadPromise;
+    return pagePath ? `${pagePath}/${path}`.replace(/\/+/g, '/') : path;
   };
 
-  // Asset cache for server-loaded images
-  const assetCache = new Map(); // filepath -> Uint8Array
-
-  const extractRelFilePaths = (src) => {
-    const paths = new Set();
-
-    // Pattern for read() function
-    // Matches: read("path"), read('path'), read("path", encoding: ...)
-    const readRe = /#read\s*\(\s*(['"])([^'"]+)\1[^)]*\)/gi;
-
-    // Pattern for csv() function
-    // Matches: csv("path"), csv('path'), csv("path", delimiter: ...)
-    const csvRe = /csv\s*\(\s*(['"])([^'"]+)\1[^)]*\)/gi;
-
-    // Pattern for json() function
-    // Matches: json("path"), json('path')
-    const jsonRe = /json\s*\(\s*(['"])([^'"]+)\1[^)]*\)/gi;
-
-    // Pattern for yaml() function
-    const yamlRe = /yaml\s*\(\s*(['"])([^'"]+)\1[^)]*\)/gi;
-    //
-    // Pattern for xml() function
-    const xmlRe = /xml\s*\(\s*(['"])([^'"]+)\1[^)]*\)/gi;
-
-    const imageRe = /image\s*\(\s*(['"])([^'"]+)\1[^)]*\)/gi;
-
-    // Process all patterns
-    const patterns = [imageRe, readRe, csvRe, jsonRe, yamlRe, xmlRe];
-
-    for (const re of patterns) {
-      let m;
-      while ((m = re.exec(src))) {
-        const p = m[2];
-        // Skip absolute URLs, data URLs, blob URLs
-        if (/^(https?:|data:|blob:)/i.test(p)) continue;
-        paths.add(p);
-      }
-    }
-
-    return [...paths];
+  /**
+   * Get localized string with fallback
+   * @param {string} key - Translation key
+   * @param {string} fallback - Fallback text
+   * @returns {string} Localized or fallback text
+   */
+  const i18nGet = (key, fallback = '') => {
+    return window.i18n?.get(key) || fallback;
   };
 
-  // Fetch assets from server and cache them
-  const fetchAssets = async (paths, basePath, pagePath) => {
-    const misses = paths.filter((p) => !assetCache.has(p));
-    await Promise.all(
-      misses.map(async (p) => {
-        try {
-          // Construct URL: absolute paths use basePath, relative paths use pagePath
-          let url;
-          if (p.startsWith("/")) {
-            url = basePath ? `${basePath}${p}`.replace(/\/+/g, "/") : p;
-          } else {
-            url = pagePath ? `${pagePath}/${p}`.replace(/\/+/g, "/") : p;
-          }
-          const res = await fetch(url);
-          if (!res.ok) {
-            console.warn(
-              `Asset not found: ${p} at ${url} (HTTP ${res.status})`,
-            );
-            assetCache.set(p, null); // Mark as failed
-            return;
-          }
-          const buf = await res.arrayBuffer();
-          assetCache.set(p, new Uint8Array(buf));
-        } catch (error) {
-          console.warn(`Error loading asset ${p}:`, error);
-          assetCache.set(p, null); // Mark as failed
-        }
-      }),
+  // ============================================================================
+  // INITIALIZATION
+  // ============================================================================
+
+  /**
+   * Initialize code-input template for Typst syntax highlighting
+   */
+  const initializeCodeInput = () => {
+    if (!window.codeInput) return;
+
+    window.codeInput.registerTemplate(
+      "typst-highlighted",
+      window.codeInput.templates.prism(window.Prism, [
+        new window.codeInput.plugins.AutoCloseBrackets(),
+        new window.codeInput.plugins.Indent(true, 2),
+      ])
     );
   };
 
-  // Map cached assets to typst virtual filesystem
-  const mapAssetsToShadow = () => {
-    for (const [path, data] of assetCache.entries()) {
-      if (data !== null) {
-        const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-        $typst.mapShadow(normalizedPath, data);
-      }
-    }
-  };
+  // ============================================================================
+  // TYPST LOADER
+  // ============================================================================
 
-  // Fetch and prepare assets for typst rendering
-  const prepareAssets = async (src, sourceFiles, basePath, pagePath) => {
-    // Extract paths from main source AND all source files
-    const allPaths = new Set();
-    
-    // Extract from main source
-    extractRelFilePaths(src, sourceFiles).forEach(p => allPaths.add(p));
-    
-    // Extract from all source files
-    for (const { content } of sourceFiles) {
-      extractRelFilePaths(content, sourceFiles).forEach(p => allPaths.add(p));
+  class TypstLoader {
+    constructor() {
+      this.loaded = false;
+      this.loadPromise = null;
+      this.loadedFonts = new Set();
     }
-    
-    const relPaths = [...allPaths];
-    
-    if (relPaths.length > 0) {
-      await fetchAssets(relPaths, basePath, pagePath);
-      mapAssetsToShadow();
-    }
-  };
 
-  // Parse error message from SourceDiagnostic format
-  const parseTypstError = (errorMessage) => {
-    try {
-      // Try to extract message from SourceDiagnostic format
-      const match = errorMessage.match(/message:\s*"([^"]+)"/);
-      if (match) {
-        return match[1];
-      }
-    } catch (e) {
-      // Fallback to original message
-    }
-    return errorMessage;
-  };
-
-  // Render typst code to SVG
-  const renderTypst = async (
-    code,
-    container,
-    loadingIndicator,
-    sourceFiles,
-    binaryFiles,
-    fontFiles,
-    id,
-    previewContainer,
-    basePath,
-    pagePath,
-  ) => {
-    // Queue this render to ensure only one compilation runs at a time
-    return queueRender(async () => {
-      // Show loading indicator
-      if (loadingIndicator) {
-        loadingIndicator.style.display = "flex";
+    /**
+     * Load Typst compiler and renderer
+     * @param {Array} fontFiles - Array of font file objects
+     * @returns {Promise<void>}
+     */
+    async load({ fontFiles = [] } = {}) {
+      if (this.loaded) {
+        return Promise.resolve();
       }
 
-      await loadTypst({ fontFiles });
+      if (this.loadPromise) {
+        return this.loadPromise;
+      }
 
+      this.loadPromise = new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = CONFIG.TYPST_BUNDLE_URL;
+        script.type = 'module';
+        script.id = 'typst-loader';
+
+        script.onload = () => {
+          this.waitForTypst(fontFiles)
+            .then(resolve)
+            .catch(reject);
+        };
+
+        script.onerror = () => {
+          reject(new Error('Failed to load Typst bundle'));
+        };
+
+        document.head.appendChild(script);
+      });
+
+      return this.loadPromise;
+    }
+
+    /**
+     * Wait for Typst module to initialize
+     * @param {Array} fontFiles - Array of font file objects
+     * @returns {Promise<void>}
+     */
+    async waitForTypst(fontFiles) {
+      return new Promise((resolve, reject) => {
+        const checkTypst = async () => {
+          if (typeof window.$typst !== 'undefined') {
+            try {
+              await this.initializeTypst(fontFiles);
+              this.loaded = true;
+              resolve();
+            } catch (error) {
+              reject(error);
+            }
+          } else {
+            setTimeout(checkTypst, CONFIG.TYPST_CHECK_INTERVAL);
+          }
+        };
+        checkTypst();
+      });
+    }
+
+    /**
+     * Initialize Typst compiler and renderer with fonts
+     * @param {Array} fontFiles - Array of font file objects
+     * @returns {Promise<void>}
+     */
+    async initializeTypst(fontFiles) {
+      const fonts = window.TypstCompileModule.loadFonts(
+        fontFiles.map((f) => f.url)
+      );
+
+      window.$typst.setCompilerInitOptions({
+        beforeBuild: [fonts],
+        getModule: () => CONFIG.TYPST_COMPILER_URL,
+      });
+
+      window.$typst.setRendererInitOptions({
+        beforeBuild: [fonts],
+        getModule: () => CONFIG.TYPST_RENDERER_URL,
+      });
+    }
+  }
+
+  // ============================================================================
+  // RENDER QUEUE
+  // ============================================================================
+
+  class RenderQueue {
+    constructor() {
+      this.queue = Promise.resolve();
+    }
+
+    /**
+     * Add render function to queue
+     * @param {Function} renderFn - Async render function
+     * @returns {Promise}
+     */
+    add(renderFn) {
+      this.queue = this.queue
+        .then(renderFn)
+        .catch((error) => {
+          console.error('Queued render error:', error);
+        });
+      return this.queue;
+    }
+  }
+
+  // ============================================================================
+  // ASSET MANAGEMENT
+  // ============================================================================
+
+  class AssetManager {
+    constructor() {
+      this.cache = new Map(); // filepath -> Uint8Array | null
+    }
+
+    /**
+     * Extract relative file paths from Typst source code
+     * @param {string} src - Typst source code
+     * @returns {Array<string>} Array of file paths
+     */
+    extractFilePaths(src) {
+      const paths = new Set();
+      const patterns = Object.values(REGEX_PATTERNS).filter(
+        p => p !== REGEX_PATTERNS.ABSOLUTE_URL && p !== REGEX_PATTERNS.ERROR_MESSAGE
+      );
+
+      for (const pattern of patterns) {
+        let match;
+        // Reset regex lastIndex
+        pattern.lastIndex = 0;
+        
+        while ((match = pattern.exec(src)) !== null) {
+          const path = match[2];
+          // Skip absolute URLs, data URLs, blob URLs
+          if (REGEX_PATTERNS.ABSOLUTE_URL.test(path)) continue;
+          paths.add(path);
+        }
+      }
+
+      return Array.from(paths);
+    }
+
+    /**
+     * Fetch single asset from server
+     * @param {string} path - Asset path
+     * @param {string} basePath - Base path
+     * @param {string} pagePath - Page path
+     * @returns {Promise<Uint8Array|null>}
+     */
+    async fetchAsset(path, basePath, pagePath) {
       try {
-        // Reset shadow files for this render
-        $typst.resetShadow();
+        const url = constructUrl(path, basePath, pagePath);
+        const response = await fetch(url);
 
-        // Fetch and map assets to virtual filesystem
-        await prepareAssets(code, sourceFiles, basePath, pagePath);
-
-        // Add source files
-        for (const { filename, content } of sourceFiles) {
-          const path = filename.startsWith("/")
-            ? filename.substring(1)
-            : filename;
-          await $typst.addSource(`/${path}`, content);
+        if (!response.ok) {
+          console.warn(`Asset not found: ${path} at ${url} (HTTP ${response.status})`);
+          return null;
         }
 
-        // Add binary files
-        for (const { dest, url } of binaryFiles) {
+        const arrayBuffer = await response.arrayBuffer();
+        return new Uint8Array(arrayBuffer);
+      } catch (error) {
+        console.warn(`Error loading asset ${path}:`, error);
+        return null;
+      }
+    }
+
+    /**
+     * Fetch multiple assets and cache them
+     * @param {Array<string>} paths - Array of asset paths
+     * @param {string} basePath - Base path
+     * @param {string} pagePath - Page path
+     * @returns {Promise<void>}
+     */
+    async fetchAssets(paths, basePath, pagePath) {
+      const missingPaths = paths.filter((p) => !this.cache.has(p));
+      
+      await Promise.all(
+        missingPaths.map(async (path) => {
+          const data = await this.fetchAsset(path, basePath, pagePath);
+          this.cache.set(path, data);
+        })
+      );
+    }
+
+    /**
+     * Map cached assets to Typst virtual filesystem
+     */
+    mapToShadow() {
+      for (const [path, data] of this.cache.entries()) {
+        if (data !== null) {
+          const normalizedPath = normalizePath(path);
+          window.$typst.mapShadow(normalizedPath, data);
+        }
+      }
+    }
+
+    /**
+     * Prepare assets for rendering (extract, fetch, and map)
+     * @param {string} mainSrc - Main Typst source
+     * @param {Array} sourceFiles - Source file objects
+     * @param {string} basePath - Base path
+     * @param {string} pagePath - Page path
+     * @returns {Promise<void>}
+     */
+    async prepare(mainSrc, sourceFiles, basePath, pagePath) {
+      const allPaths = new Set();
+
+      // Extract from main source
+      this.extractFilePaths(mainSrc).forEach((p) => allPaths.add(p));
+
+      // Extract from all source files
+      for (const { content } of sourceFiles) {
+        this.extractFilePaths(content).forEach((p) => allPaths.add(p));
+      }
+
+      const paths = Array.from(allPaths);
+      
+      if (paths.length > 0) {
+        await this.fetchAssets(paths, basePath, pagePath);
+        this.mapToShadow();
+      }
+    }
+  }
+
+  // ============================================================================
+  // ERROR HANDLING
+  // ============================================================================
+
+  class ErrorHandler {
+    /**
+     * Parse error message from SourceDiagnostic format
+     * @param {string|Error} error - Error object or message
+     * @returns {string} Parsed error message
+     */
+    static parse(error) {
+      const errorMessage = error?.toString() || 'Unknown error';
+      
+      try {
+        const match = errorMessage.match(REGEX_PATTERNS.ERROR_MESSAGE);
+        if (match) {
+          return match[1];
+        }
+      } catch (e) {
+        // Fallback to original message
+      }
+      
+      return errorMessage;
+    }
+
+    /**
+     * Display error overlay in preview container
+     * @param {HTMLElement} previewContainer - Preview container element
+     * @param {string} errorText - Error message
+     */
+    static showOverlay(previewContainer, errorText) {
+      // Remove any existing error overlay
+      const existingError = previewContainer.querySelector('.typst-error-overlay');
+      if (existingError) {
+        existingError.remove();
+      }
+
+      // Create floating error overlay
+      const errorOverlay = document.createElement('div');
+      errorOverlay.className = 'typst-error-overlay';
+      errorOverlay.innerHTML = `
+        <div class="typst-error-content">
+          <div class="typst-error-header">
+            <span class="typst-error-title">⚠️ Typst Error</span>
+            <button class="typst-error-close" title="Dismiss error">×</button>
+          </div>
+          <div class="typst-error-message">${errorText}</div>
+        </div>
+      `;
+
+      // Add close button functionality
+      const closeBtn = errorOverlay.querySelector('.typst-error-close');
+      closeBtn.addEventListener('click', () => errorOverlay.remove());
+
+      previewContainer.appendChild(errorOverlay);
+    }
+
+    /**
+     * Display error inline
+     * @param {HTMLElement} container - Container element
+     * @param {string} errorText - Error message
+     */
+    static showInline(container, errorText) {
+      container.innerHTML = `<div class="typst-error">${errorText}</div>`;
+    }
+  }
+
+  // ============================================================================
+  // BINARY FILE HANDLER
+  // ============================================================================
+
+  class BinaryFileHandler {
+    /**
+     * Load binary file from URL
+     * @param {string} url - File URL (data URL or HTTP URL)
+     * @returns {Promise<ArrayBuffer>}
+     */
+    static async load(url) {
+      const response = await fetch(url);
+      
+      if (!response.ok && !url.startsWith('data:')) {
+        throw new Error(`Failed to load binary file: ${url}`);
+      }
+      
+      return response.arrayBuffer();
+    }
+
+    /**
+     * Add binary files to Typst shadow filesystem
+     * @param {Array} binaryFiles - Array of binary file objects
+     * @returns {Promise<void>}
+     */
+    static async addToShadow(binaryFiles) {
+      await Promise.all(
+        binaryFiles.map(async ({ dest, url }) => {
           try {
-            let arrayBuffer;
-
-            // Check if URL is a data URL (user-uploaded file)
-            if (url.startsWith("data:")) {
-              const response = await fetch(url);
-              arrayBuffer = await response.arrayBuffer();
-            } else {
-              // External URL
-              const response = await fetch(url);
-              if (!response.ok) {
-                console.warn(`Failed to load binary file: ${url}`);
-                continue;
-              }
-              arrayBuffer = await response.arrayBuffer();
-            }
-
-            const path = dest.startsWith("/") ? dest.substring(1) : dest;
-            $typst.mapShadow(`/${path}`, new Uint8Array(arrayBuffer));
+            const arrayBuffer = await BinaryFileHandler.load(url);
+            const path = dest.startsWith('/') ? dest.substring(1) : dest;
+            window.$typst.mapShadow(`/${path}`, new Uint8Array(arrayBuffer));
           } catch (error) {
             console.warn(`Error loading binary file ${url}:`, error);
           }
-        }
-
-        const svg = await $typst.svg({ mainContent: code });
-
-        // Remove any existing error overlay from preview-container
-        if (previewContainer) {
-          const existingError = previewContainer.querySelector(
-            ".typst-error-overlay",
-          );
-          if (existingError) {
-            existingError.remove();
-          }
-        }
-
-        container.innerHTML = svg;
-
-        // Scale SVG to fit container
-        const svgElem = container.firstElementChild;
-        if (svgElem) {
-          const width = Number.parseFloat(svgElem.getAttribute("width"));
-          const height = Number.parseFloat(svgElem.getAttribute("height"));
-          const containerWidth = container.clientWidth - 20;
-          if (width > 0 && containerWidth > 0) {
-            svgElem.setAttribute("width", containerWidth);
-            svgElem.setAttribute("height", (height * containerWidth) / width);
-          }
-        }
-      } catch (error) {
-        const errorText = parseTypstError(error || "Error rendering Typst");
-
-        // Check if we have existing content (previous successful render)
-        const hasExistingContent = container.querySelector("svg") !== null;
-
-        // Always use error overlay in preview-container if available
-        if (previewContainer) {
-          // Remove any existing error overlay
-          const existingError = previewContainer.querySelector(
-            ".typst-error-overlay",
-          );
-          if (existingError) {
-            existingError.remove();
-          }
-
-          // Clear preview if no existing content
-          if (!hasExistingContent) {
-            container.innerHTML = "";
-          }
-
-          // Create floating error overlay in preview-container
-          const errorOverlay = document.createElement("div");
-          errorOverlay.className = "typst-error-overlay";
-          errorOverlay.innerHTML = `
-            <div class="typst-error-content">
-              <div class="typst-error-header">
-                <span class="typst-error-title">⚠️ Typst Error</span>
-                <button class="typst-error-close" title="Dismiss error">×</button>
-              </div>
-              <div class="typst-error-message">${errorText}</div>
-            </div>
-          `;
-
-          // Add close button functionality
-          const closeBtn = errorOverlay.querySelector(".typst-error-close");
-          closeBtn.addEventListener("click", () => {
-            errorOverlay.remove();
-          });
-
-          previewContainer.appendChild(errorOverlay);
-        } else {
-          // Fallback: show error in preview container directly
-          container.innerHTML = `<div class="typst-error">${errorText}</div>`;
-        }
-      } finally {
-        // Hide loading indicator
-        if (loadingIndicator) {
-          loadingIndicator.style.display = "none";
-        }
-      }
-    });
-  };
-
-  // Export to PDF
-  const exportPdf = async (
-    code,
-    id,
-    sourceFiles,
-    binaryFiles,
-    fontFiles,
-    basePath,
-    pagePath,
-  ) => {
-    // Queue this export to ensure only one compilation runs at a time
-    return queueRender(async () => {
-      await loadTypst({ fontFiles });
-
-      try {
-        // Reset shadow files for this export
-        $typst.resetShadow();
-
-        // Fetch and map assets to virtual filesystem
-        await prepareAssets(code, sourceFiles, basePath, pagePath);
-
-        // Add source files
-        for (const { filename, content } of sourceFiles) {
-          const path = filename.startsWith("/")
-            ? filename.substring(1)
-            : filename;
-          await $typst.addSource(`/${path}`, content);
-        }
-
-        // Add binary files
-        for (const { dest, url } of binaryFiles) {
-          try {
-            let arrayBuffer;
-
-            // Check if URL is a data URL (user-uploaded file)
-            if (url.startsWith("data:")) {
-              const response = await fetch(url);
-              arrayBuffer = await response.arrayBuffer();
-            } else {
-              // External URL
-              const response = await fetch(url);
-              if (!response.ok) {
-                continue;
-              }
-              arrayBuffer = await response.arrayBuffer();
-            }
-
-            const path = dest.startsWith("/") ? dest.substring(1) : dest;
-            $typst.mapShadow(`/${path}`, new Uint8Array(arrayBuffer));
-          } catch (error) {
-            console.warn(`Error loading binary file ${url}:`, error);
-          }
-        }
-
-        const pdfData = await $typst.pdf({ mainContent: code });
-        const pdfFile = new Blob([pdfData], { type: "application/pdf" });
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(pdfFile);
-        link.download = `typst-${id}.pdf`;
-        link.click();
-        URL.revokeObjectURL(link.href);
-      } catch (error) {
-        console.error("PDF export error:", error);
-        alert(i18n.get("typst-pdf-error") || "Error exporting PDF");
-      }
-    });
-  };
-
-  for (let elem of elems) {
-    const id = elem.getAttribute("data-id");
-    const previewContainer = elem.querySelector(".preview-container");
-    const preview = elem.querySelector(".typst-preview");
-    const loadingIndicator = elem.querySelector(".typst-loading");
-    const editor = elem.querySelector(".editor.typst");
-    const downloadBtn = elem.querySelector(".download-pdf");
-    const downloadProjectBtn = elem.querySelector(".download-project");
-    const resetBtn = elem.querySelector(".reset");
-    const sourceTextarea = elem.querySelector(".typst-source");
-    const tabsList = elem.querySelector(".tabs-list");
-    const binaryFilesList = elem.querySelector(".binary-files-list");
-    const addSourceFileBtn = elem.querySelector(".add-source-file");
-    const addBinaryFileBtn = elem.querySelector(".add-binary-file");
-
-    // Parse source files and binary files from data attributes
-    const sourceFilesData = elem.getAttribute("data-source-files");
-    const binaryFilesData = elem.getAttribute("data-binary-files");
-    const fontFilesData = elem.getAttribute("data-font-files");
-    let basePath = elem.getAttribute("data-base-path") || "";
-    let pagePath = elem.getAttribute("data-page-path") || "";
-
-    // Ensure basePath starts with / for absolute paths
-    if (pagePath && !pagePath.startsWith("/")) {
-      pagePath = "/" + pagePath;
+        })
+      );
     }
-    // Ensure basePath starts with / for absolute paths
-    if (basePath && !basePath.startsWith("/")) {
-      basePath = "/" + basePath;
+  }
+
+  // ============================================================================
+  // TYPST RENDERER
+  // ============================================================================
+
+  class TypstRenderer {
+    constructor(loader, assetManager, renderQueue) {
+      this.loader = loader;
+      this.assetManager = assetManager;
+      this.renderQueue = renderQueue;
     }
 
-    let sourceFiles = sourceFilesData ? JSON.parse(atob(sourceFilesData)) : [];
-    let binaryFiles = binaryFilesData ? JSON.parse(atob(binaryFilesData)) : [];
-    const fontFiles = fontFilesData ? JSON.parse(atob(fontFilesData)) : [];
-
-    // Track current active file
-    let currentFile =
-      sourceFiles.find(
-        (f) => f.filename === "main.typ" || f.filename === "main.typst",
-      ) || sourceFiles[0];
-
-    // Store file contents in memory
-    const fileContents = new Map();
-    sourceFiles.forEach((f) => fileContents.set(f.filename, f.content));
-
-    // Function to update tabs UI
-    const updateTabs = () => {
-      if (!tabsList) return;
-
-      tabsList.innerHTML = "";
-
-      // Add source file tabs
-      sourceFiles.forEach((file) => {
-        const tab = document.createElement("div");
-        tab.className = "file-tab";
-        if (file.filename === currentFile.filename) {
-          tab.classList.add("active");
-        }
-
-        const tabName = document.createElement("span");
-        tabName.className = "tab-name";
-        tabName.textContent = file.filename;
-        tab.appendChild(tabName);
-
-        // Add delete button (except for main file)
-        if (file.filename !== "main.typ" && file.filename !== "main.typst") {
-          const deleteBtn = document.createElement("button");
-          deleteBtn.className = "tab-delete";
-          deleteBtn.textContent = "×";
-          deleteBtn.title = i18n.get("typst-delete-file") || "Delete file";
-          deleteBtn.addEventListener("click", (e) => {
-            e.stopPropagation();
-            if (
-              confirm(
-                `${i18n.get("typst-delete-confirm") || "Delete"} ${file.filename}?`,
-              )
-            ) {
-              sourceFiles = sourceFiles.filter(
-                (f) => f.filename !== file.filename,
-              );
-              fileContents.delete(file.filename);
-
-              // Switch to main file if we deleted the current file
-              if (currentFile.filename === file.filename) {
-                currentFile = sourceFiles[0];
-                if (editor) {
-                  editor.value = fileContents.get(currentFile.filename) || "";
-                }
-              }
-
-              updateTabs();
-              saveState();
-              rerenderTypst();
-            }
-          });
-          tab.appendChild(deleteBtn);
-        }
-
-        tab.addEventListener("click", () => {
-          if (currentFile.filename !== file.filename) {
-            // Save current file content
-            if (editor) {
-              fileContents.set(currentFile.filename, editor.value);
-            }
-
-            // Switch to new file
-            currentFile = file;
-            if (editor) {
-              editor.value = fileContents.get(currentFile.filename) || "";
-            }
-
-            updateTabs();
-            saveState();
-          }
-        });
-
-        tabsList.appendChild(tab);
-      });
-    };
-
-    // Function to update binary files list
-    const updateBinaryFilesList = () => {
-      if (!binaryFilesList) return;
-
-      binaryFilesList.innerHTML = "";
-
-      if (binaryFiles.length === 0) {
-        const emptyMsg = document.createElement("div");
-        emptyMsg.className = "binary-files-empty";
-        emptyMsg.textContent =
-          i18n.get("typst-no-binary-files") || "No binary files";
-        binaryFilesList.appendChild(emptyMsg);
-        return;
-      }
-
-      binaryFiles.forEach((file) => {
-        const item = document.createElement("div");
-        item.className = "binary-file-item";
-
-        const icon = document.createElement("span");
-        icon.className = "binary-file-icon";
-        icon.textContent = "📎";
-        item.appendChild(icon);
-
-        const name = document.createElement("span");
-        name.className = "binary-file-name";
-        name.textContent = file.dest;
-        item.appendChild(name);
-
-        const deleteBtn = document.createElement("button");
-        deleteBtn.className = "binary-file-delete";
-        deleteBtn.textContent = "×";
-        deleteBtn.title = i18n.get("typst-delete-file") || "Delete file";
-        deleteBtn.addEventListener("click", () => {
-          if (
-            confirm(
-              `${i18n.get("typst-delete-confirm") || "Delete"} ${file.dest}?`,
-            )
-          ) {
-            binaryFiles = binaryFiles.filter((f) => f.dest !== file.dest);
-            updateBinaryFilesList();
-            saveState();
-            rerenderTypst();
-          }
-        });
-        item.appendChild(deleteBtn);
-
-        binaryFilesList.appendChild(item);
-      });
-    };
-
-    // Function to save state to store
-    const saveState = async () => {
-      if (!editor) return;
-
-      // Update current file content
-      fileContents.set(currentFile.filename, editor.value);
-
-      // Update sourceFiles array with latest content
-      sourceFiles = sourceFiles.map((f) => ({
-        filename: f.filename,
-        content: fileContents.get(f.filename) || f.content,
-      }));
-
-      await store.typst?.put({
-        id,
-        code: editor.value,
-        sourceFiles,
-        binaryFiles,
-        currentFile: currentFile.filename,
-      });
-    };
-
-    // Function to rerender typst
-    const rerenderTypst = () => {
-      if (editor) {
-        // Update sourceFiles with current editor content
-        fileContents.set(currentFile.filename, editor.value);
-        sourceFiles = sourceFiles.map((f) => ({
-          filename: f.filename,
-          content: fileContents.get(f.filename) || f.content,
-        }));
-
-        const mainFile = sourceFiles.find(
-          (f) => f.filename === "main.typ" || f.filename === "main.typst",
-        );
-        const mainCode = mainFile ? mainFile.content : "";
-        renderTypst(
-          mainCode,
-          preview,
-          loadingIndicator,
-          sourceFiles,
-          binaryFiles,
-          fontFiles,
-          id,
-          previewContainer,
-          basePath,
-          pagePath,
-        );
-      }
-    };
-
-    // Create debounced version of rerenderTypst for input events (500ms delay)
-    const debouncedRerenderTypst = debounce(rerenderTypst, 500);
-
-    // Add source file button
-    addSourceFileBtn?.addEventListener("click", () => {
-      const filename = prompt(
-        i18n.get("typst-filename-prompt") ||
-          "Enter filename (e.g., helper.typ):",
-      );
-      if (filename) {
-        // Validate filename
-        if (!filename.endsWith(".typ") && !filename.endsWith(".typst")) {
-          alert(
-            i18n.get("typst-filename-error") ||
-              "Filename must end with .typ or .typst",
-          );
-          return;
-        }
-
-        if (sourceFiles.some((f) => f.filename === filename)) {
-          alert(i18n.get("typst-filename-exists") || "File already exists");
-          return;
-        }
-
-        // Add new file
-        const newFile = { filename, content: `// ${filename}\n` };
-        sourceFiles.push(newFile);
-        fileContents.set(filename, newFile.content);
-
-        // Switch to new file
-        if (editor) {
-          fileContents.set(currentFile.filename, editor.value);
-        }
-        currentFile = newFile;
-        if (editor) {
-          editor.value = newFile.content;
-        }
-
-        updateTabs();
-        saveState();
-        rerenderTypst();
-      }
-    });
-
-    // Add binary file button
-    addBinaryFileBtn?.addEventListener("click", (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-
-      const input = document.createElement("input");
-      input.type = "file";
-      input.accept = "image/*,.pdf";
-      input.addEventListener("change", async (e) => {
-        const file = e.target.files[0];
-        if (file) {
-          const dest = `/${file.name}`;
-
-          // Check if file already exists
-          if (binaryFiles.some((f) => f.dest === dest)) {
-            if (
-              !confirm(
-                i18n.get("typst-file-replace") || `Replace existing ${dest}?`,
-              )
-            ) {
-              return;
-            }
-            binaryFiles = binaryFiles.filter((f) => f.dest !== dest);
-          }
-
-          // Read file as data URL
-          const reader = new FileReader();
-          reader.onload = async (e) => {
-            const url = e.target.result;
-            binaryFiles.push({ dest, url });
-            updateBinaryFilesList();
-            saveState();
-            rerenderTypst();
-          };
-          reader.readAsDataURL(file);
-        }
-      });
-      input.click();
-    });
-
-    // Get initial code
-    let initialCode = "";
-    if (editor) {
-      // Edit mode - code is in the editor
-      // Wait for code-input to load
-      editor.addEventListener("code-input_load", async () => {
-        // Check for stored code
-        const result = await store.typst?.get(id);
-        if (result) {
-          editor.value = result.code;
-
-          // Restore sourceFiles and binaryFiles if available
-          if (result.sourceFiles) {
-            sourceFiles = result.sourceFiles;
-            sourceFiles.forEach((f) => fileContents.set(f.filename, f.content));
-          }
-          if (result.binaryFiles) {
-            binaryFiles = result.binaryFiles;
-          }
-          if (result.currentFile) {
-            currentFile =
-              sourceFiles.find((f) => f.filename === result.currentFile) ||
-              sourceFiles[0];
-            editor.value = fileContents.get(currentFile.filename) || "";
-          }
-        }
-        initialCode = editor.value;
-
-        updateTabs();
-        updateBinaryFilesList();
-        rerenderTypst();
-
-        // Listen for input changes
-        editor.addEventListener("input", () => {
-          saveState();
-          debouncedRerenderTypst();
-        });
-      });
-    } else if (sourceTextarea) {
-      // Preview mode - code is in hidden textarea
-      initialCode = sourceTextarea.value;
-      loadTypst({ fontFiles }).then(() => {
-        renderTypst(
-          initialCode,
-          preview,
-          loadingIndicator,
-          sourceFiles,
-          binaryFiles,
-          fontFiles,
-          id,
-          previewContainer,
-          basePath,
-          pagePath,
-        );
-      });
-    }
-
-    // Download PDF button
-    downloadBtn?.addEventListener("click", async () => {
-      // Get the main file content
-      const mainFile = sourceFiles.find(
-        (f) => f.filename === "main.typ" || f.filename === "main.typst",
-      );
-      const code = mainFile
-        ? mainFile.content
-        : editor
-          ? editor.value
-          : initialCode;
-      await exportPdf(code, id, sourceFiles, binaryFiles, fontFiles, basePath, pagePath);
-    });
-
-    // Download Project button (ZIP with all files)
-    downloadProjectBtn?.addEventListener("click", async () => {
-      // Get the main file content
-      const mainFile = sourceFiles.find(
-        (f) => f.filename === "main.typ" || f.filename === "main.typst",
-      );
-      const code = mainFile
-        ? mainFile.content
-        : editor
-          ? editor.value
-          : initialCode;
-      const encoder = new TextEncoder();
-      const zipFiles = {};
-
-      // Add all source files
+    /**
+     * Add source files to Typst
+     * @param {Array} sourceFiles - Source file objects
+     * @returns {Promise<void>}
+     */
+    async addSourceFiles(sourceFiles) {
       for (const { filename, content } of sourceFiles) {
-        const path = filename.startsWith("/")
-          ? filename.substring(1)
-          : filename;
-        zipFiles[path] = encoder.encode(content);
+        const path = filename.startsWith('/') ? filename.substring(1) : filename;
+        await window.$typst.addSource(`/${path}`, content);
+      }
+    }
+
+    /**
+     * Scale SVG to fit container
+     * @param {HTMLElement} container - Container element
+     */
+    scaleSvg(container) {
+      const svgElem = container.firstElementChild;
+      if (!svgElem) return;
+
+      const width = Number.parseFloat(svgElem.getAttribute('width'));
+      const height = Number.parseFloat(svgElem.getAttribute('height'));
+      const containerWidth = container.clientWidth - CONFIG.CONTAINER_PADDING;
+
+      if (width > 0 && containerWidth > 0) {
+        svgElem.setAttribute('width', containerWidth);
+        svgElem.setAttribute('height', (height * containerWidth) / width);
+      }
+    }
+
+    /**
+     * Render Typst code to SVG
+     * @param {Object} params - Render parameters
+     * @returns {Promise<void>}
+     */
+    async render({
+      code,
+      container,
+      loadingIndicator,
+      sourceFiles,
+      binaryFiles,
+      fontFiles,
+      id,
+      previewContainer,
+      basePath,
+      pagePath,
+    }) {
+      return this.renderQueue.add(async () => {
+        try {
+          // Show loading indicator
+          if (loadingIndicator) {
+            loadingIndicator.style.display = 'flex';
+          }
+
+          await this.loader.load({ fontFiles });
+
+          // Reset shadow files
+          window.$typst.resetShadow();
+
+          // Prepare assets
+          await this.assetManager.prepare(code, sourceFiles, basePath, pagePath);
+
+          // Add source files
+          await this.addSourceFiles(sourceFiles);
+
+          // Add binary files
+          await BinaryFileHandler.addToShadow(binaryFiles);
+
+          // Render to SVG
+          const svg = await window.$typst.svg({ mainContent: code });
+
+          // Clear any existing errors
+          if (previewContainer) {
+            const existingError = previewContainer.querySelector('.typst-error-overlay');
+            if (existingError) {
+              existingError.remove();
+            }
+          }
+
+          // Update container with SVG
+          container.innerHTML = svg;
+          this.scaleSvg(container);
+
+        } catch (error) {
+          const errorText = ErrorHandler.parse(error);
+          const hasExistingContent = container.querySelector('svg') !== null;
+
+          if (previewContainer) {
+            // Don't clear existing content on error
+            if (!hasExistingContent) {
+              container.innerHTML = '';
+            }
+            ErrorHandler.showOverlay(previewContainer, errorText);
+          } else {
+            ErrorHandler.showInline(container, errorText);
+          }
+
+        } finally {
+          // Hide loading indicator
+          if (loadingIndicator) {
+            loadingIndicator.style.display = 'none';
+          }
+        }
+      });
+    }
+
+    /**
+     * Export Typst code to PDF
+     * @param {Object} params - Export parameters
+     * @returns {Promise<void>}
+     */
+    async exportPdf({
+      code,
+      id,
+      sourceFiles,
+      binaryFiles,
+      fontFiles,
+      basePath,
+      pagePath,
+    }) {
+      return this.renderQueue.add(async () => {
+        try {
+          await this.loader.load({ fontFiles });
+
+          // Reset shadow files
+          window.$typst.resetShadow();
+
+          // Prepare assets
+          await this.assetManager.prepare(code, sourceFiles, basePath, pagePath);
+
+          // Add source files
+          await this.addSourceFiles(sourceFiles);
+
+          // Add binary files
+          await BinaryFileHandler.addToShadow(binaryFiles);
+
+          // Generate PDF
+          const pdfData = await window.$typst.pdf({ mainContent: code });
+          const pdfBlob = new Blob([pdfData], { type: 'application/pdf' });
+          
+          // Download PDF
+          const link = document.createElement('a');
+          link.href = URL.createObjectURL(pdfBlob);
+          link.download = `typst-${id}.pdf`;
+          link.click();
+          URL.revokeObjectURL(link.href);
+
+        } catch (error) {
+          console.error('PDF export error:', error);
+          alert(i18nGet('typst-pdf-error', 'Error exporting PDF'));
+        }
+      });
+    }
+  }
+
+  // ============================================================================
+  // FILE MANAGER
+  // ============================================================================
+
+  class FileManager {
+    constructor(sourceFiles) {
+      this.sourceFiles = sourceFiles;
+      this.contents = new Map();
+      this.currentFile = this.findMainFile() || sourceFiles[0];
+      
+      // Initialize contents map
+      sourceFiles.forEach((f) => this.contents.set(f.filename, f.content));
+    }
+
+    /**
+     * Find main Typst file
+     * @returns {Object|null} Main file object
+     */
+    findMainFile() {
+      return this.sourceFiles.find(
+        (f) => f.filename === 'main.typ' || f.filename === 'main.typst'
+      );
+    }
+
+    /**
+     * Get current file content
+     * @returns {string} File content
+     */
+    getCurrentContent() {
+      return this.contents.get(this.currentFile.filename) || '';
+    }
+
+    /**
+     * Update current file content
+     * @param {string} content - New content
+     */
+    updateCurrentContent(content) {
+      this.contents.set(this.currentFile.filename, content);
+    }
+
+    /**
+     * Switch to different file
+     * @param {string} filename - Target filename
+     * @returns {string} New file content
+     */
+    switchTo(filename) {
+      const file = this.sourceFiles.find((f) => f.filename === filename);
+      if (file) {
+        this.currentFile = file;
+        return this.getCurrentContent();
+      }
+      return '';
+    }
+
+    /**
+     * Add new source file
+     * @param {string} filename - New filename
+     * @param {string} content - File content
+     * @returns {boolean} Success status
+     */
+    addFile(filename, content = `// ${filename}\n`) {
+      if (this.sourceFiles.some((f) => f.filename === filename)) {
+        return false;
       }
 
-      // Add binary files
+      const newFile = { filename, content };
+      this.sourceFiles.push(newFile);
+      this.contents.set(filename, content);
+      this.currentFile = newFile;
+      
+      return true;
+    }
+
+    /**
+     * Delete source file
+     * @param {string} filename - Filename to delete
+     * @returns {boolean} Success status
+     */
+    deleteFile(filename) {
+      // Don't delete main file
+      if (filename === 'main.typ' || filename === 'main.typst') {
+        return false;
+      }
+
+      this.sourceFiles = this.sourceFiles.filter((f) => f.filename !== filename);
+      this.contents.delete(filename);
+
+      // Switch to main file if we deleted current file
+      if (this.currentFile.filename === filename) {
+        this.currentFile = this.sourceFiles[0];
+      }
+
+      return true;
+    }
+
+    /**
+     * Get all source files with current content
+     * @returns {Array} Updated source files
+     */
+    getSourceFiles() {
+      return this.sourceFiles.map((f) => ({
+        filename: f.filename,
+        content: this.contents.get(f.filename) || f.content,
+      }));
+    }
+  }
+
+  // ============================================================================
+  // PROJECT EXPORTER
+  // ============================================================================
+
+  class ProjectExporter {
+    constructor(assetManager) {
+      this.assetManager = assetManager;
+    }
+
+    /**
+     * Export project as ZIP file
+     * @param {Object} params - Export parameters
+     * @returns {Promise<void>}
+     */
+    async export({ code, id, sourceFiles, binaryFiles, basePath, pagePath }) {
+      try {
+        const encoder = new TextEncoder();
+        const zipFiles = {};
+
+        // Add all source files
+        for (const { filename, content } of sourceFiles) {
+          const path = filename.startsWith('/') ? filename.substring(1) : filename;
+          zipFiles[path] = encoder.encode(content);
+        }
+
+        // Add binary files
+        await this.addBinaryFiles(zipFiles, binaryFiles, basePath, pagePath);
+
+        // Add referenced assets
+        await this.addAssets(zipFiles, code, basePath, pagePath);
+
+        // Create and download ZIP
+        this.downloadZip(zipFiles, id);
+
+      } catch (error) {
+        console.error('Project export error:', error);
+        alert(i18nGet('typst-export-error', 'Error exporting project'));
+      }
+    }
+
+    /**
+     * Add binary files to ZIP
+     * @param {Object} zipFiles - ZIP files object
+     * @param {Array} binaryFiles - Binary files array
+     * @param {string} basePath - Base path
+     * @param {string} pagePath - Page path
+     * @returns {Promise<void>}
+     */
+    async addBinaryFiles(zipFiles, binaryFiles, basePath, pagePath) {
       for (const { dest, url } of binaryFiles) {
         try {
           let arrayBuffer;
 
-          // Check if URL is a data URL (user-uploaded file)
-          if (url.startsWith("data:")) {
+          if (url.startsWith('data:')) {
             const response = await fetch(url);
             arrayBuffer = await response.arrayBuffer();
-          } else if (url.startsWith("http://") || url.startsWith("https://")) {
-            // External URL
+          } else if (url.startsWith('http://') || url.startsWith('https://')) {
             const response = await fetch(url);
-            if (response.ok) {
-              arrayBuffer = await response.arrayBuffer();
-            } else {
-              console.warn(`Failed to load binary file: ${url}`);
-              continue;
-            }
+            if (!response.ok) continue;
+            arrayBuffer = await response.arrayBuffer();
           } else {
-            // Absolute paths use basePath, relative paths use pagePath
-            let fullUrl;
-            if (url.startsWith("/")) {
-              fullUrl = basePath ? `${basePath}${url}`.replace(/\/+/g, "/") : url;
-            } else {
-              fullUrl = pagePath ? `${pagePath}/${url}`.replace(/\/+/g, "/") : url;
-            }
+            const fullUrl = constructUrl(url, basePath, pagePath);
             const response = await fetch(fullUrl);
-            if (response.ok) {
-              arrayBuffer = await response.arrayBuffer();
-            } else {
+            if (!response.ok) {
               console.warn(`Failed to load binary file: ${url} at ${fullUrl}`);
               continue;
             }
+            arrayBuffer = await response.arrayBuffer();
           }
 
-          const path = dest.startsWith("/") ? dest.substring(1) : dest;
+          const path = dest.startsWith('/') ? dest.substring(1) : dest;
           zipFiles[path] = new Uint8Array(arrayBuffer);
         } catch (error) {
           console.warn(`Error loading binary file ${url}:`, error);
         }
       }
+    }
 
-      const relPaths = extractRelFilePaths(code);
+    /**
+     * Add referenced assets to ZIP
+     * @param {Object} zipFiles - ZIP files object
+     * @param {string} code - Typst source code
+     * @param {string} basePath - Base path
+     * @param {string} pagePath - Page path
+     * @returns {Promise<void>}
+     */
+    async addAssets(zipFiles, code, basePath, pagePath) {
+      const relPaths = this.assetManager.extractFilePaths(code);
+
       for (const relPath of relPaths) {
-        // Skip if already in zipFiles or already handled as binary file
-        const normalizedPath = relPath.startsWith("/")
-          ? relPath.substring(1)
+        const normalizedPath = relPath.startsWith('/') 
+          ? relPath.substring(1) 
           : relPath;
+
+        // Skip if already in zipFiles
         if (zipFiles[normalizedPath]) continue;
 
-        // Skip absolute URLs, data URLs, and blob URLs
-        if (/^(https?:|data:|blob:)/i.test(relPath)) continue;
+        // Skip absolute URLs
+        if (REGEX_PATTERNS.ABSOLUTE_URL.test(relPath)) continue;
 
         try {
-          // Construct URL: absolute paths use basePath, relative paths use pagePath
-          let url;
-          if (relPath.startsWith("/")) {
-            url = basePath ? `${basePath}${relPath}`.replace(/\/+/g, "/") : relPath;
-          } else {
-            url = pagePath ? `${pagePath}/${relPath}`.replace(/\/+/g, "/") : relPath;
-          }
+          const url = constructUrl(relPath, basePath, pagePath);
           const response = await fetch(url);
+          
           if (response.ok) {
             const arrayBuffer = await response.arrayBuffer();
             zipFiles[normalizedPath] = new Uint8Array(arrayBuffer);
@@ -890,28 +830,578 @@ hyperbook.typst = (function () {
           console.warn(`Error loading asset ${relPath}:`, error);
         }
       }
+    }
 
-      // Create ZIP using UZIP
-      const zipData = UZIP.encode(zipFiles);
-      const zipBlob = new Blob([zipData], { type: "application/zip" });
-      const link = document.createElement("a");
+    /**
+     * Create and download ZIP file
+     * @param {Object} zipFiles - ZIP files object
+     * @param {string} id - Project ID
+     */
+    downloadZip(zipFiles, id) {
+      if (typeof window.UZIP === 'undefined') {
+        throw new Error('UZIP library not loaded');
+      }
+
+      const zipData = window.UZIP.encode(zipFiles);
+      const zipBlob = new Blob([zipData], { type: 'application/zip' });
+      const link = document.createElement('a');
       link.href = URL.createObjectURL(zipBlob);
       link.download = `typst-project-${id}.zip`;
       link.click();
       URL.revokeObjectURL(link.href);
-    });
+    }
+  }
 
-    // Reset button (edit mode only)
-    resetBtn?.addEventListener("click", async () => {
-      if (
-        window.confirm(
-          i18n.get("typst-reset-prompt") ||
-            "Are you sure you want to reset the code?",
-        )
-      ) {
-        store.typst?.delete(id);
+  // ============================================================================
+  // UI MANAGER
+  // ============================================================================
+
+  class UIManager {
+    constructor(elem, fileManager, binaryFiles) {
+      this.elem = elem;
+      this.fileManager = fileManager;
+      this.binaryFiles = binaryFiles;
+      this.tabsList = elem.querySelector('.tabs-list');
+      this.binaryFilesList = elem.querySelector('.binary-files-list');
+    }
+
+    /**
+     * Update tabs UI
+     */
+    updateTabs() {
+      if (!this.tabsList) return;
+
+      this.tabsList.innerHTML = '';
+
+      this.fileManager.sourceFiles.forEach((file) => {
+        const tab = this.createTab(file);
+        this.tabsList.appendChild(tab);
+      });
+    }
+
+    /**
+     * Create tab element for file
+     * @param {Object} file - File object
+     * @returns {HTMLElement} Tab element
+     */
+    createTab(file) {
+      const tab = document.createElement('div');
+      tab.className = 'file-tab';
+      
+      if (file.filename === this.fileManager.currentFile.filename) {
+        tab.classList.add('active');
+      }
+
+      // Tab name
+      const tabName = document.createElement('span');
+      tabName.className = 'tab-name';
+      tabName.textContent = file.filename;
+      tab.appendChild(tabName);
+
+      // Delete button (except for main file)
+      if (file.filename !== 'main.typ' && file.filename !== 'main.typst') {
+        const deleteBtn = this.createDeleteButton(file);
+        tab.appendChild(deleteBtn);
+      }
+
+      // Click handler
+      tab.addEventListener('click', () => this.handleTabClick(file));
+
+      return tab;
+    }
+
+    /**
+     * Create delete button for tab
+     * @param {Object} file - File object
+     * @returns {HTMLElement} Delete button
+     */
+    createDeleteButton(file) {
+      const deleteBtn = document.createElement('button');
+      deleteBtn.className = 'tab-delete';
+      deleteBtn.textContent = '×';
+      deleteBtn.title = i18nGet('typst-delete-file', 'Delete file');
+      
+      deleteBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.handleDeleteFile(file.filename);
+      });
+
+      return deleteBtn;
+    }
+
+    /**
+     * Handle tab click
+     * @param {Object} file - File object
+     */
+    handleTabClick(file) {
+      if (this.fileManager.currentFile.filename !== file.filename) {
+        this.onFileSwitch?.(file.filename);
+      }
+    }
+
+    /**
+     * Handle file deletion
+     * @param {string} filename - Filename to delete
+     */
+    handleDeleteFile(filename) {
+      const confirmMsg = `${i18nGet('typst-delete-confirm', 'Delete')} ${filename}?`;
+      
+      if (confirm(confirmMsg)) {
+        this.fileManager.deleteFile(filename);
+        this.updateTabs();
+        this.onFilesChange?.();
+      }
+    }
+
+    /**
+     * Update binary files list UI
+     */
+    updateBinaryFilesList() {
+      if (!this.binaryFilesList) return;
+
+      this.binaryFilesList.innerHTML = '';
+
+      if (this.binaryFiles.length === 0) {
+        const emptyMsg = document.createElement('div');
+        emptyMsg.className = 'binary-files-empty';
+        emptyMsg.textContent = i18nGet('typst-no-binary-files', 'No binary files');
+        this.binaryFilesList.appendChild(emptyMsg);
+        return;
+      }
+
+      this.binaryFiles.forEach((file) => {
+        const item = this.createBinaryFileItem(file);
+        this.binaryFilesList.appendChild(item);
+      });
+    }
+
+    /**
+     * Create binary file list item
+     * @param {Object} file - Binary file object
+     * @returns {HTMLElement} List item
+     */
+    createBinaryFileItem(file) {
+      const item = document.createElement('div');
+      item.className = 'binary-file-item';
+
+      const icon = document.createElement('span');
+      icon.className = 'binary-file-icon';
+      icon.textContent = '📎';
+      item.appendChild(icon);
+
+      const name = document.createElement('span');
+      name.className = 'binary-file-name';
+      name.textContent = file.dest;
+      item.appendChild(name);
+
+      const deleteBtn = document.createElement('button');
+      deleteBtn.className = 'binary-file-delete';
+      deleteBtn.textContent = '×';
+      deleteBtn.title = i18nGet('typst-delete-file', 'Delete file');
+      deleteBtn.addEventListener('click', () => this.handleDeleteBinaryFile(file.dest));
+      item.appendChild(deleteBtn);
+
+      return item;
+    }
+
+    /**
+     * Handle binary file deletion
+     * @param {string} dest - File destination path
+     */
+    handleDeleteBinaryFile(dest) {
+      const confirmMsg = `${i18nGet('typst-delete-confirm', 'Delete')} ${dest}?`;
+      
+      if (confirm(confirmMsg)) {
+        this.binaryFiles = this.binaryFiles.filter((f) => f.dest !== dest);
+        this.updateBinaryFilesList();
+        this.onBinaryFilesChange?.(this.binaryFiles);
+      }
+    }
+  }
+
+  // ============================================================================
+  // TYPST EDITOR
+  // ============================================================================
+
+  class TypstEditor {
+    constructor({
+      elem,
+      id,
+      sourceFiles,
+      binaryFiles,
+      fontFiles,
+      basePath,
+      pagePath,
+      renderer,
+      exporter,
+    }) {
+      this.elem = elem;
+      this.id = id;
+      this.fontFiles = fontFiles;
+      this.basePath = normalizePath(basePath);
+      this.pagePath = normalizePath(pagePath);
+      this.renderer = renderer;
+      this.exporter = exporter;
+
+      // Initialize managers
+      this.fileManager = new FileManager(sourceFiles);
+      this.binaryFiles = binaryFiles;
+      this.uiManager = new UIManager(elem, this.fileManager, this.binaryFiles);
+
+      // Get DOM elements
+      this.previewContainer = elem.querySelector('.preview-container');
+      this.preview = elem.querySelector('.typst-preview');
+      this.loadingIndicator = elem.querySelector('.typst-loading');
+      this.editor = elem.querySelector('.editor.typst');
+      this.sourceTextarea = elem.querySelector('.typst-source');
+
+      // Setup UI callbacks
+      this.setupUICallbacks();
+
+      // Setup event handlers
+      this.setupEventHandlers();
+
+      // Initialize
+      this.initialize();
+    }
+
+    /**
+     * Setup UI manager callbacks
+     */
+    setupUICallbacks() {
+      this.uiManager.onFileSwitch = (filename) => this.handleFileSwitch(filename);
+      this.uiManager.onFilesChange = () => this.handleFilesChange();
+      this.uiManager.onBinaryFilesChange = (binaryFiles) => this.handleBinaryFilesChange(binaryFiles);
+    }
+
+    /**
+     * Setup event handlers
+     */
+    setupEventHandlers() {
+      const downloadBtn = this.elem.querySelector('.download-pdf');
+      const downloadProjectBtn = this.elem.querySelector('.download-project');
+      const resetBtn = this.elem.querySelector('.reset');
+      const addSourceFileBtn = this.elem.querySelector('.add-source-file');
+      const addBinaryFileBtn = this.elem.querySelector('.add-binary-file');
+
+      downloadBtn?.addEventListener('click', () => this.handleExportPdf());
+      downloadProjectBtn?.addEventListener('click', () => this.handleExportProject());
+      resetBtn?.addEventListener('click', () => this.handleReset());
+      addSourceFileBtn?.addEventListener('click', () => this.handleAddSourceFile());
+      addBinaryFileBtn?.addEventListener('click', (e) => this.handleAddBinaryFile(e));
+    }
+
+    /**
+     * Initialize editor
+     */
+    async initialize() {
+      if (this.editor) {
+        // Edit mode - wait for code-input to load
+        this.editor.addEventListener('code-input_load', async () => {
+          await this.restoreState();
+          this.uiManager.updateTabs();
+          this.uiManager.updateBinaryFilesList();
+          this.rerender();
+
+          // Create debounced rerender for input events
+          const debouncedRerender = debounce(() => this.rerender(), CONFIG.DEBOUNCE_DELAY);
+
+          this.editor.addEventListener('input', () => {
+            this.saveState();
+            debouncedRerender();
+          });
+        });
+      } else if (this.sourceTextarea) {
+        // Preview mode
+        const initialCode = this.sourceTextarea.value;
+        await this.renderer.render({
+          code: initialCode,
+          container: this.preview,
+          loadingIndicator: this.loadingIndicator,
+          sourceFiles: this.fileManager.sourceFiles,
+          binaryFiles: this.binaryFiles,
+          fontFiles: this.fontFiles,
+          id: this.id,
+          previewContainer: this.previewContainer,
+          basePath: this.basePath,
+          pagePath: this.pagePath,
+        });
+      }
+    }
+
+    /**
+     * Restore state from storage
+     */
+    async restoreState() {
+      const result = await window.store?.typst?.get(this.id);
+      
+      if (result) {
+        this.editor.value = result.code;
+
+        if (result.sourceFiles) {
+          this.fileManager.sourceFiles = result.sourceFiles;
+          result.sourceFiles.forEach((f) => 
+            this.fileManager.contents.set(f.filename, f.content)
+          );
+        }
+
+        if (result.binaryFiles) {
+          this.binaryFiles = result.binaryFiles;
+        }
+
+        if (result.currentFile) {
+          const file = this.fileManager.sourceFiles.find(
+            (f) => f.filename === result.currentFile
+          );
+          if (file) {
+            this.fileManager.currentFile = file;
+            this.editor.value = this.fileManager.getCurrentContent();
+          }
+        }
+      } else {
+        this.editor.value = this.fileManager.getCurrentContent();
+      }
+    }
+
+    /**
+     * Save state to storage
+     */
+    async saveState() {
+      if (!this.editor) return;
+
+      this.fileManager.updateCurrentContent(this.editor.value);
+
+      await window.store?.typst?.put({
+        id: this.id,
+        code: this.editor.value,
+        sourceFiles: this.fileManager.getSourceFiles(),
+        binaryFiles: this.binaryFiles,
+        currentFile: this.fileManager.currentFile.filename,
+      });
+    }
+
+    /**
+     * Rerender Typst preview
+     */
+    rerender() {
+      if (!this.editor) return;
+
+      this.fileManager.updateCurrentContent(this.editor.value);
+
+      const mainFile = this.fileManager.findMainFile();
+      const mainCode = mainFile ? mainFile.content : '';
+
+      this.renderer.render({
+        code: mainCode,
+        container: this.preview,
+        loadingIndicator: this.loadingIndicator,
+        sourceFiles: this.fileManager.getSourceFiles(),
+        binaryFiles: this.binaryFiles,
+        fontFiles: this.fontFiles,
+        id: this.id,
+        previewContainer: this.previewContainer,
+        basePath: this.basePath,
+        pagePath: this.pagePath,
+      });
+    }
+
+    /**
+     * Handle file switch
+     * @param {string} filename - Target filename
+     */
+    handleFileSwitch(filename) {
+      if (this.editor) {
+        this.fileManager.updateCurrentContent(this.editor.value);
+        const content = this.fileManager.switchTo(filename);
+        this.editor.value = content;
+        this.uiManager.updateTabs();
+        this.saveState();
+      }
+    }
+
+    /**
+     * Handle files change
+     */
+    handleFilesChange() {
+      if (this.editor) {
+        this.editor.value = this.fileManager.getCurrentContent();
+      }
+      this.saveState();
+      this.rerender();
+    }
+
+    /**
+     * Handle binary files change
+     * @param {Array} binaryFiles - Updated binary files array
+     */
+    handleBinaryFilesChange(binaryFiles) {
+      this.binaryFiles = binaryFiles;
+      this.saveState();
+      this.rerender();
+    }
+
+    /**
+     * Handle add source file
+     */
+    handleAddSourceFile() {
+      const filename = prompt(
+        i18nGet('typst-filename-prompt', 'Enter filename (e.g., helper.typ):')
+      );
+
+      if (!filename) return;
+
+      // Validate filename
+      if (!filename.endsWith('.typ') && !filename.endsWith('.typst')) {
+        alert(i18nGet('typst-filename-error', 'Filename must end with .typ or .typst'));
+        return;
+      }
+
+      if (!this.fileManager.addFile(filename)) {
+        alert(i18nGet('typst-filename-exists', 'File already exists'));
+        return;
+      }
+
+      if (this.editor) {
+        this.editor.value = this.fileManager.getCurrentContent();
+      }
+
+      this.uiManager.updateTabs();
+      this.saveState();
+      this.rerender();
+    }
+
+    /**
+     * Handle add binary file
+     * @param {Event} e - Click event
+     */
+    handleAddBinaryFile(e) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*,.pdf';
+
+      input.addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const dest = `/${file.name}`;
+
+        // Check if file already exists
+        if (this.binaryFiles.some((f) => f.dest === dest)) {
+          if (!confirm(i18nGet('typst-file-replace', `Replace existing ${dest}?`))) {
+            return;
+          }
+          this.binaryFiles = this.binaryFiles.filter((f) => f.dest !== dest);
+        }
+
+        // Read file as data URL
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+          const url = e.target.result;
+          this.binaryFiles.push({ dest, url });
+          this.uiManager.updateBinaryFilesList();
+          this.saveState();
+          this.rerender();
+        };
+        reader.readAsDataURL(file);
+      });
+
+      input.click();
+    }
+
+    /**
+     * Handle PDF export
+     */
+    async handleExportPdf() {
+      const mainFile = this.fileManager.findMainFile();
+      const code = mainFile ? mainFile.content : (this.editor ? this.editor.value : '');
+
+      await this.renderer.exportPdf({
+        code,
+        id: this.id,
+        sourceFiles: this.fileManager.getSourceFiles(),
+        binaryFiles: this.binaryFiles,
+        fontFiles: this.fontFiles,
+        basePath: this.basePath,
+        pagePath: this.pagePath,
+      });
+    }
+
+    /**
+     * Handle project export
+     */
+    async handleExportProject() {
+      const mainFile = this.fileManager.findMainFile();
+      const code = mainFile ? mainFile.content : (this.editor ? this.editor.value : '');
+
+      await this.exporter.export({
+        code,
+        id: this.id,
+        sourceFiles: this.fileManager.getSourceFiles(),
+        binaryFiles: this.binaryFiles,
+        basePath: this.basePath,
+        pagePath: this.pagePath,
+      });
+    }
+
+    /**
+     * Handle reset
+     */
+    async handleReset() {
+      const confirmMsg = i18nGet(
+        'typst-reset-prompt',
+        'Are you sure you want to reset the code?'
+      );
+
+      if (confirm(confirmMsg)) {
+        await window.store?.typst?.delete(this.id);
         window.location.reload();
       }
+    }
+  }
+
+  // ============================================================================
+  // MAIN INITIALIZATION
+  // ============================================================================
+
+  // Initialize code-input
+  initializeCodeInput();
+
+  // Get all Typst directive elements
+  const elements = document.getElementsByClassName('directive-typst');
+
+  // Create shared instances
+  const typstLoader = new TypstLoader();
+  const renderQueue = new RenderQueue();
+  const assetManager = new AssetManager();
+  const renderer = new TypstRenderer(typstLoader, assetManager, renderQueue);
+  const exporter = new ProjectExporter(assetManager);
+
+  // Initialize each Typst element
+  for (const elem of elements) {
+    const id = elem.getAttribute('data-id');
+    const sourceFilesData = elem.getAttribute('data-source-files');
+    const binaryFilesData = elem.getAttribute('data-binary-files');
+    const fontFilesData = elem.getAttribute('data-font-files');
+    const basePath = elem.getAttribute('data-base-path') || '';
+    const pagePath = elem.getAttribute('data-page-path') || '';
+
+    const sourceFiles = sourceFilesData ? JSON.parse(atob(sourceFilesData)) : [];
+    const binaryFiles = binaryFilesData ? JSON.parse(atob(binaryFilesData)) : [];
+    const fontFiles = fontFilesData ? JSON.parse(atob(fontFilesData)) : [];
+
+    new TypstEditor({
+      elem,
+      id,
+      sourceFiles,
+      binaryFiles,
+      fontFiles,
+      basePath,
+      pagePath,
+      renderer,
+      exporter,
     });
   }
 
