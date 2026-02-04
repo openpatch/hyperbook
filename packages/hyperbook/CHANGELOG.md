@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.81.0
+
+### Minor Changes
+
+- [`25fabdf`](https://github.com/openpatch/hyperbook/commit/25fabdfe4a6af538f41041b233c3e5a02cf1b7f4) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Allow to load custom fonts in typst.
+
 ## 0.80.0
 
 ### Minor Changes
