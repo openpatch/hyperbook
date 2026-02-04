@@ -1,5 +1,15 @@
 # @hyperbook/markdown
 
+## 0.52.0
+
+### Minor Changes
+
+- [`25fabdf`](https://github.com/openpatch/hyperbook/commit/25fabdfe4a6af538f41041b233c3e5a02cf1b7f4) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Allow to load custom fonts in typst.
+
+### Patch Changes
+
+- [`f81de0c`](https://github.com/openpatch/hyperbook/commit/f81de0c24a93a7a126f5358b7f1ed94139e8ee4f) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Improve code structure in typst client.js
+
 ## 0.51.0
 
 ### Minor Changes
