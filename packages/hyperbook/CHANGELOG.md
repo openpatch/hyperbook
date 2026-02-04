@@ -1,5 +1,15 @@
 # hyperbook
 
+## 0.81.1
+
+### Patch Changes
+
+- [`75dfa0d`](https://github.com/openpatch/hyperbook/commit/75dfa0d202c1245ece7fb088e23047fdf31c6568) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix Typst directive issues:
+  - Fix preview not updating when editor content changes
+  - Fix UTF-8 encoding for umlauts and special characters in base64 decoding
+  - Fix CSV/JSON/YAML/XML file loading by inlining assets as bytes with proper UTF-8 handling
+  - Add assets preamble to all source files to support `#include` with assets
+
 ## 0.81.0
 
 ### Minor Changes
