@@ -38,6 +38,19 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.81.1
+
+::::tabs
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+- Typst editor not loading assets correctly from the server and handling special characters.
+- Typst preview not updating when the editor content changes.
+
+:::
+
+::::
+
 ## v0.81.0
 
 ::::tabs

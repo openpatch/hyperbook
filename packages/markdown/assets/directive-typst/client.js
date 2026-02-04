@@ -15,7 +15,7 @@ hyperbook.typst = (function () {
   };
 
   const REGEX_PATTERNS = {
-    READ: /#read\s*\(\s*(['"])([^'"]+)\1[^)]*\)/gi,
+    READ: /read\s*\(\s*(['"])([^'"]+)\1[^)]*\)/gi,
     CSV: /csv\s*\(\s*(['"])([^'"]+)\1[^)]*\)/gi,
     JSON: /json\s*\(\s*(['"])([^'"]+)\1[^)]*\)/gi,
     YAML: /yaml\s*\(\s*(['"])([^'"]+)\1[^)]*\)/gi,
@@ -24,6 +24,9 @@ hyperbook.typst = (function () {
     ABSOLUTE_URL: /^(https?:|data:|blob:)/i,
     ERROR_MESSAGE: /message:\s*"([^"]+)"/,
   };
+
+  // Text file patterns that need UTF-8 encoding
+  const TEXT_PATTERNS = ['READ', 'CSV', 'JSON', 'YAML', 'XML'];
 
   // ============================================================================
   // UTILITY FUNCTIONS
@@ -229,15 +232,15 @@ hyperbook.typst = (function () {
     /**
      * Extract relative file paths from Typst source code
      * @param {string} src - Typst source code
-     * @returns {Array<string>} Array of file paths
+     * @returns {Array<{path: string, isText: boolean}>} Array of file paths with type info
      */
     extractFilePaths(src) {
-      const paths = new Set();
-      const patterns = Object.values(REGEX_PATTERNS).filter(
-        p => p !== REGEX_PATTERNS.ABSOLUTE_URL && p !== REGEX_PATTERNS.ERROR_MESSAGE
-      );
+      const paths = new Map(); // path -> isText
 
-      for (const pattern of patterns) {
+      for (const [name, pattern] of Object.entries(REGEX_PATTERNS)) {
+        if (name === 'ABSOLUTE_URL' || name === 'ERROR_MESSAGE') continue;
+        
+        const isText = TEXT_PATTERNS.includes(name);
         let match;
         // Reset regex lastIndex
         pattern.lastIndex = 0;
@@ -246,11 +249,11 @@ hyperbook.typst = (function () {
           const path = match[2];
           // Skip absolute URLs, data URLs, blob URLs
           if (REGEX_PATTERNS.ABSOLUTE_URL.test(path)) continue;
-          paths.add(path);
+          paths.set(path, isText);
         }
       }
 
-      return Array.from(paths);
+      return Array.from(paths.entries()).map(([path, isText]) => ({ path, isText }));
     }
 
     /**
@@ -258,9 +261,10 @@ hyperbook.typst = (function () {
      * @param {string} path - Asset path
      * @param {string} basePath - Base path
      * @param {string} pagePath - Page path
+     * @param {boolean} isText - Whether this is a text file
      * @returns {Promise<Uint8Array|null>}
      */
-    async fetchAsset(path, basePath, pagePath) {
+    async fetchAsset(path, basePath, pagePath, isText = false) {
       try {
         const url = constructUrl(path, basePath, pagePath);
         const response = await fetch(url);
@@ -270,8 +274,15 @@ hyperbook.typst = (function () {
           return null;
         }
 
-        const arrayBuffer = await response.arrayBuffer();
-        return new Uint8Array(arrayBuffer);
+        if (isText) {
+          // For text files, decode as text and re-encode as UTF-8
+          const text = await response.text();
+          return new TextEncoder().encode(text);
+        } else {
+          // For binary files, use arrayBuffer directly
+          const arrayBuffer = await response.arrayBuffer();
+          return new Uint8Array(arrayBuffer);
+        }
       } catch (error) {
         console.warn(`Error loading asset ${path}:`, error);
         return null;
@@ -280,36 +291,124 @@ hyperbook.typst = (function () {
 
     /**
      * Fetch multiple assets and cache them
-     * @param {Array<string>} paths - Array of asset paths
+     * @param {Array<{path: string, isText: boolean}>} pathInfos - Array of path info objects
      * @param {string} basePath - Base path
      * @param {string} pagePath - Page path
      * @returns {Promise<void>}
      */
-    async fetchAssets(paths, basePath, pagePath) {
-      const missingPaths = paths.filter((p) => !this.cache.has(p));
+    async fetchAssets(pathInfos, basePath, pagePath) {
+      const missingPaths = pathInfos.filter(({ path }) => !this.cache.has(path));
       
       await Promise.all(
-        missingPaths.map(async (path) => {
-          const data = await this.fetchAsset(path, basePath, pagePath);
+        missingPaths.map(async ({ path, isText }) => {
+          const data = await this.fetchAsset(path, basePath, pagePath, isText);
           this.cache.set(path, data);
         })
       );
     }
 
     /**
-     * Map cached assets to Typst virtual filesystem
+     * Build Typst preamble with inlined assets as bytes
+     * @returns {string} Typst preamble code
      */
-    mapToShadow() {
-      for (const [path, data] of this.cache.entries()) {
-        if (data !== null) {
-          const normalizedPath = normalizePath(path);
-          window.$typst.mapShadow(normalizedPath, data);
-        }
-      }
+    buildAssetsPreamble() {
+      if (this.cache.size === 0) return "";
+      const entries = [...this.cache.entries()]
+        .filter(([name, u8]) => u8 !== null)
+        .map(([name, u8]) => {
+          const nums = Array.from(u8).join(",");
+          return `  "${name}": bytes((${nums}))`;
+        })
+        .join(",\n");
+      if (!entries) return "";
+      return `#let __assets = (\n${entries}\n)\n\n`;
     }
 
     /**
-     * Prepare assets for rendering (extract, fetch, and map)
+     * Rewrite file calls (image, read, csv, json, yaml, xml) to use inlined assets
+     * @param {string} src - Typst source code
+     * @returns {string} Rewritten source code
+     */
+    rewriteAssetCalls(src) {
+      if (this.cache.size === 0) return src;
+
+      // Rewrite image() calls
+      src = src.replace(/image\s*\(\s*(['"])([^'"]+)\1/g, (m, q, fname) => {
+        if (this.cache.has(fname)) {
+          const asset = this.cache.get(fname);
+          if (asset === null) {
+            return `[File not found: _${fname}_]`;
+          }
+          return `image(__assets.at("${fname}")`;
+        }
+        return m;
+      });
+
+      // Rewrite read() calls
+      src = src.replace(/read\s*\(\s*(['"])([^'"]+)\1/g, (m, q, fname) => {
+        if (this.cache.has(fname)) {
+          const asset = this.cache.get(fname);
+          if (asset === null) {
+            return `[File not found: _${fname}_]`;
+          }
+          return `read(__assets.at("${fname}")`;
+        }
+        return m;
+      });
+
+      // Rewrite csv() calls
+      src = src.replace(/csv\s*\(\s*(['"])([^'"]+)\1/g, (m, q, fname) => {
+        if (this.cache.has(fname)) {
+          const asset = this.cache.get(fname);
+          if (asset === null) {
+            return `[File not found: _${fname}_]`;
+          }
+          return `csv(__assets.at("${fname}")`;
+        }
+        return m;
+      });
+
+      // Rewrite json() calls
+      src = src.replace(/json\s*\(\s*(['"])([^'"]+)\1/g, (m, q, fname) => {
+        if (this.cache.has(fname)) {
+          const asset = this.cache.get(fname);
+          if (asset === null) {
+            return `[File not found: _${fname}_]`;
+          }
+          return `json(__assets.at("${fname}")`;
+        }
+        return m;
+      });
+
+      // Rewrite yaml() calls
+      src = src.replace(/yaml\s*\(\s*(['"])([^'"]+)\1/g, (m, q, fname) => {
+        if (this.cache.has(fname)) {
+          const asset = this.cache.get(fname);
+          if (asset === null) {
+            return `[File not found: _${fname}_]`;
+          }
+          return `yaml(__assets.at("${fname}")`;
+        }
+        return m;
+      });
+
+      // Rewrite xml() calls
+      src = src.replace(/xml\s*\(\s*(['"])([^'"]+)\1/g, (m, q, fname) => {
+        if (this.cache.has(fname)) {
+          const asset = this.cache.get(fname);
+          if (asset === null) {
+            return `[File not found: _${fname}_]`;
+          }
+          return `xml(__assets.at("${fname}")`;
+        }
+        return m;
+      });
+
+      return src;
+    }
+
+    /**
+     * Prepare assets for rendering (extract and fetch)
      * @param {string} mainSrc - Main Typst source
      * @param {Array} sourceFiles - Source file objects
      * @param {string} basePath - Base path
@@ -317,21 +416,24 @@ hyperbook.typst = (function () {
      * @returns {Promise<void>}
      */
     async prepare(mainSrc, sourceFiles, basePath, pagePath) {
-      const allPaths = new Set();
+      const allPaths = new Map(); // path -> isText
 
       // Extract from main source
-      this.extractFilePaths(mainSrc).forEach((p) => allPaths.add(p));
+      for (const { path, isText } of this.extractFilePaths(mainSrc)) {
+        allPaths.set(path, isText);
+      }
 
       // Extract from all source files
       for (const { content } of sourceFiles) {
-        this.extractFilePaths(content).forEach((p) => allPaths.add(p));
+        for (const { path, isText } of this.extractFilePaths(content)) {
+          allPaths.set(path, isText);
+        }
       }
 
-      const paths = Array.from(allPaths);
+      const pathInfos = Array.from(allPaths.entries()).map(([path, isText]) => ({ path, isText }));
       
-      if (paths.length > 0) {
-        await this.fetchAssets(paths, basePath, pagePath);
-        this.mapToShadow();
+      if (pathInfos.length > 0) {
+        await this.fetchAssets(pathInfos, basePath, pagePath);
       }
     }
   }
@@ -516,14 +618,23 @@ hyperbook.typst = (function () {
           // Prepare assets
           await this.assetManager.prepare(code, sourceFiles, basePath, pagePath);
 
-          // Add source files
-          await this.addSourceFiles(sourceFiles);
+          // Build assets preamble and rewrite source files
+          const assetsPreamble = this.assetManager.buildAssetsPreamble();
+          const rewrittenCode = this.assetManager.rewriteAssetCalls(code);
+          const rewrittenSourceFiles = sourceFiles.map(({ filename, content }) => ({
+            filename,
+            content: assetsPreamble + this.assetManager.rewriteAssetCalls(content),
+          }));
+
+          // Add source files with rewritten content (includes preamble)
+          await this.addSourceFiles(rewrittenSourceFiles);
 
           // Add binary files
           await BinaryFileHandler.addToShadow(binaryFiles);
 
-          // Render to SVG
-          const svg = await window.$typst.svg({ mainContent: code });
+          // Render to SVG with preamble prepended
+          const mainContent = assetsPreamble + rewrittenCode;
+          const svg = await window.$typst.svg({ mainContent });
 
           // Clear any existing errors
           if (previewContainer) {
@@ -584,14 +695,23 @@ hyperbook.typst = (function () {
           // Prepare assets
           await this.assetManager.prepare(code, sourceFiles, basePath, pagePath);
 
-          // Add source files
-          await this.addSourceFiles(sourceFiles);
+          // Build assets preamble and rewrite source files
+          const assetsPreamble = this.assetManager.buildAssetsPreamble();
+          const rewrittenCode = this.assetManager.rewriteAssetCalls(code);
+          const rewrittenSourceFiles = sourceFiles.map(({ filename, content }) => ({
+            filename,
+            content: assetsPreamble + this.assetManager.rewriteAssetCalls(content),
+          }));
+
+          // Add source files with rewritten content (includes preamble)
+          await this.addSourceFiles(rewrittenSourceFiles);
 
           // Add binary files
           await BinaryFileHandler.addToShadow(binaryFiles);
 
-          // Generate PDF
-          const pdfData = await window.$typst.pdf({ mainContent: code });
+          // Generate PDF with preamble prepended
+          const mainContent = assetsPreamble + rewrittenCode;
+          const pdfData = await window.$typst.pdf({ mainContent });
           const pdfBlob = new Blob([pdfData], { type: 'application/pdf' });
           
           // Download PDF
@@ -803,9 +923,9 @@ hyperbook.typst = (function () {
      * @returns {Promise<void>}
      */
     async addAssets(zipFiles, code, basePath, pagePath) {
-      const relPaths = this.assetManager.extractFilePaths(code);
+      const pathInfos = this.assetManager.extractFilePaths(code);
 
-      for (const relPath of relPaths) {
+      for (const { path: relPath, isText } of pathInfos) {
         const normalizedPath = relPath.startsWith('/') 
           ? relPath.substring(1) 
           : relPath;
@@ -821,8 +941,13 @@ hyperbook.typst = (function () {
           const response = await fetch(url);
           
           if (response.ok) {
-            const arrayBuffer = await response.arrayBuffer();
-            zipFiles[normalizedPath] = new Uint8Array(arrayBuffer);
+            if (isText) {
+              const text = await response.text();
+              zipFiles[normalizedPath] = new TextEncoder().encode(text);
+            } else {
+              const arrayBuffer = await response.arrayBuffer();
+              zipFiles[normalizedPath] = new Uint8Array(arrayBuffer);
+            }
           } else {
             console.warn(`Failed to load asset: ${relPath} at ${url}`);
           }
@@ -1189,7 +1314,9 @@ hyperbook.typst = (function () {
       this.fileManager.updateCurrentContent(this.editor.value);
 
       const mainFile = this.fileManager.findMainFile();
-      const mainCode = mainFile ? mainFile.content : '';
+      const mainCode = mainFile 
+        ? this.fileManager.contents.get(mainFile.filename) || mainFile.content 
+        : '';
 
       this.renderer.render({
         code: mainCode,
@@ -1388,9 +1515,16 @@ hyperbook.typst = (function () {
     const basePath = elem.getAttribute('data-base-path') || '';
     const pagePath = elem.getAttribute('data-page-path') || '';
 
-    const sourceFiles = sourceFilesData ? JSON.parse(atob(sourceFilesData)) : [];
-    const binaryFiles = binaryFilesData ? JSON.parse(atob(binaryFilesData)) : [];
-    const fontFiles = fontFilesData ? JSON.parse(atob(fontFilesData)) : [];
+    // Decode base64 with proper UTF-8 handling
+    const decodeBase64 = (str) => {
+      const binaryStr = atob(str);
+      const bytes = Uint8Array.from(binaryStr, (c) => c.charCodeAt(0));
+      return new TextDecoder('utf-8').decode(bytes);
+    };
+
+    const sourceFiles = sourceFilesData ? JSON.parse(decodeBase64(sourceFilesData)) : [];
+    const binaryFiles = binaryFilesData ? JSON.parse(decodeBase64(binaryFilesData)) : [];
+    const fontFiles = fontFilesData ? JSON.parse(decodeBase64(fontFilesData)) : [];
 
     new TypstEditor({
       elem,
