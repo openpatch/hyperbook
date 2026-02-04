@@ -18,7 +18,7 @@ Die Typst-Direktive ermöglicht es dir, [Typst](https://typst.app/)-Dokumente di
 ## Wichtige Hinweise
 
 - **Mehrere Typst-Blöcke**: Wenn mehrere Typst-Blöcke auf derselben Seite vorhanden sind, werden sie nacheinander gerendert (einer nach dem anderen), um die Dateiisolierung zu gewährleisten. Jeder Block behält sein eigenes unabhängiges Dateisystem während des Renderns bei.
-- **Dateiisolierung**: Dateien, die in einem Typst-Block geladen werden (über `@source` oder `@file`), sind vollständig von anderen Blöcken auf derselben Seite isoliert. Das bedeutet, dass du denselben Dateinamen (z.B. `other.typ`) in verschiedenen Blöcken ohne Konflikte verwenden kannst.
+- **Dateiisolierung**: Dateien, die in einem Typst-Block geladen werden (über `@source`), sind vollständig von anderen Blöcken auf derselben Seite isoliert. Das bedeutet, dass du denselben Dateinamen (z.B. `other.typ`) in verschiedenen Blöcken ohne Konflikte verwenden kannst.
 
 
 ## Verwendung
@@ -91,7 +91,7 @@ $ sum_(i=1)^n i = (n(n+1))/2 $
 
 ### Laden aus externen Dateien
 
-Du kannst Typst-Quelldateien und Binärdateien (wie Bilder) aus externen Quellen laden, indem du spezielle Direktiven verwendest.
+Du kannst Typst-Quelldateien aus externen Quellen laden, indem du spezielle Direktiven verwendest. Assets wie Bilder werden automatisch vom Server oder von Remote-Adressen geladen.
 
 #### Laden von Quelldateien
 
@@ -121,33 +121,9 @@ Verwende die `@source`-Direktive, um Typst-Quelldateien zu laden, die in dein Ha
 ```
 :::
 
-#### Laden von Binärdateien
+#### Laden von Bildern
 
-Es gibt zwei Möglichkeiten, Binärdateien wie Bilder in Typst zu laden:
-
-**Methode 1: Mit `@file`-Direktive (explizite Deklaration)**
-
-Verwende die `@file`-Direktive, um Binärdateien explizit zu deklarieren:
-
-````md
-:::typst{mode="preview"}
-
-@file dest="/image.jpg" src="/my-image.jpg"
-
-```typ
-= Dokument mit Bild
-
-#figure(
-  image("/image.jpg", width: 80%),
-  caption: "Mein Bild"
-)
-```
-:::
-````
-
-**Methode 2: Direkter Verweis in `image()`-Aufrufen (automatisches Laden)**
-
-Du kannst Bilder auch direkt in deinem Typst-Code referenzieren, ohne `@file` zu verwenden. Die Bilder werden automatisch vom Server geladen:
+Bilder, die in deinem Typst-Code referenziert werden, werden automatisch vom Server oder von Remote-URLs geladen:
 
 ````md
 :::typst{mode="preview"}
@@ -163,20 +139,75 @@ Du kannst Bilder auch direkt in deinem Typst-Code referenzieren, ohne `@file` zu
 :::
 ````
 
-Bei Verwendung direkter Bildverweise (Methode 2) sind die Bildpfade relativ und werden automatisch in denselben Speicherorten wie `@file`-Quellen gesucht.
-
-:::alert{info}
-
-**Empfehlung**: Verwende Methode 2 (direkte Verweise) für einfacheren Code, wenn du nur Bilder anzeigen möchtest. Verwende Methode 1 (`@file`-Direktive), wenn du explizite Kontrolle über Dateipfade benötigst oder Abhängigkeiten klar machen möchtest.
-
-:::
-
 #### Suchpfade für Dateien
 
-Dateien, die in `src`-Attributen (für `@file`- und `@source`-Direktiven) referenziert werden, sowie Bilder, die direkt in `image()`-Aufrufen referenziert werden, werden in den folgenden Speicherorten gesucht (in dieser Reihenfolge):
-1. `public/`-Verzeichnis
-2. `book/`-Verzeichnis  
-3. Verzeichnis der aktuellen Seite
+Dateien, die in `src`-Attributen (für `@source`- und `@font`-Direktiven) referenziert werden, sowie Bilder, die in `image()`-Aufrufen referenziert werden, werden wie folgt aufgelöst:
+
+- **Absolute Pfade** (beginnend mit `/`): Der `basePath` wird dem Pfad vorangestellt
+- **Relative Pfade**: Werden relativ zum Verzeichnis der aktuellen Seite (`pagePath`) aufgelöst
+
+### Laden von Schriftarten
+
+Verwende die `@font`-Direktive, um benutzerdefinierte Schriftarten für deine Typst-Dokumente zu laden. Nur `.otf` (OpenType) und `.ttf` (TrueType) Schriftarten werden unterstützt.
+
+````md
+:::typst{mode="preview"}
+
+@font src="/fonts/FiraSans-Regular.otf"
+
+```typ
+#set text(font: "Fira Sans")
+
+= Beispiel mit benutzerdefinierter Schriftart
+
+Dieser Text verwendet die Fira Sans Schriftart.
+```
+:::
+````
+
+#### Emoji-Unterstützung
+
+Für Emoji-Unterstützung in Typst musst du die NotoColorEmoji-Schriftart laden:
+
+````md
+:::typst{mode="preview"}
+
+@font src="/fonts/NotoColorEmoji.ttf"
+
+```typ
+= Emoji-Beispiel
+
+Hallo Welt! 🎉🚀✨
+```
+:::
+````
+
+#### Wiederverwendung von Schriftarten mit Snippets
+
+Um Schriftarten in vielen Typst-Instanzen wiederzuverwenden, empfiehlt es sich, ein Snippet zu erstellen. Erstelle eine Datei `fonts.md.hbs` im `snippets`-Ordner:
+
+```hbs
+@font src="/fonts/NotoColorEmoji.ttf"
+@font src="/fonts/FiraSans-Regular.otf"
+```
+
+Dann verwende das Snippet in deinen Typst-Blöcken:
+
+````md
+:::typst
+
+::snippet{#fonts}
+
+```typ
+#set text(font: "Fira Sans")
+
+= Dokument mit benutzerdefinierten Schriftarten
+
+Dieser Text verwendet Fira Sans und unterstützt Emojis! 🎉
+```
+
+:::
+````
 
 #### Mehrere Quelldateien
 
@@ -269,12 +300,10 @@ $ x = (-b plus.minus sqrt(b^2 - 4a c)) / (2a) $
 
 ### Komplexes Beispiel mit mehreren Dateien
 
-Dieses Beispiel demonstriert das Laden von sowohl Quell- als auch Binärdateien mit mehreren benannten Typst-Dateien:
+Dieses Beispiel demonstriert das Laden von Quelldateien mit mehreren benannten Typst-Dateien:
 
 ````md
 :::typst{mode="preview" height="250px"}
-
-@file dest="/hello.jpg" src="/test.jpg"
 
 ```typ main.typ
 = Code-Beispiel
@@ -286,7 +315,7 @@ Hier ist etwas Inline-`Code` und ein Code-Block:
     print('Hallo Welt!')")
 
 #figure(
-  image("/hello.jpg", width: 80%),
+  image("test.jpg", width: 80%),
   caption: "Eine komplexe Abbildung mit einem Bild."
 )
 
@@ -297,7 +326,7 @@ Hier ist etwas Inline-`Code` und ein Code-Block:
 = Zusätzlicher Inhalt
 
 #figure(
-  image("hello.jpg", width: 80%),
+  image("test.jpg", width: 80%),
   caption: "Eine weitere Ansicht des Bildes."
 )
 ```
@@ -305,8 +334,6 @@ Hier ist etwas Inline-`Code` und ein Code-Block:
 ````
 
 :::typst{mode="preview" height="250px"}
-
-@file dest="/hello.jpg" src="/test.jpg"
 
 ```typ main.typ
 = Code-Beispiel
@@ -318,8 +345,8 @@ Hier ist etwas Inline-`Code` und ein Code-Block:
     print('Hallo Welt!')")
 
 #figure(
-  image("/hello.jpg", width: 80%),
-  caption: "Eine komplexe Abbildung mit einem Bild und einer Tabellenbeschriftung."
+  image("/test.jpg", width: 80%),
+  caption: "Eine komplexe Abbildung mit einem Bild."
 )
 
 #include "/other.typ"
@@ -330,8 +357,8 @@ Hier ist etwas Inline-`Code` und ein Code-Block:
 = Ein weiterer Code-Block
 
 #figure(
-  image("hello.jpg", width: 80%),
-  caption: "Eine komplexe Abbildung mit einem Bild und einer Tabellenbeschriftung."
+  image("/test.jpg", width: 80%),
+  caption: "Eine komplexe Abbildung mit einem Bild."
 )
 ```
 :::

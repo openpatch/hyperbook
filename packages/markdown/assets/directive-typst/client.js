@@ -43,7 +43,10 @@ hyperbook.typst = (function () {
     return renderQueue;
   };
 
-  const loadTypst = () => {
+  // Font cache to avoid loading the same font multiple times
+  const loadedFonts = new Set();
+
+  const loadTypst = ({ fontFiles = [] }) => {
     if (typstLoaded) {
       return Promise.resolve();
     }
@@ -59,13 +62,18 @@ hyperbook.typst = (function () {
       script.id = "typst-loader";
       script.onload = () => {
         // Wait a bit for the module to initialize
-        const checkTypst = () => {
+        const checkTypst = async () => {
           if (typeof $typst !== "undefined") {
             // Initialize the Typst compiler and renderer
+            const fonts = TypstCompileModule.loadFonts(
+              fontFiles.map((f) => f.url),
+            );
             $typst.setCompilerInitOptions({
+              beforeBuild: [fonts],
               getModule: () => TYPST_COMPILER_URL,
             });
             $typst.setRendererInitOptions({
+              beforeBuild: [fonts],
               getModule: () => TYPST_RENDERER_URL,
             });
             typstLoaded = true;
@@ -91,23 +99,23 @@ hyperbook.typst = (function () {
 
     // Pattern for read() function
     // Matches: read("path"), read('path'), read("path", encoding: ...)
-    const readRe = /#read\s*\(\s*(['"])([^'"]+)\1/gi;
+    const readRe = /#read\s*\(\s*(['"])([^'"]+)\1[^)]*\)/gi;
 
     // Pattern for csv() function
     // Matches: csv("path"), csv('path'), csv("path", delimiter: ...)
-    const csvRe = /csv\s*\(\s*(['"])([^'"]+)\1/gi;
+    const csvRe = /csv\s*\(\s*(['"])([^'"]+)\1[^)]*\)/gi;
 
     // Pattern for json() function
     // Matches: json("path"), json('path')
-    const jsonRe = /json\s*\(\s*(['"])([^'"]+)\1/gi;
+    const jsonRe = /json\s*\(\s*(['"])([^'"]+)\1[^)]*\)/gi;
 
     // Pattern for yaml() function
-    const yamlRe = /yaml\s*\(\s*(['"])([^'"]+)\1/gi;
+    const yamlRe = /yaml\s*\(\s*(['"])([^'"]+)\1[^)]*\)/gi;
     //
     // Pattern for xml() function
-    const xmlRe = /xml\s*\(\s*(['"])([^'"]+)\1/gi;
+    const xmlRe = /xml\s*\(\s*(['"])([^'"]+)\1[^)]*\)/gi;
 
-    const imageRe = /image\s*\(\s*(['"])([^'"]+)\1/gi;
+    const imageRe = /image\s*\(\s*(['"])([^'"]+)\1[^)]*\)/gi;
 
     // Process all patterns
     const patterns = [imageRe, readRe, csvRe, jsonRe, yamlRe, xmlRe];
@@ -116,8 +124,8 @@ hyperbook.typst = (function () {
       let m;
       while ((m = re.exec(src))) {
         const p = m[2];
-        // Skip absolute URLs, data URLs, blob URLs, and paths starting with "/"
-        if (/^(https?:|data:|blob:|\/)/i.test(p)) continue;
+        // Skip absolute URLs, data URLs, blob URLs
+        if (/^(https?:|data:|blob:)/i.test(p)) continue;
         paths.add(p);
       }
     }
@@ -125,14 +133,19 @@ hyperbook.typst = (function () {
     return [...paths];
   };
 
-  // Fetch assets from server using base path
-  const fetchAssets = async (paths, basePath) => {
+  // Fetch assets from server and cache them
+  const fetchAssets = async (paths, basePath, pagePath) => {
     const misses = paths.filter((p) => !assetCache.has(p));
     await Promise.all(
       misses.map(async (p) => {
         try {
-          // Construct URL using base path
-          const url = basePath ? `${basePath}/${p}`.replace(/\/+/g, "/") : p;
+          // Construct URL: absolute paths use basePath, relative paths use pagePath
+          let url;
+          if (p.startsWith("/")) {
+            url = basePath ? `${basePath}${p}`.replace(/\/+/g, "/") : p;
+          } else {
+            url = pagePath ? `${pagePath}/${p}`.replace(/\/+/g, "/") : p;
+          }
           const res = await fetch(url);
           if (!res.ok) {
             console.warn(
@@ -151,84 +164,35 @@ hyperbook.typst = (function () {
     );
   };
 
-  // Build typst preamble with inlined assets
-  const buildAssetsPreamble = () => {
-    if (assetCache.size === 0) return "";
-    const entries = [...assetCache.entries()]
-      .filter(([name, u8]) => u8 !== null) // Skip failed images
-      .map(([name, u8]) => {
-        const nums = Array.from(u8).join(",");
-        return `  "${name}": bytes((${nums}))`;
-      })
-      .join(",\n");
-    if (!entries) return "";
-    return `#let __assets = (\n${entries}\n)\n\n`;
-  };
-
-  // Rewrite file calls (image, read, csv, json) to use inlined assets
-  const rewriteAssetCalls = (src) => {
-    if (assetCache.size === 0) return src;
-    
-    // Rewrite image() calls
-    src = src.replace(/image\s*\(\s*(['"])([^'"]+)\1/g, (m, q, fname) => {
-      if (assetCache.has(fname)) {
-        const asset = assetCache.get(fname);
-        if (asset === null) {
-          return `[File not found: _${fname}_]`;
-        }
-        return `image(__assets.at("${fname}")`;
+  // Map cached assets to typst virtual filesystem
+  const mapAssetsToShadow = () => {
+    for (const [path, data] of assetCache.entries()) {
+      if (data !== null) {
+        const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+        $typst.mapShadow(normalizedPath, data);
       }
-      return m;
-    });
-    
-    // Rewrite read() calls
-    src = src.replace(/#read\s*\(\s*(['"])([^'"]+)\1/g, (m, q, fname) => {
-      if (assetCache.has(fname)) {
-        const asset = assetCache.get(fname);
-        if (asset === null) {
-          return `[File not found: _${fname}_]`;
-        }
-        return `#read(__assets.at("${fname}")`;
-      }
-      return m;
-    });
-    
-    // Rewrite csv() calls
-    src = src.replace(/csv\s*\(\s*(['"])([^'"]+)\1/g, (m, q, fname) => {
-      if (assetCache.has(fname)) {
-        const asset = assetCache.get(fname);
-        if (asset === null) {
-          return `[File not found: _${fname}_]`;
-        }
-        return `csv(__assets.at("${fname}")`;
-      }
-      return m;
-    });
-    
-    // Rewrite json() calls
-    src = src.replace(/json\s*\(\s*(['"])([^'"]+)\1/g, (m, q, fname) => {
-      if (assetCache.has(fname)) {
-        const asset = assetCache.get(fname);
-        if (asset === null) {
-          return `[File not found: _${fname}_]`;
-        }
-        return `json(__assets.at("${fname}")`;
-      }
-      return m;
-    });
-    
-    return src;
-  };
-
-  // Prepare typst source with server-loaded assets
-  const prepareTypstSourceWithAssets = async (src, basePath) => {
-    const relPaths = extractRelFilePaths(src);
-    if (relPaths.length > 0) {
-      await fetchAssets(relPaths, basePath);
-      const preamble = buildAssetsPreamble();
-      return preamble + rewriteAssetCalls(src);
     }
-    return src;
+  };
+
+  // Fetch and prepare assets for typst rendering
+  const prepareAssets = async (src, sourceFiles, basePath, pagePath) => {
+    // Extract paths from main source AND all source files
+    const allPaths = new Set();
+    
+    // Extract from main source
+    extractRelFilePaths(src, sourceFiles).forEach(p => allPaths.add(p));
+    
+    // Extract from all source files
+    for (const { content } of sourceFiles) {
+      extractRelFilePaths(content, sourceFiles).forEach(p => allPaths.add(p));
+    }
+    
+    const relPaths = [...allPaths];
+    
+    if (relPaths.length > 0) {
+      await fetchAssets(relPaths, basePath, pagePath);
+      mapAssetsToShadow();
+    }
   };
 
   // Parse error message from SourceDiagnostic format
@@ -252,9 +216,11 @@ hyperbook.typst = (function () {
     loadingIndicator,
     sourceFiles,
     binaryFiles,
+    fontFiles,
     id,
     previewContainer,
     basePath,
+    pagePath,
   ) => {
     // Queue this render to ensure only one compilation runs at a time
     return queueRender(async () => {
@@ -263,14 +229,14 @@ hyperbook.typst = (function () {
         loadingIndicator.style.display = "flex";
       }
 
-      await loadTypst();
+      await loadTypst({ fontFiles });
 
       try {
         // Reset shadow files for this render
         $typst.resetShadow();
 
-        // Prepare code with server-loaded assets
-        const preparedCode = await prepareTypstSourceWithAssets(code, basePath);
+        // Fetch and map assets to virtual filesystem
+        await prepareAssets(code, sourceFiles, basePath, pagePath);
 
         // Add source files
         for (const { filename, content } of sourceFiles) {
@@ -306,7 +272,7 @@ hyperbook.typst = (function () {
           }
         }
 
-        const svg = await $typst.svg({ mainContent: preparedCode });
+        const svg = await $typst.svg({ mainContent: code });
 
         // Remove any existing error overlay from preview-container
         if (previewContainer) {
@@ -386,17 +352,25 @@ hyperbook.typst = (function () {
   };
 
   // Export to PDF
-  const exportPdf = async (code, id, sourceFiles, binaryFiles, basePath) => {
+  const exportPdf = async (
+    code,
+    id,
+    sourceFiles,
+    binaryFiles,
+    fontFiles,
+    basePath,
+    pagePath,
+  ) => {
     // Queue this export to ensure only one compilation runs at a time
     return queueRender(async () => {
-      await loadTypst();
+      await loadTypst({ fontFiles });
 
       try {
         // Reset shadow files for this export
         $typst.resetShadow();
 
-        // Prepare code with server-loaded assets
-        const preparedCode = await prepareTypstSourceWithAssets(code, basePath);
+        // Fetch and map assets to virtual filesystem
+        await prepareAssets(code, sourceFiles, basePath, pagePath);
 
         // Add source files
         for (const { filename, content } of sourceFiles) {
@@ -431,7 +405,7 @@ hyperbook.typst = (function () {
           }
         }
 
-        const pdfData = await $typst.pdf({ mainContent: preparedCode });
+        const pdfData = await $typst.pdf({ mainContent: code });
         const pdfFile = new Blob([pdfData], { type: "application/pdf" });
         const link = document.createElement("a");
         link.href = URL.createObjectURL(pdfFile);
@@ -463,8 +437,14 @@ hyperbook.typst = (function () {
     // Parse source files and binary files from data attributes
     const sourceFilesData = elem.getAttribute("data-source-files");
     const binaryFilesData = elem.getAttribute("data-binary-files");
+    const fontFilesData = elem.getAttribute("data-font-files");
     let basePath = elem.getAttribute("data-base-path") || "";
+    let pagePath = elem.getAttribute("data-page-path") || "";
 
+    // Ensure basePath starts with / for absolute paths
+    if (pagePath && !pagePath.startsWith("/")) {
+      pagePath = "/" + pagePath;
+    }
     // Ensure basePath starts with / for absolute paths
     if (basePath && !basePath.startsWith("/")) {
       basePath = "/" + basePath;
@@ -472,6 +452,7 @@ hyperbook.typst = (function () {
 
     let sourceFiles = sourceFilesData ? JSON.parse(atob(sourceFilesData)) : [];
     let binaryFiles = binaryFilesData ? JSON.parse(atob(binaryFilesData)) : [];
+    const fontFiles = fontFilesData ? JSON.parse(atob(fontFilesData)) : [];
 
     // Track current active file
     let currentFile =
@@ -651,9 +632,11 @@ hyperbook.typst = (function () {
           loadingIndicator,
           sourceFiles,
           binaryFiles,
+          fontFiles,
           id,
           previewContainer,
           basePath,
+          pagePath,
         );
       }
     };
@@ -783,16 +766,18 @@ hyperbook.typst = (function () {
     } else if (sourceTextarea) {
       // Preview mode - code is in hidden textarea
       initialCode = sourceTextarea.value;
-      loadTypst().then(() => {
+      loadTypst({ fontFiles }).then(() => {
         renderTypst(
           initialCode,
           preview,
           loadingIndicator,
           sourceFiles,
           binaryFiles,
+          fontFiles,
           id,
           previewContainer,
           basePath,
+          pagePath,
         );
       });
     }
@@ -808,7 +793,7 @@ hyperbook.typst = (function () {
         : editor
           ? editor.value
           : initialCode;
-      await exportPdf(code, id, sourceFiles, binaryFiles, basePath);
+      await exportPdf(code, id, sourceFiles, binaryFiles, fontFiles, basePath, pagePath);
     });
 
     // Download Project button (ZIP with all files)
@@ -852,10 +837,13 @@ hyperbook.typst = (function () {
               continue;
             }
           } else {
-            // Relative URL - use basePath to construct full URL
-            const fullUrl = basePath
-              ? `${basePath}/${url}`.replace(/\/+/g, "/")
-              : url;
+            // Absolute paths use basePath, relative paths use pagePath
+            let fullUrl;
+            if (url.startsWith("/")) {
+              fullUrl = basePath ? `${basePath}${url}`.replace(/\/+/g, "/") : url;
+            } else {
+              fullUrl = pagePath ? `${pagePath}/${url}`.replace(/\/+/g, "/") : url;
+            }
             const response = await fetch(fullUrl);
             if (response.ok) {
               arrayBuffer = await response.arrayBuffer();
@@ -884,10 +872,13 @@ hyperbook.typst = (function () {
         if (/^(https?:|data:|blob:)/i.test(relPath)) continue;
 
         try {
-          // Construct URL using basePath
-          const url = basePath
-            ? `${basePath}/${relPath}`.replace(/\/+/g, "/")
-            : imagePath;
+          // Construct URL: absolute paths use basePath, relative paths use pagePath
+          let url;
+          if (relPath.startsWith("/")) {
+            url = basePath ? `${basePath}${relPath}`.replace(/\/+/g, "/") : relPath;
+          } else {
+            url = pagePath ? `${pagePath}/${relPath}`.replace(/\/+/g, "/") : relPath;
+          }
           const response = await fetch(url);
           if (response.ok) {
             const arrayBuffer = await response.arrayBuffer();

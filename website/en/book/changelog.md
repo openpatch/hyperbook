@@ -38,6 +38,18 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.81.0
+
+::::tabs
+
+:::tab{title="Improved :+1:" id="improved"}
+
+- Typst can now load custom fonts. You can use the `@font` directive to load fonts from your hyperbook project. [Learn more](/elements/typst#custom-fonts) 
+
+:::
+
+::::
+
 ## v0.80.0
 
 ::::tabs

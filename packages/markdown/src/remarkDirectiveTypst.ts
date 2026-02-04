@@ -48,6 +48,7 @@ export default (ctx: HyperbookContext) => () => {
 
         const sourceFiles: { filename: string; content: string }[] = [];
         const binaryFiles: { dest: string; url: string }[] = [];
+        const fontFiles: { url: string }[] = [];
 
         // Parse @file and @source directives from text nodes (including nested in paragraphs)
         for (const child of node.children) {
@@ -69,6 +70,24 @@ export default (ctx: HyperbookContext) => () => {
               binaryFiles.push({ dest, url });
             }
 
+            // Parse @font directives for font files
+            const fontMatches = text.matchAll(
+              /@font\s+src="([^"]+)"/g,
+            );
+            for (const match of fontMatches) {
+              const src = match[1];
+              // Check if it's a remote URL or local file
+              const isRemote = src.startsWith("http://") || src.startsWith("https://");
+              const url = isRemote
+                ? src
+                : ctx.makeUrl(
+                    src,
+                    "public",
+                    ctx.navigation.current || undefined,
+                  );
+              fontFiles.push({ url });
+            }
+
             // Parse @source directives for typst source files
             const sourceMatches = text.matchAll(
               /@source\s+dest="([^"]+)"\s+src="([^"]+)"/g,
@@ -80,37 +99,63 @@ export default (ctx: HyperbookContext) => () => {
               sourceFiles.push({ filename: dest, content });
             }
           } else if (child.type === "paragraph") {
-            // Check text nodes inside paragraphs
-            for (const textNode of child.children) {
-              if (textNode.type === "text") {
-                const text = (textNode as Text).value;
+            // Reconstruct full text from all children (handles URLs being parsed as links)
+            const reconstructText = (node: any): string => {
+              if (node.type === "text") return node.value;
+              if (node.type === "link") {
+                // Reconstruct the original markdown-ish text for links
+                // For autolinks like https://..., just return the URL
+                return node.url;
+              }
+              if (node.children) {
+                return node.children.map(reconstructText).join("");
+              }
+              return "";
+            };
+            const text = child.children.map(reconstructText).join("");
 
-                // Parse @file directives for binary files
-                const fileMatches = text.matchAll(
-                  /@file\s+dest="([^"]+)"\s+src="([^"]+)"/g,
-                );
-                for (const match of fileMatches) {
-                  const dest = match[1];
-                  const src = match[2];
-                  const url = ctx.makeUrl(
+            // Parse @file directives for binary files
+            const fileMatches = text.matchAll(
+              /@file\s+dest="([^"]+)"\s+src="([^"]+)"/g,
+            );
+            for (const match of fileMatches) {
+              const dest = match[1];
+              const src = match[2];
+              const url = ctx.makeUrl(
+                src,
+                "public",
+                ctx.navigation.current || undefined,
+              );
+              binaryFiles.push({ dest, url });
+            }
+
+            // Parse @font directives for font files
+            const fontMatches = text.matchAll(
+              /@font\s+src="([^"]+)"/g,
+            );
+            for (const match of fontMatches) {
+              const src = match[1];
+              // Check if it's a remote URL or local file
+              const isRemote = src.startsWith("http://") || src.startsWith("https://");
+              const url = isRemote
+                ? src
+                : ctx.makeUrl(
                     src,
                     "public",
                     ctx.navigation.current || undefined,
                   );
-                  binaryFiles.push({ dest, url });
-                }
+              fontFiles.push({ url });
+            }
 
-                // Parse @source directives for typst source files
-                const sourceMatches = text.matchAll(
-                  /@source\s+dest="([^"]+)"\s+src="([^"]+)"/g,
-                );
-                for (const match of sourceMatches) {
-                  const dest = match[1];
-                  const src = match[2];
-                  const content = readFile(src, ctx) || "";
-                  sourceFiles.push({ filename: dest, content });
-                }
-              }
+            // Parse @source directives for typst source files
+            const sourceMatches = text.matchAll(
+              /@source\s+dest="([^"]+)"\s+src="([^"]+)"/g,
+            );
+            for (const match of sourceMatches) {
+              const dest = match[1];
+              const src = match[2];
+              const content = readFile(src, ctx) || "";
+              sourceFiles.push({ filename: dest, content });
             }
           }
         }
@@ -144,7 +189,8 @@ export default (ctx: HyperbookContext) => () => {
         const isPreviewMode = mode === "preview" || !isEditMode;
 
         // Get base path from current page directory
-        const basePath = ctx.navigation.current?.path?.directory || "";
+        const pagePath = ctx.navigation.current?.path?.directory || "";
+        const basePath = ctx.config.basePath || "/";
 
         data.hName = "div";
         data.hProperties = {
@@ -158,7 +204,11 @@ export default (ctx: HyperbookContext) => () => {
           "data-binary-files": Buffer.from(
             JSON.stringify(binaryFiles),
           ).toString("base64"),
+          "data-font-files": Buffer.from(
+            JSON.stringify(fontFiles),
+          ).toString("base64"),
           "data-base-path": basePath,
+          "data-page-path": pagePath,
         };
 
         const previewContainer: Element = {
