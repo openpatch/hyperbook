@@ -33,7 +33,7 @@ store.version(2).stores({
   typst: `id,code`,
 });
 var sqlIdeDB = new Dexie("SQL-IDE");
-sqlIdeDB.version(0.1).stores({
+sqlIdeDB.version(1).stores({
   scripts: `scriptId,script`,
 });
 var learnJDB = new Dexie("LearnJ");
