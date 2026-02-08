@@ -17,7 +17,7 @@ The Online-IDE element accepts these arguments:
 - **speed**: Speed of the execution. Defaults to 1000.
 - **url**: The base URL of the embedded files for the Online IDE. Defaults to onlineide.openpatch.org.
 
-(See: https://github.com/martin-pabst/Online-IDE).
+(See: https://github.com/martin-pabst/Online-IDE-new-compiler).
 
 :::onlineide{height=500 console=false}
 
@@ -183,9 +183,15 @@ class Funke extends Circle {
 :::
 `````
 
-## With a custom URL
+## With others libraries
 
-:::onlineide{height=500 console=false url="https://nrw.onlineide.openpatch.org"}
+| Library | Parameter | Description |
+| --- | --- | --- |
+| Abitur classes NRW | libraries="nrw" | Class library for use in the central Abitur of North Rhine-Westphalia |
+| Graphics and Games Library | libraries="gng" | Graphical class library for the Bavarian computer science books of the Cornelsen publishing house |
+| Abitur classes Lower Saxony | libraries="niedersachsen" | Class library for use in the Abitur Lower Saxony |
+
+:::onlineide{height=500 console=false libraries="nrw"}
 
 ```java Test.java
 
@@ -197,7 +203,7 @@ l.append(1);
 :::
 
 ````
-:::onlineide{height=500 console=false url="https://nrw.onlineide.openpatch.org"}
+:::onlineide{height=500 console=false libraries="NRW"}
 
 ```java Test.java
 

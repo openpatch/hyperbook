@@ -25,11 +25,12 @@ export default (ctx: HyperbookContext) => () => {
         const attributes = node.attributes || {};
         const {
           url = ctx.config.elements?.onlineide?.url ||
-            "https://onlineide.openpatch.org",
+            "https://onlineide2.openpatch.org",
           height = ctx.config.elements?.onlineide?.height || "600px",
           fileList = true,
           console: con = true,
           pCode = false,
+          libraries = "",
           bottomPanel = true,
           errorList = true,
           speed = 1000,
@@ -75,7 +76,7 @@ export default (ctx: HyperbookContext) => () => {
             children: [
               {
                 type: "raw",
-                value: `{'id': '${id}', 'speed': ${speed}, 'withBottomPanel': ${bottomPanel},'withPCode': ${pCode},'withConsole': ${con},'withFileList': ${fileList},'withErrorList': ${errorList}}`,
+                value: `{'id': '${id}', 'speed': ${speed}, 'withBottomPanel': ${bottomPanel},'withPCode': ${pCode},'withConsole': ${con},'withFileList': ${fileList},'withErrorList': ${errorList}, 'libraries': [${libraries?.split(",").map((lib) => `'${lib.trim()}'`)}]}`,
               },
               ...codes,
               {

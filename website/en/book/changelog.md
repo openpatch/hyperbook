@@ -38,6 +38,29 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.82.0
+
+::::tabs
+
+:::tab{title="Improved :+1:" id="improved"}
+
+- Update the Online-IDE to use onlineide2.openpatch.org, which uses the new compiler. If you have used nrw.onlineide.openpatch.org you can use the new version like this:
+
+````md
+:::onlineide{libraries=['nrw']}
+
+```java Main.java
+var l = new List<Integer>();
+l.append(1);
+```
+
+:::
+````
+
+:::
+
+::::
+
 ## v0.81.1
 
 ::::tabs
