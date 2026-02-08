@@ -203,11 +203,11 @@ l.append(1);
 :::
 
 ````
-:::onlineide{height=500 console=false libraries="NRW"}
+:::onlineide{height=500 console=false libraries="nrw"}
 
 ```java Test.java
 
-var l = new NRWList<Integer>();
+var l = new List<Integer>();
 l.append(1);
 
 ```
