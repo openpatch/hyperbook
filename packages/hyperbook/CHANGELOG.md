@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.82.0
+
+### Minor Changes
+
+- [`f695770`](https://github.com/openpatch/hyperbook/commit/f6957703fbc722b849b1ab250136a3bb8dc3f052) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Update online-ide
+
 ## 0.81.1
 
 ### Patch Changes
