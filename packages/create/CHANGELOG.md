@@ -1,5 +1,12 @@
 # create-hyperbook
 
+## 0.3.3
+
+### Patch Changes
+
+- Updated dependencies [[`78a5ff3`](https://github.com/openpatch/hyperbook/commit/78a5ff37534742ee79f2f7422914d4a091a805f6)]:
+  - @hyperbook/types@0.21.0
+
 ## 0.3.2
 
 ### Patch Changes
