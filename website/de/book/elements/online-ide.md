@@ -15,7 +15,6 @@ Das Online-IDE element akzeptiert folgende Parameter:
 - **errorList**: falls mit unterem Panel: mit/ohne Fehlerliste.
 - **height**: Höhe des Editors. Standardwert 600px.
 - **speed**: Geschwindigkeit in Steps/s. Standardwert 1000.
-- **url**: Die Basis-URL für die Dateien der Online IDE. Standardwert https://onlineide.openpatch.org.
 
 (See: https://github.com/martin-pabst/Online-IDE-new-compiler).
 
@@ -188,7 +187,7 @@ class Funke extends Circle {
 | Graphics and Games Library | libraries="gng" | Graphische Klassenbibliothek für die bayerischen Informatikbücher des Cornelsen-Verlages |
 | Abiturklassen Niedersachsen | libraries="niedersachsen" | Klassenbibliothek zur Verwendung im Abitur Niedersachsen |
 
-:::onlineide{height=500 console=false libraries="nrw"}
+:::onlineide{height="500px" console=false libraries="nrw"}
 
 ```java Test.java
 
@@ -200,7 +199,7 @@ l.append(1);
 :::
 
 ````
-:::onlineide{height=500 console=false libraries="nrw"}
+:::onlineide{height="500px" console=false libraries="nrw"}
 
 ```java Test.java
 

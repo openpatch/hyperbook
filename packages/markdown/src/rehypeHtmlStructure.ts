@@ -618,6 +618,42 @@ HYPERBOOK_ASSETS = "${makeUrl("/", "assets")}"
                     }) as ElementContent,
                 ),
               ),
+              ...Object.entries(directives).flatMap(
+                ([directive, { scripts }]) =>
+                  scripts
+                    .filter(
+                      (script) =>
+                        typeof script === "object" &&
+                        script.position === "head",
+                    )
+                    .map((script) => {
+                      if (typeof script === "object") {
+                        const { position, versioned, src, ...properties } =
+                          script;
+                        let scriptSrc = script.src.includes("://")
+                          ? script.src
+                          : makeUrl(
+                              ["directive-" + directive, script.src],
+                              "assets",
+                            );
+
+                        if (!versioned) {
+                          scriptSrc = scriptSrc.split("?")[0];
+                        }
+                        return {
+                          type: "element",
+                          tagName: "script",
+                          properties: {
+                            ...properties,
+                            src: scriptSrc,
+                          },
+                          children: [],
+                        } as ElementContent;
+                      }
+                      return null;
+                    })
+                    .filter((s) => s !== null),
+              ),
             ],
           },
           {
@@ -637,9 +673,36 @@ HYPERBOOK_ASSETS = "${makeUrl("/", "assets")}"
               },
               ...Object.entries(directives).flatMap(
                 ([directive, { scripts }]) =>
-                  scripts.map(
-                    (script) =>
-                      ({
+                  scripts
+                    .filter(
+                      (script) =>
+                        typeof script !== "object" || script.position == "body",
+                    )
+                    .map((script) => {
+                      if (typeof script === "object") {
+                        const { position, versioned, src, ...properties } =
+                          script;
+                        let scriptSrc = script.src.includes("://")
+                          ? script.src
+                          : makeUrl(
+                              ["directive-" + directive, script.src],
+                              "assets",
+                            );
+
+                        if (!versioned) {
+                          scriptSrc = scriptSrc.split("?")[0];
+                        }
+                        return {
+                          type: "element",
+                          tagName: "script",
+                          properties: {
+                            ...properties,
+                            src: scriptSrc,
+                          },
+                          children: [],
+                        } as ElementContent;
+                      }
+                      return {
                         type: "element",
                         tagName: "script",
                         properties: {
@@ -652,8 +715,8 @@ HYPERBOOK_ASSETS = "${makeUrl("/", "assets")}"
                           defer: true,
                         },
                         children: [],
-                      }) as ElementContent,
-                  ),
+                      } as ElementContent;
+                    }),
               ),
               ...(ctx.config.scripts || []).map(
                 (script) =>

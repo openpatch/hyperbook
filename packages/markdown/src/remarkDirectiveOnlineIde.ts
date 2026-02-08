@@ -24,8 +24,6 @@ export default (ctx: HyperbookContext) => () => {
         const data = node.data || (node.data = {});
         const attributes = node.attributes || {};
         const {
-          url = ctx.config.elements?.onlineide?.url ||
-            "https://onlineide2.openpatch.org",
           height = ctx.config.elements?.onlineide?.height || "600px",
           fileList = true,
           console: con = true,
@@ -38,7 +36,22 @@ export default (ctx: HyperbookContext) => () => {
         } = attributes;
 
         expectContainerDirective(node, file, name);
-        registerDirective(file, name, ["client.js"], ["style.css"], []);
+        registerDirective(
+          file,
+          name,
+          [
+            "client.js",
+            {
+              type: "module",
+              crossorigin: true,
+              src: "include/online-ide-embedded.js",
+              position: "head",
+              versioned: false
+            },
+          ],
+          ["style.css", "include/online-ide-embedded.css"],
+          [],
+        );
 
         const codes: ElementContent[] = node.children
           ?.filter(isCode)
@@ -46,10 +59,10 @@ export default (ctx: HyperbookContext) => () => {
             type: "element",
             tagName: "script",
             properties: {
-              type: "plain/text",
+              type: "text/plain",
               title: n.meta,
               "data-type":
-                n.lang === "md" || n.lang === "markdown" ? "hint" : undefined,
+                n.lang === "md" || n.lang === "markdown" ? "hint" : "java",
             },
             children: [
               {
@@ -66,40 +79,13 @@ export default (ctx: HyperbookContext) => () => {
         data.hChildren = [
           {
             type: "element",
-            tagName: "iframe",
+            tagName: "div",
             properties: {
-              class: "player",
-              srcdoc: `<script>window.jo_doc = window.frameElement.textContent;</script><script src='${url}/includeIDE.js'></script>`,
-              frameBorder: "0",
-              height: height,
+              class: "java-online",
+              style: `height: ${height}; padding: 0; margin: 0;`,
+              "data-java-online": `{'id': '${id}', 'speed': ${speed}, 'withBottomPanel': ${bottomPanel},'withPCode': ${pCode},'withConsole': ${con},'withFileList': ${fileList},'withErrorList': ${errorList}, 'libraries': [${libraries?.split(",").map((lib) => `'${lib.trim()}'`)}]}`,
             },
-            children: [
-              {
-                type: "raw",
-                value: `{'id': '${id}', 'speed': ${speed}, 'withBottomPanel': ${bottomPanel},'withPCode': ${pCode},'withConsole': ${con},'withFileList': ${fileList},'withErrorList': ${errorList}, 'libraries': [${libraries?.split(",").map((lib) => `'${lib.trim()}'`)}]}`,
-              },
-              ...codes,
-              {
-                type: "element",
-                tagName: "style",
-                properties: {},
-                children: [
-                  {
-                    type: "raw",
-                    value: `
-.joe_javaOnlineDiv {
-  box-shadow: none;
-  margin: 0!important;
-  top: 0!important;
-  width: 100%!important;
-  height: calc(100% - 5px) !important;
-  border: none !important;
-}
-`,
-                  },
-                ],
-              },
-            ],
+            children: [...codes],
           },
           {
             type: "element",

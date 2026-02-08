@@ -8,6 +8,7 @@ import {
 } from "mdast-util-directive";
 import { Node } from "unified/lib";
 import { VFile } from "vfile";
+import { Script } from "@hyperbook/types";
 
 export const findFlat = <G extends Node>(
   node: Node,
@@ -32,7 +33,7 @@ export const findFlat = <G extends Node>(
 export const registerDirective = (
   file: VFile,
   directive: string,
-  scripts: string[] = [],
+  scripts: Script[] = [],
   styles: string[] = [],
   additionalDirective: string[] = [],
 ) => {

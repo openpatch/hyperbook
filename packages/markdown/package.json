@@ -103,6 +103,7 @@
     "p5": "^2.2.0",
     "scratchblocks": "^3.6.4",
     "terser": "^5.46.0",
+    "unzipper": "^0.12.3",
     "vfile": "^6.0.3",
     "vitest": "^4.0.18",
     "wavesurfer.js": "^7.12.1"

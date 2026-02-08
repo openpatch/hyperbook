@@ -2,6 +2,16 @@ type ElementConfig = {
   version?: string;
 };
 
+export type Script =
+  | string
+  | {
+      type?: "module" | "plain/text";
+      src: string;
+      crossorigin?: boolean;
+      position: "head" | "body";
+      versioned?: boolean;
+    };
+
 export type LinkWithLinks = {
   label: string;
   icon?: string;
@@ -43,7 +53,12 @@ export type BreadcrumbConfig = {
 
 export type PageNavigation = "default" | "hidden";
 
-export type SectionNavigation = "default" | "hidden" | "virtual" | "page" | "expanded";
+export type SectionNavigation =
+  | "default"
+  | "hidden"
+  | "virtual"
+  | "page"
+  | "expanded";
 
 export type HyperbookPageFrontmatter = {
   name: string;
@@ -65,7 +80,10 @@ export type HyperbookPageFrontmatter = {
   navigation?: PageNavigation;
 };
 
-export type HyperbookSectionFrontmatter = Omit<HyperbookPageFrontmatter, 'navigation'> & {
+export type HyperbookSectionFrontmatter = Omit<
+  HyperbookPageFrontmatter,
+  "navigation"
+> & {
   virtual?: boolean;
   expanded?: boolean;
   navigation?: SectionNavigation;
@@ -164,11 +182,9 @@ export type HyperbookJson = {
       edit?: boolean;
     };
     onlineide?: ElementConfig & {
-      url?: string;
       height?: string | number;
     };
     sqlide?: ElementConfig & {
-      url?: string;
       db?: string;
       height?: string | number;
     };

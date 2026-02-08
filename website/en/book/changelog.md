@@ -38,6 +38,23 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.83.0
+
+::::tabs
+
+:::tab{title="Improved :+1:" id="improved"}
+
+- Use bundled local versions of the Online IDE and SQL IDE instead of the
+externally hosted versions on onlineide.openpatch.org. This improves
+performance and reliability, enables faster updates, and prevents unexpected
+changes caused by external updates.
+- This increases the build size by approx. 31MB for the Online-IDE and 21MB for
+the SQL IDE, but provides a much better experience for users.
+
+:::
+
+::::
+
 ## v0.82.0
 
 ::::tabs

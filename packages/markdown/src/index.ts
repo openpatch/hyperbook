@@ -1,3 +1,4 @@
+import { Script } from "@hyperbook/types";
 import { process, remark } from "./process";
 
 declare module "vfile" {
@@ -5,7 +6,7 @@ declare module "vfile" {
     directives: Record<
       string,
       {
-        scripts: string[];
+        scripts: Script[];
         styles: string[];
         addditionalDirective: string[];
       }

@@ -9,17 +9,15 @@ runs entirely in the browser.
 The Online-IDE element accepts these arguments:
 
 - **fileList**: With file list on the left.
-- **console**: With console tab in the bottom panel.
 - **pCode**: With PCode tab in the bottom panel.
 - **bottomPanel**: With bottom panel.
 - **errorList**: With error list in the bottom panel.
 - **height**: Height of the editor. Defaults to 600px.
 - **speed**: Speed of the execution. Defaults to 1000.
-- **url**: The base URL of the embedded files for the Online IDE. Defaults to onlineide.openpatch.org.
 
 (See: https://github.com/martin-pabst/Online-IDE-new-compiler).
 
-:::onlineide{height=500 console=false}
+:::onlineide
 
 ````markdown A Hint
 ## Tip:
@@ -101,7 +99,7 @@ class Funke extends Circle {
 :::
 
 `````markdown
-:::onlineide{height=500 console=false}
+:::onlineide
 
 ````markdown A Hint
 ## Tip:
@@ -191,7 +189,7 @@ class Funke extends Circle {
 | Graphics and Games Library | libraries="gng" | Graphical class library for the Bavarian computer science books of the Cornelsen publishing house |
 | Abitur classes Lower Saxony | libraries="niedersachsen" | Class library for use in the Abitur Lower Saxony |
 
-:::onlineide{height=500 console=false libraries="nrw"}
+:::onlineide{height="500px" libraries="nrw"}
 
 ```java Test.java
 
@@ -203,7 +201,7 @@ l.append(1);
 :::
 
 ````
-:::onlineide{height=500 console=false libraries="nrw"}
+:::onlineide{height="500px" libraries="nrw"}
 
 ```java Test.java
 

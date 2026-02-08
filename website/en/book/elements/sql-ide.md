@@ -10,7 +10,7 @@ The SQL-IDE element accepts the following arguments:
 
 (See: https://github.com/martin-pabst/SQL-IDE).
 
-:::sqlide{height=500}
+:::sqlide{height="500px"}
 
 ```mysql Statements.sql
 
@@ -21,7 +21,7 @@ SELECT * from fluss;
 :::
 
 ````markdown
-:::sqlide{height=500}
+:::sqlide{height="500px"}
 
 ```mysql Statements.sql
 

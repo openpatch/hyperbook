@@ -3,9 +3,9 @@ hyperbook.onlineide = (function () {
    * @param {HTMLElement} el
    */
   function openFullscreen(el) {
-    const iframeEl =
-      el.parentElement.parentElement.getElementsByTagName("iframe")[0];
-    iframeEl.requestFullscreen();
+    const frameEl =
+      el.parentElement.parentElement.getElementsByClassName("java-online")[0];
+    frameEl.requestFullscreen();
   }
 
   return {

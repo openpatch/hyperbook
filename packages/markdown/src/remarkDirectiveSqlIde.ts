@@ -24,8 +24,6 @@ export default (ctx: HyperbookContext) => () => {
         const data = node.data || (node.data = {});
         const attributes = node.attributes || {};
         const {
-          url = ctx.config.elements?.sqlide?.url ||
-            "https://sqlide.openpatch.org",
           id = hash(node),
           db = ctx.config.elements?.sqlide?.db ||
             "https://sqlide.openpatch.org/assets/databases/world1.sqLite",
@@ -33,7 +31,22 @@ export default (ctx: HyperbookContext) => () => {
         } = attributes;
 
         expectContainerDirective(node, file, name);
-        registerDirective(file, name, ["client.js"], ["style.css"], []);
+        registerDirective(
+          file,
+          name,
+          [
+            "client.js",
+            {
+              type: "module",
+              crossorigin: true,
+              src: "include/sql-ide-embedded.js",
+              position: "head",
+              versioned: false,
+            },
+          ],
+          ["style.css", "include/sql-ide-embedded.css"],
+          [],
+        );
 
         const codes: ElementContent[] = node.children
           ?.filter(isCode)
@@ -41,10 +54,10 @@ export default (ctx: HyperbookContext) => () => {
             type: "element",
             tagName: "script",
             properties: {
-              type: "plain/text",
+              type: "text/plain",
               title: n.meta,
               "data-type":
-                n.lang === "md" || n.lang === "markdown" ? "hint" : undefined,
+                n.lang === "md" || n.lang === "markdown" ? "hint" : "sql",
             },
             children: [
               {
@@ -61,40 +74,13 @@ export default (ctx: HyperbookContext) => () => {
         data.hChildren = [
           {
             type: "element",
-            tagName: "iframe",
+            tagName: "div",
             properties: {
-              class: "player",
-              srcdoc: `<script>window.jo_doc = window.frameElement.textContent;</script><script src='${url}/js/includeide/includeIDE.js'></script>`,
-              frameBorder: "0",
-              height: height,
+              class: "sql-online",
+              style: `height: ${height}; padding: 0; margin: 0;`,
+              "data-sql-online": `{'id': '${id}', "databaseURL": "${db}"}`,
             },
-            children: [
-              {
-                type: "raw",
-                value: `{'id': '${id}', 'databaseURL': '${ctx.makeUrl(db || "", "public", ctx.navigation.current || undefined)}'}`,
-              },
-              ...codes,
-              {
-                type: "element",
-                tagName: "style",
-                properties: {},
-                children: [
-                  {
-                    type: "raw",
-                    value: `
-.joe_javaOnlineDiv {
-  box-shadow: none;
-  margin: 0!important;
-  top: 0!important;
-  width: 100%!important;
-  height: calc(100% - 5px) !important;
-  border: none !important;
-}
-`,
-                  },
-                ],
-              },
-            ],
+            children: [...codes],
           },
           {
             type: "element",

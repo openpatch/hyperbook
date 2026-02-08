@@ -3,10 +3,16 @@
   border-radius: 8px;
   background: #1e1e1e;
   overflow: hidden;
-}
 
-.directive-onlineide iframe {
-  width: 100%;
+  .jo_iconButton.img_whole-window-dark {
+    display: none;
+  }
+
+  .joe_javaOnlineDiv {
+    box-shadow: none;
+    border: none;
+    border-radius: 0;
+  }
 }
 
 .directive-onlineide .menu {
@@ -16,6 +22,8 @@
 
 .directive-onlineide .menu button {
   flex: 1;
+  font-size: 0.9rem;
+  padding: 0.4rem 0.2rem;
   background: var(--color-nav);
   color: var(--color-text);
   border: none;
