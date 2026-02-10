@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.84.1
+
+### Patch Changes
+
+- [`0d029e3`](https://github.com/openpatch/hyperbook/commit/0d029e3d4287e7054c25f40d42aadb4eb308f740) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix bug related to the new cloud feature.
+
 ## 0.84.0
 
 ### Minor Changes
