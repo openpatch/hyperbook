@@ -1,0 +1,71 @@
+<nav class="breadcrumb">
+  <a class="breadcrumb-item" href="/">Hyperbooks</a>
+  <span class="breadcrumb-sep">›</span>
+  <a class="breadcrumb-item" href="/users">Users</a>
+  <span class="breadcrumb-sep">›</span>
+  <span class="breadcrumb-current">{{user.username}}</span>
+</nav>
+
+{{#if error}}
+<p class="error">{{error}}</p>
+{{/if}}
+{{#if success}}
+<p class="success">{{success}}</p>
+{{/if}}
+
+<form method="POST" action="/users/{{user.id}}/permissions">
+  <div class="content-area">
+    <h3 style="margin-bottom: 16px;">Global Permissions</h3>
+    <label class="perm-checkbox">
+      <input type="checkbox" name="hyperbooks:create" value="1" {{#if canCreate}}checked{{/if}} />
+      Create Hyperbooks
+    </label>
+  </div>
+
+  {{#if hyperbookPerms.length}}
+  <div class="content-area" style="margin-top: 16px;">
+    <h3 style="margin-bottom: 16px;">Hyperbook Permissions</h3>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Hyperbook</th>
+          <th>Read</th>
+          <th>Update</th>
+          <th>Delete</th>
+          <th>Groups Create</th>
+          <th>Groups Update</th>
+          <th>Groups Delete</th>
+          <th>Students Create</th>
+          <th>Students Update</th>
+          <th>Students Delete</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each hyperbookPerms}}
+        <tr>
+          <td><strong>{{this.name}}</strong><br><small><code>{{this.slug}}</code></small></td>
+          <td><input type="checkbox" name="hyperbook:{{this.id}}:read" value="1" {{#if this.read}}checked{{/if}} /></td>
+          <td><input type="checkbox" name="hyperbook:{{this.id}}:update" value="1" {{#if this.update}}checked{{/if}} /></td>
+          <td><input type="checkbox" name="hyperbook:{{this.id}}:delete" value="1" {{#if this.delete}}checked{{/if}} /></td>
+          <td><input type="checkbox" name="hyperbook:{{this.id}}:groups:create" value="1" {{#if this.groupsCreate}}checked{{/if}} /></td>
+          <td><input type="checkbox" name="hyperbook:{{this.id}}:groups:update" value="1" {{#if this.groupsUpdate}}checked{{/if}} /></td>
+          <td><input type="checkbox" name="hyperbook:{{this.id}}:groups:delete" value="1" {{#if this.groupsDelete}}checked{{/if}} /></td>
+          <td><input type="checkbox" name="hyperbook:{{this.id}}:students:create" value="1" {{#if this.studentsCreate}}checked{{/if}} /></td>
+          <td><input type="checkbox" name="hyperbook:{{this.id}}:students:update" value="1" {{#if this.studentsUpdate}}checked{{/if}} /></td>
+          <td><input type="checkbox" name="hyperbook:{{this.id}}:students:delete" value="1" {{#if this.studentsDelete}}checked{{/if}} /></td>
+        </tr>
+        {{/each}}
+      </tbody>
+    </table>
+  </div>
+  {{else}}
+  <div class="content-area" style="margin-top: 16px;">
+    <p class="empty">No hyperbooks exist yet. Create one first.</p>
+  </div>
+  {{/if}}
+
+  <div class="toolbar" style="margin-top: 16px;">
+    <button type="submit" class="btn btn-primary">Save Permissions</button>
+    <a href="/users" class="btn btn-secondary">Cancel</a>
+  </div>
+</form>

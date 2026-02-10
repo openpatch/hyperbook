@@ -40,6 +40,8 @@ can and part wise must set (indicated by a \*).
 | llms               | When set to true, generates an llms.txt file that combines all markdown files in order. The file includes the book name and version in a header format.         |
 | trailingSlash      | Outputs all files into ther own folders and produces only index.html files.                                                                                     |
 | importExport       | Allows to import and export the state of the Hyperbook as a file. Buttons for importing and exporting will be at the bottom of the page.                        |
+| cloud.url          | URL of your [Hyperbook Cloud](/configuration/cloud) server. Enables student login and cloud sync.                                                               |
+| cloud.id           | The hyperbook slug/ID on the cloud server. Must match the slug configured in the cloud admin interface.                                                         |
 
 Here is an example configuration:
 
@@ -64,6 +66,10 @@ Here is an example configuration:
   },
   "colors": {
     "brand": "#FF0000"
+  },
+  "cloud": {
+    "url": "https://cloud.example.com",
+    "id": "my-hyperbook"
   },
   "elements": {
     "bookmarks": false

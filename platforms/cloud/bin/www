@@ -1,0 +1,114 @@
+#!/usr/bin/env node
+
+/**
+ * Module dependencies.
+ */
+
+require('dotenv').config();
+
+var app = require('../app');
+var debug = require('debug')('cloud:server');
+var http = require('http');
+var db = require('../lib/db');
+
+/**
+ * Get port from environment and store in Express.
+ */
+
+var port = normalizePort(process.env.PORT || '3001');
+app.set('port', port);
+
+/**
+ * Create HTTP server.
+ */
+
+var server = http.createServer(app);
+
+/**
+ * Start the server after initializing the database.
+ */
+
+async function start() {
+  try {
+    console.log('🚀 Starting Hyperbook Cloud...');
+
+    await db.initializeDatabase();
+
+    var adminUsername = process.env.ADMIN_USERNAME || 'admin';
+    var adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
+    await db.ensureAdminUser(adminUsername, adminPassword);
+
+    server.listen(port);
+    server.on('error', onError);
+    server.on('listening', function() {
+      console.log('✓ Server running on port ' + port);
+      console.log('✓ Admin interface: http://localhost:' + port + '/');
+      console.log('✓ API endpoint: http://localhost:' + port + '/api');
+
+      if (process.env.NODE_ENV !== 'production') {
+        console.log(
+          '\n⚠️  Default admin credentials:\n   Username: ' +
+            adminUsername +
+            '\n   Password: ' +
+            adminPassword
+        );
+        console.log('   Please change these in production!\n');
+      }
+
+      debug('Listening on ' + port);
+    });
+  } catch (error) {
+    console.error('Failed to start server:', error);
+    process.exit(1);
+  }
+}
+
+start();
+
+/**
+ * Normalize a port into a number, string, or false.
+ */
+
+function normalizePort(val) {
+  var port = parseInt(val, 10);
+
+  if (isNaN(port)) {
+    // named pipe
+    return val;
+  }
+
+  if (port >= 0) {
+    // port number
+    return port;
+  }
+
+  return false;
+}
+
+/**
+ * Event listener for HTTP server "error" event.
+ */
+
+function onError(error) {
+  if (error.syscall !== 'listen') {
+    throw error;
+  }
+
+  var bind = typeof port === 'string'
+    ? 'Pipe ' + port
+    : 'Port ' + port;
+
+  // handle specific listen errors with friendly messages
+  switch (error.code) {
+    case 'EACCES':
+      console.error(bind + ' requires elevated privileges');
+      process.exit(1);
+      break;
+    case 'EADDRINUSE':
+      console.error(bind + ' is already in use');
+      process.exit(1);
+      break;
+    default:
+      throw error;
+  }
+}

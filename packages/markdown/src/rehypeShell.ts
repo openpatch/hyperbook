@@ -1070,6 +1070,218 @@ const makeHeaderElements = (ctx: HyperbookContext): ElementContent[] => {
     children: [],
   });
 
+  if (config.cloud) {
+    elements.push({
+      type: "element",
+      tagName: "button",
+      properties: {
+        id: "user-toggle",
+        class: "icon-button",
+        title: "User",
+        onclick: "hyperbook.userToggle()",
+      },
+      children: [
+        {
+          type: "element",
+          tagName: "div",
+          properties: {
+            class: "user-icon",
+          },
+          children: [],
+        },
+      ],
+    });
+
+    // Add user drawer (popup)
+    elements.push({
+      type: "element",
+      tagName: "side-drawer",
+      properties: {
+        id: "user-drawer",
+        right: true,
+      },
+      children: [
+        {
+          type: "element",
+          tagName: "div",
+          properties: {
+            class: "user-drawer-content",
+          },
+          children: [
+            {
+              type: "element",
+              tagName: "div",
+              properties: {
+                id: "user-login-form",
+                class: "user-form",
+              },
+              children: [
+                {
+                  type: "element",
+                  tagName: "h3",
+                  properties: {},
+                  children: [
+                    {
+                      type: "text",
+                      value: i18n.get("user-login-title"),
+                    },
+                  ],
+                },
+                {
+                  type: "element",
+                  tagName: "input",
+                  properties: {
+                    type: "text",
+                    id: "user-username",
+                    placeholder: i18n.get("user-username"),
+                  },
+                  children: [],
+                },
+                {
+                  type: "element",
+                  tagName: "input",
+                  properties: {
+                    type: "password",
+                    id: "user-password",
+                    placeholder: i18n.get("user-password"),
+                  },
+                  children: [],
+                },
+                {
+                  type: "element",
+                  tagName: "button",
+                  properties: {
+                    onclick: "hyperbook.doLogin()",
+                  },
+                  children: [
+                    {
+                      type: "text",
+                      value: i18n.get("user-login"),
+                    },
+                  ],
+                },
+                {
+                  type: "element",
+                  tagName: "div",
+                  properties: {
+                    id: "user-login-error",
+                    class: "user-error",
+                  },
+                  children: [],
+                },
+              ],
+            },
+            {
+              type: "element",
+              tagName: "div",
+              properties: {
+                id: "user-info",
+                class: "user-info hidden",
+              },
+              children: [
+                {
+                  type: "element",
+                  tagName: "h3",
+                  properties: {},
+                  children: [
+                    {
+                      type: "text",
+                      value: i18n.get("user-info-title"),
+                    },
+                  ],
+                },
+                {
+                  type: "element",
+                  tagName: "p",
+                  properties: {},
+                  children: [
+                    {
+                      type: "element",
+                      tagName: "strong",
+                      properties: {},
+                      children: [
+                        {
+                          type: "text",
+                          value: i18n.get("user-username") + ": ",
+                        },
+                      ],
+                    },
+                    {
+                      type: "element",
+                      tagName: "span",
+                      properties: {
+                        id: "user-display-name",
+                      },
+                      children: [],
+                    },
+                  ],
+                },
+                {
+                  type: "element",
+                  tagName: "p",
+                  properties: {},
+                  children: [
+                    {
+                      type: "element",
+                      tagName: "strong",
+                      properties: {},
+                      children: [
+                        {
+                          type: "text",
+                          value: i18n.get("user-status") + ": ",
+                        },
+                      ],
+                    },
+                    {
+                      type: "element",
+                      tagName: "span",
+                      properties: {
+                        id: "user-save-status",
+                      },
+                      children: [
+                        {
+                          type: "text",
+                          value: i18n.get("user-saved"),
+                        },
+                      ],
+                    },
+                  ],
+                },
+                {
+                  type: "element",
+                  tagName: "button",
+                  properties: {
+                    onclick: "hyperbookManualSave()",
+                  },
+                  children: [
+                    {
+                      type: "text",
+                      value: i18n.get("user-save"),
+                    },
+                  ],
+                },
+                {
+                  type: "element",
+                  tagName: "button",
+                  properties: {
+                    onclick: "hyperbook.doLogout()",
+                    class: "logout-btn",
+                  },
+                  children: [
+                    {
+                      type: "text",
+                      value: i18n.get("user-logout"),
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    });
+  }
+
   return [
     {
       type: "element",

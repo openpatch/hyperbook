@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>{{title}} — Hyperbook Cloud</title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+  </head>
+  <body>
+    <div class="main-grid">
+      <header>
+        <a class="branding" href="/">
+          <span class="name">Hyperbook Cloud</span>
+        </a>
+        {{#if username}}
+        <div class="header-actions">
+          {{#if isAdmin}}
+          <a href="/users" class="header-link">Users</a>
+          <span class="header-sep"></span>
+          {{/if}}
+          <span class="header-user">{{username}}</span>
+          <a href="/logout" class="header-link">Logout</a>
+        </div>
+        {{/if}}
+      </header>
+      <main>
+        <article>
+          {{{body}}}
+        </article>
+      </main>
+    </div>
+  </body>
+</html>

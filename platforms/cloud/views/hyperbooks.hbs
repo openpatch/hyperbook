@@ -1,0 +1,141 @@
+<nav class="breadcrumb">
+  <span class="breadcrumb-current">Hyperbooks</span>
+</nav>
+
+{{#if error}}
+<p class="error">{{error}}</p>
+{{/if}}
+{{#if success}}
+<p class="success">{{success}}</p>
+{{/if}}
+
+<div class="toolbar">
+  {{#if canCreate}}
+  <button class="btn btn-primary" onclick="document.getElementById('addModal').style.display='flex'">+ Add Hyperbook</button>
+  {{/if}}
+</div>
+
+<div class="content-area">
+  {{#if hyperbooks.length}}
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Slug</th>
+        <th>URL</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each hyperbooks}}
+      <tr class="clickable-row" onclick="window.location='/hyperbook/{{this.id}}'">
+        <td>
+          <strong>{{this.name}}</strong>
+          {{#if this.description}}<br><small>{{this.description}}</small>{{/if}}
+        </td>
+        <td><code>{{this.slug}}</code></td>
+        <td>
+          {{#if this.url}}
+          <a href="{{this.url}}" target="_blank" onclick="event.stopPropagation()">{{this.url}}</a>
+          {{else}}
+          —
+          {{/if}}
+        </td>
+        <td class="actions" onclick="event.stopPropagation()">
+          {{#if this.canUpdate}}
+          <button class="btn btn-sm" data-id="{{this.id}}" data-name="{{this.name}}" data-slug="{{this.slug}}" data-url="{{this.url}}" data-description="{{this.description}}" onclick="showEditModal(this)">Edit</button>
+          {{/if}}
+          {{#if this.canDelete}}
+          <form method="POST" action="/hyperbooks/{{this.id}}/delete" style="display:inline" onsubmit="return confirm('Delete hyperbook &quot;{{this.name}}&quot;? This will also delete all groups and students.')">
+            <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+          </form>
+          {{/if}}
+        </td>
+      </tr>
+      {{/each}}
+    </tbody>
+  </table>
+  {{else}}
+  <p class="empty">No hyperbooks yet. Add one to get started.</p>
+  {{/if}}
+</div>
+
+<!-- Add Hyperbook Modal -->
+<div id="addModal" class="modal" style="display:none">
+  <div class="modal-backdrop" onclick="this.parentElement.style.display='none'"></div>
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Add Hyperbook</h3>
+      <button class="modal-close" onclick="document.getElementById('addModal').style.display='none'">&times;</button>
+    </div>
+    <div class="modal-body">
+      <form method="POST" action="/hyperbooks">
+        <div class="form-group">
+          <label>Name</label>
+          <input type="text" name="name" required oninput="this.form.slug.value=this.value.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')" />
+        </div>
+        <div class="form-group">
+          <label>Slug</label>
+          <input type="text" name="slug" required />
+        </div>
+        <div class="form-group">
+          <label>URL</label>
+          <input type="url" name="url" placeholder="https://hyperbook.example.com" />
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea name="description"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Create</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Hyperbook Modal -->
+<div id="editModal" class="modal" style="display:none">
+  <div class="modal-backdrop" onclick="this.parentElement.style.display='none'"></div>
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Edit Hyperbook</h3>
+      <button class="modal-close" onclick="document.getElementById('editModal').style.display='none'">&times;</button>
+    </div>
+    <div class="modal-body">
+      <form method="POST" id="editForm">
+        <div class="form-group">
+          <label>Name</label>
+          <input type="text" name="name" id="editName" required />
+        </div>
+        <div class="form-group">
+          <label>Slug</label>
+          <input type="text" name="slug" id="editSlug" required />
+        </div>
+        <div class="form-group">
+          <label>URL</label>
+          <input type="url" name="url" id="editUrl" placeholder="https://hyperbook.example.com" />
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea name="description" id="editDesc"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Save</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+function showEditModal(btn) {
+  var id = btn.getAttribute('data-id');
+  var name = btn.getAttribute('data-name');
+  var slug = btn.getAttribute('data-slug');
+  var url = btn.getAttribute('data-url');
+  var description = btn.getAttribute('data-description');
+  document.getElementById('editForm').action = '/hyperbooks/' + id + '/update';
+  document.getElementById('editName').value = name || '';
+  document.getElementById('editSlug').value = slug || '';
+  document.getElementById('editUrl').value = url || '';
+  document.getElementById('editDesc').value = description || '';
+  document.getElementById('editModal').style.display = 'flex';
+}
+</script>

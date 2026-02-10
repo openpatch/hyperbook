@@ -1,0 +1,25 @@
+<div class="login-section">
+  <div class="login-card">
+    <h2>Login</h2>
+    {{#if error}}
+    <p class="error">{{error}}</p>
+    {{/if}}
+    {{#if success}}
+    <p class="success">{{success}}</p>
+    {{/if}}
+    <form method="POST" action="/login">
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" required autocomplete="username" />
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" required autocomplete="current-password" />
+      </div>
+      <button type="submit" class="btn btn-primary btn-full">Login</button>
+    </form>
+    <p style="text-align: center; margin-top: 16px;">
+      <a href="/forgot-password">Forgot password?</a>
+    </p>
+  </div>
+</div>

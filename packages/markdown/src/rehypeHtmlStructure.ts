@@ -564,6 +564,7 @@ window.Prism.manual = true;`,
                     type: "raw",
                     value: `
 HYPERBOOK_ASSETS = "${makeUrl("/", "assets")}"
+${ctx.config.cloud ? `HYPERBOOK_CLOUD = ${JSON.stringify(ctx.config.cloud).replace(/</g, '\\u003c')}` : ""}
 `,
                   },
                 ],
@@ -662,6 +663,19 @@ HYPERBOOK_ASSETS = "${makeUrl("/", "assets")}"
             properties: {},
             children: [
               ...originalChildren,
+              ...(ctx.config.cloud
+                ? [
+                    {
+                      type: "element",
+                      tagName: "script",
+                      properties: {
+                        src: makeUrl(["cloud.js"], "assets"),
+                        defer: true,
+                      },
+                      children: [],
+                    } as ElementContent,
+                  ]
+                : []),
               {
                 type: "element",
                 tagName: "script",

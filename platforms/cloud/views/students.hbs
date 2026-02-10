@@ -1,0 +1,177 @@
+<nav class="breadcrumb">
+  <a class="breadcrumb-item" href="/">Hyperbooks</a>
+  <span class="breadcrumb-sep">›</span>
+  <a class="breadcrumb-item" href="/hyperbook/{{hyperbook.id}}">{{hyperbook.name}}</a>
+  <span class="breadcrumb-sep">›</span>
+  <span class="breadcrumb-current">{{group.name}}</span>
+</nav>
+
+{{#if error}}
+<p class="error">{{error}}</p>
+{{/if}}
+{{#if success}}
+<p class="success">{{success}}</p>
+{{/if}}
+
+<div class="toolbar">
+  {{#if canCreateStudent}}
+  <button class="btn btn-primary" onclick="document.getElementById('addModal').style.display='flex'">+ Add Student</button>
+  <button class="btn btn-secondary" onclick="document.getElementById('bulkModal').style.display='flex'">Bulk Add</button>
+  <button class="btn btn-secondary" onclick="document.getElementById('generateModal').style.display='flex'">Generate Students</button>
+  {{/if}}
+  <a class="btn btn-secondary" href="/hyperbook/{{hyperbook.id}}/group/{{group.id}}/print" target="_blank">🖨 Print Cards</a>
+</div>
+
+<div class="content-area">
+  {{#if students.length}}
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Username</th>
+        <th>Created</th>
+        <th>Store Updated</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each students}}
+      <tr>
+        <td><strong>{{this.username}}</strong></td>
+        <td>{{this.created_at}}</td>
+        <td>{{#if this.store_updated_at}}{{this.store_updated_at}}{{else}}—{{/if}}</td>
+        <td class="actions">
+          {{#if ../hyperbook.url}}
+          <form method="POST" action="/impersonate/{{this.id}}" style="display:inline">
+            <input type="hidden" name="hyperbook_id" value="{{../hyperbook.id}}" />
+            <input type="hidden" name="group_id" value="{{../group.id}}" />
+            <button type="submit" class="btn btn-sm btn-impersonate">👁 Impersonate</button>
+          </form>
+          {{/if}}
+          {{#if ../canUpdateStudent}}
+          <button class="btn btn-sm" onclick="showPasswordModal('{{this.id}}', '{{this.username}}')">🔑 Password</button>
+          {{/if}}
+          {{#if ../canDeleteStudent}}
+          <form method="POST" action="/students/{{this.id}}/delete" style="display:inline" onsubmit="return confirm('Delete student &quot;{{this.username}}&quot;?')">
+            <input type="hidden" name="hyperbook_id" value="{{../hyperbook.id}}" />
+            <input type="hidden" name="group_id" value="{{../group.id}}" />
+            <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+          </form>
+          {{/if}}
+        </td>
+      </tr>
+      {{/each}}
+    </tbody>
+  </table>
+  {{else}}
+  <p class="empty">No students in this group yet.</p>
+  {{/if}}
+</div>
+
+<!-- Add Student Modal -->
+<div id="addModal" class="modal" style="display:none">
+  <div class="modal-backdrop" onclick="this.parentElement.style.display='none'"></div>
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Add Student</h3>
+      <button class="modal-close" onclick="document.getElementById('addModal').style.display='none'">&times;</button>
+    </div>
+    <div class="modal-body">
+      <form method="POST" action="/students">
+        <input type="hidden" name="hyperbook_id" value="{{hyperbook.id}}" />
+        <input type="hidden" name="group_id" value="{{group.id}}" />
+        <div class="form-group">
+          <label>Username</label>
+          <input type="text" name="username" required />
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="text" name="password" required />
+        </div>
+        <button type="submit" class="btn btn-primary">Create</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Bulk Add Modal -->
+<div id="bulkModal" class="modal" style="display:none">
+  <div class="modal-backdrop" onclick="this.parentElement.style.display='none'"></div>
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Bulk Add Students</h3>
+      <button class="modal-close" onclick="document.getElementById('bulkModal').style.display='none'">&times;</button>
+    </div>
+    <div class="modal-body">
+      <form method="POST" action="/students/bulk">
+        <input type="hidden" name="hyperbook_id" value="{{hyperbook.id}}" />
+        <input type="hidden" name="group_id" value="{{group.id}}" />
+        <p class="hint">One student per line: <code>username,password</code></p>
+        <div class="form-group">
+          <textarea name="csv" rows="8" placeholder="student1,pass123&#10;student2,pass456" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary btn-full">Import CSV</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Generate Students Modal -->
+<div id="generateModal" class="modal" style="display:none">
+  <div class="modal-backdrop" onclick="this.parentElement.style.display='none'"></div>
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Generate Student Accounts</h3>
+      <button class="modal-close" onclick="document.getElementById('generateModal').style.display='none'">&times;</button>
+    </div>
+    <div class="modal-body">
+      <form method="POST" action="/students/generate">
+        <input type="hidden" name="hyperbook_id" value="{{hyperbook.id}}" />
+        <input type="hidden" name="group_id" value="{{group.id}}" />
+        <div class="form-group">
+          <label>Number of students</label>
+          <input type="number" name="count" min="1" max="200" value="10" required />
+        </div>
+        <div class="form-group">
+          <label>Username prefix</label>
+          <input type="text" name="prefix" value="student" required />
+          <p class="hint">Accounts will be named <code>prefix01</code>, <code>prefix02</code>, etc.</p>
+        </div>
+        <div class="form-group">
+          <label>Password length</label>
+          <input type="number" name="password_length" min="4" max="32" value="8" required />
+        </div>
+        <button type="submit" class="btn btn-primary btn-full">Generate</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Change Password Modal -->
+<div id="passwordModal" class="modal" style="display:none">
+  <div class="modal-backdrop" onclick="this.parentElement.style.display='none'"></div>
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 id="pwModalTitle">Change Password</h3>
+      <button class="modal-close" onclick="document.getElementById('passwordModal').style.display='none'">&times;</button>
+    </div>
+    <div class="modal-body">
+      <form method="POST" id="pwForm">
+        <input type="hidden" name="hyperbook_id" value="{{hyperbook.id}}" />
+        <input type="hidden" name="group_id" value="{{group.id}}" />
+        <div class="form-group">
+          <label>New Password</label>
+          <input type="text" name="password" required />
+        </div>
+        <button type="submit" class="btn btn-primary">Update</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+function showPasswordModal(id, username) {
+  document.getElementById('pwModalTitle').textContent = 'Change Password: ' + username;
+  document.getElementById('pwForm').action = '/students/' + id + '/password';
+  document.getElementById('passwordModal').style.display = 'flex';
+}
+</script>

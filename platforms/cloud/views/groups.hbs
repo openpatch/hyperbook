@@ -1,0 +1,116 @@
+<nav class="breadcrumb">
+  <a class="breadcrumb-item" href="/">Hyperbooks</a>
+  <span class="breadcrumb-sep">›</span>
+  <span class="breadcrumb-current">{{hyperbook.name}}</span>
+</nav>
+
+{{#if error}}
+<p class="error">{{error}}</p>
+{{/if}}
+{{#if success}}
+<p class="success">{{success}}</p>
+{{/if}}
+
+<div class="toolbar">
+  {{#if canCreateGroup}}
+  <button class="btn btn-primary" onclick="document.getElementById('addModal').style.display='flex'">+ Add Group</button>
+  {{/if}}
+</div>
+
+<div class="content-area">
+  {{#if groups.length}}
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Description</th>
+        <th>Students</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each groups}}
+      <tr class="clickable-row" onclick="window.location='/hyperbook/{{../hyperbook.id}}/group/{{this.id}}'">
+        <td><strong>{{this.name}}</strong></td>
+        <td>{{#if this.description}}{{this.description}}{{else}}—{{/if}}</td>
+        <td>{{this.student_count}}</td>
+        <td class="actions" onclick="event.stopPropagation()">
+          {{#if ../canUpdateGroup}}
+          <button class="btn btn-sm" data-id="{{this.id}}" data-name="{{this.name}}" data-description="{{this.description}}" onclick="showEditModal(this)">Edit</button>
+          {{/if}}
+          {{#if ../canDeleteGroup}}
+          <form method="POST" action="/groups/{{this.id}}/delete" style="display:inline" onsubmit="return confirm('Delete group &quot;{{this.name}}&quot;? This will also delete all students in this group.')">
+            <input type="hidden" name="hyperbook_id" value="{{../hyperbook.id}}" />
+            <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+          </form>
+          {{/if}}
+        </td>
+      </tr>
+      {{/each}}
+    </tbody>
+  </table>
+  {{else}}
+  <p class="empty">No groups yet. Add one to organize students.</p>
+  {{/if}}
+</div>
+
+<!-- Add Group Modal -->
+<div id="addModal" class="modal" style="display:none">
+  <div class="modal-backdrop" onclick="this.parentElement.style.display='none'"></div>
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Add Group</h3>
+      <button class="modal-close" onclick="document.getElementById('addModal').style.display='none'">&times;</button>
+    </div>
+    <div class="modal-body">
+      <form method="POST" action="/hyperbook/{{hyperbook.id}}/groups">
+        <div class="form-group">
+          <label>Name</label>
+          <input type="text" name="name" required />
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea name="description"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Create</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Group Modal -->
+<div id="editModal" class="modal" style="display:none">
+  <div class="modal-backdrop" onclick="this.parentElement.style.display='none'"></div>
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Edit Group</h3>
+      <button class="modal-close" onclick="document.getElementById('editModal').style.display='none'">&times;</button>
+    </div>
+    <div class="modal-body">
+      <form method="POST" id="editForm">
+        <input type="hidden" name="hyperbook_id" value="{{hyperbook.id}}" />
+        <div class="form-group">
+          <label>Name</label>
+          <input type="text" name="name" id="editName" required />
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea name="description" id="editDesc"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Save</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+function showEditModal(btn) {
+  var id = btn.getAttribute('data-id');
+  var name = btn.getAttribute('data-name');
+  var description = btn.getAttribute('data-description');
+  document.getElementById('editForm').action = '/groups/' + id + '/update';
+  document.getElementById('editName').value = name || '';
+  document.getElementById('editDesc').value = description || '';
+  document.getElementById('editModal').style.display = 'flex';
+}
+</script>

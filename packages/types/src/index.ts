@@ -163,6 +163,10 @@ export type HyperbookJson = {
         label: string;
       };
   links?: Link[];
+  cloud?: {
+    url: string;
+    id: string;
+  };
   elements?: {
     bookmarks?: false | ElementConfig;
     code?: ElementConfig & {

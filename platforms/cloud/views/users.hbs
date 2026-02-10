@@ -1,0 +1,140 @@
+<nav class="breadcrumb">
+  <a class="breadcrumb-item" href="/">Hyperbooks</a>
+  <span class="breadcrumb-sep">›</span>
+  <span class="breadcrumb-current">Users</span>
+</nav>
+
+{{#if error}}
+<p class="error">{{error}}</p>
+{{/if}}
+{{#if success}}
+<p class="success">{{success}}</p>
+{{/if}}
+
+<div class="toolbar">
+  <button class="btn btn-primary" onclick="document.getElementById('addModal').style.display='flex'">+ Add User</button>
+</div>
+
+<div class="content-area">
+  {{#if users.length}}
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Username</th>
+        <th>Email</th>
+        <th>Created</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each users}}
+      <tr>
+        <td><strong>{{this.username}}</strong></td>
+        <td>{{#if this.email}}{{this.email}}{{else}}—{{/if}}</td>
+        <td>{{this.created_at}}</td>
+        <td class="actions">
+          <a class="btn btn-sm" href="/users/{{this.id}}/permissions">🔐 Permissions</a>
+          <button class="btn btn-sm" data-id="{{this.id}}" data-username="{{this.username}}" data-email="{{this.email}}" onclick="showEditModal(this)">Edit</button>
+          <button class="btn btn-sm" onclick="showPasswordModal('{{this.id}}', '{{this.username}}')">🔑 Password</button>
+          <form method="POST" action="/users/{{this.id}}/delete" style="display:inline" onsubmit="return confirm('Delete user &quot;{{this.username}}&quot;? This will also remove all their permissions.')">
+            <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+          </form>
+        </td>
+      </tr>
+      {{/each}}
+    </tbody>
+  </table>
+  {{else}}
+  <p class="empty">No users yet. Add a teacher to get started.</p>
+  {{/if}}
+</div>
+
+<!-- Add User Modal -->
+<div id="addModal" class="modal" style="display:none">
+  <div class="modal-backdrop" onclick="this.parentElement.style.display='none'"></div>
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Add User</h3>
+      <button class="modal-close" onclick="document.getElementById('addModal').style.display='none'">&times;</button>
+    </div>
+    <div class="modal-body">
+      <form method="POST" action="/users">
+        <div class="form-group">
+          <label>Username</label>
+          <input type="text" name="username" required />
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" name="email" placeholder="teacher@example.com" />
+          <p class="hint">Used for password reset emails</p>
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" name="password" required minlength="6" />
+        </div>
+        <button type="submit" class="btn btn-primary">Create</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Edit User Modal -->
+<div id="editModal" class="modal" style="display:none">
+  <div class="modal-backdrop" onclick="this.parentElement.style.display='none'"></div>
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Edit User</h3>
+      <button class="modal-close" onclick="document.getElementById('editModal').style.display='none'">&times;</button>
+    </div>
+    <div class="modal-body">
+      <form method="POST" id="editForm">
+        <div class="form-group">
+          <label>Username</label>
+          <input type="text" name="username" id="editUsername" required />
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" name="email" id="editEmail" placeholder="teacher@example.com" />
+        </div>
+        <button type="submit" class="btn btn-primary">Save</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Change Password Modal -->
+<div id="passwordModal" class="modal" style="display:none">
+  <div class="modal-backdrop" onclick="this.parentElement.style.display='none'"></div>
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 id="pwModalTitle">Change Password</h3>
+      <button class="modal-close" onclick="document.getElementById('passwordModal').style.display='none'">&times;</button>
+    </div>
+    <div class="modal-body">
+      <form method="POST" id="pwForm">
+        <div class="form-group">
+          <label>New Password</label>
+          <input type="password" name="password" required minlength="6" />
+        </div>
+        <button type="submit" class="btn btn-primary">Update</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+function showEditModal(btn) {
+  var id = btn.getAttribute('data-id');
+  var username = btn.getAttribute('data-username');
+  var email = btn.getAttribute('data-email');
+  document.getElementById('editForm').action = '/users/' + id + '/update';
+  document.getElementById('editUsername').value = username || '';
+  document.getElementById('editEmail').value = email || '';
+  document.getElementById('editModal').style.display = 'flex';
+}
+function showPasswordModal(id, username) {
+  document.getElementById('pwModalTitle').textContent = 'Change Password: ' + username;
+  document.getElementById('pwForm').action = '/users/' + id + '/password';
+  document.getElementById('passwordModal').style.display = 'flex';
+}
+</script>

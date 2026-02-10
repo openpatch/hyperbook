@@ -10,4 +10,5 @@ ignoredBuiltDependencies:
 onlyBuiltDependencies:
   - '@parcel/watcher'
   - '@vscode/vsce-sign'
+  - better-sqlite3
   - sharp

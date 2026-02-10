@@ -38,6 +38,19 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.84.0
+
+::::tabs
+
+:::tab{title="Improved :+1:" id="improved"}
+
+- Add hyperbook cloud support for managing students data in a central place.
+- See the documentation for more information: [Hyperbook Cloud](/configuration/cloud)  
+
+:::
+
+::::
+
 ## v0.83.0
 
 ::::tabs

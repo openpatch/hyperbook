@@ -41,6 +41,8 @@ von Optionen, die du definieren kannst. Optionen mit einem "\*" müssen gesetzt 
 | llms               | Wenn auf true gesetzt, wird eine llms.txt-Datei generiert, die alle Markdown-Dateien in Reihenfolge kombiniert. Die Datei enthält den Buchnamen und die Version im Header-Format.              |
 | trailingSlash      | Exportiert alle Datei in eigene Verzeichnisse und erzeugt nur index.html Dateien.                                                                                                               |
 | importExport       | Ermöglicht das Importieren und Exportieren des Zustands des Hyperbooks als Datei. Schaltflächen zum Importieren und Exportieren befinden sich am unteren Rand der Seite.                        |
+| cloud.url          | URL deines [Hyperbook Cloud](/configuration/cloud)-Servers. Aktiviert den Schüler-Login und die Cloud-Synchronisierung.                                                                         |
+| cloud.id           | Der Hyperbook-Slug/ID auf dem Cloud-Server. Muss mit dem Slug übereinstimmen, der in der Cloud-Admin-Oberfläche konfiguriert ist.                                                               |
 
 Hier ist eine Beispielkonfiguration:
 
@@ -62,6 +64,10 @@ Hier ist eine Beispielkonfiguration:
   "repo": "https://github.com/mikebarkmin/hyperbook-github-pages/edit/main",
   "colors": {
     "brand": "#FF0000"
+  },
+  "cloud": {
+    "url": "https://cloud.example.com",
+    "id": "my-hyperbook"
   },
   "elements": {
     "bookmarks": false

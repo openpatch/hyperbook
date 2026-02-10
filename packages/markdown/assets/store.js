@@ -9,7 +9,7 @@ store.version(2).stores({
             mouseX,
             mouseY,
             scrollX,
-            scorllY,
+            scrollY,
             windowWidth,
             windowHeight
   `,
@@ -32,14 +32,141 @@ store.version(2).stores({
   multievent: `id,state`,
   typst: `id,code`,
 });
-var sqlIdeDB = new Dexie("SQL-IDE");
-sqlIdeDB.version(1).stores({
-  scripts: `scriptId,script`,
-});
-var learnJDB = new Dexie("LearnJ");
-learnJDB.version(1).stores({
-  scripts: `scriptId,script`,
-});
+
+/**
+ * Read all data from an external IndexedDB database using the raw API.
+ * Returns a Dexie-export-compatible object, or null if the DB doesn't exist.
+ */
+function exportExternalDB(dbName) {
+  return new Promise((resolve) => {
+    const request = indexedDB.open(dbName);
+    request.onerror = () => resolve(null);
+    request.onsuccess = (event) => {
+      const db = event.target.result;
+      const storeNames = Array.from(db.objectStoreNames);
+      if (storeNames.length === 0) {
+        db.close();
+        resolve(null);
+        return;
+      }
+      const result = {
+        formatName: "dexie",
+        formatVersion: 1,
+        data: {
+          databaseName: dbName,
+          databaseVersion: db.version,
+          tables: [],
+        },
+      };
+      const tx = db.transaction(storeNames, "readonly");
+      let pending = storeNames.length;
+      storeNames.forEach((name) => {
+        const objectStore = tx.objectStore(name);
+        const tableInfo = {
+          name: name,
+          schema: objectStore.keyPath ? `${objectStore.keyPath}` : "++id",
+          rowCount: 0,
+          rows: [],
+        };
+        const cursorReq = objectStore.openCursor();
+        cursorReq.onsuccess = (e) => {
+          const cursor = e.target.result;
+          if (cursor) {
+            tableInfo.rows.push(cursor.value);
+            cursor.continue();
+          } else {
+            tableInfo.rowCount = tableInfo.rows.length;
+            result.data.tables.push(tableInfo);
+            pending--;
+            if (pending === 0) {
+              db.close();
+              resolve(result);
+            }
+          }
+        };
+        cursorReq.onerror = () => {
+          pending--;
+          if (pending === 0) {
+            db.close();
+            resolve(result);
+          }
+        };
+      });
+    };
+  });
+}
+
+/**
+ * Import data into an external IndexedDB database using the raw API.
+ * Accepts a Dexie-export-compatible object. Clears existing data before importing.
+ */
+function importExternalDB(dbName, exportData) {
+  return new Promise((resolve, reject) => {
+    const tables = exportData?.data?.tables;
+    if (!tables || tables.length === 0) { resolve(); return; }
+
+    // Determine the version the external tool uses (keep it in sync)
+    const request = indexedDB.open(dbName);
+    request.onerror = () => reject(request.error);
+
+    request.onupgradeneeded = (event) => {
+      // DB didn't exist yet — create the object stores from the export data
+      const db = event.target.result;
+      tables.forEach((table) => {
+        if (!db.objectStoreNames.contains(table.name)) {
+          const keyPath = table.schema && !table.schema.startsWith('++')
+            ? table.schema.split(',')[0].trim()
+            : null;
+          db.createObjectStore(table.name, keyPath ? { keyPath } : { autoIncrement: true });
+        }
+      });
+    };
+
+    request.onsuccess = (event) => {
+      const db = event.target.result;
+      const storeNames = tables
+        .map((t) => t.name)
+        .filter((n) => db.objectStoreNames.contains(n));
+      if (storeNames.length === 0) { db.close(); resolve(); return; }
+
+      const tx = db.transaction(storeNames, "readwrite");
+      // Clear then re-populate each store
+      storeNames.forEach((name) => {
+        const objectStore = tx.objectStore(name);
+        objectStore.clear();
+        const table = tables.find((t) => t.name === name);
+        if (table && table.rows) {
+          table.rows.forEach((row) => objectStore.put(row));
+        }
+      });
+      tx.oncomplete = () => { db.close(); resolve(); };
+      tx.onerror = () => { db.close(); reject(tx.error); };
+    };
+  });
+}
+
+/**
+ * Clear all tables in an external IndexedDB database using the raw API.
+ */
+function clearExternalDB(dbName) {
+  return new Promise((resolve) => {
+    const request = indexedDB.open(dbName);
+    request.onerror = () => resolve();
+    request.onsuccess = (event) => {
+      const db = event.target.result;
+      const storeNames = Array.from(db.objectStoreNames);
+      if (storeNames.length === 0) {
+        db.close();
+        resolve();
+        return;
+      }
+      const tx = db.transaction(storeNames, "readwrite");
+      storeNames.forEach((name) => tx.objectStore(name).clear());
+      tx.oncomplete = () => { db.close(); resolve(); };
+      tx.onerror = () => { db.close(); resolve(); };
+    };
+  });
+}
 
 const initStore = async () => {
   store.currentState.put({
@@ -67,21 +194,27 @@ const initStore = async () => {
       windowHeight: window.innerHeight,
     });
   });
+
+  // Initialize cloud integration if configured
+  if (window.hyperbook.cloud) {
+    await window.hyperbook.cloud.initializeStore(store);
+  }
 };
+
 initStore();
 
 async function hyperbookExport() {
   const hyperbook = await store.export({ prettyJson: true });
-  const sqlIde = await sqlIdeDB.export({ prettyJson: true });
-  const learnJ = await learnJDB.export({ prettyJson: true });
+  const sqlIde = await exportExternalDB('SQL-IDE');
+  const learnJ = await exportExternalDB('LearnJ');
 
   const data = {
     version: 1,
     origin: window.location.origin,
     data: {
       hyperbook: JSON.parse(await hyperbook.text()),
-      sqlIde: JSON.parse(await sqlIde.text()),
-      learnJ: JSON.parse(await learnJ.text()),
+      sqlIde: sqlIde || {},
+      learnJ: learnJ || {},
     },
   };
 
@@ -108,8 +241,8 @@ async function hyperbookReset() {
   }
 
   clearTable(store);
-  clearTable(learnJDB);
-  clearTable(sqlIdeDB);
+  await clearExternalDB('LearnJ');
+  await clearExternalDB('SQL-IDE');
 
   alert(i18n.get("store-reset-sucessful"));
   window.location.reload();
@@ -146,16 +279,14 @@ async function hyperbookImport() {
       const hyperbookBlob = new Blob([JSON.stringify(hyperbook)], {
         type: "application/json",
       });
-      const sqlIdeBlob = new Blob([JSON.stringify(sqlIde)], {
-        type: "application/json",
-      });
-      const learnJBlob = new Blob([JSON.stringify(learnJ)], {
-        type: "application/json",
-      });
 
       await store.import(hyperbookBlob, { clearTablesBeforeImport: true });
-      await sqlIdeDB.import(sqlIdeBlob, { clearTablesBeforeImport: true });
-      await learnJDB.import(learnJBlob, { clearTablesBeforeImport: true });
+      if (sqlIde) {
+        await importExternalDB('SQL-IDE', sqlIde);
+      }
+      if (learnJ) {
+        await importExternalDB('LearnJ', learnJ);
+      }
 
       alert(i18n.get("store-import-sucessful"));
       window.location.reload();
