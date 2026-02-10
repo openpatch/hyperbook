@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.84.2
+
+### Patch Changes
+
+- [`74f520c`](https://github.com/openpatch/hyperbook/commit/74f520c92b5fda0eb72b536c7ba91b52bf0b97e9) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix url path for relative links in tiles element.
+
 ## 0.84.1
 
 ### Patch Changes
