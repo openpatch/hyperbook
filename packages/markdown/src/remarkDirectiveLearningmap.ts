@@ -53,7 +53,7 @@ export default (ctx: HyperbookContext) => () => {
           if (node.resources) {
             node.resources = node.resources.map((res: any) => ({
               ...res,
-              url: ctx.makeUrl(res.url, "public"),
+              url: ctx.makeUrl(res.url, "public", ctx.navigation.current || undefined),
             }));
           }
         });

@@ -52,7 +52,7 @@ export default (ctx: HyperbookContext) => () => {
                 tagName: "a",
                 properties: {
                   class: "tile-title",
-                  href: href ? ctx.makeUrl(href, "public") : undefined,
+                  href: href ? ctx.makeUrl(href, "public", ctx.navigation.current || undefined) : undefined,
                 },
                 children: [
                   {
