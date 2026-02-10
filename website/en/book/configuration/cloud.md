@@ -1,9 +1,15 @@
 ---
-name: Cloud
+name: Cloud [Alpha]
 index: 3
 ---
 
-# Cloud
+# Cloud [Alpha] 
+
+:::alert{warn}
+
+This feature is still in alpha. It may be buggy and subject to change. Please test it out and share your feedback with us!
+
+:::
 
 Hyperbook Cloud is a self-hosted student management platform that enables user login, progress tracking, and cloud synchronization for your hyperbooks.
 

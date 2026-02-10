@@ -1,10 +1,16 @@
 ---
-name: Cloud
+name: Cloud [Alpha]
 index: 3
 lang: de
 ---
 
-# Cloud
+# Cloud [Alpha] 
+
+:::alert{warn}
+
+Diese Funktion befindet sich noch in der Alpha-Phase. Sie ist möglicherweise fehlerhaft und unterliegt Änderungen. Bitte teste sie und teile dein Feedback mit uns!
+
+:::
 
 Hyperbook Cloud ist eine selbst gehostete Plattform zur Schülerverwaltung, die Benutzeranmeldung, Fortschrittsverfolgung und Cloud-Synchronisierung für deine Hyperbooks ermöglicht.
 
