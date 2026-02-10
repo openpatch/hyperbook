@@ -15,12 +15,16 @@ var app = express();
 
 var PORT = process.env.PORT || 3001;
 
+var corsOrigins = [process.env.BASE_URL];
+
 app.use(cors({
   origin: async function(origin, callback) {
     if (!origin) return callback(null, true);
 
     var selfOrigin = 'http://localhost:' + PORT;
     if (origin === selfOrigin) return callback(null, true);
+
+    if (corsOrigins.includes(origin)) return callback(null, true);
 
     try {
       var hyperbooks = await db.allAsync(

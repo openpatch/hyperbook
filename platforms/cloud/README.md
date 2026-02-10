@@ -45,7 +45,7 @@ cp .env.example .env
 | `SMTP_USER` | SMTP username | — |
 | `SMTP_PASS` | SMTP password | — |
 | `SMTP_FROM` | Sender email address | `noreply@example.com` |
-| `BASE_URL` | Public URL (used in password reset links) | auto-detected |
+| `BASE_URL` | Public URL (used in password reset links and for CORS) | required |
 
 ## Users & Permissions
 
