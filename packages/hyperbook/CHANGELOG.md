@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.83.0
+
+### Minor Changes
+
+- [`78a5ff3`](https://github.com/openpatch/hyperbook/commit/78a5ff37534742ee79f2f7422914d4a091a805f6) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Use local files for online-ide and for sql-ide.
+
 ## 0.82.0
 
 ### Minor Changes
