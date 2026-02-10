@@ -1,5 +1,11 @@
 # @hyperbook/markdown
 
+## 0.55.0
+
+### Minor Changes
+
+- [`4b64ec3`](https://github.com/openpatch/hyperbook/commit/4b64ec3be33fcda363e5cc724adcfadfc3c42649) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add hyperbook cloud support.
+
 ## 0.54.0
 
 ### Minor Changes
