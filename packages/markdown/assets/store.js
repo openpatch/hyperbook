@@ -194,11 +194,6 @@ const initStore = async () => {
       windowHeight: window.innerHeight,
     });
   });
-
-  // Initialize cloud integration if configured
-  if (window.hyperbook.cloud) {
-    await window.hyperbook.cloud.initializeStore(store);
-  }
 };
 
 initStore();

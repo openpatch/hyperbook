@@ -1078,7 +1078,7 @@ const makeHeaderElements = (ctx: HyperbookContext): ElementContent[] => {
         id: "user-toggle",
         class: "icon-button",
         title: "User",
-        onclick: "hyperbook.userToggle()",
+        onclick: "hyperbook.cloud.userToggle()",
       },
       children: [
         {
@@ -1151,7 +1151,7 @@ const makeHeaderElements = (ctx: HyperbookContext): ElementContent[] => {
                   type: "element",
                   tagName: "button",
                   properties: {
-                    onclick: "hyperbook.doLogin()",
+                    onclick: "hyperbook.cloud.login()",
                   },
                   children: [
                     {
@@ -1251,7 +1251,7 @@ const makeHeaderElements = (ctx: HyperbookContext): ElementContent[] => {
                   type: "element",
                   tagName: "button",
                   properties: {
-                    onclick: "hyperbookManualSave()",
+                    onclick: "hyperbook.cloud.save()",
                   },
                   children: [
                     {
@@ -1264,7 +1264,7 @@ const makeHeaderElements = (ctx: HyperbookContext): ElementContent[] => {
                   type: "element",
                   tagName: "button",
                   properties: {
-                    onclick: "hyperbook.doLogout()",
+                    onclick: "hyperbook.cloud.logout()",
                     class: "logout-btn",
                   },
                   children: [

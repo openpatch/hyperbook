@@ -488,25 +488,6 @@ var hyperbook = Object.assign(window.hyperbook || {}, (function () {
 
   observer.observe(document.body, { childList: true, subtree: true });
 
-  // User authentication functions (delegate to cloud.js IIFE)
-  const userToggle = () => {
-    if (window.hyperbook.cloud) {
-      window.hyperbook.cloud.userToggle();
-    }
-  };
-
-  const doLogin = async () => {
-    if (window.hyperbook.cloud) {
-      await window.hyperbook.cloud.doLogin();
-    }
-  };
-
-  const doLogout = () => {
-    if (window.hyperbook.cloud) {
-      window.hyperbook.cloud.doLogout();
-    }
-  };
-
   return {
     toggleLightbox,
     toggleBookmark,
@@ -520,9 +501,6 @@ var hyperbook = Object.assign(window.hyperbook || {}, (function () {
     shareClose,
     shareUpdatePreview,
     shareCopyUrl,
-    userToggle,
-    doLogin,
-    doLogout,
     init,
   };
 })());

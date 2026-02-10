@@ -4,6 +4,7 @@ window.hyperbook.cloud = (function () {
   const AUTH_TOKEN_KEY = "hyperbook_auth_token";
   const AUTH_USER_KEY = "hyperbook_auth_user";
   let isLoadingFromCloud = false;
+  let syncManager = null;
 
   // ===== Simple Mutex =====
   class Mutex {
@@ -557,7 +558,7 @@ window.hyperbook.cloud = (function () {
   /**
    * Initialize cloud integration
    */
-  async function initCloudIntegration() {
+  async function init() {
     // Load from cloud if authenticated
     if (HYPERBOOK_CLOUD && getAuthToken()) {
       try {
@@ -578,8 +579,6 @@ window.hyperbook.cloud = (function () {
       }
     }
 
-    // Initialize SyncManager for cloud syncing
-    let syncManager = null;
     if (HYPERBOOK_CLOUD && getAuthToken() && !isReadOnlyMode()) {
       syncManager = new SyncManager({
         debounceDelay: 2000,
@@ -599,119 +598,130 @@ window.hyperbook.cloud = (function () {
 
       // Start polling external DBs for changes
       syncManager.startPolling();
-
-      window.hyperbookManualSave = () => syncManager.manualSave();
     }
   }
 
   // ===== Cloud UI Functions =====
   const updateUserIconState = (state) => {
-    const icon = document.querySelector('.user-icon');
+    const icon = document.querySelector(".user-icon");
     if (!icon) return;
-    icon.setAttribute('data-state', state);
+    icon.setAttribute("data-state", state);
   };
 
   const updateUserUI = (user) => {
-    const loginForm = document.getElementById('user-login-form');
-    const userInfo = document.getElementById('user-info');
+    const loginForm = document.getElementById("user-login-form");
+    const userInfo = document.getElementById("user-info");
 
     if (!loginForm || !userInfo) return;
 
     if (user) {
-      loginForm.classList.add('hidden');
-      userInfo.classList.remove('hidden');
-      document.getElementById('user-display-name').textContent = user.username;
-      updateUserIconState('logged-in');
+      loginForm.classList.add("hidden");
+      userInfo.classList.remove("hidden");
+      document.getElementById("user-display-name").textContent = user.username;
+      updateUserIconState("logged-in");
     } else {
-      loginForm.classList.remove('hidden');
-      userInfo.classList.add('hidden');
-      const passwordField = document.getElementById('user-password');
-      if (passwordField) passwordField.value = '';
-      updateUserIconState('not-logged-in');
+      loginForm.classList.remove("hidden");
+      userInfo.classList.add("hidden");
+      const passwordField = document.getElementById("user-password");
+      if (passwordField) passwordField.value = "";
+      updateUserIconState("not-logged-in");
     }
   };
 
   const updateSaveStatus = (status, metadata = {}) => {
-    const statusEl = document.getElementById('user-save-status');
+    const statusEl = document.getElementById("user-save-status");
     if (!statusEl) return;
 
     statusEl.className = status;
 
-    if (status === 'unsaved') {
-      statusEl.textContent = i18n.get('user-unsaved', {}, 'Unsaved changes');
-      updateUserIconState('logged-in');
-    } else if (status === 'saving') {
-      statusEl.textContent = i18n.get('user-saving', {}, 'Saving...');
-      updateUserIconState('syncing');
-    } else if (status === 'saved') {
-      statusEl.textContent = i18n.get('user-saved', {}, 'Saved');
-      updateUserIconState('synced');
-    } else if (status === 'error') {
-      statusEl.textContent = i18n.get('user-save-error', {}, 'Save Error');
-      updateUserIconState('unsynced');
-    } else if (status === 'offline') {
-      statusEl.textContent = i18n.get('user-offline', {}, 'Offline');
-      updateUserIconState('unsynced');
-    } else if (status === 'offline-queued') {
-      statusEl.textContent = i18n.get('user-offline-queued', {}, 'Saved locally');
-      updateUserIconState('logged-in');
-    } else if (status === 'readonly') {
-      statusEl.textContent = i18n.get('user-readonly', {}, 'Read-Only Mode');
-      statusEl.className = 'readonly';
-      updateUserIconState('synced');
+    if (status === "unsaved") {
+      statusEl.textContent = i18n.get("user-unsaved", {}, "Unsaved changes");
+      updateUserIconState("logged-in");
+    } else if (status === "saving") {
+      statusEl.textContent = i18n.get("user-saving", {}, "Saving...");
+      updateUserIconState("syncing");
+    } else if (status === "saved") {
+      statusEl.textContent = i18n.get("user-saved", {}, "Saved");
+      updateUserIconState("synced");
+    } else if (status === "error") {
+      statusEl.textContent = i18n.get("user-save-error", {}, "Save Error");
+      updateUserIconState("unsynced");
+    } else if (status === "offline") {
+      statusEl.textContent = i18n.get("user-offline", {}, "Offline");
+      updateUserIconState("unsynced");
+    } else if (status === "offline-queued") {
+      statusEl.textContent = i18n.get(
+        "user-offline-queued",
+        {},
+        "Saved locally",
+      );
+      updateUserIconState("logged-in");
+    } else if (status === "readonly") {
+      statusEl.textContent = i18n.get("user-readonly", {}, "Read-Only Mode");
+      statusEl.className = "readonly";
+      updateUserIconState("synced");
     }
   };
 
   const showLogin = () => {
-    const drawer = document.getElementById('user-drawer');
-    if (drawer && !drawer.hasAttribute('open')) {
-      drawer.setAttribute('open', '');
+    const drawer = document.getElementById("user-drawer");
+    if (drawer && !drawer.hasAttribute("open")) {
+      drawer.setAttribute("open", "");
       updateUserUI(null);
     }
   };
 
   const userToggle = () => {
-    const drawer = document.getElementById('user-drawer');
+    const drawer = document.getElementById("user-drawer");
     if (drawer) {
-      drawer.toggleAttribute('open');
+      drawer.toggleAttribute("open");
       const user = getAuthUser();
       updateUserUI(user);
     }
   };
 
-  const doLogin = async () => {
-    const username = document.getElementById('user-username').value;
-    const password = document.getElementById('user-password').value;
-    const errorEl = document.getElementById('user-login-error');
+  const login = async () => {
+    const username = document.getElementById("user-username").value;
+    const password = document.getElementById("user-password").value;
+    const errorEl = document.getElementById("user-login-error");
 
     if (!username || !password) {
-      errorEl.textContent = i18n.get('user-login-required', {}, 'Username and password required');
+      errorEl.textContent = i18n.get(
+        "user-login-required",
+        {},
+        "Username and password required",
+      );
       return;
     }
 
     try {
       const user = await hyperbookLogin(username, password);
       updateUserUI(user);
-      errorEl.textContent = '';
+      errorEl.textContent = "";
     } catch (error) {
-      errorEl.textContent = error.message || i18n.get('user-login-failed', {}, 'Login failed');
+      errorEl.textContent =
+        error.message || i18n.get("user-login-failed", {}, "Login failed");
     }
   };
 
-  const doLogout = () => {
-    if (confirm(i18n.get('user-logout-confirm', {}, 'Are you sure you want to logout?'))) {
+  const logout = () => {
+    if (
+      confirm(
+        i18n.get("user-logout-confirm", {}, "Are you sure you want to logout?"),
+      )
+    ) {
       hyperbookLogout();
       updateUserUI(null);
 
-      const drawer = document.getElementById('user-drawer');
+      const drawer = document.getElementById("user-drawer");
       if (drawer) {
-        drawer.removeAttribute('open');
+        drawer.removeAttribute("open");
       }
     }
   };
 
   // Initialize user UI on load
-  document.addEventListener('DOMContentLoaded', () => {
+  document.addEventListener("DOMContentLoaded", () => {
     const user = getAuthUser();
     if (user) {
       updateUserUI(user);
@@ -719,34 +729,31 @@ window.hyperbook.cloud = (function () {
 
     // Show impersonation banner if in readonly mode
     if (isReadOnlyMode()) {
-      const banner = document.createElement('div');
-      banner.id = 'impersonation-banner';
+      const banner = document.createElement("div");
+      banner.id = "impersonation-banner";
       banner.innerHTML = `
-        <span>${i18n.get('user-impersonating', {}, 'Impersonating')}: <strong>${user ? user.username : ''}</strong> — ${i18n.get('user-readonly', {}, 'Read-Only Mode')}</span>
-        <a href="#" id="exit-impersonation">${i18n.get('user-exit-impersonation', {}, 'Exit Impersonation')}</a>
+        <span>${i18n.get("user-impersonating", {}, "Impersonating")}: <strong>${user ? user.username : ""}</strong> — ${i18n.get("user-readonly", {}, "Read-Only Mode")}</span>
+        <a href="#" id="exit-impersonation">${i18n.get("user-exit-impersonation", {}, "Exit Impersonation")}</a>
       `;
       document.body.prepend(banner);
 
-      document.getElementById('exit-impersonation').addEventListener('click', (e) => {
-        e.preventDefault();
-        hyperbookLogout();
-        window.close();
-        window.location.reload();
-      });
+      document
+        .getElementById("exit-impersonation")
+        .addEventListener("click", (e) => {
+          e.preventDefault();
+          hyperbookLogout();
+          window.close();
+          window.location.reload();
+        });
     }
   });
 
+  init();
+
   return {
-    login: hyperbookLogin,
-    logout: hyperbookLogout,
-    getAuthUser,
-    isReadOnlyMode,
-    initCloudIntegration,
-    updateUserUI,
-    updateSaveStatus,
-    showLogin,
+    save: () => syncManager?.manualSave(),
     userToggle,
-    doLogin,
-    doLogout,
-  }
+    login,
+    logout,
+  };
 })();

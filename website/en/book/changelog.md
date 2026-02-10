@@ -38,6 +38,19 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.84.1
+
+::::tabs
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+- Fix hyperbook cloud integration not working correctly.
+
+:::
+
+::::
+
+
 ## v0.84.0
 
 ::::tabs

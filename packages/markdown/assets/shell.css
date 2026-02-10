@@ -1096,6 +1096,7 @@ nav.toc li.level-3 {
 }
 
 #impersonation-banner {
+  font-family: hyperbook-body, sans-serif;
   position: fixed;
   top: 0;
   left: 0;
@@ -1108,7 +1109,7 @@ nav.toc li.level-3 {
   justify-content: center;
   align-items: center;
   gap: 16px;
-  font-size: 14px;
+  font-size: 1rem;
 }
 
 #impersonation-banner a {
