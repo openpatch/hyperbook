@@ -499,7 +499,7 @@ window.Prism = window.Prism || {};
 window.Prism.manual = true;</script><script src="/assets/prism/prism.js" defer></script><script src="/assets/prism/prism-typst.js" defer></script><link rel="stylesheet" href="/assets/prism/prism.css"><link rel="stylesheet" href="/assets/prism/prism-theme-github-dark.css" media="(prefers-color-scheme: dark)"><link rel="stylesheet" href="/assets/prism/prism-theme-github-light.css" media="(prefers-color-scheme: light)"><link rel="stylesheet" href="/assets/math/katex.min.css"><link rel="stylesheet" href="/assets/shell.css"><link rel="stylesheet" href="/assets/content.css"><link rel="stylesheet" href="/assets/code.css"><script>
 HYPERBOOK_ASSETS = "/assets/"
 
-</script><script type="module" src="/assets/side-drawer.js" async></script><script src="/assets/qrcode.js" async></script><link rel="stylesheet" href="/assets/directive-youtube/style.css"><link rel="stylesheet" href="/assets/directive-tabs/style.css"></head><body><div class="main-grid"><header><div class="mobile-nav"><button aria-label="Nav Toggle" class="toggle" onclick="hyperbook.navToggle()"><div class="bar1"></div><div class="bar2"></div><div class="bar3"></div></button><side-drawer id="nav-drawer"><div class="nav-drawer-content"><nav><ul></ul></nav><a class="author" href="https://hyperbook.openpatch.org">Powered by <b>Hyperbook</b></a></div></side-drawer></div><a class="branding" href="/book/"><div class="name">My Hyperbook</div></a><button id="share-button" class="icon-button" title="Share" onclick="hyperbook.shareOpen()"><div class="share-icon"></div></button><dark-mode-toggle id="dark-mode-toggle" appearence="switch" title="Toggle between Dark and Light Mode" permanent></dark-mode-toggle></header><div class="sidebar"><nav><ul></ul></nav><a class="author" href="https://hyperbook.openpatch.org">Powered by <b>Hyperbook</b></a></div><main><article>
+</script><script type="module" src="/assets/side-drawer.js" async></script><script src="/assets/qrcode.js" async></script><link rel="stylesheet" href="/assets/directive-tabs/style.css"><link rel="stylesheet" href="/assets/directive-youtube/style.css"></head><body><div class="main-grid"><header><div class="mobile-nav"><button aria-label="Nav Toggle" class="toggle" onclick="hyperbook.navToggle()"><div class="bar1"></div><div class="bar2"></div><div class="bar3"></div></button><side-drawer id="nav-drawer"><div class="nav-drawer-content"><nav><ul></ul></nav><a class="author" href="https://hyperbook.openpatch.org">Powered by <b>Hyperbook</b></a></div></side-drawer></div><a class="branding" href="/book/"><div class="name">My Hyperbook</div></a><button id="share-button" class="icon-button" title="Share" onclick="hyperbook.shareOpen()"><div class="share-icon"></div></button><dark-mode-toggle id="dark-mode-toggle" appearence="switch" title="Toggle between Dark and Light Mode" permanent></dark-mode-toggle></header><div class="sidebar"><nav><ul></ul></nav><a class="author" href="https://hyperbook.openpatch.org">Powered by <b>Hyperbook</b></a></div><main><article>
 <div class="hyperbook-markdown">
   <div class="floating-buttons-container" id="floating-buttons-container"><button id="toc-toggle" onclick="hyperbook.tocToggle()" title="Table of Contents"><div class="bar1"></div><div class="bar2"></div><div class="bar3"></div><div class="bar4"></div></button></div>
   <side-drawer id="toc-drawer" right>
@@ -512,40 +512,28 @@ HYPERBOOK_ASSETS = "/assets/"
   <div class="directive-tabs"><input type="radio" name="tabs-e6623695a74b72863efad18d50defcb1f52fb26928e406ca74b727bb38e7c8e6" id="tab-e6623695a74b72863efad18d50defcb1f52fb26928e406ca74b727bb38e7c8e6-java" data-tab-id="java" data-tabs-id="code" class="tab-input" checked><input type="radio" name="tabs-e6623695a74b72863efad18d50defcb1f52fb26928e406ca74b727bb38e7c8e6" id="tab-e6623695a74b72863efad18d50defcb1f52fb26928e406ca74b727bb38e7c8e6-python" data-tab-id="python" data-tabs-id="code" class="tab-input">
     <div class="tabs" data-tabs-id="code"><label for="tab-e6623695a74b72863efad18d50defcb1f52fb26928e406ca74b727bb38e7c8e6-java" data-tab-id="java" data-tabs-id="code" class="tab active">Java</label><label for="tab-e6623695a74b72863efad18d50defcb1f52fb26928e406ca74b727bb38e7c8e6-python" data-tab-id="python" data-tabs-id="code" class="tab">Python</label></div>
     <div class="tabpanel active" data-tab-id="java" data-tabs-id="code">
-      <tab title="Java" id="java">
-        <p>Java</p>
-      </tab>
+      <p>Java</p>
     </div>
     <div class="tabpanel" data-tab-id="python" data-tabs-id="code">
-      <tab title="Python" id="python">
-        <p>Python</p>
-      </tab>
+      <p>Python</p>
     </div>
   </div>
   <p>Another tabs cluster with the same ids.</p>
-  <div class="directive-tabs"><input type="radio" name="tabs-d094d812e54ddce40d15ed10b8897a36fe2448971509ecf8e4757abcc64494bf" id="tab-d094d812e54ddce40d15ed10b8897a36fe2448971509ecf8e4757abcc64494bf-2990934dbcfd5acd0b539d89a9953b6d79d2f6aa2eef5c9033ee8b9f04795cf7" data-tab-id="2990934dbcfd5acd0b539d89a9953b6d79d2f6aa2eef5c9033ee8b9f04795cf7" data-tabs-id="code" class="tab-input" checked><input type="radio" name="tabs-d094d812e54ddce40d15ed10b8897a36fe2448971509ecf8e4757abcc64494bf" id="tab-d094d812e54ddce40d15ed10b8897a36fe2448971509ecf8e4757abcc64494bf-python" data-tab-id="python" data-tabs-id="code" class="tab-input"><input type="radio" name="tabs-d094d812e54ddce40d15ed10b8897a36fe2448971509ecf8e4757abcc64494bf" id="tab-d094d812e54ddce40d15ed10b8897a36fe2448971509ecf8e4757abcc64494bf-c" data-tab-id="c" data-tabs-id="code" class="tab-input"><input type="radio" name="tabs-d094d812e54ddce40d15ed10b8897a36fe2448971509ecf8e4757abcc64494bf" id="tab-d094d812e54ddce40d15ed10b8897a36fe2448971509ecf8e4757abcc64494bf-c" data-tab-id="c" data-tabs-id="code" class="tab-input">
-    <div class="tabs" data-tabs-id="code"><label for="tab-d094d812e54ddce40d15ed10b8897a36fe2448971509ecf8e4757abcc64494bf-2990934dbcfd5acd0b539d89a9953b6d79d2f6aa2eef5c9033ee8b9f04795cf7" data-tab-id="2990934dbcfd5acd0b539d89a9953b6d79d2f6aa2eef5c9033ee8b9f04795cf7" data-tabs-id="code" class="tab active">Java</label><label for="tab-d094d812e54ddce40d15ed10b8897a36fe2448971509ecf8e4757abcc64494bf-python" data-tab-id="python" data-tabs-id="code" class="tab">Python</label><label for="tab-d094d812e54ddce40d15ed10b8897a36fe2448971509ecf8e4757abcc64494bf-c" data-tab-id="c" data-tabs-id="code" class="tab">C</label><label for="tab-d094d812e54ddce40d15ed10b8897a36fe2448971509ecf8e4757abcc64494bf-c" data-tab-id="c" data-tabs-id="code" class="tab">YouTube</label></div>
+  <div class="directive-tabs"><input type="radio" name="tabs-2ebeb94b8fd58f5d9ef2963538cca30f3521760b724793c8570058850e7f6449" id="tab-2ebeb94b8fd58f5d9ef2963538cca30f3521760b724793c8570058850e7f6449-2990934dbcfd5acd0b539d89a9953b6d79d2f6aa2eef5c9033ee8b9f04795cf7" data-tab-id="2990934dbcfd5acd0b539d89a9953b6d79d2f6aa2eef5c9033ee8b9f04795cf7" data-tabs-id="code" class="tab-input" checked><input type="radio" name="tabs-2ebeb94b8fd58f5d9ef2963538cca30f3521760b724793c8570058850e7f6449" id="tab-2ebeb94b8fd58f5d9ef2963538cca30f3521760b724793c8570058850e7f6449-python" data-tab-id="python" data-tabs-id="code" class="tab-input"><input type="radio" name="tabs-2ebeb94b8fd58f5d9ef2963538cca30f3521760b724793c8570058850e7f6449" id="tab-2ebeb94b8fd58f5d9ef2963538cca30f3521760b724793c8570058850e7f6449-c" data-tab-id="c" data-tabs-id="code" class="tab-input"><input type="radio" name="tabs-2ebeb94b8fd58f5d9ef2963538cca30f3521760b724793c8570058850e7f6449" id="tab-2ebeb94b8fd58f5d9ef2963538cca30f3521760b724793c8570058850e7f6449-c" data-tab-id="c" data-tabs-id="code" class="tab-input">
+    <div class="tabs" data-tabs-id="code"><label for="tab-2ebeb94b8fd58f5d9ef2963538cca30f3521760b724793c8570058850e7f6449-2990934dbcfd5acd0b539d89a9953b6d79d2f6aa2eef5c9033ee8b9f04795cf7" data-tab-id="2990934dbcfd5acd0b539d89a9953b6d79d2f6aa2eef5c9033ee8b9f04795cf7" data-tabs-id="code" class="tab active">Java</label><label for="tab-2ebeb94b8fd58f5d9ef2963538cca30f3521760b724793c8570058850e7f6449-python" data-tab-id="python" data-tabs-id="code" class="tab">Python</label><label for="tab-2ebeb94b8fd58f5d9ef2963538cca30f3521760b724793c8570058850e7f6449-c" data-tab-id="c" data-tabs-id="code" class="tab">C</label><label for="tab-2ebeb94b8fd58f5d9ef2963538cca30f3521760b724793c8570058850e7f6449-c" data-tab-id="c" data-tabs-id="code" class="tab">YouTube</label></div>
     <div class="tabpanel active" data-tab-id="2990934dbcfd5acd0b539d89a9953b6d79d2f6aa2eef5c9033ee8b9f04795cf7" data-tabs-id="code">
-      <tab title="Java">
-        <p>Java</p>
-      </tab>
+      <p>Java</p>
     </div>
     <div class="tabpanel" data-tab-id="python" data-tabs-id="code">
-      <tab title="Python" id="python">
-        <p>Python</p>
-      </tab>
+      <p>Python</p>
     </div>
     <div class="tabpanel" data-tab-id="c" data-tabs-id="code">
-      <tab title="C" id="c">
-        <p>C</p>
-      </tab>
+      <p>C</p>
     </div>
     <div class="tabpanel" data-tab-id="c" data-tabs-id="code">
-      <tab title="YouTube" id="c">
-        <div class="directive-youtube" id="video-1234">
-          <iframe class="player" src="https://www.youtube-nocookie.com/embed/1234" frameborder="0" title="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"></iframe>
-        </div>
-      </tab>
+      <div class="directive-youtube" id="video-1234">
+        <iframe class="player" src="https://www.youtube-nocookie.com/embed/1234" frameborder="0" title="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"></iframe>
+      </div>
     </div>
   </div>
 </div>

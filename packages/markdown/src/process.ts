@@ -67,10 +67,11 @@ import remarkDirectiveTypst from "./remarkDirectiveTypst";
 export const remark = (ctx: HyperbookContext) => {
   i18n.init(ctx.config.language || "en");
   const remarkPlugins: PluggableList = [
-    remarkGithubEmoji,
     remarkRemoveComments,
     remarkDirective,
     remarkDirectiveRehype,
+    remarkDirectiveTabs(ctx),
+    remarkDirectiveCollapsible(ctx),
     remarkDirectivePyide(ctx),
     remarkDirectiveWebide(ctx),
     remarkDirectiveOnlineIde(ctx),
@@ -88,11 +89,9 @@ export const remark = (ctx: HyperbookContext) => {
     remarkDirectiveAudio(ctx),
     remarkDirectiveAlert(ctx),
     remarkDirectiveBookmarks(ctx),
-    remarkDirectiveCollapsible(ctx),
     remarkDirectiveVideo(ctx),
     remarkDirectiveYoutube(ctx),
     remarkDirectiveTiles(ctx),
-    remarkDirectiveTabs(ctx),
     remarkDirectiveSqlIde(ctx),
     remarkDirectivePlantuml(ctx),
     remarkDirectiveSlideshow(ctx),
@@ -110,6 +109,7 @@ export const remark = (ctx: HyperbookContext) => {
     remarkDirectiveTypst(ctx),
     remarkCode(ctx),
     remarkMath,
+    remarkGithubEmoji,
     /* needs to be last directive */
     remarkDirectiveProtect(ctx),
     /* needs to be after all directives */

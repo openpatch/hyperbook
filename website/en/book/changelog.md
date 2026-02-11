@@ -38,6 +38,19 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.84.3
+
+::::tabs
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+- Fix tabs and collapsible processing.
+- Fix protect processing.
+
+:::
+
+::::
+
 ## v0.84.1
 
 ::::tabs

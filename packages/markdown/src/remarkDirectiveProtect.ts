@@ -1,29 +1,24 @@
-// Register directive nodes in mdast:
 /// <reference types="mdast-util-directive" />
-//
 import { HyperbookContext } from "@hyperbook/types";
 import { Root } from "mdast";
-import { Element } from "hast";
 import { visit } from "unist-util-visit";
 import { VFile } from "vfile";
 import {
   expectContainerDirective,
-  expectTextDirective,
   isDirective,
   registerDirective,
 } from "./remarkHelper";
-import { toHast } from "mdast-util-to-hast";
 import hash from "./objectHash";
+import { Processor } from "unified";
 
-export default (ctx: HyperbookContext) => () => {
+export default (ctx: HyperbookContext) => function (this: Processor) {
   const name = "protect";
-  return (tree: Root, file: VFile) => {
-    visit(tree, function (node) {
-      if (isDirective(node)) {
-        if (node.name !== name) return;
+  const processor = this;
 
+  return async (tree: Root, file: VFile) => {
+    visit(tree, (node) => {
+      if (isDirective(node) && node.name === name) {
         const data = node.data || (node.data = {});
-
         expectContainerDirective(node, file, name);
         registerDirective(file, name, ["client.js"], ["style.css"], []);
 
@@ -32,71 +27,73 @@ export default (ctx: HyperbookContext) => () => {
           description = "",
           id = hash(node),
         } = node.attributes || {};
+
+        // 1. Setup the main container
         data.hName = "div";
         data.hProperties = {
           class: "directive-protect",
           "data-id": id,
           "data-toast": Buffer.from(password as string).toString("base64"),
         };
-        data.hChildren = [
-          {
-            type: "element",
-            tagName: "div",
-            properties: {
-              class: "hidden",
-            },
-            children: (
-              toHast(node, {
-                allowDangerousHtml: ctx.config.allowDangerousHtml || false,
-              }) as Element
-            )?.children,
+
+        // 2. Parse the description and strip the paragraph wrapper
+        const parsedDescription = processor.parse(description as string);
+        const descriptionNodes = (parsedDescription.children[0]?.type === 'paragraph')
+          ? (parsedDescription.children[0] as any).children 
+          : [{ type: "text", value: description }];
+
+        // 3. Reconstruct as MDAST nodes
+        // This 'hidden' div contains the actual content of the directive
+        const hiddenContent: any = {
+          type: "parent",
+          data: {
+            hName: "div",
+            hProperties: { class: "hidden" },
           },
-          {
-            type: "element",
-            tagName: "div",
-            properties: {
-              class: "password-input",
+          children: [...node.children], // Keep original children for basepath processing
+        };
+
+        // This is the password input UI
+        const inputUI: any = {
+          type: "parent",
+          data: {
+            hName: "div",
+            hProperties: { class: "password-input" },
+          },
+          children: [
+            {
+              type: "paragraph",
+              data: {
+                hName: "span",
+                hProperties: { class: "description" },
+              },
+              children: descriptionNodes, // Injected description (Gemoji/Link compatible)
             },
-            children: [
-              {
-                type: "element",
-                tagName: "span",
-                properties: {
-                  class: "description",
-                },
-                children: [
-                  {
-                    type: "text",
-                    value: description as string,
-                  },
-                ],
+            {
+              type: "paragraph",
+              data: {
+                hName: "span",
+                hProperties: { class: "icon" },
               },
-              {
-                type: "element",
-                tagName: "span",
-                properties: {
-                  class: "icon",
-                },
-                children: [
-                  {
-                    type: "text",
-                    value: "🔒",
-                  },
-                ],
-              },
-              {
-                type: "element",
-                tagName: "input",
-                properties: {
+              children: [{ type: "text", value: "🔒" }],
+            },
+            {
+              type: "paragraph",
+              data: {
+                hName: "input",
+                hProperties: {
                   placeholder: "...",
                   type: "password",
                   "data-id": id,
                 },
-                children: [],
               },
-            ],
-          },
-        ];
+              children: [],
+            },
+          ],
+        };
+
+        // 4. Overwrite node children so the pipeline visits them correctly
+        node.children = [hiddenContent, inputUI];
       }
     });
   };

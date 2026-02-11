@@ -1,8 +1,5 @@
-// Register directive nodes in mdast:
 /// <reference types="mdast-util-directive" />
-//
 import { HyperbookContext } from "@hyperbook/types";
-import { Element } from "hast";
 import { Root } from "mdast";
 import { visit } from "unist-util-visit";
 import { VFile } from "vfile";
@@ -11,95 +8,59 @@ import {
   isDirective,
   registerDirective,
 } from "./remarkHelper";
-import { toHast } from "mdast-util-to-hast";
-import { remark } from "./process";
 import hash from "./objectHash";
-import remarkGemoji from "remark-gemoji";
 import { Processor } from "unified";
-import { LeafDirective, TextDirective } from "mdast-util-directive";
-import { ContainerDirective } from "mdast-util-directive";
 
 export default function (ctx: HyperbookContext) {
   return function (this: Processor) {
-    const self = this;
-    return async (tree: Root, file: VFile) => {
-      const tabsNodes: (TextDirective | ContainerDirective | LeafDirective)[] =
-        [];
-      visit(tree, function (node) {
-        if (isDirective(node)) {
-          if (node.name == "tab") {
-            registerDirective(
-              file,
-              "tabs",
-              ["client.js"],
-              ["style.css"],
-              ["tab"],
-            );
-          }
-          if (node.name !== "tabs") return;
+    // 'this' refers to the Processor, allowing us to use this.parse
+    const processor = this;
 
+    return async (tree: Root, file: VFile) => {
+      const tabsNodes: any[] = [];
+      visit(tree, (node) => {
+        if (isDirective(node) && node.name === "tabs") {
           tabsNodes.push(node);
-          return;
         }
       });
 
       for (const node of tabsNodes) {
         const data = node.data || (node.data = {});
+        expectContainerDirective(node, file, "tabs");
 
-        if (node.name === "tabs") {
-          expectContainerDirective(node, file, "tabs");
+        let { id: tabsId } = node.attributes || {};
+        if (!tabsId) tabsId = hash(node);
+        const instanceId = hash(node);
 
-          let { id: tabsId } = node.attributes || {};
+        registerDirective(file, "tabs", ["client.js"], ["style.css"], ["tab"]);
 
-          if (!tabsId) {
-            tabsId = hash(node);
-          }
+        data.hName = "div";
+        data.hProperties = { class: "directive-tabs" };
 
-          // Generate a unique instance ID for this specific tab group
-          // This ensures radio button names are unique per instance
-          const instanceId = hash(node);
+        const radioInputs: any[] = [];
+        const labels: any[] = [];
+        const contents: any[] = [];
 
-          registerDirective(
-            file,
-            "tabs",
-            ["client.js"],
-            ["style.css"],
-            ["tab"],
-          );
+        let first = true;
 
-          data.hName = "div";
-          data.hProperties = {
-            class: "directive-tabs",
-          };
+        for (const child of node.children) {
+          if (!isDirective(child) || child.name !== "tab") continue;
 
-          const tabContentElements: Element[] = [];
-          const tabTitleElements: Element[] = [];
+          let { title = "", id: tabId = hash(child) } = child.attributes || {};
 
-          let first = true;
+          // --- TITLE PARSING LOGIC ---
+          // Parse the title string into an MDAST tree
+          const parsedTitle = processor.parse(title as string);
+          // Extract children from the first paragraph to keep it "inline"
+          const titleNodes = (parsedTitle.children[0] as any)?.children || [
+            { type: "text", value: title },
+          ];
 
-          for (const tabNode of node.children.filter(isDirective)) {
-            expectContainerDirective(tabNode, file, "tab");
-            let { title = "", id: tabId = hash(tabNode) } =
-              tabNode.attributes || {};
-
-            let tree = remark(ctx).parse(title as string);
-            remarkGemoji()(tree);
-            let hastTree = toHast(tree);
-            if (
-              hastTree.type === "root" &&
-              hastTree.children[0]?.type === "element" &&
-              hastTree.children[0]?.tagName === "p"
-            ) {
-              hastTree = hastTree.children[0];
-              hastTree.tagName = "span";
-            }
-
-            // Add hidden radio input for CSS-only tab switching
-            // Use instanceId for unique radio names, tabsId for syncing across instances
-            tabTitleElements.push({
-              type: "element",
-              tagName: "input",
-              properties: {
+          radioInputs.push({
+            type: "paragraph",
+            data: {
+              hName: "input",
+              hProperties: {
                 type: "radio",
                 name: `tabs-${instanceId}`,
                 id: `tab-${instanceId}-${tabId}`,
@@ -108,60 +69,56 @@ export default function (ctx: HyperbookContext) {
                 class: "tab-input",
                 checked: first,
               },
-              children: [],
-            });
+            },
+            children: [],
+          });
 
-            // Add label that acts as the tab button
-            tabTitleElements.push({
-              type: "element",
-              tagName: "label",
-              properties: {
+          labels.push({
+            type: "paragraph",
+            data: {
+              hName: "label",
+              hProperties: {
                 for: `tab-${instanceId}-${tabId}`,
                 "data-tab-id": tabId,
                 "data-tabs-id": tabsId,
                 class: "tab" + (first ? " active" : ""),
               },
-              children: (hastTree as Element).children || [],
-            });
+            },
+            // We now use the parsed nodes instead of a raw text node
+            children: titleNodes,
+          });
 
-            const tabContent = await remark(ctx).run(tabNode);
-            tabContentElements.push({
-              type: "element",
-              tagName: "div",
-              properties: {
+          contents.push({
+            type: "parent",
+            data: {
+              hName: "div",
+              hProperties: {
                 class: "tabpanel" + (first ? " active" : ""),
                 "data-tab-id": tabId,
                 "data-tabs-id": tabsId,
               },
-              children: [tabContent],
-            });
+            },
+            children: child.children,
+          });
 
-            first = false;
-          }
+          first = false;
+        }
 
-          // Separate radio inputs from labels
-          const radioInputs: Element[] = [];
-          const labelElements: Element[] = [];
-          
-          for (let i = 0; i < tabTitleElements.length; i += 2) {
-            radioInputs.push(tabTitleElements[i]); // inputs
-            labelElements.push(tabTitleElements[i + 1]); // labels
-          }
-
-          data.hChildren = [
-            ...radioInputs, // Radio inputs as direct children
-            {
-              type: "element",
-              tagName: "div",
-              properties: {
+        node.children = [
+          ...radioInputs,
+          {
+            type: "parent",
+            data: {
+              hName: "div",
+              hProperties: {
                 class: "tabs",
                 "data-tabs-id": tabsId,
               },
-              children: labelElements, // Only labels in tabs div
             },
-            ...tabContentElements,
-          ];
-        }
+            children: labels,
+          },
+          ...contents,
+        ];
       }
     };
   };

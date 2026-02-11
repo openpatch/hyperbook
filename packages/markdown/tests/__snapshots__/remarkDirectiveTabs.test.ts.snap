@@ -5,33 +5,23 @@ exports[`remarkDirectiveTabs > should transform 1`] = `
 <div class="directive-tabs"><input type="radio" name="tabs-e6623695a74b72863efad18d50defcb1f52fb26928e406ca74b727bb38e7c8e6" id="tab-e6623695a74b72863efad18d50defcb1f52fb26928e406ca74b727bb38e7c8e6-java" data-tab-id="java" data-tabs-id="code" class="tab-input" checked><input type="radio" name="tabs-e6623695a74b72863efad18d50defcb1f52fb26928e406ca74b727bb38e7c8e6" id="tab-e6623695a74b72863efad18d50defcb1f52fb26928e406ca74b727bb38e7c8e6-python" data-tab-id="python" data-tabs-id="code" class="tab-input">
   <div class="tabs" data-tabs-id="code"><label for="tab-e6623695a74b72863efad18d50defcb1f52fb26928e406ca74b727bb38e7c8e6-java" data-tab-id="java" data-tabs-id="code" class="tab active">Java</label><label for="tab-e6623695a74b72863efad18d50defcb1f52fb26928e406ca74b727bb38e7c8e6-python" data-tab-id="python" data-tabs-id="code" class="tab">Python</label></div>
   <div class="tabpanel active" data-tab-id="java" data-tabs-id="code">
-    <tab title="Java" id="java">
-      <p>Java</p>
-    </tab>
+    <p>Java</p>
   </div>
   <div class="tabpanel" data-tab-id="python" data-tabs-id="code">
-    <tab title="Python" id="python">
-      <p>Python</p>
-    </tab>
+    <p>Python</p>
   </div>
 </div>
 <p>Another tabs cluster with the same ids.</p>
 <div class="directive-tabs"><input type="radio" name="tabs-9c4d4a6f4ab7d5f411a2bb8b8efc735d6d6a26c51cab6d4e34f441e74ad87a1a" id="tab-9c4d4a6f4ab7d5f411a2bb8b8efc735d6d6a26c51cab6d4e34f441e74ad87a1a-2990934dbcfd5acd0b539d89a9953b6d79d2f6aa2eef5c9033ee8b9f04795cf7" data-tab-id="2990934dbcfd5acd0b539d89a9953b6d79d2f6aa2eef5c9033ee8b9f04795cf7" data-tabs-id="code" class="tab-input" checked><input type="radio" name="tabs-9c4d4a6f4ab7d5f411a2bb8b8efc735d6d6a26c51cab6d4e34f441e74ad87a1a" id="tab-9c4d4a6f4ab7d5f411a2bb8b8efc735d6d6a26c51cab6d4e34f441e74ad87a1a-python" data-tab-id="python" data-tabs-id="code" class="tab-input"><input type="radio" name="tabs-9c4d4a6f4ab7d5f411a2bb8b8efc735d6d6a26c51cab6d4e34f441e74ad87a1a" id="tab-9c4d4a6f4ab7d5f411a2bb8b8efc735d6d6a26c51cab6d4e34f441e74ad87a1a-c" data-tab-id="c" data-tabs-id="code" class="tab-input">
   <div class="tabs" data-tabs-id="code"><label for="tab-9c4d4a6f4ab7d5f411a2bb8b8efc735d6d6a26c51cab6d4e34f441e74ad87a1a-2990934dbcfd5acd0b539d89a9953b6d79d2f6aa2eef5c9033ee8b9f04795cf7" data-tab-id="2990934dbcfd5acd0b539d89a9953b6d79d2f6aa2eef5c9033ee8b9f04795cf7" data-tabs-id="code" class="tab active">Java</label><label for="tab-9c4d4a6f4ab7d5f411a2bb8b8efc735d6d6a26c51cab6d4e34f441e74ad87a1a-python" data-tab-id="python" data-tabs-id="code" class="tab">Python</label><label for="tab-9c4d4a6f4ab7d5f411a2bb8b8efc735d6d6a26c51cab6d4e34f441e74ad87a1a-c" data-tab-id="c" data-tabs-id="code" class="tab">C</label></div>
   <div class="tabpanel active" data-tab-id="2990934dbcfd5acd0b539d89a9953b6d79d2f6aa2eef5c9033ee8b9f04795cf7" data-tabs-id="code">
-    <tab title="Java">
-      <p>Java</p>
-    </tab>
+    <p>Java</p>
   </div>
   <div class="tabpanel" data-tab-id="python" data-tabs-id="code">
-    <tab title="Python" id="python">
-      <p>Python</p>
-    </tab>
+    <p>Python</p>
   </div>
   <div class="tabpanel" data-tab-id="c" data-tabs-id="code">
-    <tab title="C" id="c">
-      <p>C</p>
-    </tab>
+    <p>C</p>
   </div>
 </div>
 "

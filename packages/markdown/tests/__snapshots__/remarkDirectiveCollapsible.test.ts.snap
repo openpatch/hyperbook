@@ -6,30 +6,20 @@ exports[`remarkDirectiveCollapsible > should transform 1`] = `
   <summary>Hallo</summary>
   <div class="content">
     <p>This is a panel</p>
-    <div class="directive-audio">
-      <div class="player">
-        <div class="thumbnail" style="background-image: url(&#x22;/public/group-people.png&#x22;)"></div><button class="play" onclick="hyperbook.audio.togglePlayPause(&#x22;f877d1f0ff50bf344794f9bd20e8df025b5189c193d15f71e173a67e3fd0bb78&#x22;)" title="Play/Pause"></button>
-        <div class="wave" id="f877d1f0ff50bf344794f9bd20e8df025b5189c193d15f71e173a67e3fd0bb78" data-src="/public/Free_Test_Data_1MB_MP3.mp3"></div>
-      </div>
-      <div class="information"><span class="title">Hallo</span><span class="spacer"> - </span><span class="author">Max Mustermann</span><span class="duration"></span></div>
-    </div>
+    <audio src="/Free_Test_Data_1MB_MP3.mp3" thumbnail="/group-people.png" title="Hallo" author="Max Mustermann"></audio>
     <details class="directive-collapsible" data-id="13caa90143e8b1bb873970593700aa49da40b6c2c3ecf175995eba4b14ff9ee7">
       <summary>Nested</summary>
       <div class="content">
         <p>This is a stacked collapsible</p>
-        <div class="directive-youtube" id="video-124">
-          <iframe class="player" src="https://www.youtube-nocookie.com/embed/124" frameborder="0" title="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"></iframe>
-        </div>
+        <youtube id="124">Test</youtube>
       </div>
     </details>
     <p>This is normal Test in-between.</p>
-    <details class="directive-collapsible" data-id="f6163f300c1b01fb3c2b0b552e42ee77b46b12f1051084fa3cd6ca39a4af5cdb">
+    <details class="directive-collapsible" data-id="a80605f62a0075b79b15495e23cea3724d30c97d2f5433bd070ab97ac596a5e0">
       <summary>With an Image</summary>
       <div class="content">
         <p>
-          <figure src="/public/public/test.jpg" alt="" class="normal normal undefined">
-            <img class="normal undefined" src="/public/public/test.jpg" alt="" onclick="hyperbook.toggleLightbox(this)">
-          </figure>
+          <img src="/test.jpg" alt="">
         </p>
       </div>
     </details>
