@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.84.3
+
+### Patch Changes
+
+- [`0332c62`](https://github.com/openpatch/hyperbook/commit/0332c62c717900b73746a631d2293b946d80b44a) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix processing of tabs and collapsibles
+
 ## 0.84.2
 
 ### Patch Changes
