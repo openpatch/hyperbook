@@ -224,6 +224,9 @@ export interface HyperbookContext {
     path: string | string[],
     base: "public" | "book" | "archive" | "glossary" | "assets",
     page?: HyperbookPage,
+    options?: {
+      versioned?: boolean;
+    }
   ): string;
   navigation: Navigation;
 }

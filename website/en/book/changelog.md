@@ -38,6 +38,18 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.84.4
+
+::::tabs
+
+:::tab{title="Improved :+1:" id="improved"}
+
+- Updated Onlineide and Sqlide to integrated into the hyperbook store. This invalidates the state of all onlineide and sqlide instances, so your students have to start fresh.
+
+:::
+
+::::
+
 ## v0.84.3
 
 ::::tabs

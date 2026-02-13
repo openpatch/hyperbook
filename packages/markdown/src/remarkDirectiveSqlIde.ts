@@ -26,7 +26,18 @@ export default (ctx: HyperbookContext) => () => {
         const {
           id = hash(node),
           db = ctx.config.elements?.sqlide?.db ||
-            "https://sqlide.openpatch.org/assets/databases/world1.sqLite",
+            ctx.makeUrl(
+              [
+                "directive-sqlide",
+                "include",
+                "assets",
+                "databases",
+                "world1.sqLite",
+              ],
+              "assets",
+              undefined,
+              { versioned: false },
+            ),
           height = ctx.config.elements?.sqlide?.height || "600px",
         } = attributes;
 

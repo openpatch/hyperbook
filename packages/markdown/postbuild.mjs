@@ -93,11 +93,11 @@ async function postbuild() {
   // Download and extract zips
   const zipFiles = [
     {
-      url: "https://github.com/openpatch/sql-ide/releases/download/v2.0.0/dist-embedded.zip",
+      url: "https://github.com/openpatch/sql-ide/releases/download/v2.0.0-hyperbook.1/dist-embedded.zip",
       dst: path.join("./dist", "assets", "directive-sqlide", "include"),
     },
     {
-      url: "https://github.com/openpatch/online-ide/releases/download/v2.2.1/dist-embedded.zip",
+      url: "https://github.com/openpatch/online-ide/releases/download/v2.2.1-hyperbook.1/dist-embedded.zip",
       dst: path.join("./dist", "assets", "directive-onlineide", "include"),
     },
   ];

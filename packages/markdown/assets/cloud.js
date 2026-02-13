@@ -1,4 +1,3 @@
-window.hyperbook = window.hyperbook || {};
 window.hyperbook.cloud = (function () {
   // ===== Cloud Integration =====
   const AUTH_TOKEN_KEY = "hyperbook_auth_token";
@@ -55,97 +54,7 @@ window.hyperbook.cloud = (function () {
       this.offlineQueue = [];
       this.isOnline = navigator.onLine;
 
-      // Snapshots for external DB polling
-      this.externalDBs = options.externalDBs || [];
-      this.externalSnapshots = {};
-      this.pollInterval = options.pollInterval || 5000;
-      this.pollTimer = null;
-
       this.setupEventListeners();
-    }
-
-    /**
-     * Get a fingerprint of an external DB by hashing all row data.
-     */
-    _snapshotExternalDB(dbName) {
-      return new Promise((resolve) => {
-        const request = indexedDB.open(dbName);
-        request.onerror = () => resolve(null);
-        request.onsuccess = (event) => {
-          const db = event.target.result;
-          const storeNames = Array.from(db.objectStoreNames);
-          if (storeNames.length === 0) {
-            db.close();
-            resolve(null);
-            return;
-          }
-
-          const parts = [];
-          const tx = db.transaction(storeNames, "readonly");
-          let pending = storeNames.length;
-          storeNames.forEach((name) => {
-            const rows = [];
-            const cursorReq = tx.objectStore(name).openCursor();
-            cursorReq.onsuccess = (e) => {
-              const cursor = e.target.result;
-              if (cursor) {
-                rows.push(JSON.stringify(cursor.value));
-                cursor.continue();
-              } else {
-                parts.push(name + ":" + rows.join(","));
-                pending--;
-                if (pending === 0) {
-                  db.close();
-                  resolve(parts.join("|"));
-                }
-              }
-            };
-            cursorReq.onerror = () => {
-              pending--;
-              if (pending === 0) {
-                db.close();
-                resolve(parts.join("|"));
-              }
-            };
-          });
-        };
-      });
-    }
-
-    /**
-     * Take initial snapshots and start polling external DBs for changes.
-     */
-    async startPolling() {
-      for (const dbName of this.externalDBs) {
-        this.externalSnapshots[dbName] = await this._snapshotExternalDB(dbName);
-      }
-      this.pollTimer = setInterval(
-        () => this._pollExternalDBs(),
-        this.pollInterval,
-      );
-    }
-
-    /**
-     * Stop polling external DBs.
-     */
-    stopPolling() {
-      if (this.pollTimer) {
-        clearInterval(this.pollTimer);
-        this.pollTimer = null;
-      }
-    }
-
-    async _pollExternalDBs() {
-      if (isLoadingFromCloud || this.saveInProgress) return;
-      for (const dbName of this.externalDBs) {
-        const current = await this._snapshotExternalDB(dbName);
-        const prev = this.externalSnapshots[dbName];
-
-        if (current !== prev) {
-          this.externalSnapshots[dbName] = current;
-          this.markDirty(dbName);
-        }
-      }
     }
 
     markDirty(storeName = null) {
@@ -230,15 +139,11 @@ window.hyperbook.cloud = (function () {
 
     async exportStores() {
       const hyperbookExport = await store.export({ prettyJson: false });
-      const sqlIdeExport = await exportExternalDB("SQL-IDE");
-      const learnJExport = await exportExternalDB("LearnJ");
       return {
         version: 1,
         origin: window.location.origin,
         data: {
           hyperbook: JSON.parse(await hyperbookExport.text()),
-          sqlIde: sqlIdeExport || {},
-          learnJ: learnJExport || {},
         },
       };
     }
@@ -336,7 +241,6 @@ window.hyperbook.cloud = (function () {
       this.isDirty = false;
       this.dirtyStores.clear();
       this.clearTimers();
-      this.stopPolling();
       this.offlineQueue = [];
       this.retryCount = 0;
     }
@@ -527,21 +431,13 @@ window.hyperbook.cloud = (function () {
       if (data && data.data) {
         // Import data into local stores
         const storeData = data.data.data || data.data;
-        const { hyperbook, sqlIde, learnJ } = storeData;
+        const { hyperbook } = storeData;
 
         if (hyperbook) {
           const blob = new Blob([JSON.stringify(hyperbook)], {
             type: "application/json",
           });
           await store.import(blob, { clearTablesBeforeImport: true });
-        }
-
-        if (sqlIde) {
-          await importExternalDB("SQL-IDE", sqlIde);
-        }
-
-        if (learnJ) {
-          await importExternalDB("LearnJ", learnJ);
         }
 
         console.log("✓ Store loaded from cloud");
@@ -584,8 +480,6 @@ window.hyperbook.cloud = (function () {
         debounceDelay: 2000,
         maxWaitTime: 10000,
         minSaveInterval: 1000,
-        externalDBs: ["SQL-IDE", "LearnJ"],
-        pollInterval: 5000,
       });
 
       // Hook Dexie tables to track changes (skip currentState — ephemeral UI data)
@@ -595,9 +489,6 @@ window.hyperbook.cloud = (function () {
         table.hook("updating", () => syncManager.markDirty(table.name));
         table.hook("deleting", () => syncManager.markDirty(table.name));
       });
-
-      // Start polling external DBs for changes
-      syncManager.startPolling();
     }
   }
 

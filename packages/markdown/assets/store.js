@@ -29,6 +29,9 @@ store.version(2).stores({
   learningmap: `id,nodes,x,y,zoom`,
   textinput: `id,text`,
   custom: `id,payload`,
+  onlineide: `scriptId,script`,
+  sqlideScripts: `scriptId,script`,
+  sqlideDatabases: `databaseId,database`,
   multievent: `id,state`,
   typst: `id,code`,
 });

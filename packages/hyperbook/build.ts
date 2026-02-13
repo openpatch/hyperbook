@@ -234,10 +234,7 @@ async function runBuild(
   await runArchive(root, rootOut, prefix);
 
   // Helper function to resolve relative paths
-  const resolveRelativePath = (
-    path: string,
-    page: HyperbookPage,
-  ): string => {
+  const resolveRelativePath = (path: string, page: HyperbookPage): string => {
     // If path is absolute, return as-is
     if (path.startsWith("/")) {
       return path;
@@ -263,7 +260,7 @@ async function runBuild(
   > = {
     root,
     config: hyperbookJson,
-    makeUrl: (path, base, page) => {
+    makeUrl: (path, base, page, options = { versioned: true }) => {
       if (typeof path === "string") {
         // Handle absolute URLs
         if (path.includes("://") || path.startsWith("data:")) {
@@ -309,7 +306,11 @@ async function runBuild(
           if (path.length === 1 && path[0] === "/") {
             return `${posix.join("/", basePath || "", ASSETS_FOLDER, ...path)}`;
           } else {
-            return `${posix.join("/", basePath || "", ASSETS_FOLDER, ...path)}?version=${packageJson.version}`;
+            let p = `${posix.join("/", basePath || "", ASSETS_FOLDER, ...path)}`;
+            if (options?.versioned) {
+              p += `?v=${packageJson.version}`;
+            }
+            return p;
           }
       }
     },
