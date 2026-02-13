@@ -1,5 +1,11 @@
 # @hyperbook/types
 
+## 0.22.1
+
+### Patch Changes
+
+- [`3d77fd8`](https://github.com/openpatch/hyperbook/commit/3d77fd83942ccb9e8fe7fae86b03689ee739bae0) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - sqlide and onlineide now using the dexie store.
+
 ## 0.22.0
 
 ### Minor Changes

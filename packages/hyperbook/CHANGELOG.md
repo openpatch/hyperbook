@@ -1,5 +1,13 @@
 # hyperbook
 
+## 0.84.4
+
+### Patch Changes
+
+- [`d98c9ca`](https://github.com/openpatch/hyperbook/commit/d98c9cac95017c0bfa098929218bc94ff758a906) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Move to an event driven architecture for hyperbook cloud
+
+- [`3d77fd8`](https://github.com/openpatch/hyperbook/commit/3d77fd83942ccb9e8fe7fae86b03689ee739bae0) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - sqlide and onlineide now using the dexie store.
+
 ## 0.84.3
 
 ### Patch Changes
