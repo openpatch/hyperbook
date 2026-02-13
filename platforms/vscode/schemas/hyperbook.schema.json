@@ -93,6 +93,21 @@
                 }
             ]
         },
+        "cloud": {
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "id",
+                "url"
+            ],
+            "type": "object"
+        },
         "colors": {
             "properties": {
                 "brand": {
@@ -225,9 +240,6 @@
                                         "string",
                                         "number"
                                     ]
-                                },
-                                "url": {
-                                    "type": "string"
                                 }
                             },
                             "type": "object"
@@ -254,9 +266,6 @@
                                         "string",
                                         "number"
                                     ]
-                                },
-                                "url": {
-                                    "type": "string"
                                 }
                             },
                             "type": "object"

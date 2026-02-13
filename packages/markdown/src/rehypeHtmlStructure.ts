@@ -663,6 +663,15 @@ ${ctx.config.cloud ? `HYPERBOOK_CLOUD = ${JSON.stringify(ctx.config.cloud).repla
             properties: {},
             children: [
               ...originalChildren,
+              {
+                type: "element",
+                tagName: "script",
+                properties: {
+                  src: makeUrl(["client.js"], "assets"),
+                  defer: true,
+                },
+                children: [],
+              },
               ...(ctx.config.cloud
                 ? [
                     {
@@ -676,15 +685,6 @@ ${ctx.config.cloud ? `HYPERBOOK_CLOUD = ${JSON.stringify(ctx.config.cloud).repla
                     } as ElementContent,
                   ]
                 : []),
-              {
-                type: "element",
-                tagName: "script",
-                properties: {
-                  src: makeUrl(["client.js"], "assets"),
-                  defer: true,
-                },
-                children: [],
-              },
               ...Object.entries(directives).flatMap(
                 ([directive, { scripts }]) =>
                   scripts

@@ -301,23 +301,33 @@ router.get("/students", async function (req, res) {
 
     if (groupId) {
       query =
-        "SELECT u.id, u.username, u.password, u.created_at, s.updated_at as store_updated_at " +
+        "SELECT u.id, u.username, u.password, u.created_at " +
         "FROM users u " +
-        "LEFT JOIN groups g ON u.group_id = g.id " +
-        "LEFT JOIN stores s ON s.user_id = u.id AND s.hyperbook_id = g.hyperbook_id " +
         "WHERE u.role = 'student' AND u.group_id = ? ORDER BY u.username";
       params = [groupId];
     } else {
       query =
-        "SELECT u.id, u.username, u.password, u.group_id, u.created_at, s.updated_at as store_updated_at " +
+        "SELECT u.id, u.username, u.password, u.group_id, u.created_at " +
         "FROM users u " +
-        "LEFT JOIN groups g ON u.group_id = g.id " +
-        "LEFT JOIN stores s ON s.user_id = u.id AND s.hyperbook_id = g.hyperbook_id " +
         "WHERE u.role = 'student' ORDER BY u.username";
       params = [];
     }
 
     var students = await db.allAsync(query, params);
+
+    // Enrich with store_updated_at from event-sourcing tables
+    for (var i = 0; i < students.length; i++) {
+      var student = students[i];
+      var hbId = null;
+      if (groupId) {
+        var grp = await db.getAsync("SELECT hyperbook_id FROM groups WHERE id = ?", [groupId]);
+        hbId = grp ? grp.hyperbook_id : null;
+      } else if (student.group_id) {
+        var grp2 = await db.getAsync("SELECT hyperbook_id FROM groups WHERE id = ?", [student.group_id]);
+        hbId = grp2 ? grp2.hyperbook_id : null;
+      }
+      student.store_updated_at = hbId ? await db.getStoreUpdatedAt(student.id, hbId) : null;
+    }
     res.json({ students: students });
   } catch (error) {
     console.error("List students error:", error);
@@ -626,24 +636,19 @@ router.get("/students/:studentId/store", async function (req, res) {
       return;
     }
 
-    var store = await db.getAsync(
-      "SELECT data, updated_at FROM stores WHERE user_id = ? AND hyperbook_id = ?",
-      [student.id, group.hyperbook_id]
-    );
+    var state = await db.reconstructState(student.id, group.hyperbook_id);
 
-    if (!store) {
+    if (!state) {
       res.status(404).json({ error: "No store data found for this student" });
       return;
     }
-
-    var data = JSON.parse(store.data);
 
     res.setHeader("Content-Type", "application/json");
     res.setHeader(
       "Content-Disposition",
       'attachment; filename="store-' + student.username + '.json"'
     );
-    res.json(data);
+    res.json(state.data);
   } catch (error) {
     console.error("Download store error:", error);
     res.status(500).json({ error: "Internal server error" });

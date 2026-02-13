@@ -498,13 +498,16 @@ router.get(
       }
 
       var students = await db.allAsync(
-        "SELECT u.id, u.username, u.password, u.created_at, s.updated_at as store_updated_at " +
+        "SELECT u.id, u.username, u.password, u.created_at " +
           "FROM users u " +
-          "LEFT JOIN groups g ON u.group_id = g.id " +
-          "LEFT JOIN stores s ON s.user_id = u.id AND s.hyperbook_id = g.hyperbook_id " +
           "WHERE u.role = 'student' AND u.group_id = ? ORDER BY u.username",
         [groupId]
       );
+
+      // Enrich with store_updated_at from event-sourcing tables
+      for (var si = 0; si < students.length; si++) {
+        students[si].store_updated_at = await db.getStoreUpdatedAt(students[si].id, hyperbookId);
+      }
 
       res.render("students", {
         title: group.name + " — Students",
@@ -520,6 +523,143 @@ router.get(
     } catch (error) {
       console.error("List students error:", error);
       res.render("error", { message: "Failed to load students", error: error });
+    }
+  }
+);
+
+// GET /hyperbook/:hyperbookId/group/:groupId/events — Event log for a group
+router.get(
+  "/hyperbook/:hyperbookId/group/:groupId/events",
+  requireAuth,
+  loadPermissions,
+  async function (req, res) {
+    try {
+      var hyperbookId = req.params.hyperbookId;
+      var groupId = req.params.groupId;
+
+      if (!hasPerm(req, "hyperbook:" + hyperbookId + ":read")) {
+        res.redirect("/");
+        return;
+      }
+
+      var hyperbook = await db.getAsync(
+        "SELECT id, slug, name, url FROM hyperbooks WHERE id = ?",
+        [hyperbookId]
+      );
+
+      if (!hyperbook) {
+        res.redirect("/");
+        return;
+      }
+
+      var group = await db.getAsync(
+        "SELECT id, name FROM groups WHERE id = ? AND hyperbook_id = ?",
+        [groupId, hyperbookId]
+      );
+
+      if (!group) {
+        res.redirect("/hyperbook/" + hyperbookId);
+        return;
+      }
+
+      // Get students in this group
+      var students = await db.allAsync(
+        "SELECT id, username FROM users WHERE role = 'student' AND group_id = ? ORDER BY username",
+        [groupId]
+      );
+
+      var studentIds = students.map(function (s) { return s.id; });
+      var studentMap = {};
+      students.forEach(function (s) { studentMap[s.id] = s.username; });
+
+      var events = [];
+      var snapshots = [];
+
+      if (studentIds.length > 0) {
+        var placeholders = studentIds.map(function () { return "?"; }).join(",");
+
+        // Get recent events (last 200)
+        events = await db.allAsync(
+          "SELECT e.id, e.user_id, e.table_name, e.operation, e.prim_key, e.created_at " +
+            "FROM events e " +
+            "WHERE e.user_id IN (" + placeholders + ") AND e.hyperbook_id = ? " +
+            "ORDER BY e.id DESC LIMIT 200",
+          studentIds.concat([hyperbookId])
+        );
+
+        // Add username to events
+        events.forEach(function (e) {
+          e.username = studentMap[e.user_id] || "Unknown";
+        });
+
+        // Get latest snapshot per student
+        for (var i = 0; i < studentIds.length; i++) {
+          var snap = await db.getLatestSnapshot(studentIds[i], hyperbookId);
+          if (snap) {
+            snap.username = studentMap[studentIds[i]];
+            snap.user_id = studentIds[i];
+            snapshots.push(snap);
+          }
+        }
+      }
+
+      res.render("event-log", {
+        title: group.name + " — Event Log",
+        hyperbook: hyperbook,
+        group: group,
+        events: events,
+        snapshots: snapshots,
+        username: req.user.username,
+        isAdmin: req.user.role === "admin",
+      });
+    } catch (error) {
+      console.error("Event log error:", error);
+      res.render("error", { message: "Failed to load event log", error: error });
+    }
+  }
+);
+
+// GET /hyperbook/:hyperbookId/group/:groupId/snapshot/:studentId — Download student snapshot
+router.get(
+  "/hyperbook/:hyperbookId/group/:groupId/snapshot/:studentId",
+  requireAuth,
+  loadPermissions,
+  async function (req, res) {
+    try {
+      var hyperbookId = req.params.hyperbookId;
+      var studentId = req.params.studentId;
+
+      if (!hasPerm(req, "hyperbook:" + hyperbookId + ":read")) {
+        res.status(403).json({ error: "Permission denied" });
+        return;
+      }
+
+      var student = await db.getAsync(
+        "SELECT id, username FROM users WHERE id = ? AND role = 'student'",
+        [studentId]
+      );
+
+      if (!student) {
+        res.status(404).json({ error: "Student not found" });
+        return;
+      }
+
+      var state = await db.reconstructState(student.id, parseInt(hyperbookId, 10));
+
+      if (!state) {
+        res.status(404).json({ error: "No store data found for this student" });
+        return;
+      }
+
+      res.setHeader("Content-Type", "application/json");
+      res.setHeader(
+        "Content-Disposition",
+        'attachment; filename="snapshot-' + student.username + '.json"'
+      );
+      res.json(state.data);
+    } catch (error) {
+      console.error("Download snapshot error:", error);
+      res.status(500).json({ error: "Internal server error" });
     }
   }
 );

@@ -1,0 +1,77 @@
+<nav class="breadcrumb">
+  <a class="breadcrumb-item" href="/">Hyperbooks</a>
+  <span class="breadcrumb-sep">›</span>
+  <a class="breadcrumb-item" href="/hyperbook/{{hyperbook.id}}">{{hyperbook.name}}</a>
+  <span class="breadcrumb-sep">›</span>
+  <a class="breadcrumb-item" href="/hyperbook/{{hyperbook.id}}/group/{{group.id}}">{{group.name}}</a>
+  <span class="breadcrumb-sep">›</span>
+  <span class="breadcrumb-current">Event Log</span>
+</nav>
+
+<div class="toolbar">
+  <a class="btn btn-secondary" href="/hyperbook/{{hyperbook.id}}/group/{{group.id}}">← Back to Students</a>
+</div>
+
+<div class="content-area">
+  <h2>Snapshots</h2>
+  {{#if snapshots.length}}
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Student</th>
+        <th>Source</th>
+        <th>Last Event ID</th>
+        <th>Created</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each snapshots}}
+      <tr>
+        <td><strong>{{this.username}}</strong></td>
+        <td>{{this.source}}</td>
+        <td>{{this.last_event_id}}</td>
+        <td>{{this.created_at}}</td>
+        <td class="actions">
+          <a class="btn btn-sm" href="/hyperbook/{{../hyperbook.id}}/group/{{../group.id}}/snapshot/{{this.user_id}}">⬇ Download</a>
+        </td>
+      </tr>
+      {{/each}}
+    </tbody>
+  </table>
+  {{else}}
+  <p class="empty">No snapshots yet.</p>
+  {{/if}}
+
+  <h2>Recent Events</h2>
+  {{#if events.length}}
+  <div style="overflow-x:auto">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Student</th>
+        <th>Table</th>
+        <th>Operation</th>
+        <th>Key</th>
+        <th>Created</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each events}}
+      <tr>
+        <td>{{this.id}}</td>
+        <td><strong>{{this.username}}</strong></td>
+        <td><code>{{this.table_name}}</code></td>
+        <td>{{this.operation}}</td>
+        <td><code style="word-break:break-all">{{this.prim_key}}</code></td>
+        <td style="white-space:nowrap">{{this.created_at}}</td>
+      </tr>
+      {{/each}}
+    </tbody>
+  </table>
+  </div>
+  {{else}}
+  <p class="empty">No events yet.</p>
+  {{/if}}
+</div>

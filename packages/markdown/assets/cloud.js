@@ -2,6 +2,8 @@ window.hyperbook.cloud = (function () {
   // ===== Cloud Integration =====
   const AUTH_TOKEN_KEY = "hyperbook_auth_token";
   const AUTH_USER_KEY = "hyperbook_auth_user";
+  const LAST_EVENT_ID_KEY = "hyperbook_last_event_id";
+  const EVENT_BATCH_MAX_SIZE = 512 * 1024; // 512KB
   let isLoadingFromCloud = false;
   let syncManager = null;
 
@@ -40,7 +42,6 @@ window.hyperbook.cloud = (function () {
       this.maxWaitTime = options.maxWaitTime || 10000;
       this.minSaveInterval = options.minSaveInterval || 1000;
 
-      this.isDirty = false;
       this.lastSaveTime = 0;
       this.lastChangeTime = 0;
       this.debounceTimer = null;
@@ -49,7 +50,11 @@ window.hyperbook.cloud = (function () {
       this.saveMutex = new Mutex();
       this.retryCount = 0;
 
-      this.dirtyStores = new Set();
+      this.pendingEvents = [];
+      this.lastEventId = parseInt(
+        localStorage.getItem(LAST_EVENT_ID_KEY) || "0",
+        10,
+      );
 
       this.offlineQueue = [];
       this.isOnline = navigator.onLine;
@@ -57,12 +62,13 @@ window.hyperbook.cloud = (function () {
       this.setupEventListeners();
     }
 
-    markDirty(storeName = null) {
+    get isDirty() {
+      return this.pendingEvents.length > 0;
+    }
+
+    addEvent(event) {
       if (isLoadingFromCloud || isReadOnlyMode()) return;
-      if (storeName) {
-        this.dirtyStores.add(storeName);
-      }
-      this.isDirty = true;
+      this.pendingEvents.push(event);
       this.lastChangeTime = Date.now();
       this.updateUI("unsaved");
       this.scheduleSave();
@@ -105,24 +111,46 @@ window.hyperbook.cloud = (function () {
         this.updateUI("saving");
 
         try {
-          const dataToSave = await this.exportStores();
+          // Take a snapshot of pending events
+          const eventsToSend = this.pendingEvents.slice();
+          const serialized = JSON.stringify(eventsToSend);
 
           if (!this.isOnline) {
             this.offlineQueue.push({
-              data: dataToSave,
+              events: eventsToSend,
+              afterEventId: this.lastEventId,
               timestamp: Date.now(),
             });
+            this.pendingEvents = [];
             this.updateUI("offline-queued");
             return;
           }
 
-          await apiRequest(`/api/store/${HYPERBOOK_CLOUD.id}`, {
-            method: "POST",
-            body: JSON.stringify({ data: dataToSave }),
-          });
+          let result;
 
-          this.isDirty = false;
-          this.dirtyStores.clear();
+          if (serialized.length > EVENT_BATCH_MAX_SIZE) {
+            // Large batch — fall back to full snapshot
+            result = await this.sendSnapshot();
+          } else {
+            // Normal path — send events
+            result = await this.sendEvents(eventsToSend);
+          }
+
+          if (result.conflict) {
+            // 409 — stale state, re-fetch
+            console.log("⚠ Stale state detected, re-fetching from cloud...");
+            await loadFromCloud();
+            this.pendingEvents = [];
+            window.location.reload();
+            return;
+          }
+
+          this.pendingEvents = [];
+          this.lastEventId = result.lastEventId;
+          localStorage.setItem(
+            LAST_EVENT_ID_KEY,
+            String(this.lastEventId),
+          );
           this.lastSaveTime = Date.now();
           this.retryCount = 0;
           this.updateUI("saved");
@@ -137,15 +165,46 @@ window.hyperbook.cloud = (function () {
       });
     }
 
-    async exportStores() {
+    async sendEvents(events, afterEventId) {
+      var effectiveAfterId = afterEventId !== undefined ? afterEventId : this.lastEventId;
+      try {
+        const data = await apiRequest(
+          `/api/store/${HYPERBOOK_CLOUD.id}/events`,
+          {
+            method: "POST",
+            body: JSON.stringify({
+              events: events,
+              afterEventId: effectiveAfterId,
+            }),
+          },
+        );
+        return { lastEventId: data.lastEventId, conflict: false };
+      } catch (error) {
+        if (error.status === 409) {
+          return { conflict: true };
+        }
+        throw error;
+      }
+    }
+
+    async sendSnapshot() {
       const hyperbookExport = await store.export({ prettyJson: false });
-      return {
-        version: 1,
-        origin: window.location.origin,
-        data: {
-          hyperbook: JSON.parse(await hyperbookExport.text()),
+      const exportData = JSON.parse(await hyperbookExport.text());
+
+      const data = await apiRequest(
+        `/api/store/${HYPERBOOK_CLOUD.id}/snapshot`,
+        {
+          method: "POST",
+          body: JSON.stringify({
+            data: {
+              version: 1,
+              origin: window.location.origin,
+              data: { hyperbook: exportData },
+            },
+          }),
         },
-      };
+      );
+      return { lastEventId: data.lastEventId, conflict: false };
     }
 
     scheduleRetry() {
@@ -177,7 +236,6 @@ window.hyperbook.cloud = (function () {
 
       window.addEventListener("beforeunload", (e) => {
         if (this.isDirty) {
-          this.performSave("unload");
           e.preventDefault();
           e.returnValue = "";
         }
@@ -194,21 +252,38 @@ window.hyperbook.cloud = (function () {
       if (this.offlineQueue.length === 0) return;
 
       console.log(`Processing ${this.offlineQueue.length} queued saves...`);
-      this.offlineQueue.sort((a, b) => a.timestamp - b.timestamp);
 
-      // Only send the latest queued save
-      const latest = this.offlineQueue[this.offlineQueue.length - 1];
-      try {
-        await apiRequest(`/api/store/${HYPERBOOK_CLOUD.id}`, {
-          method: "POST",
-          body: JSON.stringify({ data: latest.data }),
-        });
-        this.offlineQueue = [];
-        this.lastSaveTime = Date.now();
-        console.log("✓ Offline queue processed");
-      } catch (error) {
-        console.error("Failed to process offline queue:", error);
+      // Send queued events in order
+      for (let i = 0; i < this.offlineQueue.length; i++) {
+        const queued = this.offlineQueue[i];
+        try {
+          const result = await this.sendEvents(queued.events, queued.afterEventId);
+
+          if (result.conflict) {
+            // Conflict — discard remaining queue, re-fetch
+            console.log("⚠ Offline queue conflict, re-fetching...");
+            this.offlineQueue = [];
+            await loadFromCloud();
+            window.location.reload();
+            return;
+          }
+
+          this.lastEventId = result.lastEventId;
+          localStorage.setItem(
+            LAST_EVENT_ID_KEY,
+            String(this.lastEventId),
+          );
+        } catch (error) {
+          console.error("Failed to process offline queue:", error);
+          // Keep remaining items in queue
+          this.offlineQueue = this.offlineQueue.slice(i);
+          return;
+        }
       }
+
+      this.offlineQueue = [];
+      this.lastSaveTime = Date.now();
+      console.log("✓ Offline queue processed");
     }
 
     clearTimers() {
@@ -232,14 +307,30 @@ window.hyperbook.cloud = (function () {
     }
 
     async manualSave() {
-      this.isDirty = true;
+      if (this.pendingEvents.length === 0) {
+        // No pending events — send full snapshot
+        this.clearTimers();
+        try {
+          this.updateUI("saving");
+          const result = await this.sendSnapshot();
+          this.lastEventId = result.lastEventId;
+          localStorage.setItem(
+            LAST_EVENT_ID_KEY,
+            String(this.lastEventId),
+          );
+          this.updateUI("saved");
+        } catch (error) {
+          console.error("Manual save failed:", error);
+          this.updateUI("error");
+        }
+        return;
+      }
       this.clearTimers();
       await this.performSave("manual");
     }
 
     reset() {
-      this.isDirty = false;
-      this.dirtyStores.clear();
+      this.pendingEvents = [];
       this.clearTimers();
       this.offlineQueue = [];
       this.retryCount = 0;
@@ -304,6 +395,7 @@ window.hyperbook.cloud = (function () {
   function clearAuthToken() {
     localStorage.removeItem(AUTH_TOKEN_KEY);
     localStorage.removeItem(AUTH_USER_KEY);
+    localStorage.removeItem(LAST_EVENT_ID_KEY);
   }
 
   /**
@@ -371,12 +463,16 @@ window.hyperbook.cloud = (function () {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Request failed");
+        const err = new Error(data.error || "Request failed");
+        err.status = response.status;
+        throw err;
       }
 
       return data;
     } catch (error) {
-      console.error("Cloud API error:", error);
+      if (!error.status) {
+        console.error("Cloud API error:", error);
+      }
       throw error;
     }
   }
@@ -428,9 +524,8 @@ window.hyperbook.cloud = (function () {
     try {
       const data = await apiRequest(`/api/store/${HYPERBOOK_CLOUD.id}`);
 
-      if (data && data.data) {
-        // Import data into local stores
-        const storeData = data.data.data || data.data;
+      if (data && data.snapshot) {
+        const storeData = data.snapshot.data || data.snapshot;
         const { hyperbook } = storeData;
 
         if (hyperbook) {
@@ -438,6 +533,17 @@ window.hyperbook.cloud = (function () {
             type: "application/json",
           });
           await store.import(blob, { clearTablesBeforeImport: true });
+        }
+
+        // Track the server's lastEventId
+        if (data.lastEventId !== undefined) {
+          localStorage.setItem(
+            LAST_EVENT_ID_KEY,
+            String(data.lastEventId),
+          );
+          if (syncManager) {
+            syncManager.lastEventId = data.lastEventId;
+          }
         }
 
         console.log("✓ Store loaded from cloud");
@@ -482,12 +588,36 @@ window.hyperbook.cloud = (function () {
         minSaveInterval: 1000,
       });
 
-      // Hook Dexie tables to track changes (skip currentState — ephemeral UI data)
+      // Hook Dexie tables to capture granular events (skip currentState — ephemeral UI data)
       store.tables.forEach((table) => {
         if (table.name === "currentState") return;
-        table.hook("creating", () => syncManager.markDirty(table.name));
-        table.hook("updating", () => syncManager.markDirty(table.name));
-        table.hook("deleting", () => syncManager.markDirty(table.name));
+
+        table.hook("creating", function (primKey, obj) {
+          syncManager.addEvent({
+            table: table.name,
+            op: "create",
+            primKey: primKey,
+            data: obj,
+          });
+        });
+
+        table.hook("updating", function (modifications, primKey) {
+          syncManager.addEvent({
+            table: table.name,
+            op: "update",
+            primKey: primKey,
+            data: modifications,
+          });
+        });
+
+        table.hook("deleting", function (primKey) {
+          syncManager.addEvent({
+            table: table.name,
+            op: "delete",
+            primKey: primKey,
+            data: null,
+          });
+        });
       });
     }
   }
@@ -618,6 +748,14 @@ window.hyperbook.cloud = (function () {
       updateUserUI(user);
     }
 
+    // Hide local export/import/reset when logged into cloud
+    if (HYPERBOOK_CLOUD && getAuthToken()) {
+      document.querySelectorAll(".export-icon, .import-icon, .reset-icon").forEach((el) => {
+        const link = el.closest("a");
+        if (link) link.style.display = "none";
+      });
+    }
+
     // Show impersonation banner if in readonly mode
     if (isReadOnlyMode()) {
       const banner = document.createElement("div");
@@ -643,6 +781,14 @@ window.hyperbook.cloud = (function () {
 
   return {
     save: () => syncManager?.manualSave(),
+    sendSnapshot: async () => {
+      if (!syncManager || !HYPERBOOK_CLOUD || !getAuthToken() || isReadOnlyMode()) return;
+      syncManager.pendingEvents = [];
+      syncManager.clearTimers();
+      const result = await syncManager.sendSnapshot();
+      syncManager.lastEventId = result.lastEventId;
+      localStorage.setItem(LAST_EVENT_ID_KEY, String(result.lastEventId));
+    },
     userToggle,
     login,
     logout,

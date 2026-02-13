@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "start": "node ./bin/www",
-    "dev": "node --watch ./bin/www"
+    "dev": "node --watch ./bin/www",
+    "test": "vitest"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
@@ -19,5 +20,8 @@
     "jsonwebtoken": "^9.0.2",
     "morgan": "~1.9.1",
     "nodemailer": "^8.0.1"
+  },
+  "devDependencies": {
+    "vitest": "^4.0.18"
   }
 }

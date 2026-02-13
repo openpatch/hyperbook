@@ -513,6 +513,10 @@ importers:
       nodemailer:
         specifier: ^8.0.1
         version: 8.0.1
+    devDependencies:
+      vitest:
+        specifier: ^4.0.18
+        version: 4.0.18(@types/node@22.13.1)(lightningcss@1.28.2)(sass@1.97.3)(terser@5.46.0)(yaml@2.8.2)
 
   platforms/vscode:
     dependencies:

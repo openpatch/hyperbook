@@ -4,6 +4,7 @@ var middleware = require("../middleware/auth");
 
 var router = express.Router();
 
+// GET /api/store/:hyperbookId — fetch current state (snapshot + event replay)
 router.get(
   "/:hyperbookId",
   middleware.authenticateToken,
@@ -22,19 +23,17 @@ router.get(
         return;
       }
 
-      var store = await db.getAsync(
-        "SELECT data, updated_at FROM stores WHERE user_id = ? AND hyperbook_id = ?",
-        [userId, hyperbook.id]
-      );
+      var state = await db.reconstructState(userId, hyperbook.id);
 
-      if (!store) {
+      if (!state) {
         res.status(404).json({ error: "No store data found" });
         return;
       }
 
       res.json({
-        data: JSON.parse(store.data),
-        updatedAt: store.updated_at,
+        snapshot: state.data,
+        lastEventId: state.lastEventId,
+        updatedAt: state.updatedAt,
       });
     } catch (error) {
       console.error("Get store error:", error);
@@ -43,8 +42,9 @@ router.get(
   }
 );
 
+// POST /api/store/:hyperbookId/events — append event batch
 router.post(
-  "/:hyperbookId",
+  "/:hyperbookId/events",
   middleware.authenticateToken,
   async function (req, res) {
     try {
@@ -55,10 +55,11 @@ router.post(
 
       var hyperbookId = req.params.hyperbookId;
       var userId = req.user.id;
-      var data = req.body.data;
+      var events = req.body.events;
+      var afterEventId = req.body.afterEventId;
 
-      if (!data) {
-        res.status(400).json({ error: "Store data required" });
+      if (!Array.isArray(events) || events.length === 0) {
+        res.status(400).json({ error: "Events array required" });
         return;
       }
 
@@ -72,17 +73,78 @@ router.post(
         return;
       }
 
-      await db.runAsync(
-        "INSERT INTO stores (user_id, hyperbook_id, data, updated_at) " +
-          "VALUES (?, ?, ?, CURRENT_TIMESTAMP) " +
-          "ON CONFLICT(user_id, hyperbook_id) " +
-          "DO UPDATE SET data = ?, updated_at = CURRENT_TIMESTAMP",
-        [userId, hyperbook.id, JSON.stringify(data), JSON.stringify(data)]
+      // Validate afterEventId matches server's latest
+      var currentLatest = await db.getLatestEventId(userId, hyperbook.id);
+      var latestSnapshot = await db.getLatestSnapshot(userId, hyperbook.id);
+      var serverLatest = Math.max(
+        currentLatest,
+        latestSnapshot ? latestSnapshot.last_event_id : 0
       );
 
-      res.json({ success: true, updatedAt: new Date().toISOString() });
+      if (afterEventId !== null && afterEventId !== undefined && afterEventId !== serverLatest) {
+        res.status(409).json({
+          error: "Stale state — re-fetch required",
+          serverLastEventId: serverLatest,
+        });
+        return;
+      }
+
+      var lastEventId = await db.appendEvents(userId, hyperbook.id, events);
+
+      res.json({
+        success: true,
+        lastEventId: lastEventId,
+      });
     } catch (error) {
-      console.error("Save store error:", error);
+      console.error("Append events error:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  }
+);
+
+// POST /api/store/:hyperbookId/snapshot — full-state overwrite
+router.post(
+  "/:hyperbookId/snapshot",
+  middleware.authenticateToken,
+  async function (req, res) {
+    try {
+      if (req.user.readonly) {
+        res.status(403).json({ error: "Read-only access" });
+        return;
+      }
+
+      var hyperbookId = req.params.hyperbookId;
+      var userId = req.user.id;
+      var data = req.body.data;
+
+      if (!data) {
+        res.status(400).json({ error: "Snapshot data required" });
+        return;
+      }
+
+      var hyperbook = await db.getAsync(
+        "SELECT id FROM hyperbooks WHERE slug = ?",
+        [hyperbookId]
+      );
+
+      if (!hyperbook) {
+        res.status(404).json({ error: "Hyperbook not found" });
+        return;
+      }
+
+      var snapshotId = await db.replaceWithSnapshot(
+        userId,
+        hyperbook.id,
+        data
+      );
+
+      res.json({
+        success: true,
+        snapshotId: snapshotId,
+        lastEventId: 0,
+      });
+    } catch (error) {
+      console.error("Save snapshot error:", error);
       res.status(500).json({ error: "Internal server error" });
     }
   }

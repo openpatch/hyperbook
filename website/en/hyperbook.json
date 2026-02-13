@@ -1,5 +1,9 @@
 {
   "name": "Hyperbook Documentation",
+  "cloud": {
+    "id": "test",
+    "url": "http://localhost:3001"
+  },
   "qrcode": true,
   "breadcrumb": true,
   "llms": true,

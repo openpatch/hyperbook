@@ -41,7 +41,32 @@ Once logged in, the following happens automatically:
 - **State synchronization** — All interactive element state (code editors, bookmarks, collapsibles, excalidraw drawings, etc.) is saved to the cloud server.
 - **Cross-device access** — Students can continue where they left off on any device.
 - **Offline support** — Changes are queued locally when offline and synced when the connection is restored.
-- **External databases** — Data from embedded tools like SQL-IDE and LearnJ is also synced.
+- **Auto-save indicator** — A status icon shows the current sync state (saved, saving, unsaved, offline).
+
+When logged into the cloud, local export, import, and reset buttons are hidden to prevent conflicts with cloud-managed state.
+
+## Event-Sourcing Architecture
+
+Instead of sending the entire store on every change, Hyperbook Cloud uses an event-sourcing approach for efficient synchronization.
+
+### How It Works
+
+1. **Granular event capture** — Every change to the local Dexie database (create, update, delete) is captured as an individual event via Dexie hooks. Only the changed fields are recorded for updates (deltas), not the full row.
+2. **Batched sync** — Events are collected and sent in batches to the cloud server after a debounce period (2 seconds of inactivity or 10 seconds maximum wait).
+3. **Server-side snapshots** — The server periodically compacts events into snapshots. After 100 events (configurable via `SNAPSHOT_THRESHOLD` environment variable), a new snapshot is created and old events are pruned.
+4. **State reconstruction** — When a student loads their state, the server reconstructs it by applying any events since the last snapshot.
+
+### Large Data Handling
+
+If an event batch exceeds 512 KB (e.g., large Excalidraw drawings or Geogebra states), the client falls back to sending a full snapshot instead of individual events. This prevents bandwidth issues with large binary data.
+
+### Conflict Detection
+
+The client tracks the last known event ID from the server. When sending events, it includes this ID as `afterEventId`. If the server detects that the client is out of date (e.g., another device sent events in the meantime), it responds with a 409 conflict and the client re-fetches the latest state.
+
+### Offline Queue
+
+When the device is offline, events are stored in a local queue with their `afterEventId`. Once the connection is restored, the queue is replayed in order. If a conflict is detected during replay, the client discards the queue and re-fetches from the server.
 
 ## Cloud Server
 
@@ -59,32 +84,67 @@ The cloud server is a separate application located in `platforms/cloud/` of the 
 
 Teachers and admins can impersonate a student to view their progress in read-only mode. This opens the hyperbook with the student's saved state without allowing any modifications.
 
+### Event Log
+
+The admin interface provides an event log per group, showing recent events (last 200) and the latest snapshot per student. Teachers and admins can:
+
+- **View the event log** — See all recent database changes across students in a group.
+- **Download snapshots** — Download the latest reconstructed state for a student as a JSON file.
+
+Snapshots are labeled with their source: `auto` (created automatically when the event threshold is reached) or `manual` (created from a full snapshot upload, import, or reset).
+
 ## Data Flow
+
+### Saving Changes
 
 ```
 Student interacts with hyperbook
         ↓
-Local state saved (IndexedDB)
+Dexie hook captures change as event
         ↓
-Cloud sync (debounced, automatic)
+Events batched (debounced 2s / max 10s)
         ↓
-POST /api/store/:hyperbookId
+POST /api/store/:hyperbookId/events
         ↓
-Stored per-user on cloud server
+Events stored on cloud server
 ```
 
-When the student logs in on another device:
+If the event batch exceeds 512 KB:
+
+```
+Batch too large
+        ↓
+Full Dexie export created
+        ↓
+POST /api/store/:hyperbookId/snapshot
+        ↓
+Snapshot replaces all events + previous snapshot
+```
+
+### Loading State
 
 ```
 Student logs in
         ↓
 GET /api/store/:hyperbookId
         ↓
-State imported into local storage
+Server reconstructs state (snapshot + events)
+        ↓
+State imported into local IndexedDB
         ↓
 Interactive elements restored
 ```
 
-## Import & Export
+## API Endpoints
 
-Cloud sync works alongside the `importExport` feature. Students can still manually export and import their state as a file, even when cloud sync is active.
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/api/store/:hyperbookId` | Fetch reconstructed state (snapshot + event replay). |
+| `POST` | `/api/store/:hyperbookId/events` | Append a batch of events. Includes `afterEventId` for conflict detection. |
+| `POST` | `/api/store/:hyperbookId/snapshot` | Full-state overwrite. Replaces all events and snapshots. |
+
+## Configuration
+
+| Environment Variable | Default | Description |
+|---|---|---|
+| `SNAPSHOT_THRESHOLD` | `100` | Number of events before the server automatically creates a new snapshot and prunes old events. |

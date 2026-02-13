@@ -20,6 +20,7 @@
   <button class="btn btn-secondary" onclick="document.getElementById('generateModal').style.display='flex'">Generate Students</button>
   {{/if}}
   <a class="btn btn-secondary" href="/hyperbook/{{hyperbook.id}}/group/{{group.id}}/print" target="_blank">🖨 Print Cards</a>
+  <a class="btn btn-secondary" href="/hyperbook/{{hyperbook.id}}/group/{{group.id}}/events">📋 Event Log</a>
 </div>
 
 <div class="content-area">
@@ -46,6 +47,9 @@
             <input type="hidden" name="group_id" value="{{../group.id}}" />
             <button type="submit" class="btn btn-sm btn-impersonate">👁 Impersonate</button>
           </form>
+          {{/if}}
+          {{#if this.store_updated_at}}
+          <a class="btn btn-sm" href="/hyperbook/{{../hyperbook.id}}/group/{{../group.id}}/snapshot/{{this.id}}">⬇ Snapshot</a>
           {{/if}}
           {{#if ../canUpdateStudent}}
           <button class="btn btn-sm" onclick="showPasswordModal('{{this.id}}', '{{this.username}}')">🔑 Password</button>
