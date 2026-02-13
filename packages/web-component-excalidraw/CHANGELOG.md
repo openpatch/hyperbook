@@ -1,5 +1,11 @@
 # @hyperbook/element-excalidraw
 
+## 0.3.3
+
+### Patch Changes
+
+- [`c05d4d3`](https://github.com/openpatch/hyperbook/commit/c05d4d36c50f687fde6dd039b7d5118247c771f4) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Use new store
+
 ## 0.3.2
 
 ### Patch Changes
