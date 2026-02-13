@@ -1,5 +1,19 @@
 # @hyperbook/markdown
 
+## 0.56.0
+
+### Minor Changes
+
+- [`b39a52a`](https://github.com/openpatch/hyperbook/commit/b39a52a0b1b1a37cb0b5b256ba7f43093e2ee946) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Standardize client-side scripts to use `hyperbook.*` namespace pattern.
+
+  - All scripts now use `hyperbook.X = (function() { return {...} })()` IIFE pattern
+  - Moved `var store` and `var i18n` globals under `hyperbook.store` and `hyperbook.i18n`
+  - Split `client.js` into `bootstrap.js` (init logic) and `ui.js` (UI functions)
+  - Grouped UI functions into sub-namespaces: `hyperbook.ui`, `hyperbook.qrcode`, `hyperbook.share`
+  - All directives now auto-init with `DOMContentLoaded` and `MutationObserver`
+  - Added JSDoc type definitions via `hyperbook.types.js` for IDE support
+  - Resolved `hyperbook.download` naming collision (archive directive renamed to `hyperbook.archive`)
+
 ## 0.55.4
 
 ### Patch Changes
