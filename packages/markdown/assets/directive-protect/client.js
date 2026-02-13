@@ -1,3 +1,11 @@
+/// <reference path="../hyperbook.types.js" />
+
+/**
+ * Password-protected content sections.
+ * @type {HyperbookProtect}
+ * @memberof hyperbook
+ * @see hyperbook.store
+ */
 hyperbook.protect = (function () {
   /**
    * @param {HTMLInputElement} inputEl
@@ -7,7 +15,7 @@ hyperbook.protect = (function () {
     const value = inputEl.value;
     const id = el.getAttribute("data-id");
 
-    store.protect.put({ id, passwordHash: btoa(value) }).then(() => {
+    hyperbook.store.protect.put({ id, passwordHash: btoa(value) }).then(() => {
       const els = document.querySelectorAll(
         `input[data-id="${el.getAttribute("data-id")}"]`
       );
@@ -22,7 +30,7 @@ hyperbook.protect = (function () {
    */
   function onUpdateToast(inputEl, el, hiddenEl) {
     const id = el.getAttribute("data-id");
-    store.protect.get(id).then((result) => {
+    hyperbook.store.protect.get(id).then((result) => {
       if (result) {
         const value = atob(result.passwordHash);
         inputEl.value = value;
@@ -50,7 +58,7 @@ hyperbook.protect = (function () {
       const id = el.getAttribute("data-id");
 
       if (!inputEl) continue;
-      store.protect.get(id).then((result) => {
+      hyperbook.store.protect.get(id).then((result) => {
         if (result) {
           inputEl.value = atob(result.passwordHash);
         } else {

@@ -1,3 +1,11 @@
+/// <reference path="../hyperbook.types.js" />
+
+/**
+ * File download management.
+ * @type {HyperbookDownload}
+ * @memberof hyperbook
+ * @see hyperbook.i18n
+ */
 hyperbook.download = (function () {
   const init = (root) => {
     const els = root.getElementsByClassName("directive-download");
@@ -10,10 +18,10 @@ hyperbook.download = (function () {
         const isOnline = r.ok;
         if (isOnline) {
           labelEl.classList.remove("offline");
-          labelEl.innerHTML.replace(`(${i18n.get("download-offline")})`, "");
+          labelEl.innerHTML.replace(`(${hyperbook.i18n.get("download-offline")})`, "");
         } else {
           labelEl.classList.add("offline");
-          labelEl.innerHTML += ` (${i18n.get("download-offline")})`;
+          labelEl.innerHTML += ` (${hyperbook.i18n.get("download-offline")})`;
         }
       });
     }

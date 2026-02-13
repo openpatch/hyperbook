@@ -1,4 +1,15 @@
-window.hyperbook.cloud = (function () {
+/// <reference path="./hyperbook.types.js" />
+window.hyperbook = window.hyperbook || {};
+
+/**
+ * Cloud sync integration for hyperbook store data.
+ * Handles authentication, event-based sync, and snapshot sync.
+ * @type {HyperbookCloud}
+ * @memberof hyperbook
+ * @see hyperbook.store
+ * @see hyperbook.i18n
+ */
+hyperbook.cloud = (function () {
   // ===== Cloud Integration =====
   const AUTH_TOKEN_KEY = "hyperbook_auth_token";
   const AUTH_USER_KEY = "hyperbook_auth_user";
@@ -188,8 +199,8 @@ window.hyperbook.cloud = (function () {
     }
 
     async sendSnapshot() {
-      const hyperbookExport = await store.export({ prettyJson: false });
-      const exportData = JSON.parse(await hyperbookExport.text());
+      const storeExport = await hyperbook.store.db.export({ prettyJson: false });
+      const exportData = JSON.parse(await storeExport.text());
 
       const data = await apiRequest(
         `/api/store/${HYPERBOOK_CLOUD.id}/snapshot`,
@@ -532,7 +543,7 @@ window.hyperbook.cloud = (function () {
           const blob = new Blob([JSON.stringify(hyperbook)], {
             type: "application/json",
           });
-          await store.import(blob, { clearTablesBeforeImport: true });
+          await hyperbook.store.db.import(blob, { clearTablesBeforeImport: true });
         }
 
         // Track the server's lastEventId
@@ -589,7 +600,7 @@ window.hyperbook.cloud = (function () {
       });
 
       // Hook Dexie tables to capture granular events (skip currentState — ephemeral UI data)
-      store.tables.forEach((table) => {
+      hyperbook.store.tables.forEach((table) => {
         if (table.name === "currentState") return;
 
         table.hook("creating", function (primKey, obj) {
@@ -656,29 +667,29 @@ window.hyperbook.cloud = (function () {
     statusEl.className = status;
 
     if (status === "unsaved") {
-      statusEl.textContent = i18n.get("user-unsaved", {}, "Unsaved changes");
+      statusEl.textContent = hyperbook.i18n.get("user-unsaved", {}, "Unsaved changes");
       updateUserIconState("logged-in");
     } else if (status === "saving") {
-      statusEl.textContent = i18n.get("user-saving", {}, "Saving...");
+      statusEl.textContent = hyperbook.i18n.get("user-saving", {}, "Saving...");
       updateUserIconState("syncing");
     } else if (status === "saved") {
-      statusEl.textContent = i18n.get("user-saved", {}, "Saved");
+      statusEl.textContent = hyperbook.i18n.get("user-saved", {}, "Saved");
       updateUserIconState("synced");
     } else if (status === "error") {
-      statusEl.textContent = i18n.get("user-save-error", {}, "Save Error");
+      statusEl.textContent = hyperbook.i18n.get("user-save-error", {}, "Save Error");
       updateUserIconState("unsynced");
     } else if (status === "offline") {
-      statusEl.textContent = i18n.get("user-offline", {}, "Offline");
+      statusEl.textContent = hyperbook.i18n.get("user-offline", {}, "Offline");
       updateUserIconState("unsynced");
     } else if (status === "offline-queued") {
-      statusEl.textContent = i18n.get(
+      statusEl.textContent = hyperbook.i18n.get(
         "user-offline-queued",
         {},
         "Saved locally",
       );
       updateUserIconState("logged-in");
     } else if (status === "readonly") {
-      statusEl.textContent = i18n.get("user-readonly", {}, "Read-Only Mode");
+      statusEl.textContent = hyperbook.i18n.get("user-readonly", {}, "Read-Only Mode");
       statusEl.className = "readonly";
       updateUserIconState("synced");
     }
@@ -707,7 +718,7 @@ window.hyperbook.cloud = (function () {
     const errorEl = document.getElementById("user-login-error");
 
     if (!username || !password) {
-      errorEl.textContent = i18n.get(
+      errorEl.textContent = hyperbook.i18n.get(
         "user-login-required",
         {},
         "Username and password required",
@@ -721,14 +732,14 @@ window.hyperbook.cloud = (function () {
       errorEl.textContent = "";
     } catch (error) {
       errorEl.textContent =
-        error.message || i18n.get("user-login-failed", {}, "Login failed");
+        error.message || hyperbook.i18n.get("user-login-failed", {}, "Login failed");
     }
   };
 
   const logout = () => {
     if (
       confirm(
-        i18n.get("user-logout-confirm", {}, "Are you sure you want to logout?"),
+        hyperbook.i18n.get("user-logout-confirm", {}, "Are you sure you want to logout?"),
       )
     ) {
       hyperbookLogout();
@@ -761,8 +772,8 @@ window.hyperbook.cloud = (function () {
       const banner = document.createElement("div");
       banner.id = "impersonation-banner";
       banner.innerHTML = `
-        <span>${i18n.get("user-impersonating", {}, "Impersonating")}: <strong>${user ? user.username : ""}</strong> — ${i18n.get("user-readonly", {}, "Read-Only Mode")}</span>
-        <a href="#" id="exit-impersonation">${i18n.get("user-exit-impersonation", {}, "Exit Impersonation")}</a>
+        <span>${hyperbook.i18n.get("user-impersonating", {}, "Impersonating")}: <strong>${user ? user.username : ""}</strong> — ${hyperbook.i18n.get("user-readonly", {}, "Read-Only Mode")}</span>
+        <a href="#" id="exit-impersonation">${hyperbook.i18n.get("user-exit-impersonation", {}, "Exit Impersonation")}</a>
       `;
       document.body.prepend(banner);
 

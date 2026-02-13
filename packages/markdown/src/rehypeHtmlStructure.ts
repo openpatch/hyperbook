@@ -667,7 +667,16 @@ ${ctx.config.cloud ? `HYPERBOOK_CLOUD = ${JSON.stringify(ctx.config.cloud).repla
                 type: "element",
                 tagName: "script",
                 properties: {
-                  src: makeUrl(["client.js"], "assets"),
+                  src: makeUrl(["bootstrap.js"], "assets"),
+                  defer: true,
+                },
+                children: [],
+              },
+              {
+                type: "element",
+                tagName: "script",
+                properties: {
+                  src: makeUrl(["ui.js"], "assets"),
                   defer: true,
                 },
                 children: [],

@@ -40,7 +40,7 @@ export default (ctx: HyperbookContext) => () => {
             ...figureProps,
             src: node.url,
             alt: node.alt,
-            onclick: `hyperbook.toggleLightbox(this)`,
+            onclick: `hyperbook.ui.toggleLightbox(this)`,
           },
           children: [],
         },

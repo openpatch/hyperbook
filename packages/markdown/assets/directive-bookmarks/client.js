@@ -1,6 +1,14 @@
+/// <reference path="../hyperbook.types.js" />
+
+/**
+ * Bookmark management and navigation.
+ * @type {HyperbookBookmarks}
+ * @memberof hyperbook
+ * @see hyperbook.store
+ */
 hyperbook.bookmarks = (function () {
   function update(root = document) {
-    store.bookmarks
+    hyperbook.store.bookmarks
       .toArray()
       .then((bookmarks) => {
         return bookmarks.map((bookmark) => {

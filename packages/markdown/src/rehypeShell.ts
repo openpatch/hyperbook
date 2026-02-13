@@ -513,7 +513,7 @@ const makeMetaElements = (ctx: HyperbookContext): ElementContent[] => {
       tagName: "a",
       properties: {
         href: "#",
-        onclick: "hyperbookExport()",
+        onclick: "hyperbook.store.export()",
       },
       children: [
         {
@@ -532,7 +532,7 @@ const makeMetaElements = (ctx: HyperbookContext): ElementContent[] => {
       tagName: "a",
       properties: {
         href: "#",
-        onclick: "hyperbookImport()",
+        onclick: "hyperbook.store.import()",
       },
       children: [
         {
@@ -552,7 +552,7 @@ const makeMetaElements = (ctx: HyperbookContext): ElementContent[] => {
     tagName: "a",
     properties: {
       href: "#",
-      onclick: "hyperbookReset()",
+      onclick: "hyperbook.store.reset()",
     },
     children: [
       {
@@ -700,7 +700,7 @@ const makeHeaderElements = (ctx: HyperbookContext): ElementContent[] => {
         properties: {
           "aria-label": "Nav Toggle",
           class: "toggle",
-          onclick: "hyperbook.navToggle()",
+          onclick: "hyperbook.ui.navToggle()",
         },
         children: [
           {
@@ -968,7 +968,7 @@ const makeHeaderElements = (ctx: HyperbookContext): ElementContent[] => {
       tagName: "button",
       properties: {
         id: "search-toggle",
-        onclick: "hyperbook.searchToggle()",
+        onclick: "hyperbook.ui.searchToggle()",
         title: i18n.get("shell-search"),
       },
       children: [],
@@ -1017,7 +1017,7 @@ const makeHeaderElements = (ctx: HyperbookContext): ElementContent[] => {
                   tagName: "button",
                   properties: {
                     class: "search-button",
-                    onclick: "hyperbook.search()",
+                    onclick: "hyperbook.ui.search()",
                   },
                   children: [],
                 },
@@ -1044,7 +1044,7 @@ const makeHeaderElements = (ctx: HyperbookContext): ElementContent[] => {
       id: "share-button",
       class: "icon-button",
       title: i18n.get("shell-share"),
-      onclick: "hyperbook.shareOpen()",
+      onclick: "hyperbook.share.open()",
     },
     children: [
       {

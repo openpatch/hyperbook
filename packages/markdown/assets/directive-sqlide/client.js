@@ -1,3 +1,10 @@
+/// <reference path="../hyperbook.types.js" />
+
+/**
+ * SQL IDE integration.
+ * @type {HyperbookSqlide}
+ * @memberof hyperbook
+ */
 hyperbook.sqlide = (function () {
   /**
    * @param {HTMLElement} el

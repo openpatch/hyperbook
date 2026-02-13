@@ -1,3 +1,11 @@
+/// <reference path="../hyperbook.types.js" />
+
+/**
+ * Text input with state persistence.
+ * @type {HyperbookTextinput}
+ * @memberof hyperbook
+ * @see hyperbook.store
+ */
 hyperbook.textinput = (function () {
   // Debounce helper to reduce database writes
   const debounce = (func, wait) => {
@@ -19,7 +27,7 @@ hyperbook.textinput = (function () {
       const id = textarea.getAttribute("data-id");
       
       // Load saved text from store
-      store.textinput.get(id).then((result) => {
+      hyperbook.store.textinput.get(id).then((result) => {
         if (result && result.text) {
           textarea.value = result.text;
         }
@@ -29,7 +37,7 @@ hyperbook.textinput = (function () {
       
       // Save text to store on input with debouncing
       const saveToStore = debounce(() => {
-        store.textinput.put({
+        hyperbook.store.textinput.put({
           id: id,
           text: textarea.value,
         }).catch((error) => {
@@ -41,7 +49,10 @@ hyperbook.textinput = (function () {
     });
   };
 
-  init(document.body);
+  // Initialize existing elements on document load
+  document.addEventListener("DOMContentLoaded", () => {
+    init(document);
+  });
 
   // Observe for new textinputs added to the DOM
   const observer = new MutationObserver((mutations) => {

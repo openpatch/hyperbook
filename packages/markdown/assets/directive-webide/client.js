@@ -1,3 +1,12 @@
+/// <reference path="../hyperbook.types.js" />
+
+/**
+ * Web IDE with HTML/CSS/JS editing.
+ * @type {HyperbookWebide}
+ * @memberof hyperbook
+ * @see hyperbook.store
+ * @see hyperbook.i18n
+ */
 hyperbook.webide = (function () {
   window.codeInput?.registerTemplate(
     "webide-highlighted",
@@ -7,9 +16,7 @@ hyperbook.webide = (function () {
     ]),
   );
 
-  const elems = document.getElementsByClassName("directive-webide");
-
-  for (let elem of elems) {
+  function initElement(elem) {
     const title = elem.getElementsByClassName("container-title")[0];
     /** @type {HTMLTextAreaElement | null} */
     const editorHTML = elem.querySelector(".editor.html");
@@ -33,8 +40,8 @@ hyperbook.webide = (function () {
     const downloadEl = elem.querySelector("button.download");
 
     resetEl?.addEventListener("click", () => {
-      if (window.confirm(i18n.get("webide-reset-prompt"))) {
-        store.webide.delete(id);
+      if (window.confirm(hyperbook.i18n.get("webide-reset-prompt"))) {
+        hyperbook.store.webide.delete(id);
         window.location.reload();
       }
     });
@@ -70,7 +77,7 @@ hyperbook.webide = (function () {
     });
 
     const load = async () => {
-      const result = await store.webide.get(id);
+      const result = await hyperbook.store.webide.get(id);
       if (!result) {
         return;
       }
@@ -84,7 +91,7 @@ hyperbook.webide = (function () {
     load();
 
     const update = () => {
-      store.webide.put({
+      hyperbook.store.webide.put({
         id,
         html: editorHTML?.value,
         css: editorCSS?.value,
@@ -102,7 +109,7 @@ hyperbook.webide = (function () {
     });
 
     editorHTML?.addEventListener("code-input_load", async () => {
-      const result = await store.webide.get(id);
+      const result = await hyperbook.store.webide.get(id);
       if (result) {
         editorHTML.value = result.html;
       }
@@ -115,7 +122,7 @@ hyperbook.webide = (function () {
     });
 
     editorCSS?.addEventListener("code-input_load", async () => {
-      const result = await store.webide.get(id);
+      const result = await hyperbook.store.webide.get(id);
       if (result) {
         editorCSS.value = result.css;
       }
@@ -128,7 +135,7 @@ hyperbook.webide = (function () {
     });
 
     editorJS?.addEventListener("code-input_load", async () => {
-      const result = await store.webide.get(id);
+      const result = await hyperbook.store.webide.get(id);
       if (result) {
         editorJS.value = result.js;
       }
@@ -149,4 +156,32 @@ hyperbook.webide = (function () {
       a.click();
     });
   }
+
+  function init(root) {
+    const elems = root.querySelectorAll(".directive-webide");
+    elems.forEach(initElement);
+  }
+
+  // Initialize existing elements on document load
+  document.addEventListener("DOMContentLoaded", () => {
+    init(document);
+  });
+
+  // Observe for new elements added to the DOM
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      mutation.addedNodes.forEach((node) => {
+        if (
+          node.nodeType === 1 &&
+          node.classList.contains("directive-webide")
+        ) {
+          initElement(node);
+        }
+      });
+    });
+  });
+
+  observer.observe(document.body, { childList: true, subtree: true });
+
+  return { init };
 })();

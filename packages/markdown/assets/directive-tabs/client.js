@@ -1,3 +1,11 @@
+/// <reference path="../hyperbook.types.js" />
+
+/**
+ * Tabbed content panels with state persistence.
+ * @type {HyperbookTabs}
+ * @memberof hyperbook
+ * @see hyperbook.store
+ */
 hyperbook.tabs = (function () {
   const init = (root) => {
     // Find all radio inputs for tabs
@@ -9,7 +17,7 @@ hyperbook.tabs = (function () {
       // Listen for changes on radio inputs
       input.addEventListener("change", () => {
         if (input.checked) {
-          store.tabs.put({
+          hyperbook.store.tabs.put({
             id: tabsId,
             active: tabId,
           });
@@ -21,7 +29,7 @@ hyperbook.tabs = (function () {
     });
     
     // Restore saved tab selections
-    store.tabs.each((result) => {
+    hyperbook.store.tabs.each((result) => {
       selectTab(result.id, result.active);
     });
   };
@@ -42,7 +50,10 @@ hyperbook.tabs = (function () {
     syncAllTabs(tabsId, tabId);
   }
 
-  init(document.body);
+  // Initialize existing elements on document load
+  document.addEventListener("DOMContentLoaded", () => {
+    init(document);
+  });
 
   // Observe for new tabs added to the DOM
   const observer = new MutationObserver((mutations) => {

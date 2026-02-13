@@ -204,14 +204,14 @@ var multievent = {
       });
     }
     
-    await store.multievent.put({
+    await hyperbook.store.multievent.put({
       id: "multievent_" + clNr + "_" + window.location.pathname,
       state: JSON.stringify(state)
     });
   },
   loadState: async function (clNr) {
     try {
-      var record = await store.multievent.get("multievent_" + clNr + "_" + window.location.pathname);
+      var record = await hyperbook.store.multievent.get("multievent_" + clNr + "_" + window.location.pathname);
       if (!record) return false;
       
       var state = JSON.parse(record.state);

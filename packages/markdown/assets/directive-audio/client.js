@@ -1,3 +1,11 @@
+/// <reference path="../hyperbook.types.js" />
+
+/**
+ * Audio player with playback controls and state persistence.
+ * @type {HyperbookAudio}
+ * @memberof hyperbook
+ * @see hyperbook.store
+ */
 hyperbook.audio = (function () {
   /**
    * @param {number} seconds
@@ -23,37 +31,68 @@ hyperbook.audio = (function () {
    */
   const wavesurferInstances = {};
 
-  function init() {
-    const els = document.getElementsByClassName("wave");
+  function initElement(el) {
+    const src = el.getAttribute("data-src");
+    const id = el.id;
+
+    if (wavesurferInstances[id]) return;
+
+    const wavesurfer = window.WaveSurfer.create({
+      container: el,
+      cursorWidth: 4,
+      barWidth: 4,
+      barGap: 5,
+      barRadius: 2,
+      height: 64,
+      url: src,
+    });
+    wavesurfer.on("ready", () => update(id));
+    wavesurfer.on("audioprocess", () => update(id));
+    wavesurfer.on("pause", () => update(id));
+    wavesurfer.on("finish", () => update(id));
+    wavesurfer.on("play", () => update(id));
+    wavesurferInstances[id] = wavesurfer;
+
+    hyperbook.store.audio.get(id).then((result) => {
+      if (result) {
+        wavesurfer.setTime(result.time);
+      }
+    });
+  }
+
+  function init(root) {
+    const els = root.getElementsByClassName("wave");
     for (let el of els) {
-      const src = el.getAttribute("data-src");
-      const id = el.id;
-
-      const wavesurfer = window.WaveSurfer.create({
-        container: el,
-        cursorWidth: 4,
-        barWidth: 4,
-        barGap: 5,
-        barRadius: 2,
-        height: 64,
-        url: src,
-      });
-      wavesurfer.on("ready", () => update(id));
-      wavesurfer.on("audioprocess", () => update(id));
-      wavesurfer.on("pause", () => update(id));
-      wavesurfer.on("finish", () => update(id));
-      wavesurfer.on("play", () => update(id));
-      wavesurferInstances[id] = wavesurfer;
-
-      store.audio.get(id).then((result) => {
-        if (result) {
-          wavesurfer.setTime(result.time);
-        }
-      });
+      initElement(el);
     }
   }
 
-  init();
+  // Initialize existing elements on document load
+  document.addEventListener("DOMContentLoaded", () => {
+    init(document);
+  });
+
+  // Observe for new elements added to the DOM
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      mutation.addedNodes.forEach((node) => {
+        if (node.nodeType === 1) {
+          if (node.classList.contains("wave")) {
+            initElement(node);
+          } else {
+            const waves = node.getElementsByClassName?.("wave");
+            if (waves) {
+              for (let el of waves) {
+                initElement(el);
+              }
+            }
+          }
+        }
+      });
+    });
+  });
+
+  observer.observe(document.body, { childList: true, subtree: true });
 
   /**
    * @param {string} id
@@ -78,7 +117,7 @@ hyperbook.audio = (function () {
       playEl.classList.remove("playing");
     }
 
-    store.audio.put({ id, time });
+    hyperbook.store.audio.put({ id, time });
 
     durationEl.innerHTML = ` ${secondsToTimestamp(time)}/${secondsToTimestamp(duration)}`;
   }

@@ -1,3 +1,10 @@
+/// <reference path="../hyperbook.types.js" />
+
+/**
+ * Scratch block rendering.
+ * @type {HyperbookScratchblock}
+ * @memberof hyperbook
+ */
 hyperbook.scratchblock = (function () {
   const init = () => {
     scratchblocks.renderMatching("pre.directive-scratchblock", {
@@ -42,4 +49,6 @@ hyperbook.scratchblock = (function () {
   });
 
   observer.observe(document.body, { childList: true, subtree: true });
+
+  return { init };
 })();

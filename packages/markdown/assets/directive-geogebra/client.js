@@ -1,17 +1,25 @@
+/// <reference path="../hyperbook.types.js" />
+
+/**
+ * GeoGebra math applet integration.
+ * @type {HyperbookGeogebra}
+ * @memberof hyperbook
+ * @see hyperbook.store
+ */
 hyperbook.geogebra = (function () {
   async function init(root) {
     const els = root.getElementsByTagName("hyperbook-geogebra");
     for (const el of els) {
       const id = el.getAttribute("data-id");
 
-      const result = await store.geogebra.get(id);
+      const result = await hyperbook.store.geogebra.get(id);
       if (result && result.state) {
         el.setBase64(result.state);
       }
 
       el.registerUpdateListener(() => {
         el.getBase64((b) => {
-          store.geogebra.put({ id, state: b });
+          hyperbook.store.geogebra.put({ id, state: b });
         });
       });
     }
@@ -33,5 +41,10 @@ hyperbook.geogebra = (function () {
 
   observer.observe(document.body, { childList: true, subtree: true });
 
-  init(document);
+  // Initialize existing elements on document load
+  document.addEventListener("DOMContentLoaded", () => {
+    init(document);
+  });
+
+  return { init };
 })();

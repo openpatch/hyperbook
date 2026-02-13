@@ -1,4 +1,12 @@
-hyperbook.download = (function () {
+/// <reference path="../hyperbook.types.js" />
+
+/**
+ * Archive download management.
+ * @type {HyperbookArchive}
+ * @memberof hyperbook
+ * @see hyperbook.i18n
+ */
+hyperbook.archive = (function () {
   function initElement(el) {
     const labelEl = el.getElementsByClassName("label")[0];
     const src = el.href;
@@ -7,10 +15,10 @@ hyperbook.download = (function () {
       const isOnline = r.ok;
       if (isOnline) {
         labelEl.classList.remove("offline");
-        labelEl.innerHTML = labelEl.innerHTML.replace(`(${i18n.get("archive-offline")})`, "");
+        labelEl.innerHTML = labelEl.innerHTML.replace(`(${hyperbook.i18n.get("archive-offline")})`, "");
       } else {
         labelEl.classList.add("offline");
-        labelEl.innerHTML += ` (${i18n.get("archive-offline")})`;
+        labelEl.innerHTML += ` (${hyperbook.i18n.get("archive-offline")})`;
       }
     });
   }
@@ -36,5 +44,10 @@ hyperbook.download = (function () {
 
   observer.observe(document.body, { childList: true, subtree: true });
 
-  init();
+  // Initialize existing elements on document load
+  document.addEventListener("DOMContentLoaded", () => {
+    init();
+  });
+
+  return { init };
 })();

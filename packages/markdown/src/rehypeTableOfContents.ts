@@ -18,7 +18,7 @@ export default (ctx: HyperbookContext) => () => {
       tagName: "button",
       properties: {
         id: "toc-toggle",
-        onclick: "hyperbook.tocToggle()",
+        onclick: "hyperbook.ui.tocToggle()",
         title: i18n.get("table-of-contents"),
       },
       children: [

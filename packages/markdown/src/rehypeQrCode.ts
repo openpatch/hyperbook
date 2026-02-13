@@ -43,7 +43,7 @@ export default (ctx: HyperbookContext) => () => {
         tagName: "button",
         properties: {
           id: "qrcode-open",
-          onclick: "hyperbook.qrcodeOpen()",
+          onclick: "hyperbook.qrcode.open()",
           title: i18n.get("qr-code"),
         },
         children: [
@@ -107,7 +107,7 @@ export default (ctx: HyperbookContext) => () => {
             tagName: "button",
             properties: {
               class: "close",
-              onclick: "hyperbook.qrcodeClose()",
+              onclick: "hyperbook.qrcode.close()",
             },
             children: [
               {

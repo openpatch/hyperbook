@@ -1,3 +1,11 @@
+/// <reference path="../hyperbook.types.js" />
+
+/**
+ * H5P interactive content integration.
+ * @type {HyperbookH5p}
+ * @memberof hyperbook
+ * @see hyperbook.store
+ */
 hyperbook.h5p = (function () {
   /**
    * Initialize H5P elements within the given root element.
@@ -7,7 +15,7 @@ hyperbook.h5p = (function () {
   const save = (id) =>
     H5P.getUserData(id, "state", (error, userData) => {
       if (!error) {
-        store.h5p.put({ id, userData });
+        hyperbook.store.h5p.put({ id, userData });
       }
     });
 
@@ -33,7 +41,7 @@ hyperbook.h5p = (function () {
       const src = el.getAttribute("data-src");
       const id = el.getAttribute("data-id");
       if (h5pFrame && src) {
-        const result = await store.h5p.get(id);
+        const result = await hyperbook.store.h5p.get(id);
         const h5pOptions = {
           ...h5pBaseOptions,
           id,
@@ -51,5 +59,26 @@ hyperbook.h5p = (function () {
     }
   };
 
-  init(document);
+  // Initialize existing elements on document load
+  document.addEventListener("DOMContentLoaded", () => {
+    init(document);
+  });
+
+  // Observe for new elements added to the DOM
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      mutation.addedNodes.forEach((node) => {
+        if (
+          node.nodeType === 1 &&
+          node.classList.contains("directive-h5p")
+        ) {
+          init(node);
+        }
+      });
+    });
+  });
+
+  observer.observe(document.body, { childList: true, subtree: true });
+
+  return { init, save };
 })();

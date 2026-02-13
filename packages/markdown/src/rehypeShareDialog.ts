@@ -34,7 +34,7 @@ export default (ctx: HyperbookContext) => () => {
             type: "checkbox",
             value: heading.anchor,
             "data-anchor": heading.anchor,
-            onchange: "hyperbook.shareUpdatePreview()",
+            onchange: "hyperbook.share.updatePreview()",
           },
           children: [],
         },
@@ -86,7 +86,7 @@ export default (ctx: HyperbookContext) => () => {
                     properties: {
                       type: "checkbox",
                       id: "share-standalone-checkbox",
-                      onchange: "hyperbook.shareUpdatePreview()",
+                      onchange: "hyperbook.share.updatePreview()",
                     },
                     children: [],
                   },
@@ -136,7 +136,7 @@ export default (ctx: HyperbookContext) => () => {
                 tagName: "button",
                 properties: {
                   class: "copy-button",
-                  onclick: "hyperbook.shareCopyUrl()",
+                  onclick: "hyperbook.share.copyUrl()",
                 },
                 children: [
                   {
@@ -152,7 +152,7 @@ export default (ctx: HyperbookContext) => () => {
             tagName: "button",
             properties: {
               class: "close",
-              onclick: "hyperbook.shareClose()",
+              onclick: "hyperbook.share.close()",
             },
             children: [
               {

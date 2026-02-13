@@ -1,3 +1,12 @@
+/// <reference path="../hyperbook.types.js" />
+
+/**
+ * Python IDE with code execution.
+ * @type {HyperbookPython}
+ * @memberof hyperbook
+ * @see hyperbook.store
+ * @see hyperbook.i18n
+ */
 hyperbook.python = (function () {
   window.codeInput?.registerTemplate(
     "pyide-highlighted",
@@ -71,19 +80,19 @@ hyperbook.python = (function () {
       if (callback) {
         if (elem.id === id && type === "run") {
           if (window.crossOriginIsolated) {
-            run.textContent = i18n.get("pyide-running-click-to-stop");
+            run.textContent = hyperbook.i18n.get("pyide-running-click-to-stop");
             run.addEventListener("click", interruptExecution);
           } else {
-            run.textContent = i18n.get("pyide-running-refresh-to-stop");
+            run.textContent = hyperbook.i18n.get("pyide-running-refresh-to-stop");
 
             run.addEventListener("click", reload);
           }
         } else if (test && elem.id === id && type === "test") {
           if (window.crossOriginIsolated) {
-            test.textContent = i18n.get("pyide-testing-click-to-stop");
+            test.textContent = hyperbook.i18n.get("pyide-testing-click-to-stop");
             test.addEventListener("click", interruptExecution);
           } else {
-            test.textContent = i18n.get("pyide-testing-refresh-to-stop");
+            test.textContent = hyperbook.i18n.get("pyide-testing-refresh-to-stop");
             test.addEventListener("click", reload);
           }
         } else {
@@ -96,13 +105,13 @@ hyperbook.python = (function () {
         }
       } else {
         run.classList.remove("running");
-        run.textContent = i18n.get("pyide-run");
+        run.textContent = hyperbook.i18n.get("pyide-run");
         run.disabled = false;
         run.removeEventListener("click", interruptExecution);
         run.removeEventListener("click", reload);
         if (test) {
           test.classList.remove("running");
-          test.textContent = i18n.get("pyide-test");
+          test.textContent = hyperbook.i18n.get("pyide-test");
           test.disabled = false;
           test.removeEventListener("click", interruptExecution);
           test.removeEventListener("click", reload);
@@ -161,7 +170,7 @@ hyperbook.python = (function () {
       });
 
       resetEl?.addEventListener("click", () => {
-        store.pyide.delete(id);
+        hyperbook.store.pyide.delete(id);
         window.location.reload();
       });
 
@@ -194,14 +203,14 @@ hyperbook.python = (function () {
       inputBtn?.addEventListener("click", showInput);
 
       editor.addEventListener("code-input_load", async () => {
-        const result = await store.pyide.get(id);
+        const result = await hyperbook.store.pyide.get(id);
         if (result) {
           editor.value = result.script;
         }
       });
 
       editor.addEventListener("input", () => {
-        store.pyide.put({ id, script: editor.value });
+        hyperbook.store.pyide.put({ id, script: editor.value });
       });
 
       test?.addEventListener("click", async () => {
@@ -283,4 +292,6 @@ hyperbook.python = (function () {
   document.addEventListener("DOMContentLoaded", () => {
     init(document);
   });
+
+  return { init };
 })();

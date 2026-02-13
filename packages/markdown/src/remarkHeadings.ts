@@ -98,7 +98,7 @@ export default ({
             tagName: "button",
             properties: {
               class: "bookmark",
-              onclick: `hyperbook.toggleBookmark("${key}", "${label}")`,
+              onclick: `hyperbook.ui.toggleBookmark("${key}", "${label}")`,
               title: i18n.get("toggle-bookmark"),
               "data-key": key,
             },

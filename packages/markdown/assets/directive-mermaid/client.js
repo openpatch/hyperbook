@@ -1,3 +1,10 @@
+/// <reference path="../hyperbook.types.js" />
+
+/**
+ * Mermaid diagram rendering.
+ * @type {HyperbookMermaid}
+ * @memberof hyperbook
+ */
 hyperbook.mermaid = (function () {
   const elementCode = ".directive-mermaid";
 
@@ -69,7 +76,10 @@ hyperbook.mermaid = (function () {
     });
   };
 
-  init();
+  // Initialize existing elements on document load
+  document.addEventListener("DOMContentLoaded", () => {
+    init();
+  });
 
   // Observe for new elements added to the DOM
   const observer = new MutationObserver((mutations) => {

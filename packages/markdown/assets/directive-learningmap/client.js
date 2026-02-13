@@ -1,3 +1,11 @@
+/// <reference path="../hyperbook.types.js" />
+
+/**
+ * Learning map visualization and progress tracking.
+ * @type {HyperbookLearningmap}
+ * @memberof hyperbook
+ * @see hyperbook.store
+ */
 hyperbook.learningmap = (function () {
   async function init(root) {
     const elems = root.getElementsByClassName("directive-learningmap");
@@ -5,12 +13,12 @@ hyperbook.learningmap = (function () {
     for (let elem of elems) {
       const map = elem.getElementsByTagName("hyperbook-learningmap")[0];
       if (map) {
-        const result = await store.learningmap.get(elem.id);
+        const result = await hyperbook.store.learningmap.get(elem.id);
         if (result) {
           map.initialState = result;
         }
         map.addEventListener("change", function (event) {
-          store.learningmap
+          hyperbook.store.learningmap
             .update(elem.id, {
               id: elem.id,
               nodes: event.detail.nodes,
@@ -20,7 +28,7 @@ hyperbook.learningmap = (function () {
             })
             .then((updated) => {
               if (updated == 0) {
-                store.learningmap.put({
+                hyperbook.store.learningmap.put({
                   id: elem.id,
                   nodes: event.detail.nodes,
                   x: event.detail.x,

@@ -1,3 +1,11 @@
+/// <reference path="../hyperbook.types.js" />
+
+/**
+ * ABC music notation rendering and editing.
+ * @type {HyperbookAbc}
+ * @memberof hyperbook
+ * @see hyperbook.store
+ */
 hyperbook.abc = (function () {
   window.codeInput?.registerTemplate(
     "abc-highlighted",
@@ -33,7 +41,7 @@ hyperbook.abc = (function () {
       });
 
       resetEl?.addEventListener("click", () => {
-        store.abcMusic.delete(id);
+        hyperbook.store.abcMusic.delete(id);
         window.location.reload();
       });
 
@@ -46,7 +54,7 @@ hyperbook.abc = (function () {
       });
 
       editorEl.addEventListener("code-input_load", async () => {
-        const storeResult = await store.abcMusic
+        const storeResult = await hyperbook.store.abcMusic
           .where("id")
           .equals(editorEl.id)
           .first();
@@ -70,7 +78,7 @@ hyperbook.abc = (function () {
         });
 
         editorEl.addEventListener("change", () => {
-          store.abcMusic.put({
+          hyperbook.store.abcMusic.put({
             id: editorEl.id,
             tune: editorEl.value,
           });

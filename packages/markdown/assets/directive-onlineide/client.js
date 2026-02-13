@@ -1,3 +1,10 @@
+/// <reference path="../hyperbook.types.js" />
+
+/**
+ * Online IDE integration.
+ * @type {HyperbookOnlineide}
+ * @memberof hyperbook
+ */
 hyperbook.onlineide = (function () {
   /**
    * @param {HTMLElement} el

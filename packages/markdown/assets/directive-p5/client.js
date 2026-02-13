@@ -1,3 +1,11 @@
+/// <reference path="../hyperbook.types.js" />
+
+/**
+ * p5.js creative coding environment.
+ * @type {HyperbookP5}
+ * @memberof hyperbook
+ * @see hyperbook.store
+ */
 hyperbook.p5 = (function () {
   window.codeInput?.registerTemplate(
     "p5-highlighted",
@@ -6,8 +14,6 @@ hyperbook.p5 = (function () {
       new codeInput.plugins.Indent(true, 2),
     ]),
   );
-
-  const elems = document.getElementsByClassName("directive-p5");
 
   const wrapSketch = (sketchCode) => {
     if (sketchCode !== "" && !sketchCode?.includes("setup")) {
@@ -21,7 +27,7 @@ hyperbook.p5 = (function () {
     return sketchCode;
   };
 
-  for (let elem of elems) {
+  function initElement(elem) {
     const editor = elem.getElementsByClassName("editor")[0];
     /** @type {HTMLButtonElement} */
     const update = elem.getElementsByClassName("update")[0];
@@ -48,7 +54,7 @@ hyperbook.p5 = (function () {
     });
 
     resetEl?.addEventListener("click", () => {
-      store.p5.delete(id);
+      hyperbook.store.p5.delete(id);
       window.location.reload();
     });
 
@@ -62,7 +68,7 @@ hyperbook.p5 = (function () {
 
     editor?.addEventListener("code-input_load", async () => {
       if (id) {
-        const result = await store.p5.get(id);
+        const result = await hyperbook.store.p5.get(id);
         if (result) {
           editor.value = result.sketch;
           const code = result.sketch;
@@ -73,7 +79,7 @@ hyperbook.p5 = (function () {
         }
 
         editor.addEventListener("input", () => {
-          store.p5.put({ id, sketch: editor.value });
+          hyperbook.store.p5.put({ id, sketch: editor.value });
         });
       }
 
@@ -86,5 +92,31 @@ hyperbook.p5 = (function () {
     });
   }
 
-  return {};
+  function init(root) {
+    const elems = root.querySelectorAll(".directive-p5");
+    elems.forEach(initElement);
+  }
+
+  // Initialize existing elements on document load
+  document.addEventListener("DOMContentLoaded", () => {
+    init(document);
+  });
+
+  // Observe for new elements added to the DOM
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      mutation.addedNodes.forEach((node) => {
+        if (
+          node.nodeType === 1 &&
+          node.classList.contains("directive-p5")
+        ) {
+          initElement(node);
+        }
+      });
+    });
+  });
+
+  observer.observe(document.body, { childList: true, subtree: true });
+
+  return { init };
 })();
