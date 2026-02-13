@@ -1,5 +1,16 @@
 # @hyperbook/vscode-extension
 
+## 0.49.21
+
+### Patch Changes
+
+- [`d98c9ca`](https://github.com/openpatch/hyperbook/commit/d98c9cac95017c0bfa098929218bc94ff758a906) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Move to an event driven architecture for hyperbook cloud
+
+- Updated dependencies [[`d98c9ca`](https://github.com/openpatch/hyperbook/commit/d98c9cac95017c0bfa098929218bc94ff758a906), [`3d77fd8`](https://github.com/openpatch/hyperbook/commit/3d77fd83942ccb9e8fe7fae86b03689ee739bae0)]:
+  - @hyperbook/markdown@0.55.4
+  - create-hyperbook@0.3.5
+  - @hyperbook/fs@0.24.2
+
 ## 0.49.20
 
 ### Patch Changes
