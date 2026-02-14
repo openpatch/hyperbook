@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.85.0
+
+### Minor Changes
+
+- [`bb3a336`](https://github.com/openpatch/hyperbook/commit/bb3a3365f9b10d5f56e2e3c38b655ad5777f7618) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add consent banner to embeds and youtube
+
 ## 0.84.5
 
 ### Patch Changes
