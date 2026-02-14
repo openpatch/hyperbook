@@ -38,7 +38,7 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
-## v0.86.0
+## v0.85.0
 
 ::::tabs
 
@@ -50,7 +50,7 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 
 ::::
 
-## v0.85.0
+## v0.84.5
 
 ::::tabs
 
