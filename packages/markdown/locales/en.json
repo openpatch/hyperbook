@@ -95,5 +95,13 @@
     "user-logout-confirm": "Are you sure you want to logout?",
     "user-readonly": "Read-Only Mode",
     "user-impersonating": "Impersonating",
-    "user-exit-impersonation": "Exit Impersonation"
+    "user-exit-impersonation": "Exit Impersonation",
+    "consent-youtube-text": "Clicking the play button will load a YouTube video via YouTube-NoCookie. However, a connection will still be established and the necessary data will be transmitted.",
+    "consent-youtube-nocookie": "We use YouTube-NoCookie to protect your privacy.",
+    "consent-youtube-always": "Always allow YouTube videos",
+    "consent-youtube-accept": "Accept and play",
+    "consent-embed-text": "Content from an external website is to be loaded here.",
+    "consent-embed-personal-data": "The external website may collect personal data.",
+    "consent-embed-always": "Always allow content from {{domain}}",
+    "consent-embed-accept": "Load content"
 }

@@ -12,7 +12,8 @@ window.hyperbook = window.hyperbook || {};
 hyperbook.store = (function () {
   /** @type {import("dexie").Dexie} */
   var db = new Dexie("Hyperbook");
-  db.version(2).stores({
+  db.version(3).stores({
+    consent: `id`,
     currentState: `
               id,
               path,

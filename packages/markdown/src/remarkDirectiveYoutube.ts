@@ -10,6 +10,7 @@ import {
   isDirective,
   registerDirective,
 } from "./remarkHelper";
+import { i18n } from "./i18n";
 
 export default (ctx: HyperbookContext) => () => {
   const name = "youtube";
@@ -31,7 +32,11 @@ export default (ctx: HyperbookContext) => () => {
           );
         }
 
-        registerDirective(file, name, [], ["style.css"], []);
+        registerDirective(file, name, ["client.js"], ["style.css"], []);
+
+        const iframeSrc = "https://www.youtube-nocookie.com/embed/" + id;
+        const iframeTitle =
+          typeof data.hChildren === "string" ? data.hChildren : "";
 
         data.hName = "div";
         data.hProperties = {
@@ -41,16 +46,82 @@ export default (ctx: HyperbookContext) => () => {
         data.hChildren = [
           {
             type: "element",
-            tagName: "iframe",
+            tagName: "div",
             properties: {
-              class: "player",
-              src: "https://www.youtube-nocookie.com/embed/" + id,
-              frameBorder: "0",
-              title: typeof data.hChildren === "string" ? data.hChildren : "",
-              allow:
-                "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen",
+              class: "directive-youtube-consent",
             },
-            children: [],
+            children: [
+              {
+                type: "element",
+                tagName: "div",
+                properties: { class: "directive-youtube-consent-banner" },
+                children: [
+                  {
+                    type: "element",
+                    tagName: "p",
+                    properties: { class: "directive-youtube-consent-banner-text" },
+                    children: [
+                      {
+                        type: "text",
+                        value: i18n.get("consent-youtube-text"),
+                      },
+                    ],
+                  },
+                  {
+                    type: "element",
+                    tagName: "p",
+                    properties: { class: "directive-youtube-consent-banner-text" },
+                    children: [
+                      {
+                        type: "text",
+                        value: i18n.get("consent-youtube-nocookie"),
+                      },
+                    ],
+                  },
+                  {
+                    type: "element",
+                    tagName: "label",
+                    properties: { class: "directive-youtube-consent-always-label" },
+                    children: [
+                      {
+                        type: "element",
+                        tagName: "input",
+                        properties: {
+                          type: "checkbox",
+                          class: "directive-youtube-consent-always-checkbox",
+                        },
+                        children: [],
+                      },
+                      {
+                        type: "text",
+                        value: i18n.get("consent-youtube-always"),
+                      },
+                    ],
+                  },
+                  {
+                    type: "element",
+                    tagName: "button",
+                    properties: { class: "directive-youtube-consent-accept-btn" },
+                    children: [
+                      { type: "text", value: i18n.get("consent-youtube-accept") },
+                    ],
+                  },
+                ],
+              },
+              {
+                type: "element",
+                tagName: "iframe",
+                properties: {
+                  class: "player",
+                  "data-consent-src": iframeSrc,
+                  frameBorder: "0",
+                  title: iframeTitle,
+                  allow:
+                    "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen",
+                },
+                children: [],
+              },
+            ],
           },
         ];
       }

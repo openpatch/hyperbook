@@ -95,5 +95,13 @@
     "user-logout-confirm": "Möchten Sie sich wirklich abmelden?",
     "user-readonly": "Nur-Lesen-Modus",
     "user-impersonating": "Angemeldet als",
-    "user-exit-impersonation": "Identitätswechsel beenden"
+    "user-exit-impersonation": "Identitätswechsel beenden",
+    "consent-youtube-text": "Bei einem Klick auf den Play-Button wird ein YouTube-Video über YouTube-NoCookie geladen. Dennoch findet der Verbindungsaufbau statt und die dafür notwendigen Daten werden übertragen.",
+    "consent-youtube-nocookie": "Wir verwenden YouTube-NoCookie, um Ihre Privatsphäre zu schützen.",
+    "consent-youtube-always": "YouTube-Videos immer zulassen",
+    "consent-youtube-accept": "Akzeptieren und abspielen",
+    "consent-embed-text": "Hier sollen Inhalte einer externen Internetseite geladen werden.",
+    "consent-embed-personal-data": "Die externe Internetseite kann möglicherweise personenbezogene Daten erheben.",
+    "consent-embed-always": "Inhalte von {{domain}} immer zulassen",
+    "consent-embed-accept": "Inhalte laden"
 }

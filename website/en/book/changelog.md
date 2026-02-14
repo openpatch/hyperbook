@@ -38,6 +38,18 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.86.0
+
+::::tabs
+
+:::tab{title="Improved :+1:" id="improved"}
+
+- Add consent banner to embed and youtube elements.
+
+:::
+
+::::
+
 ## v0.85.0
 
 ::::tabs
