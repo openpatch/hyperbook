@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.86.0
+
+### Minor Changes
+
+- [`7aa3666`](https://github.com/openpatch/hyperbook/commit/7aa3666ffc93f22c496254c64dbf3ee2641a1c97) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add struktolab integration
+
 ## 0.85.0
 
 ### Minor Changes
