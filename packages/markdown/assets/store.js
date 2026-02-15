@@ -12,7 +12,7 @@ window.hyperbook = window.hyperbook || {};
 hyperbook.store = (function () {
   /** @type {import("dexie").Dexie} */
   var db = new Dexie("Hyperbook");
-  db.version(3).stores({
+  db.version(4).stores({
     consent: `id`,
     currentState: `
               id,
@@ -43,6 +43,7 @@ hyperbook.store = (function () {
     onlineide: `scriptId,script`,
     sqlideScripts: `scriptId,script`,
     sqlideDatabases: `databaseId,database`,
+    struktolab: `id,tree`,
     multievent: `id,state`,
     typst: `id,code`,
   });

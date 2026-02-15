@@ -26,40 +26,42 @@ async function isCached(cachePath) {
 
 async function downloadZip(url, destination) {
   console.log(`Downloading ${url}...`);
-  
+
   return new Promise((resolve, reject) => {
-    https.get(url, (response) => {
-      if (response.statusCode === 302 || response.statusCode === 301) {
-        // Follow redirect
-        downloadZip(response.headers.location, destination)
-          .then(resolve)
-          .catch(reject);
-        return;
-      }
-      
-      if (response.statusCode !== 200) {
-        reject(new Error(`Failed to download: ${response.statusCode}`));
-        return;
-      }
-      
-      const fileStream = createWriteStream(destination);
-      response.pipe(fileStream);
-      
-      fileStream.on("finish", () => {
-        fileStream.close();
-        console.log(`Downloaded to ${destination}`);
-        resolve();
-      });
-      
-      fileStream.on("error", reject);
-      response.on("error", reject);
-    }).on("error", reject);
+    https
+      .get(url, (response) => {
+        if (response.statusCode === 302 || response.statusCode === 301) {
+          // Follow redirect
+          downloadZip(response.headers.location, destination)
+            .then(resolve)
+            .catch(reject);
+          return;
+        }
+
+        if (response.statusCode !== 200) {
+          reject(new Error(`Failed to download: ${response.statusCode}`));
+          return;
+        }
+
+        const fileStream = createWriteStream(destination);
+        response.pipe(fileStream);
+
+        fileStream.on("finish", () => {
+          fileStream.close();
+          console.log(`Downloaded to ${destination}`);
+          resolve();
+        });
+
+        fileStream.on("error", reject);
+        response.on("error", reject);
+      })
+      .on("error", reject);
   });
 }
 
 async function extractZip(zipPath, destination) {
   console.log(`Extracting ${zipPath} to ${destination}...`);
-  
+
   return new Promise((resolve, reject) => {
     createReadStream(zipPath)
       .pipe(Extract({ path: destination }))
@@ -73,10 +75,10 @@ async function extractZip(zipPath, destination) {
 
 async function downloadAndExtractZip(url, destination) {
   const cachePath = await getCachedZipPath(url);
-  
+
   // Ensure cache directory exists
   await mkdir(CACHE_DIR, { recursive: true });
-  
+
   // Check if zip is already cached
   if (await isCached(cachePath)) {
     console.log(`Using cached zip at ${cachePath}`);
@@ -84,7 +86,7 @@ async function downloadAndExtractZip(url, destination) {
     // Download to cache
     await downloadZip(url, cachePath);
   }
-  
+
   // Extract from cache
   await extractZip(cachePath, destination);
 }
@@ -324,6 +326,36 @@ async function postbuild() {
         "assets",
         "directive-learningmap",
         "web-component-learningmap.css",
+      ),
+    },
+    {
+      src: path.join(
+        "./node_modules",
+        "struktolab",
+        "dist",
+        "editor",
+        "struktolab-editor.umd.js",
+      ),
+      dst: path.join(
+        "./dist",
+        "assets",
+        "directive-struktolab",
+        "struktolab-editor.umd.js",
+      ),
+    },
+    {
+      src: path.join(
+        "./node_modules",
+        "struktolab",
+        "dist",
+        "renderer",
+        "struktolab-renderer.umd.js",
+      ),
+      dst: path.join(
+        "./dist",
+        "assets",
+        "directive-struktolab",
+        "struktolab-renderer.umd.js",
       ),
     },
   ];

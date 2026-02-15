@@ -1,9 +1,13 @@
 ---
-name: Struktog
+name: Struktog [Deprecated]
 permaid: struktog
 ---
 
-# Struktog
+# Struktog [Deprecated]
+
+:::alert{warn}
+Please use [Struktolab](./struktolab) instead. Struktog integration is no developed anymore.
+:::
 
 Struktog is a Nashi-Shneidermann-Diagram-Editor. It was originally
 developed by the [TU

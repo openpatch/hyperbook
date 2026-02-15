@@ -38,6 +38,18 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.86.0
+
+::::tabs
+
+:::tab{title="New :rocket:" id="new"}
+
+- Add struktolab integration for creating structograms. [Learn more](/elements/struktolab). This replaces the old struktog integration.
+
+:::
+
+::::
+
 ## v0.85.0
 
 ::::tabs

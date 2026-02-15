@@ -63,6 +63,7 @@ import remarkImageAttrs from "./remarkImageAttrs";
 import remarkDirectiveLearningmap from "./remarkDirectiveLearningmap";
 import remarkDirectiveTextinput from "./remarkDirectiveTextinput";
 import remarkDirectiveTypst from "./remarkDirectiveTypst";
+import remarkDirectiveStruktolab from "./remarkDirectiveStruktolab";
 
 export const remark = (ctx: HyperbookContext) => {
   i18n.init(ctx.config.language || "en");
@@ -100,6 +101,7 @@ export const remark = (ctx: HyperbookContext) => {
     remarkDirectiveAbcMusic(ctx),
     remarkDirectiveExcalidraw(ctx),
     remarkDirectiveStruktog(ctx),
+    remarkDirectiveStruktolab(ctx),
     remarkDirectiveGeogebra(ctx),
     remarkDirectiveH5P(ctx),
     remarkDirectiveJSXGraph(ctx),

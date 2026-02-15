@@ -1,9 +1,13 @@
 ---
-name: Struktog
+name: Struktog [Deprecated]
 lang: de
 ---
 
-# Struktog
+# Struktog [Deprecated]
+
+:::alert{warn}
+Bitte benutze stattdessen [Struktolab](./struktolab). Die Struktog-Integration wird nicht mehr weiterentwickelt.
+:::
 
 Struktog ist ein Nashi-Schneidermann-Diagramm-Editor. Er wurde von der [TU
 Dresden](https://gitlab.com/ddi-tu-dresden/cs-school-tools/struktog)

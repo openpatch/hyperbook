@@ -426,6 +426,9 @@ importers:
       scratchblocks:
         specifier: ^3.6.4
         version: 3.6.4
+      struktolab:
+        specifier: ^0.4.2
+        version: 0.4.2
       terser:
         specifier: ^5.46.0
         version: 5.46.0
@@ -8066,6 +8069,9 @@ packages:
 
   structured-source@4.0.0:
     resolution: {integrity: sha512-qGzRFNJDjFieQkl/sVOI2dUjHKRyL9dAJi2gCPGJLbJHBIkyOHxjuocpIEfbLioX+qSJpvbYdT49/YCdMznKxA==}
+
+  struktolab@0.4.2:
+    resolution: {integrity: sha512-ppEqkTq0S/Bcx/KZPUCf4YUXojT5rp2chjMgAWSaJwh4mxAQY/BIS/mIL6AIo0KSPnsrcwfgQ2IxdN25A5Bryw==}
 
   style-loader@4.0.0:
     resolution: {integrity: sha512-1V4WqhhZZgjVAVJyt7TdDPZoPBPNHbekX4fWnCJL1yQukhCeZhJySUL+gL9y6sNdN95uEOS83Y55SqHcP7MzLA==}
@@ -17593,6 +17599,10 @@ snapshots:
   structured-source@4.0.0:
     dependencies:
       boundary: 2.0.0
+
+  struktolab@0.4.2:
+    dependencies:
+      pako: 2.1.0
 
   style-loader@4.0.0(webpack@5.97.1):
     dependencies:
