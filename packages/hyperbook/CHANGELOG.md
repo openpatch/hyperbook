@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.86.1
+
+### Patch Changes
+
+- [`bd5620b`](https://github.com/openpatch/hyperbook/commit/bd5620bd54d51cd05759bb894a4624e5d1175854) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix dark mode and overflow for consent banners
+
 ## 0.86.0
 
 ### Minor Changes
