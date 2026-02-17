@@ -3,10 +3,10 @@
 exports[`remarkDirectiveYoutube > should render 1`] = `
 "
 <div class="directive-youtube" id="video-LXb3EKWsInQ">
-  <div class="directive-youtube-consent">
-    <div class="directive-youtube-consent-banner">
-      <p class="directive-youtube-consent-banner-text">consent-youtube-text</p>
-      <p class="directive-youtube-consent-banner-text">consent-youtube-nocookie</p><label class="directive-youtube-consent-always-label"><input type="checkbox" class="directive-youtube-consent-always-checkbox">consent-youtube-always</label><button class="directive-youtube-consent-accept-btn">consent-youtube-accept</button>
+  <div class="consent">
+    <div class="consent-banner">
+      <p class="consent-banner-text">consent-youtube-text</p>
+      <p class="consent-banner-text">consent-youtube-nocookie</p><label class="consent-always-label"><input type="checkbox" class="consent-always-checkbox">consent-youtube-always</label><button class="consent-accept-btn">consent-youtube-accept</button>
     </div>
     <iframe class="player" data-consent-src="https://www.youtube-nocookie.com/embed/LXb3EKWsInQ" frameborder="0" title="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"></iframe>
   </div>

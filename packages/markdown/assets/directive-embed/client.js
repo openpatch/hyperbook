@@ -26,7 +26,7 @@ hyperbook.embed.consent = (function () {
   }
 
   function loadContent(wrapper) {
-    var banner = wrapper.querySelector(".directive-embed-consent-banner");
+    var banner = wrapper.querySelector(".directive-embed .consent-banner");
     if (banner) {
       banner.remove();
     }
@@ -55,9 +55,9 @@ hyperbook.embed.consent = (function () {
       return;
     }
 
-    var btn = wrapper.querySelector(".directive-embed-consent-accept-btn");
+    var btn = wrapper.querySelector(".directive-embed .consent-accept-btn");
     var checkbox = wrapper.querySelector(
-      ".directive-embed-consent-always-checkbox"
+      ".directive-embed .consent-always-checkbox"
     );
     if (btn) {
       btn.addEventListener("click", async function () {
@@ -67,7 +67,7 @@ hyperbook.embed.consent = (function () {
         loadContent(wrapper);
         if (checkbox && checkbox.checked) {
           document
-            .querySelectorAll(".directive-embed-consent")
+            .querySelectorAll(".directive-embed .consent")
             .forEach(function (el) {
               var elSrc = el.getAttribute("data-consent-src");
               if (getDomain(elSrc) === domain) {
@@ -81,7 +81,7 @@ hyperbook.embed.consent = (function () {
 
   function init(root) {
     var wrappers = root.querySelectorAll
-      ? root.querySelectorAll(".directive-embed-consent")
+      ? root.querySelectorAll(".directive-embed .consent")
       : [];
     wrappers.forEach(function (w) {
       initWrapper(w);

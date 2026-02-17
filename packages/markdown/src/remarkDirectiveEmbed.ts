@@ -54,19 +54,19 @@ export default (ctx: HyperbookContext) => () => {
               type: "element",
               tagName: "div",
               properties: {
-                class: "directive-embed-consent",
+                class: "consent",
                 "data-consent-src": src,
               },
               children: [
                 {
                   type: "element",
                   tagName: "div",
-                  properties: { class: "directive-embed-consent-banner" },
+                  properties: { class: "consent-banner" },
                   children: [
                     {
                       type: "element",
                       tagName: "p",
-                      properties: { class: "directive-embed-consent-banner-text" },
+                      properties: { class: "consent-banner-text" },
                       children: [
                         {
                           type: "text",
@@ -112,7 +112,7 @@ export default (ctx: HyperbookContext) => () => {
                       type: "element",
                       tagName: "label",
                       properties: {
-                        class: "directive-embed-consent-always-label",
+                        class: "consent-always-label",
                       },
                       children: [
                         {
@@ -120,7 +120,7 @@ export default (ctx: HyperbookContext) => () => {
                           tagName: "input",
                           properties: {
                             type: "checkbox",
-                            class: "directive-embed-consent-always-checkbox",
+                            class: "consent-always-checkbox",
                           },
                           children: [],
                         },
@@ -134,7 +134,7 @@ export default (ctx: HyperbookContext) => () => {
                       type: "element",
                       tagName: "button",
                       properties: {
-                        class: "directive-embed-consent-accept-btn",
+                        class: "consent-accept-btn",
                       },
                       children: [
                         {

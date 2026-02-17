@@ -3,10 +3,10 @@
 exports[`remarkDirectiveEmbed > should transform 1`] = `
 "
 <div class="directive-embed" style="aspect-ratio: undefined; height: 400px; width: 100%">
-  <div class="directive-embed-consent" data-consent-src="https://learningapps.org/watch?app=15767435">
-    <div class="directive-embed-consent-banner">
-      <p class="directive-embed-consent-banner-text">consent-embed-text<br><br>consent-embed-personal-data</p>
-      <p class="directive-embed-consent-banner-url">URL: <a href="https://learningapps.org/watch?app=15767435" target="_blank" rel="noopener noreferrer">https://learningapps.org/watch?app=15767435</a></p><label class="directive-embed-consent-always-label"><input type="checkbox" class="directive-embed-consent-always-checkbox">consent-embed-always</label><button class="directive-embed-consent-accept-btn">consent-embed-accept</button>
+  <div class="consent" data-consent-src="https://learningapps.org/watch?app=15767435">
+    <div class="consent-banner">
+      <p class="consent-banner-text">consent-embed-text<br><br>consent-embed-personal-data</p>
+      <p class="directive-embed-consent-banner-url">URL: <a href="https://learningapps.org/watch?app=15767435" target="_blank" rel="noopener noreferrer">https://learningapps.org/watch?app=15767435</a></p><label class="consent-always-label"><input type="checkbox" class="consent-always-checkbox">consent-embed-always</label><button class="consent-accept-btn">consent-embed-accept</button>
     </div>
     <iframe data-consent-src="https://learningapps.org/watch?app=15767435" allowfullscreen></iframe>
   </div>

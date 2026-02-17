@@ -532,10 +532,10 @@ HYPERBOOK_ASSETS = "/assets/"
     </div>
     <div class="tabpanel" data-tab-id="c" data-tabs-id="code">
       <div class="directive-youtube" id="video-1234">
-        <div class="directive-youtube-consent">
-          <div class="directive-youtube-consent-banner">
-            <p class="directive-youtube-consent-banner-text">Clicking the play button will load a YouTube video via YouTube-NoCookie. However, a connection will still be established and the necessary data will be transmitted.</p>
-            <p class="directive-youtube-consent-banner-text">We use YouTube-NoCookie to protect your privacy.</p><label class="directive-youtube-consent-always-label"><input type="checkbox" class="directive-youtube-consent-always-checkbox">Always allow YouTube videos</label><button class="directive-youtube-consent-accept-btn">Accept and play</button>
+        <div class="consent">
+          <div class="consent-banner">
+            <p class="consent-banner-text">Clicking the play button will load a YouTube video via YouTube-NoCookie. However, a connection will still be established and the necessary data will be transmitted.</p>
+            <p class="consent-banner-text">We use YouTube-NoCookie to protect your privacy.</p><label class="consent-always-label"><input type="checkbox" class="consent-always-checkbox">Always allow YouTube videos</label><button class="consent-accept-btn">Accept and play</button>
           </div>
           <iframe class="player" data-consent-src="https://www.youtube-nocookie.com/embed/1234" frameborder="0" title="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"></iframe>
         </div>

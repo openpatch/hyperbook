@@ -20,7 +20,7 @@ hyperbook.youtube.consent = (function () {
   }
 
   function loadContent(wrapper) {
-    var banner = wrapper.querySelector(".directive-youtube-consent-banner");
+    var banner = wrapper.querySelector(".directive-youtube .consent-banner");
     if (banner) {
       banner.remove();
     }
@@ -45,9 +45,9 @@ hyperbook.youtube.consent = (function () {
       return;
     }
 
-    var btn = wrapper.querySelector(".directive-youtube-consent-accept-btn");
+    var btn = wrapper.querySelector(".directive-youtube .consent-accept-btn");
     var checkbox = wrapper.querySelector(
-      ".directive-youtube-consent-always-checkbox"
+      ".directive-youtube .consent-always-checkbox"
     );
     if (btn) {
       btn.addEventListener("click", async function () {
@@ -57,7 +57,7 @@ hyperbook.youtube.consent = (function () {
         loadContent(wrapper);
         if (checkbox && checkbox.checked) {
           document
-            .querySelectorAll(".directive-youtube-consent")
+            .querySelectorAll(".directive-youtube .consent")
             .forEach(function (el) {
               loadContent(el);
             });
@@ -68,7 +68,7 @@ hyperbook.youtube.consent = (function () {
 
   function init(root) {
     var wrappers = root.querySelectorAll
-      ? root.querySelectorAll(".directive-youtube-consent")
+      ? root.querySelectorAll(".directive-youtube .consent")
       : [];
     wrappers.forEach(function (w) {
       initWrapper(w);

@@ -48,18 +48,18 @@ export default (ctx: HyperbookContext) => () => {
             type: "element",
             tagName: "div",
             properties: {
-              class: "directive-youtube-consent",
+              class: "consent",
             },
             children: [
               {
                 type: "element",
                 tagName: "div",
-                properties: { class: "directive-youtube-consent-banner" },
+                properties: { class: "consent-banner" },
                 children: [
                   {
                     type: "element",
                     tagName: "p",
-                    properties: { class: "directive-youtube-consent-banner-text" },
+                    properties: { class: "consent-banner-text" },
                     children: [
                       {
                         type: "text",
@@ -70,7 +70,7 @@ export default (ctx: HyperbookContext) => () => {
                   {
                     type: "element",
                     tagName: "p",
-                    properties: { class: "directive-youtube-consent-banner-text" },
+                    properties: { class: "consent-banner-text" },
                     children: [
                       {
                         type: "text",
@@ -81,14 +81,14 @@ export default (ctx: HyperbookContext) => () => {
                   {
                     type: "element",
                     tagName: "label",
-                    properties: { class: "directive-youtube-consent-always-label" },
+                    properties: { class: "consent-always-label" },
                     children: [
                       {
                         type: "element",
                         tagName: "input",
                         properties: {
                           type: "checkbox",
-                          class: "directive-youtube-consent-always-checkbox",
+                          class: "consent-always-checkbox",
                         },
                         children: [],
                       },
@@ -101,7 +101,7 @@ export default (ctx: HyperbookContext) => () => {
                   {
                     type: "element",
                     tagName: "button",
-                    properties: { class: "directive-youtube-consent-accept-btn" },
+                    properties: { class: "consent-accept-btn" },
                     children: [
                       { type: "text", value: i18n.get("consent-youtube-accept") },
                     ],
