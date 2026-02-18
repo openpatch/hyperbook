@@ -1443,10 +1443,12 @@ hyperbook.typst = (function () {
      */
     async handleExportPdf() {
       const mainFile = this.fileManager.findMainFile();
-      const code = mainFile ? mainFile.content : (this.editor ? this.editor.value : '');
+      const mainCode = mainFile 
+        ? this.fileManager.contents.get(mainFile.filename) || mainFile.content 
+        : '';
 
       await this.renderer.exportPdf({
-        code,
+        code: mainCode,
         id: this.id,
         sourceFiles: this.fileManager.getSourceFiles(),
         binaryFiles: this.binaryFiles,
