@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.86.2
+
+### Patch Changes
+
+- [`a0e379b`](https://github.com/openpatch/hyperbook/commit/a0e379bb0be20dd2c8e582d32b3481a463d48e6f) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix typst not downloading the current code
+
 ## 0.86.1
 
 ### Patch Changes
