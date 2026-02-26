@@ -1,5 +1,5 @@
 /// <reference path="./hyperbook.types.js" />
-window.hyperbook = window.hyperbook || {};
+var hyperbook = window.hyperbook = window.hyperbook || {};
 
 /**
  * Persistent store backed by Dexie (IndexedDB).
