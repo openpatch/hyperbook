@@ -537,10 +537,10 @@ hyperbook.cloud = (function () {
 
       if (data && data.snapshot) {
         const storeData = data.snapshot.data || data.snapshot;
-        const { hyperbook } = storeData;
+        const { hyperbook: hb } = storeData;
 
-        if (hyperbook) {
-          const blob = new Blob([JSON.stringify(hyperbook)], {
+        if (hb) {
+          const blob = new Blob([JSON.stringify(hb)], {
             type: "application/json",
           });
           await hyperbook.store.db.import(blob, { clearTablesBeforeImport: true });
