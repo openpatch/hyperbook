@@ -1,5 +1,11 @@
 # @hyperbook/markdown
 
+## 0.58.3
+
+### Patch Changes
+
+- [`146b7e2`](https://github.com/openpatch/hyperbook/commit/146b7e2bd3df8dbd66a835152f555e9ad45e90eb) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix global var hyperbook not found
+
 ## 0.58.2
 
 ### Patch Changes
