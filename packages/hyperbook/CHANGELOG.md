@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.86.4
+
+### Patch Changes
+
+- [`2e0f062`](https://github.com/openpatch/hyperbook/commit/2e0f062e7368bacecd063e32f6060c1431bc6631) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix variable overloading, leading to cloud not restoring data.
+
 ## 0.86.3
 
 ### Patch Changes
