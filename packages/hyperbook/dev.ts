@@ -355,7 +355,7 @@ window.onload = () => {
       cwd: root,
       usePolling: true,
       interval: 600,
-      ignored: [outDir, path.join("archives", "*.zip")],
+      ignored: [outDir, path.join("archives", "*.zip"), /(^|[\/\\])\./, "**/node_modules/**"],
     })
     .on("add", handleFileChange("add"))
     .on("change", handleFileChange("change"))
