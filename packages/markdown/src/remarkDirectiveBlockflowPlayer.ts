@@ -30,8 +30,10 @@ export default (ctx: HyperbookContext) => () => {
           aspectRatio = "4/3",
         } = node.attributes || {};
 
+        const siteSrc = ctx.makeUrl(src || "", "public", ctx.navigation.current || undefined);
+
         const iframeSrc = src
-          ? `https://blockflow.openpatch.org/player.html?project=${encodeURIComponent(src)}`
+          ? `https://blockflow.openpatch.org/player.html?project=${encodeURIComponent(siteSrc)}`
           : undefined;
 
         data.hName = "div";

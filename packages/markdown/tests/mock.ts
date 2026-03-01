@@ -25,6 +25,9 @@ export const ctx: HyperbookContext = {
   },
   makeUrl: (p, base) => {
     if (typeof p === "string") {
+      if (p.startsWith("http://") || p.startsWith("https://") || p.startsWith("mailto:")) {
+        return p;
+      }
       if (base === "public" || base === "book") {
         return path.posix.join("/", base, p);
       }

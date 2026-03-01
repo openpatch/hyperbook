@@ -20,7 +20,7 @@ exports[`remarkDirectiveTiles > should transform 1`] = `
     <li class="tile L "><a class="tile-title">A large tile</a></li>
     <li class="tile S "><a class="tile-title">A small tile</a></li>
     <li class="tile M "><a class="tile-title">A icon tile</a>
-      <img class="tile-icon" src="/public/https:/www.inf-schule.de/assets/img/icons/icon_algorithmen.png">
+      <img class="tile-icon" src="https://www.inf-schule.de/assets/img/icons/icon_algorithmen.png">
     </li>
   </ul>
 </div>

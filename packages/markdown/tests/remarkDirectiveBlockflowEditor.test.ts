@@ -96,7 +96,7 @@ Content
     const base64 = match![1];
     const config = JSON.parse(Buffer.from(base64, "base64").toString("utf-8"));
     expect(config.title).toBe("Test");
-    expect(config.sb3).toBe("./test.sb3");
+    expect(config.sb3).toBe("/public/test.sb3");
     expect(config.steps).toHaveLength(1);
     expect(config.steps[0].title).toBe("Step 1");
     expect(config.steps[0].text).toBe("Content");

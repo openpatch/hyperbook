@@ -62,7 +62,8 @@ export default (ctx: HyperbookContext) => () => {
 
         if (project) {
           // Use the provided project JSON URL directly
-          projectParam = encodeURIComponent(project as string);
+          const projectSrc = ctx.makeUrl(project, "public", ctx.navigation.current || undefined);
+          projectParam = encodeURIComponent(projectSrc);
         } else {
           const steps: BlockflowStep[] = [];
 
@@ -75,15 +76,15 @@ export default (ctx: HyperbookContext) => () => {
             steps.push({
               title: stepAttrs.title || undefined,
               text,
-              image: stepAttrs.image || undefined,
-              video: stepAttrs.video || undefined,
+              image: stepAttrs.image ? ctx.makeUrl(stepAttrs.image, "public", ctx.navigation.current || undefined) : undefined,
+              video: stepAttrs.video ? ctx.makeUrl(stepAttrs.video, "public", ctx.navigation.current || undefined) : undefined,
             });
           }
 
           const config: BlockflowConfig = {};
           if (title) config.title = title;
-          if (src) config.sb3 = src;
-
+          if (src) config.sb3 = ctx.makeUrl(src, "public", ctx.navigation.current || undefined);
+        
           const ui: BlockflowConfig["ui"] = {};
           if (allowExtensions !== undefined) {
             ui.allowExtensions = allowExtensions !== "false";
