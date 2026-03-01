@@ -130,9 +130,9 @@ Die automatische Erkennung sorgt für saubere, ablenkungsfreie Inhalte bei ifram
 - Widget-Integration
 - Präsentationen
 
-**[Standalone Layout Demo ansehen →](/de/advanced/standalone-layout-demo)**
+**[Standalone Layout Demo ansehen →](/advanced/standalone-layout-demo)**
 
-**[Sections-Filter Demo ansehen →](/de/advanced/sections-filter-demo)**
+**[Sections-Filter Demo ansehen →](/advanced/sections-filter-demo)**
 
 ---
 
