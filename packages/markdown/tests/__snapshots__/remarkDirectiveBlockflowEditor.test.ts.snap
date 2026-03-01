@@ -2,7 +2,7 @@
 
 exports[`remarkDirectiveBlockflowEditor > should transform with steps 1`] = `
 "
-<div class="directive-blockflow-editor" style="aspect-ratio: undefined; height: 600px; width: 100%">
+<div class="directive-blockflow-editor" style="aspect-ratio: undefined; height: 700px; width: 100%">
   <iframe src="https://blockflow.openpatch.org?project=eyJ0aXRsZSI6IkJhc2ljIFR1dG9yaWFsIiwic2IzIjoiLi9wcm9qZWN0LnNiMyIsInN0ZXBzIjpbeyJ0aXRsZSI6IldlbGNvbWUiLCJ0ZXh0IjoiSGVsbG8gd29ybGQhIn0seyJ0aXRsZSI6IlN0ZXAgMiIsInRleHQiOiJEbyB0aGlzIHRoaW5nLiIsImltYWdlIjoiLi9zdGVwMi5wbmciLCJ2aWRlbyI6Ii4vc3RlcDIubXA0In1dfQ==" allowfullscreen></iframe>
 </div>
 "
@@ -10,7 +10,7 @@ exports[`remarkDirectiveBlockflowEditor > should transform with steps 1`] = `
 
 exports[`remarkDirectiveBlockflowEditor > should transform without steps 1`] = `
 "
-<div class="directive-blockflow-editor" style="aspect-ratio: undefined; height: 600px; width: 100%">
+<div class="directive-blockflow-editor" style="aspect-ratio: undefined; height: 700px; width: 100%">
   <iframe src="https://blockflow.openpatch.org?project=eyJ0aXRsZSI6Ik15IFR1dG9yaWFsIiwic2IzIjoiLi9wcm9qZWN0LnNiMyJ9" allowfullscreen></iframe>
 </div>
 "

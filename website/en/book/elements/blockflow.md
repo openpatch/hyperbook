@@ -129,7 +129,7 @@ When `project` is set, all other configuration attributes (`title`, `src`, `allo
 - **src**: The path or URL to the `.sb3` Scratch project file.
 - **project**: URL to a `.json` project file. When set, inline configuration is ignored.
 - **width**: The width of the editor. Defaults to `100%`.
-- **height**: The height of the editor. Defaults to `600px`.
+- **height**: The height of the editor. Defaults to `700px`.
 - **allowExtensions**: Allow Scratch extensions (`"true"` or `"false"`).
 - **showCostumesTab**: Show or hide the Costumes/Backdrops tab (`"true"` or `"false"`).
 - **showSoundsTab**: Show or hide the Sounds tab (`"true"` or `"false"`).

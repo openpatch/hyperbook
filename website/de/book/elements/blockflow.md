@@ -130,7 +130,7 @@ Wenn `project` gesetzt ist, werden alle anderen Konfigurationsattribute (`title`
 - **src**: Der Pfad oder die URL zur `.sb3`-Scratch-Projektdatei.
 - **project**: URL zu einer `.json`-Projektdatei. Wenn gesetzt, wird die Inline-Konfiguration ignoriert.
 - **width**: Die Breite des Editors. Standard `100%`.
-- **height**: Die Höhe des Editors. Standard `600px`.
+- **height**: Die Höhe des Editors. Standard `700px`.
 - **allowExtensions**: Scratch-Erweiterungen erlauben (`"true"` oder `"false"`).
 - **showCostumesTab**: Kostüme/Bühnenbilder-Tab anzeigen oder ausblenden (`"true"` oder `"false"`).
 - **showSoundsTab**: Klänge-Tab anzeigen oder ausblenden (`"true"` oder `"false"`).

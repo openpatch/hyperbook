@@ -49,7 +49,7 @@ export default (ctx: HyperbookContext) => () => {
           src,
           project,
           width = "100%",
-          height = "600px",
+          height = "700px",
           aspectRatio,
           allowExtensions,
           showCostumesTab,
