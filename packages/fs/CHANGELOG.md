@@ -1,5 +1,11 @@
 # @hyperbook/fs
 
+## 0.25.0
+
+### Minor Changes
+
+- [`d474152`](https://github.com/openpatch/hyperbook/commit/d47415218d4ceadff26395d957d274aeaa315689) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add blockflow element
+
 ## 0.24.2
 
 ### Patch Changes
