@@ -140,18 +140,25 @@ window.onload = () => {
   }
 
   // Force full reload button
-  const btn = document.createElement("button");
+  var style = document.createElement("style");
+  style.textContent = "@keyframes __hb_spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }";
+  document.head.appendChild(style);
+
+  var btn = document.createElement("button");
   btn.innerHTML = "&#x21bb;";
-  btn.title = "Force full reload";
+  btn.title = "Force full rebuild";
   btn.style.cssText = "position:fixed;bottom:16px;right:16px;z-index:99999;"
     + "width:40px;height:40px;border-radius:50%;border:none;cursor:pointer;"
     + "background:#333;color:#fff;font-size:20px;line-height:1;"
     + "box-shadow:0 2px 8px rgba(0,0,0,0.3);opacity:0.6;transition:opacity 0.2s;";
   btn.addEventListener("mouseenter", function() { btn.style.opacity = "1"; });
-  btn.addEventListener("mouseleave", function() { btn.style.opacity = "0.6"; });
+  btn.addEventListener("mouseleave", function() { if (!btn.dataset.spinning) btn.style.opacity = "0.6"; });
   btn.addEventListener("click", function() {
+    btn.style.opacity = "1";
+    btn.style.animation = "__hb_spin 0.8s linear infinite";
+    btn.disabled = true;
+    btn.dataset.spinning = "1";
     socket.send(JSON.stringify({ type: "force-reload" }));
-    window.location.reload();
   });
   document.body.appendChild(btn);
 };
