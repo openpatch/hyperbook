@@ -110,6 +110,18 @@ socket.addEventListener("message", (event) => {
     }
   }
 
+  if (msg.type === "rebuild-complete") {
+    // Force-reload build finished — stop spinner, don't refresh
+    var btn = document.getElementById("__hb_reload_btn");
+    if (btn) {
+      btn.style.animation = "none";
+      btn.disabled = false;
+      delete btn.dataset.spinning;
+      btn.innerHTML = "&#x2713;";
+      setTimeout(function() { btn.innerHTML = "&#x21bb;"; btn.style.opacity = "0.6"; }, 2000);
+    }
+  }
+
   if (msg.type === "reload") {
     const currentPath = window.location.pathname;
     const shouldReload = msg.changedPages === "*" || msg.changedPages.some(function(p) {
@@ -145,6 +157,8 @@ window.onload = () => {
   document.head.appendChild(style);
 
   var btn = document.createElement("button");
+  btn.id = "__hb_reload_btn";
+  btn.type = "button";
   btn.innerHTML = "&#x21bb;";
   btn.title = "Force full rebuild";
   btn.style.cssText = "position:fixed;bottom:16px;right:16px;z-index:99999;"
@@ -265,8 +279,11 @@ window.onload = () => {
           console.log(`${chalk.yellow("[Force Reload]")} Triggered by client`);
           rebuilding = true;
           builder.handleChange("hyperbook.json", "change")
-            .then((result) => {
-              sendReload(result.changedPages);
+            .then(() => {
+              // Notify the requesting client that rebuild is complete (no page refresh)
+              if (ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({ type: "rebuild-complete" }));
+              }
             })
             .catch((e) => {
               console.error(`${chalk.red("[Error]")}: ${e instanceof Error ? e.message : e}`);
