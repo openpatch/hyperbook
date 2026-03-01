@@ -58,7 +58,7 @@ layout: wide
 - Interaktive eingebettete Inhalte
 - Präsentations-Seiten
 
-**[Wide Layout Demo ansehen →](/de/advanced/wide-layout-demo)**
+**[Wide Layout Demo ansehen →](/advanced/wide-layout-demo)**
 
 ---
 
