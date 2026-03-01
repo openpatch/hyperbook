@@ -1,5 +1,11 @@
 # @hyperbook/markdown
 
+## 0.59.1
+
+### Patch Changes
+
+- [`816309a`](https://github.com/openpatch/hyperbook/commit/816309a4c43ef69fb9a12434cbf3f1c6a2d813c2) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix url construction for blockflow
+
 ## 0.59.0
 
 ### Minor Changes
