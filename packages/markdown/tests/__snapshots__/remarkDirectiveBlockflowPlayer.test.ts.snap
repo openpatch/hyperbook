@@ -1,0 +1,17 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`remarkDirectiveBlockflowPlayer > should support custom dimensions 1`] = `
+"
+<div class="directive-blockflow-player" style="aspect-ratio: 4/3; height: 500px; width: 800px">
+  <iframe src="https://blockflow.openpatch.org/player.html?project=https%3A%2F%2Fexample.com%2Fproject.sb3" allowfullscreen></iframe>
+</div>
+"
+`;
+
+exports[`remarkDirectiveBlockflowPlayer > should transform 1`] = `
+"
+<div class="directive-blockflow-player" style="aspect-ratio: 4/3; height: 600px; width: 100%">
+  <iframe src="https://blockflow.openpatch.org/player.html?project=https%3A%2F%2Fexample.com%2Fproject.sb3" allowfullscreen></iframe>
+</div>
+"
+`;

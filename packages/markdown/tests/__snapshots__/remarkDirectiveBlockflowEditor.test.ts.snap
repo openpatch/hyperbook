@@ -1,0 +1,17 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`remarkDirectiveBlockflowEditor > should transform with steps 1`] = `
+"
+<div class="directive-blockflow-editor" style="aspect-ratio: undefined; height: 600px; width: 100%">
+  <iframe src="https://blockflow.openpatch.org?project=%2Fassets%2Fdirective-blockflow-editor%2Fcd02f991d234.json" allowfullscreen></iframe>
+</div>
+"
+`;
+
+exports[`remarkDirectiveBlockflowEditor > should transform without steps 1`] = `
+"
+<div class="directive-blockflow-editor" style="aspect-ratio: undefined; height: 600px; width: 100%">
+  <iframe src="https://blockflow.openpatch.org?project=%2Fassets%2Fdirective-blockflow-editor%2F62ce7bf56dd7.json" allowfullscreen></iframe>
+</div>
+"
+`;

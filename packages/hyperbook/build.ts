@@ -227,6 +227,7 @@ async function runBuild(
   if (out) {
     rootOut = path.join(out, ".hyperbook", "out", basePath || "");
   }
+  const assetsOut = path.join(rootOut, ASSETS_FOLDER);
   console.log(
     `${chalk.blue(`[${prefix}]`)} Cleaning output folder ${rootOut}.`,
   );
@@ -348,6 +349,18 @@ async function runBuild(
       directives.add(directive);
     }
 
+    for (const generated of (result.data.generatedFiles as any[]) || []) {
+      const genDir = path.join(
+        assetsOut,
+        `directive-${generated.directive}`,
+      );
+      await makeDir(genDir, { recursive: true });
+      await fs.writeFile(
+        path.join(genDir, generated.filename),
+        generated.content,
+      );
+    }
+
     let directoryOut = path.join(rootOut, file.path.directory);
     let href: string;
     if (file.name === "index") {
@@ -430,6 +443,18 @@ async function runBuild(
       directives.add(directive);
     }
 
+    for (const generated of (result.data.generatedFiles as any[]) || []) {
+      const genDir = path.join(
+        assetsOut,
+        `directive-${generated.directive}`,
+      );
+      await makeDir(genDir, { recursive: true });
+      await fs.writeFile(
+        path.join(genDir, generated.filename),
+        generated.content,
+      );
+    }
+
     let href = file.path.href + ".html";
     let fileOut = path.join(rootOut, href);
     if (hyperbookJson.trailingSlash) {
@@ -458,7 +483,6 @@ async function runBuild(
   process.stdout.write("\n");
 
   const assetsPath = path.join(__dirname, "assets");
-  const assetsOut = path.join(rootOut, ASSETS_FOLDER);
   await mkdir(assetsOut, {
     recursive: true,
   });

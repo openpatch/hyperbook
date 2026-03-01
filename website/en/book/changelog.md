@@ -38,6 +38,18 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.87.0
+
+::::tabs
+
+:::tab{title="New :rocket:" id="new"}
+
+- Add Blockflow integration for building and playing Scratch-based guided tutorials. Use `::blockflow-player` for playing and `::::blockflow-editor` for creating tutorials with steps, toolbox and UI configuration. [Learn more](/elements/blockflow).
+
+:::
+
+::::
+
 ## v0.86.0
 
 ::::tabs
