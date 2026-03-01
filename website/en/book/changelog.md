@@ -38,6 +38,32 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.88.0
+
+::::tabs
+
+:::tab{title="New :rocket:" id="new"}
+
+- Incremental dev rebuilds: content changes now only rebuild the affected page instead of the entire site, resulting in much faster browser updates during development.
+- Force full rebuild button: a circular button in the bottom-right corner of the page triggers a full rebuild. It spins while the server is rebuilding.
+- Enhanced WebSocket protocol for targeted reloads — the browser only refreshes when the currently viewed page is affected by a change.
+
+:::
+
+:::tab{title="Improved :+1:" id="improved"}
+
+- The file watcher now ignores dotfiles (`.git`, `.hyperbook`) and `node_modules`, preventing unnecessary rebuild triggers.
+
+:::
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+- Fixed lunr language plugin "Overwriting existing registered function" warnings during dev rebuilds.
+
+:::
+
+::::
+
 ## v0.87.0
 
 ::::tabs
