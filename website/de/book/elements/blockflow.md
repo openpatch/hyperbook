@@ -100,6 +100,8 @@ Probiere die Bewegungsblöcke aus!
 ### UI-Konfiguration
 
 - **allowExtensions**: Ob Scratch-Erweiterungen erlaubt sind. Setze auf `"false"`, um sie zu deaktivieren. Standard ist `true`.
+- **showCostumesTab**: Ob der Kostüme/Bühnenbilder-Tab angezeigt wird. Setze auf `"false"`, um ihn auszublenden. Standard ist `true`.
+- **showSoundsTab**: Ob der Klänge-Tab angezeigt wird. Setze auf `"false"`, um ihn auszublenden. Standard ist `true`.
 
 ```md
 ::::blockflow-editor{title="Tutorial" src="./projekt.sb3" allowExtensions="false"}
@@ -111,12 +113,26 @@ Los geht's!
 ::::
 ```
 
+### Projektdatei
+
+Anstatt den Editor inline zu konfigurieren, kannst du eine URL zu einer `.json`-Projektdatei über das `project`-Attribut angeben. Das ist nützlich, wenn du eine Konfiguration wiederverwenden oder extern verwalten möchtest. Du kannst den [Blockflow Generator](https://blockflow.openpatch.org/generator.html) verwenden, um eine Projektdatei zu erstellen.
+
+```md
+::::blockflow-editor{project="https://example.com/tutorial.json"}
+::::
+```
+
+Wenn `project` gesetzt ist, werden alle anderen Konfigurationsattribute (`title`, `src`, `allowExtensions`, `categories`, `blocks-*`) und `:::step`-Kinder ignoriert.
+
 ### Editor-Argumente
 
 - **title**: Der Titel des Tutorials.
 - **src**: Der Pfad oder die URL zur `.sb3`-Scratch-Projektdatei.
+- **project**: URL zu einer `.json`-Projektdatei. Wenn gesetzt, wird die Inline-Konfiguration ignoriert.
 - **width**: Die Breite des Editors. Standard `100%`.
 - **height**: Die Höhe des Editors. Standard `600px`.
 - **allowExtensions**: Scratch-Erweiterungen erlauben (`"true"` oder `"false"`).
+- **showCostumesTab**: Kostüme/Bühnenbilder-Tab anzeigen oder ausblenden (`"true"` oder `"false"`).
+- **showSoundsTab**: Klänge-Tab anzeigen oder ausblenden (`"true"` oder `"false"`).
 - **categories**: Kommagetrennte Liste von Toolbox-Kategorien.
 - **blocks-\<kategorie\>**: Kommagetrennte Liste von Blöcken für eine Kategorie.

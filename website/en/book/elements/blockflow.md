@@ -99,6 +99,8 @@ Try using the motion blocks!
 ### UI Configuration
 
 - **allowExtensions**: Whether to allow Scratch extensions. Set to `"false"` to disable. Defaults to `true`.
+- **showCostumesTab**: Whether to show the Costumes/Backdrops tab. Set to `"false"` to hide. Defaults to `true`.
+- **showSoundsTab**: Whether to show the Sounds tab. Set to `"false"` to hide. Defaults to `true`.
 
 ```md
 ::::blockflow-editor{title="Tutorial" src="./project.sb3" allowExtensions="false"}
@@ -110,12 +112,26 @@ Let's get started!
 ::::
 ```
 
+### Project File
+
+Instead of configuring the editor inline, you can provide a URL to a `.json` project file using the `project` attribute. This is useful when you want to reuse a configuration or manage it externally. You can use the [Blockflow Generator](https://blockflow.openpatch.org/generator.html) to create a project file.
+
+```md
+::::blockflow-editor{project="https://example.com/tutorial.json"}
+::::
+```
+
+When `project` is set, all other configuration attributes (`title`, `src`, `allowExtensions`, `categories`, `blocks-*`) and `:::step` children are ignored.
+
 ### Editor Arguments
 
 - **title**: The title of the tutorial.
 - **src**: The path or URL to the `.sb3` Scratch project file.
+- **project**: URL to a `.json` project file. When set, inline configuration is ignored.
 - **width**: The width of the editor. Defaults to `100%`.
 - **height**: The height of the editor. Defaults to `600px`.
 - **allowExtensions**: Allow Scratch extensions (`"true"` or `"false"`).
+- **showCostumesTab**: Show or hide the Costumes/Backdrops tab (`"true"` or `"false"`).
+- **showSoundsTab**: Show or hide the Sounds tab (`"true"` or `"false"`).
 - **categories**: Comma-separated list of toolbox categories.
 - **blocks-\<category\>**: Comma-separated list of blocks for a category.
