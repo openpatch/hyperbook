@@ -765,8 +765,12 @@ async function runBuild(
     let foundLanguage = false;
     if (hyperbookJson.language && hyperbookJson.language !== "en") {
       try {
-        require("./lunr-languages/lunr.stemmer.support.min.js")(lunr);
-        require(`./lunr-languages/lunr.${hyperbookJson.language}.min.js`)(lunr);
+        // Only register lunr language plugins once to avoid "Overwriting" warnings
+        if (!(lunr as any)["_hyperbook_lang_loaded_" + hyperbookJson.language]) {
+          require("./lunr-languages/lunr.stemmer.support.min.js")(lunr);
+          require(`./lunr-languages/lunr.${hyperbookJson.language}.min.js`)(lunr);
+          (lunr as any)["_hyperbook_lang_loaded_" + hyperbookJson.language] = true;
+        }
         foundLanguage = true;
       } catch (e) {
         console.log(e);

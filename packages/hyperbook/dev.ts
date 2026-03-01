@@ -138,6 +138,22 @@ window.onload = () => {
     main.scrollTop = parseInt(scrollTop, 10);
     localStorage.removeItem("__hyperbook_dev_scroll");
   }
+
+  // Force full reload button
+  const btn = document.createElement("button");
+  btn.innerHTML = "&#x21bb;";
+  btn.title = "Force full reload";
+  btn.style.cssText = "position:fixed;bottom:16px;right:16px;z-index:99999;"
+    + "width:40px;height:40px;border-radius:50%;border:none;cursor:pointer;"
+    + "background:#333;color:#fff;font-size:20px;line-height:1;"
+    + "box-shadow:0 2px 8px rgba(0,0,0,0.3);opacity:0.6;transition:opacity 0.2s;";
+  btn.addEventListener("mouseenter", function() { btn.style.opacity = "1"; });
+  btn.addEventListener("mouseleave", function() { btn.style.opacity = "0.6"; });
+  btn.addEventListener("click", function() {
+    socket.send(JSON.stringify({ type: "force-reload" }));
+    window.location.reload();
+  });
+  document.body.appendChild(btn);
 };
 `;
 
@@ -232,6 +248,31 @@ window.onload = () => {
       }
     });
   };
+
+  // Handle client messages (force-reload requests)
+  reloadServer.on("connection", (ws) => {
+    ws.on("message", (data) => {
+      try {
+        const msg = JSON.parse(data.toString());
+        if (msg.type === "force-reload" && !rebuilding) {
+          console.log(`${chalk.yellow("[Force Reload]")} Triggered by client`);
+          rebuilding = true;
+          builder.handleChange("hyperbook.json", "change")
+            .then((result) => {
+              sendReload(result.changedPages);
+            })
+            .catch((e) => {
+              console.error(`${chalk.red("[Error]")}: ${e instanceof Error ? e.message : e}`);
+            })
+            .finally(() => {
+              rebuilding = false;
+            });
+        }
+      } catch {
+        // Ignore malformed messages
+      }
+    });
+  });
 
   ////////////////////
   // Incremental Builder
