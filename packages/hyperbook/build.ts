@@ -350,10 +350,15 @@ async function runBuild(
     }
 
     for (const generated of (result.data.generatedFiles as any[]) || []) {
-      const genDir = path.join(
-        assetsOut,
-        `directive-${generated.directive}`,
-      );
+      let genDir;
+      if (generated.relativeTo === "page") {
+        genDir = path.join(rootOut, file.path.directory);
+      } else {
+        genDir = path.join(
+          assetsOut,
+          `directive-${generated.directive}`,
+        );
+      }
       await makeDir(genDir, { recursive: true });
       await fs.writeFile(
         path.join(genDir, generated.filename),
@@ -444,10 +449,15 @@ async function runBuild(
     }
 
     for (const generated of (result.data.generatedFiles as any[]) || []) {
-      const genDir = path.join(
-        assetsOut,
-        `directive-${generated.directive}`,
-      );
+      let genDir;
+      if (generated.relativeTo === "page") {
+        genDir = path.join(rootOut, file.path.directory);
+      } else {
+        genDir = path.join(
+          assetsOut,
+          `directive-${generated.directive}`,
+        );
+      }
       await makeDir(genDir, { recursive: true });
       await fs.writeFile(
         path.join(genDir, generated.filename),

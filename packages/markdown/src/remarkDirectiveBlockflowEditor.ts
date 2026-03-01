@@ -41,7 +41,7 @@ export default (ctx: HyperbookContext) => () => {
         const data = node.data || (node.data = {});
 
         expectContainerDirective(node, file, name);
-        registerDirective(file, name, [], ["style.css"], ["step"]);
+        registerDirective(file, name, ["client.js"], ["style.css"], ["step"]);
 
         const {
           title,
@@ -112,13 +112,13 @@ export default (ctx: HyperbookContext) => () => {
           directive: name,
           filename,
           content: configJson,
+          relativeTo: "page",
         });
 
         const projectUrl = ctx.makeUrl(
-          `directive-${name}/${filename}`,
-          "assets",
+          filename,
+          "book",
           ctx.navigation.current || undefined,
-          { versioned: false },
         );
 
         const iframeSrc = `https://blockflow.openpatch.org?project=${encodeURIComponent(projectUrl)}`;
