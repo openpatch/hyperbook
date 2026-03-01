@@ -1,14 +1,13 @@
 import chokidar from "chokidar";
 import { hyperproject } from "@hyperbook/fs";
-import { runBuildProject } from "./build";
+import { IncrementalBuilder } from "./incremental";
 import path from "path";
 import http from "http";
 import fs from "fs";
 import mime from "mime";
-import { WebSocketServer } from "ws";
+import { WebSocketServer, WebSocket } from "ws";
 import { OutgoingHttpHeaders } from "http2";
 import chalk from "chalk";
-import { rimraf } from "rimraf";
 import prompts from "prompts";
 import net from "net";
 
@@ -92,15 +91,46 @@ export async function runDev({ port = 8080 }: { port: number }): Promise<void> {
     if (request.url === "/__hyperbook_dev.js") {
       const responseBody = `
 const socket = new WebSocket("ws://localhost:${port}");
+
+// Report current page to server
+socket.addEventListener("open", () => {
+  socket.send(JSON.stringify({ type: "page", href: window.location.pathname }));
+});
+
 socket.addEventListener("message", (event) => {
-  if (event.data === "RELOAD") {
-    const main = document.querySelector("main");
-    if (main) {
-      localStorage.setItem("__hyperbook_dev_scroll", main.scrollTop);
+  let msg;
+  try {
+    msg = JSON.parse(event.data);
+  } catch {
+    // Legacy fallback
+    if (event.data === "RELOAD") {
+      msg = { type: "reload", changedPages: "*" };
+    } else {
+      return;
     }
-    window.location.reload();
+  }
+
+  if (msg.type === "reload") {
+    const currentPath = window.location.pathname;
+    const shouldReload = msg.changedPages === "*" || msg.changedPages.some(function(p) {
+      // Special case for root page
+      if (p === "/" && (currentPath === "/" || currentPath === "/index.html")) {
+        return true;
+      }
+      return currentPath === p || currentPath === p + "/" || currentPath === p + ".html"
+        || currentPath === p + "/index.html" || currentPath.startsWith(p + "/");
+    });
+
+    if (shouldReload) {
+      const main = document.querySelector("main");
+      if (main) {
+        localStorage.setItem("__hyperbook_dev_scroll", main.scrollTop);
+      }
+      window.location.reload();
+    }
   }
 });
+
 window.onload = () => {
   const main = document.querySelector("main");
   const scrollTop = localStorage.getItem("__hyperbook_dev_scroll");
@@ -194,43 +224,46 @@ window.onload = () => {
     server,
   });
 
-  reloadServer.on("reload", () => {
+  const sendReload = (changedPages: string[] | "*") => {
+    const message = JSON.stringify({ type: "reload", changedPages });
     reloadServer.clients.forEach((client) => {
-      client.send("RELOAD");
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(message);
+      }
     });
-  });
+  };
+
+  ////////////////////
+  // Incremental Builder
+  ////////////////////
+
+  const builder = new IncrementalBuilder(root, rootProject);
 
   let rebuilding = false;
-  const rebuild = (status: string, shouldClean: boolean = false) => async (file: string) => {
+  const handleFileChange = (eventType: "add" | "change" | "unlink") => async (file: string) => {
     if (!rebuilding) {
-      console.log(`${chalk.yellow(`[Rebuilding ${status}]`)}: ${file}.`);
+      console.log(`${chalk.yellow(`[File ${eventType}]`)}: ${file}`);
       rebuilding = true;
       try {
-        const rootProject = await hyperproject.get(process.cwd());
-        // Clean output folder when files are deleted or renamed to avoid stale files
-        if (shouldClean) {
-          const cleanOutDir = path.join(rootProject.src, ".hyperbook", "out");
-          console.log(`${chalk.yellow(`[Cleaning]`)}: ${cleanOutDir}`);
-          await rimraf(cleanOutDir);
-        }
-        await runBuildProject(rootProject, rootProject);
-        console.log(`${chalk.yellow(`[Reloading]`)}: Website`);
-        reloadServer.emit("reload");
+        const result = await builder.handleChange(file, eventType);
+        console.log(`${chalk.yellow("[Reloading]")}: Website`);
+        sendReload(result.changedPages);
       } catch (e) {
         if (e instanceof Error) {
-          console.error(`${chalk.red(`[Error]`)}: ${e.message}.`);
+          console.error(`${chalk.red("[Error]")}: ${e.message}.`);
         } else {
-          console.error(`${chalk.red(`[Error]`)}: ${e}.`);
+          console.error(`${chalk.red("[Error]")}: ${e}.`);
         }
       }
       rebuilding = false;
     }
   };
-  await rebuild("(Initialize)")("");
+
+  await builder.initialize();
 
   server.listen(port, () => {
     console.log(
-      `${chalk.yellow(`[DEV-SERVER]`)} is running at http://localhost:${port}`,
+      `${chalk.yellow("[DEV-SERVER]")} is running at http://localhost:${port}`,
     );
   });
 
@@ -246,7 +279,7 @@ window.onload = () => {
       interval: 600,
       ignored: [outDir, path.join("archives", "*.zip")],
     })
-    .on("add", rebuild("(Added)"))
-    .on("change", rebuild("(Changed)"))
-    .on("unlink", rebuild("(Deleted)", true));
+    .on("add", handleFileChange("add"))
+    .on("change", handleFileChange("change"))
+    .on("unlink", handleFileChange("unlink"));
 }

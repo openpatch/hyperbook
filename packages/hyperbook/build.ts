@@ -2,7 +2,7 @@ import path, { posix } from "path";
 import fs, { cp, mkdir } from "fs/promises";
 import chalk from "chalk";
 import readline from "readline";
-import { hyperproject, vfile, hyperbook } from "@hyperbook/fs";
+import { hyperproject, vfile, hyperbook, VFileBook, VFileGlossary } from "@hyperbook/fs";
 import { runArchive } from "./archive";
 import { makeDir } from "./helpers/make-dir";
 import { rimraf } from "rimraf";
@@ -21,6 +21,143 @@ import { process as hyperbookProcess } from "@hyperbook/markdown";
 import packageJson from "./package.json";
 
 export const ASSETS_FOLDER = "__hyperbook_assets";
+
+export interface SinglePageResult {
+  searchDocuments: any[];
+  directives: string[];
+}
+
+export async function buildSingleBookPage(
+  file: VFileBook,
+  baseCtx: Pick<HyperbookContext, "config" | "makeUrl" | "project" | "root">,
+  pageList: HyperbookPage[],
+  pagesAndSections: Pick<Navigation, "pages" | "sections" | "glossary">,
+  rootOut: string,
+  assetsOut: string,
+  hyperbookJson: HyperbookJson,
+): Promise<SinglePageResult> {
+  const n1 = await hyperbook.getNavigationForFile(pageList, file);
+  const navigation: Navigation = {
+    ...n1,
+    ...pagesAndSections,
+  };
+  const ctx: HyperbookContext = {
+    ...baseCtx,
+    navigation,
+  };
+  const result = await hyperbookProcess(file.markdown.content, ctx);
+  const searchDocuments = [...(result.data.searchDocuments || [])];
+  const directives = Object.keys(result.data.directives || {});
+
+  for (const generated of (result.data.generatedFiles as any[]) || []) {
+    let genDir;
+    if (generated.relativeTo === "page") {
+      genDir = path.join(rootOut, file.path.directory);
+    } else {
+      genDir = path.join(assetsOut, `directive-${generated.directive}`);
+    }
+    await makeDir(genDir, { recursive: true });
+    await fs.writeFile(
+      path.join(genDir, generated.filename),
+      generated.content,
+    );
+  }
+
+  let directoryOut = path.join(rootOut, file.path.directory);
+  let href: string;
+  if (file.name === "index") {
+    href = path.posix.join(file.path.href || "", "index.html");
+  } else if (hyperbookJson.trailingSlash) {
+    directoryOut = path.join(directoryOut, file.name);
+    href = path.posix.join(file.path.href || "", "index.html");
+  } else {
+    href = file.path.href + ".html";
+  }
+  const fileOut = path.join(rootOut, href);
+  await makeDir(directoryOut, { recursive: true });
+  if (file.markdown.data.permaid) {
+    const permaOut = path.join(rootOut, "@");
+    await makeDir(permaOut, { recursive: true });
+    const permaFileOut = path.join(
+      permaOut,
+      file.markdown.data.permaid + ".html",
+    );
+    await fs.writeFile(permaFileOut, result.value);
+  }
+  await fs.writeFile(fileOut, result.value);
+
+  return { searchDocuments, directives };
+}
+
+export async function buildSingleGlossaryPage(
+  file: VFileGlossary,
+  baseCtx: Pick<HyperbookContext, "config" | "makeUrl" | "project" | "root">,
+  pageList: HyperbookPage[],
+  pagesAndSections: Pick<Navigation, "pages" | "sections" | "glossary">,
+  rootOut: string,
+  assetsOut: string,
+  hyperbookJson: HyperbookJson,
+): Promise<SinglePageResult> {
+  const n1 = await hyperbook.getNavigationForFile(pageList, file);
+  const navigation: Navigation = {
+    ...n1,
+    ...pagesAndSections,
+  };
+
+  if (!navigation.current && file.markdown.data) {
+    navigation.current = {
+      name: file.markdown.data.name || file.name,
+      href: file.path.href || undefined,
+      path: file.path,
+      scripts: file.markdown.data.scripts,
+      styles: file.markdown.data.styles,
+      description: file.markdown.data.description,
+      keywords: file.markdown.data.keywords,
+      lang: file.markdown.data.lang,
+      qrcode: file.markdown.data.qrcode,
+      toc: file.markdown.data.toc,
+      layout: file.markdown.data.layout,
+    };
+  }
+
+  const ctx: HyperbookContext = {
+    ...baseCtx,
+    navigation,
+  };
+  const result = await hyperbookProcess(file.markdown.content, ctx);
+  const searchDocuments = [...(result.data.searchDocuments || [])];
+  const directives = Object.keys(result.data.directives || {});
+
+  for (const generated of (result.data.generatedFiles as any[]) || []) {
+    let genDir;
+    if (generated.relativeTo === "page") {
+      genDir = path.join(rootOut, file.path.directory);
+    } else {
+      genDir = path.join(assetsOut, `directive-${generated.directive}`);
+    }
+    await makeDir(genDir, { recursive: true });
+    await fs.writeFile(
+      path.join(genDir, generated.filename),
+      generated.content,
+    );
+  }
+
+  const glossaryOut = path.join(rootOut, "glossary");
+  let href = file.path.href + ".html";
+  let fileOut = path.join(rootOut, href);
+  if (hyperbookJson.trailingSlash) {
+    href = path.posix.join(file.path.href || "", "index.html");
+    fileOut = path.join(rootOut, file.path.href || "", "index.html");
+    await makeDir(path.join(rootOut, file.path.href || ""), {
+      recursive: true,
+    });
+  } else {
+    await makeDir(glossaryOut, { recursive: true });
+  }
+  await fs.writeFile(fileOut, result.value);
+
+  return { searchDocuments, directives };
+}
 
 /**
  * Generates an llms.txt file by combining all markdown files in order
@@ -184,6 +321,79 @@ export async function runBuildProject(
   }
 }
 
+export function makeBaseCtx(
+  root: string,
+  hyperbookJson: HyperbookJson,
+  basePath: string | undefined,
+  rootProject: Hyperproject,
+): Pick<HyperbookContext, "config" | "makeUrl" | "project" | "root"> {
+  const resolveRelativePath = (p: string, page: HyperbookPage): string => {
+    if (p.startsWith("/")) {
+      return p;
+    }
+    let currentPageDir: string;
+    if (page.path?.directory) {
+      currentPageDir = posix.join("/", page.path.directory);
+    } else {
+      currentPageDir = posix.dirname(page.href || "/");
+    }
+    return posix.normalize(posix.resolve(currentPageDir, p));
+  };
+
+  return {
+    root,
+    config: hyperbookJson,
+    makeUrl: (p, base, page, options = { versioned: true }) => {
+      if (typeof p === "string") {
+        if (p.includes("://") || p.startsWith("data:")) {
+          return p;
+        }
+        if (p.endsWith(".md")) {
+          p = p.slice(0, -3);
+        } else if (p.endsWith(".md.json")) {
+          p = p.slice(0, -8);
+        } else if (p.endsWith(".md.yml")) {
+          p = p.slice(0, -7);
+        }
+        if (page && !p.startsWith("/")) {
+          p = resolveRelativePath(p, page);
+        }
+        p = [p] as any;
+      }
+      if (Array.isArray(p) && page) {
+        p = (p as string[]).map((segment) => {
+          if (typeof segment === "string" && !segment.startsWith("/")) {
+            return resolveRelativePath(segment, page);
+          }
+          return segment;
+        });
+      }
+      const pathArr = p as string[];
+      switch (base) {
+        case "glossary":
+          return posix.join("/", basePath || "", "glossary", ...pathArr);
+        case "book":
+          return posix.join(basePath || "", ...pathArr);
+        case "public":
+          return posix.join(basePath || "", ...pathArr);
+        case "archive":
+          return posix.join("/", basePath || "", "archives", ...pathArr);
+        case "assets":
+          if (pathArr.length === 1 && pathArr[0] === "/") {
+            return `${posix.join("/", basePath || "", ASSETS_FOLDER, ...pathArr)}`;
+          } else {
+            let result = `${posix.join("/", basePath || "", ASSETS_FOLDER, ...pathArr)}`;
+            if (options?.versioned) {
+              result += `?v=${packageJson.version}`;
+            }
+            return result;
+          }
+      }
+    },
+    project: rootProject,
+  };
+}
+
 async function runBuild(
   root: string,
   rootProject: Hyperproject,
@@ -234,89 +444,7 @@ async function runBuild(
 
   await runArchive(root, rootOut, prefix);
 
-  // Helper function to resolve relative paths
-  const resolveRelativePath = (path: string, page: HyperbookPage): string => {
-    // If path is absolute, return as-is
-    if (path.startsWith("/")) {
-      return path;
-    }
-
-    // Get the directory of the current page
-    // Use page.path.directory if available, otherwise derive from href
-    let currentPageDir: string;
-    if (page.path?.directory) {
-      currentPageDir = posix.join("/", page.path.directory);
-    } else {
-      currentPageDir = posix.dirname(page.href || "/");
-    }
-
-    // Resolve the relative path and normalize
-    const resolvedPath = posix.normalize(posix.resolve(currentPageDir, path));
-    return resolvedPath;
-  };
-
-  const baseCtx: Pick<
-    HyperbookContext,
-    "config" | "makeUrl" | "project" | "root"
-  > = {
-    root,
-    config: hyperbookJson,
-    makeUrl: (path, base, page, options = { versioned: true }) => {
-      if (typeof path === "string") {
-        // Handle absolute URLs
-        if (path.includes("://") || path.startsWith("data:")) {
-          return path;
-        }
-
-        if (path.endsWith(".md")) {
-          path = path.slice(0, -3);
-        } else if (path.endsWith(".md.json")) {
-          path = path.slice(0, -8);
-        } else if (path.endsWith(".md.yml")) {
-          path = path.slice(0, -7);
-        }
-
-        // Handle relative paths when we have a current page context
-        if (page && !path.startsWith("/")) {
-          path = resolveRelativePath(path, page);
-        }
-
-        path = [path];
-      }
-
-      // Handle array paths - resolve relative segments
-      if (Array.isArray(path) && page) {
-        path = path.map((segment) => {
-          if (typeof segment === "string" && !segment.startsWith("/")) {
-            return resolveRelativePath(segment, page);
-          }
-          return segment;
-        });
-      }
-
-      switch (base) {
-        case "glossary":
-          return posix.join("/", basePath || "", "glossary", ...path);
-        case "book":
-          return posix.join(basePath || "", ...path);
-        case "public":
-          return posix.join(basePath || "", ...path);
-        case "archive":
-          return posix.join("/", basePath || "", "archives", ...path);
-        case "assets":
-          if (path.length === 1 && path[0] === "/") {
-            return `${posix.join("/", basePath || "", ASSETS_FOLDER, ...path)}`;
-          } else {
-            let p = `${posix.join("/", basePath || "", ASSETS_FOLDER, ...path)}`;
-            if (options?.versioned) {
-              p += `?v=${packageJson.version}`;
-            }
-            return p;
-          }
-      }
-    },
-    project: rootProject,
-  };
+  const baseCtx = makeBaseCtx(root, hyperbookJson, basePath, rootProject);
 
   const directives = new Set<string>([]);
   const pagesAndSections = await hyperbook.getPagesAndSections(root);
@@ -334,64 +462,20 @@ async function runBuild(
 
   let i = 1;
   for (let file of bookFiles) {
-    const n1 = await hyperbook.getNavigationForFile(pageList, file);
-    const navigation: Navigation = {
-      ...n1,
-      ...pagesAndSections,
-    };
-    const ctx: HyperbookContext = {
-      ...baseCtx,
-      navigation,
-    };
-    const result = await hyperbookProcess(file.markdown.content, ctx);
-    searchDocuments.push(...(result.data.searchDocuments || []));
-    for (let directive of Object.keys(result.data.directives || {})) {
+    const pageResult = await buildSingleBookPage(
+      file,
+      baseCtx,
+      pageList,
+      pagesAndSections,
+      rootOut,
+      assetsOut,
+      hyperbookJson,
+    );
+    searchDocuments.push(...pageResult.searchDocuments);
+    for (let directive of pageResult.directives) {
       directives.add(directive);
     }
 
-    for (const generated of (result.data.generatedFiles as any[]) || []) {
-      let genDir;
-      if (generated.relativeTo === "page") {
-        genDir = path.join(rootOut, file.path.directory);
-      } else {
-        genDir = path.join(
-          assetsOut,
-          `directive-${generated.directive}`,
-        );
-      }
-      await makeDir(genDir, { recursive: true });
-      await fs.writeFile(
-        path.join(genDir, generated.filename),
-        generated.content,
-      );
-    }
-
-    let directoryOut = path.join(rootOut, file.path.directory);
-    let href: string;
-    if (file.name === "index") {
-      href = path.posix.join(file.path.href || "", "index.html");
-    } else if (hyperbookJson.trailingSlash) {
-      directoryOut = path.join(directoryOut, file.name);
-      href = path.posix.join(file.path.href || "", "index.html");
-    } else {
-      href = file.path.href + ".html";
-    }
-    const fileOut = path.join(rootOut, href);
-    await makeDir(directoryOut, {
-      recursive: true,
-    });
-    if (file.markdown.data.permaid) {
-      const permaOut = path.join(rootOut, "@");
-      await makeDir(permaOut, {
-        recursive: true,
-      });
-      const permaFileOut = path.join(
-        permaOut,
-        file.markdown.data.permaid + ".html",
-      );
-      await fs.writeFile(permaFileOut, result.value);
-    }
-    await fs.writeFile(fileOut, result.value);
     if (!process.env.CI) {
       readline.clearLine(process.stdout, 0);
       readline.cursorTo(process.stdout, 0);
@@ -406,7 +490,6 @@ async function runBuild(
   process.stdout.write("\n");
 
   let glossaryFiles = await vfile.listForFolder(root, "glossary");
-  const glossaryOut = path.join(rootOut, "glossary");
   if (filter) {
     glossaryFiles = glossaryFiles.filter((f) =>
       f.path.absolute?.endsWith(filter),
@@ -415,70 +498,20 @@ async function runBuild(
 
   i = 1;
   for (let file of glossaryFiles) {
-    const n1 = await hyperbook.getNavigationForFile(pageList, file);
-    const navigation: Navigation = {
-      ...n1,
-      ...pagesAndSections,
-    };
-
-    // If current is null (glossary page not in pageList), create it from file frontmatter
-    if (!navigation.current && file.markdown.data) {
-      navigation.current = {
-        name: file.markdown.data.name || file.name,
-        href: file.path.href || undefined,
-        path: file.path,
-        scripts: file.markdown.data.scripts,
-        styles: file.markdown.data.styles,
-        description: file.markdown.data.description,
-        keywords: file.markdown.data.keywords,
-        lang: file.markdown.data.lang,
-        qrcode: file.markdown.data.qrcode,
-        toc: file.markdown.data.toc,
-        layout: file.markdown.data.layout,
-      };
-    }
-
-    const ctx: HyperbookContext = {
-      ...baseCtx,
-      navigation,
-    };
-    const result = await hyperbookProcess(file.markdown.content, ctx);
-    searchDocuments.push(...(result.data.searchDocuments || []));
-    for (let directive of Object.keys(result.data.directives || {})) {
+    const pageResult = await buildSingleGlossaryPage(
+      file,
+      baseCtx,
+      pageList,
+      pagesAndSections,
+      rootOut,
+      assetsOut,
+      hyperbookJson,
+    );
+    searchDocuments.push(...pageResult.searchDocuments);
+    for (let directive of pageResult.directives) {
       directives.add(directive);
     }
 
-    for (const generated of (result.data.generatedFiles as any[]) || []) {
-      let genDir;
-      if (generated.relativeTo === "page") {
-        genDir = path.join(rootOut, file.path.directory);
-      } else {
-        genDir = path.join(
-          assetsOut,
-          `directive-${generated.directive}`,
-        );
-      }
-      await makeDir(genDir, { recursive: true });
-      await fs.writeFile(
-        path.join(genDir, generated.filename),
-        generated.content,
-      );
-    }
-
-    let href = file.path.href + ".html";
-    let fileOut = path.join(rootOut, href);
-    if (hyperbookJson.trailingSlash) {
-      href = path.posix.join(file.path.href || "", "index.html");
-      fileOut = path.join(rootOut, file.path.href || "", "index.html");
-      await makeDir(path.join(rootOut, file.path.href || ""), {
-        recursive: true,
-      });
-    } else {
-      await makeDir(glossaryOut, {
-        recursive: true,
-      });
-    }
-    await fs.writeFile(fileOut, result.value);
     if (!process.env.CI) {
       readline.clearLine(process.stdout, 0);
       readline.cursorTo(process.stdout, 0);
