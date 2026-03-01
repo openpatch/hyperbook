@@ -110,6 +110,16 @@ socket.addEventListener("message", (event) => {
     }
   }
 
+  if (msg.type === "rebuilding") {
+    var btn = document.getElementById("__hb_reload_btn");
+    if (btn) {
+      btn.style.opacity = "1";
+      btn.style.animation = "__hb_spin 0.8s linear infinite";
+      btn.disabled = true;
+      btn.dataset.spinning = "1";
+    }
+  }
+
   if (msg.type === "rebuild-complete") {
     // Force-reload build finished — stop spinner, don't refresh
     var btn = document.getElementById("__hb_reload_btn");
@@ -261,13 +271,17 @@ window.onload = () => {
     server,
   });
 
-  const sendReload = (changedPages: string[] | "*") => {
-    const message = JSON.stringify({ type: "reload", changedPages });
+  const broadcast = (msg: object) => {
+    const message = JSON.stringify(msg);
     reloadServer.clients.forEach((client) => {
       if (client.readyState === WebSocket.OPEN) {
         client.send(message);
       }
     });
+  };
+
+  const sendReload = (changedPages: string[] | "*") => {
+    broadcast({ type: "reload", changedPages });
   };
 
   // Handle client messages (force-reload requests)
@@ -278,12 +292,10 @@ window.onload = () => {
         if (msg.type === "force-reload" && !rebuilding) {
           console.log(`${chalk.yellow("[Force Reload]")} Triggered by client`);
           rebuilding = true;
+          broadcast({ type: "rebuilding" });
           builder.handleChange("hyperbook.json", "change")
             .then(() => {
-              // Notify the requesting client that rebuild is complete (no page refresh)
-              if (ws.readyState === WebSocket.OPEN) {
-                ws.send(JSON.stringify({ type: "rebuild-complete" }));
-              }
+              broadcast({ type: "rebuild-complete" });
             })
             .catch((e) => {
               console.error(`${chalk.red("[Error]")}: ${e instanceof Error ? e.message : e}`);
@@ -309,6 +321,7 @@ window.onload = () => {
     if (!rebuilding) {
       console.log(`${chalk.yellow(`[File ${eventType}]`)}: ${file}`);
       rebuilding = true;
+      broadcast({ type: "rebuilding" });
       try {
         const result = await builder.handleChange(file, eventType);
         console.log(`${chalk.yellow("[Reloading]")}: Website`);
