@@ -1,5 +1,11 @@
 # @hyperbook/markdown
 
+## 0.59.2
+
+### Patch Changes
+
+- [`6fb9623`](https://github.com/openpatch/hyperbook/commit/6fb9623db85eccc4cdb023c1b168e696908cfc5e) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix blockflow-editor prepending window.origin for base64 encoded urls.
+
 ## 0.59.1
 
 ### Patch Changes
