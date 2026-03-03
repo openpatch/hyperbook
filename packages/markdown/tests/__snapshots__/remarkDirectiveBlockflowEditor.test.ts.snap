@@ -3,7 +3,7 @@
 exports[`remarkDirectiveBlockflowEditor > should transform with steps 1`] = `
 "
 <div class="directive-blockflow-editor" style="aspect-ratio: undefined; height: 700px; width: 100%">
-  <iframe src="https://blockflow.openpatch.org?project=pako%3AeJxljbEKwkAQRH%2Fl3DokEK1SioW9goVYJJclrmyyx91GhZB%2Fd9MYwWaK92aYCZSUESrY14m8O48qkWqGDFKzNVyEsWHyRYjyQK%2F5Qs0phgTVdfrOL8heejSn%2BFYDR2QW95LI7QbmbG2ebOvKtXgQp3dKSwxdbpz6usOf6%2BWszMPQmXtSi%2FLn%2BrCD%2BTZ%2FACU7Q1Y%3D" allowfullscreen></iframe>
+  <iframe src="https://blockflow.openpatch.org/editor?project=pako%3AeJxljbEKwkAQRH%2Fl3DokEK1SioW9goVYJJclrmyyx91GhZB%2Fd9MYwWaK92aYCZSUESrY14m8O48qkWqGDFKzNVyEsWHyRYjyQK%2F5Qs0phgTVdfrOL8heejSn%2BFYDR2QW95LI7QbmbG2ebOvKtXgQp3dKSwxdbpz6usOf6%2BWszMPQmXtSi%2FLn%2BrCD%2BTZ%2FACU7Q1Y%3D" allowfullscreen></iframe>
 </div>
 "
 `;
@@ -11,7 +11,7 @@ exports[`remarkDirectiveBlockflowEditor > should transform with steps 1`] = `
 exports[`remarkDirectiveBlockflowEditor > should transform without steps 1`] = `
 "
 <div class="directive-blockflow-editor" style="aspect-ratio: undefined; height: 700px; width: 100%">
-  <iframe src="https://blockflow.openpatch.org?project=pako%3AeJyrVirJLMlJVbJS8q1UCCktyS%2FKTMxR0lEqTjIGiukXlCblZCbrFxTlZ6Uml%2BiBRGsBuRgRFw%3D%3D" allowfullscreen></iframe>
+  <iframe src="https://blockflow.openpatch.org/editor?project=pako%3AeJyrVirJLMlJVbJS8q1UCCktyS%2FKTMxR0lEqTjIGiukXlCblZCbrFxTlZ6Uml%2BiBRGsBuRgRFw%3D%3D" allowfullscreen></iframe>
 </div>
 "
 `;
