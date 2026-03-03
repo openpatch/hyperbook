@@ -100,8 +100,8 @@ Probiere die Bewegungsblöcke aus!
 ### UI-Konfiguration
 
 - **allowExtensions**: Ob Scratch-Erweiterungen erlaubt sind. Setze auf `"false"`, um sie zu deaktivieren. Standard ist `true`.
-- **showCostumesTab**: Ob der Kostüme/Bühnenbilder-Tab angezeigt wird. Setze auf `"false"`, um ihn auszublenden. Standard ist `true`.
-- **showSoundsTab**: Ob der Klänge-Tab angezeigt wird. Setze auf `"false"`, um ihn auszublenden. Standard ist `true`.
+- **showCostumesTab**: Ob der Kostüme/Bühnenbilder-Tab angezeigt wird. Setze auf `"false"`, um ihn auszublenden. Standard ist `true`. (Wird zu `costumes.enabled` in der Blockflow-Konfiguration.)
+- **showSoundsTab**: Ob der Klänge-Tab angezeigt wird. Setze auf `"false"`, um ihn auszublenden. Standard ist `true`. (Wird zu `sounds.enabled` in der Blockflow-Konfiguration.)
 
 ```md
 ::::blockflow-editor{title="Tutorial" src="./projekt.sb3" allowExtensions="false"}

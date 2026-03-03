@@ -99,8 +99,8 @@ Try using the motion blocks!
 ### UI Configuration
 
 - **allowExtensions**: Whether to allow Scratch extensions. Set to `"false"` to disable. Defaults to `true`.
-- **showCostumesTab**: Whether to show the Costumes/Backdrops tab. Set to `"false"` to hide. Defaults to `true`.
-- **showSoundsTab**: Whether to show the Sounds tab. Set to `"false"` to hide. Defaults to `true`.
+- **showCostumesTab**: Whether to show the Costumes/Backdrops tab. Set to `"false"` to hide. Defaults to `true`. (Maps to `costumes.enabled` in the Blockflow config.)
+- **showSoundsTab**: Whether to show the Sounds tab. Set to `"false"` to hide. Defaults to `true`. (Maps to `sounds.enabled` in the Blockflow config.)
 
 ```md
 ::::blockflow-editor{title="Tutorial" src="./project.sb3" allowExtensions="false"}

@@ -9,6 +9,7 @@ import {
   registerDirective,
 } from "./remarkHelper";
 import { toString } from "mdast-util-to-string";
+import { deflate } from "pako";
 
 interface BlockflowStep {
   title?: string;
@@ -22,14 +23,18 @@ interface BlockflowConfig {
   sb3?: string;
   ui?: {
     allowExtensions?: boolean;
-    showCostumesTab?: boolean;
-    showSoundsTab?: boolean;
   };
   toolbox?: {
     categories?: string[];
     blocks?: Record<string, string[]>;
   };
   steps?: BlockflowStep[];
+  costumes?: {
+    enabled?: boolean;
+  };
+  sounds?: {
+    enabled?: boolean;
+  };
 }
 
 export default (ctx: HyperbookContext) => () => {
@@ -85,18 +90,15 @@ export default (ctx: HyperbookContext) => () => {
           if (title) config.title = title;
           if (src) config.sb3 = ctx.makeUrl(src, "public", ctx.navigation.current || undefined);
         
-          const ui: BlockflowConfig["ui"] = {};
           if (allowExtensions !== undefined) {
-            ui.allowExtensions = allowExtensions !== "false";
+            config.ui = { allowExtensions: allowExtensions !== "false" };
           }
+
           if (showCostumesTab !== undefined) {
-            ui.showCostumesTab = showCostumesTab !== "false";
+            config.costumes = { enabled: showCostumesTab !== "false" };
           }
           if (showSoundsTab !== undefined) {
-            ui.showSoundsTab = showSoundsTab !== "false";
-          }
-          if (Object.keys(ui).length > 0) {
-            config.ui = ui;
+            config.sounds = { enabled: showSoundsTab !== "false" };
           }
 
           if (categories || Object.keys(rest).some((k) => k.startsWith("blocks-"))) {
@@ -123,10 +125,12 @@ export default (ctx: HyperbookContext) => () => {
           if (steps.length > 0) config.steps = steps;
 
           const configJson = JSON.stringify(config);
-          projectParam = Buffer.from(configJson).toString("base64");
+          const compressed = deflate(configJson);
+          const encoded = "pako:" + Buffer.from(compressed).toString("base64");
+          projectParam = encodeURIComponent(encoded);
         }
 
-        const iframeSrc = `https://blockflow.openpatch.org?project=${projectParam}`;
+        const iframeSrc = `https://blockflow.openpatch.org/editor?project=${projectParam}`;
 
         data.hName = "div";
         data.hProperties = {

@@ -9,6 +9,7 @@ import remarkDirectiveRehype from "remark-directive-rehype";
 import { ctx } from "./mock";
 import remarkDirectiveBlockflowEditor from "../src/remarkDirectiveBlockflowEditor";
 import remarkParse from "../src/remarkParse";
+import { inflate } from "pako";
 
 export const toHtml = (md: string, ctx: HyperbookContext) => {
   const remarkPlugins: PluggableList = [
@@ -28,6 +29,13 @@ export const toHtml = (md: string, ctx: HyperbookContext) => {
     })
     .processSync(md);
 };
+
+function decodePako(encoded: string): any {
+  const prefix = "pako:";
+  const b64 = encoded.slice(prefix.length);
+  const binary = Buffer.from(b64, "base64");
+  return JSON.parse(inflate(binary, { to: "string" }));
+}
 
 describe("remarkDirectiveBlockflowEditor", () => {
   it("should transform with steps", async () => {
@@ -77,7 +85,7 @@ Content
       ).data.directives?.["blockflow-editor"],
     ).toBeDefined();
   });
-  it("should use base64 encoding for inline config", async () => {
+  it("should use pako encoding for inline config", async () => {
     const result = toHtml(
       `
 ::::blockflow-editor{title="Test" src="./test.sb3"}
@@ -91,10 +99,11 @@ Content
       ctx,
     );
     const html = result.value as string;
-    const match = html.match(/project=([^"]*)/);
+    const match = html.match(/project=([^"&]*)/);
     expect(match).toBeDefined();
-    const base64 = match![1];
-    const config = JSON.parse(Buffer.from(base64, "base64").toString("utf-8"));
+    const decoded = decodeURIComponent(match![1]);
+    expect(decoded.startsWith("pako:")).toBe(true);
+    const config = decodePako(decoded);
     expect(config.title).toBe("Test");
     expect(config.sb3).toBe("/public/test.sb3");
     expect(config.steps).toHaveLength(1);
@@ -143,14 +152,16 @@ Hello
       ctx,
     );
     const html = result.value as string;
-    const match = html.match(/project=([^"]*)/);
-    const config = JSON.parse(
-      Buffer.from(match![1], "base64").toString("utf-8"),
-    );
+    const match = html.match(/project=([^"&]*)/);
+    const config = decodePako(decodeURIComponent(match![1]));
     expect(config.ui).toEqual({
       allowExtensions: false,
-      showCostumesTab: false,
-      showSoundsTab: true,
+    });
+    expect(config.costumes).toEqual({
+      enabled: false,
+    });
+    expect(config.sounds).toEqual({
+      enabled: true,
     });
     expect(config.toolbox.categories).toEqual(["motion", "events", "control"]);
     expect(config.toolbox.blocks).toEqual({

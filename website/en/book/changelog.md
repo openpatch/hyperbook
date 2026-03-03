@@ -38,6 +38,19 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.88.1
+
+::::tabs
+
+:::tab{title="Improved :+1:" id="improved"}
+
+- Update to blockflows new schema
+
+:::
+
+::::
+
+
 ## v0.88.0
 
 ::::tabs
