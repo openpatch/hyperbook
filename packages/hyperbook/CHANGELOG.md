@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.88.1
+
+### Patch Changes
+
+- [`63a7dfe`](https://github.com/openpatch/hyperbook/commit/63a7dfea04aa26c2b5c840f0000fee25ebd6a05c) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Update to blockflows new schema
+
 ## 0.88.0
 
 ### Minor Changes
