@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.88.2
+
+### Patch Changes
+
+- [`2e0b614`](https://github.com/openpatch/hyperbook/commit/2e0b614996e72057e3237ccbc2fdd04752b534c3) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix cloud integration
+
 ## 0.88.1
 
 ### Patch Changes
