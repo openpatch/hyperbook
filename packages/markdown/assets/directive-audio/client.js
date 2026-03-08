@@ -53,7 +53,7 @@ hyperbook.audio = (function () {
     wavesurfer.on("play", () => update(id));
     wavesurferInstances[id] = wavesurfer;
 
-    hyperbook.store.audio.get(id).then((result) => {
+    hyperbook.store.db.audio.get(id).then((result) => {
       if (result) {
         wavesurfer.setTime(result.time);
       }
@@ -117,7 +117,7 @@ hyperbook.audio = (function () {
       playEl.classList.remove("playing");
     }
 
-    hyperbook.store.audio.put({ id, time });
+    hyperbook.store.db.audio.put({ id, time });
 
     durationEl.innerHTML = ` ${secondsToTimestamp(time)}/${secondsToTimestamp(duration)}`;
   }

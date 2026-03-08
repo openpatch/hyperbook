@@ -41,7 +41,7 @@ hyperbook.webide = (function () {
 
     resetEl?.addEventListener("click", () => {
       if (window.confirm(hyperbook.i18n.get("webide-reset-prompt"))) {
-        hyperbook.store.webide.delete(id);
+        hyperbook.store.db.webide.delete(id);
         window.location.reload();
       }
     });
@@ -77,7 +77,7 @@ hyperbook.webide = (function () {
     });
 
     const load = async () => {
-      const result = await hyperbook.store.webide.get(id);
+      const result = await hyperbook.store.db.webide.get(id);
       if (!result) {
         return;
       }
@@ -91,7 +91,7 @@ hyperbook.webide = (function () {
     load();
 
     const update = () => {
-      hyperbook.store.webide.put({
+      hyperbook.store.db.webide.put({
         id,
         html: editorHTML?.value,
         css: editorCSS?.value,
@@ -109,7 +109,7 @@ hyperbook.webide = (function () {
     });
 
     editorHTML?.addEventListener("code-input_load", async () => {
-      const result = await hyperbook.store.webide.get(id);
+      const result = await hyperbook.store.db.webide.get(id);
       if (result) {
         editorHTML.value = result.html;
       }
@@ -122,7 +122,7 @@ hyperbook.webide = (function () {
     });
 
     editorCSS?.addEventListener("code-input_load", async () => {
-      const result = await hyperbook.store.webide.get(id);
+      const result = await hyperbook.store.db.webide.get(id);
       if (result) {
         editorCSS.value = result.css;
       }
@@ -135,7 +135,7 @@ hyperbook.webide = (function () {
     });
 
     editorJS?.addEventListener("code-input_load", async () => {
-      const result = await hyperbook.store.webide.get(id);
+      const result = await hyperbook.store.db.webide.get(id);
       if (result) {
         editorJS.value = result.js;
       }

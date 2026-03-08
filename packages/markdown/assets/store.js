@@ -192,11 +192,10 @@ hyperbook.store = (function () {
     input.click();
   }
 
-  // Expose the Dexie db instance properties and public API
-  return Object.assign(db, {
+  return {
     db,
     export: hyperbookExport,
     reset: hyperbookReset,
     import: hyperbookImport,
-  });
+  };
 })();

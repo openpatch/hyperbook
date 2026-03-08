@@ -55,14 +55,14 @@ hyperbook.ui = (function () {
    */
   function toggleBookmark(key, label) {
     const el = document.querySelectorAll(`.bookmark[data-key="${key}"]`);
-    hyperbook.store.bookmarks.get(key).then((bookmark) => {
+    hyperbook.store.db.bookmarks.get(key).then((bookmark) => {
       if (!bookmark) {
-        hyperbook.store.bookmarks.add({ path: key, label }).then(() => {
+        hyperbook.store.db.bookmarks.add({ path: key, label }).then(() => {
           el.forEach((e) => e.classList.add("active"));
           hyperbook.bookmarks.update();
         });
       } else {
-        hyperbook.store.bookmarks.delete(key).then(() => {
+        hyperbook.store.db.bookmarks.delete(key).then(() => {
           el.forEach((e) => e.classList.remove("active"));
           hyperbook.bookmarks.update();
         });

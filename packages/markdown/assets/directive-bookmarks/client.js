@@ -8,7 +8,7 @@
  */
 hyperbook.bookmarks = (function () {
   function update(root = document) {
-    hyperbook.store.bookmarks
+    hyperbook.store.db.bookmarks
       .toArray()
       .then((bookmarks) => {
         return bookmarks.map((bookmark) => {

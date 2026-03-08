@@ -14,7 +14,7 @@ hyperbook.embed.consent = (function () {
 
   async function isAllowed(consentId) {
     try {
-      var entry = await hyperbook.store.consent.get(consentId);
+      var entry = await hyperbook.store.db.consent.get(consentId);
       return entry?.allowed === true;
     } catch (e) {
       return false;
@@ -22,7 +22,7 @@ hyperbook.embed.consent = (function () {
   }
 
   async function allow(consentId) {
-    await hyperbook.store.consent.put({ id: consentId, allowed: true });
+    await hyperbook.store.db.consent.put({ id: consentId, allowed: true });
   }
 
   function loadContent(wrapper) {

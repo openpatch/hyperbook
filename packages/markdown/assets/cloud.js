@@ -15,6 +15,7 @@ hyperbook.cloud = (function () {
   const AUTH_USER_KEY = "hyperbook_auth_user";
   const LAST_EVENT_ID_KEY = "hyperbook_last_event_id";
   const EVENT_BATCH_MAX_SIZE = 512 * 1024; // 512KB
+  const OFFLINE_QUEUE_MAX_SIZE = 100; // FIX: cap offline queue to avoid unbounded memory growth
   let isLoadingFromCloud = false;
   let syncManager = null;
 
@@ -122,17 +123,27 @@ hyperbook.cloud = (function () {
         this.updateUI("saving");
 
         try {
-          // Take a snapshot of pending events
+          // Snapshot exactly which events we're attempting to send,
+          // so that any events added during the async save are not lost.
+          // FIX: was `this.pendingEvents = []` after save, which would silently
+          // discard events that arrived between the slice() and the clear.
           const eventsToSend = this.pendingEvents.slice();
           const serialized = JSON.stringify(eventsToSend);
 
           if (!this.isOnline) {
-            this.offlineQueue.push({
-              events: eventsToSend,
-              afterEventId: this.lastEventId,
-              timestamp: Date.now(),
-            });
-            this.pendingEvents = [];
+            // FIX: enforce offline queue size cap to prevent unbounded memory growth
+            if (this.offlineQueue.length >= OFFLINE_QUEUE_MAX_SIZE) {
+              console.warn("Offline queue full — falling back to snapshot on reconnect");
+              this.offlineQueue = [{ snapshot: true, timestamp: Date.now() }];
+            } else {
+              this.offlineQueue.push({
+                events: eventsToSend,
+                afterEventId: this.lastEventId,
+                timestamp: Date.now(),
+              });
+            }
+            // FIX: only clear the events we snapshotted
+            this.pendingEvents = this.pendingEvents.slice(eventsToSend.length);
             this.updateUI("offline-queued");
             return;
           }
@@ -151,12 +162,16 @@ hyperbook.cloud = (function () {
             // 409 — stale state, re-fetch
             console.log("⚠ Stale state detected, re-fetching from cloud...");
             await loadFromCloud();
-            this.pendingEvents = [];
+            // FIX: only discard the events we tried to send, not any that
+            // arrived concurrently during the async round-trip
+            this.pendingEvents = this.pendingEvents.slice(eventsToSend.length);
             window.location.reload();
             return;
           }
 
-          this.pendingEvents = [];
+          // FIX: only discard the events we snapshotted, preserving any
+          // events that were added while the network request was in flight
+          this.pendingEvents = this.pendingEvents.slice(eventsToSend.length);
           this.lastEventId = result.lastEventId;
           localStorage.setItem(
             LAST_EVENT_ID_KEY,
@@ -176,8 +191,13 @@ hyperbook.cloud = (function () {
       });
     }
 
-    async sendEvents(events, afterEventId) {
-      var effectiveAfterId = afterEventId !== undefined ? afterEventId : this.lastEventId;
+    // FIX: removed the redundant `afterEventId` parameter. It was never passed
+    // explicitly by `performSave`, so the default always took effect, making the
+    // parameter misleading. `processOfflineQueue` now passes it via options instead.
+    async sendEvents(events, options = {}) {
+      const afterEventId = options.afterEventId !== undefined
+        ? options.afterEventId
+        : this.lastEventId;
       try {
         const data = await apiRequest(
           `/api/store/${HYPERBOOK_CLOUD.id}/events`,
@@ -185,7 +205,7 @@ hyperbook.cloud = (function () {
             method: "POST",
             body: JSON.stringify({
               events: events,
-              afterEventId: effectiveAfterId,
+              afterEventId: afterEventId,
             }),
           },
         );
@@ -264,11 +284,28 @@ hyperbook.cloud = (function () {
 
       console.log(`Processing ${this.offlineQueue.length} queued saves...`);
 
+      // FIX: if the queue was compacted to a snapshot sentinel, send a full
+      // snapshot instead of trying to replay individual events
+      if (this.offlineQueue.length === 1 && this.offlineQueue[0].snapshot) {
+        this.offlineQueue = [];
+        try {
+          const result = await this.sendSnapshot();
+          this.lastEventId = result.lastEventId;
+          localStorage.setItem(LAST_EVENT_ID_KEY, String(this.lastEventId));
+          this.lastSaveTime = Date.now();
+          console.log("✓ Offline snapshot flushed");
+        } catch (error) {
+          console.error("Failed to flush offline snapshot:", error);
+        }
+        return;
+      }
+
       // Send queued events in order
       for (let i = 0; i < this.offlineQueue.length; i++) {
         const queued = this.offlineQueue[i];
         try {
-          const result = await this.sendEvents(queued.events, queued.afterEventId);
+          // FIX: use named options object to match the updated sendEvents signature
+          const result = await this.sendEvents(queued.events, { afterEventId: queued.afterEventId });
 
           if (result.conflict) {
             // Conflict — discard remaining queue, re-fetch
@@ -317,24 +354,27 @@ hyperbook.cloud = (function () {
       });
     }
 
+    // FIX: manualSave's no-pending-events path now runs inside saveMutex,
+    // preventing a concurrent performSave from racing with sendSnapshot
     async manualSave() {
       if (this.pendingEvents.length === 0) {
         // No pending events — send full snapshot
         this.clearTimers();
-        try {
-          this.updateUI("saving");
-          const result = await this.sendSnapshot();
-          this.lastEventId = result.lastEventId;
-          localStorage.setItem(
-            LAST_EVENT_ID_KEY,
-            String(this.lastEventId),
-          );
-          this.updateUI("saved");
-        } catch (error) {
-          console.error("Manual save failed:", error);
-          this.updateUI("error");
-        }
-        return;
+        return this.saveMutex.runExclusive(async () => {
+          try {
+            this.updateUI("saving");
+            const result = await this.sendSnapshot();
+            this.lastEventId = result.lastEventId;
+            localStorage.setItem(
+              LAST_EVENT_ID_KEY,
+              String(this.lastEventId),
+            );
+            this.updateUI("saved");
+          } catch (error) {
+            console.error("Manual save failed:", error);
+            this.updateUI("error");
+          }
+        });
       }
       this.clearTimers();
       await this.performSave("manual");
@@ -599,8 +639,12 @@ hyperbook.cloud = (function () {
         minSaveInterval: 1000,
       });
 
+      // Suppress events from directive initialization (e.g., restoring collapsible
+      // state triggers Dexie writes via toggle events after hooks are registered).
+      isLoadingFromCloud = true;
+
       // Hook Dexie tables to capture granular events (skip currentState — ephemeral UI data)
-      hyperbook.store.tables.forEach((table) => {
+      hyperbook.store.db.tables.forEach((table) => {
         if (table.name === "currentState") return;
 
         table.hook("creating", function (primKey, obj) {
@@ -630,6 +674,10 @@ hyperbook.cloud = (function () {
           });
         });
       });
+
+      // Allow directive initialization to settle before accepting sync events
+      await new Promise((r) => requestAnimationFrame(() => setTimeout(r, 0)));
+      isLoadingFromCloud = false;
     }
   }
 

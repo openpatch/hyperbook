@@ -8,7 +8,7 @@ hyperbook.youtube.consent = (function () {
 
   async function isAllowed() {
     try {
-      var entry = await hyperbook.store.consent.get(CONSENT_ID);
+      var entry = await hyperbook.store.db.consent.get(CONSENT_ID);
       return entry?.allowed === true;
     } catch (e) {
       return false;
@@ -16,7 +16,7 @@ hyperbook.youtube.consent = (function () {
   }
 
   async function allow() {
-    await hyperbook.store.consent.put({ id: CONSENT_ID, allowed: true });
+    await hyperbook.store.db.consent.put({ id: CONSENT_ID, allowed: true });
   }
 
   function loadContent(wrapper) {

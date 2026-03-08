@@ -170,7 +170,7 @@ hyperbook.python = (function () {
       });
 
       resetEl?.addEventListener("click", () => {
-        hyperbook.store.pyide.delete(id);
+        hyperbook.store.db.pyide.delete(id);
         window.location.reload();
       });
 
@@ -203,14 +203,14 @@ hyperbook.python = (function () {
       inputBtn?.addEventListener("click", showInput);
 
       editor.addEventListener("code-input_load", async () => {
-        const result = await hyperbook.store.pyide.get(id);
+        const result = await hyperbook.store.db.pyide.get(id);
         if (result) {
           editor.value = result.script;
         }
       });
 
       editor.addEventListener("input", () => {
-        hyperbook.store.pyide.put({ id, script: editor.value });
+        hyperbook.store.db.pyide.put({ id, script: editor.value });
       });
 
       test?.addEventListener("click", async () => {

@@ -30,9 +30,9 @@ hyperbook.bootstrap = (function () {
       details.addEventListener("toggle", () => {
         if (id) {
           if (details.open) {
-            hyperbook.store.collapsibles.put({ id });
+            hyperbook.store.db.collapsibles.put({ id });
           } else {
-            hyperbook.store.collapsibles.delete(id);
+            hyperbook.store.db.collapsibles.delete(id);
           }
 
           // Sync all elements with the same ID
@@ -57,7 +57,7 @@ hyperbook.bootstrap = (function () {
    * @param {HTMLElement} root
    */
   const updateCollapsibles = (root) => {
-    hyperbook.store.collapsibles.toArray().then((collapsibles) => {
+    hyperbook.store.db.collapsibles.toArray().then((collapsibles) => {
       const detailsEls = root.querySelectorAll("details.section, details.directive-collapsible");
       for (let details of detailsEls) {
         const id = details.getAttribute("data-id");
@@ -95,7 +95,7 @@ hyperbook.bootstrap = (function () {
     const bookmarkEls = root.getElementsByClassName("bookmark");
     for (let bookmarkEl of bookmarkEls) {
       const key = bookmarkEl.getAttribute("data-key");
-      hyperbook.store.bookmarks.get(key).then((bookmark) => {
+      hyperbook.store.db.bookmarks.get(key).then((bookmark) => {
         if (bookmark) {
           bookmarkEl.classList.add("active");
         }

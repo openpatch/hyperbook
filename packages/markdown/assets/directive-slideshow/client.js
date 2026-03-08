@@ -11,7 +11,7 @@ hyperbook.slideshow = (function () {
    * @param {string} id
    */
   const update = (id) => {
-    hyperbook.store.slideshow.get(id).then((result) => {
+    hyperbook.store.db.slideshow.get(id).then((result) => {
       const active = result?.active ?? 0;
       const dots = document.querySelectorAll(`.dot[data-id="${id}"]`);
       const images = document.querySelectorAll(
@@ -38,11 +38,11 @@ hyperbook.slideshow = (function () {
    */
   const moveBy = (id, steps) => {
     const images = document.querySelectorAll(`.dot[data-id="${id}"]`);
-    hyperbook.store.slideshow.get(id).then((result) => {
+    hyperbook.store.db.slideshow.get(id).then((result) => {
       let active = result?.active ?? 0;
       active += steps;
       active = ((active % images.length) + images.length) % images.length;
-      hyperbook.store.slideshow.put({ id, active }).then(() => {
+      hyperbook.store.db.slideshow.put({ id, active }).then(() => {
         window.hyperbook.slideshow.update(id);
       });
     });
@@ -55,7 +55,7 @@ hyperbook.slideshow = (function () {
   const setActive = (id, index) => {
     const images = document.querySelectorAll(`.dot[data-id="${id}"]`);
     if (index >= 0 && index < images.length) {
-      hyperbook.store.slideshow.put({ id, active: index }).then(() => {
+      hyperbook.store.db.slideshow.put({ id, active: index }).then(() => {
         window.hyperbook.slideshow.update(id);
       });
     }

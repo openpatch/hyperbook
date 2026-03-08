@@ -13,7 +13,7 @@ hyperbook.struktolab = (function () {
       const editorId = editor.getAttribute("data-id");
 
       // Load saved content for this editor
-      hyperbook.store.struktolab.get(editorId).then((result) => {
+      hyperbook.store.db.struktolab.get(editorId).then((result) => {
         if (result) {
           editor.loadJSON(JSON.parse(result.tree));
         }
@@ -21,7 +21,7 @@ hyperbook.struktolab = (function () {
 
       // Listen for changes in the editor
       editor.addEventListener("change", (e) => {
-        hyperbook.store.struktolab.put({
+        hyperbook.store.db.struktolab.put({
           id: editorId,
           tree: JSON.stringify(e.detail.tree),
         });

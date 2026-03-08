@@ -17,7 +17,7 @@ hyperbook.tabs = (function () {
       // Listen for changes on radio inputs
       input.addEventListener("change", () => {
         if (input.checked) {
-          hyperbook.store.tabs.put({
+          hyperbook.store.db.tabs.put({
             id: tabsId,
             active: tabId,
           });
@@ -29,7 +29,7 @@ hyperbook.tabs = (function () {
     });
     
     // Restore saved tab selections
-    hyperbook.store.tabs.each((result) => {
+    hyperbook.store.db.tabs.each((result) => {
       selectTab(result.id, result.active);
     });
   };

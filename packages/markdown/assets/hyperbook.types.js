@@ -26,28 +26,6 @@
 /**
  * @typedef {Object} HyperbookStore
  * @property {import("dexie").Dexie} db - The underlying Dexie database instance.
- * @property {import("dexie").Table} currentState - Ephemeral UI state (mouse, scroll, window size).
- * @property {import("dexie").Table} collapsibles - Persisted open/close state for collapsible elements.
- * @property {import("dexie").Table} abcMusic - ABC music editor tunes.
- * @property {import("dexie").Table} audio - Audio playback positions.
- * @property {import("dexie").Table} bookmarks - User bookmarks (path + label).
- * @property {import("dexie").Table} p5 - p5.js sketches.
- * @property {import("dexie").Table} protect - Password hashes for protected content.
- * @property {import("dexie").Table} pyide - Python IDE scripts.
- * @property {import("dexie").Table} slideshow - Active slide indices.
- * @property {import("dexie").Table} tabs - Active tab selections.
- * @property {import("dexie").Table} excalidraw - Excalidraw drawing state.
- * @property {import("dexie").Table} webide - Web IDE editor contents (HTML/CSS/JS).
- * @property {import("dexie").Table} h5p - H5P user data.
- * @property {import("dexie").Table} geogebra - GeoGebra applet state.
- * @property {import("dexie").Table} learningmap - Learning map node positions and zoom.
- * @property {import("dexie").Table} textinput - Text input field values.
- * @property {import("dexie").Table} custom - Custom directive payload storage.
- * @property {import("dexie").Table} onlineide - Online IDE scripts.
- * @property {import("dexie").Table} sqlideScripts - SQL IDE scripts.
- * @property {import("dexie").Table} sqlideDatabases - SQL IDE databases.
- * @property {import("dexie").Table} multievent - Multi-event state.
- * @property {import("dexie").Table} typst - Typst editor code.
  * @property {() => Promise<void>} export - Export all store data as a JSON download.
  * @property {() => Promise<void>} reset - Clear all store data after user confirmation.
  * @property {() => Promise<void>} import - Import store data from a JSON file.

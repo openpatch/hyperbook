@@ -54,7 +54,7 @@ hyperbook.p5 = (function () {
     });
 
     resetEl?.addEventListener("click", () => {
-      hyperbook.store.p5.delete(id);
+      hyperbook.store.db.p5.delete(id);
       window.location.reload();
     });
 
@@ -68,7 +68,7 @@ hyperbook.p5 = (function () {
 
     editor?.addEventListener("code-input_load", async () => {
       if (id) {
-        const result = await hyperbook.store.p5.get(id);
+        const result = await hyperbook.store.db.p5.get(id);
         if (result) {
           editor.value = result.sketch;
           const code = result.sketch;
@@ -79,7 +79,7 @@ hyperbook.p5 = (function () {
         }
 
         editor.addEventListener("input", () => {
-          hyperbook.store.p5.put({ id, sketch: editor.value });
+          hyperbook.store.db.p5.put({ id, sketch: editor.value });
         });
       }
 

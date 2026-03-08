@@ -15,7 +15,7 @@ hyperbook.h5p = (function () {
   const save = (id) =>
     H5P.getUserData(id, "state", (error, userData) => {
       if (!error) {
-        hyperbook.store.h5p.put({ id, userData });
+        hyperbook.store.db.h5p.put({ id, userData });
       }
     });
 
@@ -41,7 +41,7 @@ hyperbook.h5p = (function () {
       const src = el.getAttribute("data-src");
       const id = el.getAttribute("data-id");
       if (h5pFrame && src) {
-        const result = await hyperbook.store.h5p.get(id);
+        const result = await hyperbook.store.db.h5p.get(id);
         const h5pOptions = {
           ...h5pBaseOptions,
           id,

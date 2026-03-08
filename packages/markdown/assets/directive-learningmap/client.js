@@ -13,12 +13,12 @@ hyperbook.learningmap = (function () {
     for (let elem of elems) {
       const map = elem.getElementsByTagName("hyperbook-learningmap")[0];
       if (map) {
-        const result = await hyperbook.store.learningmap.get(elem.id);
+        const result = await hyperbook.store.db.learningmap.get(elem.id);
         if (result) {
           map.initialState = result;
         }
         map.addEventListener("change", function (event) {
-          hyperbook.store.learningmap
+          hyperbook.store.db.learningmap
             .update(elem.id, {
               id: elem.id,
               nodes: event.detail.nodes,
@@ -28,7 +28,7 @@ hyperbook.learningmap = (function () {
             })
             .then((updated) => {
               if (updated == 0) {
-                hyperbook.store.learningmap.put({
+                hyperbook.store.db.learningmap.put({
                   id: elem.id,
                   nodes: event.detail.nodes,
                   x: event.detail.x,

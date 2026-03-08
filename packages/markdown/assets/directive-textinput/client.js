@@ -27,7 +27,7 @@ hyperbook.textinput = (function () {
       const id = textarea.getAttribute("data-id");
       
       // Load saved text from store
-      hyperbook.store.textinput.get(id).then((result) => {
+      hyperbook.store.db.textinput.get(id).then((result) => {
         if (result && result.text) {
           textarea.value = result.text;
         }
@@ -37,7 +37,7 @@ hyperbook.textinput = (function () {
       
       // Save text to store on input with debouncing
       const saveToStore = debounce(() => {
-        hyperbook.store.textinput.put({
+        hyperbook.store.db.textinput.put({
           id: id,
           text: textarea.value,
         }).catch((error) => {

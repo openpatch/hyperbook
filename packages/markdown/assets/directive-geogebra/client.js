@@ -12,14 +12,14 @@ hyperbook.geogebra = (function () {
     for (const el of els) {
       const id = el.getAttribute("data-id");
 
-      const result = await hyperbook.store.geogebra.get(id);
+      const result = await hyperbook.store.db.geogebra.get(id);
       if (result && result.state) {
         el.setBase64(result.state);
       }
 
       el.registerUpdateListener(() => {
         el.getBase64((b) => {
-          hyperbook.store.geogebra.put({ id, state: b });
+          hyperbook.store.db.geogebra.put({ id, state: b });
         });
       });
     }

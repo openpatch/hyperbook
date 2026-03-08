@@ -41,7 +41,7 @@ hyperbook.abc = (function () {
       });
 
       resetEl?.addEventListener("click", () => {
-        hyperbook.store.abcMusic.delete(id);
+        hyperbook.store.db.abcMusic.delete(id);
         window.location.reload();
       });
 
@@ -54,7 +54,7 @@ hyperbook.abc = (function () {
       });
 
       editorEl.addEventListener("code-input_load", async () => {
-        const storeResult = await hyperbook.store.abcMusic
+        const storeResult = await hyperbook.store.db.abcMusic
           .where("id")
           .equals(editorEl.id)
           .first();
@@ -78,7 +78,7 @@ hyperbook.abc = (function () {
         });
 
         editorEl.addEventListener("change", () => {
-          hyperbook.store.abcMusic.put({
+          hyperbook.store.db.abcMusic.put({
             id: editorEl.id,
             tune: editorEl.value,
           });
