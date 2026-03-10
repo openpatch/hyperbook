@@ -1,5 +1,15 @@
 # @hyperbook/markdown
 
+## 0.60.0
+
+### Minor Changes
+
+- [`dcff5a6`](https://github.com/openpatch/hyperbook/commit/dcff5a6f67fe9536f7a039f89b272c13a9c4bf73) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Show version of hyperbook
+
+### Patch Changes
+
+- [`0f0748c`](https://github.com/openpatch/hyperbook/commit/0f0748cc1ee56a536d07d95f3a630a3a917909a5) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Show the reuse button in h5p elements.
+
 ## 0.59.4
 
 ### Patch Changes

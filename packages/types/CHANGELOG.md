@@ -1,5 +1,11 @@
 # @hyperbook/types
 
+## 0.23.0
+
+### Minor Changes
+
+- [`dcff5a6`](https://github.com/openpatch/hyperbook/commit/dcff5a6f67fe9536f7a039f89b272c13a9c4bf73) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Show version of hyperbook
+
 ## 0.22.1
 
 ### Patch Changes
