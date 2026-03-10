@@ -14,7 +14,10 @@ The src attribute is used to specify the path to the H5P file.
 ```md
 ::h5p{src="/test.h5p"}
 ```
-
 ::h5p{src="/test.h5p"}
 
 The best way to create H5P content is to use the [ZUM Apps](https://apps.zum.de) website. You can create and edit H5P content on the website, and then download the content as an H5P file. For this you can use the Reuse button. You can then put the h5p file into your public folder and use it in a h5p-element.
+
+## Example with Reuse-Button
+
+::h5p{src="/reuse.h5p"}

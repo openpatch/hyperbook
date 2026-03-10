@@ -38,6 +38,18 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.88.3
+
+::::tabs
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+- Show reuse button in h5p elements.
+
+:::
+
+::::
+
 ## v0.88.2
 
 ::::tabs

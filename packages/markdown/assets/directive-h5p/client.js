@@ -29,10 +29,10 @@ hyperbook.h5p = (function () {
       librariesPath: `${assets}/libraries`,
       saveFreq: 1,
       contentUserData: undefined,
-      frame: false,
-      copyright: false,
+      frame: true,
+      copyright: true,
       export: false,
-      icon: false,
+      icon: true,
       embed: false,
     };
 

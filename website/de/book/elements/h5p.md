@@ -18,3 +18,7 @@ Das `src`-Attribut wird verwendet, um den Pfad zur H5P-Datei anzugeben.
 ::h5p{src="/test.h5p"}
 
 Der beste Weg, H5P-Inhalte zu erstellen, ist die Nutzung der [ZUM Apps](https://apps.zum.de) Website. Sie können H5P-Inhalte auf der Website erstellen und bearbeiten und dann die Inhalte als H5P-Datei herunterladen. Dafür können Sie die Schaltfläche "Reuse" verwenden. Sie können die h5p-Datei dann in Ihren öffentlichen Ordner legen und sie in einem h5p-Element verwenden.
+
+## Beispiel mit Reuse-Button
+
+::h5p{src="/resuse.h5p"}
