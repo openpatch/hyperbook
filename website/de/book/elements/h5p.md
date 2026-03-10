@@ -21,4 +21,4 @@ Der beste Weg, H5P-Inhalte zu erstellen, ist die Nutzung der [ZUM Apps](https://
 
 ## Beispiel mit Reuse-Button
 
-::h5p{src="/resuse.h5p"}
+::h5p{src="/reuse.h5p"}
