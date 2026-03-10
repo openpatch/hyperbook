@@ -29,7 +29,7 @@ export interface SinglePageResult {
 
 export async function buildSingleBookPage(
   file: VFileBook,
-  baseCtx: Pick<HyperbookContext, "config" | "makeUrl" | "project" | "root">,
+  baseCtx: Pick<HyperbookContext, "config" | "makeUrl" | "project" | "root" | "version">,
   pageList: HyperbookPage[],
   pagesAndSections: Pick<Navigation, "pages" | "sections" | "glossary">,
   rootOut: string,
@@ -91,8 +91,7 @@ export async function buildSingleBookPage(
 
 export async function buildSingleGlossaryPage(
   file: VFileGlossary,
-  baseCtx: Pick<HyperbookContext, "config" | "makeUrl" | "project" | "root">,
-  pageList: HyperbookPage[],
+  baseCtx: Pick<HyperbookContext, "config" | "makeUrl" | "project" | "root" | "version">,  pageList: HyperbookPage[],
   pagesAndSections: Pick<Navigation, "pages" | "sections" | "glossary">,
   rootOut: string,
   assetsOut: string,
@@ -326,7 +325,7 @@ export function makeBaseCtx(
   hyperbookJson: HyperbookJson,
   basePath: string | undefined,
   rootProject: Hyperproject,
-): Pick<HyperbookContext, "config" | "makeUrl" | "project" | "root"> {
+): Pick<HyperbookContext, "config" | "makeUrl" | "project" | "root" | "version"> {
   const resolveRelativePath = (p: string, page: HyperbookPage): string => {
     if (p.startsWith("/")) {
       return p;
@@ -343,6 +342,7 @@ export function makeBaseCtx(
   return {
     root,
     config: hyperbookJson,
+    version: packageJson.version,
     makeUrl: (p, base, page, options = { versioned: true }) => {
       if (typeof p === "string") {
         if (p.includes("://") || p.startsWith("data:")) {

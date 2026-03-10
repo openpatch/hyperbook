@@ -24,7 +24,7 @@ export class IncrementalBuilder {
   private root: string;
   private rootProject: Hyperproject;
   private hyperbookJson: HyperbookJson | null = null;
-  private baseCtx: Pick<HyperbookContext, "config" | "makeUrl" | "project" | "root"> | null = null;
+  private baseCtx: Pick<HyperbookContext, "config" | "makeUrl" | "project" | "root" | "version"> | null = null;
   private pagesAndSections: Pick<Navigation, "pages" | "sections" | "glossary"> | null = null;
   private pageList: HyperbookPage[] | null = null;
   private searchDocuments: Map<string, any[]> = new Map();

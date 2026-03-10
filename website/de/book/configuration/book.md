@@ -43,6 +43,7 @@ von Optionen, die du definieren kannst. Optionen mit einem "\*" müssen gesetzt 
 | importExport       | Ermöglicht das Importieren und Exportieren des Zustands des Hyperbooks als Datei. Schaltflächen zum Importieren und Exportieren befinden sich am unteren Rand der Seite.                        |
 | cloud.url          | URL deines [Hyperbook Cloud](/configuration/cloud)-Servers. Aktiviert den Schüler-Login und die Cloud-Synchronisierung.                                                                         |
 | cloud.id           | Der Hyperbook-Slug/ID auf dem Cloud-Server. Muss mit dem Slug übereinstimmen, der in der Cloud-Admin-Oberfläche konfiguriert ist.                                                               |
+| version | Konfiguriert, wo die Version des Hyperbooks angezeigt wird. "text" zeigt sie unter dem "Powered by Hyperbook"-Text an. "tooltip" als Tooltip beim Hover über den "Powered by Hyperbook"-Text und "console" nur in der Konsole. |
 
 Hier ist eine Beispielkonfiguration:
 

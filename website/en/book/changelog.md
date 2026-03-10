@@ -42,6 +42,12 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 
 ::::tabs
 
+:::tab{title="Improved :+1:" id="improved"}
+
+- Show version of the hyperbook in the console. This can be configured to "text" showing it under the Powered by Hyperbook text or "tooltip" showing it as a tooltip when hovering the Powered by Hyperbook text.
+
+:::
+
 :::tab{title="Fixed :bug:" id="fixed"}
 
 - Show reuse button in h5p elements.

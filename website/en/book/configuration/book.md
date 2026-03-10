@@ -42,6 +42,7 @@ can and part wise must set (indicated by a \*).
 | importExport       | Allows to import and export the state of the Hyperbook as a file. Buttons for importing and exporting will be at the bottom of the page.                        |
 | cloud.url          | URL of your [Hyperbook Cloud](/configuration/cloud) server. Enables student login and cloud sync.                                                               |
 | cloud.id           | The hyperbook slug/ID on the cloud server. Must match the slug configured in the cloud admin interface.                                                         |
+| version | Configure where the version of the Hyperbook is shown. "text" show it under the Powered by Hyperbook text. "tooltip" as a tooltip when hovering the Powered by Hyperbook text and "console" only in the console. |
 
 Here is an example configuration:
 

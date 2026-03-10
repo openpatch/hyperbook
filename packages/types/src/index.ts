@@ -130,6 +130,13 @@ export type HyperbookJson = {
     name?: string;
     url?: string;
   };
+  /**
+   * Controls how the Hyperbook version is displayed.
+   * - "text": Shows version below the "Powered by Hyperbook" label.
+   * - "tooltip": Shows version on hover of the "Powered by Hyperbook" label.
+   * - "console": Outputs version as ASCII art in the browser console (default).
+   */
+  version?: "text" | "tooltip" | "console";
   font?: string;
   fonts?: {
     heading?: string;
@@ -220,6 +227,7 @@ export interface HyperbookContext {
   config: HyperbookJson;
   library?: HyperlibraryJson;
   project?: Hyperproject;
+  version?: string;
   makeUrl(
     path: string | string[],
     base: "public" | "book" | "archive" | "glossary" | "assets",

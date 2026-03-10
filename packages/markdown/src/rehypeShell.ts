@@ -20,6 +20,56 @@ const resolveEmoji = (text: string): string => {
   });
 };
 
+const makeAuthorElement = (ctx: HyperbookContext): ElementContent => {
+  const versionMode = ctx.config.version ?? "console";
+  const showTextVersion = versionMode === "text" && ctx.version;
+  const showTooltip = versionMode === "tooltip" && ctx.version;
+
+  return {
+    type: "element",
+    tagName: "a",
+    properties: {
+      class: "author",
+      href: "https://hyperbook.openpatch.org",
+      ...(showTooltip ? { title: `Hyperbook v${ctx.version}` } : {}),
+    },
+    children: [
+      {
+        type: "text",
+        value: "Powered by ",
+      },
+      {
+        type: "element",
+        tagName: "b",
+        properties: {},
+        children: [
+          {
+            type: "text",
+            value: "Hyperbook",
+          },
+        ],
+      },
+      ...(showTextVersion
+        ? [
+            {
+              type: "element" as const,
+              tagName: "span",
+              properties: {
+                class: "author-version",
+              },
+              children: [
+                {
+                  type: "text" as const,
+                  value: ctx.version!,
+                },
+              ],
+            },
+          ]
+        : []),
+    ],
+  };
+};
+
 type BreadcrumbItem = {
   name: string;
   href: string | null;
@@ -744,31 +794,7 @@ const makeHeaderElements = (ctx: HyperbookContext): ElementContent[] => {
             },
             children: [
               ...makeNavigationElements(ctx),
-              {
-                type: "element",
-                tagName: "a",
-                properties: {
-                  class: "author",
-                  href: "https://hyperbook.openpatch.org",
-                },
-                children: [
-                  {
-                    type: "text",
-                    value: "Powered by ",
-                  },
-                  {
-                    type: "element",
-                    tagName: "b",
-                    properties: {},
-                    children: [
-                      {
-                        type: "text",
-                        value: "Hyperbook",
-                      },
-                    ],
-                  },
-                ],
-              },
+              makeAuthorElement(ctx),
             ],
           },
         ],
@@ -1346,31 +1372,7 @@ const makeJump = (ctx: HyperbookContext): ElementContent[] => {
 const makeSidebar = (ctx: HyperbookContext): ElementContent[] => {
   const elements: ElementContent[] = [
     ...makeNavigationElements(ctx),
-    {
-      type: "element",
-      tagName: "a",
-      properties: {
-        class: "author",
-        href: "https://hyperbook.openpatch.org",
-      },
-      children: [
-        {
-          type: "text",
-          value: "Powered by ",
-        },
-        {
-          type: "element",
-          tagName: "b",
-          properties: {},
-          children: [
-            {
-              type: "text",
-              value: "Hyperbook",
-            },
-          ],
-        },
-      ],
-    },
+    makeAuthorElement(ctx),
   ];
 
   return [

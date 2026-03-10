@@ -569,6 +569,26 @@ ${ctx.config.cloud ? `HYPERBOOK_CLOUD = ${JSON.stringify(ctx.config.cloud).repla
                   },
                 ],
               },
+              ...((ctx.config.version ?? "console") === "console" && ctx.version
+                ? [
+                    {
+                      type: "element" as const,
+                      tagName: "script",
+                      properties: {},
+                      children: [
+                        {
+                          type: "raw" as const,
+                          value: `
+console.log(
+  "%c" +
+  "Hyperbook v${ctx.version}",
+  "font-family: monospace; font-size: 16px;"
+);`,
+                        },
+                      ],
+                    } as ElementContent,
+                  ]
+                : []),
               {
                 type: "element",
                 tagName: "script",

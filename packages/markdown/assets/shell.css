@@ -295,6 +295,13 @@ a.jump.previous::before {
   font-weight: bold;
 }
 
+.sidebar>.author>.author-version,
+.nav-drawer-content>.author>.author-version {
+  display: block;
+  font-size: 0.7rem;
+  opacity: 0.6;
+}
+
 .mobile-nav {
   display: none;
   margin-left: 1rem;
