@@ -1,9 +1,11 @@
 {
   "name": "Hyperbook Dokumenation",
+  "version": "text",
   "qrcode": true,
-  "search": true,
+  "breadcrumb": true,
   "llms": true,
   "importExport": true,
+  "search": true,
   "description": "Dokumentation für Hyperbook erstellt mit Hyperbook",
   "author": {
     "name": "OpenPatch",
