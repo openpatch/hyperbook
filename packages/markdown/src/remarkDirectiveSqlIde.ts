@@ -23,23 +23,30 @@ export default (ctx: HyperbookContext) => () => {
 
         const data = node.data || (node.data = {});
         const attributes = node.attributes || {};
-        const {
+        let {
           id = hash(node),
-          db = ctx.config.elements?.sqlide?.db ||
-            ctx.makeUrl(
-              [
-                "directive-sqlide",
-                "include",
-                "assets",
-                "databases",
-                "world1.sqLite",
-              ],
-              "assets",
-              undefined,
-              { versioned: false },
-            ),
+          db,
           height = ctx.config.elements?.sqlide?.height || "600px",
         } = attributes;
+
+        if (!db) {
+          db = ctx.config.elements?.sqlide?.db
+            ? ctx.makeUrl(ctx.config.elements?.sqlide?.db, "public")
+            : ctx.makeUrl(
+                [
+                  "directive-sqlide",
+                  "include",
+                  "assets",
+                  "databases",
+                  "world1.sqLite",
+                ],
+                "assets",
+                undefined,
+                { versioned: false },
+              );
+        } else {
+          db = ctx.makeUrl(db, "public", ctx.navigation.current || undefined);
+        }
 
         expectContainerDirective(node, file, name);
         registerDirective(

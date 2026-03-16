@@ -38,6 +38,18 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.89.1
+
+::::tabs
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+- Fix issue where the base URL was not included in the SQLIDE database URL.
+
+:::
+
+::::
+
 ## v0.89.0
 
 ::::tabs
