@@ -1,5 +1,11 @@
 # @hyperbook/markdown
 
+## 0.60.2
+
+### Patch Changes
+
+- [`1b84619`](https://github.com/openpatch/hyperbook/commit/1b84619ead4f6f7661c2a3b04b69fb6b89d47504) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix false constructor in the vertex class in nrw module of the online ide element
+
 ## 0.60.1
 
 ### Patch Changes
