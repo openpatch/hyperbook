@@ -99,7 +99,7 @@ async function postbuild() {
       dst: path.join("./dist", "assets", "directive-sqlide", "include"),
     },
     {
-      url: "https://github.com/openpatch/online-ide/releases/download/v2.2.1-hyperbook.2/dist-embedded.zip",
+      url: "https://github.com/openpatch/online-ide/releases/download/v2.2.1-hyperbook.5/dist-embedded.zip",
       dst: path.join("./dist", "assets", "directive-onlineide", "include"),
     },
   ];
