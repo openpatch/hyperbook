@@ -1,5 +1,11 @@
 # @hyperbook/markdown
 
+## 0.60.1
+
+### Patch Changes
+
+- [`87f8c55`](https://github.com/openpatch/hyperbook/commit/87f8c5506431f1b44e34026b142c415ab2d5ac04) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix missing basepath in db of sqlide
+
 ## 0.60.0
 
 ### Minor Changes
