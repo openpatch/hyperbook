@@ -54,7 +54,7 @@ hyperbook.protect = (function () {
   function init(root) {
     const els = root.getElementsByClassName("directive-protect");
     for (let el of els) {
-      const inputEl = el.getElementsByTagName("input")[0];
+      const inputEl = el.querySelector(":scope > .password-input input");
       const id = el.getAttribute("data-id");
 
       if (!inputEl) continue;
@@ -66,7 +66,7 @@ hyperbook.protect = (function () {
         }
       });
 
-      const hiddenEL = el.getElementsByClassName("hidden")[0];
+      const hiddenEL = el.querySelector(":scope > .hidden");
       el.removeChild(hiddenEL);
 
       onUpdateToast(inputEl, el, hiddenEL);

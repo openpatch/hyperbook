@@ -38,6 +38,18 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.89.2
+
+::::tabs
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+- Fix protect directive not revealing content when wrapping tabs or other directives containing input elements.
+
+:::
+
+::::
+
 ## v0.89.1
 
 ::::tabs
