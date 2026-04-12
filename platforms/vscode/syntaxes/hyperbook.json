@@ -55,10 +55,10 @@
       "include": "#directive-scratchblock"
     },
     {
-      "include": "#directive-snippets-inline"
+      "include": "#directive-snippets-block"
     },
     {
-      "include": "#directive-snippets-block"
+      "include": "#directive-snippets-inline"
     },
     {
       "include": "#directive-struktog"
@@ -1536,6 +1536,137 @@
         },
         "3": {
           "name": "entity.name.function.directive.typst.hyperbook"
+        }
+      },
+      "endCaptures": {
+        "2": {
+          "name": "punctuation.definition.directive.level.hyperbook"
+        }
+      },
+      "patterns": [
+        {
+          "include": "text.html.markdown"
+        }
+      ]
+    },
+    "directive-snippets-inline": {
+      "name": "meta.directive.snippet.inline.hyperbook",
+      "match": "(?<!:)(:{1,2})(snippet)\\{([^}]*)\\}",
+      "captures": {
+        "1": {
+          "name": "punctuation.definition.directive.level.hyperbook"
+        },
+        "2": {
+          "name": "entity.name.function.directive.snippet.hyperbook"
+        },
+        "3": {
+          "patterns": [
+            {
+              "match": "(#[0-9a-zA-Z-]+)",
+              "captures": {
+                "1": {
+                  "name": "string.unquoted"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][a-zA-Z0-9]*)=\"([^\"]*)\"",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.snippet.hyperbook"
+                },
+                "2": {
+                  "name": "string.quoted.double.untitled"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][a-zA-Z0-9]*)=(?:(false)|(true))",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.snippet.hyperbook"
+                },
+                "2": {
+                  "name": "constant.language.boolean.false"
+                },
+                "3": {
+                  "name": "constant.language.boolean.true"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][a-zA-Z0-9]*)=([^\\s}\"]+)",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.snippet.hyperbook"
+                },
+                "2": {
+                  "name": "constant.numeric"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "directive-snippets-block": {
+      "name": "meta.directive.snippet.block.hyperbook",
+      "begin": "(^|\\G)(:{3,})(snippet)\\{([^}]*)\\}\\s*$",
+      "end": "(^|\\G)(\\2)\\s*$",
+      "beginCaptures": {
+        "2": {
+          "name": "punctuation.definition.directive.level.hyperbook"
+        },
+        "3": {
+          "name": "entity.name.function.directive.snippet.hyperbook"
+        },
+        "4": {
+          "patterns": [
+            {
+              "match": "(#[0-9a-zA-Z-]+)",
+              "captures": {
+                "1": {
+                  "name": "string.unquoted"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][a-zA-Z0-9]*)=\"([^\"]*)\"",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.snippet.hyperbook"
+                },
+                "2": {
+                  "name": "string.quoted.double.untitled"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][a-zA-Z0-9]*)=(?:(false)|(true))",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.snippet.hyperbook"
+                },
+                "2": {
+                  "name": "constant.language.boolean.false"
+                },
+                "3": {
+                  "name": "constant.language.boolean.true"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][a-zA-Z0-9]*)=([^\\s}\"]+)",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.snippet.hyperbook"
+                },
+                "2": {
+                  "name": "constant.numeric"
+                }
+              }
+            }
+          ]
         }
       },
       "endCaptures": {
