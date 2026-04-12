@@ -1,5 +1,11 @@
 # @hyperbook/markdown
 
+## 0.60.3
+
+### Patch Changes
+
+- [`39cf0ed`](https://github.com/openpatch/hyperbook/commit/39cf0edefa4ddafce806c8a1172099cb092ef710) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix protect directive not revealing content when wrapping tabs or other directives containing input elements. The password input selector now scopes to the direct child `.password-input` container instead of selecting the first input in the entire subtree.
+
 ## 0.60.2
 
 ### Patch Changes

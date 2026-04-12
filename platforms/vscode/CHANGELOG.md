@@ -1,5 +1,14 @@
 # @hyperbook/vscode-extension
 
+## 0.49.37
+
+### Patch Changes
+
+- [`0cbed55`](https://github.com/openpatch/hyperbook/commit/0cbed558b39c266920a0dda521192d20d416415d) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix syntax highlighting for snippet and other directives
+
+- Updated dependencies [[`39cf0ed`](https://github.com/openpatch/hyperbook/commit/39cf0edefa4ddafce806c8a1172099cb092ef710)]:
+  - @hyperbook/markdown@0.60.3
+
 ## 0.49.36
 
 ### Patch Changes
