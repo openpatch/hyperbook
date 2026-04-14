@@ -6,6 +6,8 @@ import remarkToRehype from "remark-rehype";
 import { unified, PluggableList } from "unified";
 import { remarkRemoveComments } from "./remarkRemoveComments";
 import remarkGfm from "remark-gfm";
+import { getSingletonHighlighter } from "shiki";
+import hyperbookGrammar from "./langs/hyperbook.tmLanguage.json";
 import remarkDirective from "remark-directive";
 import remarkDirectiveRehype from "remark-directive-rehype";
 import remarkMath from "remark-math";
@@ -173,6 +175,19 @@ export const process = (md: string, ctx: HyperbookContext) => {
           dark: `github-dark`,
           light: `github-light`,
         },
+        getHighlighter: (options: Parameters<typeof getSingletonHighlighter>[0]) =>
+          getSingletonHighlighter({
+            ...options,
+            langs: [
+              ...(options?.langs || []),
+              "markdown",
+              "yaml",
+              {
+                ...hyperbookGrammar,
+                embeddedLangsLazy: ["markdown", "yaml"],
+              },
+            ],
+          }),
       },
     ],
     rehypeFormat,

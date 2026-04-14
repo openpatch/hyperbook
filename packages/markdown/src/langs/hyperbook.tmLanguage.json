@@ -1,0 +1,158 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "hyperbook",
+  "scopeName": "source.hyperbook",
+  "patterns": [
+    { "include": "#frontmatter" },
+    { "include": "#container-directive" },
+    { "include": "#leaf-directive" },
+    { "include": "#inline-directive" },
+    { "include": "text.html.markdown" }
+  ],
+  "repository": {
+    "frontmatter": {
+      "name": "markup.raw.yaml.front-matter.hyperbook",
+      "begin": "\\A(-{3})\\s*$",
+      "beginCaptures": {
+        "1": {
+          "name": "punctuation.definition.frontmatter.hyperbook"
+        }
+      },
+      "end": "^(-{3})\\s*$",
+      "endCaptures": {
+        "1": {
+          "name": "punctuation.definition.frontmatter.hyperbook"
+        }
+      },
+      "patterns": [{ "include": "source.yaml" }]
+    },
+    "container-directive": {
+      "name": "meta.directive.container.hyperbook",
+      "begin": "(^|\\G)(:{3,})([a-zA-Z][\\w-]*)(\\{[^}]*\\})?\\s*$",
+      "end": "(^|\\G)(\\2)\\s*$",
+      "beginCaptures": {
+        "2": {
+          "name": "punctuation.definition.directive.hyperbook"
+        },
+        "3": {
+          "name": "entity.name.function.directive.hyperbook"
+        },
+        "4": {
+          "patterns": [{ "include": "#directive-attributes" }]
+        }
+      },
+      "endCaptures": {
+        "2": {
+          "name": "punctuation.definition.directive.hyperbook"
+        }
+      },
+      "patterns": [{ "include": "$self" }]
+    },
+    "leaf-directive": {
+      "name": "meta.directive.leaf.hyperbook",
+      "match": "(^|\\G)(:{2})([a-zA-Z][\\w-]*)(\\[[^\\]]*\\])?(\\{[^}]*\\})?\\s*$",
+      "captures": {
+        "2": {
+          "name": "punctuation.definition.directive.hyperbook"
+        },
+        "3": {
+          "name": "entity.name.function.directive.hyperbook"
+        },
+        "4": {
+          "patterns": [{ "include": "#directive-label" }]
+        },
+        "5": {
+          "patterns": [{ "include": "#directive-attributes" }]
+        }
+      }
+    },
+    "inline-directive": {
+      "name": "meta.directive.inline.hyperbook",
+      "match": "(?<!:)(:)([a-zA-Z][\\w-]*)(\\[[^\\]]*\\])?(\\{[^}]*\\})?",
+      "captures": {
+        "1": {
+          "name": "punctuation.definition.directive.hyperbook"
+        },
+        "2": {
+          "name": "entity.name.function.directive.hyperbook"
+        },
+        "3": {
+          "patterns": [{ "include": "#directive-label" }]
+        },
+        "4": {
+          "patterns": [{ "include": "#directive-attributes" }]
+        }
+      }
+    },
+    "directive-attributes": {
+      "match": "\\{([^}]*)\\}",
+      "captures": {
+        "0": {
+          "name": "meta.directive.attributes.hyperbook"
+        },
+        "1": {
+          "patterns": [
+            {
+              "name": "variable.other.directive.id.hyperbook",
+              "match": "#[a-zA-Z][\\w-]*"
+            },
+            {
+              "name": "entity.other.attribute-name.class.hyperbook",
+              "match": "\\.[a-zA-Z][\\w-]*"
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)\\s*=\\s*\"([^\"]*)\"",
+              "captures": {
+                "1": {
+                  "name": "entity.other.attribute-name.hyperbook"
+                },
+                "2": {
+                  "name": "string.quoted.double.hyperbook"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)\\s*=\\s*(?:(true|false)|([0-9]+))",
+              "captures": {
+                "1": {
+                  "name": "entity.other.attribute-name.hyperbook"
+                },
+                "2": {
+                  "name": "constant.language.boolean.hyperbook"
+                },
+                "3": {
+                  "name": "constant.numeric.hyperbook"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)\\s*=\\s*([^\\s}\"]+)",
+              "captures": {
+                "1": {
+                  "name": "entity.other.attribute-name.hyperbook"
+                },
+                "2": {
+                  "name": "string.unquoted.hyperbook"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "directive-label": {
+      "match": "(\\[)([^\\]]*)(\\])",
+      "captures": {
+        "1": {
+          "name": "punctuation.definition.label.begin.hyperbook"
+        },
+        "2": {
+          "name": "string.other.directive.label.hyperbook"
+        },
+        "3": {
+          "name": "punctuation.definition.label.end.hyperbook"
+        }
+      }
+    }
+  }
+}

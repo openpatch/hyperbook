@@ -8,7 +8,7 @@ permaid: tabs
 Tabs are a great way to display alternative content. In Hyperbook you
 can use the `::::tabs` and `:::tab{title="A Tab Title"}`.
 
-```md
+```hyperbook
 ::::tabs
 
 :::tab{title="Hi"}
@@ -58,7 +58,7 @@ Wow
 
 You can link tabs together by using the same id or the same titles.
 
-```md
+```hyperbook
 ::::tabs{id="code"}
 :::tab{title="Java" id="java"}
 Java
