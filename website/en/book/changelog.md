@@ -38,6 +38,18 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.90.0
+
+::::tabs
+
+:::tab{title="Improved :+1:" id="improved"}
+
+- Permaid files now use a lightweight HTML redirect instead of duplicating the full page content. This reduces build output size and build times while providing proper SEO via `<link rel="canonical">`.
+
+:::
+
+::::
+
 ## v0.89.3
 
 ::::tabs

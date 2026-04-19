@@ -82,7 +82,17 @@ export async function buildSingleBookPage(
       permaOut,
       file.markdown.data.permaid + ".html",
     );
-    await fs.writeFile(permaFileOut, result.value);
+    const redirectUrl = posix.join(
+      "/",
+      hyperbookJson.basePath || "",
+      file.path.href || "",
+    );
+    const redirectHtml = `<!DOCTYPE html>
+<meta charset="utf-8">
+<meta http-equiv="refresh" content="0; url=${redirectUrl}">
+<link rel="canonical" href="${redirectUrl}">
+`;
+    await fs.writeFile(permaFileOut, redirectHtml);
   }
   await fs.writeFile(fileOut, result.value);
 
