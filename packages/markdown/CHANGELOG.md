@@ -1,5 +1,11 @@
 # @hyperbook/markdown
 
+## 0.61.0
+
+### Minor Changes
+
+- [`d463ac7`](https://github.com/openpatch/hyperbook/commit/d463ac76faa65fe0d69dec955f3e0bc3baf3ed85) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add hyperbook highlighting for code blocks with lang hyperbook
+
 ## 0.60.3
 
 ### Patch Changes
