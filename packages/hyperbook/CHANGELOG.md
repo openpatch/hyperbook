@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.90.0
+
+### Minor Changes
+
+- [`75025ec`](https://github.com/openpatch/hyperbook/commit/75025ec127107d2689e57cfffdeea2ac1842e158) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Permaid sites are now using a small footprint approach.
+
 ## 0.89.3
 
 ### Patch Changes
