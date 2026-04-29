@@ -65,3 +65,88 @@ The following example uses some of these arguments:
 
 ::geogebra{showToolBar showAlgebraInput algebraInputPosition="bottom" enableUndoRedo showMenuBar enableFileFeatures showZoomButtons}
 
+## Apps
+
+### Suite
+
+```hyperbook
+:::geogebra{appName="suite" showToolbar showAlgebraInput}
+
+:::
+```
+
+:::geogebra{appName="suite" showToolbar showAlgebraInput}
+
+:::
+
+### Classic
+
+```hyperbook
+:::geogebra{appName="classic" showToolbar showAlgebraInput}
+
+:::
+```
+
+:::geogebra{appName="classic" showToolbar showAlgebraInput}
+
+:::
+
+### Graphing
+
+```hyperbook
+:::geogebra{appName="graphing" showToolbar showAlgebraInput}
+
+:::
+```
+
+:::geogebra{appName="graphing" showToolbar showAlgebraInput}
+
+:::
+
+### Geometry
+
+```hyperbook
+:::geogebra{appName="geometry" showToolbar showAlgebraInput}
+
+:::
+```
+
+:::geogebra{appName="geometry" showToolbar showAlgebraInput}
+
+:::
+
+### 3D
+
+```hyperbook
+:::geogebra{appName="3d" showToolbar showAlgebraInput}
+
+:::
+```
+
+:::geogebra{appName="3d" showToolbar showAlgebraInput}
+
+:::
+
+### Scientific
+
+```hyperbook
+:::geogebra{appName="scientific" showToolbar showAlgebraInput}
+
+:::
+```
+
+:::geogebra{appName="scientific" showToolbar showAlgebraInput}
+
+:::
+
+### Notes
+
+```hyperbook
+:::geogebra{appName="notes" showToolbar}
+
+:::
+```
+
+:::geogebra{appName="notes" showToolbar}
+
+:::
