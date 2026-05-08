@@ -165,11 +165,15 @@ hyperbook.python = (function () {
       const hasCanvas = elem.getAttribute("data-canvas") === "true";
 
       if (hasCanvas && canvas) {
-        const offscreenCanvas = canvas.transferControlToOffscreen();
-        pyodideWorker.postMessage(
-          { type: "setCanvas", id, payload: { canvas: offscreenCanvas } },
-          [offscreenCanvas]
-        );
+        try {
+          const offscreenCanvas = canvas.transferControlToOffscreen();
+          pyodideWorker.postMessage(
+            { type: "setCanvas", id, payload: { canvas: offscreenCanvas } },
+            [offscreenCanvas]
+          );
+        } catch (error) {
+          console.error("Canvas transfer failed:", error.message);
+        }
       }
 
       copyEl?.addEventListener("click", async () => {

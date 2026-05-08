@@ -39,7 +39,11 @@ self.onmessage = async ({ data: { id, type, payload } }) => {
       }
 
       if (canvases[id]) {
-        self.pyodide.canvas.setCanvas2D(canvases[id]);
+        try {
+          self.pyodide.canvas.setCanvas2D(canvases[id]);
+        } catch (error) {
+          self.postMessage({ id, type: "stderr", payload: `Canvas setup failed: ${error.message}` });
+        }
       }
 
       self.pyodide.setStdin(new StdinHandler(inputs));
