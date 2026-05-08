@@ -1,6 +1,3 @@
-// Setup your project to serve `py-worker.js`. You should also serve
-// `pyodide.js`, and all its associated `.asm.js`, `.json`,
-// and `.wasm` files as well:
 importScripts("https://cdn.jsdelivr.net/pyodide/v0.29.4/full/pyodide.js");
 
 class StdinHandler {
@@ -22,8 +19,15 @@ async function loadPyodideAndPackages() {
 }
 let pyodideReadyPromise = loadPyodideAndPackages();
 
+const canvases = {};
+
 self.onmessage = async ({ data: { id, type, payload } }) => {
   switch (type) {
+    case "setCanvas": {
+      const { canvas } = payload;
+      canvases[id] = canvas;
+      break;
+    }
     case "run": {
       // make sure loading is done
       await pyodideReadyPromise;
@@ -32,6 +36,10 @@ self.onmessage = async ({ data: { id, type, payload } }) => {
       // The worker copies the context in its own "memory" (an object mapping name to values)
       for (const key of Object.keys(context)) {
         self[key] = context[key];
+      }
+
+      if (canvases[id]) {
+        self.pyodide.canvas.setCanvas2D(canvases[id]);
       }
 
       self.pyodide.setStdin(new StdinHandler(inputs));

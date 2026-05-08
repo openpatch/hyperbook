@@ -151,8 +151,10 @@ hyperbook.python = (function () {
       const run = elem.getElementsByClassName("run")[0];
       const test = elem.getElementsByClassName("test")[0];
       const output = elem.getElementsByClassName("output")[0];
+      const canvas = elem.getElementsByClassName("canvas")[0];
       const input = elem.getElementsByClassName("input")[0];
       const outputBtn = elem.getElementsByClassName("output-btn")[0];
+      const canvasBtn = elem.getElementsByClassName("canvas-btn")[0];
       const inputBtn = elem.getElementsByClassName("input-btn")[0];
 
       const copyEl = elem.getElementsByClassName("copy")[0];
@@ -160,6 +162,15 @@ hyperbook.python = (function () {
       const downloadEl = elem.getElementsByClassName("download")[0];
 
       const id = elem.id;
+      const hasCanvas = elem.getAttribute("data-canvas") === "true";
+
+      if (hasCanvas && canvas) {
+        const offscreenCanvas = canvas.transferControlToOffscreen();
+        pyodideWorker.postMessage(
+          { type: "setCanvas", id, payload: { canvas: offscreenCanvas } },
+          [offscreenCanvas]
+        );
+      }
 
       copyEl?.addEventListener("click", async () => {
         try {
@@ -188,18 +199,31 @@ hyperbook.python = (function () {
 
       function showInput() {
         outputBtn.classList.remove("active");
+        if (canvasBtn) canvasBtn.classList.remove("active");
         inputBtn.classList.add("active");
         output.classList.add("hidden");
+        if (canvas) canvas.classList.add("hidden");
         input.classList.remove("hidden");
       }
       function showOutput() {
         outputBtn.classList.add("active");
+        if (canvasBtn) canvasBtn.classList.remove("active");
         inputBtn.classList.remove("active");
         output.classList.remove("hidden");
+        if (canvas) canvas.classList.add("hidden");
+        input.classList.add("hidden");
+      }
+      function showCanvas() {
+        outputBtn.classList.remove("active");
+        if (canvasBtn) canvasBtn.classList.add("active");
+        inputBtn.classList.remove("active");
+        output.classList.add("hidden");
+        if (canvas) canvas.classList.remove("hidden");
         input.classList.add("hidden");
       }
 
       outputBtn?.addEventListener("click", showOutput);
+      canvasBtn?.addEventListener("click", showCanvas);
       inputBtn?.addEventListener("click", showInput);
 
       editor.addEventListener("code-input_load", async () => {
@@ -248,7 +272,11 @@ hyperbook.python = (function () {
       });
 
       run?.addEventListener("click", async () => {
-        showOutput();
+        if (hasCanvas) {
+          showCanvas();
+        } else {
+          showOutput();
+        }
         if (callback) return;
 
         const script = editor.value;

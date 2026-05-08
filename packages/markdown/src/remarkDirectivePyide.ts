@@ -35,6 +35,7 @@ export default (ctx: HyperbookContext) => () => {
 
         const data = node.data || (node.data = {});
         const { src = "", id = hash(node) } = node.attributes || {};
+        const hasCanvas = "canvas" in (node.attributes || {});
 
         expectContainerDirective(node, file, name);
         registerDirective(file, name, ["client.js"], ["style.css"], []);
@@ -81,6 +82,7 @@ export default (ctx: HyperbookContext) => () => {
           class: "directive-pyide",
           id: id,
           "data-tests": Buffer.from(JSON.stringify(tests)).toString("base64"),
+          ...(hasCanvas ? { "data-canvas": "true" } : {}),
         };
         data.hChildren = [
           {
@@ -110,6 +112,23 @@ export default (ctx: HyperbookContext) => () => {
                       },
                     ],
                   },
+                  ...(hasCanvas
+                    ? [
+                        {
+                          type: "element",
+                          tagName: "button",
+                          properties: {
+                            class: "canvas-btn",
+                          },
+                          children: [
+                            {
+                              type: "text",
+                              value: i18n.get("pyide-canvas"),
+                            },
+                          ],
+                        } as ElementContent,
+                      ]
+                    : []),
                   {
                     type: "element",
                     tagName: "button",
@@ -133,6 +152,18 @@ export default (ctx: HyperbookContext) => () => {
                 },
                 children: [],
               },
+              ...(hasCanvas
+                ? [
+                    {
+                      type: "element",
+                      tagName: "canvas",
+                      properties: {
+                        class: "canvas hidden",
+                      },
+                      children: [],
+                    } as ElementContent,
+                  ]
+                : []),
               {
                 type: "element",
                 tagName: "code-input",

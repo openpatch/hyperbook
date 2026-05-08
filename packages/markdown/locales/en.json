@@ -34,6 +34,7 @@
     "pyide-test-running-click-to-stop": "Test running (Click to stop) ...",
     "pyide-test-running-refresh-to-stop": "Test running (Refresh to stop) ...",
     "pyide-output": "Output",
+    "pyide-canvas": "Canvas",
     "pyide-input": "Input",
     "pyide-reset": "Reset",
     "pyide-copy": "Copy",
