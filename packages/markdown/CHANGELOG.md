@@ -1,5 +1,11 @@
 # @hyperbook/markdown
 
+## 0.61.1
+
+### Patch Changes
+
+- [`37f1650`](https://github.com/openpatch/hyperbook/commit/37f1650f735612bb3684197862939ccd114f05f7) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Update pyodide
+
 ## 0.61.0
 
 ### Minor Changes
