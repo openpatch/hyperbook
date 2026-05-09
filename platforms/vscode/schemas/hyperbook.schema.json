@@ -361,6 +361,15 @@
         },
         "trailingSlash": {
             "type": "boolean"
+        },
+        "version": {
+            "description": "Controls how the Hyperbook version is displayed.\n- \"text\": Shows version below the \"Powered by Hyperbook\" label.\n- \"tooltip\": Shows version on hover of the \"Powered by Hyperbook\" label.\n- \"console\": Outputs version as ASCII art in the browser console (default).",
+            "enum": [
+                "console",
+                "text",
+                "tooltip"
+            ],
+            "type": "string"
         }
     },
     "required": [

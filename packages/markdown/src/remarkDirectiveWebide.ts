@@ -48,8 +48,14 @@ html, body {
   return (tree: Root, file: VFile) => {
     visit(tree, function (node) {
       if (isDirective(node) && node.name === name) {
-        const { height = 400, id = hash(node) } = node.attributes || {};
+        const { height, id = hash(node) } = node.attributes || {};
         const data = node.data || (node.data = {});
+        const resolvedHeight =
+          height !== undefined
+            ? typeof height === "number"
+              ? `${height}px`
+              : `${height}`
+            : "calc(100dvh - 80px)";
 
         expectContainerDirective(node, file, name);
         registerDirective(file, name, ["client.js"], ["style.css"], []);
@@ -197,7 +203,7 @@ html, body {
             tagName: "div",
             properties: {
               class: "container",
-              style: `height: ${height}px;`,
+              style: `height: ${resolvedHeight};`,
             },
             children: [
               {
@@ -227,6 +233,16 @@ html, body {
                 children: [],
               },
             ],
+          },
+          {
+            type: "element",
+            tagName: "div",
+            properties: {
+              class: "splitter",
+              role: "separator",
+              "aria-label": "Resize panels",
+            },
+            children: [],
           },
           {
             type: "element",

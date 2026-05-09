@@ -5,7 +5,7 @@
   flex-direction: column;
   overflow: hidden;
   gap: 8px;
-  height: calc(100dvh - 128px);
+  height: calc(100dvh - 80px);
 }
 
 code-input {
@@ -14,6 +14,8 @@ code-input {
 
 .directive-typst .preview-container {
   width: 100%;
+  min-height: 120px;
+  min-width: 120px;
   border: 1px solid var(--color-spacer);
   border-radius: 8px;
   overflow: auto;
@@ -167,7 +169,42 @@ code-input {
   width: 100%;
   display: flex;
   flex-direction: column;
+  min-height: 120px;
+  min-width: 120px;
   height: 400px;
+}
+
+.directive-typst .splitter {
+  background: var(--color-spacer);
+  border-radius: 999px;
+  flex-shrink: 0;
+  touch-action: none;
+  opacity: 0.45;
+  transition: opacity 0.15s ease-in-out;
+}
+
+.directive-typst .splitter:hover {
+  opacity: 0.65;
+}
+
+.directive-typst.split-vertical .splitter {
+  width: 100%;
+  height: 4px;
+  cursor: row-resize;
+}
+
+.directive-typst.split-horizontal .splitter {
+  width: 4px;
+  height: 100%;
+  cursor: col-resize;
+}
+
+.directive-typst.resizing {
+  user-select: none;
+}
+
+.directive-typst.resizing .splitter {
+  opacity: 0.75;
 }
 
 .directive-typst .file-tabs {
@@ -450,7 +487,7 @@ code-input {
 @media screen and (min-width: 1024px) {
   .directive-typst:not(.preview-only) {
     flex-direction: row;
-    height: calc(100dvh - 128px);
+    height: calc(100dvh - 80px);
 
     .preview-container {
       flex: 1;

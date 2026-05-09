@@ -156,11 +156,21 @@ export default (ctx: HyperbookContext) => () => {
                 ? [
                     {
                       type: "element",
-                      tagName: "canvas",
+                      tagName: "div",
                       properties: {
-                        class: "canvas hidden",
+                        class: "canvas-wrapper hidden",
                       },
-                      children: [],
+                      children: [
+                        {
+                          type: "element",
+                          tagName: "canvas",
+                          properties: {
+                            class: "canvas",
+                            id: "canvas",
+                          },
+                          children: [],
+                        } as ElementContent,
+                      ],
                     } as ElementContent,
                   ]
                 : []),
@@ -178,6 +188,16 @@ export default (ctx: HyperbookContext) => () => {
                 ],
               },
             ],
+          },
+          {
+            type: "element",
+            tagName: "div",
+            properties: {
+              class: "splitter",
+              role: "separator",
+              "aria-label": "Resize panels",
+            },
+            children: [],
           },
           {
             type: "element",

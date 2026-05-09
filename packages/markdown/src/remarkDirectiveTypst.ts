@@ -32,11 +32,13 @@ export default (ctx: HyperbookContext) => () => {
     visit(tree, function (node) {
       if (isDirective(node) && node.name === name) {
         const {
-          height = "auto",
+          height,
           id = hash(node),
           mode = "preview",
         } = node.attributes || {};
         const data = node.data || (node.data = {});
+        const resolvedHeight =
+          height !== undefined ? `${height}` : "calc(100dvh - 80px)";
 
         expectContainerDirective(node, file, name);
         registerDirective(file, name, ["client.js"], ["style.css"], []);
@@ -214,10 +216,10 @@ export default (ctx: HyperbookContext) => () => {
         const previewContainer: Element = {
           type: "element",
           tagName: "div",
-          properties: {
-            class: "preview-container",
-            style: `height: ${height};`,
-          },
+            properties: {
+              class: "preview-container",
+              style: `height: ${resolvedHeight};`,
+            },
           children: [
             {
               type: "element",
@@ -290,6 +292,16 @@ export default (ctx: HyperbookContext) => () => {
           // Edit mode: show editor and preview side by side
           data.hChildren = [
             previewContainer,
+            {
+              type: "element",
+              tagName: "div",
+              properties: {
+                class: "splitter",
+                role: "separator",
+                "aria-label": "Resize panels",
+              },
+              children: [],
+            },
             {
               type: "element",
               tagName: "div",

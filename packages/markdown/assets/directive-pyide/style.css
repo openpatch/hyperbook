@@ -14,7 +14,9 @@
 .directive-pyide .container {
   width: 100%;
   overflow: hidden;
-  height: 200px;
+  min-height: 120px;
+  min-width: 120px;
+  flex: 0 0 200px;
   display: flex;
   flex-direction: column;
 }
@@ -35,14 +37,20 @@
   font-family: hyperbook-monospace, monospace;
 }
 
-.directive-pyide .canvas {
-  width: 100%;
+.directive-pyide .canvas-wrapper {
+  overflow: auto;
   height: 100%;
-  min-height: 300px;
   border: 1px solid var(--color-spacer);
   border-radius: 8px;
   border-top-left-radius: 0;
   border-top-right-radius: 0;
+}
+
+.directive-pyide .canvas {
+  display: block;
+  width: auto;
+  height: auto;
+  min-height: 300px;
 }
 
 .directive-pyide .hidden {
@@ -53,7 +61,43 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  height: 400px;
+  min-height: 120px;
+  min-width: 120px;
+  flex: 1 1 400px;
+  overflow: hidden;
+}
+
+.directive-pyide .splitter {
+  background: var(--color-spacer);
+  border-radius: 999px;
+  flex-shrink: 0;
+  touch-action: none;
+  opacity: 0.45;
+  transition: opacity 0.15s ease-in-out;
+}
+
+.directive-pyide .splitter:hover {
+  opacity: 0.65;
+}
+
+.directive-pyide.split-vertical .splitter {
+  width: 100%;
+  height: 4px;
+  cursor: row-resize;
+}
+
+.directive-pyide.split-horizontal .splitter {
+  width: 4px;
+  height: 100%;
+  cursor: col-resize;
+}
+
+.directive-pyide.resizing {
+  user-select: none;
+}
+
+.directive-pyide.resizing .splitter {
+  opacity: 0.75;
 }
 
 .directive-pyide .editor {
@@ -118,22 +162,26 @@
   opacity: 0.5;
 }
 
+.directive-pyide button.stopping {
+  pointer-events: auto;
+  cursor: progress;
+  opacity: 0.75;
+}
+
 @media screen and (min-width: 1024px) {
   .directive-pyide {
     flex-direction: row;
-    height: calc(100dvh - 128px);
+    height: calc(100dvh - 80px);
 
     .output {
       height: 100%;
     }
 
     .container {
-      flex: 1;
       height: 100% !important;
     }
 
     .editor-container {
-      flex: 3;
       height: 100%;
       overflow: hidden;
     }

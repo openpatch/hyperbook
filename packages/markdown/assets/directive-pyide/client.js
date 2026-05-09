@@ -16,85 +16,186 @@ hyperbook.python = (function () {
     ])
   );
 
-  const pyodideWorker = new Worker(
-    `${HYPERBOOK_ASSETS}directive-pyide/webworker.js`
-  );
+  class StdinHandler {
+    constructor(results, options) {
+      this.results = results;
+      this.idx = 0;
+      Object.assign(this, options);
+    }
 
-  let callback = null;
-  /**
-   * @type Uint8Array
-   */
-  let interruptBuffer;
-  /**
-   * @type Int32Array
-   */
-  let stdinBuffer;
-  if (window.crossOriginIsolated) {
-    interruptBuffer = new Uint8Array(new SharedArrayBuffer(1));
-    pyodideWorker.postMessage({
-      type: "setInterruptBuffer",
-      payload: { interruptBuffer },
-    });
-  } else {
-    interruptBuffer = new ArrayBuffer(1);
-    pyodideWorker.postMessage({
-      type: "setInterruptBuffer",
-      payload: { interruptBuffer },
-    });
+    stdin() {
+      return this.results[this.idx++];
+    }
   }
 
-  const asyncRun = (id, type) => {
-    if (callback) return;
+  const PYODIDE_CDN = "https://cdn.jsdelivr.net/pyodide/v0.29.4/full/pyodide.js";
 
-    interruptBuffer[0] = 0;
-    return (script, context) => {
-      return new Promise((onSuccess) => {
-        callback = onSuccess;
-        updateRunning(id, type);
-        pyodideWorker.postMessage({
-          type: "run",
-          payload: {
-            ...context,
-            python: script,
-          },
-          id,
-        });
-      });
-    };
+  const loadPyodideScript = () => {
+    if (window.loadPyodide) {
+      return Promise.resolve();
+    }
+
+    return new Promise((resolve, reject) => {
+      const script = document.createElement("script");
+      script.src = PYODIDE_CDN;
+      script.onload = () => resolve();
+      script.onerror = () => reject(new Error("Failed to load Pyodide"));
+      document.head.appendChild(script);
+    });
   };
 
-  function interruptExecution() {
-    // 2 stands for SIGINT.
-    interruptBuffer[0] = 2;
-  }
+  const pyodideReadyPromise = (async () => {
+    await loadPyodideScript();
+    return window.loadPyodide;
+  })();
 
-  function reload() {
-    window.location.reload();
-  }
+  /**
+   * @type {Map<string, any>}
+   */
+  const runtimes = new Map();
 
-  const updateRunning = (id, type) => {
+  /**
+   * @type {Map<string, { running: boolean, stopping: boolean, stopRequested: boolean, type: "run" | "test" | null }>}
+   */
+  const executionStates = new Map();
+
+  const getExecutionState = (id) => {
+    if (!executionStates.has(id)) {
+      executionStates.set(id, {
+        running: false,
+        stopping: false,
+        stopRequested: false,
+        type: null,
+      });
+    }
+    return executionStates.get(id);
+  };
+
+  const getRuntime = async (id) => {
+    if (runtimes.has(id)) {
+      return runtimes.get(id);
+    }
+    const loadPyodide = await pyodideReadyPromise;
+    const pyodide = await loadPyodide();
+    runtimes.set(id, pyodide);
+    return pyodide;
+  };
+
+  const getOutput = (id) => {
+    return document.getElementById(id)?.getElementsByClassName("output")[0];
+  };
+
+  const appendOutputLine = (id, message) => {
+    const output = getOutput(id);
+    if (!output) return;
+    output.appendChild(document.createTextNode(message + "\n"));
+  };
+
+  const resetCanvas = (canvas) => {
+    if (!canvas) return;
+    const context = canvas.getContext("2d");
+    context?.clearRect(0, 0, canvas.width, canvas.height);
+  };
+
+  const executeScript = async (id, script, context = {}) => {
+    const filename = "<exec>";
+    try {
+      const pyodide = await getRuntime(id);
+      const { inputs = [], canvas, ...globalsContext } = context;
+
+      if (canvas) {
+        try {
+          resetCanvas(canvas);
+          pyodide.canvas.setCanvas2D(canvas);
+        } catch (error) {
+          appendOutputLine(id, `Canvas setup failed: ${error.message}`);
+        }
+      }
+
+      pyodide.setStdin(new StdinHandler(inputs));
+      pyodide.setStdout({
+        batched: (msg) => appendOutputLine(id, msg),
+      });
+      pyodide.setStderr({
+        batched: (msg) => appendOutputLine(id, msg),
+      });
+
+      await pyodide.loadPackagesFromImports(script);
+      const dict = pyodide.globals.get("dict");
+      const globals = dict();
+      try {
+        for (const [key, value] of Object.entries(globalsContext)) {
+          globals.set(key, value);
+        }
+        const results = await pyodide.runPythonAsync(script, {
+          globals,
+          locals: globals,
+          filename,
+        });
+        return { results };
+      } finally {
+        globals.destroy();
+        dict.destroy();
+      }
+    } catch (error) {
+      let message = error.message;
+      if (message.startsWith("Traceback")) {
+        const lines = message?.split("\n") || [];
+        const i = lines.findIndex((line) => line.includes(filename));
+        message = lines[0] + "\n" + lines.slice(i).join("\n");
+      }
+      return { error: message };
+    }
+  };
+
+  const requestStop = (id) => {
+    const state = getExecutionState(id);
+    if (!state.running || state.stopRequested) return;
+    state.stopRequested = true;
+    state.stopping = true;
+    appendOutputLine(id, "Stop requested. Finishing current execution...");
+    updateRunning();
+  };
+
+  const handleStopClick = (event) => {
+    const elem = event.currentTarget.closest(".directive-pyide");
+    if (!elem?.id) return;
+    requestStop(elem.id);
+  };
+
+  const updateRunning = () => {
     const elems = document.getElementsByClassName("directive-pyide");
     for (let elem of elems) {
       const run = elem.getElementsByClassName("run")[0];
       const test = elem.getElementsByClassName("test")[0];
-      if (callback) {
-        if (elem.id === id && type === "run") {
-          if (window.crossOriginIsolated) {
-            run.textContent = hyperbook.i18n.get("pyide-running-click-to-stop");
-            run.addEventListener("click", interruptExecution);
-          } else {
-            run.textContent = hyperbook.i18n.get("pyide-running-refresh-to-stop");
+      const state = getExecutionState(elem.id);
 
-            run.addEventListener("click", reload);
+      run.removeEventListener("click", handleStopClick);
+      test?.removeEventListener("click", handleStopClick);
+      run.classList.remove("stopping");
+      test?.classList.remove("stopping");
+
+      if (state.running) {
+        if (state.type === "run") {
+          run.textContent = state.stopping
+            ? "Stopping..."
+            : hyperbook.i18n.get("pyide-running-click-to-stop");
+          run.disabled = false;
+          run.addEventListener("click", handleStopClick);
+          run.classList.toggle("stopping", state.stopping);
+          if (test) {
+            test.classList.add("running");
+            test.disabled = true;
           }
-        } else if (test && elem.id === id && type === "test") {
-          if (window.crossOriginIsolated) {
-            test.textContent = hyperbook.i18n.get("pyide-testing-click-to-stop");
-            test.addEventListener("click", interruptExecution);
-          } else {
-            test.textContent = hyperbook.i18n.get("pyide-testing-refresh-to-stop");
-            test.addEventListener("click", reload);
-          }
+        } else if (state.type === "test" && test) {
+          test.textContent = state.stopping
+            ? "Stopping..."
+            : hyperbook.i18n.get("pyide-testing-click-to-stop");
+          test.disabled = false;
+          test.addEventListener("click", handleStopClick);
+          test.classList.toggle("stopping", state.stopping);
+          run.classList.add("running");
+          run.disabled = true;
         } else {
           run.classList.add("running");
           run.disabled = true;
@@ -104,54 +205,103 @@ hyperbook.python = (function () {
           }
         }
       } else {
+        run.classList.remove("stopping");
         run.classList.remove("running");
         run.textContent = hyperbook.i18n.get("pyide-run");
         run.disabled = false;
-        run.removeEventListener("click", interruptExecution);
-        run.removeEventListener("click", reload);
         if (test) {
+          test.classList.remove("stopping");
           test.classList.remove("running");
           test.textContent = hyperbook.i18n.get("pyide-test");
           test.disabled = false;
-          test.removeEventListener("click", interruptExecution);
-          test.removeEventListener("click", reload);
         }
       }
     }
   };
 
-  pyodideWorker.onmessage = (event) => {
-    const { id, type, payload } = event.data;
-    switch (type) {
-      case "stdout": {
-        const output = document
-          .getElementById(id)
-          .getElementsByClassName("output")[0];
-        output.appendChild(document.createTextNode(payload + "\n"));
-        break;
+  const setupSplitter = (elem, container, editorContainer, splitter) => {
+    if (!container || !editorContainer || !splitter) return;
+
+    const minPanelSize = 120;
+
+    const getIsHorizontal = () =>
+      getComputedStyle(elem).flexDirection.startsWith("row");
+
+    const applySplitSize = (rawSize, isHorizontal) => {
+      const total = isHorizontal ? elem.clientWidth : elem.clientHeight;
+      const splitterSize = isHorizontal ? splitter.offsetWidth : splitter.offsetHeight;
+      const maxSize = Math.max(
+        minPanelSize,
+        total - splitterSize - minPanelSize
+      );
+      const clamped = Math.max(minPanelSize, Math.min(rawSize, maxSize));
+      container.style.flex = `0 0 ${clamped}px`;
+      return clamped;
+    };
+
+    const applyStoredSplitSize = () => {
+      const isHorizontal = getIsHorizontal();
+      elem.classList.toggle("split-horizontal", isHorizontal);
+      elem.classList.toggle("split-vertical", !isHorizontal);
+      const key = isHorizontal ? "splitHorizontal" : "splitVertical";
+      const rawStored = Number(elem.dataset[key]);
+      if (!Number.isFinite(rawStored) || rawStored <= 0) {
+        container.style.flex = "";
+        return;
       }
-      case "error": {
-        const onSuccess = callback;
-        onSuccess({ error: payload });
-        break;
-      }
-      case "success": {
-        const onSuccess = callback;
-        onSuccess({ results: payload });
-        break;
-      }
-    }
+      applySplitSize(rawStored, isHorizontal);
+    };
+
+    applyStoredSplitSize();
+
+    splitter.addEventListener("mousedown", (event) => {
+      event.preventDefault();
+
+      const isHorizontal = getIsHorizontal();
+      const key = isHorizontal ? "splitHorizontal" : "splitVertical";
+      const startPointer = isHorizontal ? event.clientX : event.clientY;
+      const startSize = isHorizontal
+        ? container.getBoundingClientRect().width
+        : container.getBoundingClientRect().height;
+
+      elem.classList.add("resizing");
+
+      const onMouseMove = (moveEvent) => {
+        const pointer = isHorizontal ? moveEvent.clientX : moveEvent.clientY;
+        const delta = pointer - startPointer;
+        const size = applySplitSize(startSize + delta, isHorizontal);
+        elem.dataset[key] = String(Math.round(size));
+      };
+
+      const onMouseUp = () => {
+        elem.classList.remove("resizing");
+        window.removeEventListener("mousemove", onMouseMove);
+        window.removeEventListener("mouseup", onMouseUp);
+      };
+
+      window.addEventListener("mousemove", onMouseMove);
+      window.addEventListener("mouseup", onMouseUp);
+    });
+
+    window.addEventListener("resize", applyStoredSplitSize);
   };
 
   const init = (root) => {
     const elems = root.getElementsByClassName("directive-pyide");
 
     for (let elem of elems) {
+      if (elem.getAttribute("data-pyide-initialized") === "true") continue;
+      elem.setAttribute("data-pyide-initialized", "true");
+
       const editor = elem.getElementsByClassName("editor")[0];
+      const container = elem.getElementsByClassName("container")[0];
+      const editorContainer = elem.getElementsByClassName("editor-container")[0];
+      const splitter = elem.getElementsByClassName("splitter")[0];
       const run = elem.getElementsByClassName("run")[0];
       const test = elem.getElementsByClassName("test")[0];
       const output = elem.getElementsByClassName("output")[0];
       const canvas = elem.getElementsByClassName("canvas")[0];
+      const canvasWrapper = elem.getElementsByClassName("canvas-wrapper")[0] || canvas;
       const input = elem.getElementsByClassName("input")[0];
       const outputBtn = elem.getElementsByClassName("output-btn")[0];
       const canvasBtn = elem.getElementsByClassName("canvas-btn")[0];
@@ -163,18 +313,6 @@ hyperbook.python = (function () {
 
       const id = elem.id;
       const hasCanvas = elem.getAttribute("data-canvas") === "true";
-
-      if (hasCanvas && canvas) {
-        try {
-          const offscreenCanvas = canvas.transferControlToOffscreen();
-          pyodideWorker.postMessage(
-            { type: "setCanvas", id, payload: { canvas: offscreenCanvas } },
-            [offscreenCanvas]
-          );
-        } catch (error) {
-          console.error("Canvas transfer failed:", error.message);
-        }
-      }
 
       copyEl?.addEventListener("click", async () => {
         try {
@@ -206,7 +344,7 @@ hyperbook.python = (function () {
         if (canvasBtn) canvasBtn.classList.remove("active");
         inputBtn.classList.add("active");
         output.classList.add("hidden");
-        if (canvas) canvas.classList.add("hidden");
+        if (canvasWrapper) canvasWrapper.classList.add("hidden");
         input.classList.remove("hidden");
       }
       function showOutput() {
@@ -214,7 +352,7 @@ hyperbook.python = (function () {
         if (canvasBtn) canvasBtn.classList.remove("active");
         inputBtn.classList.remove("active");
         output.classList.remove("hidden");
-        if (canvas) canvas.classList.add("hidden");
+        if (canvasWrapper) canvasWrapper.classList.add("hidden");
         input.classList.add("hidden");
       }
       function showCanvas() {
@@ -222,13 +360,14 @@ hyperbook.python = (function () {
         if (canvasBtn) canvasBtn.classList.add("active");
         inputBtn.classList.remove("active");
         output.classList.add("hidden");
-        if (canvas) canvas.classList.remove("hidden");
+        if (canvasWrapper) canvasWrapper.classList.remove("hidden");
         input.classList.add("hidden");
       }
 
       outputBtn?.addEventListener("click", showOutput);
       canvasBtn?.addEventListener("click", showCanvas);
       inputBtn?.addEventListener("click", showInput);
+      setupSplitter(elem, container, editorContainer, splitter);
 
       editor.addEventListener("code-input_load", async () => {
         const result = await hyperbook.store.db.pyide.get(id);
@@ -243,35 +382,46 @@ hyperbook.python = (function () {
 
       test?.addEventListener("click", async () => {
         showOutput();
-        if (callback) return;
+        const state = getExecutionState(id);
+        if (state.running) return;
+        state.running = true;
+        state.type = "test";
+        state.stopRequested = false;
+        state.stopping = false;
+        updateRunning();
 
         output.innerHTML = "";
 
         const script = editor.value;
-        for (let test of tests) {
-          const testCode = test.code.replace("#SCRIPT#", script);
+        try {
+          for (let test of tests) {
+            if (state.stopRequested) {
+              appendOutputLine(id, "Stopped pending test execution.");
+              break;
+            }
 
-          const heading = document.createElement("div");
-          heading.innerHTML = `== Test ${test.name} ==`;
-          heading.classList.add("test-heading");
-          output.appendChild(heading);
+            const testCode = test.code.replace("#SCRIPT#", script);
 
-          await asyncRun(id, "test")(testCode, {})
-            .then(({ results, error }) => {
-              if (results) {
-                output.textContent += results;
-              } else if (error) {
-                output.textContent += error;
-              }
-              callback = null;
-              updateRunning(id, "test");
-            })
-            .catch((e) => {
-              output.textContent = `Error: ${e}`;
-              console.log(e);
-              callback = null;
-              updateRunning(id, "test");
-            });
+            const heading = document.createElement("div");
+            heading.innerHTML = `== Test ${test.name} ==`;
+            heading.classList.add("test-heading");
+            output.appendChild(heading);
+
+            const { results, error } = await executeScript(id, testCode, {});
+            if (results) {
+              output.textContent += results;
+            } else if (error) {
+              output.textContent += error;
+            }
+          }
+        } catch (e) {
+          output.textContent = `Error: ${e}`;
+          console.log(e);
+        } finally {
+          state.running = false;
+          state.stopping = false;
+          state.type = null;
+          updateRunning();
         }
       });
 
@@ -281,28 +431,39 @@ hyperbook.python = (function () {
         } else {
           showOutput();
         }
-        if (callback) return;
+        const state = getExecutionState(id);
+        if (state.running) return;
+        state.running = true;
+        state.type = "run";
+        state.stopRequested = false;
+        state.stopping = false;
+        updateRunning();
 
         const script = editor.value;
         output.innerHTML = "";
-        asyncRun(id, "run")(script, {
-          inputs: input.value.split("\n"),
-        })
-          .then(({ results, error }) => {
+        try {
+          const { results, error } = await executeScript(id, script, {
+            inputs: input.value.split("\n"),
+            ...(hasCanvas && canvas ? { canvas } : {}),
+          });
+          if (!state.stopRequested) {
             if (results) {
               output.textContent += results;
             } else if (error) {
               output.textContent += error;
             }
-            callback = null;
-            updateRunning(id, "run");
-          })
-          .catch((e) => {
-            output.textContent = `Error: ${e}`;
-            console.log(e);
-            callback = null;
-            updateRunning(id, "run");
-          });
+          } else {
+            appendOutputLine(id, "Execution stopped.");
+          }
+        } catch (e) {
+          output.textContent = `Error: ${e}`;
+          console.log(e);
+        } finally {
+          state.running = false;
+          state.stopping = false;
+          state.type = null;
+          updateRunning();
+        }
       });
     }
   };
