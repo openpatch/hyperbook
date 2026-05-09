@@ -254,8 +254,9 @@ hyperbook.python = (function () {
 
     applyStoredSplitSize();
 
-    splitter.addEventListener("mousedown", (event) => {
+    splitter.addEventListener("pointerdown", (event) => {
       event.preventDefault();
+      splitter.setPointerCapture(event.pointerId);
 
       const isHorizontal = getIsHorizontal();
       const key = isHorizontal ? "splitHorizontal" : "splitVertical";
@@ -266,21 +267,23 @@ hyperbook.python = (function () {
 
       elem.classList.add("resizing");
 
-      const onMouseMove = (moveEvent) => {
+      const onPointerMove = (moveEvent) => {
         const pointer = isHorizontal ? moveEvent.clientX : moveEvent.clientY;
         const delta = pointer - startPointer;
         const size = applySplitSize(startSize + delta, isHorizontal);
         elem.dataset[key] = String(Math.round(size));
       };
 
-      const onMouseUp = () => {
+      const onPointerUp = () => {
         elem.classList.remove("resizing");
-        window.removeEventListener("mousemove", onMouseMove);
-        window.removeEventListener("mouseup", onMouseUp);
+        splitter.removeEventListener("pointermove", onPointerMove);
+        splitter.removeEventListener("pointerup", onPointerUp);
+        splitter.removeEventListener("pointercancel", onPointerUp);
       };
 
-      window.addEventListener("mousemove", onMouseMove);
-      window.addEventListener("mouseup", onMouseUp);
+      splitter.addEventListener("pointermove", onPointerMove);
+      splitter.addEventListener("pointerup", onPointerUp);
+      splitter.addEventListener("pointercancel", onPointerUp);
     });
 
     window.addEventListener("resize", applyStoredSplitSize);
