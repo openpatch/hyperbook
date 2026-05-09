@@ -94,6 +94,32 @@ hyperbook.p5 = (function () {
     window.addEventListener("resize", applyStoredSplitSize);
   }
 
+  const updateFullscreenButtonState = (elem, button) => {
+    if (!elem || !button) return;
+    const isFullscreen = document.fullscreenElement === elem;
+    button.textContent = hyperbook.i18n.get(
+      isFullscreen ? "ide-fullscreen-exit" : "ide-fullscreen-enter",
+    );
+    button.classList.toggle("active", isFullscreen);
+  };
+
+  const toggleFullscreen = async (elem) => {
+    if (!elem) return;
+    if (document.fullscreenElement === elem) {
+      await document.exitFullscreen();
+      return;
+    }
+    await elem.requestFullscreen();
+  };
+
+  const syncFullscreenButtons = () => {
+    const elems = document.querySelectorAll(".directive-p5");
+    elems.forEach((elem) => {
+      const fullscreen = elem.querySelector("button.fullscreen");
+      updateFullscreenButtonState(elem, fullscreen);
+    });
+  };
+
   function initElement(elem) {
     if (elem.getAttribute("data-p5-initialized") === "true") return;
     elem.setAttribute("data-p5-initialized", "true");
@@ -110,8 +136,18 @@ hyperbook.p5 = (function () {
     const copyEl = elem.getElementsByClassName("copy")[0];
     const resetEl = elem.getElementsByClassName("reset")[0];
     const downloadEl = elem.getElementsByClassName("download")[0];
+    const fullscreenEl = elem.getElementsByClassName("fullscreen")[0];
 
     setupSplitter(elem, container, editorContainer, splitter);
+
+    fullscreenEl?.addEventListener("click", async () => {
+      try {
+        await toggleFullscreen(elem);
+      } catch (error) {
+        console.error(error.message);
+      }
+    });
+    updateFullscreenButtonState(elem, fullscreenEl);
 
     if (frame) {
       frame.srcdoc = frame.srcdoc.replaceAll(
@@ -192,6 +228,7 @@ hyperbook.p5 = (function () {
   });
 
   observer.observe(document.body, { childList: true, subtree: true });
+  document.addEventListener("fullscreenchange", syncFullscreenButtons);
 
   return { init };
 })();

@@ -288,6 +288,20 @@ export default (ctx: HyperbookContext) => () => {
           ],
         };
 
+        const createFullscreenButton = (): Element => ({
+          type: "element",
+          tagName: "button",
+          properties: {
+            class: "fullscreen",
+          },
+          children: [
+            {
+              type: "text",
+              value: i18n.get("ide-fullscreen-enter"),
+            },
+          ],
+        });
+
         if (isEditMode) {
           // Edit mode: show editor and preview side by side
           data.hChildren = [
@@ -435,6 +449,7 @@ export default (ctx: HyperbookContext) => () => {
                     class: "buttons bottom",
                   },
                   children: [
+                    createFullscreenButton(),
                     {
                       type: "element",
                       tagName: "button",
@@ -465,7 +480,7 @@ export default (ctx: HyperbookContext) => () => {
               properties: {
                 class: "buttons bottom",
               },
-              children: [downloadProjectButton, downloadButton],
+              children: [createFullscreenButton(), downloadProjectButton, downloadButton],
             },
             {
               type: "element",

@@ -104,6 +104,7 @@ code-input {
   border-bottom: none;
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
+  overflow: hidden;
 }
 
 .directive-webide .buttons.bottom {
@@ -128,8 +129,13 @@ code-input {
   opacity: 0.6;
 }
 
-.directive-webide .buttons:last-child {
+.directive-webide .buttons button:last-child {
   border-right: none;
+}
+
+.directive-webide button.fullscreen {
+  flex: 0 0 auto;
+  min-width: 120px;
 }
 
 .directive-webide button:hover {
@@ -141,6 +147,18 @@ code-input {
   width: 100%;
   height: 100%;
   background-color: white;
+}
+
+.directive-webide:fullscreen {
+  width: 100vw;
+  height: 100dvh !important;
+  padding: 12px;
+  box-sizing: border-box;
+  background-color: var(--color-background, var(--color--background, #fff));
+}
+
+.directive-webide:fullscreen::backdrop {
+  background-color: var(--color-background, var(--color--background, #fff));
 }
 
 @media screen and (min-width: 1024px) {

@@ -4,15 +4,14 @@ exports[`remarkDirectivePyide > should transform basic pyide 1`] = `
 "
 <div class="directive-pyide" id="6e715f54a4511463b93efb79132206d5a01139c1cb5c2bc3c218cc548024134e" data-tests="W10=">
   <div class="container">
-    <div class="buttons"><button class="output-btn active">pyide-output</button><button class="input-btn">pyide-input</button></div>
+    <div class="buttons"><button class="output-btn active">pyide-output</button></div>
     <pre class="output"></pre>
-    <code-input class="input hidden"></code-input>
   </div>
   <div class="splitter" role="separator" aria-label="Resize panels"></div>
   <div class="editor-container">
-    <div class="buttons"><button class="run">pyide-run</button></div>
+    <div class="buttons"><button class="run">pyide-run</button><button class="stop" disabled>pyide-stop</button></div>
     <code-input class="editor line-numbers" language="python" template="pyide-highlighted">print(&quot;Hello World&quot;)</code-input>
-    <div class="buttons bottom"><button class="reset">pyide-reset</button><button class="copy">pyide-copy</button><button class="download">pyide-download</button></div>
+    <div class="buttons bottom"><button class="fullscreen">ide-fullscreen-enter</button><button class="reset">pyide-reset</button><button class="copy">pyide-copy</button><button class="download">pyide-download</button></div>
   </div>
 </div>
 "
@@ -22,19 +21,21 @@ exports[`remarkDirectivePyide > should transform pyide with canvas attribute 1`]
 "
 <div class="directive-pyide" id="304aa65140ff04fdf9232aadeb24a64910a638c44d7ff9257d5e3348267e9ad9" data-tests="W10=" data-canvas="true">
   <div class="container">
-    <div class="buttons"><button class="output-btn active">pyide-output</button><button class="canvas-btn">pyide-canvas</button><button class="input-btn">pyide-input</button></div>
-    <pre class="output"></pre>
+    <div class="buttons"><button class="output-btn active">pyide-output</button><button class="canvas-btn">pyide-canvas</button></div>
+    <div class="canvas-header hidden">pyide-canvas</div>
     <div class="canvas-wrapper hidden">
       <canvas class="canvas" id="canvas"></canvas>
     </div>
-    <code-input class="input hidden"></code-input>
+    <div class="canvas-output-splitter hidden" role="separator" aria-label="Resize canvas and output"></div>
+    <div class="output-header hidden">pyide-output</div>
+    <pre class="output"></pre>
   </div>
   <div class="splitter" role="separator" aria-label="Resize panels"></div>
   <div class="editor-container">
-    <div class="buttons"><button class="run">pyide-run</button></div>
+    <div class="buttons"><button class="run">pyide-run</button><button class="stop" disabled>pyide-stop</button></div>
     <code-input class="editor line-numbers" language="python" template="pyide-highlighted">import pygame
 pygame.init()</code-input>
-    <div class="buttons bottom"><button class="reset">pyide-reset</button><button class="copy">pyide-copy</button><button class="download">pyide-download</button></div>
+    <div class="buttons bottom"><button class="fullscreen">ide-fullscreen-enter</button><button class="reset">pyide-reset</button><button class="copy">pyide-copy</button><button class="download">pyide-download</button></div>
   </div>
 </div>
 "

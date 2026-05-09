@@ -1215,6 +1215,25 @@ hyperbook.typst = (function () {
     window.addEventListener('resize', applyStoredSplitSize);
   }
 
+  const updateFullscreenButtonState = (elem, button) => {
+    if (!elem || !button) return;
+    const isFullscreen = document.fullscreenElement === elem;
+    button.textContent = i18nGet(
+      isFullscreen ? 'ide-fullscreen-exit' : 'ide-fullscreen-enter',
+      isFullscreen ? 'Exit Fullscreen' : 'Fullscreen',
+    );
+    button.classList.toggle('active', isFullscreen);
+  };
+
+  const toggleFullscreen = async (elem) => {
+    if (!elem) return;
+    if (document.fullscreenElement === elem) {
+      await document.exitFullscreen();
+      return;
+    }
+    await elem.requestFullscreen();
+  };
+
   class TypstEditor {
     constructor({
       elem,
@@ -1248,6 +1267,7 @@ hyperbook.typst = (function () {
       this.editorContainer = elem.querySelector('.editor-container');
       this.splitter = elem.querySelector('.splitter');
       this.sourceTextarea = elem.querySelector('.typst-source');
+      this.fullscreenBtn = elem.querySelector('.fullscreen');
 
       setupSplitter(this.elem, this.previewContainer, this.editorContainer, this.splitter);
 
@@ -1256,6 +1276,11 @@ hyperbook.typst = (function () {
 
       // Setup event handlers
       this.setupEventHandlers();
+      this.handleFullscreenChange = () => {
+        updateFullscreenButtonState(this.elem, this.fullscreenBtn);
+      };
+      document.addEventListener('fullscreenchange', this.handleFullscreenChange);
+      updateFullscreenButtonState(this.elem, this.fullscreenBtn);
 
       // Initialize
       this.initialize();
@@ -1279,12 +1304,14 @@ hyperbook.typst = (function () {
       const resetBtn = this.elem.querySelector('.reset');
       const addSourceFileBtn = this.elem.querySelector('.add-source-file');
       const addBinaryFileBtn = this.elem.querySelector('.add-binary-file');
+      const fullscreenBtn = this.elem.querySelector('.fullscreen');
 
       downloadBtn?.addEventListener('click', () => this.handleExportPdf());
       downloadProjectBtn?.addEventListener('click', () => this.handleExportProject());
       resetBtn?.addEventListener('click', () => this.handleReset());
       addSourceFileBtn?.addEventListener('click', () => this.handleAddSourceFile());
       addBinaryFileBtn?.addEventListener('click', (e) => this.handleAddBinaryFile(e));
+      fullscreenBtn?.addEventListener('click', () => this.handleFullscreenToggle());
     }
 
     /**
@@ -1558,6 +1585,14 @@ hyperbook.typst = (function () {
       if (confirm(confirmMsg)) {
         await window.store?.typst?.delete(this.id);
         window.location.reload();
+      }
+    }
+
+    async handleFullscreenToggle() {
+      try {
+        await toggleFullscreen(this.elem);
+      } catch (error) {
+        console.error(error.message);
       }
     }
   }

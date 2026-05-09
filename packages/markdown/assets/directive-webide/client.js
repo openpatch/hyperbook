@@ -83,6 +83,32 @@ hyperbook.webide = (function () {
     window.addEventListener("resize", applyStoredSplitSize);
   }
 
+  const updateFullscreenButtonState = (elem, button) => {
+    if (!elem || !button) return;
+    const isFullscreen = document.fullscreenElement === elem;
+    button.textContent = hyperbook.i18n.get(
+      isFullscreen ? "ide-fullscreen-exit" : "ide-fullscreen-enter",
+    );
+    button.classList.toggle("active", isFullscreen);
+  };
+
+  const toggleFullscreen = async (elem) => {
+    if (!elem) return;
+    if (document.fullscreenElement === elem) {
+      await document.exitFullscreen();
+      return;
+    }
+    await elem.requestFullscreen();
+  };
+
+  const syncFullscreenButtons = () => {
+    const elems = document.querySelectorAll(".directive-webide");
+    elems.forEach((elem) => {
+      const fullscreen = elem.querySelector("button.fullscreen");
+      updateFullscreenButtonState(elem, fullscreen);
+    });
+  };
+
   function initElement(elem) {
     if (elem.getAttribute("data-webide-initialized") === "true") return;
     elem.setAttribute("data-webide-initialized", "true");
@@ -111,8 +137,19 @@ hyperbook.webide = (function () {
     const resetEl = elem.querySelector("button.reset");
     /** @type {HTMLButtonElement} */
     const downloadEl = elem.querySelector("button.download");
+    /** @type {HTMLButtonElement} */
+    const fullscreenEl = elem.querySelector("button.fullscreen");
 
     setupSplitter(elem, container, editorContainer, splitter);
+
+    fullscreenEl?.addEventListener("click", async () => {
+      try {
+        await toggleFullscreen(elem);
+      } catch (error) {
+        console.error(error.message);
+      }
+    });
+    updateFullscreenButtonState(elem, fullscreenEl);
 
     resetEl?.addEventListener("click", () => {
       if (window.confirm(hyperbook.i18n.get("webide-reset-prompt"))) {
@@ -241,6 +278,7 @@ hyperbook.webide = (function () {
   document.addEventListener("DOMContentLoaded", () => {
     init(document);
   });
+  document.addEventListener("fullscreenchange", syncFullscreenButtons);
 
   // Observe for new elements added to the DOM
   const observer = new MutationObserver((mutations) => {

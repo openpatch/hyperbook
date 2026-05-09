@@ -50,8 +50,6 @@ export default (ctx: HyperbookContext) => () => {
           code: string;
         }[] = [];
 
-        let input = "";
-
         if (src) {
           srcFile = readFile(src, ctx) || "";
         } else if (node.children?.length > 0) {
@@ -62,11 +60,6 @@ export default (ctx: HyperbookContext) => () => {
               code: (c as Code).value,
               name: `${i}`,
             }));
-          input = toText(
-            node.children.find(
-              (c) => c.type === "code" && c.lang === "input",
-            ) as Code,
-          );
           srcFile = toText(
             node.children.find(
               (c) =>
@@ -129,31 +122,23 @@ export default (ctx: HyperbookContext) => () => {
                         } as ElementContent,
                       ]
                     : []),
-                  {
-                    type: "element",
-                    tagName: "button",
-                    properties: {
-                      class: "input-btn",
-                    },
-                    children: [
-                      {
-                        type: "text",
-                        value: i18n.get("pyide-input"),
-                      },
-                    ],
-                  },
                 ],
-              },
-              {
-                type: "element",
-                tagName: "pre",
-                properties: {
-                  class: "output",
-                },
-                children: [],
               },
               ...(hasCanvas
                 ? [
+                    {
+                      type: "element",
+                      tagName: "div",
+                      properties: {
+                        class: "canvas-header hidden",
+                      },
+                      children: [
+                        {
+                          type: "text",
+                          value: i18n.get("pyide-canvas"),
+                        },
+                      ],
+                    } as ElementContent,
                     {
                       type: "element",
                       tagName: "div",
@@ -172,20 +157,38 @@ export default (ctx: HyperbookContext) => () => {
                         } as ElementContent,
                       ],
                     } as ElementContent,
+                    {
+                      type: "element",
+                      tagName: "div",
+                      properties: {
+                        class: "canvas-output-splitter hidden",
+                        role: "separator",
+                        "aria-label": "Resize canvas and output",
+                      },
+                      children: [],
+                    } as ElementContent,
+                    {
+                      type: "element",
+                      tagName: "div",
+                      properties: {
+                        class: "output-header hidden",
+                      },
+                      children: [
+                        {
+                          type: "text",
+                          value: i18n.get("pyide-output"),
+                        },
+                      ],
+                    } as ElementContent,
                   ]
                 : []),
               {
                 type: "element",
-                tagName: "code-input",
+                tagName: "pre",
                 properties: {
-                  class: "input hidden",
+                  class: "output",
                 },
-                children: [
-                  {
-                    type: "raw",
-                    value: input || "",
-                  },
-                ],
+                children: [],
               },
             ],
           },
@@ -243,6 +246,20 @@ export default (ctx: HyperbookContext) => () => {
                         } as ElementContent,
                       ]
                     : []),
+                  {
+                    type: "element",
+                    tagName: "button",
+                    properties: {
+                      class: "stop",
+                      disabled: true,
+                    },
+                    children: [
+                      {
+                        type: "text",
+                        value: i18n.get("pyide-stop"),
+                      },
+                    ],
+                  },
                 ],
               },
               {
@@ -267,6 +284,19 @@ export default (ctx: HyperbookContext) => () => {
                   class: "buttons bottom",
                 },
                 children: [
+                  {
+                    type: "element",
+                    tagName: "button",
+                    properties: {
+                      class: "fullscreen",
+                    },
+                    children: [
+                      {
+                        type: "text",
+                        value: i18n.get("ide-fullscreen-enter"),
+                      },
+                    ],
+                  },
                   {
                     type: "element",
                     tagName: "button",

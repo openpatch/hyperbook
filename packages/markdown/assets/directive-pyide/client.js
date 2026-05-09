@@ -16,18 +16,6 @@ hyperbook.python = (function () {
     ])
   );
 
-  class StdinHandler {
-    constructor(results, options) {
-      this.results = results;
-      this.idx = 0;
-      Object.assign(this, options);
-    }
-
-    stdin() {
-      return this.results[this.idx++];
-    }
-  }
-
   const PYODIDE_CDN = "https://cdn.jsdelivr.net/pyodide/v0.29.4/full/pyodide.js";
 
   const loadPyodideScript = () => {
@@ -58,6 +46,10 @@ hyperbook.python = (function () {
    * @type {Map<string, { running: boolean, stopping: boolean, stopRequested: boolean, type: "run" | "test" | null }>}
    */
   const executionStates = new Map();
+  /**
+   * @type {Map<string, Int32Array>}
+   */
+  const interruptBuffers = new Map();
 
   const getExecutionState = (id) => {
     if (!executionStates.has(id)) {
@@ -77,6 +69,15 @@ hyperbook.python = (function () {
     }
     const loadPyodide = await pyodideReadyPromise;
     const pyodide = await loadPyodide();
+    if (
+      typeof SharedArrayBuffer !== "undefined" &&
+      window.crossOriginIsolated &&
+      typeof pyodide.setInterruptBuffer === "function"
+    ) {
+      const interruptBuffer = new Int32Array(new SharedArrayBuffer(4));
+      pyodide.setInterruptBuffer(interruptBuffer);
+      interruptBuffers.set(id, interruptBuffer);
+    }
     runtimes.set(id, pyodide);
     return pyodide;
   };
@@ -91,6 +92,65 @@ hyperbook.python = (function () {
     output.appendChild(document.createTextNode(message + "\n"));
   };
 
+  const appendOutputErrorLine = (id, message) => {
+    const output = getOutput(id);
+    if (!output) return;
+    const line = document.createElement("span");
+    line.classList.add("error-line");
+    line.textContent = message + "\n";
+    output.appendChild(line);
+  };
+
+  const appendOutput = (output, message, isError = false) => {
+    if (!output || message === undefined || message === null) return;
+    if (isError) {
+      const line = document.createElement("span");
+      line.classList.add("error-line");
+      line.textContent = String(message);
+      output.appendChild(line);
+      return;
+    }
+    output.appendChild(document.createTextNode(String(message)));
+  };
+
+  const updateFullscreenButtonState = (elem, button) => {
+    if (!elem || !button) return;
+    const isFullscreen = document.fullscreenElement === elem;
+    button.textContent = hyperbook.i18n.get(
+      isFullscreen ? "ide-fullscreen-exit" : "ide-fullscreen-enter",
+    );
+    button.classList.toggle("active", isFullscreen);
+  };
+
+  const toggleFullscreen = async (elem) => {
+    if (!elem) return;
+    if (document.fullscreenElement === elem) {
+      await document.exitFullscreen();
+      return;
+    }
+    await elem.requestFullscreen();
+  };
+
+  const syncFullscreenButtons = () => {
+    const elems = document.getElementsByClassName("directive-pyide");
+    for (const elem of elems) {
+      const fullscreen = elem.getElementsByClassName("fullscreen")[0];
+      updateFullscreenButtonState(elem, fullscreen);
+    }
+  };
+
+  const releaseKeyboardCapture = (id) => {
+    const elem = document.getElementById(id);
+    if (!elem) return;
+    const canvas = elem.getElementsByClassName("canvas")[0];
+    const editor = elem.getElementsByClassName("editor")[0];
+    document.activeElement?.blur?.();
+    canvas?.blur?.();
+    window.setTimeout(() => {
+      editor?.focus?.();
+    }, 0);
+  };
+
   const resetCanvas = (canvas) => {
     if (!canvas) return;
     const context = canvas.getContext("2d");
@@ -101,23 +161,31 @@ hyperbook.python = (function () {
     const filename = "<exec>";
     try {
       const pyodide = await getRuntime(id);
-      const { inputs = [], canvas, ...globalsContext } = context;
+      const { canvas, ...globalsContext } = context;
 
       if (canvas) {
         try {
           resetCanvas(canvas);
           pyodide.canvas.setCanvas2D(canvas);
         } catch (error) {
-          appendOutputLine(id, `Canvas setup failed: ${error.message}`);
+          appendOutputErrorLine(id, `Canvas setup failed: ${error.message}`);
         }
       }
 
-      pyodide.setStdin(new StdinHandler(inputs));
+      pyodide.setStdin({
+        stdin: () => {
+          const value = window.prompt(hyperbook.i18n.get("pyide-input-prompt"));
+          if (value === null) {
+            return "";
+          }
+          return value;
+        },
+      });
       pyodide.setStdout({
         batched: (msg) => appendOutputLine(id, msg),
       });
       pyodide.setStderr({
-        batched: (msg) => appendOutputLine(id, msg),
+        batched: (msg) => appendOutputErrorLine(id, msg),
       });
 
       await pyodide.loadPackagesFromImports(script);
@@ -150,11 +218,24 @@ hyperbook.python = (function () {
 
   const requestStop = (id) => {
     const state = getExecutionState(id);
-    if (!state.running || state.stopRequested) return;
+    const hasRuntime = runtimes.has(id);
+    if ((!state.running && !hasRuntime) || state.stopRequested) return;
     state.stopRequested = true;
     state.stopping = true;
-    appendOutputLine(id, "Stop requested. Finishing current execution...");
+    const interruptBuffer = interruptBuffers.get(id);
+    if (interruptBuffer) {
+      interruptBuffer[0] = 2;
+      appendOutputLine(id, "Stop requested. Interrupting execution...");
+    } else {
+      appendOutputLine(id, hyperbook.i18n.get("pyide-stop-reloading"));
+    }
+    releaseKeyboardCapture(id);
     updateRunning();
+    if (!interruptBuffer) {
+      window.setTimeout(() => {
+        window.location.reload();
+      }, 50);
+    }
   };
 
   const handleStopClick = (event) => {
@@ -163,48 +244,99 @@ hyperbook.python = (function () {
     requestStop(elem.id);
   };
 
+  const getRunningInstanceId = () => {
+    const elems = document.getElementsByClassName("directive-pyide");
+    for (const elem of elems) {
+      if (getExecutionState(elem.id).running) {
+        return elem.id;
+      }
+    }
+    return null;
+  };
+
   const updateRunning = () => {
+    const runningInstanceId = getRunningInstanceId();
     const elems = document.getElementsByClassName("directive-pyide");
     for (let elem of elems) {
       const run = elem.getElementsByClassName("run")[0];
       const test = elem.getElementsByClassName("test")[0];
+      const stop = elem.getElementsByClassName("stop")[0];
+      const editor = elem.getElementsByClassName("editor")[0];
+      const editorTextarea = editor?.querySelector("textarea");
       const state = getExecutionState(elem.id);
+      const hasRuntime = runtimes.has(elem.id);
+      const hasInterrupt = interruptBuffers.has(elem.id);
+      const lockedByOther =
+        runningInstanceId !== null &&
+        runningInstanceId !== elem.id &&
+        !state.running;
 
-      run.removeEventListener("click", handleStopClick);
-      test?.removeEventListener("click", handleStopClick);
+      stop?.removeEventListener("click", handleStopClick);
       run.classList.remove("stopping");
+      run.classList.remove("locked");
       test?.classList.remove("stopping");
+      test?.classList.remove("locked");
+      stop?.classList.remove("stopping");
+      elem.classList.toggle("locked-by-other", lockedByOther);
 
-      if (state.running) {
-        if (state.type === "run") {
-          run.textContent = state.stopping
-            ? "Stopping..."
-            : hyperbook.i18n.get("pyide-running-click-to-stop");
-          run.disabled = false;
-          run.addEventListener("click", handleStopClick);
-          run.classList.toggle("stopping", state.stopping);
+      if (state.running || lockedByOther) {
+        editor?.setAttribute("disabled", "");
+        editor?.classList.add("running");
+        if (editorTextarea) {
+          editorTextarea.readOnly = true;
+        }
+        if (state.running && state.type === "run") {
+          run.textContent = hyperbook.i18n.get("pyide-running");
+          run.disabled = true;
+          run.classList.add("running");
           if (test) {
             test.classList.add("running");
             test.disabled = true;
           }
-        } else if (state.type === "test" && test) {
-          test.textContent = state.stopping
-            ? "Stopping..."
-            : hyperbook.i18n.get("pyide-testing-click-to-stop");
-          test.disabled = false;
-          test.addEventListener("click", handleStopClick);
-          test.classList.toggle("stopping", state.stopping);
+        } else if (state.running && state.type === "test" && test) {
+          test.textContent = hyperbook.i18n.get("pyide-testing");
+          test.disabled = true;
+          test.classList.add("running");
           run.classList.add("running");
           run.disabled = true;
         } else {
+          const lockLabel = lockedByOther
+            ? "pyide-locked-other-instance-running"
+            : "pyide-run";
+          run.textContent = hyperbook.i18n.get(lockLabel);
           run.classList.add("running");
+          run.classList.toggle("locked", lockedByOther);
           run.disabled = true;
           if (test) {
+            test.textContent = hyperbook.i18n.get(
+              lockedByOther ? "pyide-locked-other-instance-running" : "pyide-test",
+            );
+            test.classList.toggle("locked", lockedByOther);
             test.classList.add("running");
             test.disabled = true;
           }
         }
+
+        if (stop) {
+          const stopLabel = hasInterrupt ? "pyide-stop" : "pyide-stop-refresh";
+          if (state.running) {
+            stop.textContent = state.stopping
+              ? hyperbook.i18n.get("pyide-stopping")
+              : hyperbook.i18n.get(stopLabel);
+            stop.disabled = false;
+            stop.addEventListener("click", handleStopClick);
+          } else {
+            stop.textContent = hyperbook.i18n.get(stopLabel);
+            stop.disabled = true;
+          }
+          stop.classList.toggle("stopping", state.stopping);
+        }
       } else {
+        editor?.removeAttribute("disabled");
+        editor?.classList.remove("running");
+        if (editorTextarea) {
+          editorTextarea.readOnly = false;
+        }
         run.classList.remove("stopping");
         run.classList.remove("running");
         run.textContent = hyperbook.i18n.get("pyide-run");
@@ -215,11 +347,28 @@ hyperbook.python = (function () {
           test.textContent = hyperbook.i18n.get("pyide-test");
           test.disabled = false;
         }
+        if (stop) {
+          stop.classList.remove("stopping");
+          stop.classList.remove("running");
+          stop.textContent = hyperbook.i18n.get(
+            hasInterrupt ? "pyide-stop" : "pyide-stop-refresh",
+          );
+          stop.disabled = !hasRuntime;
+          if (hasRuntime) {
+            stop.addEventListener("click", handleStopClick);
+          }
+        }
       }
     }
   };
 
-  const setupSplitter = (elem, container, editorContainer, splitter) => {
+  const setupSplitter = (
+    elem,
+    container,
+    editorContainer,
+    splitter,
+    onSplitChanged,
+  ) => {
     if (!container || !editorContainer || !splitter) return;
 
     const minPanelSize = 120;
@@ -279,6 +428,16 @@ hyperbook.python = (function () {
         splitter.removeEventListener("pointermove", onPointerMove);
         splitter.removeEventListener("pointerup", onPointerUp);
         splitter.removeEventListener("pointercancel", onPointerUp);
+        const splitHorizontal = Number(elem.dataset.splitHorizontal);
+        const splitVertical = Number(elem.dataset.splitVertical);
+        onSplitChanged?.({
+          ...(Number.isFinite(splitHorizontal) && splitHorizontal > 0
+            ? { splitHorizontal: Math.round(splitHorizontal) }
+            : {}),
+          ...(Number.isFinite(splitVertical) && splitVertical > 0
+            ? { splitVertical: Math.round(splitVertical) }
+            : {}),
+        });
       };
 
       splitter.addEventListener("pointermove", onPointerMove);
@@ -287,6 +446,79 @@ hyperbook.python = (function () {
     });
 
     window.addEventListener("resize", applyStoredSplitSize);
+    return applyStoredSplitSize;
+  };
+
+  const setupCanvasOutputSplitter = (
+    elem,
+    container,
+    canvasWrapper,
+    output,
+    splitter,
+    onSplitChanged,
+  ) => {
+    if (!elem || !container || !canvasWrapper || !output || !splitter) return;
+
+    const minPanelSize = 80;
+
+    const getAvailableHeight = () => {
+      const tabs = container.querySelector(".buttons");
+      const tabsHeight = tabs && tabs.offsetParent !== null ? tabs.offsetHeight : 0;
+      return container.clientHeight - tabsHeight - splitter.offsetHeight;
+    };
+
+    const applySplitSize = (rawSize) => {
+      const total = getAvailableHeight();
+      const maxSize = Math.max(minPanelSize, total - minPanelSize);
+      const clamped = Math.max(minPanelSize, Math.min(rawSize, maxSize));
+      canvasWrapper.style.flex = `0 0 ${clamped}px`;
+      output.style.flex = "1 1 0";
+      return clamped;
+    };
+
+    const applyStoredSplitSize = () => {
+      const rawStored = Number(elem.dataset.splitCanvasOutput);
+      if (!Number.isFinite(rawStored) || rawStored <= 0) {
+        canvasWrapper.style.flex = "1 1 0";
+        output.style.flex = "1 1 0";
+        return;
+      }
+      applySplitSize(rawStored);
+    };
+
+    splitter.addEventListener("pointerdown", (event) => {
+      event.preventDefault();
+      splitter.setPointerCapture(event.pointerId);
+
+      const startPointer = event.clientY;
+      const startSize = canvasWrapper.getBoundingClientRect().height;
+
+      elem.classList.add("resizing");
+
+      const onPointerMove = (moveEvent) => {
+        const delta = moveEvent.clientY - startPointer;
+        const size = applySplitSize(startSize + delta);
+        elem.dataset.splitCanvasOutput = String(Math.round(size));
+      };
+
+      const onPointerUp = () => {
+        elem.classList.remove("resizing");
+        splitter.removeEventListener("pointermove", onPointerMove);
+        splitter.removeEventListener("pointerup", onPointerUp);
+        splitter.removeEventListener("pointercancel", onPointerUp);
+        const splitCanvasOutput = Number(elem.dataset.splitCanvasOutput);
+        if (Number.isFinite(splitCanvasOutput) && splitCanvasOutput > 0) {
+          onSplitChanged?.({ splitCanvasOutput: Math.round(splitCanvasOutput) });
+        }
+      };
+
+      splitter.addEventListener("pointermove", onPointerMove);
+      splitter.addEventListener("pointerup", onPointerUp);
+      splitter.addEventListener("pointercancel", onPointerUp);
+    });
+
+    window.addEventListener("resize", applyStoredSplitSize);
+    return applyStoredSplitSize;
   };
 
   const init = (root) => {
@@ -302,24 +534,42 @@ hyperbook.python = (function () {
       const splitter = elem.getElementsByClassName("splitter")[0];
       const run = elem.getElementsByClassName("run")[0];
       const test = elem.getElementsByClassName("test")[0];
+      const stop = elem.getElementsByClassName("stop")[0];
       const output = elem.getElementsByClassName("output")[0];
       const canvas = elem.getElementsByClassName("canvas")[0];
       const canvasWrapper = elem.getElementsByClassName("canvas-wrapper")[0] || canvas;
-      const input = elem.getElementsByClassName("input")[0];
+      const canvasOutputSplitter = elem.getElementsByClassName("canvas-output-splitter")[0];
+      const canvasHeader = elem.getElementsByClassName("canvas-header")[0];
+      const outputHeader = elem.getElementsByClassName("output-header")[0];
       const outputBtn = elem.getElementsByClassName("output-btn")[0];
       const canvasBtn = elem.getElementsByClassName("canvas-btn")[0];
-      const inputBtn = elem.getElementsByClassName("input-btn")[0];
+      const canvasTabs = outputBtn?.closest(".buttons");
 
       const copyEl = elem.getElementsByClassName("copy")[0];
       const resetEl = elem.getElementsByClassName("reset")[0];
       const downloadEl = elem.getElementsByClassName("download")[0];
+      const fullscreenEl = elem.getElementsByClassName("fullscreen")[0];
 
       const id = elem.id;
       const hasCanvas = elem.getAttribute("data-canvas") === "true";
+      let pyideState = { id };
+
+      const getEditorValue = () => {
+        const textarea = editor?.querySelector("textarea");
+        if (textarea) return textarea.value;
+        return typeof editor?.textContent === "string" ? editor.textContent : "";
+      };
+
+      pyideState = { ...pyideState, script: getEditorValue() };
+
+      const persistPyideState = (updates = {}) => {
+        pyideState = { ...pyideState, ...updates, id };
+        return hyperbook.store.db.pyide.put(pyideState);
+      };
 
       copyEl?.addEventListener("click", async () => {
         try {
-          await navigator.clipboard.writeText(editor.value);
+          await navigator.clipboard.writeText(getEditorValue());
         } catch (error) {
           console.error(error.message);
         }
@@ -332,70 +582,178 @@ hyperbook.python = (function () {
 
       downloadEl?.addEventListener("click", () => {
         const a = document.createElement("a");
-        const blob = new Blob([editor.value], { type: "text/plain" });
+        const blob = new Blob([getEditorValue()], { type: "text/plain" });
         a.href = URL.createObjectURL(blob);
         a.download = `script-${id}.py`;
         a.click();
       });
+
+      fullscreenEl?.addEventListener("click", async () => {
+        try {
+          await toggleFullscreen(elem);
+        } catch (error) {
+          console.error(error.message);
+        }
+      });
+      updateFullscreenButtonState(elem, fullscreenEl);
       let tests = [];
       try {
         tests = JSON.parse(atob(elem.getAttribute("data-tests")));
       } catch (e) {}
 
-      function showInput() {
-        outputBtn.classList.remove("active");
-        if (canvasBtn) canvasBtn.classList.remove("active");
-        inputBtn.classList.add("active");
-        output.classList.add("hidden");
-        if (canvasWrapper) canvasWrapper.classList.add("hidden");
-        input.classList.remove("hidden");
-      }
-      function showOutput() {
+      const isWideCanvasMode = () =>
+        hasCanvas && window.matchMedia("(min-width: 1024px)").matches;
+
+      let activeCanvasView = "output";
+
+      const showOutputTab = () => {
+        activeCanvasView = "output";
         outputBtn.classList.add("active");
         if (canvasBtn) canvasBtn.classList.remove("active");
-        inputBtn.classList.remove("active");
+        canvasHeader?.classList.add("hidden");
+        outputHeader?.classList.add("hidden");
         output.classList.remove("hidden");
         if (canvasWrapper) canvasWrapper.classList.add("hidden");
-        input.classList.add("hidden");
-      }
-      function showCanvas() {
+        canvasOutputSplitter?.classList.add("hidden");
+      };
+      const showCanvasTab = () => {
+        activeCanvasView = "canvas";
         outputBtn.classList.remove("active");
         if (canvasBtn) canvasBtn.classList.add("active");
-        inputBtn.classList.remove("active");
+        canvasHeader?.classList.add("hidden");
+        outputHeader?.classList.add("hidden");
         output.classList.add("hidden");
         if (canvasWrapper) canvasWrapper.classList.remove("hidden");
-        input.classList.add("hidden");
+        canvasOutputSplitter?.classList.add("hidden");
+      };
+
+      const applyStoredCanvasOutputSplit = setupCanvasOutputSplitter(
+        elem,
+        container,
+        canvasWrapper,
+        output,
+        canvasOutputSplitter,
+        (splitState) => {
+          void persistPyideState(splitState);
+        },
+      );
+
+      const applyCanvasOutputLayout = () => {
+        if (!hasCanvas || !canvasWrapper || !canvasOutputSplitter) return;
+        if (isWideCanvasMode()) {
+          elem.classList.add("canvas-split-mode");
+          canvasTabs?.classList.add("hidden");
+          output.classList.remove("hidden");
+          canvasWrapper.classList.remove("hidden");
+          canvasOutputSplitter.classList.remove("hidden");
+          canvasHeader?.classList.remove("hidden");
+          outputHeader?.classList.remove("hidden");
+          outputBtn.classList.add("active");
+          outputBtn.disabled = true;
+          if (canvasBtn) {
+            canvasBtn.classList.add("active");
+            canvasBtn.disabled = true;
+          }
+          applyStoredCanvasOutputSplit?.();
+          return;
+        }
+
+        elem.classList.remove("canvas-split-mode");
+        canvasTabs?.classList.remove("hidden");
+        output.style.flex = "";
+        canvasWrapper.style.flex = "";
+        outputBtn.disabled = false;
+        if (canvasBtn) {
+          canvasBtn.disabled = false;
+        }
+        if (activeCanvasView === "canvas") {
+          showCanvasTab();
+        } else {
+          showOutputTab();
+        }
+      };
+
+      function showOutput() {
+        if (isWideCanvasMode()) {
+          applyCanvasOutputLayout();
+          return;
+        }
+        showOutputTab();
+      }
+      function showCanvas() {
+        if (isWideCanvasMode()) {
+          applyCanvasOutputLayout();
+          return;
+        }
+        showCanvasTab();
       }
 
       outputBtn?.addEventListener("click", showOutput);
       canvasBtn?.addEventListener("click", showCanvas);
-      inputBtn?.addEventListener("click", showInput);
-      setupSplitter(elem, container, editorContainer, splitter);
+      const applyStoredSplitSize = setupSplitter(
+        elem,
+        container,
+        editorContainer,
+        splitter,
+        (splitState) => {
+          void persistPyideState(splitState);
+        },
+      );
 
       editor.addEventListener("code-input_load", async () => {
         const result = await hyperbook.store.db.pyide.get(id);
         if (result) {
-          editor.value = result.script;
+          pyideState = { ...pyideState, ...result };
+          if (typeof result.script === "string") {
+            editor.value = result.script;
+          }
+          if (
+            Number.isFinite(result.splitHorizontal) &&
+            result.splitHorizontal > 0
+          ) {
+            elem.dataset.splitHorizontal = String(Math.round(result.splitHorizontal));
+          }
+          if (
+            Number.isFinite(result.splitVertical) &&
+            result.splitVertical > 0
+          ) {
+            elem.dataset.splitVertical = String(Math.round(result.splitVertical));
+          }
+          if (
+            Number.isFinite(result.splitCanvasOutput) &&
+            result.splitCanvasOutput > 0
+          ) {
+            elem.dataset.splitCanvasOutput = String(
+              Math.round(result.splitCanvasOutput),
+            );
+          }
+          applyStoredSplitSize?.();
+          applyCanvasOutputLayout();
         }
       });
 
+      window.addEventListener("resize", applyCanvasOutputLayout);
+      applyCanvasOutputLayout();
+
       editor.addEventListener("input", () => {
-        hyperbook.store.db.pyide.put({ id, script: editor.value });
+        void persistPyideState({ script: getEditorValue() });
       });
 
       test?.addEventListener("click", async () => {
         showOutput();
         const state = getExecutionState(id);
-        if (state.running) return;
+        if (state.running || getRunningInstanceId() !== null) return;
         state.running = true;
         state.type = "test";
         state.stopRequested = false;
         state.stopping = false;
+        const interruptBuffer = interruptBuffers.get(id);
+        if (interruptBuffer) interruptBuffer[0] = 0;
         updateRunning();
 
         output.innerHTML = "";
 
-        const script = editor.value;
+        const script = getEditorValue();
         try {
           for (let test of tests) {
             if (state.stopRequested) {
@@ -412,18 +770,20 @@ hyperbook.python = (function () {
 
             const { results, error } = await executeScript(id, testCode, {});
             if (results) {
-              output.textContent += results;
+              appendOutput(output, results);
             } else if (error) {
-              output.textContent += error;
+              appendOutput(output, error, true);
             }
           }
         } catch (e) {
-          output.textContent = `Error: ${e}`;
+          output.innerHTML = "";
+          appendOutput(output, `Error: ${e}`, true);
           console.log(e);
         } finally {
           state.running = false;
           state.stopping = false;
           state.type = null;
+          releaseKeyboardCapture(id);
           updateRunning();
         }
       });
@@ -435,39 +795,46 @@ hyperbook.python = (function () {
           showOutput();
         }
         const state = getExecutionState(id);
-        if (state.running) return;
+        if (state.running || getRunningInstanceId() !== null) return;
         state.running = true;
         state.type = "run";
         state.stopRequested = false;
         state.stopping = false;
+        const interruptBuffer = interruptBuffers.get(id);
+        if (interruptBuffer) interruptBuffer[0] = 0;
         updateRunning();
 
-        const script = editor.value;
+        const script = getEditorValue();
         output.innerHTML = "";
         try {
           const { results, error } = await executeScript(id, script, {
-            inputs: input.value.split("\n"),
             ...(hasCanvas && canvas ? { canvas } : {}),
           });
           if (!state.stopRequested) {
             if (results) {
-              output.textContent += results;
+              appendOutput(output, results);
             } else if (error) {
-              output.textContent += error;
+              showOutput();
+              appendOutput(output, error, true);
             }
           } else {
             appendOutputLine(id, "Execution stopped.");
           }
         } catch (e) {
-          output.textContent = `Error: ${e}`;
+          showOutput();
+          output.innerHTML = "";
+          appendOutput(output, `Error: ${e}`, true);
           console.log(e);
         } finally {
           state.running = false;
           state.stopping = false;
           state.type = null;
+          releaseKeyboardCapture(id);
           updateRunning();
         }
       });
+
+      stop?.addEventListener("click", handleStopClick);
     }
   };
 
@@ -488,6 +855,7 @@ hyperbook.python = (function () {
   document.addEventListener("DOMContentLoaded", () => {
     init(document);
   });
+  document.addEventListener("fullscreenchange", syncFullscreenButtons);
 
   return { init };
 })();

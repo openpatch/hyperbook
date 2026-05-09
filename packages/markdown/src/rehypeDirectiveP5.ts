@@ -178,6 +178,19 @@ ${(code.scripts ? [cdnLibraryUrl, ...code.scripts] : []).map((src) => `<script t
                           type: "element",
                           tagName: "button",
                           properties: {
+                            class: "fullscreen",
+                          },
+                          children: [
+                            {
+                              type: "text",
+                              value: i18n.get("ide-fullscreen-enter"),
+                            },
+                          ],
+                        },
+                        {
+                          type: "element",
+                          tagName: "button",
+                          properties: {
                             class: "update",
                           },
                           children: [

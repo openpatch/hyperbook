@@ -435,6 +435,7 @@ code-input {
   border-bottom: none;
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
+  overflow: hidden;
 }
 
 .directive-typst .buttons.bottom {
@@ -465,8 +466,13 @@ code-input {
   opacity: 0.6;
 }
 
-.directive-typst .buttons:last-child {
+.directive-typst .buttons button:last-child {
   border-right: none;
+}
+
+.directive-typst button.fullscreen {
+  flex: 0 0 auto;
+  min-width: 120px;
 }
 
 .directive-typst button:hover {
@@ -482,6 +488,22 @@ code-input {
 
 .directive-typst .hidden {
   display: none !important;
+}
+
+.directive-typst:fullscreen {
+  width: 100vw;
+  height: 100dvh !important;
+  padding: 12px;
+  box-sizing: border-box;
+  background-color: var(--color-background, var(--color--background, #fff));
+}
+
+.directive-typst:fullscreen::backdrop {
+  background-color: var(--color-background, var(--color--background, #fff));
+}
+
+.directive-typst:fullscreen.preview-only {
+  height: 100dvh !important;
 }
 
 @media screen and (min-width: 1024px) {

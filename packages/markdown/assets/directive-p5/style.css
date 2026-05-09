@@ -75,6 +75,7 @@ code-input {
   border-bottom: none;
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
+  overflow: hidden;
 }
 
 .directive-p5 .buttons.bottom {
@@ -95,8 +96,13 @@ code-input {
   cursor: pointer;
 }
 
-.directive-p5 .buttons:last-child {
+.directive-p5 .buttons button:last-child {
   border-right: none;
+}
+
+.directive-p5 button.fullscreen {
+  flex: 0 0 auto;
+  min-width: 120px;
 }
 
 .directive-p5 button:hover {
@@ -111,6 +117,18 @@ code-input {
 
 .directive-p5 iframe canvas {
   margin: 0 auto;
+}
+
+.directive-p5:fullscreen {
+  width: 100vw;
+  height: 100dvh !important;
+  padding: 12px;
+  box-sizing: border-box;
+  background-color: var(--color-background, var(--color--background, #fff));
+}
+
+.directive-p5:fullscreen::backdrop {
+  background-color: var(--color-background, var(--color--background, #fff));
 }
 
 @media screen and (min-width: 1024px) {

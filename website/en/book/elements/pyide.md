@@ -3,6 +3,8 @@ name: Pyide
 permaid: pyide
 ---
 
+# Pyide
+
 The `pyide` element represents a Python Integrated Development Environment (IDE) component.
 It is used to embed a Python coding environment within the hyperbook website.
 This element allows users to write, edit, and execute Python code directly in the browser.
@@ -119,27 +121,14 @@ def check_palindrom(s):
 
 :::
 
-## Input()
-
-You can use the `input()` function in the code snippets. The `input()` function is replaced by the values provided in the `input` tag.
-If there are multiple `input()` functions, the values are provided in the order they are written in the `input` tag.
-If you call `input()` more times than the number of values provided, the code will throw an error.
+When your code calls `input()`, the browser shows a prompt dialog for the value.
 
 ````md
 :::pyide
 
-```input
-a
-b
-c
-d
-```
-
 ```python
-print(input())
-print(input())
-print(input())
-print(input())
+a = input("Enter a value: ")
+print(a)
 ```
 
 :::
@@ -147,18 +136,10 @@ print(input())
 
 :::pyide
 
-```input
-a
-b
-c
-d
-```
 
 ```python
-print(input())
-print(input())
-print(input())
-print(input())
+a = input("Enter a value: ")
+print(a)
 ```
 
 :::
@@ -166,7 +147,8 @@ print(input())
 ## Stopping the execution
 
 :::alert{warn}
-Stopping an infinite loop or a long lasting process is only possible by refreshing the page or by setting these two headers on your server:
+Use the **Stop** button in the editor to request an interrupt.
+For infinite loops or long-running processes, interruption is only reliable when these two headers are set on your server:
 ```
 'Cross-Origin-Embedder-Policy': 'require-corp'
 'Cross-Origin-Opener-Policy': 'same-origin'
@@ -179,10 +161,32 @@ Stopping an infinite loop or a long lasting process is only possible by refreshi
 
 ```python
 import pygame
-pygame.init()
-screen = pygame.display.set_mode((400, 300))
-screen.fill((0, 128, 255))
-pygame.display.flip()
+import asyncio
+
+async def run_game():
+    fps = 60
+    pygame.init()
+    screen = pygame.display.set_mode((400, 300))
+    r = 0
+    g = 0
+    b = 0
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_r:
+                    r = (r + 50) % 256
+                elif event.key == pygame.K_g:
+                    g = (g + 50) % 256
+                elif event.key == pygame.K_b:
+                    b = (b + 50) % 256
+            elif event.type == pygame.K_ESCAPE or event.type == pygame.QUIT:
+                return
+        screen.fill((r, g, b))
+        pygame.display.flip()
+        await asyncio.sleep(1 / fps)
+
+asyncio.run(run_game())
 ```
 
 :::
