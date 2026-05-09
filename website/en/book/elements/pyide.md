@@ -172,3 +172,17 @@ Stopping an infinite loop or a long lasting process is only possible by refreshi
 'Cross-Origin-Opener-Policy': 'same-origin'
 ```
 :::
+
+## Pygame
+
+:::pyide{canvas}
+
+```python
+import pygame
+pygame.init()
+screen = pygame.display.set_mode((400, 300))
+screen.fill((0, 128, 255))
+pygame.display.flip()
+```
+
+:::
