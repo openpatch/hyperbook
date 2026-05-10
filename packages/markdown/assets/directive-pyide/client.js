@@ -171,7 +171,12 @@ hyperbook.python = (function () {
 
     const unProxy = (obj) => {
       if (typeof obj === "object" && obj !== null && typeof obj.toJs === "function") {
-        return obj.toJs({ pyproxies: [] });
+        try {
+          return obj.toJs({ pyproxies: [] });
+        } catch (e) {
+          console.error("Error converting PyProxy:", e);
+          return obj;
+        }
       }
       return obj;
     };
@@ -434,40 +439,50 @@ hyperbook.python = (function () {
       );
     };
 
-    return {
+     return {
       js_graphic_size: (specs) => {
-        const unproxiedSpecs = unProxy(specs);
-        const graphic = buildGraphic(unproxiedSpecs);
-        return { width: graphic.width, height: graphic.height };
+        try {
+          const unproxiedSpecs = unProxy(specs);
+          const graphic = buildGraphic(unproxiedSpecs);
+          return { width: graphic.width, height: graphic.height };
+        } catch (e) {
+          console.error("js_graphic_size error:", e);
+          throw e;
+        }
       },
       js_render_graphic: (specs, scalingFactor, debug) => {
-        const unproxiedSpecs = unProxy(specs);
-        const graphic = buildGraphic(unproxiedSpecs);
-        const width = Math.max(1, Math.ceil(graphic.width));
-        const height = Math.max(1, Math.ceil(graphic.height));
-        const scale = Math.max(1, Number(scalingFactor) || 1);
-        const canvas = document.createElement("canvas");
-        canvas.width = Math.max(1, Math.ceil(width * scale));
-        canvas.height = Math.max(1, Math.ceil(height * scale));
-        const ctx = canvas.getContext("2d");
-        ctx.scale(scale, scale);
-        ctx.translate(width / 2, height / 2);
-        graphic.draw(ctx);
+        try {
+          const unproxiedSpecs = unProxy(specs);
+          const graphic = buildGraphic(unproxiedSpecs);
+          const width = Math.max(1, Math.ceil(graphic.width));
+          const height = Math.max(1, Math.ceil(graphic.height));
+          const scale = Math.max(1, Number(scalingFactor) || 1);
+          const canvas = document.createElement("canvas");
+          canvas.width = Math.max(1, Math.ceil(width * scale));
+          canvas.height = Math.max(1, Math.ceil(height * scale));
+          const ctx = canvas.getContext("2d");
+          ctx.scale(scale, scale);
+          ctx.translate(width / 2, height / 2);
+          graphic.draw(ctx);
 
-        if (debug) {
-          ctx.strokeStyle = "red";
-          ctx.lineWidth = 1 / scale;
-          ctx.strokeRect(-width / 2, -height / 2, width, height);
-          ctx.strokeStyle = "rgba(255, 255, 0, 0.8)";
-          ctx.beginPath();
-          ctx.moveTo(graphic.pin.x - 8, graphic.pin.y);
-          ctx.lineTo(graphic.pin.x + 8, graphic.pin.y);
-          ctx.moveTo(graphic.pin.x, graphic.pin.y - 8);
-          ctx.lineTo(graphic.pin.x, graphic.pin.y + 8);
-          ctx.stroke();
+          if (debug) {
+            ctx.strokeStyle = "red";
+            ctx.lineWidth = 1 / scale;
+            ctx.strokeRect(-width / 2, -height / 2, width, height);
+            ctx.strokeStyle = "rgba(255, 255, 0, 0.8)";
+            ctx.beginPath();
+            ctx.moveTo(graphic.pin.x - 8, graphic.pin.y);
+            ctx.lineTo(graphic.pin.x + 8, graphic.pin.y);
+            ctx.moveTo(graphic.pin.x, graphic.pin.y - 8);
+            ctx.lineTo(graphic.pin.x, graphic.pin.y + 8);
+            ctx.stroke();
+          }
+
+          return canvas.toDataURL("image/png");
+        } catch (e) {
+          console.error("js_render_graphic error:", e);
+          throw e;
         }
-
-        return canvas.toDataURL("image/png");
       },
       js_save: (filename, content) => {
         const link = document.createElement("a");
