@@ -26,6 +26,18 @@ function htmlEntities(str: string) {
     .replace(/"/g, "&quot;");
 }
 
+function parsePackagesAttribute(value: unknown): string[] {
+  if (typeof value !== "string") return [];
+  return Array.from(
+    new Set(
+      value
+        .split(",")
+        .map((pkg) => pkg.trim())
+        .filter((pkg) => pkg.length > 0),
+    ),
+  );
+}
+
 export default (ctx: HyperbookContext) => () => {
   const name = "pyide";
   return (tree: Root, file: VFile) => {
@@ -34,8 +46,9 @@ export default (ctx: HyperbookContext) => () => {
         if (node.name !== name) return;
 
         const data = node.data || (node.data = {});
-        const { src = "", id = hash(node) } = node.attributes || {};
+        const { src = "", id = hash(node), packages } = node.attributes || {};
         const hasCanvas = "canvas" in (node.attributes || {});
+        const packageList = parsePackagesAttribute(packages);
 
         expectContainerDirective(node, file, name);
         registerDirective(file, name, ["client.js"], ["style.css"], []);
@@ -76,6 +89,9 @@ export default (ctx: HyperbookContext) => () => {
           id: id,
           "data-tests": Buffer.from(JSON.stringify(tests)).toString("base64"),
           ...(hasCanvas ? { "data-canvas": "true" } : {}),
+          ...(packageList.length > 0
+            ? { "data-packages": packageList.join(",") }
+            : {}),
         };
         data.hChildren = [
           {
@@ -288,19 +304,6 @@ export default (ctx: HyperbookContext) => () => {
                     type: "element",
                     tagName: "button",
                     properties: {
-                      class: "fullscreen",
-                    },
-                    children: [
-                      {
-                        type: "text",
-                        value: i18n.get("ide-fullscreen-enter"),
-                      },
-                    ],
-                  },
-                  {
-                    type: "element",
-                    tagName: "button",
-                    properties: {
                       class: "reset",
                     },
                     children: [
@@ -333,6 +336,21 @@ export default (ctx: HyperbookContext) => () => {
                       {
                         type: "text",
                         value: i18n.get("pyide-download"),
+                      },
+                    ],
+                  },
+                  {
+                    type: "element",
+                    tagName: "button",
+                    properties: {
+                      class: "fullscreen",
+                      title: i18n.get("ide-fullscreen-enter"),
+                      "aria-label": i18n.get("ide-fullscreen-enter"),
+                    },
+                    children: [
+                      {
+                        type: "text",
+                        value: "⛶",
                       },
                     ],
                   },

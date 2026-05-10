@@ -64,4 +64,21 @@ pygame.init()
       ).value,
     ).toMatchSnapshot();
   });
+
+  it("should transform pyide with packages attribute", async () => {
+    expect(
+      toHtml(
+        `:::pyide{packages="snowballstemmer, nltk"}
+
+\`\`\`python
+import snowballstemmer
+\`\`\`
+
+:::
+
+`,
+        ctx,
+      ).value,
+    ).toMatchSnapshot();
+  });
 });

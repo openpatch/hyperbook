@@ -30,6 +30,20 @@ print(a)
 
 Sie können auch jedes Paket verwenden, das hier aufgeführt ist: https://pyodide.org/en/stable/usage/packages-in-pyodide.html
 
+Wenn Sie Pakete aus PyPI benötigen, verwenden Sie das Attribut `packages` mit einer kommaseparierten Liste. Hyperbook lädt `micropip` und installiert diese Pakete vor der Ausführung Ihres Skripts.
+
+````md
+:::pyide{packages="snowballstemmer"}
+
+```python
+import snowballstemmer
+stemmer = snowballstemmer.stemmer("english")
+print(stemmer.stemWords(["running", "runner", "runs"]))
+```
+
+:::
+````
+
 ````md
 :::pyide
 

@@ -241,7 +241,9 @@
 
 .directive-pyide button.fullscreen {
   flex: 0 0 auto;
-  min-width: 120px;
+  min-width: 42px;
+  width: 42px;
+  padding: 8px 0;
 }
 
 .directive-pyide button.stop {

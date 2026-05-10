@@ -34,6 +34,20 @@ print(a)
 
 You can also use any package listed here: https://pyodide.org/en/stable/usage/packages-in-pyodide.html
 
+If you need packages from PyPI, use the `packages` attribute with a comma-separated list. Hyperbook loads `micropip` and installs these packages before executing your script.
+
+````md
+:::pyide{packages="snowballstemmer"}
+
+```python
+import snowballstemmer
+stemmer = snowballstemmer.stemmer("english")
+print(stemmer.stemWords(["running", "runner", "runs"]))
+```
+
+:::
+````
+
 ````md
 :::pyide
 
@@ -187,6 +201,30 @@ async def run_game():
         await asyncio.sleep(1 / fps)
 
 asyncio.run(run_game())
+```
+
+:::
+
+## Pytamato
+
+:::pyide{canvas packages="pytamaro"}
+
+```python
+from pytamaro import *
+
+block_size = 25
+num_blocks = 16
+line = empty_graphic()
+for col in range(num_blocks):
+    if col % 2 == 0:
+        color = black
+    else:
+        color = white
+    block = rectangle(block_size, block_size, color)
+    line = beside(line, block)
+second_line = rotate(180, line)
+finish_line = above(line, second_line)
+show_graphic(finish_line)
 ```
 
 :::

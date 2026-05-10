@@ -293,11 +293,13 @@ export default (ctx: HyperbookContext) => () => {
           tagName: "button",
           properties: {
             class: "fullscreen",
+            title: i18n.get("ide-fullscreen-enter"),
+            "aria-label": i18n.get("ide-fullscreen-enter"),
           },
           children: [
             {
               type: "text",
-              value: i18n.get("ide-fullscreen-enter"),
+              value: "⛶",
             },
           ],
         });
@@ -449,7 +451,6 @@ export default (ctx: HyperbookContext) => () => {
                     class: "buttons bottom",
                   },
                   children: [
-                    createFullscreenButton(),
                     {
                       type: "element",
                       tagName: "button",
@@ -465,6 +466,7 @@ export default (ctx: HyperbookContext) => () => {
                     },
                     downloadProjectButton,
                     downloadButton,
+                    createFullscreenButton(),
                   ],
                 },
               ],
@@ -480,7 +482,7 @@ export default (ctx: HyperbookContext) => () => {
               properties: {
                 class: "buttons bottom",
               },
-              children: [createFullscreenButton(), downloadProjectButton, downloadButton],
+              children: [downloadProjectButton, downloadButton],
             },
             {
               type: "element",

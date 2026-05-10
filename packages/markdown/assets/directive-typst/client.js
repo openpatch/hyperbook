@@ -1218,10 +1218,10 @@ hyperbook.typst = (function () {
   const updateFullscreenButtonState = (elem, button) => {
     if (!elem || !button) return;
     const isFullscreen = document.fullscreenElement === elem;
-    button.textContent = i18nGet(
-      isFullscreen ? 'ide-fullscreen-exit' : 'ide-fullscreen-enter',
-      isFullscreen ? 'Exit Fullscreen' : 'Fullscreen',
-    );
+    const label = i18nGet('ide-fullscreen-enter', 'Fullscreen');
+    button.textContent = '⛶';
+    button.title = label;
+    button.setAttribute('aria-label', label);
     button.classList.toggle('active', isFullscreen);
   };
 
@@ -1268,6 +1268,7 @@ hyperbook.typst = (function () {
       this.splitter = elem.querySelector('.splitter');
       this.sourceTextarea = elem.querySelector('.typst-source');
       this.fullscreenBtn = elem.querySelector('.fullscreen');
+      this.editorInitialized = false;
 
       setupSplitter(this.elem, this.previewContainer, this.editorContainer, this.splitter);
 
@@ -1319,8 +1320,9 @@ hyperbook.typst = (function () {
      */
     async initialize() {
       if (this.editor) {
-        // Edit mode - wait for code-input to load
-        this.editor.addEventListener('code-input_load', async () => {
+        const initializeEditor = async () => {
+          if (this.editorInitialized) return;
+          this.editorInitialized = true;
           await this.restoreState();
           this.uiManager.updateTabs();
           this.uiManager.updateBinaryFilesList();
@@ -1333,7 +1335,13 @@ hyperbook.typst = (function () {
             this.saveState();
             debouncedRerender();
           });
-        });
+        };
+
+        // Edit mode - wait for code-input to load (or initialize immediately if already ready)
+        this.editor.addEventListener('code-input_load', initializeEditor);
+        if (this.editor.querySelector('textarea')) {
+          await initializeEditor();
+        }
       } else if (this.sourceTextarea) {
         // Preview mode
         const initialCode = this.sourceTextarea.value;
@@ -1359,7 +1367,7 @@ hyperbook.typst = (function () {
       const result = await window.store?.typst?.get(this.id);
       
       if (result) {
-        this.editor.value = result.code;
+        this.setEditorValue(result.code || this.fileManager.getCurrentContent());
 
         if (result.sourceFiles) {
           this.fileManager.sourceFiles = result.sourceFiles;
@@ -1378,11 +1386,11 @@ hyperbook.typst = (function () {
           );
           if (file) {
             this.fileManager.currentFile = file;
-            this.editor.value = this.fileManager.getCurrentContent();
+            this.setEditorValue(this.fileManager.getCurrentContent());
           }
         }
       } else {
-        this.editor.value = this.fileManager.getCurrentContent();
+        this.setEditorValue(this.fileManager.getCurrentContent());
       }
     }
 
@@ -1392,11 +1400,11 @@ hyperbook.typst = (function () {
     async saveState() {
       if (!this.editor) return;
 
-      this.fileManager.updateCurrentContent(this.editor.value);
+      this.fileManager.updateCurrentContent(this.getEditorValue());
 
       await window.store?.typst?.put({
         id: this.id,
-        code: this.editor.value,
+        code: this.getEditorValue(),
         sourceFiles: this.fileManager.getSourceFiles(),
         binaryFiles: this.binaryFiles,
         currentFile: this.fileManager.currentFile.filename,
@@ -1409,7 +1417,7 @@ hyperbook.typst = (function () {
     rerender() {
       if (!this.editor) return;
 
-      this.fileManager.updateCurrentContent(this.editor.value);
+      this.fileManager.updateCurrentContent(this.getEditorValue());
 
       const mainFile = this.fileManager.findMainFile();
       const mainCode = mainFile 
@@ -1436,9 +1444,9 @@ hyperbook.typst = (function () {
      */
     handleFileSwitch(filename) {
       if (this.editor) {
-        this.fileManager.updateCurrentContent(this.editor.value);
+        this.fileManager.updateCurrentContent(this.getEditorValue());
         const content = this.fileManager.switchTo(filename);
-        this.editor.value = content;
+        this.setEditorValue(content);
         this.uiManager.updateTabs();
         this.saveState();
       }
@@ -1449,7 +1457,7 @@ hyperbook.typst = (function () {
      */
     handleFilesChange() {
       if (this.editor) {
-        this.editor.value = this.fileManager.getCurrentContent();
+        this.setEditorValue(this.fileManager.getCurrentContent());
       }
       this.saveState();
       this.rerender();
@@ -1487,7 +1495,7 @@ hyperbook.typst = (function () {
       }
 
       if (this.editor) {
-        this.editor.value = this.fileManager.getCurrentContent();
+        this.setEditorValue(this.fileManager.getCurrentContent());
       }
 
       this.uiManager.updateTabs();
@@ -1561,7 +1569,7 @@ hyperbook.typst = (function () {
      */
     async handleExportProject() {
       const mainFile = this.fileManager.findMainFile();
-      const code = mainFile ? mainFile.content : (this.editor ? this.editor.value : '');
+      const code = mainFile ? mainFile.content : this.getEditorValue();
 
       await this.exporter.export({
         code,
@@ -1593,6 +1601,32 @@ hyperbook.typst = (function () {
         await toggleFullscreen(this.elem);
       } catch (error) {
         console.error(error.message);
+      }
+    }
+
+    getEditorValue() {
+      if (!this.editor) return '';
+      const textarea = this.editor.querySelector('textarea');
+      if (textarea) return textarea.value;
+      try {
+        if (typeof this.editor.value === 'string') {
+          return this.editor.value;
+        }
+      } catch (e) {}
+      return this.editor.textContent || '';
+    }
+
+    setEditorValue(value) {
+      if (!this.editor) return;
+      const normalizedValue = value ?? '';
+      const textarea = this.editor.querySelector('textarea');
+      if (textarea) {
+        textarea.value = normalizedValue;
+      }
+      try {
+        this.editor.value = normalizedValue;
+      } catch (e) {
+        this.editor.textContent = normalizedValue;
       }
     }
   }

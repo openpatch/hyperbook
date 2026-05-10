@@ -178,19 +178,6 @@ ${(code.scripts ? [cdnLibraryUrl, ...code.scripts] : []).map((src) => `<script t
                           type: "element",
                           tagName: "button",
                           properties: {
-                            class: "fullscreen",
-                          },
-                          children: [
-                            {
-                              type: "text",
-                              value: i18n.get("ide-fullscreen-enter"),
-                            },
-                          ],
-                        },
-                        {
-                          type: "element",
-                          tagName: "button",
-                          properties: {
                             class: "update",
                           },
                           children: [
@@ -259,6 +246,21 @@ ${(code.scripts ? [cdnLibraryUrl, ...code.scripts] : []).map((src) => `<script t
                             {
                               type: "text",
                               value: i18n.get("p5-download"),
+                            },
+                          ],
+                        },
+                        {
+                          type: "element",
+                          tagName: "button",
+                          properties: {
+                            class: "fullscreen",
+                            title: i18n.get("ide-fullscreen-enter"),
+                            "aria-label": i18n.get("ide-fullscreen-enter"),
+                          },
+                          children: [
+                            {
+                              type: "text",
+                              value: "⛶",
                             },
                           ],
                         },

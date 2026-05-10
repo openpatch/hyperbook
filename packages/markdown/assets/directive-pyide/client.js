@@ -41,6 +41,10 @@ hyperbook.python = (function () {
    * @type {Map<string, any>}
    */
   const runtimes = new Map();
+  /**
+   * @type {Map<string, Set<string>>}
+   */
+  const installedMicropipPackages = new Map();
 
   /**
    * @type {Map<string, { running: boolean, stopping: boolean, stopRequested: boolean, type: "run" | "test" | null }>}
@@ -69,6 +73,9 @@ hyperbook.python = (function () {
     }
     const loadPyodide = await pyodideReadyPromise;
     const pyodide = await loadPyodide();
+    if (typeof pyodide.registerJsModule === "function") {
+      pyodide.registerJsModule("pytamaro_js_ffi", createPytamaroJsFFI());
+    }
     if (
       typeof SharedArrayBuffer !== "undefined" &&
       window.crossOriginIsolated &&
@@ -116,9 +123,10 @@ hyperbook.python = (function () {
   const updateFullscreenButtonState = (elem, button) => {
     if (!elem || !button) return;
     const isFullscreen = document.fullscreenElement === elem;
-    button.textContent = hyperbook.i18n.get(
-      isFullscreen ? "ide-fullscreen-exit" : "ide-fullscreen-enter",
-    );
+    const label = hyperbook.i18n.get("ide-fullscreen-enter");
+    button.textContent = "⛶";
+    button.title = label;
+    button.setAttribute("aria-label", label);
     button.classList.toggle("active", isFullscreen);
   };
 
@@ -157,7 +165,341 @@ hyperbook.python = (function () {
     context?.clearRect(0, 0, canvas.width, canvas.height);
   };
 
-  const executeScript = async (id, script, context = {}) => {
+  const createPytamaroJsFFI = () => {
+    const floatBuffer = new ArrayBuffer(4);
+    const floatView = new DataView(floatBuffer);
+
+    const unProxy = (obj) => {
+      if (typeof obj === "object" && obj !== null && typeof obj.toJs === "function") {
+        return obj.toJs({ pyproxies: [] });
+      }
+      return obj;
+    };
+
+    const uint32ToFloat = (u32) => {
+      floatView.setUint32(0, u32 >>> 0, false);
+      return floatView.getFloat32(0, false);
+    };
+
+    const decodePoint = (value, width, height) => {
+      const packed = typeof value === "bigint" ? value : BigInt(value || 0);
+      const x = uint32ToFloat(Number((packed >> 32n) & 0xffffffffn));
+      const y = uint32ToFloat(Number(packed & 0xffffffffn));
+      return { x: x * width * 0.5, y: -y * height * 0.5 };
+    };
+
+    const colorToCss = (value) => {
+      const argb =
+        typeof value === "bigint"
+          ? Number(value & 0xffffffffn)
+          : Number(value >>> 0);
+      const a = ((argb >> 24) & 0xff) / 255;
+      const r = (argb >> 16) & 0xff;
+      const g = (argb >> 8) & 0xff;
+      const b = argb & 0xff;
+      return `rgba(${r}, ${g}, ${b}, ${a})`;
+    };
+
+    const rotatePoint = (point, pivot, angleRad) => {
+      const dx = point.x - pivot.x;
+      const dy = point.y - pivot.y;
+      const cos = Math.cos(angleRad);
+      const sin = Math.sin(angleRad);
+      return {
+        x: pivot.x + dx * cos - dy * sin,
+        y: pivot.y + dx * sin + dy * cos,
+      };
+    };
+
+    const buildGraphic = (specs) => {
+      const stack = [];
+      const measureCanvas = document.createElement("canvas");
+      const measureCtx = measureCanvas.getContext("2d");
+
+      for (const spec of specs || []) {
+        if (!spec || typeof spec !== "object") continue;
+        const type = spec.t;
+        if (
+          type === "Empty" ||
+          type === "Rectangle" ||
+          type === "Ellipse" ||
+          type === "CircularSector" ||
+          type === "Triangle" ||
+          type === "Text"
+        ) {
+          let width = 0;
+          let height = 0;
+          let pin = { x: 0, y: 0 };
+          let draw = () => {};
+
+          if (type === "Rectangle") {
+            width = Math.max(0, Number(spec.width) || 0);
+            height = Math.max(0, Number(spec.height) || 0);
+            const fill = colorToCss(spec.color);
+            draw = (ctx) => {
+              ctx.fillStyle = fill;
+              ctx.fillRect(-width / 2, -height / 2, width, height);
+            };
+          } else if (type === "Ellipse") {
+            width = Math.max(0, Number(spec.width) || 0);
+            height = Math.max(0, Number(spec.height) || 0);
+            const fill = colorToCss(spec.color);
+            draw = (ctx) => {
+              ctx.beginPath();
+              ctx.ellipse(0, 0, width / 2, height / 2, 0, 0, 2 * Math.PI);
+              ctx.fillStyle = fill;
+              ctx.fill();
+            };
+          } else if (type === "CircularSector") {
+            const radius = Math.max(0, Number(spec.radius) || 0);
+            const angle = Number(spec.angle) || 0;
+            width = radius * 2;
+            height = radius * 2;
+            const fill = colorToCss(spec.color);
+            draw = (ctx) => {
+              ctx.beginPath();
+              ctx.moveTo(0, 0);
+              ctx.arc(0, 0, radius, 0, (-angle * Math.PI) / 180, true);
+              ctx.closePath();
+              ctx.fillStyle = fill;
+              ctx.fill();
+            };
+          } else if (type === "Triangle") {
+            const side1 = Math.max(0, Number(spec.side1) || 0);
+            const side2 = Math.max(0, Number(spec.side2) || 0);
+            const angle = (Number(spec.angle) || 0) * (Math.PI / 180);
+            const p1 = { x: 0, y: 0 };
+            const p2 = { x: side1, y: 0 };
+            const p3 = { x: side2 * Math.cos(angle), y: -side2 * Math.sin(angle) };
+            const centroid = {
+              x: (p1.x + p2.x + p3.x) / 3,
+              y: (p1.y + p2.y + p3.y) / 3,
+            };
+            const points = [p1, p2, p3].map((p) => ({
+              x: p.x - centroid.x,
+              y: p.y - centroid.y,
+            }));
+            const xs = points.map((p) => p.x);
+            const ys = points.map((p) => p.y);
+            width = Math.max(...xs) - Math.min(...xs);
+            height = Math.max(...ys) - Math.min(...ys);
+            const fill = colorToCss(spec.color);
+            draw = (ctx) => {
+              ctx.beginPath();
+              ctx.moveTo(points[0].x, points[0].y);
+              ctx.lineTo(points[1].x, points[1].y);
+              ctx.lineTo(points[2].x, points[2].y);
+              ctx.closePath();
+              ctx.fillStyle = fill;
+              ctx.fill();
+            };
+          } else if (type === "Text") {
+            const text = String(spec.text || "");
+            const fontName = String(spec.font_name || "sans-serif");
+            const textSize = Math.max(1, Number(spec.text_size) || 1);
+            const fill = colorToCss(spec.color);
+            measureCtx.font = `${textSize}px ${fontName}`;
+            const metrics = measureCtx.measureText(text);
+            width = Math.max(0, metrics.width || 0);
+            const ascent = metrics.actualBoundingBoxAscent || textSize * 0.8;
+            const descent = metrics.actualBoundingBoxDescent || textSize * 0.2;
+            height = ascent + descent;
+            pin = { x: -width / 2, y: (ascent - descent) / 2 };
+            draw = (ctx) => {
+              ctx.fillStyle = fill;
+              ctx.font = `${textSize}px ${fontName}`;
+              ctx.textAlign = "left";
+              ctx.textBaseline = "alphabetic";
+              const centerY = (descent - ascent) / 2;
+              ctx.fillText(text, -width / 2, -centerY);
+            };
+          }
+
+          stack.push({ width, height, pin, draw });
+          continue;
+        }
+
+        if (type === "Pin") {
+          const child = stack.pop();
+          if (!child) continue;
+          const pin = decodePoint(spec.pin, child.width, child.height);
+          stack.push({ ...child, pin });
+          continue;
+        }
+
+        if (type === "Rotate") {
+          const child = stack.pop();
+          if (!child) continue;
+          const angleDeg = Number(spec.angle) || 0;
+          const angleRad = (-angleDeg * Math.PI) / 180;
+          const corners = [
+            { x: -child.width / 2, y: -child.height / 2 },
+            { x: child.width / 2, y: -child.height / 2 },
+            { x: child.width / 2, y: child.height / 2 },
+            { x: -child.width / 2, y: child.height / 2 },
+          ].map((p) => rotatePoint(p, child.pin, angleRad));
+          const minX = Math.min(...corners.map((p) => p.x));
+          const maxX = Math.max(...corners.map((p) => p.x));
+          const minY = Math.min(...corners.map((p) => p.y));
+          const maxY = Math.max(...corners.map((p) => p.y));
+          const center = { x: (minX + maxX) / 2, y: (minY + maxY) / 2 };
+          const offset = { x: -center.x, y: -center.y };
+          const pin = { x: child.pin.x + offset.x, y: child.pin.y + offset.y };
+
+          stack.push({
+            width: maxX - minX,
+            height: maxY - minY,
+            pin,
+            draw: (ctx) => {
+              ctx.save();
+              ctx.translate(offset.x, offset.y);
+              ctx.translate(child.pin.x, child.pin.y);
+              ctx.rotate(angleRad);
+              ctx.translate(-child.pin.x, -child.pin.y);
+              child.draw(ctx);
+              ctx.restore();
+            },
+          });
+          continue;
+        }
+
+        if (type === "Compose") {
+          const bg = stack.pop();
+          const fg = stack.pop();
+          if (!fg || !bg) continue;
+          const fgPin = spec.fg_pin
+            ? decodePoint(spec.fg_pin, fg.width, fg.height)
+            : fg.pin;
+          const bgPin = spec.bg_pin
+            ? decodePoint(spec.bg_pin, bg.width, bg.height)
+            : bg.pin;
+
+          const bgCenter = { x: 0, y: 0 };
+          const fgCenter = { x: bgPin.x - fgPin.x, y: bgPin.y - fgPin.y };
+          const minX = Math.min(
+            fgCenter.x - fg.width / 2,
+            bgCenter.x - bg.width / 2,
+          );
+          const maxX = Math.max(
+            fgCenter.x + fg.width / 2,
+            bgCenter.x + bg.width / 2,
+          );
+          const minY = Math.min(
+            fgCenter.y - fg.height / 2,
+            bgCenter.y - bg.height / 2,
+          );
+          const maxY = Math.max(
+            fgCenter.y + fg.height / 2,
+            bgCenter.y + bg.height / 2,
+          );
+
+          const center = { x: (minX + maxX) / 2, y: (minY + maxY) / 2 };
+          const fgOffset = {
+            x: fgCenter.x - center.x,
+            y: fgCenter.y - center.y,
+          };
+          const bgOffset = {
+            x: bgCenter.x - center.x,
+            y: bgCenter.y - center.y,
+          };
+          const pin = spec.pin
+            ? decodePoint(spec.pin, maxX - minX, maxY - minY)
+            : { x: bgPin.x - center.x, y: bgPin.y - center.y };
+
+          stack.push({
+            width: maxX - minX,
+            height: maxY - minY,
+            pin,
+            draw: (ctx) => {
+              ctx.save();
+              ctx.translate(bgOffset.x, bgOffset.y);
+              bg.draw(ctx);
+              ctx.restore();
+              ctx.save();
+              ctx.translate(fgOffset.x, fgOffset.y);
+              fg.draw(ctx);
+              ctx.restore();
+            },
+          });
+        }
+      }
+
+      return (
+        stack[stack.length - 1] || {
+          width: 0,
+          height: 0,
+          pin: { x: 0, y: 0 },
+          draw: () => {},
+        }
+      );
+    };
+
+    return {
+      js_graphic_size: (specs) => {
+        const unproxiedSpecs = unProxy(specs);
+        const graphic = buildGraphic(unproxiedSpecs);
+        return { width: graphic.width, height: graphic.height };
+      },
+      js_render_graphic: (specs, scalingFactor, debug) => {
+        const unproxiedSpecs = unProxy(specs);
+        const graphic = buildGraphic(unproxiedSpecs);
+        const width = Math.max(1, Math.ceil(graphic.width));
+        const height = Math.max(1, Math.ceil(graphic.height));
+        const scale = Math.max(1, Number(scalingFactor) || 1);
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.max(1, Math.ceil(width * scale));
+        canvas.height = Math.max(1, Math.ceil(height * scale));
+        const ctx = canvas.getContext("2d");
+        ctx.scale(scale, scale);
+        ctx.translate(width / 2, height / 2);
+        graphic.draw(ctx);
+
+        if (debug) {
+          ctx.strokeStyle = "red";
+          ctx.lineWidth = 1 / scale;
+          ctx.strokeRect(-width / 2, -height / 2, width, height);
+          ctx.strokeStyle = "rgba(255, 255, 0, 0.8)";
+          ctx.beginPath();
+          ctx.moveTo(graphic.pin.x - 8, graphic.pin.y);
+          ctx.lineTo(graphic.pin.x + 8, graphic.pin.y);
+          ctx.moveTo(graphic.pin.x, graphic.pin.y - 8);
+          ctx.lineTo(graphic.pin.x, graphic.pin.y + 8);
+          ctx.stroke();
+        }
+
+        return canvas.toDataURL("image/png");
+      },
+      js_save: (filename, content) => {
+        const link = document.createElement("a");
+        link.href = String(content || "");
+        link.download = String(filename || "graphic.png");
+        link.click();
+      },
+    };
+  };
+
+  const ensureMicropipPackages = async (id, pyodide, packages = []) => {
+    if (packages.length === 0) return;
+    if (!installedMicropipPackages.has(id)) {
+      installedMicropipPackages.set(id, new Set());
+    }
+    const installed = installedMicropipPackages.get(id);
+    const toInstall = packages.filter((pkg) => !installed.has(pkg));
+    if (toInstall.length === 0) return;
+
+    await pyodide.loadPackage("micropip");
+    const micropip = pyodide.pyimport("micropip");
+    try {
+      for (const pkg of toInstall) {
+        await micropip.install(pkg);
+        installed.add(pkg);
+      }
+    } finally {
+      micropip?.destroy?.();
+    }
+  };
+
+  const executeScript = async (id, script, context = {}, packages = []) => {
     const filename = "<exec>";
     try {
       const pyodide = await getRuntime(id);
@@ -188,6 +530,7 @@ hyperbook.python = (function () {
         batched: (msg) => appendOutputErrorLine(id, msg),
       });
 
+      await ensureMicropipPackages(id, pyodide, packages);
       await pyodide.loadPackagesFromImports(script);
       const dict = pyodide.globals.get("dict");
       const globals = dict();
@@ -552,6 +895,14 @@ hyperbook.python = (function () {
 
       const id = elem.id;
       const hasCanvas = elem.getAttribute("data-canvas") === "true";
+      const additionalPackages = Array.from(
+        new Set(
+          (elem.getAttribute("data-packages") || "")
+            .split(",")
+            .map((pkg) => pkg.trim())
+            .filter((pkg) => pkg.length > 0),
+        ),
+      );
       let pyideState = { id };
 
       const getEditorValue = () => {
@@ -768,7 +1119,12 @@ hyperbook.python = (function () {
             heading.classList.add("test-heading");
             output.appendChild(heading);
 
-            const { results, error } = await executeScript(id, testCode, {});
+            const { results, error } = await executeScript(
+              id,
+              testCode,
+              {},
+              additionalPackages,
+            );
             if (results) {
               appendOutput(output, results);
             } else if (error) {
@@ -809,7 +1165,7 @@ hyperbook.python = (function () {
         try {
           const { results, error } = await executeScript(id, script, {
             ...(hasCanvas && canvas ? { canvas } : {}),
-          });
+          }, additionalPackages);
           if (!state.stopRequested) {
             if (results) {
               appendOutput(output, results);
