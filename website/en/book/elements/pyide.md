@@ -205,9 +205,9 @@ asyncio.run(run_game())
 
 :::
 
-## Pytamato
+## Pytamaro
 
-:::pyide{canvas packages="pytamaro"}
+:::pyide{packages="pytamaro"}
 
 ```python
 from pytamaro import *

@@ -89,13 +89,51 @@ hyperbook.python = (function () {
     return pyodide;
   };
 
+  const PYTAMARO_URI_BEGIN = "@@@PYTAMARO_DATA_URI_BEGIN@@@";
+  const PYTAMARO_URI_END = "@@@PYTAMARO_DATA_URI_END@@@";
+
   const getOutput = (id) => {
     return document.getElementById(id)?.getElementsByClassName("output")[0];
+  };
+
+  /**
+   * Renders a message that may contain pytamaro data URI image markers into
+   * the given container, creating <img> elements for each embedded image.
+   */
+  const renderOutputSegments = (container, message) => {
+    let remaining = String(message);
+    while (remaining.length > 0) {
+      const beginIdx = remaining.indexOf(PYTAMARO_URI_BEGIN);
+      if (beginIdx === -1) {
+        container.appendChild(document.createTextNode(remaining));
+        break;
+      }
+      if (beginIdx > 0) {
+        container.appendChild(document.createTextNode(remaining.slice(0, beginIdx)));
+      }
+      const afterBegin = remaining.slice(beginIdx + PYTAMARO_URI_BEGIN.length);
+      const endIdx = afterBegin.indexOf(PYTAMARO_URI_END);
+      if (endIdx === -1) {
+        container.appendChild(document.createTextNode(remaining.slice(beginIdx)));
+        break;
+      }
+      const dataUri = afterBegin.slice(0, endIdx);
+      const img = document.createElement("img");
+      img.src = dataUri;
+      img.style.maxWidth = "100%";
+      img.style.display = "block";
+      container.appendChild(img);
+      remaining = afterBegin.slice(endIdx + PYTAMARO_URI_END.length);
+    }
   };
 
   const appendOutputLine = (id, message) => {
     const output = getOutput(id);
     if (!output) return;
+    if (message.includes(PYTAMARO_URI_BEGIN)) {
+      renderOutputSegments(output, message);
+      return;
+    }
     output.appendChild(document.createTextNode(message + "\n"));
   };
 
@@ -117,7 +155,12 @@ hyperbook.python = (function () {
       output.appendChild(line);
       return;
     }
-    output.appendChild(document.createTextNode(String(message)));
+    const msg = String(message);
+    if (msg.includes(PYTAMARO_URI_BEGIN)) {
+      renderOutputSegments(output, msg);
+      return;
+    }
+    output.appendChild(document.createTextNode(msg));
   };
 
   const updateFullscreenButtonState = (elem, button) => {
@@ -172,7 +215,7 @@ hyperbook.python = (function () {
     const unProxy = (obj) => {
       if (typeof obj === "object" && obj !== null && typeof obj.toJs === "function") {
         try {
-          return obj.toJs({ pyproxies: [] });
+          return obj.toJs({ pyproxies: [], dict_converter: Object.fromEntries });
         } catch (e) {
           console.error("Error converting PyProxy:", e);
           return obj;
