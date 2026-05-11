@@ -1032,6 +1032,12 @@ hyperbook.python = (function () {
             .filter((pkg) => pkg.length > 0),
         ),
       );
+      const hasPytamaroPackage = additionalPackages.some(
+        (pkg) => pkg.toLowerCase() === "pytamaro",
+      );
+      const scriptLooksLikePytamaro = (script) => {
+        return /\bfrom\s+pytamaro\s+import\b|\bimport\s+pytamaro\b/.test(script);
+      };
       let pyideState = { id };
 
       const getEditorValue = () => {
@@ -1276,7 +1282,9 @@ hyperbook.python = (function () {
       });
 
       run?.addEventListener("click", async () => {
-        if (hasCanvas) {
+        const script = getEditorValue();
+        const useOutputForPytamaro = hasPytamaroPackage || scriptLooksLikePytamaro(script);
+        if (hasCanvas && !useOutputForPytamaro) {
           showCanvas();
         } else {
           showOutput();
@@ -1291,12 +1299,11 @@ hyperbook.python = (function () {
         if (interruptBuffer) interruptBuffer[0] = 0;
         updateRunning();
 
-        const script = getEditorValue();
         output.innerHTML = "";
         clearPytamaroStdoutCarry(id);
         try {
           const { results, error } = await executeScript(id, script, {
-            ...(hasCanvas && canvas ? { canvas } : {}),
+            ...(hasCanvas && canvas && !useOutputForPytamaro ? { canvas } : {}),
           }, additionalPackages);
           if (!state.stopRequested) {
             if (results) {
