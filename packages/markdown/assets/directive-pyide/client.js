@@ -154,7 +154,7 @@ hyperbook.python = (function () {
     let combined = carry + msg;
     pytamaroStdoutCarry.delete(id);
 
-    // Fast path for regular stdout lines, preserving legacy newline behavior.
+    // Fast path for regular stdout chunks.
     if (!combined.includes(PYTAMARO_URI_BEGIN) && carry.length === 0) {
       const partialBeginLength = getTrailingPrefixLength(combined, PYTAMARO_URI_BEGIN);
       if (partialBeginLength > 0) {
@@ -162,7 +162,7 @@ hyperbook.python = (function () {
         appendText(output, visible);
         pytamaroStdoutCarry.set(id, combined.slice(combined.length - partialBeginLength));
       } else {
-        appendText(output, combined + "\n");
+        appendText(output, combined);
       }
       return;
     }
@@ -175,8 +175,6 @@ hyperbook.python = (function () {
         appendText(output, visible);
         if (partialBeginLength > 0) {
           pytamaroStdoutCarry.set(id, combined.slice(combined.length - partialBeginLength));
-        } else {
-          appendText(output, "\n");
         }
         break;
       }
@@ -205,7 +203,7 @@ hyperbook.python = (function () {
     if (!output) return;
     const line = document.createElement("span");
     line.classList.add("error-line");
-    line.textContent = message + "\n";
+    line.textContent = String(message);
     output.appendChild(line);
   };
 
@@ -629,6 +627,7 @@ hyperbook.python = (function () {
     try {
       const pyodide = await getRuntime(id);
       const { canvas, ...globalsContext } = context;
+      const decoder = new TextDecoder("utf-8");
 
       if (canvas) {
         try {
@@ -649,10 +648,18 @@ hyperbook.python = (function () {
         },
       });
       pyodide.setStdout({
-        batched: (msg) => appendOutputLine(id, msg),
+        write: (msg) => {
+          const text = typeof msg === "string" ? msg : decoder.decode(msg);
+          appendOutputLine(id, text);
+          return msg?.length ?? text.length;
+        },
       });
       pyodide.setStderr({
-        batched: (msg) => appendOutputErrorLine(id, msg),
+        write: (msg) => {
+          const text = typeof msg === "string" ? msg : decoder.decode(msg);
+          appendOutputErrorLine(id, text);
+          return msg?.length ?? text.length;
+        },
       });
 
       await ensureMicropipPackages(id, pyodide, packages);
