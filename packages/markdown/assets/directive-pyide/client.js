@@ -91,6 +91,10 @@ hyperbook.python = (function () {
 
   const PYTAMARO_URI_BEGIN = "@@@PYTAMARO_DATA_URI_BEGIN@@@";
   const PYTAMARO_URI_END = "@@@PYTAMARO_DATA_URI_END@@@";
+  /**
+   * @type {Map<string, string>}
+   */
+  const pytamaroStdoutCarry = new Map();
 
   const getOutput = (id) => {
     return document.getElementById(id)?.getElementsByClassName("output")[0];
@@ -127,14 +131,73 @@ hyperbook.python = (function () {
     }
   };
 
+  const getTrailingPrefixLength = (text, marker) => {
+    const max = Math.min(text.length, marker.length - 1);
+    for (let len = max; len > 0; len -= 1) {
+      if (text.endsWith(marker.slice(0, len))) {
+        return len;
+      }
+    }
+    return 0;
+  };
+
+  const appendText = (output, text) => {
+    if (!text) return;
+    output.appendChild(document.createTextNode(text));
+  };
+
   const appendOutputLine = (id, message) => {
     const output = getOutput(id);
     if (!output) return;
-    if (message.includes(PYTAMARO_URI_BEGIN)) {
-      renderOutputSegments(output, message);
+    const msg = String(message ?? "");
+    const carry = pytamaroStdoutCarry.get(id) || "";
+    let combined = carry + msg;
+    pytamaroStdoutCarry.delete(id);
+
+    // Fast path for regular stdout lines, preserving legacy newline behavior.
+    if (!combined.includes(PYTAMARO_URI_BEGIN) && carry.length === 0) {
+      const partialBeginLength = getTrailingPrefixLength(combined, PYTAMARO_URI_BEGIN);
+      if (partialBeginLength > 0) {
+        const visible = combined.slice(0, combined.length - partialBeginLength);
+        appendText(output, visible);
+        pytamaroStdoutCarry.set(id, combined.slice(combined.length - partialBeginLength));
+      } else {
+        appendText(output, combined + "\n");
+      }
       return;
     }
-    output.appendChild(document.createTextNode(message + "\n"));
+
+    while (combined.length > 0) {
+      const beginIdx = combined.indexOf(PYTAMARO_URI_BEGIN);
+      if (beginIdx === -1) {
+        const partialBeginLength = getTrailingPrefixLength(combined, PYTAMARO_URI_BEGIN);
+        const visible = combined.slice(0, combined.length - partialBeginLength);
+        appendText(output, visible);
+        if (partialBeginLength > 0) {
+          pytamaroStdoutCarry.set(id, combined.slice(combined.length - partialBeginLength));
+        } else {
+          appendText(output, "\n");
+        }
+        break;
+      }
+
+      appendText(output, combined.slice(0, beginIdx));
+      const afterBegin = combined.slice(beginIdx + PYTAMARO_URI_BEGIN.length);
+      const endIdx = afterBegin.indexOf(PYTAMARO_URI_END);
+      if (endIdx === -1) {
+        // Keep incomplete marker and continue when the next stdout chunk arrives.
+        pytamaroStdoutCarry.set(id, combined.slice(beginIdx));
+        break;
+      }
+
+      const dataUri = afterBegin.slice(0, endIdx);
+      const img = document.createElement("img");
+      img.src = dataUri;
+      img.style.maxWidth = "100%";
+      img.style.display = "block";
+      output.appendChild(img);
+      combined = afterBegin.slice(endIdx + PYTAMARO_URI_END.length);
+    }
   };
 
   const appendOutputErrorLine = (id, message) => {
@@ -161,6 +224,10 @@ hyperbook.python = (function () {
       return;
     }
     output.appendChild(document.createTextNode(msg));
+  };
+
+  const clearPytamaroStdoutCarry = (id) => {
+    pytamaroStdoutCarry.delete(id);
   };
 
   const updateFullscreenButtonState = (elem, button) => {
@@ -754,10 +821,7 @@ hyperbook.python = (function () {
           stop.textContent = hyperbook.i18n.get(
             hasInterrupt ? "pyide-stop" : "pyide-stop-refresh",
           );
-          stop.disabled = !hasRuntime;
-          if (hasRuntime) {
-            stop.addEventListener("click", handleStopClick);
-          }
+          stop.disabled = true;
         }
       }
     }
@@ -1161,6 +1225,7 @@ hyperbook.python = (function () {
         updateRunning();
 
         output.innerHTML = "";
+        clearPytamaroStdoutCarry(id);
 
         const script = getEditorValue();
         try {
@@ -1194,6 +1259,7 @@ hyperbook.python = (function () {
           appendOutput(output, `Error: ${e}`, true);
           console.log(e);
         } finally {
+          clearPytamaroStdoutCarry(id);
           state.running = false;
           state.stopping = false;
           state.type = null;
@@ -1220,6 +1286,7 @@ hyperbook.python = (function () {
 
         const script = getEditorValue();
         output.innerHTML = "";
+        clearPytamaroStdoutCarry(id);
         try {
           const { results, error } = await executeScript(id, script, {
             ...(hasCanvas && canvas ? { canvas } : {}),
@@ -1240,6 +1307,7 @@ hyperbook.python = (function () {
           appendOutput(output, `Error: ${e}`, true);
           console.log(e);
         } finally {
+          clearPytamaroStdoutCarry(id);
           state.running = false;
           state.stopping = false;
           state.type = null;
