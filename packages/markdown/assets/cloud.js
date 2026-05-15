@@ -162,19 +162,32 @@ hyperbook.cloud = (function () {
             // 409 — stale state, force overwrite with current local snapshot.
             // This avoids repeated reload loops and makes sync deterministic.
             console.log("⚠ Stale state detected, overwriting cloud state with local snapshot...");
-            const snapshotResult = await this.sendSnapshot();
-            // FIX: only discard the events we tried to send, not any that
-            // arrived concurrently during the async round-trip
-            this.pendingEvents = this.pendingEvents.slice(eventsToSend.length);
-            this.lastEventId = snapshotResult.lastEventId;
-            localStorage.setItem(
-              LAST_EVENT_ID_KEY,
-              String(this.lastEventId),
-            );
-            this.lastSaveTime = Date.now();
-            this.retryCount = 0;
-            this.updateUI("saved");
-            console.log("✓ Conflict resolved by snapshot overwrite");
+            try {
+              const snapshotResult = await this.sendSnapshot();
+              const snapshotLastEventId =
+                snapshotResult && snapshotResult.lastEventId !== undefined
+                  ? snapshotResult.lastEventId
+                  : 0;
+              // FIX: only discard the events we tried to send, not any that
+              // arrived concurrently during the async round-trip
+              this.pendingEvents = this.pendingEvents.slice(eventsToSend.length);
+              this.lastEventId = snapshotLastEventId;
+              localStorage.setItem(
+                LAST_EVENT_ID_KEY,
+                String(this.lastEventId),
+              );
+              this.lastSaveTime = Date.now();
+              this.retryCount = 0;
+              this.updateUI("saved");
+              console.log("✓ Conflict resolved by snapshot overwrite");
+            } catch (snapshotError) {
+              console.error(
+                "Conflict resolution via snapshot failed:",
+                snapshotError,
+              );
+              this.updateUI("error");
+              this.scheduleRetry();
+            }
             return;
           }
 
@@ -320,15 +333,26 @@ hyperbook.cloud = (function () {
             // Conflict while replaying offline changes — resolve by replacing
             // cloud state with the current local snapshot.
             console.log("⚠ Offline queue conflict, overwriting cloud state...");
-            this.offlineQueue = [];
-            const snapshotResult = await this.sendSnapshot();
-            this.lastEventId = snapshotResult.lastEventId;
-            localStorage.setItem(
-              LAST_EVENT_ID_KEY,
-              String(this.lastEventId),
-            );
-            this.lastSaveTime = Date.now();
-            console.log("✓ Offline conflict resolved by snapshot overwrite");
+            try {
+              const snapshotResult = await this.sendSnapshot();
+              const snapshotLastEventId =
+                snapshotResult && snapshotResult.lastEventId !== undefined
+                  ? snapshotResult.lastEventId
+                  : 0;
+              this.offlineQueue = [];
+              this.lastEventId = snapshotLastEventId;
+              localStorage.setItem(
+                LAST_EVENT_ID_KEY,
+                String(this.lastEventId),
+              );
+              this.lastSaveTime = Date.now();
+              console.log("✓ Offline conflict resolved by snapshot overwrite");
+            } catch (snapshotError) {
+              console.error(
+                "Offline conflict resolution via snapshot failed:",
+                snapshotError,
+              );
+            }
             return;
           }
 
