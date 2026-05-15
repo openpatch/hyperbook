@@ -283,10 +283,10 @@ block_size = 25
 num_blocks = 16
 line = empty_graphic()
 for col in range(num_blocks):
-if col % 2 == 0:
-    color = black
-else:
-    color = white
+    if col % 2 == 0:
+        color = black
+    else:
+        color = white
 block = rectangle(block_size, block_size, color)
 line = beside(line, block)
 second_line = rotate(180, line)
