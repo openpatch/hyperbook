@@ -38,6 +38,20 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.91.0
+
+::::tabs
+
+:::tab{title="Improved :+1:" id="improved"}
+
+- improve fullscreen mode for pyide, web ide, typst and p5
+- add canvas rendering to pyide
+- add graphical output to pyide
+
+:::
+
+::::
+
 ## v0.90.0
 
 ::::tabs
