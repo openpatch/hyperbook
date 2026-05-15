@@ -1,8 +1,9 @@
 import { describe, it, expect } from "vitest";
 import fs from "node:fs";
 import vm from "node:vm";
+import { fileURLToPath } from "node:url";
 
-const CLOUD_JS_PATH = "/home/runner/work/hyperbook/hyperbook/packages/markdown/assets/cloud.js";
+const CLOUD_JS_PATH = fileURLToPath(new URL("../assets/cloud.js", import.meta.url));
 const AUTH_TOKEN_KEY = "hyperbook_auth_token";
 const OFFLINE_QUEUE_KEY = "hyperbook_offline_queue";
 

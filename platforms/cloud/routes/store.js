@@ -12,6 +12,19 @@ function computeChecksum(data) {
     .digest("hex");
 }
 
+function hasProvided(value) {
+  return value !== null && value !== undefined;
+}
+
+async function getServerSyncHead(userId, hyperbookId) {
+  var currentLatest = await db.getLatestEventId(userId, hyperbookId);
+  var latestSnapshot = await db.getLatestSnapshot(userId, hyperbookId);
+  return Math.max(
+    currentLatest,
+    latestSnapshot ? latestSnapshot.last_event_id : 0
+  );
+}
+
 // GET /api/store/:hyperbookId — fetch current state (snapshot + event replay)
 router.get(
   "/:hyperbookId",
@@ -84,14 +97,9 @@ router.post(
       }
 
       // Validate afterEventId matches server's latest
-      var currentLatest = await db.getLatestEventId(userId, hyperbook.id);
-      var latestSnapshot = await db.getLatestSnapshot(userId, hyperbook.id);
-      var serverLatest = Math.max(
-        currentLatest,
-        latestSnapshot ? latestSnapshot.last_event_id : 0
-      );
+      var serverLatest = await getServerSyncHead(userId, hyperbook.id);
 
-      if (afterEventId !== null && afterEventId !== undefined && afterEventId !== serverLatest) {
+      if (hasProvided(afterEventId) && afterEventId !== serverLatest) {
         res.status(409).json({
           error: "Stale state — re-fetch required",
           serverLastEventId: serverLatest,
@@ -145,7 +153,7 @@ router.post(
       var ifMatchChecksum = req.body.ifMatchChecksum;
       var forceOverwrite = req.body.forceOverwrite === true;
 
-      if (ifMatchLastEventId !== null && ifMatchLastEventId !== undefined) {
+      if (hasProvided(ifMatchLastEventId)) {
         ifMatchLastEventId = Number(ifMatchLastEventId);
       }
 
@@ -164,19 +172,10 @@ router.post(
         return;
       }
 
-      var currentLatest = await db.getLatestEventId(userId, hyperbook.id);
-      var latestSnapshot = await db.getLatestSnapshot(userId, hyperbook.id);
-      var serverLatest = Math.max(
-        currentLatest,
-        latestSnapshot ? latestSnapshot.last_event_id : 0
-      );
+      var serverLatest = await getServerSyncHead(userId, hyperbook.id);
 
       if (!forceOverwrite) {
-        if (
-          ifMatchLastEventId !== null &&
-          ifMatchLastEventId !== undefined &&
-          ifMatchLastEventId !== serverLatest
-        ) {
+        if (hasProvided(ifMatchLastEventId) && ifMatchLastEventId !== serverLatest) {
           res.status(409).json({
             error: "Stale state — re-fetch required",
             serverLastEventId: serverLatest,
