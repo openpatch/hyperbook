@@ -1,8 +1,16 @@
 var express = require("express");
+var crypto = require("crypto");
 var db = require("../lib/db");
 var middleware = require("../middleware/auth");
 
 var router = express.Router();
+
+function computeChecksum(data) {
+  return crypto
+    .createHash("sha256")
+    .update(JSON.stringify(data || null))
+    .digest("hex");
+}
 
 // GET /api/store/:hyperbookId — fetch current state (snapshot + event replay)
 router.get(
@@ -33,6 +41,7 @@ router.get(
       res.json({
         snapshot: state.data,
         lastEventId: state.lastEventId,
+        stateChecksum: computeChecksum(state.data),
         updatedAt: state.updatedAt,
       });
     } catch (error) {
@@ -57,6 +66,7 @@ router.post(
       var userId = req.user.id;
       var events = req.body.events;
       var afterEventId = req.body.afterEventId;
+      var ifMatchChecksum = req.body.ifMatchChecksum;
 
       if (!Array.isArray(events) || events.length === 0) {
         res.status(400).json({ error: "Events array required" });
@@ -89,11 +99,26 @@ router.post(
         return;
       }
 
+      if (ifMatchChecksum) {
+        var currentState = await db.reconstructState(userId, hyperbook.id);
+        var serverChecksum = computeChecksum(currentState ? currentState.data : null);
+        if (ifMatchChecksum !== serverChecksum) {
+          res.status(409).json({
+            error: "Stale state checksum mismatch",
+            serverLastEventId: serverLatest,
+            serverChecksum: serverChecksum,
+          });
+          return;
+        }
+      }
+
       var lastEventId = await db.appendEvents(userId, hyperbook.id, events);
+      var updatedState = await db.reconstructState(userId, hyperbook.id);
 
       res.json({
         success: true,
         lastEventId: lastEventId,
+        stateChecksum: computeChecksum(updatedState ? updatedState.data : null),
       });
     } catch (error) {
       console.error("Append events error:", error);
@@ -116,6 +141,13 @@ router.post(
       var hyperbookId = req.params.hyperbookId;
       var userId = req.user.id;
       var data = req.body.data;
+      var ifMatchLastEventId = req.body.ifMatchLastEventId;
+      var ifMatchChecksum = req.body.ifMatchChecksum;
+      var forceOverwrite = req.body.forceOverwrite === true;
+
+      if (ifMatchLastEventId !== null && ifMatchLastEventId !== undefined) {
+        ifMatchLastEventId = Number(ifMatchLastEventId);
+      }
 
       if (!data) {
         res.status(400).json({ error: "Snapshot data required" });
@@ -132,6 +164,40 @@ router.post(
         return;
       }
 
+      var currentLatest = await db.getLatestEventId(userId, hyperbook.id);
+      var latestSnapshot = await db.getLatestSnapshot(userId, hyperbook.id);
+      var serverLatest = Math.max(
+        currentLatest,
+        latestSnapshot ? latestSnapshot.last_event_id : 0
+      );
+
+      if (!forceOverwrite) {
+        if (
+          ifMatchLastEventId !== null &&
+          ifMatchLastEventId !== undefined &&
+          ifMatchLastEventId !== serverLatest
+        ) {
+          res.status(409).json({
+            error: "Stale state — re-fetch required",
+            serverLastEventId: serverLatest,
+          });
+          return;
+        }
+
+        if (ifMatchChecksum) {
+          var currentState = await db.reconstructState(userId, hyperbook.id);
+          var serverChecksum = computeChecksum(currentState ? currentState.data : null);
+          if (ifMatchChecksum !== serverChecksum) {
+            res.status(409).json({
+              error: "Stale state checksum mismatch",
+              serverLastEventId: serverLatest,
+              serverChecksum: serverChecksum,
+            });
+            return;
+          }
+        }
+      }
+
       var snapshotId = await db.replaceWithSnapshot(
         userId,
         hyperbook.id,
@@ -142,6 +208,7 @@ router.post(
         success: true,
         snapshotId: snapshotId,
         lastEventId: 0,
+        stateChecksum: computeChecksum(data),
       });
     } catch (error) {
       console.error("Save snapshot error:", error);

@@ -14,6 +14,8 @@ hyperbook.cloud = (function () {
   const AUTH_TOKEN_KEY = "hyperbook_auth_token";
   const AUTH_USER_KEY = "hyperbook_auth_user";
   const LAST_EVENT_ID_KEY = "hyperbook_last_event_id";
+  const OFFLINE_QUEUE_KEY = "hyperbook_offline_queue";
+  const STATE_CHECKSUM_KEY = "hyperbook_state_checksum";
   const EVENT_BATCH_MAX_SIZE = 512 * 1024; // 512KB
   const OFFLINE_QUEUE_MAX_SIZE = 100; // FIX: cap offline queue to avoid unbounded memory growth
   let isLoadingFromCloud = false;
@@ -67,15 +69,37 @@ hyperbook.cloud = (function () {
         localStorage.getItem(LAST_EVENT_ID_KEY) || "0",
         10,
       );
-
-      this.offlineQueue = [];
+      this.lastKnownChecksum = localStorage.getItem(STATE_CHECKSUM_KEY);
+      this.offlineQueue = this.loadOfflineQueue();
       this.isOnline = navigator.onLine;
 
       this.setupEventListeners();
+      if (this.isOnline && this.offlineQueue.length > 0) {
+        this.processOfflineQueue();
+      }
     }
 
     get isDirty() {
       return this.pendingEvents.length > 0;
+    }
+
+    loadOfflineQueue() {
+      try {
+        const raw = localStorage.getItem(OFFLINE_QUEUE_KEY);
+        if (!raw) return [];
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (error) {
+        console.warn("Failed to parse offline queue from localStorage:", error);
+        return [];
+      }
+    }
+
+    persistOfflineQueue() {
+      localStorage.setItem(
+        OFFLINE_QUEUE_KEY,
+        JSON.stringify(this.offlineQueue),
+      );
     }
 
     addEvent(event) {
@@ -142,6 +166,7 @@ hyperbook.cloud = (function () {
                 timestamp: Date.now(),
               });
             }
+            this.persistOfflineQueue();
             // FIX: only clear the events we snapshotted
             this.pendingEvents = this.pendingEvents.slice(eventsToSend.length);
             this.updateUI("offline-queued");
@@ -163,7 +188,7 @@ hyperbook.cloud = (function () {
             // This avoids repeated reload loops and makes sync deterministic.
             console.log("⚠ Stale state detected, overwriting cloud state with local snapshot...");
             try {
-              const snapshotResult = await this.sendSnapshot();
+              const snapshotResult = await this.sendSnapshot({ force: true });
               const snapshotLastEventId =
                 snapshotResult && snapshotResult.lastEventId !== undefined
                   ? snapshotResult.lastEventId
@@ -172,10 +197,14 @@ hyperbook.cloud = (function () {
               // arrived concurrently during the async round-trip
               this.pendingEvents = this.pendingEvents.slice(eventsToSend.length);
               this.lastEventId = snapshotLastEventId;
+              this.lastKnownChecksum = snapshotResult?.stateChecksum || null;
               localStorage.setItem(
                 LAST_EVENT_ID_KEY,
                 String(this.lastEventId),
               );
+              if (this.lastKnownChecksum) {
+                localStorage.setItem(STATE_CHECKSUM_KEY, this.lastKnownChecksum);
+              }
               this.lastSaveTime = Date.now();
               this.retryCount = 0;
               this.updateUI("saved");
@@ -195,10 +224,14 @@ hyperbook.cloud = (function () {
           // events that were added while the network request was in flight
           this.pendingEvents = this.pendingEvents.slice(eventsToSend.length);
           this.lastEventId = result.lastEventId;
+          this.lastKnownChecksum = result.stateChecksum || this.lastKnownChecksum;
           localStorage.setItem(
             LAST_EVENT_ID_KEY,
             String(this.lastEventId),
           );
+          if (this.lastKnownChecksum) {
+            localStorage.setItem(STATE_CHECKSUM_KEY, this.lastKnownChecksum);
+          }
           this.lastSaveTime = Date.now();
           this.retryCount = 0;
           this.updateUI("saved");
@@ -228,10 +261,15 @@ hyperbook.cloud = (function () {
             body: JSON.stringify({
               events: events,
               afterEventId: afterEventId,
+              ifMatchChecksum: this.lastKnownChecksum || undefined,
             }),
           },
         );
-        return { lastEventId: data.lastEventId, conflict: false };
+        return {
+          lastEventId: data.lastEventId,
+          stateChecksum: data.stateChecksum,
+          conflict: false,
+        };
       } catch (error) {
         if (error.status === 409) {
           return { conflict: true };
@@ -240,7 +278,8 @@ hyperbook.cloud = (function () {
       }
     }
 
-    async sendSnapshot() {
+    async sendSnapshot(options = {}) {
+      const force = options.force === true;
       const storeExport = await hyperbook.store.db.export({ prettyJson: false });
       const exportData = JSON.parse(await storeExport.text());
 
@@ -254,10 +293,17 @@ hyperbook.cloud = (function () {
               origin: window.location.origin,
               data: { hyperbook: exportData },
             },
+            ifMatchLastEventId: force ? undefined : this.lastEventId,
+            ifMatchChecksum: force ? undefined : this.lastKnownChecksum || undefined,
+            forceOverwrite: force,
           }),
         },
       );
-      return { lastEventId: data.lastEventId, conflict: false };
+      return {
+        lastEventId: data.lastEventId,
+        stateChecksum: data.stateChecksum,
+        conflict: false,
+      };
     }
 
     scheduleRetry() {
@@ -310,10 +356,15 @@ hyperbook.cloud = (function () {
       // snapshot instead of trying to replay individual events
       if (this.offlineQueue.length === 1 && this.offlineQueue[0].snapshot) {
         this.offlineQueue = [];
+        this.persistOfflineQueue();
         try {
           const result = await this.sendSnapshot();
           this.lastEventId = result.lastEventId;
+          this.lastKnownChecksum = result.stateChecksum || this.lastKnownChecksum;
           localStorage.setItem(LAST_EVENT_ID_KEY, String(this.lastEventId));
+          if (this.lastKnownChecksum) {
+            localStorage.setItem(STATE_CHECKSUM_KEY, this.lastKnownChecksum);
+          }
           this.lastSaveTime = Date.now();
           console.log("✓ Offline snapshot flushed");
         } catch (error) {
@@ -334,17 +385,22 @@ hyperbook.cloud = (function () {
             // cloud state with the current local snapshot.
             console.log("⚠ Offline queue conflict, overwriting cloud state...");
             try {
-              const snapshotResult = await this.sendSnapshot();
+              const snapshotResult = await this.sendSnapshot({ force: true });
               const snapshotLastEventId =
                 snapshotResult && snapshotResult.lastEventId !== undefined
                   ? snapshotResult.lastEventId
                   : 0;
               this.offlineQueue = [];
+              this.persistOfflineQueue();
               this.lastEventId = snapshotLastEventId;
+              this.lastKnownChecksum = snapshotResult?.stateChecksum || null;
               localStorage.setItem(
                 LAST_EVENT_ID_KEY,
                 String(this.lastEventId),
               );
+              if (this.lastKnownChecksum) {
+                localStorage.setItem(STATE_CHECKSUM_KEY, this.lastKnownChecksum);
+              }
               this.lastSaveTime = Date.now();
               console.log("✓ Offline conflict resolved by snapshot overwrite");
             } catch (snapshotError) {
@@ -357,19 +413,25 @@ hyperbook.cloud = (function () {
           }
 
           this.lastEventId = result.lastEventId;
+          this.lastKnownChecksum = result.stateChecksum || this.lastKnownChecksum;
           localStorage.setItem(
             LAST_EVENT_ID_KEY,
             String(this.lastEventId),
           );
+          if (this.lastKnownChecksum) {
+            localStorage.setItem(STATE_CHECKSUM_KEY, this.lastKnownChecksum);
+          }
         } catch (error) {
           console.error("Failed to process offline queue:", error);
           // Keep remaining items in queue
           this.offlineQueue = this.offlineQueue.slice(i);
+          this.persistOfflineQueue();
           return;
         }
       }
 
       this.offlineQueue = [];
+      this.persistOfflineQueue();
       this.lastSaveTime = Date.now();
       console.log("✓ Offline queue processed");
     }
@@ -405,10 +467,14 @@ hyperbook.cloud = (function () {
             this.updateUI("saving");
             const result = await this.sendSnapshot();
             this.lastEventId = result.lastEventId;
+            this.lastKnownChecksum = result.stateChecksum || this.lastKnownChecksum;
             localStorage.setItem(
               LAST_EVENT_ID_KEY,
               String(this.lastEventId),
             );
+            if (this.lastKnownChecksum) {
+              localStorage.setItem(STATE_CHECKSUM_KEY, this.lastKnownChecksum);
+            }
             this.updateUI("saved");
           } catch (error) {
             console.error("Manual save failed:", error);
@@ -424,6 +490,7 @@ hyperbook.cloud = (function () {
       this.pendingEvents = [];
       this.clearTimers();
       this.offlineQueue = [];
+      this.persistOfflineQueue();
       this.retryCount = 0;
     }
   }
@@ -487,6 +554,8 @@ hyperbook.cloud = (function () {
     localStorage.removeItem(AUTH_TOKEN_KEY);
     localStorage.removeItem(AUTH_USER_KEY);
     localStorage.removeItem(LAST_EVENT_ID_KEY);
+    localStorage.removeItem(OFFLINE_QUEUE_KEY);
+    localStorage.removeItem(STATE_CHECKSUM_KEY);
   }
 
   /**
@@ -634,6 +703,12 @@ hyperbook.cloud = (function () {
           );
           if (syncManager) {
             syncManager.lastEventId = data.lastEventId;
+          }
+        }
+        if (data.stateChecksum) {
+          localStorage.setItem(STATE_CHECKSUM_KEY, data.stateChecksum);
+          if (syncManager) {
+            syncManager.lastKnownChecksum = data.stateChecksum;
           }
         }
 
@@ -886,7 +961,11 @@ hyperbook.cloud = (function () {
       syncManager.clearTimers();
       const result = await syncManager.sendSnapshot();
       syncManager.lastEventId = result.lastEventId;
+      syncManager.lastKnownChecksum = result.stateChecksum || syncManager.lastKnownChecksum;
       localStorage.setItem(LAST_EVENT_ID_KEY, String(result.lastEventId));
+      if (syncManager.lastKnownChecksum) {
+        localStorage.setItem(STATE_CHECKSUM_KEY, syncManager.lastKnownChecksum);
+      }
     },
     userToggle,
     login,
