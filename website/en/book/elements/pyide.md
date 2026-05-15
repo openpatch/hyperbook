@@ -207,6 +207,7 @@ asyncio.run(run_game())
 
 ## Pytamaro
 
+````hyperbook
 :::pyide{packages="pytamaro"}
 
 ```python
@@ -216,12 +217,36 @@ block_size = 25
 num_blocks = 16
 line = empty_graphic()
 for col in range(num_blocks):
-    if col % 2 == 0:
-        color = black
-    else:
-        color = white
-    block = rectangle(block_size, block_size, color)
-    line = beside(line, block)
+if col % 2 == 0:
+    color = black
+else:
+    color = white
+block = rectangle(block_size, block_size, color)
+line = beside(line, block)
+second_line = rotate(180, line)
+finish_line = above(line, second_line)
+show_graphic(finish_line)
+```
+:::
+
+````
+
+
+:::pyide{packages="pytamaro"}
+
+```python
+from pytamaro import *
+
+block_size = 25
+num_blocks = 16
+line = empty_graphic()
+for col in range(num_blocks):
+if col % 2 == 0:
+    color = black
+else:
+    color = white
+block = rectangle(block_size, block_size, color)
+line = beside(line, block)
 second_line = rotate(180, line)
 finish_line = above(line, second_line)
 show_graphic(finish_line)
