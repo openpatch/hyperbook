@@ -677,10 +677,18 @@ hyperbook.python = (function () {
         if (canvas) {
           try {
             await pyodide.runPythonAsync(
-              "import sys as _sys\n_pg = _sys.modules.get('pygame')\nif _pg:\n    try:\n        _pg.quit()\n    except Exception:\n        pass",
+              `import sys as _sys
+_pg = _sys.modules.get('pygame')
+if _pg:
+    try:
+        _pg.quit()
+    except Exception:
+        pass`,
               { filename: "<cleanup>" },
             );
-          } catch (e) {}
+          } catch (e) {
+            console.warn("pygame cleanup failed:", e);
+          }
         }
       }
     } catch (error) {
