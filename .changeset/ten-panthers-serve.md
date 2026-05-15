@@ -1,3 +1,4 @@
+---
 "@hyperbook/markdown": patch
 "hyperbook": patch
 ---
