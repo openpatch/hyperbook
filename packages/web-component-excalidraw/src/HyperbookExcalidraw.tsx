@@ -116,7 +116,7 @@ export const HyperbookExcalidraw: FC<HyperbookExcalidrawProps> = ({
   const loadData = async (): Promise<ExcalidrawInitialDataState> => {
     if (edit && id) {
       const store = (window as any).hyperbook.store;
-      const result = await store.excalidraw.get(id);
+      const result = await store.db.excalidraw.get(id);
       if (result) {
         return {
           ...result,
@@ -147,7 +147,7 @@ export const HyperbookExcalidraw: FC<HyperbookExcalidrawProps> = ({
   const handleChange: EDP["onChange"] = async (elements, state, files) => {
     if (edit && id) {
       const store = (window as any).hyperbook.store;
-      store.excalidraw.put({ id, elements, state, files });
+      store.db.excalidraw.put({ id, elements, state, files });
     }
   };
 
