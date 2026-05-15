@@ -259,7 +259,6 @@ hyperbook.python = (function () {
     const elem = document.getElementById(id);
     if (!elem) return;
     const canvas = elem.getElementsByClassName("canvas")[0];
-    document.activeElement?.blur?.();
     canvas?.blur?.();
   };
 
@@ -675,6 +674,22 @@ hyperbook.python = (function () {
       } finally {
         globals.destroy();
         dict.destroy();
+        if (canvas) {
+          try {
+            await pyodide.runPythonAsync(
+              `import sys as _sys
+_pg = _sys.modules.get('pygame')
+if _pg:
+    try:
+        _pg.quit()
+    except Exception:
+        pass`,
+              { filename: "<cleanup>" },
+            );
+          } catch (e) {
+            console.warn("pygame cleanup failed:", e);
+          }
+        }
       }
     } catch (error) {
       let message = error.message;
