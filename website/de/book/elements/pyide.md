@@ -162,7 +162,47 @@ Das Stoppen einer Endlosschleife oder eines lang andauernden Prozesses ist jedoc
 ```
 :::
 
-## Pygame
+## Bibliotheken mit SDL
+
+### PyGame
+
+````hyperbook
+:::pyide{canvas}
+
+```python
+import pygame
+import asyncio
+
+async def run_game():
+    fps = 60
+    pygame.init()
+    screen = pygame.display.set_mode((400, 300))
+    r = 0
+    g = 0
+    b = 0
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_r:
+                    r = (r + 50) % 256
+                elif event.key == pygame.K_g:
+                    g = (g + 50) % 256
+                elif event.key == pygame.K_b:
+                    b = (b + 50) % 256
+                elif event.key == pygame.K_ESCAPE:
+                    sys.exit()
+            elif event.type == pygame.QUIT:
+                return
+        screen.fill((r, g, b))
+        pygame.display.flip()
+        await asyncio.sleep(1 / fps)
+
+asyncio.run(run_game())
+```
+
+:::
+````
 
 :::pyide{canvas}
 
@@ -187,7 +227,9 @@ async def run_game():
                     g = (g + 50) % 256
                 elif event.key == pygame.K_b:
                     b = (b + 50) % 256
-            elif event.type == pygame.K_ESCAPE or event.type == pygame.QUIT:
+                elif event.key == pygame.K_ESCAPE:
+                    sys.exit()
+            elif event.type == pygame.QUIT:
                 return
         screen.fill((r, g, b))
         pygame.display.flip()
