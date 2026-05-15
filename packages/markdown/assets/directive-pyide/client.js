@@ -1197,7 +1197,11 @@ if _pg:
         },
       );
 
-      editor.addEventListener("code-input_load", async () => {
+      let editorStateRestored = false;
+      const restoreEditorState = async () => {
+        if (editorStateRestored) return;
+        editorStateRestored = true;
+
         const result = await hyperbook.store.db.pyide.get(id);
         if (result) {
           pyideState = { ...pyideState, ...result };
@@ -1227,7 +1231,12 @@ if _pg:
           applyStoredSplitSize?.();
           applyCanvasOutputLayout();
         }
-      });
+      };
+
+      editor.addEventListener("code-input_load", restoreEditorState);
+      if (editor.querySelector("textarea")) {
+        void restoreEditorState();
+      }
 
       window.addEventListener("resize", applyCanvasOutputLayout);
       applyCanvasOutputLayout();

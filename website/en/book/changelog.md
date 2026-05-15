@@ -38,6 +38,18 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.91.1
+
+::::tabs
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+- Fix pyide editors not restoring saved code from the database when `code-input_load` fires before the restore handler is attached.
+
+:::
+
+::::
+
 ## v0.91.0
 
 ::::tabs
