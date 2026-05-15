@@ -287,8 +287,8 @@ for col in range(num_blocks):
         color = black
     else:
         color = white
-block = rectangle(block_size, block_size, color)
-line = beside(line, block)
+    block = rectangle(block_size, block_size, color)
+    line = beside(line, block)
 second_line = rotate(180, line)
 finish_line = above(line, second_line)
 show_graphic(finish_line)
