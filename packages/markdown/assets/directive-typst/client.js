@@ -1148,6 +1148,92 @@ hyperbook.typst = (function () {
   // TYPST EDITOR
   // ============================================================================
 
+  function setupSplitter(elem, container, editorContainer, splitter) {
+    if (!container || !editorContainer || !splitter) return;
+
+    const minPanelSize = 120;
+
+    const getIsHorizontal = () =>
+      getComputedStyle(elem).flexDirection.startsWith('row');
+
+    const applySplitSize = (rawSize, isHorizontal) => {
+      const total = isHorizontal ? elem.clientWidth : elem.clientHeight;
+      const splitterSize = isHorizontal ? splitter.offsetWidth : splitter.offsetHeight;
+      const maxSize = Math.max(minPanelSize, total - splitterSize - minPanelSize);
+      const clamped = Math.max(minPanelSize, Math.min(rawSize, maxSize));
+      container.style.flex = `0 0 ${clamped}px`;
+      return clamped;
+    };
+
+    const applyStoredSplitSize = () => {
+      const isHorizontal = getIsHorizontal();
+      elem.classList.toggle('split-horizontal', isHorizontal);
+      elem.classList.toggle('split-vertical', !isHorizontal);
+      const key = isHorizontal ? 'splitHorizontal' : 'splitVertical';
+      const rawStored = Number(elem.dataset[key]);
+      if (!Number.isFinite(rawStored) || rawStored <= 0) {
+        container.style.flex = '';
+        return;
+      }
+      applySplitSize(rawStored, isHorizontal);
+    };
+
+    applyStoredSplitSize();
+
+    splitter.addEventListener('pointerdown', (event) => {
+      event.preventDefault();
+      splitter.setPointerCapture(event.pointerId);
+
+      const isHorizontal = getIsHorizontal();
+      const key = isHorizontal ? 'splitHorizontal' : 'splitVertical';
+      const startPointer = isHorizontal ? event.clientX : event.clientY;
+      const startSize = isHorizontal
+        ? container.getBoundingClientRect().width
+        : container.getBoundingClientRect().height;
+
+      elem.classList.add('resizing');
+
+      const onPointerMove = (moveEvent) => {
+        const pointer = isHorizontal ? moveEvent.clientX : moveEvent.clientY;
+        const delta = pointer - startPointer;
+        const size = applySplitSize(startSize + delta, isHorizontal);
+        elem.dataset[key] = String(Math.round(size));
+      };
+
+      const onPointerUp = () => {
+        elem.classList.remove('resizing');
+        splitter.removeEventListener('pointermove', onPointerMove);
+        splitter.removeEventListener('pointerup', onPointerUp);
+        splitter.removeEventListener('pointercancel', onPointerUp);
+      };
+
+      splitter.addEventListener('pointermove', onPointerMove);
+      splitter.addEventListener('pointerup', onPointerUp);
+      splitter.addEventListener('pointercancel', onPointerUp);
+    });
+
+    window.addEventListener('resize', applyStoredSplitSize);
+  }
+
+  const updateFullscreenButtonState = (elem, button) => {
+    if (!elem || !button) return;
+    const isFullscreen = document.fullscreenElement === elem;
+    const label = i18nGet('ide-fullscreen-enter', 'Fullscreen');
+    button.textContent = '⛶';
+    button.title = label;
+    button.setAttribute('aria-label', label);
+    button.classList.toggle('active', isFullscreen);
+  };
+
+  const toggleFullscreen = async (elem) => {
+    if (!elem) return;
+    if (document.fullscreenElement === elem) {
+      await document.exitFullscreen();
+      return;
+    }
+    await elem.requestFullscreen();
+  };
+
   class TypstEditor {
     constructor({
       elem,
@@ -1178,13 +1264,24 @@ hyperbook.typst = (function () {
       this.preview = elem.querySelector('.typst-preview');
       this.loadingIndicator = elem.querySelector('.typst-loading');
       this.editor = elem.querySelector('.editor.typst');
+      this.editorContainer = elem.querySelector('.editor-container');
+      this.splitter = elem.querySelector('.splitter');
       this.sourceTextarea = elem.querySelector('.typst-source');
+      this.fullscreenBtn = elem.querySelector('.fullscreen');
+      this.editorInitialized = false;
+
+      setupSplitter(this.elem, this.previewContainer, this.editorContainer, this.splitter);
 
       // Setup UI callbacks
       this.setupUICallbacks();
 
       // Setup event handlers
       this.setupEventHandlers();
+      this.handleFullscreenChange = () => {
+        updateFullscreenButtonState(this.elem, this.fullscreenBtn);
+      };
+      document.addEventListener('fullscreenchange', this.handleFullscreenChange);
+      updateFullscreenButtonState(this.elem, this.fullscreenBtn);
 
       // Initialize
       this.initialize();
@@ -1208,12 +1305,14 @@ hyperbook.typst = (function () {
       const resetBtn = this.elem.querySelector('.reset');
       const addSourceFileBtn = this.elem.querySelector('.add-source-file');
       const addBinaryFileBtn = this.elem.querySelector('.add-binary-file');
+      const fullscreenBtn = this.elem.querySelector('.fullscreen');
 
       downloadBtn?.addEventListener('click', () => this.handleExportPdf());
       downloadProjectBtn?.addEventListener('click', () => this.handleExportProject());
       resetBtn?.addEventListener('click', () => this.handleReset());
       addSourceFileBtn?.addEventListener('click', () => this.handleAddSourceFile());
       addBinaryFileBtn?.addEventListener('click', (e) => this.handleAddBinaryFile(e));
+      fullscreenBtn?.addEventListener('click', () => this.handleFullscreenToggle());
     }
 
     /**
@@ -1221,8 +1320,9 @@ hyperbook.typst = (function () {
      */
     async initialize() {
       if (this.editor) {
-        // Edit mode - wait for code-input to load
-        this.editor.addEventListener('code-input_load', async () => {
+        const initializeEditor = async () => {
+          if (this.editorInitialized) return;
+          this.editorInitialized = true;
           await this.restoreState();
           this.uiManager.updateTabs();
           this.uiManager.updateBinaryFilesList();
@@ -1235,7 +1335,13 @@ hyperbook.typst = (function () {
             this.saveState();
             debouncedRerender();
           });
-        });
+        };
+
+        // Edit mode - wait for code-input to load (or initialize immediately if already ready)
+        this.editor.addEventListener('code-input_load', initializeEditor);
+        if (this.editor.querySelector('textarea')) {
+          await initializeEditor();
+        }
       } else if (this.sourceTextarea) {
         // Preview mode
         const initialCode = this.sourceTextarea.value;
@@ -1261,7 +1367,7 @@ hyperbook.typst = (function () {
       const result = await window.store?.typst?.get(this.id);
       
       if (result) {
-        this.editor.value = result.code;
+        this.setEditorValue(result.code || this.fileManager.getCurrentContent());
 
         if (result.sourceFiles) {
           this.fileManager.sourceFiles = result.sourceFiles;
@@ -1280,11 +1386,11 @@ hyperbook.typst = (function () {
           );
           if (file) {
             this.fileManager.currentFile = file;
-            this.editor.value = this.fileManager.getCurrentContent();
+            this.setEditorValue(this.fileManager.getCurrentContent());
           }
         }
       } else {
-        this.editor.value = this.fileManager.getCurrentContent();
+        this.setEditorValue(this.fileManager.getCurrentContent());
       }
     }
 
@@ -1294,11 +1400,11 @@ hyperbook.typst = (function () {
     async saveState() {
       if (!this.editor) return;
 
-      this.fileManager.updateCurrentContent(this.editor.value);
+      this.fileManager.updateCurrentContent(this.getEditorValue());
 
       await window.store?.typst?.put({
         id: this.id,
-        code: this.editor.value,
+        code: this.getEditorValue(),
         sourceFiles: this.fileManager.getSourceFiles(),
         binaryFiles: this.binaryFiles,
         currentFile: this.fileManager.currentFile.filename,
@@ -1311,7 +1417,7 @@ hyperbook.typst = (function () {
     rerender() {
       if (!this.editor) return;
 
-      this.fileManager.updateCurrentContent(this.editor.value);
+      this.fileManager.updateCurrentContent(this.getEditorValue());
 
       const mainFile = this.fileManager.findMainFile();
       const mainCode = mainFile 
@@ -1338,9 +1444,9 @@ hyperbook.typst = (function () {
      */
     handleFileSwitch(filename) {
       if (this.editor) {
-        this.fileManager.updateCurrentContent(this.editor.value);
+        this.fileManager.updateCurrentContent(this.getEditorValue());
         const content = this.fileManager.switchTo(filename);
-        this.editor.value = content;
+        this.setEditorValue(content);
         this.uiManager.updateTabs();
         this.saveState();
       }
@@ -1351,7 +1457,7 @@ hyperbook.typst = (function () {
      */
     handleFilesChange() {
       if (this.editor) {
-        this.editor.value = this.fileManager.getCurrentContent();
+        this.setEditorValue(this.fileManager.getCurrentContent());
       }
       this.saveState();
       this.rerender();
@@ -1389,7 +1495,7 @@ hyperbook.typst = (function () {
       }
 
       if (this.editor) {
-        this.editor.value = this.fileManager.getCurrentContent();
+        this.setEditorValue(this.fileManager.getCurrentContent());
       }
 
       this.uiManager.updateTabs();
@@ -1463,7 +1569,7 @@ hyperbook.typst = (function () {
      */
     async handleExportProject() {
       const mainFile = this.fileManager.findMainFile();
-      const code = mainFile ? mainFile.content : (this.editor ? this.editor.value : '');
+      const code = mainFile ? mainFile.content : this.getEditorValue();
 
       await this.exporter.export({
         code,
@@ -1487,6 +1593,40 @@ hyperbook.typst = (function () {
       if (confirm(confirmMsg)) {
         await window.store?.typst?.delete(this.id);
         window.location.reload();
+      }
+    }
+
+    async handleFullscreenToggle() {
+      try {
+        await toggleFullscreen(this.elem);
+      } catch (error) {
+        console.error(error.message);
+      }
+    }
+
+    getEditorValue() {
+      if (!this.editor) return '';
+      const textarea = this.editor.querySelector('textarea');
+      if (textarea) return textarea.value;
+      try {
+        if (typeof this.editor.value === 'string') {
+          return this.editor.value;
+        }
+      } catch (e) {}
+      return this.editor.textContent || '';
+    }
+
+    setEditorValue(value) {
+      if (!this.editor) return;
+      const normalizedValue = value ?? '';
+      const textarea = this.editor.querySelector('textarea');
+      if (textarea) {
+        textarea.value = normalizedValue;
+      }
+      try {
+        this.editor.value = normalizedValue;
+      } catch (e) {
+        this.editor.textContent = normalizedValue;
       }
     }
   }

@@ -5,7 +5,7 @@
   flex-direction: column;
   overflow: hidden;
   gap: 8px;
-  height: calc(100dvh - 128px);
+  height: var(--typst-height, calc(100dvh - 80px));
 }
 
 code-input {
@@ -14,11 +14,14 @@ code-input {
 
 .directive-typst .preview-container {
   width: 100%;
+  min-height: 120px;
+  min-width: 120px;
   border: 1px solid var(--color-spacer);
   border-radius: 8px;
   overflow: auto;
   background-color: var(--color--background);
   position: relative;
+  flex: 1 1 0;
 }
 
 .directive-typst .typst-preview {
@@ -167,7 +170,42 @@ code-input {
   width: 100%;
   display: flex;
   flex-direction: column;
-  height: 400px;
+  min-height: 120px;
+  min-width: 120px;
+  flex: 1 1 0;
+}
+
+.directive-typst .splitter {
+  background: var(--color-spacer);
+  border-radius: 999px;
+  flex-shrink: 0;
+  touch-action: none;
+  opacity: 0.45;
+  transition: opacity 0.15s ease-in-out;
+}
+
+.directive-typst .splitter:hover {
+  opacity: 0.65;
+}
+
+.directive-typst.split-vertical .splitter {
+  width: 100%;
+  height: 4px;
+  cursor: row-resize;
+}
+
+.directive-typst.split-horizontal .splitter {
+  width: 4px;
+  height: 100%;
+  cursor: col-resize;
+}
+
+.directive-typst.resizing {
+  user-select: none;
+}
+
+.directive-typst.resizing .splitter {
+  opacity: 0.75;
 }
 
 .directive-typst .file-tabs {
@@ -398,6 +436,7 @@ code-input {
   border-bottom: none;
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
+  overflow: hidden;
 }
 
 .directive-typst .buttons.bottom {
@@ -428,8 +467,15 @@ code-input {
   opacity: 0.6;
 }
 
-.directive-typst .buttons:last-child {
+.directive-typst .buttons button:last-child {
   border-right: none;
+}
+
+.directive-typst button.fullscreen {
+  flex: 0 0 auto;
+  min-width: 42px;
+  width: 42px;
+  padding: 8px 0;
 }
 
 .directive-typst button:hover {
@@ -447,10 +493,25 @@ code-input {
   display: none !important;
 }
 
+.directive-typst:fullscreen {
+  width: 100vw;
+  height: 100dvh !important;
+  padding: 12px;
+  box-sizing: border-box;
+  background-color: var(--color-background, var(--color--background, #fff));
+}
+
+.directive-typst:fullscreen::backdrop {
+  background-color: var(--color-background, var(--color--background, #fff));
+}
+
+.directive-typst:fullscreen.preview-only {
+  height: 100dvh !important;
+}
+
 @media screen and (min-width: 1024px) {
   .directive-typst:not(.preview-only) {
     flex-direction: row;
-    height: calc(100dvh - 128px);
 
     .preview-container {
       flex: 1;

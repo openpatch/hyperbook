@@ -3,6 +3,9 @@
   border-radius: 8px;
   background: #1e1e1e;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: var(--onlineide-height, calc(100dvh - 80px));
 
   .jo_iconButton.img_whole-window-dark {
     display: none;
@@ -13,6 +16,11 @@
     border: none;
     border-radius: 0;
   }
+}
+
+.directive-onlineide .java-online {
+  flex: 1;
+  min-height: 0;
 }
 
 .directive-onlineide .menu {

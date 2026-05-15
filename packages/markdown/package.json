@@ -85,7 +85,7 @@
     "@types/object-hash": "3.0.6",
     "@types/pako": "2.0.4",
     "@types/qrcode-svg": "^1.1.5",
-    "@webcoder49/code-input": "^2.2.1",
+    "@webcoder49/code-input": "^2.8.2",
     "abcjs": "^6.6.0",
     "chalk": "^5.4.1",
     "chokidar": "4.0.3",

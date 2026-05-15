@@ -26,6 +26,18 @@ function htmlEntities(str: string) {
     .replace(/"/g, "&quot;");
 }
 
+function parsePackagesAttribute(value: unknown): string[] {
+  if (typeof value !== "string") return [];
+  return Array.from(
+    new Set(
+      value
+        .split(",")
+        .map((pkg) => pkg.trim())
+        .filter((pkg) => pkg.length > 0),
+    ),
+  );
+}
+
 export default (ctx: HyperbookContext) => () => {
   const name = "pyide";
   return (tree: Root, file: VFile) => {
@@ -34,7 +46,9 @@ export default (ctx: HyperbookContext) => () => {
         if (node.name !== name) return;
 
         const data = node.data || (node.data = {});
-        const { src = "", id = hash(node) } = node.attributes || {};
+        const { src = "", id = hash(node), packages, height } = node.attributes || {};
+        const hasCanvas = "canvas" in (node.attributes || {});
+        const packageList = parsePackagesAttribute(packages);
 
         expectContainerDirective(node, file, name);
         registerDirective(file, name, ["client.js"], ["style.css"], []);
@@ -49,8 +63,6 @@ export default (ctx: HyperbookContext) => () => {
           code: string;
         }[] = [];
 
-        let input = "";
-
         if (src) {
           srcFile = readFile(src, ctx) || "";
         } else if (node.children?.length > 0) {
@@ -61,11 +73,6 @@ export default (ctx: HyperbookContext) => () => {
               code: (c as Code).value,
               name: `${i}`,
             }));
-          input = toText(
-            node.children.find(
-              (c) => c.type === "code" && c.lang === "input",
-            ) as Code,
-          );
           srcFile = toText(
             node.children.find(
               (c) =>
@@ -81,6 +88,11 @@ export default (ctx: HyperbookContext) => () => {
           class: "directive-pyide",
           id: id,
           "data-tests": Buffer.from(JSON.stringify(tests)).toString("base64"),
+          ...(hasCanvas ? { "data-canvas": "true" } : {}),
+          ...(packageList.length > 0
+            ? { "data-packages": packageList.join(",") }
+            : {}),
+          ...(height ? { style: `--pyide-height: ${height}` } : {}),
         };
         data.hChildren = [
           {
@@ -110,21 +122,83 @@ export default (ctx: HyperbookContext) => () => {
                       },
                     ],
                   },
-                  {
-                    type: "element",
-                    tagName: "button",
-                    properties: {
-                      class: "input-btn",
-                    },
-                    children: [
-                      {
-                        type: "text",
-                        value: i18n.get("pyide-input"),
-                      },
-                    ],
-                  },
+                  ...(hasCanvas
+                    ? [
+                        {
+                          type: "element",
+                          tagName: "button",
+                          properties: {
+                            class: "canvas-btn",
+                          },
+                          children: [
+                            {
+                              type: "text",
+                              value: i18n.get("pyide-canvas"),
+                            },
+                          ],
+                        } as ElementContent,
+                      ]
+                    : []),
                 ],
               },
+              ...(hasCanvas
+                ? [
+                    {
+                      type: "element",
+                      tagName: "div",
+                      properties: {
+                        class: "canvas-header hidden",
+                      },
+                      children: [
+                        {
+                          type: "text",
+                          value: i18n.get("pyide-canvas"),
+                        },
+                      ],
+                    } as ElementContent,
+                    {
+                      type: "element",
+                      tagName: "div",
+                      properties: {
+                        class: "canvas-wrapper hidden",
+                      },
+                      children: [
+                        {
+                          type: "element",
+                          tagName: "canvas",
+                          properties: {
+                            class: "canvas",
+                            id: "canvas",
+                          },
+                          children: [],
+                        } as ElementContent,
+                      ],
+                    } as ElementContent,
+                    {
+                      type: "element",
+                      tagName: "div",
+                      properties: {
+                        class: "canvas-output-splitter hidden",
+                        role: "separator",
+                        "aria-label": "Resize canvas and output",
+                      },
+                      children: [],
+                    } as ElementContent,
+                    {
+                      type: "element",
+                      tagName: "div",
+                      properties: {
+                        class: "output-header hidden",
+                      },
+                      children: [
+                        {
+                          type: "text",
+                          value: i18n.get("pyide-output"),
+                        },
+                      ],
+                    } as ElementContent,
+                  ]
+                : []),
               {
                 type: "element",
                 tagName: "pre",
@@ -133,20 +207,17 @@ export default (ctx: HyperbookContext) => () => {
                 },
                 children: [],
               },
-              {
-                type: "element",
-                tagName: "code-input",
-                properties: {
-                  class: "input hidden",
-                },
-                children: [
-                  {
-                    type: "raw",
-                    value: input || "",
-                  },
-                ],
-              },
             ],
+          },
+          {
+            type: "element",
+            tagName: "div",
+            properties: {
+              class: "splitter",
+              role: "separator",
+              "aria-label": "Resize panels",
+            },
+            children: [],
           },
           {
             type: "element",
@@ -192,6 +263,20 @@ export default (ctx: HyperbookContext) => () => {
                         } as ElementContent,
                       ]
                     : []),
+                  {
+                    type: "element",
+                    tagName: "button",
+                    properties: {
+                      class: "stop",
+                      disabled: true,
+                    },
+                    children: [
+                      {
+                        type: "text",
+                        value: i18n.get("pyide-stop"),
+                      },
+                    ],
+                  },
                 ],
               },
               {
@@ -252,6 +337,21 @@ export default (ctx: HyperbookContext) => () => {
                       {
                         type: "text",
                         value: i18n.get("pyide-download"),
+                      },
+                    ],
+                  },
+                  {
+                    type: "element",
+                    tagName: "button",
+                    properties: {
+                      class: "fullscreen",
+                      title: i18n.get("ide-fullscreen-enter"),
+                      "aria-label": i18n.get("ide-fullscreen-enter"),
+                    },
+                    children: [
+                      {
+                        type: "text",
+                        value: "⛶",
                       },
                     ],
                   },

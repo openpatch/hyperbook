@@ -32,11 +32,13 @@ export default (ctx: HyperbookContext) => () => {
     visit(tree, function (node) {
       if (isDirective(node) && node.name === name) {
         const {
-          height = "auto",
+          height,
           id = hash(node),
           mode = "preview",
         } = node.attributes || {};
         const data = node.data || (node.data = {});
+        const resolvedHeight =
+          height !== undefined ? `${height}` : "calc(100dvh - 80px)";
 
         expectContainerDirective(node, file, name);
         registerDirective(file, name, ["client.js"], ["style.css"], []);
@@ -209,15 +211,18 @@ export default (ctx: HyperbookContext) => () => {
           ).toString("base64"),
           "data-base-path": basePath,
           "data-page-path": pagePath,
+          ...(height !== undefined && !isPreviewMode
+            ? { style: `--typst-height: ${height}` }
+            : {}),
         };
 
         const previewContainer: Element = {
           type: "element",
           tagName: "div",
-          properties: {
-            class: "preview-container",
-            style: `height: ${height};`,
-          },
+            properties: {
+              class: "preview-container",
+              ...(isPreviewMode ? { style: `height: ${resolvedHeight};` } : {}),
+            },
           children: [
             {
               type: "element",
@@ -286,10 +291,36 @@ export default (ctx: HyperbookContext) => () => {
           ],
         };
 
+        const createFullscreenButton = (): Element => ({
+          type: "element",
+          tagName: "button",
+          properties: {
+            class: "fullscreen",
+            title: i18n.get("ide-fullscreen-enter"),
+            "aria-label": i18n.get("ide-fullscreen-enter"),
+          },
+          children: [
+            {
+              type: "text",
+              value: "⛶",
+            },
+          ],
+        });
+
         if (isEditMode) {
           // Edit mode: show editor and preview side by side
           data.hChildren = [
             previewContainer,
+            {
+              type: "element",
+              tagName: "div",
+              properties: {
+                class: "splitter",
+                role: "separator",
+                "aria-label": "Resize panels",
+              },
+              children: [],
+            },
             {
               type: "element",
               tagName: "div",
@@ -438,6 +469,7 @@ export default (ctx: HyperbookContext) => () => {
                     },
                     downloadProjectButton,
                     downloadButton,
+                    createFullscreenButton(),
                   ],
                 },
               ],

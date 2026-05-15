@@ -77,10 +77,16 @@ ${(code.scripts ? [cdnLibraryUrl, ...code.scripts] : []).map((src) => `<script t
       if (node.type === "element" && node.tagName === "p5") {
         const {
           src = "",
-          height = 100,
+          height,
           editor = false,
           id = hash(node),
         } = node.properties || {};
+        const resolvedHeight =
+          height !== undefined
+            ? typeof height === "number"
+              ? `${height}px`
+              : `${height}`
+            : "calc(100dvh - 80px)";
 
         let bEditor = editor === "true";
 
@@ -114,9 +120,12 @@ ${(code.scripts ? [cdnLibraryUrl, ...code.scripts] : []).map((src) => `<script t
           .replace(/\u00A0/g, " ");
         node.tagName = "div";
         node.properties = {
-          class: ["directive-p5", bEditor ? "" : "standalone"].join(" "),
+          class: ["directive-p5", bEditor ? "" : "standalone"].join(" ").trim(),
           "data-template": template.replace(/\u00A0/g, " "),
           "data-id": id,
+          ...(bEditor && height !== undefined
+            ? { style: `--p5-height: ${resolvedHeight}` }
+            : {}),
         };
         node.children = [
           {
@@ -124,7 +133,7 @@ ${(code.scripts ? [cdnLibraryUrl, ...code.scripts] : []).map((src) => `<script t
             tagName: "div",
             properties: {
               class: "container",
-              style: `height: ${height}px;`,
+              ...(!bEditor ? { style: `height: ${resolvedHeight};` } : {}),
             },
             children: [
               {
@@ -144,6 +153,16 @@ ${(code.scripts ? [cdnLibraryUrl, ...code.scripts] : []).map((src) => `<script t
           },
           ...(bEditor
             ? [
+                {
+                  type: "element",
+                  tagName: "div",
+                  properties: {
+                    class: "splitter",
+                    role: "separator",
+                    "aria-label": "Resize panels",
+                  },
+                  children: [],
+                },
                 {
                   type: "element",
                   tagName: "div",
@@ -230,6 +249,21 @@ ${(code.scripts ? [cdnLibraryUrl, ...code.scripts] : []).map((src) => `<script t
                             {
                               type: "text",
                               value: i18n.get("p5-download"),
+                            },
+                          ],
+                        },
+                        {
+                          type: "element",
+                          tagName: "button",
+                          properties: {
+                            class: "fullscreen",
+                            title: i18n.get("ide-fullscreen-enter"),
+                            "aria-label": i18n.get("ide-fullscreen-enter"),
+                          },
+                          children: [
+                            {
+                              type: "text",
+                              value: "⛶",
                             },
                           ],
                         },

@@ -376,8 +376,8 @@ importers:
         specifier: ^1.1.5
         version: 1.1.5
       '@webcoder49/code-input':
-        specifier: ^2.2.1
-        version: 2.2.1
+        specifier: ^2.8.2
+        version: 2.8.2
       abcjs:
         specifier: ^6.6.0
         version: 6.6.0
@@ -3001,8 +3001,8 @@ packages:
   '@webassemblyjs/wast-printer@1.14.1':
     resolution: {integrity: sha512-kPSSXE6De1XOR820C90RIo2ogvZG+c3KiHzqUoO/F34Y2shGzesfqv7o57xrxovZJH/MetF5UjroJ/R/3isoiw==}
 
-  '@webcoder49/code-input@2.2.1':
-    resolution: {integrity: sha512-1B+wLZhBR1wyuD1bUICgNZNy5VA/z1YReMmsaGvdEHaV/Jfc7EB/4wnQ+78vEfxx0SZvHyosCivAmfmaq6tIHg==}
+  '@webcoder49/code-input@2.8.2':
+    resolution: {integrity: sha512-ji7qsSxqCFtoHgVBerwb/TZFT/5TPSEUtVXQzyQpxupWhS/Fsz3nzGdZ2T+26HbnDJDovckOGoHrC7a3ogY2rw==}
 
   '@webpack-cli/configtest@3.0.1':
     resolution: {integrity: sha512-u8d0pJ5YFgneF/GuvEiDA61Tf1VDomHHYMjv/wc9XzYj7nopltpG96nXN5dJRstxZhcNpV1g+nT6CydO7pHbjA==}
@@ -11545,7 +11545,7 @@ snapshots:
       '@webassemblyjs/ast': 1.14.1
       '@xtuc/long': 4.2.2
 
-  '@webcoder49/code-input@2.2.1': {}
+  '@webcoder49/code-input@2.8.2': {}
 
   '@webpack-cli/configtest@3.0.1(webpack-cli@6.0.1)(webpack@5.97.1)':
     dependencies:

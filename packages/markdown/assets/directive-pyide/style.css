@@ -5,6 +5,7 @@
   flex-direction: column;
   overflow: hidden;
   gap: 8px;
+  height: var(--pyide-height, calc(100dvh - 80px));
 }
 
 .directive-pyide code-input {
@@ -14,7 +15,9 @@
 .directive-pyide .container {
   width: 100%;
   overflow: hidden;
-  height: 200px;
+  min-height: 120px;
+  min-width: 120px;
+  flex: 0 0 200px;
   display: flex;
   flex-direction: column;
 }
@@ -35,6 +38,57 @@
   font-family: hyperbook-monospace, monospace;
 }
 
+.directive-pyide .output .error-line {
+  color: #b42318;
+}
+
+.directive-pyide .canvas-wrapper {
+  overflow: auto;
+  height: 100%;
+  border: 1px solid var(--color-spacer);
+  border-radius: 8px;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+.directive-pyide .canvas {
+  display: block;
+  width: auto;
+  height: auto;
+  min-height: 300px;
+}
+
+.directive-pyide .canvas-header,
+.directive-pyide .output-header {
+  border: 1px solid var(--color-spacer);
+  border-bottom: none;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  padding: 8px 16px;
+  background-color: var(--color-spacer);
+  color: var(--color-text);
+  font-weight: 600;
+  text-align: center;
+}
+
+.directive-pyide .canvas-output-splitter {
+  display: none;
+  width: 100%;
+  height: 4px;
+  margin: 10px 0;
+  cursor: row-resize;
+  background: var(--color-spacer);
+  border-radius: 999px;
+  flex-shrink: 0;
+  touch-action: none;
+  opacity: 0.45;
+  transition: opacity 0.15s ease-in-out;
+}
+
+.directive-pyide .canvas-output-splitter:hover {
+  opacity: 0.65;
+}
+
 .directive-pyide .hidden {
   display: none;
 }
@@ -43,13 +97,63 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  height: 400px;
+  min-height: 120px;
+  min-width: 120px;
+  flex: 1 1 400px;
+  overflow: hidden;
+}
+
+.directive-pyide .splitter {
+  background: var(--color-spacer);
+  border-radius: 999px;
+  flex-shrink: 0;
+  touch-action: none;
+  opacity: 0.45;
+  transition: opacity 0.15s ease-in-out;
+}
+
+.directive-pyide .splitter:hover {
+  opacity: 0.65;
+}
+
+.directive-pyide.split-vertical .splitter {
+  width: 100%;
+  height: 4px;
+  cursor: row-resize;
+}
+
+.directive-pyide.split-horizontal .splitter {
+  width: 4px;
+  height: 100%;
+  cursor: col-resize;
+}
+
+.directive-pyide.resizing {
+  user-select: none;
+}
+
+.directive-pyide.resizing .splitter {
+  opacity: 0.75;
 }
 
 .directive-pyide .editor {
   width: 100%;
   border: 1px solid var(--color-spacer);
   flex: 1;
+}
+
+.directive-pyide .editor.running {
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.directive-pyide.locked-by-other {
+  outline: 2px solid #f59e0b;
+  outline-offset: 2px;
+}
+
+.directive-pyide.locked-by-other .buttons {
+  border-color: #f59e0b;
 }
 
 .directive-pyide .buttons {
@@ -59,6 +163,7 @@
   border-bottom: none;
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
+  overflow: hidden;
 }
 
 .directive-pyide .buttons.bottom {
@@ -90,8 +195,24 @@
   cursor: pointer;
 }
 
-.directive-pyide .buttons:last-child {
+.directive-pyide .buttons button:last-child {
   border-right: none;
+}
+
+.directive-pyide .buttons:not(.bottom) button:first-child {
+  border-top-left-radius: 8px;
+}
+
+.directive-pyide .buttons:not(.bottom) button:last-child {
+  border-top-right-radius: 8px;
+}
+
+.directive-pyide .buttons.bottom button:first-child {
+  border-bottom-left-radius: 8px;
+}
+
+.directive-pyide .buttons.bottom button:last-child {
+  border-bottom-right-radius: 8px;
 }
 
 .directive-pyide button.active {
@@ -108,24 +229,80 @@
   opacity: 0.5;
 }
 
+.directive-pyide button.stopping {
+  pointer-events: auto;
+  cursor: progress;
+  opacity: 0.75;
+}
+
+.directive-pyide button.locked {
+  color: #b45309;
+  font-weight: 600;
+}
+
+.directive-pyide button.fullscreen {
+  flex: 0 0 auto;
+  min-width: 42px;
+  width: 42px;
+  padding: 8px 0;
+}
+
+.directive-pyide button.stop {
+  flex: 0 0 auto;
+  min-width: 96px;
+  color: #b42318;
+}
+
+.directive-pyide button.stop:disabled {
+  color: var(--color-text);
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.directive-pyide:fullscreen {
+  width: 100vw;
+  height: 100dvh !important;
+  padding: 12px;
+  box-sizing: border-box;
+  background-color: var(--color-background, var(--color--background, #fff));
+}
+
+.directive-pyide:fullscreen::backdrop {
+  background-color: var(--color-background, var(--color--background, #fff));
+}
+
 @media screen and (min-width: 1024px) {
   .directive-pyide {
     flex-direction: row;
-    height: calc(100dvh - 128px);
 
     .output {
       height: 100%;
     }
 
     .container {
-      flex: 1;
       height: 100% !important;
     }
 
     .editor-container {
-      flex: 3;
       height: 100%;
       overflow: hidden;
     }
+  }
+
+  .directive-pyide[data-canvas="true"].canvas-split-mode .canvas-wrapper,
+  .directive-pyide[data-canvas="true"].canvas-split-mode .output {
+    flex: 1 1 0;
+    min-height: 120px;
+    border-radius: 8px;
+  }
+
+  .directive-pyide[data-canvas="true"].canvas-split-mode .canvas-wrapper,
+  .directive-pyide[data-canvas="true"].canvas-split-mode .output {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+  }
+
+  .directive-pyide[data-canvas="true"].canvas-split-mode .canvas-output-splitter {
+    display: block;
   }
 }

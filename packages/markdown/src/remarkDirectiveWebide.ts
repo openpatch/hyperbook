@@ -48,8 +48,14 @@ html, body {
   return (tree: Root, file: VFile) => {
     visit(tree, function (node) {
       if (isDirective(node) && node.name === name) {
-        const { height = 400, id = hash(node) } = node.attributes || {};
+        const { height, id = hash(node) } = node.attributes || {};
         const data = node.data || (node.data = {});
+        const resolvedHeight =
+          height !== undefined
+            ? typeof height === "number"
+              ? `${height}px`
+              : `${height}`
+            : "calc(100dvh - 80px)";
 
         expectContainerDirective(node, file, name);
         registerDirective(file, name, ["client.js"], ["style.css"], []);
@@ -190,6 +196,7 @@ html, body {
           class: "directive-webide",
           "data-template": template.replace(/\u00A0/g, " "),
           "data-id": id,
+          ...(height !== undefined ? { style: `--webide-height: ${resolvedHeight}` } : {}),
         };
         data.hChildren = [
           {
@@ -197,7 +204,6 @@ html, body {
             tagName: "div",
             properties: {
               class: "container",
-              style: `height: ${height}px;`,
             },
             children: [
               {
@@ -227,6 +233,16 @@ html, body {
                 children: [],
               },
             ],
+          },
+          {
+            type: "element",
+            tagName: "div",
+            properties: {
+              class: "splitter",
+              role: "separator",
+              "aria-label": "Resize panels",
+            },
+            children: [],
           },
           {
             type: "element",
@@ -274,6 +290,21 @@ html, body {
                       {
                         type: "text",
                         value: i18n.get("webide-download"),
+                      },
+                    ],
+                  },
+                  {
+                    type: "element",
+                    tagName: "button",
+                    properties: {
+                      class: "fullscreen",
+                      title: i18n.get("ide-fullscreen-enter"),
+                      "aria-label": i18n.get("ide-fullscreen-enter"),
+                    },
+                    children: [
+                      {
+                        type: "text",
+                        value: "⛶",
                       },
                     ],
                   },

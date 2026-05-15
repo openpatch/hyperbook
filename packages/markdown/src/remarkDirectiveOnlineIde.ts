@@ -24,7 +24,7 @@ export default (ctx: HyperbookContext) => () => {
         const data = node.data || (node.data = {});
         const attributes = node.attributes || {};
         const {
-          height = ctx.config.elements?.onlineide?.height || "600px",
+          height = ctx.config.elements?.onlineide?.height || "calc(100dvh - 80px)",
           fileList = true,
           console: con = true,
           pCode = false,
@@ -75,6 +75,7 @@ export default (ctx: HyperbookContext) => () => {
         data.hName = "div";
         data.hProperties = {
           class: "directive-onlineide",
+          style: `--onlineide-height: ${height}`,
         };
         data.hChildren = [
           {
@@ -82,7 +83,7 @@ export default (ctx: HyperbookContext) => () => {
             tagName: "div",
             properties: {
               class: "java-online",
-              style: `height: ${height}; padding: 0; margin: 0;`,
+              style: `padding: 0; margin: 0;`,
               "data-java-online": `{'id': '${id}', 'speed': ${speed}, 'withBottomPanel': ${bottomPanel},'withPCode': ${pCode},'withConsole': ${con},'withFileList': ${fileList},'withErrorList': ${errorList}, 'libraries': [${libraries?.split(",").map((lib) => `'${lib.trim()}'`)}]}`,
             },
             children: [...codes],

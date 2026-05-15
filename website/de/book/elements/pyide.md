@@ -30,6 +30,20 @@ print(a)
 
 Sie können auch jedes Paket verwenden, das hier aufgeführt ist: https://pyodide.org/en/stable/usage/packages-in-pyodide.html
 
+Wenn Sie Pakete aus PyPI benötigen, verwenden Sie das Attribut `packages` mit einer kommaseparierten Liste. Hyperbook lädt `micropip` und installiert diese Pakete vor der Ausführung Ihres Skripts.
+
+````md
+:::pyide{packages="snowballstemmer"}
+
+```python
+import snowballstemmer
+stemmer = snowballstemmer.stemmer("english")
+print(stemmer.stemWords(["running", "runner", "runs"]))
+```
+
+:::
+````
+
 ````md
 :::pyide
 
@@ -114,27 +128,14 @@ def check_palindrom(s):
 
 :::
 
-## Input()
-
-Sie können die `input()`-Funktion in den Code-Snippets verwenden. Die `input()`-Funktion wird durch die im `input`-Tag angegebenen Werte ersetzt.
-Wenn es mehrere `input()`-Funktionen gibt, werden die Werte in der Reihenfolge bereitgestellt, in der sie im `input`-Tag geschrieben sind.
-Wenn Sie `input()` öfter aufrufen als die Anzahl der bereitgestellten Werte, wird ein Fehler ausgelöst.
+Wenn Ihr Code `input()` aufruft, zeigt der Browser einen Prompt-Dialog für die Eingabe an.
 
 ````md
 :::pyide
 
-```input
-a
-b
-c
-d
-```
-
 ```python
-print(input())
-print(input())
-print(input())
-print(input())
+a = input("Enter a value: ")
+print(a)
 ```
 
 :::
@@ -142,18 +143,10 @@ print(input())
 
 :::pyide
 
-```input
-a
-b
-c
-d
-```
 
 ```python
-print(input())
-print(input())
-print(input())
-print(input())
+a = input("Enter a value: ")
+print(a)
 ```
 
 :::
@@ -161,9 +154,136 @@ print(input())
 ## Ausführung stoppen
 
 :::alert{warn}
-Das Stoppen einer Endlosschleife oder eines lang andauernden Prozesses ist nur durch Aktualisieren der Seite oder durch Setzen dieser beiden Header auf Ihrem Server möglich:
+Nutzen Sie den **Stoppen**-Button im Editor, um eine Unterbrechung anzufordern.
+Das Stoppen einer Endlosschleife oder eines lang andauernden Prozesses ist jedoch nur zuverlässig, wenn diese beiden Header auf Ihrem Server gesetzt sind:
 ```
 'Cross-Origin-Embedder-Policy': 'require-corp'
 'Cross-Origin-Opener-Policy': 'same-origin'
 ```
+:::
+
+## Bibliotheken mit SDL
+
+### PyGame
+
+````hyperbook
+:::pyide{canvas}
+
+```python
+import pygame
+import asyncio
+
+async def run_game():
+    fps = 60
+    pygame.init()
+    screen = pygame.display.set_mode((400, 300))
+    r = 0
+    g = 0
+    b = 0
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_r:
+                    r = (r + 50) % 256
+                elif event.key == pygame.K_g:
+                    g = (g + 50) % 256
+                elif event.key == pygame.K_b:
+                    b = (b + 50) % 256
+                elif event.key == pygame.K_ESCAPE:
+                    sys.exit()
+            elif event.type == pygame.QUIT:
+                return
+        screen.fill((r, g, b))
+        pygame.display.flip()
+        await asyncio.sleep(1 / fps)
+
+asyncio.run(run_game())
+```
+
+:::
+````
+
+:::pyide{canvas}
+
+```python
+import pygame
+import asyncio
+
+async def run_game():
+    fps = 60
+    pygame.init()
+    screen = pygame.display.set_mode((400, 300))
+    r = 0
+    g = 0
+    b = 0
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_r:
+                    r = (r + 50) % 256
+                elif event.key == pygame.K_g:
+                    g = (g + 50) % 256
+                elif event.key == pygame.K_b:
+                    b = (b + 50) % 256
+                elif event.key == pygame.K_ESCAPE:
+                    sys.exit()
+            elif event.type == pygame.QUIT:
+                return
+        screen.fill((r, g, b))
+        pygame.display.flip()
+        await asyncio.sleep(1 / fps)
+
+asyncio.run(run_game())
+```
+
+:::
+
+## Pytamaro
+
+````hyperbook
+:::pyide{packages="pytamaro"}
+
+```python
+from pytamaro import *
+
+block_size = 25
+num_blocks = 16
+line = empty_graphic()
+for col in range(num_blocks):
+if col % 2 == 0:
+    color = black
+else:
+    color = white
+block = rectangle(block_size, block_size, color)
+line = beside(line, block)
+second_line = rotate(180, line)
+finish_line = above(line, second_line)
+show_graphic(finish_line)
+```
+
+:::
+````
+
+:::pyide{packages="pytamaro"}
+
+```python
+from pytamaro import *
+
+block_size = 25
+num_blocks = 16
+line = empty_graphic()
+for col in range(num_blocks):
+    if col % 2 == 0:
+        color = black
+    else:
+        color = white
+    block = rectangle(block_size, block_size, color)
+    line = beside(line, block)
+second_line = rotate(180, line)
+finish_line = above(line, second_line)
+show_graphic(finish_line)
+```
+
 :::
