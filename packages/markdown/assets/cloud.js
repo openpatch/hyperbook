@@ -159,13 +159,22 @@ hyperbook.cloud = (function () {
           }
 
           if (result.conflict) {
-            // 409 — stale state, re-fetch
-            console.log("⚠ Stale state detected, re-fetching from cloud...");
-            await loadFromCloud();
+            // 409 — stale state, force overwrite with current local snapshot.
+            // This avoids repeated reload loops and makes sync deterministic.
+            console.log("⚠ Stale state detected, overwriting cloud state with local snapshot...");
+            const snapshotResult = await this.sendSnapshot();
             // FIX: only discard the events we tried to send, not any that
             // arrived concurrently during the async round-trip
             this.pendingEvents = this.pendingEvents.slice(eventsToSend.length);
-            window.location.reload();
+            this.lastEventId = snapshotResult.lastEventId;
+            localStorage.setItem(
+              LAST_EVENT_ID_KEY,
+              String(this.lastEventId),
+            );
+            this.lastSaveTime = Date.now();
+            this.retryCount = 0;
+            this.updateUI("saved");
+            console.log("✓ Conflict resolved by snapshot overwrite");
             return;
           }
 
@@ -308,11 +317,18 @@ hyperbook.cloud = (function () {
           const result = await this.sendEvents(queued.events, { afterEventId: queued.afterEventId });
 
           if (result.conflict) {
-            // Conflict — discard remaining queue, re-fetch
-            console.log("⚠ Offline queue conflict, re-fetching...");
+            // Conflict while replaying offline changes — resolve by replacing
+            // cloud state with the current local snapshot.
+            console.log("⚠ Offline queue conflict, overwriting cloud state...");
             this.offlineQueue = [];
-            await loadFromCloud();
-            window.location.reload();
+            const snapshotResult = await this.sendSnapshot();
+            this.lastEventId = snapshotResult.lastEventId;
+            localStorage.setItem(
+              LAST_EVENT_ID_KEY,
+              String(this.lastEventId),
+            );
+            this.lastSaveTime = Date.now();
+            console.log("✓ Offline conflict resolved by snapshot overwrite");
             return;
           }
 
