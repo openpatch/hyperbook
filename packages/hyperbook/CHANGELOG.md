@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.91.1
+
+### Patch Changes
+
+- [`894f47b`](https://github.com/openpatch/hyperbook/commit/894f47ba98ea7e1057ec6b7ffbd905a2a2f7be1b) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix pyide editors restoring saved code when the `code-input_load` event fires before the restore handler is attached.
+
 ## 0.91.0
 
 ### Minor Changes
