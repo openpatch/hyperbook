@@ -5,7 +5,7 @@
   flex-direction: column;
   overflow: hidden;
   gap: 8px;
-  height: calc(100dvh - 80px);
+  height: var(--typst-height, calc(100dvh - 80px));
 }
 
 code-input {
@@ -21,6 +21,7 @@ code-input {
   overflow: auto;
   background-color: var(--color--background);
   position: relative;
+  flex: 1 1 0;
 }
 
 .directive-typst .typst-preview {
@@ -171,7 +172,7 @@ code-input {
   flex-direction: column;
   min-height: 120px;
   min-width: 120px;
-  height: 400px;
+  flex: 1 1 0;
 }
 
 .directive-typst .splitter {
@@ -511,7 +512,6 @@ code-input {
 @media screen and (min-width: 1024px) {
   .directive-typst:not(.preview-only) {
     flex-direction: row;
-    height: calc(100dvh - 80px);
 
     .preview-container {
       flex: 1;

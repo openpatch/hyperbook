@@ -26,7 +26,7 @@ export default (ctx: HyperbookContext) => () => {
         let {
           id = hash(node),
           db,
-          height = ctx.config.elements?.sqlide?.height || "600px",
+          height = ctx.config.elements?.sqlide?.height || "calc(100dvh - 80px)",
         } = attributes;
 
         if (!db) {
@@ -88,6 +88,7 @@ export default (ctx: HyperbookContext) => () => {
         data.hName = "div";
         data.hProperties = {
           class: "directive-sqlide",
+          style: `--sqlide-height: ${height}`,
         };
         data.hChildren = [
           {
@@ -95,7 +96,7 @@ export default (ctx: HyperbookContext) => () => {
             tagName: "div",
             properties: {
               class: "sql-online",
-              style: `height: ${height}; padding: 0; margin: 0;`,
+              style: `padding: 0; margin: 0;`,
               "data-sql-online": `{'id': '${id}', "databaseURL": "${db}"}`,
             },
             children: [...codes],

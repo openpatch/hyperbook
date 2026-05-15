@@ -5,6 +5,7 @@
   flex-direction: column;
   overflow: hidden;
   gap: 8px;
+  height: var(--pyide-height, calc(100dvh - 80px));
 }
 
 .directive-pyide code-input {
@@ -273,7 +274,6 @@
 @media screen and (min-width: 1024px) {
   .directive-pyide {
     flex-direction: row;
-    height: calc(100dvh - 80px);
 
     .output {
       height: 100%;

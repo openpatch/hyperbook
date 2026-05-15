@@ -211,6 +211,9 @@ export default (ctx: HyperbookContext) => () => {
           ).toString("base64"),
           "data-base-path": basePath,
           "data-page-path": pagePath,
+          ...(height !== undefined && !isPreviewMode
+            ? { style: `--typst-height: ${height}` }
+            : {}),
         };
 
         const previewContainer: Element = {
@@ -218,7 +221,7 @@ export default (ctx: HyperbookContext) => () => {
           tagName: "div",
             properties: {
               class: "preview-container",
-              style: `height: ${resolvedHeight};`,
+              ...(isPreviewMode ? { style: `height: ${resolvedHeight};` } : {}),
             },
           children: [
             {

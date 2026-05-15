@@ -3,6 +3,9 @@
   border-radius: 8px;
   background: #1e1e1e;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: var(--sqlide-height, calc(100dvh - 80px));
 
   .jo_iconButton.img_whole-window-dark {
     display: none;
@@ -17,6 +20,11 @@
   .jo_result-body tr:nth-child(2n+1) {
     background: var(--table-odd);
   }
+}
+
+.directive-sqlide .sql-online {
+  flex: 1;
+  min-height: 0;
 }
 
 .directive-sqlide .menu {

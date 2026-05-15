@@ -26,7 +26,15 @@ code-input {
   flex-direction: column;
   min-height: 120px;
   min-width: 120px;
-  height: 400px;
+  flex: 1 1 0;
+}
+
+.directive-p5:not(.standalone) {
+  height: var(--p5-height, calc(100dvh - 80px));
+}
+
+.directive-p5:not(.standalone) .container {
+  flex: 1 1 0;
 }
 
 .directive-p5 .splitter {
@@ -136,7 +144,6 @@ code-input {
 @media screen and (min-width: 1024px) {
   .directive-p5:not(.standalone) {
     flex-direction: row;
-    height: calc(100dvh - 80px);
     .container {
       flex: 1;
       height: 100% !important;

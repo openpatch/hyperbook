@@ -46,7 +46,7 @@ export default (ctx: HyperbookContext) => () => {
         if (node.name !== name) return;
 
         const data = node.data || (node.data = {});
-        const { src = "", id = hash(node), packages } = node.attributes || {};
+        const { src = "", id = hash(node), packages, height } = node.attributes || {};
         const hasCanvas = "canvas" in (node.attributes || {});
         const packageList = parsePackagesAttribute(packages);
 
@@ -92,6 +92,7 @@ export default (ctx: HyperbookContext) => () => {
           ...(packageList.length > 0
             ? { "data-packages": packageList.join(",") }
             : {}),
+          ...(height ? { style: `--pyide-height: ${height}` } : {}),
         };
         data.hChildren = [
           {

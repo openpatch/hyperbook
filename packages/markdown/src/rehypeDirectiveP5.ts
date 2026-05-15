@@ -120,9 +120,12 @@ ${(code.scripts ? [cdnLibraryUrl, ...code.scripts] : []).map((src) => `<script t
           .replace(/\u00A0/g, " ");
         node.tagName = "div";
         node.properties = {
-          class: ["directive-p5", bEditor ? "" : "standalone"].join(" "),
+          class: ["directive-p5", bEditor ? "" : "standalone"].join(" ").trim(),
           "data-template": template.replace(/\u00A0/g, " "),
           "data-id": id,
+          ...(bEditor && height !== undefined
+            ? { style: `--p5-height: ${resolvedHeight}` }
+            : {}),
         };
         node.children = [
           {
@@ -130,7 +133,7 @@ ${(code.scripts ? [cdnLibraryUrl, ...code.scripts] : []).map((src) => `<script t
             tagName: "div",
             properties: {
               class: "container",
-              style: `height: ${resolvedHeight};`,
+              ...(!bEditor ? { style: `height: ${resolvedHeight};` } : {}),
             },
             children: [
               {

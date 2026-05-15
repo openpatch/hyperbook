@@ -196,6 +196,7 @@ html, body {
           class: "directive-webide",
           "data-template": template.replace(/\u00A0/g, " "),
           "data-id": id,
+          ...(height !== undefined ? { style: `--webide-height: ${resolvedHeight}` } : {}),
         };
         data.hChildren = [
           {
@@ -203,7 +204,6 @@ html, body {
             tagName: "div",
             properties: {
               class: "container",
-              style: `height: ${resolvedHeight};`,
             },
             children: [
               {
