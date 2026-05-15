@@ -259,7 +259,6 @@ hyperbook.python = (function () {
     const elem = document.getElementById(id);
     if (!elem) return;
     const canvas = elem.getElementsByClassName("canvas")[0];
-    document.activeElement?.blur?.();
     canvas?.blur?.();
   };
 
