@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.91.0
+
+### Minor Changes
+
+- [#1123](https://github.com/openpatch/hyperbook/pull/1123) [`5607041`](https://github.com/openpatch/hyperbook/commit/56070412972900fc3c76978297875ce7cde43a25) Thanks [@copilot-swe-agent](https://github.com/apps/copilot-swe-agent)! - Add graphical output support to pyide. For example for pygame.
+
 ## 0.90.0
 
 ### Minor Changes

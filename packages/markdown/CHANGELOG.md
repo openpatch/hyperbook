@@ -1,5 +1,15 @@
 # @hyperbook/markdown
 
+## 0.62.0
+
+### Minor Changes
+
+- [#1123](https://github.com/openpatch/hyperbook/pull/1123) [`5607041`](https://github.com/openpatch/hyperbook/commit/56070412972900fc3c76978297875ce7cde43a25) Thanks [@copilot-swe-agent](https://github.com/apps/copilot-swe-agent)! - Add graphical output support to pyide. For example for pygame.
+
+### Patch Changes
+
+- [#1123](https://github.com/openpatch/hyperbook/pull/1123) [`5607041`](https://github.com/openpatch/hyperbook/commit/56070412972900fc3c76978297875ce7cde43a25) Thanks [@copilot-swe-agent](https://github.com/apps/copilot-swe-agent)! - Fix pytamaro show_graphic not rendering images in pyide output. Parse `@@@PYTAMARO_DATA_URI_BEGIN@@@` / `@@@PYTAMARO_DATA_URI_END@@@` markers in stdout and render them as inline `<img>` elements.
+
 ## 0.61.1
 
 ### Patch Changes

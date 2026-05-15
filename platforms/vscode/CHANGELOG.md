@@ -1,5 +1,16 @@
 # @hyperbook/vscode-extension
 
+## 0.50.0
+
+### Minor Changes
+
+- [#1123](https://github.com/openpatch/hyperbook/pull/1123) [`5607041`](https://github.com/openpatch/hyperbook/commit/56070412972900fc3c76978297875ce7cde43a25) Thanks [@copilot-swe-agent](https://github.com/apps/copilot-swe-agent)! - Add graphical output support to pyide. For example for pygame.
+
+### Patch Changes
+
+- Updated dependencies [[`5607041`](https://github.com/openpatch/hyperbook/commit/56070412972900fc3c76978297875ce7cde43a25), [`5607041`](https://github.com/openpatch/hyperbook/commit/56070412972900fc3c76978297875ce7cde43a25)]:
+  - @hyperbook/markdown@0.62.0
+
 ## 0.49.39
 
 ### Patch Changes
