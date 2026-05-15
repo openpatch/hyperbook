@@ -259,12 +259,8 @@ hyperbook.python = (function () {
     const elem = document.getElementById(id);
     if (!elem) return;
     const canvas = elem.getElementsByClassName("canvas")[0];
-    const editor = elem.getElementsByClassName("editor")[0];
     document.activeElement?.blur?.();
     canvas?.blur?.();
-    window.setTimeout(() => {
-      editor?.focus?.();
-    }, 0);
   };
 
   const resetCanvas = (canvas) => {
