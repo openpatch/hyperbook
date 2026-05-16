@@ -1,0 +1,19 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`remarkDirectiveOpenscad > should transform basic openscad 1`] = `
+"
+<div class="directive-openscad" data-id="2f3d1caccab3360d23eb47da1cba3a5e0f8d6adb066e9298d473e0e82351d9f7">
+  <div class="preview-container">
+    <div class="preview-header">openscad-preview</div>
+    <canvas class="preview-canvas"></canvas>
+    <pre class="output"></pre>
+  </div>
+  <div class="splitter" role="separator" aria-label="Resize panels"></div>
+  <div class="editor-container">
+    <div class="buttons"><button class="tab-code active">openscad-code</button><button class="tab-parameters">openscad-parameters</button></div>
+    <code-input class="editor active line-numbers" language="clike" template="openscad-highlighted">cube([20,20,20], center=true);</code-input><textarea class="parameters" placeholder="{&#x22;size&#x22;: 20, &#x22;height&#x22;: 10}">{}</textarea>
+    <div class="buttons bottom"><button class="render">openscad-render</button><button class="copy">openscad-copy</button><button class="download-stl">openscad-download-stl</button><button class="download-3mf">openscad-download-3mf</button><button class="reset">openscad-reset</button><button class="fullscreen" title="ide-fullscreen-enter" aria-label="ide-fullscreen-enter">⛶</button></div>
+  </div>
+</div>
+"
+`;

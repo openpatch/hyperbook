@@ -1,0 +1,173 @@
+.directive-openscad {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  overflow: hidden;
+  gap: 8px;
+  height: var(--openscad-height, calc(100dvh - 80px));
+}
+
+.directive-openscad .preview-container {
+  width: 100%;
+  min-height: 120px;
+  min-width: 120px;
+  border: 1px solid var(--color-spacer);
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: var(--color--background);
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.directive-openscad .preview-header {
+  border-bottom: 1px solid var(--color-spacer);
+  padding: 8px 16px;
+  font-weight: 600;
+}
+
+.directive-openscad .preview-canvas {
+  width: 100%;
+  height: 100%;
+  min-height: 260px;
+  display: block;
+  background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
+}
+
+.directive-openscad .output {
+  margin: 0;
+  border-top: 1px solid var(--color-spacer);
+  padding: 8px 12px;
+  min-height: 56px;
+  max-height: 120px;
+  overflow: auto;
+  white-space: pre-wrap;
+  font-family: hyperbook-monospace, monospace;
+}
+
+.directive-openscad .editor-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 120px;
+  min-width: 120px;
+  flex: 1 1 0;
+}
+
+.directive-openscad .splitter {
+  background: var(--color-spacer);
+  border-radius: 999px;
+  flex-shrink: 0;
+  touch-action: none;
+  opacity: 0.45;
+  transition: opacity 0.15s ease-in-out;
+}
+
+.directive-openscad .splitter:hover {
+  opacity: 0.65;
+}
+
+.directive-openscad.split-vertical .splitter {
+  width: 100%;
+  height: 4px;
+  cursor: row-resize;
+}
+
+.directive-openscad.split-horizontal .splitter {
+  width: 4px;
+  height: 100%;
+  cursor: col-resize;
+}
+
+.directive-openscad.resizing {
+  user-select: none;
+}
+
+.directive-openscad .buttons {
+  display: flex;
+  border: 1px solid var(--color-spacer);
+  border-radius: 8px;
+  border-bottom: none;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  overflow: hidden;
+}
+
+.directive-openscad .buttons.bottom {
+  border: 1px solid var(--color-spacer);
+  border-radius: 8px;
+  border-top: none;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+.directive-openscad button {
+  flex: 1;
+  padding: 8px 16px;
+  border: none;
+  border-right: 1px solid var(--color-spacer);
+  background-color: var(--color--background);
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.directive-openscad .buttons button:last-child {
+  border-right: none;
+}
+
+.directive-openscad button.fullscreen {
+  flex: 0 0 auto;
+  min-width: 42px;
+  width: 42px;
+  padding: 8px 0;
+}
+
+.directive-openscad button:hover,
+.directive-openscad button.active {
+  background-color: var(--color-spacer);
+}
+
+.directive-openscad .editor,
+.directive-openscad .parameters {
+  width: 100%;
+  border: 1px solid var(--color-spacer);
+  flex: 1;
+}
+
+.directive-openscad .parameters {
+  display: none;
+  box-sizing: border-box;
+  resize: none;
+  padding: 12px;
+  font-family: hyperbook-monospace, monospace;
+}
+
+.directive-openscad .editor:not(.active),
+.directive-openscad .parameters:not(.active) {
+  display: none;
+}
+
+.directive-openscad:fullscreen {
+  width: 100vw;
+  height: 100dvh !important;
+  padding: 12px;
+  box-sizing: border-box;
+  background-color: var(--color-background, var(--color--background, #fff));
+}
+
+.directive-openscad:fullscreen::backdrop {
+  background-color: var(--color-background, var(--color--background, #fff));
+}
+
+@media screen and (min-width: 1024px) {
+  .directive-openscad {
+    flex-direction: row;
+  }
+
+  .directive-openscad .preview-container,
+  .directive-openscad .editor-container {
+    flex: 1;
+    height: 100% !important;
+  }
+}

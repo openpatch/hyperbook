@@ -15,7 +15,7 @@ Markdown processing engine for Hyperbook. This package provides extensive markdo
 - Image processing with attributes
 
 **Supported Directives:**
-`:alert`, `:video`, `:youtube`, `:audio`, `:archive`, `:download`, `:embed`, `:excalidraw`, `:mermaid`, `:plantuml`, `:collapsible`, `:tabs`, `:tiles`, `:slideshow`, `:term`, `:pagelist`, `:bookmarks`, `:qr`, `:protect`, `:textinput`, `:pyide`, `:sqlide`, `:webide`, `:onlineide`, `:scratchblock`, `:h5p`, `:geogebra`, `:jsxgraph`, `:abcmusic`, `:learningmap`, `:struktog`, `:typst`, and more.
+`:alert`, `:video`, `:youtube`, `:audio`, `:archive`, `:download`, `:embed`, `:excalidraw`, `:mermaid`, `:plantuml`, `:collapsible`, `:tabs`, `:tiles`, `:slideshow`, `:term`, `:pagelist`, `:bookmarks`, `:qr`, `:protect`, `:textinput`, `:pyide`, `:sqlide`, `:webide`, `:onlineide`, `:scratchblock`, `:h5p`, `:geogebra`, `:jsxgraph`, `:abcmusic`, `:learningmap`, `:struktog`, `:typst`, `:openscad`, and more.
 
 ## Installation
 
