@@ -37,9 +37,9 @@ hyperbook.openscad = (function () {
   const getThree = async () => {
     if (!threePromise) {
       threePromise = Promise.all([
-        import("https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js"),
-        import("https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/loaders/STLLoader.js"),
-        import("https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/controls/OrbitControls.js"),
+        import("https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js/+esm"),
+        import("https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/loaders/STLLoader.js/+esm"),
+        import("https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/controls/OrbitControls.js/+esm"),
       ]).then(([THREE, STLLoaderModule, OrbitControlsModule]) => ({
         THREE,
         STLLoader: STLLoaderModule.STLLoader,
