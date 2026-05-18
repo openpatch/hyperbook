@@ -381,6 +381,22 @@ hyperbook.python = (function () {
       const numeric = Number(value);
       return Number.isFinite(numeric) ? numeric : fallback;
     };
+    const toPlainBoolean = (value, fallback = false) => {
+      if (value === null || value === undefined) return fallback;
+      if (typeof value === "boolean") return value;
+      if (typeof value === "number") return value !== 0;
+      if (typeof value === "bigint") return value !== 0n;
+      if (typeof value === "string") {
+        const normalized = value.trim().toLowerCase();
+        if (!normalized) return fallback;
+        if (["false", "0", "no", "off"].includes(normalized)) return false;
+        if (["true", "1", "yes", "on"].includes(normalized)) return true;
+      }
+      if (typeof value.toJs === "function") {
+        return toPlainBoolean(value.toJs({ pyproxies: [] }), fallback);
+      }
+      return Boolean(value);
+    };
     const fontSizeToCanvasUnits = (value) => {
       const numeric = toPlainNumber(value, Number.NaN);
       if (!Number.isFinite(numeric) || numeric === 0) {
@@ -1026,28 +1042,21 @@ hyperbook.python = (function () {
       let writeMove = move;
       let writeAlign = align;
       let writeFont = font;
-
-      if (isWriteKwargsObject(writeAlign)) {
-        const kwargs = toPlainObject(writeAlign);
-        if (kwargs) {
-          if (hasOwn(kwargs, "arg")) writeText = kwargs.arg;
-          else if (hasOwn(kwargs, "text")) writeText = kwargs.text;
-          if (hasOwn(kwargs, "move")) writeMove = kwargs.move;
-          if (hasOwn(kwargs, "align")) writeAlign = kwargs.align;
-          if (hasOwn(kwargs, "font")) writeFont = kwargs.font;
-        }
-      }
-      if (isWriteKwargsObject(writeFont)) {
-        const kwargs = toPlainObject(writeFont);
-        if (kwargs) {
-          if (hasOwn(kwargs, "arg")) writeText = kwargs.arg;
-          else if (hasOwn(kwargs, "text")) writeText = kwargs.text;
-          if (hasOwn(kwargs, "move")) writeMove = kwargs.move;
-          if (hasOwn(kwargs, "align")) writeAlign = kwargs.align;
-          if (hasOwn(kwargs, "font")) writeFont = kwargs.font;
-        }
-        writeFont = null;
-      }
+      const applyWriteKwargs = (candidate) => {
+        if (!isWriteKwargsObject(candidate)) return;
+        const kwargs = toPlainObject(candidate);
+        if (!kwargs) return;
+        if (hasOwn(kwargs, "arg")) writeText = kwargs.arg;
+        else if (hasOwn(kwargs, "text")) writeText = kwargs.text;
+        if (hasOwn(kwargs, "move")) writeMove = kwargs.move;
+        if (hasOwn(kwargs, "align")) writeAlign = kwargs.align;
+        if (hasOwn(kwargs, "font")) writeFont = kwargs.font;
+      };
+      applyWriteKwargs(writeText);
+      applyWriteKwargs(writeMove);
+      applyWriteKwargs(writeAlign);
+      applyWriteKwargs(writeFont);
+      if (isWriteKwargsObject(writeFont)) writeFont = null;
 
       let family = currentFontFamily;
       let size = fontSize;
@@ -1080,7 +1089,7 @@ hyperbook.python = (function () {
           },
         ],
       });
-      if (Boolean(writeMove)) {
+      if (toPlainBoolean(writeMove, false)) {
         const metrics = measureTurtleText(String(writeText), family, size, style);
         const left = metrics.left || 0;
         const right = metrics.right || metrics.width || 0;
