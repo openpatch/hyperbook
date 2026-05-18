@@ -38,6 +38,19 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.93.0
+
+::::tabs
+
+:::tab{title="Improved :+1:" id="improved"}
+
+- Add turtle library to pyide, which mimicks the turtle library in python.
+- Move pytamaro output to the canvas, which allows for better performance and more features like saving the output as an image.
+
+:::
+
+::::
+
 ## v0.92.0
 
 ::::tabs
