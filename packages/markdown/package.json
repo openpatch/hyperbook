@@ -67,6 +67,7 @@
     "remark-rehype": "^11.1.2",
     "shiki": "^3.21.0",
     "sort-keys": "^6.0.0",
+    "three": "0.170.0",
     "unified": "^11.0.5",
     "unist-util-find-after": "^5.0.0",
     "unist-util-visit": "^5.1.0",

@@ -30,7 +30,7 @@ export default (ctx: HyperbookContext) => () => {
   return (tree: Root, file: VFile) => {
     visit(tree, function (node) {
       if (isDirective(node) && node.name === name) {
-        const { src = "", id = hash(node), height } = node.attributes || {};
+        const { src = "", id = hash(node), height, library } = node.attributes || {};
         const data = node.data || (node.data = {});
 
         expectContainerDirective(node, file, name);
@@ -59,44 +59,75 @@ export default (ctx: HyperbookContext) => () => {
           class: "directive-openscad",
           "data-id": id,
           ...(height ? { style: `--openscad-height: ${height}` } : {}),
+          ...(library ? { "data-library": library } : {}),
         };
 
         data.hChildren = [
           {
             type: "element",
             tagName: "div",
-            properties: {
-              class: "preview-container",
-            },
+            properties: { class: "left-side" },
             children: [
               {
                 type: "element",
                 tagName: "div",
-                properties: {
-                  class: "preview-header",
-                },
+                properties: { class: "preview-container" },
                 children: [
                   {
-                    type: "text",
-                    value: i18n.get("openscad-preview"),
+                    type: "element",
+                    tagName: "div",
+                    properties: { class: "preview-header" },
+                    children: [{ type: "text", value: i18n.get("openscad-preview") }],
+                  },
+                  {
+                    type: "element",
+                    tagName: "div",
+                    properties: { class: "canvas-wrapper" },
+                    children: [
+                      {
+                        type: "element",
+                        tagName: "canvas",
+                        properties: { class: "preview-canvas" },
+                        children: [],
+                      },
+                      {
+                        type: "element",
+                        tagName: "div",
+                        properties: { class: "canvas-overlay hidden" },
+                        children: [],
+                      },
+                    ],
                   },
                 ],
               },
               {
                 type: "element",
-                tagName: "canvas",
+                tagName: "div",
                 properties: {
-                  class: "preview-canvas",
+                  class: "canvas-params-splitter hidden",
+                  role: "separator",
+                  "aria-label": "Resize canvas and parameters",
                 },
                 children: [],
               },
               {
                 type: "element",
-                tagName: "pre",
-                properties: {
-                  class: "output",
-                },
-                children: [],
+                tagName: "div",
+                properties: { class: "parameters-panel hidden" },
+                children: [
+                  {
+                    type: "element",
+                    tagName: "div",
+                    properties: { class: "parameters-header" },
+                    children: [{ type: "text", value: i18n.get("openscad-parameters") }],
+                  },
+                  {
+                    type: "element",
+                    tagName: "div",
+                    properties: { class: "parameters-body" },
+                    children: [],
+                  },
+                ],
               },
             ],
           },
@@ -113,42 +144,18 @@ export default (ctx: HyperbookContext) => () => {
           {
             type: "element",
             tagName: "div",
-            properties: {
-              class: "editor-container",
-            },
+            properties: { class: "editor-container" },
             children: [
               {
                 type: "element",
                 tagName: "div",
-                properties: {
-                  class: "buttons",
-                },
+                properties: { class: "buttons" },
                 children: [
                   {
                     type: "element",
                     tagName: "button",
-                    properties: {
-                      class: "tab-code active",
-                    },
-                    children: [
-                      {
-                        type: "text",
-                        value: i18n.get("openscad-code"),
-                      },
-                    ],
-                  },
-                  {
-                    type: "element",
-                    tagName: "button",
-                    properties: {
-                      class: "tab-parameters",
-                    },
-                    children: [
-                      {
-                        type: "text",
-                        value: i18n.get("openscad-parameters"),
-                      },
-                    ],
+                    properties: { class: "render" },
+                    children: [{ type: "text", value: i18n.get("openscad-render") }],
                   },
                 ],
               },
@@ -156,16 +163,11 @@ export default (ctx: HyperbookContext) => () => {
                 type: "element",
                 tagName: "code-input",
                 properties: {
-                  class: "editor active line-numbers",
+                  class: "editor line-numbers",
                   language: "clike",
                   template: "openscad-highlighted",
                 },
-                children: [
-                  {
-                    type: "raw",
-                    value: htmlEntities(source),
-                  },
-                ],
+                children: [{ type: "raw", value: htmlEntities(source) }],
               },
               {
                 type: "element",
@@ -174,84 +176,30 @@ export default (ctx: HyperbookContext) => () => {
                   class: "parameters",
                   placeholder: '{"size": 20, "height": 10}',
                 },
-                children: [
-                  {
-                    type: "text",
-                    value: "{}",
-                  },
-                ],
+                children: [{ type: "text", value: "{}" }],
               },
               {
                 type: "element",
                 tagName: "div",
-                properties: {
-                  class: "buttons bottom",
-                },
+                properties: { class: "buttons bottom" },
                 children: [
                   {
                     type: "element",
                     tagName: "button",
-                    properties: {
-                      class: "render",
-                    },
-                    children: [
-                      {
-                        type: "text",
-                        value: i18n.get("openscad-render"),
-                      },
-                    ],
+                    properties: { class: "copy" },
+                    children: [{ type: "text", value: i18n.get("openscad-copy") }],
                   },
                   {
                     type: "element",
                     tagName: "button",
-                    properties: {
-                      class: "copy",
-                    },
-                    children: [
-                      {
-                        type: "text",
-                        value: i18n.get("openscad-copy"),
-                      },
-                    ],
+                    properties: { class: "download-stl" },
+                    children: [{ type: "text", value: i18n.get("openscad-download-stl") }],
                   },
                   {
                     type: "element",
                     tagName: "button",
-                    properties: {
-                      class: "download-stl",
-                    },
-                    children: [
-                      {
-                        type: "text",
-                        value: i18n.get("openscad-download-stl"),
-                      },
-                    ],
-                  },
-                  {
-                    type: "element",
-                    tagName: "button",
-                    properties: {
-                      class: "download-3mf",
-                    },
-                    children: [
-                      {
-                        type: "text",
-                        value: i18n.get("openscad-download-3mf"),
-                      },
-                    ],
-                  },
-                  {
-                    type: "element",
-                    tagName: "button",
-                    properties: {
-                      class: "reset",
-                    },
-                    children: [
-                      {
-                        type: "text",
-                        value: i18n.get("openscad-reset"),
-                      },
-                    ],
+                    properties: { class: "reset" },
+                    children: [{ type: "text", value: i18n.get("openscad-reset") }],
                   },
                   {
                     type: "element",
@@ -261,12 +209,7 @@ export default (ctx: HyperbookContext) => () => {
                       title: i18n.get("ide-fullscreen-enter"),
                       "aria-label": i18n.get("ide-fullscreen-enter"),
                     },
-                    children: [
-                      {
-                        type: "text",
-                        value: "⛶",
-                      },
-                    ],
+                    children: [{ type: "text", value: "⛶" }],
                   },
                 ],
               },
