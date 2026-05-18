@@ -326,6 +326,9 @@ importers:
       sort-keys:
         specifier: ^6.0.0
         version: 6.0.0
+      three:
+        specifier: 0.170.0
+        version: 0.170.0
       unified:
         specifier: ^11.0.5
         version: 11.0.5
@@ -8167,6 +8170,9 @@ packages:
   textextensions@6.11.0:
     resolution: {integrity: sha512-tXJwSr9355kFJI3lbCkPpUH5cP8/M0GGy2xLO34aZCjMXBaK3SoPnZwr/oWmo1FdCnELcs4npdCIOFtq9W3ruQ==}
     engines: {node: '>=4'}
+
+  three@0.170.0:
+    resolution: {integrity: sha512-FQK+LEpYc0fBD+J8g6oSEyyNzjp+Q7Ks1C568WWaoMRLW+TkNNWmenWeGgJjV105Gd+p/2ql1ZcjYvNiPZBhuQ==}
 
   throttle-debounce@5.0.2:
     resolution: {integrity: sha512-B71/4oyj61iNH0KeCamLuE2rmKuTO5byTOSVwECM5FA7TiAiAW+UqTKZ9ERueC4qvgSttUhdmq1mXC3kJqGX7A==}
@@ -17716,6 +17722,8 @@ snapshots:
   textextensions@6.11.0:
     dependencies:
       editions: 6.22.0
+
+  three@0.170.0: {}
 
   throttle-debounce@5.0.2: {}
 

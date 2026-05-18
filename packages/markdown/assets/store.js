@@ -12,7 +12,7 @@ var hyperbook = window.hyperbook = window.hyperbook || {};
 hyperbook.store = (function () {
   /** @type {import("dexie").Dexie} */
   var db = new Dexie("Hyperbook");
-  db.version(4).stores({
+  db.version(5).stores({
     consent: `id`,
     currentState: `
               id,
@@ -46,6 +46,7 @@ hyperbook.store = (function () {
     struktolab: `id,tree`,
     multievent: `id,state`,
     typst: `id,code`,
+    openscad: `id,code,params`,
   });
 
   /** @returns {Promise<void>} */

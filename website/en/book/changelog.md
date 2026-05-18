@@ -38,6 +38,18 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.92.0
+
+::::tabs
+
+:::tab{title="Improved :+1:" id="improved"}
+
+- Add OpenSCAD element for rendering OpenSCAD code with interactive 3D viewer. [Learn more](/elements/openscad)
+
+:::
+
+::::
+
 ## v0.91.1
 
 ::::tabs

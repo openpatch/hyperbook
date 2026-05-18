@@ -65,6 +65,7 @@ import remarkImageAttrs from "./remarkImageAttrs";
 import remarkDirectiveLearningmap from "./remarkDirectiveLearningmap";
 import remarkDirectiveTextinput from "./remarkDirectiveTextinput";
 import remarkDirectiveTypst from "./remarkDirectiveTypst";
+import remarkDirectiveOpenscad from "./remarkDirectiveOpenscad";
 import remarkDirectiveStruktolab from "./remarkDirectiveStruktolab";
 import remarkDirectiveBlockflowPlayer from "./remarkDirectiveBlockflowPlayer";
 import remarkDirectiveBlockflowEditor from "./remarkDirectiveBlockflowEditor";
@@ -115,6 +116,7 @@ export const remark = (ctx: HyperbookContext) => {
     remarkDirectiveLearningmap(ctx),
     remarkDirectiveTextinput(ctx),
     remarkDirectiveTypst(ctx),
+    remarkDirectiveOpenscad(ctx),
     remarkCode(ctx),
     remarkMath,
     remarkGithubEmoji,

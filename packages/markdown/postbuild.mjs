@@ -92,6 +92,9 @@ async function downloadAndExtractZip(url, destination) {
 }
 
 async function postbuild() {
+  // Read openscad-config.json for WASM asset configuration
+  const openscadConfig = JSON.parse(await readFile("openscad-config.json", "utf-8"));
+
   // Download and extract zips
   const zipFiles = [
     {
@@ -101,6 +104,10 @@ async function postbuild() {
     {
       url: "https://github.com/openpatch/online-ide/releases/download/v2.2.1-hyperbook.5/dist-embedded.zip",
       dst: path.join("./dist", "assets", "directive-onlineide", "include"),
+    },
+    {
+      url: openscadConfig.wasmBuild.url,
+      dst: path.join("./dist", "assets", openscadConfig.wasmBuild.target),
     },
   ];
 
@@ -358,6 +365,20 @@ async function postbuild() {
         "struktolab-renderer.umd.js",
       ),
     },
+    {
+      src: path.join("./node_modules", "three", "build", "three.module.js"),
+      dst: path.join("./dist", "assets", "directive-openscad", "three.module.js"),
+    },
+    {
+      src: path.join("./node_modules", "three", "examples", "jsm", "loaders", "STLLoader.js"),
+      dst: path.join("./dist", "assets", "directive-openscad", "STLLoader.js"),
+      rewriteThreeImport: true,
+    },
+    {
+      src: path.join("./node_modules", "three", "examples", "jsm", "controls", "OrbitControls.js"),
+      dst: path.join("./dist", "assets", "directive-openscad", "OrbitControls.js"),
+      rewriteThreeImport: true,
+    },
   ];
 
   for (let asset of assets) {
@@ -368,6 +389,13 @@ async function postbuild() {
         mangle: true,
       });
       await writeFile(asset.dst, result.code);
+    } else if (asset.rewriteThreeImport) {
+      // Rewrite bare `from 'three'` specifier to a relative path so the file
+      // works as a standalone ES module without an import map.
+      let code = await readFile(asset.src, "utf8");
+      code = code.replaceAll("from 'three'", "from './three.module.js'");
+      await mkdir(path.dirname(asset.dst), { recursive: true });
+      await writeFile(asset.dst, code);
     } else {
       await cp(asset.src, asset.dst, { recursive: true });
     }

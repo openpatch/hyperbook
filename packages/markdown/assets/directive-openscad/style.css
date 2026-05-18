@@ -1,0 +1,371 @@
+.directive-openscad {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  overflow: hidden;
+  gap: 8px;
+  height: var(--openscad-height, calc(100dvh - 80px));
+}
+
+/* Left side: wraps preview-container + params card */
+.directive-openscad .left-side {
+  width: 100%;
+  min-height: 120px;
+  min-width: 120px;
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  overflow: hidden;
+}
+
+.directive-openscad .preview-container {
+  width: 100%;
+  min-height: 120px;
+  border: 1px solid var(--color-spacer);
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: var(--color-background, var(--color--background, #fff));
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.directive-openscad .preview-header {
+  border-bottom: 1px solid var(--color-spacer);
+  padding: 8px 16px;
+  font-weight: 600;
+}
+
+.directive-openscad .preview-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
+}
+
+/* Canvas wrapper: relative container for overlay positioning */
+.directive-openscad .canvas-wrapper {
+  position: relative;
+  flex: 1;
+  overflow: hidden;
+  min-height: 80px;
+  display: flex;
+}
+
+/* Canvas overlay: covers the canvas area */
+.directive-openscad .canvas-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 16px;
+  box-sizing: border-box;
+  pointer-events: none;
+}
+
+.directive-openscad .canvas-overlay.hidden {
+  display: none;
+}
+
+/* Loading state */
+.directive-openscad .canvas-overlay.loading {
+  background: rgba(0, 0, 0, 0.45);
+  color: #fff;
+}
+
+/* Error state */
+.directive-openscad .canvas-overlay.error {
+  background: rgba(239, 68, 68, 0.12);
+  color: #991b1b;
+  align-items: flex-start;
+  justify-content: flex-start;
+  overflow-y: auto;
+  pointer-events: auto;
+}
+
+.directive-openscad .canvas-overlay .overlay-message {
+  font-weight: 600;
+  font-size: 0.95em;
+  text-align: center;
+}
+
+.directive-openscad .canvas-overlay.error .overlay-message {
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-weight: 400;
+  text-align: left;
+  font-family: hyperbook-monospace, monospace;
+  font-size: 0.85em;
+}
+
+.directive-openscad .overlay-dismiss {
+  padding: 4px 14px;
+  border: 1px solid currentColor;
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font-size: 0.85em;
+  opacity: 0.8;
+  flex: 0 0 auto;
+}
+
+.directive-openscad .overlay-dismiss:hover {
+  opacity: 1;
+  background: rgba(0, 0, 0, 0.06);
+}
+
+/* Spinner */
+.directive-openscad .canvas-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: openscad-spin 0.75s linear infinite;
+}
+
+@keyframes openscad-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Splitter between canvas and parameters card */
+.directive-openscad .canvas-params-splitter {
+  width: 100%;
+  height: 4px;
+  margin: 6px 0;
+  cursor: row-resize;
+  background: var(--color-spacer);
+  border-radius: 999px;
+  flex-shrink: 0;
+  touch-action: none;
+  opacity: 0.45;
+  transition: opacity 0.15s ease-in-out;
+}
+
+.directive-openscad .canvas-params-splitter:hover {
+  opacity: 0.65;
+}
+
+/* Parameters card */
+.directive-openscad .parameters-panel {
+  width: 100%;
+  min-height: 80px;
+  border: 1px solid var(--color-spacer);
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: var(--color-background, var(--color--background, #fff));
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+.directive-openscad .parameters-panel.hidden {
+  display: none;
+}
+
+.directive-openscad .parameters-header {
+  border-bottom: 1px solid var(--color-spacer);
+  padding: 8px 16px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.directive-openscad .parameters-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.directive-openscad .editor-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 120px;
+  min-width: 120px;
+  flex: 1 1 0;
+}
+
+/* Main left/right splitter */
+.directive-openscad .splitter {
+  background: var(--color-spacer);
+  border-radius: 999px;
+  flex-shrink: 0;
+  touch-action: none;
+  opacity: 0.45;
+  transition: opacity 0.15s ease-in-out;
+}
+
+.directive-openscad .splitter:hover {
+  opacity: 0.65;
+}
+
+.directive-openscad.split-vertical .splitter {
+  width: 100%;
+  height: 4px;
+  cursor: row-resize;
+}
+
+.directive-openscad.split-horizontal .splitter {
+  width: 4px;
+  height: 100%;
+  cursor: col-resize;
+}
+
+.directive-openscad.resizing {
+  user-select: none;
+}
+
+.directive-openscad .buttons {
+  display: flex;
+  border: 1px solid var(--color-spacer);
+  border-radius: 8px;
+  border-bottom: none;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  overflow: hidden;
+}
+
+.directive-openscad .buttons.bottom {
+  border: 1px solid var(--color-spacer);
+  border-radius: 8px;
+  border-top: none;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+.directive-openscad button {
+  flex: 1;
+  padding: 8px 16px;
+  border: none;
+  border-right: 1px solid var(--color-spacer);
+  background-color: var(--color-background, var(--color--background, #fff));
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.directive-openscad .buttons button:last-child {
+  border-right: none;
+}
+
+.directive-openscad button.fullscreen {
+  flex: 0 0 auto;
+  min-width: 42px;
+  width: 42px;
+  padding: 8px 0;
+}
+
+.directive-openscad button:hover,
+.directive-openscad button.active {
+  background-color: var(--color-spacer);
+}
+
+.directive-openscad .editor,
+.directive-openscad .parameters {
+  width: 100%;
+  border: 1px solid var(--color-spacer);
+  flex: 1;
+  margin: 0; /* override code-input.min.css default margin: 8px */
+}
+
+/* The parameters textarea is always hidden — the form replaces it visually */
+.directive-openscad .parameters {
+  display: none !important;
+}
+
+.directive-openscad .param-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.directive-openscad .param-row label {
+  flex: 1;
+  font-weight: 500;
+  min-width: 0;
+  word-break: break-word;
+}
+
+.directive-openscad .param-row input[type="text"],
+.directive-openscad .param-row input[type="number"],
+.directive-openscad .param-row select {
+  flex: 1;
+  padding: 4px 8px;
+  border: 1px solid var(--color-spacer);
+  border-radius: 4px;
+  background: var(--color-background, var(--color--background, #fff));
+  color: var(--color-text);
+  font-family: inherit;
+}
+
+.directive-openscad .param-vector {
+  flex: 1;
+  display: flex;
+  gap: 4px;
+}
+
+.directive-openscad .param-vector input[type="number"] {
+  flex: 1;
+  min-width: 0;
+}
+
+.directive-openscad .param-row input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.directive-openscad .params-empty {
+  color: var(--color-text-muted, #888);
+  font-style: italic;
+  margin: auto;
+  text-align: center;
+}
+
+.directive-openscad:fullscreen {
+  width: 100vw;
+  height: 100dvh !important;
+  padding: 12px;
+  box-sizing: border-box;
+  background-color: var(--color-background, var(--color--background, #fff));
+}
+
+.directive-openscad:fullscreen::backdrop {
+  background-color: var(--color-background, var(--color--background, #fff));
+}
+
+@media screen and (min-width: 1024px) {
+  .directive-openscad {
+    flex-direction: row;
+  }
+
+  .directive-openscad .left-side,
+  .directive-openscad .editor-container {
+    flex: 1;
+    height: 100% !important;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .directive-openscad .preview-canvas {
+    background: linear-gradient(180deg, #2a2a2a 0%, #1e1e1e 100%);
+  }
+
+  .directive-openscad .canvas-overlay.error {
+    background: rgba(239, 68, 68, 0.18);
+    color: #fca5a5;
+  }
+
+  .directive-openscad .overlay-dismiss:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+}
