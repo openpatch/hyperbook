@@ -92,6 +92,8 @@
     "openscad-render": "Render",
     "openscad-copy": "Copy",
     "openscad-copy-done": "Code copied",
+    "openscad-download": "Download",
+    "openscad-download-format": "Download format",
     "openscad-download-stl": "Download STL",
     "openscad-download-ready": "Download ready",
     "openscad-reset": "Reset",

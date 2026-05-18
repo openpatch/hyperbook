@@ -16,226 +16,114 @@ hyperbook.openscad = (function () {
     ]),
   );
 
-  // Cache the ESM module import (loaded once). Each render creates a fresh
-  // WASM instance to avoid C++ singleton state issues
-  // (e.g. the Manifold backend throwing a C++ exception on second callMain).
-  let openscadModulePromise = null;
   let threePromise = null;
-
-  // Font bytes are fetched once and re-written to each fresh WASM instance.
-  let robotoFontData = null;
-
-  // Per-render stderr capture — cleared before each render.
-  let openscadStderr = [];
+  let openscadWorkerPromise = null;
+  let workerRequestId = 0;
+  const pendingWorkerRequests = new Map();
 
   const i18nGet = (key, fallback = key) => hyperbook.i18n?.get(key) || fallback;
 
-  const FONTS_CONF = `<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE fontconfig SYSTEM "urn:fontconfig:fonts.dtd">
-<fontconfig>
-  <dir>/fonts</dir>
-</fontconfig>`;
-
-  // Create a fresh OpenSCAD WASM instance for each render.
-  // The ESM module (and its compiled WASM binary) is imported only once;
-  // the browser's WebAssembly module cache makes subsequent instantiations fast.
-  const getOpenScad = async () => {
-    if (!openscadModulePromise) {
-      openscadModulePromise = import(/* @vite-ignore */ _scriptBase + "openscad.js");
+  const rejectPendingWorkerRequests = (error) => {
+    for (const { reject } of pendingWorkerRequests.values()) {
+      reject(error);
     }
-    const OpenSCAD = (await openscadModulePromise).default;
-    const instance = await OpenSCAD({
-      noInitialRun: true,
-      locateFile: (file) => _scriptBase + file,
-      printErr: (text) => openscadStderr.push(text),
+    pendingWorkerRequests.clear();
+  };
+
+  const getOpenScadWorker = async () => {
+    if (!window.Worker) {
+      throw new Error(i18nGet("openscad-render-failed", "OpenSCAD render failed"));
+    }
+    if (!openscadWorkerPromise) {
+      openscadWorkerPromise = new Promise((resolve, reject) => {
+        try {
+          const worker = new Worker(new URL(_scriptBase + "worker.js", window.location.href), {
+            type: "module",
+          });
+
+          worker.addEventListener("message", (event) => {
+            const { requestId, ok, result, error } = event.data || {};
+            if (!requestId || !pendingWorkerRequests.has(requestId)) return;
+            const pending = pendingWorkerRequests.get(requestId);
+            pendingWorkerRequests.delete(requestId);
+            if (ok) {
+              pending.resolve(result);
+              return;
+            }
+            const workerError = new Error(error?.message || "OpenSCAD worker request failed");
+            if (Array.isArray(error?.stderr)) {
+              workerError.stderr = error.stderr;
+            }
+            pending.reject(workerError);
+          });
+
+          worker.addEventListener("error", (event) => {
+            const workerError = new Error(event?.message || "OpenSCAD worker crashed");
+            rejectPendingWorkerRequests(workerError);
+            openscadWorkerPromise = null;
+          });
+
+          worker.addEventListener("messageerror", () => {
+            const workerError = new Error("OpenSCAD worker message error");
+            rejectPendingWorkerRequests(workerError);
+            openscadWorkerPromise = null;
+          });
+
+          resolve(worker);
+        } catch (error) {
+          openscadWorkerPromise = null;
+          reject(error);
+        }
+      });
+    }
+    return openscadWorkerPromise;
+  };
+
+  const callOpenScadWorker = async (type, payload, transfer = []) => {
+    const worker = await getOpenScadWorker();
+    const requestId = ++workerRequestId;
+    return new Promise((resolve, reject) => {
+      pendingWorkerRequests.set(requestId, { resolve, reject });
+      try {
+        worker.postMessage({ requestId, type, payload }, transfer);
+      } catch (error) {
+        pendingWorkerRequests.delete(requestId);
+        reject(error);
+      }
     });
-    const fs = instance.FS;
-    try { fs.mkdir("/tmp"); } catch (_) {}
-    try { fs.mkdir("/fonts"); } catch (_) {}
-    // Fonts are resolved from $(cwd)/fonts — keep cwd at /
-    try { instance.FS.chdir("/"); } catch (_) {}
-    try { fs.writeFile("/fonts/fonts.conf", FONTS_CONF); } catch (_) {}
-    // Write cached font data if already fetched
-    if (robotoFontData) {
-      try { fs.writeFile("/fonts/Roboto-Regular.ttf", robotoFontData); } catch (_) {}
-    }
-    return instance;
   };
 
-  // Known library URLs hosted at the openscad-playground deployment.
-  const KNOWN_LIBRARIES = {
-    BOSL2: "https://ochafik.com/openscad2/libraries/BOSL2.zip",
-    BOSL: "https://ochafik.com/openscad2/libraries/BOSL.zip",
-    MCAD: "https://ochafik.com/openscad2/libraries/MCAD.zip",
-    NopSCADlib: "https://ochafik.com/openscad2/libraries/NopSCADlib.zip",
-    fonts: "https://ochafik.com/openscad2/libraries/fonts.zip",
-  };
+  const getInvocationStderr = (invocationResult) =>
+    (invocationResult?.mergedOutputs || [])
+      .filter((entry) => typeof entry?.stderr === "string")
+      .map((entry) => entry.stderr);
 
-  // Per-name cache of extracted file maps: Map<name, { [path]: Uint8Array }>
-  const libraryCache = new Map();
-
-  // Minimal ZIP extractor using the browser-native DecompressionStream API.
-  // Supports Stored (method 0) and Deflate (method 8) entries.
-  const extractZip = async (buffer) => {
-    const view = new DataView(buffer);
-    const bytes = new Uint8Array(buffer);
-    const files = {};
-    const dec = new TextDecoder();
-
-    // Locate End of Central Directory record.
-    let eocdPos = -1;
-    for (let i = buffer.byteLength - 22; i >= Math.max(0, buffer.byteLength - 65558); i--) {
-      if (view.getUint32(i, true) === 0x06054b50) { eocdPos = i; break; }
-    }
-    if (eocdPos < 0) throw new Error("Not a valid ZIP file");
-
-    const entryCount = view.getUint16(eocdPos + 10, true);
-    let cdOffset = view.getUint32(eocdPos + 16, true);
-
-    for (let i = 0; i < entryCount; i++) {
-      if (view.getUint32(cdOffset, true) !== 0x02014b50) break;
-      const compression = view.getUint16(cdOffset + 10, true);
-      const compressedSize = view.getUint32(cdOffset + 20, true);
-      const fnLen = view.getUint16(cdOffset + 28, true);
-      const extraLen = view.getUint16(cdOffset + 30, true);
-      const commentLen = view.getUint16(cdOffset + 32, true);
-      const localOffset = view.getUint32(cdOffset + 42, true);
-      const name = dec.decode(bytes.subarray(cdOffset + 46, cdOffset + 46 + fnLen));
-      cdOffset += 46 + fnLen + extraLen + commentLen;
-
-      if (name.endsWith("/")) continue;
-
-      const localFnLen = view.getUint16(localOffset + 26, true);
-      const localExtraLen = view.getUint16(localOffset + 28, true);
-      const dataStart = localOffset + 30 + localFnLen + localExtraLen;
-      const compressed = bytes.subarray(dataStart, dataStart + compressedSize);
-
-      if (compression === 0) {
-        files[name] = new Uint8Array(compressed);
-      } else if (compression === 8) {
-        const ds = new DecompressionStream("deflate-raw");
-        const writer = ds.writable.getWriter();
-        const reader = ds.readable.getReader();
-        writer.write(compressed);
-        writer.close();
-        const chunks = [];
-        let totalLen = 0;
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          chunks.push(value);
-          totalLen += value.byteLength;
-        }
-        const out = new Uint8Array(totalLen);
-        let pos = 0;
-        for (const c of chunks) { out.set(c, pos); pos += c.byteLength; }
-        files[name] = out;
-      }
-    }
-    return files;
-  };
-
-  // Fetch and extract a library zip, caching the result.
-  const loadLibrary = async (name) => {
-    if (libraryCache.has(name)) return libraryCache.get(name);
-    const url = KNOWN_LIBRARIES[name];
-    if (!url) throw new Error(`Unknown OpenSCAD library: ${name}`);
-    const resp = await fetch(url);
-    if (!resp.ok) throw new Error(`Failed to fetch library ${name}: ${resp.status}`);
-    const files = await extractZip(await resp.arrayBuffer());
-    libraryCache.set(name, files);
-    return files;
-  };
-
-  // Mount a list of libraries into a WASM FS instance.
-  // Each library is written to /<name>/<file> so `use <BOSL2/std.scad>` resolves correctly.
-  const mountLibraries = async (instance, libraryNames) => {
-    for (const libName of libraryNames) {
-      const files = await loadLibrary(libName);
-      try { instance.FS.mkdir(`/${libName}`); } catch (_) {}
-      for (const [filePath, data] of Object.entries(files)) {
-        const parts = filePath.split("/");
-        let dir = `/${libName}`;
-        for (let j = 0; j < parts.length - 1; j++) {
-          dir += "/" + parts[j];
-          try { instance.FS.mkdir(dir); } catch (_) {}
-        }
-        try { instance.FS.writeFile(`/${libName}/${filePath}`, data); } catch (_) {}
-      }
-    }
-  };
-
-  // Fetch the Roboto TTF once and cache it in memory so it can be written
-  // to each new WASM instance's FS to enable OpenSCAD text() rendering.
-  const loadFonts = async () => {
-    if (robotoFontData) return;
-    try {
-      const resp = await fetch(
-        "https://fonts.gstatic.com/s/roboto/v32/KFOmCnqEu92Fr1Me5Q.ttf",
-      );
-      if (resp.ok) {
-        robotoFontData = new Uint8Array(await resp.arrayBuffer());
-      }
-    } catch (e) {
-      console.warn("[openscad] Failed to load fonts:", e);
-    }
-  };
-
-  // Extract parameters from SCAD code. Tries OpenSCAD WASM with
-  // --export-format=param first (uses the built-in Customizer engine with full
-  // comment syntax support). Falls back to regex parsing if WASM returns nothing.
+  // Extract parameters from SCAD code in the worker to keep the main thread responsive.
   const extractParams = async (code, libraryNames = []) => {
     try {
-      const openscad = await getOpenScad();
-      const instance = openscad;
-
-      if (libraryNames.length > 0) {
-        await mountLibraries(instance, libraryNames);
+      const result = await callOpenScadWorker("extractParams", { code, libraryNames });
+      if (result?.error || result?.exitCode !== 0) {
+        return [];
       }
-
-      const sourcePath = "/tmp/params_model.scad";
-      const outPath = "/tmp/params_out.json";
-
-      try { instance.FS.unlink(sourcePath); } catch (_) {}
-      try { instance.FS.unlink(outPath); } catch (_) {}
-
-      // Prepend $preview=true as the playground does, to avoid full geometry evaluation.
-      instance.FS.writeFile(sourcePath, "$preview=true;\n" + code);
-
-      const exitCode = instance.callMain([
-        sourcePath,
-        "-o", outPath,
-        "--export-format=param",
-      ]);
-
-      if (exitCode === 0) {
-        try {
-          const json = instance.FS.readFile(outPath, { encoding: "utf8" });
-          const paramSet = JSON.parse(json);
-          if (Array.isArray(paramSet.parameters) && paramSet.parameters.length > 0) {
-            // Filter out OpenSCAD special variables (e.g. $preview, $fn, $fa, $fs)
-            // that are internal and should not be exposed in the parameter UI.
-            return paramSet.parameters.filter(p => !p.name?.startsWith('$'));
-          }
-        } catch (e) {
-          console.warn("[openscad] Failed to parse param output:", e);
-        }
-      }
+      const output = result?.outputs?.[0]?.[1];
+      if (!output) return [];
+      const json = new TextDecoder().decode(toUint8Array(output));
+      const paramSet = JSON.parse(json);
+      if (!Array.isArray(paramSet?.parameters)) return [];
+      return paramSet.parameters.filter((p) => !p.name?.startsWith("$"));
     } catch (e) {
-      console.warn("[openscad] WASM param extraction failed:", e);
+      console.warn("[openscad] Worker param extraction failed:", e);
+      return [];
     }
-    return [];
   };
 
   const getThree = async () => {
     if (!threePromise) {
       threePromise = Promise.all([
         import(/* @vite-ignore */ _scriptBase + "three.module.js"),
-        import(/* @vite-ignore */ _scriptBase + "STLLoader.js"),
         import(/* @vite-ignore */ _scriptBase + "OrbitControls.js"),
-      ]).then(([THREE, STLLoaderModule, OrbitControlsModule]) => ({
+      ]).then(([THREE, OrbitControlsModule]) => ({
         THREE,
-        STLLoader: STLLoaderModule.STLLoader,
         OrbitControls: OrbitControlsModule.OrbitControls,
       }));
     }
@@ -419,6 +307,318 @@ hyperbook.openscad = (function () {
     return new Uint8Array(data || []);
   };
 
+  const textEncoder = new TextEncoder();
+  const DEFAULT_FACE_COLOR = [0xf9 / 255, 0xd7 / 255, 0x2c / 255, 1];
+  const PAINT_COLOR_MAP = ["", "8", "0C", "1C", "2C", "3C", "4C", "5C", "6C", "7C", "8C", "9C", "AC", "BC", "CC", "DC"];
+  const CRC32_TABLE = (() => {
+    const table = new Uint32Array(256);
+    for (let n = 0; n < 256; n++) {
+      let c = n;
+      for (let k = 0; k < 8; k++) {
+        c = (c & 1) ? (0xedb88320 ^ (c >>> 1)) : (c >>> 1);
+      }
+      table[n] = c >>> 0;
+    }
+    return table;
+  })();
+
+  const crc32 = (bytes) => {
+    let crc = 0xffffffff;
+    for (let i = 0; i < bytes.length; i++) {
+      crc = CRC32_TABLE[(crc ^ bytes[i]) & 0xff] ^ (crc >>> 8);
+    }
+    return (crc ^ 0xffffffff) >>> 0;
+  };
+
+  const concatUint8Arrays = (chunks) => {
+    const total = chunks.reduce((sum, chunk) => sum + chunk.length, 0);
+    const out = new Uint8Array(total);
+    let offset = 0;
+    for (const chunk of chunks) {
+      out.set(chunk, offset);
+      offset += chunk.length;
+    }
+    return out;
+  };
+
+  const createZip = (files) => {
+    const localChunks = [];
+    const centralChunks = [];
+    let offset = 0;
+
+    for (const [name, dataLike] of Object.entries(files)) {
+      const nameBytes = textEncoder.encode(name);
+      const data = toUint8Array(dataLike);
+      const crc = crc32(data);
+      const localHeader = new Uint8Array(30 + nameBytes.length);
+      const localView = new DataView(localHeader.buffer);
+      localView.setUint32(0, 0x04034b50, true);
+      localView.setUint16(4, 20, true);
+      localView.setUint16(6, 0, true);
+      localView.setUint16(8, 0, true);
+      localView.setUint16(10, 0, true);
+      localView.setUint16(12, 0, true);
+      localView.setUint32(14, crc, true);
+      localView.setUint32(18, data.length, true);
+      localView.setUint32(22, data.length, true);
+      localView.setUint16(26, nameBytes.length, true);
+      localView.setUint16(28, 0, true);
+      localHeader.set(nameBytes, 30);
+      localChunks.push(localHeader, data);
+
+      const centralHeader = new Uint8Array(46 + nameBytes.length);
+      const centralView = new DataView(centralHeader.buffer);
+      centralView.setUint32(0, 0x02014b50, true);
+      centralView.setUint16(4, 20, true);
+      centralView.setUint16(6, 20, true);
+      centralView.setUint16(8, 0, true);
+      centralView.setUint16(10, 0, true);
+      centralView.setUint16(12, 0, true);
+      centralView.setUint16(14, 0, true);
+      centralView.setUint32(16, crc, true);
+      centralView.setUint32(20, data.length, true);
+      centralView.setUint32(24, data.length, true);
+      centralView.setUint16(28, nameBytes.length, true);
+      centralView.setUint16(30, 0, true);
+      centralView.setUint16(32, 0, true);
+      centralView.setUint16(34, 0, true);
+      centralView.setUint16(36, 0, true);
+      centralView.setUint32(38, 0, true);
+      centralView.setUint32(42, offset, true);
+      centralHeader.set(nameBytes, 46);
+      centralChunks.push(centralHeader);
+
+      offset += localHeader.length + data.length;
+    }
+
+    const centralDirectory = concatUint8Arrays(centralChunks);
+    const eocd = new Uint8Array(22);
+    const eocdView = new DataView(eocd.buffer);
+    eocdView.setUint32(0, 0x06054b50, true);
+    eocdView.setUint16(4, 0, true);
+    eocdView.setUint16(6, 0, true);
+    eocdView.setUint16(8, centralChunks.length, true);
+    eocdView.setUint16(10, centralChunks.length, true);
+    eocdView.setUint32(12, centralDirectory.length, true);
+    eocdView.setUint32(16, offset, true);
+    eocdView.setUint16(20, 0, true);
+
+    return concatUint8Arrays([...localChunks, centralDirectory, eocd]);
+  };
+
+  const toHexByte = (value) => Math.round(Math.max(0, Math.min(1, value)) * 255).toString(16).padStart(2, "0").toUpperCase();
+
+  const colorToDisplayColor = ([r, g, b, a = 1]) => {
+    const base = `#${toHexByte(r)}${toHexByte(g)}${toHexByte(b)}`;
+    return a < 1 ? `${base}${toHexByte(a)}` : base;
+  };
+
+  const createUuid = () =>
+    (globalThis.crypto?.randomUUID?.() ||
+      `${Date.now().toString(16)}-${Math.random().toString(16).slice(2, 10)}-${Math.random().toString(16).slice(2, 10)}`);
+
+  const parseOffToIndexedPolyhedron = (offData) => {
+    const arrayBuffer = offData.buffer.slice(
+      offData.byteOffset,
+      offData.byteOffset + offData.byteLength,
+    );
+    const text = new TextDecoder().decode(arrayBuffer);
+    const lines = text
+      .split("\n")
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0 && !line.startsWith("#"));
+
+    if (lines.length === 0) {
+      throw new Error(i18nGet("openscad-render-failed", "OpenSCAD render failed"));
+    }
+
+    let countsLine = "";
+    let currentLine = 0;
+    if (/^OFF(\s|$)/.test(lines[0])) {
+      countsLine = lines[0].substring(3).trim();
+      currentLine = 1;
+    } else if (lines[0] === "OFF" && lines.length > 1) {
+      countsLine = lines[1];
+      currentLine = 2;
+    } else {
+      throw new Error(i18nGet("openscad-render-failed", "OpenSCAD render failed"));
+    }
+
+    const [vertexCountRaw, faceCountRaw] = countsLine.split(/\s+/).map(Number);
+    const vertexCount = Number.isFinite(vertexCountRaw) ? Math.floor(vertexCountRaw) : NaN;
+    const faceCount = Number.isFinite(faceCountRaw) ? Math.floor(faceCountRaw) : NaN;
+    if (!Number.isFinite(vertexCount) || !Number.isFinite(faceCount) || vertexCount <= 0 || faceCount <= 0) {
+      throw new Error(i18nGet("openscad-render-failed", "OpenSCAD render failed"));
+    }
+    if (currentLine + vertexCount + faceCount > lines.length) {
+      throw new Error(i18nGet("openscad-render-failed", "OpenSCAD render failed"));
+    }
+
+    const vertices = [];
+    for (let i = 0; i < vertexCount; i++) {
+      const parts = lines[currentLine + i].split(/\s+/).map(Number);
+      if (parts.length < 3 || parts.some(Number.isNaN)) {
+        throw new Error(i18nGet("openscad-render-failed", "OpenSCAD render failed"));
+      }
+      vertices.push({ x: parts[0], y: parts[1], z: parts[2] });
+    }
+    currentLine += vertexCount;
+
+    const colors = [];
+    const colorMap = new Map();
+    const faces = [];
+
+    for (let i = 0; i < faceCount; i++) {
+      const parts = lines[currentLine + i].split(/\s+/).map(Number);
+      const numVerts = Number.isFinite(parts[0]) ? Math.floor(parts[0]) : 0;
+      const faceVertices = parts.slice(1, numVerts + 1).map((index) => Math.floor(index));
+      if (faceVertices.length < 3) {
+        throw new Error(i18nGet("openscad-render-failed", "OpenSCAD render failed"));
+      }
+
+      let color = DEFAULT_FACE_COLOR;
+      if (parts.length >= numVerts + 4) {
+        const raw = parts.slice(numVerts + 1, numVerts + 5).filter(Number.isFinite);
+        if (raw.length >= 3) {
+          const r = raw[0];
+          const g = raw[1];
+          const b = raw[2];
+          const a = raw.length >= 4 ? raw[3] : (Math.max(r, g, b) > 1 ? 255 : 1);
+          const divisor = Math.max(r, g, b, a) > 1 ? 255 : 1;
+          color = [r / divisor, g / divisor, b / divisor, a / divisor];
+        }
+      }
+
+      const colorKey = color.join(",");
+      let colorIndex = colorMap.get(colorKey);
+      if (colorIndex == null) {
+        colorIndex = colors.length;
+        colors.push(color);
+        colorMap.set(colorKey, colorIndex);
+      }
+
+      if (faceVertices.length === 3) {
+        faces.push({ vertices: faceVertices, colorIndex });
+      } else {
+        for (let j = 1; j < faceVertices.length - 1; j++) {
+          faces.push({
+            vertices: [faceVertices[0], faceVertices[j], faceVertices[j + 1]],
+            colorIndex,
+          });
+        }
+      }
+    }
+
+    return { vertices, faces, colors };
+  };
+
+  const buildThreeModelFromIndexedPolyhedron = (polyhedron, THREE) => {
+    const model = new THREE.Group();
+    const facesByColor = new Map();
+
+    for (const face of polyhedron.faces) {
+      const [i1, i2, i3] = face.vertices;
+      const v1 = polyhedron.vertices[i1];
+      const v2 = polyhedron.vertices[i2];
+      const v3 = polyhedron.vertices[i3];
+      if (!v1 || !v2 || !v3) continue;
+      const color = polyhedron.colors[face.colorIndex] || DEFAULT_FACE_COLOR;
+      const colorKey = color.join(",");
+      let bucket = facesByColor.get(colorKey);
+      if (!bucket) {
+        bucket = { color, positions: [] };
+        facesByColor.set(colorKey, bucket);
+      }
+      bucket.positions.push(v1.x, v1.y, v1.z, v2.x, v2.y, v2.z, v3.x, v3.y, v3.z);
+    }
+
+    if (facesByColor.size === 0) {
+      throw new Error(i18nGet("openscad-render-failed", "OpenSCAD render failed"));
+    }
+
+    for (const bucket of facesByColor.values()) {
+      const geometry = new THREE.BufferGeometry();
+      geometry.setAttribute("position", new THREE.Float32BufferAttribute(bucket.positions, 3));
+      geometry.computeBoundingBox();
+      geometry.computeVertexNormals();
+      const [r, g, b, a = 1] = bucket.color;
+      const material = new THREE.MeshStandardMaterial({
+        color: new THREE.Color(r, g, b),
+        transparent: a < 1,
+        opacity: a,
+        metalness: 0.1,
+        roughness: 0.6,
+      });
+      model.add(new THREE.Mesh(geometry, material));
+    }
+
+    return model;
+  };
+
+  const exportIndexedPolyhedronTo3mf = (polyhedron) => {
+    const objectUuid = createUuid();
+    const buildUuid = createUuid();
+    const extruderIndexByColorIndex = polyhedron.colors.map((_, idx) => idx % PAINT_COLOR_MAP.length);
+
+    const modelXml = [
+      '<?xml version="1.0" encoding="utf-8"?>',
+      '<model unit="millimeter" xml:lang="en-US" xmlns="http://schemas.microsoft.com/3dmanufacturing/core/2015/02" xmlns:p="http://schemas.microsoft.com/3dmanufacturing/production/2015/06">',
+      '<meta name="BambuStudio:3mfVersion" value="1"/>',
+      '<meta name="slic3rpe:Version3mf" value="1"/>',
+      '<meta name="slic3rpe:MmPaintingVersion" value="1"/>',
+      "<resources>",
+      '<basematerials id="2">',
+      ...polyhedron.colors.map((color, i) => `<base name="color_${i}" displaycolor="${colorToDisplayColor(color)}"/>`),
+      "</basematerials>",
+      `<object id="1" name="OpenSCAD Model" type="model" p:UUID="${objectUuid}" pid="2" pindex="0">`,
+      "<mesh>",
+      "<vertices>",
+      ...polyhedron.vertices.map((vertex) => `<vertex x="${vertex.x}" y="${vertex.y}" z="${vertex.z}" />`),
+      "</vertices>",
+      "<triangles>",
+      ...polyhedron.faces.map((face) => {
+        const [v1, v2, v3] = face.vertices;
+        const attrs = [`v1="${v1}"`, `v2="${v2}"`, `v3="${v3}"`];
+        if (face.colorIndex > 0) {
+          attrs.push(`pid="2"`, `p1="${face.colorIndex}"`);
+        }
+        const paintColor = PAINT_COLOR_MAP[extruderIndexByColorIndex[face.colorIndex]];
+        if (paintColor) {
+          attrs.push(`paint_color="${paintColor}"`);
+        }
+        return `<triangle ${attrs.join(" ")} />`;
+      }),
+      "</triangles>",
+      "</mesh>",
+      "</object>",
+      "</resources>",
+      `<build p:UUID="${buildUuid}">`,
+      `<item objectid="1" p:UUID="${objectUuid}"/>`,
+      "</build>",
+      "</model>",
+    ].join("\n");
+
+    const contentTypesXml = [
+      '<?xml version="1.0" encoding="utf-8"?>',
+      '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">',
+      '<Default Extension="model" ContentType="application/vnd.ms-package.3dmanufacturing-3dmodel+xml"/>',
+      "</Types>",
+    ].join("\n");
+
+    const relationshipsXml = [
+      '<?xml version="1.0" encoding="utf-8"?>',
+      '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">',
+      '<Relationship Type="http://schemas.microsoft.com/3dmanufacturing/2013/01/3dmodel" Target="/3D/3dmodel.model" Id="rel0"/>',
+      "</Relationships>",
+    ].join("\n");
+
+    return createZip({
+      "3D/3dmodel.model": textEncoder.encode(modelXml),
+      "[Content_Types].xml": textEncoder.encode(contentTypesXml),
+      "_rels/.rels": textEncoder.encode(relationshipsXml),
+    });
+  };
+
   function initElement(elem) {
     if (elem.getAttribute("data-openscad-initialized") === "true") return;
     elem.setAttribute("data-openscad-initialized", "true");
@@ -444,9 +644,27 @@ hyperbook.openscad = (function () {
 
     const renderBtn = elem.querySelector("button.render");
     const copyBtn = elem.querySelector("button.copy");
-    const downloadStlBtn = elem.querySelector("button.download-stl");
+    const downloadBtn = elem.querySelector("button.download-stl");
     const resetBtn = elem.querySelector("button.reset");
     const fullscreenBtn = elem.querySelector("button.fullscreen");
+    const bottomButtons = elem.querySelector(".buttons.bottom");
+    let downloadFormatSelect = bottomButtons?.querySelector("select.download-format");
+    if (!downloadFormatSelect && bottomButtons && downloadBtn) {
+      downloadFormatSelect = document.createElement("select");
+      downloadFormatSelect.className = "download-format";
+      downloadFormatSelect.setAttribute("aria-label", i18nGet("openscad-download-format", "Download format"));
+      const stlOption = document.createElement("option");
+      stlOption.value = "stl";
+      stlOption.textContent = "STL";
+      const threeMfOption = document.createElement("option");
+      threeMfOption.value = "3mf";
+      threeMfOption.textContent = "3MF";
+      downloadFormatSelect.append(stlOption, threeMfOption);
+      bottomButtons.insertBefore(downloadFormatSelect, downloadBtn);
+    }
+    if (downloadBtn) {
+      downloadBtn.textContent = i18nGet("openscad-download", "Download");
+    }
 
     // --- Canvas overlay ---
     let overlayDismissTimer = null;
@@ -510,7 +728,7 @@ hyperbook.openscad = (function () {
       camera: null,
       scene: null,
       controls: null,
-      mesh: null,
+      model: null,
       raf: 0,
       disposed: false,
       resizeObserver: null,
@@ -700,54 +918,42 @@ hyperbook.openscad = (function () {
       return Object.entries(parsed).map(([k, v]) => `-D${k}=${formatValue(v)}`);
     };
 
-    const renderWithFormat = async (format, libraryNames = []) => {
+    const renderWithFormat = async (format, libraryNames = [], isPreview = false) => {
       renderBtn?.setAttribute("disabled", "true");
       showOverlay("loading", i18nGet("openscad-rendering", "Rendering..."));
 
       try {
         const paramDefinitions = getParamDefinitions();
-        const openscad = await getOpenScad();
-        const instance = openscad;
-
-        if (libraryNames.length > 0) {
-          await mountLibraries(instance, libraryNames);
+        const result = await callOpenScadWorker("render", {
+          code: editor?.value || "",
+          format,
+          libraryNames,
+          paramDefinitions,
+          isPreview,
+        });
+        const stderr = getInvocationStderr(result);
+        if (result?.error || result?.exitCode !== 0) {
+          const error = new Error(result?.error || i18nGet("openscad-render-failed", "OpenSCAD render failed"));
+          error.stderr = stderr;
+          throw error;
         }
-
-        const sourcePath = "/tmp/model.scad";
-        const outPath = `/tmp/output.${format}`;
-        const exportFormat = format === "stl" ? "binstl" : format;
-
-        try {
-          instance.FS.unlink(sourcePath);
-        } catch (_) {}
-        try {
-          instance.FS.unlink(outPath);
-        } catch (_) {}
-
-        instance.FS.writeFile(sourcePath, editor?.value || "");
-
-        const args = [
-          sourcePath,
-          "-o",
-          outPath,
-          `--export-format=${exportFormat}`,
-          ...paramDefinitions,
-        ];
-
-        const exitCode = instance.callMain(args);
-        if (exitCode !== 0) {
-          throw new Error(i18nGet("openscad-render-failed", "OpenSCAD render failed"));
+        const output = result?.outputs?.[0]?.[1];
+        if (!output) {
+          const error = new Error(i18nGet("openscad-render-failed", "OpenSCAD render failed"));
+          error.stderr = stderr;
+          throw error;
         }
-
-        const content = toUint8Array(instance.FS.readFile(outPath, { encoding: "binary" }));
-        return content;
+        return {
+          content: toUint8Array(output),
+          stderr,
+        };
       } finally {
         renderBtn?.removeAttribute("disabled");
       }
     };
 
-    const downloadBinary = (content, ext) => {
-      const blob = new Blob([content], { type: "application/octet-stream" });
+    const downloadBinary = (content, ext, mimeType = "application/octet-stream") => {
+      const blob = new Blob([content], { type: mimeType });
       const a = document.createElement("a");
       a.href = URL.createObjectURL(blob);
       a.download = `openscad-${id || "model"}.${ext}`;
@@ -756,18 +962,13 @@ hyperbook.openscad = (function () {
     };
 
     const renderPreview = async () => {
-      openscadStderr = [];
       try {
-        // Ensure font bytes are fetched before creating the WASM instance
-        await loadFonts();
         await save();
-        const stl = await renderWithFormat("stl", libraryNames);
-        await renderStl(stl);
+        const { content: off } = await renderWithFormat("off", libraryNames, true);
+        await renderOff(off);
         hideOverlay();
       } catch (error) {
-        // Prefer actual OpenSCAD error lines over raw JS/C++ exception values.
-        // emscripten throws C++ exceptions as raw numbers (WASM memory pointers).
-        const stderrErrors = openscadStderr.filter((l) => /error/i.test(l)).join("\n");
+        const stderrErrors = (error?.stderr || []).filter((l) => /error/i.test(l)).join("\n");
         if (stderrErrors) {
           showOverlay("error", stderrErrors);
         } else if (typeof error === "number") {
@@ -778,8 +979,22 @@ hyperbook.openscad = (function () {
       }
     };
 
-    const renderStl = async (stlData) => {
-      const { THREE, STLLoader, OrbitControls } = await getThree();
+    const disposeModel = () => {
+      if (!viewerState.model || !viewerState.scene) return;
+      viewerState.scene.remove(viewerState.model);
+      viewerState.model.traverse((child) => {
+        child.geometry?.dispose?.();
+        if (Array.isArray(child.material)) {
+          child.material.forEach((material) => material?.dispose?.());
+        } else {
+          child.material?.dispose?.();
+        }
+      });
+      viewerState.model = null;
+    };
+
+    const renderOff = async (offData) => {
+      const { THREE, OrbitControls } = await getThree();
       if (!canvas) return;
 
       if (!viewerState.renderer) {
@@ -828,38 +1043,25 @@ hyperbook.openscad = (function () {
       viewerState.camera.aspect = width / height;
       viewerState.camera.updateProjectionMatrix();
 
-      if (viewerState.mesh) {
-        viewerState.scene.remove(viewerState.mesh);
-        viewerState.mesh.geometry?.dispose();
+      disposeModel();
+
+      const polyhedron = parseOffToIndexedPolyhedron(offData);
+      const model = buildThreeModelFromIndexedPolyhedron(polyhedron, THREE);
+      viewerState.model = model;
+      viewerState.scene.add(model);
+
+      const box = new THREE.Box3().setFromObject(model);
+      if (box.isEmpty()) {
+        throw new Error(i18nGet("openscad-render-failed", "OpenSCAD render failed"));
       }
-
-      const loader = new STLLoader();
-      const arrayBuffer = stlData.buffer.slice(
-        stlData.byteOffset,
-        stlData.byteOffset + stlData.byteLength,
-      );
-      const geometry = loader.parse(arrayBuffer);
-      geometry.computeBoundingBox();
-      geometry.computeVertexNormals();
-
-      const material = new THREE.MeshStandardMaterial({
-        color: 0x3b82f6,
-        metalness: 0.1,
-        roughness: 0.6,
-      });
-      const mesh = new THREE.Mesh(geometry, material);
-      viewerState.mesh = mesh;
-      viewerState.scene.add(mesh);
-
-      const box = geometry.boundingBox;
       const size = new THREE.Vector3();
       const center = new THREE.Vector3();
       box.getSize(size);
       box.getCenter(center);
 
-      mesh.position.x = -center.x;
-      mesh.position.y = -center.y;
-      mesh.position.z = -center.z;
+      model.position.x = -center.x;
+      model.position.y = -center.y;
+      model.position.z = -center.z;
 
       const maxDim = Math.max(size.x, size.y, size.z) || 1;
       const distance = maxDim * 1.8;
@@ -888,17 +1090,22 @@ hyperbook.openscad = (function () {
 
     renderBtn?.addEventListener("click", renderPreview);
 
-    downloadStlBtn?.addEventListener("click", async () => {
-      openscadStderr = [];
+    downloadBtn?.addEventListener("click", async () => {
       try {
-        await loadFonts();
         await save();
-        const stl = await renderWithFormat("stl", libraryNames);
-        downloadBinary(stl, "stl");
-        await renderStl(stl);
+        const selectedFormat = downloadFormatSelect?.value === "3mf" ? "3mf" : "stl";
+        if (selectedFormat === "3mf") {
+          const { content: off } = await renderWithFormat("off", libraryNames);
+          const polyhedron = parseOffToIndexedPolyhedron(off);
+          const threeMf = exportIndexedPolyhedronTo3mf(polyhedron);
+          downloadBinary(threeMf, "3mf", "model/3mf");
+        } else {
+          const { content: stl } = await renderWithFormat("stl", libraryNames);
+          downloadBinary(stl, "stl");
+        }
         hideOverlay();
       } catch (error) {
-        const stderrErrors = openscadStderr.filter((l) => /error/i.test(l)).join("\n");
+        const stderrErrors = (error?.stderr || []).filter((l) => /error/i.test(l)).join("\n");
         showOverlay("error", stderrErrors || error?.message || `${error}`);
       }
     });

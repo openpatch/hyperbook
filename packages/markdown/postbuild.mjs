@@ -370,11 +370,6 @@ async function postbuild() {
       dst: path.join("./dist", "assets", "directive-openscad", "three.module.js"),
     },
     {
-      src: path.join("./node_modules", "three", "examples", "jsm", "loaders", "STLLoader.js"),
-      dst: path.join("./dist", "assets", "directive-openscad", "STLLoader.js"),
-      rewriteThreeImport: true,
-    },
-    {
       src: path.join("./node_modules", "three", "examples", "jsm", "controls", "OrbitControls.js"),
       dst: path.join("./dist", "assets", "directive-openscad", "OrbitControls.js"),
       rewriteThreeImport: true,

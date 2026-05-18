@@ -253,6 +253,18 @@
   cursor: pointer;
 }
 
+.directive-openscad .buttons select.download-format {
+  flex: 0 0 auto;
+  min-width: 72px;
+  padding: 8px 10px;
+  border: none;
+  border-right: 1px solid var(--color-spacer);
+  background-color: var(--color-background, var(--color--background, #fff));
+  color: var(--color-text);
+  font: inherit;
+  cursor: pointer;
+}
+
 .directive-openscad .buttons button:last-child {
   border-right: none;
 }

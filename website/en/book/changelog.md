@@ -38,6 +38,21 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.94.0
+
+::::tabs
+
+:::tab{title="Improved :+1:" id="improved"}
+
+- Improve OpenSCAD rendering by running compile/render and parameter extraction inside a Web Worker so the page stays responsive.
+- Improve OpenSCAD preview color handling using OFF-based parsing and grouped materials for face colors.
+- Add STL/3MF download format selection for OpenSCAD.
+- Add automatic 3MF export generation from indexed polyhedron data, including material and paint-color mapping.
+
+:::
+
+::::
+
 ## v0.93.1
 
 ::::tabs
