@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.93.0
+
+### Minor Changes
+
+- [`9af5f79`](https://github.com/openpatch/hyperbook/commit/9af5f79a6a2179f5bc8aa398f7c0fb4f021d479a) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add turtle library to pyide
+
 ## 0.92.0
 
 ### Minor Changes
