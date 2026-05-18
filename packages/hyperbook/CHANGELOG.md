@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.93.1
+
+### Patch Changes
+
+- [`4c0e47b`](https://github.com/openpatch/hyperbook/commit/4c0e47b90c4253fd70ad0e7d1a256f31667ef31a) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix font rendering in turtle library
+
 ## 0.93.0
 
 ### Minor Changes
