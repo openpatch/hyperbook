@@ -81,4 +81,21 @@ import snowballstemmer
       ).value,
     ).toMatchSnapshot();
   });
+
+  it("should transform pyide with canvas and packages attributes", async () => {
+    expect(
+      toHtml(
+        `:::pyide{canvas packages="pytamaro"}
+
+\`\`\`python
+from pytamaro import *
+\`\`\`
+
+:::
+
+`,
+        ctx,
+      ).value,
+    ).toMatchSnapshot();
+  });
 });

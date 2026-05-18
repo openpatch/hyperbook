@@ -17,6 +17,29 @@ exports[`remarkDirectivePyide > should transform basic pyide 1`] = `
 "
 `;
 
+exports[`remarkDirectivePyide > should transform pyide with canvas and packages attributes 1`] = `
+"
+<div class="directive-pyide" id="32bed1cdcab5a0b96c91aee00a91608d4aef71f9620a6a787e82c62f6c999ac9" data-tests="W10=" data-canvas="true" data-packages="pytamaro">
+  <div class="container">
+    <div class="buttons"><button class="output-btn active">pyide-output</button><button class="canvas-btn">pyide-canvas</button></div>
+    <div class="canvas-header hidden">pyide-canvas</div>
+    <div class="canvas-wrapper hidden">
+      <canvas class="canvas" id="canvas"></canvas>
+    </div>
+    <div class="canvas-output-splitter hidden" role="separator" aria-label="Resize canvas and output"></div>
+    <div class="output-header hidden">pyide-output</div>
+    <pre class="output"></pre>
+  </div>
+  <div class="splitter" role="separator" aria-label="Resize panels"></div>
+  <div class="editor-container">
+    <div class="buttons"><button class="run">pyide-run</button><button class="stop" disabled>pyide-stop</button></div>
+    <code-input class="editor line-numbers" language="python" template="pyide-highlighted">from pytamaro import *</code-input>
+    <div class="buttons bottom"><button class="reset">pyide-reset</button><button class="copy">pyide-copy</button><button class="download">pyide-download</button><button class="fullscreen" title="ide-fullscreen-enter" aria-label="ide-fullscreen-enter">⛶</button></div>
+  </div>
+</div>
+"
+`;
+
 exports[`remarkDirectivePyide > should transform pyide with canvas attribute 1`] = `
 "
 <div class="directive-pyide" id="304aa65140ff04fdf9232aadeb24a64910a638c44d7ff9257d5e3348267e9ad9" data-tests="W10=" data-canvas="true">
