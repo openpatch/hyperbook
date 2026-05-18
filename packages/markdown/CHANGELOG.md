@@ -1,5 +1,17 @@
 # @hyperbook/markdown
 
+## 0.65.0
+
+### Minor Changes
+
+- [`b60ab5f`](https://github.com/openpatch/hyperbook/commit/b60ab5f3f31875811bcd9a63121a6557af232cb6) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Improve the OpenSCAD directive with a non-blocking worker-based renderer and better color-aware outputs.
+
+  - Move OpenSCAD rendering and parameter extraction to a Web Worker to keep the page responsive.
+  - Align worker responses with an `OpenSCADInvocationResults`-style payload (`exitCode`, `error`, `outputs`, `mergedOutputs`, `elapsedMillis`).
+  - Use OFF-based preview rendering with improved face-color parsing and material grouping.
+  - Add STL/3MF download format selection in the OpenSCAD UI.
+  - Add automatic 3MF generation from the indexed polyhedron, including base materials and paint-color mapping.
+
 ## 0.64.1
 
 ### Patch Changes
