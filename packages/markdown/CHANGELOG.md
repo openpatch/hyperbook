@@ -1,5 +1,11 @@
 # @hyperbook/markdown
 
+## 0.63.0
+
+### Minor Changes
+
+- [#1127](https://github.com/openpatch/hyperbook/pull/1127) [`ad132d6`](https://github.com/openpatch/hyperbook/commit/ad132d616d2a771d3e596c1e006d427e84005c89) Thanks [@copilot-swe-agent](https://github.com/apps/copilot-swe-agent)! - Add openscad element
+
 ## 0.62.1
 
 ### Patch Changes
