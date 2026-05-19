@@ -12,6 +12,18 @@ code-input {
   margin: 0;
 }
 
+.directive-typst .editor {
+  width: 100%;
+  border: 1px solid var(--color-spacer);
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.directive-typst .editor .cm-editor {
+  height: 100%;
+}
+
 .directive-typst .preview-container {
   width: 100%;
   min-height: 120px;
@@ -417,12 +429,6 @@ code-input {
 .directive-typst .binary-file-delete:hover {
   background-color: rgba(220, 38, 38, 0.1);
   color: #dc2626;
-}
-
-.directive-typst .editor {
-  width: 100%;
-  border: 1px solid var(--color-spacer);
-  flex: 1;
 }
 
 .directive-typst .editor:not(.active) {

@@ -204,6 +204,261 @@ const serializeInvocationResults = (result) => {
   };
 };
 
+const getExtractedParameters = (result) => {
+  if (result?.error || result?.exitCode !== 0) {
+    return [];
+  }
+  const output = result?.outputs?.[0]?.[1];
+  if (!output) return [];
+  try {
+    const bytes = output instanceof Uint8Array ? output : new Uint8Array(output);
+    const json = new TextDecoder().decode(bytes);
+    const paramSet = JSON.parse(json);
+    if (!Array.isArray(paramSet?.parameters)) return [];
+    return paramSet.parameters.filter((p) => !p.name?.startsWith("$"));
+  } catch (_) {
+    return [];
+  }
+};
+
+const escapeHtml = (value) =>
+  String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+
+const toFiniteNumber = (value, fallback = 0) => {
+  const num = Number(value);
+  return Number.isFinite(num) ? num : fallback;
+};
+
+const buildParamFormUi = (codeParams, currentOverrides = {}, id = "model") => {
+  if (!Array.isArray(codeParams) || codeParams.length === 0) {
+    return { hasParams: false, html: "", values: {} };
+  }
+
+  const values = {};
+
+  const appendNumberAttrs = (min, max, step) => {
+    let attrs = "";
+    if (step != null) attrs += ` step="${escapeHtml(String(step))}"`;
+    else attrs += ' step="any"';
+    if (min != null) attrs += ` min="${escapeHtml(String(min))}"`;
+    if (max != null) attrs += ` max="${escapeHtml(String(max))}"`;
+    return attrs;
+  };
+
+  const buildParamRow = (param, index) => {
+    const name = param?.name;
+    if (!name) return null;
+    const caption = param?.caption || name;
+    const type = param?.type;
+    const initial = param?.initial;
+    const min = param?.min;
+    const max = param?.max;
+    const step = param?.step;
+    const options = Array.isArray(param?.options) ? param.options : [];
+    const current = Object.prototype.hasOwnProperty.call(currentOverrides, name)
+      ? currentOverrides[name]
+      : initial;
+
+    const inputId = `openscad-param-${id}-${index}`;
+    let controlHtml = "";
+
+    if (type === "boolean") {
+      const value = Boolean(current);
+      values[name] = value;
+      controlHtml = `<input id="${escapeHtml(inputId)}" type="checkbox" data-param-name="${escapeHtml(name)}" data-param-kind="boolean"${value ? " checked" : ""}>`;
+    } else if (options.length > 0) {
+      let selectedIndex = options.findIndex((opt) => String(opt?.value) === String(current));
+      if (selectedIndex < 0) selectedIndex = 0;
+      const selectedValue = options[selectedIndex]?.value ?? null;
+      values[name] = selectedValue;
+      const optionHtml = options.map((opt, optIndex) => {
+        const optLabel = opt?.name || String(opt?.value);
+        const optValueJson = JSON.stringify(opt?.value ?? null);
+        const selected = optIndex === selectedIndex ? " selected" : "";
+        return `<option value="${escapeHtml(String(optIndex))}" data-param-option-value="${escapeHtml(optValueJson)}"${selected}>${escapeHtml(optLabel)}</option>`;
+      }).join("");
+      controlHtml = `<select id="${escapeHtml(inputId)}" data-param-name="${escapeHtml(name)}" data-param-kind="option">${optionHtml}</select>`;
+    } else if (type === "number" && Array.isArray(initial)) {
+      const source = Array.isArray(current) ? current : initial;
+      const vector = source.map((entry) => toFiniteNumber(entry));
+      values[name] = vector;
+      const vectorInputs = vector.map((entry, vectorIndex) =>
+        `<input id="${escapeHtml(`${inputId}-${vectorIndex}`)}" type="number" value="${escapeHtml(String(entry))}" data-param-name="${escapeHtml(name)}" data-param-kind="vector" data-vector-index="${vectorIndex}"${appendNumberAttrs(min, max, step)}>`
+      ).join("");
+      controlHtml = `<span class="param-vector">${vectorInputs}</span>`;
+    } else if (type === "number") {
+      const value = toFiniteNumber(current, toFiniteNumber(initial));
+      values[name] = value;
+      controlHtml = `<input id="${escapeHtml(inputId)}" type="number" value="${escapeHtml(String(value))}" data-param-name="${escapeHtml(name)}" data-param-kind="number"${appendNumberAttrs(min, max, step)}>`;
+    } else {
+      const value = current == null ? "" : String(current);
+      values[name] = value;
+      controlHtml = `<input id="${escapeHtml(inputId)}" type="text" value="${escapeHtml(value)}" data-param-name="${escapeHtml(name)}" data-param-kind="string">`;
+    }
+
+    return `<div class="param-row"><label for="${escapeHtml(inputId)}">${escapeHtml(caption)}</label>${controlHtml}</div>`;
+  };
+
+  // Separate global/ungrouped params from named groups.
+  // Parameters with group=null/undefined/"Global" are always shown outside any accordion.
+  const globalRows = [];
+  const groupMap = new Map(); // preserves insertion order
+
+  codeParams.forEach((param, index) => {
+    const row = buildParamRow(param, index);
+    if (!row) return;
+    const group = param?.group;
+    if (!group || group === "Global") {
+      globalRows.push(row);
+    } else {
+      if (!groupMap.has(group)) groupMap.set(group, []);
+      groupMap.get(group).push(row);
+    }
+  });
+
+  const parts = [...globalRows];
+
+  for (const [groupName, groupRows] of groupMap) {
+    parts.push(
+      `<details class="param-group" open><summary class="param-group-summary">${escapeHtml(groupName)}</summary><div class="param-group-body">${groupRows.join("")}</div></details>`
+    );
+  }
+
+  const totalRows = globalRows.length + [...groupMap.values()].reduce((sum, rows) => sum + rows.length, 0);
+
+  return {
+    hasParams: totalRows > 0,
+    html: parts.join(""),
+    values,
+  };
+};
+
+const DEFAULT_FACE_COLOR_WORKER = [0xf9 / 255, 0xd7 / 255, 0x2c / 255, 1];
+
+// Compute flat (per-triangle) normals for a non-indexed positions array.
+// Every 9 consecutive floats represent one triangle (3 vertices × xyz).
+const computeFlatNormals = (positions) => {
+  const normals = new Float32Array(positions.length);
+  for (let i = 0; i < positions.length; i += 9) {
+    const ax = positions[i], ay = positions[i + 1], az = positions[i + 2];
+    const bx = positions[i + 3], by = positions[i + 4], bz = positions[i + 5];
+    const cx = positions[i + 6], cy = positions[i + 7], cz = positions[i + 8];
+    const ex = bx - ax, ey = by - ay, ez = bz - az;
+    const fx = cx - ax, fy = cy - ay, fz = cz - az;
+    const nx = ey * fz - ez * fy;
+    const ny = ez * fx - ex * fz;
+    const nz = ex * fy - ey * fx;
+    const len = Math.sqrt(nx * nx + ny * ny + nz * nz) || 1;
+    const nnx = nx / len, nny = ny / len, nnz = nz / len;
+    normals[i] = nnx; normals[i + 1] = nny; normals[i + 2] = nnz;
+    normals[i + 3] = nnx; normals[i + 4] = nny; normals[i + 5] = nnz;
+    normals[i + 6] = nnx; normals[i + 7] = nny; normals[i + 8] = nnz;
+  }
+  return normals;
+};
+
+// Parse an OFF file into flat Float32Array colour buckets so the main thread can
+// construct Three.js geometries without any text-parsing work.
+// Returns { colorBuckets: [{color, positions, normals}], transfer } or null on failure.
+const parseOffToColorBuckets = (offData) => {
+  try {
+    const text = new TextDecoder().decode(
+      offData instanceof Uint8Array ? offData : new Uint8Array(offData),
+    );
+    const lines = text
+      .split("\n")
+      .map((l) => l.trim())
+      .filter((l) => l.length > 0 && !l.startsWith("#"));
+    if (lines.length === 0) return null;
+
+    let countsLine = "";
+    let currentLine = 0;
+    if (/^OFF(\s|$)/.test(lines[0])) {
+      countsLine = lines[0].substring(3).trim();
+      currentLine = 1;
+    }
+    // Handle standard two-line OFF header: "OFF\nV F E"
+    if (!countsLine && currentLine < lines.length) {
+      countsLine = lines[currentLine];
+      currentLine++;
+    }
+    if (!countsLine) return null;
+
+    const countParts = countsLine.split(/\s+/).map(Number);
+    const vertexCount = Number.isFinite(countParts[0]) ? Math.floor(countParts[0]) : NaN;
+    const faceCount = Number.isFinite(countParts[1]) ? Math.floor(countParts[1]) : NaN;
+    if (!Number.isFinite(vertexCount) || !Number.isFinite(faceCount) || vertexCount <= 0 || faceCount <= 0) return null;
+    if (currentLine + vertexCount + faceCount > lines.length) return null;
+
+    const vertices = new Float32Array(vertexCount * 3);
+    for (let i = 0; i < vertexCount; i++) {
+      const parts = lines[currentLine + i].split(/\s+/).map(Number);
+      vertices[i * 3] = parts[0] || 0;
+      vertices[i * 3 + 1] = parts[1] || 0;
+      vertices[i * 3 + 2] = parts[2] || 0;
+    }
+    currentLine += vertexCount;
+
+    const colorMap = new Map();
+    const buckets = [];
+
+    for (let i = 0; i < faceCount; i++) {
+      const parts = lines[currentLine + i].split(/\s+/).map(Number);
+      const numVerts = Number.isFinite(parts[0]) ? Math.floor(parts[0]) : 0;
+      const faceVertices = parts.slice(1, numVerts + 1).map(Math.floor);
+      if (faceVertices.length < 3) continue;
+
+      let color = DEFAULT_FACE_COLOR_WORKER;
+      if (parts.length >= numVerts + 4) {
+        const raw = parts.slice(numVerts + 1, numVerts + 5).filter(Number.isFinite);
+        if (raw.length >= 3) {
+          const r = raw[0], g = raw[1], b = raw[2];
+          const a = raw.length >= 4 ? raw[3] : (Math.max(r, g, b) > 1 ? 255 : 1);
+          const div = Math.max(r, g, b, a) > 1 ? 255 : 1;
+          color = [r / div, g / div, b / div, a / div];
+        }
+      }
+
+      const colorKey = color.join(",");
+      let bucket = colorMap.get(colorKey);
+      if (!bucket) {
+        bucket = { color, positionsList: [] };
+        colorMap.set(colorKey, bucket);
+        buckets.push(bucket);
+      }
+
+      // Fan triangulation of potentially non-triangular faces
+      for (let j = 1; j < faceVertices.length - 1; j++) {
+        const i1 = faceVertices[0], i2 = faceVertices[j], i3 = faceVertices[j + 1];
+        bucket.positionsList.push(
+          vertices[i1 * 3], vertices[i1 * 3 + 1], vertices[i1 * 3 + 2],
+          vertices[i2 * 3], vertices[i2 * 3 + 1], vertices[i2 * 3 + 2],
+          vertices[i3 * 3], vertices[i3 * 3 + 1], vertices[i3 * 3 + 2],
+        );
+      }
+    }
+
+    if (buckets.length === 0) return null;
+
+    const transfer = [];
+    const colorBuckets = buckets.map((bucket) => {
+      const positions = new Float32Array(bucket.positionsList);
+      const normals = computeFlatNormals(positions);
+      transfer.push(positions.buffer, normals.buffer);
+      return { color: bucket.color, positions, normals };
+    });
+
+    return { colorBuckets, transfer };
+  } catch (_) {
+    return null;
+  }
+};
+
 const runOpenScadInvocation = async ({
   code,
   sourcePath,
@@ -284,6 +539,40 @@ self.addEventListener("message", async (event) => {
       self.postMessage({ requestId, ok: true, result: serialized.result }, serialized.transfer);
       return;
     }
+    if (type === "buildParamForm") {
+      const sourcePath = "/tmp/params_model.scad";
+      const outPath = "/tmp/params_out.json";
+      result = await runOpenScadInvocation({
+        code: `$preview=true;\n${payload?.code || ""}`,
+        sourcePath,
+        outputPaths: [outPath],
+        libraryNames: payload?.libraryNames || [],
+        args: [
+          sourcePath,
+          "-o",
+          outPath,
+          "--export-format=param",
+        ],
+      });
+
+      const codeParams = getExtractedParameters(result);
+      const ui = buildParamFormUi(
+        codeParams,
+        payload?.currentOverrides || {},
+        payload?.id || "model",
+      );
+
+      self.postMessage({
+        requestId,
+        ok: true,
+        result: {
+          hasParams: ui.hasParams,
+          html: ui.html,
+          values: ui.values,
+        },
+      });
+      return;
+    }
     if (type === "render") {
       const format = payload?.format || "stl";
       const sourcePath = "/tmp/model.scad";
@@ -304,6 +593,27 @@ self.addEventListener("message", async (event) => {
           ...OPENSCAD_FEATURE_ARGS,
         ],
       });
+      // For preview OFF renders, parse geometry here in the worker so the main thread
+      // never has to do heavy text parsing or Float32Array building.
+      if (format === "off" && payload?.isPreview && result.exitCode === 0 && !result.error) {
+        const offOutput = result.outputs?.[0]?.[1];
+        if (offOutput) {
+          const parsed = parseOffToColorBuckets(offOutput);
+          if (parsed) {
+            self.postMessage({
+              requestId,
+              ok: true,
+              result: {
+                exitCode: result.exitCode,
+                mergedOutputs: result.mergedOutputs,
+                elapsedMillis: result.elapsedMillis,
+                parsedGeometry: parsed.colorBuckets,
+              },
+            }, parsed.transfer);
+            return;
+          }
+        }
+      }
       const serialized = serializeInvocationResults(result);
       self.postMessage({ requestId, ok: true, result: serialized.result }, serialized.transfer);
       return;

@@ -5,6 +5,7 @@ import https from "https";
 import { Extract } from "unzipper";
 import { createWriteStream, createReadStream } from "fs";
 import { createHash } from "crypto";
+import { build as esbuild } from "esbuild";
 
 const CACHE_DIR = path.join(".cache", "downloads");
 
@@ -241,49 +242,6 @@ async function postbuild() {
       ),
     },
     {
-      src: path.join(
-        "./node_modules",
-        "@webcoder49",
-        "code-input",
-        "code-input.min.css",
-      ),
-      dst: path.join("./dist", "assets", "code-input", "code-input.min.css"),
-    },
-    {
-      src: path.join(
-        "./node_modules",
-        "@webcoder49",
-        "code-input",
-        "code-input.min.js",
-      ),
-      dst: path.join("./dist", "assets", "code-input", "code-input.min.js"),
-    },
-    {
-      src: path.join(
-        "./node_modules",
-        "@webcoder49",
-        "code-input",
-        "plugins",
-        "indent.min.js",
-      ),
-      dst: path.join("./dist", "assets", "code-input", "indent.min.js"),
-    },
-    {
-      src: path.join(
-        "./node_modules",
-        "@webcoder49",
-        "code-input",
-        "plugins",
-        "auto-close-brackets.min.js",
-      ),
-      dst: path.join(
-        "./dist",
-        "assets",
-        "code-input",
-        "auto-close-brackets.min.js",
-      ),
-    },
-    {
       src: path.join("./node_modules", "h5p-standalone", "dist"),
       dst: path.join("./dist", "assets", "directive-h5p"),
     },
@@ -397,5 +355,16 @@ async function postbuild() {
   }
 
   await cp("locales", "./dist/locales", { recursive: true });
+
+  // Bundle CodeMirror 6 + language packages into a single IIFE for browser use.
+  await mkdir("./dist/assets/codemirror", { recursive: true });
+  await esbuild({
+    entryPoints: ["codemirror-bundle/index.js"],
+    bundle: true,
+    format: "iife",
+    outfile: "./dist/assets/codemirror/codemirror.bundle.js",
+    minify: true,
+  });
+  console.log("Built CodeMirror bundle → dist/assets/codemirror/codemirror.bundle.js");
 }
 postbuild();

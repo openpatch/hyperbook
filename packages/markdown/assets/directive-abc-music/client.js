@@ -7,34 +7,41 @@
  * @see hyperbook.store
  */
 hyperbook.abc = (function () {
-  window.codeInput?.registerTemplate(
-    "abc-highlighted",
-    codeInput.templates.prism(window.Prism, [
-      new codeInput.plugins.Indent(true, 2),
-    ])
-  );
-
   const initABC = async (el) => {
     const tuneEl = el.getElementsByClassName("tune")[0];
     const playerEl = el.getElementsByClassName("player")[0];
 
     const tune = atob(el.getAttribute("data-tune"));
-    const editor = el.getAttribute("data-editor");
+    const isEditor = el.getAttribute("data-editor") === "true";
 
-    if (editor == "true") {
-      /**
-       * @type {HTMLTextAreaElement}
-       */
+    if (isEditor) {
       const editorEl = el.getElementsByClassName("editor")[0];
-      const id = editorEl.id;
+      const id = el.getAttribute("data-id") || editorEl.id;
 
       const copyEl = el.getElementsByClassName("copy")[0];
       const resetEl = el.getElementsByClassName("reset")[0];
       const downloadEl = el.getElementsByClassName("download")[0];
 
+      // Restore saved tune or use default
+      const storeResult = await hyperbook.store.db.abcMusic
+        .where("id")
+        .equals(id)
+        .first();
+      const initialTune = storeResult?.tune || tune;
+
+      editorEl.textContent = "";
+      const cm = HyperbookCM.create(editorEl, {
+        lang: "default",
+        value: initialTune,
+        onChange: (code) => {
+          hyperbook.store.db.abcMusic.put({ id, tune: code });
+          renderAndPlay(code);
+        },
+      });
+
       copyEl?.addEventListener("click", async () => {
         try {
-          await navigator.clipboard.writeText(editor.value);
+          await navigator.clipboard.writeText(cm.getValue());
         } catch (error) {
           console.error(error.message);
         }
@@ -47,43 +54,36 @@ hyperbook.abc = (function () {
 
       downloadEl?.addEventListener("click", () => {
         const a = document.createElement("a");
-        const blob = new Blob([editor.value], { type: "text/plain" });
+        const blob = new Blob([cm.getValue()], { type: "text/plain" });
         a.href = URL.createObjectURL(blob);
         a.download = `tones-${id}.abc`;
         a.click();
       });
 
-      editorEl.addEventListener("code-input_load", async () => {
-        const storeResult = await hyperbook.store.db.abcMusic
-          .where("id")
-          .equals(editorEl.id)
-          .first();
-        editorEl.value = storeResult?.tune || tune;
-
-        new ABCJS.Editor(editorEl.id, {
-          canvas_id: tuneEl,
-          synth: {
-            el: playerEl,
-            options: {
+      // Render initial notation + player
+      const renderAndPlay = (abcText) => {
+        const visualObj = ABCJS.renderAbc(tuneEl, abcText, {
+          responsive: "resize",
+          selectTypes: false,
+          selectionColor: "currentColor",
+        })[0];
+        if (ABCJS.synth.supportsAudio()) {
+          if (!el._synthControl) {
+            el._synthControl = new ABCJS.synth.SynthController();
+            el._synthControl.load(playerEl, null, {
               displayRestart: true,
               displayPlay: true,
               displayProgress: true,
-            },
-          },
-          abcjsParams: {
-            responsive: "resize",
-            selectTypes: false,
-            selectionColor: "currentColor",
-          },
-        });
+            });
+          }
+          el._synthControl.setTune(visualObj, false);
+        } else {
+          playerEl.innerHTML =
+            "<div class='audio-error'>Audio is not supported in this browser.</div>";
+        }
+      };
 
-        editorEl.addEventListener("change", () => {
-          hyperbook.store.db.abcMusic.put({
-            id: editorEl.id,
-            tune: editorEl.value,
-          });
-        });
-      });
+      renderAndPlay(initialTune);
     } else {
       const visualObj = ABCJS.renderAbc(tuneEl, tune, {
         responsive: "resize",

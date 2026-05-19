@@ -203,6 +203,12 @@
   width: 100%;
   border: 1px solid var(--color-spacer);
   flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.directive-abc-music .editor .cm-editor {
+  height: 100%;
 }
 
 .directive-abc-music .buttons {

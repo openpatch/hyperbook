@@ -10,7 +10,7 @@ exports[`remarkDirectivePyide > should transform basic pyide 1`] = `
   <div class="splitter" role="separator" aria-label="Resize panels"></div>
   <div class="editor-container">
     <div class="buttons"><button class="run">pyide-run</button><button class="stop" disabled>pyide-stop</button></div>
-    <code-input class="editor line-numbers" language="python" template="pyide-highlighted">print(&quot;Hello World&quot;)</code-input>
+    <div class="editor" data-lang="python">print(&quot;Hello World&quot;)</div>
     <div class="buttons bottom"><button class="reset">pyide-reset</button><button class="copy">pyide-copy</button><button class="download">pyide-download</button><button class="fullscreen" title="ide-fullscreen-enter" aria-label="ide-fullscreen-enter">⛶</button></div>
   </div>
 </div>
@@ -33,7 +33,7 @@ exports[`remarkDirectivePyide > should transform pyide with canvas and packages 
   <div class="splitter" role="separator" aria-label="Resize panels"></div>
   <div class="editor-container">
     <div class="buttons"><button class="run">pyide-run</button><button class="stop" disabled>pyide-stop</button></div>
-    <code-input class="editor line-numbers" language="python" template="pyide-highlighted">from pytamaro import *</code-input>
+    <div class="editor" data-lang="python">from pytamaro import *</div>
     <div class="buttons bottom"><button class="reset">pyide-reset</button><button class="copy">pyide-copy</button><button class="download">pyide-download</button><button class="fullscreen" title="ide-fullscreen-enter" aria-label="ide-fullscreen-enter">⛶</button></div>
   </div>
 </div>
@@ -56,8 +56,8 @@ exports[`remarkDirectivePyide > should transform pyide with canvas attribute 1`]
   <div class="splitter" role="separator" aria-label="Resize panels"></div>
   <div class="editor-container">
     <div class="buttons"><button class="run">pyide-run</button><button class="stop" disabled>pyide-stop</button></div>
-    <code-input class="editor line-numbers" language="python" template="pyide-highlighted">import pygame
-pygame.init()</code-input>
+    <div class="editor" data-lang="python">import pygame
+pygame.init()</div>
     <div class="buttons bottom"><button class="reset">pyide-reset</button><button class="copy">pyide-copy</button><button class="download">pyide-download</button><button class="fullscreen" title="ide-fullscreen-enter" aria-label="ide-fullscreen-enter">⛶</button></div>
   </div>
 </div>
@@ -74,7 +74,7 @@ exports[`remarkDirectivePyide > should transform pyide with packages attribute 1
   <div class="splitter" role="separator" aria-label="Resize panels"></div>
   <div class="editor-container">
     <div class="buttons"><button class="run">pyide-run</button><button class="stop" disabled>pyide-stop</button></div>
-    <code-input class="editor line-numbers" language="python" template="pyide-highlighted">import snowballstemmer</code-input>
+    <div class="editor" data-lang="python">import snowballstemmer</div>
     <div class="buttons bottom"><button class="reset">pyide-reset</button><button class="copy">pyide-copy</button><button class="download">pyide-download</button><button class="fullscreen" title="ide-fullscreen-enter" aria-label="ide-fullscreen-enter">⛶</button></div>
   </div>
 </div>

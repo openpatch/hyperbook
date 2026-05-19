@@ -38,6 +38,28 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.95.0
+
+::::tabs
+
+:::tab{title="New :rocket:" id="new"}
+
+- Migrate all code editors (`webide`, `pyide`, `p5`, `typst`, `abc-music`) from Prism.js to **CodeMirror 6**, with syntax highlighting, GitHub Light/Dark themes, and proper bracket/indent handling.
+
+:::
+
+:::tab{title="Improved :+1:" id="improved"}
+
+- Always show the OpenSCAD parameters panel.
+- Support `/* [Tab Name] */` comment syntax to group OpenSCAD parameters into collapsible accordions. Parameters in `/* [Global] */` are shown outside any accordion, and accordion state is preserved across rebuilds.
+- Parameter changes now auto-trigger a re-render of the OpenSCAD preview.
+- Parameter changes are written back into the editor source code so code and form stay in sync.
+- Editing OpenSCAD source code directly also triggers a re-render.
+
+:::
+
+::::
+
 ## v0.94.0
 
 ::::tabs

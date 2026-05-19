@@ -8,14 +8,6 @@
  * @see hyperbook.i18n
  */
 hyperbook.python = (function () {
-  window.codeInput?.registerTemplate(
-    "pyide-highlighted",
-    codeInput.templates.prism(window.Prism, [
-      new codeInput.plugins.AutoCloseBrackets(),
-      new codeInput.plugins.Indent(true, 2),
-    ])
-  );
-
   const PYODIDE_CDN = "https://cdn.jsdelivr.net/pyodide/v0.29.4/full/pyodide.js";
 
   const loadPyodideScript = () => {
@@ -1899,7 +1891,7 @@ if _pg:
       const test = elem.getElementsByClassName("test")[0];
       const stop = elem.getElementsByClassName("stop")[0];
       const editor = elem.getElementsByClassName("editor")[0];
-      const editorTextarea = editor?.querySelector("textarea");
+      const editorCm = editor?._cm;
       const state = getExecutionState(elem.id);
       const hasRuntime = runtimes.has(elem.id);
       const hasInterrupt = interruptBuffers.has(elem.id);
@@ -1917,11 +1909,8 @@ if _pg:
       elem.classList.toggle("locked-by-other", lockedByOther);
 
       if (state.running || lockedByOther) {
-        editor?.setAttribute("disabled", "");
         editor?.classList.add("running");
-        if (editorTextarea) {
-          editorTextarea.readOnly = true;
-        }
+        editorCm?.setReadOnly(true);
         if (state.running && state.type === "run") {
           run.textContent = hyperbook.i18n.get("pyide-running");
           run.disabled = true;
@@ -1969,11 +1958,8 @@ if _pg:
           stop.classList.toggle("stopping", state.stopping);
         }
       } else {
-        editor?.removeAttribute("disabled");
         editor?.classList.remove("running");
-        if (editorTextarea) {
-          editorTextarea.readOnly = false;
-        }
+        editorCm?.setReadOnly(false);
         run.classList.remove("stopping");
         run.classList.remove("running");
         run.textContent = hyperbook.i18n.get("pyide-run");
@@ -2162,7 +2148,7 @@ if _pg:
       if (elem.getAttribute("data-pyide-initialized") === "true") continue;
       elem.setAttribute("data-pyide-initialized", "true");
 
-      const editor = elem.getElementsByClassName("editor")[0];
+      const editorDiv = elem.getElementsByClassName("editor")[0];
       const container = elem.getElementsByClassName("container")[0];
       const editorContainer = elem.getElementsByClassName("editor-container")[0];
       const splitter = elem.getElementsByClassName("splitter")[0];
@@ -2202,11 +2188,20 @@ if _pg:
       };
       let pyideState = { id };
 
-      const getEditorValue = () => {
-        const textarea = editor?.querySelector("textarea");
-        if (textarea) return textarea.value;
-        return typeof editor?.textContent === "string" ? editor.textContent : "";
-      };
+      // Initialize CodeMirror
+      const initialSource = editorDiv ? editorDiv.textContent : "";
+      if (editorDiv) editorDiv.textContent = "";
+      const cm = editorDiv ? HyperbookCM.create(editorDiv, {
+        lang: editorDiv.dataset.lang || "python",
+        value: initialSource,
+        onChange: (code) => {
+          void persistPyideState({ script: code });
+        },
+      }) : null;
+      // Store CM on the element so updateRunning() can toggle readOnly
+      if (editorDiv && cm) editorDiv._cm = cm;
+
+      const getEditorValue = () => cm?.getValue() ?? "";
 
       pyideState = { ...pyideState, script: getEditorValue() };
 
@@ -2359,7 +2354,7 @@ if _pg:
         if (result) {
           pyideState = { ...pyideState, ...result };
           if (typeof result.script === "string") {
-            editor.value = result.script;
+            cm?.setValue(result.script);
           }
           if (
             Number.isFinite(result.splitHorizontal) &&
@@ -2386,20 +2381,13 @@ if _pg:
         }
       };
 
-      editor.addEventListener("code-input_load", restoreEditorState);
-      if (editor.querySelector("textarea")) {
-        void restoreEditorState();
-      }
+      void restoreEditorState();
 
       window.addEventListener("resize", () => {
         applyCanvasOutputLayout();
         turtleModules.get(id)?.__redraw?.();
       });
       applyCanvasOutputLayout();
-
-      editor.addEventListener("input", () => {
-        void persistPyideState({ script: getEditorValue() });
-      });
 
       test?.addEventListener("click", async () => {
         showOutput();

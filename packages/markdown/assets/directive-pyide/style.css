@@ -12,6 +12,18 @@
   margin: 0;
 }
 
+.directive-pyide .editor {
+  width: 100%;
+  border: 1px solid var(--color-spacer);
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.directive-pyide .editor .cm-editor {
+  height: 100%;
+}
+
 .directive-pyide .container {
   width: 100%;
   overflow: hidden;
@@ -133,12 +145,6 @@
 
 .directive-pyide.resizing .splitter {
   opacity: 0.75;
-}
-
-.directive-pyide .editor {
-  width: 100%;
-  border: 1px solid var(--color-spacer);
-  flex: 1;
 }
 
 .directive-pyide .editor.running {

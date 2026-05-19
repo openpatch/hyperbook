@@ -9,7 +9,6 @@ import {
   expectContainerDirective,
   isDirective,
   registerDirective,
-  requestCSS,
   requestJS,
 } from "./remarkHelper";
 import hash from "./objectHash";
@@ -42,10 +41,7 @@ export default (ctx: HyperbookContext) => () => {
 
         expectContainerDirective(node, file, name);
         registerDirective(file, name, ["client.js"], ["style.css"], []);
-        requestJS(file, ["code-input", "code-input.min.js"]);
-        requestCSS(file, ["code-input", "code-input.min.css"]);
-        requestJS(file, ["code-input", "auto-close-brackets.min.js"]);
-        requestJS(file, ["code-input", "indent.min.js"]);
+        requestJS(file, ["codemirror", "codemirror.bundle.js"]);
         requestJS(file, ["uzip", "uzip.js"]);
 
         const sourceFiles: { filename: string; content: string }[] = [];
@@ -434,11 +430,10 @@ export default (ctx: HyperbookContext) => () => {
                 },
                 {
                   type: "element",
-                  tagName: "code-input",
+                  tagName: "div",
                   properties: {
-                    class: "editor typst active line-numbers",
-                    language: "typst",
-                    template: "typst-highlighted",
+                    class: "editor typst active",
+                    "data-lang": "typst",
                   },
                   children: [
                     {

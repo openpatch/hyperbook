@@ -11,8 +11,8 @@ exports[`remarkDirectiveOpenscad > should transform basic openscad 1`] = `
         <div class="canvas-overlay hidden"></div>
       </div>
     </div>
-    <div class="canvas-params-splitter hidden" role="separator" aria-label="Resize canvas and parameters"></div>
-    <div class="parameters-panel hidden">
+    <div class="canvas-params-splitter" role="separator" aria-label="Resize canvas and parameters"></div>
+    <div class="parameters-panel">
       <div class="parameters-header">openscad-parameters</div>
       <div class="parameters-body"></div>
     </div>
@@ -20,7 +20,7 @@ exports[`remarkDirectiveOpenscad > should transform basic openscad 1`] = `
   <div class="splitter" role="separator" aria-label="Resize panels"></div>
   <div class="editor-container">
     <div class="buttons"><button class="render">openscad-render</button></div>
-    <code-input class="editor line-numbers" language="clike" template="openscad-highlighted">cube([20,20,20], center=true);</code-input><textarea class="parameters" placeholder="{&#x22;size&#x22;: 20, &#x22;height&#x22;: 10}">{}</textarea>
+    <div class="editor" data-lang="clike">cube([20,20,20], center=true);</div><textarea class="parameters" placeholder="{&#x22;size&#x22;: 20, &#x22;height&#x22;: 10}">{}</textarea>
     <div class="buttons bottom"><button class="copy">openscad-copy</button><button class="download-stl">openscad-download-stl</button><button class="reset">openscad-reset</button><button class="fullscreen" title="ide-fullscreen-enter" aria-label="ide-fullscreen-enter">⛶</button></div>
   </div>
 </div>

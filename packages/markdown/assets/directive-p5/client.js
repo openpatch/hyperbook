@@ -7,14 +7,6 @@
  * @see hyperbook.store
  */
 hyperbook.p5 = (function () {
-  window.codeInput?.registerTemplate(
-    "p5-highlighted",
-    codeInput.templates.prism(window.Prism, [
-      new codeInput.plugins.AutoCloseBrackets(),
-      new codeInput.plugins.Indent(true, 2),
-    ]),
-  );
-
   const wrapSketch = (sketchCode) => {
     if (sketchCode !== "" && !sketchCode?.includes("setup")) {
       return `
@@ -128,7 +120,7 @@ hyperbook.p5 = (function () {
     const container = elem.querySelector(".container");
     const editorContainer = elem.querySelector(".editor-container");
     const splitter = elem.querySelector(".splitter");
-    const editor = elem.getElementsByClassName("editor")[0];
+    const editorDiv = elem.getElementsByClassName("editor")[0];
     /** @type {HTMLButtonElement} */
     const update = elem.getElementsByClassName("update")[0];
     const frame = elem.getElementsByTagName("iframe")[0];
@@ -138,6 +130,20 @@ hyperbook.p5 = (function () {
     const resetEl = elem.getElementsByClassName("reset")[0];
     const downloadEl = elem.getElementsByClassName("download")[0];
     const fullscreenEl = elem.getElementsByClassName("fullscreen")[0];
+
+    // Initialize CodeMirror editor (only in editor mode)
+    let cm = null;
+    if (editorDiv) {
+      const initialSource = editorDiv.textContent;
+      editorDiv.textContent = "";
+      cm = HyperbookCM.create(editorDiv, {
+        lang: editorDiv.dataset.lang,
+        value: initialSource,
+        onChange: (code) => {
+          if (id) hyperbook.store.db.p5.put({ id, sketch: code });
+        },
+      });
+    }
 
     setupSplitter(elem, container, editorContainer, splitter);
 
@@ -159,7 +165,7 @@ hyperbook.p5 = (function () {
 
     copyEl?.addEventListener("click", async () => {
       try {
-        await navigator.clipboard.writeText(editor.value);
+        await navigator.clipboard.writeText(cm?.getValue() ?? "");
       } catch (error) {
         console.error(error.message);
       }
@@ -172,35 +178,30 @@ hyperbook.p5 = (function () {
 
     downloadEl?.addEventListener("click", () => {
       const a = document.createElement("a");
-      const blob = new Blob([editor.value], { type: "text/plain" });
+      const blob = new Blob([cm?.getValue() ?? ""], { type: "text/plain" });
       a.href = URL.createObjectURL(blob);
       a.download = `sketch-${id}.js`;
       a.click();
     });
 
-    editor?.addEventListener("code-input_load", async () => {
-      if (id) {
-        const result = await hyperbook.store.db.p5.get(id);
+    if (id && cm) {
+      hyperbook.store.db.p5.get(id).then((result) => {
         if (result) {
-          editor.value = result.sketch;
+          cm.setValue(result.sketch);
           const code = result.sketch;
           frame.srcdoc = template
             .replace("###SLOT###", wrapSketch(code))
             .replaceAll("###ORIGIN###", window.location.origin)
             .replace(/\u00A0/g, " ");
         }
-
-        editor.addEventListener("input", () => {
-          hyperbook.store.db.p5.put({ id, sketch: editor.value });
-        });
-      }
-
-      update?.addEventListener("click", () => {
-        const code = editor.value;
-        frame.srcdoc = template
-          .replace("###SLOT###", wrapSketch(code))
-          .replaceAll("###ORIGIN###", window.location.origin);
       });
+    }
+
+    update?.addEventListener("click", () => {
+      const code = cm?.getValue() ?? "";
+      frame.srcdoc = template
+        .replace("###SLOT###", wrapSketch(code))
+        .replaceAll("###ORIGIN###", window.location.origin);
     });
   }
 

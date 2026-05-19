@@ -88,21 +88,6 @@ hyperbook.typst = (function () {
   // INITIALIZATION
   // ============================================================================
 
-  /**
-   * Initialize code-input template for Typst syntax highlighting
-   */
-  const initializeCodeInput = () => {
-    if (!window.codeInput) return;
-
-    window.codeInput.registerTemplate(
-      "typst-highlighted",
-      window.codeInput.templates.prism(window.Prism, [
-        new window.codeInput.plugins.AutoCloseBrackets(),
-        new window.codeInput.plugins.Indent(true, 2),
-      ])
-    );
-  };
-
   // ============================================================================
   // TYPST LOADER
   // ============================================================================
@@ -1269,6 +1254,7 @@ hyperbook.typst = (function () {
       this.sourceTextarea = elem.querySelector('.typst-source');
       this.fullscreenBtn = elem.querySelector('.fullscreen');
       this.editorInitialized = false;
+      this.cm = null;
 
       setupSplitter(this.elem, this.previewContainer, this.editorContainer, this.splitter);
 
@@ -1320,28 +1306,26 @@ hyperbook.typst = (function () {
      */
     async initialize() {
       if (this.editor) {
-        const initializeEditor = async () => {
-          if (this.editorInitialized) return;
-          this.editorInitialized = true;
-          await this.restoreState();
-          this.uiManager.updateTabs();
-          this.uiManager.updateBinaryFilesList();
-          this.rerender();
+        if (this.editorInitialized) return;
+        this.editorInitialized = true;
 
-          // Create debounced rerender for input events
-          const debouncedRerender = debounce(() => this.rerender(), CONFIG.DEBOUNCE_DELAY);
-
-          this.editor.addEventListener('input', () => {
+        // Create CodeMirror editor
+        const initialSource = this.editor.textContent;
+        this.editor.textContent = "";
+        const debouncedRerender = debounce(() => this.rerender(), CONFIG.DEBOUNCE_DELAY);
+        this.cm = HyperbookCM.create(this.editor, {
+          lang: "typst",
+          value: initialSource,
+          onChange: () => {
             this.saveState();
             debouncedRerender();
-          });
-        };
+          },
+        });
 
-        // Edit mode - wait for code-input to load (or initialize immediately if already ready)
-        this.editor.addEventListener('code-input_load', initializeEditor);
-        if (this.editor.querySelector('textarea')) {
-          await initializeEditor();
-        }
+        await this.restoreState();
+        this.uiManager.updateTabs();
+        this.uiManager.updateBinaryFilesList();
+        this.rerender();
       } else if (this.sourceTextarea) {
         // Preview mode
         const initialCode = this.sourceTextarea.value;
@@ -1606,37 +1590,18 @@ hyperbook.typst = (function () {
 
     getEditorValue() {
       if (!this.editor) return '';
-      const textarea = this.editor.querySelector('textarea');
-      if (textarea) return textarea.value;
-      try {
-        if (typeof this.editor.value === 'string') {
-          return this.editor.value;
-        }
-      } catch (e) {}
-      return this.editor.textContent || '';
+      return this.cm?.getValue() ?? '';
     }
 
     setEditorValue(value) {
       if (!this.editor) return;
-      const normalizedValue = value ?? '';
-      const textarea = this.editor.querySelector('textarea');
-      if (textarea) {
-        textarea.value = normalizedValue;
-      }
-      try {
-        this.editor.value = normalizedValue;
-      } catch (e) {
-        this.editor.textContent = normalizedValue;
-      }
+      this.cm?.setValue(value ?? '');
     }
   }
 
   // ============================================================================
   // MAIN INITIALIZATION
   // ============================================================================
-
-  // Initialize code-input
-  initializeCodeInput();
 
   // Get all Typst directive elements
   const elements = document.getElementsByClassName('directive-typst');

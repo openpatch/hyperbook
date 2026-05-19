@@ -9,7 +9,6 @@ import {
   expectContainerDirective,
   isDirective,
   registerDirective,
-  requestCSS,
   requestJS,
 } from "./remarkHelper";
 import hash from "./objectHash";
@@ -35,10 +34,7 @@ export default (ctx: HyperbookContext) => () => {
 
         expectContainerDirective(node, file, name);
         registerDirective(file, name, ["client.js"], ["style.css"], []);
-        requestJS(file, ["code-input", "code-input.min.js"]);
-        requestCSS(file, ["code-input", "code-input.min.css"]);
-        requestJS(file, ["code-input", "auto-close-brackets.min.js"]);
-        requestJS(file, ["code-input", "indent.min.js"]);
+        requestJS(file, ["codemirror", "codemirror.bundle.js"]);
 
         let source = "";
         if (src) {
@@ -104,7 +100,7 @@ export default (ctx: HyperbookContext) => () => {
                 type: "element",
                 tagName: "div",
                 properties: {
-                  class: "canvas-params-splitter hidden",
+                  class: "canvas-params-splitter",
                   role: "separator",
                   "aria-label": "Resize canvas and parameters",
                 },
@@ -113,7 +109,7 @@ export default (ctx: HyperbookContext) => () => {
               {
                 type: "element",
                 tagName: "div",
-                properties: { class: "parameters-panel hidden" },
+                properties: { class: "parameters-panel" },
                 children: [
                   {
                     type: "element",
@@ -161,11 +157,10 @@ export default (ctx: HyperbookContext) => () => {
               },
               {
                 type: "element",
-                tagName: "code-input",
+                tagName: "div",
                 properties: {
-                  class: "editor line-numbers",
-                  language: "clike",
-                  template: "openscad-highlighted",
+                  class: "editor",
+                  "data-lang": "clike",
                 },
                 children: [{ type: "raw", value: htmlEntities(source) }],
               },

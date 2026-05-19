@@ -11,6 +11,18 @@ code-input {
   margin: 0;
 }
 
+.directive-p5 .editor {
+  width: 100%;
+  border: 1px solid var(--color-spacer);
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.directive-p5 .editor .cm-editor {
+  height: 100%;
+}
+
 .directive-p5 .container {
   width: 100%;
   min-height: 120px;
@@ -68,12 +80,6 @@ code-input {
 
 .directive-p5.resizing .splitter {
   opacity: 0.75;
-}
-
-.directive-p5 .editor {
-  width: 100%;
-  border: 1px solid var(--color-spacer);
-  flex: 1;
 }
 
 .directive-p5 .buttons {

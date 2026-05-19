@@ -12,6 +12,18 @@ code-input {
   margin: 0;
 }
 
+.directive-webide .editor {
+  width: 100%;
+  border: 1px solid var(--color-spacer);
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.directive-webide .editor .cm-editor {
+  height: 100%;
+}
+
 .directive-webide .container {
   width: 100%;
   min-height: 120px;
@@ -87,12 +99,6 @@ code-input {
 
 .directive-webide.resizing .splitter {
   opacity: 0.75;
-}
-
-.directive-webide .editor {
-  width: 100%;
-  border: 1px solid var(--color-spacer);
-  flex: 1;
 }
 
 .directive-webide .editor:not(.active) {

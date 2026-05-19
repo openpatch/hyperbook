@@ -103,6 +103,7 @@
     "openscad-render-failed": "OpenSCAD-Rendern fehlgeschlagen",
     "openscad-params-object": "Parameter müssen ein JSON-Objekt sein",
     "openscad-params-loading": "Parameter werden geladen...",
+    "openscad-params-none": "Keine Parameter",
     "openscad-parameters": "Parameter",
     "user-login-title": "Anmelden",
     "user-username": "Benutzername",

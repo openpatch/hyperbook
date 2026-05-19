@@ -8,14 +8,6 @@
  * @see hyperbook.i18n
  */
 hyperbook.webide = (function () {
-  window.codeInput?.registerTemplate(
-    "webide-highlighted",
-    codeInput.templates.prism(window.Prism, [
-      new codeInput.plugins.AutoCloseBrackets(),
-      new codeInput.plugins.Indent(true, 2),
-    ]),
-  );
-
   function setupSplitter(elem, container, editorContainer, splitter) {
     if (!container || !editorContainer || !splitter) return;
 
@@ -118,18 +110,32 @@ hyperbook.webide = (function () {
     const editorContainer = elem.querySelector(".editor-container");
     const splitter = elem.querySelector(".splitter");
     const title = elem.getElementsByClassName("container-title")[0];
-    /** @type {HTMLTextAreaElement | null} */
-    const editorHTML = elem.querySelector(".editor.html");
-    /** @type {HTMLTextAreaElement | null} */
-    const editorCSS = elem.querySelector(".editor.css");
-    /** @type {HTMLTextAreaElement | null} */
-    const editorJS = elem.querySelector(".editor.js");
+    const editorHTMLDiv = elem.querySelector(".editor.html");
+    const editorCSSDiv = elem.querySelector(".editor.css");
+    const editorJSDiv = elem.querySelector(".editor.js");
     /** @type {HTMLButtonElement | null} */
     const btnHTML = elem.querySelector("button.html");
     /** @type {HTMLButtonElement | null} */
     const btnCSS = elem.querySelector("button.css");
     /** @type {HTMLButtonElement | null} */
     const btnJS = elem.querySelector("button.js");
+
+    // Initialize CodeMirror instances
+    const cmHTML = editorHTMLDiv ? (() => {
+      const src = editorHTMLDiv.textContent;
+      editorHTMLDiv.textContent = "";
+      return HyperbookCM.create(editorHTMLDiv, { lang: "html", value: src, onChange: () => update() });
+    })() : null;
+    const cmCSS = editorCSSDiv ? (() => {
+      const src = editorCSSDiv.textContent;
+      editorCSSDiv.textContent = "";
+      return HyperbookCM.create(editorCSSDiv, { lang: "css", value: src, onChange: () => update() });
+    })() : null;
+    const cmJS = editorJSDiv ? (() => {
+      const src = editorJSDiv.textContent;
+      editorJSDiv.textContent = "";
+      return HyperbookCM.create(editorJSDiv, { lang: "javascript", value: src, onChange: () => update() });
+    })() : null;
 
     const frame = elem.getElementsByTagName("iframe")[0];
     const template = elem.getAttribute("data-template");
@@ -164,9 +170,9 @@ hyperbook.webide = (function () {
       btnCSS?.classList.remove("active");
       btnJS?.classList.remove("active");
 
-      editorHTML?.classList.add("active");
-      editorCSS?.classList.remove("active");
-      editorJS?.classList.remove("active");
+      editorHTMLDiv?.classList.add("active");
+      editorCSSDiv?.classList.remove("active");
+      editorJSDiv?.classList.remove("active");
     });
 
     btnCSS?.addEventListener("click", () => {
@@ -174,9 +180,9 @@ hyperbook.webide = (function () {
       btnCSS?.classList.add("active");
       btnJS?.classList.remove("active");
 
-      editorHTML?.classList.remove("active");
-      editorCSS?.classList.add("active");
-      editorJS?.classList.remove("active");
+      editorHTMLDiv?.classList.remove("active");
+      editorCSSDiv?.classList.add("active");
+      editorJSDiv?.classList.remove("active");
     });
 
     btnJS?.addEventListener("click", () => {
@@ -184,80 +190,40 @@ hyperbook.webide = (function () {
       btnCSS?.classList.remove("active");
       btnJS?.classList.add("active");
 
-      editorHTML?.classList.remove("active");
-      editorCSS?.classList.remove("active");
-      editorJS?.classList.add("active");
+      editorHTMLDiv?.classList.remove("active");
+      editorCSSDiv?.classList.remove("active");
+      editorJSDiv?.classList.add("active");
     });
 
-    const load = async () => {
-      const result = await hyperbook.store.db.webide.get(id);
-      if (!result) {
-        return;
-      }
-      const website = template
-        .replace("###HTML###", result.html)
-        .replace("###CSS###", result.css)
-        .replace("###JS###", result.js);
-      frame.srcdoc = website;
-    };
-
-    load();
-
     const update = () => {
+      const htmlVal = cmHTML?.getValue() ?? "";
+      const cssVal = cmCSS?.getValue() ?? "";
+      const jsVal = cmJS?.getValue() ?? "";
       hyperbook.store.db.webide.put({
         id,
-        html: editorHTML?.value,
-        css: editorCSS?.value,
-        js: editorJS?.value,
+        html: htmlVal,
+        css: cssVal,
+        js: jsVal,
       });
       const website = template
-        .replace("###HTML###", editorHTML?.value)
-        .replace("###CSS###", editorCSS?.value)
-        .replace("###JS###", editorJS?.value);
+        .replace("###HTML###", htmlVal)
+        .replace("###CSS###", cssVal)
+        .replace("###JS###", jsVal);
       frame.srcdoc = website;
     };
+
+    // Restore saved state on init
+    hyperbook.store.db.webide.get(id).then((result) => {
+      if (result) {
+        if (cmHTML && result.html != null) cmHTML.setValue(result.html);
+        if (cmCSS && result.css != null) cmCSS.setValue(result.css);
+        if (cmJS && result.js != null) cmJS.setValue(result.js);
+      }
+      update();
+    });
 
     frame.addEventListener("load", () => {
       title.textContent = frame.contentDocument.title;
-    });
-
-    editorHTML?.addEventListener("code-input_load", async () => {
-      const result = await hyperbook.store.db.webide.get(id);
-      if (result) {
-        editorHTML.value = result.html;
-      }
-
-      update();
-
-      editorHTML.addEventListener("input", () => {
-        update();
-      });
-    });
-
-    editorCSS?.addEventListener("code-input_load", async () => {
-      const result = await hyperbook.store.db.webide.get(id);
-      if (result) {
-        editorCSS.value = result.css;
-      }
-
-      update();
-
-      editorCSS.addEventListener("input", () => {
-        update();
-      });
-    });
-
-    editorJS?.addEventListener("code-input_load", async () => {
-      const result = await hyperbook.store.db.webide.get(id);
-      if (result) {
-        editorJS.value = result.js;
-      }
-
-      update();
-
-      editorJS.addEventListener("input", () => {
-        update();
-      });
     });
 
     downloadEl?.addEventListener("click", async () => {

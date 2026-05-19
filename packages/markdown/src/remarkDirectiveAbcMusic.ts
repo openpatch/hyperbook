@@ -9,7 +9,6 @@ import { toString } from "mdast-util-to-string";
 import {
   expectContainerDirective,
   registerDirective,
-  requestCSS,
   requestJS,
 } from "./remarkHelper";
 import hash from "./objectHash";
@@ -32,9 +31,7 @@ export default (ctx: HyperbookContext) => () => {
           ["style.css"],
           [],
         );
-        requestJS(file, ["code-input", "code-input.min.js"]);
-        requestCSS(file, ["code-input", "code-input.min.css"]);
-        requestJS(file, ["code-input", "indent.min.js"]);
+        requestJS(file, ["codemirror", "codemirror.bundle.js"]);
 
         const value = node.value || toString(node.children);
         const editor = node.meta?.includes("editor");
@@ -65,19 +62,12 @@ export default (ctx: HyperbookContext) => () => {
                   children: [
                     {
                       type: "element",
-                      tagName: "code-input",
+                      tagName: "div",
                       properties: {
                         class: "editor",
-                        id: hash(node),
-                        template: "abc-highlighted",
-                        language: "javascript",
+                        "data-lang": "default",
                       },
-                      children: [
-                        {
-                          type: "raw",
-                          value: value,
-                        },
-                      ],
+                      children: [],
                     },
                     {
                       type: "element",

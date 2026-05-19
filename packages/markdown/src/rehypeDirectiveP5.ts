@@ -9,7 +9,6 @@ import { VFile } from "vfile";
 import {
   expectContainerDirective,
   registerDirective,
-  requestCSS,
   requestJS,
 } from "./remarkHelper";
 import { toText } from "./mdastUtilToText";
@@ -92,10 +91,9 @@ ${(code.scripts ? [cdnLibraryUrl, ...code.scripts] : []).map((src) => `<script t
 
         expectContainerDirective(node, file, name);
         registerDirective(file, name, ["client.js"], ["style.css"]);
-        requestJS(file, ["code-input", "code-input.min.js"]);
-        requestCSS(file, ["code-input", "code-input.min.css"]);
-        requestJS(file, ["code-input", "auto-close-brackets.min.js"]);
-        requestJS(file, ["code-input", "indent.min.js"]);
+        if (bEditor) {
+          requestJS(file, ["codemirror", "codemirror.bundle.js"]);
+        }
 
         let srcFile = "";
 
@@ -194,10 +192,10 @@ ${(code.scripts ? [cdnLibraryUrl, ...code.scripts] : []).map((src) => `<script t
                     },
                     {
                       type: "element",
-                      tagName: "code-input",
+                      tagName: "div",
                       properties: {
-                        class: "editor line-numbers",
-                        language: "javascript",
+                        class: "editor",
+                        "data-lang": "javascript",
                       },
                       children: [
                         {

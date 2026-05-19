@@ -9,7 +9,6 @@ import {
   expectContainerDirective,
   isDirective,
   registerDirective,
-  requestCSS,
   requestJS,
 } from "./remarkHelper";
 import { toText } from "./mdastUtilToText";
@@ -52,10 +51,7 @@ export default (ctx: HyperbookContext) => () => {
 
         expectContainerDirective(node, file, name);
         registerDirective(file, name, ["client.js"], ["style.css"], []);
-        requestJS(file, ["code-input", "code-input.min.js"]);
-        requestCSS(file, ["code-input", "code-input.min.css"]);
-        requestJS(file, ["code-input", "auto-close-brackets.min.js"]);
-        requestJS(file, ["code-input", "indent.min.js"]);
+        requestJS(file, ["codemirror", "codemirror.bundle.js"]);
 
         let srcFile = "";
 
@@ -281,11 +277,10 @@ export default (ctx: HyperbookContext) => () => {
               },
               {
                 type: "element",
-                tagName: "code-input",
+                tagName: "div",
                 properties: {
-                  class: "editor line-numbers",
-                  language: "python",
-                  template: "pyide-highlighted",
+                  class: "editor",
+                  "data-lang": "python",
                 },
                 children: [
                   {

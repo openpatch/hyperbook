@@ -8,34 +8,25 @@
 hyperbook.openscad = (function () {
   const _scriptBase = window.HYPERBOOK_ASSETS + "directive-openscad/";
 
-  window.codeInput?.registerTemplate(
-    "openscad-highlighted",
-    codeInput.templates.prism(window.Prism, [
-      new codeInput.plugins.AutoCloseBrackets(),
-      new codeInput.plugins.Indent(true, 2),
-    ]),
-  );
-
   let threePromise = null;
-  let openscadWorkerPromise = null;
   let workerRequestId = 0;
-  const pendingWorkerRequests = new Map();
+
+  // Two separate worker instances: one for rendering, one for parameter extraction.
+  // This allows both to run concurrently in truly separate threads.
+  const workerSlots = {
+    render: { promise: null, pending: new Map() },
+    param: { promise: null, pending: new Map() },
+  };
 
   const i18nGet = (key, fallback = key) => hyperbook.i18n?.get(key) || fallback;
 
-  const rejectPendingWorkerRequests = (error) => {
-    for (const { reject } of pendingWorkerRequests.values()) {
-      reject(error);
-    }
-    pendingWorkerRequests.clear();
-  };
-
-  const getOpenScadWorker = async () => {
+  const getWorker = async (slot) => {
     if (!window.Worker) {
       throw new Error(i18nGet("openscad-render-failed", "OpenSCAD render failed"));
     }
-    if (!openscadWorkerPromise) {
-      openscadWorkerPromise = new Promise((resolve, reject) => {
+    const s = workerSlots[slot];
+    if (!s.promise) {
+      s.promise = new Promise((resolve, reject) => {
         try {
           const worker = new Worker(new URL(_scriptBase + "worker.js", window.location.href), {
             type: "module",
@@ -43,9 +34,9 @@ hyperbook.openscad = (function () {
 
           worker.addEventListener("message", (event) => {
             const { requestId, ok, result, error } = event.data || {};
-            if (!requestId || !pendingWorkerRequests.has(requestId)) return;
-            const pending = pendingWorkerRequests.get(requestId);
-            pendingWorkerRequests.delete(requestId);
+            if (!requestId || !s.pending.has(requestId)) return;
+            const pending = s.pending.get(requestId);
+            s.pending.delete(requestId);
             if (ok) {
               pending.resolve(result);
               return;
@@ -59,35 +50,38 @@ hyperbook.openscad = (function () {
 
           worker.addEventListener("error", (event) => {
             const workerError = new Error(event?.message || "OpenSCAD worker crashed");
-            rejectPendingWorkerRequests(workerError);
-            openscadWorkerPromise = null;
+            for (const { reject } of s.pending.values()) reject(workerError);
+            s.pending.clear();
+            s.promise = null;
           });
 
           worker.addEventListener("messageerror", () => {
             const workerError = new Error("OpenSCAD worker message error");
-            rejectPendingWorkerRequests(workerError);
-            openscadWorkerPromise = null;
+            for (const { reject } of s.pending.values()) reject(workerError);
+            s.pending.clear();
+            s.promise = null;
           });
 
           resolve(worker);
         } catch (error) {
-          openscadWorkerPromise = null;
+          s.promise = null;
           reject(error);
         }
       });
     }
-    return openscadWorkerPromise;
+    return s.promise;
   };
 
-  const callOpenScadWorker = async (type, payload, transfer = []) => {
-    const worker = await getOpenScadWorker();
+  const callWorker = async (slot, type, payload, transfer = []) => {
+    const worker = await getWorker(slot);
+    const s = workerSlots[slot];
     const requestId = ++workerRequestId;
     return new Promise((resolve, reject) => {
-      pendingWorkerRequests.set(requestId, { resolve, reject });
+      s.pending.set(requestId, { resolve, reject });
       try {
         worker.postMessage({ requestId, type, payload }, transfer);
       } catch (error) {
-        pendingWorkerRequests.delete(requestId);
+        s.pending.delete(requestId);
         reject(error);
       }
     });
@@ -98,22 +92,27 @@ hyperbook.openscad = (function () {
       .filter((entry) => typeof entry?.stderr === "string")
       .map((entry) => entry.stderr);
 
-  // Extract parameters from SCAD code in the worker to keep the main thread responsive.
-  const extractParams = async (code, libraryNames = []) => {
+  // Build parameter UI metadata/markup in the worker to minimize main-thread work.
+  const buildParamUiInWorker = async (code, libraryNames = [], currentOverrides = {}, id = "") => {
     try {
-      const result = await callOpenScadWorker("extractParams", { code, libraryNames });
-      if (result?.error || result?.exitCode !== 0) {
-        return [];
-      }
-      const output = result?.outputs?.[0]?.[1];
-      if (!output) return [];
-      const json = new TextDecoder().decode(toUint8Array(output));
-      const paramSet = JSON.parse(json);
-      if (!Array.isArray(paramSet?.parameters)) return [];
-      return paramSet.parameters.filter((p) => !p.name?.startsWith("$"));
+      const result = await callWorker("param", "buildParamForm", {
+        code,
+        libraryNames,
+        currentOverrides,
+        id,
+      });
+      return {
+        hasParams: Boolean(result?.hasParams),
+        html: typeof result?.html === "string" ? result.html : "",
+        values: result?.values && typeof result.values === "object" ? result.values : {},
+      };
     } catch (e) {
-      console.warn("[openscad] Worker param extraction failed:", e);
-      return [];
+      console.warn("[openscad] Worker param UI build failed:", e);
+      return {
+        hasParams: false,
+        html: "",
+        values: {},
+      };
     }
   };
 
@@ -173,6 +172,7 @@ hyperbook.openscad = (function () {
         const delta = moveEvent.clientY - startPointer;
         const size = applySplitSize(startSize + delta);
         leftSide.dataset.splitCanvasParams = String(Math.round(size));
+        onSplitChanged?.({ splitCanvasParams: Math.round(size) });
       };
 
       const onPointerUp = () => {
@@ -246,6 +246,9 @@ hyperbook.openscad = (function () {
         const delta = pointer - startPointer;
         const size = applySplitSize(startSize + delta, isHorizontal);
         elem.dataset[key] = String(Math.round(size));
+        onSplitChanged?.({
+          [key]: Math.round(size),
+        });
       };
 
       const onPointerUp = () => {
@@ -555,6 +558,35 @@ hyperbook.openscad = (function () {
     return model;
   };
 
+  // Build a Three.js Group from pre-parsed colour buckets returned by the render worker.
+  // The Float32Array buffers are already computed off the main thread — no text parsing needed.
+  const buildThreeModelFromColorBuckets = (colorBuckets, THREE) => {
+    const model = new THREE.Group();
+    for (const bucket of colorBuckets) {
+      const posArray = bucket.positions instanceof Float32Array
+        ? bucket.positions : new Float32Array(bucket.positions || []);
+      const normArray = bucket.normals instanceof Float32Array
+        ? bucket.normals : new Float32Array(bucket.normals || []);
+      if (posArray.length === 0) continue;
+      const geometry = new THREE.BufferGeometry();
+      geometry.setAttribute("position", new THREE.Float32BufferAttribute(posArray, 3));
+      geometry.setAttribute("normal", new THREE.Float32BufferAttribute(normArray, 3));
+      const [r, g, b, a = 1] = bucket.color || DEFAULT_FACE_COLOR;
+      const material = new THREE.MeshStandardMaterial({
+        color: new THREE.Color(r, g, b),
+        transparent: a < 1,
+        opacity: a,
+        metalness: 0.1,
+        roughness: 0.6,
+      });
+      model.add(new THREE.Mesh(geometry, material));
+    }
+    if (model.children.length === 0) {
+      throw new Error(i18nGet("openscad-render-failed", "OpenSCAD render failed"));
+    }
+    return model;
+  };
+
   const exportIndexedPolyhedronTo3mf = (polyhedron) => {
     const objectUuid = createUuid();
     const buildUuid = createUuid();
@@ -635,8 +667,11 @@ hyperbook.openscad = (function () {
     const splitter = elem.querySelector(".splitter");
     const canvasParamsSplitter = elem.querySelector(".canvas-params-splitter");
     const canvas = elem.querySelector(".preview-canvas");
-    const editor = elem.querySelector("code-input.editor");
+    const editorDiv = elem.querySelector(".editor");
     const params = elem.querySelector("textarea.parameters");
+
+    // `cm` will be initialized after scheduleSave/scheduleParamBuild are defined.
+    let cm = null;
 
     // The parameters panel is its own card below the canvas.
     const paramsPanel = elem.querySelector(".parameters-panel");
@@ -704,6 +739,30 @@ hyperbook.openscad = (function () {
       }
     };
 
+    const viewerState = {
+      renderer: null,
+      camera: null,
+      scene: null,
+      controls: null,
+      model: null,
+      renderRaf: 0,
+      resizeRaf: 0,
+      disposed: false,
+      resizeObserver: null,
+    };
+
+    const requestRender = () => {
+      if (viewerState.renderRaf || viewerState.disposed) return;
+      viewerState.renderRaf = requestAnimationFrame(() => {
+        viewerState.renderRaf = 0;
+        if (viewerState.disposed) return;
+        if (viewerState.controls) viewerState.controls.update();
+        if (viewerState.renderer && viewerState.scene && viewerState.camera) {
+          viewerState.renderer.render(viewerState.scene, viewerState.camera);
+        }
+      });
+    };
+
     // Resize the Three.js renderer to match the current canvas-wrapper size.
     const resizeCanvas = () => {
       if (!viewerState.renderer || !viewerState.camera || !canvasWrapper) return;
@@ -712,27 +771,25 @@ hyperbook.openscad = (function () {
       viewerState.renderer.setSize(w, h, false);
       viewerState.camera.aspect = w / h;
       viewerState.camera.updateProjectionMatrix();
+      requestRender();
+    };
+
+    const scheduleResizeCanvas = () => {
+      if (viewerState.resizeRaf || viewerState.disposed) return;
+      viewerState.resizeRaf = requestAnimationFrame(() => {
+        viewerState.resizeRaf = 0;
+        resizeCanvas();
+      });
     };
 
     const applyMainSplitSize = setupSplitter(elem, leftSide, editorContainer, splitter, () => {
-      resizeCanvas();
-      save();
+      scheduleResizeCanvas();
+      scheduleSave();
     });
     const applyCanvasParamsSplitSize = setupCanvasParamsSplitter(leftSide, previewContainer, paramsPanel, canvasParamsSplitter, () => {
-      resizeCanvas();
-      save();
+      scheduleResizeCanvas();
+      scheduleSave();
     });
-
-    const viewerState = {
-      renderer: null,
-      camera: null,
-      scene: null,
-      controls: null,
-      model: null,
-      raf: 0,
-      disposed: false,
-      resizeObserver: null,
-    };
 
     const save = async () => {
       if (!id) return;
@@ -741,7 +798,7 @@ hyperbook.openscad = (function () {
       const splitCanvasParams = Number(leftSide?.dataset.splitCanvasParams);
       await hyperbook.store.db.openscad.put({
         id,
-        code: editor?.value || "",
+        code: cm?.getValue() || "",
         params: params?.value || "{}",
         ...(Number.isFinite(splitHorizontal) && splitHorizontal > 0
           ? { splitHorizontal: Math.round(splitHorizontal) }
@@ -759,8 +816,8 @@ hyperbook.openscad = (function () {
       if (!id) return null;
       const result = await hyperbook.store.db.openscad.get(id);
       if (!result) return null;
-      if (editor && typeof result.code === "string") {
-        editor.value = result.code;
+      if (cm && typeof result.code === "string") {
+        cm.setValue(result.code);
       }
       if (params && typeof result.params === "string") {
         params.value = result.params;
@@ -777,141 +834,192 @@ hyperbook.openscad = (function () {
       return result;
     };
 
+    const SAVE_DEBOUNCE_MS = 250;
+    const PARAM_REBUILD_DEBOUNCE_MS = 900;
+    const PARAM_RENDER_DEBOUNCE_MS = 600;
+    let saveTimer = 0;
+    let paramRebuildTimer = 0;
+    let paramRenderTimer = 0;
+    let pendingParamCode = null;
+    let lastBuiltParamCode = null;
+    let paramBuildInFlight = false;
+    let latestParamBuildToken = 0;
+    // Suppresses scheduleParamBuild when code is updated programmatically from a param change.
+    let suppressParamBuild = false;
+
+    const scheduleSave = () => {
+      clearTimeout(saveTimer);
+      saveTimer = window.setTimeout(() => {
+        const runSave = () => { void save(); };
+        if (typeof window.requestIdleCallback === "function") {
+          window.requestIdleCallback(runSave, { timeout: 500 });
+        } else {
+          runSave();
+        }
+      }, SAVE_DEBOUNCE_MS);
+    };
+
+    let paramValues = {};
+
+    // Surgically replaces the value of a top-level variable assignment in SCAD source,
+    // preserving any trailing inline comment (e.g. // [min:max] annotations).
+    const updateVariableInCode = (code, name, value) => {
+      const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const pattern = new RegExp(
+        `^([ \\t]*${escaped}[ \\t]*=[ \\t]*)([^;\\n]*)(;[^\\n]*)$`,
+        "m",
+      );
+      try {
+        return code.replace(pattern, `$1${formatValue(value)}$3`);
+      } catch (_) {
+        return code;
+      }
+    };
+
+    const syncParamsTextareaFromState = () => {
+      if (params) {
+        params.value = JSON.stringify(paramValues);
+      }
+    };
+
+    const handleParamFieldEvent = (event) => {
+      const target = event?.target;
+      const name = target?.dataset?.paramName;
+      const kind = target?.dataset?.paramKind;
+      if (!name || !kind) return;
+
+      if (kind === "boolean") {
+        paramValues[name] = Boolean(target.checked);
+      } else if (kind === "number") {
+        paramValues[name] = Number(target.value);
+      } else if (kind === "vector") {
+        const vectorContainer = target.closest(".param-vector");
+        if (!vectorContainer) return;
+        const vectorInputs = Array.from(
+          vectorContainer.querySelectorAll('input[data-param-kind="vector"]'),
+        ).filter((input) => input.dataset.paramName === name);
+        paramValues[name] = vectorInputs.map((input) => Number(input.value));
+      } else if (kind === "option") {
+        const selected = target.options?.[target.selectedIndex];
+        const raw = selected?.dataset?.paramOptionValue;
+        if (typeof raw === "string") {
+          try {
+            paramValues[name] = JSON.parse(raw);
+          } catch (_) {
+            paramValues[name] = target.value;
+          }
+        } else {
+          paramValues[name] = target.value;
+        }
+      } else {
+        paramValues[name] = target.value;
+      }
+
+      syncParamsTextareaFromState();
+
+      // Reflect the new value back into the editor source code.
+      const currentCode = cm?.getValue() || "";
+      const updatedCode = updateVariableInCode(currentCode, name, paramValues[name]);
+      if (updatedCode !== currentCode) {
+        suppressParamBuild = true;
+        cm?.setValue(updatedCode);
+        suppressParamBuild = false;
+      }
+
+      scheduleParamRender();
+      scheduleSave();
+    };
+
+    paramsForm?.addEventListener("input", handleParamFieldEvent);
+    paramsForm?.addEventListener("change", handleParamFieldEvent);
+
     // Rebuild the parameters form from the code's top-level variable assignments.
     // Stored overrides from the textarea are preserved so user edits survive
     // code changes that don't touch those variable names.
-    const buildParamForm = async (code) => {
-      // Show a loading indicator while WASM extracts params.
+    const buildParamForm = async (code, buildToken) => {
+      // Show a loading indicator while WASM extracts params and builds UI model.
       paramsForm.innerHTML = "";
-      paramsPanel?.classList.remove("hidden");
-      canvasParamsSplitter?.classList.remove("hidden");
       const loading = document.createElement("p");
       loading.className = "params-empty";
       loading.textContent = i18nGet("openscad-params-loading", "Loading parameters...");
       paramsForm.appendChild(loading);
 
-      const codeParams = await extractParams(code, libraryNames);
-      paramsForm.innerHTML = "";
-
-      if (codeParams.length === 0) {
-        paramsPanel?.classList.add("hidden");
-        canvasParamsSplitter?.classList.add("hidden");
+      // Code is the source of truth — param changes are always synced back to the
+      // code, so we never need stored overrides to win over the code's own values.
+      const result = await buildParamUiInWorker(code, libraryNames, {}, id || "model");
+      if (buildToken !== latestParamBuildToken) {
+        return false;
+      }
+      if (!result.hasParams) {
+        paramsForm.innerHTML = "";
+        const empty = document.createElement("p");
+        empty.className = "params-empty";
+        empty.textContent = i18nGet("openscad-params-none", "No parameters");
+        paramsForm.appendChild(empty);
+        paramValues = {};
         if (params) params.value = "{}";
-        return;
+        return true;
       }
 
-      let currentOverrides = {};
-      try {
-        currentOverrides = JSON.parse(params?.value || "{}");
-      } catch (_) {}
-
-      const syncTextarea = () => {
-        const values = {};
-        paramsForm.querySelectorAll("[data-param-name]").forEach((input) => {
-          const name = input.dataset.paramName;
-          const type = input.dataset.paramType;
-          if (type === "boolean") {
-            values[name] = input.checked;
-          } else if (type === "number") {
-            values[name] = Number(input.value);
-          } else {
-            values[name] = input.value;
-          }
-        });
-        if (params) params.value = JSON.stringify(values);
-        save();
-      };
-
-      codeParams.forEach(({ name, caption, type, initial, min, max, step, options }) => {
-        const current =
-          currentOverrides[name] !== undefined ? currentOverrides[name] : initial;
-
-        const row = document.createElement("div");
-        row.className = "param-row";
-
-        const label = document.createElement("label");
-        label.textContent = caption || name;
-        label.setAttribute("for", `openscad-param-${id}-${name}`);
-
-        let input;
-        if (type === "boolean") {
-          input = document.createElement("input");
-          input.type = "checkbox";
-          input.checked = Boolean(current);
-        } else if (options && options.length > 0) {
-          // Dropdown for parameters with a fixed set of options.
-          input = document.createElement("select");
-          options.forEach(({ name: optName, value: optValue }) => {
-            const opt = document.createElement("option");
-            opt.value = String(optValue);
-            opt.textContent = optName || String(optValue);
-            if (String(optValue) === String(current)) opt.selected = true;
-            input.appendChild(opt);
-          });
-          input.addEventListener("change", syncTextarea);
-        } else if (type === "number" && Array.isArray(initial)) {
-          // Vector: render one number input per component.
-          input = document.createElement("span");
-          input.className = "param-vector";
-          const arr = Array.isArray(current) ? current : initial;
-          arr.forEach((val, idx) => {
-            const ni = document.createElement("input");
-            ni.type = "number";
-            ni.value = String(val);
-            ni.step = step != null ? String(step) : "any";
-            if (min != null) ni.min = String(min);
-            if (max != null) ni.max = String(max);
-            ni.dataset.paramName = name;
-            ni.dataset.paramType = "vector";
-            ni.dataset.vectorIndex = String(idx);
-            ni.addEventListener("input", () => {
-              const all = Array.from(input.querySelectorAll("input")).map(
-                (i) => Number(i.value)
-              );
-              const sibling = paramsForm.querySelector(
-                `[data-param-name="${name}"][data-param-type="number"]`
-              );
-              if (sibling) sibling.value = JSON.stringify(all);
-              syncTextarea();
-            });
-            input.appendChild(ni);
-          });
-          // Hidden input holds the JSON array for syncTextarea to read.
-          const hidden = document.createElement("input");
-          hidden.type = "hidden";
-          hidden.dataset.paramName = name;
-          hidden.dataset.paramType = "number";
-          hidden.value = JSON.stringify(arr);
-          input.appendChild(hidden);
-        } else if (type === "number") {
-          input = document.createElement("input");
-          input.type = "number";
-          input.value = String(current);
-          input.step = step != null ? String(step) : "any";
-          if (min != null) input.min = String(min);
-          if (max != null) input.max = String(max);
-        } else {
-          input = document.createElement("input");
-          input.type = "text";
-          input.value = String(current);
+      // Preserve accordion open/closed state by group name before replacing HTML.
+      const accordionStates = new Map();
+      paramsForm.querySelectorAll("details.param-group").forEach((details) => {
+        const summary = details.querySelector("summary.param-group-summary");
+        if (summary) {
+          accordionStates.set(summary.textContent.trim(), details.open);
         }
-        input.id = `openscad-param-${id}-${name}`;
-        if (input.tagName !== "SPAN") {
-          input.dataset.paramName = name;
-          input.dataset.paramType = type;
-          input.addEventListener("input", syncTextarea);
-        }
-
-        row.appendChild(label);
-        row.appendChild(input);
-        paramsForm.appendChild(row);
       });
 
-      syncTextarea();
+      paramsForm.innerHTML = result.html;
+
+      // Restore accordion states after the rebuild.
+      if (accordionStates.size > 0) {
+        paramsForm.querySelectorAll("details.param-group").forEach((details) => {
+          const summary = details.querySelector("summary.param-group-summary");
+          if (summary) {
+            const name = summary.textContent.trim();
+            if (accordionStates.has(name)) {
+              details.open = accordionStates.get(name);
+            }
+          }
+        });
+      }
+
+      paramValues = result.values || {};
+      syncParamsTextareaFromState();
+      scheduleSave();
+      return true;
+    };
+
+    const runPendingParamBuild = async () => {
+      if (paramBuildInFlight) return;
+      while (pendingParamCode !== null && pendingParamCode !== lastBuiltParamCode) {
+        const nextCode = pendingParamCode;
+        const nextToken = latestParamBuildToken;
+        pendingParamCode = null;
+        paramBuildInFlight = true;
+        try {
+          const wasApplied = await buildParamForm(nextCode, nextToken);
+          if (wasApplied && nextToken === latestParamBuildToken) {
+            lastBuiltParamCode = nextCode;
+          }
+        } finally {
+          paramBuildInFlight = false;
+        }
+      }
+    };
+
+    const scheduleParamBuild = (code) => {
+      latestParamBuildToken += 1;
+      pendingParamCode = code;
+      clearTimeout(paramRebuildTimer);
+      paramRebuildTimer = window.setTimeout(() => {
+        void runPendingParamBuild();
+      }, PARAM_REBUILD_DEBOUNCE_MS);
     };
 
     const getParamDefinitions = () => {
-      const parsed = JSON.parse(params?.value || "{}");
+      const parsed = paramValues;
       if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
         throw new Error(i18nGet("openscad-params-object", "Parameters must be a JSON object"));
       }
@@ -923,12 +1031,15 @@ hyperbook.openscad = (function () {
       showOverlay("loading", i18nGet("openscad-rendering", "Rendering..."));
 
       try {
-        const paramDefinitions = getParamDefinitions();
-        const result = await callOpenScadWorker("render", {
-          code: editor?.value || "",
+        // Param values are always synced back into the editor code, so the code
+        // itself is the single source of truth. Passing -D overrides is both
+        // redundant and causes stale-value renders when the render fires before
+        // the next param-build cycle completes.
+        const result = await callWorker("render", "render", {
+          code: cm?.getValue() || "",
           format,
           libraryNames,
-          paramDefinitions,
+          paramDefinitions: [],
           isPreview,
         });
         const stderr = getInvocationStderr(result);
@@ -936,6 +1047,10 @@ hyperbook.openscad = (function () {
           const error = new Error(result?.error || i18nGet("openscad-render-failed", "OpenSCAD render failed"));
           error.stderr = stderr;
           throw error;
+        }
+        // Worker returns pre-parsed geometry for preview OFF renders (avoids main-thread text parsing).
+        if (result?.parsedGeometry) {
+          return { parsedGeometry: result.parsedGeometry, stderr };
         }
         const output = result?.outputs?.[0]?.[1];
         if (!output) {
@@ -964,8 +1079,12 @@ hyperbook.openscad = (function () {
     const renderPreview = async () => {
       try {
         await save();
-        const { content: off } = await renderWithFormat("off", libraryNames, true);
-        await renderOff(off);
+        const renderResult = await renderWithFormat("off", libraryNames, true);
+        if (renderResult.parsedGeometry) {
+          await renderOff({ colorBuckets: renderResult.parsedGeometry });
+        } else {
+          await renderOff(renderResult.content);
+        }
         hideOverlay();
       } catch (error) {
         const stderrErrors = (error?.stderr || []).filter((l) => /error/i.test(l)).join("\n");
@@ -977,6 +1096,13 @@ hyperbook.openscad = (function () {
           showOverlay("error", error?.message || `${error}`);
         }
       }
+    };
+
+    const scheduleParamRender = () => {
+      clearTimeout(paramRenderTimer);
+      paramRenderTimer = window.setTimeout(() => {
+        void renderPreview();
+      }, PARAM_RENDER_DEBOUNCE_MS);
     };
 
     const disposeModel = () => {
@@ -1020,19 +1146,10 @@ hyperbook.openscad = (function () {
 
         viewerState.camera = new THREE.PerspectiveCamera(45, 1, 0.1, 5000);
         viewerState.controls = new OrbitControls(viewerState.camera, canvas);
-        viewerState.controls.enableDamping = true;
+        viewerState.controls.enableDamping = false;
+        viewerState.controls.addEventListener("change", requestRender);
 
-        const tick = () => {
-          if (viewerState.disposed) return;
-          if (viewerState.controls) viewerState.controls.update();
-          if (viewerState.renderer && viewerState.scene && viewerState.camera) {
-            viewerState.renderer.render(viewerState.scene, viewerState.camera);
-          }
-          viewerState.raf = requestAnimationFrame(tick);
-        };
-        tick();
-
-        viewerState.resizeObserver = new ResizeObserver(() => resizeCanvas());
+        viewerState.resizeObserver = new ResizeObserver(() => scheduleResizeCanvas());
         viewerState.resizeObserver.observe(canvasWrapper || previewContainer);
       }
 
@@ -1045,8 +1162,10 @@ hyperbook.openscad = (function () {
 
       disposeModel();
 
-      const polyhedron = parseOffToIndexedPolyhedron(offData);
-      const model = buildThreeModelFromIndexedPolyhedron(polyhedron, THREE);
+      const polyhedron = offData?.colorBuckets ? null : parseOffToIndexedPolyhedron(offData);
+      const model = offData?.colorBuckets
+        ? buildThreeModelFromColorBuckets(offData.colorBuckets, THREE)
+        : buildThreeModelFromIndexedPolyhedron(polyhedron, THREE);
       viewerState.model = model;
       viewerState.scene.add(model);
 
@@ -1073,6 +1192,7 @@ hyperbook.openscad = (function () {
 
       viewerState.controls.target.set(0, 0, 0);
       viewerState.controls.update();
+      requestRender();
     };
 
     copyBtn?.addEventListener("click", async () => {
@@ -1121,6 +1241,24 @@ hyperbook.openscad = (function () {
     updateFullscreenButtonState(elem, fullscreenBtn);
 
     let editorStateRestored = false;
+
+    // Initialize CodeMirror now that scheduleSave/scheduleParamBuild are defined.
+    if (editorDiv) {
+      const initialSource = editorDiv.textContent;
+      editorDiv.textContent = "";
+      cm = HyperbookCM.create(editorDiv, {
+        lang: editorDiv.dataset.lang || "clike",
+        value: initialSource,
+        onChange: (code) => {
+          scheduleSave();
+          if (!suppressParamBuild) {
+            scheduleParamBuild(code);
+            scheduleParamRender();
+          }
+        },
+      });
+    }
+
     const restoreEditorState = async () => {
       if (editorStateRestored) return;
       editorStateRestored = true;
@@ -1129,36 +1267,29 @@ hyperbook.openscad = (function () {
       // Re-apply split sizes after stored dataset values are applied by load().
       applyMainSplitSize?.();
       applyCanvasParamsSplitSize?.();
-      let paramRebuildTimer = null;
-      editor.addEventListener("input", () => {
-        save();
-        clearTimeout(paramRebuildTimer);
-        paramRebuildTimer = setTimeout(() => buildParamForm(editor.value), 500);
-      });
 
       // Use stored code if available; otherwise fall back to the editor's
       // current value (the markdown default) or the built-in placeholder.
-      const initialCode = stored?.code || editor.value.trim() || "// OpenSCAD\ncube([20,20,20], center=true);";
-      editor.value = initialCode;
+      const initialCode = stored?.code || cm?.getValue().trim() || "// OpenSCAD\ncube([20,20,20], center=true);";
+      cm?.setValue(initialCode);
       if (!params?.value.trim()) {
         params.value = "{}";
       }
-      await buildParamForm(initialCode);
-      // Only persist when there was no stored entry; if one already existed we
-      // must not overwrite it — reading editor.value right now may return stale
-      // data because code-input's async re-render may not have completed yet.
+      latestParamBuildToken += 1;
+      const initParamToken = latestParamBuildToken;
+      // Fire param extraction and rendering concurrently — each uses its own dedicated worker.
+      buildParamForm(initialCode, initParamToken).then(() => {
+        if (initParamToken === latestParamBuildToken) {
+          lastBuiltParamCode = initialCode;
+        }
+      }).catch(() => {});
       if (!stored) {
         await save();
       }
       renderPreview();
     };
 
-    editor?.addEventListener("code-input_load", restoreEditorState);
-    // SPA timing: if code-input already rendered its inner textarea before we
-    // attached the listener, fire the handler immediately (mirrors pyide).
-    if (editor?.querySelector("textarea")) {
-      void restoreEditorState();
-    }
+    void restoreEditorState();
   }
 
   function init(root) {

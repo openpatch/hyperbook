@@ -9,7 +9,6 @@ import {
   expectContainerDirective,
   isDirective,
   registerDirective,
-  requestCSS,
   requestJS,
 } from "./remarkHelper";
 import hash from "./objectHash";
@@ -59,10 +58,7 @@ html, body {
 
         expectContainerDirective(node, file, name);
         registerDirective(file, name, ["client.js"], ["style.css"], []);
-        requestJS(file, ["code-input", "code-input.min.js"]);
-        requestCSS(file, ["code-input", "code-input.min.css"]);
-        requestJS(file, ["code-input", "auto-close-brackets.min.js"]);
-        requestJS(file, ["code-input", "indent.min.js"]);
+        requestJS(file, ["codemirror", "codemirror.bundle.js"]);
 
         let js = "";
         let css = "";
@@ -102,11 +98,10 @@ html, body {
           });
           editors.push({
             type: "element",
-            tagName: "code-input",
+            tagName: "div",
             properties: {
-              class: "editor html line-numbers",
-              language: "html",
-              template: "webide-highlighted",
+              class: "editor html",
+              "data-lang": "html",
             },
             children: [
               {
@@ -133,11 +128,10 @@ html, body {
           });
           editors.push({
             type: "element",
-            tagName: "code-input",
+            tagName: "div",
             properties: {
-              class: "editor css line-numbers",
-              language: "css",
-              template: "webide-highlighted",
+              class: "editor css",
+              "data-lang": "css",
             },
             children: [
               {
@@ -164,11 +158,10 @@ html, body {
           });
           editors.push({
             type: "element",
-            tagName: "code-input",
+            tagName: "div",
             properties: {
-              class: "editor js line-numbers",
-              language: "javascript",
-              template: "webide-highlighted",
+              class: "editor js",
+              "data-lang": "javascript",
             },
             children: [
               {
