@@ -1776,20 +1776,29 @@ hyperbook.python = (function () {
         }
       }
 
+      let lastStdinPrompt = "";
+      pyodide.setStdout({
+        write: (msg) => {
+          const text = typeof msg === "string" ? msg : decoder.decode(msg);
+          if (text.endsWith("\n")) {
+            lastStdinPrompt = "";
+          } else {
+            lastStdinPrompt += text;
+          }
+          appendOutputLine(id, text);
+          return msg?.length ?? text.length;
+        },
+      });
       pyodide.setStdin({
         stdin: () => {
-          const value = window.prompt(hyperbook.i18n.get("pyide-input-prompt"));
+          const promptText =
+            lastStdinPrompt || hyperbook.i18n.get("pyide-input-prompt");
+          lastStdinPrompt = "";
+          const value = window.prompt(promptText);
           if (value === null) {
             return "";
           }
           return value;
-        },
-      });
-      pyodide.setStdout({
-        write: (msg) => {
-          const text = typeof msg === "string" ? msg : decoder.decode(msg);
-          appendOutputLine(id, text);
-          return msg?.length ?? text.length;
         },
       });
       pyodide.setStderr({

@@ -38,6 +38,18 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.96.0
+
+::::tabs
+
+:::tab{title="Improved :+1:" id="improved"}
+
+- Show the Python `input()` prompt message in the browser dialog. When a script calls e.g. `input("Enter number: ")`, the prompt text is now displayed in the dialog instead of the generic "Input required:" message.
+
+:::
+
+::::
+
 ## v0.95.0
 
 ::::tabs
