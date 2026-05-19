@@ -1,5 +1,13 @@
 # @hyperbook/markdown
 
+## 0.66.1
+
+### Patch Changes
+
+- [`c267b74`](https://github.com/openpatch/hyperbook/commit/c267b7429a962f7b6a7af6c893918780c52762ee) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Show the Python `input()` prompt message in the browser dialog.
+
+  When a Python script calls `input("Zahl eingeben: ")`, the prompt text is now passed through to the browser's `window.prompt()` dialog instead of always showing the generic "Input required:" message.
+
 ## 0.66.0
 
 ### Minor Changes
