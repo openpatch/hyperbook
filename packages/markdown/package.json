@@ -74,6 +74,7 @@
     "unist-util-visit-parents": "^6.0.2"
   },
   "devDependencies": {
+    "@raspberrypifoundation/python-friendly-error-messages": "^0.1.6",
     "@excalidraw/excalidraw": "0.18.0",
     "@hyperbook/fs": "workspace:*",
     "@hyperbook/types": "workspace:*",

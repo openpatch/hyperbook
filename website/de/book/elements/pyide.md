@@ -334,17 +334,128 @@ Die Browser-Turtle-API steht ueber `from turtle import *` zur Verfuegung.
 | `towards` | `x, y` | Gibt den Winkel von der Turtle zum angegebenen Punkt zurueck. |
 | `pen` | `options=None` | Gibt den aktuellen Stiftzustand zurueck oder aktualisiert Teile davon ueber ein Dictionary-aehnliches Objekt. |
 | `isvisible` | keine | Gibt zurueck, ob der Turtle-Cursor aktuell sichtbar ist. |
+| `shape` | `name=None` | Setzt oder gibt die Form der Turtle zurueck. Verfuegbare Formen: `'classic'` (Standard), `'arrow'`, `'turtle'`, `'triangle'`, `'square'`, `'circle'`. |
 
 ### Bildschirm und Reset
 
 | Methode | Parameter | Beschreibung |
 | --- | --- | --- |
 | `speed` | `value=0` | Setzt die Animationsgeschwindigkeit der Turtle. Hoehere Werte zeichnen schneller. |
-| `screensize` | `canvwidth=None, canvheight=None, bg=None` | Gibt die aktuelle Canvas-Groesse zurueck oder aendert Groesse und optionale Hintergrundfarbe. Wenn das Canvas groesser als der sichtbare Bereich ist, erscheinen Scrollbalken. |
+| `screensize` | `canvwidth=None, canvheight=None, bg=None` | Gibt die aktuelle Canvas-Groesse zurueck oder aendert Groesse und optionale Hintergrundfarbe. Wenn das Canvas groesser als der sichtbare Bereich ist, erscheinen Scrollbalken. Standardgroesse ist 640×480. |
 | `showturtle`, `st` | keine | Zeigt den Turtle-Cursor an. |
 | `hideturtle`, `ht` | keine | Blendet den Turtle-Cursor aus. |
 | `clear` | keine | Loescht die Zeichnung, behaelt aber den aktuellen Turtle-Zustand bei. |
 | `reset` | keine | Setzt den Turtle-Zustand zurueck und loescht die Zeichnung. |
+
+### Mehrere Turtles
+
+Mit `Turtle()` lassen sich weitere unabhaengige Turtles erstellen, die dasselbe Canvas teilen. Jede Turtle hat ihre eigene Position, Ausrichtung, Farbe, Form und Stiftzustand und wird ueber das zurueckgegebene Objekt gesteuert.
+
+````hyperbook
+:::pyide{canvas}
+
+```python
+from turtle import *
+from random import randint
+
+speed(0)
+penup()
+goto(-140, 140)
+
+for step in range(15):
+  write(step, align='center')
+  right(90)
+  for num in range(8):
+    penup()
+    forward(10)
+    pendown()
+    forward(10)
+  penup()
+  backward(160)
+  left(90)
+  forward(20)
+
+red = Turtle()
+red.color('red')
+red.shape('turtle')
+red.penup()
+red.goto(-160, 100)
+red.pendown()
+
+blue = Turtle()
+blue.color('blue')
+blue.shape('turtle')
+blue.penup()
+blue.goto(-160, 70)
+blue.pendown()
+
+green = Turtle()
+green.shape('turtle')
+green.color('green')
+green.penup()
+green.goto(-160, 40)
+green.pendown()
+
+for turn in range(100):
+  red.forward(randint(1, 5))
+  blue.forward(randint(1, 5))
+  green.forward(randint(1, 5))
+```
+
+:::
+````
+
+:::pyide{canvas}
+
+```python
+from turtle import *
+from random import randint
+
+speed(0)
+penup()
+goto(-140, 140)
+
+for step in range(15):
+  write(step, align='center')
+  right(90)
+  for num in range(8):
+    penup()
+    forward(10)
+    pendown()
+    forward(10)
+  penup()
+  backward(160)
+  left(90)
+  forward(20)
+
+red = Turtle()
+red.color('red')
+red.shape('turtle')
+red.penup()
+red.goto(-160, 100)
+red.pendown()
+
+blue = Turtle()
+blue.color('blue')
+blue.shape('turtle')
+blue.penup()
+blue.goto(-160, 70)
+blue.pendown()
+
+green = Turtle()
+green.shape('turtle')
+green.color('green')
+green.penup()
+green.goto(-160, 40)
+green.pendown()
+
+for turn in range(100):
+  red.forward(randint(1, 5))
+  blue.forward(randint(1, 5))
+  green.forward(randint(1, 5))
+```
+
+:::
 
 ````hyperbook
 :::pyide{canvas}

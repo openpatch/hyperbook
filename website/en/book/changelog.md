@@ -38,6 +38,34 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.96.0
+
+::::tabs
+
+:::tab{title="New :rocket:" id="new"}
+
+- **pyide**: Add `Turtle()` constructor support for creating multiple simultaneous turtles
+- **pyide**: Add all standard turtle shapes: `arrow`, `turtle`, `classic`, `triangle`, `square`, `circle` (default: `classic`)
+- **pyide**: Integrate friendly Python error messages via `@raspberrypifoundation/python-friendly-error-messages`
+
+:::
+
+:::tab{title="Improved :+1:" id="improved"}
+
+- **pyide**: Default screen size is now 640×480
+- **pyide**: Canvas wrapper now shows a checkered transparency pattern to distinguish canvas from page background
+- **pyide**: Fix `js_svg_graphic` FFI for pytamaro 2.0.1 compatibility (`show_graphic`, `save_graphic_svg`)
+
+:::
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+- **pyide**: Fix `write()` alignment — text no longer influences turtle position
+
+:::
+
+::::
+
 ## v0.95.1
 
 ::::tabs

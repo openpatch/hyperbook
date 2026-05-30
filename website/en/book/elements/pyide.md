@@ -339,17 +339,128 @@ The browser turtle API is available via `from turtle import *`.
 | `towards` | `x, y` | Return the angle from the turtle to the given point. |
 | `pen` | `options=None` | Return the current pen state, or update parts of it from a dictionary-like object. |
 | `isvisible` | none | Return whether the turtle cursor is currently visible. |
+| `shape` | `name=None` | Set or return the turtle shape. Available shapes: `'classic'` (default), `'arrow'`, `'turtle'`, `'triangle'`, `'square'`, `'circle'`. |
 
 ### Screen and reset
 
 | Method | Parameters | Description |
 | --- | --- | --- |
 | `speed` | `value=0` | Set the turtle animation speed. Higher values draw faster. |
-| `screensize` | `canvwidth=None, canvheight=None, bg=None` | Return or update the turtle canvas size and optional background color. Scrollbars appear when the canvas is larger than the panel. |
+| `screensize` | `canvwidth=None, canvheight=None, bg=None` | Return or update the turtle canvas size and optional background color. Scrollbars appear when the canvas is larger than the panel. Default size is 640×480. |
 | `showturtle`, `st` | none | Show the turtle cursor. |
 | `hideturtle`, `ht` | none | Hide the turtle cursor. |
 | `clear` | none | Clear the drawing but keep the current turtle state. |
 | `reset` | none | Reset the turtle state and clear the drawing. |
+
+### Multiple turtles
+
+Use `Turtle()` to create additional independent turtles that share the same canvas. Each turtle has its own position, heading, color, shape, and pen state and is controlled through the object it returns.
+
+````hyperbook
+:::pyide{canvas}
+
+```python
+from turtle import *
+from random import randint
+
+speed(0)
+penup()
+goto(-140, 140)
+
+for step in range(15):
+  write(step, align='center')
+  right(90)
+  for num in range(8):
+    penup()
+    forward(10)
+    pendown()
+    forward(10)
+  penup()
+  backward(160)
+  left(90)
+  forward(20)
+
+red = Turtle()
+red.color('red')
+red.shape('turtle')
+red.penup()
+red.goto(-160, 100)
+red.pendown()
+
+blue = Turtle()
+blue.color('blue')
+blue.shape('turtle')
+blue.penup()
+blue.goto(-160, 70)
+blue.pendown()
+
+green = Turtle()
+green.shape('turtle')
+green.color('green')
+green.penup()
+green.goto(-160, 40)
+green.pendown()
+
+for turn in range(100):
+  red.forward(randint(1, 5))
+  blue.forward(randint(1, 5))
+  green.forward(randint(1, 5))
+```
+
+:::
+````
+
+:::pyide{canvas}
+
+```python
+from turtle import *
+from random import randint
+
+speed(0)
+penup()
+goto(-140, 140)
+
+for step in range(15):
+  write(step, align='center')
+  right(90)
+  for num in range(8):
+    penup()
+    forward(10)
+    pendown()
+    forward(10)
+  penup()
+  backward(160)
+  left(90)
+  forward(20)
+
+red = Turtle()
+red.color('red')
+red.shape('turtle')
+red.penup()
+red.goto(-160, 100)
+red.pendown()
+
+blue = Turtle()
+blue.color('blue')
+blue.shape('turtle')
+blue.penup()
+blue.goto(-160, 70)
+blue.pendown()
+
+green = Turtle()
+green.shape('turtle')
+green.color('green')
+green.penup()
+green.goto(-160, 40)
+green.pendown()
+
+for turn in range(100):
+  red.forward(randint(1, 5))
+  blue.forward(randint(1, 5))
+  green.forward(randint(1, 5))
+```
+
+:::
 
 ````hyperbook
 :::pyide{canvas}

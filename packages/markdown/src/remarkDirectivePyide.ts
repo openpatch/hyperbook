@@ -50,7 +50,7 @@ export default (ctx: HyperbookContext) => () => {
         const packageList = parsePackagesAttribute(packages);
 
         expectContainerDirective(node, file, name);
-        registerDirective(file, name, ["client.js"], ["style.css"], []);
+        registerDirective(file, name, ["python-friendly-error-messages.js", "client.js"], ["style.css"], []);
         requestJS(file, ["codemirror", "codemirror.bundle.js"]);
 
         let srcFile = "";

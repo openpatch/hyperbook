@@ -4,6 +4,16 @@ packages:
   - platforms/*
   - '!**/test/**'
 
+allowBuilds:
+  '@parcel/watcher': true
+  '@swc/core': true
+  '@vscode/vsce-sign': true
+  better-sqlite3: true
+  esbuild: true
+  h5p-standalone: true
+  keytar: true
+  sharp: true
+
 ignoredBuiltDependencies:
   - esbuild
 

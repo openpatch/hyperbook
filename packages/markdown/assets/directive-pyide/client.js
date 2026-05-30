@@ -246,6 +246,42 @@ hyperbook.python = (function () {
     output.appendChild(line);
   };
 
+  // ─── Python Friendly Error Messages ────────────────────────────────────────
+  // Loaded from python-friendly-error-messages.js (built from npm package)
+
+  if (window.PythonFriendlyErrorMessages) {
+    const { loadCopydeckFor, registerAdapter, pyodideAdapter } = window.PythonFriendlyErrorMessages;
+    loadCopydeckFor("en");
+    registerAdapter("pyodide", pyodideAdapter);
+  }
+
+  const appendFriendlyError = (output, errorString, code) => {
+    if (!output) return;
+    let result = null;
+    if (window.PythonFriendlyErrorMessages) {
+      try {
+        result = window.PythonFriendlyErrorMessages.friendlyExplain({
+          error: String(errorString),
+          code,
+          runtime: "pyodide",
+        });
+      } catch {}
+    }
+    if (result?.html) {
+      const div = document.createElement("div");
+      div.classList.add("pfem");
+      div.innerHTML = result.html;
+      output.appendChild(div);
+    } else {
+      const span = document.createElement("span");
+      span.classList.add("error-line");
+      span.textContent = String(errorString);
+      output.appendChild(span);
+    }
+  };
+
+  // ───────────────────────────────────────────────────────────────────────────
+
   const appendOutput = (output, message, isError = false, id = null) => {
     if (!output || message === undefined || message === null) return;
     if (isError) {
@@ -311,10 +347,26 @@ hyperbook.python = (function () {
   const createTurtleJsFFI = (id) => {
     const DEFAULT_LINE_WIDTH = 1;
     const DEFAULT_FONT_SIZE = 8;
-    const TK_TEXT_X_OFFSET = -1;
-    const DEFAULT_TURTLE_SCREEN_WIDTH = 400;
-    const TURTLE_SIZE = 20;
+    const DEFAULT_SHAPE = "classic";
 
+    // Shape polygons in canvas-local coords (+x = forward, +y = down).
+    // Derived from CPython/RPi turtle shapes by applying a 90° CCW screen rotation:
+    // (sx, sy) → (sy, -sx).
+    const TURTLE_SHAPES = {
+      classic:  [[0, 0], [-9, 5], [-7, 0], [-9, -5]],
+      arrow:    [[0, 10], [0, -10], [10, 0]],
+      triangle: [[-5.77, -10], [11.55, 0], [-5.77, 10]],
+      square:   [[-10, -10], [10, -10], [10, 10], [-10, 10]],
+      circle:   null, // rendered as arc, not polygon
+      turtle: [
+        [16, 0], [14, 2], [10, 1], [7, 4], [9, 7], [8, 9],
+        [5, 6], [1, 7], [-3, 5], [-6, 8], [-8, 6], [-5, 4],
+        [-7, 0], [-5, -4], [-8, -6], [-6, -8], [-3, -5],
+        [1, -7], [5, -6], [8, -9], [9, -7], [7, -4], [10, -1], [14, -2],
+      ],
+    };
+
+    // ---- Shared canvas/screen state ----
     let pyodide = null;
     let canvas = null;
     let context = null;
@@ -322,39 +374,23 @@ hyperbook.python = (function () {
     let cssHeight = 0;
     let dpr = 1;
     let active = false;
-
-    let x = 0;
-    let y = 0;
-    let heading = 0;
-    let renderedX = 0;
-    let renderedY = 0;
-    let renderedHeading = 0;
-    let penDown = true;
-    let turtleVisible = true;
-    let renderedTurtleVisible = true;
-    let strokeColor = "#000000";
-    let fillColor = "#000000";
     let backgroundColor = "#ffffff";
     let backgroundImage = null;
-    let fontSize = DEFAULT_FONT_SIZE;
-    let currentFontFamily = "Arial";
-    let currentFontStyle = "normal";
     let colorMode = 1.0;
     let delayMs = 80;
     let turtleSpeed = 3;
-    let screenWidth = null;
-    let screenHeight = null;
-    let filling = false;
-    let fillPath = null;
-    let currentPath = null;
-    /** @type {Array<any>} */
-    let paths = [];
+    let screenWidth = 640;
+    let screenHeight = 480;
     let operationQueue = [];
     let queueGeneration = 0;
     let queueRunning = false;
     const textMeasureCanvas = document.createElement("canvas");
     const textMeasureContext = textMeasureCanvas.getContext("2d");
 
+    // Registry of all active turtle pens (rendering state objects)
+    const allPens = [];
+
+    // ---- Shared helper functions ----
     const normalizeAngle = (angle) => {
       const value = Number(angle) || 0;
       return ((value % 360) + 360) % 360;
@@ -501,6 +537,37 @@ hyperbook.python = (function () {
           pxApprox * 0.2,
       };
     };
+    const toColorString = (value) => {
+      if (typeof value === "string") {
+        return value;
+      }
+      if (value && typeof value.toJs === "function") {
+        return toColorString(value.toJs({ pyproxies: [] }));
+      }
+      if (Array.isArray(value) || (value && typeof value === "object" && "length" in value)) {
+        const parts = Array.from(value).slice(0, 3).map((part) => Number(part));
+        if (parts.length !== 3 || parts.some((part) => !Number.isFinite(part))) {
+          throw new Error(`bad color sequence: ${String(value)}`);
+        }
+        if (colorMode === 1.0) {
+          if (parts.some((part) => part < 0 || part > 1)) {
+            throw new Error(`bad color sequence: ${String(value)}`);
+          }
+          const [r, g, b] = parts.map((part) => Math.round(part * 255));
+          return `rgb(${r}, ${g}, ${b})`;
+        }
+        if (colorMode === 255) {
+          if (parts.some((part) => part < 0 || part > 255)) {
+            throw new Error(`bad color sequence: ${String(value)}`);
+          }
+          const [r, g, b] = parts.map((part) => Math.round(part));
+          return `rgb(${r}, ${g}, ${b})`;
+        }
+        throw new Error(`bad color sequence: ${String(value)}`);
+      }
+      return "#000000";
+    };
+
     const sleep = (ms) => new Promise((resolve) => window.setTimeout(resolve, ms));
     const clearQueue = () => {
       queueGeneration += 1;
@@ -571,41 +638,6 @@ hyperbook.python = (function () {
       return true;
     };
 
-    const makePath = (overrides = {}) => ({
-      down: penDown,
-      stroke: strokeColor,
-      lineWidth: DEFAULT_LINE_WIDTH,
-      fontsize: fontSize,
-      fontfamily: currentFontFamily,
-      fontstyle: currentFontStyle,
-      fill: false,
-      fillstyle: fillColor,
-      points: [{ x, y }],
-      ...overrides,
-    });
-
-    const beginCurrentPath = () => {
-      currentPath = makePath();
-      paths.push(currentPath);
-      return currentPath;
-    };
-
-    const commitStyleToNewPath = () => {
-      currentPath = makePath({
-        down: penDown,
-        lineWidth: currentPath?.lineWidth ?? DEFAULT_LINE_WIDTH,
-      });
-      paths.push(currentPath);
-      return currentPath;
-    };
-
-    const ensurePath = () => {
-      if (!currentPath) {
-        beginCurrentPath();
-      }
-      return currentPath;
-    };
-
     const drawBackground = () => {
       context.save();
       context.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -649,22 +681,11 @@ hyperbook.python = (function () {
           const text = String(point.text);
           const metrics = measureTurtleText(text, family, size, style);
           const align = normalizeTextAlign(point.align);
-          const left = metrics.left || 0;
-          const right = metrics.right || metrics.width || 0;
-          const descent = metrics.descent || 0;
-          const anchorX = px + TK_TEXT_X_OFFSET;
-          let drawX = anchorX + left;
-          if (align === "center") {
-            drawX = anchorX + (left - right) / 2;
-          } else if (align === "right") {
-            drawX = anchorX - right;
-          }
-          const drawY = py - descent;
           context.font = metrics.font;
           context.fillStyle = point.color || path.stroke;
-          context.textAlign = "left";
+          context.textAlign = align;
           context.textBaseline = "alphabetic";
-          context.fillText(text, drawX, drawY);
+          context.fillText(text, px, py);
           continue;
         }
         if (point.dotRadius) {
@@ -691,22 +712,31 @@ hyperbook.python = (function () {
       }
     };
 
-    const drawTurtle = () => {
-      if (!renderedTurtleVisible) return;
+    const drawTurtleShape = (pen) => {
+      if (!pen.renderedTurtleVisible) return;
       context.save();
-      context.translate(toCanvasX(renderedX), toCanvasY(renderedY));
-      context.rotate(-toRadians(renderedHeading));
-      context.beginPath();
-      context.moveTo(TURTLE_SIZE / 2, 0);
-      context.lineTo(-TURTLE_SIZE / 2, TURTLE_SIZE / 3);
-      context.lineTo(-TURTLE_SIZE / 4, 0);
-      context.lineTo(-TURTLE_SIZE / 2, -TURTLE_SIZE / 3);
-      context.closePath();
-      context.fillStyle = "#2f9e44";
-      context.strokeStyle = "#1b5e20";
+      context.translate(toCanvasX(pen.renderedX), toCanvasY(pen.renderedY));
+      context.rotate(-toRadians(pen.renderedHeading));
+      context.fillStyle = pen.shapeColor;
+      context.strokeStyle = pen.shapeColor;
       context.lineWidth = 1;
-      context.fill();
-      context.stroke();
+      const shapeName = pen.shapeName || DEFAULT_SHAPE;
+      if (shapeName === "circle") {
+        context.beginPath();
+        context.arc(0, 0, 10, 0, 2 * Math.PI);
+        context.fill();
+        context.stroke();
+      } else {
+        const points = TURTLE_SHAPES[shapeName] || TURTLE_SHAPES[DEFAULT_SHAPE];
+        context.beginPath();
+        context.moveTo(points[0][0], points[0][1]);
+        for (let i = 1; i < points.length; i++) {
+          context.lineTo(points[i][0], points[i][1]);
+        }
+        context.closePath();
+        context.fill();
+        context.stroke();
+      }
       context.restore();
     };
 
@@ -714,205 +744,491 @@ hyperbook.python = (function () {
       if (!active) return;
       if (!setupCanvasResolution()) return;
       drawBackground();
-      paths.forEach(drawPathSegment);
-      drawTurtle();
+      for (const pen of allPens) {
+        pen.paths.forEach(drawPathSegment);
+      }
+      for (const pen of allPens) {
+        drawTurtleShape(pen);
+      }
     };
 
-    const resetState = () => {
-      paths = [];
-      currentPath = null;
-      fillPath = null;
-      x = 0;
-      y = 0;
-      heading = 0;
-      renderedX = 0;
-      renderedY = 0;
-      renderedHeading = 0;
-      penDown = true;
-      turtleVisible = true;
-      renderedTurtleVisible = true;
-      strokeColor = "#000000";
-      fillColor = "#000000";
-      backgroundColor = "#ffffff";
-      backgroundImage = null;
-      fontSize = DEFAULT_FONT_SIZE;
-      currentFontFamily = "Arial";
-      currentFontStyle = "normal";
-      colorMode = 1.0;
-      screenWidth = null;
-      screenHeight = null;
-      filling = false;
-      active = true;
-      clearQueue();
+    // ---- Per-turtle pen factory ----
+    const createTurtlePen = () => {
+      let x = 0;
+      let y = 0;
+      let heading = 0;
+      let penDown = true;
+      let turtleVisible = true;
+      let strokeColor = "#000000";
+      let fillColor = "#000000";
+      let fontSize = DEFAULT_FONT_SIZE;
+      let currentFontFamily = "Arial";
+      let currentFontStyle = "normal";
+      let filling = false;
+      let fillPath = null;
+      let currentPath = null;
+
+      // Mutable rendering state exposed to the shared draw() function
+      const pen = {
+        paths: [],
+        renderedX: 0,
+        renderedY: 0,
+        renderedHeading: 0,
+        renderedTurtleVisible: true,
+        shapeColor: "#000000",
+        shapeName: DEFAULT_SHAPE,
+      };
+
+      const makePath = (overrides = {}) => ({
+        down: penDown,
+        stroke: strokeColor,
+        lineWidth: DEFAULT_LINE_WIDTH,
+        fontsize: fontSize,
+        fontfamily: currentFontFamily,
+        fontstyle: currentFontStyle,
+        fill: false,
+        fillstyle: fillColor,
+        points: [{ x, y }],
+        ...overrides,
+      });
+
+      const beginCurrentPath = () => {
+        currentPath = makePath();
+        pen.paths.push(currentPath);
+        return currentPath;
+      };
+
+      const commitStyleToNewPath = () => {
+        currentPath = makePath({
+          down: penDown,
+          lineWidth: currentPath?.lineWidth ?? DEFAULT_LINE_WIDTH,
+        });
+        pen.paths.push(currentPath);
+        return currentPath;
+      };
+
+      const ensurePath = () => {
+        if (!currentPath) {
+          beginCurrentPath();
+        }
+        return currentPath;
+      };
+
+      const getPenState = () => ({
+        pendown: penDown,
+        pencolor: strokeColor,
+        fillcolor: fillColor,
+        pensize: currentPath?.lineWidth ?? DEFAULT_LINE_WIDTH,
+        speed: turtleSpeed,
+        shown: turtleVisible,
+      });
+
       beginCurrentPath();
-      draw();
-    };
 
-    const deactivate = () => {
-      active = false;
-      clearQueue();
-      paths = [];
-      currentPath = null;
-      fillPath = null;
-      turtleVisible = false;
-      renderedTurtleVisible = false;
-    };
-
-    const bindCanvas = (nextCanvas) => {
-      canvas = nextCanvas || getCanvas(id);
-      context = canvas?.getContext?.("2d") || null;
-      if (canvas) {
-        canvas.tabIndex = 0;
-      }
-      if (!currentPath) {
-        beginCurrentPath();
-      }
-      draw();
-    };
-
-    const toColorString = (value) => {
-      if (typeof value === "string") {
-        return value;
-      }
-      if (value && typeof value.toJs === "function") {
-        return toColorString(value.toJs({ pyproxies: [] }));
-      }
-      if (Array.isArray(value) || (value && typeof value === "object" && "length" in value)) {
-        const parts = Array.from(value).slice(0, 3).map((part) => Number(part));
-        if (parts.length !== 3 || parts.some((part) => !Number.isFinite(part))) {
-          throw new Error(`bad color sequence: ${String(value)}`);
-        }
-        if (colorMode === 1.0) {
-          if (parts.some((part) => part < 0 || part > 1)) {
-            throw new Error(`bad color sequence: ${String(value)}`);
+      const forward = (distance) => {
+        if (!ensureContext()) return;
+        const path = ensurePath();
+        const fill = filling ? fillPath : null;
+        const length = Number(distance) || 0;
+        const nextX = x + length * Math.cos(toRadians(heading));
+        const nextY = y + length * Math.sin(toRadians(heading));
+        x = nextX;
+        y = nextY;
+        const point = { x, y, move: !penDown };
+        enqueueOperation(() => {
+          pen.renderedX = point.x;
+          pen.renderedY = point.y;
+          path.points.push(point);
+          if (fill) {
+            fill.points.push({ x, y });
           }
-          const [r, g, b] = parts.map((part) => Math.round(part * 255));
-          return `rgb(${r}, ${g}, ${b})`;
+          draw();
+        });
+      };
+
+      const backward = (distance) => forward(-Number(distance || 0));
+      const right = (angle) => {
+        heading = normalizeAngle(heading - Number(angle || 0));
+        const nextHeading = heading;
+        enqueueOperation(() => {
+          pen.renderedHeading = nextHeading;
+          draw();
+        });
+      };
+      const left = (angle) => {
+        heading = normalizeAngle(heading + Number(angle || 0));
+        const nextHeading = heading;
+        enqueueOperation(() => {
+          pen.renderedHeading = nextHeading;
+          draw();
+        });
+      };
+      const penup = () => {
+        penDown = false;
+        commitStyleToNewPath();
+        draw();
+      };
+      const pendownFn = () => {
+        penDown = true;
+        commitStyleToNewPath();
+        draw();
+      };
+      const goto_ = (a, b) => {
+        if (!ensureContext()) return;
+        let nextX = Number(a);
+        let nextY = Number(b);
+        if (b === undefined && (Array.isArray(a) || (a && typeof a === "object"))) {
+          const source =
+            a && typeof a.toJs === "function" ? a.toJs({ pyproxies: [] }) : a;
+          nextX = Number(source?.[0] ?? source?.x ?? 0);
+          nextY = Number(source?.[1] ?? source?.y ?? 0);
         }
-        if (colorMode === 255) {
-          if (parts.some((part) => part < 0 || part > 255)) {
-            throw new Error(`bad color sequence: ${String(value)}`);
+        x = Number.isFinite(nextX) ? nextX : 0;
+        y = Number.isFinite(nextY) ? nextY : 0;
+        const path = ensurePath();
+        const fill = filling ? fillPath : null;
+        const point = { x, y, move: !penDown };
+        enqueueOperation(() => {
+          pen.renderedX = point.x;
+          pen.renderedY = point.y;
+          path.points.push(point);
+          if (fill) {
+            fill.points.push({ x, y });
           }
-          const [r, g, b] = parts.map((part) => Math.round(part));
-          return `rgb(${r}, ${g}, ${b})`;
+          draw();
+        });
+      };
+      const setx = (value) => goto_(Number(value), y);
+      const sety = (value) => goto_(x, Number(value));
+      const position = () => [x, y];
+      const xcor = () => x;
+      const ycor = () => y;
+      const heading_ = () => heading;
+      const setheading = (angle) => {
+        heading = normalizeAngle(angle);
+        const nextHeading = heading;
+        enqueueOperation(() => {
+          pen.renderedHeading = nextHeading;
+          draw();
+        });
+      };
+      const home = () => {
+        goto_(0, 0);
+        setheading(0);
+      };
+      const towards = (tx, ty) => {
+        const dx = Number(tx) - x;
+        const dy = Number(ty) - y;
+        if (!Number.isFinite(dx) || !Number.isFinite(dy)) return 0;
+        return normalizeAngle((Math.atan2(dy, dx) * 180) / Math.PI);
+      };
+      const speed = (value = 0) => {
+        const numeric = Number(value);
+        turtleSpeed = Number.isFinite(numeric) ? numeric : 0;
+        delayMs = turtleSpeed <= 0 ? 0 : Math.max(0, Math.round(300 / turtleSpeed));
+        return delayMs;
+      };
+      const color = (...args) => {
+        const stroke = toColorString(args[0]);
+        const fill = args.length > 1 ? toColorString(args[1]) : stroke;
+        strokeColor = stroke;
+        fillColor = fill;
+        pen.shapeColor = stroke;
+        commitStyleToNewPath();
+        if (filling && fillPath) {
+          fillPath.fillstyle = fillColor;
         }
-        throw new Error(`bad color sequence: ${String(value)}`);
-      }
-      return "#000000";
-    };
+        draw();
+      };
+      const pencolor = (value) => {
+        strokeColor = toColorString(value);
+        pen.shapeColor = strokeColor;
+        commitStyleToNewPath();
+        draw();
+      };
+      const fillcolor = (value) => {
+        fillColor = toColorString(value);
+        if (filling && fillPath) {
+          fillPath.fillstyle = fillColor;
+        }
+        commitStyleToNewPath();
+        draw();
+      };
+      const pensize = (value) => {
+        ensurePath().lineWidth = Math.max(1, Number(value) || DEFAULT_LINE_WIDTH);
+        commitStyleToNewPath();
+        draw();
+      };
+      const width = (value) => pensize(value);
+      const begin_fill = () => {
+        if (filling) return;
+        filling = true;
+        fillPath = makePath({
+          down: false,
+          fill: true,
+          stroke: "transparent",
+          lineWidth: 1,
+          fillstyle: fillColor,
+        });
+        pen.paths.push(fillPath);
+        draw();
+      };
+      const end_fill = () => {
+        filling = false;
+        fillPath = null;
+        commitStyleToNewPath();
+        draw();
+      };
+      const dot = (size = 5, colorValue = null) => {
+        const segment = makePath({
+          down: false,
+          fill: false,
+          stroke: colorValue ? toColorString(colorValue) : strokeColor,
+          fillstyle: colorValue ? toColorString(colorValue) : strokeColor,
+          points: [
+            {
+              x,
+              y,
+              dotRadius: Math.max(0.5, Number(size) || 5) / 2,
+              color: colorValue ? toColorString(colorValue) : strokeColor,
+            },
+          ],
+        });
+        enqueueOperation(() => {
+          pen.paths.push(segment);
+          draw();
+        });
+      };
+      const circle = (radius, steps = 120) => {
+        const numericRadius = Number(radius) || 0;
+        const stepCount = Math.max(8, Number(steps) | 0);
+        const circumference = 2 * Math.PI * Math.abs(numericRadius);
+        const stepLength = circumference / stepCount;
+        const stepTurn = (360 / stepCount) * (numericRadius >= 0 ? 1 : -1);
+        for (let index = 0; index < stepCount; index += 1) {
+          forward(stepLength);
+          left(stepTurn);
+        }
+      };
+      const write = (text, move = false, align = "left", font = null) => {
+        let writeText = text;
+        let writeMove = move;
+        let writeAlign = align;
+        let writeFont = font;
+        const applyWriteKwargs = (candidate) => {
+          if (!isWriteKwargsObject(candidate)) return;
+          const kwargs = toPlainObject(candidate);
+          if (!kwargs) return;
+          if (hasOwn(kwargs, "arg")) writeText = kwargs.arg;
+          else if (hasOwn(kwargs, "text")) writeText = kwargs.text;
+          if (hasOwn(kwargs, "move")) writeMove = kwargs.move;
+          if (hasOwn(kwargs, "align")) writeAlign = kwargs.align;
+          if (hasOwn(kwargs, "font")) writeFont = kwargs.font;
+        };
+        applyWriteKwargs(writeText);
+        applyWriteKwargs(writeMove);
+        applyWriteKwargs(writeAlign);
+        applyWriteKwargs(writeFont);
+        if (isWriteKwargsObject(writeFont)) writeFont = null;
+        if (isWriteKwargsObject(writeMove)) writeMove = false;
+        if (isWriteKwargsObject(writeAlign)) writeAlign = "left";
 
-    const getPenState = () => ({
-      pendown: penDown,
-      pencolor: strokeColor,
-      fillcolor: fillColor,
-      pensize: currentPath?.lineWidth ?? DEFAULT_LINE_WIDTH,
-      speed: turtleSpeed,
-      shown: turtleVisible,
-    });
-
-    const forward = (distance) => {
-      if (!ensureContext()) return;
-      const path = ensurePath();
-      const fill = filling ? fillPath : null;
-      const length = Number(distance) || 0;
-      const nextX = x + length * Math.cos(toRadians(heading));
-      const nextY = y + length * Math.sin(toRadians(heading));
-      x = nextX;
-      y = nextY;
-      const point = { x, y, move: !penDown };
-      enqueueOperation(() => {
-        renderedX = point.x;
-        renderedY = point.y;
-        path.points.push(point);
-        if (fill) {
-          fill.points.push({ x, y });
+        let family = currentFontFamily;
+        let size = fontSize;
+        let style = currentFontStyle;
+        try {
+          const source = toSequence(writeFont);
+          if (source?.length) {
+            if (source[0]) family = toPlainString(source[0], family);
+            if (source[1] !== undefined && source[1] !== null) {
+              size = toPlainNumber(source[1], size);
+            }
+            if (source[2]) style = toPlainString(source[2], style);
+          }
+        } catch {}
+        const normalizedAlign = normalizeTextAlign(writeAlign);
+        const segment = makePath({
+          down: false,
+          fill: false,
+          stroke: strokeColor,
+          points: [
+            {
+              x,
+              y,
+              text: String(writeText),
+              align: normalizedAlign,
+              fontsize: size,
+              fontfamily: family,
+              fontstyle: style,
+              color: strokeColor,
+            },
+          ],
+        });
+        if (toPlainBoolean(writeMove, false)) {
+          const metrics = measureTurtleText(String(writeText), family, size, style);
+          const textWidth = metrics.width || 0;
+          if (normalizedAlign === "left") {
+            x += textWidth;
+          } else if (normalizedAlign === "center") {
+            x += textWidth / 2;
+          }
+          // right alignment: turtle stays at its position (text ends there)
+          commitStyleToNewPath();
+        }
+        enqueueOperation(() => {
+          pen.paths.push(segment);
+          draw();
+        });
+      };
+      const setfontsize = (value) => {
+        const nextSize = toPlainNumber(value, DEFAULT_FONT_SIZE);
+        fontSize = Math.max(1, Number.isFinite(nextSize) ? nextSize : DEFAULT_FONT_SIZE);
+        commitStyleToNewPath();
+        draw();
+      };
+      const showturtle = () => {
+        turtleVisible = true;
+        enqueueOperation(() => {
+          pen.renderedTurtleVisible = true;
+          draw();
+        });
+      };
+      const hideturtle = () => {
+        turtleVisible = false;
+        enqueueOperation(() => {
+          pen.renderedTurtleVisible = false;
+          draw();
+        });
+      };
+      const isvisible = () => turtleVisible;
+      const shape = (name = undefined) => {
+        if (name === undefined || name === null) {
+          return pen.shapeName;
+        }
+        const nameStr = toPlainString(name, DEFAULT_SHAPE).toLowerCase().trim();
+        if (nameStr in TURTLE_SHAPES) {
+          pen.shapeName = nameStr;
         }
         draw();
-      });
-    };
-
-    const backward = (distance) => forward(-Number(distance || 0));
-    const right = (angle) => {
-      heading = normalizeAngle(heading - Number(angle || 0));
-      const nextHeading = heading;
-      enqueueOperation(() => {
-        renderedHeading = nextHeading;
-        draw();
-      });
-    };
-    const left = (angle) => {
-      heading = normalizeAngle(heading + Number(angle || 0));
-      const nextHeading = heading;
-      enqueueOperation(() => {
-        renderedHeading = nextHeading;
-        draw();
-      });
-    };
-    const penup = () => {
-      penDown = false;
-      commitStyleToNewPath();
-      draw();
-    };
-    const pendownFn = () => {
-      penDown = true;
-      commitStyleToNewPath();
-      draw();
-    };
-    const goto_ = (a, b) => {
-      if (!ensureContext()) return;
-      let nextX = Number(a);
-      let nextY = Number(b);
-      if (b === undefined && (Array.isArray(a) || (a && typeof a === "object"))) {
+        return pen.shapeName;
+      };
+      const penFn = (options = undefined) => {
+        if (options === undefined) {
+          return getPenState();
+        }
         const source =
-          a && typeof a.toJs === "function" ? a.toJs({ pyproxies: [] }) : a;
-        nextX = Number(source?.[0] ?? source?.x ?? 0);
-        nextY = Number(source?.[1] ?? source?.y ?? 0);
-      }
-      x = Number.isFinite(nextX) ? nextX : 0;
-      y = Number.isFinite(nextY) ? nextY : 0;
-      const path = ensurePath();
-      const fill = filling ? fillPath : null;
-      const point = { x, y, move: !penDown };
-      enqueueOperation(() => {
-        renderedX = point.x;
-        renderedY = point.y;
-        path.points.push(point);
-        if (fill) {
-          fill.points.push({ x, y });
+          options && typeof options.toJs === "function"
+            ? options.toJs({ pyproxies: [], dict_converter: Object.fromEntries })
+            : options;
+        if (!source || typeof source !== "object") return getPenState();
+        if ("pendown" in source) {
+          penDown = !!source.pendown;
         }
+        if ("pencolor" in source) {
+          strokeColor = toColorString(source.pencolor);
+        }
+        if ("fillcolor" in source) {
+          fillColor = toColorString(source.fillcolor);
+        }
+        if ("pensize" in source) {
+          ensurePath().lineWidth = Math.max(1, Number(source.pensize) || DEFAULT_LINE_WIDTH);
+        }
+        if ("shown" in source) {
+          turtleVisible = !!source.shown;
+          pen.renderedTurtleVisible = turtleVisible;
+        }
+        commitStyleToNewPath();
         draw();
-      });
-    };
-    const setx = (value) => goto_(Number(value), y);
-    const sety = (value) => goto_(x, Number(value));
-    const position = () => [x, y];
-    const xcor = () => x;
-    const ycor = () => y;
-    const heading_ = () => heading;
-    const setheading = (angle) => {
-      heading = normalizeAngle(angle);
-      const nextHeading = heading;
-      enqueueOperation(() => {
-        renderedHeading = nextHeading;
+        return getPenState();
+      };
+      const clear = () => {
+        pen.paths = [];
+        currentPath = null;
+        fillPath = null;
+        beginCurrentPath();
         draw();
-      });
+      };
+      const resetPen = () => {
+        pen.paths = [];
+        currentPath = null;
+        fillPath = null;
+        x = 0;
+        y = 0;
+        heading = 0;
+        pen.renderedX = 0;
+        pen.renderedY = 0;
+        pen.renderedHeading = 0;
+        penDown = true;
+        turtleVisible = true;
+        pen.renderedTurtleVisible = true;
+        strokeColor = "#000000";
+        fillColor = "#000000";
+        pen.shapeColor = "#000000";
+        pen.shapeName = DEFAULT_SHAPE;
+        fontSize = DEFAULT_FONT_SIZE;
+        currentFontFamily = "Arial";
+        currentFontStyle = "normal";
+        filling = false;
+        beginCurrentPath();
+      };
+
+      const api = {
+        forward,
+        fd: forward,
+        backward,
+        bk: backward,
+        back: backward,
+        right,
+        rt: right,
+        left,
+        lt: left,
+        goto: (...args) => goto_(...args),
+        setpos: (...args) => goto_(...args),
+        setposition: (...args) => goto_(...args),
+        setx,
+        sety,
+        setheading,
+        seth: setheading,
+        home,
+        circle,
+        dot,
+        position,
+        pos: position,
+        xcor,
+        ycor,
+        heading: heading_,
+        towards,
+        pendown: pendownFn,
+        pd: pendownFn,
+        down: pendownFn,
+        penup,
+        pu: penup,
+        up: penup,
+        pensize,
+        width,
+        pen: penFn,
+        write,
+        setfontsize,
+        color,
+        pencolor,
+        fillcolor,
+        begin_fill,
+        end_fill,
+        speed,
+        showturtle,
+        st: showturtle,
+        hideturtle,
+        ht: hideturtle,
+        isvisible,
+        shape,
+        clear,
+        reset: resetPen,
+      };
+
+      return { pen, api, resetPen };
     };
-    const home = () => {
-      goto_(0, 0);
-      setheading(0);
-    };
-    const towards = (tx, ty) => {
-      const dx = Number(tx) - x;
-      const dy = Number(ty) - y;
-      if (!Number.isFinite(dx) || !Number.isFinite(dy)) return 0;
-      return normalizeAngle((Math.atan2(dy, dx) * 180) / Math.PI);
-    };
-    const speed = (value = 0) => {
-      const numeric = Number(value);
-      turtleSpeed = Number.isFinite(numeric) ? numeric : 0;
-      delayMs = turtleSpeed <= 0 ? 0 : Math.max(0, Math.round(300 / turtleSpeed));
-      return delayMs;
-    };
+
+    // Screen-level functions
     const colormode = (mode = undefined) => {
       if (mode === undefined) return colorMode;
       const numeric = Number(mode);
@@ -948,164 +1264,6 @@ hyperbook.python = (function () {
         wrapper.scrollTop = Math.max(0, (cssHeight - wrapper.clientHeight) / 2);
       }
       return [screenWidth || cssWidth || 0, screenHeight || cssHeight || 0];
-    };
-    const color = (...args) => {
-      const stroke = toColorString(args[0]);
-      const fill = args.length > 1 ? toColorString(args[1]) : stroke;
-      strokeColor = stroke;
-      fillColor = fill;
-      commitStyleToNewPath();
-      if (filling && fillPath) {
-        fillPath.fillstyle = fillColor;
-      }
-      draw();
-    };
-    const pencolor = (value) => {
-      strokeColor = toColorString(value);
-      commitStyleToNewPath();
-      draw();
-    };
-    const fillcolor = (value) => {
-      fillColor = toColorString(value);
-      if (filling && fillPath) {
-        fillPath.fillstyle = fillColor;
-      }
-      commitStyleToNewPath();
-      draw();
-    };
-    const pensize = (value) => {
-      ensurePath().lineWidth = Math.max(1, Number(value) || DEFAULT_LINE_WIDTH);
-      commitStyleToNewPath();
-      draw();
-    };
-    const width = (value) => pensize(value);
-    const begin_fill = () => {
-      if (filling) return;
-      filling = true;
-      fillPath = makePath({
-        down: false,
-        fill: true,
-        stroke: "transparent",
-        lineWidth: 1,
-        fillstyle: fillColor,
-      });
-      paths.push(fillPath);
-      draw();
-    };
-    const end_fill = () => {
-      filling = false;
-      fillPath = null;
-      commitStyleToNewPath();
-      draw();
-    };
-    const dot = (size = 5, colorValue = null) => {
-      const segment = makePath({
-        down: false,
-        fill: false,
-        stroke: colorValue ? toColorString(colorValue) : strokeColor,
-        fillstyle: colorValue ? toColorString(colorValue) : strokeColor,
-        points: [
-          {
-            x,
-            y,
-            dotRadius: Math.max(0.5, Number(size) || 5) / 2,
-            color: colorValue ? toColorString(colorValue) : strokeColor,
-          },
-        ],
-      });
-      enqueueOperation(() => {
-        paths.push(segment);
-        draw();
-      });
-    };
-    const circle = (radius, steps = 120) => {
-      const numericRadius = Number(radius) || 0;
-      const stepCount = Math.max(8, Number(steps) | 0);
-      const circumference = 2 * Math.PI * Math.abs(numericRadius);
-      const stepLength = circumference / stepCount;
-      const stepTurn = (360 / stepCount) * (numericRadius >= 0 ? 1 : -1);
-      for (let index = 0; index < stepCount; index += 1) {
-        forward(stepLength);
-        left(stepTurn);
-      }
-    };
-    const write = (text, move = false, align = "left", font = null) => {
-      let writeText = text;
-      let writeMove = move;
-      let writeAlign = align;
-      let writeFont = font;
-      const applyWriteKwargs = (candidate) => {
-        if (!isWriteKwargsObject(candidate)) return;
-        const kwargs = toPlainObject(candidate);
-        if (!kwargs) return;
-        if (hasOwn(kwargs, "arg")) writeText = kwargs.arg;
-        else if (hasOwn(kwargs, "text")) writeText = kwargs.text;
-        if (hasOwn(kwargs, "move")) writeMove = kwargs.move;
-        if (hasOwn(kwargs, "align")) writeAlign = kwargs.align;
-        if (hasOwn(kwargs, "font")) writeFont = kwargs.font;
-      };
-      applyWriteKwargs(writeText);
-      applyWriteKwargs(writeMove);
-      applyWriteKwargs(writeAlign);
-      applyWriteKwargs(writeFont);
-      if (isWriteKwargsObject(writeFont)) writeFont = null;
-
-      let family = currentFontFamily;
-      let size = fontSize;
-      let style = currentFontStyle;
-      try {
-        const source = toSequence(writeFont);
-        if (source?.length) {
-          if (source[0]) family = toPlainString(source[0], family);
-          if (source[1] !== undefined && source[1] !== null) {
-            size = toPlainNumber(source[1], size);
-          }
-          if (source[2]) style = toPlainString(source[2], style);
-        }
-      } catch {}
-      const normalizedAlign = normalizeTextAlign(writeAlign);
-      const segment = makePath({
-        down: false,
-        fill: false,
-        stroke: strokeColor,
-        points: [
-          {
-            x,
-            y,
-            text: String(writeText),
-            align: normalizedAlign,
-            fontsize: size,
-            fontfamily: family,
-            fontstyle: style,
-            color: strokeColor,
-          },
-        ],
-      });
-      if (toPlainBoolean(writeMove, false)) {
-        const metrics = measureTurtleText(String(writeText), family, size, style);
-        const left = metrics.left || 0;
-        const right = metrics.right || metrics.width || 0;
-        const align = normalizeTextAlign(normalizedAlign);
-        const textWidth = left + right;
-        if (align === "left") {
-          x += TK_TEXT_X_OFFSET + textWidth;
-        } else if (align === "center") {
-          x += TK_TEXT_X_OFFSET + right;
-        } else {
-          x += TK_TEXT_X_OFFSET;
-        }
-        commitStyleToNewPath();
-      }
-      enqueueOperation(() => {
-        paths.push(segment);
-        draw();
-      });
-    };
-    const setfontsize = (value) => {
-      const nextSize = toPlainNumber(value, DEFAULT_FONT_SIZE);
-      fontSize = Math.max(1, Number.isFinite(nextSize) ? nextSize : DEFAULT_FONT_SIZE);
-      commitStyleToNewPath();
-      draw();
     };
     const bgcolor = (value) => {
       backgroundColor = toColorString(value);
@@ -1143,60 +1301,55 @@ hyperbook.python = (function () {
         } catch {}
       }
     };
-    const clear = () => {
+
+    // Create the default turtle pen and register it
+    const defaultPenObj = createTurtlePen();
+    allPens.push(defaultPenObj.pen);
+
+    const bindCanvas = (nextCanvas) => {
+      canvas = nextCanvas || getCanvas(id);
+      context = canvas?.getContext?.("2d") || null;
+      if (canvas) {
+        canvas.tabIndex = 0;
+      }
+      draw();
+    };
+
+    const deactivate = () => {
+      active = false;
       clearQueue();
-      paths = [];
-      currentPath = null;
-      fillPath = null;
-      beginCurrentPath();
+      for (const pen of allPens) {
+        pen.paths = [];
+        pen.renderedTurtleVisible = false;
+      }
+    };
+
+    const resetState = () => {
+      clearQueue();
+      // Remove all extra turtles, keeping only the default pen
+      allPens.length = 0;
+      allPens.push(defaultPenObj.pen);
+      defaultPenObj.resetPen();
+      backgroundColor = "#ffffff";
+      backgroundImage = null;
+      colorMode = 1.0;
+      screenWidth = 640;
+      screenHeight = 480;
+      active = true;
       draw();
     };
-    const reset = () => {
-      resetState();
-    };
-    const showturtle = () => {
-      turtleVisible = true;
+
+    // Turtle constructor — creates an additional independent turtle on the same canvas.
+    // The pen is registered into allPens via enqueueOperation so it enters the render
+    // loop in queue order, preventing the turtle from appearing at center before prior
+    // drawing operations have completed.
+    const Turtle = function () {
+      const penObj = createTurtlePen();
       enqueueOperation(() => {
-        renderedTurtleVisible = true;
+        allPens.push(penObj.pen);
         draw();
       });
-    };
-    const hideturtle = () => {
-      turtleVisible = false;
-      enqueueOperation(() => {
-        renderedTurtleVisible = false;
-        draw();
-      });
-    };
-    const isvisible = () => turtleVisible;
-    const pen = (options = undefined) => {
-      if (options === undefined) {
-        return getPenState();
-      }
-      const source =
-        options && typeof options.toJs === "function"
-          ? options.toJs({ pyproxies: [], dict_converter: Object.fromEntries })
-          : options;
-      if (!source || typeof source !== "object") return getPenState();
-      if ("pendown" in source) {
-        penDown = !!source.pendown;
-      }
-      if ("pencolor" in source) {
-        strokeColor = toColorString(source.pencolor);
-      }
-      if ("fillcolor" in source) {
-        fillColor = toColorString(source.fillcolor);
-      }
-      if ("pensize" in source) {
-        ensurePath().lineWidth = Math.max(1, Number(source.pensize) || DEFAULT_LINE_WIDTH);
-      }
-      if ("shown" in source) {
-        turtleVisible = !!source.shown;
-        renderedTurtleVisible = turtleVisible;
-      }
-      commitStyleToNewPath();
-      draw();
-      return getPenState();
+      return penObj.api;
     };
 
     const api = {
@@ -1207,59 +1360,12 @@ hyperbook.python = (function () {
       __setPyodide: (runtime) => {
         pyodide = runtime;
       },
-      forward,
-      fd: forward,
-      backward,
-      bk: backward,
-      back: backward,
-      right,
-      rt: right,
-      left,
-      lt: left,
-      goto: (...args) => goto_(...args),
-      setpos: (...args) => goto_(...args),
-      setposition: (...args) => goto_(...args),
-      setx,
-      sety,
-      setheading,
-      seth: setheading,
-      home,
-      circle,
-      dot,
-      position,
-      pos: position,
-      xcor,
-      ycor,
-      heading: heading_,
-      towards,
-      pendown: pendownFn,
-      pd: pendownFn,
-      down: pendownFn,
-      penup,
-      pu: penup,
-      up: penup,
-      pensize,
-      width,
-      pen,
-      write,
-      setfontsize,
-      color,
-      pencolor,
-      fillcolor,
-      begin_fill,
-      end_fill,
-      bgcolor,
-      bgpic,
-      reset,
-      clear,
-      speed,
+      ...defaultPenObj.api,
+      Turtle,
       colormode,
       screensize,
-      showturtle,
-      st: showturtle,
-      hideturtle,
-      ht: hideturtle,
-      isvisible,
+      bgcolor,
+      bgpic,
     };
 
     return api;
@@ -1539,6 +1645,156 @@ hyperbook.python = (function () {
       );
     };
 
+    // SVG-based renderer — mirrors buildGraphic but produces SVG markup.
+    // Each stack node has { width, height, pin, svg } where `svg` is a string
+    // drawn with the coordinate origin at the graphic's centre (y-down, same as canvas).
+    const buildSvgElements = (specs) => {
+      const stack = [];
+      const measureCanvas = document.createElement("canvas");
+      const measureCtx = measureCanvas.getContext("2d");
+
+      for (const spec of specs || []) {
+        if (!spec || typeof spec !== "object") continue;
+        const type = spec.t;
+
+        if (
+          type === "Empty" ||
+          type === "Rectangle" ||
+          type === "Ellipse" ||
+          type === "CircularSector" ||
+          type === "Triangle" ||
+          type === "Text"
+        ) {
+          let width = 0, height = 0, pin = { x: 0, y: 0 };
+          let svg = "";
+
+          if (type === "Rectangle") {
+            width = Math.max(0, Number(spec.width) || 0);
+            height = Math.max(0, Number(spec.height) || 0);
+            const fill = colorToCss(spec.color);
+            svg = `<rect x="${-width / 2}" y="${-height / 2}" width="${width}" height="${height}" fill="${fill}"/>`;
+          } else if (type === "Ellipse") {
+            width = Math.max(0, Number(spec.width) || 0);
+            height = Math.max(0, Number(spec.height) || 0);
+            const fill = colorToCss(spec.color);
+            svg = `<ellipse cx="0" cy="0" rx="${width / 2}" ry="${height / 2}" fill="${fill}"/>`;
+          } else if (type === "CircularSector") {
+            const radius = Math.max(0, Number(spec.radius) || 0);
+            const angle = Number(spec.angle) || 0;
+            width = radius * 2;
+            height = radius * 2;
+            const fill = colorToCss(spec.color);
+            // canvas: ctx.arc(0, 0, r, 0, -angle*PI/180, counterclockwise=true)
+            // SVG arc from (r,0) counterclockwise to the same end-point (sweep=0)
+            const endAngleRad = -angle * Math.PI / 180;
+            const endX = radius * Math.cos(endAngleRad);
+            const endY = radius * Math.sin(endAngleRad);
+            const largeArcFlag = angle > 180 ? 1 : 0;
+            svg = `<path d="M 0 0 L ${radius} 0 A ${radius} ${radius} 0 ${largeArcFlag} 0 ${endX} ${endY} Z" fill="${fill}"/>`;
+          } else if (type === "Triangle") {
+            const side1 = Math.max(0, Number(spec.side1) || 0);
+            const side2 = Math.max(0, Number(spec.side2) || 0);
+            const angle = (Number(spec.angle) || 0) * (Math.PI / 180);
+            const p1 = { x: 0, y: 0 };
+            const p2 = { x: side1, y: 0 };
+            const p3 = { x: side2 * Math.cos(angle), y: -side2 * Math.sin(angle) };
+            const centroid = { x: (p1.x + p2.x + p3.x) / 3, y: (p1.y + p2.y + p3.y) / 3 };
+            const points = [p1, p2, p3].map((p) => ({ x: p.x - centroid.x, y: p.y - centroid.y }));
+            const xs = points.map((p) => p.x);
+            const ys = points.map((p) => p.y);
+            width = Math.max(...xs) - Math.min(...xs);
+            height = Math.max(...ys) - Math.min(...ys);
+            const fill = colorToCss(spec.color);
+            svg = `<polygon points="${points.map((p) => `${p.x},${p.y}`).join(" ")}" fill="${fill}"/>`;
+          } else if (type === "Text") {
+            const text = String(spec.text || "");
+            const fontName = String(spec.font_name || "sans-serif");
+            const textSize = Math.max(1, Number(spec.text_size) || 1);
+            const fill = colorToCss(spec.color);
+            measureCtx.font = `${textSize}px ${fontName}`;
+            const metrics = measureCtx.measureText(text);
+            width = Math.max(0, metrics.width || 0);
+            const ascent = metrics.actualBoundingBoxAscent || textSize * 0.8;
+            const descent = metrics.actualBoundingBoxDescent || textSize * 0.2;
+            height = ascent + descent;
+            pin = { x: -width / 2, y: (ascent - descent) / 2 };
+            // y attribute is the text baseline; mirrors canvas fillText(-w/2, (ascent-descent)/2)
+            svg = `<text x="${-width / 2}" y="${(ascent - descent) / 2}" font-family="${fontName}" font-size="${textSize}" fill="${fill}" text-anchor="start">${text}</text>`;
+          }
+
+          stack.push({ width, height, pin, svg });
+          continue;
+        }
+
+        if (type === "Pin") {
+          const child = stack.pop();
+          if (!child) continue;
+          const pin = decodePoint(spec.pin, child.width, child.height);
+          stack.push({ ...child, pin });
+          continue;
+        }
+
+        if (type === "Rotate") {
+          const child = stack.pop();
+          if (!child) continue;
+          const angleDeg = Number(spec.angle) || 0;
+          const angleRad = (-angleDeg * Math.PI) / 180;
+          const corners = [
+            { x: -child.width / 2, y: -child.height / 2 },
+            { x: child.width / 2, y: -child.height / 2 },
+            { x: child.width / 2, y: child.height / 2 },
+            { x: -child.width / 2, y: child.height / 2 },
+          ].map((p) => rotatePoint(p, child.pin, angleRad));
+          const minX = Math.min(...corners.map((p) => p.x));
+          const maxX = Math.max(...corners.map((p) => p.x));
+          const minY = Math.min(...corners.map((p) => p.y));
+          const maxY = Math.max(...corners.map((p) => p.y));
+          const center = { x: (minX + maxX) / 2, y: (minY + maxY) / 2 };
+          const offset = { x: -center.x, y: -center.y };
+          const pin = { x: child.pin.x + offset.x, y: child.pin.y + offset.y };
+          // SVG transform mirrors the canvas sequence: translate(offset) rotate(-angleDeg, pin)
+          // SVG and canvas share the same y-down convention so signs are identical.
+          const transform = `translate(${offset.x},${offset.y}) rotate(${-angleDeg},${child.pin.x},${child.pin.y})`;
+          stack.push({
+            width: maxX - minX,
+            height: maxY - minY,
+            pin,
+            svg: `<g transform="${transform}">${child.svg}</g>`,
+          });
+          continue;
+        }
+
+        if (type === "Compose") {
+          const bg = stack.pop();
+          const fg = stack.pop();
+          if (!fg || !bg) continue;
+          const fgPin = spec.fg_pin ? decodePoint(spec.fg_pin, fg.width, fg.height) : fg.pin;
+          const bgPin = spec.bg_pin ? decodePoint(spec.bg_pin, bg.width, bg.height) : bg.pin;
+          const bgCenter = { x: 0, y: 0 };
+          const fgCenter = { x: bgPin.x - fgPin.x, y: bgPin.y - fgPin.y };
+          const minX = Math.min(fgCenter.x - fg.width / 2, bgCenter.x - bg.width / 2);
+          const maxX = Math.max(fgCenter.x + fg.width / 2, bgCenter.x + bg.width / 2);
+          const minY = Math.min(fgCenter.y - fg.height / 2, bgCenter.y - bg.height / 2);
+          const maxY = Math.max(fgCenter.y + fg.height / 2, bgCenter.y + bg.height / 2);
+          const center = { x: (minX + maxX) / 2, y: (minY + maxY) / 2 };
+          const fgOffset = { x: fgCenter.x - center.x, y: fgCenter.y - center.y };
+          const bgOffset = { x: bgCenter.x - center.x, y: bgCenter.y - center.y };
+          const pin = spec.pin
+            ? decodePoint(spec.pin, maxX - minX, maxY - minY)
+            : { x: bgPin.x - center.x, y: bgPin.y - center.y };
+          // bg drawn first (behind), fg on top — same draw order as canvas
+          stack.push({
+            width: maxX - minX,
+            height: maxY - minY,
+            pin,
+            svg: `<g transform="translate(${bgOffset.x},${bgOffset.y})">${bg.svg}</g><g transform="translate(${fgOffset.x},${fgOffset.y})">${fg.svg}</g>`,
+          });
+        }
+      }
+
+      return stack[stack.length - 1] || { width: 0, height: 0, pin: { x: 0, y: 0 }, svg: "" };
+    };
+
      return {
       js_graphic_size: (specs) => {
         try {
@@ -1581,6 +1837,24 @@ hyperbook.python = (function () {
           return canvas.toDataURL("image/png");
         } catch (e) {
           console.error("js_render_graphic error:", e);
+          throw e;
+        }
+      },
+      js_svg_graphic: (specs, debug) => {
+        try {
+          const unproxiedSpecs = unProxy(specs);
+          const result = buildSvgElements(unproxiedSpecs);
+          const width = Math.max(1, Math.ceil(result.width));
+          const height = Math.max(1, Math.ceil(result.height));
+          let inner = result.svg;
+          if (debug) {
+            inner += `<rect x="${-width / 2}" y="${-height / 2}" width="${width}" height="${height}" fill="none" stroke="red" stroke-width="1"/>`;
+            inner += `<line x1="${result.pin.x - 8}" y1="${result.pin.y}" x2="${result.pin.x + 8}" y2="${result.pin.y}" stroke="rgba(255,255,0,0.8)" stroke-width="1"/>`;
+            inner += `<line x1="${result.pin.x}" y1="${result.pin.y - 8}" x2="${result.pin.x}" y2="${result.pin.y + 8}" stroke="rgba(255,255,0,0.8)" stroke-width="1"/>`;
+          }
+          return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}"><g transform="translate(${width / 2},${height / 2})">${inner}</g></svg>`;
+        } catch (e) {
+          console.error("js_svg_graphic error:", e);
           throw e;
         }
       },
@@ -2437,7 +2711,7 @@ if _pg:
             if (results) {
               appendOutput(output, results);
             } else if (error) {
-              appendOutput(output, error, true);
+              appendFriendlyError(output, error, testCode);
             }
           }
         } catch (e) {
@@ -2485,7 +2759,7 @@ if _pg:
               appendOutput(output, results, false, id);
             } else if (error) {
               showOutput();
-              appendOutput(output, error, true, id);
+              appendFriendlyError(output, error, script);
             }
           } else {
             appendOutputLine(id, "Execution stopped.");

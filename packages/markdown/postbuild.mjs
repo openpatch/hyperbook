@@ -356,6 +356,16 @@ async function postbuild() {
 
   await cp("locales", "./dist/locales", { recursive: true });
 
+  await esbuild({
+    entryPoints: ["./node_modules/@raspberrypifoundation/python-friendly-error-messages/dist/index.browser.js"],
+    bundle: false,
+    format: "iife",
+    globalName: "PythonFriendlyErrorMessages",
+    outfile: "./dist/assets/directive-pyide/python-friendly-error-messages.js",
+    minify: true,
+  });
+  console.log("Built python-friendly-error-messages → dist/assets/directive-pyide/python-friendly-error-messages.js");
+
   // Bundle CodeMirror 6 + language packages into a single IIFE for browser use.
   await mkdir("./dist/assets/codemirror", { recursive: true });
   await esbuild({
