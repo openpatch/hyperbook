@@ -1,12 +1,19 @@
 import path from "path";
-import { cp } from "fs/promises";
+import { cp, rm } from "fs/promises";
 
 async function postbuild() {
   const markdownAssets = path.join(
     ...["./node_modules", "@hyperbook", "markdown", "dist", "assets"],
   );
   const distAssets = path.join(...["./dist", "assets"]);
-  await cp(markdownAssets, distAssets, { recursive: true });
+  await cp(markdownAssets, distAssets, {
+    recursive: true,
+    filter: (src) => {
+      // Exclude source module directories — only the bundled output belongs in dist.
+      const rel = path.relative(markdownAssets, src);
+      return !rel.startsWith("directive-pyide" + path.sep + "src") && rel !== "directive-pyide/src";
+    },
+  });
 
   const templates = path.join(
     ...["./node_modules", "create-hyperbook", "dist", "templates"],

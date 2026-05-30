@@ -1,5 +1,5 @@
 import path from "path";
-import { cp, readFile, writeFile, mkdir, access } from "fs/promises";
+import { cp, readFile, writeFile, mkdir, access, rm } from "fs/promises";
 import { minify } from "terser";
 import https from "https";
 import { Extract } from "unzipper";
@@ -375,6 +375,10 @@ async function postbuild() {
     minify: false,
   });
   console.log("Built pyide client bundle → dist/assets/directive-pyide/client.js");
+
+  // Remove the source directory copied by ncp — only the bundle is needed in dist.
+  await rm("./dist/assets/directive-pyide/src", { recursive: true, force: true });
+  console.log("Removed dist/assets/directive-pyide/src (source files not needed in dist)");
 
   // Bundle CodeMirror 6 + language packages into a single IIFE for browser use.
   await mkdir("./dist/assets/codemirror", { recursive: true });
