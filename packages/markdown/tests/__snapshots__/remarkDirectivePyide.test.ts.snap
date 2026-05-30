@@ -24,7 +24,7 @@ exports[`remarkDirectivePyide > should transform pyide with canvas and packages 
     <div class="buttons"><button class="output-btn active">pyide-output</button><button class="canvas-btn">pyide-canvas</button></div>
     <div class="canvas-header hidden">pyide-canvas</div>
     <div class="canvas-wrapper hidden">
-      <canvas class="canvas" id="canvas"></canvas>
+      <canvas class="canvas"></canvas>
     </div>
     <div class="canvas-output-splitter hidden" role="separator" aria-label="Resize canvas and output"></div>
     <div class="output-header hidden">pyide-output</div>
@@ -47,7 +47,7 @@ exports[`remarkDirectivePyide > should transform pyide with canvas attribute 1`]
     <div class="buttons"><button class="output-btn active">pyide-output</button><button class="canvas-btn">pyide-canvas</button></div>
     <div class="canvas-header hidden">pyide-canvas</div>
     <div class="canvas-wrapper hidden">
-      <canvas class="canvas" id="canvas"></canvas>
+      <canvas class="canvas"></canvas>
     </div>
     <div class="canvas-output-splitter hidden" role="separator" aria-label="Resize canvas and output"></div>
     <div class="output-header hidden">pyide-output</div>

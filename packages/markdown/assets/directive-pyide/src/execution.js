@@ -122,10 +122,13 @@ const wrapTopLevelIntoAsyncMain = (userCode) => {
       "$1$2$3\n$1await asyncio.sleep(0)",
     );
 
+  const hasAsyncio = /(?:^|\W)import\s+asyncio\b/m.test(code);
+  const hasPygameImport =
+    /(?:^|\W)(?:import\s+pygame\b|from\s+pygame\b\s+import\b)/m.test(code);
   const prelude = [
     "# --- auto-wrapped by IDE for browser pygame compatibility ---",
-    "import asyncio",
-    "import pygame",
+    ...(hasAsyncio ? [] : ["import asyncio"]),
+    ...(hasPygameImport ? [] : ["import pygame"]),
     "",
     "async def main():",
     indentBlock(injected, 4),
@@ -276,7 +279,7 @@ if _pg:
     if (message.startsWith("Traceback")) {
       const lines = message?.split("\n") || [];
       const i = lines.findIndex((line) => line.includes(filename));
-      message = lines[0] + "\n" + lines.slice(i).join("\n");
+      message = i >= 0 ? lines[0] + "\n" + lines.slice(i).join("\n") : message;
     }
     return { error: message };
   }

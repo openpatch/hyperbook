@@ -165,7 +165,8 @@ export const appendOutputErrorLine = (id, message) => {
 if (window.PythonFriendlyErrorMessages) {
   const { loadCopydeckFor, registerAdapter, pyodideAdapter } =
     window.PythonFriendlyErrorMessages;
-  loadCopydeckFor("en");
+  const lang = document.documentElement.lang || "en";
+  loadCopydeckFor(lang);
   registerAdapter("pyodide", pyodideAdapter);
 }
 

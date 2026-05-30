@@ -164,7 +164,6 @@ export default (ctx: HyperbookContext) => () => {
                           tagName: "canvas",
                           properties: {
                             class: "canvas",
-                            id: "canvas",
                           },
                           children: [],
                         } as ElementContent,

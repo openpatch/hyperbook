@@ -38,6 +38,22 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.96.1
+
+::::tabs
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+- **pyide**: Fix MutationObserver check (`node.type` → `node.nodeType`) so dynamically added pyide elements are correctly initialized
+- **pyide**: Fix error traceback trimming — when `<exec>` is absent, the full traceback is now preserved instead of showing only the last line
+- **pyide**: Remove duplicate `id="canvas"` HTML attribute on canvas elements (invalid when multiple canvas pyides exist on one page)
+- **pyide**: Friendly Python error messages now use the page language instead of always loading English
+- **pyide**: Pygame auto-wrap no longer injects redundant `import asyncio` / `import pygame` when already present in user code
+
+:::
+
+::::
+
 ## v0.96.0
 
 ::::tabs

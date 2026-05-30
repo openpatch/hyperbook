@@ -411,7 +411,7 @@ hyperbook.python = (function () {
     mutations.forEach((mutation) => {
       if (mutation.addedNodes.length) {
         mutation.addedNodes.forEach((node) => {
-          if (node.type === 1 && node.classList?.contains("directive-pyide")) {
+          if (node.nodeType === 1 && node.classList?.contains("directive-pyide")) {
             init(node);
           }
         });
