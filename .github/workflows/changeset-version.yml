@@ -5,6 +5,9 @@ on:
     branches:
       - main
 
+permissions:
+  id-token: write  # Required for OIDC
+
 jobs:
   release:
     name: Release
@@ -41,7 +44,6 @@ jobs:
           version: pnpm version-packages
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish VS Code extension
         if: steps.changesets.outputs.published == 'true'
