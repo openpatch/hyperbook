@@ -366,6 +366,16 @@ async function postbuild() {
   });
   console.log("Built python-friendly-error-messages → dist/assets/directive-pyide/python-friendly-error-messages.js");
 
+  // Bundle pyide client source modules into a single IIFE.
+  await esbuild({
+    entryPoints: ["./assets/directive-pyide/src/index.js"],
+    bundle: true,
+    format: "iife",
+    outfile: "./dist/assets/directive-pyide/client.js",
+    minify: false,
+  });
+  console.log("Built pyide client bundle → dist/assets/directive-pyide/client.js");
+
   // Bundle CodeMirror 6 + language packages into a single IIFE for browser use.
   await mkdir("./dist/assets/codemirror", { recursive: true });
   await esbuild({
