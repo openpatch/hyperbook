@@ -3,7 +3,9 @@ import { appendOutputLine, appendOutputErrorLine } from "./output.js";
 import { getRuntime } from "./pyodide.js";
 
 export const scriptLooksLikeTurtle = (script) => {
-  return /\bfrom\s+turtle\s+import\b|\bimport\s+turtle\b/.test(String(script || ""));
+  return /\bfrom\s+turtle\s+import\b|\bimport\s+turtle\b/.test(
+    String(script || ""),
+  );
 };
 
 export const resetCanvas = (canvas) => {
@@ -26,7 +28,9 @@ const looksLikeTopLevelGameLoop = (code) => {
   const hasPygame =
     /(?:^|\W)(?:import\s+pygame\b|from\s+pygame\b\s+import\b)/m.test(text);
   const hasSasPygame =
-    /(?:^|\W)(?:import\s+sas_pygame\b|from\s+sas_pygame\b\s+import\b)/m.test(text);
+    /(?:^|\W)(?:import\s+sas_pygame\b|from\s+sas_pygame\b\s+import\b)/m.test(
+      text,
+    );
   const hasAnyWhile = /^\s*while\s+.+:\s*$/m.test(text);
   if (!hasAnyWhile) return false;
   return (hasPygame || hasSasPygame) && hasAnyWhile;
@@ -169,7 +173,12 @@ export const ensureMicropipPackages = async (id, pyodide, packages = []) => {
   }
 };
 
-export const executeScript = async (id, script, context = {}, packages = []) => {
+export const executeScript = async (
+  id,
+  script,
+  context = {},
+  packages = [],
+) => {
   const filename = "<exec>";
   try {
     const pyodide = await getRuntime(id);

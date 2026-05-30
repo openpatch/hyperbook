@@ -39,15 +39,19 @@ hyperbook.python = (function () {
 
       const editorDiv = elem.getElementsByClassName("editor")[0];
       const container = elem.getElementsByClassName("container")[0];
-      const editorContainer = elem.getElementsByClassName("editor-container")[0];
+      const editorContainer =
+        elem.getElementsByClassName("editor-container")[0];
       const splitter = elem.getElementsByClassName("splitter")[0];
       const run = elem.getElementsByClassName("run")[0];
       const test = elem.getElementsByClassName("test")[0];
       const stop = elem.getElementsByClassName("stop")[0];
       const output = elem.getElementsByClassName("output")[0];
       const canvas = elem.getElementsByClassName("canvas")[0];
-      const canvasWrapper = elem.getElementsByClassName("canvas-wrapper")[0] || canvas;
-      const canvasOutputSplitter = elem.getElementsByClassName("canvas-output-splitter")[0];
+      const canvasWrapper =
+        elem.getElementsByClassName("canvas-wrapper")[0] || canvas;
+      const canvasOutputSplitter = elem.getElementsByClassName(
+        "canvas-output-splitter",
+      )[0];
       const canvasHeader = elem.getElementsByClassName("canvas-header")[0];
       const outputHeader = elem.getElementsByClassName("output-header")[0];
       const outputBtn = elem.getElementsByClassName("output-btn")[0];
@@ -73,20 +77,24 @@ hyperbook.python = (function () {
         (pkg) => pkg.toLowerCase() === "pytamaro",
       );
       const scriptLooksLikePytamaro = (script) => {
-        return /\bfrom\s+pytamaro\s+import\b|\bimport\s+pytamaro\b/.test(script);
+        return /\bfrom\s+pytamaro\s+import\b|\bimport\s+pytamaro\b/.test(
+          script,
+        );
       };
       let pyideState = { id };
 
       // Initialize CodeMirror
       const initialSource = editorDiv ? editorDiv.textContent : "";
       if (editorDiv) editorDiv.textContent = "";
-      const cm = editorDiv ? HyperbookCM.create(editorDiv, {
-        lang: editorDiv.dataset.lang || "python",
-        value: initialSource,
-        onChange: (code) => {
-          void persistPyideState({ script: code });
-        },
-      }) : null;
+      const cm = editorDiv
+        ? HyperbookCM.create(editorDiv, {
+            lang: editorDiv.dataset.lang || "python",
+            value: initialSource,
+            onChange: (code) => {
+              void persistPyideState({ script: code });
+            },
+          })
+        : null;
       // Store CM on the element so updateRunning() can toggle readOnly
       if (editorDiv && cm) editorDiv._cm = cm;
 
@@ -249,13 +257,17 @@ hyperbook.python = (function () {
             Number.isFinite(result.splitHorizontal) &&
             result.splitHorizontal > 0
           ) {
-            elem.dataset.splitHorizontal = String(Math.round(result.splitHorizontal));
+            elem.dataset.splitHorizontal = String(
+              Math.round(result.splitHorizontal),
+            );
           }
           if (
             Number.isFinite(result.splitVertical) &&
             result.splitVertical > 0
           ) {
-            elem.dataset.splitVertical = String(Math.round(result.splitVertical));
+            elem.dataset.splitVertical = String(
+              Math.round(result.splitVertical),
+            );
           }
           if (
             Number.isFinite(result.splitCanvasOutput) &&
@@ -336,7 +348,8 @@ hyperbook.python = (function () {
 
       run?.addEventListener("click", async () => {
         const script = getEditorValue();
-        const usesPytamaro = hasPytamaroPackage || scriptLooksLikePytamaro(script);
+        const usesPytamaro =
+          hasPytamaroPackage || scriptLooksLikePytamaro(script);
         const renderPytamaroToCanvas = hasCanvas && canvas && usesPytamaro;
         if (hasCanvas) {
           showCanvas();
@@ -357,9 +370,14 @@ hyperbook.python = (function () {
         clearPytamaroStdoutCarry(id);
         try {
           setPytamaroCanvasTarget(id, renderPytamaroToCanvas);
-          const { results, error } = await executeScript(id, script, {
-            ...(hasCanvas && canvas ? { canvas } : {}),
-          }, additionalPackages);
+          const { results, error } = await executeScript(
+            id,
+            script,
+            {
+              ...(hasCanvas && canvas ? { canvas } : {}),
+            },
+            additionalPackages,
+          );
           if (!state.stopRequested) {
             if (results) {
               appendOutput(output, results, false, id);

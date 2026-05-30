@@ -59,7 +59,9 @@ export const renderOutputSegments = (container, message, id = null) => {
       break;
     }
     if (beginIdx > 0) {
-      container.appendChild(document.createTextNode(remaining.slice(0, beginIdx)));
+      container.appendChild(
+        document.createTextNode(remaining.slice(0, beginIdx)),
+      );
     }
     const afterBegin = remaining.slice(beginIdx + PYTAMARO_URI_BEGIN.length);
     const endIdx = afterBegin.indexOf(PYTAMARO_URI_END);
@@ -98,11 +100,17 @@ export const appendOutputLine = (id, message) => {
 
   // Fast path for regular stdout chunks.
   if (!combined.includes(PYTAMARO_URI_BEGIN) && carry.length === 0) {
-    const partialBeginLength = getTrailingPrefixLength(combined, PYTAMARO_URI_BEGIN);
+    const partialBeginLength = getTrailingPrefixLength(
+      combined,
+      PYTAMARO_URI_BEGIN,
+    );
     if (partialBeginLength > 0) {
       const visible = combined.slice(0, combined.length - partialBeginLength);
       appendText(output, visible);
-      pytamaroStdoutCarry.set(id, combined.slice(combined.length - partialBeginLength));
+      pytamaroStdoutCarry.set(
+        id,
+        combined.slice(combined.length - partialBeginLength),
+      );
     } else {
       appendText(output, combined);
     }
@@ -112,11 +120,17 @@ export const appendOutputLine = (id, message) => {
   while (combined.length > 0) {
     const beginIdx = combined.indexOf(PYTAMARO_URI_BEGIN);
     if (beginIdx === -1) {
-      const partialBeginLength = getTrailingPrefixLength(combined, PYTAMARO_URI_BEGIN);
+      const partialBeginLength = getTrailingPrefixLength(
+        combined,
+        PYTAMARO_URI_BEGIN,
+      );
       const visible = combined.slice(0, combined.length - partialBeginLength);
       appendText(output, visible);
       if (partialBeginLength > 0) {
-        pytamaroStdoutCarry.set(id, combined.slice(combined.length - partialBeginLength));
+        pytamaroStdoutCarry.set(
+          id,
+          combined.slice(combined.length - partialBeginLength),
+        );
       }
       break;
     }
@@ -149,7 +163,8 @@ export const appendOutputErrorLine = (id, message) => {
 // Loaded from python-friendly-error-messages.js (built from npm package)
 
 if (window.PythonFriendlyErrorMessages) {
-  const { loadCopydeckFor, registerAdapter, pyodideAdapter } = window.PythonFriendlyErrorMessages;
+  const { loadCopydeckFor, registerAdapter, pyodideAdapter } =
+    window.PythonFriendlyErrorMessages;
   loadCopydeckFor("en");
   registerAdapter("pyodide", pyodideAdapter);
 }

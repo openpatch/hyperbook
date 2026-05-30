@@ -97,7 +97,9 @@ export const updateRunning = () => {
         run.disabled = true;
         if (test) {
           test.textContent = hyperbook.i18n.get(
-            lockedByOther ? "pyide-locked-other-instance-running" : "pyide-test",
+            lockedByOther
+              ? "pyide-locked-other-instance-running"
+              : "pyide-test",
           );
           test.classList.toggle("locked", lockedByOther);
           test.classList.add("running");
@@ -188,11 +190,10 @@ export const setupSplitter = (
 
   const applySplitSize = (rawSize, isHorizontal) => {
     const total = isHorizontal ? elem.clientWidth : elem.clientHeight;
-    const splitterSize = isHorizontal ? splitter.offsetWidth : splitter.offsetHeight;
-    const maxSize = Math.max(
-      minPanelSize,
-      total - splitterSize - minPanelSize
-    );
+    const splitterSize = isHorizontal
+      ? splitter.offsetWidth
+      : splitter.offsetHeight;
+    const maxSize = Math.max(minPanelSize, total - splitterSize - minPanelSize);
     const clamped = Math.max(minPanelSize, Math.min(rawSize, maxSize));
     container.style.flex = `0 0 ${clamped}px`;
     return clamped;
@@ -273,7 +274,8 @@ export const setupCanvasOutputSplitter = (
 
   const getAvailableHeight = () => {
     const tabs = container.querySelector(".buttons");
-    const tabsHeight = tabs && tabs.offsetParent !== null ? tabs.offsetHeight : 0;
+    const tabsHeight =
+      tabs && tabs.offsetParent !== null ? tabs.offsetHeight : 0;
     return container.clientHeight - tabsHeight - splitter.offsetHeight;
   };
 
