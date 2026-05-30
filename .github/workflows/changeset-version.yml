@@ -6,7 +6,9 @@ on:
       - main
 
 permissions:
-  id-token: write  # Required for OIDC
+  contents: write
+  id-token: write
+  pull-requests: write
 
 jobs:
   release:
@@ -14,24 +16,27 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           # This makes Actions fetch all Git history so that Changesets can generate changelogs with the correct commits
           fetch-depth: 0
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
         with:
-          version: 9.1.1
+          version: 11.3.0
 
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v6
         with:
-          node-version: 22
+          node-version: 24
           cache: "pnpm"
+          registry-url: 'https://registry.npmjs.org'
+          
       - name: Install dependencies
         run: pnpm install
       - name: Build packages
         run: |
           pnpm build
+          
       - name: Build vscode package
         run: |
           pnpm --filter "hyperbook-studio" vscode:package
