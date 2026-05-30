@@ -1,5 +1,6 @@
 ---
 "@hyperbook/markdown": minor
+"hyperbook": minor
 ---
 
 **pyide**: Improve turtle and pytamaro support
