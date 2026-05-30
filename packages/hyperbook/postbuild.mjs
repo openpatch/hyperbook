@@ -9,9 +9,11 @@ async function postbuild() {
   await cp(markdownAssets, distAssets, {
     recursive: true,
     filter: (src) => {
-      // Exclude source module directories — only the bundled output belongs in dist.
+      // Exclude source module directories — only bundled output belongs in dist.
       const rel = path.relative(markdownAssets, src);
-      return !rel.startsWith("directive-pyide" + path.sep + "src") && rel !== "directive-pyide/src";
+      const parts = rel.split(path.sep);
+      // Skip any src/ subdirectory inside a directive-* folder.
+      return !(parts[0]?.startsWith("directive-") && parts[1] === "src");
     },
   });
 

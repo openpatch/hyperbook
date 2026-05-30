@@ -1,5 +1,5 @@
 import path from "path";
-import { cp, readFile, writeFile, mkdir, access, rm } from "fs/promises";
+import { cp, readFile, writeFile, mkdir, access, rm, readdir } from "fs/promises";
 import { minify } from "terser";
 import https from "https";
 import { Extract } from "unzipper";
@@ -366,19 +366,36 @@ async function postbuild() {
   });
   console.log("Built python-friendly-error-messages → dist/assets/directive-pyide/python-friendly-error-messages.js");
 
-  // Bundle pyide client source modules into a single IIFE.
-  await esbuild({
-    entryPoints: ["./assets/directive-pyide/src/index.js"],
-    bundle: true,
-    format: "iife",
-    outfile: "./dist/assets/directive-pyide/client.js",
-    minify: false,
-  });
-  console.log("Built pyide client bundle → dist/assets/directive-pyide/client.js");
+  // Bundle any directive that ships a src/index.js into dist/assets/<directive>/client.js.
+  // Each src/ directory is removed from dist after bundling — only the bundle is served.
+  const assetsDir = "./assets";
+  const entries = await readdir(assetsDir, { withFileTypes: true });
+  const directiveDirs = entries
+    .filter((e) => e.isDirectory() && e.name.startsWith("directive-"))
+    .map((e) => e.name);
 
-  // Remove the source directory copied by ncp — only the bundle is needed in dist.
-  await rm("./dist/assets/directive-pyide/src", { recursive: true, force: true });
-  console.log("Removed dist/assets/directive-pyide/src (source files not needed in dist)");
+  for (const directive of directiveDirs) {
+    const srcEntry = path.join(assetsDir, directive, "src", "index.js");
+    try {
+      await access(srcEntry);
+    } catch {
+      continue; // no src/index.js — skip
+    }
+    const outfile = path.join("./dist", "assets", directive, "client.js");
+    await esbuild({
+      entryPoints: [srcEntry],
+      bundle: true,
+      format: "iife",
+      outfile,
+      minify: false,
+    });
+    console.log(`Built ${directive} client bundle → ${outfile}`);
+    // Remove the copied src/ directory — source files are not needed in dist.
+    await rm(path.join("./dist", "assets", directive, "src"), {
+      recursive: true,
+      force: true,
+    });
+  }
 
   // Bundle CodeMirror 6 + language packages into a single IIFE for browser use.
   await mkdir("./dist/assets/codemirror", { recursive: true });
