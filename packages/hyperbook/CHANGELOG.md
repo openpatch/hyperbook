@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.96.2
+
+### Patch Changes
+
+- [`4ec0a52`](https://github.com/openpatch/hyperbook/commit/4ec0a528a2851b2f854927ef6bad0f655bf98840) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - **pyide**: Remove pytamaro canvas-mode rendering. `show_graphic()` and `show_animation()` now always render to the output panel, which correctly displays animated GIFs produced by `show_animation()`. The `canvas` attribute on `:::pyide` is no longer needed for pytamaro and has no effect on pytamaro output.
+
 ## 0.96.1
 
 ### Patch Changes
