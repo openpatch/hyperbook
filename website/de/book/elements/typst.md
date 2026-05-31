@@ -5,6 +5,10 @@ permaid: typst
 
 # Typst
 
+:::alert{warning}
+**Erfordert eine Netzwerkverbindung.** Der Typst-WebAssembly-Compiler (~28 MB), der Renderer (~1 MB) und das JavaScript-Bundle (~1,4 MB) werden zur Laufzeit von `cdn.jsdelivr.net` geladen und sind nicht im Hyperbook-Build-Output enthalten. Dieses Element funktioniert nicht in Offline- oder netzwerkbeschränkten Umgebungen.
+:::
+
 Die Typst-Direktive ermöglicht es dir, [Typst](https://typst.app/)-Dokumente direkt in deinem Hyperbook zu rendern. Typst ist ein modernes Markup-basiertes Satzsystem, das einfach zu erlernen ist und schöne Dokumente erzeugt.
 
 ## Optionen

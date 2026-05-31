@@ -5,6 +5,10 @@ permaid: typst
 
 # Typst
 
+:::alert{warning}
+**Requires a network connection.** The Typst WebAssembly compiler (~28 MB), renderer (~1 MB), and JavaScript bundle (~1.4 MB) are loaded at runtime from `cdn.jsdelivr.net` and are not bundled with the hyperbook build output. This element will not work in offline or network-restricted environments.
+:::
+
 The Typst directive allows you to render [Typst](https://typst.app/) documents directly in your hyperbook. Typst is a modern markup-based typesetting system that is easy to learn and produces beautiful documents.
 
 ## Options

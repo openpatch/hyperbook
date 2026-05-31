@@ -5,6 +5,10 @@ permaid: geogebra
 
 # GeoGebra
 
+:::alert{warning}
+**Requires a network connection.** The GeoGebra application is loaded at runtime from `geogebra.org` and is not bundled with the hyperbook build output. GeoGebra is proprietary and cannot be self-hosted or redistributed. This element will not work in offline or network-restricted environments.
+:::
+
 GeoGebra applets can be embedded in various ways.
 
 On one hand, GeoGebra instructions can be passed directly.

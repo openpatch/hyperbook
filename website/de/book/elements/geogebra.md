@@ -6,6 +6,10 @@ lang: de
 
 # GeoGebra
 
+:::alert{warning}
+**Erfordert eine Netzwerkverbindung.** Die GeoGebra-Anwendung wird zur Laufzeit von `geogebra.org` geladen und ist nicht im Hyperbook-Build-Output enthalten. GeoGebra ist proprietär und kann nicht selbst gehostet oder weiterverteilt werden. Dieses Element funktioniert nicht in Offline- oder netzwerkbeschränkten Umgebungen.
+:::
+
 GeoGebra Applets können auf unterschiedle Art und Weise eingebunden werden.
 
 Zum einen können GeoGebra Anweisungen direkt übergeben werden.
