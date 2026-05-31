@@ -3,7 +3,7 @@ name: PlantUML
 lang: de
 ---
 
-:::alert{warning}
+:::alert{warn}
 **Erfordert eine Netzwerkverbindung.** Diagramme werden serverseitig durch den [Kroki](https://kroki.io/)-Dienst (`kroki.io`) gerendert. Kroki ist nicht im Hyperbook-Build-Output enthalten. Dieses Element funktioniert nicht, wenn Kroki nicht erreichbar ist. Kroki ist Open Source und kann für netzwerkisolierte Deployments [selbst gehostet](https://docs.kroki.io/kroki/setup/install/) werden.
 :::
 

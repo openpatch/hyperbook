@@ -19,9 +19,11 @@ To add a learning map, use the following Markdown block:
 
 ## Attributes
 
-- `id` (required): A unique identifier for the learning map instance.
-- `height` (optional): The height of the learning map container (e.g., `600px`, `100%`).
-- `src` (required): The path to the JSON file that defines the learning map structure.
+| Attribute | Description | Default |
+|---|---|---|
+| `id` | Unique identifier for the learning map instance | auto-generated |
+| `height` | Height of the learning map container, for example `600px` or `100%` | `calc(100vh - 80px)` |
+| `src` | Path to the `.learningmap` file | - |
 
 ## Editor 
 

@@ -3,17 +3,21 @@ name: Online IDE
 permaid: online-ide
 ---
 
-Java-like programming language (compiler, interpreter, debugger) with IDE that
-runs entirely in the browser.
+# Online IDE
 
-The Online-IDE element accepts these arguments:
+Java-like programming language (compiler, interpreter, debugger) with IDE that runs entirely in the browser.
 
-- **fileList**: With file list on the left.
-- **pCode**: With PCode tab in the bottom panel.
-- **bottomPanel**: With bottom panel.
-- **errorList**: With error list in the bottom panel.
-- **height**: Height of the editor. Defaults to 600px.
-- **speed**: Speed of the execution. Defaults to 1000.
+## Attributes
+
+| Attribute | Description | Default |
+|---|---|---|
+| `fileList` | Show the file list on the left | `true` |
+| `pCode` | Show the PCode tab in the bottom panel | `false` |
+| `bottomPanel` | Show the bottom panel | `true` |
+| `errorList` | Show the error list in the bottom panel | `true` |
+| `height` | Height of the editor | `calc(100dvh - 80px)` |
+| `speed` | Execution speed | `1000` |
+| `libraries` | Comma-separated list of libraries to preload, for example `nrw` | - |
 
 (See: https://github.com/martin-pabst/Online-IDE-new-compiler).
 

@@ -16,12 +16,15 @@ hyperbook in development mode, you see two buttons below an Excalidraw
 whiteboard and all editor options. You can edit your whiteboard here and just
 hit save. The Excalidraw will be saved at the place which you have defined.
 
-The Excalidraw element accepts these arguments:
+## Attributes
 
-- **src**: A path to an Excalidraw file, if it does not exists it will be created, when using the editor in development mode.
-- **aspectRatio**: To keep your Excalidraw nice on every device you need to provide an aspect-ratio, e.g.: "16/9", "4/3", "1/1".
-- **autoZoom**: By default your Excalidraw will auto zoom to look the same even when viewed on a smaller device. You can disable it by passing false to autoZoom.
-- **edit**: Allows to edit the Excalidraw.
+| Attribute | Description | Default |
+|---|---|---|
+| `src` | Path to an Excalidraw file; in development mode it can be created automatically | - |
+| `aspectRatio` | Aspect ratio, for example `16/9`, `4/3`, or `1/1` | `16/9` |
+| `autoZoom` | Automatically zoom the drawing to fit smaller screens | `true` |
+| `edit` | Enable editing mode | `false` |
+
 
 :::alert{info}
 autoZoom does not seems to work, when using a file from excalidraw.com, since the file does not come with its original dimensions.

@@ -6,7 +6,7 @@ lang: de
 
 # OpenSCAD
 
-:::alert{warning}
+:::alert{warn}
 **Erfordert eine Netzwerkverbindung für optionale Bibliotheken und Schriftarten.** Wenn du eine Bibliothek (BOSL2, BOSL, MCAD, NopSCADlib, Fonts) im Editor auswählst, wird die entsprechende ZIP-Datei (~56 KB–4,3 MB) von `ochafik.com` heruntergeladen. Die Roboto-Schriftart der Editor-Oberfläche wird von Google Fonts geladen. Diese Ressourcen sind nicht im Hyperbook-Build-Output enthalten. Der OpenSCAD-Editor selbst funktioniert offline, aber Bibliotheken und die benutzerdefinierte Schriftart sind dann nicht verfügbar.
 :::
 

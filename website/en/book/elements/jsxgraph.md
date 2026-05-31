@@ -9,6 +9,16 @@ JSXGraph is a JavaScript library for interactive geometry, function plotting, ch
 
 You can embed JSXGraph in your book using the `jsxgraph` element. You can use the `height` and `width` attributes to set the size of the JSXGraph board. The `boundingbox` attribute is used to set the bounding box of the board. The `axis` and `grid` attributes are used to show or hide the axis and grid.
 
+## Attributes
+
+| Attribute | Description | Default |
+|---|---|---|
+| `height` | Height of the JSXGraph board in pixels | `600` |
+| `width` | Width of the JSXGraph board in pixels | `800` |
+| `boundingbox` | Visible board area as `[left, top, right, bottom]` | `[-5, 5, 5, -5]` |
+| `axis` | Show or hide the axes | `true` |
+| `grid` | Show or hide the grid | `true` |
+
 In your code you must use the `board` variable to access the JSXGraph board. You can create points, lines, curves, and other elements on the board using the `board.create` method. The first argument is the type of element you want to create, and the second argument is an array of parameters for the element.
 
 You can find the documentation for JSXGraph [here](https://jsxgraph.org/docs/) and examples [here](https://jsxgraph.uni-bayreuth.de/share/).

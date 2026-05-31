@@ -10,6 +10,12 @@ hyperbook. You can use the `archive` directive to add a download button for
 these zipped folders. You only have to pass the folder name, everything else is
 handled for you.
 
+## Attributes
+
+| Attribute | Description | Default |
+|---|---|---|
+| `name` | Folder name inside the `archives` directory | - |
+
 ```md
 :archive[Project Template]{name="project-1"}
 ```

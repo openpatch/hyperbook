@@ -8,6 +8,19 @@ permaid: tabs
 Tabs are a great way to display alternative content. In Hyperbook you
 can use the `::::tabs` and `:::tab{title="A Tab Title"}`.
 
+## `tabs` Attributes
+
+| Attribute | Description | Default |
+|---|---|---|
+| `id` | Optional shared id for linking multiple tab groups together | auto-generated |
+
+## `tab` Attributes
+
+| Attribute | Description | Default |
+|---|---|---|
+| `title` | Label shown in the tab bar | - |
+| `id` | Optional id used for syncing tabs across groups | auto-generated |
+
 ```hyperbook
 ::::tabs
 

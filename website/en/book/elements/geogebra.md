@@ -5,11 +5,24 @@ permaid: geogebra
 
 # GeoGebra
 
-:::alert{warning}
+:::alert{warn}
 **Requires a network connection.** The GeoGebra application is loaded at runtime from `geogebra.org` and is not bundled with the hyperbook build output. GeoGebra is proprietary and cannot be self-hosted or redistributed. This element will not work in offline or network-restricted environments.
 :::
 
 GeoGebra applets can be embedded in various ways.
+
+## Attributes
+
+| Attribute | Description | Default |
+|---|---|---|
+| `perspective` | Visible GeoGebra views, for example `G` for geometry | - |
+| `height` | Height of the applet in pixels | `600` |
+| `width` | Width of the applet in pixels | `800` |
+| `coordsystem` | Visible coordinate system as `xmin,xmax,ymin,ymax` | - |
+| `src` | URL or path to an existing GeoGebra applet or `.ggb` file | - |
+| `appName` | GeoGebra app to load, for example `graphing`, `geometry`, or `suite` | - |
+| `showFullscreenButton` | Show the fullscreen button | `true` |
+| `showResetIcon` | Show the reset icon | `true` |
 
 On one hand, GeoGebra instructions can be passed directly.
 

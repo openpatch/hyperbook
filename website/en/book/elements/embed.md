@@ -15,10 +15,12 @@ For example to embed a LearningApp you can use the following syntax:
 
 ::embed{src="https://learningapps.org/watch?app=15767435"}
 
-The embed element accepts these arguments:
+## Attributes
 
-- **src**: The url which should be embedded.
-- **aspectRatio**: To keep your embed nice on every device you need to provide an aspect-ratio, e.g.: "16/9", "4/3", "1/1".
-- **height**: The height of the embed.
-- **width**: The width of the embed. Defaults to 100%.
-- **allowFullscreen**: If the embed is allowed to go into full screen mode. Defaults to true.
+| Attribute | Description | Default |
+|---|---|---|
+| `src` | URL that should be embedded | - |
+| `aspectRatio` | Aspect ratio, for example `16/9`, `4/3`, or `1/1` | - |
+| `height` | Height of the embed | `400px` |
+| `width` | Width of the embed | `100%` |
+| `allowFullscreen` | Allow fullscreen mode for the iframe | `true` |

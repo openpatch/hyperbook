@@ -11,11 +11,13 @@ For more information on how to use Struktolab, see the [Struktolab documentation
 
 ## Attributes
 
-- `mode`: "view" | "edit"
-- `scale`: number
-- `fontSize`: number
-- `lang`: "de" | "en" uses the hyperbook language by default
-- `colorMode`: "color" | "greyscale" | "bw"
+| Attribute | Description | Default |
+|---|---|---|
+| `mode` | Display mode: `preview` or `edit` | `preview` |
+| `scale` | Scale factor for the diagram | `1` |
+| `fontSize` | Font size used by Struktolab | `14` |
+| `lang` | UI language: `de` or `en` | hyperbook language |
+| `colorMode` | Color mode: `color`, `greyscale`, or `bw` | `color` |
 
 ## View
 

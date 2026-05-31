@@ -7,6 +7,14 @@ permaid: alert
 
 Alerts are a great way to get the attention of a reader.
 
+## Attributes
+
+| Attribute | Description | Default |
+|---|---|---|
+| `error` / `success` / `info` / `warn` | Positional alert type, for example `:::alert{warn}` | neutral alert |
+| `color` | Custom color for the alert | - |
+| `label` | Custom label or emoji shown as the alert icon | - |
+
 ```md
 :::alert
 Default

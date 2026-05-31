@@ -7,6 +7,14 @@ permaid: textinput
 
 The text input directive allows users to input and save text directly in the page. The input is automatically saved to the browser's local storage using Dexie, so it persists across page reloads.
 
+## Attributes
+
+| Attribute | Description | Default |
+|---|---|---|
+| `id` | Custom id used for local storage persistence | auto-generated |
+| `placeholder` | Placeholder text shown in the textarea | - |
+| `height` | Height of the textarea | `200px` |
+
 ## Basic Usage
 
 ```md

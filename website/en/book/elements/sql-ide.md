@@ -3,10 +3,16 @@ name: SQL IDE
 permaid: sql-ide
 ---
 
-The SQL-IDE element accepts the following arguments:
+# SQL IDE
 
-- **db**: An url to a sqlite file.
-- **height**: Height of the editor. Defaults to 600px.
+The `sqlide` directive embeds an SQL editor and runner for SQLite databases directly in your book.
+
+## Attributes
+
+| Attribute | Description | Default |
+|---|---|---|
+| `db` | URL or path to the SQLite database file | bundled demo database |
+| `height` | Height of the editor | `calc(100dvh - 80px)` |
 
 (See: https://github.com/martin-pabst/SQL-IDE).
 

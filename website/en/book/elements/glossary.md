@@ -9,6 +9,13 @@ You can keep a glossary of important terms. Just fill the folder
 `glossary` with markdown files. The name of the file will be the key of
 the term. You can then reference the terms like so:
 
+## Attributes
+
+| Attribute | Description | Default |
+|---|---|---|
+| `#<term-id>` | Glossary entry id, usually matching the filename in `glossary/` | - |
+| `.<heading-id>` | Optional anchor to link to a specific heading inside the glossary entry | - |
+
 ```md
 :t[Object-oriented Programming]{#oop}
 ```

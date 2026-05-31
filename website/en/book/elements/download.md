@@ -10,6 +10,14 @@ will be marked with "Offline". You should prefix local downloads with
 a slash. These will be linked to your public directory. You
 can also use external downloads from other sources.
 
+## Attributes
+
+| Attribute | Description | Default |
+|---|---|---|
+| `src` | URL or path to the file to download | - |
+
+The text inside `[]` is used as the download button label.
+
 ```md
 :download[Herunterladen]{src="/test.zip"}
 

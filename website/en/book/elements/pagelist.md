@@ -12,6 +12,15 @@ The ::pagelist element allows you to create a dynamic page directory that displa
 ::pagelist{format="<Format>" source="<Source>" orderBy="<OrderCriteria>"}
 ```
 
+## Attributes
+
+| Attribute | Description | Default |
+|---|---|---|
+| `format` | Render format: `ul`, `ol`, `glossary`, or `#<snippet>` | `ul` |
+| `source` | Query expression that filters the pages to include | `href(.*)` |
+| `orderBy` | Sort expression in the form `field:direction` | `name:asc` |
+| `limit` | Maximum number of results to return | - |
+
 ## Parameters
 
 ### format

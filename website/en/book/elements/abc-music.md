@@ -12,6 +12,12 @@ is supported by the `abcjs` library, which is integrated into hyperbook.
 
 Learn more about ABC music at [abcnotation.com](http://abcnotation.com/).
 
+## Attributes
+
+| Attribute | Description | Default |
+|---|---|---|
+| `editor` | Optional `abcjs` code fence flag that enables the interactive editor; add `editor` after `abcjs` in the fence info string | - |
+
 ````md
 ```abcjs
 X: 1

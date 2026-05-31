@@ -5,7 +5,7 @@ permaid: openscad
 
 # OpenSCAD
 
-:::alert{warning}
+:::alert{warn}
 **Requires a network connection for optional libraries and fonts.** When you select a library (BOSL2, BOSL, MCAD, NopSCADlib, fonts) in the editor, the corresponding ZIP file (~56 KB–4.3 MB) is downloaded from `ochafik.com`. The Roboto font used by the editor UI is loaded from Google Fonts. These resources are not bundled with the hyperbook build output. The core OpenSCAD editor works offline, but libraries and the custom font will not be available.
 :::
 

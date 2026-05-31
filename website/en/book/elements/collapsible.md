@@ -8,6 +8,13 @@ permaid: collapsible
 If you want to show additional content, which should not be seen at
 first glance, you can use a collapsible. Collapsibles are great for hints. They can also be nested.
 
+## Attributes
+
+| Attribute | Description | Default |
+|---|---|---|
+| `title` | Title shown in the collapsible summary | - |
+| `id` | Optional shared id for syncing multiple collapsibles | auto-generated |
+
 ```md
 ::::collapsible{title="Hallo"}
 

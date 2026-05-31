@@ -3,7 +3,7 @@ name: PlantUML
 permaid: plantuml
 ---
 
-:::alert{warning}
+:::alert{warn}
 **Requires a network connection.** Diagrams are rendered server-side by the [Kroki](https://kroki.io/) service (`kroki.io`) at build/render time. Kroki is not bundled with the hyperbook build output. This element will not work if Kroki is unreachable. Kroki is open source and can be [self-hosted](https://docs.kroki.io/kroki/setup/install/) for air-gapped deployments.
 :::
 
@@ -26,7 +26,9 @@ Bob -> Alice : hello
 @enduml
 :::
 
-The PlantUML element accepts these arguments:
+## Attributes
 
-- **width**: The width of the diagram.
-- **alt**: An alternative text for the diagram.
+| Attribute | Description | Default |
+|---|---|---|
+| `width` | Width of the generated diagram image | - |
+| `alt` | Alternative text for the diagram image | - |

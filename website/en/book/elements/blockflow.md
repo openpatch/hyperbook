@@ -11,21 +11,40 @@ permaid: blockflow
 
 The Blockflow Player embeds a player for playing Scratch-based guided tutorials.
 
+### Player Attributes
+
+| Attribute | Description | Default |
+|---|---|---|
+| `src` | URL to the `.sb3` file | - |
+| `width` | Width of the player | `100%` |
+| `height` | Height of the player | `600px` |
+| `aspectRatio` | Aspect ratio of the player container | `4/3` |
+
 ```md
 ::blockflow-player{src="https://hyperbook.openpatch.org/elements/platformer.sb3"}
 ```
 
 ::blockflow-player{src="https://hyperbook.openpatch.org/elements/platformer.sb3"}
 
-### Player Arguments
-
-- **src**: The URL pointing to an `.sb3` file.
-- **width**: The width of the player. Defaults to `100%`.
-- **height**: The height of the player. Defaults to `600px`.
-
 ## Editor
 
 The Blockflow Editor embeds an editor for creating Scratch-based guided tutorials. You can define tutorial steps directly in markdown, and the configuration is generated automatically at build time.
+
+### Editor Attributes
+
+| Attribute | Description | Default |
+|---|---|---|
+| `title` | Title of the tutorial | - |
+| `src` | Path or URL to the `.sb3` Scratch project file | - |
+| `project` | URL to a `.json` project file; when set, inline configuration is ignored | - |
+| `width` | Width of the editor | `100%` |
+| `height` | Height of the editor | `700px` |
+| `aspectRatio` | Aspect ratio of the editor container | - |
+| `allowExtensions` | Allow Scratch extensions (`true` or `false`) | `true` |
+| `showCostumesTab` | Show or hide the Costumes/Backdrops tab (`true` or `false`) | `true` |
+| `showSoundsTab` | Show or hide the Sounds tab (`true` or `false`) | `true` |
+| `categories` | Comma-separated list of toolbox categories | - |
+| `blocks-<category>` | Comma-separated list of blocks available in a category | - |
 
 ### Basic Usage
 
@@ -123,15 +142,3 @@ Instead of configuring the editor inline, you can provide a URL to a `.json` pro
 
 When `project` is set, all other configuration attributes (`title`, `src`, `allowExtensions`, `categories`, `blocks-*`) and `:::step` children are ignored.
 
-### Editor Arguments
-
-- **title**: The title of the tutorial.
-- **src**: The path or URL to the `.sb3` Scratch project file.
-- **project**: URL to a `.json` project file. When set, inline configuration is ignored.
-- **width**: The width of the editor. Defaults to `100%`.
-- **height**: The height of the editor. Defaults to `700px`.
-- **allowExtensions**: Allow Scratch extensions (`"true"` or `"false"`).
-- **showCostumesTab**: Show or hide the Costumes/Backdrops tab (`"true"` or `"false"`).
-- **showSoundsTab**: Show or hide the Sounds tab (`"true"` or `"false"`).
-- **categories**: Comma-separated list of toolbox categories.
-- **blocks-\<category\>**: Comma-separated list of blocks for a category.

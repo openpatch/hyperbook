@@ -8,6 +8,17 @@ permaid: tiles
 Tiles are a nice visual structure for landing pages or hubs, which should give
 your users an overview.
 
+The `:::tiles` container has no attributes.
+
+## `tile` Attributes
+
+| Attribute | Description | Default |
+|---|---|---|
+| `title` | Title shown inside the tile | - |
+| `href` | Optional URL or path the tile links to | - |
+| `size` | Tile size: `S`, `M`, or `L` | `M` |
+| `icon` | Optional icon URL or emoji such as `:rocket:` | - |
+
 ```md
 :::tiles
 

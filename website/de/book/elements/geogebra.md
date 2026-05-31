@@ -6,7 +6,7 @@ lang: de
 
 # GeoGebra
 
-:::alert{warning}
+:::alert{warn}
 **Erfordert eine Netzwerkverbindung.** Die GeoGebra-Anwendung wird zur Laufzeit von `geogebra.org` geladen und ist nicht im Hyperbook-Build-Output enthalten. GeoGebra ist proprietär und kann nicht selbst gehostet oder weiterverteilt werden. Dieses Element funktioniert nicht in Offline- oder netzwerkbeschränkten Umgebungen.
 :::
 

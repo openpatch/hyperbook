@@ -7,11 +7,13 @@ permaid: qr
 
 You can use the QR code element for showing QR codes in your hyperbook.
 
-The QR code element accepts three arguments:
+## Attributes
 
-- **value**: The value which is encoded in the QR code.
-- **size**: Sets the size of the QR code. You can choose between S, M, L and XL. Defaults to M.
-- **label**: The label is shown below the QR code.
+| Attribute | Description | Default |
+|---|---|---|
+| `value` | Value encoded in the QR code | - |
+| `size` | Size of the QR code: `S`, `M`, `L`, or `XL` | `M` |
+| `label` | Label shown below the QR code | - |
 
 ```md
 ::qr{value="https://hyperbook.openpatch.org" size="XL"}

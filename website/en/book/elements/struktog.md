@@ -15,6 +15,12 @@ Dresden](https://gitlab.com/ddi-tu-dresden/cs-school-tools/struktog). We
 forked the project and added the ability to store diagrams in the URL.
 This makes it rather easy to use the diagrams in Hyperbook. You can find our fork at [https://struktog.openpatch.org](https://struktog.openpatch.org).
 
+## Attributes
+
+| Attribute | Description | Default |
+|---|---|---|
+| `data` | Serialized Struktog state or a full Struktog URL containing that state | - |
+
 ```
 ::struktog{data="pako:eNqtVMtqG0EQ_Jc9u6HnPaNryAtCHEjIJeTQM91jiawlI61wgtGf5ZYfS8vYEQ6RsXAuw7LMVFdVV_fNcLliGYfZzbDgYTYUH4tNpkCpOYOp1kLhZCAYW5CSDGfD9ONK9Obb5UbW03t9rf_6ahxX1y9HuZTl9Aess2spGoYcbYDYE0JBS0CFihXvDmBvhPjdanV1BzfJd0UZXv_6OU6Li2-ymDZVeLG82C4vjlYLhjrznnBIHnr3FcRhhMaRiq_9adSX23HcnQ1tvhj5AJ2tFRM8YO8O9LNCsdFBNyQtxHKSK66XRFEQZO9Ki4pTDCls447q1gHsfDtdbaeHnnySzXQUOhfulNhDy03A-dZAuheoznLN0Z3E07umzcKiPH0GrJqCWmzVKGCKTvIB7AVt5CHLz7ReUB2Pgwul6hIrZO0eEroIFmNTpmRibu6kZrF02o7T-XKYTeut_Plx--i-YizNN4wdbC8dImEGhyFDSNlGJfF3xb2og6CPq-UjvleLqTA1yJUTBC4JUNgBh6jSfHiq73eXPozUZL4aWdbDbrdPo3LZDLMvd-Va9V7D3jSJpPkOpgN70RhF2zsiPy7lFY3jUSWUQzfG7ZUYB663AjVoOFvWyUL3XCX384TSc65WsZseRjKQWgisJTBjeIYASy6l4BwgRgbLBSHZxOCCtt-WdNqoakpD5QZR3wJmCmBCzVB1cpOn-H8XWCdnvboN5KKydt1CZ9ERLrX58NTd-88FhtEyVimQdfmA76VpRyNBxdQTk31eW3e7r7enlp3L4mKuVy36s-F6wdN8mOWSdr8BJ5f68w"}
 

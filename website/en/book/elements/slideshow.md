@@ -5,6 +5,14 @@ permaid: slideshow
 
 # Slideshow
 
+The `slideshow` directive creates an image slideshow with navigation controls.
+
+## Attributes
+
+| Attribute | Description | Default |
+|---|---|---|
+| `height` | Height of the slideshow, for example `500` or `500px` | `300px` |
+
 ```md
 :::slideshow
 

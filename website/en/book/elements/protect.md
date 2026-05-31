@@ -8,6 +8,14 @@ permaid: protect
 If you want to protect an area of your Hyperbook with a password, you
 can use the protect-block.
 
+## Attributes
+
+| Attribute | Description | Default |
+|---|---|---|
+| `password` | Password required to unlock the protected content | - |
+| `description` | Description shown above the password input | - |
+| `id` | Optional shared id for syncing multiple protected blocks | auto-generated |
+
 ```md
 :::protect{password="hyperbook" description="The password is the name of this project."}
 

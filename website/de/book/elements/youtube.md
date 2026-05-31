@@ -4,7 +4,7 @@ name: YouTube
 
 # YouTube
 
-:::alert{warning}
+:::alert{warn}
 **Erfordert eine Netzwerkverbindung.** Videos werden von `youtube-nocookie.com` gestreamt und können nicht im Hyperbook-Build-Output enthalten sein. Dieses Element funktioniert nicht in Offline- oder netzwerkbeschränkten Umgebungen.
 :::
 

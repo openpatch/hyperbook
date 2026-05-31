@@ -9,6 +9,12 @@ The scratchblock element allows to easier inserting of scratch programs. The pro
 
 As a default your hyperbook language and english are supported.
 
+## Attributes
+
+| Attribute | Description | Default |
+|---|---|---|
+| `language` | Scratchblocks locale to use, for example `de` | hyperbook language / `en` |
+
 ```md
 :::scratchblock
 when green flag clicked

@@ -9,12 +9,14 @@ Video element to allow easy display of videos on Hyperbook via HTML's [_The Vide
 
 The `<video>` tag is supported by all modern browsers, see [Browser compatibility](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/video#browser_compatibility) for more detail.
 
-The video element accepts these arguments:
+## Attributes
 
-- **src**: The URL of the video file to embed. Could be a local file path relative from your public directory, or a remote video URL.
-- **title**: Video title (optional).
-- **author**: The video's author (optional).
-- **poster**: An image to be shown while the video is downloading, or until the user hits the play button. Could be a local file path relative from your public directory, or a remote image URL (optional).
+| Attribute | Description | Default |
+|---|---|---|
+| `src` | URL or path to the video file | - |
+| `title` | Video title shown below the player | - |
+| `author` | Video author shown below the player | - |
+| `poster` | Image shown before playback starts | - |
 
 ## Local file
 
