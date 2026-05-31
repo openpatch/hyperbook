@@ -7,7 +7,6 @@ import {
   appendFriendlyError,
   appendOutputLine,
   clearPytamaroStdoutCarry,
-  setPytamaroCanvasTarget,
 } from "./output.js";
 import { executeScript } from "./execution.js";
 import {
@@ -73,14 +72,6 @@ hyperbook.python = (function () {
             .filter((pkg) => pkg.length > 0),
         ),
       );
-      const hasPytamaroPackage = additionalPackages.some(
-        (pkg) => pkg.toLowerCase() === "pytamaro",
-      );
-      const scriptLooksLikePytamaro = (script) => {
-        return /\bfrom\s+pytamaro\s+import\b|\bimport\s+pytamaro\b/.test(
-          script,
-        );
-      };
       let pyideState = { id };
 
       // Initialize CodeMirror
@@ -348,9 +339,6 @@ hyperbook.python = (function () {
 
       run?.addEventListener("click", async () => {
         const script = getEditorValue();
-        const usesPytamaro =
-          hasPytamaroPackage || scriptLooksLikePytamaro(script);
-        const renderPytamaroToCanvas = hasCanvas && canvas && usesPytamaro;
         if (hasCanvas) {
           showCanvas();
         } else {
@@ -369,7 +357,6 @@ hyperbook.python = (function () {
         output.innerHTML = "";
         clearPytamaroStdoutCarry(id);
         try {
-          setPytamaroCanvasTarget(id, renderPytamaroToCanvas);
           const { results, error } = await executeScript(
             id,
             script,

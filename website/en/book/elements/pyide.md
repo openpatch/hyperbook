@@ -245,10 +245,10 @@ while running:
 
 ## Pytamaro
 
-Use `canvas` together with `packages="pytamaro"` to render `show_graphic(...)` on the canvas instead of the output panel.
+Use `packages="pytamaro"` to render `show_graphic(...)` and `show_animation(...)` in the output panel.
 
 ````hyperbook
-:::pyide{canvas packages="pytamaro"}
+:::pyide{packages="pytamaro"}
 
 ```python
 from pytamaro import *
@@ -270,7 +270,7 @@ show_graphic(finish_line)
 :::
 ````
 
-:::pyide{canvas packages="pytamaro"}
+:::pyide{packages="pytamaro"}
 
 ```python
 from pytamaro import *

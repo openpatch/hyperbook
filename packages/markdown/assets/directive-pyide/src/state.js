@@ -24,7 +24,6 @@ export const interruptBuffers = new Map();
  * @type {Map<string, string>}
  */
 export const pytamaroStdoutCarry = new Map();
-export const pytamaroCanvasTargets = new Set();
 
 export const getExecutionState = (id) => {
   if (!executionStates.has(id)) {

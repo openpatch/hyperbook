@@ -38,6 +38,18 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.96.2
+
+::::tabs
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+- **pyide**: `show_animation()` now correctly displays animated GIFs — previously, rendering pytamaro output to a canvas element would only show the first frame. Pytamaro output (including `show_graphic()` and `show_animation()`) always renders to the output panel as an image. The `canvas` attribute is no longer needed for pytamaro.
+
+:::
+
+::::
+
 ## v0.96.1
 
 ::::tabs

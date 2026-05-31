@@ -1,44 +1,11 @@
 import { PYTAMARO_URI_BEGIN, PYTAMARO_URI_END } from "./constants.js";
-import { pytamaroStdoutCarry, pytamaroCanvasTargets } from "./state.js";
+import { pytamaroStdoutCarry } from "./state.js";
 
 export const getOutput = (id) => {
   return document.getElementById(id)?.getElementsByClassName("output")[0];
 };
 
-export const getCanvas = (id) => {
-  return document.getElementById(id)?.getElementsByClassName("canvas")[0];
-};
-
-export const setPytamaroCanvasTarget = (id, enabled) => {
-  if (enabled) {
-    pytamaroCanvasTargets.add(id);
-  } else {
-    pytamaroCanvasTargets.delete(id);
-  }
-};
-
 export const renderPytamaroDataUri = (id, container, dataUri) => {
-  if (id && pytamaroCanvasTargets.has(id)) {
-    const canvas = getCanvas(id);
-    const context = canvas?.getContext?.("2d");
-    if (canvas && context) {
-      const img = new Image();
-      img.onload = () => {
-        const width = Math.max(1, img.naturalWidth || img.width);
-        const height = Math.max(1, img.naturalHeight || img.height);
-        canvas.width = width;
-        canvas.height = height;
-        context.clearRect(0, 0, width, height);
-        context.drawImage(img, 0, 0, width, height);
-      };
-      img.onerror = () => {
-        appendOutputErrorLine(id, "Failed to render pytamaro graphic.");
-      };
-      img.src = dataUri;
-      return;
-    }
-  }
-
   const img = document.createElement("img");
   img.src = dataUri;
   img.style.maxWidth = "100%";
@@ -216,5 +183,4 @@ export const appendOutput = (output, message, isError = false, id = null) => {
 
 export const clearPytamaroStdoutCarry = (id) => {
   pytamaroStdoutCarry.delete(id);
-  pytamaroCanvasTargets.delete(id);
 };

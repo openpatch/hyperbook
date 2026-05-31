@@ -238,10 +238,10 @@ while running:
 
 ## Pytamaro
 
-Verwenden Sie `canvas` zusammen mit `packages="pytamaro"`, um `show_graphic(...)` direkt auf dem Canvas statt im Ausgabebereich darzustellen.
+Verwenden Sie `packages="pytamaro"`, um `show_graphic(...)` und `show_animation(...)` im Ausgabebereich darzustellen.
 
 ````hyperbook
-:::pyide{canvas packages="pytamaro"}
+:::pyide{packages="pytamaro"}
 
 ```python
 from pytamaro import *
@@ -264,7 +264,7 @@ show_graphic(finish_line)
 :::
 ````
 
-:::pyide{canvas packages="pytamaro"}
+:::pyide{packages="pytamaro"}
 
 ```python
 from pytamaro import *
