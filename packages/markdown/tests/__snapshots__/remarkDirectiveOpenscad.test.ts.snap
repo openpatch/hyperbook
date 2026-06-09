@@ -2,7 +2,7 @@
 
 exports[`remarkDirectiveOpenscad > should transform basic openscad 1`] = `
 "
-<div class="directive-openscad" data-id="2f3d1caccab3360d23eb47da1cba3a5e0f8d6adb066e9298d473e0e82351d9f7">
+<div class="directive-openscad" data-id="2f3d1caccab3360d23eb47da1cba3a5e0f8d6adb066e9298d473e0e82351d9f7" data-binary-files="W10=" data-base-path="/" data-page-path="">
   <div class="left-side">
     <div class="preview-container">
       <div class="preview-header">openscad-preview</div>
@@ -20,7 +20,44 @@ exports[`remarkDirectiveOpenscad > should transform basic openscad 1`] = `
   <div class="splitter" role="separator" aria-label="Resize panels"></div>
   <div class="editor-container">
     <div class="buttons"><button class="render">openscad-render</button></div>
+    <details class="binary-files-section">
+      <summary><span class="summary-text"><span class="summary-indicator">▶</span>openscad-binary-files</span></summary>
+      <div class="binary-files-list"></div>
+      <div class="binary-files-actions"><button class="add-binary-file" title="openscad-add-binary-file">+ openscad-add</button></div>
+    </details>
     <div class="editor" data-lang="clike">cube([20,20,20], center=true);</div><textarea class="parameters" placeholder="{&#x22;size&#x22;: 20, &#x22;height&#x22;: 10}">{}</textarea>
+    <div class="buttons bottom"><button class="copy">openscad-copy</button><button class="download-stl">openscad-download-stl</button><button class="reset">openscad-reset</button><button class="fullscreen" title="ide-fullscreen-enter" aria-label="ide-fullscreen-enter">⛶</button></div>
+  </div>
+</div>
+"
+`;
+
+exports[`remarkDirectiveOpenscad > should transform openscad with binary file directives 1`] = `
+"
+<div class="directive-openscad" data-id="8a2723a4f60788bdf17899f701948bd8910783721b2a9294ece3af9a48c697b7" data-binary-files="W3siZGVzdCI6Ii9pbnB1dC9tb2RlbC5zdGwiLCJ1cmwiOiIvcHVibGljL21vZGVscy9tb2RlbC5zdGwifV0=" data-base-path="/" data-page-path="">
+  <div class="left-side">
+    <div class="preview-container">
+      <div class="preview-header">openscad-preview</div>
+      <div class="canvas-wrapper">
+        <canvas class="preview-canvas"></canvas>
+        <div class="canvas-overlay hidden"></div>
+      </div>
+    </div>
+    <div class="canvas-params-splitter" role="separator" aria-label="Resize canvas and parameters"></div>
+    <div class="parameters-panel">
+      <div class="parameters-header">openscad-parameters</div>
+      <div class="parameters-body"></div>
+    </div>
+  </div>
+  <div class="splitter" role="separator" aria-label="Resize panels"></div>
+  <div class="editor-container">
+    <div class="buttons"><button class="render">openscad-render</button></div>
+    <details class="binary-files-section">
+      <summary><span class="summary-text"><span class="summary-indicator">▶</span>openscad-binary-files</span></summary>
+      <div class="binary-files-list"></div>
+      <div class="binary-files-actions"><button class="add-binary-file" title="openscad-add-binary-file">+ openscad-add</button></div>
+    </details>
+    <div class="editor" data-lang="clike">import(&quot;/input/model.stl&quot;);</div><textarea class="parameters" placeholder="{&#x22;size&#x22;: 20, &#x22;height&#x22;: 10}">{}</textarea>
     <div class="buttons bottom"><button class="copy">openscad-copy</button><button class="download-stl">openscad-download-stl</button><button class="reset">openscad-reset</button><button class="fullscreen" title="ide-fullscreen-enter" aria-label="ide-fullscreen-enter">⛶</button></div>
   </div>
 </div>

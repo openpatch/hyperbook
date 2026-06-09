@@ -272,6 +272,126 @@
   border-right: none;
 }
 
+.directive-openscad .binary-files-section {
+  border: 1px solid var(--color-spacer);
+  border-top: none;
+  border-bottom: none;
+  background-color: var(--color-background, var(--color--background, #fff));
+  margin-bottom: 0;
+}
+
+.directive-openscad .binary-files-section summary {
+  padding: 8px 12px;
+  cursor: pointer;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  user-select: none;
+  background-color: var(--color-background, var(--color--background, #fff));
+  list-style: none;
+}
+
+.directive-openscad .binary-files-section summary::-webkit-details-marker {
+  display: none;
+}
+
+.directive-openscad .binary-files-section summary .summary-text {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.directive-openscad .binary-files-section summary .summary-indicator {
+  transition: transform 0.2s;
+  display: inline-block;
+  font-size: 0.75rem;
+}
+
+.directive-openscad .binary-files-section[open] summary .summary-indicator {
+  transform: rotate(90deg);
+}
+
+.directive-openscad .binary-files-section summary:hover {
+  background-color: var(--color-spacer);
+}
+
+.directive-openscad .binary-files-actions {
+  padding: 8px;
+}
+
+.directive-openscad .add-binary-file {
+  width: 100%;
+  flex: none;
+  padding: 6px 12px;
+  font-size: 0.875rem;
+  border: 1px solid var(--color-spacer);
+  border-radius: 4px;
+  background-color: var(--color-background, var(--color--background, #fff));
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.directive-openscad .add-binary-file:hover {
+  background-color: var(--color-spacer);
+}
+
+.directive-openscad .binary-files-list {
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.directive-openscad .binary-files-empty {
+  padding: 12px;
+  text-align: center;
+  color: var(--color-text);
+  opacity: 0.6;
+  font-style: italic;
+  font-size: 0.875rem;
+}
+
+.directive-openscad .binary-file-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  font-size: 0.875rem;
+}
+
+.directive-openscad .binary-file-icon {
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.directive-openscad .binary-file-name {
+  flex: 1;
+  word-break: break-all;
+}
+
+.directive-openscad .binary-file-delete {
+  background: none;
+  border: none;
+  color: var(--color-text);
+  cursor: pointer;
+  font-size: 1.125rem;
+  line-height: 1;
+  padding: 0;
+  margin: 0;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 2px;
+  flex: none;
+}
+
+.directive-openscad .binary-file-delete:hover {
+  background-color: rgba(220, 38, 38, 0.1);
+  color: #dc2626;
+}
+
 .directive-openscad button.fullscreen {
   flex: 0 0 auto;
   min-width: 42px;

@@ -2,7 +2,7 @@
 /// <reference types="mdast-util-directive" />
 //
 import { HyperbookContext } from "@hyperbook/types";
-import { Code, Root } from "mdast";
+import { Code, Root, Text } from "mdast";
 import { visit } from "unist-util-visit";
 import { VFile } from "vfile";
 import {
@@ -31,6 +31,37 @@ export default (ctx: HyperbookContext) => () => {
       if (isDirective(node) && node.name === name) {
         const { src = "", id = hash(node), height, library } = node.attributes || {};
         const data = node.data || (node.data = {});
+        const binaryFiles: { dest: string; url: string }[] = [];
+
+        for (const child of node.children) {
+          let text = "";
+          if (child.type === "text") {
+            text = (child as Text).value;
+          } else if (child.type === "paragraph") {
+            const reconstructText = (paragraphNode: any): string => {
+              if (paragraphNode.type === "text") return paragraphNode.value;
+              if (paragraphNode.type === "link") return paragraphNode.url;
+              if (paragraphNode.children) {
+                return paragraphNode.children.map(reconstructText).join("");
+              }
+              return "";
+            };
+            text = child.children.map(reconstructText).join("");
+          }
+
+          if (!text) continue;
+          const fileMatches = text.matchAll(/@file\s+dest="([^"]+)"\s+src="([^"]+)"/g);
+          for (const match of fileMatches) {
+            const dest = match[1];
+            const src = match[2];
+            const url = ctx.makeUrl(
+              src,
+              "public",
+              ctx.navigation.current || undefined,
+            );
+            binaryFiles.push({ dest, url });
+          }
+        }
 
         expectContainerDirective(node, file, name);
         registerDirective(file, name, ["client.js"], ["style.css"], []);
@@ -54,6 +85,11 @@ export default (ctx: HyperbookContext) => () => {
         data.hProperties = {
           class: "directive-openscad",
           "data-id": id,
+          "data-binary-files": Buffer.from(
+            JSON.stringify(binaryFiles),
+          ).toString("base64"),
+          "data-base-path": ctx.config.basePath || "/",
+          "data-page-path": ctx.navigation.current?.path?.directory || "",
           ...(height ? { style: `--openscad-height: ${height}` } : {}),
           ...(library ? { "data-library": library } : {}),
         };
@@ -152,6 +188,79 @@ export default (ctx: HyperbookContext) => () => {
                     tagName: "button",
                     properties: { class: "render" },
                     children: [{ type: "text", value: i18n.get("openscad-render") }],
+                  },
+                ],
+              },
+              {
+                type: "element",
+                tagName: "details",
+                properties: {
+                  class: "binary-files-section",
+                },
+                children: [
+                  {
+                    type: "element",
+                    tagName: "summary",
+                    properties: {},
+                    children: [
+                      {
+                        type: "element",
+                        tagName: "span",
+                        properties: {
+                          class: "summary-text",
+                        },
+                        children: [
+                          {
+                            type: "element",
+                            tagName: "span",
+                            properties: {
+                              class: "summary-indicator",
+                            },
+                            children: [
+                              {
+                                type: "text",
+                                value: "▶",
+                              },
+                            ],
+                          },
+                          {
+                            type: "text",
+                            value: i18n.get("openscad-binary-files"),
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                  {
+                    type: "element",
+                    tagName: "div",
+                    properties: {
+                      class: "binary-files-list",
+                    },
+                    children: [],
+                  },
+                  {
+                    type: "element",
+                    tagName: "div",
+                    properties: {
+                      class: "binary-files-actions",
+                    },
+                    children: [
+                      {
+                        type: "element",
+                        tagName: "button",
+                        properties: {
+                          class: "add-binary-file",
+                          title: i18n.get("openscad-add-binary-file"),
+                        },
+                        children: [
+                          {
+                            type: "text",
+                            value: "+ " + i18n.get("openscad-add"),
+                          },
+                        ],
+                      },
+                    ],
                   },
                 ],
               },

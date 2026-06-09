@@ -19,6 +19,72 @@ hyperbook.openscad = (function () {
   };
 
   const i18nGet = (key, fallback = key) => hyperbook.i18n?.get(key) || fallback;
+  const ABSOLUTE_URL_PATTERN = /^(?:[a-z]+:)?\/\//i;
+
+  const normalizePath = (path) => {
+    if (!path) return "/";
+    return path.startsWith("/") ? path : `/${path}`;
+  };
+
+  const constructUrl = (path, basePath, pagePath) => {
+    if (path.startsWith("/")) {
+      return basePath ? `${basePath}${path}`.replace(/\/+/g, "/") : path;
+    }
+    return pagePath ? `${pagePath}/${path}`.replace(/\/+/g, "/") : path;
+  };
+
+  const resolveImportFsPath = (assetPath) => {
+    try {
+      return new URL(assetPath, "file:///tmp/model.scad").pathname || null;
+    } catch (_) {
+      return null;
+    }
+  };
+
+  const extractImportAssetPaths = (code) => {
+    const paths = new Set();
+    const pattern = /import\s*\(\s*(['"])([^'"]+)\1/g;
+    let match;
+    while ((match = pattern.exec(code || "")) !== null) {
+      const path = match[2];
+      if (!path) continue;
+      if (
+        ABSOLUTE_URL_PATTERN.test(path) ||
+        path.startsWith("data:") ||
+        path.startsWith("blob:")
+      ) {
+        continue;
+      }
+      paths.add(path);
+    }
+    return [...paths];
+  };
+
+  const buildAutoBinaryFiles = (code, basePath, pagePath) => {
+    return extractImportAssetPaths(code)
+      .map((assetPath) => {
+        const dest = resolveImportFsPath(assetPath);
+        if (!dest) return null;
+        return {
+          dest,
+          url: constructUrl(assetPath, basePath, pagePath),
+        };
+      })
+      .filter(Boolean);
+  };
+
+  const mergeBinaryFiles = (baseFiles = [], autoFiles = []) => {
+    const merged = new Map();
+    for (const file of autoFiles) {
+      if (!file?.dest || !file?.url) continue;
+      merged.set(file.dest, file);
+    }
+    for (const file of baseFiles) {
+      if (!file?.dest || !file?.url) continue;
+      merged.set(file.dest, file);
+    }
+    return [...merged.values()];
+  };
 
   const getWorker = async (slot) => {
     if (!window.Worker) {
@@ -93,11 +159,18 @@ hyperbook.openscad = (function () {
       .map((entry) => entry.stderr);
 
   // Build parameter UI metadata/markup in the worker to minimize main-thread work.
-  const buildParamUiInWorker = async (code, libraryNames = [], currentOverrides = {}, id = "") => {
+  const buildParamUiInWorker = async (
+    code,
+    libraryNames = [],
+    binaryFiles = [],
+    currentOverrides = {},
+    id = "",
+  ) => {
     try {
       const result = await callWorker("param", "buildParamForm", {
         code,
         libraryNames,
+        binaryFiles,
         currentOverrides,
         id,
       });
@@ -658,6 +731,16 @@ hyperbook.openscad = (function () {
     const id = elem.getAttribute("data-id");
     const libraryNames = (elem.getAttribute("data-library") || "")
       .split(",").map(s => s.trim()).filter(Boolean);
+    const binaryFilesData = elem.getAttribute("data-binary-files");
+    const basePath = normalizePath(elem.getAttribute("data-base-path") || "/");
+    const pagePath = normalizePath(elem.getAttribute("data-page-path") || "");
+    const decodeBase64 = (str) => {
+      const binaryStr = atob(str);
+      const bytes = Uint8Array.from(binaryStr, (c) => c.charCodeAt(0));
+      return new TextDecoder("utf-8").decode(bytes);
+    };
+    const initialBinaryFiles = binaryFilesData ? JSON.parse(decodeBase64(binaryFilesData)) : [];
+    let userBinaryFiles = Array.isArray(initialBinaryFiles) ? [...initialBinaryFiles] : [];
 
     const previewContainer = elem.querySelector(".preview-container");
     const leftSide = elem.querySelector(".left-side");
@@ -682,6 +765,8 @@ hyperbook.openscad = (function () {
     const downloadBtn = elem.querySelector("button.download-stl");
     const resetBtn = elem.querySelector("button.reset");
     const fullscreenBtn = elem.querySelector("button.fullscreen");
+    const addBinaryFileBtn = elem.querySelector("button.add-binary-file");
+    const binaryFilesList = elem.querySelector(".binary-files-list");
     const bottomButtons = elem.querySelector(".buttons.bottom");
     let downloadFormatSelect = bottomButtons?.querySelector("select.download-format");
     if (!downloadFormatSelect && bottomButtons && downloadBtn) {
@@ -700,6 +785,97 @@ hyperbook.openscad = (function () {
     if (downloadBtn) {
       downloadBtn.textContent = i18nGet("openscad-download", "Download");
     }
+
+    const normalizeBinaryDest = (dest) => {
+      if (typeof dest !== "string") return null;
+      const trimmed = dest.trim();
+      if (!trimmed) return null;
+      return normalizePath(trimmed).replace(/\/+/g, "/");
+    };
+
+    const updateBinaryFilesList = () => {
+      if (!binaryFilesList) return;
+      binaryFilesList.innerHTML = "";
+
+      if (userBinaryFiles.length === 0) {
+        const emptyMsg = document.createElement("div");
+        emptyMsg.className = "binary-files-empty";
+        emptyMsg.textContent = i18nGet("openscad-no-binary-files", "No binary files");
+        binaryFilesList.appendChild(emptyMsg);
+        return;
+      }
+
+      userBinaryFiles.forEach((file) => {
+        const item = document.createElement("div");
+        item.className = "binary-file-item";
+
+        const icon = document.createElement("span");
+        icon.className = "binary-file-icon";
+        icon.textContent = "📎";
+        item.appendChild(icon);
+
+        const name = document.createElement("span");
+        name.className = "binary-file-name";
+        name.textContent = file.dest;
+        item.appendChild(name);
+
+        const deleteBtn = document.createElement("button");
+        deleteBtn.className = "binary-file-delete";
+        deleteBtn.textContent = "×";
+        deleteBtn.title = i18nGet("typst-delete-file", "Delete file");
+        deleteBtn.addEventListener("click", () => {
+          const confirmMsg = `${i18nGet("typst-delete-confirm", "Delete")} ${file.dest}?`;
+          if (!window.confirm(confirmMsg)) return;
+          userBinaryFiles = userBinaryFiles.filter((f) => f.dest !== file.dest);
+          updateBinaryFilesList();
+          scheduleSave();
+          void renderPreview();
+        });
+        item.appendChild(deleteBtn);
+
+        binaryFilesList.appendChild(item);
+      });
+    };
+
+    const handleAddBinaryFile = (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = "*/*";
+
+      input.addEventListener("change", (changeEvent) => {
+        const file = changeEvent.target.files?.[0];
+        if (!file) return;
+
+        const dest = normalizeBinaryDest(`/${file.name}`);
+        if (!dest) return;
+
+        if (userBinaryFiles.some((f) => f.dest === dest)) {
+          if (!window.confirm(i18nGet("openscad-file-replace", `Replace existing ${dest}?`))) {
+            return;
+          }
+          userBinaryFiles = userBinaryFiles.filter((f) => f.dest !== dest);
+        }
+
+        const reader = new FileReader();
+        reader.onload = (loadEvent) => {
+          const url = loadEvent.target?.result;
+          if (typeof url !== "string") return;
+          userBinaryFiles.push({ dest, url });
+          updateBinaryFilesList();
+          scheduleSave();
+          void renderPreview();
+        };
+        reader.readAsDataURL(file);
+      });
+
+      input.click();
+    };
+
+    addBinaryFileBtn?.addEventListener("click", handleAddBinaryFile);
+    updateBinaryFilesList();
 
     // --- Canvas overlay ---
     let overlayDismissTimer = null;
@@ -800,6 +976,7 @@ hyperbook.openscad = (function () {
         id,
         code: cm?.getValue() || "",
         params: params?.value || "{}",
+        binaryFiles: userBinaryFiles,
         ...(Number.isFinite(splitHorizontal) && splitHorizontal > 0
           ? { splitHorizontal: Math.round(splitHorizontal) }
           : {}),
@@ -821,6 +998,15 @@ hyperbook.openscad = (function () {
       }
       if (params && typeof result.params === "string") {
         params.value = result.params;
+      }
+      if (Array.isArray(result.binaryFiles)) {
+        userBinaryFiles = result.binaryFiles
+          .map((file) => ({
+            dest: normalizeBinaryDest(file?.dest),
+            url: typeof file?.url === "string" ? file.url : "",
+          }))
+          .filter((file) => file.dest && file.url);
+        updateBinaryFilesList();
       }
       if (Number.isFinite(result.splitHorizontal) && result.splitHorizontal > 0) {
         elem.dataset.splitHorizontal = String(Math.round(result.splitHorizontal));
@@ -946,7 +1132,17 @@ hyperbook.openscad = (function () {
 
       // Code is the source of truth — param changes are always synced back to the
       // code, so we never need stored overrides to win over the code's own values.
-      const result = await buildParamUiInWorker(code, libraryNames, {}, id || "model");
+      const resolvedBinaryFiles = mergeBinaryFiles(
+        userBinaryFiles,
+        buildAutoBinaryFiles(code, basePath, pagePath),
+      );
+      const result = await buildParamUiInWorker(
+        code,
+        libraryNames,
+        resolvedBinaryFiles,
+        {},
+        id || "model",
+      );
       if (buildToken !== latestParamBuildToken) {
         return false;
       }
@@ -1035,10 +1231,15 @@ hyperbook.openscad = (function () {
         // itself is the single source of truth. Passing -D overrides is both
         // redundant and causes stale-value renders when the render fires before
         // the next param-build cycle completes.
+        const resolvedBinaryFiles = mergeBinaryFiles(
+          userBinaryFiles,
+          buildAutoBinaryFiles(cm?.getValue() || "", basePath, pagePath),
+        );
         const result = await callWorker("render", "render", {
           code: cm?.getValue() || "",
           format,
           libraryNames,
+          binaryFiles: resolvedBinaryFiles,
           paramDefinitions: [],
           isPreview,
         });

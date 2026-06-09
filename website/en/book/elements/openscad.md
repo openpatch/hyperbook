@@ -56,6 +56,37 @@ Possible libraries include: BOSL2, BOSL, MCAD, NopSCADlib, fonts
 :::openscad{src="openscad/example.scad"}
 :::
 ````
+
+## Load binary files into the OpenSCAD filesystem
+
+Use `@file` directives inside the `:::openscad` block to mount binary files before rendering.
+
+In edit mode, you can also use the **Binary Files** panel to upload files directly (stored locally in browser storage for this block).
+
+````md
+:::openscad
+
+@file dest="/input/model.stl" src="models/model.stl"
+
+```scad
+import("/input/model.stl");
+```
+
+:::
+````
+
+Relative paths in `import()` are also supported and resolved like Typst assets (relative to the current page). Example:
+
+````md
+:::openscad
+
+```scad
+import("./koala.svg", center=true);
+```
+
+:::
+````
+
 ## Example with variables
 
 ````md

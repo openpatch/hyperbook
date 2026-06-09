@@ -46,4 +46,22 @@ cube([20,20,20], center=true);
       ).value,
     ).toMatchSnapshot();
   });
+
+  it("should transform openscad with binary file directives", async () => {
+    expect(
+      toHtml(
+        `:::openscad
+
+@file dest="/input/model.stl" src="models/model.stl"
+
+\`\`\`scad
+import("/input/model.stl");
+\`\`\`
+
+:::
+`,
+        ctx,
+      ).value,
+    ).toMatchSnapshot();
+  });
 });

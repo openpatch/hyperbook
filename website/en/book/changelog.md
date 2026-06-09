@@ -38,6 +38,18 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.97.0
+
+::::tabs
+
+:::tab{title="Improved :+1:" id="improved"}
+
+- **openscad**: Add binary file support.
+
+:::
+
+::::
+
 ## v0.96.3
 
 ::::tabs

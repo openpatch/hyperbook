@@ -183,6 +183,48 @@ const loadFonts = async () => {
   }
 };
 
+const normalizeFsPath = (rawPath) => {
+  if (typeof rawPath !== "string") return null;
+  const trimmed = rawPath.trim();
+  if (!trimmed) return null;
+  return (trimmed.startsWith("/") ? trimmed : `/${trimmed}`).replace(/\/+/g, "/");
+};
+
+const ensureParentDirectories = (instance, filePath) => {
+  const parts = filePath.split("/").filter(Boolean);
+  let current = "";
+  for (let i = 0; i < parts.length - 1; i++) {
+    current += `/${parts[i]}`;
+    try {
+      instance.FS.mkdir(current);
+    } catch (_) {}
+  }
+};
+
+const mountBinaryFiles = async (instance, binaryFiles = []) => {
+  for (const file of binaryFiles) {
+    const fsPath = normalizeFsPath(file?.dest);
+    if (!fsPath) continue;
+
+    const url = file?.url;
+    if (typeof url !== "string" || !url) {
+      throw new Error(`Invalid OpenSCAD binary file URL for ${fsPath}`);
+    }
+
+    const resp = await fetch(url);
+    if (!resp.ok) {
+      throw new Error(`Failed to fetch binary file ${url}: ${resp.status}`);
+    }
+
+    const data = new Uint8Array(await resp.arrayBuffer());
+    ensureParentDirectories(instance, fsPath);
+    try {
+      instance.FS.unlink(fsPath);
+    } catch (_) {}
+    instance.FS.writeFile(fsPath, data);
+  }
+};
+
 const toArrayBuffer = (content) => {
   const typed = content instanceof Uint8Array ? content : new Uint8Array(content || []);
   return typed.buffer.slice(typed.byteOffset, typed.byteOffset + typed.byteLength);
@@ -465,6 +507,7 @@ const runOpenScadInvocation = async ({
   outputPaths = [],
   args = [],
   libraryNames = [],
+  binaryFiles = [],
 }) => {
   const mergedOutputs = [];
   const start = performance.now();
@@ -475,6 +518,9 @@ const runOpenScadInvocation = async ({
 
     if (libraryNames.length > 0) {
       await mountLibraries(instance, libraryNames);
+    }
+    if (binaryFiles.length > 0) {
+      await mountBinaryFiles(instance, binaryFiles);
     }
 
     try {
@@ -528,6 +574,7 @@ self.addEventListener("message", async (event) => {
         sourcePath,
         outputPaths: [outPath],
         libraryNames: payload?.libraryNames || [],
+        binaryFiles: payload?.binaryFiles || [],
         args: [
           sourcePath,
           "-o",
@@ -547,6 +594,7 @@ self.addEventListener("message", async (event) => {
         sourcePath,
         outputPaths: [outPath],
         libraryNames: payload?.libraryNames || [],
+        binaryFiles: payload?.binaryFiles || [],
         args: [
           sourcePath,
           "-o",
@@ -583,6 +631,7 @@ self.addEventListener("message", async (event) => {
         sourcePath,
         outputPaths: [outPath],
         libraryNames: payload?.libraryNames || [],
+        binaryFiles: payload?.binaryFiles || [],
         args: [
           sourcePath,
           "-o",
