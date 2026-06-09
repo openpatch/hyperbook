@@ -38,6 +38,18 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.96.3
+
+::::tabs
+
+:::tab{title="Improved :+1:" id="improved"}
+
+- **openscad**: Update to newest version 2026-06-08.
+
+:::
+
+::::
+
 ## v0.96.2
 
 ::::tabs
