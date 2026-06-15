@@ -1,5 +1,11 @@
 # @hyperbook/markdown
 
+## 0.69.0
+
+### Minor Changes
+
+- [`f7a5e13`](https://github.com/openpatch/hyperbook/commit/f7a5e13427dc08030e714b5bab3bf8e48b1fc211) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - add gizmo and grid to openscad
+
 ## 0.68.0
 
 ### Minor Changes
