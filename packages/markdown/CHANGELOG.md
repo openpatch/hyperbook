@@ -1,5 +1,15 @@
 # @hyperbook/markdown
 
+## 0.68.0
+
+### Minor Changes
+
+- [`f43374a`](https://github.com/openpatch/hyperbook/commit/f43374a7c3ced353f9d7dedf18fc76de14f12150) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add binary file support to OpenSCAD
+
+### Patch Changes
+
+- [`a683870`](https://github.com/openpatch/hyperbook/commit/a6838701d14fa66dd16e7258b0299fcf2de4083a) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Update OpenSCAD to newest version
+
 ## 0.67.2
 
 ### Patch Changes
