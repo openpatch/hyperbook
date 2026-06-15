@@ -38,6 +38,18 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.98.0
+
+::::tabs
+
+:::tab{title="Improved :+1:" id="improved"}
+
+- **openscad**: Add gizmo and grid for better navigation in 3d space.
+
+:::
+
+::::
+
 ## v0.97.0
 
 ::::tabs

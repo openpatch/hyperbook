@@ -323,15 +323,6 @@ async function postbuild() {
         "struktolab-renderer.umd.js",
       ),
     },
-    {
-      src: path.join("./node_modules", "three", "build", "three.module.js"),
-      dst: path.join("./dist", "assets", "directive-openscad", "three.module.js"),
-    },
-    {
-      src: path.join("./node_modules", "three", "examples", "jsm", "controls", "OrbitControls.js"),
-      dst: path.join("./dist", "assets", "directive-openscad", "OrbitControls.js"),
-      rewriteThreeImport: true,
-    },
   ];
 
   for (let asset of assets) {
@@ -342,13 +333,6 @@ async function postbuild() {
         mangle: true,
       });
       await writeFile(asset.dst, result.code);
-    } else if (asset.rewriteThreeImport) {
-      // Rewrite bare `from 'three'` specifier to a relative path so the file
-      // works as a standalone ES module without an import map.
-      let code = await readFile(asset.src, "utf8");
-      code = code.replaceAll("from 'three'", "from './three.module.js'");
-      await mkdir(path.dirname(asset.dst), { recursive: true });
-      await writeFile(asset.dst, code);
     } else {
       await cp(asset.src, asset.dst, { recursive: true });
     }
