@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.98.1
+
+### Patch Changes
+
+- [`305837b`](https://github.com/openpatch/hyperbook/commit/305837b000be0ada1438d856a507ba4521ab76fb) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - fix axis in openscad
+
 ## 0.98.0
 
 ### Minor Changes
