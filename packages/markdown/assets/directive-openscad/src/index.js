@@ -748,6 +748,9 @@ hyperbook.openscad = (function () {
         ? buildThreeModelFromColorBuckets(offData.colorBuckets)
         : buildThreeModelFromIndexedPolyhedron(polyhedron);
       viewerState.model = model;
+      // OpenSCAD is Z-up (right-handed); Three.js is Y-up.
+      // Rotate -90° around X so OpenSCAD's XY ground plane maps to Three.js's XZ ground plane.
+      model.rotation.x = -Math.PI / 2;
       viewerState.scene.add(model);
 
       const box = new THREE.Box3().setFromObject(model);

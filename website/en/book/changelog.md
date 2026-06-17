@@ -38,6 +38,18 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.98.1
+
+::::tabs
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+- **openscad**: Fix axes in openscad to match the standard OpenSCAD orientation (X right, Y forward, Z up) instead of the previous incorrect orientation.
+
+:::
+
+::::
+
 ## v0.98.0
 
 ::::tabs
