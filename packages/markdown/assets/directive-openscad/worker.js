@@ -537,8 +537,12 @@ const runOpenScadInvocation = async ({
 
     const outputs = [];
     for (const outputPath of outputPaths) {
-      const content = instance.FS.readFile(outputPath, { encoding: "binary" });
-      outputs.push([outputPath, content]);
+      try {
+        const content = instance.FS.readFile(outputPath, { encoding: "binary" });
+        outputs.push([outputPath, content]);
+      } catch (_) {
+        // Output file missing — render produced no output (handled by caller)
+      }
     }
 
     return {
@@ -548,7 +552,7 @@ const runOpenScadInvocation = async ({
       elapsedMillis: performance.now() - start,
     };
   } catch (e) {
-    const error = `${e}`;
+    const error = e?.message || (typeof e === "string" ? e : String(e)) || "Unknown error";
     mergedOutputs.push({ error });
     return {
       exitCode: undefined,
@@ -559,6 +563,24 @@ const runOpenScadInvocation = async ({
     };
   }
 };
+
+// Adjust "line N" references in stderr messages by a given offset (e.g. -1 when a
+// header line is prepended to the user's code so reported line numbers stay accurate).
+// Parser syntax errors are reported at the position OpenSCAD expected the next token
+// (one past the actual expression), so they get an extra -1 applied.
+const adjustStderrLineNumbers = (mergedOutputs, offset) =>
+  mergedOutputs.map((entry) => {
+    if (typeof entry?.stderr !== "string") return entry;
+    const isParserError = /Parser error/i.test(entry.stderr);
+    const effectiveOffset = isParserError ? offset - 1 : offset;
+    return {
+      ...entry,
+      stderr: entry.stderr.replace(/\bline (\d+)/g, (match, n) => {
+        const adjusted = parseInt(n, 10) + effectiveOffset;
+        return `line ${adjusted > 0 ? adjusted : parseInt(n, 10)}`;
+      }),
+    };
+  });
 
 self.addEventListener("message", async (event) => {
   const { requestId, type, payload } = event.data || {};
@@ -582,6 +604,7 @@ self.addEventListener("message", async (event) => {
           "--export-format=param",
         ],
       });
+      result = { ...result, mergedOutputs: adjustStderrLineNumbers(result.mergedOutputs, -1) };
       const serialized = serializeInvocationResults(result);
       self.postMessage({ requestId, ok: true, result: serialized.result }, serialized.transfer);
       return;
@@ -602,6 +625,7 @@ self.addEventListener("message", async (event) => {
           "--export-format=param",
         ],
       });
+      result = { ...result, mergedOutputs: adjustStderrLineNumbers(result.mergedOutputs, -1) };
 
       const codeParams = getExtractedParameters(result);
       const ui = buildParamFormUi(
@@ -642,6 +666,9 @@ self.addEventListener("message", async (event) => {
           ...OPENSCAD_FEATURE_ARGS,
         ],
       });
+      if (payload?.isPreview) {
+        result = { ...result, mergedOutputs: adjustStderrLineNumbers(result.mergedOutputs, -1) };
+      }
       // For preview OFF renders, parse geometry here in the worker so the main thread
       // never has to do heavy text parsing or Float32Array building.
       if (format === "off" && payload?.isPreview && result.exitCode === 0 && !result.error) {

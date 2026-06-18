@@ -38,6 +38,18 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.98.2
+
+::::tabs
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+- **openscad**: Fix unclear error messages — empty files no longer show `[object Object]`, and line numbers in parser errors are now correctly adjusted to match the user's code.
+
+:::
+
+::::
+
 ## v0.98.1
 
 ::::tabs
