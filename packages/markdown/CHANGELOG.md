@@ -1,5 +1,11 @@
 # @hyperbook/markdown
 
+## 0.69.2
+
+### Patch Changes
+
+- [`e8ab000`](https://github.com/openpatch/hyperbook/commit/e8ab0009fd20bbd687f1dec15632ff4e117beac7) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - **openscad**: Fix unclear error messages — empty files no longer show `[object Object]`, and line numbers in parser errors are now correctly adjusted to match the user's code (accounting for the preview mode prepend and OpenSCAD's parser-offset reporting).
+
 ## 0.69.1
 
 ### Patch Changes
