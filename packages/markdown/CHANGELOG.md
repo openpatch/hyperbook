@@ -1,5 +1,11 @@
 # @hyperbook/markdown
 
+## 0.70.0
+
+### Minor Changes
+
+- Add kiri directive
+
 ## 0.69.2
 
 ### Patch Changes

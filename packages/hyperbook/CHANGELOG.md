@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.99.0
+
+### Minor Changes
+
+- Add kiri directive
+
 ## 0.98.2
 
 ### Patch Changes
