@@ -1,0 +1,167 @@
+/**
+ * Kiri Directive Styles
+ * Online 3D slicer using Kiri:Moto engine
+ */
+
+.directive-kiri {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  margin: 1em 0;
+  overflow: hidden;
+  border-radius: 8px;
+  background-color: #1a1a2e;
+}
+
+.directive-kiri .kiri-iframe {
+  width: 100%;
+  min-height: 500px;
+  border: none;
+  display: block;
+  background: transparent;
+}
+
+.directive-kiri .kiri-status {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 12px 24px;
+  background: rgba(0, 0, 0, 0.8);
+  color: #ffffff;
+  border-radius: 6px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 14px;
+  z-index: 10;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.directive-kiri .kiri-status.hidden {
+  display: none;
+}
+
+/* Responsive aspect ratios */
+.directive-kiri.aspect-16-9 {
+  aspect-ratio: 16 / 9;
+}
+
+.directive-kiri.aspect-4-3 {
+  aspect-ratio: 4 / 3;
+}
+
+.directive-kiri.aspect-square {
+  aspect-ratio: 1 / 1;
+}
+
+/* Full width container */
+.directive-kiri.full-width {
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
+}
+
+/* Height variants */
+.directive-kiri.height-small .kiri-iframe {
+  min-height: 300px;
+}
+
+.directive-kiri.height-medium .kiri-iframe {
+  min-height: 500px;
+}
+
+.directive-kiri.height-large .kiri-iframe {
+  min-height: 700px;
+}
+
+.directive-kiri.height-xlarge .kiri-iframe {
+  min-height: 900px;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .directive-kiri {
+    background-color: #16213e;
+  }
+}
+
+/* Light mode support */
+@media (prefers-color-scheme: light) {
+  .directive-kiri {
+    background-color: #f8f9fa;
+  }
+  
+  .directive-kiri .kiri-status {
+    background: rgba(255, 255, 255, 0.9);
+    color: #333333;
+  }
+}
+
+/* Animation for loading state */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.directive-kiri .kiri-status {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.directive-kiri .kiri-iframe:not([src]) + .kiri-status {
+  animation: none;
+}
+
+/* Focus styles for keyboard navigation */
+.directive-kiri:focus-within {
+  outline: 2px solid #4a90e2;
+  outline-offset: 2px;
+}
+
+/* Border radius variants */
+.directive-kiri.rounded-none {
+  border-radius: 0;
+}
+
+.directive-kiri.rounded-sm {
+  border-radius: 4px;
+}
+
+.directive-kiri.rounded-md {
+  border-radius: 8px;
+}
+
+.directive-kiri.rounded-lg {
+  border-radius: 12px;
+}
+
+.directive-kiri.rounded-xl {
+  border-radius: 16px;
+}
+
+.directive-kiri.rounded-full {
+  border-radius: 9999px;
+}
+
+/* Shadow variants */
+.directive-kiri.shadow-none {
+  box-shadow: none;
+}
+
+.directive-kiri.shadow-sm {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.directive-kiri.shadow-md {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.directive-kiri.shadow-lg {
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.15);
+}
+
+.directive-kiri.shadow-xl {
+  box-shadow: 0 20px 25px rgba(0, 0, 0, 0.2);
+}

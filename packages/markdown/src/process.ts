@@ -69,6 +69,7 @@ import remarkDirectiveOpenscad from "./remarkDirectiveOpenscad";
 import remarkDirectiveStruktolab from "./remarkDirectiveStruktolab";
 import remarkDirectiveBlockflowPlayer from "./remarkDirectiveBlockflowPlayer";
 import remarkDirectiveBlockflowEditor from "./remarkDirectiveBlockflowEditor";
+import remarkDirectiveKiri from "./remarkDirectiveKiri";
 
 export const remark = (ctx: HyperbookContext) => {
   i18n.init(ctx.config.language || "en");
@@ -117,6 +118,7 @@ export const remark = (ctx: HyperbookContext) => {
     remarkDirectiveTextinput(ctx),
     remarkDirectiveTypst(ctx),
     remarkDirectiveOpenscad(ctx),
+    remarkDirectiveKiri(ctx),
     remarkCode(ctx),
     remarkMath,
     remarkGithubEmoji,
