@@ -38,6 +38,18 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.99.0
+
+::::tabs
+
+:::tab{title="Improved :+1:" id="improved"}
+
+- **kiri**: Kiri is a online slicer.
+
+:::
+
+::::
+
 ## v0.98.2
 
 ::::tabs
