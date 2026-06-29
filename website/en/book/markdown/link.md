@@ -40,3 +40,20 @@ Some text to show that the reference links can follow later.
 
 [case-insensitive reference text]: https://edugit.org
 [1]: http://codeberg.org
+
+## Internal Links
+
+You can link to other pages in your book using relative paths. Hyperbook automatically handles markdown file extensions, so you can use links with or without the `.md` extension:
+
+```md
+[With extension](./other-page.md)
+[Without extension](./other-page)
+```
+
+Both links will point to the same page. This also works for other markdown file types:
+
+```md
+[Template file](./template.md.hbs)
+[JSON file](./data.md.json) 
+[YAML file](./config.md.yml)
+```

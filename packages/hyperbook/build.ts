@@ -358,12 +358,14 @@ export function makeBaseCtx(
         if (p.includes("://") || p.startsWith("data:")) {
           return p;
         }
-        if (p.endsWith(".md")) {
-          p = p.slice(0, -3);
+        if (p.endsWith(".md.hbs")) {
+          p = p.slice(0, -7);
         } else if (p.endsWith(".md.json")) {
           p = p.slice(0, -8);
         } else if (p.endsWith(".md.yml")) {
           p = p.slice(0, -7);
+        } else if (p.endsWith(".md")) {
+          p = p.slice(0, -3);
         }
         if (page && !p.startsWith("/")) {
           p = resolveRelativePath(p, page);

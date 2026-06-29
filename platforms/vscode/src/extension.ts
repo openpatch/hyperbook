@@ -218,6 +218,7 @@ Start writing your content here...
     files: vscode.Uri[],
     baseFolder: string,
     stripExtension: boolean = false,
+    range?: vscode.Range,
   ): vscode.CompletionItem[] {
     return files.map((f) => {
       const p = path.relative(baseFolder, f.path);
@@ -230,11 +231,14 @@ Start writing your content here...
       item.insertText =
         stripExtension && name !== "index"
           ? dir
-            ? path.join(dir, name)
-            : name
+            ? "/" + path.join(dir, name)
+            : "/" + name
           : dir && name === "index"
-            ? dir
-            : p;
+            ? "/" + dir
+            : "/" + p;
+      if (range) {
+        item.range = range;
+      }
       return item;
     });
   }
@@ -353,13 +357,42 @@ Start writing your content here...
         }
 
         const files = await vscode.workspace.findFiles(
-          new vscode.RelativePattern(workspaceFolder, "book/**/*.md"),
+          new vscode.RelativePattern(workspaceFolder, "book/**/*.{md,md.hbs,md.json,md.yml}"),
+        );
+
+        // Calculate the start position for replacement
+        // The goal is to avoid duplication when accepting autocomplete suggestions
+        let rangeStartChar = position.character;
+        
+        if (isPath) {
+          // Triggered on / - find where to start replacement
+          const openParenIndex = linePrefix.lastIndexOf("(");
+          if (openParenIndex >= 0) {
+            // Inside a link: [text](path/ -> replace from after (
+            rangeStartChar = openParenIndex + 1;
+          } else {
+            // Standalone path like /user/ -> replace from first / to avoid duplication
+            const firstSlashIndex = linePrefix.indexOf("/");
+            rangeStartChar = firstSlashIndex >= 0 ? firstSlashIndex : 0;
+          }
+        } else if (isLink) {
+          // Triggered on [ - this is for link text, not the URL part
+          // We'll handle the URL part when / is triggered
+          rangeStartChar = position.character;
+        }
+
+        const range = new vscode.Range(
+          position.line,
+          rangeStartChar,
+          position.line,
+          position.character,
         );
 
         return createFileCompletionItems(
           files,
           path.join(workspaceFolder, "book"),
           true,
+          range,
         );
       },
     },
@@ -474,21 +507,45 @@ Start writing your content here...
         }
 
         const files = await vscode.workspace.findFiles(
-          new vscode.RelativePattern(workspaceFolder, "glossary/**/*.md"),
+          new vscode.RelativePattern(workspaceFolder, "glossary/**/*.{md,md.hbs,md.json,md.yml}"),
         );
+
+        // Calculate range to replace the text after {#
+        const hashMatch = linePrefix.match(/#([^}]*)$/);
+        const range = hashMatch ? new vscode.Range(
+          position.line,
+          position.character - (hashMatch[1].length),
+          position.line,
+          position.character,
+        ) : undefined;
 
         return files.map((f) => {
           const p = path.relative(
             path.join(workspaceFolder, "glossary"),
             f.path,
           );
-          const { name, dir } = path.parse(p);
+          let { name, dir } = path.parse(p);
+          
+          // Strip markdown file extensions for display
+          if (name.endsWith(".md.hbs")) {
+            name = name.slice(0, -7);
+          } else if (name.endsWith(".md.json")) {
+            name = name.slice(0, -8);
+          } else if (name.endsWith(".md.yml")) {
+            name = name.slice(0, -7);
+          } else if (name.endsWith(".md")) {
+            name = name.slice(0, -3);
+          }
+          
           const item = new vscode.CompletionItem(
             name,
             vscode.CompletionItemKind.Reference,
           );
           item.detail = `Glossary term: ${dir ? dir + "/" : ""}${name}`;
           item.insertText = name;
+          if (range) {
+            item.range = range;
+          }
           return item;
         });
       },

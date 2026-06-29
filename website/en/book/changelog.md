@@ -38,6 +38,24 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.99.0
+
+::::tabs
+
+:::tab{title="New :rocket:" id="new"}
+
+**links*: Links now support extensions:
+
+• `[Hallo](./hallo.md)` → resolves to /hallo
+• `[Hallo](./hallo)` → resolves to /hallo
+• `[Template](./template.md.hbs)` → resolves to /template
+• `[Data](./data.md.json)` → resolves to /data
+• `[Config](./config.md.yml)` → resolves to /config
+
+:::
+
+::::
+
 ## v0.98.2
 
 ::::tabs

@@ -193,6 +193,17 @@ export default class Preview {
               return path;
             }
 
+            // Strip markdown file extensions
+            if (path.endsWith(".md.hbs")) {
+              path = path.slice(0, -7);
+            } else if (path.endsWith(".md.json")) {
+              path = path.slice(0, -8);
+            } else if (path.endsWith(".md.yml")) {
+              path = path.slice(0, -7);
+            } else if (path.endsWith(".md")) {
+              path = path.slice(0, -3);
+            }
+
             // Handle relative paths when we have a current page context
             if (page && !path.startsWith("/")) {
               path = resolveRelativePath(path, page);
@@ -201,11 +212,24 @@ export default class Preview {
             path = [path];
           }
 
-          // Handle array paths - resolve relative segments
+          // Handle array paths - strip extensions and resolve relative segments
           if (Array.isArray(path) && page) {
             path = path.map((segment) => {
-              if (typeof segment === "string" && !segment.startsWith("/")) {
-                return resolveRelativePath(segment, page);
+              if (typeof segment === "string") {
+                // Strip markdown file extensions from array segments
+                if (segment.endsWith(".md.hbs")) {
+                  segment = segment.slice(0, -7);
+                } else if (segment.endsWith(".md.json")) {
+                  segment = segment.slice(0, -8);
+                } else if (segment.endsWith(".md.yml")) {
+                  segment = segment.slice(0, -7);
+                } else if (segment.endsWith(".md")) {
+                  segment = segment.slice(0, -3);
+                }
+                
+                if (!segment.startsWith("/")) {
+                  return resolveRelativePath(segment, page);
+                }
               }
               return segment;
             });
