@@ -1,5 +1,16 @@
 # @hyperbook/vscode-extension
 
+## 0.51.0
+
+### Minor Changes
+
+- [`698f41f`](https://github.com/openpatch/hyperbook/commit/698f41f14b2b0607f210fb9784f94db6751695c6) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Support new link behaviour and improve autocomplete.
+
+### Patch Changes
+
+- Updated dependencies [[`5bbb078`](https://github.com/openpatch/hyperbook/commit/5bbb078fb8deaa1087c3b0a1f34cb90021282721)]:
+  - @hyperbook/markdown@0.70.0
+
 ## 0.50.14
 
 ### Patch Changes

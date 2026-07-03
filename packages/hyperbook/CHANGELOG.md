@@ -1,5 +1,13 @@
 # hyperbook
 
+## 0.99.0
+
+### Minor Changes
+
+- [`698f41f`](https://github.com/openpatch/hyperbook/commit/698f41f14b2b0607f210fb9784f94db6751695c6) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add support for .md extension in links.
+
+- [`5bbb078`](https://github.com/openpatch/hyperbook/commit/5bbb078fb8deaa1087c3b0a1f34cb90021282721) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add Kiri:Moto directive for embedding the browser-based 3D slicer from grid.space. Supports `mode`, `model`, `workspace`, `settings`, and `height` attributes. Global defaults for `height` and `settings` can be set in `hyperbook.json`.
+
 ## 0.98.2
 
 ### Patch Changes
