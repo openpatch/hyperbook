@@ -195,6 +195,10 @@ export type HyperbookJson = {
     onlineide?: ElementConfig & {
       height?: string | number;
     };
+    kirimoto?: ElementConfig & {
+      height?: string;
+      settings?: string;
+    };
     sqlide?: ElementConfig & {
       db?: string;
       height?: string | number;

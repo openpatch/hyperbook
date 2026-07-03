@@ -1,0 +1,30 @@
+.directive-kirimoto {
+  border: 1px solid var(--color-spacer);
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: var(--kirimoto-height, calc(100vh - 60px));
+}
+
+.directive-kirimoto iframe {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  border: none;
+}
+
+.directive-kirimoto .menu {
+  display: flex;
+  border-top: 1px solid var(--color-spacer);
+}
+
+.directive-kirimoto .menu button {
+  flex: 1;
+  font-size: 0.9rem;
+  padding: 0.4rem 0.2rem;
+  background: var(--color-nav);
+  color: var(--color-text);
+  border: none;
+  cursor: pointer;
+}

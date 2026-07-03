@@ -52,6 +52,25 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 • `[Data](./data.md.json)` → resolves to /data
 • `[Config](./config.md.yml)` → resolves to /config
 
+**Kiri:Moto**: Embed the browser-based 3D slicer [Kiri:Moto](https://grid.space/kiri) in any hyperbook page using the new `::kirimoto` directive.
+
+```md
+::kirimoto{mode="FDM" settings="1qzciqo/3"}
+```
+
+Supported attributes: `height`, `mode`, `model`, `workspace`, `settings`. Global defaults for `height` and `settings` can be configured in `hyperbook.json`:
+
+```json
+{
+  "elements": {
+    "kirimoto": {
+      "height": "700px",
+      "settings": "13b1vam/1"
+    }
+  }
+}
+```
+
 :::
 
 ::::
