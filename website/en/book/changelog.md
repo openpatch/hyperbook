@@ -38,6 +38,19 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.99.1
+
+::::tabs
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+- **openscad**: Fix 3MF export to split geometry into separate objects by color, enabling proper multicolor prints in slicers like BambuStudio and PrusaSlicer.
+
+:::
+
+::::
+
+
 ## v0.99.0
 
 ::::tabs

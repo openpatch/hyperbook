@@ -121,12 +121,75 @@ export const parseOffToIndexedPolyhedron = (offData) => {
   return { vertices, faces, colors };
 };
 
+const splitByColor = (vertices, faces, colorCount) => {
+  const groups = Array.from({ length: colorCount }, () => ({ faceIndices: [] }));
+  faces.forEach((face, faceIdx) => {
+    groups[face.colorIndex].faceIndices.push(faceIdx);
+  });
+
+  return groups
+    .filter((g) => g.faceIndices.length > 0)
+    .map(({ faceIndices }, groupIdx) => {
+      const oldToNew = new Map();
+      const groupVertices = [];
+      for (const faceIdx of faceIndices) {
+        for (const vIdx of faces[faceIdx].vertices) {
+          if (!oldToNew.has(vIdx)) {
+            oldToNew.set(vIdx, groupVertices.length);
+            groupVertices.push(vertices[vIdx]);
+          }
+        }
+      }
+      const groupFaces = faceIndices.map((faceIdx) => ({
+        ...faces[faceIdx],
+        vertices: faces[faceIdx].vertices.map((vIdx) => oldToNew.get(vIdx)),
+      }));
+      return { vertices: groupVertices, faces: groupFaces };
+    });
+};
+
 export const exportIndexedPolyhedronTo3mf = (polyhedron) => {
-  const objectUuid = createUuid();
   const buildUuid = createUuid();
   const extruderIndexByColorIndex = polyhedron.colors.map(
     (_, idx) => idx % PAINT_COLOR_MAP.length,
   );
+
+  const materialsId = 1;
+  const components = splitByColor(polyhedron.vertices, polyhedron.faces, polyhedron.colors.length);
+
+  const objectXmls = components.map((comp, compIdx) => {
+    const objectId = compIdx + 2;
+    const objectUuid = createUuid();
+    const colorIndex = comp.faces[0]?.colorIndex ?? 0;
+    const paintColor = PAINT_COLOR_MAP[extruderIndexByColorIndex[colorIndex]];
+    return [
+      `<object id="${objectId}" name="OpenSCAD Model ${compIdx + 1}" type="model" p:UUID="${objectUuid}" pid="${materialsId}" pindex="${colorIndex}">`,
+      "<mesh>",
+      "<vertices>",
+      ...comp.vertices.map(
+        (vertex) => `<vertex x="${vertex.x}" y="${vertex.y}" z="${vertex.z}" />`,
+      ),
+      "</vertices>",
+      "<triangles>",
+      ...comp.faces.map((face) => {
+        const [v1, v2, v3] = face.vertices;
+        const attrs = [`v1="${v1}"`, `v2="${v2}"`, `v3="${v3}"`];
+        if (paintColor) {
+          attrs.push(`paint_color="${paintColor}"`);
+        }
+        return `<triangle ${attrs.join(" ")} />`;
+      }),
+      "</triangles>",
+      "</mesh>",
+      "</object>",
+    ].join("\n");
+  });
+
+  const buildItems = components.map((_, compIdx) => {
+    const objectId = compIdx + 2;
+    const objectUuid = createUuid();
+    return `<item objectid="${objectId}" p:UUID="${objectUuid}"/>`;
+  });
 
   const modelXml = [
     '<?xml version="1.0" encoding="utf-8"?>',
@@ -135,40 +198,16 @@ export const exportIndexedPolyhedronTo3mf = (polyhedron) => {
     '<meta name="slic3rpe:Version3mf" value="1"/>',
     '<meta name="slic3rpe:MmPaintingVersion" value="1"/>',
     "<resources>",
-    '<basematerials id="2">',
+    `<basematerials id="${materialsId}">`,
     ...polyhedron.colors.map(
       (color, i) =>
         `<base name="color_${i}" displaycolor="${colorToDisplayColor(color)}"/>`,
     ),
     "</basematerials>",
-    `<object id="1" name="OpenSCAD Model" type="model" p:UUID="${objectUuid}" pid="2" pindex="0">`,
-    "<mesh>",
-    "<vertices>",
-    ...polyhedron.vertices.map(
-      (vertex) =>
-        `<vertex x="${vertex.x}" y="${vertex.y}" z="${vertex.z}" />`,
-    ),
-    "</vertices>",
-    "<triangles>",
-    ...polyhedron.faces.map((face) => {
-      const [v1, v2, v3] = face.vertices;
-      const attrs = [`v1="${v1}"`, `v2="${v2}"`, `v3="${v3}"`];
-      if (face.colorIndex > 0) {
-        attrs.push(`pid="2"`, `p1="${face.colorIndex}"`);
-      }
-      const paintColor =
-        PAINT_COLOR_MAP[extruderIndexByColorIndex[face.colorIndex]];
-      if (paintColor) {
-        attrs.push(`paint_color="${paintColor}"`);
-      }
-      return `<triangle ${attrs.join(" ")} />`;
-    }),
-    "</triangles>",
-    "</mesh>",
-    "</object>",
+    ...objectXmls,
     "</resources>",
     `<build p:UUID="${buildUuid}">`,
-    `<item objectid="1" p:UUID="${objectUuid}"/>`,
+    ...buildItems,
     "</build>",
     "</model>",
   ].join("\n");
