@@ -1,5 +1,11 @@
 # @hyperbook/markdown
 
+## 0.70.1
+
+### Patch Changes
+
+- [`5c544bc`](https://github.com/openpatch/hyperbook/commit/5c544bc48a6fd3dab130715caf01f4ce2952987f) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix 3MF export in openscad directive to split geometry into separate objects by color, enabling proper multicolor prints in slicers like BambuStudio and PrusaSlicer.
+
 ## 0.70.0
 
 ### Minor Changes

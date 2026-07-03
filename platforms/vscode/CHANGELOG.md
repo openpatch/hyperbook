@@ -1,5 +1,12 @@
 # @hyperbook/vscode-extension
 
+## 0.51.1
+
+### Patch Changes
+
+- Updated dependencies [[`5c544bc`](https://github.com/openpatch/hyperbook/commit/5c544bc48a6fd3dab130715caf01f4ce2952987f)]:
+  - @hyperbook/markdown@0.70.1
+
 ## 0.51.0
 
 ### Minor Changes
