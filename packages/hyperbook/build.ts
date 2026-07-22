@@ -2,7 +2,13 @@ import path, { posix } from "path";
 import fs, { cp, mkdir } from "fs/promises";
 import chalk from "chalk";
 import readline from "readline";
-import { hyperproject, vfile, hyperbook, VFileBook, VFileGlossary } from "@hyperbook/fs";
+import {
+  hyperproject,
+  vfile,
+  hyperbook,
+  VFileBook,
+  VFileGlossary,
+} from "@hyperbook/fs";
 import { runArchive } from "./archive";
 import { makeDir } from "./helpers/make-dir";
 import { rimraf } from "rimraf";
@@ -22,14 +28,88 @@ import packageJson from "./package.json";
 
 export const ASSETS_FOLDER = "__hyperbook_assets";
 
+/**
+ * Builds the lunr index and writes search.js. Extracted so the dev server can
+ * regenerate it after an incremental rebuild instead of leaving it stale.
+ */
+export async function writeSearchIndex(
+  hyperbookJson: HyperbookJson,
+  baseCtx: Pick<HyperbookContext, "makeUrl">,
+  searchDocuments: any[],
+  rootOut: string,
+  prefix = "Hyperbook",
+): Promise<void> {
+  if (!hyperbookJson.search) return;
+
+  const documents: Record<string, any> = {};
+  console.log(`${chalk.blue(`[${prefix}]`)} Building search index`);
+
+  let foundLanguage = false;
+  if (hyperbookJson.language && hyperbookJson.language !== "en") {
+    try {
+      // Only register lunr language plugins once to avoid "Overwriting" warnings
+      if (!(lunr as any)["_hyperbook_lang_loaded_" + hyperbookJson.language]) {
+        require("./lunr-languages/lunr.stemmer.support.min.js")(lunr);
+        require(`./lunr-languages/lunr.${hyperbookJson.language}.min.js`)(lunr);
+        (lunr as any)["_hyperbook_lang_loaded_" + hyperbookJson.language] =
+          true;
+      }
+      foundLanguage = true;
+    } catch (e) {
+      console.log(e);
+      console.log(
+        `${chalk.yellow(`[${prefix}]`)} ${hyperbookJson.language} is not a valid value for the language key. See https://github.com/MihaiValentin/lunr-languages for possible values. Falling back to English.`,
+      );
+    }
+  }
+
+  const idx = lunr(function () {
+    if (foundLanguage) {
+      // @ts-ignore
+      this.use(lunr[hyperbookJson.language]);
+    }
+    this.ref("href");
+    this.field("description");
+    this.field("keywords");
+    this.field("heading");
+    this.field("content");
+    this.metadataWhitelist = ["position"];
+
+    searchDocuments.forEach((doc) => {
+      const href = baseCtx.makeUrl(doc.href, "book");
+      const docWithBase = {
+        ...doc,
+        href,
+      };
+      this.add(docWithBase);
+      documents[href] = docWithBase;
+    });
+  });
+
+  const js = `
+const LUNR_INDEX = ${JSON.stringify(idx)};
+const SEARCH_DOCUMENTS = ${JSON.stringify(documents)};
+`;
+
+  await fs.writeFile(path.join(rootOut, ASSETS_FOLDER, "search.js"), js);
+}
+
+/** Called once per built page so a caller can index what each page consumed. */
+export type PageResultSink = (href: string, result: SinglePageResult) => void;
+
 export interface SinglePageResult {
   searchDocuments: any[];
   directives: string[];
+  /** Absolute paths whose contents were inlined into this page. */
+  dependencies: string[];
 }
 
 export async function buildSingleBookPage(
   file: VFileBook,
-  baseCtx: Pick<HyperbookContext, "config" | "makeUrl" | "project" | "root" | "version">,
+  baseCtx: Pick<
+    HyperbookContext,
+    "config" | "makeUrl" | "project" | "root" | "version"
+  >,
   pageList: HyperbookPage[],
   pagesAndSections: Pick<Navigation, "pages" | "sections" | "glossary">,
   rootOut: string,
@@ -41,9 +121,15 @@ export async function buildSingleBookPage(
     ...n1,
     ...pagesAndSections,
   };
+  // Templates and snippets were inlined while the vfile was read; directive
+  // `src=` files are collected as the markdown is processed.
+  const dependencies = new Set<string>(
+    (file.markdown.dependencies || []).map((d) => path.resolve(file.root, d)),
+  );
   const ctx: HyperbookContext = {
     ...baseCtx,
     navigation,
+    dependencies,
   };
   const result = await hyperbookProcess(file.markdown.content, ctx);
   const searchDocuments = [...(result.data.searchDocuments || [])];
@@ -96,12 +182,16 @@ export async function buildSingleBookPage(
   }
   await fs.writeFile(fileOut, result.value);
 
-  return { searchDocuments, directives };
+  return { searchDocuments, directives, dependencies: [...dependencies] };
 }
 
 export async function buildSingleGlossaryPage(
   file: VFileGlossary,
-  baseCtx: Pick<HyperbookContext, "config" | "makeUrl" | "project" | "root" | "version">,  pageList: HyperbookPage[],
+  baseCtx: Pick<
+    HyperbookContext,
+    "config" | "makeUrl" | "project" | "root" | "version"
+  >,
+  pageList: HyperbookPage[],
   pagesAndSections: Pick<Navigation, "pages" | "sections" | "glossary">,
   rootOut: string,
   assetsOut: string,
@@ -129,9 +219,15 @@ export async function buildSingleGlossaryPage(
     };
   }
 
+  // Templates and snippets were inlined while the vfile was read; directive
+  // `src=` files are collected as the markdown is processed.
+  const dependencies = new Set<string>(
+    (file.markdown.dependencies || []).map((d) => path.resolve(file.root, d)),
+  );
   const ctx: HyperbookContext = {
     ...baseCtx,
     navigation,
+    dependencies,
   };
   const result = await hyperbookProcess(file.markdown.content, ctx);
   const searchDocuments = [...(result.data.searchDocuments || [])];
@@ -165,7 +261,7 @@ export async function buildSingleGlossaryPage(
   }
   await fs.writeFile(fileOut, result.value);
 
-  return { searchDocuments, directives };
+  return { searchDocuments, directives, dependencies: [...dependencies] };
 }
 
 /**
@@ -306,6 +402,7 @@ export async function runBuildProject(
   rootProject: Hyperproject,
   out?: string,
   filter?: string,
+  onPage?: PageResultSink,
 ): Promise<void> {
   const name = hyperproject.getName(project);
   if (project.type === "book") {
@@ -317,6 +414,7 @@ export async function runBuildProject(
       name,
       out,
       filter,
+      onPage,
     );
   } else {
     console.log(`${chalk.cyan(`[${name}]`)} Building Library.`);
@@ -325,7 +423,7 @@ export async function runBuildProject(
     }
     await rimraf(path.join(out, ".hyperbook", "out"));
     for (const p of project.projects) {
-      await runBuildProject(p, rootProject, out, filter);
+      await runBuildProject(p, rootProject, out, filter, onPage);
     }
   }
 }
@@ -335,7 +433,10 @@ export function makeBaseCtx(
   hyperbookJson: HyperbookJson,
   basePath: string | undefined,
   rootProject: Hyperproject,
-): Pick<HyperbookContext, "config" | "makeUrl" | "project" | "root" | "version"> {
+): Pick<
+  HyperbookContext,
+  "config" | "makeUrl" | "project" | "root" | "version"
+> {
   const resolveRelativePath = (p: string, page: HyperbookPage): string => {
     if (p.startsWith("/")) {
       return p;
@@ -413,6 +514,7 @@ async function runBuild(
   prefix?: string,
   out?: string,
   filter?: string,
+  onPage?: PageResultSink,
 ): Promise<void> {
   console.log(`${chalk.blue(`[${prefix}]`)} Reading hyperbook.json.`);
   const hyperbookJson = await hyperbook.getJson(root);
@@ -487,6 +589,7 @@ async function runBuild(
     for (let directive of pageResult.directives) {
       directives.add(directive);
     }
+    onPage?.(file.path.href || file.path.absolute, pageResult);
 
     if (!process.env.CI) {
       readline.clearLine(process.stdout, 0);
@@ -523,6 +626,7 @@ async function runBuild(
     for (let directive of pageResult.directives) {
       directives.add(directive);
     }
+    onPage?.(file.path.href || file.path.absolute, pageResult);
 
     if (!process.env.CI) {
       readline.clearLine(process.stdout, 0);
@@ -770,57 +874,13 @@ async function runBuild(
   }
   process.stdout.write("\n");
 
-  if (hyperbookJson.search) {
-    const documents: Record<string, any> = {};
-    console.log(`${chalk.blue(`[${prefix}]`)} Building search index`);
-
-    let foundLanguage = false;
-    if (hyperbookJson.language && hyperbookJson.language !== "en") {
-      try {
-        // Only register lunr language plugins once to avoid "Overwriting" warnings
-        if (!(lunr as any)["_hyperbook_lang_loaded_" + hyperbookJson.language]) {
-          require("./lunr-languages/lunr.stemmer.support.min.js")(lunr);
-          require(`./lunr-languages/lunr.${hyperbookJson.language}.min.js`)(lunr);
-          (lunr as any)["_hyperbook_lang_loaded_" + hyperbookJson.language] = true;
-        }
-        foundLanguage = true;
-      } catch (e) {
-        console.log(e);
-        console.log(
-          `${chalk.yellow(`[${prefix}]`)} ${hyperbookJson.language} is not a valid value for the language key. See https://github.com/MihaiValentin/lunr-languages for possible values. Falling back to English.`,
-        );
-      }
-    }
-    const idx = lunr(function () {
-      if (foundLanguage) {
-        // @ts-ignore
-        this.use(lunr[hyperbookJson.language]);
-      }
-      this.ref("href");
-      this.field("description");
-      this.field("keywords");
-      this.field("heading");
-      this.field("content");
-      this.metadataWhitelist = ["position"];
-
-      searchDocuments.forEach((doc) => {
-        const href = baseCtx.makeUrl(doc.href, "book");
-        const docWithBase = {
-          ...doc,
-          href,
-        };
-        this.add(docWithBase);
-        documents[href] = docWithBase;
-      });
-    });
-
-    const js = `
-const LUNR_INDEX = ${JSON.stringify(idx)};
-const SEARCH_DOCUMENTS = ${JSON.stringify(documents)};
-`;
-
-    await fs.writeFile(path.join(rootOut, ASSETS_FOLDER, "search.js"), js);
-  }
+  await writeSearchIndex(
+    hyperbookJson,
+    baseCtx,
+    searchDocuments,
+    rootOut,
+    prefix,
+  );
 
   const supportLanguages = await fs
     .readdir(path.join(__dirname, "locales"))

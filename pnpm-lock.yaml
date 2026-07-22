@@ -236,6 +236,9 @@ importers:
       update-check:
         specifier: 1.5.4
         version: 1.5.4
+      vitest:
+        specifier: ^4.0.18
+        version: 4.0.18(@types/node@22.13.1)(sass@1.97.3)(terser@5.46.0)(yaml@2.8.2)
       ws:
         specifier: ^8.18.0
         version: 8.18.0

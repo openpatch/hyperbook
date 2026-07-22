@@ -2,29 +2,35 @@ import { HyperbookContext } from "@hyperbook/types";
 import path from "path";
 import fs from "fs";
 
+/**
+ * Reads a file referenced by a directive's `src` attribute and inlines it.
+ *
+ * The candidate paths are tried in order; every one of them is recorded as a
+ * dependency, not just the one that resolved. A file that does not exist yet is
+ * still a dependency: creating it later has to rebuild this page, and without
+ * the misses the dev server would never notice.
+ */
 export const readFile = (src: string, ctx: HyperbookContext) => {
-  let srcFile = null;
-  try {
-    srcFile = fs.readFileSync(path.join(ctx.root, "public", src), "utf-8");
-  } catch (e) {
+  const candidates = [
+    path.join(ctx.root, "public", src),
+    path.join(ctx.root, "book", src),
+    path.join(
+      ctx.root,
+      "book",
+      ctx.navigation.current?.path?.directory || "",
+      src,
+    ),
+  ];
+
+  for (const candidate of candidates) {
+    ctx.dependencies?.add(candidate);
     try {
-      srcFile = fs.readFileSync(path.join(ctx.root, "book", src), "utf-8");
+      return fs.readFileSync(candidate, "utf-8");
     } catch (e) {
-      try {
-        srcFile = fs.readFileSync(
-          path.join(
-            ctx.root,
-            "book",
-            ctx.navigation.current?.path?.directory || "",
-            src,
-          ),
-          "utf-8",
-        );
-      } catch (e) {
-        // File not found in any location
-        return null;
-      }
+      // Try the next location.
     }
   }
-  return srcFile;
+
+  // File not found in any location
+  return null;
 };

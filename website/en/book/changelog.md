@@ -78,6 +78,8 @@ The output panel reads like a terminal too: the prompt, the answer that was type
 
 **turtle**: `turtle.numinput()` and `turtle.textinput()` use the same field, and follow CPython in asking again when the answer is not a number or falls outside `minval`/`maxval`.
 
+**dev**: `hyperbook dev` now knows which files each page pulls in, so saving a file rebuilds exactly the pages that used it. Editing a script referenced by a directive's `src=` attribute used to reload the browser without rebuilding the page, which brought back the old content; a file under `book/` did nothing at all. Snippets and templates now rebuild only the pages that include them rather than the whole book. Renaming a page also refreshes the navigation everywhere instead of only on the page you edited, and the search index no longer goes stale between full builds.
+
 **pyide**, **p5**, **openscad**: The reset, copy, download and fullscreen buttons in the editor toolbar are now icons instead of written labels, which wrapped onto several lines in languages with long words. The wording becomes the tooltip, and is still announced by screen readers.
 
 Directive icons are now drawn as SVG throughout — the fullscreen buttons in **webide** and **typst**, the download icons in **download** and **archive**, the lock in **protect**, typst's add-file button and the expand arrows on the binary-file sections. They follow the light and dark themes, and the fullscreen button no longer renders as an empty box on systems whose fonts lack `⛶`.

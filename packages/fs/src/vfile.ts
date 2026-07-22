@@ -54,6 +54,8 @@ export type VFileGlossary = VFileBase & {
   markdown: {
     content: string;
     data: HyperbookFrontmatter;
+    /** Files inlined into the content (templates, snippets), relative to root. */
+    dependencies?: string[];
   };
   references: VFileBook[];
 };
@@ -64,6 +66,8 @@ export type VFileBook = VFileBase & {
   markdown: {
     content: string;
     data: HyperbookFrontmatter;
+    /** Files inlined into the content (templates, snippets), relative to root. */
+    dependencies?: string[];
   };
 };
 
@@ -835,6 +839,13 @@ export const getMarkdown = async (
 
   registerHelpers(handlebars, { file });
 
+  // Everything inlined into this page, so the dev server knows which pages to
+  // rebuild when one of these files changes. Kept relative to the book root so
+  // the value stays portable between machines.
+  const dependencies: string[] = [];
+  const addDependency = (absolute: string) =>
+    dependencies.push(path.relative(file.root, absolute));
+
   let markdown = "";
   if (file.extension === ".md.yml") {
     const j = await fs
@@ -845,9 +856,13 @@ export const getMarkdown = async (
         `Yaml files need a template. You need to define a template property in your yaml file: ${file.path.absolute}`,
       );
     } else {
-      const templateSource = await fs.readFile(
-        path.join(file.root, "templates", j.template + ".md.hbs"),
+      const templatePath = path.join(
+        file.root,
+        "templates",
+        j.template + ".md.hbs",
       );
+      addDependency(templatePath);
+      const templateSource = await fs.readFile(templatePath);
       const template = handlebars.compile(templateSource.toString());
       markdown = template(j);
     }
@@ -861,9 +876,13 @@ export const getMarkdown = async (
         `JSON files need a template. You need to define a template property in your json file: ${file.path.absolute}`,
       );
     } else {
-      const templateSource = await fs.readFile(
-        path.join(file.root, "templates", j.template + ".md.hbs"),
+      const templatePath = path.join(
+        file.root,
+        "templates",
+        j.template + ".md.hbs",
       );
+      addDependency(templatePath);
+      const templateSource = await fs.readFile(templatePath);
       const template = handlebars.compile(templateSource.toString());
       markdown = template(j);
     }
@@ -891,10 +910,9 @@ export const getMarkdown = async (
   for (const snippet of snippets) {
     const dots = snippet[2];
     const snippetId = snippet[3];
-    const snippetFile = await fs.readFile(
-      path.join(file.root, "snippets", snippetId + ".md.hbs"),
-      { encoding: "utf8" },
-    );
+    const snippetPath = path.join(file.root, "snippets", snippetId + ".md.hbs");
+    addDependency(snippetPath);
+    const snippetFile = await fs.readFile(snippetPath, { encoding: "utf8" });
     const template = handlebars.compile(snippetFile);
 
     const vars: Record<string, any> = {
@@ -937,6 +955,7 @@ export const getMarkdown = async (
 
   return {
     content,
+    dependencies,
     data: { ...data } as HyperbookFrontmatter,
   };
 };

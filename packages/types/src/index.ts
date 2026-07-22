@@ -238,7 +238,13 @@ export interface HyperbookContext {
     page?: HyperbookPage,
     options?: {
       versioned?: boolean;
-    }
+    },
   ): string;
   navigation: Navigation;
+  /**
+   * Collects absolute paths of files inlined into the page while it is being
+   * processed, so the dev server can rebuild exactly the pages that used them.
+   * Only set during a build that tracks dependencies.
+   */
+  dependencies?: Set<string>;
 }
