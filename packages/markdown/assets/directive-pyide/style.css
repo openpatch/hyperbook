@@ -50,6 +50,132 @@
   font-family: hyperbook-monospace, monospace;
 }
 
+/* Prompt bar, shown while the script waits for input. Styled as its own
+   console-like strip below the output/canvas panel so it reads as "the program
+   is waiting for you" rather than as part of the page chrome. */
+.directive-pyide .stdin {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+  flex: 0 0 auto;
+  margin-top: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--color-brand);
+  border-radius: 8px;
+  background-color: color-mix(in srgb, var(--color-brand) 7%, transparent);
+}
+
+.directive-pyide .stdin.hidden {
+  display: none;
+}
+
+/* Blinking caret marks the waiting state without needing extra markup. */
+.directive-pyide .stdin::before {
+  content: "❯";
+  flex: 0 0 auto;
+  font-family: hyperbook-monospace, monospace;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--color-brand);
+  animation: pyide-stdin-caret 1.4s ease-in-out infinite;
+}
+
+@keyframes pyide-stdin-caret {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .directive-pyide .stdin::before {
+    animation: none;
+  }
+}
+
+.directive-pyide .stdin .stdin-prompt {
+  flex: 0 1 auto;
+  min-width: 0;
+  font-family: hyperbook-monospace, monospace;
+  color: var(--color-text);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.directive-pyide .stdin .stdin-prompt:empty {
+  display: none;
+}
+
+/* Grows to fill the row, and wraps to its own line when the prompt is long. */
+.directive-pyide .stdin .stdin-field {
+  flex: 1 1 160px;
+  min-width: 0;
+  padding: 8px 12px;
+  border: 1px solid var(--color-spacer);
+  border-radius: 6px;
+  font-family: hyperbook-monospace, monospace;
+  font-size: 1em;
+  line-height: 1.4;
+  background-color: var(--color-background);
+  color: var(--color-text);
+}
+
+.directive-pyide .stdin .stdin-field:focus {
+  outline: none;
+  border-color: var(--color-brand);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-brand) 25%, transparent);
+}
+
+/* Overrides the shared .directive-pyide button reset, which is borderless and
+   full-width for the tab/toolbar groups.
+
+   The fill is a tint of the brand mixed into --color-background rather than
+   flat --color-brand, and the label is always --color-text. That keeps the
+   contrast guaranteed by the theme's own background/text pairing in both
+   colour schemes: --color-brand-text is only defined for light mode, and
+   --color-brand-dark falls back to --color-brand, so neither can be relied on
+   to stay legible against a brand fill. */
+.directive-pyide .stdin .stdin-submit {
+  flex: 0 0 auto;
+  padding: 8px 18px;
+  border: 1px solid var(--color-brand);
+  border-radius: 6px;
+  background-color: color-mix(
+    in srgb,
+    var(--color-brand) 18%,
+    var(--color-background)
+  );
+  color: var(--color-text);
+  font-weight: 600;
+  line-height: 1.4;
+  cursor: pointer;
+}
+
+.directive-pyide .stdin .stdin-submit:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--color-brand) 32%,
+    var(--color-background)
+  );
+}
+
+.directive-pyide .stdin .stdin-submit:active {
+  background-color: color-mix(
+    in srgb,
+    var(--color-brand) 45%,
+    var(--color-background)
+  );
+}
+
+.directive-pyide .stdin .stdin-submit:focus-visible {
+  outline: 2px solid var(--color-text);
+  outline-offset: 2px;
+}
+
 .directive-pyide .output .error-line {
   color: #b42318;
 }
@@ -128,7 +254,11 @@
     linear-gradient(45deg, transparent 75%, #cccccc 75%),
     linear-gradient(-45deg, transparent 75%, #cccccc 75%);
   background-size: 20px 20px;
-  background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+  background-position:
+    0 0,
+    0 10px,
+    10px -10px,
+    -10px 0px;
 }
 
 .directive-pyide .canvas {
@@ -375,7 +505,8 @@
     border-top-right-radius: 0;
   }
 
-  .directive-pyide[data-canvas="true"].canvas-split-mode .canvas-output-splitter {
+  .directive-pyide[data-canvas="true"].canvas-split-mode
+    .canvas-output-splitter {
     display: block;
   }
 }

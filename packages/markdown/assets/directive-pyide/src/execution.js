@@ -1,11 +1,153 @@
 import { installedMicropipPackages, turtleModules } from "./state.js";
 import { appendOutputLine, appendOutputErrorLine } from "./output.js";
 import { getRuntime } from "./pyodide.js";
+import { scriptLooksLikeTurtle } from "./constants.js";
+import { askStdinAsync, askStdinSync, hideStdinField } from "./stdin.js";
 
-export const scriptLooksLikeTurtle = (script) => {
-  return /\bfrom\s+turtle\s+import\b|\bimport\s+turtle\b/.test(
-    String(script || ""),
-  );
+export { scriptLooksLikeTurtle };
+
+/**
+ * Whether this runtime can suspend a synchronous Python call on a JS promise
+ * (WebAssembly JSPI, via pyodide.ffi.run_sync). Probed once per runtime, by
+ * actually doing it — feature-sniffing WebAssembly.Suspending is not enough,
+ * since the runtime also has to have been loaded with stack switching on.
+ */
+const runSyncSupport = new Map();
+
+const PROBE_RUN_SYNC = `
+def _hyperbook_probe():
+    try:
+        from pyodide.ffi import run_sync
+        import js
+    except Exception:
+        return False
+    try:
+        run_sync(js.Promise.resolve(True))
+        return True
+    except Exception:
+        return False
+
+_hyperbook_probe()
+`;
+
+/**
+ * Shadows the builtin input() in the script's own namespace. Writing the
+ * prompt through sys.stdout keeps it in the output panel, like a terminal.
+ */
+const INPUT_SHIM = `
+def input(prompt=""):
+    import sys
+    from pyodide.ffi import run_sync
+
+    text = "" if prompt is None else str(prompt)
+    if text:
+        sys.stdout.write(text)
+        sys.stdout.flush()
+    answer = run_sync(__hyperbook_ask_stdin(text))
+    answer = "" if answer is None else str(answer)
+    # A terminal echoes what was typed and the Enter that ended it; nothing
+    # does that here, so the transcript has to include it explicitly.
+    sys.stdout.write(answer + "\\n")
+    sys.stdout.flush()
+    return answer
+`;
+
+/**
+ * turtle's own dialogs. The JS module can only offer blocking versions, since
+ * a JS function cannot await on Python's behalf — so when Python can be
+ * suspended we replace them with ones that read from the page instead.
+ *
+ * Both the functional interface (`from turtle import *`) and the screen object
+ * (`Screen().numinput(...)`) have to be covered; they hold separate references
+ * to the same underlying functions.
+ */
+const TURTLE_INPUT_SHIM = `
+def _hyperbook_patch_turtle():
+    import turtle
+    from pyodide.ffi import run_sync
+
+    def _label(title, prompt):
+        return " ".join(str(part) for part in (title, prompt) if part).strip()
+
+    def textinput(title="", prompt=""):
+        return run_sync(__hyperbook_ask_stdin(_label(title, prompt)))
+
+    def numinput(title="", prompt="", default=None, minval=None, maxval=None):
+        hint = ""
+        if minval is not None and maxval is not None:
+            hint = " [{0}, {1}]".format(minval, maxval)
+        elif minval is not None:
+            hint = " [>= {0}]".format(minval)
+        elif maxval is not None:
+            hint = " [<= {0}]".format(maxval)
+        while True:
+            answer = run_sync(__hyperbook_ask_stdin(_label(title, prompt) + hint))
+            # An empty answer stands in for tkinter's Cancel button.
+            if answer is None or str(answer).strip() == "":
+                return default
+            try:
+                value = float(str(answer).strip().replace(",", "."))
+            except ValueError:
+                continue
+            if minval is not None and value < minval:
+                continue
+            if maxval is not None and value > maxval:
+                continue
+            return value
+
+    # Screen() hands back one shared object, so patching it once is enough.
+    try:
+        screen = turtle.Screen()
+        screen.numinput = numinput
+        screen.textinput = textinput
+    except Exception:
+        pass
+
+    try:
+        turtle.numinput = numinput
+        turtle.textinput = textinput
+    except Exception:
+        pass
+    if getattr(turtle, "numinput", None) is not numinput:
+        # The JS module rejected the assignment; shadow it with a real Python
+        # module so \`from turtle import *\` still picks up the patched names.
+        import sys
+        import types
+
+        wrapper = types.ModuleType("turtle")
+        for name in dir(turtle):
+            try:
+                setattr(wrapper, name, getattr(turtle, name))
+            except Exception:
+                pass
+        wrapper.numinput = numinput
+        wrapper.textinput = textinput
+        sys.modules["turtle"] = wrapper
+        sys.modules["jturtle"] = wrapper
+
+_hyperbook_patch_turtle()
+del _hyperbook_patch_turtle
+`;
+
+const supportsRunSync = async (id, pyodide) => {
+  if (runSyncSupport.has(id)) return runSyncSupport.get(id);
+  let supported = false;
+  const dict = pyodide.globals.get("dict");
+  const probeGlobals = dict();
+  try {
+    supported = !!(await pyodide.runPythonAsync(PROBE_RUN_SYNC, {
+      globals: probeGlobals,
+      locals: probeGlobals,
+      filename: "<hyperbook-probe>",
+    }));
+  } catch {
+    supported = false;
+  } finally {
+    probeGlobals.destroy();
+    dict.destroy();
+  }
+  runSyncSupport.set(id, supported);
+  return supported;
 };
 
 export const resetCanvas = (canvas) => {
@@ -221,14 +363,15 @@ export const executeScript = async (
       },
     });
     pyodide.setStdin({
+      // Reached by sys.stdin reads, and by input() when Python cannot be
+      // suspended. Both block the main thread; there is no way around that
+      // without stack switching.
       stdin: () => {
-        const promptText =
-          lastStdinPrompt || hyperbook.i18n.get("pyide-input-prompt");
+        const promptText = lastStdinPrompt;
         lastStdinPrompt = "";
-        const value = window.prompt(promptText);
-        if (value === null) {
-          return "";
-        }
+        const value = askStdinSync(id, promptText);
+        // Echo the answer, as a terminal would — see INPUT_SHIM.
+        appendOutputLine(id, `${value}\n`);
         return value;
       },
     });
@@ -242,11 +385,31 @@ export const executeScript = async (
 
     await ensureMicropipPackages(id, pyodide, packages);
     await pyodide.loadPackagesFromImports(executableScript);
+    const canSuspend = await supportsRunSync(id, pyodide);
     const dict = pyodide.globals.get("dict");
     const globals = dict();
     try {
       for (const [key, value] of Object.entries(globalsContext)) {
         globals.set(key, value);
+      }
+      if (canSuspend) {
+        // Shadow input() in the script's namespace so it reads from the page
+        // instead of blocking the main thread in window.prompt().
+        globals.set("__hyperbook_ask_stdin", (promptText) =>
+          askStdinAsync(id, promptText),
+        );
+        await pyodide.runPythonAsync(INPUT_SHIM, {
+          globals,
+          locals: globals,
+          filename: "<hyperbook-stdin>",
+        });
+        if (scriptLooksLikeTurtle(executableScript)) {
+          await pyodide.runPythonAsync(TURTLE_INPUT_SHIM, {
+            globals,
+            locals: globals,
+            filename: "<hyperbook-stdin>",
+          });
+        }
       }
       const results = await pyodide.runPythonAsync(executableScript, {
         globals,
@@ -255,6 +418,7 @@ export const executeScript = async (
       });
       return { results };
     } finally {
+      hideStdinField(id);
       globals.destroy();
       dict.destroy();
       if (canvas) {

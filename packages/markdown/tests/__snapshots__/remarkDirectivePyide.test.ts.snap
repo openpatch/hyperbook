@@ -6,6 +6,7 @@ exports[`remarkDirectivePyide > should transform basic pyide 1`] = `
   <div class="container">
     <div class="buttons"><button class="output-btn active">pyide-output</button></div>
     <pre class="output"></pre>
+    <form class="stdin hidden"><span class="stdin-prompt"></span><input class="stdin-field" type="text" autocomplete="off" spellcheck="false" aria-label="pyide-input"><button class="stdin-submit" type="submit">pyide-input-submit</button></form>
   </div>
   <div class="splitter" role="separator" aria-label="Resize panels"></div>
   <div class="editor-container">
@@ -29,6 +30,7 @@ exports[`remarkDirectivePyide > should transform pyide with canvas and packages 
     <div class="canvas-output-splitter hidden" role="separator" aria-label="Resize canvas and output"></div>
     <div class="output-header hidden">pyide-output</div>
     <pre class="output"></pre>
+    <form class="stdin hidden"><span class="stdin-prompt"></span><input class="stdin-field" type="text" autocomplete="off" spellcheck="false" aria-label="pyide-input"><button class="stdin-submit" type="submit">pyide-input-submit</button></form>
   </div>
   <div class="splitter" role="separator" aria-label="Resize panels"></div>
   <div class="editor-container">
@@ -52,6 +54,7 @@ exports[`remarkDirectivePyide > should transform pyide with canvas attribute 1`]
     <div class="canvas-output-splitter hidden" role="separator" aria-label="Resize canvas and output"></div>
     <div class="output-header hidden">pyide-output</div>
     <pre class="output"></pre>
+    <form class="stdin hidden"><span class="stdin-prompt"></span><input class="stdin-field" type="text" autocomplete="off" spellcheck="false" aria-label="pyide-input"><button class="stdin-submit" type="submit">pyide-input-submit</button></form>
   </div>
   <div class="splitter" role="separator" aria-label="Resize panels"></div>
   <div class="editor-container">
@@ -70,6 +73,7 @@ exports[`remarkDirectivePyide > should transform pyide with packages attribute 1
   <div class="container">
     <div class="buttons"><button class="output-btn active">pyide-output</button></div>
     <pre class="output"></pre>
+    <form class="stdin hidden"><span class="stdin-prompt"></span><input class="stdin-field" type="text" autocomplete="off" spellcheck="false" aria-label="pyide-input"><button class="stdin-submit" type="submit">pyide-input-submit</button></form>
   </div>
   <div class="splitter" role="separator" aria-label="Resize panels"></div>
   <div class="editor-container">
