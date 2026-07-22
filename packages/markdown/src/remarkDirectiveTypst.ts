@@ -266,7 +266,7 @@ export default (ctx: HyperbookContext) => () => {
             title: i18n.get("typst-download-pdf"),
             "aria-label": i18n.get("typst-download-pdf"),
           },
-          children: [icon("download")],
+          children: [icon("pdf")],
         };
 
         const downloadProjectButton: Element = {

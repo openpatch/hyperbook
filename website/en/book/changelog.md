@@ -84,7 +84,7 @@ The output panel reads like a terminal too: the prompt, the answer that was type
 
 **pyide**, **p5**, **openscad**, **webide**, **typst**, **abc-music**: The reset, copy, download and fullscreen buttons in the editor toolbar are now icons instead of written labels, which wrapped onto several lines in languages with long words. The wording becomes the tooltip, and is still announced by screen readers.
 
-Directive icons are now drawn as SVG throughout — the download icons in **download** and **archive**, the lock in **protect**, typst's add-file button and the expand arrows on the binary-file sections. Typst's two download buttons are told apart by their icons: a box for the whole project, an arrow for the PDF. They follow the light and dark themes, and the fullscreen button no longer renders as an empty box on systems whose fonts lack `⛶`.
+Directive icons are now drawn as SVG throughout — the download icons in **download** and **archive**, the lock in **protect**, typst's add-file button and the expand arrows on the binary-file sections. Typst's two download buttons are told apart by their icons: a box for the whole project, a document for the PDF. They follow the light and dark themes, and the fullscreen button no longer renders as an empty box on systems whose fonts lack `⛶`.
 
 :::
 

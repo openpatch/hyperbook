@@ -20,7 +20,8 @@ type IconName =
   | "lock"
   | "plus"
   | "chevron"
-  | "archive";
+  | "archive"
+  | "pdf";
 
 /** Path data per icon, drawn on Feather's 24×24 grid. */
 const PATHS: Record<IconName, string[]> = {
@@ -52,6 +53,13 @@ const PATHS: Record<IconName, string[]> = {
   plus: ["M12 5v14", "M5 12h14"],
   // lidded box — the whole project rather than a single file
   archive: ["M21 8v13H3V8", "M1 3h22v5H1z", "M10 12h4"],
+  // document with a folded corner — the rendered PDF
+  pdf: [
+    "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z",
+    "M14 2v6h6",
+    "M16 13H8",
+    "M16 17H8",
+  ],
   // disclosure arrow; rotated by CSS when the section is open
   chevron: ["M9 18l6-6-6-6"],
 };
