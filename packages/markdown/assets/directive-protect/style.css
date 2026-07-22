@@ -12,7 +12,7 @@
   border-width: 1px;
 }
 
-.directive-protect .password-input>input {
+.directive-protect .password-input > input {
   text-align: center;
   border-radius: 10px;
   font-size: 1.125rem;
@@ -20,7 +20,7 @@
   border-style: solid;
 }
 
-.directive-protect .password-input>.icon {
+.directive-protect .password-input > .icon {
   position: absolute;
   user-select: none;
   left: -14px;
@@ -33,17 +33,17 @@
   margin-bottom: 10px;
 }
 
-.directive-protect .password-input>.description {
+.directive-protect .password-input > .description {
   margin-bottom: 10px;
 }
 
-.directive-protect .password-input>input {
+.directive-protect .password-input > input {
   color: var(--color-text);
   background: var(--color-nav);
   border-color: var(--color-spacer);
 }
 
-.directive-protect .password-input>.icon {
+.directive-protect .password-input > .icon {
   background: white;
   border-color: var(--color-spacer);
 }
@@ -51,4 +51,10 @@
 .directive-protect .hidden {
   visibility: hidden;
   display: none;
+}
+
+.directive-protect .password-input > .icon .icon {
+  width: 16px;
+  height: 16px;
+  display: block;
 }

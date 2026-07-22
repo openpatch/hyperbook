@@ -330,8 +330,14 @@
 
 .directive-openscad .binary-files-section summary .summary-indicator {
   transition: transform 0.2s;
-  display: inline-block;
-  font-size: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+}
+
+.directive-openscad .binary-files-section summary .summary-indicator .icon {
+  width: 14px;
+  height: 14px;
+  display: block;
 }
 
 .directive-openscad .binary-files-section[open] summary .summary-indicator {

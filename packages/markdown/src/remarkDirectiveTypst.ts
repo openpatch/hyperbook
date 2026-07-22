@@ -13,6 +13,7 @@ import {
 } from "./remarkHelper";
 import hash from "./objectHash";
 import { i18n } from "./i18n";
+import { icon } from "./icons";
 import { Element, ElementContent } from "hast";
 import { readFile } from "./helper";
 
@@ -69,13 +70,12 @@ export default (ctx: HyperbookContext) => () => {
             }
 
             // Parse @font directives for font files
-            const fontMatches = text.matchAll(
-              /@font\s+src="([^"]+)"/g,
-            );
+            const fontMatches = text.matchAll(/@font\s+src="([^"]+)"/g);
             for (const match of fontMatches) {
               const src = match[1];
               // Check if it's a remote URL or local file
-              const isRemote = src.startsWith("http://") || src.startsWith("https://");
+              const isRemote =
+                src.startsWith("http://") || src.startsWith("https://");
               const url = isRemote
                 ? src
                 : ctx.makeUrl(
@@ -128,13 +128,12 @@ export default (ctx: HyperbookContext) => () => {
             }
 
             // Parse @font directives for font files
-            const fontMatches = text.matchAll(
-              /@font\s+src="([^"]+)"/g,
-            );
+            const fontMatches = text.matchAll(/@font\s+src="([^"]+)"/g);
             for (const match of fontMatches) {
               const src = match[1];
               // Check if it's a remote URL or local file
-              const isRemote = src.startsWith("http://") || src.startsWith("https://");
+              const isRemote =
+                src.startsWith("http://") || src.startsWith("https://");
               const url = isRemote
                 ? src
                 : ctx.makeUrl(
@@ -202,9 +201,9 @@ export default (ctx: HyperbookContext) => () => {
           "data-binary-files": Buffer.from(
             JSON.stringify(binaryFiles),
           ).toString("base64"),
-          "data-font-files": Buffer.from(
-            JSON.stringify(fontFiles),
-          ).toString("base64"),
+          "data-font-files": Buffer.from(JSON.stringify(fontFiles)).toString(
+            "base64",
+          ),
           "data-base-path": basePath,
           "data-page-path": pagePath,
           ...(height !== undefined && !isPreviewMode
@@ -215,10 +214,10 @@ export default (ctx: HyperbookContext) => () => {
         const previewContainer: Element = {
           type: "element",
           tagName: "div",
-            properties: {
-              class: "preview-container",
-              ...(isPreviewMode ? { style: `height: ${resolvedHeight};` } : {}),
-            },
+          properties: {
+            class: "preview-container",
+            ...(isPreviewMode ? { style: `height: ${resolvedHeight};` } : {}),
+          },
           children: [
             {
               type: "element",
@@ -295,12 +294,7 @@ export default (ctx: HyperbookContext) => () => {
             title: i18n.get("ide-fullscreen-enter"),
             "aria-label": i18n.get("ide-fullscreen-enter"),
           },
-          children: [
-            {
-              type: "text",
-              value: "⛶",
-            },
-          ],
+          children: [icon("fullscreen")],
         });
 
         if (isEditMode) {
@@ -346,12 +340,7 @@ export default (ctx: HyperbookContext) => () => {
                         class: "add-source-file",
                         title: i18n.get("typst-add-source-file"),
                       },
-                      children: [
-                        {
-                          type: "text",
-                          value: "+",
-                        },
-                      ],
+                      children: [icon("plus")],
                     },
                   ],
                 },
@@ -380,12 +369,7 @@ export default (ctx: HyperbookContext) => () => {
                               properties: {
                                 class: "summary-indicator",
                               },
-                              children: [
-                                {
-                                  type: "text",
-                                  value: "▶",
-                                },
-                              ],
+                              children: [icon("chevron")],
                             },
                             {
                               type: "text",

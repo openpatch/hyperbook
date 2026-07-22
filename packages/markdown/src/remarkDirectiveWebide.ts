@@ -13,6 +13,7 @@ import {
 } from "./remarkHelper";
 import hash from "./objectHash";
 import { i18n } from "./i18n";
+import { icon } from "./icons";
 import { Element } from "hast";
 
 function htmlEntities(str: string) {
@@ -189,7 +190,9 @@ html, body {
           class: "directive-webide",
           "data-template": template.replace(/\u00A0/g, " "),
           "data-id": id,
-          ...(height !== undefined ? { style: `--webide-height: ${resolvedHeight}` } : {}),
+          ...(height !== undefined
+            ? { style: `--webide-height: ${resolvedHeight}` }
+            : {}),
         };
         data.hChildren = [
           {
@@ -294,12 +297,7 @@ html, body {
                       title: i18n.get("ide-fullscreen-enter"),
                       "aria-label": i18n.get("ide-fullscreen-enter"),
                     },
-                    children: [
-                      {
-                        type: "text",
-                        value: "⛶",
-                      },
-                    ],
+                    children: [icon("fullscreen")],
                   },
                 ],
               },

@@ -39,7 +39,7 @@ code-input {
   padding: 8px 16px;
   padding-left: 0px;
   overflow: hidden;
-  white-space:nowrap;
+  white-space: nowrap;
   text-overflow: ellipsis;
   background-color: var(--color-background);
   color: var(--color-text);
@@ -146,6 +146,13 @@ code-input {
   min-width: 42px;
   width: 42px;
   padding: 8px 0;
+}
+
+.directive-webide button.fullscreen .icon {
+  width: 18px;
+  height: 18px;
+  display: block;
+  margin: 0 auto;
 }
 
 .directive-webide button:hover {

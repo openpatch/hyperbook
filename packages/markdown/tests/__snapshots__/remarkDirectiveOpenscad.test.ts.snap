@@ -21,7 +21,9 @@ exports[`remarkDirectiveOpenscad > should transform basic openscad 1`] = `
   <div class="editor-container">
     <div class="buttons"><button class="render">openscad-render</button></div>
     <details class="binary-files-section">
-      <summary><span class="summary-text"><span class="summary-indicator">▶</span>openscad-binary-files</span></summary>
+      <summary><span class="summary-text"><span class="summary-indicator"><svg class="icon icon-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+              <path d="M9 18l6-6-6-6"></path>
+            </svg></span>openscad-binary-files</span></summary>
       <div class="binary-files-list"></div>
       <div class="binary-files-actions"><button class="add-binary-file" title="openscad-add-binary-file">+ openscad-add</button></div>
     </details>
@@ -68,7 +70,9 @@ exports[`remarkDirectiveOpenscad > should transform openscad with binary file di
   <div class="editor-container">
     <div class="buttons"><button class="render">openscad-render</button></div>
     <details class="binary-files-section">
-      <summary><span class="summary-text"><span class="summary-indicator">▶</span>openscad-binary-files</span></summary>
+      <summary><span class="summary-text"><span class="summary-indicator"><svg class="icon icon-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+              <path d="M9 18l6-6-6-6"></path>
+            </svg></span>openscad-binary-files</span></summary>
       <div class="binary-files-list"></div>
       <div class="binary-files-actions"><button class="add-binary-file" title="openscad-add-binary-file">+ openscad-add</button></div>
     </details>

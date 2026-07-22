@@ -343,8 +343,14 @@ code-input {
 
 .directive-typst .binary-files-section summary .summary-indicator {
   transition: transform 0.2s;
-  display: inline-block;
-  font-size: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+}
+
+.directive-typst .binary-files-section summary .summary-indicator .icon {
+  width: 14px;
+  height: 14px;
+  display: block;
 }
 
 .directive-typst .binary-files-section[open] summary .summary-indicator {
@@ -482,6 +488,19 @@ code-input {
   min-width: 42px;
   width: 42px;
   padding: 8px 0;
+}
+
+.directive-typst button.fullscreen .icon {
+  width: 18px;
+  height: 18px;
+  display: block;
+  margin: 0 auto;
+}
+
+.directive-typst .add-source-file .icon {
+  width: 16px;
+  height: 16px;
+  display: block;
 }
 
 .directive-typst button:hover {

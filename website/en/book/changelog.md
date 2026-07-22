@@ -78,7 +78,9 @@ The output panel reads like a terminal too: the prompt, the answer that was type
 
 **turtle**: `turtle.numinput()` and `turtle.textinput()` use the same field, and follow CPython in asking again when the answer is not a number or falls outside `minval`/`maxval`.
 
-**pyide**, **p5**, **openscad**: The reset, copy, download and fullscreen buttons in the editor toolbar are now icons instead of written labels, which wrapped onto several lines in languages with long words. The wording becomes the tooltip, and is still announced by screen readers. The icons follow the light and dark themes, and the fullscreen button no longer renders as an empty box on systems whose fonts lack `⛶`.
+**pyide**, **p5**, **openscad**: The reset, copy, download and fullscreen buttons in the editor toolbar are now icons instead of written labels, which wrapped onto several lines in languages with long words. The wording becomes the tooltip, and is still announced by screen readers.
+
+Directive icons are now drawn as SVG throughout — the fullscreen buttons in **webide** and **typst**, the download icons in **download** and **archive**, the lock in **protect**, typst's add-file button and the expand arrows on the binary-file sections. They follow the light and dark themes, and the fullscreen button no longer renders as an empty box on systems whose fonts lack `⛶`.
 
 :::
 

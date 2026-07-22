@@ -231,12 +231,7 @@ export default (ctx: HyperbookContext) => () => {
                             properties: {
                               class: "summary-indicator",
                             },
-                            children: [
-                              {
-                                type: "text",
-                                value: "▶",
-                              },
-                            ],
+                            children: [icon("chevron")],
                           },
                           {
                             type: "text",

@@ -12,7 +12,14 @@ import { ElementContent } from "hast";
  * Paths from Feather Icons (https://feathericons.com), MIT licensed.
  */
 
-type IconName = "reset" | "copy" | "download" | "fullscreen";
+type IconName =
+  | "reset"
+  | "copy"
+  | "download"
+  | "fullscreen"
+  | "lock"
+  | "plus"
+  | "chevron";
 
 /** Path data per icon, drawn on Feather's 24×24 grid. */
 const PATHS: Record<IconName, string[]> = {
@@ -36,6 +43,14 @@ const PATHS: Record<IconName, string[]> = {
     "M16 21h3a2 2 0 0 0 2-2v-3",
     "M3 16v3a2 2 0 0 0 2 2h3",
   ],
+  // closed padlock
+  lock: [
+    "M5 11h14a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2z",
+    "M7 11V7a5 5 0 0 1 10 0v4",
+  ],
+  plus: ["M12 5v14", "M5 12h14"],
+  // disclosure arrow; rotated by CSS when the section is open
+  chevron: ["M9 18l6-6-6-6"],
 };
 
 /**

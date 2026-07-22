@@ -6,6 +6,7 @@ import { Root } from "mdast";
 import { Element } from "hast";
 import { visit } from "unist-util-visit";
 import { VFile } from "vfile";
+import { icon } from "./icons";
 import {
   expectTextDirective,
   isDirective,
@@ -44,12 +45,7 @@ export default (ctx: HyperbookContext) => () => {
             properties: {
               class: "icon",
             },
-            children: [
-              {
-                type: "text",
-                value: "⏬",
-              },
-            ],
+            children: [icon("download")],
           },
           {
             type: "element",

@@ -18,8 +18,13 @@ hyperbook.webide = (function () {
 
     const applySplitSize = (rawSize, isHorizontal) => {
       const total = isHorizontal ? elem.clientWidth : elem.clientHeight;
-      const splitterSize = isHorizontal ? splitter.offsetWidth : splitter.offsetHeight;
-      const maxSize = Math.max(minPanelSize, total - splitterSize - minPanelSize);
+      const splitterSize = isHorizontal
+        ? splitter.offsetWidth
+        : splitter.offsetHeight;
+      const maxSize = Math.max(
+        minPanelSize,
+        total - splitterSize - minPanelSize,
+      );
       const clamped = Math.max(minPanelSize, Math.min(rawSize, maxSize));
       container.style.flex = `0 0 ${clamped}px`;
       return clamped;
@@ -79,7 +84,6 @@ hyperbook.webide = (function () {
     if (!elem || !button) return;
     const isFullscreen = document.fullscreenElement === elem;
     const label = hyperbook.i18n.get("ide-fullscreen-enter");
-    button.textContent = "⛶";
     button.title = label;
     button.setAttribute("aria-label", label);
     button.classList.toggle("active", isFullscreen);
@@ -121,21 +125,39 @@ hyperbook.webide = (function () {
     const btnJS = elem.querySelector("button.js");
 
     // Initialize CodeMirror instances
-    const cmHTML = editorHTMLDiv ? (() => {
-      const src = editorHTMLDiv.textContent;
-      editorHTMLDiv.textContent = "";
-      return HyperbookCM.create(editorHTMLDiv, { lang: "html", value: src, onChange: () => update() });
-    })() : null;
-    const cmCSS = editorCSSDiv ? (() => {
-      const src = editorCSSDiv.textContent;
-      editorCSSDiv.textContent = "";
-      return HyperbookCM.create(editorCSSDiv, { lang: "css", value: src, onChange: () => update() });
-    })() : null;
-    const cmJS = editorJSDiv ? (() => {
-      const src = editorJSDiv.textContent;
-      editorJSDiv.textContent = "";
-      return HyperbookCM.create(editorJSDiv, { lang: "javascript", value: src, onChange: () => update() });
-    })() : null;
+    const cmHTML = editorHTMLDiv
+      ? (() => {
+          const src = editorHTMLDiv.textContent;
+          editorHTMLDiv.textContent = "";
+          return HyperbookCM.create(editorHTMLDiv, {
+            lang: "html",
+            value: src,
+            onChange: () => update(),
+          });
+        })()
+      : null;
+    const cmCSS = editorCSSDiv
+      ? (() => {
+          const src = editorCSSDiv.textContent;
+          editorCSSDiv.textContent = "";
+          return HyperbookCM.create(editorCSSDiv, {
+            lang: "css",
+            value: src,
+            onChange: () => update(),
+          });
+        })()
+      : null;
+    const cmJS = editorJSDiv
+      ? (() => {
+          const src = editorJSDiv.textContent;
+          editorJSDiv.textContent = "";
+          return HyperbookCM.create(editorJSDiv, {
+            lang: "javascript",
+            value: src,
+            onChange: () => update(),
+          });
+        })()
+      : null;
 
     const frame = elem.getElementsByTagName("iframe")[0];
     const template = elem.getAttribute("data-template");
