@@ -216,11 +216,13 @@ ${(code.scripts ? [cdnLibraryUrl, ...code.scripts] : []).map((src) => `<script t
                           tagName: "button",
                           properties: {
                             class: "reset",
+                            title: i18n.get("p5-reset"),
+                            "aria-label": i18n.get("p5-reset"),
                           },
                           children: [
                             {
                               type: "text",
-                              value: i18n.get("p5-reset"),
+                              value: "↺",
                             },
                           ],
                         },
@@ -229,11 +231,13 @@ ${(code.scripts ? [cdnLibraryUrl, ...code.scripts] : []).map((src) => `<script t
                           tagName: "button",
                           properties: {
                             class: "copy",
+                            title: i18n.get("p5-copy"),
+                            "aria-label": i18n.get("p5-copy"),
                           },
                           children: [
                             {
                               type: "text",
-                              value: i18n.get("p5-copy"),
+                              value: "⧉",
                             },
                           ],
                         },
@@ -242,11 +246,13 @@ ${(code.scripts ? [cdnLibraryUrl, ...code.scripts] : []).map((src) => `<script t
                           tagName: "button",
                           properties: {
                             class: "download",
+                            title: i18n.get("p5-download"),
+                            "aria-label": i18n.get("p5-download"),
                           },
                           children: [
                             {
                               type: "text",
-                              value: i18n.get("p5-download"),
+                              value: "⇩",
                             },
                           ],
                         },

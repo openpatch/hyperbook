@@ -100,6 +100,24 @@ code-input {
   border-top-right-radius: 0;
 }
 
+/* Icon-only toolbar: the written labels (Reset/Copy/Download) made this row
+   wrap on narrow screens, so the wording moved into title/aria-label. */
+.directive-p5 .buttons.bottom button {
+  flex: 0 0 auto;
+  min-width: 42px;
+  width: 42px;
+  padding: 8px 0;
+  font-size: 1.15em;
+  line-height: 1.2;
+}
+
+/* Fullscreen sits apart, at the trailing edge of the toolbar. */
+.directive-p5 .buttons.bottom button.fullscreen {
+  margin-inline-start: auto;
+  border-right: none;
+  border-left: 1px solid var(--color-spacer);
+}
+
 .directive-p5 button {
   flex: 1;
   padding: 8px 16px;

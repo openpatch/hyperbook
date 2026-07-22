@@ -358,11 +358,13 @@ export default (ctx: HyperbookContext) => () => {
                     tagName: "button",
                     properties: {
                       class: "reset",
+                      title: i18n.get("pyide-reset"),
+                      "aria-label": i18n.get("pyide-reset"),
                     },
                     children: [
                       {
                         type: "text",
-                        value: i18n.get("pyide-reset"),
+                        value: "↺",
                       },
                     ],
                   },
@@ -371,11 +373,13 @@ export default (ctx: HyperbookContext) => () => {
                     tagName: "button",
                     properties: {
                       class: "copy",
+                      title: i18n.get("pyide-copy"),
+                      "aria-label": i18n.get("pyide-copy"),
                     },
                     children: [
                       {
                         type: "text",
-                        value: i18n.get("pyide-copy"),
+                        value: "⧉",
                       },
                     ],
                   },
@@ -384,11 +388,13 @@ export default (ctx: HyperbookContext) => () => {
                     tagName: "button",
                     properties: {
                       class: "download",
+                      title: i18n.get("pyide-download"),
+                      "aria-label": i18n.get("pyide-download"),
                     },
                     children: [
                       {
                         type: "text",
-                        value: i18n.get("pyide-download"),
+                        value: "⇩",
                       },
                     ],
                   },

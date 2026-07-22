@@ -29,7 +29,12 @@ export default (ctx: HyperbookContext) => () => {
   return (tree: Root, file: VFile) => {
     visit(tree, function (node) {
       if (isDirective(node) && node.name === name) {
-        const { src = "", id = hash(node), height, library } = node.attributes || {};
+        const {
+          src = "",
+          id = hash(node),
+          height,
+          library,
+        } = node.attributes || {};
         const data = node.data || (node.data = {});
         const binaryFiles: { dest: string; url: string }[] = [];
 
@@ -50,7 +55,9 @@ export default (ctx: HyperbookContext) => () => {
           }
 
           if (!text) continue;
-          const fileMatches = text.matchAll(/@file\s+dest="([^"]+)"\s+src="([^"]+)"/g);
+          const fileMatches = text.matchAll(
+            /@file\s+dest="([^"]+)"\s+src="([^"]+)"/g,
+          );
           for (const match of fileMatches) {
             const dest = match[1];
             const src = match[2];
@@ -76,7 +83,8 @@ export default (ctx: HyperbookContext) => () => {
               node.children.find(
                 (c) =>
                   c.type === "code" &&
-                  ((c as Code).lang === "scad" || (c as Code).lang === "openscad"),
+                  ((c as Code).lang === "scad" ||
+                    (c as Code).lang === "openscad"),
               ) as Code
             )?.value || "";
         }
@@ -109,7 +117,9 @@ export default (ctx: HyperbookContext) => () => {
                     type: "element",
                     tagName: "div",
                     properties: { class: "preview-header" },
-                    children: [{ type: "text", value: i18n.get("openscad-preview") }],
+                    children: [
+                      { type: "text", value: i18n.get("openscad-preview") },
+                    ],
                   },
                   {
                     type: "element",
@@ -151,7 +161,9 @@ export default (ctx: HyperbookContext) => () => {
                     type: "element",
                     tagName: "div",
                     properties: { class: "parameters-header" },
-                    children: [{ type: "text", value: i18n.get("openscad-parameters") }],
+                    children: [
+                      { type: "text", value: i18n.get("openscad-parameters") },
+                    ],
                   },
                   {
                     type: "element",
@@ -187,7 +199,9 @@ export default (ctx: HyperbookContext) => () => {
                     type: "element",
                     tagName: "button",
                     properties: { class: "render" },
-                    children: [{ type: "text", value: i18n.get("openscad-render") }],
+                    children: [
+                      { type: "text", value: i18n.get("openscad-render") },
+                    ],
                   },
                 ],
               },
@@ -290,20 +304,32 @@ export default (ctx: HyperbookContext) => () => {
                   {
                     type: "element",
                     tagName: "button",
-                    properties: { class: "copy" },
-                    children: [{ type: "text", value: i18n.get("openscad-copy") }],
+                    properties: {
+                      class: "copy",
+                      title: i18n.get("openscad-copy"),
+                      "aria-label": i18n.get("openscad-copy"),
+                    },
+                    children: [{ type: "text", value: "⧉" }],
                   },
                   {
                     type: "element",
                     tagName: "button",
-                    properties: { class: "download-stl" },
-                    children: [{ type: "text", value: i18n.get("openscad-download-stl") }],
+                    properties: {
+                      class: "download-stl",
+                      title: i18n.get("openscad-download-stl"),
+                      "aria-label": i18n.get("openscad-download-stl"),
+                    },
+                    children: [{ type: "text", value: "⇩" }],
                   },
                   {
                     type: "element",
                     tagName: "button",
-                    properties: { class: "reset" },
-                    children: [{ type: "text", value: i18n.get("openscad-reset") }],
+                    properties: {
+                      class: "reset",
+                      title: i18n.get("openscad-reset"),
+                      "aria-label": i18n.get("openscad-reset"),
+                    },
+                    children: [{ type: "text", value: "↺" }],
                   },
                   {
                     type: "element",
