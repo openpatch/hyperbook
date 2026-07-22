@@ -691,14 +691,18 @@ nav li+li {
 
 /* The row always toggles the section, so it always looks clickable. Only the
    title tells the two kinds of section apart: a section without its own page
-   is set in italics and is not a link. */
-.section.empty summary.name .label {
+   is set in italics and is not a link.
+
+   Both rules are scoped with child combinators. Sections nest, so a descendant
+   selector would style a subsection according to its parent — a subsection with
+   content sitting inside an empty section came out italic. */
+.section.empty>summary.name>.label {
   font-style: italic;
 }
 
 /* A section that has its own page: the title is a real link and behaves like
    one, while clicking elsewhere in the row just expands the section. */
-.section:not(.empty) summary.name>.label:hover {
+.section:not(.empty)>summary.name>.label:hover {
   text-decoration: underline;
 }
 
