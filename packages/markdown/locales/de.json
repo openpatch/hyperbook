@@ -47,6 +47,7 @@
     "pyide-canvas": "Canvas",
     "pyide-input": "Eingabe",
     "pyide-input-prompt": "Eingabe erforderlich:",
+    "pyide-input-submit": "Senden",
     "pyide-reset": "Zurücksetzen",
     "pyide-copy": "Kopieren",
     "pyide-download": "Herunterladen",

@@ -9,6 +9,7 @@ import {
   clearPytamaroStdoutCarry,
 } from "./output.js";
 import { executeScript } from "./execution.js";
+import { turtleCompletions } from "./turtle-completions.js";
 import {
   updateFullscreenButtonState,
   toggleFullscreen,
@@ -81,6 +82,7 @@ hyperbook.python = (function () {
         ? HyperbookCM.create(editorDiv, {
             lang: editorDiv.dataset.lang || "python",
             value: initialSource,
+            completions: [turtleCompletions],
             onChange: (code) => {
               void persistPyideState({ script: code });
             },
@@ -398,7 +400,10 @@ hyperbook.python = (function () {
     mutations.forEach((mutation) => {
       if (mutation.addedNodes.length) {
         mutation.addedNodes.forEach((node) => {
-          if (node.nodeType === 1 && node.classList?.contains("directive-pyide")) {
+          if (
+            node.nodeType === 1 &&
+            node.classList?.contains("directive-pyide")
+          ) {
             init(node);
           }
         });

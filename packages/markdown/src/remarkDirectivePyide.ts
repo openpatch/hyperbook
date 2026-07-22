@@ -45,12 +45,23 @@ export default (ctx: HyperbookContext) => () => {
         if (node.name !== name) return;
 
         const data = node.data || (node.data = {});
-        const { src = "", id = hash(node), packages, height } = node.attributes || {};
+        const {
+          src = "",
+          id = hash(node),
+          packages,
+          height,
+        } = node.attributes || {};
         const hasCanvas = "canvas" in (node.attributes || {});
         const packageList = parsePackagesAttribute(packages);
 
         expectContainerDirective(node, file, name);
-        registerDirective(file, name, ["python-friendly-error-messages.js", "client.js"], ["style.css"], []);
+        registerDirective(
+          file,
+          name,
+          ["python-friendly-error-messages.js", "client.js"],
+          ["style.css"],
+          [],
+        );
         requestJS(file, ["codemirror", "codemirror.bundle.js"]);
 
         let srcFile = "";
@@ -201,6 +212,53 @@ export default (ctx: HyperbookContext) => () => {
                   class: "output",
                 },
                 children: [],
+              },
+              // Shown only while the running script waits on input(). Reading
+              // input here keeps the main thread free, so drawings stay live.
+              {
+                type: "element",
+                tagName: "form",
+                properties: {
+                  class: "stdin hidden",
+                },
+                children: [
+                  // The prompt also goes to the output panel, but that panel is
+                  // hidden while the canvas tab is open — so repeat it here.
+                  {
+                    type: "element",
+                    tagName: "span",
+                    properties: {
+                      class: "stdin-prompt",
+                    },
+                    children: [],
+                  },
+                  {
+                    type: "element",
+                    tagName: "input",
+                    properties: {
+                      class: "stdin-field",
+                      type: "text",
+                      autocomplete: "off",
+                      spellcheck: "false",
+                      "aria-label": i18n.get("pyide-input"),
+                    },
+                    children: [],
+                  },
+                  {
+                    type: "element",
+                    tagName: "button",
+                    properties: {
+                      class: "stdin-submit",
+                      type: "submit",
+                    },
+                    children: [
+                      {
+                        type: "text",
+                        value: i18n.get("pyide-input-submit"),
+                      },
+                    ],
+                  },
+                ],
               },
             ],
           },

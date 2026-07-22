@@ -38,6 +38,61 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.100.0
+
+::::tabs
+
+:::tab{title="New :rocket:" id="new"}
+
+**pyide**: The editor now autocompletes the `turtle` module. Every function it provides is offered with its signature and a short description, both for `from turtle import *` and for member access on `turtle`, a `Turtle()` or a `Screen()`. Suggestions only appear once a script imports turtle, and never inside comments or strings.
+
+**turtle**: The module gained the screen and turtle functions it was missing:
+
+- Program flow: `done`, `mainloop`, `exitonclick`, `bye`, `Screen`, `getscreen`
+- Drawing control: `tracer`, `update`, `delay`, `undo`, `setundobuffer`, `undobufferentries`
+- Stamps: `stamp`, `clearstamp`, `clearstamps`
+- Geometry and angles: `distance`, `mode` (standard and logo), `degrees`, `radians`, `filling`
+- Cursor: `shapesize`/`turtlesize`, `tilt`, `tiltangle`, `settiltangle`, `register_shape`/`addshape`
+- Screen: `setup`, `title`, `clearscreen`, `resetscreen`, `window_width`, `window_height`
+- Interaction: `numinput`, `textinput`, `listen`, `onkey`, `onkeypress`, `onkeyrelease`, `onclick`, `onscreenclick`, `ontimer`
+
+`tracer(0)` also skips the animation queue, so the usual "draw everything, then `update()`" pattern is fast instead of appearing to hang.
+
+:::
+
+:::tab{title="Improved :+1:" id="improved"}
+
+**pyide**: `input()` no longer freezes the page. Python runs on the browser's main thread, so the old `window.prompt()` blocked it — everything a script had drawn stayed invisible until the program finished. Input is now read from a field in the output panel while Python is suspended, so the canvas keeps painting and queued turtle animation keeps draining while a script waits. This needs WebAssembly JSPI (Chrome and Edge 137+); other browsers keep the previous dialog.
+
+```python
+from turtle import *
+
+# The board is now visible while the program asks.
+for i in range(12):
+    dot(40)
+    forward(50)
+karte = int(input("Which card? "))
+```
+
+The output panel reads like a terminal too: the prompt, the answer that was typed, then a newline.
+
+**turtle**: `turtle.numinput()` and `turtle.textinput()` use the same field, and follow CPython in asking again when the answer is not a number or falls outside `minval`/`maxval`.
+
+:::
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+- **turtle**: `begin_fill()` and `end_fill()` drew nothing. Every vertex of the fill collapsed onto the turtle's final position, and fills painted over the lines drawn during them instead of underneath.
+- **turtle**: Reading a pen setting destroyed it — `pensize()`, `pencolor()`, `fillcolor()`, `color()` and `speed()` without arguments reset the pen instead of returning the current value.
+- **turtle**: `clear()` called during a fill left the turtle unable to fill for the rest of the program, and also reset the pen width. `speed()` carried over into the next run of a program.
+- **turtle**: `circle()` ignored its `extent` argument, so arcs were impossible. The signature is now `circle(radius, extent=None, steps=None)`, and a negative radius curves to the right.
+- **turtle**: `pencolor(r, g, b)` and `color(r, g, b)` produced black, and `speed("slowest")` and the other named speeds selected the fastest setting.
+- **turtle**: The turtle cursor ignored `fillcolor`, `towards()` rejected a coordinate pair, and `shape()` silently ignored an unknown shape name instead of raising.
+
+:::
+
+::::
+
 ## v0.99.1
 
 ::::tabs

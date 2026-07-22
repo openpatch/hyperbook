@@ -1,4 +1,5 @@
 import { runtimes, interruptBuffers, getExecutionState } from "./state.js";
+import { cancelStdin } from "./stdin.js";
 import { appendOutputLine } from "./output.js";
 
 export const updateFullscreenButtonState = (elem, button) => {
@@ -152,6 +153,9 @@ export const requestStop = (id) => {
   if ((!state.running && !hasRuntime) || state.stopRequested) return;
   state.stopRequested = true;
   state.stopping = true;
+  // A script parked on input() is not executing bytecode, so the interrupt
+  // buffer alone would never reach it — release the read first.
+  cancelStdin(id);
   const interruptBuffer = interruptBuffers.get(id);
   if (interruptBuffer) {
     interruptBuffer[0] = 2;
