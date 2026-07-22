@@ -1,5 +1,41 @@
 # @hyperbook/markdown
 
+## 0.71.0
+
+### Minor Changes
+
+- [`e82362d`](https://github.com/openpatch/hyperbook/commit/e82362d9e0546ebb68140902143c7dcdd65d3f2f) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - **pyide**: `input()` no longer freezes the page. Python is suspended on a promise via WebAssembly JSPI and the answer is read from a field in the output panel, so the canvas keeps painting and queued turtle animation keeps draining while a script waits for input. Browsers without JSPI fall back to the previous blocking dialog. The transcript now matches a terminal: the prompt, the typed answer, then a newline. `turtle.numinput()` and `turtle.textinput()` use the same field, with CPython's re-ask and `minval`/`maxval` behaviour.
+
+  **pyide**: The editor offers autocompletion for the `turtle` module — signatures and descriptions for every function it provides, for both `from turtle import *` and member access on `turtle`, a `Turtle()` or a `Screen()`. Completions only appear once a script imports turtle, and are suppressed inside comments and strings.
+
+  **turtle**: Fixed `begin_fill()`/`end_fill()` producing nothing. Fill vertices were read when the deferred render ran rather than when the move was made, so every vertex collapsed onto the turtle's final position. Fills also painted over the lines drawn during them instead of underneath.
+
+  **turtle**: Fixed accessors destroying the value they should return — `pensize()`, `pencolor()`, `fillcolor()`, `color()` and `speed()` called without arguments reset the pen to a default instead of reporting the current one.
+
+  **turtle**: Fixed state that leaked or was lost — `clear()` during a fill left the turtle permanently unable to fill again, `clear()` reset the pen width, and `speed()` carried over between runs of a program.
+
+  **turtle**: Fixed `circle()` ignoring `extent`; the signature is now `circle(radius, extent=None, steps=None)`, so arcs work and a negative radius curves to the right. Fixed `pencolor(r, g, b)` and `color(r, g, b)` producing black, `speed("slowest")` and the other named speeds selecting the fastest setting, the turtle cursor ignoring `fillcolor`, and `towards()` rejecting a coordinate pair. `shape()` now raises on an unknown shape name instead of silently ignoring it.
+
+  **turtle**: Added the missing screen and turtle API: `done`, `mainloop`, `exitonclick`, `bye`, `Screen`, `getscreen`, `tracer`, `update`, `delay`, `undo`, `setundobuffer`, `undobufferentries`, `stamp`, `clearstamp`, `clearstamps`, `distance`, `mode` (standard and logo), `degrees`, `radians`, `filling`, `shapesize`/`turtlesize`, `tilt`, `tiltangle`, `settiltangle`, `setup`, `title`, `register_shape`/`addshape`, `clearscreen`, `resetscreen`, `window_width`, `window_height`, `numinput`, `textinput`, `listen`, `onkey`, `onkeypress`, `onkeyrelease`, `onclick`, `onscreenclick` and `ontimer`.
+
+### Patch Changes
+
+- [`8c766ec`](https://github.com/openpatch/hyperbook/commit/8c766ec08e154114dc2b1bd5103eda7b29948c5e) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - **dev**: The dev server now tracks which files each page inlines, so a change rebuilds exactly the pages that used it.
+
+  Editing a file referenced by a directive's `src=` attribute previously reloaded the browser without rebuilding anything, so the page came back showing the old content — and for a file under `book/` nothing happened at all. Snippets and templates are now mapped to the pages that use them instead of forcing a full rebuild of the book.
+
+  Two related fixes: renaming a page or changing its order rebuilds every page, because the navigation is baked into all of them and the rest were left showing the old title; and the search index is regenerated after an incremental build instead of going stale until the next full build.
+
+- [`0797f76`](https://github.com/openpatch/hyperbook/commit/0797f767b5366e809a2dc7e777745150dcd4eb09) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - **pyide**, **p5**, **openscad**: The reset, copy, download and fullscreen buttons in the editor toolbar are now inline SVG icons instead of written labels, which wrapped onto several lines in languages with long words. The wording moves to `title` and `aria-label`, so it still shows as a tooltip and is still announced by screen readers.
+
+  The same applies to **webide**, **typst** and **abc-music**, and to the remaining directive icons: the download icons in **download** and **archive**, the lock in **protect**, typst's add-file button, and the expand arrows on the binary-file sections of **openscad** and **typst**. Typst's two download buttons now differ — a box for the whole project, a document for the PDF.
+
+  This also fixes the fullscreen button rendering as an empty box for some readers: it used the glyph `⛶` (U+26F6), which ships in very few fonts. The icons inherit the button's colour, so they follow the light and dark themes.
+
+- [`8f5daae`](https://github.com/openpatch/hyperbook/commit/8f5daaed186e1e787d3c98a8440e71c14fb1795f) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - **navigation**: A section that links to its own page is now distinguishable from one that only expands. Sections whose `index.md` is empty are set in italics, and the title of a section that does have a page underlines on hover to show it is a link. Each subsection is judged on its own content rather than inheriting its parent's styling.
+
+  This also repairs the highlight of the section you are currently on. The stylesheet still looked for `active` and `empty` on the `<summary>` element, but they moved to the surrounding `<details>` when sections became collapsible, so those rules had stopped matching.
+
 ## 0.70.1
 
 ### Patch Changes
