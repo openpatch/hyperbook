@@ -193,3 +193,26 @@ code-input {
     }
   }
 }
+
+/* Icon-only toolbar: the written labels made this row wrap on narrow screens,
+   so the wording moved into title/aria-label. */
+.directive-webide .buttons.bottom button {
+  flex: 0 0 auto;
+  min-width: 42px;
+  width: 42px;
+  padding: 8px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.directive-webide .buttons.bottom button .icon {
+  width: 18px;
+  height: 18px;
+  display: block;
+}
+
+/* Fullscreen sits apart, at the trailing edge of the toolbar. */
+.directive-webide .buttons.bottom button.fullscreen {
+  margin-inline-start: auto;
+}

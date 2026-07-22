@@ -249,3 +249,26 @@
 .directive-abc-music .buttons button:hover {
   background-color: var(--color-spacer);
 }
+
+/* Icon-only toolbar: the written labels made this row wrap on narrow screens,
+   so the wording moved into title/aria-label. */
+.directive-abc-music .buttons.bottom button {
+  flex: 0 0 auto;
+  min-width: 42px;
+  width: 42px;
+  padding: 8px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.directive-abc-music .buttons.bottom button .icon {
+  width: 18px;
+  height: 18px;
+  display: block;
+}
+
+/* Fullscreen sits apart, at the trailing edge of the toolbar. */
+.directive-abc-music .buttons.bottom button.fullscreen {
+  margin-inline-start: auto;
+}

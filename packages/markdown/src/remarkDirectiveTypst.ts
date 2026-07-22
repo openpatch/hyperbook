@@ -263,13 +263,10 @@ export default (ctx: HyperbookContext) => () => {
           tagName: "button",
           properties: {
             class: "download-pdf",
+            title: i18n.get("typst-download-pdf"),
+            "aria-label": i18n.get("typst-download-pdf"),
           },
-          children: [
-            {
-              type: "text",
-              value: i18n.get("typst-download-pdf"),
-            },
-          ],
+          children: [icon("download")],
         };
 
         const downloadProjectButton: Element = {
@@ -277,13 +274,10 @@ export default (ctx: HyperbookContext) => () => {
           tagName: "button",
           properties: {
             class: "download-project",
+            title: i18n.get("typst-download-project"),
+            "aria-label": i18n.get("typst-download-project"),
           },
-          children: [
-            {
-              type: "text",
-              value: i18n.get("typst-download-project"),
-            },
-          ],
+          children: [icon("archive")],
         };
 
         const createFullscreenButton = (): Element => ({
@@ -438,13 +432,10 @@ export default (ctx: HyperbookContext) => () => {
                       tagName: "button",
                       properties: {
                         class: "reset",
+                        title: i18n.get("typst-reset"),
+                        "aria-label": i18n.get("typst-reset"),
                       },
-                      children: [
-                        {
-                          type: "text",
-                          value: i18n.get("typst-reset"),
-                        },
-                      ],
+                      children: [icon("reset")],
                     },
                     downloadProjectButton,
                     downloadButton,

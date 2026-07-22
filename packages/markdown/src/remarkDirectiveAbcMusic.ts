@@ -13,6 +13,7 @@ import {
 } from "./remarkHelper";
 import hash from "./objectHash";
 import { i18n } from "./i18n";
+import { icon } from "./icons";
 
 export default (ctx: HyperbookContext) => () => {
   const name = "abc-music";
@@ -81,39 +82,30 @@ export default (ctx: HyperbookContext) => () => {
                           tagName: "button",
                           properties: {
                             class: "reset",
+                            title: i18n.get("abc-music-reset"),
+                            "aria-label": i18n.get("abc-music-reset"),
                           },
-                          children: [
-                            {
-                              type: "text",
-                              value: i18n.get("abc-music-reset"),
-                            },
-                          ],
+                          children: [icon("reset")],
                         },
                         {
                           type: "element",
                           tagName: "button",
                           properties: {
                             class: "copy",
+                            title: i18n.get("abc-music-copy"),
+                            "aria-label": i18n.get("abc-music-copy"),
                           },
-                          children: [
-                            {
-                              type: "text",
-                              value: i18n.get("abc-music-copy"),
-                            },
-                          ],
+                          children: [icon("copy")],
                         },
                         {
                           type: "element",
                           tagName: "button",
                           properties: {
                             class: "download",
+                            title: i18n.get("abc-music-download"),
+                            "aria-label": i18n.get("abc-music-download"),
                           },
-                          children: [
-                            {
-                              type: "text",
-                              value: i18n.get("abc-music-download"),
-                            },
-                          ],
+                          children: [icon("download")],
                         },
                       ],
                     },

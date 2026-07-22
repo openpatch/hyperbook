@@ -268,26 +268,20 @@ html, body {
                     tagName: "button",
                     properties: {
                       class: "reset",
+                      title: i18n.get("webide-reset"),
+                      "aria-label": i18n.get("webide-reset"),
                     },
-                    children: [
-                      {
-                        type: "text",
-                        value: i18n.get("webide-reset"),
-                      },
-                    ],
+                    children: [icon("reset")],
                   },
                   {
                     type: "element",
                     tagName: "button",
                     properties: {
                       class: "download",
+                      title: i18n.get("webide-download"),
+                      "aria-label": i18n.get("webide-download"),
                     },
-                    children: [
-                      {
-                        type: "text",
-                        value: i18n.get("webide-download"),
-                      },
-                    ],
+                    children: [icon("download")],
                   },
                   {
                     type: "element",
