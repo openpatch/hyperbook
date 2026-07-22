@@ -13,6 +13,7 @@ import {
 } from "./remarkHelper";
 import hash from "./objectHash";
 import { i18n } from "./i18n";
+import { icon } from "./icons";
 import { readFile } from "./helper";
 
 function htmlEntities(str: string) {
@@ -309,7 +310,7 @@ export default (ctx: HyperbookContext) => () => {
                       title: i18n.get("openscad-copy"),
                       "aria-label": i18n.get("openscad-copy"),
                     },
-                    children: [{ type: "text", value: "⧉" }],
+                    children: [icon("copy")],
                   },
                   {
                     type: "element",
@@ -319,7 +320,7 @@ export default (ctx: HyperbookContext) => () => {
                       title: i18n.get("openscad-download-stl"),
                       "aria-label": i18n.get("openscad-download-stl"),
                     },
-                    children: [{ type: "text", value: "⇩" }],
+                    children: [icon("download")],
                   },
                   {
                     type: "element",
@@ -329,7 +330,7 @@ export default (ctx: HyperbookContext) => () => {
                       title: i18n.get("openscad-reset"),
                       "aria-label": i18n.get("openscad-reset"),
                     },
-                    children: [{ type: "text", value: "↺" }],
+                    children: [icon("reset")],
                   },
                   {
                     type: "element",
@@ -339,7 +340,7 @@ export default (ctx: HyperbookContext) => () => {
                       title: i18n.get("ide-fullscreen-enter"),
                       "aria-label": i18n.get("ide-fullscreen-enter"),
                     },
-                    children: [{ type: "text", value: "⛶" }],
+                    children: [icon("fullscreen")],
                   },
                 ],
               },

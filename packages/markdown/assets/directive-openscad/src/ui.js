@@ -87,10 +87,7 @@ export function setupSplitter(
     const splitterSize = isHorizontal
       ? splitter.offsetWidth
       : splitter.offsetHeight;
-    const maxSize = Math.max(
-      minPanelSize,
-      total - splitterSize - minPanelSize,
-    );
+    const maxSize = Math.max(minPanelSize, total - splitterSize - minPanelSize);
     const clamped = Math.max(minPanelSize, Math.min(rawSize, maxSize));
     previewContainer.style.flex = `0 0 ${clamped}px`;
     return clamped;
@@ -164,7 +161,6 @@ export const updateFullscreenButtonState = (elem, button) => {
   if (!elem || !button) return;
   const isFullscreen = document.fullscreenElement === elem;
   const label = i18nGet("ide-fullscreen-enter", "Fullscreen");
-  button.textContent = "⛶";
   button.title = label;
   button.setAttribute("aria-label", label);
   button.classList.toggle("active", isFullscreen);

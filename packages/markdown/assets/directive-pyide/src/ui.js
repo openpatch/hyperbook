@@ -6,7 +6,6 @@ export const updateFullscreenButtonState = (elem, button) => {
   if (!elem || !button) return;
   const isFullscreen = document.fullscreenElement === elem;
   const label = hyperbook.i18n.get("ide-fullscreen-enter");
-  button.textContent = "⛶";
   button.title = label;
   button.setAttribute("aria-label", label);
   button.classList.toggle("active", isFullscreen);

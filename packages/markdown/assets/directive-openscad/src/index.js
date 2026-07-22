@@ -1,10 +1,36 @@
 /// <reference path="../../hyperbook.types.js" />
 
-import { THREE, OrbitControls, ViewportGizmo, buildThreeModelFromIndexedPolyhedron, buildThreeModelFromColorBuckets } from "./viewer.js";
-import { parseOffToIndexedPolyhedron, exportIndexedPolyhedronTo3mf } from "./geometry.js";
-import { callWorker, getInvocationStderr, buildParamUiInWorker } from "./worker.js";
-import { setupSplitter, setupCanvasParamsSplitter, updateFullscreenButtonState, toggleFullscreen, syncFullscreenButtons } from "./ui.js";
-import { i18nGet, normalizePath, buildAutoBinaryFiles, mergeBinaryFiles, formatValue, toUint8Array } from "./utils.js";
+import {
+  THREE,
+  OrbitControls,
+  ViewportGizmo,
+  buildThreeModelFromIndexedPolyhedron,
+  buildThreeModelFromColorBuckets,
+} from "./viewer.js";
+import {
+  parseOffToIndexedPolyhedron,
+  exportIndexedPolyhedronTo3mf,
+} from "./geometry.js";
+import {
+  callWorker,
+  getInvocationStderr,
+  buildParamUiInWorker,
+} from "./worker.js";
+import {
+  setupSplitter,
+  setupCanvasParamsSplitter,
+  updateFullscreenButtonState,
+  toggleFullscreen,
+  syncFullscreenButtons,
+} from "./ui.js";
+import {
+  i18nGet,
+  normalizePath,
+  buildAutoBinaryFiles,
+  mergeBinaryFiles,
+  formatValue,
+  toUint8Array,
+} from "./utils.js";
 
 /**
  * OpenSCAD IDE directive.
@@ -85,7 +111,12 @@ hyperbook.openscad = (function () {
       bottomButtons.insertBefore(downloadFormatSelect, downloadBtn);
     }
     if (downloadBtn) {
-      downloadBtn.textContent = i18nGet("openscad-download", "Download");
+      // The button shows an icon and the format select beside it carries the
+      // STL/3MF choice, so the generic wording belongs in the tooltip — writing
+      // it as text content would replace the icon.
+      const downloadLabel = i18nGet("openscad-download", "Download");
+      downloadBtn.title = downloadLabel;
+      downloadBtn.setAttribute("aria-label", downloadLabel);
     }
 
     const normalizeBinaryDest = (dest) => {
@@ -603,14 +634,19 @@ hyperbook.openscad = (function () {
           userBinaryFiles,
           buildAutoBinaryFiles(cm?.getValue() || "", basePath, pagePath),
         );
-        const result = await callWorker("render", "render", {
-          code: cm?.getValue() || "",
-          format,
-          libraryNames,
-          binaryFiles: resolvedBinaryFiles,
-          paramDefinitions: [],
-          isPreview,
-        }, _scriptBase);
+        const result = await callWorker(
+          "render",
+          "render",
+          {
+            code: cm?.getValue() || "",
+            format,
+            libraryNames,
+            binaryFiles: resolvedBinaryFiles,
+            paramDefinitions: [],
+            isPreview,
+          },
+          _scriptBase,
+        );
         const stderr = getInvocationStderr(result);
         if (result?.error || result?.exitCode !== 0) {
           const error = new Error(

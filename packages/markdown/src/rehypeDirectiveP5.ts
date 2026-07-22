@@ -14,6 +14,7 @@ import {
 import { toText } from "./mdastUtilToText";
 import hash from "./objectHash";
 import { i18n } from "./i18n";
+import { icon } from "./icons";
 import { readFile } from "./helper";
 
 interface CodeBundle {
@@ -219,12 +220,7 @@ ${(code.scripts ? [cdnLibraryUrl, ...code.scripts] : []).map((src) => `<script t
                             title: i18n.get("p5-reset"),
                             "aria-label": i18n.get("p5-reset"),
                           },
-                          children: [
-                            {
-                              type: "text",
-                              value: "↺",
-                            },
-                          ],
+                          children: [icon("reset")],
                         },
                         {
                           type: "element",
@@ -234,12 +230,7 @@ ${(code.scripts ? [cdnLibraryUrl, ...code.scripts] : []).map((src) => `<script t
                             title: i18n.get("p5-copy"),
                             "aria-label": i18n.get("p5-copy"),
                           },
-                          children: [
-                            {
-                              type: "text",
-                              value: "⧉",
-                            },
-                          ],
+                          children: [icon("copy")],
                         },
                         {
                           type: "element",
@@ -249,12 +240,7 @@ ${(code.scripts ? [cdnLibraryUrl, ...code.scripts] : []).map((src) => `<script t
                             title: i18n.get("p5-download"),
                             "aria-label": i18n.get("p5-download"),
                           },
-                          children: [
-                            {
-                              type: "text",
-                              value: "⇩",
-                            },
-                          ],
+                          children: [icon("download")],
                         },
                         {
                           type: "element",
@@ -264,12 +250,7 @@ ${(code.scripts ? [cdnLibraryUrl, ...code.scripts] : []).map((src) => `<script t
                             title: i18n.get("ide-fullscreen-enter"),
                             "aria-label": i18n.get("ide-fullscreen-enter"),
                           },
-                          children: [
-                            {
-                              type: "text",
-                              value: "⛶",
-                            },
-                          ],
+                          children: [icon("fullscreen")],
                         },
                       ],
                     },

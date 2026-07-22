@@ -255,8 +255,15 @@
   min-width: 42px;
   width: 42px;
   padding: 8px 0;
-  font-size: 1.15em;
-  line-height: 1.2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.directive-openscad .buttons.bottom button .icon {
+  width: 18px;
+  height: 18px;
+  display: block;
 }
 
 /* Fullscreen sits apart, at the trailing edge of the toolbar. */

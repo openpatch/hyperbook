@@ -12,7 +12,22 @@ exports[`remarkDirectivePyide > should transform basic pyide 1`] = `
   <div class="editor-container">
     <div class="buttons"><button class="run">pyide-run</button><button class="stop" disabled>pyide-stop</button></div>
     <div class="editor" data-lang="python">print(&quot;Hello World&quot;)</div>
-    <div class="buttons bottom"><button class="reset" title="pyide-reset" aria-label="pyide-reset">↺</button><button class="copy" title="pyide-copy" aria-label="pyide-copy">⧉</button><button class="download" title="pyide-download" aria-label="pyide-download">⇩</button><button class="fullscreen" title="ide-fullscreen-enter" aria-label="ide-fullscreen-enter">⛶</button></div>
+    <div class="buttons bottom"><button class="reset" title="pyide-reset" aria-label="pyide-reset"><svg class="icon icon-reset" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+          <path d="M1 4v6h6"></path>
+          <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+        </svg></button><button class="copy" title="pyide-copy" aria-label="pyide-copy"><svg class="icon icon-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+          <path d="M9 9h11a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-9a2 2 0 0 1-2-2V9z"></path>
+          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+        </svg></button><button class="download" title="pyide-download" aria-label="pyide-download"><svg class="icon icon-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <path d="M7 10l5 5 5-5"></path>
+          <path d="M12 15V3"></path>
+        </svg></button><button class="fullscreen" title="ide-fullscreen-enter" aria-label="ide-fullscreen-enter"><svg class="icon icon-fullscreen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+          <path d="M8 3H5a2 2 0 0 0-2 2v3"></path>
+          <path d="M21 8V5a2 2 0 0 0-2-2h-3"></path>
+          <path d="M16 21h3a2 2 0 0 0 2-2v-3"></path>
+          <path d="M3 16v3a2 2 0 0 0 2 2h3"></path>
+        </svg></button></div>
   </div>
 </div>
 "
@@ -36,7 +51,22 @@ exports[`remarkDirectivePyide > should transform pyide with canvas and packages 
   <div class="editor-container">
     <div class="buttons"><button class="run">pyide-run</button><button class="stop" disabled>pyide-stop</button></div>
     <div class="editor" data-lang="python">from pytamaro import *</div>
-    <div class="buttons bottom"><button class="reset" title="pyide-reset" aria-label="pyide-reset">↺</button><button class="copy" title="pyide-copy" aria-label="pyide-copy">⧉</button><button class="download" title="pyide-download" aria-label="pyide-download">⇩</button><button class="fullscreen" title="ide-fullscreen-enter" aria-label="ide-fullscreen-enter">⛶</button></div>
+    <div class="buttons bottom"><button class="reset" title="pyide-reset" aria-label="pyide-reset"><svg class="icon icon-reset" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+          <path d="M1 4v6h6"></path>
+          <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+        </svg></button><button class="copy" title="pyide-copy" aria-label="pyide-copy"><svg class="icon icon-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+          <path d="M9 9h11a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-9a2 2 0 0 1-2-2V9z"></path>
+          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+        </svg></button><button class="download" title="pyide-download" aria-label="pyide-download"><svg class="icon icon-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <path d="M7 10l5 5 5-5"></path>
+          <path d="M12 15V3"></path>
+        </svg></button><button class="fullscreen" title="ide-fullscreen-enter" aria-label="ide-fullscreen-enter"><svg class="icon icon-fullscreen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+          <path d="M8 3H5a2 2 0 0 0-2 2v3"></path>
+          <path d="M21 8V5a2 2 0 0 0-2-2h-3"></path>
+          <path d="M16 21h3a2 2 0 0 0 2-2v-3"></path>
+          <path d="M3 16v3a2 2 0 0 0 2 2h3"></path>
+        </svg></button></div>
   </div>
 </div>
 "
@@ -61,7 +91,22 @@ exports[`remarkDirectivePyide > should transform pyide with canvas attribute 1`]
     <div class="buttons"><button class="run">pyide-run</button><button class="stop" disabled>pyide-stop</button></div>
     <div class="editor" data-lang="python">import pygame
 pygame.init()</div>
-    <div class="buttons bottom"><button class="reset" title="pyide-reset" aria-label="pyide-reset">↺</button><button class="copy" title="pyide-copy" aria-label="pyide-copy">⧉</button><button class="download" title="pyide-download" aria-label="pyide-download">⇩</button><button class="fullscreen" title="ide-fullscreen-enter" aria-label="ide-fullscreen-enter">⛶</button></div>
+    <div class="buttons bottom"><button class="reset" title="pyide-reset" aria-label="pyide-reset"><svg class="icon icon-reset" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+          <path d="M1 4v6h6"></path>
+          <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+        </svg></button><button class="copy" title="pyide-copy" aria-label="pyide-copy"><svg class="icon icon-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+          <path d="M9 9h11a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-9a2 2 0 0 1-2-2V9z"></path>
+          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+        </svg></button><button class="download" title="pyide-download" aria-label="pyide-download"><svg class="icon icon-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <path d="M7 10l5 5 5-5"></path>
+          <path d="M12 15V3"></path>
+        </svg></button><button class="fullscreen" title="ide-fullscreen-enter" aria-label="ide-fullscreen-enter"><svg class="icon icon-fullscreen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+          <path d="M8 3H5a2 2 0 0 0-2 2v3"></path>
+          <path d="M21 8V5a2 2 0 0 0-2-2h-3"></path>
+          <path d="M16 21h3a2 2 0 0 0 2-2v-3"></path>
+          <path d="M3 16v3a2 2 0 0 0 2 2h3"></path>
+        </svg></button></div>
   </div>
 </div>
 "
@@ -79,7 +124,22 @@ exports[`remarkDirectivePyide > should transform pyide with packages attribute 1
   <div class="editor-container">
     <div class="buttons"><button class="run">pyide-run</button><button class="stop" disabled>pyide-stop</button></div>
     <div class="editor" data-lang="python">import snowballstemmer</div>
-    <div class="buttons bottom"><button class="reset" title="pyide-reset" aria-label="pyide-reset">↺</button><button class="copy" title="pyide-copy" aria-label="pyide-copy">⧉</button><button class="download" title="pyide-download" aria-label="pyide-download">⇩</button><button class="fullscreen" title="ide-fullscreen-enter" aria-label="ide-fullscreen-enter">⛶</button></div>
+    <div class="buttons bottom"><button class="reset" title="pyide-reset" aria-label="pyide-reset"><svg class="icon icon-reset" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+          <path d="M1 4v6h6"></path>
+          <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+        </svg></button><button class="copy" title="pyide-copy" aria-label="pyide-copy"><svg class="icon icon-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+          <path d="M9 9h11a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-9a2 2 0 0 1-2-2V9z"></path>
+          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+        </svg></button><button class="download" title="pyide-download" aria-label="pyide-download"><svg class="icon icon-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <path d="M7 10l5 5 5-5"></path>
+          <path d="M12 15V3"></path>
+        </svg></button><button class="fullscreen" title="ide-fullscreen-enter" aria-label="ide-fullscreen-enter"><svg class="icon icon-fullscreen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+          <path d="M8 3H5a2 2 0 0 0-2 2v3"></path>
+          <path d="M21 8V5a2 2 0 0 0-2-2h-3"></path>
+          <path d="M16 21h3a2 2 0 0 0 2-2v-3"></path>
+          <path d="M3 16v3a2 2 0 0 0 2 2h3"></path>
+        </svg></button></div>
   </div>
 </div>
 "

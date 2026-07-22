@@ -15,6 +15,7 @@ import { toText } from "./mdastUtilToText";
 import hash from "./objectHash";
 import { ElementContent } from "hast";
 import { i18n } from "./i18n";
+import { icon } from "./icons";
 import { readFile } from "./helper";
 
 function htmlEntities(str: string) {
@@ -361,12 +362,7 @@ export default (ctx: HyperbookContext) => () => {
                       title: i18n.get("pyide-reset"),
                       "aria-label": i18n.get("pyide-reset"),
                     },
-                    children: [
-                      {
-                        type: "text",
-                        value: "↺",
-                      },
-                    ],
+                    children: [icon("reset")],
                   },
                   {
                     type: "element",
@@ -376,12 +372,7 @@ export default (ctx: HyperbookContext) => () => {
                       title: i18n.get("pyide-copy"),
                       "aria-label": i18n.get("pyide-copy"),
                     },
-                    children: [
-                      {
-                        type: "text",
-                        value: "⧉",
-                      },
-                    ],
+                    children: [icon("copy")],
                   },
                   {
                     type: "element",
@@ -391,12 +382,7 @@ export default (ctx: HyperbookContext) => () => {
                       title: i18n.get("pyide-download"),
                       "aria-label": i18n.get("pyide-download"),
                     },
-                    children: [
-                      {
-                        type: "text",
-                        value: "⇩",
-                      },
-                    ],
+                    children: [icon("download")],
                   },
                   {
                     type: "element",
@@ -406,12 +392,7 @@ export default (ctx: HyperbookContext) => () => {
                       title: i18n.get("ide-fullscreen-enter"),
                       "aria-label": i18n.get("ide-fullscreen-enter"),
                     },
-                    children: [
-                      {
-                        type: "text",
-                        value: "⛶",
-                      },
-                    ],
+                    children: [icon("fullscreen")],
                   },
                 ],
               },

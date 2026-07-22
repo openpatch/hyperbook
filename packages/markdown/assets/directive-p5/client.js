@@ -29,8 +29,13 @@ hyperbook.p5 = (function () {
 
     const applySplitSize = (rawSize, isHorizontal) => {
       const total = isHorizontal ? elem.clientWidth : elem.clientHeight;
-      const splitterSize = isHorizontal ? splitter.offsetWidth : splitter.offsetHeight;
-      const maxSize = Math.max(minPanelSize, total - splitterSize - minPanelSize);
+      const splitterSize = isHorizontal
+        ? splitter.offsetWidth
+        : splitter.offsetHeight;
+      const maxSize = Math.max(
+        minPanelSize,
+        total - splitterSize - minPanelSize,
+      );
       const clamped = Math.max(minPanelSize, Math.min(rawSize, maxSize));
       container.style.flex = `0 0 ${clamped}px`;
       return clamped;
@@ -90,7 +95,6 @@ hyperbook.p5 = (function () {
     if (!elem || !button) return;
     const isFullscreen = document.fullscreenElement === elem;
     const label = hyperbook.i18n.get("ide-fullscreen-enter");
-    button.textContent = "⛶";
     button.title = label;
     button.setAttribute("aria-label", label);
     button.classList.toggle("active", isFullscreen);
@@ -219,10 +223,7 @@ hyperbook.p5 = (function () {
   const observer = new MutationObserver((mutations) => {
     mutations.forEach((mutation) => {
       mutation.addedNodes.forEach((node) => {
-        if (
-          node.nodeType === 1 &&
-          node.classList.contains("directive-p5")
-        ) {
+        if (node.nodeType === 1 && node.classList.contains("directive-p5")) {
           initElement(node);
         }
       });
