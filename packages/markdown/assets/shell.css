@@ -140,25 +140,16 @@ header.inverted>.branding:hover {
   color: var(--color-text);
 }
 
-.section>.name.active>.label {
+/* `active` and `empty` sit on the <details>, not on the <summary>. */
+.section.active>.name>.label {
   color: var(--color-brand);
-}
-
-.section .name.empty {
-  color: var(--color-text-deactivated);
-  cursor: pointer;
-  font-style: italic;
 }
 
 .section>.name:hover {
   background: var(--color-spacer);
 }
 
-.section>.name.empty:hover {
-  background: none;
-}
-
-.section>.name.active {
+.section.active>.name {
   background: var(--color-background);
   color: var(--color-brand);
 }
@@ -698,12 +689,17 @@ nav li+li {
   text-decoration: none;
 }
 
-.section.empty summary.name {
-  cursor: default;
-}
-
+/* The row always toggles the section, so it always looks clickable. Only the
+   title tells the two kinds of section apart: a section without its own page
+   is set in italics and is not a link. */
 .section.empty summary.name .label {
   font-style: italic;
+}
+
+/* A section that has its own page: the title is a real link and behaves like
+   one, while clicking elsewhere in the row just expands the section. */
+.section:not(.empty) summary.name>.label:hover {
+  text-decoration: underline;
 }
 
 .section summary.name:after {

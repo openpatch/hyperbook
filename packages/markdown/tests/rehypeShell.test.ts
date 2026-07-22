@@ -42,6 +42,63 @@ describe("rehypeShell", () => {
       ],
     },
   };
+  describe("section navigation affordance", () => {
+    // The stylesheet tells a section that links to a page apart from one that
+    // only expands, using the `empty` class on the <details> and whether the
+    // title is an <a> or a <span>. Both are asserted here so a markup change
+    // cannot silently make the two kinds look identical again.
+    const sectionCtx: HyperbookContext = {
+      ...ctx,
+      navigation: {
+        ...ctx.navigation,
+        sections: [
+          {
+            name: "__LINKS_TO_A_PAGE",
+            href: "/linked",
+            isEmpty: false,
+            sections: [],
+            pages: [],
+          },
+          {
+            name: "__ONLY_EXPANDS",
+            href: "/expander",
+            isEmpty: true,
+            sections: [],
+            pages: [],
+          },
+        ],
+      },
+    };
+
+    const html = () => String(toHtml("", sectionCtx).value);
+
+    it("marks a section without its own page as empty", () => {
+      expect(html()).toMatch(
+        /<details[^>]*data-id="_nav:\/expander"[^>]*class="[^"]*\bempty\b/,
+      );
+    });
+
+    it("does not mark a section that has its own page as empty", () => {
+      const match = html().match(
+        /<details[^>]*data-id="_nav:\/linked"[^>]*class="([^"]*)"/,
+      );
+      expect(match).not.toBeNull();
+      expect(match![1]).not.toContain("empty");
+    });
+
+    it("renders the title of a linking section as a link", () => {
+      expect(html()).toMatch(
+        /<a href="[^"]*\/linked" class="label">__LINKS_TO_A_PAGE<\/a>/,
+      );
+    });
+
+    it("renders the title of an expanding section as plain text", () => {
+      const value = html();
+      expect(value).toContain('<span class="label">__ONLY_EXPANDS</span>');
+      expect(value).not.toMatch(/<a[^>]*expander[^>]*class="label"/);
+    });
+  });
+
   it("should hide virtual section", async () => {
     const value = toHtml("", virtualCtx).value;
     expect(value).toContain("__I_AM_HERE");
