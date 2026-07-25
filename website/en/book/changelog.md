@@ -38,6 +38,16 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.100.1
+
+::::tabs
+:::tab{title="Improved :+1:" id="improved"}
+
+- onlineide: Update to the latest version. It now supports scratch-for-java programs. 
+
+:::
+::::
+
 ## v0.100.0
 
 ::::tabs
