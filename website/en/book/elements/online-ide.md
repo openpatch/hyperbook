@@ -192,6 +192,7 @@ class Funke extends Circle {
 | Abitur classes NRW | libraries="nrw" | Class library for use in the central Abitur of North Rhine-Westphalia |
 | Graphics and Games Library | libraries="gng" | Graphical class library for the Bavarian computer science books of the Cornelsen publishing house |
 | Abitur classes Lower Saxony | libraries="niedersachsen" | Class library for use in the Abitur Lower Saxony |
+| Scratch for Java | libraries="scratch" | Scratch-like class library (Stage, Sprite, costumes, sounds) — a port of [org.openpatch.scratch](https://scratch4j.openpatch.org) |
 
 :::onlineide{height="500px" libraries="nrw"}
 
@@ -216,3 +217,161 @@ l.append(1);
 
 :::
 ````
+
+### Scratch for Java
+
+`libraries="scratch"` makes the classes of
+[Scratch for Java](https://scratch4j.openpatch.org) available: `Stage`, `Sprite`,
+`AnimatedSprite`, `UISprite`, `Pen`, `Text`, `Camera`, `Timer` and the rest of
+the library. Programs written for the desktop library run unchanged in the
+browser, with two differences:
+
+- No `import org.openpatch.scratch.*;` — the Online IDE has no packages, all
+  classes are available right away.
+- Everything that only a desktop program can do (shaders, the pixel buffer,
+  recording, the file system, Tiled maps, fullscreen) compiles, but reports in
+  the output that it does nothing.
+
+The 841 costumes, 266 sounds and the backdrops of the library are bundled, so an
+example needs no assets of its own. Browse the costumes on the
+[Sprites](https://scratch4j.openpatch.org/sprites) page of the Scratch for Java
+documentation.
+
+In the example below the bunny follows the mouse pointer and plays a sound
+whenever it reaches the carrot.
+
+:::onlineide{height="500px" libraries="scratch"}
+
+```java MyStage.java
+
+new MyStage();
+
+class MyStage extends Stage {
+
+   MyStage() {
+      super(480, 360);
+      addBackdrop("background");
+      add(new Bunny());
+      add(new Carrot());
+   }
+
+}
+
+class Bunny extends Sprite {
+
+   public void whenAddedToStage() {
+      addCostume("bunny1_walk1");
+      addCostume("bunny1_walk2");
+      addSound("handleCoins");
+      setSize(60);
+      setRotationStyle(RotationStyle.LEFT_RIGHT);
+      setPosition(-180, -40);
+      say("Move your mouse!", 2000);
+   }
+
+   public void run() {
+      if (distanceToMousePointer() > 10) {
+         pointTowardsMousePointer();
+         move(2);
+         if (getTimer().everyMillis(150)) {
+            nextCostume();
+         }
+      }
+      if (isTouchingSprite(Carrot.class)) {
+         playSound("handleCoins");
+         getTouchingSprite(Carrot.class).goToRandomPosition();
+      }
+   }
+
+   public void whenClicked() {
+      say("Hop!", 1000);
+   }
+
+}
+
+class Carrot extends Sprite {
+
+   public void whenAddedToStage() {
+      addCostume("carrot");
+      setSize(50);
+      setPosition(120, -40);
+   }
+
+   public void run() {
+      turnRight(1);
+   }
+
+}
+
+```
+
+:::
+
+`````markdown
+:::onlineide{height="500px" libraries="scratch"}
+
+```java MyStage.java
+
+new MyStage();
+
+class MyStage extends Stage {
+
+   MyStage() {
+      super(480, 360);
+      addBackdrop("background");
+      add(new Bunny());
+      add(new Carrot());
+   }
+
+}
+
+class Bunny extends Sprite {
+
+   public void whenAddedToStage() {
+      addCostume("bunny1_walk1");
+      addCostume("bunny1_walk2");
+      addSound("handleCoins");
+      setSize(60);
+      setRotationStyle(RotationStyle.LEFT_RIGHT);
+      setPosition(-180, -40);
+      say("Move your mouse!", 2000);
+   }
+
+   public void run() {
+      if (distanceToMousePointer() > 10) {
+         pointTowardsMousePointer();
+         move(2);
+         if (getTimer().everyMillis(150)) {
+            nextCostume();
+         }
+      }
+      if (isTouchingSprite(Carrot.class)) {
+         playSound("handleCoins");
+         getTouchingSprite(Carrot.class).goToRandomPosition();
+      }
+   }
+
+   public void whenClicked() {
+      say("Hop!", 1000);
+   }
+
+}
+
+class Carrot extends Sprite {
+
+   public void whenAddedToStage() {
+      addCostume("carrot");
+      setSize(50);
+      setPosition(120, -40);
+   }
+
+   public void run() {
+      turnRight(1);
+   }
+
+}
+
+```
+
+:::
+`````

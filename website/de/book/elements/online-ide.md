@@ -15,6 +15,7 @@ Das Online-IDE element akzeptiert folgende Parameter:
 - **errorList**: falls mit unterem Panel: mit/ohne Fehlerliste.
 - **height**: Höhe des Editors. Standardwert 600px.
 - **speed**: Geschwindigkeit in Steps/s. Standardwert 1000.
+- **libraries**: Komma-getrennte Liste der zu ladenden Bibliotheken, z.B. `scratch`.
 
 (See: https://github.com/martin-pabst/Online-IDE-new-compiler).
 
@@ -186,6 +187,7 @@ class Funke extends Circle {
 | Abiturklassen NRW | libraries="nrw" | Klassenbibliothek zur Verwendung im Zentralabitur Nordrhein-Westfalen |
 | Graphics and Games Library | libraries="gng" | Graphische Klassenbibliothek für die bayerischen Informatikbücher des Cornelsen-Verlages |
 | Abiturklassen Niedersachsen | libraries="niedersachsen" | Klassenbibliothek zur Verwendung im Abitur Niedersachsen |
+| Scratch for Java | libraries="scratch" | Scratch-artige Klassenbibliothek (Stage, Sprite, Kostüme, Klänge) — Port von [org.openpatch.scratch](https://scratch4j.openpatch.org) |
 
 :::onlineide{height="500px" console=false libraries="nrw"}
 
@@ -210,3 +212,161 @@ l.append(1);
 
 :::
 ````
+
+### Scratch for Java
+
+Mit `libraries="scratch"` stehen die Klassen von
+[Scratch for Java](https://scratch4j.openpatch.org) zur Verfügung: `Stage`,
+`Sprite`, `AnimatedSprite`, `UISprite`, `Pen`, `Text`, `Camera`, `Timer` und der
+Rest der Bibliothek. Programme für die Desktop-Bibliothek laufen unverändert im
+Browser, mit zwei Unterschieden:
+
+- Kein `import org.openpatch.scratch.*;` — die Online IDE kennt keine Pakete,
+  alle Klassen sind sofort verfügbar.
+- Alles, was nur ein Desktop-Programm kann (Shader, Pixelzugriff, Aufnahmen,
+  Dateisystem, Tiled-Karten, Vollbild), lässt sich übersetzen, meldet aber in
+  der Ausgabe, dass es nichts tut.
+
+Die 841 Kostüme, 266 Klänge und die Hintergründe der Bibliothek sind enthalten,
+ein Beispiel braucht also keine eigenen Dateien. Alle Kostüme sind auf der Seite
+[Sprites](https://scratch4j.openpatch.org/sprites) der Scratch-for-Java-Dokumentation
+zu sehen.
+
+Im folgenden Beispiel läuft der Hase dem Mauszeiger nach und spielt einen Klang,
+sobald er die Möhre erreicht.
+
+:::onlineide{height="500px" libraries="scratch"}
+
+```java MeineBuehne.java
+
+new MeineBuehne();
+
+class MeineBuehne extends Stage {
+
+   MeineBuehne() {
+      super(480, 360);
+      addBackdrop("background");
+      add(new Hase());
+      add(new Moehre());
+   }
+
+}
+
+class Hase extends Sprite {
+
+   public void whenAddedToStage() {
+      addCostume("bunny1_walk1");
+      addCostume("bunny1_walk2");
+      addSound("handleCoins");
+      setSize(60);
+      setRotationStyle(RotationStyle.LEFT_RIGHT);
+      setPosition(-180, -40);
+      say("Beweg die Maus!", 2000);
+   }
+
+   public void run() {
+      if (distanceToMousePointer() > 10) {
+         pointTowardsMousePointer();
+         move(2);
+         if (getTimer().everyMillis(150)) {
+            nextCostume();
+         }
+      }
+      if (isTouchingSprite(Moehre.class)) {
+         playSound("handleCoins");
+         getTouchingSprite(Moehre.class).goToRandomPosition();
+      }
+   }
+
+   public void whenClicked() {
+      say("Hopp!", 1000);
+   }
+
+}
+
+class Moehre extends Sprite {
+
+   public void whenAddedToStage() {
+      addCostume("carrot");
+      setSize(50);
+      setPosition(120, -40);
+   }
+
+   public void run() {
+      turnRight(1);
+   }
+
+}
+
+```
+
+:::
+
+`````markdown
+:::onlineide{height="500px" libraries="scratch"}
+
+```java MeineBuehne.java
+
+new MeineBuehne();
+
+class MeineBuehne extends Stage {
+
+   MeineBuehne() {
+      super(480, 360);
+      addBackdrop("background");
+      add(new Hase());
+      add(new Moehre());
+   }
+
+}
+
+class Hase extends Sprite {
+
+   public void whenAddedToStage() {
+      addCostume("bunny1_walk1");
+      addCostume("bunny1_walk2");
+      addSound("handleCoins");
+      setSize(60);
+      setRotationStyle(RotationStyle.LEFT_RIGHT);
+      setPosition(-180, -40);
+      say("Beweg die Maus!", 2000);
+   }
+
+   public void run() {
+      if (distanceToMousePointer() > 10) {
+         pointTowardsMousePointer();
+         move(2);
+         if (getTimer().everyMillis(150)) {
+            nextCostume();
+         }
+      }
+      if (isTouchingSprite(Moehre.class)) {
+         playSound("handleCoins");
+         getTouchingSprite(Moehre.class).goToRandomPosition();
+      }
+   }
+
+   public void whenClicked() {
+      say("Hopp!", 1000);
+   }
+
+}
+
+class Moehre extends Sprite {
+
+   public void whenAddedToStage() {
+      addCostume("carrot");
+      setSize(50);
+      setPosition(120, -40);
+   }
+
+   public void run() {
+      turnRight(1);
+   }
+
+}
+
+```
+
+:::
+`````
