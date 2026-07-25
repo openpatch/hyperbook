@@ -1,5 +1,11 @@
 # create-hyperbook
 
+## 0.3.8
+
+### Patch Changes
+
+- [`5997865`](https://github.com/openpatch/hyperbook/commit/59978656bf9c152d78c133e66a46fea38356ec55) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix release by including repository url
+
 ## 0.3.7
 
 ### Patch Changes
