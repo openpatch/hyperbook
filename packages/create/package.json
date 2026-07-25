@@ -8,6 +8,11 @@
   "bin": {
     "create-hyperbook": "./dist/create-hyperbook.js"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/openpatch/hyperbook.git",
+    "directory": "packages/create"
+  },
   "files": [
     "dist",
     "templates"
