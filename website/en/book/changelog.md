@@ -38,6 +38,16 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.100.2
+
+::::tabs
+:::tab{title="Improved :+1:" id="improved"}
+
+- onlineide: Update to the latest version. It fixes some bugs in the scratch implementation.
+
+:::
+::::
+
 ## v0.100.1
 
 ::::tabs
