@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.100.2
+
+### Patch Changes
+
+- [`63442c2`](https://github.com/openpatch/hyperbook/commit/63442c25193f01b70ebbcc3ea5c42574c9dea497) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Update onlineide
+
 ## 0.100.1
 
 ### Patch Changes
