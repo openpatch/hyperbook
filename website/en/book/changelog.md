@@ -38,7 +38,7 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
-## v0.100.4
+## v0.100.5
 ::::tabs
 
 :::tab{title="Improved :+1:" id="improved"}
@@ -49,7 +49,7 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 
 ::::
 
-## v0.100.3
+## v0.100.4
 
 ::::tabs
 
