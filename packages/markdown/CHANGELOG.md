@@ -1,5 +1,68 @@
 # @hyperbook/markdown
 
+## 0.71.4
+
+### Patch Changes
+
+- [`d91255b`](https://github.com/openpatch/hyperbook/commit/d91255bb77ce954056c8caa7780a1e7048e60b9d) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Improve the cloud sync indicator:
+
+  - Each sync state now has its own badge shape on the toolbar icon. Every state
+    previously rendered the identical person glyph, distinguished only by fill
+    color, so amber "unsynced" and green "synced" were indistinguishable to a
+    red-green color blind reader.
+  - Sync states a reader can act on are now surfaced outside the user drawer.
+    Being offline or failing to save was only visible in a drawer most readers
+    never open. The notice offers a retry when a save fails, and says how much is
+    waiting while offline. Successful saves stay silent.
+  - A sync conflict no longer reloads the page without warning. The merge is
+    explained first, with a "Reload now" button, and the reload follows a few
+    seconds later. Reloading is still necessary because directives read the store
+    once at startup, but it is no longer a surprise.
+  - The toolbar button carries an accessible name that tracks the sync state, and
+    the status line is an `aria-live` region, so a change is announced rather than
+    only shown.
+  - The status line reports what it already knew but discarded: how long ago the
+    last save landed, and how many batches are waiting while offline. "Saved
+    locally" alone read as "you are all done".
+  - The toolbar icon no longer stops updating when the shell is rendered without
+    the user drawer.
+  - Status colors meet WCAG AA contrast and follow the light/dark theme; they
+    were fixed mid-tones at roughly 2-3:1 on white.
+  - `hyperbook.i18n.get` honors its fallback argument. Ten call sites in the
+    cloud UI passed one, but the parameter did not exist, so a missing key
+    rendered the raw key id.
+  - The impersonation banner offsets only the element after it, not every
+    following sibling, and builds its markup as nodes instead of interpolating
+    the username into `innerHTML`.
+
+- [`d91255b`](https://github.com/openpatch/hyperbook/commit/d91255bb77ce954056c8caa7780a1e7048e60b9d) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix several data-loss and corruption bugs in cloud sync:
+
+  - Loading from the cloud no longer fails whenever the server has events but no
+    snapshot. The reconstruction the server builds from an event log alone
+    carries a placeholder database version, which `import` rejected outright —
+    so a user's work synced up but never came back down, silently, until
+    something happened to post a full snapshot.
+  - The event watermark is now stored per hyperbook. Two hyperbooks served from
+    the same origin shared one `localStorage` key, so each sent the other's
+    `afterEventId` and got stuck in a permanent conflict loop.
+  - A sync conflict no longer discards local work. The client now pulls the
+    server state, replays its pending events on top of it locally and remotely,
+    and only then reloads.
+  - Offline batches now chain onto the watermark each one returns. Every batch
+    after the first previously carried a watermark recorded before the flush and
+    was rejected, discarding the whole queue.
+  - Events now carry their Dexie primary-key schema, so the server can replay
+    onto a table it has no snapshot for without assuming the key field is `id`.
+  - Ephemeral `currentState` (cursor, scroll, window size) is no longer included
+    in cloud snapshots; it was already excluded from events.
+  - A batch rejected with a 4xx is dropped instead of being retried forever, and
+    a 404 from the cloud no longer throws a `TypeError` that looked transient.
+  - Concurrent `online` events can no longer start two overlapping queue flushes.
+  - Closing the tab now flushes pending changes with a `keepalive` request
+    instead of only warning. Anything changed inside the debounce window was
+    lost when the tab closed, and `beforeunload` never fires at all on mobile
+    Safari or when a background tab is discarded.
+
 ## 0.71.3
 
 ### Patch Changes
