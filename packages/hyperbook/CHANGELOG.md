@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.100.6
+
+### Patch Changes
+
+- [`354df02`](https://github.com/openpatch/hyperbook/commit/354df02e9f7070c2ed4557e961efac688fb2b202) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Update onlineide to fix pen bug.
+
 ## 0.100.5
 
 ### Patch Changes
