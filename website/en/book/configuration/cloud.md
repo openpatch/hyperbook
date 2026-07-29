@@ -41,7 +41,8 @@ Once logged in, the following happens automatically:
 - **State synchronization** — All interactive element state (code editors, bookmarks, collapsibles, excalidraw drawings, etc.) is saved to the cloud server.
 - **Cross-device access** — Students can continue where they left off on any device.
 - **Offline support** — Changes are queued locally when offline and synced when the connection is restored.
-- **Auto-save indicator** — A status icon shows the current sync state (saved, saving, unsaved, offline).
+- **Auto-save indicator** — A status icon in the toolbar shows the current sync state. Each state has its own badge shape, so it does not rely on color alone, and the button's label reads out the state for screen readers.
+- **Sync notices** — States you can act on — a failed save, being offline, a merge with another session — are surfaced in a notice at the bottom of the page, with a retry button where one applies. Successful saves stay silent.
 
 When logged into the cloud, local export, import, and reset buttons are hidden to prevent conflicts with cloud-managed state.
 
@@ -60,13 +61,37 @@ Instead of sending the entire store on every change, Hyperbook Cloud uses an eve
 
 If an event batch exceeds 512 KB (e.g., large Excalidraw drawings or Geogebra states), the client falls back to sending a full snapshot instead of individual events. This prevents bandwidth issues with large binary data.
 
-### Conflict Detection
+### Conflict Detection and Merging
 
-The client tracks the last known event ID from the server. When sending events, it includes this ID as `afterEventId`. If the server detects that the client is out of date (e.g., another device sent events in the meantime), it responds with a 409 conflict and the client re-fetches the latest state.
+The client tracks the last known event ID from the server. When sending events, it includes this ID as `afterEventId`. If the server detects that the client is out of date (e.g., another device sent events in the meantime), it responds with a 409 conflict.
+
+A conflict never discards local work. The client:
+
+1. Fetches the current server state and imports it,
+2. Replays its pending events on top of that state, locally and on the server,
+3. Explains the merge in a notice and reloads the page.
+
+The reload is necessary because interactive elements read the store once when the page loads, so the page still shows pre-merge state until it happens. It is announced rather than immediate, and the notice offers a **Reload now** button.
+
+The server checks `afterEventId` and appends the batch in a single transaction, so two devices saving at the same moment cannot both pass the check.
+
+Each hyperbook tracks its own event ID. Two hyperbooks served from the same domain do not share a watermark.
 
 ### Offline Queue
 
-When the device is offline, events are stored in a local queue with their `afterEventId`. Once the connection is restored, the queue is replayed in order. If a conflict is detected during replay, the client discards the queue and re-fetches from the server.
+When the device is offline, event batches are stored in a local queue. Once the connection is restored, the queue is sent in order, each batch chaining onto the event ID the previous one returned — the watermark cannot advance while offline, so batches cannot carry one recorded at queue time.
+
+If the server has moved on in the meantime, the queue is merged rather than discarded: the events still waiting are replayed on top of the fetched state, exactly as for an online conflict.
+
+The queue holds at most 100 batches. Beyond that it collapses into a single full snapshot, sent on reconnect.
+
+### Leaving the Page
+
+Changes made inside the debounce window would otherwise be lost if the tab were closed before it elapsed. On `beforeunload` and `pagehide` the client flushes anything pending with a `keepalive` request, which outlives the page. Batches over 60 KB are left for the "unsaved changes" prompt instead, because browsers reject oversized keepalive requests outright.
+
+### What Is Not Synced
+
+Ephemeral interface state — cursor position, scroll offset, window size — is excluded from both events and snapshots. It is per-device by nature, and syncing it made one device pull another's scroll position.
 
 ## Cloud Server
 

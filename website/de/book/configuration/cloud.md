@@ -42,7 +42,8 @@ Nach der Anmeldung passiert automatisch Folgendes:
 - **Zustandssynchronisierung** — Alle Zustände interaktiver Elemente (Code-Editoren, Lesezeichen, Aufklappelemente, Excalidraw-Zeichnungen usw.) werden auf dem Cloud-Server gespeichert.
 - **Geräteübergreifender Zugriff** — Schüler können auf jedem Gerät dort weitermachen, wo sie aufgehört haben.
 - **Offline-Unterstützung** — Änderungen werden lokal zwischengespeichert, wenn keine Verbindung besteht, und synchronisiert, sobald die Verbindung wiederhergestellt ist.
-- **Auto-Save-Anzeige** — Ein Status-Icon zeigt den aktuellen Synchronisierungsstatus an (gespeichert, speichernd, ungespeichert, offline).
+- **Auto-Save-Anzeige** — Ein Status-Icon in der Werkzeugleiste zeigt den aktuellen Synchronisierungsstatus an. Jeder Zustand hat eine eigene Symbolform, verlässt sich also nicht allein auf Farbe, und die Beschriftung der Schaltfläche gibt den Zustand für Screenreader wieder.
+- **Synchronisierungshinweise** — Zustände, auf die du reagieren kannst — ein fehlgeschlagenes Speichern, fehlende Verbindung, eine Zusammenführung mit einer anderen Sitzung — werden in einem Hinweis am unteren Seitenrand angezeigt, mit Wiederholen-Schaltfläche, wo sie sinnvoll ist. Erfolgreiches Speichern bleibt stumm.
 
 Wenn man in die Cloud eingeloggt ist, werden die lokalen Export-, Import- und Zurücksetzen-Buttons ausgeblendet, um Konflikte mit dem Cloud-verwalteten Zustand zu vermeiden.
 
@@ -61,13 +62,37 @@ Anstatt bei jeder Änderung den gesamten Speicher zu senden, verwendet Hyperbook
 
 Wenn ein Event-Batch 512 KB überschreitet (z. B. große Excalidraw-Zeichnungen oder Geogebra-Zustände), sendet der Client stattdessen einen vollständigen Snapshot anstelle einzelner Events. Dies verhindert Bandbreitenprobleme bei großen Binärdaten.
 
-### Konflikterkennung
+### Konflikterkennung und Zusammenführung
 
-Der Client verfolgt die letzte bekannte Event-ID vom Server. Beim Senden von Events wird diese ID als `afterEventId` mitgesendet. Wenn der Server erkennt, dass der Client veraltet ist (z. B. weil ein anderes Gerät zwischenzeitlich Events gesendet hat), antwortet er mit einem 409-Konflikt und der Client ruft den neuesten Zustand erneut ab.
+Der Client verfolgt die letzte bekannte Event-ID vom Server. Beim Senden von Events wird diese ID als `afterEventId` mitgesendet. Wenn der Server erkennt, dass der Client veraltet ist (z. B. weil ein anderes Gerät zwischenzeitlich Events gesendet hat), antwortet er mit einem 409-Konflikt.
+
+Ein Konflikt verwirft niemals lokale Arbeit. Der Client:
+
+1. ruft den aktuellen Server-Zustand ab und importiert ihn,
+2. spielt seine ausstehenden Events darauf erneut ab — lokal und auf dem Server,
+3. erklärt die Zusammenführung in einem Hinweis und lädt die Seite neu.
+
+Das Neuladen ist nötig, weil interaktive Elemente den Store nur einmal beim Laden der Seite lesen; bis dahin zeigt die Seite den Zustand vor der Zusammenführung. Es wird angekündigt statt sofort ausgeführt, und der Hinweis bietet eine Schaltfläche **Jetzt neu laden**.
+
+Der Server prüft `afterEventId` und fügt den Batch in einer einzigen Transaktion an. Zwei Geräte, die im selben Moment speichern, können die Prüfung daher nicht beide bestehen.
+
+Jedes Hyperbook verfolgt seine eigene Event-ID. Zwei Hyperbooks unter derselben Domain teilen sich keinen Zählerstand.
 
 ### Offline-Warteschlange
 
-Wenn das Gerät offline ist, werden Events in einer lokalen Warteschlange mit ihrer `afterEventId` gespeichert. Sobald die Verbindung wiederhergestellt ist, wird die Warteschlange der Reihe nach abgearbeitet. Wird während der Wiedergabe ein Konflikt erkannt, verwirft der Client die Warteschlange und ruft den Zustand erneut vom Server ab.
+Wenn das Gerät offline ist, werden Event-Batches in einer lokalen Warteschlange gespeichert. Sobald die Verbindung wiederhergestellt ist, wird die Warteschlange der Reihe nach gesendet, wobei jeder Batch an die Event-ID des vorherigen anknüpft — der Zählerstand kann offline nicht weiterlaufen, daher dürfen Batches keinen zum Zeitpunkt des Einreihens gemerkten Stand mitführen.
+
+Hat der Server sich zwischenzeitlich weiterbewegt, wird die Warteschlange zusammengeführt statt verworfen: Die noch wartenden Events werden auf dem abgerufenen Zustand erneut abgespielt, genau wie bei einem Online-Konflikt.
+
+Die Warteschlange fasst höchstens 100 Batches. Darüber hinaus wird sie zu einem einzigen vollständigen Snapshot zusammengefasst, der beim Wiederverbinden gesendet wird.
+
+### Verlassen der Seite
+
+Änderungen innerhalb des Debounce-Fensters gingen sonst verloren, wenn der Tab vor dessen Ablauf geschlossen wird. Bei `beforeunload` und `pagehide` sendet der Client alles Ausstehende mit einem `keepalive`-Request, der die Seite überdauert. Batches über 60 KB bleiben stattdessen der Warnung zu ungespeicherten Änderungen überlassen, da Browser zu große Keepalive-Requests grundsätzlich ablehnen.
+
+### Was nicht synchronisiert wird
+
+Flüchtiger Oberflächenzustand — Cursorposition, Scrollposition, Fenstergröße — ist von Events und Snapshots ausgenommen. Er ist naturgemäß gerätespezifisch, und seine Synchronisierung führte dazu, dass ein Gerät die Scrollposition eines anderen übernahm.
 
 ## Cloud-Server
 

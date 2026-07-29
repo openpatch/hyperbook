@@ -38,6 +38,46 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.100.3
+
+::::tabs
+
+:::tab{title="Improved :+1:" id="improved"}
+
+**cloud**: The sync indicator tells its states apart by shape, not only by color. Every state previously drew the same person icon in a different shade, which made "unsynced" and "synced" indistinguishable for red-green color blind readers. The toolbar button now also carries the current state as its accessible name, and the status line is announced when it changes.
+
+**cloud**: States you can act on are surfaced outside the user drawer. A failed save, being offline, or a merge with another session now appear in a notice at the bottom of the page — with a retry button for a failed save, and a count of how much is still waiting while offline. Successful saves stay silent.
+
+**cloud**: A sync conflict explains itself before reloading. The page still has to reload so interactive elements pick up the merged state, but it is announced first, with a **Reload now** button, instead of happening without warning.
+
+**cloud**: The status line reports how long ago the last save landed.
+
+:::
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+**cloud**: Loading from the cloud failed whenever the server held events but no snapshot yet. The failure was silent, so work synced up but never came back down — on a second device, after clearing browser data, or during a conflict merge — until something happened to upload a full snapshot.
+
+**cloud**: A sync conflict no longer discards local work. The client fetches the server state, replays its pending changes on top of it both locally and on the server, and only then reloads.
+
+**cloud**: Changes made offline are no longer lost on reconnect. Every queued batch after the first carried an event ID recorded before the flush, so the server rejected it and the whole queue was discarded.
+
+**cloud**: Closing the tab no longer loses changes made in the last few seconds. Saves are debounced by up to two seconds, and nothing was sent when the page went away — it only warned. Pending changes are now flushed with a request that outlives the page.
+
+**cloud**: Two hyperbooks served from the same domain no longer share one sync counter, which put both into a permanent conflict loop.
+
+**cloud**: The server keys rows by each table's own primary key. Tables not keyed by `id` — bookmarks, online IDE scripts, SQL IDE databases — were rewritten with a bogus `id` field, and updates and deletes against them silently missed.
+
+**cloud**: Replaying the same events twice no longer duplicates rows, and updates to nested fields (such as a saved zoom level) are no longer dropped.
+
+**cloud**: Cursor position, scroll offset and window size are no longer uploaded, so one device no longer pulls another's scroll position.
+
+**cloud**: A change the server rejects is dropped instead of being retried forever, which used to block every later change behind it.
+
+:::
+
+::::
+
 ## v0.100.2
 
 ::::tabs

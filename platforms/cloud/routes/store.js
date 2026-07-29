@@ -58,8 +58,12 @@ router.post(
       var events = req.body.events;
       var afterEventId = req.body.afterEventId;
 
-      if (!Array.isArray(events) || events.length === 0) {
-        res.status(400).json({ error: "Events array required" });
+      // Reject malformed batches with a 400 rather than letting a bad
+      // operation trip the CHECK constraint and surface as a 500 — the client
+      // retries 5xx forever, but treats 4xx as terminal.
+      var validationError = db.validateEvents(events);
+      if (validationError) {
+        res.status(400).json({ error: validationError });
         return;
       }
 
@@ -73,27 +77,26 @@ router.post(
         return;
       }
 
-      // Validate afterEventId matches server's latest
-      var currentLatest = await db.getLatestEventId(userId, hyperbook.id);
-      var latestSnapshot = await db.getLatestSnapshot(userId, hyperbook.id);
-      var serverLatest = Math.max(
-        currentLatest,
-        latestSnapshot ? latestSnapshot.last_event_id : 0
+      // The staleness check and the append happen in one transaction, so two
+      // concurrent batches cannot both observe the same watermark and append.
+      var result = await db.appendEventsIfCurrent(
+        userId,
+        hyperbook.id,
+        events,
+        afterEventId
       );
 
-      if (afterEventId !== null && afterEventId !== undefined && afterEventId !== serverLatest) {
+      if (result.conflict) {
         res.status(409).json({
           error: "Stale state — re-fetch required",
-          serverLastEventId: serverLatest,
+          serverLastEventId: result.serverLastEventId,
         });
         return;
       }
 
-      var lastEventId = await db.appendEvents(userId, hyperbook.id, events);
-
       res.json({
         success: true,
-        lastEventId: lastEventId,
+        lastEventId: result.lastEventId,
       });
     } catch (error) {
       console.error("Append events error:", error);
@@ -132,16 +135,12 @@ router.post(
         return;
       }
 
-      var snapshotId = await db.replaceWithSnapshot(
-        userId,
-        hyperbook.id,
-        data
-      );
+      var result = await db.replaceWithSnapshot(userId, hyperbook.id, data);
 
       res.json({
         success: true,
-        snapshotId: snapshotId,
-        lastEventId: 0,
+        snapshotId: result.snapshotId,
+        lastEventId: result.lastEventId,
       });
     } catch (error) {
       console.error("Save snapshot error:", error);

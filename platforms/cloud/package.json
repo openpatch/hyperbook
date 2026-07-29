@@ -22,6 +22,9 @@
     "nodemailer": "^8.0.1"
   },
   "devDependencies": {
+    "dexie": "^4.2.1",
+    "dexie-export-import": "^4.1.4",
+    "fake-indexeddb": "^6.2.5",
     "vitest": "^4.0.18"
   }
 }

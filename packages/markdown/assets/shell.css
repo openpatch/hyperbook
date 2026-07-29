@@ -78,27 +78,27 @@ side-drawer {
   border-right-color: var(--color-nav-border);
 }
 
-.sidebar>.author,
-.nav-drawer-content>.author {
+.sidebar > .author,
+.nav-drawer-content > .author {
   color: var(--color-author-color);
   background: var(--color-author-background);
 }
 
-.sidebar>.author:hover,
-.nav-drawer-content>.author:hover {
+.sidebar > .author:hover,
+.nav-drawer-content > .author:hover {
   color: var(--color-brand);
 }
 
 /* Three bars for burger menu */
-.toggle>.bar1,
-.toggle>.bar2,
-.toggle>.bar3 {
+.toggle > .bar1,
+.toggle > .bar2,
+.toggle > .bar3 {
   background-color: var(--color-brand-text);
 }
 
-.inverted .toggle>.bar1,
-.inverted .toggle>.bar2,
-.inverted .toggle>.bar3 {
+.inverted .toggle > .bar1,
+.inverted .toggle > .bar2,
+.inverted .toggle > .bar3 {
   background-color: var(--color-brand);
 }
 
@@ -119,11 +119,11 @@ header.inverted {
   color: var(--color-brand-text);
 }
 
-header.inverted>.branding {
+header.inverted > .branding {
   color: var(--color-brand);
 }
 
-header.inverted>.branding:hover {
+header.inverted > .branding:hover {
   color: var(--color-brand);
 }
 
@@ -131,25 +131,25 @@ header.inverted>.branding:hover {
   border-top-color: var(--color-spacer);
 }
 
-.section>.name {
+.section > .name {
   color: var(--color-text);
   border-color: var(--color-spacer);
 }
 
-.section>.name>.label {
+.section > .name > .label {
   color: var(--color-text);
 }
 
 /* `active` and `empty` sit on the <details>, not on the <summary>. */
-.section.active>.name>.label {
+.section.active > .name > .label {
   color: var(--color-brand);
 }
 
-.section>.name:hover {
+.section > .name:hover {
   background: var(--color-spacer);
 }
 
-.section.active>.name {
+.section.active > .name {
   background: var(--color-background);
   color: var(--color-brand);
 }
@@ -168,7 +168,7 @@ header.inverted>.branding:hover {
   color: var(--color-brand);
 }
 
-.section>.links {
+.section > .links {
   border-left-color: var(--color-spacer);
 }
 
@@ -268,26 +268,26 @@ a.jump.previous::before {
   border-right-color: var(--color-nav-border);
 }
 
-.sidebar>nav,
-.nav-drawer-content>nav {
+.sidebar > nav,
+.nav-drawer-content > nav {
   padding: 1rem;
   flex: 1;
 }
 
-.sidebar>.author,
-.nav-drawer-content>.author {
+.sidebar > .author,
+.nav-drawer-content > .author {
   text-align: center;
   text-decoration: none;
   padding: 1rem;
 }
 
-.sidebar>.author,
-.nav-drawer-content>.author>b {
+.sidebar > .author,
+.nav-drawer-content > .author > b {
   font-weight: bold;
 }
 
-.sidebar>.author>.author-version,
-.nav-drawer-content>.author>.author-version {
+.sidebar > .author > .author-version,
+.nav-drawer-content > .author > .author-version {
   display: block;
   font-size: 0.7rem;
   opacity: 0.6;
@@ -309,9 +309,9 @@ a.jump.previous::before {
   cursor: pointer;
 }
 
-.toggle>.bar1,
-.toggle>.bar2,
-.toggle>.bar3 {
+.toggle > .bar1,
+.toggle > .bar2,
+.toggle > .bar3 {
   width: 30px;
   height: 4px;
   margin: 6px 0;
@@ -464,7 +464,7 @@ header {
   margin-right: 0.5rem;
 }
 
-#custom-links-footer>.links-item {
+#custom-links-footer > .links-item {
   border-radius: 0.5rem;
   padding: 0.5rem;
   border: 1px solid var(--color-nav-border);
@@ -644,13 +644,13 @@ header {
 
 .section ul,
 .virtual-section ul,
-nav>ul {
+nav > ul {
   list-style-type: none;
   margin: 0;
   padding: 0;
 }
 
-nav li+li {
+nav li + li {
   margin-top: 0px;
 }
 
@@ -684,7 +684,7 @@ nav li+li {
   display: none;
 }
 
-.section summary.name>.label {
+.section summary.name > .label {
   flex: 1;
   text-decoration: none;
 }
@@ -696,13 +696,13 @@ nav li+li {
    Both rules are scoped with child combinators. Sections nest, so a descendant
    selector would style a subsection according to its parent — a subsection with
    content sitting inside an empty section came out italic. */
-.section.empty>summary.name>.label {
+.section.empty > summary.name > .label {
   font-style: italic;
 }
 
 /* A section that has its own page: the title is a real link and behaves like
    one, while clicking elsewhere in the row just expands the section. */
-.section:not(.empty)>summary.name>.label:hover {
+.section:not(.empty) > summary.name > .label:hover {
   text-decoration: underline;
 }
 
@@ -715,7 +715,7 @@ nav li+li {
   margin-left: 0.25rem;
 }
 
-.section[open]>summary.name:after {
+.section[open] > summary.name:after {
   content: "\2212";
 }
 
@@ -730,7 +730,7 @@ nav li+li {
   text-decoration: none;
 }
 
-.section>.links {
+.section > .links {
   border-left-width: 1px;
   border-left-style: solid;
 }
@@ -762,12 +762,12 @@ nav.toc li {
   margin-bottom: 0.5rem;
 }
 
-nav.toc li>a {
+nav.toc li > a {
   color: var(--color-text);
   text-decoration: none;
 }
 
-nav.toc li>a:hover {
+nav.toc li > a:hover {
   color: var(--color-brand);
 }
 
@@ -957,47 +957,112 @@ nav.toc li.level-3 {
 }
 
 .user-icon {
+  position: relative;
   width: 24px;
   height: 24px;
+}
+
+/* The person glyph. Constant across every state — what changes is the badge. */
+.user-icon::before {
+  content: "";
+  position: absolute;
+  inset: 0;
   background-color: var(--color-brand-text);
   mask-size: contain;
   mask-repeat: no-repeat;
   mask-position: center;
-  /* not-logged-in: person with question mark */
-  mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>');
+  mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>');
   opacity: 0.5;
 }
 
-/* logged-in: solid person */
-.user-icon[data-state="logged-in"] {
-  mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>');
+.user-icon:not([data-state="not-logged-in"])::before {
   opacity: 1;
 }
 
-/* unsynced: person with exclamation */
-.user-icon[data-state="unsynced"] {
-  mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>');
-  opacity: 1;
-  background-color: #f59e0b;
+/*
+ * The sync badge.
+ *
+ * Each state gets its own shape, not merely its own colour: this icon is the
+ * only ambient sync indicator in the shell, and amber-vs-green at 24px is
+ * indistinguishable to a red-green colour blind reader (WCAG 1.4.1). The disc
+ * is drawn with fill-rule="evenodd" so the glyph is punched out of it, and the
+ * drop-shadow ring keeps it legible over the person glyph beneath.
+ */
+.user-icon::after {
+  content: "";
+  position: absolute;
+  right: -3px;
+  bottom: -3px;
+  width: 13px;
+  height: 13px;
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  filter: drop-shadow(0 0 1.5px var(--color-background))
+    drop-shadow(0 0 1.5px var(--color-background));
 }
 
-/* syncing: person with rotating animation */
-.user-icon[data-state="syncing"] {
-  mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>');
-  opacity: 1;
+/* No badge until there is a session whose sync state means anything. */
+.user-icon[data-state="not-logged-in"]::after,
+.user-icon[data-state="logged-in"]::after {
+  content: none;
+}
+
+/* pending: unsent changes are waiting */
+.user-icon[data-state="pending"]::after {
+  background-color: var(--color-sync-pending);
+  mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 1a11 11 0 100 22 11 11 0 000-22zM7 10.6a1.6 1.6 0 100 3.2 1.6 1.6 0 100-3.2zm5 0a1.6 1.6 0 100 3.2 1.6 1.6 0 100-3.2zm5 0a1.6 1.6 0 100 3.2 1.6 1.6 0 100-3.2z"/></svg>');
+}
+
+/* syncing: a save is in flight */
+.user-icon[data-state="syncing"]::after {
+  background-color: var(--color-sync-active);
+  mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 1a11 11 0 100 22 11 11 0 000-22zM9 5.2l4 4.2h-2.8v4.2H7.8V9.4H5zm6 13.6l-4-4.2h2.8v-4.2h2.4v4.2H19z"/></svg>');
+}
+
+/* synced: everything is on the server */
+.user-icon[data-state="synced"]::after {
+  background-color: var(--color-sync-ok);
+  mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 1a11 11 0 100 22 11 11 0 000-22zM17.1 8.4l-1.6-1.6-4.8 4.8-2.2-2.2-1.6 1.6 3.8 3.8z"/></svg>');
+}
+
+/* error: the last save failed */
+.user-icon[data-state="error"]::after {
+  background-color: var(--color-sync-error);
+  mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 1a11 11 0 100 22 11 11 0 000-22zM10.8 5.6h2.4v7.2h-2.4zm0 8.8h2.4v2.4h-2.4z"/></svg>');
+}
+
+/* offline: no connection */
+.user-icon[data-state="offline"]::after {
+  background-color: var(--color-sync-idle);
+  mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 1a11 11 0 100 22 11 11 0 000-22zM6.6 5.1l12.3 12.3-1.5 1.5L5.1 6.6z"/></svg>');
+}
+
+/* readonly: impersonation, no writes */
+.user-icon[data-state="readonly"]::after {
+  background-color: var(--color-sync-readonly);
+  mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 1a11 11 0 100 22 11 11 0 000-22zM12 7.2c-3 0-5.4 2-6.3 4.8.9 2.8 3.3 4.8 6.3 4.8s5.4-2 6.3-4.8c-.9-2.8-3.3-4.8-6.3-4.8zm0 8a3.2 3.2 0 110-6.4 3.2 3.2 0 010 6.4z"/></svg>');
+}
+
+.user-icon[data-state="syncing"]::after {
   animation: user-icon-pulse 1s ease-in-out infinite;
 }
 
-/* synced: person with checkmark feel */
-.user-icon[data-state="synced"] {
-  mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>');
-  opacity: 1;
-  background-color: #22c55e;
+@keyframes user-icon-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
 }
 
-@keyframes user-icon-pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
+/* The badge shape already carries the state; motion is decoration. */
+@media (prefers-reduced-motion: reduce) {
+  .user-icon[data-state="syncing"]::after {
+    animation: none;
+  }
 }
 
 #user-drawer {
@@ -1073,33 +1138,99 @@ nav.toc li.level-3 {
   font-weight: normal;
 }
 
-#user-save-status.unsaved {
-  color: #f39c12;
+#user-save-status.unsaved,
+#user-save-status.offline-queued {
+  color: var(--color-sync-pending);
 }
 
 #user-save-status.saving {
-  color: #f39c12;
+  color: var(--color-sync-active);
 }
 
 #user-save-status.saved {
-  color: #27ae60;
+  color: var(--color-sync-ok);
 }
 
 #user-save-status.error {
-  color: #e74c3c;
+  color: var(--color-sync-error);
 }
 
 #user-save-status.offline {
-  color: #95a5a6;
-}
-
-#user-save-status.offline-queued {
-  color: #f39c12;
+  color: var(--color-sync-idle);
 }
 
 #user-save-status.readonly {
-  color: #e67e22;
+  color: var(--color-sync-readonly);
   font-weight: bold;
+}
+
+/*
+ * Ambient sync notice.
+ *
+ * Only shown for states the reader can act on — offline, a failed save, a
+ * merge. The status line it complements lives inside the user drawer, which
+ * most readers never open.
+ */
+#cloud-sync-notice {
+  font-family: hyperbook-body, sans-serif;
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 9999;
+  max-width: min(28rem, calc(100vw - 32px));
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid currentColor;
+  background: var(--color-background);
+  box-shadow: 0 4px 16px rgb(0 0 0 / 18%);
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+#cloud-sync-notice > span {
+  color: var(--color-text);
+}
+
+#cloud-sync-notice.error {
+  color: var(--color-sync-error);
+}
+
+#cloud-sync-notice.warning {
+  color: var(--color-sync-pending);
+}
+
+#cloud-sync-notice.info {
+  color: var(--color-sync-active);
+}
+
+#cloud-sync-notice button {
+  flex: none;
+  font: inherit;
+  font-weight: bold;
+  cursor: pointer;
+  color: inherit;
+  background: none;
+  border: 1px solid currentColor;
+  border-radius: 5px;
+  padding: 4px 10px;
+}
+
+#cloud-sync-notice button:hover,
+#cloud-sync-notice button:focus-visible {
+  /* A tint rather than a fill: inverting would resolve `currentColor` against
+     the overridden colour and paint the button its own background. */
+  background: color-mix(in srgb, currentColor 15%, transparent);
+}
+
+@media (max-width: 40rem) {
+  #cloud-sync-notice {
+    left: 16px;
+    right: 16px;
+    max-width: none;
+  }
 }
 
 #impersonation-banner {
@@ -1129,7 +1260,7 @@ nav.toc li.level-3 {
   opacity: 0.8;
 }
 
-#impersonation-banner ~ * {
+#impersonation-banner + * {
   margin-top: 36px;
 }
 

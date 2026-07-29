@@ -15,17 +15,24 @@ hyperbook.i18n = (function () {
    * Get a translated string by key, with optional placeholder substitution.
    * @param {string} key - The translation key.
    * @param {Record<string, string>} [values] - Placeholder values to substitute.
-   * @returns {string} The translated string, or the key itself if not found.
+   * @param {string} [fallback] - Used when the key has no translation. Without
+   *   it the key itself is rendered, which surfaces raw ids like
+   *   "user-save-conflict" in the UI.
+   * @returns {string} The translated string, the fallback, or the key.
    */
-  const get = (key, values) => {
+  const get = (key, values, fallback) => {
     if (!locales[key]) {
       console.warn(
         `Missing translation for key '${key}'`
       );
-      return key;
+      if (fallback === undefined) return key;
+      return substitute(fallback, values);
     }
 
-    let translation = locales[key];
+    return substitute(locales[key], values);
+  };
+
+  const substitute = (translation, values) => {
     if (values) {
       for (const [key, value] of Object.entries(values)) {
         translation = translation.replace(`{{${key}}}`, value);

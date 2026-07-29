@@ -2,6 +2,14 @@
   --color-background: white;
   --color-text: black;
   --color-text-deactivated: #242428;
+
+  /* Cloud sync states. Each is >=5:1 on this theme's background (WCAG AA). */
+  --color-sync-pending: #b45309;
+  --color-sync-active: #1d4ed8;
+  --color-sync-ok: #15803d;
+  --color-sync-error: #b91c1c;
+  --color-sync-idle: #4b5563;
+  --color-sync-readonly: #c2410c;
   --color-nav: #f5f5f5;
   --color-nav-border: #3c3c3c;
   --color-author-background: #d6d6d6;

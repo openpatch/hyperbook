@@ -1,11 +1,25 @@
 var Database = require("better-sqlite3");
+var eventSourcing = require("./eventSourcing");
 
-var dbPath = process.env.DATABASE_PATH || "./database.sqlite";
+var db = null;
 
-var db = new Database(dbPath);
+/**
+ * Open the sqlite handle on first use rather than at import time, so that the
+ * process is free to set DATABASE_PATH (dotenv, tests) before the connection
+ * is made, and so tests can inject a database and exercise the real module.
+ */
+function getDb() {
+  if (!db) db = new Database(process.env.DATABASE_PATH || "./database.sqlite");
+  return db;
+}
+
+/** Replace the sqlite handle. Intended for tests. */
+function setDatabase(instance) {
+  db = instance;
+}
 
 function runAsync(sql, params) {
-  var stmt = db.prepare(sql);
+  var stmt = getDb().prepare(sql);
   var result = stmt.run.apply(stmt, params || []);
   return Promise.resolve({
     lastID: result.lastInsertRowid,
@@ -14,21 +28,21 @@ function runAsync(sql, params) {
 }
 
 function getAsync(sql, params) {
-  var stmt = db.prepare(sql);
+  var stmt = getDb().prepare(sql);
   var row = stmt.get.apply(stmt, params || []);
   return Promise.resolve(row);
 }
 
 function allAsync(sql, params) {
-  var stmt = db.prepare(sql);
+  var stmt = getDb().prepare(sql);
   var rows = stmt.all.apply(stmt, params || []);
   return Promise.resolve(rows);
 }
 
 function initializeDatabase() {
-  db.pragma("foreign_keys = ON");
+  getDb().pragma("foreign_keys = ON");
 
-  db.exec(
+  getDb().exec(
     "CREATE TABLE IF NOT EXISTS hyperbooks (" +
       "id INTEGER PRIMARY KEY AUTOINCREMENT," +
       "slug TEXT UNIQUE NOT NULL," +
@@ -39,7 +53,7 @@ function initializeDatabase() {
       ")"
   );
 
-  db.exec(
+  getDb().exec(
     "CREATE TABLE IF NOT EXISTS groups (" +
       "id INTEGER PRIMARY KEY AUTOINCREMENT," +
       "hyperbook_id INTEGER NOT NULL," +
@@ -52,15 +66,15 @@ function initializeDatabase() {
   );
 
   // Check if the users table needs migration (add teacher role + email column)
-  var tableInfo = db.pragma("table_info(users)");
+  var tableInfo = getDb().pragma("table_info(users)");
   var hasEmail = tableInfo.some(function (col) {
     return col.name === "email";
   });
 
   if (tableInfo.length > 0 && !hasEmail) {
     // Migrate: recreate users table with teacher role and email column
-    db.exec("PRAGMA foreign_keys = OFF");
-    db.exec(
+    getDb().exec("PRAGMA foreign_keys = OFF");
+    getDb().exec(
       "CREATE TABLE users_new (" +
         "id INTEGER PRIMARY KEY AUTOINCREMENT," +
         "username TEXT UNIQUE NOT NULL," +
@@ -72,16 +86,16 @@ function initializeDatabase() {
         "FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE CASCADE" +
         ")"
     );
-    db.exec(
+    getDb().exec(
       "INSERT INTO users_new (id, username, password, role, group_id, created_at) " +
         "SELECT id, username, password, role, group_id, created_at FROM users"
     );
-    db.exec("DROP TABLE users");
-    db.exec("ALTER TABLE users_new RENAME TO users");
-    db.exec("PRAGMA foreign_keys = ON");
+    getDb().exec("DROP TABLE users");
+    getDb().exec("ALTER TABLE users_new RENAME TO users");
+    getDb().exec("PRAGMA foreign_keys = ON");
     console.log("✓ Migrated users table (added teacher role + email)");
   } else if (tableInfo.length === 0) {
-    db.exec(
+    getDb().exec(
       "CREATE TABLE IF NOT EXISTS users (" +
         "id INTEGER PRIMARY KEY AUTOINCREMENT," +
         "username TEXT UNIQUE NOT NULL," +
@@ -97,7 +111,7 @@ function initializeDatabase() {
 
   // === Event-sourcing tables ===
 
-  db.exec(
+  getDb().exec(
     "CREATE TABLE IF NOT EXISTS events (" +
       "id INTEGER PRIMARY KEY AUTOINCREMENT," +
       "user_id INTEGER NOT NULL," +
@@ -112,12 +126,35 @@ function initializeDatabase() {
       ")"
   );
 
-  db.exec(
+  getDb().exec(
     "CREATE INDEX IF NOT EXISTS idx_events_user_hyperbook " +
       "ON events (user_id, hyperbook_id, id)"
   );
 
-  db.exec(
+  // Add prim_key_json to events if missing (migration).
+  // The legacy prim_key column stores String(primKey), which loses the type of
+  // numeric keys and flattens compound keys. prim_key_json keeps the original
+  // value; prim_key is still written for backwards compatibility.
+  var eventColumns = getDb().prepare("PRAGMA table_info(events)").all();
+  var hasPrimKeyJson = eventColumns.some(function (c) {
+    return c.name === "prim_key_json";
+  });
+  if (!hasPrimKeyJson) {
+    getDb().exec("ALTER TABLE events ADD COLUMN prim_key_json TEXT");
+  }
+
+  // Add table_schema to events if missing (migration).
+  // The Dexie primary-key source string ("id", "path", "++id", "[a+b]") for the
+  // table the event targets. Without it the server has to assume "id" for any
+  // table it has not yet seen in a snapshot, corrupting tables keyed otherwise.
+  var hasTableSchema = eventColumns.some(function (c) {
+    return c.name === "table_schema";
+  });
+  if (!hasTableSchema) {
+    getDb().exec("ALTER TABLE events ADD COLUMN table_schema TEXT");
+  }
+
+  getDb().exec(
     "CREATE TABLE IF NOT EXISTS snapshots (" +
       "id INTEGER PRIMARY KEY AUTOINCREMENT," +
       "user_id INTEGER NOT NULL," +
@@ -131,40 +168,40 @@ function initializeDatabase() {
       ")"
   );
 
-  db.exec(
+  getDb().exec(
     "CREATE INDEX IF NOT EXISTS idx_snapshots_user_hyperbook " +
       "ON snapshots (user_id, hyperbook_id, id)"
   );
 
   // Add source column to snapshots if missing (migration)
-  var snapshotColumns = db.prepare("PRAGMA table_info(snapshots)").all();
+  var snapshotColumns = getDb().prepare("PRAGMA table_info(snapshots)").all();
   var hasSourceCol = snapshotColumns.some(function (c) { return c.name === "source"; });
   if (!hasSourceCol) {
-    db.exec("ALTER TABLE snapshots ADD COLUMN source TEXT NOT NULL DEFAULT 'manual'");
+    getDb().exec("ALTER TABLE snapshots ADD COLUMN source TEXT NOT NULL DEFAULT 'manual'");
   }
 
   // Migrate existing stores data into snapshots
-  var hasStoresTable = db
+  var hasStoresTable = getDb()
     .prepare(
       "SELECT name FROM sqlite_master WHERE type='table' AND name='stores'"
     )
     .get();
 
   if (hasStoresTable) {
-    var storeRows = db
+    var storeRows = getDb()
       .prepare("SELECT user_id, hyperbook_id, data, updated_at FROM stores")
       .all();
 
     for (var s = 0; s < storeRows.length; s++) {
       var row = storeRows[s];
-      var existingSnapshot = db
+      var existingSnapshot = getDb()
         .prepare(
           "SELECT id FROM snapshots WHERE user_id = ? AND hyperbook_id = ? LIMIT 1"
         )
         .get(row.user_id, row.hyperbook_id);
 
       if (!existingSnapshot) {
-        db.prepare(
+        getDb().prepare(
           "INSERT INTO snapshots (user_id, hyperbook_id, data, last_event_id, created_at) " +
             "VALUES (?, ?, ?, 0, ?)"
         ).run(row.user_id, row.hyperbook_id, row.data, row.updated_at);
@@ -177,11 +214,11 @@ function initializeDatabase() {
       );
     }
 
-    db.exec("DROP TABLE stores");
+    getDb().exec("DROP TABLE stores");
     console.log("✓ Dropped legacy stores table");
   }
 
-  db.exec(
+  getDb().exec(
     "CREATE TABLE IF NOT EXISTS permissions (" +
       "id INTEGER PRIMARY KEY AUTOINCREMENT," +
       "user_id INTEGER NOT NULL," +
@@ -276,7 +313,7 @@ function getLatestSnapshot(userId, hyperbookId) {
 
 function getEventsSince(userId, hyperbookId, afterEventId) {
   return allAsync(
-    "SELECT id, table_name, operation, prim_key, data, created_at FROM events " +
+    "SELECT id, table_name, operation, prim_key, prim_key_json, table_schema, data, created_at FROM events " +
       "WHERE user_id = ? AND hyperbook_id = ? AND id > ? ORDER BY id ASC",
     [userId, hyperbookId, afterEventId]
   );
@@ -300,36 +337,106 @@ function getLatestEventId(userId, hyperbookId) {
   });
 }
 
-function appendEvents(userId, hyperbookId, events) {
-  var stmt = db.prepare(
-    "INSERT INTO events (user_id, hyperbook_id, table_name, operation, prim_key, data) " +
-      "VALUES (?, ?, ?, ?, ?, ?)"
+function insertEvents(userId, hyperbookId, events) {
+  var stmt = getDb().prepare(
+    "INSERT INTO events (user_id, hyperbook_id, table_name, operation, prim_key, prim_key_json, table_schema, data) " +
+      "VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
   );
 
-  var insertMany = db.transaction(function (evts) {
-    var lastId = 0;
-    for (var i = 0; i < evts.length; i++) {
-      var evt = evts[i];
-      var result = stmt.run(
-        userId,
-        hyperbookId,
-        evt.table,
-        evt.op,
-        String(evt.primKey),
-        evt.data ? JSON.stringify(evt.data) : null
-      );
-      lastId = Number(result.lastInsertRowid);
-    }
-    return lastId;
+  var lastId = 0;
+  for (var i = 0; i < events.length; i++) {
+    var evt = events[i];
+    var result = stmt.run(
+      userId,
+      hyperbookId,
+      evt.table,
+      evt.op,
+      String(evt.primKey),
+      JSON.stringify(evt.primKey),
+      typeof evt.schema === "string" ? evt.schema : null,
+      evt.data ? JSON.stringify(evt.data) : null
+    );
+    lastId = Number(result.lastInsertRowid);
+  }
+  return lastId;
+}
+
+function appendEvents(userId, hyperbookId, events) {
+  var insertMany = getDb().transaction(function (evts) {
+    return insertEvents(userId, hyperbookId, evts);
   });
 
-  var lastEventId = insertMany(events);
-  return Promise.resolve(lastEventId);
+  return Promise.resolve(insertMany(events));
+}
+
+/**
+ * The event id a client must send as `afterEventId` to be considered current.
+ * Snapshots reset the event log, so the snapshot's watermark counts too.
+ */
+function getServerLastEventIdSync(userId, hyperbookId) {
+  var eventRow = getDb()
+    .prepare(
+      "SELECT MAX(id) as max_id FROM events WHERE user_id = ? AND hyperbook_id = ?"
+    )
+    .get(userId, hyperbookId);
+
+  var snapshotRow = getDb()
+    .prepare(
+      "SELECT last_event_id FROM snapshots " +
+        "WHERE user_id = ? AND hyperbook_id = ? ORDER BY id DESC LIMIT 1"
+    )
+    .get(userId, hyperbookId);
+
+  return Math.max(
+    eventRow && eventRow.max_id ? eventRow.max_id : 0,
+    snapshotRow ? snapshotRow.last_event_id : 0
+  );
+}
+
+function getServerLastEventId(userId, hyperbookId) {
+  return Promise.resolve(getServerLastEventIdSync(userId, hyperbookId));
+}
+
+/**
+ * Append a batch only if the client is up to date.
+ *
+ * The staleness check and the insert run inside one transaction. Doing them as
+ * two separate statements let two concurrent requests both read the same
+ * `serverLastEventId`, both pass the check, and both append — silently
+ * interleaving two clients' events instead of returning a 409 to one of them.
+ *
+ * @returns {Promise<{conflict: boolean, lastEventId: number, serverLastEventId: number}>}
+ */
+function appendEventsIfCurrent(userId, hyperbookId, events, afterEventId) {
+  var run = getDb().transaction(function () {
+    var serverLatest = getServerLastEventIdSync(userId, hyperbookId);
+
+    if (
+      afterEventId !== null &&
+      afterEventId !== undefined &&
+      afterEventId !== serverLatest
+    ) {
+      return {
+        conflict: true,
+        lastEventId: serverLatest,
+        serverLastEventId: serverLatest,
+      };
+    }
+
+    var lastId = insertEvents(userId, hyperbookId, events);
+    return {
+      conflict: false,
+      lastEventId: lastId,
+      serverLastEventId: lastId,
+    };
+  });
+
+  return Promise.resolve(run());
 }
 
 function createSnapshot(userId, hyperbookId, data, lastEventId) {
-  var insertAndClean = db.transaction(function () {
-    var result = db
+  var insertAndClean = getDb().transaction(function () {
+    var result = getDb()
       .prepare(
         "INSERT INTO snapshots (user_id, hyperbook_id, data, last_event_id, source) " +
           "VALUES (?, ?, ?, ?, 'auto')"
@@ -339,12 +446,12 @@ function createSnapshot(userId, hyperbookId, data, lastEventId) {
     var newSnapshotId = Number(result.lastInsertRowid);
 
     // Delete older snapshots
-    db.prepare(
+    getDb().prepare(
       "DELETE FROM snapshots WHERE user_id = ? AND hyperbook_id = ? AND id < ?"
     ).run(userId, hyperbookId, newSnapshotId);
 
     // Delete events up to and including lastEventId
-    db.prepare(
+    getDb().prepare(
       "DELETE FROM events WHERE user_id = ? AND hyperbook_id = ? AND id <= ?"
     ).run(userId, hyperbookId, lastEventId);
 
@@ -356,19 +463,19 @@ function createSnapshot(userId, hyperbookId, data, lastEventId) {
 }
 
 function replaceWithSnapshot(userId, hyperbookId, data) {
-  var replaceAll = db.transaction(function () {
+  var replaceAll = getDb().transaction(function () {
     // Delete all events
-    db.prepare(
+    getDb().prepare(
       "DELETE FROM events WHERE user_id = ? AND hyperbook_id = ?"
     ).run(userId, hyperbookId);
 
     // Delete all snapshots
-    db.prepare(
+    getDb().prepare(
       "DELETE FROM snapshots WHERE user_id = ? AND hyperbook_id = ?"
     ).run(userId, hyperbookId);
 
     // Insert new snapshot
-    var result = db
+    var result = getDb()
       .prepare(
         "INSERT INTO snapshots (user_id, hyperbook_id, data, last_event_id, source) " +
           "VALUES (?, ?, ?, 0, 'manual')"
@@ -379,112 +486,8 @@ function replaceWithSnapshot(userId, hyperbookId, data) {
   });
 
   var snapshotId = replaceAll();
-  return Promise.resolve(snapshotId);
-}
-
-/**
- * Apply events to a snapshot to reconstruct the current state.
- * Snapshot data uses wrapper format: { version, data: { hyperbook: dexieExport } }
- * Dexie export has two formats:
- *   1. Real Dexie: tables=[{name,schema,rowCount}], data=[{tableName,inbound,rows}]
- *   2. Simplified: tables=[{name,schema,rowCount,rows}]
- */
-function applyEventsToSnapshot(snapshotData, events) {
-  if (!events || events.length === 0) return snapshotData;
-
-  // Navigate to the Dexie inner data object inside the wrapper format
-  var dexieData = snapshotData.data && snapshotData.data.hyperbook
-    ? snapshotData.data.hyperbook.data
-    : snapshotData.data;
-
-  // Detect format: real Dexie has a data[] array alongside tables[]
-  var useDataArray = Array.isArray(dexieData.data);
-  var schemaList = dexieData.tables || [];
-  var dataList = useDataArray ? dexieData.data : null;
-
-  // Build schema lookup: tableName → schema string
-  var schemaMap = {};
-  for (var s = 0; s < schemaList.length; s++) {
-    schemaMap[schemaList[s].name] = schemaList[s].schema || "id";
-  }
-
-  // Build row data lookup: tableName → entry with rows array
-  var rowDataMap = {};
-  if (useDataArray) {
-    for (var d = 0; d < dataList.length; d++) {
-      rowDataMap[dataList[d].tableName] = dataList[d];
-    }
-  } else {
-    for (var t = 0; t < schemaList.length; t++) {
-      if (!schemaList[t].rows) schemaList[t].rows = [];
-      rowDataMap[schemaList[t].name] = { tableName: schemaList[t].name, inbound: true, rows: schemaList[t].rows };
-    }
-  }
-
-  for (var i = 0; i < events.length; i++) {
-    var evt = events[i];
-    var tableName = evt.table_name;
-    var data = evt.data ? JSON.parse(evt.data) : null;
-
-    // Ensure schema entry exists
-    if (!schemaMap[tableName]) {
-      schemaMap[tableName] = "id";
-      schemaList.push({ name: tableName, schema: "id", rowCount: 0 });
-    }
-
-    // Ensure data entry exists
-    if (!rowDataMap[tableName]) {
-      var newDataEntry = { tableName: tableName, inbound: true, rows: [] };
-      if (useDataArray) {
-        dataList.push(newDataEntry);
-      } else {
-        var schemaEntry = schemaList.find(function (e) { return e.name === tableName; });
-        if (schemaEntry) schemaEntry.rows = [];
-        newDataEntry.rows = schemaEntry ? schemaEntry.rows : [];
-      }
-      rowDataMap[tableName] = newDataEntry;
-    }
-
-    var rows = rowDataMap[tableName].rows;
-    if (!rows) {
-      rows = [];
-      rowDataMap[tableName].rows = rows;
-    }
-    var pkField = schemaMap[tableName].split(",")[0].trim();
-
-    if (evt.operation === "create") {
-      rows.push(data);
-    } else if (evt.operation === "update") {
-      var found = false;
-      for (var r = 0; r < rows.length; r++) {
-        if (String(rows[r][pkField]) === evt.prim_key) {
-          var keys = Object.keys(data);
-          for (var k = 0; k < keys.length; k++) {
-            rows[r][keys[k]] = data[keys[k]];
-          }
-          found = true;
-          break;
-        }
-      }
-      if (!found && data) {
-        data[pkField] = evt.prim_key;
-        rows.push(data);
-      }
-    } else if (evt.operation === "delete") {
-      for (var del = 0; del < rows.length; del++) {
-        if (String(rows[del][pkField]) === evt.prim_key) {
-          rows.splice(del, 1);
-          break;
-        }
-      }
-    }
-
-    // Update rowCount in schema entry
-    var schema = schemaList.find(function (e) { return e.name === tableName; });
-    if (schema) schema.rowCount = rows.length;
-  }
-
-  return snapshotData;
+  // The event log was truncated, so the client's new watermark is 0.
+  return Promise.resolve({ snapshotId: snapshotId, lastEventId: 0 });
 }
 
 /**
@@ -502,16 +505,9 @@ function reconstructState(userId, hyperbookId) {
           return null;
         }
 
-        var snapshotData = snapshot ? JSON.parse(snapshot.data) : {
-          version: 1,
-          data: {
-            hyperbook: {
-              formatName: "dexie",
-              formatVersion: 1,
-              data: { databaseName: "Hyperbook", databaseVersion: 2, tables: [] },
-            },
-          },
-        };
+        var snapshotData = snapshot
+          ? JSON.parse(snapshot.data)
+          : eventSourcing.createEmptySnapshot();
 
         var lastEventId = events.length > 0
           ? events[events.length - 1].id
@@ -531,7 +527,10 @@ function reconstructState(userId, hyperbookId) {
           };
         }
 
-        var reconstructed = applyEventsToSnapshot(snapshotData, events);
+        var reconstructed = eventSourcing.applyEventsToSnapshot(
+          snapshotData,
+          events
+        );
 
         // Create new snapshot if threshold exceeded
         if (events.length >= SNAPSHOT_THRESHOLD) {
@@ -581,6 +580,7 @@ module.exports = {
   runAsync: runAsync,
   getAsync: getAsync,
   allAsync: allAsync,
+  setDatabase: setDatabase,
   initializeDatabase: initializeDatabase,
   ensureAdminUser: ensureAdminUser,
   getUserPermissions: getUserPermissions,
@@ -593,10 +593,14 @@ module.exports = {
   getEventsSince: getEventsSince,
   getEventCountSince: getEventCountSince,
   getLatestEventId: getLatestEventId,
+  getServerLastEventId: getServerLastEventId,
   appendEvents: appendEvents,
+  appendEventsIfCurrent: appendEventsIfCurrent,
   createSnapshot: createSnapshot,
   replaceWithSnapshot: replaceWithSnapshot,
-  applyEventsToSnapshot: applyEventsToSnapshot,
+  applyEventsToSnapshot: eventSourcing.applyEventsToSnapshot,
+  validateEvents: eventSourcing.validateEvents,
+  createEmptySnapshot: eventSourcing.createEmptySnapshot,
   reconstructState: reconstructState,
   getStoreUpdatedAt: getStoreUpdatedAt,
   SNAPSHOT_THRESHOLD: SNAPSHOT_THRESHOLD,

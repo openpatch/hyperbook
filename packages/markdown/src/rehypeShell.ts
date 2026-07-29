@@ -1103,7 +1103,10 @@ const makeHeaderElements = (ctx: HyperbookContext): ElementContent[] => {
       properties: {
         id: "user-toggle",
         class: "icon-button",
-        title: "User",
+        // Replaced with the live sync state by cloud.js; this is what a
+        // screen reader announces before the first status update.
+        title: i18n.get("user-info-title"),
+        "aria-label": i18n.get("user-info-title"),
         onclick: "hyperbook.cloud.userToggle()",
       },
       children: [
@@ -1263,6 +1266,9 @@ const makeHeaderElements = (ctx: HyperbookContext): ElementContent[] => {
                       tagName: "span",
                       properties: {
                         id: "user-save-status",
+                        // Sync state changes on its own, with no user action
+                        // to anchor it, so it has to be announced.
+                        "aria-live": "polite",
                       },
                       children: [
                         {
