@@ -38,6 +38,17 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.100.4
+::::tabs
+
+:::tab{title="Improved :+1:" id="improved"}
+
+- onlineide: Update to support java 25 syntax.
+
+:::
+
+::::
+
 ## v0.100.3
 
 ::::tabs
