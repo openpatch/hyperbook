@@ -1,5 +1,11 @@
 # @hyperbook/markdown
 
+## 0.71.3
+
+### Patch Changes
+
+- [`84834ea`](https://github.com/openpatch/hyperbook/commit/84834ea6b5fdc4b2cf47f618e1f5f16ba74a7f26) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Bump to fetch new onlineide version
+
 ## 0.71.2
 
 ### Patch Changes
