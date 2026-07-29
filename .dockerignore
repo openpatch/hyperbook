@@ -1,0 +1,28 @@
+# The build context is the repository root (see platforms/cloud/Dockerfile).
+# Keep it to the manifests, the lockfile and the cloud platform's own source.
+
+**/node_modules
+**/dist
+**/.next
+**/.turbo
+**/coverage
+
+.git
+.github
+.changeset
+.husky
+.vscode
+
+website/
+packages/
+platforms/vscode/
+
+**/*.sqlite
+**/*.sqlite-journal
+**/*.backup
+**/.env
+**/*.log
+
+**/tests
+**/*.test.js
+**/*.test.ts

@@ -7,6 +7,7 @@
 require('dotenv').config();
 
 var app = require('../app');
+var config = require('../lib/config');
 var debug = require('debug')('cloud:server');
 var http = require('http');
 var db = require('../lib/db');
@@ -31,6 +32,10 @@ var server = http.createServer(app);
 async function start() {
   try {
     console.log('🚀 Starting Hyperbook Cloud...');
+
+    // Before touching the database: a production server with a placeholder
+    // secret should never accept a request at all.
+    config.assertUsable();
 
     await db.initializeDatabase();
 
@@ -58,7 +63,7 @@ async function start() {
       debug('Listening on ' + port);
     });
   } catch (error) {
-    console.error('Failed to start server:', error);
+    console.error('\n✗ ' + error.message + '\n');
     process.exit(1);
   }
 }

@@ -1,5 +1,6 @@
 var Database = require("better-sqlite3");
 var eventSourcing = require("./eventSourcing");
+var migrations = require("./migrations");
 
 var db = null;
 
@@ -39,198 +40,20 @@ function allAsync(sql, params) {
   return Promise.resolve(rows);
 }
 
-function initializeDatabase() {
+function initializeDatabase(options) {
   getDb().pragma("foreign_keys = ON");
 
-  getDb().exec(
-    "CREATE TABLE IF NOT EXISTS hyperbooks (" +
-      "id INTEGER PRIMARY KEY AUTOINCREMENT," +
-      "slug TEXT UNIQUE NOT NULL," +
-      "name TEXT NOT NULL," +
-      "url TEXT," +
-      "description TEXT," +
-      "created_at DATETIME DEFAULT CURRENT_TIMESTAMP" +
-      ")"
-  );
+  var result = migrations.migrate(getDb(), options);
 
-  getDb().exec(
-    "CREATE TABLE IF NOT EXISTS groups (" +
-      "id INTEGER PRIMARY KEY AUTOINCREMENT," +
-      "hyperbook_id INTEGER NOT NULL," +
-      "name TEXT NOT NULL," +
-      "description TEXT," +
-      "created_at DATETIME DEFAULT CURRENT_TIMESTAMP," +
-      "FOREIGN KEY (hyperbook_id) REFERENCES hyperbooks(id) ON DELETE CASCADE," +
-      "UNIQUE(hyperbook_id, name)" +
-      ")"
-  );
-
-  // Check if the users table needs migration (add teacher role + email column)
-  var tableInfo = getDb().pragma("table_info(users)");
-  var hasEmail = tableInfo.some(function (col) {
-    return col.name === "email";
-  });
-
-  if (tableInfo.length > 0 && !hasEmail) {
-    // Migrate: recreate users table with teacher role and email column
-    getDb().exec("PRAGMA foreign_keys = OFF");
-    getDb().exec(
-      "CREATE TABLE users_new (" +
-        "id INTEGER PRIMARY KEY AUTOINCREMENT," +
-        "username TEXT UNIQUE NOT NULL," +
-        "password TEXT NOT NULL," +
-        "email TEXT," +
-        "role TEXT NOT NULL CHECK(role IN ('admin', 'student', 'teacher'))," +
-        "group_id INTEGER," +
-        "created_at DATETIME DEFAULT CURRENT_TIMESTAMP," +
-        "FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE CASCADE" +
-        ")"
-    );
-    getDb().exec(
-      "INSERT INTO users_new (id, username, password, role, group_id, created_at) " +
-        "SELECT id, username, password, role, group_id, created_at FROM users"
-    );
-    getDb().exec("DROP TABLE users");
-    getDb().exec("ALTER TABLE users_new RENAME TO users");
-    getDb().exec("PRAGMA foreign_keys = ON");
-    console.log("✓ Migrated users table (added teacher role + email)");
-  } else if (tableInfo.length === 0) {
-    getDb().exec(
-      "CREATE TABLE IF NOT EXISTS users (" +
-        "id INTEGER PRIMARY KEY AUTOINCREMENT," +
-        "username TEXT UNIQUE NOT NULL," +
-        "password TEXT NOT NULL," +
-        "email TEXT," +
-        "role TEXT NOT NULL CHECK(role IN ('admin', 'student', 'teacher'))," +
-        "group_id INTEGER," +
-        "created_at DATETIME DEFAULT CURRENT_TIMESTAMP," +
-        "FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE CASCADE" +
-        ")"
+  if (result.applied.length === 0) {
+    console.log("✓ Database schema up to date (v" + result.to + ")");
+  } else {
+    console.log(
+      "✓ Database schema migrated v" + result.from + " → v" + result.to
     );
   }
 
-  // === Event-sourcing tables ===
-
-  getDb().exec(
-    "CREATE TABLE IF NOT EXISTS events (" +
-      "id INTEGER PRIMARY KEY AUTOINCREMENT," +
-      "user_id INTEGER NOT NULL," +
-      "hyperbook_id INTEGER NOT NULL," +
-      "table_name TEXT NOT NULL," +
-      "operation TEXT NOT NULL CHECK(operation IN ('create', 'update', 'delete'))," +
-      "prim_key TEXT NOT NULL," +
-      "data TEXT," +
-      "created_at DATETIME DEFAULT CURRENT_TIMESTAMP," +
-      "FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE," +
-      "FOREIGN KEY (hyperbook_id) REFERENCES hyperbooks(id) ON DELETE CASCADE" +
-      ")"
-  );
-
-  getDb().exec(
-    "CREATE INDEX IF NOT EXISTS idx_events_user_hyperbook " +
-      "ON events (user_id, hyperbook_id, id)"
-  );
-
-  // Add prim_key_json to events if missing (migration).
-  // The legacy prim_key column stores String(primKey), which loses the type of
-  // numeric keys and flattens compound keys. prim_key_json keeps the original
-  // value; prim_key is still written for backwards compatibility.
-  var eventColumns = getDb().prepare("PRAGMA table_info(events)").all();
-  var hasPrimKeyJson = eventColumns.some(function (c) {
-    return c.name === "prim_key_json";
-  });
-  if (!hasPrimKeyJson) {
-    getDb().exec("ALTER TABLE events ADD COLUMN prim_key_json TEXT");
-  }
-
-  // Add table_schema to events if missing (migration).
-  // The Dexie primary-key source string ("id", "path", "++id", "[a+b]") for the
-  // table the event targets. Without it the server has to assume "id" for any
-  // table it has not yet seen in a snapshot, corrupting tables keyed otherwise.
-  var hasTableSchema = eventColumns.some(function (c) {
-    return c.name === "table_schema";
-  });
-  if (!hasTableSchema) {
-    getDb().exec("ALTER TABLE events ADD COLUMN table_schema TEXT");
-  }
-
-  getDb().exec(
-    "CREATE TABLE IF NOT EXISTS snapshots (" +
-      "id INTEGER PRIMARY KEY AUTOINCREMENT," +
-      "user_id INTEGER NOT NULL," +
-      "hyperbook_id INTEGER NOT NULL," +
-      "data TEXT NOT NULL," +
-      "last_event_id INTEGER NOT NULL DEFAULT 0," +
-      "source TEXT NOT NULL DEFAULT 'manual'," +
-      "created_at DATETIME DEFAULT CURRENT_TIMESTAMP," +
-      "FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE," +
-      "FOREIGN KEY (hyperbook_id) REFERENCES hyperbooks(id) ON DELETE CASCADE" +
-      ")"
-  );
-
-  getDb().exec(
-    "CREATE INDEX IF NOT EXISTS idx_snapshots_user_hyperbook " +
-      "ON snapshots (user_id, hyperbook_id, id)"
-  );
-
-  // Add source column to snapshots if missing (migration)
-  var snapshotColumns = getDb().prepare("PRAGMA table_info(snapshots)").all();
-  var hasSourceCol = snapshotColumns.some(function (c) { return c.name === "source"; });
-  if (!hasSourceCol) {
-    getDb().exec("ALTER TABLE snapshots ADD COLUMN source TEXT NOT NULL DEFAULT 'manual'");
-  }
-
-  // Migrate existing stores data into snapshots
-  var hasStoresTable = getDb()
-    .prepare(
-      "SELECT name FROM sqlite_master WHERE type='table' AND name='stores'"
-    )
-    .get();
-
-  if (hasStoresTable) {
-    var storeRows = getDb()
-      .prepare("SELECT user_id, hyperbook_id, data, updated_at FROM stores")
-      .all();
-
-    for (var s = 0; s < storeRows.length; s++) {
-      var row = storeRows[s];
-      var existingSnapshot = getDb()
-        .prepare(
-          "SELECT id FROM snapshots WHERE user_id = ? AND hyperbook_id = ? LIMIT 1"
-        )
-        .get(row.user_id, row.hyperbook_id);
-
-      if (!existingSnapshot) {
-        getDb().prepare(
-          "INSERT INTO snapshots (user_id, hyperbook_id, data, last_event_id, created_at) " +
-            "VALUES (?, ?, ?, 0, ?)"
-        ).run(row.user_id, row.hyperbook_id, row.data, row.updated_at);
-      }
-    }
-
-    if (storeRows.length > 0) {
-      console.log(
-        "✓ Migrated " + storeRows.length + " store rows to snapshots"
-      );
-    }
-
-    getDb().exec("DROP TABLE stores");
-    console.log("✓ Dropped legacy stores table");
-  }
-
-  getDb().exec(
-    "CREATE TABLE IF NOT EXISTS permissions (" +
-      "id INTEGER PRIMARY KEY AUTOINCREMENT," +
-      "user_id INTEGER NOT NULL," +
-      "permission TEXT NOT NULL," +
-      "created_at DATETIME DEFAULT CURRENT_TIMESTAMP," +
-      "FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE," +
-      "UNIQUE(user_id, permission)" +
-      ")"
-  );
-
-  console.log("✓ Database schema initialized");
-  return Promise.resolve();
+  return Promise.resolve(result);
 }
 
 function ensureAdminUser(username, password) {
@@ -582,6 +405,10 @@ module.exports = {
   allAsync: allAsync,
   setDatabase: setDatabase,
   initializeDatabase: initializeDatabase,
+  schemaVersion: function () {
+    return migrations.getVersion(getDb());
+  },
+  LATEST_SCHEMA_VERSION: migrations.LATEST_VERSION,
   ensureAdminUser: ensureAdminUser,
   getUserPermissions: getUserPermissions,
   hasPermission: hasPermission,

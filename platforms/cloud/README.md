@@ -13,15 +13,39 @@ A web-based student management platform for [Hyperbook](https://github.com/openp
 
 ## Quick Start
 
-```bash
-# Install dependencies
-npm install
+### With Docker (recommended)
 
-# Start in development mode (auto-restart on file changes)
-npm run dev
+```bash
+cd platforms/cloud
+cp .env.example .env      # set JWT_SECRET and BASE_URL
+docker compose up -d
 ```
 
-The server starts at `http://localhost:3001/` with default credentials `admin` / `admin123`.
+The admin interface is at `http://localhost:3001/`, with the credentials from
+`ADMIN_USERNAME` / `ADMIN_PASSWORD` on first run.
+
+Updating is:
+
+```bash
+docker compose pull && docker compose up -d
+```
+
+Images are published per release as `ghcr.io/openpatch/hyperbook-cloud:<version>`.
+Pin one in `docker-compose.yml` so upgrading is something you choose rather
+than something that happens.
+
+### From source
+
+Requires Node.js 20 or newer, because `better-sqlite3` is a native module built
+against a specific Node ABI.
+
+```bash
+pnpm install
+pnpm --filter @hyperbook/cloud dev
+```
+
+The server starts at `http://localhost:3001/` with default credentials
+`admin` / `admin123`.
 
 ## Configuration
 
@@ -33,19 +57,30 @@ cp .env.example .env
 
 | Variable | Description | Default |
 |---|---|---|
+| `JWT_SECRET` | Signs every session token. **Required in production**; the server refuses to start with the placeholder or with fewer than 32 characters. | — |
+| `BASE_URL` | Public URL. **Required in production.** Used for password reset links and CORS. | — |
 | `PORT` | Server port | `3001` |
-| `NODE_ENV` | Environment (`development` or `production`) | `development` |
-| `JWT_SECRET` | Secret key for JWT tokens — **must change in production** | `default-secret-...` |
+| `NODE_ENV` | `development` or `production` | `development` |
 | `JWT_EXPIRES_IN` | JWT token lifetime | `24h` |
 | `ADMIN_USERNAME` | Initial admin username (first run only) | `admin` |
 | `ADMIN_PASSWORD` | Initial admin password (first run only) | `admin123` |
-| `DATABASE_PATH` | Path to SQLite database file | `./database.sqlite` |
+| `DATABASE_PATH` | SQLite file. Ignored under Compose, which uses a volume. | `./database.sqlite` |
+| `SNAPSHOT_THRESHOLD` | Events before the server compacts them into a snapshot | `100` |
 | `SMTP_HOST` | SMTP server hostname | — |
 | `SMTP_PORT` | SMTP server port | `587` |
 | `SMTP_USER` | SMTP username | — |
 | `SMTP_PASS` | SMTP password | — |
 | `SMTP_FROM` | Sender email address | `noreply@example.com` |
-| `BASE_URL` | Public URL (used in password reset links and for CORS) | required |
+
+Generate a secret with:
+
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+```
+
+Leave every `SMTP_*` value empty to run without email. Setting only some of
+them is rejected in production, because a half configuration silently sends
+nothing.
 
 ## Users & Permissions
 
@@ -76,107 +111,62 @@ Permissions are string-based and assigned per teacher by an admin.
 
 Permissions are managed at **Admin → Users → (select user) → Permissions** using a checkbox matrix.
 
-## Production Deployment with PM2
+## Production Deployment
 
-### 1. Prerequisites
+In production the server refuses to start until `JWT_SECRET` and `BASE_URL` are
+set, and it will tell you exactly what is missing. This is deliberate: with the
+placeholder secret, anyone who has read this repository can mint a valid token
+for any account, and nothing in the logs would say so.
+
+### With Docker Compose
+
+`docker-compose.yml` in this directory is the whole deployment. Edit `.env`,
+then:
 
 ```bash
-# Install Node.js 18+ and npm
-# Then install PM2 globally
+docker compose up -d
+docker compose logs -f
+```
+
+It binds to `127.0.0.1:3001` by default, expecting a reverse proxy in front for
+TLS — see [Reverse Proxy](#reverse-proxy) below. The database lives on a named
+volume, so `docker compose down` does not take it with it.
+
+> If you replace the named volume with a bind mount (`./data:/data`), make the
+> host directory writable by UID 1000, which the container runs as. Otherwise
+> the first upgrade refuses to start: it cannot write its backup, and it will
+> not migrate without one.
+
+### With PM2
+
+If you would rather not use containers:
+
+```bash
+git clone https://github.com/openpatch/hyperbook.git
+cd hyperbook
+pnpm install --filter @hyperbook/cloud --prod
+cd platforms/cloud
+cp .env.example .env      # edit it
 npm install -g pm2
-```
-
-### 2. Setup
-
-```bash
-# Clone and install
-git clone <repo-url>
-cd hyperbook/platforms/cloud
-npm install --production
-
-# Create production config
-cp .env.example .env
-```
-
-Edit `.env` with production values:
-
-```env
-PORT=3001
-NODE_ENV=production
-
-# Generate a strong random secret
-JWT_SECRET=your-random-secret-here-at-least-32-chars
-
-ADMIN_USERNAME=admin
-ADMIN_PASSWORD=a-strong-admin-password
-
-# Persistent database location
-DATABASE_PATH=/var/lib/hyperbook-cloud/database.sqlite
-
-# SMTP for password reset
-SMTP_HOST=smtp.example.com
-SMTP_PORT=587
-SMTP_USER=noreply@example.com
-SMTP_PASS=smtp-password
-SMTP_FROM=noreply@example.com
-
-BASE_URL=https://cloud.example.com
-```
-
-### 3. Create an ecosystem file
-
-Create `ecosystem.config.js`:
-
-```js
-module.exports = {
-  apps: [
-    {
-      name: "hyperbook-cloud",
-      script: "./bin/www",
-      cwd: __dirname,
-      env: {
-        NODE_ENV: "production",
-      },
-      instances: 1,
-      autorestart: true,
-      max_memory_restart: "256M",
-      log_date_format: "YYYY-MM-DD HH:mm:ss",
-      error_file: "/var/log/hyperbook-cloud/error.log",
-      out_file: "/var/log/hyperbook-cloud/out.log",
-      merge_logs: true,
-    },
-  ],
-};
-```
-
-> **Note:** Since Hyperbook Cloud uses SQLite, only run **1 instance**. SQLite does not support concurrent writes from multiple processes.
-
-### 4. Start with PM2
-
-```bash
-# Create log directory
-sudo mkdir -p /var/log/hyperbook-cloud
-sudo chown $USER:$USER /var/log/hyperbook-cloud
-
-# Create database directory
-sudo mkdir -p /var/lib/hyperbook-cloud
-sudo chown $USER:$USER /var/lib/hyperbook-cloud
-
-# Start the application
 pm2 start ecosystem.config.js
-
-# Check status
-pm2 status
-pm2 logs hyperbook-cloud
-
-# Enable startup on boot
-pm2 startup
-pm2 save
+pm2 startup && pm2 save
 ```
 
-### 5. Reverse Proxy (Nginx)
+`ecosystem.config.js` is committed alongside this README. It logs to
+`./logs/` and keeps the database wherever `DATABASE_PATH` points.
 
-Place behind Nginx for HTTPS and static caching:
+> Run **one** instance only. SQLite does not support concurrent writes from
+> multiple processes, so `instances: 1` is not a starting point to tune.
+
+Update with:
+
+```bash
+git pull
+pnpm install --filter @hyperbook/cloud --prod
+pm2 restart hyperbook-cloud
+```
+
+### Reverse Proxy
 
 ```nginx
 server {
@@ -202,38 +192,48 @@ server {
 }
 ```
 
-### 6. Common PM2 Commands
+`/api/health` returns `200` once the server is up, for uptime checks and
+container orchestration.
 
-```bash
-pm2 start hyperbook-cloud      # Start
-pm2 stop hyperbook-cloud       # Stop
-pm2 restart hyperbook-cloud    # Restart
-pm2 reload hyperbook-cloud     # Zero-downtime reload
-pm2 delete hyperbook-cloud     # Remove from PM2
-pm2 logs hyperbook-cloud       # View logs
-pm2 monit                      # Real-time monitoring dashboard
-```
+## Schema Migrations
 
-### 7. Updating
+The schema is versioned with SQLite's `user_version` and migrated on startup.
 
-```bash
-cd hyperbook/platforms/cloud
-git pull
-npm install --production
-pm2 restart hyperbook-cloud
-```
+- Each migration runs at most once, in order, and the version is only recorded
+  after it succeeds — so an interrupted upgrade re-runs the step rather than
+  skipping it.
+- **The database is copied aside before any migration that has work to do**, via
+  `VACUUM INTO`, next to the database file as `<name>.v<version>-<timestamp>.backup`.
+  The five most recent are kept. If the copy cannot be written, the migration
+  does not run.
+- Starting a build **older** than the one that last wrote the database is
+  refused, rather than left to read columns it does not understand.
+
+Adding a schema change means appending an entry to `MIGRATIONS` in
+`lib/migrations.js`. Never edit or renumber an existing one: deployments have
+already run it and will not run it again.
 
 ## Backups
 
-The entire application state lives in a single SQLite file. Back it up regularly:
+All state is one SQLite file. Upgrades back it up on their own (see above), but
+that is not a substitute for a schedule.
+
+Use `VACUUM INTO` rather than `cp`: it takes a consistent copy of a database
+that is being written to, which a file copy does not.
 
 ```bash
-# One-time backup
-cp /var/lib/hyperbook-cloud/database.sqlite /backups/hyperbook-cloud-$(date +%F).sqlite
+# Docker
+docker compose exec -T cloud node -e "\
+  new (require('better-sqlite3'))('/data/database.sqlite', { readonly: true })\
+    .exec(\"VACUUM INTO '/data/backup-$(date +%F).sqlite'\")"
 
-# Cron job (daily at 2 AM)
-0 2 * * * cp /var/lib/hyperbook-cloud/database.sqlite /backups/hyperbook-cloud-$(date +\%F).sqlite
+# From source
+node -e "\
+  new (require('better-sqlite3'))(process.env.DATABASE_PATH, { readonly: true })\
+    .exec(\"VACUUM INTO '/backups/hyperbook-cloud-$(date +%F).sqlite'\")"
 ```
+
+Restoring is stopping the server, putting the file back, and starting it again.
 
 ## API Reference
 
@@ -292,14 +292,19 @@ All API routes require a JWT Bearer token obtained via `POST /api/auth/login`.
 
 ### Student Data Store
 
+Hyperbooks sync through these. See
+[the Cloud documentation](https://openpatch.org/hyperbook/en/book/configuration/cloud)
+for how the client uses them.
+
 | Method | Endpoint | Description |
 |---|---|---|
-| `GET` | `/api/store/:hyperbookId` | Get stored data for current user |
-| `POST` | `/api/store/:hyperbookId` | Save data `{ data }` |
+| `GET` | `/api/store/:hyperbookId` | Reconstructed state (latest snapshot with events replayed on top) |
+| `POST` | `/api/store/:hyperbookId/events` | Append a batch of events. Takes `afterEventId`; answers `409` if the client is behind |
+| `POST` | `/api/store/:hyperbookId/snapshot` | Replace all state. Discards that user's events and previous snapshots |
 
 ## Database
 
-Hyperbook Cloud uses SQLite via [better-sqlite3](https://github.com/WiseLibs/better-sqlite3). The schema is automatically created and migrated on startup.
+Hyperbook Cloud uses SQLite via [better-sqlite3](https://github.com/WiseLibs/better-sqlite3). The schema is created and migrated on startup — see [Schema Migrations](#schema-migrations).
 
 ### Tables
 
@@ -307,7 +312,11 @@ Hyperbook Cloud uses SQLite via [better-sqlite3](https://github.com/WiseLibs/bet
 - `groups` — Student groups within hyperbooks
 - `users` — All accounts (admin, teacher, student)
 - `permissions` — Per-user permission grants
-- `stores` — Per-user, per-hyperbook JSON data
+- `events` — Per-user, per-hyperbook change log, one row per store write
+- `snapshots` — Compacted state, written every `SNAPSHOT_THRESHOLD` events
+
+A `stores` table held one JSON blob per user before event sourcing. It is
+folded into `snapshots` on upgrade and then dropped.
 
 ### Password Storage
 

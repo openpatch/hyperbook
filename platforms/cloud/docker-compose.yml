@@ -1,0 +1,53 @@
+# Hyperbook Cloud.
+#
+#   cp .env.example .env    # then edit it — the server refuses to start without
+#   docker compose up -d    # JWT_SECRET and BASE_URL
+#
+# To update:
+#
+#   docker compose pull && docker compose up -d
+#
+# The database is migrated on startup, and backed up first whenever a migration
+# actually has something to do.
+
+services:
+  cloud:
+    # Pin a release rather than tracking latest, so an update is something you
+    # choose. Tags are published per release: ghcr.io/openpatch/hyperbook-cloud:0.0.1
+    image: ghcr.io/openpatch/hyperbook-cloud:latest
+    # To run your own build instead of the published image, comment out `image`
+    # above and uncomment this. The context is the repository root.
+    # build:
+    #   context: ../..
+    #   dockerfile: platforms/cloud/Dockerfile
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      NODE_ENV: production
+      # Inside the container this path is on the volume below. Overriding it in
+      # .env would put the database in the container's writable layer, where the
+      # next update destroys it.
+      DATABASE_PATH: /data/database.sqlite
+    ports:
+      # Bound to localhost: put a reverse proxy in front for TLS. Change to
+      # "3001:3001" only if this machine is not reachable from the internet.
+      - "127.0.0.1:3001:3001"
+    volumes:
+      - cloud-data:/data
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:3001/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+volumes:
+  # Named, so `docker compose down` does not take the database with it.
+  # Back it up with:
+  #   docker compose exec -T cloud \
+  #     node -e "new (require('better-sqlite3'))('/data/database.sqlite',{readonly:true}).exec(\"VACUUM INTO '/data/backup.sqlite'\")"
+  cloud-data:
