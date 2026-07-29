@@ -1,5 +1,11 @@
 # @hyperbook/markdown
 
+## 0.71.5
+
+### Patch Changes
+
+- [`7250d29`](https://github.com/openpatch/hyperbook/commit/7250d29322d03a001a1d5547f47e3419b600a5e4) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Update onlineide to support java 25 syntax.
+
 ## 0.71.4
 
 ### Patch Changes
