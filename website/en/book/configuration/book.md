@@ -35,7 +35,8 @@ can and part wise must set (indicated by a \*).
 | styles             | Here you can add Links to custom CSS files.                                                                                                                     |
 | scripts            | Here you can add links to custom JavaScript files.                                                                                                              |
 | allowDangerousHtml | Allow HTML. This can lead to incompatibilities in future versions.                                                                                              |
-| assets.cdn         | Load the stylesheets and scripts of the elements from a CDN instead of copying them into your build. `true` uses jsDelivr, pinned to the version that built your hyperbook. A URL uses a mirror of your own. A hyperbook served this way needs the network. |
+| assets.cdn         | Names of the elements whose assets are served from a CDN instead of being copied into your build, for example `["onlineide", "sqlide", "emoji"]`. An element named here needs the network to work.                                    |
+| assets.cdnUrl      | Where those assets are served from. Defaults to jsDelivr, pinned to the version of hyperbook that built your pages. Set it to use a mirror of your own.                                          |
 | qrcode             | Shows an icon, which opens a qr code to the current page.                                                                                                       |
 | toc         | Show or hide a table of content for the page. This is on for pages and off for glossary entries by default                          |
 | llms               | When set to true, generates an llms.txt file that combines all markdown files in order. The file includes the book name and version in a header format.         |

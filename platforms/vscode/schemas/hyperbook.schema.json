@@ -65,11 +65,15 @@
             "description": "Where the assets of a hyperbook are served from. Assets are the stylesheets\nand the scripts of the elements you use, and they are copied into your\nbuild by default.",
             "properties": {
                 "cdn": {
-                    "description": "Load them from a CDN instead of copying them, which keeps a build small\nand lets a reader who visits more than one hyperbook reuse them.\n\n- `true`: from jsDelivr, pinned to the version that built the hyperbook\n- a URL: from your own mirror, for example behind your own domain\n\nA hyperbook served this way needs the network. Leave it off to keep it\nworking offline.",
-                    "type": [
-                        "string",
-                        "boolean"
-                    ]
+                    "description": "Elements whose assets are served from a CDN instead of being copied into\nyour build. Name them the way you write them, for example \"onlineide\",\n\"sqlide\" or \"emoji\". The heavy ones are worth naming here; a build that\ncopies none of them is a fraction of the size.\n\nAn element served this way needs the network to work, so leave one out\nto keep it working offline.",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "cdnUrl": {
+                    "description": "Where those assets are served from. Defaults to jsDelivr, pinned to the\nversion of hyperbook that built your pages, so the assets always match\nthe pages that ask for them. Set it to serve them from your own mirror.",
+                    "type": "string"
                 }
             },
             "type": "object"

@@ -30,21 +30,39 @@ import packageJson from "./package.json";
 export const ASSETS_FOLDER = "__hyperbook_assets";
 
 /**
- * Where the assets are served from, when they are not copied into the build.
- *
- * The version is the one that built the hyperbook, so the assets always match
- * the pages that ask for them, and the address never changes for a build that
- * was already published.
+ * The element an asset belongs to, or null when it belongs to no element and
+ * always comes from the build. Every element keeps its assets in one folder,
+ * named after it, which is what makes opting in per element possible.
  */
-export const assetsBase = (hyperbookJson: HyperbookJson): string | null => {
-  const cdn = hyperbookJson.assets?.cdn;
-  if (!cdn) {
+export const assetElement = (pathArr: string[]): string | null => {
+  const folder = pathArr[0]?.replace(/^\/+/, "");
+  if (!folder) {
     return null;
   }
-  if (typeof cdn === "string") {
-    return cdn.replace(/\/$/, "");
+  if (folder.startsWith("directive-")) {
+    return folder.slice("directive-".length);
   }
-  return `https://cdn.jsdelivr.net/npm/hyperbook@${packageJson.version}/dist/assets`;
+  // Emojis are not a directive but are asked for by name just the same.
+  return folder === "emoji" ? "emoji" : null;
+};
+
+/**
+ * Whether the assets of an element are served from somewhere else, and where
+ * from. The version is the one that built the hyperbook, so the assets always
+ * match the pages that ask for them, and the address never changes for a build
+ * that was already published.
+ */
+export const assetsBase = (
+  hyperbookJson: HyperbookJson,
+  element: string | null,
+): string | null => {
+  if (!element || !hyperbookJson.assets?.cdn?.includes(element)) {
+    return null;
+  }
+  const url = hyperbookJson.assets.cdnUrl;
+  return url
+    ? url.replace(/\/$/, "")
+    : `https://cdn.jsdelivr.net/npm/hyperbook@${packageJson.version}/dist/assets`;
 };
 
 /**
@@ -525,7 +543,9 @@ export function makeBaseCtx(
         case "archive":
           return posix.join("/", basePath || "", "archives", ...pathArr);
         case "assets": {
-          const cdn = options?.local ? null : assetsBase(hyperbookJson);
+          const cdn = options?.local
+            ? null
+            : assetsBase(hyperbookJson, assetElement(pathArr));
           if (cdn) {
             // Joined by hand: posix.join would turn the // of the address into
             // a single slash. The version is already in the address, so it
@@ -862,17 +882,23 @@ async function runBuild(
 
   // Assets that come from a CDN are not copied. What a build writes itself,
   // the favicons and the search index, is written either way.
-  const servedFromCdn = assetsBase(hyperbookJson) !== null;
-  // Even then a build writes its own translations, search index and favicons.
+  // A build always writes its own translations, search index and favicons.
   await mkdir(assetsOut, { recursive: true });
-  if (servedFromCdn) {
+  const fromCdn = (element: string) =>
+    assetsBase(hyperbookJson, element) !== null;
+  const servedFromCdn = (hyperbookJson.assets?.cdn || []).filter((element) =>
+    fromCdn(element),
+  );
+  if (servedFromCdn.length > 0) {
     console.log(
-      `${chalk.blue(`[${prefix}]`)} Assets are served from ${assetsBase(hyperbookJson)}`,
+      `${chalk.blue(`[${prefix}]`)} Served from ${assetsBase(hyperbookJson, servedFromCdn[0])}: ${servedFromCdn.join(", ")}`,
     );
   }
 
   i = 1;
-  for (let directive of servedFromCdn ? [] : directives) {
+  for (let directive of [...directives].filter(
+    (directive) => !fromCdn(directive),
+  )) {
     const assetsDirectivePath = path.join(assetsPath, `directive-${directive}`);
     const assetsDirectiveOut = path.join(assetsOut, `directive-${directive}`);
     if (!process.env.CI) {
@@ -901,7 +927,7 @@ async function runBuild(
   }
   process.stdout.write("\n");
 
-  if (emojis.size > 0 && !servedFromCdn) {
+  if (emojis.size > 0 && !fromCdn("emoji")) {
     const emojiPath = path.join(assetsPath, "emoji");
     const emojiOut = path.join(assetsOut, "emoji");
     await mkdir(emojiOut, { recursive: true });
@@ -933,7 +959,7 @@ async function runBuild(
     process.stdout.write("\n");
   }
 
-  const mainAssets = servedFromCdn ? [] : await fs.readdir(assetsPath);
+  const mainAssets = await fs.readdir(assetsPath);
   i = 1;
   for (let asset of mainAssets) {
     const assetPath = path.join(assetsPath, asset);

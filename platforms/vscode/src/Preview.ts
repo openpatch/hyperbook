@@ -244,17 +244,22 @@ export default class Preview {
 
           switch (base) {
             case "assets":
-              // A hyperbook that points its assets at a mirror of its own is
-              // previewed against that mirror. `true` is not followed here: it
-              // means the version that built the hyperbook, and the preview
-              // renders with the version inside this extension, so the assets
-              // that ship with it are the ones that match.
-              const cdn = config.assets?.cdn;
-              if (typeof cdn === "string") {
+              // An element that a hyperbook serves from a mirror of its own
+              // is previewed against that mirror. Without a mirror the assets
+              // that ship with this extension are used, because they are the
+              // ones that match the version rendering the preview.
+              const folder = path[0]?.replace(/^\/+/, "");
+              const element = folder?.startsWith("directive-")
+                ? folder.slice("directive-".length)
+                : folder === "emoji"
+                  ? "emoji"
+                  : null;
+              const mirror = config.assets?.cdnUrl;
+              if (mirror && element && config.assets?.cdn?.includes(element)) {
                 const segments = path
                   .flatMap((segment) => segment.split("/"))
                   .filter((segment) => segment && segment !== ".");
-                return [cdn.replace(/\/$/, ""), ...segments].join("/");
+                return [mirror.replace(/\/$/, ""), ...segments].join("/");
               }
 
               const vsExtensionPath =

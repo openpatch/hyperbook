@@ -168,16 +168,21 @@ export type HyperbookJson = {
    */
   assets?: {
     /**
-     * Load them from a CDN instead of copying them, which keeps a build small
-     * and lets a reader who visits more than one hyperbook reuse them.
+     * Elements whose assets are served from a CDN instead of being copied into
+     * your build. Name them the way you write them, for example "onlineide",
+     * "sqlide" or "emoji". The heavy ones are worth naming here; a build that
+     * copies none of them is a fraction of the size.
      *
-     * - `true`: from jsDelivr, pinned to the version that built the hyperbook
-     * - a URL: from your own mirror, for example behind your own domain
-     *
-     * A hyperbook served this way needs the network. Leave it off to keep it
-     * working offline.
+     * An element served this way needs the network to work, so leave one out
+     * to keep it working offline.
      */
-    cdn?: boolean | string;
+    cdn?: string[];
+    /**
+     * Where those assets are served from. Defaults to jsDelivr, pinned to the
+     * version of hyperbook that built your pages, so the assets always match
+     * the pages that ask for them. Set it to serve them from your own mirror.
+     */
+    cdnUrl?: string;
   };
   license?: string;
   language?: Language;

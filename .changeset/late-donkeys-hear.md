@@ -4,25 +4,28 @@
 "hyperbook-studio": minor
 ---
 
-Add `assets.cdn`, for serving the stylesheets and the scripts of the elements
-from somewhere else instead of copying them into every build.
+Add `assets.cdn`, for serving the assets of an element from a CDN instead of
+copying them into every build. Name the elements you want it for:
 
 ```json
 {
   "assets": {
-    "cdn": true
+    "cdn": ["onlineide", "sqlide", "emoji"]
   }
 }
 ```
 
-`true` serves them from jsDelivr, pinned to the version of hyperbook that built
-the pages, so they always match and never change for a build that was already
-published. A URL serves them from a mirror of your own.
+They are served from jsDelivr, pinned to the version of hyperbook that built
+the pages, so the assets always match the pages that ask for them and never
+change for a build that was already published. `assets.cdnUrl` serves them from
+a mirror of your own instead.
 
-A build then only writes what belongs to your hyperbook: its pages, its own
-files, its translations, its search index and its favicons. Those are written
-either way, because they are built from your hyperbook and not shipped with
-hyperbook.
+The elements carry the weight of a build, and they carry it unevenly: a book
+with one SQL IDE goes from 23 MB to 1.9 MB by naming that one element. Naming
+none, which is the default, changes nothing.
 
-Leave it off, which is the default, to keep a hyperbook working without the
-network.
+Everything else stays in your build. The shell, the stylesheets and the maths
+are the same for every hyperbook but small, and the translations, the search
+index and the favicons are built from your hyperbook rather than shipped with
+hyperbook. An element you name needs the network, so leave out the ones you
+want working offline.
