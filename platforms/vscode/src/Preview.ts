@@ -10,7 +10,13 @@ import {
 import { process } from "@hyperbook/markdown";
 import { disposeAll } from "./utils/dispose";
 import path, { posix } from "path";
-import { HyperbookContext, HyperbookJson, HyperbookPage, Navigation } from "@hyperbook/types";
+import {
+  HyperbookContext,
+  HyperbookJson,
+  HyperbookPage,
+  Navigation,
+  isExternalUrl,
+} from "@hyperbook/types";
 
 // Helper function to resolve relative paths
 const resolveRelativePath = (path: string, page: HyperbookPage): string => {
@@ -189,7 +195,7 @@ export default class Preview {
         makeUrl: (path, base, page) => {
           if (typeof path === "string") {
             // Handle absolute URLs
-            if (path.includes("://") || path.startsWith("data:")) {
+            if (isExternalUrl(path)) {
               return path;
             }
 

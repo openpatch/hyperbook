@@ -21,6 +21,7 @@ import {
   HyperbookPage,
   HyperbookSection,
   Navigation,
+  isExternalUrl,
 } from "@hyperbook/types";
 import lunr from "lunr";
 import { process as hyperbookProcess } from "@hyperbook/markdown";
@@ -456,7 +457,7 @@ export function makeBaseCtx(
     version: packageJson.version,
     makeUrl: (p, base, page, options = { versioned: true }) => {
       if (typeof p === "string") {
-        if (p.includes("://") || p.startsWith("data:")) {
+        if (isExternalUrl(p)) {
           return p;
         }
         if (p.endsWith(".md.hbs")) {

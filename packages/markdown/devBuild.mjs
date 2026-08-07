@@ -1,6 +1,7 @@
 import fs from "fs/promises";
 import path from "path";
 import { process } from "./dist/index.js";
+import { isExternalUrl } from "@hyperbook/types";
 
 const markdown = await fs.readFile("dev.md", "utf8");
 
@@ -54,7 +55,7 @@ const result = await process(markdown, {
     },
   },
   makeUrl: (p, base) => {
-    if (p.includes("://")) return p;
+    if (typeof p === "string" && isExternalUrl(p)) return p;
     if (typeof p === "string") {
       p = [p];
     }

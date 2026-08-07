@@ -248,3 +248,17 @@ export interface HyperbookContext {
    */
   dependencies?: Set<string>;
 }
+
+/**
+ * Matches a URI scheme at the start of a string, as defined by RFC 3986.
+ * This covers `https://` and `data:` as well as schemes without an authority
+ * like `mailto:`, `tel:` or `sms:`.
+ */
+const URL_SCHEME = /^[a-zA-Z][a-zA-Z0-9+.-]*:/;
+
+/**
+ * Checks whether a path is an absolute URL and therefore must be passed
+ * through untouched by `makeUrl`, instead of being resolved against the
+ * hyperbook's base path.
+ */
+export const isExternalUrl = (path: string): boolean => URL_SCHEME.test(path);
