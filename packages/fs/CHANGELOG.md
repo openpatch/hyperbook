@@ -1,5 +1,22 @@
 # @hyperbook/fs
 
+## 0.26.0
+
+### Minor Changes
+
+- [#1159](https://github.com/openpatch/hyperbook/pull/1159) [`9bdb389`](https://github.com/openpatch/hyperbook/commit/9bdb389501ec7cbf96abaf8c6acbeededd311535) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Order pages and sections together by `index`. Pages were always rendered before
+  the sections of the same level, so a page could not sit after or between them.
+  The `index` of a page and the `index` of a section are now one order, and a
+  section that ends up between two pages is rendered between them.
+
+  The reading order follows the navigation, so the previous and next buttons, the
+  breadcrumb and `::pagelist` agree with the sidebar.
+
+  A page or a section without an `index` keeps its old place: pages come before
+  sections, and a page wins a tie against a section. A book that gives its
+  sections an `index` but leaves it off a page will see that page move behind
+  those sections. Give the page an `index` to place it.
+
 ## 0.25.1
 
 ### Patch Changes
