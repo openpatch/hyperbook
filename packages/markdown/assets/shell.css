@@ -41,6 +41,13 @@ side-drawer {
   display: none;
 }
 
+/* A custom element renders its children until it is upgraded. The drawers are
+   only hidden by their shadow root, so without this their content paints over
+   the page until side-drawer.js has run. */
+side-drawer:not(:defined) {
+  display: none;
+}
+
 /* Hide mobile nav toggle when JavaScript is disabled */
 .no-js .mobile-nav .toggle {
   display: none;
