@@ -669,6 +669,7 @@ nav li + li {
 
 .section {
   margin-top: 4px;
+  margin-bottom: 4px;
 }
 
 .section summary.name {
@@ -740,6 +741,9 @@ nav li + li {
 .section > .links {
   border-left-width: 1px;
   border-left-style: solid;
+  /* The pages of a section have to read as belonging to it, now that a page of
+     the level above can follow them. */
+  padding-left: 0.75rem;
 }
 
 .pages {
