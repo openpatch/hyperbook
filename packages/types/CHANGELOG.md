@@ -1,5 +1,21 @@
 # @hyperbook/types
 
+## 0.23.2
+
+### Patch Changes
+
+- [#1153](https://github.com/openpatch/hyperbook/pull/1153) [`20de8fe`](https://github.com/openpatch/hyperbook/commit/20de8fe89fdb753246c8f15b713a40b6f3682b1f) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix `mailto:` and `tel:` links in markdown. `makeUrl` only passed through URLs
+  containing `://` or starting with `data:`, so `[Write us](mailto:a@b.c)` was
+  resolved against the base path and became `href="/mailto:a@b.c"`. Any URL with
+  a scheme is now passed through untouched.
+
+- [#1153](https://github.com/openpatch/hyperbook/pull/1153) [`20de8fe`](https://github.com/openpatch/hyperbook/commit/20de8fe89fdb753246c8f15b713a40b6f3682b1f) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add `elements.emoji.style`. Emojis are drawn by the reader's operating system,
+  so the same emoji looks different on Windows, macOS, Android and Linux. Setting
+  the style to `twemoji` replaces them with Twemoji images at build time, so a
+  hyperbook looks the same on every platform. This covers emojis in the content
+  as well as icons from the config, leaves code untouched, and only copies the
+  emojis a book actually uses into its output. The default stays `native`.
+
 ## 0.23.1
 
 ### Patch Changes
