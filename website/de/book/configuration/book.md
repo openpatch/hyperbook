@@ -31,13 +31,11 @@ von Optionen, die du definieren kannst. Optionen mit einem "\*" müssen gesetzt 
 | repo               | Der Link zum GitHub-Repository. Wird für das Zeigen eines Edit-Buttons verwendet. Der Platzhalter %path% wird durch den aktuellen Pfad ersetzt oder der aktuelle Pfad wird ans Ende angehangen. |
 | repo.url           | Der Link zum Repository. Wird für das Zeigen eines Edit-Buttons verwendet. Der Platzhalter %path% wird durch den aktuellen Pfad ersetzt oder der aktuelle Pfad wird ans Ende angehangen.        |
 | repo.label         | Der Bezeichner für den Repository-Link.                                                                                                                                                         |
-| elements           | Hier können einzelne Elemente konfiguriert werden. Schaue dazu auf die Elementseiten.                                                                                                           |
+| elements           | Hier konfigurierst du die Elemente. Setzt Standards für die Parameter eines Elements, und `cdn` lädt seine Assets von einem CDN. Siehe unten.                        |
 | links              | Hier können Links hinzugefügt werden, welche in der rechten oberen Ecke angezeigt werden. Schaue dir dazu das untere Beispiel an.                                                               |
 | styles             | Hier können Links zu eigenen CSS-Styles gesetzt werden.                                                                                                                                         |
 | scripts            | Hier können Links zu eigenen JavaScript-Dateien gesetzt werden.                                                                                                                                 |
 | allowDangerousHtml | Erlaube HTML im Hyperbook. Dies kann zu Inkompatibilität in zukünftigen Versionen führen.                                                                                                       |
-| assets.cdn         | Namen der Elemente, deren Assets von einem CDN geladen statt in deinen Build kopiert werden, zum Beispiel `["onlineide", "sqlide", "emoji"]`. Ein hier genanntes Element braucht das Netz.                                    |
-| assets.cdnUrl      | Woher diese Assets geladen werden. Standard ist jsDelivr, festgelegt auf die Version, die deine Seiten gebaut hat. Setze es für einen eigenen Spiegel.                                          |
 | qrcode             | Zeigt ein Icon, um einen QR-Code zur aktuellen Seite anzuzeigen.                                                                                                                                |
 | toc         | Zeige ein Inhaltsverzeichnis. Diese ist standardmäßig aktiviert für Seiten und deaktiviert für Begriffe im Glossar.                            |
 | llms               | Wenn auf true gesetzt, wird eine llms.txt-Datei generiert, die alle Markdown-Dateien in Reihenfolge kombiniert. Die Datei enthält den Buchnamen und die Version im Header-Format.              |
@@ -108,3 +106,54 @@ Hier ist eine Beispielkonfiguration:
   ]
 }
 ```
+
+## Ein Element konfigurieren
+
+Jedes Element kann unter `elements` konfiguriert werden, unter dem Namen, mit
+dem du es schreibst. Was dort steht, wird als Standard für die Parameter dieses
+Elements verwendet, sodass du ihn einmal setzt statt bei jeder Verwendung.
+
+```json
+{
+  "elements": {
+    "sqlide": {
+      "height": "500px"
+    },
+    "qr": {
+      "size": "L"
+    }
+  }
+}
+```
+
+Jede SQL IDE ist dann 500px hoch und jeder QR-Code groß. Ein Element, das einen
+Parameter selbst setzt, behält seinen Wert, es wird also nur ergänzt, was fehlt.
+Die Seite eines Elements listet die Parameter auf, die es versteht.
+
+### Die Assets eines Elements von einem CDN laden
+
+Die Stile und Skripte, die ein Element braucht, werden in deinen Build kopiert.
+Bei den großen ist das der Großteil des Gewichts: ein Buch mit einer SQL IDE ist
+23 MB groß, davon 21 MB die SQL IDE.
+
+`cdn` lädt sie stattdessen von woanders.
+
+```json
+{
+  "elements": {
+    "sqlide": {
+      "cdn": true
+    }
+  }
+}
+```
+
+Dieses Buch ist jetzt 1,9 MB groß. `true` lädt sie von jsDelivr, festgelegt auf
+die Version von Hyperbook, die deine Seiten gebaut hat, damit die Assets immer
+zu den Seiten passen, die sie anfragen, und sich für einen bereits
+veröffentlichten Build nie ändern. Eine URL nutzt einen eigenen Spiegel.
+
+Ein so geladenes Element braucht das Netz, lass es also weg für die, die offline
+funktionieren sollen. Alles, was zu keinem Element gehört, die Hülle, die Stile
+und die Mathematik, bleibt in deinem Build, ebenso dein Suchindex, deine
+Übersetzungen und deine Favicons.

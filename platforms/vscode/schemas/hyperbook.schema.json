@@ -61,23 +61,6 @@
         "allowDangerousHtml": {
             "type": "boolean"
         },
-        "assets": {
-            "description": "Where the assets of a hyperbook are served from. Assets are the stylesheets\nand the scripts of the elements you use, and they are copied into your\nbuild by default.",
-            "properties": {
-                "cdn": {
-                    "description": "Elements whose assets are served from a CDN instead of being copied into\nyour build. Name them the way you write them, for example \"onlineide\",\n\"sqlide\" or \"emoji\". The heavy ones are worth naming here; a build that\ncopies none of them is a fraction of the size.\n\nAn element served this way needs the network to work, so leave one out\nto keep it working offline.",
-                    "items": {
-                        "type": "string"
-                    },
-                    "type": "array"
-                },
-                "cdnUrl": {
-                    "description": "Where those assets are served from. Defaults to jsDelivr, pinned to the\nversion of hyperbook that built your pages, so the assets always match\nthe pages that ask for them. Set it to serve them from your own mirror.",
-                    "type": "string"
-                }
-            },
-            "type": "object"
-        },
         "author": {
             "properties": {
                 "name": {
@@ -149,196 +132,283 @@
             "type": "string"
         },
         "elements": {
-            "properties": {
-                "bookmarks": {
-                    "anyOf": [
-                        {
-                            "properties": {
-                                "version": {
-                                    "type": "string"
-                                }
-                            },
-                            "type": "object"
-                        },
-                        {
-                            "const": false,
-                            "type": "boolean"
-                        }
-                    ]
-                },
-                "code": {
-                    "allOf": [
-                        {
-                            "properties": {
-                                "version": {
-                                    "type": "string"
-                                }
-                            },
-                            "type": "object"
-                        },
-                        {
-                            "properties": {
-                                "bypassInline": {
-                                    "type": "boolean"
-                                },
-                                "showLineNumbers": {
-                                    "type": "boolean"
-                                },
-                                "theme": {
-                                    "anyOf": [
-                                        {
-                                            "properties": {
-                                                "dark": {
-                                                    "type": "string"
-                                                },
-                                                "light": {
-                                                    "type": "string"
-                                                }
-                                            },
-                                            "required": [
-                                                "dark",
-                                                "light"
-                                            ],
-                                            "type": "object"
+            "allOf": [
+                {
+                    "properties": {
+                        "bookmarks": {
+                            "anyOf": [
+                                {
+                                    "additionalProperties": {},
+                                    "properties": {
+                                        "cdn": {
+                                            "description": "Serve the assets of this element from a CDN instead of copying them into\nyour build. `true` uses jsDelivr, pinned to the version of hyperbook that\nbuilt your pages, so the assets always match the pages that ask for them.\nA URL uses a mirror of your own.\n\nAn element served this way needs the network, so leave it off for the ones\nyou want working offline.",
+                                            "type": [
+                                                "string",
+                                                "boolean"
+                                            ]
                                         },
-                                        {
+                                        "version": {
                                             "type": "string"
                                         }
-                                    ]
-                                }
-                            },
-                            "type": "object"
-                        }
-                    ]
-                },
-                "emoji": {
-                    "allOf": [
-                        {
-                            "properties": {
-                                "version": {
-                                    "type": "string"
-                                }
-                            },
-                            "type": "object"
-                        },
-                        {
-                            "properties": {
-                                "style": {
-                                    "description": "How emojis are rendered.\n- \"native\": Emojis are kept as text and drawn with the emoji font of\n  the reader's operating system (default).\n- \"twemoji\": Emojis are replaced with Twemoji images, so they look the\n  same on every platform.",
-                                    "enum": [
-                                        "native",
-                                        "twemoji"
-                                    ],
-                                    "type": "string"
-                                }
-                            },
-                            "type": "object"
-                        }
-                    ]
-                },
-                "excalidraw": {
-                    "allOf": [
-                        {
-                            "properties": {
-                                "version": {
-                                    "type": "string"
-                                }
-                            },
-                            "type": "object"
-                        },
-                        {
-                            "properties": {
-                                "aspectRatio": {
-                                    "type": "string"
+                                    },
+                                    "type": "object"
                                 },
-                                "autoZoom": {
-                                    "type": "boolean"
-                                },
-                                "center": {
-                                    "type": "boolean"
-                                },
-                                "edit": {
+                                {
+                                    "const": false,
                                     "type": "boolean"
                                 }
-                            },
-                            "type": "object"
-                        }
-                    ]
-                },
-                "kirimoto": {
-                    "allOf": [
-                        {
-                            "properties": {
-                                "version": {
-                                    "type": "string"
-                                }
-                            },
-                            "type": "object"
+                            ]
                         },
-                        {
-                            "properties": {
-                                "height": {
-                                    "type": "string"
+                        "code": {
+                            "allOf": [
+                                {
+                                    "additionalProperties": {},
+                                    "properties": {
+                                        "cdn": {
+                                            "description": "Serve the assets of this element from a CDN instead of copying them into\nyour build. `true` uses jsDelivr, pinned to the version of hyperbook that\nbuilt your pages, so the assets always match the pages that ask for them.\nA URL uses a mirror of your own.\n\nAn element served this way needs the network, so leave it off for the ones\nyou want working offline.",
+                                            "type": [
+                                                "string",
+                                                "boolean"
+                                            ]
+                                        },
+                                        "version": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
                                 },
-                                "settings": {
-                                    "type": "string"
+                                {
+                                    "properties": {
+                                        "bypassInline": {
+                                            "type": "boolean"
+                                        },
+                                        "showLineNumbers": {
+                                            "type": "boolean"
+                                        },
+                                        "theme": {
+                                            "anyOf": [
+                                                {
+                                                    "properties": {
+                                                        "dark": {
+                                                            "type": "string"
+                                                        },
+                                                        "light": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "dark",
+                                                        "light"
+                                                    ],
+                                                    "type": "object"
+                                                },
+                                                {
+                                                    "type": "string"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "type": "object"
                                 }
-                            },
-                            "type": "object"
-                        }
-                    ]
-                },
-                "onlineide": {
-                    "allOf": [
-                        {
-                            "properties": {
-                                "version": {
-                                    "type": "string"
-                                }
-                            },
-                            "type": "object"
+                            ]
                         },
-                        {
-                            "properties": {
-                                "height": {
-                                    "type": [
-                                        "string",
-                                        "number"
-                                    ]
-                                }
-                            },
-                            "type": "object"
-                        }
-                    ]
-                },
-                "sqlide": {
-                    "allOf": [
-                        {
-                            "properties": {
-                                "version": {
-                                    "type": "string"
-                                }
-                            },
-                            "type": "object"
-                        },
-                        {
-                            "properties": {
-                                "db": {
-                                    "type": "string"
+                        "emoji": {
+                            "allOf": [
+                                {
+                                    "additionalProperties": {},
+                                    "properties": {
+                                        "cdn": {
+                                            "description": "Serve the assets of this element from a CDN instead of copying them into\nyour build. `true` uses jsDelivr, pinned to the version of hyperbook that\nbuilt your pages, so the assets always match the pages that ask for them.\nA URL uses a mirror of your own.\n\nAn element served this way needs the network, so leave it off for the ones\nyou want working offline.",
+                                            "type": [
+                                                "string",
+                                                "boolean"
+                                            ]
+                                        },
+                                        "version": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
                                 },
-                                "height": {
-                                    "type": [
-                                        "string",
-                                        "number"
-                                    ]
+                                {
+                                    "properties": {
+                                        "style": {
+                                            "description": "How emojis are rendered.\n- \"native\": Emojis are kept as text and drawn with the emoji font of\n  the reader's operating system (default).\n- \"twemoji\": Emojis are replaced with Twemoji images, so they look the\n  same on every platform.",
+                                            "enum": [
+                                                "native",
+                                                "twemoji"
+                                            ],
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
                                 }
-                            },
-                            "type": "object"
+                            ]
+                        },
+                        "excalidraw": {
+                            "allOf": [
+                                {
+                                    "additionalProperties": {},
+                                    "properties": {
+                                        "cdn": {
+                                            "description": "Serve the assets of this element from a CDN instead of copying them into\nyour build. `true` uses jsDelivr, pinned to the version of hyperbook that\nbuilt your pages, so the assets always match the pages that ask for them.\nA URL uses a mirror of your own.\n\nAn element served this way needs the network, so leave it off for the ones\nyou want working offline.",
+                                            "type": [
+                                                "string",
+                                                "boolean"
+                                            ]
+                                        },
+                                        "version": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                {
+                                    "properties": {
+                                        "aspectRatio": {
+                                            "type": "string"
+                                        },
+                                        "autoZoom": {
+                                            "type": "boolean"
+                                        },
+                                        "center": {
+                                            "type": "boolean"
+                                        },
+                                        "edit": {
+                                            "type": "boolean"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            ]
+                        },
+                        "kirimoto": {
+                            "allOf": [
+                                {
+                                    "additionalProperties": {},
+                                    "properties": {
+                                        "cdn": {
+                                            "description": "Serve the assets of this element from a CDN instead of copying them into\nyour build. `true` uses jsDelivr, pinned to the version of hyperbook that\nbuilt your pages, so the assets always match the pages that ask for them.\nA URL uses a mirror of your own.\n\nAn element served this way needs the network, so leave it off for the ones\nyou want working offline.",
+                                            "type": [
+                                                "string",
+                                                "boolean"
+                                            ]
+                                        },
+                                        "version": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                {
+                                    "properties": {
+                                        "height": {
+                                            "type": "string"
+                                        },
+                                        "settings": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            ]
+                        },
+                        "onlineide": {
+                            "allOf": [
+                                {
+                                    "additionalProperties": {},
+                                    "properties": {
+                                        "cdn": {
+                                            "description": "Serve the assets of this element from a CDN instead of copying them into\nyour build. `true` uses jsDelivr, pinned to the version of hyperbook that\nbuilt your pages, so the assets always match the pages that ask for them.\nA URL uses a mirror of your own.\n\nAn element served this way needs the network, so leave it off for the ones\nyou want working offline.",
+                                            "type": [
+                                                "string",
+                                                "boolean"
+                                            ]
+                                        },
+                                        "version": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                {
+                                    "properties": {
+                                        "height": {
+                                            "type": [
+                                                "string",
+                                                "number"
+                                            ]
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            ]
+                        },
+                        "sqlide": {
+                            "allOf": [
+                                {
+                                    "additionalProperties": {},
+                                    "properties": {
+                                        "cdn": {
+                                            "description": "Serve the assets of this element from a CDN instead of copying them into\nyour build. `true` uses jsDelivr, pinned to the version of hyperbook that\nbuilt your pages, so the assets always match the pages that ask for them.\nA URL uses a mirror of your own.\n\nAn element served this way needs the network, so leave it off for the ones\nyou want working offline.",
+                                            "type": [
+                                                "string",
+                                                "boolean"
+                                            ]
+                                        },
+                                        "version": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                {
+                                    "properties": {
+                                        "db": {
+                                            "type": "string"
+                                        },
+                                        "height": {
+                                            "type": [
+                                                "string",
+                                                "number"
+                                            ]
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            ]
                         }
-                    ]
+                    },
+                    "type": "object"
+                },
+                {
+                    "additionalProperties": {
+                        "anyOf": [
+                            {
+                                "additionalProperties": {},
+                                "properties": {
+                                    "cdn": {
+                                        "description": "Serve the assets of this element from a CDN instead of copying them into\nyour build. `true` uses jsDelivr, pinned to the version of hyperbook that\nbuilt your pages, so the assets always match the pages that ask for them.\nA URL uses a mirror of your own.\n\nAn element served this way needs the network, so leave it off for the ones\nyou want working offline.",
+                                        "type": [
+                                            "string",
+                                            "boolean"
+                                        ]
+                                    },
+                                    "version": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            },
+                            {
+                                "const": false,
+                                "type": "boolean"
+                            }
+                        ]
+                    },
+                    "type": "object"
                 }
-            },
-            "type": "object"
+            ]
         },
         "font": {
             "type": "string"

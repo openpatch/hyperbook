@@ -56,12 +56,13 @@ export const assetsBase = (
   hyperbookJson: HyperbookJson,
   element: string | null,
 ): string | null => {
-  if (!element || !hyperbookJson.assets?.cdn?.includes(element)) {
+  const config = element ? hyperbookJson.elements?.[element] : undefined;
+  const from = config ? config.cdn : undefined;
+  if (!from) {
     return null;
   }
-  const url = hyperbookJson.assets.cdnUrl;
-  return url
-    ? url.replace(/\/$/, "")
+  return typeof from === "string"
+    ? from.replace(/\/$/, "")
     : `https://cdn.jsdelivr.net/npm/hyperbook@${packageJson.version}/dist/assets`;
 };
 
@@ -886,8 +887,8 @@ async function runBuild(
   await mkdir(assetsOut, { recursive: true });
   const fromCdn = (element: string) =>
     assetsBase(hyperbookJson, element) !== null;
-  const servedFromCdn = (hyperbookJson.assets?.cdn || []).filter((element) =>
-    fromCdn(element),
+  const servedFromCdn = Object.keys(hyperbookJson.elements || {}).filter(
+    (element) => fromCdn(element),
   );
   if (servedFromCdn.length > 0) {
     console.log(

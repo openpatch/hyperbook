@@ -30,13 +30,11 @@ can and part wise must set (indicated by a \*).
 | repo               | The link to the GitHub repo. Used for showing an edit button. The %path% placeholder will be replaced by the current path or the current path will be appended. |
 | repo.url           | The link to the repo. Used for showing an edit button. The %path% placeholder will be replaced by the current path or the current path will be appended.        |
 | repo.label         | The label for the repo link.                                                                                                                                    |
-| elements           | Here you can configure the elements. See the element pages for configuration options.                                                                           |
+| elements           | Here you can configure the elements. Sets a default for the parameters of an element, and `cdn` serves its assets from a CDN. See below.                        |
 | links              | Here you can add custom links, which will be shown in the top right corner. See the example below on how to use them.                                           |
 | styles             | Here you can add Links to custom CSS files.                                                                                                                     |
 | scripts            | Here you can add links to custom JavaScript files.                                                                                                              |
 | allowDangerousHtml | Allow HTML. This can lead to incompatibilities in future versions.                                                                                              |
-| assets.cdn         | Names of the elements whose assets are served from a CDN instead of being copied into your build, for example `["onlineide", "sqlide", "emoji"]`. An element named here needs the network to work.                                    |
-| assets.cdnUrl      | Where those assets are served from. Defaults to jsDelivr, pinned to the version of hyperbook that built your pages. Set it to use a mirror of your own.                                          |
 | qrcode             | Shows an icon, which opens a qr code to the current page.                                                                                                       |
 | toc         | Show or hide a table of content for the page. This is on for pages and off for glossary entries by default                          |
 | llms               | When set to true, generates an llms.txt file that combines all markdown files in order. The file includes the book name and version in a header format.         |
@@ -110,3 +108,54 @@ Here is an example configuration:
   ]
 }
 ```
+
+## Configuring an element
+
+Every element can be configured under `elements`, by the name you write it with.
+What you put there is used as a default for the parameters of that element, so
+you set it once instead of on every use.
+
+```json
+{
+  "elements": {
+    "sqlide": {
+      "height": "500px"
+    },
+    "qr": {
+      "size": "L"
+    }
+  }
+}
+```
+
+Every SQL IDE is then 500px tall and every QR code is large. An element that
+sets a parameter itself keeps what it sets, so this only fills in what is
+missing. The page of an element lists the parameters it understands.
+
+### Serving the assets of an element from a CDN
+
+The stylesheets and the scripts an element needs are copied into your build.
+For the big ones that is most of what your build weighs: a book with one SQL IDE
+is 23 MB, of which 21 MB is the SQL IDE.
+
+`cdn` serves them from somewhere else instead.
+
+```json
+{
+  "elements": {
+    "sqlide": {
+      "cdn": true
+    }
+  }
+}
+```
+
+That book is 1.9 MB now. `true` serves them from jsDelivr, pinned to the version
+of hyperbook that built your pages, so the assets always match the pages that
+ask for them and never change for a build you already published. A URL serves
+them from a mirror of your own.
+
+An element served this way needs the network, so leave it off for the ones you
+want working offline. Everything that belongs to no element, the shell and the
+stylesheets and the maths, stays in your build either way, as do your search
+index, your translations and your favicons.

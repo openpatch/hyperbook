@@ -72,6 +72,7 @@ import remarkDirectiveStruktolab from "./remarkDirectiveStruktolab";
 import remarkDirectiveBlockflowPlayer from "./remarkDirectiveBlockflowPlayer";
 import remarkDirectiveBlockflowEditor from "./remarkDirectiveBlockflowEditor";
 import remarkDirectiveKirimoto from "./remarkDirectiveKirimoto";
+import remarkElementDefaults from "./remarkElementDefaults";
 
 export const remark = (ctx: HyperbookContext) => {
   i18n.init(ctx.config.language || "en");
@@ -79,6 +80,9 @@ export const remark = (ctx: HyperbookContext) => {
     remarkRemoveComments,
     remarkDirective,
     remarkDirectiveRehype,
+    // Before every element, so each of them reads its parameters as if they
+    // had been written on it.
+    remarkElementDefaults(ctx),
     remarkDirectiveTabs(ctx),
     remarkDirectiveCollapsible(ctx),
     remarkDirectivePyide(ctx),

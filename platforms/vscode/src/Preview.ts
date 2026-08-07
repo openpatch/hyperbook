@@ -245,17 +245,21 @@ export default class Preview {
           switch (base) {
             case "assets":
               // An element that a hyperbook serves from a mirror of its own
-              // is previewed against that mirror. Without a mirror the assets
-              // that ship with this extension are used, because they are the
-              // ones that match the version rendering the preview.
+              // is previewed against that mirror. A `true` is not followed: it
+              // means the version that built the hyperbook, while the preview
+              // renders with the version inside this extension, so the assets
+              // that ship with it are the ones that match.
               const folder = path[0]?.replace(/^\/+/, "");
               const element = folder?.startsWith("directive-")
                 ? folder.slice("directive-".length)
                 : folder === "emoji"
                   ? "emoji"
                   : null;
-              const mirror = config.assets?.cdnUrl;
-              if (mirror && element && config.assets?.cdn?.includes(element)) {
+              const elementConfig = element
+                ? config.elements?.[element]
+                : undefined;
+              const mirror = elementConfig ? elementConfig.cdn : undefined;
+              if (typeof mirror === "string") {
                 const segments = path
                   .flatMap((segment) => segment.split("/"))
                   .filter((segment) => segment && segment !== ".");

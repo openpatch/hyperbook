@@ -1,5 +1,21 @@
 type ElementConfig = {
   version?: string;
+  /**
+   * Serve the assets of this element from a CDN instead of copying them into
+   * your build. `true` uses jsDelivr, pinned to the version of hyperbook that
+   * built your pages, so the assets always match the pages that ask for them.
+   * A URL uses a mirror of your own.
+   *
+   * An element served this way needs the network, so leave it off for the ones
+   * you want working offline.
+   */
+  cdn?: boolean | string;
+  /**
+   * Everything else is a default for a parameter of this element, used wherever
+   * the element does not set that parameter itself. `{ "height": "500px" }`
+   * gives every SQL IDE that height without repeating it on each one.
+   */
+  [parameter: string]: unknown;
 };
 
 export type Script =
@@ -161,29 +177,6 @@ export type HyperbookJson = {
     inverted?: boolean;
   };
   basePath?: string;
-  /**
-   * Where the assets of a hyperbook are served from. Assets are the stylesheets
-   * and the scripts of the elements you use, and they are copied into your
-   * build by default.
-   */
-  assets?: {
-    /**
-     * Elements whose assets are served from a CDN instead of being copied into
-     * your build. Name them the way you write them, for example "onlineide",
-     * "sqlide" or "emoji". The heavy ones are worth naming here; a build that
-     * copies none of them is a fraction of the size.
-     *
-     * An element served this way needs the network to work, so leave one out
-     * to keep it working offline.
-     */
-    cdn?: string[];
-    /**
-     * Where those assets are served from. Defaults to jsDelivr, pinned to the
-     * version of hyperbook that built your pages, so the assets always match
-     * the pages that ask for them. Set it to serve them from your own mirror.
-     */
-    cdnUrl?: string;
-  };
   license?: string;
   language?: Language;
   repo?:
@@ -236,6 +229,13 @@ export type HyperbookJson = {
        */
       style?: "native" | "twemoji";
     };
+  } & {
+    /**
+     * Every element of a hyperbook can be configured, not only the ones named
+     * above. The names above only describe what a particular element
+     * understands beyond a default for one of its parameters.
+     */
+    [element: string]: ElementConfig | false | undefined;
   };
 };
 

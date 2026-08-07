@@ -35,28 +35,30 @@ describe("where assets are served from", () => {
   });
 
   it("serves an element that opted in, pinned to a version", () => {
-    const { makeUrl } = ctxFor({ assets: { cdn: ["onlineide"] } });
+    const { makeUrl } = ctxFor({ elements: { onlineide: { cdn: true } } });
     expect(makeUrl(["directive-onlineide", "app.js"], "assets")).toMatch(
       /^https:\/\/cdn\.jsdelivr\.net\/npm\/hyperbook@[^/]+\/dist\/assets\/directive-onlineide\/app\.js$/,
     );
   });
 
   it("leaves an element that did not opt in in the build", () => {
-    const { makeUrl } = ctxFor({ assets: { cdn: ["onlineide"] } });
+    const { makeUrl } = ctxFor({ elements: { onlineide: { cdn: true } } });
     expect(makeUrl(["directive-sqlide", "app.js"], "assets")).toContain(
       "/__hyperbook_assets/directive-sqlide/app.js",
     );
   });
 
   it("leaves the shell in the build, whatever opted in", () => {
-    const { makeUrl } = ctxFor({ assets: { cdn: ["onlineide", "emoji"] } });
+    const { makeUrl } = ctxFor({
+      elements: { onlineide: { cdn: true }, emoji: { cdn: true } },
+    });
     expect(makeUrl(["shell.css"], "assets")).toContain(
       "/__hyperbook_assets/shell.css",
     );
   });
 
   it("serves emojis when they opted in", () => {
-    const { makeUrl } = ctxFor({ assets: { cdn: ["emoji"] } });
+    const { makeUrl } = ctxFor({ elements: { emoji: { cdn: true } } });
     expect(makeUrl(["emoji", "1f427.svg"], "assets")).toContain(
       "/dist/assets/emoji/1f427.svg",
     );
@@ -64,10 +66,7 @@ describe("where assets are served from", () => {
 
   it("serves them from a mirror of your own", () => {
     const { makeUrl } = ctxFor({
-      assets: {
-        cdn: ["emoji"],
-        cdnUrl: "https://assets.example.org/hyperbook/",
-      },
+      elements: { emoji: { cdn: "https://assets.example.org/hyperbook/" } },
     });
     expect(makeUrl(["emoji", "1f427.svg"], "assets")).toBe(
       "https://assets.example.org/hyperbook/emoji/1f427.svg",
@@ -75,14 +74,14 @@ describe("where assets are served from", () => {
   });
 
   it("keeps what the build writes itself in the build", () => {
-    const { makeUrl } = ctxFor({ assets: { cdn: ["emoji"] } });
+    const { makeUrl } = ctxFor({ elements: { emoji: { cdn: true } } });
     expect(
       makeUrl(["emoji", "x.svg"], "assets", undefined, { local: true }),
     ).toContain("/__hyperbook_assets/emoji/x.svg");
   });
 
   it("does not add a version query to an address that has one", () => {
-    const { makeUrl } = ctxFor({ assets: { cdn: ["emoji"] } });
+    const { makeUrl } = ctxFor({ elements: { emoji: { cdn: true } } });
     expect(
       makeUrl(["emoji", "x.svg"], "assets", undefined, { versioned: true }),
     ).not.toContain("?v=");
