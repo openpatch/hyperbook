@@ -98,6 +98,21 @@ describe("rehypeEmoji", () => {
     expect(file.data.emojis?.sort()).toEqual(["1f34e", "1f427"]);
   });
 
+  it("should walk past an element without children", () => {
+    // Directives build hast by hand and may leave children out entirely.
+    const tree: any = {
+      type: "root",
+      children: [
+        { type: "element", tagName: "img", properties: { src: "/a.png" } },
+        { type: "text", value: "🐧" },
+      ],
+    };
+    const file = new VFile("");
+    expect(() => (rehypeEmoji as any)(twemojiCtx)(tree, file)).not.toThrow();
+    expect(tree.children[1].tagName).toBe("img");
+    expect(tree.children[1].properties["data-emoji"]).toBe("1f427");
+  });
+
   it("should keep emojis as text when the style is native", () => {
     const { html, file } = toHtml(":penguin:", baseCtx);
     expect(html).not.toContain("<img");

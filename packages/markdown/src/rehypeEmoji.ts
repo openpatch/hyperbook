@@ -128,6 +128,12 @@ export const rehypeEmoji: Plugin<[HyperbookContext], Root> =
     };
 
     const walk = (parent: Parent) => {
+      // Not every element carries children. A directive that builds a void
+      // element like an img can leave them out.
+      if (!Array.isArray(parent.children)) {
+        return;
+      }
+
       const children: ElementContent[] = [];
       let replaced = false;
 
