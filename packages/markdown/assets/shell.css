@@ -1267,3 +1267,13 @@ nav.toc li.level-3 {
 .hidden {
   display: none !important;
 }
+
+img.emoji {
+  height: 1em;
+  width: 1em;
+  min-width: 1em;
+  margin: 0 0.05em 0 0.1em;
+  vertical-align: -0.1em;
+  display: inline-block;
+  max-width: none;
+}

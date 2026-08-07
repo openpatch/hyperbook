@@ -203,6 +203,16 @@ export type HyperbookJson = {
       db?: string;
       height?: string | number;
     };
+    emoji?: ElementConfig & {
+      /**
+       * How emojis are rendered.
+       * - "native": Emojis are kept as text and drawn with the emoji font of
+       *   the reader's operating system (default).
+       * - "twemoji": Emojis are replaced with Twemoji images, so they look the
+       *   same on every platform.
+       */
+      style?: "native" | "twemoji";
+    };
   };
 };
 

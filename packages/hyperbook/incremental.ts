@@ -353,6 +353,7 @@ export class IncrementalBuilder {
 
         // Copy any new directive assets
         await this.copyDirectiveAssets(result.directives);
+        await this.copyEmojiAssets(result.emojis);
 
         const changedHref = changedFile.path.href || "/";
 
@@ -423,6 +424,7 @@ export class IncrementalBuilder {
         }
 
         await this.copyDirectiveAssets(result.directives);
+        await this.copyEmojiAssets(result.emojis);
 
         const changedHref = changedFile.path.href || "/glossary";
         await this.refreshSearchIndex();
@@ -487,6 +489,7 @@ export class IncrementalBuilder {
         this.directives.add(directive);
       }
       await this.copyDirectiveAssets(result.directives);
+      await this.copyEmojiAssets(result.emojis);
       return href;
     }
 
@@ -507,6 +510,7 @@ export class IncrementalBuilder {
         this.directives.add(directive);
       }
       await this.copyDirectiveAssets(result.directives);
+      await this.copyEmojiAssets(result.emojis);
       return href;
     }
 
@@ -527,6 +531,27 @@ export class IncrementalBuilder {
       this.rootOut,
       "Incremental",
     );
+  }
+
+  /**
+   * Emojis are copied one file at a time, so a book only ships the Twemoji
+   * images it actually uses.
+   */
+  private async copyEmojiAssets(newEmojis: string[]): Promise<void> {
+    if (newEmojis.length === 0) return;
+    const emojiPath = path.join(__dirname, "assets", "emoji");
+    const emojiOut = path.join(this.assetsOut, "emoji");
+    await fs.mkdir(emojiOut, { recursive: true });
+    for (const emoji of newEmojis) {
+      try {
+        await cp(
+          path.join(emojiPath, `${emoji}.svg`),
+          path.join(emojiOut, `${emoji}.svg`),
+        );
+      } catch {
+        // Emoji has no asset
+      }
+    }
   }
 
   private async copyDirectiveAssets(newDirectives: string[]): Promise<void> {

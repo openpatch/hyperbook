@@ -32,6 +32,16 @@ figure {
   max-width: 100%;
 }
 
+img.emoji {
+  height: 1em;
+  width: 1em;
+  min-width: 1em;
+  margin: 0 0.05em 0 0.1em;
+  vertical-align: -0.1em;
+  display: inline-block;
+  max-width: none;
+}
+
 .hyperbook-markdown figure.align-left {
   display: table;
   float: left;

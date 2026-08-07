@@ -13,6 +13,29 @@ Just like in most chat apps you can insert an emoji by using its name.
 
 :smiley: :apple: :penguin:
 
+## Consistent Emojis
+
+Emojis are drawn by the operating system of your reader, so the same emoji looks
+different on Windows, macOS, Android and Linux. Set `elements.emoji.style` to
+`twemoji` to replace them with [Twemoji](https://github.com/jdecked/twemoji)
+images, which look the same everywhere.
+
+```json
+{
+  "elements": {
+    "emoji": {
+      "style": "twemoji"
+    }
+  }
+}
+```
+
+This covers emojis in your content as well as the icons you configure, for
+example for links. Emojis in code blocks are never replaced, and only the emojis
+you actually use are copied into your build.
+
+Twemoji graphics are licensed CC-BY 4.0 by Twitter, Inc and other contributors.
+
 # GitHub Emoji Cheat Sheet
 
 This file lists all supported GitHub-style emoji shortcodes and their corresponding Unicode characters.

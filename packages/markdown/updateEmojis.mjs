@@ -43,6 +43,29 @@ Just like in most chat apps you can insert an emoji by using its name.
 \`\`\`
 
 :smiley: :apple: :penguin:
+
+## Consistent Emojis
+
+Emojis are drawn by the operating system of your reader, so the same emoji looks
+different on Windows, macOS, Android and Linux. Set `elements.emoji.style` to
+`twemoji` to replace them with [Twemoji](https://github.com/jdecked/twemoji)
+images, which look the same everywhere.
+
+```json
+{
+  "elements": {
+    "emoji": {
+      "style": "twemoji"
+    }
+  }
+}
+```
+
+This covers emojis in your content as well as the icons you configure, for
+example for links. Emojis in code blocks are never replaced, and only the emojis
+you actually use are copied into your build.
+
+Twemoji graphics are licensed CC-BY 4.0 by Twitter, Inc and other contributors.
 `;
 
   const deBase = `---
@@ -59,6 +82,31 @@ Wie in den meisten Chat-Apps kannst du Emojis durch Eingabe ihres Namens einfüg
 \`\`\`
 
 :smiley: :apple: :penguin:
+
+## Einheitliche Emojis
+
+Emojis werden vom Betriebssystem deiner Leser gezeichnet, dasselbe Emoji sieht
+daher unter Windows, macOS, Android und Linux unterschiedlich aus. Setze
+`elements.emoji.style` auf `twemoji`, um sie durch
+[Twemoji](https://github.com/jdecked/twemoji)-Bilder zu ersetzen, die überall
+gleich aussehen.
+
+```json
+{
+  "elements": {
+    "emoji": {
+      "style": "twemoji"
+    }
+  }
+}
+```
+
+Das gilt für Emojis in deinen Inhalten und für die Icons, die du konfigurierst,
+zum Beispiel für Links. Emojis in Codeblöcken werden nie ersetzt und es werden
+nur die Emojis in deinen Build kopiert, die du tatsächlich verwendest.
+
+Twemoji-Grafiken stehen unter der CC-BY-4.0-Lizenz von Twitter, Inc und weiteren
+Mitwirkenden.
 `;
 
   const enHeader = `# GitHub Emoji Cheat Sheet

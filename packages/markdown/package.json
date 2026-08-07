@@ -35,7 +35,7 @@
     "build": "rimraf dist && pnpm build:pkg && pnpm build:types && node postbuild.mjs",
     "build:pkg": "node ../../scripts/build.mjs && ncp assets dist/assets",
     "build:types": "tsc --project tsconfig.build.json --declaration --emitDeclarationOnly",
-    "emojis:update": "node updateEmojis.mjs"
+    "emojis:update": "node updateEmojis.mjs && node updateEmojiAssets.mjs"
   },
   "bundle": "all",
   "dependencies": {
@@ -92,6 +92,7 @@
     "@learningmap/web-component": "^0.3.7",
     "@raspberrypifoundation/python-friendly-error-messages": "^0.1.6",
     "@shikijs/types": "^3.21.0",
+    "@twemoji/svg": "15.0.0",
     "@types/hast": "3.0.4",
     "@types/js-yaml": "^4.0.9",
     "@types/mdast": "^4.0.4",
