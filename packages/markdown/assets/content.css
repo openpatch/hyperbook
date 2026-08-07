@@ -331,12 +331,32 @@ img.emoji {
   align-items: center;
 }
 
+/* The bookmark icon is drawn from the stylesheet, so it looks the same on
+   every platform and takes the color of its heading. */
+:root {
+  --bookmark-icon: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>');
+  --bookmark-icon-active: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>');
+}
+
 .hyperbook-markdown .bookmark {
   margin-left: 10px;
-  background: none;
   border: none;
-  opacity: 0.5;
+  padding: 0;
+  /* A button does not inherit the color of its heading on its own, and the
+     icon is painted with currentColor. */
+  color: inherit;
+  cursor: pointer;
+  display: inline-block;
+  vertical-align: middle;
+  width: 1em;
+  height: 1em;
   font-size: 1rem;
+  opacity: 0.5;
+  background-color: currentColor;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  mask-size: contain;
+  mask-image: var(--bookmark-icon);
 }
 
 .hyperbook-markdown .bookmark:hover {
@@ -345,6 +365,7 @@ img.emoji {
 
 .hyperbook-markdown .bookmark.active {
   opacity: 1;
+  mask-image: var(--bookmark-icon-active);
 }
 
 .hyperbook-markdown ul.bookmarks {

@@ -100,18 +100,17 @@ export default ({
               type: "button",
               class: "bookmark",
               title: i18n.get("toggle-bookmark"),
+              "aria-label": i18n.get("toggle-bookmark"),
               "aria-pressed": "false",
               "data-key": key,
               // Plain text fallback. The label is normally read from the
               // rendered heading, so it keeps whatever the page shows.
               "data-label": label,
             },
-            children: [
-              {
-                type: "text",
-                value: "🔖",
-              },
-            ],
+            // The icon comes from the stylesheet, so it does not depend on
+            // the emoji font of the reader and does not change with the
+            // emoji style of the hyperbook.
+            children: [],
           });
         }
       });

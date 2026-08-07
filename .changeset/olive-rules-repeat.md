@@ -23,11 +23,21 @@ This also fixes bookmarking a heading that contains a quote or a backslash.
 Those characters ended up inside a JavaScript string in the `onclick`
 attribute and made the button throw a syntax error.
 
+The bookmark indicator is no longer the 🔖 emoji. Both the button on a heading
+and the marker in the bookmark list are drawn from the stylesheet with a mask,
+so the control looks the same on every platform, takes the color of its
+surroundings in light and dark mode, and does not change when the emoji style
+changes. A bookmarked heading now shows a filled icon instead of only a less
+transparent one.
+
 Breaking:
 
 - `hyperbook.ui.toggleBookmark(key, label)` no longer takes a label:
   `hyperbook.ui.toggleBookmark(key)`. The label comes from the heading.
 - Bookmark buttons no longer carry an inline `onclick`. They are handled by a
-  delegated listener and carry `data-key`, `data-label` and `aria-pressed`.
+  delegated listener and carry `data-key`, `data-label`, `aria-label` and
+  `aria-pressed`.
+- Bookmark buttons are empty. The icon comes from `.bookmark` in the
+  stylesheet, so a custom style that replaced the emoji has to be updated.
 - The store moves to version 6. Labels of existing bookmarks are migrated to
   the new shape, and a plain label is still rendered, so nothing is lost.
