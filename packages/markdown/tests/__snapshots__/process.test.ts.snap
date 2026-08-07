@@ -380,7 +380,7 @@ HYPERBOOK_ASSETS = "/assets/"
       </nav>
     </div>
   </side-drawer>
-  <h1 id="heading-11"><a href="#heading-11" class="heading"><span>Heading 1:1</span></a><button class="bookmark" onclick="hyperbook.ui.toggleBookmark(&#x22;#heading-11&#x22;, &#x22;Heading 1:1&#x22;)" title="Toggle Bookmark" data-key="#heading-11">🔖</button></h1>
+  <h1 id="heading-11"><a href="#heading-11" class="heading"><span>Heading 1:1</span></a><button type="button" class="bookmark" title="Toggle Bookmark" aria-pressed="false" data-key="#heading-11" data-label="Heading 1:1">🔖</button></h1>
 </div>
 </article><div class="jump-container"></div><div class="meta"><a href="#" onclick="hyperbook.store.reset()"><span class="reset-icon" title="Reset Hyperbook"></span></a><span class="copyright">© Copyright 2026</span></div></main></div><script src="/assets/bootstrap.js" defer></script><script src="/assets/ui.js" defer></script></body></html>"
 `;

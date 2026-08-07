@@ -55,6 +55,12 @@ describe("rehypeEmoji", () => {
     expect(html).toContain(`class="emoji"`);
   });
 
+  it("should tag the image with the emoji id", () => {
+    // The id lets the client rebuild the image, for example for a bookmark.
+    const { html } = toHtml(":penguin:", twemojiCtx);
+    expect(html).toContain(`data-emoji="1f427"`);
+  });
+
   it("should replace an emoji that was typed directly", () => {
     const { html } = toHtml("Hello 🐧 world", twemojiCtx);
     expect(html).toContain(`src="/assets/emoji/1f427.svg"`);

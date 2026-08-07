@@ -97,10 +97,14 @@ export default ({
             type: "element",
             tagName: "button",
             properties: {
+              type: "button",
               class: "bookmark",
-              onclick: `hyperbook.ui.toggleBookmark("${key}", "${label}")`,
               title: i18n.get("toggle-bookmark"),
+              "aria-pressed": "false",
               "data-key": key,
+              // Plain text fallback. The label is normally read from the
+              // rendered heading, so it keeps whatever the page shows.
+              "data-label": label,
             },
             children: [
               {

@@ -72,6 +72,7 @@ const makeImage = (
     class: "emoji",
     src: ctx.makeUrl(["emoji", `${id}.svg`], "assets"),
     alt: emoji,
+    "data-emoji": id,
     draggable: "false",
     loading: "lazy",
     decoding: "async",
