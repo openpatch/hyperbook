@@ -18,6 +18,7 @@ To summarize, here are the properties you can set in the frontmatter:
 | Property   | Description                                                                                                            |
 | :--------- | :--------------------------------------------------------------------------------------------------------------------- |
 | ...        | Every Property from a [page](/configuration/page)                                                                      |
+| index      | A number indicating the position in the menu, in relation to the pages and the sections on the same level. Without it, a section comes after the pages. |
 | virtual    | Everything will appear on the same level as the parent. Be aware that the index property does not work across folders. (deprecated, use `navigation: virtual` instead) |
 | expanded   | Defines whether the section is expanded on page load. (deprecated, use `navigation: expanded` instead)                 |
 | navigation | Controls how the section appears in navigation. Options: `default` (collapsible section), `hidden` (hides from navigation), `virtual` (items appear at parent level), `page` (renders as a regular page link without showing children), `expanded` (section is expanded by default) |
