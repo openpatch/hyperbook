@@ -382,10 +382,11 @@ describe("rehypeShell", () => {
     });
 
     it("keeps pages before sections when nothing has an index", () => {
+      // Both lists arrive in order, so the navigation only weaves them.
       expect(
         order({
-          pages: [page("zebra"), page("apple")],
-          sections: [section("beta"), section("alpha")],
+          pages: [page("apple"), page("zebra")],
+          sections: [section("alpha"), section("beta")],
         }),
       ).toEqual(["apple", "zebra", "alpha", "beta"]);
     });

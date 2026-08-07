@@ -280,39 +280,59 @@ const isShownAsPage = (section: HyperbookSection): boolean =>
  * order. `index` decides, across both of them, so a section can sit between
  * two pages. Entries without an `index` fall back to pages before sections,
  * and entries that end up equal are ordered by name.
+ *
+ * Both lists are expected to be in order already, which is what reading a
+ * hyperbook gives. They are merged rather than sorted, so the order a caller
+ * built stays intact and only the two lists are woven together.
  */
 export const sortNavigation = (
   pages: HyperbookPage[],
   sections: HyperbookSection[],
 ): NavigationEntry[] => {
-  const entries: {
-    entry: NavigationEntry;
-    index: number;
-    /** Decides a tie on the index: a page comes before a section. */
-    kind: number;
-    name: string;
-  }[] = [
-    ...pages.map((page) => ({
-      entry: { type: "page" as const, page },
-      index: page.index ?? FALLBACK_INDEX_PAGE,
-      kind: 0,
-      name: page.name,
-    })),
-    ...sections.map((section) => ({
-      entry: { type: "section" as const, section },
-      index:
-        section.index ??
-        (isShownAsPage(section) ? FALLBACK_INDEX_PAGE : FALLBACK_INDEX_SECTION),
-      kind: isShownAsPage(section) ? 0 : 1,
-      name: section.name,
-    })),
-  ];
+  const pageKey = (page: HyperbookPage) => ({
+    index: page.index ?? FALLBACK_INDEX_PAGE,
+    kind: 0,
+    name: page.name,
+  });
+  const sectionKey = (section: HyperbookSection) => ({
+    index:
+      section.index ??
+      (isShownAsPage(section) ? FALLBACK_INDEX_PAGE : FALLBACK_INDEX_SECTION),
+    kind: isShownAsPage(section) ? 0 : 1,
+    name: section.name,
+  });
 
-  return entries
-    .sort((a, b) => (a.name > b.name ? 1 : -1))
-    .sort((a, b) => a.kind - b.kind)
-    .sort((a, b) => a.index - b.index)
-    .map(({ entry }) => entry);
+  const entries: NavigationEntry[] = [];
+  let p = 0;
+  let s = 0;
+
+  while (p < pages.length || s < sections.length) {
+    if (s >= sections.length) {
+      entries.push({ type: "page", page: pages[p++] });
+      continue;
+    }
+    if (p >= pages.length) {
+      entries.push({ type: "section", section: sections[s++] });
+      continue;
+    }
+
+    const page = pageKey(pages[p]);
+    const section = sectionKey(sections[s]);
+    const takePage =
+      page.index !== section.index
+        ? page.index < section.index
+        : page.kind !== section.kind
+          ? page.kind < section.kind
+          : page.name <= section.name;
+
+    if (takePage) {
+      entries.push({ type: "page", page: pages[p++] });
+    } else {
+      entries.push({ type: "section", section: sections[s++] });
+    }
+  }
+
+  return entries;
 };
 
 /**
