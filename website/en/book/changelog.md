@@ -47,7 +47,7 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 
 **navigation**: The pages of a section are indented, so they read as belonging to it when a page of the level above follows them.
 
-**navigation**: A section can sit between two pages, and a page can sit after a section. The `index` of a page and the `index` of a section are one order now, instead of pages always coming first. Without an `index` nothing moves: pages still come before sections.
+**navigation**: A section can sit between two pages, and a page can sit after a section. This works at every level, so a subsection can sit between two pages of its section. The `index` of a page and the `index` of a section are one order now, instead of pages always coming first. Without an `index` nothing moves: pages still come before sections.
 
 **emoji**: Emojis can be rendered as images, so they look the same on every platform instead of being drawn with the emoji font of the reader's operating system. Set `elements.emoji.style` to `twemoji` in your `hyperbook.json`. Only the emojis your book uses end up in your build.
 

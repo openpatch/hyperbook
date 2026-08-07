@@ -390,6 +390,22 @@ describe("rehypeShell", () => {
       ).toEqual(["apple", "zebra", "alpha", "beta"]);
     });
 
+    it("puts a subsection between two pages of its section", () => {
+      // The pages of a section and its subsections share one order too, so the
+      // sidebar keeps agreeing with the previous and next buttons.
+      expect(
+        order({
+          sections: [
+            {
+              ...section("outer", 1),
+              pages: [page("early", 1), page("late", 3)],
+              sections: [section("middle", 2)],
+            },
+          ],
+        }),
+      ).toEqual(["outer", "early", "middle", "late"]);
+    });
+
     it("puts a page before a section that shares its index", () => {
       expect(
         order({
