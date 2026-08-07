@@ -154,7 +154,7 @@ export default class Preview {
         ...pagesAndSections,
         ...fileNav,
       };
-      
+
       // If current is null (glossary page not in pageList), create it from file frontmatter
       if (!navigation.current && this._vfile.markdown.data) {
         navigation.current = {
@@ -171,7 +171,7 @@ export default class Preview {
           layout: this._vfile.markdown.data.layout,
         };
       }
-      
+
       const files = await vfile.list(this._vfile.root);
       const publicFiles = await vfile.listForFolder(this._vfile.root, "public");
       const publicBookFiles = await vfile.listForFolder(
@@ -233,7 +233,7 @@ export default class Preview {
                 } else if (segment.endsWith(".md")) {
                   segment = segment.slice(0, -3);
                 }
-                
+
                 if (!segment.startsWith("/")) {
                   return resolveRelativePath(segment, page);
                 }
@@ -244,6 +244,19 @@ export default class Preview {
 
           switch (base) {
             case "assets":
+              // A hyperbook that points its assets at a mirror of its own is
+              // previewed against that mirror. `true` is not followed here: it
+              // means the version that built the hyperbook, and the preview
+              // renders with the version inside this extension, so the assets
+              // that ship with it are the ones that match.
+              const cdn = config.assets?.cdn;
+              if (typeof cdn === "string") {
+                const segments = path
+                  .flatMap((segment) => segment.split("/"))
+                  .filter((segment) => segment && segment !== ".");
+                return [cdn.replace(/\/$/, ""), ...segments].join("/");
+              }
+
               const vsExtensionPath =
                 this.panel?.webview
                   .asWebviewUri(
@@ -385,7 +398,7 @@ export default class Preview {
         null,
         this.disposables,
       );
-      
+
       const fileWatcher = vscode.workspace.createFileSystemWatcher("**/*");
       fileWatcher.onDidChange(
         async (uri) => {
@@ -402,7 +415,7 @@ export default class Preview {
         null,
         this.disposables,
       );
-      
+
       vscode.workspace.onDidSaveTextDocument(
         this.handleTextDocumentChange.bind(this),
         null,

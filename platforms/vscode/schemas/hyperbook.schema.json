@@ -61,6 +61,19 @@
         "allowDangerousHtml": {
             "type": "boolean"
         },
+        "assets": {
+            "description": "Where the assets of a hyperbook are served from. Assets are the stylesheets\nand the scripts of the elements you use, and they are copied into your\nbuild by default.",
+            "properties": {
+                "cdn": {
+                    "description": "Load them from a CDN instead of copying them, which keeps a build small\nand lets a reader who visits more than one hyperbook reuse them.\n\n- `true`: from jsDelivr, pinned to the version that built the hyperbook\n- a URL: from your own mirror, for example behind your own domain\n\nA hyperbook served this way needs the network. Leave it off to keep it\nworking offline.",
+                    "type": [
+                        "string",
+                        "boolean"
+                    ]
+                }
+            },
+            "type": "object"
+        },
         "author": {
             "properties": {
                 "name": {

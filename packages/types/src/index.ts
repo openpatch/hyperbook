@@ -161,6 +161,24 @@ export type HyperbookJson = {
     inverted?: boolean;
   };
   basePath?: string;
+  /**
+   * Where the assets of a hyperbook are served from. Assets are the stylesheets
+   * and the scripts of the elements you use, and they are copied into your
+   * build by default.
+   */
+  assets?: {
+    /**
+     * Load them from a CDN instead of copying them, which keeps a build small
+     * and lets a reader who visits more than one hyperbook reuse them.
+     *
+     * - `true`: from jsDelivr, pinned to the version that built the hyperbook
+     * - a URL: from your own mirror, for example behind your own domain
+     *
+     * A hyperbook served this way needs the network. Leave it off to keep it
+     * working offline.
+     */
+    cdn?: boolean | string;
+  };
   license?: string;
   language?: Language;
   repo?:
@@ -248,6 +266,12 @@ export interface HyperbookContext {
     page?: HyperbookPage,
     options?: {
       versioned?: boolean;
+      /**
+       * The asset is written by the build for this hyperbook, like its search
+       * index or its translations, so it comes from the build itself even when
+       * the rest are served from somewhere else.
+       */
+      local?: boolean;
     },
   ): string;
   navigation: Navigation;

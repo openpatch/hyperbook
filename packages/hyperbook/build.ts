@@ -30,6 +30,24 @@ import packageJson from "./package.json";
 export const ASSETS_FOLDER = "__hyperbook_assets";
 
 /**
+ * Where the assets are served from, when they are not copied into the build.
+ *
+ * The version is the one that built the hyperbook, so the assets always match
+ * the pages that ask for them, and the address never changes for a build that
+ * was already published.
+ */
+export const assetsBase = (hyperbookJson: HyperbookJson): string | null => {
+  const cdn = hyperbookJson.assets?.cdn;
+  if (!cdn) {
+    return null;
+  }
+  if (typeof cdn === "string") {
+    return cdn.replace(/\/$/, "");
+  }
+  return `https://cdn.jsdelivr.net/npm/hyperbook@${packageJson.version}/dist/assets`;
+};
+
+/**
  * Builds the lunr index and writes search.js. Extracted so the dev server can
  * regenerate it after an incremental rebuild instead of leaving it stale.
  */
@@ -506,7 +524,17 @@ export function makeBaseCtx(
           return posix.join(basePath || "", ...pathArr);
         case "archive":
           return posix.join("/", basePath || "", "archives", ...pathArr);
-        case "assets":
+        case "assets": {
+          const cdn = options?.local ? null : assetsBase(hyperbookJson);
+          if (cdn) {
+            // Joined by hand: posix.join would turn the // of the address into
+            // a single slash. The version is already in the address, so it
+            // needs no query either.
+            const segments = pathArr
+              .flatMap((segment) => segment.split("/"))
+              .filter((segment) => segment && segment !== ".");
+            return [cdn, ...segments].join("/");
+          }
           if (pathArr.length === 1 && pathArr[0] === "/") {
             return `${posix.join("/", basePath || "", ASSETS_FOLDER, ...pathArr)}`;
           } else {
@@ -516,6 +544,7 @@ export function makeBaseCtx(
             }
             return result;
           }
+        }
       }
     },
     project: rootProject,
@@ -831,8 +860,19 @@ async function runBuild(
     }
   }
 
+  // Assets that come from a CDN are not copied. What a build writes itself,
+  // the favicons and the search index, is written either way.
+  const servedFromCdn = assetsBase(hyperbookJson) !== null;
+  // Even then a build writes its own translations, search index and favicons.
+  await mkdir(assetsOut, { recursive: true });
+  if (servedFromCdn) {
+    console.log(
+      `${chalk.blue(`[${prefix}]`)} Assets are served from ${assetsBase(hyperbookJson)}`,
+    );
+  }
+
   i = 1;
-  for (let directive of directives) {
+  for (let directive of servedFromCdn ? [] : directives) {
     const assetsDirectivePath = path.join(assetsPath, `directive-${directive}`);
     const assetsDirectiveOut = path.join(assetsOut, `directive-${directive}`);
     if (!process.env.CI) {
@@ -861,7 +901,7 @@ async function runBuild(
   }
   process.stdout.write("\n");
 
-  if (emojis.size > 0) {
+  if (emojis.size > 0 && !servedFromCdn) {
     const emojiPath = path.join(assetsPath, "emoji");
     const emojiOut = path.join(assetsOut, "emoji");
     await mkdir(emojiOut, { recursive: true });
@@ -893,7 +933,7 @@ async function runBuild(
     process.stdout.write("\n");
   }
 
-  const mainAssets = await fs.readdir(assetsPath);
+  const mainAssets = servedFromCdn ? [] : await fs.readdir(assetsPath);
   i = 1;
   for (let asset of mainAssets) {
     const assetPath = path.join(assetsPath, asset);
@@ -947,8 +987,11 @@ async function runBuild(
     language = hyperbookJson.language;
   }
 
+  // Read from the package rather than from the output: the translations of a
+  // hyperbook are written into the output either way, and with the assets
+  // served from elsewhere there is nothing there to read back.
   const i18nJS = await fs.readFile(
-    path.join(rootOut, ASSETS_FOLDER, "i18n.js"),
+    path.join(__dirname, "assets", "i18n.js"),
     "utf-8",
   );
   const locales = await fs.readFile(
