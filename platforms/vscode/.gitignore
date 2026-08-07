@@ -6,3 +6,4 @@ node_modules
 .history
 assets/hyperbook
 templates
+.vscode-test-web

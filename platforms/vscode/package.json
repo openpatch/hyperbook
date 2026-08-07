@@ -11,6 +11,7 @@
   },
   "homepage": "https://hyperbook.openpatch.org",
   "main": "./out/extension.js",
+  "browser": "./dist/web/extension.js",
   "version": "0.53.0",
   "engines": {
     "vscode": "^1.71.0"
@@ -84,6 +85,16 @@
           "command": "hyperbook.sidePreview",
           "when": "(editorLangId == markdown || editorLangId == handlebars ) && config.hyperbook.preview.showPreviewOptionInMenuBar",
           "group": "navigation"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "hyperbook.startDevServer",
+          "when": "!virtualWorkspace"
+        },
+        {
+          "command": "hyperbook.new",
+          "when": "!virtualWorkspace"
         }
       ]
     },
@@ -191,7 +202,13 @@
           }
         ]
       }
-    ]
+    ],
+    "capabilities": {
+      "virtualWorkspaces": {
+        "supported": "limited",
+        "description": "Creating a hyperbook and the dev server need a folder on your machine. Everything else, including the preview, works."
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "pnpm compile",
@@ -207,7 +224,10 @@
     "watch:extension": "webpack --config ./webpack.extension.config.js --watch --mode development",
     "open": "code --extensionDevelopmentPath=$PWD",
     "pretest": "pnpm compile && pnpm lint",
-    "lint": "eslint src --ext ts"
+    "lint": "eslint src --ext ts",
+    "compile:extension-web": "webpack --config ./webpack.web.config.js --mode production",
+    "watch:extension-web": "webpack --config ./webpack.web.config.js --watch --mode development",
+    "open-in-browser": "vscode-test-web --extensionDevelopmentPath=. ."
   },
   "devDependencies": {
     "@hyperbook/types": "workspace:*",
@@ -216,7 +236,9 @@
     "@types/vscode": "1.71.0",
     "@typescript-eslint/eslint-plugin": "8.53.1",
     "@typescript-eslint/parser": "8.53.1",
+    "@vscode/test-web": "^0.0.81",
     "@vscode/vsce": "3.7.1",
+    "assert": "^2.1.0",
     "buffer": "6.0.3",
     "copy-webpack-plugin": "12.0.2",
     "css-loader": "7.1.2",
@@ -226,7 +248,9 @@
     "node-polyfill-webpack-plugin": "^4.1.0",
     "npm-run-all": "4.1.5",
     "ovsx": "0.10.8",
+    "path-browserify": "^1.0.1",
     "prettier": "3.4.2",
+    "process": "^0.11.10",
     "sass": "1.97.3",
     "sass-loader": "16.0.6",
     "style-loader": "4.0.0",
