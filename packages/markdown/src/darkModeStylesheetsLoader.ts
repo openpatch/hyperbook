@@ -1,19 +1,17 @@
 /**
- * Copyright 2024 Google LLC
+ * Writes the light and dark stylesheets into the page, honoring a mode the
+ * reader picked before. The stylesheets sit in a noscript element, so they are
+ * only text until this runs.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * This is inlined into the head instead of being loaded as a file. Nothing can
+ * paint before the stylesheets are there, so an external script would put a
+ * round trip in front of every first paint, and a second one in front of the
+ * stylesheets it writes.
  *
- *     https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * © 2024 Google LLC. Licensed under the Apache License, Version 2.0.
+ * https://www.apache.org/licenses/LICENSE-2.0
  */
-
+export const darkModeStylesheetsLoader = `
 // @license © 2024 Google LLC. Licensed under the Apache License, Version 2.0.
 (() => {
   const ELEMENT_ID = 'dark-mode-toggle-stylesheets';
@@ -28,8 +26,8 @@
     mode = localStorage.getItem(STORAGE_NAME);
   } catch (e) {}
 
-  const lightCSSMediaRegex = /\(\s*prefers-color-scheme\s*:\s*light\s*\)/gi;
-  const darkCSSMediaRegex = /\(\s*prefers-color-scheme\s*:\s*dark\s*\)/gi;
+  const lightCSSMediaRegex = /\\(\\s*prefers-color-scheme\\s*:\\s*light\\s*\\)/gi;
+  const darkCSSMediaRegex = /\\(\\s*prefers-color-scheme\\s*:\\s*dark\\s*\\)/gi;
 
   switch (mode) {
     case LIGHT:
@@ -47,3 +45,4 @@
 
   document.write(stylesheets);
 })();
+// @license-end`;
