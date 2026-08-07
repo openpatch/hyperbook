@@ -49,21 +49,55 @@ hyperbook.ui = (function () {
   }
 
   /**
+   * Read the label of a heading as bookmark parts. Reading it from the
+   * rendered heading instead of the markup keeps whatever the page shows,
+   * so an emoji that is drawn as an image stays an image in the bookmark
+   * list. Emojis are stored by id, never by URL, so bookmarks survive a
+   * change of the basePath.
+   * @param {Element} [buttonEl] - The bookmark button of the heading.
+   * @returns {HyperbookBookmarkLabel} The label parts.
+   */
+  function readBookmarkLabel(buttonEl) {
+    const labelEl = buttonEl?.parentElement?.querySelector("a.heading > span");
+    const label = [];
+    for (let node of labelEl ? labelEl.childNodes : []) {
+      if (node.nodeName === "IMG" && node.dataset.emoji) {
+        label.push({ text: node.alt || "", emoji: node.dataset.emoji });
+      } else if (node.textContent) {
+        label.push({ text: node.textContent });
+      }
+    }
+    if (label.length === 0) {
+      const fallback = buttonEl?.getAttribute("data-label");
+      if (fallback) {
+        label.push({ text: fallback });
+      }
+    }
+    return label;
+  }
+
+  /**
    * Toggle a bookmark on/off.
    * @param {string} key - The bookmark path key.
-   * @param {string} label - The bookmark label.
    */
-  function toggleBookmark(key, label) {
+  function toggleBookmark(key) {
     const el = document.querySelectorAll(`.bookmark[data-key="${key}"]`);
     hyperbook.store.db.bookmarks.get(key).then((bookmark) => {
       if (!bookmark) {
+        const label = readBookmarkLabel(el[0]);
         hyperbook.store.db.bookmarks.add({ path: key, label }).then(() => {
-          el.forEach((e) => e.classList.add("active"));
+          el.forEach((e) => {
+            e.classList.add("active");
+            e.setAttribute("aria-pressed", "true");
+          });
           hyperbook.bookmarks.update();
         });
       } else {
         hyperbook.store.db.bookmarks.delete(key).then(() => {
-          el.forEach((e) => e.classList.remove("active"));
+          el.forEach((e) => {
+            e.classList.remove("active");
+            e.setAttribute("aria-pressed", "false");
+          });
           hyperbook.bookmarks.update();
         });
       }

@@ -13,6 +13,31 @@ Wie in den meisten Chat-Apps kannst du Emojis durch Eingabe ihres Namens einfüg
 
 :smiley: :apple: :penguin:
 
+## Einheitliche Emojis
+
+Emojis werden vom Betriebssystem deiner Leser gezeichnet, dasselbe Emoji sieht
+daher unter Windows, macOS, Android und Linux unterschiedlich aus. Setze
+`elements.emoji.style` auf `twemoji`, um sie durch
+[Twemoji](https://github.com/jdecked/twemoji)-Bilder zu ersetzen, die überall
+gleich aussehen.
+
+```json
+{
+  "elements": {
+    "emoji": {
+      "style": "twemoji"
+    }
+  }
+}
+```
+
+Das gilt für Emojis in deinen Inhalten und für die Icons, die du konfigurierst,
+zum Beispiel für Links. Emojis in Codeblöcken werden nie ersetzt und es werden
+nur die Emojis in deinen Build kopiert, die du tatsächlich verwendest.
+
+Twemoji-Grafiken stehen unter der CC-BY-4.0-Lizenz von Twitter, Inc und weiteren
+Mitwirkenden.
+
 # GitHub Emoji Cheat Sheet
 Diese Datei listet alle unterstützten GitHub-Emoji-Kürzel und ihre entsprechenden Unicode-Zeichen auf.
 

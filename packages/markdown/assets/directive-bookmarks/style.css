@@ -34,12 +34,18 @@ ul.directive-bookmarks li:last-of-type {
 }
 
 ul.directive-bookmarks a::before {
-  content: "🔖";
+  content: "";
   position: absolute;
-  font-size: 0.75rem;
+  width: 0.75rem;
+  height: 0.75rem;
   left: 12px;
   top: 50%;
   transform: translateY(-50%);
+  background-color: currentColor;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  mask-size: contain;
+  mask-image: var(--bookmark-icon-active);
 }
 
 ul.directive-bookmarks li {

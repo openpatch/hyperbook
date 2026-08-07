@@ -18,6 +18,8 @@ declare module "vfile" {
       anchor: string;
       label: string;
     }[];
+    /** Twemoji file names used on the page, without the .svg extension. */
+    emojis: string[];
     searchDocuments: {
       description: string;
       keywords: string[];

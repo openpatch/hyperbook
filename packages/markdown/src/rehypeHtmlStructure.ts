@@ -357,6 +357,25 @@ document.documentElement.classList.remove('no-js');`,
                   },
                 ],
               },
+              ...(config.elements?.emoji?.style === "twemoji"
+                ? [
+                    {
+                      type: "element" as const,
+                      tagName: "script",
+                      properties: {},
+                      children: [
+                        {
+                          type: "raw" as const,
+                          // Lets the client rebuild an emoji image from its id,
+                          // for example when it renders a stored bookmark.
+                          value: `
+window.hyperbook = window.hyperbook || {};
+window.hyperbook.emoji = { style: "twemoji", base: "${makeUrl(["emoji"], "assets", undefined, { versioned: false })}" };`,
+                        },
+                      ],
+                    } as ElementContent,
+                  ]
+                : []),
               {
                 type: "element",
                 tagName: "script",

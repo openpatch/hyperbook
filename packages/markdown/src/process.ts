@@ -59,6 +59,7 @@ import remarkDirectiveMultievent from "./remarkDirectiveMultievent";
 import remarkDirectiveUnpack from "./remarkDirectiveUnpack";
 import { makeTransformerCopyButton } from "./rehypePrettyCodeCopyButton";
 import { remarkGithubEmoji } from "./remarkGithubEmoji";
+import { rehypeEmoji } from "./rehypeEmoji";
 import remarkParse from "./remarkParse";
 import remarkSubSup from "./remarkSubSup";
 import remarkImageAttrs from "./remarkImageAttrs";
@@ -200,6 +201,8 @@ export const process = (md: string, ctx: HyperbookContext) => {
   return remark(ctx)
     .use(rehypePlugins)
     .use(rehypeShell(ctx))
+    /* needs to be after the shell, so icons from the config are covered too */
+    .use(rehypeEmoji, ctx)
     .use(rehypeHtmlStructure(ctx))
     .use(rehypeStringify, {
       allowDangerousCharacters: true,

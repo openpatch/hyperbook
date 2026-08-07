@@ -98,10 +98,24 @@ hyperbook.bootstrap = (function () {
       hyperbook.store.db.bookmarks.get(key).then((bookmark) => {
         if (bookmark) {
           bookmarkEl.classList.add("active");
+          bookmarkEl.setAttribute("aria-pressed", "true");
         }
       });
     }
   }
+
+  /**
+   * Bookmark buttons are handled by one delegated listener, so headings that
+   * are added later work too and no heading has to carry its label in an
+   * inline script.
+   */
+  document.addEventListener("click", (event) => {
+    const bookmarkEl = event.target.closest?.("button.bookmark");
+    const key = bookmarkEl?.getAttribute("data-key");
+    if (key) {
+      hyperbook.ui.toggleBookmark(key);
+    }
+  });
 
   /**
    * Initialize all hyperbook elements within a root.

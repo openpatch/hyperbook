@@ -194,6 +194,31 @@
                         }
                     ]
                 },
+                "emoji": {
+                    "allOf": [
+                        {
+                            "properties": {
+                                "version": {
+                                    "type": "string"
+                                }
+                            },
+                            "type": "object"
+                        },
+                        {
+                            "properties": {
+                                "style": {
+                                    "description": "How emojis are rendered.\n- \"native\": Emojis are kept as text and drawn with the emoji font of\n  the reader's operating system (default).\n- \"twemoji\": Emojis are replaced with Twemoji images, so they look the\n  same on every platform.",
+                                    "enum": [
+                                        "native",
+                                        "twemoji"
+                                    ],
+                                    "type": "string"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    ]
+                },
                 "excalidraw": {
                     "allOf": [
                         {
@@ -217,6 +242,29 @@
                                 },
                                 "edit": {
                                     "type": "boolean"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    ]
+                },
+                "kirimoto": {
+                    "allOf": [
+                        {
+                            "properties": {
+                                "version": {
+                                    "type": "string"
+                                }
+                            },
+                            "type": "object"
+                        },
+                        {
+                            "properties": {
+                                "height": {
+                                    "type": "string"
+                                },
+                                "settings": {
+                                    "type": "string"
                                 }
                             },
                             "type": "object"

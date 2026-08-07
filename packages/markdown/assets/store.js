@@ -48,6 +48,22 @@ hyperbook.store = (function () {
     typst: `id,code`,
     openscad: `id,code,params`,
   });
+  // Bookmark labels became a list of parts, so they can carry emojis without
+  // storing markup. The label is content, not a key, so it is not indexed.
+  db.version(6)
+    .stores({
+      bookmarks: `path`,
+    })
+    .upgrade((tx) =>
+      tx
+        .table("bookmarks")
+        .toCollection()
+        .modify((bookmark) => {
+          if (typeof bookmark.label === "string") {
+            bookmark.label = [{ text: bookmark.label }];
+          }
+        }),
+    );
 
   /** @returns {Promise<void>} */
   const init = async () => {

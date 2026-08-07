@@ -32,6 +32,16 @@ figure {
   max-width: 100%;
 }
 
+img.emoji {
+  height: 1em;
+  width: 1em;
+  min-width: 1em;
+  margin: 0 0.05em 0 0.1em;
+  vertical-align: -0.1em;
+  display: inline-block;
+  max-width: none;
+}
+
 .hyperbook-markdown figure.align-left {
   display: table;
   float: left;
@@ -321,12 +331,33 @@ figure {
   align-items: center;
 }
 
+/* The bookmark icon is drawn from the stylesheet, so it looks the same on
+   every platform and takes the color of its heading. */
+:root {
+  --bookmark-icon: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>');
+  --bookmark-icon-active: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>');
+}
+
 .hyperbook-markdown .bookmark {
   margin-left: 10px;
-  background: none;
   border: none;
-  opacity: 0.5;
+  padding: 0;
+  /* The heading text is a link, and the button is its sibling, so inheriting
+     would pick up the color of the h1 rather than the color the heading
+     appears in. Take the same color the heading link takes. */
+  color: var(--color-brand);
+  cursor: pointer;
+  display: inline-block;
+  vertical-align: middle;
+  width: 1em;
+  height: 1em;
   font-size: 1rem;
+  opacity: 0.5;
+  background-color: currentColor;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  mask-size: contain;
+  mask-image: var(--bookmark-icon);
 }
 
 .hyperbook-markdown .bookmark:hover {
@@ -335,6 +366,7 @@ figure {
 
 .hyperbook-markdown .bookmark.active {
   opacity: 1;
+  mask-image: var(--bookmark-icon-active);
 }
 
 .hyperbook-markdown ul.bookmarks {

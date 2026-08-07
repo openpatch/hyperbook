@@ -21,6 +21,7 @@ import {
   HyperbookPage,
   HyperbookSection,
   Navigation,
+  isExternalUrl,
 } from "@hyperbook/types";
 import lunr from "lunr";
 import { process as hyperbookProcess } from "@hyperbook/markdown";
@@ -100,6 +101,8 @@ export type PageResultSink = (href: string, result: SinglePageResult) => void;
 export interface SinglePageResult {
   searchDocuments: any[];
   directives: string[];
+  /** Twemoji file names used on this page, without the .svg extension. */
+  emojis: string[];
   /** Absolute paths whose contents were inlined into this page. */
   dependencies: string[];
 }
@@ -134,6 +137,7 @@ export async function buildSingleBookPage(
   const result = await hyperbookProcess(file.markdown.content, ctx);
   const searchDocuments = [...(result.data.searchDocuments || [])];
   const directives = Object.keys(result.data.directives || {});
+  const emojis = [...(result.data.emojis || [])];
 
   for (const generated of (result.data.generatedFiles as any[]) || []) {
     let genDir;
@@ -182,7 +186,12 @@ export async function buildSingleBookPage(
   }
   await fs.writeFile(fileOut, result.value);
 
-  return { searchDocuments, directives, dependencies: [...dependencies] };
+  return {
+    searchDocuments,
+    directives,
+    emojis,
+    dependencies: [...dependencies],
+  };
 }
 
 export async function buildSingleGlossaryPage(
@@ -232,6 +241,7 @@ export async function buildSingleGlossaryPage(
   const result = await hyperbookProcess(file.markdown.content, ctx);
   const searchDocuments = [...(result.data.searchDocuments || [])];
   const directives = Object.keys(result.data.directives || {});
+  const emojis = [...(result.data.emojis || [])];
 
   for (const generated of (result.data.generatedFiles as any[]) || []) {
     let genDir;
@@ -261,7 +271,12 @@ export async function buildSingleGlossaryPage(
   }
   await fs.writeFile(fileOut, result.value);
 
-  return { searchDocuments, directives, dependencies: [...dependencies] };
+  return {
+    searchDocuments,
+    directives,
+    emojis,
+    dependencies: [...dependencies],
+  };
 }
 
 /**
@@ -456,7 +471,7 @@ export function makeBaseCtx(
     version: packageJson.version,
     makeUrl: (p, base, page, options = { versioned: true }) => {
       if (typeof p === "string") {
-        if (p.includes("://") || p.startsWith("data:")) {
+        if (isExternalUrl(p)) {
           return p;
         }
         if (p.endsWith(".md.hbs")) {
@@ -561,6 +576,7 @@ async function runBuild(
   const baseCtx = makeBaseCtx(root, hyperbookJson, basePath, rootProject);
 
   const directives = new Set<string>([]);
+  const emojis = new Set<string>([]);
   const pagesAndSections = await hyperbook.getPagesAndSections(root);
   const pageList = hyperbook.getPageList(
     pagesAndSections.sections,
@@ -588,6 +604,9 @@ async function runBuild(
     searchDocuments.push(...pageResult.searchDocuments);
     for (let directive of pageResult.directives) {
       directives.add(directive);
+    }
+    for (let emoji of pageResult.emojis) {
+      emojis.add(emoji);
     }
     onPage?.(file.path.href || file.path.absolute, pageResult);
 
@@ -625,6 +644,9 @@ async function runBuild(
     searchDocuments.push(...pageResult.searchDocuments);
     for (let directive of pageResult.directives) {
       directives.add(directive);
+    }
+    for (let emoji of pageResult.emojis) {
+      emojis.add(emoji);
     }
     onPage?.(file.path.href || file.path.absolute, pageResult);
 
@@ -839,12 +861,44 @@ async function runBuild(
   }
   process.stdout.write("\n");
 
+  if (emojis.size > 0) {
+    const emojiPath = path.join(assetsPath, "emoji");
+    const emojiOut = path.join(assetsOut, "emoji");
+    await mkdir(emojiOut, { recursive: true });
+    i = 1;
+    for (let emoji of emojis) {
+      if (!process.env.CI) {
+        readline.clearLine(process.stdout, 0);
+        readline.cursorTo(process.stdout, 0);
+      }
+      process.stdout.write(
+        `${chalk.blue(`[${prefix}]`)} Copying emojis: [${i++}/${emojis.size}]`,
+      );
+      if (process.env.CI) {
+        process.stdout.write("\n");
+      }
+      try {
+        await cp(
+          path.join(emojiPath, `${emoji}.svg`),
+          path.join(emojiOut, `${emoji}.svg`),
+        );
+      } catch (e) {
+        process.stdout.write("\n");
+        process.stdout.write(
+          `${chalk.red(`[${prefix}]`)} Failed copying emoji: ${emoji}`,
+        );
+        process.stdout.write("\n");
+      }
+    }
+    process.stdout.write("\n");
+  }
+
   const mainAssets = await fs.readdir(assetsPath);
   i = 1;
   for (let asset of mainAssets) {
     const assetPath = path.join(assetsPath, asset);
     const assetOut = path.join(assetsOut, asset);
-    if (!asset.startsWith("directive-")) {
+    if (!asset.startsWith("directive-") && asset !== "emoji") {
       await cp(assetPath, assetOut, {
         recursive: true,
         filter: (src) => {

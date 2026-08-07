@@ -6,6 +6,7 @@ import { Extract } from "unzipper";
 import { createWriteStream, createReadStream } from "fs";
 import { createHash } from "crypto";
 import { build as esbuild } from "esbuild";
+import { createRequire } from "module";
 
 const CACHE_DIR = path.join(".cache", "downloads");
 
@@ -380,6 +381,22 @@ async function postbuild() {
       force: true,
     });
   }
+
+  // Copy the Twemoji SVGs, which back the "twemoji" emoji style. A build only
+  // copies the emojis a book actually uses into its output, so shipping the
+  // full set here costs nothing for the reader.
+  const twemojiDir = path.dirname(
+    createRequire(import.meta.url).resolve("@twemoji/svg/package.json"),
+  );
+  const emojiOut = path.join("./dist", "assets", "emoji");
+  await mkdir(emojiOut, { recursive: true });
+  const emojiFiles = (await readdir(twemojiDir)).filter((f) =>
+    f.endsWith(".svg"),
+  );
+  for (const file of emojiFiles) {
+    await cp(path.join(twemojiDir, file), path.join(emojiOut, file));
+  }
+  console.log(`Copied ${emojiFiles.length} emojis → ${emojiOut}`);
 
   // Bundle CodeMirror 6 + language packages into a single IIFE for browser use.
   await mkdir("./dist/assets/codemirror", { recursive: true });
