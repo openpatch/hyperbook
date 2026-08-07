@@ -38,6 +38,34 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.101.0
+
+::::tabs
+
+:::tab{title="New :rocket:" id="new"}
+
+**emoji**: Emojis can be rendered as images, so they look the same on every platform instead of being drawn with the emoji font of the reader's operating system. Set `elements.emoji.style` to `twemoji` in your `hyperbook.json`. Only the emojis your book uses end up in your build.
+
+:::
+
+:::tab{title="Improved :+1:" id="improved"}
+
+**bookmarks**: The bookmark icon is drawn by the stylesheet instead of being an emoji. It looks the same everywhere, takes the color of its heading, and a saved bookmark shows a filled icon.
+
+**bookmarks**: An entry in the bookmark list shows the same emojis as the heading it points at. If you call `hyperbook.ui.toggleBookmark` yourself, it no longer takes a label.
+
+:::
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+**markdown**: `mailto:` and `tel:` links in your content kept the base path of the book in front of them, so `[Write us](mailto:hi@example.org)` became `/mailto:hi@example.org`.
+
+**bookmarks**: A heading that contains a quote or a backslash can be bookmarked again.
+
+:::
+
+::::
+
 ## v0.100.5
 ::::tabs
 
