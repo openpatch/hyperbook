@@ -6,6 +6,7 @@ import {
   HyperbookContext,
   HyperbookPage,
   HyperbookSection,
+  sortNavigation,
 } from "@hyperbook/types";
 import { ElementContent, Root } from "hast";
 import { VFile } from "vfile";
@@ -321,6 +322,46 @@ const makeNavigationSectionAsPageElement = (
   };
 };
 
+/**
+ * Renders one level of the navigation. Pages and sections share one order, so
+ * a section can sit between two pages. A run of pages becomes one list, and a
+ * section breaks the run.
+ */
+const makeNavigationLevel = (
+  ctx: HyperbookContext,
+  pages: HyperbookPage[],
+  sections: HyperbookSection[],
+  listClass?: string,
+): ElementContent[] => {
+  const elements: ElementContent[] = [];
+  let list: ElementContent[] | null = null;
+  const addToList = (element: ElementContent) => {
+    if (!list) {
+      list = [];
+      elements.push({
+        type: "element",
+        tagName: "ul",
+        properties: listClass ? { class: listClass } : {},
+        children: list,
+      });
+    }
+    list.push(element);
+  };
+
+  for (const entry of sortNavigation(pages, sections)) {
+    if (entry.type === "page") {
+      addToList(makeNavigationPageElement(ctx, entry.page));
+    } else if (entry.section.navigation === "page") {
+      addToList(makeNavigationSectionAsPageElement(ctx, entry.section));
+    } else {
+      elements.push(makeNavigationSectionElement(ctx, entry.section));
+      list = null;
+    }
+  }
+
+  return elements;
+};
+
 const makeNavigationSectionElement = (
   ctx: HyperbookContext,
   section: HyperbookSection,
@@ -332,68 +373,20 @@ const makeNavigationSectionElement = (
   const isExpanded = navigation === "expanded" || (navigation === undefined && expanded) || 
     ctx.navigation.current?.href?.startsWith(href || "");
 
-  const pagesElements: ElementContent[] = pages
-    .filter((page) => !page.hide && page.navigation !== "hidden" && page.href !== href)
-    .map((page) => makeNavigationPageElement(ctx, page));
-
-  const linksElements: ElementContent[] = [];
-  if (pagesElements.length > 0) {
-    linksElements.push({
-      type: "element",
-      tagName: "ul",
-      properties: {
-        class: "pages",
-      },
-      children: pagesElements,
-    });
-  }
-
-  // Handle page-mode sections - they should be rendered as pages in the pages list
-  const pageModeChildSections = sections
-    .filter((s) => !s.hide && s.navigation !== "hidden" && s.navigation === "page" && !s.isEmpty);
-  
-  // Merge pages and page-mode sections, sort by index
-  if (pageModeChildSections.length > 0) {
-    // We need to combine the existing pages with page-mode sections
-    const combinedItems: { index?: number; name: string; element: ElementContent }[] = [
-      ...pages
-        .filter((page) => !page.hide && page.navigation !== "hidden" && page.href !== href)
-        .map((page) => ({ 
-          index: page.index, 
-          name: page.name, 
-          element: makeNavigationPageElement(ctx, page) 
-        })),
-      ...pageModeChildSections.map((s) => ({ 
-        index: s.index, 
-        name: s.name, 
-        element: makeNavigationSectionAsPageElement(ctx, s) 
-      })),
-    ].sort((a, b) => {
-      const aIndex = a.index !== undefined ? a.index : 9999;
-      const bIndex = b.index !== undefined ? b.index : 9999;
-      if (aIndex !== bIndex) return aIndex - bIndex;
-      return a.name > b.name ? 1 : -1;
-    });
-
-    // Replace pagesElements with combined sorted elements
-    linksElements.length = 0; // Clear existing
-    if (combinedItems.length > 0) {
-      linksElements.push({
-        type: "element",
-        tagName: "ul",
-        properties: {
-          class: "pages",
-        },
-        children: combinedItems.map((item) => item.element),
-      });
-    }
-  }
-
-  // Regular sections (not page-mode)
-  const sectionElements: ElementContent[] = sections
-    .filter((s) => !s.hide && s.navigation !== "hidden" && s.navigation !== "page")
-    .map((s) => makeNavigationSectionElement(ctx, s));
-  linksElements.push(...sectionElements);
+  const linksElements = makeNavigationLevel(
+    ctx,
+    pages.filter(
+      (page) =>
+        !page.hide && page.navigation !== "hidden" && page.href !== href,
+    ),
+    sections.filter(
+      (s) =>
+        !s.hide &&
+        s.navigation !== "hidden" &&
+        (s.navigation !== "page" || !s.isEmpty),
+    ),
+    "pages",
+  );
 
   // For virtual sections, just render the links without a container
   if (isVirtual) {
@@ -483,56 +476,24 @@ const makeNavigationSectionElement = (
   };
 };
 
-// Helper type for navigation items that can be sorted together
-type NavigationItem = 
-  | { type: "page"; item: HyperbookPage }
-  | { type: "section"; item: HyperbookSection };
-
-const makeNavigationElements = (ctx: HyperbookContext): ElementContent[] => {
-  // Collect all navigation items (pages and sections in "page" mode go to pages list)
-  const pageItems: NavigationItem[] = ctx.navigation.pages
-    .filter((p) => !p.hide && p.navigation !== "hidden")
-    .map((p) => ({ type: "page" as const, item: p }));
-  
-  const pageModeSecions: NavigationItem[] = ctx.navigation.sections
-    .filter((s) => !s.hide && s.navigation !== "hidden" && s.navigation === "page" && !s.isEmpty)
-    .map((s) => ({ type: "section" as const, item: s }));
-  
-  const regularSections = ctx.navigation.sections
-    .filter((s) => !s.hide && s.navigation !== "hidden" && s.navigation !== "page");
-
-  // Merge pages and page-mode sections, then sort by index
-  const combinedItems = [...pageItems, ...pageModeSecions].sort((a, b) => {
-    const aIndex = a.item.index !== undefined ? a.item.index : 9999;
-    const bIndex = b.item.index !== undefined ? b.item.index : 9999;
-    if (aIndex !== bIndex) return aIndex - bIndex;
-    return a.item.name > b.item.name ? 1 : -1;
-  });
-
-  return [
-    {
-      type: "element",
-      tagName: "nav",
-      properties: {},
-      children: [
-        {
-          type: "element",
-          tagName: "ul",
-          properties: {},
-          children: combinedItems.map((navItem) => {
-            if (navItem.type === "page") {
-              return makeNavigationPageElement(ctx, navItem.item);
-            } else {
-              // Render section in page mode as a page element
-              return makeNavigationSectionAsPageElement(ctx, navItem.item);
-            }
-          }),
-        },
-        ...regularSections.map((s) => makeNavigationSectionElement(ctx, s)),
-      ],
-    },
-  ];
-};
+const makeNavigationElements = (ctx: HyperbookContext): ElementContent[] => [
+  {
+    type: "element",
+    tagName: "nav",
+    properties: {},
+    children: makeNavigationLevel(
+      ctx,
+      ctx.navigation.pages.filter((p) => !p.hide && p.navigation !== "hidden"),
+      ctx.navigation.sections.filter(
+        (s) =>
+          !s.hide &&
+          s.navigation !== "hidden" &&
+          // A section shown as a page needs a page to link to.
+          (s.navigation !== "page" || !s.isEmpty),
+      ),
+    ),
+  },
+];
 
 const makeMetaElements = (ctx: HyperbookContext): ElementContent[] => {
   const elements: ElementContent[] = [];

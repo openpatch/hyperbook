@@ -29,7 +29,7 @@ Here are the properties you can set in the frontmatter:
 | description | Description of the page used for SEO                                                                                                |
 | permaid     | An id which will make the page also available at e.g. /@/audio, when setting permaid to audio |
 | keywords    | A list of keywords used for SEO                                                                                                     |
-| index       | A number indicating the position in the menu in relation to pages on the same level                                                 |
+| index       | A number indicating the position in the menu, in relation to the pages and the sections on the same level. Without it, a page comes before the sections. |
 | prev        | The absolute path to the prev page or a absolute path to a permaid e.g. /@/audio. This overrides index and hide. You can also set it to nothing and it will hide the prev button. |
 | next        | The absoulte path to the next page or a absolute path to a permaid e.g. /@/audio. This overrides index and hide. You can also set it to nothing and it will hide the next button. |
 | hide        | Hides the page from the navigation (deprecated, use `navigation: hidden` instead)                                                  |

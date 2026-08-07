@@ -4,6 +4,7 @@
 import { HyperbookContext } from "@hyperbook/types";
 import { ElementContent, Root } from "hast";
 import { VFile } from "vfile";
+import { darkModeStylesheetsLoader } from "./darkModeStylesheetsLoader";
 
 function parseFont(font: string): [string, string] {
   const parts = font.split(":");
@@ -379,13 +380,13 @@ window.hyperbook.emoji = { style: "twemoji", base: "${makeUrl(["emoji"], "assets
               {
                 type: "element",
                 tagName: "script",
-                properties: {
-                  src: makeUrl(
-                    ["dark-mode-toggle-stylesheets-loader.js"],
-                    "assets",
-                  ),
-                },
-                children: [],
+                properties: {},
+                children: [
+                  {
+                    type: "raw",
+                    value: darkModeStylesheetsLoader,
+                  },
+                ],
               },
               {
                 type: "element",

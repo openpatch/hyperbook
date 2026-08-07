@@ -1,4 +1,4 @@
 ---
 name: Configuration
-index: 1
+index: 3
 ---

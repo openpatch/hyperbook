@@ -259,6 +259,82 @@ export interface HyperbookContext {
   dependencies?: Set<string>;
 }
 
+/** One entry of a navigation level, either a page or a section. */
+export type NavigationEntry =
+  | { type: "page"; page: HyperbookPage }
+  | { type: "section"; section: HyperbookSection };
+
+/**
+ * Pages and sections without an index keep their old order, pages first. A
+ * section that is shown as a page is one of the pages here, because that is
+ * how it is rendered.
+ */
+const FALLBACK_INDEX_PAGE = 9999;
+const FALLBACK_INDEX_SECTION = 10000;
+
+const isShownAsPage = (section: HyperbookSection): boolean =>
+  section.navigation === "page";
+
+/**
+ * Brings the pages and the sections of one navigation level into a single
+ * order. `index` decides, across both of them, so a section can sit between
+ * two pages. Entries without an `index` fall back to pages before sections,
+ * and entries that end up equal are ordered by name.
+ *
+ * Both lists are expected to be in order already, which is what reading a
+ * hyperbook gives. They are merged rather than sorted, so the order a caller
+ * built stays intact and only the two lists are woven together.
+ */
+export const sortNavigation = (
+  pages: HyperbookPage[],
+  sections: HyperbookSection[],
+): NavigationEntry[] => {
+  const pageKey = (page: HyperbookPage) => ({
+    index: page.index ?? FALLBACK_INDEX_PAGE,
+    kind: 0,
+    name: page.name,
+  });
+  const sectionKey = (section: HyperbookSection) => ({
+    index:
+      section.index ??
+      (isShownAsPage(section) ? FALLBACK_INDEX_PAGE : FALLBACK_INDEX_SECTION),
+    kind: isShownAsPage(section) ? 0 : 1,
+    name: section.name,
+  });
+
+  const entries: NavigationEntry[] = [];
+  let p = 0;
+  let s = 0;
+
+  while (p < pages.length || s < sections.length) {
+    if (s >= sections.length) {
+      entries.push({ type: "page", page: pages[p++] });
+      continue;
+    }
+    if (p >= pages.length) {
+      entries.push({ type: "section", section: sections[s++] });
+      continue;
+    }
+
+    const page = pageKey(pages[p]);
+    const section = sectionKey(sections[s]);
+    const takePage =
+      page.index !== section.index
+        ? page.index < section.index
+        : page.kind !== section.kind
+          ? page.kind < section.kind
+          : page.name <= section.name;
+
+    if (takePage) {
+      entries.push({ type: "page", page: pages[p++] });
+    } else {
+      entries.push({ type: "section", section: sections[s++] });
+    }
+  }
+
+  return entries;
+};
+
 /**
  * Matches a URI scheme at the start of a string, as defined by RFC 3986.
  * This covers `https://` and `data:` as well as schemes without an authority

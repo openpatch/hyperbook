@@ -41,6 +41,13 @@ side-drawer {
   display: none;
 }
 
+/* A custom element renders its children until it is upgraded. The drawers are
+   only hidden by their shadow root, so without this their content paints over
+   the page until side-drawer.js has run. */
+side-drawer:not(:defined) {
+  display: none;
+}
+
 /* Hide mobile nav toggle when JavaScript is disabled */
 .no-js .mobile-nav .toggle {
   display: none;
@@ -662,6 +669,7 @@ nav li + li {
 
 .section {
   margin-top: 4px;
+  margin-bottom: 4px;
 }
 
 .section summary.name {
@@ -733,6 +741,9 @@ nav li + li {
 .section > .links {
   border-left-width: 1px;
   border-left-style: solid;
+  /* The pages of a section have to read as belonging to it, now that a page of
+     the level above can follow them. */
+  padding-left: 0.75rem;
 }
 
 .pages {
