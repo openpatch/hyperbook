@@ -64,6 +64,8 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 
 **shell**: The search and table of contents drawers no longer flash over the page for a moment while it loads.
 
+**shell**: Pages paint sooner. The script that loads the light and dark stylesheets is part of the page now, instead of a file that had to be fetched before anything could be drawn.
+
 :::
 
 ::::
