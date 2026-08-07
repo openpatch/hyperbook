@@ -1,6 +1,6 @@
 import { HyperbookContext } from "@hyperbook/types";
-import path from "path";
-import fs from "fs";
+import { nodeSync } from "@hyperbook/fs";
+import { candidates } from "./prefetch";
 
 /**
  * Reads a file referenced by a directive's `src` attribute and inlines it.
@@ -11,21 +11,19 @@ import fs from "fs";
  * the misses the dev server would never notice.
  */
 export const readFile = (src: string, ctx: HyperbookContext) => {
-  const candidates = [
-    path.join(ctx.root, "public", src),
-    path.join(ctx.root, "book", src),
-    path.join(
-      ctx.root,
-      "book",
-      ctx.navigation.current?.path?.directory || "",
-      src,
-    ),
-  ];
-
-  for (const candidate of candidates) {
+  for (const candidate of candidates(src, ctx)) {
     ctx.dependencies?.add(candidate);
+
+    // Read before processing, where the host has no synchronous file system.
+    const prefetched = ctx.files?.get(candidate);
+    if (prefetched !== undefined) {
+      return prefetched;
+    }
+
     try {
-      return fs.readFileSync(candidate, "utf-8");
+      if (nodeSync) {
+        return nodeSync.readFileSync(candidate, "utf8");
+      }
     } catch (e) {
       // Try the next location.
     }

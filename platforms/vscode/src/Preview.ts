@@ -9,6 +9,7 @@ import {
 } from "@hyperbook/fs";
 import { process } from "@hyperbook/markdown";
 import { disposeAll } from "./utils/dispose";
+import { toPath } from "./workspaceFileSystem";
 import path, { posix } from "path";
 import {
   HyperbookContext,
@@ -69,10 +70,10 @@ export default class Preview {
   async getConfig() {
     if (this._resource) {
       const hyperbookRoot = await hyperbook
-        .findRoot(this._resource.fsPath)
+        .findRoot(toPath(this._resource))
         .catch(() => "");
       const config: HyperbookJson = await hyperbook
-        .find(this._resource.fsPath)
+        .find(toPath(this._resource))
         .catch(
           () =>
             ({
@@ -83,7 +84,7 @@ export default class Preview {
       if (rootPath) {
         const projectPath = this.hyperbookViewerConfig.get("root");
         const project = await hyperproject.get(
-          path.join(rootPath.uri.fsPath, projectPath),
+          path.join(toPath(rootPath.uri), projectPath),
         );
         const links = [];
         if (config.links) {
@@ -99,7 +100,7 @@ export default class Preview {
           });
           links.push(link);
         }
-        const basePath = path.relative(rootPath.uri.fsPath, hyperbookRoot);
+        const basePath = path.relative(toPath(rootPath.uri), hyperbookRoot);
 
         return {
           ...config,
@@ -128,8 +129,8 @@ export default class Preview {
         vscode.window.activeTextEditor.document.fileName.split("/");
       const fileName = filePaths[filePaths.length - 1];
 
-      const hyperbookRoot = await hyperbook.findRoot(this._resource.fsPath);
-      const resourcePath = this._resource.fsPath;
+      const hyperbookRoot = await hyperbook.findRoot(toPath(this._resource));
+      const resourcePath = toPath(this._resource);
       this._vfile = await vfile
         .get(hyperbookRoot, "book", resourcePath, "absolute")
         .catch(async () => {
@@ -391,9 +392,9 @@ export default class Preview {
           if (this.panel) {
             // If the changed file is within the current hyperbook root, refresh preview
             const hyperbookRoot = this._resource
-              ? await hyperbook.findRoot(this._resource.fsPath).catch(() => "")
+              ? await hyperbook.findRoot(toPath(this._resource)).catch(() => "")
               : "";
-            if (hyperbookRoot && uri.fsPath.startsWith(hyperbookRoot)) {
+            if (hyperbookRoot && toPath(uri).startsWith(hyperbookRoot)) {
               await this.handleTextDocumentChange();
             }
           }

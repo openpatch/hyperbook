@@ -1,6 +1,7 @@
 import handlebars from "handlebars";
 import { lookup } from "mime-types";
 import path from "path";
+import { nodeSync } from "./nodeSync";
 import { extractLines, VFileBase } from "./vfile";
 
 declare global {
@@ -147,21 +148,10 @@ const registerBasicHelpers = (hbs: typeof handlebars) => {
  * Register all handlebars helpers including file-dependent ones.
  * Calls registerBasicHelpers internally.
  */
-/**
- * Node's file system, when there is one. It is resolved with require so a
- * bundle for a browser leaves it out, and so the helpers below can tell
- * whether they are able to work at all.
- */
-const nodeFs: typeof import("fs") | null = (() => {
-  try {
-    return eval("require")("fs");
-  } catch {
-    return null;
-  }
-})();
+const nodeFs = nodeSync;
 
 const nodeFindUpSync:
-  | ((name: string, options: any) => string | undefined)
+  | ((name: string, options: { cwd: string }) => string | undefined)
   | null = nodeFs
   ? (name, options) => {
       let directory: string = options.cwd;

@@ -2,11 +2,17 @@ import * as vscode from "vscode";
 import * as path from "path";
 import Preview from "./Preview";
 import StatusBarItem from "./StatusBarItem";
-import { hyperbook } from "@hyperbook/fs";
+import { hyperbook, useFileSystem } from "@hyperbook/fs";
+import { toPath, workspaceFileSystem } from "./workspaceFileSystem";
 import { createNewHyperbook } from "./NewCommand";
 import { HyperbookFoldingProvider } from "./FoldingProvider";
 
 export function activate(context: vscode.ExtensionContext) {
+  // A hyperbook is read through the workspace, so it works the same whether
+  // the workspace is a folder on this machine or a repository that is only
+  // served over the network, as in VS Code for the Web.
+  useFileSystem(workspaceFileSystem);
+
   let preview = new Preview(context);
   let statusBarItem = new StatusBarItem(context, preview);
   statusBarItem.updateStatusbar();
@@ -48,7 +54,7 @@ export function activate(context: vscode.ExtensionContext) {
 
       const workspaceFolder = workspaceFolders[0];
       const hyperbookRoot = await hyperbook.findRoot(
-        workspaceFolder.uri.fsPath,
+        toPath(workspaceFolder.uri),
       );
 
       if (!hyperbookRoot) {
@@ -84,7 +90,7 @@ export function activate(context: vscode.ExtensionContext) {
 
       const workspaceFolder = workspaceFolders[0];
       const hyperbookRoot = await hyperbook.findRoot(
-        workspaceFolder.uri.fsPath,
+        toPath(workspaceFolder.uri),
       );
 
       if (!hyperbookRoot) {

@@ -257,6 +257,12 @@ export interface HyperbookContext {
    * Only set during a build that tracks dependencies.
    */
   dependencies?: Set<string>;
+  /**
+   * Contents of the files a page inlines, read before it is processed. A
+   * directive that inlines its `src` runs synchronously and cannot read a file
+   * itself where the host has no synchronous file system, so it looks here.
+   */
+  files?: Map<string, string>;
 }
 
 /** One entry of a navigation level, either a page or a section. */

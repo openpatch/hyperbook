@@ -24,4 +24,6 @@ export {
   findUp,
 } from "./filesystem";
 
+export { nodeSync, SyncFileSystem } from "./nodeSync";
+
 export { hyperlibrary, hyperbook, hyperproject, vfile };

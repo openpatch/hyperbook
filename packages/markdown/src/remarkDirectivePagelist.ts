@@ -7,9 +7,8 @@ import {
   HyperbookSection,
   sortNavigation,
 } from "@hyperbook/types";
-import { registerBasicHelpers } from "@hyperbook/fs";
+import { nodeSync, registerBasicHelpers } from "@hyperbook/fs";
 import handlebars from "handlebars";
-import fs from "fs";
 import path from "path";
 import { Node, Root } from "mdast";
 import { visit } from "unist-util-visit";
@@ -87,11 +86,15 @@ export default (ctx: HyperbookContext) => () => {
 
         // Parse and evaluate the query
         const query = parseQuery(source || "href(.*)");
-        let filteredPages = pageList.filter((p) => evaluateQuery(query, p as HyperbookPage & Record<string, unknown>));
+        let filteredPages = pageList.filter((p) =>
+          evaluateQuery(query, p as HyperbookPage & Record<string, unknown>),
+        );
 
         // Sort pages
         const sorter = createPageSorter(orderBy || "name:asc");
-        filteredPages = filteredPages.sort((p1, p2) => sorter(p1 as Record<string, unknown>, p2 as Record<string, unknown>));
+        filteredPages = filteredPages.sort((p1, p2) =>
+          sorter(p1 as Record<string, unknown>, p2 as Record<string, unknown>),
+        );
 
         if (limit !== null) {
           filteredPages = filteredPages.slice(0, Number(limit));
@@ -104,10 +107,17 @@ export default (ctx: HyperbookContext) => () => {
 
         if (format?.startsWith("#")) {
           const snippetId = format.slice(1);
-          const snippetFile = fs.readFileSync(
-            path.join(ctx.root, "snippets", snippetId + ".md.hbs"),
-            { encoding: "utf8" },
+          const snippetPath = path.join(
+            ctx.root,
+            "snippets",
+            snippetId + ".md.hbs",
           );
+          const snippetFile =
+            ctx.files?.get(snippetPath) ??
+            nodeSync?.readFileSync(snippetPath, "utf8");
+          if (snippetFile === undefined) {
+            throw Error(`Could not read the snippet ${snippetId}`);
+          }
           registerBasicHelpers(handlebars);
           const template = handlebars.compile(snippetFile);
           const content = template({ pages: filteredPages });

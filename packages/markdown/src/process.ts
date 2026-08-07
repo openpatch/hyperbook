@@ -60,6 +60,7 @@ import remarkDirectiveUnpack from "./remarkDirectiveUnpack";
 import { makeTransformerCopyButton } from "./rehypePrettyCodeCopyButton";
 import { remarkGithubEmoji } from "./remarkGithubEmoji";
 import { rehypeEmoji } from "./rehypeEmoji";
+import { prefetchFiles } from "./prefetch";
 import remarkParse from "./remarkParse";
 import remarkSubSup from "./remarkSubSup";
 import remarkImageAttrs from "./remarkImageAttrs";
@@ -152,8 +153,12 @@ export const remark = (ctx: HyperbookContext) => {
     });
 };
 
-export const process = (md: string, ctx: HyperbookContext) => {
+export const process = async (md: string, ctx: HyperbookContext) => {
   i18n.init(ctx.config.language || "en");
+
+  // A directive that inlines its `src` cannot read a file itself, so whatever
+  // this page inlines is read here first.
+  await prefetchFiles(md, ctx);
 
   const rehypePlugins: PluggableList = [
     rehypeUnwrapImages,
@@ -180,7 +185,9 @@ export const process = (md: string, ctx: HyperbookContext) => {
           dark: `github-dark`,
           light: `github-light`,
         },
-        getHighlighter: (options: Parameters<typeof getSingletonHighlighter>[0]) =>
+        getHighlighter: (
+          options: Parameters<typeof getSingletonHighlighter>[0],
+        ) =>
           getSingletonHighlighter({
             ...options,
             langs: [
@@ -198,15 +205,17 @@ export const process = (md: string, ctx: HyperbookContext) => {
     rehypeFormat,
   ];
 
-  return remark(ctx)
-    .use(rehypePlugins)
-    .use(rehypeShell(ctx))
-    /* needs to be after the shell, so icons from the config are covered too */
-    .use(rehypeEmoji, ctx)
-    .use(rehypeHtmlStructure(ctx))
-    .use(rehypeStringify, {
-      allowDangerousCharacters: true,
-      allowDangerousHtml: true,
-    })
-    .process(md);
+  return (
+    remark(ctx)
+      .use(rehypePlugins)
+      .use(rehypeShell(ctx))
+      /* needs to be after the shell, so icons from the config are covered too */
+      .use(rehypeEmoji, ctx)
+      .use(rehypeHtmlStructure(ctx))
+      .use(rehypeStringify, {
+        allowDangerousCharacters: true,
+        allowDangerousHtml: true,
+      })
+      .process(md)
+  );
 };
