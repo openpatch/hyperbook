@@ -1,7 +1,5 @@
 import handlebars from "handlebars";
-import { findUpSync, Options } from "find-up";
 import { lookup } from "mime-types";
-import fs from "fs";
 import path from "path";
 import { extractLines, VFileBase } from "./vfile";
 
@@ -116,54 +114,92 @@ const registerBasicHelpers = (hbs: typeof handlebars) => {
     },
   );
 
-  hbs.registerHelper(
-    "dateformat",
-    (date: string | Date, format: string) => {
-      const d = date instanceof Date ? date : new Date(date);
-      if (isNaN(d.getTime())) return "";
-      if (!isString(format)) format = "YYYY-MM-DD";
+  hbs.registerHelper("dateformat", (date: string | Date, format: string) => {
+    const d = date instanceof Date ? date : new Date(date);
+    if (isNaN(d.getTime())) return "";
+    if (!isString(format)) format = "YYYY-MM-DD";
 
-      const pad = (n: number, len = 2) => String(n).padStart(len, "0");
-      const year = d.getFullYear();
-      const month = d.getMonth() + 1;
-      const day = d.getDate();
-      const hours = d.getHours();
-      const minutes = d.getMinutes();
-      const seconds = d.getSeconds();
+    const pad = (n: number, len = 2) => String(n).padStart(len, "0");
+    const year = d.getFullYear();
+    const month = d.getMonth() + 1;
+    const day = d.getDate();
+    const hours = d.getHours();
+    const minutes = d.getMinutes();
+    const seconds = d.getSeconds();
 
-      return format
-        .replace(/YYYY/g, String(year))
-        .replace(/YY/g, String(year).slice(-2))
-        .replace(/MM/g, pad(month))
-        .replace(/M/g, String(month))
-        .replace(/DD/g, pad(day))
-        .replace(/D/g, String(day))
-        .replace(/HH/g, pad(hours))
-        .replace(/H/g, String(hours))
-        .replace(/mm/g, pad(minutes))
-        .replace(/m/g, String(minutes))
-        .replace(/ss/g, pad(seconds))
-        .replace(/s/g, String(seconds));
-    },
-  );
+    return format
+      .replace(/YYYY/g, String(year))
+      .replace(/YY/g, String(year).slice(-2))
+      .replace(/MM/g, pad(month))
+      .replace(/M/g, String(month))
+      .replace(/DD/g, pad(day))
+      .replace(/D/g, String(day))
+      .replace(/HH/g, pad(hours))
+      .replace(/H/g, String(hours))
+      .replace(/mm/g, pad(minutes))
+      .replace(/m/g, String(minutes))
+      .replace(/ss/g, pad(seconds))
+      .replace(/s/g, String(seconds));
+  });
 };
 
 /**
  * Register all handlebars helpers including file-dependent ones.
  * Calls registerBasicHelpers internally.
  */
-const registerHelpers = (hbs: typeof handlebars, options?: { file: VFileBase }) => {
+/**
+ * Node's file system, when there is one. It is resolved with require so a
+ * bundle for a browser leaves it out, and so the helpers below can tell
+ * whether they are able to work at all.
+ */
+const nodeFs: typeof import("fs") | null = (() => {
+  try {
+    return eval("require")("fs");
+  } catch {
+    return null;
+  }
+})();
+
+const nodeFindUpSync:
+  | ((name: string, options: any) => string | undefined)
+  | null = nodeFs
+  ? (name, options) => {
+      let directory: string = options.cwd;
+      while (true) {
+        const candidate = path.join(directory, name);
+        if (nodeFs.existsSync(candidate)) return candidate;
+        const parent = path.dirname(directory);
+        if (parent === directory) return undefined;
+        directory = parent;
+      }
+    }
+  : null;
+
+const registerHelpers = (
+  hbs: typeof handlebars,
+  options?: { file: VFileBase },
+) => {
   const cwd = options?.file.root ?? process.cwd();
 
   registerBasicHelpers(hbs);
 
+  // These four read a file while handlebars renders, which handlebars does
+  // synchronously. Node can do that, a workspace that is not on disk cannot,
+  // so they are only registered where they can work. Without them a template
+  // that uses one renders the message below instead of failing the build.
+  if (!nodeFs) {
+    for (const name of ["rbase64", "rfile", "base64", "file"]) {
+      hbs.registerHelper(name, () => `${name} needs a file system.`);
+    }
+    return;
+  }
+  const fs = nodeFs;
+  const findUpSync = nodeFindUpSync!;
+
   hbs.registerHelper("rbase64", (src: string) => {
-    let gitRoot = findUpSync(".git", { type: "file", cwd: cwd } as Options);
+    const gitRoot = findUpSync(".git", { cwd });
     if (!gitRoot) {
-      gitRoot = findUpSync(".git", { type: "directory", cwd: cwd } as Options);
-      if (!gitRoot) {
-        return `rbase64 is only applicable in git projects. No .git was found in ${cwd} and above.`;
-      }
+      return `rbase64 is only applicable in git projects. No .git was found in ${cwd} and above.`;
     }
     let p = path.join(path.dirname(gitRoot), src);
     try {
@@ -181,15 +217,9 @@ const registerHelpers = (hbs: typeof handlebars, options?: { file: VFileBase }) 
       if (!src) {
         throw Error("file needs a path to a file");
       }
-      let gitRoot = findUpSync(".git", { type: "file", cwd: cwd } as Options);
+      const gitRoot = findUpSync(".git", { cwd });
       if (!gitRoot) {
-        gitRoot = findUpSync(".git", {
-          type: "directory",
-          cwd: cwd,
-        } as Options);
-        if (!gitRoot) {
-          return `rfile is only applicable in git projects. No .git was found in ${cwd} and above`;
-        }
+        return `rfile is only applicable in git projects. No .git was found in ${cwd} and above`;
       }
       let p = path.join(path.dirname(gitRoot), src);
       try {

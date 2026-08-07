@@ -15,4 +15,13 @@ export {
 
 export { registerBasicHelpers } from "./handlebars";
 
+export {
+  HyperbookFileSystem,
+  useFileSystem,
+  getFileSystem,
+  readText,
+  exists,
+  findUp,
+} from "./filesystem";
+
 export { hyperlibrary, hyperbook, hyperproject, vfile };

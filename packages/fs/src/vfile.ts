@@ -1,6 +1,10 @@
 import matter from "gray-matter";
-import fs from "fs/promises";
-import fsD from "fs";
+import {
+  readText,
+  readdir as readDirectory,
+  stat as statPath,
+} from "./filesystem";
+import * as cache from "./cache";
 import path from "path";
 import {
   Glossary,
@@ -11,10 +15,7 @@ import yaml from "yaml";
 import { handlebars, registerHelpers } from "./handlebars";
 
 export const getJson = async (root: string): Promise<HyperbookJson> => {
-  return fs
-    .readFile(path.join(root, "hyperbook.json"))
-    .then((f) => f.toString())
-    .then(JSON.parse);
+  return readText(path.join(root, "hyperbook.json")).then(JSON.parse);
 };
 
 export type VFileBase = {
@@ -164,10 +165,10 @@ async function getDirectoryArchives(root: string): Promise<VDirectoryArchive> {
   const vfiles: VFileArchive[] = [];
 
   try {
-    const files = await fs.readdir(path.join(root, "archives"));
+    const files = await readDirectory(path.join(root, "archives"));
     for (const file of files) {
-      const stat = await fs.stat(path.join(root, "archives", file));
-      if (stat.isDirectory()) {
+      const stat = await statPath(path.join(root, "archives", file));
+      if (stat.isDirectory) {
         const { name } = path.parse(file);
         const vfile: VFileArchive = {
           folder: "archives",
@@ -201,12 +202,12 @@ async function getDirectoryArchives(root: string): Promise<VDirectoryArchive> {
 
 async function getDirectoryBook(root: string): Promise<VDirectoryBook> {
   async function getTree(directory: VDirectoryBook): Promise<VDirectoryBook> {
-    const files = await fs
-      .readdir(path.join(directory.path.absolute))
-      .catch(() => []);
+    const files = await readDirectory(path.join(directory.path.absolute)).catch(
+      () => [],
+    );
     for (const file of files) {
-      const stat = await fs.stat(path.join(directory.path.absolute, file));
-      if (stat.isDirectory()) {
+      const stat = await statPath(path.join(directory.path.absolute, file));
+      if (stat.isDirectory) {
         const { name } = path.parse(file);
         const d: VDirectoryBook = {
           name,
@@ -297,12 +298,12 @@ async function getDirectoryGlossary(root: string): Promise<VDirectoryGlossary> {
   async function getTree(
     directory: VDirectoryGlossary,
   ): Promise<VDirectoryGlossary> {
-    const files = await fs
-      .readdir(path.join(directory.path.absolute))
-      .catch(() => []);
+    const files = await readDirectory(path.join(directory.path.absolute)).catch(
+      () => [],
+    );
     for (const file of files) {
-      const stat = await fs.stat(path.join(directory.path.absolute, file));
-      if (stat.isDirectory()) {
+      const stat = await statPath(path.join(directory.path.absolute, file));
+      if (stat.isDirectory) {
         const { name } = path.parse(file);
         const d: VDirectoryGlossary = {
           name,
@@ -388,12 +389,12 @@ async function getDirectoryGlossaryPublic(
   async function getTree(
     directory: VDirectoryGlossaryPublic,
   ): Promise<VDirectoryGlossaryPublic> {
-    const files = await fs
-      .readdir(path.join(directory.path.absolute))
-      .catch(() => []);
+    const files = await readDirectory(path.join(directory.path.absolute)).catch(
+      () => [],
+    );
     for (const file of files) {
-      const stat = await fs.stat(path.join(directory.path.absolute, file));
-      if (stat.isDirectory()) {
+      const stat = await statPath(path.join(directory.path.absolute, file));
+      if (stat.isDirectory) {
         const { name } = path.parse(file);
         const d: VDirectoryGlossaryPublic = {
           name,
@@ -445,12 +446,12 @@ async function getDirectoryPublic(root: string): Promise<VDirectoryPublic> {
   async function getTree(
     directory: VDirectoryPublic,
   ): Promise<VDirectoryPublic> {
-    const files = await fs
-      .readdir(path.join(directory.path.absolute))
-      .catch(() => []);
+    const files = await readDirectory(path.join(directory.path.absolute)).catch(
+      () => [],
+    );
     for (const file of files) {
-      const stat = await fs.stat(path.join(directory.path.absolute, file));
-      if (stat.isDirectory()) {
+      const stat = await statPath(path.join(directory.path.absolute, file));
+      if (stat.isDirectory) {
         const { name } = path.parse(file);
         const d: VDirectoryPublic = {
           name,
@@ -503,12 +504,12 @@ async function getDirectoryBookPublic(
   async function getTree(
     directory: VDirectoryBookPublic,
   ): Promise<VDirectoryBookPublic> {
-    const files = await fs
-      .readdir(path.join(directory.path.absolute))
-      .catch(() => []);
+    const files = await readDirectory(path.join(directory.path.absolute)).catch(
+      () => [],
+    );
     for (const file of files) {
-      const stat = await fs.stat(path.join(directory.path.absolute, file));
-      if (stat.isDirectory()) {
+      const stat = await statPath(path.join(directory.path.absolute, file));
+      if (stat.isDirectory) {
         const { name } = path.parse(file);
         const d: VDirectoryBookPublic = {
           name,
@@ -658,30 +659,25 @@ export async function getDirectory(
   root: string,
   folder: VDirectory["folder"],
 ): Promise<VDirectory> {
-  const cache = path.join(root, `vdirectory.${folder}.json`);
-  if (process.env.HYPERBOOK_CACHE && fsD.existsSync(cache)) {
-    return JSON.parse(fsD.readFileSync(cache, "utf8"));
+  const cachePath = path.join(root, `vdirectory.${folder}.json`);
+  const cached = await cache.read<VDirectory>(cachePath);
+  if (cached) {
+    return cached;
   }
   switch (folder) {
     case "glossary": {
       const dir = await getDirectoryGlossary(root);
-      if (process.env.HYPERBOOK_CACHE) {
-        fsD.writeFileSync(cache, JSON.stringify(dir));
-      }
+      await cache.write(cachePath, dir);
       return dir;
     }
     case "archives": {
       const dir = await getDirectoryArchives(root);
-      if (process.env.HYPERBOOK_CACHE) {
-        fsD.writeFileSync(cache, JSON.stringify(dir));
-      }
+      await cache.write(cachePath, dir);
       return dir;
     }
     case "public": {
       const dir = await getDirectoryPublic(root);
-      if (process.env.HYPERBOOK_CACHE) {
-        fsD.writeFileSync(cache, JSON.stringify(dir));
-      }
+      await cache.write(cachePath, dir);
       return dir;
     }
     case "book-public": {
@@ -694,9 +690,7 @@ export async function getDirectory(
     }
     default: {
       const dir = await getDirectoryBook(root);
-      if (process.env.HYPERBOOK_CACHE) {
-        fsD.writeFileSync(cache, JSON.stringify(dir));
-      }
+      await cache.write(cachePath, dir);
       return dir;
     }
   }
@@ -758,30 +752,23 @@ export async function listForFolder(
 }
 
 export const list = async (root: string): Promise<VFile[]> => {
-  const cache = path.join(root, "vfiles.json");
-  if (process.env.HYPERBOOK_CACHE && fsD.existsSync(cache)) {
-    return JSON.parse(fsD.readFileSync(cache, "utf8"));
+  const cachePath = path.join(root, "vfiles.json");
+  const cached = await cache.read<VFile[]>(cachePath);
+  if (cached) {
+    return cached;
   }
   const vfiles = await Promise.all(
     folders.flatMap((folder) => listForFolder(root, folder as any)),
   ).then((f) => f.flat());
-  if (process.env.HYPERBOOK_CACHE) {
-    fsD.writeFileSync(cache, JSON.stringify(vfiles));
-  }
+  await cache.write(cachePath, vfiles);
   return vfiles;
 };
 
 export const clean = async (root: string): Promise<void> => {
-  const cache = path.join(root, "vfiles.json");
-  if (fsD.existsSync(cache)) {
-    fsD.rmSync(cache);
+  await cache.remove(path.join(root, "vfiles.json"));
+  for (const folder of folders) {
+    await cache.remove(path.join(root, `vdirectory.${folder}.json`));
   }
-  folders.forEach((folder) => {
-    const cache = path.join(root, `vdirectory.${folder}.json`);
-    if (fsD.existsSync(cache)) {
-      fsD.rmSync(cache);
-    }
-  });
 };
 
 export const extractLines = (
@@ -848,9 +835,7 @@ export const getMarkdown = async (
 
   let markdown = "";
   if (file.extension === ".md.yml") {
-    const j = await fs
-      .readFile(file.path.absolute)
-      .then((f) => yaml.parse(f.toString()));
+    const j = await readText(file.path.absolute).then((f) => yaml.parse(f));
     if (!j.template) {
       console.log(
         `Yaml files need a template. You need to define a template property in your yaml file: ${file.path.absolute}`,
@@ -862,14 +847,13 @@ export const getMarkdown = async (
         j.template + ".md.hbs",
       );
       addDependency(templatePath);
-      const templateSource = await fs.readFile(templatePath);
+      const templateSource = await readText(templatePath);
       const template = handlebars.compile(templateSource.toString());
       markdown = template(j);
     }
   } else if (file.extension === ".md.json") {
-    const j = await fs
-      .readFile(file.path.absolute)
-      .then((f) => JSON.parse(f.toString()))
+    const j = await readText(file.path.absolute)
+      .then((f) => JSON.parse(f))
       .catch(() => ({}));
     if (!j.template) {
       console.log(
@@ -882,16 +866,14 @@ export const getMarkdown = async (
         j.template + ".md.hbs",
       );
       addDependency(templatePath);
-      const templateSource = await fs.readFile(templatePath);
+      const templateSource = await readText(templatePath);
       const template = handlebars.compile(templateSource.toString());
       markdown = template(j);
     }
   } else if (file.extension === ".md") {
-    markdown = await fs.readFile(file.path.absolute).then((f) => f.toString());
+    markdown = await readText(file.path.absolute);
   } else if (file.extension === ".md.hbs") {
-    const templateString = await fs
-      .readFile(file.path.absolute)
-      .then((f) => f.toString());
+    const templateString = await readText(file.path.absolute);
     const template = handlebars.compile(templateString);
     markdown = template({});
   } else {
@@ -912,7 +894,7 @@ export const getMarkdown = async (
     const snippetId = snippet[3];
     const snippetPath = path.join(file.root, "snippets", snippetId + ".md.hbs");
     addDependency(snippetPath);
-    const snippetFile = await fs.readFile(snippetPath, { encoding: "utf8" });
+    const snippetFile = await readText(snippetPath);
     const template = handlebars.compile(snippetFile);
 
     const vars: Record<string, any> = {

@@ -1,5 +1,4 @@
 import path from "path";
-import fs from "fs/promises";
 import {
   HyperbookJson,
   HyperbookPage,
@@ -8,34 +7,27 @@ import {
   PageNavigation,
   sortNavigation,
 } from "@hyperbook/types";
-import { findUp } from "find-up";
+import { findUp, readText } from "./filesystem";
 import { vfile } from ".";
 import { VDirectoryBook, VFile } from "./vfile";
 
 export const getJson = async (root: string): Promise<HyperbookJson> => {
-  return fs
-    .readFile(path.join(root, "hyperbook.json"))
-    .then((f) => f.toString())
-    .then(JSON.parse);
+  return readText(path.join(root, "hyperbook.json")).then(JSON.parse);
 };
 
 export const find = async (file: string): Promise<HyperbookJson> => {
-  return findUp("hyperbook.json", {
-    cwd: file,
-  } as any)
+  return findUp("hyperbook.json", file)
     .then((f) => {
       if (!f) {
         throw new Error("Could not find hyperbook.json");
       }
-      return fs.readFile(f);
+      return readText(f);
     })
-    .then((f) => JSON.parse(f.toString()));
+    .then(JSON.parse);
 };
 
 export const findRoot = async (file: string): Promise<string> => {
-  return findUp("hyperbook.json", {
-    cwd: file,
-  } as any).then((f) => {
+  return findUp("hyperbook.json", file).then((f) => {
     if (!f) {
       console.log(file);
       throw new Error("Could not find hyperbook.json");
