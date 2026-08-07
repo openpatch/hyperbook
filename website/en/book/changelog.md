@@ -39,15 +39,37 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
-## v0.101.0
+## v0.102.0
 
 ::::tabs
 
 :::tab{title="New :rocket:" id="new"}
 
+**navigation**: A section can sit between two pages, and a page can sit after a section. This works at every level, so a subsection can sit between two pages of its section. The `index` of a page and the `index` of a section are one order now, instead of pages always coming first. Without an `index` nothing moves: pages still come before sections.
+
+:::
+
+:::tab{title="Improved :+1:" id="improved"}
+
 **navigation**: The pages of a section are indented, so they read as belonging to it when a page of the level above follows them.
 
-**navigation**: A section can sit between two pages, and a page can sit after a section. This works at every level, so a subsection can sit between two pages of its section. The `index` of a page and the `index` of a section are one order now, instead of pages always coming first. Without an `index` nothing moves: pages still come before sections.
+:::
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+**shell**: The search and table of contents drawers no longer flash over the page for a moment while it loads.
+
+**shell**: Pages paint sooner. The script that loads the light and dark stylesheets is part of the page now, instead of a file that had to be fetched before anything could be drawn.
+
+:::
+
+::::
+
+## v0.101.0
+
+::::tabs
+
+:::tab{title="New :rocket:" id="new"}
 
 **emoji**: Emojis can be rendered as images, so they look the same on every platform instead of being drawn with the emoji font of the reader's operating system. Set `elements.emoji.style` to `twemoji` in your `hyperbook.json`. Only the emojis your book uses end up in your build.
 
@@ -66,10 +88,6 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 **markdown**: `mailto:` and `tel:` links in your content kept the base path of the book in front of them, so `[Write us](mailto:hi@example.org)` became `/mailto:hi@example.org`.
 
 **bookmarks**: A heading that contains a quote or a backslash can be bookmarked again.
-
-**shell**: The search and table of contents drawers no longer flash over the page for a moment while it loads.
-
-**shell**: Pages paint sooner. The script that loads the light and dark stylesheets is part of the page now, instead of a file that had to be fetched before anything could be drawn.
 
 :::
 
