@@ -323,4 +323,80 @@ describe("rehypeShell", () => {
     const value = toHtml("", rootCtx).value;
     expect(value).not.toContain('class="breadcrumb"');
   });
+
+  describe("navigation order", () => {
+    // The order of the labels in the navigation, so a test reads like the
+    // sidebar looks. A section is a <details>, a page an <a class="page">.
+    const order = (navigation: Partial<HyperbookContext["navigation"]>) => {
+      const html = String(
+        toHtml("", {
+          ...ctx,
+          navigation: {
+            ...ctx.navigation,
+            sections: [],
+            pages: [],
+            ...navigation,
+          },
+        }).value,
+      );
+      // The breadcrumb is a <nav> too, and it comes first in the document.
+      const start = html.indexOf("<nav>");
+      const nav = html.slice(start, html.indexOf("</nav>", start));
+      return [
+        ...nav.matchAll(
+          /class="page[^"]*" href="[^"]*">([^<]*)<|class="label">([^<]*)</g,
+        ),
+      ].map((m) => m[1] ?? m[2]);
+    };
+
+    const page = (name: string, index?: number) => ({
+      name,
+      href: "/" + name,
+      index,
+    });
+    const section = (name: string, index?: number) => ({
+      name,
+      href: "/" + name,
+      index,
+      isEmpty: false,
+      pages: [],
+      sections: [],
+    });
+
+    it("puts a section between two pages by index", () => {
+      expect(
+        order({
+          pages: [page("one", 1), page("three", 3)],
+          sections: [section("two", 2)],
+        }),
+      ).toEqual(["one", "two", "three"]);
+    });
+
+    it("puts a page after a section by index", () => {
+      expect(
+        order({
+          pages: [page("last", 9)],
+          sections: [section("first", 1)],
+        }),
+      ).toEqual(["first", "last"]);
+    });
+
+    it("keeps pages before sections when nothing has an index", () => {
+      expect(
+        order({
+          pages: [page("zebra"), page("apple")],
+          sections: [section("beta"), section("alpha")],
+        }),
+      ).toEqual(["apple", "zebra", "alpha", "beta"]);
+    });
+
+    it("puts a page before a section that shares its index", () => {
+      expect(
+        order({
+          pages: [page("zebra", 1)],
+          sections: [section("alpha", 1)],
+        }),
+      ).toEqual(["zebra", "alpha"]);
+    });
+  });
 });

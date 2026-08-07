@@ -6,6 +6,7 @@ import {
   HyperbookSection,
   Navigation,
   PageNavigation,
+  sortNavigation,
 } from "@hyperbook/types";
 import { findUp } from "find-up";
 import { vfile } from ".";
@@ -254,17 +255,25 @@ export const getPageList = (
   sections: HyperbookSection[],
   pages: HyperbookPage[],
 ): HyperbookPage[] => {
-  let pageList = [...pages];
+  let pageList: HyperbookPage[] = [];
 
-  for (const section of sections) {
+  // Reading order follows the navigation, so the previous and next buttons
+  // agree with the sidebar when a section sits between two pages.
+  for (const entry of sortNavigation(pages, sections)) {
+    if (entry.type === "page") {
+      pageList.push(entry.page);
+      continue;
+    }
+
+    const section = entry.section;
     // Check if section is virtual or not
     const isVirtual = section.virtual || section.navigation === "virtual";
-    
+
     if (!isVirtual && section.href) {
       // For non-virtual sections with an href, add the index page first
-      const indexPage = section.pages.find(p => p.href === section.href);
-      const otherPages = section.pages.filter(p => p.href !== section.href);
-      
+      const indexPage = section.pages.find((p) => p.href === section.href);
+      const otherPages = section.pages.filter((p) => p.href !== section.href);
+
       if (indexPage) {
         pageList.push(indexPage);
       }

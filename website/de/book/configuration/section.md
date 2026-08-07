@@ -14,6 +14,7 @@ Folgenden dokumentiert sind.
 | Property   | Description                                                                                                                        |
 | :--------- | :--------------------------------------------------------------------------------------------------------------------------------- |
 | ...        | Jede Eigenschaft der [Seite](/configuration/page)                                                                                  |
+| index      | Eine Zahl, die die Position relativ zu den Seiten und den anderen Bereichen auf dieser Navigationsebene angibt. Ohne sie steht ein Bereich hinter den Seiten. |
 | virtual    | Alles erscheint auf derselben Ebene wie der drüberliegende Ordner. Vorsicht: Die Index-Eigenschaft wirkt nicht über Ordner hinweg. (veraltet, verwende stattdessen `navigation: virtual`) |
 | expanded   | Definiert, ob der Bereich in der Navigation ausgeklappt sein soll. (veraltet, verwende stattdessen `navigation: expanded`)        |
 | navigation | Steuert wie der Bereich in der Navigation angezeigt wird. Optionen: `default` (aufklappbarer Bereich), `hidden` (versteckt in der Navigation), `virtual` (Elemente erscheinen auf Elternebene), `page` (wird als normaler Seitenlink angezeigt ohne Kinder anzuzeigen), `expanded` (Bereich ist standardmäßig ausgeklappt) |

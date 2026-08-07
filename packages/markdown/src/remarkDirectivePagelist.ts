@@ -5,6 +5,7 @@ import {
   HyperbookContext,
   HyperbookPage,
   HyperbookSection,
+  sortNavigation,
 } from "@hyperbook/types";
 import { registerBasicHelpers } from "@hyperbook/fs";
 import handlebars from "handlebars";
@@ -25,13 +26,17 @@ const getPageList = (
   sections: HyperbookSection[],
   pages: HyperbookPage[],
 ): HyperbookPage[] => {
-  let pageList = [...pages];
+  let pageList: HyperbookPage[] = [];
 
-  for (const section of sections) {
-    pageList = [
-      ...pageList,
-      ...getPageList(section.sections, section.pages),
-    ];
+  for (const entry of sortNavigation(pages, sections)) {
+    if (entry.type === "page") {
+      pageList.push(entry.page);
+    } else {
+      pageList = [
+        ...pageList,
+        ...getPageList(entry.section.sections, entry.section.pages),
+      ];
+    }
   }
 
   return pageList;

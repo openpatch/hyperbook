@@ -1,5 +1,6 @@
 ---
 name: Changelog
+index: 1
 ---
 
 # Changelog
@@ -43,6 +44,8 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::tabs
 
 :::tab{title="New :rocket:" id="new"}
+
+**navigation**: A section can sit between two pages, and a page can sit after a section. The `index` of a page and the `index` of a section are one order now, instead of pages always coming first. Without an `index` nothing moves: pages still come before sections.
 
 **emoji**: Emojis can be rendered as images, so they look the same on every platform instead of being drawn with the emoji font of the reader's operating system. Set `elements.emoji.style` to `twemoji` in your `hyperbook.json`. Only the emojis your book uses end up in your build.
 

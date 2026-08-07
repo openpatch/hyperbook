@@ -259,6 +259,62 @@ export interface HyperbookContext {
   dependencies?: Set<string>;
 }
 
+/** One entry of a navigation level, either a page or a section. */
+export type NavigationEntry =
+  | { type: "page"; page: HyperbookPage }
+  | { type: "section"; section: HyperbookSection };
+
+/**
+ * Pages and sections without an index keep their old order, pages first. A
+ * section that is shown as a page is one of the pages here, because that is
+ * how it is rendered.
+ */
+const FALLBACK_INDEX_PAGE = 9999;
+const FALLBACK_INDEX_SECTION = 10000;
+
+const isShownAsPage = (section: HyperbookSection): boolean =>
+  section.navigation === "page";
+
+/**
+ * Brings the pages and the sections of one navigation level into a single
+ * order. `index` decides, across both of them, so a section can sit between
+ * two pages. Entries without an `index` fall back to pages before sections,
+ * and entries that end up equal are ordered by name.
+ */
+export const sortNavigation = (
+  pages: HyperbookPage[],
+  sections: HyperbookSection[],
+): NavigationEntry[] => {
+  const entries: {
+    entry: NavigationEntry;
+    index: number;
+    /** Decides a tie on the index: a page comes before a section. */
+    kind: number;
+    name: string;
+  }[] = [
+    ...pages.map((page) => ({
+      entry: { type: "page" as const, page },
+      index: page.index ?? FALLBACK_INDEX_PAGE,
+      kind: 0,
+      name: page.name,
+    })),
+    ...sections.map((section) => ({
+      entry: { type: "section" as const, section },
+      index:
+        section.index ??
+        (isShownAsPage(section) ? FALLBACK_INDEX_PAGE : FALLBACK_INDEX_SECTION),
+      kind: isShownAsPage(section) ? 0 : 1,
+      name: section.name,
+    })),
+  ];
+
+  return entries
+    .sort((a, b) => (a.name > b.name ? 1 : -1))
+    .sort((a, b) => a.kind - b.kind)
+    .sort((a, b) => a.index - b.index)
+    .map(({ entry }) => entry);
+};
+
 /**
  * Matches a URI scheme at the start of a string, as defined by RFC 3986.
  * This covers `https://` and `data:` as well as schemes without an authority

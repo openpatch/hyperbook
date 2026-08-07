@@ -38,7 +38,7 @@ Hier sind die Eigenschaften, die im Frontmatter gesetzt werden können:
 | description | Beschreibung der Seite. Wird für SEO verwendet.                                                                                                |
 | permaid     | Eine id, welche die Seite auch unter zum Beispiel /@/audio verfügbar macht, wenn die permaid auf audio gesetzt wurde. |
 | keywords    | Eine Liste von Schlüsselwörter. Wird für SEO verwendet.                                                                                        |
-| index       | Eine Zahl, die die Position relative zu anderen Seiten auf dieser Navigationsebene angibt. Kleine Zahlen erscheinen zuerst in der Navigation.  |
+| index       | Eine Zahl, die die Position relativ zu den anderen Seiten und den Bereichen auf dieser Navigationsebene angibt. Kleine Zahlen erscheinen zuerst in der Navigation. Ohne sie steht eine Seite vor den Bereichen. |
 | prev        | Ein absoluter Pfad zur vorherigen Seite or ein absoluter Pfad zur permaid z. B. /@/audio. Dies überschreibt index und hide. Du kannst außerdem nichts setzen, sodass der Button versteckt wird. |
 | next        | Ein absoluter Pfad zur nächsten Seite or ein absoluter Pfad zur permaid z. B. /@/audio. Dies überschreibt index und hide. Du kannst außerdem nichts setzen, sodass der Button versteckt wird.   |
 | hide        | Verstecke die Seite von der Navigation. (veraltet, verwende stattdessen `navigation: hidden`)                                                  |

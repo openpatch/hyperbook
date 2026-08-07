@@ -6,6 +6,7 @@ import {
   HyperbookContext,
   HyperbookPage,
   HyperbookSection,
+  sortNavigation,
 } from "@hyperbook/types";
 import { ElementContent, Root } from "hast";
 import { VFile } from "vfile";
@@ -483,53 +484,52 @@ const makeNavigationSectionElement = (
   };
 };
 
-// Helper type for navigation items that can be sorted together
-type NavigationItem = 
-  | { type: "page"; item: HyperbookPage }
-  | { type: "section"; item: HyperbookSection };
-
 const makeNavigationElements = (ctx: HyperbookContext): ElementContent[] => {
-  // Collect all navigation items (pages and sections in "page" mode go to pages list)
-  const pageItems: NavigationItem[] = ctx.navigation.pages
-    .filter((p) => !p.hide && p.navigation !== "hidden")
-    .map((p) => ({ type: "page" as const, item: p }));
-  
-  const pageModeSecions: NavigationItem[] = ctx.navigation.sections
-    .filter((s) => !s.hide && s.navigation !== "hidden" && s.navigation === "page" && !s.isEmpty)
-    .map((s) => ({ type: "section" as const, item: s }));
-  
-  const regularSections = ctx.navigation.sections
-    .filter((s) => !s.hide && s.navigation !== "hidden" && s.navigation !== "page");
+  const pages = ctx.navigation.pages.filter(
+    (p) => !p.hide && p.navigation !== "hidden",
+  );
+  const sections = ctx.navigation.sections.filter(
+    (s) =>
+      !s.hide &&
+      s.navigation !== "hidden" &&
+      // A section shown as a page needs a page to link to.
+      (s.navigation !== "page" || !s.isEmpty),
+  );
 
-  // Merge pages and page-mode sections, then sort by index
-  const combinedItems = [...pageItems, ...pageModeSecions].sort((a, b) => {
-    const aIndex = a.item.index !== undefined ? a.item.index : 9999;
-    const bIndex = b.item.index !== undefined ? b.item.index : 9999;
-    if (aIndex !== bIndex) return aIndex - bIndex;
-    return a.item.name > b.item.name ? 1 : -1;
-  });
+  // Pages and sections share one order, so a section can sit between two
+  // pages. A run of pages becomes one list, a section breaks the run.
+  const children: ElementContent[] = [];
+  let list: ElementContent[] | null = null;
+  const addToList = (element: ElementContent) => {
+    if (!list) {
+      list = [];
+      children.push({
+        type: "element",
+        tagName: "ul",
+        properties: {},
+        children: list,
+      });
+    }
+    list.push(element);
+  };
+
+  for (const entry of sortNavigation(pages, sections)) {
+    if (entry.type === "page") {
+      addToList(makeNavigationPageElement(ctx, entry.page));
+    } else if (entry.section.navigation === "page") {
+      addToList(makeNavigationSectionAsPageElement(ctx, entry.section));
+    } else {
+      children.push(makeNavigationSectionElement(ctx, entry.section));
+      list = null;
+    }
+  }
 
   return [
     {
       type: "element",
       tagName: "nav",
       properties: {},
-      children: [
-        {
-          type: "element",
-          tagName: "ul",
-          properties: {},
-          children: combinedItems.map((navItem) => {
-            if (navItem.type === "page") {
-              return makeNavigationPageElement(ctx, navItem.item);
-            } else {
-              // Render section in page mode as a page element
-              return makeNavigationSectionAsPageElement(ctx, navItem.item);
-            }
-          }),
-        },
-        ...regularSections.map((s) => makeNavigationSectionElement(ctx, s)),
-      ],
+      children,
     },
   ];
 };
