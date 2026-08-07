@@ -62,6 +62,8 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 
 **bookmarks**: A heading that contains a quote or a backslash can be bookmarked again.
 
+**shell**: The search and table of contents drawers no longer flash over the page for a moment while it loads.
+
 :::
 
 ::::
