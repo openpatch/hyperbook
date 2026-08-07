@@ -25,9 +25,9 @@ attribute and made the button throw a syntax error.
 
 The bookmark indicator is no longer the 🔖 emoji. Both the button on a heading
 and the marker in the bookmark list are drawn from the stylesheet with a mask,
-so the control looks the same on every platform, takes the color of its
-surroundings in light and dark mode, and does not change when the emoji style
-changes. A bookmarked heading now shows a filled icon instead of only a less
+so the control looks the same on every platform, takes the color of the
+heading it belongs to in light and dark mode, and does not change when the
+emoji style changes. A bookmarked heading now shows a filled icon instead of only a less
 transparent one.
 
 Breaking:

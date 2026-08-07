@@ -342,9 +342,10 @@ img.emoji {
   margin-left: 10px;
   border: none;
   padding: 0;
-  /* A button does not inherit the color of its heading on its own, and the
-     icon is painted with currentColor. */
-  color: inherit;
+  /* The heading text is a link, and the button is its sibling, so inheriting
+     would pick up the color of the h1 rather than the color the heading
+     appears in. Take the same color the heading link takes. */
+  color: var(--color-brand);
   cursor: pointer;
   display: inline-block;
   vertical-align: middle;
