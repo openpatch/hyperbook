@@ -1,5 +1,50 @@
 # @hyperbook/vscode-extension
 
+## 0.53.0
+
+### Minor Changes
+
+- [#1159](https://github.com/openpatch/hyperbook/pull/1159) [`9bdb389`](https://github.com/openpatch/hyperbook/commit/9bdb389501ec7cbf96abaf8c6acbeededd311535) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Order pages and sections together by `index`. Pages were always rendered before
+  the sections of the same level, so a page could not sit after or between them.
+  The `index` of a page and the `index` of a section are now one order, and a
+  section that ends up between two pages is rendered between them.
+
+  The reading order follows the navigation, so the previous and next buttons, the
+  breadcrumb and `::pagelist` agree with the sidebar.
+
+  A page or a section without an `index` keeps its old place: pages come before
+  sections, and a page wins a tie against a section. A book that gives its
+  sections an `index` but leaves it off a page will see that page move behind
+  those sections. Give the page an `index` to place it.
+
+### Patch Changes
+
+- [#1159](https://github.com/openpatch/hyperbook/pull/1159) [`9bdb389`](https://github.com/openpatch/hyperbook/commit/9bdb389501ec7cbf96abaf8c6acbeededd311535) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Inline the script that loads the light and dark stylesheets. It was a file, and
+  nothing can paint before the stylesheets it writes are there, so every first
+  paint waited for a round trip to fetch 1.5 kB and then another for the
+  stylesheets themselves. It is part of the page now, which measured about 140 ms
+  off the first contentful paint of the documentation on a throttled connection.
+
+- [#1159](https://github.com/openpatch/hyperbook/pull/1159) [`9bdb389`](https://github.com/openpatch/hyperbook/commit/9bdb389501ec7cbf96abaf8c6acbeededd311535) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix the drawers flashing over the page while it loads. A custom element renders
+  its children until it is upgraded, and a side drawer is only hidden by its
+  shadow root, so the search drawer and the table of contents drawer painted over
+  the header and the article until `side-drawer.js` had run.
+
+- [#1159](https://github.com/openpatch/hyperbook/pull/1159) [`9bdb389`](https://github.com/openpatch/hyperbook/commit/9bdb389501ec7cbf96abaf8c6acbeededd311535) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Order the pages and the subsections of a section together too. Only the top
+  level of the navigation shared one order, so inside a section a subsection was
+  still rendered after every page of that section, and the sidebar disagreed with
+  the previous and next buttons, which already followed the index.
+
+- [#1159](https://github.com/openpatch/hyperbook/pull/1159) [`9bdb389`](https://github.com/openpatch/hyperbook/commit/9bdb389501ec7cbf96abaf8c6acbeededd311535) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Indent the pages of a section in the navigation. They sat one pixel to the
+  right of a page of the level above, so only a hairline told the two levels
+  apart. That was harmless while every page came before every section, but a page
+  can sit after a section now, and it has to be readable as a page of the level
+  above.
+- Updated dependencies [[`9bdb389`](https://github.com/openpatch/hyperbook/commit/9bdb389501ec7cbf96abaf8c6acbeededd311535), [`9bdb389`](https://github.com/openpatch/hyperbook/commit/9bdb389501ec7cbf96abaf8c6acbeededd311535), [`9bdb389`](https://github.com/openpatch/hyperbook/commit/9bdb389501ec7cbf96abaf8c6acbeededd311535), [`9bdb389`](https://github.com/openpatch/hyperbook/commit/9bdb389501ec7cbf96abaf8c6acbeededd311535), [`9bdb389`](https://github.com/openpatch/hyperbook/commit/9bdb389501ec7cbf96abaf8c6acbeededd311535)]:
+  - @hyperbook/markdown@0.73.0
+  - @hyperbook/fs@0.26.0
+  - create-hyperbook@0.3.10
+
 ## 0.52.0
 
 ### Minor Changes
