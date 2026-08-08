@@ -140,13 +140,6 @@
                                 {
                                     "additionalProperties": {},
                                     "properties": {
-                                        "cdn": {
-                                            "description": "Serve the assets of this element from a CDN instead of copying them into\nyour build. `true` uses jsDelivr, pinned to the version of hyperbook that\nbuilt your pages, so the assets always match the pages that ask for them.\nA URL uses a mirror of your own.\n\nAn element served this way needs the network, so leave it off for the ones\nyou want working offline.",
-                                            "type": [
-                                                "string",
-                                                "boolean"
-                                            ]
-                                        },
                                         "version": {
                                             "type": "string"
                                         }
@@ -164,13 +157,6 @@
                                 {
                                     "additionalProperties": {},
                                     "properties": {
-                                        "cdn": {
-                                            "description": "Serve the assets of this element from a CDN instead of copying them into\nyour build. `true` uses jsDelivr, pinned to the version of hyperbook that\nbuilt your pages, so the assets always match the pages that ask for them.\nA URL uses a mirror of your own.\n\nAn element served this way needs the network, so leave it off for the ones\nyou want working offline.",
-                                            "type": [
-                                                "string",
-                                                "boolean"
-                                            ]
-                                        },
                                         "version": {
                                             "type": "string"
                                         }
@@ -217,13 +203,6 @@
                                 {
                                     "additionalProperties": {},
                                     "properties": {
-                                        "cdn": {
-                                            "description": "Serve the assets of this element from a CDN instead of copying them into\nyour build. `true` uses jsDelivr, pinned to the version of hyperbook that\nbuilt your pages, so the assets always match the pages that ask for them.\nA URL uses a mirror of your own.\n\nAn element served this way needs the network, so leave it off for the ones\nyou want working offline.",
-                                            "type": [
-                                                "string",
-                                                "boolean"
-                                            ]
-                                        },
                                         "version": {
                                             "type": "string"
                                         }
@@ -250,13 +229,6 @@
                                 {
                                     "additionalProperties": {},
                                     "properties": {
-                                        "cdn": {
-                                            "description": "Serve the assets of this element from a CDN instead of copying them into\nyour build. `true` uses jsDelivr, pinned to the version of hyperbook that\nbuilt your pages, so the assets always match the pages that ask for them.\nA URL uses a mirror of your own.\n\nAn element served this way needs the network, so leave it off for the ones\nyou want working offline.",
-                                            "type": [
-                                                "string",
-                                                "boolean"
-                                            ]
-                                        },
                                         "version": {
                                             "type": "string"
                                         }
@@ -287,13 +259,6 @@
                                 {
                                     "additionalProperties": {},
                                     "properties": {
-                                        "cdn": {
-                                            "description": "Serve the assets of this element from a CDN instead of copying them into\nyour build. `true` uses jsDelivr, pinned to the version of hyperbook that\nbuilt your pages, so the assets always match the pages that ask for them.\nA URL uses a mirror of your own.\n\nAn element served this way needs the network, so leave it off for the ones\nyou want working offline.",
-                                            "type": [
-                                                "string",
-                                                "boolean"
-                                            ]
-                                        },
                                         "version": {
                                             "type": "string"
                                         }
@@ -318,13 +283,6 @@
                                 {
                                     "additionalProperties": {},
                                     "properties": {
-                                        "cdn": {
-                                            "description": "Serve the assets of this element from a CDN instead of copying them into\nyour build. `true` uses jsDelivr, pinned to the version of hyperbook that\nbuilt your pages, so the assets always match the pages that ask for them.\nA URL uses a mirror of your own.\n\nAn element served this way needs the network, so leave it off for the ones\nyou want working offline.",
-                                            "type": [
-                                                "string",
-                                                "boolean"
-                                            ]
-                                        },
                                         "version": {
                                             "type": "string"
                                         }
@@ -349,13 +307,6 @@
                                 {
                                     "additionalProperties": {},
                                     "properties": {
-                                        "cdn": {
-                                            "description": "Serve the assets of this element from a CDN instead of copying them into\nyour build. `true` uses jsDelivr, pinned to the version of hyperbook that\nbuilt your pages, so the assets always match the pages that ask for them.\nA URL uses a mirror of your own.\n\nAn element served this way needs the network, so leave it off for the ones\nyou want working offline.",
-                                            "type": [
-                                                "string",
-                                                "boolean"
-                                            ]
-                                        },
                                         "version": {
                                             "type": "string"
                                         }
@@ -387,13 +338,6 @@
                             {
                                 "additionalProperties": {},
                                 "properties": {
-                                    "cdn": {
-                                        "description": "Serve the assets of this element from a CDN instead of copying them into\nyour build. `true` uses jsDelivr, pinned to the version of hyperbook that\nbuilt your pages, so the assets always match the pages that ask for them.\nA URL uses a mirror of your own.\n\nAn element served this way needs the network, so leave it off for the ones\nyou want working offline.",
-                                        "type": [
-                                            "string",
-                                            "boolean"
-                                        ]
-                                    },
                                     "version": {
                                         "type": "string"
                                     }

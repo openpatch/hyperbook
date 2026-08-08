@@ -58,7 +58,7 @@ const makeSearchScripts = (ctx: HyperbookContext): ElementContent[] => {
       type: "element",
       tagName: "script",
       properties: {
-        src: ctx.makeUrl(["search.js"], "assets", undefined, { local: true }),
+        src: ctx.makeUrl(["search.js"], "assets"),
         defer: true,
       },
       children: [],
@@ -293,14 +293,7 @@ export default (ctx: HyperbookContext) => () => {
                 properties: {
                   rel: "apple-touch-icon",
                   sizes: "180x180",
-                  href: makeUrl(
-                    ["favicons", "apple-touch-icon.png"],
-                    "assets",
-                    undefined,
-                    {
-                      local: true,
-                    },
-                  ),
+                  href: makeUrl(["favicons", "apple-touch-icon.png"], "assets"),
                 },
                 children: [],
               },
@@ -309,14 +302,7 @@ export default (ctx: HyperbookContext) => () => {
                 tagName: "link",
                 properties: {
                   rel: "manifest",
-                  href: makeUrl(
-                    ["favicons", "manifest.webmanifest"],
-                    "assets",
-                    undefined,
-                    {
-                      local: true,
-                    },
-                  ),
+                  href: makeUrl(["favicons", "manifest.webmanifest"], "assets"),
                 },
                 children: [],
               },
@@ -415,9 +401,7 @@ window.hyperbook.emoji = { style: "twemoji", base: "${makeUrl(["emoji"], "assets
                 type: "element",
                 tagName: "script",
                 properties: {
-                  src: makeUrl(["i18n.js"], "assets", undefined, {
-                    local: true,
-                  }),
+                  src: makeUrl(["i18n.js"], "assets"),
                   defer: true,
                 },
                 children: [],
@@ -600,7 +584,7 @@ window.Prism.manual = true;`,
                     type: "raw",
                     value: `
 HYPERBOOK_ASSETS = "${makeUrl("/", "assets")}"
-${ctx.config.cloud ? `HYPERBOOK_CLOUD = ${JSON.stringify(ctx.config.cloud).replace(/</g, "\\u003c")}` : ""}
+${ctx.config.cloud ? `HYPERBOOK_CLOUD = ${JSON.stringify(ctx.config.cloud).replace(/</g, '\\u003c')}` : ""}
 `,
                   },
                 ],

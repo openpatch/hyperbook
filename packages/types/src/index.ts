@@ -1,16 +1,6 @@
 type ElementConfig = {
   version?: string;
   /**
-   * Serve the assets of this element from a CDN instead of copying them into
-   * your build. `true` uses jsDelivr, pinned to the version of hyperbook that
-   * built your pages, so the assets always match the pages that ask for them.
-   * A URL uses a mirror of your own.
-   *
-   * An element served this way needs the network, so leave it off for the ones
-   * you want working offline.
-   */
-  cdn?: boolean | string;
-  /**
    * Everything else is a default for a parameter of this element, used wherever
    * the element does not set that parameter itself. `{ "height": "500px" }`
    * gives every SQL IDE that height without repeating it on each one.
@@ -271,12 +261,6 @@ export interface HyperbookContext {
     page?: HyperbookPage,
     options?: {
       versioned?: boolean;
-      /**
-       * The asset is written by the build for this hyperbook, like its search
-       * index or its translations, so it comes from the build itself even when
-       * the rest are served from somewhere else.
-       */
-      local?: boolean;
     },
   ): string;
   navigation: Navigation;

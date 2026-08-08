@@ -10,7 +10,7 @@ import { isDirective } from "./remarkHelper";
  * Keys of an element's configuration that say something about the element
  * itself rather than about one of its parameters.
  */
-const notAParameter = new Set(["cdn", "version"]);
+const notAParameter = new Set(["version"]);
 
 /**
  * Fills in the parameters of an element from the configuration of the
@@ -38,8 +38,9 @@ export default (ctx: HyperbookContext) => () => {
         return;
       }
 
+      // `false` turns an element off, which is the element's own business.
       const config = elements[node.name];
-      if (!config || config === true) {
+      if (!config || typeof config !== "object") {
         return;
       }
 

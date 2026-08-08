@@ -30,7 +30,7 @@ can and part wise must set (indicated by a \*).
 | repo               | The link to the GitHub repo. Used for showing an edit button. The %path% placeholder will be replaced by the current path or the current path will be appended. |
 | repo.url           | The link to the repo. Used for showing an edit button. The %path% placeholder will be replaced by the current path or the current path will be appended.        |
 | repo.label         | The label for the repo link.                                                                                                                                    |
-| elements           | Here you can configure the elements. Sets a default for the parameters of an element, and `cdn` serves its assets from a CDN. See below.                        |
+| elements           | Here you can configure the elements. Sets a default for the parameters of an element. See below.                                                                |
 | links              | Here you can add custom links, which will be shown in the top right corner. See the example below on how to use them.                                           |
 | styles             | Here you can add Links to custom CSS files.                                                                                                                     |
 | scripts            | Here you can add links to custom JavaScript files.                                                                                                              |
@@ -131,31 +131,3 @@ you set it once instead of on every use.
 Every SQL IDE is then 500px tall and every QR code is large. An element that
 sets a parameter itself keeps what it sets, so this only fills in what is
 missing. The page of an element lists the parameters it understands.
-
-### Serving the assets of an element from a CDN
-
-The stylesheets and the scripts an element needs are copied into your build.
-For the big ones that is most of what your build weighs: a book with one SQL IDE
-is 23 MB, of which 21 MB is the SQL IDE.
-
-`cdn` serves them from somewhere else instead.
-
-```json
-{
-  "elements": {
-    "sqlide": {
-      "cdn": true
-    }
-  }
-}
-```
-
-That book is 1.9 MB now. `true` serves them from jsDelivr, pinned to the version
-of hyperbook that built your pages, so the assets always match the pages that
-ask for them and never change for a build you already published. A URL serves
-them from a mirror of your own.
-
-An element served this way needs the network, so leave it off for the ones you
-want working offline. Everything that belongs to no element, the shell and the
-stylesheets and the maths, stays in your build either way, as do your search
-index, your translations and your favicons.

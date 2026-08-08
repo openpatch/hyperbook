@@ -31,7 +31,7 @@ von Optionen, die du definieren kannst. Optionen mit einem "\*" müssen gesetzt 
 | repo               | Der Link zum GitHub-Repository. Wird für das Zeigen eines Edit-Buttons verwendet. Der Platzhalter %path% wird durch den aktuellen Pfad ersetzt oder der aktuelle Pfad wird ans Ende angehangen. |
 | repo.url           | Der Link zum Repository. Wird für das Zeigen eines Edit-Buttons verwendet. Der Platzhalter %path% wird durch den aktuellen Pfad ersetzt oder der aktuelle Pfad wird ans Ende angehangen.        |
 | repo.label         | Der Bezeichner für den Repository-Link.                                                                                                                                                         |
-| elements           | Hier konfigurierst du die Elemente. Setzt Standards für die Parameter eines Elements, und `cdn` lädt seine Assets von einem CDN. Siehe unten.                        |
+| elements           | Hier konfigurierst du die Elemente. Setzt Standards für die Parameter eines Elements. Siehe unten.                                                                                              |
 | links              | Hier können Links hinzugefügt werden, welche in der rechten oberen Ecke angezeigt werden. Schaue dir dazu das untere Beispiel an.                                                               |
 | styles             | Hier können Links zu eigenen CSS-Styles gesetzt werden.                                                                                                                                         |
 | scripts            | Hier können Links zu eigenen JavaScript-Dateien gesetzt werden.                                                                                                                                 |
@@ -129,31 +129,3 @@ Elements verwendet, sodass du ihn einmal setzt statt bei jeder Verwendung.
 Jede SQL IDE ist dann 500px hoch und jeder QR-Code groß. Ein Element, das einen
 Parameter selbst setzt, behält seinen Wert, es wird also nur ergänzt, was fehlt.
 Die Seite eines Elements listet die Parameter auf, die es versteht.
-
-### Die Assets eines Elements von einem CDN laden
-
-Die Stile und Skripte, die ein Element braucht, werden in deinen Build kopiert.
-Bei den großen ist das der Großteil des Gewichts: ein Buch mit einer SQL IDE ist
-23 MB groß, davon 21 MB die SQL IDE.
-
-`cdn` lädt sie stattdessen von woanders.
-
-```json
-{
-  "elements": {
-    "sqlide": {
-      "cdn": true
-    }
-  }
-}
-```
-
-Dieses Buch ist jetzt 1,9 MB groß. `true` lädt sie von jsDelivr, festgelegt auf
-die Version von Hyperbook, die deine Seiten gebaut hat, damit die Assets immer
-zu den Seiten passen, die sie anfragen, und sich für einen bereits
-veröffentlichten Build nie ändern. Eine URL nutzt einen eigenen Spiegel.
-
-Ein so geladenes Element braucht das Netz, lass es also weg für die, die offline
-funktionieren sollen. Alles, was zu keinem Element gehört, die Hülle, die Stile
-und die Mathematik, bleibt in deinem Build, ebenso dein Suchindex, deine
-Übersetzungen und deine Favicons.
