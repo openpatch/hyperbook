@@ -75,10 +75,10 @@ export default (ctx: HyperbookContext) => () => {
             type: "element",
             tagName: webcomponent,
             properties: {
-              lang,
+              lang: lang ?? undefined,
               "color-mode": colorMode,
               "font-size": fontSize,
-              "scale": scale,
+              "scale": String(scale),
               "data-id": id,
               src: src
                 ? ctx.makeUrl(

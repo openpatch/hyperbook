@@ -69,8 +69,8 @@ export default (ctx: HyperbookContext) => () => {
             tagName: "hyperbook-geogebra",
             properties: {
               ...props,
-              height: height,
-              width: width,
+              height: height ?? undefined,
+              width: width ?? undefined,
               borderRadius: 8,
               material: material,
               filename: filename,

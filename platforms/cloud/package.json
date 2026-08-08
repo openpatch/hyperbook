@@ -18,16 +18,16 @@
     "debug": "~2.6.9",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
-    "hbs": "~4.0.4",
+    "hbs": "~4.2.1",
     "http-errors": "~1.6.3",
     "jsonwebtoken": "^9.0.2",
-    "morgan": "~1.9.1",
+    "morgan": "~1.11.0",
     "nodemailer": "^8.0.1"
   },
   "devDependencies": {
-    "dexie": "^4.2.1",
-    "dexie-export-import": "^4.1.4",
+    "dexie": "^4.4.4",
+    "dexie-export-import": "^4.4.0",
     "fake-indexeddb": "^6.2.5",
-    "vitest": "^4.0.18"
+    "vitest": "^4.1.10"
   }
 }

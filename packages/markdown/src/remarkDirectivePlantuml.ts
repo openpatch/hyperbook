@@ -46,8 +46,8 @@ export default (ctx: HyperbookContext) => () => {
             type: "element",
             tagName: "img",
             properties: {
-              alt,
-              width,
+              alt: alt ?? undefined,
+              width: width ?? undefined,
               src: url,
             },
             children: [],

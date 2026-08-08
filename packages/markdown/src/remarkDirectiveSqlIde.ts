@@ -73,7 +73,7 @@ export default (ctx: HyperbookContext) => () => {
             tagName: "script",
             properties: {
               type: "text/plain",
-              title: n.meta,
+              title: n.meta ?? undefined,
               "data-type":
                 n.lang === "md" || n.lang === "markdown" ? "hint" : "sql",
             },

@@ -31,7 +31,7 @@ export default (ctx: HyperbookContext) => () => {
         data.hProperties = {
           class: "directive-archive",
           target: "_blank",
-          rel: "noopener noreferrer",
+          rel: ["noopener", "noreferrer"],
           href: ctx.makeUrl(archiveName + ".zip", "archive"),
         };
         data.hChildren = [

@@ -31,7 +31,7 @@ export default (ctx: HyperbookContext) => () => {
         data.hProperties = {
           class: "directive-download",
           target: "_blank",
-          rel: "noopener noreferrer",
+          rel: ["noopener", "noreferrer"],
           href: ctx.makeUrl(
             src as string,
             "public",

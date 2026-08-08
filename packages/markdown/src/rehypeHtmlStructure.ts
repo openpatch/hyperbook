@@ -281,7 +281,7 @@ export default (ctx: HyperbookContext) => () => {
                 type: "element",
                 tagName: "link",
                 properties: {
-                  rel: "icon",
+                  rel: ["icon"],
                   type: "image/x-icon",
                   href: makeUrl(["/favicon.ico"], "public"),
                 },
@@ -291,7 +291,7 @@ export default (ctx: HyperbookContext) => () => {
                 type: "element",
                 tagName: "link",
                 properties: {
-                  rel: "apple-touch-icon",
+                  rel: ["apple-touch-icon"],
                   sizes: "180x180",
                   href: makeUrl(["favicons", "apple-touch-icon.png"], "assets"),
                 },
@@ -301,7 +301,7 @@ export default (ctx: HyperbookContext) => () => {
                 type: "element",
                 tagName: "link",
                 properties: {
-                  rel: "manifest",
+                  rel: ["manifest"],
                   href: makeUrl(["favicons", "manifest.webmanifest"], "assets"),
                 },
                 children: [],
@@ -310,7 +310,7 @@ export default (ctx: HyperbookContext) => () => {
                 type: "element",
                 tagName: "link",
                 properties: {
-                  rel: "stylesheet",
+                  rel: ["stylesheet"],
                   href: makeUrl(["normalize.css"], "assets"),
                 },
                 children: [],
@@ -327,7 +327,7 @@ export default (ctx: HyperbookContext) => () => {
                     type: "element",
                     tagName: "link",
                     properties: {
-                      rel: "stylesheet",
+                      rel: ["stylesheet"],
                       href: makeUrl(["light.css"], "assets"),
                       media: "(prefers-color-scheme: light)",
                     },
@@ -337,7 +337,7 @@ export default (ctx: HyperbookContext) => () => {
                     type: "element",
                     tagName: "link",
                     properties: {
-                      rel: "stylesheet",
+                      rel: ["stylesheet"],
                       href: makeUrl(["dark.css"], "assets"),
                       media: "(prefers-color-scheme: dark)",
                     },
@@ -468,7 +468,7 @@ window.Prism.manual = true;`,
                 type: "element",
                 tagName: "link",
                 properties: {
-                  rel: "stylesheet",
+                  rel: ["stylesheet"],
                   href: makeUrl(["prism", "prism.css"], "assets"),
                 },
                 children: [],
@@ -477,7 +477,7 @@ window.Prism.manual = true;`,
                 type: "element",
                 tagName: "link",
                 properties: {
-                  rel: "stylesheet",
+                  rel: ["stylesheet"],
                   href: makeUrl(
                     ["prism", "prism-theme-github-dark.css"],
                     "assets",
@@ -490,7 +490,7 @@ window.Prism.manual = true;`,
                 type: "element",
                 tagName: "link",
                 properties: {
-                  rel: "stylesheet",
+                  rel: ["stylesheet"],
                   href: makeUrl(
                     ["prism", "prism-theme-github-light.css"],
                     "assets",
@@ -503,7 +503,7 @@ window.Prism.manual = true;`,
                 type: "element",
                 tagName: "link",
                 properties: {
-                  rel: "stylesheet",
+                  rel: ["stylesheet"],
                   href: makeUrl(["math", "katex.min.css"], "assets"),
                 },
                 children: [],
@@ -512,7 +512,7 @@ window.Prism.manual = true;`,
                 type: "element",
                 tagName: "link",
                 properties: {
-                  rel: "stylesheet",
+                  rel: ["stylesheet"],
                   href: makeUrl(["shell.css"], "assets"),
                 },
                 children: [],
@@ -521,7 +521,7 @@ window.Prism.manual = true;`,
                 type: "element",
                 tagName: "link",
                 properties: {
-                  rel: "stylesheet",
+                  rel: ["stylesheet"],
                   href: makeUrl(["content.css"], "assets"),
                 },
                 children: [],
@@ -530,7 +530,7 @@ window.Prism.manual = true;`,
                 type: "element",
                 tagName: "link",
                 properties: {
-                  rel: "stylesheet",
+                  rel: ["stylesheet"],
                   href: makeUrl(["code.css"], "assets"),
                 },
                 children: [],
@@ -541,7 +541,7 @@ window.Prism.manual = true;`,
                     type: "element",
                     tagName: "link",
                     properties: {
-                      rel: "stylesheet",
+                      rel: ["stylesheet"],
                       href: makeUrl(style, "assets"),
                     },
                     children: [],
@@ -553,7 +553,7 @@ window.Prism.manual = true;`,
                     type: "element",
                     tagName: "link",
                     properties: {
-                      rel: "stylesheet",
+                      rel: ["stylesheet"],
                       href: style.includes("://")
                         ? style
                         : makeUrl(style, "public"),
@@ -567,7 +567,7 @@ window.Prism.manual = true;`,
                     type: "element",
                     tagName: "link",
                     properties: {
-                      rel: "stylesheet",
+                      rel: ["stylesheet"],
                       href: style.includes("://")
                         ? style
                         : makeUrl(style, "public", currentPage || undefined),
@@ -647,7 +647,7 @@ console.log(
                       type: "element",
                       tagName: "link",
                       properties: {
-                        rel: "stylesheet",
+                        rel: ["stylesheet"],
                         href: style.includes("://")
                           ? style
                           : makeUrl(

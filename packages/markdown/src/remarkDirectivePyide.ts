@@ -94,7 +94,7 @@ export default (ctx: HyperbookContext) => () => {
         data.hName = "div";
         data.hProperties = {
           class: "directive-pyide",
-          id: id,
+          id: id ?? undefined,
           "data-tests": Buffer.from(JSON.stringify(tests)).toString("base64"),
           ...(hasCanvas ? { "data-canvas": "true" } : {}),
           ...(packageList.length > 0
