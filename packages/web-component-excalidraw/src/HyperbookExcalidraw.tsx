@@ -4,7 +4,7 @@ import {
   ExcalidrawImperativeAPI,
   type ExcalidrawProps as EDP,
   ExcalidrawInitialDataState,
-} from "@excalidraw/excalidraw/dist/types/excalidraw/types";
+} from "@excalidraw/excalidraw/types";
 
 type HyperbookExcalidrawProps = {
   id: string;

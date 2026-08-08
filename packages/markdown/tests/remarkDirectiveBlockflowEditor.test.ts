@@ -34,7 +34,7 @@ function decodePako(encoded: string): any {
   const prefix = "pako:";
   const b64 = encoded.slice(prefix.length);
   const binary = Buffer.from(b64, "base64");
-  return JSON.parse(inflate(binary, { to: "string" }));
+  return JSON.parse(inflate(binary, { toText: true }));
 }
 
 describe("remarkDirectiveBlockflowEditor", () => {

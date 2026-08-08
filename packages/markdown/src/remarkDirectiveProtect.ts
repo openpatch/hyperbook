@@ -39,7 +39,9 @@ export default (ctx: HyperbookContext) =>
           };
 
           // 2. Parse the description and strip the paragraph wrapper
-          const parsedDescription = processor.parse(description as string);
+          const parsedDescription = processor.parse(
+            description as string,
+          ) as Root;
           const descriptionNodes =
             parsedDescription.children[0]?.type === "paragraph"
               ? (parsedDescription.children[0] as any).children

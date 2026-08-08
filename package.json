@@ -21,13 +21,13 @@
     "website:diff": "node scripts/diffFolders.mjs ./website/en ./website/de"
   },
   "devDependencies": {
-    "@changesets/changelog-github": "0.5.0",
+    "@changesets/changelog-github": "0.7.0",
     "@changesets/cli": "2.31.1",
     "@types/node": "24.13.3",
-    "chalk": "5.4.1",
-    "chokidar": "4.0.3",
-    "cross-env": "7.0.3",
-    "esbuild": "0.24.2",
+    "chalk": "6.0.0",
+    "chokidar": "5.0.0",
+    "cross-env": "10.1.0",
+    "esbuild": "0.28.1",
     "husky": "9.1.7",
     "plop": "4.0.5",
     "prettier": "3.9.6",

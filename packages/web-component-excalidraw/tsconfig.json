@@ -1,5 +1,7 @@
 {
   "compilerOptions": {
+    "module": "esnext",
+    "moduleResolution": "bundler",
     "outDir": "./dist",
     "declaration": true,
     "jsx": "react-jsx"

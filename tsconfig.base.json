@@ -7,7 +7,7 @@
     "declaration": true,
     "declarationMap": false,
 
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
 

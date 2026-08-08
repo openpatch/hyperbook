@@ -1,6 +1,6 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import got from "got";
-import tar from "tar";
+import { extract } from "tar";
 import { Stream } from "stream";
 import { promisify } from "util";
 import chalk from "chalk";
@@ -56,7 +56,7 @@ export function downloadAndExtractRepo(
     got.stream(
       `https://codeload.github.com/${username}/${name}/tar.gz/${branch}`
     ),
-    tar.extract(
+    extract(
       { cwd: root, strip: filePath ? filePath.split("/").length + 1 : 1 },
       [`${name}-${branch}${filePath ? `/${filePath}` : ""}`]
     )
