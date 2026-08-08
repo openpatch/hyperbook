@@ -97,7 +97,6 @@
     "@types/js-yaml": "^4.0.9",
     "@types/mdast": "^4.0.4",
     "@types/object-hash": "3.0.6",
-    "@types/pako": "3.0.0",
     "@types/qrcode-svg": "^1.1.5",
     "@types/unist": "^3.0.3",
     "abcjs": "^6.7.0",

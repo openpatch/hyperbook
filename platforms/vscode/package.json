@@ -224,14 +224,13 @@
     "watch:extension": "webpack --config ./webpack.extension.config.js --watch --mode development",
     "open": "code --extensionDevelopmentPath=$PWD",
     "pretest": "pnpm compile && pnpm lint",
-    "lint": "eslint src --ext ts",
+    "lint": "eslint src",
     "compile:extension-web": "webpack --config ./webpack.web.config.js --mode production",
     "watch:extension-web": "webpack --config ./webpack.web.config.js --watch --mode development",
     "open-in-browser": "vscode-test-web --extensionDevelopmentPath=. ."
   },
   "devDependencies": {
     "@hyperbook/types": "workspace:*",
-    "@types/glob": "9.0.0",
     "@types/node": "24.13.3",
     "@types/vscode": "1.71.0",
     "@typescript-eslint/eslint-plugin": "8.66.0",
@@ -242,7 +241,7 @@
     "buffer": "6.0.3",
     "copy-webpack-plugin": "14.0.0",
     "css-loader": "7.1.4",
-    "eslint": "9.39.2",
+    "eslint": "10.8.1",
     "file-loader": "6.2.0",
     "glob": "13.0.6",
     "node-polyfill-webpack-plugin": "^4.1.0",
@@ -255,7 +254,7 @@
     "sass-loader": "17.0.0",
     "style-loader": "4.0.0",
     "ts-loader": "9.6.2",
-    "typescript": "5.7.3",
+    "typescript": "5.9.3",
     "typescript-json-schema": "0.68.0",
     "webpack": "5.109.2",
     "webpack-cli": "7.2.2"
