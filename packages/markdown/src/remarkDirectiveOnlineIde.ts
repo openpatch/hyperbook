@@ -40,7 +40,6 @@ export default (ctx: HyperbookContext) => () => {
           file,
           name,
           [
-            "client.js",
             {
               type: "module",
               crossorigin: true,
@@ -87,28 +86,6 @@ export default (ctx: HyperbookContext) => () => {
               "data-java-online": `{'id': '${id}', 'speed': ${speed}, 'withBottomPanel': ${bottomPanel},'withPCode': ${pCode},'withConsole': ${con},'withFileList': ${fileList},'withErrorList': ${errorList}, 'libraries': [${libraries?.split(",").map((lib) => `'${lib.trim()}'`)}]}`,
             },
             children: [...codes],
-          },
-          {
-            type: "element",
-            tagName: "div",
-            properties: {
-              class: "menu",
-            },
-            children: [
-              {
-                type: "element",
-                tagName: "button",
-                properties: {
-                  onclick: "hyperbook.onlineide.openFullscreen(this)",
-                },
-                children: [
-                  {
-                    type: "text",
-                    value: "Fullscreen",
-                  },
-                ],
-              },
-            ],
           },
         ];
       }

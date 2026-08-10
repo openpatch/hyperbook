@@ -39,6 +39,24 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.103.0
+
+::::tabs
+
+:::tab{title="New :rocket:" id="new"}
+
+**online-ide**: The IDE takes its theme from the book's dark mode toggle and follows it when a reader flips it.
+
+:::
+
+:::tab{title="Improved :+1:" id="improved"}
+
+**online-ide**: The IDE's own fullscreen buttons are shown instead of the separate button below it. Escape leaves fullscreen again.
+
+:::
+
+::::
+
 ## v0.102.1
 
 ::::tabs

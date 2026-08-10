@@ -112,11 +112,6 @@
  */
 
 /**
- * @typedef {Object} HyperbookOnlineide
- * @property {(el: HTMLElement) => void} openFullscreen - Open the online IDE in fullscreen.
- */
-
-/**
  * @typedef {Object} HyperbookP5
  */
 
@@ -194,7 +189,6 @@
  *   h5p?: HyperbookH5p,
  *   learningmap?: HyperbookLearningmap,
  *   mermaid?: HyperbookMermaid,
- *   onlineide?: HyperbookOnlineide,
  *   p5?: HyperbookP5,
  *   protect?: HyperbookProtect,
  *   python?: HyperbookPython,

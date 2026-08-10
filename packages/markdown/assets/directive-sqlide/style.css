@@ -1,7 +1,11 @@
 .directive-sqlide {
   border: 1px solid var(--color-spacer);
   border-radius: 8px;
-  background: #1e1e1e;
+  /* The IDE follows the book's theme, so the frame behind it has to as well.
+     This was #1e1e1e, which is what --color-background is in dark mode - the
+     same colour there, but a dark box behind a light IDE in light mode, seen
+     while the IDE is still loading and in the rounded corners afterwards. */
+  background: var(--color-background);
   overflow: hidden;
   display: flex;
   flex-direction: column;
