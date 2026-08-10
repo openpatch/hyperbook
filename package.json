@@ -53,5 +53,10 @@
   },
   "engines": {
     "pnpm": ">=8"
+  },
+  "pnpm": {
+    "overrides": {
+      "handlebars": "4.7.9"
+    }
   }
 }
