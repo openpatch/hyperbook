@@ -1,5 +1,22 @@
 # @hyperbook/vscode-extension
 
+## 0.54.0
+
+### Minor Changes
+
+- [#1164](https://github.com/openpatch/hyperbook/pull/1164) [`87e7042`](https://github.com/openpatch/hyperbook/commit/87e7042b06523cbff6cddbd8ceb60c85075dea2a) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Update all dependencies to their latest versions
+
+  Notable upgrades: Shiki 4, Mermaid 11.16, three.js 0.185, p5 2.3, Excalidraw 0.18.1, React 19.2, Express 5, TypeScript 6, ESLint 10 and Vite 8. Rendered output is unchanged.
+
+  hyperbook-studio now requires VS Code 1.125.0 or newer.
+
+### Patch Changes
+
+- Updated dependencies [[`87e7042`](https://github.com/openpatch/hyperbook/commit/87e7042b06523cbff6cddbd8ceb60c85075dea2a)]:
+  - @hyperbook/markdown@0.75.0
+  - create-hyperbook@0.4.0
+  - @hyperbook/fs@0.27.0
+
 ## 0.53.2
 
 ### Patch Changes
