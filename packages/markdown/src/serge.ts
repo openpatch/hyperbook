@@ -10,7 +10,7 @@ const pakoSerde = {
   deserialize: (state: string): string => {
     try {
       const data = toUint8Array(state);
-      return inflate(data, { to: "string" });
+      return new TextDecoder().decode(inflate(data));
     } catch (e) {
       return "{}";
     }

@@ -10,13 +10,13 @@ import {
   isDirective,
   registerDirective,
 } from "./remarkHelper";
-import pako from "pako";
+import { deflate } from "pako";
 import { Base64 } from "js-base64";
 import { toString } from "mdast-util-to-string";
 
 export function encode(str: string) {
   var data = new TextEncoder().encode(str);
-  var buffer = pako.deflate(data, { level: 9 });
+  var buffer = deflate(data, { level: 9 });
   var result = Base64.fromUint8Array(buffer, true);
   return result;
 }
@@ -46,8 +46,8 @@ export default (ctx: HyperbookContext) => () => {
             type: "element",
             tagName: "img",
             properties: {
-              alt,
-              width,
+              alt: alt ?? undefined,
+              width: width ?? undefined,
               src: url,
             },
             children: [],

@@ -100,9 +100,9 @@ export default (ctx: HyperbookContext) => () => {
                           type: "element",
                           tagName: "a",
                           properties: {
-                            href: src,
+                            href: src ?? undefined,
                             target: "_blank",
-                            rel: "noopener noreferrer",
+                            rel: ["noopener", "noreferrer"],
                           },
                           children: [{ type: "text", value: src || "" }],
                         },
@@ -150,7 +150,7 @@ export default (ctx: HyperbookContext) => () => {
                   tagName: "iframe",
                   properties: {
                     "data-consent-src": src,
-                    title,
+                    title: title ?? undefined,
                     allowfullscreen: allowFullScreen,
                   },
                   children: [],
@@ -171,8 +171,8 @@ export default (ctx: HyperbookContext) => () => {
               type: "element",
               tagName: "iframe",
               properties: {
-                src,
-                title,
+                src: src ?? undefined,
+                title: title ?? undefined,
                 allowfullscreen: allowFullScreen,
               },
               children: [],

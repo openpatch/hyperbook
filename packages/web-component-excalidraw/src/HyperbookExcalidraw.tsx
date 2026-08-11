@@ -4,7 +4,7 @@ import {
   ExcalidrawImperativeAPI,
   type ExcalidrawProps as EDP,
   ExcalidrawInitialDataState,
-} from "@excalidraw/excalidraw/dist/types/excalidraw/types";
+} from "@excalidraw/excalidraw/types";
 
 type HyperbookExcalidrawProps = {
   id: string;
@@ -13,6 +13,9 @@ type HyperbookExcalidrawProps = {
   edit: boolean;
   src: string;
   onlinkopen: (link: string) => void;
+  // Registered as custom-element props in index.ts but handled internally.
+  onChange?: EDP["onChange"];
+  value?: unknown;
 };
 
 export const HyperbookExcalidraw: FC<HyperbookExcalidrawProps> = ({

@@ -2,6 +2,12 @@
   "compilerOptions": {
     "outDir": "./dist",
     "declaration": true,
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "types": ["node"],
+    // @excalidraw/excalidraw ships .d.ts files that reference untyped deps and
+    // .scss side-effect imports; don't type-check dependency declarations.
+    "skipLibCheck": true
   }
 }

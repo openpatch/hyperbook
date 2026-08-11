@@ -7,13 +7,12 @@
     "declaration": true,
     "declarationMap": false,
 
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
 
     "strict": true,
     "noFallthroughCasesInSwitch": true,
-    "downlevelIteration": true,
     "noImplicitAny": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
@@ -30,6 +29,10 @@
       "@hyperbook/*": ["./packages/*"]
     },
 
-    "typeRoots": ["./node_modules/@types", "./types"]
+    "typeRoots": ["./node_modules/@types", "./types"],
+
+    // TypeScript 6 no longer auto-includes every package under typeRoots,
+    // so ambient type packages have to be listed explicitly.
+    "types": ["node"]
   }
 }

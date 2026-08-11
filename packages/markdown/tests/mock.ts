@@ -7,7 +7,6 @@ export const ctx: HyperbookContext = {
     name: "My Hyperbook",
     elements: {
       sqlide: {
-        url: "https://embed.learn-sql.de/include",
         db: "https://embed.learn-sql.de/include/assets/databases/world1.sqLite",
       },
     },

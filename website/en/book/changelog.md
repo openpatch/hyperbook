@@ -39,6 +39,20 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.104.0
+
+::::tabs
+
+:::tab{title="Improved :+1:" id="improved"}
+
+**dependencies**: All dependencies are updated to their latest versions. Among them Shiki 4 for syntax highlighting, Mermaid 11.16, three.js 0.185, p5 2.3, Excalidraw 0.18.1 and React 19.2. The rendered output of your book stays the same.
+
+**hyperbook-studio**: The extension now requires VS Code 1.125.0 or newer.
+
+:::
+
+::::
+
 ## v0.103.0
 
 ::::tabs

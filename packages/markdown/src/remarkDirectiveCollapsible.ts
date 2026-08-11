@@ -35,7 +35,7 @@ export default (ctx: HyperbookContext) => function (this: Processor) {
         };
 
         // 2. Parse the title string into MDAST nodes
-        const parsedTitle = processor.parse(title as string);
+        const parsedTitle = processor.parse(title as string) as Root;
         // Extract children from the first paragraph of the parsed title
         const titleNodes = (parsedTitle.children[0] as any)?.children || [
           { type: "text", value: title },

@@ -50,7 +50,7 @@ export default function (ctx: HyperbookContext) {
 
           // --- TITLE PARSING LOGIC ---
           // Parse the title string into an MDAST tree
-          const parsedTitle = processor.parse(title as string);
+          const parsedTitle = processor.parse(title as string) as Root;
           // Extract children from the first paragraph to keep it "inline"
           const titleNodes = (parsedTitle.children[0] as any)?.children || [
             { type: "text", value: title },

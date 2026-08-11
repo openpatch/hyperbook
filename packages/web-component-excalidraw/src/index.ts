@@ -13,7 +13,7 @@ customElements.define(
       src: "string",
       onlinkopen: "function",
       onChange: "function",
-      value: "object"
+      value: "json"
     },
   }),
 );

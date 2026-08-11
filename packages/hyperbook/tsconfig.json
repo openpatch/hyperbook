@@ -1,12 +1,28 @@
 {
   "compilerOptions": {
     "target": "es2019",
+    // ncc's ts-loader requires CommonJS emit, which in turn pins module
+    // resolution to node10 (bundler/node16 are rejected with this module mode).
     "module": "commonjs",
-    "moduleResolution": "node",
+    "moduleResolution": "node10",
+    "ignoreDeprecations": "6.0",
     "strict": true,
     "resolveJsonModule": true,
     "esModuleInterop": true,
-    "skipLibCheck": false
+    // vitest 4 / vite 8 declarations use "exports" subpaths that node10
+    // resolution cannot follow; don't type-check dependency declarations.
+    // (Every other package inherits skipLibCheck: true from tsconfig.base.json.)
+    "skipLibCheck": true,
+    "types": ["node"],
+    // chalk 6 and got 15 ship an "exports" map with no "main"/"types" fallback,
+    // so node10 resolution cannot find them. Point at the containing directory
+    // (not the .d.ts): ts-loader resolves index.d.ts for types while webpack
+    // resolves index.js for the bundle. Mapping straight to the .d.ts makes
+    // webpack try to bundle the declaration file and breaks the built CLI.
+    "paths": {
+      "chalk": ["./node_modules/chalk/source"],
+      "got": ["./node_modules/got/dist/source"]
+    }
   },
   "exclude": ["templates", "dist"]
 }
