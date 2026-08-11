@@ -46,6 +46,7 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 :::tab{title="New :rocket:" id="new"}
 
 **online-ide**: The IDE takes its theme from the book's dark mode toggle and follows it when a reader flips it.
+**sql-ide**: The IDE takes its theme from the book's dark mode toggle and follows it when a reader flips it.
 
 :::
 

@@ -100,7 +100,7 @@ async function postbuild() {
   // Download and extract zips
   const zipFiles = [
     {
-      url: "https://github.com/openpatch/sql-ide/releases/download/v2.0.0-hyperbook.2/dist-embedded.zip",
+      url: "https://github.com/openpatch/sql-ide/releases/download/v2.0.0-hyperbook.4/dist-embedded.zip",
       dst: path.join("./dist", "assets", "directive-sqlide", "include"),
     },
     {
