@@ -1,5 +1,15 @@
 # hyperbook
 
+## 0.104.0
+
+### Minor Changes
+
+- [#1164](https://github.com/openpatch/hyperbook/pull/1164) [`87e7042`](https://github.com/openpatch/hyperbook/commit/87e7042b06523cbff6cddbd8ceb60c85075dea2a) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Update all dependencies to their latest versions
+
+  Notable upgrades: Shiki 4, Mermaid 11.16, three.js 0.185, p5 2.3, Excalidraw 0.18.1, React 19.2, Express 5, TypeScript 6, ESLint 10 and Vite 8. Rendered output is unchanged.
+
+  hyperbook-studio now requires VS Code 1.125.0 or newer.
+
 ## 0.103.0
 
 ### Minor Changes
@@ -2202,7 +2212,6 @@ setup`.
   ```
 
   # CLI Changes
-
   - `hyperbook setup` does not download the template any more from the GitHub repo, but bundles it. This should decrease bandwidth and improve setup speed.
   - `hyperbook build` and `hyperbook setup` received new command line outputs. This was necessary for not getting lost when using the CLI with a Hyperlibrary.
 
