@@ -221,8 +221,13 @@ html, body {
                 properties: {
                   srcdoc: srcdoc,
                   loading: "eager",
-                  sandbox:
-                    "allow-scripts allow-popups allow-modals allow-forms allow-same-origin",
+                  sandbox: [
+                    "allow-scripts",
+                    "allow-popups",
+                    "allow-modals",
+                    "allow-forms",
+                    "allow-same-origin",
+                  ],
                   "aria-label": i18n.get("webide-code-preview"),
                   title: i18n.get("webide-code-preview"),
                 },

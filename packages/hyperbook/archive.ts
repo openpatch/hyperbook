@@ -1,6 +1,6 @@
 import path from "path";
 import fs from "fs";
-import archiver from "archiver";
+import { ZipArchive } from "archiver";
 import chalk from "chalk";
 
 async function archiveFolder(
@@ -16,12 +16,12 @@ async function archiveFolder(
     }
     const outputPath = path.join(archivesPath, name + ".zip");
     const output = fs.createWriteStream(outputPath);
-    const archive = archiver("zip", { zlib: { level: 9 } });
+    const archive = new ZipArchive({ zlib: { level: 9 } });
     archive.on("finish", () => {
       console.log(`${chalk.blue(`[${prefix}]`)} Archive ${name} zipped.`);
       resolve();
     });
-    archive.on("error", (err) => {
+    archive.on("error", (err: Error) => {
       throw err;
     });
 

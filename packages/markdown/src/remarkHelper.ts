@@ -6,7 +6,7 @@ import {
   LeafDirective,
   TextDirective,
 } from "mdast-util-directive";
-import { Node } from "unified/lib";
+import { Node } from "unist";
 import { VFile } from "vfile";
 import { Script } from "@hyperbook/types";
 

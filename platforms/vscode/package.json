@@ -13,7 +13,7 @@
   "main": "./out/extension.js",
   "version": "0.53.2",
   "engines": {
-    "vscode": "^1.71.0"
+    "vscode": "^1.125.0"
   },
   "categories": [
     "Other"
@@ -207,34 +207,33 @@
     "watch:extension": "webpack --config ./webpack.extension.config.js --watch --mode development",
     "open": "code --extensionDevelopmentPath=$PWD",
     "pretest": "pnpm compile && pnpm lint",
-    "lint": "eslint src --ext ts"
+    "lint": "eslint src"
   },
   "devDependencies": {
     "@hyperbook/types": "workspace:*",
-    "@types/glob": "8.1.0",
-    "@types/node": "20.12.12",
-    "@types/vscode": "1.71.0",
-    "@typescript-eslint/eslint-plugin": "8.53.1",
-    "@typescript-eslint/parser": "8.53.1",
-    "@vscode/vsce": "3.7.1",
+    "@types/node": "26.2.0",
+    "@types/vscode": "1.125.0",
+    "@typescript-eslint/eslint-plugin": "8.67.0",
+    "@typescript-eslint/parser": "8.67.0",
+    "@vscode/vsce": "3.9.2",
     "buffer": "6.0.3",
-    "copy-webpack-plugin": "12.0.2",
-    "css-loader": "7.1.2",
-    "eslint": "9.39.2",
+    "copy-webpack-plugin": "14.0.0",
+    "css-loader": "7.1.4",
+    "eslint": "10.8.1",
     "file-loader": "6.2.0",
-    "glob": "11.0.1",
+    "glob": "13.0.6",
     "node-polyfill-webpack-plugin": "^4.1.0",
     "npm-run-all": "4.1.5",
-    "ovsx": "0.10.8",
-    "prettier": "3.4.2",
-    "sass": "1.97.3",
-    "sass-loader": "16.0.6",
+    "ovsx": "1.1.1",
+    "prettier": "3.9.6",
+    "sass": "1.102.0",
+    "sass-loader": "17.0.0",
     "style-loader": "4.0.0",
-    "ts-loader": "9.5.4",
-    "typescript": "5.7.3",
-    "typescript-json-schema": "0.67.1",
-    "webpack": "5.97.1",
-    "webpack-cli": "6.0.1"
+    "ts-loader": "9.6.2",
+    "typescript": "6.0.3",
+    "typescript-json-schema": "0.68.0",
+    "webpack": "5.109.2",
+    "webpack-cli": "7.2.2"
   },
   "dependencies": {
     "@hyperbook/fs": "workspace:*",

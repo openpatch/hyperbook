@@ -1,13 +1,14 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
+    "module": "preserve",
     "target": "es6",
     "outDir": "out",
     "lib": ["es6"],
     "esModuleInterop": true,
     "sourceMap": true,
     "rootDir": ".",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
+    "types": ["node", "vscode"],
     "strict": true /* enable all strict type-checking options */
     /* Additional Checks */
     // "noImplicitReturns": true, /* Report error when not all code paths in function return a value. */
