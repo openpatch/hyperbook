@@ -1,5 +1,15 @@
 # @hyperbook/markdown
 
+## 0.74.0
+
+### Minor Changes
+
+- [`9304880`](https://github.com/openpatch/hyperbook/commit/9304880b99cfb9f55db54e43b77889771c101f1a) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Online IDE follows the book's dark mode toggle and uses its own fullscreen buttons
+
+### Patch Changes
+
+- [`be999ea`](https://github.com/openpatch/hyperbook/commit/be999ea2ea36518ca41dec63a0a6fba1564eabe1) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Update sql-ide
+
 ## 0.73.1
 
 ### Patch Changes
