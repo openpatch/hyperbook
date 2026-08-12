@@ -39,6 +39,18 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.104.2
+
+::::tabs
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+**online-ide**: Update online-ide to newest version.
+
+:::
+
+::::
+
 ## v0.104.1
 
 ::::tabs
