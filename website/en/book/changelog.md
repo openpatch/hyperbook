@@ -39,6 +39,18 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.104.1
+
+::::tabs
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+**webide**: The preview cut off the bottom of its content. The frame claimed the full height of its box instead of the space left below the title bar, so it hung over the lower edge and the part underneath was clipped — about 40 pixels, no matter which `height` you set on the block. Scrolling did not reach it either, because the frame did not know it was too tall. A preview now ends where its box ends.
+
+:::
+
+::::
+
 ## v0.104.0
 
 ::::tabs
