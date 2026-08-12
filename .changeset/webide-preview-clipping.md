@@ -1,5 +1,6 @@
 ---
 "@hyperbook/markdown": patch
+"hyperbook": patch
 ---
 
 Fix the bottom of the webide preview being clipped
