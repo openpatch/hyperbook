@@ -26,6 +26,8 @@ code-input {
 
 .directive-webide .container {
   width: 100%;
+  display: flex;
+  flex-direction: column;
   min-height: 120px;
   min-width: 120px;
   border: 1px solid var(--color-spacer);
@@ -159,10 +161,16 @@ code-input {
   background-color: var(--color-spacer);
 }
 
+/* Der Rahmen teilt sich den Container mit der Titelleiste. Mit height: 100%
+   wuerde er die volle Containerhoehe beanspruchen und um die Hoehe der
+   Titelleiste unten herausragen - overflow: hidden schnitte diesen Teil ab,
+   und weil der Rahmen selbst dann keinen Ueberlauf hat, waere er auch nicht
+   scrollbar. flex: 1 mit min-height: 0 laesst ihm genau den Rest. */
 .directive-webide iframe {
   border: none;
   width: 100%;
-  height: 100%;
+  flex: 1;
+  min-height: 0;
   background-color: white;
 }
 
