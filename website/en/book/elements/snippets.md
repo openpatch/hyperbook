@@ -188,11 +188,53 @@ And you can define an ellipsis.
 
 ### rfile
 
-rfile work like file, but will read from root of a git repository. This is useful, when your hyperbook is in a subdirectory and you want to reference files from the root of the repository.
+rfile works like file, but reads from the root of a git repository. This is useful when your hyperbook lives in a subdirectory and you want to reference files from the root of the repository.
 
 ```hbs
 {{{rfile "/path/to/file"}}}
 ```
+
+It takes the same two optional arguments as `file`: a line selection and an ellipsis.
+
+#### Selecting lines
+
+Line numbers and ranges, separated by commas:
+
+```hbs
+{{{rfile "/archives/project-1/Main.java" "1,3-8"}}}
+```
+
+#### Leaving lines out
+
+If the selection starts with `reg:`, the rest is read as a regular expression, and **every line matching it is dropped**. The remaining lines keep their order.
+
+```hbs
+{{{rfile "/archives/project-1/Main.java" "reg:^import "}}}
+```
+
+This is the way to share one file between a download and an embedded editor. The
+downloadable project needs its `import` statements; an editor that has the
+classes built in rejects them. With the filter, both come from the same file:
+
+````md
+Download the project: ::archive[Project]{name="project-1"}
+
+:::onlineide
+
+```java Main.java
+{{{rfile "/archives/project-1/Main.java" "reg:^import "}}}
+```
+
+:::
+````
+
+Change the file in `archives/`, and the page follows on the next build. Nobody
+has to remember to update a copy.
+
+:::alert{info}
+The helpers are only expanded on pages that end in `.md.hbs`. See [Single Use
+Templates](/advanced/single-use-templates).
+:::
 
 ### base64
 

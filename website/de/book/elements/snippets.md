@@ -183,11 +183,54 @@ Und du kannst definieren, ob ein Ausblendungssymbol gezeigt werden soll.
 
 ### rfile
 
-rfile funktioniert wie file, aber die Datei wird von der Wurzel eines git-Repository gelesen.
+rfile funktioniert wie file, liest die Datei aber von der Wurzel eines git-Repositorys. Das ist nützlich, wenn dein Hyperbook in einem Unterordner liegt und du Dateien von weiter oben einbinden willst.
 
 ```hbs
 {{{rfile "/path/to/file"}}}
 ```
+
+Es nimmt dieselben beiden zusätzlichen Angaben wie `file`: eine Zeilenauswahl und ein Auslassungszeichen.
+
+#### Zeilen auswählen
+
+Zeilennummern und Bereiche, durch Kommas getrennt:
+
+```hbs
+{{{rfile "/archives/project-1/Main.java" "1,3-8"}}}
+```
+
+#### Zeilen weglassen
+
+Beginnt die Auswahl mit `reg:`, wird der Rest als regulärer Ausdruck gelesen, und **jede passende Zeile fällt weg**. Die übrigen behalten ihre Reihenfolge.
+
+```hbs
+{{{rfile "/archives/project-1/Main.java" "reg:^import "}}}
+```
+
+So teilen sich ein Download und ein eingebetteter Editor **eine** Datei: Das
+Projekt zum Herunterladen braucht seine `import`-Zeilen, ein Editor, der die
+Klassen schon mitbringt, lehnt sie ab. Mit dem Filter kommt beides aus derselben
+Quelle:
+
+````md
+Projekt herunterladen: ::archive[Projekt]{name="project-1"}
+
+:::onlineide
+
+```java Main.java
+{{{rfile "/archives/project-1/Main.java" "reg:^import "}}}
+```
+
+:::
+````
+
+Ändert sich die Datei in `archives/`, zieht die Seite beim nächsten Bauen nach.
+Niemand muss daran denken, eine Kopie zu pflegen.
+
+:::alert{info}
+Die Helfer werden nur auf Seiten ausgewertet, die auf `.md.hbs` enden. Siehe
+[Single Use Templates](/advanced/single-use-templates).
+:::
 
 ### base64
 
