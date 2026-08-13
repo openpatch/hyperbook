@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 
 import chalk from "chalk";
-import { Command } from "commander";
+import { Command, InvalidArgumentError } from "commander";
 import checkForUpdate from "update-check";
 import { runBuildProject } from "./build";
+import { runCheck } from "./check";
 import { runDev } from "./dev";
 import { getPkgManager } from "./helpers/get-pkg-manager";
 import { hyperproject } from "@hyperbook/fs";
@@ -17,6 +18,14 @@ import {
 import packageJson from "./package.json";
 
 const program = new Command();
+
+/**
+ * Kicked off before the command runs so the network round trip overlaps with
+ * the build. Must be declared before `parseAsync` below: commander invokes the
+ * first `preAction` hook synchronously, so a `const` declared after the parse
+ * call would still be in its temporal dead zone when the hook reads it.
+ */
+const update = checkForUpdate(packageJson).catch(() => null);
 
 program
   .name(packageJson.name)
@@ -44,21 +53,34 @@ program.command("setup").action(async () => {
 program
   .command("dev")
   .description("start the development server for a hyperbook")
-  .option("-p, --port <number>", "set a specific port")
+  .option("-p, --port <number>", "set a specific port", (value) => {
+    const port = Number.parseInt(value, 10);
+    if (Number.isNaN(port) || port < 1 || port > 65535) {
+      throw new InvalidArgumentError("Expected a port between 1 and 65535.");
+    }
+    return port;
+  })
   .action(async (options) => {
     await runDev({
       port: options.port,
+    }).catch((e) => {
+      reportError(e);
+      process.exit(1);
     });
+  });
+
+/** Loads the project in the working directory, reporting failures readably. */
+const withProject = async () =>
+  hyperproject.get(process.cwd()).catch((e) => {
+    reportError(e);
+    process.exit(1);
   });
 
 program
   .command("build")
   .description("build a hyperbook")
   .action(async () => {
-    const rootProject = await hyperproject.get(process.cwd()).catch((e) => {
-      console.error(e);
-      process.exit(1);
-    });
+    const rootProject = await withProject();
     let name = hyperproject.getName(rootProject);
     console.log(
       `${chalk.blue(`[${name}]`)} Building Project: ${rootProject.src}.`,
@@ -69,15 +91,21 @@ program
     });
   });
 
+program
+  .command("check")
+  .description("verify that internal links and images resolve")
+  .option("--strict", "exit non-zero on warnings as well as errors")
+  .action(async (options) => {
+    const ok = await runCheck(await withProject(), options).catch((e) => {
+      reportError(e);
+      process.exit(1);
+    });
+    if (!ok) process.exit(1);
+  });
+
 const passwords = program
   .command("passwords")
   .description("inspect the passwords a hyperbook uses");
-
-const withProject = async () =>
-  hyperproject.get(process.cwd()).catch((e) => {
-    reportError(e);
-    process.exit(1);
-  });
 
 passwords
   .command("list", { isDefault: true })
@@ -124,8 +152,6 @@ passwords
 
 program.parseAsync(process.argv);
 
-const update = checkForUpdate(packageJson).catch(() => null);
-
 async function notifyUpdate(): Promise<void> {
   try {
     const res = await update;
@@ -146,7 +172,6 @@ async function notifyUpdate(): Promise<void> {
       );
       console.log();
     }
-    process.exit();
   } catch {
     // ignore error
   }
