@@ -49,17 +49,28 @@ const hasEmojiPresentation = (emoji: string): boolean =>
   /^\p{RI}/u.test(emoji);
 
 /**
- * Builds the Twemoji file name of an emoji. Twemoji drops the variation
- * selector, unless the emoji is a sequence joined by a zero width joiner.
+ * Twemoji file names for an emoji, most specific first.
+ *
+ * Twemoji is not consistent about the variation selector: it keeps it in some
+ * sequences and drops it in others — 👁️‍🗨️ is stored as `1f441-200d-1f5e8`
+ * with both selectors gone, while other sequences keep theirs. Rather than
+ * guess the rule, both spellings are offered and the caller takes whichever
+ * one it actually has.
  */
-export const toEmojiId = (emoji: string): string => {
+export const toEmojiIds = (emoji: string): string[] => {
   const codePoints = Array.from(emoji).map((c) => c.codePointAt(0) as number);
-  const isSequence = codePoints.includes(0x200d);
-  return codePoints
-    .filter((codePoint) => isSequence || codePoint !== 0xfe0f)
-    .map((codePoint) => codePoint.toString(16))
+  const hex = (codePoint: number) => codePoint.toString(16);
+  const full = codePoints.map(hex).join("-");
+  const withoutVariants = codePoints
+    .filter((codePoint) => codePoint !== 0xfe0f)
+    .map(hex)
     .join("-");
+  return full === withoutVariants ? [full] : [full, withoutVariants];
 };
+
+/** The name of the asset that exists for this emoji, if there is one. */
+export const toEmojiId = (emoji: string): string | undefined =>
+  toEmojiIds(emoji).find((id) => availableEmojis.has(id));
 
 const makeImage = (
   ctx: HyperbookContext,
@@ -102,7 +113,7 @@ export const rehypeEmoji: Plugin<[HyperbookContext], Root> =
       for (const match of node.value.matchAll(emojiPattern)) {
         const emoji = match[0];
         const id = toEmojiId(emoji);
-        if (!hasEmojiPresentation(emoji) || !availableEmojis.has(id)) {
+        if (!id || !hasEmojiPresentation(emoji)) {
           continue;
         }
 

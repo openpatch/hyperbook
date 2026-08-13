@@ -323,9 +323,6 @@ importers:
       remark-directive-rehype:
         specifier: 1.0.0
         version: 1.0.0
-      remark-gemoji:
-        specifier: 8.0.0
-        version: 8.0.0
       remark-gfm:
         specifier: 4.0.1
         version: 4.0.1
@@ -456,6 +453,9 @@ importers:
       esbuild:
         specifier: 0.28.2
         version: 0.28.2
+      gemoji:
+        specifier: ^8.1.0
+        version: 8.1.0
       h5p-standalone:
         specifier: ^3.8.2
         version: 3.8.2
@@ -6903,9 +6903,6 @@ packages:
 
   remark-directive@4.0.0:
     resolution: {integrity: sha512-7sxn4RfF1o3izevPV1DheyGDD6X4c9hrGpfdUpm7uC++dqrnJxIZVkk7CoKqcLm0VUMAuOol7Mno3m6g8cfMuA==}
-
-  remark-gemoji@8.0.0:
-    resolution: {integrity: sha512-/fL9rc72FYwFGtOKcT+QeQdx9Q9t5v4N6KLXSDOTEgaedzK85I9judBqB2eqz+g4b0ERMejlwSOuPK+wket6aA==}
 
   remark-gfm@4.0.1:
     resolution: {integrity: sha512-1quofZ2RQ9EWdeN34S79+KExV1764+wCUGop5CPL1WGdD0ocPpu91lzPGbwWMECpEpd42kJGQwzRfyov9j4yNg==}
@@ -15314,12 +15311,6 @@ snapshots:
       unified: 11.0.5
     transitivePeerDependencies:
       - supports-color
-
-  remark-gemoji@8.0.0:
-    dependencies:
-      '@types/mdast': 4.0.4
-      gemoji: 8.1.0
-      mdast-util-find-and-replace: 3.0.2
 
   remark-gfm@4.0.1:
     dependencies:

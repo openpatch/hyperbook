@@ -5,7 +5,9 @@ import remarkToRehype from "remark-rehype";
 import { unified } from "unified";
 import { VFile } from "vfile";
 import { ctx as baseCtx } from "./mock";
-import { rehypeEmoji, toEmojiId } from "../src/rehypeEmoji";
+import { rehypeEmoji, toEmojiId, toEmojiIds } from "../src/rehypeEmoji";
+import githubEmojis from "../src/github-emojis.json";
+import emojiAssets from "../src/emoji-assets.json";
 import { remarkGithubEmoji } from "../src/remarkGithubEmoji";
 import remarkParse from "../src/remarkParse";
 
@@ -44,6 +46,56 @@ describe("toEmojiId", () => {
   });
   it("should build keycaps without the variation selector", () => {
     expect(toEmojiId("1️⃣")).toBe("31-20e3");
+  });
+
+  it("should fall back to the stripped spelling when twemoji uses it", () => {
+    // Twemoji is not consistent: this sequence is stored with both variation
+    // selectors dropped, even though it is joined by a zero width joiner.
+    expect(toEmojiIds("👁️‍🗨️")).toEqual([
+      "1f441-fe0f-200d-1f5e8-fe0f",
+      "1f441-200d-1f5e8",
+    ]);
+    expect(toEmojiId("👁️‍🗨️")).toBe("1f441-200d-1f5e8");
+  });
+
+  it("should return nothing when there is no asset", () => {
+    expect(toEmojiId("\u{1FAE9}\u{1FAE9}")).toBeUndefined();
+  });
+});
+
+describe("the shortcode map", () => {
+  const assets = new Set<string>(emojiAssets);
+  const entries = Object.entries(githubEmojis as Record<string, string>);
+
+  it("should cover every shortcode with a twemoji asset", () => {
+    // The map used to come from GitHub's emoji API, whose image file names
+    // drop the ZWJ and the variation selectors. Rebuilding the sequences from
+    // those names guessed wrong for flags and keycaps, so a fifth of the
+    // shortcodes silently fell back to the reader's system font. This fails if
+    // gemoji and @twemoji/svg ever drift apart again.
+    const uncovered = entries.filter(
+      ([, emoji]) => !toEmojiIds(emoji).some((id) => assets.has(id)),
+    );
+    expect(uncovered).toEqual([]);
+  });
+
+  it("should ask for emoji presentation everywhere", () => {
+    // A text-default emoji such as :comet: only becomes an image when the
+    // character carries a variation selector, which is what makes the
+    // shortcode unambiguous.
+    const textDefault = entries.filter(
+      ([, emoji]) =>
+        !emoji.includes("\uFE0F") &&
+        !emoji.includes("\u20E3") &&
+        !/^\p{Emoji_Presentation}/u.test(emoji) &&
+        !/^\p{RI}/u.test(emoji),
+    );
+    expect(textDefault).toEqual([]);
+  });
+
+  it("should not join flags with a zero width joiner", () => {
+    expect(Array.from(githubEmojis.afghanistan)).toHaveLength(2);
+    expect(githubEmojis.afghanistan).toBe("🇦🇫");
   });
 });
 
