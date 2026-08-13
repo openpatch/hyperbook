@@ -7,6 +7,8 @@ import {
 import path from "path";
 import * as hyperbook from "./hyperbook";
 import * as hyperlibrary from "./hyperlibrary";
+import { JsonParseError } from "./json";
+import { UserError } from "./errors";
 
 export const get = async (
   root: string,
@@ -15,7 +17,14 @@ export const get = async (
   if (libraryEntry?.src) {
     root = path.join(root, libraryEntry.src);
   }
-  const hyperbookJson = await hyperbook.getJson(root).catch(() => null);
+  // A file that is present but malformed is an authoring mistake worth
+  // reporting; only a missing one means "this is not a book, try library".
+  const rethrowParseErrors = (e: unknown) => {
+    if (e instanceof JsonParseError) throw e;
+    return null;
+  };
+
+  const hyperbookJson = await hyperbook.getJson(root).catch(rethrowParseErrors);
   if (hyperbookJson) {
     return {
       type: "book",
@@ -26,7 +35,9 @@ export const get = async (
     };
   }
 
-  const hyperlibraryJson = await hyperlibrary.getJson(root).catch(() => null);
+  const hyperlibraryJson = await hyperlibrary
+    .getJson(root)
+    .catch(rethrowParseErrors);
   if (hyperlibraryJson) {
     return {
       type: "library",
@@ -48,7 +59,10 @@ export const get = async (
     };
   }
 
-  throw Error(`Missing or invalid hyperbook.json/hyperlibray.json ${root}`);
+  throw new UserError(
+    `No hyperbook.json or hyperlibrary.json found in ${root}.\n` +
+      `Run "hyperbook new <directory>" to create a book, or change into an existing book's directory.`,
+  );
 };
 
 export const getName = (project: Hyperproject, language?: Language) => {
