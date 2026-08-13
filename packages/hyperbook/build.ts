@@ -8,7 +8,9 @@ import {
   hyperbook,
   VFileBook,
   VFileGlossary,
+  getPasswords,
 } from "@hyperbook/fs";
+import { VFile } from "vfile";
 import { runArchive } from "./archive";
 import { makeDir } from "./helpers/make-dir";
 import { rimraf } from "rimraf";
@@ -24,7 +26,10 @@ import {
   isExternalUrl,
 } from "@hyperbook/types";
 import lunr from "lunr";
-import { process as hyperbookProcess } from "@hyperbook/markdown";
+import {
+  process as hyperbookProcess,
+  stripProtectBlocks,
+} from "@hyperbook/markdown";
 import packageJson from "./package.json";
 
 export const ASSETS_FOLDER = "__hyperbook_assets";
@@ -111,7 +116,7 @@ export async function buildSingleBookPage(
   file: VFileBook,
   baseCtx: Pick<
     HyperbookContext,
-    "config" | "makeUrl" | "project" | "root" | "version"
+    "config" | "makeUrl" | "project" | "root" | "version" | "passwords"
   >,
   pageList: HyperbookPage[],
   pagesAndSections: Pick<Navigation, "pages" | "sections" | "glossary">,
@@ -134,7 +139,12 @@ export async function buildSingleBookPage(
     navigation,
     dependencies,
   };
-  const result = await hyperbookProcess(file.markdown.content, ctx);
+  // Pass a VFile rather than a bare string so build errors name the source
+  // file instead of reporting a bare line number.
+  const result = await hyperbookProcess(
+    new VFile({ path: file.path.absolute, value: file.markdown.content }),
+    ctx,
+  );
   const searchDocuments = [...(result.data.searchDocuments || [])];
   const directives = Object.keys(result.data.directives || {});
   const emojis = [...(result.data.emojis || [])];
@@ -198,7 +208,7 @@ export async function buildSingleGlossaryPage(
   file: VFileGlossary,
   baseCtx: Pick<
     HyperbookContext,
-    "config" | "makeUrl" | "project" | "root" | "version"
+    "config" | "makeUrl" | "project" | "root" | "version" | "passwords"
   >,
   pageList: HyperbookPage[],
   pagesAndSections: Pick<Navigation, "pages" | "sections" | "glossary">,
@@ -238,7 +248,12 @@ export async function buildSingleGlossaryPage(
     navigation,
     dependencies,
   };
-  const result = await hyperbookProcess(file.markdown.content, ctx);
+  // Pass a VFile rather than a bare string so build errors name the source
+  // file instead of reporting a bare line number.
+  const result = await hyperbookProcess(
+    new VFile({ path: file.path.absolute, value: file.markdown.content }),
+    ctx,
+  );
   const searchDocuments = [...(result.data.searchDocuments || [])];
   const directives = Object.keys(result.data.directives || {});
   const emojis = [...(result.data.emojis || [])];
@@ -308,8 +323,12 @@ async function generateLlmsTxt(
       return;
     }
 
+    // A protected section's own content stays out; its pages are visited
+    // below and skip themselves if they inherited the protection.
+    const sectionProtected = Boolean(section.protect);
+
     // Add section header if it has content
-    if (section.href && !section.isEmpty) {
+    if (section.href && !section.isEmpty && !sectionProtected) {
       const file = allFiles.find((f) => f.path.href === section.href);
       if (file) {
         // Add section name as a header
@@ -317,7 +336,7 @@ async function generateLlmsTxt(
         lines.push("");
 
         // Get the markdown content without frontmatter
-        const content = file.markdown.content.trim();
+        const content = stripProtectBlocks(file.markdown.content).trim();
         if (content) {
           lines.push(content);
           lines.push(""); // Empty line after content
@@ -346,6 +365,12 @@ async function generateLlmsTxt(
       return;
     }
 
+    // llms.txt dumps the source, so a protected page would publish both its
+    // content and the password attribute in plaintext.
+    if (page.protect) {
+      return;
+    }
+
     if (page.href) {
       const file = allFiles.find((f) => f.path.href === page.href);
       if (file) {
@@ -354,7 +379,7 @@ async function generateLlmsTxt(
         lines.push("");
 
         // Get the markdown content without frontmatter
-        const content = file.markdown.content.trim();
+        const content = stripProtectBlocks(file.markdown.content).trim();
         if (content) {
           lines.push(content);
           lines.push(""); // Empty line after content
@@ -450,7 +475,7 @@ export function makeBaseCtx(
   rootProject: Hyperproject,
 ): Pick<
   HyperbookContext,
-  "config" | "makeUrl" | "project" | "root" | "version"
+  "config" | "makeUrl" | "project" | "root" | "version" | "passwords"
 > {
   const resolveRelativePath = (p: string, page: HyperbookPage): string => {
     if (p.startsWith("/")) {
@@ -573,7 +598,13 @@ async function runBuild(
 
   await runArchive(root, rootOut, prefix);
 
-  const baseCtx = makeBaseCtx(root, hyperbookJson, basePath, rootProject);
+  // Passwords are attached to the build context rather than to config: the
+  // config object is serialized into pages in several places.
+  const { passwords } = await getPasswords(root, hyperbookJson);
+  const baseCtx = {
+    ...makeBaseCtx(root, hyperbookJson, basePath, rootProject),
+    passwords,
+  };
 
   const directives = new Set<string>([]);
   const emojis = new Set<string>([]);

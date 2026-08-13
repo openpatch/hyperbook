@@ -55,6 +55,14 @@
                     "type": "object"
                 }
             ]
+        },
+        "ProtectMode": {
+            "description": "How protected content is stored in the built HTML.\n\n- \"encrypt\": AES-256-GCM, key derived from the password with PBKDF2. The\n  plaintext never leaves the build. Needs `crypto.subtle`, which browsers\n  only expose in secure contexts (https or localhost).\n- \"obfuscate\": the legacy behaviour — content and password both ship in the\n  page. Provides no protection, but works from `file://`.",
+            "enum": [
+                "encrypt",
+                "obfuscate"
+            ],
+            "type": "string"
         }
     },
     "properties": {
@@ -363,6 +371,24 @@
         },
         "name": {
             "type": "string"
+        },
+        "protect": {
+            "description": "Password protection behaviour. Passwords themselves live in a separate\nregistry file so this one can stay committed.",
+            "properties": {
+                "iterations": {
+                    "description": "PBKDF2 iterations. Defaults to 250000.",
+                    "type": "number"
+                },
+                "mode": {
+                    "$ref": "#/definitions/ProtectMode",
+                    "description": "Defaults to \"encrypt\"."
+                },
+                "passwordsFile": {
+                    "description": "Registry location, relative to the book root. Defaults to \"passwords.json\".",
+                    "type": "string"
+                }
+            },
+            "type": "object"
         },
         "qrcode": {
             "type": "boolean"

@@ -1,0 +1,15 @@
+.directive-passwordlist table {
+  width: 100%;
+}
+
+.directive-passwordlist .password {
+  font-family: monospace;
+  /* One click selects the whole password, which is usually what you want
+     when you are reading it out or pasting it somewhere. */
+  user-select: all;
+  white-space: nowrap;
+}
+
+.directive-passwordlist .empty {
+  opacity: 0.7;
+}

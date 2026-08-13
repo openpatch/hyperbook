@@ -43,6 +43,7 @@
     "decircular": "^1.0.0",
     "handlebars": "^4.7.9",
     "hast-util-from-html": "^2.0.3",
+    "hast-util-to-html": "^9.0.5",
     "hast-util-to-text": "^4.0.2",
     "is-obj": "^3.0.0",
     "js-base64": "^3.9.2",

@@ -147,5 +147,16 @@
     "consent-embed-text": "Hier sollen Inhalte einer externen Internetseite geladen werden.",
     "consent-embed-personal-data": "Die externe Internetseite kann möglicherweise personenbezogene Daten erheben.",
     "consent-embed-always": "Inhalte von {{domain}} immer zulassen",
-    "consent-embed-accept": "Inhalte laden"
+    "consent-embed-accept": "Inhalte laden",
+    "protect-unlock": "Entsperren",
+    "protect-unlocking": "Wird entsperrt ...",
+    "protect-wrong-password": "Falsches Passwort.",
+    "protect-failed": "Der geschützte Inhalt konnte nicht geöffnet werden.",
+    "protect-insecure-context": "Geschützte Inhalte benötigen eine sichere Verbindung (https). Öffne die Seite über https oder localhost.",
+    "protect-page-description": "Diese Seite ist geschützt. Gib das Passwort ein, um sie zu lesen.",
+    "protect-navigation-label": "Passwortgeschützt",
+    "passwordlist-empty": "Keine Passwörter.",
+    "passwordlist-password": "Passwort",
+    "passwordlist-where": "Wo",
+    "passwordlist-description": "Beschreibung"
 }

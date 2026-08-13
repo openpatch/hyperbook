@@ -64,6 +64,23 @@ hyperbook.store = (function () {
           }
         }),
     );
+  // `passwordHash` never held a hash — it was base64 of the password. Renamed
+  // so the field says what it is. The value is content, not a key.
+  db.version(7)
+    .stores({
+      protect: `id`,
+    })
+    .upgrade((tx) =>
+      tx
+        .table("protect")
+        .toCollection()
+        .modify((entry) => {
+          if (entry.passwordHash !== undefined) {
+            entry.password = entry.passwordHash;
+            delete entry.passwordHash;
+          }
+        }),
+    );
 
   /** @returns {Promise<void>} */
   const init = async () => {

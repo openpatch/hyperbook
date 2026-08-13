@@ -11,6 +11,7 @@ import {
 import { ElementContent, Root } from "hast";
 import { VFile } from "vfile";
 import { i18n } from "./i18n";
+import { icon } from "./icons";
 import githubEmojiMap from "./github-emojis.json";
 
 // Helper to resolve emoji shortcuts like :house: to actual emoji
@@ -265,6 +266,33 @@ const makeBreadcrumbElements = (ctx: HyperbookContext): ElementContent[] => {
   ];
 };
 
+/**
+ * Marks a navigation entry whose target is password protected.
+ *
+ * Protected pages stay in the sidebar — hiding them would make the book look
+ * incomplete and leave no way to reach the unlock form — so the lock is what
+ * tells a reader they will need a password.
+ */
+const makeNavigationLabel = (
+  label: string,
+  protect: HyperbookPage["protect"],
+): ElementContent[] => {
+  const children: ElementContent[] = [{ type: "text", value: label }];
+  if (protect) {
+    children.push({
+      type: "element",
+      tagName: "span",
+      properties: {
+        class: "protected",
+        title: i18n.get("protect-navigation-label"),
+        "aria-label": i18n.get("protect-navigation-label"),
+      },
+      children: [icon("lock")],
+    });
+  }
+  return children;
+};
+
 const makeNavigationPageElement = (
   ctx: HyperbookContext,
   page: HyperbookPage,
@@ -282,12 +310,7 @@ const makeNavigationPageElement = (
             ctx.navigation.current?.href === page.href ? "page active" : "page",
           href: ctx.makeUrl(page.href || "", "book"),
         },
-        children: [
-          {
-            type: "text",
-            value: page.name,
-          },
-        ],
+        children: makeNavigationLabel(page.name, page.protect),
       },
     ],
   };
@@ -311,12 +334,7 @@ const makeNavigationSectionAsPageElement = (
             ctx.navigation.current?.href === href ? "page active" : "page",
           href: ctx.makeUrl(href || "", "book"),
         },
-        children: [
-          {
-            type: "text",
-            value: name,
-          },
-        ],
+        children: makeNavigationLabel(name, section.protect),
       },
     ],
   };
@@ -419,12 +437,7 @@ const makeNavigationSectionElement = (
       properties: {
         class: "label",
       },
-      children: [
-        {
-          type: "text",
-          value: name,
-        },
-      ],
+      children: makeNavigationLabel(name, section.protect),
     });
   } else {
     summaryChildren.push({
@@ -434,12 +447,7 @@ const makeNavigationSectionElement = (
         href: ctx.makeUrl(href || "", "book"),
         class: "label",
       },
-      children: [
-        {
-          type: "text",
-          value: name,
-        },
-      ],
+      children: makeNavigationLabel(name, section.protect),
     });
   }
 

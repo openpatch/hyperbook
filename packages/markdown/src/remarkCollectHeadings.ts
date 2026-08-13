@@ -7,10 +7,18 @@ import { visit } from "unist-util-visit";
 import { VFile, VFileData } from "vfile";
 import { Root as MdastRoot, Heading as AstHeading } from "mdast";
 import { toString } from "mdast-util-to-string";
+import { collectProtectedNodes, isPageProtected } from "./protectedNodes";
 
 export default (ctx: HyperbookContext) => () => {
   return (tree: Root, file: VFile) => {
-    const headings = getHeadings(tree);
+    // Headings of a protected page live inside the ciphertext, so a table of
+    // contents built from them would leak the outline and link nowhere.
+    if (isPageProtected(ctx)) {
+      file.data.headings = [];
+      return;
+    }
+
+    const headings = getHeadings(tree, collectProtectedNodes(tree));
     file.data.headings = headings;
   };
 };
@@ -32,10 +40,15 @@ export const getAnchor = (heading: AstHeading): string => {
   return anchor;
 };
 
-const getHeadings = (root: MdastRoot): VFileData["headings"] => {
+const getHeadings = (
+  root: MdastRoot,
+  protectedNodes: Set<unknown>,
+): VFileData["headings"] => {
   const headingList: VFileData["headings"] = [];
 
   visit(root, "heading", (node: AstHeading) => {
+    if (protectedNodes.has(node)) return;
+
     const heading = {
       level: node.depth,
       label: toString(node, { includeImageAlt: false }),

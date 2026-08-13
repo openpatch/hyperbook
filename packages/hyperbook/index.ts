@@ -8,6 +8,12 @@ import { runDev } from "./dev";
 import { getPkgManager } from "./helpers/get-pkg-manager";
 import { hyperproject } from "@hyperbook/fs";
 import { runNew } from "./new";
+import { reportError } from "./helpers/report-error";
+import {
+  runPasswordsCheck,
+  runPasswordsInit,
+  runPasswordsList,
+} from "./passwords";
 import packageJson from "./package.json";
 
 const program = new Command();
@@ -58,9 +64,62 @@ program
       `${chalk.blue(`[${name}]`)} Building Project: ${rootProject.src}.`,
     );
     await runBuildProject(rootProject, rootProject).catch((e) => {
-      console.error(e);
+      reportError(e);
       process.exit(1);
     });
+  });
+
+const passwords = program
+  .command("passwords")
+  .description("inspect the passwords a hyperbook uses");
+
+const withProject = async () =>
+  hyperproject.get(process.cwd()).catch((e) => {
+    reportError(e);
+    process.exit(1);
+  });
+
+passwords
+  .command("list", { isDefault: true })
+  .description("list every password and where it is used")
+  .option("--json", "output as JSON")
+  .option(
+    "-t, --type <types>",
+    "only show registry, section, page or block entries",
+  )
+  .option("-f, --filter <regex>", "only show entries matching a pattern")
+  .action(async (options) => {
+    await runPasswordsList(await withProject(), options).catch((e) => {
+      reportError(e);
+      process.exit(1);
+    });
+  });
+
+passwords
+  .command("init")
+  .description("create or update the password registry file")
+  .option("--file <path>", "write to a different registry file")
+  .option("--generate", "fill empty entries with random passwords")
+  .option("--force", "also replace entries that already have a value")
+  .action(async (options) => {
+    await runPasswordsInit(await withProject(), options).catch((e) => {
+      reportError(e);
+      process.exit(1);
+    });
+  });
+
+passwords
+  .command("check")
+  .description("verify that every referenced password resolves")
+  .option("--json", "output as JSON")
+  .action(async (options) => {
+    const ok = await runPasswordsCheck(await withProject(), options).catch(
+      (e) => {
+        reportError(e);
+        process.exit(1);
+      },
+    );
+    if (!ok) process.exit(1);
   });
 
 program.parseAsync(process.argv);

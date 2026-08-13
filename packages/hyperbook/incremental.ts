@@ -3,12 +3,13 @@ import fs from "fs/promises";
 import { cp } from "fs/promises";
 import chalk from "chalk";
 import {
-  hyperproject,
   vfile,
   hyperbook,
   VFileBook,
   VFileGlossary,
+  getPasswords,
 } from "@hyperbook/fs";
+import { clearCollectedPasswords } from "@hyperbook/markdown";
 import {
   Hyperproject,
   HyperbookContext,
@@ -40,7 +41,7 @@ export class IncrementalBuilder {
   private hyperbookJson: HyperbookJson | null = null;
   private baseCtx: Pick<
     HyperbookContext,
-    "config" | "makeUrl" | "project" | "root" | "version"
+    "config" | "makeUrl" | "project" | "root" | "version" | "passwords"
   > | null = null;
   private pagesAndSections: Pick<
     Navigation,
@@ -155,12 +156,20 @@ export class IncrementalBuilder {
     }
     this.hyperbookJson.basePath = basePath;
 
-    this.baseCtx = makeBaseCtx(
-      this.root,
-      this.hyperbookJson,
-      basePath,
-      this.rootProject,
-    );
+    // Reloaded on every full init, so editing the registry during a dev
+    // session takes effect.
+    const { passwords } = await getPasswords(this.root, this.hyperbookJson, {
+      reload: true,
+    });
+    this.baseCtx = {
+      ...makeBaseCtx(
+        this.root,
+        this.hyperbookJson,
+        basePath,
+        this.rootProject,
+      ),
+      passwords,
+    };
     this.pagesAndSections = await hyperbook.getPagesAndSections(this.root);
     this.pageList = hyperbook.getPageList(
       this.pagesAndSections.sections,
@@ -252,6 +261,10 @@ export class IncrementalBuilder {
     filePath: string,
     eventType: "add" | "change" | "unlink",
   ): Promise<{ changedPages: string[] | "*" }> {
+    // A protect block added anywhere changes what a ::passwordlist elsewhere
+    // should list, so the collected report never survives a change.
+    clearCollectedPasswords(this.root);
+
     if (!this.initialized || this.rootProject.type !== "book") {
       // Fall back to full rebuild for libraries or uninitialized state
       await this.fullRebuild();

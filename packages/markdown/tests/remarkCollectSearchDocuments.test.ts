@@ -6,6 +6,9 @@ import { realCtx } from "./mock";
 import remarkCollectSearchDocuments from "../src/remarkCollectSearchDocuments";
 import rehypeStringify from "rehype-stringify";
 import remarkParse from "../src/remarkParse";
+import remarkDirective from "remark-directive";
+import remarkDirectiveRehype from "remark-directive-rehype";
+import remarkDirectiveProtect from "../src/remarkDirectiveProtect";
 
 export const toData = (md: string, ctx: HyperbookContext) => {
   return unified()
@@ -18,6 +21,21 @@ export const toData = (md: string, ctx: HyperbookContext) => {
     })
     .processSync(md);
 };
+
+/** Mirrors the real pipeline: protect runs before the collector. */
+const toDataWithProtect = (md: string, ctx: HyperbookContext) =>
+  unified()
+    .use(remarkParse)
+    .use(remarkDirective)
+    .use(remarkDirectiveRehype)
+    .use(remarkDirectiveProtect(ctx))
+    .use(remarkCollectSearchDocuments(ctx))
+    .use(remarkToRehype)
+    .use(rehypeStringify, {
+      allowDangerousCharacters: true,
+      allowDangerousHtml: true,
+    })
+    .process(md);
 
 describe("remarkCollectSearchDocuments", () => {
   it("should transform", async () => {
@@ -74,5 +92,59 @@ subsub-heading 1
         },
       ]
     `);
+  });
+
+  it("should not index the content of a protect block", async () => {
+    const data = (
+      await toDataWithProtect(
+        `
+# Heading
+
+visible prose
+
+:::protect{password="pw"}
+
+the protected secret
+
+## Protected Heading
+
+more secrets
+
+:::
+
+trailing prose
+`,
+        realCtx,
+      )
+    ).data.searchDocuments;
+
+    const serialized = JSON.stringify(data);
+    expect(serialized).not.toContain("the protected secret");
+    expect(serialized).not.toContain("more secrets");
+    expect(serialized).not.toContain("Protected Heading");
+    expect(serialized).not.toContain("pw");
+
+    // The surrounding prose is still indexed.
+    expect(data?.[0].content).toContain("visible prose");
+    expect(data?.[0].content).toContain("trailing prose");
+  });
+
+  it("should index nothing on a protected page", async () => {
+    const protectedCtx = {
+      ...realCtx,
+      navigation: {
+        ...realCtx.navigation,
+        current: { ...realCtx.navigation.current, protect: "chapter-3" },
+      },
+    } as HyperbookContext;
+
+    const data = (
+      await toDataWithProtect(
+        `# Heading\n\nsecret page content\n`,
+        protectedCtx,
+      )
+    ).data.searchDocuments;
+
+    expect(data).toEqual([]);
   });
 });

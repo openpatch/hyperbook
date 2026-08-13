@@ -34,6 +34,8 @@ import remarkDirectiveArchive from "./remarkDirectiveArchive";
 import remarkDirectiveDownload from "./remarkDirectiveDownload";
 import remarkDirectiveEmbed from "./remarkDirectiveEmbed";
 import remarkDirectiveProtect from "./remarkDirectiveProtect";
+import rehypeProtect from "./rehypeProtect";
+import remarkPageProtect from "./remarkPageProtect";
 import remarkDirectiveQr from "./remarkDirectiveQr";
 import remarkDirectiveExcalidraw from "./remarkDirectiveExcalidraw";
 import remarkDirectiveScratchblock from "./remarkDirectiveScratchblock";
@@ -44,6 +46,7 @@ import remarkDirectiveStruktog from "./remarkDirectiveStruktog";
 import remarkDirectiveTerm from "./remarkDirectiveTerm";
 import remarkLink from "./remarkLink";
 import remarkDirectivePagelist from "./remarkDirectivePagelist";
+import remarkDirectivePasswordlist from "./remarkDirectivePasswordlist";
 import rehypeQrCode from "./rehypeQrCode";
 import rehypeShareDialog from "./rehypeShareDialog";
 import rehypeDirectiveP5 from "./rehypeDirectiveP5";
@@ -61,6 +64,7 @@ import { makeTransformerCopyButton } from "./rehypePrettyCodeCopyButton";
 import { remarkGithubEmoji } from "./remarkGithubEmoji";
 import { rehypeEmoji } from "./rehypeEmoji";
 import remarkParse from "./remarkParse";
+import { VFile } from "vfile";
 import remarkSubSup from "./remarkSubSup";
 import remarkImageAttrs from "./remarkImageAttrs";
 import remarkDirectiveLearningmap from "./remarkDirectiveLearningmap";
@@ -84,6 +88,7 @@ export const remark = (ctx: HyperbookContext) => {
     remarkDirectiveWebide(ctx),
     remarkDirectiveOnlineIde(ctx),
     remarkDirectivePagelist(ctx),
+    remarkDirectivePasswordlist(ctx),
     remarkLink(ctx),
     remarkImageAttrs(ctx),
     remarkImage(ctx),
@@ -123,6 +128,9 @@ export const remark = (ctx: HyperbookContext) => {
     remarkCode(ctx),
     remarkMath,
     remarkGithubEmoji,
+    /* wraps the page before protect runs, so a page-level password uses the
+       same machinery as a :::protect block */
+    remarkPageProtect(ctx),
     /* needs to be last directive */
     remarkDirectiveProtect(ctx),
     /* needs to be after all directives */
@@ -152,7 +160,14 @@ export const remark = (ctx: HyperbookContext) => {
     });
 };
 
-export const process = (md: string, ctx: HyperbookContext) => {
+/**
+ * @param md - The page source, or a VFile carrying it. Pass a VFile with a
+ *   `path` so build errors name the file they came from.
+ */
+export const process = (
+  md: string | VFile,
+  ctx: HyperbookContext,
+) => {
   i18n.init(ctx.config.language || "en");
 
   const rehypePlugins: PluggableList = [
@@ -196,6 +211,10 @@ export const process = (md: string, ctx: HyperbookContext) => {
       },
     ],
     rehypeFormat,
+    /* needs to be after every content transform, so that code highlighting and
+       math are inside the ciphertext, and before the shell, so the tree is
+       still just the article */
+    rehypeProtect(ctx),
   ];
 
   return remark(ctx)

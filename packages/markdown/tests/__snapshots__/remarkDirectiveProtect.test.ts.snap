@@ -1,0 +1,15 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`remarkDirectiveProtect > should transform 1`] = `
+"
+<div class="directive-protect" data-id="645bb70f7bdf57fe1ff4ccaaf977a472fe3e3570e343afc90261ab370ec8d590">
+  <script type="application/json" class="protect-payload"><payload></script>
+  <div class="password-input"><span class="description">A hint</span><span class="icon"><svg class="icon icon-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+        <path d="M5 11h14a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2z"></path>
+        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+      </svg></span>
+    <div class="controls"><input placeholder="..." type="password" data-id="645bb70f7bdf57fe1ff4ccaaf977a472fe3e3570e343afc90261ab370ec8d590"><button type="button" class="unlock">Unlock</button></div><span class="status" role="status"></span>
+  </div>
+</div>
+"
+`;

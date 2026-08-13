@@ -132,6 +132,50 @@ export const getNavigationForFile = async (
   };
 };
 
+/**
+ * Pushes a section's `protect` down to everything inside it.
+ *
+ * Resolving inheritance once, here, means the renderer, the search index, the
+ * navigation, the CLI and the passwordlist directive all agree on which pages
+ * are protected — rather than each re-deriving it from the section tree.
+ *
+ * A page or subsection that declares its own `protect` keeps it; protection is
+ * not additive, so a nested section can hand out a different password without
+ * its readers also needing the parent's.
+ */
+const inheritProtect = (
+  sections: HyperbookSection[],
+  pages: HyperbookPage[],
+  inherited?: HyperbookSection["protect"],
+  inheritedSource?: string,
+): void => {
+  for (const page of pages) {
+    if (page.protect) {
+      page.protectSource = page.protectSource ?? page.href;
+    } else if (inherited) {
+      page.protect = inherited;
+      page.protectInherited = true;
+      page.protectSource = inheritedSource;
+    }
+  }
+
+  for (const section of sections) {
+    if (section.protect) {
+      section.protectSource = section.protectSource ?? section.href;
+    } else if (inherited) {
+      section.protect = inherited;
+      section.protectInherited = true;
+      section.protectSource = inheritedSource;
+    }
+    inheritProtect(
+      section.sections,
+      section.pages,
+      section.protect,
+      section.protectSource,
+    );
+  }
+};
+
 export const getPagesAndSections = async (
   root: string,
 ): Promise<Pick<Navigation, "pages" | "sections" | "glossary">> => {
@@ -235,6 +279,7 @@ export const getPagesAndSections = async (
   };
 
   const { sections, pages } = await getSectionsAndPages(directory);
+  inheritProtect(sections, pages);
 
   return {
     sections,

@@ -68,7 +68,7 @@
     "webide-reset": "Reset",
     "webide-reset-prompt": "Are you sure you want to reset the code?",
     "webide-copy": "Copy",
-    "webide-download": "Download", 
+    "webide-download": "Download",
     "typst-code": "Typst",
     "typst-reset": "Reset",
     "typst-reset-prompt": "Are you sure you want to reset the code?",
@@ -147,5 +147,16 @@
     "consent-embed-text": "Content from an external website is to be loaded here.",
     "consent-embed-personal-data": "The external website may collect personal data.",
     "consent-embed-always": "Always allow content from {{domain}}",
-    "consent-embed-accept": "Load content"
+    "consent-embed-accept": "Load content",
+    "protect-unlock": "Unlock",
+    "protect-unlocking": "Unlocking ...",
+    "protect-wrong-password": "Wrong password.",
+    "protect-failed": "The protected content could not be opened.",
+    "protect-insecure-context": "Protected content needs a secure connection (https). Open this page over https or from localhost.",
+    "protect-page-description": "This page is protected. Enter the password to read it.",
+    "protect-navigation-label": "Password protected",
+    "passwordlist-empty": "No passwords.",
+    "passwordlist-password": "Password",
+    "passwordlist-where": "Where",
+    "passwordlist-description": "Description"
 }

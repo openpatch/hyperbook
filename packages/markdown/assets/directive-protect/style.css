@@ -5,14 +5,24 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100px;
+  /* Not a fixed height: the status line appears and disappears. */
+  min-height: 100px;
+  padding: 10px;
   margin-bottom: 10px;
   border-radius: 4px;
   border-style: solid;
   border-width: 1px;
 }
 
-.directive-protect .password-input > input {
+.directive-protect .password-input .controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.directive-protect .password-input input {
   text-align: center;
   border-radius: 10px;
   font-size: 1.125rem;
@@ -20,32 +30,73 @@
   border-style: solid;
 }
 
+.directive-protect .password-input .unlock {
+  color: var(--color-text);
+  background: var(--color-nav);
+  border: 1px solid var(--color-spacer);
+  border-radius: 10px;
+  font-size: 1rem;
+  padding: 4px 14px;
+  cursor: pointer;
+}
+
+.directive-protect .password-input .unlock:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.directive-protect .password-input .status {
+  margin-top: 8px;
+  font-size: 0.875rem;
+  text-align: center;
+  min-height: 1.2em;
+}
+
+.directive-protect .password-input .status.error {
+  color: var(--color-error, #b3261e);
+}
+
+.directive-protect .password-input .status.pending {
+  opacity: 0.7;
+}
+
 .directive-protect .password-input > .icon {
   position: absolute;
   user-select: none;
   left: -14px;
+  /* Centred on the panel rather than left in the flow: the panel grows and
+     shrinks as the status line appears, and the badge should not move with it.
+     The icon inside is a block-level svg, so the badge centres it with flex —
+     text-align has no effect on it. */
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border-width: 1px;
   border-style: solid;
   height: 28px;
   width: 28px;
-  text-align: center;
   border-radius: 50%;
-  margin-bottom: 10px;
 }
 
 .directive-protect .password-input > .description {
   margin-bottom: 10px;
 }
 
-.directive-protect .password-input > input {
+.directive-protect .password-input input {
   color: var(--color-text);
   background: var(--color-nav);
   border-color: var(--color-spacer);
 }
 
 .directive-protect .password-input > .icon {
-  background: white;
+  /* The lock is an svg stroked with currentColor. A hardcoded white background
+     left it invisible in dark mode, so both follow the theme, like the input
+     and the button above. */
+  background: var(--color-nav);
   border-color: var(--color-spacer);
+  color: var(--color-text);
 }
 
 .directive-protect .hidden {

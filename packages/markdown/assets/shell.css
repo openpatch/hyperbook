@@ -175,6 +175,21 @@ header.inverted > .branding:hover {
   color: var(--color-brand);
 }
 
+/* Tells the reader a page will ask for a password before they open it. */
+.page > .protected,
+.section .label > .protected {
+  display: inline-flex;
+  vertical-align: middle;
+  margin-left: 0.4em;
+  opacity: 0.65;
+}
+
+.page > .protected .icon,
+.section .label > .protected .icon {
+  width: 0.85em;
+  height: 0.85em;
+}
+
 .section > .links {
   border-left-color: var(--color-spacer);
 }

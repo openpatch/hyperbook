@@ -127,6 +127,12 @@
           "hyperlibrary.json"
         ],
         "url": "./schemas/hyperlibrary.schema.json"
+      },
+      {
+        "fileMatch": [
+          "passwords.json"
+        ],
+        "url": "./schemas/passwords.schema.json"
       }
     ],
     "walkthroughs": [
@@ -183,7 +189,7 @@
           },
           {
             "id": "done",
-            "title": "You're all set! 🎉",
+            "title": "You're all set! \ud83c\udf89",
             "description": "Congratulations! You've learned the basics of Hyperbook. Now you can:\n- Use the preview to see your changes\n- Explore more snippets and elements\n- Deploy your Hyperbook online\n[Open Documentation](command:hyperbook.openDocumentation)",
             "media": {
               "markdown": "assets/walkthrough/done.md"
@@ -207,7 +213,8 @@
     "watch:extension": "webpack --config ./webpack.extension.config.js --watch --mode development",
     "open": "code --extensionDevelopmentPath=$PWD",
     "pretest": "pnpm compile && pnpm lint",
-    "lint": "eslint src"
+    "lint": "eslint src",
+    "compile:schema-passwords": "typescript-json-schema ../../packages/types/src/index.ts PasswordsJson --out ./schemas/passwords.schema.json --required"
   },
   "devDependencies": {
     "@hyperbook/types": "workspace:*",

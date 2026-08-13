@@ -78,6 +78,11 @@ export type HyperbookPageFrontmatter = {
   layout?: Layout;
   breadcrumb?: boolean | BreadcrumbConfig;
   navigation?: PageNavigation;
+  /**
+   * Password-protects the whole page. On a section (its index.md) this is
+   * inherited by every descendant that does not set its own.
+   */
+  protect?: ProtectReference;
 };
 
 export type HyperbookSectionFrontmatter = Omit<
@@ -89,7 +94,24 @@ export type HyperbookSectionFrontmatter = Omit<
   navigation?: SectionNavigation;
 };
 
-export type HyperbookPage = HyperbookPageFrontmatter & {
+export type ProtectInheritance = {
+  /**
+   * True when this page's `protect` came from an ancestor section rather than
+   * from its own frontmatter.
+   */
+  protectInherited?: boolean;
+  /**
+   * href of the page or section whose frontmatter declared the protection.
+   *
+   * Everything that resolves to the same source shares one unlock, so entering
+   * a section's password opens the whole section rather than every page asking
+   * again for the same thing.
+   */
+  protectSource?: string;
+};
+
+export type HyperbookPage = HyperbookPageFrontmatter &
+  ProtectInheritance & {
   isEmpty?: boolean;
   href?: string;
   path?: {
@@ -102,17 +124,73 @@ export type HyperbookPage = HyperbookPageFrontmatter & {
   repo?: string;
 };
 
-export type HyperbookSection = HyperbookSectionFrontmatter & {
-  isEmpty?: boolean;
-  href?: string;
-  pages: HyperbookPage[];
-  sections: HyperbookSection[];
-  repo?: string;
-};
+export type HyperbookSection = HyperbookSectionFrontmatter &
+  ProtectInheritance & {
+    isEmpty?: boolean;
+    href?: string;
+    pages: HyperbookPage[];
+    sections: HyperbookSection[];
+    repo?: string;
+  };
 
 export type HyperbookFrontmatter =
   | HyperbookPageFrontmatter
   | HyperbookSectionFrontmatter;
+
+/**
+ * How protected content is stored in the built HTML.
+ *
+ * - "encrypt": AES-256-GCM, key derived from the password with PBKDF2. The
+ *   plaintext never leaves the build. Needs `crypto.subtle`, which browsers
+ *   only expose in secure contexts (https or localhost).
+ * - "obfuscate": the legacy behaviour — content and password both ship in the
+ *   page. Provides no protection, but works from `file://`.
+ */
+export type ProtectMode = "encrypt" | "obfuscate";
+
+export type ProtectConfig = {
+  /** Defaults to "encrypt". */
+  mode?: ProtectMode;
+  /** PBKDF2 iterations. Defaults to 250000. */
+  iterations?: number;
+  /** Registry location, relative to the book root. Defaults to "passwords.json". */
+  passwordsFile?: string;
+};
+
+/** One named password in the registry. */
+export type PasswordEntry = {
+  value: string;
+  /** Label shown by `hyperbook passwords` and the passwordlist directive. */
+  name?: string;
+  description?: string;
+};
+
+/**
+ * Contents of passwords.json.
+ *
+ * Keep this file out of version control if the book is public — it holds the
+ * actual passwords. Values can also come from the environment; see the
+ * `hyperbook passwords` documentation.
+ */
+export type PasswordsJson = {
+  $schema?: string;
+  /** The bare string form is shorthand for `{ "value": "..." }`. */
+  passwords: { [key: string]: PasswordEntry | string };
+};
+
+/**
+ * A password reference on a page or section, or on a `:::protect` directive.
+ * The string form is a registry key.
+ */
+export type ProtectReference =
+  | string
+  | {
+      /** Key in the password registry. */
+      use?: string;
+      /** Literal password, for books that do not use a registry. */
+      password?: string;
+      description?: string;
+    };
 
 export type HyperbookJson = {
   name: string;
@@ -125,6 +203,11 @@ export type HyperbookJson = {
   qrcode?: boolean;
   toc?: boolean;
   llms?: boolean;
+  /**
+   * Password protection behaviour. Passwords themselves live in a separate
+   * registry file so this one can stay committed.
+   */
+  protect?: ProtectConfig;
   breadcrumb?: boolean | BreadcrumbConfig;
   author?: {
     name?: string;
@@ -251,6 +334,14 @@ export interface HyperbookContext {
     },
   ): string;
   navigation: Navigation;
+  /**
+   * Resolved password registry.
+   *
+   * Deliberately kept off `config`: the config object is serialized into the
+   * page in several places, and a password that reaches it would be published.
+   * Only the protect plugins may read this.
+   */
+  passwords?: Record<string, PasswordEntry>;
   /**
    * Collects absolute paths of files inlined into the page while it is being
    * processed, so the dev server can rebuild exactly the pages that used them.

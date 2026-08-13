@@ -6,6 +6,7 @@ import {
   vfile,
   VFileBook,
   VFileGlossary,
+  getPasswords,
 } from "@hyperbook/fs";
 import { process } from "@hyperbook/markdown";
 import { disposeAll } from "./utils/dispose";
@@ -188,10 +189,17 @@ export default class Preview {
       ];
       const config = await this.getConfig();
 
+      // Without this a `:::protect{use="..."}` block fails to render in the
+      // preview, even though it builds fine.
+      const { passwords } = await getPasswords(this._vfile.root, config, {
+        reload: true,
+      });
+
       const ctx: HyperbookContext = {
         root: this._vfile.root,
         config,
         navigation,
+        passwords,
         makeUrl: (path, base, page) => {
           if (typeof path === "string") {
             // Handle absolute URLs

@@ -2,19 +2,38 @@
 /// <reference types="mdast-util-directive" />
 //
 import { HyperbookContext } from "@hyperbook/types";
-import { Node, Parent, Root } from "mdast";
+import { Parent, Root } from "mdast";
 import { visit } from "unist-util-visit";
 import { findAfter } from "unist-util-find-after";
 import { VFile, VFileData } from "vfile";
 import { getAnchor } from "./remarkCollectHeadings";
 import { toText } from "./mdastUtilToText";
+import {
+  collectProtectedNodes,
+  isPageProtected,
+  isProtectedWrapper,
+} from "./protectedNodes";
 
 export default (ctx: HyperbookContext) => () => {
   return (tree: Root, file: VFile) => {
     const searchDocuments: VFileData["searchDocuments"] = [];
 
+    // A protected page contributes nothing at all: the search index stores the
+    // full text of every section, so indexing it would publish the content the
+    // password is meant to withhold.
+    if (isPageProtected(ctx)) {
+      file.data.searchDocuments = [];
+      return;
+    }
+
+    const protectedNodes = collectProtectedNodes(tree);
+
     visit(tree, function (node, index, parent: Parent | undefined) {
       if (node.type === "heading") {
+        // Headings inside a protect block would leak the outline and link to
+        // content that is not there until it is unlocked.
+        if (protectedNodes.has(node)) return;
+
         const start = node;
         const startIndex = index;
         const depth = start.depth;
@@ -32,7 +51,9 @@ export default (ctx: HyperbookContext) => () => {
         );
 
         const anchor = getAnchor(node);
-        const content = toText(between);
+        // A section may contain a protect block; its text is dropped while the
+        // surrounding prose is still indexed.
+        const content = toText(between, { skip: isProtectedWrapper });
         searchDocuments.push({
           href: `${ctx.navigation.current?.href || ""}#${anchor}`,
           heading: toText(node) || ctx.navigation.current?.name || "",
