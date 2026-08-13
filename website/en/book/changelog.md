@@ -39,6 +39,40 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.105.0
+
+::::tabs
+
+:::tab{title="New :rocket:" id="new"}
+
+**protect**: Protected content is really protected now. It is encrypted while your book is built, with a key derived from the password, and the browser decrypts it once a reader enters that password. Neither the content nor the password is in the page any more — before, both were, and anyone could read them from the page source. Blocks can be nested: the inner one is encrypted first, so an outer password opens only the outer layer.
+
+**protect**: A whole page or a whole section can be protected, by putting `protect` in its frontmatter instead of wrapping the content in a block. A section passes it down to every page and subsection inside it, so pages you add to the folder later are covered without you having to remember. One password opens the whole section — readers enter it once, not on every page. Protected entries stay in the navigation and get a lock next to their name.
+
+**passwords**: Passwords can live in a `passwords.json` next to your `hyperbook.json` and be used by name, with `use="chapter-3"` on a protect block or `protect: chapter-3` in frontmatter. You then change a password in one place, and the file can stay out of your repository: the values can come from `HYPERBOOK_PASSWORDS_FILE`, `HYPERBOOK_PASSWORDS` or `HYPERBOOK_PASSWORD_<KEY>` instead. A name with no value stops the build rather than falling back to an empty password.
+
+**passwords**: A new `hyperbook passwords` command shows every password a book uses and where. `list` prints them, `init` writes the registry and can generate the passwords for you, and `check` fails when a name has no value — useful in CI before `hyperbook build`.
+
+**passwordlist**: A new element puts that same overview on a page, for a teacher's copy of the book. It can be narrowed to the current page, the current section or a pattern. Read the warning in its documentation first: it prints passwords into the built page.
+
+:::
+
+:::tab{title="Improved :+1:" id="improved"}
+
+**protect**: Unlocking is now an explicit step — an Unlock button, or Enter — and a wrong password says so. Deriving the key from the password takes a moment, which is what makes guessing passwords expensive, so it can no longer happen on every keystroke.
+
+:::
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+**protect**: Protected content no longer reaches the search index. The index stores the full text of everything it covers, so until now the content of every protected block was sitting in `search.js`, readable without any password. It is also kept out of `llms.txt`, and headings inside a protected block no longer appear in the table of contents.
+
+**emoji**: Emoji shortcodes no longer fall back to the reader's own emoji font when you use the `twemoji` style. 616 of the 1913 shortcodes did, so a page mixed two different emoji styles — flags, keycaps and emoji like `:comet:`, `:asterisk:` and `:airplane:` were all affected. Every shortcode now has a Twemoji image. The names are unchanged, so nothing you have written needs to change.
+
+:::
+
+::::
+
 ## v0.104.3
 
 ::::tabs
