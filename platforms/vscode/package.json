@@ -11,7 +11,7 @@
   },
   "homepage": "https://hyperbook.openpatch.org",
   "main": "./out/extension.js",
-  "version": "0.54.3",
+  "version": "0.54.4",
   "engines": {
     "vscode": "^1.125.0"
   },
@@ -189,7 +189,7 @@
           },
           {
             "id": "done",
-            "title": "You're all set! \ud83c\udf89",
+            "title": "You're all set! 🎉",
             "description": "Congratulations! You've learned the basics of Hyperbook. Now you can:\n- Use the preview to see your changes\n- Explore more snippets and elements\n- Deploy your Hyperbook online\n[Open Documentation](command:hyperbook.openDocumentation)",
             "media": {
               "markdown": "assets/walkthrough/done.md"
