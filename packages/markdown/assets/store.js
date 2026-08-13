@@ -124,6 +124,13 @@ hyperbook.store = (function () {
     try {
       await db.transaction("rw", tables, async () => {
         for (const table of tables) {
+          // Not every table keys on "id": onlineide and sqlideScripts use
+          // scriptId and sqlideDatabases uses databaseId. Writing the new id
+          // to the wrong field would put the row back where it already was,
+          // and the delete below would then destroy it.
+          const primaryKey = table.schema.primKey.name;
+          if (!primaryKey) continue;
+
           for (const [newId, oldId] of entries) {
             const legacyRow = await table.get(oldId);
             if (legacyRow === undefined) continue;
@@ -131,7 +138,7 @@ hyperbook.store = (function () {
             // has used this directive since the upgrade.
             if ((await table.get(newId)) !== undefined) continue;
 
-            await table.put({ ...legacyRow, id: newId });
+            await table.put({ ...legacyRow, [primaryKey]: newId });
             await table.delete(oldId);
           }
         }
