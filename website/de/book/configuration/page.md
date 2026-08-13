@@ -46,5 +46,6 @@ Hier sind die Eigenschaften, die im Frontmatter gesetzt werden können:
 | toc         | Zeige ein Inhaltsverzeichnis. Diese ist standardmäßig aktiviert für Seiten und deaktiviert für Begriffe im Glossar.                            |
 | layout      | Wähle das Seitenlayout. Optionen: `default` (Standardlayout mit Seitenleiste), `wide` (Inhalt in voller Breite mit Navigation im Drawer-Modus) oder `standalone` (nur Inhalt, versteckt alle Navigation - ideal für iframe-Einbettung). Das standalone Layout kann auch über URL-Parameter aktiviert werden: `?standalone=true` |
 | qrcode | Zeigt ein Icon, um einen QR-Code zur Seite anzuzeigen |
+| protect | Schützt die ganze Seite mit einem Passwort. Entweder ein Name aus deiner [Passwortliste](/configuration/passwords) oder ein Objekt mit `password` und `description`. Siehe [Geschützer Bereich](/elements/protect) |
 | styles            | Hier können Links zu eigenen CSS-Styles gesetzt werden. |
 | scripts            | Hier können Links zu eigenen JavaScript-Dateien gesetzt werden. |

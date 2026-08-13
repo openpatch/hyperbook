@@ -22,6 +22,7 @@ To summarize, here are the properties you can set in the frontmatter:
 | virtual    | Everything will appear on the same level as the parent. Be aware that the index property does not work across folders. (deprecated, use `navigation: virtual` instead) |
 | expanded   | Defines whether the section is expanded on page load. (deprecated, use `navigation: expanded` instead)                 |
 | navigation | Controls how the section appears in navigation. Options: `default` (collapsible section), `hidden` (hides from navigation), `virtual` (items appear at parent level), `page` (renders as a regular page link without showing children), `expanded` (section is expanded by default) |
+| protect | Password-protects the section. Every page and subsection inside it inherits this, unless it sets its own `protect`. See [passwords](/configuration/passwords) |
 
 If the `index.md` file only contains a front matter and is otherwise
 empty, it will appear in the navigation as a non-clickable item.

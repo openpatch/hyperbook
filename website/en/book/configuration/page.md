@@ -39,3 +39,4 @@ Here are the properties you can set in the frontmatter:
 | styles            | Here you can add Links to custom CSS files. |
 | scripts            | Here you can add links to custom JavaScript files. |
 | qrcode | Shows an icon, which opens a qr code to this page. |
+| protect | Password-protects the whole page. Either a key from your [password registry](/configuration/passwords), or an object with `password` and `description`. See [protect](/elements/protect) |
