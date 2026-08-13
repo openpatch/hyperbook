@@ -10,7 +10,7 @@ import {
   isDirective,
   registerDirective,
 } from "./remarkHelper";
-import hash from "./objectHash";
+import { resolveDirectiveId } from "./directiveId";
 import { readFile } from "./helper";
 
 export default (ctx: HyperbookContext) => () => {
@@ -33,7 +33,7 @@ export default (ctx: HyperbookContext) => () => {
 
         const {
           height = "calc(100vh - 80px)",
-          id = hash(node),
+          id = resolveDirectiveId(file, node),
           src = "",
         } = node.attributes || {};
 

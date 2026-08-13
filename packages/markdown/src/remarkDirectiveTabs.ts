@@ -8,7 +8,7 @@ import {
   isDirective,
   registerDirective,
 } from "./remarkHelper";
-import hash from "./objectHash";
+import { resolveDirectiveId } from "./directiveId";
 import { Processor } from "unified";
 
 export default function (ctx: HyperbookContext) {
@@ -29,8 +29,11 @@ export default function (ctx: HyperbookContext) {
         expectContainerDirective(node, file, "tabs");
 
         let { id: tabsId } = node.attributes || {};
-        if (!tabsId) tabsId = hash(node);
-        const instanceId = hash(node);
+        // One derivation for both: calling the helper twice would advance the
+        // per-page occurrence counter and hand out two different ids.
+        const derivedId = resolveDirectiveId(file, node);
+        if (!tabsId) tabsId = derivedId;
+        const instanceId = derivedId;
 
         registerDirective(file, "tabs", ["client.js"], ["style.css"], ["tab"]);
 
@@ -46,7 +49,8 @@ export default function (ctx: HyperbookContext) {
         for (const child of node.children) {
           if (!isDirective(child) || child.name !== "tab") continue;
 
-          let { title = "", id: tabId = hash(child) } = child.attributes || {};
+          let { title = "", id: tabId = resolveDirectiveId(file, child) } =
+            child.attributes || {};
 
           // --- TITLE PARSING LOGIC ---
           // Parse the title string into an MDAST tree

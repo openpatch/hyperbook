@@ -8,7 +8,7 @@ import { visit } from "unist-util-visit";
 import { VFile } from "vfile";
 import { icon } from "./icons";
 import {
-  expectTextDirective,
+  expectDirective,
   isDirective,
   registerDirective,
 } from "./remarkHelper";
@@ -23,7 +23,7 @@ export default (ctx: HyperbookContext) => () => {
 
         const data = node.data || (node.data = {});
 
-        expectTextDirective(node, file, name);
+        expectDirective(node, file, name, ["text", "leaf"]);
         registerDirective(file, name, ["client.js"], ["style.css"], []);
 
         const { src = "" } = node.attributes || {};

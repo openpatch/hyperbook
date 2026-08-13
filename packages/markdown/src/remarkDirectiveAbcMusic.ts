@@ -7,7 +7,6 @@ import { visit } from "unist-util-visit";
 import { VFile } from "vfile";
 import { toString } from "mdast-util-to-string";
 import {
-  expectContainerDirective,
   registerDirective,
   requestJS,
 } from "./remarkHelper";
@@ -24,7 +23,8 @@ export default (ctx: HyperbookContext) => () => {
         node.type = "directive";
         node.lang = "";
 
-        expectContainerDirective(node, file, name);
+        // No form check: this is reached from a ```abcjs code fence, not
+        // from directive syntax, so there is no colon count to validate.
         registerDirective(
           file,
           name,

@@ -9,7 +9,7 @@ import {
   isDirective,
   registerDirective,
 } from "./remarkHelper";
-import hash from "./objectHash";
+import { resolveDirectiveId } from "./directiveId";
 import { Processor } from "unified";
 import { resolvePassword } from "./resolvePassword";
 import { i18n } from "./i18n";
@@ -36,9 +36,12 @@ export default (ctx: HyperbookContext) =>
           // A shared groupId syncs several blocks: unlocking one unlocks all,
           // and it is the key the entered password is stored under. instanceId
           // is unique per block, so two blocks sharing a groupId still get
-          // their own ciphertext.
-          const groupId = id || hash(node);
-          const instanceId = hash(node);
+          // their own ciphertext. One derivation feeds both, because calling
+          // the helper twice would advance the per-page occurrence counter and
+          // hand out two different ids.
+          const derivedId = resolveDirectiveId(file, node);
+          const groupId = id || derivedId;
+          const instanceId = derivedId;
 
           const password = resolvePassword(ctx, file, {
             password: inlinePassword as string | undefined,

@@ -12,7 +12,7 @@ import {
   registerDirective,
 } from "./remarkHelper";
 import { ElementContent } from "hast";
-import hash from "./objectHash";
+import { resolveDirectiveId } from "./directiveId";
 
 export default (ctx: HyperbookContext) => () => {
   const name = "sqlide";
@@ -24,7 +24,7 @@ export default (ctx: HyperbookContext) => () => {
         const data = node.data || (node.data = {});
         const attributes = node.attributes || {};
         let {
-          id = hash(node),
+          id = resolveDirectiveId(file, node),
           db,
           height = ctx.config.elements?.sqlide?.height || "calc(100dvh - 80px)",
         } = attributes;

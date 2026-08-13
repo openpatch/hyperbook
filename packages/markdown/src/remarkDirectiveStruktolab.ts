@@ -6,13 +6,13 @@ import { Root } from "mdast";
 import { visit } from "unist-util-visit";
 import { VFile } from "vfile";
 import {
-  expectLeafDirective,
-  isDirective,
+  expectDirective,
   isCode,
+  isDirective,
   registerDirective,
 } from "./remarkHelper";
 import { ElementContent } from "hast";
-import hash from "./objectHash";
+import { resolveDirectiveId } from "./directiveId";
 
 export default (ctx: HyperbookContext) => () => {
   const name = "struktolab";
@@ -24,7 +24,7 @@ export default (ctx: HyperbookContext) => () => {
         const data = node.data || (node.data = {});
 
         const {
-          id = hash(node),
+          id = resolveDirectiveId(file, node),
           lang = ctx.config.language,
           colorMode = "color",
           fontSize = 14,
@@ -33,8 +33,7 @@ export default (ctx: HyperbookContext) => () => {
           mode = "preview", // "preview" or "edit"
         } = node.attributes || {};
 
-        expectLeafDirective(node, file, name);
-
+        expectDirective(node, file, "struktolab", ["leaf", "container"]);
 
         registerDirective(
           file,

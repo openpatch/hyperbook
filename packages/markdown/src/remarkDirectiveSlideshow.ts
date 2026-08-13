@@ -14,7 +14,7 @@ import {
   registerDirective,
 } from "./remarkHelper";
 import { toHast } from "mdast-util-to-hast";
-import hash from "./objectHash";
+import { resolveDirectiveId } from "./directiveId";
 import { i18n } from "./i18n";
 import { title } from "process";
 
@@ -25,7 +25,7 @@ export default (_: HyperbookContext) => () => {
         if (node.name !== "slideshow") return;
 
         const data = node.data || (node.data = {});
-        const { height = "300px", id = hash(node) } = node.attributes || {};
+        const { height = "300px", id = resolveDirectiveId(file, node) } = node.attributes || {};
 
         expectContainerDirective(node, file, "slideshow");
         registerDirective(file, "slideshow", ["client.js"], ["style.css"], []);

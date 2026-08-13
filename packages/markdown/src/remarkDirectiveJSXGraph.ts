@@ -5,9 +5,14 @@ import { HyperbookContext } from "@hyperbook/types";
 import { Root } from "mdast";
 import { visit } from "unist-util-visit";
 import { VFile } from "vfile";
-import { isDirective, registerDirective, requestJS } from "./remarkHelper";
+import {
+  expectDirective,
+  isDirective,
+  registerDirective,
+  requestJS,
+} from "./remarkHelper";
 import { toText } from "./mdastUtilToText";
-import hash from "./objectHash";
+import { resolveDirectiveId } from "./directiveId";
 
 export default (ctx: HyperbookContext) => () => {
   const name = "jsxgraph";
@@ -18,7 +23,7 @@ export default (ctx: HyperbookContext) => () => {
 
         const data = node.data || (node.data = {});
         const {
-          id = hash(node),
+          id = resolveDirectiveId(file, node),
           height = 600,
           width = 800,
           boundingbox = [-5, 5, 5, -5],
@@ -30,6 +35,8 @@ export default (ctx: HyperbookContext) => () => {
           axis = true,
           grid = true,
         } = node.attributes || {};
+
+        expectDirective(node, file, "jsxgraph", ["container"]);
 
         registerDirective(
           file,

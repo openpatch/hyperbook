@@ -43,6 +43,14 @@ declare module "vfile" {
         password: string;
       }
     >;
+    /** Per-page occurrence counts, used to disambiguate identical directives. */
+    directiveIdCounts: Record<string, number>;
+    /**
+     * Maps each directive's current storage id to the id it had before ids
+     * became position-independent, so the client can migrate saved reader data
+     * once instead of losing it.
+     */
+    legacyDirectiveIds: Record<string, string>;
   }
 }
 
@@ -53,6 +61,8 @@ declare module "mdast" {
 }
 
 export { process, remark };
+export { collectLinkTargets } from "./collectLinks";
+export type { LinkTarget } from "./collectLinks";
 export { stripProtectBlocks } from "./stripProtect";
 export { collectPasswords, clearCollectedPasswords } from "./collectPasswords";
 export type {

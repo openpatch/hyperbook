@@ -6,12 +6,12 @@ import { Code, Root } from "mdast";
 import { visit } from "unist-util-visit";
 import { VFile } from "vfile";
 import {
-  expectContainerDirective,
+  expectDirective,
   isDirective,
   registerDirective,
   requestJS,
 } from "./remarkHelper";
-import hash from "./objectHash";
+import { resolveDirectiveId } from "./directiveId";
 import { i18n } from "./i18n";
 import { icon } from "./icons";
 import { Element } from "hast";
@@ -48,7 +48,7 @@ html, body {
   return (tree: Root, file: VFile) => {
     visit(tree, function (node) {
       if (isDirective(node) && node.name === name) {
-        const { height, id = hash(node) } = node.attributes || {};
+        const { height, id = resolveDirectiveId(file, node) } = node.attributes || {};
         const data = node.data || (node.data = {});
         const resolvedHeight =
           height !== undefined
@@ -57,7 +57,7 @@ html, body {
               : `${height}`
             : "calc(100dvh - 80px)";
 
-        expectContainerDirective(node, file, name);
+        expectDirective(node, file, name, ["leaf", "container"]);
         registerDirective(file, name, ["client.js"], ["style.css"], []);
         requestJS(file, ["codemirror", "codemirror.bundle.js"]);
 
