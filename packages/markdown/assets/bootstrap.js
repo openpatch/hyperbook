@@ -285,7 +285,13 @@ hyperbook.bootstrap = (function () {
 
     const expand = () => {
       for (const textarea of document.querySelectorAll("textarea")) {
-        previousHeights.set(textarea, textarea.style.height);
+        // Chromium fires both `beforeprint` and the media query change, so
+        // this runs twice per print. Without the guard the second pass would
+        // record the already-expanded height as the original, and `restore`
+        // would leave every textarea stretched on screen afterwards.
+        if (!previousHeights.has(textarea)) {
+          previousHeights.set(textarea, textarea.style.height);
+        }
         textarea.style.height = "auto";
         // scrollHeight is only meaningful once the height constraint is gone.
         textarea.style.height = `${textarea.scrollHeight}px`;
