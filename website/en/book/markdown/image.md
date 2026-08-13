@@ -34,10 +34,10 @@ You can also add a visible caption to your image like so:
 If you want to link your image you can use the normal link syntax:
 
 ```md
-[![A description](/test.jpg "A caption")](/elements/hints)
+[![A description](/test.jpg "A caption")](/elements/alert.md)
 ```
 
-[![A description](/test.jpg "A caption")](/elements/hints)
+[![A description](/test.jpg "A caption")](/elements/alert.md)
 
 :::alert{info}
 If your Hyperbook uses the [basePath](/configuration/book) property, the basePath will automatically be prepended.

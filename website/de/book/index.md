@@ -46,7 +46,6 @@ Du kannst eins der Startprojekte forken und direkt loslegen:
 
 - GitHub: https://github.com/mikebarkmin/hyperbook-github-pages/fork
 - GitLab: https://gitlab.com/mikebarkmin/hyperbook-gitlab-pages/-/forks/new
-- EduGit: https://edugit.org/mikebarkmin/hyperbook-edugit-pages/-/forks/new
 
 :::alert{warn}
 
@@ -64,7 +63,7 @@ Das Hauptziel des Schreibens eines Hyperbooks ist ein interaktives Arbeitsheft. 
 
 Zum Glück sind GitHub Pages, GitLab Pages und Vercel kostenlose Optionen, welche bereits für dich konfiguriert sind, wenn du unseren Starter benutzt hast [hyperbook-anywhere](https://github.com/openpatch/hyperbook-anywhere).
 
-Du musst die Dateien nur zu [GitHub](https://github.com), [GitLab](https://gitlab.com) oder [EduGit](edugit.org/) pushen.
+Du musst die Dateien nur zu [GitHub](https://github.com) oder [GitLab](https://gitlab.com) pushen.
 
 Wenn du die CLI Version verwendet hast, kannst du außerdem dein Hyperbook in statische HTML-Dateien umwandeln, welche du überall hochladen kannst. Dafür musst du den folgenden Befehl ausführen:
 
