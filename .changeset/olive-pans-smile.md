@@ -18,8 +18,13 @@ search-as-you-type and a `/` shortcut worth adding.
 The id a directive stores reader input under was derived from a hash that
 included the node's position in the file, so inserting a paragraph above a
 `::textinput` changed it and silently orphaned every answer already written
-into it. Ids now come from the directive's own content. Books built with an
-older version are migrated on first load, so no existing work is lost.
+into it. Ids now come from the directive's own content, and books built with an
+older version are migrated on first load.
+
+Two directives on a page that are byte-for-byte identical are the one case a
+content-derived id cannot separate; they are told apart by their order, so
+editing one of them can still move a reader's work into the other. The build
+now warns when that situation exists and asks for an explicit `id`.
 
 **Books can be printed.** There was no print stylesheet at all, and because the
 reading layout is a fixed grid whose article pane scrolls, printing a chapter

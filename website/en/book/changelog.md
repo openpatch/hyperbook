@@ -63,7 +63,7 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 
 :::tab{title="Fixed :bug:" id="fixed"}
 
-**textinput and other interactive elements**: Editing a page no longer wipes what readers have written into it. The id an element stored its data under was worked out from a hash that included where the element sat in the file, so adding a paragraph anywhere above a `::textinput` gave it a new id and every answer already written into it was silently orphaned. Ids now come from the element itself. Books built with an earlier version are migrated the first time a reader opens them, so nothing already saved is lost.
+**textinput and other interactive elements**: Editing a page no longer wipes what readers have written into it. The id an element stored its data under was worked out from a hash that included where the element sat in the file, so adding a paragraph anywhere above a `::textinput` gave it a new id and every answer already written into it was silently orphaned. Ids now come from the element itself, and books built with an earlier version are migrated the first time a reader opens them. Two elements on a page that are written exactly alike are the one case this cannot separate — they are told apart by their order — so the build now warns about them and asks you to give each an `id`.
 
 **accessibility**: A book with no `language` set was announced as Spanish by screen readers. The search field also had no placeholder and no label.
 
