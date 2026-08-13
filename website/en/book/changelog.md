@@ -14,13 +14,13 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 :::
 
 <!--
-## v0.41.0
+## vNEXT
 
 ::::tabs
 
 :::tab{title="New :rocket:" id="new"}
 
-- Allow emojis in tab titles. E.g.: `:::tab{title="Hi :smile:"}`
+
 
 :::
 
@@ -81,9 +81,9 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 
 :::tab{title="New :rocket:" id="new"}
 
-**protect**: Protected content is really protected now. It is encrypted while your book is built, with a key derived from the password, and the browser decrypts it once a reader enters that password. Neither the content nor the password is in the page any more — before, both were, and anyone could read them from the page source. Blocks can be nested: the inner one is encrypted first, so an outer password opens only the outer layer.
+**protect**: Protected content is really protected now. It is encrypted while your book is built, with a key derived from the password, and the browser decrypts it once a reader enters that password. Until now both the content and the password sat in the page, readable by anyone who viewed its source. Blocks can be nested: the inner one is encrypted first, so an outer password opens only the outer layer.
 
-**protect**: A whole page or a whole section can be protected, by putting `protect` in its frontmatter instead of wrapping the content in a block. A section passes it down to every page and subsection inside it, so pages you add to the folder later are covered without you having to remember. One password opens the whole section — readers enter it once, not on every page. Protected entries stay in the navigation and get a lock next to their name.
+**protect**: A whole page or a whole section can be protected, by putting `protect` in its frontmatter instead of wrapping the content in a block. A section passes it down to every page and subsection inside it, so pages you add to the folder later are covered automatically. One password opens the whole section — readers enter it once, not on every page. Protected entries stay in the navigation and get a lock next to their name.
 
 **passwords**: Passwords can live in a `passwords.json` next to your `hyperbook.json` and be used by name, with `use="chapter-3"` on a protect block or `protect: chapter-3` in frontmatter. You then change a password in one place, and the file can stay out of your repository: the values can come from `HYPERBOOK_PASSWORDS_FILE`, `HYPERBOOK_PASSWORDS` or `HYPERBOOK_PASSWORD_<KEY>` instead. A name with no value stops the build rather than falling back to an empty password.
 
@@ -95,15 +95,15 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 
 :::tab{title="Improved :+1:" id="improved"}
 
-**protect**: Unlocking is now an explicit step — an Unlock button, or Enter — and a wrong password says so. Deriving the key from the password takes a moment, which is what makes guessing passwords expensive, so it can no longer happen on every keystroke.
+**protect**: Unlocking is now an explicit step — an Unlock button, or Enter — and a wrong password says so.
 
 :::
 
 :::tab{title="Fixed :bug:" id="fixed"}
 
-**protect**: Protected content no longer reaches the search index. The index stores the full text of everything it covers, so until now the content of every protected block was sitting in `search.js`, readable without any password. It is also kept out of `llms.txt`, and headings inside a protected block no longer appear in the table of contents.
+**protect**: Protected content no longer reaches the search index, where it was stored as full text and readable without any password. It is also kept out of `llms.txt`, and headings inside a protected block no longer appear in the table of contents.
 
-**emoji**: Emoji shortcodes no longer fall back to the reader's own emoji font when you use the `twemoji` style. 616 of the 1913 shortcodes did, so a page mixed two different emoji styles — flags, keycaps and emoji like `:comet:`, `:asterisk:` and `:airplane:` were all affected. Every shortcode now has a Twemoji image. The names are unchanged, so nothing you have written needs to change.
+**emoji**: Emoji shortcodes no longer fall back to the reader's own emoji font when you use the `twemoji` style, which made a page mix two emoji styles. 616 of the 1913 shortcodes were affected, among them flags, keycaps and emoji like `:comet:`, `:asterisk:` and `:airplane:`. The names are unchanged, so nothing you have written needs to change.
 
 :::
 
@@ -139,7 +139,7 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 
 :::tab{title="Fixed :bug:" id="fixed"}
 
-**webide**: The preview cut off the bottom of its content. The frame claimed the full height of its box instead of the space left below the title bar, so it hung over the lower edge and the part underneath was clipped — about 40 pixels, no matter which `height` you set on the block. Scrolling did not reach it either, because the frame did not know it was too tall. A preview now ends where its box ends.
+**webide**: The preview no longer cuts off the bottom of its content. It overhung its box by about 40 pixels, whatever `height` you set on the block, and scrolling did not reach the clipped part.
 
 :::
 
@@ -165,8 +165,7 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 
 :::tab{title="New :rocket:" id="new"}
 
-**online-ide**: The IDE takes its theme from the book's dark mode toggle and follows it when a reader flips it.
-**sql-ide**: The IDE takes its theme from the book's dark mode toggle and follows it when a reader flips it.
+**online-ide**, **sql-ide**: Both editors take their theme from the book's dark mode toggle and follow it when a reader flips it.
 
 :::
 
@@ -261,7 +260,7 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 
 :::tab{title="Improved :+1:" id="improved"}
 
-**cloud**: The sync indicator tells its states apart by shape, not only by color. Every state previously drew the same person icon in a different shade, which made "unsynced" and "synced" indistinguishable for red-green color blind readers. The toolbar button now also carries the current state as its accessible name, and the status line is announced when it changes.
+**cloud**: The sync indicator tells its states apart by shape, not only by color — "unsynced" and "synced" used to be the same icon in a different shade, and so were indistinguishable for red-green color blind readers. The toolbar button now also carries the current state as its accessible name, and the status line is announced when it changes.
 
 **cloud**: States you can act on are surfaced outside the user drawer. A failed save, being offline, or a merge with another session now appear in a notice at the bottom of the page — with a retry button for a failed save, and a count of how much is still waiting while offline. Successful saves stay silent.
 
@@ -273,17 +272,15 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 
 :::tab{title="Fixed :bug:" id="fixed"}
 
-**cloud**: Loading from the cloud failed whenever the server held events but no snapshot yet. The failure was silent, so work synced up but never came back down — on a second device, after clearing browser data, or during a conflict merge — until something happened to upload a full snapshot.
+**cloud**: Work synced up but never came back down whenever the server held events but no snapshot yet — on a second device, after clearing browser data, or during a conflict merge. The failure was silent.
 
-**cloud**: A sync conflict no longer discards local work. The client fetches the server state, replays its pending changes on top of it both locally and on the server, and only then reloads.
+**cloud**: A sync conflict no longer discards local work. Pending changes are replayed on top of the server state before the page reloads.
 
-**cloud**: Changes made offline are no longer lost on reconnect. Every queued batch after the first carried an event ID recorded before the flush, so the server rejected it and the whole queue was discarded.
-
-**cloud**: Closing the tab no longer loses changes made in the last few seconds. Saves are debounced by up to two seconds, and nothing was sent when the page went away — it only warned. Pending changes are now flushed with a request that outlives the page.
+**cloud**: Changes made offline are no longer lost on reconnect, and closing the tab no longer loses the last few seconds of work. Saves are debounced by up to two seconds, and were previously not sent when the page went away.
 
 **cloud**: Two hyperbooks served from the same domain no longer share one sync counter, which put both into a permanent conflict loop.
 
-**cloud**: The server keys rows by each table's own primary key. Tables not keyed by `id` — bookmarks, online IDE scripts, SQL IDE databases — were rewritten with a bogus `id` field, and updates and deletes against them silently missed.
+**cloud**: Bookmarks, online IDE scripts and SQL IDE databases sync correctly. They are not keyed by `id`, and updates and deletes against them silently missed.
 
 **cloud**: Replaying the same events twice no longer duplicates rows, and updates to nested fields (such as a saved zoom level) are no longer dropped.
 
@@ -355,7 +352,7 @@ The output panel reads like a terminal too: the prompt, the answer that was type
 
 **turtle**: `turtle.numinput()` and `turtle.textinput()` use the same field, and follow CPython in asking again when the answer is not a number or falls outside `minval`/`maxval`.
 
-**navigation**: A section that links to its own page is now easy to tell apart from one that only expands. Sections with an empty `index.md` are set in italics, and the title of a section that has its own page underlines on hover to show that it is a link. Subsections are judged on their own content, not on their parent's. The highlight for the section you are currently on works again — the stylesheet was still looking for `active` on the `<summary>` element, which moved to the surrounding `<details>` when sections became collapsible.
+**navigation**: A section that links to its own page is now easy to tell apart from one that only expands. Sections with an empty `index.md` are set in italics, and the title of a section that has its own page underlines on hover to show that it is a link. Subsections are judged on their own content, not on their parent's. The highlight for the section you are currently on works again.
 
 **dev**: `hyperbook dev` now knows which files each page pulls in, so saving a file rebuilds exactly the pages that used it. Editing a script referenced by a directive's `src=` attribute used to reload the browser without rebuilding the page, which brought back the old content; a file under `book/` did nothing at all. Snippets and templates now rebuild only the pages that include them rather than the whole book. Renaming a page also refreshes the navigation everywhere instead of only on the page you edited, and the search index no longer goes stale between full builds.
 
@@ -397,7 +394,7 @@ Directive icons are now drawn as SVG throughout — the download icons in **down
 
 :::tab{title="New :rocket:" id="new"}
 
-**links*: Links now support extensions:
+**links**: Links now support extensions:
 
 • `[Hallo](./hallo.md)` → resolves to /hallo
 • `[Hallo](./hallo)` → resolves to /hallo
@@ -1502,6 +1499,8 @@ Add shareable URL builder with sections filter
 
 :::
 
+::::
+
 ## v0.70.0
 
 ::::tabs
@@ -1516,6 +1515,8 @@ next: ./next-page.md
 ```
 
 :::
+
+::::
 
 ## v0.69.0
 
@@ -1532,6 +1533,8 @@ next:
 
 :::
 
+::::
+
 ## v0.68.2
 
 ::::tabs
@@ -1541,6 +1544,8 @@ next:
 - Fixed images have doubled base paths.
 
 :::
+
+::::
 
 ## v0.68.1
 
@@ -2356,19 +2361,6 @@ Styling Improvements:
 - The code of the editor for the elements P5, Pyide, ABC-Music can now be copied, download or resetted.
 - Add i18n support. Currently, only `en` and `de` are supported. You need to set the `language` in the configuration file. [Learn more](/configuration/book) 
     - If you want to contribute a new language, please create a pull-request and add a new locale in `packages/markdown/locales`.
-
-:::
-
-::::
-
-## v0.46.1
-
-::::tabs
-
-:::tab{title="Fixed :bug:" id="fixed"}
-
-- Resolved an issue where interactive elements failed to initialize correctly after being revealed within the protect element.
-- Fixed an issue where collapsibles with the same ID were not synchronized.
 
 :::
 
