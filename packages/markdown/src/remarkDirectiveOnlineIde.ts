@@ -12,7 +12,7 @@ import {
   registerDirective,
 } from "./remarkHelper";
 import { ElementContent } from "hast";
-import hash from "./objectHash";
+import { resolveDirectiveId } from "./directiveId";
 
 export default (ctx: HyperbookContext) => () => {
   const name = "onlineide";
@@ -32,7 +32,7 @@ export default (ctx: HyperbookContext) => () => {
           bottomPanel = true,
           errorList = true,
           speed = 1000,
-          id = hash(node),
+          id = resolveDirectiveId(file, node),
         } = attributes;
 
         expectContainerDirective(node, file, name);

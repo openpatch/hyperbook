@@ -5,9 +5,13 @@ import { HyperbookContext } from "@hyperbook/types";
 import { Root } from "mdast";
 import { visit } from "unist-util-visit";
 import { VFile } from "vfile";
-import { isDirective, registerDirective } from "./remarkHelper";
+import {
+  expectDirective,
+  isDirective,
+  registerDirective,
+} from "./remarkHelper";
 import { toText } from "./mdastUtilToText";
-import hash from "./objectHash";
+import { resolveDirectiveId } from "./directiveId";
 
 export default (ctx: HyperbookContext) => () => {
   const name = "geogebra";
@@ -19,13 +23,15 @@ export default (ctx: HyperbookContext) => () => {
         const data = node.data || (node.data = {});
         const {
           src = "",
-          id = hash(node),
+          id = resolveDirectiveId(file, node),
           height = 600,
           width = 800,
           showFullscreenButton = true,
           showResetIcon = true,
           ...props
         } = node.attributes || {};
+
+        expectDirective(node, file, "geogebra", ["leaf", "container"]);
 
         registerDirective(
           file,

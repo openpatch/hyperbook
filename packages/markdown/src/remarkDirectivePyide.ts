@@ -6,13 +6,13 @@ import { Code, Root } from "mdast";
 import { visit } from "unist-util-visit";
 import { VFile } from "vfile";
 import {
-  expectContainerDirective,
+  expectDirective,
   isDirective,
   registerDirective,
   requestJS,
 } from "./remarkHelper";
 import { toText } from "./mdastUtilToText";
-import hash from "./objectHash";
+import { resolveDirectiveId } from "./directiveId";
 import { ElementContent } from "hast";
 import { i18n } from "./i18n";
 import { icon } from "./icons";
@@ -48,14 +48,14 @@ export default (ctx: HyperbookContext) => () => {
         const data = node.data || (node.data = {});
         const {
           src = "",
-          id = hash(node),
+          id = resolveDirectiveId(file, node),
           packages,
           height,
         } = node.attributes || {};
         const hasCanvas = "canvas" in (node.attributes || {});
         const packageList = parsePackagesAttribute(packages);
 
-        expectContainerDirective(node, file, name);
+        expectDirective(node, file, name, ["leaf", "container"]);
         registerDirective(
           file,
           name,

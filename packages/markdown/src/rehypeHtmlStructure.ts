@@ -15,57 +15,50 @@ function parseFont(font: string): [string, string] {
   return [parts[0], "100%"];
 }
 
+/**
+ * Emits the URLs the search client needs, rather than the scripts themselves.
+ *
+ * The lunr index for a large book runs to several megabytes, so loading it on
+ * every page view — for the majority of readers who never open search — is by
+ * far the biggest thing on the page. `ui.js` fetches these on the first search
+ * interaction instead.
+ */
 const makeSearchScripts = (ctx: HyperbookContext): ElementContent[] => {
-  const elements: ElementContent[] = [];
-  if (ctx.config.search) {
-    elements.push({
-      type: "element",
-      tagName: "script",
-      properties: {
-        src: ctx.makeUrl(["lunr.min.js"], "assets"),
-        defer: true,
-      },
-      children: [],
-    });
-
-    if (ctx.config.language && ctx.config.language !== "en") {
-      elements.push({
-        type: "element",
-        tagName: "script",
-        properties: {
-          src: ctx.makeUrl(
-            ["lunr-languages", "lunr.stemmer.support.min.js"],
-            "assets",
-          ),
-          defer: true,
-        },
-        children: [],
-      });
-      elements.push({
-        type: "element",
-        tagName: "script",
-        properties: {
-          src: ctx.makeUrl(
-            ["lunr-languages", `lunr.${ctx.config.language}.min.js`],
-            "assets",
-          ),
-          defer: true,
-        },
-        children: [],
-      });
-    }
-    elements.push({
-      type: "element",
-      tagName: "script",
-      properties: {
-        src: ctx.makeUrl(["search.js"], "assets"),
-        defer: true,
-      },
-      children: [],
-    });
+  if (!ctx.config.search) {
+    return [];
   }
 
-  return elements;
+  const languages: string[] = [];
+  if (ctx.config.language && ctx.config.language !== "en") {
+    languages.push(
+      ctx.makeUrl(["lunr-languages", "lunr.stemmer.support.min.js"], "assets"),
+      ctx.makeUrl(
+        ["lunr-languages", `lunr.${ctx.config.language}.min.js`],
+        "assets",
+      ),
+    );
+  }
+
+  return [
+    {
+      type: "element",
+      tagName: "script",
+      properties: {
+        type: "application/json",
+        id: "hyperbook-search-config",
+      },
+      children: [
+        {
+          type: "text",
+          value: JSON.stringify({
+            lunr: ctx.makeUrl(["lunr.min.js"], "assets"),
+            index: ctx.makeUrl(["search.js"], "assets"),
+            languages,
+          }),
+        },
+      ],
+    },
+  ];
 };
 
 const makeRootCssElement = ({
@@ -186,6 +179,7 @@ export default (ctx: HyperbookContext) => () => {
     const directives = file.data.directives || {};
     const js = file.data.js || [];
     const css = file.data.css || [];
+    const legacyDirectiveIds = file.data.legacyDirectiveIds || {};
     const originalChildren = tree.children as ElementContent[];
 
     tree.children = [
@@ -197,7 +191,7 @@ export default (ctx: HyperbookContext) => () => {
         type: "element",
         tagName: "html",
         properties: {
-          lang: config.language || "es",
+          lang: config.language || "en",
           class: "no-js",
         },
         children: [
@@ -424,6 +418,27 @@ window.hyperbook.emoji = { style: "twemoji", base: "${makeUrl(["emoji"], "assets
                 },
                 children: [],
               },
+              // Emitted before store.js so the migration map is in the DOM by
+              // the time the store wraps its tables. Omitted entirely when
+              // every directive on the page kept its previous id.
+              ...(Object.keys(legacyDirectiveIds).length > 0
+                ? [
+                    {
+                      type: "element" as const,
+                      tagName: "script",
+                      properties: {
+                        type: "application/json",
+                        id: "hyperbook-legacy-ids",
+                      },
+                      children: [
+                        {
+                          type: "text" as const,
+                          value: JSON.stringify(legacyDirectiveIds),
+                        },
+                      ],
+                    },
+                  ]
+                : []),
               {
                 type: "element",
                 tagName: "script",
@@ -523,6 +538,16 @@ window.Prism.manual = true;`,
                 properties: {
                   rel: ["stylesheet"],
                   href: makeUrl(["content.css"], "assets"),
+                },
+                children: [],
+              },
+              {
+                type: "element",
+                tagName: "link",
+                properties: {
+                  rel: ["stylesheet"],
+                  media: "print",
+                  href: makeUrl(["print.css"], "assets"),
                 },
                 children: [],
               },

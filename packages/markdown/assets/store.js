@@ -82,6 +82,75 @@ hyperbook.store = (function () {
         }),
     );
 
+  /**
+   * Adopts data saved under a directive's previous id.
+   *
+   * Directive ids used to be derived from a hash that included the node's
+   * position in the file, so they changed whenever anything above them was
+   * edited. They are content-derived now, which means a reader opening a book
+   * rebuilt with the new scheme would otherwise find their saved work gone.
+   *
+   * The page carries a `newId -> oldId` map for the directives whose id
+   * changed. This renames the matching rows once, so directive clients need no
+   * knowledge of it and keep reading by the current id.
+   *
+   * Started at load rather than on DOMContentLoaded so that its transaction is
+   * created before any directive client's read. IndexedDB runs transactions
+   * with overlapping scope in creation order, so the rename lands first.
+   *
+   * @returns {Promise<void>} Resolves once any rename has been applied.
+   */
+  const migrateLegacyIds = async () => {
+    const el = document.getElementById("hyperbook-legacy-ids");
+    if (!el) return;
+
+    /** @type {Record<string, string>} */
+    let mapping;
+    try {
+      mapping = JSON.parse(el.textContent);
+    } catch {
+      return;
+    }
+
+    const entries = Object.entries(mapping);
+    if (entries.length === 0) return;
+
+    // Tables keyed by a directive id. `bookmarks` is keyed by path and
+    // `currentState` by a fixed row id, so neither can carry one.
+    const tables = db.tables.filter(
+      (t) => t.name !== "bookmarks" && t.name !== "currentState",
+    );
+
+    try {
+      await db.transaction("rw", tables, async () => {
+        for (const table of tables) {
+          // Not every table keys on "id": onlineide and sqlideScripts use
+          // scriptId and sqlideDatabases uses databaseId. Writing the new id
+          // to the wrong field would put the row back where it already was,
+          // and the delete below would then destroy it.
+          const primaryKey = table.schema.primKey.name;
+          if (!primaryKey) continue;
+
+          for (const [newId, oldId] of entries) {
+            const legacyRow = await table.get(oldId);
+            if (legacyRow === undefined) continue;
+            // Anything already stored under the current id wins: the reader
+            // has used this directive since the upgrade.
+            if ((await table.get(newId)) !== undefined) continue;
+
+            await table.put({ ...legacyRow, [primaryKey]: newId });
+            await table.delete(oldId);
+          }
+        }
+      });
+    } catch (e) {
+      // Losing the migration is recoverable; blocking the page is not.
+      console.warn("Could not migrate stored data to the new ids:", e);
+    }
+  };
+
+  const legacyMigration = migrateLegacyIds();
+
   /** @returns {Promise<void>} */
   const init = async () => {
     db.currentState.put({
@@ -228,6 +297,8 @@ hyperbook.store = (function () {
 
   return {
     db,
+    /** Resolves once pre-upgrade reader data has been renamed, if any. */
+    legacyMigration,
     export: hyperbookExport,
     reset: hyperbookReset,
     import: hyperbookImport,

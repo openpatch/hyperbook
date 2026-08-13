@@ -7,12 +7,11 @@ import path from "path";
 import { visit } from "unist-util-visit";
 import { VFile } from "vfile";
 import {
-  expectContainerDirective,
   registerDirective,
   requestJS,
 } from "./remarkHelper";
 import { toText } from "./mdastUtilToText";
-import hash from "./objectHash";
+import { resolveDirectiveId } from "./directiveId";
 import { i18n } from "./i18n";
 import { icon } from "./icons";
 import { readFile } from "./helper";
@@ -79,7 +78,7 @@ ${(code.scripts ? [cdnLibraryUrl, ...code.scripts] : []).map((src) => `<script t
           src = "",
           height,
           editor = false,
-          id = hash(node),
+          id = resolveDirectiveId(file, node),
         } = node.properties || {};
         const resolvedHeight =
           height !== undefined
@@ -90,7 +89,9 @@ ${(code.scripts ? [cdnLibraryUrl, ...code.scripts] : []).map((src) => `<script t
 
         let bEditor = editor === "true";
 
-        expectContainerDirective(node, file, name);
+        // No form check: by this rehype stage the node is a hast element,
+        // so the leaf/container distinction has already been erased.
+        // p5 accepts both anyway (`::p5{src=...}` and an inline body).
         registerDirective(file, name, ["client.js"], ["style.css"]);
         if (bEditor) {
           requestJS(file, ["codemirror", "codemirror.bundle.js"]);

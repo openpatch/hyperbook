@@ -1,7 +1,7 @@
 ---
 name: Snippets
 lang: de
-id: snippets
+permaid: snippets
 ---
 
 # Snippets

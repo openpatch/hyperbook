@@ -11,7 +11,7 @@ import {
   registerDirective,
 } from "./remarkHelper";
 import { ElementContent } from "hast";
-import hash from "./objectHash";
+import { resolveDirectiveId } from "./directiveId";
 import { i18n } from "./i18n";
 
 export default (ctx: HyperbookContext) => () => {
@@ -38,7 +38,7 @@ export default (ctx: HyperbookContext) => () => {
           ["style.css"],
           [],
         );
-        const id = hash(node);
+        const id = resolveDirectiveId(file, node);
 
         node.attributes = {};
         data.hName = "div";

@@ -21,10 +21,16 @@ export default (ctx: HyperbookContext) => () => {
         (node.type === "code" && node.lang === "mermaid")
       ) {
         const data = node.data || (node.data = {});
+
+        // Check the form before the retype below: once node.type is
+        // "directive" there is no leaf/container distinction left to inspect.
+        // A ```mermaid fence has no colon count, so it is exempt.
+        if (isDirective(node)) {
+          expectContainerDirective(node, file, name);
+        }
+
         node.type = "directive";
         node.lang = "";
-
-        expectContainerDirective(node, file, name);
         registerDirective(
           file,
           name,

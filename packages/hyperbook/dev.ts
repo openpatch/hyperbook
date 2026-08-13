@@ -10,6 +10,30 @@ import { OutgoingHttpHeaders } from "http2";
 import chalk from "chalk";
 import prompts from "prompts";
 import net from "net";
+import { reportError } from "./helpers/report-error";
+
+/**
+ * Renders a build failure as the plain text shown in the browser overlay.
+ * Mirrors what `reportError` prints to the terminal, minus the colour codes.
+ */
+function formatErrorForBrowser(e: unknown): string {
+  const message = e as {
+    reason?: string;
+    file?: string;
+    line?: number | null;
+    column?: number | null;
+  };
+
+  if (message && typeof message.reason === "string") {
+    const where = [message.file, message.line, message.column]
+      .filter((part) => part !== undefined && part !== null)
+      .join(":");
+    return where ? `${where}\n${message.reason}` : message.reason;
+  }
+
+  if (e instanceof Error) return e.message;
+  return String(e);
+}
 
 async function isPortAvailable(port: number): Promise<boolean> {
   return new Promise((resolve) => {
@@ -92,6 +116,45 @@ export async function runDev({ port = 8080 }: { port: number }): Promise<void> {
       const responseBody = `
 const socket = new WebSocket("ws://localhost:${port}");
 
+// Build errors used to appear only in the terminal, so the browser silently
+// kept serving the last good page. Surface them over the content instead.
+function __hbShowError(message) {
+  var overlay = document.getElementById("__hb_error");
+  if (!overlay) {
+    overlay = document.createElement("div");
+    overlay.id = "__hb_error";
+    overlay.style.cssText = "position:fixed;inset:0;z-index:100000;"
+      + "background:rgba(20,20,20,0.94);color:#f7f7f7;padding:2rem;"
+      + "font:14px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;"
+      + "overflow:auto;white-space:pre-wrap;word-break:break-word;";
+    document.body.appendChild(overlay);
+  }
+  var heading = document.createElement("div");
+  heading.textContent = "Build failed";
+  heading.style.cssText = "color:#ff6b6b;font-weight:bold;font-size:1.1rem;margin-bottom:1rem;";
+  var body = document.createElement("div");
+  body.textContent = message;
+  var hint = document.createElement("div");
+  hint.textContent = "This overlay clears on the next successful build.";
+  hint.style.cssText = "margin-top:1.5rem;opacity:0.6;";
+  overlay.replaceChildren(heading, body, hint);
+}
+
+function __hbHideError() {
+  var overlay = document.getElementById("__hb_error");
+  if (overlay) overlay.remove();
+}
+
+function __hbStopSpinner() {
+  var btn = document.getElementById("__hb_reload_btn");
+  if (btn) {
+    btn.style.animation = "none";
+    btn.disabled = false;
+    delete btn.dataset.spinning;
+    btn.style.opacity = "0.6";
+  }
+}
+
 // Report current page to server
 socket.addEventListener("open", () => {
   socket.send(JSON.stringify({ type: "page", href: window.location.pathname }));
@@ -111,6 +174,7 @@ socket.addEventListener("message", (event) => {
   }
 
   if (msg.type === "rebuilding") {
+    __hbHideError();
     var btn = document.getElementById("__hb_reload_btn");
     if (btn) {
       btn.style.opacity = "1";
@@ -118,6 +182,11 @@ socket.addEventListener("message", (event) => {
       btn.disabled = true;
       btn.dataset.spinning = "1";
     }
+  }
+
+  if (msg.type === "rebuild-error") {
+    __hbStopSpinner();
+    __hbShowError(msg.message);
   }
 
   if (msg.type === "rebuild-complete") {
@@ -327,11 +396,16 @@ window.onload = () => {
         console.log(`${chalk.yellow("[Reloading]")}: Website`);
         sendReload(result.changedPages);
       } catch (e) {
-        if (e instanceof Error) {
-          console.error(`${chalk.red("[Error]")}: ${e.message}.`);
-        } else {
-          console.error(`${chalk.red("[Error]")}: ${e}.`);
-        }
+        // reportError keeps the file:line:column a VFileMessage carries, which
+        // the old `e.message`-only path threw away.
+        reportError(e);
+        // Without this the browser keeps showing the last good page while the
+        // rebuild button spins forever, since neither `reload` nor
+        // `rebuild-complete` is sent on this path.
+        broadcast({
+          type: "rebuild-error",
+          message: formatErrorForBrowser(e),
+        });
       }
       rebuilding = false;
     }

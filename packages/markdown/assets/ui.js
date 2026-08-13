@@ -121,24 +121,149 @@ hyperbook.ui = (function () {
   }
 
   /**
-   * Toggle the search drawer.
+   * Resolves once lunr, the stemmers and the index module are all in memory.
+   * Memoized: the index is parsed once per page, not once per query.
+   * @type {Promise<{index: any, documents: Object}> | null}
+   */
+  let searchReady = null;
+
+  /**
+   * Load a classic (non-module) script and resolve when it has run.
+   * @param {string} src
+   * @returns {Promise<void>}
+   */
+  function loadScript(src) {
+    return new Promise((resolve, reject) => {
+      const script = document.createElement("script");
+      script.src = src;
+      script.onload = () => resolve();
+      script.onerror = () => reject(new Error(`Failed to load ${src}`));
+      document.head.appendChild(script);
+    });
+  }
+
+  /**
+   * Fetch the search payload on demand. The index is several megabytes for a
+   * large book, so it is deliberately kept off the initial page load.
+   * @returns {Promise<{index: any, documents: Object}>}
+   */
+  function loadSearch() {
+    if (searchReady) return searchReady;
+
+    const configEl = document.getElementById("hyperbook-search-config");
+    if (!configEl) {
+      searchReady = Promise.reject(new Error("Search is not enabled"));
+      return searchReady;
+    }
+    const config = JSON.parse(configEl.textContent);
+
+    searchReady = (async () => {
+      await loadScript(config.lunr);
+      // Stemmer support must run before the language plugin that uses it.
+      for (const src of config.languages || []) {
+        await loadScript(src);
+      }
+      const mod = await import(config.index);
+      return {
+        index: window.lunr.Index.load(mod.LUNR_INDEX),
+        documents: mod.SEARCH_DOCUMENTS,
+      };
+    })();
+
+    return searchReady;
+  }
+
+  /**
+   * Toggle the search drawer, starting the index download on first open.
    */
   function searchToggle() {
     const searchDrawerEl = document.getElementById("search-drawer");
     searchDrawerEl.open = !searchDrawerEl.open;
+    if (searchDrawerEl.open) {
+      loadSearch().catch(() => {});
+      const searchInputEl = document.querySelector("#search-input");
+      if (searchInputEl) searchInputEl.focus();
+    }
   }
 
   /**
    * Perform a search and display the results.
+   * @returns {Promise<void>}
    */
-  function search() {
+  async function search() {
     const resultsEl = document.getElementById("search-results");
-    resultsEl.innerHTML = "";
     const searchInputEl = document.querySelector("#search-input");
     const query = searchInputEl.value;
-    const idx = window.lunr.Index.load(LUNR_INDEX);
-    const documents = SEARCH_DOCUMENTS;
-    const results = idx.search(query);
+
+    if (!query.trim()) {
+      resultsEl.innerHTML = "";
+      return;
+    }
+
+    let index;
+    let documents;
+    try {
+      // Only show a loading state if the payload is not already resident,
+      // otherwise every keystroke would flash it.
+      const pending = loadSearch();
+      let settled = false;
+      pending.then(
+        () => (settled = true),
+        () => (settled = true),
+      );
+      await Promise.resolve();
+      if (!settled) {
+        resultsEl.textContent = hyperbook.i18n.get("shell-search-loading");
+      }
+      ({ index, documents } = await pending);
+    } catch (e) {
+      console.error("Failed to load search:", e);
+      resultsEl.textContent = hyperbook.i18n.get("shell-search-failed");
+      return;
+    }
+
+    // The input may have moved on while the index was downloading.
+    if (searchInputEl.value !== query) return;
+
+    resultsEl.innerHTML = "";
+
+    // lunr exposes a query syntax (`~`, `*`, `+`, `field:term`). A partially
+    // typed expression either throws or silently matches nothing, and with
+    // search-as-you-type the reader passes through those states on the way to
+    // an ordinary word. Retry such a query with the operators stripped.
+    const LUNR_OPERATORS = /[:~^*+-]/;
+
+    /** @returns {any[]} */
+    const literalSearch = () => {
+      try {
+        return index.query((q) => {
+          for (const raw of query.split(/\s+/)) {
+            const term = raw.replace(new RegExp(LUNR_OPERATORS, "g"), "");
+            if (term) q.term(term, { usePipeline: true });
+          }
+        });
+      } catch {
+        return [];
+      }
+    };
+
+    let results;
+    try {
+      results = index.search(query);
+      if (results.length === 0 && LUNR_OPERATORS.test(query)) {
+        results = literalSearch();
+      }
+    } catch (e) {
+      results = literalSearch();
+    }
+
+    if (results.length === 0) {
+      resultsEl.textContent = hyperbook.i18n.get("shell-search-no-results", {
+        query,
+      });
+      return;
+    }
+
     for (let result of results) {
       const doc = documents[result.ref];
 
@@ -193,6 +318,7 @@ hyperbook.ui = (function () {
     navToggle,
     tocToggle,
     searchToggle,
+    loadSearch,
     search,
   };
 })();

@@ -10,7 +10,7 @@ import {
   isDirective,
   registerDirective,
 } from "./remarkHelper";
-import hash from "./objectHash";
+import { resolveDirectiveId } from "./directiveId";
 
 export default (ctx: HyperbookContext) => () => {
   const name = "h5p";
@@ -18,7 +18,7 @@ export default (ctx: HyperbookContext) => () => {
     visit(tree, function (node) {
       if (isDirective(node) && node.name === name) {
         const data = node.data || (node.data = {});
-        const { src, id = hash(node), ...props } = node.attributes || {};
+        const { src, id = resolveDirectiveId(file, node), ...props } = node.attributes || {};
 
         expectLeafDirective(node, file, name);
         registerDirective(

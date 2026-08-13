@@ -2,6 +2,6 @@
 
 exports[`remarkDirectiveTextinput > should create snapshot 1`] = `
 "
-<div class="directive-textinput" data-id="a5a1fe0002881e0355d3924ad776e6bf7bdc5755d9eb56e709ffcc078f8790b9"><textarea class="textinput" data-id="a5a1fe0002881e0355d3924ad776e6bf7bdc5755d9eb56e709ffcc078f8790b9" placeholder="Write your answer" style="height: 250px"></textarea></div>
+<div class="directive-textinput" data-id="a276a61922150efad620a9a6ad5403793b4a28f3e6d30d92b177a39c1b39b621"><textarea class="textinput" data-id="a276a61922150efad620a9a6ad5403793b4a28f3e6d30d92b177a39c1b39b621" placeholder="Write your answer" style="height: 250px"></textarea></div>
 "
 `;

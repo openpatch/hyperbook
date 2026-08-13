@@ -29,6 +29,13 @@ async function postbuild() {
   );
   await cp(markdownLocales, distLocales, { recursive: true });
 
+  // Config schemas, generated from @hyperbook/types by the VS Code extension's
+  // build and committed there. `hyperbook check` uses them to flag config keys
+  // that Hyperbook would otherwise ignore in silence.
+  const schemas = path.join(...["..", "..", "platforms", "vscode", "schemas"]);
+  const distSchemas = path.join(...["./dist", "schemas"]);
+  await cp(schemas, distSchemas, { recursive: true });
+
   const distLunrLanguages = path.join(...["./dist", "lunr-languages"]);
   const lunrLanguages = path.join(
     ...["./node_modules", "lunr-languages", "min"],

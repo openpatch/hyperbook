@@ -965,6 +965,7 @@ const makeHeaderElements = (ctx: HyperbookContext): ElementContent[] => {
         id: "search-toggle",
         onclick: "hyperbook.ui.searchToggle()",
         title: i18n.get("shell-search"),
+        "aria-label": i18n.get("shell-search"),
       },
       children: [],
     });
@@ -1003,7 +1004,9 @@ const makeHeaderElements = (ctx: HyperbookContext): ElementContent[] => {
                   tagName: "input",
                   properties: {
                     id: "search-input",
-                    placerholder: "...",
+                    type: "search",
+                    placeholder: i18n.get("shell-search-placeholder"),
+                    "aria-label": i18n.get("shell-search"),
                   },
                   children: [],
                 },

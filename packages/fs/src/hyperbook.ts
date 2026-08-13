@@ -9,14 +9,12 @@ import {
   sortNavigation,
 } from "@hyperbook/types";
 import { findUp } from "find-up";
+import { readJsonFile } from "./json";
 import { vfile } from ".";
 import { VDirectoryBook, VFile } from "./vfile";
 
 export const getJson = async (root: string): Promise<HyperbookJson> => {
-  return fs
-    .readFile(path.join(root, "hyperbook.json"))
-    .then((f) => f.toString())
-    .then(JSON.parse);
+  return readJsonFile<HyperbookJson>(path.join(root, "hyperbook.json"));
 };
 
 export const find = async (file: string): Promise<HyperbookJson> => {

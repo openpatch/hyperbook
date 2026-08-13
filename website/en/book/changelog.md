@@ -39,6 +39,42 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.106.0
+
+::::tabs
+
+:::tab{title="New :rocket:" id="new"}
+
+**check**: A new `hyperbook check` command goes over a book without building it and reports links and images that point at nothing, two pages claiming the same `permaid`, and options in `hyperbook.json` that Hyperbook does not know about. A mistyped option is otherwise ignored in silence, and a broken link only shows up when a reader clicks it. It exits with an error, so it can run in CI ahead of `hyperbook build`.
+
+**print**: Books can be printed. There was no print stylesheet before, and because the reading layout is a fixed grid whose article pane scrolls, printing a chapter gave you roughly one sheet. Now the whole chapter comes out: the navigation and buttons are dropped, collapsed sections and every tab of a tab group are opened, dark mode is not carried onto paper, and an answer a reader has typed into a `::textinput` prints in full rather than being cut off at the edge of the box.
+
+:::
+
+:::tab{title="Improved :+1:" id="improved"}
+
+**search**: Pages load a great deal faster. The search index was linked from every page whether or not the reader ever opened search — on this documentation that was 2.9 MB of the 3.1 MB of JavaScript each page pulled in. It is fetched the first time someone searches now, which leaves 284 KB. Search itself got quicker too, because the index is read once instead of on every keystroke, and it now searches as you type. Press `/` anywhere to open it.
+
+**diagnostics**: The build tells you when a directive is written with the wrong number of colons. Messages like `Unexpected "::alert" leaf directive, use three colons` were being worked out on every build and then thrown away. They now appear with the file and line while you build, in `hyperbook dev` both in the terminal and over the page in the browser, and as squiggles in the VS Code preview. `hyperbook dev` also shows build errors in the browser instead of only in the terminal, where they were easy to miss.
+
+**directives**: Directives now accept every form they actually support. `geogebra`, `struktolab`, `p5` and the code editors `pyide`, `webide`, `typst` and `openscad` take either a body or an attribute — an editor with no body is how you set a blank exercise — and `archive` and `download` work inside a sentence as well as on their own. Each of those used to insist on one form and call the other a mistake.
+
+:::
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+**textinput and other interactive elements**: Editing a page no longer wipes what readers have written into it. The id an element stored its data under was worked out from a hash that included where the element sat in the file, so adding a paragraph anywhere above a `::textinput` gave it a new id and every answer already written into it was silently orphaned. Ids now come from the element itself, and books built with an earlier version are migrated the first time a reader opens them. Two elements on a page that are written exactly alike are the one case this cannot separate — they are told apart by their order — so the build now warns about them and asks you to give each an `id`.
+
+**accessibility**: A book with no `language` set was announced as Spanish by screen readers. The search field also had no placeholder and no label.
+
+**hyperbook.json**: A syntax error in `hyperbook.json` now names the line it is on. It used to say `Missing or invalid hyperbook.json/hyperlibray.json` and leave you to find it.
+
+**dev**: `hyperbook dev -p 3000` searched from port 30001 when 3000 was already taken. The notice telling you a new version of Hyperbook is available could never appear.
+
+:::
+
+::::
+
 ## v0.105.0
 
 ::::tabs

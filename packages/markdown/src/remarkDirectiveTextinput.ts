@@ -10,7 +10,7 @@ import {
   isDirective,
   registerDirective,
 } from "./remarkHelper";
-import hash from "./objectHash";
+import { resolveDirectiveId } from "./directiveId";
 
 export default (ctx: HyperbookContext) => () => {
   const name = "textinput";
@@ -27,7 +27,7 @@ export default (ctx: HyperbookContext) => () => {
         const {
           placeholder = "",
           height = "200px",
-          id = hash(node),
+          id = resolveDirectiveId(file, node),
         } = node.attributes || {};
 
         data.hName = "div";

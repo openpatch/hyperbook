@@ -1,0 +1,222 @@
+/**
+ * Print styles.
+ *
+ * The reading layout is a fixed-position grid whose article pane is the thing
+ * that scrolls (`.main-grid { position: fixed }`, `main { overflow-y: auto }`,
+ * and `html, body { overflow: hidden }` from the inline root CSS). That means a
+ * page printed without these rules stops after the first sheet — everything
+ * below the fold is clipped rather than flowed onto the next page.
+ *
+ * These rules unwind the layout back into normal document flow, drop the
+ * interactive chrome, and open anything collapsed so the printed sheet carries
+ * the same content the reader can see on screen.
+ */
+
+@media print {
+  /* --- Always print light ----------------------------------------------- */
+
+  /* The theme follows the reader's dark-mode preference, but a dark page on
+     paper is an ink-flooded sheet with washed-out text. Pin the light palette
+     for print regardless of what is on screen. */
+  :root {
+    color-scheme: light !important;
+    --color-background: white !important;
+    --color-text: black !important;
+    --color-text-deactivated: #242428 !important;
+    --color-nav: #f5f5f5 !important;
+    --color-nav-border: #3c3c3c !important;
+    --color-author-background: #d6d6d6 !important;
+    --color-author-color: #3c3c3c !important;
+    --color-spacer: #a4a4a4 !important;
+  }
+
+  /* Syntax highlighting ships both palettes as custom properties; select the
+     light one, matching the rules in light.css. */
+  figure[data-rehype-pretty-code-figure] pre,
+  code[data-theme*=" "],
+  code[data-theme*=" "] span {
+    color: var(--shiki-light) !important;
+    background-color: var(--shiki-light-bg) !important;
+  }
+
+  /* --- Unwind the scroll container ------------------------------------- */
+
+  html,
+  body {
+    overflow: visible !important;
+    height: auto !important;
+    width: auto !important;
+    margin: 0;
+    background: white !important;
+  }
+
+  .main-grid {
+    position: static !important;
+    display: block !important;
+    height: auto !important;
+    color: black !important;
+    background: white !important;
+    /* The reading measure is a screen constraint; on paper the page box wins. */
+    --main-width: 100% !important;
+  }
+
+  main {
+    display: block !important;
+    overflow: visible !important;
+    height: auto !important;
+    padding: 0 !important;
+  }
+
+  article {
+    max-width: none !important;
+    width: auto !important;
+  }
+
+  @page {
+    margin: 2cm;
+  }
+
+  /* --- Drop the chrome -------------------------------------------------- */
+
+  header,
+  .sidebar,
+  .mobile-nav,
+  side-drawer,
+  .floating-buttons-container,
+  .jump-container,
+  #custom-links-footer,
+  #toc-toggle,
+  #search-toggle,
+  #search-drawer,
+  #qrcode-open,
+  #share-button,
+  #user-toggle,
+  #cloud-sync-notice,
+  #hyperbook-dev-reload,
+  dark-mode-toggle,
+  .bookmark,
+  .copy-button,
+  .rehype-pretty-copy,
+  .lightbox-overlay {
+    display: none !important;
+  }
+
+  /* Heading permalinks stay as text, but drop the anchor styling. */
+  a.heading {
+    text-decoration: none !important;
+    color: inherit !important;
+  }
+
+  /* --- Reveal collapsed content ---------------------------------------- */
+
+  details {
+    display: block !important;
+  }
+
+  details > * {
+    display: block !important;
+  }
+
+  details:not([open]) > *:not(summary) {
+    display: block !important;
+  }
+
+  summary {
+    list-style: none;
+    font-weight: bold;
+  }
+
+  /* Tabs are a CSS-driven radio group, so only the checked panel is visible.
+     There is no way to switch tabs on paper, so print every panel. The tab
+     strip itself goes: its labels repeat as the panel headings below. */
+  .directive-tabs > .tabpanel {
+    display: block !important;
+  }
+
+  .directive-tabs > .tabs {
+    display: none !important;
+  }
+
+  /* Slideshows likewise: print every slide rather than only the current one. */
+  .directive-slideshow .slideshow .image-container {
+    display: block !important;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  .directive-slideshow .dots-container,
+  .directive-slideshow .prev,
+  .directive-slideshow .next {
+    display: none !important;
+  }
+
+  /* --- Reader-entered content ------------------------------------------ */
+
+  /* A textarea scrolls its overflow instead of growing, so a long written
+     answer would print truncated. `initPrintExpansion` in bootstrap.js sets an
+     inline height from scrollHeight on beforeprint — deliberately no `height`
+     rule here, because an `!important` one would override it. */
+  textarea,
+  .directive-textinput textarea {
+    display: block !important;
+    min-height: 6rem;
+    overflow: visible !important;
+    resize: none;
+    border: 1px solid #999 !important;
+    background: white !important;
+    color: black !important;
+    font-family: inherit;
+    white-space: pre-wrap;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* --- Pagination ------------------------------------------------------- */
+
+  figure,
+  pre,
+  table,
+  blockquote,
+  .directive-alert {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    page-break-after: avoid;
+    break-after: avoid;
+  }
+
+  img,
+  svg,
+  canvas {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+
+  pre,
+  code {
+    white-space: pre-wrap !important;
+    word-wrap: break-word;
+  }
+
+  /* --- Links ------------------------------------------------------------ */
+
+  /* Spell out external targets, which are otherwise lost on paper. Internal
+     links are omitted: a book-relative href is meaningless off-screen. */
+  a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-size: 0.85em;
+    word-break: break-all;
+  }
+
+  a[href^="http"].heading::after,
+  a[href^="http"] img ~ ::after {
+    content: none;
+  }
+}

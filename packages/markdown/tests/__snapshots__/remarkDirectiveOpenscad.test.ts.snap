@@ -2,7 +2,7 @@
 
 exports[`remarkDirectiveOpenscad > should transform basic openscad 1`] = `
 "
-<div class="directive-openscad" data-id="2f3d1caccab3360d23eb47da1cba3a5e0f8d6adb066e9298d473e0e82351d9f7" data-binary-files="W10=" data-base-path="/" data-page-path="">
+<div class="directive-openscad" data-id="eb541cd756411e88163c5bf0e21aa54ad33d3bceb8a95721bff82640f32d1f12" data-binary-files="W10=" data-base-path="/" data-page-path="">
   <div class="left-side">
     <div class="preview-container">
       <div class="preview-header">openscad-preview</div>
@@ -51,7 +51,7 @@ exports[`remarkDirectiveOpenscad > should transform basic openscad 1`] = `
 
 exports[`remarkDirectiveOpenscad > should transform openscad with binary file directives 1`] = `
 "
-<div class="directive-openscad" data-id="8a2723a4f60788bdf17899f701948bd8910783721b2a9294ece3af9a48c697b7" data-binary-files="W3siZGVzdCI6Ii9pbnB1dC9tb2RlbC5zdGwiLCJ1cmwiOiIvcHVibGljL21vZGVscy9tb2RlbC5zdGwifV0=" data-base-path="/" data-page-path="">
+<div class="directive-openscad" data-id="139b1c3731d1e8d20ccd26c9fa372bc8247253b5e2779f36089986a0fd297f1e" data-binary-files="W3siZGVzdCI6Ii9pbnB1dC9tb2RlbC5zdGwiLCJ1cmwiOiIvcHVibGljL21vZGVscy9tb2RlbC5zdGwifV0=" data-base-path="/" data-page-path="">
   <div class="left-side">
     <div class="preview-container">
       <div class="preview-header">openscad-preview</div>

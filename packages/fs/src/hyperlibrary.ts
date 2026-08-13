@@ -2,12 +2,10 @@ import path from "path";
 import fs from "fs/promises";
 import { HyperlibraryJson } from "@hyperbook/types";
 import { findUp } from "find-up";
+import { readJsonFile } from "./json";
 
 export const getJson = async (root: string): Promise<HyperlibraryJson> => {
-  return fs
-    .readFile(path.join(root, "hyperlibrary.json"))
-    .then((f) => f.toString())
-    .then(JSON.parse);
+  return readJsonFile<HyperlibraryJson>(path.join(root, "hyperlibrary.json"));
 };
 
 export const find = async (file: string): Promise<HyperlibraryJson> => {

@@ -11,6 +11,17 @@ import {
   getPasswords,
 } from "@hyperbook/fs";
 import { VFile } from "vfile";
+import {
+  formatMessageSummary,
+  lineOffsetFor,
+  reportMessages,
+  type MessageCounts,
+} from "./helpers/report-error";
+import {
+  breakProgressLine,
+  endProgress,
+  writeProgress,
+} from "./helpers/terminal";
 import { runArchive } from "./archive";
 import { makeDir } from "./helpers/make-dir";
 import { rimraf } from "rimraf";
@@ -92,9 +103,11 @@ export async function writeSearchIndex(
     });
   });
 
+  // An ES module rather than globals, so the client can `import()` it lazily on
+  // the first search instead of every page paying for it up front.
   const js = `
-const LUNR_INDEX = ${JSON.stringify(idx)};
-const SEARCH_DOCUMENTS = ${JSON.stringify(documents)};
+export const LUNR_INDEX = ${JSON.stringify(idx)};
+export const SEARCH_DOCUMENTS = ${JSON.stringify(documents)};
 `;
 
   await fs.writeFile(path.join(rootOut, ASSETS_FOLDER, "search.js"), js);
@@ -110,6 +123,8 @@ export interface SinglePageResult {
   emojis: string[];
   /** Absolute paths whose contents were inlined into this page. */
   dependencies: string[];
+  /** Non-fatal diagnostics this page produced, already printed. */
+  messages: MessageCounts;
 }
 
 export async function buildSingleBookPage(
@@ -145,6 +160,16 @@ export async function buildSingleBookPage(
     new VFile({ path: file.path.absolute, value: file.markdown.content }),
     ctx,
   );
+  // Print anything the plugins flagged: wrong colon counts, missing referenced
+  // files, weak password blocks. These used to be collected and discarded.
+  // Positions are relative to the processed markdown, so shift them back onto
+  // the source the author edits.
+  const messages = reportMessages(result, {
+    lineOffset: lineOffsetFor(
+      await fs.readFile(file.path.absolute, "utf8").catch(() => ""),
+      file.markdown.content,
+    ),
+  });
   const searchDocuments = [...(result.data.searchDocuments || [])];
   const directives = Object.keys(result.data.directives || {});
   const emojis = [...(result.data.emojis || [])];
@@ -201,6 +226,7 @@ export async function buildSingleBookPage(
     directives,
     emojis,
     dependencies: [...dependencies],
+    messages,
   };
 }
 
@@ -254,6 +280,16 @@ export async function buildSingleGlossaryPage(
     new VFile({ path: file.path.absolute, value: file.markdown.content }),
     ctx,
   );
+  // Print anything the plugins flagged: wrong colon counts, missing referenced
+  // files, weak password blocks. These used to be collected and discarded.
+  // Positions are relative to the processed markdown, so shift them back onto
+  // the source the author edits.
+  const messages = reportMessages(result, {
+    lineOffset: lineOffsetFor(
+      await fs.readFile(file.path.absolute, "utf8").catch(() => ""),
+      file.markdown.content,
+    ),
+  });
   const searchDocuments = [...(result.data.searchDocuments || [])];
   const directives = Object.keys(result.data.directives || {});
   const emojis = [...(result.data.emojis || [])];
@@ -291,6 +327,7 @@ export async function buildSingleGlossaryPage(
     directives,
     emojis,
     dependencies: [...dependencies],
+    messages,
   };
 }
 
@@ -592,6 +629,9 @@ async function runBuild(
     rootOut = path.join(out, ".hyperbook", "out", basePath || "");
   }
   const assetsOut = path.join(rootOut, ASSETS_FOLDER);
+  // Diagnostics scroll past mid-build behind the progress counters, so tally
+  // them and repeat the total next to "Build success".
+  const totalMessages: MessageCounts = { warnings: 0, infos: 0 };
   console.log(
     `${chalk.blue(`[${prefix}]`)} Cleaning output folder ${rootOut}.`,
   );
@@ -639,20 +679,15 @@ async function runBuild(
     for (let emoji of pageResult.emojis) {
       emojis.add(emoji);
     }
+    totalMessages.warnings += pageResult.messages.warnings;
+    totalMessages.infos += pageResult.messages.infos;
     onPage?.(file.path.href || file.path.absolute, pageResult);
 
-    if (!process.env.CI) {
-      readline.clearLine(process.stdout, 0);
-      readline.cursorTo(process.stdout, 0);
-    }
-    process.stdout.write(
+    writeProgress(
       `${chalk.blue(`[${prefix}]`)} Building book: [${i++}/${bookFiles.length}]`,
     );
-    if (process.env.CI) {
-      process.stdout.write("\n");
-    }
   }
-  process.stdout.write("\n");
+  endProgress();
 
   let glossaryFiles = await vfile.listForFolder(root, "glossary");
   if (filter) {
@@ -679,20 +714,15 @@ async function runBuild(
     for (let emoji of pageResult.emojis) {
       emojis.add(emoji);
     }
+    totalMessages.warnings += pageResult.messages.warnings;
+    totalMessages.infos += pageResult.messages.infos;
     onPage?.(file.path.href || file.path.absolute, pageResult);
 
-    if (!process.env.CI) {
-      readline.clearLine(process.stdout, 0);
-      readline.cursorTo(process.stdout, 0);
-    }
-    process.stdout.write(
+    writeProgress(
       `${chalk.blue(`[${prefix}]`)} Building glossary: [${i++}/${glossaryFiles.length}]`,
     );
-    if (process.env.CI) {
-      process.stdout.write("\n");
-    }
   }
-  process.stdout.write("\n");
+  endProgress();
 
   const assetsPath = path.join(__dirname, "assets");
   await mkdir(assetsOut, {
@@ -764,18 +794,11 @@ async function runBuild(
         await rimraf(path.join(fileOut, libraryFolder));
       }
     }
-    if (!process.env.CI) {
-      readline.clearLine(process.stdout, 0);
-      readline.cursorTo(process.stdout, 0);
-    }
-    process.stdout.write(
+    writeProgress(
       `${chalk.blue(`[${prefix}]`)} Copying public files: [${i++}/${otherFiles.length}]`,
     );
-    if (process.env.CI) {
-      process.stdout.write("\n");
-    }
   }
-  process.stdout.write("\n");
+  endProgress();
 
   // Generate favicons if logo exists and no favicon.ico is present
   const faviconPath = path.join(rootOut, "favicon.ico");
@@ -866,16 +889,9 @@ async function runBuild(
   for (let directive of directives) {
     const assetsDirectivePath = path.join(assetsPath, `directive-${directive}`);
     const assetsDirectiveOut = path.join(assetsOut, `directive-${directive}`);
-    if (!process.env.CI) {
-      readline.clearLine(process.stdout, 0);
-      readline.cursorTo(process.stdout, 0);
-    }
-    process.stdout.write(
+    writeProgress(
       `${chalk.blue(`[${prefix}]`)} Copying directive assets: [${i++}/${directives.size}]`,
     );
-    if (process.env.CI) {
-      process.stdout.write("\n");
-    }
     try {
       await fs.access(assetsDirectivePath);
       await mkdir(assetsDirectiveOut, {
@@ -883,14 +899,12 @@ async function runBuild(
       });
       await cp(assetsDirectivePath, assetsDirectiveOut, { recursive: true });
     } catch (e) {
-      process.stdout.write("\n");
-      process.stdout.write(
-        `${chalk.red(`[${prefix}]`)} Failed copying directive assets: ${directive}`,
-      );
-      process.stdout.write("\n");
+      // Close the progress line so the failure is not appended to it.
+      breakProgressLine();
+      console.log(`${chalk.red(`[${prefix}]`)} Failed copying directive assets: ${directive}`);
     }
   }
-  process.stdout.write("\n");
+  endProgress();
 
   if (emojis.size > 0) {
     const emojiPath = path.join(assetsPath, "emoji");
@@ -898,30 +912,21 @@ async function runBuild(
     await mkdir(emojiOut, { recursive: true });
     i = 1;
     for (let emoji of emojis) {
-      if (!process.env.CI) {
-        readline.clearLine(process.stdout, 0);
-        readline.cursorTo(process.stdout, 0);
-      }
-      process.stdout.write(
+      writeProgress(
         `${chalk.blue(`[${prefix}]`)} Copying emojis: [${i++}/${emojis.size}]`,
       );
-      if (process.env.CI) {
-        process.stdout.write("\n");
-      }
       try {
         await cp(
           path.join(emojiPath, `${emoji}.svg`),
           path.join(emojiOut, `${emoji}.svg`),
         );
       } catch (e) {
-        process.stdout.write("\n");
-        process.stdout.write(
-          `${chalk.red(`[${prefix}]`)} Failed copying emoji: ${emoji}`,
-        );
-        process.stdout.write("\n");
+        // Close the progress line so the failure is not appended to it.
+        breakProgressLine();
+        console.log(`${chalk.red(`[${prefix}]`)} Failed copying emoji: ${emoji}`);
       }
     }
-    process.stdout.write("\n");
+    endProgress();
   }
 
   const mainAssets = await fs.readdir(assetsPath);
@@ -946,18 +951,11 @@ async function runBuild(
         },
       });
     }
-    if (!process.env.CI) {
-      readline.clearLine(process.stdout, 0);
-      readline.cursorTo(process.stdout, 0);
-    }
-    process.stdout.write(
+    writeProgress(
       `${chalk.blue(`[${prefix}]`)} Copying hyperbook assets: [${i++}/${mainAssets.length}]`,
     );
-    if (process.env.CI) {
-      process.stdout.write("\n");
-    }
   }
-  process.stdout.write("\n");
+  endProgress();
 
   await writeSearchIndex(
     hyperbookJson,
@@ -1009,5 +1007,10 @@ async function runBuild(
     );
   }
 
-  console.log(`${chalk.green(`[${prefix}]`)} Build success: ${rootOut}`);
+  const summary = formatMessageSummary(totalMessages);
+  console.log(
+    `${chalk.green(`[${prefix}]`)} Build success: ${rootOut}${
+      summary ? ` (${summary})` : ""
+    }`,
+  );
 }

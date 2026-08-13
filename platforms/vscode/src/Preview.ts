@@ -53,6 +53,14 @@ export default class Preview {
   private readonly _onDisposeEmitter = new vscode.EventEmitter<void>();
   public readonly onDispose = this._onDisposeEmitter.event;
 
+  /**
+   * Squiggles for the diagnostics the markdown plugins already produce — most
+   * usefully the wrong-number-of-colons messages from remarkHelper, which were
+   * previously computed on every render and discarded.
+   */
+  private static readonly diagnostics =
+    vscode.languages.createDiagnosticCollection("hyperbook");
+
   constructor(context: vscode.ExtensionContext) {
     this.context = context;
 
@@ -339,8 +347,78 @@ export default class Preview {
       };
       const result = await process(this._vfile.markdown.content, ctx);
 
+      this.publishDiagnostics(result);
+
       this.panel.webview.html = String(result);
     }
+  }
+
+  /**
+   * Maps the processed file's messages back onto the open document.
+   *
+   * Positions are relative to the markdown that was handed to the pipeline,
+   * which has had its frontmatter stripped and its snippets inlined. The line
+   * offset from frontmatter is recoverable; snippet expansion is not, so when
+   * the content no longer matches the source the diagnostics are dropped rather
+   * than pointed at the wrong lines.
+   */
+  private publishDiagnostics(result: { messages?: unknown[] }): void {
+    if (!this._resource || !this._vfile) return;
+
+    const uri = this._resource;
+    const messages = result.messages || [];
+    if (messages.length === 0) {
+      Preview.diagnostics.delete(uri);
+      return;
+    }
+
+    const document = vscode.workspace.textDocuments.find(
+      (d) => d.uri.toString() === uri.toString(),
+    );
+    if (!document) return;
+
+    const source = document.getText();
+    const processed = this._vfile.markdown.content;
+
+    // The processed content must appear verbatim at the end of the source for
+    // the offset to be a simple line shift.
+    if (!source.endsWith(processed)) {
+      Preview.diagnostics.delete(uri);
+      return;
+    }
+    const lineOffset = source.slice(0, source.length - processed.length).split("\n")
+      .length - 1;
+
+    const diagnostics: vscode.Diagnostic[] = [];
+    for (const raw of messages) {
+      const message = raw as {
+        reason?: string;
+        fatal?: boolean | null;
+        line?: number | null;
+        column?: number | null;
+      };
+      if (!message.reason || !message.line) continue;
+
+      const line = message.line - 1 + lineOffset;
+      const column = Math.max((message.column || 1) - 1, 0);
+      const range = document.lineAt(
+        Math.min(line, document.lineCount - 1),
+      ).range;
+
+      diagnostics.push(
+        new vscode.Diagnostic(
+          new vscode.Range(range.start.translate(0, column), range.end),
+          message.reason,
+          message.fatal
+            ? vscode.DiagnosticSeverity.Error
+            : message.fatal === false
+              ? vscode.DiagnosticSeverity.Warning
+              : vscode.DiagnosticSeverity.Information,
+        ),
+      );
+    }
+
+    Preview.diagnostics.set(uri, diagnostics);
   }
 
   checkDocumentIsHyperbookFile(showWarning: boolean): boolean {

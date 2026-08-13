@@ -72,19 +72,51 @@ hyperbook.bootstrap = (function () {
   };
 
   /**
-   * Initialize search input Enter key handling.
+   * Initialize search input key handling.
    * @param {HTMLElement} root
    */
   const initSearch = (root) => {
     const searchInputEl = root.querySelector("#search-input");
-    if (searchInputEl) {
-      searchInputEl.addEventListener("keypress", (event) => {
-        if (event.key === "Enter") {
-          event.preventDefault();
-          hyperbook.ui.search();
-        }
-      });
-    }
+    if (!searchInputEl) return;
+
+    searchInputEl.addEventListener("keypress", (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        hyperbook.ui.search();
+      }
+    });
+
+    // Search-as-you-type. Only worthwhile because the index is parsed once and
+    // kept in memory; it used to be rebuilt on every query.
+    let debounce;
+    searchInputEl.addEventListener("input", () => {
+      clearTimeout(debounce);
+      debounce = setTimeout(() => hyperbook.ui.search(), 150);
+    });
+
+    // "/" focuses search from anywhere, the convention on documentation sites.
+    document.addEventListener("keydown", (event) => {
+      if (event.key !== "/" || event.ctrlKey || event.metaKey || event.altKey) {
+        return;
+      }
+      const active = document.activeElement;
+      const tag = active?.tagName;
+      if (
+        tag === "INPUT" ||
+        tag === "TEXTAREA" ||
+        tag === "SELECT" ||
+        active?.isContentEditable
+      ) {
+        return;
+      }
+      event.preventDefault();
+      const searchDrawerEl = document.getElementById("search-drawer");
+      if (searchDrawerEl && !searchDrawerEl.open) {
+        hyperbook.ui.searchToggle();
+      } else {
+        searchInputEl.focus();
+      }
+    });
   };
 
   /**
@@ -238,11 +270,58 @@ hyperbook.bootstrap = (function () {
     }
   }
 
+  /**
+   * Grow every textarea to fit its content while printing.
+   *
+   * A textarea scrolls its overflow rather than growing, and CSS `height: auto`
+   * resolves to the element's default row count, not its content. So without
+   * this a student's written answer prints truncated to the first few lines.
+   * The inline heights are restored afterwards so the screen layout is
+   * untouched.
+   */
+  const initPrintExpansion = () => {
+    /** @type {Map<HTMLTextAreaElement, string>} */
+    const previousHeights = new Map();
+
+    const expand = () => {
+      for (const textarea of document.querySelectorAll("textarea")) {
+        // Chromium fires both `beforeprint` and the media query change, so
+        // this runs twice per print. Without the guard the second pass would
+        // record the already-expanded height as the original, and `restore`
+        // would leave every textarea stretched on screen afterwards.
+        if (!previousHeights.has(textarea)) {
+          previousHeights.set(textarea, textarea.style.height);
+        }
+        textarea.style.height = "auto";
+        // scrollHeight is only meaningful once the height constraint is gone.
+        textarea.style.height = `${textarea.scrollHeight}px`;
+      }
+    };
+
+    const restore = () => {
+      for (const [textarea, height] of previousHeights) {
+        textarea.style.height = height;
+      }
+      previousHeights.clear();
+    };
+
+    window.addEventListener("beforeprint", expand);
+    window.addEventListener("afterprint", restore);
+
+    // Safari and some print-to-PDF paths fire the media query instead of the
+    // events above.
+    const printQuery = window.matchMedia?.("print");
+    printQuery?.addEventListener?.("change", (event) =>
+      event.matches ? expand() : restore(),
+    );
+  };
+
   // Initialize on DOMContentLoaded
   document.addEventListener("DOMContentLoaded", () => {
     init(document);
     checkStandaloneMode();
     filterSections();
+    initPrintExpansion();
   });
 
   // Observe for new elements added to the DOM

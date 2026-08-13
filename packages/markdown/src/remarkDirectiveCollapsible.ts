@@ -8,7 +8,7 @@ import {
   isDirective,
   registerDirective,
 } from "./remarkHelper";
-import hash from "./objectHash";
+import { resolveDirectiveId } from "./directiveId";
 import { Processor } from "unified";
 
 export default (ctx: HyperbookContext) => function (this: Processor) {
@@ -21,7 +21,7 @@ export default (ctx: HyperbookContext) => function (this: Processor) {
         const data = node.data || (node.data = {});
         // Get title from attributes
         const { title = "" } = node.attributes || {};
-        const { id = hash(node) } = data.hProperties || {};
+        const { id = resolveDirectiveId(file, node) } = data.hProperties || {};
 
         expectContainerDirective(node, file, name);
         registerDirective(file, name, [], ["style.css"], []);

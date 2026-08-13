@@ -50,7 +50,6 @@ So you can just fork one of our starters and get going:
 
 - GitHub: https://github.com/mikebarkmin/hyperbook-github-pages/fork
 - GitLab: https://gitlab.com/mikebarkmin/hyperbook-gitlab-pages/-/forks/new
-- EduGit: https://edugit.org/mikebarkmin/hyperbook-edugit-pages/-/forks/new
 
 :::alert{warn}
 
@@ -68,7 +67,7 @@ The main goal of writing a Hyperbook is to have an interactive workbook. For thi
 
 Luckily GitHub Pages, GitLab Pages and Vercel are free to use options, which are already setup for you, if you used one of our starters, like [hyperbook-anywhere](https://github.com/openpatch/hyperbook-anywhere).
 
-You just have to push your files to [GitHub](https://github.com), [GitLab](https://gitlab.com) or [EduGit](edugit.org/).
+You just have to push your files to [GitHub](https://github.com) or [GitLab](https://gitlab.com).
 
 If you use the CLI version you can also export your Hyperbook to static HTML files, which can be uploaded anywhere. For this you need to run:
 

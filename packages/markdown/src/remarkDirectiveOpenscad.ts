@@ -6,12 +6,12 @@ import { Code, Root, Text } from "mdast";
 import { visit } from "unist-util-visit";
 import { VFile } from "vfile";
 import {
-  expectContainerDirective,
+  expectDirective,
   isDirective,
   registerDirective,
   requestJS,
 } from "./remarkHelper";
-import hash from "./objectHash";
+import { resolveDirectiveId } from "./directiveId";
 import { i18n } from "./i18n";
 import { icon } from "./icons";
 import { readFile } from "./helper";
@@ -32,7 +32,7 @@ export default (ctx: HyperbookContext) => () => {
       if (isDirective(node) && node.name === name) {
         const {
           src = "",
-          id = hash(node),
+          id = resolveDirectiveId(file, node),
           height,
           library,
         } = node.attributes || {};
@@ -71,7 +71,7 @@ export default (ctx: HyperbookContext) => () => {
           }
         }
 
-        expectContainerDirective(node, file, name);
+        expectDirective(node, file, name, ["leaf", "container"]);
         registerDirective(file, name, ["client.js"], ["style.css"], []);
         requestJS(file, ["codemirror", "codemirror.bundle.js"]);
 
