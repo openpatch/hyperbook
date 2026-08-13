@@ -74,3 +74,40 @@ describe("directive ids", () => {
     expect(legacyMapOf(String(result.value))).toEqual({});
   });
 });
+
+describe("identical directives", () => {
+  /** The form-check messages are noise here; only the id warning matters. */
+  const idWarnings = async (source: string) => {
+    const file = await process(source, ctx);
+    return file.messages
+      .map((m) => String(m.reason))
+      .filter((r) => r.includes("have to share a generated id"));
+  };
+
+  it("warns when two identical directives must share a generated id", async () => {
+    // Their ids differ only by a suffix that depends on the other still
+    // colliding, so editing one can move a reader's answer into the other.
+    const warnings = await idWarnings("::textinput\n\n::textinput\n");
+    expect(warnings).toHaveLength(1);
+    // The message has to say what to do about it.
+    expect(warnings[0]).toContain('id="textinput-1"');
+  });
+
+  it("warns once per group, not once per repeat", async () => {
+    expect(
+      await idWarnings("::textinput\n\n::textinput\n\n::textinput\n"),
+    ).toHaveLength(1);
+  });
+
+  it("stays quiet when the directives differ", async () => {
+    expect(
+      await idWarnings('::textinput{placeholder="A"}\n\n::textinput{placeholder="B"}\n'),
+    ).toEqual([]);
+  });
+
+  it("stays quiet when the author pinned ids", async () => {
+    expect(
+      await idWarnings('::textinput{id="a"}\n\n::textinput{id="b"}\n'),
+    ).toEqual([]);
+  });
+});
