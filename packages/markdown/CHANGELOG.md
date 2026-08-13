@@ -1,5 +1,69 @@
 # @hyperbook/markdown
 
+## 0.76.0
+
+### Minor Changes
+
+- [`a126ba6`](https://github.com/openpatch/hyperbook/commit/a126ba63ac90a3521a741d0966d74726e9547824) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Encrypt protected content, and add page, section and registry level passwords.
+
+  `:::protect` used to embed both the content and the password in the built page,
+  so anyone could read either from the HTML source. The content is now encrypted
+  at build time with AES-256-GCM under a key derived from the password with
+  PBKDF2, and the browser decrypts it once the password is entered. Nested
+  protect blocks are encrypted innermost first, so an outer password reveals only
+  the outer layer.
+
+  Protected content also no longer leaks into the search index or `llms.txt`, and
+  headings inside a protect block stay out of the table of contents. This was a
+  live bug: `search.js` contained the full plaintext of every protected section.
+
+  Because decryption needs the Web Crypto API, which browsers only expose over
+  `https` or on `localhost`, books distributed as folders can opt out with
+  `protect.mode: "obfuscate"` in `hyperbook.json`, which restores the old
+  behaviour. Unlocking is now an explicit action — an Unlock button or Enter —
+  because deriving the key takes a moment.
+
+  New alongside it:
+
+  - `protect` in page and section frontmatter, protecting the whole page. A
+    section passes it down to everything inside it, and one password opens the
+    whole section: the unlock is keyed on whichever page or section declared the
+    `protect`, so readers do not re-enter it on every page. Protected entries are
+    marked with a lock in the navigation.
+  - A password registry in its own `passwords.json`, so passwords can be named,
+    reused via `:::protect{use="..."}`, and kept out of the repository. Values can
+    come from `HYPERBOOK_PASSWORDS_FILE`, `HYPERBOOK_PASSWORDS` or
+    `HYPERBOOK_PASSWORD_<KEY>` instead. A name with no value fails the build
+    rather than falling back to an empty password.
+  - `hyperbook passwords list|init|check` to see every password a book uses,
+    scaffold the registry, and verify in CI that nothing is missing.
+  - A `::passwordlist` directive that puts the same overview on a page.
+
+### Patch Changes
+
+- [`32fa025`](https://github.com/openpatch/hyperbook/commit/32fa025254d395dfdf63637578c3f4fe636af500) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix emoji shortcodes falling back to the reader's system font.
+
+  With `elements.emoji.style` set to `twemoji`, 616 of the 1913 shortcodes were
+  rendered by the operating system instead of as a Twemoji image, so a page mixed
+  two different emoji styles. Flags, keycaps and text-presentation emoji such as
+  `:comet:`, `:afghanistan:` and `:asterisk:` were all affected.
+
+  The cause was the shortcode map, which was built from GitHub's emoji API. That
+  API answers with image URLs like `unicode/1f1e6-1f1eb.png`, and those file names
+  drop the zero width joiner and the variation selectors — so `1f9d1-1f3a8`
+  (artist, which needs a ZWJ) and `1f1e6-1f1eb` (a flag, which must not have one)
+  are indistinguishable. The generator inserted a ZWJ between every codepoint,
+  which happened to be right for sequences and wrong for everything else, and left
+  text-default emoji without the variation selector that marks them as emoji.
+
+  The map is now built from `gemoji`, the same shortcode set, which carries the
+  actual Unicode sequences. All 1913 shortcodes are unchanged in name, so nothing
+  that worked before stops working — they now resolve to the correct characters.
+
+  Also fixes emoji typed directly into a page: Twemoji keeps the variation
+  selector in some sequences and drops it in others, so both spellings are tried
+  rather than guessing the rule. 👁️‍🗨️ was one such case.
+
 ## 0.75.3
 
 ### Patch Changes
