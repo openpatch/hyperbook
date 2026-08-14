@@ -232,6 +232,12 @@
       ":::"
     ]
   },
+  "Element Java Memory Playground": {
+    "prefix": [":jmp"],
+    "body": [
+      "::jmp{id=\"${1:$RANDOM}\" height=\"${2:600px}\" src=\"${3:memory.jmp}\"}"
+    ]
+  },
   "Element Learningmap": {
     "prefix": [":learningmap"],
     "body": [

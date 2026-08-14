@@ -675,6 +675,47 @@ Start writing your content here...
     '"',
   );
 
+  // New: Java Memory Playground file completion
+  const jmpProvider = vscode.languages.registerCompletionItemProvider(
+    DocumentSelectorMarkdown,
+    {
+      async provideCompletionItems(document, position) {
+        const linePrefix = document
+          .lineAt(position)
+          .text.slice(0, position.character);
+        const match = linePrefix.match(/:(jmp)\{[^}]*src=\"/);
+        if (!match) {
+          return undefined;
+        }
+
+        const workspaceFolder = await getHyperbookRoot(document.uri.path);
+        if (!workspaceFolder) {
+          return undefined;
+        }
+
+        // Search in both public and book folders
+        const publicFiles = await vscode.workspace.findFiles(
+          new vscode.RelativePattern(workspaceFolder, "public/**/*.jmp"),
+        );
+        const bookFiles = await vscode.workspace.findFiles(
+          new vscode.RelativePattern(workspaceFolder, "book/**/*.jmp"),
+        );
+
+        const allFiles = [...publicFiles, ...bookFiles];
+
+        return createMultiPathCompletionItems(
+          allFiles,
+          document.uri.path,
+          workspaceFolder,
+          path.join(workspaceFolder, "public"),
+          path.join(workspaceFolder, "book"),
+          true,
+        );
+      },
+    },
+    '"',
+  );
+
   // New: Excalidraw file completion
   const excalidrawProvider = vscode.languages.registerCompletionItemProvider(
     DocumentSelectorMarkdown,
@@ -835,6 +876,7 @@ Start writing your content here...
     archiveProvider,
     h5pProvider,
     learningmapProvider,
+    jmpProvider,
     excalidrawProvider,
     mediaProvider,
     downloadProvider,

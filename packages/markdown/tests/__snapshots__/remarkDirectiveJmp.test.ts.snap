@@ -1,0 +1,13 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`remarkDirectiveJmp > should transform 1`] = `
+"
+<div class="directive-jmp" id="jmp-list" style="height: 600px">
+  <java-memory-playground memory="{&#x22;klasses&#x22;:{&#x22;Node&#x22;:{&#x22;attributes&#x22;:{&#x22;value&#x22;:&#x22;int&#x22;,&#x22;next&#x22;:&#x22;Node&#x22;}}},&#x22;objects&#x22;:{&#x22;@33&#x22;:{&#x22;klass&#x22;:&#x22;Node&#x22;,&#x22;attributes&#x22;:{&#x22;value&#x22;:{&#x22;dataType&#x22;:&#x22;int&#x22;,&#x22;value&#x22;:1},&#x22;next&#x22;:{&#x22;dataType&#x22;:&#x22;Node&#x22;,&#x22;value&#x22;:&#x22;@34&#x22;}},&#x22;position&#x22;:{&#x22;x&#x22;:400,&#x22;y&#x22;:60}},&#x22;@34&#x22;:{&#x22;klass&#x22;:&#x22;Node&#x22;,&#x22;attributes&#x22;:{&#x22;value&#x22;:{&#x22;dataType&#x22;:&#x22;int&#x22;,&#x22;value&#x22;:2},&#x22;next&#x22;:{&#x22;dataType&#x22;:&#x22;Node&#x22;}},&#x22;position&#x22;:{&#x22;x&#x22;:400,&#x22;y&#x22;:220}}},&#x22;variables&#x22;:{},&#x22;methodCalls&#x22;:{&#x22;1&#x22;:{&#x22;name&#x22;:&#x22;App.main&#x22;,&#x22;index&#x22;:0,&#x22;localVariables&#x22;:{&#x22;head&#x22;:{&#x22;dataType&#x22;:&#x22;Node&#x22;,&#x22;value&#x22;:&#x22;@33&#x22;}},&#x22;position&#x22;:{&#x22;x&#x22;:0,&#x22;y&#x22;:60}}}}" language="en"></java-memory-playground>
+  <div class="buttons"><button class="reset" title="Reset" aria-label="Reset"><svg class="icon icon-reset" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+        <path d="M1 4v6h6"></path>
+        <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+      </svg></button></div>
+</div>
+"
+`;

@@ -73,6 +73,8 @@
     "webide-reset-prompt": "Are you sure you want to reset the code?",
     "webide-copy": "Copy",
     "webide-download": "Download",
+    "jmp-reset": "Reset",
+    "jmp-reset-prompt": "Are you sure you want to reset the diagram? Your changes will be lost.",
     "typst-code": "Typst",
     "typst-reset": "Reset",
     "typst-reset-prompt": "Are you sure you want to reset the code?",

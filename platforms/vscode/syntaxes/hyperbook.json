@@ -37,6 +37,9 @@
       "include": "#directive-geogebra"
     },
     {
+      "include": "#directive-jmp"
+    },
+    {
       "include": "#directive-jsxgraph"
     },
     {
@@ -1317,6 +1320,33 @@
           "include": "text.html.markdown"
         }
       ]
+    },
+    "directive-jmp": {
+      "name": "meta.directive.jmp.hyperbook",
+      "match": "(^|\\G)(:{2,})(jmp){(.*)}\\s*$",
+      "captures": {
+        "2": {
+          "name": "punctuation.definition.directive.level.hyperbook"
+        },
+        "3": {
+          "name": "entity.name.function.directive.jmp.hyperbook"
+        },
+        "4": {
+          "patterns": [
+            {
+              "match": "(src|id|height|step|language)=\"([^\"]*)\"",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.jmp.hyperbook"
+                },
+                "2": {
+                  "name": "string.quoted.double.untitled"
+                }
+              }
+            }
+          ]
+        }
+      }
     },
     "directive-learningmap": {
       "name": "meta.directive.learningmap.hyperbook",

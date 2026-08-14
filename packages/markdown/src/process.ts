@@ -68,6 +68,7 @@ import { VFile } from "vfile";
 import remarkSubSup from "./remarkSubSup";
 import remarkImageAttrs from "./remarkImageAttrs";
 import remarkDirectiveLearningmap from "./remarkDirectiveLearningmap";
+import remarkDirectiveJmp from "./remarkDirectiveJmp";
 import remarkDirectiveTextinput from "./remarkDirectiveTextinput";
 import remarkDirectiveTypst from "./remarkDirectiveTypst";
 import remarkDirectiveOpenscad from "./remarkDirectiveOpenscad";
@@ -121,6 +122,7 @@ export const remark = (ctx: HyperbookContext) => {
     remarkDirectiveJSXGraph(ctx),
     remarkDirectiveMultievent(ctx),
     remarkDirectiveLearningmap(ctx),
+    remarkDirectiveJmp(ctx),
     remarkDirectiveTextinput(ctx),
     remarkDirectiveTypst(ctx),
     remarkDirectiveOpenscad(ctx),
