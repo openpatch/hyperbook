@@ -7,6 +7,9 @@
  * page printed without these rules stops after the first sheet — everything
  * below the fold is clipped rather than flowed onto the next page.
  *
+ * Narrow screens already unwind that layout (see the last block in shell.css),
+ * but they do it behind `@media screen`, so print never inherits it.
+ *
  * These rules unwind the layout back into normal document flow, drop the
  * interactive chrome, and open anything collapsed so the printed sheet carries
  * the same content the reader can see on screen.

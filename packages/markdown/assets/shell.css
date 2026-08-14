@@ -1303,3 +1303,76 @@ img.emoji {
   display: inline-block;
   max-width: none;
 }
+
+/*
+ * Narrow screens: give scrolling back to the document.
+ *
+ * The reading layout pins the shell to the viewport (`.main-grid { position:
+ * fixed }`, plus `html, body { overflow: hidden }` from the inline root CSS)
+ * and scrolls `main` on its own, so the sidebar can stay put while the article
+ * moves. The document itself then never scrolls — and a mobile browser drives
+ * both pull-to-refresh and the collapsing address bar off the *document*
+ * scroller, so neither gesture ever fires.
+ *
+ * Below the breakpoint none of that is being paid for: the sidebar is already
+ * a drawer and the grid is a single column. So unwind the shell back into
+ * normal flow and hold the header in place with `position: sticky` instead.
+ *
+ * The rules must come after the base layout in source order — they override it
+ * on equal specificity — and the shell has to be block-level for the sticky
+ * header: a grid item sticks only within its own grid area, which for the
+ * header is exactly the row it already fills.
+ *
+ * These rules live after every other breakpoint in this file on purpose. Keep
+ * them last.
+ */
+@media screen and (max-width: 1280px) {
+  html,
+  body {
+    overflow: visible;
+    height: auto;
+    width: auto;
+  }
+
+  html {
+    /* Jumping to a heading has to clear the sticky header. */
+    scroll-padding-top: var(--header-height);
+  }
+
+  body {
+    /* Rubber-banding past the end exposes the canvas, which without this
+       paints white behind a dark page. */
+    background: var(--color-background);
+    /* The document is the scroller now, so its scrollbar is the one worth
+       showing — the article pane had one here before. */
+    scrollbar-width: auto;
+  }
+
+  body::-webkit-scrollbar {
+    display: block;
+  }
+
+  .main-grid {
+    display: block;
+    position: static;
+    min-height: 100dvh;
+  }
+
+  main {
+    overflow: visible;
+  }
+
+  header {
+    position: sticky;
+    top: 0;
+    /* The grid row used to size the header; in flow it has to size itself. */
+    height: var(--header-height);
+    box-sizing: border-box;
+  }
+
+  /* The impersonation banner is fixed to the top of the viewport, so the header
+     sticks below it rather than sliding underneath. */
+  #impersonation-banner + .main-grid header {
+    top: 36px;
+  }
+}
