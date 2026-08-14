@@ -102,6 +102,11 @@
  */
 
 /**
+ * @typedef {Object} HyperbookJmp
+ * @property {(root: HTMLElement) => void} init - Initialize Java Memory Playground elements.
+ */
+
+/**
  * @typedef {Object} HyperbookLearningmap
  * @property {(root: HTMLElement) => void} init - Initialize learning map elements.
  */
@@ -187,6 +192,7 @@
  *   excalidraw?: HyperbookExcalidraw,
  *   geogebra?: HyperbookGeogebra,
  *   h5p?: HyperbookH5p,
+ *   jmp?: HyperbookJmp,
  *   learningmap?: HyperbookLearningmap,
  *   mermaid?: HyperbookMermaid,
  *   p5?: HyperbookP5,

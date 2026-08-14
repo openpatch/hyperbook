@@ -1,0 +1,39 @@
+{
+  "klasses": {
+    "Node": {
+      "attributes": {
+        "value": "int",
+        "next": "Node"
+      }
+    }
+  },
+  "objects": {
+    "@33": {
+      "klass": "Node",
+      "attributes": {
+        "value": { "dataType": "int", "value": 1 },
+        "next": { "dataType": "Node", "value": "@34" }
+      },
+      "position": { "x": 400, "y": 60 }
+    },
+    "@34": {
+      "klass": "Node",
+      "attributes": {
+        "value": { "dataType": "int", "value": 2 },
+        "next": { "dataType": "Node" }
+      },
+      "position": { "x": 400, "y": 220 }
+    }
+  },
+  "variables": {},
+  "methodCalls": {
+    "1": {
+      "name": "App.main",
+      "index": 0,
+      "localVariables": {
+        "head": { "dataType": "Node", "value": "@33" }
+      },
+      "position": { "x": 0, "y": 60 }
+    }
+  }
+}

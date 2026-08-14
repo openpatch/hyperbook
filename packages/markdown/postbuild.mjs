@@ -267,6 +267,31 @@ async function postbuild() {
     {
       src: path.join(
         "./node_modules",
+        "@java-memory-playground",
+        "web-component",
+        "dist",
+        "index.umd.js",
+      ),
+      dst: path.join("./dist", "assets", "directive-jmp", "jmp.umd.js"),
+    },
+    {
+      src: path.join(
+        "./node_modules",
+        "@java-memory-playground",
+        "web-component",
+        "dist",
+        "index.css",
+      ),
+      dst: path.join(
+        "./dist",
+        "assets",
+        "directive-jmp",
+        "web-component-jmp.css",
+      ),
+    },
+    {
+      src: path.join(
+        "./node_modules",
         "@learningmap",
         "web-component",
         "dist",

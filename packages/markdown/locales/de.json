@@ -73,6 +73,8 @@
     "webide-reset-prompt": "Sind Sie sicher, dass Sie den Code zurücksetzen möchten?",
     "webide-copy": "Kopieren",
     "webide-download": "Herunterladen",
+    "jmp-reset": "Zurücksetzen",
+    "jmp-reset-prompt": "Sind Sie sicher, dass Sie das Diagramm zurücksetzen möchten? Ihre Änderungen gehen verloren.",
     "typst-code": "Typst",
     "typst-reset": "Zurücksetzen",
     "typst-reset-prompt": "Sind Sie sicher, dass Sie den Code zurücksetzen möchten?",

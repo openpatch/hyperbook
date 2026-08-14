@@ -39,6 +39,30 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.107.0
+
+::::tabs
+
+:::tab{title="New :rocket:" id="new"}
+
+**jmp**: A new `::jmp{src="memory.jmp"}` element embeds the [Java Memory Playground](https://jmp.openpatch.org) — a diagram of the stack and the heap that a reader can take apart and rebuild. It reads a `.jmp` file, the same JSON the playground shares in a link, and the playground's display options can be overridden per embed, so `::jmp{src="memory.jmp" hide-sidebar disable-garbage-collector}` turns the same file into a figure to look at rather than a canvas to work on. What a reader builds is kept as they work, without them having to press Save, and a button in the corner puts your diagram back.
+
+:::
+
+:::tab{title="Improved :+1:" id="improved"}
+
+
+
+:::
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+
+
+:::
+
+::::
+
 ## v0.106.0
 
 ::::tabs

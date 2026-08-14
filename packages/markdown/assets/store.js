@@ -81,6 +81,10 @@ hyperbook.store = (function () {
           }
         }),
     );
+  // The Java Memory Playground. The diagram is content, not a key.
+  db.version(8).stores({
+    jmp: `id`,
+  });
 
   /**
    * Adopts data saved under a directive's previous id.
