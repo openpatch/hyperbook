@@ -17,6 +17,15 @@ allowBuilds:
 ignoredBuiltDependencies:
   - esbuild
 
+# Our own packages. The release-age guard is there to slow down a compromised
+# upstream release reaching us; it does not apply to packages published from
+# our own repositories, and waiting a day to consume one would mean a change
+# that spans two repositories cannot be finished in one sitting.
+minimumReleaseAgeExclude:
+  - '@java-memory-playground/*'
+  - '@learningmap/*'
+  - struktolab
+
 onlyBuiltDependencies:
   - '@parcel/watcher'
   - '@vscode/vsce-sign'
