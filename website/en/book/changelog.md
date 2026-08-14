@@ -39,6 +39,18 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.107.1
+
+::::tabs
+
+:::tab{title="Improved :+1:" id="improved"}
+
+**struktolab**: Update struktolab to newest version.
+
+:::
+
+::::
+
 ## v0.107.0
 
 ::::tabs
