@@ -1,6 +1,7 @@
 ---
 "@hyperbook/markdown": patch
 "@hyperbook/cloud": patch
+hyperbook: patch
 ---
 
 Restore pull-to-refresh and the collapsing address bar on mobile
