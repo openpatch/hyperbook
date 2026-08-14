@@ -120,7 +120,7 @@
     "node-fetch": "^3.3.2",
     "p5": "^2.3.2",
     "scratchblocks": "^3.7.1",
-    "struktolab": "^0.5.0",
+    "struktolab": "^0.6.0",
     "terser": "^5.49.2",
     "three-viewport-gizmo": "^2.2.0",
     "unzipper": "^0.12.5",

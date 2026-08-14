@@ -493,8 +493,8 @@ importers:
         specifier: ^3.7.1
         version: 3.7.1
       struktolab:
-        specifier: ^0.5.0
-        version: 0.5.0
+        specifier: ^0.6.0
+        version: 0.6.0
       terser:
         specifier: ^5.49.2
         version: 5.49.2
@@ -7459,8 +7459,8 @@ packages:
   structured-source@4.0.0:
     resolution: {integrity: sha512-qGzRFNJDjFieQkl/sVOI2dUjHKRyL9dAJi2gCPGJLbJHBIkyOHxjuocpIEfbLioX+qSJpvbYdT49/YCdMznKxA==}
 
-  struktolab@0.5.0:
-    resolution: {integrity: sha512-uCQFk3szVyarQ10M08M3dfeV2NcdX395eaCrQx/4eowQwljfO3th+V4O2FanErHzQ1dVK4xTZ61zIZnF6j5UPg==}
+  struktolab@0.6.0:
+    resolution: {integrity: sha512-dSxaROJEeF8uXKSpamFQNyGfn9aMPavT9wa+e/WRCPdInqzvzxmjJJhi7RZac2MGR7sFKV+f16hJbHmbu91r2g==}
 
   style-loader@4.0.0:
     resolution: {integrity: sha512-1V4WqhhZZgjVAVJyt7TdDPZoPBPNHbekX4fWnCJL1yQukhCeZhJySUL+gL9y6sNdN95uEOS83Y55SqHcP7MzLA==}
@@ -16028,9 +16028,7 @@ snapshots:
     dependencies:
       boundary: 2.0.0
 
-  struktolab@0.5.0:
-    dependencies:
-      pako: 2.1.0
+  struktolab@0.6.0: {}
 
   style-loader@4.0.0(webpack@5.109.2):
     dependencies:
