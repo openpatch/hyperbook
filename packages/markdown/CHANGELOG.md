@@ -1,5 +1,11 @@
 # @hyperbook/markdown
 
+## 0.78.1
+
+### Patch Changes
+
+- [`befbd5e`](https://github.com/openpatch/hyperbook/commit/befbd5e6d5a0b7ecd967eea4f3773192469f6383) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - update struktolab
+
 ## 0.78.0
 
 ### Minor Changes
