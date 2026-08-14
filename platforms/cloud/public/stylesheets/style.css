@@ -344,3 +344,43 @@ nav.breadcrumb {
   .data-table th, .data-table td { padding: 8px 6px; font-size: 0.85rem; }
   .actions { flex-wrap: wrap; }
 }
+
+/*
+ * Narrow screens: give scrolling back to the document.
+ *
+ * The shell above pins itself to the viewport and scrolls `main` on its own,
+ * which leaves the document scroller motionless — and a mobile browser drives
+ * pull-to-refresh and the collapsing address bar off that scroller, so neither
+ * gesture ever fires. Unwind the grid into normal flow and keep the header in
+ * place with `position: sticky` instead. Mirrors the reading shell in
+ * packages/markdown/assets/shell.css.
+ *
+ * Must stay after the base layout in source order: these override it on equal
+ * specificity. A grid item can only stick inside its own grid area, hence the
+ * block-level shell.
+ */
+@media screen and (max-width: 1280px) {
+  html, body {
+    overflow: visible;
+    height: auto;
+    width: auto;
+  }
+
+  html { scroll-padding-top: var(--header-height); }
+
+  body { background: var(--color-background); }
+
+  .main-grid {
+    display: block;
+    position: static;
+    min-height: 100dvh;
+  }
+
+  main { overflow: visible; }
+
+  header {
+    position: sticky;
+    top: 0;
+    height: var(--header-height);
+  }
+}

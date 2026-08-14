@@ -166,12 +166,27 @@ hyperbook.store = (function () {
     window.addEventListener("mousemove", (e) => {
       db.currentState.update(1, { mouseX: e.clientX, mouseY: e.clientY });
     });
-    window.addEventListener("scroll", (e) => {
-      db.currentState.update(1, {
-        scrollX: window.scrollX,
-        scrollY: window.scrollY,
-      });
-    });
+    // On narrow screens the document is the scroller, so this fires for the
+    // whole length of every fling. Coalescing to one write per frame keeps a
+    // scroll gesture from queueing an IndexedDB write per scroll event.
+    let scrollWritePending = false;
+    window.addEventListener(
+      "scroll",
+      () => {
+        if (scrollWritePending) {
+          return;
+        }
+        scrollWritePending = true;
+        requestAnimationFrame(() => {
+          scrollWritePending = false;
+          db.currentState.update(1, {
+            scrollX: window.scrollX,
+            scrollY: window.scrollY,
+          });
+        });
+      },
+      { passive: true },
+    );
     window.addEventListener("resize", (e) => {
       db.currentState.update(1, {
         windowWidth: window.innerWidth,
