@@ -49,18 +49,6 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 
 :::
 
-:::tab{title="Improved :+1:" id="improved"}
-
-
-
-:::
-
-:::tab{title="Fixed :bug:" id="fixed"}
-
-
-
-:::
-
 ::::
 
 ## v0.106.0
