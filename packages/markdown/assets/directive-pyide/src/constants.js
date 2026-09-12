@@ -8,3 +8,9 @@ export const PYTAMARO_URI_END = "@@@PYTAMARO_DATA_URI_END@@@";
  * completions are only activated when they are actually needed. */
 export const scriptLooksLikeTurtle = (script) =>
   /\bfrom\s+turtle\s+import\b|\bimport\s+turtle\b/.test(String(script || ""));
+
+/** Whether a script imports pygame, so the canvas is only resized from
+ * `set_mode` for scripts that actually draw with SDL. Covers submodules too
+ * (`from pygame.locals import *`). */
+export const scriptLooksLikePygame = (script) =>
+  /\bfrom\s+pygame\b|\bimport\s+pygame\b/.test(String(script || ""));

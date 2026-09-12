@@ -1,10 +1,10 @@
 import { installedMicropipPackages, turtleModules } from "./state.js";
 import { appendOutputLine, appendOutputErrorLine } from "./output.js";
 import { getRuntime } from "./pyodide.js";
-import { scriptLooksLikeTurtle } from "./constants.js";
+import { scriptLooksLikeTurtle, scriptLooksLikePygame } from "./constants.js";
 import { askStdinAsync, askStdinSync, hideStdinField } from "./stdin.js";
 
-export { scriptLooksLikeTurtle };
+export { scriptLooksLikeTurtle, scriptLooksLikePygame };
 
 /**
  * Whether this runtime can suspend a synchronous Python call on a JS promise
@@ -129,6 +129,43 @@ _hyperbook_patch_turtle()
 del _hyperbook_patch_turtle
 `;
 
+/**
+ * SDL draws into the canvas element at the surface's own pixel size, but
+ * emscripten never resizes that element here, so it keeps the HTML default of
+ * 300x150 and everything outside that is silently clipped. pygame itself is
+ * unaware: `screen.get_size()` reports the requested size either way.
+ *
+ * So `set_mode` carries the size over to the element, the way `screensize`
+ * already does for the turtle. The resize happens before anything is drawn
+ * into the new surface, so clearing the backing store costs nothing.
+ */
+const PYGAME_CANVAS_SHIM = `
+def _hyperbook_patch_pygame_canvas():
+    try:
+        import pygame
+    except Exception:
+        return
+
+    original = pygame.display.set_mode
+
+    def set_mode(size=(0, 0), *args, **kwargs):
+        surface = original(size, *args, **kwargs)
+        try:
+            width, height = surface.get_size()
+            __hyperbook_resize_canvas(width, height)
+        except Exception:
+            pass
+        return surface
+
+    try:
+        pygame.display.set_mode = set_mode
+    except Exception:
+        pass
+
+_hyperbook_patch_pygame_canvas()
+del _hyperbook_patch_pygame_canvas
+`;
+
 const supportsRunSync = async (id, pyodide) => {
   if (runSyncSupport.has(id)) return runSyncSupport.get(id);
   let supported = false;
@@ -154,6 +191,22 @@ export const resetCanvas = (canvas) => {
   if (!canvas) return;
   const context = canvas.getContext("2d");
   context?.clearRect(0, 0, canvas.width, canvas.height);
+};
+
+/**
+ * Sizes the canvas element to a pygame surface. The backing store has to match
+ * the surface pixel for pixel — SDL writes raw pixels into it, so scaling it by
+ * the device pixel ratio the way the turtle does would push the frame into a
+ * corner.
+ */
+export const resizeCanvasToSurface = (canvas, width, height) => {
+  if (!canvas) return;
+  const w = Math.max(1, Math.floor(Number(width) || 0));
+  const h = Math.max(1, Math.floor(Number(height) || 0));
+  if (canvas.width !== w) canvas.width = w;
+  if (canvas.height !== h) canvas.height = h;
+  canvas.style.width = `${w}px`;
+  canvas.style.height = `${h}px`;
 };
 
 // Browser/Pyodide needs periodic yielding for top-level pygame loops.
@@ -410,6 +463,16 @@ export const executeScript = async (
             filename: "<hyperbook-stdin>",
           });
         }
+      }
+      if (canvas && scriptLooksLikePygame(executableScript)) {
+        globals.set("__hyperbook_resize_canvas", (width, height) =>
+          resizeCanvasToSurface(canvas, width, height),
+        );
+        await pyodide.runPythonAsync(PYGAME_CANVAS_SHIM, {
+          globals,
+          locals: globals,
+          filename: "<hyperbook-pygame>",
+        });
       }
       const results = await pyodide.runPythonAsync(executableScript, {
         globals,

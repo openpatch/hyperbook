@@ -95,6 +95,24 @@ async function serverState() {
   return { tables, lastEventId: state?.lastEventId ?? 0, raw: state };
 }
 
+/**
+ * Poll the server state until `predicate` holds, or give up.
+ *
+ * The unload flush is fire-and-forget by design, so nothing on the client
+ * settles when it lands. A fixed sleep raced it: node dispatches that request
+ * tens of milliseconds later than a browser would, and how much later depends
+ * on what the earlier tests left in the connection pool.
+ */
+async function waitForServerState(predicate, timeout = 2000) {
+  const deadline = Date.now() + timeout;
+  let state = await serverState();
+  while (!predicate(state) && Date.now() < deadline) {
+    await new Promise((r) => setTimeout(r, 10));
+    state = await serverState();
+  }
+  return state;
+}
+
 /** Force compaction: fold every event into a fresh snapshot. */
 async function compact() {
   const state = await db.reconstructState(1, 1);
@@ -330,9 +348,8 @@ describe("e2e: unload flush", () => {
     expect((await serverState()).lastEventId).toBe(0);
 
     a.fire("pagehide");
-    await new Promise((r) => setTimeout(r, 50));
 
-    const { tables } = await serverState();
+    const { tables } = await waitForServerState((s) => s.lastEventId > 0);
     expect(tables.bookmarks).toEqual([{ path: "/unsaved", label: "Unsaved" }]);
   });
 });

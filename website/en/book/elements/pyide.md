@@ -182,6 +182,8 @@ For infinite loops or long-running processes, interruption is only reliable when
 
 Top-level PyGame loops are wrapped automatically for browser execution, so you can write the loop directly without `asyncio.run(...)`.
 
+The drawing area takes its size from `pygame.display.set_mode`, so the canvas is as large as the surface your script asks for.
+
 ````hyperbook
 :::pyide{canvas}
 

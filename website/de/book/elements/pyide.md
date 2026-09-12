@@ -172,6 +172,8 @@ Das Stoppen einer Endlosschleife oder eines lang andauernden Prozesses ist jedoc
 
 Top-Level-PyGame-Schleifen werden fuer die Browser-Ausfuehrung automatisch verpackt, daher koennen Sie die Schleife direkt ohne `asyncio.run(...)` schreiben.
 
+Die Zeichenflaeche uebernimmt ihre Groesse aus `pygame.display.set_mode`, der Canvas ist also so gross wie die Flaeche, die Ihr Skript anfordert.
+
 ````hyperbook
 :::pyide{canvas}
 
