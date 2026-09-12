@@ -1,0 +1,60 @@
+{
+  "version": 1,
+  "meta": {
+    "id": "elements-bitflow-example",
+    "title": "Prime numbers",
+    "locale": "en",
+    "askConfidence": false,
+    "askReasoning": false
+  },
+  "nodes": [
+    {
+      "id": "start",
+      "type": "start-simple",
+      "position": { "x": 0, "y": 0 },
+      "data": {
+        "title": "Prime numbers",
+        "markdown": "One question, no time limit."
+      }
+    },
+    {
+      "id": "question",
+      "type": "task-choice",
+      "position": { "x": 0, "y": 120 },
+      "data": {
+        "instruction": "Which of these numbers are prime?",
+        "variant": "multiple",
+        "choices": [
+          { "id": "c-2", "markdown": "2", "correct": true },
+          { "id": "c-4", "markdown": "4", "correct": false },
+          { "id": "c-7", "markdown": "7", "correct": true },
+          { "id": "c-9", "markdown": "9", "correct": false }
+        ],
+        "shuffle": false,
+        "partialCredit": false,
+        "evaluation": {
+          "mode": "auto",
+          "enableRetry": true,
+          "showFeedback": true
+        },
+        "patternFeedback": []
+      }
+    },
+    {
+      "id": "end",
+      "type": "end-tries",
+      "position": { "x": 0, "y": 240 },
+      "data": {
+        "title": "Finished",
+        "markdown": "Thank you for taking part.",
+        "showBreakdown": true,
+        "showScore": true,
+        "allowReview": true
+      }
+    }
+  ],
+  "edges": [
+    { "id": "e-start-question", "source": "start", "target": "question" },
+    { "id": "e-question-end", "source": "question", "target": "end" }
+  ]
+}

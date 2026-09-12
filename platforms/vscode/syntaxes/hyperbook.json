@@ -450,7 +450,7 @@
     },
     "directive-bitflow": {
       "name": "meta.directive.bitflow.hyperbook",
-      "match": "(^|\\G)(:{2,})(task|flow){(.*)}\\s*$",
+      "match": "(^|\\G)(:{2,})(bitflow){(.*)}\\s*$",
       "captures": {
         "2": {
           "name": "punctuation.definition.directive.level.hyperbook"
@@ -479,6 +479,25 @@
                 },
                 "2": {
                   "name": "constant.numeric"
+                }
+              }
+            },
+            {
+              "match": "(id|locale)=\"([^\"]*)\"",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.bitflow.hyperbook"
+                },
+                "2": {
+                  "name": "string.quoted.double.untitled"
+                }
+              }
+            },
+            {
+              "match": "\\b(readonly)\\b",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.bitflow.hyperbook"
                 }
               }
             }

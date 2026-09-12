@@ -74,6 +74,7 @@
     "unist-util-visit-parents": "^6.0.2"
   },
   "devDependencies": {
+    "@bitflow/web-component": "^0.1.0",
     "@codemirror/commands": "^6.10.4",
     "@codemirror/lang-cpp": "^6.0.3",
     "@codemirror/lang-css": "^6.3.1",
@@ -89,7 +90,7 @@
     "@hyperbook/fs": "workspace:*",
     "@hyperbook/types": "workspace:*",
     "@hyperbook/web-component-excalidraw": "workspace:*",
-    "@java-memory-playground/web-component": "^0.3.0",
+    "@java-memory-playground/web-component": "^0.3.1",
     "@learningmap/web-component": "^0.3.8",
     "@raspberrypifoundation/python-friendly-error-messages": "^0.8.0",
     "@shikijs/types": "^4.4.3",

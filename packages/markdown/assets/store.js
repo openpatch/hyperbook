@@ -86,6 +86,12 @@ hyperbook.store = (function () {
     jmp: `id`,
   });
 
+  // A bitflow attempt. The snapshot is content, not a key — nothing queries
+  // into it, and the flow it belongs to validates it on the way back in.
+  db.version(9).stores({
+    bitflow: `id`,
+  });
+
   /**
    * Adopts data saved under a directive's previous id.
    *

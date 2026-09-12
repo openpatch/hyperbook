@@ -716,6 +716,55 @@ Start writing your content here...
     '"',
   );
 
+  // A bitflow flow is JSON, and carries either a `.bitflow` or a `.json`
+  // extension depending on what wrote it. Both are offered: inside
+  // `::bitflow{src="` there is nothing else the author could mean.
+  const bitflowProvider = vscode.languages.registerCompletionItemProvider(
+    DocumentSelectorMarkdown,
+    {
+      async provideCompletionItems(document, position) {
+        const linePrefix = document
+          .lineAt(position)
+          .text.slice(0, position.character);
+        const match = linePrefix.match(/:(bitflow)\{[^}]*src=\"/);
+        if (!match) {
+          return undefined;
+        }
+
+        const workspaceFolder = await getHyperbookRoot(document.uri.path);
+        if (!workspaceFolder) {
+          return undefined;
+        }
+
+        // Search in both public and book folders
+        const allFiles = (
+          await Promise.all(
+            ["public", "book"].flatMap((folder) =>
+              ["bitflow", "json"].map((extension) =>
+                vscode.workspace.findFiles(
+                  new vscode.RelativePattern(
+                    workspaceFolder,
+                    `${folder}/**/*.${extension}`,
+                  ),
+                ),
+              ),
+            ),
+          )
+        ).flat();
+
+        return createMultiPathCompletionItems(
+          allFiles,
+          document.uri.path,
+          workspaceFolder,
+          path.join(workspaceFolder, "public"),
+          path.join(workspaceFolder, "book"),
+          true,
+        );
+      },
+    },
+    '"',
+  );
+
   // New: Excalidraw file completion
   const excalidrawProvider = vscode.languages.registerCompletionItemProvider(
     DocumentSelectorMarkdown,
@@ -877,6 +926,7 @@ Start writing your content here...
     h5pProvider,
     learningmapProvider,
     jmpProvider,
+    bitflowProvider,
     excalidrawProvider,
     mediaProvider,
     downloadProvider,

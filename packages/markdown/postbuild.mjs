@@ -319,6 +319,24 @@ async function postbuild() {
         "web-component-learningmap.css",
       ),
     },
+    // bitflow ships ES modules, not a UMD global, so the whole dist tree is
+    // copied rather than one file: the entry imports sibling chunks by relative
+    // specifier, and the browser resolves those against the module's own URL.
+    // That split is the point — a chunk per bit type, loaded only when a flow
+    // references it, so a page with three multiple-choice questions never
+    // fetches the 2.4MB of MathLive behind the maths bit.
+    //
+    // The whole tree is copied even though only `flow.js` is ever served. The
+    // chunk names are content-hashed, so there is no reliable way to name the
+    // editor's chunks in order to leave them out, and `build.ts` only copies a
+    // directive's folder into books that actually use the directive.
+    {
+      src: path.join("./node_modules", "@bitflow", "web-component", "dist"),
+      dst: path.join("./dist", "assets", "directive-bitflow"),
+      // The published package carries its type declarations beside the bundle.
+      // They are of no use to a browser.
+      filter: (src) => !src.endsWith(".d.ts"),
+    },
     {
       src: path.join(
         "./node_modules",
@@ -360,7 +378,10 @@ async function postbuild() {
       });
       await writeFile(asset.dst, result.code);
     } else {
-      await cp(asset.src, asset.dst, { recursive: true });
+      await cp(asset.src, asset.dst, {
+        recursive: true,
+        ...(asset.filter ? { filter: asset.filter } : {}),
+      });
     }
   }
 

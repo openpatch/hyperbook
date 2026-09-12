@@ -73,6 +73,8 @@
     "webide-reset-prompt": "Sind Sie sicher, dass Sie den Code zurücksetzen möchten?",
     "webide-copy": "Kopieren",
     "webide-download": "Herunterladen",
+    "bitflow-reset": "Neu beginnen",
+    "bitflow-reset-prompt": "Sind Sie sicher, dass Sie diese Lernkontrolle neu beginnen möchten? Ihre Antworten gehen verloren.",
     "jmp-reset": "Zurücksetzen",
     "jmp-reset-prompt": "Sind Sie sicher, dass Sie das Diagramm zurücksetzen möchten? Ihre Änderungen gehen verloren.",
     "typst-code": "Typst",

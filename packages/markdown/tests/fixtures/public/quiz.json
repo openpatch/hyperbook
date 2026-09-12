@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "meta": {
+    "id": "quiz",
+    "title": "A very short quiz",
+    "locale": "en",
+    "askConfidence": false,
+    "askReasoning": false
+  },
+  "nodes": [
+    {
+      "id": "question",
+      "type": "task-yes-no",
+      "position": { "x": 0, "y": 0 },
+      "data": {
+        "question": "Is Paris the capital of France?",
+        "correctAnswer": true,
+        "evaluation": {
+          "mode": "auto",
+          "enableRetry": false,
+          "showFeedback": true
+        }
+      }
+    }
+  ],
+  "edges": []
+}

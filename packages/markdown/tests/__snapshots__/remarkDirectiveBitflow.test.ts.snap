@@ -1,0 +1,13 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`remarkDirectiveBitflow > should transform 1`] = `
+"
+<div class="directive-bitflow" id="bitflow-quiz" style="height: 600px">
+  <bitflow-flow flow="{&#x22;version&#x22;:1,&#x22;meta&#x22;:{&#x22;id&#x22;:&#x22;quiz&#x22;,&#x22;title&#x22;:&#x22;A very short quiz&#x22;,&#x22;locale&#x22;:&#x22;en&#x22;,&#x22;askConfidence&#x22;:false,&#x22;askReasoning&#x22;:false},&#x22;nodes&#x22;:[{&#x22;id&#x22;:&#x22;question&#x22;,&#x22;type&#x22;:&#x22;task-yes-no&#x22;,&#x22;position&#x22;:{&#x22;x&#x22;:0,&#x22;y&#x22;:0},&#x22;data&#x22;:{&#x22;question&#x22;:&#x22;Is Paris the capital of France?&#x22;,&#x22;correctAnswer&#x22;:true,&#x22;evaluation&#x22;:{&#x22;mode&#x22;:&#x22;auto&#x22;,&#x22;enableRetry&#x22;:false,&#x22;showFeedback&#x22;:true}}}],&#x22;edges&#x22;:[]}" locale="en"></bitflow-flow>
+  <div class="buttons"><button class="reset" title="Start over" aria-label="Start over"><svg class="icon icon-reset" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+        <path d="M1 4v6h6"></path>
+        <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+      </svg></button></div>
+</div>
+"
+`;

@@ -102,6 +102,11 @@
  */
 
 /**
+ * @typedef {Object} HyperbookBitflow
+ * @property {(root: HTMLElement) => Promise<void>} init - Initialize bitflow elements.
+ */
+
+/**
  * @typedef {Object} HyperbookJmp
  * @property {(root: HTMLElement) => void} init - Initialize Java Memory Playground elements.
  */
@@ -192,6 +197,7 @@
  *   excalidraw?: HyperbookExcalidraw,
  *   geogebra?: HyperbookGeogebra,
  *   h5p?: HyperbookH5p,
+ *   bitflow?: HyperbookBitflow,
  *   jmp?: HyperbookJmp,
  *   learningmap?: HyperbookLearningmap,
  *   mermaid?: HyperbookMermaid,

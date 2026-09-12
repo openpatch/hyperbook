@@ -83,3 +83,63 @@ code[data-theme*=" "] span {
   background-color: #6b21a880 !important;
   color: rgb(233, 213, 255) !important;
 }
+
+/* bitflow's own theme is light-only — `@bitflow/core`'s theme.css defines its
+   72 tokens once, with no `prefers-color-scheme` block. So a dark book has to
+   supply the dark half itself.
+
+   Declared on the container rather than on `:root`: bitflow injects theme.css
+   into the head at import time, which puts it after this file in the cascade,
+   and a `:root` rule here would lose the tie. A declaration on the element the
+   flow lives in is not a tie — it is the nearer declaration, so it wins the
+   inheritance outright, whatever order the stylesheets arrived in.
+
+   Deliberately partial. The surfaces, borders and text have one obvious dark
+   counterpart each. The neutral *scale* does not: `--bitflow-color-neutral-900`
+   is a border colour in the flow chrome and the fill of a blocked crossword
+   cell as well as the source of the text colour, so inverting it would fix the
+   text and break the crossword.
+
+   The semantic feedback colours cannot be skipped, though, because overriding
+   `--bitflow-color-text` above is already half a re-tint. A marked option row
+   sets only `background` and `border-color` from its pair and takes its label
+   from the general text token — so a light-only `-surface` ends up carrying
+   near-white text: #f5f5f5 on #e6f2ef is 1.05:1, an answer the reader cannot
+   read. Both halves therefore need a dark value, because each is genuinely a
+   pair: alerts and state badges paint `--bitflow-color-<name>` *on* the
+   matching `-surface` (via `--bitflow-alert-accent` / `--bitflow-state-color`),
+   so darkening the surface alone would break those the other way round.
+
+   Surfaces are the accent at 22% over the page background; accents are mixed
+   toward white until they clear 4.5:1 both on that surface and on the page.
+   The literal values are bitflow's hues, not this theme's, and are spelled out
+   rather than derived with color-mix() because a rule cannot both redefine
+   `--bitflow-color-correct` and mix from its original value. All of this
+   belongs upstream in theme.css; until bitflow ships a dark half, a dark book
+   has to carry it. */
+.directive-bitflow {
+  --bitflow-color-background: var(--color-background);
+  --bitflow-color-surface: var(--color-author-background);
+  --bitflow-color-border: var(--color-nav-border);
+  --bitflow-color-text: var(--color-text);
+  --bitflow-color-text-muted: var(--color-text-deactivated);
+  /* The generic raised surface — code, pre, drag sources, option rows. Light
+     everywhere it is used, so it is the one neutral that can be flipped without
+     taking a border or a fill with it. */
+  --bitflow-color-neutral-100: var(--color-author-background);
+
+  /* Feedback pairs. Contrast on the dark theme, accent-on-surface first,
+     body text on the same surface second:
+       correct 4.67 / 12.71   wrong 4.58 / 13.62   warning 4.65 / 12.47
+       info    4.66 / 13.46   manual 4.58 / 13.20                        */
+  --bitflow-color-correct: #57a396;
+  --bitflow-color-correct-surface: #18312d;
+  --bitflow-color-wrong: #c67a7d;
+  --bitflow-color-wrong-surface: #3b2021;
+  --bitflow-color-warning: #af9452;
+  --bitflow-color-warning-surface: #362d17;
+  --bitflow-color-info: #7496a8;
+  --bitflow-color-info-surface: #1e2a31;
+  --bitflow-color-manual: #958cb4;
+  --bitflow-color-manual-surface: #2b2836;
+}

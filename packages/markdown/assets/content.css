@@ -80,11 +80,23 @@ img.emoji {
   }
 }
 
-.hyperbook-markdown table {
+/* The book's table styling stops at the edge of an embedded bitflow flow.
+
+   bitflow renders into the light DOM, so `.hyperbook-markdown table` reaches
+   the truth tables, trace tables and result tables inside it — and at (0,1,1)
+   it outranks bitflow's own `.bitflow-truth-table` (0,1,0), turning a table
+   into `display: block; width: max-content`. Excluding the subtree hands those
+   tables back to the stylesheet that knows what they are, rather than trying to
+   restate bitflow's values here, where they would drift.
+
+   Only the table rules need this. Everywhere else bitflow's own selectors match
+   hyperbook's specificity, and because a bit injects its CSS into the head at
+   import time, it comes later in the cascade and wins the tie. */
+.hyperbook-markdown table:not(.directive-bitflow *) {
   border-color: var(--color-spacer);
 }
 
-.hyperbook-markdown table tr {
+.hyperbook-markdown table:not(.directive-bitflow *) tr {
   background-color: var(--color-nav);
   border-color: var(--color-spacer);
 }
@@ -194,7 +206,7 @@ img.emoji {
 .hyperbook-markdown blockquote,
 .hyperbook-markdown ol,
 .hyperbook-markdown ul,
-.hyperbook-markdown table,
+.hyperbook-markdown table:not(.directive-bitflow *),
 .hyperbook-markdown pre,
 .hyperbook-markdown details {
   margin-top: 0;
@@ -240,7 +252,7 @@ img.emoji {
   margin-bottom: 0;
 }
 
-.hyperbook-markdown table {
+.hyperbook-markdown table:not(.directive-bitflow *) {
   display: block;
   border-collapse: collapse;
   width: max-content;
@@ -248,23 +260,23 @@ img.emoji {
   overflow: auto;
 }
 
-.hyperbook-markdown table caption {
+.hyperbook-markdown table:not(.directive-bitflow *) caption {
   font-size: 1.5em;
   margin: 0.5em 0 0.75em;
 }
 
-.hyperbook-markdown table tr {
+.hyperbook-markdown table:not(.directive-bitflow *) tr {
   border-width: 1px;
   border-style: solid;
   padding: 0.35em;
 }
 
-.hyperbook-markdown table th,
-.hyperbook-markdown table td {
+.hyperbook-markdown table:not(.directive-bitflow *) th,
+.hyperbook-markdown table:not(.directive-bitflow *) td {
   padding: 0.625em;
 }
 
-.hyperbook-markdown table th {
+.hyperbook-markdown table:not(.directive-bitflow *) th {
   font-size: 0.85em;
   letter-spacing: 0.1em;
 }

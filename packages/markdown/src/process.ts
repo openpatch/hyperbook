@@ -76,6 +76,7 @@ import remarkDirectiveStruktolab from "./remarkDirectiveStruktolab";
 import remarkDirectiveBlockflowPlayer from "./remarkDirectiveBlockflowPlayer";
 import remarkDirectiveBlockflowEditor from "./remarkDirectiveBlockflowEditor";
 import remarkDirectiveKirimoto from "./remarkDirectiveKirimoto";
+import remarkDirectiveBitflow from "./remarkDirectiveBitflow";
 
 export const remark = (ctx: HyperbookContext) => {
   i18n.init(ctx.config.language || "en");
@@ -127,6 +128,7 @@ export const remark = (ctx: HyperbookContext) => {
     remarkDirectiveTypst(ctx),
     remarkDirectiveOpenscad(ctx),
     remarkDirectiveKirimoto(ctx),
+    remarkDirectiveBitflow(ctx),
     remarkCode(ctx),
     remarkMath,
     remarkGithubEmoji,
