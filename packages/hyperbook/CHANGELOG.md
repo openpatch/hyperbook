@@ -1,5 +1,13 @@
 # hyperbook
 
+## 0.107.2
+
+### Patch Changes
+
+- [`37194d2`](https://github.com/openpatch/hyperbook/commit/37194d2df9a766a885c8cc3f81cc27e82c0fb8ad) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Update the Java Memory Playground to 0.3.1, which confines its stylesheet to the playground. The
+  component's bundle is linked into any page carrying a `:jmp` directive, and its rules were unscoped
+  — `.sidebar` in particular, which resized the book's own navigation on every page with a diagram.
+
 ## 0.107.1
 
 ### Patch Changes
