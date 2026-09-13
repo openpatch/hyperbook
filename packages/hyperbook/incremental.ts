@@ -26,6 +26,39 @@ import {
   writeSearchIndex,
 } from "./build";
 
+/** Simple concurrency limiter — avoids adding p-limit as a dependency. */
+function pLimit(concurrency: number) {
+  let active = 0;
+  const queue: (() => void)[] = [];
+  const next = () => {
+    if (queue.length > 0) queue.shift()!();
+  };
+  return <T>(fn: () => Promise<T>): Promise<T> =>
+    new Promise<T>((resolve, reject) => {
+      const run = () => {
+        active++;
+        const release = () => {
+          active--;
+          next();
+        };
+        let running: Promise<T>;
+        try {
+          running = fn();
+        } catch (e) {
+          release();
+          reject(e);
+          return;
+        }
+        running.then(resolve, reject).finally(release);
+      };
+      if (active < concurrency) {
+        run();
+      } else {
+        queue.push(run);
+      }
+    });
+}
+
 type ChangeType =
   | "content-book"
   | "content-glossary"
@@ -67,6 +100,11 @@ export class IncrementalBuilder {
   private glossaryFileByPath: Map<string, VFileGlossary> = new Map();
   // Nav-relevant shape of the last build, to notice when every page goes stale.
   private navigationFingerprint = "";
+  // Asset copies already started. Pages rebuild concurrently, and two of them
+  // wanting the same directive would otherwise run overlapping fs.cp calls
+  // into one destination — which is not atomic, and whose failures are
+  // swallowed. Keyed by asset, holding the in-flight promise.
+  private assetCopies: Map<string, Promise<void>> = new Map();
 
   constructor(root: string, rootProject: Hyperproject) {
     this.root = root;
@@ -92,6 +130,9 @@ export class IncrementalBuilder {
   private async fullRebuild(): Promise<void> {
     this.dependents.clear();
     this.searchDocuments.clear();
+    // The full build rewrites the output tree, so nothing copied before it
+    // can be assumed to still be there.
+    this.assetCopies.clear();
     await runBuildProject(
       this.rootProject,
       this.rootProject,
@@ -301,17 +342,34 @@ export class IncrementalBuilder {
         await this.refreshCaches();
 
         const rebuilt: string[] = [];
-        for (const href of pages) {
-          const file =
-            [...this.bookFileByPath.values()].find(
-              (f) => (f.path.href || "/") === href,
-            ) ||
-            [...this.glossaryFileByPath.values()].find(
-              (f) => (f.path.href || "/glossary") === href,
-            );
-          if (!file) continue;
-          const result = await this.rebuildPage(file.path.absolute);
-          if (result) rebuilt.push(result);
+        // Index once: the per-page scan of both maps was quadratic in the
+        // number of affected pages.
+        const absoluteByHref = new Map<string, string>();
+        for (const f of this.bookFileByPath.values()) {
+          absoluteByHref.set(f.path.href || "/", f.path.absolute);
+        }
+        for (const f of this.glossaryFileByPath.values()) {
+          // Book pages win on a collision, as they did before.
+          const href = f.path.href || "/glossary";
+          if (!absoluteByHref.has(href)) {
+            absoluteByHref.set(href, f.path.absolute);
+          }
+        }
+
+        // Rebuild all affected pages concurrently with a concurrency limit
+        // to avoid overwhelming the CPU for large dependency graphs.
+        const limit = pLimit(4);
+        const results = await Promise.all(
+          pages.map((href) =>
+            limit(async () => {
+              const absolute = absoluteByHref.get(href);
+              if (!absolute) return null;
+              return this.rebuildPage(absolute);
+            }),
+          ),
+        );
+        for (const r of results) {
+          if (r) rebuilt.push(r);
         }
 
         await this.refreshSearchIndex();
@@ -379,13 +437,17 @@ export class IncrementalBuilder {
             `${chalk.yellow("[Incremental]")} Navigation changed, rebuilding all pages...`,
           );
           this.navigationFingerprint = nextFingerprint;
-          for (const absolute of this.bookFileByPath.keys()) {
-            if (absolute === absPath) continue;
-            await this.rebuildPage(absolute);
-          }
-          for (const absolute of this.glossaryFileByPath.keys()) {
-            await this.rebuildPage(absolute);
-          }
+          const navLimit = pLimit(4);
+          await Promise.all(
+            [...this.bookFileByPath.keys()]
+              .filter((absolute) => absolute !== absPath)
+              .map((absolute) => navLimit(() => this.rebuildPage(absolute))),
+          );
+          await Promise.all(
+            [...this.glossaryFileByPath.keys()].map((absolute) =>
+              navLimit(() => this.rebuildPage(absolute)),
+            ),
+          );
           await this.refreshSearchIndex();
           return { changedPages: "*" };
         }
@@ -547,6 +609,19 @@ export class IncrementalBuilder {
   }
 
   /**
+   * Runs `copy` at most once per key. The entry is registered synchronously,
+   * so concurrent callers await the same copy rather than racing it.
+   */
+  private copyOnce(key: string, copy: () => Promise<void>): Promise<void> {
+    let inFlight = this.assetCopies.get(key);
+    if (!inFlight) {
+      inFlight = copy();
+      this.assetCopies.set(key, inFlight);
+    }
+    return inFlight;
+  }
+
+  /**
    * Emojis are copied one file at a time, so a book only ships the Twemoji
    * images it actually uses.
    */
@@ -554,37 +629,47 @@ export class IncrementalBuilder {
     if (newEmojis.length === 0) return;
     const emojiPath = path.join(__dirname, "assets", "emoji");
     const emojiOut = path.join(this.assetsOut, "emoji");
-    await fs.mkdir(emojiOut, { recursive: true });
-    for (const emoji of newEmojis) {
-      try {
-        await cp(
-          path.join(emojiPath, `${emoji}.svg`),
-          path.join(emojiOut, `${emoji}.svg`),
-        );
-      } catch {
-        // Emoji has no asset
-      }
-    }
+    await Promise.all(
+      newEmojis.map((emoji) =>
+        this.copyOnce(`emoji:${emoji}`, async () => {
+          await fs.mkdir(emojiOut, { recursive: true });
+          try {
+            await cp(
+              path.join(emojiPath, `${emoji}.svg`),
+              path.join(emojiOut, `${emoji}.svg`),
+            );
+          } catch {
+            // Emoji has no asset
+          }
+        }),
+      ),
+    );
   }
 
   private async copyDirectiveAssets(newDirectives: string[]): Promise<void> {
     const assetsPath = path.join(__dirname, "assets");
-    for (const directive of newDirectives) {
-      const assetsDirectivePath = path.join(
-        assetsPath,
-        `directive-${directive}`,
-      );
-      const assetsDirectiveOut = path.join(
-        this.assetsOut,
-        `directive-${directive}`,
-      );
-      try {
-        await fs.access(assetsDirectivePath);
-        await fs.mkdir(assetsDirectiveOut, { recursive: true });
-        await cp(assetsDirectivePath, assetsDirectiveOut, { recursive: true });
-      } catch {
-        // Directive has no assets or already copied
-      }
-    }
+    await Promise.all(
+      newDirectives.map((directive) =>
+        this.copyOnce(`directive:${directive}`, async () => {
+          const assetsDirectivePath = path.join(
+            assetsPath,
+            `directive-${directive}`,
+          );
+          const assetsDirectiveOut = path.join(
+            this.assetsOut,
+            `directive-${directive}`,
+          );
+          try {
+            await fs.access(assetsDirectivePath);
+            await fs.mkdir(assetsDirectiveOut, { recursive: true });
+            await cp(assetsDirectivePath, assetsDirectiveOut, {
+              recursive: true,
+            });
+          } catch {
+            // Directive has no assets
+          }
+        }),
+      ),
+    );
   }
 }

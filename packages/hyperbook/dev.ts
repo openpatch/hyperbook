@@ -1,5 +1,6 @@
 import chokidar from "chokidar";
 import { hyperproject } from "@hyperbook/fs";
+import { Hyperproject } from "@hyperbook/types";
 import { IncrementalBuilder } from "./incremental";
 import path from "path";
 import http from "http";
@@ -114,7 +115,42 @@ export async function runDev({ port = 8080 }: { port: number }): Promise<void> {
     // Special Case: GET '/client.js'
     if (request.url === "/__hyperbook_dev.js") {
       const responseBody = `
-const socket = new WebSocket("ws://localhost:${port}");
+var __hbPort = ${port};
+var __hbSocket = null;
+var __hbReconnectDelay = 1000;
+var __hbConnected = false;
+
+// Same origin as the page, so the dev server is still reachable when the book
+// is opened from another device or through a proxy rather than on localhost.
+function __hbWsUrl() {
+  var protocol = window.location.protocol === "https:" ? "wss://" : "ws://";
+  return protocol + (window.location.host || "localhost:" + __hbPort);
+}
+
+function __hbConnect() {
+  __hbSocket = new WebSocket(__hbWsUrl());
+
+  __hbSocket.addEventListener("open", () => {
+    __hbConnected = true;
+    __hbReconnectDelay = 1000;
+    __hbSocket.send(JSON.stringify({ type: "page", href: window.location.pathname }));
+    __hbUpdateConnStatus();
+  });
+
+  __hbSocket.addEventListener("close", () => {
+    __hbConnected = false;
+    __hbUpdateConnStatus();
+    // Exponential backoff with cap at 10s
+    setTimeout(__hbConnect, __hbReconnectDelay);
+    __hbReconnectDelay = Math.min(__hbReconnectDelay * 2, 10000);
+  });
+
+  __hbSocket.addEventListener("error", () => {
+    // The close handler will trigger reconnect
+  });
+
+  __hbSocket.addEventListener("message", __hbHandleMessage);
+}
 
 // Build errors used to appear only in the terminal, so the browser silently
 // kept serving the last good page. Surface them over the content instead.
@@ -155,17 +191,153 @@ function __hbStopSpinner() {
   }
 }
 
-// Report current page to server
-socket.addEventListener("open", () => {
-  socket.send(JSON.stringify({ type: "page", href: window.location.pathname }));
-});
+function __hbUpdateConnStatus() {
+  var dot = document.getElementById("__hb_conn_dot");
+  if (dot) {
+    dot.style.background = __hbConnected ? "#4ade80" : "#f87171";
+  }
+}
 
-socket.addEventListener("message", (event) => {
+// Check whether the current page path matches one of the changed pages.
+function __hbShouldReload(changedPages) {
+  var currentPath = window.location.pathname;
+  if (changedPages === "*") return true;
+  return changedPages.some(function(p) {
+    if (p === "/" && (currentPath === "/" || currentPath === "/index.html")) {
+      return true;
+    }
+    return currentPath === p || currentPath === p + "/" || currentPath === p + ".html"
+      || currentPath === p + "/index.html" || currentPath.startsWith(p + "/");
+  });
+}
+
+// Every <script src> the page has already run. A bundle must not be executed
+// twice: customElements.define throws on a name that is already registered.
+var __hbLoadedScripts = {};
+
+function __hbIndexLoadedScripts() {
+  document.querySelectorAll("script[src]").forEach(function(script) {
+    __hbLoadedScripts[script.src] = true;
+  });
+}
+
+// Not every <script> is code. Directives carry their payloads in ones the
+// browser never executes — type="text/plain" for online-ide/sql-ide sources,
+// type="application/json" for protect blocks — and the custom element around
+// them has already upgraded and read them by the time we get here, so
+// replacing those nodes would pull the data out from under it.
+var __hbExecutableScriptTypes = [
+  "",
+  "text/javascript",
+  "application/javascript",
+  "module",
+];
+
+function __hbIsExecutableScript(script) {
+  var type = (script.getAttribute("type") || "").toLowerCase();
+  return __hbExecutableScriptTypes.indexOf(type) !== -1;
+}
+
+// Re-inject scripts that were part of the new <main> content so that
+// interactive directives (terminals, canvases, etc.) re-initialise. Scripts
+// inserted via innerHTML never run on their own.
+function __hbReexecuteScripts(container) {
+  container.querySelectorAll("script").forEach(function(oldScript) {
+    if (!__hbIsExecutableScript(oldScript)) return;
+    if (oldScript.src && __hbLoadedScripts[oldScript.src]) return;
+    var newScript = document.createElement("script");
+    if (oldScript.src) {
+      newScript.src = oldScript.src;
+      __hbLoadedScripts[newScript.src] = true;
+    } else {
+      newScript.textContent = oldScript.textContent;
+    }
+    // Copy relevant attributes
+    if (oldScript.type) newScript.type = oldScript.type;
+    if (oldScript.defer) newScript.defer = true;
+    if (oldScript.async) newScript.async = true;
+    oldScript.parentNode.replaceChild(newScript, oldScript);
+  });
+}
+
+// A directive ships its stylesheet and bundle outside <main> — in <head> or at
+// the end of <body> — and its client script initialises either on
+// DOMContentLoaded or from a MutationObserver it registers as it loads.
+// Neither can be replayed into a page that is already live: appending the
+// script after the content is in the DOM leaves the directive silently inert.
+// So a page that wants an asset this one does not have needs a real reload.
+// Directives render an element classed directive-<name>, and their client
+// scripts bind to DOMContentLoaded or to observers that only look at the nodes
+// directly inserted — not at descendants, which is all an innerHTML swap
+// produces. So a mermaid diagram swapped back in arrives as raw source that
+// nothing re-renders. Plain prose has no such contract, and is the case the
+// swap is actually for.
+function __hbHasDirectives(rootEl) {
+  var classed = rootEl.querySelectorAll("[class]");
+  for (var i = 0; i < classed.length; i++) {
+    var tokens = classed[i].classList;
+    for (var j = 0; j < tokens.length; j++) {
+      if (tokens[j].indexOf("directive-") === 0) return true;
+    }
+  }
+  return false;
+}
+
+function __hbNeedsNewAssets(doc) {
+  var selector = "link[rel~='stylesheet'][href], script[src]";
+  var have = {};
+  document.querySelectorAll(selector).forEach(function(el) {
+    have[el.href || el.src] = true;
+  });
+  return [].some.call(doc.querySelectorAll(selector), function(el) {
+    // Anything inside <main> arrives with the content swap itself.
+    if (el.closest("main")) return false;
+    var url = el.href || el.src;
+    return !!url && !have[url];
+  });
+}
+
+// Fetch the updated page and swap <main> content in-place.
+// Preserves scroll position, avoids full-page reload flash, and keeps
+// any client-side state outside <main> (e.g. the dev toolbar itself).
+function __hbSwapMain() {
+  fetch(window.location.href, { cache: "no-store" })
+    .then(function(res) { return res.text(); })
+    .then(function(html) {
+      var doc = new DOMParser().parseFromString(html, "text/html");
+      var newMain = doc.querySelector("main");
+      var oldMain = document.querySelector("main");
+      if (
+        !newMain ||
+        !oldMain ||
+        __hbNeedsNewAssets(doc) ||
+        __hbHasDirectives(newMain) ||
+        __hbHasDirectives(oldMain)
+      ) {
+        // Structure changed, the page picked up a directive whose assets this
+        // one never loaded, or either side has a directive that would not
+        // survive the swap.
+        window.location.reload();
+        return;
+      }
+      // Preserve scroll position across the swap
+      var scrollTop = oldMain.scrollTop;
+      if (doc.title) document.title = doc.title;
+      oldMain.innerHTML = newMain.innerHTML;
+      oldMain.scrollTop = scrollTop;
+      __hbReexecuteScripts(oldMain);
+    })
+    .catch(function() {
+      // Network error — full reload
+      window.location.reload();
+    });
+}
+
+function __hbHandleMessage(event) {
   let msg;
   try {
     msg = JSON.parse(event.data);
   } catch {
-    // Legacy fallback
     if (event.data === "RELOAD") {
       msg = { type: "reload", changedPages: "*" };
     } else {
@@ -190,7 +362,6 @@ socket.addEventListener("message", (event) => {
   }
 
   if (msg.type === "rebuild-complete") {
-    // Force-reload build finished — stop spinner, don't refresh
     var btn = document.getElementById("__hb_reload_btn");
     if (btn) {
       btn.style.animation = "none";
@@ -202,39 +373,38 @@ socket.addEventListener("message", (event) => {
   }
 
   if (msg.type === "reload") {
-    const currentPath = window.location.pathname;
-    const shouldReload = msg.changedPages === "*" || msg.changedPages.some(function(p) {
-      // Special case for root page
-      if (p === "/" && (currentPath === "/" || currentPath === "/index.html")) {
-        return true;
+    // The page survives a <main> swap, so nothing else would ever re-enable
+    // the button — and clients whose page is not in changedPages never even
+    // get that far.
+    __hbStopSpinner();
+    if (__hbShouldReload(msg.changedPages)) {
+      // For full structural changes, do a full page reload to pick up
+      // sidebar/navigation changes. For single-page changes, swap only
+      // <main> content to preserve state and avoid flash.
+      if (msg.changedPages === "*") {
+        window.location.reload();
+      } else {
+        __hbSwapMain();
       }
-      return currentPath === p || currentPath === p + "/" || currentPath === p + ".html"
-        || currentPath === p + "/index.html" || currentPath.startsWith(p + "/");
-    });
-
-    if (shouldReload) {
-      const main = document.querySelector("main");
-      if (main) {
-        localStorage.setItem("__hyperbook_dev_scroll", main.scrollTop);
-      }
-      window.location.reload();
     }
   }
-});
+}
 
-window.onload = () => {
-  const main = document.querySelector("main");
-  const scrollTop = localStorage.getItem("__hyperbook_dev_scroll");
-  if (main && scrollTop !== null) {
-    main.scrollTop = parseInt(scrollTop, 10);
-    localStorage.removeItem("__hyperbook_dev_scroll");
-  }
-
-  // Force full reload button
+window.addEventListener("DOMContentLoaded", function() {
+  // Inject keyframes for spinner
   var style = document.createElement("style");
   style.textContent = "@keyframes __hb_spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }";
   document.head.appendChild(style);
 
+  // Connection status dot
+  var dot = document.createElement("div");
+  dot.id = "__hb_conn_dot";
+  dot.style.cssText = "position:fixed;bottom:18px;right:62px;z-index:99999;"
+    + "width:10px;height:10px;border-radius:50%;background:#f87171;"
+    + "transition:background 0.3s;";
+  document.body.appendChild(dot);
+
+  // Force full rebuild button
   var btn = document.createElement("button");
   btn.id = "__hb_reload_btn";
   btn.type = "button";
@@ -247,18 +417,25 @@ window.onload = () => {
   btn.addEventListener("mouseenter", function() { btn.style.opacity = "1"; });
   btn.addEventListener("mouseleave", function() { if (!btn.dataset.spinning) btn.style.opacity = "0.6"; });
   btn.addEventListener("click", function() {
-    btn.style.opacity = "1";
-    btn.style.animation = "__hb_spin 0.8s linear infinite";
-    btn.disabled = true;
-    btn.dataset.spinning = "1";
-    socket.send(JSON.stringify({ type: "force-reload" }));
+    if (__hbSocket && __hbSocket.readyState === WebSocket.OPEN) {
+      btn.style.opacity = "1";
+      btn.style.animation = "__hb_spin 0.8s linear infinite";
+      btn.disabled = true;
+      btn.dataset.spinning = "1";
+      __hbSocket.send(JSON.stringify({ type: "force-reload" }));
+    }
   });
   document.body.appendChild(btn);
-};
+
+  __hbIndexLoadedScripts();
+
+  // Connect WebSocket
+  __hbConnect();
+});
 `;
 
       response.writeHead(200, {
-        "Content-Length": responseBody.length,
+        "Content-Length": Buffer.byteLength(responseBody),
         "Content-Type": "application/javascript",
       });
 
@@ -368,9 +545,17 @@ window.onload = () => {
             })
             .catch((e) => {
               console.error(`${chalk.red("[Error]")}: ${e instanceof Error ? e.message : e}`);
+              broadcast({
+                type: "rebuild-error",
+                message: formatErrorForBrowser(e),
+              });
             })
             .finally(() => {
               rebuilding = false;
+              // Process any changes that accumulated during the forced rebuild
+              if (pendingFiles.size > 0) {
+                flushPendingChanges();
+              }
             });
         }
       } catch {
@@ -386,30 +571,89 @@ window.onload = () => {
   const builder = new IncrementalBuilder(root, rootProject);
 
   let rebuilding = false;
-  const handleFileChange = (eventType: "add" | "change" | "unlink") => async (file: string) => {
-    if (!rebuilding) {
+  let pendingTimeout: NodeJS.Timeout | null = null;
+  const pendingFiles = new Map<string, "add" | "change" | "unlink">();
+
+  const DEBOUNCE_MS = 100;
+
+  // Process all accumulated file changes as a single batch.
+  // Each file is fed to builder.handleChange. Results are aggregated:
+  // if any change returns "*", the final reload covers all pages.
+  // Otherwise, all individual page lists are merged.
+  async function flushPendingChanges() {
+    if (rebuilding || pendingFiles.size === 0) return;
+    rebuilding = true;
+    broadcast({ type: "rebuilding" });
+
+    const files = [...pendingFiles.entries()];
+    pendingFiles.clear();
+
+    const start = performance.now();
+    let allChangedPages: string[] | "*" = [];
+    let hasError = false;
+
+    for (let i = 0; i < files.length; i++) {
+      const [file, eventType] = files[i];
       console.log(`${chalk.yellow(`[File ${eventType}]`)}: ${file}`);
-      rebuilding = true;
-      broadcast({ type: "rebuilding" });
       try {
         const result = await builder.handleChange(file, eventType);
-        console.log(`${chalk.yellow("[Reloading]")}: Website`);
-        sendReload(result.changedPages);
+        // Aggregate: once "*" always "*"; otherwise merge page lists
+        if (allChangedPages !== "*") {
+          if (result.changedPages === "*") {
+            allChangedPages = "*";
+          } else {
+            allChangedPages = [...new Set([...allChangedPages, ...result.changedPages])];
+          }
+        }
       } catch (e) {
-        // reportError keeps the file:line:column a VFileMessage carries, which
-        // the old `e.message`-only path threw away.
         reportError(e);
-        // Without this the browser keeps showing the last good page while the
-        // rebuild button spins forever, since neither `reload` nor
-        // `rebuild-complete` is sent on this path.
         broadcast({
           type: "rebuild-error",
           message: formatErrorForBrowser(e),
         });
+        hasError = true;
+        // The batch is already drained, so anything the failed file kept us
+        // from reaching would be lost — and stay stale until touched again.
+        for (const [queuedFile, queuedEvent] of files.slice(i + 1)) {
+          if (!pendingFiles.has(queuedFile)) {
+            pendingFiles.set(queuedFile, queuedEvent);
+          }
+        }
+        break;
       }
-      rebuilding = false;
     }
-  };
+
+    const elapsed = (performance.now() - start).toFixed(0);
+
+    if (!hasError) {
+      if (allChangedPages === "*" || allChangedPages.length > 0) {
+        console.log(`${chalk.green("[Incremental]")} Rebuilt in ${elapsed}ms`);
+      }
+      sendReload(allChangedPages);
+    }
+
+    rebuilding = false;
+
+    // If more changes arrived during the rebuild, schedule another flush
+    if (pendingFiles.size > 0) {
+      if (pendingTimeout) clearTimeout(pendingTimeout);
+      pendingTimeout = setTimeout(flushPendingChanges, DEBOUNCE_MS);
+    }
+  }
+
+  const handleFileChange =
+    (eventType: "add" | "change" | "unlink") => (file: string) => {
+      // Coalesce: one file can fire several events inside a debounce window.
+      // add/unlink outrank change, and a later add/unlink replaces an earlier
+      // one — editors that save atomically emit unlink followed by add.
+      const existing = pendingFiles.get(file);
+      if (!existing || existing === "change" || eventType !== "change") {
+        pendingFiles.set(file, eventType);
+      }
+
+      if (pendingTimeout) clearTimeout(pendingTimeout);
+      pendingTimeout = setTimeout(flushPendingChanges, DEBOUNCE_MS);
+    };
 
   await builder.initialize();
 
@@ -423,15 +667,89 @@ window.onload = () => {
   // File Watching
   ////////////////////
 
-  chokidar
-    .watch(".", {
+  // Only the entries below can affect a build. Everything else in a project
+  // (README, LICENSE, editor configs) used to trigger a structural rebuild.
+  const WATCHED_ENTRIES = [
+    "archives",
+    "book",
+    "glossary",
+    "public",
+    "book-public",
+    "glossary-public",
+    "snippets",
+    "templates",
+    "hyperbook.json",
+    "hyperlibrary.json",
+  ];
+
+  // A library keeps its books in subdirectories, so each sub-project brings
+  // its own set of watched entries. Watching only the root's would leave a
+  // hyperlibrary with nothing to reload on.
+  const collectProjectRoots = (
+    project: Hyperproject,
+    acc: string[] = [],
+  ): string[] => {
+    acc.push(path.resolve(project.src));
+    if (project.type === "library") {
+      for (const child of project.projects) {
+        collectProjectRoots(child, acc);
+      }
+    }
+    return acc;
+  };
+
+  const projectRoots = collectProjectRoots(rootProject);
+
+  const isInside = (parent: string, child: string) =>
+    child === parent || child.startsWith(parent + path.sep);
+
+  // Decided per path rather than pinned to a list at startup, so a snippets/
+  // folder created mid-session is picked up too.
+  const isWatched = (absolute: string): boolean =>
+    projectRoots.some((projectRoot) => {
+      if (absolute === projectRoot) return true;
+      // Ancestors of a sub-project have to stay traversable, or chokidar never
+      // descends far enough to reach the book inside them.
+      if (isInside(absolute, projectRoot)) return true;
+      if (!isInside(projectRoot, absolute)) return false;
+      const [entry] = path.relative(projectRoot, absolute).split(path.sep);
+      return WATCHED_ENTRIES.includes(entry);
+    });
+
+  // chokidar dropped glob support in v4, so these have to be matched by hand.
+  const isIgnored = (absolute: string): boolean => {
+    if (isInside(outDir, absolute)) return true;
+    const segments = path.relative(root, absolute).split(path.sep);
+    if (segments.some((segment) => segment.startsWith("."))) return true;
+    if (segments.includes("node_modules")) return true;
+    // A zip directly under archives/ is the build's own output, not a source.
+    // Elsewhere — public/, say — a zip is a perfectly good downloadable.
+    return projectRoots.some(
+      (projectRoot) =>
+        path.dirname(absolute) === path.join(projectRoot, "archives") &&
+        absolute.endsWith(".zip"),
+    );
+  };
+
+  // Use native fs events by default for instant detection. Polling is only
+  // needed on network filesystems (Docker volumes, WSL2, NFS) where inotify
+  // / FSEvents don't fire. Enable with HYPERBOOK_POLLING=1.
+  const usePolling = process.env.HYPERBOOK_POLLING === "1";
+
+  const watcher = chokidar
+    .watch(root, {
       ignoreInitial: true,
       cwd: root,
-      usePolling: true,
-      interval: 600,
-      ignored: [outDir, path.join("archives", "*.zip"), /(^|[\/\\])\./, "**/node_modules/**"],
+      usePolling,
+      interval: usePolling ? 300 : undefined,
+      ignored: (absolute) => {
+        const resolved = path.resolve(root, absolute);
+        return isIgnored(resolved) || !isWatched(resolved);
+      },
     })
     .on("add", handleFileChange("add"))
     .on("change", handleFileChange("change"))
     .on("unlink", handleFileChange("unlink"));
+
+  await new Promise<void>((resolve) => watcher.once("ready", () => resolve()));
 }

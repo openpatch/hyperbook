@@ -39,6 +39,58 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.170.4
+
+::::tabs
+
+:::tab{title="Improved :+1:" id="improved"}
+
+**dev**: File watching uses native filesystem events instead of polling every 600ms, so changes are picked up immediately and an idle dev server no longer spins the CPU. On network filesystems where those events do not fire — Docker volumes, WSL2, NFS — set `HYPERBOOK_POLLING=1` to restore polling. Pages affected by one change are also rebuilt concurrently.
+
+:::
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+**dev**: A hyperlibrary now watches the books inside it, not just its own `hyperlibrary.json`, and a folder such as `snippets/` created while the server is running is picked up too. `hyperbook dev` waits for the watcher's first scan before reporting that it is running, so an edit made in the first moments after startup is no longer missed, and when one file in a batch fails to build the rest of the batch is no longer left stale until touched again.
+
+**dev**: Swapping a page's content in place instead of reloading is now limited to pages with no directives on them, which is the only case it was ever sound for. A page carrying a mermaid diagram, a directive used on it for the first time, or the data blocks that online-ide, sql-ide and protect rely on falls back to a real reload now, as does a page whose structure changed. Plain prose still swaps, keeping scroll position and page state. The rebuild button no longer spins forever after a swap.
+
+**dev**: Live reload connects to the page's own origin rather than `localhost`, so it works when a book is opened from another device or through a proxy.
+
+:::
+
+::::
+
+## v0.107.3
+
+::::tabs
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+**pyide**: A pygame script's canvas takes its size from `pygame.display.set_mode`. It had kept the HTML default of 300x150 whatever size you asked for, clipping every frame to the top-left corner of the game, while pygame itself reported the size you requested. Turtle scripts are unaffected.
+
+:::
+
+::::
+
+## v0.107.2
+
+::::tabs
+
+:::tab{title="New :rocket:" id="new"}
+
+**bitflow**: A new `::bitflow{src="quiz.json"}` element embeds a [bitflow](https://bitflow.openpatch.org) assessment. The flow is read from the file while your book is built and inlined into the page, so a built book opens an assessment without a network and a missing or malformed file is reported as a build warning rather than by a reader looking at a blank space. Answers are saved as the reader goes and restored on their next visit, and a button starts a fresh attempt. Only the learner-facing flow is embedded — bitflow's authoring canvas is not part of a book — and a flow downloads only the task types it actually uses.
+
+:::
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+**jmp**: The Java Memory Playground's stylesheet no longer escapes the playground. Its `.sidebar` rule resized the book's own navigation on every page carrying a `::jmp`.
+
+:::
+
+::::
+
 ## v0.107.1
 
 ::::tabs
