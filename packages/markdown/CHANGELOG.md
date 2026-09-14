@@ -1,5 +1,11 @@
 # @hyperbook/markdown
 
+## 0.79.3
+
+### Patch Changes
+
+- [`601bb4b`](https://github.com/openpatch/hyperbook/commit/601bb4b1e11c3ce2e46c00de1914fd32172b6f26) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Update java memory playground
+
 ## 0.79.2
 
 ### Patch Changes
