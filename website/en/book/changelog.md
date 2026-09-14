@@ -39,6 +39,18 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 ::::
 -->
 
+## v0.170.6
+
+::::tabs
+
+:::tab{title="Improved :+1:" id="improved"}
+
+**jmp**: Update java memory playground to the latest version
+
+:::
+
+::::
+
 ## v0.170.5
 
 ::::tabs
