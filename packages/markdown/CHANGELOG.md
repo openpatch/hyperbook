@@ -1,5 +1,23 @@
 # @hyperbook/markdown
 
+## 0.79.2
+
+### Patch Changes
+
+- [`4860a12`](https://github.com/openpatch/hyperbook/commit/4860a12682725eabaf087bde405ebdde59adb506) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add a fullscreen button to the `jmp` element.
+
+  A memory diagram is worked on rather than only looked at, and inside a book page there is rarely
+  enough room to drag a node anywhere useful. The button sits next to reset in the figure's bottom
+  right corner and puts the whole figure — the playground and both of those buttons — on the screen
+  on its own.
+
+  The whole figure goes fullscreen rather than the web component, so the reset and fullscreen
+  buttons, which live beside the component rather than inside it, are not left behind on the page.
+  The button reads its state back from the browser on `fullscreenchange`, so it still says the right
+  thing after a reader leaves fullscreen with Escape or F11.
+
+- [`25fa98c`](https://github.com/openpatch/hyperbook/commit/25fa98c5a56a98e670d2a784515099a1585d692c) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Update java-memory-playground
+
 ## 0.79.1
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.107.5
+
+### Patch Changes
+
+- [`25fa98c`](https://github.com/openpatch/hyperbook/commit/25fa98c5a56a98e670d2a784515099a1585d692c) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Update java-memory-playground
+
 ## 0.107.4
 
 ### Patch Changes
