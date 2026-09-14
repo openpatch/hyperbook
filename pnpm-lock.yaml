@@ -403,8 +403,8 @@ importers:
         specifier: workspace:*
         version: link:../web-component-excalidraw
       '@java-memory-playground/web-component':
-        specifier: ^0.3.1
-        version: 0.3.1(@types/react-dom@19.2.4(@types/react@19.2.18))(@types/react@19.2.18)(use-sync-external-store@1.6.0(react@18.3.1))
+        specifier: ^0.3.2
+        version: 0.3.2(@types/react-dom@19.2.4(@types/react@19.2.18))(@types/react@19.2.18)(use-sync-external-store@1.6.0(react@18.3.1))
       '@learningmap/web-component':
         specifier: ^0.3.8
         version: 0.3.8(@types/react-dom@19.2.4(@types/react@19.2.18))(@types/react@19.2.18)(use-sync-external-store@1.6.0(react@18.3.1))
@@ -1470,14 +1470,14 @@ packages:
   '@japont/unicode-range@1.0.0':
     resolution: {integrity: sha512-BckHvA2XdjRBVAWe2uceNuRf78lBeI28kyWEbfr/Q2pE17POkwuZ6WWY/UMv8FL9iBxhW4xfDoNLM9UVZaTeUQ==}
 
-  '@java-memory-playground/java-memory-playground@0.2.2':
-    resolution: {integrity: sha512-tMnMdz7x9BiPKkdILC1L1TYK43d6tmCDJ3aUFzpxQO+wt0DNO4PZnvewk1VIEgUfG3JOh/ADuLmXuC+abr6ymw==}
+  '@java-memory-playground/java-memory-playground@0.2.3':
+    resolution: {integrity: sha512-Gpsb3eUotzvZrk91/hGRa5M/wWDRSqAbMHiionBOuJbsfuMTkQDDCAGFEcF2eYg+QHPEo8clNR8o2ccJPOR5wQ==}
     peerDependencies:
       react: ^18.0.0 || ^19.0.0
       react-dom: ^18.0.0 || ^19.0.0
 
-  '@java-memory-playground/web-component@0.3.1':
-    resolution: {integrity: sha512-6khVCnGUeNVJVPymIVTTjFEfDUlPT6mjOZx7a6omp89x8Q9soFHg0Rgfp89hz/LwEXQAOpxLXMeSX3xrYSTRpg==}
+  '@java-memory-playground/web-component@0.3.2':
+    resolution: {integrity: sha512-06lEPOG2u2IxeYvMf2GATq6YF3+bTuC2uyK0IaENOAYZ4SXQepHum2yWmhoWZeM8zHISDFQ3Z6EcB12AMlN4yw==}
 
   '@jridgewell/gen-mapping@0.3.13':
     resolution: {integrity: sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA==}
@@ -9301,7 +9301,7 @@ snapshots:
 
   '@japont/unicode-range@1.0.0': {}
 
-  '@java-memory-playground/java-memory-playground@0.2.2(@types/react-dom@19.2.4(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(use-sync-external-store@1.6.0(react@18.3.1))':
+  '@java-memory-playground/java-memory-playground@0.2.3(@types/react-dom@19.2.4(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(use-sync-external-store@1.6.0(react@18.3.1))':
     dependencies:
       '@xyflow/react': 12.11.2(@types/react-dom@19.2.4(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       fast-deep-equal: 3.1.3
@@ -9319,9 +9319,9 @@ snapshots:
       - immer
       - use-sync-external-store
 
-  '@java-memory-playground/web-component@0.3.1(@types/react-dom@19.2.4(@types/react@19.2.18))(@types/react@19.2.18)(use-sync-external-store@1.6.0(react@18.3.1))':
+  '@java-memory-playground/web-component@0.3.2(@types/react-dom@19.2.4(@types/react@19.2.18))(@types/react@19.2.18)(use-sync-external-store@1.6.0(react@18.3.1))':
     dependencies:
-      '@java-memory-playground/java-memory-playground': 0.2.2(@types/react-dom@19.2.4(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(use-sync-external-store@1.6.0(react@18.3.1))
+      '@java-memory-playground/java-memory-playground': 0.2.3(@types/react-dom@19.2.4(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(use-sync-external-store@1.6.0(react@18.3.1))
       '@r2wc/react-to-web-component': 2.1.1(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       react: 19.2.8
       react-dom: 19.2.8(react@19.2.8)
