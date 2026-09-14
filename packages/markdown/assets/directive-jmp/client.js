@@ -35,6 +35,24 @@ hyperbook.jmp = (function () {
     playground.addEventListener("change", save);
   };
 
+  /** The label and the pressed look follow whatever the browser is doing. */
+  const updateFullscreenButton = (elem, button) => {
+    if (!button) return;
+    const isFullscreen = document.fullscreenElement === elem;
+    const label = hyperbook.i18n.get(
+      isFullscreen ? "ide-fullscreen-exit" : "ide-fullscreen-enter",
+    );
+    button.title = label;
+    button.setAttribute("aria-label", label);
+    button.classList.toggle("active", isFullscreen);
+  };
+
+  const syncFullscreenButtons = () => {
+    for (const elem of document.getElementsByClassName("directive-jmp")) {
+      updateFullscreenButton(elem, elem.querySelector("button.fullscreen"));
+    }
+  };
+
   async function init(root) {
     const elems = root.getElementsByClassName("directive-jmp");
 
@@ -58,6 +76,21 @@ hyperbook.jmp = (function () {
       }
       listen(playground, elem.id);
 
+      // The whole figure goes fullscreen, not the component: the reset and
+      // fullscreen buttons live outside it and would be left behind on the
+      // page otherwise.
+      const fullscreen = elem.getElementsByClassName("fullscreen")[0];
+      if (fullscreen) {
+        fullscreen.addEventListener("click", async () => {
+          if (document.fullscreenElement === elem) {
+            await document.exitFullscreen();
+          } else {
+            await elem.requestFullscreen();
+          }
+        });
+        updateFullscreenButton(elem, fullscreen);
+      }
+
       const reset = elem.getElementsByClassName("reset")[0];
       if (reset) {
         reset.addEventListener("click", async () => {
@@ -76,6 +109,10 @@ hyperbook.jmp = (function () {
   document.addEventListener("DOMContentLoaded", () => {
     init(document);
   });
+
+  // Escape and F11 leave fullscreen without going through the button, so the
+  // button's state is read back from the browser rather than tracked.
+  document.addEventListener("fullscreenchange", syncFullscreenButtons);
 
   // Observe for new elements added to the DOM
   const observer = new MutationObserver((mutations) => {

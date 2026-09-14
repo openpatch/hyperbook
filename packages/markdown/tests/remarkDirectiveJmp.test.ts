@@ -50,6 +50,14 @@ describe("remarkDirectiveJmp", () => {
     );
   });
 
+  it("should render a fullscreen and a reset button", async () => {
+    const html = String(
+      toHtml(`\n::jmp{#list src="memory.jmp"}\n`, ctx).value,
+    );
+    expect(html).toContain(`<button class="fullscreen"`);
+    expect(html).toContain(`<button class="reset"`);
+  });
+
   it("should use the given height", async () => {
     expect(
       String(

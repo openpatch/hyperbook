@@ -117,6 +117,19 @@ export default (ctx: HyperbookContext) => () => {
               class: "buttons",
             },
             children: [
+              // Fullscreen first: a reader reaches for it while working, and
+              // reset — the one button that throws work away — stays at the
+              // far edge where it is not hit by accident.
+              {
+                type: "element",
+                tagName: "button",
+                properties: {
+                  class: "fullscreen",
+                  title: i18n.get("ide-fullscreen-enter"),
+                  "aria-label": i18n.get("ide-fullscreen-enter"),
+                },
+                children: [icon("fullscreen")],
+              },
               {
                 type: "element",
                 tagName: "button",

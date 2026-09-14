@@ -20,6 +20,7 @@
   right: 8px;
   bottom: 8px;
   display: flex;
+  gap: 4px;
   z-index: 5;
 }
 
@@ -51,4 +52,31 @@
   width: 18px;
   height: 18px;
   display: block;
+}
+
+/* A toggle reads as on by being filled in, matching the playground's own. */
+.directive-jmp .buttons button.active {
+  background-color: #242428;
+  color: #f5f5f5;
+}
+
+.directive-jmp .buttons button.active:hover {
+  background-color: #3c3c3c;
+}
+
+/* The figure is sized by an inline `height` from the directive, which has to
+   give way once it owns the screen. */
+.directive-jmp:fullscreen {
+  width: 100vw;
+  height: 100dvh !important;
+  border: none;
+  border-radius: 0;
+  background-color: #ffffff;
+}
+
+/* The playground's canvas is white whatever the book's theme, so the backdrop
+   behind it is too — a dark backdrop would show as a frame around it while the
+   browser animates into fullscreen. */
+.directive-jmp:fullscreen::backdrop {
+  background-color: #ffffff;
 }
