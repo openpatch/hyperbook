@@ -93,6 +93,40 @@ hyperbook.store = (function () {
   });
 
   /**
+   * Re-applies the data migrations from v6 and v7 to rows that were imported
+   * from an older export. Dexie's `.upgrade()` callbacks only run during a
+   * live IndexedDB version upgrade, not during `db.import()`, so imported
+   * rows from a v5–v6 era export keep their old field shapes unless we fix
+   * them here.
+   * @returns {Promise<void>}
+   */
+  async function migrateImportedData() {
+    try {
+      await db.transaction("rw", db.tables, async () => {
+        // v6: bookmark label string → [{text: label}]
+        await db.bookmarks
+          .toCollection()
+          .modify((bookmark) => {
+            if (typeof bookmark.label === "string") {
+              bookmark.label = [{ text: bookmark.label }];
+            }
+          });
+        // v7: passwordHash → password
+        await db.protect
+          .toCollection()
+          .modify((entry) => {
+            if (entry.passwordHash !== undefined) {
+              entry.password = entry.passwordHash;
+              delete entry.passwordHash;
+            }
+          });
+      });
+    } catch (e) {
+      console.warn("Could not migrate imported data:", e);
+    }
+  }
+
+  /**
    * Adopts data saved under a directive's previous id.
    *
    * Directive ids used to be derived from a hash that included the node's
@@ -301,7 +335,13 @@ hyperbook.store = (function () {
           type: "application/json",
         });
 
-        await db.import(hyperbookBlob, { clearTablesBeforeImport: true });
+        await db.import(hyperbookBlob, {
+          clearTablesBeforeImport: true,
+          acceptVersionDiff: true,
+          acceptMissingTables: true,
+        });
+
+        await migrateImportedData();
 
         // Send full snapshot to cloud after import
         if (hyperbook.cloud) {

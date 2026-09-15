@@ -13,8 +13,7 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 
 :::
 
-<!--
-## vNEXT
+## v0.170.7
 
 ::::tabs
 
@@ -32,12 +31,11 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 
 :::tab{title="Fixed :bug:" id="fixed"}
 
-
+**store**: Fix importing JSON exports created by older Hyperbook versions. The import now accepts exports with different Dexie database versions and missing tables, and re-applies data migrations (bookmark label format, password field rename) to imported rows.
 
 :::
 
 ::::
--->
 
 ## v0.170.6
 
