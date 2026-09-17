@@ -36,6 +36,66 @@ function formatErrorForBrowser(e: unknown): string {
   return String(e);
 }
 
+/**
+ * Whether a missing resource is a page the reader navigated to rather than an
+ * asset some page asked for. An image or a bundle wants its 404: a stylesheet
+ * that suddenly parses as HTML helps nobody.
+ */
+function isDocumentRequest(
+  request: http.IncomingMessage,
+  pathname: string,
+): boolean {
+  const accept = request.headers.accept || "";
+  if (!accept.includes("text/html") && !accept.includes("*/*")) return false;
+  const extension = path.extname(pathname);
+  return extension === "" || extension === ".html";
+}
+
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+/**
+ * A stand-in page for a route the broken build never produced.
+ *
+ * It loads the dev client, so it reconnects like any other page and reloads
+ * itself as soon as a build succeeds — the author never has to restart the
+ * server or remember which URL they were on.
+ */
+function renderErrorPage(message: string): string {
+  return `<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Build failed</title>
+    <style>
+      :root { color-scheme: dark; }
+      body {
+        margin: 0;
+        padding: 2rem;
+        background: #141414;
+        color: #f7f7f7;
+        font: 14px/1.6 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      }
+      h1 { color: #ff6b6b; font-size: 1.1rem; margin: 0 0 1rem; }
+      pre { white-space: pre-wrap; word-break: break-word; margin: 0; }
+      p { margin-top: 1.5rem; opacity: 0.6; }
+    </style>
+  </head>
+  <body>
+    <h1>Build failed</h1>
+    <pre>${escapeHtml(message)}</pre>
+    <p>Fix the file and save — this page reloads on the next successful build.</p>
+    <script src="/__hyperbook_dev.js"></script>
+  </body>
+</html>
+`;
+}
+
 async function isPortAvailable(port: number): Promise<boolean> {
   return new Promise((resolve) => {
     const server = net.createServer();
@@ -98,6 +158,12 @@ export async function runDev({ port = 8080 }: { port: number }): Promise<void> {
   const root = process.cwd();
   const rootProject = await hyperproject.get(root);
   const outDir = path.join(rootProject.src, ".hyperbook", "out");
+
+  // The failure the output tree is currently stale because of, or null when
+  // the last build succeeded. A broken page used to take the whole dev server
+  // down with it, so the author fixed their typo against a dead port; now the
+  // server keeps serving and the failure is what it serves.
+  let buildError: unknown = null;
 
   const server = http.createServer(async (request, response) => {
     // Special Case: Reject non-GET methods.
@@ -497,6 +563,20 @@ window.addEventListener("DOMContentLoaded", function() {
 
       return response.end(responseBody);
     } catch (e) {
+      // A build that never finished leaves most of the tree missing, so a 404
+      // here says nothing useful. Hand back the reason instead — the page
+      // reconnects and reloads itself once a build succeeds.
+      if (buildError !== null && isDocumentRequest(request, pathname)) {
+        const responseBody = renderErrorPage(formatErrorForBrowser(buildError));
+
+        response.writeHead(500, {
+          "Content-Type": "text/html; charset=utf-8",
+          "Content-Length": Buffer.byteLength(responseBody),
+        });
+
+        return response.end(responseBody);
+      }
+
       // Respond to all errors with a 404 response.
       const responseBody = `Cannot GET resource: ${pathname}`;
 
@@ -532,6 +612,17 @@ window.addEventListener("DOMContentLoaded", function() {
 
   // Handle client messages (force-reload requests)
   reloadServer.on("connection", (ws) => {
+    // A page opened while the build is broken would otherwise look fine: the
+    // overlay only ever arrived with a rebuild it was not around for.
+    if (buildError !== null) {
+      ws.send(
+        JSON.stringify({
+          type: "rebuild-error",
+          message: formatErrorForBrowser(buildError),
+        }),
+      );
+    }
+
     ws.on("message", (data) => {
       try {
         const msg = JSON.parse(data.toString());
@@ -541,10 +632,16 @@ window.addEventListener("DOMContentLoaded", function() {
           broadcast({ type: "rebuilding" });
           builder.handleChange("hyperbook.json", "change")
             .then(() => {
+              const recovered = buildError !== null;
+              buildError = null;
               broadcast({ type: "rebuild-complete" });
+              // Pages that were standing in for a failed build have nothing
+              // else to tell them the book is whole again.
+              if (recovered) sendReload("*");
             })
             .catch((e) => {
-              console.error(`${chalk.red("[Error]")}: ${e instanceof Error ? e.message : e}`);
+              buildError = e;
+              reportError(e);
               broadcast({
                 type: "rebuild-error",
                 message: formatErrorForBrowser(e),
@@ -606,6 +703,7 @@ window.addEventListener("DOMContentLoaded", function() {
           }
         }
       } catch (e) {
+        buildError = e;
         reportError(e);
         broadcast({
           type: "rebuild-error",
@@ -629,7 +727,12 @@ window.addEventListener("DOMContentLoaded", function() {
       if (allChangedPages === "*" || allChangedPages.length > 0) {
         console.log(`${chalk.green("[Incremental]")} Rebuilt in ${elapsed}ms`);
       }
-      sendReload(allChangedPages);
+      // Whatever the batch touched, a build that had been failing leaves every
+      // page stale — including the error pages standing in for routes that
+      // were never written.
+      const recovered = buildError !== null;
+      buildError = null;
+      sendReload(recovered ? "*" : allChangedPages);
     }
 
     rebuilding = false;
@@ -655,7 +758,18 @@ window.addEventListener("DOMContentLoaded", function() {
       pendingTimeout = setTimeout(flushPendingChanges, DEBOUNCE_MS);
     };
 
-  await builder.initialize();
+  // A book with one broken page used to end the process here, before the
+  // server ever listened. Keep going: the failure is reported to the terminal,
+  // served to the browser, and cleared by the save that fixes it.
+  try {
+    await builder.initialize();
+  } catch (e) {
+    buildError = e;
+    reportError(e);
+    console.log(
+      `${chalk.yellow("[DEV-SERVER]")} Initial build failed. Serving the error until it is fixed.`,
+    );
+  }
 
   server.listen(port, () => {
     console.log(

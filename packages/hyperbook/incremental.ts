@@ -310,6 +310,13 @@ export class IncrementalBuilder {
       // Fall back to full rebuild for libraries or uninitialized state
       await this.fullRebuild();
       await this.refreshCaches();
+      // A first build that threw leaves the builder uninitialized, and the dev
+      // server now survives that. Once one succeeds the caches are true again,
+      // so incremental mode can take over rather than staying on full rebuilds
+      // for the rest of the session.
+      if (this.rootProject.type === "book") {
+        this.initialized = true;
+      }
       return { changedPages: "*" };
     }
 

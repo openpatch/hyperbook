@@ -9,6 +9,7 @@ import {
 } from "@hyperbook/types";
 import yaml from "yaml";
 import { handlebars, registerHelpers } from "./handlebars";
+import { FrontmatterParseError } from "./errors";
 
 export const getJson = async (root: string): Promise<HyperbookJson> => {
   return fs
@@ -828,6 +829,80 @@ export const extractLines = (
   return extractedLines.join("\n");
 };
 
+/** A js-yaml exception: `mark` points into the string gray-matter parsed. */
+type YamlException = {
+  reason?: string;
+  mark?: { line: number; column: number };
+};
+
+/**
+ * Maps a YAML error's position inside the frontmatter back onto the file.
+ *
+ * gray-matter hands the parser everything after the opening `---`, so the
+ * parsed string's first line is the delimiter line itself; the two differ only
+ * by whatever precedes the delimiter.
+ */
+const frontmatterPosition = (
+  markdown: string,
+  mark: { line: number; column: number },
+): { line: number; column: number } => {
+  const delimiter = markdown.indexOf("---");
+  const linesBefore =
+    delimiter < 0 ? 0 : markdown.slice(0, delimiter).split("\n").length - 1;
+  return { line: linesBefore + mark.line + 1, column: mark.column + 1 };
+};
+
+/**
+ * The line the parser tripped on, with a caret under the column, plus a hint
+ * for the mistake that causes most of these: a title or description holding a
+ * colon, which YAML reads as a second mapping key.
+ */
+const frontmatterExcerpt = (
+  markdown: string,
+  position: { line: number; column: number },
+): string => {
+  const source = markdown.split("\n")[position.line - 1];
+  if (source === undefined) return "";
+  const gutter = `${position.line} | `;
+  const parts = [
+    "",
+    `${gutter}${source}`,
+    `${" ".repeat(gutter.length + position.column - 1)}^`,
+  ];
+  const unquoted = /^\s*([A-Za-z0-9_-]+):\s+([^"'\s].*:\s.*)$/.exec(source);
+  if (unquoted) {
+    parts.push(
+      "",
+      `A value containing ": " has to be quoted: ${unquoted[1]}: "${unquoted[2]}"`,
+    );
+  }
+  return parts.join("\n");
+};
+
+/**
+ * Reads the frontmatter, turning a YAML failure into an error that names the
+ * file and the line instead of the parser's context-free complaint.
+ *
+ * `located` is false for the templated extensions, where the parsed markdown
+ * is a template's output rather than the file on disk: the name is still worth
+ * having, the line numbers would point at nothing.
+ */
+const parseFrontmatter = (markdown: string, file: string, located: boolean) => {
+  try {
+    return matter(markdown);
+  } catch (e) {
+    const { reason, mark } = (e ?? {}) as YamlException;
+    if (!reason) throw e;
+    const position =
+      located && mark ? frontmatterPosition(markdown, mark) : undefined;
+    throw new FrontmatterParseError(
+      file,
+      position ? reason + frontmatterExcerpt(markdown, position) : reason,
+      position,
+    );
+  }
+};
+
 export const getMarkdown = async (
   file: VFileBase,
 ): Promise<VFileBook["markdown"]> => {
@@ -899,7 +974,11 @@ export const getMarkdown = async (
       `Unsupported file extension ${file.extension}. Only .md, .md.yml, .md.json and .md.hbs files are supported.`,
     );
   }
-  let { content, data } = matter(markdown);
+  let { content, data } = parseFrontmatter(
+    markdown,
+    file.path.absolute,
+    file.extension === ".md",
+  );
   // apply Snippets
   const reg =
     /((:+)snippet{#([a-zA-Z0-9-]+)(( +([a-zA-Z]+)=(\d+|false|true|".*?"))*) *})/g;

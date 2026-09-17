@@ -13,15 +13,23 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 
 :::
 
-## v0.170.7
+## v0.170.8
 
 ::::tabs
 
-:::tab{title="New :rocket:" id="new"}
+:::tab{title="Fixed :bug:" id="fixed"}
 
+**dev**: A build failure no longer takes the dev server down with it. `hyperbook dev` used to exit when the initial build threw, so you fixed the file against a dead port and started over. The server now starts anyway, prints the failure and serves it: routes the broken build never wrote answer with an error page, pages still standing from an earlier build get the error overlay as soon as they connect, and the save that fixes the problem rebuilds and reloads everything. A first build that failed also no longer pins the session to full rebuilds — incremental mode takes over once a build succeeds.
 
+**dev**: A page whose frontmatter is not valid YAML now names the file and the line. The parser's own complaint — "incomplete explicit mapping pair; a key node is missed" — used to arrive with no hint at which of a few hundred pages it came from. It now comes with `path:line:column`, the offending line with a caret under it, and, for the mistake that causes most of these, the quoted form that fixes it: `title: "Text als Daten: Tokenisierung"`.
 
 :::
+
+::::
+
+## v0.170.7
+
+::::tabs
 
 :::tab{title="Improved :+1:" id="improved"}
 

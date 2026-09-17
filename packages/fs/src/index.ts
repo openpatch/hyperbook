@@ -17,7 +17,7 @@ export {
 export { registerBasicHelpers } from "./handlebars";
 
 export { readJsonFile, JsonParseError } from "./json";
-export { UserError } from "./errors";
+export { UserError, FrontmatterParseError } from "./errors";
 
 export {
   getPasswords,
