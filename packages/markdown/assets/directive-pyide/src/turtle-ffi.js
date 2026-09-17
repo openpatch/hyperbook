@@ -5,7 +5,7 @@ export const createTurtleJsFFI = (id) => {
   const DEFAULT_FONT_SIZE = 8;
   const DEFAULT_SHAPE = "classic";
   const DEFAULT_SPEED = 3;
-  const DEFAULT_DELAY_MS = 80;
+  const DEFAULT_DELAY_MS = 10;
   const DEFAULT_UNDO_BUFFER = 1000;
 
   // CPython's named speeds (turtle.py Turtle.speed)
@@ -637,46 +637,65 @@ export const createTurtleJsFFI = (id) => {
     beginCurrentPath();
 
     // Shared by forward() and goto(): records the move, queues the render and
-    // registers the undo entry.
+    // registers the undo entry. Like CPython's _goto, a move is split into
+    // `moveHops(distance)` sub-steps so higher speeds draw the line in fewer,
+    // larger chunks (and speed 0 jumps in a single hop).
     const moveTo = (nextX, nextY) => {
       const prevX = x;
       const prevY = y;
       const path = ensurePath();
       const fill = filling ? fillPath : null;
+      const pathLen = path.points.length;
+      const fillLen = fill ? fill.points.length : 0;
       x = nextX;
       y = nextY;
-      const point = { x, y, move: !penDown };
       pushUndo(() => {
         x = prevX;
         y = prevY;
-        if (path.points[path.points.length - 1] === point) path.points.pop();
-        if (fill) fill.points.pop();
+        path.points.length = pathLen;
+        if (fill) fill.points.length = fillLen;
         pen.renderedX = prevX;
         pen.renderedY = prevY;
       });
-      enqueueOperation(() => {
-        pen.renderedX = point.x;
-        pen.renderedY = point.y;
-        path.points.push(point);
-        if (fill) {
-          fill.points.push({ x: point.x, y: point.y });
-        }
-        draw();
-      });
+      const dx = nextX - prevX;
+      const dy = nextY - prevY;
+      const hops = moveHops(Math.hypot(dx, dy));
+      for (let n = 1; n <= hops; n += 1) {
+        const hx = prevX + (dx * n) / hops;
+        const hy = prevY + (dy * n) / hops;
+        const point = { x: hx, y: hy, move: !penDown };
+        enqueueOperation(() => {
+          pen.renderedX = hx;
+          pen.renderedY = hy;
+          path.points.push(point);
+          if (fill) {
+            fill.points.push({ x: hx, y: hy });
+          }
+          draw();
+        });
+      }
     };
 
     const turnTo = (nextHeading) => {
       const prevHeading = heading;
-      heading = normalizeAngle(nextHeading);
-      const target = heading;
+      const target = normalizeAngle(nextHeading);
+      // CPython's _rotate sweeps the raw signed angle (left(360) animates a
+      // full revolution), so animate over the un-normalized difference rather
+      // than the shortest turn.
+      const delta = nextHeading - prevHeading;
+      heading = target;
       pushUndo(() => {
         heading = prevHeading;
         pen.renderedHeading = prevHeading;
       });
-      enqueueOperation(() => {
-        pen.renderedHeading = target;
-        draw();
-      });
+      const hops = turnHops(delta);
+      for (let n = 1; n <= hops; n += 1) {
+        const hHeading = prevHeading + (delta * n) / hops;
+        enqueueOperation(() => {
+          pen.renderedHeading = normalizeAngle(hHeading);
+          draw();
+        });
+      }
     };
 
     const forward = (distance) => {
@@ -773,9 +792,22 @@ export const createTurtleJsFFI = (id) => {
       // CPython clamps anything outside 0.5..10.5 to "fastest" (0).
       if (numeric < 0.5 || numeric > 10.5) numeric = 0;
       turtleSpeed = Math.round(numeric);
-      delayMs =
-        turtleSpeed <= 0 ? 0 : Math.max(0, Math.round(300 / turtleSpeed));
+      // CPython keeps the screen delay (delay()/tracer()) independent of speed;
+      // speed only changes how many sub-steps a move/turn is split into.
       return turtleSpeed;
+    };
+    // CPython: number of hops for a move of `distance` pixels.
+    //   nhops = 1 + int(distance / (3 * (1.1 ** speed) * speed))
+    const moveHops = (distance) => {
+      if (turtleSpeed <= 0) return 1;
+      const dist = Math.abs(toPlainNumber(distance, 0));
+      return 1 + Math.trunc(dist / (3 * Math.pow(1.1, turtleSpeed) * turtleSpeed));
+    };
+    // CPython: number of hops for a turn of `angle` degrees.
+    //   steps = 1 + int(abs(angle) / (3.0 * speed))
+    const turnHops = (angle) => {
+      if (turtleSpeed <= 0) return 1;
+      return 1 + Math.trunc(Math.abs(toPlainNumber(angle, 0)) / (3.0 * turtleSpeed));
     };
     const setStroke = (value) => {
       strokeColor = value;
