@@ -1,5 +1,57 @@
 # hyperbook
 
+## 0.107.8
+
+### Patch Changes
+
+- [`9cee0b6`](https://github.com/openpatch/hyperbook/commit/9cee0b63d5922ed68e4acbffa21be006af7cebcc) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - **dev**: A build failure no longer takes the dev server down with it.
+
+  `hyperbook dev` used to exit when the initial build threw, so the author fixed
+  the file against a dead port and started over. The server now starts anyway,
+  prints the failure, and serves it: routes the broken build never wrote answer
+  with an error page, pages still standing from an earlier build get the overlay
+  as soon as they connect, and the save that fixes the problem rebuilds and
+  reloads everything. A first build that failed also no longer pins the session
+  to full rebuilds — incremental mode takes over once a build succeeds.
+
+  **frontmatter**: A page whose frontmatter is not valid YAML now names the file
+  and the line. The parser's own complaint ("incomplete explicit mapping pair")
+  arrived with no indication of which page it came from; it now comes with
+  `path:line:column`, the offending line with a caret under it, and — for the
+  mistake that causes most of these — the quoted form that fixes it:
+
+  ```
+  error book/tokenisierung.md:2:22
+  incomplete explicit mapping pair; a key node is missed; or followed by a non-tabulated empty line
+  2 | title: Text als Daten: Tokenisierung
+                           ^
+
+  A value containing ": " has to be quoted: title: "Text als Daten: Tokenisierung"
+  ```
+
+- [`706325b`](https://github.com/openpatch/hyperbook/commit/706325bd0edf95f77934f054e506fc932523bf24) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - **mermaid / pyide**: Diagram labels and test code with non-ASCII characters are
+  no longer mangled.
+
+  A mermaid node labelled `Überwachtes Lernen` rendered as `Ãberwachtes Lernen`,
+  and the same happened to every umlaut, accent, `ß` and emoji in a diagram. The
+  text was stored correctly — the directives base64-encode it with `Buffer.from()`,
+  which writes UTF-8 bytes — but the clients decoded it with a bare `atob()`, which
+  hands those bytes back one character at a time. `Ü` (C3 9C) arrived as `Ã`
+  followed by an invisible control character, and mermaid drew exactly that. Both
+  clients now decode the bytes as UTF-8 before using them.
+
+  `pyide` carried the identical bug in its `data-tests` attribute, where it hit
+  the assertion messages a learner reads when a test fails: `Die Größe muss
+größer als 0 sein` arrived as `Die GrÃ¶Ãe muss grÃ¶Ãer als 0 sein`.
+
+  Authors who worked around the mermaid case by writing HTML entities
+  (`vollj&auml;hrig`) can keep them — mermaid still resolves those — or switch
+  back to plain characters.
+
+  **mermaid**: A page with several diagrams no longer stops rendering at the first
+  one that was already processed. The loop in `loadMermaid` used `return` where it
+  meant `continue`, so one processed diagram skipped every diagram after it.
+
 ## 0.107.7
 
 ### Patch Changes
