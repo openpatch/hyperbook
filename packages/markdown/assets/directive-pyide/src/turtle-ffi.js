@@ -5,7 +5,7 @@ export const createTurtleJsFFI = (id) => {
   const DEFAULT_FONT_SIZE = 8;
   const DEFAULT_SHAPE = "classic";
   const DEFAULT_SPEED = 3;
-  const DEFAULT_DELAY_MS = 80;
+  const DEFAULT_DELAY_MS = 10;
   const DEFAULT_UNDO_BUFFER = 1000;
 
   // CPython's named speeds (turtle.py Turtle.speed)
@@ -510,12 +510,27 @@ export const createTurtleJsFFI = (id) => {
     });
   };
 
+  // The in-flight portion of an animated move. Drawn on top of the committed
+  // paths and discarded once the move lands, so hops add no permanent geometry.
+  const drawHopSegment = (segment) => {
+    if (!segment) return;
+    context.beginPath();
+    context.moveTo(toCanvasX(segment.x0), toCanvasY(segment.y0));
+    context.lineTo(toCanvasX(segment.x1), toCanvasY(segment.y1));
+    context.strokeStyle = segment.stroke;
+    context.lineWidth = segment.lineWidth || DEFAULT_LINE_WIDTH;
+    context.stroke();
+  };
+
   const render = () => {
     if (!active) return;
     if (!setupCanvasResolution()) return;
     drawBackground();
     for (const pen of allPens) {
       pen.paths.forEach(drawPathSegment);
+    }
+    for (const pen of allPens) {
+      drawHopSegment(pen.hopSegment);
     }
     for (const pen of allPens) {
       drawTurtleShape(pen);
@@ -561,6 +576,10 @@ export const createTurtleJsFFI = (id) => {
       renderedY: 0,
       renderedHeading: 0,
       renderedTurtleVisible: true,
+      // CPython animates a move on a throwaway canvas item (drawingLineItem)
+      // and only commits the endpoint to the real line, so hops never become
+      // permanent geometry. This mirrors that item.
+      hopSegment: null,
       shapeColor: "#000000",
       shapeFillColor: "#000000",
       shapeName: DEFAULT_SHAPE,
@@ -637,29 +656,56 @@ export const createTurtleJsFFI = (id) => {
     beginCurrentPath();
 
     // Shared by forward() and goto(): records the move, queues the render and
-    // registers the undo entry.
+    // registers the undo entry. Like CPython's _goto, a move is split into
+    // `moveHops(distance)` sub-steps so higher speeds draw the line in fewer,
+    // larger chunks (and speed 0 jumps in a single hop).
     const moveTo = (nextX, nextY) => {
       const prevX = x;
       const prevY = y;
       const path = ensurePath();
       const fill = filling ? fillPath : null;
+      const pathLen = path.points.length;
+      const fillLen = fill ? fill.points.length : 0;
       x = nextX;
       y = nextY;
-      const point = { x, y, move: !penDown };
       pushUndo(() => {
         x = prevX;
         y = prevY;
-        if (path.points[path.points.length - 1] === point) path.points.pop();
-        if (fill) fill.points.pop();
+        path.points.length = pathLen;
+        if (fill) fill.points.length = fillLen;
         pen.renderedX = prevX;
         pen.renderedY = prevY;
       });
+      const dx = nextX - prevX;
+      const dy = nextY - prevY;
+      const drawing = penDown;
+      const stroke = strokeColor;
+      const lineWidth = penWidth;
+      // CPython's `for n in range(1, nhops)`: the intermediate hops only move
+      // the cursor and stretch a throwaway line from the start point.
+      const hops = moveHops(Math.hypot(dx, dy));
+      for (let n = 1; n < hops; n += 1) {
+        const hx = prevX + (dx * n) / hops;
+        const hy = prevY + (dy * n) / hops;
+        enqueueOperation(() => {
+          pen.renderedX = hx;
+          pen.renderedY = hy;
+          pen.hopSegment = drawing
+            ? { x0: prevX, y0: prevY, x1: hx, y1: hy, stroke, lineWidth }
+            : null;
+          draw();
+        });
+      }
+      // The move lands: drop the throwaway line and commit the single endpoint,
+      // exactly as CPython appends only `end` to currentLine.
+      const point = { x: nextX, y: nextY, move: !penDown };
       enqueueOperation(() => {
-        pen.renderedX = point.x;
-        pen.renderedY = point.y;
+        pen.renderedX = nextX;
+        pen.renderedY = nextY;
+        pen.hopSegment = null;
         path.points.push(point);
         if (fill) {
-          fill.points.push({ x: point.x, y: point.y });
+          fill.points.push({ x: nextX, y: nextY });
         }
         draw();
       });
@@ -667,12 +713,27 @@ export const createTurtleJsFFI = (id) => {
 
     const turnTo = (nextHeading) => {
       const prevHeading = heading;
-      heading = normalizeAngle(nextHeading);
-      const target = heading;
+      const target = normalizeAngle(nextHeading);
+      // CPython's _rotate sweeps the raw signed angle (left(360) animates a
+      // full revolution), so animate over the un-normalized difference rather
+      // than the shortest turn.
+      const delta = nextHeading - prevHeading;
+      heading = target;
       pushUndo(() => {
         heading = prevHeading;
         pen.renderedHeading = prevHeading;
       });
+      // CPython's _rotate runs `for _ in range(steps)` and then snaps to the
+      // exact target with one more update, so an animated turn renders
+      // steps + 1 frames.
+      const hops = turnHops(delta);
+      for (let n = 1; n <= hops; n += 1) {
+        const hHeading = prevHeading + (delta * n) / hops;
+        enqueueOperation(() => {
+          pen.renderedHeading = normalizeAngle(hHeading);
+          draw();
+        });
+      }
       enqueueOperation(() => {
         pen.renderedHeading = target;
         draw();
@@ -740,7 +801,14 @@ export const createTurtleJsFFI = (id) => {
     const xcor = () => x;
     const ycor = () => y;
     const heading_ = () => toUserAngle(heading);
-    const setheading = (angle) => turnTo(toInternalAngle(angle));
+    // CPython's setheading folds the turn into [-180, 180) before rotating, so
+    // it always takes the short way round -- unlike left()/right(), which sweep
+    // the raw angle they were given.
+    const setheading = (angle) => {
+      const raw = toInternalAngle(angle) - heading;
+      const delta = ((((raw + 180) % 360) + 360) % 360) - 180;
+      turnTo(heading + delta);
+    };
     const home = () => {
       goto_(0, 0);
       setheading(0);
@@ -773,9 +841,30 @@ export const createTurtleJsFFI = (id) => {
       // CPython clamps anything outside 0.5..10.5 to "fastest" (0).
       if (numeric < 0.5 || numeric > 10.5) numeric = 0;
       turtleSpeed = Math.round(numeric);
-      delayMs =
-        turtleSpeed <= 0 ? 0 : Math.max(0, Math.round(300 / turtleSpeed));
+      // CPython keeps the screen delay (delay()/tracer()) independent of speed;
+      // speed only changes how many sub-steps a move/turn is split into.
       return turtleSpeed;
+    };
+    // CPython subdivides only when `self._speed and screen._tracing == 1`:
+    // speed 0 ("fastest") and any tracer() setting other than 1 skip the
+    // animation entirely rather than generating hops nobody sees.
+    const animates = () => turtleSpeed > 0 && tracerN === 1;
+    // CPython: number of hops for a move of `distance` pixels.
+    //   nhops = 1 + int(distance / (3 * (1.1 ** speed) * speed))
+    const moveHops = (distance) => {
+      if (!animates()) return 1;
+      return (
+        1 +
+        Math.trunc(
+          Math.abs(distance) / (3 * Math.pow(1.1, turtleSpeed) * turtleSpeed),
+        )
+      );
+    };
+    // CPython: number of hops for a turn of `angle` degrees.
+    //   steps = 1 + int(abs(angle) / (3.0 * speed))
+    const turnHops = (angle) => {
+      if (!animates()) return 0;
+      return 1 + Math.trunc(Math.abs(angle) / (3.0 * turtleSpeed));
     };
     const setStroke = (value) => {
       strokeColor = value;
@@ -1202,6 +1291,8 @@ export const createTurtleJsFFI = (id) => {
       penDown = true;
       turtleVisible = true;
       pen.renderedTurtleVisible = true;
+      // Drop any half-finished move left over from an interrupted run.
+      pen.hopSegment = null;
       strokeColor = "#000000";
       fillColor = "#000000";
       penWidth = DEFAULT_LINE_WIDTH;
