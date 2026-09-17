@@ -131,7 +131,15 @@ hyperbook.python = (function () {
       updateFullscreenButtonState(elem, fullscreenEl);
       let tests = [];
       try {
-        tests = JSON.parse(atob(elem.getAttribute("data-tests")));
+        // remarkDirectivePyide encodes the tests with Buffer.from(), so the
+        // attribute holds base64 of their UTF-8 *bytes*. atob() gives those
+        // bytes back one per character, which would turn "prüfe" into
+        // "prÃ¼fe" in every test name and message -- decode them as UTF-8.
+        const bytes = Uint8Array.from(
+          atob(elem.getAttribute("data-tests")),
+          (c) => c.charCodeAt(0),
+        );
+        tests = JSON.parse(new TextDecoder().decode(bytes));
       } catch (e) {}
 
       const isWideCanvasMode = () =>

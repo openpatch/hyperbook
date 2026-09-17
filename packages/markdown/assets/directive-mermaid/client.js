@@ -12,7 +12,8 @@ hyperbook.mermaid = (function () {
     window.mermaid.initialize({ theme, startOnLoad: false });
     let i = 0;
     for (const el of document.querySelectorAll(elementCode)) {
-      if (el.getAttribute("data-processed")) return;
+      // skip this one, not every diagram after it
+      if (el.getAttribute("data-processed")) continue;
 
       el.setAttribute("data-processed", true);
       let id = `graph-` + Date.now() + i++;
@@ -31,7 +32,15 @@ hyperbook.mermaid = (function () {
         els.forEach((element) => {
           if (element.getAttribute("data-mermaid") != null) {
             element.removeAttribute("data-processed");
-            const data = atob(element.getAttribute("data-mermaid"));
+            // remarkDirectiveMermaid encodes the diagram with Buffer.from(),
+            // so the attribute holds base64 of its UTF-8 *bytes*. atob() gives
+            // those bytes back one per character, which would turn "Ü" into
+            // "Ã\u009c" -- decode them as UTF-8 before handing them to mermaid.
+            const bytes = Uint8Array.from(
+              atob(element.getAttribute("data-mermaid")),
+              (c) => c.charCodeAt(0),
+            );
+            const data = new TextDecoder().decode(bytes);
             const escapedData = data
               .replace(/&/g, "&amp;")
               .replace(/</g, "&lt;")
