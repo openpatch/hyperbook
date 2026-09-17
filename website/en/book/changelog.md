@@ -25,7 +25,9 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 
 :::tab{title="Improved :+1:" id="improved"}
 
+**turtle**: `speed()` now animates the way CPython's `turtle` does. The turtle used to jump a whole command at a time, with `speed()` only changing the pause between commands — a single `forward(200)` arrived at its destination in one step no matter how slow you set it, and `speed(11)` snapped to instant. Moves and turns are now split into sub-steps, so the line visibly crawls along its path and lower speeds really do draw more slowly, while higher speeds cover the same distance in fewer, larger steps. Animated turns take the shorter way round for `setheading()` and `home()`, so after `left(270)` a `setheading(0)` sweeps 90° counter-clockwise; `left()` and `right()` still sweep the exact angle they are given, so `left(360)` is a full revolution.
 
+`delay()` and `tracer()` control the drawing pace on their own again instead of being overwritten by `speed()`, and the default delay is now CPython's 10 ms rather than 80 ms. Existing books will draw noticeably faster at the default `speed(3)` where they use many short moves; long moves keep a comparable overall pace.
 
 :::
 
