@@ -1,2 +1,4 @@
 assets
 locales
+assets.staging-*
+locales.staging-*

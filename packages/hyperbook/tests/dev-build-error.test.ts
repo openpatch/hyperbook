@@ -6,23 +6,6 @@ import net from "net";
 import { WebSocket } from "ws";
 import { runDev } from "../dev";
 
-/** See dev.test.ts: assets and locales only exist next to the source after a build. */
-async function stageBundledFiles() {
-  const pkg = path.join(__dirname, "..");
-  const markdownDist = path.join(
-    pkg,
-    "node_modules",
-    "@hyperbook",
-    "markdown",
-    "dist",
-  );
-  for (const name of ["assets", "locales"]) {
-    const dest = path.join(pkg, name);
-    if (await fs.stat(dest).catch(() => null)) continue;
-    await fs.cp(path.join(markdownDist, name), dest, { recursive: true });
-  }
-}
-
 let root: string;
 let cwd: string;
 let port: number;
@@ -48,7 +31,6 @@ const waitFor = <T>(promise: Promise<T>, what: string, ms = 20_000) =>
 
 /** The book starts out broken: an unquoted colon in the title. */
 beforeAll(async () => {
-  await stageBundledFiles();
   root = await fs.mkdtemp(path.join(os.tmpdir(), "hyperbook-dev-error-"));
   await fs.mkdir(path.join(root, "book"), { recursive: true });
   await fs.writeFile(

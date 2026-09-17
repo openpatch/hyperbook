@@ -771,10 +771,15 @@ window.addEventListener("DOMContentLoaded", function() {
     );
   }
 
-  server.listen(port, () => {
-    console.log(
-      `${chalk.yellow("[DEV-SERVER]")} is running at http://localhost:${port}`,
-    );
+  // Resolve only once the socket is actually accepting, or a caller that
+  // awaits runDev can still race the first request.
+  await new Promise<void>((resolve) => {
+    server.listen(port, () => {
+      console.log(
+        `${chalk.yellow("[DEV-SERVER]")} is running at http://localhost:${port}`,
+      );
+      resolve();
+    });
   });
 
   ////////////////////

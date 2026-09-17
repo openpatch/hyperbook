@@ -6,27 +6,6 @@ import net from "net";
 import { WebSocket } from "ws";
 import { runDev } from "../dev";
 
-/**
- * Running from source means __dirname is the package root, where the bundled
- * assets and locales only exist after `pnpm build`. Both are gitignored, so
- * staging them here just mirrors what postbuild.mjs does into dist/.
- */
-async function stageBundledFiles() {
-  const pkg = path.join(__dirname, "..");
-  const markdownDist = path.join(
-    pkg,
-    "node_modules",
-    "@hyperbook",
-    "markdown",
-    "dist",
-  );
-  for (const name of ["assets", "locales"]) {
-    const dest = path.join(pkg, name);
-    if (await fs.stat(dest).catch(() => null)) continue;
-    await fs.cp(path.join(markdownDist, name), dest, { recursive: true });
-  }
-}
-
 let root: string;
 let cwd: string;
 let port: number;
@@ -42,7 +21,6 @@ const freePort = () =>
 
 /** A hyperlibrary keeps its books in subdirectories of the root. */
 beforeAll(async () => {
-  await stageBundledFiles();
   root = await fs.mkdtemp(path.join(os.tmpdir(), "hyperbook-dev-"));
   await fs.writeFile(
     path.join(root, "hyperlibrary.json"),
@@ -87,10 +65,15 @@ test("reloads when a page inside a library sub-book changes", async () => {
   const ws = new WebSocket(`ws://localhost:${port}`);
   await new Promise((resolve) => ws.once("open", resolve));
 
-  const reload = new Promise<any>((resolve) => {
+  // A failed rebuild answers with rebuild-error and no reload, so report that
+  // message rather than letting the race below time out with nothing to go on.
+  const reload = new Promise<any>((resolve, reject) => {
     ws.on("message", (data) => {
       const msg = JSON.parse(data.toString());
       if (msg.type === "reload") resolve(msg);
+      if (msg.type === "rebuild-error") {
+        reject(new Error(`rebuild failed: ${msg.message}`));
+      }
     });
   });
 
