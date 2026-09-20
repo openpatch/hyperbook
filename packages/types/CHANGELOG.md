@@ -1,5 +1,13 @@
 # @hyperbook/types
 
+## 0.25.1
+
+### Patch Changes
+
+- [`faa4cdf`](https://github.com/openpatch/hyperbook/commit/faa4cdf8bd54cc324c28c1dcdb5fa69b8347ed9e) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add grouped, navigation-ordered password lists with inferred and explicit
+  solution labels, making it possible to generate learner-facing solution pages
+  from protected blocks.
+
 ## 0.25.0
 
 ### Minor Changes
