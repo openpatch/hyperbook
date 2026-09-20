@@ -1,5 +1,11 @@
 # @hyperbook/markdown
 
+## 0.79.7
+
+### Patch Changes
+
+- [`5d1bc3b`](https://github.com/openpatch/hyperbook/commit/5d1bc3bcf717930b13583bde0758f0b9b209359c) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Update online-ide
+
 ## 0.79.6
 
 ### Patch Changes
