@@ -189,6 +189,8 @@ export type ProtectReference =
       use?: string;
       /** Literal password, for books that do not use a registry. */
       password?: string;
+      /** Human-readable label for this protected content in password lists. */
+      name?: string;
       description?: string;
     };
 

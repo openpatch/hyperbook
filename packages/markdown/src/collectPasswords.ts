@@ -15,6 +15,8 @@ import { Root } from "mdast";
 import { unified } from "unified";
 import remarkDirective from "remark-directive";
 import { visit } from "unist-util-visit";
+import { toString } from "mdast-util-to-string";
+import fs from "fs/promises";
 import remarkParse from "./remarkParse";
 import { readProtectReference } from "./remarkPageProtect";
 
@@ -28,6 +30,13 @@ export type CollectedPassword = {
   password?: string;
   resolvedFrom?: "inline" | "file" | "env";
   name?: string;
+  /** Nearest task label or heading for a protected block. */
+  context?: string;
+  pageName?: string;
+  /** Ancestor section names, outermost first. */
+  sectionPath?: string[];
+  /** Position in the book navigation, used by orderBy="navigation". */
+  navigationIndex?: number;
   description?: string;
   type: PasswordOrigin;
   /** Page or section this belongs to. */
@@ -65,18 +74,60 @@ const collectBlocks = (
   markdown: string,
   file: string,
   href: string | undefined,
+  sourceMarkdown = markdown,
 ): CollectedPassword[] => {
   const found: CollectedPassword[] = [];
   const tree = parser.parse(markdown) as Root;
   parser.runSync(tree);
 
+  const inferContexts = (source: string): (string | undefined)[] => {
+    const sourceTree = parser.parse(source) as Root;
+    parser.runSync(sourceTree);
+    const headings: { offset: number; value: string }[] = [];
+    const tasks: { offset: number; value: string }[] = [];
+    const contexts: (string | undefined)[] = [];
+    visit(sourceTree, (node: any) => {
+      const offset = node.position?.start?.offset;
+      if (typeof offset !== "number") return;
+      if (node.type === "heading" && node.depth >= 2) {
+        headings.push({ offset, value: toString(node).trim() });
+      }
+      if (node.type === "containerDirective" && node.name === "snippet") {
+        const id = node.attributes?.id || node.attributes?.["#"];
+        if (id !== "aufgabe") return;
+        const first = node.children?.[0];
+        const strong = first?.children?.find(
+          (child: any) => child.type === "strong",
+        );
+        const value = strong ? toString(strong).trim() : "";
+        if (value) tasks.push({ offset, value });
+      }
+      if (node.type === "containerDirective" && node.name === "protect") {
+        const heading = headings.filter((item) => item.offset < offset).at(-1);
+        const task = tasks.filter((item) => item.offset < offset).at(-1);
+        contexts.push(
+          node.attributes?.name ||
+            (task && (!heading || task.offset > heading.offset)
+              ? task.value
+              : heading?.value),
+        );
+      }
+    });
+    return contexts;
+  };
+  const inferredContexts = inferContexts(sourceMarkdown);
+  let blockIndex = 0;
+
   visit(tree, (node: any) => {
     if (node.type !== "containerDirective" || node.name !== "protect") return;
     const attributes = node.attributes || {};
+    const inferredContext = inferredContexts[blockIndex++];
     found.push({
       key: attributes.use || undefined,
       password: attributes.password || undefined,
       resolvedFrom: attributes.password ? "inline" : undefined,
+      name: attributes.name || undefined,
+      context: attributes.name || inferredContext,
       description: attributes.description || undefined,
       type: "block",
       href,
@@ -93,11 +144,13 @@ const fromReference = (
   reference: ProtectReference,
   base: Omit<CollectedPassword, "key" | "password" | "description">,
 ): CollectedPassword => {
-  const { use, password, description } = readProtectReference(reference);
+  const { use, password, name, description } = readProtectReference(reference);
   return {
     ...base,
     key: use,
     password,
+    name,
+    context: name,
     resolvedFrom: password ? "inline" : undefined,
     description,
   };
@@ -183,19 +236,70 @@ const collect = async (root: string): Promise<PasswordReport> => {
   walkSections(sections, pages, entries);
   walkSections([], glossary, entries);
 
+  const pageMetadata = new Map<
+    string,
+    { pageName: string; sectionPath: string[]; navigationIndex: number }
+  >();
+  let navigationIndex = 0;
+  const indexNavigation = (
+    level: HyperbookSection[],
+    levelPages: HyperbookPage[],
+    ancestors: string[] = [],
+  ) => {
+    for (const page of hyperbookFs.getPageList(level, levelPages)) {
+      if (!page.href || pageMetadata.has(page.href)) continue;
+      const findPath = (
+        sections: HyperbookSection[],
+        path: string[],
+      ): string[] | undefined => {
+        for (const section of sections) {
+          if (section.pages.some((candidate) => candidate.href === page.href)) {
+            return [...path, section.name];
+          }
+          const nested = findPath(section.sections, [...path, section.name]);
+          if (nested) return nested;
+        }
+      };
+      pageMetadata.set(page.href, {
+        pageName: page.name,
+        sectionPath: findPath(level, ancestors) || ancestors,
+        navigationIndex: navigationIndex++,
+      });
+    }
+  };
+  indexNavigation(sections, pages);
+  for (const page of glossary) {
+    if (page.href) {
+      pageMetadata.set(page.href, {
+        pageName: page.name,
+        sectionPath: [],
+        navigationIndex: navigationIndex++,
+      });
+    }
+  }
+
   // listForFolder is overloaded per folder, so the two calls stay separate.
   const files = [
     ...(await vfile.listForFolder(root, "book")),
     ...(await vfile.listForFolder(root, "glossary")),
   ];
   for (const file of files) {
+    const source = await fs
+      .readFile(file.path.absolute, "utf8")
+      .catch(() => file.markdown.content);
     entries.push(
       ...collectBlocks(
         file.markdown.content,
         file.path.relative,
         file.path.href || undefined,
+        source,
       ),
     );
+  }
+
+  for (const entry of entries) {
+    const metadata = entry.href ? pageMetadata.get(entry.href) : undefined;
+    if (metadata) Object.assign(entry, metadata);
   }
 
   const referenced = entries

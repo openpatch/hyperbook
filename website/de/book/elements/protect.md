@@ -22,6 +22,7 @@ Passwort eingegeben wurde.
 |---|---|---|
 | `password` | Passwort, das den Inhalt freischaltet | - |
 | `use` | Schlüssel eines Passworts aus der [Passwortliste](/configuration/passwords) | - |
+| `name` | Bezeichnung dieses Inhalts in einer [Passwortliste](/elements/passwordlist) | abgeleitet |
 | `description` | Hinweis über dem Passwortfeld | - |
 | `id` | Gemeinsame id, um mehrere Bereiche zusammen freizuschalten | automatisch |
 

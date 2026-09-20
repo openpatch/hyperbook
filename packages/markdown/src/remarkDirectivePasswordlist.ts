@@ -31,7 +31,7 @@ const findSection = (
     for (const section of level) {
       if (section.href && href.startsWith(section.href)) {
         // Longest matching prefix wins, so a nested section beats its parent.
-        if (!best || (section.href.length > (best.href?.length || 0))) {
+        if (!best || section.href.length > (best.href?.length || 0)) {
           best = section;
         }
       }
@@ -44,10 +44,7 @@ const findSection = (
 };
 
 /** Name of the page or section a href belongs to, for a readable link label. */
-const findName = (
-  ctx: HyperbookContext,
-  href: string,
-): string | undefined => {
+const findName = (ctx: HyperbookContext, href: string): string | undefined => {
   const walk = (
     pages: { href?: string; name: string }[],
     sections: HyperbookSection[],
@@ -84,6 +81,23 @@ const headerCell = (value: string): ElementContent => ({
 
 const describe = (entry: CollectedPassword): string =>
   entry.description || entry.name || "";
+
+const passwordContent = (entry: CollectedPassword): ElementContent[] => [
+  {
+    type: "element",
+    tagName: "span",
+    properties: { class: "password" },
+    children: [{ type: "text", value: entry.password || "" }],
+  },
+];
+
+const pageLabel = (entry: CollectedPassword): string => {
+  const innerSection = entry.sectionPath?.at(-1);
+  if (innerSection && innerSection !== entry.pageName) {
+    return `${innerSection} – ${entry.pageName || entry.href || ""}`;
+  }
+  return entry.pageName || entry.href || entry.file || "";
+};
 
 /** Plain-text location, for snippets and for entries with nowhere to link. */
 const where = (entry: CollectedPassword, ctx: HyperbookContext): string =>
@@ -143,6 +157,8 @@ export default (ctx: HyperbookContext) => () => {
         format = "table",
         orderBy = "key:asc",
         limit = null,
+        groupBy = null,
+        columns: columnsAttribute = null,
       } = attributes;
 
       expectLeafDirective(node, file, name);
@@ -183,10 +199,19 @@ export default (ctx: HyperbookContext) => () => {
         );
       }
 
-      const sorter = createPageSorter(orderBy);
-      entries = [...entries].sort((a, b) =>
-        sorter(a as Record<string, unknown>, b as Record<string, unknown>),
-      );
+      if (orderBy === "navigation") {
+        entries = [...entries].sort(
+          (a, b) =>
+            (a.navigationIndex ?? Number.MAX_SAFE_INTEGER) -
+              (b.navigationIndex ?? Number.MAX_SAFE_INTEGER) ||
+            (a.line ?? 0) - (b.line ?? 0),
+        );
+      } else {
+        const sorter = createPageSorter(orderBy);
+        entries = [...entries].sort((a, b) =>
+          sorter(a as Record<string, unknown>, b as Record<string, unknown>),
+        );
+      }
 
       if (limit !== null) {
         entries = entries.slice(0, Number(limit));
@@ -220,6 +245,163 @@ export default (ctx: HyperbookContext) => () => {
         continue;
       }
 
+      const columns: string[] = (
+        columnsAttribute || "password,where,description"
+      )
+        .split(",")
+        .map((column: string) => column.trim())
+        .filter(Boolean);
+      const columnTitle = (column: string): string => {
+        if (column === "password") return i18n.get("passwordlist-password");
+        if (column === "where") return i18n.get("passwordlist-where");
+        if (column === "description")
+          return i18n.get("passwordlist-description");
+        if (column === "context") return i18n.get("passwordlist-context");
+        return column;
+      };
+      const columnContent = (
+        entry: CollectedPassword,
+        column: string,
+      ): ElementContent[] => {
+        if (column === "password") return passwordContent(entry);
+        if (column === "where") return whereContent(entry, ctx);
+        if (column === "description") {
+          return [{ type: "text", value: describe(entry) }];
+        }
+        if (column === "context") {
+          return [{ type: "text", value: entry.context || entry.name || "" }];
+        }
+        const value = entry[column as keyof CollectedPassword];
+        return [{ type: "text", value: value == null ? "" : String(value) }];
+      };
+      const table = (tableEntries: CollectedPassword[]): ElementContent => ({
+        type: "element",
+        tagName: "table",
+        properties: {},
+        children: [
+          {
+            type: "element",
+            tagName: "thead",
+            properties: {},
+            children: [
+              {
+                type: "element",
+                tagName: "tr",
+                properties: {},
+                children: columns.map((column) =>
+                  headerCell(columnTitle(column)),
+                ),
+              },
+            ],
+          },
+          {
+            type: "element",
+            tagName: "tbody",
+            properties: {},
+            children: tableEntries.map((entry) => ({
+              type: "element",
+              tagName: "tr",
+              properties: {},
+              children: columns.map((column) =>
+                cell(columnContent(entry, column)),
+              ),
+            })),
+          },
+        ],
+      });
+
+      if (groupBy === "top-section,page") {
+        const grouped = new Map<string, Map<string, CollectedPassword[]>>();
+        for (const entry of entries) {
+          const section =
+            entry.sectionPath?.[0] || i18n.get("passwordlist-other");
+          const page = entry.href || entry.file || entry.key || "";
+          if (!grouped.has(section)) grouped.set(section, new Map());
+          const pages = grouped.get(section)!;
+          pages.set(page, [...(pages.get(page) || []), entry]);
+        }
+        const collapsible = Object.prototype.hasOwnProperty.call(
+          attributes,
+          "collapsible",
+        );
+        const showCount = Object.prototype.hasOwnProperty.call(
+          attributes,
+          "showCount",
+        );
+        data.hChildren = [...grouped.entries()].map(([section, pages]) => {
+          const sectionEntries = [...pages.values()].flat();
+          const itemLabel = i18n.get(
+            sectionEntries.length === 1
+              ? "passwordlist-item"
+              : "passwordlist-items",
+          );
+          const title = `${section}${
+            showCount
+              ? ` (${sectionEntries.length} ${itemLabel})`
+              : ""
+          }`;
+          const content: ElementContent[] = [...pages.values()].flatMap(
+            (pageEntries) => [
+              {
+                type: "element",
+                tagName: "h3",
+                properties: {},
+                children: pageEntries[0].href
+                  ? [
+                      {
+                        type: "element",
+                        tagName: "a",
+                        properties: {
+                          href: ctx.makeUrl(pageEntries[0].href, "book"),
+                        },
+                        children: [
+                          { type: "text", value: pageLabel(pageEntries[0]) },
+                        ],
+                      },
+                    ]
+                  : [{ type: "text", value: pageLabel(pageEntries[0]) }],
+              },
+              table(pageEntries),
+            ],
+          );
+          return collapsible
+            ? {
+                type: "element" as const,
+                tagName: "details",
+                properties: { class: "passwordlist-group" },
+                children: [
+                  {
+                    type: "element" as const,
+                    tagName: "summary",
+                    properties: {},
+                    children: [{ type: "text" as const, value: title }],
+                  },
+                  {
+                    type: "element" as const,
+                    tagName: "div",
+                    properties: { class: "content" },
+                    children: content,
+                  },
+                ],
+              }
+            : {
+                type: "element" as const,
+                tagName: "section",
+                properties: { class: "passwordlist-group" },
+                children: [
+                  {
+                    type: "element" as const,
+                    tagName: "h2",
+                    properties: {},
+                    children: [{ type: "text" as const, value: title }],
+                  },
+                  ...content,
+                ],
+              };
+        });
+        continue;
+      }
+
       if (format === "ul" || format === "ol") {
         data.hChildren = [
           {
@@ -238,9 +420,7 @@ export default (ctx: HyperbookContext) => () => {
                   // copy button and an injected stylesheet.
                   tagName: "span",
                   properties: { class: "password" },
-                  children: [
-                    { type: "text", value: entry.password || "" },
-                  ],
+                  children: [{ type: "text", value: entry.password || "" }],
                 },
                 { type: "text", value: " " },
                 ...whereContent(entry, ctx),
@@ -259,61 +439,7 @@ export default (ctx: HyperbookContext) => () => {
         continue;
       }
 
-      data.hChildren = [
-        {
-          type: "element",
-          tagName: "table",
-          properties: {},
-          children: [
-            {
-              type: "element",
-              tagName: "thead",
-              properties: {},
-              children: [
-                {
-                  type: "element",
-                  tagName: "tr",
-                  properties: {},
-                  children: [
-                    headerCell(i18n.get("passwordlist-password")),
-                    headerCell(i18n.get("passwordlist-where")),
-                    headerCell(i18n.get("passwordlist-description")),
-                  ],
-                },
-              ],
-            },
-            {
-              type: "element",
-              tagName: "tbody",
-              properties: {},
-              children: entries.map((entry) => ({
-                type: "element",
-                tagName: "tr",
-                properties: {},
-                children: [
-                  {
-                    type: "element",
-                    tagName: "td",
-                    properties: {},
-                    children: [
-                      {
-                        type: "element",
-                        tagName: "span",
-                        properties: { class: "password" },
-                        children: [
-                          { type: "text", value: entry.password || "" },
-                        ],
-                      },
-                    ],
-                  },
-                  cell(whereContent(entry, ctx)),
-                  cell([{ type: "text", value: describe(entry) }]),
-                ],
-              })),
-            },
-          ],
-        },
-      ];
+      data.hChildren = [table(entries)];
     }
   };
 };

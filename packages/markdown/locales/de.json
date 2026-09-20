@@ -166,5 +166,9 @@
     "passwordlist-empty": "Keine Passwörter.",
     "passwordlist-password": "Passwort",
     "passwordlist-where": "Wo",
-    "passwordlist-description": "Beschreibung"
+    "passwordlist-description": "Beschreibung",
+    "passwordlist-context": "Aufgabe",
+    "passwordlist-other": "Sonstige",
+    "passwordlist-item": "Lösung",
+    "passwordlist-items": "Lösungen"
 }

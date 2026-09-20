@@ -13,6 +13,22 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 
 :::
 
+## v0.108.0
+
+::::tabs
+
+:::tab{title="New :rocket:" id="new"}
+
+**passwordlist**: Password lists can now be generated from protected solution
+blocks. They support navigation order, grouping by learning path and page,
+collapsible sections, entry counts, configurable columns, and task labels
+inferred from `#aufgabe` snippets or headings. Use `name="…"` on `protect`
+when a block needs an explicit label.
+
+:::
+
+::::
+
 ## v0.170.10
 
 ::::tabs
@@ -231,7 +247,7 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 
 ## v0.104.3
 
-::::tabs
+::::tabs{id="v0-104-3"}
 
 :::tab{title="Fixed :bug:" id="fixed"}
 
@@ -243,7 +259,7 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 
 ## v0.104.2
 
-::::tabs
+::::tabs{id="v0-104-2"}
 
 :::tab{title="Fixed :bug:" id="fixed"}
 

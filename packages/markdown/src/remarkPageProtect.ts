@@ -7,7 +7,7 @@ import { i18n } from "./i18n";
 /** Splits the string and object forms of `protect:` into its two fields. */
 export const readProtectReference = (
   reference: ProtectReference,
-): { use?: string; password?: string; description?: string } =>
+): { use?: string; password?: string; name?: string; description?: string } =>
   typeof reference === "string" ? { use: reference } : reference;
 
 /**
@@ -27,7 +27,9 @@ export default (ctx: HyperbookContext) => () => {
     if (!page?.protect) return;
     if (tree.children.length === 0) return;
 
-    const { use, password, description } = readProtectReference(page.protect);
+    const { use, password, name, description } = readProtectReference(
+      page.protect,
+    );
     const protectedBy = page.protectSource ?? page.href;
 
     tree.children = [
@@ -44,10 +46,13 @@ export default (ctx: HyperbookContext) => () => {
           // books of a hyperlibrary share one origin, and therefore one store,
           // so two translations of a page would otherwise unlock each other.
           id: `page:${
-            protectedBy ? ctx.makeUrl(protectedBy, "book") : file.path || page.name
+            protectedBy
+              ? ctx.makeUrl(protectedBy, "book")
+              : file.path || page.name
           }`,
           ...(use ? { use } : {}),
           ...(password ? { password } : {}),
+          ...(name ? { name } : {}),
           description: description ?? i18n.get("protect-page-description"),
         },
         children: tree.children as any,

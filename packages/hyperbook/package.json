@@ -56,7 +56,7 @@
     "create-hyperbook": "workspace:*",
     "cross-spawn": "7.0.6",
     "domutils": "^4.0.2",
-    "extract-zip": "^2.0.1",
+    "unzipper": "^0.12.5",
     "got": "15.1.0",
     "htmlparser2": "^12.0.0",
     "lunr": "^2.3.9",

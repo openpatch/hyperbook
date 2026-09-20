@@ -29,18 +29,41 @@ Put it on a page you do not publish, or wrap it in a
 
 :::
 ```
+
 ::::
 
 ## Attributes
 
-| Attribute | Description | Default |
-|---|---|---|
-| `scope` | `all`, `section` (the section of the current page) or `page` (the current page) | `all` |
-| `type` | Which kinds of entry to show: `registry`, `section`, `page`, `block`. Comma-separated | `all` |
-| `source` | A query, in the same language as [pagelist](/elements/pagelist) | - |
-| `format` | `table`, `ul`, `ol`, or `#snippet` to render a [snippet](/elements/snippets) | `table` |
-| `orderBy` | Field and direction, e.g. `key:asc` | `key:asc` |
-| `limit` | Show at most this many | - |
+| Attribute     | Description                                                                           | Default                      |
+| ------------- | ------------------------------------------------------------------------------------- | ---------------------------- |
+| `scope`       | `all`, `section` (the section of the current page) or `page` (the current page)       | `all`                        |
+| `type`        | Which kinds of entry to show: `registry`, `section`, `page`, `block`. Comma-separated | `all`                        |
+| `source`      | A query, in the same language as [pagelist](/elements/pagelist)                       | -                            |
+| `format`      | `table`, `ul`, `ol`, or `#snippet` to render a [snippet](/elements/snippets)          | `table`                      |
+| `orderBy`     | Field and direction, e.g. `key:asc`                                                   | `key:asc`                    |
+| `limit`       | Show at most this many                                                                | -                            |
+| `groupBy`     | Use `top-section,page` to group by learning path and page                             | -                            |
+| `collapsible` | Make top-level groups collapsible                                                     | -                            |
+| `showCount`   | Add the number of entries to every group title                                        | -                            |
+| `columns`     | Comma-separated columns: `context`, `password`, `where`, or `description`             | `password,where,description` |
+
+## A generated solutions page
+
+Protected blocks get their context from their `name` attribute, the nearest
+preceding task-snippet title, or the nearest level-two-or-deeper
+heading. A hand-maintained solutions page can therefore use one directive:
+
+```md
+::passwordlist{type="block" orderBy="navigation" groupBy="top-section,page" collapsible showCount columns="context,password"}
+```
+
+For unusual page structures, provide the label explicitly:
+
+```md
+:::protect{password="chapter-2-1" name="Exercise 1: Two approaches"}
+...
+:::
+```
 
 ## Scope
 
@@ -92,7 +115,9 @@ With `format="#name"` the list is rendered through a
 
 ```hbs
 {{#each passwords}}
-- **{{ password }}** — {{ description }} ({{ where }})
+  - **{{password}}** —
+  {{description}}
+  ({{where}})
 {{/each}}
 ```
 

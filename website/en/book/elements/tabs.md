@@ -73,7 +73,7 @@ You can link tabs together by using the same id or the same titles.
 
 ```hyperbook
 ::::tabs{id="code"}
-:::tab{title="Java" id="java"}
+:::tab{title="Java"}
 Java
 :::
 :::tab{title="Python" id="python"}
@@ -94,7 +94,7 @@ C
 ```
 
 ::::tabs{id="code"}
-:::tab{title="Java"}
+:::tab{title="Java" id="java"}
 Java
 :::
 :::tab{title="Python" id="python"}
@@ -103,7 +103,7 @@ Python
 
 Another tabs cluster with the same ids.
 ::::tabs{id="code"}
-:::tab{title="Java"}
+:::tab{title="Java" id="java"}
 Java
 :::
 :::tab{title="Python" id="python"}

@@ -75,6 +75,7 @@ describe("remarkDirectivePasswordlist", () => {
     clearCollectedPasswords();
 
     await write("hyperbook.json", JSON.stringify({ name: "Book" }));
+    await write("snippets/aufgabe.md.hbs", "{{{ content }}}");
     await write(
       "passwords.json",
       JSON.stringify({
@@ -88,7 +89,7 @@ describe("remarkDirectivePasswordlist", () => {
     await write("book/index.md", "---\nname: Home\n---\n\n# Home\n");
     await write(
       "book/chapter1/index.md",
-      '---\nname: Chapter 1\n---\n\n# One\n\n:::protect{use="ch1"}\n\nsecret\n\n:::\n',
+      '---\nname: Chapter 1\n---\n\n# One\n\n## Exercises\n\n:::snippet{#aufgabe}\n**Exercise 1: Two approaches**\n:::\n\n:::protect{use="ch1"}\n\nsecret\n\n:::\n',
     );
     await write(
       "book/chapter1/extra.md",
@@ -172,6 +173,32 @@ describe("remarkDirectivePasswordlist", () => {
       await makeCtx("/"),
     );
     expect([...out.matchAll(/class="password"/g)]).toHaveLength(1);
+  });
+
+  it("groups blocks in navigation order with inferred task context", async () => {
+    const out = await html(
+      '::passwordlist{type="block" orderBy="navigation" groupBy="top-section,page" collapsible showCount columns="context,password"}',
+      await makeCtx("/"),
+    );
+    expect(out).toContain('<details class="passwordlist-group">');
+    expect(out).toContain("Chapter 1 (1 solution)");
+    expect(out).toContain("Exercise 1: Two approaches");
+    expect(out).toContain("alpha");
+    expect(out).not.toContain("Chapter 1 answers");
+  });
+
+  it("prefers an explicit protect name over inferred context", async () => {
+    await write(
+      "book/chapter2/index.md",
+      '---\nname: Chapter 2\n---\n\n## Exercises\n\n:::protect{use="ch2" name="Explicit exercise"}\nsecret\n:::\n',
+    );
+    clearCollectedPasswords();
+    const out = await html(
+      '::passwordlist{type="block" columns="context,password"}',
+      await makeCtx("/"),
+    );
+    expect(out).toContain("Explicit exercise");
+    expect(out).not.toContain(">Exercises<");
   });
 
   it("says so when nothing matches", async () => {

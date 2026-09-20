@@ -30,18 +30,42 @@ Lege sie auf eine Seite, die du nicht veröffentlichst, oder packe sie in einen
 
 :::
 ```
+
 ::::
 
 ## Attribute
 
-| Attribut | Beschreibung | Standard |
-|---|---|---|
-| `scope` | `all`, `section` (Abschnitt der aktuellen Seite) oder `page` (aktuelle Seite) | `all` |
-| `type` | Welche Einträge: `registry`, `section`, `page`, `block`. Mit Komma getrennt | `all` |
-| `source` | Eine Abfrage in derselben Sprache wie bei [pagelist](/elements/pagelist) | - |
-| `format` | `table`, `ul`, `ol` oder `#snippet` für ein [Snippet](/elements/snippets) | `table` |
-| `orderBy` | Feld und Richtung, z. B. `key:asc` | `key:asc` |
-| `limit` | Höchstens so viele anzeigen | - |
+| Attribut      | Beschreibung                                                                  | Standard                     |
+| ------------- | ----------------------------------------------------------------------------- | ---------------------------- |
+| `scope`       | `all`, `section` (Abschnitt der aktuellen Seite) oder `page` (aktuelle Seite) | `all`                        |
+| `type`        | Welche Einträge: `registry`, `section`, `page`, `block`. Mit Komma getrennt   | `all`                        |
+| `source`      | Eine Abfrage in derselben Sprache wie bei [pagelist](/elements/pagelist)      | -                            |
+| `format`      | `table`, `ul`, `ol` oder `#snippet` für ein [Snippet](/elements/snippets)     | `table`                      |
+| `orderBy`     | Feld und Richtung, z. B. `key:asc`                                            | `key:asc`                    |
+| `limit`       | Höchstens so viele anzeigen                                                   | -                            |
+| `groupBy`     | Mit `top-section,page` nach Lernpfad und Seite gruppieren                     | -                            |
+| `collapsible` | Gruppen der obersten Ebene einklappbar darstellen                             | -                            |
+| `showCount`   | Anzahl der Einträge im Gruppentitel anzeigen                                  | -                            |
+| `columns`     | Kommagetrennte Spalten: `context`, `password`, `where` oder `description`     | `password,where,description` |
+
+## Eine erzeugte Lösungsseite
+
+Geschützte Blöcke erhalten ihren Kontext aus dem Attribut `name`, aus dem Titel
+des letzten Aufgaben-Snippets oder aus der letzten Überschrift ab Ebene
+zwei. Eine handgepflegte Lösungsseite kann deshalb aus einem Element bestehen:
+
+```md
+::passwordlist{type="block" orderBy="navigation" groupBy="top-section,page" collapsible showCount columns="context,password"}
+```
+
+Bei ungewöhnlich aufgebauten Seiten kann die Bezeichnung ausdrücklich am
+Block stehen:
+
+```md
+:::protect{password="kapitel-2-1" name="Aufgabe 1: Zwei Wege"}
+...
+:::
+```
 
 ## Bereich
 
@@ -93,7 +117,9 @@ ausgegeben, das `passwords` bekommt:
 
 ```hbs
 {{#each passwords}}
-- **{{ password }}** — {{ description }} ({{ where }})
+  - **{{password}}** —
+  {{description}}
+  ({{where}})
 {{/each}}
 ```
 

@@ -21,6 +21,7 @@ built page — the browser decrypts it after the password is entered.
 |---|---|---|
 | `password` | Password required to unlock the protected content | - |
 | `use` | Key of a password from your [password registry](/configuration/passwords) | - |
+| `name` | Label for this content in a [password list](/elements/passwordlist) | inferred |
 | `description` | Description shown above the password input | - |
 | `id` | Optional shared id for syncing multiple protected blocks | auto-generated |
 

@@ -25,7 +25,7 @@ import {
 import { runArchive } from "./archive";
 import { makeDir } from "./helpers/make-dir";
 import { rimraf } from "rimraf";
-import extractZip from "extract-zip";
+import unzipper from "unzipper";
 import {
   Link,
   Hyperproject,
@@ -743,9 +743,9 @@ async function runBuild(
       await cp(file.path.absolute, fileOut);
     } else if (file.path.href && file.extension === ".h5p") {
       const fileOut = path.join(rootOut, file.path.href);
-      await extractZip(file.path.absolute, {
-        dir: fileOut,
-      });
+      await unzipper.Open.file(file.path.absolute).then((zip) =>
+        zip.extract({ path: fileOut }),
+      );
 
       // Read and modify h5p.json to ensure MathDisplay dependency is present
       const h5pJsonPath = path.join(fileOut, "h5p.json");
