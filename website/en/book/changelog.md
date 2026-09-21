@@ -13,6 +13,18 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 
 :::
 
+## v0.109.1
+
+::::tabs
+
+:::tab{title="New :rocket:" id="new"}
+
+**online-ide**: Images can now be uploaded directly to the online IDE.
+
+:::
+
+::::
+
 ## v0.108.0
 
 ::::tabs
