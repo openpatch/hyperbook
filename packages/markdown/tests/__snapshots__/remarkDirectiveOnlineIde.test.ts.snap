@@ -1,0 +1,39 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`remarkDirectiveOnlineIde > should transform basic online-ide 1`] = `
+"
+<div class="directive-onlineide" style="--onlineide-height: calc(100dvh - 80px)">
+  <div class="java-online" style="padding: 0; margin: 0;" data-java-online="{'id': '86b31f2709794619b79e042348ead9236afbd339b50d286c9e4981f3bd1f66a0', 'speed': 1000, 'withBottomPanel': true,'withPCode': false,'withConsole': true,'withFileList': true,'withErrorList': true, 'libraries': [''], 'binaryFiles': []}">
+    <script type="text/plain" data-type="java">public class Main {
+  public static void main(String[] args) {
+    System.out.println("Hello World");
+  }
+}</script>
+  </div>
+</div>
+"
+`;
+
+exports[`remarkDirectiveOnlineIde > should transform online-ide with @file directives 1`] = `
+"
+<div class="directive-onlineide" style="--onlineide-height: calc(100dvh - 80px)">
+  <div class="java-online" style="padding: 0; margin: 0;" data-java-online="{'id': 'e540f033acf56ff2c67fd25b9e22637cd8e32128034779cc10e6d75dd5247f2a', 'speed': 1000, 'withBottomPanel': true,'withPCode': false,'withConsole': true,'withFileList': true,'withErrorList': true, 'libraries': [''], 'binaryFiles': [{&#x22;dest&#x22;:&#x22;/input/sky.jpg&#x22;,&#x22;url&#x22;:&#x22;/public/images/sky.jpg&#x22;}]}">
+    <script type="text/plain" data-type="java">Bitmap sky = new Bitmap("/input/sky.jpg");</script>
+    <script type="text/plain" title="/input/sky.jpg" data-type="image" src="/public/images/sky.jpg"></script>
+  </div>
+</div>
+"
+`;
+
+exports[`remarkDirectiveOnlineIde > should transform online-ide with multiple @file directives 1`] = `
+"
+<div class="directive-onlineide" style="--onlineide-height: calc(100dvh - 80px)">
+  <div class="java-online" style="padding: 0; margin: 0;" data-java-online="{'id': 'cba0bd899028a244b740f25d95a208aea0884d8cff0d03200e09beb5ec76b845', 'speed': 1000, 'withBottomPanel': true,'withPCode': false,'withConsole': true,'withFileList': true,'withErrorList': true, 'libraries': [''], 'binaryFiles': [{&#x22;dest&#x22;:&#x22;/input/image1.jpg&#x22;,&#x22;url&#x22;:&#x22;/public/images/image1.jpg&#x22;},{&#x22;dest&#x22;:&#x22;/input/image2.jpg&#x22;,&#x22;url&#x22;:&#x22;/public/images/image2.jpg&#x22;}]}">
+    <script type="text/plain" data-type="java">Bitmap img1 = new Bitmap("/input/image1.jpg");
+Bitmap img2 = new Bitmap("/input/image2.jpg");</script>
+    <script type="text/plain" title="/input/image1.jpg" data-type="image" src="/public/images/image1.jpg"></script>
+    <script type="text/plain" title="/input/image2.jpg" data-type="image" src="/public/images/image2.jpg"></script>
+  </div>
+</div>
+"
+`;
