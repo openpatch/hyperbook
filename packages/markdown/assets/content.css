@@ -202,6 +202,29 @@ img.emoji {
   margin: 0;
 }
 
+.hyperbook-markdown .contains-task-list {
+  list-style: none;
+}
+
+.hyperbook-markdown .task-list-item {
+  list-style: none;
+}
+
+.hyperbook-markdown .task-list-item > input[type="checkbox"] {
+  width: 1.1em;
+  height: 1.1em;
+  margin: 0 0.5em 0 -1.6em;
+  vertical-align: -0.12em;
+  accent-color: var(--color-brand);
+  cursor: pointer;
+}
+
+.hyperbook-markdown .task-list-item.completed {
+  color: var(--color-text-deactivated);
+  text-decoration: line-through;
+  text-decoration-thickness: 0.08em;
+}
+
 .hyperbook-markdown p,
 .hyperbook-markdown blockquote,
 .hyperbook-markdown ol,

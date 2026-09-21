@@ -40,12 +40,16 @@ hyperbook.h5p = (function () {
       const h5pFrame = el.querySelector(".h5p-frame");
       const src = el.getAttribute("data-src");
       const id = el.getAttribute("data-id");
+      const allowExport = el.getAttribute("data-export") === "true";
+      const downloadUrl = el.getAttribute("data-download-url");
       if (h5pFrame && src) {
         const result = await hyperbook.store.db.h5p.get(id);
         const h5pOptions = {
           ...h5pBaseOptions,
           id,
           h5pJsonPath: src,
+          export: allowExport,
+          downloadUrl: allowExport ? downloadUrl : undefined,
           contentUserData: result
             ? [{ state: JSON.stringify(result.userData) }]
             : undefined,

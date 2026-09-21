@@ -92,6 +92,13 @@ hyperbook.store = (function () {
     bitflow: `id`,
   });
 
+  // Interactive GitHub-Flavoured Markdown task-list items. The id combines
+  // the page path and the item's content-derived id; checked is content, not
+  // something callers query by.
+  db.version(10).stores({
+    checklist: `id`,
+  });
+
   /**
    * Re-applies the data migrations from v6 and v7 to rows that were imported
    * from an older export. Dexie's `.upgrade()` callbacks only run during a

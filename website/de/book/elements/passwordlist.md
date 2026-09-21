@@ -35,18 +35,18 @@ Lege sie auf eine Seite, die du nicht veröffentlichst, oder packe sie in einen
 
 ## Attribute
 
-| Attribut      | Beschreibung                                                                  | Standard                     |
-| ------------- | ----------------------------------------------------------------------------- | ---------------------------- |
-| `scope`       | `all`, `section` (Abschnitt der aktuellen Seite) oder `page` (aktuelle Seite) | `all`                        |
-| `type`        | Welche Einträge: `registry`, `section`, `page`, `block`. Mit Komma getrennt   | `all`                        |
-| `source`      | Eine Abfrage in derselben Sprache wie bei [pagelist](/elements/pagelist)      | -                            |
-| `format`      | `table`, `ul`, `ol` oder `#snippet` für ein [Snippet](/elements/snippets)     | `table`                      |
-| `orderBy`     | Feld und Richtung, z. B. `key:asc`                                            | `key:asc`                    |
-| `limit`       | Höchstens so viele anzeigen                                                   | -                            |
-| `groupBy`     | Mit `top-section,page` nach Lernpfad und Seite gruppieren                     | -                            |
-| `collapsible` | Gruppen der obersten Ebene einklappbar darstellen                             | -                            |
-| `showCount`   | Anzahl der Einträge im Gruppentitel anzeigen                                  | -                            |
-| `columns`     | Kommagetrennte Spalten: `context`, `password`, `where` oder `description`     | `password,where,description` |
+| Attribut      | Beschreibung                                                                                                                                                   | Standard                     |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------- |
+| `scope`       | `all`, `section` (Abschnitt der aktuellen Seite) oder `page` (aktuelle Seite)                                                                                  | `all`                        |
+| `type`        | Welche Einträge: `registry`, `section`, `page`, `block`. Mit Komma getrennt                                                                                    | `all`                        |
+| `source`      | Eine Abfrage in derselben Sprache wie bei [pagelist](/elements/pagelist)                                                                                       | -                            |
+| `format`      | `table`, `ul`, `ol` oder `#snippet` für ein [Snippet](/elements/snippets)                                                                                      | `table`                      |
+| `orderBy`     | Feld und Richtung, z. B. `key:asc`                                                                                                                             | `key:asc`                    |
+| `limit`       | Höchstens so viele anzeigen                                                                                                                                    | -                            |
+| `groupBy`     | Kommagetrennte Ebenen: `section`, `top-section`, `page` oder Eintragsfelder wie `type`, `key`, `context`, `name`, `description`, `password`, `href` und `file` | -                            |
+| `collapsible` | Gruppen für diese Ebenen einklappen (`collapsible` = 1, `collapsible="2"` = zwei Ebenen, `collapsible="all"` = alle Ebenen)                                    | -                            |
+| `showCount`   | Anzahl der Einträge im Gruppentitel anzeigen                                                                                                                   | -                            |
+| `columns`     | Kommagetrennte Spalten: `context`, `password`, `where` oder `description`                                                                                      | `password,where,description` |
 
 ## Eine erzeugte Lösungsseite
 
@@ -57,6 +57,24 @@ zwei. Eine handgepflegte Lösungsseite kann deshalb aus einem Element bestehen:
 ```md
 ::passwordlist{type="block" orderBy="navigation" groupBy="top-section,page" collapsible showCount columns="context,password"}
 ```
+
+Die Gruppierung wird von links nach rechts angewendet (Kommas und `/` sind als
+Trennzeichen möglich). `section` folgt der
+gesamten Navigationshierarchie und erzeugt dadurch automatisch verschachtelte
+Gruppen; mit `section,page` (oder `section/section/page`) werden Abschnitte,
+Unterabschnitte und danach ihre Seiten gruppiert. `top-section` ist die Kurzform,
+die nur nach dem äußersten
+Abschnitt gruppiert. Für eine Registry-Ansicht kann zum Beispiel nach Typ und
+Schlüssel gruppiert werden:
+
+```md
+::passwordlist{groupBy="type,key" showCount}
+```
+
+Einträge ohne Wert landen in einer Gruppe `Sonstige`. Der Titel einer
+`page`-Gruppe verlinkt auf die Seite, sofern es eine gibt. Gruppierung
+funktioniert mit Tabellen und Listen; Snippets erhalten weiterhin die flache,
+gefilterte Eintragsliste.
 
 Bei ungewöhnlich aufgebauten Seiten kann die Bezeichnung ausdrücklich am
 Block stehen:

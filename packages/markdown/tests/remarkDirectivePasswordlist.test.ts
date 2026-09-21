@@ -180,11 +180,66 @@ describe("remarkDirectivePasswordlist", () => {
       '::passwordlist{type="block" orderBy="navigation" groupBy="top-section,page" collapsible showCount columns="context,password"}',
       await makeCtx("/"),
     );
-    expect(out).toContain('<details class="passwordlist-group">');
+    expect(out).toContain('<details class="directive-collapsible"');
     expect(out).toContain("Chapter 1 (1 solution)");
     expect(out).toContain("Exercise 1: Two approaches");
     expect(out).toContain("alpha");
     expect(out).not.toContain("Chapter 1 answers");
+  });
+
+  it("supports scalar grouping levels and list output", async () => {
+    const out = await html(
+      '::passwordlist{type="block" groupBy="type,key" format="ul" showCount}',
+      await makeCtx("/"),
+    );
+    expect(out).toContain("<h2>block (2 solutions)</h2>");
+    expect(out).toContain("<h3>ch1 (1 solution)</h3>");
+    expect(out).toContain("<ul>");
+    expect(out).toContain("alpha");
+  });
+
+  it("renders every section ancestor as a nested group", async () => {
+    await write(
+      "book/chapter1/topic/index.md",
+      '---\nname: Topic\n---\n\n# Topic\n\n:::protect{use="ch1"}\nsecret\n:::\n',
+    );
+    clearCollectedPasswords();
+    const out = await html(
+      '::passwordlist{type="block" groupBy="section,page"}',
+      await makeCtx("/"),
+    );
+    expect(out).toContain("<h2>Chapter 1</h2>");
+    expect(out).toContain("<h3>Topic</h3>");
+    expect(out).toContain("<h4>");
+    expect(out).toContain("/book/chapter1/topic");
+  });
+
+  it("accepts slash-separated grouping and collapses nested groups", async () => {
+    const out = await html(
+      '::passwordlist{type="block" groupBy="section/section/page" collapsible="all"}',
+      await makeCtx("/"),
+    );
+    // There are outer section details and nested page details. Repeated
+    // `section` does not duplicate the navigation ancestry.
+    expect(
+      [...out.matchAll(/class="directive-collapsible"/g)].length,
+    ).toBeGreaterThanOrEqual(3);
+    expect(out).toContain("<summary>Chapter 1</summary>");
+  });
+
+  it("limits collapsibles to the requested number of levels", async () => {
+    await write(
+      "book/chapter1/topic/index.md",
+      '---\nname: Topic\n---\n\n# Topic\n\n:::protect{use="ch1"}\nsecret\n:::\n',
+    );
+    clearCollectedPasswords();
+    const out = await html(
+      '::passwordlist{type="block" groupBy="section/page" collapsible="2"}',
+      await makeCtx("/"),
+    );
+    // Section and page groups collapse; a deeper page group is rendered as a
+    // regular heading instead of another <details> element.
+    expect(out).toContain("<h4>");
   });
 
   it("prefers an explicit protect name over inferred context", async () => {
@@ -209,10 +264,8 @@ describe("remarkDirectivePasswordlist", () => {
     expect(out).toContain("No passwords.");
   });
 
-  it("does not wrap passwords in <code>", async () => {
-    // rehypePrettyCode turns every code element into a highlighted figure with
-    // a copy button and an injected stylesheet, which is not wanted here.
+  it("renders passwords as copyable code", async () => {
     const out = await html("::passwordlist", await makeCtx("/"));
-    expect(out).not.toContain("<code");
+    expect(out).toContain('<code class="password">');
   });
 });

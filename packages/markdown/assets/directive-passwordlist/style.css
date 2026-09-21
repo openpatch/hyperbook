@@ -17,11 +17,56 @@
 .directive-passwordlist .passwordlist-group {
   margin-block: 1rem;
 }
-.directive-passwordlist details.passwordlist-group > summary {
-  cursor: pointer;
-  font-size: 1.15em;
-  font-weight: 600;
+
+/* Keep grouped password lists visually identical to :::collapsible. */
+.directive-passwordlist details.directive-collapsible {
+  display: flow-root;
+  margin-block: 1rem;
 }
-.directive-passwordlist .passwordlist-group > .content {
-  padding-inline: 1rem;
+.directive-passwordlist details.directive-collapsible > summary {
+  width: 100%;
+  box-sizing: border-box;
+  text-align: left;
+  border: 1px solid var(--color-spacer);
+  cursor: pointer;
+  user-select: none;
+  font-size: 100%;
+  padding: 8px 16px;
+  border-radius: 4px;
+  margin-bottom: 0;
+  list-style: none;
+  color: var(--color-text);
+  background-color: var(--color-nav);
+}
+.directive-passwordlist
+  details.directive-collapsible
+  > summary::-webkit-details-marker,
+.directive-passwordlist details.directive-collapsible > summary::marker {
+  display: none;
+}
+.directive-passwordlist details.directive-collapsible > summary::after {
+  content: "\02795";
+  font-size: 0.8125rem;
+  float: right;
+  margin-left: 5px;
+  color: var(--color-text);
+}
+.directive-passwordlist details.directive-collapsible[open] > summary {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+.directive-passwordlist details.directive-collapsible[open] > summary::after {
+  content: "\2796";
+}
+.directive-passwordlist details.directive-collapsible > .content {
+  border-top: none;
+  margin-bottom: 0;
+  display: block;
+  border-style: solid;
+  border-width: 1px;
+  padding: 6px 12px;
+  padding-top: 12px;
+  border-bottom-left-radius: 4px;
+  border-bottom-right-radius: 4px;
+  border-color: var(--color-spacer);
 }

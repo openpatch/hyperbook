@@ -77,6 +77,7 @@ import remarkDirectiveBlockflowPlayer from "./remarkDirectiveBlockflowPlayer";
 import remarkDirectiveBlockflowEditor from "./remarkDirectiveBlockflowEditor";
 import remarkDirectiveKirimoto from "./remarkDirectiveKirimoto";
 import remarkDirectiveBitflow from "./remarkDirectiveBitflow";
+import remarkChecklist from "./remarkChecklist";
 
 export const remark = (ctx: HyperbookContext) => {
   i18n.init(ctx.config.language || "en");
@@ -95,6 +96,7 @@ export const remark = (ctx: HyperbookContext) => {
     remarkImageAttrs(ctx),
     remarkImage(ctx),
     remarkGfm,
+    remarkChecklist,
     remarkSubSup,
     remarkDirectiveTerm(ctx),
     remarkDirectiveEmbed(ctx),

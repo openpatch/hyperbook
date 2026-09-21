@@ -34,18 +34,18 @@ Put it on a page you do not publish, or wrap it in a
 
 ## Attributes
 
-| Attribute     | Description                                                                           | Default                      |
-| ------------- | ------------------------------------------------------------------------------------- | ---------------------------- |
-| `scope`       | `all`, `section` (the section of the current page) or `page` (the current page)       | `all`                        |
-| `type`        | Which kinds of entry to show: `registry`, `section`, `page`, `block`. Comma-separated | `all`                        |
-| `source`      | A query, in the same language as [pagelist](/elements/pagelist)                       | -                            |
-| `format`      | `table`, `ul`, `ol`, or `#snippet` to render a [snippet](/elements/snippets)          | `table`                      |
-| `orderBy`     | Field and direction, e.g. `key:asc`                                                   | `key:asc`                    |
-| `limit`       | Show at most this many                                                                | -                            |
-| `groupBy`     | Use `top-section,page` to group by learning path and page                             | -                            |
-| `collapsible` | Make top-level groups collapsible                                                     | -                            |
-| `showCount`   | Add the number of entries to every group title                                        | -                            |
-| `columns`     | Comma-separated columns: `context`, `password`, `where`, or `description`             | `password,where,description` |
+| Attribute     | Description                                                                                                                                                                  | Default                      |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------- |
+| `scope`       | `all`, `section` (the section of the current page) or `page` (the current page)                                                                                              | `all`                        |
+| `type`        | Which kinds of entry to show: `registry`, `section`, `page`, `block`. Comma-separated                                                                                        | `all`                        |
+| `source`      | A query, in the same language as [pagelist](/elements/pagelist)                                                                                                              | -                            |
+| `format`      | `table`, `ul`, `ol`, or `#snippet` to render a [snippet](/elements/snippets)                                                                                                 | `table`                      |
+| `orderBy`     | Field and direction, e.g. `key:asc`                                                                                                                                          | `key:asc`                    |
+| `limit`       | Show at most this many                                                                                                                                                       | -                            |
+| `groupBy`     | Comma-separated grouping levels: `section`, `top-section`, `page`, or any entry field such as `type`, `key`, `context`, `name`, `description`, `password`, `href`, or `file` | -                            |
+| `collapsible` | Collapse groups for this many levels (`collapsible` = 1, `collapsible="2"` = two levels, `collapsible="all"` = every level)                                                  | -                            |
+| `showCount`   | Add the number of entries to every group title                                                                                                                               | -                            |
+| `columns`     | Comma-separated columns: `context`, `password`, `where`, or `description`                                                                                                    | `password,where,description` |
 
 ## A generated solutions page
 
@@ -56,6 +56,22 @@ heading. A hand-maintained solutions page can therefore use one directive:
 ```md
 ::passwordlist{type="block" orderBy="navigation" groupBy="top-section,page" collapsible showCount columns="context,password"}
 ```
+
+Grouping levels are applied from left to right (commas and `/` are accepted as
+separators). `section` follows the complete
+navigation hierarchy and therefore creates nested groups automatically; use
+`section,page` (or the equivalent `section/section/page`) for sections,
+subsections, and then their pages. `top-section`
+is the short form that groups only by the outermost section. Grouping by a
+field is useful for registry views, for example:
+
+```md
+::passwordlist{groupBy="type,key" showCount}
+```
+
+Entries without a value are collected in an `Other` group. The `page` group
+title links to the page when one exists. Grouping works with table and list
+formats; snippets continue to receive the flat, filtered entry list.
 
 For unusual page structures, provide the label explicitly:
 

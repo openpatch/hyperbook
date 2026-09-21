@@ -18,7 +18,25 @@ export default (ctx: HyperbookContext) => () => {
     visit(tree, function (node) {
       if (isDirective(node) && node.name === name) {
         const data = node.data || (node.data = {});
-        const { src, id = resolveDirectiveId(file, node), ...props } = node.attributes || {};
+        const attributes = node.attributes || {};
+        const src = attributes.src;
+        const id = attributes.id || resolveDirectiveId(file, node);
+        const allowExport =
+          attributes.export !== undefined && attributes.export !== "false";
+        const resolvedSrc = src
+          ? ctx.makeUrl(src, "public", ctx.navigation.current || undefined)
+          : undefined;
+        const archiveName = src?.split("/").filter(Boolean).pop();
+        const configuredDownloadUrl = attributes["download-url"];
+        const resolvedDownloadUrl = configuredDownloadUrl
+          ? ctx.makeUrl(
+              configuredDownloadUrl,
+              "public",
+              ctx.navigation.current || undefined,
+            )
+          : resolvedSrc && archiveName
+            ? `${resolvedSrc}/${archiveName}`
+            : undefined;
 
         expectLeafDirective(node, file, name);
         registerDirective(
@@ -28,15 +46,13 @@ export default (ctx: HyperbookContext) => () => {
           ["style.css"],
           [],
         );
-
-        const {} = node.attributes || {};
         data.hName = "div";
         data.hProperties = {
           class: "directive-h5p",
-          "data-src": src
-            ? ctx.makeUrl(src, "public", ctx.navigation.current || undefined)
-            : undefined,
+          "data-src": resolvedSrc,
           "data-id": id,
+          "data-export": allowExport ? "true" : undefined,
+          "data-download-url": allowExport ? resolvedDownloadUrl : undefined,
         };
         data.hChildren = [
           {

@@ -11,17 +11,29 @@ You can embed H5P content in your book using the `h5p` element. You can load H5P
 
 ## Attributes
 
-| Attribute | Description | Default |
-|---|---|---|
-| `src` | Path to the H5P file | - |
+| Attribute      | Description                                                 | Default                      |
+| -------------- | ----------------------------------------------------------- | ---------------------------- |
+| `src`          | Path to the H5P file                                        | -                            |
+| `export`       | Show the Reuse button for downloading the original H5P file | `false`                      |
+| `download-url` | Alternate path or URL downloaded by the Reuse button        | The original file from `src` |
 
 ```md
 ::h5p{src="/test.h5p"}
 ```
+
 ::h5p{src="/test.h5p"}
 
 The best way to create H5P content is to use the [ZUM Apps](https://apps.zum.de) website. You can create and edit H5P content on the website, and then download the content as an H5P file. For this you can use the Reuse button. You can then put the h5p file into your public folder and use it in a h5p-element.
 
 ## Example with Reuse-Button
 
-::h5p{src="/reuse.h5p"}
+Add the `export` attribute to let readers download and reuse the original `.h5p`
+file.
+
+Use `download-url` when the downloadable package is hosted at a different URL.
+
+```md
+::h5p{src="/reuse.h5p" export}
+```
+
+::h5p{src="/reuse.h5p" export}

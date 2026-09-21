@@ -793,6 +793,14 @@ async function runBuild(
         );
         await rimraf(path.join(fileOut, libraryFolder));
       }
+
+      // The player reads the extracted directory at the original `.h5p` URL.
+      // Keep the source archive inside it as well so an opt-in H5P export
+      // button has a real file to download rather than pointing at a folder.
+      await cp(
+        file.path.absolute,
+        path.join(fileOut, path.basename(file.path.href)),
+      );
     }
     writeProgress(
       `${chalk.blue(`[${prefix}]`)} Copying public files: [${i++}/${otherFiles.length}]`,

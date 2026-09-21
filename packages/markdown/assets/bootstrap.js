@@ -137,6 +137,61 @@ hyperbook.bootstrap = (function () {
   }
 
   /**
+   * Make Markdown task-list items interactive and restore their checked state.
+   *
+   * remark-gfm deliberately renders disabled checkboxes because Markdown is
+   * otherwise static. Hyperbook can enable them because their state has a
+   * persistent home. The page path separates books that share an origin, and
+   * the build-time content id survives unrelated edits around the task.
+   *
+   * @param {HTMLElement|Document} root
+   */
+  function initChecklists(root) {
+    const selector =
+      ".hyperbook-markdown .task-list-item > input[type='checkbox']";
+    const pageInputs = Array.from(document.querySelectorAll(selector));
+    const inputs = root.matches?.(selector)
+      ? [root]
+      : Array.from(root.querySelectorAll(selector));
+
+    for (const input of inputs) {
+      if (input.dataset.hyperbookChecklist === "initialized") continue;
+
+      const index = pageInputs.indexOf(input);
+      if (index === -1) continue;
+
+      input.dataset.hyperbookChecklist = "initialized";
+      input.disabled = false;
+
+      const item = input.closest(".task-list-item");
+      // New pages carry a content-derived id. The index keeps pages generated
+      // by older Markdown packages usable with these newer client assets.
+      const checklistId = item?.dataset.checklistId || index;
+      const id = `markdown-checklist:${window.location.pathname}:${checklistId}`;
+      let changedByReader = false;
+
+      const updateVisual = () => {
+        item?.classList.toggle("completed", input.checked);
+      };
+
+      updateVisual();
+      input.addEventListener("change", () => {
+        changedByReader = true;
+        updateVisual();
+        hyperbook.store.db.checklist.put({ id, checked: input.checked });
+      });
+
+      hyperbook.store.db.checklist.get(id).then((saved) => {
+        // Do not let a slower IndexedDB read undo a click made during startup.
+        if (saved && !changedByReader) {
+          input.checked = saved.checked;
+          updateVisual();
+        }
+      });
+    }
+  }
+
+  /**
    * Bookmark buttons are handled by one delegated listener, so headings that
    * are added later work too and no heading has to carry its label in an
    * inline script.
@@ -157,6 +212,7 @@ hyperbook.bootstrap = (function () {
     initCollapsibles(root);
     initSearch(root);
     initBookmarks(root);
+    initChecklists(root);
   }
 
   /**
