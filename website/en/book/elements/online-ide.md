@@ -25,17 +25,27 @@ Java-like programming language (compiler, interpreter, debugger) with IDE that r
 
 Use `@file` directives inside the `:::onlineide` block to reference external files (such as images) that your Java code can access.
 
-```markdown
 :::onlineide
 
-@file dest="/input/sky.jpg" src="images/sky.jpg"
+@file dest="sky.jpg" src="/clouds.jpg"
 
-```java
-Bitmap sky = new Bitmap("/input/sky.jpg");
+```java Main.java
+Bitmap sky = new Bitmap("sky.jpg");
 ```
 
 :::
+
+````markdown
+:::onlineide Main.java
+
+@file dest="sky.jpg" src="/clouds.jpg"
+
+```java
+Bitmap sky = new Bitmap("sky.jpg");
 ```
+
+:::
+````
 
 The `@file` directive takes two parameters:
 - `dest`: The path where the file should be accessible from within your Java code (e.g., `/input/sky.jpg`)
@@ -45,7 +55,7 @@ You can include multiple `@file` directives to reference multiple files.
 
 :::onlineide
 
-````markdown A Hint
+```markdown A Hint
 ## Tip:
 
 Tips are written in a simple Markdown syntax which
@@ -64,7 +74,7 @@ vx = v \* Math.cos(w);
 vy = v \* Math.sin(w);
 
 ```
-````
+
 
 ```java Feuerwerk.java
 

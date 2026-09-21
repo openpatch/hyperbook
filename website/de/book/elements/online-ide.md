@@ -23,17 +23,27 @@ Das Online-IDE element akzeptiert folgende Parameter:
 
 Verwenden Sie `@file`-Direktiven innerhalb des `:::onlineide`-Blocks, um externe Dateien (z.B. Bilder) zu referenzieren, auf die Ihr Java-Code zugreifen kann.
 
-```markdown
 :::onlineide
 
-@file dest="/input/himmel.jpg" src="bilder/himmel.jpg"
+@file dest="sky.jpg" src="/clouds.jpg"
 
-```java
-Bitmap himmel = new Bitmap("/input/himmel.jpg");
+```java Main.java
+Bitmap sky = new Bitmap("sky.jpg");
 ```
 
 :::
+
+````markdown
+:::onlineide Main.java
+
+@file dest="sky.jpg" src="/clouds.jpg"
+
+```java
+Bitmap sky = new Bitmap("sky.jpg");
 ```
+
+:::
+````
 
 Die `@file`-Direktive nimmt zwei Parameter:
 - `dest`: Der Pfad, unter dem die Datei in Ihrem Java-Code verfügbar sein soll (z.B. `/input/himmel.jpg`)
