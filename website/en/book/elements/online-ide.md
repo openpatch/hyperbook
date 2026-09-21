@@ -21,6 +21,28 @@ Java-like programming language (compiler, interpreter, debugger) with IDE that r
 
 (See: https://github.com/martin-pabst/Online-IDE-new-compiler).
 
+## Load binary files
+
+Use `@file` directives inside the `:::onlineide` block to reference external files (such as images) that your Java code can access.
+
+```markdown
+:::onlineide
+
+@file dest="/input/sky.jpg" src="images/sky.jpg"
+
+```java
+Bitmap sky = new Bitmap("/input/sky.jpg");
+```
+
+:::
+```
+
+The `@file` directive takes two parameters:
+- `dest`: The path where the file should be accessible from within your Java code (e.g., `/input/sky.jpg`)
+- `src`: The source path to the file in your project (e.g., `images/sky.jpg`)
+
+You can include multiple `@file` directives to reference multiple files.
+
 :::onlineide
 
 ````markdown A Hint
