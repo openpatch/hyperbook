@@ -1,5 +1,19 @@
 # hyperbook
 
+## 0.109.0
+
+### Minor Changes
+
+- [`99ab629`](https://github.com/openpatch/hyperbook/commit/99ab6295062e86189a72d2bb960478bc8c8bc184) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Expand `passwordlist` grouping to support nested navigation sections, arbitrary
+  entry fields, composable grouping levels, and grouped list output.
+
+- [`99ab629`](https://github.com/openpatch/hyperbook/commit/99ab6295062e86189a72d2bb960478bc8c8bc184) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Make Markdown checklists interactive, persist their checked state in the Hyperbook store, and show
+  completed items with an accessible themed checkbox and struck-through label.
+
+- [`99ab629`](https://github.com/openpatch/hyperbook/commit/99ab6295062e86189a72d2bb960478bc8c8bc184) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add an opt-in `export` attribute to H5P directives. It displays H5P's Reuse button and retains the
+  original `.h5p` package in built books so readers can download it. An optional `download-url`
+  attribute can point the button at a separately hosted package.
+
 ## 0.108.0
 
 ### Minor Changes
