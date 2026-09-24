@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.109.1
+
+### Patch Changes
+
+- [`478ecaf`](https://github.com/openpatch/hyperbook/commit/478ecafd719e6910a84b54929249e63f9db6964b) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add image uploads to the online IDE.
+
 ## 0.109.0
 
 ### Minor Changes
