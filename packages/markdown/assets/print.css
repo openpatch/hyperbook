@@ -75,6 +75,40 @@
     width: auto !important;
   }
 
+  /* A bitflow assessment is its own scroll container the same way `main` is:
+     `.directive-bitflow` clips at `overflow: hidden` with a `height`/
+     `max-height` sized for the screen (see directive-bitflow/style.css), and
+     bitflow's own shell scrolls inside that box. `end-certificate`'s
+     `window.print()` — or a reader printing the page themselves — would
+     otherwise get one screen's worth of the flow, clipped, rather than the
+     whole thing flowed onto as many sheets as it takes.
+
+     Both height properties there read a `--bitflow-height`/
+     `--bitflow-max-height` custom property the directive sets inline, and an
+     inline declaration outranks any external rule short of `!important` — but
+     only for the *same* property. `height`/`max-height`/`overflow` here are
+     plain properties, set by that stylesheet's own `.directive-bitflow` rule,
+     not inline, so this can win them cleanly. It still needs one extra class
+     of specificity to do it without `!important`: `.directive-bitflow`'s own
+     styles load after this file (every directive's stylesheet does, so a bit
+     can outrank the book — see content.css), so at equal specificity they
+     would win the tie. `.hyperbook-markdown .directive-bitflow` costs nothing
+     — the element is always inside it — and settles the tie in this rule's
+     favour regardless of load order. */
+  .hyperbook-markdown .directive-bitflow {
+    height: auto;
+    max-height: none;
+    overflow: visible;
+  }
+
+  /* Reset and the Check/Back/Next bar drive navigation between steps, which
+     printing has already resolved by putting every step on the sheet. */
+  .directive-bitflow .buttons,
+  .directive-bitflow .bitflow-shell-controls,
+  .directive-bitflow .bitflow-progress {
+    display: none !important;
+  }
+
   @page {
     margin: 2cm;
   }

@@ -84,9 +84,10 @@ code[data-theme*=" "] span {
   color: rgb(233, 213, 255) !important;
 }
 
-/* bitflow's own theme is light-only — `@bitflow/core`'s theme.css defines its
-   72 tokens once, with no `prefers-color-scheme` block. So a dark book has to
-   supply the dark half itself.
+/* bitflow has a dark theme, switched on by `color-scheme: dark` below. The
+   rest of this block puts the flow on the book's own dark surfaces rather than
+   bitflow's, and carries the dark feedback pairs for bundles from before
+   bitflow shipped them — they are the same values it now ships.
 
    Declared on the container rather than on `:root`: bitflow injects theme.css
    into the head at import time, which puts it after this file in the cascade,
@@ -118,6 +119,13 @@ code[data-theme*=" "] span {
    belongs upstream in theme.css; until bitflow ships a dark half, a dark book
    has to carry it. */
 .directive-bitflow {
+  /* bitflow's own tokens are light-dark() pairs, and this is the switch: every
+     colour it draws — the neutral scale included, which the overrides below
+     cannot safely flip — takes its dark value, and so do its native controls
+     and scrollbars. Needs @bitflow/web-component with the dark theme; an older
+     bundle ignores it and the overrides below carry the dark look alone. */
+  color-scheme: dark;
+
   --bitflow-color-background: var(--color-background);
   --bitflow-color-surface: var(--color-author-background);
   --bitflow-color-border: var(--color-nav-border);
@@ -142,4 +150,23 @@ code[data-theme*=" "] span {
   --bitflow-color-info-surface: #1e2a31;
   --bitflow-color-manual: #958cb4;
   --bitflow-color-manual-surface: #2b2836;
+}
+
+/* The brand family, dark half. `:root` in front for specificity alone:
+   directive-bitflow/style.css declares the light half on `.directive-bitflow`
+   and may load after this file, which would win a tie.
+
+   Here `--color-brand` is the light `--color-brand-dark`, so text on it wants the page background rather than
+   `--color-brand-text` (which is only defined for light mode); `-dark` is
+   used both as an accent text colour and as the hover of a filled button,
+   so it lifts toward white; `-light` is a tint for selected rows and sinks
+   into the background instead of glaring. */
+:root .directive-bitflow {
+  --bitflow-color-primary-dark: color-mix(in srgb, var(--color-brand), white 25%);
+  --bitflow-color-primary-light: color-mix(
+    in srgb,
+    var(--color-brand) 30%,
+    var(--color-background)
+  );
+  --bitflow-color-on-primary: var(--color-background);
 }

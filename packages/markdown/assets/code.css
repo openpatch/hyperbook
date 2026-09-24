@@ -6,7 +6,13 @@ pre:has(code) {
   position: relative;
 }
 
-pre code:not(:where(.not-content *)) {
+/* `:where()` already carries zero specificity, so folding the bitflow
+   exclusion into the same `:where()` list — rather than adding a second
+   `:not()` of its own — leaves this rule's specificity exactly as it was for
+   every `pre code` outside a flow. bitflow's own code samples (task-code-trace,
+   the maths bit's LaTeX preview) draw their own borders and backgrounds that
+   `all: unset` would otherwise strip. */
+pre code:not(:where(.not-content *, .directive-bitflow *)) {
   all: unset;
 }
 
@@ -27,7 +33,13 @@ figure[data-rehype-pretty-code-figure] pre code {
   padding: .75rem 0;
 }
 
-span>code {
+/* `:where(:not(...))` keeps this at `span>code`'s own specificity — plain
+   `:not(.directive-bitflow *)` would raise it and could tip a directive that
+   already out-specifies this rule for its own inline code. Without the
+   exclusion, an inline `<code>` inside a bitflow task (a Markdown-authored
+   question or option) is forced `inline-flex` with a border it never asked
+   for. */
+span>code:where(:not(.directive-bitflow *)) {
   font-size: 85%;
   border-color: var(--color-spacer);
   border-style: solid;

@@ -24,10 +24,15 @@ Lege eine Flow-Datei neben deine Seite (oder nach `public/`) und verweise mit de
 | Attribut   | Beschreibung                                          | Standard            |
 | ---------- | ----------------------------------------------------- | ------------------- |
 | `id`       | Eindeutige Kennung für diesen Flow                    | automatisch erzeugt |
-| `height`   | Höhe des Containers, zum Beispiel `600px` oder `100%` | `600px`             |
+| `height`   | Höhe des Containers, zum Beispiel `600px` oder `100%`; `auto` wächst mit dem Ablauf mit | `600px`             |
+| `maxHeight` | Wie hoch der Container höchstens wird, mit `height="auto"` genauso wie mit einer festen `height`, zum Beispiel `80vh`; darüber scrollt der Schritt | -       |
 | `src`      | Pfad zur Flow-Datei                                   | -                   |
 | `locale`   | Sprache der Oberfläche (siehe unten)                  | Sprache des Buches  |
 | `readonly` | Den Flow anzeigen, ohne Antworten anzunehmen          | aus                 |
+
+Auf einem schmalen Bildschirm wächst der Flow nie über das hinaus, was unter der Kopfzeile des Buches
+Platz hat, egal welche `height` du angegeben hast — Prüfen, Zurück und Weiter bleiben sichtbar, und
+der Schritt scrollt in seiner eigenen Box, statt dass die ganze Seite darum herum scrollt.
 
 Der Flow wird beim Bauen des Buches gelesen, nicht vom Browser der Lesenden geladen. Eine fehlende
 oder fehlerhafte Datei wird beim Bauen als Warnung mit Seite und Zeile gemeldet, du erfährst also
@@ -47,6 +52,13 @@ noch da. Der Knopf unten rechts verwirft den Versuch und beginnt einen neuen.
 Wenn du den Flow änderst und das Buch neu baust, passt ein zur alten Fassung gespeicherter Versuch
 nicht mehr. Statt einen halb wiederhergestellten Versuch zu zeigen, beginnt das Element dann still
 einen neuen.
+
+## Drucken
+
+Beim Drucken der Seite — aus dem Browser heraus oder über den `end-certificate`-Schritt eines Flows —
+wird der gesamte Flow gedruckt, nicht nur das, was im Container auf dem Bildschirm Platz hatte. Der
+Zurücksetzen-Knopf und die Leiste mit Prüfen/Zurück/Weiter fehlen auf dem Ausdruck, da beide auf
+Papier ohne Bedeutung sind.
 
 ## Was Lesende herunterladen
 

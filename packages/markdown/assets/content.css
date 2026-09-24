@@ -80,18 +80,32 @@ img.emoji {
   }
 }
 
-/* The book's table styling stops at the edge of an embedded bitflow flow.
+/* The book's prose styling stops at the edge of an embedded bitflow flow.
 
-   bitflow renders into the light DOM, so `.hyperbook-markdown table` reaches
-   the truth tables, trace tables and result tables inside it — and at (0,1,1)
-   it outranks bitflow's own `.bitflow-truth-table` (0,1,0), turning a table
-   into `display: block; width: max-content`. Excluding the subtree hands those
-   tables back to the stylesheet that knows what they are, rather than trying to
-   restate bitflow's values here, where they would drift.
+   bitflow renders into the light DOM, so a bare-element book rule —
+   `.hyperbook-markdown table`, `p`, `ul`/`ol`, `li`, `h1`–`h6`, `blockquote`,
+   `pre`, `details` — reaches every truth table, heading, list and paragraph
+   bitflow draws with the same elements, and at higher specificity than
+   bitflow's own class selectors it wins: `.hyperbook-markdown table` at
+   (0,1,1) outranks `.bitflow-truth-table` at (0,1,0), turning a table into
+   `display: block; width: max-content`; `.hyperbook-markdown h1` does the
+   same to `.bitflow-heading`, adding a `margin-bottom` and `display: flex`
+   bitflow never asked for. Excluding the subtree hands each of those back to
+   the stylesheet that knows what it is, rather than trying to restate
+   bitflow's values here, where they would drift.
 
-   Only the table rules need this. Everywhere else bitflow's own selectors match
-   hyperbook's specificity, and because a bit injects its CSS into the head at
-   import time, it comes later in the cascade and wins the tie. */
+   The table exclusion below predates the rest and is left as a plain
+   `:not(.directive-bitflow *)`, which adds the excluded class's own
+   specificity — (0,1,0) — to every rule that carries it. Every exclusion
+   added after it is wrapped in `:where()` instead: `:where()` always
+   contributes zero specificity, so `p:where(:not(.directive-bitflow *))`
+   still competes at exactly the unmodified `p` rule's own specificity. That
+   matters because another directive may already be overriding one of these
+   book rules for its own elements — a `blockquote` inside `.directive-alert`,
+   say — by out-specifying it modestly; raising the book rule's specificity
+   here, as the plain form does, could flip which one wins there. `:where()`
+   keeps that contest exactly as it was for every element outside bitflow,
+   changing only what happens inside it. */
 .hyperbook-markdown table:not(.directive-bitflow *) {
   border-color: var(--color-spacer);
 }
@@ -101,7 +115,7 @@ img.emoji {
   border-color: var(--color-spacer);
 }
 
-.hyperbook-markdown h2 {
+.hyperbook-markdown h2:where(:not(.directive-bitflow *)) {
   border-bottom-color: var(--color-spacer);
 }
 
@@ -167,38 +181,38 @@ img.emoji {
   border-radius: 6px;
 }
 
-.hyperbook-markdown ul,
-.hyperbook-markdown ol {
+.hyperbook-markdown ul:where(:not(.directive-bitflow *)),
+.hyperbook-markdown ol:where(:not(.directive-bitflow *)) {
   margin-top: 0;
   margin-bottom: 0;
   padding-left: 2em;
 }
 
-.hyperbook-markdown ol ol,
-.hyperbook-markdown ul ol {
+.hyperbook-markdown ol:where(:not(.directive-bitflow *)) ol,
+.hyperbook-markdown ul:where(:not(.directive-bitflow *)) ol {
   list-style-type: lower-roman;
 }
 
-.hyperbook-markdown ul ul ol,
-.hyperbook-markdown ul ol ol,
-.hyperbook-markdown ol ul ol,
-.hyperbook-markdown ol ol ol {
+.hyperbook-markdown ul:where(:not(.directive-bitflow *)) ul ol,
+.hyperbook-markdown ul:where(:not(.directive-bitflow *)) ol ol,
+.hyperbook-markdown ol:where(:not(.directive-bitflow *)) ul ol,
+.hyperbook-markdown ol:where(:not(.directive-bitflow *)) ol ol {
   list-style-type: lower-alpha;
 }
 
-.hyperbook-markdown ul ul,
-.hyperbook-markdown ul ol,
-.hyperbook-markdown ol ol,
-.hyperbook-markdown ol ul {
+.hyperbook-markdown ul:where(:not(.directive-bitflow *)) ul,
+.hyperbook-markdown ul:where(:not(.directive-bitflow *)) ol,
+.hyperbook-markdown ol:where(:not(.directive-bitflow *)) ol,
+.hyperbook-markdown ol:where(:not(.directive-bitflow *)) ul {
   margin-top: 0;
   margin-bottom: 0;
 }
 
-.hyperbook-markdown li+li {
+.hyperbook-markdown li:where(:not(.directive-bitflow *))+li {
   margin-top: 0.25em;
 }
 
-.hyperbook-markdown li>p {
+.hyperbook-markdown li:where(:not(.directive-bitflow *))>p {
   margin: 0;
 }
 
@@ -225,13 +239,13 @@ img.emoji {
   text-decoration-thickness: 0.08em;
 }
 
-.hyperbook-markdown p,
-.hyperbook-markdown blockquote,
-.hyperbook-markdown ol,
-.hyperbook-markdown ul,
+.hyperbook-markdown p:where(:not(.directive-bitflow *)),
+.hyperbook-markdown blockquote:where(:not(.directive-bitflow *)),
+.hyperbook-markdown ol:where(:not(.directive-bitflow *)),
+.hyperbook-markdown ul:where(:not(.directive-bitflow *)),
 .hyperbook-markdown table:not(.directive-bitflow *),
-.hyperbook-markdown pre,
-.hyperbook-markdown details {
+.hyperbook-markdown pre:where(:not(.directive-bitflow *)),
+.hyperbook-markdown details:where(:not(.directive-bitflow *)) {
   margin-top: 0;
   margin-bottom: var(--element-gap);
 }
@@ -247,7 +261,7 @@ img.emoji {
   margin-bottom: var(--element-gap);
 }
 
-.hyperbook-markdown blockquote {
+.hyperbook-markdown blockquote:where(:not(.directive-bitflow *)) {
   width: 90%;
   margin: 0 auto var(--element-gap) auto;
   font-style: italic;
@@ -258,7 +272,7 @@ img.emoji {
   background: var(--color-nav);
 }
 
-.hyperbook-markdown blockquote::before {
+.hyperbook-markdown blockquote:where(:not(.directive-bitflow *))::before {
   content: "\201C";
   color: var(--color-brand);
   font-size: 4em;
@@ -267,11 +281,11 @@ img.emoji {
   top: -10px;
 }
 
-.hyperbook-markdown blockquote::after {
+.hyperbook-markdown blockquote:where(:not(.directive-bitflow *))::after {
   content: "";
 }
 
-.hyperbook-markdown blockquote p:last-child {
+.hyperbook-markdown blockquote:where(:not(.directive-bitflow *)) p:last-child {
   margin-bottom: 0;
 }
 
@@ -304,12 +318,12 @@ img.emoji {
   letter-spacing: 0.1em;
 }
 
-.hyperbook-markdown h1,
-.hyperbook-markdown h2,
-.hyperbook-markdown h3,
-.hyperbook-markdown h4,
-.hyperbook-markdown h5,
-.hyperbook-markdown h6 {
+.hyperbook-markdown h1:where(:not(.directive-bitflow *)),
+.hyperbook-markdown h2:where(:not(.directive-bitflow *)),
+.hyperbook-markdown h3:where(:not(.directive-bitflow *)),
+.hyperbook-markdown h4:where(:not(.directive-bitflow *)),
+.hyperbook-markdown h5:where(:not(.directive-bitflow *)),
+.hyperbook-markdown h6:where(:not(.directive-bitflow *)) {
   clear: both;
   font-family: hyperbook-heading, sans-serif;
   margin-top: 0;
@@ -318,12 +332,12 @@ img.emoji {
   line-height: 1.25;
 }
 
-.hyperbook-markdown h1 {
+.hyperbook-markdown h1:where(:not(.directive-bitflow *)) {
   font-size: 1.75em;
   font-weight: 700;
 }
 
-.hyperbook-markdown h2 {
+.hyperbook-markdown h2:where(:not(.directive-bitflow *)) {
   font-weight: 600;
   padding-bottom: 0.3em;
   font-size: 1.5em;
@@ -331,37 +345,41 @@ img.emoji {
   border-bottom-style: solid;
 }
 
-.hyperbook-markdown h3 {
+.hyperbook-markdown h3:where(:not(.directive-bitflow *)) {
   font-weight: 600;
   font-size: 1.25em;
 }
 
-.hyperbook-markdown h4 {
+.hyperbook-markdown h4:where(:not(.directive-bitflow *)) {
   font-weight: 600;
   font-size: 1em;
 }
 
-.hyperbook-markdown h5 {
+.hyperbook-markdown h5:where(:not(.directive-bitflow *)) {
   font-weight: 600;
   font-size: 0.875em;
 }
 
-.hyperbook-markdown h6 {
+.hyperbook-markdown h6:where(:not(.directive-bitflow *)) {
   font-weight: 600;
   font-size: 0.85em;
 }
 
-.hyperbook-markdown p {
+.hyperbook-markdown p:where(:not(.directive-bitflow *)) {
   margin-top: 0;
   margin-bottom: var(--element-gap);
 }
 
-.hyperbook-markdown h1,
-.hyperbook-markdown h2,
-.hyperbook-markdown h3,
-.hyperbook-markdown h4,
-.hyperbook-markdown h5,
-.hyperbook-markdown h6 {
+/* Bitflow draws its own heading and label elements as flex rows to align an
+   icon beside the text; this rule would impose the same on
+   `.bitflow-heading`/`.bitflow-label`, which centre their text differently
+   and do not expect flex layout at all. */
+.hyperbook-markdown h1:where(:not(.directive-bitflow *)),
+.hyperbook-markdown h2:where(:not(.directive-bitflow *)),
+.hyperbook-markdown h3:where(:not(.directive-bitflow *)),
+.hyperbook-markdown h4:where(:not(.directive-bitflow *)),
+.hyperbook-markdown h5:where(:not(.directive-bitflow *)),
+.hyperbook-markdown h6:where(:not(.directive-bitflow *)) {
   display: flex;
   align-items: center;
 }

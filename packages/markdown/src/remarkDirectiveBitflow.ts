@@ -61,7 +61,18 @@ export default (ctx: HyperbookContext) => () => {
         );
 
         const attributes = node.attributes || {};
+        // `height="auto"` grows with the step shown; `maxHeight` caps that
+        // growth, and the flow scrolls its step inside the cap. The flow keeps
+        // its progress bar and buttons in view either way. Both are handed to
+        // style.css as custom properties rather than as `height`/`max-height`
+        // directly: an inline `height: 820px` cannot be capped to the
+        // viewport from a stylesheet without `!important`, since inline
+        // always outranks it, but `height: var(--bitflow-height, auto)` in
+        // the stylesheet is not inline, so `max-height` there still bounds it
+        // on a phone where the fixed height would otherwise run under the
+        // fold.
         const height = attributes.height || "600px";
+        const maxHeight = attributes.maxHeight;
         const id = attributes.id || resolveDirectiveId(file, node);
         const src = attributes.src;
         const locale = attributes.locale || ctx.config.language || "en";
@@ -91,7 +102,12 @@ export default (ctx: HyperbookContext) => () => {
         data.hProperties = {
           class: "directive-bitflow",
           id: `bitflow-${id}`,
-          style: `height: ${height}`,
+          style: [
+            height !== "auto" ? `--bitflow-height: ${height}` : undefined,
+            maxHeight ? `--bitflow-max-height: ${maxHeight}` : undefined,
+          ]
+            .filter(Boolean)
+            .join("; "),
         };
 
         data.hChildren = [

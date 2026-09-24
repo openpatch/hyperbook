@@ -81,7 +81,29 @@ describe("remarkDirectiveBitflow", () => {
         toHtml(`\n::bitflow{#quiz src="quiz.json" height="400px"}\n`, ctx)
           .value,
       ),
-    ).toContain("height: 400px");
+    ).toContain("--bitflow-height: 400px");
+  });
+
+  // Handed to style.css as a custom property rather than inline `height`, so
+  // the stylesheet can still cap a fixed height to the viewport — an inline
+  // `height` would win over any stylesheet rule short of `!important`.
+  it("should not set height inline", async () => {
+    const html = String(
+      toHtml(`\n::bitflow{#quiz src="quiz.json" height="400px"}\n`, ctx)
+        .value,
+    );
+    expect(html).toContain('style="--bitflow-height: 400px"');
+  });
+
+  it("should grow with the flow when the height is auto", async () => {
+    const html = String(
+      toHtml(
+        `\n::bitflow{#quiz src="quiz.json" height="auto" maxHeight="80vh"}\n`,
+        ctx,
+      ).value,
+    );
+    expect(html).not.toContain("--bitflow-height");
+    expect(html).toContain("--bitflow-max-height: 80vh");
   });
 
   it("should default the locale to the book's language", async () => {

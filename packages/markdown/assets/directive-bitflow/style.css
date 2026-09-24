@@ -1,15 +1,62 @@
+/* The flow in the book's colours. bitflow's elements render into the light
+   DOM and take every colour from a `--bitflow-*` property, so re-declaring
+   them on the container re-themes the flow without touching its styles.
+
+   The whole primary family is set, not just the primary: bitflow's derived
+   tokens are resolved on `:root`, where they were computed from its own green,
+   so setting only `--bitflow-color-primary` would pair the book's buttons with
+   bitflow's hover and focus ring. `--color-brand-text` is what the book already
+   paints on its brand colour, so a light brand keeps readable button labels.
+
+   dark.css repeats the derived half for the dark scheme, where the brand is the
+   light `--color-brand-dark` and the mixes run the other way. */
 .directive-bitflow {
+  --bitflow-color-primary: var(--color-brand);
+  --bitflow-color-primary-dark: color-mix(in srgb, var(--color-brand), black 30%);
+  --bitflow-color-primary-light: color-mix(in srgb, var(--color-brand) 30%, white);
+  --bitflow-color-on-primary: var(--color-brand-text);
+  --bitflow-shadow-outline: 0 0 0 3px
+    color-mix(in srgb, var(--color-brand) 40%, transparent);
+  /* Reserves room in bitflow's own controls bar for the reset button this
+     stylesheet draws in the bottom right corner, so Next never sits under
+     it. 32px of button plus the 8px it sits off the edge. */
+  --bitflow-controls-inset-end: 40px;
+
   position: relative;
   border: 1px solid var(--color-nav-border);
   border-radius: 8px;
   overflow: hidden;
   min-height: 300px;
+  /* The directive emits the author's `height`/`maxHeight` as custom
+     properties rather than as these two properties directly, so they can be
+     capped here rather than trusted as-is: an inline `height: 820px` outranks
+     any stylesheet rule short of `!important`, but reading it back out of a
+     variable does not. `--bitflow-height` is unset — falling through to
+     `auto` — when the author wrote `height="auto"`, so the box still grows
+     with the step by default. */
+  height: var(--bitflow-height, auto);
+  /* Never taller than the viewport under the book's sticky header, on top of
+     whatever cap the author asked for: a phone-height `100dvh` still leaves
+     the flow's Next button under the fold when `height` is a desktop-sized
+     fixed pixel value, since that path never looks at `maxHeight` at all.
+     `100dvh` accounts for a mobile browser's collapsing address bar the way
+     plain `vh` does not. `--header-height` is hyperbook's own token, set in
+     the page's root style; the fallback is only for a page built before it
+     existed. */
+  max-height: min(
+    var(--bitflow-max-height, 100dvh),
+    calc(100dvh - var(--header-height, 3.75rem))
+  );
+  /* A column, so the flow fills the height above and stops at the max-height
+     alike; bitflow stretches its shell down the element the same way. */
+  display: flex;
+  flex-direction: column;
 }
 
 .directive-bitflow bitflow-flow {
-  display: block;
   width: 100%;
-  height: 100%;
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
 /* Before the module defining it has run, an unupgraded custom element is an
@@ -18,17 +65,29 @@
 .directive-bitflow bitflow-flow:not(:defined) {
   display: block;
   width: 100%;
-  height: 100%;
+  flex: 1 1 auto;
 }
 
-/* Bottom right: the flow puts its progress bar top, its navigation bottom
-   centre, and leaves the corners free. */
+/* Bottom right: the flow puts its progress bar top and Check/Back/Next in a
+   bar along the bottom edge, so the corner is the one spot left free.
+   `--bitflow-controls-inset-end` above tells that bar to keep clear of a
+   32px button here; `bottom: 14px` centres it on the ~60px bar rather than
+   sitting flush with its bottom edge. */
 .directive-bitflow .buttons {
   position: absolute;
   right: 8px;
-  bottom: 8px;
+  bottom: 14px;
   display: flex;
   z-index: 5;
+}
+
+/* A fallback for a book running an older published `@bitflow/web-component`
+   that has no `--bitflow-controls-inset-end` in its controls bar to read:
+   this pushes Next clear of the reset button directly, the same 40px. Safe
+   to drop once the minimum supported bundle carries the variable — the two
+   would then simply agree. */
+.directive-bitflow .bitflow-shell-controls {
+  padding-inline-end: calc(var(--bitflow-space-small, 16px) + 40px);
 }
 
 .directive-bitflow .buttons button {
