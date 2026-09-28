@@ -13,6 +13,18 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 
 :::
 
+## v0.109.3
+
+::::tabs
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+**snippets**: Dollar signs inside a snippet no longer corrupt the page. The rendered snippet was inserted as a replacement string, so JavaScript expanded `` $` ``, `$&`, `$'` and `$$` as special patterns. A task that mentioned a lone `` `$` `` — natural in a spreadsheet lesson about `$B2` — got everything before the snippet pasted into it again, which showed up as blocks nested inside each other. Snippet content, including variables like `price="$$5"`, is now inserted exactly as written.
+
+:::
+
+::::
+
 ## v0.109.1
 
 ::::tabs

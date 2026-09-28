@@ -1025,10 +1025,14 @@ export const getMarkdown = async (
       const m = content.match(new RegExp(r, "m"));
       if (m) {
         vars["content"] = m[1];
-        content = content.replace(m[0], template(vars));
+        // A replacer function inserts the result literally. A replacement
+        // string would expand $`, $&, $' and $$ inside the snippet.
+        const rendered = template(vars);
+        content = content.replace(m[0], () => rendered);
       }
     } else {
-      content = content.replace(snippet[0], template(vars));
+      const rendered = template(vars);
+      content = content.replace(snippet[0], () => rendered);
     }
   }
 
