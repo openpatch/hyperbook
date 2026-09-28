@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.109.3
+
+### Patch Changes
+
+- [`20f3c54`](https://github.com/openpatch/hyperbook/commit/20f3c54a8ed0e4ccefaf7d4680cd420d23098713) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fix snippets whose content contains dollar signs, such as spreadsheet references like `$B2` or a lone `` `$` ``. The rendered snippet was inserted with a replacement string, so `` $` ``, `$&`, `$'` and `$$` were expanded as special patterns — `` $` `` pasted the whole page before the snippet into it again, which showed up as nested blocks. Snippets are now inserted literally.
+
 ## 0.109.2
 
 ### Patch Changes
