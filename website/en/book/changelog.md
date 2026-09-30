@@ -13,6 +13,18 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 
 :::
 
+## v0.109.4
+
+::::tabs
+
+:::tab{title="Improved :+1:" id="improved"}
+
+**online-ide*: Update to latest version 21.
+
+:::
+
+::::
+
 ## v0.109.3
 
 ::::tabs
