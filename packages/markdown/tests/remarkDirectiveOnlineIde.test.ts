@@ -117,4 +117,19 @@ new Stage();
     ).value as string;
     expect(html).not.toContain("outputWidth");
   });
+
+  it("should start relative asset paths from the page's folder", async () => {
+    const html = toHtml(
+      `:::onlineide{libraries="scratch"}
+
+\`\`\`java
+new Stage();
+\`\`\`
+
+:::
+`,
+      ctx,
+    ).value as string;
+    expect(html).toMatch(/'assetBaseUrl': '[^']*\/'/);
+  });
 });

@@ -22,6 +22,10 @@ Java-like programming language (compiler, interpreter, debugger) with IDE that r
 
 (See: https://github.com/martin-pabst/Online-IDE-new-compiler).
 
+## Relative paths
+
+A relative path in a program, such as `addCostume("hero", "assets/hero.png")`, starts from the folder of the page's Markdown file, just as it starts from the project folder on the desktop. Put an `assets` folder next to the page, and the same program runs in the book and in a desktop Java IDE with the same folder next to it. Every page in that folder shares it.
+
 ## Load binary files
 
 Use `@file` directives inside the `:::onlineide` block to reference external files (such as images) that your Java code can access.

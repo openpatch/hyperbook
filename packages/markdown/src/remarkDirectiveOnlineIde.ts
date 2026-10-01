@@ -43,6 +43,18 @@ export default (ctx: HyperbookContext) => () => {
           ? `, 'outputWidth': '${String(outputWidth).replace(/['"\\]/g, "")}'`
           : "";
 
+        // Relative paths in a program (addCostume("held", "assets/held.png"))
+        // start from the folder of this page's Markdown file, as they start
+        // from the project folder on the desktop. An assets folder next to the
+        // page then serves every page in that folder.
+        const page = ctx.navigation.current;
+        const assetBase = page
+          ? ctx.makeUrl(".", "book", page, { versioned: false }).replace(/\/?$/, "/")
+          : undefined;
+        const assetBaseConfig = assetBase
+          ? `, 'assetBaseUrl': '${assetBase.replace(/['"\\]/g, "")}'`
+          : "";
+
         // Parse @file directives from text content
         const binaryFiles: { dest: string; url: string }[] = [];
         for (const child of node.children) {
@@ -138,7 +150,7 @@ export default (ctx: HyperbookContext) => () => {
             properties: {
               class: "java-online",
               style: `padding: 0; margin: 0;`,
-              "data-java-online": `{'id': '${id}', 'speed': ${speed}, 'withBottomPanel': ${bottomPanel},'withPCode': ${pCode},'withConsole': ${con},'withFileList': ${fileList},'withErrorList': ${errorList}, 'libraries': [${libraries?.split(",").map((lib) => `'${lib.trim()}'`)}], 'binaryFiles': ${JSON.stringify(binaryFiles)}${outputWidthConfig}}`,
+              "data-java-online": `{'id': '${id}', 'speed': ${speed}, 'withBottomPanel': ${bottomPanel},'withPCode': ${pCode},'withConsole': ${con},'withFileList': ${fileList},'withErrorList': ${errorList}, 'libraries': [${libraries?.split(",").map((lib) => `'${lib.trim()}'`)}], 'binaryFiles': ${JSON.stringify(binaryFiles)}${outputWidthConfig}${assetBaseConfig}}`,
             },
             children: [...codes, ...fileElements],
           },

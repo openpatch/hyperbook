@@ -20,6 +20,10 @@ Das Online-IDE element akzeptiert folgende Parameter:
 
 (See: https://github.com/martin-pabst/Online-IDE-new-compiler).
 
+## Relative Pfade
+
+Ein relativer Pfad im Programm, z.B. `addCostume("held", "assets/held.png")`, beginnt beim Ordner der Markdown-Datei der Seite – so wie er auf dem Rechner beim Projektordner beginnt. Liegt ein Ordner `assets` neben der Seite, läuft dasselbe Programm im Buch und in einer Java-IDE auf dem Rechner, wenn dort derselbe Ordner neben dem Projekt liegt. Alle Seiten in diesem Ordner teilen ihn sich.
+
 ## Dateien laden
 
 Verwenden Sie `@file`-Direktiven innerhalb des `:::onlineide`-Blocks, um externe Dateien (z.B. Bilder) zu referenzieren, auf die Ihr Java-Code zugreifen kann.
