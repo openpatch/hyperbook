@@ -13,6 +13,30 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 
 :::
 
+## v0.110.0
+
+::::tabs
+
+:::tab{title="New :rocket:" id="new"}
+
+**online-ide**: The new attribute `outputWidth` (for example `outputWidth="60%"`) sets the width of the output panel next to the editor. It can also be set for the whole book under `elements.onlineide.outputWidth`.
+
+:::
+
+:::tab{title="Improved :+1:" id="improved"}
+
+**online-ide**: Update to version 22. `Window.useTextureSampling(TextureSampling.POINT)` keeps scaled-up pixel art sharp in Scratch for Java, and sprite sheets and animations can be loaded from a URL.
+
+:::
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+**online-ide**: The NRW classes `Graph`, `Edge` and `BinarySearchTree` can be used: `new Graph()` no longer returns `null`, `Edge` takes its two vertices and weight, and a class implementing `ComparableContent` is accepted as content of a `BinarySearchTree`.
+
+:::
+
+::::
+
 ## v0.109.4
 
 ::::tabs
