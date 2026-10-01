@@ -11,7 +11,7 @@
   },
   "homepage": "https://hyperbook.openpatch.org",
   "main": "./out/extension.js",
-  "version": "0.55.14",
+  "version": "0.55.15",
   "engines": {
     "vscode": "^1.125.0"
   },
