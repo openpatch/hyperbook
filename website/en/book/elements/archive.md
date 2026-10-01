@@ -23,3 +23,18 @@ handled for you.
 :archive[Project Template]{name="project-1"}
 
 This is useful for providing project templates, solutions for a coding problem etc.
+
+## Symbolic links
+
+A symbolic link inside an archive folder is followed: the zip contains the files
+it points to, not the link. That way an archive can share a folder with the book
+without keeping a second copy, for example an `assets` folder next to a page:
+
+```
+archives/game/
+  Main.java
+  assets -> ../../book/chapter/assets
+```
+
+On Windows, Git checks symbolic links out as plain text files unless they are
+enabled (`git config core.symlinks true`).

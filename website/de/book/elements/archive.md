@@ -17,3 +17,19 @@ ein gezipptes Archiv anzeigen zu lassen. Du musst nur den Namen des Ordners ange
 
 Archive sind zum Beispiel nützlich, um Projekt Vorlagen oder Lösungen
 für Programmierprobleme bereitzustellen.
+
+## Symbolische Links
+
+Ein symbolischer Link in einem Archiv-Ordner wird aufgelöst: Ins ZIP kommen die
+Dateien, auf die er zeigt, nicht der Link. So kann sich ein Archiv einen Ordner
+mit dem Buch teilen, ohne eine zweite Kopie, zum Beispiel einen Ordner `assets`
+neben einer Seite:
+
+```
+archives/spiel/
+  Main.java
+  assets -> ../../book/kapitel/assets
+```
+
+Unter Windows checkt Git symbolische Links als einfache Textdateien aus, solange
+sie nicht eingeschaltet sind (`git config core.symlinks true`).

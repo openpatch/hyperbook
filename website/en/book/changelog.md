@@ -13,6 +13,18 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 
 :::
 
+## v0.111.1
+
+::::tabs
+
+:::tab{title="Improved :+1:" id="improved"}
+
+**archive**: Symbolic links inside an archive folder are followed. The zip contains the files a link points to, so an archive can share a folder with the book without a second copy.
+
+:::
+
+::::
+
 ## v0.111.0
 
 ::::tabs

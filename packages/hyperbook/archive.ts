@@ -27,7 +27,14 @@ async function archiveFolder(
 
     archive.pipe(output);
 
-    archive.directory(path.join(root, "archives", name), false);
+    // Follow symbolic links: an archive may link to files that also live
+    // elsewhere in the book (e.g. an assets folder the pages use), and the
+    // download has to contain the files, not a link pointing outside of it.
+    archive.glob("**", {
+      cwd: path.join(root, "archives", name),
+      dot: true,
+      follow: true,
+    });
     archive.finalize();
   });
 }

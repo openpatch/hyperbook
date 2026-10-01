@@ -1,5 +1,12 @@
 declare module "unzipper" {
+  type ZipEntry = {
+    path: string;
+    type: "File" | "Directory";
+    buffer(): Promise<Buffer>;
+  };
+
   type ZipDirectory = {
+    files: ZipEntry[];
     extract(options: { path: string }): Promise<void>;
   };
 
