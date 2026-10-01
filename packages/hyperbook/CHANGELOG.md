@@ -1,5 +1,15 @@
 # hyperbook
 
+## 0.110.0
+
+### Minor Changes
+
+- [`f81850c`](https://github.com/openpatch/hyperbook/commit/f81850cb70207b681a3f59a92fdc8a3a065049dd) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - The `onlineide` element takes an `outputWidth` attribute (for example `outputWidth="60%"`) that sets the width of the output panel next to the editor. It can also be set for the whole book under `elements.onlineide.outputWidth`. Needs an Online-IDE build that knows the option.
+
+### Patch Changes
+
+- [`acd1978`](https://github.com/openpatch/hyperbook/commit/acd19782192559e270778449f488ce89278cf5a0) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Update online-ide to version 22: sharp pixel art with `Window.useTextureSampling(TextureSampling.POINT)`, sprite sheets from URLs, and working NRW `Graph`, `Edge` and `BinarySearchTree`.
+
 ## 0.109.4
 
 ### Patch Changes
