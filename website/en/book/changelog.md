@@ -13,6 +13,24 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 
 :::
 
+## v0.111.0
+
+::::tabs
+
+:::tab{title="New :rocket:" id="new"}
+
+**online-ide**: Relative paths in a program, such as `addCostume("hero", "assets/hero.png")`, start from the folder of the page's Markdown file, as they start from the project folder on the desktop. With an `assets` folder next to the page, the same program runs in the book and in a desktop Java IDE.
+
+:::
+
+:::tab{title="Improved :+1:" id="improved"}
+
+**online-ide**: Update to version 23.
+
+:::
+
+::::
+
 ## v0.110.0
 
 ::::tabs
