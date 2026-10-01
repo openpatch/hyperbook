@@ -1,5 +1,15 @@
 # @hyperbook/markdown
 
+## 0.83.0
+
+### Minor Changes
+
+- [`10b35d7`](https://github.com/openpatch/hyperbook/commit/10b35d7f405558a251cb744bc5fa8d4e23d588db) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - The `onlineide` element tells the Online-IDE where relative paths start: the folder of the page's Markdown file. `addCostume("hero", "assets/hero.png")` then loads `assets/` next to the page, as it would next to the project on the desktop.
+
+### Patch Changes
+
+- [`1b0f204`](https://github.com/openpatch/hyperbook/commit/1b0f2040051f891a9cd0cbe35307e28fd75a6aae) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Update online-ide to version 23: relative asset paths start from the folder given by the page.
+
 ## 0.82.0
 
 ### Minor Changes
