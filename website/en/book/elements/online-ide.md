@@ -18,6 +18,7 @@ Java-like programming language (compiler, interpreter, debugger) with IDE that r
 | `height` | Height of the editor | `calc(100dvh - 80px)` |
 | `speed` | Execution speed | `1000` |
 | `libraries` | Comma-separated list of libraries to preload, for example `nrw` | - |
+| `outputWidth` | Width of the output panel next to the editor, as CSS, for example `60%` or `520px`. Useful for large Scratch stages. Can also be set for the whole book in `hyperbook.json` under `elements.onlineide.outputWidth`. | `300px` |
 
 (See: https://github.com/martin-pabst/Online-IDE-new-compiler).
 

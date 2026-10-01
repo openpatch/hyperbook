@@ -16,6 +16,7 @@ Das Online-IDE element akzeptiert folgende Parameter:
 - **height**: Höhe des Editors. Standardwert 600px.
 - **speed**: Geschwindigkeit in Steps/s. Standardwert 1000.
 - **libraries**: Komma-getrennte Liste der zu ladenden Bibliotheken, z.B. `scratch`.
+- **outputWidth**: Breite der Ausgabe neben dem Editor als CSS-Angabe, z.B. `60%` oder `520px`. Standardwert 300px. Hilfreich für große Scratch-Bühnen. Lässt sich auch für das ganze Buch in der `hyperbook.json` unter `elements.onlineide.outputWidth` setzen.
 
 (See: https://github.com/martin-pabst/Online-IDE-new-compiler).
 

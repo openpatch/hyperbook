@@ -279,6 +279,7 @@ export type HyperbookJson = {
     };
     onlineide?: ElementConfig & {
       height?: string | number;
+      outputWidth?: string;
     };
     kirimoto?: ElementConfig & {
       height?: string;

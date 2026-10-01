@@ -87,4 +87,34 @@ Bitmap img2 = new Bitmap("/input/image2.jpg");
       ).value,
     ).toMatchSnapshot();
   });
+
+  it("should pass the width of the output panel on", async () => {
+    const html = toHtml(
+      `:::onlineide{outputWidth="60%" libraries="scratch"}
+
+\`\`\`java
+new Stage();
+\`\`\`
+
+:::
+`,
+      ctx,
+    ).value as string;
+    expect(html).toContain("'outputWidth': '60%'");
+  });
+
+  it("should leave the output panel alone without outputWidth", async () => {
+    const html = toHtml(
+      `:::onlineide
+
+\`\`\`java
+new Stage();
+\`\`\`
+
+:::
+`,
+      ctx,
+    ).value as string;
+    expect(html).not.toContain("outputWidth");
+  });
 });

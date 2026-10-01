@@ -32,8 +32,16 @@ export default (ctx: HyperbookContext) => () => {
           bottomPanel = true,
           errorList = true,
           speed = 1000,
+          outputWidth = ctx.config.elements?.onlineide?.outputWidth,
           id = resolveDirectiveId(file, node),
         } = attributes;
+
+        // Width of the output panel next to the editor, as CSS ("60%",
+        // "520px"). Left out, the IDE keeps its own 300px. Quotes would end
+        // the value inside data-java-online, so they are dropped.
+        const outputWidthConfig = outputWidth
+          ? `, 'outputWidth': '${String(outputWidth).replace(/['"\\]/g, "")}'`
+          : "";
 
         // Parse @file directives from text content
         const binaryFiles: { dest: string; url: string }[] = [];
@@ -130,7 +138,7 @@ export default (ctx: HyperbookContext) => () => {
             properties: {
               class: "java-online",
               style: `padding: 0; margin: 0;`,
-              "data-java-online": `{'id': '${id}', 'speed': ${speed}, 'withBottomPanel': ${bottomPanel},'withPCode': ${pCode},'withConsole': ${con},'withFileList': ${fileList},'withErrorList': ${errorList}, 'libraries': [${libraries?.split(",").map((lib) => `'${lib.trim()}'`)}], 'binaryFiles': ${JSON.stringify(binaryFiles)}}`,
+              "data-java-online": `{'id': '${id}', 'speed': ${speed}, 'withBottomPanel': ${bottomPanel},'withPCode': ${pCode},'withConsole': ${con},'withFileList': ${fileList},'withErrorList': ${errorList}, 'libraries': [${libraries?.split(",").map((lib) => `'${lib.trim()}'`)}], 'binaryFiles': ${JSON.stringify(binaryFiles)}${outputWidthConfig}}`,
             },
             children: [...codes, ...fileElements],
           },
