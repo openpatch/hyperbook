@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.111.1
+
+### Patch Changes
+
+- [`1d13ddc`](https://github.com/openpatch/hyperbook/commit/1d13ddcc053669ad2f19b57e2b709a831dd2eeb6) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Archives follow symbolic links: the zip contains the files a link points to, not the link. An archive can share a folder with the book, such as an `assets` folder next to a page, without a second copy.
+
 ## 0.111.0
 
 ### Minor Changes
