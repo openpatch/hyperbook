@@ -13,6 +13,13 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 
 :::
 
+## v0.112.0
+
+**online-ide**: Update to v2.2.1-hyperbook.26. Export and import portable project
+ZIPs to continue a browser project in Scratch for Java Studio, including images,
+sounds and teaching checks. Scratch for Java 5.8.0 support includes the cat
+atlas, clone lifecycle, variable monitors, pause, stepping and game speed.
+
 ## v0.111.1
 
 ::::tabs
