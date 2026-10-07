@@ -296,6 +296,9 @@
                                         "string",
                                         "number"
                                     ]
+                                },
+                                "outputWidth": {
+                                    "type": "string"
                                 }
                             },
                             "type": "object"
