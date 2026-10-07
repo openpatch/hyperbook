@@ -13,6 +13,12 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 
 :::
 
+## v0.112.1
+
+**online-ide**: Update to v2.2.1-hyperbook.27. Project ZIPs exported for Scratch
+for Java Studio now include assets loaded from next to the page, not only the
+files handed over with `@file`.
+
 ## v0.112.0
 
 **online-ide**: Update to v2.2.1-hyperbook.26. Export and import portable project
