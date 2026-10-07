@@ -1,5 +1,14 @@
 # hyperbook
 
+## 0.112.1
+
+### Patch Changes
+
+- [`e777e57`](https://github.com/openpatch/hyperbook/commit/e777e57ff204412046bba3120f086f631b3dfe8d) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Update the embedded Online IDE to v2.2.1-hyperbook.27. Project ZIP exports for
+  Scratch for Java Studio now include the assets a program loads from next to the
+  page (e.g. a chapter's `assets` folder), not only the files handed over with
+  `@file`.
+
 ## 0.112.0
 
 ### Minor Changes
