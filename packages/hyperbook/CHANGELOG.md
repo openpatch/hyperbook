@@ -1,5 +1,15 @@
 # hyperbook
 
+## 0.112.0
+
+### Minor Changes
+
+- [`a74fd31`](https://github.com/openpatch/hyperbook/commit/a74fd317ab3d540036d169ec6d4bdb4994f57733) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Update the embedded Online IDE to v2.2.1-hyperbook.26. Scratch for Java lessons
+  can import and export portable project ZIPs to continue in Scratch for Java
+  Studio, retain assets and teaching checks, and use the new cat atlas. The browser
+  runtime includes clone lifecycle, variable monitors, pause, stepping and game
+  speed support, with shared API and asset catalogs for Scratch for Java 5.8.0.
+
 ## 0.111.3
 
 ### Patch Changes
