@@ -13,6 +13,12 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 
 :::
 
+## v0.112.2
+
+**online-ide**: Update to v2.2.1-hyperbook.28. Adds the "Zeichnen mit Java"
+class library (`libraries="zeichnen"`), `import static`, `java.util.Scanner` on
+`System.in` and `java.util.*` imports.
+
 ## v0.112.1
 
 **online-ide**: Update to v2.2.1-hyperbook.27. Project ZIPs exported for Scratch

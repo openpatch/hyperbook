@@ -230,6 +230,7 @@ class Funke extends Circle {
 | Graphics and Games Library | libraries="gng" | Graphical class library for the Bavarian computer science books of the Cornelsen publishing house |
 | Abitur classes Lower Saxony | libraries="niedersachsen" | Class library for use in the Abitur Lower Saxony |
 | Scratch for Java | libraries="scratch" | Scratch-like class library (Stage, Sprite, costumes, sounds) — a port of [org.openpatch.scratch](https://scratch4j.openpatch.org) |
+| Zeichnen mit Java | libraries="zeichnen" | Class library of the book "Zeichnen mit Java" (packages `zeichnen`, `turtle`, `farbmanagment`) |
 
 :::onlineide{height="500px" libraries="nrw"}
 

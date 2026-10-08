@@ -225,6 +225,7 @@ class Funke extends Circle {
 | Graphics and Games Library | libraries="gng" | Graphische Klassenbibliothek für die bayerischen Informatikbücher des Cornelsen-Verlages |
 | Abiturklassen Niedersachsen | libraries="niedersachsen" | Klassenbibliothek zur Verwendung im Abitur Niedersachsen |
 | Scratch for Java | libraries="scratch" | Scratch-artige Klassenbibliothek (Stage, Sprite, Kostüme, Klänge) — Port von [org.openpatch.scratch](https://scratch4j.openpatch.org) |
+| Zeichnen mit Java | libraries="zeichnen" | Klassenbibliothek des Buches „Zeichnen mit Java“ (Pakete `zeichnen`, `turtle`, `farbmanagment`) |
 
 :::onlineide{height="500px" console=false libraries="nrw"}
 
