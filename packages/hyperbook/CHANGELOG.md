@@ -1,5 +1,13 @@
 # hyperbook
 
+## 0.112.2
+
+### Patch Changes
+
+- [`8ac39cd`](https://github.com/openpatch/hyperbook/commit/8ac39cdda9977c9ed37c30548468f5870c564b5e) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Update the embedded Online IDE to v2.2.1-hyperbook.28. Adds the "Zeichnen mit
+  Java" class library (`libraries="zeichnen"`), `import static`, `java.util.Scanner`
+  on `System.in` and `java.util.*` imports.
+
 ## 0.112.1
 
 ### Patch Changes
