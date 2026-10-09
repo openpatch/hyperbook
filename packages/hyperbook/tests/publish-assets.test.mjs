@@ -31,6 +31,7 @@ beforeEach(async () => {
     }),
   );
   uploaded = {
+    id: 123,
     draft: true,
     assets: [
       {
@@ -45,7 +46,15 @@ beforeEach(async () => {
   ghImpl = vi.fn((...args) => {
     if (args[0] === "api" && args.includes("--paginate"))
       return existingRelease ? JSON.stringify(existingRelease) : "";
-    if (args[0] === "api") return JSON.stringify(uploaded);
+    if (args[0] === "api" && args.includes("POST"))
+      return JSON.stringify({ id: uploaded.id, draft: true });
+    if (
+      args[0] === "api" &&
+      args[1] === `repos/openpatch/hyperbook/releases/${uploaded.id}`
+    )
+      return JSON.stringify(uploaded);
+    if (args[0] === "api")
+      throw new Error(`Unknown release endpoint: ${args[1]}`);
     return "";
   });
 });
@@ -56,11 +65,15 @@ it("publishes a draft only after every uploaded checksum matches the CLI", async
   await publishAssets({ packagePath: root, fetchImpl, ghImpl });
   const calls = ghImpl.mock.calls;
   expect(
-    calls.find((args) => args[0] === "release" && args[1] === "create"),
-  ).toContain("--draft");
+    calls.find((args) => args[0] === "api" && args.includes("POST")),
+  ).toContain("draft=true");
   expect(calls.findIndex((args) => args[1] === "upload")).toBeLessThan(
     calls.findIndex((args) => args[1] === "edit"),
   );
+  expect(calls).toContainEqual([
+    "api",
+    "repos/openpatch/hyperbook/releases/123",
+  ]);
   expect(calls.at(-1)).toEqual([
     "release",
     "edit",
@@ -74,11 +87,11 @@ it("publishes a draft only after every uploaded checksum matches the CLI", async
 it.each([true, false])(
   "reuses an existing asset release with draft=%s",
   async (draft) => {
-    existingRelease = { draft };
+    existingRelease = { id: uploaded.id, draft };
     uploaded.draft = draft;
     await publishAssets({ packagePath: root, fetchImpl, ghImpl });
     const calls = ghImpl.mock.calls;
-    expect(calls.some((args) => args[1] === "create")).toBe(false);
+    expect(calls.some((args) => args.includes("POST"))).toBe(false);
     expect(calls.some((args) => args[1] === "upload")).toBe(draft);
     expect(calls.some((args) => args[1] === "edit")).toBe(draft);
   },
@@ -92,6 +105,7 @@ it("stops before creating a release when the GitHub lookup fails", async () => {
     publishAssets({ packagePath: root, fetchImpl, ghImpl }),
   ).rejects.toThrow("GitHub API unavailable");
   expect(ghImpl.mock.calls.some((args) => args[0] === "release")).toBe(false);
+  expect(ghImpl.mock.calls.some((args) => args.includes("POST"))).toBe(false);
 });
 
 it("blocks publication when the uploaded bundle is corrupt", async () => {

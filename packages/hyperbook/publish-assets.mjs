@@ -63,25 +63,30 @@ export async function publishAssets({
       "--paginate",
       `repos/${repo}/releases?per_page=100`,
       "--jq",
-      `.[] | select(.tag_name == ${JSON.stringify(tag)}) | {draft}`,
+      `.[] | select(.tag_name == ${JSON.stringify(tag)}) | {id, draft}`,
     ).trim();
     let release = releaseJson ? JSON.parse(releaseJson) : null;
     if (!release) {
-      gh(
-        "release",
-        "create",
-        tag,
-        "--repo",
-        repo,
-        "--draft",
-        "--target",
-        process.env.GITHUB_SHA || "main",
-        "--title",
-        `Hyperbook ${version} assets`,
-        "--notes",
-        `Optional browser assets for hyperbook@${version}. The CLI verifies the SHA-256 checksums before using these bundles.`,
+      release = JSON.parse(
+        gh(
+          "api",
+          `repos/${repo}/releases`,
+          "--method",
+          "POST",
+          "--raw-field",
+          `tag_name=${tag}`,
+          "--raw-field",
+          `target_commitish=${process.env.GITHUB_SHA || "main"}`,
+          "--raw-field",
+          `name=Hyperbook ${version} assets`,
+          "--raw-field",
+          `body=Optional browser assets for hyperbook@${version}. The CLI verifies the SHA-256 checksums before using these bundles.`,
+          "--field",
+          "draft=true",
+          "--jq",
+          "{id, draft}",
+        ),
       );
-      release = { draft: true };
     }
     if (release.draft) {
       gh(
@@ -94,8 +99,9 @@ export async function publishAssets({
         ...Object.keys(manifest.bundles).map(filename),
       );
     }
+    // GitHub's tag endpoint only returns published releases, so verify drafts by ID.
     const uploaded = JSON.parse(
-      gh("api", `repos/${repo}/releases/tags/${tag}`),
+      gh("api", `repos/${repo}/releases/${release.id}`),
     );
     for (const [name, bundle] of Object.entries(manifest.bundles)) {
       const asset = uploaded.assets.find(
