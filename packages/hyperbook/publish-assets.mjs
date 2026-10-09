@@ -57,10 +57,15 @@ export async function publishAssets({
     }
 
     // List rather than treating every failed API request as a nonexistent release.
-    const releases = JSON.parse(
-      gh("api", "--paginate", "--slurp", `repos/${repo}/releases`),
-    ).flat();
-    let release = releases.find((entry) => entry.tag_name === tag);
+    // Filter inside gh so the release history cannot fill execFileSync's buffer.
+    const releaseJson = gh(
+      "api",
+      "--paginate",
+      `repos/${repo}/releases?per_page=100`,
+      "--jq",
+      `.[] | select(.tag_name == ${JSON.stringify(tag)}) | {draft}`,
+    ).trim();
+    let release = releaseJson ? JSON.parse(releaseJson) : null;
     if (!release) {
       gh(
         "release",
