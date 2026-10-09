@@ -100,6 +100,44 @@ run `hyperbook assets fetch`, build with `--offline`, and save the cache again.
 
 Deleting the cache is safe; the next online build downloads the required bundles again.
 
+### Optional CDNs
+
+Set `cdn` per element in `hyperbook.json` to load its large runtime from a CDN:
+
+```json
+{
+  "name": "My Hyperbook",
+  "elements": {
+    "pyide": { "cdn": true },
+    "typst": { "cdn": "https://assets.example.com/directive-typst/" },
+    "geogebra": { "cdn": true },
+    "openscad": { "cdn": false }
+  }
+}
+```
+
+Omitting `cdn` or setting it to `false` keeps local assets. `true` selects the
+default CDN: jsDelivr for Pyodide and Typst, GeoGebra's server for GeoGebra, and
+versioned Hyperbook assets on UNPKG for the other elements. The option supports
+`pyide`, `typst`, `geogebra`, `openscad`, `excalidraw`, `onlineide`, `sqlide`, and
+`blockflow` (both player and editor).
+
+A custom HTTP(S) URL points to the contents of the element's
+`__hyperbook_assets/directive-<element>/` directory from a local build. Keep its
+subdirectories. For `pyide`, point directly to
+the Pyodide distribution directory containing `pyodide.js` and
+`pyodide-lock.json`.
+
+If a custom CDN URL has a different origin from the book (domain, port, or
+protocol), enable CORS on that asset server. Locally bundled assets and custom
+URLs on the book's own origin need no extra CORS headers. If the book uses HTTPS,
+its CDN URLs must use HTTPS too.
+
+CDN-enabled elements skip local runtime downloads during build, development,
+and `assets fetch`. Their integration scripts and styles remain local. They
+can be built with `--offline` without a cached runtime, but readers need access
+to the CDN. `assets fetch --all` still downloads every bundle.
+
 ### Building and releasing the CLI
 
 Build the workspace packages before building the CLI. Its postbuild step writes

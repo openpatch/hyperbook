@@ -40,11 +40,35 @@
     }
   ],
   "elements": {
+    "blockflow": {
+      "cdn": true
+    },
     "code": {
       "showLineNumbers": true
     },
     "emoji": {
       "style": "twemoji"
+    },
+    "excalidraw": {
+      "cdn": true
+    },
+    "geogebra": {
+      "cdn": true
+    },
+    "onlineide": {
+      "cdn": true
+    },
+    "openscad": {
+      "cdn": true
+    },
+    "pyide": {
+      "cdn": true
+    },
+    "sqlide": {
+      "cdn": true
+    },
+    "typst": {
+      "cdn": true
     }
   },
   "language": "en",

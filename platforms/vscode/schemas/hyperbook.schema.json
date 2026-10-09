@@ -1,6 +1,30 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "definitions": {
+        "ElementAssetConfig": {
+            "allOf": [
+                {
+                    "properties": {
+                        "version": {
+                            "type": "string"
+                        }
+                    },
+                    "type": "object"
+                },
+                {
+                    "properties": {
+                        "cdn": {
+                            "description": "Use the default CDN (true), a custom HTTP(S) asset base URL, or local assets (false/default).",
+                            "type": [
+                                "string",
+                                "boolean"
+                            ]
+                        }
+                    },
+                    "type": "object"
+                }
+            ]
+        },
         "Language": {
             "enum": [
                 "de",
@@ -141,6 +165,9 @@
         },
         "elements": {
             "properties": {
+                "blockflow": {
+                    "$ref": "#/definitions/ElementAssetConfig"
+                },
                 "bookmarks": {
                     "anyOf": [
                         {
@@ -239,6 +266,18 @@
                         },
                         {
                             "properties": {
+                                "cdn": {
+                                    "description": "Use the default CDN (true), a custom HTTP(S) asset base URL, or local assets (false/default).",
+                                    "type": [
+                                        "string",
+                                        "boolean"
+                                    ]
+                                }
+                            },
+                            "type": "object"
+                        },
+                        {
+                            "properties": {
                                 "aspectRatio": {
                                     "type": "string"
                                 },
@@ -255,6 +294,9 @@
                             "type": "object"
                         }
                     ]
+                },
+                "geogebra": {
+                    "$ref": "#/definitions/ElementAssetConfig"
                 },
                 "kirimoto": {
                     "allOf": [
@@ -291,6 +333,18 @@
                         },
                         {
                             "properties": {
+                                "cdn": {
+                                    "description": "Use the default CDN (true), a custom HTTP(S) asset base URL, or local assets (false/default).",
+                                    "type": [
+                                        "string",
+                                        "boolean"
+                                    ]
+                                }
+                            },
+                            "type": "object"
+                        },
+                        {
+                            "properties": {
                                 "height": {
                                     "type": [
                                         "string",
@@ -305,12 +359,30 @@
                         }
                     ]
                 },
+                "openscad": {
+                    "$ref": "#/definitions/ElementAssetConfig"
+                },
+                "pyide": {
+                    "$ref": "#/definitions/ElementAssetConfig"
+                },
                 "sqlide": {
                     "allOf": [
                         {
                             "properties": {
                                 "version": {
                                     "type": "string"
+                                }
+                            },
+                            "type": "object"
+                        },
+                        {
+                            "properties": {
+                                "cdn": {
+                                    "description": "Use the default CDN (true), a custom HTTP(S) asset base URL, or local assets (false/default).",
+                                    "type": [
+                                        "string",
+                                        "boolean"
+                                    ]
                                 }
                             },
                             "type": "object"
@@ -330,6 +402,9 @@
                             "type": "object"
                         }
                     ]
+                },
+                "typst": {
+                    "$ref": "#/definitions/ElementAssetConfig"
                 }
             },
             "type": "object"

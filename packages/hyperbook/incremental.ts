@@ -3,6 +3,7 @@ import fs from "fs/promises";
 import { cp } from "fs/promises";
 import chalk from "chalk";
 import { AssetManager } from "./helpers/assets";
+import { elementCdn } from "@hyperbook/types";
 import {
   vfile,
   hyperbook,
@@ -209,12 +210,7 @@ export class IncrementalBuilder {
       reload: true,
     });
     this.baseCtx = {
-      ...makeBaseCtx(
-        this.root,
-        this.hyperbookJson,
-        basePath,
-        this.rootProject,
-      ),
+      ...makeBaseCtx(this.root, this.hyperbookJson, basePath, this.rootProject),
       passwords,
     };
     this.pagesAndSections = await hyperbook.getPagesAndSections(this.root);
@@ -664,7 +660,11 @@ export class IncrementalBuilder {
     await Promise.all(
       newDirectives.map((directive) =>
         this.copyOnce(`directive:${directive}`, async () => {
-          await this.assets.copyDirective(directive, this.assetsOut);
+          await this.assets.copyDirective(
+            directive,
+            this.assetsOut,
+            !!(this.hyperbookJson && elementCdn(this.hyperbookJson, directive)),
+          );
         }),
       ),
     );

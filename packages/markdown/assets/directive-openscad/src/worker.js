@@ -19,12 +19,14 @@ export const getWorker = async (slot, scriptBase) => {
   if (!s.promise) {
     s.promise = new Promise((resolve, reject) => {
       try {
-        const worker = new Worker(
-          new URL(scriptBase + "worker.js", window.location.href),
-          {
-            type: "module",
-          },
-        );
+        const url = new URL(scriptBase + "worker.js", window.location.href);
+        const runtimeBase = document
+          .querySelector(".directive-openscad[data-runtime-base]")
+          ?.getAttribute("data-runtime-base");
+        if (runtimeBase) url.searchParams.set("runtime", runtimeBase);
+        const worker = new Worker(url, {
+          type: "module",
+        });
 
         worker.addEventListener("message", (event) => {
           const { requestId, ok, result, error } = event.data || {};
@@ -70,7 +72,13 @@ export const getWorker = async (slot, scriptBase) => {
   return s.promise;
 };
 
-export const callWorker = async (slot, type, payload, scriptBase, transfer = []) => {
+export const callWorker = async (
+  slot,
+  type,
+  payload,
+  scriptBase,
+  transfer = [],
+) => {
   const worker = await getWorker(slot, scriptBase);
   const s = workerSlots[slot];
   const requestId = ++workerRequestId;
@@ -99,13 +107,18 @@ export const buildParamUiInWorker = async (
   scriptBase,
 ) => {
   try {
-    const result = await callWorker("param", "buildParamForm", {
-      code,
-      libraryNames,
-      binaryFiles,
-      currentOverrides,
-      id,
-    }, scriptBase);
+    const result = await callWorker(
+      "param",
+      "buildParamForm",
+      {
+        code,
+        libraryNames,
+        binaryFiles,
+        currentOverrides,
+        id,
+      },
+      scriptBase,
+    );
     return {
       hasParams: Boolean(result?.hasParams),
       html: typeof result?.html === "string" ? result.html : "",

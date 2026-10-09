@@ -9,10 +9,11 @@ hyperbook.typst = (function () {
     "directive-typst/",
     new URL(HYPERBOOK_ASSETS, document.baseURI),
   );
+  const runtime = JSON.parse(document.getElementsByClassName("directive-typst")[0]?.getAttribute("data-runtime") || "{}");
   const CONFIG = {
-    TYPST_COMPILER_URL: new URL("typst-compiler.wasm", assetBase).href,
-    TYPST_RENDERER_URL: new URL("typst-renderer.wasm", assetBase).href,
-    TYPST_BUNDLE_URL: new URL("typst-bundle.js", assetBase).href,
+    TYPST_COMPILER_URL: runtime.compiler || new URL("typst-compiler.wasm", assetBase).href,
+    TYPST_RENDERER_URL: runtime.renderer || new URL("typst-renderer.wasm", assetBase).href,
+    TYPST_BUNDLE_URL: runtime.bundle || new URL("typst-bundle.js", assetBase).href,
     DEBOUNCE_DELAY: 500,
     TYPST_CHECK_INTERVAL: 50,
     CONTAINER_PADDING: 20,
@@ -173,7 +174,7 @@ hyperbook.typst = (function () {
         fontFiles.map((f) => f.url),
         {
           assets: ["text"],
-          assetUrlPrefix: { text: new URL("fonts/", assetBase).href },
+          assetUrlPrefix: { text: runtime.fonts || new URL("fonts/", assetBase).href },
         },
       );
 

@@ -1,5 +1,6 @@
 /// <reference types="mdast-util-directive" />
-import { HyperbookContext } from "@hyperbook/types";
+import { HyperbookContext, elementCdn } from "@hyperbook/types";
+import { elementAssetUrl } from "./elementAssets";
 import { Root } from "mdast";
 import { visit } from "unist-util-visit";
 import { VFile } from "vfile";
@@ -48,7 +49,8 @@ export default (ctx: HyperbookContext) => () => {
 
         expectContainerDirective(node, file, name);
         registerDirective(file, name, ["client.js"], ["style.css"], ["step"]);
-        registerDirective(file, "blockflow");
+        if (!elementCdn(ctx.config, "blockflow"))
+          registerDirective(file, "blockflow");
 
         const {
           title,
@@ -68,7 +70,11 @@ export default (ctx: HyperbookContext) => () => {
 
         if (project) {
           // Use the provided project JSON URL directly
-          const projectSrc = ctx.makeUrl(project, "public", ctx.navigation.current || undefined);
+          const projectSrc = ctx.makeUrl(
+            project,
+            "public",
+            ctx.navigation.current || undefined,
+          );
           projectParam = encodeURIComponent(projectSrc);
         } else {
           const steps: BlockflowStep[] = [];
@@ -82,15 +88,32 @@ export default (ctx: HyperbookContext) => () => {
             steps.push({
               title: stepAttrs.title || undefined,
               text,
-              image: stepAttrs.image ? ctx.makeUrl(stepAttrs.image, "public", ctx.navigation.current || undefined) : undefined,
-              video: stepAttrs.video ? ctx.makeUrl(stepAttrs.video, "public", ctx.navigation.current || undefined) : undefined,
+              image: stepAttrs.image
+                ? ctx.makeUrl(
+                    stepAttrs.image,
+                    "public",
+                    ctx.navigation.current || undefined,
+                  )
+                : undefined,
+              video: stepAttrs.video
+                ? ctx.makeUrl(
+                    stepAttrs.video,
+                    "public",
+                    ctx.navigation.current || undefined,
+                  )
+                : undefined,
             });
           }
 
           const config: BlockflowConfig = {};
           if (title) config.title = title;
-          if (src) config.sb3 = ctx.makeUrl(src, "public", ctx.navigation.current || undefined);
-        
+          if (src)
+            config.sb3 = ctx.makeUrl(
+              src,
+              "public",
+              ctx.navigation.current || undefined,
+            );
+
           if (allowExtensions !== undefined) {
             config.ui = { allowExtensions: allowExtensions !== "false" };
           }
@@ -102,7 +125,10 @@ export default (ctx: HyperbookContext) => () => {
             config.sounds = { enabled: showSoundsTab !== "false" };
           }
 
-          if (categories || Object.keys(rest).some((k) => k.startsWith("blocks-"))) {
+          if (
+            categories ||
+            Object.keys(rest).some((k) => k.startsWith("blocks-"))
+          ) {
             config.toolbox = {};
             if (categories) {
               config.toolbox.categories = (categories as string)
@@ -131,12 +157,7 @@ export default (ctx: HyperbookContext) => () => {
           projectParam = encodeURIComponent(encoded);
         }
 
-        const editorSrc = ctx.makeUrl(
-          ["directive-blockflow", "editor.html"],
-          "assets",
-          undefined,
-          { versioned: false },
-        );
+        const editorSrc = elementAssetUrl(ctx, "blockflow", "editor.html");
         const iframeSrc = `${editorSrc}?project=${projectParam}`;
 
         data.hName = "div";

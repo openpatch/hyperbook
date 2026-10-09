@@ -106,3 +106,55 @@ Hier ist eine Beispielkonfiguration:
   ]
 }
 ```
+
+## Lokale Dateien und CDNs
+
+Hyperbook lädt große Laufzeitumgebungen beim ersten Bedarf herunter und kopiert
+sie in den Build. Mit `cdn` in der Elementkonfiguration kannst du sie stattdessen
+von einem CDN laden:
+
+```json
+{
+  "name": "Mein Hyperbook",
+  "elements": {
+    "pyide": { "cdn": true },
+    "typst": { "cdn": "https://assets.example.com/directive-typst/" },
+    "geogebra": { "cdn": true },
+    "openscad": { "cdn": false }
+  }
+}
+```
+
+| Wert | Verhalten |
+| --- | --- |
+| Nicht gesetzt oder `false` | Die Laufzeitumgebung herunterladen und in den Build kopieren. Dies ist der Standard. |
+| `true` | Die Laufzeitumgebung vom Standard-CDN laden. |
+| Eine HTTP(S)-Basis-URL | Die Laufzeitumgebung vom eigenen Server oder CDN laden. |
+
+Diese Option gibt es für `pyide`, `typst`, `geogebra`, `openscad`, `excalidraw`,
+`onlineide`, `sqlide` und `blockflow`. Die Einstellung `blockflow` gilt für den
+Player und den Editor. Kiri:Moto verwendet weiterhin seinen externen Dienst.
+
+Die Standard-CDNs sind jsDelivr für Pyodide und Typst, der GeoGebra-Server für
+GeoGebra und die versionierten Hyperbook-Dateien auf UNPKG für die anderen
+Elemente. Die kleinen Integrationsskripte und Styles von Hyperbook bleiben im
+Build.
+
+Eine eigene URL muss auf den Inhalt des Verzeichnisses
+`__hyperbook_assets/directive-<element>/` aus einem lokalen Build zeigen.
+Behalte die Unterverzeichnisse bei. Bei `pyide` muss die URL direkt auf die
+Pyodide-Distribution mit `pyodide.js` und `pyodide-lock.json` zeigen, zum Beispiel
+`https://assets.example.com/pyodide/`.
+
+Wenn eine eigene CDN-URL eine andere Origin als das Buch hat (andere Domain,
+anderer Port oder anderes Protokoll), muss der Server für die Laufzeitdateien
+Anfragen von dieser Origin erlauben, zum Beispiel mit
+`Access-Control-Allow-Origin: *`. Lokal eingebundene Dateien und eigene URLs
+auf derselben Origin wie das Buch benötigen keine zusätzlichen CORS-Header.
+Wenn das Buch HTTPS verwendet, müssen auch seine CDN-URLs HTTPS verwenden.
+
+`hyperbook assets fetch` überspringt Laufzeitumgebungen mit aktiviertem CDN.
+Für `hyperbook build --offline` müssen diese nicht im Cache liegen. Zum Lesen
+des Buchs ist weiterhin Zugriff auf das konfigurierte CDN nötig.
+`hyperbook assets fetch --all` lädt unabhängig von der Elementkonfiguration
+alle Laufzeitumgebungen herunter.

@@ -1,7 +1,8 @@
 // Register directive nodes in mdast:
 /// <reference types="mdast-util-directive" />
 //
-import { HyperbookContext } from "@hyperbook/types";
+import { HyperbookContext, elementCdn } from "@hyperbook/types";
+import { elementAssetUrl } from "./elementAssets";
 import { Root } from "mdast";
 import { visit } from "unist-util-visit";
 import { VFile } from "vfile";
@@ -22,7 +23,8 @@ export default (ctx: HyperbookContext) => () => {
 
         expectLeafDirective(node, file, name);
         registerDirective(file, name, ["client.js"], ["style.css"], []);
-        registerDirective(file, "blockflow");
+        if (!elementCdn(ctx.config, "blockflow"))
+          registerDirective(file, "blockflow");
 
         const {
           src,
@@ -31,14 +33,13 @@ export default (ctx: HyperbookContext) => () => {
           aspectRatio = "4/3",
         } = node.attributes || {};
 
-        const siteSrc = ctx.makeUrl(src || "", "public", ctx.navigation.current || undefined);
-
-        const playerSrc = ctx.makeUrl(
-          ["directive-blockflow", "player.html"],
-          "assets",
-          undefined,
-          { versioned: false },
+        const siteSrc = ctx.makeUrl(
+          src || "",
+          "public",
+          ctx.navigation.current || undefined,
         );
+
+        const playerSrc = elementAssetUrl(ctx, "blockflow", "player.html");
         const iframeSrc = src
           ? `${playerSrc}?project=${encodeURIComponent(siteSrc)}`
           : undefined;

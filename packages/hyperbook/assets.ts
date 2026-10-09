@@ -1,6 +1,6 @@
 import { hyperbook, vfile, getPasswords } from "@hyperbook/fs";
 import { process as processMarkdown } from "@hyperbook/markdown";
-import { Hyperproject } from "@hyperbook/types";
+import { Hyperproject, elementCdn } from "@hyperbook/types";
 import { VFile } from "vfile";
 import { makeBaseCtx } from "./build";
 import { AssetManager } from "./helpers/assets";
@@ -58,7 +58,7 @@ export async function projectDirectives(
       { ...base, navigation },
     );
     for (const directive of Object.keys(result.data.directives || {}))
-      directives.add(directive);
+      if (!elementCdn(config, directive)) directives.add(directive);
   }
   return directives;
 }

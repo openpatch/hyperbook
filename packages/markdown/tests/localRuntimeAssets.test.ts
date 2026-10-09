@@ -64,36 +64,42 @@ it("selects GeoGebra's local HTML5 codebase before injecting the applet", () => 
   ]);
 });
 
-it("loads Pyodide and its package index from local assets", async () => {
-  vi.stubGlobal("HYPERBOOK_ASSETS", assets);
-  const loadPyodide = vi.fn(async () => ({}));
-  const browser: any = {};
-  vi.stubGlobal("window", browser);
-  let scriptUrl;
-  vi.stubGlobal("document", {
-    baseURI,
-    createElement: () => ({}),
-    head: {
-      appendChild(script: any) {
-        scriptUrl = script.src;
-        browser.loadPyodide = loadPyodide;
-        script.onload();
+it.each([undefined, "https://cdn.example.com/pyodide/"])(
+  "loads Pyodide and its package index from the configured assets: %s",
+  async (runtimeUrl: string | undefined) => {
+    vi.stubGlobal("HYPERBOOK_ASSETS", assets);
+    const loadPyodide = vi.fn(async () => ({}));
+    const browser: any = {};
+    vi.stubGlobal("window", browser);
+    let scriptUrl;
+    vi.stubGlobal("document", {
+      baseURI,
+      querySelector: () =>
+        runtimeUrl ? { getAttribute: () => runtimeUrl } : null,
+      createElement: () => ({}),
+      head: {
+        appendChild(script: any) {
+          scriptUrl = script.src;
+          browser.loadPyodide = loadPyodide;
+          script.onload();
+        },
       },
-    },
-  });
-  const { getRuntime } =
-    // @ts-expect-error The browser client is JavaScript.
-    await import("../assets/directive-pyide/src/pyodide.js");
-  await getRuntime("test");
-  expect(scriptUrl).toBe(
-    `https://example.com${assets}directive-pyide/pyodide/pyodide.js`,
-  );
-  expect(loadPyodide).toHaveBeenCalledWith({
-    indexURL: `https://example.com${assets}directive-pyide/pyodide/`,
-  });
-  await getRuntime("test");
-  expect(loadPyodide).toHaveBeenCalledTimes(1);
-});
+    });
+    const { getRuntime } =
+      // @ts-expect-error The browser client is JavaScript.
+      await import("../assets/directive-pyide/src/pyodide.js");
+    await getRuntime("test");
+    expect(scriptUrl).toBe(
+      `${runtimeUrl || `https://example.com${assets}directive-pyide/pyodide/`}pyodide.js`,
+    );
+    expect(loadPyodide).toHaveBeenCalledWith({
+      indexURL:
+        runtimeUrl || `https://example.com${assets}directive-pyide/pyodide/`,
+    });
+    await getRuntime("test");
+    expect(loadPyodide).toHaveBeenCalledTimes(1);
+  },
+);
 
 it("returns undefined for cancelled turtle number input so current Pyodide converts it to None", async () => {
   vi.stubGlobal("window", {
@@ -116,77 +122,104 @@ it("returns undefined for cancelled turtle number input so current Pyodide conve
   expect(turtle.numinput("Title", "Number")).toBe(3.5);
 });
 
-it("loads Typst WASM and all standard fonts locally while preserving custom fonts", async () => {
-  const loadFonts = vi.fn();
-  const compiler = vi.fn();
-  const renderer = vi.fn();
-  const context: any = {
-    URL,
-    HYPERBOOK_ASSETS: assets,
-    hyperbook: {},
-    document: { baseURI, getElementsByClassName: () => [] },
-    window: {
-      TypstCompileModule: { loadFonts },
-      $typst: {
-        setCompilerInitOptions: compiler,
-        setRendererInitOptions: renderer,
+it.each([undefined, "https://cdn.example.com/typst/"])(
+  "loads Typst WASM and fonts from the configured assets while preserving custom fonts: %s",
+  async (runtimeUrl: string | undefined) => {
+    const loadFonts = vi.fn();
+    const compiler = vi.fn();
+    const renderer = vi.fn();
+    const runtime = runtimeUrl
+      ? {
+          bundle: `${runtimeUrl}typst-bundle.js`,
+          compiler: `${runtimeUrl}typst-compiler.wasm`,
+          renderer: `${runtimeUrl}typst-renderer.wasm`,
+          fonts: `${runtimeUrl}fonts/`,
+        }
+      : undefined;
+    const context: any = {
+      URL,
+      HYPERBOOK_ASSETS: assets,
+      hyperbook: {},
+      document: {
+        baseURI,
+        getElementsByClassName: vi
+          .fn()
+          .mockReturnValueOnce(
+            runtime ? [{ getAttribute: () => JSON.stringify(runtime) }] : [],
+          )
+          .mockReturnValue([]),
       },
-    },
-  };
-  runInNewContext(
-    read("directive-typst/client.js").replace(
-      "return {};\n})();",
-      "return { TypstLoader, CONFIG };\n})();",
-    ),
-    context,
-  );
-  const { TypstLoader, CONFIG } = context.hyperbook.typst;
-  await new TypstLoader().initializeTypst([{ url: "/course/custom.ttf" }]);
-  expect(CONFIG.TYPST_BUNDLE_URL).toBe(
-    `https://example.com${assets}directive-typst/typst-bundle.js`,
-  );
-  expect(compiler.mock.calls[0][0].getModule()).toBe(
-    `https://example.com${assets}directive-typst/typst-compiler.wasm`,
-  );
-  expect(renderer.mock.calls[0][0].getModule()).toBe(
-    `https://example.com${assets}directive-typst/typst-renderer.wasm`,
-  );
-  expect(loadFonts).toHaveBeenCalledWith(["/course/custom.ttf"], {
-    assets: ["text"],
-    assetUrlPrefix: {
-      text: `https://example.com${assets}directive-typst/fonts/`,
-    },
-  });
-});
-
-it("resolves every optional OpenSCAD library and Roboto font beside the worker", async () => {
-  const fetch = vi.fn(async () => ({
-    ok: true,
-    arrayBuffer: async () => new ArrayBuffer(1),
-  }));
-  const context: any = {
-    URL,
-    fetch,
-    Uint8Array,
-    self: {
-      location: {
-        href: `https://example.com${assets}directive-openscad/worker.js?v=1`,
+      window: {
+        TypstCompileModule: { loadFonts },
+        $typst: {
+          setCompilerInitOptions: compiler,
+          setRendererInitOptions: renderer,
+        },
       },
-      addEventListener: () => {},
-    },
-  };
-  runInNewContext(
-    read("directive-openscad/worker.js") +
-      "\nglobalThis.runtime = { KNOWN_LIBRARIES, loadFonts };",
-    context,
-  );
-  for (const [name, url] of Object.entries(context.runtime.KNOWN_LIBRARIES)) {
-    expect(url).toBe(
-      `https://example.com${assets}directive-openscad/libraries/${name}.zip`,
+    };
+    runInNewContext(
+      read("directive-typst/client.js").replace(
+        "return {};\n})();",
+        "return { TypstLoader, CONFIG };\n})();",
+      ),
+      context,
     );
-  }
-  await context.runtime.loadFonts();
-  expect(fetch).toHaveBeenCalledWith(
-    `https://example.com${assets}directive-openscad/fonts/Roboto-Regular.ttf`,
-  );
-});
+    const { TypstLoader, CONFIG } = context.hyperbook.typst;
+    await new TypstLoader().initializeTypst([{ url: "/course/custom.ttf" }]);
+    expect(CONFIG.TYPST_BUNDLE_URL).toBe(
+      runtime?.bundle ||
+        `https://example.com${assets}directive-typst/typst-bundle.js`,
+    );
+    expect(compiler.mock.calls[0][0].getModule()).toBe(
+      runtime?.compiler ||
+        `https://example.com${assets}directive-typst/typst-compiler.wasm`,
+    );
+    expect(renderer.mock.calls[0][0].getModule()).toBe(
+      runtime?.renderer ||
+        `https://example.com${assets}directive-typst/typst-renderer.wasm`,
+    );
+    expect(loadFonts).toHaveBeenCalledWith(["/course/custom.ttf"], {
+      assets: ["text"],
+      assetUrlPrefix: {
+        text:
+          runtime?.fonts ||
+          `https://example.com${assets}directive-typst/fonts/`,
+      },
+    });
+  },
+);
+
+it.each([undefined, "https://cdn.example.com/openscad/"])(
+  "resolves every optional OpenSCAD library and Roboto font from the worker's configured assets: %s",
+  async (runtimeUrl: string | undefined) => {
+    const fetch = vi.fn(async () => ({
+      ok: true,
+      arrayBuffer: async () => new ArrayBuffer(1),
+    }));
+    const context: any = {
+      URL,
+      fetch,
+      Uint8Array,
+      self: {
+        location: {
+          href: `https://example.com${assets}directive-openscad/worker.js?v=1${runtimeUrl ? `&runtime=${encodeURIComponent(runtimeUrl)}` : ""}`,
+        },
+        addEventListener: () => {},
+      },
+    };
+    runInNewContext(
+      read("directive-openscad/worker.js") +
+        "\nglobalThis.runtime = { KNOWN_LIBRARIES, loadFonts };",
+      context,
+    );
+    for (const [name, url] of Object.entries(context.runtime.KNOWN_LIBRARIES)) {
+      expect(url).toBe(
+        `${runtimeUrl || `https://example.com${assets}directive-openscad/`}libraries/${name}.zip`,
+      );
+    }
+    await context.runtime.loadFonts();
+    expect(fetch).toHaveBeenCalledWith(
+      `${runtimeUrl || `https://example.com${assets}directive-openscad/`}fonts/Roboto-Regular.ttf`,
+    );
+  },
+);

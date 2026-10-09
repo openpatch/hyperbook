@@ -1,7 +1,8 @@
 // Register directive nodes in mdast:
 /// <reference types="mdast-util-directive" />
 //
-import { HyperbookContext } from "@hyperbook/types";
+import { HyperbookContext, elementCdn } from "@hyperbook/types";
+import { elementAssetUrl } from "./elementAssets";
 import { Root } from "mdast";
 import { visit } from "unist-util-visit";
 import { VFile } from "vfile";
@@ -10,12 +11,14 @@ import {
   isCode,
   isDirective,
   registerDirective,
+  requestJS,
 } from "./remarkHelper";
 import { ElementContent } from "hast";
 import { resolveDirectiveId } from "./directiveId";
 
 export default (ctx: HyperbookContext) => () => {
   const name = "sqlide";
+  const cdn = elementCdn(ctx.config, name);
   return (tree: Root, file: VFile) => {
     visit(tree, function (node) {
       if (isDirective(node)) {
@@ -32,23 +35,17 @@ export default (ctx: HyperbookContext) => () => {
         if (!db) {
           db = ctx.config.elements?.sqlide?.db
             ? ctx.makeUrl(ctx.config.elements?.sqlide?.db, "public")
-            : ctx.makeUrl(
-                [
-                  "directive-sqlide",
-                  "include",
-                  "assets",
-                  "databases",
-                  "world1.sqLite",
-                ],
-                "assets",
-                undefined,
-                { versioned: false },
+            : elementAssetUrl(
+                ctx,
+                name,
+                "include/assets/databases/world1.sqLite",
               );
         } else {
           db = ctx.makeUrl(db, "public", ctx.navigation.current || undefined);
         }
 
         expectContainerDirective(node, file, name);
+        if (cdn) requestJS(file, ["cdn-workers.js"]);
         registerDirective(
           file,
           name,
@@ -57,12 +54,19 @@ export default (ctx: HyperbookContext) => () => {
             {
               type: "module",
               crossorigin: true,
-              src: "include/sql-ide-embedded.js",
+              src: cdn
+                ? elementAssetUrl(ctx, name, "include/sql-ide-embedded.js")
+                : "include/sql-ide-embedded.js",
               position: "head",
               versioned: false,
             },
           ],
-          ["style.css", "include/sql-ide-embedded.css"],
+          [
+            "style.css",
+            cdn
+              ? elementAssetUrl(ctx, name, "include/sql-ide-embedded.css")
+              : "include/sql-ide-embedded.css",
+          ],
           [],
         );
 

@@ -43,6 +43,7 @@ import {
 } from "@hyperbook/markdown";
 import packageJson from "./package.json";
 import { AssetManager } from "./helpers/assets";
+import { elementCdn } from "@hyperbook/types";
 
 export const ASSETS_FOLDER = "__hyperbook_assets";
 
@@ -903,7 +904,7 @@ async function runBuild(
       `${chalk.blue(`[${prefix}]`)} Copying directive assets: [${i++}/${directives.size}]`,
     );
     try {
-      await assets.copyDirective(directive, assetsOut);
+      await assets.copyDirective(directive, assetsOut, !!elementCdn(hyperbookJson, directive));
     } catch (e) {
       // Close the progress line so the failure is not appended to it.
       breakProgressLine();

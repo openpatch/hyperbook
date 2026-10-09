@@ -2,6 +2,51 @@ type ElementConfig = {
   version?: string;
 };
 
+export type ElementAssetConfig = ElementConfig & {
+  /** Use the default CDN (true), a custom HTTP(S) asset base URL, or local assets (false/default). */
+  cdn?: boolean | string;
+};
+
+/** Small integration files retained locally when an element uses a CDN. */
+export const elementCoreFiles = {
+  blockflow: [] as string[],
+  onlineide: ["style.css"],
+  sqlide: ["client.js", "style.css"],
+  excalidraw: ["client.js", "style.css"],
+  openscad: ["client.js", "worker.js", "style.css"],
+  geogebra: ["client.js", "geogebra-web-component.js", "style.css"],
+  pyide: ["client.js", "python-friendly-error-messages.js", "style.css"],
+  typst: ["client.js", "style.css"],
+} satisfies Record<string, string[]>;
+
+export type DownloadableElement = keyof typeof elementCoreFiles;
+
+export function elementCdn(
+  config: HyperbookJson,
+  element: string,
+): boolean | string {
+  if (!Object.prototype.hasOwnProperty.call(elementCoreFiles, element))
+    return false;
+  const value = config.elements?.[element as DownloadableElement]?.cdn;
+  if (value === undefined || value === false) return false;
+  if (value === true) return true;
+  if (typeof value === "string") {
+    try {
+      const url = new URL(value);
+      if (
+        ["http:", "https:"].includes(url.protocol) &&
+        !url.search &&
+        !url.hash
+      ) {
+        return url.href.replace(/\/?$/, "/");
+      }
+    } catch {}
+  }
+  throw new Error(
+    `elements.${element}.cdn must be a boolean or an absolute HTTP(S) base URL without a query or fragment.`,
+  );
+}
+
 export type Script =
   | string
   | {
@@ -54,11 +99,7 @@ export type BreadcrumbConfig = {
 export type PageNavigation = "default" | "hidden";
 
 export type SectionNavigation =
-  | "default"
-  | "hidden"
-  | "virtual"
-  | "page"
-  | "expanded";
+  "default" | "hidden" | "virtual" | "page" | "expanded";
 
 export type HyperbookPageFrontmatter = {
   name: string;
@@ -112,17 +153,17 @@ export type ProtectInheritance = {
 
 export type HyperbookPage = HyperbookPageFrontmatter &
   ProtectInheritance & {
-  isEmpty?: boolean;
-  href?: string;
-  path?: {
-    directory: string;
-    relative: string;
-    absolute: string;
-    href: string | null;
-    permalink: string | null;
+    isEmpty?: boolean;
+    href?: string;
+    path?: {
+      directory: string;
+      relative: string;
+      absolute: string;
+      href: string | null;
+      permalink: string | null;
+    };
+    repo?: string;
   };
-  repo?: string;
-};
 
 export type HyperbookSection = HyperbookSectionFrontmatter &
   ProtectInheritance & {
@@ -134,8 +175,7 @@ export type HyperbookSection = HyperbookSectionFrontmatter &
   };
 
 export type HyperbookFrontmatter =
-  | HyperbookPageFrontmatter
-  | HyperbookSectionFrontmatter;
+  HyperbookPageFrontmatter | HyperbookSectionFrontmatter;
 
 /**
  * How protected content is stored in the built HTML.
@@ -271,13 +311,18 @@ export type HyperbookJson = {
       bypassInline?: boolean;
       showLineNumbers?: boolean;
     };
-    excalidraw?: ElementConfig & {
+    blockflow?: ElementAssetConfig;
+    geogebra?: ElementAssetConfig;
+    openscad?: ElementAssetConfig;
+    pyide?: ElementAssetConfig;
+    typst?: ElementAssetConfig;
+    excalidraw?: ElementAssetConfig & {
       autoZoom?: boolean;
       center?: boolean;
       aspectRatio?: string;
       edit?: boolean;
     };
-    onlineide?: ElementConfig & {
+    onlineide?: ElementAssetConfig & {
       height?: string | number;
       outputWidth?: string;
     };
@@ -285,7 +330,7 @@ export type HyperbookJson = {
       height?: string;
       settings?: string;
     };
-    sqlide?: ElementConfig & {
+    sqlide?: ElementAssetConfig & {
       db?: string;
       height?: string | number;
     };

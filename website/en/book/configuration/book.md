@@ -108,3 +108,53 @@ Here is an example configuration:
   ]
 }
 ```
+
+## Local assets and CDNs
+
+Hyperbook downloads large element runtimes when they are first needed and copies
+them into the build. To load a runtime from a CDN instead, set `cdn` in its
+element configuration:
+
+```json
+{
+  "name": "My Hyperbook",
+  "elements": {
+    "pyide": { "cdn": true },
+    "typst": { "cdn": "https://assets.example.com/directive-typst/" },
+    "geogebra": { "cdn": true },
+    "openscad": { "cdn": false }
+  }
+}
+```
+
+| Value | Behavior |
+| --- | --- |
+| Omitted or `false` | Download and include the runtime in the build. This is the default. |
+| `true` | Load the runtime from its default CDN. |
+| An HTTP(S) base URL | Load the runtime from your own server or CDN. |
+
+This option is available for `pyide`, `typst`, `geogebra`, `openscad`,
+`excalidraw`, `onlineide`, `sqlide`, and `blockflow`. The `blockflow` setting
+applies to both the player and editor. Kiri:Moto continues to use its external
+service.
+
+The default CDNs are jsDelivr for Pyodide and Typst, GeoGebra's server for
+GeoGebra, and UNPKG's versioned Hyperbook assets for the other elements.
+Hyperbook's small integration scripts and styles stay in the build.
+
+A custom URL must point to the contents of the corresponding
+`__hyperbook_assets/directive-<element>/` directory from a local build. Preserve
+its subdirectories. For `pyide`, point directly to the Pyodide distribution
+directory containing `pyodide.js` and `pyodide-lock.json`, such as
+`https://assets.example.com/pyodide/`.
+
+If a custom CDN URL has a different origin from the book (domain, port, or
+protocol), its asset server must allow cross-origin requests, for example with
+`Access-Control-Allow-Origin: *`. Locally bundled assets and custom URLs on the
+book's own origin need no extra CORS headers. If the book uses HTTPS, its CDN
+URLs must use HTTPS too.
+
+CDN-enabled runtimes are skipped by `hyperbook assets fetch` and do not need to
+be cached for `hyperbook build --offline`. Readers still need access to the
+configured CDN. `hyperbook assets fetch --all` downloads every runtime,
+regardless of the element configuration.

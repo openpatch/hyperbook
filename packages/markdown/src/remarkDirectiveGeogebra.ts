@@ -1,7 +1,8 @@
 // Register directive nodes in mdast:
 /// <reference types="mdast-util-directive" />
 //
-import { HyperbookContext } from "@hyperbook/types";
+import { HyperbookContext, elementCdn } from "@hyperbook/types";
+import { elementAssetUrl } from "./elementAssets";
 import { Root } from "mdast";
 import { visit } from "unist-util-visit";
 import { VFile } from "vfile";
@@ -15,6 +16,7 @@ import { resolveDirectiveId } from "./directiveId";
 
 export default (ctx: HyperbookContext) => () => {
   const name = "geogebra";
+  const cdn = elementCdn(ctx.config, name);
   return (tree: Root, file: VFile) => {
     visit(tree, function (node) {
       if (isDirective(node)) {
@@ -36,7 +38,13 @@ export default (ctx: HyperbookContext) => () => {
         registerDirective(
           file,
           name,
-          ["GeoGebra/deployggb.js", "geogebra-web-component.js", "client.js"],
+          [
+            cdn
+              ? elementAssetUrl(ctx, name, "GeoGebra/deployggb.js")
+              : "GeoGebra/deployggb.js",
+            "geogebra-web-component.js",
+            "client.js",
+          ],
           ["style.css"],
           [],
         );
@@ -78,13 +86,11 @@ export default (ctx: HyperbookContext) => () => {
               filename: filename,
               language: ctx.config.language || "en",
               "data-id": id,
-              "data-codebase":
-                ctx.makeUrl(
-                  ["directive-geogebra", "GeoGebra", "HTML5", "5.0", "web3d"],
-                  "assets",
-                  undefined,
-                  { versioned: false },
-                ) + "/",
+              "data-codebase": elementAssetUrl(
+                ctx,
+                name,
+                "GeoGebra/HTML5/5.0/web3d/",
+              ),
               showFullscreenButton,
               scaleContainerClass: "directive-geogebra",
               allowUpscale: true,

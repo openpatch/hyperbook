@@ -66,6 +66,35 @@ afterEach(async () => {
 });
 
 describe("on-demand assets", () => {
+  it("copies only integration files in CDN mode without downloading or accessing the cache", async () => {
+    const source = path.join(options.assetsPath!, "directive-pyide");
+    await fs.mkdir(path.join(source, "pyodide"), { recursive: true });
+    await fs.writeFile(path.join(source, "client.js"), "client");
+    await fs.writeFile(path.join(source, "style.css"), "style");
+    await fs.writeFile(path.join(source, "pyodide", "pyodide.js"), "runtime");
+    const output = path.join(root, "out");
+    await new AssetManager({ ...options, offline: true }).copyDirective(
+      "pyide",
+      output,
+      true,
+    );
+    expect(await fs.readdir(path.join(output, "directive-pyide"))).toEqual([
+      "client.js",
+      "style.css",
+    ]);
+    await expect(fs.stat(options.cacheDir!)).rejects.toMatchObject({
+      code: "ENOENT",
+    });
+    expect(download).not.toHaveBeenCalled();
+  });
+
+  it("downloads a runtime when only the small CLI integration files are installed", async () => {
+    const source = path.join(options.assetsPath!, "directive-blockflow");
+    await fs.mkdir(source, { recursive: true });
+    const resolved = await new AssetManager(options).ensure("blockflow");
+    expect(resolved).not.toBe(source);
+    expect(download).toHaveBeenCalledOnce();
+  });
   it("uses locally built archives offline before their release exists, with the same checksum validation", async () => {
     const bundles = path.join(options.bundlesPath!, manifest.version);
     await fs.mkdir(bundles, { recursive: true });

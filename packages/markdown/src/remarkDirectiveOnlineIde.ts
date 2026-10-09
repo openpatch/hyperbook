@@ -1,7 +1,8 @@
 // Register directive nodes in mdast:
 /// <reference types="mdast-util-directive" />
 //
-import { HyperbookContext } from "@hyperbook/types";
+import { HyperbookContext, elementCdn } from "@hyperbook/types";
+import { elementAssetUrl } from "./elementAssets";
 import { Code, Root, Text } from "mdast";
 import { visit } from "unist-util-visit";
 import { VFile } from "vfile";
@@ -10,12 +11,14 @@ import {
   isCode,
   isDirective,
   registerDirective,
+  requestJS,
 } from "./remarkHelper";
 import { ElementContent } from "hast";
 import { resolveDirectiveId } from "./directiveId";
 
 export default (ctx: HyperbookContext) => () => {
   const name = "onlineide";
+  const cdn = elementCdn(ctx.config, name);
   return (tree: Root, file: VFile) => {
     visit(tree, function (node) {
       if (isDirective(node)) {
@@ -24,7 +27,8 @@ export default (ctx: HyperbookContext) => () => {
         const data = node.data || (node.data = {});
         const attributes = node.attributes || {};
         const {
-          height = ctx.config.elements?.onlineide?.height || "calc(100dvh - 80px)",
+          height = ctx.config.elements?.onlineide?.height ||
+            "calc(100dvh - 80px)",
           fileList = true,
           console: con = true,
           pCode = false,
@@ -49,7 +53,9 @@ export default (ctx: HyperbookContext) => () => {
         // page then serves every page in that folder.
         const page = ctx.navigation.current;
         const assetBase = page
-          ? ctx.makeUrl(".", "book", page, { versioned: false }).replace(/\/?$/, "/")
+          ? ctx
+              .makeUrl(".", "book", page, { versioned: false })
+              .replace(/\/?$/, "/")
           : undefined;
         const assetBaseConfig = assetBase
           ? `, 'assetBaseUrl': '${assetBase.replace(/['"\\]/g, "")}'`
@@ -90,6 +96,7 @@ export default (ctx: HyperbookContext) => () => {
         }
 
         expectContainerDirective(node, file, name);
+        if (cdn) requestJS(file, ["cdn-workers.js"]);
         registerDirective(
           file,
           name,
@@ -97,12 +104,19 @@ export default (ctx: HyperbookContext) => () => {
             {
               type: "module",
               crossorigin: true,
-              src: "include/online-ide-embedded.js",
+              src: cdn
+                ? elementAssetUrl(ctx, name, "include/online-ide-embedded.js")
+                : "include/online-ide-embedded.js",
               position: "head",
-              versioned: false
+              versioned: false,
             },
           ],
-          ["style.css", "include/online-ide-embedded.css"],
+          [
+            "style.css",
+            cdn
+              ? elementAssetUrl(ctx, name, "include/online-ide-embedded.css")
+              : "include/online-ide-embedded.css",
+          ],
           [],
         );
 

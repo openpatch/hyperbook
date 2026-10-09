@@ -7,8 +7,13 @@ import { Transform, Readable } from "stream";
 import { pipeline } from "stream/promises";
 import { extract } from "tar";
 import remoteDirectives from "../asset-bundles.json";
+import { elementCoreFiles, DownloadableElement } from "@hyperbook/types";
 
 const runtimeFiles: Record<string, string[]> = {
+  blockflow: ["player.html"],
+  onlineide: ["include/online-ide-embedded.js"],
+  sqlide: ["include/sql-ide-embedded.js"],
+  excalidraw: ["hyperbook-excalidraw.umd.js"],
   geogebra: ["GeoGebra/deployggb.js"],
   pyide: ["pyodide/pyodide.js", "pyodide/pyodide-lock.json"],
   typst: [
@@ -147,12 +152,12 @@ export class AssetManager {
   }
 
   /** Directives without any assets are valid; missing remote bundles are errors. */
-  async ensure(directive: string): Promise<string | undefined> {
+  async ensure(directive: string, cdn = false): Promise<string | undefined> {
     const bundled = path.join(this.assetsPath, `directive-${directive}`);
     try {
       if ((await fs.stat(bundled)).isDirectory()) {
         await Promise.all(
-          (runtimeFiles[directive] || []).map((file) =>
+          (cdn ? [] : runtimeFiles[directive] || []).map((file) =>
             fs.access(path.join(bundled, file)),
           ),
         );
@@ -161,7 +166,7 @@ export class AssetManager {
     } catch (error: any) {
       if (error.code !== "ENOENT") throw error;
     }
-    if (!remoteDirectives.includes(directive)) return undefined;
+    if (cdn || !remoteDirectives.includes(directive)) return undefined;
     const manifest = await this.readManifest();
     const bundle = manifest.bundles[directive];
     if (!bundle)
@@ -182,12 +187,29 @@ export class AssetManager {
     return pending;
   }
 
-  async copyDirective(directive: string, assetsOut: string): Promise<void> {
-    const source = await this.ensure(directive);
+  async copyDirective(
+    directive: string,
+    assetsOut: string,
+    cdn = false,
+  ): Promise<void> {
+    const source = await this.ensure(directive, cdn);
     if (!source) return;
     const destination = path.join(assetsOut, `directive-${directive}`);
     await fs.mkdir(destination, { recursive: true });
-    await fs.cp(source, destination, { recursive: true });
+    await fs.cp(source, destination, {
+      recursive: true,
+      filter(file) {
+        if (!cdn) return true;
+        const relative = path.relative(source, file).split(path.sep).join("/");
+        return (
+          !relative ||
+          (elementCoreFiles[directive as DownloadableElement]?.includes(
+            relative,
+          ) ??
+            false)
+        );
+      },
+    });
   }
 
   private async complete(

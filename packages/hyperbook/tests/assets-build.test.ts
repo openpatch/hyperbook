@@ -99,6 +99,74 @@ it("downloads the registered shared Blockflow dependency during a full build", a
   expect(download).toHaveBeenCalledOnce();
 });
 
+it("builds and prefetches CDN elements offline without obtaining their local runtimes", async () => {
+  await fs.writeFile(
+    path.join(root, "hyperbook.json"),
+    JSON.stringify({
+      name: "Assets",
+      elements: {
+        blockflow: { cdn: true },
+        pyide: { cdn: "https://cdn.example.com/python/" },
+      },
+    }),
+  );
+  await fs.writeFile(
+    path.join(root, "book", "index.md"),
+    `${player}\n\n::pyide`,
+  );
+  await fs.mkdir(path.join(options.assetsPath!, "directive-pyide"));
+  await fs.writeFile(
+    path.join(options.assetsPath!, "directive-pyide", "client.js"),
+    "client",
+  );
+  const manager = new AssetManager({ ...options, offline: true });
+  await fetchAssets(project, manager);
+  await runBuildProject(
+    project,
+    project,
+    undefined,
+    undefined,
+    undefined,
+    manager,
+  );
+  const out = path.join(root, ".hyperbook", "out");
+  const html = await fs.readFile(path.join(out, "index.html"), "utf8");
+  expect(html).toContain("unpkg.com/@hyperbook/markdown@");
+  expect(html).toContain('data-runtime-url="https://cdn.example.com/python/"');
+  await expect(
+    fs.stat(path.join(out, "__hyperbook_assets", "directive-blockflow")),
+  ).rejects.toMatchObject({ code: "ENOENT" });
+  await expect(fs.stat(options.cacheDir!)).rejects.toMatchObject({
+    code: "ENOENT",
+  });
+  expect(download).not.toHaveBeenCalled();
+});
+
+it("honors CDN configuration for a directive first added during incremental development", async () => {
+  await fs.writeFile(
+    path.join(root, "hyperbook.json"),
+    JSON.stringify({
+      name: "Assets",
+      elements: { blockflow: { cdn: "http://cdn.example.com/blockflow" } },
+    }),
+  );
+  const builder = new IncrementalBuilder(
+    root,
+    project,
+    new AssetManager({ ...options, offline: true }),
+  );
+  await builder.initialize();
+  await fs.writeFile(path.join(root, "book", "index.md"), player);
+  await builder.handleChange(path.join("book", "index.md"), "change");
+  expect(
+    await fs.readFile(
+      path.join(root, ".hyperbook", "out", "index.html"),
+      "utf8",
+    ),
+  ).toContain("http://cdn.example.com/blockflow/player.html");
+  expect(download).not.toHaveBeenCalled();
+});
+
 it("downloads a directive first introduced during an incremental build", async () => {
   const builder = new IncrementalBuilder(
     root,
@@ -188,4 +256,23 @@ it("prefetches directives in a library's glossary, expanded snippets and templat
   await expect(
     fs.stat(path.join(root, ".hyperbook", "out")),
   ).rejects.toMatchObject({ code: "ENOENT" });
+});
+
+it("prefetches a shared runtime when any book in a library needs it locally", async () => {
+  await fs.writeFile(path.join(root, "book", "index.md"), player);
+  const otherRoot = path.join(root, "other");
+  await fs.mkdir(path.join(otherRoot, "book"), { recursive: true });
+  await fs.writeFile(path.join(otherRoot, "book", "index.md"), player);
+  await fs.writeFile(
+    path.join(otherRoot, "hyperbook.json"),
+    JSON.stringify({ name: "CDN", elements: { blockflow: { cdn: true } } }),
+  );
+  const library: Hyperproject = {
+    name: "Library",
+    type: "library",
+    src: root,
+    projects: [project, { name: "CDN", type: "book", src: otherRoot }],
+  };
+  await fetchAssets(library, new AssetManager(options));
+  expect(download).toHaveBeenCalledOnce();
 });

@@ -4,6 +4,7 @@ import { createReadStream } from "fs";
 import { createHash } from "crypto";
 import { create } from "tar";
 import { fileURLToPath } from "url";
+import { elementCoreFiles } from "@hyperbook/types";
 
 const packagePath = path.dirname(fileURLToPath(import.meta.url));
 const remoteDirectives = JSON.parse(
@@ -76,8 +77,14 @@ async function postbuild() {
       // Exclude source module directories — only bundled output belongs in dist.
       const rel = path.relative(markdownAssets, src);
       const parts = rel.split(path.sep);
-      if (remoteDirectives.some((name) => parts[0] === `directive-${name}`))
-        return false;
+      const directive = remoteDirectives.find(
+        (name) => parts[0] === `directive-${name}`,
+      );
+      if (directive)
+        return (
+          parts.length === 1 ||
+          elementCoreFiles[directive].includes(parts.slice(1).join("/"))
+        );
       // Skip any src/ subdirectory inside a directive-* folder.
       return !(parts[0]?.startsWith("directive-") && parts[1] === "src");
     },

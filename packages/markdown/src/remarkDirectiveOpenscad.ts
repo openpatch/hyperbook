@@ -1,7 +1,8 @@
 // Register directive nodes in mdast:
 /// <reference types="mdast-util-directive" />
 //
-import { HyperbookContext } from "@hyperbook/types";
+import { HyperbookContext, elementCdn } from "@hyperbook/types";
+import { elementAssetUrl } from "./elementAssets";
 import { Code, Root, Text } from "mdast";
 import { visit } from "unist-util-visit";
 import { VFile } from "vfile";
@@ -26,6 +27,7 @@ function htmlEntities(str: string) {
 
 export default (ctx: HyperbookContext) => () => {
   const name = "openscad";
+  const cdn = elementCdn(ctx.config, name);
 
   return (tree: Root, file: VFile) => {
     visit(tree, function (node) {
@@ -94,6 +96,9 @@ export default (ctx: HyperbookContext) => () => {
         data.hProperties = {
           class: "directive-openscad",
           "data-id": id,
+          ...(cdn
+            ? { "data-runtime-base": elementAssetUrl(ctx, name, "") }
+            : {}),
           "data-binary-files": Buffer.from(
             JSON.stringify(binaryFiles),
           ).toString("base64"),

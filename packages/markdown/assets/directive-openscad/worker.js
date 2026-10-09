@@ -1,4 +1,4 @@
-const scriptBase = new URL("./", self.location.href);
+const runtimeBase = new URL(new URL(self.location.href).searchParams.get("runtime") || "./", self.location.href);
 
 const FONTS_CONF = `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE fontconfig SYSTEM "urn:fontconfig:fonts.dtd">
@@ -7,11 +7,11 @@ const FONTS_CONF = `<?xml version="1.0" encoding="UTF-8"?>
 </fontconfig>`;
 
 const KNOWN_LIBRARIES = {
-  BOSL2: new URL("libraries/BOSL2.zip", scriptBase).href,
-  BOSL: new URL("libraries/BOSL.zip", scriptBase).href,
-  MCAD: new URL("libraries/MCAD.zip", scriptBase).href,
-  NopSCADlib: new URL("libraries/NopSCADlib.zip", scriptBase).href,
-  fonts: new URL("libraries/fonts.zip", scriptBase).href,
+  BOSL2: new URL("libraries/BOSL2.zip", runtimeBase).href,
+  BOSL: new URL("libraries/BOSL.zip", runtimeBase).href,
+  MCAD: new URL("libraries/MCAD.zip", runtimeBase).href,
+  NopSCADlib: new URL("libraries/NopSCADlib.zip", runtimeBase).href,
+  fonts: new URL("libraries/fonts.zip", runtimeBase).href,
 };
 const OPENSCAD_BACKEND_ARG = "--backend=manifold";
 const OPENSCAD_FEATURE_ARGS = ["--enable=lazy-union"];
@@ -35,12 +35,12 @@ const invokeOpenScad = (instance, args) => {
 
 const getOpenScad = async (mergedOutputs) => {
   if (!openscadModulePromise) {
-    openscadModulePromise = import(/* @vite-ignore */ new URL("openscad.js", scriptBase).href);
+    openscadModulePromise = import(/* @vite-ignore */ new URL("openscad.js", runtimeBase).href);
   }
   const OpenSCAD = (await openscadModulePromise).default;
   const instance = await OpenSCAD({
     noInitialRun: true,
-    locateFile: (file) => new URL(file, scriptBase).href,
+    locateFile: (file) => new URL(file, runtimeBase).href,
     print: (text) => mergedOutputs.push({ stdout: text }),
     printErr: (text) => mergedOutputs.push({ stderr: text }),
   });
@@ -174,7 +174,7 @@ const mountLibraries = async (instance, libraryNames) => {
 const loadFonts = async () => {
   if (robotoFontData) return;
   try {
-    const resp = await fetch(new URL("fonts/Roboto-Regular.ttf", scriptBase).href);
+    const resp = await fetch(new URL("fonts/Roboto-Regular.ttf", runtimeBase).href);
     if (resp.ok) {
       robotoFontData = new Uint8Array(await resp.arrayBuffer());
     }

@@ -1,7 +1,8 @@
 // Register directive nodes in mdast:
 /// <reference types="mdast-util-directive" />
 //
-import { HyperbookContext } from "@hyperbook/types";
+import { HyperbookContext, elementCdn } from "@hyperbook/types";
+import { elementAssetUrl } from "./elementAssets";
 import { Code, Root, Text } from "mdast";
 import { visit } from "unist-util-visit";
 import { VFile } from "vfile";
@@ -27,6 +28,7 @@ function htmlEntities(str: string) {
 
 export default (ctx: HyperbookContext) => () => {
   const name = "typst";
+  const cdn = elementCdn(ctx.config, name);
 
   return (tree: Root, file: VFile) => {
     visit(tree, function (node) {
@@ -195,6 +197,16 @@ export default (ctx: HyperbookContext) => () => {
             .join(" ")
             .trim(),
           "data-id": id,
+          ...(cdn
+            ? {
+                "data-runtime": JSON.stringify({
+                  bundle: elementAssetUrl(ctx, name, "typst-bundle.js"),
+                  compiler: elementAssetUrl(ctx, name, "typst-compiler.wasm"),
+                  renderer: elementAssetUrl(ctx, name, "typst-renderer.wasm"),
+                  fonts: elementAssetUrl(ctx, name, "fonts/"),
+                }),
+              }
+            : {}),
           "data-source-files": Buffer.from(
             JSON.stringify(sourceFiles),
           ).toString("base64"),

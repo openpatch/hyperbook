@@ -1,7 +1,8 @@
 // Register directive nodes in mdast:
 /// <reference types="mdast-util-directive" />
 //
-import { HyperbookContext } from "@hyperbook/types";
+import { HyperbookContext, elementCdn } from "@hyperbook/types";
+import { elementAssetUrl } from "./elementAssets";
 import { Code, Root } from "mdast";
 import { visit } from "unist-util-visit";
 import { VFile } from "vfile";
@@ -40,6 +41,7 @@ function parsePackagesAttribute(value: unknown): string[] {
 
 export default (ctx: HyperbookContext) => () => {
   const name = "pyide";
+  const cdn = elementCdn(ctx.config, name);
   return (tree: Root, file: VFile) => {
     visit(tree, function (node) {
       if (isDirective(node)) {
@@ -94,6 +96,9 @@ export default (ctx: HyperbookContext) => () => {
         data.hName = "div";
         data.hProperties = {
           class: "directive-pyide",
+          ...(cdn
+            ? { "data-runtime-url": elementAssetUrl(ctx, name, "pyodide/") }
+            : {}),
           id: id ?? undefined,
           "data-tests": Buffer.from(JSON.stringify(tests)).toString("base64"),
           ...(hasCanvas ? { "data-canvas": "true" } : {}),
