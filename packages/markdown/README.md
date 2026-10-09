@@ -39,3 +39,19 @@ const result = await process({
 console.log(result.html); // Transformed HTML
 console.log(result.data.headings); // Extracted headings
 ```
+
+## Browser assets
+
+Browser scripts and styles are included under `dist/assets`. Pyodide's large
+distribution is provided separately to keep the package within npm's upload
+limit. When self-hosting PyIDE with this package, download the
+[Pyodide asset bundle for Hyperbook 0.113.0](https://github.com/openpatch/hyperbook/releases/download/hyperbook-assets-v0.113.0/pyide.tar.gz),
+verify its SHA-256 checksum against the
+[CLI asset manifest](https://unpkg.com/hyperbook@0.113.0/dist/asset-manifest.json),
+and extract it into the served assets directory, alongside the other
+`directive-*` folders. The bundle includes `directive-pyide/pyodide/` and its
+complete Python package distribution.
+
+The Hyperbook CLI downloads this bundle automatically. Hyperbook Studio for
+VS Code includes the runtime. Setting `elements.pyide.cdn` to `true` uses the
+Pyodide CDN instead of locally served runtime files.

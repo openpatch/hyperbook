@@ -13,7 +13,8 @@
     ".": "./dist/index.js"
   },
   "files": [
-    "dist"
+    "dist",
+    "!dist/assets/directive-pyide/pyodide"
   ],
   "publishConfig": {
     "access": "public"

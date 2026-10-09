@@ -143,7 +143,10 @@ to the CDN. `assets fetch --all` still downloads every bundle.
 Build the workspace packages before building the CLI. Its postbuild step writes
 the small npm package to `dist/`, an asset manifest to `dist/asset-manifest.json`,
 and eight separate archives to `.cache/asset-bundles/<cli-version>/`. The Markdown
-package and VS Code extension continue to include their complete assets.
+build and VS Code extension continue to include their complete assets. Markdown's
+npm tarball omits the Pyodide distribution to fit npm's upload limit; standalone
+users can extract the CLI's `pyide.tar.gz` bundle alongside the other directive
+assets.
 Locally built CLIs use these archives directly, including with `--offline`,
 so workspace builds work before the corresponding release is published.
 
