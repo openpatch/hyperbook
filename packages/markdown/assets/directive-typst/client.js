@@ -5,10 +5,14 @@ hyperbook.typst = (function () {
   // CONSTANTS AND CONFIGURATION
   // ============================================================================
   
+  const assetBase = new URL(
+    "directive-typst/",
+    new URL(HYPERBOOK_ASSETS, document.baseURI),
+  );
   const CONFIG = {
-    TYPST_COMPILER_URL: "https://cdn.jsdelivr.net/npm/@myriaddreamin/typst-ts-web-compiler/pkg/typst_ts_web_compiler_bg.wasm",
-    TYPST_RENDERER_URL: "https://cdn.jsdelivr.net/npm/@myriaddreamin/typst-ts-renderer/pkg/typst_ts_renderer_bg.wasm",
-    TYPST_BUNDLE_URL: "https://cdn.jsdelivr.net/npm/@myriaddreamin/typst.ts/dist/esm/contrib/all-in-one-lite.bundle.js",
+    TYPST_COMPILER_URL: new URL("typst-compiler.wasm", assetBase).href,
+    TYPST_RENDERER_URL: new URL("typst-renderer.wasm", assetBase).href,
+    TYPST_BUNDLE_URL: new URL("typst-bundle.js", assetBase).href,
     DEBOUNCE_DELAY: 500,
     TYPST_CHECK_INTERVAL: 50,
     CONTAINER_PADDING: 20,
@@ -166,7 +170,11 @@ hyperbook.typst = (function () {
      */
     async initializeTypst(fontFiles) {
       const fonts = window.TypstCompileModule.loadFonts(
-        fontFiles.map((f) => f.url)
+        fontFiles.map((f) => f.url),
+        {
+          assets: ["text"],
+          assetUrlPrefix: { text: new URL("fonts/", assetBase).href },
+        },
       );
 
       window.$typst.setCompilerInitOptions({

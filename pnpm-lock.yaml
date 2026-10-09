@@ -498,12 +498,18 @@ importers:
       struktolab:
         specifier: ^0.6.0
         version: 0.6.0
+      tar:
+        specifier: 7.5.22
+        version: 7.5.22
       terser:
         specifier: ^5.49.2
         version: 5.49.2
       three-viewport-gizmo:
         specifier: ^2.2.0
         version: 2.2.0(three@0.185.1)
+      unbzip2-stream:
+        specifier: 1.4.3
+        version: 1.4.3
       unzipper:
         specifier: ^0.12.5
         version: 0.12.5
@@ -7720,6 +7726,9 @@ packages:
   unbox-primitive@1.1.0:
     resolution: {integrity: sha512-nWJ91DjeOkej/TA8pXQ3myruKpKEYgqvpw9lz4OPHj/NWFNluYrjbz9j01CJ8yKQd2g4jFoOkINCTW2I5LEEyw==}
     engines: {node: '>= 0.4'}
+
+  unbzip2-stream@1.4.3:
+    resolution: {integrity: sha512-mlExGW4w71ebDJviH16lQLtZS32VKqsSfk80GCfUlwT/4/hNRFsoscrF/c++9xinkMzECL1uL9DDwXqFWkruPg==}
 
   unc-path-regex@0.1.2:
     resolution: {integrity: sha512-eXL4nmJT7oCpkZsHZUOJo8hcX3GbsiDOa0Qu9F646fi8dT3XuSVopVqAcEiVzSKKH7UoDti23wNX3qGFxcW5Qg==}
@@ -16679,6 +16688,11 @@ snapshots:
       has-bigints: 1.1.0
       has-symbols: 1.1.0
       which-boxed-primitive: 1.1.1
+
+  unbzip2-stream@1.4.3:
+    dependencies:
+      buffer: 5.7.1
+      through: 2.3.8
 
   unc-path-regex@0.1.2: {}
 

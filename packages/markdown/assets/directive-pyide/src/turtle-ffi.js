@@ -1542,9 +1542,10 @@ export const createTurtleJsFFI = (id) => {
 
   const numinput = (promptTitle = "", promptText = "") => {
     const answer = askStdinSync(id, inputLabel(promptTitle, promptText));
-    if (!answer) return null;
+    // Pyodide 0.28+ maps undefined to Python None; null becomes jsnull.
+    if (!answer) return undefined;
     const numeric = Number(answer);
-    return Number.isFinite(numeric) ? numeric : null;
+    return Number.isFinite(numeric) ? numeric : undefined;
   };
 
   const textinput = (promptTitle = "", promptText = "") =>

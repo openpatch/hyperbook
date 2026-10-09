@@ -7,6 +7,7 @@ import { createWriteStream, createReadStream } from "fs";
 import { createHash } from "crypto";
 import { build as esbuild } from "esbuild";
 import { createRequire } from "module";
+import { installRuntimeAssets } from "./runtime-assets.mjs";
 
 const CACHE_DIR = path.join(".cache", "downloads");
 
@@ -75,18 +76,33 @@ async function extractZip(zipPath, destination) {
   });
 }
 
-async function downloadAndExtractZip(url, destination) {
+async function downloadAndExtractZip(url, destination, sha256) {
   const cachePath = await getCachedZipPath(url);
 
   // Ensure cache directory exists
   await mkdir(CACHE_DIR, { recursive: true });
 
   // Check if zip is already cached
-  if (await isCached(cachePath)) {
+  let cached = await isCached(cachePath);
+  if (cached && sha256) {
+    const hash = createHash("sha256");
+    for await (const chunk of createReadStream(cachePath)) hash.update(chunk);
+    cached = hash.digest("hex") === sha256;
+  }
+  if (cached) {
     console.log(`Using cached zip at ${cachePath}`);
   } else {
     // Download to cache
     await downloadZip(url, cachePath);
+  }
+
+  if (sha256) {
+    const hash = createHash("sha256");
+    for await (const chunk of createReadStream(cachePath)) hash.update(chunk);
+    if (hash.digest("hex") !== sha256) {
+      await rm(cachePath, { force: true });
+      throw new Error(`Runtime asset checksum mismatch: ${url}`);
+    }
   }
 
   // Extract from cache
@@ -100,6 +116,10 @@ async function postbuild() {
   // Download and extract zips
   const zipFiles = [
     {
+      url: "https://github.com/openpatch/blockflow/releases/download/blockflow-v0.1.1/dist-embedded.zip",
+      dst: path.join("./dist", "assets", "directive-blockflow"),
+    },
+    {
       url: "https://github.com/openpatch/sql-ide/releases/download/v2.0.0-hyperbook.4/dist-embedded.zip",
       dst: path.join("./dist", "assets", "directive-sqlide", "include"),
     },
@@ -109,14 +129,19 @@ async function postbuild() {
     },
     {
       url: openscadConfig.wasmBuild.url,
+      sha256: openscadConfig.wasmBuild.sha256,
       dst: path.join("./dist", "assets", openscadConfig.wasmBuild.target),
     },
   ];
 
   for (let zip of zipFiles) {
     await mkdir(zip.dst, { recursive: true });
-    await downloadAndExtractZip(zip.url, zip.dst);
+    await downloadAndExtractZip(zip.url, zip.dst, zip.sha256);
   }
+
+  // These files are served locally by the elements. The CLI publishes them in
+  // optional bundles; Markdown and VS Code keep their complete asset trees.
+  await installRuntimeAssets(JSON.parse(await readFile("runtime-assets.json", "utf8")));
 
   const assets = [
     {

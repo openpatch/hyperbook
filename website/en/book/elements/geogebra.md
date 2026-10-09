@@ -5,9 +5,7 @@ permaid: geogebra
 
 # GeoGebra
 
-:::alert{warn}
-**Requires a network connection.** The GeoGebra application is loaded at runtime from `geogebra.org` and is not bundled with the hyperbook build output. GeoGebra is proprietary and cannot be self-hosted or redistributed. This element will not work in offline or network-restricted environments.
-:::
+GeoGebra’s Math Apps runtime is included locally in the exported book. The CLI downloads and caches it the first time a build uses this element. Inline commands and local `.ggb` files work without a CDN connection; materials hosted on `geogebra.org` still need a network connection.
 
 GeoGebra applets can be embedded in various ways.
 

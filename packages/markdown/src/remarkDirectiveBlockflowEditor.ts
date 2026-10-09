@@ -48,6 +48,7 @@ export default (ctx: HyperbookContext) => () => {
 
         expectContainerDirective(node, file, name);
         registerDirective(file, name, ["client.js"], ["style.css"], ["step"]);
+        registerDirective(file, "blockflow");
 
         const {
           title,
@@ -130,7 +131,13 @@ export default (ctx: HyperbookContext) => () => {
           projectParam = encodeURIComponent(encoded);
         }
 
-        const iframeSrc = `https://blockflow.openpatch.org/editor?project=${projectParam}`;
+        const editorSrc = ctx.makeUrl(
+          ["directive-blockflow", "editor.html"],
+          "assets",
+          undefined,
+          { versioned: false },
+        );
+        const iframeSrc = `${editorSrc}?project=${projectParam}`;
 
         data.hName = "div";
         data.hProperties = {

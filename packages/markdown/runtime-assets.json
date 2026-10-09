@@ -1,0 +1,78 @@
+[
+  {
+    "url": "https://download.geogebra.org/installers/5.4/geogebra-math-apps-bundle-5-4-931-2.zip",
+    "sha256": "08f1b4b3bcf41cb268d3e9424a6438bbe866ba0ebd6659565273e22e2402a8a8",
+    "format": "zip",
+    "target": "directive-geogebra"
+  },
+  {
+    "url": "https://github.com/pyodide/pyodide/releases/download/314.0.7/pyodide-314.0.7.tar.bz2",
+    "sha256": "192b5864e6e6d30ab074861af800cb8b4acb0998ef0f9342c3367448aeb86645",
+    "format": "tar.bz2",
+    "target": "directive-pyide",
+    "prefix": "pyodide/",
+    "exclude": ["-tests.tar", ".map"]
+  },
+  {
+    "url": "https://cdn.jsdelivr.net/npm/@myriaddreamin/typst.ts@0.7.0/dist/esm/contrib/all-in-one-lite.bundle.js",
+    "sha256": "9999a19a74f27810e8d951849f208a9b556fa36b5c0a726c052f1e5bb8ba9200",
+    "format": "file",
+    "target": "directive-typst/typst-bundle.js"
+  },
+  {
+    "url": "https://cdn.jsdelivr.net/npm/@myriaddreamin/typst-ts-web-compiler@0.7.0/pkg/typst_ts_web_compiler_bg.wasm",
+    "sha256": "1fc968438a672366dfec39c96c842c26ed29caff4eb1bcaab19a6c60867de5fd",
+    "format": "file",
+    "target": "directive-typst/typst-compiler.wasm"
+  },
+  {
+    "url": "https://cdn.jsdelivr.net/npm/@myriaddreamin/typst-ts-renderer@0.7.0/pkg/typst_ts_renderer_bg.wasm",
+    "sha256": "5a93d7a8b3b7b43b0e679f3dafed966f74fc1653cc7ed6623f04a8a6550da725",
+    "format": "file",
+    "target": "directive-typst/typst-renderer.wasm"
+  },
+  {
+    "url": "https://github.com/typst/typst-assets/archive/refs/tags/v0.13.1.tar.gz",
+    "sha256": "23629124a2fa85c6b831e54ab3a90eb9594e98b21d808c1b1be99cfc045bd051",
+    "format": "tar.gz",
+    "target": "directive-typst/fonts",
+    "prefix": "typst-assets-0.13.1/files/fonts/",
+    "strip": 3
+  },
+  {
+    "url": "https://fonts.gstatic.com/s/roboto/v32/KFOmCnqEu92Fr1Me5Q.ttf",
+    "sha256": "791aba3a80c988031de40920e6805746129ccab8774cbfdd75838a550087c3db",
+    "format": "file",
+    "target": "directive-openscad/fonts/Roboto-Regular.ttf"
+  },
+  {
+    "url": "https://ochafik.com/openscad2/libraries/BOSL2.zip",
+    "sha256": "c43af5a6aa1d41f18d121dc742d321f6eef5bda046c2001c9c69812fa0ba7776",
+    "format": "file",
+    "target": "directive-openscad/libraries/BOSL2.zip"
+  },
+  {
+    "url": "https://ochafik.com/openscad2/libraries/BOSL.zip",
+    "sha256": "930f46e8f17406c1003396a0511298fc63ff1489088445278eacab23cd2d37a5",
+    "format": "file",
+    "target": "directive-openscad/libraries/BOSL.zip"
+  },
+  {
+    "url": "https://ochafik.com/openscad2/libraries/MCAD.zip",
+    "sha256": "03b979460d926ce56d357cfdea4721dd414d0b944e2cb27b1035b3e21cb759f6",
+    "format": "file",
+    "target": "directive-openscad/libraries/MCAD.zip"
+  },
+  {
+    "url": "https://ochafik.com/openscad2/libraries/NopSCADlib.zip",
+    "sha256": "e261c83ab621e77258be469f491e113a2ba6ed3ab03e0258557010d6e4b48fc2",
+    "format": "file",
+    "target": "directive-openscad/libraries/NopSCADlib.zip"
+  },
+  {
+    "url": "https://ochafik.com/openscad2/libraries/fonts.zip",
+    "sha256": "7b0731569b3b815a144fe350b60aa52c12d0b97b3dbfeff0d72a5012f16622f0",
+    "format": "file",
+    "target": "directive-openscad/libraries/fonts.zip"
+  }
+]

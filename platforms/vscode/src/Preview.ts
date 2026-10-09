@@ -266,20 +266,17 @@ export default class Preview {
                       this.context.extensionUri,
                       "assets",
                       "hyperbook",
+                      ...path,
                     ),
                   )
                   .toString() || "";
 
-              return posix.join(vsExtensionPath, ...path);
+              return vsExtensionPath;
 
             case "public":
               const otherFile = otherFiles.find(
                 (f) => f.path.href === path.join("/"),
               );
-              const vsPath =
-                this.panel?.webview
-                  .asWebviewUri(vscode.Uri.file(this._vfile?.root || ""))
-                  .toString() || "";
               let directory = otherFile?.path.directory || "";
               if (otherFile?.folder === "public") {
                 directory = "public";
@@ -288,10 +285,16 @@ export default class Preview {
               } else if (otherFile?.folder === "glossary-public") {
                 directory = "glossary";
               }
-              return posix.join(
-                vsPath,
-                directory,
-                otherFile?.path.relative || "",
+              return (
+                this.panel?.webview
+                  .asWebviewUri(
+                    vscode.Uri.joinPath(
+                      vscode.Uri.file(this._vfile?.root || ""),
+                      directory,
+                      otherFile?.path.relative || "",
+                    ),
+                  )
+                  .toString() || ""
               );
 
             case "glossary":

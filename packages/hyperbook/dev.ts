@@ -2,6 +2,7 @@ import chokidar from "chokidar";
 import { hyperproject } from "@hyperbook/fs";
 import { Hyperproject } from "@hyperbook/types";
 import { IncrementalBuilder } from "./incremental";
+import { AssetManager } from "./helpers/assets";
 import path from "path";
 import http from "http";
 import fs from "fs";
@@ -128,7 +129,13 @@ async function findFreePort(startPort: number): Promise<number> {
   throw new Error('No free ports available');
 }
 
-export async function runDev({ port = 8080 }: { port: number }): Promise<void> {
+export async function runDev({
+  port = 8080,
+  offline = false,
+}: {
+  port: number;
+  offline?: boolean;
+}): Promise<void> {
   // Check if the port is available
   const portAvailable = await isPortAvailable(port);
   
@@ -665,7 +672,11 @@ window.addEventListener("DOMContentLoaded", function() {
   // Incremental Builder
   ////////////////////
 
-  const builder = new IncrementalBuilder(root, rootProject);
+  const builder = new IncrementalBuilder(
+    root,
+    rootProject,
+    new AssetManager({ offline }),
+  );
 
   let rebuilding = false;
   let pendingTimeout: NodeJS.Timeout | null = null;

@@ -2,6 +2,7 @@ import path from "path";
 import fs from "fs/promises";
 import { cp } from "fs/promises";
 import chalk from "chalk";
+import { AssetManager } from "./helpers/assets";
 import {
   vfile,
   hyperbook,
@@ -106,7 +107,11 @@ export class IncrementalBuilder {
   // swallowed. Keyed by asset, holding the in-flight promise.
   private assetCopies: Map<string, Promise<void>> = new Map();
 
-  constructor(root: string, rootProject: Hyperproject) {
+  constructor(
+    root: string,
+    rootProject: Hyperproject,
+    private readonly assets = new AssetManager(),
+  ) {
     this.root = root;
     this.rootProject = rootProject;
   }
@@ -141,6 +146,7 @@ export class IncrementalBuilder {
       (href, result) => {
         this.recordPageResult(href, result);
       },
+      this.assets,
     );
   }
 
@@ -624,6 +630,7 @@ export class IncrementalBuilder {
     if (!inFlight) {
       inFlight = copy();
       this.assetCopies.set(key, inFlight);
+      inFlight.catch(() => this.assetCopies.delete(key));
     }
     return inFlight;
   }
@@ -654,27 +661,10 @@ export class IncrementalBuilder {
   }
 
   private async copyDirectiveAssets(newDirectives: string[]): Promise<void> {
-    const assetsPath = path.join(__dirname, "assets");
     await Promise.all(
       newDirectives.map((directive) =>
         this.copyOnce(`directive:${directive}`, async () => {
-          const assetsDirectivePath = path.join(
-            assetsPath,
-            `directive-${directive}`,
-          );
-          const assetsDirectiveOut = path.join(
-            this.assetsOut,
-            `directive-${directive}`,
-          );
-          try {
-            await fs.access(assetsDirectivePath);
-            await fs.mkdir(assetsDirectiveOut, { recursive: true });
-            await cp(assetsDirectivePath, assetsDirectiveOut, {
-              recursive: true,
-            });
-          } catch {
-            // Directive has no assets
-          }
+          await this.assets.copyDirective(directive, this.assetsOut);
         }),
       ),
     );

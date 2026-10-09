@@ -1,4 +1,4 @@
-import { PYODIDE_CDN } from "./constants.js";
+import { PYODIDE_INDEX_URL } from "./constants.js";
 import { runtimes, turtleModules, interruptBuffers } from "./state.js";
 import { createTurtleJsFFI } from "./turtle-ffi.js";
 import { createPytamaroJsFFI } from "./pytamaro-ffi.js";
@@ -10,7 +10,7 @@ const loadPyodideScript = () => {
 
   return new Promise((resolve, reject) => {
     const script = document.createElement("script");
-    script.src = PYODIDE_CDN;
+    script.src = new URL("pyodide.js", PYODIDE_INDEX_URL).href;
     script.onload = () => resolve();
     script.onerror = () => reject(new Error("Failed to load Pyodide"));
     document.head.appendChild(script);
@@ -27,7 +27,7 @@ export const getRuntime = async (id) => {
     return runtimes.get(id);
   }
   const loadPyodide = await pyodideReadyPromise;
-  const pyodide = await loadPyodide();
+  const pyodide = await loadPyodide({ indexURL: PYODIDE_INDEX_URL });
   if (typeof pyodide.registerJsModule === "function") {
     const turtleModule = createTurtleJsFFI(id);
     turtleModule.__setPyodide(pyodide);

@@ -2,8 +2,7 @@
 
 /**
  * Blockflow player client script.
- * Prepends window.origin to relative project URLs so that
- * blockflow.openpatch.org can fetch them cross-origin.
+ * Resolves project URLs against the book page before opening the bundled player.
  */
 (function () {
   function fixIframes(root) {
@@ -14,10 +13,10 @@
       var src = iframe.getAttribute("src");
       if (!src) return;
       try {
-        var url = new URL(src);
+        var url = new URL(src, document.baseURI);
         var project = url.searchParams.get("project");
-        if (project && !project.match(/^https?:\/\//)) {
-          url.searchParams.set("project", window.origin + project);
+        if (project && !project.match(/^[a-z][a-z\d+.-]*:/i)) {
+          url.searchParams.set("project", new URL(project, document.baseURI).href);
           iframe.setAttribute("src", url.toString());
         }
       } catch (e) {

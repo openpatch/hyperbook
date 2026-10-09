@@ -36,11 +36,7 @@ export default (ctx: HyperbookContext) => () => {
         registerDirective(
           file,
           name,
-          [
-            "https://www.geogebra.org/apps/deployggb.js",
-            "geogebra-web-component.js",
-            "client.js",
-          ],
+          ["GeoGebra/deployggb.js", "geogebra-web-component.js", "client.js"],
           ["style.css"],
           [],
         );
@@ -82,6 +78,13 @@ export default (ctx: HyperbookContext) => () => {
               filename: filename,
               language: ctx.config.language || "en",
               "data-id": id,
+              "data-codebase":
+                ctx.makeUrl(
+                  ["directive-geogebra", "GeoGebra", "HTML5", "5.0", "web3d"],
+                  "assets",
+                  undefined,
+                  { versioned: false },
+                ) + "/",
               showFullscreenButton,
               scaleContainerClass: "directive-geogebra",
               allowUpscale: true,

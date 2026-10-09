@@ -16,6 +16,8 @@ import {
   runPasswordsList,
 } from "./passwords";
 import packageJson from "./package.json";
+import { AssetManager } from "./helpers/assets";
+import { fetchAssets } from "./assets";
 
 const program = new Command();
 
@@ -25,7 +27,10 @@ const program = new Command();
  * first `preAction` hook synchronously, so a `const` declared after the parse
  * call would still be in its temporal dead zone when the hook reads it.
  */
-const update = checkForUpdate(packageJson).catch(() => null);
+const offline = process.argv.includes("--offline");
+const update = offline
+  ? Promise.resolve(null)
+  : checkForUpdate(packageJson).catch(() => null);
 
 program
   .name(packageJson.name)
@@ -53,6 +58,7 @@ program.command("setup").action(async () => {
 program
   .command("dev")
   .description("start the development server for a hyperbook")
+  .option("--offline", "use cached assets without downloading")
   .option("-p, --port <number>", "set a specific port", (value) => {
     const port = Number.parseInt(value, 10);
     if (Number.isNaN(port) || port < 1 || port > 65535) {
@@ -63,6 +69,7 @@ program
   .action(async (options) => {
     await runDev({
       port: options.port,
+      offline: options.offline,
     }).catch((e) => {
       reportError(e);
       process.exit(1);
@@ -79,16 +86,39 @@ const withProject = async () =>
 program
   .command("build")
   .description("build a hyperbook")
-  .action(async () => {
+  .option("--offline", "use cached assets without downloading")
+  .action(async (options) => {
     const rootProject = await withProject();
     let name = hyperproject.getName(rootProject);
     console.log(
       `${chalk.blue(`[${name}]`)} Building Project: ${rootProject.src}.`,
     );
-    await runBuildProject(rootProject, rootProject).catch((e) => {
+    await runBuildProject(
+      rootProject,
+      rootProject,
+      undefined,
+      undefined,
+      undefined,
+      new AssetManager({ offline: options.offline }),
+    ).catch((e) => {
       reportError(e);
       process.exit(1);
     });
+  });
+
+program
+  .command("assets")
+  .description("manage downloadable assets")
+  .command("fetch")
+  .description("prefetch the assets used by this project")
+  .option("--all", "download every optional asset bundle")
+  .action(async (options) => {
+    await fetchAssets(options.all ? undefined : await withProject()).catch(
+      (e) => {
+        reportError(e);
+        process.exit(1);
+      },
+    );
   });
 
 program

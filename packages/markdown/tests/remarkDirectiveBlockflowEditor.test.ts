@@ -38,6 +38,42 @@ function decodePako(encoded: string): any {
 }
 
 describe("remarkDirectiveBlockflowEditor", () => {
+  it("should request an unversioned asset URL without page-relative paths", () => {
+    const result = toHtml('::::blockflow-editor{src="./test.sb3"}\n::::', {
+      ...ctx,
+      makeUrl: (p, base, page, options) => {
+        if (base === "assets") {
+          expect(page).toBeUndefined();
+          expect(options?.versioned).toBe(false);
+        }
+        return ctx.makeUrl(p, base, page, options);
+      },
+    });
+    expect(result.value).toContain("editor.html?project=");
+  });
+
+  it("should embed the shared local bundle and register its assets", () => {
+    const result = toHtml('::::blockflow-editor{src="./test.sb3"}\n::::', ctx);
+    expect(result.value).toContain(
+      "/assets/directive-blockflow/editor.html?project=",
+    );
+    expect(result.value).not.toContain("blockflow.openpatch.org");
+    expect(result.data.directives?.blockflow).toBeDefined();
+  });
+
+  it("should use the asset URL supplied by a VS Code preview", () => {
+    const result = toHtml('::::blockflow-editor{src="./test.sb3"}\n::::', {
+      ...ctx,
+      makeUrl: (p, base, page) =>
+        base === "assets"
+          ? `https://file+.vscode-resource.vscode-cdn.net/extension/assets/hyperbook/${Array.isArray(p) ? p.join("/") : p}`
+          : ctx.makeUrl(p, base, page),
+    });
+    expect(result.value).toContain(
+      "https://file+.vscode-resource.vscode-cdn.net/extension/assets/hyperbook/directive-blockflow/editor.html?project=",
+    );
+  });
+
   it("should transform with steps", async () => {
     expect(
       toHtml(

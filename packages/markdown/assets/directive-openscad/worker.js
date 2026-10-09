@@ -7,11 +7,11 @@ const FONTS_CONF = `<?xml version="1.0" encoding="UTF-8"?>
 </fontconfig>`;
 
 const KNOWN_LIBRARIES = {
-  BOSL2: "https://ochafik.com/openscad2/libraries/BOSL2.zip",
-  BOSL: "https://ochafik.com/openscad2/libraries/BOSL.zip",
-  MCAD: "https://ochafik.com/openscad2/libraries/MCAD.zip",
-  NopSCADlib: "https://ochafik.com/openscad2/libraries/NopSCADlib.zip",
-  fonts: "https://ochafik.com/openscad2/libraries/fonts.zip",
+  BOSL2: new URL("libraries/BOSL2.zip", scriptBase).href,
+  BOSL: new URL("libraries/BOSL.zip", scriptBase).href,
+  MCAD: new URL("libraries/MCAD.zip", scriptBase).href,
+  NopSCADlib: new URL("libraries/NopSCADlib.zip", scriptBase).href,
+  fonts: new URL("libraries/fonts.zip", scriptBase).href,
 };
 const OPENSCAD_BACKEND_ARG = "--backend=manifold";
 const OPENSCAD_FEATURE_ARGS = ["--enable=lazy-union"];
@@ -174,7 +174,7 @@ const mountLibraries = async (instance, libraryNames) => {
 const loadFonts = async () => {
   if (robotoFontData) return;
   try {
-    const resp = await fetch("https://fonts.gstatic.com/s/roboto/v32/KFOmCnqEu92Fr1Me5Q.ttf");
+    const resp = await fetch(new URL("fonts/Roboto-Regular.ttf", scriptBase).href);
     if (resp.ok) {
       robotoFontData = new Uint8Array(await resp.arrayBuffer());
     }

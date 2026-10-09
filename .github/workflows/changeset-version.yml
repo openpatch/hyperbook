@@ -43,6 +43,11 @@ jobs:
         run: |
           pnpm --filter "hyperbook-studio" vscode:package
 
+      - name: Publish CLI asset bundles before npm
+        run: node packages/hyperbook/publish-assets.mjs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Create Release Pull Request or Publish to npm
         id: changesets
         uses: changesets/action@v1

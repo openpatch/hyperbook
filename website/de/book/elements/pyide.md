@@ -4,9 +4,7 @@ permaid: pyide
 lang: de
 ---
 
-:::alert{warn}
-**Erfordert eine Netzwerkverbindung.** Die Python-Laufzeitumgebung ([Pyodide](https://pyodide.org/)) wird zur Laufzeit von `cdn.jsdelivr.net` geladen und ist nicht im Hyperbook-Build-Output enthalten. Das Bootstrap-Skript allein umfasst ~1 MB; zusätzliche Python-Pakete werden bei Bedarf heruntergeladen. Dieses Element funktioniert nicht in Offline- oder netzwerkbeschränkten Umgebungen.
-:::
+Die Pyodide-Laufzeitumgebung und ihre mitgelieferten Pakete sind lokal im exportierten Hyperbook enthalten. Die CLI lädt sie beim ersten Build mit diesem Element herunter und speichert sie im Cache. Mitgelieferte Pakete können ohne CDN-Verbindung importiert werden. Pakete, die über das Attribut `packages` von PyPI installiert werden, benötigen weiterhin eine Netzwerkverbindung.
 
 Das `pyide`-Element repräsentiert eine Python-Integrated-Development-Environment (IDE)-Komponente.
 Es wird verwendet, um eine Python-Coding-Umgebung in die Hyperbook-Website einzubetten.

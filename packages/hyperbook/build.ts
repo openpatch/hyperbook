@@ -42,6 +42,7 @@ import {
   stripProtectBlocks,
 } from "@hyperbook/markdown";
 import packageJson from "./package.json";
+import { AssetManager } from "./helpers/assets";
 
 export const ASSETS_FOLDER = "__hyperbook_assets";
 
@@ -480,6 +481,7 @@ export async function runBuildProject(
   out?: string,
   filter?: string,
   onPage?: PageResultSink,
+  assets = new AssetManager(),
 ): Promise<void> {
   const name = hyperproject.getName(project);
   if (project.type === "book") {
@@ -492,6 +494,7 @@ export async function runBuildProject(
       out,
       filter,
       onPage,
+      assets,
     );
   } else {
     console.log(`${chalk.cyan(`[${name}]`)} Building Library.`);
@@ -500,7 +503,7 @@ export async function runBuildProject(
     }
     await rimraf(path.join(out, ".hyperbook", "out"));
     for (const p of project.projects) {
-      await runBuildProject(p, rootProject, out, filter, onPage);
+      await runBuildProject(p, rootProject, out, filter, onPage, assets);
     }
   }
 }
@@ -592,6 +595,7 @@ async function runBuild(
   out?: string,
   filter?: string,
   onPage?: PageResultSink,
+  assets = new AssetManager(),
 ): Promise<void> {
   console.log(`${chalk.blue(`[${prefix}]`)} Reading hyperbook.json.`);
   const hyperbookJson = await hyperbook.getJson(root);
@@ -895,21 +899,15 @@ async function runBuild(
 
   i = 1;
   for (let directive of directives) {
-    const assetsDirectivePath = path.join(assetsPath, `directive-${directive}`);
-    const assetsDirectiveOut = path.join(assetsOut, `directive-${directive}`);
     writeProgress(
       `${chalk.blue(`[${prefix}]`)} Copying directive assets: [${i++}/${directives.size}]`,
     );
     try {
-      await fs.access(assetsDirectivePath);
-      await mkdir(assetsDirectiveOut, {
-        recursive: true,
-      });
-      await cp(assetsDirectivePath, assetsDirectiveOut, { recursive: true });
+      await assets.copyDirective(directive, assetsOut);
     } catch (e) {
       // Close the progress line so the failure is not appended to it.
       breakProgressLine();
-      console.log(`${chalk.red(`[${prefix}]`)} Failed copying directive assets: ${directive}`);
+      throw e;
     }
   }
   endProgress();

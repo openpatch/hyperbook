@@ -22,6 +22,7 @@ export default (ctx: HyperbookContext) => () => {
 
         expectLeafDirective(node, file, name);
         registerDirective(file, name, ["client.js"], ["style.css"], []);
+        registerDirective(file, "blockflow");
 
         const {
           src,
@@ -32,8 +33,14 @@ export default (ctx: HyperbookContext) => () => {
 
         const siteSrc = ctx.makeUrl(src || "", "public", ctx.navigation.current || undefined);
 
+        const playerSrc = ctx.makeUrl(
+          ["directive-blockflow", "player.html"],
+          "assets",
+          undefined,
+          { versioned: false },
+        );
         const iframeSrc = src
-          ? `https://blockflow.openpatch.org/player.html?project=${encodeURIComponent(siteSrc)}`
+          ? `${playerSrc}?project=${encodeURIComponent(siteSrc)}`
           : undefined;
 
         data.hName = "div";

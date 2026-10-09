@@ -1,6 +1,7 @@
 {
   "wasmBuild": {
-    "url": "https://files.openscad.org/snapshots/OpenSCAD-2026.06.08-WebAssembly-web.zip",
+    "url": "https://files.openscad.org/snapshots/OpenSCAD-2026.10.08-WebAssembly-web.zip",
+    "sha256": "274c0e725733efea09e99b1186ebafe50ce799b8c8353ad59d9e72a6b9c76ab1",
     "target": "directive-openscad",
     "files": ["openscad.js", "openscad.wasm"]
   }

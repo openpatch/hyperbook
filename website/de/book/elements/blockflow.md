@@ -7,6 +7,13 @@ lang: de
 
 [Blockflow](https://blockflow.openpatch.org) ist ein Fork von Scratch zum Erstellen von geführten Tutorials. Hyperbook bietet zwei Direktiven zum Einbetten von Blockflow: einen **Player** zum Abspielen und einen **Editor** zum Erstellen von Tutorials.
 
+Hyperbook und die VS Code-Erweiterung enthalten ein Blockflow-Browserpaket mit fester Version.
+Bücher mit einer dieser Direktiven verwenden eine gemeinsame lokale Kopie und sind für Editor
+und Player nicht auf blockflow.openpatch.org angewiesen. Lokale Projekte und Tutorial-Medien
+funktionieren offline, wenn das Buch lokal bereitgestellt wird. Externe Projekte, Inhalte aus der
+Scratch-Bibliothek und Netzwerk-Erweiterungen benötigen weiterhin Internetzugang.
+Lizenz und Quellcode-Link von Blockflow werden mit den Dateien ausgeliefert.
+
 ## Player
 
 Der Blockflow Player bettet einen Player zum Abspielen von Scratch-basierten geführten Tutorials ein.

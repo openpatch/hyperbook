@@ -73,6 +73,28 @@ npx hyperbook build
 
 Danach kannst du die Dateien vom Ordner `.hyperbook/out` zum Zielort kopieren.
 
+### Assets herunterladen und offline bauen
+
+Die CLI lädt die großen Assets für Blockflow, Online IDE, SQL IDE,
+Excalidraw, OpenSCAD, GeoGebra, Pyodide und Typst herunter, sobald ein Build sie zum ersten Mal benötigt.
+Die Downloads werden geprüft und projektübergreifend zwischengespeichert.
+Das exportierte Hyperbook enthält lokale Kopien.
+
+Lade vor der Arbeit ohne Internet die Assets deines Projekts herunter:
+
+```sh
+npx hyperbook assets fetch
+npx hyperbook build --offline
+npx hyperbook dev --offline
+```
+
+Mit `npx hyperbook assets fetch --all` lädst du alle optionalen Asset-Pakete
+herunter. Über `HYPERBOOK_ASSET_CACHE` kannst du den Cache-Ordner festlegen,
+zum Beispiel für einen Cache in der CI. Standardmäßig liegt er im
+Benutzer-Cache deines Betriebssystems. `--offline` meldet fehlende Assets und
+überspringt die Update-Prüfung der CLI. Elemente, die externe Dienste nutzen,
+benötigen weiterhin eine Verbindung zu diesen Diensten.
+
 :::alert{warn}
 
 Vergiss nicht den `basePath` in deiner hyperbook.json zu setzen.

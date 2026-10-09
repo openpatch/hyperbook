@@ -2,13 +2,12 @@
 
 /**
  * Blockflow editor client script.
- * Prepends window.origin to relative project URLs so that
- * blockflow.openpatch.org can fetch them cross-origin.
+ * Resolves project URLs against the book page before opening the bundled editor.
  *
  * The ?project= parameter accepts:
  *   - A base64-encoded JSON string (no origin prepended)
- *   - A URL to a .json project file (origin prepended if relative)
- *   - A URL to an .sb3 Scratch project (origin prepended if relative)
+ *   - A URL to a .json project file
+ *   - A URL to an .sb3 Scratch project
  */
 (function () {
   function isRelativeUrl(value) {
@@ -23,10 +22,10 @@
       var src = iframe.getAttribute("src");
       if (!src) return;
       try {
-        var url = new URL(src);
+        var url = new URL(src, document.baseURI);
         var project = url.searchParams.get("project");
-        if (project && !project.match(/^https?:\/\//) && isRelativeUrl(project)) {
-          url.searchParams.set("project", window.origin + project);
+        if (project && !project.match(/^[a-z][a-z\d+.-]*:/i) && isRelativeUrl(project)) {
+          url.searchParams.set("project", new URL(project, document.baseURI).href);
           iframe.setAttribute("src", url.toString());
         }
       } catch (e) {

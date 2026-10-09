@@ -774,6 +774,9 @@ class GeogebraElement extends HTMLElement {
       this.dispatchEvent(new CustomEvent("load", { detail: app }));
     };
     applet = new window.GGBApplet(options, true);
+    applet.setHTML5Codebase(
+      new URL(this.getAttribute("data-codebase"), document.baseURI).href,
+    );
     applet.inject(div, "preferHTML5");
   }
 

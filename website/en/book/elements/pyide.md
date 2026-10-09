@@ -5,9 +5,7 @@ permaid: pyide
 
 # PyIDE
 
-:::alert{warn}
-**Requires a network connection.** The Python runtime ([Pyodide](https://pyodide.org/)) is loaded at runtime from `cdn.jsdelivr.net` and is not bundled with the hyperbook build output. The bootstrap script alone is ~1 MB; additional Python packages are downloaded on demand. This element will not work in offline or network-restricted environments.
-:::
+The Pyodide runtime and its bundled packages are included locally in the exported book. The CLI downloads and caches them the first time a build uses this element. Imports of bundled packages work without a CDN connection. Packages installed from PyPI through the `packages` attribute still need a network connection.
 
 The `pyide` element represents a Python Integrated Development Environment (IDE) component.
 It is used to embed a Python coding environment within the hyperbook website.

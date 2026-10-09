@@ -6,9 +6,7 @@ lang: de
 
 # GeoGebra
 
-:::alert{warn}
-**Erfordert eine Netzwerkverbindung.** Die GeoGebra-Anwendung wird zur Laufzeit von `geogebra.org` geladen und ist nicht im Hyperbook-Build-Output enthalten. GeoGebra ist proprietär und kann nicht selbst gehostet oder weiterverteilt werden. Dieses Element funktioniert nicht in Offline- oder netzwerkbeschränkten Umgebungen.
-:::
+Die Laufzeitumgebung der GeoGebra Math Apps ist lokal im exportierten Hyperbook enthalten. Die CLI lädt sie beim ersten Build mit diesem Element herunter und speichert sie im Cache. Direkte Anweisungen und lokale `.ggb`-Dateien funktionieren ohne CDN-Verbindung; Materialien auf `geogebra.org` benötigen weiterhin eine Netzwerkverbindung.
 
 GeoGebra Applets können auf unterschiedle Art und Weise eingebunden werden.
 
