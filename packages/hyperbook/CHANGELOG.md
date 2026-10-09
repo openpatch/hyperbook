@@ -1,5 +1,20 @@
 # hyperbook
 
+## 0.113.0
+
+### Minor Changes
+
+- [`b1907cf`](https://github.com/openpatch/hyperbook/commit/b1907cf41adb77c6e1d8d0a509c58a0e2b417adb) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Bundle Blockflow 0.1.1 with Hyperbook and the VS Code extension. Editor and player directives
+  load a shared local bundle, which is copied into generated books only when Blockflow is used.
+
+- [`b1907cf`](https://github.com/openpatch/hyperbook/commit/b1907cf41adb77c6e1d8d0a509c58a0e2b417adb) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Download Blockflow, Online IDE, SQL IDE, Excalidraw, OpenSCAD, GeoGebra, Pyodide and Typst assets when a build first uses them instead of including them in the CLI package. Cache verified bundles across builds, support `hyperbook assets fetch` and `hyperbook assets fetch --all` for prefetching, and add `--offline` to build and dev.
+
+  Serve GeoGebra's Math Apps bundle, Pyodide's runtime and vendored packages, Typst's compiler, renderer and standard fonts, and OpenSCAD's optional libraries and font locally in exported books. Kiri:Moto, external media and materials, arbitrary PyPI packages, and Typst preview packages still use their external services.
+
+  Update Pyodide to 314.0.7 (Python 3.14), Typst browser packages to 0.7.0, and OpenSCAD to the 2026.10.08 WebAssembly snapshot. Adapt cancelled turtle numeric input to Pyodide’s current JavaScript-to-Python conversions.
+
+- [`9e24572`](https://github.com/openpatch/hyperbook/commit/9e24572f9b752cc2ac7d57d9c8acf459d8a1afb9) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add per-element `cdn` settings under `elements` in hyperbook.json for Blockflow, Online IDE, SQL IDE, Excalidraw, OpenSCAD, GeoGebra, PyIDE and Typst. Set `cdn: true` to use the default versioned CDN or provide an HTTP(S) base URL for custom hosting. Local assets remain the default; builds, incremental previews and project asset prefetching skip local runtime bundles for CDN-enabled elements while retaining their small integration files.
+
 ## 0.112.2
 
 ### Patch Changes
