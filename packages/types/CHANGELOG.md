@@ -1,5 +1,11 @@
 # @hyperbook/types
 
+## 0.27.0
+
+### Minor Changes
+
+- [`9e24572`](https://github.com/openpatch/hyperbook/commit/9e24572f9b752cc2ac7d57d9c8acf459d8a1afb9) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Add per-element `cdn` settings under `elements` in hyperbook.json for Blockflow, Online IDE, SQL IDE, Excalidraw, OpenSCAD, GeoGebra, PyIDE and Typst. Set `cdn: true` to use the default versioned CDN or provide an HTTP(S) base URL for custom hosting. Local assets remain the default; builds, incremental previews and project asset prefetching skip local runtime bundles for CDN-enabled elements while retaining their small integration files.
+
 ## 0.26.0
 
 ### Minor Changes
