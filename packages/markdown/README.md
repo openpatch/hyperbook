@@ -70,4 +70,5 @@ To serve a missing runtime, choose one of these options:
   `directive-*` folders.
 
 The Hyperbook CLI downloads these bundles automatically. The Hyperbook extension
-for VS Code loads missing runtimes from their default CDN.
+for VS Code shares the CLI's asset cache and can download them on request.
+`AssetManager` from `@hyperbook/fs` implements both.

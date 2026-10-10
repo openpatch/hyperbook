@@ -144,9 +144,12 @@ Excalidraw's own packages on UNPKG for Excalidraw, and UNPKG's versioned
 Hyperbook assets for OpenSCAD, the Online IDE, and the SQL IDE. Hyperbook's
 small integration scripts and styles stay in the build.
 
-The Hyperbook extension for VS Code does not include these runtimes. Its
-preview loads them from the default CDN unless `cdn` is set to a custom URL, so
-previewing these elements needs an internet connection.
+The Hyperbook extension for VS Code does not include these runtimes. Its preview
+resolves them like a build: elements with `cdn` load from that CDN, and the
+others use the runtimes in the CLI's asset cache, which the extension shares.
+A runtime that is not downloaded yet loads from its default CDN. Run
+**Hyperbook: Download Element Runtimes...** or **Hyperbook: Download All
+Element Runtimes** in VS Code to download runtimes for offline previews.
 
 A custom URL must point to the contents of the corresponding
 `__hyperbook_assets/directive-<element>/` directory from a local build. Preserve

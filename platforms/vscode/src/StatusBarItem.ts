@@ -6,14 +6,14 @@ export default class StatusBarItem {
   statusBarItem: vscode.StatusBarItem;
   previewUtil: Preview;
 
-  constructor(context: vscode.ExtensionContext, utilities?: Preview) {
+  constructor(context: vscode.ExtensionContext, utilities: Preview) {
     this.statusBarItem = vscode.window.createStatusBarItem(
       vscode.StatusBarAlignment.Left
     );
     this.statusBarItem.command = "hyperbook.sidePreview";
     this.statusBarItem.tooltip =
       Constants.ExtensionConstants.STATUS_BAR_HTML_TOOLTIP;
-    this.previewUtil = (utilities && utilities) || new Preview(context);
+    this.previewUtil = utilities;
   }
 
   updateStatusbar() {

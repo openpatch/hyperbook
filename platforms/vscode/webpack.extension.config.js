@@ -1,7 +1,7 @@
 const path = require("path");
 const CopyPlugin = require("copy-webpack-plugin");
 
-module.exports = {
+module.exports = (_env, argv) => ({
   target: "node",
   entry: path.join(__dirname, "src", "extension.ts"),
   resolve: {
@@ -30,6 +30,20 @@ module.exports = {
             "assets",
           ),
           to: path.resolve(__dirname, "assets", "hyperbook"),
+        },
+        {
+          // Lists the verified runtime bundles of the matching CLI release.
+          // The preview downloads them into the CLI's shared asset cache.
+          from: path.resolve(
+            __dirname,
+            "node_modules",
+            "hyperbook",
+            "dist",
+            "asset-manifest.json",
+          ),
+          to: path.resolve(__dirname, "out", "asset-manifest.json"),
+          // Releases must ship it; development builds may skip the CLI build.
+          noErrorOnMissing: argv.mode !== "production",
         },
         {
           from: path.resolve(
@@ -62,4 +76,4 @@ module.exports = {
       },
     ],
   },
-};
+});

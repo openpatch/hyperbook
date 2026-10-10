@@ -2,6 +2,7 @@ import chalk from "chalk";
 import { build } from "esbuild";
 import { existsSync, readFileSync } from "fs";
 import { join } from "path";
+import { builtinModules } from "module";
 
 const ignorePackages = [];
 
@@ -48,6 +49,8 @@ export const buildPackage = async (path) => {
   }
   external.push("path");
   external.push("fs");
+  // Node built-ins stay imports, for packages that only run in Node.
+  external.push(...builtinModules, "node:*");
 
   const platform = JSON.parse(packageJSON)?.platform || "browser";
 

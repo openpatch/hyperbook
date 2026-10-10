@@ -10,8 +10,8 @@ lang: de
 Hyperbook enthält ein Blockflow-Browserpaket mit fester Version. Die CLI lädt es herunter, wenn ein
 Build Blockflow zum ersten Mal verwendet. Bücher mit einer dieser Direktiven verwenden eine
 gemeinsame lokale Kopie und sind für Editor und Player nicht auf blockflow.openpatch.org
-angewiesen. Die VS Code-Erweiterung enthält das Paket nicht; ihre Vorschau lädt Blockflow von
-blockflow.openpatch.org. Lokale Projekte und Tutorial-Medien
+angewiesen. Die VS Code-Erweiterung enthält das Paket nicht. Ihre Vorschau verwendet die von der CLI
+heruntergeladene Kopie oder lädt Blockflow bis zum Download von blockflow.openpatch.org. Lokale Projekte und Tutorial-Medien
 funktionieren offline, wenn das Buch lokal bereitgestellt wird. Externe Projekte, Inhalte aus der
 Scratch-Bibliothek und Netzwerk-Erweiterungen benötigen weiterhin Internetzugang.
 Lizenz und Quellcode-Link von Blockflow werden mit den Dateien ausgeliefert.

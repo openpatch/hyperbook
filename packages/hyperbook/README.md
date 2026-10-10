@@ -100,6 +100,9 @@ run `hyperbook assets fetch`, build with `--offline`, and save the cache again.
 
 Deleting the cache is safe; the next online build downloads the required bundles again.
 
+The Hyperbook extension for VS Code shares this cache. Its preview uses the
+runtimes found there, and its **Download Element Runtimes** commands fill it.
+
 ### Optional CDNs
 
 Set `cdn` per element in `hyperbook.json` to load its large runtime from a CDN:
@@ -153,7 +156,9 @@ extension build from. The published packages stay small:
   IDE, and the SQL IDE, because their default CDN is this package on UNPKG.
   `packages/markdown/tests/packageContents.test.ts` enforces this split.
 - The VS Code extension omits all eight runtimes through `.vscodeignore`. Its
-  preview loads a missing runtime from the element's default CDN.
+  preview uses runtimes from the CLI's asset cache and loads missing ones from
+  their default CDN. It ships the CLI's `asset-manifest.json`, so its download
+  commands fetch the same verified bundles into the same cache.
 Locally built CLIs use these archives directly, including with `--offline`,
 so workspace builds work before the corresponding release is published.
 

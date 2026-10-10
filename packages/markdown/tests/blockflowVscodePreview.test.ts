@@ -22,14 +22,24 @@ import { expect, it } from "vitest";
 const vscodePlatform = new URL("../../../platforms/vscode/", import.meta.url);
 const elements = Object.keys(elementCoreFiles) as DownloadableElement[];
 
+type RuntimeLocation =
+  | { kind: "bundled" }
+  | { kind: "cached"; directory: string }
+  | { kind: "missing" };
+
 /** Renders the active document with the extension's Preview and a stubbed VS Code. */
 async function renderPreview({
-  existing = () => true,
+  locate = () => ({ kind: "bundled" }),
   config = { name: "Test" },
+  directives = {},
+  renders = 1,
 }: {
-  existing?: (file: string) => boolean;
+  locate?: (element: DownloadableElement) => RuntimeLocation;
   config?: HyperbookJson;
-} = {}): Promise<HyperbookContext> {
+  directives?: Record<string, unknown>;
+  renders?: number;
+} = {}): Promise<{ ctx: HyperbookContext; messages: string[] }> {
+  const messages: string[] = [];
   const source = readFileSync(
     new URL("src/Preview.ts", vscodePlatform),
     "utf8",
@@ -49,8 +59,12 @@ async function renderPreview({
   };
   const vscode = {
     languages: { createDiagnosticCollection: () => ({}) },
+    commands: { executeCommand: () => {} },
     workspace: { getConfiguration: () => ({}) },
     window: {
+      showInformationMessage: async (message: string) => {
+        messages.push(message);
+      },
       activeTextEditor: {
         document: {
           uri: { fsPath: "/workspace/book/lesson/index.md" },
@@ -86,16 +100,18 @@ async function renderPreview({
   const modules: Record<string, unknown> = {
     vscode,
     path: path.posix,
-    fs: { existsSync: existing },
+    "./RuntimeAssets": {
+      runtimeElements: elements,
+      runtimeLabels: Object.fromEntries(elements.map((e) => [e, `<${e}>`])),
+    },
     "@hyperbook/fs": filesystem,
     "@hyperbook/types": {
-      elementRuntimeFiles,
       isExternalUrl: (p: string) => /^https?:\/\//.test(p),
     },
     "@hyperbook/markdown": {
       process: async (_content: string, context: HyperbookContext) => {
         ctx = context;
-        return "";
+        return { data: { directives } };
       },
     },
   };
@@ -105,7 +121,10 @@ async function renderPreview({
     require: (name: string) => modules[name] || {},
   });
   const preview = Object.create(exports.default.prototype);
-  preview.context = { extensionUri: "/extension", extensionPath: "/extension" };
+  preview.context = { extensionUri: "/extension" };
+  // Object.create skips the constructor and its field initializers.
+  preview.offeredDownloads = new Set();
+  preview.runtimes = { locate: async (e: DownloadableElement) => locate(e) };
   preview.panel = {
     webview: {
       asWebviewUri: (p: string) => ({
@@ -116,12 +135,12 @@ async function renderPreview({
   preview.checkDocumentIsHyperbookFile = () => true;
   preview.getConfig = async () => config;
   preview.publishDiagnostics = () => {};
-  await preview.handleTextDocumentChange();
-  return ctx!;
+  for (let i = 0; i < renders; i++) await preview.handleTextDocumentChange();
+  return { ctx: ctx!, messages };
 }
 
 it("uses valid VS Code resource URLs for the bundle and local projects", async () => {
-  const ctx = await renderPreview();
+  const { ctx } = await renderPreview();
 
   const asset = ctx.makeUrl(["directive-blockflow", "editor.html"], "assets");
   expect(asset).toBe(
@@ -137,39 +156,72 @@ it("uses valid VS Code resource URLs for the bundle and local projects", async (
 
 it("keeps local runtimes when the extension ships them", async () => {
   const config = { name: "Test", elements: { pyide: { cdn: false } } };
-  const ctx = await renderPreview({ config });
+  const { ctx } = await renderPreview({ config });
   expect(ctx.config).toEqual(config);
 });
 
-it("loads runtimes missing from the extension from their CDN", async () => {
-  const ctx = await renderPreview({
-    existing: (file) => !file.includes("/directive-pyide/"),
-    config: {
-      name: "Test",
-      elements: { pyide: { cdn: false }, typst: { cdn: false } },
-    },
+it("uses runtimes from the CLI asset cache", async () => {
+  const { ctx, messages } = await renderPreview({
+    locate: (element) =>
+      element === "pyide" || element === "typst"
+        ? {
+            kind: "cached",
+            directory: `/cache/hash/content-1/directive-${element}`,
+          }
+        : { kind: "bundled" },
+    config: { name: "Test", elements: { pyide: { cdn: false } } },
+    directives: { pyide: {}, typst: {} },
   });
-  expect(ctx.config.elements?.pyide).toEqual({ cdn: true });
-  expect(ctx.config.elements?.typst).toEqual({ cdn: false });
+  const cache =
+    "https://file+.vscode-resource.vscode-cdn.net/cache/hash/content-1";
+  expect(ctx.config.elements?.pyide).toEqual({
+    cdn: `${cache}/directive-pyide/pyodide/`,
+  });
+  expect(ctx.config.elements?.typst).toEqual({
+    cdn: `${cache}/directive-typst/`,
+  });
+  expect(ctx.config.elements?.geogebra).toBeUndefined();
+  expect(messages).toEqual([]);
 });
 
-it("keeps a book's own CDN and element settings", async () => {
-  const ctx = await renderPreview({
-    existing: () => false,
+it("loads runtimes that are not downloaded from their CDN and offers a download once", async () => {
+  const { ctx, messages } = await renderPreview({
+    locate: () => ({ kind: "missing" }),
+    directives: { pyide: {}, "blockflow-player": {}, alert: {} },
+    renders: 2,
+  });
+  for (const element of elements)
+    expect(ctx.config.elements?.[element]).toEqual({ cdn: true });
+  expect(messages).toHaveLength(1);
+  expect(messages[0]).toContain("<blockflow>, <pyide>");
+  expect(messages[0]).not.toContain("<typst>");
+});
+
+it("keeps a book's own CDN and element settings, like a Hyperbook build", async () => {
+  const located: DownloadableElement[] = [];
+  const { ctx, messages } = await renderPreview({
+    locate: (element) => {
+      located.push(element);
+      return { kind: "missing" };
+    },
     config: {
       name: "Test",
       elements: {
         typst: { cdn: "https://assets.example.com/typst/" },
+        geogebra: { cdn: true },
         onlineide: { height: 400 },
       },
     },
+    directives: { typst: {}, geogebra: {} },
   });
-  for (const element of elements)
-    expect(ctx.config.elements?.[element]?.cdn).toBeTruthy();
   expect(ctx.config.elements?.typst?.cdn).toBe(
     "https://assets.example.com/typst/",
   );
+  expect(located).not.toContain("typst");
+  expect(located).not.toContain("geogebra");
   expect(ctx.config.elements?.onlineide).toEqual({ height: 400, cdn: true });
+  // The book chose these CDNs, so there is nothing to download.
+  expect(messages).toEqual([]);
 });
 
 it("leaves large element runtimes out of the VS Code package", async () => {
@@ -187,6 +239,7 @@ it("leaves large element runtimes out of the VS Code package", async () => {
       writeFileSync(path.join(fixture, file), "");
     };
     write("out/extension.js");
+    write("out/asset-manifest.json");
     write("assets/hyperbook/directive-alert/client.js");
     for (const element of elements)
       for (const file of [
@@ -200,6 +253,7 @@ it("leaves large element runtimes out of the VS Code package", async () => {
       packageManager: vsce.PackageManager.None,
     });
     expect(files).toContain("out/extension.js");
+    expect(files).toContain("out/asset-manifest.json");
     expect(files).toContain("assets/hyperbook/directive-alert/client.js");
     for (const element of elements) {
       for (const file of elementCoreFiles[element])

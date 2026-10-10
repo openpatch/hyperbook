@@ -143,9 +143,12 @@ SQL-IDE. Die kleinen Integrationsskripte und Styles von Hyperbook bleiben im
 Build.
 
 Die Hyperbook-Erweiterung für VS Code enthält diese Laufzeitumgebungen nicht.
-Ihre Vorschau lädt sie vom Standard-CDN, sofern `cdn` nicht auf eine eigene URL
-gesetzt ist. Für die Vorschau dieser Elemente ist daher eine Internetverbindung
-nötig.
+Ihre Vorschau verhält sich wie ein Build: Elemente mit `cdn` laden von diesem
+CDN, die anderen verwenden die Laufzeitumgebungen aus dem Asset-Cache der CLI,
+den die Erweiterung mitbenutzt. Eine noch nicht heruntergeladene
+Laufzeitumgebung lädt vom Standard-CDN. Mit **Hyperbook: Download Element
+Runtimes...** oder **Hyperbook: Download All Element Runtimes** lädst du
+Laufzeitumgebungen in VS Code für die Offline-Vorschau herunter.
 
 Eine eigene URL muss auf den Inhalt des Verzeichnisses
 `__hyperbook_assets/directive-<element>/` aus einem lokalen Build zeigen.
