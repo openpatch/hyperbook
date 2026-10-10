@@ -7,9 +7,10 @@ permaid: blockflow
 
 [Blockflow](https://blockflow.openpatch.org) is a fork of Scratch for building guided tutorials. Hyperbook provides two directives for embedding Blockflow: a **player** for playing tutorials and an **editor** for creating them.
 
-Hyperbook and its VS Code extension include a pinned Blockflow browser bundle. Books that use
-either directive serve one shared local copy, so the editor and player do not depend on
-blockflow.openpatch.org. Local project files and tutorial media work offline when the book is
+Hyperbook includes a pinned Blockflow browser bundle. The CLI downloads it the first time a build
+uses Blockflow. Books that use either directive serve one shared local copy, so the editor and
+player do not depend on blockflow.openpatch.org. The VS Code extension does not include the bundle;
+its preview loads Blockflow from blockflow.openpatch.org. Local project files and tutorial media work offline when the book is
 served locally; remote projects, Scratch library assets, and network extensions still need internet access.
 The bundled Blockflow license and source link are included with its assets.
 

@@ -11,11 +11,14 @@ import {
 import { process } from "@hyperbook/markdown";
 import { disposeAll } from "./utils/dispose";
 import path, { posix } from "path";
+import { existsSync } from "fs";
 import {
+  DownloadableElement,
   HyperbookContext,
   HyperbookJson,
   HyperbookPage,
   Navigation,
+  elementRuntimeFiles,
   isExternalUrl,
 } from "@hyperbook/types";
 
@@ -47,6 +50,9 @@ export default class Preview {
 
   private _resource: vscode.Uri | undefined;
   private _vfile: VFileBook | VFileGlossary | undefined;
+
+  /** Elements whose large runtime is not shipped with the extension. */
+  private missingRuntimes: DownloadableElement[] | undefined;
 
   private readonly disposables: vscode.Disposable[] = [];
   private _disposed: boolean = false;
@@ -124,6 +130,42 @@ export default class Preview {
     }
   }
 
+  /**
+   * The published extension leaves out large element runtimes (Pyodide,
+   * GeoGebra, Typst, ...) to stay small. Elements whose runtime is missing load
+   * it from their default CDN, unless the book already sets its own CDN URL.
+   * Development builds keep the full runtimes and stay unaffected.
+   */
+  withCdnFallback(config: HyperbookJson): HyperbookJson {
+    if (!this.missingRuntimes) {
+      const assets = path.join(
+        this.context.extensionPath,
+        "assets",
+        "hyperbook",
+      );
+      this.missingRuntimes = (
+        Object.keys(elementRuntimeFiles) as DownloadableElement[]
+      ).filter(
+        (element) =>
+          !elementRuntimeFiles[element].every((file) =>
+            existsSync(
+              path.join(assets, `directive-${element}`, ...file.split("/")),
+            ),
+          ),
+      );
+    }
+    if (this.missingRuntimes.length === 0) {
+      return config;
+    }
+    const elements: Record<string, any> = { ...config.elements };
+    for (const element of this.missingRuntimes) {
+      if (!elements[element]?.cdn) {
+        elements[element] = { ...elements[element], cdn: true };
+      }
+    }
+    return { ...config, elements };
+  }
+
   async handleTextDocumentChange() {
     this.hyperbookViewerConfig = vscode.workspace.getConfiguration("hyperbook");
     if (
@@ -195,7 +237,7 @@ export default class Preview {
         ...publicBookFiles,
         ...publicGlossaryFiles,
       ];
-      const config = await this.getConfig();
+      const config = this.withCdnFallback(await this.getConfig());
 
       // Without this a `:::protect{use="..."}` block fails to render in the
       // preview, even though it builds fine.

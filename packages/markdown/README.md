@@ -42,16 +42,32 @@ console.log(result.data.headings); // Extracted headings
 
 ## Browser assets
 
-Browser scripts and styles are included under `dist/assets`. Pyodide's large
-distribution is provided separately to keep the package within npm's upload
-limit. When self-hosting PyIDE with this package, download the
-[Pyodide asset bundle for Hyperbook 0.113.0](https://github.com/openpatch/hyperbook/releases/download/hyperbook-assets-v0.113.0/pyide.tar.gz),
-verify its SHA-256 checksum against the
-[CLI asset manifest](https://unpkg.com/hyperbook@0.113.0/dist/asset-manifest.json),
-and extract it into the served assets directory, alongside the other
-`directive-*` folders. The bundle includes `directive-pyide/pyodide/` and its
-complete Python package distribution.
+Browser scripts and styles are included under `dist/assets`. To keep the
+package small, it leaves out the large runtimes of these elements and keeps only
+their integration scripts and styles:
 
-The Hyperbook CLI downloads this bundle automatically. Hyperbook Studio for
-VS Code includes the runtime. Setting `elements.pyide.cdn` to `true` uses the
-Pyodide CDN instead of locally served runtime files.
+| Element | Default CDN |
+| --- | --- |
+| `pyide` | Pyodide on jsDelivr |
+| `typst` | Typst packages and fonts on jsDelivr |
+| `geogebra` | GeoGebra's server |
+| `blockflow` | `blockflow.openpatch.org` |
+| `excalidraw` | Excalidraw's own packages on UNPKG |
+
+The OpenSCAD, Online IDE, and SQL IDE runtimes stay in the package, because
+their default CDN is this package on UNPKG.
+
+To serve a missing runtime, choose one of these options:
+
+- **Use the CDN.** Set `elements.<element>.cdn` to `true` in the configuration
+  passed to `process`, or to the base URL of your own copy.
+- **Download it.** The Hyperbook CLI publishes one verified bundle per element
+  for each release. For example, the
+  [PyIDE bundle for Hyperbook 0.113.0](https://github.com/openpatch/hyperbook/releases/download/hyperbook-assets-v0.113.0/pyide.tar.gz)
+  is listed with its SHA-256 checksum in the
+  [CLI asset manifest](https://unpkg.com/hyperbook@0.113.0/dist/asset-manifest.json).
+  Extract a bundle into the served assets directory, alongside the other
+  `directive-*` folders.
+
+The Hyperbook CLI downloads these bundles automatically. The Hyperbook extension
+for VS Code loads missing runtimes from their default CDN.

@@ -3,6 +3,7 @@ import { DownloadableElement, elementCdn } from "@hyperbook/types";
 import { process as processMarkdown } from "../src/process";
 import { elementAssetUrl } from "../src/elementAssets";
 import packageJson from "../package.json";
+import excalidrawPackageJson from "../../web-component-excalidraw/package.json";
 import { ctx } from "./mock";
 
 const elements: [DownloadableElement, string][] = [
@@ -49,7 +50,13 @@ describe.each(elements)(
                 pyide: "https://cdn.jsdelivr.net/pyodide/v314.0.7/full/",
                 typst: "https://cdn.jsdelivr.net/npm/@myriaddreamin/",
                 geogebra: "https://www.geogebra.org/apps/",
-              }[element as "pyide" | "typst" | "geogebra"] ||
+                blockflow: "https://blockflow.openpatch.org/",
+                excalidraw:
+                  "https://unpkg.com/@hyperbook/web-component-excalidraw@",
+              }[
+                element as
+                  "pyide" | "typst" | "geogebra" | "blockflow" | "excalidraw"
+              ] ||
                 `https://unpkg.com/@hyperbook/markdown@${packageJson.version}/dist/assets/directive-${element}/`
             : "http://assets.example.com/runtime/",
         );
@@ -110,4 +117,30 @@ it("uses pinned upstream Typst fonts and GeoGebra codebases", () => {
   expect(
     elementAssetUrl(configured, "geogebra", "GeoGebra/HTML5/5.0/web3d/"),
   ).toBe("https://www.geogebra.org/apps/5.4.931.2/web3d/");
+});
+
+it("loads Blockflow and Excalidraw from their upstream CDNs", () => {
+  const configured = {
+    ...ctx,
+    config: {
+      ...ctx.config,
+      elements: { blockflow: { cdn: true }, excalidraw: { cdn: true } },
+    },
+  };
+  expect(elementAssetUrl(configured, "blockflow", "editor.html")).toBe(
+    "https://blockflow.openpatch.org/editor.html",
+  );
+  expect(
+    elementAssetUrl(configured, "excalidraw", "hyperbook-excalidraw.umd.js"),
+  ).toBe(
+    `https://unpkg.com/@hyperbook/web-component-excalidraw@${excalidrawPackageJson.version}/dist/index.umd.js`,
+  );
+  const excalidraw = `https://unpkg.com/@excalidraw/excalidraw@${excalidrawPackageJson.dependencies["@excalidraw/excalidraw"]}/dist/prod/`;
+  expect(elementAssetUrl(configured, "excalidraw", "excalidraw.css")).toBe(
+    `${excalidraw}index.css`,
+  );
+  // Excalidraw resolves fonts/ beside its asset base.
+  expect(elementAssetUrl(configured, "excalidraw", "")).toBe(excalidraw);
+  // An unpkg URL needs an exact version to stay stable.
+  expect(excalidraw).toMatch(/@\d+\.\d+\.\d+\/dist/);
 });

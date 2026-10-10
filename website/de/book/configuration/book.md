@@ -136,9 +136,16 @@ Diese Option gibt es für `pyide`, `typst`, `geogebra`, `openscad`, `excalidraw`
 Player und den Editor. Kiri:Moto verwendet weiterhin seinen externen Dienst.
 
 Die Standard-CDNs sind jsDelivr für Pyodide und Typst, der GeoGebra-Server für
-GeoGebra und die versionierten Hyperbook-Dateien auf UNPKG für die anderen
-Elemente. Die kleinen Integrationsskripte und Styles von Hyperbook bleiben im
+GeoGebra, die gehostete Blockflow-App unter `blockflow.openpatch.org` für
+Blockflow, die eigenen Pakete von Excalidraw auf UNPKG für Excalidraw und die
+versionierten Hyperbook-Dateien auf UNPKG für OpenSCAD, die Online-IDE und die
+SQL-IDE. Die kleinen Integrationsskripte und Styles von Hyperbook bleiben im
 Build.
+
+Die Hyperbook-Erweiterung für VS Code enthält diese Laufzeitumgebungen nicht.
+Ihre Vorschau lädt sie vom Standard-CDN, sofern `cdn` nicht auf eine eigene URL
+gesetzt ist. Für die Vorschau dieser Elemente ist daher eine Internetverbindung
+nötig.
 
 Eine eigene URL muss auf den Inhalt des Verzeichnisses
 `__hyperbook_assets/directive-<element>/` aus einem lokalen Build zeigen.

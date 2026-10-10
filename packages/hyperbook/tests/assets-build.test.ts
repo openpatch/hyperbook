@@ -131,7 +131,7 @@ it("builds and prefetches CDN elements offline without obtaining their local run
   );
   const out = path.join(root, ".hyperbook", "out");
   const html = await fs.readFile(path.join(out, "index.html"), "utf8");
-  expect(html).toContain("unpkg.com/@hyperbook/markdown@");
+  expect(html).toContain("https://blockflow.openpatch.org/player.html");
   expect(html).toContain('data-runtime-url="https://cdn.example.com/python/"');
   await expect(
     fs.stat(path.join(out, "__hyperbook_assets", "directive-blockflow")),

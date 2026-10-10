@@ -19,6 +19,12 @@ You can preview your Hyperbook pages by clicking the preview icon in the top rig
 
 ![Preview](https://github.com/openpatch/hyperbook/raw/main/platforms/vscode/screenshots/preview.gif)
 
+To keep the extension small, it does not include the large runtimes of Pyodide,
+Typst, GeoGebra, OpenSCAD, Excalidraw, Blockflow, the Online IDE, and the SQL
+IDE. The preview loads them from their default CDN, so previewing these
+elements needs an internet connection. If your `hyperbook.json` sets `cdn` to
+your own URL for an element, the preview uses that URL instead.
+
 ### Hyperbook Config
 
 The `hyperbook.json` is validated against a schema, which presents you

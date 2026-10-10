@@ -4,7 +4,11 @@ import {
   elementCdn,
 } from "@hyperbook/types";
 import packageJson from "../package.json";
+import excalidrawPackageJson from "../../web-component-excalidraw/package.json";
 import runtimeAssets from "../runtime-assets.json";
+
+/** Hosted Blockflow app; the npm package does not include Blockflow's bundle. */
+const blockflowCdn = "https://blockflow.openpatch.org/";
 
 /** Resolve payload files; Hyperbook's integration scripts stay local. */
 export function elementAssetUrl(
@@ -57,6 +61,16 @@ export function elementAssetUrl(
       .replace(/^GeoGebra\/(?:HTML5\/)?/, "")
       .replace(/^5\.0\//, `${version}/`);
     return `https://www.geogebra.org/apps/${relative}`;
+  }
+  if (element === "blockflow") return new URL(file, blockflowCdn).href;
+  if (element === "excalidraw") {
+    // The npm package omits Excalidraw's fonts and bundle; use their own packages.
+    if (file === "hyperbook-excalidraw.umd.js")
+      return `https://unpkg.com/${excalidrawPackageJson.name}@${excalidrawPackageJson.version}/dist/index.umd.js`;
+    const base = `https://unpkg.com/@excalidraw/excalidraw@${excalidrawPackageJson.dependencies["@excalidraw/excalidraw"]}/dist/prod/`;
+    return file === "excalidraw.css"
+      ? `${base}index.css`
+      : new URL(file, base).href;
   }
   return `https://unpkg.com/@hyperbook/markdown@${packageJson.version}/dist/assets/directive-${element}/${file}`;
 }

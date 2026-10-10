@@ -117,8 +117,10 @@ Set `cdn` per element in `hyperbook.json` to load its large runtime from a CDN:
 ```
 
 Omitting `cdn` or setting it to `false` keeps local assets. `true` selects the
-default CDN: jsDelivr for Pyodide and Typst, GeoGebra's server for GeoGebra, and
-versioned Hyperbook assets on UNPKG for the other elements. The option supports
+default CDN: jsDelivr for Pyodide and Typst, GeoGebra's server for GeoGebra,
+`blockflow.openpatch.org` for Blockflow, Excalidraw's own packages on UNPKG for
+Excalidraw, and versioned `@hyperbook/markdown` assets on UNPKG for OpenSCAD,
+the Online IDE, and the SQL IDE. The option supports
 `pyide`, `typst`, `geogebra`, `openscad`, `excalidraw`, `onlineide`, `sqlide`, and
 `blockflow` (both player and editor).
 
@@ -143,10 +145,15 @@ to the CDN. `assets fetch --all` still downloads every bundle.
 Build the workspace packages before building the CLI. Its postbuild step writes
 the small npm package to `dist/`, an asset manifest to `dist/asset-manifest.json`,
 and eight separate archives to `.cache/asset-bundles/<cli-version>/`. The Markdown
-build and VS Code extension continue to include their complete assets. Markdown's
-npm tarball omits the Pyodide distribution to fit npm's upload limit; standalone
-users can extract the CLI's `pyide.tar.gz` bundle alongside the other directive
-assets.
+build keeps its complete assets in `dist/assets`, which the CLI and the VS Code
+extension build from. The published packages stay small:
+
+- Markdown's npm tarball omits the Pyodide, GeoGebra, Typst, Blockflow, and
+  Excalidraw runtimes, which have upstream CDNs. It keeps OpenSCAD, the Online
+  IDE, and the SQL IDE, because their default CDN is this package on UNPKG.
+  `packages/markdown/tests/packageContents.test.ts` enforces this split.
+- The VS Code extension omits all eight runtimes through `.vscodeignore`. Its
+  preview loads a missing runtime from the element's default CDN.
 Locally built CLIs use these archives directly, including with `--offline`,
 so workspace builds work before the corresponding release is published.
 

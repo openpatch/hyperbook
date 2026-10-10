@@ -1,13 +1,37 @@
-import { readFileSync } from "node:fs";
+import {
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
+import { createRequire } from "node:module";
+import { tmpdir } from "node:os";
 import path from "node:path";
 import { runInNewContext } from "node:vm";
 import ts from "typescript";
-import { HyperbookContext } from "@hyperbook/types";
+import {
+  DownloadableElement,
+  HyperbookContext,
+  HyperbookJson,
+  elementCoreFiles,
+  elementRuntimeFiles,
+} from "@hyperbook/types";
 import { expect, it } from "vitest";
 
-it("uses valid VS Code resource URLs for the bundle and local projects", async () => {
+const vscodePlatform = new URL("../../../platforms/vscode/", import.meta.url);
+const elements = Object.keys(elementCoreFiles) as DownloadableElement[];
+
+/** Renders the active document with the extension's Preview and a stubbed VS Code. */
+async function renderPreview({
+  existing = () => true,
+  config = { name: "Test" },
+}: {
+  existing?: (file: string) => boolean;
+  config?: HyperbookJson;
+} = {}): Promise<HyperbookContext> {
   const source = readFileSync(
-    new URL("../../../platforms/vscode/src/Preview.ts", import.meta.url),
+    new URL("src/Preview.ts", vscodePlatform),
     "utf8",
   );
   const compiled = ts.transpileModule(source, {
@@ -61,9 +85,11 @@ it("uses valid VS Code resource URLs for the bundle and local projects", async (
   };
   const modules: Record<string, unknown> = {
     vscode,
-    path,
+    path: path.posix,
+    fs: { existsSync: existing },
     "@hyperbook/fs": filesystem,
     "@hyperbook/types": {
+      elementRuntimeFiles,
       isExternalUrl: (p: string) => /^https?:\/\//.test(p),
     },
     "@hyperbook/markdown": {
@@ -79,7 +105,7 @@ it("uses valid VS Code resource URLs for the bundle and local projects", async (
     require: (name: string) => modules[name] || {},
   });
   const preview = Object.create(exports.default.prototype);
-  preview.context = { extensionUri: "/extension" };
+  preview.context = { extensionUri: "/extension", extensionPath: "/extension" };
   preview.panel = {
     webview: {
       asWebviewUri: (p: string) => ({
@@ -88,18 +114,104 @@ it("uses valid VS Code resource URLs for the bundle and local projects", async (
     },
   };
   preview.checkDocumentIsHyperbookFile = () => true;
-  preview.getConfig = async () => ({ name: "Test" });
+  preview.getConfig = async () => config;
   preview.publishDiagnostics = () => {};
   await preview.handleTextDocumentChange();
+  return ctx!;
+}
 
-  const asset = ctx!.makeUrl(["directive-blockflow", "editor.html"], "assets");
+it("uses valid VS Code resource URLs for the bundle and local projects", async () => {
+  const ctx = await renderPreview();
+
+  const asset = ctx.makeUrl(["directive-blockflow", "editor.html"], "assets");
   expect(asset).toBe(
     "https://file+.vscode-resource.vscode-cdn.net/extension/assets/hyperbook/directive-blockflow/editor.html",
   );
   expect(
     new URL(asset, "https://preview.vscode-webview.net/index.html").hostname,
   ).toBe("file+.vscode-resource.vscode-cdn.net");
-  expect(ctx!.makeUrl("/project.sb3", "public")).toBe(
+  expect(ctx.makeUrl("/project.sb3", "public")).toBe(
     "https://file+.vscode-resource.vscode-cdn.net/workspace/public/project.sb3",
   );
 });
+
+it("keeps local runtimes when the extension ships them", async () => {
+  const config = { name: "Test", elements: { pyide: { cdn: false } } };
+  const ctx = await renderPreview({ config });
+  expect(ctx.config).toEqual(config);
+});
+
+it("loads runtimes missing from the extension from their CDN", async () => {
+  const ctx = await renderPreview({
+    existing: (file) => !file.includes("/directive-pyide/"),
+    config: {
+      name: "Test",
+      elements: { pyide: { cdn: false }, typst: { cdn: false } },
+    },
+  });
+  expect(ctx.config.elements?.pyide).toEqual({ cdn: true });
+  expect(ctx.config.elements?.typst).toEqual({ cdn: false });
+});
+
+it("keeps a book's own CDN and element settings", async () => {
+  const ctx = await renderPreview({
+    existing: () => false,
+    config: {
+      name: "Test",
+      elements: {
+        typst: { cdn: "https://assets.example.com/typst/" },
+        onlineide: { height: 400 },
+      },
+    },
+  });
+  for (const element of elements)
+    expect(ctx.config.elements?.[element]?.cdn).toBeTruthy();
+  expect(ctx.config.elements?.typst?.cdn).toBe(
+    "https://assets.example.com/typst/",
+  );
+  expect(ctx.config.elements?.onlineide).toEqual({ height: 400, cdn: true });
+});
+
+it("leaves large element runtimes out of the VS Code package", async () => {
+  const require = createRequire(new URL("package.json", vscodePlatform));
+  const vsce = require("@vscode/vsce");
+  const fixture = mkdtempSync(path.join(tmpdir(), "hyperbook-vsix-"));
+  try {
+    for (const name of ["package.json", ".vscodeignore"])
+      writeFileSync(
+        path.join(fixture, name),
+        readFileSync(new URL(name, vscodePlatform)),
+      );
+    const write = (file: string) => {
+      mkdirSync(path.dirname(path.join(fixture, file)), { recursive: true });
+      writeFileSync(path.join(fixture, file), "");
+    };
+    write("out/extension.js");
+    write("assets/hyperbook/directive-alert/client.js");
+    for (const element of elements)
+      for (const file of [
+        ...elementCoreFiles[element],
+        ...elementRuntimeFiles[element],
+      ])
+        write(`assets/hyperbook/directive-${element}/${file}`);
+
+    const files: string[] = await vsce.listFiles({
+      cwd: fixture,
+      packageManager: vsce.PackageManager.None,
+    });
+    expect(files).toContain("out/extension.js");
+    expect(files).toContain("assets/hyperbook/directive-alert/client.js");
+    for (const element of elements) {
+      for (const file of elementCoreFiles[element])
+        expect(files).toContain(
+          `assets/hyperbook/directive-${element}/${file}`,
+        );
+      for (const file of elementRuntimeFiles[element])
+        expect(files).not.toContain(
+          `assets/hyperbook/directive-${element}/${file}`,
+        );
+    }
+  } finally {
+    rmSync(fixture, { recursive: true, force: true });
+  }
+}, 60_000);

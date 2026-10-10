@@ -139,8 +139,14 @@ applies to both the player and editor. Kiri:Moto continues to use its external
 service.
 
 The default CDNs are jsDelivr for Pyodide and Typst, GeoGebra's server for
-GeoGebra, and UNPKG's versioned Hyperbook assets for the other elements.
-Hyperbook's small integration scripts and styles stay in the build.
+GeoGebra, the hosted Blockflow app at `blockflow.openpatch.org` for Blockflow,
+Excalidraw's own packages on UNPKG for Excalidraw, and UNPKG's versioned
+Hyperbook assets for OpenSCAD, the Online IDE, and the SQL IDE. Hyperbook's
+small integration scripts and styles stay in the build.
+
+The Hyperbook extension for VS Code does not include these runtimes. Its
+preview loads them from the default CDN unless `cdn` is set to a custom URL, so
+previewing these elements needs an internet connection.
 
 A custom URL must point to the contents of the corresponding
 `__hyperbook_assets/directive-<element>/` directory from a local build. Preserve

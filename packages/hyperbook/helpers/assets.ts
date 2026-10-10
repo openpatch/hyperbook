@@ -7,26 +7,11 @@ import { Transform, Readable } from "stream";
 import { pipeline } from "stream/promises";
 import { extract } from "tar";
 import remoteDirectives from "../asset-bundles.json";
-import { elementCoreFiles, DownloadableElement } from "@hyperbook/types";
-
-const runtimeFiles: Record<string, string[]> = {
-  blockflow: ["player.html"],
-  onlineide: ["include/online-ide-embedded.js"],
-  sqlide: ["include/sql-ide-embedded.js"],
-  excalidraw: ["hyperbook-excalidraw.umd.js"],
-  geogebra: ["GeoGebra/deployggb.js"],
-  pyide: ["pyodide/pyodide.js", "pyodide/pyodide-lock.json"],
-  typst: [
-    "typst-bundle.js",
-    "typst-compiler.wasm",
-    "fonts/LibertinusSerif-Regular.otf",
-  ],
-  openscad: [
-    "openscad.wasm",
-    "libraries/BOSL2.zip",
-    "fonts/Roboto-Regular.ttf",
-  ],
-};
+import {
+  elementCoreFiles,
+  elementRuntimeFiles,
+  DownloadableElement,
+} from "@hyperbook/types";
 
 export interface AssetBundle {
   url: string;
@@ -157,9 +142,10 @@ export class AssetManager {
     try {
       if ((await fs.stat(bundled)).isDirectory()) {
         await Promise.all(
-          (cdn ? [] : runtimeFiles[directive] || []).map((file) =>
-            fs.access(path.join(bundled, file)),
-          ),
+          (cdn
+            ? []
+            : elementRuntimeFiles[directive as DownloadableElement] || []
+          ).map((file) => fs.access(path.join(bundled, file))),
         );
         return bundled;
       }
