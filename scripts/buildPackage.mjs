@@ -63,6 +63,16 @@ export const buildPackage = async (path) => {
     bundle: true,
     platform,
     external,
+    // ESM hosts do not provide `require` for bundled CommonJS dependencies.
+    ...(platform === "node"
+      ? {
+          // Downstream CommonJS bundles provide __filename. Using it avoids
+          // their import.meta.url shim calling a shadowed require during setup.
+          banner: {
+            js: 'import { createRequire as __hyperbookCreateRequire } from "node:module"; const require = __hyperbookCreateRequire(typeof __filename === "string" ? __filename : import.meta.url);',
+          },
+        }
+      : {}),
   };
 
   // await build({

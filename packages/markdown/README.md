@@ -53,9 +53,14 @@ their integration scripts and styles:
 | `geogebra` | GeoGebra's server |
 | `blockflow` | `blockflow.openpatch.org` |
 | `excalidraw` | Excalidraw's own packages on UNPKG |
+| `onlineide` | Runtime from `@hyperbook/markdown@0.85.0` on UNPKG |
+| `sqlide` | Runtime from `@hyperbook/markdown@0.85.0` on UNPKG |
+| `openscad` | Runtime from `@hyperbook/markdown@0.85.0` on UNPKG |
 
-The OpenSCAD, Online IDE, and SQL IDE runtimes stay in the package, because
-their default CDN is this package on UNPKG.
+All eight large runtimes are excluded from the npm package. The OpenSCAD,
+Online IDE, and SQL IDE default CDNs are pinned to the last published Markdown
+release containing them, independently of the current renderer version.
+Workspace builds still prepare the full asset tree for publishing CLI bundles.
 
 To serve a missing runtime, choose one of these options:
 

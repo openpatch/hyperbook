@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 import { DownloadableElement, elementCdn } from "@hyperbook/types";
 import { process as processMarkdown } from "../src/process";
 import { elementAssetUrl } from "../src/elementAssets";
-import packageJson from "../package.json";
 import excalidrawPackageJson from "../../web-component-excalidraw/package.json";
 import { ctx } from "./mock";
 
@@ -57,7 +56,7 @@ describe.each(elements)(
                 element as
                   "pyide" | "typst" | "geogebra" | "blockflow" | "excalidraw"
               ] ||
-                `https://unpkg.com/@hyperbook/markdown@${packageJson.version}/dist/assets/directive-${element}/`
+                `https://unpkg.com/@hyperbook/markdown@0.85.0/dist/assets/directive-${element}/`
             : "http://assets.example.com/runtime/",
         );
         if (element === "blockflow")
@@ -144,3 +143,16 @@ it("loads Blockflow and Excalidraw from their upstream CDNs", () => {
   // An unpkg URL needs an exact version to stay stable.
   expect(excalidraw).toMatch(/@\d+\.\d+\.\d+\/dist/);
 });
+
+it.each(["onlineide", "sqlide", "openscad"] as const)(
+  "keeps %s's default CDN pinned to a release containing its runtime",
+  (element: DownloadableElement) => {
+    const configured = {
+      ...ctx,
+      config: { ...ctx.config, elements: { [element]: { cdn: true } } },
+    };
+    expect(elementAssetUrl(configured, element, "")).toBe(
+      `https://unpkg.com/@hyperbook/markdown@0.85.0/dist/assets/directive-${element}/`,
+    );
+  },
+);

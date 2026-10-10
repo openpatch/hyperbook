@@ -140,7 +140,8 @@ async function postbuild() {
   }
 
   // These files are served locally by the elements. The CLI publishes them in
-  // optional bundles; Markdown and VS Code keep their complete asset trees.
+  // optional bundles. The Markdown npm package and VS Code extension exclude
+  // the runtimes, retaining only their small integration scripts and styles.
   await installRuntimeAssets(JSON.parse(await readFile("runtime-assets.json", "utf8")));
 
   const assets = [

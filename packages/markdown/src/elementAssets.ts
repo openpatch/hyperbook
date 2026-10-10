@@ -3,12 +3,16 @@ import {
   HyperbookContext,
   elementCdn,
 } from "@hyperbook/types";
-import packageJson from "../package.json";
 import excalidrawPackageJson from "../../web-component-excalidraw/package.json";
 import runtimeAssets from "../runtime-assets.json";
 
 /** Hosted Blockflow app; the npm package does not include Blockflow's bundle. */
 const blockflowCdn = "https://blockflow.openpatch.org/";
+
+// The last published Markdown release that includes these runtimes. Keep this
+// independent of the renderer version: new packages omit every large runtime.
+const legacyRuntimeCdn =
+  "https://unpkg.com/@hyperbook/markdown@0.85.0/dist/assets/";
 
 /** Resolve payload files; Hyperbook's integration scripts stay local. */
 export function elementAssetUrl(
@@ -72,5 +76,5 @@ export function elementAssetUrl(
       ? `${base}index.css`
       : new URL(file, base).href;
   }
-  return `https://unpkg.com/@hyperbook/markdown@${packageJson.version}/dist/assets/directive-${element}/${file}`;
+  return `${legacyRuntimeCdn}directive-${element}/${file}`;
 }

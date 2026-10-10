@@ -6,9 +6,11 @@ import {
   writeFileSync,
 } from "node:fs";
 import { createRequire } from "node:module";
+import { execFileSync } from "node:child_process";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { runInNewContext } from "node:vm";
+import { fileURLToPath } from "node:url";
 import ts from "typescript";
 import {
   DownloadableElement,
@@ -21,6 +23,36 @@ import { expect, it } from "vitest";
 
 const vscodePlatform = new URL("../../../platforms/vscode/", import.meta.url);
 const elements = Object.keys(elementCoreFiles) as DownloadableElement[];
+
+it("loads the compiled extension in a Node extension host", () => {
+  execFileSync(
+    process.execPath,
+    [
+      "-e",
+      `
+        const fs = require('node:fs');
+        const Module = require('node:module');
+        const filename = process.argv[1];
+        const extension = new Module(filename);
+        extension.filename = filename;
+        extension.paths = Module._nodeModulePaths(require('node:path').dirname(filename));
+        const vscode = { languages: { createDiagnosticCollection: () => ({}) } };
+        extension.require = name => name === 'vscode'
+          ? vscode : Module.prototype.require.call(extension, name);
+        try {
+          extension._compile(fs.readFileSync(filename, 'utf8'), filename);
+          if (typeof extension.exports.activate !== 'function')
+            throw new Error('The compiled extension does not export activate.');
+        } catch (error) {
+          console.error(error.message);
+          process.exitCode = 1;
+        }
+      `,
+      fileURLToPath(new URL("out/extension.js", vscodePlatform)),
+    ],
+    { stdio: "pipe" },
+  );
+});
 
 type RuntimeLocation =
   | { kind: "bundled" }
