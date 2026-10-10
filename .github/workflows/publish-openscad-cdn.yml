@@ -1,0 +1,48 @@
+name: Publish OpenSCAD runtime to R2
+on:
+  # Bootstrap the first runtime from the migration branch; removed after upload.
+  push:
+    branches: [ccr-dc12b6f7-p2rfkj]
+    paths: [.github/workflows/publish-openscad-cdn.yml]
+  workflow_dispatch:
+  workflow_call:
+permissions:
+  contents: read
+concurrency:
+  group: cdn-openscad
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_R2_CDN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID || secrets.CLOUDFLARE_ACCOUNT_ID }}
+      WRANGLER_SEND_METRICS: "false"
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11.3.0
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: pnpm
+      - name: Install runtime downloader dependencies
+        run: pnpm install --frozen-lockfile --filter @hyperbook/markdown...
+      - run: pnpm test:cdn
+      - name: Install Wrangler
+        run: npm install --global wrangler@4.149.0
+      - name: Check Cloudflare configuration
+        run: |
+          test -n "$CLOUDFLARE_API_TOKEN" || { echo 'Missing CLOUDFLARE_R2_CDN Actions secret'; exit 1; }
+          test -n "$CLOUDFLARE_ACCOUNT_ID" || { echo 'Missing CLOUDFLARE_ACCOUNT_ID Actions variable or secret'; exit 1; }
+      - name: Prepare upstream WASM, fonts and libraries
+        run: node scripts/prepare-openscad-cdn.mjs
+      - name: Allow browser access to runtime files
+        run: wrangler r2 bucket cors set cdn --file scripts/cdn-cors.json --force
+      - name: Publish and verify immutable runtime files
+        run: |
+          version=$(node -p 'JSON.parse(require("fs").readFileSync("packages/markdown/openscad-config.json", "utf8")).wasmBuild.cdnVersion')
+          node scripts/publish-cdn.mjs openscad "$version" .cache/cdn-openscad/runtime
+          node scripts/verify-cdn.mjs openscad "$version" .cache/cdn-openscad/runtime
