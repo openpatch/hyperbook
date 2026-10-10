@@ -5,9 +5,12 @@ import StatusBarItem from "./StatusBarItem";
 import { hyperbook } from "@hyperbook/fs";
 import { createNewHyperbook } from "./NewCommand";
 import { HyperbookFoldingProvider } from "./FoldingProvider";
+import RuntimeAssets, { runtimeElements, runtimeLabels } from "./RuntimeAssets";
+import { DownloadableElement } from "@hyperbook/types";
 
 export function activate(context: vscode.ExtensionContext) {
-  let preview = new Preview(context);
+  const runtimes = new RuntimeAssets(context.extensionPath);
+  let preview = new Preview(context, runtimes);
   let statusBarItem = new StatusBarItem(context, preview);
   statusBarItem.updateStatusbar();
 
@@ -169,6 +172,48 @@ Start writing your content here...
     },
   );
 
+  // Like `hyperbook assets fetch`: download element runtimes into the CLI's
+  // shared asset cache, so the preview works offline.
+  let disposableDownloadRuntimes = vscode.commands.registerCommand(
+    "hyperbook.downloadRuntimes",
+    async (elements?: DownloadableElement[]) => {
+      if (!elements) {
+        const items = await Promise.all(
+          runtimeElements.map(async (element) => {
+            const location = await runtimes.locate(element);
+            return {
+              label: runtimeLabels[element],
+              element,
+              description:
+                location.kind === "missing" ? undefined : "available offline",
+              picked:
+                location.kind === "missing" &&
+                preview.usedElements.includes(element),
+            };
+          }),
+        );
+        const picked = await vscode.window.showQuickPick(items, {
+          canPickMany: true,
+          title: "Download Hyperbook element runtimes",
+          placeHolder: `Runtimes are stored in ${runtimes.cacheDir}`,
+        });
+        if (!picked || picked.length === 0) {
+          return;
+        }
+        elements = picked.map((item) => item.element);
+      }
+      await runtimes.download(elements);
+    },
+  );
+
+  // Like `hyperbook assets fetch --all`.
+  let disposableDownloadAllRuntimes = vscode.commands.registerCommand(
+    "hyperbook.downloadAllRuntimes",
+    async () => {
+      await runtimes.download(runtimeElements);
+    },
+  );
+
   let disposableNew = vscode.commands.registerCommand(
     "hyperbook.new",
     async () => {
@@ -184,6 +229,8 @@ Start writing your content here...
   context.subscriptions.push(disposableOpenIndexMd);
   context.subscriptions.push(disposableCreateNewPage);
   context.subscriptions.push(disposableOpenDocumentation);
+  context.subscriptions.push(disposableDownloadRuntimes);
+  context.subscriptions.push(disposableDownloadAllRuntimes);
   context.subscriptions.push(disposableStatusBar);
 
   // Completions

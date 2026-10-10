@@ -5,6 +5,9 @@ lang: de
 
 # Deploy on Vercel
 
+Siehe [Caching](/hosting/caching#dateien-im-browser-zwischenspeichern) für
+Cache-Header bei der Konfiguration deines Deployments.
+
 Zuerst musst du eine `vercel.json`-Datei erstellen mit dem folgenden Inhalt:
 
 ```json

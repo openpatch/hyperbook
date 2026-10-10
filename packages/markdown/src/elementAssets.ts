@@ -3,8 +3,13 @@ import {
   HyperbookContext,
   elementCdn,
 } from "@hyperbook/types";
-import packageJson from "../package.json";
+import excalidrawPackageJson from "../../web-component-excalidraw/package.json";
 import runtimeAssets from "../runtime-assets.json";
+import ideReleases from "../ide-releases.json";
+import openscadConfig from "../openscad-config.json";
+
+/** Hosted Blockflow app; the npm package does not include Blockflow's bundle. */
+const blockflowCdn = "https://blockflow.openpatch.org/";
 
 /** Resolve payload files; Hyperbook's integration scripts stay local. */
 export function elementAssetUrl(
@@ -27,6 +32,18 @@ export function elementAssetUrl(
     return new URL(
       element === "pyide" ? file.replace(/^pyodide\//, "") : file,
       cdn,
+    ).href;
+  }
+  if (element === "onlineide" || element === "sqlide") {
+    return new URL(
+      file,
+      `https://cdn.openpatch.org/${element}/${ideReleases[element]}/`,
+    ).href;
+  }
+  if (element === "openscad") {
+    return new URL(
+      file,
+      `https://cdn.openpatch.org/openscad/${openscadConfig.wasmBuild.cdnVersion}/`,
     ).href;
   }
   if (element === "pyide") {
@@ -58,5 +75,15 @@ export function elementAssetUrl(
       .replace(/^5\.0\//, `${version}/`);
     return `https://www.geogebra.org/apps/${relative}`;
   }
-  return `https://unpkg.com/@hyperbook/markdown@${packageJson.version}/dist/assets/directive-${element}/${file}`;
+  if (element === "blockflow") return new URL(file, blockflowCdn).href;
+  if (element === "excalidraw") {
+    // The npm package omits Excalidraw's fonts and bundle; use their own packages.
+    if (file === "hyperbook-excalidraw.umd.js")
+      return `https://unpkg.com/${excalidrawPackageJson.name}@${excalidrawPackageJson.version}/dist/index.umd.js`;
+    const base = `https://unpkg.com/@excalidraw/excalidraw@${excalidrawPackageJson.dependencies["@excalidraw/excalidraw"]}/dist/prod/`;
+    return file === "excalidraw.css"
+      ? `${base}index.css`
+      : new URL(file, base).href;
+  }
+  throw new Error(`No default CDN asset for ${element}/${file}`);
 }

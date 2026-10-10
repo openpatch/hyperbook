@@ -4,6 +4,9 @@ name: GitHub Pages
 
 # Deploy on GitHub Pages
 
+See [Caching](/hosting/caching#cache-runtime-downloads-between-builds) to reuse
+downloaded runtimes between workflow runs.
+
 :::alert{warn}
 Remember to add a basePath to your [configuration](/configuration/book), when deploying to GitHub pages.
 :::

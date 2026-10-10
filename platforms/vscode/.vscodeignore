@@ -11,3 +11,30 @@ vsc-extension-quickstart.md
 **/*.ts
 .prettierrc
 screenshots/**
+
+# Large element runtimes load from their CDNs instead (see src/Preview.ts).
+# Keep only the integration files listed in elementCoreFiles (@hyperbook/types).
+assets/hyperbook/directive-blockflow/**
+assets/hyperbook/directive-onlineide/**
+!assets/hyperbook/directive-onlineide/style.css
+assets/hyperbook/directive-sqlide/**
+!assets/hyperbook/directive-sqlide/client.js
+!assets/hyperbook/directive-sqlide/style.css
+assets/hyperbook/directive-excalidraw/**
+!assets/hyperbook/directive-excalidraw/client.js
+!assets/hyperbook/directive-excalidraw/style.css
+assets/hyperbook/directive-openscad/**
+!assets/hyperbook/directive-openscad/client.js
+!assets/hyperbook/directive-openscad/worker.js
+!assets/hyperbook/directive-openscad/style.css
+assets/hyperbook/directive-geogebra/**
+!assets/hyperbook/directive-geogebra/client.js
+!assets/hyperbook/directive-geogebra/geogebra-web-component.js
+!assets/hyperbook/directive-geogebra/style.css
+assets/hyperbook/directive-pyide/**
+!assets/hyperbook/directive-pyide/client.js
+!assets/hyperbook/directive-pyide/python-friendly-error-messages.js
+!assets/hyperbook/directive-pyide/style.css
+assets/hyperbook/directive-typst/**
+!assets/hyperbook/directive-typst/client.js
+!assets/hyperbook/directive-typst/style.css

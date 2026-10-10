@@ -131,7 +131,7 @@ it("builds and prefetches CDN elements offline without obtaining their local run
   );
   const out = path.join(root, ".hyperbook", "out");
   const html = await fs.readFile(path.join(out, "index.html"), "utf8");
-  expect(html).toContain("unpkg.com/@hyperbook/markdown@");
+  expect(html).toContain("https://blockflow.openpatch.org/player.html");
   expect(html).toContain('data-runtime-url="https://cdn.example.com/python/"');
   await expect(
     fs.stat(path.join(out, "__hyperbook_assets", "directive-blockflow")),
@@ -165,6 +165,108 @@ it("honors CDN configuration for a directive first added during incremental deve
     ),
   ).toContain("http://cdn.example.com/blockflow/player.html");
   expect(download).not.toHaveBeenCalled();
+});
+
+it("defaults PyIDE to its CDN during prefetching and offline builds", async () => {
+  await fs.writeFile(path.join(root, "book", "index.md"), "::pyide");
+  await fs.mkdir(path.join(options.assetsPath!, "directive-pyide"));
+  await fs.writeFile(
+    path.join(options.assetsPath!, "directive-pyide", "client.js"),
+    "client",
+  );
+  const manager = new AssetManager({ ...options, offline: true });
+  await fetchAssets(project, manager);
+  await runBuildProject(
+    project,
+    project,
+    undefined,
+    undefined,
+    undefined,
+    manager,
+  );
+  const out = path.join(root, ".hyperbook", "out");
+  expect(await fs.readFile(path.join(out, "index.html"), "utf8")).toContain(
+    'data-runtime-url="https://cdn.jsdelivr.net/pyodide/v314.0.7/full/"',
+  );
+  expect(
+    await fs.readFile(
+      path.join(out, "__hyperbook_assets", "directive-pyide", "client.js"),
+      "utf8",
+    ),
+  ).toBe("client");
+  await expect(
+    fs.stat(path.join(out, "__hyperbook_assets", "directive-pyide", "pyodide")),
+  ).rejects.toMatchObject({ code: "ENOENT" });
+  expect(download).not.toHaveBeenCalled();
+
+  await fs.writeFile(
+    path.join(root, "hyperbook.json"),
+    JSON.stringify({ name: "Assets", elements: { pyide: { cdn: false } } }),
+  );
+  expect(await projectDirectives(project)).toContain("pyide");
+  const input = path.join(root, "input");
+  await fs.mkdir(path.join(input, "directive-pyide", "pyodide"), {
+    recursive: true,
+  });
+  await fs.writeFile(
+    path.join(input, "directive-pyide", "pyodide", "pyodide.js"),
+    "python",
+  );
+  await fs.writeFile(
+    path.join(input, "directive-pyide", "pyodide", "pyodide-lock.json"),
+    "{}",
+  );
+  const archivePath = path.join(root, "python.tar.gz");
+  await create({ file: archivePath, cwd: input, gzip: true }, [
+    "directive-pyide",
+  ]);
+  const archive = await fs.readFile(archivePath);
+  await fs.writeFile(
+    options.manifestPath!,
+    JSON.stringify({
+      format: 1,
+      version: "test",
+      bundles: {
+        pyide: {
+          url: "https://example.com/python.tar.gz",
+          sha256: createHash("sha256").update(archive).digest("hex"),
+          bytes: archive.length,
+          files: {
+            "directive-pyide/pyodide/pyodide.js": 6,
+            "directive-pyide/pyodide/pyodide-lock.json": 2,
+          },
+        },
+      },
+    }),
+  );
+  download.mockImplementation(
+    async () => new Response(new Uint8Array(archive)),
+  );
+  await fetchAssets(project, new AssetManager(options));
+  await runBuildProject(
+    project,
+    project,
+    undefined,
+    undefined,
+    undefined,
+    new AssetManager({ ...options, offline: true }),
+  );
+  expect(await fs.readFile(path.join(out, "index.html"), "utf8")).not.toContain(
+    "https://cdn.jsdelivr.net/pyodide/",
+  );
+  expect(
+    await fs.readFile(
+      path.join(
+        out,
+        "__hyperbook_assets",
+        "directive-pyide",
+        "pyodide",
+        "pyodide.js",
+      ),
+      "utf8",
+    ),
+  ).toBe("python");
+  expect(download).toHaveBeenCalledOnce();
 });
 
 it("downloads a directive first introduced during an incremental build", async () => {

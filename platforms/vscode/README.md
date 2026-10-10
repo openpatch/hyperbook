@@ -19,6 +19,28 @@ You can preview your Hyperbook pages by clicking the preview icon in the top rig
 
 ![Preview](https://github.com/openpatch/hyperbook/raw/main/platforms/vscode/screenshots/preview.gif)
 
+### Element runtimes
+
+To keep the extension small, it does not include the large runtimes of Pyodide,
+Typst, GeoGebra, OpenSCAD, Excalidraw, Blockflow, the Online IDE, and the SQL
+IDE. The preview resolves them like a Hyperbook build:
+
+- If your `hyperbook.json` sets `cdn` for an element, the preview loads it from
+  that CDN.
+- Otherwise the preview uses the runtime from the Hyperbook CLI's asset cache.
+  The extension and the CLI share this folder, so a runtime downloaded by
+  either one works for both.
+- A runtime that is not downloaded yet loads from the element's default CDN.
+  The preview offers to download it.
+
+To download runtimes for offline use, run **Hyperbook: Download Element
+Runtimes...** or **Hyperbook: Download All Element Runtimes**. They work like
+`hyperbook assets fetch` and `hyperbook assets fetch --all`. Downloads are
+verified with SHA-256 and stored in the CLI's cache folder: `~/.cache/hyperbook/assets`
+on Linux, `~/Library/Caches/hyperbook/assets` on macOS, and
+`%LOCALAPPDATA%\hyperbook\assets` on Windows. `HYPERBOOK_ASSET_CACHE` and
+`XDG_CACHE_HOME` change it, as for the CLI.
+
 ### Hyperbook Config
 
 The `hyperbook.json` is validated against a schema, which presents you

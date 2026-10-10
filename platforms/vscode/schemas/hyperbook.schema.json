@@ -14,7 +14,7 @@
                 {
                     "properties": {
                         "cdn": {
-                            "description": "Use the default CDN (true), a custom HTTP(S) asset base URL, or local assets (false/default).",
+                            "description": "Use the default CDN (true), a custom HTTP(S) asset base URL, or local assets (false). Defaults to true for PyIDE and false for other elements.",
                             "type": [
                                 "string",
                                 "boolean"
@@ -267,7 +267,7 @@
                         {
                             "properties": {
                                 "cdn": {
-                                    "description": "Use the default CDN (true), a custom HTTP(S) asset base URL, or local assets (false/default).",
+                                    "description": "Use the default CDN (true), a custom HTTP(S) asset base URL, or local assets (false). Defaults to true for PyIDE and false for other elements.",
                                     "type": [
                                         "string",
                                         "boolean"
@@ -334,7 +334,7 @@
                         {
                             "properties": {
                                 "cdn": {
-                                    "description": "Use the default CDN (true), a custom HTTP(S) asset base URL, or local assets (false/default).",
+                                    "description": "Use the default CDN (true), a custom HTTP(S) asset base URL, or local assets (false). Defaults to true for PyIDE and false for other elements.",
                                     "type": [
                                         "string",
                                         "boolean"
@@ -378,7 +378,7 @@
                         {
                             "properties": {
                                 "cdn": {
-                                    "description": "Use the default CDN (true), a custom HTTP(S) asset base URL, or local assets (false/default).",
+                                    "description": "Use the default CDN (true), a custom HTTP(S) asset base URL, or local assets (false). Defaults to true for PyIDE and false for other elements.",
                                     "type": [
                                         "string",
                                         "boolean"

@@ -13,7 +13,11 @@ permissions:
   packages: write
 
 jobs:
+  publish-openscad-cdn:
+    uses: ./.github/workflows/publish-openscad-cdn.yml
+    secrets: inherit
   release:
+    needs: publish-openscad-cdn
     name: Release
     runs-on: ubuntu-latest
     steps:
@@ -42,6 +46,11 @@ jobs:
       - name: Build vscode package
         run: |
           pnpm --filter "hyperbook-studio" vscode:package
+
+      - name: Verify default CDN runtimes before publishing
+        # CDN previews must work before any consumer package can be published.
+        # Validate all files against the locally built runtime bundles.
+        run: node scripts/verify-default-cdns.mjs
 
       - name: Publish CLI asset bundles before npm
         run: node packages/hyperbook/publish-assets.mjs

@@ -45,6 +45,7 @@
     "mdast-util-from-markdown": "^2.0.3",
     "micromark-extension-directive": "^4.0.0",
     "mime-types": "^3.0.2",
+    "tar": "7.5.22",
     "unist-util-visit": "^5.1.0",
     "yaml": "^2.9.0"
   },

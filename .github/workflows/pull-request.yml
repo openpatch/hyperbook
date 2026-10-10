@@ -24,3 +24,5 @@ jobs:
         run: pnpm build
       - name: Test packages
         run: pnpm test
+      - name: Test CDN publishing
+        run: pnpm test:cdn

@@ -12,12 +12,15 @@ import { process } from "@hyperbook/markdown";
 import { disposeAll } from "./utils/dispose";
 import path, { posix } from "path";
 import {
+  DownloadableElement,
   HyperbookContext,
   HyperbookJson,
   HyperbookPage,
   Navigation,
+  elementCdn,
   isExternalUrl,
 } from "@hyperbook/types";
+import RuntimeAssets, { runtimeElements, runtimeLabels } from "./RuntimeAssets";
 
 // Helper function to resolve relative paths
 const resolveRelativePath = (path: string, page: HyperbookPage): string => {
@@ -48,6 +51,13 @@ export default class Preview {
   private _resource: vscode.Uri | undefined;
   private _vfile: VFileBook | VFileGlossary | undefined;
 
+  runtimes: RuntimeAssets;
+  /** Elements that load from their CDN only because their runtime is missing. */
+  private cdnFallbacks = new Set<DownloadableElement>();
+  /** Elements the user was already offered a download for. */
+  private readonly offeredDownloads = new Set<DownloadableElement>();
+
+
   private readonly disposables: vscode.Disposable[] = [];
   private _disposed: boolean = false;
   private readonly _onDisposeEmitter = new vscode.EventEmitter<void>();
@@ -61,8 +71,11 @@ export default class Preview {
   private static readonly diagnostics =
     vscode.languages.createDiagnosticCollection("hyperbook");
 
-  constructor(context: vscode.ExtensionContext) {
+  constructor(context: vscode.ExtensionContext, runtimes: RuntimeAssets) {
     this.context = context;
+    this.runtimes = runtimes;
+    runtimes.onDidChange(() => this.handleTextDocumentChange());
+
 
     vscode.workspace.onDidChangeTextDocument(async (e) => {
       // Only refresh when hyperbook config files change
@@ -123,6 +136,68 @@ export default class Preview {
       };
     }
   }
+
+  /**
+   * Resolves element runtimes like a Hyperbook build. An element with a CDN in
+   * the book's config loads from it. Every other element uses its local
+   * runtime: shipped with a development build of the extension, or downloaded
+   * into the Hyperbook CLI's asset cache. A runtime that is not downloaded yet
+   * loads from the element's default CDN, so the preview still works.
+   */
+  async withRuntimes(config: HyperbookJson): Promise<HyperbookJson> {
+    const elements: Record<string, any> = { ...config.elements };
+    const fallbacks = new Set<DownloadableElement>();
+    for (const element of runtimeElements) {
+      if (elementCdn(config, element)) {
+        continue;
+      }
+      const location = await this.runtimes.locate(element);
+      if (location.kind === "bundled") {
+        continue;
+      }
+      let cdn: string | true = true;
+      if (location.kind === "cached" && this.panel) {
+        // A custom CDN URL points at the contents of directive-<element>/.
+        // Pyodide's URL points at its distribution folder instead.
+        cdn =
+          this.panel.webview
+            .asWebviewUri(vscode.Uri.file(location.directory))
+            .toString()
+            .replace(/\/?$/, "/") + (element === "pyide" ? "pyodide/" : "");
+      } else {
+        fallbacks.add(element);
+      }
+      elements[element] = { ...elements[element], cdn };
+    }
+    this.cdnFallbacks = fallbacks;
+    return { ...config, elements };
+  }
+
+  /** Offers to download the missing runtimes a page uses, once per element. */
+  private offerDownloads(used: DownloadableElement[]) {
+    const missing = used.filter(
+      (element) =>
+        this.cdnFallbacks.has(element) && !this.offeredDownloads.has(element),
+    );
+    if (missing.length === 0) {
+      return;
+    }
+    missing.forEach((element) => this.offeredDownloads.add(element));
+    const names = missing.map((element) => runtimeLabels[element]).join(", ");
+    vscode.window
+      .showInformationMessage(
+        `Hyperbook: The preview loads ${names} from the internet. Download the runtime to preview it offline, like a Hyperbook build.`,
+        "Download",
+      )
+      .then((choice) => {
+        if (choice === "Download") {
+          vscode.commands.executeCommand("hyperbook.downloadRuntimes", missing);
+        }
+      });
+  }
+
+  /** Elements used by the current page, for preselecting downloads. */
+  usedElements: DownloadableElement[] = [];
 
   async handleTextDocumentChange() {
     this.hyperbookViewerConfig = vscode.workspace.getConfiguration("hyperbook");
@@ -195,7 +270,7 @@ export default class Preview {
         ...publicBookFiles,
         ...publicGlossaryFiles,
       ];
-      const config = await this.getConfig();
+      const config = await this.withRuntimes(await this.getConfig());
 
       // Without this a `:::protect{use="..."}` block fails to render in the
       // preview, even though it builds fine.
@@ -351,6 +426,15 @@ export default class Preview {
       const result = await process(this._vfile.markdown.content, ctx);
 
       this.publishDiagnostics(result);
+      // Blockflow registers as blockflow-player and blockflow-editor.
+      const directives = Object.keys((result.data as any)?.directives || {});
+      this.usedElements = runtimeElements.filter((element) =>
+        directives.some(
+          (name) => name === element || name.startsWith(`${element}-`),
+        ),
+      );
+      this.offerDownloads(this.usedElements);
+
 
       this.panel.webview.html = String(result);
     }
@@ -457,6 +541,7 @@ export default class Preview {
           enableCommandUris: true,
           localResourceRoots: [
             vscode.Uri.joinPath(this.context.extensionUri, "assets"),
+            vscode.Uri.file(this.runtimes.cacheDir),
             vscode.Uri.file(vscode.workspace?.rootPath || ""),
           ],
         },

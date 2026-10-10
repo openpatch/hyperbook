@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { DownloadableElement, elementCdn } from "@hyperbook/types";
 import { process as processMarkdown } from "../src/process";
 import { elementAssetUrl } from "../src/elementAssets";
-import packageJson from "../package.json";
+import excalidrawPackageJson from "../../web-component-excalidraw/package.json";
 import { ctx } from "./mock";
 
 const elements: [DownloadableElement, string][] = [
@@ -19,8 +19,26 @@ const elements: [DownloadableElement, string][] = [
 describe.each(elements)(
   "%s CDN configuration",
   (element: DownloadableElement, markdown: string) => {
-    it("keeps local assets as the default and accepts explicit false", async () => {
-      const local = await processMarkdown(markdown, ctx);
+    it("defaults to CDN for PyIDE and local assets for other elements", async () => {
+      const defaults = await processMarkdown(markdown, ctx);
+      const configured = await processMarkdown(markdown, {
+        ...ctx,
+        config: {
+          ...ctx.config,
+          elements: {
+            ...ctx.config.elements,
+            [element]: {
+              ...ctx.config.elements?.[element],
+              cdn: element === "pyide",
+            },
+          },
+        },
+      });
+      expect(defaults.value).toBe(configured.value);
+      expect(defaults.data.directives).toEqual(configured.data.directives);
+    });
+
+    it("accepts explicit false for local assets", async () => {
       const disabled = await processMarkdown(markdown, {
         ...ctx,
         config: {
@@ -31,8 +49,12 @@ describe.each(elements)(
           },
         },
       });
-      expect(disabled.value).toBe(local.value);
-      expect(disabled.data.directives).toEqual(local.data.directives);
+      const output =
+        String(disabled.value) + JSON.stringify(disabled.data.directives);
+      expect(output).not.toContain('data-runtime-url="https://');
+      expect(output).not.toContain("https://cdn.");
+      expect(output).not.toContain("http://assets.example.com/");
+      expect(disabled.data.directives).toHaveProperty(element);
     });
 
     it("uses the default CDN and a custom HTTP base URL", async () => {
@@ -49,8 +71,14 @@ describe.each(elements)(
                 pyide: "https://cdn.jsdelivr.net/pyodide/v314.0.7/full/",
                 typst: "https://cdn.jsdelivr.net/npm/@myriaddreamin/",
                 geogebra: "https://www.geogebra.org/apps/",
-              }[element as "pyide" | "typst" | "geogebra"] ||
-                `https://unpkg.com/@hyperbook/markdown@${packageJson.version}/dist/assets/directive-${element}/`
+                blockflow: "https://blockflow.openpatch.org/",
+                excalidraw:
+                  "https://unpkg.com/@hyperbook/web-component-excalidraw@",
+                onlineide:
+                  "https://cdn.openpatch.org/onlineide/v2.2.1-hyperbook.28/",
+                sqlide: "https://cdn.openpatch.org/sqlide/v2.0.0-hyperbook.4/",
+                openscad: "https://cdn.openpatch.org/openscad/2026.10.08-1/",
+              }[element]
             : "http://assets.example.com/runtime/",
         );
         if (element === "blockflow")
@@ -111,3 +139,49 @@ it("uses pinned upstream Typst fonts and GeoGebra codebases", () => {
     elementAssetUrl(configured, "geogebra", "GeoGebra/HTML5/5.0/web3d/"),
   ).toBe("https://www.geogebra.org/apps/5.4.931.2/web3d/");
 });
+
+it("loads Blockflow and Excalidraw from their upstream CDNs", () => {
+  const configured = {
+    ...ctx,
+    config: {
+      ...ctx.config,
+      elements: { blockflow: { cdn: true }, excalidraw: { cdn: true } },
+    },
+  };
+  expect(elementAssetUrl(configured, "blockflow", "editor.html")).toBe(
+    "https://blockflow.openpatch.org/editor.html",
+  );
+  expect(
+    elementAssetUrl(configured, "excalidraw", "hyperbook-excalidraw.umd.js"),
+  ).toBe(
+    `https://unpkg.com/@hyperbook/web-component-excalidraw@${excalidrawPackageJson.version}/dist/index.umd.js`,
+  );
+  const excalidraw = `https://unpkg.com/@excalidraw/excalidraw@${excalidrawPackageJson.dependencies["@excalidraw/excalidraw"]}/dist/prod/`;
+  expect(elementAssetUrl(configured, "excalidraw", "excalidraw.css")).toBe(
+    `${excalidraw}index.css`,
+  );
+  // Excalidraw resolves fonts/ beside its asset base.
+  expect(elementAssetUrl(configured, "excalidraw", "")).toBe(excalidraw);
+  // An unpkg URL needs an exact version to stay stable.
+  expect(excalidraw).toMatch(/@\d+\.\d+\.\d+\/dist/);
+});
+
+it.each([
+  ["onlineide", "v2.2.1-hyperbook.28", "include/online-ide-embedded.js"],
+  ["sqlide", "v2.0.0-hyperbook.4", "include/sql-ide-embedded.js"],
+  ["openscad", "2026.10.08-1", "openscad.wasm"],
+] as const)(
+  "pins %s's default CDN independently of the Markdown package",
+  (element: DownloadableElement, version: string, file: string) => {
+    const configured = {
+      ...ctx,
+      config: { ...ctx.config, elements: { [element]: { cdn: true } } },
+    };
+    expect(elementAssetUrl(configured, element, "")).toBe(
+      `https://cdn.openpatch.org/${element}/${version}/`,
+    );
+    expect(elementAssetUrl(configured, element, file)).toBe(
+      `https://cdn.openpatch.org/${element}/${version}/${file}`,
+    );
+  },
+);

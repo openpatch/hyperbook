@@ -2,6 +2,7 @@ import chalk from "chalk";
 import { build } from "esbuild";
 import { existsSync, readFileSync } from "fs";
 import { join } from "path";
+import { builtinModules } from "module";
 
 const ignorePackages = [];
 
@@ -48,6 +49,8 @@ export const buildPackage = async (path) => {
   }
   external.push("path");
   external.push("fs");
+  // Node built-ins stay imports, for packages that only run in Node.
+  external.push(...builtinModules, "node:*");
 
   const platform = JSON.parse(packageJSON)?.platform || "browser";
 
@@ -60,6 +63,16 @@ export const buildPackage = async (path) => {
     bundle: true,
     platform,
     external,
+    // ESM hosts do not provide `require` for bundled CommonJS dependencies.
+    ...(platform === "node"
+      ? {
+          // Downstream CommonJS bundles provide __filename. Using it avoids
+          // their import.meta.url shim calling a shadowed require during setup.
+          banner: {
+            js: 'import { createRequire as __hyperbookCreateRequire } from "node:module"; const require = __hyperbookCreateRequire(typeof __filename === "string" ? __filename : import.meta.url);',
+          },
+        }
+      : {}),
   };
 
   // await build({

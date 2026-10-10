@@ -28,4 +28,7 @@ export {
 } from "./passwords";
 export type { PasswordRegistry, ResolvedRegistry } from "./passwords";
 
+export { AssetManager, assetCacheDir } from "./assets";
+export type { AssetBundle, AssetManifest, AssetOptions } from "./assets";
+
 export { hyperlibrary, hyperbook, hyperproject, vfile, passwords };

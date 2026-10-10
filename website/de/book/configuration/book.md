@@ -109,15 +109,16 @@ Hier ist eine Beispielkonfiguration:
 
 ## Lokale Dateien und CDNs
 
-Hyperbook lädt große Laufzeitumgebungen beim ersten Bedarf herunter und kopiert
-sie in den Build. Mit `cdn` in der Elementkonfiguration kannst du sie stattdessen
-von einem CDN laden:
+PyIDE verwendet standardmäßig das Pyodide-CDN, weil die vollständige Distribution
+sehr groß ist. Andere Elemente laden ihre großen Laufzeitumgebungen beim ersten
+Bedarf herunter und kopieren sie in den Build. Mit `cdn` kannst du dieses
+Verhalten ausdrücklich festlegen:
 
 ```json
 {
   "name": "Mein Hyperbook",
   "elements": {
-    "pyide": { "cdn": true },
+    "pyide": { "cdn": false },
     "typst": { "cdn": "https://assets.example.com/directive-typst/" },
     "geogebra": { "cdn": true },
     "openscad": { "cdn": false }
@@ -127,7 +128,8 @@ von einem CDN laden:
 
 | Wert | Verhalten |
 | --- | --- |
-| Nicht gesetzt oder `false` | Die Laufzeitumgebung herunterladen und in den Build kopieren. Dies ist der Standard. |
+| Nicht gesetzt | Bei `pyide` das Standard-CDN verwenden; bei anderen Elementen die Laufzeitumgebung herunterladen und in den Build kopieren. |
+| `false` | Die Laufzeitumgebung herunterladen und in den Build kopieren, auch bei `pyide`. |
 | `true` | Die Laufzeitumgebung vom Standard-CDN laden. |
 | Eine HTTP(S)-Basis-URL | Die Laufzeitumgebung vom eigenen Server oder CDN laden. |
 
@@ -136,9 +138,22 @@ Diese Option gibt es für `pyide`, `typst`, `geogebra`, `openscad`, `excalidraw`
 Player und den Editor. Kiri:Moto verwendet weiterhin seinen externen Dienst.
 
 Die Standard-CDNs sind jsDelivr für Pyodide und Typst, der GeoGebra-Server für
-GeoGebra und die versionierten Hyperbook-Dateien auf UNPKG für die anderen
-Elemente. Die kleinen Integrationsskripte und Styles von Hyperbook bleiben im
-Build.
+GeoGebra, die gehostete Blockflow-App unter `blockflow.openpatch.org` für
+Blockflow, die eigenen Pakete von Excalidraw auf UNPKG für Excalidraw und
+`cdn.openpatch.org` für OpenSCAD, die Online-IDE und die SQL-IDE. Diese
+Openpatch-Laufzeitumgebungen verwenden festgelegte Releases, die direkt aus
+ihrem jeweiligen Repository veröffentlicht werden. Die kleinen
+Integrationsskripte und Styles von Hyperbook bleiben im Build.
+
+Die Hyperbook-Erweiterung für VS Code enthält diese Laufzeitumgebungen nicht.
+Ihre Vorschau verhält sich wie ein Build: Elemente mit `cdn` laden von diesem
+CDN, die anderen verwenden die Laufzeitumgebungen aus dem Asset-Cache der CLI,
+den die Erweiterung mitbenutzt. Eine noch nicht heruntergeladene
+Laufzeitumgebung lädt vom Standard-CDN. Mit **Hyperbook: Download Element
+Runtimes...** oder **Hyperbook: Download All Element Runtimes** lädst du
+Laufzeitumgebungen in VS Code für die Offline-Vorschau herunter.
+Setze bei PyIDE zusätzlich `elements.pyide.cdn` auf `false`, um die
+heruntergeladene Laufzeitumgebung zu verwenden.
 
 Eine eigene URL muss auf den Inhalt des Verzeichnisses
 `__hyperbook_assets/directive-<element>/` aus einem lokalen Build zeigen.
@@ -158,3 +173,6 @@ Für `hyperbook build --offline` müssen diese nicht im Cache liegen. Zum Lesen
 des Buchs ist weiterhin Zugriff auf das konfigurierte CDN nötig.
 `hyperbook assets fetch --all` lädt unabhängig von der Elementkonfiguration
 alle Laufzeitumgebungen herunter.
+
+Siehe [Hosting und Caching](/hosting/caching), um Downloads zwischen CI-Builds
+aufzubewahren und Cache-Header für das exportierte Buch festzulegen.

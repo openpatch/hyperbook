@@ -10,6 +10,7 @@
     "build": "pnpm -r build",
     "build:vercel": "pnpm --filter=!hyperbook-studio build",
     "test": "CI=true pnpm -r test",
+    "test:cdn": "node --test scripts/publish-cdn.test.mjs",
     "lint": "pnpm -r lint",
     "hyperbook:build": "pnpm --filter hyperbook build",
     "version-packages": "changeset version",

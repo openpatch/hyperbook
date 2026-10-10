@@ -3,7 +3,7 @@ type ElementConfig = {
 };
 
 export type ElementAssetConfig = ElementConfig & {
-  /** Use the default CDN (true), a custom HTTP(S) asset base URL, or local assets (false/default). */
+  /** Use the default CDN (true), a custom HTTP(S) asset base URL, or local assets (false). Defaults to true for PyIDE and false for other elements. */
   cdn?: boolean | string;
 };
 
@@ -21,6 +21,26 @@ export const elementCoreFiles = {
 
 export type DownloadableElement = keyof typeof elementCoreFiles;
 
+/** Files whose presence shows that an element's full runtime is available locally. */
+export const elementRuntimeFiles: Record<DownloadableElement, string[]> = {
+  blockflow: ["player.html"],
+  onlineide: ["include/online-ide-embedded.js"],
+  sqlide: ["include/sql-ide-embedded.js"],
+  excalidraw: ["hyperbook-excalidraw.umd.js"],
+  geogebra: ["GeoGebra/deployggb.js"],
+  pyide: ["pyodide/pyodide.js", "pyodide/pyodide-lock.json"],
+  typst: [
+    "typst-bundle.js",
+    "typst-compiler.wasm",
+    "fonts/LibertinusSerif-Regular.otf",
+  ],
+  openscad: [
+    "openscad.wasm",
+    "libraries/BOSL2.zip",
+    "fonts/Roboto-Regular.ttf",
+  ],
+};
+
 export function elementCdn(
   config: HyperbookJson,
   element: string,
@@ -28,7 +48,8 @@ export function elementCdn(
   if (!Object.prototype.hasOwnProperty.call(elementCoreFiles, element))
     return false;
   const value = config.elements?.[element as DownloadableElement]?.cdn;
-  if (value === undefined || value === false) return false;
+  if (value === undefined) return element === "pyide";
+  if (value === false) return false;
   if (value === true) return true;
   if (typeof value === "string") {
     try {

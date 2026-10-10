@@ -4,7 +4,22 @@ permaid: pyide
 lang: de
 ---
 
-Die Pyodide-Laufzeitumgebung und ihre mitgelieferten Pakete sind lokal im exportierten Hyperbook enthalten. Die CLI lädt sie beim ersten Build mit diesem Element herunter und speichert sie im Cache. Mitgelieferte Pakete können ohne CDN-Verbindung importiert werden. Pakete, die über das Attribut `packages` von PyPI installiert werden, benötigen weiterhin eine Netzwerkverbindung.
+PyIDE lädt Pyodide standardmäßig vom versionierten jsDelivr-CDN. Die vollständige Laufzeitumgebung mit ihren mitgelieferten Paketen ist sehr groß und bleibt deshalb außerhalb des exportierten Hyperbooks. Leser benötigen eine Internetverbindung. Ihr Browser lädt die Laufzeitumgebung und angeforderte Pakete und kann diese Dateien für spätere Besuche zwischenspeichern.
+
+Für selbst gehostete oder offline nutzbare Bücher kannst du Pyodide lokal einbinden. Setze dafür `elements.pyide.cdn` in `hyperbook.json` auf `false`:
+
+```json
+{
+  "name": "Mein Offline-Hyperbook",
+  "elements": {
+    "pyide": { "cdn": false }
+  }
+}
+```
+
+Die CLI lädt dann beim ersten Build mit PyIDE die vollständige Distribution herunter und speichert sie im Cache. Führe für einen Offline-Build zunächst mit Internetverbindung `npx hyperbook assets fetch` und anschließend `npx hyperbook build --offline` aus. Führe in VS Code zusätzlich **Hyperbook: Download Element Runtimes...** aus und wähle PyIDE. Mitgelieferte Pakete funktionieren dann ohne CDN-Verbindung. Pakete, die über das Attribut `packages` von PyPI installiert werden, benötigen weiterhin eine Netzwerkverbindung.
+
+Siehe [CDN-Konfiguration](/configuration/book#lokale-dateien-und-cdns) für eigene Server und [Hosting und Caching](/hosting/caching) für Browser- und Build-Caches.
 
 Das `pyide`-Element repräsentiert eine Python-Integrated-Development-Environment (IDE)-Komponente.
 Es wird verwendet, um eine Python-Coding-Umgebung in die Hyperbook-Website einzubetten.

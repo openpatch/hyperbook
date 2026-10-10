@@ -1,5 +1,13 @@
 import path from "path";
-import { cp, readFile, writeFile, mkdir, access, rm, readdir } from "fs/promises";
+import {
+  cp,
+  readFile,
+  writeFile,
+  mkdir,
+  access,
+  rm,
+  readdir,
+} from "fs/promises";
 import { minify } from "terser";
 import https from "https";
 import { Extract } from "unzipper";
@@ -111,7 +119,10 @@ async function downloadAndExtractZip(url, destination, sha256) {
 
 async function postbuild() {
   // Read openscad-config.json for WASM asset configuration
-  const openscadConfig = JSON.parse(await readFile("openscad-config.json", "utf-8"));
+  const openscadConfig = JSON.parse(
+    await readFile("openscad-config.json", "utf-8"),
+  );
+  const ideReleases = JSON.parse(await readFile("ide-releases.json", "utf8"));
 
   // Download and extract zips
   const zipFiles = [
@@ -120,11 +131,11 @@ async function postbuild() {
       dst: path.join("./dist", "assets", "directive-blockflow"),
     },
     {
-      url: "https://github.com/openpatch/sql-ide/releases/download/v2.0.0-hyperbook.4/dist-embedded.zip",
+      url: `https://github.com/openpatch/sql-ide/releases/download/${ideReleases.sqlide}/dist-embedded.zip`,
       dst: path.join("./dist", "assets", "directive-sqlide", "include"),
     },
     {
-      url: "https://github.com/openpatch/online-ide/releases/download/v2.2.1-hyperbook.28/dist-embedded.zip",
+      url: `https://github.com/openpatch/online-ide/releases/download/${ideReleases.onlineide}/dist-embedded.zip`,
       dst: path.join("./dist", "assets", "directive-onlineide", "include"),
     },
     {
@@ -140,8 +151,11 @@ async function postbuild() {
   }
 
   // These files are served locally by the elements. The CLI publishes them in
-  // optional bundles; Markdown and VS Code keep their complete asset trees.
-  await installRuntimeAssets(JSON.parse(await readFile("runtime-assets.json", "utf8")));
+  // optional bundles. The Markdown npm package and VS Code extension exclude
+  // the runtimes, retaining only their small integration scripts and styles.
+  await installRuntimeAssets(
+    JSON.parse(await readFile("runtime-assets.json", "utf8")),
+  );
 
   const assets = [
     {
@@ -413,14 +427,18 @@ async function postbuild() {
   await cp("locales", "./dist/locales", { recursive: true });
 
   await esbuild({
-    entryPoints: ["./node_modules/@raspberrypifoundation/python-friendly-error-messages/dist/index.browser.js"],
+    entryPoints: [
+      "./node_modules/@raspberrypifoundation/python-friendly-error-messages/dist/index.browser.js",
+    ],
     bundle: false,
     format: "iife",
     globalName: "PythonFriendlyErrorMessages",
     outfile: "./dist/assets/directive-pyide/python-friendly-error-messages.js",
     minify: true,
   });
-  console.log("Built python-friendly-error-messages → dist/assets/directive-pyide/python-friendly-error-messages.js");
+  console.log(
+    "Built python-friendly-error-messages → dist/assets/directive-pyide/python-friendly-error-messages.js",
+  );
 
   // Bundle any directive that ships a src/index.js into dist/assets/<directive>/client.js.
   // Each src/ directory is removed from dist after bundling — only the bundle is served.
@@ -478,6 +496,8 @@ async function postbuild() {
     outfile: "./dist/assets/codemirror/codemirror.bundle.js",
     minify: true,
   });
-  console.log("Built CodeMirror bundle → dist/assets/codemirror/codemirror.bundle.js");
+  console.log(
+    "Built CodeMirror bundle → dist/assets/codemirror/codemirror.bundle.js",
+  );
 }
 postbuild();
