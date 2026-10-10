@@ -4,6 +4,9 @@ name: Custom
 
 # Deploy on Your Server
 
+See [Caching](/hosting/caching#cache-files-for-readers) for recommended HTTP
+headers when configuring your server.
+
 You just need to copy the output folder after running build command.
 
 ```

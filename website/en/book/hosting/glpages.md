@@ -4,6 +4,9 @@ name: GitLab Pages
 
 # Deploy on GitLab Pages
 
+See [Caching](/hosting/caching#cache-runtime-downloads-between-builds) to reuse
+downloaded runtimes between Pages builds.
+
 :::alert{warn}
 Remember to add a basePath to your [configuration](/configuration/book), when deploying to GitLab pages.
 :::

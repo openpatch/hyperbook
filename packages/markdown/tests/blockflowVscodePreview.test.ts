@@ -17,6 +17,7 @@ import {
   HyperbookContext,
   HyperbookJson,
   elementCoreFiles,
+  elementCdn,
   elementRuntimeFiles,
 } from "@hyperbook/types";
 import { expect, it } from "vitest";
@@ -138,6 +139,7 @@ async function renderPreview({
     },
     "@hyperbook/fs": filesystem,
     "@hyperbook/types": {
+      elementCdn,
       isExternalUrl: (p: string) => /^https?:\/\//.test(p),
     },
     "@hyperbook/markdown": {
@@ -192,6 +194,23 @@ it("keeps local runtimes when the extension ships them", async () => {
   expect(ctx.config).toEqual(config);
 });
 
+it("uses Pyodide's default CDN even when its local runtime is cached", async () => {
+  const located: DownloadableElement[] = [];
+  const { ctx, messages } = await renderPreview({
+    locate: (element) => {
+      located.push(element);
+      return {
+        kind: "cached",
+        directory: `/cache/hash/content-1/directive-${element}`,
+      };
+    },
+    directives: { pyide: {} },
+  });
+  expect(located).not.toContain("pyide");
+  expect(elementCdn(ctx.config, "pyide")).toBe(true);
+  expect(messages).toEqual([]);
+});
+
 it("uses runtimes from the CLI asset cache", async () => {
   const { ctx, messages } = await renderPreview({
     locate: (element) =>
@@ -223,9 +242,10 @@ it("loads runtimes that are not downloaded from their CDN and offers a download 
     renders: 2,
   });
   for (const element of elements)
-    expect(ctx.config.elements?.[element]).toEqual({ cdn: true });
+    expect(elementCdn(ctx.config, element)).toBe(true);
   expect(messages).toHaveLength(1);
-  expect(messages[0]).toContain("<blockflow>, <pyide>");
+  expect(messages[0]).toContain("<blockflow>");
+  expect(messages[0]).not.toContain("<pyide>");
   expect(messages[0]).not.toContain("<typst>");
 });
 

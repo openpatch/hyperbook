@@ -19,8 +19,26 @@ const elements: [DownloadableElement, string][] = [
 describe.each(elements)(
   "%s CDN configuration",
   (element: DownloadableElement, markdown: string) => {
-    it("keeps local assets as the default and accepts explicit false", async () => {
-      const local = await processMarkdown(markdown, ctx);
+    it("defaults to CDN for PyIDE and local assets for other elements", async () => {
+      const defaults = await processMarkdown(markdown, ctx);
+      const configured = await processMarkdown(markdown, {
+        ...ctx,
+        config: {
+          ...ctx.config,
+          elements: {
+            ...ctx.config.elements,
+            [element]: {
+              ...ctx.config.elements?.[element],
+              cdn: element === "pyide",
+            },
+          },
+        },
+      });
+      expect(defaults.value).toBe(configured.value);
+      expect(defaults.data.directives).toEqual(configured.data.directives);
+    });
+
+    it("accepts explicit false for local assets", async () => {
       const disabled = await processMarkdown(markdown, {
         ...ctx,
         config: {
@@ -31,8 +49,12 @@ describe.each(elements)(
           },
         },
       });
-      expect(disabled.value).toBe(local.value);
-      expect(disabled.data.directives).toEqual(local.data.directives);
+      const output =
+        String(disabled.value) + JSON.stringify(disabled.data.directives);
+      expect(output).not.toContain('data-runtime-url="https://');
+      expect(output).not.toContain("https://cdn.");
+      expect(output).not.toContain("http://assets.example.com/");
+      expect(disabled.data.directives).toHaveProperty(element);
     });
 
     it("uses the default CDN and a custom HTTP base URL", async () => {

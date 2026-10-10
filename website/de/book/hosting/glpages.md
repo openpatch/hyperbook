@@ -5,6 +5,9 @@ lang: de
 
 # Deploy on GitLab Pages
 
+Siehe [Caching](/hosting/caching#downloads-zwischen-builds-aufbewahren), um
+heruntergeladene Laufzeitumgebungen zwischen Pages-Builds wiederzuverwenden.
+
 :::alert{warn}
 Denke daran den basePath in deiner [Konfiguration](/configuration/book) zu
 setzen, when du dein Hyperbook auf GitLab bereitstellst.

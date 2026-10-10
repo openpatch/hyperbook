@@ -5,6 +5,9 @@ lang: de
 
 # Auf GitHub Pages bereitstellen
 
+Siehe [Caching](/hosting/caching#downloads-zwischen-builds-aufbewahren), um
+heruntergeladene Laufzeitumgebungen zwischen Workflow-Läufen wiederzuverwenden.
+
 :::alert{warn}
 Denke daran den basePath in deiner [Konfiguration](/configuration/book) zu
 setzen, when du dein Hyperbook auf GitHub bereitstellst.

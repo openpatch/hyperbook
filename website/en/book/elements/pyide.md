@@ -5,7 +5,22 @@ permaid: pyide
 
 # PyIDE
 
-The Pyodide runtime and its bundled packages are included locally in the exported book. The CLI downloads and caches them the first time a build uses this element. Imports of bundled packages work without a CDN connection. Packages installed from PyPI through the `packages` attribute still need a network connection.
+PyIDE loads Pyodide from its versioned jsDelivr CDN by default. The full runtime distribution and its bundled packages are very large, so Hyperbook keeps them out of the exported book. Readers need an internet connection; their browsers download the runtime and requested packages and can cache these files for later visits.
+
+To include Pyodide locally for self-hosted or offline books, set `elements.pyide.cdn` to `false` in `hyperbook.json`:
+
+```json
+{
+  "name": "My offline Hyperbook",
+  "elements": {
+    "pyide": { "cdn": false }
+  }
+}
+```
+
+The CLI then downloads and caches the full distribution the first time a build uses PyIDE. To prepare an offline build, run `npx hyperbook assets fetch` while online, then `npx hyperbook build --offline`. In VS Code, also run **Hyperbook: Download Element Runtimes...** and select PyIDE. Bundled packages then work without a CDN connection. Packages installed from PyPI through the `packages` attribute still need a network connection.
+
+See [CDN configuration](/configuration/book#local-assets-and-cdns) for custom asset servers and [hosting and caching](/hosting/caching) for browser and build caches.
 
 The `pyide` element represents a Python Integrated Development Environment (IDE) component.
 It is used to embed a Python coding environment within the hyperbook website.

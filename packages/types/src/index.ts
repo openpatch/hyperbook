@@ -3,7 +3,7 @@ type ElementConfig = {
 };
 
 export type ElementAssetConfig = ElementConfig & {
-  /** Use the default CDN (true), a custom HTTP(S) asset base URL, or local assets (false/default). */
+  /** Use the default CDN (true), a custom HTTP(S) asset base URL, or local assets (false). Defaults to true for PyIDE and false for other elements. */
   cdn?: boolean | string;
 };
 
@@ -48,7 +48,8 @@ export function elementCdn(
   if (!Object.prototype.hasOwnProperty.call(elementCoreFiles, element))
     return false;
   const value = config.elements?.[element as DownloadableElement]?.cdn;
-  if (value === undefined || value === false) return false;
+  if (value === undefined) return element === "pyide";
+  if (value === false) return false;
   if (value === true) return true;
   if (typeof value === "string") {
     try {

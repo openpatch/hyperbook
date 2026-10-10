@@ -4,6 +4,9 @@ name: Vercel
 
 # Deploy on Vercel
 
+See [Caching](/hosting/caching#cache-files-for-readers) for cache headers when
+configuring your deployment.
+
 First you need to create a `vercel.json` file at the root of your
 project with the following content.
 

@@ -17,6 +17,7 @@ import {
   HyperbookJson,
   HyperbookPage,
   Navigation,
+  elementCdn,
   isExternalUrl,
 } from "@hyperbook/types";
 import RuntimeAssets, { runtimeElements, runtimeLabels } from "./RuntimeAssets";
@@ -147,7 +148,7 @@ export default class Preview {
     const elements: Record<string, any> = { ...config.elements };
     const fallbacks = new Set<DownloadableElement>();
     for (const element of runtimeElements) {
-      if (elements[element]?.cdn) {
+      if (elementCdn(config, element)) {
         continue;
       }
       const location = await this.runtimes.locate(element);

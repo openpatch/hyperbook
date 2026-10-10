@@ -111,15 +111,15 @@ Here is an example configuration:
 
 ## Local assets and CDNs
 
-Hyperbook downloads large element runtimes when they are first needed and copies
-them into the build. To load a runtime from a CDN instead, set `cdn` in its
-element configuration:
+PyIDE uses Pyodide's CDN by default because its full distribution is very large.
+Other elements download their large runtimes when first needed and copy them
+into the build. Use `cdn` in an element's configuration to choose explicitly:
 
 ```json
 {
   "name": "My Hyperbook",
   "elements": {
-    "pyide": { "cdn": true },
+    "pyide": { "cdn": false },
     "typst": { "cdn": "https://assets.example.com/directive-typst/" },
     "geogebra": { "cdn": true },
     "openscad": { "cdn": false }
@@ -129,7 +129,8 @@ element configuration:
 
 | Value | Behavior |
 | --- | --- |
-| Omitted or `false` | Download and include the runtime in the build. This is the default. |
+| Omitted | Use the default CDN for `pyide`; download and include the runtime for other elements. |
+| `false` | Download and include the runtime in the build, including for `pyide`. |
 | `true` | Load the runtime from its default CDN. |
 | An HTTP(S) base URL | Load the runtime from your own server or CDN. |
 
@@ -151,6 +152,7 @@ others use the runtimes in the CLI's asset cache, which the extension shares.
 A runtime that is not downloaded yet loads from its default CDN. Run
 **Hyperbook: Download Element Runtimes...** or **Hyperbook: Download All
 Element Runtimes** in VS Code to download runtimes for offline previews.
+For PyIDE, also set `elements.pyide.cdn` to `false` to use the downloaded runtime.
 
 A custom URL must point to the contents of the corresponding
 `__hyperbook_assets/directive-<element>/` directory from a local build. Preserve
@@ -168,3 +170,6 @@ CDN-enabled runtimes are skipped by `hyperbook assets fetch` and do not need to
 be cached for `hyperbook build --offline`. Readers still need access to the
 configured CDN. `hyperbook assets fetch --all` downloads every runtime,
 regardless of the element configuration.
+
+See [hosting and caching](/hosting/caching) for keeping downloads between CI
+builds and choosing cache headers for your exported book.
