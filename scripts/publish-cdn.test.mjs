@@ -210,6 +210,7 @@ test("public verification checks all payloads and fails for bad CORS, cache, MIM
     );
   };
   await verifyCdn({ ...f, fetchImpl });
+  await verifyCdn({ ...f, directory: undefined, manifest, fetchImpl });
   for (fault of ["CORS", "Cache-Control", "Content-Type", "checksum"]) {
     await assert.rejects(
       verifyCdn({ ...f, fetchImpl }),

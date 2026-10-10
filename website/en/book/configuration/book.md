@@ -140,8 +140,9 @@ service.
 
 The default CDNs are jsDelivr for Pyodide and Typst, GeoGebra's server for
 GeoGebra, the hosted Blockflow app at `blockflow.openpatch.org` for Blockflow,
-Excalidraw's own packages on UNPKG for Excalidraw, and UNPKG's versioned
-Hyperbook assets for OpenSCAD, the Online IDE, and the SQL IDE. Hyperbook's
+Excalidraw's own packages on UNPKG for Excalidraw, and `cdn.openpatch.org` for
+OpenSCAD, the Online IDE, and the SQL IDE. Each Openpatch runtime uses a pinned
+release, published directly from its owning repository. Hyperbook's
 small integration scripts and styles stay in the build.
 
 The Hyperbook extension for VS Code does not include these runtimes. Its preview

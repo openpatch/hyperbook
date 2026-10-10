@@ -1,9 +1,5 @@
 name: Publish OpenSCAD runtime to R2
 on:
-  # Bootstrap the first runtime from the migration branch; removed after upload.
-  push:
-    branches: [ccr-dc12b6f7-p2rfkj]
-    paths: [.github/workflows/publish-openscad-cdn.yml]
   workflow_dispatch:
   workflow_call:
 permissions:

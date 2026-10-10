@@ -52,11 +52,11 @@ describe.each(elements)(
                 blockflow: "https://blockflow.openpatch.org/",
                 excalidraw:
                   "https://unpkg.com/@hyperbook/web-component-excalidraw@",
-              }[
-                element as
-                  "pyide" | "typst" | "geogebra" | "blockflow" | "excalidraw"
-              ] ||
-                `https://unpkg.com/@hyperbook/markdown@0.85.0/dist/assets/directive-${element}/`
+                onlineide:
+                  "https://cdn.openpatch.org/onlineide/v2.2.1-hyperbook.28/",
+                sqlide: "https://cdn.openpatch.org/sqlide/v2.0.0-hyperbook.4/",
+                openscad: "https://cdn.openpatch.org/openscad/2026.10.08-1/",
+              }[element]
             : "http://assets.example.com/runtime/",
         );
         if (element === "blockflow")
@@ -144,15 +144,22 @@ it("loads Blockflow and Excalidraw from their upstream CDNs", () => {
   expect(excalidraw).toMatch(/@\d+\.\d+\.\d+\/dist/);
 });
 
-it.each(["onlineide", "sqlide", "openscad"] as const)(
-  "keeps %s's default CDN pinned to a release containing its runtime",
-  (element: DownloadableElement) => {
+it.each([
+  ["onlineide", "v2.2.1-hyperbook.28", "include/online-ide-embedded.js"],
+  ["sqlide", "v2.0.0-hyperbook.4", "include/sql-ide-embedded.js"],
+  ["openscad", "2026.10.08-1", "openscad.wasm"],
+] as const)(
+  "pins %s's default CDN independently of the Markdown package",
+  (element: DownloadableElement, version: string, file: string) => {
     const configured = {
       ...ctx,
       config: { ...ctx.config, elements: { [element]: { cdn: true } } },
     };
     expect(elementAssetUrl(configured, element, "")).toBe(
-      `https://unpkg.com/@hyperbook/markdown@0.85.0/dist/assets/directive-${element}/`,
+      `https://cdn.openpatch.org/${element}/${version}/`,
+    );
+    expect(elementAssetUrl(configured, element, file)).toBe(
+      `https://cdn.openpatch.org/${element}/${version}/${file}`,
     );
   },
 );

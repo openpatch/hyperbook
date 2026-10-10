@@ -47,6 +47,11 @@ jobs:
         run: |
           pnpm --filter "hyperbook-studio" vscode:package
 
+      - name: Verify default CDN runtimes before publishing
+        # CDN previews must work before any consumer package can be published.
+        # Validate all files against the locally built runtime bundles.
+        run: node scripts/verify-default-cdns.mjs
+
       - name: Publish CLI asset bundles before npm
         run: node packages/hyperbook/publish-assets.mjs
         env:

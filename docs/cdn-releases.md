@@ -12,8 +12,11 @@ domain `cdn.openpatch.org`. Each repository owns its release uploads:
 All workflows use Wrangler and the Cloudflare API token in the organization
 Actions secret `CLOUDFLARE_R2_CDN`. Set `CLOUDFLARE_ACCOUNT_ID` as an organization
 Actions variable or secret. Grant both to the publishing repositories. S3 access
-keys are unnecessary. The token needs remote R2 object read/write and bucket
-CORS configuration permissions for `cdn`.
+keys are unnecessary. The token needs **Account → Workers R2 Storage → Edit**
+(the R2 token permission **Admin Read & Write**) for the account holding `cdn`.
+Cloudflare's bucket-scoped **Object Read & Write** permission supports only the
+S3 API, so it cannot authenticate these Wrangler operations. See
+[Cloudflare's permission documentation](https://developers.cloudflare.com/r2/api/tokens/#permissions).
 
 The IDE publishers download the ZIP already attached to the release and verify
 GitHub's SHA-256 digest. HTML examples and source maps are excluded. OpenSCAD is
@@ -46,7 +49,7 @@ gh workflow run release-embedded.yml --repo openpatch/sql-ide -f cdn_release_tag
 gh workflow run publish-openscad-cdn.yml --repo openpatch/hyperbook
 ```
 
-Once the CDN uploads pass verification, Hyperbook can pin these base URLs:
+Hyperbook pins these default base URLs. You can also configure them explicitly:
 
 ```json
 {
@@ -70,6 +73,12 @@ Update the upstream URL and SHA-256 in `openscad-config.json`, then increment
 `wasmBuild.cdnVersion`. Increment it when changing font or library downloads as
 well. Publish that version before using it as Hyperbook's default. The build
 continues to keep the small Hyperbook integration scripts local.
+
+Update IDE pins in `packages/markdown/ide-releases.json`; local bundle downloads
+and default CDN URLs use the same tags. Hyperbook's release workflow verifies
+every pinned CDN runtime against the local bundle payloads before publishing
+CLI bundles, npm packages or the VS Code extension. A missing or different CDN
+release prevents package publication.
 
 ## Cloudflare caching
 

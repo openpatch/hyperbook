@@ -8,10 +8,11 @@ export async function verifyCdn({
   element,
   version,
   directory,
+  manifest: expectedManifest,
   fetchImpl = fetch,
 }) {
   const base = `https://cdn.openpatch.org/${releasePrefix(element, version)}/`;
-  const expected = await runtimeManifest(directory);
+  const expected = expectedManifest || (await runtimeManifest(directory));
   async function get(relative) {
     const response = await fetchImpl(new URL(relative, base), {
       headers: { Origin: "https://hyperbook.openpatch.org" },

@@ -5,14 +5,11 @@ import {
 } from "@hyperbook/types";
 import excalidrawPackageJson from "../../web-component-excalidraw/package.json";
 import runtimeAssets from "../runtime-assets.json";
+import ideReleases from "../ide-releases.json";
+import openscadConfig from "../openscad-config.json";
 
 /** Hosted Blockflow app; the npm package does not include Blockflow's bundle. */
 const blockflowCdn = "https://blockflow.openpatch.org/";
-
-// The last published Markdown release that includes these runtimes. Keep this
-// independent of the renderer version: new packages omit every large runtime.
-const legacyRuntimeCdn =
-  "https://unpkg.com/@hyperbook/markdown@0.85.0/dist/assets/";
 
 /** Resolve payload files; Hyperbook's integration scripts stay local. */
 export function elementAssetUrl(
@@ -35,6 +32,18 @@ export function elementAssetUrl(
     return new URL(
       element === "pyide" ? file.replace(/^pyodide\//, "") : file,
       cdn,
+    ).href;
+  }
+  if (element === "onlineide" || element === "sqlide") {
+    return new URL(
+      file,
+      `https://cdn.openpatch.org/${element}/${ideReleases[element]}/`,
+    ).href;
+  }
+  if (element === "openscad") {
+    return new URL(
+      file,
+      `https://cdn.openpatch.org/openscad/${openscadConfig.wasmBuild.cdnVersion}/`,
     ).href;
   }
   if (element === "pyide") {
@@ -76,5 +85,5 @@ export function elementAssetUrl(
       ? `${base}index.css`
       : new URL(file, base).href;
   }
-  return `${legacyRuntimeCdn}directive-${element}/${file}`;
+  throw new Error(`No default CDN asset for ${element}/${file}`);
 }
