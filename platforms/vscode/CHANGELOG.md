@@ -1,5 +1,14 @@
 # @hyperbook/vscode-extension
 
+## 0.57.1
+
+### Patch Changes
+
+- [`643c321`](https://github.com/openpatch/hyperbook/commit/643c321fe2b2c4f9fe64f77ad1ae48aa0c9a393e) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Update bitflow to 0.3.0. Maths in a flow's Markdown is typeset with KaTeX, `task-math` accepts a decimal comma in comma locales such as German, and `task-pixel-grid` can number its cells from 0.
+
+- Updated dependencies [[`643c321`](https://github.com/openpatch/hyperbook/commit/643c321fe2b2c4f9fe64f77ad1ae48aa0c9a393e)]:
+  - @hyperbook/markdown@0.86.1
+
 ## 0.57.0
 
 ### Minor Changes
