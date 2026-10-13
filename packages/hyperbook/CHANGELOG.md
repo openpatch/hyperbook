@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.113.3
+
+### Patch Changes
+
+- [`4c8d4e9`](https://github.com/openpatch/hyperbook/commit/4c8d4e97d9beba83cbe4f9aa4837a93d29c97d7c) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Update bitflow to 0.3.1. Long flows with hint loops no longer freeze the page while the progress line works out how many steps are left.
+
 ## 0.113.2
 
 ### Patch Changes
