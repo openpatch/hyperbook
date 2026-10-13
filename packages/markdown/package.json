@@ -98,7 +98,7 @@
     "unist-util-visit-parents": "^6.0.2"
   },
   "devDependencies": {
-    "@bitflow/web-component": "^0.3.0",
+    "@bitflow/web-component": "^0.3.1",
     "@codemirror/commands": "^6.10.4",
     "@codemirror/lang-cpp": "^6.0.3",
     "@codemirror/lang-css": "^6.3.1",

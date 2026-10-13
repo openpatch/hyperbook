@@ -358,8 +358,8 @@ importers:
         version: 6.0.2
     devDependencies:
       '@bitflow/web-component':
-        specifier: ^0.3.0
-        version: 0.3.0
+        specifier: ^0.3.1
+        version: 0.3.1
       '@codemirror/commands':
         specifier: ^6.10.4
         version: 6.10.4
@@ -766,8 +766,8 @@ packages:
     resolution: {integrity: sha512-Nq8OhGWiZIZGV6hLHoyAKLLcJihP/xFeBMGJoUrxTX2psI8dCifzLhZISFb+VWS3wFMRDmCGw5R+dOySCqPLhw==}
     engines: {node: '>=6.9.0'}
 
-  '@bitflow/web-component@0.3.0':
-    resolution: {integrity: sha512-YsgBIW2riY3OvomAZEeZGfBFQIDJTfy6symqKi2vMnMo37nQ7kct4ev5zL2Ex5QQLjN6+zEly5QtfW4NFvnlVw==}
+  '@bitflow/web-component@0.3.1':
+    resolution: {integrity: sha512-cUsHq0UDzpBsWBIkf9jRY1uUI1yXmUweYQH9CN2xYz9V6FYMBXto6FbECSnpr9whl1FHblocVKf48JlCtoTqvQ==}
 
   '@braintree/sanitize-url@6.0.2':
     resolution: {integrity: sha512-Tbsj02wXCbqGmzdnXNk0SOF19ChhRU70BsroIi4Pm6Ehp56in6vch94mfbdQ17DozxkL3BAVjbZ4Qc1a0HFRAg==}
@@ -8442,7 +8442,7 @@ snapshots:
 
   '@babel/runtime@7.29.7': {}
 
-  '@bitflow/web-component@0.3.0': {}
+  '@bitflow/web-component@0.3.1': {}
 
   '@braintree/sanitize-url@6.0.2': {}
 
