@@ -1,5 +1,13 @@
 # hyperbook
 
+## 0.113.5
+
+### Patch Changes
+
+- [`208a0af`](https://github.com/openpatch/hyperbook/commit/208a0af4b2f6dffc2db9018408400d0648406f0a) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Update the embedded Online IDE to v2.2.1-hyperbook.31. Scratch for Java programs
+  now support library version 6.2.0 (including 6.0.0–6.1.3 compatibility), and
+  `SaveData` is persisted in IndexedDB.
+
 ## 0.113.4
 
 ### Patch Changes
