@@ -608,7 +608,7 @@ var multievent = {
       /\{v\{(.*?)\}\}/gms,
       "<table align='center' class='MulEvHaManTab' style='border-collapse:collapse;' border='0' cellspacing='0' cellpadding='6'><tr><td  valign='middle' align='center' style='min-width:10em;font-family:sans-serif;' class='MulEvHaManTd'><span class='MulEvHaManAusg'>$1</span></td></tr><tr><td align='center' ><span class='MulEvHaManFehl' style='text-decoration:line-through;color:#e00;font-size:smaller;font-family:sans-serif;'> </span><br /></td></tr><tr><td align='center'><input maxlength='2' onkeydown='this.value=\"\"' onkeyup='multievent.MulEvHaMan(this.id);multievent.Auswertung(\"" +
         clNr +
-        "\")' class='MulEvHaManInp' data-MulEvHaMan='$1' data-Nummer='0' data-BuchstSind='' data-Fehler='1' data-BegriffeSind='' style='text-align:center;font-size:1em;width:1.5em;font-family:sans-serif;padding:2px;border:1px solid #999;border-radius:3px;background-color:#eee;'/></td></tr></table>",
+        "\")' class='MulEvHaManInp' data-MulEvHaMan='$1' data-Nummer='0' data-BuchstSind='' data-Fehler='1' data-BegriffeSind='' style='text-align:center;font-size:1em;width:2.4em;font-family:sans-serif;padding:2px;border:1px solid #999;border-radius:3px;background-color:#eee;'/></td></tr></table>",
     );
     IN = IN.replace(
       /\{w\{(.*?)\}\}/gms,
@@ -926,26 +926,18 @@ var multievent = {
         }
         var IB = 0;
         for (var k = 0; k < iW.length; k++) {
-          var s = Inp[j].style;
           if (IB < iW[k].length) {
             IB = iW[k].length;
           }
-          if (IB <= 1) {
-            s.width = "1.2em";
-          }
-          if (IB == 2) {
-            s.width = "2.4em";
-          }
-          if (IB == 3) {
-            s.width = "3.6em";
-          }
-          if (IB == 4) {
-            s.width = "4.8em";
-          }
-          if (IB > 4) {
-            s.width = IB * 1.2 + "em";
-          }
         }
+        if (InpStil == "zahl") {
+          // Numbers can be entered in other notations (3,5 vs 3.50),
+          // so leave some room beyond the length of the solution.
+          IB++;
+        }
+        // At least three characters wide, otherwise short answers get
+        // fields that are too small to tap and type into (e.g. on iPads).
+        Inp[j].style.width = Math.max(IB, 3) * 1.2 + "em";
       }
     }
 
