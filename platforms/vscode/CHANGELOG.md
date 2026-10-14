@@ -1,5 +1,14 @@
 # @hyperbook/vscode-extension
 
+## 0.57.3
+
+### Patch Changes
+
+- [`7238254`](https://github.com/openpatch/hyperbook/commit/72382546f2a2de1c40be3971edbaacbdc440b933) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Make the text inputs in the multievent element bigger. On iPads, fields for short answers were barely wider than a single character. Text and number inputs (`{t{…}}`, `{T{…}}`, `{l{…}}`, `{L{…}}`, `{y{…}}`, `{Y{…}}`, `{z{…}}`, `{Z{…}}`) are now at least three characters wide, number inputs get one extra character so answers written differently from the solution still fit (e.g. `3.50` instead of `3.5`), and the hangman input is wider as well.
+
+- Updated dependencies [[`7238254`](https://github.com/openpatch/hyperbook/commit/72382546f2a2de1c40be3971edbaacbdc440b933)]:
+  - @hyperbook/markdown@0.86.3
+
 ## 0.57.2
 
 ### Patch Changes
