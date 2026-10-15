@@ -138,8 +138,8 @@ _tg_turtle_functions = ['back', 'backward', 'begin_fill', 'begin_poly', 'bk',
         'reset', 'resizemode', 'rt', 'seth', 'setheading', 'setpos',
         'setposition', 'setundobuffer', 'setx', 'sety', 'shape', 'shapesize',
         'shapetransform', 'shearfactor', 'showturtle', 'speed', 'st', 'stamp',
-        'setfontsize', 'settiltangle', 'teleport', 'tilt', 'tiltangle',
-        'towards', 'turtlesize', 'undo',
+        'setfontsize', 'teleport', 'tilt', 'tiltangle', 'towards',
+        'turtlesize', 'undo',
         'undobufferentries', 'up', 'width',
         'write', 'xcor', 'ycor']
 _tg_utilities = ['write_docstringdict', 'done']
@@ -3521,14 +3521,6 @@ class RawTurtle(TPen, TNavigator):
         write(text, font=("Arial", size, "normal")).
         """
         self._fontsize = size
-
-    def settiltangle(self, angle):
-        """Same as tiltangle(angle).
-
-        Hyperbook: removed from Python's turtle module in 3.13, kept here
-        for programs written for earlier versions.
-        """
-        self.tiltangle(angle)
 
     @contextmanager
     def poly(self):

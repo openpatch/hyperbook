@@ -180,14 +180,9 @@ print(a)
 
 ## Stopping the execution
 
-:::alert{warn}
-Use the **Stop** button in the editor to request an interrupt.
-For infinite loops or long-running processes, interruption is only reliable when these two headers are set on your server:
-```
-'Cross-Origin-Embedder-Policy': 'require-corp'
-'Cross-Origin-Opener-Policy': 'same-origin'
-```
-A turtle program also stops without them, at its next turtle command.
+:::alert{info}
+Use the **Stop** button in the editor to end a program. This also works for programs that wait, for example game loops, `input()` and turtle drawings.
+A program that calculates without ever waiting, such as `while True: pass`, keeps the browser so busy that the page no longer reacts. Then only closing or reloading the page helps.
 :::
 
 ## Libraries with SDL

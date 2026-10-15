@@ -15,6 +15,7 @@ import {
   toggleFullscreen,
   syncFullscreenButtons,
   releaseKeyboardCapture,
+  returnAfterReload,
   updateRunning,
   handleStopClick,
   getRunningInstanceId,
@@ -294,6 +295,12 @@ hyperbook.python = (function () {
       });
       applyCanvasOutputLayout();
 
+      // The page was reloaded to stop this IDE's script: back to where it was.
+      if (returnAfterReload(elem)) {
+        showOutput();
+        appendOutputLine(id, "Execution stopped.");
+      }
+
       test?.addEventListener("click", async () => {
         showOutput();
         const state = getExecutionState(id);
@@ -332,7 +339,7 @@ hyperbook.python = (function () {
             );
             if (results) {
               appendOutput(output, results);
-            } else if (error) {
+            } else if (error && !state.stopRequested) {
               appendFriendlyError(output, error, testCode);
             }
           }

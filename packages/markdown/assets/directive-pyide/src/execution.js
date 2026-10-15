@@ -1,4 +1,9 @@
-import { installedMicropipPackages, turtleModules } from "./state.js";
+import {
+  installedMicropipPackages,
+  turtleModules,
+  runtimes,
+  getExecutionState,
+} from "./state.js";
 import { appendOutputLine, appendOutputErrorLine } from "./output.js";
 import { getRuntime } from "./pyodide.js";
 import { forgetTurtleModule } from "./turtle-module.js";
@@ -89,6 +94,35 @@ def _hyperbook_patch_pygame_canvas():
 _hyperbook_patch_pygame_canvas()
 del _hyperbook_patch_pygame_canvas
 `;
+
+const CANCEL_TASKS = `
+import asyncio
+for task in asyncio.all_tasks(asyncio.get_event_loop()):
+    task.cancel()
+`;
+
+/**
+ * Stop the running script by cancelling its asyncio tasks.
+ *
+ * Python runs on the page's own thread, so whenever a click on Stop is
+ * handled the script is waiting for something. If it waits in asyncio -- for
+ * a timer, the next frame of a game loop, time.sleep() -- cancelling its tasks
+ * ends it right there, with no need for an interrupt or a reload. Waits for
+ * input() or the turtle are ended by stdin.js and the turtle. (A script that
+ * never waits keeps the page from handling the click in the first place.)
+ */
+export const cancelPythonTasks = (id) => {
+  const pyodide = runtimes.get(id);
+  if (!pyodide) return;
+  const globals = pyodide.toPy({});
+  try {
+    pyodide.runPython(CANCEL_TASKS, { globals, filename: "<hyperbook-stop>" });
+  } catch (error) {
+    console.warn("Could not cancel the running script:", error);
+  } finally {
+    globals.destroy();
+  }
+};
 
 const supportsRunSync = async (id, pyodide) => {
   if (runSyncSupport.has(id)) return runSyncSupport.get(id);
@@ -396,6 +430,10 @@ export const executeScript = async (
           filename: "<hyperbook-pygame>",
         });
       }
+      // Stop may have been pressed while packages were still loading.
+      const state = getExecutionState(id);
+      if (state.stopRequested) return {};
+      state.executing = true;
       const results = await pyodide.runPythonAsync(executableScript, {
         globals,
         locals: globals,
@@ -403,6 +441,7 @@ export const executeScript = async (
       });
       return { results };
     } finally {
+      getExecutionState(id).executing = false;
       hideStdinField(id);
       globals.destroy();
       dict.destroy();

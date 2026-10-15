@@ -4,8 +4,9 @@ import {
   getExecutionState,
   turtleModules,
 } from "./state.js";
-import { cancelStdin } from "./stdin.js";
+import { abortStdin } from "./stdin.js";
 import { appendOutputLine } from "./output.js";
+import { cancelPythonTasks } from "./execution.js";
 
 export const updateFullscreenButtonState = (elem, button) => {
   if (!elem || !button) return;
@@ -62,8 +63,6 @@ export const updateRunning = () => {
     const editor = elem.getElementsByClassName("editor")[0];
     const editorCm = editor?._cm;
     const state = getExecutionState(elem.id);
-    const hasRuntime = runtimes.has(elem.id);
-    const hasInterrupt = interruptBuffers.has(elem.id);
     const lockedByOther =
       runningInstanceId !== null &&
       runningInstanceId !== elem.id &&
@@ -115,15 +114,14 @@ export const updateRunning = () => {
       }
 
       if (stop) {
-        const stopLabel = hasInterrupt ? "pyide-stop" : "pyide-stop-refresh";
         if (state.running) {
           stop.textContent = state.stopping
             ? hyperbook.i18n.get("pyide-stopping")
-            : hyperbook.i18n.get(stopLabel);
+            : hyperbook.i18n.get("pyide-stop");
           stop.disabled = false;
           stop.addEventListener("click", handleStopClick);
         } else {
-          stop.textContent = hyperbook.i18n.get(stopLabel);
+          stop.textContent = hyperbook.i18n.get("pyide-stop");
           stop.disabled = true;
         }
         stop.classList.toggle("stopping", state.stopping);
@@ -144,13 +142,77 @@ export const updateRunning = () => {
       if (stop) {
         stop.classList.remove("stopping");
         stop.classList.remove("running");
-        stop.textContent = hyperbook.i18n.get(
-          hasInterrupt ? "pyide-stop" : "pyide-stop-refresh",
-        );
+        stop.textContent = hyperbook.i18n.get("pyide-stop");
         stop.disabled = true;
       }
     }
   }
+};
+
+const RETURN_KEY = "hyperbook-pyide-return";
+
+/** The element that scrolls the page around `elem`. */
+const scrollerOf = (elem) => {
+  for (let node = elem.parentElement; node; node = node.parentElement) {
+    const { overflowY } = getComputedStyle(node);
+    if (
+      /auto|scroll/.test(overflowY) &&
+      node.scrollHeight > node.clientHeight
+    ) {
+      return node;
+    }
+  }
+  return document.scrollingElement || document.documentElement;
+};
+
+const currentPage = () => window.location.pathname + window.location.search;
+
+/**
+ * Last resort for a script that does not stop: reload the page, noting where
+ * the IDE was on the screen, so the learner finds it there again.
+ */
+const reloadAndReturn = (id) => {
+  const elem = document.getElementById(id);
+  try {
+    window.sessionStorage.setItem(
+      RETURN_KEY,
+      JSON.stringify({
+        page: currentPage(),
+        id,
+        top: elem ? elem.getBoundingClientRect().top : null,
+      }),
+    );
+  } catch {}
+  window.location.reload();
+};
+
+/**
+ * After reloadAndReturn(): put the IDE back where it was on the screen.
+ * @returns whether the page was reloaded to stop this IDE's script
+ */
+export const returnAfterReload = (elem) => {
+  let saved = null;
+  try {
+    saved = JSON.parse(window.sessionStorage.getItem(RETURN_KEY) || "null");
+  } catch {}
+  if (!saved || saved.id !== elem.id || saved.page !== currentPage()) {
+    return false;
+  }
+  try {
+    window.sessionStorage.removeItem(RETURN_KEY);
+  } catch {}
+  const scrollBack = () => {
+    if (typeof saved.top !== "number") return;
+    scrollerOf(elem).scrollTop += elem.getBoundingClientRect().top - saved.top;
+  };
+  requestAnimationFrame(scrollBack);
+  // Images and other elements above the IDE may still change their height.
+  if (document.readyState !== "complete") {
+    window.addEventListener("load", () => requestAnimationFrame(scrollBack), {
+      once: true,
+    });
+  }
+  return true;
 };
 
 export const requestStop = (id) => {
@@ -159,32 +221,33 @@ export const requestStop = (id) => {
   if ((!state.running && !hasRuntime) || state.stopRequested) return;
   state.stopRequested = true;
   state.stopping = true;
-  // A script parked on input() is not executing bytecode, so the interrupt
-  // buffer alone would never reach it — release the read first.
-  cancelStdin(id);
-  // Halt the turtle's animation and its event handlers and timers. A script
-  // that was waiting for the animation ends by itself (turtle.Terminator).
-  const endedByTurtle = turtleModules.get(id)?.__stop();
-  if (state.finishing) {
-    // Python has already returned; only the drawing was still going.
-    releaseKeyboardCapture(id);
-    updateRunning();
-    return;
-  }
-  const interruptBuffer = interruptBuffers.get(id);
-  if (interruptBuffer) {
-    interruptBuffer[0] = 2;
-    appendOutputLine(id, "Stop requested. Interrupting execution...");
-  } else if (!endedByTurtle) {
-    appendOutputLine(id, hyperbook.i18n.get("pyide-stop-reloading"));
-  }
+  // A script waiting for a timer, the next frame of a game loop or
+  // time.sleep() ends there once its asyncio tasks are cancelled.
+  if (!state.finishing) cancelPythonTasks(id);
+  // A script waiting for input() or for the turtle ends there with an error.
+  // This also halts the turtle's animation, event handlers and timers.
+  abortStdin(id);
+  turtleModules.get(id)?.__stop();
   releaseKeyboardCapture(id);
   updateRunning();
-  if (!interruptBuffer && !endedByTurtle) {
+  // Python has already returned; only the drawing was still going.
+  if (state.finishing) return;
+
+  appendOutputLine(id, "Stop requested. Interrupting execution...");
+  // Should the script still run, interrupt it, and as a last resort reload
+  // the page -- but not while packages are loading, which ends by itself.
+  const stillExecuting = () =>
+    state.running && state.stopRequested && state.executing;
+  window.setTimeout(() => {
+    if (!stillExecuting()) return;
+    const interruptBuffer = interruptBuffers.get(id);
+    if (interruptBuffer) interruptBuffer[0] = 2;
     window.setTimeout(() => {
-      window.location.reload();
-    }, 50);
-  }
+      if (!stillExecuting()) return;
+      appendOutputLine(id, hyperbook.i18n.get("pyide-stop-reloading"));
+      window.setTimeout(() => reloadAndReturn(id), 500);
+    }, 3000);
+  }, 1000);
 };
 
 export const handleStopClick = (event) => {

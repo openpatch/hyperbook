@@ -32,12 +32,13 @@ export const getRuntime = async (id) => {
     turtleModules.set(id, installTurtle(pyodide, id));
     pyodide.registerJsModule("pytamaro_js_ffi", createPytamaroJsFFI());
   }
-  if (
-    typeof SharedArrayBuffer !== "undefined" &&
-    window.crossOriginIsolated &&
-    typeof pyodide.setInterruptBuffer === "function"
-  ) {
-    const interruptBuffer = new Int32Array(new SharedArrayBuffer(4));
+  if (typeof pyodide.setInterruptBuffer === "function") {
+    // Python runs on the page's own thread and reads the buffer whenever it
+    // runs, so a plain buffer serves as well as a shared one.
+    const interruptBuffer =
+      typeof SharedArrayBuffer !== "undefined" && window.crossOriginIsolated
+        ? new Int32Array(new SharedArrayBuffer(4))
+        : new Int32Array(1);
     pyodide.setInterruptBuffer(interruptBuffer);
     interruptBuffers.set(id, interruptBuffer);
   }

@@ -12,8 +12,9 @@ export const installedMicropipPackages = new Map();
 export const turtleModules = new Map();
 
 /**
+ * `executing`: the script itself (not the setup around it) is running.
  * `finishing`: the script has returned, but the turtle is still drawing.
- * @type {Map<string, { running: boolean, stopping: boolean, stopRequested: boolean, finishing: boolean, type: "run" | "test" | null }>}
+ * @type {Map<string, { running: boolean, stopping: boolean, stopRequested: boolean, executing: boolean, finishing: boolean, type: "run" | "test" | null }>}
  */
 export const executionStates = new Map();
 /**
@@ -32,6 +33,7 @@ export const getExecutionState = (id) => {
       running: false,
       stopping: false,
       stopRequested: false,
+      executing: false,
       finishing: false,
       type: null,
     });

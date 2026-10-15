@@ -46,6 +46,19 @@ export const cancelStdin = (id, value = "") => {
 };
 
 /**
+ * Stop button: end a waiting read with an error, so the script stops at its
+ * input() instead of carrying on with an empty answer.
+ */
+export const abortStdin = (id) => {
+  const entry = pending.get(id);
+  if (!entry) return;
+  pending.delete(id);
+  entry.cleanup();
+  hideStdinField(id);
+  entry.reject(new Error("The program was stopped while waiting for input."));
+};
+
+/**
  * Ask for a line of input via the in-page field.
  * @returns {Promise<string>} resolves once the learner submits.
  */
@@ -58,7 +71,7 @@ export const askStdinAsync = (id, promptText = "") => {
   const { form, field, label } = found;
   if (label) label.textContent = String(promptText ?? "").trimEnd();
 
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     const onSubmit = (event) => {
       event.preventDefault();
       const value = field.value;
@@ -69,7 +82,7 @@ export const askStdinAsync = (id, promptText = "") => {
     };
     const cleanup = () => form.removeEventListener("submit", onSubmit);
 
-    pending.set(id, { resolve, cleanup });
+    pending.set(id, { resolve, reject, cleanup });
     form.addEventListener("submit", onSubmit);
     form.classList.remove("hidden");
     field.value = "";

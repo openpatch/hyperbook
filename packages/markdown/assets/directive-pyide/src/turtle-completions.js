@@ -245,11 +245,6 @@ const TURTLE_CURSOR = [
     "Read or set the shape's rotation relative to the heading.",
   ],
   [
-    "settiltangle",
-    "settiltangle(angle)",
-    "Same as tiltangle(angle); kept for older programs.",
-  ],
-  [
     "resizemode",
     "resizemode(rmode=None)",
     "How the shape follows the pen: 'auto' (grows with pensize), 'user' (shapesize) or 'noresize'.",

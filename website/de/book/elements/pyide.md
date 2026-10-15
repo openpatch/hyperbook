@@ -170,14 +170,9 @@ print(a)
 
 ## Ausführung stoppen
 
-:::alert{warn}
-Nutzen Sie den **Stoppen**-Button im Editor, um eine Unterbrechung anzufordern.
-Das Stoppen einer Endlosschleife oder eines lang andauernden Prozesses ist jedoch nur zuverlässig, wenn diese beiden Header auf Ihrem Server gesetzt sind:
-```
-'Cross-Origin-Embedder-Policy': 'require-corp'
-'Cross-Origin-Opener-Policy': 'same-origin'
-```
-Ein Turtle-Programm stoppt auch ohne sie, bei seinem nächsten Turtle-Befehl.
+:::alert{info}
+Nutzen Sie den **Stoppen**-Button im Editor, um ein Programm zu beenden. Das funktioniert auch bei Programmen, die warten, zum Beispiel bei Spielschleifen, `input()` und Turtle-Zeichnungen.
+Ein Programm, das rechnet, ohne jemals zu warten, etwa `while True: pass`, beschäftigt den Browser so sehr, dass die Seite nicht mehr reagiert. Dann hilft nur, die Seite zu schließen oder neu zu laden.
 :::
 
 ## Bibliotheken mit SDL
