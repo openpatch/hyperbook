@@ -28,7 +28,7 @@
     "version": "pnpm build",
     "lint": "tsc --noEmit",
     "test": "vitest",
-    "dev": "ncc build ./index.ts -w -o dist/",
+    "dev": "ncc build ./index.ts -w -o dist/ --external favicons --external sharp",
     "build": "rimraf dist && ncc build ./index.ts -o ./dist/ --no-cache --no-source-map-register --external favicons --external sharp && node postbuild.mjs"
   },
   "dependencies": {
