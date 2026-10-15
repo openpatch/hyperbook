@@ -462,6 +462,8 @@ async function postbuild() {
       format: "iife",
       outfile,
       minify: false,
+      // Python modules (e.g. the pyide's turtle.py) are bundled as source text.
+      loader: { ".py": "text" },
     });
     console.log(`Built ${directive} client bundle → ${outfile}`);
     // Remove the copied src/ directory — source files are not needed in dist.

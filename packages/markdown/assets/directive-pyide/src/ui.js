@@ -1,4 +1,9 @@
-import { runtimes, interruptBuffers, getExecutionState } from "./state.js";
+import {
+  runtimes,
+  interruptBuffers,
+  getExecutionState,
+  turtleModules,
+} from "./state.js";
 import { cancelStdin } from "./stdin.js";
 import { appendOutputLine } from "./output.js";
 
@@ -29,6 +34,8 @@ export const syncFullscreenButtons = () => {
 };
 
 export const releaseKeyboardCapture = (id) => {
+  // A turtle program that reacts to keys keeps them after it has returned.
+  if (turtleModules.get(id)?.__hasKeyBindings()) return;
   const elem = document.getElementById(id);
   if (!elem) return;
   const canvas = elem.getElementsByClassName("canvas")[0];
@@ -155,16 +162,25 @@ export const requestStop = (id) => {
   // A script parked on input() is not executing bytecode, so the interrupt
   // buffer alone would never reach it — release the read first.
   cancelStdin(id);
+  // Halt the turtle's animation and its event handlers and timers. A script
+  // that was waiting for the animation ends by itself (turtle.Terminator).
+  const endedByTurtle = turtleModules.get(id)?.__stop();
+  if (state.finishing) {
+    // Python has already returned; only the drawing was still going.
+    releaseKeyboardCapture(id);
+    updateRunning();
+    return;
+  }
   const interruptBuffer = interruptBuffers.get(id);
   if (interruptBuffer) {
     interruptBuffer[0] = 2;
     appendOutputLine(id, "Stop requested. Interrupting execution...");
-  } else {
+  } else if (!endedByTurtle) {
     appendOutputLine(id, hyperbook.i18n.get("pyide-stop-reloading"));
   }
   releaseKeyboardCapture(id);
   updateRunning();
-  if (!interruptBuffer) {
+  if (!interruptBuffer && !endedByTurtle) {
     window.setTimeout(() => {
       window.location.reload();
     }, 50);

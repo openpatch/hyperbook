@@ -1,10 +1,9 @@
 import { scriptLooksLikeTurtle } from "./constants.js";
 
 /**
- * Editor completions for the built-in `turtle` module implemented in
- * turtle-ffi.js. Keep this list in sync with the API objects exported there —
- * every entry below has to exist at runtime, or the editor promises something
- * the module cannot deliver.
+ * Editor completions for the `turtle` module (turtle.py, CPython's own module).
+ * Every entry below has to be exported by it (its `__all__`), or the editor
+ * promises something the module cannot deliver.
  *
  * Entries are [name, signature, description]; aliases are listed separately so
  * short forms like `fd` still show what they stand for.
@@ -60,6 +59,11 @@ const TURTLE_MOVE = [
     "Set the turtle's orientation to angle. 0 is east in standard mode, north in logo mode.",
   ],
   ["seth", "seth(angle)", "Short form of setheading()."],
+  [
+    "teleport",
+    "teleport(x=None, y=None, *, fill_gap=False)",
+    "Jump to a position without drawing a line, whether the pen is up or down.",
+  ],
   [
     "home",
     "home()",
@@ -158,6 +162,24 @@ const TURTLE_PEN = [
     "Fill the shape drawn since the last begin_fill().",
   ],
   ["filling", "filling()", "Return True while a fill is being recorded."],
+  ["fill", "fill()", "Fill the shape drawn in a with block: with fill(): ..."],
+  ["isdown", "isdown()", "Return True if the pen is down."],
+  [
+    "begin_poly",
+    "begin_poly()",
+    "Start recording the turtle's positions as the corners of a polygon.",
+  ],
+  ["end_poly", "end_poly()", "Stop recording the polygon."],
+  [
+    "get_poly",
+    "get_poly()",
+    "Return the last recorded polygon, e.g. for register_shape().",
+  ],
+  [
+    "poly",
+    "poly()",
+    "Record the corners of a polygon in a with block: with poly(): ...",
+  ],
   [
     "write",
     "write(arg, move=False, align='left', font=('Arial', 8, 'normal'))",
@@ -192,6 +214,12 @@ const TURTLE_CURSOR = [
   ["ht", "ht()", "Short form of hideturtle()."],
   ["isvisible", "isvisible()", "Return True if the turtle is visible."],
   [
+    "clone",
+    "clone()",
+    "Create and return a copy of the turtle, with the same position, heading and pen.",
+  ],
+  ["getturtle", "getturtle()", "Return the turtle object itself."],
+  [
     "shape",
     "shape(name=None)",
     "Set the turtle's shape: 'classic', 'arrow', 'turtle', 'circle', 'square', 'triangle' or 'blank'.",
@@ -219,7 +247,32 @@ const TURTLE_CURSOR = [
   [
     "settiltangle",
     "settiltangle(angle)",
-    "Set the shape's rotation relative to the heading.",
+    "Same as tiltangle(angle); kept for older programs.",
+  ],
+  [
+    "resizemode",
+    "resizemode(rmode=None)",
+    "How the shape follows the pen: 'auto' (grows with pensize), 'user' (shapesize) or 'noresize'.",
+  ],
+  [
+    "shearfactor",
+    "shearfactor(shear=None)",
+    "Read or set the shear of the turtle's shape.",
+  ],
+  [
+    "onclick",
+    "onclick(fun, btn=1, add=None)",
+    "Call fun(x, y) when this turtle is clicked.",
+  ],
+  [
+    "onrelease",
+    "onrelease(fun, btn=1, add=None)",
+    "Call fun(x, y) when the mouse button is released over this turtle.",
+  ],
+  [
+    "ondrag",
+    "ondrag(fun, btn=1, add=None)",
+    "Call fun(x, y) while this turtle is dragged, e.g. ondrag(goto).",
   ],
   [
     "stamp",
@@ -289,11 +342,27 @@ const TURTLE_SCREEN = [
   ["window_height", "window_height()", "Return the canvas height in pixels."],
   [
     "register_shape",
-    "register_shape(name, shape)",
-    "Register a polygon as a new turtle shape.",
+    "register_shape(name, shape=None)",
+    "Register a polygon, or an image file (name only), as a new turtle shape.",
   ],
-  ["addshape", "addshape(name, shape)", "Same as register_shape()."],
-  ["clearscreen", "clearscreen()", "Erase everything and reset every turtle."],
+  ["addshape", "addshape(name, shape=None)", "Same as register_shape()."],
+  ["getshapes", "getshapes()", "Return the names of all available shapes."],
+  ["turtles", "turtles()", "Return the list of turtles on the screen."],
+  [
+    "setworldcoordinates",
+    "setworldcoordinates(llx, lly, urx, ury)",
+    "Choose your own coordinates: lower-left and upper-right corner of the canvas.",
+  ],
+  [
+    "no_animation",
+    "no_animation()",
+    "Draw without animation in a with block, then show the result.",
+  ],
+  [
+    "clearscreen",
+    "clearscreen()",
+    "Erase everything, remove all turtles and reset the screen.",
+  ],
   ["resetscreen", "resetscreen()", "Reset every turtle to its starting state."],
   [
     "setundobuffer",
@@ -302,8 +371,8 @@ const TURTLE_SCREEN = [
   ],
   [
     "numinput",
-    "numinput(title, prompt)",
-    "Ask the user for a number and return it, or None if cancelled.",
+    "numinput(title, prompt, default=None, minval=None, maxval=None)",
+    "Ask the user for a number and return it, or default if the answer is empty.",
   ],
   [
     "textinput",
@@ -327,20 +396,27 @@ const TURTLE_SCREEN = [
   ],
   ["onkeyrelease", "onkeyrelease(fun, key)", "Same as onkey()."],
   [
-    "onclick",
-    "onclick(fun, btn=1)",
+    "onscreenclick",
+    "onscreenclick(fun, btn=1, add=None)",
     "Call fun(x, y) when the canvas is clicked.",
   ],
-  ["onscreenclick", "onscreenclick(fun, btn=1)", "Same as onclick()."],
   ["ontimer", "ontimer(fun, t=0)", "Call fun after t milliseconds."],
-  ["mainloop", "mainloop()", "No-op here — the canvas is always on screen."],
-  ["done", "done()", "No-op here — the canvas is always on screen."],
+  [
+    "mainloop",
+    "mainloop()",
+    "No-op here — event handlers keep working after the program has ended.",
+  ],
+  [
+    "done",
+    "done()",
+    "No-op here — event handlers keep working after the program has ended.",
+  ],
   [
     "exitonclick",
     "exitonclick()",
-    "No-op here — the canvas is always on screen.",
+    "End the program's event handlers when the canvas is clicked.",
   ],
-  ["bye", "bye()", "No-op here — the canvas is always on screen."],
+  ["bye", "bye()", "End the program's event handlers; the drawing stays."],
 ];
 
 const toOptions = (entries, boost = 0) =>

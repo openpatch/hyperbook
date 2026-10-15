@@ -187,6 +187,7 @@ For infinite loops or long-running processes, interruption is only reliable when
 'Cross-Origin-Embedder-Policy': 'require-corp'
 'Cross-Origin-Opener-Policy': 'same-origin'
 ```
+A turtle program also stops without them, at its next turtle command.
 :::
 
 ## Libraries with SDL
@@ -315,7 +316,18 @@ show_graphic(finish_line)
 
 ## Turtle
 
-The browser turtle API is available via `from turtle import *`.
+`import turtle` gives you Python's own turtle module (the one in Python 3.14), drawing on the canvas of the element. Programs behave as they do with Python installed on a computer: the turtle draws in the same order and at the same speed, and `clear()`, `undo()`, fills, stamps, text and event handlers work as described in the [Python documentation](https://docs.python.org/3/library/turtle.html).
+
+A few things differ because the canvas is part of the page:
+
+- The canvas is 640×480 pixels. `screensize()` and `setup()` change its size; a larger canvas gets scrollbars.
+- `mainloop()`, `done()` and `exitonclick()` are not needed. Functions registered with `onkey()`, `onscreenclick()` or `ontimer()` keep working after the program has ended, until it is run again or stopped. Key presses reach the canvas after `listen()` or a click on it.
+- `textinput()` and `numinput()` ask in the input field below the canvas.
+- `bgpic()` and `register_shape()` load GIF, PNG or JPEG files from the file system of the element.
+- `save()` is not available.
+- The **Stop** button also stops the drawing and the event handlers.
+
+The tables list the most common functions.
 
 ### Movement
 
@@ -330,7 +342,8 @@ The browser turtle API is available via `from turtle import *`.
 | `sety` | `y` | Set only the y coordinate. |
 | `setheading`, `seth` | `angle` | Set the turtle heading directly. |
 | `home` | none | Move back to the center and reset the heading. |
-| `circle` | `radius, steps=120` | Draw an approximated circle. |
+| `teleport` | `x=None, y=None` | Jump to a position without drawing a line. |
+| `circle` | `radius, extent=None, steps=None` | Draw a circle, or an arc of `extent` degrees. A positive radius curves to the left. |
 
 ### Pen and drawing
 
@@ -338,17 +351,18 @@ The browser turtle API is available via `from turtle import *`.
 | --- | --- | --- |
 | `penup`, `pu`, `up` | none | Lift the pen so movement no longer draws lines. |
 | `pendown`, `pd`, `down` | none | Lower the pen so movement draws lines again. |
-| `pensize`, `width` | `size` | Set the stroke width for new lines. |
-| `colormode` | `mode=1.0` | Set or return the current color mode. Use `255` before passing RGB tuples with values from 0 to 255. |
-| `pencolor` | `color` | Set the line color. |
+| `pensize`, `width` | `width=None` | Set the stroke width for new lines. |
+| `colormode` | `cmode=None` | Set or return the color mode. Use `255` before passing RGB tuples with values from 0 to 255. |
+| `pencolor` | `color` | Set the line color: a name such as `"red"` or `"SpringGreen2"`, `"#ff8800"`, or an RGB tuple. |
 | `fillcolor` | `color` | Set the fill color used by `begin_fill` / `end_fill`. |
-| `color` | `stroke` or `stroke, fill` | Set stroke and fill color together. |
-| `dot` | `size=5, color=None` | Draw a filled dot at the current position. |
+| `color` | `pen` or `pen, fill` | Set line and fill color together. |
+| `dot` | `size=None, *color` | Draw a filled dot at the current position. |
 | `begin_fill` | none | Start recording a filled shape. |
 | `end_fill` | none | Finish and fill the current shape. |
-| `write` | `text, move=False, align=\"left\", font=None` | Draw text at the current turtle position. |
-| `bgcolor` | `color` | Set the turtle canvas background color. |
-| `bgpic` | `filename=\"\"` | Load a background image from the Pyodide file system, or clear it with an empty string. |
+| `stamp` | none | Stamp a copy of the turtle onto the canvas and return its id. |
+| `write` | `arg, move=False, align="left", font=("Arial", 8, "normal")` | Draw text at the current turtle position. |
+| `bgcolor` | `color` | Set the background color of the canvas. |
+| `bgpic` | `picname=None` | Show an image file as background, or remove it with `"nopic"`. |
 
 ### State
 
@@ -359,20 +373,38 @@ The browser turtle API is available via `from turtle import *`.
 | `ycor` | none | Return the current y coordinate. |
 | `heading` | none | Return the current heading in degrees. |
 | `towards` | `x, y` | Return the angle from the turtle to the given point. |
-| `pen` | `options=None` | Return the current pen state, or update parts of it from a dictionary-like object. |
+| `distance` | `x, y` | Return the distance from the turtle to the given point. |
+| `isdown` | none | Return whether the pen is down. |
+| `pen` | `pen=None, **pendict` | Return the current pen state, or change parts of it. |
 | `isvisible` | none | Return whether the turtle cursor is currently visible. |
-| `shape` | `name=None` | Set or return the turtle shape. Available shapes: `'classic'` (default), `'arrow'`, `'turtle'`, `'triangle'`, `'square'`, `'circle'`. |
+| `shape` | `name=None` | Set or return the turtle shape: `'classic'` (default), `'arrow'`, `'turtle'`, `'triangle'`, `'square'`, `'circle'` or `'blank'`. |
 
 ### Screen and reset
 
 | Method | Parameters | Description |
 | --- | --- | --- |
-| `speed` | `value=0` | Set the turtle animation speed. Higher values draw faster. |
-| `screensize` | `canvwidth=None, canvheight=None, bg=None` | Return or update the turtle canvas size and optional background color. Scrollbars appear when the canvas is larger than the panel. Default size is 640×480. |
+| `speed` | `speed=None` | Set the animation speed from 1 (slowest) to 10 (fastest); 0 draws each step without animation. |
+| `tracer` | `n=None, delay=None` | `tracer(0)` turns the animation off until `update()` is called, the quickest way to draw complex pictures. |
+| `update` | none | Show everything drawn since `tracer(0)`. |
+| `screensize` | `canvwidth=None, canvheight=None, bg=None` | Return or change the canvas size and background color. |
 | `showturtle`, `st` | none | Show the turtle cursor. |
 | `hideturtle`, `ht` | none | Hide the turtle cursor. |
-| `clear` | none | Clear the drawing but keep the current turtle state. |
-| `reset` | none | Reset the turtle state and clear the drawing. |
+| `undo` | none | Undo the turtle's last action. |
+| `clear` | none | Delete this turtle's drawing but keep its position and pen. |
+| `reset` | none | Delete this turtle's drawing and restore its starting state. |
+| `clearscreen` | none | Delete everything, remove all turtles and reset the canvas. |
+
+### Events
+
+| Method | Parameters | Description |
+| --- | --- | --- |
+| `listen` | none | Send key presses to the canvas. |
+| `onkey`, `onkeyrelease` | `fun, key` | Call `fun()` when the key is released, e.g. `"Up"`, `"space"` or `"a"`. |
+| `onkeypress` | `fun, key=None` | Call `fun()` when the key is pressed. |
+| `onscreenclick` | `fun, btn=1` | Call `fun(x, y)` when the canvas is clicked. |
+| `onclick` | `fun, btn=1` | Call `fun(x, y)` when the turtle is clicked. |
+| `ondrag` | `fun, btn=1` | Call `fun(x, y)` while the turtle is dragged; `ondrag(goto)` lets you move it with the mouse. |
+| `ontimer` | `fun, t=0` | Call `fun()` after `t` milliseconds. |
 
 ### Multiple turtles
 

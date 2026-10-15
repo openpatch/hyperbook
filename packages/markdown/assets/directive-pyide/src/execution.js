@@ -1,6 +1,7 @@
 import { installedMicropipPackages, turtleModules } from "./state.js";
 import { appendOutputLine, appendOutputErrorLine } from "./output.js";
 import { getRuntime } from "./pyodide.js";
+import { forgetTurtleModule } from "./turtle-module.js";
 import { scriptLooksLikeTurtle, scriptLooksLikePygame } from "./constants.js";
 import { askStdinAsync, askStdinSync, hideStdinField } from "./stdin.js";
 
@@ -50,83 +51,6 @@ def input(prompt=""):
     sys.stdout.write(answer + "\\n")
     sys.stdout.flush()
     return answer
-`;
-
-/**
- * turtle's own dialogs. The JS module can only offer blocking versions, since
- * a JS function cannot await on Python's behalf — so when Python can be
- * suspended we replace them with ones that read from the page instead.
- *
- * Both the functional interface (`from turtle import *`) and the screen object
- * (`Screen().numinput(...)`) have to be covered; they hold separate references
- * to the same underlying functions.
- */
-const TURTLE_INPUT_SHIM = `
-def _hyperbook_patch_turtle():
-    import turtle
-    from pyodide.ffi import run_sync
-
-    def _label(title, prompt):
-        return " ".join(str(part) for part in (title, prompt) if part).strip()
-
-    def textinput(title="", prompt=""):
-        return run_sync(__hyperbook_ask_stdin(_label(title, prompt)))
-
-    def numinput(title="", prompt="", default=None, minval=None, maxval=None):
-        hint = ""
-        if minval is not None and maxval is not None:
-            hint = " [{0}, {1}]".format(minval, maxval)
-        elif minval is not None:
-            hint = " [>= {0}]".format(minval)
-        elif maxval is not None:
-            hint = " [<= {0}]".format(maxval)
-        while True:
-            answer = run_sync(__hyperbook_ask_stdin(_label(title, prompt) + hint))
-            # An empty answer stands in for tkinter's Cancel button.
-            if answer is None or str(answer).strip() == "":
-                return default
-            try:
-                value = float(str(answer).strip().replace(",", "."))
-            except ValueError:
-                continue
-            if minval is not None and value < minval:
-                continue
-            if maxval is not None and value > maxval:
-                continue
-            return value
-
-    # Screen() hands back one shared object, so patching it once is enough.
-    try:
-        screen = turtle.Screen()
-        screen.numinput = numinput
-        screen.textinput = textinput
-    except Exception:
-        pass
-
-    try:
-        turtle.numinput = numinput
-        turtle.textinput = textinput
-    except Exception:
-        pass
-    if getattr(turtle, "numinput", None) is not numinput:
-        # The JS module rejected the assignment; shadow it with a real Python
-        # module so \`from turtle import *\` still picks up the patched names.
-        import sys
-        import types
-
-        wrapper = types.ModuleType("turtle")
-        for name in dir(turtle):
-            try:
-                setattr(wrapper, name, getattr(turtle, name))
-            except Exception:
-                pass
-        wrapper.numinput = numinput
-        wrapper.textinput = textinput
-        sys.modules["turtle"] = wrapper
-        sys.modules["jturtle"] = wrapper
-
-_hyperbook_patch_turtle()
-del _hyperbook_patch_turtle
 `;
 
 /**
@@ -384,15 +308,16 @@ export const executeScript = async (
     const decoder = new TextDecoder("utf-8");
     const executableScript = maybeAutoWrapPygame(script);
 
+    const usesTurtle = scriptLooksLikeTurtle(executableScript);
+    const turtle = turtleModules.get(id);
     if (canvas) {
       try {
         resetCanvas(canvas);
-        const usesTurtle = scriptLooksLikeTurtle(executableScript);
         if (usesTurtle) {
-          turtleModules.get(id)?.__bindCanvas(canvas);
-          turtleModules.get(id)?.__resetState();
+          turtle?.__bindCanvas(canvas);
+          turtle?.__resetState(canvas);
         } else {
-          turtleModules.get(id)?.__deactivate?.();
+          turtle?.__deactivate();
           canvas.style.width = "";
           canvas.style.height = "";
         }
@@ -400,7 +325,11 @@ export const executeScript = async (
       } catch (error) {
         appendOutputErrorLine(id, `Canvas setup failed: ${error.message}`);
       }
+    } else if (usesTurtle) {
+      // A test run: the turtle works, but leaves the canvas as it is.
+      turtle?.__resetState(null);
     }
+    if (usesTurtle && turtle) forgetTurtleModule(pyodide);
 
     let lastStdinPrompt = "";
     pyodide.setStdout({
@@ -456,13 +385,6 @@ export const executeScript = async (
           locals: globals,
           filename: "<hyperbook-stdin>",
         });
-        if (scriptLooksLikeTurtle(executableScript)) {
-          await pyodide.runPythonAsync(TURTLE_INPUT_SHIM, {
-            globals,
-            locals: globals,
-            filename: "<hyperbook-stdin>",
-          });
-        }
       }
       if (canvas && scriptLooksLikePygame(executableScript)) {
         globals.set("__hyperbook_resize_canvas", (width, height) =>

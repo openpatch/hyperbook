@@ -1,6 +1,6 @@
 import { PYODIDE_INDEX_URL } from "./constants.js";
 import { runtimes, turtleModules, interruptBuffers } from "./state.js";
-import { createTurtleJsFFI } from "./turtle-ffi.js";
+import { installTurtle } from "./turtle-module.js";
 import { createPytamaroJsFFI } from "./pytamaro-ffi.js";
 
 const loadPyodideScript = () => {
@@ -29,12 +29,8 @@ export const getRuntime = async (id) => {
   const loadPyodide = await pyodideReadyPromise;
   const pyodide = await loadPyodide({ indexURL: PYODIDE_INDEX_URL });
   if (typeof pyodide.registerJsModule === "function") {
-    const turtleModule = createTurtleJsFFI(id);
-    turtleModule.__setPyodide(pyodide);
-    pyodide.registerJsModule("turtle", turtleModule);
-    pyodide.registerJsModule("jturtle", turtleModule);
+    turtleModules.set(id, installTurtle(pyodide, id));
     pyodide.registerJsModule("pytamaro_js_ffi", createPytamaroJsFFI());
-    turtleModules.set(id, turtleModule);
   }
   if (
     typeof SharedArrayBuffer !== "undefined" &&

@@ -177,6 +177,7 @@ Das Stoppen einer Endlosschleife oder eines lang andauernden Prozesses ist jedoc
 'Cross-Origin-Embedder-Policy': 'require-corp'
 'Cross-Origin-Opener-Policy': 'same-origin'
 ```
+Ein Turtle-Programm stoppt auch ohne sie, bei seinem nächsten Turtle-Befehl.
 :::
 
 ## Bibliotheken mit SDL
@@ -307,7 +308,18 @@ show_graphic(finish_line)
 
 ## Turtle
 
-Die Browser-Turtle-API steht ueber `from turtle import *` zur Verfuegung.
+`import turtle` stellt das Turtle-Modul von Python selbst bereit (das aus Python 3.14), das auf dem Canvas des Elements zeichnet. Programme verhalten sich wie mit einem auf dem Computer installierten Python: Die Turtle zeichnet in derselben Reihenfolge und Geschwindigkeit, und `clear()`, `undo()`, Füllungen, Stempel, Text und Ereignisse funktionieren wie in der [Python-Dokumentation](https://docs.python.org/3/library/turtle.html) beschrieben.
+
+Weil das Canvas Teil der Seite ist, gibt es ein paar Unterschiede:
+
+- Das Canvas ist 640×480 Pixel groß. `screensize()` und `setup()` ändern seine Größe; ein größeres Canvas bekommt Scrollbalken.
+- `mainloop()`, `done()` und `exitonclick()` werden nicht benötigt. Mit `onkey()`, `onscreenclick()` oder `ontimer()` angemeldete Funktionen reagieren auch nach dem Ende des Programms, bis es erneut ausgeführt oder gestoppt wird. Tastendrücke erreichen das Canvas nach `listen()` oder einem Klick darauf.
+- `textinput()` und `numinput()` fragen im Eingabefeld unter dem Canvas.
+- `bgpic()` und `register_shape()` laden GIF-, PNG- oder JPEG-Dateien aus dem Dateisystem des Elements.
+- `save()` steht nicht zur Verfügung.
+- Der **Stoppen**-Button hält auch das Zeichnen und die Ereignisse an.
+
+Die Tabellen zeigen die gebräuchlichsten Funktionen.
 
 ### Bewegung
 
@@ -321,8 +333,9 @@ Die Browser-Turtle-API steht ueber `from turtle import *` zur Verfuegung.
 | `setx` | `x` | Setzt nur die x-Koordinate. |
 | `sety` | `y` | Setzt nur die y-Koordinate. |
 | `setheading`, `seth` | `angle` | Setzt die Ausrichtung der Turtle direkt. |
-| `home` | keine | Bewegt die Turtle zur Mitte zurueck und setzt die Ausrichtung zurueck. |
-| `circle` | `radius, steps=120` | Zeichnet einen angenaeherten Kreis. |
+| `home` | keine | Bewegt die Turtle zur Mitte zurück und setzt die Ausrichtung zurück. |
+| `teleport` | `x=None, y=None` | Springt zu einer Position, ohne eine Linie zu zeichnen. |
+| `circle` | `radius, extent=None, steps=None` | Zeichnet einen Kreis oder einen Bogen von `extent` Grad. Ein positiver Radius biegt nach links. |
 
 ### Stift und Zeichnen
 
@@ -330,45 +343,64 @@ Die Browser-Turtle-API steht ueber `from turtle import *` zur Verfuegung.
 | --- | --- | --- |
 | `penup`, `pu`, `up` | keine | Hebt den Stift an, sodass Bewegungen keine Linien mehr zeichnen. |
 | `pendown`, `pd`, `down` | keine | Senkt den Stift, sodass Bewegungen wieder Linien zeichnen. |
-| `pensize`, `width` | `size` | Setzt die Strichbreite fuer neue Linien. |
-| `colormode` | `mode=1.0` | Setzt oder liefert den aktuellen Farbmodus. Verwenden Sie `255`, bevor Sie RGB-Tupel mit Werten von 0 bis 255 uebergeben. |
-| `pencolor` | `color` | Setzt die Linienfarbe. |
-| `fillcolor` | `color` | Setzt die Fuellfarbe fuer `begin_fill` / `end_fill`. |
-| `color` | `stroke` oder `stroke, fill` | Setzt Linien- und Fuellfarbe zusammen. |
-| `dot` | `size=5, color=None` | Zeichnet einen gefuellten Punkt an der aktuellen Position. |
-| `begin_fill` | keine | Startet die Aufzeichnung einer gefuellten Form. |
-| `end_fill` | keine | Beendet und fuellt die aktuelle Form. |
-| `write` | `text, move=False, align=\"left\", font=None` | Zeichnet Text an der aktuellen Turtle-Position. |
-| `bgcolor` | `color` | Setzt die Hintergrundfarbe des Turtle-Canvas. |
-| `bgpic` | `filename=\"\"` | Laedt ein Hintergrundbild aus dem Pyodide-Dateisystem oder entfernt es mit einem leeren String. |
+| `pensize`, `width` | `width=None` | Setzt die Strichbreite für neue Linien. |
+| `colormode` | `cmode=None` | Setzt oder liefert den Farbmodus. Verwenden Sie `255`, bevor Sie RGB-Tupel mit Werten von 0 bis 255 übergeben. |
+| `pencolor` | `color` | Setzt die Linienfarbe: einen Namen wie `"red"` oder `"SpringGreen2"`, `"#ff8800"` oder ein RGB-Tupel. |
+| `fillcolor` | `color` | Setzt die Füllfarbe für `begin_fill` / `end_fill`. |
+| `color` | `pen` oder `pen, fill` | Setzt Linien- und Füllfarbe zusammen. |
+| `dot` | `size=None, *color` | Zeichnet einen gefüllten Punkt an der aktuellen Position. |
+| `begin_fill` | keine | Startet die Aufzeichnung einer gefüllten Form. |
+| `end_fill` | keine | Beendet und füllt die aktuelle Form. |
+| `stamp` | keine | Stempelt eine Kopie der Turtle auf das Canvas und gibt ihre Nummer zurück. |
+| `write` | `arg, move=False, align="left", font=("Arial", 8, "normal")` | Zeichnet Text an der aktuellen Turtle-Position. |
+| `bgcolor` | `color` | Setzt die Hintergrundfarbe des Canvas. |
+| `bgpic` | `picname=None` | Zeigt eine Bilddatei als Hintergrund oder entfernt sie mit `"nopic"`. |
 
 ### Status
 
 | Methode | Parameter | Beschreibung |
 | --- | --- | --- |
-| `position`, `pos` | keine | Gibt die aktuelle Turtle-Position als `(x, y)` zurueck. |
-| `xcor` | keine | Gibt die aktuelle x-Koordinate zurueck. |
-| `ycor` | keine | Gibt die aktuelle y-Koordinate zurueck. |
-| `heading` | keine | Gibt die aktuelle Ausrichtung in Grad zurueck. |
-| `towards` | `x, y` | Gibt den Winkel von der Turtle zum angegebenen Punkt zurueck. |
-| `pen` | `options=None` | Gibt den aktuellen Stiftzustand zurueck oder aktualisiert Teile davon ueber ein Dictionary-aehnliches Objekt. |
-| `isvisible` | keine | Gibt zurueck, ob der Turtle-Cursor aktuell sichtbar ist. |
-| `shape` | `name=None` | Setzt oder gibt die Form der Turtle zurueck. Verfuegbare Formen: `'classic'` (Standard), `'arrow'`, `'turtle'`, `'triangle'`, `'square'`, `'circle'`. |
+| `position`, `pos` | keine | Gibt die aktuelle Turtle-Position als `(x, y)` zurück. |
+| `xcor` | keine | Gibt die aktuelle x-Koordinate zurück. |
+| `ycor` | keine | Gibt die aktuelle y-Koordinate zurück. |
+| `heading` | keine | Gibt die aktuelle Ausrichtung in Grad zurück. |
+| `towards` | `x, y` | Gibt den Winkel von der Turtle zum angegebenen Punkt zurück. |
+| `distance` | `x, y` | Gibt den Abstand der Turtle zum angegebenen Punkt zurück. |
+| `isdown` | keine | Gibt zurück, ob der Stift unten ist. |
+| `pen` | `pen=None, **pendict` | Gibt den aktuellen Stiftzustand zurück oder ändert Teile davon. |
+| `isvisible` | keine | Gibt zurück, ob der Turtle-Cursor aktuell sichtbar ist. |
+| `shape` | `name=None` | Setzt oder liefert die Form der Turtle: `'classic'` (Standard), `'arrow'`, `'turtle'`, `'triangle'`, `'square'`, `'circle'` oder `'blank'`. |
 
 ### Bildschirm und Reset
 
 | Methode | Parameter | Beschreibung |
 | --- | --- | --- |
-| `speed` | `value=0` | Setzt die Animationsgeschwindigkeit der Turtle. Hoehere Werte zeichnen schneller. |
-| `screensize` | `canvwidth=None, canvheight=None, bg=None` | Gibt die aktuelle Canvas-Groesse zurueck oder aendert Groesse und optionale Hintergrundfarbe. Wenn das Canvas groesser als der sichtbare Bereich ist, erscheinen Scrollbalken. Standardgroesse ist 640×480. |
+| `speed` | `speed=None` | Setzt die Animationsgeschwindigkeit von 1 (langsamste) bis 10 (schnellste); 0 zeichnet jeden Schritt ohne Animation. |
+| `tracer` | `n=None, delay=None` | `tracer(0)` schaltet die Animation ab, bis `update()` aufgerufen wird – der schnellste Weg, komplexe Bilder zu zeichnen. |
+| `update` | keine | Zeigt alles, was seit `tracer(0)` gezeichnet wurde. |
+| `screensize` | `canvwidth=None, canvheight=None, bg=None` | Liefert oder ändert die Größe und Hintergrundfarbe des Canvas. |
 | `showturtle`, `st` | keine | Zeigt den Turtle-Cursor an. |
 | `hideturtle`, `ht` | keine | Blendet den Turtle-Cursor aus. |
-| `clear` | keine | Loescht die Zeichnung, behaelt aber den aktuellen Turtle-Zustand bei. |
-| `reset` | keine | Setzt den Turtle-Zustand zurueck und loescht die Zeichnung. |
+| `undo` | keine | Macht die letzte Aktion der Turtle rückgängig. |
+| `clear` | keine | Löscht die Zeichnung dieser Turtle, behält aber Position und Stift. |
+| `reset` | keine | Löscht die Zeichnung dieser Turtle und stellt ihren Anfangszustand wieder her. |
+| `clearscreen` | keine | Löscht alles, entfernt alle Turtles und setzt das Canvas zurück. |
+
+### Ereignisse
+
+| Methode | Parameter | Beschreibung |
+| --- | --- | --- |
+| `listen` | keine | Leitet Tastendrücke an das Canvas. |
+| `onkey`, `onkeyrelease` | `fun, key` | Ruft `fun()` auf, wenn die Taste losgelassen wird, z. B. `"Up"`, `"space"` oder `"a"`. |
+| `onkeypress` | `fun, key=None` | Ruft `fun()` auf, wenn die Taste gedrückt wird. |
+| `onscreenclick` | `fun, btn=1` | Ruft `fun(x, y)` auf, wenn auf das Canvas geklickt wird. |
+| `onclick` | `fun, btn=1` | Ruft `fun(x, y)` auf, wenn auf die Turtle geklickt wird. |
+| `ondrag` | `fun, btn=1` | Ruft `fun(x, y)` auf, während die Turtle gezogen wird; mit `ondrag(goto)` lässt sie sich mit der Maus verschieben. |
+| `ontimer` | `fun, t=0` | Ruft `fun()` nach `t` Millisekunden auf. |
 
 ### Mehrere Turtles
 
-Mit `Turtle()` lassen sich weitere unabhaengige Turtles erstellen, die dasselbe Canvas teilen. Jede Turtle hat ihre eigene Position, Ausrichtung, Farbe, Form und Stiftzustand und wird ueber das zurueckgegebene Objekt gesteuert.
+Mit `Turtle()` lassen sich weitere unabhängige Turtles erstellen, die dasselbe Canvas teilen. Jede Turtle hat ihre eigene Position, Ausrichtung, Farbe, Form und Stiftzustand und wird über das zurückgegebene Objekt gesteuert.
 
 ````hyperbook
 :::pyide{canvas}

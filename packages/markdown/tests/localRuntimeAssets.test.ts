@@ -101,27 +101,6 @@ it.each([undefined, "https://cdn.example.com/pyodide/"])(
   },
 );
 
-it("returns undefined for cancelled turtle number input so current Pyodide converts it to None", async () => {
-  vi.stubGlobal("window", {
-    prompt: vi
-      .fn()
-      .mockReturnValueOnce(null)
-      .mockReturnValueOnce("invalid")
-      .mockReturnValueOnce("3.5"),
-  });
-  vi.stubGlobal("hyperbook", { i18n: { get: () => "Input" } });
-  vi.stubGlobal("document", {
-    createElement: () => ({ getContext: () => ({}) }),
-  });
-  const { createTurtleJsFFI } =
-    // @ts-expect-error The browser client is JavaScript.
-    await import("../assets/directive-pyide/src/turtle-ffi.js");
-  const turtle = createTurtleJsFFI("test");
-  expect(turtle.numinput("Title", "Number")).toBeUndefined();
-  expect(turtle.numinput("Title", "Number")).toBeUndefined();
-  expect(turtle.numinput("Title", "Number")).toBe(3.5);
-});
-
 it.each([undefined, "https://cdn.example.com/typst/"])(
   "loads Typst WASM and fonts from the configured assets while preserving custom fonts: %s",
   async (runtimeUrl: string | undefined) => {

@@ -385,7 +385,17 @@ hyperbook.python = (function () {
               showOutput();
               appendFriendlyError(output, error, script);
             }
-          } else {
+          }
+          // The turtle may still be drawing, or waiting for ontimer(). Until
+          // it is done, the program counts as running, so Stop can end it.
+          const turtle = turtleModules.get(id);
+          if (turtle && !state.stopRequested) {
+            state.finishing = true;
+            await turtle.__whenIdle();
+            state.finishing = false;
+            turtle.__redraw();
+          }
+          if (state.stopRequested) {
             appendOutputLine(id, "Execution stopped.");
           }
         } catch (e) {
@@ -397,6 +407,7 @@ hyperbook.python = (function () {
           clearPytamaroStdoutCarry(id);
           state.running = false;
           state.stopping = false;
+          state.finishing = false;
           state.type = null;
           releaseKeyboardCapture(id);
           updateRunning();
