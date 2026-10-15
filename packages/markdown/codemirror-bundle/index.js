@@ -19,6 +19,7 @@ import { python } from "@codemirror/lang-python";
 import { cpp } from "@codemirror/lang-cpp";
 import { html } from "@codemirror/lang-html";
 import { css } from "@codemirror/lang-css";
+import { indentGuides } from "./indent-guides.js";
 
 const langExtMap = {
   javascript,
@@ -119,12 +120,19 @@ function completionSource(spec) {
  * Create a CodeMirror 6 editor inside container.
  *
  * @param {HTMLElement} container
- * @param {{lang?: string, value?: string, readOnly?: boolean, onChange?: (code: string) => void, completions?: CompletionSpec[]}} opts
+ * @param {{lang?: string, value?: string, readOnly?: boolean, onChange?: (code: string) => void, completions?: CompletionSpec[], indentGuides?: boolean}} opts
  * @returns {{ getValue(): string, setValue(v: string): void, setReadOnly(ro: boolean): void, destroy(): void }}
  */
 function create(
   container,
-  { lang = "", value = "", readOnly = false, onChange, completions } = {},
+  {
+    lang = "",
+    value = "",
+    readOnly = false,
+    onChange,
+    completions,
+    indentGuides: withIndentGuides = false,
+  } = {},
 ) {
   const readOnlyComp = new Compartment();
   const themeComp = new Compartment();
@@ -142,6 +150,8 @@ function create(
 
   const langFn = langExtMap[lang];
   if (langFn) extensions.push(langFn());
+
+  if (withIndentGuides) extensions.push(indentGuides());
 
   if (completions?.length) {
     // basicSetup already enables autocompletion, so these are registered as

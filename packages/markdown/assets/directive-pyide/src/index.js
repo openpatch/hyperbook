@@ -83,6 +83,9 @@ hyperbook.python = (function () {
             lang: editorDiv.dataset.lang || "python",
             value: initialSource,
             completions: [turtleCompletions],
+            // Python blocks are defined by indentation alone, so show where
+            // each one starts and ends.
+            indentGuides: true,
             onChange: (code) => {
               void persistPyideState({ script: code });
             },
