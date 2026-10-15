@@ -1,5 +1,29 @@
 # @hyperbook/markdown
 
+## 0.87.0
+
+### Minor Changes
+
+- [`cd80cb9`](https://github.com/openpatch/hyperbook/commit/cd80cb968cd9d47dfb711171b3029777547a1bb9) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Rework the turtle of the pyide element: `import turtle` is now Python's own turtle module (from Python 3.14), drawing on the canvas of the page. Turtle programs behave as they do with Python installed on a computer.
+
+  This fixes several bugs of the previous implementation:
+
+  - Lines drawn after a large `dot()` (for example with `goto()` and `forward()`) showed up while the turtle moved and then disappeared behind the dot.
+  - `clear()` did not work reliably: depending on the animation, it removed lines drawn after it, or text and dots drawn before it came back.
+  - Functions registered with `onkey()`, `onkeypress()`, `onscreenclick()` and `ontimer()` were never called. Keys can now also be given with their Python names (`"Up"`, `"space"`), and errors inside these functions are shown in the output.
+  - `circle(radius, extent=...)` and other keyword arguments were ignored, and `pos() == (0, 0)` or `abs(pos())` did not work.
+  - Lines with a pen size of 1 were drawn blurry.
+
+  New: `undo()`, `clone()`, `teleport()`, `onclick()`, `ondrag()` and `onrelease()` on turtles, `begin_poly()`/`get_poly()`, `setworldcoordinates()`, image shapes, Tk colour names such as `"SpringGreen2"`, and the `fill()` and `no_animation()` context managers. In browsers that can pause Python (for example Chrome and Edge), a program now runs in step with its drawing, so `print()` and `input()` happen at the right moment. The **Stop** button stops the drawing and the event functions, and a turtle program stops even when the page cannot interrupt Python.
+
+  Changed to match Python: `onclick()` reacts to clicks on the turtle (use `onscreenclick()` for clicks on the canvas), fills follow the even-odd rule, an unknown colour raises an error, and pen changes take a short animation step.
+
+- [`2515c5c`](https://github.com/openpatch/hyperbook/commit/2515c5c6f79669c357a2404118c0900fe6ba2b65) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Stop a running pyide program without reloading the page. Stop now cancels the program where it waits — in a game loop, at `input()`, or while the turtle draws — so learners keep their place on the page, and pages no longer need the `Cross-Origin-Embedder-Policy` and `Cross-Origin-Opener-Policy` headers for it. The button is always labelled "Stop". Only a program that ignores the stop is ended by reloading the page; the page then scrolls back to the same IDE and shows "Execution stopped." in its output.
+
+### Patch Changes
+
+- [`16bf390`](https://github.com/openpatch/hyperbook/commit/16bf39015de4131edaa6f64e2582587b980ffbd4) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Show indentation guides in the pyide editor. Thin vertical lines mark where each indented block begins and ends, so learners can see which `if`, loop or function a line belongs to. The guide of the block around the cursor is drawn stronger; on a line that opens a block (e.g. `for i in range(3):`), it is the block that line opens. The guides follow the indentation the code actually uses, so two spaces, four spaces and tabs all line up.
+
 ## 0.86.4
 
 ### Patch Changes
