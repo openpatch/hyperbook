@@ -1,5 +1,14 @@
 # hyperbook
 
+## 0.114.1
+
+### Patch Changes
+
+- [`cbe2cdf`](https://github.com/openpatch/hyperbook/commit/cbe2cdff191a584f251fb868df77ae2a035d7dca) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Update the embedded Online IDE to v2.2.1-hyperbook.32. Shader assets (`.frag`,
+  `.vert`, and `.glsl`) now open as editable source with GLSL highlighting.
+  Shader edits survive browser reloads and are used on the next run instead of
+  reusing an older cached shader.
+
 ## 0.114.0
 
 ### Minor Changes
