@@ -1,5 +1,11 @@
 # @hyperbook/markdown
 
+## 0.87.2
+
+### Patch Changes
+
+- [`ebe2617`](https://github.com/openpatch/hyperbook/commit/ebe261738451d9bf39f65207e860a6714155df72) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - onlineide: pick the workspace file's data-type (image, asset or plain text) from the @file's extension, so .frag, .vert and .json files reach the Online-IDE in the form it expects.
+
 ## 0.87.1
 
 ### Patch Changes
