@@ -44,7 +44,7 @@ empty retains the existing manual build/artifact behavior. The equivalent CLI
 commands are:
 
 ```sh
-gh workflow run release-embedded.yml --repo openpatch/online-ide -f cdn_release_tag=v2.2.1-hyperbook.31
+gh workflow run release-embedded.yml --repo openpatch/online-ide -f cdn_release_tag=v2.2.1-hyperbook.32
 gh workflow run release-embedded.yml --repo openpatch/sql-ide -f cdn_release_tag=v2.0.0-hyperbook.4
 gh workflow run publish-openscad-cdn.yml --repo openpatch/hyperbook
 ```
@@ -55,7 +55,7 @@ Hyperbook pins these default base URLs. You can also configure them explicitly:
 {
   "elements": {
     "onlineide": {
-      "cdn": "https://cdn.openpatch.org/onlineide/v2.2.1-hyperbook.31/"
+      "cdn": "https://cdn.openpatch.org/onlineide/v2.2.1-hyperbook.32/"
     },
     "sqlide": { "cdn": "https://cdn.openpatch.org/sqlide/v2.0.0-hyperbook.4/" },
     "openscad": { "cdn": "https://cdn.openpatch.org/openscad/2026.10.08-1/" }

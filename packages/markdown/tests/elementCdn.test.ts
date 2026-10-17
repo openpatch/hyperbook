@@ -75,7 +75,7 @@ describe.each(elements)(
                 excalidraw:
                   "https://unpkg.com/@hyperbook/web-component-excalidraw@",
                 onlineide:
-                  "https://cdn.openpatch.org/onlineide/v2.2.1-hyperbook.31/",
+                  "https://cdn.openpatch.org/onlineide/v2.2.1-hyperbook.32/",
                 sqlide: "https://cdn.openpatch.org/sqlide/v2.0.0-hyperbook.4/",
                 openscad: "https://cdn.openpatch.org/openscad/2026.10.08-1/",
               }[element]
@@ -167,7 +167,7 @@ it("loads Blockflow and Excalidraw from their upstream CDNs", () => {
 });
 
 it.each([
-  ["onlineide", "v2.2.1-hyperbook.31", "include/online-ide-embedded.js"],
+  ["onlineide", "v2.2.1-hyperbook.32", "include/online-ide-embedded.js"],
   ["sqlide", "v2.0.0-hyperbook.4", "include/sql-ide-embedded.js"],
   ["openscad", "2026.10.08-1", "openscad.wasm"],
 ] as const)(
