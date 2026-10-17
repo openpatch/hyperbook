@@ -13,24 +13,231 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 
 :::
 
+## v0.114.1
+
+::::tabs
+
+:::tab{title="Improved :+1:" id="improved"}
+
+**online-ide**: Update to v2.2.1-hyperbook.32. Shader assets (`.frag`, `.vert`
+and `.glsl`) open as editable source with GLSL highlighting. Shader edits
+survive browser reloads and are used on the next run instead of an older cached
+shader.
+
+:::
+
+::::
+
+## v0.114.0
+
+::::tabs
+
+:::tab{title="New :rocket:" id="new"}
+
+**pyide**: `import turtle` is now Python's own turtle module (from Python 3.14),
+drawing on the canvas of the page. Turtle programs behave as they do with Python
+installed on a computer. This fixes several bugs of the previous implementation:
+lines drawn after a large `dot()` no longer disappear, `clear()` works reliably,
+and functions registered with `onkey()`, `onscreenclick()` and `ontimer()` are
+now called. New: `undo()`, `clone()`, `teleport()`, `onclick()`, `ondrag()` and
+`onrelease()` on turtles, `begin_poly()`/`get_poly()`, `setworldcoordinates()`,
+image shapes, Tk colour names such as `"SpringGreen2"`, and the `fill()` and
+`no_animation()` context managers. In browsers that can pause Python (for
+example Chrome and Edge), a program now runs in step with its drawing, so
+`print()` and `input()` happen at the right moment.
+
+**pyide**: Stop a running program without reloading the page. Stop now cancels
+the program where it waits — in a game loop, at `input()`, or while the turtle
+draws — so learners keep their place on the page, and pages no longer need the
+`Cross-Origin-Embedder-Policy` and `Cross-Origin-Opener-Policy` headers for it.
+Only a program that ignores the stop is ended by reloading the page; the page
+then scrolls back to the same IDE and shows "Execution stopped." in its output.
+
+:::
+
+:::tab{title="Improved :+1:" id="improved"}
+
+**pyide**: Show indentation guides in the editor. Thin vertical lines mark
+where each indented block begins and ends, so learners can see which `if`, loop
+or function a line belongs to. The guide of the block around the cursor is drawn
+stronger, and the guides follow the indentation the code actually uses, so two
+spaces, four spaces and tabs all line up.
+
+:::
+
+::::
+
+## v0.113.5
+
+::::tabs
+
+:::tab{title="Improved :+1:" id="improved"}
+
+**online-ide**: Update to v2.2.1-hyperbook.31. Scratch for Java programs now
+support library version 6.2.0 (including 6.0.0–6.1.3 compatibility), and
+`SaveData` is persisted in IndexedDB.
+
+:::
+
+::::
+
+## v0.113.4
+
+::::tabs
+
+:::tab{title="Improved :+1:" id="improved"}
+
+**multievent**: Make the text inputs bigger. On iPads, fields for short answers
+were barely wider than a single character. Text and number inputs
+(`{t{…}}`, `{T{…}}`, `{l{…}}`, `{L{…}}`, `{y{…}}`, `{Y{…}}`, `{z{…}}`, `{Z{…}}`)
+are now at least three characters wide, number inputs get one extra character so
+answers written differently from the solution still fit (e.g. `3.50` instead of
+`3.5`), and the hangman input is wider as well.
+
+:::
+
+::::
+
+## v0.113.3
+
+::::tabs
+
+:::tab{title="Improved :+1:" id="improved"}
+
+**bitflow**: Update to 0.3.1. Long flows with hint loops no longer freeze the
+page while the progress line works out how many steps are left.
+
+:::
+
+::::
+
+## v0.113.2
+
+::::tabs
+
+:::tab{title="Improved :+1:" id="improved"}
+
+**bitflow**: Update to 0.3.0. Maths in a flow's Markdown is typeset with KaTeX,
+`task-math` accepts a decimal comma in comma locales such as German, and
+`task-pixel-grid` can number its cells from 0.
+
+:::
+
+::::
+
+## v0.113.1
+
+::::tabs
+
+:::tab{title="New :rocket:" id="new"}
+
+**vscode**: New commands "Download Element Runtimes..." and "Download All
+Element Runtimes" work like `hyperbook assets fetch` and
+`hyperbook assets fetch --all`. The preview resolves element runtimes like a
+Hyperbook build and shares the asset cache with the CLI. Runtimes that are not
+downloaded yet load from their default CDN, and the preview offers to download
+them.
+
+:::
+
+:::tab{title="Improved :+1:" id="improved"}
+
+**markdown**: The npm package no longer includes the eight large element
+runtimes; it keeps their integration scripts and styles. With `cdn: true`,
+Blockflow now loads from `blockflow.openpatch.org` and Excalidraw from its own
+packages on UNPKG. OpenSCAD, Online IDE and SQL IDE use independent, pinned
+releases on `cdn.openpatch.org`, verified by Hyperbook before publishing a
+release.
+
+**pyide**: Pyodide now loads from its versioned jsDelivr CDN by default, because
+its full local distribution is very large. Set `elements.pyide.cdn` to `false`
+for self-hosted and offline books, and prefetch the runtime before an offline
+build.
+
+:::
+
+::::
+
+## v0.113.0
+
+::::tabs
+
+:::tab{title="New :rocket:" id="new"}
+
+**blockflow**: Bundle Blockflow 0.1.1 with Hyperbook and the VS Code extension.
+Editor and player directives load a shared local bundle, which is copied into
+generated books only when Blockflow is used.
+
+**hyperbook.json**: Per-element `cdn` settings under `elements` for Blockflow,
+Online IDE, SQL IDE, Excalidraw, OpenSCAD, GeoGebra, PyIDE and Typst. Set
+`cdn: true` to use the default versioned CDN, or provide an HTTP(S) base URL
+for custom hosting. Local assets remain the default.
+
+:::
+
+:::tab{title="Improved :+1:" id="improved"}
+
+**cli**: Element runtimes are downloaded when a build first uses them instead of
+being included in the CLI package. Verified bundles are cached across builds,
+`hyperbook assets fetch` and `hyperbook assets fetch --all` prefetch them, and
+`--offline` was added to build and dev. GeoGebra's Math Apps bundle, Pyodide's
+runtime and vendored packages, Typst's compiler, renderer and standard fonts,
+and OpenSCAD's optional libraries and fonts are served locally in exported
+books.
+
+**pyide**: Update Pyodide to 314.0.7 (Python 3.14). Cancelled turtle numeric
+input adapts to Pyodide's current JavaScript-to-Python conversions.
+
+**typst**: Update the browser packages to 0.7.0.
+
+**openscad**: Update to the 2026.10.08 WebAssembly snapshot.
+
+:::
+
+::::
+
 ## v0.112.2
+
+::::tabs
+
+:::tab{title="Improved :+1:" id="improved"}
 
 **online-ide**: Update to v2.2.1-hyperbook.28. Adds the "Zeichnen mit Java"
 class library (`libraries="zeichnen"`), `import static`, `java.util.Scanner` on
 `System.in` and `java.util.*` imports.
 
+:::
+
+::::
+
 ## v0.112.1
+
+::::tabs
+
+:::tab{title="Improved :+1:" id="improved"}
 
 **online-ide**: Update to v2.2.1-hyperbook.27. Project ZIPs exported for Scratch
 for Java Studio now include assets loaded from next to the page, not only the
 files handed over with `@file`.
 
+:::
+
+::::
+
 ## v0.112.0
+
+::::tabs
+
+:::tab{title="Improved :+1:" id="improved"}
 
 **online-ide**: Update to v2.2.1-hyperbook.26. Export and import portable project
 ZIPs to continue a browser project in Scratch for Java Studio, including images,
 sounds and teaching checks. Scratch for Java 5.8.0 support includes the cat
 atlas, clone lifecycle, variable monitors, pause, stepping and game speed.
+
+:::
+
+::::
 
 ## v0.111.1
 
