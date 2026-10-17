@@ -13,6 +13,23 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 
 :::
 
+## v0.114.2
+
+::::tabs
+
+:::tab{title="Improved :+1:" id="improved"}
+
+**online-ide**: `@file` in an online-ide directive now hands each file to the
+IDE in the form it expects, chosen by the file's extension. Images keep their
+`image` type, other binaries and shaders (`.frag`, `.vert`, `.glsl`) become
+`asset`, and text files such as `.json` reach the IDE as plain text workspace
+files instead of a data URL, so a program reading them sees the file's content
+and not base64 data.
+
+:::
+
+::::
+
 ## v0.114.1
 
 ::::tabs
