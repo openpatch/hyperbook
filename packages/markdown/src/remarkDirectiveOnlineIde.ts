@@ -16,6 +16,21 @@ import {
 import { ElementContent } from "hast";
 import { resolveDirectiveId } from "./directiveId";
 
+// The embedded Online-IDE distinguishes scripts by data-type: "image" and
+// "asset" are fetched as a blob and become a data URL (shader sources are
+// decoded back to text by the IDE), "hint" is a markdown hint, and anything
+// else is a plain text file. Text formats like .json must not become data
+// URLs, because nothing on the IDE side decodes them.
+const IMAGE_FILES = /\.(png|jpe?g|gif|webp|bmp|svg|ico|avif)$/i;
+const ASSET_FILES =
+  /\.(frag|vert|glsl|wav|wave|mp3|ogg|opus|flac|m4a|aac|webm|mp4|ttf|otf|woff2?)$/i;
+
+function workspaceFileDataType(dest: string): string {
+  if (IMAGE_FILES.test(dest)) return "image";
+  if (ASSET_FILES.test(dest)) return "asset";
+  return "java";
+}
+
 export default (ctx: HyperbookContext) => () => {
   const name = "onlineide";
   const cdn = elementCdn(ctx.config, name);
@@ -139,14 +154,15 @@ export default (ctx: HyperbookContext) => () => {
             ],
           }));
 
-        // Add binary files as script elements with data-type="image"
+        // Add @file entries as workspace files with a data-type matching the
+        // kind of file, as the embedded IDE expects it.
         const fileElements: ElementContent[] = binaryFiles.map((file) => ({
           type: "element",
           tagName: "script",
           properties: {
             type: "text/plain",
             title: file.dest,
-            "data-type": "image",
+            "data-type": workspaceFileDataType(file.dest),
             src: file.url,
           },
           children: [],

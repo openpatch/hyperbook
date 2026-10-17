@@ -88,6 +88,37 @@ Bitmap img2 = new Bitmap("/input/image2.jpg");
     ).toMatchSnapshot();
   });
 
+  it("should map @file directives to the data-type of their file kind", async () => {
+    const html = toHtml(
+      `:::onlineide
+
+@file dest="/waves.frag" src="shaders/waves.frag"
+@file dest="/default.vert" src="shaders/default.vert"
+@file dest="/level.json" src="data/level.json"
+@file dest="/sky.jpg" src="images/sky.jpg"
+
+\`\`\`java
+new Stage();
+\`\`\`
+
+:::
+`,
+      ctx,
+    ).value as string;
+    expect(html).toContain(
+      '<script type="text/plain" title="/waves.frag" data-type="asset" src="/public/shaders/waves.frag"></script>',
+    );
+    expect(html).toContain(
+      '<script type="text/plain" title="/default.vert" data-type="asset" src="/public/shaders/default.vert"></script>',
+    );
+    expect(html).toContain(
+      '<script type="text/plain" title="/level.json" data-type="java" src="/public/data/level.json"></script>',
+    );
+    expect(html).toContain(
+      '<script type="text/plain" title="/sky.jpg" data-type="image" src="/public/images/sky.jpg"></script>',
+    );
+  });
+
   it("should pass the width of the output panel on", async () => {
     const html = toHtml(
       `:::onlineide{outputWidth="60%" libraries="scratch"}
