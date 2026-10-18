@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.114.4
+
+### Patch Changes
+
+- [`05b3733`](https://github.com/openpatch/hyperbook/commit/05b373306f39bbf7d695d95c94b8ec5db1c39304) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Update online-ide
+
 ## 0.114.3
 
 ### Patch Changes
