@@ -1,5 +1,11 @@
 # @hyperbook/markdown
 
+## 0.87.3
+
+### Patch Changes
+
+- [`7e904ec`](https://github.com/openpatch/hyperbook/commit/7e904ece8c786373682ebcb2a4ff17717064c781) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Update the embedded Online IDE to v2.2.1-hyperbook.33. The runtime reuses audio resources across stage switches and sprite clones while preserving independent overlapping playback and volume controls, and includes Scratch for Java 6.2.1 compatibility metadata.
+
 ## 0.87.2
 
 ### Patch Changes
