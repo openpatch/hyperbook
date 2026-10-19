@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.114.5
+
+### Patch Changes
+
+- Update the Online IDE runtime to build 36 for Scratch for Java 6.3.0, with lazy stage transitions, correct Tiled tile flags, reusable rendering caches, and garbage collection of discarded stages. Use the same pinned runtime for local bundles and the default CDN.
+
 ## 0.114.4
 
 ### Patch Changes
