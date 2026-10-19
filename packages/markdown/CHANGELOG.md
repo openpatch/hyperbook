@@ -1,5 +1,11 @@
 # @hyperbook/markdown
 
+## 0.87.6
+
+### Patch Changes
+
+- [`ea58eae`](https://github.com/openpatch/hyperbook/commit/ea58eae90dcd4d4f06d732574980f29348786207) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Update the Online IDE runtime to build 37 for Scratch for Java 6.4.0: a stage can draw with several shaders at once (`getShaders().activate(name)`), and the existing shader methods behave as before.
+
 ## 0.87.5
 
 ### Patch Changes
