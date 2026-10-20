@@ -261,11 +261,15 @@ Browser, mit zwei Unterschieden:
 
 - Kein `import org.openpatch.scratch.*;` — die Online IDE kennt keine Pakete,
   alle Klassen sind sofort verfügbar.
-- Alles, was nur ein Desktop-Programm kann (Shader, Pixelzugriff, Aufnahmen,
-  Dateisystem, Tiled-Karten, Vollbild), lässt sich übersetzen, meldet aber in
+- Alles, was nur ein Desktop-Programm kann (Pixelzugriff, Aufnahmen,
+  Dateisystem, Vollbild, Vertex-Shader), lässt sich übersetzen, meldet aber in
   der Ausgabe, dass es nichts tut.
 
-Die 841 Kostüme, 266 Klänge und die Hintergründe der Bibliothek sind enthalten,
+Wie auf dem Desktop wird zuerst das `Window` erzeugt und dann die Bühne
+hineingesetzt; eine Bühne ist immer so groß wie ihr Fenster, ein
+`super(breite, hoehe)` gibt es deshalb nicht.
+
+Die eingebauten Kostüme, Klänge und Hintergründe der Bibliothek sind enthalten,
 ein Beispiel braucht also keine eigenen Dateien. Alle Kostüme sind auf der Seite
 [Sprites](https://scratch4j.openpatch.org/sprites) der Scratch-for-Java-Dokumentation
 zu sehen.
@@ -277,12 +281,12 @@ sobald er die Möhre erreicht.
 
 ```java MeineBuehne.java
 
-new MeineBuehne();
+Window window = new Window(480, 360);
+window.setStage(new MeineBuehne());
 
 class MeineBuehne extends Stage {
 
    MeineBuehne() {
-      super(480, 360);
       addBackdrop("background");
       add(new Hase());
       add(new Moehre());
@@ -345,12 +349,12 @@ class Moehre extends Sprite {
 
 ```java MeineBuehne.java
 
-new MeineBuehne();
+Window window = new Window(480, 360);
+window.setStage(new MeineBuehne());
 
 class MeineBuehne extends Stage {
 
    MeineBuehne() {
-      super(480, 360);
       addBackdrop("background");
       add(new Hase());
       add(new Moehre());

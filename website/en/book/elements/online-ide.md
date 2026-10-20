@@ -60,7 +60,7 @@ You can include multiple `@file` directives to reference multiple files.
 
 :::onlineide
 
-```markdown A Hint
+````markdown A Hint
 ## Tip:
 
 Tips are written in a simple Markdown syntax which
@@ -79,6 +79,7 @@ vx = v \* Math.cos(w);
 vy = v \* Math.sin(w);
 
 ```
+````
 
 
 ```java Feuerwerk.java
@@ -266,11 +267,14 @@ browser, with two differences:
 
 - No `import org.openpatch.scratch.*;` — the Online IDE has no packages, all
   classes are available right away.
-- Everything that only a desktop program can do (shaders, the pixel buffer,
-  recording, the file system, Tiled maps, fullscreen) compiles, but reports in
-  the output that it does nothing.
+- Everything that only a desktop program can do (the pixel buffer, recording,
+  the file system, fullscreen, vertex shaders) compiles, but reports in the
+  output that it does nothing.
 
-The 841 costumes, 266 sounds and the backdrops of the library are bundled, so an
+As on the desktop, create the `Window` first and put the stage into it; a stage
+is always as big as its window, so a stage has no `super(width, height)`.
+
+The built-in costumes, sounds and backdrops of the library are bundled, so an
 example needs no assets of its own. Browse the costumes on the
 [Sprites](https://scratch4j.openpatch.org/sprites) page of the Scratch for Java
 documentation.
@@ -282,12 +286,12 @@ whenever it reaches the carrot.
 
 ```java MyStage.java
 
-new MyStage();
+Window window = new Window(480, 360);
+window.setStage(new MyStage());
 
 class MyStage extends Stage {
 
    MyStage() {
-      super(480, 360);
       addBackdrop("background");
       add(new Bunny());
       add(new Carrot());
@@ -350,12 +354,12 @@ class Carrot extends Sprite {
 
 ```java MyStage.java
 
-new MyStage();
+Window window = new Window(480, 360);
+window.setStage(new MyStage());
 
 class MyStage extends Stage {
 
    MyStage() {
-      super(480, 360);
       addBackdrop("background");
       add(new Bunny());
       add(new Carrot());
