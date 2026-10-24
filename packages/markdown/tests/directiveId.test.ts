@@ -110,4 +110,23 @@ describe("identical directives", () => {
       await idWarnings('::textinput{id="a"}\n\n::textinput{id="b"}\n'),
     ).toEqual([]);
   });
+
+  it("records each resolved id with its directive's source range", async () => {
+    const source =
+      `Intro\n\n:::pyide\n\n\`\`\`python\nprint(1)\n\`\`\`\n\n:::\n\n` +
+      `::textinput{placeholder="A"}\n`;
+    const result = await process(source, ctx);
+    const html = String(result.value);
+    const recorded = result.data.resolvedDirectiveIds || [];
+
+    const pyide = recorded.find((r) => r.name === "pyide")!;
+    expect(source.slice(pyide.start, pyide.end)).toMatch(/^:::pyide[\s\S]*:::$/);
+    expect(html).toContain(`id="${pyide.id}"`);
+
+    const textinput = recorded.find((r) => r.name === "textinput")!;
+    expect(source.slice(textinput.start, textinput.end)).toBe(
+      '::textinput{placeholder="A"}',
+    );
+    expect(idsOf(html)).toEqual([textinput.id]);
+  });
 });

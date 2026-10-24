@@ -3,29 +3,38 @@
 //
 import { HyperbookContext, elementCdn } from "@hyperbook/types";
 import { elementAssetUrl } from "./elementAssets";
-import { Code, Root } from "mdast";
+import { Root } from "mdast";
 import { visit } from "unist-util-visit";
 import { VFile } from "vfile";
 import {
   expectDirective,
   isDirective,
   registerDirective,
-  requestJS,
 } from "./remarkHelper";
-import { toText } from "./mdastUtilToText";
+import {
+  collectWorkspace,
+  compareAttributes,
+  fileActionAttributes,
+  cssHeight,
+  encodeWorkspace,
+  htmlEntities,
+  ideBottomButtons,
+  idePanelHeader,
+  idePanelTitle,
+  ideSplitter,
+  requestIdeAssets,
+} from "./ideWorkspace";
 import { resolveDirectiveId } from "./directiveId";
 import { ElementContent } from "hast";
 import { i18n } from "./i18n";
-import { icon } from "./icons";
-import { readFile } from "./helper";
 
-function htmlEntities(str: string) {
-  return String(str)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
+/** A button of the switch between output and canvas. */
+const viewButton = (className: string, labelKey: string): ElementContent => ({
+  type: "element",
+  tagName: "button",
+  properties: { class: `ide-view ${className}`, type: "button" },
+  children: [{ type: "text", value: i18n.get(labelKey) }],
+});
 
 function parsePackagesAttribute(value: unknown): string[] {
   if (typeof value !== "string") return [];
@@ -49,13 +58,23 @@ export default (ctx: HyperbookContext) => () => {
 
         const data = node.data || (node.data = {});
         const {
-          src = "",
           id = resolveDirectiveId(file, node),
           packages,
           height,
         } = node.attributes || {};
         const hasCanvas = "canvas" in (node.attributes || {});
-        const packageList = parsePackagesAttribute(packages);
+        // pytamaro needs pillow 11.3.0, which the bundled Pyodide does not
+        // have, so micropip cannot install it. Off until it can.
+        const requested = parsePackagesAttribute(packages);
+        const packageList = requested.filter(
+          (pkg) => pkg.toLowerCase() !== "pytamaro",
+        );
+        if (packageList.length < requested.length) {
+          file.message(
+            'The pyide directive does not support packages="pytamaro" for now: it needs a version of pillow that Pyodide does not provide.',
+            node as never,
+          );
+        }
 
         expectDirective(node, file, name, ["leaf", "container"]);
         registerDirective(
@@ -65,47 +84,47 @@ export default (ctx: HyperbookContext) => () => {
           ["style.css"],
           [],
         );
-        requestJS(file, ["codemirror", "codemirror.bundle.js"]);
+        requestIdeAssets(file);
 
-        let srcFile = "";
-
-        let tests: {
-          code: string;
-        }[] = [];
-
-        if (src) {
-          srcFile = readFile(src, ctx) || "";
-        } else if (node.children?.length > 0) {
-          tests = node.children
-            .filter((c) => c.type === "code")
-            .filter((c) => (c as Code).meta?.includes("test"))
-            .map((c, i) => ({
-              code: (c as Code).value,
-              name: `${i}`,
-            }));
-          srcFile = toText(
-            node.children.find(
-              (c) =>
-                c.type === "code" &&
-                c.lang === "python" &&
-                !(c as Code).meta?.includes("test"),
-            ) as Code,
+        if (node.attributes?.src) {
+          file.message(
+            'pyide no longer reads src="…"; load the file with ::file{path="main.py" src="…"} inside the directive. Run `hyperbook migrate` to convert the page.',
+            node,
           );
         }
 
+        const workspace = collectWorkspace(node, file, ctx, {
+          name,
+          langs: ["python"],
+          defaultMain: "main.py",
+        });
+        const mainFile = workspace.files.find((f) => f.path === workspace.main);
+        const hasTests = workspace.files.some((f) => f.role === "test");
+        if ("compare" in (node.attributes || {}) && !hasCanvas) {
+          file.message(
+            "pyide compares drawings, so compare needs the canvas attribute too.",
+            node,
+          );
+        }
+        const compare = hasCanvas
+          ? compareAttributes(node, file, workspace, name)
+          : {};
+
         data.hName = "div";
         data.hProperties = {
-          class: "directive-pyide",
+          class: "directive-pyide ide",
           ...(cdn
             ? { "data-runtime-url": elementAssetUrl(ctx, name, "pyodide/") }
             : {}),
           id: id ?? undefined,
-          "data-tests": Buffer.from(JSON.stringify(tests)).toString("base64"),
+          "data-workspace": encodeWorkspace(workspace),
+          ...fileActionAttributes(node, file, { name, accept: ".py" }),
+          ...compare,
           ...(hasCanvas ? { "data-canvas": "true" } : {}),
           ...(packageList.length > 0
             ? { "data-packages": packageList.join(",") }
             : {}),
-          ...(height ? { style: `--pyide-height: ${height}` } : {}),
+          ...(height ? { style: `--ide-height: ${cssHeight(height)}` } : {}),
         };
         data.hChildren = [
           {
@@ -115,65 +134,30 @@ export default (ctx: HyperbookContext) => () => {
               class: "container",
             },
             children: [
-              {
-                type: "element",
-                tagName: "div",
-                properties: {
-                  class: "buttons",
-                },
-                children: [
-                  {
-                    type: "element",
-                    tagName: "button",
-                    properties: {
-                      class: "output-btn active",
-                    },
-                    children: [
-                      {
-                        type: "text",
-                        value: i18n.get("pyide-output"),
+              // With a canvas, output and canvas are tabs of one panel.
+              hasCanvas
+                ? idePanelHeader("canvas-tabs", [
+                    {
+                      type: "element",
+                      tagName: "div",
+                      properties: {
+                        class: "ide-view-switch",
+                        role: "group",
                       },
-                    ],
-                  },
-                  ...(hasCanvas
-                    ? [
-                        {
-                          type: "element",
-                          tagName: "button",
-                          properties: {
-                            class: "canvas-btn",
-                          },
-                          children: [
-                            {
-                              type: "text",
-                              value: i18n.get("pyide-canvas"),
-                            },
-                          ],
-                        } as ElementContent,
-                      ]
-                    : []),
-                ],
-              },
+                      children: [
+                        viewButton("canvas-btn active", "pyide-canvas"),
+                        viewButton("output-btn", "pyide-output"),
+                      ],
+                    },
+                  ])
+                : idePanelHeader("", [idePanelTitle("pyide-output")]),
               ...(hasCanvas
                 ? [
                     {
                       type: "element",
                       tagName: "div",
                       properties: {
-                        class: "canvas-header hidden",
-                      },
-                      children: [
-                        {
-                          type: "text",
-                          value: i18n.get("pyide-canvas"),
-                        },
-                      ],
-                    } as ElementContent,
-                    {
-                      type: "element",
-                      tagName: "div",
-                      properties: {
-                        class: "canvas-wrapper hidden",
+                        class: "canvas-wrapper",
                       },
                       children: [
                         {
@@ -186,36 +170,14 @@ export default (ctx: HyperbookContext) => () => {
                         } as ElementContent,
                       ],
                     } as ElementContent,
-                    {
-                      type: "element",
-                      tagName: "div",
-                      properties: {
-                        class: "canvas-output-splitter hidden",
-                        role: "separator",
-                        "aria-label": "Resize canvas and output",
-                      },
-                      children: [],
-                    } as ElementContent,
-                    {
-                      type: "element",
-                      tagName: "div",
-                      properties: {
-                        class: "output-header hidden",
-                      },
-                      children: [
-                        {
-                          type: "text",
-                          value: i18n.get("pyide-output"),
-                        },
-                      ],
-                    } as ElementContent,
                   ]
                 : []),
               {
                 type: "element",
                 tagName: "pre",
                 properties: {
-                  class: "output",
+                  // With a canvas, the canvas tab is open first.
+                  class: hasCanvas ? "output hidden" : "output",
                 },
                 children: [],
               },
@@ -268,16 +230,7 @@ export default (ctx: HyperbookContext) => () => {
               },
             ],
           },
-          {
-            type: "element",
-            tagName: "div",
-            properties: {
-              class: "splitter",
-              role: "separator",
-              "aria-label": "Resize panels",
-            },
-            children: [],
-          },
+          ideSplitter(),
           {
             type: "element",
             tagName: "div",
@@ -305,7 +258,7 @@ export default (ctx: HyperbookContext) => () => {
                       },
                     ],
                   },
-                  ...(tests.length > 0
+                  ...(hasTests
                     ? [
                         {
                           type: "element",
@@ -348,59 +301,11 @@ export default (ctx: HyperbookContext) => () => {
                 children: [
                   {
                     type: "raw",
-                    value: htmlEntities(srcFile),
+                    value: htmlEntities(mainFile?.content ?? ""),
                   },
                 ],
               },
-              {
-                type: "element",
-                tagName: "div",
-                properties: {
-                  class: "buttons bottom",
-                },
-                children: [
-                  {
-                    type: "element",
-                    tagName: "button",
-                    properties: {
-                      class: "reset",
-                      title: i18n.get("pyide-reset"),
-                      "aria-label": i18n.get("pyide-reset"),
-                    },
-                    children: [icon("reset")],
-                  },
-                  {
-                    type: "element",
-                    tagName: "button",
-                    properties: {
-                      class: "copy",
-                      title: i18n.get("pyide-copy"),
-                      "aria-label": i18n.get("pyide-copy"),
-                    },
-                    children: [icon("copy")],
-                  },
-                  {
-                    type: "element",
-                    tagName: "button",
-                    properties: {
-                      class: "download",
-                      title: i18n.get("pyide-download"),
-                      "aria-label": i18n.get("pyide-download"),
-                    },
-                    children: [icon("download")],
-                  },
-                  {
-                    type: "element",
-                    tagName: "button",
-                    properties: {
-                      class: "fullscreen",
-                      title: i18n.get("ide-fullscreen-enter"),
-                      "aria-label": i18n.get("ide-fullscreen-enter"),
-                    },
-                    children: [icon("fullscreen")],
-                  },
-                ],
-              },
+              ideBottomButtons(),
             ],
           },
         ];

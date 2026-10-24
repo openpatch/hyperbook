@@ -131,6 +131,24 @@ No Integration. No updates.
 
 ::::
 
+## Migrate
+
+When a release changes the syntax of an element in a way old pages no longer understand, `migrate` converts your book to the current syntax. It is needed for v0.115.0, which changed the IDEs (PyIDE, Web IDE, p5, OpenSCAD and Typst) to the syntax with several files; the element pages describe what changed and what replaced it.
+
+Run the command in the directory of your book:
+
+```sh
+npx hyperbook migrate
+```
+
+It rewrites the pages and the snippets they use and pins the `id` of every IDE it changes, so readers keep the code they saved. Only the parts that changed are replaced; the rest of the page stays as it is. What cannot be converted automatically is printed as a note for you to review.
+
+The command refuses to run while your project has uncommitted changes. Commit them first, so you can review the migration with `git diff` and undo it with `git checkout`, or pass `--force` to run anyway. Use `--dry-run` to see what would change without writing anything:
+
+```sh
+npx hyperbook migrate --dry-run
+```
+
 ## Support
 
 We are [happy to hear from you](mailto:contact@openpatch.org), if you need custom support or features for your application.

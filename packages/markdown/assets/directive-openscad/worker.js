@@ -589,7 +589,7 @@ self.addEventListener("message", async (event) => {
   try {
     let result;
     if (type === "extractParams") {
-      const sourcePath = "/tmp/params_model.scad";
+      const sourcePath = payload?.sourcePath || "/tmp/params_model.scad";
       const outPath = "/tmp/params_out.json";
       result = await runOpenScadInvocation({
         code: `$preview=true;\n${payload?.code || ""}`,
@@ -610,7 +610,7 @@ self.addEventListener("message", async (event) => {
       return;
     }
     if (type === "buildParamForm") {
-      const sourcePath = "/tmp/params_model.scad";
+      const sourcePath = payload?.sourcePath || "/tmp/params_model.scad";
       const outPath = "/tmp/params_out.json";
       result = await runOpenScadInvocation({
         code: `$preview=true;\n${payload?.code || ""}`,
@@ -647,7 +647,7 @@ self.addEventListener("message", async (event) => {
     }
     if (type === "render") {
       const format = payload?.format || "stl";
-      const sourcePath = "/tmp/model.scad";
+      const sourcePath = payload?.sourcePath || "/tmp/model.scad";
       const outPath = `/tmp/output.${format}`;
       const exportFormat = format === "stl" ? "binstl" : format;
       result = await runOpenScadInvocation({

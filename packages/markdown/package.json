@@ -59,7 +59,8 @@
     "build": "rimraf dist && pnpm build:pkg && pnpm build:types && node postbuild.mjs",
     "build:pkg": "node ../../scripts/build.mjs && ncp assets dist/assets",
     "build:types": "tsc --project tsconfig.build.json --declaration --emitDeclarationOnly",
-    "emojis:update": "node updateEmojis.mjs && node updateEmojiAssets.mjs"
+    "emojis:update": "node updateEmojis.mjs && node updateEmojiAssets.mjs",
+    "p5:completions": "node updateP5Completions.mjs"
   },
   "bundle": "all",
   "dependencies": {

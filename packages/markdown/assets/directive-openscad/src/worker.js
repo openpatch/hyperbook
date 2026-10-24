@@ -105,6 +105,7 @@ export const buildParamUiInWorker = async (
   currentOverrides = {},
   id = "",
   scriptBase,
+  sourcePath,
 ) => {
   try {
     const result = await callWorker(
@@ -116,6 +117,7 @@ export const buildParamUiInWorker = async (
         binaryFiles,
         currentOverrides,
         id,
+        sourcePath,
       },
       scriptBase,
     );

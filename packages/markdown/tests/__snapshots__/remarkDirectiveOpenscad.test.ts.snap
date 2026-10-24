@@ -2,10 +2,10 @@
 
 exports[`remarkDirectiveOpenscad > should transform basic openscad 1`] = `
 "
-<div class="directive-openscad" data-id="eb541cd756411e88163c5bf0e21aa54ad33d3bceb8a95721bff82640f32d1f12" data-binary-files="W10=" data-base-path="/" data-page-path="">
-  <div class="left-side">
+<div class="directive-openscad ide" data-id="eb541cd756411e88163c5bf0e21aa54ad33d3bceb8a95721bff82640f32d1f12" data-workspace="eyJtYWluIjoibWFpbi5zY2FkIiwiZmlsZXMiOlt7InBhdGgiOiJtYWluLnNjYWQiLCJjb250ZW50IjoiY3ViZShbMjAsMjAsMjBdLCBjZW50ZXI9dHJ1ZSk7In1dfQ==" data-files="upload" data-accept=".scad" data-base-path="/" data-page-path="">
+  <div class="container left-side">
     <div class="preview-container">
-      <div class="preview-header">openscad-preview</div>
+      <div class="ide-panel-header preview-header"><span class="ide-panel-title">openscad-preview</span></div>
       <div class="canvas-wrapper">
         <canvas class="preview-canvas"></canvas>
         <div class="canvas-overlay hidden"></div>
@@ -13,80 +13,28 @@ exports[`remarkDirectiveOpenscad > should transform basic openscad 1`] = `
     </div>
     <div class="canvas-params-splitter" role="separator" aria-label="Resize canvas and parameters"></div>
     <div class="parameters-panel">
-      <div class="parameters-header">openscad-parameters</div>
+      <div class="ide-panel-header parameters-header"><span class="ide-panel-title">openscad-parameters</span></div>
       <div class="parameters-body"></div>
     </div>
   </div>
   <div class="splitter" role="separator" aria-label="Resize panels"></div>
   <div class="editor-container">
     <div class="buttons"><button class="render">openscad-render</button></div>
-    <details class="binary-files-section">
-      <summary><span class="summary-text"><span class="summary-indicator"><svg class="icon icon-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-              <path d="M9 18l6-6-6-6"></path>
-            </svg></span>openscad-binary-files</span></summary>
-      <div class="binary-files-list"></div>
-      <div class="binary-files-actions"><button class="add-binary-file" title="openscad-add-binary-file">+ openscad-add</button></div>
-    </details>
-    <div class="editor" data-lang="clike">cube([20,20,20], center=true);</div><textarea class="parameters" placeholder="{&#x22;size&#x22;: 20, &#x22;height&#x22;: 10}">{}</textarea>
-    <div class="buttons bottom"><button class="copy" title="openscad-copy" aria-label="openscad-copy"><svg class="icon icon-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-          <path d="M9 9h11a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-9a2 2 0 0 1-2-2V9z"></path>
-          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-        </svg></button><button class="download-stl" title="openscad-download-stl" aria-label="openscad-download-stl"><svg class="icon icon-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+    <div class="editor">cube([20,20,20], center=true);</div><textarea class="parameters" placeholder="{&#x22;size&#x22;: 20, &#x22;height&#x22;: 10}">{}</textarea>
+    <div class="buttons bottom"><button class="download-stl" title="openscad-download-stl" aria-label="openscad-download-stl"><svg class="icon icon-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
           <path d="M7 10l5 5 5-5"></path>
           <path d="M12 15V3"></path>
-        </svg></button><button class="reset" title="openscad-reset" aria-label="openscad-reset"><svg class="icon icon-reset" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+        </svg></button><button class="reset" title="ide-reset" aria-label="ide-reset"><svg class="icon icon-reset" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
           <path d="M1 4v6h6"></path>
           <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
-        </svg></button><button class="fullscreen" title="ide-fullscreen-enter" aria-label="ide-fullscreen-enter"><svg class="icon icon-fullscreen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-          <path d="M8 3H5a2 2 0 0 0-2 2v3"></path>
-          <path d="M21 8V5a2 2 0 0 0-2-2h-3"></path>
-          <path d="M16 21h3a2 2 0 0 0 2-2v-3"></path>
-          <path d="M3 16v3a2 2 0 0 0 2 2h3"></path>
-        </svg></button></div>
-  </div>
-</div>
-"
-`;
-
-exports[`remarkDirectiveOpenscad > should transform openscad with binary file directives 1`] = `
-"
-<div class="directive-openscad" data-id="139b1c3731d1e8d20ccd26c9fa372bc8247253b5e2779f36089986a0fd297f1e" data-binary-files="W3siZGVzdCI6Ii9pbnB1dC9tb2RlbC5zdGwiLCJ1cmwiOiIvcHVibGljL21vZGVscy9tb2RlbC5zdGwifV0=" data-base-path="/" data-page-path="">
-  <div class="left-side">
-    <div class="preview-container">
-      <div class="preview-header">openscad-preview</div>
-      <div class="canvas-wrapper">
-        <canvas class="preview-canvas"></canvas>
-        <div class="canvas-overlay hidden"></div>
-      </div>
-    </div>
-    <div class="canvas-params-splitter" role="separator" aria-label="Resize canvas and parameters"></div>
-    <div class="parameters-panel">
-      <div class="parameters-header">openscad-parameters</div>
-      <div class="parameters-body"></div>
-    </div>
-  </div>
-  <div class="splitter" role="separator" aria-label="Resize panels"></div>
-  <div class="editor-container">
-    <div class="buttons"><button class="render">openscad-render</button></div>
-    <details class="binary-files-section">
-      <summary><span class="summary-text"><span class="summary-indicator"><svg class="icon icon-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-              <path d="M9 18l6-6-6-6"></path>
-            </svg></span>openscad-binary-files</span></summary>
-      <div class="binary-files-list"></div>
-      <div class="binary-files-actions"><button class="add-binary-file" title="openscad-add-binary-file">+ openscad-add</button></div>
-    </details>
-    <div class="editor" data-lang="clike">import(&quot;/input/model.stl&quot;);</div><textarea class="parameters" placeholder="{&#x22;size&#x22;: 20, &#x22;height&#x22;: 10}">{}</textarea>
-    <div class="buttons bottom"><button class="copy" title="openscad-copy" aria-label="openscad-copy"><svg class="icon icon-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+        </svg></button><button class="copy" title="ide-copy" aria-label="ide-copy"><svg class="icon icon-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
           <path d="M9 9h11a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-9a2 2 0 0 1-2-2V9z"></path>
           <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-        </svg></button><button class="download-stl" title="openscad-download-stl" aria-label="openscad-download-stl"><svg class="icon icon-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-          <path d="M7 10l5 5 5-5"></path>
-          <path d="M12 15V3"></path>
-        </svg></button><button class="reset" title="openscad-reset" aria-label="openscad-reset"><svg class="icon icon-reset" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-          <path d="M1 4v6h6"></path>
-          <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+        </svg></button><button class="download" title="ide-download-files" aria-label="ide-download-files"><svg class="icon icon-archive" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+          <path d="M21 8v13H3V8"></path>
+          <path d="M1 3h22v5H1z"></path>
+          <path d="M10 12h4"></path>
         </svg></button><button class="fullscreen" title="ide-fullscreen-enter" aria-label="ide-fullscreen-enter"><svg class="icon icon-fullscreen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
           <path d="M8 3H5a2 2 0 0 0-2 2v3"></path>
           <path d="M21 8V5a2 2 0 0 0-2-2h-3"></path>

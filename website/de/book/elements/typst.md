@@ -16,11 +16,14 @@ Die Typst-Direktive ermöglicht es dir, [Typst](https://typst.app/)-Dokumente di
 | `id` | Eindeutiger Bezeichner für den Typst-Block | Automatisch generiert |
 | `mode` | Anzeigemodus: `preview` (nur Ansicht) oder `edit` (mit Editor) | `preview` |
 | `height` | Höhe des Vorschau-Containers | `auto` |
+| `main` | Die Datei, die kompiliert wird | `main.typ` |
+| `files` | Was Leserinnen und Leser mit Dateien tun dürfen: `create`, `upload`, `rename`, `delete`, durch Kommas getrennt, oder `open` für alles | `create,upload` |
+| `accept` | Dateiendungen für Dateien, die Leserinnen und Leser anlegen oder umbenennen, durch Kommas getrennt | `.typ` |
 
 ## Wichtige Hinweise
 
 - **Mehrere Typst-Blöcke**: Wenn mehrere Typst-Blöcke auf derselben Seite vorhanden sind, werden sie nacheinander gerendert (einer nach dem anderen), um die Dateiisolierung zu gewährleisten. Jeder Block behält sein eigenes unabhängiges Dateisystem während des Renderns bei.
-- **Dateiisolierung**: Dateien, die in einem Typst-Block geladen werden (über `@source`), sind vollständig von anderen Blöcken auf derselben Seite isoliert. Das bedeutet, dass du denselben Dateinamen (z.B. `other.typ`) in verschiedenen Blöcken ohne Konflikte verwenden kannst.
+- **Dateiisolierung**: Dateien, die in einem Typst-Block geladen werden (über `::file` oder benannte Codeblöcke), sind vollständig von anderen Blöcken auf derselben Seite isoliert. Das bedeutet, dass du denselben Dateinamen (z.B. `other.typ`) in verschiedenen Blöcken ohne Konflikte verwenden kannst.
 
 
 ## Verwendung
@@ -97,12 +100,12 @@ Du kannst Typst-Quelldateien aus externen Quellen laden, indem du spezielle Dire
 
 #### Laden von Quelldateien
 
-Verwende die `@source`-Direktive, um Typst-Quelldateien zu laden, die in dein Hauptdokument eingebunden werden können:
+Verwende `::file{path="…" src="…"}`, um Typst-Quelldateien zu laden, die in dein Hauptdokument eingebunden werden können:
 
 ````md
 :::typst{mode="preview"}
 
-@source dest="other.typ" src="typst-doc.typ"
+::file{path="other.typ" src="typst-doc.typ"}
 
 ```typ
 = Hauptdokument
@@ -112,9 +115,9 @@ Verwende die `@source`-Direktive, um Typst-Quelldateien zu laden, die in dein Ha
 :::
 ````
 
-:::typst{mode="preview"}
+:::typst{id="dcb47be943118f120f83e5b3b449bceee800f6e62f21c1937a81995706782106" mode="preview"}
 
-@source dest="other.typ" src="typst-doc.typ"
+::file{path="other.typ" src="typst-doc.typ"}
 
 ```typ
 = Hauptdokument
@@ -143,19 +146,19 @@ Bilder, die in deinem Typst-Code referenziert werden, werden automatisch vom Ser
 
 #### Suchpfade für Dateien
 
-Dateien, die in `src`-Attributen (für `@source`- und `@font`-Direktiven) referenziert werden, sowie Bilder, die in `image()`-Aufrufen referenziert werden, werden wie folgt aufgelöst:
+Dateien, die im `src`-Attribut von `::file` referenziert werden, sowie Bilder, die in `image()`-Aufrufen referenziert werden, werden wie folgt aufgelöst:
 
 - **Absolute Pfade** (beginnend mit `/`): Der `basePath` wird dem Pfad vorangestellt
 - **Relative Pfade**: Werden relativ zum Verzeichnis der aktuellen Seite (`pagePath`) aufgelöst
 
 ### Laden von Schriftarten
 
-Verwende die `@font`-Direktive, um benutzerdefinierte Schriftarten für deine Typst-Dokumente zu laden. Nur `.otf` (OpenType) und `.ttf` (TrueType) Schriftarten werden unterstützt.
+Verwende `::file` mit dem Schalter `font`, um benutzerdefinierte Schriftarten für deine Typst-Dokumente zu laden. Nur `.otf` (OpenType) und `.ttf` (TrueType) Schriftarten werden unterstützt.
 
 ````md
 :::typst{mode="preview"}
 
-@font src="/fonts/FiraSans-Regular.otf"
+::file{src="/fonts/FiraSans-Regular.otf" font}
 
 ```typ
 #set text(font: "Fira Sans")
@@ -174,7 +177,7 @@ Für Emoji-Unterstützung in Typst musst du die NotoColorEmoji-Schriftart laden:
 ````md
 :::typst{mode="preview"}
 
-@font src="/fonts/NotoColorEmoji.ttf"
+::file{src="/fonts/NotoColorEmoji.ttf" font}
 
 ```typ
 = Emoji-Beispiel
@@ -189,8 +192,8 @@ Hallo Welt! 🎉🚀✨
 Um Schriftarten in vielen Typst-Instanzen wiederzuverwenden, empfiehlt es sich, ein Snippet zu erstellen. Erstelle eine Datei `fonts.md.hbs` im `snippets`-Ordner:
 
 ```hbs
-@font src="/fonts/NotoColorEmoji.ttf"
-@font src="/fonts/FiraSans-Regular.otf"
+::file{src="/fonts/NotoColorEmoji.ttf" font}
+::file{src="/fonts/FiraSans-Regular.otf" font}
 ```
 
 Dann verwende das Snippet in deinen Typst-Blöcken:
@@ -218,13 +221,13 @@ Du kannst mehrere Quelldateien definieren, indem du benannte Code-Blöcke verwen
 ````md
 :::typst{mode="preview"}
 
-```typ main.typ
+```typ
 = Hauptdokument
 
 #include "/helper.typ"
 ```
 
-```typ helper.typ
+```typ file="helper.typ"
 = Hilfsinhalt
 
 Dieser Inhalt befindet sich in einer separaten Datei.
@@ -307,7 +310,7 @@ Dieses Beispiel demonstriert das Laden von Quelldateien mit mehreren benannten T
 ````md
 :::typst{mode="preview" height="250px"}
 
-```typ main.typ
+```typ
 = Code-Beispiel
 
 Hier ist etwas Inline-`Code` und ein Code-Block:
@@ -324,7 +327,7 @@ Hier ist etwas Inline-`Code` und ein Code-Block:
 #include "/other.typ"
 ```
 
-```typ other.typ
+```typ file="other.typ"
 = Zusätzlicher Inhalt
 
 #figure(
@@ -335,9 +338,9 @@ Hier ist etwas Inline-`Code` und ein Code-Block:
 :::
 ````
 
-:::typst{mode="preview" height="250px"}
+:::typst{id="f04db1b387b940fc254f6298f71d6a0a8ca23facc79b5ae4afbbb290afaa1917" mode="preview" height="250px"}
 
-```typ main.typ
+```typ file="main.typ"
 = Code-Beispiel
 
 Hier ist etwas Inline-`Code` und ein Code-Block:
@@ -355,7 +358,7 @@ Hier ist etwas Inline-`Code` und ein Code-Block:
 
 ```
 
-```typ other.typ
+```typ file="other.typ"
 = Ein weiterer Code-Block
 
 #figure(
@@ -364,3 +367,17 @@ Hier ist etwas Inline-`Code` und ein Code-Block:
 )
 ```
 :::
+
+## Dateien, die Leserinnen und Leser ändern dürfen
+
+Mit `files` bekommen Leserinnen und Leser Knöpfe für eigene Dateien: **+** legt eine Datei an, **⤒** lädt eine hoch, und jeder Tab bekommt **✎** zum Umbenennen und **×** zum Löschen. `rename` und `delete` erlauben das auch für die Dateien der Seite; die Hauptdatei sowie `readonly`-, `hidden`- und Testdateien bleiben immer, wie sie geschrieben sind. Selbst angelegte oder hochgeladene Dateien dürfen Leserinnen und Leser immer umbenennen und löschen. Ein Klick auf den Tab einer Binärdatei zeigt eine Vorschau: Bilder, Audio und Video, PDFs, Schriftarten (TTF, OTF, WOFF) und 3D-Modelle (STL, OBJ), die sich drehen und zoomen lassen.
+
+````md
+:::typst{files="create,upload,rename,delete"}
+...
+:::
+````
+
+## Umstieg von der alten Schreibweise
+
+Ältere Bücher laden Dateien mit `@source`-, `@file`- und `@font`-Zeilen und benennen Codeblöcke nur über ihre Meta-Angabe (```` ```typ other.typ ````). Führe in deinem Buch `npx hyperbook migrate` aus, um diese Seiten und die verwendeten Snippets umzustellen; gespeicherte Dokumente der Leserinnen und Leser bleiben dabei erhalten.

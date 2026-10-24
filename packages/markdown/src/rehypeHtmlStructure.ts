@@ -439,6 +439,16 @@ window.hyperbook.emoji = { style: "twemoji", base: "${makeUrl(["emoji"], "assets
                     },
                   ]
                 : []),
+              // Before store.js, whose v11 upgrade calls into it.
+              {
+                type: "element",
+                tagName: "script",
+                properties: {
+                  src: makeUrl(["store-ide-migration.js"], "assets"),
+                  defer: true,
+                },
+                children: [],
+              },
               {
                 type: "element",
                 tagName: "script",

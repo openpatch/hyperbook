@@ -117,11 +117,22 @@ function completionSource(spec) {
 }
 
 /**
+ * One file open in an editor. Holds the file's own editor state, so switching
+ * between documents keeps each one's undo history, selection and scroll.
+ *
+ * @typedef {object} EditorDoc
+ * @property {() => string} getValue
+ */
+
+/**
  * Create a CodeMirror 6 editor inside container.
+ *
+ * The editor starts with one document. `createDoc` and `swapDoc` let it show
+ * several files in turn, like the tabs of an IDE workspace.
  *
  * @param {HTMLElement} container
  * @param {{lang?: string, value?: string, readOnly?: boolean, onChange?: (code: string) => void, completions?: CompletionSpec[], indentGuides?: boolean}} opts
- * @returns {{ getValue(): string, setValue(v: string): void, setReadOnly(ro: boolean): void, destroy(): void }}
+ * @returns {{ getValue(): string, setValue(v: string): void, setReadOnly(ro: boolean): void, createDoc(value?: string, opts?: {lang?: string, readOnly?: boolean}): EditorDoc, swapDoc(doc: EditorDoc): void, currentDoc(): EditorDoc, destroy(): void }}
  */
 function create(
   container,
@@ -137,21 +148,20 @@ function create(
   const readOnlyComp = new Compartment();
   const themeComp = new Compartment();
 
-  const extensions = [
+  // Whole-editor read-only (e.g. while a program runs), on top of each
+  // document's own read-only flag.
+  let editorReadOnly = readOnly;
+
+  const shared = [
     basicSetup,
     keymap.of([indentWithTab]),
     EditorView.theme({
       "&": { height: "100%" },
       ".cm-scroller": { overflow: "auto" },
     }),
-    themeComp.of(isDark() ? githubDark : githubLight),
-    readOnlyComp.of(EditorState.readOnly.of(readOnly)),
   ];
 
-  const langFn = langExtMap[lang];
-  if (langFn) extensions.push(langFn());
-
-  if (withIndentGuides) extensions.push(indentGuides());
+  if (withIndentGuides) shared.push(indentGuides());
 
   if (completions?.length) {
     // basicSetup already enables autocompletion, so these are registered as
@@ -159,20 +169,57 @@ function create(
     const sources = completions.map((spec) => ({
       autocomplete: completionSource(spec),
     }));
-    extensions.push(EditorState.languageData.of(() => sources));
+    shared.push(EditorState.languageData.of(() => sources));
   }
 
   if (onChange) {
-    extensions.push(
+    shared.push(
       EditorView.updateListener.of((update) => {
         if (update.docChanged) onChange(update.state.doc.toString());
       }),
     );
   }
 
-  const view = new EditorView({ doc: value, extensions, parent: container });
+  const makeState = (doc, docLang, docReadOnly) => {
+    const extensions = [
+      ...shared,
+      themeComp.of(isDark() ? githubDark : githubLight),
+      readOnlyComp.of(EditorState.readOnly.of(editorReadOnly || docReadOnly)),
+    ];
+    const langFn = langExtMap[docLang];
+    if (langFn) extensions.push(langFn());
+    return EditorState.create({ doc, extensions });
+  };
+
+  const view = new EditorView({
+    state: makeState(value, lang, false),
+    parent: container,
+  });
   const entry = { view, themeComp };
   activeViews.add(entry);
+
+  /** @returns {EditorDoc & {state: EditorState | null, readOnly: boolean}} */
+  const makeDoc = (state, docReadOnly) => {
+    const doc = {
+      state,
+      readOnly: docReadOnly,
+      getValue() {
+        const s = doc === current ? view.state : doc.state;
+        return s.doc.toString();
+      },
+    };
+    return doc;
+  };
+
+  let current = makeDoc(null, false);
+
+  const applyReadOnly = () => {
+    view.dispatch({
+      effects: readOnlyComp.reconfigure(
+        EditorState.readOnly.of(editorReadOnly || current.readOnly),
+      ),
+    });
+  };
 
   return {
     getValue() {
@@ -184,9 +231,26 @@ function create(
       });
     },
     setReadOnly(ro) {
+      editorReadOnly = ro;
+      applyReadOnly();
+    },
+    createDoc(docValue = "", { lang: docLang = lang, readOnly: ro = false } = {}) {
+      return makeDoc(makeState(docValue, docLang, ro), ro);
+    },
+    swapDoc(doc) {
+      if (doc === current) return;
+      current.state = view.state;
+      view.setState(doc.state);
+      doc.state = null;
+      current = doc;
+      // The stored state kept the theme and read-only flag it was left with.
       view.dispatch({
-        effects: readOnlyComp.reconfigure(EditorState.readOnly.of(ro)),
+        effects: themeComp.reconfigure(isDark() ? githubDark : githubLight),
       });
+      applyReadOnly();
+    },
+    currentDoc() {
+      return current;
     },
     destroy() {
       activeViews.delete(entry);

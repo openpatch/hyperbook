@@ -1,3 +1,4 @@
+import { Position } from "unist";
 import { VFile } from "vfile";
 import hash, { stableHash } from "./objectHash";
 
@@ -43,6 +44,18 @@ export function resolveDirectiveId(file: VFile, node: unknown): string {
         `them later can move a reader's saved work into the other.`,
       node as never,
     );
+  }
+
+  // `hyperbook migrate` reads these back to pin the id a directive had
+  // before its syntax is rewritten.
+  const position = (node as { position?: Position })?.position;
+  if (position?.start.offset !== undefined && position.end.offset !== undefined) {
+    (file.data.resolvedDirectiveIds ||= []).push({
+      name: (node as { name?: string })?.name ?? "",
+      start: position.start.offset,
+      end: position.end.offset,
+      id,
+    });
   }
 
   // An unchanged id needs no migration, and recording it would only grow the

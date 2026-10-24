@@ -17,9 +17,9 @@ export const constructUrl = (path, basePath, pagePath) => {
   return pagePath ? `${pagePath}/${path}`.replace(/\/+/g, "/") : path;
 };
 
-export const resolveImportFsPath = (assetPath) => {
+export const resolveImportFsPath = (assetPath, main = "main.scad") => {
   try {
-    return new URL(assetPath, "file:///tmp/model.scad").pathname || null;
+    return new URL(assetPath, `file:///${main}`).pathname || null;
   } catch (_) {
     return null;
   }
@@ -44,10 +44,15 @@ export const extractImportAssetPaths = (code) => {
   return [...paths];
 };
 
-export const buildAutoBinaryFiles = (code, basePath, pagePath) => {
+/**
+ * Files the model imports by a path the workspace does not have, fetched
+ * from the book instead. Paths are resolved next to the main file, where the
+ * worker writes it.
+ */
+export const buildAutoBinaryFiles = (code, main, basePath, pagePath) => {
   return extractImportAssetPaths(code)
     .map((assetPath) => {
-      const dest = resolveImportFsPath(assetPath);
+      const dest = resolveImportFsPath(assetPath, main);
       if (!dest) return null;
       return {
         dest,

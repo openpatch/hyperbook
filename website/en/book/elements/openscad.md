@@ -42,36 +42,58 @@ cube([20,20,20], center=true);
 | Attribute | Description | Default |
 |---|---|---|
 | `id` | Unique id for persistence | auto-generated |
-| `src` | Load source from an external file path | inline code block |
+| `main` | The file that is rendered | `main.scad` |
 | `height` | Height of the editor/preview container | `calc(100dvh - 80px)` |
 | `library` | Comma-separated list of libraries to load into the OpenSCAD environment | none |
+| `files` | What readers may do with files: `create`, `upload`, `rename`, `delete`, comma-separated, or `open` for all | `upload` |
+| `accept` | Extensions of files readers create or rename, comma-separated | `.scad` |
 
 Possible libraries include: BOSL2, BOSL, MCAD, NopSCADlib, fonts
 
 ## Load code from file
 
 ````md
-:::openscad{src="openscad/example.scad"}
+:::openscad
+::file{path="main.scad" src="openscad/example.scad"}
+:::
+````
+
+## Several files
+
+Further files get a name with `file="…"` and show up as tabs. The main file can `include` or `use` them:
+
+````md
+:::openscad
+
+```scad
+include <parts.scad>
+part(10);
+```
+
+```scad file="parts.scad"
+module part(s) { cube([s, s, s]); }
+```
+
 :::
 ````
 
 ## Load binary files into the OpenSCAD filesystem
 
-Use `@file` directives inside the `:::openscad` block to mount binary files before rendering.
-
-In edit mode, you can also use the **Binary Files** panel to upload files directly (stored locally in browser storage for this block).
+Use `::file` lines inside the `:::openscad` block to add meshes, images or fonts from your book. They are placed next to the main file, at their `path`:
 
 ````md
 :::openscad
 
-@file dest="/input/model.stl" src="models/model.stl"
+::file{path="input/model.stl" src="models/model.stl"}
 
 ```scad
-import("/input/model.stl");
+import("input/model.stl");
 ```
 
 :::
 ````
+
+Readers can upload files of their own with the **⤒** tab; they are saved in the browser with the rest of the model.
 
 Relative paths in `import()` are also supported and resolved like Typst assets (relative to the current page). Example:
 
@@ -254,3 +276,17 @@ bridge(rod_diameter=rod_diameter);
 ```
 
 :::
+
+## Files readers may change
+
+With `files`, readers get buttons for their own files: **+** creates a file, **⤒** uploads one, and each tab gets **✎** to rename and **×** to delete it. `rename` and `delete` allow it for the files of the page too; the main file and `readonly`, `hidden` and test files always stay as written. Files readers created or uploaded they can always rename and delete. Clicking the tab of a binary file shows a preview: images, audio and video, PDFs, fonts (TTF, OTF, WOFF) and 3D models (STL, OBJ), which you can turn and zoom.
+
+````md
+:::openscad{files="create,upload,rename,delete"}
+...
+:::
+````
+
+## Upgrading from the old syntax
+
+Older books loaded files with `src="…"` on the directive and `@file dest="…" src="…"` lines. Run `npx hyperbook migrate` in your book to convert these pages; it also keeps the models readers saved.

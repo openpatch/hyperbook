@@ -16,13 +16,7 @@ import {
   getInvocationStderr,
   buildParamUiInWorker,
 } from "./worker.js";
-import {
-  setupSplitter,
-  setupCanvasParamsSplitter,
-  updateFullscreenButtonState,
-  toggleFullscreen,
-  syncFullscreenButtons,
-} from "./ui.js";
+import { setupCanvasParamsSplitter } from "./ui.js";
 import {
   i18nGet,
   normalizePath,
@@ -49,20 +43,8 @@ hyperbook.openscad = (function () {
       .split(",")
       .map((s) => s.trim())
       .filter(Boolean);
-    const binaryFilesData = elem.getAttribute("data-binary-files");
     const basePath = normalizePath(elem.getAttribute("data-base-path") || "/");
     const pagePath = normalizePath(elem.getAttribute("data-page-path") || "");
-    const decodeBase64 = (str) => {
-      const binaryStr = atob(str);
-      const bytes = Uint8Array.from(binaryStr, (c) => c.charCodeAt(0));
-      return new TextDecoder("utf-8").decode(bytes);
-    };
-    const initialBinaryFiles = binaryFilesData
-      ? JSON.parse(decodeBase64(binaryFilesData))
-      : [];
-    let userBinaryFiles = Array.isArray(initialBinaryFiles)
-      ? [...initialBinaryFiles]
-      : [];
 
     const previewContainer = elem.querySelector(".preview-container");
     const leftSide = elem.querySelector(".left-side");
@@ -75,21 +57,13 @@ hyperbook.openscad = (function () {
     const editorDiv = elem.querySelector(".editor");
     const params = elem.querySelector("textarea.parameters");
 
-    // `cm` will be initialized after scheduleSave/scheduleParamBuild are defined.
-    let cm = null;
-
     // The parameters panel is its own card below the canvas.
     const paramsPanel = elem.querySelector(".parameters-panel");
     const paramsForm =
       paramsPanel?.querySelector(".parameters-body") ?? paramsPanel;
 
     const renderBtn = elem.querySelector("button.render");
-    const copyBtn = elem.querySelector("button.copy");
     const downloadBtn = elem.querySelector("button.download-stl");
-    const resetBtn = elem.querySelector("button.reset");
-    const fullscreenBtn = elem.querySelector("button.fullscreen");
-    const addBinaryFileBtn = elem.querySelector("button.add-binary-file");
-    const binaryFilesList = elem.querySelector(".binary-files-list");
     const bottomButtons = elem.querySelector(".buttons.bottom");
     let downloadFormatSelect = bottomButtons?.querySelector(
       "select.download-format",
@@ -119,103 +93,62 @@ hyperbook.openscad = (function () {
       downloadBtn.setAttribute("aria-label", downloadLabel);
     }
 
-    const normalizeBinaryDest = (dest) => {
-      if (typeof dest !== "string") return null;
-      const trimmed = dest.trim();
-      if (!trimmed) return null;
-      return normalizePath(trimmed).replace(/\/+/g, "/");
-    };
-
-    const updateBinaryFilesList = () => {
-      if (!binaryFilesList) return;
-      binaryFilesList.innerHTML = "";
-
-      if (userBinaryFiles.length === 0) {
-        const emptyMsg = document.createElement("div");
-        emptyMsg.className = "binary-files-empty";
-        emptyMsg.textContent = i18nGet(
-          "openscad-no-binary-files",
-          "No binary files",
-        );
-        binaryFilesList.appendChild(emptyMsg);
-        return;
-      }
-
-      userBinaryFiles.forEach((file) => {
-        const item = document.createElement("div");
-        item.className = "binary-file-item";
-
-        const icon = document.createElement("span");
-        icon.className = "binary-file-icon";
-        icon.textContent = "📎";
-        item.appendChild(icon);
-
-        const name = document.createElement("span");
-        name.className = "binary-file-name";
-        name.textContent = file.dest;
-        item.appendChild(name);
-
-        const deleteBtn = document.createElement("button");
-        deleteBtn.className = "binary-file-delete";
-        deleteBtn.textContent = "×";
-        deleteBtn.title = i18nGet("typst-delete-file", "Delete file");
-        deleteBtn.addEventListener("click", () => {
-          const confirmMsg = `${i18nGet("typst-delete-confirm", "Delete")} ${file.dest}?`;
-          if (!window.confirm(confirmMsg)) return;
-          userBinaryFiles = userBinaryFiles.filter((f) => f.dest !== file.dest);
-          updateBinaryFilesList();
-          scheduleSave();
-          void renderPreview();
-        });
-        item.appendChild(deleteBtn);
-
-        binaryFilesList.appendChild(item);
-      });
-    };
-
-    const handleAddBinaryFile = (event) => {
-      event.preventDefault();
-      event.stopPropagation();
-
-      const input = document.createElement("input");
-      input.type = "file";
-      input.accept = "*/*";
-
-      input.addEventListener("change", (changeEvent) => {
-        const file = changeEvent.target.files?.[0];
-        if (!file) return;
-
-        const dest = normalizeBinaryDest(`/${file.name}`);
-        if (!dest) return;
-
-        if (userBinaryFiles.some((f) => f.dest === dest)) {
-          if (
-            !window.confirm(
-              i18nGet("openscad-file-replace", `Replace existing ${dest}?`),
-            )
-          ) {
-            return;
-          }
-          userBinaryFiles = userBinaryFiles.filter((f) => f.dest !== dest);
+    const ide = HyperbookIDE.mount(elem, {
+      id,
+      runtime: "openscad",
+      editor: editorDiv,
+      workspace: elem.getAttribute("data-workspace"),
+      lang: (path) => (path.endsWith(".scad") ? "clike" : ""),
+      buttons: {
+        reset: elem.querySelector("button.reset"),
+        copy: elem.querySelector("button.copy"),
+        download: elem.querySelector("button.download"),
+        fullscreen: elem.querySelector("button.fullscreen"),
+      },
+      layout: { container: leftSide, editorContainer, splitter },
+      onRestore: (ui, extra) => {
+        if (
+          leftSide &&
+          Number.isFinite(ui.splitCanvasParams) &&
+          ui.splitCanvasParams > 0
+        ) {
+          leftSide.dataset.splitCanvasParams = String(
+            Math.round(ui.splitCanvasParams),
+          );
         }
+        if (params && typeof extra.params === "string") {
+          params.value = extra.params;
+        }
+      },
+      onChange: (path) => {
+        if (path === ide.main && !suppressParamBuild) {
+          scheduleParamBuild(getCode());
+        }
+        // An included file or an upload changes the model too.
+        scheduleParamRender();
+      },
+    });
 
-        const reader = new FileReader();
-        reader.onload = (loadEvent) => {
-          const url = loadEvent.target?.result;
-          if (typeof url !== "string") return;
-          userBinaryFiles.push({ dest, url });
-          updateBinaryFilesList();
-          scheduleSave();
-          void renderPreview();
-        };
-        reader.readAsDataURL(file);
-      });
+    /** The main file, which OpenSCAD renders. */
+    const getCode = () => ide.content(ide.main) ?? "";
 
-      input.click();
-    };
-
-    addBinaryFileBtn?.addEventListener("click", handleAddBinaryFile);
-    updateBinaryFilesList();
+    /**
+     * The other files of the workspace, placed next to the main file the way
+     * the worker places binary files: included .scad files and imported
+     * meshes are found by their relative path.
+     */
+    const workspaceFiles = () =>
+      ide
+        .files()
+        .filter((file) => file.path !== ide.main && !file.role)
+        .map((file) => ({
+          dest: `/${file.path}`,
+          url:
+            typeof file.content === "string"
+              ? `data:text/plain;charset=utf-8,${encodeURIComponent(file.content)}`
+              : file.url,
+        }))
+        .filter((file) => file.url);
 
     // --- Canvas overlay ---
     let overlayDismissTimer = null;
@@ -311,90 +244,18 @@ hyperbook.openscad = (function () {
       });
     };
 
-    const applyMainSplitSize = setupSplitter(
-      elem,
-      leftSide,
-      editorContainer,
-      splitter,
-      () => {
-        scheduleResizeCanvas();
-        scheduleSave();
-      },
-    );
     const applyCanvasParamsSplitSize = setupCanvasParamsSplitter(
       leftSide,
       previewContainer,
       paramsPanel,
       canvasParamsSplitter,
-      () => {
+      (sizes) => {
         scheduleResizeCanvas();
-        scheduleSave();
+        void ide.saveUi(sizes);
       },
     );
 
-    const save = async () => {
-      if (!id) return;
-      const splitHorizontal = Number(elem.dataset.splitHorizontal);
-      const splitVertical = Number(elem.dataset.splitVertical);
-      const splitCanvasParams = Number(leftSide?.dataset.splitCanvasParams);
-      await hyperbook.store.db.openscad.put({
-        id,
-        code: cm?.getValue() || "",
-        params: params?.value || "{}",
-        binaryFiles: userBinaryFiles,
-        ...(Number.isFinite(splitHorizontal) && splitHorizontal > 0
-          ? { splitHorizontal: Math.round(splitHorizontal) }
-          : {}),
-        ...(Number.isFinite(splitVertical) && splitVertical > 0
-          ? { splitVertical: Math.round(splitVertical) }
-          : {}),
-        ...(Number.isFinite(splitCanvasParams) && splitCanvasParams > 0
-          ? { splitCanvasParams: Math.round(splitCanvasParams) }
-          : {}),
-      });
-    };
-
-    const load = async () => {
-      if (!id) return null;
-      const result = await hyperbook.store.db.openscad.get(id);
-      if (!result) return null;
-      if (cm && typeof result.code === "string") {
-        cm.setValue(result.code);
-      }
-      if (params && typeof result.params === "string") {
-        params.value = result.params;
-      }
-      if (Array.isArray(result.binaryFiles)) {
-        userBinaryFiles = result.binaryFiles
-          .map((file) => ({
-            dest: normalizeBinaryDest(file?.dest),
-            url: typeof file?.url === "string" ? file.url : "",
-          }))
-          .filter((file) => file.dest && file.url);
-        updateBinaryFilesList();
-      }
-      if (
-        Number.isFinite(result.splitHorizontal) &&
-        result.splitHorizontal > 0
-      ) {
-        elem.dataset.splitHorizontal = String(
-          Math.round(result.splitHorizontal),
-        );
-      }
-      if (Number.isFinite(result.splitVertical) && result.splitVertical > 0) {
-        elem.dataset.splitVertical = String(Math.round(result.splitVertical));
-      }
-      if (
-        leftSide &&
-        Number.isFinite(result.splitCanvasParams) &&
-        result.splitCanvasParams > 0
-      ) {
-        leftSide.dataset.splitCanvasParams = String(
-          Math.round(result.splitCanvasParams),
-        );
-      }
-      return result;
-    };
+    const save = () => ide.saveExtra({ params: params?.value || "{}" });
 
     const SAVE_DEBOUNCE_MS = 250;
     const PARAM_REBUILD_DEBOUNCE_MS = 900;
@@ -482,7 +343,7 @@ hyperbook.openscad = (function () {
       syncParamsTextareaFromState();
 
       // Reflect the new value back into the editor source code.
-      const currentCode = cm?.getValue() || "";
+      const currentCode = getCode();
       const updatedCode = updateVariableInCode(
         currentCode,
         name,
@@ -490,7 +351,7 @@ hyperbook.openscad = (function () {
       );
       if (updatedCode !== currentCode) {
         suppressParamBuild = true;
-        cm?.setValue(updatedCode);
+        ide.setContent(ide.main, updatedCode);
         suppressParamBuild = false;
       }
 
@@ -518,8 +379,8 @@ hyperbook.openscad = (function () {
       // Code is the source of truth — param changes are always synced back to the
       // code, so we never need stored overrides to win over the code's own values.
       const resolvedBinaryFiles = mergeBinaryFiles(
-        userBinaryFiles,
-        buildAutoBinaryFiles(code, basePath, pagePath),
+        workspaceFiles(),
+        buildAutoBinaryFiles(code, ide.main, basePath, pagePath),
       );
       const result = await buildParamUiInWorker(
         code,
@@ -528,6 +389,7 @@ hyperbook.openscad = (function () {
         {},
         id || "model",
         _scriptBase,
+        `/${ide.main}`,
       );
       if (buildToken !== latestParamBuildToken) {
         return false;
@@ -631,14 +493,15 @@ hyperbook.openscad = (function () {
         // redundant and causes stale-value renders when the render fires before
         // the next param-build cycle completes.
         const resolvedBinaryFiles = mergeBinaryFiles(
-          userBinaryFiles,
-          buildAutoBinaryFiles(cm?.getValue() || "", basePath, pagePath),
+          workspaceFiles(),
+          buildAutoBinaryFiles(getCode(), ide.main, basePath, pagePath),
         );
         const result = await callWorker(
           "render",
           "render",
           {
-            code: cm?.getValue() || "",
+            code: getCode(),
+            sourcePath: `/${ide.main}`,
             format,
             libraryNames,
             binaryFiles: resolvedBinaryFiles,
@@ -872,26 +735,6 @@ hyperbook.openscad = (function () {
       }, PARAM_RENDER_DEBOUNCE_MS);
     };
 
-    copyBtn?.addEventListener("click", async () => {
-      await navigator.clipboard.writeText(cm?.getValue() || "");
-      hideOverlay();
-    });
-
-    resetBtn?.addEventListener("click", async () => {
-      if (
-        !window.confirm(
-          i18nGet(
-            "openscad-reset-prompt",
-            "Are you sure you want to reset the code?",
-          ),
-        )
-      ) {
-        return;
-      }
-      await hyperbook.store.db.openscad.delete(id);
-      window.location.reload();
-    });
-
     renderBtn?.addEventListener("click", renderPreview);
 
     downloadBtn?.addEventListener("click", async () => {
@@ -917,54 +760,15 @@ hyperbook.openscad = (function () {
       }
     });
 
-    fullscreenBtn?.addEventListener("click", async () => {
-      try {
-        await toggleFullscreen(elem);
-      } catch (error) {
-        console.error(error?.message || error);
-      }
-    });
-
-    updateFullscreenButtonState(elem, fullscreenBtn);
-
-    let editorStateRestored = false;
-
-    // Initialize CodeMirror now that scheduleSave/scheduleParamBuild are defined.
-    if (editorDiv) {
-      const initialSource = editorDiv.textContent;
-      editorDiv.textContent = "";
-      cm = HyperbookCM.create(editorDiv, {
-        lang: editorDiv.dataset.lang || "clike",
-        value: initialSource,
-        onChange: (code) => {
-          scheduleSave();
-          if (!suppressParamBuild) {
-            scheduleParamBuild(code);
-            scheduleParamRender();
-          }
-        },
-      });
-    }
-
-    const restoreEditorState = async () => {
-      if (editorStateRestored) return;
-      editorStateRestored = true;
-
-      const stored = await load();
-      // Re-apply split sizes after stored dataset values are applied by load().
-      applyMainSplitSize?.();
+    ide.ready.then(() => {
       applyCanvasParamsSplitSize?.();
-
-      // Use stored code if available; otherwise fall back to the editor's
-      // current value (the markdown default) or the built-in placeholder.
-      const initialCode =
-        stored?.code ||
-        cm?.getValue().trim() ||
-        "// OpenSCAD\ncube([20,20,20], center=true);";
-      cm?.setValue(initialCode);
+      if (!getCode().trim()) {
+        ide.setContent(ide.main, "// OpenSCAD\ncube([20,20,20], center=true);");
+      }
       if (!params?.value.trim()) {
         params.value = "{}";
       }
+      const initialCode = getCode();
       latestParamBuildToken += 1;
       const initParamToken = latestParamBuildToken;
       // Fire param extraction and rendering concurrently — each uses its own dedicated worker.
@@ -975,13 +779,8 @@ hyperbook.openscad = (function () {
           }
         })
         .catch(() => {});
-      if (!stored) {
-        await save();
-      }
       renderPreview();
-    };
-
-    void restoreEditorState();
+    });
   }
 
   function init(root) {
@@ -992,7 +791,6 @@ hyperbook.openscad = (function () {
   document.addEventListener("DOMContentLoaded", () => {
     init(document);
   });
-  document.addEventListener("fullscreenchange", syncFullscreenButtons);
 
   const observer = new MutationObserver((mutations) => {
     mutations.forEach((mutation) => {

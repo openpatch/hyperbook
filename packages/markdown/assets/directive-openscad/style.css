@@ -1,23 +1,9 @@
-.directive-openscad {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  overflow: hidden;
-  gap: 8px;
-  height: var(--openscad-height, calc(100dvh - 80px));
-}
-
-/* Left side: wraps preview-container + params card */
+/* Not a card itself: it holds two, the preview and the parameters. */
 .directive-openscad .left-side {
-  width: 100%;
-  min-height: 120px;
-  min-width: 120px;
-  flex: 1 1 0;
-  display: flex;
-  flex-direction: column;
   gap: 0;
-  overflow: hidden;
+  border: none;
+  border-radius: 0;
+  background: none;
 }
 
 .directive-openscad .preview-container {
@@ -30,12 +16,6 @@
   flex: 1 1 0;
   display: flex;
   flex-direction: column;
-}
-
-.directive-openscad .preview-header {
-  border-bottom: 1px solid var(--color-spacer);
-  padding: 8px 16px;
-  font-weight: 600;
 }
 
 .directive-openscad .preview-canvas {
@@ -140,7 +120,7 @@
 .directive-openscad .canvas-params-splitter {
   width: 100%;
   height: 4px;
-  margin: 6px 0;
+  margin: 8px 0;
   cursor: row-resize;
   background: var(--color-spacer);
   border-radius: 999px;
@@ -172,13 +152,6 @@
   display: none;
 }
 
-.directive-openscad .parameters-header {
-  border-bottom: 1px solid var(--color-spacer);
-  padding: 8px 16px;
-  font-weight: 600;
-  flex-shrink: 0;
-}
-
 .directive-openscad .parameters-body {
   flex: 1;
   min-height: 0;
@@ -191,264 +164,17 @@
   margin-top: 10px;
 }
 
-.directive-openscad .editor-container {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  min-height: 120px;
-  min-width: 120px;
-  flex: 1 1 0;
-}
-
-/* Main left/right splitter */
-.directive-openscad .splitter {
-  background: var(--color-spacer);
-  border-radius: 999px;
-  flex-shrink: 0;
-  touch-action: none;
-  opacity: 0.45;
-  transition: opacity 0.15s ease-in-out;
-}
-
-.directive-openscad .splitter:hover {
-  opacity: 0.65;
-}
-
-.directive-openscad.split-vertical .splitter {
-  width: 100%;
-  height: 4px;
-  cursor: row-resize;
-}
-
-.directive-openscad.split-horizontal .splitter {
-  width: 4px;
-  height: 100%;
-  cursor: col-resize;
-}
-
-.directive-openscad.resizing {
-  user-select: none;
-}
-
-.directive-openscad .buttons {
-  display: flex;
-  border: 1px solid var(--color-spacer);
-  border-radius: 8px;
-  border-bottom: none;
-  border-bottom-left-radius: 0;
-  border-bottom-right-radius: 0;
-  overflow: hidden;
-}
-
-.directive-openscad .buttons.bottom {
-  border: 1px solid var(--color-spacer);
-  border-radius: 8px;
-  border-top: none;
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
-}
-
-/* Icon-only toolbar: the written labels (Reset/Copy/Download) made this row
-   wrap on narrow screens, so the wording moved into title/aria-label. */
-.directive-openscad .buttons.bottom button {
-  flex: 0 0 auto;
-  min-width: 42px;
-  width: 42px;
-  padding: 8px 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.directive-openscad .buttons.bottom button .icon {
-  width: 18px;
-  height: 18px;
-  display: block;
-}
-
-/* Fullscreen sits apart, at the trailing edge of the toolbar. */
-.directive-openscad .buttons.bottom button.fullscreen {
-  margin-inline-start: auto;
-  border-right: none;
-  border-left: 1px solid var(--color-spacer);
-}
-
-.directive-openscad button {
-  flex: 1;
-  padding: 8px 16px;
-  border: none;
-  border-right: 1px solid var(--color-spacer);
-  background-color: var(--color-background, var(--color--background, #fff));
-  color: var(--color-text);
-  cursor: pointer;
-}
-
 .directive-openscad .buttons select.download-format {
   flex: 0 0 auto;
   min-width: 72px;
-  padding: 8px 10px;
+  min-height: var(--ide-bar-height);
+  padding: 0 10px;
   border: none;
   border-right: 1px solid var(--color-spacer);
-  background-color: var(--color-background, var(--color--background, #fff));
+  background-color: var(--color-background);
   color: var(--color-text);
   font: inherit;
   cursor: pointer;
-}
-
-.directive-openscad .buttons button:last-child {
-  border-right: none;
-}
-
-.directive-openscad .binary-files-section {
-  border: 1px solid var(--color-spacer);
-  border-top: none;
-  border-bottom: none;
-  background-color: var(--color-background, var(--color--background, #fff));
-  margin-bottom: 0;
-}
-
-.directive-openscad .binary-files-section summary {
-  padding: 8px 12px;
-  cursor: pointer;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  user-select: none;
-  background-color: var(--color-background, var(--color--background, #fff));
-  list-style: none;
-}
-
-.directive-openscad .binary-files-section summary::-webkit-details-marker {
-  display: none;
-}
-
-.directive-openscad .binary-files-section summary .summary-text {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.directive-openscad .binary-files-section summary .summary-indicator {
-  transition: transform 0.2s;
-  display: inline-flex;
-  align-items: center;
-}
-
-.directive-openscad .binary-files-section summary .summary-indicator .icon {
-  width: 14px;
-  height: 14px;
-  display: block;
-}
-
-.directive-openscad .binary-files-section[open] summary .summary-indicator {
-  transform: rotate(90deg);
-}
-
-.directive-openscad .binary-files-section summary:hover {
-  background-color: var(--color-spacer);
-}
-
-.directive-openscad .binary-files-actions {
-  padding: 8px;
-}
-
-.directive-openscad .add-binary-file {
-  width: 100%;
-  flex: none;
-  padding: 6px 12px;
-  font-size: 0.875rem;
-  border: 1px solid var(--color-spacer);
-  border-radius: 4px;
-  background-color: var(--color-background, var(--color--background, #fff));
-  color: var(--color-text);
-  cursor: pointer;
-}
-
-.directive-openscad .add-binary-file:hover {
-  background-color: var(--color-spacer);
-}
-
-.directive-openscad .binary-files-list {
-  padding: 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.directive-openscad .binary-files-empty {
-  padding: 12px;
-  text-align: center;
-  color: var(--color-text);
-  opacity: 0.6;
-  font-style: italic;
-  font-size: 0.875rem;
-}
-
-.directive-openscad .binary-file-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  font-size: 0.875rem;
-}
-
-.directive-openscad .binary-file-icon {
-  font-size: 1rem;
-  flex-shrink: 0;
-}
-
-.directive-openscad .binary-file-name {
-  flex: 1;
-  word-break: break-all;
-}
-
-.directive-openscad .binary-file-delete {
-  background: none;
-  border: none;
-  color: var(--color-text);
-  cursor: pointer;
-  font-size: 1.125rem;
-  line-height: 1;
-  padding: 0;
-  margin: 0;
-  width: 20px;
-  height: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 2px;
-  flex: none;
-}
-
-.directive-openscad .binary-file-delete:hover {
-  background-color: rgba(220, 38, 38, 0.1);
-  color: #dc2626;
-}
-
-.directive-openscad button.fullscreen {
-  flex: 0 0 auto;
-  min-width: 42px;
-  width: 42px;
-  padding: 8px 0;
-}
-
-.directive-openscad button:hover,
-.directive-openscad button.active {
-  background-color: var(--color-spacer);
-}
-
-.directive-openscad .editor,
-.directive-openscad .parameters {
-  width: 100%;
-  border: 1px solid var(--color-spacer);
-  flex: 1;
-  margin: 0;
-  min-height: 0;
-  overflow: hidden;
-}
-
-.directive-openscad .editor .cm-editor {
-  height: 100%;
 }
 
 /* The parameters textarea is always hidden — the form replaces it visually */
@@ -549,30 +275,6 @@
 
 .directive-openscad .param-group-body > * + * {
   margin-top: 10px;
-}
-
-.directive-openscad:fullscreen {
-  width: 100vw;
-  height: 100dvh !important;
-  padding: 12px;
-  box-sizing: border-box;
-  background-color: var(--color-background, var(--color--background, #fff));
-}
-
-.directive-openscad:fullscreen::backdrop {
-  background-color: var(--color-background, var(--color--background, #fff));
-}
-
-@media screen and (min-width: 1024px) {
-  .directive-openscad {
-    flex-direction: row;
-  }
-
-  .directive-openscad .left-side,
-  .directive-openscad .editor-container {
-    flex: 1;
-    height: 100% !important;
-  }
 }
 
 @media (prefers-color-scheme: dark) {

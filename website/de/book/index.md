@@ -123,6 +123,24 @@ npm update hyperbook --global
 
 ::::
 
+## Migrieren
+
+Wenn ein Release die Syntax eines Elements so ändert, dass alte Seiten sie nicht mehr verstehen, wandelt `migrate` dein Buch auf die aktuelle Syntax um. Nötig ist das für v0.115.0, das die IDEs (PyIDE, Web IDE, p5, OpenSCAD und Typst) auf die Syntax mit mehreren Dateien umgestellt hat; die Element-Seiten beschreiben, was sich geändert hat und was es ersetzt hat.
+
+Führe den Befehl im Verzeichnis deines Buches aus:
+
+```sh
+npx hyperbook migrate
+```
+
+Der Befehl schreibt die Seiten und die von ihnen benutzten Snippets um und legt die `id` jedes geänderten IDEs fest, sodass Leser ihren gespeicherten Code behalten. Nur die geänderten Stellen werden ersetzt; der Rest der Seite bleibt, wie er ist. Was sich nicht automatisch umwandeln lässt, wird als Hinweis ausgegeben, den du dir ansehen solltest.
+
+Der Befehl verweigert den Lauf, solange das Projekt nicht committete Änderungen hat. Committet sie zuerst, damit du die Migration mit `git diff` ansehen und mit `git checkout` zurücknehmen kannst, oder benutze `--force`. Mit `--dry-run` siehst du, was sich ändern würde, ohne etwas zu schreiben:
+
+```sh
+npx hyperbook migrate --dry-run
+```
+
 ## Unterstützung
 
 Wir [freuen uns von dir zu hören](mailto:contact@openpatch.org), wenn du Unterstützung oder neue Features für deinen Anwendungszweck benötigst.

@@ -1,8 +1,20 @@
 import { PYTAMARO_URI_BEGIN, PYTAMARO_URI_END } from "./constants.js";
 import { pytamaroStdoutCarry } from "./state.js";
 
+/** Where an IDE's output goes instead of its panel, e.g. a test's row. */
+const outputTargets = new Map();
+
+/** @param {HTMLElement | null} target null sends output to the panel again. */
+export const setOutputTarget = (id, target) => {
+  if (target) outputTargets.set(id, target);
+  else outputTargets.delete(id);
+};
+
 export const getOutput = (id) => {
-  return document.getElementById(id)?.getElementsByClassName("output")[0];
+  return (
+    outputTargets.get(id) ||
+    document.getElementById(id)?.getElementsByClassName("output")[0]
+  );
 };
 
 export const renderPytamaroDataUri = (id, container, dataUri) => {
@@ -129,18 +141,28 @@ export const appendOutputErrorLine = (id, message) => {
 // ─── Python Friendly Error Messages ────────────────────────────────────────
 // Loaded from python-friendly-error-messages.js (built from npm package)
 
-if (window.PythonFriendlyErrorMessages) {
-  const { loadCopydeckFor, registerAdapter, pyodideAdapter } =
-    window.PythonFriendlyErrorMessages;
-  const lang = document.documentElement.lang || "en";
-  loadCopydeckFor(lang);
-  registerAdapter("pyodide", pyodideAdapter);
-}
+// The library may load after this script, so it is set up once it is there.
+// Pyodide prints CPython's tracebacks; the library has no adapter of its own
+// for it.
+let friendlyErrorsReady = false;
+const friendlyErrors = () => {
+  const pfem = window.PythonFriendlyErrorMessages;
+  if (pfem && !friendlyErrorsReady) {
+    friendlyErrorsReady = true;
+    pfem.registerAdapter("pyodide", pfem.pyodideAdapter || pfem.cpythonAdapter);
+    Promise.resolve(
+      pfem.loadCopydeckFor(document.documentElement.lang || "en"),
+    ).catch((error) => console.warn("Friendly error messages:", error));
+  }
+  return pfem;
+};
+friendlyErrors();
+window.addEventListener("load", friendlyErrors, { once: true });
 
 export const appendFriendlyError = (output, errorString, code) => {
   if (!output) return;
   let result = null;
-  if (window.PythonFriendlyErrorMessages) {
+  if (friendlyErrors()) {
     try {
       result = window.PythonFriendlyErrorMessages.friendlyExplain({
         error: String(errorString),
@@ -150,10 +172,10 @@ export const appendFriendlyError = (output, errorString, code) => {
     } catch {}
   }
   if (result?.html) {
+    // The library's markup is a div.pfem of its own.
     const div = document.createElement("div");
-    div.classList.add("pfem");
-    div.innerHTML = result.html;
-    output.appendChild(div);
+    div.innerHTML = result.html.trim();
+    output.append(...div.childNodes);
   } else {
     const span = document.createElement("span");
     span.classList.add("error-line");

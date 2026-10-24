@@ -75,7 +75,7 @@ document.documentElement.classList.remove('no-js');</script><script>
 
   document.write(stylesheets);
 })();
-// @license-end</script><script type="module" src="assets/dark-mode-toggle.js"></script><script src="assets/i18n.js" defer></script><script src="assets/dexie.min.js" defer></script><script src="assets/dexie-export-import.js" defer></script><script src="assets/store.js" defer></script><script>
+// @license-end</script><script type="module" src="assets/dark-mode-toggle.js"></script><script src="assets/i18n.js" defer></script><script src="assets/dexie.min.js" defer></script><script src="assets/dexie-export-import.js" defer></script><script src="assets/store-ide-migration.js" defer></script><script src="assets/store.js" defer></script><script>
 window.Prism = window.Prism || {};
 window.Prism.manual = true;</script><script src="assets/prism/prism.js" defer></script><script src="assets/prism/prism-typst.js" defer></script><link rel="stylesheet" href="assets/prism/prism.css"><link rel="stylesheet" href="assets/prism/prism-theme-github-dark.css" media="(prefers-color-scheme: dark)"><link rel="stylesheet" href="assets/prism/prism-theme-github-light.css" media="(prefers-color-scheme: light)"><link rel="stylesheet" href="assets/math/katex.min.css"><link rel="stylesheet" href="assets/shell.css"><link rel="stylesheet" href="assets/content.css"><link rel="stylesheet" media="print" href="assets/print.css"><link rel="stylesheet" href="assets/code.css"><script>
 HYPERBOOK_ASSETS = "assets/"
@@ -183,7 +183,7 @@ document.documentElement.classList.remove('no-js');</script><script>
 
   document.write(stylesheets);
 })();
-// @license-end</script><script type="module" src="/assets/dark-mode-toggle.js"></script><script src="/assets/i18n.js" defer></script><script src="/assets/dexie.min.js" defer></script><script src="/assets/dexie-export-import.js" defer></script><script src="/assets/store.js" defer></script><script>
+// @license-end</script><script type="module" src="/assets/dark-mode-toggle.js"></script><script src="/assets/i18n.js" defer></script><script src="/assets/dexie.min.js" defer></script><script src="/assets/dexie-export-import.js" defer></script><script src="/assets/store-ide-migration.js" defer></script><script src="/assets/store.js" defer></script><script>
 window.Prism = window.Prism || {};
 window.Prism.manual = true;</script><script src="/assets/prism/prism.js" defer></script><script src="/assets/prism/prism-typst.js" defer></script><link rel="stylesheet" href="/assets/prism/prism.css"><link rel="stylesheet" href="/assets/prism/prism-theme-github-dark.css" media="(prefers-color-scheme: dark)"><link rel="stylesheet" href="/assets/prism/prism-theme-github-light.css" media="(prefers-color-scheme: light)"><link rel="stylesheet" href="/assets/math/katex.min.css"><link rel="stylesheet" href="/assets/shell.css"><link rel="stylesheet" href="/assets/content.css"><link rel="stylesheet" media="print" href="/assets/print.css"><link rel="stylesheet" href="/assets/code.css"><script>
 HYPERBOOK_ASSETS = "/assets/"
@@ -280,7 +280,7 @@ document.documentElement.classList.remove('no-js');</script><script>
 
   document.write(stylesheets);
 })();
-// @license-end</script><script type="module" src="/assets/dark-mode-toggle.js"></script><script src="/assets/i18n.js" defer></script><script src="/assets/dexie.min.js" defer></script><script src="/assets/dexie-export-import.js" defer></script><script src="/assets/store.js" defer></script><script>
+// @license-end</script><script type="module" src="/assets/dark-mode-toggle.js"></script><script src="/assets/i18n.js" defer></script><script src="/assets/dexie.min.js" defer></script><script src="/assets/dexie-export-import.js" defer></script><script src="/assets/store-ide-migration.js" defer></script><script src="/assets/store.js" defer></script><script>
 window.Prism = window.Prism || {};
 window.Prism.manual = true;</script><script src="/assets/prism/prism.js" defer></script><script src="/assets/prism/prism-typst.js" defer></script><link rel="stylesheet" href="/assets/prism/prism.css"><link rel="stylesheet" href="/assets/prism/prism-theme-github-dark.css" media="(prefers-color-scheme: dark)"><link rel="stylesheet" href="/assets/prism/prism-theme-github-light.css" media="(prefers-color-scheme: light)"><link rel="stylesheet" href="/assets/math/katex.min.css"><link rel="stylesheet" href="/assets/shell.css"><link rel="stylesheet" href="/assets/content.css"><link rel="stylesheet" media="print" href="/assets/print.css"><link rel="stylesheet" href="/assets/code.css"><script>
 HYPERBOOK_ASSETS = "/assets/"
@@ -377,7 +377,7 @@ document.documentElement.classList.remove('no-js');</script><script>
 
   document.write(stylesheets);
 })();
-// @license-end</script><script type="module" src="/assets/dark-mode-toggle.js"></script><script src="/assets/i18n.js" defer></script><script src="/assets/dexie.min.js" defer></script><script src="/assets/dexie-export-import.js" defer></script><script src="/assets/store.js" defer></script><script>
+// @license-end</script><script type="module" src="/assets/dark-mode-toggle.js"></script><script src="/assets/i18n.js" defer></script><script src="/assets/dexie.min.js" defer></script><script src="/assets/dexie-export-import.js" defer></script><script src="/assets/store-ide-migration.js" defer></script><script src="/assets/store.js" defer></script><script>
 window.Prism = window.Prism || {};
 window.Prism.manual = true;</script><script src="/assets/prism/prism.js" defer></script><script src="/assets/prism/prism-typst.js" defer></script><link rel="stylesheet" href="/assets/prism/prism.css"><link rel="stylesheet" href="/assets/prism/prism-theme-github-dark.css" media="(prefers-color-scheme: dark)"><link rel="stylesheet" href="/assets/prism/prism-theme-github-light.css" media="(prefers-color-scheme: light)"><link rel="stylesheet" href="/assets/math/katex.min.css"><link rel="stylesheet" href="/assets/shell.css"><link rel="stylesheet" href="/assets/content.css"><link rel="stylesheet" media="print" href="/assets/print.css"><link rel="stylesheet" href="/assets/code.css"><script>
 HYPERBOOK_ASSETS = "/assets/"
@@ -472,7 +472,7 @@ document.documentElement.classList.remove('no-js');</script><script>
 
   document.write(stylesheets);
 })();
-// @license-end</script><script type="module" src="/assets/dark-mode-toggle.js"></script><script src="/assets/i18n.js" defer></script><script src="/assets/dexie.min.js" defer></script><script src="/assets/dexie-export-import.js" defer></script><script src="/assets/store.js" defer></script><script>
+// @license-end</script><script type="module" src="/assets/dark-mode-toggle.js"></script><script src="/assets/i18n.js" defer></script><script src="/assets/dexie.min.js" defer></script><script src="/assets/dexie-export-import.js" defer></script><script src="/assets/store-ide-migration.js" defer></script><script src="/assets/store.js" defer></script><script>
 window.Prism = window.Prism || {};
 window.Prism.manual = true;</script><script src="/assets/prism/prism.js" defer></script><script src="/assets/prism/prism-typst.js" defer></script><link rel="stylesheet" href="/assets/prism/prism.css"><link rel="stylesheet" href="/assets/prism/prism-theme-github-dark.css" media="(prefers-color-scheme: dark)"><link rel="stylesheet" href="/assets/prism/prism-theme-github-light.css" media="(prefers-color-scheme: light)"><link rel="stylesheet" href="/assets/math/katex.min.css"><link rel="stylesheet" href="/assets/shell.css"><link rel="stylesheet" href="/assets/content.css"><link rel="stylesheet" media="print" href="/assets/print.css"><link rel="stylesheet" href="/assets/code.css"><script>
 HYPERBOOK_ASSETS = "/assets/"
@@ -567,7 +567,7 @@ document.documentElement.classList.remove('no-js');</script><script>
 
   document.write(stylesheets);
 })();
-// @license-end</script><script type="module" src="/assets/dark-mode-toggle.js"></script><script src="/assets/i18n.js" defer></script><script src="/assets/dexie.min.js" defer></script><script src="/assets/dexie-export-import.js" defer></script><script src="/assets/store.js" defer></script><script>
+// @license-end</script><script type="module" src="/assets/dark-mode-toggle.js"></script><script src="/assets/i18n.js" defer></script><script src="/assets/dexie.min.js" defer></script><script src="/assets/dexie-export-import.js" defer></script><script src="/assets/store-ide-migration.js" defer></script><script src="/assets/store.js" defer></script><script>
 window.Prism = window.Prism || {};
 window.Prism.manual = true;</script><script src="/assets/prism/prism.js" defer></script><script src="/assets/prism/prism-typst.js" defer></script><link rel="stylesheet" href="/assets/prism/prism.css"><link rel="stylesheet" href="/assets/prism/prism-theme-github-dark.css" media="(prefers-color-scheme: dark)"><link rel="stylesheet" href="/assets/prism/prism-theme-github-light.css" media="(prefers-color-scheme: light)"><link rel="stylesheet" href="/assets/math/katex.min.css"><link rel="stylesheet" href="/assets/shell.css"><link rel="stylesheet" href="/assets/content.css"><link rel="stylesheet" media="print" href="/assets/print.css"><link rel="stylesheet" href="/assets/code.css"><script>
 HYPERBOOK_ASSETS = "/assets/"
@@ -664,7 +664,7 @@ document.documentElement.classList.remove('no-js');</script><script>
 
   document.write(stylesheets);
 })();
-// @license-end</script><script type="module" src="/assets/dark-mode-toggle.js"></script><script src="/assets/i18n.js" defer></script><script src="/assets/dexie.min.js" defer></script><script src="/assets/dexie-export-import.js" defer></script><script src="/assets/store.js" defer></script><script>
+// @license-end</script><script type="module" src="/assets/dark-mode-toggle.js"></script><script src="/assets/i18n.js" defer></script><script src="/assets/dexie.min.js" defer></script><script src="/assets/dexie-export-import.js" defer></script><script src="/assets/store-ide-migration.js" defer></script><script src="/assets/store.js" defer></script><script>
 window.Prism = window.Prism || {};
 window.Prism.manual = true;</script><script src="/assets/prism/prism.js" defer></script><script src="/assets/prism/prism-typst.js" defer></script><link rel="stylesheet" href="/assets/prism/prism.css"><link rel="stylesheet" href="/assets/prism/prism-theme-github-dark.css" media="(prefers-color-scheme: dark)"><link rel="stylesheet" href="/assets/prism/prism-theme-github-light.css" media="(prefers-color-scheme: light)"><link rel="stylesheet" href="/assets/math/katex.min.css"><link rel="stylesheet" href="/assets/shell.css"><link rel="stylesheet" href="/assets/content.css"><link rel="stylesheet" media="print" href="/assets/print.css"><link rel="stylesheet" href="/assets/code.css"><script>
 HYPERBOOK_ASSETS = "/assets/"
@@ -766,7 +766,7 @@ document.documentElement.classList.remove('no-js');</script><script>
 
   document.write(stylesheets);
 })();
-// @license-end</script><script type="module" src="/assets/dark-mode-toggle.js"></script><script src="/assets/i18n.js" defer></script><script src="/assets/dexie.min.js" defer></script><script src="/assets/dexie-export-import.js" defer></script><script type="application/json" id="hyperbook-legacy-ids">{"376d64c26f4e4309f5aabd715d56a43efc6ded4a5ea8d3b655e2dada17e3b24d":"e6623695a74b72863efad18d50defcb1f52fb26928e406ca74b727bb38e7c8e6","180717c7dcd7e9cf2de4dd2baa7d6985a4be7f96e55fb3cb9f3c87b114f7e336":"2ebeb94b8fd58f5d9ef2963538cca30f3521760b724793c8570058850e7f6449","0f8093938785204d81fcc26184c520173baecdda93a1277e4933ed25b6bc1ebb":"2990934dbcfd5acd0b539d89a9953b6d79d2f6aa2eef5c9033ee8b9f04795cf7"}</script><script src="/assets/store.js" defer></script><script>
+// @license-end</script><script type="module" src="/assets/dark-mode-toggle.js"></script><script src="/assets/i18n.js" defer></script><script src="/assets/dexie.min.js" defer></script><script src="/assets/dexie-export-import.js" defer></script><script type="application/json" id="hyperbook-legacy-ids">{"376d64c26f4e4309f5aabd715d56a43efc6ded4a5ea8d3b655e2dada17e3b24d":"e6623695a74b72863efad18d50defcb1f52fb26928e406ca74b727bb38e7c8e6","180717c7dcd7e9cf2de4dd2baa7d6985a4be7f96e55fb3cb9f3c87b114f7e336":"2ebeb94b8fd58f5d9ef2963538cca30f3521760b724793c8570058850e7f6449","0f8093938785204d81fcc26184c520173baecdda93a1277e4933ed25b6bc1ebb":"2990934dbcfd5acd0b539d89a9953b6d79d2f6aa2eef5c9033ee8b9f04795cf7"}</script><script src="/assets/store-ide-migration.js" defer></script><script src="/assets/store.js" defer></script><script>
 window.Prism = window.Prism || {};
 window.Prism.manual = true;</script><script src="/assets/prism/prism.js" defer></script><script src="/assets/prism/prism-typst.js" defer></script><link rel="stylesheet" href="/assets/prism/prism.css"><link rel="stylesheet" href="/assets/prism/prism-theme-github-dark.css" media="(prefers-color-scheme: dark)"><link rel="stylesheet" href="/assets/prism/prism-theme-github-light.css" media="(prefers-color-scheme: light)"><link rel="stylesheet" href="/assets/math/katex.min.css"><link rel="stylesheet" href="/assets/shell.css"><link rel="stylesheet" href="/assets/content.css"><link rel="stylesheet" media="print" href="/assets/print.css"><link rel="stylesheet" href="/assets/code.css"><script>
 HYPERBOOK_ASSETS = "/assets/"
@@ -893,7 +893,7 @@ document.documentElement.classList.remove('no-js');</script><script>
 
   document.write(stylesheets);
 })();
-// @license-end</script><script type="module" src="assets/dark-mode-toggle.js"></script><script src="assets/i18n.js" defer></script><script src="assets/dexie.min.js" defer></script><script src="assets/dexie-export-import.js" defer></script><script src="assets/store.js" defer></script><script>
+// @license-end</script><script type="module" src="assets/dark-mode-toggle.js"></script><script src="assets/i18n.js" defer></script><script src="assets/dexie.min.js" defer></script><script src="assets/dexie-export-import.js" defer></script><script src="assets/store-ide-migration.js" defer></script><script src="assets/store.js" defer></script><script>
 window.Prism = window.Prism || {};
 window.Prism.manual = true;</script><script src="assets/prism/prism.js" defer></script><script src="assets/prism/prism-typst.js" defer></script><link rel="stylesheet" href="assets/prism/prism.css"><link rel="stylesheet" href="assets/prism/prism-theme-github-dark.css" media="(prefers-color-scheme: dark)"><link rel="stylesheet" href="assets/prism/prism-theme-github-light.css" media="(prefers-color-scheme: light)"><link rel="stylesheet" href="assets/math/katex.min.css"><link rel="stylesheet" href="assets/shell.css"><link rel="stylesheet" href="assets/content.css"><link rel="stylesheet" media="print" href="assets/print.css"><link rel="stylesheet" href="assets/code.css"><script>
 HYPERBOOK_ASSETS = "assets/"

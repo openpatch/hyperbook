@@ -1,226 +1,39 @@
-.directive-webide {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  overflow: hidden;
-  gap: 8px;
-  height: var(--webide-height, calc(100dvh - 80px));
-}
-
-code-input {
-  margin: 0;
-}
-
-.directive-webide .editor {
-  width: 100%;
-  border: 1px solid var(--color-spacer);
-  flex: 1;
-  min-height: 0;
-  overflow: hidden;
-}
-
-.directive-webide .editor .cm-editor {
-  height: 100%;
-}
-
-.directive-webide .container {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  min-height: 120px;
-  min-width: 120px;
-  border: 1px solid var(--color-spacer);
-  border-radius: 8px;
-  overflow: hidden;
-  flex: 1 1 0;
-}
-
-.directive-webide .container-title {
-  border-bottom: 1px solid var(--color-spacer);
-  padding: 8px 16px;
-  padding-left: 0px;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  background-color: var(--color-background);
-  color: var(--color-text);
-}
-
+/* The frame's title bar: a browser's three dots before the page's title. */
 .directive-webide .container-title::before {
+  flex: 0 0 auto;
   content: "";
-  margin-right: 4.4rem;
   display: inline-block;
+  height: 0.65rem;
   aspect-ratio: 1 / 1;
-  height: 0.75rem;
+  margin-right: 3.6em;
+  margin-left: -0.6em;
   border-radius: 9999px;
   opacity: 0.3;
   box-shadow:
     0.8em 0,
-    2.2em 0,
-    3.6em 0;
+    2.1em 0,
+    3.4em 0;
 }
 
-.directive-webide .editor-container {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  min-height: 120px;
-  min-width: 120px;
-  flex: 1 1 0;
-}
-
-.directive-webide .splitter {
-  background: var(--color-spacer);
-  border-radius: 999px;
-  flex-shrink: 0;
-  touch-action: none;
-  opacity: 0.45;
-  transition: opacity 0.15s ease-in-out;
-}
-
-.directive-webide .splitter:hover {
-  opacity: 0.65;
-}
-
-.directive-webide.split-vertical .splitter {
-  width: 100%;
-  height: 4px;
-  cursor: row-resize;
-}
-
-.directive-webide.split-horizontal .splitter {
-  width: 4px;
-  height: 100%;
-  cursor: col-resize;
-}
-
-.directive-webide.resizing {
-  user-select: none;
-}
-
-.directive-webide.resizing .splitter {
-  opacity: 0.75;
-}
-
-.directive-webide .editor:not(.active) {
-  display: none;
-}
-
-.directive-webide .buttons {
-  display: flex;
-  border: 1px solid var(--color-spacer);
-  border-radius: 8px;
-  border-bottom: none;
-  border-bottom-left-radius: 0;
-  border-bottom-right-radius: 0;
-  overflow: hidden;
-}
-
-.directive-webide .buttons.bottom {
-  border: 1px solid var(--color-spacer);
-  border-radius: 8px;
-  border-top: none;
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
-}
-
-.directive-webide button {
-  flex: 1;
-  padding: 8px 16px;
-  border: none;
-  border-right: 1px solid var(--color-spacer);
-  background-color: var(--color--background);
-  color: var(--color-text);
-  cursor: pointer;
-}
-
-.directive-webide button:not(.active) {
-  opacity: 0.6;
-}
-
-.directive-webide .buttons button:last-child {
-  border-right: none;
-}
-
-.directive-webide button.fullscreen {
-  flex: 0 0 auto;
-  min-width: 42px;
-  width: 42px;
-  padding: 8px 0;
-}
-
-.directive-webide button.fullscreen .icon {
-  width: 18px;
-  height: 18px;
-  display: block;
-  margin: 0 auto;
-}
-
-.directive-webide button:hover {
-  background-color: var(--color-spacer);
-}
-
-/* Der Rahmen teilt sich den Container mit der Titelleiste. Mit height: 100%
-   wuerde er die volle Containerhoehe beanspruchen und um die Hoehe der
-   Titelleiste unten herausragen - overflow: hidden schnitte diesen Teil ab,
-   und weil der Rahmen selbst dann keinen Ueberlauf hat, waere er auch nicht
-   scrollbar. flex: 1 mit min-height: 0 laesst ihm genau den Rest. */
+/* The frame shares the panel with the title bar: flex: 1 with min-height: 0
+   leaves it exactly the rest, where height: 100% would push it out below. */
 .directive-webide iframe {
-  border: none;
-  width: 100%;
   flex: 1;
+  width: 100%;
   min-height: 0;
+  border: none;
   background-color: white;
 }
 
-.directive-webide:fullscreen {
-  width: 100vw;
-  height: 100dvh !important;
-  padding: 12px;
-  box-sizing: border-box;
-  background-color: var(--color-background, var(--color--background, #fff));
+/* With compare: the frame at the size the pages are compared at, from the
+   top left, as the target is shown. */
+.directive-webide .webide-frame {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
 }
 
-.directive-webide:fullscreen::backdrop {
-  background-color: var(--color-background, var(--color--background, #fff));
-}
-
-@media screen and (min-width: 1024px) {
-  .directive-webide:not(.standalone) {
-    flex-direction: row;
-    .container {
-      flex: 1;
-      height: 100% !important;
-    }
-
-    .editor-container {
-      flex: 1;
-      height: 100%;
-      overflow: hidden;
-    }
-  }
-}
-
-/* Icon-only toolbar: the written labels made this row wrap on narrow screens,
-   so the wording moved into title/aria-label. */
-.directive-webide .buttons.bottom button {
-  flex: 0 0 auto;
-  min-width: 42px;
-  width: 42px;
-  padding: 8px 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.directive-webide .buttons.bottom button .icon {
-  width: 18px;
-  height: 18px;
+.directive-webide .webide-frame iframe {
   display: block;
-}
-
-/* Fullscreen sits apart, at the trailing edge of the toolbar. */
-.directive-webide .buttons.bottom button.fullscreen {
-  margin-inline-start: auto;
+  flex: none;
 }
