@@ -9,6 +9,7 @@ import { getRuntime } from "./pyodide.js";
 import { forgetTurtleModule } from "./turtle-module.js";
 import { scriptLooksLikeTurtle, scriptLooksLikePygame } from "./constants.js";
 import { askStdinAsync, askStdinSync, hideStdinField } from "./stdin.js";
+import { filesForDisk, syncWorkspaceFiles } from "./files.js";
 
 export { scriptLooksLikeTurtle, scriptLooksLikePygame };
 
@@ -338,7 +339,9 @@ export const executeScript = async (
   const filename = "<exec>";
   try {
     const pyodide = await getRuntime(id);
-    const { canvas, ...globalsContext } = context;
+    // quiet: a run the reader does not see, e.g. drawing the solution a
+    // comparison needs. Its output goes nowhere.
+    const { canvas, files = [], quiet = false, ...globalsContext } = context;
     const decoder = new TextDecoder("utf-8");
     const executableScript = maybeAutoWrapPygame(script);
 
@@ -357,7 +360,9 @@ export const executeScript = async (
         }
         pyodide.canvas.setCanvas2D(canvas);
       } catch (error) {
-        appendOutputErrorLine(id, `Canvas setup failed: ${error.message}`);
+        if (!quiet) {
+          appendOutputErrorLine(id, `Canvas setup failed: ${error.message}`);
+        }
       }
     } else if (usesTurtle) {
       // A test run: the turtle works, but leaves the canvas as it is.
@@ -374,7 +379,7 @@ export const executeScript = async (
         } else {
           lastStdinPrompt += text;
         }
-        appendOutputLine(id, text);
+        if (!quiet) appendOutputLine(id, text);
         return msg?.length ?? text.length;
       },
     });
@@ -394,13 +399,22 @@ export const executeScript = async (
     pyodide.setStderr({
       write: (msg) => {
         const text = typeof msg === "string" ? msg : decoder.decode(msg);
-        appendOutputErrorLine(id, text);
+        if (!quiet) appendOutputErrorLine(id, text);
         return msg?.length ?? text.length;
       },
     });
 
     await ensureMicropipPackages(id, pyodide, packages);
     await pyodide.loadPackagesFromImports(executableScript);
+    // The modules next to the main file may import packages of their own.
+    for (const file of filesForDisk(files)) {
+      if (file.path.endsWith(".py") && typeof file.content === "string") {
+        await pyodide.loadPackagesFromImports(file.content);
+      }
+    }
+    for (const warning of await syncWorkspaceFiles(id, pyodide, files)) {
+      if (!quiet) appendOutputErrorLine(id, `${warning}\n`);
+    }
     const canSuspend = await supportsRunSync(id, pyodide);
     const dict = pyodide.globals.get("dict");
     const globals = dict();

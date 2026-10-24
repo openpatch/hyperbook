@@ -51,6 +51,16 @@ declare module "vfile" {
      * once instead of losing it.
      */
     legacyDirectiveIds: Record<string, string>;
+    /**
+     * Every id resolved on this page with the source range of its directive,
+     * for `hyperbook migrate` to pin ids before it rewrites a directive.
+     */
+    resolvedDirectiveIds: {
+      name: string;
+      start: number;
+      end: number;
+      id: string;
+    }[];
   }
 }
 
@@ -61,6 +71,7 @@ declare module "mdast" {
 }
 
 export { process, remark };
+export { legacyP5Ids } from "./legacyIds";
 export { collectLinkTargets } from "./collectLinks";
 export type { LinkTarget } from "./collectLinks";
 export { stripProtectBlocks } from "./stripProtect";

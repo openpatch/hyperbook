@@ -10,17 +10,14 @@ import {
 } from "./output.js";
 import { executeScript } from "./execution.js";
 import { turtleCompletions } from "./turtle-completions.js";
+import { setupComparison } from "./compare.js";
+import { runTests } from "./tests.js";
 import {
-  updateFullscreenButtonState,
-  toggleFullscreen,
-  syncFullscreenButtons,
   releaseKeyboardCapture,
   returnAfterReload,
   updateRunning,
   handleStopClick,
   getRunningInstanceId,
-  setupSplitter,
-  setupCanvasOutputSplitter,
 } from "./ui.js";
 
 /**
@@ -50,14 +47,8 @@ hyperbook.python = (function () {
       const canvas = elem.getElementsByClassName("canvas")[0];
       const canvasWrapper =
         elem.getElementsByClassName("canvas-wrapper")[0] || canvas;
-      const canvasOutputSplitter = elem.getElementsByClassName(
-        "canvas-output-splitter",
-      )[0];
-      const canvasHeader = elem.getElementsByClassName("canvas-header")[0];
-      const outputHeader = elem.getElementsByClassName("output-header")[0];
       const outputBtn = elem.getElementsByClassName("output-btn")[0];
       const canvasBtn = elem.getElementsByClassName("canvas-btn")[0];
-      const canvasTabs = outputBtn?.closest(".buttons");
 
       const copyEl = elem.getElementsByClassName("copy")[0];
       const resetEl = elem.getElementsByClassName("reset")[0];
@@ -74,226 +65,53 @@ hyperbook.python = (function () {
             .filter((pkg) => pkg.length > 0),
         ),
       );
-      let pyideState = { id };
-
-      // Initialize CodeMirror
-      const initialSource = editorDiv ? editorDiv.textContent : "";
-      if (editorDiv) editorDiv.textContent = "";
-      const cm = editorDiv
-        ? HyperbookCM.create(editorDiv, {
-            lang: editorDiv.dataset.lang || "python",
-            value: initialSource,
-            completions: [turtleCompletions],
-            // Python blocks are defined by indentation alone, so show where
-            // each one starts and ends.
-            indentGuides: true,
-            onChange: (code) => {
-              void persistPyideState({ script: code });
-            },
-          })
-        : null;
-      // Store CM on the element so updateRunning() can toggle readOnly
-      if (editorDiv && cm) editorDiv._cm = cm;
-
-      const getEditorValue = () => cm?.getValue() ?? "";
-
-      pyideState = { ...pyideState, script: getEditorValue() };
-
-      const persistPyideState = (updates = {}) => {
-        pyideState = { ...pyideState, ...updates, id };
-        return hyperbook.store.db.pyide.put(pyideState);
-      };
-
-      copyEl?.addEventListener("click", async () => {
-        try {
-          await navigator.clipboard.writeText(getEditorValue());
-        } catch (error) {
-          console.error(error.message);
-        }
-      });
-
-      resetEl?.addEventListener("click", () => {
-        hyperbook.store.db.pyide.delete(id);
-        window.location.reload();
-      });
-
-      downloadEl?.addEventListener("click", () => {
-        const a = document.createElement("a");
-        const blob = new Blob([getEditorValue()], { type: "text/plain" });
-        a.href = URL.createObjectURL(blob);
-        a.download = `script-${id}.py`;
-        a.click();
-      });
-
-      fullscreenEl?.addEventListener("click", async () => {
-        try {
-          await toggleFullscreen(elem);
-        } catch (error) {
-          console.error(error.message);
-        }
-      });
-      updateFullscreenButtonState(elem, fullscreenEl);
-      let tests = [];
-      try {
-        // remarkDirectivePyide encodes the tests with Buffer.from(), so the
-        // attribute holds base64 of their UTF-8 *bytes*. atob() gives those
-        // bytes back one per character, which would turn "prüfe" into
-        // "prÃ¼fe" in every test name and message -- decode them as UTF-8.
-        const bytes = Uint8Array.from(
-          atob(elem.getAttribute("data-tests")),
-          (c) => c.charCodeAt(0),
-        );
-        tests = JSON.parse(new TextDecoder().decode(bytes));
-      } catch (e) {}
-
-      const isWideCanvasMode = () =>
-        hasCanvas && window.matchMedia("(min-width: 1024px)").matches;
-
-      let activeCanvasView = "output";
-
-      const showOutputTab = () => {
-        activeCanvasView = "output";
-        outputBtn.classList.add("active");
-        if (canvasBtn) canvasBtn.classList.remove("active");
-        canvasHeader?.classList.add("hidden");
-        outputHeader?.classList.add("hidden");
-        output.classList.remove("hidden");
-        if (canvasWrapper) canvasWrapper.classList.add("hidden");
-        canvasOutputSplitter?.classList.add("hidden");
-      };
-      const showCanvasTab = () => {
-        activeCanvasView = "canvas";
-        outputBtn.classList.remove("active");
-        if (canvasBtn) canvasBtn.classList.add("active");
-        canvasHeader?.classList.add("hidden");
-        outputHeader?.classList.add("hidden");
-        output.classList.add("hidden");
-        if (canvasWrapper) canvasWrapper.classList.remove("hidden");
-        canvasOutputSplitter?.classList.add("hidden");
-        turtleModules.get(id)?.__redraw?.();
-      };
-
-      const applyStoredCanvasOutputSplit = setupCanvasOutputSplitter(
-        elem,
-        container,
-        canvasWrapper,
-        output,
-        canvasOutputSplitter,
-        (splitState) => {
-          void persistPyideState(splitState);
+      const ide = HyperbookIDE.mount(elem, {
+        id,
+        runtime: "pyide",
+        editor: editorDiv,
+        workspace: elem.getAttribute("data-workspace"),
+        lang: (path) => (path.endsWith(".py") ? "python" : ""),
+        editorOptions: {
+          completions: [turtleCompletions],
+          // Python blocks are defined by indentation alone, so show where
+          // each one starts and ends.
+          indentGuides: true,
         },
-      );
+        buttons: {
+          reset: resetEl,
+          copy: copyEl,
+          download: downloadEl,
+          fullscreen: fullscreenEl,
+        },
+        layout: { container, editorContainer, splitter },
+      });
+      // Store CM on the element so updateRunning() can toggle readOnly
+      editorDiv._cm = ide.cm;
 
-      const applyCanvasOutputLayout = () => {
-        if (!hasCanvas || !canvasWrapper || !canvasOutputSplitter) return;
-        if (isWideCanvasMode()) {
-          elem.classList.add("canvas-split-mode");
-          canvasTabs?.classList.add("hidden");
-          output.classList.remove("hidden");
-          canvasWrapper.classList.remove("hidden");
-          canvasOutputSplitter.classList.remove("hidden");
-          canvasHeader?.classList.remove("hidden");
-          outputHeader?.classList.remove("hidden");
-          outputBtn.classList.add("active");
-          outputBtn.disabled = true;
-          if (canvasBtn) {
-            canvasBtn.classList.add("active");
-            canvasBtn.disabled = true;
-          }
-          applyStoredCanvasOutputSplit?.();
-          turtleModules.get(id)?.__redraw?.();
-          return;
-        }
+      const getMainScript = () => ide.content(ide.main) ?? "";
+      const getTests = () => ide.files().filter((file) => file.role === "test");
 
-        elem.classList.remove("canvas-split-mode");
-        canvasTabs?.classList.remove("hidden");
-        output.style.flex = "";
-        canvasWrapper.style.flex = "";
-        outputBtn.disabled = false;
-        if (canvasBtn) {
-          canvasBtn.disabled = false;
-        }
-        if (activeCanvasView === "canvas") {
-          showCanvasTab();
-        } else {
-          showOutputTab();
-        }
+      // Output and canvas share the panel as tabs. A run shows the canvas,
+      // an error the output, where the message is.
+      const showView = (view) => {
+        if (!hasCanvas) return;
+        const onCanvas = view === "canvas";
+        outputBtn?.classList.toggle("active", !onCanvas);
+        canvasBtn?.classList.toggle("active", onCanvas);
+        output.classList.toggle("hidden", onCanvas);
+        canvasWrapper.classList.toggle("hidden", !onCanvas);
+        if (onCanvas) turtleModules.get(id)?.__redraw?.();
       };
-
-      function showOutput() {
-        if (isWideCanvasMode()) {
-          applyCanvasOutputLayout();
-          return;
-        }
-        showOutputTab();
-      }
-      function showCanvas() {
-        if (isWideCanvasMode()) {
-          applyCanvasOutputLayout();
-          return;
-        }
-        showCanvasTab();
-      }
+      const showOutput = () => showView("output");
+      const showCanvas = () => showView("canvas");
 
       outputBtn?.addEventListener("click", showOutput);
       canvasBtn?.addEventListener("click", showCanvas);
-      const applyStoredSplitSize = setupSplitter(
-        elem,
-        container,
-        editorContainer,
-        splitter,
-        (splitState) => {
-          void persistPyideState(splitState);
-        },
-      );
-
-      let editorStateRestored = false;
-      const restoreEditorState = async () => {
-        if (editorStateRestored) return;
-        editorStateRestored = true;
-
-        const result = await hyperbook.store.db.pyide.get(id);
-        if (result) {
-          pyideState = { ...pyideState, ...result };
-          if (typeof result.script === "string") {
-            cm?.setValue(result.script);
-          }
-          if (
-            Number.isFinite(result.splitHorizontal) &&
-            result.splitHorizontal > 0
-          ) {
-            elem.dataset.splitHorizontal = String(
-              Math.round(result.splitHorizontal),
-            );
-          }
-          if (
-            Number.isFinite(result.splitVertical) &&
-            result.splitVertical > 0
-          ) {
-            elem.dataset.splitVertical = String(
-              Math.round(result.splitVertical),
-            );
-          }
-          if (
-            Number.isFinite(result.splitCanvasOutput) &&
-            result.splitCanvasOutput > 0
-          ) {
-            elem.dataset.splitCanvasOutput = String(
-              Math.round(result.splitCanvasOutput),
-            );
-          }
-          applyStoredSplitSize?.();
-          applyCanvasOutputLayout();
-        }
-      };
-
-      void restoreEditorState();
-
       window.addEventListener("resize", () => {
-        applyCanvasOutputLayout();
         turtleModules.get(id)?.__redraw?.();
       });
-      applyCanvasOutputLayout();
+      // The canvas is the first tab, and open first.
+      showView("canvas");
 
       // The page was reloaded to stop this IDE's script: back to where it was.
       if (returnAfterReload(elem)) {
@@ -316,33 +134,16 @@ hyperbook.python = (function () {
         output.innerHTML = "";
         clearPytamaroStdoutCarry(id);
 
-        const script = getEditorValue();
         try {
-          for (let test of tests) {
-            if (state.stopRequested) {
-              appendOutputLine(id, "Stopped pending test execution.");
-              break;
-            }
-
-            const testCode = test.code.replace("#SCRIPT#", script);
-
-            const heading = document.createElement("div");
-            heading.innerHTML = `== Test ${test.name} ==`;
-            heading.classList.add("test-heading");
-            output.appendChild(heading);
-
-            const { results, error } = await executeScript(
-              id,
-              testCode,
-              {},
-              additionalPackages,
-            );
-            if (results) {
-              appendOutput(output, results);
-            } else if (error && !state.stopRequested) {
-              appendFriendlyError(output, error, testCode);
-            }
-          }
+          await runTests({
+            id,
+            output,
+            tests: getTests(),
+            script: getMainScript(),
+            files: ide.files(),
+            packages: additionalPackages,
+            state,
+          });
         } catch (e) {
           output.innerHTML = "";
           appendOutput(output, `Error: ${e}`, true);
@@ -357,15 +158,21 @@ hyperbook.python = (function () {
         }
       });
 
-      run?.addEventListener("click", async () => {
-        const script = getEditorValue();
+      /**
+       * Runs the reader's program.
+       * @returns whether it ran to its end, without an error or Stop (another
+       *   program may also hold the runtime).
+       */
+      const runProgram = async () => {
+        const script = getMainScript();
+        const files = ide.files();
         if (hasCanvas) {
           showCanvas();
         } else {
           showOutput();
         }
         const state = getExecutionState(id);
-        if (state.running || getRunningInstanceId() !== null) return;
+        if (state.running || getRunningInstanceId() !== null) return false;
         state.running = true;
         state.type = "run";
         state.stopRequested = false;
@@ -376,11 +183,13 @@ hyperbook.python = (function () {
 
         output.innerHTML = "";
         clearPytamaroStdoutCarry(id);
+        let completed = false;
         try {
           const { results, error } = await executeScript(
             id,
             script,
             {
+              files,
               ...(hasCanvas && canvas ? { canvas } : {}),
             },
             additionalPackages,
@@ -405,6 +214,7 @@ hyperbook.python = (function () {
           if (state.stopRequested) {
             appendOutputLine(id, "Execution stopped.");
           }
+          completed = !error && !state.stopRequested;
         } catch (e) {
           showOutput();
           output.innerHTML = "";
@@ -419,6 +229,23 @@ hyperbook.python = (function () {
           releaseKeyboardCapture(id);
           updateRunning();
         }
+        return completed;
+      };
+
+      // With compare, every run that ends without an error is scored.
+      const comparison = elem.hasAttribute("data-compare")
+        ? setupComparison({
+            elem,
+            id,
+            ide,
+            canvas,
+            canvasWrapper,
+            packages: additionalPackages,
+          })
+        : null;
+
+      run?.addEventListener("click", async () => {
+        if ((await runProgram()) && comparison) await comparison.changed();
       });
 
       stop?.addEventListener("click", handleStopClick);
@@ -445,7 +272,6 @@ hyperbook.python = (function () {
   document.addEventListener("DOMContentLoaded", () => {
     init(document);
   });
-  document.addEventListener("fullscreenchange", syncFullscreenButtons);
 
   return { init };
 })();

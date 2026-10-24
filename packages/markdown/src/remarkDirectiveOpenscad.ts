@@ -3,27 +3,29 @@
 //
 import { HyperbookContext, elementCdn } from "@hyperbook/types";
 import { elementAssetUrl } from "./elementAssets";
-import { Code, Root, Text } from "mdast";
+import { Root } from "mdast";
 import { visit } from "unist-util-visit";
 import { VFile } from "vfile";
 import {
   expectDirective,
   isDirective,
   registerDirective,
-  requestJS,
 } from "./remarkHelper";
 import { resolveDirectiveId } from "./directiveId";
 import { i18n } from "./i18n";
-import { icon } from "./icons";
-import { readFile } from "./helper";
-
-function htmlEntities(str: string) {
-  return String(str)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
+import {
+  collectWorkspace,
+  fileActionAttributes,
+  cssHeight,
+  encodeWorkspace,
+  htmlEntities,
+  ideBottomButtons,
+  ideIconButton,
+  ideSplitter,
+  requestIdeAssets,
+  idePanelHeader,
+  idePanelTitle,
+} from "./ideWorkspace";
 
 export default (ctx: HyperbookContext) => () => {
   const name = "openscad";
@@ -33,78 +35,50 @@ export default (ctx: HyperbookContext) => () => {
     visit(tree, function (node) {
       if (isDirective(node) && node.name === name) {
         const {
-          src = "",
           id = resolveDirectiveId(file, node),
           height,
           library,
         } = node.attributes || {};
         const data = node.data || (node.data = {});
-        const binaryFiles: { dest: string; url: string }[] = [];
-
-        for (const child of node.children) {
-          let text = "";
-          if (child.type === "text") {
-            text = (child as Text).value;
-          } else if (child.type === "paragraph") {
-            const reconstructText = (paragraphNode: any): string => {
-              if (paragraphNode.type === "text") return paragraphNode.value;
-              if (paragraphNode.type === "link") return paragraphNode.url;
-              if (paragraphNode.children) {
-                return paragraphNode.children.map(reconstructText).join("");
-              }
-              return "";
-            };
-            text = child.children.map(reconstructText).join("");
-          }
-
-          if (!text) continue;
-          const fileMatches = text.matchAll(
-            /@file\s+dest="([^"]+)"\s+src="([^"]+)"/g,
-          );
-          for (const match of fileMatches) {
-            const dest = match[1];
-            const src = match[2];
-            const url = ctx.makeUrl(
-              src,
-              "public",
-              ctx.navigation.current || undefined,
-            );
-            binaryFiles.push({ dest, url });
-          }
-        }
 
         expectDirective(node, file, name, ["leaf", "container"]);
         registerDirective(file, name, ["client.js"], ["style.css"], []);
-        requestJS(file, ["codemirror", "codemirror.bundle.js"]);
+        requestIdeAssets(file);
 
-        let source = "";
-        if (src) {
-          source = readFile(src, ctx) || "";
-        } else {
-          source =
-            (
-              node.children.find(
-                (c) =>
-                  c.type === "code" &&
-                  ((c as Code).lang === "scad" ||
-                    (c as Code).lang === "openscad"),
-              ) as Code
-            )?.value || "";
+        if (node.attributes?.src) {
+          file.message(
+            'openscad no longer reads src="…"; load the file with ::file{path="main.scad" src="…"} inside the directive. Run `hyperbook migrate` to convert the page.',
+            node,
+          );
         }
+
+        const workspace = collectWorkspace(node, file, ctx, {
+          name,
+          langs: ["scad", "openscad"],
+          defaultMain: "main.scad",
+        });
+        const source =
+          workspace.files.find((f) => f.path === workspace.main)?.content ?? "";
 
         data.hName = "div";
         data.hProperties = {
-          class: "directive-openscad",
+          class: "directive-openscad ide",
           "data-id": id,
           ...(cdn
             ? { "data-runtime-base": elementAssetUrl(ctx, name, "") }
             : {}),
-          "data-binary-files": Buffer.from(
-            JSON.stringify(binaryFiles),
-          ).toString("base64"),
+          "data-workspace": encodeWorkspace(workspace),
+          // Models import meshes and fonts, so readers bring their own.
+          ...fileActionAttributes(node, file, {
+            name,
+            defaults: ["upload"],
+            accept: ".scad",
+          }),
           "data-base-path": ctx.config.basePath || "/",
           "data-page-path": ctx.navigation.current?.path?.directory || "",
-          ...(height ? { style: `--openscad-height: ${height}` } : {}),
+          ...(height
+            ? { style: `--ide-height: ${cssHeight(height)}` }
+            : {}),
           ...(library ? { "data-library": library } : {}),
         };
 
@@ -112,21 +86,16 @@ export default (ctx: HyperbookContext) => () => {
           {
             type: "element",
             tagName: "div",
-            properties: { class: "left-side" },
+            properties: { class: "container left-side" },
             children: [
               {
                 type: "element",
                 tagName: "div",
                 properties: { class: "preview-container" },
                 children: [
-                  {
-                    type: "element",
-                    tagName: "div",
-                    properties: { class: "preview-header" },
-                    children: [
-                      { type: "text", value: i18n.get("openscad-preview") },
-                    ],
-                  },
+                  idePanelHeader("preview-header", [
+                    idePanelTitle("openscad-preview"),
+                  ]),
                   {
                     type: "element",
                     tagName: "div",
@@ -163,14 +132,9 @@ export default (ctx: HyperbookContext) => () => {
                 tagName: "div",
                 properties: { class: "parameters-panel" },
                 children: [
-                  {
-                    type: "element",
-                    tagName: "div",
-                    properties: { class: "parameters-header" },
-                    children: [
-                      { type: "text", value: i18n.get("openscad-parameters") },
-                    ],
-                  },
+                  idePanelHeader("parameters-header", [
+                    idePanelTitle("openscad-parameters"),
+                  ]),
                   {
                     type: "element",
                     tagName: "div",
@@ -181,16 +145,7 @@ export default (ctx: HyperbookContext) => () => {
               },
             ],
           },
-          {
-            type: "element",
-            tagName: "div",
-            properties: {
-              class: "splitter",
-              role: "separator",
-              "aria-label": "Resize panels",
-            },
-            children: [],
-          },
+          ideSplitter(),
           {
             type: "element",
             tagName: "div",
@@ -213,78 +168,9 @@ export default (ctx: HyperbookContext) => () => {
               },
               {
                 type: "element",
-                tagName: "details",
-                properties: {
-                  class: "binary-files-section",
-                },
-                children: [
-                  {
-                    type: "element",
-                    tagName: "summary",
-                    properties: {},
-                    children: [
-                      {
-                        type: "element",
-                        tagName: "span",
-                        properties: {
-                          class: "summary-text",
-                        },
-                        children: [
-                          {
-                            type: "element",
-                            tagName: "span",
-                            properties: {
-                              class: "summary-indicator",
-                            },
-                            children: [icon("chevron")],
-                          },
-                          {
-                            type: "text",
-                            value: i18n.get("openscad-binary-files"),
-                          },
-                        ],
-                      },
-                    ],
-                  },
-                  {
-                    type: "element",
-                    tagName: "div",
-                    properties: {
-                      class: "binary-files-list",
-                    },
-                    children: [],
-                  },
-                  {
-                    type: "element",
-                    tagName: "div",
-                    properties: {
-                      class: "binary-files-actions",
-                    },
-                    children: [
-                      {
-                        type: "element",
-                        tagName: "button",
-                        properties: {
-                          class: "add-binary-file",
-                          title: i18n.get("openscad-add-binary-file"),
-                        },
-                        children: [
-                          {
-                            type: "text",
-                            value: "+ " + i18n.get("openscad-add"),
-                          },
-                        ],
-                      },
-                    ],
-                  },
-                ],
-              },
-              {
-                type: "element",
                 tagName: "div",
                 properties: {
                   class: "editor",
-                  "data-lang": "clike",
                 },
                 children: [{ type: "raw", value: htmlEntities(source) }],
               },
@@ -297,53 +183,16 @@ export default (ctx: HyperbookContext) => () => {
                 },
                 children: [{ type: "text", value: "{}" }],
               },
-              {
-                type: "element",
-                tagName: "div",
-                properties: { class: "buttons bottom" },
-                children: [
-                  {
-                    type: "element",
-                    tagName: "button",
-                    properties: {
-                      class: "copy",
-                      title: i18n.get("openscad-copy"),
-                      "aria-label": i18n.get("openscad-copy"),
-                    },
-                    children: [icon("copy")],
-                  },
-                  {
-                    type: "element",
-                    tagName: "button",
-                    properties: {
-                      class: "download-stl",
-                      title: i18n.get("openscad-download-stl"),
-                      "aria-label": i18n.get("openscad-download-stl"),
-                    },
-                    children: [icon("download")],
-                  },
-                  {
-                    type: "element",
-                    tagName: "button",
-                    properties: {
-                      class: "reset",
-                      title: i18n.get("openscad-reset"),
-                      "aria-label": i18n.get("openscad-reset"),
-                    },
-                    children: [icon("reset")],
-                  },
-                  {
-                    type: "element",
-                    tagName: "button",
-                    properties: {
-                      class: "fullscreen",
-                      title: i18n.get("ide-fullscreen-enter"),
-                      "aria-label": i18n.get("ide-fullscreen-enter"),
-                    },
-                    children: [icon("fullscreen")],
-                  },
+              ideBottomButtons(
+                [
+                  ideIconButton(
+                    "download-stl",
+                    "openscad-download-stl",
+                    "download",
+                  ),
                 ],
-              },
+                { filesAsArchive: true },
+              ),
             ],
           },
         ];

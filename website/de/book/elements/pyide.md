@@ -25,6 +25,17 @@ Das `pyide`-Element repräsentiert eine Python-Integrated-Development-Environmen
 Es wird verwendet, um eine Python-Coding-Umgebung in die Hyperbook-Website einzubetten.
 Dieses Element ermöglicht es Benutzern, Python-Code direkt im Browser zu schreiben, zu bearbeiten und auszuführen.
 
+## Attribute
+
+| Attribut | Beschreibung | Standard |
+|---|---|---|
+| `packages` | Kommaseparierte Liste von PyPI-Paketen, die vor dem Ausführen mit `micropip` installiert werden | - |
+| `canvas` | Zeigt eine Zeichenfläche für Bibliotheken wie `pygame` oder `turtle` | `false` |
+| `main` | Die Datei, die ausgeführt wird | `main.py` |
+| `id` | Unter welcher Kennung der Code gespeichert wird. Halten Sie sie fest, damit gespeicherter Code beim Bearbeiten des Elements erhalten bleibt | aus dem Inhalt abgeleitet |
+| `files` | Was Leserinnen und Leser mit Dateien tun dürfen: `create`, `upload`, `rename`, `delete`, durch Kommas getrennt, oder `open` für alles | keine |
+| `accept` | Dateiendungen für Dateien, die Leserinnen und Leser anlegen oder umbenennen, durch Kommas getrennt | `.py` |
+
 ````md
 :::pyide
 
@@ -85,14 +96,73 @@ print(a)
 
 :::
 
-## Testfälle hinzufügen
+## Mehrere Dateien
 
-Sie können Testfälle zu den Code-Snippets hinzufügen, indem Sie ein `test`-Tag zum Codeblock hinzufügen. Der Kommentar `#SCRIPT#` wird durch den geschriebenen Code ersetzt. Er kann an jeder Stelle des Codeblocks platziert werden.
+Ein Codeblock ohne `file="…"` ist die Hauptdatei. Weitere Dateien bekommen mit `file="…"` einen Namen und erscheinen als Tabs. Die Hauptdatei kann sie wie jedes Python-Modul importieren.
+
+Mit `readonly` wird eine Datei angezeigt, kann aber nicht verändert werden. Mit `hidden` erscheint sie nicht im Editor, liegt beim Ausführen aber trotzdem bereit.
 
 ````md
 :::pyide
 
-```python test
+```python
+from helpers import greet
+greet("Ada")
+```
+
+```python file="helpers.py" readonly
+def greet(name):
+    print(f"Hallo {name}!")
+```
+
+:::
+````
+
+:::pyide
+
+```python
+from helpers import greet
+greet("Ada")
+```
+
+```python file="helpers.py" readonly
+def greet(name):
+    print(f"Hallo {name}!")
+```
+
+:::
+
+Dateien aus Ihrem Buch fügen Sie mit `::file` hinzu. Python-Dateien und andere Textdateien wie CSV oder JSON erscheinen als Tab; Bilder und andere Binärdateien liegen nur für das Programm bereit. `src` wird wie jede andere Datei Ihres Buchs aufgelöst.
+
+````md
+:::pyide
+
+```python
+print(open("data.csv").read())
+```
+
+::file{path="data.csv" src="/data/klasse.csv"}
+
+:::
+````
+
+Mit `main` wählen Sie eine andere Hauptdatei als `main.py`.
+
+## Testfälle hinzufügen
+
+Ein Test ist eine Datei mit `role="test"`. Meist ist sie zusätzlich `hidden`, damit sie nicht im Editor erscheint. **Test** führt alle Testdateien nacheinander aus. Der Kommentar `#SCRIPT#` wird durch den Code der Hauptdatei ersetzt. Er kann an jeder Stelle des Tests stehen.
+
+Die Ausgabe zeigt danach einen Bericht: wie viele Tests bestanden sind und für jeden Test, ob er bestanden ist, zusammen mit dem, was er ausgegeben hat. Ein Test ist nicht bestanden, wenn ein `assert` fehlschlägt (der Bericht zeigt das `assert` und seine Meldung) oder wenn er eine Zeile ausgibt, die mit `Nicht bestanden` oder `Fail` beginnt. Wirft ein Test einen anderen Fehler, wird er als Fehler markiert und der Fehler erklärt. Sonst ist er bestanden.
+
+````md
+:::pyide
+
+```python
+def check_palindrom(s):
+    return True
+```
+
+```python file="test_1.py" role="test" hidden
 #SCRIPT#
 r = check_palindrom("uhu")
 if r:
@@ -101,7 +171,7 @@ else:
     print("Fail")
 ```
 
-```python test
+```python file="test_2.py" role="test" hidden
 #SCRIPT#
 r = check_palindrom("test")
 if not r:
@@ -110,17 +180,12 @@ else:
     print("Fail")
 ```
 
-```python
-def check_palindrom(s):
-    return True
-```
-
 :::
 ````
 
-:::pyide
+:::pyide{id="e0c3c794102458243ed5c9edfe037648cf1a3e18c7e4bcbed5afd58d34ac9238"}
 
-```python test
+```python file="test_1.py" role="test" hidden
 #SCRIPT#
 r = check_palindrom("uhu")
 if r:
@@ -129,7 +194,7 @@ else:
     print("Fail")
 ```
 
-```python test
+```python file="test_2.py" role="test" hidden
 #SCRIPT#
 r = check_palindrom("test")
 if not r:
@@ -247,56 +312,6 @@ while running:
     screen.fill((r, g, b))
     pygame.display.flip()
     clock.tick(60)
-```
-
-:::
-
-## Pytamaro
-
-Verwenden Sie `packages="pytamaro"`, um `show_graphic(...)` und `show_animation(...)` im Ausgabebereich darzustellen.
-
-````hyperbook
-:::pyide{packages="pytamaro"}
-
-```python
-from pytamaro import *
-
-block_size = 25
-num_blocks = 16
-line = empty_graphic()
-for col in range(num_blocks):
-    if col % 2 == 0:
-        color = black
-    else:
-        color = white
-    block = rectangle(block_size, block_size, color)
-    line = beside(line, block)
-second_line = rotate(180, line)
-finish_line = above(line, second_line)
-show_graphic(finish_line)
-```
-
-:::
-````
-
-:::pyide{packages="pytamaro"}
-
-```python
-from pytamaro import *
-
-block_size = 25
-num_blocks = 16
-line = empty_graphic()
-for col in range(num_blocks):
-    if col % 2 == 0:
-        color = black
-    else:
-        color = white
-    block = rectangle(block_size, block_size, color)
-    line = beside(line, block)
-second_line = rotate(180, line)
-finish_line = above(line, second_line)
-show_graphic(finish_line)
 ```
 
 :::
@@ -568,3 +583,61 @@ hideturtle()
 ```
 
 :::
+
+## Dateien, die Leserinnen und Leser ändern dürfen
+
+Mit `files` bekommen Leserinnen und Leser Knöpfe für eigene Dateien: **+** legt eine Datei an, **⤒** lädt eine hoch, und jeder Tab bekommt **✎** zum Umbenennen und **×** zum Löschen. `rename` und `delete` erlauben das auch für die Dateien der Seite; die Hauptdatei sowie `readonly`-, `hidden`- und Testdateien bleiben immer, wie sie geschrieben sind. Selbst angelegte oder hochgeladene Dateien dürfen Leserinnen und Leser immer umbenennen und löschen. Ein Klick auf den Tab einer Binärdatei zeigt eine Vorschau: Bilder, Audio und Video, PDFs, Schriftarten (TTF, OTF, WOFF) und 3D-Modelle (STL, OBJ), die sich drehen und zoomen lassen.
+
+````md
+:::pyide{files="create,upload,rename,delete"}
+...
+:::
+````
+
+## Mit einer Lösung vergleichen
+
+Leserinnen und Leser können versuchen, ein vorgegebenes Bild mit der Turtle möglichst genau nachzuzeichnen, wie bei [CSSBattle](https://cssbattle.dev/). Fügen Sie `canvas`, `compare` und eine Datei mit `role="solution"` hinzu: Die Lösung wird unsichtbar gezeichnet, und jedes **Ausführen**, das ohne Fehler endet, bewertet, wie viel der Zeichnung übereinstimmt. Das vorgegebene Bild liegt in gleicher Größe und an gleicher Stelle über der eigenen Ausgabe und verdeckt sie zunächst. Eine Linie teilt beide: links die eigene Zeichnung („Deins“), rechts das Ziel („Ziel“). Nach der ersten Änderung rückt die Linie in die Mitte; man zieht sie an ihrem Griff oder mit dem Schieberegler darunter. Der Bereich darunter zeigt die Übereinstimmung und die Farben des Ziels (ein Klick kopiert den Farbwert). **Überlagert** zeigt das Ziel halb durchsichtig über der ganzen Zeichnung, **Unterschiede** markiert, was nicht passt, und gedrückt gehaltenes **Ziel** zeigt das ganze Ziel. Ist die Aufgabe gelöst, wird das Bild grün umrandet.
+
+Die Bewertung hat drei Teile. **Farbe** (die Hälfte) vergleicht jedes Pixel, auch den Hintergrund; ähnliche Farben zählen teilweise. **Umriss** (30 %) prüft, ob die Kanten der Formen dort liegen, wo sie im Ziel liegen. **Fläche** (20 %) prüft, ob sich die gezeichneten Flächen decken, gleich in welcher Farbe. Umriss und Fläche betrachten nur die Zeichnung: Eine leere Zeichenfläche bekommt dafür nichts und höchstens die Hälfte der Punkte. Was ein Pixel daneben liegt, passt trotzdem ganz. Gelöst ist die Aufgabe, wenn die Bewertung und jeder ihrer Teile `pass` erreichen; eine Form in falscher Farbe besteht also nicht allein durch ihren Umriss. Fährt man über die Bewertung, zeigt sie die drei Teile.
+
+````md
+:::pyide{canvas compare pass=95}
+
+```python
+import turtle
+t = turtle.Turtle()
+```
+
+```python file="solution.py" role="solution"
+import turtle
+t = turtle.Turtle()
+for i in range(4):
+    t.forward(100)
+    t.left(90)
+```
+
+:::
+````
+
+:::pyide{canvas compare pass=95 height=520}
+
+```python
+import turtle
+t = turtle.Turtle()
+```
+
+```python file="solution.py" role="solution"
+import turtle
+t = turtle.Turtle()
+for i in range(4):
+    t.forward(100)
+    t.left(90)
+```
+
+:::
+
+Verglichen wird die ganze Zeichenfläche. `pass` (Standard `98`) ist die Übereinstimmung in Prozent, ab der die Aufgabe gelöst ist. Statt einer Lösung kann `::file{path="target.png" src="…" role="target"}` das Bild vorgeben.
+
+## Umstieg von der alten Schreibweise
+
+Ältere Bücher kennzeichnen Tests mit ```` ```python test ```` und laden Dateien mit `src="…"` direkt am Element. Führen Sie in Ihrem Buch `npx hyperbook migrate` aus, um diese Seiten umzustellen. Dabei wird auch die `id` jeder geänderten IDE festgehalten, sodass gespeicherter Code der Leserinnen und Leser erhalten bleibt. Prüfen Sie die Änderungen vor dem Veröffentlichen mit `git diff`.

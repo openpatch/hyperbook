@@ -99,8 +99,21 @@ hyperbook.store = (function () {
     checklist: `id`,
   });
 
+  // The IDEs share one table holding a workspace of files. The old IDE
+  // tables stay as empty inboxes: an export from before this version still
+  // names them, and importing one would otherwise drop those rows. The webide
+  // table was never used by a book and goes without a migration.
+  db.version(11)
+    .stores({
+      ide: `id`,
+      webide: null,
+    })
+    .upgrade((tx) =>
+      hyperbook.storeIdeMigration.moveLegacyIdeRows((name) => tx.table(name)),
+    );
+
   /**
-   * Re-applies the data migrations from v6 and v7 to rows that were imported
+   * Re-applies the data migrations from v6, v7 and v11 to rows that were imported
    * from an older export. Dexie's `.upgrade()` callbacks only run during a
    * live IndexedDB version upgrade, not during `db.import()`, so imported
    * rows from a v5–v6 era export keep their old field shapes unless we fix
@@ -127,6 +140,10 @@ hyperbook.store = (function () {
               delete entry.passwordHash;
             }
           });
+        // v11: single-file IDE rows → ide
+        await hyperbook.storeIdeMigration.moveLegacyIdeRows((name) =>
+          db.table(name),
+        );
       });
     } catch (e) {
       console.warn("Could not migrate imported data:", e);

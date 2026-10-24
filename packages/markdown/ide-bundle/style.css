@@ -1,0 +1,1118 @@
+/* The frame every IDE shares: output and editor side by side (stacked on
+   narrow screens) with a splitter between them, a bar of actions above the
+   editor and a toolbar below it. A directive's own stylesheet adds only what
+   is its own: what the output panel holds.
+
+   An IDE's root has the class `ide`; `height` sets --ide-height. */
+
+.ide {
+  /* The height of every bar at the top of a column, so the output's header
+     and the editor's actions (or tabs) line up. */
+  --ide-bar-height: 36px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  overflow: hidden;
+  height: var(--ide-height, calc(100dvh - 80px));
+}
+
+.ide code-input {
+  margin: 0;
+}
+
+.ide .editor-container {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0;
+  min-width: 120px;
+  min-height: 120px;
+  overflow: hidden;
+}
+
+.ide .editor {
+  flex: 1;
+  min-height: 0;
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid var(--color-spacer);
+}
+
+.ide .editor .cm-editor {
+  height: 100%;
+}
+
+/* The output panel: a card, headed by .ide-panel-header. */
+.ide .container {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0;
+  min-width: 120px;
+  min-height: 120px;
+  overflow: hidden;
+  border: 1px solid var(--color-spacer);
+  border-radius: 8px;
+  background-color: var(--color-background);
+}
+
+.ide .splitter {
+  flex-shrink: 0;
+  border-radius: 999px;
+  background: var(--color-spacer);
+  touch-action: none;
+  opacity: 0.45;
+  transition: opacity 0.15s ease-in-out;
+}
+
+.ide .splitter:hover {
+  opacity: 0.65;
+}
+
+.ide.split-vertical .splitter {
+  width: 100%;
+  height: 4px;
+  cursor: row-resize;
+}
+
+.ide.split-horizontal .splitter {
+  width: 4px;
+  height: 100%;
+  cursor: col-resize;
+}
+
+.ide.resizing {
+  user-select: none;
+}
+
+.ide.resizing .splitter {
+  opacity: 0.75;
+}
+
+/* Actions above the editor (Run, Check, …), and the toolbar below it. */
+.ide .buttons {
+  display: flex;
+  flex: 0 0 auto;
+  overflow: hidden;
+  border: 1px solid var(--color-spacer);
+  border-bottom: none;
+  border-radius: 8px 8px 0 0;
+}
+
+.ide .buttons.bottom {
+  border: 1px solid var(--color-spacer);
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+}
+
+.ide .buttons button {
+  flex: 1;
+  min-height: var(--ide-bar-height);
+  padding: 0 16px;
+  border: none;
+  border-right: 1px solid var(--color-spacer);
+  border-radius: 0;
+  background-color: var(--color-background);
+  color: var(--color-text);
+  font: inherit;
+  cursor: pointer;
+}
+
+.ide .buttons button:last-child {
+  border-right: none;
+}
+
+.ide .buttons button:hover,
+.ide .buttons button.active {
+  background-color: var(--color-spacer);
+}
+
+.ide .buttons button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* Icon-only toolbar: written labels made this row wrap on narrow screens,
+   so the wording is in title and aria-label. */
+.ide .buttons.bottom button {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  padding: 0;
+}
+
+.ide .buttons.bottom button .icon {
+  display: block;
+  width: 18px;
+  height: 18px;
+}
+
+/* Fullscreen sits apart, at the trailing edge of the toolbar. */
+.ide .buttons.bottom button.fullscreen {
+  margin-inline-start: auto;
+  border-right: none;
+  border-left: 1px solid var(--color-spacer);
+}
+
+.ide:fullscreen {
+  width: 100vw;
+  height: 100dvh !important;
+  padding: 12px;
+  box-sizing: border-box;
+  background-color: var(--color-background, #fff);
+}
+
+.ide:fullscreen::backdrop {
+  background-color: var(--color-background, #fff);
+}
+
+@media screen and (min-width: 1024px) {
+  .ide {
+    flex-direction: row;
+  }
+
+  .ide > .container,
+  .ide > .editor-container {
+    height: 100%;
+  }
+}
+
+/* Stacked on narrow screens, a small height like height=300 would split
+   between output and editor and leave the editor a line or two. It sizes the
+   output instead, and the editor keeps room to work in. */
+@media screen and (max-width: 1023px) {
+  .ide {
+    height: auto;
+  }
+
+  .ide > .container {
+    flex: 0 0 auto;
+    height: var(--ide-height, 50dvh);
+  }
+
+  .ide > .editor-container {
+    flex: 0 0 auto;
+    height: max(260px, var(--ide-height, 50dvh));
+  }
+
+  .ide:fullscreen > .container,
+  .ide:fullscreen > .editor-container {
+    flex: 1 1 0;
+    height: auto;
+  }
+}
+
+/* The head of an output panel: what it shows, or the switch between output,
+   target and comparison. As tall as the editor's first bar. */
+.ide-panel-header {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: var(--ide-bar-height, 36px);
+  padding: 0 6px 0 12px;
+  box-sizing: border-box;
+  overflow: hidden;
+  border-bottom: 1px solid var(--color-spacer);
+  background-color: var(--color-nav);
+  color: var(--color-text);
+  font-size: 0.9em;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.ide-panel-header[hidden],
+.ide-panel-header.hidden {
+  display: none;
+}
+
+.ide-panel-title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* A switch takes the title's place. */
+.ide-panel-header .ide-view-switch ~ .ide-panel-title,
+.ide-panel-header .ide-panel-title:has(~ .ide-view-switch) {
+  display: none;
+}
+
+/* File tabs of an IDE workspace, between the run buttons and the editor. */
+
+.ide-tabs {
+  display: flex;
+  align-items: stretch;
+  border: 1px solid var(--color-spacer);
+  border-bottom: none;
+  background-color: var(--color-nav);
+}
+
+.ide-tabs[hidden] {
+  display: none;
+}
+
+/* The strip of tabs; it scrolls once the files no longer fit. */
+.ide-tabs-strip {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  /* The scroll buttons and the wheel scroll the strip. */
+  scrollbar-width: none;
+}
+
+.ide-tabs-strip::-webkit-scrollbar {
+  display: none;
+}
+
+/* Scoped under .ide-tabs: the directives' own `.directive-x button` rules
+   (flex: 1, padding: 8px 16px) would otherwise win and stretch these. */
+.ide-tabs .ide-tabs-scroll {
+  flex: 0 0 auto;
+  /* A little wider than the chevron itself, but still a usable target. */
+  padding: 0 5px;
+  border: none;
+  background: none;
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: 0.9em;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.ide-tabs .ide-tabs-scroll[hidden] {
+  display: none;
+}
+
+.ide-tabs .ide-tabs-scroll:disabled {
+  cursor: default;
+  opacity: 0.3;
+}
+
+.ide-tabs .ide-tabs-scroll:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: -2px;
+}
+
+/* As the first row of an IDE's editor column, the bar is the card's top,
+   as tall as the output's header beside it. */
+.ide-tabs:first-child {
+  min-height: calc(var(--ide-bar-height, 36px) + 1px);
+  box-sizing: border-box;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  overflow: hidden;
+}
+
+.ide-icon {
+  display: block;
+  flex: 0 0 auto;
+  width: 14px;
+  height: 14px;
+}
+
+.ide-tabs .ide-tab {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px 6px 12px;
+  border: none;
+  border-right: 1px solid var(--color-spacer);
+  border-radius: 0;
+  background-color: transparent;
+  color: var(--color-text);
+  font-family: hyperbook-code, monospace;
+  font-size: 0.85em;
+  cursor: pointer;
+  white-space: nowrap;
+  opacity: 0.75;
+}
+
+.ide-tabs .ide-tab:hover {
+  opacity: 1;
+}
+
+.ide-tabs .ide-tab.active {
+  background-color: var(--color-background);
+  box-shadow: inset 0 -2px 0 var(--color-brand);
+  opacity: 1;
+}
+
+.ide-tabs .ide-tab:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: -2px;
+}
+
+/* What a binary file is, or a lock on a file readers cannot change. */
+.ide-tabs .ide-tab-kind {
+  opacity: 0.7;
+}
+
+/* A long path takes the tab it needs, but no more than the strip offers. */
+.ide-tabs .ide-tab-name {
+  min-width: 0;
+  max-width: 14ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Rename and delete: on the open tab, and on others while pointed at or
+   focused, so a row of tabs stays calm. */
+.ide-tabs .ide-tab-action {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  margin: -2px 0;
+  border: none;
+  border-radius: 4px;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  opacity: 0;
+}
+
+.ide-tabs .ide-tab.active .ide-tab-action,
+.ide-tabs .ide-tab:hover .ide-tab-action,
+.ide-tabs .ide-tab:focus-within .ide-tab-action {
+  opacity: 0.6;
+}
+
+.ide-tabs .ide-tab .ide-tab-action:hover,
+.ide-tabs .ide-tab .ide-tab-action:focus-visible {
+  opacity: 1;
+  background-color: var(--color-spacer);
+}
+
+/* Without hover, the buttons must be there to be found. */
+@media (hover: none) {
+  .ide-tabs .ide-tab .ide-tab-action {
+    opacity: 0.6;
+  }
+}
+
+/* New and upload, after the strip so they never scroll away. */
+.ide-tabs .ide-tab-tools {
+  flex: 0 0 auto;
+  display: flex;
+  border-left: 1px solid var(--color-spacer);
+}
+
+.ide-tabs .ide-tab-add {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: none;
+  color: var(--color-text);
+  cursor: pointer;
+  opacity: 0.75;
+}
+
+.ide-tabs .ide-tab-add + .ide-tab-add {
+  border-left: 1px solid var(--color-spacer);
+}
+
+.ide-tabs .ide-tab-add:hover,
+.ide-tabs .ide-tab-add:focus-visible {
+  opacity: 1;
+  background-color: var(--color-background);
+}
+
+.ide-tabs .ide-tab-add .ide-icon {
+  width: 16px;
+  height: 16px;
+}
+
+/* Shown in place of the editor while a binary file's tab is open. */
+.ide-preview {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--color-spacer);
+  background-color: var(--color-background);
+  color: var(--color-text);
+}
+
+.ide-preview[hidden] {
+  display: none;
+}
+
+.ide-preview-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 4px 4px 12px;
+  border-bottom: 1px solid var(--color-spacer);
+  font-size: 0.85em;
+}
+
+.ide-preview-kind {
+  opacity: 0.7;
+}
+
+.ide-preview-name {
+  font-family: hyperbook-code, monospace;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ide-preview-meta {
+  opacity: 0.7;
+  white-space: nowrap;
+}
+
+.ide-preview .ide-preview-download {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-inline-start: auto;
+  width: 32px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.ide-preview .ide-preview-download .ide-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.ide-preview .ide-preview-download:hover {
+  background-color: var(--color-spacer);
+}
+
+.ide-preview-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  overflow: auto;
+  padding: 12px;
+}
+
+/* A checkerboard, so transparent images stay visible. */
+.ide-preview-image {
+  background-image: conic-gradient(
+    var(--color-spacer) 25%,
+    transparent 0 50%,
+    var(--color-spacer) 0 75%,
+    transparent 0
+  );
+  background-size: 16px 16px;
+}
+
+.ide-preview-image img,
+.ide-preview-video video {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.ide-preview-audio audio {
+  width: min(100%, 480px);
+}
+
+.ide-preview-pdf {
+  padding: 0;
+}
+
+.ide-preview-pdf iframe {
+  flex: 1;
+  width: 100%;
+  border: none;
+}
+
+.ide-preview-sample {
+  align-self: stretch;
+  overflow-wrap: anywhere;
+}
+
+.ide-preview-font p {
+  margin: 0 0 12px;
+  line-height: 1.25;
+}
+
+.ide-preview-font .ide-preview-glyphs {
+  font-size: 18px;
+  white-space: pre-line;
+  opacity: 0.85;
+}
+
+.ide-preview-font {
+  justify-content: flex-start;
+}
+
+.ide-preview-model {
+  padding: 0;
+  position: relative;
+}
+
+.ide-preview-model canvas {
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  cursor: grab;
+  touch-action: none;
+}
+
+.ide-preview-model canvas:active {
+  cursor: grabbing;
+}
+
+.ide-preview-hint {
+  position: absolute;
+  bottom: 8px;
+  margin: 0;
+  font-size: 0.8em;
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.ide-preview-note {
+  margin: 0;
+  padding: 8px 12px;
+  border-radius: 6px;
+  background-color: var(--color-nav);
+  max-width: 40ch;
+  text-align: center;
+}
+
+/* Graphic comparison, on the reader's own output: the target lies over it
+   at the same size and place, uncovered from the left by the slider. */
+.ide-compare-host {
+  position: relative;
+}
+
+/* Over the output's picture, from its top; it scrolls with the output. Does
+   not take the pointer: a sketch may react to the mouse. */
+.ide-compare-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: flex-start;
+  pointer-events: none;
+}
+
+.ide-compare-overlay[hidden] {
+  display: none;
+}
+
+/* p5 centres its canvas; "safe" keeps it at the left edge when the output is
+   narrower than the picture, as the output does. */
+.ide-compare-overlay.ide-compare-centered {
+  justify-content: safe center;
+}
+
+.ide-compare-picture {
+  position: relative;
+  flex: 0 0 auto;
+}
+
+/* Where the IDE says its picture is (p5's canvas), not just aligned. */
+.ide-compare-overlay.ide-compare-located {
+  display: block;
+  height: 100%;
+}
+
+.ide-compare-overlay.ide-compare-located .ide-compare-picture {
+  position: absolute;
+}
+
+.ide-compare-overlay.ide-compare-located[hidden] {
+  display: none;
+}
+
+.ide-compare-layer {
+  position: absolute;
+  inset: 0;
+}
+
+.ide-compare-layer[hidden] {
+  display: none;
+}
+
+.ide-compare-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* The line between drawing (left) and target (right): white, outlined, so
+   it shows on light and dark pictures alike. */
+.ide-compare-handle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  margin-left: -1px;
+  background-color: #fff;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.35);
+}
+
+.ide-compare-handle[hidden] {
+  display: none;
+}
+
+/* The grip on the line, to drag it; the only part over the output that
+   takes the pointer. Kept inside the picture at its edges. */
+.ide-compare-grip {
+  position: absolute;
+  top: 50%;
+  width: 28px;
+  height: 28px;
+  margin-top: -14px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background-color: #fff;
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.2),
+    0 2px 6px rgba(0, 0, 0, 0.35);
+  cursor: ew-resize;
+  pointer-events: auto;
+  touch-action: none;
+  transition: transform 0.15s;
+}
+
+.ide-compare-grip:hover,
+.ide-compare-picture.dragging .ide-compare-grip {
+  transform: translateX(-50%) scale(1.1);
+}
+
+/* ‹ › in the brand colour. */
+.ide-compare-grip::before,
+.ide-compare-grip::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  margin-top: -3px;
+  border: solid var(--color-brand);
+  border-width: 0 0 2px 2px;
+}
+
+.ide-compare-grip::before {
+  left: 7px;
+  transform: rotate(45deg);
+}
+
+.ide-compare-grip::after {
+  right: 7px;
+  transform: rotate(-135deg);
+}
+
+.ide-compare-grip[hidden] {
+  display: none;
+}
+
+/* While dragging, the sketch below must not take the pointer: frames would
+   swallow the moves. */
+.ide-compare-host:has(.ide-compare-picture.dragging) iframe {
+  pointer-events: none;
+}
+
+/* Overlay: the target half see-through over the whole drawing. */
+.ide-compare-target.see-through {
+  opacity: 0.5;
+}
+
+/* Solved: the picture is outlined and says so. */
+.ide-compare-picture.solved {
+  box-shadow: 0 0 0 3px #16a34a;
+}
+
+.ide-compare-solved {
+  position: absolute;
+  top: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 2px 10px;
+  border-radius: 999px;
+  background-color: #16a34a;
+  color: #fff;
+  font-family: hyperbook-body, sans-serif;
+  font-size: 12px;
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+.ide-compare-solved[hidden] {
+  display: none;
+}
+
+/* What each side of the line is: the reader's drawing in the top left
+   corner, the target in the top right. */
+.ide-compare-label {
+  position: absolute;
+  top: 8px;
+  padding: 2px 9px;
+  border-radius: 999px;
+  background-color: rgba(17, 17, 17, 0.7);
+  color: #fff;
+  font-family: hyperbook-body, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+
+.ide-compare-label[hidden] {
+  display: none;
+}
+
+.ide-compare-label-yours {
+  left: 8px;
+}
+
+.ide-compare-label-target {
+  right: 8px;
+}
+
+/* The panel underneath the output: it stays while the output scrolls. */
+.ide-compare {
+  position: relative;
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px 12px;
+  border-top: 1px solid var(--color-spacer);
+  background-color: var(--color-nav);
+  color: var(--color-text);
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+/* Score, best score and how to compare. */
+.ide-compare-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 12px;
+}
+
+.ide-compare-score {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  cursor: help;
+  transition: opacity 0.2s;
+}
+
+.ide-compare-score-value {
+  font-size: 1.35rem;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.ide-compare-score-word {
+  font-size: 0.85em;
+  opacity: 0.7;
+}
+
+.ide-compare-score.passed .ide-compare-score-value {
+  color: #16a34a;
+}
+
+.ide-compare-score.failed .ide-compare-score-value {
+  color: #d97706;
+}
+
+/* While a score is worked out, the last one fades a little. */
+.ide-compare-score.busy {
+  opacity: 0.5;
+}
+
+/* Split, Overlay, Differences. */
+.ide-compare-modes {
+  display: flex;
+  margin-inline-start: auto;
+  padding: 2px;
+  gap: 2px;
+  border-radius: 8px;
+  background-color: color-mix(in srgb, var(--color-spacer) 45%, transparent);
+}
+
+.ide-compare .ide-compare-mode {
+  padding: 3px 10px;
+  border: none;
+  border-radius: 6px;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: 0.85em;
+  cursor: pointer;
+  opacity: 0.8;
+}
+
+.ide-compare .ide-compare-mode:hover:not(:disabled) {
+  opacity: 1;
+}
+
+.ide-compare .ide-compare-mode[aria-pressed="true"] {
+  background-color: var(--color-background);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  font-weight: 600;
+  opacity: 1;
+}
+
+.ide-compare .ide-compare-mode:disabled {
+  cursor: default;
+  opacity: 0.4;
+}
+
+/* How far the score is from solved, along the panel's top edge: filled to
+   the score, marked at the pass score. */
+.ide-compare-meter {
+  position: absolute;
+  top: -1px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background-color: color-mix(in srgb, var(--color-spacer) 60%, transparent);
+}
+
+.ide-compare-meter-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 0;
+  background-color: #d97706;
+  transition: width 0.4s ease;
+}
+
+.ide-compare-meter.passed .ide-compare-meter-fill {
+  background-color: #16a34a;
+}
+
+.ide-compare-meter-pass {
+  position: absolute;
+  top: 0;
+  bottom: -3px;
+  width: 2px;
+  margin-left: -1px;
+  background-color: var(--color-text);
+  opacity: 0.5;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ide-compare-meter-fill {
+    transition: none;
+  }
+}
+
+/* The slider for the line, and "Target" to hold. */
+.ide-compare-slide {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ide-compare-slider {
+  flex: 1;
+  min-width: 80px;
+  margin: 0;
+  accent-color: var(--color-brand);
+  cursor: ew-resize;
+}
+
+.ide-compare-slider:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+.ide-compare .ide-compare-peek {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border: 1px solid var(--color-spacer);
+  border-radius: 6px;
+  background: var(--color-background);
+  color: inherit;
+  font: inherit;
+  font-size: 0.85em;
+  cursor: pointer;
+  user-select: none;
+  touch-action: none;
+}
+
+.ide-compare .ide-compare-peek .ide-icon {
+  width: 14px;
+  height: 14px;
+}
+
+.ide-compare .ide-compare-peek:hover:not(:disabled) {
+  border-color: var(--color-brand);
+}
+
+.ide-compare .ide-compare-peek:active:not(:disabled) {
+  background-color: var(--color-spacer);
+}
+
+.ide-compare .ide-compare-peek:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+/* How the comparison works, until the first score; loading and errors.
+   Scoped twice: the book's paragraph margins would win otherwise. */
+.ide-compare .ide-compare-hint {
+  margin: 0;
+  padding: 6px 10px;
+  border-left: 3px solid var(--color-spacer);
+  border-radius: 0 6px 6px 0;
+  background-color: var(--color-background);
+  font-size: 0.9em;
+}
+
+.ide-compare .ide-compare-hint:empty {
+  display: none;
+}
+
+/* The target's colours. */
+.ide-compare-colours {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+}
+
+.ide-compare-colours[hidden] {
+  display: none;
+}
+
+.ide-compare-colours-label {
+  font-size: 0.85em;
+  opacity: 0.7;
+}
+
+/* Renderers working out of sight: p5 frames and the solution's canvas. Kept
+   in the page, as browsers throttle frames that are display:none. */
+.ide-compare-offscreen {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.ide-compare-offscreen iframe {
+  width: 800px;
+  height: 600px;
+  border: none;
+}
+
+/* The target's colours, to copy. */
+.ide-compare-palette {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.ide-compare-palette:empty {
+  display: none;
+}
+
+.ide-compare .ide-compare-swatch {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 8px 2px 2px;
+  border: 1px solid var(--color-spacer);
+  border-radius: 999px;
+  background: var(--color-background);
+  color: inherit;
+  font-family: hyperbook-code, monospace;
+  font-size: 0.85em;
+  cursor: copy;
+}
+
+.ide-compare .ide-compare-swatch:hover,
+.ide-compare .ide-compare-swatch:focus-visible {
+  background-color: var(--color-spacer);
+}
+
+.ide-compare .ide-compare-swatch.copied {
+  border-color: var(--color-brand);
+}
+
+.ide-compare-chip {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.2);
+}
+
+/* The switch between views of an IDE's output (pyide's Output and Canvas),
+   in its header. It looks like the bar of actions above the editor (Run,
+   Check, Stop), so both columns start alike: the views fill the header, and
+   the one shown is raised like a pressed button. */
+.ide-panel-header:has(> .ide-view-switch) {
+  padding: 0;
+  font-size: inherit;
+}
+
+.ide-view-switch {
+  flex: 1;
+  display: flex;
+  align-self: stretch;
+  min-width: 0;
+  font-weight: normal;
+}
+
+.ide-panel-header .ide-view-switch .ide-view {
+  flex: 1;
+  min-width: 0;
+  min-height: var(--ide-bar-height, 36px);
+  padding: 0 16px;
+  border: none;
+  border-radius: 0;
+  background-color: var(--color-background);
+  color: var(--color-text);
+  font: inherit;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.ide-panel-header .ide-view-switch .ide-view + .ide-view {
+  border-left: 1px solid var(--color-spacer);
+}
+
+.ide-panel-header .ide-view-switch .ide-view:hover,
+.ide-panel-header .ide-view-switch .ide-view.active {
+  background-color: var(--color-spacer);
+}

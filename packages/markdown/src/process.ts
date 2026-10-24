@@ -49,7 +49,7 @@ import remarkDirectivePagelist from "./remarkDirectivePagelist";
 import remarkDirectivePasswordlist from "./remarkDirectivePasswordlist";
 import rehypeQrCode from "./rehypeQrCode";
 import rehypeShareDialog from "./rehypeShareDialog";
-import rehypeDirectiveP5 from "./rehypeDirectiveP5";
+import remarkDirectiveP5 from "./remarkDirectiveP5";
 import remarkCollectSearchDocuments from "./remarkCollectSearchDocuments";
 import remarkDirectiveGeogebra from "./remarkDirectiveGeogebra";
 import remarkDirectiveAbcMusic from "./remarkDirectiveAbcMusic";
@@ -79,7 +79,15 @@ import remarkDirectiveKirimoto from "./remarkDirectiveKirimoto";
 import remarkDirectiveBitflow from "./remarkDirectiveBitflow";
 import remarkChecklist from "./remarkChecklist";
 
-export const remark = (ctx: HyperbookContext) => {
+/**
+ * @param options.withoutP5 - Leaves p5 directives untransformed, as the remark
+ *   stage did before p5 moved there from the rehype stage. Only for
+ *   `legacyP5Ids`.
+ */
+export const remark = (
+  ctx: HyperbookContext,
+  { withoutP5 = false }: { withoutP5?: boolean } = {},
+) => {
   i18n.init(ctx.config.language || "en");
   const remarkPlugins: PluggableList = [
     remarkRemoveComments,
@@ -89,6 +97,7 @@ export const remark = (ctx: HyperbookContext) => {
     remarkDirectiveCollapsible(ctx),
     remarkDirectivePyide(ctx),
     remarkDirectiveWebide(ctx),
+    ...(withoutP5 ? [] : [remarkDirectiveP5(ctx)]),
     remarkDirectiveOnlineIde(ctx),
     remarkDirectivePagelist(ctx),
     remarkDirectivePasswordlist(ctx),
@@ -182,7 +191,6 @@ export const process = (
     rehypeQrCode(ctx),
     rehypeShareDialog(ctx),
     rehypeKatex,
-    rehypeDirectiveP5(ctx),
     [
       rehypePrettyCode,
       {

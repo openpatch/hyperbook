@@ -5,6 +5,7 @@ import { Command, InvalidArgumentError } from "commander";
 import checkForUpdate from "update-check";
 import { runBuildProject } from "./build";
 import { runCheck } from "./check";
+import { runMigrate } from "./migrate";
 import { runDev } from "./dev";
 import { getPkgManager } from "./helpers/get-pkg-manager";
 import { hyperproject } from "@hyperbook/fs";
@@ -127,6 +128,24 @@ program
   .option("--strict", "exit non-zero on warnings as well as errors")
   .action(async (options) => {
     const ok = await runCheck(await withProject(), options).catch((e) => {
+      reportError(e);
+      process.exit(1);
+    });
+    if (!ok) process.exit(1);
+  });
+
+program
+  .command("migrate")
+  .description(
+    "convert pages to the current syntax of elements that changed (the IDEs)",
+  )
+  .option("--dry-run", "show what would change without writing")
+  .option("--force", "run even with uncommitted changes")
+  .action(async (options) => {
+    const ok = await runMigrate(await withProject(), {
+      dryRun: options.dryRun,
+      force: options.force,
+    }).catch((e) => {
       reportError(e);
       process.exit(1);
     });

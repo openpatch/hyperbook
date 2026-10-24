@@ -43,36 +43,58 @@ cube([20,20,20], center=true);
 | Attribut | Beschreibung | Standard |
 |---|---|---|
 | `id` | Eindeutige ID für Persistenz | automatisch generiert |
-| `src` | Lädt Quellcode aus einem externen Dateipfad | eingebetteter Codeblock |
+| `main` | Die Datei, die gerendert wird | `main.scad` |
 | `height` | Höhe des Editor-/Vorschau-Containers | `calc(100dvh - 80px)` |
 | `library` | Kommaseparierte Liste von Bibliotheken, die in die OpenSCAD-Umgebung geladen werden sollen | keine |
+| `files` | Was Leserinnen und Leser mit Dateien tun dürfen: `create`, `upload`, `rename`, `delete`, durch Kommas getrennt, oder `open` für alles | `upload` |
+| `accept` | Dateiendungen für Dateien, die Leserinnen und Leser anlegen oder umbenennen, durch Kommas getrennt | `.scad` |
 
 Mögliche Bibliotheken sind: BOSL2, BOSL, MCAD, NopSCADlib, fonts
 
 ## Code aus Datei laden
 
 ````md
-:::openscad{src="openscad/example.scad"}
+:::openscad
+::file{path="main.scad" src="openscad/example.scad"}
+:::
+````
+
+## Mehrere Dateien
+
+Weitere Dateien bekommen mit `file="…"` einen Namen und erscheinen als Tabs. Die Hauptdatei kann sie mit `include` oder `use` einbinden:
+
+````md
+:::openscad
+
+```scad
+include <parts.scad>
+part(10);
+```
+
+```scad file="parts.scad"
+module part(s) { cube([s, s, s]); }
+```
+
 :::
 ````
 
 ## Binärdateien in das OpenSCAD-Dateisystem laden
 
-Verwenden Sie `@file`-Direktiven innerhalb des `:::openscad`-Blocks, um Binärdateien vor dem Rendern einzubinden.
-
-Im Edit-Modus können Sie zusätzlich im Bereich **Binärdateien** Dateien direkt hochladen (lokal im Browser-Speicher für diesen Block gespeichert).
+Verwenden Sie `::file`-Zeilen innerhalb des `:::openscad`-Blocks, um Meshes, Bilder oder Schriftarten aus Ihrem Buch einzubinden. Sie liegen neben der Hauptdatei unter ihrem `path`:
 
 ````md
 :::openscad
 
-@file dest="/input/model.stl" src="models/model.stl"
+::file{path="input/model.stl" src="models/model.stl"}
 
 ```scad
-import("/input/model.stl");
+import("input/model.stl");
 ```
 
 :::
 ````
+
+Leserinnen und Leser können über den Tab **⤒** eigene Dateien hochladen; sie werden mit dem Modell im Browser gespeichert.
 
 Relative Pfade in `import()` werden ebenfalls unterstützt und wie Typst-Assets aufgelöst (relativ zur aktuellen Seite). Beispiel:
 
@@ -255,3 +277,17 @@ bridge(rod_diameter=rod_diameter);
 ```
 
 :::
+
+## Dateien, die Leserinnen und Leser ändern dürfen
+
+Mit `files` bekommen Leserinnen und Leser Knöpfe für eigene Dateien: **+** legt eine Datei an, **⤒** lädt eine hoch, und jeder Tab bekommt **✎** zum Umbenennen und **×** zum Löschen. `rename` und `delete` erlauben das auch für die Dateien der Seite; die Hauptdatei sowie `readonly`-, `hidden`- und Testdateien bleiben immer, wie sie geschrieben sind. Selbst angelegte oder hochgeladene Dateien dürfen Leserinnen und Leser immer umbenennen und löschen. Ein Klick auf den Tab einer Binärdatei zeigt eine Vorschau: Bilder, Audio und Video, PDFs, Schriftarten (TTF, OTF, WOFF) und 3D-Modelle (STL, OBJ), die sich drehen und zoomen lassen.
+
+````md
+:::openscad{files="create,upload,rename,delete"}
+...
+:::
+````
+
+## Umstieg von der alten Schreibweise
+
+Ältere Bücher laden Dateien mit `src="…"` direkt am Element und mit `@file dest="…" src="…"`-Zeilen. Führen Sie in Ihrem Buch `npx hyperbook migrate` aus, um diese Seiten umzustellen; gespeicherte Modelle der Leserinnen und Leser bleiben dabei erhalten.

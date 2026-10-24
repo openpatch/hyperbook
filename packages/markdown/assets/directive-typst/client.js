@@ -86,7 +86,7 @@ hyperbook.typst = (function () {
    * @returns {string} Localized or fallback text
    */
   const i18nGet = (key, fallback = '') => {
-    return window.i18n?.get(key) || fallback;
+    return hyperbook.i18n.get(key, undefined, fallback);
   };
 
   // ============================================================================
@@ -596,6 +596,7 @@ hyperbook.typst = (function () {
       previewContainer,
       basePath,
       pagePath,
+      mainPath,
     }) {
       return this.renderQueue.add(async () => {
         try {
@@ -626,9 +627,14 @@ hyperbook.typst = (function () {
           // Add binary files
           await BinaryFileHandler.addToShadow(binaryFiles);
 
-          // Render to SVG with preamble prepended
-          const mainContent = assetsPreamble + rewrittenCode;
-          const svg = await window.$typst.svg({ mainContent });
+          // Compile the main file by its path: relative #include and
+          // #image only resolve inside the project, which inline
+          // mainContent is not part of.
+          const svg = await window.$typst.svg(
+            mainPath
+              ? { mainFilePath: mainPath }
+              : { mainContent: assetsPreamble + rewrittenCode },
+          );
 
           // Clear any existing errors
           if (previewContainer) {
@@ -678,6 +684,7 @@ hyperbook.typst = (function () {
       fontFiles,
       basePath,
       pagePath,
+      mainPath,
     }) {
       return this.renderQueue.add(async () => {
         try {
@@ -703,9 +710,11 @@ hyperbook.typst = (function () {
           // Add binary files
           await BinaryFileHandler.addToShadow(binaryFiles);
 
-          // Generate PDF with preamble prepended
-          const mainContent = assetsPreamble + rewrittenCode;
-          const pdfData = await window.$typst.pdf({ mainContent });
+          const pdfData = await window.$typst.pdf(
+            mainPath
+              ? { mainFilePath: mainPath }
+              : { mainContent: assetsPreamble + rewrittenCode },
+          );
           const pdfBlob = new Blob([pdfData], { type: 'application/pdf' });
           
           // Download PDF
@@ -724,935 +733,150 @@ hyperbook.typst = (function () {
   }
 
   // ============================================================================
-  // FILE MANAGER
+  // WORKSPACE
   // ============================================================================
 
-  class FileManager {
-    constructor(sourceFiles) {
-      this.sourceFiles = sourceFiles;
-      this.contents = new Map();
-      this.currentFile = this.findMainFile() || sourceFiles[0];
-      
-      // Initialize contents map
-      sourceFiles.forEach((f) => this.contents.set(f.filename, f.content));
-    }
+  /**
+   * Decodes the `data-workspace` attribute for a document shown without the
+   * IDE shell.
+   * @param {string | null} attribute
+   */
+  const decodeWorkspace = (attribute) => {
+    if (!attribute) return { main: 'main.typ', files: [] };
+    const bytes = Uint8Array.from(atob(attribute), (c) => c.charCodeAt(0));
+    return JSON.parse(new TextDecoder('utf-8').decode(bytes));
+  };
 
-    /**
-     * Find main Typst file
-     * @returns {Object|null} Main file object
-     */
-    findMainFile() {
-      return this.sourceFiles.find(
-        (f) => f.filename === 'main.typ' || f.filename === 'main.typst'
-      );
-    }
+  /**
+   * What the renderer needs from a workspace: the main source, the other
+   * sources, the binary files and the fonts.
+   * @param {{path: string, content?: string, url?: string, font?: boolean}[]} files
+   * @param {string} main
+   */
+  const renderInput = (all, main) => {
+    const files = all.filter((f) => !f.role);
+    return {
+    code: files.find((f) => f.path === main)?.content ?? '',
+    mainPath: `/${main}`,
+    sourceFiles: files
+      .filter((f) => typeof f.content === 'string')
+      .map((f) => ({ filename: f.path, content: f.content })),
+    binaryFiles: files
+      .filter((f) => typeof f.content !== 'string' && f.url && !f.font)
+      .map((f) => ({ dest: f.path, url: f.url })),
+    fontFiles: files
+      .filter((f) => f.font && f.url)
+      .map((f) => ({ url: f.url })),
+    };
+  };
 
-    /**
-     * Get current file content
-     * @returns {string} File content
-     */
-    getCurrentContent() {
-      return this.contents.get(this.currentFile.filename) || '';
-    }
-
-    /**
-     * Update current file content
-     * @param {string} content - New content
-     */
-    updateCurrentContent(content) {
-      this.contents.set(this.currentFile.filename, content);
-    }
-
-    /**
-     * Switch to different file
-     * @param {string} filename - Target filename
-     * @returns {string} New file content
-     */
-    switchTo(filename) {
-      const file = this.sourceFiles.find((f) => f.filename === filename);
-      if (file) {
-        this.currentFile = file;
-        return this.getCurrentContent();
+  /** Downloads the workspace as a ZIP, for a document shown without the shell. */
+  const downloadProject = async (files, id) => {
+    const encoder = new TextEncoder();
+    const zipFiles = {};
+    for (const file of files) {
+      if (file.font) continue;
+      if (typeof file.content === 'string') {
+        zipFiles[file.path] = encoder.encode(file.content);
+        continue;
       }
-      return '';
-    }
-
-    /**
-     * Add new source file
-     * @param {string} filename - New filename
-     * @param {string} content - File content
-     * @returns {boolean} Success status
-     */
-    addFile(filename, content = `// ${filename}\n`) {
-      if (this.sourceFiles.some((f) => f.filename === filename)) {
-        return false;
-      }
-
-      const newFile = { filename, content };
-      this.sourceFiles.push(newFile);
-      this.contents.set(filename, content);
-      this.currentFile = newFile;
-      
-      return true;
-    }
-
-    /**
-     * Delete source file
-     * @param {string} filename - Filename to delete
-     * @returns {boolean} Success status
-     */
-    deleteFile(filename) {
-      // Don't delete main file
-      if (filename === 'main.typ' || filename === 'main.typst') {
-        return false;
-      }
-
-      this.sourceFiles = this.sourceFiles.filter((f) => f.filename !== filename);
-      this.contents.delete(filename);
-
-      // Switch to main file if we deleted current file
-      if (this.currentFile.filename === filename) {
-        this.currentFile = this.sourceFiles[0];
-      }
-
-      return true;
-    }
-
-    /**
-     * Get all source files with current content
-     * @returns {Array} Updated source files
-     */
-    getSourceFiles() {
-      return this.sourceFiles.map((f) => ({
-        filename: f.filename,
-        content: this.contents.get(f.filename) || f.content,
-      }));
-    }
-  }
-
-  // ============================================================================
-  // PROJECT EXPORTER
-  // ============================================================================
-
-  class ProjectExporter {
-    constructor(assetManager) {
-      this.assetManager = assetManager;
-    }
-
-    /**
-     * Export project as ZIP file
-     * @param {Object} params - Export parameters
-     * @returns {Promise<void>}
-     */
-    async export({ code, id, sourceFiles, binaryFiles, basePath, pagePath }) {
       try {
-        const encoder = new TextEncoder();
-        const zipFiles = {};
-
-        // Add all source files
-        for (const { filename, content } of sourceFiles) {
-          const path = filename.startsWith('/') ? filename.substring(1) : filename;
-          zipFiles[path] = encoder.encode(content);
+        const response = await fetch(file.url);
+        if (response.ok) {
+          zipFiles[file.path] = new Uint8Array(await response.arrayBuffer());
         }
-
-        // Add binary files
-        await this.addBinaryFiles(zipFiles, binaryFiles, basePath, pagePath);
-
-        // Add referenced assets
-        await this.addAssets(zipFiles, code, basePath, pagePath);
-
-        // Create and download ZIP
-        this.downloadZip(zipFiles, id);
-
       } catch (error) {
-        console.error('Project export error:', error);
-        alert(i18nGet('typst-export-error', 'Error exporting project'));
+        console.warn(`Could not add ${file.path} to the download:`, error);
       }
     }
-
-    /**
-     * Add binary files to ZIP
-     * @param {Object} zipFiles - ZIP files object
-     * @param {Array} binaryFiles - Binary files array
-     * @param {string} basePath - Base path
-     * @param {string} pagePath - Page path
-     * @returns {Promise<void>}
-     */
-    async addBinaryFiles(zipFiles, binaryFiles, basePath, pagePath) {
-      for (const { dest, url } of binaryFiles) {
-        try {
-          let arrayBuffer;
-
-          if (url.startsWith('data:')) {
-            const response = await fetch(url);
-            arrayBuffer = await response.arrayBuffer();
-          } else if (url.startsWith('http://') || url.startsWith('https://')) {
-            const response = await fetch(url);
-            if (!response.ok) continue;
-            arrayBuffer = await response.arrayBuffer();
-          } else {
-            const fullUrl = constructUrl(url, basePath, pagePath);
-            const response = await fetch(fullUrl);
-            if (!response.ok) {
-              console.warn(`Failed to load binary file: ${url} at ${fullUrl}`);
-              continue;
-            }
-            arrayBuffer = await response.arrayBuffer();
-          }
-
-          const path = dest.startsWith('/') ? dest.substring(1) : dest;
-          zipFiles[path] = new Uint8Array(arrayBuffer);
-        } catch (error) {
-          console.warn(`Error loading binary file ${url}:`, error);
-        }
-      }
-    }
-
-    /**
-     * Add referenced assets to ZIP
-     * @param {Object} zipFiles - ZIP files object
-     * @param {string} code - Typst source code
-     * @param {string} basePath - Base path
-     * @param {string} pagePath - Page path
-     * @returns {Promise<void>}
-     */
-    async addAssets(zipFiles, code, basePath, pagePath) {
-      const pathInfos = this.assetManager.extractFilePaths(code);
-
-      for (const { path: relPath, isText } of pathInfos) {
-        const normalizedPath = relPath.startsWith('/') 
-          ? relPath.substring(1) 
-          : relPath;
-
-        // Skip if already in zipFiles
-        if (zipFiles[normalizedPath]) continue;
-
-        // Skip absolute URLs
-        if (REGEX_PATTERNS.ABSOLUTE_URL.test(relPath)) continue;
-
-        try {
-          const url = constructUrl(relPath, basePath, pagePath);
-          const response = await fetch(url);
-          
-          if (response.ok) {
-            if (isText) {
-              const text = await response.text();
-              zipFiles[normalizedPath] = new TextEncoder().encode(text);
-            } else {
-              const arrayBuffer = await response.arrayBuffer();
-              zipFiles[normalizedPath] = new Uint8Array(arrayBuffer);
-            }
-          } else {
-            console.warn(`Failed to load asset: ${relPath} at ${url}`);
-          }
-        } catch (error) {
-          console.warn(`Error loading asset ${relPath}:`, error);
-        }
-      }
-    }
-
-    /**
-     * Create and download ZIP file
-     * @param {Object} zipFiles - ZIP files object
-     * @param {string} id - Project ID
-     */
-    downloadZip(zipFiles, id) {
-      if (typeof window.UZIP === 'undefined') {
-        throw new Error('UZIP library not loaded');
-      }
-
-      const zipData = window.UZIP.encode(zipFiles);
-      const zipBlob = new Blob([zipData], { type: 'application/zip' });
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(zipBlob);
-      link.download = `typst-project-${id}.zip`;
-      link.click();
-      URL.revokeObjectURL(link.href);
-    }
-  }
-
-  // ============================================================================
-  // UI MANAGER
-  // ============================================================================
-
-  class UIManager {
-    constructor(elem, fileManager, binaryFiles) {
-      this.elem = elem;
-      this.fileManager = fileManager;
-      this.binaryFiles = binaryFiles;
-      this.tabsList = elem.querySelector('.tabs-list');
-      this.binaryFilesList = elem.querySelector('.binary-files-list');
-    }
-
-    /**
-     * Update tabs UI
-     */
-    updateTabs() {
-      if (!this.tabsList) return;
-
-      this.tabsList.innerHTML = '';
-
-      this.fileManager.sourceFiles.forEach((file) => {
-        const tab = this.createTab(file);
-        this.tabsList.appendChild(tab);
-      });
-    }
-
-    /**
-     * Create tab element for file
-     * @param {Object} file - File object
-     * @returns {HTMLElement} Tab element
-     */
-    createTab(file) {
-      const tab = document.createElement('div');
-      tab.className = 'file-tab';
-      
-      if (file.filename === this.fileManager.currentFile.filename) {
-        tab.classList.add('active');
-      }
-
-      // Tab name
-      const tabName = document.createElement('span');
-      tabName.className = 'tab-name';
-      tabName.textContent = file.filename;
-      tab.appendChild(tabName);
-
-      // Delete button (except for main file)
-      if (file.filename !== 'main.typ' && file.filename !== 'main.typst') {
-        const deleteBtn = this.createDeleteButton(file);
-        tab.appendChild(deleteBtn);
-      }
-
-      // Click handler
-      tab.addEventListener('click', () => this.handleTabClick(file));
-
-      return tab;
-    }
-
-    /**
-     * Create delete button for tab
-     * @param {Object} file - File object
-     * @returns {HTMLElement} Delete button
-     */
-    createDeleteButton(file) {
-      const deleteBtn = document.createElement('button');
-      deleteBtn.className = 'tab-delete';
-      deleteBtn.textContent = '×';
-      deleteBtn.title = i18nGet('typst-delete-file', 'Delete file');
-      
-      deleteBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        this.handleDeleteFile(file.filename);
-      });
-
-      return deleteBtn;
-    }
-
-    /**
-     * Handle tab click
-     * @param {Object} file - File object
-     */
-    handleTabClick(file) {
-      if (this.fileManager.currentFile.filename !== file.filename) {
-        this.onFileSwitch?.(file.filename);
-      }
-    }
-
-    /**
-     * Handle file deletion
-     * @param {string} filename - Filename to delete
-     */
-    handleDeleteFile(filename) {
-      const confirmMsg = `${i18nGet('typst-delete-confirm', 'Delete')} ${filename}?`;
-      
-      if (confirm(confirmMsg)) {
-        this.fileManager.deleteFile(filename);
-        this.updateTabs();
-        this.onFilesChange?.();
-      }
-    }
-
-    /**
-     * Update binary files list UI
-     */
-    updateBinaryFilesList() {
-      if (!this.binaryFilesList) return;
-
-      this.binaryFilesList.innerHTML = '';
-
-      if (this.binaryFiles.length === 0) {
-        const emptyMsg = document.createElement('div');
-        emptyMsg.className = 'binary-files-empty';
-        emptyMsg.textContent = i18nGet('typst-no-binary-files', 'No binary files');
-        this.binaryFilesList.appendChild(emptyMsg);
-        return;
-      }
-
-      this.binaryFiles.forEach((file) => {
-        const item = this.createBinaryFileItem(file);
-        this.binaryFilesList.appendChild(item);
-      });
-    }
-
-    /**
-     * Create binary file list item
-     * @param {Object} file - Binary file object
-     * @returns {HTMLElement} List item
-     */
-    createBinaryFileItem(file) {
-      const item = document.createElement('div');
-      item.className = 'binary-file-item';
-
-      const icon = document.createElement('span');
-      icon.className = 'binary-file-icon';
-      icon.textContent = '📎';
-      item.appendChild(icon);
-
-      const name = document.createElement('span');
-      name.className = 'binary-file-name';
-      name.textContent = file.dest;
-      item.appendChild(name);
-
-      const deleteBtn = document.createElement('button');
-      deleteBtn.className = 'binary-file-delete';
-      deleteBtn.textContent = '×';
-      deleteBtn.title = i18nGet('typst-delete-file', 'Delete file');
-      deleteBtn.addEventListener('click', () => this.handleDeleteBinaryFile(file.dest));
-      item.appendChild(deleteBtn);
-
-      return item;
-    }
-
-    /**
-     * Handle binary file deletion
-     * @param {string} dest - File destination path
-     */
-    handleDeleteBinaryFile(dest) {
-      const confirmMsg = `${i18nGet('typst-delete-confirm', 'Delete')} ${dest}?`;
-      
-      if (confirm(confirmMsg)) {
-        this.binaryFiles = this.binaryFiles.filter((f) => f.dest !== dest);
-        this.updateBinaryFilesList();
-        this.onBinaryFilesChange?.(this.binaryFiles);
-      }
-    }
-  }
-
-  // ============================================================================
-  // TYPST EDITOR
-  // ============================================================================
-
-  function setupSplitter(elem, container, editorContainer, splitter) {
-    if (!container || !editorContainer || !splitter) return;
-
-    const minPanelSize = 120;
-
-    const getIsHorizontal = () =>
-      getComputedStyle(elem).flexDirection.startsWith('row');
-
-    const applySplitSize = (rawSize, isHorizontal) => {
-      const total = isHorizontal ? elem.clientWidth : elem.clientHeight;
-      const splitterSize = isHorizontal ? splitter.offsetWidth : splitter.offsetHeight;
-      const maxSize = Math.max(minPanelSize, total - splitterSize - minPanelSize);
-      const clamped = Math.max(minPanelSize, Math.min(rawSize, maxSize));
-      container.style.flex = `0 0 ${clamped}px`;
-      return clamped;
-    };
-
-    const applyStoredSplitSize = () => {
-      const isHorizontal = getIsHorizontal();
-      elem.classList.toggle('split-horizontal', isHorizontal);
-      elem.classList.toggle('split-vertical', !isHorizontal);
-      const key = isHorizontal ? 'splitHorizontal' : 'splitVertical';
-      const rawStored = Number(elem.dataset[key]);
-      if (!Number.isFinite(rawStored) || rawStored <= 0) {
-        container.style.flex = '';
-        return;
-      }
-      applySplitSize(rawStored, isHorizontal);
-    };
-
-    applyStoredSplitSize();
-
-    splitter.addEventListener('pointerdown', (event) => {
-      event.preventDefault();
-      splitter.setPointerCapture(event.pointerId);
-
-      const isHorizontal = getIsHorizontal();
-      const key = isHorizontal ? 'splitHorizontal' : 'splitVertical';
-      const startPointer = isHorizontal ? event.clientX : event.clientY;
-      const startSize = isHorizontal
-        ? container.getBoundingClientRect().width
-        : container.getBoundingClientRect().height;
-
-      elem.classList.add('resizing');
-
-      const onPointerMove = (moveEvent) => {
-        const pointer = isHorizontal ? moveEvent.clientX : moveEvent.clientY;
-        const delta = pointer - startPointer;
-        const size = applySplitSize(startSize + delta, isHorizontal);
-        elem.dataset[key] = String(Math.round(size));
-      };
-
-      const onPointerUp = () => {
-        elem.classList.remove('resizing');
-        splitter.removeEventListener('pointermove', onPointerMove);
-        splitter.removeEventListener('pointerup', onPointerUp);
-        splitter.removeEventListener('pointercancel', onPointerUp);
-      };
-
-      splitter.addEventListener('pointermove', onPointerMove);
-      splitter.addEventListener('pointerup', onPointerUp);
-      splitter.addEventListener('pointercancel', onPointerUp);
+    const blob = new Blob([window.UZIP.encode(zipFiles)], {
+      type: 'application/zip',
     });
-
-    window.addEventListener('resize', applyStoredSplitSize);
-  }
-
-  const updateFullscreenButtonState = (elem, button) => {
-    if (!elem || !button) return;
-    const isFullscreen = document.fullscreenElement === elem;
-    const label = i18nGet('ide-fullscreen-enter', 'Fullscreen');
-    button.textContent = '⛶';
-    button.title = label;
-    button.setAttribute('aria-label', label);
-    button.classList.toggle('active', isFullscreen);
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `typst-project-${id}.zip`;
+    link.click();
+    URL.revokeObjectURL(link.href);
   };
-
-  const toggleFullscreen = async (elem) => {
-    if (!elem) return;
-    if (document.fullscreenElement === elem) {
-      await document.exitFullscreen();
-      return;
-    }
-    await elem.requestFullscreen();
-  };
-
-  class TypstEditor {
-    constructor({
-      elem,
-      id,
-      sourceFiles,
-      binaryFiles,
-      fontFiles,
-      basePath,
-      pagePath,
-      renderer,
-      exporter,
-    }) {
-      this.elem = elem;
-      this.id = id;
-      this.fontFiles = fontFiles;
-      this.basePath = normalizePath(basePath);
-      this.pagePath = normalizePath(pagePath);
-      this.renderer = renderer;
-      this.exporter = exporter;
-
-      // Initialize managers
-      this.fileManager = new FileManager(sourceFiles);
-      this.binaryFiles = binaryFiles;
-      this.uiManager = new UIManager(elem, this.fileManager, this.binaryFiles);
-
-      // Get DOM elements
-      this.previewContainer = elem.querySelector('.preview-container');
-      this.preview = elem.querySelector('.typst-preview');
-      this.loadingIndicator = elem.querySelector('.typst-loading');
-      this.editor = elem.querySelector('.editor.typst');
-      this.editorContainer = elem.querySelector('.editor-container');
-      this.splitter = elem.querySelector('.splitter');
-      this.sourceTextarea = elem.querySelector('.typst-source');
-      this.fullscreenBtn = elem.querySelector('.fullscreen');
-      this.editorInitialized = false;
-      this.cm = null;
-
-      setupSplitter(this.elem, this.previewContainer, this.editorContainer, this.splitter);
-
-      // Setup UI callbacks
-      this.setupUICallbacks();
-
-      // Setup event handlers
-      this.setupEventHandlers();
-      this.handleFullscreenChange = () => {
-        updateFullscreenButtonState(this.elem, this.fullscreenBtn);
-      };
-      document.addEventListener('fullscreenchange', this.handleFullscreenChange);
-      updateFullscreenButtonState(this.elem, this.fullscreenBtn);
-
-      // Initialize
-      this.initialize();
-    }
-
-    /**
-     * Setup UI manager callbacks
-     */
-    setupUICallbacks() {
-      this.uiManager.onFileSwitch = (filename) => this.handleFileSwitch(filename);
-      this.uiManager.onFilesChange = () => this.handleFilesChange();
-      this.uiManager.onBinaryFilesChange = (binaryFiles) => this.handleBinaryFilesChange(binaryFiles);
-    }
-
-    /**
-     * Setup event handlers
-     */
-    setupEventHandlers() {
-      const downloadBtn = this.elem.querySelector('.download-pdf');
-      const downloadProjectBtn = this.elem.querySelector('.download-project');
-      const resetBtn = this.elem.querySelector('.reset');
-      const addSourceFileBtn = this.elem.querySelector('.add-source-file');
-      const addBinaryFileBtn = this.elem.querySelector('.add-binary-file');
-      const fullscreenBtn = this.elem.querySelector('.fullscreen');
-
-      downloadBtn?.addEventListener('click', () => this.handleExportPdf());
-      downloadProjectBtn?.addEventListener('click', () => this.handleExportProject());
-      resetBtn?.addEventListener('click', () => this.handleReset());
-      addSourceFileBtn?.addEventListener('click', () => this.handleAddSourceFile());
-      addBinaryFileBtn?.addEventListener('click', (e) => this.handleAddBinaryFile(e));
-      fullscreenBtn?.addEventListener('click', () => this.handleFullscreenToggle());
-    }
-
-    /**
-     * Initialize editor
-     */
-    async initialize() {
-      if (this.editor) {
-        if (this.editorInitialized) return;
-        this.editorInitialized = true;
-
-        // Create CodeMirror editor
-        const initialSource = this.editor.textContent;
-        this.editor.textContent = "";
-        const debouncedRerender = debounce(() => this.rerender(), CONFIG.DEBOUNCE_DELAY);
-        this.cm = HyperbookCM.create(this.editor, {
-          lang: "typst",
-          value: initialSource,
-          onChange: () => {
-            this.saveState();
-            debouncedRerender();
-          },
-        });
-
-        await this.restoreState();
-        this.uiManager.updateTabs();
-        this.uiManager.updateBinaryFilesList();
-        this.rerender();
-      } else if (this.sourceTextarea) {
-        // Preview mode
-        const initialCode = this.sourceTextarea.value;
-        await this.renderer.render({
-          code: initialCode,
-          container: this.preview,
-          loadingIndicator: this.loadingIndicator,
-          sourceFiles: this.fileManager.sourceFiles,
-          binaryFiles: this.binaryFiles,
-          fontFiles: this.fontFiles,
-          id: this.id,
-          previewContainer: this.previewContainer,
-          basePath: this.basePath,
-          pagePath: this.pagePath,
-        });
-      }
-    }
-
-    /**
-     * Restore state from storage
-     */
-    async restoreState() {
-      const result = await window.store?.typst?.get(this.id);
-      
-      if (result) {
-        this.setEditorValue(result.code || this.fileManager.getCurrentContent());
-
-        if (result.sourceFiles) {
-          this.fileManager.sourceFiles = result.sourceFiles;
-          result.sourceFiles.forEach((f) => 
-            this.fileManager.contents.set(f.filename, f.content)
-          );
-        }
-
-        if (result.binaryFiles) {
-          this.binaryFiles = result.binaryFiles;
-        }
-
-        if (result.currentFile) {
-          const file = this.fileManager.sourceFiles.find(
-            (f) => f.filename === result.currentFile
-          );
-          if (file) {
-            this.fileManager.currentFile = file;
-            this.setEditorValue(this.fileManager.getCurrentContent());
-          }
-        }
-      } else {
-        this.setEditorValue(this.fileManager.getCurrentContent());
-      }
-    }
-
-    /**
-     * Save state to storage
-     */
-    async saveState() {
-      if (!this.editor) return;
-
-      this.fileManager.updateCurrentContent(this.getEditorValue());
-
-      await window.store?.typst?.put({
-        id: this.id,
-        code: this.getEditorValue(),
-        sourceFiles: this.fileManager.getSourceFiles(),
-        binaryFiles: this.binaryFiles,
-        currentFile: this.fileManager.currentFile.filename,
-      });
-    }
-
-    /**
-     * Rerender Typst preview
-     */
-    rerender() {
-      if (!this.editor) return;
-
-      this.fileManager.updateCurrentContent(this.getEditorValue());
-
-      const mainFile = this.fileManager.findMainFile();
-      const mainCode = mainFile 
-        ? this.fileManager.contents.get(mainFile.filename) || mainFile.content 
-        : '';
-
-      this.renderer.render({
-        code: mainCode,
-        container: this.preview,
-        loadingIndicator: this.loadingIndicator,
-        sourceFiles: this.fileManager.getSourceFiles(),
-        binaryFiles: this.binaryFiles,
-        fontFiles: this.fontFiles,
-        id: this.id,
-        previewContainer: this.previewContainer,
-        basePath: this.basePath,
-        pagePath: this.pagePath,
-      });
-    }
-
-    /**
-     * Handle file switch
-     * @param {string} filename - Target filename
-     */
-    handleFileSwitch(filename) {
-      if (this.editor) {
-        this.fileManager.updateCurrentContent(this.getEditorValue());
-        const content = this.fileManager.switchTo(filename);
-        this.setEditorValue(content);
-        this.uiManager.updateTabs();
-        this.saveState();
-      }
-    }
-
-    /**
-     * Handle files change
-     */
-    handleFilesChange() {
-      if (this.editor) {
-        this.setEditorValue(this.fileManager.getCurrentContent());
-      }
-      this.saveState();
-      this.rerender();
-    }
-
-    /**
-     * Handle binary files change
-     * @param {Array} binaryFiles - Updated binary files array
-     */
-    handleBinaryFilesChange(binaryFiles) {
-      this.binaryFiles = binaryFiles;
-      this.saveState();
-      this.rerender();
-    }
-
-    /**
-     * Handle add source file
-     */
-    handleAddSourceFile() {
-      const filename = prompt(
-        i18nGet('typst-filename-prompt', 'Enter filename (e.g., helper.typ):')
-      );
-
-      if (!filename) return;
-
-      // Validate filename
-      if (!filename.endsWith('.typ') && !filename.endsWith('.typst')) {
-        alert(i18nGet('typst-filename-error', 'Filename must end with .typ or .typst'));
-        return;
-      }
-
-      if (!this.fileManager.addFile(filename)) {
-        alert(i18nGet('typst-filename-exists', 'File already exists'));
-        return;
-      }
-
-      if (this.editor) {
-        this.setEditorValue(this.fileManager.getCurrentContent());
-      }
-
-      this.uiManager.updateTabs();
-      this.saveState();
-      this.rerender();
-    }
-
-    /**
-     * Handle add binary file
-     * @param {Event} e - Click event
-     */
-    handleAddBinaryFile(e) {
-      e.preventDefault();
-      e.stopPropagation();
-
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = 'image/*,.pdf';
-
-      input.addEventListener('change', async (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-
-        const dest = `/${file.name}`;
-
-        // Check if file already exists
-        if (this.binaryFiles.some((f) => f.dest === dest)) {
-          if (!confirm(i18nGet('typst-file-replace', `Replace existing ${dest}?`))) {
-            return;
-          }
-          this.binaryFiles = this.binaryFiles.filter((f) => f.dest !== dest);
-        }
-
-        // Read file as data URL
-        const reader = new FileReader();
-        reader.onload = async (e) => {
-          const url = e.target.result;
-          this.binaryFiles.push({ dest, url });
-          this.uiManager.updateBinaryFilesList();
-          this.saveState();
-          this.rerender();
-        };
-        reader.readAsDataURL(file);
-      });
-
-      input.click();
-    }
-
-    /**
-     * Handle PDF export
-     */
-    async handleExportPdf() {
-      const mainFile = this.fileManager.findMainFile();
-      const mainCode = mainFile 
-        ? this.fileManager.contents.get(mainFile.filename) || mainFile.content 
-        : '';
-
-      await this.renderer.exportPdf({
-        code: mainCode,
-        id: this.id,
-        sourceFiles: this.fileManager.getSourceFiles(),
-        binaryFiles: this.binaryFiles,
-        fontFiles: this.fontFiles,
-        basePath: this.basePath,
-        pagePath: this.pagePath,
-      });
-    }
-
-    /**
-     * Handle project export
-     */
-    async handleExportProject() {
-      const mainFile = this.fileManager.findMainFile();
-      const code = mainFile ? mainFile.content : this.getEditorValue();
-
-      await this.exporter.export({
-        code,
-        id: this.id,
-        sourceFiles: this.fileManager.getSourceFiles(),
-        binaryFiles: this.binaryFiles,
-        basePath: this.basePath,
-        pagePath: this.pagePath,
-      });
-    }
-
-    /**
-     * Handle reset
-     */
-    async handleReset() {
-      const confirmMsg = i18nGet(
-        'typst-reset-prompt',
-        'Are you sure you want to reset the code?'
-      );
-
-      if (confirm(confirmMsg)) {
-        await window.store?.typst?.delete(this.id);
-        window.location.reload();
-      }
-    }
-
-    async handleFullscreenToggle() {
-      try {
-        await toggleFullscreen(this.elem);
-      } catch (error) {
-        console.error(error.message);
-      }
-    }
-
-    getEditorValue() {
-      if (!this.editor) return '';
-      return this.cm?.getValue() ?? '';
-    }
-
-    setEditorValue(value) {
-      if (!this.editor) return;
-      this.cm?.setValue(value ?? '');
-    }
-  }
 
   // ============================================================================
   // MAIN INITIALIZATION
   // ============================================================================
 
-  // Get all Typst directive elements
-  const elements = document.getElementsByClassName('directive-typst');
-
-  // Create shared instances
   const typstLoader = new TypstLoader();
   const renderQueue = new RenderQueue();
   const assetManager = new AssetManager();
   const renderer = new TypstRenderer(typstLoader, assetManager, renderQueue);
-  const exporter = new ProjectExporter(assetManager);
 
-  // Initialize each Typst element
-  for (const elem of elements) {
+  const initElement = (elem) => {
+    if (elem.getAttribute('data-typst-initialized') === 'true') return;
+    elem.setAttribute('data-typst-initialized', 'true');
+
     const id = elem.getAttribute('data-id');
-    const sourceFilesData = elem.getAttribute('data-source-files');
-    const binaryFilesData = elem.getAttribute('data-binary-files');
-    const fontFilesData = elem.getAttribute('data-font-files');
-    const basePath = elem.getAttribute('data-base-path') || '';
-    const pagePath = elem.getAttribute('data-page-path') || '';
+    const basePath = normalizePath(elem.getAttribute('data-base-path') || '');
+    const pagePath = normalizePath(elem.getAttribute('data-page-path') || '');
+    const previewContainer = elem.querySelector('.preview-container');
+    const preview = elem.querySelector('.typst-preview');
+    const loadingIndicator = elem.querySelector('.typst-loading');
+    const editor = elem.querySelector('.editor');
 
-    // Decode base64 with proper UTF-8 handling
-    const decodeBase64 = (str) => {
-      const binaryStr = atob(str);
-      const bytes = Uint8Array.from(binaryStr, (c) => c.charCodeAt(0));
-      return new TextDecoder('utf-8').decode(bytes);
-    };
+    const page = decodeWorkspace(elem.getAttribute('data-workspace'));
+    let currentFiles = () => page.files;
+    let currentMain = () => page.main;
 
-    const sourceFiles = sourceFilesData ? JSON.parse(decodeBase64(sourceFilesData)) : [];
-    const binaryFiles = binaryFilesData ? JSON.parse(decodeBase64(binaryFilesData)) : [];
-    const fontFiles = fontFilesData ? JSON.parse(decodeBase64(fontFilesData)) : [];
+    const render = () =>
+      renderer.render({
+        ...renderInput(currentFiles(), currentMain()),
+        container: preview,
+        loadingIndicator,
+        id,
+        previewContainer,
+        basePath,
+        pagePath,
+      });
 
-    new TypstEditor({
-      elem,
+    elem.querySelector('.download-pdf')?.addEventListener('click', () =>
+      renderer.exportPdf({
+        ...renderInput(currentFiles(), currentMain()),
+        id,
+        basePath,
+        pagePath,
+      }),
+    );
+
+    if (!editor) {
+      elem
+        .querySelector('.download-project')
+        ?.addEventListener('click', () => downloadProject(page.files, id));
+      render();
+      return;
+    }
+
+    const ide = HyperbookIDE.mount(elem, {
       id,
-      sourceFiles,
-      binaryFiles,
-      fontFiles,
-      basePath,
-      pagePath,
-      renderer,
-      exporter,
+      runtime: 'typst',
+      editor,
+      workspace: elem.getAttribute('data-workspace'),
+      buttons: {
+        reset: elem.querySelector('button.reset'),
+        copy: elem.querySelector('button.copy'),
+        download: elem.querySelector('button.download'),
+        fullscreen: elem.querySelector('button.fullscreen'),
+      },
+      layout: {
+        container: previewContainer,
+        editorContainer: elem.querySelector('.editor-container'),
+        splitter: elem.querySelector('.splitter'),
+      },
+      onChange: debounce(render, CONFIG.DEBOUNCE_DELAY),
     });
+    currentFiles = () => ide.files();
+    currentMain = () => ide.main;
+    ide.ready.then(render);
+  };
+
+  for (const elem of document.getElementsByClassName('directive-typst')) {
+    initElement(elem);
   }
 
   return {};

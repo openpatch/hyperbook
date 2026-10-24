@@ -2,196 +2,123 @@
 /// <reference types="mdast-util-directive" />
 //
 import { HyperbookContext } from "@hyperbook/types";
-import { Code, Root } from "mdast";
+import { Root } from "mdast";
+import {
+  ContainerDirective,
+  LeafDirective,
+  TextDirective,
+} from "mdast-util-directive";
 import { visit } from "unist-util-visit";
 import { VFile } from "vfile";
 import {
   expectDirective,
   isDirective,
   registerDirective,
-  requestJS,
 } from "./remarkHelper";
 import { resolveDirectiveId } from "./directiveId";
 import { i18n } from "./i18n";
-import { icon } from "./icons";
 import { Element } from "hast";
+import {
+  collectWorkspace,
+  compareAttributes,
+  fileActionAttributes,
+  cssHeight,
+  encodeWorkspace,
+  htmlEntities,
+  ideBottomButtons,
+  ideSplitter,
+  requestIdeAssets,
+} from "./ideWorkspace";
 
-function htmlEntities(str: string) {
-  return String(str)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
+/** The size pages are compared at: compare="WxH", or 400×300. */
+const pageSize = (
+  node: ContainerDirective | LeafDirective | TextDirective,
+  file: VFile,
+): [number, number] => {
+  const value = String(node.attributes?.compare ?? "").trim();
+  const match = /^(\d+)x(\d+)$/.exec(value);
+  if (match && Number(match[1]) > 0 && Number(match[2]) > 0) {
+    return [Number(match[1]), Number(match[2])];
+  }
+  if (value) {
+    file.message(
+      `compare="${value}" in the webide directive should be a size like compare="400x300", or empty.`,
+      node as never,
+    );
+  }
+  return [400, 300];
+};
 
+/**
+ * A small website: `index.html` and the files it links. The page is shown in
+ * an iframe and updated as the reader types.
+ */
 export default (ctx: HyperbookContext) => () => {
   const name = "webide";
-
-  const makeWrapInMarkupTemplate = () =>
-    `<!DOCTYPE html>
-<head>
-<title>WebIDE</title>
-<meta charset="utf8" />
-<style type='text/css'>
-html, body {
-  margin: 0;
-  padding: 0;
-  background: white;
-}
-###CSS###
-</style>
-</head>
-<body>###HTML###</body>
-<script type="text/javascript">###JS###</script>
-`;
 
   return (tree: Root, file: VFile) => {
     visit(tree, function (node) {
       if (isDirective(node) && node.name === name) {
-        const { height, id = resolveDirectiveId(file, node) } = node.attributes || {};
+        const {
+          height,
+          id = resolveDirectiveId(file, node),
+        } = node.attributes || {};
         const data = node.data || (node.data = {});
-        const resolvedHeight =
-          height !== undefined
-            ? typeof height === "number"
-              ? `${height}px`
-              : `${height}`
-            : "calc(100dvh - 80px)";
+        const resolvedHeight = cssHeight(height);
 
         expectDirective(node, file, name, ["leaf", "container"]);
         registerDirective(file, name, ["client.js"], ["style.css"], []);
-        requestJS(file, ["codemirror", "codemirror.bundle.js"]);
+        requestIdeAssets(file);
 
-        let js = "";
-        let css = "";
-        let html = "";
-        let template = makeWrapInMarkupTemplate();
+        const workspace = collectWorkspace(node, file, ctx, {
+          name,
+          langs: ["html"],
+          defaultMain: "index.html",
+        });
+        const mainFile = workspace.files.find((f) => f.path === workspace.main);
+        const compare = compareAttributes(node, file, workspace, name);
+        // A page has no size of its own: both are rendered at the size
+        // compare="WxH" gives (400×300 without one), and the frame has it,
+        // so the reader sees what is compared.
+        const compareSize = compare["data-compare"]
+          ? pageSize(node, file)
+          : null;
 
-        let jsNode = node.children.find(
-          (n) => n.type === "code" && n.lang === "js",
-        ) as Code;
-        let cssNode = node.children.find(
-          (n) => n.type === "code" && n.lang === "css",
-        ) as Code;
-        let htmlNode = node.children.find(
-          (n) => n.type === "code" && n.lang === "html" && n.meta === null,
-        ) as Code;
-        let templateNode = node.children.find(
-          (n) =>
-            n.type === "code" && n.lang === "html" && n.meta === "template",
-        ) as Code;
+        const preview: Element = {
+          type: "element",
+          tagName: "iframe",
+          properties: {
+            loading: "eager",
+            sandbox: [
+              "allow-scripts",
+              "allow-popups",
+              "allow-modals",
+              "allow-forms",
+              "allow-same-origin",
+            ],
+            "aria-label": i18n.get("webide-code-preview"),
+            title: i18n.get("webide-code-preview"),
+            ...(compareSize
+              ? {
+                  style: `width: ${compareSize[0]}px; height: ${compareSize[1]}px;`,
+                }
+              : {}),
+          },
+          children: [],
+        };
 
-        const buttons: Element[] = [];
-        const editors: Element[] = [];
-
-        if (htmlNode) {
-          buttons.push({
-            type: "element",
-            tagName: "button",
-            properties: {
-              class: "html",
-            },
-            children: [
-              {
-                type: "text",
-                value: i18n.get("webide-html"),
-              },
-            ],
-          });
-          editors.push({
-            type: "element",
-            tagName: "div",
-            properties: {
-              class: "editor html",
-              "data-lang": "html",
-            },
-            children: [
-              {
-                type: "raw",
-                value: htmlEntities(htmlNode.value),
-              },
-            ],
-          });
-        }
-        if (cssNode) {
-          css = cssNode.value;
-          buttons.push({
-            type: "element",
-            tagName: "button",
-            properties: {
-              class: "css",
-            },
-            children: [
-              {
-                type: "text",
-                value: i18n.get("webide-css"),
-              },
-            ],
-          });
-          editors.push({
-            type: "element",
-            tagName: "div",
-            properties: {
-              class: "editor css",
-              "data-lang": "css",
-            },
-            children: [
-              {
-                type: "raw",
-                value: htmlEntities(css),
-              },
-            ],
-          });
-        }
-        if (jsNode) {
-          js = jsNode.value;
-          buttons.push({
-            type: "element",
-            tagName: "button",
-            properties: {
-              class: "js",
-            },
-            children: [
-              {
-                type: "text",
-                value: i18n.get("webide-js"),
-              },
-            ],
-          });
-          editors.push({
-            type: "element",
-            tagName: "div",
-            properties: {
-              class: "editor js",
-              "data-lang": "javascript",
-            },
-            children: [
-              {
-                type: "raw",
-                value: htmlEntities(js),
-              },
-            ],
-          });
-        }
-        if (buttons.length > 0) {
-          buttons[0].properties.class += " active";
-        }
-        if (editors.length > 0) {
-          editors[0].properties.class += " active";
-        }
-        if (templateNode) template = templateNode.value;
-
-        const srcdoc = template
-          .replace("###JS###", js)
-          .replace("###HTML###", html)
-          .replace("###CSS###", css)
-          .replace(/\u00A0/g, " ");
         data.hName = "div";
         data.hProperties = {
-          class: "directive-webide",
-          "data-template": template.replace(/\u00A0/g, " "),
+          class: "directive-webide ide",
           "data-id": id,
+          "data-workspace": encodeWorkspace(workspace),
+          ...fileActionAttributes(node, file, {
+            name,
+            accept: ".html,.css,.js",
+          }),
+          ...compare,
           ...(height !== undefined
-            ? { style: `--webide-height: ${resolvedHeight}` }
+            ? { style: `--ide-height: ${resolvedHeight}` }
             : {}),
         };
         data.hChildren = [
@@ -206,45 +133,30 @@ html, body {
                 type: "element",
                 tagName: "div",
                 properties: {
-                  class: "container-title",
+                  class: "ide-panel-header container-title",
                 },
                 children: [
                   {
-                    type: "text",
-                    value: "",
+                    type: "element",
+                    tagName: "span",
+                    properties: { class: "ide-panel-title container-title-text" },
+                    children: [],
                   },
                 ],
               },
-              {
-                type: "element",
-                tagName: "iframe",
-                properties: {
-                  srcdoc: srcdoc,
-                  loading: "eager",
-                  sandbox: [
-                    "allow-scripts",
-                    "allow-popups",
-                    "allow-modals",
-                    "allow-forms",
-                    "allow-same-origin",
-                  ],
-                  "aria-label": i18n.get("webide-code-preview"),
-                  title: i18n.get("webide-code-preview"),
-                },
-                children: [],
-              },
+              // With compare, the frame has the compared size, in an area
+              // that scrolls when the panel is smaller.
+              compareSize
+                ? {
+                    type: "element",
+                    tagName: "div",
+                    properties: { class: "webide-frame" },
+                    children: [preview],
+                  }
+                : preview,
             ],
           },
-          {
-            type: "element",
-            tagName: "div",
-            properties: {
-              class: "splitter",
-              role: "separator",
-              "aria-label": "Resize panels",
-            },
-            children: [],
-          },
+          ideSplitter(),
           {
             type: "element",
             tagName: "div",
@@ -256,50 +168,16 @@ html, body {
                 type: "element",
                 tagName: "div",
                 properties: {
-                  class: "buttons",
-                },
-                children: buttons,
-              },
-              ...editors,
-              {
-                type: "element",
-                tagName: "div",
-                properties: {
-                  class: "buttons bottom",
+                  class: "editor",
                 },
                 children: [
                   {
-                    type: "element",
-                    tagName: "button",
-                    properties: {
-                      class: "reset",
-                      title: i18n.get("webide-reset"),
-                      "aria-label": i18n.get("webide-reset"),
-                    },
-                    children: [icon("reset")],
-                  },
-                  {
-                    type: "element",
-                    tagName: "button",
-                    properties: {
-                      class: "download",
-                      title: i18n.get("webide-download"),
-                      "aria-label": i18n.get("webide-download"),
-                    },
-                    children: [icon("download")],
-                  },
-                  {
-                    type: "element",
-                    tagName: "button",
-                    properties: {
-                      class: "fullscreen",
-                      title: i18n.get("ide-fullscreen-enter"),
-                      "aria-label": i18n.get("ide-fullscreen-enter"),
-                    },
-                    children: [icon("fullscreen")],
+                    type: "raw",
+                    value: htmlEntities(mainFile?.content ?? ""),
                   },
                 ],
               },
+              ideBottomButtons(),
             ],
           },
         ];

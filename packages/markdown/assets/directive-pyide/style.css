@@ -1,52 +1,54 @@
-.directive-pyide {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  overflow: hidden;
-  gap: 8px;
-  height: var(--pyide-height, calc(100dvh - 80px));
-}
-
 .directive-pyide code-input {
   margin: 0;
 }
 
-.directive-pyide .editor {
-  width: 100%;
-  border: 1px solid var(--color-spacer);
-  flex: 1;
-  min-height: 0;
-  overflow: hidden;
-}
-
-.directive-pyide .editor .cm-editor {
-  height: 100%;
-}
-
+/* Not a card itself: its header, the output or canvas below it, and the
+   comparison panel are, together. */
 .directive-pyide .container {
-  width: 100%;
-  overflow: hidden;
-  min-height: 120px;
-  min-width: 120px;
-  flex: 0 0 200px;
-  display: flex;
-  flex-direction: column;
+  border: none;
+  border-radius: 0;
+  background: none;
+}
+
+.directive-pyide .container > .ide-panel-header {
+  border: 1px solid var(--color-spacer);
+  border-radius: 8px 8px 0 0;
+}
+
+.directive-pyide .output,
+.directive-pyide .input,
+.directive-pyide .canvas-wrapper {
+  flex: 1 1 0;
+  min-height: 0;
+  border: 1px solid var(--color-spacer);
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+}
+
+/* With compare, the panel below the canvas closes its card, and goes with
+   the canvas when the narrow layout shows the output instead. */
+.directive-pyide .canvas-wrapper:has(+ .ide-compare) {
+  border-radius: 0;
+}
+
+.directive-pyide .ide-compare {
+  border: 1px solid var(--color-spacer);
+  border-radius: 0 0 8px 8px;
+}
+
+.directive-pyide .canvas-wrapper.hidden + .ide-compare {
+  display: none;
 }
 
 .directive-pyide .output,
 .directive-pyide .input {
   white-space: pre;
-  height: 100%;
-  border: 1px solid var(--color-spacer);
-  border-radius: 8px;
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
+  overflow: auto;
 }
 
 .directive-pyide .output {
   padding: 16px;
-  margin-bottom: 0px;
+  margin: 0;
   font-family: hyperbook-monospace, monospace;
 }
 
@@ -191,48 +193,52 @@
   white-space: normal;
 }
 
-.directive-pyide .output .pfem-title {
+.directive-pyide .output .pfem p {
+  margin: 0 0 4px;
+}
+
+.directive-pyide .output .pfem__title {
   font-weight: bold;
   color: #b42318;
   margin-bottom: 4px;
 }
 
-.directive-pyide .output .pfem-summary {
+.directive-pyide .output .pfem__summary {
   margin-bottom: 4px;
 }
 
-.directive-pyide .output .pfem-why {
+.directive-pyide .output .pfem__why {
   color: var(--color-text, #555);
   font-style: italic;
   margin-bottom: 4px;
   opacity: 0.8;
 }
 
-.directive-pyide .output .pfem-steps {
+.directive-pyide .output .pfem__steps {
   margin: 4px 0 4px 18px;
   padding: 0;
 }
 
-.directive-pyide .output .pfem-steps li {
+.directive-pyide .output .pfem__steps li {
   margin: 2px 0;
 }
 
-.directive-pyide .output .pfem-details {
+.directive-pyide .output .pfem__details {
   margin-top: 6px;
 }
 
-.directive-pyide .output .pfem-details > summary {
+.directive-pyide .output .pfem__details > summary {
   cursor: pointer;
   opacity: 0.6;
   font-size: 0.85em;
   user-select: none;
 }
 
-.directive-pyide .output .pfem-details > summary:hover {
+.directive-pyide .output .pfem__details > summary:hover {
   opacity: 1;
 }
 
-.directive-pyide .output .pfem-details pre {
+.directive-pyide .output .pfem__details pre {
   margin: 4px 0 0;
   font-family: hyperbook-monospace, monospace;
   font-size: 0.85em;
@@ -243,11 +249,6 @@
 
 .directive-pyide .canvas-wrapper {
   overflow: auto;
-  height: 100%;
-  border: 1px solid var(--color-spacer);
-  border-radius: 8px;
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
   background-color: #e8e8e8;
   background-image: linear-gradient(45deg, #cccccc 25%, transparent 25%),
     linear-gradient(-45deg, #cccccc 25%, transparent 25%),
@@ -267,82 +268,8 @@
   height: auto;
 }
 
-.directive-pyide .canvas-header,
-.directive-pyide .output-header {
-  border: 1px solid var(--color-spacer);
-  border-bottom: none;
-  border-top-left-radius: 8px;
-  border-top-right-radius: 8px;
-  padding: 8px 16px;
-  background-color: var(--color-spacer);
-  color: var(--color-text);
-  font-weight: 600;
-  text-align: center;
-}
-
-.directive-pyide .canvas-output-splitter {
-  display: none;
-  width: 100%;
-  height: 4px;
-  margin: 10px 0;
-  cursor: row-resize;
-  background: var(--color-spacer);
-  border-radius: 999px;
-  flex-shrink: 0;
-  touch-action: none;
-  opacity: 0.45;
-  transition: opacity 0.15s ease-in-out;
-}
-
-.directive-pyide .canvas-output-splitter:hover {
-  opacity: 0.65;
-}
-
 .directive-pyide .hidden {
   display: none;
-}
-
-.directive-pyide .editor-container {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  min-height: 120px;
-  min-width: 120px;
-  flex: 1 1 400px;
-  overflow: hidden;
-}
-
-.directive-pyide .splitter {
-  background: var(--color-spacer);
-  border-radius: 999px;
-  flex-shrink: 0;
-  touch-action: none;
-  opacity: 0.45;
-  transition: opacity 0.15s ease-in-out;
-}
-
-.directive-pyide .splitter:hover {
-  opacity: 0.65;
-}
-
-.directive-pyide.split-vertical .splitter {
-  width: 100%;
-  height: 4px;
-  cursor: row-resize;
-}
-
-.directive-pyide.split-horizontal .splitter {
-  width: 4px;
-  height: 100%;
-  cursor: col-resize;
-}
-
-.directive-pyide.resizing {
-  user-select: none;
-}
-
-.directive-pyide.resizing .splitter {
-  opacity: 0.75;
 }
 
 .directive-pyide .editor.running {
@@ -357,98 +284,6 @@
 
 .directive-pyide.locked-by-other .buttons {
   border-color: #f59e0b;
-}
-
-.directive-pyide .buttons {
-  display: flex;
-  border: 1px solid var(--color-spacer);
-  border-radius: 8px;
-  border-bottom: none;
-  border-bottom-left-radius: 0;
-  border-bottom-right-radius: 0;
-  overflow: hidden;
-}
-
-.directive-pyide .buttons.bottom {
-  border: 1px solid var(--color-spacer);
-  border-radius: 8px;
-  border-top: none;
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
-}
-
-/* Icon-only toolbar: the written labels (Reset/Copy/Download) made this row
-   wrap on narrow screens, so the wording moved into title/aria-label. */
-.directive-pyide .buttons.bottom button {
-  flex: 0 0 auto;
-  min-width: 42px;
-  width: 42px;
-  padding: 8px 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.directive-pyide .buttons.bottom button .icon {
-  width: 18px;
-  height: 18px;
-  display: block;
-}
-
-/* Fullscreen sits apart, at the trailing edge of the toolbar. */
-.directive-pyide .buttons.bottom button.fullscreen {
-  margin-inline-start: auto;
-  border-right: none;
-  border-left: 1px solid var(--color-spacer);
-}
-
-.directive-pyide .test-heading {
-  font-size: 1.1em;
-  font-weight: bold;
-  text-decoration: underline;
-  margin-top: 8px;
-}
-
-.directive-pyide .test-heading:first-of-type {
-  margin-top: 0;
-}
-
-.directive-pyide button {
-  flex: 1;
-  padding: 8px 16px;
-  border: none;
-  border-right: 1px solid var(--color-spacer);
-  background-color: var(--color--background);
-  color: var(--color-text);
-  cursor: pointer;
-}
-
-.directive-pyide .buttons button:last-child {
-  border-right: none;
-}
-
-.directive-pyide .buttons:not(.bottom) button:first-child {
-  border-top-left-radius: 8px;
-}
-
-.directive-pyide .buttons:not(.bottom) button:last-child {
-  border-top-right-radius: 8px;
-}
-
-.directive-pyide .buttons.bottom button:first-child {
-  border-bottom-left-radius: 8px;
-}
-
-.directive-pyide .buttons.bottom button:last-child {
-  border-bottom-right-radius: 8px;
-}
-
-.directive-pyide button.active {
-  background-color: var(--color-spacer);
-}
-
-.directive-pyide button:hover {
-  background-color: var(--color-spacer);
 }
 
 .directive-pyide button.running {
@@ -468,13 +303,6 @@
   font-weight: 600;
 }
 
-.directive-pyide button.fullscreen {
-  flex: 0 0 auto;
-  min-width: 42px;
-  width: 42px;
-  padding: 8px 0;
-}
-
 .directive-pyide button.stop {
   flex: 0 0 auto;
   min-width: 96px;
@@ -487,51 +315,248 @@
   cursor: not-allowed;
 }
 
-.directive-pyide:fullscreen {
-  width: 100vw;
-  height: 100dvh !important;
-  padding: 12px;
+/* The report of a test run, in place of the output. */
+.directive-pyide .pyide-tests {
+  --pyide-test-passed: #16a34a;
+  --pyide-test-failed: #dc2626;
+  --pyide-test-error: #d97706;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  /* The output panel keeps text as printed; the report is not text. */
+  white-space: normal;
+  font-family: hyperbook-body, sans-serif;
+}
+
+.directive-pyide .pyide-tests-summary {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  font-weight: 600;
+}
+
+.directive-pyide .pyide-tests-title {
+  flex: 1;
+  min-width: 0;
+}
+
+.directive-pyide .pyide-tests[data-status="passed"] .pyide-tests-title {
+  color: var(--pyide-test-passed);
+}
+
+.directive-pyide .pyide-tests[data-status="failed"] .pyide-tests-title {
+  color: var(--pyide-test-failed);
+}
+
+/* One segment per test, coloured as it finishes. */
+.directive-pyide .pyide-tests-bar {
+  display: flex;
+  gap: 3px;
+  height: 6px;
+}
+
+.directive-pyide .pyide-tests-segment {
+  flex: 1;
+  border-radius: 999px;
+  background-color: var(--color-spacer);
+}
+
+.directive-pyide .pyide-tests-segment[data-status="running"] {
+  background-color: var(--color-brand);
+  animation: pyide-test-pulse 1s ease-in-out infinite alternate;
+}
+
+.directive-pyide .pyide-tests-segment[data-status="passed"] {
+  background-color: var(--pyide-test-passed);
+}
+
+.directive-pyide .pyide-tests-segment[data-status="failed"] {
+  background-color: var(--pyide-test-failed);
+}
+
+.directive-pyide .pyide-tests-segment[data-status="error"] {
+  background-color: var(--pyide-test-error);
+}
+
+@keyframes pyide-test-pulse {
+  from {
+    opacity: 0.4;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .directive-pyide .pyide-tests-segment[data-status="running"] {
+    animation: none;
+  }
+}
+
+.directive-pyide .pyide-tests-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.directive-pyide .pyide-test {
+  overflow: hidden;
+  border: 1px solid var(--color-spacer);
+  border-left: 4px solid var(--color-spacer);
+  border-radius: 6px;
+}
+
+.directive-pyide .pyide-test[data-status="running"] {
+  border-left-color: var(--color-brand);
+}
+
+.directive-pyide .pyide-test[data-status="passed"] {
+  border-left-color: var(--pyide-test-passed);
+}
+
+.directive-pyide .pyide-test[data-status="failed"] {
+  border-left-color: var(--pyide-test-failed);
+}
+
+.directive-pyide .pyide-test[data-status="error"] {
+  border-left-color: var(--pyide-test-error);
+}
+
+.directive-pyide .pyide-test[data-status="pending"],
+.directive-pyide .pyide-test[data-status="stopped"] {
+  opacity: 0.6;
+}
+
+.directive-pyide .pyide-test-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+}
+
+/* ✓, ✗ and ! in a coloured circle; a ring while running. */
+.directive-pyide .pyide-test-icon {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
   box-sizing: border-box;
-  background-color: var(--color-background, var(--color--background, #fff));
+  border: 2px solid var(--color-spacer);
+  border-radius: 50%;
+  color: #fff;
+  font-size: 11px;
+  font-weight: bold;
+  line-height: 1;
 }
 
-.directive-pyide:fullscreen::backdrop {
-  background-color: var(--color-background, var(--color--background, #fff));
+.directive-pyide .pyide-test[data-status="running"] .pyide-test-icon {
+  border-color: var(--color-spacer);
+  border-top-color: var(--color-brand);
+  animation: pyide-test-spin 0.8s linear infinite;
 }
 
-@media screen and (min-width: 1024px) {
-  .directive-pyide {
-    flex-direction: row;
+.directive-pyide .pyide-test[data-status="passed"] .pyide-test-icon {
+  border: none;
+  background-color: var(--pyide-test-passed);
+}
 
-    .output {
-      height: 100%;
-    }
+.directive-pyide .pyide-test[data-status="passed"] .pyide-test-icon::before {
+  content: "✓";
+}
 
-    .container {
-      height: 100% !important;
-    }
+.directive-pyide .pyide-test[data-status="failed"] .pyide-test-icon {
+  border: none;
+  background-color: var(--pyide-test-failed);
+}
 
-    .editor-container {
-      height: 100%;
-      overflow: hidden;
-    }
+.directive-pyide .pyide-test[data-status="failed"] .pyide-test-icon::before {
+  content: "✗";
+}
+
+.directive-pyide .pyide-test[data-status="error"] .pyide-test-icon {
+  border: none;
+  background-color: var(--pyide-test-error);
+}
+
+.directive-pyide .pyide-test[data-status="error"] .pyide-test-icon::before {
+  content: "!";
+}
+
+@keyframes pyide-test-spin {
+  to {
+    transform: rotate(360deg);
   }
+}
 
-  .directive-pyide[data-canvas="true"].canvas-split-mode .canvas-wrapper,
-  .directive-pyide[data-canvas="true"].canvas-split-mode .output {
-    flex: 1 1 0;
-    min-height: 120px;
-    border-radius: 8px;
+@media (prefers-reduced-motion: reduce) {
+  .directive-pyide .pyide-test[data-status="running"] .pyide-test-icon {
+    animation: none;
   }
+}
 
-  .directive-pyide[data-canvas="true"].canvas-split-mode .canvas-wrapper,
-  .directive-pyide[data-canvas="true"].canvas-split-mode .output {
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
-  }
+.directive-pyide .pyide-test-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: hyperbook-code, monospace;
+  font-size: 0.9em;
+}
 
-  .directive-pyide[data-canvas="true"].canvas-split-mode
-    .canvas-output-splitter {
-    display: block;
-  }
+.directive-pyide .pyide-test-status {
+  flex: 0 0 auto;
+  font-size: 0.85em;
+  opacity: 0.8;
+}
+
+.directive-pyide .pyide-test[data-status="failed"] .pyide-test-status {
+  color: var(--pyide-test-failed);
+  opacity: 1;
+}
+
+.directive-pyide .pyide-test[data-status="error"] .pyide-test-status {
+  color: var(--pyide-test-error);
+  opacity: 1;
+}
+
+/* What the test printed, as printed. */
+.directive-pyide .pyide-test-output {
+  padding: 8px 10px;
+  border-top: 1px solid var(--color-spacer);
+  background-color: var(--color-nav);
+  font-family: hyperbook-monospace, monospace;
+  font-size: 0.85em;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.directive-pyide .pyide-test-output[hidden] {
+  display: none;
+}
+
+/* A friendly error message, in a row that is already marked. */
+.directive-pyide .pyide-test-output .pfem {
+  padding: 0;
+  border-left: none;
+  border-radius: 0;
+  background: none;
+  font-size: 1em;
+}
+
+.directive-pyide .pyide-test-assert {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.directive-pyide .pyide-test-assert-statement {
+  color: var(--pyide-test-failed);
+  font-family: inherit;
+}
+
+.directive-pyide .pyide-test-assert-message {
+  font-family: hyperbook-body, sans-serif;
 }

@@ -32,6 +32,10 @@ This element allows users to write, edit, and execute Python code directly in th
 |---|---|---|
 | `packages` | Comma-separated list of PyPI packages to install with `micropip` before running the code | - |
 | `canvas` | Enable the canvas view for libraries such as `pygame` or `turtle` | `false` |
+| `main` | The file that is run | `main.py` |
+| `id` | Where the reader's code is saved. Pin it to keep saved code when you edit the directive | derived from the content |
+| `files` | What readers may do with files: `create`, `upload`, `rename`, `delete`, comma-separated, or `open` for all | none |
+| `accept` | Extensions of files readers create or rename, comma-separated | `.py` |
 
 ````md
 :::pyide
@@ -94,23 +98,81 @@ print(a)
 
 :::
 
-## Add test cases
+## Multiple files
 
-You can add test cases to the code snippets by adding a `test` tag to the code block. The `#SCRIPT#` comment will be replaced by the written code. It can be placed in any part of the code block.
+A code block without `file="…"` is the main file. Further files get a name with `file="…"` and show up as tabs. The main file can import them like any Python module.
+
+Mark a file `readonly` to show it without letting readers change it, or `hidden` to keep it out of the editor while it still is on disk when the program runs.
 
 ````md
 :::pyide
 
-```python test
+```python
+from helpers import greet
+greet("Ada")
+```
+
+```python file="helpers.py" readonly
+def greet(name):
+    print(f"Hi {name}!")
+```
+
+:::
+````
+
+:::pyide
+
+```python
+from helpers import greet
+greet("Ada")
+```
+
+```python file="helpers.py" readonly
+def greet(name):
+    print(f"Hi {name}!")
+```
+
+:::
+
+Files from your book are added with `::file`. Python files and other text files, such as CSV or JSON, are shown in a tab; images and other binary files are only put on disk for the program to open. `src` is resolved like any other file of your book.
+
+````md
+:::pyide
+
+```python
+print(open("data.csv").read())
+```
+
+::file{path="data.csv" src="/data/klasse.csv"}
+
+:::
+````
+
+
+## Add test cases
+
+A test is a file with `role="test"`. Usually it is also `hidden`, so readers do not see it. **Test** runs every test file in order. The `#SCRIPT#` comment is replaced by the code of the main file. It can be placed in any part of the test.
+
+The output then shows a report: how many tests passed, and for each test whether it passed, together with what it printed. A test fails when an `assert` fails (the report shows the assert and its message) or when it prints a line that starts with `Fail` or `Nicht bestanden`. A test that raises any other error is marked as an error, with an explanation of the error. Otherwise it passes.
+
+````md
+:::pyide
+
+```python
+def check_palindrom(s):
+    return True
+```
+
+```python file="test_1.py" role="test" hidden
 #SCRIPT#
 r = check_palindrom("uhu")
 if r:
-print("Pass")
+    print("Pass")
 else:
-print("Fail")
+    print("Fail")
 ```
 
-```python test
+```python file="test_2.py" role="test" hidden
 #SCRIPT#
 r = check_palindrom("test")
 if not r:
@@ -119,18 +181,13 @@ else:
     print("Fail")
 ```
 
-```python
-def check_palindrom(s):
-    return True
-```
-
 :::
 
 ````
 
-:::pyide
+:::pyide{id="e0c3c794102458243ed5c9edfe037648cf1a3e18c7e4bcbed5afd58d34ac9238"}
 
-```python test
+```python file="test_1.py" role="test" hidden
 #SCRIPT#
 r = check_palindrom("uhu")
 if r:
@@ -139,7 +196,7 @@ else:
     print("Fail")
 ```
 
-```python test
+```python file="test_2.py" role="test" hidden
 #SCRIPT#
 r = check_palindrom("test")
 if not r:
@@ -259,54 +316,6 @@ while running:
     clock.tick(60)
 ```
 
-:::
-
-## Pytamaro
-
-Use `packages="pytamaro"` to render `show_graphic(...)` and `show_animation(...)` in the output panel.
-
-````hyperbook
-:::pyide{packages="pytamaro"}
-
-```python
-from pytamaro import *
-
-block_size = 25
-num_blocks = 16
-line = empty_graphic()
-for col in range(num_blocks):
-    if col % 2 == 0:
-        color = black
-    else:
-        color = white
-    block = rectangle(block_size, block_size, color)
-    line = beside(line, block)
-second_line = rotate(180, line)
-finish_line = above(line, second_line)
-show_graphic(finish_line)
-```
-:::
-````
-
-:::pyide{packages="pytamaro"}
-
-```python
-from pytamaro import *
-
-block_size = 25
-num_blocks = 16
-line = empty_graphic()
-for col in range(num_blocks):
-    if col % 2 == 0:
-        color = black
-    else:
-        color = white
-    block = rectangle(block_size, block_size, color)
-    line = beside(line, block)
-second_line = rotate(180, line)
-finish_line = above(line, second_line)
-show_graphic(finish_line)
-```
 :::
 
 ## Turtle
@@ -576,3 +585,61 @@ hideturtle()
 ```
 
 :::
+
+## Files readers may change
+
+With `files`, readers get buttons for their own files: **+** creates a file, **⤒** uploads one, and each tab gets **✎** to rename and **×** to delete it. `rename` and `delete` allow it for the files of the page too; the main file and `readonly`, `hidden` and test files always stay as written. Files readers created or uploaded they can always rename and delete. Clicking the tab of a binary file shows a preview: images, audio and video, PDFs, fonts (TTF, OTF, WOFF) and 3D models (STL, OBJ), which you can turn and zoom.
+
+````md
+:::pyide{files="create,upload,rename,delete"}
+...
+:::
+````
+
+## Compare with a solution
+
+Readers can try to draw a given picture with the turtle as exactly as possible, like on [CSSBattle](https://cssbattle.dev/). Add `canvas`, `compare` and a file with `role="solution"`: the solution is drawn out of sight, and every **Run** that ends without an error scores how much of the drawing matches. The picture to draw lies over the reader's own output, at the same size and place, and covers it at first. A line divides them: the reader's drawing on the left ("Yours"), the target on the right ("Target"). After the first change the line moves to the middle; readers drag it by its handle, or with the slider below. The panel below shows the match and the target's colours (click one to copy its hex value). **Overlay** shows the target half see-through over the whole drawing, **Differences** marks what did not match, and holding **Target** shows all of the target. Once solved, the picture is outlined in green.
+
+The score has three parts. **Colour** (half of it) compares every pixel, the background too, with partial credit for colours that are close. **Outline** (30 %) checks that the edges of shapes are where the target has them. **Area** (20 %) checks that the drawn areas cover each other, whatever their colour. Outline and area look only at the drawing, so an empty canvas gets nothing for them and scores at most half. Anything one pixel off still matches fully. A task is solved when the score and each of its parts reach `pass`, so a shape in the wrong colour does not pass on its outline alone. Hovering the score shows the three parts.
+
+````md
+:::pyide{canvas compare pass=95}
+
+```python
+import turtle
+t = turtle.Turtle()
+```
+
+```python file="solution.py" role="solution"
+import turtle
+t = turtle.Turtle()
+for i in range(4):
+    t.forward(100)
+    t.left(90)
+```
+
+:::
+````
+
+:::pyide{canvas compare pass=95 height=520}
+
+```python
+import turtle
+t = turtle.Turtle()
+```
+
+```python file="solution.py" role="solution"
+import turtle
+t = turtle.Turtle()
+for i in range(4):
+    t.forward(100)
+    t.left(90)
+```
+
+:::
+
+The whole canvas is compared. `pass` (default `98`) is the match in percent that counts as solved. Instead of a solution, `::file{path="target.png" src="…" role="target"}` can give the picture.
+
+## Upgrading from the old syntax
+
+Older books marked tests with ```` ```python test ```` and loaded files with `src="…"` on the directive. Run `npx hyperbook migrate` in your book to convert these pages. It also pins each changed IDE's `id`, so readers keep the code they saved. Review the changes with `git diff` before you publish them.

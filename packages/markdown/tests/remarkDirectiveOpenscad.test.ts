@@ -47,21 +47,31 @@ cube([20,20,20], center=true);
     ).toMatchSnapshot();
   });
 
-  it("should transform openscad with binary file directives", async () => {
-    expect(
+  it("puts ::file binaries into the workspace next to the model", async () => {
+    const html = String(
       toHtml(
         `:::openscad
 
-@file dest="/input/model.stl" src="models/model.stl"
+::file{path="input/model.stl" src="models/model.stl"}
 
 \`\`\`scad
-import("/input/model.stl");
+import("input/model.stl");
 \`\`\`
 
 :::
 `,
         ctx,
       ).value,
-    ).toMatchSnapshot();
+    );
+    const encoded = html.match(/data-workspace="([^"]*)"/)![1];
+    expect(JSON.parse(Buffer.from(encoded, "base64").toString("utf8"))).toEqual(
+      {
+        main: "main.scad",
+        files: [
+          { path: "input/model.stl", url: "/public/models/model.stl" },
+          { path: "main.scad", content: 'import("input/model.stl");' },
+        ],
+      },
+    );
   });
 });

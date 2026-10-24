@@ -7,7 +7,7 @@ import path from "path";
 const log = console.log.bind(console);
 
 const watcher = chokidar.watch(
-  ["dev.mjs", "devBuild.mjs", "src/**/*", "dev.md", "assets/**/*"],
+  ["dev.mjs", "devBuild.mjs", "src/**/*", "dev.md", "assets/**/*", "ide-bundle/**/*", "codemirror-bundle/**/*"],
   {
     interval: 600,
     usePolling: true,

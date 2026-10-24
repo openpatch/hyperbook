@@ -501,5 +501,18 @@ async function postbuild() {
   console.log(
     "Built CodeMirror bundle → dist/assets/codemirror/codemirror.bundle.js",
   );
+
+  // The IDE shell (workspace tabs, saving, splitter, fullscreen) shared by the
+  // IDE directives. Loaded after the CodeMirror bundle it builds on.
+  await mkdir("./dist/assets/ide", { recursive: true });
+  await esbuild({
+    entryPoints: ["ide-bundle/index.js"],
+    bundle: true,
+    format: "iife",
+    outfile: "./dist/assets/ide/ide.bundle.js",
+    minify: true,
+  });
+  await cp("ide-bundle/style.css", "./dist/assets/ide/ide.css");
+  console.log("Built IDE bundle → dist/assets/ide/ide.bundle.js");
 }
 postbuild();

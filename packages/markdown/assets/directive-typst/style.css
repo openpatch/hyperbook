@@ -1,62 +1,40 @@
-.directive-typst {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  overflow: hidden;
-  gap: 8px;
-  height: var(--typst-height, calc(100dvh - 80px));
-}
-
-code-input {
-  margin: 0;
-}
-
-.directive-typst .editor {
-  width: 100%;
-  border: 1px solid var(--color-spacer);
-  flex: 1;
-  min-height: 0;
-  overflow: hidden;
-}
-
-.directive-typst .editor .cm-editor {
-  height: 100%;
-}
-
 .directive-typst .preview-container {
-  width: 100%;
+  position: relative;
+  display: flex;
+  flex-direction: column;
   min-height: 120px;
-  min-width: 120px;
+  overflow: hidden;
   border: 1px solid var(--color-spacer);
   border-radius: 8px;
-  overflow: auto;
-  background-color: var(--color--background);
-  position: relative;
-  flex: 1 1 0;
+  background-color: var(--color-background);
 }
 
+/* The document scrolls below the header. */
 .directive-typst .typst-preview {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
   padding: 16px;
-  min-height: 100px;
   display: flex;
   justify-content: center;
   align-items: flex-start;
 }
 
+/* Without the editor: the document and its downloads, one above the other
+   at any width. */
 .directive-typst.preview-only {
-  gap: 0px;
-  align-items: normal;
+  flex-direction: column;
+  gap: 0;
   height: auto;
+}
 
-  .download-pdf {
-    border-right: none;
-  }
+.directive-typst.preview-only .preview-container {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
 
-  .preview-container {
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
-  }
+.directive-typst.preview-only .download-pdf {
+  border-right: none;
 }
 
 .directive-typst .typst-preview svg {
@@ -178,333 +156,10 @@ code-input {
   line-height: 1.5;
 }
 
-.directive-typst .editor-container {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  min-height: 120px;
-  min-width: 120px;
-  flex: 1 1 0;
-}
-
-.directive-typst .splitter {
-  background: var(--color-spacer);
-  border-radius: 999px;
-  flex-shrink: 0;
-  touch-action: none;
-  opacity: 0.45;
-  transition: opacity 0.15s ease-in-out;
-}
-
-.directive-typst .splitter:hover {
-  opacity: 0.65;
-}
-
-.directive-typst.split-vertical .splitter {
-  width: 100%;
-  height: 4px;
-  cursor: row-resize;
-}
-
-.directive-typst.split-horizontal .splitter {
-  width: 4px;
-  height: 100%;
-  cursor: col-resize;
-}
-
-.directive-typst.resizing {
-  user-select: none;
-}
-
-.directive-typst.resizing .splitter {
-  opacity: 0.75;
-}
-
-.directive-typst .file-tabs {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  background-color: var(--color--background);
-  border: 1px solid var(--color-spacer);
-  border-bottom: none;
-  border-radius: 8px 8px 0 0;
-  padding: 4px;
-  overflow-x: auto;
-}
-
-.directive-typst .tabs-list {
-  display: flex;
-  gap: 4px;
-  flex: 1;
-  overflow-x: auto;
-  padding: 2px;
-}
-
-.directive-typst .file-tab {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  background-color: var(--color--background);
-  border: 1px solid var(--color-spacer);
-  border-radius: 4px;
-  cursor: pointer;
-  white-space: nowrap;
-  font-size: 0.875rem;
-  transition: all 0.2s;
-}
-
-.directive-typst .file-tab:hover {
-  background-color: var(--color-spacer);
-}
-
-.directive-typst .file-tab.active {
-  background-color: var(--color-brand, #3b82f6);
-  color: var(--color-brand-text);
-  border-color: var(--color-brand, #3b82f6);
-}
-
-.directive-typst .tab-name {
-  flex: 1;
-}
-
-.directive-typst .tab-delete {
-  background: none;
-  border: none;
-  color: inherit;
-  cursor: pointer;
-  font-size: 1.125rem;
-  line-height: 1;
-  padding: 0;
-  margin: 0;
-  width: 18px;
-  height: 18px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 2px;
-  flex-shrink: 0;
-}
-
-.directive-typst .tab-delete:hover {
-  background-color: rgba(0, 0, 0, 0.1);
-}
-
-.directive-typst .file-tab.active .tab-delete:hover {
-  background-color: rgba(255, 255, 255, 0.2);
-}
-
-.directive-typst .add-source-file {
-  padding: 6px 12px;
-  font-size: 1rem;
-  flex: none;
-  font-weight: bold;
-  white-space: nowrap;
-  border: 1px solid var(--color-spacer);
-  border-radius: 4px;
-  background-color: var(--color--background);
-  color: var(--color-text);
-  cursor: pointer;
-  min-width: 32px;
-}
-
-.directive-typst .add-source-file:hover {
-  background-color: var(--color-spacer);
-}
-
-.directive-typst .binary-files-section {
-  border: 1px solid var(--color-spacer);
-  border-top: none;
-  border-bottom: none;
-  background-color: var(--color--background);
-  margin-bottom: 0;
-}
-
-.directive-typst .binary-files-section summary {
-  padding: 8px 12px;
-  cursor: pointer;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  user-select: none;
-  background-color: var(--color--background);
-  list-style: none;
-}
-
-.directive-typst .binary-files-section summary::-webkit-details-marker {
-  display: none;
-}
-
-.directive-typst .binary-files-section summary .summary-text {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.directive-typst .binary-files-section summary .summary-indicator {
-  transition: transform 0.2s;
-  display: inline-flex;
-  align-items: center;
-}
-
-.directive-typst .binary-files-section summary .summary-indicator .icon {
-  width: 14px;
-  height: 14px;
-  display: block;
-}
-
-.directive-typst .binary-files-section[open] summary .summary-indicator {
-  transform: rotate(90deg);
-}
-
-.directive-typst .binary-files-section summary:hover {
-  background-color: var(--color-spacer);
-}
-
-.directive-typst .add-binary-file {
-  padding: 6px 12px;
-  font-size: 0.875rem;
-  border: 1px solid var(--color-spacer);
-  border-radius: 4px;
-  background-color: var(--color--background);
-  color: var(--color-text);
-  cursor: pointer;
-  width: 100%;
-}
-
-.directive-typst .add-binary-file:hover {
-  background-color: var(--color-spacer);
-}
-
-.directive-typst .binary-files-actions {
-  padding: 8px;
-}
-
-.directive-typst .binary-files-list {
-  padding: 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.directive-typst .binary-files-empty {
-  padding: 12px;
-  text-align: center;
-  color: var(--color-text);
-  opacity: 0.6;
-  font-style: italic;
-  font-size: 0.875rem;
-}
-
-.directive-typst .binary-file-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  font-size: 0.875rem;
-}
-
-.directive-typst .binary-file-icon {
-  font-size: 1rem;
-  flex-shrink: 0;
-}
-
-.directive-typst .binary-file-name {
-  flex: 1;
-  word-break: break-all;
-}
-
-.directive-typst .binary-file-delete {
-  background: none;
-  border: none;
-  color: var(--color-text);
-  cursor: pointer;
-  font-size: 1.125rem;
-  line-height: 1;
-  padding: 0;
-  margin: 0;
-  width: 20px;
-  height: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 2px;
-  flex: none;
-}
-
-.directive-typst .binary-file-delete:hover {
-  background-color: rgba(220, 38, 38, 0.1);
-  color: #dc2626;
-}
-
-.directive-typst .editor:not(.active) {
-  display: none;
-}
-
-.directive-typst .buttons {
-  display: flex;
-  border: 1px solid var(--color-spacer);
-  border-radius: 8px;
-  border-bottom: none;
-  border-bottom-left-radius: 0;
-  border-bottom-right-radius: 0;
-  overflow: hidden;
-}
-
-.directive-typst .buttons.bottom {
-  border: 1px solid var(--color-spacer);
-  border-radius: 8px;
-  border-top: none;
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
-}
-
 .directive-typst .buttons-container {
   display: flex;
   justify-content: center;
   width: 100%;
-}
-
-.directive-typst button {
-  flex: 1;
-  padding: 8px 16px;
-  border: none;
-  border-right: 1px solid var(--color-spacer);
-  background-color: var(--color--background);
-  color: var(--color-text);
-  cursor: pointer;
-}
-
-.directive-typst button:not(.active) {
-  opacity: 0.6;
-}
-
-.directive-typst .buttons button:last-child {
-  border-right: none;
-}
-
-.directive-typst button.fullscreen {
-  flex: 0 0 auto;
-  min-width: 42px;
-  width: 42px;
-  padding: 8px 0;
-}
-
-.directive-typst button.fullscreen .icon {
-  width: 18px;
-  height: 18px;
-  display: block;
-  margin: 0 auto;
-}
-
-.directive-typst .add-source-file .icon {
-  width: 16px;
-  height: 16px;
-  display: block;
-}
-
-.directive-typst button:hover {
-  background-color: var(--color-spacer);
 }
 
 .directive-typst .buttons-container button {
@@ -518,58 +173,7 @@ code-input {
   display: none !important;
 }
 
-.directive-typst:fullscreen {
-  width: 100vw;
-  height: 100dvh !important;
-  padding: 12px;
-  box-sizing: border-box;
-  background-color: var(--color-background, var(--color--background, #fff));
-}
-
-.directive-typst:fullscreen::backdrop {
-  background-color: var(--color-background, var(--color--background, #fff));
-}
-
 .directive-typst:fullscreen.preview-only {
   height: 100dvh !important;
 }
 
-@media screen and (min-width: 1024px) {
-  .directive-typst:not(.preview-only) {
-    flex-direction: row;
-
-    .preview-container {
-      flex: 1;
-      height: 100% !important;
-    }
-
-    .editor-container {
-      flex: 1;
-      height: 100%;
-      overflow: hidden;
-    }
-  }
-}
-
-/* Icon-only toolbar: the written labels made this row wrap on narrow screens,
-   so the wording moved into title/aria-label. */
-.directive-typst .buttons.bottom button {
-  flex: 0 0 auto;
-  min-width: 42px;
-  width: 42px;
-  padding: 8px 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.directive-typst .buttons.bottom button .icon {
-  width: 18px;
-  height: 18px;
-  display: block;
-}
-
-/* Fullscreen sits apart, at the trailing edge of the toolbar. */
-.directive-typst .buttons.bottom button.fullscreen {
-  margin-inline-start: auto;
-}

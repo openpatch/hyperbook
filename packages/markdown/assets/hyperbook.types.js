@@ -32,6 +32,39 @@
  */
 
 /**
+ * A file of an IDE workspace. Text files carry `content`, binary files a
+ * `url`: a link from the page, or the data URL of a reader's upload.
+ * @typedef {Object} HyperbookIdeFile
+ * @property {string} path - Path relative to the workspace root, e.g. "lib/helpers.py".
+ * @property {string} [content]
+ * @property {string} [url]
+ * @property {boolean} [readonly]
+ * @property {boolean} [hidden]
+ * @property {"test"} [role]
+ * @property {boolean} [created] - Added by the reader, not by the page.
+ * @property {boolean} [font] - A font the runtime loads (Typst).
+ */
+
+/**
+ * A row of the `ide` table: one directive's saved workspace.
+ * @typedef {Object} HyperbookIdeRow
+ * @property {string} id - The directive id.
+ * @property {string} runtime - The directive that saved it, e.g. "pyide".
+ * @property {string} [migratedFrom] - The legacy table it was converted from.
+ * @property {HyperbookIdeFile[]} files
+ * @property {string} [active] - Path of the open tab.
+ * @property {Record<string, number>} [ui] - Split sizes and the like.
+ * @property {Record<string, unknown>} [extra] - Runtime-specific state.
+ */
+
+/**
+ * @typedef {Object} HyperbookStoreIdeMigration
+ * @property {Record<string, string>} LEGACY_IDE_TABLES - Legacy table → its main file.
+ * @property {(table: string, row: Record<string, unknown>) => HyperbookIdeRow | null} convertLegacyIdeRow
+ * @property {(table: (name: string) => import("dexie").Table) => Promise<void>} moveLegacyIdeRows
+ */
+
+/**
  * @typedef {Object} HyperbookCloud
  * @property {() => Promise<void>} save - Manually trigger a save to the cloud.
  * @property {() => Promise<void>} sendSnapshot - Send a full snapshot to the cloud.
@@ -174,6 +207,7 @@
  * @type {{
  *   i18n: HyperbookI18n,
  *   store: HyperbookStore,
+ *   storeIdeMigration: HyperbookStoreIdeMigration,
  *   cloud?: HyperbookCloud,
  *   toggleLightbox: (el: HTMLElement) => void,
  *   toggleBookmark: (key: string) => void,
