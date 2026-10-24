@@ -1,5 +1,27 @@
 # @hyperbook/markdown
 
+## 0.88.0
+
+### Minor Changes
+
+- [`435a8ef`](https://github.com/openpatch/hyperbook/commit/435a8ef70b8be9554683bcff15a32a72b7537176) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - The IDEs (PyIDE, Web IDE, p5, OpenSCAD and Typst) share one editor with several files. A code block without `file="…"` is the main file; further files get a name with `file="…"` and show up as tabs. `::file{path src}` adds files from the book, such as data files, images, meshes or (with `font`) Typst fonts. Files can be `readonly` or `hidden`. `files="create,upload,rename,delete"` (or `open` for all) decides what readers may do with files in every IDE, and clicking a binary file's tab shows a preview of images, audio, video, PDFs, fonts and 3D models (STL, OBJ). The download button saves all files as a ZIP.
+
+  - **PyIDE**: the main file can import the other files, and programs can open data files. **Test** shows a report: how many tests passed, and each test with its status (passed, failed, error) and what it printed. A failed `assert`, or a printed line starting with `Fail` or `Nicht bestanden`, fails a test. Friendly explanations of Python errors show again. `packages="pytamaro"` is turned off for now: pytamaro needs a version of pillow that Pyodide does not provide, so it cannot be installed. The build reports it, and the rest of the packages still load.
+  - **Web IDE**: `index.html` links its CSS, JavaScript and images like on a web server, and the page updates while you type.
+  - **p5**: further JavaScript files are loaded before the sketch. The editor completes p5's functions, system variables and constants with their parameters and a short description, and a vector's members after `v.`.
+  - **OpenSCAD**: models can `include` and `use` the other files; uploads show up as files.
+  - **Typst**: relative `#include`s work, and saving the document works again.
+
+  p5, PyIDE's turtle and the Web IDE can compare a drawing or page with a solution, like CSSBattle: with `compare` and a `role="solution"` file, the picture to draw lies over the reader's own output, at the same size and place, and covers it at first. A line divides the reader's drawing (left, "Yours") from the target (right, "Target"); it moves to the middle after the first change and is dragged by its handle or with a slider. The drawing is scored on every change, without a button: in p5 on **Update**, in PyIDE on every **Run** that ends without an error, in the Web IDE as the reader types. A panel below shows the score, the target's colours to copy, and switches between the split view, an overlay of the target and the differences; holding **Target** shows all of it. A solved task is outlined in green. The score has three parts, shown on hovering it: colour (half: every pixel, the background too, with partial credit for close colours), outline (30 %) and area (20 %), the last two looking only at the drawing, so an empty canvas scores at most half. `pass` sets the score that counts as solved, for the total and each part. In the Web IDE, the page is shown in a frame of the compared size: 400×300, or what `compare="WxH"` gives.
+
+  All five IDEs share one layout: output and editor side by side at the same width (stacked on small screens), and every output panel has a header as tall as the bar above the editor. PyIDE shows its output and canvas as tabs, styled like the buttons above the editor; an error switches to the output.
+
+  **Breaking:** the old syntax is gone: `src="…"` on the directives, PyIDE's ` ```python test ` blocks (now `file="test_1.py" role="test" hidden`), the Web IDE's fixed template and `html template` blocks, p5's `editor=true` (now `mode="editor"`), and the `@file`, `@source` and `@font` lines of OpenSCAD and Typst. Run `npx hyperbook migrate` to convert a book, snippets included. It also pins the `id` of every IDE it changes, so readers keep the code they saved. Saved code moves into a new store table the first time a reader opens the updated book; nothing is lost. Web IDE code saved before is not carried over.
+
+### Patch Changes
+
+- [`49484e5`](https://github.com/openpatch/hyperbook/commit/49484e5fbed5e6b9e77597fac93cc8eb2fd2a370) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Update the Online IDE runtime to build 38: a code block without a file name no longer makes the IDE report "The project could not be transferred: Invalid project path" on the next visit, and the Scratch for Java catalogs are synchronized with 6.5.0.
+
 ## 0.87.6
 
 ### Patch Changes
