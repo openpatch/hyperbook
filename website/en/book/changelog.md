@@ -13,6 +13,68 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 
 :::
 
+## v0.115.0
+
+::::tabs
+
+:::tab{title="New :rocket:" id="new"}
+
+**ides**: The IDEs (PyIDE, Web IDE, p5, OpenSCAD and Typst) share one editor with
+several files. A code block without `file="…"` is the main file; further files get
+a name with `file="…"` and show up as tabs. `::file{path src}` adds files from the
+book, such as data files, images, meshes or (with `font`) Typst fonts. Files can be
+`readonly` or `hidden`. `files="create,upload,rename,delete"` (or `open` for all)
+decides what readers may do with files in every IDE, and clicking a binary file's
+tab shows a preview of images, audio, video, PDFs, fonts and 3D models (STL, OBJ).
+The download button saves all files as a ZIP. All five IDEs share one layout:
+output and editor side by side at the same width, stacked on small screens.
+
+**pyide**: The main file can import the other files, and programs can open data
+files. **Test** shows a report: how many tests passed, and each test with its
+status (passed, failed, error) and what it printed. A failed `assert`, or a printed
+line starting with `Fail` or `Nicht bestanden`, fails a test.
+
+**webide**: `index.html` links its CSS, JavaScript and images like on a web server,
+and the page updates while you type.
+
+**p5**: Further JavaScript files are loaded before the sketch. The editor completes
+p5's functions, system variables and constants with their parameters and a short
+description, and a vector's members after `v.`.
+
+**openscad**: Models can `include` and `use` the other files; uploads show up as
+files.
+
+**typst**: Relative `#include`s work, and saving the document works again.
+
+**ides**: p5, PyIDE's turtle and the Web IDE can compare a drawing or page with a
+solution, like CSSBattle: with `compare` and a `role="solution"` file, the picture
+to draw lies over the reader's own output, at the same size and place, and covers
+it at first. A line divides the reader's drawing (left, "Yours") from the target
+(right, "Target"); it moves to the middle after the first change and is dragged by
+its handle or with a slider. The drawing is scored on every change, without a
+button. A panel below shows the score, the target's colours to copy, and switches
+between the split view, an overlay of the target and the differences; holding
+**Target** shows all of it. A solved task is outlined in green. `pass` sets the
+score that counts as solved. In the Web IDE, the page is shown in a frame of the
+compared size: 400×300, or what `compare="WxH"` gives.
+
+:::
+
+:::tab{title="Breaking :warning:" id="breaking"}
+
+**ides**: The old syntax is gone: `src="…"` on the directives, PyIDE's
+```` ```python test ```` blocks (now `file="test_1.py" role="test" hidden`), the Web
+IDE's fixed template and `html template` blocks, p5's `editor=true` (now
+`mode="editor"`), and the `@file`, `@source` and `@font` lines of OpenSCAD and
+Typst. Run `npx hyperbook migrate` to convert a book, snippets included. It also
+pins the `id` of every IDE it changes, so readers keep the code they saved. Saved
+code moves into a new store table the first time a reader opens the updated book;
+nothing is lost. Web IDE code saved before is not carried over.
+
+:::
+
+::::
+
 ## v0.114.2
 
 ::::tabs
