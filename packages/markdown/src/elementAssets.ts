@@ -66,10 +66,9 @@ export function elementAssetUrl(
     }
   }
   if (element === "geogebra") {
-    const version = runtimeAssets
-      .find((asset) => asset.target === "directive-geogebra")!
-      .url.match(/geogebra-math-apps-bundle-([\d-]+)\.zip$/)![1]
-      .replaceAll("-", ".");
+    const version = runtimeAssets.find(
+      (asset) => asset.target === "directive-geogebra",
+    )!.version;
     const relative = file
       .replace(/^GeoGebra\/(?:HTML5\/)?/, "")
       .replace(/^5\.0\//, `${version}/`);

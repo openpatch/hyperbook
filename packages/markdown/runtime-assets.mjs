@@ -11,24 +11,17 @@ const require = createRequire(import.meta.url);
 const unbzip2 = require("unbzip2-stream");
 const { extract } = require("tar");
 
+const downloadAttempts = 3;
+
 async function checksum(file) {
   const hash = createHash("sha256");
   for await (const chunk of createReadStream(file)) hash.update(chunk);
   return hash.digest("hex");
 }
 
-export async function installRuntimeAssets(
-  assets,
-  output = "dist/assets",
-  cache = ".cache/runtime-assets",
-) {
-  await fs.mkdir(cache, { recursive: true });
-  for (const asset of assets) {
-    const archive = path.join(cache, asset.sha256);
-    if (
-      !(await fs.stat(archive).catch(() => null)) ||
-      (await checksum(archive)) !== asset.sha256
-    ) {
+async function downloadRuntimeAsset(asset, file) {
+  for (let attempt = 1; ; attempt++) {
+    try {
       const response = await fetch(asset.url, {
         signal: AbortSignal.timeout(600_000),
       });
@@ -36,20 +29,50 @@ export async function installRuntimeAssets(
         throw new Error(
           `Could not download ${asset.url}: HTTP ${response.status}`,
         );
-      const staging = await fs.mkdtemp(path.join(cache, ".download-"));
-      const downloaded = path.join(staging, "asset");
-      try {
-        await pipeline(
-          Readable.fromWeb(response.body),
-          createWriteStream(downloaded),
-        );
-        if ((await checksum(downloaded)) !== asset.sha256)
-          throw new Error(`Runtime asset checksum mismatch: ${asset.url}`);
-        await fs.rename(downloaded, archive);
-      } finally {
-        await fs.rm(staging, { recursive: true, force: true });
-      }
+      await pipeline(Readable.fromWeb(response.body), createWriteStream(file));
+      return;
+    } catch (error) {
+      if (attempt >= downloadAttempts) throw error;
+      const delay = 5_000 * attempt;
+      console.warn(
+        `Could not download ${asset.url} (attempt ${attempt} of ${downloadAttempts}), retrying in ${delay / 1000}s: ${error}`,
+      );
+      await new Promise((resolve) => setTimeout(resolve, delay));
     }
+  }
+}
+
+export async function ensureRuntimeAssetArchive(
+  asset,
+  cache = ".cache/runtime-assets",
+) {
+  await fs.mkdir(cache, { recursive: true });
+  const archive = path.join(cache, asset.sha256);
+  if (
+    (await fs.stat(archive).catch(() => null)) &&
+    (await checksum(archive)) === asset.sha256
+  )
+    return archive;
+  const staging = await fs.mkdtemp(path.join(cache, ".download-"));
+  const downloaded = path.join(staging, "asset");
+  try {
+    await downloadRuntimeAsset(asset, downloaded);
+    if ((await checksum(downloaded)) !== asset.sha256)
+      throw new Error(`Runtime asset checksum mismatch: ${asset.url}`);
+    await fs.rename(downloaded, archive);
+  } finally {
+    await fs.rm(staging, { recursive: true, force: true });
+  }
+  return archive;
+}
+
+export async function installRuntimeAssets(
+  assets,
+  output = "dist/assets",
+  cache = ".cache/runtime-assets",
+) {
+  for (const asset of assets) {
+    const archive = await ensureRuntimeAssetArchive(asset, cache);
     const target = path.join(output, asset.target);
     if (asset.format === "file") {
       await fs.mkdir(path.dirname(target), { recursive: true });

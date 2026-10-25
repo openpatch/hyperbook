@@ -39,11 +39,41 @@ it("checks runtime downloads and reuses cached files without network access", as
   expect(fetch).toHaveBeenCalledTimes(2);
 });
 
-it("rejects a corrupt runtime without leaving a completed cache entry", async () => {
-  vi.stubGlobal(
-    "fetch",
-    vi.fn(async () => new Response("corrupt")),
+it("retries a transient download failure and succeeds on the next attempt", async () => {
+  const bytes = Buffer.from("wasm");
+  const sha256 = createHash("sha256").update(bytes).digest("hex");
+  const asset = {
+    url: "https://example.com/runtime",
+    sha256,
+    format: "file",
+    target: "runtime.js",
+  };
+  const fetch = vi
+    .fn()
+    .mockResolvedValueOnce(new Response("unavailable", { status: 500 }))
+    .mockResolvedValueOnce(new Response(bytes));
+  vi.stubGlobal("fetch", fetch);
+  // Only setTimeout is faked so the real event loop keeps serving I/O.
+  vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+  try {
+    const installation = installRuntimeAssets([asset], output, cache);
+    while (fetch.mock.calls.length < 2) {
+      await vi.advanceTimersByTimeAsync(5_000);
+      await new Promise((resolve) => setImmediate(resolve));
+    }
+    await installation;
+  } finally {
+    vi.useRealTimers();
+  }
+  expect(fetch).toHaveBeenCalledTimes(2);
+  expect(await fs.readFile(path.join(output, asset.target), "utf8")).toBe(
+    "wasm",
   );
+});
+
+it("rejects a corrupt runtime without leaving a completed cache entry", async () => {
+  const fetch = vi.fn(async () => new Response("corrupt"));
+  vi.stubGlobal("fetch", fetch);
   await expect(
     installRuntimeAssets(
       [
@@ -58,6 +88,8 @@ it("rejects a corrupt runtime without leaving a completed cache entry", async ()
       cache,
     ),
   ).rejects.toThrow("checksum mismatch");
+  // A completed download with a pinned checksum is never retried.
+  expect(fetch).toHaveBeenCalledTimes(1);
   expect(await fs.readdir(cache)).toEqual([]);
 });
 
