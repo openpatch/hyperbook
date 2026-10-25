@@ -1,5 +1,11 @@
 # @hyperbook/markdown
 
+## 0.88.1
+
+### Patch Changes
+
+- [#1215](https://github.com/openpatch/hyperbook/pull/1215) [`85c8419`](https://github.com/openpatch/hyperbook/commit/85c841926a7ddf7568cdb216b87f368ba4388171) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Runtime asset archives for GeoGebra and the OpenSCAD libraries and fonts now download from cdn.openpatch.org under `runtime-archives/<element>/<version>/` instead of download.geogebra.org and ochafik.com. A release is published once per version: publishing again while that version is already on the CDN is a no-op, and downloads retry transient failures. The mirrors are published with the new `scripts/publish-runtime-archive.mjs`.
+
 ## 0.88.0
 
 ### Minor Changes
