@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import { DownloadableElement, elementCdn } from "@hyperbook/types";
 import { process as processMarkdown } from "../src/process";
 import { elementAssetUrl } from "../src/elementAssets";
+import ideReleases from "../ide-releases.json";
+import openscadConfig from "../openscad-config.json";
 import excalidrawPackageJson from "../../web-component-excalidraw/package.json";
 import { ctx } from "./mock";
 
@@ -74,10 +76,9 @@ describe.each(elements)(
                 blockflow: "https://blockflow.openpatch.org/",
                 excalidraw:
                   "https://unpkg.com/@hyperbook/web-component-excalidraw@",
-                onlineide:
-                  "https://cdn.openpatch.org/onlineide/v2.2.1-hyperbook.38/",
-                sqlide: "https://cdn.openpatch.org/sqlide/v2.0.0-hyperbook.4/",
-                openscad: "https://cdn.openpatch.org/openscad/2026.10.08-1/",
+                onlineide: `https://cdn.openpatch.org/onlineide/${ideReleases.onlineide}/`,
+                sqlide: `https://cdn.openpatch.org/sqlide/${ideReleases.sqlide}/`,
+                openscad: `https://cdn.openpatch.org/openscad/${openscadConfig.wasmBuild.cdnVersion}/`,
               }[element]
             : "http://assets.example.com/runtime/",
         );
@@ -167,9 +168,9 @@ it("loads Blockflow and Excalidraw from their upstream CDNs", () => {
 });
 
 it.each([
-  ["onlineide", "v2.2.1-hyperbook.38", "include/online-ide-embedded.js"],
-  ["sqlide", "v2.0.0-hyperbook.4", "include/sql-ide-embedded.js"],
-  ["openscad", "2026.10.08-1", "openscad.wasm"],
+  ["onlineide", ideReleases.onlineide, "include/online-ide-embedded.js"],
+  ["sqlide", ideReleases.sqlide, "include/sql-ide-embedded.js"],
+  ["openscad", openscadConfig.wasmBuild.cdnVersion, "openscad.wasm"],
 ] as const)(
   "pins %s's default CDN independently of the Markdown package",
   (element: DownloadableElement, version: string, file: string) => {
