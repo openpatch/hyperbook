@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.115.1
+
+### Patch Changes
+
+- [`208d713`](https://github.com/openpatch/hyperbook/commit/208d713b00f106926aacd5c4316f16637e979637) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Update the Online IDE runtime to build 39: Scratch for Java code blocks run on the Scratch for Java 7.0 runtime (graphics aligned with the new renderer, the 7.0 shader format, stage transitions that build their stage lazily), and the catalogs are synchronized with 7.0.0.
+
 ## 0.115.0
 
 ### Minor Changes
