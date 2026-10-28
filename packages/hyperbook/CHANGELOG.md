@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.115.2
+
+### Patch Changes
+
+- [`5c53167`](https://github.com/openpatch/hyperbook/commit/5c531671f1ce9c01f9703a0a0426646b64a3b6a7) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Update the Online IDE runtime to build 41: Scratch for Java code blocks run on the Scratch for Java 7.1.0 runtime (`TiledMap.spawn` takes the sprite classes to make, `File`'s XML methods are gone), the catalogs are synchronized with 7.1.0, and "Open in Scratch for Java Studio" saves a project as a `.scratch4j` file that Studio opens with a double-click.
+
 ## 0.115.1
 
 ### Patch Changes
