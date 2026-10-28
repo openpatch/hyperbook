@@ -53,6 +53,7 @@
     ]
   },
   "engines": {
-    "pnpm": ">=8"
-  }
+    "pnpm": ">=10"
+  },
+  "packageManager": "pnpm@11.3.0"
 }
