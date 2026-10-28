@@ -138,7 +138,7 @@ export function hyperbookVersion(config: Config): string | null {
  * - Student login and saving go to the book's own host (`/_hyperbook/api`),
  *   so `cloud` is set to same-origin mode, whatever the book said.
  */
-async function adaptConfig(srcDir: string, log: BuildLog) {
+export async function adaptConfig(srcDir: string, log: BuildLog) {
   const file = path.join(srcDir, "hyperbook.json");
   let json: Record<string, unknown>;
   try {

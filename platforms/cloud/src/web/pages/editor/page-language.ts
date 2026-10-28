@@ -330,6 +330,9 @@ function pageCompletion(files: () => string[]) {
     const start = /^[ \t]*(:{1,6})([\w-]*)$/.exec(before);
     if (start) {
       const colons = start[1]!.length;
+      // Colons that close an element, where Enter must start a new line.
+      const closes = state.field(outlineField).containers.some((c) => c.close === line.number);
+      if (closes && start[2] === "" && !context.explicit) return null;
       return {
         from: pos - start[1]!.length - start[2]!.length,
         options: directiveOptions(state, line.number, Math.max(colons, 2)),

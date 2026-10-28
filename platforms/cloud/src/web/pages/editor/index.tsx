@@ -135,7 +135,6 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
       },
     });
   };
-  const [page, setPage] = useState("/");
   const uploadInput = useRef<HTMLInputElement>(null);
   const uploadFolder = useRef("");
   const replaceTarget = useRef<string | null>(null);
@@ -147,16 +146,6 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
     if (first) ws.open(first);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // The preview follows the open page.
-  useEffect(() => {
-    const p = ws.active && pageOf(ws.active);
-    if (p) setPage(p);
-  }, [ws.active]);
-
-  // A save queues a build; follow it.
-  useEffect(() => {
-    if (ws.lastBuildId) void queryClient.invalidateQueries({ queryKey: ["books", bookId, "builds"] });
-  }, [ws.lastBuildId, bookId, queryClient]);
 
   // Ask before leaving with unsaved changes.
   const hasUnsaved = ws.dirty.size > 0;
@@ -429,7 +418,6 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
   };
 
   const activeTab = ws.tabs.find((t) => t.path === ws.active);
-  const lastBuild = builds?.find((b) => b.id === ws.lastBuildId) ?? builds?.[0];
 
   return (
     <div className="flex h-dvh flex-col">
@@ -548,7 +536,12 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
 
         {showPreview && (
           <section className="hidden w-[45%] max-w-3xl shrink-0 border-l border-border lg:block" aria-label="Preview">
-            <PreviewPane bookId={bookId} page={page} build={lastBuild} onShowLog={setLogFor} />
+            <PreviewPane
+              bookId={bookId}
+              file={activeTab && pageOf(activeTab.path) && activeTab.status === "ready" ? activeTab.path : null}
+              text={activeTab && pageOf(activeTab.path) ? (activeTab.text ?? null) : null}
+              commit={listing.commit}
+            />
           </section>
         )}
       </div>

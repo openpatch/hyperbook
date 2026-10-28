@@ -11,6 +11,7 @@ import { ConfigError, loadConfig } from "./config";
 import { migrateDb, openDb } from "./db/client";
 import { ensureFirstAdmin } from "./db/seed";
 import { BuildQueue } from "./hosting/builds";
+import { Renderers } from "./hosting/renders";
 import { clearTmp, repoDir } from "./hosting/storage";
 import { fillMissingSourceBytes } from "./domain/storage";
 import { headCommit, listTree } from "./hosting/git";
@@ -94,7 +95,8 @@ async function start() {
   const rebuilding = builds.enqueueRebuilds({ upgrades: config.build.rebuildOnUpgrade });
   if (rebuilding > 0) console.log(`Rebuilding ${rebuilding} book(s) with Hyperbook ${hyperbookVersion(config)}`);
 
-  const app = createApp({ config, db, mailer: createMailer(config), builds, dns: createDns() }, { webRoot });
+  const renders = new Renderers(config);
+  const app = createApp({ config, db, mailer: createMailer(config), builds, renders, dns: createDns() }, { webRoot });
   const server = serve({ fetch: app.fetch, port: config.port }, (info) => {
     console.log(`Hyperbook Cloud listening on port ${info.port}`);
     console.log(`  admin  ${config.adminOrigin}`);
@@ -103,6 +105,7 @@ async function start() {
 
   const shutdown = () => {
     server.close(async () => {
+      renders.closeAll();
       await builds.stop();
       sqlite.close();
       process.exit(0);

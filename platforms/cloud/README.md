@@ -47,7 +47,7 @@ One process answers these hosts, told apart by the `Host` header:
 |---|---|
 | `ADMIN_ORIGIN` (e.g. `cloud.example.org`) | Admin UI and API |
 | `<slug>.<BOOKS_DOMAIN>` (e.g. `physics.example.page`) | Books |
-| `<slug>--preview.<BOOKS_DOMAIN>` | A book's newest build, for its teachers |
+| `<slug>--preview.<BOOKS_DOMAIN>` | A book's newest save, rendered page by page, for its teachers |
 | A book's custom domain (e.g. `physik.schule.de`) | The book, once the domain is active; see [Custom domains](#custom-domains) |
 
 Books run scripts their teachers wrote, so they never share an origin

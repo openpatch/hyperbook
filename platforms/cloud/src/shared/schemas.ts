@@ -230,6 +230,12 @@ export const bookPath = z.string().superRefine((path, ctx) => {
   if (problem) ctx.addIssue({ code: "custom", message: problem });
 });
 
+/** A page with the editor's unsaved text, for the preview. */
+export const renderPageInput = z.object({
+  path: bookPath,
+  text: z.string().max(2 * 1024 * 1024),
+});
+
 /** A blob id: what the teacher's copy of a file was made from. */
 const oid = z.string().regex(/^[0-9a-f]{40}$/);
 

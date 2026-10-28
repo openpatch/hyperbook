@@ -21,13 +21,11 @@ describe("files", () => {
     const res = await owner.c.post(files("/init"), { template: "default" });
     expect(res.status).toBe(200);
     expect(res.body.files.map((f: { path: string }) => f.path)).toContain("book/index.md");
-    expect(res.body.buildId).toEqual(expect.any(Number));
     expect((await owner.c.post(files("/init"), { template: "empty" })).status).toBe(409);
 
     await instance.builds.idle();
-    const builds = (await owner.c.get(files().replace("/files", "/builds"))).body;
-    // A save only previews; nothing is live yet.
-    expect(builds[0]).toMatchObject({ trigger: "edit", publish: false, preview: true, published: false });
+    // Saving builds nothing: the preview renders pages, publishing builds.
+    expect((await owner.c.get(files().replace("/files", "/builds"))).body).toEqual([]);
   });
 
   it("reads files as bytes that never render on the admin origin", async () => {
@@ -54,7 +52,7 @@ describe("files", () => {
       ],
     });
     expect(res.status).toBe(200);
-    expect(res.body).toMatchObject({ changed: true, buildId: expect.any(Number) });
+    expect(res.body).toMatchObject({ changed: true });
     listing = res.body;
     const png = await owner.c.raw("GET", files("/raw?path=book/logo.png"));
     expect(png.headers.get("content-type")).toBe("application/octet-stream");
@@ -114,7 +112,8 @@ describe("files", () => {
 
   it("downloads a build as a website", async () => {
     const { instance, owner, files, book } = await world();
-    const { buildId } = (await owner.c.post(files("/init"), { template: "empty" })).body;
+    await owner.c.post(files("/init"), { template: "empty" });
+    const buildId = (await owner.c.post(`/api/books/${book.id}/publish`)).body.build.id;
     await instance.builds.idle();
     const res = await instance.app.request(`/api/books/${book.id}/builds/${buildId}/site.zip`, {
       headers: { host: ADMIN_HOST, cookie: owner.c.cookie },

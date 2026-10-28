@@ -594,6 +594,76 @@ export function makeBaseCtx(
   };
 }
 
+/**
+ * Copies Hyperbook's own assets (styles, client scripts, fonts) into the
+ * output, leaving out element runtimes and emojis, which are copied as pages
+ * use them.
+ */
+export async function copyMainAssets(
+  assetsOut: string,
+  hyperbookJson: HyperbookJson,
+  onProgress?: (done: number, total: number) => void,
+): Promise<void> {
+  const assetsPath = path.join(__dirname, "assets");
+  await mkdir(assetsOut, { recursive: true });
+  const mainAssets = await fs.readdir(assetsPath);
+  let i = 1;
+  for (let asset of mainAssets) {
+    const assetPath = path.join(assetsPath, asset);
+    const assetOut = path.join(assetsOut, asset);
+    if (!asset.startsWith("directive-") && asset !== "emoji") {
+      await copy(assetPath, assetOut, {
+        filter: (src) => {
+          if (src.includes("lunr-languages")) {
+            return (
+              hyperbookJson.language !== undefined &&
+              hyperbookJson.language !== "en" &&
+              (src.endsWith("lunr-languages") ||
+                src.endsWith(`lunr.${hyperbookJson.language}.min.js`) ||
+                src.endsWith(`lunr.stemmer.support.min.js`))
+            );
+          }
+          return true;
+        },
+      });
+    }
+    onProgress?.(i++, mainAssets.length);
+  }
+}
+
+/** Puts the interface texts in the book's language into the copied i18n.js. */
+export async function writeI18n(
+  assetsOut: string,
+  hyperbookJson: HyperbookJson,
+): Promise<void> {
+  const supportLanguages = await fs
+    .readdir(path.join(__dirname, "locales"))
+    .then((files) => files.map((file) => file.split(".")[0]));
+  let language = "en";
+  if (
+    hyperbookJson.language &&
+    supportLanguages.includes(hyperbookJson.language)
+  ) {
+    language = hyperbookJson.language;
+  }
+
+  const i18nJS = await fs.readFile(path.join(assetsOut, "i18n.js"), "utf-8");
+  const locales = await fs.readFile(
+    path.join(__dirname, "locales", `${language}.json`),
+    "utf-8",
+  );
+  await fs.writeFile(
+    path.join(assetsOut, "i18n.js"),
+    i18nJS.replace(
+      /\/\/[\s]*LOCALES[\s\S]*?[\s]*\/\/[\s]*LOCALES/g,
+      `
+  // GENERATED
+  const locales = ${locales};
+`,
+    ),
+  );
+}
+
 async function runBuild(
   root: string,
   rootProject: Hyperproject,
@@ -941,31 +1011,11 @@ async function runBuild(
     endProgress();
   }
 
-  const mainAssets = await fs.readdir(assetsPath);
-  i = 1;
-  for (let asset of mainAssets) {
-    const assetPath = path.join(assetsPath, asset);
-    const assetOut = path.join(assetsOut, asset);
-    if (!asset.startsWith("directive-") && asset !== "emoji") {
-      await copy(assetPath, assetOut, {
-        filter: (src) => {
-          if (src.includes("lunr-languages")) {
-            return (
-              hyperbookJson.language !== undefined &&
-              hyperbookJson.language !== "en" &&
-              (src.endsWith("lunr-languages") ||
-                src.endsWith(`lunr.${hyperbookJson.language}.min.js`) ||
-                src.endsWith(`lunr.stemmer.support.min.js`))
-            );
-          }
-          return true;
-        },
-      });
-    }
+  await copyMainAssets(assetsOut, hyperbookJson, (done, total) =>
     writeProgress(
-      `${chalk.blue(`[${prefix}]`)} Copying hyperbook assets: [${i++}/${mainAssets.length}]`,
-    );
-  }
+      `${chalk.blue(`[${prefix}]`)} Copying hyperbook assets: [${done}/${total}]`,
+    ),
+  );
   endProgress();
 
   await writeSearchIndex(
@@ -976,35 +1026,7 @@ async function runBuild(
     prefix,
   );
 
-  const supportLanguages = await fs
-    .readdir(path.join(__dirname, "locales"))
-    .then((files) => files.map((file) => file.split(".")[0]));
-  let language = "en";
-  if (
-    hyperbookJson.language &&
-    supportLanguages.includes(hyperbookJson.language)
-  ) {
-    language = hyperbookJson.language;
-  }
-
-  const i18nJS = await fs.readFile(
-    path.join(rootOut, ASSETS_FOLDER, "i18n.js"),
-    "utf-8",
-  );
-  const locales = await fs.readFile(
-    path.join(__dirname, "locales", `${language}.json`),
-    "utf-8",
-  );
-  await fs.writeFile(
-    path.join(rootOut, ASSETS_FOLDER, "i18n.js"),
-    i18nJS.replace(
-      /\/\/[\s]*LOCALES[\s\S]*?[\s]*\/\/[\s]*LOCALES/g,
-      `
-  // GENERATED
-  const locales = ${locales};
-`,
-    ),
-  );
+  await writeI18n(assetsOut, hyperbookJson);
 
   // Generate llms.txt if enabled
   if (hyperbookJson.llms) {
