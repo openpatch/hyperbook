@@ -4,7 +4,7 @@ index: 3
 lang: de
 ---
 
-# Cloud [Alpha] 
+# Cloud [Alpha]
 
 :::alert{warn}
 
@@ -12,165 +12,81 @@ Diese Funktion befindet sich noch in der Alpha-Phase. Sie ist möglicherweise fe
 
 :::
 
-Hyperbook Cloud ist eine selbst gehostete Plattform zur Schülerverwaltung, die Benutzeranmeldung, Fortschrittsverfolgung und Cloud-Synchronisierung für deine Hyperbooks ermöglicht.
+Hyperbook Cloud ist eine selbst gehostete Plattform für Lehrkräfte. Sie veröffentlicht Bücher, gibt Schülerinnen und Schülern anonyme Zugänge und speichert, was sie in den interaktiven Elementen eines Buchs tun, damit sie auf jedem Gerät weitermachen können.
 
-## Einrichtung
+## Bücher auf Hyperbook Cloud
 
-Um ein Hyperbook mit einem Cloud-Server zu verbinden, füge die `cloud`-Eigenschaft zu deiner `hyperbook.json` hinzu:
+Wenn du dein Buch auf Hyperbook Cloud hochlädst, musst du nichts einstellen. Die Plattform baut dein Buch und verbindet es mit sich selbst: Im Buch erscheint ein Anmelde-Knopf, und die gedruckten QR-Codes melden Schülerinnen und Schüler direkt an.
+
+Ein Buch auf Hyperbook Cloud kann **öffentlich** sein (alle können es lesen, Schülerinnen und Schüler melden sich an, um ihre Arbeit zu speichern) oder **privat** (nur seine Schülerinnen und Schüler können es lesen; alle anderen werden zuerst um eine Anmeldung gebeten).
+
+## Bücher, die woanders liegen
+
+Ein Buch auf GitHub Pages oder einem anderen Webspace kann Hyperbook Cloud trotzdem für Schülerzugänge nutzen. Lege das Buch in Hyperbook Cloud an, markiere es als „woanders gehostet“ mit seiner Adresse und ergänze die Eigenschaft `cloud` in deiner `hyperbook.json`:
 
 ```json
 {
   "name": "Mein Hyperbook",
   "cloud": {
-    "url": "https://cloud.example.com",
-    "id": "mein-hyperbook"
+    "url": "https://physik.example.page",
+    "id": "physik"
   }
 }
 ```
 
 | Eigenschaft | Beschreibung |
 |---|---|
-| `url` | Die URL deines Hyperbook-Cloud-Servers. |
-| `id` | Der Slug des Hyperbooks, wie er in der Cloud-Admin-Oberfläche konfiguriert ist. Muss exakt übereinstimmen. |
+| `url` | Die Adresse des Buchs auf Hyperbook Cloud, wie sie auf seiner Seite dort steht. |
+| `id` | Der Adressname des Buchs auf Hyperbook Cloud (der erste Teil von `url`). |
 
-## Funktionsweise
+Hyperbook Cloud nimmt nur Anfragen von der Adresse an, die du für das Buch eingetragen hast. Das Buch muss also dort laufen.
 
-Wenn Cloud konfiguriert ist, erscheint ein Login-Button im Hyperbook. Schüler melden sich mit den Zugangsdaten an, die ihre Lehrkraft in der Cloud-Admin-Oberfläche erstellt hat.
+## Anmelden
 
-Nach der Anmeldung passiert automatisch Folgendes:
+Schülerinnen und Schüler melden sich mit Benutzername und Passwort von ihrer Zugangskarte an oder scannen deren QR-Code. Das Anmeldeformular hat die Option **gemeinsam genutztes Gerät**: Dann endet die Anmeldung, wenn der Browser geschlossen wird. Sonst gilt eine Anmeldung 30 Tage.
 
-- **Zustandssynchronisierung** — Alle Zustände interaktiver Elemente (Code-Editoren, Lesezeichen, Aufklappelemente, Excalidraw-Zeichnungen usw.) werden auf dem Cloud-Server gespeichert.
-- **Geräteübergreifender Zugriff** — Schüler können auf jedem Gerät dort weitermachen, wo sie aufgehört haben.
-- **Offline-Unterstützung** — Änderungen werden lokal zwischengespeichert, wenn keine Verbindung besteht, und synchronisiert, sobald die Verbindung wiederhergestellt ist.
-- **Auto-Save-Anzeige** — Ein Status-Icon in der Werkzeugleiste zeigt den aktuellen Synchronisierungsstatus an. Jeder Zustand hat eine eigene Symbolform, verlässt sich also nicht allein auf Farbe, und die Beschriftung der Schaltfläche gibt den Zustand für Screenreader wieder.
-- **Synchronisierungshinweise** — Zustände, auf die du reagieren kannst — ein fehlgeschlagenes Speichern, fehlende Verbindung, eine Zusammenführung mit einer anderen Sitzung — werden in einem Hinweis am unteren Seitenrand angezeigt, mit Wiederholen-Schaltfläche, wo sie sinnvoll ist. Erfolgreiches Speichern bleibt stumm.
+Lehrkräfte können die Arbeit einer Schülerin oder eines Schülers in Hyperbook Cloud mit **View as student** öffnen. Das Buch zeigt dann ein Banner mit dem Namen und speichert nichts.
 
-Wenn man in die Cloud eingeloggt ist, werden die lokalen Export-, Import- und Zurücksetzen-Buttons ausgeblendet, um Konflikte mit dem Cloud-verwalteten Zustand zu vermeiden.
+## Was gespeichert wird
 
-## Event-Sourcing-Architektur
+Nach der Anmeldung wird alles, was die interaktiven Elemente des Buchs speichern (Code-Editoren, Lesezeichen, Zeichnungen, Antworten, …), in Hyperbook Cloud gesichert:
 
-Anstatt bei jeder Änderung den gesamten Speicher zu senden, verwendet Hyperbook Cloud einen Event-Sourcing-Ansatz für eine effiziente Synchronisierung.
+- **Geräteübergreifend**: Schülerinnen und Schüler machen auf jedem Gerät dort weiter, wo sie aufgehört haben.
+- **Offline**: Änderungen ohne Verbindung bleiben erhalten und werden gespeichert, sobald die Verbindung zurück ist.
+- **Speicheranzeige**: Ein Symbol in der Werkzeugleiste zeigt, ob alles gespeichert ist. Jeder Zustand hat eine eigene Form, ist also nicht nur an der Farbe zu erkennen, und der Knopf nennt den Zustand für Screenreader.
+- **Hinweise**: Zustände, bei denen man etwas tun kann (fehlgeschlagenes Speichern, offline, Zusammenführung mit einer anderen Sitzung), erscheinen als Hinweis unten auf der Seite, wo sinnvoll mit einem Knopf zum erneuten Versuchen. Erfolgreiches Speichern bleibt still.
 
-### Funktionsweise
+Während man angemeldet ist, sind die Knöpfe für lokalen Export, Import und Zurücksetzen ausgeblendet, damit sie nicht mit dem gespeicherten Stand kollidieren.
 
-1. **Granulare Event-Erfassung** — Jede Änderung an der lokalen Dexie-Datenbank (Erstellen, Aktualisieren, Löschen) wird als einzelnes Event über Dexie-Hooks erfasst. Bei Aktualisierungen werden nur die geänderten Felder (Deltas) aufgezeichnet, nicht die gesamte Zeile.
-2. **Gebündelte Synchronisierung** — Events werden gesammelt und nach einer Verzögerungszeit (2 Sekunden Inaktivität oder maximal 10 Sekunden Wartezeit) gebündelt an den Cloud-Server gesendet.
-3. **Serverseitige Snapshots** — Der Server komprimiert regelmäßig Events zu Snapshots. Nach 100 Events (konfigurierbar über die Umgebungsvariable `SNAPSHOT_THRESHOLD`) wird ein neuer Snapshot erstellt und alte Events werden bereinigt.
-4. **Zustandsrekonstruktion** — Wenn ein Schüler seinen Zustand lädt, rekonstruiert der Server diesen, indem alle Events seit dem letzten Snapshot angewendet werden.
+Flüchtige Zustände der Oberfläche (Cursorposition, Scrollposition, Fenstergröße) werden nicht gespeichert: Sie gehören zu einem Gerät.
 
-### Umgang mit großen Daten
+## Wie gespeichert wird
 
-Wenn ein Event-Batch 512 KB überschreitet (z. B. große Excalidraw-Zeichnungen oder Geogebra-Zustände), sendet der Client stattdessen einen vollständigen Snapshot anstelle einzelner Events. Dies verhindert Bandbreitenprobleme bei großen Binärdaten.
+Hyperbook Cloud speichert Änderungen, nicht den ganzen Speicher:
 
-### Konflikterkennung und Zusammenführung
+1. **Änderungen werden festgehalten**, sobald sie passieren: jedes Anlegen, Ändern und Löschen in der lokalen Datenbank des Buchs, bei Änderungen nur die geänderten Felder.
+2. **Sie werden gebündelt gesendet**, nach 2 Sekunden ohne Änderung (oder spätestens alle 10 Sekunden).
+3. **Der Server fasst sie zusammen** zu einem Schnappschuss, nach 100 Änderungen.
+4. **Beim Laden** wird der Stand aus dem Schnappschuss und den Änderungen danach wiederhergestellt.
 
-Der Client verfolgt die letzte bekannte Event-ID vom Server. Beim Senden von Events wird diese ID als `afterEventId` mitgesendet. Wenn der Server erkennt, dass der Client veraltet ist (z. B. weil ein anderes Gerät zwischenzeitlich Events gesendet hat), antwortet er mit einem 409-Konflikt.
+Ein Bündel über 512 KB (zum Beispiel große Zeichnungen) wird stattdessen als vollständiger Schnappschuss gesendet.
 
-Ein Konflikt verwirft niemals lokale Arbeit. Der Client:
+### Zwei Geräte gleichzeitig
 
-1. ruft den aktuellen Server-Zustand ab und importiert ihn,
-2. spielt seine ausstehenden Events darauf erneut ab — lokal und auf dem Server,
-3. erklärt die Zusammenführung in einem Hinweis und lädt die Seite neu.
+Jedes Speichern nennt den letzten Stand, den das Gerät kannte. Hat ein anderes Gerät dazwischen gespeichert, lehnt der Server ab, und das Gerät
 
-Das Neuladen ist nötig, weil interaktive Elemente den Store nur einmal beim Laden der Seite lesen; bis dahin zeigt die Seite den Zustand vor der Zusammenführung. Es wird angekündigt statt sofort ausgeführt, und der Hinweis bietet eine Schaltfläche **Jetzt neu laden**.
+1. lädt den aktuellen Stand,
+2. wendet seine eigenen ungespeicherten Änderungen darauf an, lokal und auf dem Server,
+3. erklärt die Zusammenführung in einem Hinweis und lädt die Seite neu, damit die Elemente den zusammengeführten Stand zeigen. Der Hinweis bietet **Jetzt neu laden** an.
 
-Der Server prüft `afterEventId` und fügt den Batch in einer einzigen Transaktion an. Zwei Geräte, die im selben Moment speichern, können die Prüfung daher nicht beide bestehen.
+Bei einer Zusammenführung geht nichts verloren. Der Server prüft und speichert in einem Schritt, sodass nicht zwei Geräte im selben Moment beide durchkommen.
 
-Jedes Hyperbook verfolgt seine eigene Event-ID. Zwei Hyperbooks unter derselben Domain teilen sich keinen Zählerstand.
+### Offline und Verlassen der Seite
 
-### Offline-Warteschlange
+Änderungen ohne Verbindung warten in einer Warteschlange und werden der Reihe nach gesendet, sobald die Verbindung zurück ist; hat ein anderes Gerät inzwischen gespeichert, werden sie wie oben zusammengeführt. Die Warteschlange fasst höchstens 100 Bündel; darüber hinaus wird ein Schnappschuss gesendet.
 
-Wenn das Gerät offline ist, werden Event-Batches in einer lokalen Warteschlange gespeichert. Sobald die Verbindung wiederhergestellt ist, wird die Warteschlange der Reihe nach gesendet, wobei jeder Batch an die Event-ID des vorherigen anknüpft — der Zählerstand kann offline nicht weiterlaufen, daher dürfen Batches keinen zum Zeitpunkt des Einreihens gemerkten Stand mitführen.
+Wird die Seite geschlossen, während noch Änderungen warten, werden sie mit einer Anfrage gesendet, die die Seite überdauert. Bündel über 60 KB lassen sich so nicht senden; dann ist die Nachfrage des Browsers nach ungespeicherten Änderungen das Zeichen, kurz zu warten.
 
-Hat der Server sich zwischenzeitlich weiterbewegt, wird die Warteschlange zusammengeführt statt verworfen: Die noch wartenden Events werden auf dem abgerufenen Zustand erneut abgespielt, genau wie bei einem Online-Konflikt.
+## Hyperbook Cloud betreiben
 
-Die Warteschlange fasst höchstens 100 Batches. Darüber hinaus wird sie zu einem einzigen vollständigen Snapshot zusammengefasst, der beim Wiederverbinden gesendet wird.
-
-### Verlassen der Seite
-
-Änderungen innerhalb des Debounce-Fensters gingen sonst verloren, wenn der Tab vor dessen Ablauf geschlossen wird. Bei `beforeunload` und `pagehide` sendet der Client alles Ausstehende mit einem `keepalive`-Request, der die Seite überdauert. Batches über 60 KB bleiben stattdessen der Warnung zu ungespeicherten Änderungen überlassen, da Browser zu große Keepalive-Requests grundsätzlich ablehnen.
-
-### Was nicht synchronisiert wird
-
-Flüchtiger Oberflächenzustand — Cursorposition, Scrollposition, Fenstergröße — ist von Events und Snapshots ausgenommen. Er ist naturgemäß gerätespezifisch, und seine Synchronisierung führte dazu, dass ein Gerät die Scrollposition eines anderen übernahm.
-
-## Cloud-Server
-
-Der Cloud-Server ist eine separate Anwendung im Verzeichnis `platforms/cloud/` des Hyperbook-Repositories. Siehe die [Cloud-README](https://github.com/openpatch/hyperbook/tree/main/platforms/cloud) für Installations- und Deployment-Anleitungen.
-
-### Wichtige Konzepte
-
-- **Hyperbooks** — Jedes Hyperbook wird in der Cloud mit einem eindeutigen Slug registriert. Dieser Slug wird als `cloud.id` verwendet.
-- **Gruppen** — Schüler werden innerhalb eines Hyperbooks in Gruppen organisiert.
-- **Schüler** — Jeder Schüler hat einen Benutzernamen und ein Passwort für die Anmeldung im Hyperbook.
-- **Lehrkräfte** — Lehrkräfte können Gruppen und Schüler für ihre zugewiesenen Hyperbooks verwalten.
-- **Berechtigungen** — Admins können Lehrkräften feingranulare Berechtigungen pro Hyperbook zuweisen.
-
-### Impersonation
-
-Lehrkräfte und Admins können einen Schüler imitieren, um dessen Fortschritt im Nur-Lese-Modus einzusehen. Dabei wird das Hyperbook mit dem gespeicherten Zustand des Schülers geöffnet, ohne dass Änderungen möglich sind.
-
-### Event-Log
-
-Die Admin-Oberfläche bietet ein Event-Log pro Gruppe, das die letzten Events (letzte 200) und den neuesten Snapshot pro Schüler anzeigt. Lehrkräfte und Admins können:
-
-- **Das Event-Log einsehen** — Alle aktuellen Datenbankänderungen aller Schüler einer Gruppe anzeigen.
-- **Snapshots herunterladen** — Den zuletzt rekonstruierten Zustand eines Schülers als JSON-Datei herunterladen.
-
-Snapshots werden mit ihrer Quelle gekennzeichnet: `auto` (automatisch erstellt, wenn der Event-Schwellenwert erreicht wird) oder `manual` (erstellt durch einen vollständigen Snapshot-Upload, Import oder Zurücksetzen).
-
-## Datenfluss
-
-### Änderungen speichern
-
-```
-Schüler interagiert mit dem Hyperbook
-        ↓
-Dexie-Hook erfasst Änderung als Event
-        ↓
-Events gebündelt (verzögert 2s / max 10s)
-        ↓
-POST /api/store/:hyperbookId/events
-        ↓
-Events auf dem Cloud-Server gespeichert
-```
-
-Wenn der Event-Batch 512 KB überschreitet:
-
-```
-Batch zu groß
-        ↓
-Vollständiger Dexie-Export erstellt
-        ↓
-POST /api/store/:hyperbookId/snapshot
-        ↓
-Snapshot ersetzt alle Events + vorherigen Snapshot
-```
-
-### Zustand laden
-
-```
-Schüler meldet sich an
-        ↓
-GET /api/store/:hyperbookId
-        ↓
-Server rekonstruiert Zustand (Snapshot + Events)
-        ↓
-Zustand in lokale IndexedDB importiert
-        ↓
-Interaktive Elemente wiederhergestellt
-```
-
-## API-Endpunkte
-
-| Methode | Endpunkt | Beschreibung |
-|---|---|---|
-| `GET` | `/api/store/:hyperbookId` | Rekonstruierten Zustand abrufen (Snapshot + Event-Replay). |
-| `POST` | `/api/store/:hyperbookId/events` | Einen Batch von Events anhängen. Enthält `afterEventId` zur Konflikterkennung. |
-| `POST` | `/api/store/:hyperbookId/snapshot` | Vollständige Zustandsüberschreibung. Ersetzt alle Events und Snapshots. |
-
-## Konfiguration
-
-| Umgebungsvariable | Standard | Beschreibung |
-|---|---|---|
-| `SNAPSHOT_THRESHOLD` | `100` | Anzahl der Events, bevor der Server automatisch einen neuen Snapshot erstellt und alte Events bereinigt. |
+Hyperbook Cloud liegt in `platforms/cloud/` des Hyperbook-Repositorys und läuft als ein einzelner Docker-Container. Installation und Betrieb beschreibt die [Cloud-README](https://github.com/openpatch/hyperbook/tree/main/platforms/cloud).

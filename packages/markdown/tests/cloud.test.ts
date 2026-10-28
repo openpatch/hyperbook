@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { createHarness, clientEvent, readonlyToken } from "./cloudHarness";
+import { createHarness, clientEvent } from "./cloudHarness";
 
 // Exercises the client half of the cloud sync in assets/cloud.js: the pending
 // queue, the per-hyperbook watermark, offline batching and conflict recovery.
@@ -54,7 +54,9 @@ describe("watermark storage", () => {
 
 describe("sending events", () => {
   it("sends the queue and advances the watermark", async () => {
-    const h = await createHarness({ respond: () => ({ lastEventId: 4 }) });
+    const h = await createHarness({
+      respond: (req) => (req.method === "POST" ? { lastEventId: 4 } : undefined),
+    });
     immediate(h.sync);
 
     h.sync.addEvent(clientEvent("consent", "create", 1, { id: 1 }));
@@ -397,7 +399,7 @@ describe("conflict recovery", () => {
 describe("read-only (impersonation) sessions", () => {
   it("does not start a sync manager", async () => {
     const h = await createHarness({
-      storage: { hyperbook_auth_token: readonlyToken() },
+      readonly: true,
     });
 
     expect(h.sync).toBeNull();
@@ -405,7 +407,7 @@ describe("read-only (impersonation) sessions", () => {
 
   it("sends nothing to the cloud", async () => {
     const h = await createHarness({
-      storage: { hyperbook_auth_token: readonlyToken() },
+      readonly: true,
     });
 
     await h.cloud.save();
@@ -500,7 +502,7 @@ describe("flushing on unload", () => {
 
   it("sends nothing in a read-only session", async () => {
     const h = await createHarness({
-      storage: { hyperbook_auth_token: readonlyToken() },
+      readonly: true,
     });
 
     h.fire("pagehide");
@@ -782,5 +784,88 @@ describe("merge notice", () => {
 
     expect(h.ui.notice).not.toBeNull();
     expect(h.ui.notice.textContent).toContain("another session");
+  });
+});
+
+describe("connecting to Hyperbook Cloud", () => {
+  it("talks to its own host with the cookie when the platform hosts it", async () => {
+    const h = await createHarness({ sameOrigin: true });
+    immediate(h.sync);
+    h.sync.addEvent(clientEvent("consent", "create", 1, { id: 1 }));
+    await h.sync.performSave();
+
+    const session = h.requests.find((r) => r.url.endsWith("/session"))!;
+    expect(session.url).toBe("/_hyperbook/api/session");
+    const [req] = eventRequests(h.requests);
+    expect(req.url).toBe("/_hyperbook/api/store/events");
+    expect(req.credentials).toBe("same-origin");
+    expect(req.headers.Authorization).toBeUndefined();
+  });
+
+  it("does not sync on a hosted book nobody is logged in to", async () => {
+    const h = await createHarness({ sameOrigin: true, authenticated: false });
+    expect(h.sync).toBeNull();
+    expect(h.requests.some((r) => r.url.endsWith("/store"))).toBe(false);
+  });
+
+  it("sends a Bearer token to its address on the platform when hosted elsewhere", async () => {
+    const h = await createHarness({ hyperbookId: "physics" });
+    immediate(h.sync);
+    h.sync.addEvent(clientEvent("consent", "create", 1, { id: 1 }));
+    await h.sync.performSave();
+
+    const [req] = eventRequests(h.requests);
+    expect(req.url).toBe("https://physics.books.example.org/_hyperbook/api/store/events");
+    expect(req.headers.Authorization).toBe("Bearer token-s1");
+    expect(req.credentials).toBe("omit");
+  });
+
+  it("adopts the server's watermark even when nothing was saved yet", async () => {
+    const h = await createHarness({
+      respond: (req) => (req.url.endsWith("/store") ? { snapshot: null, lastEventId: 0 } : { lastEventId: 1 }),
+      storage: { "hyperbook_last_event_id:test": "9" },
+    });
+    expect(h.sync.lastEventId).toBe(0);
+  });
+
+  it("forgets a token the server no longer knows", async () => {
+    const h = await createHarness({ authenticated: false, storage: { "hyperbook_auth_token:test": "stale" } });
+    expect(h.sync).toBeNull();
+    expect(h.localStorage.has("hyperbook_auth_token:test")).toBe(false);
+  });
+
+  it("stays logged in when an action is refused with 403", async () => {
+    const h = await createHarness({
+      respond: (req) => {
+        if (req.url.endsWith("/events")) throw { status: 403, body: { error: "read-only" } };
+        return undefined;
+      },
+    });
+    immediate(h.sync);
+    h.sync.addEvent(clientEvent("consent", "create", 1, { id: 1 }));
+    await h.sync.performSave();
+    expect(h.localStorage.get("hyperbook_auth_token:test")).toBe("token-s1");
+  });
+
+  it("logs in with the key of a scanned QR code", async () => {
+    const h = await createHarness({
+      authenticated: false,
+      hash: "#hyperbook-key=abc123",
+      respond: (req) => {
+        if (req.url.endsWith("/login/key")) return { user: { username: "s1" }, token: "fresh" };
+        return undefined;
+      },
+    });
+    const login = h.requests.find((r) => r.url.endsWith("/login/key"))!;
+    expect(login.body).toEqual({ key: "abc123", token: true });
+    expect(h.localStorage.get("hyperbook_auth_token:test")).toBe("fresh");
+    expect(h.reloads).toBe(1);
+  });
+
+  it("opens a teacher's read-only view handed over in the address", async () => {
+    const h = await createHarness({ authenticated: true, readonly: true, hash: "#hyperbook-impersonate=view-token" });
+    expect(h.localStorage.get("hyperbook_auth_token:test")).toBe("view-token");
+    expect(JSON.parse(h.localStorage.get("hyperbook_auth_user:test")!)).toEqual({ username: "s1", readonly: true });
+    expect(h.reloads).toBe(1);
   });
 });
