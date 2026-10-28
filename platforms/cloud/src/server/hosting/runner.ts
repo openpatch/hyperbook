@@ -87,6 +87,17 @@ export class BuildLog {
     }
   }
 
+  /** The newest line matching `pattern`, including one still being written. */
+  findLast(pattern: RegExp): RegExpMatchArray | null {
+    const partial = this.partial ? pattern.exec(this.clean(this.partial)) : null;
+    if (partial) return partial;
+    for (let i = this.lines.length - 1; i >= 0; i--) {
+      const match = pattern.exec(this.lines[i]!);
+      if (match) return match;
+    }
+    return null;
+  }
+
   toString(): string {
     const current = this.partial ? [this.clean(this.partial)] : [];
     const head = this.cut ? ["[Hyperbook Cloud] (earlier output cut)"] : [];

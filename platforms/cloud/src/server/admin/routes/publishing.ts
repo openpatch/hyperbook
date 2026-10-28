@@ -13,7 +13,7 @@ import type { SessionUser } from "../../auth/sessions";
 import { books, builds, users } from "../../db/schema";
 import type { Deps } from "../../deps";
 import { type BookRow, bookAccess } from "../../domain/books";
-import type { BuildRow } from "../../hosting/builds";
+import type { BuildProgress, BuildRow } from "../../hosting/builds";
 import {
   ConcurrentChangeError,
   archiveZip,
@@ -42,6 +42,7 @@ function publicBuild(
   build: BuildRow,
   book: Pick<BookRow, "publishedBuildId" | "previewBuildId">,
   requestedBy: string | null,
+  progress: BuildProgress | null = null,
 ) {
   return {
     id: build.id,
@@ -58,6 +59,7 @@ function publicBuild(
     createdAt: build.createdAt.getTime(),
     startedAt: build.startedAt?.getTime() ?? null,
     finishedAt: build.finishedAt?.getTime() ?? null,
+    progress,
   };
 }
 
@@ -89,7 +91,7 @@ export function bookPublishingRoutes({ db, config, builds: queue }: Deps) {
       .orderBy(desc(builds.id))
       .limit(20)
       .all()
-      .map(({ build, requestedBy }) => publicBuild(build, book, requestedBy));
+      .map(({ build, requestedBy }) => publicBuild(build, book, requestedBy, queue.progress(build.id)));
   }
 
   return new Hono<AuthedEnv>()
@@ -220,8 +222,9 @@ export function bookPublishingRoutes({ db, config, builds: queue }: Deps) {
     })
 
     // Makes the current commit live: its newest successful build if there is
-    // one (a build does not depend on the host serving it), otherwise a new
-    // build that goes live when it succeeds.
+    // one (a build does not depend on the host serving it), otherwise the one
+    // waiting or running for it, or else a new build, which go live when they
+    // succeed.
     .post("/:id/publish", idParam, async (c) => {
       const user = c.get("user");
       const { book } = bookAccess(db, user, c.req.valid("param").id);
@@ -247,8 +250,8 @@ export function bookPublishingRoutes({ db, config, builds: queue }: Deps) {
         });
         return c.json({ published: true, build: publicBuild(built, { ...book, publishedBuildId: built.id }, null) });
       }
-      const build = queue.enqueue(book.id, commit, "publish", user.id);
-      return c.json({ published: false, build: publicBuild(build, book, user.email) });
+      const build = queue.publishPending(book.id, commit, user.id) ?? queue.enqueue(book.id, commit, "publish", user.id);
+      return c.json({ published: false, build: publicBuild(build, book, user.email, queue.progress(build.id)) });
     })
 
     .post("/:id/unpublish", idParam, (c) => {

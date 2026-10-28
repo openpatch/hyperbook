@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { api, unwrap } from "@/lib/api";
-import type { Build } from "./publish";
+import { type Build, buildStatus } from "./publish";
 
 /** A one-time hand-off into the book's preview host, landing on `page`. */
 async function previewUrl(bookId: string, page: string) {
@@ -79,7 +79,7 @@ export function PreviewPane({
             className="cursor-pointer"
             onClick={() => onShowLog(build.id)}
           >
-            {build.status === "failed" ? "Build failed – show log" : build.status === "canceled" ? "Canceled" : "Building…"}
+            {build.status === "failed" ? "Build failed – show log" : build.status === "canceled" ? "Canceled" : buildStatus(build)}
           </Badge>
         )}
         <span className="flex-1" />

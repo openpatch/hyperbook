@@ -124,6 +124,48 @@ describe("build queue", () => {
     expect(bookRow(instance, book.id)).toMatchObject({ publishedBuildId: publish.id, previewBuildId: edit2.id });
   });
 
+  it("lets a running preview build of the same commit go live instead of building it again", async () => {
+    let release!: () => void;
+    const gate = new Promise<void>((r) => (release = r));
+    const runner: Runner = async (job) => {
+      await gate;
+      return copyRunner(job);
+    };
+    const instance = setup({}, { runner });
+    const { book, commit } = await bookWithSource(instance, { "hyperbook.json": "{}" });
+    const edit = instance.builds.enqueue(book.id, commit, "edit", null); // starts running
+    const other = await commitFiles(instance, book.id, { "hyperbook.json": '{"name":"x"}' });
+    expect(instance.builds.publishPending(book.id, other, null)).toBeNull();
+    expect(instance.builds.publishPending(book.id, commit, null)).toMatchObject({ id: edit.id, publish: true, trigger: "publish" });
+    release();
+    await instance.builds.idle();
+    expect(buildRow(instance, edit.id)).toMatchObject({ status: "succeeded", publish: true });
+    expect(buildRow(instance, edit.id).log).toContain("Published");
+    expect(bookRow(instance, book.id)).toMatchObject({ publishedBuildId: edit.id, previewBuildId: edit.id });
+  });
+
+  it("reports how far a running build is", async () => {
+    let release!: () => void;
+    const gate = new Promise<void>((r) => (release = r));
+    let started!: () => void;
+    const running = new Promise<void>((r) => (started = r));
+    const runner: Runner = async (job) => {
+      job.log.write("[Book] Building book: [1/10]\x1b[2K\x1b[1G[Book] Building book: [3/10]");
+      started();
+      await gate;
+      return copyRunner(job);
+    };
+    const instance = setup({}, { runner });
+    const { book, commit } = await bookWithSource(instance, { "hyperbook.json": "{}" });
+    const build = instance.builds.enqueue(book.id, commit, "upload", null);
+    expect(instance.builds.progress(build.id)).toBeNull();
+    await running;
+    expect(instance.builds.progress(build.id)).toEqual({ step: "book", done: 3, total: 10 });
+    release();
+    await instance.builds.idle();
+    expect(instance.builds.progress(build.id)).toBeNull();
+  });
+
   it("cancels a running build", async () => {
     const runner: Runner = ({ signal }) =>
       new Promise((resolve) =>

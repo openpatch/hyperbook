@@ -435,6 +435,7 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
           builds={builds}
           hasUnsaved={hasUnsaved}
           onPublish={onPublish}
+          onShowLog={setLogFor}
         />
         <Button
           size="icon"

@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync } from "node:fs";
 import { mkdir, rename, rm } from "node:fs/promises";
 import path from "node:path";
-import { and, asc, desc, eq, inArray, isNotNull, lt, notInArray, sql } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, isNotNull, lt, ne, notInArray, sql } from "drizzle-orm";
 import { audit } from "../audit";
 import type { Config } from "../config";
 import type { Db } from "../db/client";
@@ -18,6 +18,11 @@ const KEEP_PREVIOUS = 2;
 const KEEP_RECORDS = 50;
 /** How often a running build's log is written to the database. */
 const LOG_INTERVAL_MS = 1000;
+
+export type BuildProgress = { step: "book" | "glossary"; done: number; total: number };
+
+/** The CLI's progress line, e.g. "[Physics] Building book: [12/340]". */
+const PROGRESS = /Building (book|glossary): \[(\d+)\/(\d+)\]/;
 
 type Running = { buildId: number; bookId: number; abort: AbortController; log: BuildLog };
 
@@ -131,6 +136,47 @@ export class BuildQueue {
     return queued;
   }
 
+  /**
+   * Makes a waiting or running build of `commit` go live when it succeeds,
+   * so publishing right after a save does not build the same commit twice.
+   * Returns that build, or null if there is none.
+   */
+  publishPending(bookId: number, commit: string, userId: number | null): BuildRow | null {
+    const pending = this.db
+      .select()
+      .from(builds)
+      .where(
+        and(
+          eq(builds.bookId, bookId),
+          eq(builds.commit, commit),
+          inArray(builds.status, ["queued", "running"]),
+          ne(builds.trigger, "upgrade"),
+        ),
+      )
+      .orderBy(desc(builds.id))
+      .limit(1)
+      .get();
+    if (!pending) return null;
+    if (pending.publish) return pending;
+    return this.db
+      .update(builds)
+      .set({ publish: true, trigger: "publish", requestedBy: userId })
+      .where(eq(builds.id, pending.id))
+      .returning()
+      .get();
+  }
+
+  /** How far a running build is, from the counters in its log. */
+  progress(buildId: number): BuildProgress | null {
+    for (const r of this.running.values()) {
+      if (r.buildId !== buildId) continue;
+      const match = r.log.findLast(PROGRESS);
+      if (!match) return null;
+      return { step: match[1] as BuildProgress["step"], done: Number(match[2]), total: Number(match[3]) };
+    }
+    return null;
+  }
+
   /** Cancels a queued or running build. Returns false if it had finished. */
   cancel(buildId: number): boolean {
     for (const r of this.running.values()) {
@@ -236,15 +282,17 @@ export class BuildQueue {
       const target = buildDir(this.config, build.bookId, build.id);
       mkdirSync(path.dirname(target), { recursive: true });
       await rename(outcome.outDir, target);
+      // Publishing while it ran may have made it a build that goes live.
+      const current = this.db.select().from(builds).where(eq(builds.id, build.id)).get() ?? build;
       const size = `${(outcome.sizeBytes / 1024 / 1024).toFixed(1)} MB`;
       log.note(
-        build.trigger === "upgrade"
+        current.trigger === "upgrade"
           ? `Built with Hyperbook ${hyperbookVersion(this.config)} (${size})`
-          : build.publish
+          : current.publish
             ? `Published (${size})`
             : `Ready for the preview (${size})`,
       );
-      this.finish(build, "succeeded", log, { sizeBytes: outcome.sizeBytes });
+      this.finish(current, "succeeded", log, { sizeBytes: outcome.sizeBytes });
       await this.prune(build.bookId);
     } catch (error) {
       const message = `Internal error: ${(error as Error).message}`;
