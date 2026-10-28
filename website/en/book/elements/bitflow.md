@@ -11,13 +11,13 @@ chapter. You do **not** need to write any HTML.
 
 ## Basic Usage
 
-Put a flow file next to your page (or into `public/`) and point the element at it:
+Put a flow file (`.bitflow`, which holds JSON) next to your page (or into `public/`) and point the element at it:
 
 ```markdown
-::bitflow{id="bitflow-example" height="600px" src="quiz.json"}
+::bitflow{id="bitflow-example" height="600px" src="quiz.bitflow"}
 ```
 
-::bitflow{id="bitflow-example" height="600px" src="quiz.json"}
+::bitflow{id="bitflow-example" height="600px" src="quiz.bitflow"}
 
 ## Attributes
 

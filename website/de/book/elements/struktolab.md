@@ -16,6 +16,7 @@ Für weitere Informationen zur Verwendung von Struktolab siehe die [Struktolab-D
 - `fontSize`: number
 - `lang`: "de" | "en" uses the hyperbook language by default
 - `colorMode`: "color" | "greyscale" | "bw"
+- `src`: eine Struktogramm-Datei (`.struktolab`, der Baum als JSON) statt eines Code-Blocks, z. B. `::struktolab{src="/schleife.struktolab"}`
 
 ## View
 

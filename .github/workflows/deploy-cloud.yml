@@ -1,0 +1,174 @@
+name: Deploy Hyperbook Cloud
+
+# Builds the cloud platform and the Hyperbook CLI here, copies them to the
+# server and restarts it with pm2 (see platforms/cloud/README.md, "Without
+# Docker"). The server installs the runtime dependencies itself, because
+# better-sqlite3 is native and the server's CPU may differ from this runner's.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - platforms/cloud/**
+      - packages/**
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - .github/workflows/deploy-cloud.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-cloud
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Build and deploy to the server
+    runs-on: ubuntu-latest
+    environment:
+      name: cloud
+      url: https://${{ vars.DEPLOY_HOST }}
+    env:
+      # BatchMode stops ssh dropping to an interactive password prompt, which
+      # turns a rejected key into a clear failure instead of "please try again".
+      SSH_OPTS: -i ~/.ssh/deploy_key -o BatchMode=yes -o StrictHostKeyChecking=yes
+      TARGET: ${{ secrets.DEPLOY_SSH_USER }}@${{ secrets.DEPLOY_SSH_HOST }}
+      DEPLOY_PATH: ${{ vars.DEPLOY_PATH }}
+      # The same pnpm as the release workflow, on the server too.
+      PNPM: npx --yes pnpm@11.3.0
+
+    steps:
+      # rsync --delete against an empty path would wipe the wrong directory, so
+      # refuse to start without one.
+      - name: Check configuration
+        run: |
+          missing=""
+          [ -n "$DEPLOY_PATH" ] || missing="$missing DEPLOY_PATH(variable)"
+          [ -n "${{ secrets.DEPLOY_SSH_HOST }}" ] || missing="$missing DEPLOY_SSH_HOST(secret)"
+          [ -n "${{ secrets.DEPLOY_SSH_USER }}" ] || missing="$missing DEPLOY_SSH_USER(secret)"
+          [ -n "${{ secrets.DEPLOY_SSH_KEY }}" ] || missing="$missing DEPLOY_SSH_KEY(secret)"
+          [ -n "${{ vars.DEPLOY_HOST }}" ] || missing="$missing DEPLOY_HOST(variable)"
+          if [ -n "$missing" ]; then
+            echo "::error::Not configured. Missing:$missing"
+            exit 1
+          fi
+          case "$DEPLOY_PATH" in
+            /*/?*) ;;
+            *) echo "::error::DEPLOY_PATH must be an absolute path, got '$DEPLOY_PATH'"; exit 1 ;;
+          esac
+
+      - uses: actions/checkout@v6
+
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11.3.0
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+
+      # --ignore-scripts: the root's prepare hook runs husky; better-sqlite3 is
+      # built explicitly for the tests below.
+      - name: Install dependencies
+        run: |
+          pnpm install --filter @hyperbook/cloud --filter "hyperbook..." --frozen-lockfile --ignore-scripts
+          pnpm rebuild --filter @hyperbook/cloud better-sqlite3
+
+      # Also packs every element's runtime into packages/hyperbook/.cache,
+      # which offline builds on the server use; it goes along below.
+      - name: Build the Hyperbook CLI
+        run: pnpm --filter "hyperbook..." build
+
+      - name: Check and build the cloud
+        working-directory: platforms/cloud
+        run: |
+          pnpm typecheck
+          pnpm test
+          pnpm build
+
+      # The server gets the repository's layout, so the cloud finds the CLI at
+      # its default path (packages/hyperbook/dist from platforms/cloud/dist).
+      - name: Stage files
+        run: |
+          mkdir -p stage/platforms/cloud stage/packages/hyperbook
+          cp package.json pnpm-lock.yaml pnpm-workspace.yaml stage/
+          cp -r platforms/cloud/package.json platforms/cloud/dist platforms/cloud/drizzle stage/platforms/cloud/
+          cp -r packages/hyperbook/package.json packages/hyperbook/dist packages/hyperbook/.cache stage/packages/hyperbook/
+
+      - name: Add deploy key
+        run: |
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+
+          # printf, not echo: OpenSSH rejects a key whose final line has no
+          # newline, which is the usual way this secret goes wrong.
+          printf '%s\n' "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+
+          if ! why=$(ssh-keygen -y -P "" -f ~/.ssh/deploy_key 2>&1 >/dev/null); then
+            case "$why" in
+              *passphrase*)
+                echo "::error::DEPLOY_SSH_KEY has a passphrase, so it cannot be used"
+                echo "::error::unattended. Generate a deploy key with an empty one:"
+                echo "::error::  ssh-keygen -t ed25519 -N '' -C 'hyperbook cloud deploy' -f cloud_deploy"
+                echo "::error::then put cloud_deploy in this secret and cloud_deploy.pub in"
+                echo "::error::the server's ~/.ssh/authorized_keys." ;;
+              *)
+                echo "::error::DEPLOY_SSH_KEY is not a readable private key ($why)."
+                echo "::error::It must be the whole PRIVATE key, BEGIN and END lines"
+                echo "::error::included — not the .pub half." ;;
+            esac
+            exit 1
+          fi
+
+          ssh-keyscan -H "${{ secrets.DEPLOY_SSH_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null
+          if [ ! -s ~/.ssh/known_hosts ]; then
+            echo "::error::Could not reach ${{ secrets.DEPLOY_SSH_HOST }} to read its host key."
+            exit 1
+          fi
+
+      - name: Check the server accepts the key
+        run: |
+          if ! ssh $SSH_OPTS "$TARGET" true; then
+            echo "::error::The key is valid but the server rejected it. Add its public"
+            echo "::error::half to ~/.ssh/authorized_keys of ${{ secrets.DEPLOY_SSH_USER }}"
+            echo "::error::on ${{ secrets.DEPLOY_SSH_HOST }}:"
+            ssh-keygen -y -P "" -f ~/.ssh/deploy_key
+            exit 1
+          fi
+
+      # node_modules (installed on the server), data/ and .env are never touched:
+      # the --delete runs only inside the two code folders, and skips node_modules.
+      - name: Upload
+        run: |
+          rsync -az -e "ssh $SSH_OPTS" \
+            stage/package.json stage/pnpm-lock.yaml stage/pnpm-workspace.yaml \
+            "$TARGET:$DEPLOY_PATH/"
+          rsync -az --delete --mkpath --exclude node_modules -e "ssh $SSH_OPTS" \
+            stage/platforms/cloud/ "$TARGET:$DEPLOY_PATH/platforms/cloud/"
+          rsync -az --delete --mkpath --exclude node_modules -e "ssh $SSH_OPTS" \
+            stage/packages/hyperbook/ "$TARGET:$DEPLOY_PATH/packages/hyperbook/"
+
+      # The native module is built (or downloaded) for the server's own CPU, and
+      # checked before the running server is touched.
+      - name: Install dependencies and restart
+        run: |
+          ssh $SSH_OPTS "$TARGET" "set -e
+            cd $DEPLOY_PATH
+            $PNPM install --filter @hyperbook/cloud --prod --frozen-lockfile --ignore-scripts
+            $PNPM rebuild --filter @hyperbook/cloud better-sqlite3
+            cd platforms/cloud
+            node -e \"new (require('better-sqlite3'))(':memory:').exec('select 1')\"
+            pm2 restart hyperbook-cloud --update-env"
+
+      - name: Wait for health
+        run: |
+          for i in $(seq 1 30); do
+            if curl -fsS "https://${{ vars.DEPLOY_HOST }}/api/health" > /dev/null; then
+              echo "healthy"; exit 0
+            fi
+            sleep 2
+          done
+          echo "server did not come back healthy"; exit 1

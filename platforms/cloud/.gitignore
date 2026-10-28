@@ -63,3 +63,9 @@ typings/
 # SQLite database
 *.sqlite
 *.sqlite-journal
+
+# Development data (DATA_DIR) and SQLite's write-ahead files
+data/
+data-test/
+*.sqlite-wal
+*.sqlite-shm

@@ -1,0 +1,37 @@
+# Caddy in front of Hyperbook Cloud, with one wildcard certificate for all
+# books. Better for large instances: no per-book certificates, no rate limits.
+#
+# A wildcard certificate needs the DNS-01 challenge, so Caddy must be able to
+# create DNS records at your provider. That takes a Caddy build with the
+# provider's module (https://caddyserver.com/download, or xcaddy), e.g.
+#   xcaddy build --with github.com/caddy-dns/cloudflare
+#
+# Replace cloud.example.org and example.page with your ADMIN_ORIGIN host and
+# BOOKS_DOMAIN, and the dns line with your provider's.
+{
+	on_demand_tls {
+		# Only for books' custom domains (last block): Caddy asks Hyperbook
+		# Cloud first, which allows active custom domains only.
+		ask http://localhost:3001/api/tls-check
+	}
+}
+
+cloud.example.org {
+	reverse_proxy localhost:3001
+}
+
+*.example.page {
+	tls {
+		dns cloudflare {env.CLOUDFLARE_API_TOKEN}
+	}
+	reverse_proxy localhost:3001
+}
+
+# Custom domains of books (e.g. physik.schule.de): a certificate each, on
+# the first visit. Remove this block if your instance does not allow them.
+https:// {
+	tls {
+		on_demand
+	}
+	reverse_proxy localhost:3001
+}

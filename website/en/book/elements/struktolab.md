@@ -18,6 +18,7 @@ For more information on how to use Struktolab, see the [Struktolab documentation
 | `fontSize` | Font size used by Struktolab | `14` |
 | `lang` | UI language: `de` or `en` | hyperbook language |
 | `colorMode` | Color mode: `color`, `greyscale`, or `bw` | `color` |
+| `src` | A structogram file (`.struktolab`, its tree as JSON) instead of a code block, e.g. `::struktolab{src="/loop.struktolab"}` | - |
 
 ## View
 

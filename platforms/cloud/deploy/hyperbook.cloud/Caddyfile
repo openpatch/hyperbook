@@ -1,0 +1,50 @@
+# Caddy for OpenPatch's own instance, hyperbook.cloud. DNS is at Hetzner.
+#
+# .env of the instance (next to docker-compose.yml):
+#   ADMIN_ORIGIN=https://hyperbook.cloud
+#   BOOKS_DOMAIN=hyperbook.cloud        books at https://<slug>.hyperbook.cloud
+#
+# DNS records in the hyperbook.cloud zone (A and AAAA, to this server):
+#   hyperbook.cloud            admin UI and API
+#   *.hyperbook.cloud          books and their preview hosts
+#   www.hyperbook.cloud        redirects to hyperbook.cloud (optional)
+#
+# Caddy needs the Hetzner DNS module for the wildcard certificate:
+#   xcaddy build --with github.com/caddy-dns/hetzner/v2
+# and an API token with read and write access, made in the Hetzner Console
+# project that holds the hyperbook.cloud zone, as HETZNER_API_TOKEN in Caddy's
+# environment (e.g. a systemd drop-in with Environment=HETZNER_API_TOKEN=…).
+{
+	on_demand_tls {
+		# Only for books' custom domains (last block): Hyperbook Cloud allows
+		# a certificate for active custom domains only.
+		ask http://localhost:3001/api/tls-check
+	}
+}
+
+hyperbook.cloud {
+	reverse_proxy localhost:3001
+}
+
+www.hyperbook.cloud {
+	redir https://hyperbook.cloud{uri} permanent
+}
+
+# One certificate for all books, through the DNS-01 challenge at Hetzner.
+# (www has its own block above; "www" is a reserved slug anyway.)
+*.hyperbook.cloud {
+	tls {
+		dns hetzner {env.HETZNER_API_TOKEN}
+		propagation_delay 30s
+	}
+	reverse_proxy localhost:3001
+}
+
+# Custom domains of books (e.g. physik.schule.de, a CNAME to
+# physik.hyperbook.cloud): a certificate each, on the first visit.
+https:// {
+	tls {
+		on_demand
+	}
+	reverse_proxy localhost:3001
+}
