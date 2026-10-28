@@ -1,0 +1,33 @@
+/*
+ * Design tokens for the light theme. Shared by books (through light.css)
+ * and Hyperbook Cloud, so both stay one look.
+ */
+/*
+ * Brand defaults. :where() keeps their specificity at zero, so the colors a
+ * book sets in hyperbook.json (written as :root by rehypeHtmlStructure.ts,
+ * which carries the same defaults) always win, whatever the load order.
+ */
+:where(:root) {
+  --color-brand: #007864;
+  --color-brand-dark: #b5e3d8;
+  --color-brand-text: white;
+}
+
+:root {
+  --color-background: white;
+  --color-text: black;
+  --color-text-deactivated: #242428;
+
+  /* Cloud sync states. Each is >=5:1 on this theme's background (WCAG AA). */
+  --color-sync-pending: #b45309;
+  --color-sync-active: #1d4ed8;
+  --color-sync-ok: #15803d;
+  --color-sync-error: #b91c1c;
+  --color-sync-idle: #4b5563;
+  --color-sync-readonly: #c2410c;
+  --color-nav: #f5f5f5;
+  --color-nav-border: #3c3c3c;
+  --color-author-background: #d6d6d6;
+  --color-author-color: #3c3c3c;
+  --color-spacer: #a4a4a4;
+}
