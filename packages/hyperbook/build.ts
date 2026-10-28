@@ -1,5 +1,5 @@
 import path, { posix } from "path";
-import fs, { cp, mkdir } from "fs/promises";
+import fs, { mkdir } from "fs/promises";
 import chalk from "chalk";
 import readline from "readline";
 import {
@@ -9,6 +9,7 @@ import {
   VFileBook,
   VFileGlossary,
   getPasswords,
+  copy,
 } from "@hyperbook/fs";
 import { VFile } from "vfile";
 import {
@@ -66,6 +67,11 @@ export async function writeSearchIndex(
   let foundLanguage = false;
   if (hyperbookJson.language && hyperbookJson.language !== "en") {
     try {
+      // The code ends up in a require() path, so only a bare language code is
+      // accepted; anything else could load a file from the book itself.
+      if (!/^[a-z]{2,3}$/.test(hyperbookJson.language)) {
+        throw new Error(`Not a language code: ${hyperbookJson.language}`);
+      }
       // Only register lunr language plugins once to avoid "Overwriting" warnings
       if (!(lunr as any)["_hyperbook_lang_loaded_" + hyperbookJson.language]) {
         require("./lunr-languages/lunr.stemmer.support.min.js")(lunr);
@@ -745,7 +751,7 @@ async function runBuild(
     });
     if (file.path.href && file.extension !== ".h5p") {
       const fileOut = path.join(rootOut, file.path.href);
-      await cp(file.path.absolute, fileOut);
+      await copy(file.path.absolute, fileOut);
     } else if (file.path.href && file.extension === ".h5p") {
       const fileOut = path.join(rootOut, file.path.href);
       await unzipper.Open.file(file.path.absolute).then((zip) =>
@@ -788,12 +794,11 @@ async function runBuild(
         (file) => !["content", "h5p.json"].includes(file),
       );
       for (const libraryFolder of libraryFolders) {
-        await cp(
+        await copy(
           path.join(fileOut, libraryFolder),
           path.join(h5pLibraries, libraryFolder),
           {
-            recursive: true,
-            force: true,
+            // copy() replaces existing files, like force: true did.
           },
         );
         await rimraf(path.join(fileOut, libraryFolder));
@@ -802,7 +807,7 @@ async function runBuild(
       // The player reads the extracted directory at the original `.h5p` URL.
       // Keep the source archive inside it as well so an opt-in H5P export
       // button has a real file to download rather than pointing at a folder.
-      await cp(
+      await copy(
         file.path.absolute,
         path.join(fileOut, path.basename(file.path.href)),
       );
@@ -923,7 +928,7 @@ async function runBuild(
         `${chalk.blue(`[${prefix}]`)} Copying emojis: [${i++}/${emojis.size}]`,
       );
       try {
-        await cp(
+        await copy(
           path.join(emojiPath, `${emoji}.svg`),
           path.join(emojiOut, `${emoji}.svg`),
         );
@@ -942,8 +947,7 @@ async function runBuild(
     const assetPath = path.join(assetsPath, asset);
     const assetOut = path.join(assetsOut, asset);
     if (!asset.startsWith("directive-") && asset !== "emoji") {
-      await cp(assetPath, assetOut, {
-        recursive: true,
+      await copy(assetPath, assetOut, {
         filter: (src) => {
           if (src.includes("lunr-languages")) {
             return (
