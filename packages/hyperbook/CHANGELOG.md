@@ -1,5 +1,15 @@
 # hyperbook
 
+## 0.116.0
+
+### Minor Changes
+
+- [#1219](https://github.com/openpatch/hyperbook/pull/1219) [`436ee13`](https://github.com/openpatch/hyperbook/commit/436ee131e2784f83be3cafd7e3c7d7f9274bf6e7) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Books connect to the new Hyperbook Cloud. A book the platform hosts gets `"cloud": { "sameOrigin": true }` and logs students in with a cookie on its own address; a book hosted elsewhere sets `cloud.url` to its address on the platform (for example `https://physics.example.page`) and uses a token. The login form has a "shared device" option, a scanned QR code logs a student in directly, and a teacher's read-only view of a student's work is recognized from the platform's session instead of a token's contents. A refused save (403) no longer logs the student out. The API of the previous, retired cloud server is no longer supported.
+
+### Patch Changes
+
+- [#1219](https://github.com/openpatch/hyperbook/pull/1219) [`70869ef`](https://github.com/openpatch/hyperbook/commit/70869efdd0631e6efe294d6905f4f04ca9f2108e) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - `hyperbook build` runs under Node's permission model with access to just the book and the CLI: files are copied without `fs.cp`, which read every parent directory of the output up to `/`. The `language` setting only loads a search stemmer when it is a bare language code such as `de`.
+
 ## 0.115.2
 
 ### Patch Changes

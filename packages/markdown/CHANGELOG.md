@@ -1,5 +1,15 @@
 # @hyperbook/markdown
 
+## 0.89.0
+
+### Minor Changes
+
+- [#1219](https://github.com/openpatch/hyperbook/pull/1219) [`436ee13`](https://github.com/openpatch/hyperbook/commit/436ee131e2784f83be3cafd7e3c7d7f9274bf6e7) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Books connect to the new Hyperbook Cloud. A book the platform hosts gets `"cloud": { "sameOrigin": true }` and logs students in with a cookie on its own address; a book hosted elsewhere sets `cloud.url` to its address on the platform (for example `https://physics.example.page`) and uses a token. The login form has a "shared device" option, a scanned QR code logs a student in directly, and a teacher's read-only view of a student's work is recognized from the platform's session instead of a token's contents. A refused save (403) no longer logs the student out. The API of the previous, retired cloud server is no longer supported.
+
+### Patch Changes
+
+- [#1219](https://github.com/openpatch/hyperbook/pull/1219) [`f15b415`](https://github.com/openpatch/hyperbook/commit/f15b415a6103552c27f3e08ddcc68d85740b8187) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Update learningmap (0.7.1) and struktolab (0.6.2). Struktolab keeps the indented lines under a line it does not recognise instead of dropping them, and translates its editor's menus.
+
 ## 0.88.3
 
 ### Patch Changes
