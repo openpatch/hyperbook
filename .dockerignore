@@ -1,5 +1,6 @@
 # The build context is the repository root (see platforms/cloud/Dockerfile).
-# Keep it to the manifests, the lockfile and the cloud platform's own source.
+# Keep it to the manifests, the lockfile, the packages the Hyperbook CLI is
+# built from and the cloud platform's own source.
 
 **/node_modules
 **/dist
@@ -14,8 +15,11 @@
 .vscode
 
 website/
-packages/
-platforms/vscode/
+# packages/ is needed: the image builds the Hyperbook CLI that builds books.
+**/.cache
+# The CLI's build copies the JSON schemas from here; nothing else is needed.
+platforms/vscode/*
+!platforms/vscode/schemas
 
 **/*.sqlite
 **/*.sqlite-journal

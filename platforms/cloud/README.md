@@ -1,324 +1,344 @@
 # Hyperbook Cloud
 
-A web-based student management platform for [Hyperbook](https://github.com/openpatch/hyperbook). It allows teachers and administrators to manage hyperbooks, groups, and student accounts with per-user data persistence.
+A self-hosted platform for [Hyperbook](https://github.com/openpatch/hyperbook):
+teachers publish their books and manage anonymous student accounts in the
+browser.
+See [the plan](../../docs/cloud-platform.md) for where this is going.
 
-## Features
+> **Status:** milestones M0 (accounts, books, groups, students, printable
+> login cards), M1 (upload, build and host books) and M2 (student login,
+> saving students' work, private books), M3 (editing books in the
+> browser) and M4 (sign-up, storage quotas, legal pages, backups) are done.
 
-- **Hyperbook Management** — Create, update, and delete hyperbooks
-- **Group & Student Management** — Organize students into groups with bulk import (CSV), random generation, and printable credential cards
-- **User & Permission System** — Create teacher accounts with fine-grained, per-hyperbook permissions
-- **Student Data Store** — Per-user, per-hyperbook JSON data persistence (used by hyperbook frontends)
-- **Impersonation** — Admins and teachers can view a hyperbook as a specific student (read-only)
-- **Password Reset** — Email-based password reset for teachers and admins via SMTP
+## What it does
 
-## Quick Start
+- **Admins** add teachers (who get an invitation by email), decide who may
+  sign up on their own, set what each teacher may do (entitlements: private
+  books, number of books, storage), configure the instance (name, imprint
+  and privacy policy, reserved book addresses) and read the activity log.
+- **Teachers** create books, each with an address `<slug>.<BOOKS_DOMAIN>`,
+  share them with colleagues as owners or editors, and add groups (classes).
+  They write their book in the browser (a file tree, a Markdown editor,
+  uploads, a form for the book's settings, and the elements' own editors for
+  learning maps, drawings, Java memory diagrams, bitflow assessments and
+  structograms) and see every save in a preview
+  beside the editor; students see the changes once a teacher publishes them.
+  A book can also be uploaded as a zip, which is built and published right
+  away. Every save and upload is a git commit; the source and the built
+  website can be downloaded.
+- **Students** get anonymous accounts per book (`student01`, `student02`, …)
+  with a short password and a QR code. Teachers print cut-out cards for the
+  students and a class list for themselves, where they write the real names.
+  The platform never stores names. Students log in to their book (password
+  or QR code), and what they do in its interactive elements is saved, so
+  they can continue on any device.
+- **Private books** can only be read by their students; others are asked to
+  log in. Teachers open a student's work read-only with "View as student".
 
-### With Docker (recommended)
+Student passwords and QR keys are stored twice: hashed, to check logins, and
+encrypted with `CREDENTIALS_KEY`, so lists can be printed again. Every view of
+them is recorded in the activity log.
+
+## How it is served
+
+One process answers these hosts, told apart by the `Host` header:
+
+| Host | What |
+|---|---|
+| `ADMIN_ORIGIN` (e.g. `cloud.example.org`) | Admin UI and API |
+| `<slug>.<BOOKS_DOMAIN>` (e.g. `physics.example.page`) | Books |
+| `<slug>--preview.<BOOKS_DOMAIN>` | A book's newest build, for its teachers |
+| A book's custom domain (e.g. `physik.schule.de`) | The book, once the domain is active; see [Custom domains](#custom-domains) |
+
+Books run scripts their teachers wrote, so they never share an origin
+with the admin UI. Best is a separate registered domain for books
+(`example.page` next to `example.org`); a subdomain like `books.example.org`
+also works, and so do books directly below the admin host (admin on
+`example.org`, books on `<slug>.example.org`), because the admin session
+cookie is a `__Host-` cookie that other hosts cannot set or overwrite.
+
+A reverse proxy in front terminates TLS and must pass the `Host` header
+through unchanged (Caddy does by default; with nginx use
+`proxy_set_header Host $host`). Books need a wildcard DNS record
+(`*.example.page`). Two Caddy configurations are in [`deploy/`](deploy/):
+
+- [`Caddyfile.on-demand`](deploy/Caddyfile.on-demand): a certificate per book,
+  issued on its first visit. Works with every DNS provider. Caddy asks
+  `/api/tls-check?domain=…` first, which only allows the admin host,
+  existing books and active custom domains.
+- [`Caddyfile.wildcard`](deploy/Caddyfile.wildcard): one wildcard certificate
+  through the DNS-01 challenge. For large instances; needs a Caddy build
+  with your DNS provider's module. Custom domains still get their
+  certificates on demand.
+
+### Custom domains
+
+Teachers whose entitlements allow it (Settings → Default entitlements, or
+per user: "Custom domains") give a hosted book a domain of their own on the
+book's page, and create one DNS record, which the page shows:
+
+| Type | Name | Value |
+|---|---|---|
+| CNAME | `physik.schule.de` | `<slug>.<BOOKS_DOMAIN>` |
+
+The CNAME names this one book, and only whoever controls the domain's DNS
+can create it, so it is the proof of ownership as well (a CNAME to a slug
+the book had before a rename counts too). A/AAAA records do not count:
+every book shares the server's addresses. So a domain without a subdomain
+(`schule.de`), which cannot have a CNAME, is not supported. Once the record
+is found, the domain is active: the book is served there (Caddy gets a certificate on the first
+visit) and its address on `BOOKS_DOMAIN` redirects to it, so students keep
+one login and one set of saved state. Login links and QR codes printed from
+then on use the custom domain. A domain can be active for one book at a
+time, and the platform's own domains (and anything inside or above them)
+are refused.
+
+### Students on book hosts
+
+Everything students use lives under `/_hyperbook/` on the book's own host:
+the login page (also the target of the QR codes), and the API that logs in
+and saves (`/_hyperbook/api/…`). Hosted books use it same-origin with an
+HttpOnly cookie; the platform sets `"cloud": { "sameOrigin": true }` when it
+builds them. A book hosted elsewhere (marked so in its settings) sets
+`"cloud": { "url": "https://<slug>.<BOOKS_DOMAIN>", "id": "<slug>" }` and
+uses a Bearer token; CORS admits only the origin of its external address.
+
+Changing requests must come from the book's own origin (or carry a Bearer
+token), because books on sibling subdomains count as the same site for
+cookies.
+
+### Preview
+
+Each save is built for the book's preview host, which only the book's
+owners and editors can open. The editor frames it and hands the teacher over
+with a one-time code; the preview host then keeps its own session cookie
+(`SameSite=None`, `Partitioned`, since it is a third party inside the
+editor). A browser that blocks even partitioned cookies shows the preview
+in a new tab instead. Wildcard DNS and certificates already cover these
+hosts, and `tls-check` knows them.
+
+### Builds
+
+An upload is unpacked (paths and sizes are checked first), committed to the
+book's git repository and built with the Hyperbook CLI from this repository,
+so books always build with the version the platform ships. A finished build
+replaces the published one in a single step; a failed build leaves the
+published book as it was.
+
+Builds are teacher-written content and run sandboxed: a child process under
+Node's permission model that may only read the CLI and the book and write the
+book's job directory, with no child processes or native addons, an empty
+environment (no secrets), a memory limit and a timeout. The permission model
+does not block network access; builds need none, so restrict the container's
+egress if you want that guaranteed. Favicons are not generated from a book's
+logo in the sandbox; a book can include its own `favicon.ico`.
+
+Limits are set in `.env`: `UPLOAD_MAX_MB`, `BOOK_MAX_MB`, `BUILD_CONCURRENCY`,
+`BUILD_TIMEOUT_SECONDS`, `BUILD_MEMORY_MB` (see `.env.example`).
+
+## Production
 
 ```bash
 cd platforms/cloud
-cp .env.example .env      # set JWT_SECRET and BASE_URL
+cp .env.example .env      # set ADMIN_ORIGIN, BOOKS_DOMAIN, CREDENTIALS_KEY,
+                          # ADMIN_EMAIL and ADMIN_PASSWORD
 docker compose up -d
 ```
 
-The admin interface is at `http://localhost:3001/`, with the credentials from
-`ADMIN_USERNAME` / `ADMIN_PASSWORD` on first run.
+The server refuses to start with missing or unsafe settings and says which.
+On the first start it creates the admin account from `ADMIN_EMAIL` and
+`ADMIN_PASSWORD`.
 
-Updating is:
+### Without Docker (pm2)
+
+The platform also runs as a plain Node process, e.g. with pm2 next to other
+apps. The workflow `.github/workflows/deploy-cloud.yml` builds it, the
+Hyperbook CLI and the element assets in GitHub Actions, copies them to the
+server with rsync, installs the runtime dependencies there (better-sqlite3
+is native, so it is built for the server's own CPU) and restarts pm2. The
+server needs Node 22 or later, `git`, `rsync` and pm2.
+
+Once, on the server (here `/home/openpatch/projects/hyperbook-cloud`):
+
+1. Create the folder and its `.env` (see `.env.example`), with
+   `DATA_DIR=/home/openpatch/projects/hyperbook-cloud/data` and
+   `chmod 600 .env`. Nothing outside `data/` and `.env` is kept between
+   deploys.
+2. Add the app to pm2's ecosystem file:
+
+   ```js
+   {
+     name: "hyperbook-cloud",
+     cwd: "hyperbook-cloud/platforms/cloud",
+     script: "dist/server/main.js",
+     node_args: "--env-file=../../.env",
+     env: { NODE_ENV: "production", PORT: 3001 },
+     // Running builds are stopped and the database closed on shutdown.
+     kill_timeout: 30000,
+     time: true,
+   },
+   ```
+
+3. In the repository's GitHub settings, create the environment `cloud` with
+   the variables `DEPLOY_PATH` (the folder above) and `DEPLOY_HOST`
+   (`hyperbook.cloud`, for the health check), and the secrets
+   `DEPLOY_SSH_HOST`, `DEPLOY_SSH_USER` and `DEPLOY_SSH_KEY` (a private key
+   without passphrase whose public half is in the user's
+   `~/.ssh/authorized_keys`).
+4. Run the workflow once (it fails at the restart, since pm2 does not know
+   the app yet), then `pm2 start ecosystem.config.js --only hyperbook-cloud`
+   and `pm2 save`. Later deploys restart it themselves.
+
+Backups work as with Docker:
+`node --env-file=.env platforms/cloud/dist/server/main.js backup <dir>`
+from the folder above.
+
+Without a container, the build sandbox (Node's permission model) is the
+only thing between a book's build and the other files of the user the
+platform runs as. Running it as a user of its own keeps those apart.
+
+### Email
+
+Set `SMTP_*` in `.env`. With email, the platform sends invitations,
+confirmation links and password resets, and sign-up can be opened; without
+it, admins add teachers with a generated password that is shown once.
+
+### Who may make an account
+
+Under Settings → Sign-up, an admin picks one of:
+
+| Mode | Who |
+|---|---|
+| Closed (default) | Only admins add teachers; they get an invitation link to choose a password. |
+| Open | Anyone, after confirming their email address. |
+| Listed domains | Anyone with an address at one of the listed domains (and their subdomains). |
+| With approval | Anyone, after confirming the address and an admin's approval (admins get an email). |
+
+Every mode but "Closed" needs email and a privacy policy, which people
+accept when they sign up.
+
+### Limits
+
+Entitlements (Settings → Default entitlements, or per user) limit how many
+books a teacher owns and how much they store. Storage counts the files of
+the books they own (each owner counts a shared book); built websites and
+history do not count. A save that would go over the limit is refused;
+deleting files always works. Admins are never limited.
+
+### Book addresses
+
+Teachers choose their books' addresses. On a public instance, turn on
+"Teachers' addresses get an ending of their own" (Settings → General): each
+teacher's book then gets a short ending of its own (`physik-edac`), which
+stays when they rename it, so nobody can take a short, general address like
+`physik` for themselves. Admins choose addresses freely.
+
+Owners ask for an address without the ending on the book's page and say
+what the book is. Admins find the requests under Addresses (and by email),
+look at the book, and grant or decline, with a note to the teacher. A
+granted address can be taken back on the book's page: the book returns to
+its address with ending, and the freed address redirects there until it is
+given to another book.
+
+### Imprint and privacy policy
+
+Under Settings, each is either a link to an existing page or Markdown that
+the platform shows at `/imprint` and `/privacy`. Both are linked from every
+page of the platform and from the students' login page on book hosts.
+
+### Updates
+
+After an update of the image, published books that were built with another
+Hyperbook version are rebuilt in the background, after teachers' own builds
+(`REBUILD_ON_UPGRADE=false` turns that off). A rebuild never publishes
+unpublished edits: it builds the published version again, and it is
+discarded if a teacher publishes in the meantime.
+
+Before a database migration the server writes a copy of the database next to
+it, named `database.before-migration-<time>.sqlite`.
+
+### Backups
+
+Everything lives on the `/data` volume: `database.sqlite` (accounts, books,
+students and their saved work) and `books/`, one git repository and the
+latest builds per book. A consistent copy while the server runs:
 
 ```bash
-docker compose pull && docker compose up -d
+docker compose exec cloud node dist/server/main.js backup /data/backups/$(date +%F)
 ```
 
-Images are published per release as `ghcr.io/openpatch/hyperbook-cloud:<version>`.
-Pin one in `docker-compose.yml` so upgrading is something you choose rather
-than something that happens.
+It holds the database and every book's repository (builds are left out),
+and refuses a folder that is not empty. Copy it off the server, e.g. with
+`restic` or `rsync`, and keep these with it:
 
-### From source
+- `CREDENTIALS_KEY` (and your `.env`). Without it, students can still log in,
+  but their passwords and QR codes cannot be shown or printed again; a
+  teacher would have to reset them.
 
-Requires Node.js 20 or newer, because `better-sqlite3` is a native module built
-against a specific Node ABI.
+To restore: stop the platform, put `database.sqlite` and `books/` of a
+backup into an empty `/data` volume, start it with the same `.env`. Published
+books are rebuilt on start (their builds were not in the backup); until
+then they show "not published yet".
+
+### Launch checklist
+
+1. DNS: the admin host and a wildcard for `*.<BOOKS_DOMAIN>`, ideally a
+   registrable domain of its own.
+2. TLS: one of the Caddy examples in [`deploy/`](deploy/).
+3. `.env`: `ADMIN_ORIGIN`, `BOOKS_DOMAIN`, a new `CREDENTIALS_KEY`
+   (`openssl rand -base64 32`), `ADMIN_EMAIL`/`ADMIN_PASSWORD`, `SMTP_*`.
+4. Settings: name, imprint and privacy policy, default entitlements
+   (books, storage), sign-up mode.
+5. A scheduled backup (above) that is copied off the server, and one test
+   restore.
+6. Log in as a teacher, make a book, publish it, print student cards, log
+   in as a student on a phone.
+
+## Development
 
 ```bash
 pnpm install
+pnpm --filter "hyperbook..." build   # the CLI that builds books, with its element runtimes
 pnpm --filter @hyperbook/cloud dev
 ```
 
-The server starts at `http://localhost:3001/` with default credentials
-`admin` / `admin123`.
+- Admin UI: http://localhost:5173 (Vite; proxies `/api` to the server)
+- Books: http://`<slug>`.books.localhost:3001 — browsers resolve every
+  `*.localhost` name to your own machine, so no DNS setup is needed.
+- Data goes to `./data`. Set `ADMIN_EMAIL` and `ADMIN_PASSWORD` on the first
+  run to get an admin account.
+- Ports taken? `PORT=3101 WEB_PORT=5273 pnpm --filter @hyperbook/cloud dev`
 
-## Configuration
-
-Copy `.env.example` to `.env` and adjust the values:
-
-```bash
-cp .env.example .env
-```
-
-| Variable | Description | Default |
-|---|---|---|
-| `JWT_SECRET` | Signs every session token. **Required in production**; the server refuses to start with the placeholder or with fewer than 32 characters. | — |
-| `BASE_URL` | Public URL. **Required in production.** Used for password reset links and CORS. | — |
-| `PORT` | Server port | `3001` |
-| `NODE_ENV` | `development` or `production` | `development` |
-| `JWT_EXPIRES_IN` | JWT token lifetime | `24h` |
-| `ADMIN_USERNAME` | Initial admin username (first run only) | `admin` |
-| `ADMIN_PASSWORD` | Initial admin password (first run only) | `admin123` |
-| `DATABASE_PATH` | SQLite file. Ignored under Compose, which uses a volume. | `./database.sqlite` |
-| `SNAPSHOT_THRESHOLD` | Events before the server compacts them into a snapshot | `100` |
-| `SMTP_HOST` | SMTP server hostname | — |
-| `SMTP_PORT` | SMTP server port | `587` |
-| `SMTP_USER` | SMTP username | — |
-| `SMTP_PASS` | SMTP password | — |
-| `SMTP_FROM` | Sender email address | `noreply@example.com` |
-
-Generate a secret with:
+Checks:
 
 ```bash
-node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+pnpm --filter @hyperbook/cloud test        # unit and API tests
+pnpm --filter @hyperbook/cloud typecheck
+pnpm --filter @hyperbook/cloud build
+pnpm --filter @hyperbook/cloud test:e2e    # browser tests against the build;
+                                           # uses /usr/bin/chromium or CHROMIUM_PATH
 ```
 
-Leave every `SMTP_*` value empty to run without email. Setting only some of
-them is rejected in production, because a half configuration silently sends
-nothing.
+After changing `src/server/db/schema.ts`, generate a migration with
+`pnpm --filter @hyperbook/cloud db:generate` and commit it.
 
-## Users & Permissions
+### Layout
 
-There are three roles:
-
-| Role | Description |
-|---|---|
-| **admin** | Full access to everything. Can manage teachers and their permissions. |
-| **teacher** | Scoped access based on assigned permissions. Can log in to the admin interface. |
-| **student** | Can only authenticate via the API and read/write their own data store. |
-
-### Permission Types
-
-Permissions are string-based and assigned per teacher by an admin.
-
-| Permission | Scope | Description |
-|---|---|---|
-| `hyperbooks:create` | Global | Create new hyperbooks |
-| `hyperbook:<id>:read` | Per hyperbook | View hyperbook, its groups, and students |
-| `hyperbook:<id>:update` | Per hyperbook | Update hyperbook details |
-| `hyperbook:<id>:delete` | Per hyperbook | Delete hyperbook |
-| `hyperbook:<id>:groups:create` | Per hyperbook | Create groups |
-| `hyperbook:<id>:groups:update` | Per hyperbook | Update groups |
-| `hyperbook:<id>:groups:delete` | Per hyperbook | Delete groups |
-| `hyperbook:<id>:students:create` | Per hyperbook | Create students |
-| `hyperbook:<id>:students:update` | Per hyperbook | Update student passwords |
-| `hyperbook:<id>:students:delete` | Per hyperbook | Delete students |
-
-Permissions are managed at **Admin → Users → (select user) → Permissions** using a checkbox matrix.
-
-## Production Deployment
-
-In production the server refuses to start until `JWT_SECRET` and `BASE_URL` are
-set, and it will tell you exactly what is missing. This is deliberate: with the
-placeholder secret, anyone who has read this repository can mint a valid token
-for any account, and nothing in the logs would say so.
-
-### With Docker Compose
-
-`docker-compose.yml` in this directory is the whole deployment. Edit `.env`,
-then:
-
-```bash
-docker compose up -d
-docker compose logs -f
+```
+src/server/          Hono server
+  app.ts             Host dispatch: admin host vs. book hosts
+  admin/             admin API (routes/) and the built app
+  books/             book hosts: serves published builds
+  hosting/           git repositories, zip import, build queue, sandbox
+  db/                Drizzle schema, migrations runner, first-admin seed
+  domain/            books, students, entitlements, instance settings, slugs
+  auth/ crypto/      passwords, sessions, sealing, tokens
+src/shared/          zod schemas used by both server and web app
+src/web/             React app (React Router, TanStack Query, shadcn/ui)
+  app.css            shadcn variables mapped onto Hyperbook's tokens
+drizzle/             generated SQL migrations
+tests/               API tests (Vitest), tests/e2e browser tests
 ```
 
-It binds to `127.0.0.1:3001` by default, expecting a reverse proxy in front for
-TLS — see [Reverse Proxy](#reverse-proxy) below. The database lives on a named
-volume, so `docker compose down` does not take it with it.
-
-> If you replace the named volume with a bind mount (`./data:/data`), make the
-> host directory writable by UID 1000, which the container runs as. Otherwise
-> the first upgrade refuses to start: it cannot write its backup, and it will
-> not migrate without one.
-
-### With PM2
-
-If you would rather not use containers:
-
-```bash
-git clone https://github.com/openpatch/hyperbook.git
-cd hyperbook
-pnpm install --filter @hyperbook/cloud --prod
-cd platforms/cloud
-cp .env.example .env      # edit it
-npm install -g pm2
-pm2 start ecosystem.config.js
-pm2 startup && pm2 save
-```
-
-`ecosystem.config.js` is committed alongside this README. It logs to
-`./logs/` and keeps the database wherever `DATABASE_PATH` points.
-
-> Run **one** instance only. SQLite does not support concurrent writes from
-> multiple processes, so `instances: 1` is not a starting point to tune.
-
-Update with:
-
-```bash
-git pull
-pnpm install --filter @hyperbook/cloud --prod
-pm2 restart hyperbook-cloud
-```
-
-### Reverse Proxy
-
-```nginx
-server {
-    listen 443 ssl http2;
-    server_name cloud.example.com;
-
-    ssl_certificate     /etc/letsencrypt/live/cloud.example.com/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/cloud.example.com/privkey.pem;
-
-    location / {
-        proxy_pass http://127.0.0.1:3001;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-}
-
-server {
-    listen 80;
-    server_name cloud.example.com;
-    return 301 https://$host$request_uri;
-}
-```
-
-`/api/health` returns `200` once the server is up, for uptime checks and
-container orchestration.
-
-## Schema Migrations
-
-The schema is versioned with SQLite's `user_version` and migrated on startup.
-
-- Each migration runs at most once, in order, and the version is only recorded
-  after it succeeds — so an interrupted upgrade re-runs the step rather than
-  skipping it.
-- **The database is copied aside before any migration that has work to do**, via
-  `VACUUM INTO`, next to the database file as `<name>.v<version>-<timestamp>.backup`.
-  The five most recent are kept. If the copy cannot be written, the migration
-  does not run.
-- Starting a build **older** than the one that last wrote the database is
-  refused, rather than left to read columns it does not understand.
-
-Adding a schema change means appending an entry to `MIGRATIONS` in
-`lib/migrations.js`. Never edit or renumber an existing one: deployments have
-already run it and will not run it again.
-
-## Backups
-
-All state is one SQLite file. Upgrades back it up on their own (see above), but
-that is not a substitute for a schedule.
-
-Use `VACUUM INTO` rather than `cp`: it takes a consistent copy of a database
-that is being written to, which a file copy does not.
-
-```bash
-# Docker
-docker compose exec -T cloud node -e "\
-  new (require('better-sqlite3'))('/data/database.sqlite', { readonly: true })\
-    .exec(\"VACUUM INTO '/data/backup-$(date +%F).sqlite'\")"
-
-# From source
-node -e "\
-  new (require('better-sqlite3'))(process.env.DATABASE_PATH, { readonly: true })\
-    .exec(\"VACUUM INTO '/backups/hyperbook-cloud-$(date +%F).sqlite'\")"
-```
-
-Restoring is stopping the server, putting the file back, and starting it again.
-
-## API Reference
-
-All API routes require a JWT Bearer token obtained via `POST /api/auth/login`.
-
-### Authentication
-
-| Method | Endpoint | Description |
-|---|---|---|
-| `POST` | `/api/auth/login` | Login with `{ username, password }` → returns `{ token, user }` |
-| `POST` | `/api/auth/verify` | Verify token validity |
-
-### Admin — Hyperbooks
-
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/api/hyperbooks` | List hyperbooks (scoped by permissions for teachers) |
-| `POST` | `/api/hyperbooks` | Create hyperbook `{ slug, name, url?, description? }` |
-| `PUT` | `/api/hyperbooks/:id` | Update hyperbook |
-| `DELETE` | `/api/hyperbooks/:id` | Delete hyperbook |
-
-### Admin — Groups
-
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/api/hyperbooks/:hbId/groups` | List groups for a hyperbook |
-| `POST` | `/api/hyperbooks/:hbId/groups` | Create group `{ name, description? }` |
-| `PUT` | `/api/groups/:id` | Update group |
-| `DELETE` | `/api/groups/:id` | Delete group |
-
-### Admin — Students
-
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/api/students?groupId=X` | List students |
-| `POST` | `/api/students` | Create student `{ username, password, groupId }` |
-| `POST` | `/api/students/bulk` | Bulk create `{ students: [...], groupId }` |
-| `POST` | `/api/students/bulk-csv` | Bulk create from CSV `{ csv, groupId }` |
-| `PUT` | `/api/students/:id/password` | Reset student password |
-| `DELETE` | `/api/students/:id` | Delete student |
-| `GET` | `/api/students/:id/store` | Download student's stored data |
-| `POST` | `/api/impersonate/:id` | Generate impersonation token |
-
-### Admin — Users & Permissions (admin only)
-
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/api/users` | List teachers |
-| `POST` | `/api/users` | Create teacher `{ username, password, email? }` |
-| `PUT` | `/api/users/:id` | Update teacher `{ username, email? }` |
-| `PUT` | `/api/users/:id/password` | Reset teacher password |
-| `DELETE` | `/api/users/:id` | Delete teacher |
-| `GET` | `/api/users/:id/permissions` | List teacher permissions |
-| `POST` | `/api/users/:id/permissions` | Grant permission `{ permission }` |
-| `DELETE` | `/api/users/:id/permissions` | Revoke permission `{ permission }` |
-
-### Student Data Store
-
-Hyperbooks sync through these. See
-[the Cloud documentation](https://openpatch.org/hyperbook/en/book/configuration/cloud)
-for how the client uses them.
-
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/api/store/:hyperbookId` | Reconstructed state (latest snapshot with events replayed on top) |
-| `POST` | `/api/store/:hyperbookId/events` | Append a batch of events. Takes `afterEventId`; answers `409` if the client is behind |
-| `POST` | `/api/store/:hyperbookId/snapshot` | Replace all state. Discards that user's events and previous snapshots |
-
-## Database
-
-Hyperbook Cloud uses SQLite via [better-sqlite3](https://github.com/WiseLibs/better-sqlite3). The schema is created and migrated on startup — see [Schema Migrations](#schema-migrations).
-
-### Tables
-
-- `hyperbooks` — Hyperbook definitions (slug, name, url, description)
-- `groups` — Student groups within hyperbooks
-- `users` — All accounts (admin, teacher, student)
-- `permissions` — Per-user permission grants
-- `events` — Per-user, per-hyperbook change log, one row per store write
-- `snapshots` — Compacted state, written every `SNAPSHOT_THRESHOLD` events
-
-A `stores` table held one JSON blob per user before event sourcing. It is
-folded into `snapshots` on upgrade and then dropped.
-
-### Password Storage
-
-- **Admin & Teacher** passwords are hashed with bcrypt
-- **Student** passwords are stored in plain text (for printable credential cards)
+The web app calls the API through Hono's typed client, so a changed route
+shows up as a type error in the app.

@@ -4,6 +4,13 @@ window.hyperbook = window.hyperbook || {};
 /**
  * Cloud sync integration for hyperbook store data.
  * Handles authentication, event-based sync, and snapshot sync.
+ *
+ * Two modes, set by the `cloud` entry of hyperbook.json:
+ *  - `{ sameOrigin: true }`: the book is hosted by Hyperbook Cloud, which sets
+ *    this when it builds the book. The API is on the book's own host and the
+ *    session is an HttpOnly cookie the script never sees.
+ *  - `{ url, id }`: the book is hosted elsewhere and talks to its address on
+ *    Hyperbook Cloud cross-origin, with a Bearer token in localStorage.
  * @type {HyperbookCloud}
  * @memberof hyperbook
  * @see hyperbook.store
@@ -13,6 +20,11 @@ hyperbook.cloud = (function () {
   // ===== Cloud Integration =====
   const AUTH_TOKEN_KEY = "hyperbook_auth_token";
   const AUTH_USER_KEY = "hyperbook_auth_user";
+  const SAME_ORIGIN = !!(HYPERBOOK_CLOUD && HYPERBOOK_CLOUD.sameOrigin);
+  const API_BASE = !HYPERBOOK_CLOUD
+    ? ""
+    : (SAME_ORIGIN ? "" : String(HYPERBOOK_CLOUD.url || "").replace(/\/+$/, "")) +
+      "/_hyperbook/api";
   const LAST_EVENT_ID_PREFIX = "hyperbook_last_event_id";
   const EVENT_BATCH_MAX_SIZE = 512 * 1024; // 512KB
   const OFFLINE_QUEUE_MAX_SIZE = 100; // cap offline queue to avoid unbounded memory growth
@@ -36,8 +48,17 @@ hyperbook.cloud = (function () {
    */
   function lastEventIdKey() {
     return HYPERBOOK_CLOUD
-      ? `${LAST_EVENT_ID_PREFIX}:${HYPERBOOK_CLOUD.id}`
+      ? `${LAST_EVENT_ID_PREFIX}:${bookKey()}`
       : LAST_EVENT_ID_PREFIX;
+  }
+
+  /**
+   * Names this book's entries in localStorage. A hosted book is alone on its
+   * origin; books hosted elsewhere may share one (several books on one
+   * GitHub Pages site), so theirs carry the id.
+   */
+  function bookKey() {
+    return SAME_ORIGIN ? "cloud" : HYPERBOOK_CLOUD.id;
   }
 
   function readLastEventId() {
@@ -153,7 +174,7 @@ hyperbook.cloud = (function () {
 
     async performSave(reason = "manual") {
       if (!this.isDirty || this.saveInProgress) return;
-      if (!HYPERBOOK_CLOUD || !getAuthToken()) return;
+      if (!HYPERBOOK_CLOUD || !isLoggedIn()) return;
       if (isReadOnlyMode()) {
         this.updateUI("readonly");
         return;
@@ -315,7 +336,7 @@ hyperbook.cloud = (function () {
         : this.lastEventId;
       try {
         const data = await apiRequest(
-          `/api/store/${HYPERBOOK_CLOUD.id}/events`,
+          "/store/events",
           {
             method: "POST",
             body: JSON.stringify({
@@ -344,7 +365,7 @@ hyperbook.cloud = (function () {
       const exportData = JSON.parse(await storeExport.text());
 
       const data = await apiRequest(
-        `/api/store/${HYPERBOOK_CLOUD.id}/snapshot`,
+        "/store/snapshot",
         {
           method: "POST",
           body: JSON.stringify({
@@ -424,7 +445,7 @@ hyperbook.cloud = (function () {
     flushOnUnload() {
       if (this.unloadFlushed) return;
       if (!this.isDirty || !this.isOnline) return;
-      if (!HYPERBOOK_CLOUD || !getAuthToken() || isReadOnlyMode()) return;
+      if (!HYPERBOOK_CLOUD || !isLoggedIn() || isReadOnlyMode()) return;
 
       const body = JSON.stringify({
         events: this.pendingEvents,
@@ -441,13 +462,11 @@ hyperbook.cloud = (function () {
 
       this.unloadFlushed = true;
       try {
-        fetch(`${HYPERBOOK_CLOUD.url}/api/store/${HYPERBOOK_CLOUD.id}/events`, {
+        fetch(`${API_BASE}/store/events`, {
           method: "POST",
           keepalive: true,
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${getAuthToken()}`,
-          },
+          headers: requestHeaders(),
+          credentials: SAME_ORIGIN ? "same-origin" : "omit",
           body: body,
         }).catch(() => {});
       } catch (error) {
@@ -582,39 +601,21 @@ hyperbook.cloud = (function () {
     }
   }
 
-  // Check URL hash for impersonation token (cross-domain handoff)
-  let isImpersonationLoad = false;
-  (function checkImpersonationHash() {
-    if (!HYPERBOOK_CLOUD) return;
-    const hash = window.location.hash;
-    const match = hash.match(/^#impersonate=(.+)$/);
-    if (match) {
-      const token = match[1];
-      try {
-        // Validate token format before decoding
-        if (token.split(".").length !== 3) {
-          throw new Error("Invalid token format");
-        }
-        const payload = JSON.parse(atob(token.split(".")[1]));
-        localStorage.setItem(AUTH_TOKEN_KEY, token);
-        localStorage.setItem(
-          AUTH_USER_KEY,
-          JSON.stringify({
-            id: payload.id,
-            username: payload.username,
-          }),
-        );
-        isImpersonationLoad = true;
-        // Clean the hash from URL without triggering navigation
-        history.replaceState(
-          null,
-          "",
-          window.location.pathname + window.location.search,
-        );
-      } catch (e) {
-        console.error("Invalid impersonation token in URL:", e);
-      }
-    }
+  /**
+   * Hand-offs in the address's fragment, for books hosted elsewhere (a hosted
+   * book gets these on the platform's own pages instead):
+   *  - `#hyperbook-impersonate=<token>`: a teacher opened a read-only view of
+   *    a student's work from Hyperbook Cloud.
+   *  - `#hyperbook-key=<key>`: a student scanned the QR code on a login card.
+   * Read once and removed from the address right away.
+   */
+  let pendingHandoff = null;
+  (function readHandoff() {
+    if (!HYPERBOOK_CLOUD || SAME_ORIGIN) return;
+    const match = window.location.hash.match(/^#hyperbook-(impersonate|key)=([A-Za-z0-9_-]+)$/);
+    if (!match) return;
+    pendingHandoff = { kind: match[1], value: match[2] };
+    history.replaceState(null, "", window.location.pathname + window.location.search);
   })();
 
   /**
@@ -673,59 +674,53 @@ hyperbook.cloud = (function () {
     }
   }
 
-  /**
-   * Get current auth token
-   */
+  /** The Bearer token of a book hosted elsewhere; null for hosted books. */
   function getAuthToken() {
-    return localStorage.getItem(AUTH_TOKEN_KEY);
+    if (SAME_ORIGIN) return null;
+    return localStorage.getItem(`${AUTH_TOKEN_KEY}:${bookKey()}`);
   }
 
   /**
-   * Set auth token
+   * Remembers who is logged in, for the interface: `{ username, readonly }`.
+   * The server decides; this copy only spares a request before the first
+   * paint and is refreshed from /session on every page load.
    */
-  function setAuthToken(token, user) {
-    localStorage.setItem(AUTH_TOKEN_KEY, token);
-    if (user) {
-      localStorage.setItem(AUTH_USER_KEY, JSON.stringify(user));
-    }
+  function setAuthUser(user, token) {
+    if (token) localStorage.setItem(`${AUTH_TOKEN_KEY}:${bookKey()}`, token);
+    localStorage.setItem(`${AUTH_USER_KEY}:${bookKey()}`, JSON.stringify(user));
   }
 
-  /**
-   * Clear auth token
-   */
   function clearAuthToken() {
-    localStorage.removeItem(AUTH_TOKEN_KEY);
-    localStorage.removeItem(AUTH_USER_KEY);
+    localStorage.removeItem(`${AUTH_TOKEN_KEY}:${bookKey()}`);
+    localStorage.removeItem(`${AUTH_USER_KEY}:${bookKey()}`);
     clearLastEventIds();
   }
 
-  /**
-   * Get current user
-   */
   function getAuthUser() {
-    const userJson = localStorage.getItem(AUTH_USER_KEY);
-    return userJson ? JSON.parse(userJson) : null;
+    if (!HYPERBOOK_CLOUD) return null;
+    try {
+      return JSON.parse(localStorage.getItem(`${AUTH_USER_KEY}:${bookKey()}`)) || null;
+    } catch {
+      return null;
+    }
   }
 
-  /**
-   * Check if current session is read-only (impersonation mode)
-   */
-  function isReadOnlyMode() {
-    const token = getAuthToken();
-    if (!token) return false;
+  function isLoggedIn() {
+    if (!HYPERBOOK_CLOUD) return false;
+    return SAME_ORIGIN ? getAuthUser() !== null : getAuthToken() !== null;
+  }
 
-    try {
-      // Validate token format before decoding
-      if (token.split(".").length !== 3) {
-        return false;
-      }
-      // Decode JWT without verification (just to check readonly flag)
-      const payload = JSON.parse(atob(token.split(".")[1]));
-      return payload.readonly === true;
-    } catch (error) {
-      console.error("Error checking read-only mode:", error);
-      return false;
-    }
+  /** A teacher looking at a student's work: nothing may be saved. */
+  function isReadOnlyMode() {
+    const user = getAuthUser();
+    return !!(user && user.readonly);
+  }
+
+  function requestHeaders(extra) {
+    const headers = { "Content-Type": "application/json", ...extra };
+    const token = getAuthToken();
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+    return headers;
   }
 
   /**
@@ -734,27 +729,21 @@ hyperbook.cloud = (function () {
   async function apiRequest(endpoint, options = {}) {
     if (!HYPERBOOK_CLOUD) return null;
 
-    const token = getAuthToken();
-    const headers = {
-      "Content-Type": "application/json",
-      ...options.headers,
-    };
-
-    if (token) {
-      headers["Authorization"] = `Bearer ${token}`;
-    }
-
     try {
-      const response = await fetch(`${HYPERBOOK_CLOUD.url}${endpoint}`, {
+      const response = await fetch(`${API_BASE}${endpoint}`, {
         ...options,
-        headers,
+        headers: requestHeaders(options.headers),
+        credentials: SAME_ORIGIN ? "same-origin" : "omit",
       });
 
-      if (response.status === 401 || response.status === 403) {
-        // Token expired or invalid
+      // Only 401 means the session is gone. A 403 is a refused action (such
+      // as saving in a read-only view) and must not log anyone out.
+      if (response.status === 401 && !options.allowUnauthorized) {
         clearAuthToken();
         showLogin();
-        throw new Error("Authentication required");
+        const err = new Error("Authentication required");
+        err.status = 401;
+        throw err;
       }
 
       if (response.status === 404) {
@@ -787,12 +776,14 @@ hyperbook.cloud = (function () {
     }
 
     try {
-      const data = await apiRequest("/api/auth/login", {
+      const sharedDevice = !!document.getElementById("user-shared-device")?.checked;
+      const data = await apiRequest("/login", {
         method: "POST",
-        body: JSON.stringify({ username, password }),
+        allowUnauthorized: true,
+        body: JSON.stringify({ username, password, sharedDevice, token: !SAME_ORIGIN }),
       });
 
-      setAuthToken(data.token, data.user);
+      setAuthUser({ username: data.user.username, readonly: false }, data.token);
 
       // Load store data after login
       await loadFromCloud();
@@ -810,20 +801,75 @@ hyperbook.cloud = (function () {
    * Logout from cloud
    */
   function hyperbookLogout() {
+    // Ends the session on the server too; for a hosted book that is the only
+    // way to remove the HttpOnly cookie.
+    if (HYPERBOOK_CLOUD) {
+      fetch(`${API_BASE}/logout`, {
+        method: "POST",
+        headers: requestHeaders(),
+        credentials: SAME_ORIGIN ? "same-origin" : "omit",
+        body: "{}",
+      }).catch(() => {});
+    }
     clearAuthToken();
     updateUserUI(null);
+  }
+
+  /**
+   * Asks the server who is logged in and remembers it. Returns false when
+   * nobody is (any more).
+   */
+  async function refreshSession() {
+    try {
+      const data = await apiRequest("/session", { allowUnauthorized: true });
+      if (data && data.user) {
+        setAuthUser({ username: data.user.username, readonly: !!data.readonly });
+        return true;
+      }
+    } catch (error) {
+      // Offline or the server is down: keep what we knew.
+      if (error.status !== 401) return isLoggedIn();
+    }
+    clearAuthToken();
+    return false;
+  }
+
+  /** Completes a hand-off read from the address (see readHandoff). */
+  async function completeHandoff() {
+    if (!pendingHandoff) return false;
+    const { kind, value } = pendingHandoff;
+    pendingHandoff = null;
+    if (kind === "impersonate") {
+      clearAuthToken();
+      localStorage.setItem(`${AUTH_TOKEN_KEY}:${bookKey()}`, value);
+      return refreshSession();
+    }
+    try {
+      const data = await apiRequest("/login/key", {
+        method: "POST",
+        allowUnauthorized: true,
+        body: JSON.stringify({ key: value, token: true }),
+      });
+      if (data && data.token) {
+        setAuthUser({ username: data.user.username, readonly: false }, data.token);
+        return true;
+      }
+    } catch (error) {
+      console.error("Login with the QR code failed:", error);
+    }
+    return false;
   }
 
   /**
    * Load store data from cloud
    */
   async function loadFromCloud() {
-    if (!HYPERBOOK_CLOUD || !getAuthToken()) return;
+    if (!HYPERBOOK_CLOUD || !isLoggedIn()) return;
 
     isLoadingFromCloud = true;
 
     try {
-      const data = await apiRequest(`/api/store/${HYPERBOOK_CLOUD.id}`);
+      const data = await apiRequest("/store");
 
       if (data && data.snapshot) {
         const storeData = data.snapshot.data || data.snapshot;
@@ -846,16 +892,15 @@ hyperbook.cloud = (function () {
             acceptMissingTables: true,
           });
         }
-
-        // Track the server's lastEventId
-        if (data.lastEventId !== undefined) {
-          writeLastEventId(data.lastEventId);
-          if (syncManager) {
-            syncManager.lastEventId = data.lastEventId;
-          }
-        }
-
         console.log("✓ Store loaded from cloud");
+      }
+
+      // Track the server's watermark, also when nothing was saved yet.
+      if (data && typeof data.lastEventId === "number") {
+        writeLastEventId(data.lastEventId);
+        if (syncManager) {
+          syncManager.lastEventId = data.lastEventId;
+        }
       }
     } catch (error) {
       if (error.message !== "No store data found") {
@@ -870,16 +915,38 @@ hyperbook.cloud = (function () {
    * Initialize cloud integration
    */
   async function init() {
+    if (!HYPERBOOK_CLOUD) return;
+    // Nothing may be recorded as a change before we know who is logged in.
+    isLoadingFromCloud = true;
+    try {
+      await start();
+    } finally {
+      isLoadingFromCloud = false;
+    }
+  }
+
+  async function start() {
+
+    // A QR code or a teacher's "view as student" brought us here: log in,
+    // load that state, and reload so the elements show it.
+    if (pendingHandoff) {
+      if (await completeHandoff()) {
+        await loadFromCloud();
+        window.location.reload();
+        return;
+      }
+    } else if (SAME_ORIGIN || getAuthToken()) {
+      // The cookie (hosted books) is invisible to scripts, so ask who is
+      // logged in; for a token this also notices one that expired.
+      await refreshSession();
+      updateUserUI(getAuthUser());
+      showImpersonationBanner();
+    }
+
     // Load from cloud if authenticated
-    if (HYPERBOOK_CLOUD && getAuthToken()) {
+    if (isLoggedIn()) {
       try {
         await loadFromCloud();
-
-        // Reload page after impersonation data is imported so components pick up the new state
-        if (isImpersonationLoad) {
-          window.location.reload();
-          return;
-        }
 
         // Show readonly indicator if in impersonation mode
         if (isReadOnlyMode()) {
@@ -890,7 +957,7 @@ hyperbook.cloud = (function () {
       }
     }
 
-    if (HYPERBOOK_CLOUD && getAuthToken() && !isReadOnlyMode()) {
+    if (isLoggedIn() && !isReadOnlyMode()) {
       syncManager = new SyncManager({
         debounceDelay: 2000,
         maxWaitTime: 10000,
@@ -1264,64 +1331,72 @@ hyperbook.cloud = (function () {
     }
 
     // Hide local export/import/reset when logged into cloud
-    if (HYPERBOOK_CLOUD && getAuthToken()) {
+    if (isLoggedIn()) {
       document.querySelectorAll(".export-icon, .import-icon, .reset-icon").forEach((el) => {
         const link = el.closest("a");
         if (link) link.style.display = "none";
       });
     }
 
-    // Show impersonation banner if in readonly mode
-    if (isReadOnlyMode()) {
-      const banner = document.createElement("div");
-      banner.id = "impersonation-banner";
-      // Built as nodes, not innerHTML: the username is interpolated here and
-      // is whatever the account was registered with.
-      const label = document.createElement("span");
-      label.appendChild(
-        document.createTextNode(
-          `${hyperbook.i18n.get("user-impersonating", {}, "Impersonating")}: `,
-        ),
-      );
-      const name = document.createElement("strong");
-      name.textContent = user ? user.username : "";
-      label.appendChild(name);
-      label.appendChild(
-        document.createTextNode(
-          ` — ${hyperbook.i18n.get("user-readonly", {}, "Read-Only Mode")}`,
-        ),
-      );
-
-      const exit = document.createElement("a");
-      exit.href = "#";
-      exit.id = "exit-impersonation";
-      exit.textContent = hyperbook.i18n.get(
-        "user-exit-impersonation",
-        {},
-        "Exit Impersonation",
-      );
-
-      banner.appendChild(label);
-      banner.appendChild(exit);
-      document.body.prepend(banner);
-
-      document
-        .getElementById("exit-impersonation")
-        .addEventListener("click", (e) => {
-          e.preventDefault();
-          hyperbookLogout();
-          window.close();
-          window.location.reload();
-        });
-    }
+    showImpersonationBanner();
   });
+
+  /**
+   * Says whose work a teacher is looking at. Called on load and again once
+   * the session check answers, since a hosted book only learns from the
+   * server that its session is read-only.
+   */
+  function showImpersonationBanner() {
+    if (!isReadOnlyMode() || document.getElementById("impersonation-banner")) return;
+    const user = getAuthUser();
+    const banner = document.createElement("div");
+    banner.id = "impersonation-banner";
+    // Built as nodes, not innerHTML: the username is interpolated here and
+    // is whatever the account was registered with.
+    const label = document.createElement("span");
+    label.appendChild(
+      document.createTextNode(
+        `${hyperbook.i18n.get("user-impersonating", {}, "Impersonating")}: `,
+      ),
+    );
+    const name = document.createElement("strong");
+    name.textContent = user ? user.username : "";
+    label.appendChild(name);
+    label.appendChild(
+      document.createTextNode(
+        ` — ${hyperbook.i18n.get("user-readonly", {}, "Read-Only Mode")}`,
+      ),
+    );
+
+    const exit = document.createElement("a");
+    exit.href = "#";
+    exit.id = "exit-impersonation";
+    exit.textContent = hyperbook.i18n.get(
+      "user-exit-impersonation",
+      {},
+      "Exit Impersonation",
+    );
+
+    banner.appendChild(label);
+    banner.appendChild(exit);
+    document.body.prepend(banner);
+
+    document
+      .getElementById("exit-impersonation")
+      .addEventListener("click", (e) => {
+        e.preventDefault();
+        hyperbookLogout();
+        window.close();
+        window.location.reload();
+      });
+  }
 
   init();
 
   return {
     save: () => syncManager?.manualSave(),
     sendSnapshot: async () => {
-      if (!syncManager || !HYPERBOOK_CLOUD || !getAuthToken() || isReadOnlyMode()) return;
+      if (!syncManager || !isLoggedIn() || isReadOnlyMode()) return;
       syncManager.pendingEvents = [];
       syncManager.clearTimers();
       const result = await syncManager.sendSnapshot();

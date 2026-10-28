@@ -1124,6 +1124,14 @@ nav.toc li.level-3 {
   font-size: 14px;
 }
 
+.user-form .user-shared-device {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 14px;
+  color: var(--color-text);
+}
+
 .user-form button,
 .user-info button {
   padding: 10px 20px;

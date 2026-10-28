@@ -44,6 +44,7 @@ export type Harness = {
     body: any;
     keepalive: boolean;
     headers: Record<string, string>;
+    credentials?: string;
   }>;
   reloads: number;
   setOnline: (online: boolean) => void;
@@ -69,8 +70,14 @@ export type HarnessOptions = {
   hyperbookId?: string;
   /** Pre-seeded localStorage entries. */
   storage?: Record<string, string>;
-  /** Whether a valid (non-readonly) auth token is present. */
+  /** Whether a student is logged in (the server's /session agrees). */
   authenticated?: boolean;
+  /** The session is a teacher's read-only view of a student's work. */
+  readonly?: boolean;
+  /** A book hosted by Hyperbook Cloud: cookie session, API on its own host. */
+  sameOrigin?: boolean;
+  /** The address fragment at load, e.g. "#hyperbook-key=abc". */
+  hash?: string;
   /** navigator.onLine at construction time. */
   online?: boolean;
   /** Dexie table names to expose, mapped to their primary-key source string. */
@@ -81,15 +88,6 @@ export type HarnessOptions = {
   withDrawer?: boolean;
 };
 
-/** A JWT-shaped token; only the payload is read, never verified. */
-function fakeToken(payload: Record<string, unknown>) {
-  const b64 = (o: unknown) => Buffer.from(JSON.stringify(o)).toString("base64");
-  return `${b64({ alg: "none" })}.${b64(payload)}.sig`;
-}
-
-export function readonlyToken() {
-  return fakeToken({ id: 1, username: "student1", readonly: true });
-}
 
 export async function createHarness(
   options: HarnessOptions = {},
@@ -98,16 +96,21 @@ export async function createHarness(
     hyperbookId = "test",
     storage = {},
     authenticated = true,
+    readonly = false,
+    sameOrigin = false,
+    hash = "",
     online = true,
     tables = { consent: "id", bookmarks: "path", typst: "id" },
-    respond = () => ({ lastEventId: 1 }),
+    // Saves succeed; loading finds nothing saved yet, as for a new student.
+    respond = (req) => (req.method === "GET" ? undefined : { lastEventId: 1 }),
     withDrawer = true,
   } = options;
 
   const store = new Map<string, string>(Object.entries(storage));
-  if (authenticated && !store.has("hyperbook_auth_token")) {
-    store.set("hyperbook_auth_token", fakeToken({ id: 1, username: "s1" }));
-    store.set("hyperbook_auth_user", JSON.stringify({ id: 1, username: "s1" }));
+  // Hosted books keep no token; books hosted elsewhere keep one per book.
+  const key = sameOrigin ? "cloud" : hyperbookId;
+  if (authenticated && !sameOrigin && !store.has(`hyperbook_auth_token:${key}`)) {
+    store.set(`hyperbook_auth_token:${key}`, "token-s1");
   }
 
   const localStorage = {
@@ -187,12 +190,20 @@ export async function createHarness(
       body,
       keepalive: init.keepalive === true,
       headers: init.headers ?? {},
+      credentials: init.credentials,
     };
     requests.push(req);
 
     let result: any;
     try {
-      result = respond(req);
+      // The session check is answered from the options, so every test's
+      // `respond` need not know about it.
+      if (url.endsWith("/_hyperbook/api/session")) {
+        if (!authenticated) throw { status: 401, body: { error: "Not logged in" } };
+        result = { user: { username: "s1" }, readonly };
+      } else {
+        result = respond(req);
+      }
     } catch (thrown: any) {
       return {
         ok: false,
@@ -229,7 +240,7 @@ export async function createHarness(
   const windowStub: any = {
     hyperbook,
     location: {
-      hash: "",
+      hash,
       pathname: "/",
       search: "",
       origin: "https://example.org",
@@ -333,7 +344,9 @@ export async function createHarness(
     },
     history: { replaceState: () => {} },
     fetch: fetchImpl,
-    HYPERBOOK_CLOUD: { id: hyperbookId, url: "https://cloud.example.org" },
+    HYPERBOOK_CLOUD: sameOrigin
+      ? { sameOrigin: true }
+      : { id: hyperbookId, url: "https://physics.books.example.org" },
     console,
     setTimeout: (fn: Function, delay = 0) => {
       if (delay >= 1000) {

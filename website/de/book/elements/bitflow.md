@@ -11,13 +11,13 @@ passt gut als Überprüfung am Ende eines Kapitels. Du musst dafür **kein** HTM
 
 ## Grundlegende Verwendung
 
-Lege eine Flow-Datei neben deine Seite (oder nach `public/`) und verweise mit dem Element darauf:
+Lege eine Flow-Datei (`.bitflow`, enthält JSON) neben deine Seite (oder nach `public/`) und verweise mit dem Element darauf:
 
 ```markdown
-::bitflow{id="bitflow-example" height="600px" src="quiz.json"}
+::bitflow{id="bitflow-example" height="600px" src="quiz.bitflow"}
 ```
 
-::bitflow{id="bitflow-example" height="600px" src="quiz.json"}
+::bitflow{id="bitflow-example" height="600px" src="quiz.bitflow"}
 
 ## Attribute
 

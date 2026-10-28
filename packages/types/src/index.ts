@@ -316,10 +316,22 @@ export type HyperbookJson = {
         label: string;
       };
   links?: Link[];
-  cloud?: {
-    url: string;
-    id: string;
-  };
+  /**
+   * Hyperbook Cloud, for student logins and saving their work.
+   *
+   * A book hosted elsewhere names its address on the platform (`url`, e.g.
+   * "https://physics.example.page") and its address name there (`id`).
+   * Books the platform hosts get `{ "sameOrigin": true }` when it builds
+   * them; set it by hand only to test.
+   */
+  cloud?:
+    | {
+        url: string;
+        id: string;
+      }
+    | {
+        sameOrigin: true;
+      };
   elements?: {
     bookmarks?: false | ElementConfig;
     code?: ElementConfig & {

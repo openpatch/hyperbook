@@ -158,6 +158,7 @@
     "user-login-title": "Login",
     "user-username": "Username",
     "user-password": "Password",
+    "user-shared-device": "This is a shared device (log out when the browser closes)",
     "user-login": "Login",
     "user-info-title": "User Info",
     "user-status": "Status",

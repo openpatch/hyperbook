@@ -1,0 +1,117 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+/*
+ * Hyperbook's own design tokens, the same files books load. They must stay
+ * unlayered: Tailwind also writes --color-background (from @theme below) into
+ * its theme layer, and only an unlayered declaration reliably wins over it.
+ */
+@import "@hyperbook-tokens/tokens-light.css";
+@import "@hyperbook-tokens/tokens-dark.css" (prefers-color-scheme: dark);
+
+/*
+ * shadcn/ui variables, mapped onto Hyperbook's tokens. Components only ever
+ * use these names, so the look is decided here and nowhere else.
+ */
+:root {
+  --background: var(--color-background);
+  --foreground: var(--color-text);
+  --card: var(--color-background);
+  --card-foreground: var(--color-text);
+  --popover: var(--color-background);
+  --popover-foreground: var(--color-text);
+  --primary: var(--color-brand);
+  --primary-foreground: var(--color-brand-text);
+  --secondary: var(--color-nav);
+  --secondary-foreground: var(--color-text);
+  --muted: var(--color-nav);
+  --muted-foreground: color-mix(in srgb, var(--color-text) 65%, var(--color-background));
+  --accent: var(--color-nav);
+  --accent-foreground: var(--color-text);
+  --destructive: var(--color-sync-error);
+  --border: var(--color-spacer);
+  --input: var(--color-spacer);
+  --ring: var(--color-brand);
+  --sidebar: var(--color-nav);
+  --sidebar-border: var(--color-nav-border);
+  --header: var(--color-brand);
+  --header-foreground: var(--color-brand-text);
+  --radius: 8px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* The dark brand is a light tint, so text on it has to be dark. */
+    --primary-foreground: var(--color-background);
+    /* As in books' dark.css: a dark header with the brand as text. */
+    --header: var(--color-nav);
+    --header-foreground: var(--color-brand);
+  }
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-header: var(--header);
+  --color-header-foreground: var(--header-foreground);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  /* Hyperbook keeps shadows barely there. */
+  --shadow-xs: rgba(0, 0, 0, 0.24) 0px 1px 2px;
+  --shadow-sm: rgba(0, 0, 0, 0.24) 0px 1px 2px;
+  --shadow-md: rgba(0, 0, 0, 0.24) 0px 1px 4px;
+
+  --font-sans: hyperbook-body, sans-serif;
+  --font-heading: hyperbook-heading, sans-serif;
+  --font-mono: hyperbook-code, monospace;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground font-sans;
+    line-height: 1.5;
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-heading;
+  }
+}
+
+/* Credential sheets print on white, whatever the screen theme. */
+@media print {
+  @page {
+    size: A4;
+    margin: 12mm;
+  }
+  body {
+    background: white;
+    color: black;
+  }
+}

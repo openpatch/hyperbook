@@ -126,19 +126,36 @@
             ]
         },
         "cloud": {
-            "properties": {
-                "id": {
-                    "type": "string"
+            "anyOf": [
+                {
+                    "properties": {
+                        "id": {
+                            "type": "string"
+                        },
+                        "url": {
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "id",
+                        "url"
+                    ],
+                    "type": "object"
                 },
-                "url": {
-                    "type": "string"
+                {
+                    "properties": {
+                        "sameOrigin": {
+                            "const": true,
+                            "type": "boolean"
+                        }
+                    },
+                    "required": [
+                        "sameOrigin"
+                    ],
+                    "type": "object"
                 }
-            },
-            "required": [
-                "id",
-                "url"
             ],
-            "type": "object"
+            "description": "Hyperbook Cloud, for student logins and saving their work.\n\nA book hosted elsewhere names its address on the platform (`url`, e.g.\n\"https://physics.example.page\") and its address name there (`id`).\nBooks the platform hosts get `{ \"sameOrigin\": true }` when it builds\nthem; set it by hand only to test."
         },
         "colors": {
             "properties": {

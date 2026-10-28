@@ -17,6 +17,8 @@ export {
 export { registerBasicHelpers } from "./handlebars";
 
 export { readJsonFile, JsonParseError } from "./json";
+export { copy } from "./copy";
+export type { CopyOptions } from "./copy";
 export { UserError, FrontmatterParseError } from "./errors";
 
 export {

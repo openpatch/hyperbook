@@ -1,0 +1,1 @@
+ALTER TABLE `builds` ADD `replaces_build_id` integer;

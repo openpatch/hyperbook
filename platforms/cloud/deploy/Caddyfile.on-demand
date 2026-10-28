@@ -1,0 +1,29 @@
+# Caddy in front of Hyperbook Cloud, with on-demand TLS: Caddy gets a
+# certificate for each book's address the first time someone opens it. Works
+# with any DNS provider; needs only a wildcard DNS record (*.example.page)
+# pointing at this server.
+#
+# Replace cloud.example.org and example.page with your ADMIN_ORIGIN host and
+# BOOKS_DOMAIN. Let's Encrypt limits certificates to 50 new domains per week
+# per registered domain; for more books, see Caddyfile.wildcard.
+{
+	on_demand_tls {
+		# Caddy asks Hyperbook Cloud first, so certificates are only issued
+		# for books that exist, never for made-up names.
+		ask http://localhost:3001/api/tls-check
+	}
+}
+
+cloud.example.org {
+	reverse_proxy localhost:3001
+}
+
+# Every other name (books, and their custom domains): the certificate is
+# requested on the first visit, after the ask check above. Hyperbook Cloud
+# answers unknown hosts with 404.
+https:// {
+	tls {
+		on_demand
+	}
+	reverse_proxy localhost:3001
+}

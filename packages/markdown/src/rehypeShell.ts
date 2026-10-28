@@ -1150,6 +1150,20 @@ const makeHeaderElements = (ctx: HyperbookContext): ElementContent[] => {
                 },
                 {
                   type: "element",
+                  tagName: "label",
+                  properties: { class: "user-shared-device" },
+                  children: [
+                    {
+                      type: "element",
+                      tagName: "input",
+                      properties: { type: "checkbox", id: "user-shared-device" },
+                      children: [],
+                    },
+                    { type: "text", value: i18n.get("user-shared-device") },
+                  ],
+                },
+                {
+                  type: "element",
                   tagName: "button",
                   properties: {
                     onclick: "hyperbook.cloud.login()",

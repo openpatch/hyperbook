@@ -3,7 +3,7 @@ name: Cloud [Alpha]
 index: 3
 ---
 
-# Cloud [Alpha] 
+# Cloud [Alpha]
 
 :::alert{warn}
 
@@ -11,165 +11,83 @@ This feature is still in alpha. It may be buggy and subject to change. Please te
 
 :::
 
-Hyperbook Cloud is a self-hosted student management platform that enables user login, progress tracking, and cloud synchronization for your hyperbooks.
+Hyperbook Cloud is a self-hosted platform for teachers. It publishes books, gives students anonymous accounts, and saves what students do in a book's interactive elements, so they can continue on any device.
 
-## Setup
+## Books hosted on Hyperbook Cloud
 
-To connect a hyperbook to a cloud server, add the `cloud` property to your `hyperbook.json`:
+If you upload your book to Hyperbook Cloud, there is nothing to configure. The platform builds your book and connects it to itself: a login button appears in the book, and the printed QR codes log students in directly.
+
+A book on Hyperbook Cloud can be **public** (anyone can read it, students log in to save their work) or **private** (only its students can read it; everyone else is asked to log in first).
+
+## Books hosted elsewhere
+
+A book on GitHub Pages or any other web host can still use Hyperbook Cloud for student accounts. Create the book in Hyperbook Cloud, mark it as "hosted elsewhere" with its address, and add the `cloud` property to your `hyperbook.json`:
 
 ```json
 {
   "name": "My Hyperbook",
   "cloud": {
-    "url": "https://cloud.example.com",
-    "id": "my-hyperbook"
+    "url": "https://physics.example.page",
+    "id": "physics"
   }
 }
 ```
 
 | Property | Description |
 |---|---|
-| `url` | The URL of your Hyperbook Cloud server. |
-| `id` | The slug of the hyperbook as configured in the cloud admin interface. Must match exactly. |
+| `url` | The book's address on Hyperbook Cloud, as shown on the book's page there. |
+| `id` | The book's address name on Hyperbook Cloud (the first part of `url`). |
 
-## How It Works
+Hyperbook Cloud only accepts requests from the address you entered for the book, so the book has to run there.
 
-When cloud is configured, a login button appears in the hyperbook. Students log in with the credentials created by their teacher in the cloud admin interface.
+## Logging in
 
-Once logged in, the following happens automatically:
+Students log in with the username and password from their login card, or by scanning its QR code. The login form has a **shared device** option: the student is then logged out when the browser is closed. Otherwise a login lasts 30 days.
 
-- **State synchronization** — All interactive element state (code editors, bookmarks, collapsibles, excalidraw drawings, etc.) is saved to the cloud server.
-- **Cross-device access** — Students can continue where they left off on any device.
-- **Offline support** — Changes are queued locally when offline and synced when the connection is restored.
-- **Auto-save indicator** — A status icon in the toolbar shows the current sync state. Each state has its own badge shape, so it does not rely on color alone, and the button's label reads out the state for screen readers.
-- **Sync notices** — States you can act on — a failed save, being offline, a merge with another session — are surfaced in a notice at the bottom of the page, with a retry button where one applies. Successful saves stay silent.
+Teachers can open a student's work with **View as student** in Hyperbook Cloud. The book then shows a banner with the student's name and saves nothing.
 
-When logged into the cloud, local export, import, and reset buttons are hidden to prevent conflicts with cloud-managed state.
+## What is saved
 
-## Event-Sourcing Architecture
+Once logged in, everything the book's interactive elements store (code editors, bookmarks, drawings, answers, …) is saved to Hyperbook Cloud:
 
-Instead of sending the entire store on every change, Hyperbook Cloud uses an event-sourcing approach for efficient synchronization.
+- **Cross-device access**: students continue where they left off on any device.
+- **Offline support**: changes made offline are kept and saved when the connection returns.
+- **Save indicator**: an icon in the toolbar shows whether everything is saved. Each state has its own badge shape, so it does not rely on color alone, and the button's label reads out the state for screen readers.
+- **Sync notices**: states you can act on (a failed save, being offline, a merge with another session) appear in a notice at the bottom of the page, with a retry button where one applies. Successful saves stay silent.
 
-### How It Works
+When logged in, the local export, import and reset buttons are hidden, so they cannot conflict with the saved state.
 
-1. **Granular event capture** — Every change to the local Dexie database (create, update, delete) is captured as an individual event via Dexie hooks. Only the changed fields are recorded for updates (deltas), not the full row.
-2. **Batched sync** — Events are collected and sent in batches to the cloud server after a debounce period (2 seconds of inactivity or 10 seconds maximum wait).
-3. **Server-side snapshots** — The server periodically compacts events into snapshots. After 100 events (configurable via `SNAPSHOT_THRESHOLD` environment variable), a new snapshot is created and old events are pruned.
-4. **State reconstruction** — When a student loads their state, the server reconstructs it by applying any events since the last snapshot.
+Ephemeral interface state (cursor position, scroll offset, window size) is not saved: it belongs to one device.
 
-### Large Data Handling
+## How saving works
 
-If an event batch exceeds 512 KB (e.g., large Excalidraw drawings or Geogebra states), the client falls back to sending a full snapshot instead of individual events. This prevents bandwidth issues with large binary data.
+Hyperbook Cloud saves changes, not the whole store:
 
-### Conflict Detection and Merging
+1. **Changes are recorded** as they happen: every create, update and delete in the book's local database, and for updates only the changed fields.
+2. **They are sent in batches** after 2 seconds without changes (or at most every 10 seconds).
+3. **The server folds them together** into one snapshot after 100 changes.
+4. **Loading rebuilds the state** from the snapshot and the changes after it.
 
-The client tracks the last known event ID from the server. When sending events, it includes this ID as `afterEventId`. If the server detects that the client is out of date (e.g., another device sent events in the meantime), it responds with a 409 conflict.
+A batch larger than 512 KB (large drawings, for example) is sent as a full snapshot instead.
 
-A conflict never discards local work. The client:
+### Two devices at once
 
-1. Fetches the current server state and imports it,
-2. Replays its pending events on top of that state, locally and on the server,
-3. Explains the merge in a notice and reloads the page.
+Each save names the last state the device knew. If another device saved in between, the server refuses the save, and the device:
 
-The reload is necessary because interactive elements read the store once when the page loads, so the page still shows pre-merge state until it happens. It is announced rather than immediate, and the notice offers a **Reload now** button.
+1. loads the current state,
+2. applies its own unsaved changes on top of it, locally and on the server,
+3. explains the merge in a notice and reloads the page, so the elements show the merged state. The notice offers a **Reload now** button.
 
-The server checks `afterEventId` and appends the batch in a single transaction, so two devices saving at the same moment cannot both pass the check.
+Nothing is lost in a merge. The server checks and saves in one step, so two devices saving at the same moment cannot both pass.
 
-Each hyperbook tracks its own event ID. Two hyperbooks served from the same domain do not share a watermark.
+### Offline and leaving the page
 
-### Offline Queue
+Changes made offline wait in a queue and are sent in order when the connection returns; if another device saved in the meantime, they are merged as above. The queue holds at most 100 batches; beyond that it is sent as one snapshot.
 
-When the device is offline, event batches are stored in a local queue. Once the connection is restored, the queue is sent in order, each batch chaining onto the event ID the previous one returned — the watermark cannot advance while offline, so batches cannot carry one recorded at queue time.
+When the page is closed while changes are still waiting, they are sent with a request that outlives the page. Batches over 60 KB cannot be sent this way; the browser's "unsaved changes" prompt is then the cue to wait.
 
-If the server has moved on in the meantime, the queue is merged rather than discarded: the events still waiting are replayed on top of the fetched state, exactly as for an online conflict.
+## Running Hyperbook Cloud
 
-The queue holds at most 100 batches. Beyond that it collapses into a single full snapshot, sent on reconnect.
+Hyperbook Cloud is in `platforms/cloud/` of the Hyperbook repository and runs as a single Docker container. See the [Cloud README](https://github.com/openpatch/hyperbook/tree/main/platforms/cloud) for installation and deployment.
 
-### Leaving the Page
-
-Changes made inside the debounce window would otherwise be lost if the tab were closed before it elapsed. On `beforeunload` and `pagehide` the client flushes anything pending with a `keepalive` request, which outlives the page. Batches over 60 KB are left for the "unsaved changes" prompt instead, because browsers reject oversized keepalive requests outright.
-
-### What Is Not Synced
-
-Ephemeral interface state — cursor position, scroll offset, window size — is excluded from both events and snapshots. It is per-device by nature, and syncing it made one device pull another's scroll position.
-
-## Cloud Server
-
-The cloud server is a separate application located in `platforms/cloud/` of the Hyperbook repository. See the [Cloud README](https://github.com/openpatch/hyperbook/tree/main/platforms/cloud) for installation and deployment instructions.
-
-### Key Concepts
-
-- **Hyperbooks** — Each hyperbook is registered in the cloud with a unique slug. This slug is used as the `cloud.id`.
-- **Groups** — Students are organized into groups within a hyperbook.
-- **Students** — Each student has a username and password for logging into the hyperbook.
-- **Teachers** — Teachers can manage groups and students for their assigned hyperbooks.
-- **Permissions** — Admins can grant teachers fine-grained permissions per hyperbook.
-
-### Impersonation
-
-Teachers and admins can impersonate a student to view their progress in read-only mode. This opens the hyperbook with the student's saved state without allowing any modifications.
-
-### Event Log
-
-The admin interface provides an event log per group, showing recent events (last 200) and the latest snapshot per student. Teachers and admins can:
-
-- **View the event log** — See all recent database changes across students in a group.
-- **Download snapshots** — Download the latest reconstructed state for a student as a JSON file.
-
-Snapshots are labeled with their source: `auto` (created automatically when the event threshold is reached) or `manual` (created from a full snapshot upload, import, or reset).
-
-## Data Flow
-
-### Saving Changes
-
-```
-Student interacts with hyperbook
-        ↓
-Dexie hook captures change as event
-        ↓
-Events batched (debounced 2s / max 10s)
-        ↓
-POST /api/store/:hyperbookId/events
-        ↓
-Events stored on cloud server
-```
-
-If the event batch exceeds 512 KB:
-
-```
-Batch too large
-        ↓
-Full Dexie export created
-        ↓
-POST /api/store/:hyperbookId/snapshot
-        ↓
-Snapshot replaces all events + previous snapshot
-```
-
-### Loading State
-
-```
-Student logs in
-        ↓
-GET /api/store/:hyperbookId
-        ↓
-Server reconstructs state (snapshot + events)
-        ↓
-State imported into local IndexedDB
-        ↓
-Interactive elements restored
-```
-
-## API Endpoints
-
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/api/store/:hyperbookId` | Fetch reconstructed state (snapshot + event replay). |
-| `POST` | `/api/store/:hyperbookId/events` | Append a batch of events. Includes `afterEventId` for conflict detection. |
-| `POST` | `/api/store/:hyperbookId/snapshot` | Full-state overwrite. Replaces all events and snapshots. |
-
-## Configuration
-
-| Environment Variable | Default | Description |
-|---|---|---|
-| `SNAPSHOT_THRESHOLD` | `100` | Number of events before the server automatically creates a new snapshot and prunes old events. |
+Hyperbook Cloud was built with the help of AI: Claude Opus 5.5 by Anthropic, and GLM 5.3 by Z.ai, run in Mistral Vibe.

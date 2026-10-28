@@ -11,6 +11,7 @@ import {
   elementRuntimeFiles,
   DownloadableElement,
 } from "@hyperbook/types";
+import { copy } from "./copy";
 
 export interface AssetBundle {
   url: string;
@@ -175,8 +176,7 @@ export class AssetManager {
     if (!source) return;
     const destination = path.join(assetsOut, `directive-${directive}`);
     await fs.mkdir(destination, { recursive: true });
-    await fs.cp(source, destination, {
-      recursive: true,
+    await copy(source, destination, {
       filter(file) {
         if (!cdn) return true;
         const relative = path.relative(source, file).split(path.sep).join("/");
