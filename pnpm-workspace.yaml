@@ -32,3 +32,10 @@ onlyBuiltDependencies:
   - '@vscode/vsce-sign'
   - better-sqlite3
   - sharp
+
+# One copy of CodeMirror's core: extensions only work with the instance of
+# @codemirror/state and view they were made with.
+overrides:
+  '@codemirror/state': ^6.7.6
+  '@codemirror/view': ^6.43.15
+  '@codemirror/language': ^6.13.1
