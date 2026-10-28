@@ -24,7 +24,13 @@ describe("sealing", () => {
     expect(sealed).not.toContain("geheim");
     expect(open(key, sealed)).toBe("geheim");
     expect(open(Buffer.alloc(32, 2), sealed)).toBeNull();
-    expect(open(key, sealed.slice(0, -2) + "AA")).toBeNull();
+    // Flip a bit of the ciphertext: editing the base64 text itself can leave
+    // the bytes unchanged (the last character carries padding bits).
+    const parts = sealed.split(".");
+    const ciphertext = Buffer.from(parts[2]!, "base64url");
+    ciphertext[0]! ^= 1;
+    parts[2] = ciphertext.toString("base64url");
+    expect(open(key, parts.join("."))).toBeNull();
     expect(seal(key, "geheim")).not.toBe(sealed);
   });
 });
