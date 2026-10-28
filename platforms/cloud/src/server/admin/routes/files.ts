@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import { bodyLimit } from "hono/body-limit";
 import { HTTPException } from "hono/http-exception";
 import { z } from "zod";
-import { bookPath, commitFilesInput, initFilesInput } from "../../../shared/schemas";
+import { bookPath, commitFilesInput, initFilesInput, renderPageInput } from "../../../shared/schemas";
 import type { SessionUser } from "../../auth/sessions";
 import type { Deps } from "../../deps";
 import { type BookRow, bookAccess } from "../../domain/books";
@@ -18,6 +18,7 @@ import {
   listTree,
   readBlob,
 } from "../../hosting/git";
+import { RenderError } from "../../hosting/renders";
 import { repoDir } from "../../hosting/storage";
 import { createPreviewCode } from "../../auth/preview-sessions";
 import { previewOrigin } from "../../config";
@@ -53,7 +54,7 @@ function describe(changes: Change[]): string {
 }
 
 /** /api/books/:id/files */
-export function bookFileRoutes({ db, config, builds: queue }: Deps) {
+export function bookFileRoutes({ db, config, renders }: Deps) {
   const committer = {
     name: "Hyperbook Cloud",
     email: `noreply@${config.adminHost.replace(/:\d+$/, "")}`,
@@ -70,7 +71,7 @@ export function bookFileRoutes({ db, config, builds: queue }: Deps) {
     return { commit, files: files.map(({ path, size, oid }) => ({ path, size, oid })) };
   }
 
-  /** Commits `changes`, queues a preview build and answers with the new listing. */
+  /** Commits `changes` and answers with the new listing. Builds wait for publishing. */
   async function save(book: BookRow, user: SessionUser, changes: Change[], message?: string) {
     const repo = repoDir(config, book.id);
     await initRepo(repo);
@@ -95,10 +96,9 @@ export function bookFileRoutes({ db, config, builds: queue }: Deps) {
       }
       throw error;
     }
-    const build = result.changed ? queue.enqueue(book.id, result.commit, "edit", user.id) : null;
     const now = await listing(book);
     setSourceBytes(db, book.id, now.files.reduce((sum, f) => sum + f.size, 0));
-    return { changed: result.changed, buildId: build?.id ?? null, ...now };
+    return { changed: result.changed, ...now };
   }
 
   return new Hono<AuthedEnv>()
@@ -170,6 +170,31 @@ export function bookFileRoutes({ db, config, builds: queue }: Deps) {
           return { op: "write", path: ch.path, content, baseOid: ch.baseOid };
         });
         return c.json(await save(book, user, changes, input.message));
+      },
+    )
+
+    // A page with the editor's unsaved text, for the preview host to show
+    // (see hosting/renders.ts).
+    .post(
+      "/:id/files/render",
+      idParam,
+      bodyLimit({
+        maxSize: 3 * 1024 * 1024,
+        onError: () => {
+          throw new HTTPException(413, { message: "The page is too long to preview" });
+        },
+      }),
+      validate("json", renderPageInput),
+      async (c) => {
+        const { book } = bookAccess(db, c.get("user"), c.req.valid("param").id);
+        hostedOnly(book);
+        const { path, text } = c.req.valid("json");
+        try {
+          return c.json(await renders.renderText(book.id, path, text));
+        } catch (error) {
+          if (error instanceof RenderError) throw new HTTPException(400, { message: error.message });
+          throw error;
+        }
       },
     )
 

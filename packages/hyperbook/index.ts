@@ -4,6 +4,7 @@ import chalk from "chalk";
 import { Command, InvalidArgumentError } from "commander";
 import checkForUpdate from "update-check";
 import { runBuildProject } from "./build";
+import { runRender } from "./render";
 import { runCheck } from "./check";
 import { runMigrate } from "./migrate";
 import { runDev } from "./dev";
@@ -100,6 +101,28 @@ program
       undefined,
       undefined,
       undefined,
+      new AssetManager({ offline: options.offline }),
+    ).catch((e) => {
+      reportError(e);
+      process.exit(1);
+    });
+  });
+
+program
+  .command("render")
+  .description(
+    "render single pages on request, read as JSON lines from stdin (for editors)",
+  )
+  .option("--offline", "use cached assets without downloading")
+  .action(async (options) => {
+    const rootProject = await withProject();
+    if (rootProject.type !== "book") {
+      reportError(new Error("hyperbook render works on a book, not a library"));
+      process.exit(1);
+    }
+    await runRender(
+      rootProject.src,
+      rootProject,
       new AssetManager({ offline: options.offline }),
     ).catch((e) => {
       reportError(e);

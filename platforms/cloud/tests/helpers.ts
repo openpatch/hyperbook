@@ -1,5 +1,5 @@
 import { mkdtempSync } from "node:fs";
-import { cp } from "node:fs/promises";
+import { cp, mkdir, readFile, readdir, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -10,6 +10,7 @@ import { migrateDb, openDb } from "../src/server/db/client";
 import { users } from "../src/server/db/schema";
 import type { Deps } from "../src/server/deps";
 import { BuildQueue } from "../src/server/hosting/builds";
+import { type RenderSpawner, Renderers } from "../src/server/hosting/renders";
 import type { Runner } from "../src/server/hosting/runner";
 import { createMemoryDns } from "../src/server/dns";
 import { createMemoryMailer } from "../src/server/mail";
@@ -33,6 +34,37 @@ export const copyRunner: Runner = async ({ jobDir, srcDir }) => {
 };
 
 /**
+ * Stands in for `hyperbook render` in tests: a page "renders" to its source
+ * text, at the address Hyperbook would give it.
+ */
+export const textRender: RenderSpawner = async ({ srcDir }) => {
+  const pages = async () => {
+    const out: { file: string; href: string }[] = [];
+    for (const folder of ["book", "glossary"]) {
+      const entries = await readdir(path.join(srcDir, folder), { recursive: true }).catch(() => []);
+      for (const entry of entries) {
+        if (!entry.endsWith(".md")) continue;
+        const file = `${folder}/${entry}`;
+        const href = (folder === "book" ? "" : "/glossary") + ("/" + entry.slice(0, -3)).replace(/\/index$/, "");
+        out.push({ file, href: href || "/" });
+      }
+    }
+    return out;
+  };
+  return {
+    async render(target) {
+      const page = (await pages()).find((p) => ("file" in target ? p.file === target.file : p.href === target.href));
+      if (!page) return { ok: false, error: "There is no page here", log: "" };
+      const out = page.href === "/" ? "index.html" : `${page.href.slice(1)}.html`;
+      await mkdir(path.dirname(path.join(srcDir, ".hyperbook/out", out)), { recursive: true });
+      await writeFile(path.join(srcDir, ".hyperbook/out", out), await readFile(path.join(srcDir, page.file)));
+      return { ok: true, href: page.href, file: page.file, out, log: "" };
+    },
+    close() {},
+  };
+};
+
+/**
  * A fresh instance: in-memory database with migrations applied, and an empty
  * data directory for book repositories and builds.
  */
@@ -46,9 +78,10 @@ export function setup(env: Record<string, string> = {}, options: { runner?: Runn
   const builds = new BuildQueue(db, config, options.runner ?? copyRunner);
   builds.start();
   const dns = createMemoryDns();
-  const deps: Deps = { config, db, mailer, builds, dns };
+  const renders = new Renderers(config, textRender);
+  const deps: Deps = { config, db, mailer, builds, renders, dns };
   const app = createApp(deps);
-  return { config, db, sqlite, mailer, builds, dns, deps, app };
+  return { config, db, sqlite, mailer, builds, renders, dns, deps, app };
 }
 
 export type Instance = ReturnType<typeof setup>;

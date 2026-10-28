@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeftIcon, FilePlusIcon, FolderPlusIcon, PanelRightIcon, UploadIcon, XIcon } from "lucide-react";
+import { ArrowLeftIcon, FilePlusIcon, FolderPlusIcon, PanelRightIcon, SettingsIcon, UploadIcon, XIcon } from "lucide-react";
 import type { EditorView } from "@codemirror/view";
 import { useEffect, useRef, useState } from "react";
 import { Link, useBlocker, useParams } from "react-router";
@@ -21,6 +21,8 @@ import { type Block, type InlineBlock, resolveSrc } from "./blocks";
 import { BlockDialog } from "./block-dialog";
 import { FILE_ELEMENTS, type FileElement, InsertMenu, insertAtCursor } from "./insert-menu";
 import { SettingsDialog } from "./settings-dialog";
+import { PageSettingsDialog } from "./page-settings-dialog";
+import { withPageForm } from "./frontmatter";
 import { ConflictError, type Tab, isDirty, useWorkspace } from "./workspace";
 
 export function Component() {
@@ -133,7 +135,6 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
       },
     });
   };
-  const [page, setPage] = useState("/");
   const uploadInput = useRef<HTMLInputElement>(null);
   const uploadFolder = useRef("");
   const replaceTarget = useRef<string | null>(null);
@@ -145,16 +146,6 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
     if (first) ws.open(first);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // The preview follows the open page.
-  useEffect(() => {
-    const p = ws.active && pageOf(ws.active);
-    if (p) setPage(p);
-  }, [ws.active]);
-
-  // A save queues a build; follow it.
-  useEffect(() => {
-    if (ws.lastBuildId) void queryClient.invalidateQueries({ queryKey: ["books", bookId, "builds"] });
-  }, [ws.lastBuildId, bookId, queryClient]);
 
   // Ask before leaving with unsaved changes.
   const hasUnsaved = ws.dirty.size > 0;
@@ -173,6 +164,24 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
     window.addEventListener("beforeunload", warn);
     return () => window.removeEventListener("beforeunload", warn);
   }, [hasUnsaved]);
+
+  // Ctrl/Cmd+S saves the open file wherever the focus is, not just in its
+  // editor, instead of the browser saving the page.
+  const saveActive = useRef(() => {});
+  saveActive.current = () => {
+    if (ws.active) void save([ws.active]);
+  };
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key.toLowerCase() !== "s" || !(e.ctrlKey || e.metaKey) || e.altKey || e.shiftKey) return;
+      // The file's editor saved it already.
+      if (e.defaultPrevented && (e.target as Element | null)?.closest?.(".cm-editor")) return;
+      e.preventDefault();
+      saveActive.current();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
   const fail = (error: unknown) => toast.error(error instanceof Error ? error.message : "Something went wrong");
 
@@ -409,7 +418,6 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
   };
 
   const activeTab = ws.tabs.find((t) => t.path === ws.active);
-  const lastBuild = builds?.find((b) => b.id === ws.lastBuildId) ?? builds?.[0];
 
   return (
     <div className="flex h-dvh flex-col">
@@ -435,6 +443,7 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
           builds={builds}
           hasUnsaved={hasUnsaved}
           onPublish={onPublish}
+          onShowLog={setLogFor}
         />
         <Button
           size="icon"
@@ -504,6 +513,7 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
               <div key={tab.path} className={cn("absolute inset-0", tab.path !== ws.active && "hidden")}>
                 <TabContent
                   tab={tab}
+                  files={listing.files.map((f) => f.path)}
                   onEditBlock={(block, view) => editBlock(tab.path, block, view)}
                   onInsertFile={insertFileElement}
                   onInsertH5P={insertH5P}
@@ -526,7 +536,12 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
 
         {showPreview && (
           <section className="hidden w-[45%] max-w-3xl shrink-0 border-l border-border lg:block" aria-label="Preview">
-            <PreviewPane bookId={bookId} page={page} build={lastBuild} onShowLog={setLogFor} />
+            <PreviewPane
+              bookId={bookId}
+              file={activeTab && pageOf(activeTab.path) && activeTab.status === "ready" ? activeTab.path : null}
+              text={activeTab && pageOf(activeTab.path) ? (activeTab.text ?? null) : null}
+              commit={listing.commit}
+            />
           </section>
         )}
       </div>
@@ -610,6 +625,7 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
 
 function TabContent({
   tab,
+  files,
   onEditBlock,
   onInsertFile,
   onInsertH5P,
@@ -619,6 +635,7 @@ function TabContent({
   onDownload,
 }: {
   tab: Tab;
+  files: string[];
   onEditBlock: (block: Block, view: EditorView) => void;
   onInsertFile: (kind: FileElement, view: EditorView) => void;
   onInsertH5P: (view: EditorView) => void;
@@ -628,6 +645,7 @@ function TabContent({
   onDownload: () => void;
 }) {
   const viewRef = useRef<EditorView | null>(null);
+  const [pageSettings, setPageSettings] = useState<{ view: EditorView; text: string } | null>(null);
   if (tab.status === "loading") return <p className="p-4 text-muted-foreground">Loading…</p>;
   if (tab.status === "error") return <p className="p-4 text-destructive">{tab.error}</p>;
   const loaded = tab.loaded!;
@@ -642,6 +660,8 @@ function TabContent({
         onChange={onChange}
         onSave={onSave}
         onEditBlock={onEditBlock}
+        onPageSettings={(view) => setPageSettings({ view, text: view.state.doc.toString() })}
+        files={files}
         onReady={(view) => (viewRef.current = view)}
       />
     );
@@ -650,8 +670,34 @@ function TabContent({
         <div className="flex h-full flex-col">
           <div className="flex shrink-0 items-center border-b border-border px-2 py-0.5">
             <InsertMenu view={() => viewRef.current} onFileElement={onInsertFile} onH5P={onInsertH5P} />
+            {extension(tab.path) === "md" && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  const view = viewRef.current;
+                  if (view) setPageSettings({ view, text: view.state.doc.toString() });
+                }}
+              >
+                <SettingsIcon className="size-4" /> Page settings
+              </Button>
+            )}
+            <span className="flex-1" />
+            <span className="hidden text-xs text-muted-foreground md:inline">Type : at the start of a line for elements</span>
           </div>
           <div className="min-h-0 flex-1">{source}</div>
+          <PageSettingsDialog
+            text={pageSettings?.text ?? null}
+            pages={files.flatMap((f) => (f.startsWith("book/") ? (pageOf(f) ?? []) : []))}
+            onApply={(form) => {
+              const { view } = pageSettings!;
+              const text = view.state.doc.toString();
+              // An edit of the page like any other: undoable, saved with the page.
+              view.dispatch({ changes: { from: 0, to: text.length, insert: withPageForm(text, form) } });
+              view.focus();
+            }}
+            onClose={() => setPageSettings(null)}
+          />
         </div>
       );
     }

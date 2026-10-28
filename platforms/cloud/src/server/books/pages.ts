@@ -178,7 +178,8 @@ fetch("/_hyperbook/api/impersonate", {
   return shell(bookTitle, body, script);
 }
 
-export function previewPage(bookTitle: string) {
+/** `adminOrigin` frames the preview and hears when its login is done. */
+export function previewPage(bookTitle: string, adminOrigin: string) {
   const body = `
 <h1>${escapeHtml(bookTitle)}</h1>
 <p id="busy" data-t="openingPreview"></p>
@@ -205,6 +206,7 @@ fetch("/_hyperbook/api/preview", {
   // A browser that blocks cookies inside frames drops the session silently.
   const check = await fetch("/_hyperbook/api/preview");
   if (!check.ok) return fail(T.previewBlocked);
+  if (parent !== window) parent.postMessage({ hyperbookPreview: "ready" }, ${JSON.stringify(adminOrigin)});
   location.replace(next);
 }, () => fail(T.wrong));`;
   return shell(bookTitle, body, script);

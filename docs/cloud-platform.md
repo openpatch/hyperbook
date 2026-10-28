@@ -688,9 +688,22 @@ retried after checking the base blobs again.
 
 ## Preview host
 
-`<slug>--preview.<BOOKS_DOMAIN>` serves `preview_build_id` to the book's
-owners and editors only. It has no student API, so books there run as if
-logged out.
+`<slug>--preview.<BOOKS_DOMAIN>` shows the book's newest save to its
+owners and editors only, without building it. It has no student API, so
+books there run as if logged out.
+
+- Saving builds nothing; only publishing (and uploads, rebuilds) does. For
+  the preview, each book being edited gets a checkout of its newest save
+  and a `hyperbook render` process on it (`hosting/renders.ts`), sandboxed
+  like a build. It copies Hyperbook's own assets once, then renders single
+  pages on request (JSON lines on stdin), with the element runtimes they
+  use. Idle renderers stop after 10 minutes; at most 8 run at once.
+- The editor sends the open page's unsaved text
+  (`POST /api/books/:id/files/render`) a moment after typing stops; it is
+  written into the checkout (one page at a time, until the next save) and
+  rendered, and the frame reloads in place, keeping its scroll position.
+- Visiting a page on the preview host renders it unless it is fresh; other
+  files come from the checkout (`public/`, `book/`, `glossary/`).
 
 - The editor asks the admin API for a one-time code (60 s) and frames
   `https://<slug>--preview.<BOOKS_DOMAIN>/_hyperbook/preview#c=<code>&next=<path>`.

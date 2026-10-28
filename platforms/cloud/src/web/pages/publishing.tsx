@@ -154,7 +154,10 @@ export function PublishingSection({ book }: { book: Book }) {
                 </TableCell>
                 <TableCell>
                   <div className="flex items-center gap-2">
-                    <Badge variant={STATUS[b.status].variant}>{STATUS[b.status].label}</Badge>
+                    <Badge variant={STATUS[b.status].variant}>
+                      {STATUS[b.status].label}
+                      {b.progress && ` ${b.progress.done}/${b.progress.total}`}
+                    </Badge>
                     {b.published && <Badge variant="outline">Live</Badge>}
                     {b.status === "succeeded" && (
                       <a

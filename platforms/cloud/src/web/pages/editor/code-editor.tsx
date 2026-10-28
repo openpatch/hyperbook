@@ -2,7 +2,6 @@ import { css } from "@codemirror/lang-css";
 import { html } from "@codemirror/lang-html";
 import { javascript } from "@codemirror/lang-javascript";
 import { json } from "@codemirror/lang-json";
-import { markdown } from "@codemirror/lang-markdown";
 import { yaml } from "@codemirror/lang-yaml";
 import { type Extension, EditorState } from "@codemirror/state";
 import { EditorView, keymap } from "@codemirror/view";
@@ -10,12 +9,10 @@ import { basicSetup } from "codemirror";
 import { useEffect, useRef } from "react";
 import { type Block, editVisuallyButtons } from "./blocks";
 import { extension } from "./files";
+import { pageLanguage } from "./page-language";
 
 function language(path: string): Extension {
   switch (extension(path)) {
-    case "md":
-    case "hbs":
-      return markdown();
     case "json":
     case "bitflow":
     case "struktolab":
@@ -58,6 +55,22 @@ const theme = EditorView.theme({
     backgroundColor: "color-mix(in srgb, var(--color-brand) 25%, transparent) !important",
   },
   "&.cm-focused": { outline: "none" },
+  ".cm-tooltip": {
+    color: "var(--color-text)",
+    backgroundColor: "var(--color-background)",
+    border: "1px solid var(--color-nav-border)",
+    borderRadius: "6px",
+    boxShadow: "0 4px 12px rgb(0 0 0 / 0.2)",
+  },
+  ".cm-tooltip.cm-tooltip-autocomplete > ul": { fontFamily: "var(--font-code, ui-monospace, monospace)" },
+  ".cm-tooltip.cm-tooltip-autocomplete > ul > li[aria-selected]": {
+    color: "var(--color-text)",
+    backgroundColor: "color-mix(in srgb, var(--color-brand) 25%, transparent)",
+  },
+  ".cm-completionDetail": { color: "var(--muted-foreground)" },
+  ".cm-completionMatchedText": { color: "var(--color-brand)", textDecoration: "none", fontWeight: "bold" },
+  ".cm-diagnostic": { color: "var(--color-text)" },
+  ".cm-panels": { color: "var(--color-text)", backgroundColor: "var(--color-nav)" },
   ".cm-edit-visually": {
     marginLeft: "12px",
     padding: "0 8px",
@@ -80,6 +93,8 @@ export function CodeEditor({
   onChange,
   onSave,
   onEditBlock,
+  onPageSettings,
+  files = [],
   onReady,
 }: {
   path: string;
@@ -88,14 +103,18 @@ export function CodeEditor({
   onSave: () => void;
   /** Pages: open an element block (e.g. a structogram) in its visual editor. */
   onEditBlock?: (block: Block, view: EditorView) => void;
+  /** Pages: edit the frontmatter as a form. */
+  onPageSettings?: (view: EditorView) => void;
+  /** The book's files, offered for links and `src`. */
+  files?: string[];
   /** Hands out the view, e.g. to insert text at the cursor. */
   onReady?: (view: EditorView | null) => void;
 }) {
   const host = useRef<HTMLDivElement>(null);
   const view = useRef<EditorView | null>(null);
   // The latest callbacks, without rebuilding the editor when they change.
-  const callbacks = useRef({ onChange, onSave, onEditBlock });
-  callbacks.current = { onChange, onSave, onEditBlock };
+  const callbacks = useRef({ onChange, onSave, onEditBlock, onPageSettings, files });
+  callbacks.current = { onChange, onSave, onEditBlock, onPageSettings, files };
 
   useEffect(() => {
     const v = new EditorView({
@@ -115,7 +134,13 @@ export function CodeEditor({
           ]),
           basicSetup,
           EditorView.lineWrapping,
-          language(path),
+          // Pages and snippets: Markdown with Hyperbook's directives.
+          extension(path) === "md" || extension(path) === "hbs"
+            ? pageLanguage({
+                files: () => callbacks.current.files,
+                onPageSettings: extension(path) === "md" && onPageSettings ? (v) => callbacks.current.onPageSettings?.(v) : undefined,
+              })
+            : language(path),
           extension(path) === "md" ? editVisuallyButtons((block, v) => callbacks.current.onEditBlock?.(block, v)) : [],
           theme,
           EditorView.updateListener.of((update) => {

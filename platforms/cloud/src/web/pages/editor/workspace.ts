@@ -34,8 +34,6 @@ export function useWorkspace(bookId: string, listing: Listing) {
   const queryClient = useQueryClient();
   const [tabs, setTabs] = useState<Tab[]>([]);
   const [active, setActive] = useState<string | null>(null);
-  /** The build queued by the newest save, for the preview. */
-  const [lastBuildId, setLastBuildId] = useState<number | null>(null);
   const tabsRef = useRef(tabs);
   tabsRef.current = tabs;
 
@@ -102,9 +100,8 @@ export function useWorkspace(bookId: string, listing: Listing) {
   );
 
   const applyListing = useCallback(
-    (next: Listing & { buildId?: number | null }) => {
+    (next: Listing) => {
       queryClient.setQueryData(["books", bookId, "files"], { commit: next.commit, files: next.files });
-      if (next.buildId) setLastBuildId(next.buildId);
     },
     [bookId, queryClient],
   );
@@ -181,7 +178,6 @@ export function useWorkspace(bookId: string, listing: Listing) {
     renameTabs,
     dirty,
     oidOf,
-    lastBuildId,
   };
 }
 

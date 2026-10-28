@@ -87,6 +87,17 @@ export class BuildLog {
     }
   }
 
+  /** The newest line matching `pattern`, including one still being written. */
+  findLast(pattern: RegExp): RegExpMatchArray | null {
+    const partial = this.partial ? pattern.exec(this.clean(this.partial)) : null;
+    if (partial) return partial;
+    for (let i = this.lines.length - 1; i >= 0; i--) {
+      const match = pattern.exec(this.lines[i]!);
+      if (match) return match;
+    }
+    return null;
+  }
+
   toString(): string {
     const current = this.partial ? [this.clean(this.partial)] : [];
     const head = this.cut ? ["[Hyperbook Cloud] (earlier output cut)"] : [];
@@ -127,7 +138,7 @@ export function hyperbookVersion(config: Config): string | null {
  * - Student login and saving go to the book's own host (`/_hyperbook/api`),
  *   so `cloud` is set to same-origin mode, whatever the book said.
  */
-async function adaptConfig(srcDir: string, log: BuildLog) {
+export async function adaptConfig(srcDir: string, log: BuildLog) {
   const file = path.join(srcDir, "hyperbook.json");
   let json: Record<string, unknown>;
   try {

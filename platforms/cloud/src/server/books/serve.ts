@@ -92,7 +92,25 @@ export async function serveBuild(
     found = await findFile(root, ["404.html"]);
     if (!found) return page(c, 404, "Page not found", "This page does not exist in the book.");
   }
+  return send(c, found, status, options);
+}
 
+/** A file at exactly `segments` in `root`, or null if there is none. */
+export async function serveFile(
+  c: Context,
+  options: { root: string; pathname: string; segments: string[]; etag: string; cacheControl: string },
+) {
+  if (options.segments.length === 0) return null;
+  const found = await findFile(options.root, [options.segments.join("/")]);
+  return found ? send(c, found, 200, options) : null;
+}
+
+async function send(
+  c: Context,
+  found: { file: string; size: number },
+  status: 200 | 404,
+  options: { etag: string; cacheControl: string },
+) {
   const etag = `"${options.etag}-${found.size}"`;
   c.header("etag", etag);
   c.header("cache-control", options.cacheControl);

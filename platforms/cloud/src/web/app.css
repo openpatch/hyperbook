@@ -37,6 +37,18 @@
   --header: var(--color-brand);
   --header-foreground: var(--color-brand-text);
   --radius: 8px;
+  /* Syntax colors of the code editor. */
+  --hl-heading: var(--color-brand);
+  --hl-link: var(--color-brand);
+  --hl-directive: #8250df;
+  --hl-keyword: #cf222e;
+  --hl-string: #0a3069;
+  --hl-number: #0550ae;
+  --hl-type: #953800;
+  --hl-function: #6639ba;
+  --hl-property: #0550ae;
+  --hl-error: var(--color-sync-error);
+  --hl-muted: color-mix(in srgb, var(--color-text) 55%, var(--color-background));
 }
 
 @media (prefers-color-scheme: dark) {
@@ -46,6 +58,13 @@
     /* As in books' dark.css: a dark header with the brand as text. */
     --header: var(--color-nav);
     --header-foreground: var(--color-brand);
+    --hl-directive: #d2a8ff;
+    --hl-keyword: #ff7b72;
+    --hl-string: #a5d6ff;
+    --hl-number: #79c0ff;
+    --hl-type: #ffa657;
+    --hl-function: #d2a8ff;
+    --hl-property: #79c0ff;
   }
 }
 
