@@ -70,12 +70,11 @@ jobs:
           node-version: 24
           cache: pnpm
 
-      # --ignore-scripts: the root's prepare hook runs husky; better-sqlite3 is
-      # built explicitly for the tests below.
+      # The whole workspace and with its scripts, as in the release workflow:
+      # the packages' builds use tools from the root (rimraf, …), and pnpm 11
+      # leaves some of their bin links out under --ignore-scripts.
       - name: Install dependencies
-        run: |
-          pnpm install --filter @hyperbook/cloud --filter "hyperbook..." --frozen-lockfile --ignore-scripts
-          pnpm rebuild --filter @hyperbook/cloud better-sqlite3
+        run: pnpm install --frozen-lockfile
 
       # Also packs every element's runtime into packages/hyperbook/.cache,
       # which offline builds on the server use; it goes along below.
