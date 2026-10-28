@@ -1,5 +1,11 @@
 # @hyperbook/fs
 
+## 0.30.1
+
+### Patch Changes
+
+- [#1219](https://github.com/openpatch/hyperbook/pull/1219) [`70869ef`](https://github.com/openpatch/hyperbook/commit/70869efdd0631e6efe294d6905f4f04ca9f2108e) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - `hyperbook build` runs under Node's permission model with access to just the book and the CLI: files are copied without `fs.cp`, which read every parent directory of the output up to `/`. The `language` setting only loads a search stemmer when it is a bare language code such as `de`.
+
 ## 0.30.0
 
 ### Minor Changes
