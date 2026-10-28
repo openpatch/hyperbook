@@ -22,6 +22,9 @@ FROM base AS build
 RUN pnpm install --filter @hyperbook/cloud --frozen-lockfile --ignore-scripts
 COPY packages/markdown/assets/tokens-light.css packages/markdown/assets/tokens-dark.css packages/markdown/assets/
 COPY platforms/cloud/ platforms/cloud/
+# The context has no .git; pass --build-arg GIT_COMMIT=$(git rev-parse HEAD)
+# to show the commit in the sidebar.
+ARG GIT_COMMIT
 RUN pnpm --filter @hyperbook/cloud build
 
 

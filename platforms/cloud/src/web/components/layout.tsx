@@ -33,7 +33,7 @@ export function Layout() {
       <div className="flex flex-1 flex-col md:flex-row">
         <nav
           aria-label="Main"
-          className="shrink-0 border-sidebar-border bg-sidebar p-4 md:w-64 md:border-r"
+          className="flex shrink-0 flex-col border-sidebar-border bg-sidebar p-4 md:w-64 md:border-r"
         >
           <ul className="flex flex-wrap gap-1 md:flex-col">
             <NavItem to="/">Books</NavItem>
@@ -47,6 +47,7 @@ export function Layout() {
             )}
             <NavItem to="/account">Your account</NavItem>
           </ul>
+          <BuildInfo />
         </nav>
         <main className="mx-auto w-full max-w-245 min-w-0 flex-1 p-4 md:p-8">
           <Outlet />
@@ -54,6 +55,30 @@ export function Layout() {
       </div>
       <LegalLinks />
     </div>
+  );
+}
+
+/** Which version runs, so a report can name it. */
+function BuildInfo() {
+  const { version, commit, run } = __BUILD__;
+  return (
+    <p className="mt-auto hidden px-3 pt-4 text-xs text-muted-foreground md:block">
+      v{version}
+      {run && ` · build ${run}`}
+      {commit && (
+        <>
+          {" · "}
+          <a
+            href={`https://github.com/openpatch/hyperbook/commit/${commit}`}
+            target="_blank"
+            rel="noreferrer"
+            className="font-mono hover:text-primary"
+          >
+            {commit.slice(0, 7)}
+          </a>
+        </>
+      )}
+    </p>
   );
 }
 

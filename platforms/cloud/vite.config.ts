@@ -1,4 +1,5 @@
-import { cpSync, createReadStream, statSync } from "node:fs";
+import { execFileSync } from "node:child_process";
+import { cpSync, createReadStream, readFileSync, statSync } from "node:fs";
 import path from "node:path";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
@@ -28,8 +29,27 @@ function excalidrawFonts(): Plugin {
   };
 }
 
+/**
+ * The commit the platform is built from, shown in the sidebar. GIT_COMMIT
+ * covers builds without a checkout (Docker passes it as a build argument).
+ */
+function gitCommit(): string | null {
+  const fromEnv = process.env.GIT_COMMIT || process.env.GITHUB_SHA;
+  if (fromEnv) return fromEnv;
+  try {
+    return execFileSync("git", ["rev-parse", "HEAD"], { cwd: import.meta.dirname, encoding: "utf8" }).trim();
+  } catch {
+    return null;
+  }
+}
+
+const { version } = JSON.parse(readFileSync(path.resolve(import.meta.dirname, "package.json"), "utf8"));
+
 export default defineConfig({
   root: "src/web",
+  define: {
+    __BUILD__: JSON.stringify({ version, commit: gitCommit(), run: process.env.GITHUB_RUN_NUMBER || null }),
+  },
   plugins: [react(), tailwindcss(), excalidrawFonts()],
   resolve: {
     // CodeMirror and React break with two copies; other packages of the
