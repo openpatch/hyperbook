@@ -89,3 +89,5 @@ When the page is closed while changes are still waiting, they are sent with a re
 ## Running Hyperbook Cloud
 
 Hyperbook Cloud is in `platforms/cloud/` of the Hyperbook repository and runs as a single Docker container. See the [Cloud README](https://github.com/openpatch/hyperbook/tree/main/platforms/cloud) for installation and deployment.
+
+Hyperbook Cloud was built with the help of AI: Claude Opus 5.5 by Anthropic, and GLM 5.3 by Z.ai, run in Mistral Vibe.

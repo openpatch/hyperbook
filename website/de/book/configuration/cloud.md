@@ -90,3 +90,5 @@ Wird die Seite geschlossen, während noch Änderungen warten, werden sie mit ein
 ## Hyperbook Cloud betreiben
 
 Hyperbook Cloud liegt in `platforms/cloud/` des Hyperbook-Repositorys und läuft als ein einzelner Docker-Container. Installation und Betrieb beschreibt die [Cloud-README](https://github.com/openpatch/hyperbook/tree/main/platforms/cloud).
+
+Hyperbook Cloud wurde mit Unterstützung von KI entwickelt: Claude Opus 5.5 von Anthropic und GLM 5.3 von Z.ai, ausgeführt in Mistral Vibe.
