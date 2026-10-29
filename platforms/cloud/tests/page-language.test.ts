@@ -5,7 +5,7 @@ import { Text } from "@codemirror/state";
 import { describe, expect, it } from "vitest";
 import { DIRECTIVES, directive } from "../src/web/pages/editor/directives";
 import { findFrontmatter, toPageForm, withPageForm } from "../src/web/pages/editor/frontmatter";
-import { blockDirective, inlineDirectives, outline } from "../src/web/pages/editor/page-language";
+import { blockDirective, inlineDirectives, linkBase, outline, relativeTo } from "../src/web/pages/editor/page-language";
 
 const repo = path.resolve(import.meta.dirname, "../../..");
 
@@ -179,5 +179,31 @@ describe("page settings", () => {
 
   it("refuses YAML it cannot read", () => {
     expect(() => toPageForm("---\nname: [oops\n---\n")).toThrow();
+  });
+});
+
+describe("relative links", () => {
+  it("resolve against the page file's folder, index pages too", () => {
+    expect(linkBase("book/index.md")).toEqual([]);
+    expect(linkBase("book/a/b.md")).toEqual(["a"]);
+    expect(linkBase("book/a/index.md")).toEqual(["a"]);
+    expect(linkBase("snippets/x.md.hbs")).toBeNull();
+    expect(linkBase("book/a/img.png")).toBeNull();
+  });
+
+  it("lead where the link from the root leads", () => {
+    const cases: [string[], string, string][] = [
+      [["a"], "/a/c", "./c"],
+      [["a"], "/a", "./"],
+      [["a"], "/a/sub/x", "./sub/x"],
+      [["a"], "/", "../"],
+      [["a", "b"], "/a/c/d.png", "../c/d.png"],
+      [[], "/img.png", "./img.png"],
+    ];
+    for (const [base, href, relative] of cases) {
+      expect(relativeTo(base, href)).toBe(relative);
+      // As Hyperbook resolves it (resolveRelativePath in build.ts).
+      expect(path.posix.resolve("/" + base.join("/"), relative)).toBe(href);
+    }
   });
 });

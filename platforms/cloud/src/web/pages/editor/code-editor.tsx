@@ -161,6 +161,9 @@ export function CodeEditor({
   const host = useRef<HTMLDivElement>(null);
   const view = useRef<EditorView | null>(null);
   // The latest callbacks, without rebuilding the editor when they change.
+  /** The file's path: a rename keeps the editor. */
+  const pathRef = useRef(path);
+  pathRef.current = path;
   const callbacks = useRef({
     onChange,
     onSave,
@@ -217,6 +220,7 @@ export function CodeEditor({
           extension(path) === "md" || extension(path) === "hbs"
             ? pageLanguage({
                 files: () => callbacks.current.files,
+                path: () => pathRef.current,
                 onPageSettings:
                   extension(path) === "md" && onPageSettings
                     ? (v) => callbacks.current.onPageSettings?.(v)

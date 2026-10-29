@@ -28,6 +28,7 @@ function wrong(page: string, words: ReadonlySet<string> = new Set()) {
     extensions: [
       pageLanguage({
         files: () => [],
+        path: () => "book/index.md",
         onPageSettings: () => {},
       }),
     ],

@@ -37,6 +37,7 @@ import {
   copyName,
   extension,
   fetchListing,
+  fileAt,
   type ReferencesResult,
   fetchReferences,
   pageOf,
@@ -1124,6 +1125,14 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
                     : null
                 }
                 commit={listing.commit}
+                onNavigate={(href) => {
+                  const target = fileAt(
+                    href,
+                    listing.files.map((f) => f.path),
+                  );
+                  if (target) ws.open(target);
+                  return target !== null;
+                }}
               />
             </section>
           </>
@@ -1231,6 +1240,7 @@ function LivePreview({
   bookId: string;
   file: string | null;
   commit: string | null;
+  onNavigate: (href: string) => boolean;
 }) {
   const text = useLiveText(ws, file);
   return (

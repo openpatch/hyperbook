@@ -38,14 +38,16 @@ type Frame = { id: number; src: string };
  * reader's place, painted; see books/preview.ts), so the preview neither goes
  * blank nor jumps. A frame hidden instead of covered would not paint, nor
  * load its fonts, until it is revealed. The page follows the editor's light or
- * dark theme. Links in the frame render the pages they lead to. The frame logs
- * in once through a hand-off; later loads go straight to the page.
+ * dark theme. Links in the frame open their files in the editor (onNavigate);
+ * those that no file makes render here. The frame logs in once through a
+ * hand-off; later loads go straight to the page.
  */
 export function PreviewPane({
   bookId,
   file,
   text,
   commit,
+  onNavigate,
 }: {
   bookId: string;
   /** The page open in the editor, with its current text; null for other files. */
@@ -53,7 +55,11 @@ export function PreviewPane({
   text: string | null;
   /** The newest save: other pages may have changed with it. */
   commit: string | null;
+  /** A link in the frame was clicked: opens its file, if there is one. */
+  onNavigate?: (href: string) => boolean;
 }) {
+  const onNavigateRef = useRef(onNavigate);
+  onNavigateRef.current = onNavigate;
   const theme = useTheme();
   const themeRef = useRef(theme);
   themeRef.current = theme;
@@ -126,6 +132,10 @@ export function PreviewPane({
   useEffect(() => {
     const onMessage = (e: MessageEvent) => {
       if (e.origin !== origin.current) return;
+      if (e.data?.hyperbookPreview === "navigate" && typeof e.data.href === "string" && e.data.href.startsWith("/")) {
+        if (!onNavigateRef.current?.(e.data.href)) show(e.data.href);
+        return;
+      }
       if (e.data?.hyperbookPreview === "shown") {
         for (const [id, element] of elements.current) {
           if (element.contentWindow === e.source) promote(id);
@@ -144,7 +154,7 @@ export function PreviewPane({
     };
     window.addEventListener("message", onMessage);
     return () => window.removeEventListener("message", onMessage);
-  }, [load, promote]);
+  }, [load, promote, show]);
 
   // The theme changed: the pages switch in place, without loading again.
   useEffect(() => {

@@ -82,6 +82,25 @@ export function pageOf(path: string): string | null {
   return folder === "glossary" ? `/glossary${route === "/" ? "" : route}` : route;
 }
 
+/**
+ * The file the built book shows at `href`: a page, or a file from public/ or
+ * book/; null for what no file of the book makes (a search page, say).
+ */
+export function fileAt(href: string, files: string[]): string | null {
+  let route: string;
+  try {
+    route = decodeURIComponent(href.split(/[?#]/)[0]!);
+  } catch {
+    return null;
+  }
+  route = route.replace(/\.html$/, "").replace(/(.)\/+$/, "$1");
+  return (
+    files.find((f) => pageOf(f) === route) ??
+    files.find((f) => f === `public${route}` || f === `book${route}`) ??
+    null
+  );
+}
+
 /** The index.md of a folder inside book/, so a section; its frontmatter may set the section navigation. */
 export function isSectionIndex(path: string): boolean {
   const m = /^book\/(.+)\.(md|md\.hbs|md\.json|md\.yml)$/.exec(path);

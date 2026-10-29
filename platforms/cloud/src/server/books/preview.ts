@@ -86,6 +86,27 @@ const followTheme = (adminOrigin: string) => `<script>(() => {
   });
 })();</script>`;
 
+/**
+ * Links within the book open in the editor: a click on one is posted to it
+ * instead of followed, and the editor opens the page's file, which then shows
+ * here, or loads the address here when no file makes it (see
+ * pages/editor/preview.tsx). Links to elsewhere, to a place on the same page,
+ * downloads, and clicks with a modifier key go on as usual.
+ */
+const followLinks = (adminOrigin: string) => `<script>(() => {
+  if (parent === window) return;
+  addEventListener("click", (e) => {
+    if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    // Through shadow roots too: elements of the book draw links in theirs.
+    const a = e.composedPath().find((n) => n instanceof HTMLAnchorElement && n.hasAttribute("href"));
+    if (!a || (a.target && a.target !== "_self") || a.hasAttribute("download")) return;
+    const url = new URL(a.href, location.href);
+    if (url.origin !== location.origin || (url.pathname === location.pathname && url.hash)) return;
+    e.preventDefault();
+    parent.postMessage({ hyperbookPreview: "navigate", href: url.pathname + url.search + url.hash }, ${JSON.stringify(adminOrigin)});
+  });
+})();</script>`;
+
 type PreviewEnv = {
   Bindings: BookBindings;
   Variables: { book: BookRow; allowed: boolean };
@@ -178,7 +199,7 @@ export function createPreviewApp(deps: Deps) {
           const theme = followTheme(config.adminOrigin);
           html = head ? html.slice(0, head.index + head[0].length) + theme + html.slice(head.index + head[0].length) : theme + html;
           const end = html.lastIndexOf("</body>");
-          const script = keepScroll(config.adminOrigin);
+          const script = keepScroll(config.adminOrigin) + followLinks(config.adminOrigin);
           return c.html(end < 0 ? html + script : html.slice(0, end) + script + html.slice(end));
         }
       }

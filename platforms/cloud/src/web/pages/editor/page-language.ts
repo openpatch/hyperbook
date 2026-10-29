@@ -247,6 +247,25 @@ function publicPath(file: string): string | null {
   return null;
 }
 
+/**
+ * The folder relative links on a page resolve against, as Hyperbook resolves
+ * them: the page file's folder ("book/a/b.md" and "book/a/index.md": "/a").
+ * Null for other files, like snippets, which resolve on the page they go in.
+ */
+export function linkBase(file: string): string[] | null {
+  if (!file.startsWith("book/") || !pageOf(file)) return null;
+  return file.split("/").slice(1, -1);
+}
+
+/** The book's address `to` as a relative link from the folder `base`. */
+export function relativeTo(base: string[], to: string): string {
+  const target = to.split("/").filter(Boolean);
+  let common = 0;
+  while (common < base.length && base[common] === target[common]) common++;
+  const rest = target.slice(common).join("/");
+  return common < base.length ? "../".repeat(base.length - common) + rest : `./${rest}`;
+}
+
 const IMAGE = /\.(png|jpe?g|gif|webp|svg|avif)$/i;
 
 function directiveOptions(state: EditorState, line: number, colons: number | null): Completion[] {
@@ -282,20 +301,31 @@ function attributeOptions(d: Directive, token: DirectiveToken): Completion[] {
     );
 }
 
-function valueOptions(attr: Attribute | undefined, files: string[]): Completion[] {
+/** A path from the root ("/a/b"), and from the page (`base`) when it has a folder. */
+function withRelative(href: string, base: string[] | null, completion: Omit<Completion, "label">): Completion[] {
+  return [
+    { label: href, ...completion },
+    ...(base ? [{ label: relativeTo(base, href), ...completion, detail: completion.detail ? `${completion.detail}, relative` : "relative" }] : []),
+  ];
+}
+
+function valueOptions(attr: Attribute | undefined, files: string[], base: string[] | null): Completion[] {
   if (!attr) return [];
   if (attr.values) return attr.values.map((v) => ({ label: v, type: "enum" }));
   if (attr.file) {
     return files.flatMap((f) => {
       const p = publicPath(f);
-      return p ? [{ label: p, type: "variable" }] : [];
+      return p ? withRelative(p, base, { type: "variable" }) : [];
     });
   }
   return [];
 }
 
-/** Completion for pages: directives, their attributes and values, and links to the book's files. */
-function pageCompletion(files: () => string[]) {
+/**
+ * Completion for pages: directives, their attributes and values, and links to
+ * the book's files, from the book's root and relative to the page (`path`).
+ */
+function pageCompletion(files: () => string[], path: () => string) {
   return (context: CompletionContext): CompletionResult | null => {
     const { state, pos } = context;
     const line = state.doc.lineAt(pos);
@@ -310,7 +340,7 @@ function pageCompletion(files: () => string[]) {
       const inner = state.sliceDoc(token.braces!.from + 1, pos);
       const value = /([\w-]+)[ \t]*=[ \t]*["']?([^"'\s]*)$/.exec(inner);
       if (value) {
-        const options = d ? valueOptions(d.attributes.find((a) => a.name === value[1]), files()) : [];
+        const options = d ? valueOptions(d.attributes.find((a) => a.name === value[1]), files(), linkBase(path())) : [];
         return options.length ? { from: pos - value[2]!.length, options, validFor: /^[^"'\s]*$/ } : null;
       }
       const id = /#([\w./-]*)$/.exec(inner);
@@ -348,17 +378,20 @@ function pageCompletion(files: () => string[]) {
     const link = /(!?)\[[^\]]*\]\(([^)\s]*)$/.exec(before);
     if (link) {
       const all = files();
-      const options: Completion[] = link[1]
+      const targets: { href: string; detail: string; type: string }[] = link[1]
         ? all.flatMap((f) => {
             const p = publicPath(f);
-            return p && IMAGE.test(p) ? [{ label: p, type: "variable" }] : [];
+            return p && IMAGE.test(p) ? [{ href: p, detail: "image", type: "variable" }] : [];
           })
         : all.flatMap((f) => {
             const href = pageOf(f);
-            if (href) return [{ label: href, detail: "page", type: "text" }];
+            if (href) return [{ href, detail: "page", type: "text" }];
             const p = publicPath(f);
-            return p ? [{ label: p, detail: "file", type: "variable" }] : [];
+            return p ? [{ href: p, detail: "file", type: "variable" }] : [];
           });
+      // Each target from the root ("/a/b") and from this page ("./b", "../b").
+      const base = linkBase(path());
+      const options: Completion[] = targets.flatMap(({ href, detail, type }) => withRelative(href, base, { detail, type }));
       return { from: pos - link[2]!.length, options, validFor: /^[^)\s]*$/ };
     }
     return null;
@@ -694,10 +727,13 @@ function frontmatterFold(onEdit: (view: EditorView) => void): Extension {
 
 export function pageLanguage({
   files,
+  path,
   onPageSettings,
 }: {
   /** The book's files, for links and `src`. */
   files: () => string[];
+  /** The file being edited, for relative links; it changes when renamed. */
+  path: () => string;
   /** Pages (not snippets): fold the frontmatter, with a button to edit it as a form. */
   onPageSettings?: (view: EditorView) => void;
 }): Extension {
@@ -706,7 +742,7 @@ export function pageLanguage({
     outlineField,
     syntaxHighlighting(highlightStyle),
     directiveHighlight,
-    autocompletion({ override: [pageCompletion(files)], icons: false }),
+    autocompletion({ override: [pageCompletion(files, path)], icons: false }),
     hoverHelp,
     check,
     pageTheme,
