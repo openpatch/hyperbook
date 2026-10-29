@@ -44,6 +44,10 @@ Add `?standalone=true` to any page URL:
 
 This method allows **any page** to be displayed in standalone mode without modifying its frontmatter.
 
+Pages inside an iframe switch to standalone mode automatically; add
+`?standalone=false` to keep the whole page (header, navigation, footer)
+even inside an iframe — the Hyperbook Cloud editor's preview does this.
+
 ## Example Usage
 
 ```html

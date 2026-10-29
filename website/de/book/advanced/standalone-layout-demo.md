@@ -45,6 +45,11 @@ Fügen Sie `?standalone=true` zu jeder Seiten-URL hinzu:
 
 Diese Methode ermöglicht es, **jede Seite** im Standalone-Modus anzuzeigen, ohne deren Frontmatter zu ändern.
 
+Seiten innerhalb eines iframes wechseln automatisch in den Standalone-Modus;
+mit `?standalone=false` bleibt die ganze Seite (Kopfzeile, Navigation,
+Fußzeile) auch im iframe erhalten — die Vorschau des Hyperbook-Cloud-Editors
+macht das so.
+
 ## Beispielverwendung
 
 ```html

@@ -303,12 +303,17 @@ hyperbook.bootstrap = (function () {
    */
   function checkStandaloneMode() {
     const urlParams = new URLSearchParams(window.location.search);
-    const standaloneParam = urlParams.get('standalone') === 'true';
-    
+    const standaloneParam = urlParams.get('standalone');
+
     const isVSCodeWebview = typeof acquireVsCodeApi !== 'undefined';
     const isInIframe = window.self !== window.top && !isVSCodeWebview;
-    
-    if (standaloneParam || isInIframe) {
+
+    // An iframe hides the shell (standalone mode) unless the address says
+    // otherwise: `standalone=false` keeps the whole page, as the cloud
+    // editor's preview pane asks for. `standalone=true` always hides it.
+    const standalone = standaloneParam === 'true' || (standaloneParam === null && isInIframe);
+
+    if (standalone) {
       const mainGrid = document.querySelector('.main-grid');
       if (mainGrid && !mainGrid.classList.contains('layout-standalone')) {
         mainGrid.classList.add('layout-standalone');

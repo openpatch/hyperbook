@@ -7,10 +7,16 @@ import { api, unwrap } from "@/lib/api";
 import { type Theme, useTheme } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 
-/** `href` with the editor's theme, for the preview host to show the page in (see books/preview.ts). */
+/**
+ * `href` with the editor's theme, for the preview host to show the page in
+ * (see books/preview.ts). The pane is an iframe, which would make the page
+ * hide its shell (standalone mode in bootstrap.js); `standalone=false` keeps
+ * the whole page — header, navigation, footer — as readers will see it.
+ */
 function withTheme(href: string, theme: Theme) {
   const url = new URL(href, "http://preview");
   url.searchParams.set("hb-theme", theme);
+  url.searchParams.set("standalone", "false");
   return url.href.slice(url.origin.length);
 }
 
