@@ -1,5 +1,13 @@
 # @hyperbook/cloud
 
+## 0.2.2
+
+### Patch Changes
+
+- [`32ffbb4`](https://github.com/openpatch/hyperbook/commit/32ffbb4a35886d6676ce58420c014b6b9687185d) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Rename the build's "Website" link to "Download" and name the archive `<slug>.zip`.
+
+- [`6ea0bf4`](https://github.com/openpatch/hyperbook/commit/6ea0bf474a0f014bbfff59cd65384e9243868837) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - The light/dark choice applies from the first paint also where a Content-Security-Policy forbids inline scripts, so the toggle and the page no longer disagree after loading. The editor's preview follows the chosen theme, and switches with it.
+
 ## 0.2.1
 
 ### Patch Changes
