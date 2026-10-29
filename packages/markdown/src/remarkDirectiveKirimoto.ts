@@ -36,7 +36,12 @@ export default (ctx: HyperbookContext) => () => {
         };
 
         if (mode) properties["data-mode"] = mode;
-        if (model) properties["data-model"] = model;
+        if (model)
+          properties["data-model"] = ctx.makeUrl(
+            model,
+            "public",
+            ctx.navigation.current || undefined,
+          );
         if (workspace) properties["data-workspace"] = workspace;
         if (settings) properties["data-settings"] = settings;
 

@@ -88,7 +88,11 @@ export default (ctx: HyperbookContext) => () => {
                   tagName: "img",
                   properties: {
                     class: "tile-icon",
-                    src: ctx.makeUrl(icon, "public"),
+                    src: ctx.makeUrl(
+                      icon,
+                      "public",
+                      ctx.navigation.current || undefined,
+                    ),
                   },
                   children: [],
                 });

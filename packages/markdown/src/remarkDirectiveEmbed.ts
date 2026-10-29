@@ -28,12 +28,17 @@ export default (ctx: HyperbookContext) => () => {
           aspectRatio,
           width = "100%",
           height = "400px",
-          src,
+          src: rawSrc,
           allowFullScreen = true,
           title,
           consent = "true",
         } = node.attributes || {};
 
+        // A page or file of the book, from the root or this page; addresses
+        // elsewhere stay as they are.
+        const src = rawSrc
+          ? ctx.makeUrl(rawSrc, "public", ctx.navigation.current || undefined)
+          : rawSrc;
         const useConsent = consent !== "false";
 
         if (useConsent) {

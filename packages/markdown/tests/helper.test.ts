@@ -49,6 +49,31 @@ describe("readFile", () => {
     expect(readFile("c.py", makeCtx(undefined, "sub"))).toBe("from page dir");
   });
 
+  it("reads ./ and ../ from the page's folder only", async () => {
+    // public/c.py would win for a bare "c.py"; "./c.py" means the page's one.
+    await fs.writeFile(path.join(root, "public", "c.py"), "from public too");
+    try {
+      expect(readFile("c.py", makeCtx(undefined, "sub"))).toBe("from public too");
+      expect(readFile("./c.py", makeCtx(undefined, "sub"))).toBe("from page dir");
+      expect(readFile("../b.py", makeCtx(undefined, "sub"))).toBe("from book");
+      expect(readFile("../a.py", makeCtx(undefined, "sub"))).toBe("from public");
+    } finally {
+      await fs.rm(path.join(root, "public", "c.py"));
+    }
+  });
+
+  it("never reads outside the book", async () => {
+    const outside = path.join(path.dirname(root), "hyperbook-outside.txt");
+    await fs.writeFile(outside, "secret");
+    try {
+      const up = "../".repeat(10) + path.relative("/", outside);
+      expect(readFile(up, makeCtx(undefined, "sub"))).toBeNull();
+      expect(readFile("/../hyperbook-outside.txt", makeCtx())).toBeNull();
+    } finally {
+      await fs.rm(outside);
+    }
+  });
+
   it("returns null when the file is nowhere", () => {
     expect(readFile("missing.py", makeCtx())).toBeNull();
   });
@@ -67,6 +92,7 @@ describe("readFile", () => {
         path.join(root, "public", "later.py"),
         path.join(root, "book", "later.py"),
         path.join(root, "book", "sub", "later.py"),
+        path.join(root, "public", "sub", "later.py"),
       ].sort(),
     );
   });

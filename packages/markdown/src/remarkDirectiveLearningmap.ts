@@ -48,7 +48,11 @@ export default (ctx: HyperbookContext) => () => {
         let parsedRoadmapData = JSON.parse(srcFile) as any;
         parsedRoadmapData.nodes?.forEach((node: any) => {
           if (node.video) {
-            node.video = ctx.makeUrl(node.video, "public");
+            node.video = ctx.makeUrl(
+              node.video,
+              "public",
+              ctx.navigation.current || undefined,
+            );
           }
           if (node.resources) {
             node.resources = node.resources.map((res: any) => ({
