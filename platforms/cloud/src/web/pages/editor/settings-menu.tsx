@@ -22,14 +22,23 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  FONTS,
   FONT_SIZES,
+  fontOf,
   LINE_HEIGHTS,
   type EditorSettings,
 } from "@/lib/editor-settings";
 
 /**
- * The editor's look and checks: font size, line height, line numbers, spell
- * check, and the book's own words (see settings-dialog.tsx for those).
+ * The editor's look and checks: font, font size, line height, line numbers,
+ * spell check, and the book's own words (see settings-dialog.tsx for those).
  */
 export function SettingsMenu({
   settings,
@@ -113,6 +122,35 @@ export function SettingsMenu({
             })}
           </span>
         </div>
+        {/* A row like the two above: the choice and its list both drawn in
+            the chosen font, so the select shows what it picks. */}
+        <div className="flex items-center justify-between gap-2 px-2 py-1 text-sm">
+          <span aria-hidden>Font</span>
+          <Select
+            value={settings.font}
+            onValueChange={(font) => update({ font })}
+          >
+            <SelectTrigger
+              size="sm"
+              aria-label="Font"
+              className="h-7 w-32 px-2 text-xs"
+              style={{ fontFamily: fontOf(settings.font).stack }}
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent position="popper" className="text-xs">
+              {FONTS.map((font) => (
+                <SelectItem
+                  key={font.key}
+                  value={font.key}
+                  style={{ fontFamily: font.stack }}
+                >
+                  {font.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
         <DropdownMenuCheckboxItem
           checked={settings.lineNumbers}
           onCheckedChange={(checked) =>
@@ -132,7 +170,6 @@ export function SettingsMenu({
         >
           Spell check
         </DropdownMenuCheckboxItem>
-        <DropdownMenuSeparator />
         <DropdownMenuItem onSelect={onOpenWords}>
           <ListTreeIcon /> Custom words…
         </DropdownMenuItem>

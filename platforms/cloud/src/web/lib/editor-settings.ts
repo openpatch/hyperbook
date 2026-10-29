@@ -1,7 +1,57 @@
 import { useCallback, useEffect, useState } from "react";
 
+/** A font the editor can use; the Monaspace family ships with the editor. */
+export type EditorFont = {
+  /** The stored choice. */
+  key: string;
+  /** The name in the menu. */
+  label: string;
+  /** The CSS font-family stack (the @font-face rules are in app.css). */
+  stack: string;
+};
+
+/** The editor's font choices: the system's monospace and GitHub's Monaspace. */
+export const FONTS: EditorFont[] = [
+  {
+    key: "system",
+    label: "System",
+    stack: "var(--font-code, ui-monospace, monospace)",
+  },
+  {
+    key: "neon",
+    label: "Monaspace Neon",
+    stack: '"Monaspace Neon", ui-monospace, monospace',
+  },
+  {
+    key: "argon",
+    label: "Monaspace Argon",
+    stack: '"Monaspace Argon", ui-monospace, monospace',
+  },
+  {
+    key: "xenon",
+    label: "Monaspace Xenon",
+    stack: '"Monaspace Xenon", ui-monospace, monospace',
+  },
+  {
+    key: "radon",
+    label: "Monaspace Radon",
+    stack: '"Monaspace Radon", ui-monospace, monospace',
+  },
+  {
+    key: "krypton",
+    label: "Monaspace Krypton",
+    stack: '"Monaspace Krypton", ui-monospace, monospace',
+  },
+];
+
+/** The font a stored choice names; an unknown key is the system's font. */
+export const fontOf = (key: string): EditorFont =>
+  FONTS.find((font) => font.key === key) ?? FONTS[0]!;
+
 /** The editor's look, as its teacher chose it; kept in the browser. */
 export type EditorSettings = {
+  /** The editor's font (see FONTS). */
+  font: string;
   /** CodeMirror's font size in px. */
   fontSize: number;
   /** The editor's line height, relative to the font size. */
@@ -16,6 +66,7 @@ const STORAGE_KEY = "editor-settings";
 export const FONT_SIZES = [12, 13, 14, 16, 18, 20, 24];
 export const LINE_HEIGHTS = [1.2, 1.6, 2];
 const DEFAULTS: EditorSettings = {
+  font: "system",
   fontSize: 14,
   lineHeight: 1.6,
   lineNumbers: true,
@@ -28,6 +79,9 @@ function stored(): EditorSettings {
       localStorage.getItem(STORAGE_KEY) ?? "null",
     ) as Partial<EditorSettings> | null;
     return {
+      font: FONTS.some((font) => font.key === value?.font)
+        ? value!.font!
+        : DEFAULTS.font,
       fontSize: FONT_SIZES.includes(value?.fontSize ?? 14)
         ? value!.fontSize!
         : DEFAULTS.fontSize,

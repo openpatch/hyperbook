@@ -13,6 +13,42 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 /*
+ * The Monaspace fonts of the editor's font choice (see
+ * lib/editor-settings.ts). Variable fonts, so one file covers every weight;
+ * the browser loads a file only when its family ends up in use.
+ */
+@font-face {
+  font-family: "Monaspace Neon";
+  src: url("/fonts/monaspace-neon-var.woff2") format("woff2");
+  font-weight: 200 800;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Monaspace Argon";
+  src: url("/fonts/monaspace-argon-var.woff2") format("woff2");
+  font-weight: 200 800;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Monaspace Xenon";
+  src: url("/fonts/monaspace-xenon-var.woff2") format("woff2");
+  font-weight: 200 800;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Monaspace Radon";
+  src: url("/fonts/monaspace-radon-var.woff2") format("woff2");
+  font-weight: 200 800;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Monaspace Krypton";
+  src: url("/fonts/monaspace-krypton-var.woff2") format("woff2");
+  font-weight: 200 800;
+  font-display: swap;
+}
+
+/*
  * shadcn/ui variables, mapped onto Hyperbook's tokens. Components only ever
  * use these names, so the look is decided here and nowhere else.
  */
@@ -53,7 +89,11 @@
   --hl-function: #6639ba;
   --hl-property: #0550ae;
   --hl-error: var(--color-sync-error);
-  --hl-muted: color-mix(in srgb, var(--color-text) 55%, var(--color-background));
+  --hl-muted: color-mix(
+    in srgb,
+    var(--color-text) 55%,
+    var(--color-background)
+  );
 }
 
 .dark {
