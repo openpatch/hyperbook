@@ -7,6 +7,7 @@ import { python } from "@codemirror/lang-python";
 import { SQLite, sql } from "@codemirror/lang-sql";
 import { yaml } from "@codemirror/lang-yaml";
 import { typst_lezer } from "codemirror-lang-typst/lezer";
+import { syntaxHighlighting } from "@codemirror/language";
 import { Compartment, type Extension, EditorState } from "@codemirror/state";
 import { EditorView, keymap } from "@codemirror/view";
 import { basicSetup } from "codemirror";
@@ -15,7 +16,7 @@ import { fontOf, type EditorSettings } from "@/lib/editor-settings";
 import { type Block, editVisuallyButtons } from "./blocks";
 import { contextMenu } from "./context-menu";
 import { extension, isMarkdownPage } from "./files";
-import { pageLanguage } from "./page-language";
+import { highlightStyle, pageLanguage } from "./page-language";
 import { type SpellConfig, spellCheck } from "./spellcheck";
 
 function language(path: string): Extension {
@@ -243,6 +244,9 @@ export function CodeEditor({
             },
           ]),
           basicSetup,
+          // A non-fallback style disables basicSetup's defaultHighlightStyle
+          // (light-only colors, unreadable in dark mode); ours follows the mode.
+          syntaxHighlighting(highlightStyle),
           numbersCompartment.of(settings.lineNumbers ? [] : noGutters),
           heightCompartment.of(lineHeightTheme(settings.lineHeight)),
           fontCompartment.of(fontTheme(fontOf(settings.font).stack)),

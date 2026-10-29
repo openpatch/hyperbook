@@ -583,8 +583,13 @@ const directiveHighlight = ViewPlugin.fromClass(
   { decorations: (v) => v.decorations },
 );
 
-/** Colors from app.css, which switch with light and dark mode. */
-const highlightStyle = HighlightStyle.define([
+/**
+ * Colors from app.css, which switch with light and dark mode. Shared with the
+ * code editor (code-editor.tsx): without a non-fallback style there, code files
+ * fall back to basicSetup's defaultHighlightStyle, whose colors are light-only
+ * and unreadable on a dark background.
+ */
+export const highlightStyle = HighlightStyle.define([
   { tag: t.heading, color: "var(--hl-heading)", fontWeight: "bold" },
   { tag: t.heading1, fontSize: "1.25em" },
   { tag: t.heading2, fontSize: "1.12em" },
@@ -598,11 +603,14 @@ const highlightStyle = HighlightStyle.define([
   { tag: [t.processingInstruction, t.contentSeparator, t.list], color: "var(--hl-muted)" },
   { tag: [t.keyword, t.operatorKeyword, t.controlKeyword, t.moduleKeyword, t.definitionKeyword], color: "var(--hl-keyword)" },
   { tag: [t.string, t.special(t.string), t.regexp], color: "var(--hl-string)" },
-  { tag: [t.number, t.bool, t.atom, t.null], color: "var(--hl-number)" },
+  { tag: [t.number, t.bool, t.atom, t.null, t.literal, t.labelName], color: "var(--hl-number)" },
+  // Tags the default style paints near-black or dark blue; here they stay the
+  // mode-aware text color, so code is readable in dark mode too.
+  { tag: [t.variableName, t.definition(t.variableName), t.local(t.variableName), t.special(t.variableName)], color: "var(--color-text)" },
   { tag: [t.comment, t.lineComment, t.blockComment, t.docComment], color: "var(--hl-muted)", fontStyle: "italic" },
   { tag: [t.typeName, t.className, t.namespace], color: "var(--hl-type)" },
-  { tag: [t.function(t.variableName), t.function(t.propertyName), t.definition(t.function(t.variableName))], color: "var(--hl-function)" },
-  { tag: [t.propertyName, t.attributeName], color: "var(--hl-property)" },
+  { tag: [t.function(t.variableName), t.function(t.propertyName), t.definition(t.function(t.variableName)), t.macroName], color: "var(--hl-function)" },
+  { tag: [t.propertyName, t.attributeName, t.definition(t.propertyName)], color: "var(--hl-property)" },
   { tag: [t.tagName, t.angleBracket], color: "var(--hl-keyword)" },
   { tag: [t.meta, t.documentMeta, t.annotation], color: "var(--hl-muted)" },
   { tag: t.invalid, color: "var(--hl-error)" },
