@@ -7,7 +7,7 @@ import {
 } from "@codemirror/autocomplete";
 import { markdown } from "@codemirror/lang-markdown";
 import { yamlFrontmatter } from "@codemirror/lang-yaml";
-import { HighlightStyle, syntaxHighlighting } from "@codemirror/language";
+import { HighlightStyle, LanguageDescription, syntaxHighlighting } from "@codemirror/language";
 import { languages } from "@codemirror/language-data";
 import { type Action, type Diagnostic, linter } from "@codemirror/lint";
 import { type EditorState, type Extension, RangeSetBuilder, StateEffect, StateField, type Text } from "@codemirror/state";
@@ -726,6 +726,18 @@ function frontmatterFold(onEdit: (view: EditorView) => void): Extension {
 
 // ---- All together ----------------------------------------------------------
 
+/**
+ * Typst code blocks (```typ … ```) in pages; @codemirror/language-data has no
+ * Typst, so its Lezer-backed support (no WASM) is described here and loaded
+ * only when a page uses it.
+ */
+const typst = LanguageDescription.of({
+  name: "typst",
+  alias: ["typ"],
+  extensions: ["typ"],
+  load: async () => (await import("codemirror-lang-typst/lezer")).typst_lezer(),
+});
+
 export function pageLanguage({
   files,
   path,
@@ -739,7 +751,7 @@ export function pageLanguage({
   onPageSettings?: (view: EditorView) => void;
 }): Extension {
   return [
-    yamlFrontmatter({ content: markdown({ codeLanguages: languages }) }),
+    yamlFrontmatter({ content: markdown({ codeLanguages: [...languages, typst] }) }),
     outlineField,
     syntaxHighlighting(highlightStyle),
     directiveHighlight,

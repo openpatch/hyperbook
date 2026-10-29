@@ -6,7 +6,7 @@ import { audit } from "../audit";
 import type { Config } from "../config";
 import type { Db } from "../db/client";
 import { books, builds } from "../db/schema";
-import { checkout } from "./git";
+import { checkout, markProjectRoot } from "./git";
 import { BuildLog, type Runner, hyperbookVersion, sandboxedRunner } from "./runner";
 import { buildDir, makeJobDir, repoDir } from "./storage";
 
@@ -282,6 +282,8 @@ export class BuildQueue {
       await mkdir(srcDir);
       log.note(`Checking out ${build.commit.slice(0, 12)}`);
       await checkout(repoDir(this.config, build.bookId), build.commit, srcDir);
+      // So the book's rfile/rbase64 helpers see the checkout as the project root.
+      await markProjectRoot(srcDir);
       // Canceled while checking out: the runner would never hear of it.
       if (abort.signal.aborted) {
         log.note("The build was canceled");

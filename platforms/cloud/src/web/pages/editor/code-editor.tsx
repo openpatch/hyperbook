@@ -1,8 +1,12 @@
 import { css } from "@codemirror/lang-css";
 import { html } from "@codemirror/lang-html";
+import { java } from "@codemirror/lang-java";
 import { javascript } from "@codemirror/lang-javascript";
 import { json } from "@codemirror/lang-json";
+import { python } from "@codemirror/lang-python";
+import { SQLite, sql } from "@codemirror/lang-sql";
 import { yaml } from "@codemirror/lang-yaml";
+import { typst_lezer } from "codemirror-lang-typst/lezer";
 import { Compartment, type Extension, EditorState } from "@codemirror/state";
 import { EditorView, keymap } from "@codemirror/view";
 import { basicSetup } from "codemirror";
@@ -10,7 +14,7 @@ import { useEffect, useRef } from "react";
 import { fontOf, type EditorSettings } from "@/lib/editor-settings";
 import { type Block, editVisuallyButtons } from "./blocks";
 import { contextMenu } from "./context-menu";
-import { extension } from "./files";
+import { extension, isMarkdownPage } from "./files";
 import { pageLanguage } from "./page-language";
 import { type SpellConfig, spellCheck } from "./spellcheck";
 
@@ -27,16 +31,34 @@ function language(path: string): Extension {
       return css();
     case "js":
     case "mjs":
+    case "cjs":
       return javascript();
+    case "jsx":
+      return javascript({ jsx: true });
     case "ts":
       return javascript({ typescript: true });
+    case "tsx":
+      return javascript({ typescript: true, jsx: true });
     case "html":
+    case "htm":
+    case "xhtml":
     case "svg":
     case "xml":
       return html();
     case "yml":
     case "yaml":
       return yaml();
+    case "py":
+    case "pyw":
+    case "pyi":
+      return python();
+    case "java":
+      return java();
+    case "sql":
+      // The sqlide element runs SQLite, so its keywords highlight too.
+      return sql({ dialect: SQLite });
+    case "typ":
+      return typst_lezer();
     default:
       return [];
   }
@@ -195,7 +217,7 @@ export function CodeEditor({
   /** Spell check for this file, with a dictionary we have; null switches it off. */
   const spellConfig = (): SpellConfig | null => {
     const current = callbacks.current.spell;
-    if (!current?.enabled || extension(path) !== "md") return null;
+    if (!current?.enabled || !isMarkdownPage(path)) return null;
     if (current.language !== "en" && current.language !== "de") return null;
     return {
       language: current.language,
@@ -229,18 +251,19 @@ export function CodeEditor({
           spellCompartment.of(spellConfig() ? spellCheck(spellConfig()!) : []),
           contextMenu(),
           EditorView.lineWrapping,
-          // Pages and snippets: Markdown with Hyperbook's directives.
-          extension(path) === "md" || extension(path) === "hbs"
+          // Pages and snippets: Markdown with Hyperbook's directives. A
+          // .md.hbs page works as a template, but is written as Markdown too.
+          isMarkdownPage(path) || extension(path) === "hbs"
             ? pageLanguage({
                 files: () => callbacks.current.files,
                 path: () => pathRef.current,
                 onPageSettings:
-                  extension(path) === "md" && onPageSettings
+                  isMarkdownPage(path) && onPageSettings
                     ? (v) => callbacks.current.onPageSettings?.(v)
                     : undefined,
               })
             : language(path),
-          extension(path) === "md"
+          isMarkdownPage(path)
             ? editVisuallyButtons((block, v) =>
                 callbacks.current.onEditBlock?.(block, v),
               )

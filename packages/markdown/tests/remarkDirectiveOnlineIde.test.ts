@@ -134,6 +134,83 @@ new Stage();
     expect(html).toContain("'outputWidth': '60%'");
   });
 
+  it("should transform online-ide with ::file directives", async () => {
+    expect(
+      toHtml(
+        `:::onlineide
+
+::file{path="/input/sky.jpg" src="images/sky.jpg"}
+
+\`\`\`java
+Bitmap sky = new Bitmap("/input/sky.jpg");
+\`\`\`
+
+:::
+`,
+        ctx,
+      ).value,
+    ).toMatchSnapshot();
+  });
+
+  it("should map ::file directives to the data-type of their file kind", async () => {
+    const html = toHtml(
+      `:::onlineide
+
+::file{path="waves.frag" src="shaders/waves.frag"}
+::file{path="/sky.jpg" src="images/sky.jpg"}
+
+\`\`\`java
+new Stage();
+\`\`\`
+
+:::
+`,
+      ctx,
+    ).value as string;
+    expect(html).toContain(
+      '<script type="text/plain" title="waves.frag" data-type="asset" src="/public/shaders/waves.frag"></script>',
+    );
+    expect(html).toContain(
+      '<script type="text/plain" title="/sky.jpg" data-type="image" src="/public/images/sky.jpg"></script>',
+    );
+  });
+
+  it("should name a ::file without path after its source", async () => {
+    const html = toHtml(
+      `:::onlineide
+
+::file{src="images/sky.jpg"}
+
+\`\`\`java
+new Stage();
+\`\`\`
+
+:::
+`,
+      ctx,
+    ).value as string;
+    expect(html).toContain('title="sky.jpg"');
+  });
+
+  it("should report a ::file without src", async () => {
+    const result = toHtml(
+      `:::onlineide
+
+::file{path="sky.jpg"}
+
+\`\`\`java
+new Stage();
+\`\`\`
+
+:::
+`,
+      ctx,
+    );
+    expect(result.messages.map((m) => m.reason).join("\n")).toContain(
+      '::file in the onlineide directive needs a src="…".',
+    );
+  });
+
   it("should leave the output panel alone without outputWidth", async () => {
     const html = toHtml(
       `:::onlineide

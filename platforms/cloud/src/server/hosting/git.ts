@@ -1,5 +1,6 @@
 import { spawn } from "node:child_process";
 import { mkdirSync, rmSync } from "node:fs";
+import { mkdir } from "node:fs/promises";
 import path from "node:path";
 import type { Readable } from "node:stream";
 
@@ -175,6 +176,21 @@ export async function checkout(repo: string, commit: string, dest: string) {
   } finally {
     rmSync(index, { force: true });
   }
+}
+
+/**
+ * Marks a checkout as the root of the book project. Hyperbook's `rfile` and
+ * `rbase64` helpers read from the nearest `.git` above the page, and a
+ * checkout has none — without this they find no project root at all (or a
+ * `.git` far above the data directory). An empty `.git` directory makes the
+ * checkout itself the root they resolve to, so those helpers pick up the
+ * book's root. Never committed: uploads with a `.git` are refused.
+ */
+export async function markProjectRoot(dest: string) {
+  await mkdir(path.join(dest, ".git"), { recursive: true }).catch(() => {
+    // A book file called .git: leave it, the helpers then see a file, which
+    // they accept as well.
+  });
 }
 
 /** The files of `commit` as a zip, streamed. */

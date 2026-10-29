@@ -1,0 +1,2 @@
+CREATE TABLE fluss (id INTEGER PRIMARY KEY, name TEXT);
+INSERT INTO fluss VALUES (1, "Elbe");

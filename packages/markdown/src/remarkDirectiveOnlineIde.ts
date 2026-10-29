@@ -4,6 +4,7 @@
 import { HyperbookContext, elementCdn } from "@hyperbook/types";
 import { elementAssetUrl } from "./elementAssets";
 import { Code, Root, Text } from "mdast";
+import path from "path";
 import { visit } from "unist-util-visit";
 import { VFile } from "vfile";
 import {
@@ -76,9 +77,36 @@ export default (ctx: HyperbookContext) => () => {
           ? `, 'assetBaseUrl': '${assetBase.replace(/['"\\]/g, "")}'`
           : "";
 
-        // Parse @file directives from text content
+        // Collect the files the program works with: ::file directives, and
+        // the @file lines the directive read before ::file existed.
         const binaryFiles: { dest: string; url: string }[] = [];
         for (const child of node.children) {
+          if (
+            child.type === "leafDirective" &&
+            (child as { name?: string }).name === "file"
+          ) {
+            const fileAttributes =
+              (child as { attributes?: Record<string, string> }).attributes ||
+              {};
+            const src = fileAttributes.src;
+            if (!src) {
+              file.message(
+                `::file in the ${name} directive needs a src="…".`,
+                child as never,
+              );
+              continue;
+            }
+            binaryFiles.push({
+              dest: fileAttributes.path || path.posix.basename(src),
+              url: ctx.makeUrl(
+                src,
+                "public",
+                ctx.navigation.current || undefined,
+              ),
+            });
+            continue;
+          }
+
           let text = "";
           if (child.type === "text") {
             text = (child as Text).value;
@@ -154,8 +182,8 @@ export default (ctx: HyperbookContext) => () => {
             ],
           }));
 
-        // Add @file entries as workspace files with a data-type matching the
-        // kind of file, as the embedded IDE expects it.
+        // Add the ::file and @file entries as workspace files with a
+        // data-type matching the kind of file, as the embedded IDE expects it.
         const fileElements: ElementContent[] = binaryFiles.map((file) => ({
           type: "element",
           tagName: "script",

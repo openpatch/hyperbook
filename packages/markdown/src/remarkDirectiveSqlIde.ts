@@ -4,8 +4,10 @@
 import { HyperbookContext, elementCdn } from "@hyperbook/types";
 import { elementAssetUrl } from "./elementAssets";
 import { Root } from "mdast";
+import path from "path";
 import { visit } from "unist-util-visit";
 import { VFile } from "vfile";
+import { readFile } from "./helper";
 import {
   expectContainerDirective,
   isCode,
@@ -70,24 +72,75 @@ export default (ctx: HyperbookContext) => () => {
           [],
         );
 
+        const scriptElement = (
+          title: string | undefined,
+          dataType: string,
+          value: string,
+        ): ElementContent => ({
+          type: "element",
+          tagName: "script",
+          properties: {
+            type: "text/plain",
+            title,
+            "data-type": dataType,
+          },
+          children: [
+            {
+              type: "text",
+              value,
+            },
+          ],
+        });
+
         const codes: ElementContent[] = node.children
           ?.filter(isCode)
-          .map((n) => ({
-            type: "element",
-            tagName: "script",
-            properties: {
-              type: "text/plain",
-              title: n.meta ?? undefined,
-              "data-type":
-                n.lang === "md" || n.lang === "markdown" ? "hint" : "sql",
-            },
-            children: [
-              {
-                type: "text",
-                value: n.value,
-              },
-            ],
-          }));
+          .map((n) =>
+            scriptElement(
+              n.meta ?? undefined,
+              n.lang === "md" || n.lang === "markdown" ? "hint" : "sql",
+              n.value,
+            ),
+          );
+
+        // ::file{path="…" src="…"} adds a file from the book. The embedded
+        // SQL IDE reads only what is on the page, so the source is read here
+        // and a missing one is reported to the author. A Markdown source
+        // becomes a hint, everything else an SQL file.
+        const fileScripts: ElementContent[] = [];
+        for (const child of node.children || []) {
+          if (
+            child.type !== "leafDirective" ||
+            (child as { name?: string }).name !== "file"
+          ) {
+            continue;
+          }
+          const fileAttributes =
+            (child as { attributes?: Record<string, string> }).attributes || {};
+          const src = fileAttributes.src;
+          if (!src) {
+            file.message(
+              `::file in the ${name} directive needs a src="…".`,
+              child as never,
+            );
+            continue;
+          }
+          const filePath = fileAttributes.path || path.posix.basename(src);
+          const content = readFile(src, ctx);
+          if (content === null) {
+            file.message(
+              `::file in the ${name} directive: "${src}" was not found.`,
+              child as never,
+            );
+            continue;
+          }
+          fileScripts.push(
+            scriptElement(
+              filePath,
+              /\.(md|markdown)$/i.test(filePath) ? "hint" : "sql",
+              content,
+            ),
+          );
+        }
 
         data.hName = "div";
         data.hProperties = {
@@ -103,7 +156,7 @@ export default (ctx: HyperbookContext) => () => {
               style: `padding: 0; margin: 0;`,
               "data-sql-online": `{'id': '${id}', "databaseURL": "${db}"}`,
             },
-            children: [...codes],
+            children: [...(codes || []), ...fileScripts],
           },
           {
             type: "element",

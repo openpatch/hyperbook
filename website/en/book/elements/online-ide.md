@@ -26,13 +26,13 @@ Java-like programming language (compiler, interpreter, debugger) with IDE that r
 
 A relative path in a program, such as `addCostume("hero", "assets/hero.png")`, starts from the folder of the page's Markdown file, just as it starts from the project folder on the desktop. Put an `assets` folder next to the page, and the same program runs in the book and in a desktop Java IDE with the same folder next to it. Every page in that folder shares it.
 
-## Load binary files
+## Load files
 
-Use `@file` directives inside the `:::onlineide` block to reference external files (such as images) that your Java code can access.
+Use `::file` directives inside the `:::onlineide` block to reference external files (such as images) that your Java code can access.
 
 :::onlineide
 
-@file dest="sky.jpg" src="/clouds.jpg"
+::file{path="sky.jpg" src="/clouds.jpg"}
 
 ```java Main.java
 Bitmap sky = new Bitmap("sky.jpg");
@@ -43,7 +43,7 @@ Bitmap sky = new Bitmap("sky.jpg");
 ````markdown
 :::onlineide Main.java
 
-@file dest="sky.jpg" src="/clouds.jpg"
+::file{path="sky.jpg" src="/clouds.jpg"}
 
 ```java
 Bitmap sky = new Bitmap("sky.jpg");
@@ -52,11 +52,11 @@ Bitmap sky = new Bitmap("sky.jpg");
 :::
 ````
 
-The `@file` directive takes two parameters:
-- `dest`: The path where the file should be accessible from within your Java code (e.g., `/input/sky.jpg`)
+The `::file` directive takes two parameters:
+- `path`: The path where the file should be accessible from within your Java code (e.g., `/input/sky.jpg`). If left out, the file name of `src` is used.
 - `src`: The source path to the file in your project (e.g., `images/sky.jpg`)
 
-You can include multiple `@file` directives to reference multiple files.
+You can include multiple `::file` directives to reference multiple files.
 
 :::onlineide
 

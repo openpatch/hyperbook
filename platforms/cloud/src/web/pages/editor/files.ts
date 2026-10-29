@@ -71,6 +71,26 @@ export function toBase64(bytes: Uint8Array): string {
   return btoa(binary);
 }
 
+/** Source extensions of a page, longest first (as in shared/references.ts). */
+const PAGE_EXTENSIONS = [".md.hbs", ".md.json", ".md.yml", ".md"];
+
+/** A page of the book: in book/ or glossary/ with a page extension. */
+export function isPage(path: string): boolean {
+  return (
+    (path.startsWith("book/") || path.startsWith("glossary/")) &&
+    PAGE_EXTENSIONS.some((ext) => path.endsWith(ext))
+  );
+}
+
+/**
+ * A page written as Markdown, which the build may render as a template:
+ * `.md`, or `.md.hbs` where the page's output is a Handlebars template.
+ * (Snippets in snippets/ are templates too, but no pages.)
+ */
+export function isMarkdownPage(path: string): boolean {
+  return isPage(path) && (path.endsWith(".md") || path.endsWith(".md.hbs"));
+}
+
 /** The page of the built book that shows `path`, if it is a page. */
 export function pageOf(path: string): string | null {
   const m = /^(book|glossary)\/(.+?)\.(md|md\.hbs|md\.json|md\.yml)$/.exec(path);

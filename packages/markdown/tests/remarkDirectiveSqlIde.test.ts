@@ -53,4 +53,62 @@ Do this
       ).value,
     ).toMatchSnapshot();
   });
+
+  it("should add ::file sources as SQL files", async () => {
+    const html = toHtml(
+      `:::sqlide
+
+\`\`\`mysql
+SELECT * from fluss;
+\`\`\`
+
+::file{path="setup.sql" src="sqlide-setup.sql"}
+
+:::
+`,
+      ctx,
+    ).value as string;
+    expect(html).toContain(
+      '<script type="text/plain" title="setup.sql" data-type="sql">',
+    );
+    expect(html).toContain("CREATE TABLE fluss");
+  });
+
+  it("should add a Markdown ::file source as a hint", async () => {
+    const html = toHtml(
+      `:::sqlide
+
+\`\`\`mysql
+SELECT 1;
+\`\`\`
+
+::file{path="tip.md" src="sqlide-tip.md"}
+
+:::
+`,
+      ctx,
+    ).value as string;
+    expect(html).toContain(
+      '<script type="text/plain" title="tip.md" data-type="hint">',
+    );
+  });
+
+  it("should report a ::file whose source is missing", async () => {
+    const result = toHtml(
+      `:::sqlide
+
+\`\`\`mysql
+SELECT 1;
+\`\`\`
+
+::file{path="setup.sql" src="missing.sql"}
+
+:::
+`,
+      ctx,
+    );
+    expect(result.messages.map((m) => m.reason).join("\n")).toContain(
+      '::file in the sqlide directive: "missing.sql" was not found.',
+    );
+  });
 });

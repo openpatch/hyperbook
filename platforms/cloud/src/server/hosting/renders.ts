@@ -3,7 +3,7 @@ import { existsSync } from "node:fs";
 import { mkdir, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import type { Config } from "../config";
-import { checkout, headCommit } from "./git";
+import { checkout, headCommit, markProjectRoot } from "./git";
 import { BuildLog, adaptConfig } from "./runner";
 import { makeJobDir, repoDir } from "./storage";
 
@@ -193,6 +193,8 @@ export class Renderers {
       const srcDir = path.join(jobDir, "src");
       await mkdir(srcDir);
       await checkout(repo, commit, srcDir);
+      // So the book's rfile/rbase64 helpers see the checkout as the project root.
+      await markProjectRoot(srcDir);
       await adaptConfig(srcDir, new BuildLog());
       r = {
         bookId,
@@ -223,6 +225,7 @@ export class Renderers {
         if (entry !== ".hyperbook") await rm(path.join(r.srcDir, entry), { recursive: true, force: true });
       }
       await checkout(repoDir(this.config, r.bookId), commit, r.srcDir);
+      await markProjectRoot(r.srcDir);
       await adaptConfig(r.srcDir, new BuildLog());
       r.commit = commit;
       r.override = null;

@@ -1,4 +1,4 @@
-import { mkdir, mkdtemp, readFile, readdir, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, readdir, rm, stat, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
@@ -11,6 +11,7 @@ import {
   headCommit,
   initRepo,
   listTree,
+  markProjectRoot,
   readBlob,
 } from "../src/server/hosting/git";
 
@@ -79,6 +80,23 @@ describe("book repositories", () => {
     await mkdir(out);
     await checkout(repo, commit, out);
     expect((await readdir(out)).sort()).toEqual([".gitignore", "a.md"]);
+  });
+
+  it("marks a checkout as the book project root, for rfile and rbase64", async () => {
+    const repo = path.join(await tmp(), "repo.git");
+    await initRepo(repo);
+    const { commit } = await commitTree(repo, await tree({ "book/a.md": "1", "LICENSE": "MIT" }), options);
+    const out = path.join(await tmp(), "out");
+    await mkdir(out);
+    await checkout(repo, commit, out);
+    expect((await readdir(out)).sort()).toEqual(["LICENSE", "book"]);
+
+    // Hyperbook's rfile/rbase64 helpers find the nearest .git above the page
+    // and read from its directory; the checkout has to be that root itself.
+    await markProjectRoot(out);
+    const dotGit = path.join(out, ".git");
+    expect((await stat(dotGit)).isDirectory()).toBe(true);
+    expect(await readFile(path.join(dotGit, "..", "LICENSE"), "utf8")).toBe("MIT");
   });
 });
 

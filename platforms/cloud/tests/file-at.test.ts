@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { fileAt } from "../src/web/pages/editor/files";
+import { fileAt, isMarkdownPage, isPage } from "../src/web/pages/editor/files";
 
 const files = [
   "book/index.md",
@@ -29,5 +29,28 @@ describe("the file a preview link shows", () => {
     expect(fileAt("/logo.svg?v=1", files)).toBe("public/logo.svg");
     expect(fileAt("/search", files)).toBeNull();
     expect(fileAt("/%E0%A4%A", files)).toBeNull();
+  });
+});
+
+describe("what counts as a page", () => {
+  it("recognizes every page extension in book/ and glossary/", () => {
+    expect(isPage("book/a.md")).toBe(true);
+    expect(isPage("book/a.md.hbs")).toBe(true);
+    expect(isPage("book/a.md.json")).toBe(true);
+    expect(isPage("book/a.md.yml")).toBe(true);
+    expect(isPage("glossary/t.md.hbs")).toBe(true);
+    expect(isPage("snippets/list.md.hbs")).toBe(false);
+    expect(isPage("public/x.md")).toBe(false);
+    expect(isPage("book/a.png")).toBe(false);
+    expect(isPage("book/a.hbs")).toBe(false);
+  });
+
+  it("knows which pages are Markdown, .md.hbs working as a template", () => {
+    expect(isMarkdownPage("book/a.md")).toBe(true);
+    expect(isMarkdownPage("book/a.md.hbs")).toBe(true);
+    expect(isMarkdownPage("glossary/t.md.hbs")).toBe(true);
+    expect(isMarkdownPage("book/a.md.json")).toBe(false);
+    expect(isMarkdownPage("snippets/list.md.hbs")).toBe(false);
+    expect(isMarkdownPage("book/a.png")).toBe(false);
   });
 });

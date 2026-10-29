@@ -14,6 +14,17 @@ exports[`remarkDirectiveOnlineIde > should transform basic online-ide 1`] = `
 "
 `;
 
+exports[`remarkDirectiveOnlineIde > should transform online-ide with ::file directives 1`] = `
+"
+<div class="directive-onlineide" style="--onlineide-height: calc(100dvh - 80px)">
+  <div class="java-online" style="padding: 0; margin: 0;" data-java-online="{'id': 'c79313be7a91e1753e30a82f19172a3805c7cc8f122ae800e13ef53b45af7848', 'speed': 1000, 'withBottomPanel': true,'withPCode': false,'withConsole': true,'withFileList': true,'withErrorList': true, 'libraries': [''], 'binaryFiles': [{&#x22;dest&#x22;:&#x22;/input/sky.jpg&#x22;,&#x22;url&#x22;:&#x22;/public/images/sky.jpg&#x22;}], 'assetBaseUrl': '/book/'}">
+    <script type="text/plain" data-type="java">Bitmap sky = new Bitmap("/input/sky.jpg");</script>
+    <script type="text/plain" title="/input/sky.jpg" data-type="image" src="/public/images/sky.jpg"></script>
+  </div>
+</div>
+"
+`;
+
 exports[`remarkDirectiveOnlineIde > should transform online-ide with @file directives 1`] = `
 "
 <div class="directive-onlineide" style="--onlineide-height: calc(100dvh - 80px)">

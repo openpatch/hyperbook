@@ -649,7 +649,8 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
     newFile: (folder: string) =>
       setPathRequest({
         title: "New file",
-        description: "Pages are Markdown files (.md) in the book folder.",
+        description:
+          "Pages are Markdown files (.md, or .md.hbs as a template) in the book folder.",
         label: "Path",
         initial: join(folder, "new-page.md"),
         submitLabel: "Create",

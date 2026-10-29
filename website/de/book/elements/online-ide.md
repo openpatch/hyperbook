@@ -26,11 +26,11 @@ Ein relativer Pfad im Programm, z.B. `addCostume("held", "assets/held.png")`, be
 
 ## Dateien laden
 
-Verwenden Sie `@file`-Direktiven innerhalb des `:::onlineide`-Blocks, um externe Dateien (z.B. Bilder) zu referenzieren, auf die Ihr Java-Code zugreifen kann.
+Verwenden Sie `::file`-Direktiven innerhalb des `:::onlineide`-Blocks, um externe Dateien (z.B. Bilder) zu referenzieren, auf die Ihr Java-Code zugreifen kann.
 
 :::onlineide
 
-@file dest="sky.jpg" src="/clouds.jpg"
+::file{path="sky.jpg" src="/clouds.jpg"}
 
 ```java Main.java
 Bitmap sky = new Bitmap("sky.jpg");
@@ -41,7 +41,7 @@ Bitmap sky = new Bitmap("sky.jpg");
 ````markdown
 :::onlineide Main.java
 
-@file dest="sky.jpg" src="/clouds.jpg"
+::file{path="sky.jpg" src="/clouds.jpg"}
 
 ```java
 Bitmap sky = new Bitmap("sky.jpg");
@@ -50,11 +50,11 @@ Bitmap sky = new Bitmap("sky.jpg");
 :::
 ````
 
-Die `@file`-Direktive nimmt zwei Parameter:
-- `dest`: Der Pfad, unter dem die Datei in Ihrem Java-Code verfügbar sein soll (z.B. `/input/himmel.jpg`)
+Die `::file`-Direktive nimmt zwei Parameter:
+- `path`: Der Pfad, unter dem die Datei in Ihrem Java-Code verfügbar sein soll (z.B. `/input/himmel.jpg`). Fehlt er, wird der Dateiname von `src` verwendet.
 - `src`: Der Quellenpfad zur Datei in Ihrem Projekt (z.B. `bilder/himmel.jpg`)
 
-Sie können mehrere `@file`-Direktiven einfügen, um auf mehrere Dateien zuzugreifen.
+Sie können mehrere `::file`-Direktiven einfügen, um auf mehrere Dateien zuzugreifen.
 
 :::onlineide
 
