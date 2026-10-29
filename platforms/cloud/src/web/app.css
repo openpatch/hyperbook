@@ -7,7 +7,10 @@
  * its theme layer, and only an unlayered declaration reliably wins over it.
  */
 @import "@hyperbook-tokens/tokens-light.css";
-@import "@hyperbook-tokens/tokens-dark.css" (prefers-color-scheme: dark);
+/* The dark tokens come scoped to :root.dark, from the theme plugin in vite.config.ts. */
+
+/* Dark is a class the reader can toggle, not only the system setting. */
+@custom-variant dark (&:where(.dark, .dark *));
 
 /*
  * shadcn/ui variables, mapped onto Hyperbook's tokens. Components only ever
@@ -34,6 +37,8 @@
   --ring: var(--color-brand);
   --sidebar: var(--color-nav);
   --sidebar-border: var(--color-nav-border);
+  --author: var(--color-author-background);
+  --author-foreground: var(--color-author-color);
   --header: var(--color-brand);
   --header-foreground: var(--color-brand-text);
   --radius: 8px;
@@ -51,21 +56,20 @@
   --hl-muted: color-mix(in srgb, var(--color-text) 55%, var(--color-background));
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    /* The dark brand is a light tint, so text on it has to be dark. */
-    --primary-foreground: var(--color-background);
-    /* As in books' dark.css: a dark header with the brand as text. */
-    --header: var(--color-nav);
-    --header-foreground: var(--color-brand);
-    --hl-directive: #d2a8ff;
-    --hl-keyword: #ff7b72;
-    --hl-string: #a5d6ff;
-    --hl-number: #79c0ff;
-    --hl-type: #ffa657;
-    --hl-function: #d2a8ff;
-    --hl-property: #79c0ff;
-  }
+.dark {
+  color-scheme: dark;
+  /* The dark brand is a light tint, so text on it has to be dark. */
+  --primary-foreground: var(--color-background);
+  /* As in books' dark.css: a dark header with the brand as text. */
+  --header: var(--color-nav);
+  --header-foreground: var(--color-brand);
+  --hl-directive: #d2a8ff;
+  --hl-keyword: #ff7b72;
+  --hl-string: #a5d6ff;
+  --hl-number: #79c0ff;
+  --hl-type: #ffa657;
+  --hl-function: #d2a8ff;
+  --hl-property: #79c0ff;
 }
 
 @theme inline {
@@ -91,6 +95,8 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-header: var(--header);
   --color-header-foreground: var(--header-foreground);
+  --color-author: var(--author);
+  --color-author-foreground: var(--author-foreground);
 
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);

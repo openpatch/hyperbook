@@ -30,6 +30,32 @@ function excalidrawFonts(): Plugin {
 }
 
 /**
+ * Light or dark, as the reader chose (see src/web/lib/theme.ts) or else as the
+ * system is set. Both go into the head of every page, so the first paint is
+ * already in the right theme: the dark tokens, scoped to `:root.dark` (the
+ * file books load is scoped to a media query instead), and the script setting
+ * that class.
+ */
+function theme(): Plugin {
+  const tokens = path.resolve(import.meta.dirname, "../../packages/markdown/assets/tokens-dark.css");
+  const init = `(() => {
+  let mode = null;
+  try { mode = localStorage.getItem("dark-mode-toggle"); } catch {}
+  const dark = mode === "dark" || (mode !== "light" && matchMedia("(prefers-color-scheme: dark)").matches);
+  document.documentElement.classList.toggle("dark", dark);
+})();`;
+  return {
+    name: "theme",
+    transformIndexHtml() {
+      return [
+        { tag: "script", children: init, injectTo: "head-prepend" },
+        { tag: "style", children: readFileSync(tokens, "utf8").replaceAll(":root", ":root.dark"), injectTo: "head" },
+      ];
+    },
+  };
+}
+
+/**
  * The commit the platform is built from, shown in the sidebar. GIT_COMMIT
  * covers builds without a checkout (Docker passes it as a build argument).
  */
@@ -50,7 +76,7 @@ export default defineConfig({
   define: {
     __BUILD__: JSON.stringify({ version, commit: gitCommit(), run: process.env.GITHUB_RUN_NUMBER || null }),
   },
-  plugins: [react(), tailwindcss(), excalidrawFonts()],
+  plugins: [react(), tailwindcss(), excalidrawFonts(), theme()],
   resolve: {
     // CodeMirror and React break with two copies; other packages of the
     // repository pull in other versions (Excalidraw brings its own React).

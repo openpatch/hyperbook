@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useBlocker, useParams } from "react-router";
 import { toast } from "sonner";
 import type { FileChange } from "../../../shared/schemas";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { api, unwrap } from "@/lib/api";
 import { type Book, useBook } from "@/lib/books";
@@ -455,6 +456,7 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
         >
           <PanelRightIcon className="size-4" />
         </Button>
+        <ThemeToggle className="hover:bg-accent [&_svg]:size-4" />
       </header>
 
       <div className="flex min-h-0 flex-1">

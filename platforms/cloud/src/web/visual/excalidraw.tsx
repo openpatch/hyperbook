@@ -2,6 +2,7 @@ import { Excalidraw, serializeAsJSON } from "@excalidraw/excalidraw";
 import "@excalidraw/excalidraw/index.css";
 import type { ExcalidrawInitialDataState } from "@excalidraw/excalidraw/types";
 import { useMemo, useRef } from "react";
+import { useTheme } from "@/lib/theme";
 import type { VisualEditorProps } from "./protocol";
 
 declare global {
@@ -27,14 +28,14 @@ export default function ExcalidrawEditor({ text, language, onChange }: VisualEdi
   // The first serialization is the file as Excalidraw reads it.
   const baseline = useRef<string | null>(null);
   const last = useRef<string | null>(null);
-  const dark = matchMedia("(prefers-color-scheme: dark)").matches;
+  const theme = useTheme();
 
   return (
     <div style={{ height: "100%" }}>
       <Excalidraw
         initialData={initialData}
         langCode={language}
-        theme={dark ? "dark" : "light"}
+        theme={theme}
         UIOptions={{ canvasActions: { loadScene: false, saveToActiveFile: false, export: { saveFileToDisk: true } } }}
         onChange={(elements, appState, files) => {
           const now = serializeAsJSON(elements, appState, files, "local");

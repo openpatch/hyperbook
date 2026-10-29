@@ -1,26 +1,46 @@
-import { NavLink, Outlet } from "react-router";
+import { useEffect, useState } from "react";
+import { NavLink, Outlet, useLocation } from "react-router";
 import { Button } from "@/components/ui/button";
 import { useInstance, useLogout, useUser } from "@/lib/session";
 import { cn } from "@/lib/utils";
 import { LegalLinks } from "./auth-layout";
+import { ThemeToggle } from "./theme-toggle";
 
 /**
- * Laid out like a hyperbook: brand-colored header, navigation on the left,
- * one content column.
+ * Laid out like a hyperbook: brand-colored header, navigation on the left
+ * with "Powered by Hyperbook" at its foot, one content column. The shell fills
+ * the viewport and the content scrolls on its own, so the sidebar stays put.
+ * Narrow screens get the sidebar as a drawer behind a burger, as books do.
  */
 export function Layout() {
   const user = useUser();
   const { data: instance } = useInstance();
   const logout = useLogout();
+  const { pathname } = useLocation();
+  const [navOpen, setNavOpen] = useState(false);
+  useEffect(() => setNavOpen(false), [pathname]);
   return (
-    <div className="flex min-h-dvh flex-col">
-      <header className="flex h-15 shrink-0 items-center gap-4 bg-header px-4 text-header-foreground">
-        <NavLink to="/" className="flex-1 truncate font-heading text-xl">
+    <div className="flex h-dvh flex-col">
+      <header className="z-50 flex h-15 shrink-0 items-center gap-2 bg-header pr-4 text-header-foreground shadow-md">
+        <button
+          type="button"
+          className="ml-4 flex size-10 cursor-pointer flex-col items-center justify-center gap-1.5 lg:hidden"
+          aria-label={navOpen ? "Close navigation" : "Open navigation"}
+          aria-expanded={navOpen}
+          aria-controls="main-nav"
+          onClick={() => setNavOpen((open) => !open)}
+        >
+          <span className={cn("h-1 w-7.5 bg-current transition-transform", navOpen && "translate-y-2.5 -rotate-45")} />
+          <span className={cn("h-1 w-7.5 bg-current transition-opacity", navOpen && "opacity-0")} />
+          <span className={cn("h-1 w-7.5 bg-current transition-transform", navOpen && "-translate-y-2.5 rotate-45")} />
+        </button>
+        <NavLink to="/" className="min-w-0 flex-1 truncate p-4 font-heading text-[1.1rem] font-bold">
           {instance?.name ?? "Hyperbook Cloud"}
         </NavLink>
         <span className="hidden truncate text-sm sm:inline">
           {user.displayName || user.email}
         </span>
+        <ThemeToggle className="hover:bg-white/15" />
         <Button
           variant="ghost"
           size="sm"
@@ -30,55 +50,71 @@ export function Layout() {
           Log out
         </Button>
       </header>
-      <div className="flex flex-1 flex-col md:flex-row">
-        <nav
-          aria-label="Main"
-          className="flex shrink-0 flex-col border-sidebar-border bg-sidebar p-4 md:w-64 md:border-r"
+      <div className="relative flex min-h-0 flex-1">
+        {navOpen && (
+          <div className="fixed inset-0 top-15 z-30 bg-black/40 lg:hidden" onClick={() => setNavOpen(false)} />
+        )}
+        <aside
+          id="main-nav"
+          className={cn(
+            "fixed top-15 bottom-0 left-0 z-40 flex w-75 max-w-[85vw] flex-col overflow-y-auto border-r border-sidebar-border bg-sidebar text-[0.9rem] [scrollbar-width:thin] transition-transform",
+            "lg:static lg:w-[max(18.75rem,25%)] lg:max-w-none lg:translate-x-0 lg:transition-none",
+            !navOpen && "-translate-x-full",
+          )}
         >
-          <ul className="flex flex-wrap gap-1 md:flex-col">
-            <NavItem to="/">Books</NavItem>
-            {user.role === "admin" && (
-              <>
-                <NavItem to="/users">Users</NavItem>
-                {instance?.slugSuffix && <NavItem to="/addresses">Addresses</NavItem>}
-                <NavItem to="/instance">Settings</NavItem>
-                <NavItem to="/audit">Activity</NavItem>
-              </>
-            )}
-            <NavItem to="/account">Your account</NavItem>
-          </ul>
-          <BuildInfo />
-        </nav>
-        <main className="mx-auto w-full max-w-245 min-w-0 flex-1 p-4 md:p-8">
-          <Outlet />
+          <nav aria-label="Main" className="flex-1 p-4">
+            <ul>
+              <NavItem to="/">Books</NavItem>
+              {user.role === "admin" && (
+                <>
+                  <NavItem to="/users">Users</NavItem>
+                  {instance?.slugSuffix && <NavItem to="/addresses">Addresses</NavItem>}
+                  <NavItem to="/instance">Settings</NavItem>
+                  <NavItem to="/audit">Activity</NavItem>
+                </>
+              )}
+              <NavItem to="/account">Your account</NavItem>
+            </ul>
+          </nav>
+          <PoweredBy />
+        </aside>
+        <main className="min-w-0 flex-1 overflow-y-auto">
+          <div className="mx-auto w-full max-w-245 p-4 md:p-8">
+            <Outlet />
+          </div>
+          <LegalLinks />
         </main>
       </div>
-      <LegalLinks />
     </div>
   );
 }
 
-/** Which version runs, so a report can name it. */
-function BuildInfo() {
+/** A book's author line, with the cloud's slogan and the version that runs, so a report can name it. */
+function PoweredBy() {
   const { version, commit, run } = __BUILD__;
   return (
-    <p className="mt-auto hidden px-3 pt-4 text-xs text-muted-foreground md:block">
-      v{version}
-      {run && ` · build ${run}`}
-      {commit && (
-        <>
-          {" · "}
-          <a
-            href={`https://github.com/openpatch/hyperbook/commit/${commit}`}
-            target="_blank"
-            rel="noreferrer"
-            className="font-mono hover:text-primary"
-          >
-            {commit.slice(0, 7)}
-          </a>
-        </>
-      )}
-    </p>
+    <div className="shrink-0 bg-author p-4 text-center text-author-foreground">
+      <a href="https://hyperbook.openpatch.org" target="_blank" rel="noreferrer" className="hover:text-primary">
+        Power your <b>Hyperbook</b>
+      </a>
+      <span className="block text-[0.7rem] opacity-60">
+        v{version}
+        {run && ` · build ${run}`}
+        {commit && (
+          <>
+            {" · "}
+            <a
+              href={`https://github.com/openpatch/hyperbook/commit/${commit}`}
+              target="_blank"
+              rel="noreferrer"
+              className="font-mono hover:text-primary"
+            >
+              {commit.slice(0, 7)}
+            </a>
+          </>
+        )}
+      </span>
+    </div>
   );
 }
 
@@ -89,10 +125,7 @@ function NavItem({ to, children }: { to: string; children: React.ReactNode }) {
         to={to}
         end={to === "/"}
         className={({ isActive }) =>
-          cn(
-            "block rounded-md px-3 py-1.5 text-sm hover:text-primary",
-            isActive && "font-semibold text-primary",
-          )
+          cn("block p-[0.65rem] hover:bg-border", isActive && "bg-background text-primary hover:bg-background")
         }
       >
         {children}
