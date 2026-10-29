@@ -24,6 +24,7 @@ import { FILE_ELEMENTS, type FileElement, InsertMenu, insertAtCursor } from "./i
 import { SettingsDialog } from "./settings-dialog";
 import { PageSettingsDialog } from "./page-settings-dialog";
 import { withPageForm } from "./frontmatter";
+import { Splitter, usePaneWidth } from "./splitter";
 import { ConflictError, type Tab, type Workspace, isDirty, useLiveText, useWorkspace } from "./workspace";
 
 export function Component() {
@@ -110,6 +111,11 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
   const [showPreview, setShowPreview] = useState(true);
   const [showSettings, setShowSettings] = useState(false);
   const [blockEdit, setBlockEdit] = useState<{ block: InlineBlock; view: EditorView } | null>(null);
+  // The panes' widths, remembered from the last session; null means the default.
+  const [sidebarWidth, setSidebarWidth] = usePaneWidth("editor-sidebar-width", 180);
+  const [previewWidth, setPreviewWidth] = usePaneWidth("editor-preview-width", 320);
+  const sidebarRef = useRef<HTMLElement>(null);
+  const previewRef = useRef<HTMLElement>(null);
 
   /** "Edit visually" in a page: a structogram in a dialog, an element file in its tab. */
   const editBlock = (page: string, block: Block, view: EditorView) => {
@@ -460,7 +466,7 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
       </header>
 
       <div className="flex min-h-0 flex-1">
-        <aside className="flex w-64 shrink-0 flex-col border-r border-sidebar-border bg-sidebar">
+        <aside ref={sidebarRef} className="flex w-64 shrink-0 flex-col bg-sidebar" style={sidebarWidth === null ? undefined : { width: sidebarWidth }}>
           <div className="flex items-center gap-1 border-b border-sidebar-border px-2 py-1">
             <span className="flex-1 text-sm font-medium">Files</span>
             <Button variant="ghost" size="icon" className="size-7" aria-label="New file" onClick={() => actions.newFile(ws.active ? parentOf(ws.active) : "book")}>
@@ -477,6 +483,14 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
             <FileTree files={listing.files} active={ws.active} dirty={ws.dirty} actions={actions} />
           </div>
         </aside>
+        <Splitter
+          label="Resize the file list"
+          pane={sidebarRef}
+          direction={1}
+          onResize={setSidebarWidth}
+          onReset={() => setSidebarWidth(null)}
+          className="bg-sidebar-border"
+        />
 
         <main className="flex min-w-0 flex-1 flex-col">
           <div role="tablist" className="flex shrink-0 overflow-x-auto border-b border-border">
@@ -538,14 +552,29 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
         </main>
 
         {showPreview && (
-          <section className="hidden w-[45%] max-w-3xl shrink-0 border-l border-border lg:block" aria-label="Preview">
+          <>
+            <Splitter
+              label="Resize the preview"
+              pane={previewRef}
+              direction={-1}
+              onResize={setPreviewWidth}
+              onReset={() => setPreviewWidth(null)}
+              className="hidden lg:block"
+            />
+            <section
+              ref={previewRef}
+              className="hidden w-[45%] max-w-3xl shrink-0 lg:block"
+              style={previewWidth === null ? undefined : { width: previewWidth, maxWidth: "none" }}
+              aria-label="Preview"
+            >
             <LivePreview
               ws={ws}
               bookId={bookId}
               file={activeTab && pageOf(activeTab.path) && activeTab.status === "ready" ? activeTab.path : null}
               commit={listing.commit}
             />
-          </section>
+            </section>
+          </>
         )}
       </div>
 
