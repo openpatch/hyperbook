@@ -27,6 +27,11 @@ import { DomainSection } from "./domain";
 import { GroupsSection } from "./groups";
 import { PublishingSection } from "./publishing";
 
+/**
+ * The book as a grid of cards: wide ones for what needs the width (publishing,
+ * people, delete), two side by side for the forms. Narrow screens keep one
+ * column. The margin of every card is given back to the grid's own gaps.
+ */
 export function BookPage() {
   const id = useParams().id!;
   const { data: book } = useBook(id);
@@ -39,9 +44,17 @@ export function BookPage() {
       <PageHeader
         title={book.title}
         description={
-          <a href={book.url} className="text-primary hover:underline" target="_blank" rel="noreferrer">
-            {book.url.replace(/^https?:\/\//, "")}
-          </a>
+          <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <a href={book.url} className="text-primary hover:underline" target="_blank" rel="noreferrer">
+              {book.url.replace(/^https?:\/\//, "")}
+            </a>
+            {book.source === "hosted" &&
+              (book.publishedAt ? (
+                <Badge>Published</Badge>
+              ) : (
+                <Badge variant="secondary">Not published</Badge>
+              ))}
+          </span>
         }
         actions={
           <>
@@ -54,13 +67,25 @@ export function BookPage() {
           </>
         }
       />
-      {book.source === "hosted" && <PublishingSection book={book} />}
-      <GroupsSection book={book} />
-      <SettingsSection book={book} />
-      <AddressSection book={book} />
-      {book.source === "hosted" && isOwner && mayUseDomain && <DomainSection book={book} />}
-      <MembersSection book={book} />
-      {isOwner && <DeleteSection book={book} />}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 [&_section]:mb-0">
+        {book.source === "hosted" && (
+          <div className="lg:col-span-2">
+            <PublishingSection book={book} />
+          </div>
+        )}
+        <GroupsSection book={book} />
+        <SettingsSection book={book} />
+        <AddressSection book={book} />
+        {book.source === "hosted" && isOwner && mayUseDomain && <DomainSection book={book} />}
+        <div className="lg:col-span-2">
+          <MembersSection book={book} />
+        </div>
+        {isOwner && (
+          <div className="lg:col-span-2">
+            <DeleteSection book={book} />
+          </div>
+        )}
+      </div>
     </>
   );
 }
@@ -345,7 +370,11 @@ function DeleteSection({ book }: { book: Book }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   return (
-    <Section title="Delete book">
+    <Section
+      title="Delete book"
+      description="The book, its groups and all its student accounts are deleted. This cannot be undone."
+      className="border-destructive/40"
+    >
       <ConfirmButton
         title={`Delete “${book.title}”?`}
         description="The book, its groups and all its student accounts are deleted. This cannot be undone."

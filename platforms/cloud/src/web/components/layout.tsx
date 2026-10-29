@@ -58,7 +58,7 @@ export function Layout() {
           id="main-nav"
           className={cn(
             "fixed top-15 bottom-0 left-0 z-40 flex w-75 max-w-[85vw] flex-col overflow-y-auto border-r border-sidebar-border bg-sidebar text-[0.9rem] [scrollbar-width:thin] transition-transform",
-            "lg:static lg:w-[max(18.75rem,25%)] lg:max-w-none lg:translate-x-0 lg:transition-none",
+            "lg:static lg:w-[max(15rem,16%)] lg:max-w-none lg:translate-x-0 lg:transition-none",
             !navOpen && "-translate-x-full",
           )}
         >
@@ -79,7 +79,7 @@ export function Layout() {
           <PoweredBy />
         </aside>
         <main className="min-w-0 flex-1 overflow-y-auto">
-          <div className="mx-auto w-full max-w-245 p-4 md:p-8">
+          <div className="mx-auto w-full max-w-280 p-4 md:p-8">
             <Outlet />
           </div>
           <LegalLinks />

@@ -33,7 +33,7 @@ export function GroupsSection({ book }: { book: Book }) {
       description="A group is a class or course. Its students get anonymous accounts you can print."
     >
       {groups && groups.length > 0 && (
-        <ul className="mb-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+        <ul className="mb-4 grid grid-cols-2 gap-2">
           {groups.map((g) => (
             <li key={g.id}>
               <Link

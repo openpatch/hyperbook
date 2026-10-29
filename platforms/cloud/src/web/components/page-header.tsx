@@ -1,3 +1,5 @@
+import { cn } from "@/lib/utils";
+
 export function PageHeader({
   title,
   description,
@@ -18,22 +20,29 @@ export function PageHeader({
   );
 }
 
+/**
+ * One card per part of a page, like the books on the home page: a border and
+ * a barely-there shadow group what belongs together. `className` styles the
+ * card itself, e.g. the destructive tint of a delete card.
+ */
 export function Section({
   title,
   description,
   actions,
+  className,
   children,
 }: {
   title: string;
   description?: React.ReactNode;
   actions?: React.ReactNode;
+  className?: string;
   children: React.ReactNode;
 }) {
   return (
-    <section className="mb-10">
-      <div className="mb-3 flex flex-wrap items-end justify-between gap-2">
+    <section className={cn("mb-6 rounded-lg border bg-card p-5 shadow-xs", className)}>
+      <div className="mb-4 flex flex-wrap items-end justify-between gap-2">
         <div>
-          <h2 className="text-xl">{title}</h2>
+          <h2 className="text-lg">{title}</h2>
           {description && <p className="text-sm text-muted-foreground">{description}</p>}
         </div>
         {actions}
