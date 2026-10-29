@@ -627,9 +627,10 @@ const pageTheme = EditorView.baseTheme({
     alignItems: "center",
     gap: "8px",
     padding: "4px 8px",
-    margin: "4px 0",
-    border: "1px solid var(--color-nav-border)",
-    borderRadius: "6px",
+    // Pulls the bar up against the top of the editor, so its border fits the
+    // editor's edge instead of floating inside it (.cm-content's padding).
+    margin: "-4px 0 0",
+    borderBottom: "1px solid var(--color-nav-border)",
     backgroundColor: "var(--color-nav)",
     fontFamily: "var(--font-body, sans-serif)",
     fontSize: "13px",

@@ -53,6 +53,9 @@ export type PageForm = {
   qrcode: boolean;
   prev: string;
   next: string;
+  /** No previous/next button on the page. */
+  prevOff: boolean;
+  nextOff: boolean;
   /** A key of the password registry, or a password with a hint. */
   protectKey: string;
   password: string;
@@ -108,8 +111,10 @@ export function toPageForm(text: string): PageForm {
     breadcrumbHome: str(breadcrumbObj.home),
     breadcrumbSeparator: str(breadcrumbObj.separator),
     qrcode: data.qrcode === true,
-    prev: data.prev === null ? "" : str(data.prev),
-    next: data.next === null ? "" : str(data.next),
+    prev: str(data.prev),
+    next: str(data.next),
+    prevOff: data.prev === null,
+    nextOff: data.next === null,
     protectKey: typeof protect === "string" ? protect : "",
     password: str(protectObj.password),
     passwordHint: str(protectObj.description),
@@ -151,10 +156,10 @@ export function withPageForm(text: string, form: PageForm): string {
   const separator = form.breadcrumbSeparator.trim();
   const breadcrumbConfig = home || separator ? { ...(home ? { home } : {}), ...(separator ? { separator } : {}) } : undefined;
   set("breadcrumb", form.breadcrumb === "off" ? false : form.breadcrumb === "on" ? (breadcrumbConfig ?? true) : undefined);
-  // An empty prev or next written by hand hides the button; leave those alone.
-  const data = (doc.toJS() ?? {}) as Record<string, unknown>;
+  // null removes the jump; the empty string keeps hiding it as before.
   for (const key of ["prev", "next"] as const) {
-    if (form[key].trim() || data[key] !== null) set(key, form[key].trim());
+    if (key === "prev" ? form.prevOff : form.nextOff) set(key, null);
+    else set(key, form[key].trim() || undefined);
   }
   if (form.protectKey.trim()) set("protect", form.protectKey.trim());
   else if (form.password) {

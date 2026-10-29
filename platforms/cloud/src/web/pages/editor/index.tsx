@@ -1313,11 +1313,6 @@ function TabContent({
     if (pageOf(tab.path)) {
       return (
         <div className="flex h-full flex-col">
-          <div className="flex shrink-0 items-center border-b border-border px-2 py-0.5">
-            <span className="hidden text-xs text-muted-foreground md:inline">
-              Type : at the start of a line for elements
-            </span>
-          </div>
           <div className="min-h-0 flex-1">{source}</div>
           <PageSettingsDialog
             text={pageSettings?.text ?? null}

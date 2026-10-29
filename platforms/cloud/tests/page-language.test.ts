@@ -177,6 +177,19 @@ describe("page settings", () => {
     expect(withPageForm(text, toPageForm(text))).toBe(text);
   });
 
+  it("removes the previous and next jumps with None", () => {
+    const text = "---\nname: A\nprev: /book/b\n---\n";
+    const form = { ...toPageForm(text), prevOff: true, nextOff: true };
+    expect(withPageForm(text, form)).toBe("---\nname: A\nprev: null\nnext: null\n---\n");
+  });
+
+  it("reads a removed jump back as None", () => {
+    const form = toPageForm("---\nname: A\nprev: null\nnext:\n---\n");
+    expect(form).toMatchObject({ prev: "", next: "", prevOff: true, nextOff: true });
+    // Unchecking None gives the jump back to the page the book picks.
+    expect(withPageForm("---\nname: A\nprev: null\n---\n", { ...form, nextOff: false, prevOff: false })).toBe("---\nname: A\n---\n");
+  });
+
   it("refuses YAML it cannot read", () => {
     expect(() => toPageForm("---\nname: [oops\n---\n")).toThrow();
   });

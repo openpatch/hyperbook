@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Check, Field, Section } from "./form-dialog";
 import {
   Dialog,
   DialogContent,
@@ -10,7 +10,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { extension, loadFile } from "./files";
@@ -191,8 +190,8 @@ export function SettingsDialog({
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-lg">
-        <form onSubmit={save} className="grid gap-4">
+      <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-2xl">
+        <form onSubmit={save} className="grid gap-5">
           <DialogHeader>
             <DialogTitle>Book settings</DialogTitle>
             <DialogDescription>
@@ -201,13 +200,10 @@ export function SettingsDialog({
           </DialogHeader>
           {form && (
             <>
-              <Field id="s-name" label="Name">
-                <Input id="s-name" value={form.name} onChange={(e) => update({ name: e.target.value })} />
-              </Field>
-              <Field id="s-description" label="Description">
-                <Textarea id="s-description" rows={2} value={form.description} onChange={(e) => update({ description: e.target.value })} />
-              </Field>
-              <div className="grid grid-cols-2 gap-3">
+              <Section title="General">
+                <Field id="s-name" label="Name">
+                  <Input id="s-name" value={form.name} onChange={(e) => update({ name: e.target.value })} />
+                </Field>
                 <Field id="s-language" label="Language">
                   <Select value={form.language} onValueChange={(language) => update({ language })}>
                     <SelectTrigger id="s-language" className="w-full">
@@ -222,15 +218,22 @@ export function SettingsDialog({
                     </SelectContent>
                   </Select>
                 </Field>
-                <Field id="s-license" label="License">
-                  <Input id="s-license" placeholder="e.g. CC-BY-SA 4.0" value={form.license} onChange={(e) => update({ license: e.target.value })} />
+                <Field id="s-description" label="Description" full>
+                  <Textarea id="s-description" rows={2} value={form.description} onChange={(e) => update({ description: e.target.value })} />
                 </Field>
+              </Section>
+              <Section title="Author & license">
                 <Field id="s-author" label="Author">
                   <Input id="s-author" value={form.authorName} onChange={(e) => update({ authorName: e.target.value })} />
                 </Field>
                 <Field id="s-author-url" label="Author's website">
                   <Input id="s-author-url" type="url" value={form.authorUrl} onChange={(e) => update({ authorUrl: e.target.value })} />
                 </Field>
+                <Field id="s-license" label="License" full>
+                  <Input id="s-license" placeholder="e.g. CC-BY-SA 4.0" value={form.license} onChange={(e) => update({ license: e.target.value })} />
+                </Field>
+              </Section>
+              <Section title="Branding">
                 <Field id="s-logo" label="Logo">
                   <Select value={form.logo || "none"} onValueChange={(logo) => update({ logo: logo === "none" ? "" : logo })}>
                     <SelectTrigger id="s-logo" className="w-full">
@@ -249,58 +252,41 @@ export function SettingsDialog({
                     </SelectContent>
                   </Select>
                 </Field>
-              </div>
-              <fieldset className="grid gap-3">
-                <legend className="mb-1 text-sm font-medium">Colors</legend>
-                <div className="grid grid-cols-2 gap-3">
-                  <ColorField id="s-brand" label="Brand" fallback="#007864" value={form.brand} onChange={(brand) => update({ brand })} />
-                  <ColorField id="s-brand-dark" label="Brand (dark theme)" fallback="#b5e3d8" value={form.brandDark} onChange={(brandDark) => update({ brandDark })} />
-                  <ColorField id="s-brand-text" label="Header text" fallback="#ffffff" value={form.brandText} onChange={(brandText) => update({ brandText })} />
-                  <div className="flex items-center gap-2 self-end pb-1">
-                    <Checkbox id="s-inverted" checked={form.inverted} onCheckedChange={(c) => update({ inverted: c === true })} />
-                    <Label htmlFor="s-inverted" className="font-normal">
-                      Invert the header
-                    </Label>
-                  </div>
-                </div>
-              </fieldset>
-              <Field id="s-styles" label="Styles" hint="Links to CSS files, comma-separated">
-                <Input id="s-styles" value={form.styles} onChange={(e) => update({ styles: e.target.value })} />
-              </Field>
-              <Field id="s-scripts" label="Scripts" hint="Links to JavaScript files, comma-separated">
-                <Input id="s-scripts" value={form.scripts} onChange={(e) => update({ scripts: e.target.value })} />
-              </Field>
-              <fieldset className="grid gap-2">
-                <legend className="mb-1 text-sm font-medium">Features</legend>
+                <ColorField id="s-brand" label="Brand" fallback="#007864" value={form.brand} onChange={(brand) => update({ brand })} />
+                <ColorField id="s-brand-dark" label="Brand (dark theme)" fallback="#b5e3d8" value={form.brandDark} onChange={(brandDark) => update({ brandDark })} />
+                <ColorField id="s-brand-text" label="Header text" fallback="#ffffff" value={form.brandText} onChange={(brandText) => update({ brandText })} />
+                <Check id="s-inverted" label="Invert the header" checked={form.inverted} onChange={(inverted) => update({ inverted })} />
+              </Section>
+              <Section title="Advanced">
+                <Field id="s-styles" label="Styles" hint="Links to CSS files, comma-separated" full>
+                  <Input id="s-styles" value={form.styles} onChange={(e) => update({ styles: e.target.value })} />
+                </Field>
+                <Field id="s-scripts" label="Scripts" hint="Links to JavaScript files, comma-separated" full>
+                  <Input id="s-scripts" value={form.scripts} onChange={(e) => update({ scripts: e.target.value })} />
+                </Field>
+              </Section>
+              <Section title="Features">
                 {SWITCHES.map(([key, label]) => (
-                  <div key={key} className="flex items-center gap-2">
-                    <Checkbox
-                      id={`s-${key}`}
-                      checked={form.switches[key]}
-                      onCheckedChange={(checked) => update({ switches: { ...form.switches, [key]: checked === true } })}
-                    />
-                    <Label htmlFor={`s-${key}`} className="font-normal">
-                      {label}
-                    </Label>
-                  </div>
+                  <Check
+                    key={key}
+                    id={`s-${key}`}
+                    label={label}
+                    checked={form.switches[key]}
+                    onChange={(checked) => update({ switches: { ...form.switches, [key]: checked } })}
+                  />
                 ))}
-                <div className="flex items-center gap-2">
-                  <Checkbox id="s-breadcrumb" checked={form.breadcrumb} onCheckedChange={(c) => update({ breadcrumb: c === true })} />
-                  <Label htmlFor="s-breadcrumb" className="font-normal">
-                    Breadcrumb navigation
-                  </Label>
-                </div>
+                <Check id="s-breadcrumb" label="Breadcrumb navigation" full checked={form.breadcrumb} onChange={(breadcrumb) => update({ breadcrumb })} />
                 {form.breadcrumb && (
-                  <div className="grid grid-cols-2 gap-3">
+                  <>
                     <Field id="s-breadcrumb-home" label="Home" hint="Icon or text of the home item">
                       <Input id="s-breadcrumb-home" placeholder="🏠" value={form.breadcrumbHome} onChange={(e) => update({ breadcrumbHome: e.target.value })} />
                     </Field>
                     <Field id="s-breadcrumb-separator" label="Separator" hint="Between the items">
                       <Input id="s-breadcrumb-separator" placeholder=">" value={form.breadcrumbSeparator} onChange={(e) => update({ breadcrumbSeparator: e.target.value })} />
                     </Field>
-                  </div>
+                  </>
                 )}
-              </fieldset>
+              </Section>
             </>
           )}
           {!form && !error && <p className="text-muted-foreground">Loading…</p>}
@@ -321,16 +307,6 @@ export function SettingsDialog({
         </form>
       </DialogContent>
     </Dialog>
-  );
-}
-
-function Field({ id, label, hint, children }: { id: string; label: string; hint?: string; children: React.ReactNode }) {
-  return (
-    <div className="grid gap-1.5">
-      <Label htmlFor={id}>{label}</Label>
-      {children}
-      {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
-    </div>
   );
 }
 
