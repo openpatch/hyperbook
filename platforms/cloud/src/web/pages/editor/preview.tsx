@@ -4,7 +4,15 @@ import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { api, unwrap } from "@/lib/api";
+import { type Theme, useTheme } from "@/lib/theme";
 import { cn } from "@/lib/utils";
+
+/** `href` with the editor's theme, for the preview host to show the page in (see books/preview.ts). */
+function withTheme(href: string, theme: Theme) {
+  const url = new URL(href, "http://preview");
+  url.searchParams.set("hb-theme", theme);
+  return url.href.slice(url.origin.length);
+}
 
 /** A one-time hand-off into the book's preview host, landing on `page`. */
 async function previewUrl(bookId: string, page: string) {
@@ -29,8 +37,9 @@ type Frame = { id: number; src: string };
  * the shown one and takes its place once it says it is shown (back at the
  * reader's place, painted; see books/preview.ts), so the preview neither goes
  * blank nor jumps. A frame hidden instead of covered would not paint, nor
- * load its fonts, until it is revealed. Links in the frame render the pages they lead to. The frame
- * logs in once through a hand-off; later loads go straight to the page.
+ * load its fonts, until it is revealed. The page follows the editor's light or
+ * dark theme. Links in the frame render the pages they lead to. The frame logs
+ * in once through a hand-off; later loads go straight to the page.
  */
 export function PreviewPane({
   bookId,
@@ -45,6 +54,9 @@ export function PreviewPane({
   /** The newest save: other pages may have changed with it. */
   commit: string | null;
 }) {
+  const theme = useTheme();
+  const themeRef = useRef(theme);
+  themeRef.current = theme;
   const [frames, setFrames] = useState<Frame[]>([]);
   /** The frame on view: the newest one that has loaded. */
   const [shownFrame, setShownFrame] = useState<number | null>(null);
@@ -82,7 +94,7 @@ export function PreviewPane({
   const handOff = useCallback(
     async (to: string) => {
       try {
-        const url = await previewUrl(bookId, to);
+        const url = await previewUrl(bookId, withTheme(to, themeRef.current));
         origin.current = new URL(url).origin;
         ready.current = false;
         pending.current = null;
@@ -106,7 +118,7 @@ export function PreviewPane({
       }
       // Never the hand-off address again (its code works once).
       shown.current = href;
-      load(`${origin.current}${href}`);
+      load(`${origin.current}${withTheme(href, themeRef.current)}`);
     },
     [handOff, load],
   );
@@ -127,12 +139,20 @@ export function PreviewPane({
       // Rendered while logging in: show the newest state.
       if (next) {
         shown.current = next;
-        load(`${origin.current}${next}`);
+        load(`${origin.current}${withTheme(next, themeRef.current)}`);
       }
     };
     window.addEventListener("message", onMessage);
     return () => window.removeEventListener("message", onMessage);
   }, [load, promote]);
+
+  // The theme changed: the pages switch in place, without loading again.
+  useEffect(() => {
+    if (!origin.current) return;
+    for (const element of elements.current.values()) {
+      element.contentWindow?.postMessage({ hyperbookTheme: theme }, origin.current);
+    }
+  }, [theme]);
 
   // Render the open page after a pause in typing, and after every save. One
   // render at a time: the server renders a book's pages one after another, so
@@ -178,7 +198,7 @@ export function PreviewPane({
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const openInTab = async () => {
-    const url = await previewUrl(bookId, shown.current ?? "/");
+    const url = await previewUrl(bookId, withTheme(shown.current ?? "/", themeRef.current));
     window.open(url, "_blank", "noopener");
   };
 
@@ -239,7 +259,10 @@ export function PreviewPane({
               title="Preview"
               aria-hidden={!onView}
               tabIndex={onView ? undefined : -1}
-              className={cn("absolute inset-0 size-full bg-white", onView ? "z-10" : "pointer-events-none z-0")}
+              // In the theme from the start: a frame's own light or dark
+              // follows the color scheme of the element framing it.
+              style={{ colorScheme: theme }}
+              className={cn("absolute inset-0 size-full bg-background", onView ? "z-10" : "pointer-events-none z-0")}
               // Pages that never say they are shown (an error page, a file):
               // on view a moment after they have loaded.
               onLoad={() => setTimeout(() => promote(frame.id), SHOWN_FALLBACK_MS)}

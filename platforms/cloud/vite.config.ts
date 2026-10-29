@@ -32,23 +32,18 @@ function excalidrawFonts(): Plugin {
 /**
  * Light or dark, as the reader chose (see src/web/lib/theme.ts) or else as the
  * system is set. Both go into the head of every page, so the first paint is
- * already in the right theme: the dark tokens, scoped to `:root.dark` (the
- * file books load is scoped to a media query instead), and the script setting
- * that class.
+ * already in the right theme: the script setting `.dark` on the root (a file
+ * in public/, since a CSP may forbid inline scripts; it blocks rendering like
+ * any classic script) and the dark tokens, scoped to that class (the file
+ * books load is scoped to a media query instead).
  */
 function theme(): Plugin {
   const tokens = path.resolve(import.meta.dirname, "../../packages/markdown/assets/tokens-dark.css");
-  const init = `(() => {
-  let mode = null;
-  try { mode = localStorage.getItem("dark-mode-toggle"); } catch {}
-  const dark = mode === "dark" || (mode !== "light" && matchMedia("(prefers-color-scheme: dark)").matches);
-  document.documentElement.classList.toggle("dark", dark);
-})();`;
   return {
     name: "theme",
     transformIndexHtml() {
       return [
-        { tag: "script", children: init, injectTo: "head-prepend" },
+        { tag: "script", attrs: { src: "/theme.js" }, injectTo: "head-prepend" },
         { tag: "style", children: readFileSync(tokens, "utf8").replaceAll(":root", ":root.dark"), injectTo: "head" },
       ];
     },

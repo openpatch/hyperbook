@@ -23,11 +23,14 @@ function current(): Theme {
   return chosen ?? (systemDark.matches ? "dark" : "light");
 }
 
-/** The class the inline script in the page head set first (see vite.config.ts). */
+/** The class public/theme.js set first (see vite.config.ts). */
 function apply() {
   document.documentElement.classList.toggle("dark", current() === "dark");
   for (const listener of listeners) listener();
 }
+
+// public/theme.js set the class already; should it not have run, this does.
+document.documentElement.classList.toggle("dark", current() === "dark");
 
 systemDark.addEventListener("change", apply);
 // Another tab, or the visual editor's frame and its parent, changed it.

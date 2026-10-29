@@ -61,6 +61,31 @@ const keepScroll = (adminOrigin: string) => `<script>(() => {
   });
 })();</script>`;
 
+/**
+ * The editor's light or dark theme for the book: the editor names it in the
+ * address (`hb-theme`) of each page it loads, and posts it when it changes.
+ * Kept where the book's own toggle keeps it, before the book's stylesheet
+ * loader reads it, so the page is in that theme from its first paint. It goes
+ * first in the head for that reason.
+ */
+const followTheme = (adminOrigin: string) => `<script>(() => {
+  const themes = ["light", "dark"];
+  const url = new URL(location.href);
+  const theme = url.searchParams.get("hb-theme");
+  if (themes.includes(theme)) {
+    try { localStorage.setItem("dark-mode-toggle", theme); } catch {}
+    url.searchParams.delete("hb-theme");
+    history.replaceState(history.state, "", url);
+  }
+  addEventListener("message", (e) => {
+    if (e.origin !== ${JSON.stringify(adminOrigin)} || !themes.includes(e.data?.hyperbookTheme)) return;
+    const toggle = document.querySelector("dark-mode-toggle");
+    // The toggle switches the stylesheets and keeps the choice.
+    if (toggle) toggle.mode = e.data.hyperbookTheme;
+    else try { localStorage.setItem("dark-mode-toggle", e.data.hyperbookTheme); } catch {}
+  });
+})();</script>`;
+
 type PreviewEnv = {
   Bindings: BookBindings;
   Variables: { book: BookRow; allowed: boolean };
@@ -148,7 +173,10 @@ export function createPreviewApp(deps: Deps) {
           return page(c, 404, escapeHtml(book.title), `This page could not be shown: ${escapeHtml(rendered.render.error)}`);
         }
         if (rendered?.render.ok) {
-          const html = await readFile(path.join(rendered.outDir, rendered.render.out), "utf8");
+          let html = await readFile(path.join(rendered.outDir, rendered.render.out), "utf8");
+          const head = /<head[^>]*>/i.exec(html);
+          const theme = followTheme(config.adminOrigin);
+          html = head ? html.slice(0, head.index + head[0].length) + theme + html.slice(head.index + head[0].length) : theme + html;
           const end = html.lastIndexOf("</body>");
           const script = keepScroll(config.adminOrigin);
           return c.html(end < 0 ? html + script : html.slice(0, end) + script + html.slice(end));
