@@ -1206,6 +1206,7 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
         onClose={() => setShowSettings(false)}
         bookId={bookId}
         files={listing.files.map((f) => f.path)}
+        onUpload={(files) => upload("public", files)}
         onEditJson={() => {
           setShowSettings(false);
           ws.open("hyperbook.json");

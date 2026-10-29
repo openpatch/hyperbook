@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { UploadIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Check, Field, Section } from "./form-dialog";
 import {
@@ -27,6 +28,7 @@ const SWITCHES = [
   ["importExport", "Import & export the saved state", false],
 ] as const;
 const IMAGES = new Set(["png", "jpg", "jpeg", "gif", "webp", "svg", "avif"]);
+const LOGO_ACCEPT = Array.from(IMAGES, (e) => `.${e}`).join(",");
 
 type Form = {
   name: string;
@@ -137,6 +139,7 @@ export function SettingsDialog({
   onClose,
   bookId,
   files,
+  onUpload,
   onSave,
   onEditJson,
 }: {
@@ -144,6 +147,8 @@ export function SettingsDialog({
   onClose: () => void;
   bookId: string;
   files: string[];
+  /** Uploads images into the public folder; resolves to whether it worked. */
+  onUpload: (files: File[]) => Promise<boolean>;
   onSave: (content: string, baseOid: string) => Promise<void>;
   onEditJson: () => void;
 }) {
@@ -151,6 +156,8 @@ export function SettingsDialog({
   const [form, setForm] = useState<Form | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const logoInput = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -172,6 +179,21 @@ export function SettingsDialog({
   // Logos are addressed relative to the public folder.
   const images = files.filter((p) => p.startsWith("public/") && IMAGES.has(extension(p)));
   const href = (p: string) => "/" + p.slice("public/".length);
+
+  /** Uploads one image into the public folder and makes it the logo. */
+  const uploadLogo = async (file: File | undefined) => {
+    if (!file || uploading) return;
+    if (!IMAGES.has(extension(file.name))) {
+      setError(`The logo must be one of: ${LOGO_ACCEPT}`);
+      return;
+    }
+    setUploading(true);
+    try {
+      if (await onUpload([file])) update({ logo: "/" + file.name });
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const save = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -234,23 +256,46 @@ export function SettingsDialog({
                 </Field>
               </Section>
               <Section title="Branding">
-                <Field id="s-logo" label="Logo">
-                  <Select value={form.logo || "none"} onValueChange={(logo) => update({ logo: logo === "none" ? "" : logo })}>
-                    <SelectTrigger id="s-logo" className="w-full">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">No logo</SelectItem>
-                      {images.map((p) => (
-                        <SelectItem key={p} value={href(p)}>
-                          {p}
-                        </SelectItem>
-                      ))}
-                      {form.logo && !images.some((p) => href(p) === form.logo) && (
-                        <SelectItem value={form.logo}>{form.logo}</SelectItem>
-                      )}
-                    </SelectContent>
-                  </Select>
+                <Field id="s-logo" label="Logo" hint="An image in the public folder">
+                  <div className="flex gap-2">
+                    <Select value={form.logo || "none"} onValueChange={(logo) => update({ logo: logo === "none" ? "" : logo })}>
+                      <SelectTrigger id="s-logo" className="w-full">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">No logo</SelectItem>
+                        {images.map((p) => (
+                          <SelectItem key={p} value={href(p)}>
+                            {p}
+                          </SelectItem>
+                        ))}
+                        {form.logo && !images.some((p) => href(p) === form.logo) && (
+                          <SelectItem value={form.logo}>{form.logo}</SelectItem>
+                        )}
+                      </SelectContent>
+                    </Select>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      title="Upload an image"
+                      aria-label="Upload a logo image"
+                      disabled={uploading}
+                      onClick={() => logoInput.current?.click()}
+                    >
+                      <UploadIcon />
+                    </Button>
+                  </div>
+                  <input
+                    ref={logoInput}
+                    type="file"
+                    accept={LOGO_ACCEPT}
+                    hidden
+                    onChange={(e) => {
+                      void uploadLogo(e.target.files?.[0]);
+                      e.target.value = "";
+                    }}
+                  />
                 </Field>
                 <ColorField id="s-brand" label="Brand" fallback="#007864" value={form.brand} onChange={(brand) => update({ brand })} />
                 <ColorField id="s-brand-dark" label="Brand (dark theme)" fallback="#b5e3d8" value={form.brandDark} onChange={(brandDark) => update({ brandDark })} />
