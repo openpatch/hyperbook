@@ -87,6 +87,11 @@ export class BuildLog {
     }
   }
 
+  /** Restores text stored with a queued build, e.g. a note from its upload. */
+  replay(text: string) {
+    this.write(text.endsWith("\n") ? text : `${text}\n`);
+  }
+
   /** The newest line matching `pattern`, including one still being written. */
   findLast(pattern: RegExp): RegExpMatchArray | null {
     const partial = this.partial ? pattern.exec(this.clean(this.partial)) : null;

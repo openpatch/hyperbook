@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { UploadIcon } from "lucide-react";
+import { DownloadIcon, UploadIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { ConfirmButton } from "@/components/confirm-button";
@@ -46,12 +46,27 @@ function duration(b: Build): string {
   return ms < 60_000 ? `${Math.round(ms / 1000)} s` : `${Math.floor(ms / 60_000)} min ${Math.round((ms % 60_000) / 1000)} s`;
 }
 
+type UploadResult = { files: number; changed: boolean; skipped: string[]; build: Build };
+
 /** The upload goes as multipart, which the typed client does not model. */
-async function uploadZip(bookId: string, file: File) {
-  const form = new FormData();
-  form.append("file", file);
-  const res = fetch(`/api/books/${bookId}/source`, { method: "POST", body: form });
-  return (await unwrap(res)) as { files: number; changed: boolean; skipped: string[] };
+function uploadZip(bookId: string, file: File, onProgress: (fraction: number) => void) {
+  return new Promise<UploadResult>((resolve, reject) => {
+    const form = new FormData();
+    form.append("file", file);
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", `/api/books/${bookId}/source`);
+    xhr.responseType = "json";
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable) onProgress(e.loaded / e.total);
+    };
+    xhr.onerror = () => reject(new Error("Upload failed"));
+    xhr.onload = () => {
+      const body = (xhr.response ?? {}) as UploadResult & { error?: string };
+      if (xhr.status === 200) resolve(body);
+      else reject(new ApiError(body.error ?? `Request failed (${xhr.status})`, xhr.status));
+    };
+    xhr.send(form);
+  });
 }
 
 export function PublishingSection({ book }: { book: Book }) {
@@ -103,7 +118,7 @@ export function PublishingSection({ book }: { book: Book }) {
         )}
       </p>
 
-      <UploadZone bookId={id} onUploaded={refresh} />
+      <UploadZone bookId={id} onUploaded={refresh} onLog={setLogFor} />
 
       <div className="my-4 flex flex-wrap gap-2">
         <Button
@@ -201,10 +216,20 @@ export function PublishingSection({ book }: { book: Book }) {
   );
 }
 
-function UploadZone({ bookId, onUploaded }: { bookId: string; onUploaded: () => void }) {
+function UploadZone({
+  bookId,
+  onUploaded,
+  onLog,
+}: {
+  bookId: string;
+  onUploaded: () => void;
+  onLog: (buildId: number) => void;
+}) {
   const input = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
   const [busy, setBusy] = useState(false);
+  // How much of the zip was sent; 1 means the server is now unpacking it.
+  const [progress, setProgress] = useState(0);
 
   const upload = async (file: File | undefined) => {
     if (!file) return;
@@ -213,15 +238,20 @@ function UploadZone({ bookId, onUploaded }: { bookId: string; onUploaded: () => 
       return;
     }
     setBusy(true);
+    setProgress(0);
     try {
-      const result = await uploadZip(bookId, file);
+      const result = await uploadZip(bookId, file, setProgress);
       toast.success(
         result.changed
           ? `Uploaded ${result.files} files. The book is being built.`
           : "Nothing changed since the last upload. The book is being built again.",
       );
       if (result.skipped.length > 0) {
-        toast.warning(`Left out ${result.skipped.length} link(s): ${result.skipped.slice(0, 3).join(", ")}`);
+        const shown = result.skipped.slice(0, 3).join(", ");
+        toast.warning(`Left out ${result.skipped.length} link(s): ${shown}${result.skipped.length > 3 ? ", …" : ""}`, {
+          // The whole list is in the build's log.
+          action: { label: "View log", onClick: () => onLog(result.build.id) },
+        });
       }
       onUploaded();
     } catch (error) {
@@ -251,10 +281,27 @@ function UploadZone({ bookId, onUploaded }: { bookId: string; onUploaded: () => 
       }}
     >
       <UploadIcon className="size-6 text-muted-foreground" aria-hidden />
-      <span>{busy ? "Uploading…" : "Drop a zip of your book here, or click to choose one"}</span>
+      <span>
+        {busy ? (progress < 1 ? `Uploading… ${Math.round(progress * 100)}%` : "Unpacking…") : "Drop a zip of your book here, or click to choose one"}
+      </span>
       <span className="text-sm text-muted-foreground">
         It must contain your hyperbook.json. A zip from GitHub (“Download ZIP”) works as it is.
       </span>
+      {busy && (
+        <div
+          role="progressbar"
+          aria-label="Upload progress"
+          aria-valuenow={Math.round(progress * 100)}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          className="h-1.5 w-full max-w-xs overflow-hidden rounded-full bg-secondary"
+        >
+          <div
+            className={cn("h-full rounded-full bg-primary transition-[width] duration-150", progress >= 1 && "animate-pulse")}
+            style={{ width: `${Math.min(100, Math.round(progress * 100))}%` }}
+          />
+        </div>
+      )}
       <input
         ref={input}
         type="file"
@@ -283,6 +330,16 @@ export function LogDialog({ buildId, onClose }: { buildId: number | null; onClos
     pre.current?.scrollTo({ top: pre.current.scrollHeight });
   }, [build?.log]);
 
+  const downloadLog = () => {
+    if (!build?.log || buildId === null) return;
+    const url = URL.createObjectURL(new Blob([build.log], { type: "text/plain" }));
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `hyperbook-build-${buildId}.log`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <Dialog open={buildId !== null} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="sm:max-w-3xl">
@@ -300,6 +357,11 @@ export function LogDialog({ buildId, onClose }: { buildId: number | null; onClos
         >
           {build?.log || (build?.status === "queued" ? "Waiting for its turn…" : "")}
         </pre>
+        <div className="flex justify-end">
+          <Button variant="outline" size="sm" onClick={downloadLog} disabled={!build?.log}>
+            <DownloadIcon aria-hidden /> Download log
+          </Button>
+        </div>
       </DialogContent>
     </Dialog>
   );

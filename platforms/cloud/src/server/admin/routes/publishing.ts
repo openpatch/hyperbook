@@ -152,7 +152,12 @@ export function bookPublishingRoutes({ db, config, builds: queue }: Deps) {
             throw error;
           });
           setSourceBytes(db, book.id, (await listTree(repo, commit)).reduce((sum, e) => sum + e.size, 0));
-          const build = queue.enqueue(book.id, commit, "upload", user.id);
+          // The whole list goes into the build's log; the toast can only show a few.
+          const skippedNote =
+            unpacked.skipped.length > 0
+              ? `The upload left out ${unpacked.skipped.length} link(s), which are not carried over:\n${unpacked.skipped.map((entry) => `  ${entry}`).join("\n")}`
+              : undefined;
+          const build = queue.enqueue(book.id, commit, "upload", user.id, skippedNote);
           audit(db, {
             actorUserId: user.id,
             action: "book.upload",

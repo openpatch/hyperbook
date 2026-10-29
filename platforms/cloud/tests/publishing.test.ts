@@ -34,6 +34,23 @@ describe("publishing", () => {
     expect((await owner.c.get(`/api/books/${book.id}`)).body.publishedBuildId).toBe(builds[0].id);
   });
 
+  it("records the links an upload left out in the build's log", async () => {
+    const { instance, owner, book } = await world();
+    const zip = zipSync({
+      "physics/hyperbook.json": text('{"name":"Physics"}'),
+      "physics/index.html": text("<h1>Hello</h1>"),
+      // Unix mode 0120777 (symlink) in the upper half of the attributes.
+      "physics/link": [text("/etc/passwd"), { os: 3, attrs: (0o120777 << 16) >>> 0 }],
+    });
+    const res = await owner.c.upload(`/api/books/${book.id}/source`, zip);
+    expect(res.body.skipped).toEqual(["link"]);
+    await instance.builds.idle();
+    // The whole list stays traceable in the log, also once the build has run.
+    const detail = (await owner.c.get(`/api/builds/${res.body.build.id}`)).body;
+    expect(detail.log).toContain("left out 1 link(s)");
+    expect(detail.log).toContain("\n  link");
+  });
+
   it("downloads the current source", async () => {
     const { owner, book } = await world();
     expect((await owner.c.get(`/api/books/${book.id}/source.zip`)).status).toBe(404);

@@ -64,8 +64,17 @@ export class BuildQueue {
    * preview; all others go live when they succeed. A queued (not yet running)
    * build of the same book is replaced, since only the newest one matters,
    * except that a preview build never replaces one that is to go live.
+   *
+   * `note` becomes the head of the build's log, e.g. what an upload left
+   * out, so that it can be traced back long after the upload's toast.
    */
-  enqueue(bookId: number, commit: string, trigger: BuildRow["trigger"], userId: number | null): BuildRow {
+  enqueue(
+    bookId: number,
+    commit: string,
+    trigger: BuildRow["trigger"],
+    userId: number | null,
+    note?: string,
+  ): BuildRow {
     const publish = trigger !== "edit";
     const build = this.db.transaction((tx) => {
       tx.update(builds)
@@ -80,7 +89,15 @@ export class BuildQueue {
         .run();
       return tx
         .insert(builds)
-        .values({ bookId, commit, trigger, publish, status: "queued", requestedBy: userId })
+        .values({
+          bookId,
+          commit,
+          trigger,
+          publish,
+          status: "queued",
+          requestedBy: userId,
+          log: note ? `[Hyperbook Cloud] ${note}` : "",
+        })
         .returning()
         .get();
     });
@@ -234,11 +251,14 @@ export class BuildQueue {
         .where(and(eq(builds.id, next.id), eq(builds.status, "queued")))
         .run();
       if (claimed.changes === 0) continue;
+      // A queued build may already carry a note in its log, e.g. from its upload.
+      const log = new BuildLog();
+      if (next.log) log.replay(next.log);
       const running: Running = {
         buildId: next.id,
         bookId: next.bookId,
         abort: new AbortController(),
-        log: new BuildLog(),
+        log,
       };
       this.running.set(next.bookId, running);
       void this.run(next, running).finally(() => {
