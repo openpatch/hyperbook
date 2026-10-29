@@ -21,8 +21,9 @@ const BOOK = [
   "public/images/diagram.png",
   "public/data.csv",
   "public/video.mp4",
-  "book-public/style.css",
-  "glossary-public/logo.png",
+  "book/style.css",
+  "book/section/2026-10-28-112013_hyprshot.png",
+  "glossary/logo.png",
   "archives/project/report.pdf",
   "book/maps/map.learningmap",
 ];
@@ -40,8 +41,10 @@ describe("addresses", () => {
     expect(pageRoute("book/section/page.md.hbs")).toBe("/section/page");
     expect(pageRoute("glossary/terms.md")).toBe("/glossary/terms");
     expect(assetAddress("public/images/diagram.png")).toBe("/images/diagram.png");
-    expect(assetAddress("book-public/style.css")).toBe("/style.css");
-    expect(assetAddress("glossary-public/logo.png")).toBe("/glossary/logo.png");
+    expect(assetAddress("book/style.css")).toBe("/style.css");
+    expect(assetAddress("book/section/2026-10-28-112013_hyprshot.png")).toBe("/section/2026-10-28-112013_hyprshot.png");
+    expect(assetAddress("glossary/logo.png")).toBe("/glossary/logo.png");
+    expect(assetAddress("glossary/terms.md")).toBeNull();
     expect(assetAddress("book/index.md")).toBeNull();
   });
 
@@ -60,6 +63,8 @@ describe("addresses", () => {
     expect(resolveSrc("map.learningmap", "book/section/page.md", exists)).toBeNull();
     expect(resolveSrc("map.learningmap", "book/section/index.md", exists)).toBeNull();
     expect(resolveSrc("/missing.mp4", "book/index.md", exists)).toBeNull();
+    expect(resolveSrc("./2026-10-28-112013_hyprshot.png", "book/section/page.md", exists)).toBe("book/section/2026-10-28-112013_hyprshot.png");
+    expect(resolveSrc("./style.css", "book/section/page.md", exists)).toBeNull();
   });
 });
 
@@ -219,6 +224,28 @@ describe("rewriting", () => {
     }));
     expect(skipped).toEqual([]);
     expect(text).toBe('See [x](/moved) and ![i](/pics/diagram.png "T").\n:::video{src="/media/video.mp4"}');
+  });
+
+  it("finds and renames an image next to the page, keeping it relative", () => {
+    const text = "![](./2026-10-28-112013_hyprshot.png)\n![](/section/2026-10-28-112013_hyprshot.png)";
+    const refs = inPage(text, "book/section/2026-10-28-112013_hyprshot.png");
+    expect(refs.map((r) => r.kind)).toEqual(["image", "image"]);
+    const { text: out } = rewriteText(text, refs, move({ "book/section/2026-10-28-112013_hyprshot.png": "book/section/stats.png" }));
+    expect(out).toBe("![](./stats.png)\n![](/section/stats.png)");
+  });
+
+  it("keeps relative links relative when their file moves elsewhere", () => {
+    const text = '[up](../getting-started#a) and :::video{src="./clip.mp4"}';
+    const book = [...BOOK, "book/section/clip.mp4"];
+    const refs = [
+      ...findReferences([{ path: "book/section/page.md", text }], book, "book/getting-started.md"),
+      ...findReferences([{ path: "book/section/page.md", text }], book, "book/section/clip.mp4"),
+    ];
+    const { text: out } = rewriteText(text, refs, move({
+      "book/getting-started.md": "book/section/start.md",
+      "book/section/clip.mp4": "book/media/clip.mp4",
+    }));
+    expect(out).toBe('[up](./start#a) and :::video{src="../media/clip.mp4"}');
   });
 
   it("leaves references alone that have no new address", () => {

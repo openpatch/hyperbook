@@ -9,14 +9,15 @@
  *
  * - A link, image or definition addresses a route: pages of book/ and
  *   glossary/ answer at their route (book/section/page.md at /section/page,
- *   an index page at its folder), files of public/, book-public/ and
- *   glossary-public/ at their path below the folder. Relative targets
+ *   an index page at its folder), files of public/ at their path below it,
+ *   and the other files of book/ and glossary/ (what the build calls
+ *   book-public and glossary-public) next to the pages. Relative targets
  *   resolve against the page's own directory; an index page's directory is
  *   its route. A target may carry a page extension and a query or fragment.
  * - A directive attribute whose value names a file (src, poster, db, …)
  *   resolves like readFile in the markdown package: public/<value>, then
- *   book/<value>, then next to the page — with the extension, unlike a
- *   link. The archive directive's name references a folder inside archives/.
+ *   book/<value>, then next to the page; a ./ or ../ value only next to the
+ *   page — with the extension, unlike a link. The archive directive's name references a folder inside archives/.
  *
  * The scanner is deliberately pragmatic: code blocks are blanked out, and
  * the common link forms are matched with regular expressions rather than a
@@ -64,7 +65,7 @@ export type Reference = {
   file: string;
   /** Where the address starts in the page's text, 0-based. */
   start: number;
-  /** The length of the address; what a rewrite replaces. */
+  /** The length of the address, without its query or fragment. */
   length: number;
   /** The address exactly as written, including any query or fragment. */
   raw: string;
@@ -110,15 +111,28 @@ export function pageRoute(path: string): string | null {
 }
 
 /**
- * The address of a file readers can link at: public/, book-public/ and
- * glossary-public/ are served from the output's root, the glossary's public
- * files under /glossary. Pages answer at their route (see pageRoute). Files
- * of archives/ have none — the build only writes a zip for their folder.
+ * The address of a file readers can link at: public/ and the files of book/
+ * that are not pages are served from the output's root, those of glossary/
+ * under /glossary. Pages answer at their route (see pageRoute). Files of
+ * archives/ have none — the build only writes a zip for their folder.
  */
 export function assetAddress(path: string): string | null {
-  const m = /^(public|book-public|glossary-public)\/(.+)$/.exec(path);
-  if (!m) return null;
-  return m[1] === "glossary-public" ? `/glossary/${m[2]}` : `/${m[2]}`;
+  const m = /^(public|book|glossary)\/(.+)$/.exec(path);
+  if (!m || IS_PAGE.test(path)) return null;
+  return m[1] === "glossary" ? `/glossary/${m[2]}` : `/${m[2]}`;
+}
+
+/** Whether an address is written relative to the page: "./x" or "../x". */
+const isRelative = (address: string) => address.startsWith("./") || address.startsWith("../");
+
+/** `to`, an address from the root, as a relative one from the directory `base`. */
+function relativeAddress(base: string, to: string): string {
+  const from = base.split("/").filter(Boolean);
+  const target = to.split("/").filter(Boolean);
+  let common = 0;
+  while (common < from.length && from[common] === target[common]) common++;
+  const rest = target.slice(common).join("/");
+  return common < from.length ? "../".repeat(from.length - common) + rest : `./${rest}`;
 }
 
 /** A page's directory inside its own folder ("" when at its root). */
@@ -158,7 +172,10 @@ export function joinBookPath(...parts: string[]): string {
  */
 export function resolveSrc(value: string, page: string, exists: (file: string) => boolean): string | null {
   const dir = pageDirectory(page);
-  for (const candidate of [joinBookPath("public", value), joinBookPath("book", value), joinBookPath("book", dir, value)]) {
+  const candidates = isRelative(value)
+    ? [joinBookPath("book", dir, value), joinBookPath("public", dir, value)]
+    : [joinBookPath("public", value), joinBookPath("book", value), joinBookPath("book", dir, value), joinBookPath("public", dir, value)];
+  for (const candidate of candidates) {
     if (exists(candidate)) return candidate;
   }
   return null;
@@ -335,17 +352,18 @@ export function newTargetOf(ref: Reference, move: (path: string) => string | nul
   }
   // A directive's value is a path below public/ or book/ — with the
   // extension, since readFile looks for the file itself, not its route.
+  // One written from the page stays written from the page.
   if (ref.directive) {
     const m = /^(?:public|book)\/(.+)$/.exec(to);
-    return m ? `/${m[1]}` : null;
+    if (!m) return null;
+    return isRelative(ref.raw) ? relativeAddress(pageDirectory(ref.file), m[1]!) : `/${m[1]}`;
   }
-  // A link keeps its query and fragment on the new address.
+  // A link keeps its query and fragment on the new address, and stays
+  // relative when it was.
   const suffix = ref.raw.slice(ref.length);
-  const route = pageRoute(to);
-  if (route !== null) return route + suffix;
-  const asset = assetAddress(to);
-  if (asset !== null) return asset + suffix;
-  return null;
+  const address = pageRoute(to) ?? assetAddress(to);
+  if (address === null) return null;
+  return (isRelative(ref.raw) ? relativeAddress(linkBase(ref.file), address) : address) + suffix;
 }
 
 /**
@@ -366,7 +384,8 @@ export function rewriteText(
       skipped.push(ref);
       continue;
     }
-    out = out.slice(0, ref.start) + next + out.slice(ref.start + ref.length);
+    // The new address carries the query and fragment, so it replaces them too.
+    out = out.slice(0, ref.start) + next + out.slice(ref.start + ref.raw.length);
   }
   return { text: out, skipped };
 }
