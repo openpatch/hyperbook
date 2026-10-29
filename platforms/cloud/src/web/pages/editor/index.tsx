@@ -24,7 +24,7 @@ import { FILE_ELEMENTS, type FileElement, InsertMenu, insertAtCursor } from "./i
 import { SettingsDialog } from "./settings-dialog";
 import { PageSettingsDialog } from "./page-settings-dialog";
 import { withPageForm } from "./frontmatter";
-import { ConflictError, type Tab, isDirty, useWorkspace } from "./workspace";
+import { ConflictError, type Tab, type Workspace, isDirty, useLiveText, useWorkspace } from "./workspace";
 
 export function Component() {
   const id = useParams().id!;
@@ -226,7 +226,7 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
             variant: "outline",
             run: async () => {
               const taken = (p: string) => current.files.some((f) => f.path === p);
-              const tabs = ws.tabs.filter((t) => conflicts.includes(t.path));
+              const tabs = ws.currentTabs().filter((t) => conflicts.includes(t.path));
               try {
                 await ws.commit(
                   tabs.map((t) => ({ op: "write", path: copyName(t.path, taken), content: t.text!, baseOid: null })),
@@ -514,6 +514,7 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
             {ws.tabs.map((tab) => (
               <div key={tab.path} className={cn("absolute inset-0", tab.path !== ws.active && "hidden")}>
                 <TabContent
+                  ws={ws}
                   tab={tab}
                   files={listing.files.map((f) => f.path)}
                   onEditBlock={(block, view) => editBlock(tab.path, block, view)}
@@ -538,10 +539,10 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
 
         {showPreview && (
           <section className="hidden w-[45%] max-w-3xl shrink-0 border-l border-border lg:block" aria-label="Preview">
-            <PreviewPane
+            <LivePreview
+              ws={ws}
               bookId={bookId}
               file={activeTab && pageOf(activeTab.path) && activeTab.status === "ready" ? activeTab.path : null}
-              text={activeTab && pageOf(activeTab.path) ? (activeTab.text ?? null) : null}
               commit={listing.commit}
             />
           </section>
@@ -625,7 +626,14 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
   );
 }
 
+/** The preview follows the page's text as it is typed; the editor around it does not render for that. */
+function LivePreview({ ws, file, ...props }: { ws: Workspace; bookId: string; file: string | null; commit: string | null }) {
+  const text = useLiveText(ws, file);
+  return <PreviewPane {...props} file={file} text={file === null ? null : (text ?? null)} />;
+}
+
 function TabContent({
+  ws,
   tab,
   files,
   onEditBlock,
@@ -636,6 +644,7 @@ function TabContent({
   onReplace,
   onDownload,
 }: {
+  ws: Workspace;
   tab: Tab;
   files: string[];
   onEditBlock: (block: Block, view: EditorView) => void;
@@ -658,7 +667,7 @@ function TabContent({
       <CodeEditor
         key={`${tab.path}:${tab.version}`}
         path={tab.path}
-        initial={tab.text!}
+        initial={ws.textOf(tab.path)!}
         onChange={onChange}
         onSave={onSave}
         onEditBlock={onEditBlock}
@@ -704,7 +713,7 @@ function TabContent({
       );
     }
     if (!kind) return source;
-    return <VisualOrSource tab={tab} kind={kind} source={source} onChange={onChange} onSave={onSave} />;
+    return <VisualOrSource ws={ws} tab={tab} kind={kind} source={source} onChange={onChange} onSave={onSave} />;
   }
   const size = `${(loaded.size / 1024).toFixed(loaded.size < 10240 ? 1 : 0)} KB`;
   return (
@@ -734,12 +743,14 @@ function TabContent({
 }
 
 function VisualOrSource({
+  ws,
   tab,
   kind,
   source,
   onChange,
   onSave,
 }: {
+  ws: Workspace;
   tab: Tab;
   kind: NonNullable<ReturnType<typeof visualKind>>;
   source: React.ReactNode;
@@ -747,7 +758,8 @@ function VisualOrSource({
   onSave: () => void;
 }) {
   const [mode, setMode] = useState<"visual" | "source">("visual");
-  const problem = visualProblem(kind, tab.text!);
+  const text = useLiveText(ws, tab.path)!;
+  const problem = visualProblem(kind, text);
   return (
     <div className="flex h-full flex-col">
       <div className="flex shrink-0 items-center gap-1 border-b border-border px-2 py-1" role="group" aria-label="View">
@@ -767,7 +779,7 @@ function VisualOrSource({
       </div>
       <div className="min-h-0 flex-1">
         {mode === "visual" ? (
-          <VisualFrame key={`${tab.path}:${tab.version}`} kind={kind} text={tab.text!} onChange={onChange} onSave={onSave} />
+          <VisualFrame key={`${tab.path}:${tab.version}`} kind={kind} text={text} onChange={onChange} onSave={onSave} />
         ) : (
           source
         )}

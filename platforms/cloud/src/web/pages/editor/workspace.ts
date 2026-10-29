@@ -1,5 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import type { FileChange } from "../../../shared/schemas";
 import { ApiError } from "@/lib/api";
 import { type Listing, type Loaded, commitFiles, loadFile } from "./files";
@@ -11,7 +11,11 @@ export type Tab = {
   status: "loading" | "ready" | "error";
   error?: string;
   loaded?: Loaded;
-  /** Current text of a text file. */
+  /**
+   * Text of a text file, as of the last render: typing does not render the
+   * editor, so this lags until the file turns saved or unsaved. The current
+   * text is `textOf(path)`, or `useLiveText` to follow it.
+   */
   text?: string;
 };
 
@@ -27,6 +31,43 @@ export class ConflictError extends Error {
 }
 
 /**
+ * The current text of each open file, outside React state: a keystroke would
+ * otherwise render the whole editor (file tree, tabs, dialogs, preview).
+ * Only what shows the text follows it, through `useLiveText`.
+ */
+class LiveTexts {
+  private texts = new Map<string, string>();
+  private listeners = new Map<string, Set<() => void>>();
+
+  get(path: string) {
+    return this.texts.get(path);
+  }
+
+  set(path: string, text: string) {
+    this.texts.set(path, text);
+    for (const listener of this.listeners.get(path) ?? []) listener();
+  }
+
+  delete(path: string) {
+    this.texts.delete(path);
+  }
+
+  subscribe(path: string, listener: () => void) {
+    const set = this.listeners.get(path) ?? new Set();
+    this.listeners.set(path, set.add(listener));
+    return () => void set.delete(listener);
+  }
+}
+
+/** The current text of `path` (undefined while it is not loaded), following every change. */
+export function useLiveText(ws: Workspace, path: string | null): string | undefined {
+  return useSyncExternalStore(
+    useCallback((listener) => (path === null ? () => {} : ws.subscribeText(path, listener)), [ws.subscribeText, path]),
+    () => (path === null ? undefined : ws.textOf(path)),
+  );
+}
+
+/**
  * The editor's state: the book's files, the open tabs and their unsaved
  * text. Every save is one commit; the server answers with the new listing.
  */
@@ -36,6 +77,12 @@ export function useWorkspace(bookId: string, listing: Listing) {
   const [active, setActive] = useState<string | null>(null);
   const tabsRef = useRef(tabs);
   tabsRef.current = tabs;
+  const live = useRef(new LiveTexts()).current;
+  /** The tabs with their current text. */
+  const currentTabs = useCallback(
+    () => tabsRef.current.map((t) => (live.get(t.path) === undefined ? t : { ...t, text: live.get(t.path) })),
+    [live],
+  );
 
   const patchTab = useCallback((path: string, patch: Partial<Tab> | ((tab: Tab) => Partial<Tab>)) => {
     setTabs((all) => all.map((t) => (t.path === path ? { ...t, ...(typeof patch === "function" ? patch(t) : patch) } : t)));
@@ -45,6 +92,8 @@ export function useWorkspace(bookId: string, listing: Listing) {
     async (path: string) => {
       try {
         const loaded = await loadFile(bookId, path);
+        if (loaded.kind === "text") live.set(path, loaded.text);
+        else live.delete(path);
         patchTab(path, (t) => ({
           status: "ready",
           loaded,
@@ -55,7 +104,7 @@ export function useWorkspace(bookId: string, listing: Listing) {
         patchTab(path, { status: "error", error: (error as Error).message });
       }
     },
-    [bookId, patchTab],
+    [bookId, live, patchTab],
   );
 
   const open = useCallback(
@@ -81,23 +130,33 @@ export function useWorkspace(bookId: string, listing: Listing) {
   );
 
   const close = useCallback((path: string) => {
+    live.delete(path);
     setTabs((all) => {
       const i = all.findIndex((t) => t.path === path);
       const next = all.filter((t) => t.path !== path);
       setActive((a) => (a === path ? (next[Math.min(i, next.length - 1)]?.path ?? null) : a));
       return next;
     });
-  }, []);
+  }, [live]);
 
   const setText = useCallback(
     (path: string, text: string) => {
+      const tab = tabsRef.current.find((t) => t.path === path);
+      const wasDirty = tab !== undefined && isDirty({ ...tab, text: live.get(path) ?? tab.text });
       // Right away, so a save that follows before the next render (a visual
       // editor's own save button) saves this text.
-      tabsRef.current = tabsRef.current.map((t) => (t.path === path ? { ...t, text } : t));
-      patchTab(path, { text });
+      live.set(path, text);
+      // React only hears of it when the file turns unsaved, or saved again.
+      if (tab && isDirty({ ...tab, text }) !== wasDirty) patchTab(path, { text });
     },
-    [patchTab],
+    [live, patchTab],
   );
+
+  const textOf = useCallback(
+    (path: string) => live.get(path) ?? tabsRef.current.find((t) => t.path === path)?.text,
+    [live],
+  );
+  const subscribeText = useCallback((path: string, listener: () => void) => live.subscribe(path, listener), [live]);
 
   const applyListing = useCallback(
     (next: Listing) => {
@@ -131,7 +190,7 @@ export function useWorkspace(bookId: string, listing: Listing) {
    */
   const save = useCallback(
     async (paths: string[], baseOids: Record<string, string | null> = {}) => {
-      const toSave = tabsRef.current.filter((t) => paths.includes(t.path) && isDirty(t));
+      const toSave = currentTabs().filter((t) => paths.includes(t.path) && isDirty(t));
       if (toSave.length === 0) return;
       const res = await commit(
         toSave.map((t) => ({
@@ -147,26 +206,34 @@ export function useWorkspace(bookId: string, listing: Listing) {
           const saved = toSave.find((s) => s.path === t.path);
           if (!saved || t.loaded?.kind !== "text") return t;
           // What was saved becomes the base; typing since then stays unsaved.
-          return { ...t, loaded: { ...t.loaded, oid: oids.get(t.path)!, text: saved.text! } };
+          return { ...t, text: live.get(t.path) ?? t.text, loaded: { ...t.loaded, oid: oids.get(t.path)!, text: saved.text! } };
         }),
       );
     },
-    [commit],
+    [commit, currentTabs, live],
   );
 
   /** After a move, open tabs follow their files. */
   const renameTabs = useCallback((moves: Map<string, string>) => {
+    for (const [from, to] of moves) {
+      const text = live.get(from);
+      if (text === undefined) continue;
+      live.delete(from);
+      live.set(to, text);
+    }
     setTabs((all) => all.map((t) => (moves.has(t.path) ? { ...t, path: moves.get(t.path)! } : t)));
     setActive((a) => (a && moves.has(a) ? moves.get(a)! : a));
-  }, []);
+  }, [live]);
 
   const dirty = useMemo(() => new Set(tabs.filter(isDirty).map((t) => t.path)), [tabs]);
   const oidOf = useCallback((path: string) => listing.files.find((f) => f.path === path)?.oid ?? null, [listing]);
 
   return {
     tabs,
-    /** The tabs including changes not rendered yet. */
-    currentTabs: () => tabsRef.current,
+    /** The tabs with their current text. */
+    currentTabs,
+    textOf,
+    subscribeText,
     active,
     setActive,
     open,

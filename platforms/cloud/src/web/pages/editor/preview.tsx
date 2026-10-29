@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { api, unwrap } from "@/lib/api";
+import { cn } from "@/lib/utils";
 
 /** A one-time hand-off into the book's preview host, landing on `page`. */
 async function previewUrl(bookId: string, page: string) {
@@ -15,13 +16,21 @@ type Rendered = { ok: true; href: string; log: string } | { ok: false; error: st
 
 /** How long typing pauses before the page renders again. */
 const DEBOUNCE_MS = 400;
+/** How long a loaded page may take to say it is shown before it is put on view anyway. */
+const SHOWN_FALLBACK_MS = 1500;
+
+/** A page in the frame; `id` makes each load a new frame, even at the same address. */
+type Frame = { id: number; src: string };
 
 /**
  * The open page as readers will see it, framed from the book's preview host.
  * Nothing is built: the page renders on its own, with its unsaved text,
- * shortly after each change, and the frame reloads in place. Links in the
- * frame render the pages they lead to. The frame logs in once through a
- * hand-off; later loads go straight to the page.
+ * shortly after each change. The new page loads in a second frame underneath
+ * the shown one and takes its place once it says it is shown (back at the
+ * reader's place, painted; see books/preview.ts), so the preview neither goes
+ * blank nor jumps. A frame hidden instead of covered would not paint, nor
+ * load its fonts, until it is revealed. Links in the frame render the pages they lead to. The frame
+ * logs in once through a hand-off; later loads go straight to the page.
  */
 export function PreviewPane({
   bookId,
@@ -36,9 +45,31 @@ export function PreviewPane({
   /** The newest save: other pages may have changed with it. */
   commit: string | null;
 }) {
-  const [src, setSrc] = useState<string | null>(null);
+  const [frames, setFrames] = useState<Frame[]>([]);
+  /** The frame on view: the newest one that has loaded. */
+  const [shownFrame, setShownFrame] = useState<number | null>(null);
+  const frameIds = useRef(0);
+  const shownRef = useRef<number | null>(null);
+  shownRef.current = shownFrame;
+  const elements = useRef(new Map<number, HTMLIFrameElement>());
   const origin = useRef<string | null>(null);
-  const [reloads, setReloads] = useState(0);
+  /** Puts frame `id` on view and drops the ones before it. */
+  const promote = useCallback((id: number) => {
+    if (id <= (shownRef.current ?? 0)) return;
+    shownRef.current = id;
+    setShownFrame(id);
+    setFrames((all) => all.filter((f) => f.id >= id));
+  }, []);
+  /** Loads `src` in a new frame underneath the shown one. */
+  const load = useCallback((src: string, replace = false) => {
+    const frame = { id: ++frameIds.current, src };
+    if (replace) {
+      setShownFrame(null);
+      return setFrames([frame]);
+    }
+    // Keep only the shown frame: one still loading is outdated now.
+    setFrames((all) => [...all.filter((f) => f.id === shownRef.current), frame]);
+  }, []);
   const [rendered, setRendered] = useState<Rendered | null>(null);
   const [rendering, setRendering] = useState(false);
   const [showLog, setShowLog] = useState(false);
@@ -56,12 +87,13 @@ export function PreviewPane({
         ready.current = false;
         pending.current = null;
         shown.current = to;
-        setSrc(url);
+        // The hand-off page is no page of the book: nothing to keep behind it.
+        load(url, true);
       } catch (error) {
         toast.error(error instanceof Error ? error.message : "Could not open the preview");
       }
     },
-    [bookId],
+    [bookId, load],
   );
 
   /** Shows `href`: reloads the frame if it shows it already. */
@@ -72,52 +104,65 @@ export function PreviewPane({
         pending.current = href;
         return;
       }
-      // Never the hand-off address again (its code works once), and a new
-      // frame each time, which reloads it even at the same address.
+      // Never the hand-off address again (its code works once).
       shown.current = href;
-      setSrc(`${origin.current}${href}`);
-      setReloads((n) => n + 1);
+      load(`${origin.current}${href}`);
     },
-    [handOff],
+    [handOff, load],
   );
 
   useEffect(() => {
     const onMessage = (e: MessageEvent) => {
-      if (e.origin !== origin.current || e.data?.hyperbookPreview !== "ready") return;
+      if (e.origin !== origin.current) return;
+      if (e.data?.hyperbookPreview === "shown") {
+        for (const [id, element] of elements.current) {
+          if (element.contentWindow === e.source) promote(id);
+        }
+        return;
+      }
+      if (e.data?.hyperbookPreview !== "ready") return;
       ready.current = true;
       const next = pending.current;
       pending.current = null;
       // Rendered while logging in: show the newest state.
       if (next) {
         shown.current = next;
-        setSrc(`${origin.current}${next}`);
-        setReloads((n) => n + 1);
+        load(`${origin.current}${next}`);
       }
     };
     window.addEventListener("message", onMessage);
     return () => window.removeEventListener("message", onMessage);
-  }, []);
+  }, [load, promote]);
 
-  // Render the open page after a pause in typing, and after every save.
+  // Render the open page after a pause in typing, and after every save. One
+  // render at a time: the server renders a book's pages one after another, so
+  // overlapping requests would only queue up there, each one already
+  // outdated. What changes meanwhile renders once the running one is done.
   const latest = useRef(0);
+  const running = useRef<Promise<void> | null>(null);
   useEffect(() => {
     if (file === null || text === null) return;
+    const ticket = ++latest.current;
     const timer = setTimeout(async () => {
-      const ticket = ++latest.current;
+      while (running.current) await running.current;
+      if (ticket !== latest.current) return;
       setRendering(true);
-      try {
-        const res = await unwrap(
-          api.books[":id"].files.render.$post({ param: { id: bookId }, json: { path: file, text } }),
-        );
-        if (ticket !== latest.current) return;
-        setRendered(res);
-        if (res.ok) show(res.href);
-      } catch (error) {
-        if (ticket !== latest.current) return;
-        setRendered({ ok: false, error: error instanceof Error ? error.message : "Could not render the page", log: "" });
-      } finally {
-        if (ticket === latest.current) setRendering(false);
-      }
+      running.current = (async () => {
+        try {
+          const res = await unwrap(
+            api.books[":id"].files.render.$post({ param: { id: bookId }, json: { path: file, text } }),
+          );
+          if (ticket !== latest.current) return;
+          setRendered(res);
+          if (res.ok) show(res.href);
+        } catch (error) {
+          if (ticket !== latest.current) return;
+          setRendered({ ok: false, error: error instanceof Error ? error.message : "Could not render the page", log: "" });
+        }
+      })();
+      await running.current;
+      running.current = null;
+      if (ticket === latest.current) setRendering(false);
     }, DEBOUNCE_MS);
     return () => clearTimeout(timer);
   }, [bookId, file, text, commit, show]);
@@ -179,14 +224,29 @@ export function PreviewPane({
           {log && <pre className="whitespace-pre-wrap font-mono">{log}</pre>}
         </div>
       )}
-      {src && (
-        <iframe
-          key={`${src}#${reloads}`}
-          src={src}
-          title="Preview"
-          className="min-h-0 w-full flex-1 bg-white"
-        />
-      )}
+      <div className="relative min-h-0 flex-1">
+        {frames.map((frame) => {
+          // Until one has been shown, the first frame is on view as it loads.
+          const onView = frame.id === (shownFrame ?? frames[0]?.id);
+          return (
+            <iframe
+              key={frame.id}
+              ref={(element) => {
+                if (element) elements.current.set(frame.id, element);
+                else elements.current.delete(frame.id);
+              }}
+              src={frame.src}
+              title="Preview"
+              aria-hidden={!onView}
+              tabIndex={onView ? undefined : -1}
+              className={cn("absolute inset-0 size-full bg-white", onView ? "z-10" : "pointer-events-none z-0")}
+              // Pages that never say they are shown (an error page, a file):
+              // on view a moment after they have loaded.
+              onLoad={() => setTimeout(() => promote(frame.id), SHOWN_FALLBACK_MS)}
+            />
+          );
+        })}
+      </div>
     </div>
   );
 }

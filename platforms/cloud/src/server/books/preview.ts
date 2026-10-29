@@ -26,20 +26,39 @@ const PREVIEW_COOKIE = "hb_preview";
 
 /**
  * Keeps the reader's place when the editor reloads the preview after a
- * change: Hyperbook pages scroll in <main>.
+ * change: Hyperbook pages scroll in <main>. The editor loads the new page in
+ * a frame underneath the shown one and swaps them when this says the page is
+ * shown: back at its place, with its fonts, painted. So the place is kept as
+ * it changes, not only when a page goes, but not while it is being restored.
  */
-const KEEP_SCROLL = `<script>(() => {
+const keepScroll = (adminOrigin: string) => `<script>(() => {
   const key = "hb-preview-scroll:" + location.pathname;
   const scroller = () => document.querySelector("main");
-  addEventListener("pagehide", () => {
+  let restoring = true;
+  const keep = () => {
+    if (restoring) return;
     try { sessionStorage.setItem(key, JSON.stringify([scrollY, scroller()?.scrollTop ?? 0])); } catch {}
-  });
+  };
+  addEventListener("pagehide", keep);
+  addEventListener("scroll", keep, { capture: true, passive: true });
   let saved = null;
   try { saved = JSON.parse(sessionStorage.getItem(key)); } catch {}
-  if (!saved || location.hash) return;
-  const restore = () => { scrollTo(0, saved[0]); const m = scroller(); if (m) m.scrollTop = saved[1]; };
+  const restore = () => {
+    if (!saved || location.hash) return;
+    scrollTo(0, saved[0]);
+    const m = scroller();
+    if (m) m.scrollTop = saved[1];
+  };
   restore();
-  addEventListener("load", restore);
+  addEventListener("load", async () => {
+    restore();
+    try { await document.fonts.ready; } catch {}
+    restore();
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      restoring = false;
+      if (parent !== window) parent.postMessage({ hyperbookPreview: "shown" }, ${JSON.stringify(adminOrigin)});
+    }));
+  });
 })();</script>`;
 
 type PreviewEnv = {
@@ -131,7 +150,8 @@ export function createPreviewApp(deps: Deps) {
         if (rendered?.render.ok) {
           const html = await readFile(path.join(rendered.outDir, rendered.render.out), "utf8");
           const end = html.lastIndexOf("</body>");
-          return c.html(end < 0 ? html + KEEP_SCROLL : html.slice(0, end) + KEEP_SCROLL + html.slice(end));
+          const script = keepScroll(config.adminOrigin);
+          return c.html(end < 0 ? html + script : html.slice(0, end) + script + html.slice(end));
         }
       }
       const roots = await renders.roots(book.id);
