@@ -1,5 +1,13 @@
 # @hyperbook/cloud
 
+## 0.2.1
+
+### Patch Changes
+
+- [`cd9aaee`](https://github.com/openpatch/hyperbook/commit/cd9aaee0d13a620857b69ac61da0096faa40fc01) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Hyperbook Cloud looks like a book: the sidebar fills the window height with "Power your Hyperbook" and the version at its foot, the navigation is styled like a book's, narrow screens get the sidebar as a drawer, and a toggle switches between light and dark mode.
+
+- [`fcb8c71`](https://github.com/openpatch/hyperbook/commit/fcb8c71681c516f41b8f0fecd95129db16df4048) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - The editor keeps up with typing on long pages, and its preview updates without flickering: a keystroke no longer re-renders the whole editor, the preview renders one page at a time, and the new page loads underneath the shown one and takes its place at the reader's scroll position once it is painted.
+
 ## 0.2.0
 
 ### Minor Changes
