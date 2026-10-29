@@ -14,7 +14,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { PAGE_DOCS } from "./directives";
-import { type PageForm, toPageForm } from "./frontmatter";
+import { isSectionIndex } from "./files";
+import { LANGUAGES, type PageForm, toPageForm } from "./frontmatter";
 
 /**
  * A page's frontmatter as a form. "Apply" writes it into the page as an
@@ -22,12 +23,15 @@ import { type PageForm, toPageForm } from "./frontmatter";
  */
 export function PageSettingsDialog({
   text,
+  path,
   pages,
   onApply,
   onClose,
 }: {
   /** The page being edited, or null when closed. */
   text: string | null;
+  /** The page's file, to know whether it is a section's index. */
+  path: string | null;
   /** Addresses of the book's pages, for previous and next. */
   pages: string[];
   onApply: (form: PageForm) => void;
@@ -48,6 +52,7 @@ export function PageSettingsDialog({
   }, [text]);
 
   const update = (patch: Partial<PageForm>) => setForm((f) => (f ? { ...f, ...patch } : f));
+  const section = path !== null && isSectionIndex(path);
   const apply = (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!form) return;
@@ -110,6 +115,78 @@ export function PageSettingsDialog({
                     </SelectContent>
                   </Select>
                 </Field>
+                <Field id="p-lang" label="Language">
+                  <Select value={form.lang || "book"} onValueChange={(lang) => update({ lang: lang === "book" ? "" : lang })}>
+                    <SelectTrigger id="p-lang" className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="book">As the book</SelectItem>
+                      {Object.entries(LANGUAGES).map(([code, name]) => (
+                        <SelectItem key={code} value={code}>
+                          {name}
+                        </SelectItem>
+                      ))}
+                      {form.lang && form.lang !== "book" && !(form.lang in LANGUAGES) && <SelectItem value={form.lang}>{form.lang}</SelectItem>}
+                    </SelectContent>
+                  </Select>
+                </Field>
+                <Field id="p-navigation" label="Navigation">
+                  <Select
+                    value={form.navigation || "default"}
+                    onValueChange={(v) => update({ navigation: v === "default" ? "" : (v as PageForm["navigation"]) })}
+                  >
+                    <SelectTrigger id="p-navigation" className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="default">In the navigation</SelectItem>
+                      <SelectItem value="hidden">Hidden</SelectItem>
+                      {section && <SelectItem value="virtual">Pages on the parent level</SelectItem>}
+                      {section && <SelectItem value="page">As a single page</SelectItem>}
+                      {section && <SelectItem value="expanded">Expanded by default</SelectItem>}
+                    </SelectContent>
+                  </Select>
+                </Field>
+                <Field id="p-breadcrumb" label="Breadcrumb">
+                  <Select
+                    value={form.breadcrumb || "book"}
+                    onValueChange={(v) => update({ breadcrumb: v === "book" ? "" : (v as PageForm["breadcrumb"]) })}
+                  >
+                    <SelectTrigger id="p-breadcrumb" className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="book">As the book</SelectItem>
+                      <SelectItem value="on">Show</SelectItem>
+                      <SelectItem value="off">Hide</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </Field>
+                <Field id="p-breadcrumb-home" label="Breadcrumb home" hint="Icon or text of the home item">
+                  <Input
+                    id="p-breadcrumb-home"
+                    disabled={form.breadcrumb !== "on"}
+                    placeholder="🏠"
+                    value={form.breadcrumbHome}
+                    onChange={(e) => update({ breadcrumbHome: e.target.value })}
+                  />
+                </Field>
+                <Field id="p-breadcrumb-separator" label="Breadcrumb separator" hint="Between the items">
+                  <Input
+                    id="p-breadcrumb-separator"
+                    disabled={form.breadcrumb !== "on"}
+                    placeholder=">"
+                    value={form.breadcrumbSeparator}
+                    onChange={(e) => update({ breadcrumbSeparator: e.target.value })}
+                  />
+                </Field>
+                <Field id="p-styles" label="Styles" hint="Links to CSS files, comma-separated">
+                  <Input id="p-styles" value={form.styles} onChange={(e) => update({ styles: e.target.value })} />
+                </Field>
+                <Field id="p-scripts" label="Scripts" hint="Links to JavaScript files, comma-separated">
+                  <Input id="p-scripts" value={form.scripts} onChange={(e) => update({ scripts: e.target.value })} />
+                </Field>
                 <Field id="p-prev" label="Previous page" hint="Instead of the one before">
                   <Input id="p-prev" list="p-pages" value={form.prev} onChange={(e) => update({ prev: e.target.value })} />
                 </Field>
@@ -123,7 +200,6 @@ export function PageSettingsDialog({
                 </datalist>
               </div>
               <div className="grid gap-2">
-                <Check id="p-hidden" label="Hide from the navigation" checked={form.hidden} onChange={(hidden) => update({ hidden })} />
                 <Check id="p-qrcode" label="QR code of the page" checked={form.qrcode} onChange={(qrcode) => update({ qrcode })} />
               </div>
               <fieldset className="grid gap-3">

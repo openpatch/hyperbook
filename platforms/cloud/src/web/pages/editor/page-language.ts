@@ -428,7 +428,9 @@ const check = linter((view) => {
       out.push({ from: token.nameFrom, to: token.nameTo, severity: "error", message: `Hyperbook has no element "${token.name}".${fix ? ` Did you mean "${fix}"?` : ""}`, actions });
       continue;
     }
-    if (d.kind === "container" && token.colons < 3) {
+    // A container with a `src` file can also stand alone with two colons, like `::struktolab{src=…}`.
+    const file = token.attrs.some((a) => a.name === "src") && d.attributes.some((k) => k.name === "src" && k.file);
+    if (d.kind === "container" && token.colons < 3 && !file) {
       out.push({ from: token.from, to: token.nameTo, severity: "error", message: `${d.label} holds content, so it starts with three colons: :::${d.name} … :::` });
     }
     if (d.parents) {

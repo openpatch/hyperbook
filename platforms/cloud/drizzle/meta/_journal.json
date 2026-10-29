@@ -57,6 +57,13 @@
       "when": 1793222758955,
       "tag": "0007_slug_requests",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1793297268703,
+      "tag": "0008_book_dictionary",
+      "breakpoints": true
     }
   ]
 }

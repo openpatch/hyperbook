@@ -10,6 +10,7 @@ import { originCheck, sessionMiddleware } from "./middleware";
 import { auditRoutes } from "./routes/audit";
 import { authRoutes } from "./routes/auth";
 import { bookRoutes } from "./routes/books";
+import { bookDictionaryRoutes } from "./routes/dictionary";
 import { bookFileRoutes } from "./routes/files";
 import { bookGroupRoutes, groupRoutes, studentRoutes } from "./routes/groups";
 import { instanceRoutes, publicInstanceRoutes } from "./routes/instance";
@@ -33,6 +34,7 @@ export function createAdminApi(deps: Deps) {
     .route("/books", bookGroupRoutes(deps))
     .route("/books", bookPublishingRoutes(deps))
     .route("/books", bookFileRoutes(deps))
+    .route("/books", bookDictionaryRoutes(deps))
     .route("/books", bookSlugRequestRoutes(deps))
     .route("/slug-requests", slugRequestRoutes(deps))
     .route("/builds", buildRoutes(deps))

@@ -3,6 +3,7 @@ import { bodyLimit } from "hono/body-limit";
 import { HTTPException } from "hono/http-exception";
 import { z } from "zod";
 import { bookPath, commitFilesInput, initFilesInput, renderPageInput } from "../../../shared/schemas";
+import { type ScannedPage, findReferences, isScannedPage } from "../../../shared/references";
 import type { SessionUser } from "../../auth/sessions";
 import type { Deps } from "../../deps";
 import { type BookRow, bookAccess } from "../../domain/books";
@@ -125,6 +126,41 @@ export function bookFileRoutes({ db, config, renders }: Deps) {
       }
       return c.json({ language });
     })
+
+    // Where a file, or a folder of files, is referenced from: the pages that
+    // link at it, or point a directive's attribute at it. The editor asks
+    // before a rename, move or delete, and rewrites these when the file moves.
+    .get(
+      "/:id/files/references",
+      idParam,
+      validate("query", z.object({ path: bookPath })),
+      async (c) => {
+        const { book } = bookAccess(db, c.get("user"), c.req.valid("param").id);
+        const repo = repoDir(config, book.id);
+        const commit = await headCommit(repo).catch(() => null);
+        const tree = commit ? await listTree(repo, commit) : [];
+        const pages: ScannedPage[] = [];
+        for (const entry of tree) {
+          // Larger pages are not scanned; a link in them is as broken as one
+          // nobody reported.
+          if (!isScannedPage(entry.path) || entry.size > 1024 * 1024) continue;
+          pages.push({ path: entry.path, text: (await readBlob(repo, entry.oid)).toString("utf8") });
+        }
+        const references = findReferences(
+          pages,
+          tree.map((entry) => entry.path),
+          c.req.valid("query").path,
+        );
+        const texts = new Map(pages.map((page) => [page.path, page.text]));
+        const oids = new Map(tree.map((entry) => [entry.path, entry.oid]));
+        const files = [...new Set(references.map((ref) => ref.file))].map((path) => ({
+          path,
+          oid: oids.get(path)!,
+          text: texts.get(path)!,
+        }));
+        return c.json({ references, files });
+      },
+    )
 
     // The bytes of one file. Never rendered on this origin: teacher-written
     // HTML or SVG must not run next to the admin session.

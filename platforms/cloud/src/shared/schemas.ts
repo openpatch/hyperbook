@@ -236,6 +236,16 @@ export const renderPageInput = z.object({
   text: z.string().max(2 * 1024 * 1024),
 });
 
+/** A word in a book's spell-check dictionary; lowercase, no punctuation. */
+export const dictionaryWord = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .regex(/^[\p{L}\p{M}][\p{L}\p{M}'’-]*$/u, "Enter a single word (letters only)")
+  .max(64);
+
+export const addDictionaryWordInput = z.object({ word: dictionaryWord });
+
 /** A blob id: what the teacher's copy of a file was made from. */
 const oid = z.string().regex(/^[0-9a-f]{40}$/);
 

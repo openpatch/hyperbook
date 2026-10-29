@@ -14,16 +14,18 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { extension, loadFile } from "./files";
+import { LANGUAGES } from "./frontmatter";
 
 type Json = Record<string, unknown>;
 
-const LANGUAGES = { en: "English", de: "Deutsch", fr: "Français", es: "Español", it: "Italiano", pt: "Português", nl: "Nederlands" };
 /** [key, label, Hyperbook's default] */
 const SWITCHES = [
   ["search", "Search", false],
   ["toc", "Table of contents on pages", true],
   ["qrcode", "QR code of the page", false],
   ["trailingSlash", "Addresses end with /", false],
+  ["allowDangerousHtml", "Allow HTML in pages", false],
+  ["importExport", "Import & export the saved state", false],
 ] as const;
 const IMAGES = new Set(["png", "jpg", "jpeg", "gif", "webp", "svg", "avif"]);
 
@@ -36,14 +38,28 @@ type Form = {
   license: string;
   logo: string;
   brand: string;
+  brandDark: string;
+  brandText: string;
+  inverted: boolean;
+  /** Comma-separated links. */
+  scripts: string;
+  styles: string;
+  breadcrumb: boolean;
+  breadcrumbHome: string;
+  breadcrumbSeparator: string;
   switches: Record<(typeof SWITCHES)[number][0], boolean>;
 };
 
 const str = (v: unknown) => (typeof v === "string" ? v : "");
+const list = (v: unknown) => (Array.isArray(v) ? v.map((e) => str(e)).join(", ") : str(v));
 
 function toForm(json: Json): Form {
   const author = (json.author ?? {}) as Json;
   const colors = (json.colors ?? {}) as Json;
+  const breadcrumb =
+    typeof json.breadcrumb === "object" && json.breadcrumb !== null && !Array.isArray(json.breadcrumb)
+      ? (json.breadcrumb as Json)
+      : {};
   return {
     name: str(json.name),
     description: str(json.description),
@@ -53,6 +69,14 @@ function toForm(json: Json): Form {
     license: str(json.license),
     logo: str(json.logo),
     brand: str(colors.brand),
+    brandDark: str(colors.brandDark),
+    brandText: str(colors.brandText),
+    inverted: colors.inverted === true,
+    scripts: list(json.scripts),
+    styles: list(json.styles),
+    breadcrumb: json.breadcrumb === true || Object.keys(breadcrumb).length > 0,
+    breadcrumbHome: str(breadcrumb.home),
+    breadcrumbSeparator: str(breadcrumb.separator),
     switches: Object.fromEntries(
       SWITCHES.map(([key, , fallback]) => [key, typeof json[key] === "boolean" ? json[key] : fallback]),
     ) as Form["switches"],
@@ -77,7 +101,26 @@ function fromForm(json: Json, form: Form): Json {
   set(out, "author", Object.keys(author).length > 0 ? author : undefined);
   const colors: Json = { ...((json.colors ?? {}) as Json) };
   set(colors, "brand", form.brand);
+  set(colors, "brandDark", form.brandDark);
+  set(colors, "brandText", form.brandText);
+  set(colors, "inverted", form.inverted || undefined);
   set(out, "colors", Object.keys(colors).length > 0 ? colors : undefined);
+  const entries = (s: string) => s.split(",").map((e) => e.trim()).filter(Boolean);
+  const scripts = entries(form.scripts);
+  set(out, "scripts", scripts.length > 0 ? scripts : undefined);
+  const styles = entries(form.styles);
+  set(out, "styles", styles.length > 0 ? styles : undefined);
+  const home = form.breadcrumbHome.trim();
+  const separator = form.breadcrumbSeparator.trim();
+  set(
+    out,
+    "breadcrumb",
+    form.breadcrumb
+      ? home || separator
+        ? { ...(home ? { home } : {}), ...(separator ? { separator } : {}) }
+        : true
+      : undefined,
+  );
   // A switch at Hyperbook's default leaves the key out.
   for (const [key, , fallback] of SWITCHES) {
     if (form.switches[key] === fallback) delete out[key];
@@ -206,23 +249,27 @@ export function SettingsDialog({
                     </SelectContent>
                   </Select>
                 </Field>
-                <Field id="s-brand" label="Brand color">
-                  <div className="flex gap-2">
-                    <input
-                      id="s-brand"
-                      type="color"
-                      className="h-9 w-12 cursor-pointer rounded-md border border-input bg-transparent"
-                      value={form.brand || "#007864"}
-                      onChange={(e) => update({ brand: e.target.value })}
-                    />
-                    {form.brand && (
-                      <Button type="button" variant="ghost" size="sm" onClick={() => update({ brand: "" })}>
-                        Default
-                      </Button>
-                    )}
-                  </div>
-                </Field>
               </div>
+              <fieldset className="grid gap-3">
+                <legend className="mb-1 text-sm font-medium">Colors</legend>
+                <div className="grid grid-cols-2 gap-3">
+                  <ColorField id="s-brand" label="Brand" fallback="#007864" value={form.brand} onChange={(brand) => update({ brand })} />
+                  <ColorField id="s-brand-dark" label="Brand (dark theme)" fallback="#b5e3d8" value={form.brandDark} onChange={(brandDark) => update({ brandDark })} />
+                  <ColorField id="s-brand-text" label="Header text" fallback="#ffffff" value={form.brandText} onChange={(brandText) => update({ brandText })} />
+                  <div className="flex items-center gap-2 self-end pb-1">
+                    <Checkbox id="s-inverted" checked={form.inverted} onCheckedChange={(c) => update({ inverted: c === true })} />
+                    <Label htmlFor="s-inverted" className="font-normal">
+                      Invert the header
+                    </Label>
+                  </div>
+                </div>
+              </fieldset>
+              <Field id="s-styles" label="Styles" hint="Links to CSS files, comma-separated">
+                <Input id="s-styles" value={form.styles} onChange={(e) => update({ styles: e.target.value })} />
+              </Field>
+              <Field id="s-scripts" label="Scripts" hint="Links to JavaScript files, comma-separated">
+                <Input id="s-scripts" value={form.scripts} onChange={(e) => update({ scripts: e.target.value })} />
+              </Field>
               <fieldset className="grid gap-2">
                 <legend className="mb-1 text-sm font-medium">Features</legend>
                 {SWITCHES.map(([key, label]) => (
@@ -237,6 +284,22 @@ export function SettingsDialog({
                     </Label>
                   </div>
                 ))}
+                <div className="flex items-center gap-2">
+                  <Checkbox id="s-breadcrumb" checked={form.breadcrumb} onCheckedChange={(c) => update({ breadcrumb: c === true })} />
+                  <Label htmlFor="s-breadcrumb" className="font-normal">
+                    Breadcrumb navigation
+                  </Label>
+                </div>
+                {form.breadcrumb && (
+                  <div className="grid grid-cols-2 gap-3">
+                    <Field id="s-breadcrumb-home" label="Home" hint="Icon or text of the home item">
+                      <Input id="s-breadcrumb-home" placeholder="🏠" value={form.breadcrumbHome} onChange={(e) => update({ breadcrumbHome: e.target.value })} />
+                    </Field>
+                    <Field id="s-breadcrumb-separator" label="Separator" hint="Between the items">
+                      <Input id="s-breadcrumb-separator" placeholder=">" value={form.breadcrumbSeparator} onChange={(e) => update({ breadcrumbSeparator: e.target.value })} />
+                    </Field>
+                  </div>
+                )}
               </fieldset>
             </>
           )}
@@ -261,11 +324,46 @@ export function SettingsDialog({
   );
 }
 
-function Field({ id, label, children }: { id: string; label: string; children: React.ReactNode }) {
+function Field({ id, label, hint, children }: { id: string; label: string; hint?: string; children: React.ReactNode }) {
   return (
     <div className="grid gap-1.5">
       <Label htmlFor={id}>{label}</Label>
       {children}
+      {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
     </div>
+  );
+}
+
+/** A color as the swatch of a color input, with a button for the default. */
+function ColorField({
+  id,
+  label,
+  fallback,
+  value,
+  onChange,
+}: {
+  id: string;
+  label: string;
+  fallback: string;
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <Field id={id} label={label}>
+      <div className="flex gap-2">
+        <input
+          id={id}
+          type="color"
+          className="h-9 w-12 cursor-pointer rounded-md border border-input bg-transparent"
+          value={value || fallback}
+          onChange={(e) => onChange(e.target.value)}
+        />
+        {value && (
+          <Button type="button" variant="ghost" size="sm" onClick={() => onChange("")}>
+            Default
+          </Button>
+        )}
+      </div>
+    </Field>
   );
 }

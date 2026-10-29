@@ -333,7 +333,7 @@ export const DIRECTIVES: readonly Directive[] = [
       { name: "autoZoom", description: "Zoom to fit small screens (default `true`)", values: BOOL },
       { name: "edit", description: "Readers may draw (default `false`)", values: BOOL },
     ],
-    snippet: 'excalidraw{src="${/drawing.excalidraw}"}',
+    snippet: 'excalidraw{src="${drawing.excalidraw}"}',
   },
   {
     name: "learningmap",
@@ -342,7 +342,7 @@ export const DIRECTIVES: readonly Directive[] = [
     kind: "leaf",
     docs: "/elements/learningmap",
     attributes: [{ name: "src", description: "The .learningmap file", file: true }, id(), height("calc(100vh - 80px)")],
-    snippet: 'learningmap{src="${/map.learningmap}" height="600px"}',
+    snippet: 'learningmap{src="${map.learningmap}" height="600px"}',
   },
   {
     name: "bitflow",
@@ -358,7 +358,7 @@ export const DIRECTIVES: readonly Directive[] = [
       { name: "locale", description: "Interface language (default: the book's)" },
       { name: "readonly", description: "Show without accepting answers", flag: true },
     ],
-    snippet: 'bitflow{src="${/flow.bitflow}" height="600px"}',
+    snippet: 'bitflow{src="${flow.bitflow}" height="600px"}',
   },
   {
     name: "jmp",
@@ -376,7 +376,7 @@ export const DIRECTIVES: readonly Directive[] = [
         (name): Attribute => ({ name, description: name.replaceAll("-", " "), flag: true }),
       ),
     ],
-    snippet: 'jmp{src="${/memory.jmp}" height="600px"}',
+    snippet: 'jmp{src="${memory.jmp}" height="600px"}',
   },
   {
     name: "struktolab",

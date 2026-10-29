@@ -87,7 +87,7 @@ describe("page settings", () => {
   });
 
   it("reads the frontmatter into a form", () => {
-    expect(toPageForm(page)).toMatchObject({ name: "Loops", hidden: true, toc: "", qrcode: false });
+    expect(toPageForm(page)).toMatchObject({ name: "Loops", navigation: "hidden", toc: "", qrcode: false });
   });
 
   it("writes the form back, keeping comments and other keys", () => {
@@ -116,6 +116,60 @@ describe("page settings", () => {
     const withSettings = withPageForm("# Hi\n", form);
     expect(withSettings).toBe("---\nname: Hi\nprotect:\n  password: secret\n---\n\n# Hi\n");
     expect(withPageForm(withSettings, { ...form, name: "", password: "" })).toBe("# Hi\n");
+  });
+
+  it("reads and writes language, scripts, styles, breadcrumb and section navigation", () => {
+    const text = [
+      "---",
+      "name: A",
+      "lang: en",
+      "scripts:",
+      "  - /a.js",
+      "styles: [/a.css]",
+      "breadcrumb:",
+      "  home: 🏠",
+      "  separator: <",
+      "virtual: true",
+      "---",
+      "",
+      "# A",
+    ].join("\n");
+    const form = toPageForm(text);
+    expect(form).toMatchObject({
+      lang: "en",
+      scripts: "/a.js",
+      styles: "/a.css",
+      breadcrumb: "on",
+      breadcrumbHome: "🏠",
+      breadcrumbSeparator: "<",
+      navigation: "virtual",
+    });
+    expect(
+      withPageForm(text, {
+        ...form,
+        lang: "de",
+        scripts: "/a.js, /b.js",
+        styles: "",
+        breadcrumb: "off",
+        breadcrumbHome: "",
+        breadcrumbSeparator: "",
+        navigation: "expanded",
+      }),
+    ).toBe(
+      [
+        "---",
+        "name: A",
+        "lang: de",
+        "scripts:",
+        "  - /a.js",
+        "  - /b.js",
+        "breadcrumb: false",
+        "navigation: expanded",
+        "---",
+        "",
+        "# A",
+      ].join("\n"),
+    );
   });
 
   it("keeps an empty prev that hides the button", () => {

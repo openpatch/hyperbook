@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { cpSync, createReadStream, readFileSync, statSync } from "node:fs";
+import { copyFileSync, cpSync, createReadStream, mkdirSync, readFileSync, statSync } from "node:fs";
 import path from "node:path";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
@@ -25,6 +25,35 @@ function excalidrawFonts(): Plugin {
     },
     writeBundle(options) {
       cpSync(fonts, path.join(options.dir!, prefix), { recursive: true });
+    },
+  };
+}
+
+/**
+ * The spell checker's Hunspell dictionaries (see src/web/pages/editor/spellcheck.ts),
+ * served from the dictionary-* packages instead of a CDN.
+ */
+function dictionaries(): Plugin {
+  const prefix = "/dictionaries/";
+  const file = (language: string, name: string) => path.join(import.meta.dirname, "node_modules", `dictionary-${language}`, name);
+  return {
+    name: "dictionaries",
+    configureServer(server) {
+      server.middlewares.use((req, res, next) => {
+        const match = req.url?.startsWith(prefix)
+          ? req.url.slice(prefix.length).split("?")[0]!.match(/^(en|de)\/(index\.(aff|dic))$/)
+          : null;
+        if (!match) return next();
+        res.setHeader("content-type", "text/plain; charset=utf-8");
+        createReadStream(file(match[1]!, match[2]!)).pipe(res);
+      });
+    },
+    writeBundle(options) {
+      for (const language of ["en", "de"]) {
+        const out = path.join(options.dir!, prefix, language);
+        mkdirSync(out, { recursive: true });
+        for (const name of ["index.aff", "index.dic"]) copyFileSync(file(language, name), path.join(out, name));
+      }
     },
   };
 }
@@ -71,7 +100,7 @@ export default defineConfig({
   define: {
     __BUILD__: JSON.stringify({ version, commit: gitCommit(), run: process.env.GITHUB_RUN_NUMBER || null }),
   },
-  plugins: [react(), tailwindcss(), excalidrawFonts(), theme()],
+  plugins: [react(), tailwindcss(), excalidrawFonts(), dictionaries(), theme()],
   resolve: {
     // CodeMirror and React break with two copies; other packages of the
     // repository pull in other versions (Excalidraw brings its own React).

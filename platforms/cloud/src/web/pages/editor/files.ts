@@ -13,6 +13,14 @@ export const commitFiles = (bookId: string, changes: FileChange[], message?: str
 export const rawUrl = (bookId: string, path: string) =>
   `/api/books/${bookId}/files/raw?path=${encodeURIComponent(path)}`;
 
+export type ReferencesResult = Awaited<ReturnType<typeof fetchReferences>>;
+
+/** Where a file, or a folder of files, is referenced from: what a rename, move or delete would touch. */
+export const fetchReferences = (bookId: string, path: string) =>
+  unwrap(
+    api.books[":id"].files.references.$get({ param: { id: bookId }, query: { path } }),
+  );
+
 const IMAGE_TYPES: Record<string, string> = {
   png: "image/png",
   jpg: "image/jpeg",
@@ -72,6 +80,14 @@ export function pageOf(path: string): string | null {
   if (segments[segments.length - 1] === "index") segments.pop();
   const route = "/" + segments.join("/");
   return folder === "glossary" ? `/glossary${route === "/" ? "" : route}` : route;
+}
+
+/** The index.md of a folder inside book/, so a section; its frontmatter may set the section navigation. */
+export function isSectionIndex(path: string): boolean {
+  const m = /^book\/(.+)\.(md|md\.hbs|md\.json|md\.yml)$/.exec(path);
+  if (!m) return false;
+  const segments = m[1]!.split("/");
+  return segments.length > 1 && segments[segments.length - 1] === "index";
 }
 
 /** "book/a.md" → "book/a (copy).md" */

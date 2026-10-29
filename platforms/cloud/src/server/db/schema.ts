@@ -396,3 +396,22 @@ export const previewSessions = sqliteTable(
   },
   (t) => [index("preview_sessions_book_idx").on(t.bookId)],
 );
+
+/**
+ * A word a teacher added to a book's spell-check dictionary, so its pages'
+ * prose stops being underlined. Lowercase; one row per word.
+ */
+export const bookDictionary = sqliteTable(
+  "book_dictionary",
+  {
+    bookId: integer("book_id")
+      .notNull()
+      .references(() => books.id, { onDelete: "cascade" }),
+    word: text("word").notNull(),
+    addedBy: integer("added_by").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    createdAt: createdAt(),
+  },
+  (t) => [primaryKey({ columns: [t.bookId, t.word] })],
+);

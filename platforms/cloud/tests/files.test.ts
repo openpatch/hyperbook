@@ -70,6 +70,45 @@ describe("files", () => {
     expect(listing.files.map((f: { path: string }) => f.path).sort()).toEqual([".gitignore", "book/index.md", "hyperbook.json"]);
   });
 
+  it("tells where a file is referenced from", async () => {
+    const { owner, files } = await world();
+    let listing = (await owner.c.post(files("/init"), { template: "empty" })).body;
+    const write = (path: string, content: string) =>
+      owner.c.post(files("/commit"), {
+        changes: [{ op: "write", path, content, baseOid: listing.files.find((f: { path: string }) => f.path === path)?.oid ?? null }],
+      });
+    listing = (
+      await owner.c.post(files("/commit"), {
+        changes: [
+          { op: "write", path: "book/page.md", content: "A [link](/index) and a ![logo](/logo.png).", baseOid: null },
+          { op: "write", path: "public/logo.png", content: "x", baseOid: null },
+          { op: "write", path: "book/other.md", content: 'See [it](/index.md) and :::video{src="/logo.png"}.', baseOid: null },
+        ],
+      })
+    ).body;
+
+    const index = await owner.c.get(files("/references?path=book/index.md"));
+    expect(index.status).toBe(200);
+    expect(index.body).toMatchObject({
+      references: [
+        { file: "book/other.md", kind: "link", pointsAt: "book/index.md" },
+        { file: "book/page.md", kind: "link", pointsAt: "book/index.md" },
+      ],
+      files: [{ path: "book/other.md" }, { path: "book/page.md" }],
+    });
+
+    const logo = await owner.c.get(files("/references?path=public/logo.png"));
+    expect(logo.body.references.map((r: { file: string; kind: string }) => [r.file, r.kind])).toEqual([
+      ["book/other.md", "directive"],
+      ["book/page.md", "image"],
+    ]);
+
+    // Nothing points at a page nobody links to, and folders are scanned as a whole.
+    expect((await owner.c.get(files("/references?path=book/page.md"))).body).toEqual({ references: [], files: [] });
+    expect((await owner.c.get(files("/references?path=public"))).body.references).toHaveLength(2);
+    expect((await owner.c.get(files("/references?path=../etc"))).status).toBe(400);
+  });
+
   it("tells which files someone else changed in the meantime", async () => {
     const { owner, files } = await world();
     const listing = (await owner.c.post(files("/init"), { template: "empty" })).body;

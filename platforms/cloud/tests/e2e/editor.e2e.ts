@@ -221,48 +221,50 @@ describe("editor", () => {
     await page.getByTitle("Not saved").first().waitFor();
   }, 60_000);
 
-  it("inserts a learning map into a page and opens it from there", async () => {
+  it("starts a missing learning map next to the page and opens it from there", async () => {
     await page.getByRole("tab", { name: "loops.md" }).click();
-    await page.locator(".cm-content:visible").click();
+    const editor = page.locator(".cm-content:visible");
+    await editor.click();
     await page.keyboard.press("Control+End");
-    await page.getByRole("button", { name: "Insert" }).click();
-    await page.getByRole("menuitem", { name: "Learning map…" }).click();
+    await page.keyboard.type('\n::learningmap{src="path.learningmap" height="600px"}');
+
+    // The directive names a file that is not in the book yet.
+    await page.getByRole("button", { name: "Edit visually" }).last().click();
     const dialog = page.getByRole("dialog");
-    await dialog.getByLabel("Name").fill("path");
     await dialog.getByRole("button", { name: "Create" }).click();
 
-    // The starter file opens in its editor, and the page points at it.
+    // The starter file opens in its editor, next to the page.
     await page.getByRole("tab", { name: "path.learningmap" }).waitFor();
-    await page.getByRole("tab", { name: "loops.md" }).click();
-    await page.locator(".cm-content:visible").getByText('::learningmap{src="/path.learningmap" height="600px"}').waitFor();
+    await page.getByRole("list", { name: "Files" }).getByRole("button", { name: "path.learningmap", exact: true }).waitFor();
 
-    await page.getByRole("tab", { name: "index.md" }).click();
     await page.getByRole("tab", { name: "loops.md" }).click();
     await page.getByRole("button", { name: "Edit visually" }).last().click();
     await page.getByRole("tab", { name: "path.learningmap", selected: true }).waitFor();
   }, 60_000);
 
-  it("uploads H5P content into public/ and shows it in the page", async () => {
+  it("uploads H5P content with the file tree and shows it in the page", async () => {
     await page.getByRole("tab", { name: "loops.md" }).click();
-    await page.locator(".cm-content:visible").click();
-    await page.keyboard.press("Control+End");
-    await page.getByRole("button", { name: "Insert" }).click();
     const chooser = page.waitForEvent("filechooser");
-    await page.getByRole("menuitem", { name: "H5P content (upload)…" }).click();
+    await page.getByRole("button", { name: "Upload files" }).click();
     await (await chooser).setFiles({ name: "demo.h5p", mimeType: "application/zip", buffer: Buffer.from("PK") });
-
-    await page.locator(".cm-content:visible").getByText('::h5p{src="/demo.h5p"}').waitFor();
     await page.getByRole("list", { name: "Files" }).getByRole("button", { name: "demo.h5p", exact: true }).waitFor();
+
+    const editor = page.locator(".cm-content:visible");
+    await editor.click();
+    await page.keyboard.press("Control+End");
+    await page.keyboard.type('\n::h5p{src="/demo.h5p"}');
+    await editor.getByText('::h5p{src="/demo.h5p"}').waitFor();
   }, 60_000);
 
-  it("inserts a structogram as a .struktolab file and edits it", async () => {
+  it("starts a missing structogram as a .struktolab file next to the page and edits it", async () => {
     await page.getByRole("tab", { name: "loops.md" }).click();
-    await page.locator(".cm-content:visible").click();
+    const editor = page.locator(".cm-content:visible");
+    await editor.click();
     await page.keyboard.press("Control+End");
-    await page.getByRole("button", { name: "Insert" }).click();
-    await page.getByRole("menuitem", { name: "Structogram…" }).click();
+    await page.keyboard.type('\n::struktolab{src="countdown.struktolab"}');
+
+    await page.getByRole("button", { name: "Edit visually" }).last().click();
     const dialog = page.getByRole("dialog");
-    await dialog.getByLabel("Name").fill("countdown");
     await dialog.getByRole("button", { name: "Create" }).click();
 
     const tab = page.getByRole("tab", { name: "countdown.struktolab" });
@@ -278,13 +280,13 @@ describe("editor", () => {
 
     const saved = await page.evaluate(async () => {
       const id = location.pathname.split("/")[2];
-      return (await fetch(`/api/books/${id}/files/raw?path=public/countdown.struktolab`)).text();
+      return (await fetch(`/api/books/${id}/files/raw?path=book/countdown.struktolab`)).text();
     });
     expect(saved).toContain("Lift off");
     expect(() => JSON.parse(saved)).not.toThrow();
 
     await page.getByRole("tab", { name: "loops.md" }).click();
-    await page.locator(".cm-content:visible").getByText('::struktolab{src="/countdown.struktolab"}').waitFor();
+    await editor.getByText('::struktolab{src="countdown.struktolab"}').waitFor();
   }, 60_000);
 });
 
