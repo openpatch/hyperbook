@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.117.1
+
+### Patch Changes
+
+- [`7d942a6`](https://github.com/openpatch/hyperbook/commit/7d942a6bbf5ea92cb9db3c71da45a525157caf27) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - The editor's preview pane shows the whole page — header, navigation and footer — like readers will see it. Pages in an iframe used to switch to standalone (content-only) mode automatically; a new `standalone=false` URL parameter keeps the shell, and the preview pane adds it to every page it frames.
+
 ## 0.117.0
 
 ### Minor Changes
