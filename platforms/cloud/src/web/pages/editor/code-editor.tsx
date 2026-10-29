@@ -44,6 +44,8 @@ const theme = EditorView.theme({
   "&": { height: "100%", fontSize: "14px", color: "var(--color-text)", backgroundColor: "var(--color-background)" },
   ".cm-scroller": { fontFamily: "var(--font-code, ui-monospace, monospace)" },
   ".cm-content": { caretColor: "var(--color-brand)" },
+  // basicSetup draws its own cursor (drawSelection), so caretColor alone does not reach it.
+  ".cm-cursor, .cm-dropCursor": { borderLeftColor: "var(--color-brand)", borderLeftWidth: "2px" },
   ".cm-gutters": {
     backgroundColor: "var(--color-nav)",
     color: "var(--muted-foreground)",
