@@ -1,5 +1,17 @@
 # @hyperbook/markdown
 
+## 0.90.0
+
+### Minor Changes
+
+- [`6173ca1`](https://github.com/openpatch/hyperbook/commit/6173ca1ee473fd36003106d2d818fce9e42d4e11) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - The Online IDE and the SQL IDE read `::file{path="…" src="…"}` like the other IDEs: it adds a file from the book to the IDE. The Online IDE links the source, so images and other files its Java code opens work as before; the SQL IDE reads the source at build time and shows an `.sql` file as another editor tab and a Markdown file as a hint. The `@file` lines the Online IDE read before keep working.
+
+### Patch Changes
+
+- [`7d942a6`](https://github.com/openpatch/hyperbook/commit/7d942a6bbf5ea92cb9db3c71da45a525157caf27) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - The editor's preview pane shows the whole page — header, navigation and footer — like readers will see it. Pages in an iframe used to switch to standalone (content-only) mode automatically; a new `standalone=false` URL parameter keeps the shell, and the preview pane adds it to every page it frames.
+
+- [`c6c6d06`](https://github.com/openpatch/hyperbook/commit/c6c6d0619da85af4460bd87bbe84187a5063740a) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Relative paths work in every directive's file attributes, resolved from the page's folder like links: `::kirimoto{model}`, `::embed{src}`, tile icons and learning map videos now resolve them too. Files a directive inlines (`::learningmap`, `::bitflow`, `::jmp`, the IDEs' `::file`) read `./` and `../` from the page's folder, and never from outside the book.
+
 ## 0.89.0
 
 ### Minor Changes
