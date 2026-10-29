@@ -48,7 +48,7 @@ export function RequireAuth() {
 
 export function RequireAdmin() {
   const user = useUser();
-  if (user.role !== "admin") return <Navigate to="/" replace />;
+  if (user.role !== "admin") return <Navigate to="/books" replace />;
   return <Outlet />;
 }
 

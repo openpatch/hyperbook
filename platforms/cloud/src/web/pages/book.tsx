@@ -318,7 +318,7 @@ function MembersSection({ book }: { book: Book }) {
                         );
                         if (m.userId === user.id && user.role !== "admin") {
                           await queryClient.invalidateQueries({ queryKey: ["books"] });
-                          navigate("/");
+                          navigate("/books");
                         }
                       })
                     }
@@ -382,7 +382,7 @@ function DeleteSection({ book }: { book: Book }) {
         onConfirm={async () => {
           await unwrap(api.books[":id"].$delete({ param: { id: String(book.id) } }));
           await queryClient.invalidateQueries({ queryKey: ["books"] });
-          navigate("/");
+          navigate("/books");
         }}
       >
         Delete book

@@ -25,6 +25,7 @@ export function publicInstanceRoutes({ db, config, mailer }: Deps) {
       signupMode: effectiveSignupMode(settings, mailer.enabled),
       signupDomains: settings.signupDomains,
       slugSuffix: settings.slugSuffix,
+      landingPage: settings.landingPage,
     });
     })
 

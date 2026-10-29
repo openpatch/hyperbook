@@ -5,7 +5,7 @@ export async function logIn(page: Page, origin: string, email: string, password:
   await page.getByLabel("Email").fill(email);
   await page.getByLabel("Password").fill(password);
   await page.getByRole("button", { name: "Log in" }).click();
-  await page.waitForURL(`${origin}/`);
+  await page.waitForURL(`${origin}/books`);
 }
 
 /** Follows a link in the main navigation. */

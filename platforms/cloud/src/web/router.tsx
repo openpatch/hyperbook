@@ -10,6 +10,7 @@ import { ForgotPasswordPage } from "./pages/forgot-password";
 import { GroupPage } from "./pages/group";
 import { HomePage } from "./pages/home";
 import { InstancePage } from "./pages/instance";
+import { LandingPage } from "./pages/landing";
 import { LegalPage } from "./pages/legal";
 import { LoginPage } from "./pages/login";
 import { NotFoundPage } from "./pages/not-found";
@@ -21,6 +22,8 @@ import { UsersPage } from "./pages/users";
 import { VerifyPage } from "./pages/verify";
 
 export const router = createBrowserRouter([
+  // The front page is public; logged-in users are sent on to their books.
+  { path: "/", element: <LandingPage /> },
   {
     element: <AuthLayout />,
     children: [
@@ -43,7 +46,7 @@ export const router = createBrowserRouter([
       {
         element: <Layout />,
         children: [
-          { index: true, element: <HomePage /> },
+          { path: "books", element: <HomePage /> },
           { path: "books/:id", element: <BookPage /> },
           { path: "groups/:id", element: <GroupPage /> },
           { path: "account", element: <AccountPage /> },

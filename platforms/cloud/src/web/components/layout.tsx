@@ -34,7 +34,7 @@ export function Layout() {
           <span className={cn("h-1 w-7.5 bg-current transition-opacity", navOpen && "opacity-0")} />
           <span className={cn("h-1 w-7.5 bg-current transition-transform", navOpen && "-translate-y-2.5 rotate-45")} />
         </button>
-        <NavLink to="/" className="min-w-0 flex-1 truncate p-4 font-heading text-[1.1rem] font-bold">
+        <NavLink to="/books" className="min-w-0 flex-1 truncate p-4 font-heading text-[1.1rem] font-bold">
           {instance?.name ?? "Hyperbook Cloud"}
         </NavLink>
         <span className="hidden truncate text-sm sm:inline">
@@ -64,7 +64,7 @@ export function Layout() {
         >
           <nav aria-label="Main" className="flex-1 p-4">
             <ul>
-              <NavItem to="/">Books</NavItem>
+              <NavItem to="/books">Books</NavItem>
               {user.role === "admin" && (
                 <>
                   <NavItem to="/users">Users</NavItem>
@@ -123,7 +123,7 @@ function NavItem({ to, children }: { to: string; children: React.ReactNode }) {
     <li>
       <NavLink
         to={to}
-        end={to === "/"}
+        end={to === "/books"}
         className={({ isActive }) =>
           cn("block p-[0.65rem] hover:bg-border", isActive && "bg-background text-primary hover:bg-background")
         }

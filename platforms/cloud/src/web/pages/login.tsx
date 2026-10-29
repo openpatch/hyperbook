@@ -9,7 +9,7 @@ import { useInstance, useMe } from "@/lib/session";
 
 /** Only same-site paths, so the login page cannot be used to redirect elsewhere. */
 function safeNext(next: string | null): string {
-  return next && next.startsWith("/") && !next.startsWith("//") ? next : "/";
+  return next && next.startsWith("/") && !next.startsWith("//") ? next : "/books";
 }
 
 export function LoginPage() {

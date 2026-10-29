@@ -229,4 +229,14 @@ describe("instance", () => {
     expect(res.body.name).toBe("School");
     expect((await teacher.get("/api/me")).body.entitlements.max_books).toBe(3);
   });
+
+  it("exposes the landing page switch publicly and lets only admins change it", async () => {
+    const instance = setup();
+    expect((await client(instance).get("/api/instance/public")).body.landingPage).toBe(true);
+    const { c: teacher } = await loggedIn(instance, { email: "t@example.org" });
+    const { c: admin } = await loggedIn(instance, { email: "a@example.org", role: "admin" });
+    expect((await teacher.put("/api/instance", { landingPage: false })).status).toBe(403);
+    expect((await admin.put("/api/instance", { landingPage: false })).status).toBe(200);
+    expect((await client(instance).get("/api/instance/public")).body.landingPage).toBe(false);
+  });
 });

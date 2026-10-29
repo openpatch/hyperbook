@@ -98,6 +98,7 @@ export const instanceSettingsInput = z
       )
       .max(200),
     slugSuffix: z.boolean(),
+    landingPage: z.boolean(),
   })
   .partial();
 

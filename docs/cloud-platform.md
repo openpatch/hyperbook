@@ -1002,6 +1002,7 @@ OpenPatch instance launches.
 | OpenPatch at launch | `closed`: no public sign-up; admins add teachers, who get an invitation email. |
 | Storage quota | Counts the current source of the books a user owns (the git tree), not builds or history. |
 | Legal pages | Imprint and privacy policy are either a link or Markdown the platform shows at `/imprint` and `/privacy`. Sign-up requires accepting the privacy policy. |
+| Landing page | `/` shows a landing page (intro plus the ways to run Hyperbook, a sign-up link in the mode the admin set, and a login link). Instance setting `landingPage` (on by default); off, `/` goes straight to the login screen. |
 
 ## Accounts
 

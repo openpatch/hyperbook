@@ -30,6 +30,7 @@ const generalSchema = instanceSettingsInput
     imprintMarkdown: true,
     privacyMarkdown: true,
     slugSuffix: true,
+    landingPage: true,
   })
   .required()
   .extend({ reservedSlugs: z.string() });
@@ -58,6 +59,7 @@ function InstanceForms({
       privacyMarkdown: settings.privacyMarkdown,
       reservedSlugs: settings.reservedSlugs.join("\n"),
       slugSuffix: settings.slugSuffix,
+      landingPage: settings.landingPage,
     },
   });
 
@@ -133,6 +135,21 @@ function InstanceForms({
               Teachers name their books, and each gets a short ending (physik-edac), so nobody takes a short,
               general address for themselves. They can ask for one without the ending; admins decide under
               Addresses.
+            </p>
+          </div>
+          <div className="grid gap-1.5">
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="landing-page"
+                checked={form.watch("landingPage")}
+                onCheckedChange={(v) => form.setValue("landingPage", v === true, { shouldDirty: true })}
+                aria-describedby="landing-page-hint"
+              />
+              <Label htmlFor="landing-page">Show a landing page at the front address</Label>
+            </div>
+            <p id="landing-page-hint" className="text-sm text-muted-foreground">
+              The landing page introduces Hyperbook and links the ways to run it. Without it, the front address
+              shows only the login screen.
             </p>
           </div>
           <FormError form={form} />

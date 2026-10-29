@@ -1,5 +1,6 @@
 import type { Browser, Page } from "playwright-core";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { logIn } from "./login";
 import { ADMIN, launchBrowser, startServer } from "./server";
 
 let server: Awaited<ReturnType<typeof startServer>>;
@@ -45,7 +46,25 @@ describe("login", () => {
   it("logs out", async () => {
     await page.getByRole("button", { name: "Log out" }).click();
     await page.waitForURL(/\/login/);
+    // The front page is public: it shows the landing with a way to log in.
+    await page.goto(`${server.origin}/`);
+    await page.getByRole("heading", { name: "Power your Hyperbook" }).waitFor();
+    await page.getByRole("link", { name: "Log in" }).waitFor();
+    await page.getByRole("link", { name: "Open hyperbook.cloud" }).waitFor();
+  });
+
+  it("shows only the login screen when an admin turns the landing page off", async () => {
+    await logIn(page, server.origin, ADMIN.email, ADMIN.password);
+    await page.goto(`${server.origin}/instance`);
+    const general = page.locator("section", { hasText: "General" });
+    await general.getByRole("checkbox", { name: /landing page/i }).uncheck();
+    await general.getByRole("button", { name: "Save", exact: true }).click();
+    await page.getByText("Saved").waitFor();
+
+    await page.getByRole("button", { name: "Log out" }).click();
+    await page.waitForURL(/\/login/);
     await page.goto(`${server.origin}/`);
     await page.waitForURL(/\/login/);
+    await page.getByRole("heading", { name: "Log in" }).waitFor();
   });
 });

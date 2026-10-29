@@ -41,6 +41,11 @@ export const instanceSettingsSchema = z.object({
    * (physik-edac); addresses without one are granted by admins on request.
    */
   slugSuffix: z.boolean(),
+  /**
+   * Whether the front address shows the landing page. Off, visitors are sent
+   * straight to the login screen.
+   */
+  landingPage: z.boolean(),
 });
 
 export type InstanceSettings = z.infer<typeof instanceSettingsSchema>;
@@ -56,6 +61,7 @@ export const DEFAULT_INSTANCE_SETTINGS: InstanceSettings = {
   signupMode: "closed",
   signupDomains: [],
   slugSuffix: false,
+  landingPage: true,
 };
 
 /** Where a legal page is: its URL, the platform's own page, or nowhere (""). */

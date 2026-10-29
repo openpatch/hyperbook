@@ -83,7 +83,7 @@ describe("books", () => {
   it("deletes the book", async () => {
     await page.getByRole("button", { name: "Delete book" }).click();
     await page.getByRole("dialog").getByRole("button", { name: "Delete book" }).click();
-    await page.waitForURL(`${server.origin}/`);
+    await page.waitForURL(`${server.origin}/books`);
     await page.getByText("No books yet").waitFor();
   });
 });
