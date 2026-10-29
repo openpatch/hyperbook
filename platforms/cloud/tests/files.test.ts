@@ -110,7 +110,7 @@ describe("files", () => {
     expect((await owner.c.post(files("/commit"), { changes: [{ op: "write", path: "a.md", content: "", baseOid: null }] })).status).toBe(409);
   });
 
-  it("downloads a build as a website", async () => {
+  it("downloads a build as a ZIP archive", async () => {
     const { instance, owner, files, book } = await world();
     await owner.c.post(files("/init"), { template: "empty" });
     const buildId = (await owner.c.post(`/api/books/${book.id}/publish`)).body.build.id;

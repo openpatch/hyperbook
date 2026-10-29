@@ -200,7 +200,7 @@ export function bookPublishingRoutes({ db, config, builds: queue }: Deps) {
       const dir = build && buildDir(config, book.id, build.id);
       if (!dir || !existsSync(dir)) throw new HTTPException(404, { message: "This build is not kept anymore" });
       c.header("content-type", "application/zip");
-      c.header("content-disposition", `attachment; filename="${book.slug}-website.zip"`);
+      c.header("content-disposition", `attachment; filename="${book.slug}.zip"`);
       return c.body(Readable.toWeb(zipDirectory(dir)) as ReadableStream);
     })
 

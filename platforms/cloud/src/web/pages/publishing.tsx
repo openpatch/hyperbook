@@ -163,9 +163,9 @@ export function PublishingSection({ book }: { book: Book }) {
                       <a
                         href={`/api/books/${id}/builds/${b.id}/site.zip`}
                         className="text-sm text-primary hover:underline"
-                        title="The built website, to host it elsewhere. Student logins only work on this platform."
+                        title="Download the built book as a ZIP archive, to host it elsewhere. Student logins only work on this platform."
                       >
-                        Website
+                        Download
                       </a>
                     )}
                   </div>

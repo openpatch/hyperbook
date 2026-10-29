@@ -760,7 +760,7 @@ opens the file itself.
 ## Export
 
 - "Download source" (M1) stays.
-- "Download website" zips a kept build (`site.zip`), for hosting elsewhere.
+- "Download" zips a kept build (`site.zip`), for hosting elsewhere.
   Student logins of such a copy need `cloud.url` instead of `sameOrigin`;
   the dialog says so.
 
