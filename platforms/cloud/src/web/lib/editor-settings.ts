@@ -4,6 +4,8 @@ import { useCallback, useEffect, useState } from "react";
 export type EditorSettings = {
   /** CodeMirror's font size in px. */
   fontSize: number;
+  /** The editor's line height, relative to the font size. */
+  lineHeight: number;
   /** Whether the editor shows line numbers. */
   lineNumbers: boolean;
   /** Whether pages are spell checked. */
@@ -12,8 +14,10 @@ export type EditorSettings = {
 
 const STORAGE_KEY = "editor-settings";
 export const FONT_SIZES = [12, 13, 14, 16, 18, 20, 24];
+export const LINE_HEIGHTS = [1.2, 1.6, 2];
 const DEFAULTS: EditorSettings = {
   fontSize: 14,
+  lineHeight: 1.6,
   lineNumbers: true,
   spellCheck: true,
 };
@@ -27,6 +31,9 @@ function stored(): EditorSettings {
       fontSize: FONT_SIZES.includes(value?.fontSize ?? 14)
         ? value!.fontSize!
         : DEFAULTS.fontSize,
+      lineHeight: LINE_HEIGHTS.includes(value?.lineHeight ?? 1.6)
+        ? value!.lineHeight!
+        : DEFAULTS.lineHeight,
       lineNumbers: value?.lineNumbers ?? DEFAULTS.lineNumbers,
       spellCheck: value?.spellCheck ?? DEFAULTS.spellCheck,
     };

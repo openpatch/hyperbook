@@ -113,9 +113,13 @@ const theme = EditorView.theme({
 
 /** basicSetup always shows line numbers; without them, the whole gutter goes. */
 const noGutters = EditorView.theme({ ".cm-gutters": { display: "none" } });
+/** The base theme sets line-height on the scroller, so it needs a theme of its own. */
+const lineHeightTheme = (height: number) =>
+  EditorView.theme({ ".cm-scroller": { lineHeight: String(height) } });
 
 /** Re-configured while editing, without rebuilding the editor. */
 const numbersCompartment = new Compartment();
+const heightCompartment = new Compartment();
 const spellCompartment = new Compartment();
 
 export type SpellOptions = {
@@ -211,6 +215,7 @@ export function CodeEditor({
           ]),
           basicSetup,
           numbersCompartment.of(settings.lineNumbers ? [] : noGutters),
+          heightCompartment.of(lineHeightTheme(settings.lineHeight)),
           // The spell check's menu comes first: a right-click on a misspelled
           // word shows its corrections, everywhere else the editor's menu.
           spellCompartment.of(spellConfig() ? spellCheck(spellConfig()!) : []),
@@ -250,17 +255,18 @@ export function CodeEditor({
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // The settings apply while editing, without rebuilding the editor.
-  const { lineNumbers } = settings;
+  const { lineNumbers, lineHeight } = settings;
   const { enabled, language: spellLanguage, words } = spell ?? {};
   useEffect(() => {
     const config = spellConfig();
     view.current?.dispatch({
       effects: [
         numbersCompartment.reconfigure(lineNumbers ? [] : noGutters),
+        heightCompartment.reconfigure(lineHeightTheme(lineHeight)),
         spellCompartment.reconfigure(config ? spellCheck(config) : []),
       ],
     });
-  }, [lineNumbers, enabled, spellLanguage, words, path]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [lineNumbers, lineHeight, enabled, spellLanguage, words, path]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div

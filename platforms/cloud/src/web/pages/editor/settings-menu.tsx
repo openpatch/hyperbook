@@ -21,11 +21,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { FONT_SIZES, type EditorSettings } from "@/lib/editor-settings";
+import {
+  FONT_SIZES,
+  LINE_HEIGHTS,
+  type EditorSettings,
+} from "@/lib/editor-settings";
 
 /**
- * The editor's look and checks: font size, line numbers, spell check, and the
- * book's own words (see settings-dialog.tsx for those).
+ * The editor's look and checks: font size, line height, line numbers, spell
+ * check, and the book's own words (see settings-dialog.tsx for those).
  */
 export function SettingsMenu({
   settings,
@@ -80,6 +84,33 @@ export function SettingsMenu({
             >
               A+
             </Button>
+          </span>
+        </div>
+        <div className="flex items-center justify-between px-2 py-1 text-sm">
+          <span aria-hidden>Line height</span>
+          <span className="flex items-center gap-1">
+            {LINE_HEIGHTS.map((height, i) => {
+              const [label, name] = [
+                ["S", "Small"],
+                ["M", "Medium"],
+                ["L", "Large"],
+              ][i]!;
+              const active = settings.lineHeight === height;
+              return (
+                <Button
+                  key={height}
+                  variant={active ? "secondary" : "outline"}
+                  size="icon"
+                  className="size-6 text-xs"
+                  aria-label={`${name} line height`}
+                  aria-pressed={active}
+                  disabled={active}
+                  onClick={() => update({ lineHeight: height })}
+                >
+                  {label}
+                </Button>
+              );
+            })}
           </span>
         </div>
         <DropdownMenuCheckboxItem
