@@ -101,4 +101,90 @@ describe("context menu", () => {
     await expect.poll(text).toContain("and more");
   }, 120_000);
 
+  it("copies, pastes, renames, moves and deletes in the file tree", async () => {
+    const menu = page.locator(".cm-context-menu");
+    const tree = page.getByRole("list", { name: "Files" });
+    const entry = (name: string) =>
+      tree.getByRole("button", { name, exact: true });
+    const pick = (label: string) =>
+      menu.getByRole("button", { name: label }).click();
+    // Unsaved files are not copied; the earlier tests changed the page.
+    await page.keyboard.press("Control+s");
+    await expect
+      .poll(() => tree.locator('[title="Not saved"]').count())
+      .toBe(0);
+
+    // Before anything is copied, there is nothing to paste.
+    await entry("index.md").click({ button: "right" });
+    await expect
+      .poll(() => menu.getByRole("button", { name: "Paste" }).isDisabled())
+      .toBe(true);
+    expect(await menu.evaluate((box) => getComputedStyle(box).position)).toBe(
+      "fixed",
+    );
+
+    // Files download; only folders get new files, in place of the old
+    // "…" menu of every row.
+    await menu.getByRole("button", { name: "Download" }).waitFor();
+    expect(await menu.getByRole("button", { name: "New file" }).count()).toBe(
+      0,
+    );
+    expect(
+      await tree.getByRole("button", { name: /^Actions for/ }).count(),
+    ).toBe(0);
+
+    // A copy pasted next to the original gets a copy's name.
+    await pick("Copy");
+    await entry("book").click({ button: "right" });
+    await menu.getByRole("button", { name: "New file" }).waitFor();
+    expect(await menu.getByRole("button", { name: "Download" }).count()).toBe(
+      0,
+    );
+    await pick("Paste");
+    await entry("index (copy).md").waitFor();
+
+    // Rename asks for the name only, and keeps the file in its folder.
+    await entry("index (copy).md").click({ button: "right" });
+    await pick("Rename");
+    const dialog = page.getByRole("dialog");
+    const name = dialog.getByLabel("Name");
+    expect(await name.inputValue()).toBe("index (copy).md");
+    await name.fill("other/copy.md");
+    await dialog.getByRole("button", { name: "Rename" }).click();
+    await dialog.getByText("Enter a name without /").waitFor();
+    await name.fill("copy.md");
+    await dialog.getByRole("button", { name: "Rename" }).click();
+    await entry("copy.md").waitFor();
+    expect(
+      await entry("copy.md").evaluate(
+        (button) => (button.parentElement as HTMLElement).style.paddingLeft,
+      ),
+    ).toBe("16px");
+
+    // Cut, then pasted below the files: moved to the book's root.
+    await entry("copy.md").click({ button: "right" });
+    await pick("Cut");
+    const space = tree.locator("..");
+    const box = (await space.boundingBox())!;
+    await space.click({
+      button: "right",
+      position: { x: 20, y: box.height - 8 },
+    });
+    await pick("Paste");
+    await expect
+      .poll(() =>
+        entry("copy.md").evaluate(
+          (button) => (button.parentElement as HTMLElement).style.paddingLeft,
+        ),
+      )
+      .toBe("4px");
+
+    await entry("copy.md").click({ button: "right" });
+    await pick("Delete");
+    await page
+      .getByRole("dialog")
+      .getByRole("button", { name: "Delete" })
+      .click();
+    await entry("copy.md").waitFor({ state: "detached" });
+  }, 120_000);
 });

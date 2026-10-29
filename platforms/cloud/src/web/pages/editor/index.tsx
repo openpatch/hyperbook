@@ -31,7 +31,7 @@ import {
   PathDialog,
   type PathRequest,
 } from "./dialogs";
-import { FileTree } from "./file-tree";
+import { FileTree, type TreeClipboard } from "./file-tree";
 import {
   type Listing,
   copyName,
@@ -195,6 +195,10 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
   });
   const queryClient = useQueryClient();
   const [pathRequest, setPathRequest] = useState<PathRequest | null>(null);
+  /** What the file tree's Copy or Cut picked, for its Paste. */
+  const [treeClipboard, setTreeClipboard] = useState<TreeClipboard | null>(
+    null,
+  );
   const [choice, setChoice] = useState<ChoiceRequest | null>(null);
   /** What a rename, move or delete is about to do to the file's references. */
   const [refactor, setRefactor] = useState<RefactorRequest | null>(null);
@@ -686,10 +690,12 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
     rename: (path: string, isFolder: boolean) => {
       const affected = isFolder ? filesIn(path) : [path];
       if (busyFiles(affected)) return;
+      // Only the name: moving is dragging, or Cut and Paste.
       setPathRequest({
-        title: isFolder ? "Rename or move folder" : "Rename or move file",
-        label: "New path",
-        initial: path,
+        title: isFolder ? "Rename folder" : "Rename file",
+        label: "Name",
+        initial: path.split("/").pop()!,
+        folder: parentOf(path),
         submitLabel: "Rename",
         onSubmit: async (to) => {
           if (to === path) return;
@@ -770,6 +776,46 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
         affected.map((p) => [p, dest + p.slice(from.length)]),
       );
       void moveWithReferences(from, moves, "Move");
+    },
+    copy: (path: string, isFolder: boolean) =>
+      setTreeClipboard({ path, isFolder, cut: false }),
+    cut: (path: string, isFolder: boolean) =>
+      setTreeClipboard({ path, isFolder, cut: true }),
+    paste: async (folder: string) => {
+      const clip = treeClipboard;
+      if (!clip) return;
+      if (clip.cut) {
+        // Cut once, pasted once: the files are gone from where they were.
+        setTreeClipboard(null);
+        return actions.move(clip.path, folder, clip.isFolder);
+      }
+      const affected = clip.isFolder ? filesIn(clip.path) : [clip.path];
+      if (affected.length === 0)
+        return toast.error(`${clip.path} does not exist anymore.`);
+      if (busyFiles(affected)) return;
+      // Next to the original, or anywhere its name is taken, a copy's name.
+      const taken = (p: string) =>
+        listing.files.some((f) => f.path === p || f.path.startsWith(p + "/"));
+      let dest = join(folder, clip.path.split("/").pop()!);
+      if (taken(dest)) dest = copyName(dest, taken);
+      try {
+        const changes = await Promise.all(
+          affected.map(async (from): Promise<FileChange> => {
+            const res = await fetch(rawUrl(bookId, from));
+            if (!res.ok) throw new Error(`Could not copy ${from}`);
+            return {
+              op: "write",
+              path: dest + from.slice(clip.path.length),
+              encoding: "base64",
+              content: toBase64(new Uint8Array(await res.arrayBuffer())),
+              baseOid: null,
+            };
+          }),
+        );
+        await commitAndOpen(changes, clip.isFolder ? undefined : dest);
+      } catch (error) {
+        fail(error);
+      }
     },
   };
 
@@ -952,6 +998,7 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
               active={ws.active}
               dirty={ws.dirty}
               actions={actions}
+              clipboard={treeClipboard}
               collapsed={treeCollapsed}
               setCollapsed={setTreeCollapsed}
               filter={treeFilter}

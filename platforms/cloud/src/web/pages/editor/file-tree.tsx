@@ -3,18 +3,10 @@ import {
   ChevronRightIcon,
   FileIcon,
   FolderIcon,
-  MoreHorizontalIcon,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import { item, openMenu, separator } from "./context-menu";
 import type { FileEntry } from "./files";
 
 type TreeNode = { name: string; path: string; children: TreeNode[] | null };
@@ -64,7 +56,14 @@ export type TreeActions = {
   download: (path: string) => void;
   /** Dragged onto a folder ("" is the book's root): move there. */
   move: (from: string, to: string, isFolder: boolean) => void;
+  copy: (path: string, isFolder: boolean) => void;
+  cut: (path: string, isFolder: boolean) => void;
+  /** What was copied or cut, into a folder ("" is the book's root). */
+  paste: (folder: string) => void;
 };
+
+/** What Copy or Cut in the tree picked; a cut one moves when pasted. */
+export type TreeClipboard = { path: string; isFolder: boolean; cut: boolean };
 
 /** What a dragged tree node carries; uploads from the system use "Files". */
 const DRAG_TYPE = "application/x-hyperbook-path";
@@ -74,6 +73,7 @@ export function FileTree({
   active,
   dirty,
   actions,
+  clipboard,
   collapsed,
   setCollapsed,
   filter,
@@ -82,6 +82,7 @@ export function FileTree({
   active: string | null;
   dirty: Set<string>;
   actions: TreeActions;
+  clipboard: TreeClipboard | null;
   /** Which folders are collapsed; owned by the editor, for its header buttons. */
   collapsed: Set<string>;
   setCollapsed: React.Dispatch<React.SetStateAction<Set<string>>>;
@@ -159,6 +160,56 @@ export function FileTree({
     },
   });
 
+  /**
+   * The tree's context menu, in the looks of the editor's: for a file or a
+   * folder, or (node null) for the empty space below them, the book's root.
+   * Paste and the new files go into the folder, or next to the file.
+   */
+  const showMenu = (
+    event: React.MouseEvent,
+    node: { path: string; isFolder: boolean } | null,
+  ) => {
+    event.preventDefault();
+    event.stopPropagation();
+    const folder =
+      node === null
+        ? ""
+        : node.isFolder
+          ? node.path
+          : node.path.slice(0, Math.max(0, node.path.lastIndexOf("/")));
+    openMenu(event.clientX, event.clientY, (box) => {
+      if (node === null || node.isFolder) {
+        item(box, "New file", () => actions.newFile(folder));
+        item(box, "New folder", () => actions.newFolder(folder));
+        item(box, "Upload files", () => actions.pickUpload(folder));
+        separator(box);
+      }
+      if (node && !node.isFolder) {
+        item(box, "Download", () => actions.download(node.path));
+        separator(box);
+      }
+      if (node) {
+        item(box, "Cut", () => actions.cut(node.path, node.isFolder));
+        item(box, "Copy", () => actions.copy(node.path, node.isFolder));
+      }
+      item(box, "Paste", () => actions.paste(folder), {
+        disabled: clipboard === null,
+      });
+      if (node) {
+        separator(box);
+        item(box, "Rename", () => actions.rename(node.path, node.isFolder));
+        item(box, "Delete", () => actions.remove(node.path, node.isFolder), {
+          destructive: true,
+        });
+      }
+    });
+  };
+
+  /** Cut and not pasted yet: shown faded, like file managers do. */
+  const isCut = (path: string) =>
+    clipboard?.cut === true &&
+    (path === clipboard.path || path.startsWith(clipboard.path + "/"));
+
   const row = (node: TreeNode, label: string, depth: number) => {
     const isFolder = node.children !== null;
     const open = isFolder && !collapsed.has(node.path);
@@ -166,9 +217,11 @@ export function FileTree({
       <li key={node.path} {...(isFolder ? dropProps(node.path) : {})}>
         <div
           {...dragProps(node)}
+          onContextMenu={(e) => showMenu(e, { path: node.path, isFolder })}
           className={cn(
             "group flex cursor-grab items-center rounded-md pr-1 text-sm hover:bg-accent",
             node.path === active && "bg-accent font-semibold text-primary",
+            isCut(node.path) && "opacity-50",
             isFolder &&
               dropTarget === node.path &&
               "bg-secondary ring-2 ring-primary",
@@ -209,54 +262,6 @@ export function FileTree({
               />
             )}
           </button>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="size-6 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 data-[state=open]:opacity-100"
-                aria-label={`Actions for ${node.name}`}
-              >
-                <MoreHorizontalIcon className="size-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start">
-              {isFolder && (
-                <>
-                  <DropdownMenuItem onSelect={() => actions.newFile(node.path)}>
-                    New file here
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onSelect={() => actions.newFolder(node.path)}
-                  >
-                    New folder here
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onSelect={() => actions.pickUpload(node.path)}
-                  >
-                    Upload files here
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                </>
-              )}
-              {!isFolder && (
-                <DropdownMenuItem onSelect={() => actions.download(node.path)}>
-                  Download
-                </DropdownMenuItem>
-              )}
-              <DropdownMenuItem
-                onSelect={() => actions.rename(node.path, isFolder)}
-              >
-                Rename or move
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                variant="destructive"
-                onSelect={() => actions.remove(node.path, isFolder)}
-              >
-                Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
         </div>
         {open && <ul>{render(node.children!, depth + 1)}</ul>}
       </li>
@@ -278,16 +283,21 @@ export function FileTree({
     <div
       className={cn("min-h-full pb-8", dropTarget === "" && "bg-secondary")}
       {...dropProps("")}
+      onContextMenu={(e) => showMenu(e, null)}
     >
       {matching ? (
         <ul aria-label="Files">
           {matching.map((file) => (
             <li key={file.path}>
               <div
+                onContextMenu={(e) =>
+                  showMenu(e, { path: file.path, isFolder: false })
+                }
                 className={cn(
                   "group flex cursor-pointer items-center rounded-md pr-1 text-sm hover:bg-accent",
                   file.path === active &&
                     "bg-accent font-semibold text-primary",
+                  isCut(file.path) && "opacity-50",
                 )}
               >
                 <button

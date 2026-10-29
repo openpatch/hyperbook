@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { bookPathProblem } from "../../../shared/schemas";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,6 +18,11 @@ export type PathRequest = {
   label: string;
   initial: string;
   submitLabel: string;
+  /**
+   * Asks only for a name in this folder ("" is the book's root), not a path;
+   * onSubmit still gets the whole path.
+   */
+  folder?: string;
   /** Resolves when done; a thrown error is shown in the dialog. */
   onSubmit: (path: string) => Promise<void>;
 };
@@ -27,14 +32,20 @@ export function PathDialog({ request, onClose }: { request: PathRequest | null; 
   const [value, setValue] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  /** Whether the name's stem was selected since the dialog opened. */
+  const selected = useRef(false);
   useEffect(() => {
     setValue(request?.initial ?? "");
     setError(null);
+    selected.current = false;
   }, [request]);
 
   const submit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const path = value.trim();
+    const name = value.trim();
+    const folder = request!.folder;
+    if (folder !== undefined && name.includes("/")) return setError("Enter a name without /");
+    const path = folder ? `${folder}/${name}` : name;
     const problem = bookPathProblem(path);
     if (problem) return setError(problem);
     setBusy(true);
@@ -63,6 +74,14 @@ export function PathDialog({ request, onClose }: { request: PathRequest | null; 
               value={value}
               autoFocus
               spellCheck={false}
+              onFocus={(e) => {
+                // A name is mostly changed before its extension; once, so a
+                // click back into the field places the caret as usual.
+                if (request?.folder === undefined || selected.current) return;
+                selected.current = true;
+                const dot = e.target.value.indexOf(".", 1);
+                e.target.setSelectionRange(0, dot === -1 ? e.target.value.length : dot);
+              }}
               onChange={(e) => {
                 setValue(e.target.value);
                 setError(null);
