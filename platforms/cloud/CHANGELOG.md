@@ -1,5 +1,15 @@
 # @hyperbook/cloud
 
+## 0.2.0
+
+### Minor Changes
+
+- [`e01d54f`](https://github.com/openpatch/hyperbook/commit/e01d54fdf6183b55bff24c77f61223494a56e5c7) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - `hyperbook render` renders single pages on request (JSON lines on stdin) without a full build, for editors that preview a page while it is written. Hyperbook Cloud uses it: the editor's preview shows the open page with its unsaved text as you type, and saving no longer builds the book. The editor also completes elements and their attributes, highlights them, links to their documentation, checks them, and edits a page's frontmatter as a form.
+
+### Patch Changes
+
+- [`6d807d8`](https://github.com/openpatch/hyperbook/commit/6d807d8346752b88993c7b51a9570de536937d4f) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - The sidebar shows which version of Hyperbook Cloud runs: its version, the build number and the commit it was built from.
+
 ## 0.1.1
 
 ### Patch Changes
