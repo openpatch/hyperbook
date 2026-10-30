@@ -1,8 +1,11 @@
 import { spawn, type ChildProcessByStdio } from "node:child_process";
+import { randomUUID } from "node:crypto";
 import {
   chmodSync,
   mkdtempSync,
   mkdirSync,
+  readFileSync,
+  renameSync,
   rmSync,
   writeFileSync,
 } from "node:fs";
@@ -150,7 +153,7 @@ done
 exit 0
 `;
 
-/** Creates the bare repository unless it exists, and (re)writes its hook. */
+/** Creates the bare repository unless it exists, and ensures its hook is current. */
 export async function initRepo(repo: string) {
   mkdirSync(repo, { recursive: true });
   // An empty template: no sample hooks, no info/exclude.
@@ -159,8 +162,22 @@ export async function initRepo(repo: string) {
   });
   const hooks = path.join(repo, "hooks");
   mkdirSync(hooks, { recursive: true });
-  writeFileSync(path.join(hooks, "pre-receive"), PRE_RECEIVE);
-  chmodSync(path.join(hooks, "pre-receive"), 0o755);
+  const hook = path.join(hooks, "pre-receive");
+  try {
+    if (readFileSync(hook, "utf8") === PRE_RECEIVE) {
+      chmodSync(hook, 0o755);
+      return;
+    }
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
+  }
+  const temp = `${hook}.${randomUUID()}`;
+  writeFileSync(temp, PRE_RECEIVE, { mode: 0o755, flag: "wx" });
+  try {
+    renameSync(temp, hook);
+  } finally {
+    rmSync(temp, { force: true });
+  }
 }
 
 export async function headCommit(repo: string): Promise<string | null> {
@@ -170,6 +187,18 @@ export async function headCommit(repo: string): Promise<string | null> {
     });
   } catch (error) {
     if (error instanceof GitError && error.code === 1) return null;
+    throw error;
+  }
+}
+
+/** Whether `commit` is reachable from the book's current main branch. */
+export async function isMainAncestor(repo: string, commit: string): Promise<boolean> {
+  if (!/^[0-9a-f]{40}$/i.test(commit)) return false;
+  try {
+    await git(["merge-base", "--is-ancestor", commit, BRANCH], { gitDir: repo });
+    return true;
+  } catch (error) {
+    if (error instanceof GitError && error.code === 1) return false;
     throw error;
   }
 }

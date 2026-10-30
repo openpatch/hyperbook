@@ -1,4 +1,5 @@
 import { spawn } from "node:child_process";
+import { randomBytes } from "node:crypto";
 import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { serve, type ServerType } from "@hono/node-server";
 import os from "node:os";
@@ -43,7 +44,7 @@ async function tmp() {
 function run(
   cmd: string,
   args: string[],
-  options: { cwd: string; env?: Record<string, string> } = {
+  options: { cwd: string; env?: Record<string, string>; input?: string } = {
     cwd: process.cwd(),
   },
 ) {
@@ -53,6 +54,7 @@ function run(
         cwd: options.cwd,
         env: { ...process.env, GIT_TERMINAL_PROMPT: "0", ...options.env },
       });
+      child.stdin.end(options.input);
       let stdout = "";
       let stderr = "";
       child.stdout.on("data", (d: Buffer) => (stdout += d));
@@ -342,6 +344,102 @@ describe("git smart HTTP", () => {
         .all(),
     ).toHaveLength(0);
   });
+
+  it("rejects oversized pushes without crashing the git service", async () => {
+    const { instance, book, token, port } = await world();
+    instance.config.uploadMaxBytes = 1024;
+    const dir = await localBook(port, token, book.id, FILES);
+    await writeFile(path.join(dir, "large.bin"), randomBytes(16 * 1024));
+    await git(port, ["add", "large.bin"], dir);
+    await git(
+      port,
+      ["-c", "user.email=a@b.c", "-c", "user.name=A", "commit", "-m", "large"],
+      dir,
+    );
+
+    const push = await git(port, ["push", "origin", "main"], dir);
+    expect(push.code).not.toBe(0);
+    expect(push.stderr).toMatch(/413|larger than/i);
+    const info = await instance.app.request(
+      `/api/books/${book.id}/git/info/refs?service=git-upload-pack`,
+      {
+        headers: {
+          host: "admin.test",
+          authorization: `Basic ${Buffer.from(`git:${token}`).toString("base64")}`,
+        },
+      },
+    );
+    expect(info.status).toBe(200);
+  });
+
+  it("serializes concurrent pushes and accounts for the accepted push", async () => {
+    const { instance, book, token, port } = await world();
+    const initial = await localBook(port, token, book.id, FILES);
+    expect((await git(port, ["push", "origin", "main"], initial)).code).toBe(0);
+    const left = await tmp();
+    const right = await tmp();
+    expect((await git(port, ["clone", url(port, token, book.id), left], left)).code).toBe(0);
+    expect((await git(port, ["clone", url(port, token, book.id), right], right)).code).toBe(0);
+
+    for (const [dir, name] of [[left, "left"], [right, "right"]] as const) {
+      await writeFile(path.join(dir, `${name}.txt`), name);
+      await git(port, ["add", `${name}.txt`], dir);
+      await git(
+        port,
+        ["-c", "user.email=a@b.c", "-c", "user.name=A", "commit", "-m", name],
+        dir,
+      );
+    }
+
+    const pushes = await Promise.all([
+      git(port, ["push", "origin", "main"], left),
+      git(port, ["push", "origin", "main"], right),
+    ]);
+    expect(pushes.filter((push) => push.code === 0)).toHaveLength(1);
+    expect(bookRow(instance, book.id).commitCount).toBe(2);
+    expect(
+      instance.db.select().from(auditLog).where(eq(auditLog.action, "book.push")).all(),
+    ).toHaveLength(2);
+  });
+
+  it("accepts gzipped upload-pack negotiation bodies", async () => {
+    const { book, token, port } = await world();
+    const source = await localBook(port, token, book.id, FILES);
+    expect((await git(port, ["push", "origin", "main"], source)).code).toBe(0);
+
+    const client = await tmp();
+    expect(
+      (await git(port, ["clone", url(port, token, book.id), "."], client)).code,
+    ).toBe(0);
+    const base = (
+      await git(port, ["rev-parse", "HEAD"], client)
+    ).stdout.trim();
+    const commits = Array.from({ length: 160 }, (_, index) => {
+      const mark = index + 1;
+      const parent = index === 0 ? `from ${base}\n` : `from :${mark - 1}\n`;
+      return [
+        "commit refs/heads/main",
+        `mark :${mark}`,
+        `committer B <b@example.org> ${1_700_000_000 + mark} +0000`,
+        `data ${`m${mark}\n`.length}`,
+        `m${mark}`,
+        parent.trimEnd(),
+        "",
+      ].join("\n");
+    }).join("\n");
+    const imported = await run("git", ["fast-import"], { cwd: client, input: commits });
+    expect(imported.code).toBe(0);
+
+    await writeFile(path.join(source, "index.html"), "<h1>Updated</h1>");
+    await git(
+      port,
+      ["-c", "user.email=a@b.c", "-c", "user.name=A", "commit", "-am", "updated"],
+      source,
+    );
+    expect((await git(port, ["push", "origin", "main"], source)).code).toBe(0);
+    const fetched = await git(port, ["fetch", "origin"], client);
+    expect(fetched.code).toBe(0);
+  }, 60_000);
 
   it("publish creates version tags; rollback to a kept build is instant, to a pruned one a rebuild", async () => {
     const { instance, owner, book, token, port } = await world();

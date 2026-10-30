@@ -5,7 +5,9 @@ import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import path from "node:path";
 import { Readable, Transform } from "node:stream";
+import { pipeline } from "node:stream/promises";
 import type { ChildProcess } from "node:child_process";
+import { createGunzip } from "node:zlib";
 import { z } from "zod";
 import { gitTokenInput } from "../../../shared/schemas";
 import { audit } from "../../audit";
@@ -17,8 +19,8 @@ import { getInstanceSettings } from "../../domain/instance";
 import { quotaForBook, setSourceBytes } from "../../domain/storage";
 import { bookMembers, books, gitTokens, users } from "../../db/schema";
 import {
-  headCommit,
   initRepo,
+  isMainAncestor,
   listTree,
   parseRefUpdates,
   revListCount,
@@ -52,6 +54,15 @@ import { hostedOnly } from "./publishing";
 
 const ZERO = "0".repeat(40);
 const MAX_TOKENS_PER_USER = 10;
+
+class GitRequestTooLargeError extends Error {}
+
+function requestIsGzip(c: Context): boolean {
+  const encoding = c.req.header("content-encoding")?.trim().toLowerCase();
+  if (!encoding || encoding === "identity") return false;
+  if (encoding === "gzip") return true;
+  throw new HTTPException(415, { message: "Unsupported content encoding" });
+}
 
 type GitEnv = {
   Variables: { gitBook: BookRow; gitUserId: number };
@@ -183,32 +194,37 @@ export function gitHttpRoutes({ db, config, builds }: Deps) {
       (u) => u.ref === "refs/heads/main" && u.new !== ZERO,
     );
     if (!update || !exitedCleanly) return;
-    if ((await headCommit(repo).catch(() => null)) !== update.new) return; // the hook refused it
-    await withBookLock(book.id, async () => {
-      const added = await revListCount(
-        repo,
-        update.old === ZERO ? null : update.old,
-        update.new,
-      );
-      const bytes = (await listTree(repo, update.new)).reduce(
-        (sum, e) => sum + e.size,
-        0,
-      );
-      db.transaction((tx) => {
-        setSourceBytes(tx as unknown as Deps["db"], book.id, bytes);
-        addCommits(tx as unknown as Deps["db"], book.id, added);
-      });
-      audit(db, {
-        actorUserId: userId,
-        action: "book.push",
-        targetType: "book",
-        targetId: book.id,
-        data: { commit: update.new, added, bytes },
-      });
-      if (getInstanceSettings(db).gitPushUpdatesPreview) {
-        builds.enqueue(book.id, update.new, "push", userId);
-      }
+    let reachable: boolean;
+    try {
+      reachable = await isMainAncestor(repo, update.new);
+    } catch (error) {
+      console.error(`Could not verify pushed commit for book ${book.id}`, error);
+      return;
+    }
+    if (!reachable) return;
+    const added = await revListCount(
+      repo,
+      update.old === ZERO ? null : update.old,
+      update.new,
+    );
+    const bytes = (await listTree(repo, update.new)).reduce(
+      (sum, e) => sum + e.size,
+      0,
+    );
+    db.transaction((tx) => {
+      setSourceBytes(tx as unknown as Deps["db"], book.id, bytes);
+      addCommits(tx as unknown as Deps["db"], book.id, added);
     });
+    audit(db, {
+      actorUserId: userId,
+      action: "book.push",
+      targetType: "book",
+      targetId: book.id,
+      data: { commit: update.new, added, bytes },
+    });
+    if (getInstanceSettings(db).gitPushUpdatesPreview) {
+      builds.enqueue(book.id, update.new, "push", userId);
+    }
   }
 
   // Mounted at /api/books/:id/git; the auth middleware is bound to the exact
@@ -270,6 +286,7 @@ export function gitHttpRoutes({ db, config, builds }: Deps) {
         throw new HTTPException(409, {
           message: "This book is hosted elsewhere.",
         });
+      const gzip = requestIsGzip(c);
       const repo = repoDir(config, book.id);
       return initRepo(repo).then(() => {
         const child = spawnGit(["upload-pack", "--stateless-rpc", repo], {
@@ -277,8 +294,27 @@ export function gitHttpRoutes({ db, config, builds }: Deps) {
           env: gitProtocolEnv(c),
         });
         const body = c.req.raw.body;
-        if (body) Readable.fromWeb(body as never).pipe(child.stdin!);
-        else child.stdin!.end();
+        if (body) {
+          const source = Readable.fromWeb(body as never);
+          let received = 0;
+          const cap = new Transform({
+            transform(chunk: Buffer, _encoding, callback) {
+              received += chunk.length;
+              if (received > config.uploadMaxBytes) {
+                callback(new GitRequestTooLargeError());
+                return;
+              }
+              callback(null, chunk);
+            },
+          });
+          const input = gzip
+            ? pipeline(source, createGunzip(), cap, child.stdin!)
+            : pipeline(source, cap, child.stdin!);
+          void input.catch((error) => {
+            child.kill();
+            console.error(`git upload-pack request failed for book ${book.id}`, error);
+          });
+        } else child.stdin!.end();
         child.stderr!.resume();
         child.on("close", (code) => {
           if (code !== 0)
@@ -298,75 +334,121 @@ export function gitHttpRoutes({ db, config, builds }: Deps) {
         throw new HTTPException(409, {
           message: "This book is hosted elsewhere.",
         });
-      const repo = repoDir(config, book.id);
-      await initRepo(repo);
-      const quota = quotaForBook(db, book.id);
-      const maxBytes =
-        quota && quota.maxBytes < config.bookMaxBytes
-          ? quota.maxBytes
-          : config.bookMaxBytes;
-      // The pre-receive hook enforces the ref rules and the tree size; these
-      // guard the pack itself. The hooksPath override comes after
-      // SAFE_CONFIG's /dev/null, so only receive-pack runs the hook.
-      const child = spawnGit(
-        [
-          "-c",
-          "receive.denyDeletes=true",
-          "-c",
-          "receive.denyNonFastForwards=true",
-          "-c",
-          "receive.fsckObjects=true",
-          "-c",
-          `receive.maxInputSize=${config.uploadMaxBytes}`,
-          "-c",
-          `core.hooksPath=${path.join(repo, "hooks")}`,
-          "receive-pack",
-          "--stateless-rpc",
+      const gzip = requestIsGzip(c);
+      return withBookLock(book.id, async () => {
+        const repo = repoDir(config, book.id);
+        await initRepo(repo);
+        const quota = quotaForBook(db, book.id);
+        const maxBytes =
+          quota && quota.maxBytes < config.bookMaxBytes
+            ? quota.maxBytes
+            : config.bookMaxBytes;
+        // The pre-receive hook enforces the ref rules and the tree size; these
+        // guard the pack itself. The hooksPath override comes after
+        // SAFE_CONFIG's /dev/null, so only receive-pack runs the hook.
+        const child = spawnGit(
+          [
+            "-c",
+            "receive.denyDeletes=true",
+            "-c",
+            "receive.denyNonFastForwards=true",
+            "-c",
+            "receive.fsckObjects=true",
+            "-c",
+            `receive.maxInputSize=${config.uploadMaxBytes}`,
+            "-c",
+            `core.hooksPath=${path.join(repo, "hooks")}`,
+            "receive-pack",
+            "--stateless-rpc",
+            repo,
+          ],
+          { gitDir: repo, env: { HB_MAX_BYTES: String(maxBytes) } },
+        );
+        const body = c.req.raw.body;
+        if (!body) {
+          child.kill();
+          throw new HTTPException(400, { message: "Empty request" });
+        }
+        let received = 0;
+        let headerComplete = false;
+        let pending: Buffer<ArrayBufferLike> = Buffer.alloc(0);
+        let packetLength = 0;
+        const refPackets: Buffer[] = [];
+        const cap = new Transform({
+          transform(chunk: Buffer, _encoding, callback) {
+            received += chunk.length;
+            if (received > config.uploadMaxBytes) {
+              callback(new GitRequestTooLargeError());
+              return;
+            }
+            let offset = 0;
+            while (!headerComplete && offset < chunk.length) {
+              const targetLength = packetLength || 4;
+              const take = Math.min(targetLength - pending.length, chunk.length - offset);
+              const part = chunk.subarray(offset, offset + take);
+              pending = pending.length === 0 ? part : Buffer.concat([pending, part]);
+              offset += take;
+              if (pending.length < targetLength) break;
+              if (packetLength === 0) {
+                const lengthText = pending.toString("ascii");
+                if (!/^[0-9a-f]{4}$/i.test(lengthText)) {
+                  headerComplete = true;
+                  break;
+                }
+                packetLength = Number.parseInt(lengthText, 16);
+                if (packetLength === 0) {
+                  refPackets.push(pending);
+                  pending = Buffer.alloc(0);
+                  headerComplete = true;
+                } else if (packetLength < 4) {
+                  headerComplete = true;
+                }
+              } else {
+                refPackets.push(pending);
+                pending = Buffer.alloc(0);
+                packetLength = 0;
+              }
+            }
+            callback(null, chunk);
+          },
+        });
+        const source = Readable.fromWeb(body as never);
+        const input = gzip
+          ? pipeline(source, createGunzip(), cap, child.stdin!)
+          : pipeline(source, cap, child.stdin!);
+        let inputError: unknown;
+        const piping = input.catch((error) => {
+          inputError = error;
+          child.kill();
+        });
+        const { code, stdout, stderr } = await closeWith(child);
+        await piping;
+        if (inputError instanceof GitRequestTooLargeError) {
+          throw new HTTPException(413, {
+            message: `The push is larger than ${Math.round(config.uploadMaxBytes / 1024 / 1024)} MB`,
+          });
+        }
+        if (inputError) {
+          throw new HTTPException(400, {
+            message: `Could not read the git push: ${(inputError as Error).message}`,
+          });
+        }
+        if (code !== 0 && stdout.length === 0) {
+          throw new HTTPException(500, {
+            message: `git receive-pack failed: ${stderr.trim()}`,
+          });
+        }
+        await postPush(
+          book,
+          c.get("gitUserId"),
           repo,
-        ],
-        { gitDir: repo, env: { HB_MAX_BYTES: String(maxBytes) } },
-      );
-      // Stream the request in, capped, and tee it to read the ref updates
-      // after the push; the answer is small, so it is buffered.
-      const body = c.req.raw.body;
-      if (!body) throw new HTTPException(400, { message: "Empty request" });
-      let received = 0;
-      const chunks: Buffer[] = [];
-      const cap = new Transform({
-        transform(chunk: Buffer, _enc, cb) {
-          received += chunk.length;
-          if (received > config.uploadMaxBytes) {
-            cb(new Error("over the limit"));
-            return;
-          }
-          chunks.push(chunk);
-          cb(null, chunk);
-        },
+          Buffer.concat(refPackets),
+          code === 0,
+        );
+        c.header("content-type", "application/x-git-receive-pack-result");
+        c.header("cache-control", "no-cache");
+        return c.body(stdout, 200);
       });
-      const src = Readable.fromWeb(body as never);
-      src.pipe(cap).pipe(child.stdin!);
-      src.on("error", () => child.kill());
-      const { code, stdout, stderr } = await closeWith(child);
-      if (received > config.uploadMaxBytes) {
-        throw new HTTPException(413, {
-          message: `The push is larger than ${Math.round(config.uploadMaxBytes / 1024 / 1024)} MB`,
-        });
-      }
-      if (code !== 0 && stdout.length === 0) {
-        throw new HTTPException(500, {
-          message: `git receive-pack failed: ${stderr.trim()}`,
-        });
-      }
-      await postPush(
-        book,
-        c.get("gitUserId"),
-        repo,
-        Buffer.concat(chunks),
-        code === 0,
-      );
-      c.header("content-type", "application/x-git-receive-pack-result");
-      c.header("cache-control", "no-cache");
-      return c.body(stdout, 200);
     });
 }
 

@@ -1,5 +1,5 @@
 import { existsSync } from "node:fs";
-import { mkdir, readFile, readdir, writeFile } from "node:fs/promises";
+import { mkdir, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { eq } from "drizzle-orm";
 import { describe, expect, it } from "vitest";
@@ -73,6 +73,32 @@ describe("build queue", () => {
     expect(buildRow(instance, bad.id)).toMatchObject({ status: "failed", error: "broken" });
     expect(buildRow(instance, bad.id).log).toContain("broken");
     expect(bookRow(instance, book.id).publishedBuildId).toBe(good.id);
+  });
+
+  it("keeps a successfully published build successful when tag updates fail", async () => {
+    let bookId = 0;
+    const runner: Runner = async (job) => {
+      const result = await copyRunner(job);
+      const tagsDir = path.join(repoDir(job.config, bookId), "refs", "tags");
+      await rm(tagsDir, { recursive: true, force: true });
+      await writeFile(tagsDir, "unavailable");
+      return result;
+    };
+    const instance = setup({}, { runner });
+    const { book, commit } = await bookWithSource(instance, { "hyperbook.json": "{}" });
+    bookId = book.id;
+
+    const build = instance.builds.enqueue(book.id, commit, "publish", null);
+    await instance.builds.idle();
+
+    expect(buildRow(instance, build.id)).toMatchObject({
+      status: "succeeded",
+      error: null,
+    });
+    expect(buildRow(instance, build.id).log).toContain(
+      "git tags could not be updated",
+    );
+    expect(bookRow(instance, book.id).publishedBuildId).toBe(build.id);
   });
 
   it("replaces a queued build of the same book", async () => {

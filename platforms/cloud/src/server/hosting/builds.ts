@@ -328,10 +328,26 @@ export class BuildQueue {
       // A publish is recorded as a v<N> tag plus the moving "published" tag;
       // a rollback only moves "published" to the tag's commit.
       if (current.publish && current.trigger !== "upgrade") {
-        if (current.trigger === "rollback") await movePublishedTag(this.config, current.bookId, current.commit);
-        else await markPublished(this.db, this.config, current.bookId, current.commit);
+        try {
+          if (current.trigger === "rollback") await movePublishedTag(this.config, current.bookId, current.commit);
+          else await markPublished(this.db, this.config, current.bookId, current.commit);
+        } catch (error) {
+          this.recordPostSuccessWarning(
+            current.id,
+            log,
+            `Published successfully, but git tags could not be updated: ${(error as Error).message}`,
+          );
+        }
       }
-      await this.prune(build.bookId);
+      try {
+        await this.prune(build.bookId);
+      } catch (error) {
+        this.recordPostSuccessWarning(
+          current.id,
+          log,
+          `Build succeeded, but old build cleanup failed: ${(error as Error).message}`,
+        );
+      }
     } catch (error) {
       const message = `Internal error: ${(error as Error).message}`;
       log.note(message);
@@ -340,6 +356,16 @@ export class BuildQueue {
       clearInterval(saveLog);
       if (jobDir) await rm(jobDir, { recursive: true, force: true });
     }
+  }
+
+  private recordPostSuccessWarning(buildId: number, log: BuildLog, message: string) {
+    log.note(message);
+    try {
+      this.db.update(builds).set({ log: log.toString() }).where(eq(builds.id, buildId)).run();
+    } catch (error) {
+      console.error(`Could not save post-success warning for build ${buildId}`, error);
+    }
+    console.error(message);
   }
 
   private finish(
@@ -458,4 +484,3 @@ export class BuildQueue {
     }
   }
 }
-
