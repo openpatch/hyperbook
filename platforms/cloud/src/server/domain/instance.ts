@@ -22,6 +22,7 @@ export const instanceSettingsSchema = z.object({
       custom_domain: z.boolean(),
       ai: z.boolean(),
       ai_requests_per_day: z.number().int().min(0).nullable(),
+      ai_tokens_per_week: z.number().int().min(0).nullable(),
     })
     .partial(),
   /** Slugs this instance keeps for itself, on top of the built-in ones. */

@@ -95,7 +95,7 @@ export const instanceSettings = sqliteTable("instance_settings", {
 });
 
 /*
- * The AI assistant's daily quota counter, one row per user per UTC day
+ * The AI assistant's usage counter, one row per user per UTC day
  * (see domain/ai-usage.ts). Kept apart from the audit log on purpose:
  * a quota is enforced state, an activity log is history.
  */
@@ -108,6 +108,10 @@ export const aiUsage = sqliteTable(
     /** UTC day, "YYYY-MM-DD". */
     day: text("day").notNull(),
     requests: integer("requests").notNull().default(0),
+    tokensIn: integer("tokens_in").notNull().default(0),
+    tokensOut: integer("tokens_out").notNull().default(0),
+    /** Tokens times the model's weight: what the weekly quota counts. */
+    weightedTokens: integer("weighted_tokens").notNull().default(0),
   },
   (t) => [primaryKey({ columns: [t.userId, t.day] })],
 );

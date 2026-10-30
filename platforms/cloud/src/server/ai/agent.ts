@@ -32,6 +32,7 @@ import {
 export type AssistantEvent =
   | { type: "delta"; text: string }
   | { type: "tool"; name: string; args: Record<string, unknown> }
+  | { type: "usage"; promptTokens: number; completionTokens: number }
   | { type: "proposal"; changes: AiProposedChange[] }
   | { type: "done"; finish: "stop" | "length" };
 
@@ -46,6 +47,8 @@ const READ_BUDGET = 256 * 1024;
 const WRITE_MAX = 32 * 1024;
 /** Per request, across all writes. */
 const WRITE_BUDGET = 256 * 1024;
+/** Files one read_files call may name. */
+const READ_FILES_MAX = 8;
 /** Files per proposal. */
 const CHANGE_LIMIT = 10;
 
@@ -124,6 +127,22 @@ const TOOLS: ToolDefinition[] = [
         path: { type: "string", description: "The file's path in the book." },
       },
       required: ["path"],
+    },
+  },
+  {
+    name: "read_files",
+    description:
+      "Several files of the book at once, by their paths — one call instead of many read_file calls. Prefer it whenever you need more than one file.",
+    parameters: {
+      type: "object",
+      properties: {
+        paths: {
+          type: "array",
+          items: { type: "string" },
+          description: `The files' paths in the book (at most ${READ_FILES_MAX}).`,
+        },
+      },
+      required: ["paths"],
     },
   },
   {
@@ -222,6 +241,8 @@ class Tools {
   private writeBudget = WRITE_BUDGET;
   readonly overlay = new Map<string, OverlayChange>();
   readonly deletes = new Set<string>();
+  /** Files and docs already handed to the model; the history has them. */
+  private readonly seen = new Set<string>();
 
   constructor(
     private readonly repo: string,
@@ -260,6 +281,43 @@ class Tools {
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([path, size]) => `- ${path} (${size} bytes)`);
     return lines.length > 0 ? lines.join("\n") : "(the book has no files yet)";
+  }
+
+  /** Answers once per request: a second ask points back at the history. */
+  firstTime(key: string): boolean {
+    if (this.seen.has(key)) return false;
+    this.seen.add(key);
+    return true;
+  }
+
+  async readMany(paths: unknown): Promise<string> {
+    if (!Array.isArray(paths) || paths.length === 0) {
+      return "read_files needs `paths`, a list of valid file paths; call list_files first.";
+    }
+    const valid = paths.filter(
+      (p): p is string => typeof p === "string" && !bookPathProblem(p),
+    );
+    const unique = [...new Set(valid)].slice(0, READ_FILES_MAX);
+    const parts: string[] = [];
+    for (const path of unique) {
+      parts.push(`=== ${path} ===\n${await this.readOnce(path)}`);
+    }
+    if (valid.length > unique.length || valid.length < paths.length) {
+      parts.push(
+        `(Only ${unique.length} valid, distinct paths were read; at most ${READ_FILES_MAX} per call.)`,
+      );
+    }
+    return parts.join("\n\n");
+  }
+
+  /** read(), but a file the model already has is not sent again. */
+  async readOnce(path: string): Promise<string> {
+    if (this.overlay.has(path) || !this.firstTime(`file:${path}`)) {
+      return this.overlay.has(path)
+        ? await this.read(path)
+        : "Already read earlier in this conversation; see that result above.";
+    }
+    return await this.read(path);
   }
 
   async read(path: string): Promise<string> {
@@ -398,7 +456,16 @@ class Tools {
 /** The message pair of a request: who the assistant is, which book, what to do. */
 function buildMessages(book: Book, input: AiAssistInput): ChatMessage[] {
   const files = [...book.tree.values()].slice(0, TREE_LIMIT);
+  // Static text first, per-book text after it: providers that cache a
+  // request's prefix then reuse the biggest part across requests.
   const system: string[] = [SYSTEM_PROMPT];
+  system.push(
+    [
+      "## Tools",
+      "",
+      "Look through the book with `read_files` (several files in one call; `read_file` for one, `list_files` for the paths) before you write, and ask for all the files you need in a single call. For the hyperbook format and any element or file format, call `read_docs` with its name (hyperbook, p5, pyide, webide, onlineide, sqlide, multievent, bitflow, blockflow, struktolab, jmp, excalidraw, …) instead of guessing the syntax. Any request that changes text or files — \"improve the highlighted text\", \"continue this page\", \"write me a page about X\", \"add a quiz\" — must be recorded with `write_file` (the complete new content) and `delete_file`, linked from an existing page in the same request: the teacher reviews every change as a diff and nothing is applied before they accept it. Never answer a change request with bare Markdown in the chat. Answer in text only for questions and explanations. If the request includes a selected passage, it is about that passage unless the request says otherwise. Name new source files by the language's conventions — a Java public class `Equals` belongs in `Equals.java` (some runtimes require the file name to match the type), Python modules use snake_case — because a mismatched name breaks the build.",
+    ].join("\n"),
+  );
   system.push(
     [
       "## The book you are working on",
@@ -414,10 +481,6 @@ function buildMessages(book: Book, input: AiAssistInput): ChatMessage[] {
       ...(book.tree.size > files.length
         ? [`- … and ${book.tree.size - files.length} more`]
         : []),
-      "",
-      "## Tools",
-      "",
-      "Look through the book with `read_file` (and `list_files`) before you write. For the hyperbook format and any element or file format, call `read_docs` with its name (hyperbook, p5, pyide, webide, onlineide, sqlide, multievent, bitflow, blockflow, struktolab, jmp, excalidraw, …) instead of guessing the syntax. Any request that changes text or files — \"improve the highlighted text\", \"continue this page\", \"write me a page about X\", \"add a quiz\" — must be recorded with `write_file` (the complete new content) and `delete_file`, linked from an existing page in the same request: the teacher reviews every change as a diff and nothing is applied before they accept it. Never answer a change request with bare Markdown in the chat. Answer in text only for questions and explanations. If the request includes a selected passage, it is about that passage unless the request says otherwise. Name new source files by the language's conventions — a Java public class `Equals` belongs in `Equals.java` (some runtimes require the file name to match the type), Python modules use snake_case — because a mismatched name breaks the build.",
     ].join("\n"),
   );
 
@@ -473,6 +536,8 @@ export async function* runAssistant(
 
   while (step < options.ai.maxSteps) {
     let pending: ProviderToolCall[] = [];
+    let reported = false;
+    let produced = 0;
     try {
       for await (const event of streamChat({
         baseUrl: options.ai.baseUrl,
@@ -485,9 +550,17 @@ export async function* runAssistant(
         signal,
       })) {
         if (event.type === "delta") {
+          produced += event.text.length;
           yield { type: "delta", text: event.text };
+        } else if (event.type === "usage") {
+          reported = true;
+          yield event;
         } else if (event.type === "tool_calls") {
           pending = event.calls;
+          produced += event.calls.reduce(
+            (n, call) => n + call.args.length + call.name.length,
+            0,
+          );
         } else if (event.finish === "length") {
           finish = "length";
         }
@@ -504,6 +577,15 @@ export async function* runAssistant(
         continue;
       }
       throw error;
+    }
+    // A provider that reports no usage is metered by an estimate (about
+    // four characters a token), so the quota still means something.
+    if (!reported) {
+      yield {
+        type: "usage",
+        promptTokens: Math.ceil(JSON.stringify(messages).length / 4),
+        completionTokens: Math.ceil(produced / 4),
+      };
     }
     step++;
     if (pending.length === 0 || finish === "length") break;
@@ -553,12 +635,16 @@ async function answer(
       return tools.listing();
     case "read_file":
       return path
-        ? await tools.read(path)
+        ? await tools.readOnce(path)
         : "read_file needs a valid `path`; call list_files first.";
+    case "read_files":
+      return await tools.readMany(args.paths);
     case "read_docs": {
       const name = args.name;
       if (typeof name !== "string" || !(name in DOCUMENTATION))
         return `read_docs needs a \`name\` of: ${Object.keys(DOCUMENTATION).join(", ")}.`;
+      if (!tools.firstTime(`docs:${name}`))
+        return "Already fetched earlier in this conversation; see that result above.";
       const text = await readDocumentation(name as DocumentationKey);
       return text ?? `The ${name} documentation could not be fetched right now.`;
     }
@@ -571,6 +657,6 @@ async function answer(
         ? await tools.remove(path)
         : "delete_file needs a valid `path`; call list_files first.";
     default:
-      return `There is no tool "${call.name}". Use list_files, read_file, read_docs, write_file or delete_file.`;
+      return `There is no tool "${call.name}". Use list_files, read_file, read_files, read_docs, write_file or delete_file.`;
   }
 }

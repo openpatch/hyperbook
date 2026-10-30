@@ -68,6 +68,8 @@ export type Config = {
     /** Steps of the agent loop (books tools), once tools are added. */
     maxSteps: number;
     requestsPerMinute: number;
+    /** Cost weight per model for the token quota; a model not listed weighs 1. */
+    modelWeights: Record<string, number>;
   } | null;
 };
 
@@ -142,6 +144,8 @@ const schema = z.object({
   AI_MODEL: optional,
   /** Comma-separated extra models the editor offers; AI_MODEL stays the default. */
   AI_MODELS: optional,
+  /** "model=weight,…": how much a model's tokens count against the weekly quota. */
+  AI_MODEL_WEIGHTS: optional,
   AI_TIMEOUT_SECONDS: z.coerce.number().int().min(10).default(120),
   AI_MAX_OUTPUT_TOKENS: z.coerce.number().int().min(64).default(2048),
   AI_MAX_STEPS: z.coerce.number().int().min(1).max(32).default(8),
@@ -329,6 +333,24 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
                 .filter(Boolean),
             ),
           ];
+          const modelWeights: Record<string, number> = {};
+          for (const entry of (e.AI_MODEL_WEIGHTS ?? "").split(",")) {
+            if (!entry.trim()) continue;
+            const at = entry.lastIndexOf("=");
+            const name = entry.slice(0, at).trim();
+            const weight = Number(entry.slice(at + 1));
+            if (at === -1 || !name || !(weight > 0) || !Number.isFinite(weight)) {
+              problems.push(
+                `AI_MODEL_WEIGHTS entries must look like model=weight with a weight above 0 (got "${entry.trim()}")`,
+              );
+            } else if (!models.includes(name)) {
+              problems.push(
+                `AI_MODEL_WEIGHTS names "${name}", which is neither AI_MODEL nor in AI_MODELS`,
+              );
+            } else {
+              modelWeights[name] = weight;
+            }
+          }
           ai = {
             baseUrl: base,
             apiKey: e.AI_API_KEY!,
@@ -338,6 +360,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
             maxOutputTokens: e.AI_MAX_OUTPUT_TOKENS,
             maxSteps: e.AI_MAX_STEPS,
             requestsPerMinute: e.AI_REQUESTS_PER_MINUTE,
+            modelWeights,
           };
         }
       } catch {

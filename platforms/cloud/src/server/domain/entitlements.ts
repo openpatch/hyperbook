@@ -24,6 +24,8 @@ export const entitlementsSchema = z.object({
   ai: z.boolean(),
   /** AI requests per UTC day; null is unlimited. The per-minute rate limit applies either way. */
   ai_requests_per_day: z.number().int().min(0).nullable(),
+  /** Weighted AI tokens per UTC week (Monday to Sunday); null is unlimited. */
+  ai_tokens_per_week: z.number().int().min(0).nullable(),
 });
 
 export type Entitlements = z.infer<typeof entitlementsSchema>;
@@ -40,6 +42,7 @@ export const BUILTIN_ENTITLEMENTS: Entitlements = {
   custom_domain: false,
   ai: true,
   ai_requests_per_day: null,
+  ai_tokens_per_week: null,
 };
 
 const UNLIMITED: Entitlements = {
@@ -49,6 +52,7 @@ const UNLIMITED: Entitlements = {
   custom_domain: true,
   ai: true,
   ai_requests_per_day: null,
+  ai_tokens_per_week: null,
 };
 
 /** Only the keys set on the user itself, without defaults. */

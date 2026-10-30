@@ -87,8 +87,13 @@ function fakeProvider(script: (asked: Asked) => Answer) {
           const done = JSON.stringify({
             choices: [{ delta: {}, finish_reason: "tool_calls" }],
           });
+          // Providers that honour include_usage end with a usage chunk.
+          const usage = JSON.stringify({
+            choices: [],
+            usage: { prompt_tokens: 100, completion_tokens: 20 },
+          });
           controller.enqueue(
-            encoder.encode(`data: ${done}\n\ndata: [DONE]\n\n`),
+            encoder.encode(`data: ${done}\n\ndata: ${usage}\n\ndata: [DONE]\n\n`),
           );
         } else {
           for (const text of answer.deltas) {
@@ -100,8 +105,13 @@ function fakeProvider(script: (asked: Asked) => Answer) {
           const done = JSON.stringify({
             choices: [{ delta: {}, finish_reason: answer.finish ?? "stop" }],
           });
+          // Providers that honour include_usage end with a usage chunk.
+          const usage = JSON.stringify({
+            choices: [],
+            usage: { prompt_tokens: 100, completion_tokens: 20 },
+          });
           controller.enqueue(
-            encoder.encode(`data: ${done}\n\ndata: [DONE]\n\n`),
+            encoder.encode(`data: ${done}\n\ndata: ${usage}\n\ndata: [DONE]\n\n`),
           );
         }
         controller.close();
@@ -188,9 +198,13 @@ describe("AI status", () => {
       enabled: false,
       model: null,
       models: [],
+      modelWeights: {},
       allowed: true,
       usedToday: 0,
       quota: null,
+      tokensUsedThisWeek: 0,
+      tokenQuota: null,
+      tokensResetOn: expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/),
     });
   });
 
@@ -200,9 +214,13 @@ describe("AI status", () => {
       enabled: true,
       model: "mistral-test",
       models: ["mistral-test"],
+      modelWeights: { "mistral-test": 1 },
       allowed: true,
       usedToday: 0,
       quota: null,
+      tokensUsedThisWeek: 0,
+      tokenQuota: null,
+      tokensResetOn: expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/),
     });
   });
 
@@ -230,10 +248,11 @@ describe("AI assist", () => {
       "delta",
       "delta",
       "delta",
+      "usage",
       "done",
     ]);
     expect(seen[0]!.data).toEqual({ text: "Hello" });
-    expect(seen[3]!.data).toEqual({ finish: "stop" });
+    expect(seen[4]!.data).toEqual({ finish: "stop" });
 
     // The provider saw the key and the model, and a message pair that
     // knows the book: system prompt, hyperbook conventions, the page.
@@ -434,6 +453,44 @@ describe("AI assist", () => {
     expect((await owner.c.get("/api/ai")).body.usedToday).toBe(2);
   });
 
+  it("meters weighted tokens per week and blocks once they are used up", async () => {
+    const { owner, instance, assist } = await world({
+      AI_MODELS: "mistral-big",
+      AI_MODEL_WEIGHTS: "mistral-big=3",
+    });
+    const admin = await loggedIn(instance, {
+      email: "admin@example.org",
+      role: "admin",
+    });
+    await admin.c.put(`/api/users/${owner.user.id}/entitlements`, {
+      ai_tokens_per_week: 500,
+    });
+    const body = {
+      action: "continue",
+      pagePath: "book/index.md",
+      model: "mistral-big",
+    };
+    // 120 tokens (100 in, 20 out) at weight 3 = 360 credits.
+    const res = await owner.c.post(assist, body);
+    expect(events(res.body).find((e) => e.event === "usage")!.data).toEqual({
+      tokensUsedThisWeek: 360,
+      tokenQuota: 500,
+    });
+    expect((await owner.c.get("/api/ai")).body).toMatchObject({
+      modelWeights: { "mistral-test": 1, "mistral-big": 3 },
+      tokensUsedThisWeek: 360,
+      tokenQuota: 500,
+    });
+    // Under the quota, a request may overshoot it; the next one is refused.
+    expect((await owner.c.post(assist, body)).status).toBe(200);
+    const over = await owner.c.post(assist, body);
+    expect(over.status).toBe(429);
+    expect(over.body.error).toMatch(/credits/i);
+    // The week turns over: the credits refill.
+    instance.db.run("UPDATE ai_usage SET day = '2000-01-01'");
+    expect((await owner.c.post(assist, body)).status).toBe(200);
+  });
+
   it("refills the quota on a new UTC day", async () => {
     const { owner, instance, assist } = await world();
     const admin = await loggedIn(instance, {
@@ -544,8 +601,8 @@ describe("AI agent tools", () => {
     });
     expect(res.status).toBe(200);
     const seen = events(res.body);
-    expect(seen.map((e) => e.event)).toEqual(["tool", "delta", "done"]);
-    expect(seen[0]!.data).toEqual({
+    expect(seen.map((e) => e.event)).toEqual(["usage", "tool", "delta", "usage", "done"]);
+    expect(seen[1]!.data).toEqual({
       name: "read_file",
       args: { path: "book/index.md" },
     });
@@ -561,6 +618,41 @@ describe("AI agent tools", () => {
       (m) => m.role === "tool",
     )!;
     expect(String(toolMessage.content)).toContain("# Physics");
+  });
+
+  it("reads several files in one call and does not resend a file it already read", async () => {
+    const s = script([
+      {
+        toolCalls: [
+          {
+            name: "read_files",
+            args: { paths: ["book/a.md", "book/b.md", "book/a.md"] },
+          },
+        ],
+      },
+      { toolCalls: [{ name: "read_file", args: { path: "book/a.md" } }] },
+      { deltas: ["Done"] },
+    ]);
+    const { owner, provider, assist } = await world(
+      {},
+      (asked) => s.next(asked),
+      { "book/a.md": "Alpha text", "book/b.md": "Bravo text" },
+    );
+    const res = await owner.c.post(assist, {
+      action: "free",
+      prompt: "Compare a and b",
+      pagePath: "book/index.md",
+    });
+    expect(res.status).toBe(200);
+    const tools = (n: number) =>
+      provider.asked[n]!.messages.filter((m) => m.role === "tool").map((m) =>
+        String(m.content),
+      );
+    const batch = tools(1)[0]!;
+    expect(batch).toContain("=== book/a.md ===\nAlpha text");
+    expect(batch).toContain("=== book/b.md ===\nBravo text");
+    expect(batch.match(/Alpha text/g)).toHaveLength(1);
+    expect(tools(2)[1]).toMatch(/Already read/);
   });
 
   it("collects a write into a proposal, and the repository stays untouched", async () => {
@@ -646,7 +738,7 @@ describe("AI agent tools", () => {
       pagePath: "book/index.md",
     });
     const seen = events(res.body);
-    expect(seen.map((e) => e.event)).toEqual(["delta", "done"]);
+    expect(seen.map((e) => e.event)).toEqual(["delta", "usage", "done"]);
     expect(seen[0]!.data).toEqual({ text: "fallback" });
     // The retry asked without tools.
     expect(provider.asked).toHaveLength(2);

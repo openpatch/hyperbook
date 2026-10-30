@@ -208,6 +208,11 @@ export const de: Messages = {
       requests: "{{used}} von {{limit}} Anfragen heute",
       requestsTitle: "Heute verwendete Anfragen",
       requestsUnlimited: "{{used}} Anfragen heute",
+      credits: "Noch {{left}} von {{limit}} Credits",
+      creditsTitle:
+        "KI-Credits diese Woche: Tokens mal Gewicht des Modells. Sie werden am {{date}} erneuert.",
+      creditsUsed: "{{used}} Credits diese Woche verbraucht",
+      modelWeight: "{{model}} (×{{weight}})",
       promptPlaceholder: "Fragen Sie zu dieser Seite — oder markieren Sie zuerst Text…",
       ask: "Fragen",
       stop: "Stopp",
@@ -283,6 +288,8 @@ export const de: Messages = {
         "Eine Admin hat die KI-Unterstützung für Ihr Konto deaktiviert.",
       quota:
         "Ihre KI-Anfragen für heute sind aufgebraucht. Morgen stehen wieder neue zur Verfügung.",
+      tokenQuota:
+        "Ihre KI-Credits für diese Woche sind aufgebraucht. Am Montag stehen wieder neue zur Verfügung.",
       rateLimited:
         "Gerade zu viele KI-Anfragen. Versuchen Sie es in einer Minute erneut.",
       provider:

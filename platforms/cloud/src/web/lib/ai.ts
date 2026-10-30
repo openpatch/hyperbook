@@ -17,8 +17,15 @@ export type AiStatus = {
   /** Models the teacher may pick; `model` is the default (first). */
   models: string[];
   allowed: boolean;
+  /** Each model's cost weight for the token quota. */
+  modelWeights: Record<string, number>;
   usedToday: number;
   quota: number | null;
+  /** Weighted tokens ("credits") used in the current UTC week. */
+  tokensUsedThisWeek: number;
+  tokenQuota: number | null;
+  /** The Monday the weekly credits refill, "YYYY-MM-DD". */
+  tokensResetOn: string;
 };
 
 export function useAiStatus() {
@@ -34,6 +41,7 @@ export function useAiStatus() {
 export type AssistEvent =
   | { event: "delta"; text: string }
   | { event: "tool"; name: string; args: Record<string, unknown> }
+  | { event: "usage"; tokensUsedThisWeek: number; tokenQuota: number | null }
   | { event: "proposal"; changes: AiProposedChange[] }
   | { event: "done"; finish: "stop" | "length" | "error" }
   | { event: "error"; message: string; code: string };
@@ -95,6 +103,14 @@ export async function assist(
           onEvent({
             event: "proposal",
             changes: parsed.changes as AiProposedChange[],
+          });
+          break;
+        case "usage":
+          onEvent({
+            event: "usage",
+            tokensUsedThisWeek: Number(parsed.tokensUsedThisWeek),
+            tokenQuota:
+              parsed.tokenQuota === null ? null : Number(parsed.tokenQuota),
           });
           break;
         case "done":

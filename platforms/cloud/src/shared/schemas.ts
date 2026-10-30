@@ -94,6 +94,7 @@ export const entitlementOverridesInput = z
     custom_domain: z.boolean(),
     ai: z.boolean(),
     ai_requests_per_day: limit,
+    ai_tokens_per_week: z.number().int().min(0).max(1_000_000_000).nullable(),
   })
   .partial();
 

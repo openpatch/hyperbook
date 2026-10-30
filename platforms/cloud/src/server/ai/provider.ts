@@ -47,6 +47,7 @@ export class ProviderError extends Error {
 export type ProviderEvent =
   | { type: "delta"; text: string }
   | { type: "tool_calls"; calls: ProviderToolCall[] }
+  | { type: "usage"; promptTokens: number; completionTokens: number }
   | { type: "finish"; finish: "stop" | "length" | "tool_calls" };
 
 /**
@@ -97,6 +98,8 @@ export async function* streamChat(options: {
       messages: options.messages,
       max_tokens: options.maxOutputTokens,
       stream: true,
+      // The last chunk then carries the token counts the quota is built on.
+      stream_options: { include_usage: true },
       ...(options.tools
         ? {
             tools: options.tools.map((tool) => ({
@@ -146,6 +149,7 @@ export async function* streamChat(options: {
   let reasoning = "";
   let finish: "stop" | "length" | "tool_calls" | null = null;
   let done = false;
+  let usage: { promptTokens: number; completionTokens: number } | null = null;
   /** Events one SSE block produces, drained by the loop below. */
   const pending: ProviderEvent[] = [];
 
@@ -172,11 +176,22 @@ export async function* streamChat(options: {
           };
           finish_reason?: string | null;
         }[];
+        usage?: { prompt_tokens?: unknown; completion_tokens?: unknown } | null;
       };
       try {
         chunk = JSON.parse(data);
       } catch {
         continue; // A line that is not JSON — ignore it, keep streaming.
+      }
+      if (chunk.usage) {
+        const prompt = Number(chunk.usage.prompt_tokens);
+        const completion = Number(chunk.usage.completion_tokens);
+        if (Number.isFinite(prompt) || Number.isFinite(completion)) {
+          usage = {
+            promptTokens: Number.isFinite(prompt) ? prompt : 0,
+            completionTokens: Number.isFinite(completion) ? completion : 0,
+          };
+        }
       }
       const choice = chunk.choices?.[0];
       const text = deltaText(choice?.delta?.content);
@@ -215,7 +230,7 @@ export async function* streamChat(options: {
       buffer = buffer.slice(separator + 2);
       while (pending.length > 0) yield pending.shift()!;
       if (done) {
-        yield* complete(calls, finish, hasContent, reasoning);
+        yield* complete(calls, finish, hasContent, reasoning, usage);
         return;
       }
     }
@@ -226,7 +241,7 @@ export async function* streamChat(options: {
     handleEvent(buffer);
     while (pending.length > 0) yield pending.shift()!;
   }
-  yield* complete(calls, finish, hasContent, reasoning);
+  yield* complete(calls, finish, hasContent, reasoning, usage);
 }
 
 /** What a finished stream yields at its end. */
@@ -235,7 +250,9 @@ function* complete(
   finish: "stop" | "length" | "tool_calls" | null,
   hasContent: boolean,
   reasoning: string,
+  usage: { promptTokens: number; completionTokens: number } | null,
 ): Generator<ProviderEvent> {
+  if (usage) yield { type: "usage", ...usage };
   const complete = [...calls.values()].filter((call) => call.id && call.name);
   if (complete.length > 0) yield { type: "tool_calls", calls: complete };
   else if (!hasContent) {

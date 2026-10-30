@@ -9,7 +9,13 @@ import type {
   FileChange,
 } from "../../../shared/schemas";
 import { ConflictError } from "./workspace";
-import { assist, contextOf, selectionOf, useAiStatus } from "@/lib/ai";
+import {
+  assist,
+  contextOf,
+  selectionOf,
+  useAiStatus,
+  type AiStatus,
+} from "@/lib/ai";
 import { useQueryClient } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -106,6 +112,52 @@ export function AiPanel({
       </Badge>
     ) : null;
 
+  const credits =
+    status.data && status.data.enabled && status.data.allowed
+      ? status.data
+      : null;
+  const creditsBar =
+    credits && credits.tokenQuota !== null && credits.tokenQuota > 0 ? (
+      <div
+        className="w-full space-y-1"
+        title={t("editor.ai.creditsTitle", { date: credits.tokensResetOn })}
+      >
+        <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+          <div
+            className={
+              "h-full rounded-full " +
+              (credits.tokensUsedThisWeek / credits.tokenQuota >= 0.9
+                ? "bg-destructive"
+                : credits.tokensUsedThisWeek / credits.tokenQuota >= 0.75
+                  ? "bg-amber-500"
+                  : "bg-primary")
+            }
+            style={{
+              width: `${Math.min(100, (credits.tokensUsedThisWeek / credits.tokenQuota) * 100)}%`,
+            }}
+          />
+        </div>
+        <div className="text-xs text-muted-foreground">
+          {t("editor.ai.credits", {
+            left: Math.max(
+              0,
+              credits.tokenQuota - credits.tokensUsedThisWeek,
+            ).toLocaleString(),
+            limit: credits.tokenQuota.toLocaleString(),
+          })}
+        </div>
+      </div>
+    ) : credits ? (
+      <div
+        className="text-xs text-muted-foreground"
+        title={t("editor.ai.creditsTitle", { date: credits.tokensResetOn })}
+      >
+        {t("editor.ai.creditsUsed", {
+          used: credits.tokensUsedThisWeek.toLocaleString(),
+        })}
+      </div>
+    ) : null;
+
   /** Sends the teacher's request; the selection and the open page go along. */
   async function run(freePrompt: string) {
     const view = activePath ? getViewOf(activePath) : null;
@@ -172,6 +224,13 @@ export function AiPanel({
               setWorking(t("editor.ai.reading", { name: `${event.name}${path}` }));
               break;
             }
+            case "usage":
+              queryClient.setQueryData<AiStatus>(["ai-status"], (old) =>
+                old
+                  ? { ...old, tokensUsedThisWeek: event.tokensUsedThisWeek }
+                  : old,
+              );
+              break;
             case "done":
               ended.finish = event.finish;
               break;
@@ -340,7 +399,10 @@ export function AiPanel({
             <SelectContent>
               {status.data.models.map((name) => (
                 <SelectItem key={name} value={name}>
-                  {name}
+                  {t("editor.ai.modelWeight", {
+                    model: name,
+                    weight: status.data?.modelWeights[name] ?? 1,
+                  })}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -356,6 +418,7 @@ export function AiPanel({
       </div>
 
       {quotaBadge && <div className="-mt-0.5 flex items-center">{quotaBadge}</div>}
+      {creditsBar}
 
       <p className="text-xs text-muted-foreground">{t("editor.ai.hint")}</p>
 

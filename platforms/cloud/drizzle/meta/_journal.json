@@ -85,6 +85,13 @@
       "when": 1793368102570,
       "tag": "0011_neat_azazel",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "6",
+      "when": 1793389487623,
+      "tag": "0012_square_sentry",
+      "breakpoints": true
     }
   ]
 }

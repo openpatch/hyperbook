@@ -8,7 +8,14 @@ import { ProviderError } from "../../ai/provider";
 import type { Deps } from "../../deps";
 import { bookAccess } from "../../domain/books";
 import { getEntitlements } from "../../domain/entitlements";
-import { countRequest, usedToday } from "../../domain/ai-usage";
+import {
+  addTokens,
+  countRequest,
+  currentWeek,
+  modelWeight,
+  usedThisWeek,
+  usedToday,
+} from "../../domain/ai-usage";
 import { repoDir } from "../../hosting/storage";
 import { createT } from "../../i18n";
 import { aiAssistInput } from "../../../shared/schemas";
@@ -54,14 +61,24 @@ function rateLimiter(maxPerMinute: number) {
 export function aiRoutes({ config, db }: Deps) {
   return new Hono<AuthedEnv>().use(requireUser).get("/", (c) => {
     const user = c.get("user");
-    const { ai, ai_requests_per_day } = getEntitlements(db, user);
+    const { ai, ai_requests_per_day, ai_tokens_per_week } = getEntitlements(
+      db,
+      user,
+    );
+    const weights = config.ai?.modelWeights ?? {};
     return c.json({
       enabled: config.ai !== null,
       model: config.ai?.model ?? null,
       models: config.ai?.models ?? [],
+      modelWeights: Object.fromEntries(
+        (config.ai?.models ?? []).map((m) => [m, modelWeight(weights, m)]),
+      ),
       allowed: ai,
       usedToday: usedToday(db, user.id),
       quota: ai_requests_per_day,
+      tokensUsedThisWeek: usedThisWeek(db, user.id),
+      tokenQuota: ai_tokens_per_week,
+      tokensResetOn: currentWeek().resets,
     });
   });
 }
@@ -97,15 +114,19 @@ export function bookAiRoutes({ db, config }: Deps) {
       }
       // The entitlements decide whether this teacher may use the assistant
       // at all, and how many requests a UTC day buys them.
-      const { ai: allowed, ai_requests_per_day: quota } = getEntitlements(
-        db,
-        user,
-      );
+      const {
+        ai: allowed,
+        ai_requests_per_day: quota,
+        ai_tokens_per_week: tokenQuota,
+      } = getEntitlements(db, user);
       if (!allowed) {
         throw new HTTPException(403, { message: t("errors.ai.disabled") });
       }
       if (quota !== null && usedToday(db, user.id) >= quota) {
         throw new HTTPException(429, { message: t("errors.ai.quota") });
+      }
+      if (tokenQuota !== null && usedThisWeek(db, user.id) >= tokenQuota) {
+        throw new HTTPException(429, { message: t("errors.ai.tokenQuota") });
       }
       if (!allow(user.id)) {
         throw new HTTPException(429, { message: t("errors.ai.rateLimited") });
@@ -126,6 +147,9 @@ export function bookAiRoutes({ db, config }: Deps) {
         let finish = "error";
         let steps = 0;
         let proposedChanges = 0;
+        let tokensIn = 0;
+        let tokensOut = 0;
+        const weight = modelWeight(ai.modelWeights, model);
         try {
           for await (const event of runAssistant(
             { ai: { ...ai, model }, repo },
@@ -137,6 +161,22 @@ export function bookAiRoutes({ db, config }: Deps) {
             } else if (event.type === "tool") {
               steps += 1;
               await send("tool", { name: event.name, args: event.args });
+            } else if (event.type === "usage") {
+              tokensIn += event.promptTokens;
+              tokensOut += event.completionTokens;
+              // Written as it happens, so an abort or failure later on
+              // still costs what the provider already spent.
+              const week = addTokens(
+                db,
+                user.id,
+                event.promptTokens,
+                event.completionTokens,
+                weight,
+              );
+              await send("usage", {
+                tokensUsedThisWeek: week,
+                tokenQuota,
+              });
             } else if (event.type === "proposal") {
               proposedChanges = event.changes.length;
               await send("proposal", { changes: event.changes });
@@ -173,7 +213,10 @@ export function bookAiRoutes({ db, config }: Deps) {
             data: {
               action: input.action,
               page: input.pagePath,
-              model: ai.model,
+              model,
+              tokensIn,
+              tokensOut,
+              weight,
               steps,
               proposedChanges,
               finish,

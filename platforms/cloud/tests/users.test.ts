@@ -150,6 +150,7 @@ describe("entitlements", () => {
       custom_domain: false,
       ai: true,
       ai_requests_per_day: null,
+      ai_tokens_per_week: null,
     });
 
     await admin.c.put("/api/instance", { defaultEntitlements: { max_books: 5 } });

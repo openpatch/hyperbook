@@ -24,6 +24,7 @@ export const BUILTIN_ENTITLEMENTS: Entitlements = {
   custom_domain: false,
   ai: true,
   ai_requests_per_day: null,
+  ai_tokens_per_week: null,
 };
 
 const generalSchema = instanceSettingsInput

@@ -211,6 +211,11 @@ export const en = {
       requests: "{{used}} of {{limit}} requests today",
       requestsTitle: "Requests used today",
       requestsUnlimited: "{{used}} requests today",
+      credits: "{{left}} of {{limit}} credits left",
+      creditsTitle:
+        "AI credits this week: tokens times the model's weight. They refill on {{date}}.",
+      creditsUsed: "{{used}} credits used this week",
+      modelWeight: "{{model}} (×{{weight}})",
       promptPlaceholder: "Ask about this page — or select text first…",
       ask: "Ask",
       stop: "Stop",
@@ -281,6 +286,8 @@ export const en = {
         "AI assistance is not configured on this instance. Ask an admin to set it up.",
       disabled: "An admin has disabled AI assistance for your account.",
       quota: "Your AI requests for today are used up. They refill tomorrow.",
+      tokenQuota:
+        "Your AI credits for this week are used up. They refill on Monday.",
       rateLimited: "Too many AI requests right now. Try again in a minute.",
       provider: "The AI provider did not answer. Try again.",
     },

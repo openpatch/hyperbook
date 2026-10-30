@@ -110,7 +110,26 @@ describe("loadConfig", () => {
       maxOutputTokens: 2048,
       maxSteps: 8,
       requestsPerMinute: 3,
+      modelWeights: {},
     });
+  });
+
+  it("parses AI_MODEL_WEIGHTS and rejects bad ones", () => {
+    const base = {
+      ...production,
+      AI_BASE_URL: "https://api.mistral.ai/v1",
+      AI_API_KEY: "key",
+      AI_MODEL: "small",
+      AI_MODELS: "big",
+    };
+    expect(
+      loadConfig({ ...base, AI_MODEL_WEIGHTS: "big=3, small=0.5" }).ai
+        ?.modelWeights,
+    ).toEqual({ big: 3, small: 0.5 });
+    expect(() => loadConfig({ ...base, AI_MODEL_WEIGHTS: "big=0" })).toThrow();
+    expect(() =>
+      loadConfig({ ...base, AI_MODEL_WEIGHTS: "unknown=2" }),
+    ).toThrow();
   });
 
   it("parses AI_MODELS into the selectable list, default first, without duplicates", () => {

@@ -17,6 +17,7 @@ export type Entitlements = {
   custom_domain: boolean;
   ai: boolean;
   ai_requests_per_day: number | null;
+  ai_tokens_per_week: number | null;
 };
 export type Overrides = Partial<Entitlements>;
 
@@ -51,6 +52,12 @@ const LIMITS = [
     label: "AI requests",
     unit: "/ day",
     hint: "How many AI requests the user may make per day.",
+  },
+  {
+    key: "ai_tokens_per_week",
+    label: "AI credits",
+    unit: "/ week",
+    hint: "AI tokens per week, counted times the model's weight (AI_MODEL_WEIGHTS); the week starts on Monday (UTC).",
   },
 ] as const;
 
