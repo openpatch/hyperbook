@@ -16,6 +16,11 @@ jobs:
         with:
           node-version: 24
           cache: "pnpm"
+      - name: Guard test-safety rules
+        # No rm -r with unquoted globs in scripts; no hard-coded ports or the
+        # real database.sqlite in platforms/cloud e2e files. Dependency-free,
+        # so it runs before install. See platforms/cloud/AGENTS.md.
+        run: node scripts/guard-test-safety.mjs
       - name: Install dependencies
         run: pnpm install
       - name: Build packages
