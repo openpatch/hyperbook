@@ -400,7 +400,7 @@ export function AiPanel({
               {status.data.models.map((name) => (
                 <SelectItem key={name} value={name}>
                   {t("editor.ai.modelWeight", {
-                    model: name,
+                    model: status.data?.modelLabels[name] || name,
                     weight: status.data?.modelWeights[name] ?? 1,
                   })}
                 </SelectItem>
@@ -410,7 +410,7 @@ export function AiPanel({
           ) : (
             status.data?.model && (
               <span className="truncate text-xs text-muted-foreground">
-                {t("editor.ai.model", { model: status.data.model })}
+                {t("editor.ai.model", { model: status.data.modelLabels[status.data.model] || status.data.model })}
               </span>
             )
           )}

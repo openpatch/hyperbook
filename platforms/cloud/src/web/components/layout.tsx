@@ -76,6 +76,7 @@ export function Layout() {
               {user.role === "admin" && (
                 <>
                   <NavItem to="/users">{t("nav.users")}</NavItem>
+                  <NavItem to="/ai-monitor">{t("nav.aiMonitor")}</NavItem>
                   {instance?.slugSuffix && <NavItem to="/addresses">{t("nav.addresses")}</NavItem>}
                   <NavItem to="/instance">{t("nav.settings")}</NavItem>
                   <NavItem to="/audit">{t("nav.activity")}</NavItem>

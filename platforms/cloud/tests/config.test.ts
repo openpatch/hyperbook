@@ -108,7 +108,7 @@ describe("loadConfig", () => {
       models: ["mistral-medium-latest"],
       timeoutMs: 120_000,
       maxOutputTokens: 2048,
-      maxSteps: 8,
+      maxSteps: 6,
       requestsPerMinute: 3,
       modelWeights: {},
     });

@@ -70,6 +70,23 @@ export const instanceSettingsSchema = z.object({
    */
   gitPushUpdatesPreview: z.boolean(),
 });
+  /**
+   * The AI assistant's models and what each costs the token quota (its
+   * weight). Empty: the AI_MODEL, AI_MODELS and AI_MODEL_WEIGHTS of the
+   * environment apply. The provider and its key stay in the environment.
+   */
+  aiModels: z
+    .array(
+      z.object({
+        id: z.string().trim().min(1).max(200),
+        weight: z.number().positive().max(1000),
+        /** The name teachers see in the editor (e.g. "Fast"); empty: the model id. */
+        label: z.string().trim().max(60).optional(),
+      }),
+    )
+    .max(50),
+  /** One of `aiModels`; null: the first. */
+  aiDefaultModel: z.string().nullable(),
 
 export type InstanceSettings = z.infer<typeof instanceSettingsSchema>;
 
@@ -89,6 +106,8 @@ export const DEFAULT_INSTANCE_SETTINGS: InstanceSettings = {
   elementRuntimes: {},
   gitPushUpdatesPreview: false,
 };
+  aiModels: [],
+  aiDefaultModel: null,
 
 /** The elements whose runtimes load from their public CDN instead of this instance. */
 export function cdnElements(settings: InstanceSettings): string[] {
@@ -116,6 +135,25 @@ export function emailInDomains(email: string, domains: string[]) {
 }
 
 export function getInstanceSettings(db: Db): InstanceSettings {
+/**
+ * The AI configuration in effect: the environment's provider, with the
+ * models, default and weights an admin chose in the settings when there are
+ * any. Null when AI is not configured at all.
+ */
+export function effectiveAi(config: Config, settings: InstanceSettings): Config["ai"] {
+  const ai = config.ai;
+  if (!ai || settings.aiModels.length === 0) return ai;
+  const models = settings.aiModels.map((m) => m.id);
+  const model = settings.aiDefaultModel && models.includes(settings.aiDefaultModel) ? settings.aiDefaultModel : models[0]!;
+  return {
+    ...ai,
+    model,
+    models: [model, ...models.filter((m) => m !== model)],
+    modelWeights: Object.fromEntries(settings.aiModels.map((m) => [m.id, m.weight])),
+    modelLabels: Object.fromEntries(settings.aiModels.filter((m) => m.label).map((m) => [m.id, m.label!])),
+  };
+}
+
   const rows = db.select().from(instanceSettings).all();
   const settings: Record<string, unknown> = { ...DEFAULT_INSTANCE_SETTINGS };
   for (const row of rows) {

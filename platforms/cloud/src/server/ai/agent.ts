@@ -37,12 +37,18 @@ export type AssistantEvent =
   | { type: "done"; finish: "stop" | "length" };
 
 /** The part of the file tree the baseline context mentions. */
-const TREE_LIMIT = 400;
+const TREE_LIMIT = 100;
+/** A page up to this size goes into the prompt whole; a bigger one as an excerpt. */
+const PAGE_INLINE_MAX = 8 * 1024;
+/** Read results older than this many tool rounds are replaced by a stub. */
+const KEEP_ROUNDS = 2;
+/** Only results bigger than this are worth replacing. */
+const PRUNE_MIN = 2 * 1024;
 
 /** Per read_file call. */
 const READ_MAX = 32 * 1024;
 /** Per request. */
-const READ_BUDGET = 256 * 1024;
+const READ_BUDGET = 128 * 1024;
 /** Per write_file call. */
 const WRITE_MAX = 32 * 1024;
 /** Per request, across all writes. */
@@ -248,7 +254,11 @@ class Tools {
     private readonly repo: string,
     private readonly book: Book,
     private readonly input: AiAssistInput,
-  ) {}
+  ) {
+    // A page small enough to be in the prompt is not sent a second time.
+    if (input.pageText !== undefined && input.pageText.length <= PAGE_INLINE_MAX)
+      this.seen.add(`file:${input.pagePath}`);
+  }
 
   /** The committed text of a file, when it is small enough to diff against. */
   private async committedText(path: string): Promise<string | null> {
@@ -281,6 +291,11 @@ class Tools {
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([path, size]) => `- ${path} (${size} bytes)`);
     return lines.length > 0 ? lines.join("\n") : "(the book has no files yet)";
+  }
+
+  /** Lets a file or doc whose result left the history be read again. */
+  forget(key: string): void {
+    this.seen.delete(key);
   }
 
   /** Answers once per request: a second ask points back at the history. */
@@ -479,13 +494,25 @@ function buildMessages(book: Book, input: AiAssistInput): ChatMessage[] {
         ? files.map((f) => `- ${f.path} (${f.size} bytes)`)
         : ["- (the book has no files yet)"]),
       ...(book.tree.size > files.length
-        ? [`- … and ${book.tree.size - files.length} more`]
+        ? [
+            `- … and ${book.tree.size - files.length} more; call \`list_files\` for all of them`,
+          ]
         : []),
     ].join("\n"),
   );
 
   const page: string[] = [`## The page: ${input.pagePath}`];
-  if (input.pageText !== undefined) {
+  const inline =
+    input.pageText !== undefined && input.pageText.length <= PAGE_INLINE_MAX;
+  if (input.pageText !== undefined && !inline) {
+    // A big page is not resent with every step; the model reads it on demand.
+    page.push(
+      "",
+      `The page is ${input.pageText.length} bytes, too long to include here. Call \`read_file\` with its path when you need the full text.`,
+    );
+    if (input.context)
+      page.push("", "### Its text around the cursor", "", input.context);
+  } else if (input.pageText !== undefined) {
     page.push(
       "",
       "### Its full text, as the editor has it now",
@@ -534,7 +561,11 @@ export async function* runAssistant(
   let step = 0;
   let finish: "stop" | "length" = "stop";
 
+  // Big read results of earlier rounds, which pruneReads() may drop.
+  const rounds: PrunableRead[][] = [];
+
   while (step < options.ai.maxSteps) {
+    pruneReads(messages, rounds, tools);
     let pending: ProviderToolCall[] = [];
     let reported = false;
     let produced = 0;
@@ -599,6 +630,8 @@ export async function* runAssistant(
         function: { name: call.name, arguments: call.args },
       })),
     });
+    const round: PrunableRead[] = [];
+    rounds.push(round);
     for (const call of pending) {
       let args: Record<string, unknown> = {};
       try {
@@ -607,17 +640,61 @@ export async function* runAssistant(
         // A call without JSON arguments: the tool reports what it needs.
       }
       yield { type: "tool", name: call.name, args };
-      messages.push({
-        role: "tool",
-        tool_call_id: call.id,
-        content: await answer(tools, call, args),
-      });
+      const content = await answer(tools, call, args);
+      const keys = readKeys(call.name, args);
+      if (keys.length > 0 && content.length > PRUNE_MIN) {
+        round.push({
+          index: messages.length,
+          id: call.id,
+          name: call.name,
+          keys,
+        });
+      }
+      messages.push({ role: "tool", tool_call_id: call.id, content });
     }
   }
 
   const changes = await tools.proposal();
   if (changes.length > 0) yield { type: "proposal", changes };
   yield { type: "done", finish };
+}
+
+type PrunableRead = { index: number; id: string; name: string; keys: string[] };
+
+/** The files or docs a read call hands over, as `Tools` remembers them. */
+function readKeys(name: string, args: Record<string, unknown>): string[] {
+  if (name === "read_file" && typeof args.path === "string")
+    return [`file:${args.path}`];
+  if (name === "read_files" && Array.isArray(args.paths))
+    return args.paths
+      .filter((p): p is string => typeof p === "string")
+      .map((p) => `file:${p}`);
+  if (name === "read_docs" && typeof args.name === "string")
+    return [`docs:${args.name}`];
+  return [];
+}
+
+/**
+ * Every step resends the whole history, so a 30 KB file read in step 1 is
+ * paid for again in each later step. Reads older than KEEP_ROUNDS tool rounds
+ * are replaced by a stub, and may be read again if the model still needs them.
+ */
+function pruneReads(
+  messages: ChatMessage[],
+  rounds: PrunableRead[][],
+  tools: Tools,
+): void {
+  for (const round of rounds.splice(0, Math.max(0, rounds.length - KEEP_ROUNDS))) {
+    for (const read of round) {
+      const what = read.keys.map((k) => k.slice(k.indexOf(":") + 1)).join(", ");
+      messages[read.index] = {
+        role: "tool",
+        tool_call_id: read.id,
+        content: `(The result of ${read.name} for ${what} was dropped to save tokens. Call it again if you still need it.)`,
+      };
+      for (const key of read.keys) tools.forget(key);
+    }
+  }
 }
 
 /** Answers one tool call; changing tools record onto the overlay. */

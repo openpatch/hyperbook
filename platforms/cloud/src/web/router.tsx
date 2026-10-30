@@ -4,6 +4,7 @@ import { Layout } from "./components/layout";
 import { RequireAdmin, RequireAuth } from "./lib/session";
 import { AccountPage } from "./pages/account";
 import { AddressesPage } from "./pages/addresses";
+import { AiMonitorPage } from "./pages/ai-monitor";
 import { AuditPage } from "./pages/audit";
 import { BookPage } from "./pages/book";
 import { ForgotPasswordPage } from "./pages/forgot-password";
@@ -57,6 +58,7 @@ export const router = createBrowserRouter([
               { path: "users/:id", element: <UserPage /> },
               { path: "addresses", element: <AddressesPage /> },
               { path: "instance", element: <InstancePage /> },
+              { path: "ai-monitor", element: <AiMonitorPage /> },
               { path: "audit", element: <AuditPage /> },
             ],
           },

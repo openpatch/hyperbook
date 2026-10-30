@@ -17,6 +17,8 @@ export type AiStatus = {
   /** Models the teacher may pick; `model` is the default (first). */
   models: string[];
   allowed: boolean;
+  /** Names an admin gave models ("Fast"); a model without one shows its id. */
+  modelLabels: Record<string, string>;
   /** Each model's cost weight for the token quota. */
   modelWeights: Record<string, number>;
   usedToday: number;

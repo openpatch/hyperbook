@@ -232,6 +232,20 @@ function InstanceForms({
       />
       <Section
         title={t("instanceSettings.entitlements")}
+      {settings.ai.configured && (
+        <AiModelsSection
+          key={JSON.stringify(settings.ai)}
+          models={settings.ai.models}
+          defaultModel={settings.ai.defaultModel ?? ""}
+          onSave={async (aiModels, aiDefaultModel) => {
+            try {
+              await save({ aiModels, aiDefaultModel });
+            } catch (error) {
+              toast.error(error instanceof Error ? error.message : t("common.savingFailed"));
+            }
+          }}
+        />
+      )}
         description={t("instanceSettings.entitlementsDescription")}
       >
         <EntitlementsEditor
@@ -253,6 +267,107 @@ function InstanceForms({
 }
 
 const loadSettings = () => unwrap(api.instance.$get());
+
+/** The assistant's models: the default, and what each costs the token quota. */
+function AiModelsSection({
+  models: saved,
+  defaultModel: savedDefault,
+  onSave,
+}: {
+  models: { id: string; weight: number; label?: string }[];
+  defaultModel: string;
+  onSave: (models: { id: string; weight: number; label?: string }[], defaultModel: string) => Promise<void>;
+}) {
+  const { t } = useTranslation();
+  const [rows, setRows] = useState(saved.map((m) => ({ id: m.id, label: m.label ?? "", weight: String(m.weight) })));
+  const [defaultModel, setDefaultModel] = useState(savedDefault);
+  const [busy, setBusy] = useState(false);
+  const update = (index: number, change: Partial<{ id: string; label: string; weight: string }>) =>
+    setRows((current) => current.map((row, i) => (i === index ? { ...row, ...change } : row)));
+  const models = rows.map((r) => ({ id: r.id.trim(), weight: Number(r.weight), label: r.label.trim() }));
+  const invalid =
+    models.length === 0 ||
+    models.some((m) => !m.id || !(m.weight > 0)) ||
+    new Set(models.map((m) => m.id)).size !== models.length;
+  return (
+    <Section title={t("instanceSettings.aiModels")} description={t("instanceSettings.aiModelsDescription")}>
+      <div className="grid max-w-2xl gap-3">
+        <div className="grid grid-cols-[1fr_1fr_6rem_5rem_2.25rem] items-center gap-2 text-sm text-muted-foreground">
+          <span>{t("instanceSettings.aiModelName")}</span>
+          <span>{t("instanceSettings.aiModelLabel")}</span>
+          <span>{t("instanceSettings.aiModelWeight")}</span>
+          <span>{t("instanceSettings.aiModelDefault")}</span>
+          <span />
+        </div>
+        {rows.map((row, index) => (
+          <div key={index} className="grid grid-cols-[1fr_1fr_6rem_5rem_2.25rem] items-center gap-2">
+            <Input
+              value={row.id}
+              aria-label={t("instanceSettings.aiModelName")}
+              onChange={(e) => {
+                if (defaultModel === row.id) setDefaultModel(e.target.value.trim());
+                update(index, { id: e.target.value });
+              }}
+            />
+            <Input
+              value={row.label}
+              maxLength={60}
+              placeholder={row.id.trim()}
+              aria-label={t("instanceSettings.aiModelLabel")}
+              onChange={(e) => update(index, { label: e.target.value })}
+            />
+            <Input
+              type="number"
+              min="0"
+              step="any"
+              value={row.weight}
+              aria-label={t("instanceSettings.aiModelWeight")}
+              onChange={(e) => update(index, { weight: e.target.value })}
+            />
+            <input
+              type="radio"
+              name="ai-default-model"
+              className="size-4 justify-self-start"
+              checked={defaultModel === row.id.trim()}
+              aria-label={t("instanceSettings.aiModelDefault")}
+              onChange={() => setDefaultModel(row.id.trim())}
+            />
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label={t("common.delete")}
+              disabled={rows.length === 1}
+              onClick={() => setRows((current) => current.filter((_, i) => i !== index))}
+            >
+              <Trash2Icon />
+            </Button>
+          </div>
+        ))}
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" onClick={() => setRows((current) => [...current, { id: "", label: "", weight: "1" }])}>
+            <PlusIcon /> {t("instanceSettings.aiModelAdd")}
+          </Button>
+        </div>
+        <p className="text-sm text-muted-foreground">{t("instanceSettings.aiModelsHint")}</p>
+        <div>
+          <Button
+            disabled={busy || invalid}
+            onClick={async () => {
+              setBusy(true);
+              try {
+                await onSave(models, models.some((m) => m.id === defaultModel) ? defaultModel : models[0]!.id);
+              } finally {
+                setBusy(false);
+              }
+            }}
+          >
+            {t("common.save")}
+          </Button>
+        </div>
+      </div>
+    </Section>
+  );
+}
 
 type SignupMode = "closed" | "open" | "domains" | "approval";
 

@@ -198,6 +198,7 @@ describe("AI status", () => {
       enabled: false,
       model: null,
       models: [],
+      modelLabels: {},
       modelWeights: {},
       allowed: true,
       usedToday: 0,
@@ -214,6 +215,7 @@ describe("AI status", () => {
       enabled: true,
       model: "mistral-test",
       models: ["mistral-test"],
+      modelLabels: {},
       modelWeights: { "mistral-test": 1 },
       allowed: true,
       usedToday: 0,
@@ -491,6 +493,68 @@ describe("AI assist", () => {
     expect((await owner.c.post(assist, body)).status).toBe(200);
   });
 
+  it("lets an admin choose the models, default and weights in the settings", async () => {
+    const { owner, instance } = await world({ AI_MODELS: "mistral-big" });
+    const admin = await loggedIn(instance, { email: "admin@example.org", role: "admin" });
+    // Until something is saved, the environment's models show.
+    expect((await admin.c.get("/api/instance")).body.ai).toEqual({
+      configured: true,
+      defaultModel: "mistral-test",
+      models: [
+        { id: "mistral-test", weight: 1, label: "" },
+        { id: "mistral-big", weight: 1, label: "" },
+      ],
+    });
+
+    const bad = await admin.c.put("/api/instance", {
+      aiModels: [{ id: "a", weight: 1 }],
+      aiDefaultModel: "b",
+    });
+    expect(bad.status).toBe(400);
+
+    const ok = await admin.c.put("/api/instance", {
+      aiModels: [
+        { id: "mistral-large-4", weight: 1 },
+        { id: "zai-glm-5-3-flash", weight: 0.22 },
+      ],
+      aiDefaultModel: "zai-glm-5-3-flash",
+    });
+    expect(ok.status).toBe(200);
+    expect(await owner.c.get("/api/ai")).toMatchObject({
+      body: {
+        model: "zai-glm-5-3-flash",
+        models: ["zai-glm-5-3-flash", "mistral-large-4"],
+        modelWeights: { "mistral-large-4": 1, "zai-glm-5-3-flash": 0.22 },
+      },
+    });
+  });
+
+  it("shows an admin's alias for a model and monitors the usage", async () => {
+    const { owner, other, instance, assist } = await world();
+    const admin = await loggedIn(instance, { email: "admin@example.org", role: "admin" });
+    expect(
+      (
+        await admin.c.put("/api/instance", {
+          aiModels: [{ id: "mistral-test", weight: 1, label: "Fast" }],
+        })
+      ).status,
+    ).toBe(200);
+    expect((await owner.c.get("/api/ai")).body.modelLabels).toEqual({ "mistral-test": "Fast" });
+    expect((await admin.c.get("/api/instance")).body.ai.models).toEqual([
+      { id: "mistral-test", weight: 1, label: "Fast" },
+    ]);
+
+    await owner.c.post(assist, { action: "free", prompt: "hi", pagePath: "book/index.md" });
+    const monitor = (await admin.c.get("/api/ai-monitor?days=7")).body;
+    expect(monitor.total.requests).toBe(1);
+    expect(monitor.byModel).toMatchObject([{ model: "mistral-test", requests: 1 }]);
+    expect(monitor.byUser).toMatchObject([{ email: "o@example.org", requests: 1 }]);
+    const filtered = (await admin.c.get(`/api/ai-monitor?userId=${owner.user.id}`)).body;
+    expect(filtered.total.requests).toBe(1);
+    expect((await admin.c.get(`/api/ai-monitor?userId=${other.user.id}`)).body.total.requests).toBe(0);
+    expect((await owner.c.get("/api/ai-monitor")).status).toBe(403);
+  });
+
   it("refills the quota on a new UTC day", async () => {
     const { owner, instance, assist } = await world();
     const admin = await loggedIn(instance, {
@@ -579,6 +643,27 @@ describe("AI assist", () => {
 
 describe("AI agent tools", () => {
   const script = (answers: Answer[]) => new Script(answers);
+
+  it("drops big read results from the history after two more rounds", async () => {
+    const big = "x".repeat(5000);
+    const reads = ["book/a.md", "book/b.md", "book/c.md", "book/d.md"].map((path) => ({
+      toolCalls: [{ name: "read_file", args: { path } }],
+    }));
+    const s = script([...reads, { deltas: ["done"] }]);
+    const { owner, provider, assist } = await world({ AI_MAX_STEPS: "8" }, (asked) => s.next(asked), {
+      "book/a.md": big,
+      "book/b.md": big,
+      "book/c.md": big,
+      "book/d.md": big,
+    });
+    await owner.c.post(assist, { action: "free", prompt: "read all", pagePath: "book/index.md" });
+    const last = provider.asked.at(-1)!.messages.filter((m) => m.role === "tool").map((m) => String(m.content));
+    expect(last).toHaveLength(4);
+    expect(last[0]).toContain("dropped to save tokens");
+    expect(last[1]).toContain("dropped to save tokens");
+    expect(last[2]).toBe(big);
+    expect(last[3]).toBe(big);
+  });
 
   it("lets the model read a file, and passes the result back to it", async () => {
     const answers = [

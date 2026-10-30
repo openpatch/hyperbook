@@ -163,6 +163,17 @@ export const instanceSettingsInput = z
 
 /** An optional note on a publish, stored on the build row (shown in the builds table). */
 export const publishInput = z
+    aiModels: z
+      .array(
+        z.object({
+          id: z.string().trim().min(1, "Enter a model name").max(200),
+          weight: z.number("Enter a number").positive("The weight must be above 0").max(1000),
+          label: z.string().trim().max(60).optional(),
+        }),
+      )
+      .max(50)
+      .refine((models) => new Set(models.map((m) => m.id)).size === models.length, "Each model may be listed once"),
+    aiDefaultModel: z.string().nullable(),
   .object({
     note: z.string().trim().max(200, "At most 200 characters").default(""),
   })

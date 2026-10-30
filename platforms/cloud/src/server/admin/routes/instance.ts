@@ -3,7 +3,8 @@ import { instanceSettingsInput } from "../../../shared/schemas";
 import { audit } from "../../audit";
 import type { Deps } from "../../deps";
 import { HTTPException } from "hono/http-exception";
-import { effectiveSignupMode, getInstanceSettings, legalHref, updateInstanceSettings } from "../../domain/instance";
+import { modelWeight } from "../../domain/ai-usage";
+import { effectiveAi, effectiveSignupMode, getInstanceSettings, legalHref, updateInstanceSettings } from "../../domain/instance";
 import { renderLegalMarkdown } from "../../domain/legal";
 import type { AdminEnv, AuthedEnv } from "../env";
 import { requireAdmin } from "../middleware";
@@ -43,7 +44,26 @@ export function publicInstanceRoutes({ db, config, mailer }: Deps) {
     });
 }
 
-export function instanceRoutes({ db, mailer }: Deps) {
+/** The settings, plus the AI models in effect (the environment's when none are saved). */
+function settingsView(deps: Deps) {
+  const settings = getInstanceSettings(deps.db);
+  const ai = effectiveAi(deps.config, settings);
+  return {
+    ...settings,
+    ai: {
+      configured: ai !== null,
+      defaultModel: ai?.model ?? null,
+      models: (ai?.models ?? []).map((id) => ({
+        id,
+        weight: modelWeight(ai?.modelWeights ?? {}, id),
+        label: ai?.modelLabels?.[id] ?? "",
+      })),
+    },
+  };
+}
+
+export function instanceRoutes(deps: Deps) {
+  const { db, mailer } = deps;
   return new Hono<AuthedEnv>()
     .use(requireAdmin)
     .get("/", (c) => c.json(getInstanceSettings(db)))
@@ -59,6 +79,9 @@ export function instanceRoutes({ db, mailer }: Deps) {
         throw new HTTPException(400, {
           message: "Sign-up asks people to accept the privacy policy. Add one (a link or your own text) first.",
         });
+      }
+      if (after.aiDefaultModel && after.aiModels.length > 0 && !after.aiModels.some((m) => m.id === after.aiDefaultModel)) {
+        throw new HTTPException(400, { message: "The default model must be one of the models" });
       }
       updateInstanceSettings(db, changes);
       audit(db, {

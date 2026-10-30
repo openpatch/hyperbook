@@ -10,6 +10,7 @@ import type { AdminEnv } from "./env";
 import { requestLocale, createT } from "../i18n";
 import { localeMiddleware, originCheck, sessionMiddleware } from "./middleware";
 import { aiRoutes, bookAiRoutes } from "./routes/ai";
+import { aiMonitorRoutes } from "./routes/ai-monitor";
 import { auditRoutes } from "./routes/audit";
 import { authRoutes } from "./routes/auth";
 import { bookRoutes } from "./routes/books";
@@ -42,6 +43,7 @@ export function createAdminApi(deps: Deps) {
     .route("/books", bookFileRoutes(deps))
     .route("/books", bookDictionaryRoutes(deps))
     .route("/books", bookAiRoutes(deps))
+    .route("/ai-monitor", aiMonitorRoutes(deps))
     .route("/ai", aiRoutes(deps))
     .route("/books", bookSlugRequestRoutes(deps))
     .route("/slug-requests", slugRequestRoutes(deps))

@@ -70,6 +70,8 @@ export type Config = {
     requestsPerMinute: number;
     /** Cost weight per model for the token quota; a model not listed weighs 1. */
     modelWeights: Record<string, number>;
+    /** Display names an admin gave models ("Fast"); a model not listed shows its id. */
+    modelLabels?: Record<string, string>;
   } | null;
 };
 
@@ -148,7 +150,7 @@ const schema = z.object({
   AI_MODEL_WEIGHTS: optional,
   AI_TIMEOUT_SECONDS: z.coerce.number().int().min(10).default(120),
   AI_MAX_OUTPUT_TOKENS: z.coerce.number().int().min(64).default(2048),
-  AI_MAX_STEPS: z.coerce.number().int().min(1).max(32).default(8),
+  AI_MAX_STEPS: z.coerce.number().int().min(1).max(32).default(6),
   AI_REQUESTS_PER_MINUTE: z.coerce.number().int().min(1).default(6),
 });
 

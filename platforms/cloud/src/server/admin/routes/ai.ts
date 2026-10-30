@@ -65,13 +65,15 @@ export function aiRoutes({ config, db }: Deps) {
       db,
       user,
     );
-    const weights = config.ai?.modelWeights ?? {};
+    const ai = effectiveAi(config, getInstanceSettings(db));
+    const weights = ai?.modelWeights ?? {};
     return c.json({
-      enabled: config.ai !== null,
-      model: config.ai?.model ?? null,
-      models: config.ai?.models ?? [],
+      enabled: ai !== null,
+      model: ai?.model ?? null,
+      models: ai?.models ?? [],
+      modelLabels: ai?.modelLabels ?? {},
       modelWeights: Object.fromEntries(
-        (config.ai?.models ?? []).map((m) => [m, modelWeight(weights, m)]),
+        (ai?.models ?? []).map((m) => [m, modelWeight(weights, m)]),
       ),
       allowed: ai,
       usedToday: usedToday(db, user.id),

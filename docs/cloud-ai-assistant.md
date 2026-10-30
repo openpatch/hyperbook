@@ -69,7 +69,7 @@ ai: {
   model: string;         // AI_MODEL
   timeoutMs: number;     // AI_TIMEOUT_SECONDS, default 120
   maxOutputTokens: number; // AI_MAX_OUTPUT_TOKENS, default 2048
-  maxSteps: number;      // AI_MAX_STEPS (agent loop), default 8
+  maxSteps: number;      // AI_MAX_STEPS (agent loop), default 6
   requestsPerMinute: number; // AI_REQUESTS_PER_MINUTE, default 6
   modelWeights: Record<string, number>; // AI_MODEL_WEIGHTS="model=weight,…", default 1 per model
 } | null
