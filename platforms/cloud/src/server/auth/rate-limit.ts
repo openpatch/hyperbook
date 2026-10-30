@@ -2,6 +2,9 @@
  * Counts failed logins per key (the email address) in memory. One process
  * serves the whole instance, so memory is enough. Keyed by account rather than
  * IP because behind a reverse proxy every request has the proxy's address.
+ *
+ * Keys can be attacker-chosen (e.g. a password hash), so the map is bounded:
+ * expired entries are swept on insert, and past that the oldest entry goes.
  */
 export class FailureLimiter {
   private failures = new Map<string, { count: number; resetAt: number }>();
@@ -9,6 +12,7 @@ export class FailureLimiter {
   constructor(
     private readonly max = 10,
     private readonly windowMs = 15 * 60 * 1000,
+    private readonly maxKeys = 10_000,
   ) {}
 
   isBlocked(key: string, now = Date.now()): boolean {
@@ -22,6 +26,22 @@ export class FailureLimiter {
   }
 
   fail(key: string, now = Date.now()) {
+    if (this.failures.size >= this.maxKeys) {
+      for (const [k, entry] of this.failures) {
+        if (entry.resetAt <= now) this.failures.delete(k);
+      }
+    }
+    if (this.failures.size >= this.maxKeys) {
+      let oldestKey: string | undefined;
+      let oldest = Infinity;
+      for (const [k, entry] of this.failures) {
+        if (entry.resetAt < oldest) {
+          oldest = entry.resetAt;
+          oldestKey = k;
+        }
+      }
+      if (oldestKey !== undefined) this.failures.delete(oldestKey);
+    }
     const entry = this.failures.get(key);
     if (!entry || entry.resetAt <= now) {
       this.failures.set(key, { count: 1, resetAt: now + this.windowMs });

@@ -274,7 +274,7 @@ export function bookPublishingRoutes({ db, config, builds: queue }: Deps) {
           build: publicBuild({ ...built, note: note ?? built.note }, { ...book, publishedBuildId: built.id }, null, null, tags.get(commit) ?? []),
         });
       }
-      const build = queue.publishPending(book.id, commit, user.id) ?? queue.enqueue(book.id, commit, "publish", user.id, note ?? undefined);
+      const build = queue.publishPending(book.id, commit, user.id, note) ?? queue.enqueue(book.id, commit, "publish", user.id, note ?? undefined);
       return c.json({ published: false, build: publicBuild(build, book, user.email, queue.progress(build.id)) });
     })
 

@@ -26,6 +26,8 @@ export type Config = {
   uploadMaxBytes: number;
   /** Largest unpacked source, and largest build output. */
   bookMaxBytes: number;
+  /** Longest a git smart-HTTP child process may run before it is killed. */
+  gitOpTimeoutMs: number;
   store: {
     /** Largest saved state per student, and largest request. */
     maxBytes: number;
@@ -116,6 +118,7 @@ const schema = z.object({
   DATA_DIR: optional,
   UPLOAD_MAX_MB: z.coerce.number().int().min(1).default(100),
   BOOK_MAX_MB: z.coerce.number().int().min(1).default(500),
+  GIT_OP_TIMEOUT_SECONDS: z.coerce.number().int().min(1).default(300),
   BUILD_CONCURRENCY: z.coerce.number().int().min(1).max(32).default(1),
   BUILD_TIMEOUT_SECONDS: z.coerce.number().int().min(10).default(300),
   BUILD_MEMORY_MB: z.coerce.number().int().min(128).default(1024),
@@ -356,6 +359,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     dataDir,
     uploadMaxBytes: e.UPLOAD_MAX_MB * 1024 * 1024,
     bookMaxBytes: e.BOOK_MAX_MB * 1024 * 1024,
+    gitOpTimeoutMs: e.GIT_OP_TIMEOUT_SECONDS * 1000,
     store: {
       maxBytes: e.STORE_MAX_MB * 1024 * 1024,
       compactAfter: e.STORE_COMPACT_EVENTS,

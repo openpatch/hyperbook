@@ -2,10 +2,13 @@ import { spawn } from "node:child_process";
 import { randomBytes } from "node:crypto";
 import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { serve, type ServerType } from "@hono/node-server";
+import { Hono } from "hono";
 import os from "node:os";
 import path from "node:path";
 import { eq } from "drizzle-orm";
 import { afterAll, describe, expect, it } from "vitest";
+import { gitHttpRoutes } from "../src/server/admin/routes/git";
+import { FailureLimiter, OpLimiter } from "../src/server/auth/rate-limit";
 import {
   auditLog,
   books,
@@ -440,6 +443,77 @@ describe("git smart HTTP", () => {
     const fetched = await git(port, ["fetch", "origin"], client);
     expect(fetched.code).toBe(0);
   }, 60_000);
+
+  it("limits per-book git traffic with 429 and does not count anonymous probes as failures", async () => {
+    const { instance, book, token } = await world();
+    class RecordingLimiter extends FailureLimiter {
+      readonly failedKeys: string[] = [];
+      override fail(key: string, now = Date.now()): void {
+        this.failedKeys.push(key);
+        super.fail(key, now);
+      }
+    }
+    const authFailures = new RecordingLimiter();
+    const opLimit = new OpLimiter(2, 60_000);
+    const app = new Hono().route(
+      "/api/books/:id/git",
+      gitHttpRoutes(instance.deps, { authFailures, opLimit }),
+    );
+    const info = (t?: string) =>
+      app.request(`/api/books/${book.id}/git/info/refs?service=git-upload-pack`, {
+        headers: {
+          host: "admin.test",
+          ...(t === undefined
+            ? {}
+            : { authorization: `Basic ${Buffer.from(`git:${t}`).toString("base64")}` }),
+        },
+      });
+    // Every git client sends an anonymous probe first: 401, but not a failure.
+    expect((await info()).status).toBe(401);
+    expect((await info()).status).toBe(401);
+    expect(authFailures.failedKeys).toEqual([]);
+    // A wrong token is a failure.
+    expect((await info("wrong")).status).toBe(401);
+    expect(authFailures.failedKeys).toHaveLength(1);
+    // Two successful ops fill the per-book window; the next is a 429, not a 401.
+    expect((await info(token)).status).toBe(200);
+    expect((await info(token)).status).toBe(200);
+    const limited = await info(token);
+    expect(limited.status).toBe(429);
+    expect(limited.headers.get("retry-after")).toBe("60");
+    expect(authFailures.failedKeys).toHaveLength(1);
+  });
+
+  it("kills git children that outlive the operation timeout", async () => {
+    const { instance, book, token, port } = await world();
+    instance.config.gitOpTimeoutMs = 1;
+    const dir = await localBook(port, token, book.id, FILES);
+    const push = await git(port, ["push", "origin", "main"], dir);
+    expect(push.code).not.toBe(0);
+    expect(push.stderr).toMatch(/504|timed out/i);
+  });
+
+  it("rejects pushes once the git history on disk exceeds the book's limit", async () => {
+    const { instance, book, token, port } = await world();
+    const dir = await localBook(port, token, book.id, FILES);
+    await writeFile(path.join(dir, "big.bin"), randomBytes(2 * 1024 * 1024));
+    await git(port, ["add", "big.bin"], dir);
+    await git(port, ["commit", "-m", "big"], dir);
+    expect((await git(port, ["push", "origin", "main"], dir)).code).toBe(0);
+
+    // Shrink the book's limit below the history already on disk: the next
+    // push's tree is tiny (big.bin deleted), but the blob is still reachable
+    // through the first commit, so the repository itself is over the limit.
+    instance.config.bookMaxBytes = 1024 * 1024;
+    await git(port, ["rm", "big.bin"], dir);
+    await git(port, ["commit", "-m", "remove"], dir);
+    const push = await git(port, ["push", "origin", "main"], dir);
+    expect(push.code).not.toBe(0);
+    expect(push.stderr).toMatch(/git history/i);
+    // The push was refused: main did not move.
+    const head = await headCommit(repoDir(instance.config, book.id));
+    expect(head).not.toBe((await git(port, ["rev-parse", "HEAD"], dir)).stdout.trim());
+  });
 
   it("publish creates version tags; rollback to a kept build is instant, to a pruned one a rebuild", async () => {
     const { instance, owner, book, token, port } = await world();

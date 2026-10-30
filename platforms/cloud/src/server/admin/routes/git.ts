@@ -19,6 +19,7 @@ import { getInstanceSettings } from "../../domain/instance";
 import { quotaForBook, setSourceBytes } from "../../domain/storage";
 import { bookMembers, books, gitTokens, users } from "../../db/schema";
 import {
+  gcRepo,
   initRepo,
   isMainAncestor,
   listTree,
@@ -121,6 +122,22 @@ function gitProtocolEnv(c: Context): Record<string, string> {
   return {};
 }
 
+/**
+ * Kills the child when it outlives the git operation timeout, so a stuck
+ * upload-pack/receive-pack cannot hold its process forever. Returns whether
+ * the timeout fired.
+ */
+function killOnTimeout(child: ChildProcess, ms: number, what: string) {
+  let timedOut = false;
+  const timer = setTimeout(() => {
+    timedOut = true;
+    child.kill("SIGKILL");
+    console.error(`${what} exceeded ${ms} ms and was killed`);
+  }, ms);
+  child.on("close", () => clearTimeout(timer));
+  return () => timedOut;
+}
+
 /** Collects output and waits for the child to exit; stdin is the caller's. */
 async function closeWith(child: ChildProcess) {
   const out: Buffer[] = [];
@@ -139,9 +156,12 @@ async function closeWith(child: ChildProcess) {
 }
 
 /** /api/books/:id/git/… — smart HTTP, token auth. Mounted before the /api sub-app. */
-export function gitHttpRoutes({ db, config, builds }: Deps) {
-  const authFailures = new FailureLimiter();
-  const opLimit = new OpLimiter();
+export function gitHttpRoutes(
+  { db, config, builds }: Deps,
+  limits: { authFailures?: FailureLimiter; opLimit?: OpLimiter } = {},
+) {
+  const authFailures = limits.authFailures ?? new FailureLimiter();
+  const opLimit = limits.opLimit ?? new OpLimiter();
 
   const gitAuth = createMiddleware<GitEnv>(async (c, next) => {
     const id = Number(c.req.param("id"));
@@ -150,21 +170,25 @@ export function gitHttpRoutes({ db, config, builds }: Deps) {
       : undefined;
     const creds = parseBasic(c.req.header("authorization"));
     const failKey = `git:${id}:${creds ? sha256(creds.password).slice(0, 16) : "anon"}`;
-    const deny = (): never => {
-      authFailures.fail(failKey);
+    const deny = (countFailure: boolean): never => {
+      // An anonymous probe — every git client sends one first to get the 401
+      // challenge — is not a failed login and must not count against anyone.
+      if (countFailure) authFailures.fail(failKey);
       c.header("WWW-Authenticate", 'Basic realm="Hyperbook Cloud git"');
       throw new HTTPException(401, {
         message: "A git token is required (username: git)",
       });
     };
-    if (
-      !book ||
-      authFailures.isBlocked(failKey) ||
-      opLimit.isBlocked(`book:${id}`)
-    )
-      deny();
+    if (opLimit.isBlocked(`book:${id}`)) {
+      // The book's git traffic is limited, not the caller's credentials.
+      c.header("Retry-After", "60");
+      throw new HTTPException(429, {
+        message: "Too many git requests for this book; slow down and try again",
+      });
+    }
+    if (!book || authFailures.isBlocked(failKey)) deny(false);
     const authed = creds ? authenticate(db, id, creds.password) : null;
-    if (!authed) deny();
+    if (!authed) deny(!!creds);
     opLimit.hit(`book:${id}`);
     // Note the use, but not more often than once a minute per token.
     const row = authed!.row;
@@ -266,7 +290,9 @@ export function gitHttpRoutes({ db, config, builds }: Deps) {
           env: gitProtocolEnv(c),
         },
       );
+      const timedOut = killOnTimeout(child, config.gitOpTimeoutMs, `git ${serviceName} for book ${book.id}`);
       const { code, stdout, stderr } = await closeWith(child);
+      if (timedOut()) throw new HTTPException(504, { message: "git timed out" });
       if (code !== 0) throw new HTTPException(500, { message: stderr.trim() });
       // Smart HTTP expects the "# service=…" pkt-line + flush before the
       // advertisement (git http-backend adds it; receive-pack/upload-pack
@@ -293,6 +319,9 @@ export function gitHttpRoutes({ db, config, builds }: Deps) {
           gitDir: repo,
           env: gitProtocolEnv(c),
         });
+        // The response streams as it is produced, so a timeout can only end
+        // it early (the client sees a truncated stream); the kill matters.
+        killOnTimeout(child, config.gitOpTimeoutMs, `git upload-pack for book ${book.id}`);
         const body = c.req.raw.body;
         if (body) {
           const source = Readable.fromWeb(body as never);
@@ -364,6 +393,7 @@ export function gitHttpRoutes({ db, config, builds }: Deps) {
           ],
           { gitDir: repo, env: { HB_MAX_BYTES: String(maxBytes) } },
         );
+        const timedOut = killOnTimeout(child, config.gitOpTimeoutMs, `git receive-pack for book ${book.id}`);
         const body = c.req.raw.body;
         if (!body) {
           child.kill();
@@ -423,6 +453,9 @@ export function gitHttpRoutes({ db, config, builds }: Deps) {
         });
         const { code, stdout, stderr } = await closeWith(child);
         await piping;
+        if (timedOut()) {
+          throw new HTTPException(504, { message: "git receive-pack timed out" });
+        }
         if (inputError instanceof GitRequestTooLargeError) {
           throw new HTTPException(413, {
             message: `The push is larger than ${Math.round(config.uploadMaxBytes / 1024 / 1024)} MB`,
@@ -437,6 +470,13 @@ export function gitHttpRoutes({ db, config, builds }: Deps) {
           throw new HTTPException(500, {
             message: `git receive-pack failed: ${stderr.trim()}`,
           });
+        }
+        if (code === 0) {
+          // Reclaim objects of files that later commits deleted, so the
+          // history cannot grow past the quota unnoticed.
+          await gcRepo(repo).catch((error) =>
+            console.error(`git gc failed for book ${book.id}`, error),
+          );
         }
         await postPush(
           book,

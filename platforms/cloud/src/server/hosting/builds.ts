@@ -166,7 +166,7 @@ export class BuildQueue {
    * so publishing right after a save does not build the same commit twice.
    * Returns that build, or null if there is none.
    */
-  publishPending(bookId: number, commit: string, userId: number | null): BuildRow | null {
+  publishPending(bookId: number, commit: string, userId: number | null, note?: string | null): BuildRow | null {
     const pending = this.db
       .select()
       .from(builds)
@@ -182,10 +182,19 @@ export class BuildQueue {
       .limit(1)
       .get();
     if (!pending) return null;
-    if (pending.publish) return pending;
+    if (pending.publish) {
+      // Reusing an already-publishing build keeps the note the publish came with.
+      if (!note) return pending;
+      return this.db
+        .update(builds)
+        .set({ note })
+        .where(eq(builds.id, pending.id))
+        .returning()
+        .get();
+    }
     return this.db
       .update(builds)
-      .set({ publish: true, trigger: "publish", requestedBy: userId })
+      .set({ publish: true, trigger: "publish", requestedBy: userId, ...(note ? { note } : {}) })
       .where(eq(builds.id, pending.id))
       .returning()
       .get();

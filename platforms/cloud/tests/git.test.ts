@@ -1,3 +1,4 @@
+import { spawnSync } from "node:child_process";
 import { mkdir, mkdtemp, readFile, readdir, rm, stat, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
@@ -8,6 +9,7 @@ import {
   checkout,
   commitChanges,
   commitTree,
+  gcRepo,
   headCommit,
   initRepo,
   listTree,
@@ -189,6 +191,32 @@ describe("changing files", () => {
     const before = await headCommit(repo);
     const res = await commitChanges(repo, [{ op: "write", path: "a.md", content: buf("1"), baseOid: oid("a.md") }], opts);
     expect(res).toEqual({ commit: before, changed: false });
+  });
+});
+
+describe("repository maintenance", () => {
+  it("gcRepo prunes objects that nothing points at", async () => {
+    const repo = path.join(await tmp(), "repo.git");
+    await initRepo(repo);
+    await commitTree(repo, await tree({ "a.md": "1" }), options);
+    // An orphaned object, e.g. a commit that lost an update-ref race.
+    const env = {
+      ...process.env,
+      GIT_DIR: repo,
+      GIT_CONFIG_NOSYSTEM: "1",
+      GIT_CONFIG_GLOBAL: "/dev/null",
+    };
+    const oid = spawnSync("git", ["hash-object", "-w", "--stdin"], {
+      input: "orphaned blob",
+      env,
+    }).stdout.toString().trim();
+    const exists = () =>
+      spawnSync("git", ["cat-file", "-e", `${oid}^{blob}`], { env }).status === 0;
+    expect(exists()).toBe(true);
+    await gcRepo(repo);
+    expect(exists()).toBe(false);
+    // What main points at is untouched.
+    expect(await headCommit(repo)).not.toBeNull();
   });
 });
 

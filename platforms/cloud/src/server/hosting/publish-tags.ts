@@ -18,7 +18,7 @@ import {
  * push cannot interleave.
  */
 
-/** Successful version tags kept besides the newest ones (their builds too). */
+/** Only the last KEEP_TAGS v<N> tags (and their builds) are kept. */
 export const KEEP_TAGS = 2;
 
 const locks = new Map<number, Promise<unknown>>();

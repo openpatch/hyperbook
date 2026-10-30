@@ -122,6 +122,9 @@ async function git(args: string[], options: RunOptions & { input?: Buffer | stri
  * .git paths or submodule entries, and enforces the source-size limit the
  * server passes as HB_MAX_BYTES (the summed size of the new tree, computed
  * here because the hook is the last moment the push can still be refused).
+ * The whole repository must stay within the same limit: the pack of this
+ * push is still in the quarantine below objects/, so `du` of the git dir
+ * counts it too — history cannot grow past the quota.
  */
 const PRE_RECEIVE = `#!/bin/sh
 zero=0000000000000000000000000000000000000000
@@ -146,6 +149,11 @@ while read -r old new ref; do
     size=$(git ls-tree -r -l "$new" | awk '{ s += $4 } END { print s+0 }')
     if [ "$size" -gt "$HB_MAX_BYTES" ]; then
       echo "The book would be larger than $((HB_MAX_BYTES / 1024 / 1024)) MB. Delete files you no longer need, or ask an admin for more space." >&2
+      exit 1
+    fi
+    used_kb=$(du -sk "\${GIT_DIR:-.}" | cut -f1)
+    if [ "$used_kb" -gt $((HB_MAX_BYTES / 1024)) ]; then
+      echo "The book's git history would be larger than $((HB_MAX_BYTES / 1024 / 1024)) MB. Delete files you no longer need, or ask an admin for more space." >&2
       exit 1
     fi
   fi
@@ -579,6 +587,14 @@ export async function deleteTag(repo: string, name: string) {
 export async function versionTagNumbers(repo: string): Promise<number[]> {
   const tags = await listTags(repo).catch(() => [] as { name: string; commit: string }[]);
   return tags.filter((t) => VERSION_TAG.test(t.name)).map((t) => Number(t.name.slice(1)));
+}
+
+/**
+ * Repacks the repository and prunes every unreachable object right away, so
+ * blobs that a later commit deleted do not keep disk space past the quota.
+ */
+export async function gcRepo(repo: string): Promise<void> {
+  await git(["gc", "--prune=now", "--quiet"], { gitDir: repo });
 }
 
 /** How many commits `to` has that `from` (null: no history) does not. */

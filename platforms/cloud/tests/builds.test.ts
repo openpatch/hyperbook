@@ -101,6 +101,36 @@ describe("build queue", () => {
     expect(bookRow(instance, book.id).publishedBuildId).toBe(build.id);
   });
 
+  it("keeps the publish note when it reuses a pending build", async () => {
+    let release!: () => void;
+    const gate = new Promise<void>((r) => (release = r));
+    const runner: Runner = async (job) => {
+      await gate;
+      return copyRunner(job);
+    };
+    const instance = setup({}, { runner });
+    const { book, commit } = await bookWithSource(instance, { "hyperbook.json": "{}" });
+    const pending = instance.builds.enqueue(book.id, commit, "push", null);
+
+    const published = instance.builds.publishPending(book.id, commit, null, "v1 notes");
+    expect(published).not.toBeNull();
+    expect(published!.id).toBe(pending.id);
+    expect(buildRow(instance, pending.id)).toMatchObject({
+      publish: true,
+      trigger: "publish",
+      note: "v1 notes",
+    });
+
+    // A publish that lands on an already-publishing build keeps its note, too.
+    const again = instance.builds.publishPending(book.id, commit, null, "v2 notes");
+    expect(again!.id).toBe(pending.id);
+    expect(buildRow(instance, pending.id).note).toBe("v2 notes");
+
+    release();
+    await instance.builds.idle();
+    expect(buildRow(instance, pending.id)).toMatchObject({ status: "succeeded", note: "v2 notes" });
+  });
+
   it("replaces a queued build of the same book", async () => {
     let release!: () => void;
     const gate = new Promise<void>((r) => (release = r));
