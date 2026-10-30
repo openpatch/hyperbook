@@ -11,7 +11,10 @@ import {
   VFileGlossary,
   getPasswords,
 } from "@hyperbook/fs";
-import { clearCollectedPasswords } from "@hyperbook/markdown";
+import {
+  clearCollectedPasswords,
+  type ArchiveInclude,
+} from "@hyperbook/markdown";
 import {
   Hyperproject,
   HyperbookContext,
@@ -19,6 +22,7 @@ import {
   HyperbookPage,
   Navigation,
 } from "@hyperbook/types";
+import { runArchive, type ArchiveIncludes } from "./archive";
 import {
   ASSETS_FOLDER,
   buildSingleBookPage,
@@ -86,6 +90,10 @@ export class IncrementalBuilder {
   private pageList: HyperbookPage[] | null = null;
   private searchDocuments: Map<string, any[]> = new Map();
   private directives: Set<string> = new Set();
+  // Archive includes per page, so a single page save can re-zip the archives it
+  // declares includes for without a full rebuild.
+  private archiveIncludes: Map<string, Record<string, ArchiveInclude[]>> =
+    new Map();
   private rootOut: string = "";
   private assetsOut: string = "";
   private initialized = false;
@@ -137,6 +145,7 @@ export class IncrementalBuilder {
   private async fullRebuild(): Promise<void> {
     this.dependents.clear();
     this.searchDocuments.clear();
+    this.archiveIncludes.clear();
     // The full build rewrites the output tree, so nothing copied before it
     // can be assumed to still be there.
     this.assetCopies.clear();
@@ -152,11 +161,16 @@ export class IncrementalBuilder {
     );
   }
 
-  /** Indexes one page's dependencies and search documents. */
+  /** Indexes one page's dependencies, search documents and archive includes. */
   private recordPageResult(
     href: string,
-    result: { dependencies: string[]; searchDocuments: any[] },
+    result: {
+      dependencies: string[];
+      searchDocuments: any[];
+      archiveIncludes: Record<string, ArchiveInclude[]>;
+    },
   ): void {
+    this.archiveIncludes.set(href, result.archiveIncludes || {});
     // Drop stale edges first: a page that no longer uses a file must not keep
     // being rebuilt when that file changes.
     for (const pages of this.dependents.values()) {
@@ -171,6 +185,44 @@ export class IncrementalBuilder {
       pages.add(href);
     }
     this.searchDocuments.set(href, result.searchDocuments);
+  }
+
+  /** All includes declared across the built pages, merged per archive name. */
+  private aggregatedArchiveIncludes(): ArchiveIncludes {
+    const includes: ArchiveIncludes = {};
+    for (const perPage of this.archiveIncludes.values()) {
+      for (const [name, list] of Object.entries(perPage)) {
+        (includes[name] ||= []).push(...list);
+      }
+    }
+    return includes;
+  }
+
+  /** Re-zips the archives with the includes all built pages declared. */
+  private async refreshArchives(): Promise<void> {
+    await runArchive(
+      this.root,
+      this.rootOut,
+      "Incremental",
+      this.aggregatedArchiveIncludes(),
+    );
+  }
+
+  /**
+   * Re-zips when the changed file is pulled into an archive via include=.
+   * Editing an included asset otherwise left the zip stale in the dev server.
+   */
+  private async refreshArchivesIfInsideInclude(absPath: string): Promise<void> {
+    const inside = Object.values(this.aggregatedArchiveIncludes()).some(
+      (list) =>
+        list.some((inc) => {
+          const src = path.resolve(this.root, "." + inc.src);
+          return absPath === src || absPath.startsWith(src + path.sep);
+        }),
+    );
+    if (inside) {
+      await this.refreshArchives();
+    }
   }
 
   /**
@@ -347,6 +399,8 @@ export class IncrementalBuilder {
         // The file itself may also be a served asset (a `src=` script under
         // public/ is both inlined and downloadable), so copy it as well.
         await this.copyIfPublic(filePath);
+        // It may also be pulled into a zip via an archive's include=.
+        await this.refreshArchivesIfInsideInclude(absPath);
 
         vfile.clean(this.root);
         await this.refreshCaches();
@@ -425,6 +479,12 @@ export class IncrementalBuilder {
           this.hyperbookJson!,
         );
 
+        // A page that stops declaring includes still leaves a stale zip, so
+        // compare against what the page declared before this rebuild.
+        const hadIncludes = Object.keys(
+          this.archiveIncludes.get(changedFile.path.href || "/") || {},
+        ).length;
+
         // Reindex, so a page that dropped a `src=` or a snippet stops being
         // rebuilt when that file changes.
         this.recordPageResult(changedFile.path.href || "/", result);
@@ -459,10 +519,16 @@ export class IncrementalBuilder {
             ),
           );
           await this.refreshSearchIndex();
+          if (hadIncludes || Object.keys(result.archiveIncludes).length) {
+            await this.refreshArchives();
+          }
           return { changedPages: "*" };
         }
 
         await this.refreshSearchIndex();
+        if (hadIncludes || Object.keys(result.archiveIncludes).length) {
+          await this.refreshArchives();
+        }
         console.log(`${chalk.green("[Incremental]")} Rebuilt: ${changedHref}`);
         return { changedPages: [changedHref] };
       }
@@ -503,6 +569,10 @@ export class IncrementalBuilder {
           this.hyperbookJson!,
         );
 
+        const hadIncludes = Object.keys(
+          this.archiveIncludes.get(changedFile.path.href || "/glossary") || {},
+        ).length;
+
         this.recordPageResult(changedFile.path.href || "/glossary", result);
         for (const directive of result.directives) {
           this.directives.add(directive);
@@ -513,6 +583,9 @@ export class IncrementalBuilder {
 
         const changedHref = changedFile.path.href || "/glossary";
         await this.refreshSearchIndex();
+        if (hadIncludes || Object.keys(result.archiveIncludes).length) {
+          await this.refreshArchives();
+        }
         console.log(`${chalk.green("[Incremental]")} Rebuilt: ${changedHref}`);
         return { changedPages: [changedHref] };
       }
@@ -522,6 +595,11 @@ export class IncrementalBuilder {
           `${chalk.yellow("[Incremental]")} Public file change: ${filePath}`,
         );
         await this.copyIfPublic(filePath);
+        // A file under book/ that an archive includes is part of a zip, not
+        // just a plain asset.
+        await this.refreshArchivesIfInsideInclude(
+          path.resolve(this.root, filePath),
+        );
 
         // No page inlined this file — it is a plain asset, so nothing needs
         // rebuilding, but any page could embed it, so reload everything.

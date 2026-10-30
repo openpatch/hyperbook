@@ -41,6 +41,7 @@ import lunr from "lunr";
 import {
   process as hyperbookProcess,
   stripProtectBlocks,
+  type ArchiveInclude,
 } from "@hyperbook/markdown";
 import packageJson from "./package.json";
 import { AssetManager } from "./helpers/assets";
@@ -133,6 +134,8 @@ export interface SinglePageResult {
   dependencies: string[];
   /** Non-fatal diagnostics this page produced, already printed. */
   messages: MessageCounts;
+  /** Archive includes this page's archive directives declared, by archive name. */
+  archiveIncludes: Record<string, ArchiveInclude[]>;
 }
 
 export async function buildSingleBookPage(
@@ -235,6 +238,8 @@ export async function buildSingleBookPage(
     emojis,
     dependencies: [...dependencies],
     messages,
+    archiveIncludes:
+      (result.data.archiveIncludes as Record<string, ArchiveInclude[]>) || {},
   };
 }
 
@@ -336,6 +341,8 @@ export async function buildSingleGlossaryPage(
     emojis,
     dependencies: [...dependencies],
     messages,
+    archiveIncludes:
+      (result.data.archiveIncludes as Record<string, ArchiveInclude[]>) || {},
   };
 }
 
@@ -766,7 +773,10 @@ async function runBuild(
     `${chalk.blue(`[${prefix}]`)} Cleaning output folder ${rootOut}.`,
   );
 
-  await runArchive(root, rootOut, prefix);
+  // Archive includes are declared on the pages' archive directives, so the
+  // zips are written after the pages have been processed (see the runArchive
+  // call below the page loops).
+  const archiveIncludes: Record<string, ArchiveInclude[]> = {};
 
   // Passwords are attached to the build context rather than to config: the
   // config object is serialized into pages in several places.
@@ -803,6 +813,11 @@ async function runBuild(
       hyperbookJson,
     );
     searchDocuments.push(...pageResult.searchDocuments);
+    for (const [archiveName, includes] of Object.entries(
+      pageResult.archiveIncludes,
+    )) {
+      (archiveIncludes[archiveName] ||= []).push(...includes);
+    }
     for (let directive of pageResult.directives) {
       directives.add(directive);
     }
@@ -838,6 +853,11 @@ async function runBuild(
       hyperbookJson,
     );
     searchDocuments.push(...pageResult.searchDocuments);
+    for (const [archiveName, includes] of Object.entries(
+      pageResult.archiveIncludes,
+    )) {
+      (archiveIncludes[archiveName] ||= []).push(...includes);
+    }
     for (let directive of pageResult.directives) {
       directives.add(directive);
     }
@@ -853,6 +873,9 @@ async function runBuild(
     );
   }
   endProgress();
+
+  // Zipped after the pages: the includes come from their archive directives.
+  await runArchive(root, rootOut, prefix, archiveIncludes);
 
   const assetsPath = path.join(__dirname, "assets");
   await mkdir(assetsOut, {
@@ -997,9 +1020,8 @@ async function runBuild(
 
       if (logoPath) {
         try {
-          const { generateFavicons } = await import(
-            "./helpers/generate-favicons"
-          );
+          const { generateFavicons } =
+            await import("./helpers/generate-favicons");
           await generateFavicons(
             logoPath,
             rootOut,
@@ -1058,7 +1080,9 @@ async function runBuild(
       } catch (e) {
         // Close the progress line so the failure is not appended to it.
         breakProgressLine();
-        console.log(`${chalk.red(`[${prefix}]`)} Failed copying emoji: ${emoji}`);
+        console.log(
+          `${chalk.red(`[${prefix}]`)} Failed copying emoji: ${emoji}`,
+        );
       }
     }
     endProgress();

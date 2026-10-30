@@ -75,6 +75,8 @@ export { legacyP5Ids } from "./legacyIds";
 export { collectLinkTargets } from "./collectLinks";
 export type { LinkTarget } from "./collectLinks";
 export { stripProtectBlocks } from "./stripProtect";
+export type { ArchiveInclude } from "./remarkDirectiveArchive";
+export { parseArchiveIncludes } from "./remarkDirectiveArchive";
 export { collectPasswords, clearCollectedPasswords } from "./collectPasswords";
 export type {
   CollectedPassword,

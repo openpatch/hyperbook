@@ -1,0 +1,100 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`remarkDirectiveArchive > should render the download link, with and without include 1`] = `
+"<!doctype html><html lang="en" class="no-js"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1,, interactive-widget=resizes-content"><title>Hi - My Hyperbook</title><meta property="og:title" value="Hi - My Hyperbook"><meta name="description" content="undefined"><meta property="og:description" content="undefined"><meta name="keywords"><link rel="icon" type="image/x-icon" href="/public/favicon.ico"><link rel="apple-touch-icon" sizes="180x180" href="/assets/favicons/apple-touch-icon.png"><link rel="manifest" href="/assets/favicons/manifest.webmanifest"><link rel="stylesheet" href="/assets/normalize.css"><style>
+html,
+body {
+  overflow: hidden;
+  margin: 0;
+  height: 100dvh;
+  width: 100dvw;
+}
+
+body {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+body::-webkit-scrollbar {
+  display: none;
+}
+
+:root {
+  --color-brand: #007864;
+  --color-brand-dark: #b5e3d8;
+  --color-brand-text: white;
+  --main-width: 980px;
+  --header-height: 3.75rem;
+  --nav-width: minmax(300px, 0.33fr);
+  --nav-font-size: 0.9rem;
+  --element-gap: 1.5rem;
+}
+body {
+  overscroll-behavior-x: none;
+  background-color: transparent;
+  color: var(--color-text);
+  font-family: hyperbook-body;
+  font-weight: normal;
+  font-size: 1rem;
+  margin: 0;
+  padding: 0;
+}
+</style><noscript id="dark-mode-toggle-stylesheets"><link rel="stylesheet" href="/assets/light.css" media="(prefers-color-scheme: light)"><link rel="stylesheet" href="/assets/dark.css" media="(prefers-color-scheme: dark)"></noscript><script>
+// Remove no-js class as soon as JavaScript is available
+document.documentElement.classList.remove('no-js');</script><script>
+// @license © 2024 Google LLC. Licensed under the Apache License, Version 2.0.
+(() => {
+  const ELEMENT_ID = 'dark-mode-toggle-stylesheets';
+  const STORAGE_NAME = 'dark-mode-toggle';
+  const LIGHT = 'light';
+  const DARK = 'dark';
+
+  let stylesheets = document.getElementById(ELEMENT_ID).textContent;
+
+  let mode = null;
+  try {
+    mode = localStorage.getItem(STORAGE_NAME);
+  } catch (e) {}
+
+  const lightCSSMediaRegex = /\\(\\s*prefers-color-scheme\\s*:\\s*light\\s*\\)/gi;
+  const darkCSSMediaRegex = /\\(\\s*prefers-color-scheme\\s*:\\s*dark\\s*\\)/gi;
+
+  switch (mode) {
+    case LIGHT:
+      stylesheets = stylesheets
+        .replace(lightCSSMediaRegex, '$&, all')
+        .replace(darkCSSMediaRegex, '$& and not all');
+      break;
+
+    case DARK:
+      stylesheets = stylesheets
+        .replace(darkCSSMediaRegex, '$&, all')
+        .replace(lightCSSMediaRegex, '$& and not all');
+      break;
+  }
+
+  document.write(stylesheets);
+})();
+// @license-end</script><script type="module" src="/assets/dark-mode-toggle.js"></script><script src="/assets/i18n.js" defer></script><script src="/assets/dexie.min.js" defer></script><script src="/assets/dexie-export-import.js" defer></script><script src="/assets/store-ide-migration.js" defer></script><script src="/assets/store.js" defer></script><script>
+window.Prism = window.Prism || {};
+window.Prism.manual = true;</script><script src="/assets/prism/prism.js" defer></script><script src="/assets/prism/prism-typst.js" defer></script><link rel="stylesheet" href="/assets/prism/prism.css"><link rel="stylesheet" href="/assets/prism/prism-theme-github-dark.css" media="(prefers-color-scheme: dark)"><link rel="stylesheet" href="/assets/prism/prism-theme-github-light.css" media="(prefers-color-scheme: light)"><link rel="stylesheet" href="/assets/math/katex.min.css"><link rel="stylesheet" href="/assets/shell.css"><link rel="stylesheet" href="/assets/content.css"><link rel="stylesheet" media="print" href="/assets/print.css"><link rel="stylesheet" href="/assets/code.css"><script>
+HYPERBOOK_ASSETS = "/assets/"
+
+</script><script type="module" src="/assets/side-drawer.js" async></script><script src="/assets/qrcode.js" async></script><link rel="stylesheet" href="/assets/directive-archive/style.css"></head><body><div class="main-grid"><header><div class="mobile-nav"><button aria-label="Nav Toggle" class="toggle" onclick="hyperbook.ui.navToggle()"><div class="bar1"></div><div class="bar2"></div><div class="bar3"></div></button><side-drawer id="nav-drawer"><div class="nav-drawer-content"><nav></nav><a class="author" href="https://hyperbook.openpatch.org">Powered by <b>Hyperbook</b></a></div></side-drawer></div><a class="branding" href="/book/"><div class="name">My Hyperbook</div></a><button id="share-button" class="icon-button" title="Share" onclick="hyperbook.share.open()"><div class="share-icon"></div></button><dark-mode-toggle id="dark-mode-toggle" appearence="switch" title="Toggle between Dark and Light Mode" permanent></dark-mode-toggle></header><div class="sidebar"><nav></nav><a class="author" href="https://hyperbook.openpatch.org">Powered by <b>Hyperbook</b></a></div><main><article>
+<div class="hyperbook-markdown">
+  <div class="floating-buttons-container" id="floating-buttons-container"><button id="toc-toggle" onclick="hyperbook.ui.tocToggle()" title="Table of Contents"><div class="bar1"></div><div class="bar2"></div><div class="bar3"></div><div class="bar4"></div></button></div>
+  <side-drawer id="toc-drawer" right>
+    <div class="toc-drawer-content">
+      <nav class="toc">
+        <ul></ul>
+      </nav>
+    </div>
+  </side-drawer>
+  <p><a class="directive-archive" target="_blank" rel="noopener noreferrer" href="/archive/spielwerkstatt.zip"><span class="icon"><svg class="icon icon-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <path d="M7 10l5 5 5-5"></path>
+          <path d="M12 15V3"></path>
+        </svg></span><span class="label">Projekt: Spielwerkstatt</span></a></p>
+</div>
+</article><div class="jump-container"></div><div class="meta"><a href="#" onclick="hyperbook.store.reset()"><span class="reset-icon" title="Reset Hyperbook"></span></a><span class="copyright">© Copyright 2026</span></div></main></div><script src="/assets/bootstrap.js" defer></script><script src="/assets/ui.js" defer></script><script src="/assets/directive-archive/client.js" defer></script></body></html>"
+`;
