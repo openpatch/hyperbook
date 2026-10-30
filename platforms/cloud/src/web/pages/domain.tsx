@@ -1,4 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { toast } from "sonner";
 import { bookDomainInput } from "../../shared/schemas";
@@ -13,6 +14,7 @@ import { FormError, TextField, applyServerError, useZodForm } from "@/lib/form";
 
 /** For owners of hosted books whose account may use custom domains (M5). */
 export function DomainSection({ book }: { book: Book }) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const id = String(book.id);
   const domain = book.domain;
@@ -39,9 +41,10 @@ export function DomainSection({ book }: { book: Book }) {
     try {
       const updated = await unwrap(api.books[":id"].domain.check.$post({ param: { id } }));
       await show(updated);
-      if (updated.domain?.active) toast.success(`The book is now at ${updated.domain.name}`);
+      if (updated.domain?.active)
+        toast.success(t("book.domain.nowAtToast", { domain: updated.domain.name }));
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Something went wrong");
+      toast.error(error instanceof Error ? error.message : t("common.somethingWrong"));
     } finally {
       setChecking(false);
     }
@@ -49,20 +52,20 @@ export function DomainSection({ book }: { book: Book }) {
 
   return (
     <Section
-      title="Custom domain"
-      description="Serve the book at an address of your own, e.g. a subdomain of your school's website."
+      title={t("book.domain.title")}
+      description={t("book.domain.description")}
     >
       <form onSubmit={onSubmit} className="flex max-w-xl flex-wrap items-end gap-2" noValidate>
         <TextField
           form={form}
           name="domain"
-          label="Domain"
+          label={t("book.domain.field")}
           placeholder="buch.schule.de"
-          hint="A subdomain of a domain you manage."
+          hint={t("book.domain.fieldHint")}
           className="min-w-60 flex-1"
         />
         <Button type="submit" variant="outline" disabled={form.formState.isSubmitting}>
-          {domain ? "Change" : "Set domain"}
+          {domain ? t("book.domain.change") : t("book.domain.set")}
         </Button>
         <div className="basis-full">
           <FormError form={form} />
@@ -73,36 +76,33 @@ export function DomainSection({ book }: { book: Book }) {
         <div className="mt-4 grid max-w-3xl gap-3">
           <p className="flex flex-wrap items-center gap-2">
             {domain.active ? (
-              <Badge>Active</Badge>
+              <Badge>{t("book.domain.active")}</Badge>
             ) : (
-              <Badge variant="secondary">Waiting for DNS</Badge>
+              <Badge variant="secondary">{t("book.domain.waiting")}</Badge>
             )}
             <span className="font-mono">{domain.name}</span>
             {domain.checkedAt && (
               <span className="text-sm text-muted-foreground">
-                checked {new Date(domain.checkedAt).toLocaleString()}
+                {t("book.domain.checkedAt", {
+                  when: new Date(domain.checkedAt).toLocaleString(),
+                })}
               </span>
             )}
           </p>
           {domain.active ? (
-            <p className="text-sm text-muted-foreground">
-              The book's address on this platform now redirects here. Keep the DNS record.
-            </p>
+            <p className="text-sm text-muted-foreground">{t("book.domain.activeHint")}</p>
           ) : (
             <>
-              <p className="text-sm">
-                Create this record where your domain's DNS is managed, then check again. Changes can
-                take a while to show.
-              </p>
+              <p className="text-sm">{t("book.domain.recordHint")}</p>
               {domain.problem && <p className="text-sm text-destructive">{domain.problem}</p>}
             </>
           )}
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Type</TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead>Value</TableHead>
+                <TableHead>{t("book.domain.type")}</TableHead>
+                <TableHead>{t("book.domain.name")}</TableHead>
+                <TableHead>{t("book.domain.value")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -113,26 +113,26 @@ export function DomainSection({ book }: { book: Book }) {
               </TableRow>
             </TableBody>
           </Table>
-          <p className="text-sm text-muted-foreground">
-            Use a subdomain such as buch.schule.de: a domain on its own (like schule.de) cannot have a CNAME
-            record.
-          </p>
+          <p className="text-sm text-muted-foreground">{t("book.domain.subdomainHint")}</p>
           <div className="flex flex-wrap gap-2">
             {!domain.active && (
               <Button onClick={check} disabled={checking}>
-                {checking ? "Checking…" : "Check again"}
+                {checking ? t("book.domain.checking") : t("book.domain.checkAgain")}
               </Button>
             )}
             <ConfirmButton
-              title={`Remove ${domain.name}?`}
-              description={`The book is served at ${book.slug} on this platform again. Printed login links that use ${domain.name} stop working.`}
-              confirmLabel="Remove domain"
+              title={t("book.domain.removeTitle", { domain: domain.name })}
+              description={t("book.domain.removeDescription", {
+                slug: book.slug,
+                domain: domain.name,
+              })}
+              confirmLabel={t("book.domain.remove")}
               onConfirm={async () => {
                 await show(await unwrap(api.books[":id"].domain.$delete({ param: { id } })));
                 form.reset({ domain: "" });
               }}
             >
-              Remove domain
+              {t("book.domain.remove")}
             </ConfirmButton>
           </div>
         </div>

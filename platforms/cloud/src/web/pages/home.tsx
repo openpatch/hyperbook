@@ -1,6 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router";
+import { useTranslation } from "react-i18next";
 import { createBookInput } from "../../shared/schemas";
 import { PageHeader } from "@/components/page-header";
 import { Badge } from "@/components/ui/badge";
@@ -20,6 +21,7 @@ import { useInstance, useUser } from "@/lib/session";
 import { slugify } from "@/lib/slugify";
 
 export function HomePage() {
+  const { t } = useTranslation();
   const user = useUser();
   const { data: books } = useQuery({
     queryKey: ["books"],
@@ -29,14 +31,12 @@ export function HomePage() {
   return (
     <>
       <PageHeader
-        title="Books"
-        description={user.role === "admin" ? "All books of this instance." : "Books you work on."}
+        title={t("books.title")}
+        description={user.role === "admin" ? t("books.descriptionAdmin") : t("books.description")}
         actions={<CreateBookButton />}
       />
       {books?.length === 0 && (
-        <p className="text-muted-foreground">
-          No books yet. Create one to get an address for it and student accounts.
-        </p>
+        <p className="text-muted-foreground">{t("books.empty")}</p>
       )}
       <ul className="grid gap-3 sm:grid-cols-2">
         {books?.map((book) => (
@@ -47,7 +47,7 @@ export function HomePage() {
             >
               <div className="flex items-start justify-between gap-2">
                 <h2 className="text-lg font-semibold break-words">{book.title}</h2>
-                {book.visibility === "private" && <Badge variant="secondary">Private</Badge>}
+                {book.visibility === "private" && <Badge variant="secondary">{t("books.private")}</Badge>}
               </div>
               <p className="truncate text-sm text-muted-foreground">
                 {book.url.replace(/^https?:\/\//, "")}
@@ -62,6 +62,7 @@ export function HomePage() {
 }
 
 function CreateBookButton() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { data: instance } = useInstance();
@@ -98,18 +99,18 @@ function CreateBookButton() {
       }}
     >
       <DialogTrigger asChild>
-        <Button>New book</Button>
+        <Button>{t("books.new")}</Button>
       </DialogTrigger>
       <DialogContent>
         <form onSubmit={onSubmit} className="grid gap-4" noValidate>
           <DialogHeader>
-            <DialogTitle>New book</DialogTitle>
-            <DialogDescription>You can change all of this later.</DialogDescription>
+            <DialogTitle>{t("books.new")}</DialogTitle>
+            <DialogDescription>{t("books.newDescription")}</DialogDescription>
           </DialogHeader>
           <TextField
             form={form}
             name="title"
-            label="Title"
+            label={t("books.titleField")}
             autoFocus
             onChange={(e) => {
               if (!slugTouched) {
@@ -120,29 +121,24 @@ function CreateBookButton() {
           <TextField
             form={form}
             name="slug"
-            label="Address"
+            label={t("books.address")}
             hint={
               <>
-                The book will be at{" "}
+                {t("books.addressWillBeAt")}{" "}
                 <span className="font-mono">
                   {slug || "…"}
                   {suffixed && "-····"}.{instance?.booksDomain}
                 </span>
-                {suffixed && (
-                  <>
-                    . The ending is the book's own; you can ask for an address without it on the book's
-                    page.
-                  </>
-                )}
+                {suffixed && t("books.addressSuffixHint")}
               </>
             }
             onChange={() => setSlugTouched(true)}
           />
-          <TextAreaField form={form} name="description" label="Description" />
+          <TextAreaField form={form} name="description" label={t("books.descriptionField")} />
           <FormError form={form} />
           <DialogFooter>
             <Button type="submit" disabled={form.formState.isSubmitting}>
-              Create book
+              {t("books.create")}
             </Button>
           </DialogFooter>
         </form>

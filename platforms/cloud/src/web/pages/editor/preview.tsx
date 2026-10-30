@@ -1,5 +1,6 @@
 import { ExternalLinkIcon, RotateCwIcon } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -97,6 +98,7 @@ export function PreviewPane({
   const [rendered, setRendered] = useState<Rendered | null>(null);
   const [rendering, setRendering] = useState(false);
   const [showLog, setShowLog] = useState(false);
+  const { t } = useTranslation();
   const shown = useRef<string | null>(null);
   // Until the hand-off page has logged the frame in, its address must not
   // load again (its code works once): what to show waits here.
@@ -114,7 +116,9 @@ export function PreviewPane({
         // The hand-off page is no page of the book: nothing to keep behind it.
         load(url, true);
       } catch (error) {
-        toast.error(error instanceof Error ? error.message : "Could not open the preview");
+        toast.error(
+          error instanceof Error ? error.message : t("editor.preview.couldNotOpen"),
+        );
       }
     },
     [bookId, load],
@@ -193,7 +197,12 @@ export function PreviewPane({
           if (res.ok) show(res.href);
         } catch (error) {
           if (ticket !== latest.current) return;
-          setRendered({ ok: false, error: error instanceof Error ? error.message : "Could not render the page", log: "" });
+          setRendered({
+            ok: false,
+            error:
+              error instanceof Error ? error.message : t("editor.preview.couldNotRender"),
+            log: "",
+          });
         }
       })();
       await running.current;
@@ -223,16 +232,18 @@ export function PreviewPane({
   return (
     <div className="flex h-full min-h-0 flex-col">
       <div className="flex shrink-0 items-center gap-2 border-b border-border px-2 py-1 text-sm">
-        <span className="font-medium">Preview</span>
-        {rendering && <span className="text-xs text-muted-foreground">Updating…</span>}
+        <span className="font-medium">{t("editor.preview.title")}</span>
+        {rendering && (
+          <span className="text-xs text-muted-foreground">{t("editor.preview.updating")}</span>
+        )}
         {rendered && !rendered.ok && (
           <Badge variant="destructive" className="cursor-pointer" onClick={() => setShowLog(true)}>
-            Could not show the page
+            {t("editor.preview.couldNotShow")}
           </Badge>
         )}
         {rendered?.ok && log && (
           <Badge variant="secondary" className="cursor-pointer" onClick={() => setShowLog((s) => !s)}>
-            Notes on this page
+            {t("editor.preview.notes")}
           </Badge>
         )}
         <span className="flex-1" />
@@ -240,21 +251,23 @@ export function PreviewPane({
           variant="ghost"
           size="icon"
           className="size-7"
-          aria-label="Reload preview"
+          aria-label={t("editor.preview.reload")}
           onClick={() => void handOff(shown.current ?? "/")}
         >
           <RotateCwIcon className="size-4" />
         </Button>
-        <Button variant="ghost" size="icon" className="size-7" aria-label="Open preview in a new tab" onClick={() => void openInTab()}>
+        <Button variant="ghost" size="icon" className="size-7" aria-label={t("editor.preview.openInTab")} onClick={() => void openInTab()}>
           <ExternalLinkIcon className="size-4" />
         </Button>
       </div>
       {showLog && rendered && (rendered.ok ? log : true) && (
         <div className="max-h-48 shrink-0 overflow-auto border-b border-border bg-sidebar px-3 py-2 text-xs">
           <div className="mb-1 flex items-center">
-            <span className="flex-1 font-medium">{rendered.ok ? "Notes from rendering the page" : rendered.error}</span>
+            <span className="flex-1 font-medium">
+              {rendered.ok ? t("editor.preview.notesTitle") : rendered.error}
+            </span>
             <Button variant="ghost" size="sm" className="h-6" onClick={() => setShowLog(false)}>
-              Close
+              {t("editor.preview.close")}
             </Button>
           </div>
           {log && <pre className="whitespace-pre-wrap font-mono">{log}</pre>}
@@ -272,7 +285,7 @@ export function PreviewPane({
                 else elements.current.delete(frame.id);
               }}
               src={frame.src}
-              title="Preview"
+              title={t("editor.preview.title")}
               aria-hidden={!onView}
               tabIndex={onView ? undefined : -1}
               // In the theme from the start: a frame's own light or dark

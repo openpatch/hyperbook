@@ -5,6 +5,7 @@ import {
   FolderIcon,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import { item, openMenu, separator } from "./context-menu";
 import type { FileEntry } from "./files";
@@ -89,6 +90,7 @@ export function FileTree({
   /** Only files whose path matches are shown, as a flat list. */
   filter: string;
 }) {
+  const { t } = useTranslation();
   const tree = useMemo(() => buildTree(files), [files]);
   const [dropTarget, setDropTarget] = useState<string | null>(null);
 
@@ -179,26 +181,26 @@ export function FileTree({
           : node.path.slice(0, Math.max(0, node.path.lastIndexOf("/")));
     openMenu(event.clientX, event.clientY, (box) => {
       if (node === null || node.isFolder) {
-        item(box, "New file", () => actions.newFile(folder));
-        item(box, "New folder", () => actions.newFolder(folder));
-        item(box, "Upload files", () => actions.pickUpload(folder));
+        item(box, t("editor.files.newFile"), () => actions.newFile(folder));
+        item(box, t("editor.files.newFolder"), () => actions.newFolder(folder));
+        item(box, t("editor.files.uploadFiles"), () => actions.pickUpload(folder));
         separator(box);
       }
       if (node && !node.isFolder) {
-        item(box, "Download", () => actions.download(node.path));
+        item(box, t("editor.files.download"), () => actions.download(node.path));
         separator(box);
       }
       if (node) {
-        item(box, "Cut", () => actions.cut(node.path, node.isFolder));
-        item(box, "Copy", () => actions.copy(node.path, node.isFolder));
+        item(box, t("editor.files.cut"), () => actions.cut(node.path, node.isFolder));
+        item(box, t("editor.files.copy"), () => actions.copy(node.path, node.isFolder));
       }
-      item(box, "Paste", () => actions.paste(folder), {
+      item(box, t("editor.files.paste"), () => actions.paste(folder), {
         disabled: clipboard === null,
       });
       if (node) {
         separator(box);
-        item(box, "Rename", () => actions.rename(node.path, node.isFolder));
-        item(box, "Delete", () => actions.remove(node.path, node.isFolder), {
+        item(box, t("editor.files.rename"), () => actions.rename(node.path, node.isFolder));
+        item(box, t("editor.files.delete"), () => actions.remove(node.path, node.isFolder), {
           destructive: true,
         });
       }
@@ -258,7 +260,7 @@ export function FileTree({
             {dirty.has(node.path) && (
               <span
                 className="ml-1 size-2 shrink-0 rounded-full bg-primary"
-                title="Not saved"
+                title={t("editor.files.notSaved")}
               />
             )}
           </button>
@@ -286,7 +288,7 @@ export function FileTree({
       onContextMenu={(e) => showMenu(e, null)}
     >
       {matching ? (
-        <ul aria-label="Files">
+        <ul aria-label={t("editor.files.title")}>
           {matching.map((file) => (
             <li key={file.path}>
               <div
@@ -313,7 +315,7 @@ export function FileTree({
                   {dirty.has(file.path) && (
                     <span
                       className="ml-1 size-2 shrink-0 rounded-full bg-primary"
-                      title="Not saved"
+                      title={t("editor.files.notSaved")}
                     />
                   )}
                 </button>
@@ -322,12 +324,12 @@ export function FileTree({
           ))}
           {matching.length === 0 && (
             <li className="px-2 py-6 text-center text-sm text-muted-foreground">
-              No file matches.
+              {t("editor.files.noMatches")}
             </li>
           )}
         </ul>
       ) : (
-        <ul aria-label="Files">{render(tree, 0)}</ul>
+        <ul aria-label={t("editor.files.title")}>{render(tree, 0)}</ul>
       )}
     </div>
   );

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -20,6 +21,7 @@ export function SecretDialog({
   description: React.ReactNode;
   onClose: () => void;
 }) {
+  const { t } = useTranslation();
   return (
     <Dialog open={secret !== null} onOpenChange={(open) => !open && onClose()}>
       <DialogContent>
@@ -38,9 +40,9 @@ export function SecretDialog({
             variant="outline"
             onClick={() => secret && navigator.clipboard?.writeText(secret)}
           >
-            Copy
+            {t("common.copy")}
           </Button>
-          <Button onClick={onClose}>Done</Button>
+          <Button onClick={onClose}>{t("common.done")}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

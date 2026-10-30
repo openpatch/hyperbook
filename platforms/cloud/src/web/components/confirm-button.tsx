@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -32,6 +33,7 @@ export function ConfirmButton({
 }) {
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
+  const { t } = useTranslation();
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -46,7 +48,7 @@ export function ConfirmButton({
         </DialogHeader>
         <DialogFooter>
           <DialogClose asChild>
-            <Button variant="outline">Cancel</Button>
+            <Button variant="outline">{t("common.cancel")}</Button>
           </DialogClose>
           <Button
             variant={variant}
@@ -57,7 +59,7 @@ export function ConfirmButton({
                 await onConfirm();
                 setOpen(false);
               } catch (error) {
-                toast.error(error instanceof Error ? error.message : "Something went wrong");
+                toast.error(error instanceof Error ? error.message : t("common.somethingWrong"));
               } finally {
                 setBusy(false);
               }

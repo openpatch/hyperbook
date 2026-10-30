@@ -1,6 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { z } from "zod";
 import { addMemberInput, updateBookInput } from "../../shared/schemas";
@@ -33,6 +34,7 @@ import { PublishingSection } from "./publishing";
  * column. The margin of every card is given back to the grid's own gaps.
  */
 export function BookPage() {
+  const { t } = useTranslation();
   const id = useParams().id!;
   const { data: book } = useBook(id);
   const user = useUser();
@@ -50,18 +52,20 @@ export function BookPage() {
             </a>
             {book.source === "hosted" &&
               (book.publishedAt ? (
-                <Badge>Published</Badge>
+                <Badge>{t("book.published")}</Badge>
               ) : (
-                <Badge variant="secondary">Not published</Badge>
+                <Badge variant="secondary">{t("book.notPublished")}</Badge>
               ))}
           </span>
         }
         actions={
           <>
-            {book.visibility === "private" && <Badge variant="secondary">Private</Badge>}
+            {book.visibility === "private" && (
+              <Badge variant="secondary">{t("book.private")}</Badge>
+            )}
             {book.source === "hosted" && (
               <Button asChild>
-                <Link to={`/books/${book.id}/edit`}>Edit book</Link>
+                <Link to={`/books/${book.id}/edit`}>{t("book.edit")}</Link>
               </Button>
             )}
           </>
@@ -100,10 +104,11 @@ const settingsSchema = updateBookInput
   })
   .refine((v) => !v.external || z.url().safeParse(v.externalUrl).success, {
     path: ["externalUrl"],
-    message: "Enter a full URL, starting with https://",
+    message: "validation.fullUrl",
   });
 
 function SettingsSection({ book }: { book: Book }) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const user = useUser();
   const { data: instance } = useInstance();
@@ -142,25 +147,25 @@ function SettingsSection({ book }: { book: Book }) {
       queryClient.setQueryData(["books", String(book.id)], updated);
       await queryClient.invalidateQueries({ queryKey: ["books"], exact: true });
       form.reset({ ...values });
-      toast.success("Saved");
+      toast.success(t("common.saved"));
     } catch (error) {
       applyServerError(form, error);
     }
   });
 
   return (
-    <Section title="Settings">
+    <Section title={t("book.settings")}>
       <form onSubmit={onSubmit} className="grid max-w-xl gap-4" noValidate>
-        <TextField form={form} name="title" label="Title" />
-        <TextAreaField form={form} name="description" label="Description" />
+        <TextField form={form} name="title" label={t("book.titleField")} />
+        <TextAreaField form={form} name="description" label={t("book.descriptionField")} />
         <TextField
           form={form}
           name="slug"
-          label="Address"
+          label={t("book.address")}
           disabled={!mayRename}
           hint={
             suffixed && book.slugGranted ? (
-              "An admin gave the book this address. Ask an admin to change it."
+              t("book.addressAdminHint")
             ) : (
               <>
                 <span className="font-mono">
@@ -169,14 +174,14 @@ function SettingsSection({ book }: { book: Book }) {
                     : slug}
                   .{instance?.booksDomain}
                 </span>
-                . Changing it keeps the old address working as a redirect.
-                {suffixed && " The ending stays the book's own."}
+                {t("book.addressRedirectHint")}
+                {suffixed && t("book.addressSuffixHint")}
               </>
             )
           }
         />
         <div className="grid gap-1.5">
-          <Label htmlFor="book-visibility">Visibility</Label>
+          <Label htmlFor="book-visibility">{t("book.visibility")}</Label>
           <Select
             value={visibility}
             disabled={!isOwner}
@@ -188,16 +193,14 @@ function SettingsSection({ book }: { book: Book }) {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="public">Public: anyone with the link</SelectItem>
+              <SelectItem value="public">{t("book.visibilityPublic")}</SelectItem>
               <SelectItem value="private" disabled={!mayBePrivate}>
-                Private: only logged-in students
+                {t("book.visibilityPrivate")}
               </SelectItem>
             </SelectContent>
           </Select>
           <p id="book-visibility-hint" className="text-sm text-muted-foreground">
-            {mayBePrivate
-              ? "Private books ask students to log in before they can read anything."
-              : "Your account may not make books private. Ask an admin."}
+            {mayBePrivate ? t("book.visibilityPrivateHint") : t("book.visibilityNoPrivate")}
           </p>
         </div>
         <div className="grid gap-3">
@@ -208,24 +211,24 @@ function SettingsSection({ book }: { book: Book }) {
               disabled={!isOwner}
               onCheckedChange={(v) => form.setValue("external", v === true, { shouldDirty: true })}
             />
-            <Label htmlFor="book-external">This book is hosted elsewhere</Label>
+            <Label htmlFor="book-external">{t("book.external")}</Label>
           </div>
           {external && (
             <TextField
               form={form}
               name="externalUrl"
-              label="Address of the book"
+              label={t("book.externalAddress")}
               type="url"
               placeholder="https://example.github.io/physics/"
               disabled={!isOwner}
-              hint="For example on GitHub Pages. Student accounts work there too."
+              hint={t("book.externalHint")}
             />
           )}
         </div>
         <FormError form={form} />
         <div>
           <Button type="submit" disabled={form.formState.isSubmitting}>
-            Save
+            {t("common.save")}
           </Button>
         </div>
       </form>
@@ -234,6 +237,7 @@ function SettingsSection({ book }: { book: Book }) {
 }
 
 function MembersSection({ book }: { book: Book }) {
+  const { t } = useTranslation();
   const user = useUser();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -250,23 +254,23 @@ function MembersSection({ book }: { book: Book }) {
       await action();
       await queryClient.invalidateQueries({ queryKey: key });
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Something went wrong");
+      toast.error(error instanceof Error ? error.message : t("common.somethingWrong"));
     }
   };
 
   return (
     <Section
-      title="People"
-      description="Owners manage everything. Editors work on the book and its students."
+      title={t("book.people")}
+      description={t("book.peopleDescription")}
     >
       <Table className="mb-4">
         <TableHeader>
           <TableRow>
-            <TableHead>Email</TableHead>
-            <TableHead>Name</TableHead>
-            <TableHead>Role</TableHead>
+            <TableHead>{t("users.email")}</TableHead>
+            <TableHead>{t("users.name")}</TableHead>
+            <TableHead>{t("users.role")}</TableHead>
             <TableHead>
-              <span className="sr-only">Actions</span>
+              <span className="sr-only">{t("common.actions")}</span>
             </TableHead>
           </TableRow>
         </TableHeader>
@@ -290,18 +294,18 @@ function MembersSection({ book }: { book: Book }) {
                       )
                     }
                   >
-                    <SelectTrigger size="sm" aria-label={`Role of ${m.email}`}>
+                    <SelectTrigger size="sm" aria-label={t("book.roleOf", { email: m.email })}>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="owner">Owner</SelectItem>
-                      <SelectItem value="editor">Editor</SelectItem>
+                      <SelectItem value="owner">{t("book.owner")}</SelectItem>
+                      <SelectItem value="editor">{t("book.editor")}</SelectItem>
                     </SelectContent>
                   </Select>
                 ) : m.role === "owner" ? (
-                  "Owner"
+                  t("book.owner")
                 ) : (
-                  "Editor"
+                  t("book.editor")
                 )}
               </TableCell>
               <TableCell className="text-right">
@@ -323,7 +327,7 @@ function MembersSection({ book }: { book: Book }) {
                       })
                     }
                   >
-                    {m.userId === user.id ? "Leave" : "Remove"}
+                    {m.userId === user.id ? t("book.leave") : t("book.remove")}
                   </Button>
                 )}
               </TableCell>
@@ -337,6 +341,7 @@ function MembersSection({ book }: { book: Book }) {
 }
 
 function AddMemberForm({ bookId, onAdded }: { bookId: string; onAdded: () => void }) {
+  const { t } = useTranslation();
   const form = useZodForm(addMemberInput, { defaultValues: { email: "", role: "editor" } });
   const onSubmit = form.handleSubmit(async (json) => {
     try {
@@ -352,12 +357,12 @@ function AddMemberForm({ bookId, onAdded }: { bookId: string; onAdded: () => voi
       <TextField
         form={form}
         name="email"
-        label="Add a teacher by email"
+        label={t("book.addTeacher")}
         type="email"
         className="min-w-60 flex-1"
       />
       <Button type="submit" variant="outline" disabled={form.formState.isSubmitting}>
-        Add as editor
+        {t("book.addAsEditor")}
       </Button>
       <div className="basis-full">
         <FormError form={form} />
@@ -367,25 +372,26 @@ function AddMemberForm({ bookId, onAdded }: { bookId: string; onAdded: () => voi
 }
 
 function DeleteSection({ book }: { book: Book }) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   return (
     <Section
-      title="Delete book"
-      description="The book, its groups and all its student accounts are deleted. This cannot be undone."
+      title={t("book.delete")}
+      description={t("book.deleteDescription")}
       className="border-destructive/40"
     >
       <ConfirmButton
-        title={`Delete “${book.title}”?`}
-        description="The book, its groups and all its student accounts are deleted. This cannot be undone."
-        confirmLabel="Delete book"
+        title={t("book.deleteTitle", { title: book.title })}
+        description={t("book.deleteDescription")}
+        confirmLabel={t("book.delete")}
         onConfirm={async () => {
           await unwrap(api.books[":id"].$delete({ param: { id: String(book.id) } }));
           await queryClient.invalidateQueries({ queryKey: ["books"] });
           navigate("/books");
         }}
       >
-        Delete book
+        {t("book.delete")}
       </ConfirmButton>
     </Section>
   );

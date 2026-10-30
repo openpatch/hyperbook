@@ -41,7 +41,7 @@ export function applyServerError<T extends FieldValues>(
     return;
   }
   form.setError("root" as Path<T>, {
-    message: error instanceof Error ? error.message : "Something went wrong",
+    message: error instanceof Error ? error.message : "common.somethingWrong",
   });
 }
 

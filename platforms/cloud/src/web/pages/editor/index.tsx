@@ -14,6 +14,7 @@ import {
 import type { EditorView } from "@codemirror/view";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useBlocker, useParams } from "react-router";
+import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import type { FileChange } from "../../../shared/schemas";
 import { type Reference, rewriteText } from "../../../shared/references";
@@ -76,6 +77,7 @@ import {
 } from "./workspace";
 
 export function Component() {
+  const { t } = useTranslation();
   const id = useParams().id!;
   const { data: book } = useBook(id);
   const { data: listing } = useQuery({
@@ -86,7 +88,7 @@ export function Component() {
   if (book.source === "external") {
     return (
       <Centered>
-        <p>This book is hosted elsewhere, so it is not edited here.</p>
+        <p>{t("editor.start.external")}</p>
         <BackLink book={book} />
       </Centered>
     );
@@ -116,6 +118,7 @@ function BackLink({ book }: { book: Book }) {
 
 /** A new book has no files: start from a template (or upload a zip on the book page). */
 function StartBook({ book }: { book: Book }) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [busy, setBusy] = useState(false);
   const start = async (template: "default" | "empty") => {
@@ -132,36 +135,33 @@ function StartBook({ book }: { book: Book }) {
         files: res.files,
       });
     } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Something went wrong",
-      );
+      toast.error(error instanceof Error ? error.message : t("common.somethingWrong"));
       setBusy(false);
     }
   };
   return (
     <Centered>
-      <h1 className="text-2xl">{book.title} has no files yet</h1>
-      <p className="text-muted-foreground">
-        Start with a few example pages, or with a single empty page.
-      </p>
+      <h1 className="text-2xl">{t("editor.start.noFiles", { title: book.title })}</h1>
+      <p className="text-muted-foreground">{t("editor.start.hint")}</p>
       <div className="flex justify-center gap-2">
         <Button disabled={busy} onClick={() => void start("default")}>
-          Example pages
+          {t("editor.start.examplePages")}
         </Button>
         <Button
           variant="outline"
           disabled={busy}
           onClick={() => void start("empty")}
         >
-          Empty book
+          {t("editor.start.emptyBook")}
         </Button>
       </div>
       <p className="text-sm text-muted-foreground">
-        Have a book already? Upload it as a zip on the{" "}
-        <Link to={`/books/${book.id}`} className="text-primary hover:underline">
-          book's page
-        </Link>
-        .
+        <Trans
+          i18nKey="editor.start.haveBook"
+          components={{
+            a: <Link to={`/books/${book.id}`} className="text-primary hover:underline" />,
+          }}
+        />
       </p>
     </Centered>
   );
@@ -179,6 +179,7 @@ const foldersOf = (path: string) =>
     .map((_, i, all) => all.slice(0, i + 1).join("/"));
 
 function Editor({ book, listing }: { book: Book; listing: Listing }) {
+  const { t } = useTranslation();
   const bookId = String(book.id);
   const ws = useWorkspace(bookId, listing);
   const { data: builds } = useBuilds(bookId);
@@ -266,11 +267,14 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
       : "book";
     const path = `${dir}/${block.src.replace(/^\//, "")}`;
     setChoice({
-      title: `Create ${block.src}?`,
-      description: `"${block.src}" is not in the book yet. It is created next to ${page} and opens in its own tab.`,
+      title: t("editor.actions.createTitle", { name: block.src }),
+      description: t("editor.actions.createDescription", {
+        name: block.src,
+        page,
+      }),
       choices: [
         {
-          label: "Create",
+          label: t("editor.actions.create"),
           run: () =>
             void commitAndOpen(
               [
@@ -305,11 +309,11 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
   useEffect(() => {
     if (blocker.state !== "blocked") return;
     setChoice({
-      title: "Leave without saving?",
-      description: `${ws.dirty.size} file(s) have changes that are not saved.`,
+      title: t("editor.actions.leaveTitle"),
+      description: t("editor.actions.leaveDescription", { count: ws.dirty.size }),
       choices: [
         {
-          label: "Leave",
+          label: t("editor.actions.leave"),
           variant: "destructive",
           run: () => blocker.proceed(),
         },
@@ -391,9 +395,7 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
   }, []);
 
   const fail = (error: unknown) =>
-    toast.error(
-      error instanceof Error ? error.message : "Something went wrong",
-    );
+    toast.error(error instanceof Error ? error.message : t("common.somethingWrong"));
 
   /** Adds a word to the book's dictionary; the pages re-check. */
   const addWord = useCallback(
@@ -401,7 +403,7 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
       try {
         const res = await addDictionaryWord(bookId, word);
         queryClient.setQueryData(["books", bookId, "dictionary"], res);
-        toast.success(`“${word}” was added to the dictionary.`);
+        toast.success(t("editor.actions.addedWordToast", { word }));
       } catch (error) {
         fail(error);
       }
@@ -433,7 +435,9 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
       const kind = visualKind(tab.path);
       const problem = kind && visualProblem(kind, tab.text!);
       if (problem)
-        return fail(new Error(`${tab.path} was not saved. ${problem}`));
+        return fail(
+          new Error(t("editor.actions.savedProblem", { path: tab.path, problem })),
+        );
     }
     try {
       await ws.save(paths);
@@ -444,31 +448,28 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
       const oid = (p: string) =>
         current.files.find((f) => f.path === p)?.oid ?? null;
       setChoice({
-        title: "Someone else saved in the meantime",
+        title: t("editor.actions.conflictTitle"),
         description: (
           <>
-            <p>These files were changed since you opened them:</p>
+            <p>{t("editor.actions.conflictIntro")}</p>
             <ul className="my-2 list-disc pl-5 font-mono text-sm">
               {conflicts.map((p) => (
                 <li key={p}>{p}</li>
               ))}
             </ul>
-            <p>
-              Keep your version as a copy, replace theirs with yours, or drop
-              your changes.
-            </p>
+            <p>{t("editor.actions.conflictOutro")}</p>
           </>
         ),
         choices: [
           {
-            label: "Drop mine",
+            label: t("editor.actions.dropMine"),
             variant: "outline",
             run: async () => {
               await Promise.all(conflicts.map((p) => ws.reload(p)));
             },
           },
           {
-            label: "Save mine as a copy",
+            label: t("editor.actions.saveMineAsCopy"),
             variant: "outline",
             run: async () => {
               const taken = (p: string) =>
@@ -486,14 +487,14 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
                   })),
                 );
                 await Promise.all(conflicts.map((p) => ws.reload(p)));
-                toast.success("Your version was saved as a copy.");
+                toast.success(t("editor.actions.savedAsCopyToast"));
               } catch (err) {
                 fail(err);
               }
             },
           },
           {
-            label: "Replace theirs",
+            label: t("editor.actions.replaceTheirs"),
             variant: "destructive",
             run: async () => {
               try {
@@ -514,7 +515,7 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
   const busyFiles = (paths: string[]) => {
     const unsaved = paths.filter((p) => ws.dirty.has(p));
     if (unsaved.length > 0) {
-      toast.error(`Save or close ${unsaved[0]} first.`);
+      toast.error(t("editor.actions.saveFirst", { path: unsaved[0] }));
       return true;
     }
     return false;
@@ -526,9 +527,11 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
       .map((f) => f.path);
 
   const commitAndOpen = async (changes: FileChange[], open?: string) => {
-    await ws.commit(changes).catch((error) => {
+    await ws.commit(changes).catch((error: unknown) => {
       throw error instanceof ConflictError
-        ? new Error(`${error.paths[0]} exists already`)
+        ? new Error(
+            t("editor.actions.existsAlready", { path: error.paths[0] }),
+          )
         : error;
     });
     if (open) ws.open(open);
@@ -537,7 +540,7 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
   const failCommit = (error: unknown) => {
     fail(
       error instanceof ConflictError
-        ? new Error("Someone else changed these files; try again.")
+        ? new Error(t("editor.actions.changedElsewhere"))
         : error,
     );
   };
@@ -592,8 +595,9 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
   const moveWithReferences = async (
     from: string,
     moves: Map<string, string>,
-    label: "Rename" | "Move",
+    kind: "rename" | "move",
   ) => {
+    const label = t(kind === "rename" ? "editor.files.rename" : "editor.files.move");
     let scanned: ReferencesResult;
     try {
       scanned = await fetchReferences(bookId, from);
@@ -605,37 +609,45 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
     // Unsaved changes in a referencing page cannot be rewritten safely.
     const dirty = scanned.files.filter((f) => ws.dirty.has(f.path)).map((f) => f.path);
     if (dirty.length > 0) {
-      toast.error(`Save or close ${dirty[0]} first; it references ${from}.`);
+      toast.error(
+        t("editor.actions.saveFirstReferencing", { path: dirty[0], from }),
+      );
       return;
     }
     const texts = Object.fromEntries(scanned.files.map((f) => [f.path, f.text]));
     const count = scanned.references.length;
+    const lead =
+      count === 1 && scanned.files.length === 1
+        ? t("editor.actions.moveLead_one", { path: from })
+        : t("editor.actions.moveLead_other", {
+            count,
+            pages: scanned.files.length,
+            path: from,
+          });
     setRefactor({
-      title: `${label} ${from}?`,
-      lead: (
-        <p>
-          {count} place{count === 1 ? "" : "s"} in {scanned.files.length} page
-          {scanned.files.length === 1 ? "" : "s"} point{scanned.files.length === 1 && count === 1 ? "s" : ""} at {from}.{" "}
-          Moving it rewrites their addresses to the new path, or leaves them as they are.
-        </p>
-      ),
+      title: t("editor.actions.moveTitle", { label, path: from }),
+      lead: <p>{lead}</p>,
       references: scanned.references,
       texts,
       choices: [
         {
-          label: `${label} without updating`,
+          label: t("editor.actions.moveWithout", { label }),
           variant: "outline",
           run: () => commitMoves(moves).catch(failCommit),
         },
         {
-          label: `${label} and update ${count} reference${count === 1 ? "" : "s"}`,
+          label: t("editor.actions.moveAndUpdate", { label, count }),
           run: async () => {
             const writes = updateWrites(scanned, moveOf(moves));
             try {
               await commitMoves(moves, writes, `${label} ${from}`);
               for (const w of writes)
                 if (ws.tabs.some((t) => t.path === w.path)) void ws.reload(w.path);
-              toast.success(`${label}d ${from}; ${count} reference${count === 1 ? "" : "s"} updated.`);
+              toast.success(
+                kind === "rename"
+                  ? t("editor.actions.renamedToast", { path: from, count })
+                  : t("editor.actions.movedToast", { path: from, count }),
+              );
             } catch (error) {
               failCommit(error);
             }
@@ -664,8 +676,8 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
         if (ws.tabs.some((t) => t.path === ch.path)) void ws.reload(ch.path);
       toast.success(
         files.length === 1
-          ? `Uploaded ${files[0]!.name}`
-          : `Uploaded ${files.length} files`,
+          ? t("editor.actions.uploadedToast_one", { name: files[0]!.name })
+          : t("editor.actions.uploadedToast_other", { count: files.length }),
       );
       return true;
     } catch (error) {
@@ -684,12 +696,11 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
     },
     newFile: (folder: string) =>
       setPathRequest({
-        title: "New file",
-        description:
-          "Pages are Markdown files (.md, or .md.hbs as a template) in the book folder.",
-        label: "Path",
+        title: t("editor.actions.newFileTitle"),
+        description: t("editor.actions.newFileDescription"),
+        label: t("editor.actions.pathLabel"),
         initial: join(folder, "new-page.md"),
-        submitLabel: "Create",
+        submitLabel: t("editor.actions.create"),
         onSubmit: (path) =>
           commitAndOpen(
             [{ op: "write", path, content: starter(path), encoding: starterEncoding(path), baseOid: null }],
@@ -698,12 +709,11 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
       }),
     newFolder: (folder: string) =>
       setPathRequest({
-        title: "New folder",
-        description:
-          "A folder exists through its files, so it starts with an index.md page.",
-        label: "Folder",
+        title: t("editor.actions.newFolderTitle"),
+        description: t("editor.actions.newFolderDescription"),
+        label: t("editor.actions.folderLabel"),
         initial: join(folder, "chapter"),
-        submitLabel: "Create",
+        submitLabel: t("editor.actions.create"),
         onSubmit: (path) => {
           const index = `${path}/index.md`;
           return commitAndOpen(
@@ -730,17 +740,19 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
       if (busyFiles(affected)) return;
       // Only the name: moving is dragging, or Cut and Paste.
       setPathRequest({
-        title: isFolder ? "Rename folder" : "Rename file",
-        label: "Name",
+        title: isFolder
+          ? t("editor.actions.renameFolderTitle")
+          : t("editor.actions.renameFileTitle"),
+        label: t("editor.actions.nameLabel"),
         initial: path.split("/").pop()!,
         folder: parentOf(path),
-        submitLabel: "Rename",
+        submitLabel: t("editor.actions.rename"),
         onSubmit: async (to) => {
           if (to === path) return;
           const moves = new Map(
             affected.map((p) => [p, to + p.slice(path.length)]),
           );
-          await moveWithReferences(path, moves, "Rename");
+          await moveWithReferences(path, moves, "rename");
         },
       });
     },
@@ -768,33 +780,38 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
           return fail(error);
         }
         const base = isFolder
-          ? `This deletes the folder and its ${affected.length} file(s). Older versions stay in the book's history.`
-          : "Older versions stay in the book's history.";
+          ? t("editor.actions.deleteFolderDescription", { count: affected.length })
+          : t("editor.actions.deleteFileDescription");
         if (scanned.references.length === 0)
           return setChoice({
-            title: `Delete ${path}?`,
+            title: t("editor.actions.deleteTitle", { path }),
             description: base,
             choices: [
-              { label: "Delete", variant: "destructive", run: deleteThem },
+              {
+                label: t("common.delete"),
+                variant: "destructive",
+                run: deleteThem,
+              },
             ],
           });
         const count = scanned.references.length;
+        const lead =
+          count === 1 && scanned.files.length === 1
+            ? t("editor.actions.deleteLead_one")
+            : t("editor.actions.deleteLead_other", {
+                count,
+                pages: scanned.files.length,
+              });
         setRefactor({
-          title: `Delete ${path}?`,
-          lead: (
-            <p>
-              {base} {count} place{count === 1 ? "" : "s"} in {scanned.files.length} page
-              {scanned.files.length === 1 ? "" : "s"} point{count === 1 && scanned.files.length === 1 ? "s" : ""} at it and
-              will break:
-            </p>
-          ),
+          title: t("editor.actions.deleteTitle", { path }),
+          lead: <p>{base} {lead}</p>,
           references: scanned.references,
           texts: Object.fromEntries(
             scanned.files.map((f) => [f.path, f.text]),
           ),
           choices: [
             {
-              label: `Delete anyway (${count} reference${count === 1 ? "" : "s"} break${count === 1 ? "s" : ""})`,
+              label: t("editor.actions.deleteAnyway", { count }),
               variant: "destructive",
               run: deleteThem,
             },
@@ -807,13 +824,13 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
       const dest = to ? `${to}/${name}` : name;
       if (dest === from) return; // Dropped where it already is.
       if (isFolder && (to === from || to.startsWith(from + "/")))
-        return toast.error("A folder cannot be moved into itself.");
+        return toast.error(t("editor.actions.folderIntoItself"));
       const affected = isFolder ? filesIn(from) : [from];
       if (affected.length === 0 || busyFiles(affected)) return;
       const moves = new Map(
         affected.map((p) => [p, dest + p.slice(from.length)]),
       );
-      void moveWithReferences(from, moves, "Move");
+      void moveWithReferences(from, moves, "move");
     },
     copy: (path: string, isFolder: boolean) =>
       setTreeClipboard({ path, isFolder, cut: false }),
@@ -829,7 +846,7 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
       }
       const affected = clip.isFolder ? filesIn(clip.path) : [clip.path];
       if (affected.length === 0)
-        return toast.error(`${clip.path} does not exist anymore.`);
+        return toast.error(t("editor.actions.gone", { path: clip.path }));
       if (busyFiles(affected)) return;
       // Next to the original, or anywhere its name is taken, a copy's name.
       const taken = (p: string) =>
@@ -840,7 +857,8 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
         const changes = await Promise.all(
           affected.map(async (from): Promise<FileChange> => {
             const res = await fetch(rawUrl(bookId, from));
-            if (!res.ok) throw new Error(`Could not copy ${from}`);
+            if (!res.ok)
+              throw new Error(t("editor.actions.couldNotCopy", { path: from }));
             return {
               op: "write",
               path: dest + from.slice(clip.path.length),
@@ -860,16 +878,16 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
   const closeTab = (tab: Tab) => {
     if (!isDirty(tab)) return ws.close(tab.path);
     setChoice({
-      title: `Close ${tab.path}?`,
-      description: "Your changes to this file are not saved.",
+      title: t("editor.actions.closeTitle", { path: tab.path }),
+      description: t("editor.actions.closeDescription"),
       choices: [
         {
-          label: "Close without saving",
+          label: t("editor.actions.closeWithoutSaving"),
           variant: "destructive",
           run: () => ws.close(tab.path),
         },
         {
-          label: "Save and close",
+          label: t("editor.actions.saveAndClose"),
           run: async () => {
             await save([tab.path]);
             ws.close(tab.path);
@@ -882,12 +900,16 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
   const onPublish = (publish: () => Promise<void>) => {
     if (!hasUnsaved) return void publish();
     setChoice({
-      title: "Publish with unsaved changes?",
-      description: "Only saved changes are published.",
+      title: t("editor.actions.publishUnsavedTitle"),
+      description: t("editor.actions.publishUnsavedDescription"),
       choices: [
-        { label: "Publish saved version", variant: "outline", run: publish },
         {
-          label: "Save all and publish",
+          label: t("editor.actions.publishSavedVersion"),
+          variant: "outline",
+          run: publish,
+        },
+        {
+          label: t("editor.actions.saveAllAndPublish"),
           run: async () => {
             await save([...ws.dirty]);
             await publish();
@@ -912,7 +934,7 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
             if (!busyFiles(["hyperbook.json"])) setShowSettings(true);
           }}
         >
-          Book settings
+          {t("editor.toolbar.bookSettings")}
         </Button>
         <Button
           size="sm"
@@ -920,7 +942,7 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
           disabled={!hasUnsaved}
           onClick={() => void save([...ws.dirty])}
         >
-          Save all
+          {t("editor.toolbar.saveAll")}
         </Button>
         <PublishButton
           bookId={bookId}
@@ -936,7 +958,7 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
             variant="ghost"
             className="size-8"
             aria-label={
-              showAi ? "Hide the AI assistant" : "Show the AI assistant"
+              showAi ? t("editor.toolbar.hideAi") : t("editor.toolbar.showAi")
             }
             aria-pressed={showAi}
             onClick={() => setShowAi((v) => !v)}
@@ -948,7 +970,7 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
           size="icon"
           variant="ghost"
           className="size-8"
-          aria-label={showPreview ? "Hide preview" : "Show preview"}
+          aria-label={showPreview ? t("editor.toolbar.hidePreview") : t("editor.toolbar.showPreview")}
           aria-pressed={showPreview}
           onClick={() => setShowPreview((v) => !v)}
         >
@@ -970,12 +992,12 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
           style={sidebarWidth === null ? undefined : { width: sidebarWidth }}
         >
           <div className="flex items-center gap-1 border-b border-sidebar-border px-2 py-1">
-            <span className="flex-1 text-sm font-medium">Files</span>
+            <span className="flex-1 text-sm font-medium">{t("editor.files.title")}</span>
             <Button
               variant="ghost"
               size="icon"
               className="size-7"
-              aria-label="Expand all folders"
+              aria-label={t("editor.files.expandAll")}
               disabled={treeFilter.trim() !== ""}
               onClick={() => setTreeCollapsed(new Set())}
             >
@@ -985,7 +1007,7 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
               variant="ghost"
               size="icon"
               className="size-7"
-              aria-label="Collapse all folders"
+              aria-label={t("editor.files.collapseAll")}
               disabled={treeFilter.trim() !== ""}
               onClick={() =>
                 setTreeCollapsed(
@@ -999,7 +1021,7 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
               variant="ghost"
               size="icon"
               className="size-7"
-              aria-label="New file"
+              aria-label={t("editor.files.newFile")}
               onClick={() =>
                 actions.newFile(ws.active ? parentOf(ws.active) : "book")
               }
@@ -1010,7 +1032,7 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
               variant="ghost"
               size="icon"
               className="size-7"
-              aria-label="New folder"
+              aria-label={t("editor.files.newFolder")}
               onClick={() =>
                 actions.newFolder(ws.active ? parentOf(ws.active) : "book")
               }
@@ -1021,7 +1043,7 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
               variant="ghost"
               size="icon"
               className="size-7"
-              aria-label="Upload files"
+              aria-label={t("editor.files.uploadFiles")}
               onClick={() =>
                 actions.pickUpload(ws.active ? parentOf(ws.active) : "book")
               }
@@ -1038,8 +1060,8 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
               <Input
                 value={treeFilter}
                 onChange={(e) => setTreeFilter(e.target.value)}
-                placeholder="Filter files"
-                aria-label="Filter files"
+                placeholder={t("editor.files.filter")}
+                aria-label={t("editor.files.filter")}
                 className="h-7 pl-7 text-sm"
               />
             </div>
@@ -1058,7 +1080,7 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
           </div>
         </aside>
         <Splitter
-          label="Resize the file list"
+          label={t("editor.toolbar.resizeFiles")}
           pane={sidebarRef}
           direction={1}
           onResize={setSidebarWidth}
@@ -1093,14 +1115,14 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
                   {isDirty(tab) && (
                     <span
                       className="ml-1.5 inline-block size-2 rounded-full bg-primary"
-                      title="Not saved"
+                      title={t("editor.files.notSaved")}
                     />
                   )}
                 </button>
                 <button
                   type="button"
                   className="mr-1 rounded p-0.5 opacity-60 hover:bg-accent hover:opacity-100"
-                  aria-label={`Close ${tab.path}`}
+                  aria-label={t("editor.tabs.close", { path: tab.path })}
                   onClick={() => closeTab(tab)}
                 >
                   <XIcon className="size-3.5" />
@@ -1143,7 +1165,7 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
             ))}
             {!activeTab && (
               <p className="p-8 text-center text-muted-foreground">
-                Open a file from the list on the left, or press Ctrl+P.
+                {t("editor.tabs.noFileOpen")}
               </p>
             )}
           </div>
@@ -1152,7 +1174,7 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
         {showAi && aiAvailable && (
           <>
             <Splitter
-              label="Resize the AI assistant"
+              label={t("editor.toolbar.resizeAi")}
               pane={aiRef}
               direction={-1}
               onResize={setAiWidth}
@@ -1162,7 +1184,7 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
               ref={aiRef}
               className="w-[360px] shrink-0 border-l border-border bg-sidebar"
               style={aiWidth === null ? undefined : { width: aiWidth }}
-              aria-label="AI assistant"
+              aria-label={t("editor.toolbar.ai")}
             >
               <AiPanel
                 bookId={book.id}
@@ -1183,7 +1205,7 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
         {showPreview && (
           <>
             <Splitter
-              label="Resize the preview"
+              label={t("editor.toolbar.resizePreview")}
               pane={previewRef}
               direction={-1}
               onResize={setPreviewWidth}
@@ -1198,7 +1220,7 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
                   ? undefined
                   : { width: previewWidth, maxWidth: "none" }
               }
-              aria-label="Preview"
+              aria-label={t("editor.toolbar.preview")}
             >
               <LivePreview
                 ws={ws}
@@ -1230,7 +1252,7 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
         type="file"
         multiple
         className="sr-only"
-        aria-label="Choose files to upload"
+        aria-label={t("editor.files.chooseFiles")}
         onChange={(e) => {
           const files = [...(e.target.files ?? [])];
           e.target.value = "";
@@ -1301,16 +1323,16 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
           try {
             await ws.commit(
               [{ op: "write", path: "hyperbook.json", content, baseOid }],
-              "Change the book's settings",
+              t("editor.actions.settingsCommit"),
             );
           } catch (error) {
             throw error instanceof ConflictError
-              ? new Error("Someone else changed the settings; open them again.")
+              ? new Error(t("editor.actions.settingsConflict"))
               : error;
           }
           if (ws.tabs.some((t) => t.path === "hyperbook.json"))
             void ws.reload("hyperbook.json");
-          toast.success("Settings saved.");
+          toast.success(t("editor.actions.settingsSavedToast"));
         }}
       />
     </div>
@@ -1365,6 +1387,7 @@ function TabContent({
   onReplace: () => void;
   onDownload: () => void;
 }) {
+  const { t } = useTranslation();
   const viewRef = useRef<EditorView | null>(null);
   const [pageSettings, setPageSettings] = useState<{
     view: EditorView;
@@ -1372,7 +1395,7 @@ function TabContent({
     path: string;
   } | null>(null);
   if (tab.status === "loading")
-    return <p className="p-4 text-muted-foreground">Loading…</p>;
+    return <p className="p-4 text-muted-foreground">{t("common.loading")}</p>;
   if (tab.status === "error")
     return <p className="p-4 text-destructive">{tab.error}</p>;
   const loaded = tab.loaded!;
@@ -1454,9 +1477,7 @@ function TabContent({
         />
       ) : (
         <p className="max-w-md text-center text-muted-foreground">
-          {extension(tab.path) === "h5p"
-            ? "H5P content is made in an H5P editor (e.g. Lumi or ZUM Apps) and replaced here. It plays in the preview of the pages that show it."
-            : "This file cannot be edited here."}
+          {extension(tab.path) === "h5p" ? t("editor.tabs.h5p") : t("editor.tabs.cannotEdit")}
         </p>
       )}
       <p className="text-sm text-muted-foreground">
@@ -1464,10 +1485,10 @@ function TabContent({
       </p>
       <div className="flex gap-2">
         <Button variant="outline" size="sm" onClick={onDownload}>
-          Download
+          {t("editor.tabs.download")}
         </Button>
         <Button variant="outline" size="sm" onClick={onReplace}>
-          Replace…
+          {t("editor.tabs.replace")}
         </Button>
       </div>
     </div>
@@ -1489,6 +1510,7 @@ function VisualOrSource({
   onChange: (text: string) => void;
   onSave: () => void;
 }) {
+  const { t } = useTranslation();
   const [mode, setMode] = useState<"visual" | "source">("visual");
   const text = useLiveText(ws, tab.path)!;
   const problem = visualProblem(kind, text);
@@ -1497,7 +1519,7 @@ function VisualOrSource({
       <div
         className="flex shrink-0 items-center gap-1 border-b border-border px-2 py-1"
         role="group"
-        aria-label="View"
+        aria-label={t("editor.tabs.view")}
       >
         {(["visual", "source"] as const).map((m) => (
           <Button
@@ -1509,7 +1531,7 @@ function VisualOrSource({
             title={m === "visual" && problem ? problem : undefined}
             onClick={() => setMode(m)}
           >
-            {m === "visual" ? "Visual" : "Source"}
+            {m === "visual" ? t("editor.tabs.visual") : t("editor.tabs.source")}
           </Button>
         ))}
       </div>

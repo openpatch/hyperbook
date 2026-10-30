@@ -1,4 +1,5 @@
 import { useId, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,6 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import type { MessageKey } from "../../shared/i18n";
 
 export type Entitlements = {
   private_books: boolean;
@@ -24,40 +26,45 @@ export type Overrides = Partial<Entitlements>;
 const FLAGS = [
   {
     key: "private_books",
-    label: "Private books",
-    hint: "May make a book visible only to its logged-in students.",
+    label: "entitlements.privateBooks" as MessageKey,
+    hint: "entitlements.privateBooksHint" as MessageKey,
   },
   {
     key: "custom_domain",
-    label: "Custom domains",
-    hint: "May serve a book on its own domain (not available yet).",
+    label: "entitlements.customDomains" as MessageKey,
+    hint: "entitlements.customDomainsHint" as MessageKey,
   },
   {
     key: "ai",
-    label: "AI assistant",
-    hint: "May use the AI writing assistant in the editor (needs the instance to be configured for it).",
+    label: "entitlements.ai" as MessageKey,
+    hint: "entitlements.aiHint" as MessageKey,
   },
 ] as const;
 
 const LIMITS = [
-  { key: "max_books", label: "Books", unit: "books", hint: "How many books the user may own." },
+  {
+    key: "max_books",
+    label: "entitlements.maxBooks" as MessageKey,
+    unit: "entitlements.booksUnit" as MessageKey,
+    hint: "entitlements.maxBooksHint" as MessageKey,
+  },
   {
     key: "max_storage_mb",
-    label: "Storage",
-    unit: "MB",
-    hint: "Space for all owned books (enforced once books are hosted).",
+    label: "entitlements.storage" as MessageKey,
+    unit: "entitlements.mbUnit" as MessageKey,
+    hint: "entitlements.storageHint" as MessageKey,
   },
   {
     key: "ai_requests_per_day",
-    label: "AI requests",
-    unit: "/ day",
-    hint: "How many AI requests the user may make per day.",
+    label: "entitlements.aiRequests" as MessageKey,
+    unit: "entitlements.perDayUnit" as MessageKey,
+    hint: "entitlements.aiRequestsHint" as MessageKey,
   },
   {
     key: "ai_tokens_per_week",
-    label: "AI credits",
-    unit: "/ week",
-    hint: "AI tokens per week, counted times the model's weight (AI_MODEL_WEIGHTS); the week starts on Monday (UTC).",
+    label: "entitlements.aiCredits" as MessageKey,
+    unit: "entitlements.perWeekUnit" as MessageKey,
+    hint: "entitlements.aiCreditsHint" as MessageKey,
   },
 ] as const;
 
@@ -68,7 +75,7 @@ const LIMITS = [
 export function EntitlementsEditor({
   value,
   defaults,
-  defaultLabel = "Instance default",
+  defaultLabel,
   onSave,
 }: {
   value: Overrides;
@@ -76,6 +83,7 @@ export function EntitlementsEditor({
   defaultLabel?: string;
   onSave: (overrides: Overrides) => Promise<void>;
 }) {
+  const { t } = useTranslation();
   const [draft, setDraft] = useState<Overrides>(value);
   const [saving, setSaving] = useState(false);
   const set = (key: keyof Entitlements, v: Entitlements[keyof Entitlements] | undefined) =>
@@ -85,6 +93,8 @@ export function EntitlementsEditor({
       else (next as Record<string, unknown>)[key] = v;
       return next;
     });
+
+  const fallbackLabel = defaultLabel ?? t("entitlements.instanceDefault");
 
   return (
     <form
@@ -102,13 +112,16 @@ export function EntitlementsEditor({
       {FLAGS.map(({ key, label, hint }) => (
         <ChoiceRow
           key={key}
-          label={label}
-          hint={hint}
+          label={t(label)}
+          hint={t(hint)}
           value={draft[key] === undefined ? "default" : draft[key] ? "yes" : "no"}
           options={[
-            { value: "default", label: `${defaultLabel} (${defaults[key] ? "allowed" : "not allowed"})` },
-            { value: "yes", label: "Allowed" },
-            { value: "no", label: "Not allowed" },
+            {
+              value: "default",
+              label: `${fallbackLabel} (${defaults[key] ? t("entitlements.allowed") : t("entitlements.notAllowed")})`,
+            },
+            { value: "yes", label: t("entitlements.yes") },
+            { value: "no", label: t("entitlements.no") },
           ]}
           onChange={(v) => set(key, v === "default" ? undefined : v === "yes")}
         />
@@ -120,16 +133,16 @@ export function EntitlementsEditor({
         return (
           <ChoiceRow
             key={key}
-            label={label}
-            hint={hint}
+            label={t(label)}
+            hint={t(hint)}
             value={mode}
             options={[
               {
                 value: "default",
-                label: `${defaultLabel} (${fallback === null ? "unlimited" : `${fallback} ${unit}`})`,
+                label: `${fallbackLabel} (${fallback === null ? t("entitlements.unlimited") : `${fallback} ${t(unit)}`})`,
               },
-              { value: "unlimited", label: "Unlimited" },
-              { value: "limit", label: "Limited to…" },
+              { value: "unlimited", label: t("entitlements.unlimitedChoice") },
+              { value: "limit", label: t("entitlements.limitedTo") },
             ]}
             onChange={(v) =>
               set(key, v === "default" ? undefined : v === "unlimited" ? null : (fallback ?? 10))
@@ -141,11 +154,11 @@ export function EntitlementsEditor({
                   type="number"
                   min={0}
                   className="w-28"
-                  aria-label={`${label} limit`}
+                  aria-label={t("entitlements.limitAria", { label: t(label) })}
                   value={current ?? 0}
                   onChange={(e) => set(key, Math.max(0, Number(e.target.value) || 0))}
                 />
-                <span className="text-sm text-muted-foreground">{unit}</span>
+                <span className="text-sm text-muted-foreground">{t(unit)}</span>
               </div>
             )}
           </ChoiceRow>
@@ -153,7 +166,7 @@ export function EntitlementsEditor({
       })}
       <div>
         <Button type="submit" disabled={saving}>
-          Save
+          {t("common.save")}
         </Button>
       </div>
     </form>

@@ -303,19 +303,19 @@ const NOT_IN_BOOKS = new Set([".git", ".hyperbook", "node_modules"]);
 
 /** Why `path` cannot be a file of a book, or null if it can. */
 export function bookPathProblem(path: string): string | null {
-  if (path.length === 0) return "Enter a name";
-  if (path.length > 1024) return "The path is too long";
+  if (path.length === 0) return "validation.pathName";
+  if (path.length > 1024) return "validation.pathTooLong";
   if (/[\0\\]/.test(path))
-    return "Use / between folders, and no special characters";
+    return "validation.pathCharacters";
   if (path.startsWith("/") || path.endsWith("/"))
-    return "Do not start or end with /";
+    return "validation.pathEnds";
   for (const segment of path.split("/")) {
     if (segment === "" || segment === "." || segment === "..")
-      return "Use folder and file names, not // . or ..";
+      return "validation.pathSegments";
     if (NOT_IN_BOOKS.has(segment.toLowerCase()))
-      return `“${segment}” is reserved`;
+      return "validation.pathReserved";
     if (new TextEncoder().encode(segment).length > 255)
-      return "A name is too long";
+      return "validation.pathNameTooLong";
   }
   return null;
 }
@@ -338,7 +338,7 @@ export const dictionaryWord = z
   .toLowerCase()
   .regex(
     /^[\p{L}\p{M}][\p{L}\p{M}'’-]*$/u,
-    "Enter a single word (letters only)",
+    "validation.singleWord",
   )
   .max(64);
 

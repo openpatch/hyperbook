@@ -7,6 +7,7 @@ import {
 } from "@codemirror/commands";
 import { EditorSelection, type Extension } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
+import i18next from "i18next";
 import { toast } from "sonner";
 
 /*
@@ -111,7 +112,7 @@ async function paste(): Promise<string | null> {
   try {
     return await navigator.clipboard.readText();
   } catch {
-    toast.error("The browser did not allow reading the clipboard.");
+    toast.error(i18next.t("editor.actions.clipboardRead"));
     return null;
   }
 }
@@ -125,7 +126,7 @@ async function copy(text: string): Promise<boolean> {
     await navigator.clipboard.writeText(text);
     return true;
   } catch {
-    toast.error("The browser did not allow writing the clipboard.");
+    toast.error(i18next.t("editor.actions.clipboardWrite"));
     return false;
   }
 }
@@ -156,7 +157,7 @@ export function contextMenu(): Extension {
       openMenu(event.clientX, event.clientY, (box) => {
         item(
           box,
-          "Undo",
+          i18next.t("editor.actions.undo"),
           () => {
             view.focus();
             undo(view);
@@ -165,7 +166,7 @@ export function contextMenu(): Extension {
         );
         item(
           box,
-          "Redo",
+          i18next.t("editor.actions.redo"),
           () => {
             view.focus();
             redo(view);
@@ -178,7 +179,7 @@ export function contextMenu(): Extension {
         separator(box);
         item(
           box,
-          "Cut",
+          i18next.t("editor.files.cut"),
           () => {
             view.focus();
             void copy(text()).then((copied) => {
@@ -189,7 +190,7 @@ export function contextMenu(): Extension {
         );
         item(
           box,
-          "Copy",
+          i18next.t("editor.files.copy"),
           () => {
             view.focus();
             void copy(text());
@@ -198,7 +199,7 @@ export function contextMenu(): Extension {
         );
         item(
           box,
-          "Paste",
+          i18next.t("editor.files.paste"),
           () => {
             view.focus();
             void paste().then((inserted) => {
@@ -212,7 +213,7 @@ export function contextMenu(): Extension {
         separator(box);
         item(
           box,
-          "Select all",
+          i18next.t("editor.actions.selectAll"),
           () => {
             view.focus();
             selectAll(view);

@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link, useParams, useSearchParams } from "react-router";
+import { useTranslation } from "react-i18next";
 import { QrCode } from "@/components/qr-code";
 import { Button } from "@/components/ui/button";
 import { api, unwrap } from "@/lib/api";
@@ -15,6 +16,7 @@ const loadCredentials = (id: string) =>
  * so the printout is just the sheet.
  */
 export function PrintPage() {
+  const { t } = useTranslation();
   const id = useParams().id!;
   const [params, setParams] = useSearchParams();
   const layout = params.get("layout") === "list" ? "list" : "cards";
@@ -33,30 +35,30 @@ export function PrintPage() {
     <div className="print-sheet min-h-dvh bg-white text-black">
       <div className="flex flex-wrap items-center gap-2 border-b bg-muted p-3 print:hidden">
         <Button asChild variant="ghost">
-          <Link to={`/groups/${id}`}>← Back</Link>
+          <Link to={`/groups/${id}`}>{t("print.back")}</Link>
         </Button>
         <div className="flex-1" />
-        <div role="group" aria-label="Layout" className="flex gap-1">
+        <div role="group" aria-label={t("print.layout")} className="flex gap-1">
           <Button
             variant={layout === "cards" ? "default" : "outline"}
             aria-pressed={layout === "cards"}
             onClick={() => setParams({ layout: "cards" }, { replace: true })}
           >
-            Cards for students
+            {t("print.cards")}
           </Button>
           <Button
             variant={layout === "list" ? "default" : "outline"}
             aria-pressed={layout === "list"}
             onClick={() => setParams({ layout: "list" }, { replace: true })}
           >
-            Class list for you
+            {t("print.list")}
           </Button>
         </div>
-        <Button onClick={() => window.print()}>Print</Button>
+        <Button onClick={() => window.print()}>{t("print.print")}</Button>
       </div>
       <div className="mx-auto max-w-[210mm] p-6 print:max-w-none print:p-0">
         {data.students.length === 0 ? (
-          <p>This group has no students yet.</p>
+          <p>{t("print.noStudents")}</p>
         ) : layout === "list" ? (
           <ClassList data={data} />
         ) : (
@@ -68,26 +70,29 @@ export function PrintPage() {
 }
 
 function Missing() {
-  return <span className="text-sm italic">set a new one</span>;
+  const { t } = useTranslation();
+  return <span className="text-sm italic">{t("print.setNew")}</span>;
 }
 
 function ClassList({ data }: { data: Credentials }) {
+  const { t } = useTranslation();
   return (
     <>
       <h1 className="text-2xl">
         {data.book.title} – {data.group.name}
       </h1>
       <p className="mb-4 text-sm">
-        Log in at <span className="font-mono">{data.loginAddress.replace(/^https?:\/\//, "")}</span>{" "}
-        or scan the QR code. Keep this list safe: it holds every password of the group.
+        {t("print.loginAt")}{" "}
+        <span className="font-mono">{data.loginAddress.replace(/^https?:\/\//, "")}</span>{" "}
+        {t("print.loginHint")}
       </p>
       <table className="w-full border-collapse text-sm">
         <thead>
           <tr className="border-b-2 border-black text-left">
-            <th className="w-[40%] py-1 pr-2 font-semibold">Name</th>
-            <th className="py-1 pr-2 font-semibold">Username</th>
-            <th className="py-1 pr-2 font-semibold">Password</th>
-            <th className="py-1 font-semibold">QR</th>
+            <th className="w-[40%] py-1 pr-2 font-semibold">{t("print.name")}</th>
+            <th className="py-1 pr-2 font-semibold">{t("print.username")}</th>
+            <th className="py-1 pr-2 font-semibold">{t("print.password")}</th>
+            <th className="py-1 font-semibold">{t("print.qr")}</th>
           </tr>
         </thead>
         <tbody>
@@ -98,7 +103,7 @@ function ClassList({ data }: { data: Credentials }) {
               <td className="py-1 pr-2 font-mono">{s.password ?? <Missing />}</td>
               <td className="py-1">
                 {s.loginUrl && (
-                  <QrCode value={s.loginUrl} label={`QR code for ${s.username}`} className="w-[18mm]" />
+                  <QrCode value={s.loginUrl} label={t("print.qrFor", { username: s.username })} className="w-[18mm]" />
                 )}
               </td>
             </tr>
@@ -110,6 +115,7 @@ function ClassList({ data }: { data: Credentials }) {
 }
 
 function Cards({ data }: { data: Credentials }) {
+  const { t } = useTranslation();
   const address = data.loginAddress.replace(/^https?:\/\//, "");
   return (
     <ul className="grid grid-cols-2 gap-[4mm] sm:grid-cols-3">
@@ -127,17 +133,17 @@ function Cards({ data }: { data: Credentials }) {
           {s.loginUrl && (
             <QrCode
               value={s.loginUrl}
-              label={`QR code for ${s.username}`}
+              label={t("print.qrFor", { username: s.username })}
               className="mx-auto w-[32mm] max-w-full"
             />
           )}
           <dl className="grid grid-cols-[auto_1fr] gap-x-2 text-sm">
-            <dt>User</dt>
+            <dt>{t("print.user")}</dt>
             <dd className="font-mono font-semibold">{s.username}</dd>
-            <dt>Password</dt>
+            <dt>{t("print.password")}</dt>
             <dd className="font-mono font-semibold">{s.password ?? <Missing />}</dd>
           </dl>
-          <div className="mt-1 border-b border-black pb-1 text-xs">Name:</div>
+          <div className="mt-1 border-b border-black pb-1 text-xs">{t("print.nameLabel")}</div>
           <div className="truncate text-[10px]">{address}</div>
         </li>
       ))}

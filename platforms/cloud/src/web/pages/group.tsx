@@ -1,8 +1,14 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import i18next from "i18next";
 import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import { createStudentInput, generateStudentsInput, groupInput } from "../../shared/schemas";
+import {
+  createStudentInput,
+  generateStudentsInput,
+  groupInput,
+} from "../../shared/schemas";
 import { ConfirmButton } from "@/components/confirm-button";
 import { PageHeader, Section } from "@/components/page-header";
 import { SecretDialog } from "@/components/secret-dialog";
@@ -22,11 +28,19 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { api, unwrap } from "@/lib/api";
 import { FormError, TextField, applyServerError, useZodForm } from "@/lib/form";
 
 export function GroupPage() {
+  const { t } = useTranslation();
   const id = useParams().id!;
   const { data: group } = useQuery({
     queryKey: ["groups", id],
@@ -44,38 +58,49 @@ export function GroupPage() {
       <PageHeader
         title={group.name}
         description={
-          <Link to={`/books/${group.book.id}`} className="text-primary hover:underline">
+          <Link
+            to={`/books/${group.book.id}`}
+            className="text-primary hover:underline"
+          >
             {group.book.title}
           </Link>
         }
         actions={
           <>
             <Button asChild variant={students?.length ? "default" : "outline"}>
-              <Link to={`/groups/${id}/print`}>Print login cards</Link>
+              <Link to={`/groups/${id}/print`}>{t("group.print")}</Link>
             </Button>
             <GenerateButton groupId={id} />
           </>
         }
       />
       <Section
-        title="Students"
-        description="Accounts are anonymous: write the real names on your printed list, not here."
+        title={t("group.students")}
+        description={t("group.studentsDescription")}
       >
         {students?.length === 0 ? (
-          <p className="text-muted-foreground">
-            No students yet. Use “Create accounts” to make a set of accounts for this group.
-          </p>
+          <p className="text-muted-foreground">{t("group.noStudents")}</p>
         ) : (
           <StudentsTable groupId={id} students={students ?? []} />
         )}
         <AddStudentForm groupId={id} />
       </Section>
-      <GroupSettings groupId={id} name={group.name} bookId={group.book.id} hasStudents={!!students?.length} />
+      <GroupSettings
+        groupId={id}
+        name={group.name}
+        bookId={group.book.id}
+        hasStudents={!!students?.length}
+      />
     </>
   );
 }
 
-type Student = { id: number; username: string; lastLoginAt: number | null; lastSavedAt: number | null };
+type Student = {
+  id: number;
+  username: string;
+  lastLoginAt: number | null;
+  lastSavedAt: number | null;
+};
 
 /**
  * Opens the student's book read-only in a new tab. The tab is opened right
@@ -85,7 +110,11 @@ type Student = { id: number; username: string; lastLoginAt: number | null; lastS
 async function viewAsStudent(studentId: number) {
   const tab = window.open("", "_blank");
   try {
-    const { url } = await unwrap(api.students[":id"].impersonate.$post({ param: { id: String(studentId) } }));
+    const { url } = await unwrap(
+      api.students[":id"].impersonate.$post({
+        param: { id: String(studentId) },
+      }),
+    );
     if (tab) {
       tab.opener = null;
       tab.location.href = url;
@@ -94,14 +123,29 @@ async function viewAsStudent(studentId: number) {
     }
   } catch (error) {
     tab?.close();
-    toast.error(error instanceof Error ? error.message : "Something went wrong");
+    toast.error(
+      error instanceof Error
+        ? error.message
+        : i18next.t("common.somethingWrong"),
+    );
   }
 }
 
-function StudentsTable({ groupId, students }: { groupId: string; students: Student[] }) {
+function StudentsTable({
+  groupId,
+  students,
+}: {
+  groupId: string;
+  students: Student[];
+}) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const [secret, setSecret] = useState<{ username: string; password: string } | null>(null);
-  const refresh = () => queryClient.invalidateQueries({ queryKey: ["groups", groupId] });
+  const [secret, setSecret] = useState<{
+    username: string;
+    password: string;
+  } | null>(null);
+  const refresh = () =>
+    queryClient.invalidateQueries({ queryKey: ["groups", groupId] });
 
   const act = async (action: () => Promise<unknown>, done?: string) => {
     try {
@@ -109,7 +153,9 @@ function StudentsTable({ groupId, students }: { groupId: string; students: Stude
       await refresh();
       if (done) toast.success(done);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Something went wrong");
+      toast.error(
+        error instanceof Error ? error.message : t("common.somethingWrong"),
+      );
     }
   };
 
@@ -118,11 +164,11 @@ function StudentsTable({ groupId, students }: { groupId: string; students: Stude
       <Table className="mb-6">
         <TableHeader>
           <TableRow>
-            <TableHead>Username</TableHead>
-            <TableHead>Last login</TableHead>
-            <TableHead>Last saved</TableHead>
+            <TableHead>{t("group.username")}</TableHead>
+            <TableHead>{t("group.lastLogin")}</TableHead>
+            <TableHead>{t("group.lastSaved")}</TableHead>
             <TableHead>
-              <span className="sr-only">Actions</span>
+              <span className="sr-only">{t("common.actions")}</span>
             </TableHead>
           </TableRow>
         </TableHeader>
@@ -131,23 +177,35 @@ function StudentsTable({ groupId, students }: { groupId: string; students: Stude
             <TableRow key={s.id}>
               <TableCell className="font-mono">{s.username}</TableCell>
               <TableCell className="text-muted-foreground">
-                {s.lastLoginAt ? new Date(s.lastLoginAt).toLocaleString() : "never"}
+                {s.lastLoginAt
+                  ? new Date(s.lastLoginAt).toLocaleString()
+                  : t("common.never")}
               </TableCell>
               <TableCell className="text-muted-foreground">
-                {s.lastSavedAt ? new Date(s.lastSavedAt).toLocaleString() : "nothing yet"}
+                {s.lastSavedAt
+                  ? new Date(s.lastSavedAt).toLocaleString()
+                  : t("group.nothingYet")}
               </TableCell>
               <TableCell className="text-right">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm" aria-label={`Actions for ${s.username}`}>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      aria-label={t("group.actionsFor", {
+                        username: s.username,
+                      })}
+                    >
                       …
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem onSelect={() => viewAsStudent(s.id)}>View as student</DropdownMenuItem>
+                    <DropdownMenuItem onSelect={() => viewAsStudent(s.id)}>
+                      {t("group.viewAs")}
+                    </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                       <a href={`/api/students/${s.id}/data`} download>
-                        Download saved data
+                        {t("group.downloadData")}
                       </a>
                     </DropdownMenuItem>
                     <DropdownMenuItem
@@ -159,37 +217,47 @@ function StudentsTable({ groupId, students }: { groupId: string; students: Stude
                               json: {},
                             }),
                           );
-                          setSecret({ username: s.username, password: res.password });
+                          setSecret({
+                            username: s.username,
+                            password: res.password,
+                          });
                         })
                       }
                     >
-                      New password
+                      {t("group.newPassword")}
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       onSelect={() =>
                         act(
                           () =>
                             unwrap(
-                              api.students[":id"]["login-key"].regenerate.$post({
-                                param: { id: String(s.id) },
-                              }),
+                              api.students[":id"]["login-key"].regenerate.$post(
+                                {
+                                  param: { id: String(s.id) },
+                                },
+                              ),
                             ),
-                          `New QR code for ${s.username}. The old card no longer works.`,
+                          t("group.qrToast", { username: s.username }),
                         )
                       }
                     >
-                      New QR code
+                      {t("group.newQr")}
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       variant="destructive"
                       onSelect={() =>
                         act(
-                          () => unwrap(api.students[":id"].$delete({ param: { id: String(s.id) } })),
-                          `${s.username} deleted`,
+                          () =>
+                            unwrap(
+                              api.students[":id"].$delete({
+                                param: { id: String(s.id) },
+                              }),
+                            ),
+                          t("group.deletedToast", { username: s.username }),
                         )
                       }
                     >
-                      Delete
+                      {t("common.delete")}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -200,8 +268,10 @@ function StudentsTable({ groupId, students }: { groupId: string; students: Stude
       </Table>
       <SecretDialog
         secret={secret?.password ?? null}
-        title="New password"
-        description={`The new password for ${secret?.username}. It also appears on the printed cards.`}
+        title={t("group.newDialogTitle")}
+        description={t("group.newDialogDescription", {
+          username: secret?.username ?? "",
+        })}
         onClose={() => setSecret(null)}
       />
     </>
@@ -209,6 +279,7 @@ function StudentsTable({ groupId, students }: { groupId: string; students: Stude
 }
 
 function GenerateButton({ groupId }: { groupId: string }) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
@@ -219,7 +290,12 @@ function GenerateButton({ groupId }: { groupId: string }) {
 
   const onSubmit = form.handleSubmit(async (json) => {
     try {
-      await unwrap(api.groups[":id"].students.generate.$post({ param: { id: groupId }, json }));
+      await unwrap(
+        api.groups[":id"].students.generate.$post({
+          param: { id: groupId },
+          json,
+        }),
+      );
       await queryClient.invalidateQueries({ queryKey: ["groups", groupId] });
       setOpen(false);
       navigate(`/groups/${groupId}/print`);
@@ -231,28 +307,35 @@ function GenerateButton({ groupId }: { groupId: string }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline">Create accounts</Button>
+        <Button variant="outline">{t("group.create")}</Button>
       </DialogTrigger>
       <DialogContent>
         <form onSubmit={onSubmit} className="grid gap-4" noValidate>
           <DialogHeader>
-            <DialogTitle>Create student accounts</DialogTitle>
+            <DialogTitle>{t("group.createTitle")}</DialogTitle>
             <DialogDescription>
-              Each account gets a username, a short password and a QR code for quick login.
-              Afterwards you can print them.
+              {t("group.createDescription")}
             </DialogDescription>
           </DialogHeader>
-          <TextField form={form} name="count" label="How many" type="number" min={1} max={200} autoFocus />
+          <TextField
+            form={form}
+            name="count"
+            label={t("group.count")}
+            type="number"
+            min={1}
+            max={200}
+            autoFocus
+          />
           <TextField
             form={form}
             name="prefix"
-            label="Username prefix"
-            hint={`Usernames will be ${prefix || "student"}01, ${prefix || "student"}02, …`}
+            label={t("group.prefix")}
+            hint={t("group.prefixHint", { prefix: prefix || "student" })}
           />
           <TextField
             form={form}
             name="passwordLength"
-            label="Password length"
+            label={t("group.passwordLength")}
             type="number"
             min={4}
             max={20}
@@ -260,7 +343,7 @@ function GenerateButton({ groupId }: { groupId: string }) {
           <FormError form={form} />
           <DialogFooter>
             <Button type="submit" disabled={form.formState.isSubmitting}>
-              Create accounts
+              {t("group.create")}
             </Button>
           </DialogFooter>
         </form>
@@ -270,13 +353,16 @@ function GenerateButton({ groupId }: { groupId: string }) {
 }
 
 function AddStudentForm({ groupId }: { groupId: string }) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const form = useZodForm(createStudentInput.pick({ username: true }), {
     defaultValues: { username: "" },
   });
   const onSubmit = form.handleSubmit(async (json) => {
     try {
-      await unwrap(api.groups[":id"].students.$post({ param: { id: groupId }, json }));
+      await unwrap(
+        api.groups[":id"].students.$post({ param: { id: groupId }, json }),
+      );
       form.reset();
       await queryClient.invalidateQueries({ queryKey: ["groups", groupId] });
     } catch (error) {
@@ -284,17 +370,26 @@ function AddStudentForm({ groupId }: { groupId: string }) {
     }
   });
   return (
-    <form onSubmit={onSubmit} className="flex max-w-xl flex-wrap items-end gap-2" noValidate>
+    <form
+      onSubmit={onSubmit}
+      className="flex max-w-xl flex-wrap items-end gap-2"
+      noValidate
+    >
       <TextField
         form={form}
         name="username"
-        label="Add one account"
+        label={t("group.addOne")}
         placeholder="username"
-        hint="Gets a generated password and QR code."
+        hint={t("group.addOneHint")}
         className="min-w-48 flex-1"
       />
-      <Button type="submit" variant="outline" className="mb-6" disabled={form.formState.isSubmitting}>
-        Add
+      <Button
+        type="submit"
+        variant="outline"
+        className="mb-6"
+        disabled={form.formState.isSubmitting}
+      >
+        {t("group.add")}
       </Button>
       <div className="basis-full">
         <FormError form={form} />
@@ -314,6 +409,7 @@ function GroupSettings({
   bookId: number;
   hasStudents: boolean;
 }) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const form = useZodForm(groupInput, { defaultValues: { name } });
@@ -321,19 +417,34 @@ function GroupSettings({
     try {
       await unwrap(api.groups[":id"].$patch({ param: { id: groupId }, json }));
       await queryClient.invalidateQueries({ queryKey: ["groups", groupId] });
-      await queryClient.invalidateQueries({ queryKey: ["books", String(bookId), "groups"] });
-      toast.success("Saved");
+      await queryClient.invalidateQueries({
+        queryKey: ["books", String(bookId), "groups"],
+      });
+      toast.success(t("common.saved"));
     } catch (error) {
       applyServerError(form, error);
     }
   });
 
   return (
-    <Section title="Group">
-      <form onSubmit={onSubmit} className="mb-6 flex max-w-xl flex-wrap items-end gap-2" noValidate>
-        <TextField form={form} name="name" label="Name" className="min-w-48 flex-1" />
-        <Button type="submit" variant="outline" disabled={form.formState.isSubmitting}>
-          Rename
+    <Section title={t("group.settings")}>
+      <form
+        onSubmit={onSubmit}
+        className="mb-6 flex max-w-xl flex-wrap items-end gap-2"
+        noValidate
+      >
+        <TextField
+          form={form}
+          name="name"
+          label={t("group.name")}
+          className="min-w-48 flex-1"
+        />
+        <Button
+          type="submit"
+          variant="outline"
+          disabled={form.formState.isSubmitting}
+        >
+          {t("group.rename")}
         </Button>
         <div className="basis-full">
           <FormError form={form} />
@@ -343,28 +454,34 @@ function GroupSettings({
         {hasStudents && (
           <ConfirmButton
             variant="default"
-            title="New QR codes for everyone?"
-            description="All printed QR codes of this group stop working. Passwords stay the same. Print the cards again afterwards."
-            confirmLabel="Make new QR codes"
+            title={t("group.newQrAllTitle")}
+            description={t("group.newQrAllDescription")}
+            confirmLabel={t("group.newQrAllConfirm")}
             onConfirm={async () => {
-              await unwrap(api.groups[":id"]["login-keys"].regenerate.$post({ param: { id: groupId } }));
-              toast.success("New QR codes made. Print the cards again.");
+              await unwrap(
+                api.groups[":id"]["login-keys"].regenerate.$post({
+                  param: { id: groupId },
+                }),
+              );
+              toast.success(t("group.newQrAllToast"));
             }}
           >
-            New QR codes for everyone
+            {t("group.newQrAll")}
           </ConfirmButton>
         )}
         <ConfirmButton
-          title={`Delete group “${name}”?`}
-          description="The group and all its student accounts, with everything they saved, are deleted. This cannot be undone."
-          confirmLabel="Delete group"
+          title={t("group.deleteTitle", { name })}
+          description={t("group.deleteDescription")}
+          confirmLabel={t("group.delete")}
           onConfirm={async () => {
             await unwrap(api.groups[":id"].$delete({ param: { id: groupId } }));
-            await queryClient.invalidateQueries({ queryKey: ["books", String(bookId), "groups"] });
+            await queryClient.invalidateQueries({
+              queryKey: ["books", String(bookId), "groups"],
+            });
             navigate(`/books/${bookId}`);
           }}
         >
-          Delete group
+          {t("group.delete")}
         </ConfirmButton>
       </div>
     </Section>

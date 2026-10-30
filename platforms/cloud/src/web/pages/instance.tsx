@@ -76,7 +76,7 @@ function InstanceForms({
   const save = async (json: z.input<typeof instanceSettingsInput>) => {
     await unwrap(api.instance.$put({ json }));
     await queryClient.invalidateQueries({ queryKey: ["instance"] });
-    toast.success("Saved");
+    toast.success(t("common.saved"));
   };
 
   const onSubmit = form.handleSubmit(async ({ reservedSlugs, ...rest }) => {
@@ -95,41 +95,49 @@ function InstanceForms({
 
   return (
     <>
-      <PageHeader title="Settings" description="Settings for this whole instance." />
-      <Section title="General">
+      <PageHeader
+        title={t("instanceSettings.title")}
+        description={t("instanceSettings.description")}
+      />
+      <Section title={t("instanceSettings.general")}>
         <form onSubmit={onSubmit} className="grid max-w-xl gap-4" noValidate>
-          <TextField form={form} name="name" label="Name" hint="Shown in the header and in emails." />
+          <TextField
+            form={form}
+            name="name"
+            label={t("instanceSettings.name")}
+            hint={t("instanceSettings.nameHint")}
+          />
           <TextField
             form={form}
             name="imprintUrl"
-            label="Imprint (legal notice) URL"
+            label={t("instanceSettings.imprintUrl")}
             type="url"
-            hint="Linked at the bottom of every page. Or leave it empty and write the imprint below."
+            hint={t("instanceSettings.imprintUrlHint")}
           />
           <TextAreaField
             form={form}
             name="imprintMarkdown"
-            label="Imprint text (Markdown)"
-            hint="Shown at /imprint when there is no URL above."
+            label={t("instanceSettings.imprintMarkdown")}
+            hint={t("instanceSettings.imprintMarkdownHint")}
           />
           <TextField
             form={form}
             name="privacyUrl"
-            label="Privacy policy URL"
+            label={t("instanceSettings.privacyUrl")}
             type="url"
-            hint="Linked at the bottom of every page, and accepted at sign-up. Or leave it empty and write it below."
+            hint={t("instanceSettings.privacyUrlHint")}
           />
           <TextAreaField
             form={form}
             name="privacyMarkdown"
-            label="Privacy policy text (Markdown)"
-            hint="Shown at /privacy when there is no URL above."
+            label={t("instanceSettings.privacyMarkdown")}
+            hint={t("instanceSettings.privacyMarkdownHint")}
           />
           <TextAreaField
             form={form}
             name="reservedSlugs"
-            label="Reserved book addresses"
-            hint="Addresses no book may use, one per line, in addition to built-in ones like www and api."
+            label={t("instanceSettings.reservedSlugs")}
+            hint={t("instanceSettings.reservedSlugsHint")}
           />
           <div className="grid gap-1.5">
             <div className="flex items-center gap-2">
@@ -139,12 +147,10 @@ function InstanceForms({
                 onCheckedChange={(v) => form.setValue("slugSuffix", v === true, { shouldDirty: true })}
                 aria-describedby="slug-suffix-hint"
               />
-              <Label htmlFor="slug-suffix">Teachers' addresses get an ending of their own</Label>
+              <Label htmlFor="slug-suffix">{t("instanceSettings.slugSuffixLabel")}</Label>
             </div>
             <p id="slug-suffix-hint" className="text-sm text-muted-foreground">
-              Teachers name their books, and each gets a short ending (physik-edac), so nobody takes a short,
-              general address for themselves. They can ask for one without the ending; admins decide under
-              Addresses.
+              {t("instanceSettings.slugSuffixHint")}
             </p>
           </div>
           <div className="grid gap-1.5">
@@ -155,11 +161,10 @@ function InstanceForms({
                 onCheckedChange={(v) => form.setValue("landingPage", v === true, { shouldDirty: true })}
                 aria-describedby="landing-page-hint"
               />
-              <Label htmlFor="landing-page">Show a landing page at the front address</Label>
+              <Label htmlFor="landing-page">{t("instanceSettings.landingPageLabel")}</Label>
             </div>
             <p id="landing-page-hint" className="text-sm text-muted-foreground">
-              The landing page introduces Hyperbook and links the ways to run it. Without it, the front address
-              shows only the login screen.
+              {t("instanceSettings.landingPageHint")}
             </p>
           </div>
           <div className="grid gap-1.5">
@@ -170,12 +175,10 @@ function InstanceForms({
                 onCheckedChange={(v) => form.setValue("gitPushUpdatesPreview", v === true, { shouldDirty: true })}
                 aria-describedby="git-push-preview-hint"
               />
-              <Label htmlFor="git-push-preview">A git push also builds the preview</Label>
+              <Label htmlFor="git-push-preview">{t("instanceSettings.gitPushLabel")}</Label>
             </div>
             <p id="git-push-preview-hint" className="text-sm text-muted-foreground">
-              When a teacher pushes to a book's main branch with git, its preview is rebuilt (never published
-              automatically). Off by default: pushes then only update the source, so many small commits cannot
-              overwhelm the build queue.
+              {t("instanceSettings.gitPushHint")}
             </p>
           </div>
           <div className="grid gap-1.5">
@@ -203,7 +206,7 @@ function InstanceForms({
           <FormError form={form} />
           <div>
             <Button type="submit" disabled={form.formState.isSubmitting}>
-              Save
+              {t("common.save")}
             </Button>
           </div>
         </form>
@@ -223,24 +226,24 @@ function InstanceForms({
           try {
             await save({ elementRuntimes });
           } catch (error) {
-            toast.error(error instanceof Error ? error.message : "Saving failed");
+            toast.error(error instanceof Error ? error.message : t("common.savingFailed"));
           }
         }}
       />
       <Section
-        title="Default entitlements"
-        description="What teachers may do unless their own account says otherwise."
+        title={t("instanceSettings.entitlements")}
+        description={t("instanceSettings.entitlementsDescription")}
       >
         <EntitlementsEditor
           key={JSON.stringify(settings.defaultEntitlements)}
           value={settings.defaultEntitlements}
           defaults={BUILTIN_ENTITLEMENTS}
-          defaultLabel="Built-in default"
+          defaultLabel={t("entitlements.builtInDefault")}
           onSave={async (defaultEntitlements) => {
             try {
               await save({ defaultEntitlements });
             } catch (error) {
-              toast.error(error instanceof Error ? error.message : "Saving failed");
+              toast.error(error instanceof Error ? error.message : t("common.savingFailed"));
             }
           }}
         />
@@ -253,11 +256,11 @@ const loadSettings = () => unwrap(api.instance.$get());
 
 type SignupMode = "closed" | "open" | "domains" | "approval";
 
-const MODES: Record<SignupMode, { label: string; hint: string }> = {
-  closed: { label: "Closed", hint: "Only admins add teachers (they get an invitation by email)." },
-  open: { label: "Open", hint: "Anyone can sign up after confirming their email address." },
-  domains: { label: "Listed domains", hint: "Anyone with an address at one of the domains below." },
-  approval: { label: "With approval", hint: "Anyone can sign up; an admin approves each account." },
+const MODES: Record<SignupMode, { label: MessageKey; hint: MessageKey }> = {
+  closed: { label: "instanceSettings.modeClosed", hint: "instanceSettings.modeClosedHint" },
+  open: { label: "instanceSettings.modeOpen", hint: "instanceSettings.modeOpenHint" },
+  domains: { label: "instanceSettings.modeDomains", hint: "instanceSettings.modeDomainsHint" },
+  approval: { label: "instanceSettings.modeApproval", hint: "instanceSettings.modeApprovalHint" },
 };
 
 function SignupSection({
@@ -270,22 +273,23 @@ function SignupSection({
   onSave: (changes: { signupMode: SignupMode; signupDomains: string[] }) => Promise<void>;
 }) {
   const { data: instance } = useInstance();
+  const { t } = useTranslation();
   const emailEnabled = instance?.emailEnabled ?? false;
   const [mode, setMode] = useState(savedMode);
   const [domains, setDomains] = useState(savedDomains.join("\n"));
   const [busy, setBusy] = useState(false);
   return (
     <Section
-      title="Sign-up"
+      title={t("instanceSettings.signup")}
       description={
         emailEnabled
-          ? "Who may make an account. New accounts confirm their email address first."
-          : "Sign-up needs email, to confirm addresses. Configure SMTP to open it."
+          ? t("instanceSettings.signupDescriptionEmail")
+          : t("instanceSettings.signupDescriptionNoEmail")
       }
     >
       <div className="grid max-w-xl gap-4">
         <div className="grid gap-1.5">
-          <Label htmlFor="signup-mode">Who may sign up</Label>
+          <Label htmlFor="signup-mode">{t("instanceSettings.whoMay")}</Label>
           <Select value={mode} onValueChange={(v) => setMode(v as SignupMode)}>
             <SelectTrigger id="signup-mode" className="w-full">
               <SelectValue />
@@ -293,23 +297,23 @@ function SignupSection({
             <SelectContent>
               {(Object.keys(MODES) as SignupMode[]).map((m) => (
                 <SelectItem key={m} value={m} disabled={m !== "closed" && !emailEnabled}>
-                  {MODES[m].label}
+                  {t(MODES[m].label)}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
-          <p className="text-sm text-muted-foreground">{MODES[mode].hint}</p>
+          <p className="text-sm text-muted-foreground">{t(MODES[mode].hint)}</p>
         </div>
         {mode === "domains" && (
           <div className="grid gap-1.5">
-            <Label htmlFor="signup-domains">Domains</Label>
+            <Label htmlFor="signup-domains">{t("instanceSettings.domains")}</Label>
             <Textarea
               id="signup-domains"
               value={domains}
               onChange={(e) => setDomains(e.target.value)}
               placeholder="schule.de"
             />
-            <p className="text-sm text-muted-foreground">One per line. Subdomains are included.</p>
+            <p className="text-sm text-muted-foreground">{t("instanceSettings.domainsHint")}</p>
           </div>
         )}
         <div>
@@ -323,13 +327,13 @@ function SignupSection({
                   signupDomains: domains.split(/[\s,]+/).map((d) => d.trim()).filter(Boolean),
                 });
               } catch (error) {
-                toast.error(error instanceof Error ? error.message : "Saving failed");
+                toast.error(error instanceof Error ? error.message : t("common.savingFailed"));
               } finally {
                 setBusy(false);
               }
             }}
           >
-            Save
+            {t("common.save")}
           </Button>
         </div>
       </div>
@@ -364,12 +368,13 @@ function RuntimesSection({
   runtimes: Partial<Record<ElementRuntime, RuntimeChoice>>;
   onSave: (elementRuntimes: Partial<Record<ElementRuntime, RuntimeChoice>>) => Promise<void>;
 }) {
+  const { t } = useTranslation();
   const [choices, setChoices] = useState(runtimes);
   const [busy, setBusy] = useState(false);
   return (
     <Section
-      title="Element runtimes"
-      description="Element runtimes (Python, Excalidraw, GeoGebra, …) are several hundred MB. This instance extracts them once and serves them to every book — faster builds, no third-party CDN for readers. Or load single elements from their public CDN. Applies to books that do not choose in their own hyperbook.json, and to builds made from now on."
+      title={t("instanceSettings.runtimes")}
+      description={t("instanceSettings.runtimesDescription")}
     >
       <div className="grid max-w-xl gap-3">
         {RUNTIME_ELEMENTS.map(({ element, label }) => (
@@ -385,8 +390,8 @@ function RuntimesSection({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="local">This instance</SelectItem>
-                <SelectItem value="cdn">Public CDN</SelectItem>
+                <SelectItem value="local">{t("instanceSettings.thisInstance")}</SelectItem>
+                <SelectItem value="cdn">{t("instanceSettings.publicCdn")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -399,13 +404,13 @@ function RuntimesSection({
               try {
                 await onSave(choices);
               } catch (error) {
-                toast.error(error instanceof Error ? error.message : "Saving failed");
+                toast.error(error instanceof Error ? error.message : t("common.savingFailed"));
               } finally {
                 setBusy(false);
               }
             }}
           >
-            Save
+            {t("common.save")}
           </Button>
         </div>
       </div>

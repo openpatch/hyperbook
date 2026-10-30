@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -22,6 +23,7 @@ export function QuickOpen({
   onClose: () => void;
   onOpen: (path: string) => void;
 }) {
+  const { t } = useTranslation();
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState(0);
   const list = useRef<HTMLUListElement>(null);
@@ -73,13 +75,13 @@ export function QuickOpen({
         showCloseButton={false}
         aria-describedby={undefined}
       >
-        <DialogTitle className="sr-only">Open a file</DialogTitle>
+        <DialogTitle className="sr-only">{t("editor.quickOpen.title")}</DialogTitle>
         <Input
           autoFocus
           value={query}
           spellCheck={false}
-          placeholder="Search files by name…"
-          aria-label="Search files"
+          placeholder={t("editor.quickOpen.placeholder")}
+          aria-label={t("editor.quickOpen.aria")}
           aria-controls="quick-open-list"
           className="h-11 rounded-none border-0 border-b border-border font-mono text-sm focus-visible:ring-0"
           onChange={(e) => setQuery(e.target.value)}
@@ -105,7 +107,7 @@ export function QuickOpen({
           ref={list}
           id="quick-open-list"
           role="listbox"
-          aria-label="Files"
+          aria-label={t("editor.quickOpen.files")}
           className="max-h-80 overflow-auto p-1"
         >
           {matches.map((path, i) => (
@@ -125,14 +127,14 @@ export function QuickOpen({
               {path}
               {tabs.includes(path) && (
                 <span className="ml-2 rounded-sm bg-secondary px-1 font-sans text-xs text-muted-foreground">
-                  open
+                  {t("editor.quickOpen.open")}
                 </span>
               )}
             </li>
           ))}
           {matches.length === 0 && (
             <li className="px-2 py-6 text-center text-sm text-muted-foreground">
-              No file matches.
+              {t("editor.quickOpen.noMatches")}
             </li>
           )}
         </ul>

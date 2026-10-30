@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -24,6 +25,7 @@ export function BlockDialog({
   onApply: (code: string) => void;
   onClose: () => void;
 }) {
+  const { t } = useTranslation();
   const latest = useRef<string | null>(null);
   const [changed, setChanged] = useState(false);
 
@@ -44,10 +46,8 @@ export function BlockDialog({
     >
       <DialogContent className="flex h-[85dvh] flex-col sm:max-w-5xl">
         <DialogHeader>
-          <DialogTitle>Edit structogram</DialogTitle>
-          <DialogDescription>
-            Changes go into the page when you apply them; save the page afterwards.
-          </DialogDescription>
+          <DialogTitle>{t("editor.blockDialog.title")}</DialogTitle>
+          <DialogDescription>{t("editor.blockDialog.description")}</DialogDescription>
         </DialogHeader>
         {edit && (
           <div className="min-h-0 flex-1 overflow-hidden rounded-md border border-border">
@@ -66,10 +66,10 @@ export function BlockDialog({
         )}
         <DialogFooter>
           <Button variant="outline" onClick={close}>
-            Cancel
+            {t("common.cancel")}
           </Button>
           <Button disabled={!changed} onClick={apply}>
-            Apply
+            {t("editor.blockDialog.apply")}
           </Button>
         </DialogFooter>
       </DialogContent>

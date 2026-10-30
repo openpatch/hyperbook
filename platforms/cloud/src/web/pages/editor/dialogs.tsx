@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { bookPathProblem } from "../../../shared/schemas";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,6 +30,7 @@ export type PathRequest = {
 
 /** Asks for a path in the book: new file, new folder, rename. */
 export function PathDialog({ request, onClose }: { request: PathRequest | null; onClose: () => void }) {
+  const { t } = useTranslation();
   const [value, setValue] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -44,7 +46,7 @@ export function PathDialog({ request, onClose }: { request: PathRequest | null; 
     e.preventDefault();
     const name = value.trim();
     const folder = request!.folder;
-    if (folder !== undefined && name.includes("/")) return setError("Enter a name without /");
+    if (folder !== undefined && name.includes("/")) return setError(t("validation.nameWithoutSlash"));
     const path = folder ? `${folder}/${name}` : name;
     const problem = bookPathProblem(path);
     if (problem) return setError(problem);
@@ -53,7 +55,7 @@ export function PathDialog({ request, onClose }: { request: PathRequest | null; 
       await request!.onSubmit(path);
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
+      setError(err instanceof Error ? err.message : t("common.somethingWrong"));
     } finally {
       setBusy(false);
     }
@@ -92,7 +94,7 @@ export function PathDialog({ request, onClose }: { request: PathRequest | null; 
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose}>
-              Cancel
+              {t("common.cancel")}
             </Button>
             <Button type="submit" disabled={busy}>
               {request?.submitLabel}
@@ -112,6 +114,7 @@ export type ChoiceRequest = {
 
 /** A question with a few answers: discard changes, resolve a conflict, … */
 export function ChoiceDialog({ request, onClose }: { request: ChoiceRequest | null; onClose: () => void }) {
+  const { t } = useTranslation();
   const [busy, setBusy] = useState(false);
   return (
     <Dialog open={request !== null} onOpenChange={(open) => !open && !busy && onClose()}>
@@ -124,7 +127,7 @@ export function ChoiceDialog({ request, onClose }: { request: ChoiceRequest | nu
         </DialogHeader>
         <DialogFooter className="flex-wrap">
           <Button variant="outline" onClick={onClose} disabled={busy}>
-            Cancel
+            {t("common.cancel")}
           </Button>
           {request?.choices.map((choice) => (
             <Button

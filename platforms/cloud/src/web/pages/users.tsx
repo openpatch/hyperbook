@@ -1,6 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Link } from "react-router";
+import { useTranslation } from "react-i18next";
 import { createUserInput } from "../../shared/schemas";
 import { PageHeader } from "@/components/page-header";
 import { SecretDialog } from "@/components/secret-dialog";
@@ -31,6 +32,7 @@ import { FormError, TextField, applyServerError, useZodForm } from "@/lib/form";
 import { useInstance } from "@/lib/session";
 
 export function UsersPage() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { data: users } = useQuery({
     queryKey: ["users"],
@@ -43,25 +45,25 @@ export function UsersPage() {
       toast.success(done);
       await refresh();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Something went wrong");
+      toast.error(error instanceof Error ? error.message : t("common.somethingWrong"));
     }
   };
 
   return (
     <>
       <PageHeader
-        title="Users"
-        description="Teachers and admins of this instance. Students are managed per book."
+        title={t("users.title")}
+        description={t("users.description")}
         actions={<CreateUserButton />}
       />
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Email</TableHead>
-            <TableHead>Name</TableHead>
-            <TableHead>Role</TableHead>
+            <TableHead>{t("users.email")}</TableHead>
+            <TableHead>{t("users.name")}</TableHead>
+            <TableHead>{t("users.role")}</TableHead>
             <TableHead>
-              <span className="sr-only">Actions</span>
+              <span className="sr-only">{t("common.actions")}</span>
             </TableHead>
           </TableRow>
         </TableHeader>
@@ -76,11 +78,11 @@ export function UsersPage() {
               <TableCell>{user.displayName}</TableCell>
               <TableCell className="space-x-1">
                 <Badge variant={user.role === "admin" ? "default" : "secondary"}>
-                  {user.role === "admin" ? "Admin" : "Teacher"}
+                  {user.role === "admin" ? t("users.admin") : t("users.teacher")}
                 </Badge>
-                {user.disabled && <Badge variant="outline">Disabled</Badge>}
-                {user.pending && <Badge variant="destructive">Waits for approval</Badge>}
-                {user.unverified && <Badge variant="outline">Email not confirmed</Badge>}
+                {user.disabled && <Badge variant="outline">{t("users.disabled")}</Badge>}
+                {user.pending && <Badge variant="destructive">{t("users.pending")}</Badge>}
+                {user.unverified && <Badge variant="outline">{t("users.unverified")}</Badge>}
               </TableCell>
               <TableCell className="space-x-1 text-right whitespace-nowrap">
                 {user.pending && (
@@ -90,23 +92,23 @@ export function UsersPage() {
                       onClick={() =>
                         run(
                           () => unwrap(api.users[":id"].approve.$post({ param: { id: String(user.id) } })),
-                          `${user.email} is approved.`,
+                          t("users.approvedToast", { email: user.email }),
                         )
                       }
                     >
-                      Approve
+                      {t("users.approve")}
                     </Button>
                     <ConfirmButton
                       size="sm"
-                      title={`Decline ${user.email}?`}
-                      description="The account is deleted."
-                      confirmLabel="Decline"
+                      title={t("users.declineTitle", { email: user.email })}
+                      description={t("users.declineDescription")}
+                      confirmLabel={t("users.decline")}
                       onConfirm={async () => {
                         await unwrap(api.users[":id"].$delete({ param: { id: String(user.id) } }));
                         await refresh();
                       }}
                     >
-                      Decline
+                      {t("users.decline")}
                     </ConfirmButton>
                   </>
                 )}
@@ -117,11 +119,11 @@ export function UsersPage() {
                     onClick={() =>
                       run(
                         () => unwrap(api.users[":id"].invite.$post({ param: { id: String(user.id) } })),
-                        `A new invitation went to ${user.email}.`,
+                        t("users.invitedToast", { email: user.email }),
                       )
                     }
                   >
-                    Invite again
+                    {t("users.inviteAgain")}
                   </Button>
                 )}
               </TableCell>
@@ -134,6 +136,7 @@ export function UsersPage() {
 }
 
 function CreateUserButton() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [created, setCreated] = useState<{ email: string; password: string } | null>(null);
@@ -151,7 +154,7 @@ function CreateUserButton() {
       setOpen(false);
       form.reset();
       if (res.password) setCreated({ email: res.user.email, password: res.password });
-      if (res.invited) toast.success(`An invitation went to ${res.user.email}.`);
+      if (res.invited) toast.success(t("users.inviteSentToast", { email: res.user.email }));
     } catch (error) {
       applyServerError(form, error);
     }
@@ -161,22 +164,20 @@ function CreateUserButton() {
     <>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
-          <Button>Add user</Button>
+          <Button>{t("users.add")}</Button>
         </DialogTrigger>
         <DialogContent>
           <form onSubmit={onSubmit} className="grid gap-4" noValidate>
             <DialogHeader>
-              <DialogTitle>Add user</DialogTitle>
+              <DialogTitle>{t("users.add")}</DialogTitle>
               <DialogDescription>
-                {invites
-                  ? "They get an email with a link to choose their password."
-                  : "A password is generated and shown once. Give it to the person; they can change it under “Your account”."}
+                {invites ? t("users.addDescriptionEmail") : t("users.addDescriptionPassword")}
               </DialogDescription>
             </DialogHeader>
-            <TextField form={form} name="email" label="Email" type="email" autoFocus />
-            <TextField form={form} name="displayName" label="Name" />
+            <TextField form={form} name="email" label={t("users.email")} type="email" autoFocus />
+            <TextField form={form} name="displayName" label={t("users.name")} />
             <div className="grid gap-1.5">
-              <Label htmlFor="new-user-role">Role</Label>
+              <Label htmlFor="new-user-role">{t("users.role")}</Label>
               <Select
                 value={role}
                 onValueChange={(v) => form.setValue("role", v as "admin" | "teacher")}
@@ -185,15 +186,15 @@ function CreateUserButton() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="teacher">Teacher</SelectItem>
-                  <SelectItem value="admin">Admin</SelectItem>
+                  <SelectItem value="teacher">{t("users.teacher")}</SelectItem>
+                  <SelectItem value="admin">{t("users.admin")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <FormError form={form} />
             <DialogFooter>
               <Button type="submit" disabled={form.formState.isSubmitting}>
-                Add user
+                {t("users.add")}
               </Button>
             </DialogFooter>
           </form>
@@ -201,8 +202,8 @@ function CreateUserButton() {
       </Dialog>
       <SecretDialog
         secret={created?.password ?? null}
-        title="User added"
-        description={`The password for ${created?.email} is shown only now.`}
+        title={t("users.createdTitle")}
+        description={t("users.createdDescription", { email: created?.email ?? "" })}
         onClose={() => setCreated(null)}
       />
     </>

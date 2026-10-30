@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import type { Reference } from "../../../shared/references";
 import { Button } from "@/components/ui/button";
 import {
@@ -52,6 +53,7 @@ function snippet(ref: Reference, text: string | undefined): { before: string; ta
 }
 
 export function RefactorDialog({ request, onClose }: { request: RefactorRequest | null; onClose: () => void }) {
+  const { t } = useTranslation();
   const [busy, setBusy] = useState(false);
   useEffect(() => setBusy(false), [request]);
 
@@ -69,7 +71,7 @@ export function RefactorDialog({ request, onClose }: { request: RefactorRequest 
             <div className="space-y-3 text-left">
               <div>{request?.lead}</div>
               {rows.length > 0 && (
-                <ul className="max-h-64 space-y-2 overflow-y-auto" aria-label="References">
+                <ul className="max-h-64 space-y-2 overflow-y-auto">
                   {rows.map(({ ref, snippet }, i) => (
                     <li key={i} className="rounded-md border p-2 font-mono text-xs">
                       <div className="text-muted-foreground">
@@ -90,7 +92,7 @@ export function RefactorDialog({ request, onClose }: { request: RefactorRequest 
         </DialogHeader>
         <DialogFooter className="flex-wrap">
           <Button variant="outline" onClick={onClose} disabled={busy}>
-            Cancel
+            {t("common.cancel")}
           </Button>
           {request?.choices.map((choice) => (
             <Button

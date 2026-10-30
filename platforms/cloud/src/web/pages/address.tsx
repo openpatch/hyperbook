@@ -1,4 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { toast } from "sonner";
 import { slugRequestInput } from "../../shared/schemas";
@@ -27,13 +28,14 @@ export function AddressSection({ book }: { book: Book }) {
 }
 
 const STATUS = {
-  pending: { label: "Waiting for an admin", variant: "secondary" },
-  approved: { label: "Granted", variant: "default" },
-  declined: { label: "Declined", variant: "destructive" },
-  withdrawn: { label: "Withdrawn", variant: "outline" },
+  pending: { label: "book.addressRequest.statusPending", variant: "secondary" },
+  approved: { label: "book.addressRequest.statusApproved", variant: "default" },
+  declined: { label: "book.addressRequest.statusDeclined", variant: "destructive" },
+  withdrawn: { label: "book.addressRequest.statusWithdrawn", variant: "outline" },
 } as const;
 
 function RequestSection({ book }: { book: Book }) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { data: instance } = useInstance();
   const id = String(book.id);
@@ -53,7 +55,7 @@ function RequestSection({ book }: { book: Book }) {
       await unwrap(api.books[":id"]["slug-request"].$post({ param: { id }, json }));
       await queryClient.invalidateQueries({ queryKey: key });
       form.reset({ slug: json.slug, description: "" });
-      toast.success("Sent to the admins");
+      toast.success(t("book.addressRequest.sentToast"));
     } catch (error) {
       applyServerError(form, error);
     }
@@ -62,19 +64,26 @@ function RequestSection({ book }: { book: Book }) {
   const pending = request?.status === "pending";
   return (
     <Section
-      title="Address without ending"
-      description={`Short addresses like ${wanted || "physik"}.${instance?.booksDomain} are given by an admin, for books that are ready to be found by everyone.`}
+      title={t("book.addressRequest.title")}
+      description={t("book.addressRequest.description", {
+        example: wanted || "physik",
+        domain: instance?.booksDomain ?? "",
+      })}
     >
       {request && (
         <div className="mb-4 grid max-w-xl gap-1">
           <p className="flex flex-wrap items-center gap-2">
-            <Badge variant={STATUS[request.status].variant}>{STATUS[request.status].label}</Badge>
+            <Badge variant={STATUS[request.status].variant}>{t(STATUS[request.status].label)}</Badge>
             <span className="font-mono">{request.slug}</span>
             <span className="text-sm text-muted-foreground">
-              asked {new Date(request.createdAt).toLocaleDateString()}
+              {t("book.addressRequest.askedOn", {
+                date: new Date(request.createdAt).toLocaleDateString(),
+              })}
             </span>
           </p>
-          {request.note && <p className="text-sm">Admin: {request.note}</p>}
+          {request.note && (
+            <p className="text-sm">{t("book.addressRequest.adminNote", { note: request.note })}</p>
+          )}
           {pending && (
             <div>
               <Button
@@ -85,7 +94,7 @@ function RequestSection({ book }: { book: Book }) {
                   await queryClient.invalidateQueries({ queryKey: key });
                 }}
               >
-                Withdraw request
+                {t("book.addressRequest.withdraw")}
               </Button>
             </div>
           )}
@@ -96,7 +105,7 @@ function RequestSection({ book }: { book: Book }) {
           <TextField
             form={form}
             name="slug"
-            label="Address you would like"
+            label={t("book.addressRequest.wanted")}
             hint={
               <span className="font-mono">
                 {wanted || "…"}.{instance?.booksDomain}
@@ -106,13 +115,13 @@ function RequestSection({ book }: { book: Book }) {
           <TextAreaField
             form={form}
             name="description"
-            label="What is the book about?"
-            hint="For the admin who decides, e.g. subject, grades, how complete it is. The admin also looks at the book."
+            label={t("book.addressRequest.about")}
+            hint={t("book.addressRequest.aboutHint")}
           />
           <FormError form={form} />
           <div>
             <Button type="submit" variant="outline" disabled={form.formState.isSubmitting}>
-              Ask for this address
+              {t("book.addressRequest.askFor")}
             </Button>
           </div>
         </form>
@@ -122,33 +131,37 @@ function RequestSection({ book }: { book: Book }) {
 }
 
 function RevokeSection({ book }: { book: Book }) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [note, setNote] = useState("");
   const id = String(book.id);
   return (
     <Section
-      title="Granted address"
-      description={`An admin gave this book ${book.slug}. Taking it back moves the book to ${book.slug}-${book.slugSuffix ?? "…"}; the owners get an email.`}
+      title={t("book.addressRequest.grantedTitle")}
+      description={t("book.addressRequest.grantedDescription", {
+        slug: book.slug,
+        target: `${book.slug}-${book.slugSuffix ?? "…"}`,
+      })}
     >
       <div className="mb-3 grid max-w-xl gap-1.5">
-        <Label htmlFor="revoke-note">Note to the owners (optional)</Label>
+        <Label htmlFor="revoke-note">{t("book.addressRequest.noteToOwners")}</Label>
         <Textarea id="revoke-note" value={note} onChange={(e) => setNote(e.target.value)} />
       </div>
       <ConfirmButton
-        title={`Take ${book.slug} back?`}
-        description="The book moves to its address with ending, and the old one redirects there until it is given to another book."
-        confirmLabel="Take address back"
+        title={t("book.addressRequest.takeBackTitle", { slug: book.slug })}
+        description={t("book.addressRequest.takeBackDescription")}
+        confirmLabel={t("book.addressRequest.takeBack")}
         onConfirm={async () => {
           try {
             await unwrap(api.books[":id"].slug.revoke.$post({ param: { id }, json: { note } }));
             await queryClient.invalidateQueries({ queryKey: ["books"] });
             setNote("");
           } catch (error) {
-            toast.error(error instanceof Error ? error.message : "Something went wrong");
+            toast.error(error instanceof Error ? error.message : t("common.somethingWrong"));
           }
         }}
       >
-        Take address back
+        {t("book.addressRequest.takeBack")}
       </ConfirmButton>
     </Section>
   );

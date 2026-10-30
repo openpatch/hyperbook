@@ -1,6 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { ConfirmButton } from "@/components/confirm-button";
 import { EntitlementsEditor } from "@/components/entitlements-editor";
@@ -26,6 +27,7 @@ export function UserPage() {
   const me = useUser();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
   const [password, setPassword] = useState<string | null>(null);
 
   const { data: user } = useQuery({
@@ -45,9 +47,9 @@ export function UserPage() {
     try {
       await unwrap(api.users[":id"].$patch({ param: { id }, json }));
       await refresh();
-      toast.success("Saved");
+      toast.success(t("common.saved"));
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Saving failed");
+      toast.error(error instanceof Error ? error.message : t("common.savingFailed"));
     }
   };
 
@@ -57,14 +59,14 @@ export function UserPage() {
         title={user.displayName || user.email}
         description={
           <>
-            {user.email} {user.disabled && <Badge variant="outline">Disabled</Badge>}
+            {user.email} {user.disabled && <Badge variant="outline">{t("users.disabled")}</Badge>}
           </>
         }
       />
 
-      <Section title="Role">
+      <Section title={t("user.role")}>
         <div className="grid max-w-xs gap-1.5">
-          <Label htmlFor="user-role">Role</Label>
+          <Label htmlFor="user-role">{t("user.role")}</Label>
           <Select
             value={user.role}
             disabled={isMe}
@@ -74,23 +76,23 @@ export function UserPage() {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="teacher">Teacher</SelectItem>
-              <SelectItem value="admin">Admin</SelectItem>
+              <SelectItem value="teacher">{t("users.teacher")}</SelectItem>
+              <SelectItem value="admin">{t("users.admin")}</SelectItem>
             </SelectContent>
           </Select>
           {isMe && (
-            <p className="text-sm text-muted-foreground">You cannot change your own role.</p>
+            <p className="text-sm text-muted-foreground">{t("user.roleHint")}</p>
           )}
         </div>
       </Section>
 
-      <Section title="Storage">
+      <Section title={t("user.storage")}>
         <StorageUsage {...user.storage} />
       </Section>
       {user.role === "teacher" && (
         <Section
-          title="Entitlements"
-          description="What this teacher may do beyond the basics. Admins are never limited."
+          title={t("user.entitlements")}
+          description={t("user.entitlementsDescription")}
         >
           <EntitlementsEditor
             key={JSON.stringify(user.entitlementOverrides)}
@@ -100,9 +102,9 @@ export function UserPage() {
               try {
                 await unwrap(api.users[":id"].entitlements.$put({ param: { id }, json }));
                 await refresh();
-                toast.success("Saved");
+                toast.success(t("common.saved"));
               } catch (error) {
-                toast.error(error instanceof Error ? error.message : "Saving failed");
+                toast.error(error instanceof Error ? error.message : t("common.savingFailed"));
               }
             }}
           />
@@ -110,13 +112,13 @@ export function UserPage() {
       )}
 
       {!isMe && (
-        <Section title="Access">
+        <Section title={t("user.access")}>
           <div className="flex flex-wrap gap-2">
             <ConfirmButton
               variant="default"
-              title="Set a new password?"
-              description="A new password is generated and shown once. The user is logged out everywhere."
-              confirmLabel="Set new password"
+              title={t("user.setNewPasswordTitle")}
+              description={t("user.setNewPasswordDescription")}
+              confirmLabel={t("user.setNewPassword")}
               onConfirm={async () => {
                 const res = await unwrap(
                   api.users[":id"].password.$put({ param: { id }, json: {} }),
@@ -124,33 +126,33 @@ export function UserPage() {
                 setPassword(res.password);
               }}
             >
-              Set new password
+              {t("user.setNewPassword")}
             </ConfirmButton>
             {user.disabled ? (
               <Button variant="outline" onClick={() => update({ disabled: false })}>
-                Enable account
+                {t("user.enable")}
               </Button>
             ) : (
               <ConfirmButton
-                title="Disable this account?"
-                description="The user is logged out and cannot log in until the account is enabled again. Their books stay."
-                confirmLabel="Disable"
+                title={t("user.disableTitle")}
+                description={t("user.disableDescription")}
+                confirmLabel={t("user.disable")}
                 onConfirm={() => update({ disabled: true })}
               >
-                Disable account
+                {t("user.disable")}
               </ConfirmButton>
             )}
             <ConfirmButton
-              title="Delete this account?"
-              description="This cannot be undone. Books the user owns alone must get another owner first."
-              confirmLabel="Delete"
+              title={t("user.deleteTitle")}
+              description={t("user.deleteDescription")}
+              confirmLabel={t("common.delete")}
               onConfirm={async () => {
                 await unwrap(api.users[":id"].$delete({ param: { id } }));
                 await refresh();
                 navigate("/users");
               }}
             >
-              Delete account
+              {t("user.delete")}
             </ConfirmButton>
           </div>
         </Section>
@@ -158,8 +160,8 @@ export function UserPage() {
 
       <SecretDialog
         secret={password}
-        title="New password"
-        description={`The new password for ${user.email} is shown only now.`}
+        title={t("user.newDialogTitle")}
+        description={t("user.newDialogDescription", { email: user.email })}
         onClose={() => setPassword(null)}
       />
     </>

@@ -4,6 +4,7 @@ import {
   Settings2Icon,
   XIcon,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -52,6 +53,7 @@ export function SettingsMenu({
   canSpellCheck: boolean;
   onOpenWords: () => void;
 }) {
+  const { t } = useTranslation();
   const size = FONT_SIZES.indexOf(settings.fontSize);
   return (
     <DropdownMenu>
@@ -60,21 +62,21 @@ export function SettingsMenu({
           size="icon"
           variant="ghost"
           className="size-8"
-          aria-label="Editor settings"
+          aria-label={t("editor.settingsMenu.aria")}
         >
           <Settings2Icon className="size-4" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
-        <DropdownMenuLabel>Editor</DropdownMenuLabel>
+        <DropdownMenuLabel>{t("editor.settingsMenu.label")}</DropdownMenuLabel>
         <div className="flex items-center justify-between px-2 py-1 text-sm">
-          <span aria-hidden>Font size</span>
+          <span aria-hidden>{t("editor.settingsMenu.fontSize")}</span>
           <span className="flex items-center gap-1">
             <Button
               variant="outline"
               size="icon"
               className="size-6"
-              aria-label="Smaller text"
+              aria-label={t("editor.settingsMenu.smaller")}
               disabled={size <= 0}
               onClick={() => update({ fontSize: FONT_SIZES[size - 1]! })}
             >
@@ -87,7 +89,7 @@ export function SettingsMenu({
               variant="outline"
               size="icon"
               className="size-6"
-              aria-label="Bigger text"
+              aria-label={t("editor.settingsMenu.bigger")}
               disabled={size === FONT_SIZES.length - 1}
               onClick={() => update({ fontSize: FONT_SIZES[size + 1]! })}
             >
@@ -96,14 +98,14 @@ export function SettingsMenu({
           </span>
         </div>
         <div className="flex items-center justify-between px-2 py-1 text-sm">
-          <span aria-hidden>Line height</span>
+          <span aria-hidden>{t("editor.settingsMenu.lineHeight")}</span>
           <span className="flex items-center gap-1">
             {LINE_HEIGHTS.map((height, i) => {
               const [label, name] = [
-                ["S", "Small"],
-                ["M", "Medium"],
-                ["L", "Large"],
-              ][i]!;
+                ["S", t("editor.settingsMenu.small")],
+                ["M", t("editor.settingsMenu.medium")],
+                ["L", t("editor.settingsMenu.large")],
+              ][i]! as [string, string];
               const active = settings.lineHeight === height;
               return (
                 <Button
@@ -111,7 +113,7 @@ export function SettingsMenu({
                   variant={active ? "secondary" : "outline"}
                   size="icon"
                   className="size-6 text-xs"
-                  aria-label={`${name} line height`}
+                  aria-label={t("editor.settingsMenu.lineHeightAria", { name })}
                   aria-pressed={active}
                   disabled={active}
                   onClick={() => update({ lineHeight: height })}
@@ -125,14 +127,14 @@ export function SettingsMenu({
         {/* A row like the two above: the choice and its list both drawn in
             the chosen font, so the select shows what it picks. */}
         <div className="flex items-center justify-between gap-2 px-2 py-1 text-sm">
-          <span aria-hidden>Font</span>
+          <span aria-hidden>{t("editor.settingsMenu.font")}</span>
           <Select
             value={settings.font}
             onValueChange={(font) => update({ font })}
           >
             <SelectTrigger
               size="sm"
-              aria-label="Font"
+              aria-label={t("editor.settingsMenu.font")}
               className="h-7 w-32 px-2 text-xs"
               style={{ fontFamily: fontOf(settings.font).stack }}
             >
@@ -158,7 +160,7 @@ export function SettingsMenu({
           }
           onSelect={(e) => e.preventDefault()}
         >
-          Line numbers
+          {t("editor.settingsMenu.lineNumbers")}
         </DropdownMenuCheckboxItem>
         <DropdownMenuCheckboxItem
           checked={settings.spellCheck && canSpellCheck}
@@ -168,10 +170,10 @@ export function SettingsMenu({
           }
           onSelect={(e) => e.preventDefault()}
         >
-          Spell check
+          {t("editor.settingsMenu.spellCheck")}
         </DropdownMenuCheckboxItem>
         <DropdownMenuItem onSelect={onOpenWords}>
-          <ListTreeIcon /> Custom words…
+          <ListTreeIcon /> {t("editor.settingsMenu.customWords")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
@@ -190,19 +192,19 @@ export function WordsDialog({
   onRemove: (word: string) => void;
   onClose: () => void;
 }) {
+  const { t } = useTranslation();
   return (
     <Dialog open={open} onOpenChange={(value) => !value && onClose()}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Custom words</DialogTitle>
+          <DialogTitle>{t("editor.settingsMenu.wordsTitle")}</DialogTitle>
           <DialogDescription>
-            Words the book's teachers added to its spell-check dictionary.
-            Right-click an underlined word on a page to add another one.
+            {t("editor.settingsMenu.wordsDescription")}
           </DialogDescription>
         </DialogHeader>
         {words.length === 0 ? (
           <p className="rounded-md border border-dashed border-border p-4 text-center text-sm text-muted-foreground">
-            No custom words yet.
+            {t("editor.settingsMenu.wordsEmpty")}
           </p>
         ) : (
           <ul className="grid max-h-72 gap-1 overflow-auto">
@@ -216,7 +218,7 @@ export function WordsDialog({
                   variant="ghost"
                   size="icon"
                   className="size-7"
-                  aria-label={`Remove ${word}`}
+                  aria-label={t("editor.settingsMenu.removeWord", { word })}
                   onClick={() => onRemove(word)}
                 >
                   <XIcon className="size-4" />
@@ -226,8 +228,8 @@ export function WordsDialog({
           </ul>
         )}
         <p className="flex items-center gap-2 text-sm text-muted-foreground">
-          <ListRestartIcon className="size-4 shrink-0" /> The words apply to the
-          whole book, on every device.
+          <ListRestartIcon className="size-4 shrink-0" />{" "}
+          {t("editor.settingsMenu.wordsApply")}
         </p>
       </DialogContent>
     </Dialog>

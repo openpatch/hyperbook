@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Check, Field, Section } from "./form-dialog";
@@ -38,6 +39,7 @@ export function PageSettingsDialog({
   onApply: (form: PageForm) => void;
   onClose: () => void;
 }) {
+  const { t } = useTranslation();
   const [form, setForm] = useState<PageForm | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -48,9 +50,13 @@ export function PageSettingsDialog({
       setError(null);
     } catch (err) {
       setForm(null);
-      setError(`${err instanceof Error ? err.message : "The page settings cannot be read"}. Fix the YAML at the top of the page first.`);
+      setError(
+        t("editor.pageSettings.fixYaml", {
+          message: err instanceof Error ? err.message : "",
+        }),
+      );
     }
-  }, [text]);
+  }, [text]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const update = (patch: Partial<PageForm>) => setForm((f) => (f ? { ...f, ...patch } : f));
   const section = path !== null && isSectionIndex(path);
@@ -66,33 +72,42 @@ export function PageSettingsDialog({
       <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-2xl">
         <form onSubmit={apply} className="grid gap-5">
           <DialogHeader>
-            <DialogTitle>Page settings</DialogTitle>
+            <DialogTitle>{t("editor.pageSettings.title")}</DialogTitle>
             <DialogDescription>
-              Kept at the top of the page (its frontmatter). Settings not shown here stay as they are.{" "}
+              {t("editor.pageSettings.description")}{" "}
               <a href={PAGE_DOCS} target="_blank" rel="noreferrer" className="text-primary underline">
-                All settings
+                {t("editor.pageSettings.allSettings")}
               </a>
             </DialogDescription>
           </DialogHeader>
           {form && (
             <>
-              <Section title="General">
-                <Field id="p-name" label="Name" hint="Shown in the navigation">
+              <Section title={t("editor.pageSettings.general")}>
+                <Field id="p-name" label={t("editor.pageSettings.name")} hint={t("editor.pageSettings.nameHint")}>
                   <Input id="p-name" value={form.name} onChange={(e) => update({ name: e.target.value })} />
                 </Field>
-                <Field id="p-description" label="Description" hint="For search engines and link previews" full>
+                <Field
+                  id="p-description"
+                  label={t("editor.pageSettings.descriptionField")}
+                  hint={t("editor.pageSettings.descriptionHint")}
+                  full
+                >
                   <Textarea id="p-description" rows={2} value={form.description} onChange={(e) => update({ description: e.target.value })} />
                 </Field>
-                <Field id="p-keywords" label="Keywords" hint="Comma-separated">
+                <Field
+                  id="p-keywords"
+                  label={t("editor.pageSettings.keywords")}
+                  hint={t("editor.pageSettings.keywordsHint")}
+                >
                   <Input id="p-keywords" value={form.keywords} onChange={(e) => update({ keywords: e.target.value })} />
                 </Field>
-                <Field id="p-lang" label="Language">
+                <Field id="p-lang" label={t("editor.pageSettings.language")}>
                   <Select value={form.lang || "book"} onValueChange={(lang) => update({ lang: lang === "book" ? "" : lang })}>
                     <SelectTrigger id="p-lang" className="w-full">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="book">As the book</SelectItem>
+                      <SelectItem value="book">{t("editor.pageSettings.asBook")}</SelectItem>
                       {Object.entries(LANGUAGES).map(([code, name]) => (
                         <SelectItem key={code} value={code}>
                           {name}
@@ -103,14 +118,26 @@ export function PageSettingsDialog({
                   </Select>
                 </Field>
               </Section>
-              <Section title="Navigation">
-                <Field id="p-index" label="Position" hint="Lower numbers come first">
+              <Section title={t("editor.pageSettings.navigation")}>
+                <Field
+                  id="p-index"
+                  label={t("editor.pageSettings.position")}
+                  hint={t("editor.pageSettings.positionHint")}
+                >
                   <Input id="p-index" inputMode="numeric" value={form.index} onChange={(e) => update({ index: e.target.value })} />
                 </Field>
-                <Field id="p-permaid" label="Permanent id" hint={form.permaid ? `Also at /@/${form.permaid}` : "A short address that stays"}>
+                <Field
+                  id="p-permaid"
+                  label={t("editor.pageSettings.permaid")}
+                  hint={
+                    form.permaid
+                      ? t("editor.pageSettings.permaidAlso", { permaid: form.permaid })
+                      : t("editor.pageSettings.permaidHint")
+                  }
+                >
                   <Input id="p-permaid" value={form.permaid} onChange={(e) => update({ permaid: e.target.value.replace(/[^\w-]/g, "") })} />
                 </Field>
-                <Field id="p-navigation" label="Show in navigation">
+                <Field id="p-navigation" label={t("editor.pageSettings.showInNavigation")}>
                   <Select
                     value={form.navigation || "default"}
                     onValueChange={(v) => update({ navigation: v === "default" ? "" : (v as PageForm["navigation"]) })}
@@ -119,30 +146,36 @@ export function PageSettingsDialog({
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="default">In the navigation</SelectItem>
-                      <SelectItem value="hidden">Hidden</SelectItem>
-                      {section && <SelectItem value="virtual">Pages on the parent level</SelectItem>}
-                      {section && <SelectItem value="page">As a single page</SelectItem>}
-                      {section && <SelectItem value="expanded">Expanded by default</SelectItem>}
+                      <SelectItem value="default">{t("editor.pageSettings.inNavigation")}</SelectItem>
+                      <SelectItem value="hidden">{t("editor.pageSettings.hidden")}</SelectItem>
+                      {section && (
+                        <SelectItem value="virtual">{t("editor.pageSettings.pagesOnParent")}</SelectItem>
+                      )}
+                      {section && (
+                        <SelectItem value="page">{t("editor.pageSettings.singlePage")}</SelectItem>
+                      )}
+                      {section && (
+                        <SelectItem value="expanded">{t("editor.pageSettings.expanded")}</SelectItem>
+                      )}
                     </SelectContent>
                   </Select>
                 </Field>
-                <Field id="p-toc" label="Table of contents">
+                <Field id="p-toc" label={t("editor.pageSettings.toc")}>
                   <Select value={form.toc || "book"} onValueChange={(v) => update({ toc: v === "book" ? "" : (v as PageForm["toc"]) })}>
                     <SelectTrigger id="p-toc" className="w-full">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="book">As the book</SelectItem>
-                      <SelectItem value="on">Show</SelectItem>
-                      <SelectItem value="off">Hide</SelectItem>
+                      <SelectItem value="book">{t("editor.pageSettings.asBook")}</SelectItem>
+                      <SelectItem value="on">{t("editor.pageSettings.show")}</SelectItem>
+                      <SelectItem value="off">{t("editor.pageSettings.hide")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </Field>
                 <LinkField
                   id="p-prev"
-                  label="Previous page"
-                  hint="Instead of the one before"
+                  label={t("editor.pageSettings.previousPage")}
+                  hint={t("editor.pageSettings.previousHint")}
                   value={form.prev}
                   off={form.prevOff}
                   onChange={(prev) => update({ prev })}
@@ -150,8 +183,8 @@ export function PageSettingsDialog({
                 />
                 <LinkField
                   id="p-next"
-                  label="Next page"
-                  hint="Instead of the one after"
+                  label={t("editor.pageSettings.nextPage")}
+                  hint={t("editor.pageSettings.nextHint")}
                   value={form.next}
                   off={form.nextOff}
                   onChange={(next) => update({ next })}
@@ -163,20 +196,22 @@ export function PageSettingsDialog({
                   ))}
                 </datalist>
               </Section>
-              <Section title="Appearance">
-                <Field id="p-layout" label="Layout">
+              <Section title={t("editor.pageSettings.appearance")}>
+                <Field id="p-layout" label={t("editor.pageSettings.layout")}>
                   <Select value={form.layout || "default"} onValueChange={(v) => update({ layout: v === "default" ? "" : (v as PageForm["layout"]) })}>
                     <SelectTrigger id="p-layout" className="w-full">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="default">With sidebar</SelectItem>
-                      <SelectItem value="wide">Wide</SelectItem>
-                      <SelectItem value="standalone">Content only (for embedding)</SelectItem>
+                      <SelectItem value="default">{t("editor.pageSettings.withSidebar")}</SelectItem>
+                      <SelectItem value="wide">{t("editor.pageSettings.wide")}</SelectItem>
+                      <SelectItem value="standalone">
+                        {t("editor.pageSettings.standalone")}
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </Field>
-                <Field id="p-breadcrumb" label="Breadcrumb">
+                <Field id="p-breadcrumb" label={t("editor.pageSettings.breadcrumb")}>
                   <Select
                     value={form.breadcrumb || "book"}
                     onValueChange={(v) => update({ breadcrumb: v === "book" ? "" : (v as PageForm["breadcrumb"]) })}
@@ -185,13 +220,17 @@ export function PageSettingsDialog({
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="book">As the book</SelectItem>
-                      <SelectItem value="on">Show</SelectItem>
-                      <SelectItem value="off">Hide</SelectItem>
+                      <SelectItem value="book">{t("editor.pageSettings.asBook")}</SelectItem>
+                      <SelectItem value="on">{t("editor.pageSettings.show")}</SelectItem>
+                      <SelectItem value="off">{t("editor.pageSettings.hide")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </Field>
-                <Field id="p-breadcrumb-home" label="Breadcrumb home" hint="Icon or text of the home item">
+                <Field
+                  id="p-breadcrumb-home"
+                  label={t("editor.pageSettings.breadcrumbHome")}
+                  hint={t("editor.pageSettings.breadcrumbHomeHint")}
+                >
                   <Input
                     id="p-breadcrumb-home"
                     disabled={form.breadcrumb !== "on"}
@@ -200,7 +239,11 @@ export function PageSettingsDialog({
                     onChange={(e) => update({ breadcrumbHome: e.target.value })}
                   />
                 </Field>
-                <Field id="p-breadcrumb-separator" label="Breadcrumb separator" hint="Between the items">
+                <Field
+                  id="p-breadcrumb-separator"
+                  label={t("editor.pageSettings.breadcrumbSeparator")}
+                  hint={t("editor.pageSettings.breadcrumbSeparatorHint")}
+                >
                   <Input
                     id="p-breadcrumb-separator"
                     disabled={form.breadcrumb !== "on"}
@@ -210,26 +253,54 @@ export function PageSettingsDialog({
                   />
                 </Field>
               </Section>
-              <Section title="Advanced">
-                <Field id="p-styles" label="Styles" hint="Links to CSS files, comma-separated" full>
+              <Section title={t("editor.pageSettings.advanced")}>
+                <Field
+                  id="p-styles"
+                  label={t("editor.bookSettings.styles")}
+                  hint={t("editor.bookSettings.stylesHint")}
+                  full
+                >
                   <Input id="p-styles" value={form.styles} onChange={(e) => update({ styles: e.target.value })} />
                 </Field>
-                <Field id="p-scripts" label="Scripts" hint="Links to JavaScript files, comma-separated" full>
+                <Field
+                  id="p-scripts"
+                  label={t("editor.bookSettings.scripts")}
+                  hint={t("editor.bookSettings.scriptsHint")}
+                  full
+                >
                   <Input id="p-scripts" value={form.scripts} onChange={(e) => update({ scripts: e.target.value })} />
                 </Field>
-                <Check id="p-qrcode" label="QR code of the page" full checked={form.qrcode} onChange={(qrcode) => update({ qrcode })} />
+                <Check
+                  id="p-qrcode"
+                  label={t("editor.bookSettings.qrcode")}
+                  full
+                  checked={form.qrcode}
+                  onChange={(qrcode) => update({ qrcode })}
+                />
               </Section>
-              <Section title="Protect the page">
+              <Section title={t("editor.pageSettings.protect")}>
                 {form.protectKey ? (
-                  <Field id="p-protect-key" label="Password from the book's registry" hint="A key in passwords.json; empty to remove" full>
+                  <Field
+                    id="p-protect-key"
+                    label={t("editor.pageSettings.protectKey")}
+                    hint={t("editor.pageSettings.protectKeyHint")}
+                    full
+                  >
                     <Input id="p-protect-key" value={form.protectKey} onChange={(e) => update({ protectKey: e.target.value })} />
                   </Field>
                 ) : (
                   <>
-                    <Field id="p-password" label="Password" hint="Readers need it to open the page">
+                    <Field
+                      id="p-password"
+                      label={t("editor.pageSettings.password")}
+                      hint={t("editor.pageSettings.passwordHint")}
+                    >
                       <Input id="p-password" value={form.password} onChange={(e) => update({ password: e.target.value })} />
                     </Field>
-                    <Field id="p-password-hint" label="Shown above the password field">
+                    <Field
+                      id="p-password-hint"
+                      label={t("editor.pageSettings.passwordFieldHint")}
+                    >
                       <Input id="p-password-hint" disabled={!form.password} value={form.passwordHint} onChange={(e) => update({ passwordHint: e.target.value })} />
                     </Field>
                   </>
@@ -240,10 +311,10 @@ export function PageSettingsDialog({
           {error && <p className="text-sm text-destructive">{error}</p>}
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose}>
-              Cancel
+              {t("common.cancel")}
             </Button>
             <Button type="submit" disabled={!form}>
-              Apply
+              {t("editor.pageSettings.apply")}
             </Button>
           </DialogFooter>
         </form>
@@ -271,13 +342,14 @@ function LinkField({
   onChange: (value: string) => void;
   onOff: (off: boolean) => void;
 }) {
+  const { t } = useTranslation();
   return (
     <Field id={id} label={label} hint={hint}>
       <div className="flex items-center gap-2">
         <Input id={id} list="p-pages" disabled={off} value={value} onChange={(e) => onChange(e.target.value)} />
         <Label htmlFor={`${id}-none`} className="flex shrink-0 cursor-pointer items-center gap-1.5 font-normal">
           <Checkbox id={`${id}-none`} checked={off} onCheckedChange={(c) => onOff(c === true)} />
-          None
+          {t("editor.pageSettings.none")}
         </Label>
       </div>
     </Field>

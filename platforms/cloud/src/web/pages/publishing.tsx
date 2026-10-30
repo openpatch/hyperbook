@@ -1,4 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
+import i18next from "i18next";
 import { CopyIcon, DownloadIcon, KeyRoundIcon, UploadIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -25,22 +27,25 @@ type Build = Awaited<ReturnType<typeof fetchBuilds>>[number];
 
 const fetchBuilds = (id: string) => unwrap(api.books[":id"].builds.$get({ param: { id } }));
 
-const STATUS: Record<Build["status"], { label: string; variant: React.ComponentProps<typeof Badge>["variant"] }> = {
-  queued: { label: "Waiting", variant: "secondary" },
-  running: { label: "Building", variant: "secondary" },
-  succeeded: { label: "Built", variant: "default" },
-  failed: { label: "Failed", variant: "destructive" },
-  canceled: { label: "Canceled", variant: "outline" },
+const STATUS: Record<
+  Build["status"],
+  { label: "publishing.statusQueued" | "publishing.statusRunning" | "publishing.statusSucceeded" | "publishing.statusFailed" | "publishing.statusCanceled"; variant: React.ComponentProps<typeof Badge>["variant"] }
+> = {
+  queued: { label: "publishing.statusQueued", variant: "secondary" },
+  running: { label: "publishing.statusRunning", variant: "secondary" },
+  succeeded: { label: "publishing.statusSucceeded", variant: "default" },
+  failed: { label: "publishing.statusFailed", variant: "destructive" },
+  canceled: { label: "publishing.statusCanceled", variant: "outline" },
 };
 
 const TRIGGER: Record<Build["trigger"], string> = {
-  upload: "upload",
-  rebuild: "rebuild",
-  edit: "save (preview)",
-  push: "git push (preview)",
-  publish: "publish",
-  rollback: "rollback",
-  upgrade: "Hyperbook update",
+  upload: "publishing.triggerUpload",
+  rebuild: "publishing.triggerRebuild",
+  edit: "publishing.triggerEdit",
+  push: "publishing.triggerPush",
+  publish: "publishing.triggerPublish",
+  rollback: "publishing.triggerRollback",
+  upgrade: "publishing.triggerUpgrade",
 };
 
 const active = (b: Build) => b.status === "queued" || b.status === "running";
@@ -52,10 +57,15 @@ const versionTag = (b: Build) => b.tags?.find((t) => /^v\d+$/.test(t));
 const aheadOf = (book: Book, b: Build | undefined) =>
   b ? Math.max(0, book.commitCount - b.commitCount) : null;
 
-function duration(b: Build): string {
+function duration(b: Build, t: ReturnType<typeof useTranslation>["t"]): string {
   if (!b.startedAt) return "";
   const ms = (b.finishedAt ?? Date.now()) - b.startedAt;
-  return ms < 60_000 ? `${Math.round(ms / 1000)} s` : `${Math.floor(ms / 60_000)} min ${Math.round((ms % 60_000) / 1000)} s`;
+  return ms < 60_000
+    ? t("publishing.durationSeconds", { seconds: Math.round(ms / 1000) })
+    : t("publishing.durationMinutes", {
+        minutes: Math.floor(ms / 60_000),
+        seconds: Math.round((ms % 60_000) / 1000),
+      });
 }
 
 type UploadResult = { files: number; changed: boolean; skipped: string[]; build: Build };
@@ -71,7 +81,7 @@ function uploadZip(bookId: string, file: File, onProgress: (fraction: number) =>
     xhr.upload.onprogress = (e) => {
       if (e.lengthComputable) onProgress(e.loaded / e.total);
     };
-    xhr.onerror = () => reject(new Error("Upload failed"));
+    xhr.onerror = () => reject(new Error(i18next.t("publishing.upload.uploadFailed")));
     xhr.onload = () => {
       const body = (xhr.response ?? {}) as UploadResult & { error?: string };
       if (xhr.status === 200) resolve(body);
@@ -82,6 +92,7 @@ function uploadZip(bookId: string, file: File, onProgress: (fraction: number) =>
 }
 
 export function PublishingSection({ book }: { book: Book }) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const id = String(book.id);
   const key = ["books", id, "builds"];
@@ -106,7 +117,7 @@ export function PublishingSection({ book }: { book: Book }) {
       await action();
       await refresh();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Something went wrong");
+      toast.error(error instanceof Error ? error.message : t("common.somethingWrong"));
     }
   };
 
@@ -119,28 +130,30 @@ export function PublishingSection({ book }: { book: Book }) {
 
   return (
     <Section
-      title="Publishing"
-      description="Edit the book in the browser and publish it when it is ready, or upload it as a zip, which is built and published right away. You can also work on the book locally with git."
+      title={t("publishing.title")}
+      description={t("publishing.description")}
     >
       <p className="mb-4">
         {book.publishedAt ? (
           <>
-            Published {new Date(book.publishedAt).toLocaleString()} at{" "}
+            {t("publishing.publishedAt", {
+              when: new Date(book.publishedAt).toLocaleString(),
+            })}{" "}
             <a href={book.url} target="_blank" rel="noreferrer" className="text-primary hover:underline">
               {book.url.replace(/^https?:\/\//, "")}
             </a>
           </>
         ) : (
-          <span className="text-muted-foreground">Not published yet.</span>
+          <span className="text-muted-foreground">{t("publishing.notPublishedYet")}</span>
         )}
       </p>
 
       {(aheadPublished !== null && aheadPublished > 0 || (aheadPreview !== null && aheadPreview > 0)) && (
         <p className="mb-4 text-sm text-muted-foreground">
-          {aheadPublished !== null && aheadPublished > 0 && (
-            <>main is {aheadPublished} commit{aheadPublished === 1 ? "" : "s"} ahead of the live site. </>
-          )}
-          {aheadPreview !== null && aheadPreview > 0 && <>main is {aheadPreview} ahead of the preview.</>}
+          {aheadPublished !== null && aheadPublished > 0 &&
+            t("publishing.aheadPublished", { count: aheadPublished })}
+          {aheadPreview !== null && aheadPreview > 0 &&
+            t("publishing.aheadPreview", { count: aheadPreview })}
         </p>
       )}
 
@@ -152,7 +165,7 @@ export function PublishingSection({ book }: { book: Book }) {
           disabled={!hasSource}
           onClick={() => run(() => unwrap(api.books[":id"].builds.$post({ param: { id } })))}
         >
-          Rebuild
+          {t("publishing.rebuild")}
         </Button>
         <Button
           variant="outline"
@@ -165,31 +178,35 @@ export function PublishingSection({ book }: { book: Book }) {
             })
           }
         >
-          Publish
+          {t("publishing.publish")}
         </Button>
         <Input
           className="w-56"
-          placeholder="Note for this version (optional)"
+          placeholder={t("publishing.notePlaceholder")}
           maxLength={200}
           value={note}
           onChange={(e) => setNote(e.target.value)}
-          aria-label="Note for this version (optional)"
+          aria-label={t("publishing.notePlaceholder")}
         />
         <Button variant="outline" disabled={!hasSource} asChild={hasSource}>
-          {hasSource ? <a href={`/api/books/${id}/source.zip`}>Download source (zip)</a> : <span>Download source (zip)</span>}
+          {hasSource ? (
+            <a href={`/api/books/${id}/source.zip`}>{t("publishing.downloadSource")}</a>
+          ) : (
+            <span>{t("publishing.downloadSource")}</span>
+          )}
         </Button>
         {book.publishedAt && (
           <ConfirmButton
-            title={`Unpublish “${book.title}”?`}
-            description="The address shows “not published” until the next build. Nothing is deleted."
-            confirmLabel="Unpublish"
+            title={t("publishing.unpublishTitle", { title: book.title })}
+            description={t("publishing.unpublishDescription")}
+            confirmLabel={t("publishing.unpublish")}
             onConfirm={async () => {
               await unwrap(api.books[":id"].unpublish.$post({ param: { id } }));
               await queryClient.invalidateQueries({ queryKey: ["books", id], exact: true });
               await refresh();
             }}
           >
-            Unpublish
+            {t("publishing.unpublish")}
           </ConfirmButton>
         )}
       </div>
@@ -200,13 +217,13 @@ export function PublishingSection({ book }: { book: Book }) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Build</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Started by</TableHead>
-              <TableHead>When</TableHead>
-              <TableHead>Took</TableHead>
+              <TableHead>{t("publishing.build")}</TableHead>
+              <TableHead>{t("publishing.status")}</TableHead>
+              <TableHead>{t("publishing.startedBy")}</TableHead>
+              <TableHead>{t("publishing.when")}</TableHead>
+              <TableHead>{t("publishing.took")}</TableHead>
               <TableHead>
-                <span className="sr-only">Actions</span>
+                <span className="sr-only">{t("common.actions")}</span>
               </TableHead>
             </TableRow>
           </TableHeader>
@@ -215,7 +232,7 @@ export function PublishingSection({ book }: { book: Book }) {
               <TableRow key={b.id}>
                 <TableCell>
                   <div className="flex flex-wrap items-center gap-1">
-                    #{b.id} {TRIGGER[b.trigger]}
+                    #{b.id} {t(TRIGGER[b.trigger] as never)}
                     {b.tags?.map((t) => (
                       <Badge key={t} variant="outline">
                         {t}
@@ -227,17 +244,17 @@ export function PublishingSection({ book }: { book: Book }) {
                 <TableCell>
                   <div className="flex items-center gap-2">
                     <Badge variant={STATUS[b.status].variant}>
-                      {STATUS[b.status].label}
+                      {t(STATUS[b.status].label)}
                       {b.progress && ` ${b.progress.done}/${b.progress.total}`}
                     </Badge>
-                    {b.published && <Badge variant="outline">Live</Badge>}
+                    {b.published && <Badge variant="outline">{t("publishing.live")}</Badge>}
                     {b.status === "succeeded" && (
                       <a
                         href={`/api/books/${id}/builds/${b.id}/site.zip`}
                         className="text-sm text-primary hover:underline"
-                        title="Download the built book as a ZIP archive, to host it elsewhere. Student logins only work on this platform."
+                        title={t("publishing.downloadSiteTitle")}
                       >
-                        Download
+                        {t("publishing.downloadSite")}
                       </a>
                     )}
                   </div>
@@ -245,18 +262,18 @@ export function PublishingSection({ book }: { book: Book }) {
                 </TableCell>
                 <TableCell>{b.requestedBy ?? ""}</TableCell>
                 <TableCell>{new Date(b.createdAt).toLocaleString()}</TableCell>
-                <TableCell>{duration(b)}</TableCell>
+                <TableCell>{duration(b, t)}</TableCell>
                 <TableCell className="text-right whitespace-nowrap">
                   <Button variant="ghost" size="sm" onClick={() => setLogFor(b.id)}>
-                    Log
+                    {t("publishing.log")}
                   </Button>
                   {b.status === "succeeded" && versionTag(b) && !b.published && (
                     <ConfirmButton
                       size="sm"
                       variant="outline"
-                      title={`Roll back to ${versionTag(b)}?`}
-                      description="The live site switches to this version. The current main is not changed; publish it again to go forward."
-                      confirmLabel="Roll back"
+                      title={t("publishing.rollBackTitle", { tag: versionTag(b) })}
+                      description={t("publishing.rollBackDescription")}
+                      confirmLabel={t("publishing.rollBack")}
                       onConfirm={async () => {
                         await unwrap(
                           api.books[":id"].rollback.$post({ param: { id }, json: { tag: versionTag(b)! } }),
@@ -265,7 +282,7 @@ export function PublishingSection({ book }: { book: Book }) {
                         await refresh();
                       }}
                     >
-                      Roll back
+                      {t("publishing.rollBack")}
                     </ConfirmButton>
                   )}
                   {active(b) && (
@@ -276,7 +293,7 @@ export function PublishingSection({ book }: { book: Book }) {
                         run(() => unwrap(api.builds[":id"].cancel.$post({ param: { id: String(b.id) } })))
                       }
                     >
-                      Cancel
+                      {t("publishing.cancel")}
                     </Button>
                   )}
                 </TableCell>
@@ -297,6 +314,7 @@ export function PublishingSection({ book }: { book: Book }) {
  * instance setting says so.
  */
 function WorkLocally({ book }: { book: Book }) {
+  const { t } = useTranslation();
   const id = String(book.id);
   const { data: instance } = useInstance();
   const queryClient = useQueryClient();
@@ -323,7 +341,9 @@ function WorkLocally({ book }: { book: Book }) {
       setLabel("");
       await refresh();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not create a token");
+      toast.error(
+        error instanceof Error ? error.message : t("publishing.git.createTokenFailed"),
+      );
     } finally {
       setBusy(false);
     }
@@ -334,15 +354,16 @@ function WorkLocally({ book }: { book: Book }) {
       await unwrap(api.books[":id"].git.tokens[":tokenId"].$delete({ param: { id, tokenId } }));
       await refresh();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not revoke the token");
+      toast.error(error instanceof Error ? error.message : t("publishing.git.revokeFailed"));
     }
   };
 
   return (
     <div className="my-4 max-w-xl">
-      <h3 className="mb-1 font-medium">Work locally (git)</h3>
+      <h3 className="mb-1 font-medium">{t("publishing.git.title")}</h3>
       <p className="mb-2 text-sm text-muted-foreground">
-        Clone the book, edit it locally, and push to <code>main</code>. Pull before you push.
+        {t("publishing.git.hint")} <code>main</code>
+        {t("publishing.git.hint2")}
       </p>
       <div className="flex items-center gap-2">
         <code className="min-w-0 flex-1 truncate rounded-md bg-muted px-2 py-1.5 text-xs select-all">
@@ -352,27 +373,27 @@ function WorkLocally({ book }: { book: Book }) {
           variant="outline"
           size="sm"
           onClick={() => navigator.clipboard?.writeText(`git clone ${cloneUrl}`)}
-          aria-label="Copy the clone command"
+          aria-label={t("publishing.git.copyAria")}
         >
-          <CopyIcon aria-hidden /> Copy
+          <CopyIcon aria-hidden /> {t("publishing.git.copy")}
         </Button>
       </div>
       <p className="mt-2 text-sm text-muted-foreground">
-        Git asks for a username and password: use <code>git</code> and one of your tokens below. To save typing,
-        run once: <code>git config --global credential.helper store</code>
+        {t("publishing.git.authHint1")} <code>git</code> {t("publishing.git.authHint2")}{" "}
+        <code>git config --global credential.helper store</code>
       </p>
 
       <div className="mt-3 flex items-center gap-2">
         <Input
           className="w-56"
-          placeholder="Token label (optional)"
+          placeholder={t("publishing.git.tokenLabel")}
           maxLength={100}
           value={label}
           onChange={(e) => setLabel(e.target.value)}
-          aria-label="Token label (optional)"
+          aria-label={t("publishing.git.tokenLabel")}
         />
         <Button variant="outline" size="sm" disabled={busy} onClick={() => void create()}>
-          <KeyRoundIcon aria-hidden /> Create token
+          <KeyRoundIcon aria-hidden /> {t("publishing.git.createToken")}
         </Button>
       </div>
 
@@ -380,33 +401,39 @@ function WorkLocally({ book }: { book: Book }) {
         <Table className="mt-2">
           <TableHeader>
             <TableRow>
-              <TableHead>Token</TableHead>
-              <TableHead>Created by</TableHead>
-              <TableHead>Last used</TableHead>
+              <TableHead>{t("publishing.git.token")}</TableHead>
+              <TableHead>{t("publishing.git.createdBy")}</TableHead>
+              <TableHead>{t("publishing.git.lastUsed")}</TableHead>
               <TableHead>
-                <span className="sr-only">Actions</span>
+                <span className="sr-only">{t("common.actions")}</span>
               </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {tokens.map((t) => (
-              <TableRow key={t.id}>
+            {tokens.map((token) => (
+              <TableRow key={token.id}>
                 <TableCell>
-                  {t.label || <span className="text-muted-foreground">—</span>}
-                  {t.revokedAt !== null && <Badge variant="outline">revoked</Badge>}
+                  {token.label || <span className="text-muted-foreground">—</span>}
+                  {token.revokedAt !== null && (
+                    <Badge variant="outline">{t("publishing.git.revoked")}</Badge>
+                  )}
                 </TableCell>
-                <TableCell>{t.user}</TableCell>
-                <TableCell>{t.lastUsedAt ? new Date(t.lastUsedAt).toLocaleString() : "never"}</TableCell>
+                <TableCell>{token.user}</TableCell>
+                <TableCell>
+                  {token.lastUsedAt
+                    ? new Date(token.lastUsedAt).toLocaleString()
+                    : t("common.never")}
+                </TableCell>
                 <TableCell className="text-right">
-                  {t.revokedAt === null && (
+                  {token.revokedAt === null && (
                     <ConfirmButton
                       size="sm"
-                      title="Revoke this token?"
-                      description="It stops working at once. The token itself cannot be shown again — create a new one if you need it."
-                      confirmLabel="Revoke"
-                      onConfirm={() => revoke(t.id)}
+                      title={t("publishing.git.revokeTitle")}
+                      description={t("publishing.git.revokeDescription")}
+                      confirmLabel={t("publishing.git.revoke")}
+                      onConfirm={() => revoke(token.id)}
                     >
-                      Revoke
+                      {t("publishing.git.revoke")}
                     </ConfirmButton>
                   )}
                 </TableCell>
@@ -417,30 +444,35 @@ function WorkLocally({ book }: { book: Book }) {
       )}
 
       <details className="mt-2 text-sm text-muted-foreground">
-        <summary className="cursor-pointer">How git works here</summary>
+        <summary className="cursor-pointer">{t("publishing.git.howTitle")}</summary>
         <ul className="mt-2 list-disc space-y-1 pl-5">
-          <li>One branch only: <code>main</code>. Force-pushes, other branches, deletes and tags are refused.</li>
-          <li>A push never publishes. Publishing creates a version tag (v1, v2, …); <code>git checkout published</code> is what the live site shows, and <code>git log main ^published</code> lists unpublished changes.</li>
+          <li>
+            {t("publishing.git.rule1")} <code>main</code>. Force-pushes, other branches, deletes and tags are
+            refused.
+          </li>
+          <li>
+            {t("publishing.git.rule2")} <code>git checkout published</code>{" "}
+            {t("publishing.git.rule2b")} <code>git log main ^published</code>{" "}
+            {t("publishing.git.rule2c")}
+          </li>
           <li>
             {instance?.gitPushUpdatesPreview
-              ? "On this instance a push also builds the preview, so the preview follows main."
-              : "A push does not build anything; the preview moves when you save in the editor or publish."}
+              ? t("publishing.git.pushPreviewOn")
+              : t("publishing.git.pushPreviewOff")}
           </li>
-          <li>After a pull or push, reload the editor before saving — a save made against an older version is refused, so nothing is overwritten silently.</li>
-          <li>No submodules, no Git LFS; symlinks are stored as plain files.</li>
-          <li>Large pushes may need <code>git config http.postBuffer 10485760</code> once.</li>
+          <li>{t("publishing.git.rule3")}</li>
+          <li>{t("publishing.git.rule4")}</li>
+          <li>
+            {t("publishing.git.rule5")} <code>git config http.postBuffer 10485760</code>{" "}
+            {t("publishing.git.rule5b")}
+          </li>
         </ul>
       </details>
 
       <SecretDialog
         secret={secret}
-        title="Your git token"
-        description={
-          <>
-            Use it as the password with username <code>git</code>. It works only for this book, and it is shown only
-            now — store it somewhere safe.
-          </>
-        }
+        title={t("publishing.git.tokenTitle")}
+        description={t("publishing.git.tokenDescription")}
         onClose={() => setSecret(null)}
       />
     </div>
@@ -456,6 +488,7 @@ function UploadZone({
   onUploaded: () => void;
   onLog: (buildId: number) => void;
 }) {
+  const { t } = useTranslation();
   const input = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -465,7 +498,7 @@ function UploadZone({
   const upload = async (file: File | undefined) => {
     if (!file) return;
     if (!file.name.toLowerCase().endsWith(".zip")) {
-      toast.error("Choose a .zip file");
+      toast.error(t("publishing.upload.chooseZip"));
       return;
     }
     setBusy(true);
@@ -474,19 +507,32 @@ function UploadZone({
       const result = await uploadZip(bookId, file, setProgress);
       toast.success(
         result.changed
-          ? `Uploaded ${result.files} files. The book is being built.`
-          : "Nothing changed since the last upload. The book is being built again.",
+          ? t("publishing.upload.uploadedToast", { files: result.files })
+          : t("publishing.upload.unchangedToast"),
       );
       if (result.skipped.length > 0) {
         const shown = result.skipped.slice(0, 3).join(", ");
-        toast.warning(`Left out ${result.skipped.length} link(s): ${shown}${result.skipped.length > 3 ? ", …" : ""}`, {
-          // The whole list is in the build's log.
-          action: { label: "View log", onClick: () => onLog(result.build.id) },
-        });
+        toast.warning(
+          t("publishing.upload.skippedToast", {
+            count: result.skipped.length,
+            shown: `${shown}${result.skipped.length > 3 ? ", …" : ""}`,
+          }),
+          {
+            // The whole list is in the build's log.
+            action: {
+              label: t("publishing.upload.viewLog"),
+              onClick: () => onLog(result.build.id),
+            },
+          },
+        );
       }
       onUploaded();
     } catch (error) {
-      toast.error(error instanceof ApiError || error instanceof Error ? error.message : "Upload failed");
+      toast.error(
+        error instanceof ApiError || error instanceof Error
+          ? error.message
+          : t("publishing.upload.uploadFailed"),
+      );
     } finally {
       setBusy(false);
       if (input.current) input.current.value = "";
@@ -513,15 +559,17 @@ function UploadZone({
     >
       <UploadIcon className="size-6 text-muted-foreground" aria-hidden />
       <span>
-        {busy ? (progress < 1 ? `Uploading… ${Math.round(progress * 100)}%` : "Unpacking…") : "Drop a zip of your book here, or click to choose one"}
+        {busy
+          ? progress < 1
+            ? t("publishing.upload.uploading", { percent: Math.round(progress * 100) })
+            : t("publishing.upload.unpacking")
+          : t("publishing.upload.dropHere")}
       </span>
-      <span className="text-sm text-muted-foreground">
-        It must contain your hyperbook.json. A zip from GitHub (“Download ZIP”) works as it is.
-      </span>
+      <span className="text-sm text-muted-foreground">{t("publishing.upload.zipHint")}</span>
       {busy && (
         <div
           role="progressbar"
-          aria-label="Upload progress"
+          aria-label={t("publishing.upload.progressAria")}
           aria-valuenow={Math.round(progress * 100)}
           aria-valuemin={0}
           aria-valuemax={100}
@@ -538,7 +586,7 @@ function UploadZone({
         type="file"
         accept=".zip,application/zip"
         className="sr-only"
-        aria-label="Upload a zip of your book"
+        aria-label={t("publishing.upload.aria")}
         onChange={(e) => void upload(e.target.files?.[0])}
       />
     </label>
@@ -546,6 +594,7 @@ function UploadZone({
 }
 
 export function LogDialog({ buildId, onClose }: { buildId: number | null; onClose: () => void }) {
+  const { t } = useTranslation();
   const { data: build } = useQuery({
     queryKey: ["builds", buildId],
     queryFn: () => unwrap(api.builds[":id"].$get({ param: { id: String(buildId) } })),
@@ -575,22 +624,31 @@ export function LogDialog({ buildId, onClose }: { buildId: number | null; onClos
     <Dialog open={buildId !== null} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="sm:max-w-3xl">
         <DialogHeader>
-          <DialogTitle>Build #{buildId}</DialogTitle>
+          <DialogTitle>{t("publishing.logTitle", { id: buildId ?? 0 })}</DialogTitle>
           <DialogDescription>
             {build
-              ? `${STATUS[build.status].label}${build.hyperbookVersion ? ` with Hyperbook ${build.hyperbookVersion}` : ""}, commit ${build.commit.slice(0, 12)}`
-              : "Loading…"}
+              ? build.hyperbookVersion
+                ? t("publishing.logDescription", {
+                    status: t(STATUS[build.status].label),
+                    version: build.hyperbookVersion,
+                    commit: build.commit.slice(0, 12),
+                  })
+                : t("publishing.logDescriptionPlain", {
+                    status: t(STATUS[build.status].label),
+                    commit: build.commit.slice(0, 12),
+                  })
+              : t("publishing.logLoading")}
           </DialogDescription>
         </DialogHeader>
         <pre
           ref={pre}
           className="max-h-[60vh] overflow-auto rounded-md bg-secondary p-3 font-mono text-xs whitespace-pre-wrap"
         >
-          {build?.log || (build?.status === "queued" ? "Waiting for its turn…" : "")}
+          {build?.log || (build?.status === "queued" ? t("publishing.waitingForTurn") : "")}
         </pre>
         <div className="flex justify-end">
           <Button variant="outline" size="sm" onClick={downloadLog} disabled={!build?.log}>
-            <DownloadIcon aria-hidden /> Download log
+            <DownloadIcon aria-hidden /> {t("publishing.downloadLog")}
           </Button>
         </div>
       </DialogContent>

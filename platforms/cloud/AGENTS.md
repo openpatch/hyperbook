@@ -43,6 +43,32 @@ delete it.
   timeout 600 pnpm --filter @hyperbook/cloud test:e2e | tail -n 40
   ```
 
+## i18n: no hardcoded user-facing text
+
+Every string a user can read — pages, components, the editor, toasts,
+`aria-label`s, dialog titles, server validation messages, emails — comes from
+the shared catalog in `src/shared/i18n/`. **Never hardcode English UI text** in
+a string literal, template literal, or JSX text node; write the string as a
+key in both catalogs and translate it:
+
+- **Web components:** `useTranslation()` from `react-i18next`, then
+  `t("section.key")`. Text containing markup (links, `<code>`) goes through
+  `<Trans i18nKey=...>` with an `<a>`-style placeholder in the message.
+- **Non-React modules** (CodeMirror extensions, editors):
+  `import i18next from "i18next"` and `i18next.t("section.key")`.
+- **Server code:** `createT(locale)` from `src/shared/i18n`.
+- **Validation messages:** zod `message:` and error strings are catalog keys
+  (`validation.*`); the client translates them through `useMessage`/
+  `FormError`. Keys with dynamic parts use `{{param}}` interpolation, plurals
+  use the `_one`/`_other` suffixes (pass `count`).
+
+The English catalog (`locales/en.ts`) is the source of truth and defines the
+key shape; `locales/de.ts` is typed against it, and `tests/i18n.test.ts`
+fails when a key is missing in any locale. When you add a key to `en.ts`, add
+the German translation to `de.ts` in the same change — run
+`pnpm --filter @hyperbook/cloud test` (or at least `npx vitest run
+tests/i18n.test.ts`) to confirm the catalogs stay in sync.
+
 ## Enforcement
 
 `scripts/guard-test-safety.mjs` (repo root) rejects, in the husky pre-commit

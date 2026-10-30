@@ -1,4 +1,5 @@
 import { RangeSetBuilder } from "@codemirror/state";
+import i18next from "i18next";
 import { Decoration, type DecorationSet, type EditorView, ViewPlugin, type ViewUpdate, WidgetType } from "@codemirror/view";
 
 /*
@@ -94,7 +95,7 @@ class EditButton extends WidgetType {
   toDOM(view: EditorView) {
     const button = document.createElement("button");
     button.type = "button";
-    button.textContent = "Edit visually";
+    button.textContent = i18next.t("editor.actions.editVisually");
     button.className = "cm-edit-visually";
     button.addEventListener("mousedown", (e) => e.preventDefault());
     button.addEventListener("click", () => this.onEdit(this.block, view));

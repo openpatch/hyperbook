@@ -1,6 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Link } from "react-router";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { PageHeader, Section } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
@@ -15,32 +16,35 @@ type Request = Awaited<ReturnType<typeof load>>["pending"][number];
 
 /** Admins decide which books get addresses without an ending (suffix mode). */
 export function AddressesPage() {
+  const { t } = useTranslation();
   const { data } = useQuery({ queryKey: ["slug-requests"], queryFn: load });
   return (
     <>
       <PageHeader
-        title="Addresses"
-        description="Teachers ask for short addresses without their book's ending. Look at the book, then decide."
+        title={t("addresses.title")}
+        description={t("addresses.description")}
       />
-      <Section title="Requests">
-        {data && data.pending.length === 0 && <p className="text-muted-foreground">No open requests.</p>}
+      <Section title={t("addresses.requests")}>
+        {data && data.pending.length === 0 && (
+          <p className="text-muted-foreground">{t("addresses.noRequests")}</p>
+        )}
         <div className="grid gap-4">
           {data?.pending.map((request) => <RequestCard key={request.id} request={request} />)}
         </div>
       </Section>
       <Section
-        title="Granted addresses"
-        description="To take one back, open the book."
+        title={t("addresses.granted")}
+        description={t("addresses.grantedDescription")}
       >
         {data && data.granted.length === 0 ? (
-          <p className="text-muted-foreground">None yet.</p>
+          <p className="text-muted-foreground">{t("addresses.noneYet")}</p>
         ) : (
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Address</TableHead>
-                <TableHead>Book</TableHead>
-                <TableHead>Since</TableHead>
+                <TableHead>{t("addresses.address")}</TableHead>
+                <TableHead>{t("addresses.book")}</TableHead>
+                <TableHead>{t("addresses.since")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -69,6 +73,7 @@ export function AddressesPage() {
 
 function RequestCard({ request }: { request: Request }) {
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
   const [note, setNote] = useState("");
   const [busy, setBusy] = useState(false);
   const noteId = `note-${request.id}`;
@@ -84,49 +89,52 @@ function RequestCard({ request }: { request: Request }) {
       );
       await queryClient.invalidateQueries({ queryKey: ["slug-requests"] });
       await queryClient.invalidateQueries({ queryKey: ["books"] });
-      toast.success(decision === "approve" ? `${request.slug} granted` : "Declined");
+      toast.success(
+        decision === "approve" ? t("addresses.grantedToast", { slug: request.slug }) : t("addresses.declined"),
+      );
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Something went wrong");
+      toast.error(error instanceof Error ? error.message : t("common.somethingWrong"));
     } finally {
       setBusy(false);
     }
   };
 
   return (
-    <article className="grid max-w-3xl gap-3 rounded-lg border bg-card p-4" aria-label={`Request for ${request.slug}`}>
+    <article
+      className="grid max-w-3xl gap-3 rounded-lg border bg-card p-4"
+      aria-label={t("addresses.requestFor", { slug: request.slug })}
+    >
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h3 className="font-mono text-lg">{request.slug}</h3>
         <span className="text-sm text-muted-foreground">
-          {request.requestedBy?.displayName || request.requestedBy?.email || "Deleted account"},{" "}
+          {request.requestedBy?.displayName || request.requestedBy?.email || t("addresses.deletedAccount")},{" "}
           {new Date(request.createdAt).toLocaleDateString()}
         </span>
       </div>
       <p className="text-sm">
-        For{" "}
+        {t("addresses.for")}{" "}
         <Link to={`/books/${request.book.id}`} className="text-primary hover:underline">
           {request.book.title}
         </Link>
-        , now at{" "}
+        , {t("addresses.nowAt")}{" "}
         <a href={request.book.url} target="_blank" rel="noreferrer" className="font-mono text-primary hover:underline">
           {request.book.url.replace(/^https?:\/\//, "")}
         </a>
       </p>
       <p className="text-sm whitespace-pre-wrap">{request.description}</p>
       {request.takenBy && (
-        <p className="text-sm text-destructive">
-          “{request.takenBy.title}” has this address now. Approving works once it is free.
-        </p>
+        <p className="text-sm text-destructive">{t("addresses.taken", { title: request.takenBy.title })}</p>
       )}
       <div className="grid gap-1.5">
-        <Label htmlFor={noteId}>Note to the teacher (optional)</Label>
+        <Label htmlFor={noteId}>{t("addresses.noteToTeacher")}</Label>
         <Textarea id={noteId} value={note} onChange={(e) => setNote(e.target.value)} />
       </div>
       <div className="flex flex-wrap gap-2">
         <Button disabled={busy || request.takenBy !== null} onClick={() => decide("approve")}>
-          Grant {request.slug}
+          {t("addresses.grant", { slug: request.slug })}
         </Button>
         <Button variant="outline" disabled={busy} onClick={() => decide("decline")}>
-          Decline
+          {t("addresses.declined")}
         </Button>
       </div>
     </article>

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { UploadIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Check, Field, Section } from "./form-dialog";
@@ -18,14 +19,14 @@ import { LANGUAGES } from "./frontmatter";
 
 type Json = Record<string, unknown>;
 
-/** [key, label, Hyperbook's default] */
+/** [key, message key, Hyperbook's default] */
 const SWITCHES = [
-  ["search", "Search", false],
-  ["toc", "Table of contents on pages", true],
-  ["qrcode", "QR code of the page", false],
-  ["trailingSlash", "Addresses end with /", false],
-  ["allowDangerousHtml", "Allow HTML in pages", false],
-  ["importExport", "Import & export the saved state", false],
+  ["search", "editor.bookSettings.search", false],
+  ["toc", "editor.bookSettings.toc", true],
+  ["qrcode", "editor.bookSettings.qrcode", false],
+  ["trailingSlash", "editor.bookSettings.trailingSlash", false],
+  ["allowDangerousHtml", "editor.bookSettings.allowDangerousHtml", false],
+  ["importExport", "editor.bookSettings.importExport", false],
 ] as const;
 const IMAGES = new Set(["png", "jpg", "jpeg", "gif", "webp", "svg", "avif"]);
 const LOGO_ACCEPT = Array.from(IMAGES, (e) => `.${e}`).join(",");
@@ -152,6 +153,7 @@ export function SettingsDialog({
   onSave: (content: string, baseOid: string) => Promise<void>;
   onEditJson: () => void;
 }) {
+  const { t } = useTranslation();
   const [loaded, setLoaded] = useState<{ json: Json; oid: string } | null>(null);
   const [form, setForm] = useState<Form | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -172,7 +174,7 @@ export function SettingsDialog({
         setLoaded({ json: json as Json, oid: file.oid });
         setForm(toForm(json as Json));
       })
-      .catch((err: Error) => setError(`${err.message}. Fix it as JSON first.`));
+      .catch((err: Error) => setError(t("editor.bookSettings.fixJson", { message: err.message })));
   }, [open, bookId]);
 
   const update = (patch: Partial<Form>) => setForm((f) => (f ? { ...f, ...patch } : f));
@@ -184,7 +186,7 @@ export function SettingsDialog({
   const uploadLogo = async (file: File | undefined) => {
     if (!file || uploading) return;
     if (!IMAGES.has(extension(file.name))) {
-      setError(`The logo must be one of: ${LOGO_ACCEPT}`);
+      setError(t("editor.bookSettings.logoType", { accept: LOGO_ACCEPT }));
       return;
     }
     setUploading(true);
@@ -198,13 +200,13 @@ export function SettingsDialog({
   const save = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!loaded || !form) return;
-    if (!form.name.trim()) return setError("The book needs a name");
+    if (!form.name.trim()) return setError(t("editor.bookSettings.needsName"));
     setBusy(true);
     try {
       await onSave(JSON.stringify(fromForm(loaded.json, form), null, 2) + "\n", loaded.oid);
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not save");
+      setError(err instanceof Error ? err.message : t("editor.bookSettings.couldNotSave"));
     } finally {
       setBusy(false);
     }
@@ -215,18 +217,16 @@ export function SettingsDialog({
       <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-2xl">
         <form onSubmit={save} className="grid gap-5">
           <DialogHeader>
-            <DialogTitle>Book settings</DialogTitle>
-            <DialogDescription>
-              Saved in hyperbook.json. Settings not shown here stay as they are.
-            </DialogDescription>
+            <DialogTitle>{t("editor.bookSettings.title")}</DialogTitle>
+            <DialogDescription>{t("editor.bookSettings.description")}</DialogDescription>
           </DialogHeader>
           {form && (
             <>
-              <Section title="General">
-                <Field id="s-name" label="Name">
+              <Section title={t("editor.bookSettings.general")}>
+                <Field id="s-name" label={t("editor.bookSettings.name")}>
                   <Input id="s-name" value={form.name} onChange={(e) => update({ name: e.target.value })} />
                 </Field>
-                <Field id="s-language" label="Language">
+                <Field id="s-language" label={t("editor.bookSettings.language")}>
                   <Select value={form.language} onValueChange={(language) => update({ language })}>
                     <SelectTrigger id="s-language" className="w-full">
                       <SelectValue />
@@ -240,30 +240,30 @@ export function SettingsDialog({
                     </SelectContent>
                   </Select>
                 </Field>
-                <Field id="s-description" label="Description" full>
+                <Field id="s-description" label={t("editor.bookSettings.descriptionField")} full>
                   <Textarea id="s-description" rows={2} value={form.description} onChange={(e) => update({ description: e.target.value })} />
                 </Field>
               </Section>
-              <Section title="Author & license">
-                <Field id="s-author" label="Author">
+              <Section title={t("editor.bookSettings.authorLicense")}>
+                <Field id="s-author" label={t("editor.bookSettings.author")}>
                   <Input id="s-author" value={form.authorName} onChange={(e) => update({ authorName: e.target.value })} />
                 </Field>
-                <Field id="s-author-url" label="Author's website">
+                <Field id="s-author-url" label={t("editor.bookSettings.authorUrl")}>
                   <Input id="s-author-url" type="url" value={form.authorUrl} onChange={(e) => update({ authorUrl: e.target.value })} />
                 </Field>
-                <Field id="s-license" label="License" full>
-                  <Input id="s-license" placeholder="e.g. CC-BY-SA 4.0" value={form.license} onChange={(e) => update({ license: e.target.value })} />
+                <Field id="s-license" label={t("editor.bookSettings.license")} full>
+                  <Input id="s-license" placeholder={t("editor.bookSettings.licensePlaceholder")} value={form.license} onChange={(e) => update({ license: e.target.value })} />
                 </Field>
               </Section>
-              <Section title="Branding">
-                <Field id="s-logo" label="Logo" hint="An image in the public folder">
+              <Section title={t("editor.bookSettings.branding")}>
+                <Field id="s-logo" label={t("editor.bookSettings.logo")} hint={t("editor.bookSettings.logoHint")}>
                   <div className="flex gap-2">
                     <Select value={form.logo || "none"} onValueChange={(logo) => update({ logo: logo === "none" ? "" : logo })}>
                       <SelectTrigger id="s-logo" className="w-full">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="none">No logo</SelectItem>
+                        <SelectItem value="none">{t("editor.bookSettings.noLogo")}</SelectItem>
                         {images.map((p) => (
                           <SelectItem key={p} value={href(p)}>
                             {p}
@@ -278,8 +278,8 @@ export function SettingsDialog({
                       type="button"
                       variant="outline"
                       size="icon"
-                      title="Upload an image"
-                      aria-label="Upload a logo image"
+                      title={t("editor.bookSettings.uploadImage")}
+                      aria-label={t("editor.bookSettings.uploadLogo")}
                       disabled={uploading}
                       onClick={() => logoInput.current?.click()}
                     >
@@ -297,36 +297,36 @@ export function SettingsDialog({
                     }}
                   />
                 </Field>
-                <ColorField id="s-brand" label="Brand" fallback="#007864" value={form.brand} onChange={(brand) => update({ brand })} />
-                <ColorField id="s-brand-dark" label="Brand (dark theme)" fallback="#b5e3d8" value={form.brandDark} onChange={(brandDark) => update({ brandDark })} />
-                <ColorField id="s-brand-text" label="Header text" fallback="#ffffff" value={form.brandText} onChange={(brandText) => update({ brandText })} />
-                <Check id="s-inverted" label="Invert the header" checked={form.inverted} onChange={(inverted) => update({ inverted })} />
+                <ColorField id="s-brand" label={t("editor.bookSettings.brand")} fallback="#007864" value={form.brand} onChange={(brand) => update({ brand })} />
+                <ColorField id="s-brand-dark" label={t("editor.bookSettings.brandDark")} fallback="#b5e3d8" value={form.brandDark} onChange={(brandDark) => update({ brandDark })} />
+                <ColorField id="s-brand-text" label={t("editor.bookSettings.headerText")} fallback="#ffffff" value={form.brandText} onChange={(brandText) => update({ brandText })} />
+                <Check id="s-inverted" label={t("editor.bookSettings.invertHeader")} checked={form.inverted} onChange={(inverted) => update({ inverted })} />
               </Section>
-              <Section title="Advanced">
-                <Field id="s-styles" label="Styles" hint="Links to CSS files, comma-separated" full>
+              <Section title={t("editor.bookSettings.advanced")}>
+                <Field id="s-styles" label={t("editor.bookSettings.styles")} hint={t("editor.bookSettings.stylesHint")} full>
                   <Input id="s-styles" value={form.styles} onChange={(e) => update({ styles: e.target.value })} />
                 </Field>
-                <Field id="s-scripts" label="Scripts" hint="Links to JavaScript files, comma-separated" full>
+                <Field id="s-scripts" label={t("editor.bookSettings.scripts")} hint={t("editor.bookSettings.scriptsHint")} full>
                   <Input id="s-scripts" value={form.scripts} onChange={(e) => update({ scripts: e.target.value })} />
                 </Field>
               </Section>
-              <Section title="Features">
-                {SWITCHES.map(([key, label]) => (
+              <Section title={t("editor.bookSettings.features")}>
+                {SWITCHES.map(([key, labelKey]) => (
                   <Check
                     key={key}
                     id={`s-${key}`}
-                    label={label}
+                    label={t(labelKey)}
                     checked={form.switches[key]}
                     onChange={(checked) => update({ switches: { ...form.switches, [key]: checked } })}
                   />
                 ))}
-                <Check id="s-breadcrumb" label="Breadcrumb navigation" full checked={form.breadcrumb} onChange={(breadcrumb) => update({ breadcrumb })} />
+                <Check id="s-breadcrumb" label={t("editor.bookSettings.breadcrumb")} full checked={form.breadcrumb} onChange={(breadcrumb) => update({ breadcrumb })} />
                 {form.breadcrumb && (
                   <>
-                    <Field id="s-breadcrumb-home" label="Home" hint="Icon or text of the home item">
+                    <Field id="s-breadcrumb-home" label={t("editor.bookSettings.home")} hint={t("editor.bookSettings.homeHint")}>
                       <Input id="s-breadcrumb-home" placeholder="🏠" value={form.breadcrumbHome} onChange={(e) => update({ breadcrumbHome: e.target.value })} />
                     </Field>
-                    <Field id="s-breadcrumb-separator" label="Separator" hint="Between the items">
+                    <Field id="s-breadcrumb-separator" label={t("editor.bookSettings.separator")} hint={t("editor.bookSettings.separatorHint")}>
                       <Input id="s-breadcrumb-separator" placeholder=">" value={form.breadcrumbSeparator} onChange={(e) => update({ breadcrumbSeparator: e.target.value })} />
                     </Field>
                   </>
@@ -334,18 +334,18 @@ export function SettingsDialog({
               </Section>
             </>
           )}
-          {!form && !error && <p className="text-muted-foreground">Loading…</p>}
+          {!form && !error && <p className="text-muted-foreground">{t("common.loading")}</p>}
           {error && <p className="text-sm text-destructive">{error}</p>}
           <DialogFooter className="sm:justify-between">
             <Button type="button" variant="ghost" onClick={onEditJson}>
-              Edit as JSON
+              {t("editor.bookSettings.editAsJson")}
             </Button>
             <div className="flex gap-2">
               <Button type="button" variant="outline" onClick={onClose}>
-                Cancel
+                {t("common.cancel")}
               </Button>
               <Button type="submit" disabled={!form || busy}>
-                Save
+                {t("common.save")}
               </Button>
             </div>
           </DialogFooter>
@@ -369,6 +369,7 @@ function ColorField({
   value: string;
   onChange: (value: string) => void;
 }) {
+  const { t } = useTranslation();
   return (
     <Field id={id} label={label}>
       <div className="flex gap-2">
@@ -381,7 +382,7 @@ function ColorField({
         />
         {value && (
           <Button type="button" variant="ghost" size="sm" onClick={() => onChange("")}>
-            Default
+            {t("editor.bookSettings.defaultColor")}
           </Button>
         )}
       </div>

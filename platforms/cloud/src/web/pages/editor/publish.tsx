@@ -1,4 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
+import i18next from "i18next";
 import { Loader2Icon } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { toast } from "sonner";
@@ -22,10 +24,13 @@ export function useBuilds(bookId: string) {
 
 /** "12 / 340 pages" while a build counts its pages, else what it is doing. */
 export function buildStatus(build: Build): string {
-  if (build.status === "queued") return "Waiting to build…";
+  const t = i18next.t;
+  if (build.status === "queued") return t("editor.publish.waitingToBuild");
   const p = build.progress;
-  if (!p) return "Building…";
-  return `${p.done} / ${p.total} ${p.step === "glossary" ? "glossary entries" : "pages"}`;
+  if (!p) return t("editor.publish.building");
+  return p.step === "glossary"
+    ? t("editor.publish.progressGlossary", { done: p.done, total: p.total })
+    : t("editor.publish.progressPages", { done: p.done, total: p.total });
 }
 
 /**
@@ -49,6 +54,7 @@ export function PublishButton({
   onPublish: (publish: () => Promise<void>) => void;
   onShowLog: (buildId: number) => void;
 }) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const live = builds?.find((b) => b.published);
   const publishing = builds?.find((b) => b.publish && active(b));
@@ -62,10 +68,10 @@ export function PublishButton({
     if (!ended) return;
     followed.current = null;
     void queryClient.invalidateQueries({ queryKey: ["books", bookId], exact: true });
-    if (ended.status === "succeeded") toast.success("Published. Students see the new version.");
+    if (ended.status === "succeeded") toast.success(t("editor.publish.publishedToast"));
     else if (ended.status === "failed") {
-      toast.error("Publishing failed: the build did not succeed.", {
-        action: { label: "Show log", onClick: () => onShowLog(ended.id) },
+      toast.error(t("editor.publish.failedToast"), {
+        action: { label: t("editor.publish.showLog"), onClick: () => onShowLog(ended.id) },
       });
     }
   }, [ended?.id]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -73,14 +79,14 @@ export function PublishButton({
   const publish = async () => {
     try {
       const res = await unwrap(api.books[":id"].publish.$post({ param: { id: bookId }, json: {} }));
-      if (res.published) toast.success("Published.");
+      if (res.published) toast.success(t("editor.publish.publishedShort"));
       else followed.current = res.build.id;
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ["books", bookId, "builds"] }),
         queryClient.invalidateQueries({ queryKey: ["books", bookId], exact: true }),
       ]);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not publish");
+      toast.error(error instanceof Error ? error.message : t("editor.publish.couldNotPublish"));
     }
   };
 
@@ -91,11 +97,12 @@ export function PublishButton({
         size="sm"
         variant="secondary"
         className="relative overflow-hidden"
-        title="The book goes live when this build is done. Click to see its log."
+        title={t("editor.publish.publishingTitle")}
         onClick={() => onShowLog(publishing.id)}
       >
         <Loader2Icon className="size-4 animate-spin" />
-        Publishing… <span className="text-muted-foreground tabular-nums">{buildStatus(publishing)}</span>
+        {t("editor.publish.publishingLabel")}{" "}
+        <span className="text-muted-foreground tabular-nums">{buildStatus(publishing)}</span>
         {p && p.total > 0 && (
           <span
             aria-hidden
@@ -107,13 +114,15 @@ export function PublishButton({
     );
   }
 
-  const label = upToDate && !hasUnsaved ? "Published" : "Publish";
+  const label = upToDate && !hasUnsaved
+    ? t("editor.publish.published")
+    : t("editor.publish.publish");
   return (
     <Button
       size="sm"
       variant={upToDate && !hasUnsaved ? "outline" : "default"}
       disabled={!commit || (upToDate && !hasUnsaved)}
-      title={upToDate ? "Students see the newest saved version" : "Students see an older version"}
+      title={upToDate ? t("editor.publish.upToDateTitle") : t("editor.publish.behindTitle")}
       onClick={() => onPublish(publish)}
     >
       {label}

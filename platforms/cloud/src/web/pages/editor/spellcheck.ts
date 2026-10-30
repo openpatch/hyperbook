@@ -12,6 +12,7 @@ import {
   ViewPlugin,
 } from "@codemirror/view";
 import Typo from "typo-js";
+import i18next from "i18next";
 import { closeMenu, item, openMenu, separator } from "./context-menu";
 import { findFrontmatter } from "./frontmatter";
 
@@ -213,7 +214,9 @@ function spellMenu(
         }),
       );
     if (suggestions.length > 0) separator(box);
-    item(box, `Add “${word}” to the dictionary`, () => config.onAddWord(word));
+    item(box, i18next.t("editor.actions.addToDictionary", { word }), () =>
+      config.onAddWord(word),
+    );
   });
   view.focus();
 }
