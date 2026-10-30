@@ -10,8 +10,20 @@
  *   frame  → editor  { type: "save" }                Ctrl/⌘+S inside the frame
  */
 
-/** struktolab: a .struktolab file (JSON tree); struktolab-pseudocode: a block inside a page. */
-export type VisualKind = "learningmap" | "excalidraw" | "jmp" | "bitflow" | "struktolab" | "struktolab-pseudocode";
+/**
+ * struktolab: a .struktolab file (JSON tree); struktolab-pseudocode: a block inside a page.
+ * blockflow: a .sb3 file — binary, so the frame gets it base64-encoded.
+ * blockflow-project: a .blockflow project file (the generator's JSON).
+ */
+export type VisualKind =
+  | "learningmap"
+  | "excalidraw"
+  | "jmp"
+  | "bitflow"
+  | "struktolab"
+  | "struktolab-pseudocode"
+  | "blockflow"
+  | "blockflow-project";
 
 export type ToFrame = { type: "load"; text: string; language: string };
 

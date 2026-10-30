@@ -57,11 +57,16 @@ export function createAdminApp(deps: Deps, options: { webRoot?: string } = {}) {
   const app = new Hono();
 
   // The blockflow editor frame (see blockflow.ts) gets its own CSP — one that
-  // allows what scratch-vm needs. Registered before secureHeaders so it can
-  // replace the header after that middleware set it.
+  // allows what scratch-vm needs — and relaxed framing headers: its small stage
+  // is a srcdoc/blob iframe, which X-Frame-Options/CORP same-origin block from
+  // an opaque origin. CSP frame-ancestors 'self' still keeps others from
+  // framing the embed pages. Registered before secureHeaders so it can replace
+  // the headers after that middleware set them.
   app.use("/blockflow/*", async (c, next) => {
     await next();
     c.res.headers.set("Content-Security-Policy", BLOCKFLOW_CSP);
+    c.res.headers.delete("X-Frame-Options");
+    c.res.headers.set("Cross-Origin-Resource-Policy", "cross-origin");
   });
 
   app.use(

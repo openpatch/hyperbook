@@ -625,7 +625,7 @@ export const DIRECTIVES: readonly Directive[] = [
     docs: "/elements/blockflow",
     attributes: [
       { name: "src", description: "The .sb3 file to start from", file: true },
-      { name: "project", description: "A .json project file", file: true },
+      { name: "project", description: "A .blockflow/.json project file (made in the generator)", file: true },
       { name: "title", description: "Title of the tutorial" },
       { name: "width", description: "Width (default `100%`)" },
       height("700px"),

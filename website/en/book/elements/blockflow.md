@@ -141,7 +141,7 @@ Let's get started!
 
 ### Project File
 
-Instead of configuring the editor inline, you can provide a URL to a `.json` project file using the `project` attribute. This is useful when you want to reuse a configuration or manage it externally. You can use the [Blockflow Generator](https://blockflow.openpatch.org/generator.html) to create a project file.
+Instead of configuring the editor inline, you can provide a URL to a `.json` project file using the `project` attribute. This is useful when you want to reuse a configuration or manage it externally. You can use the [Blockflow Generator](https://blockflow.openpatch.org/generator.html) to create a project file. Save it as a `.blockflow` file in your book (e.g. `public/tutorial.blockflow`) and point `project` at it; in Hyperbook Cloud, `.blockflow` files open in that same generator for editing.
 
 ```md
 ::::blockflow-editor{project="https://example.com/tutorial.json"}

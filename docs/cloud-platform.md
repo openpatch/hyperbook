@@ -29,7 +29,7 @@ migrated and no old API is kept.
 - **M0 Foundations** *(done)*: rewrite skeleton, accounts, entitlements, books (metadata), groups, students, printable credentials. *This document details M0.*
 - **M1 Hosting** *(done, see [M1](#m1-hosting))*: zip upload, sandboxed build in a child process, atomic publish, Host routing to built books, `tls-check` endpoint, Caddy examples.
 - **M2 Student features** *(done, see [M2](#m2-student-features))*: `/_hyperbook/login` (password + QR), cookie sessions, event store (port `lib/eventSourcing.js` and its wire format), impersonation, private books, Bearer mode for externally hosted books, `cloud.js` same-origin mode.
-- **M3 Editor** *(done, see [M3](#m3-editor))*: git-backed files, CodeMirror, uploads, preview on `<slug>--preview.<BOOKS_DOMAIN>`, settings forms, export, and visual editors for element files (struktolab, bitflow, learningmap, excalidraw, jmp, and H5P upload only; see [M3: Visual editors](#m3-visual-editors-for-element-files)).
+- **M3 Editor** *(done, see [M3](#m3-editor))*: git-backed files, CodeMirror, uploads, preview on `<slug>--preview.<BOOKS_DOMAIN>`, settings forms, export, and visual editors for element files (struktolab, bitflow, learningmap, excalidraw, jmp, blockflow `.sb3`/`.blockflow`, and H5P upload only; see [M3: Visual editors](#m3-visual-editors-for-element-files)).
 - **M4 Instance operations** *(done except the launch itself, see [M4](#m4-instance-operations))*: signup modes, quotas, legal pages, email verification, backup docs. Launch of the OpenPatch instance.
 - **M5 Later**: OIDC, local runtime-asset mirror, custom domains (*done*, see [M5](#m5-custom-domains)), address suffixes and requests (*done*, see [M5](#m5-address-suffixes-and-name-requests)), sharing and forking.
 
@@ -815,19 +815,29 @@ the result back into the book, like any other edit.
 | learningmap | `.learningmap` file (`src`) | `hyperbook-learningmap-editor` (`@learningmap/web-component`) | `onChange` |
 | excalidraw | `.excalidraw` file (`src`) | `@hyperbook/web-component-excalidraw` | `onChange`, `value` |
 | jmp | `.jmp` file (`src`) | `@java-memory-playground/web-component` | `onChange` |
+| blockflow | `.sb3` file (`src` of `::blockflow-player` / `::::blockflow-editor`; base64 of the zip) | `embed-editor.html` of the blockflow bundle served at `/blockflow/` | embed protocol: `change`/`saved` messages |
+| blockflow (project) | `.blockflow` file (`project` of `::::blockflow-editor`; the generator's JSON) | `embed-generator.html` of the same bundle | embed protocol: `change`/`saved` messages |
 
-All five already ship an editor as a web component, so the platform embeds
-them; it does not reimplement any editor.
+Five already ship an editor as a web component, so the platform embeds them;
+it does not reimplement any editor. Blockflow has no web component: its
+editors are a static bundle, which the platform serves itself at `/blockflow/` —
+the same runtime the books of the instance render with (see below). Since
+blockflow v0.2.0 the bundle ships embed entries (`embed-editor.html`,
+`embed-generator.html`) that speak a small postMessage protocol
+(`ready`/`load`/`change`/`save`/`saved`/`error`, same-origin or an explicit
+`?embedOrigin=` allowlist), so the frame talks to the editor instead of
+touching its VM.
 
 ## How teachers reach them
 
 1. **From the file tree**: opening a `.learningmap`, `.excalidraw`, `.jmp`,
-   `.bitflow` or `.struktolab` file shows the visual editor, with a "Source" toggle to the
-   raw text.
+   `.bitflow`, `.struktolab`, `.sb3` or `.blockflow` file shows the visual
+   editor, with a "Source" toggle to the raw text (base64 for a `.sb3`).
 2. **From the Markdown editor**: a directive line (`::learningmap{src=…}`,
-   `:::struktolab`, …) gets an "Edit visually" action. For a `src` element it
-   opens that file; for inline struktolab it edits the code block and writes
-   it back into the page.
+   `::blockflow-player{src=…}`, `::::blockflow-editor{src=…}` or
+   `::::blockflow-editor{project=…}`, `:::struktolab`, …) gets an "Edit
+   visually" action. For a `src`/`project` element it opens that file; for
+   inline struktolab it edits the code block and writes it back into the page.
 3. **Creating**: "Insert" above a page offers learning map, drawing, Java
    memory diagram, flow and structogram. Each creates a starter file in
    `public/` (which every element's `src` lookup checks first) and inserts
@@ -835,9 +845,10 @@ them; it does not reimplement any editor.
    the playground's example diagram (unsaved) when it opens.
 
 Which files belong to which element comes from the file's extension:
-`.learningmap`, `.excalidraw`, `.jmp`, `.bitflow` and `.struktolab` (bitflow flows are
-JSON, but get an extension of their own so they are recognised without
-reading the book's pages; the build reads `src` whatever its extension).
+`.learningmap`, `.excalidraw`, `.jmp`, `.bitflow`, `.struktolab`, `.sb3` and
+`.blockflow` (bitflow flows and blockflow project files are JSON, but get an
+extension of their own so they are recognised without reading the book's
+pages; the build reads `src`/`project` whatever their extension).
 
 Structograms usually live inside the page (a code block in
 `:::struktolab`). The Markdown editor shows "Edit visually" on each such
@@ -890,6 +901,22 @@ component means bumping both together.
   on (`tests/element-versions.test.ts`).
 - Excalidraw's fonts are served by the platform (`/excalidraw-assets/`,
   copied at build time); its CDN fallback is blocked by `font-src 'self'`.
+- The blockflow editors are different: they are the static bundle the books
+  embed too, served on the admin origin at `/blockflow/*` from the shared
+  runtime extracted per Hyperbook version (`dataDir/shared-runtimes`, see
+  `src/server/admin/blockflow.ts`; in a monorepo checkout, from
+  `packages/markdown/dist/assets/directive-blockflow`). `/blockflow/*` gets
+  its own CSP (`BLOCKFLOW_CSP`, set after `secureHeaders` ran): `script-src
+  'unsafe-eval'` because scratch-vm compiles blocks with `new Function`,
+  `connect-src`/`img-src`/`media-src` for the Scratch asset CDNs and `blob:`
+  workers and the small-stage iframe. The admin app's own CSP stays strict.
+  The visual frame talks to the bundle's embed entries
+  (`embed-editor.html` for `.sb3`, `embed-generator.html` for `.blockflow`,
+  blockflow ≥ v0.2.0; `manifest.json` in the bundle names them, and
+  `tests/element-versions.test.ts` fails when the pin is older): the document
+  goes in with `load`, edits come back as `change`, and Ctrl/⌘+S sends `save`
+  and the `saved` answer is what gets committed. A `.sb3` travels as base64
+  text and saves with `encoding: "base64"`; a `.blockflow` is plain JSON.
 - A visual editor's own save button (jmp) saves the file, like Ctrl/⌘+S
   inside the frame.
 - Components get the content passed in directly, never a URL to fetch, so

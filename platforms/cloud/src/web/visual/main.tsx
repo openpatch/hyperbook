@@ -10,6 +10,8 @@ const EDITORS: Record<VisualKind, () => Promise<{ default: ComponentType<VisualE
   bitflow: () => import("./bitflow"),
   struktolab: () => import("./struktolab"),
   "struktolab-pseudocode": () => import("./struktolab-pseudocode"),
+  blockflow: () => import("./blockflow"),
+  "blockflow-project": () => import("./blockflow-project"),
 };
 
 const kind = new URLSearchParams(location.search).get("kind") as VisualKind;

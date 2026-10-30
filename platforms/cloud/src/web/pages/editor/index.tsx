@@ -43,6 +43,7 @@ import {
   pageOf,
   rawUrl,
   starter,
+  starterEncoding,
   toBase64,
 } from "./files";
 import { RefactorDialog, type RefactorRequest } from "./references-dialog";
@@ -265,6 +266,7 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
                   op: "write",
                   path,
                   content: starter(path, bookLanguage),
+                  encoding: starterEncoding(path),
                   baseOid: null,
                 },
               ],
@@ -656,7 +658,7 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
         submitLabel: "Create",
         onSubmit: (path) =>
           commitAndOpen(
-            [{ op: "write", path, content: starter(path), baseOid: null }],
+            [{ op: "write", path, content: starter(path), encoding: starterEncoding(path), baseOid: null }],
             path,
           ),
       }),

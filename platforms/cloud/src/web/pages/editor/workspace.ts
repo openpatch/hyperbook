@@ -197,6 +197,8 @@ export function useWorkspace(bookId: string, listing: Listing) {
           op: "write" as const,
           path: t.path,
           content: t.text!,
+          // A binary element file (a .sb3) travels as base64 text.
+          ...(t.loaded?.kind === "text" && t.loaded.encoding ? { encoding: t.loaded.encoding } : {}),
           baseOid: t.path in baseOids ? baseOids[t.path]! : t.loaded!.oid,
         })),
       );

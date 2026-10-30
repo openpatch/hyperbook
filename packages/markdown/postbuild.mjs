@@ -127,7 +127,9 @@ async function postbuild() {
   // Download and extract zips
   const zipFiles = [
     {
-      url: "https://github.com/openpatch/blockflow/releases/download/blockflow-v0.1.1/dist-embedded.zip",
+      // v0.2.0 added the embed entries (embed-editor.html, embed-generator.html)
+      // and manifest.json, which Hyperbook Cloud's visual editors speak to.
+      url: "https://github.com/openpatch/blockflow/releases/download/blockflow-v0.2.0/dist-embedded.zip",
       dst: path.join("./dist", "assets", "directive-blockflow"),
     },
     {
@@ -135,7 +137,7 @@ async function postbuild() {
       dst: path.join("./dist", "assets", "directive-sqlide", "include"),
     },
     {
-      url: `https://github.com/openpatch/online-ide/releases/download/${ideReleases.onlineide}/dist-embedded.zip`,
+      url: "https://github.com/openpatch/online-ide/releases/download/v2.2.1-hyperbook.12/dist-embedded.zip",
       dst: path.join("./dist", "assets", "directive-onlineide", "include"),
     },
     {

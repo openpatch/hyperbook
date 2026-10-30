@@ -1,37 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import type { FromFrame, ToFrame, VisualKind } from "../../visual/protocol";
-import { extension } from "./files";
 
-/** Files that open in their element's own editor (see visual.html), by extension. */
-export function visualKind(path: string): VisualKind | null {
-  switch (extension(path)) {
-    case "bitflow":
-      return "bitflow";
-    case "struktolab":
-      return "struktolab";
-    case "learningmap":
-      return "learningmap";
-    case "excalidraw":
-      return "excalidraw";
-    case "jmp":
-      return "jmp";
-    default:
-      return null;
-  }
-}
-
-/** Before saving: the editors all write JSON, and a broken file never lands in the book. */
-export function visualProblem(kind: VisualKind, text: string): string | null {
-  // All of them write JSON, except struktolab's pseudocode.
-  if (kind !== "struktolab-pseudocode" && text.trim()) {
-    try {
-      JSON.parse(text);
-    } catch (error) {
-      return `This is not valid JSON: ${(error as Error).message}`;
-    }
-  }
-  return null;
-}
+// The file-type registry and the save check live in visual-kinds.ts, so
+// files.ts can ask them without an import cycle.
+export { visualKind, visualProblem } from "./visual-kinds";
 
 /**
  * A visual editor in a same-origin frame, so its CSS stays out of the admin

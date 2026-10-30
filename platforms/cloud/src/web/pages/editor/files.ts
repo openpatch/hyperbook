@@ -1,5 +1,9 @@
+import { zipSync } from "fflate";
 import type { FileChange } from "../../../shared/schemas";
 import { api, unwrap } from "@/lib/api";
+import { extension, visualKind } from "./visual-kinds";
+
+export { extension };
 
 export type Listing = Awaited<ReturnType<typeof fetchListing>>;
 export type FileEntry = Listing["files"][number];
@@ -21,6 +25,12 @@ export const fetchReferences = (bookId: string, path: string) =>
     api.books[":id"].files.references.$get({ param: { id: bookId }, query: { path } }),
   );
 
+/** Larger files are not opened as text, even if they are. */
+const MAX_TEXT_BYTES = 2 * 1024 * 1024;
+
+/** A binary element file (.sb3) may be larger: its visual editor opens it. */
+const MAX_VISUAL_BYTES = 64 * 1024 * 1024;
+
 const IMAGE_TYPES: Record<string, string> = {
   png: "image/png",
   jpg: "image/jpeg",
@@ -32,13 +42,9 @@ const IMAGE_TYPES: Record<string, string> = {
   ico: "image/x-icon",
 };
 
-/** Larger files are not opened as text, even if they are. */
-const MAX_TEXT_BYTES = 2 * 1024 * 1024;
-
-export const extension = (path: string) => path.split("/").pop()!.split(".").slice(1).pop()?.toLowerCase() ?? "";
-
 export type Loaded =
-  | { kind: "text"; oid: string; text: string }
+  | { kind: "text"; oid: string; text: string; /** Set when the text is base64 of binary bytes (a .sb3). */
+      encoding?: "base64" }
   | { kind: "image"; oid: string; url: string; size: number }
   | { kind: "binary"; oid: string; size: number };
 
@@ -59,6 +65,11 @@ export async function loadFile(bookId: string, path: string): Promise<Loaded> {
     } catch {
       // Not UTF-8: a binary file.
     }
+  }
+  if (visualKind(path) && bytes.length <= MAX_VISUAL_BYTES) {
+    // A binary element file (a .sb3): its visual editor gets the bytes
+    // base64-encoded as the document text.
+    return { kind: "text", oid, text: toBase64(bytes), encoding: "base64" };
   }
   return { kind: "binary", oid, size: bytes.length };
 }
@@ -170,5 +181,57 @@ export function starter(path: string, language = "en"): string {
   if (name.endsWith(".excalidraw")) {
     return JSON.stringify({ type: "excalidraw", version: 2, source: "hyperbook", elements: [], appState: {}, files: {} }, null, 2) + "\n";
   }
+  if (name.endsWith(".blockflow"))
+    return JSON.stringify({ title: "New tutorial" }, null, 2) + "\n";
+  if (name.endsWith(".sb3")) return toBase64(emptySb3());
   return "";
+}
+
+/** How a starter's content is committed: a .sb3 is binary, so base64. */
+export const starterEncoding = (path: string): "utf8" | "base64" => (extension(path) === "sb3" ? "base64" : "utf8");
+
+/** An empty Scratch project: a zip with project.json and the default backdrop. */
+function emptySb3(): Uint8Array {
+  const backdrop =
+    '<svg version="1.1" width="480" height="360" viewBox="0 0 480 360" xmlns="http://www.w3.org/2000/svg">' +
+    '<path d="M0 0h480v360H0z" fill="#ffffff" stroke="none"/></svg>';
+  const project = {
+    targets: [
+      {
+        isStage: true,
+        name: "Stage",
+        variables: {},
+        lists: {},
+        broadcasts: {},
+        blocks: {},
+        comments: {},
+        currentCostume: 0,
+        costumes: [
+          {
+            assetId: "cd21514d0531fdffb22204e0ec5ed84a",
+            name: "backdrop1",
+            md5ext: "cd21514d0531fdffb22204e0ec5ed84a.svg",
+            dataFormat: "svg",
+            rotationCenterX: 240,
+            rotationCenterY: 180,
+          },
+        ],
+        sounds: [],
+        volume: 100,
+        layerOrder: 0,
+        tempo: 60,
+        videoTransparency: 50,
+        videoState: "on",
+        textToSpeechLanguage: null,
+      },
+    ],
+    monitors: [],
+    extensions: [],
+    meta: { semver: "3.0.0", vm: "0.2.0", agent: "hyperbook-cloud" },
+  };
+  const encode = (value: string) => new TextEncoder().encode(value);
+  return zipSync({
+    "project.json": encode(JSON.stringify(project)),
+    "cd21514d0531fdffb22204e0ec5ed84a.svg": encode(backdrop),
+  });
 }

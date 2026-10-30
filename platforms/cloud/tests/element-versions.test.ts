@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 /*
@@ -36,5 +36,24 @@ describe("element editors", () => {
 
   it("use the struktolab version books render with", () => {
     expect(platform["struktolab"]).toBe(inBooks("struktolab").version);
+  });
+
+  it("serve a blockflow bundle whose embed entries the visual editors speak to", () => {
+    // The platform frames /blockflow/embed-editor.html and embed-generator.html
+    // and talks blockflow's embed protocol (ready/load/change/saved/error),
+    // which exists since blockflow v0.2.0; the pin lives in postbuild.mjs.
+    const postbuild = readFileSync(new URL("../../../packages/markdown/postbuild.mjs", import.meta.url), "utf8");
+    const tag = /releases\/download\/(blockflow-v[\d.]+)\/dist-embedded\.zip/.exec(postbuild)?.[1];
+    expect(tag).toMatch(/^blockflow-v\d+\.\d+\.\d+$/);
+    const parts = tag!.slice("blockflow-v".length).split(".").map(Number);
+    const [major, minor] = [parts[0] ?? 0, parts[1] ?? 0];
+    expect(major > 0 || minor >= 2).toBe(true);
+    // When the bundle is vendored (built), it must carry the entries + manifest.
+    const manifestPath = new URL("../../../packages/markdown/dist/assets/directive-blockflow/manifest.json", import.meta.url);
+    if (existsSync(manifestPath)) {
+      const manifest = json("../../../packages/markdown/dist/assets/directive-blockflow/manifest.json");
+      expect(manifest.entries).toContain("embed-editor.html");
+      expect(manifest.entries).toContain("embed-generator.html");
+    }
   });
 });

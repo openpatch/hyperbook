@@ -44,6 +44,29 @@ describe("element blocks in pages", () => {
     ]);
   });
 
+  it("finds the blockflow directives that point at a .sb3 file", () => {
+    const page = [
+      "::blockflow-player{src=\"/game.sb3\"}",
+      "",
+      '::::blockflow-editor{title="Tutorial" src="tutorial.sb3"}',
+      ":::step{title=\"Welcome\"}",
+      "First step",
+      ":::",
+      "::::",
+    ].join("\n");
+    expect(findBlocks(page).map((b) => b.type === "file" && [b.kind, b.src])).toEqual([
+      ["blockflow", "/game.sb3"],
+      ["blockflow", "tutorial.sb3"],
+    ]);
+  });
+
+  it("finds a blockflow-editor's project file, too", () => {
+    const page = '::::blockflow-editor{project="tutorial.blockflow"}\n:::step{title="a"}\nx\n:::\n::::';
+    expect(findBlocks(page).map((b) => b.type === "file" && [b.kind, b.src])).toEqual([
+      ["blockflow-project", "tutorial.blockflow"],
+    ]);
+  });
+
   it("resolves src like the build: public/, book/, next to the page", () => {
     const files = new Set(["public/a.jmp", "book/b.jmp", "book/unit/c.jmp"]);
     const exists = (f: string) => files.has(f);

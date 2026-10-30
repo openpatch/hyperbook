@@ -18,7 +18,7 @@ export type Block = InlineBlock | FileRef;
 
 export type FileRef = {
   type: "file";
-  kind: "learningmap" | "excalidraw" | "jmp" | "bitflow" | "struktolab";
+  kind: "learningmap" | "excalidraw" | "jmp" | "bitflow" | "struktolab" | "blockflow" | "blockflow-project";
   src: string;
   /** End of the directive, where the button goes. */
   lineEnd: number;
@@ -40,15 +40,36 @@ export type InlineBlock = {
 const BLOCK = /^:{3,}struktolab(\{[^}\n]*\})?[ \t]*\n(`{3,}|~{3,})[^\n]*\n([\s\S]*?)^\2[ \t]*$/gm;
 const LANG = /(?:^|[\s{])lang=["']?([A-Za-z-]+)/;
 
-const FILE_DIRECTIVE = /^::(learningmap|excalidraw|jmp|bitflow|struktolab)\{([^}\n]*)\}/gm;
+// Two colons or more: `::bitflow-player{src=…}` and the container
+// `::::blockflow-editor{src=…}` alike.
+const FILE_DIRECTIVE = /^:{2,}(learningmap|excalidraw|jmp|bitflow|struktolab|blockflow-player|blockflow-editor)\{([^}\n]*)\}/gm;
+/** The directive names above, by the element kind their file belongs to. */
+const FILE_KIND: Record<string, FileRef["kind"]> = {
+  learningmap: "learningmap",
+  excalidraw: "excalidraw",
+  jmp: "jmp",
+  bitflow: "bitflow",
+  struktolab: "struktolab",
+  "blockflow-player": "blockflow",
+  "blockflow-editor": "blockflow",
+};
+/** The `project` attribute: a .blockflow/.json project file instead of `src`. */
+const PROJECT = /(?:^|\s)project=(?:"([^"]*)"|'([^']*)'|([^\s"'}]+))/;
 const SRC = /(?:^|\s)src=(?:"([^"]*)"|'([^']*)'|([^\s"'}]+))/;
 
 export function findBlocks(text: string): Block[] {
   const blocks: Block[] = [];
   for (const m of text.matchAll(FILE_DIRECTIVE)) {
     const src = SRC.exec(m[2]!);
-    const value = src && (src[1] ?? src[2] ?? src[3]);
-    if (value) blocks.push({ type: "file", kind: m[1] as FileRef["kind"], src: value, lineEnd: m.index + m[0].length });
+    let value = src && (src[1] ?? src[2] ?? src[3]);
+    let kind: FileRef["kind"] = FILE_KIND[m[1]!]!;
+    if (!value && m[1] === "blockflow-editor") {
+      // `::::blockflow-editor{project="tutorial.blockflow"}` names a project file.
+      const project = PROJECT.exec(m[2]!);
+      value = project && (project[1] ?? project[2] ?? project[3]);
+      if (value) kind = "blockflow-project";
+    }
+    if (value) blocks.push({ type: "file", kind, src: value, lineEnd: m.index + m[0].length });
   }
   for (const m of text.matchAll(BLOCK)) {
     const lineEnd = m.index + m[0].indexOf("\n");

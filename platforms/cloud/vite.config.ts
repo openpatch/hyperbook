@@ -136,6 +136,12 @@ export default defineConfig({
         target: `http://127.0.0.1:${process.env.PORT || 3001}`,
         changeOrigin: false,
       },
+      // The blockflow editor bundle, served by the admin server (see
+      // src/server/admin/blockflow.ts) and framed by visual.html.
+      "/blockflow": {
+        target: `http://127.0.0.1:${process.env.PORT || 3001}`,
+        changeOrigin: false,
+      },
     },
   },
 });

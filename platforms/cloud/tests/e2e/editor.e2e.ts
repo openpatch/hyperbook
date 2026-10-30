@@ -187,6 +187,146 @@ describe("editor", () => {
     expect(saved.nodes).toHaveLength(1);
   }, 60_000);
 
+  it("edits a .sb3 file in the blockflow editor", async () => {
+    // A page with the directive and an empty Scratch project, saved through
+    // the API (the .sb3 is binary, so base64).
+    const { zipSync } = await import("fflate");
+    const backdrop =
+      '<svg version="1.1" width="480" height="360" viewBox="0 0 480 360" xmlns="http://www.w3.org/2000/svg">' +
+      '<path d="M0 0h480v360H0z" fill="#ffffff" stroke="none"/></svg>';
+    const project = {
+      targets: [
+        {
+          isStage: true, name: "Stage", variables: {}, lists: {}, broadcasts: {}, blocks: {}, comments: {},
+          currentCostume: 0,
+          costumes: [{ assetId: "cd21514d0531fdffb22204e0ec5ed84a", name: "backdrop1", md5ext: "cd21514d0531fdffb22204e0ec5ed84a.svg", dataFormat: "svg", rotationCenterX: 240, rotationCenterY: 180 }],
+          sounds: [], volume: 100, layerOrder: 0, tempo: 60, videoTransparency: 50, videoState: "on", textToSpeechLanguage: null,
+        },
+      ],
+      monitors: [], extensions: [],
+      meta: { semver: "3.0.0", vm: "0.2.0", agent: "e2e" },
+    };
+    const encode = (value: string) => new TextEncoder().encode(value);
+    const sb3 = Buffer.from(
+      zipSync({ "project.json": encode(JSON.stringify(project)), "cd21514d0531fdffb22204e0ec5ed84a.svg": encode(backdrop) }),
+    ).toString("base64");
+    await page.evaluate(async (sb3) => {
+      const id = location.pathname.split("/")[2];
+      await fetch(`/api/books/${id}/files/commit`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          changes: [
+            { op: "write", path: "book/game.md", content: '::blockflow-player{src="game.sb3"}\n', baseOid: null },
+            { op: "write", path: "book/game.sb3", content: sb3, encoding: "base64", baseOid: null },
+          ],
+        }),
+      });
+    }, sb3);
+    await page.reload();
+
+    // "Edit visually" on the directive opens the .sb3 file's tab.
+    await page.getByRole("list", { name: "Files" }).getByRole("button", { name: "game.md", exact: true }).click();
+    await page.getByRole("button", { name: "Edit visually" }).click();
+    await page.getByRole("tab", { name: "game.sb3", selected: true }).waitFor();
+
+    // The visual frame speaks blockflow's embed protocol to the same-origin
+    // embed-editor.html of the served runtime bundle. Wait for the frame to
+    // actually navigate there (its initial about:blank has a body, too).
+    let embedFrame: import("playwright-core").Frame | undefined;
+    for (let i = 0; i < 120 && !embedFrame; i++) {
+      embedFrame = page.frames().find((f) => f.url().includes("/blockflow/embed-editor.html"));
+      if (!embedFrame) await page.waitForTimeout(500);
+    }
+    expect(embedFrame).toBeTruthy();
+    // Wait until our project is in the VM (it has exactly one target, the
+    // stage; the default project has two) — the embed attaches its change
+    // listener right after the load, so only then do edits travel.
+    for (let i = 0; i < 120; i++) {
+      const loaded = await embedFrame!
+        .evaluate(
+          () =>
+            !!(window as unknown as { vm?: { runtime?: { targets: unknown[] } } }).vm?.runtime &&
+            (window as unknown as { vm: { runtime: { targets: unknown[] } } }).vm.runtime.targets.length === 1,
+        )
+        .catch(() => false);
+      if (loaded) break;
+      await page.waitForTimeout(500);
+    }
+    // An edit in the editor (here the VM's own change event) travels as a
+    // "change" message and marks the file unsaved; saving writes a zip again.
+    await embedFrame!.evaluate(() => (window as unknown as { vm: { emit: (e: string) => void } }).vm.emit("PROJECT_CHANGED"));
+    await page.getByTitle("Not saved").first().waitFor({ timeout: 60_000 });
+    await page.getByRole("button", { name: "Save all" }).click();
+    await page.getByTitle("Not saved").first().waitFor({ state: "detached", timeout: 60_000 });
+
+    const saved = await page.evaluate(async () => {
+      const id = location.pathname.split("/")[2];
+      const bytes = new Uint8Array(await (await fetch(`/api/books/${id}/files/raw?path=book/game.sb3`)).arrayBuffer());
+      return [bytes[0], bytes[1]];
+    });
+    expect(saved).toEqual([0x50, 0x4b]); // "PK": still a zip
+    // None of the visual editors reported an error along the way.
+    expect(await page.getByText("The editor reported a problem").count()).toBe(0);
+  }, 90_000);
+
+  it("edits a .blockflow project file in the blockflow generator", async () => {
+    await page.evaluate(async () => {
+      const id = location.pathname.split("/")[2];
+      await fetch(`/api/books/${id}/files/commit`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          changes: [
+            {
+              op: "write",
+              path: "book/tutorial.md",
+              content: '::::blockflow-editor{project="tutorial.blockflow"}\n:::step{title="Welcome"}\nStart\n:::\n::::\n',
+              baseOid: null,
+            },
+            {
+              op: "write",
+              path: "book/tutorial.blockflow",
+              content: JSON.stringify({ title: "Tutorial", steps: [{ title: "Welcome", text: "Start" }] }, null, 2) + "\n",
+              baseOid: null,
+            },
+          ],
+        }),
+      });
+    });
+    await page.reload();
+
+    // "Edit visually" on the directive opens the project file's tab.
+    await page.getByRole("list", { name: "Files" }).getByRole("button", { name: "tutorial.md", exact: true }).click();
+    await page.getByRole("button", { name: "Edit visually" }).click();
+    await page.getByRole("tab", { name: "tutorial.blockflow", selected: true }).waitFor();
+
+    // The visual frame speaks the embed protocol to embed-generator.html.
+    // The generator renders only after our "load", so wait for its first
+    // text input (the project title; the generator's inputs carry no type
+    // attribute and its label is not associated, so neither [type="text"]
+    // nor getByLabel match).
+    let title: import("playwright-core").Locator | undefined;
+    for (let i = 0; i < 120 && !title; i++) {
+      const genFrame = page.frames().find((f) => f.url().includes("/blockflow/embed-generator.html"));
+      const candidate = genFrame?.locator('input:not([type])').first();
+      if (candidate && (await candidate.count()) > 0 && (await candidate.isVisible().catch(() => false))) title = candidate;
+      else await page.waitForTimeout(500);
+    }
+    expect(title).toBeTruthy();
+    await title!.fill("My tutorial");
+    await page.getByTitle("Not saved").first().waitFor({ timeout: 60_000 });
+    await page.getByRole("button", { name: "Save all" }).click();
+    await page.getByTitle("Not saved").first().waitFor({ state: "detached", timeout: 60_000 });
+
+    const saved = await page.evaluate(async () => {
+      const id = location.pathname.split("/")[2];
+      return (await fetch(`/api/books/${id}/files/raw?path=book/tutorial.blockflow`)).json();
+    });
+    expect(saved.title).toBe("My tutorial");
+    expect(await page.getByText("The editor reported a problem").count()).toBe(0);
+  }, 90_000);
+
   it("edits a structogram inside a page and writes it back", async () => {
     await page.evaluate(async () => {
       const id = location.pathname.split("/")[2];
