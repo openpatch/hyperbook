@@ -58,6 +58,32 @@ standardmäßig ein CDN. Setze für ein Offline-Buch `elements.pyide.cdn` auf
 anschließend mit `npx hyperbook build --offline`. `--offline` steuert die
 Downloads beim Build. Ein Buch mit CDN-URLs wird dadurch nicht offline nutzbar.
 
+## Laufzeitumgebungen vom eigenen Host ausliefern
+
+Ein Host, der viele Bücher ausliefert — Hyperbook Cloud oder ein eigener
+Server — kann die Laufzeitumgebungen der Elemente selbst ausliefern, in einer
+Kopie für alle Bücher, statt sie in jeden Build zu kopieren oder die Leser zu
+öffentlichen CDNs zu schicken. Setze `HYPERBOOK_SHARED_ASSETS_BASE` auf eine
+relativ zur Wurzel angegebene Adresse (beginnt mit `/` und endet auf `/`), unter
+der die `directive-<element>/`-Verzeichnisse eines lokalen Builds erreichbar
+sind, wie in `__hyperbook_assets/`:
+
+```bash
+HYPERBOOK_SHARED_ASSETS_BASE=/assets/1.2.0/ hyperbook build
+```
+
+Elemente, deren `cdn` nicht gesetzt oder `true` ist, laden ihre
+Laufzeitumgebung von dort; `false` und eigene URLs behalten ihre Bedeutung.
+Um nur einige Elemente selbst auszuliefern, liste die übrigen in
+`HYPERBOOK_CDN_ELEMENTS` auf (durch Kommas getrennt): sie behalten ihr
+öffentliches CDN — auch dann, wenn die eingebaute Voreinstellung ihre
+Laufzeitumgebung lokal einbinden würde. Nimm die Hyperbook-Version in die
+Adresse auf und liefere die Dateien mit
+`Cache-Control: public, max-age=31536000, immutable` aus, damit Leser eine
+Laufzeitumgebung nur einmal laden und sie für jedes Buch wiederverwenden.
+Hyperbook Cloud macht das automatisch, unter `/_hyperbook/assets/<version>/`;
+ihre Admin-Wahl trifft pro Element unter Einstellungen → Element-Runtimes.
+
 ## Dateien im Browser zwischenspeichern
 
 Wenn dein Host eigene Antwort-Header erlaubt, kannst du für öffentliche Bücher

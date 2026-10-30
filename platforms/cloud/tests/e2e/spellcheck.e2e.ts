@@ -16,7 +16,7 @@ beforeAll(async () => {
 
 afterAll(async () => {
   await browser?.close();
-  server?.stop();
+  await server?.stop();
 });
 
 describe("spell check", () => {

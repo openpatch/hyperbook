@@ -25,6 +25,7 @@ import {
   buildSingleGlossaryPage,
   makeBaseCtx,
   runBuildProject,
+  hostedRuntimeFor,
   writeSearchIndex,
 } from "./build";
 
@@ -663,7 +664,14 @@ export class IncrementalBuilder {
           await this.assets.copyDirective(
             directive,
             this.assetsOut,
-            !!(this.hyperbookJson && elementCdn(this.hyperbookJson, directive)),
+            !!(
+              this.hyperbookJson &&
+              elementCdn(
+                this.hyperbookJson,
+                directive,
+                hostedRuntimeFor(directive),
+              )
+            ),
           );
         }),
       ),

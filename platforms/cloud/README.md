@@ -246,6 +246,25 @@ Under Settings, each is either a link to an existing page or Markdown that
 the platform shows at `/imprint` and `/privacy`. Both are linked from every
 page of the platform and from the students' login page on book hosts.
 
+### Element runtimes
+
+Element runtimes (Pyodide for PyIDE, Excalidraw, GeoGebra, ...) are the bulk
+of a built book — together about 500 MB. The platform extracts them once per
+Hyperbook version into `data/shared-runtimes/<version>/` and serves them on
+every book host at `/_hyperbook/assets/<version>/`, with a year of immutable
+caching: builds link there instead of copying the runtimes into every book,
+which keeps builds fast and their output small. Under Settings → Element
+runtimes, admins choose per element whether books load its runtime from this
+instance or from the element's public CDN; the choice is the default for
+books that do not decide in their own `hyperbook.json` (`elements.*.cdn`),
+where `false` keeps a local copy in the book and a URL its own CDN. Teachers
+who download a build as a zip get one whose runtimes load from the platform.
+
+`data/asset-cache/` holds the runtimes the CLI unpacked for builds, so the
+next build does not unpack them again. On start, versions no kept build was
+made with are deleted; both directories are part of the data volume and are
+recreated on a fresh instance.
+
 ### Updates
 
 After an update of the image, published books that were built with another

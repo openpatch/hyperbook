@@ -11,7 +11,7 @@ import type { Deps } from "../deps";
 import { buildDir } from "../hosting/storage";
 import type { BookBindings, BookEnv } from "./env";
 import { impersonatePage, loginPage } from "./pages";
-import { escapeHtml, page, pathSegments, serveBuild } from "./serve";
+import { escapeHtml, page, pathSegments, serveBuild, serveSharedAssets } from "./serve";
 import { STUDENT_COOKIE, studentApi } from "./student-api";
 
 export type { BookBindings };
@@ -82,6 +82,14 @@ export function createBooksApp(deps: Deps) {
   });
 
   app.route("/_hyperbook/api", studentApi(deps));
+
+  // Element runtimes the platform extracted once per Hyperbook version (see
+  // hosting/runtimes.ts): the public bytes a CDN would serve, so every book
+  // host answers them without a login, immutable behind their versioned
+  // address. Builds link here instead of copying ~500 MB into every book.
+  app.on(["GET", "HEAD"], "/_hyperbook/assets/*", (c) =>
+    serveSharedAssets(c, config, new URL(c.req.url).pathname),
+  );
 
   app.get("/_hyperbook/login", (c) => {
     const book = c.get("book");

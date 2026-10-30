@@ -4,6 +4,8 @@ import path from "node:path";
 import { eq } from "drizzle-orm";
 import { describe, expect, it } from "vitest";
 import { books, builds } from "../src/server/db/schema";
+import { updateInstanceSettings } from "../src/server/domain/instance";
+import { sharedAssetsBaseFor } from "../src/server/hosting/runtimes";
 import { commitTree, initRepo } from "../src/server/hosting/git";
 import { BuildLog, type Runner, hyperbookVersion, sandboxedRunner } from "../src/server/hosting/runner";
 import { buildDir, makeJobDir, repoDir } from "../src/server/hosting/storage";
@@ -328,10 +330,62 @@ describe.skipIf(!cliBuilt)("sandboxed hyperbook build", () => {
     expect(html).toContain("cloud.js");
   }, 60_000);
 
-  it("uses the element runtimes packed by the CLI's build", async () => {
+  it("links elements to the instance's shared runtimes instead of copying them", async () => {
     const instance = setup({}, { runner: sandboxedRunner });
     const { book, commit } = await bookWithSource(instance, {
       "hyperbook.json": JSON.stringify({ name: "Drawing" }),
+      "book/index.md": '# Drawing\n\n::excalidraw{src="/drawing.excalidraw"}\n',
+      "public/drawing.excalidraw": JSON.stringify({ type: "excalidraw", version: 2, elements: [] }),
+    });
+    const build = instance.builds.enqueue(book.id, commit, "upload", null);
+    await instance.builds.idle();
+    const row = buildRow(instance, build.id);
+    expect(row.error, row.log).toBeNull();
+    expect(row.log).toContain("Element runtimes are served by this instance");
+    const out = buildDir(instance.config, book.id, build.id);
+
+    const base = sharedAssetsBaseFor(instance.config)!;
+    expect(base).toMatch(/^\/_hyperbook\/assets\/\d+\.\d+\.\d+\/$/);
+    const html = await readFile(path.join(out, "index.html"), "utf8");
+    expect(html).toContain(`${base}directive-excalidraw/hyperbook-excalidraw.umd.js`);
+    // The build contains only the small integration files, not the runtime.
+    expect(existsSync(path.join(out, "__hyperbook_assets/directive-excalidraw/client.js"))).toBe(true);
+    expect(existsSync(path.join(out, "__hyperbook_assets/directive-excalidraw/hyperbook-excalidraw.umd.js"))).toBe(false);
+
+    // The shared address serves the runtime, extracted from the CLI's archive.
+    const runtime = await instance.app.request(`${base}directive-excalidraw/hyperbook-excalidraw.umd.js`, {
+      headers: { host: `${bookRow(instance, book.id).slug}.books.test` },
+    });
+    expect(runtime.status).toBe(200);
+    expect(runtime.headers.get("cache-control")).toBe("public, max-age=31536000, immutable");
+  }, 120_000);
+
+  it("loads an element from its public CDN when the admin chose that", async () => {
+    const instance = setup({}, { runner: sandboxedRunner });
+    // Excalidraw follows its public CDN (UNPKG) instead of the instance.
+    updateInstanceSettings(instance.db, { elementRuntimes: { excalidraw: "cdn" } });
+    const { book, commit } = await bookWithSource(instance, {
+      "hyperbook.json": JSON.stringify({ name: "Drawing" }),
+      "book/index.md": '# Drawing\n\n::excalidraw{src="/drawing.excalidraw"}\n',
+      "public/drawing.excalidraw": JSON.stringify({ type: "excalidraw", version: 2, elements: [] }),
+    });
+    const build = instance.builds.enqueue(book.id, commit, "upload", null);
+    await instance.builds.idle();
+    const row = buildRow(instance, build.id);
+    expect(row.error, row.log).toBeNull();
+    const out = buildDir(instance.config, book.id, build.id);
+    const html = await readFile(path.join(out, "index.html"), "utf8");
+    expect(html).toContain("https://unpkg.com/@hyperbook/web-component-excalidraw@");
+    expect(html).not.toContain("/_hyperbook/assets/");
+    // The small integration files stay with the book; the runtime does not.
+    expect(existsSync(path.join(out, "__hyperbook_assets/directive-excalidraw/client.js"))).toBe(true);
+    expect(existsSync(path.join(out, "__hyperbook_assets/directive-excalidraw/hyperbook-excalidraw.umd.js"))).toBe(false);
+  }, 120_000);
+
+  it("copies the runtime into the book that asks for cdn: false", async () => {
+    const instance = setup({}, { runner: sandboxedRunner });
+    const { book, commit } = await bookWithSource(instance, {
+      "hyperbook.json": JSON.stringify({ name: "Offline", elements: { excalidraw: { cdn: false } } }),
       "book/index.md": '# Drawing\n\n::excalidraw{src="/drawing.excalidraw"}\n',
       "public/drawing.excalidraw": JSON.stringify({ type: "excalidraw", version: 2, elements: [] }),
     });

@@ -41,14 +41,46 @@ export const elementRuntimeFiles: Record<DownloadableElement, string[]> = {
   ],
 };
 
+/**
+ * Where a host serves this element's runtime from: its shared base (a
+ * root-relative string), the element's public CDN ("cdn", an admin's choice
+ * for elements the host does not want to serve itself), or nothing (no host,
+ * or the element is not its business).
+ */
+export type HostedRuntime = string | "cdn" | undefined;
+
+/**
+ * Where a host serves this element's runtime from: the shared base, or the
+ * public CDN for elements the admin chose to load from there (see
+ * {@link HyperbookContext.cdnElements}).
+ */
+export function hostedRuntime(
+  ctx: HyperbookContext,
+  element: string,
+): HostedRuntime {
+  if (ctx.cdnElements?.includes(element)) return "cdn";
+  return ctx.sharedAssetsBase;
+}
+
+/**
+ * Whether an element loads its runtime over a CDN. `true` is the default CDN,
+ * a string is a custom asset base URL, `false` keeps the runtime local.
+ *
+ * `hosted` is where the host serves this element from (see
+ * {@link hostedRuntime}): it takes the place of the default CDN for every
+ * element that does not ask for a custom URL or a local copy.
+ */
 export function elementCdn(
   config: HyperbookJson,
   element: string,
+  hosted?: HostedRuntime,
 ): boolean | string {
   if (!Object.prototype.hasOwnProperty.call(elementCoreFiles, element))
     return false;
   const value = config.elements?.[element as DownloadableElement]?.cdn;
-  if (value === undefined) return element === "pyide";
+  // Unset follows the host's choice — shared base or public CDN — and only
+  // without a host falls back to the built-in default: PyIDE on a CDN.
+  if (value === undefined) return hosted ? true : element === "pyide";
   if (value === false) return false;
   if (value === true) return true;
   if (typeof value === "string") {
@@ -415,6 +447,22 @@ export interface HyperbookContext {
     },
   ): string;
   navigation: Navigation;
+  /**
+   * Root-relative base ("/…/") where the host serves Hyperbook's element
+   * runtimes itself, e.g. a Hyperbook Cloud instance that extracts them once
+   * per Hyperbook version. Elements whose `cdn` is not explicitly `false` or
+   * a custom URL load from there instead of a public CDN or the book's own
+   * assets folder. Set from `HYPERBOOK_SHARED_ASSETS_BASE`; books built
+   * without it are unaffected.
+   */
+  sharedAssetsBase?: string;
+  /**
+   * Elements whose runtimes the host loads from their public CDNs instead
+   * of serving them itself — an admin's choice, the default for books that do
+   * not decide in their hyperbook.json. Set from
+   * `HYPERBOOK_CDN_ELEMENTS`, a comma-separated list.
+   */
+  cdnElements?: readonly string[];
   /**
    * Resolved password registry.
    *

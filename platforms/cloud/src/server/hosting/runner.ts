@@ -1,16 +1,25 @@
 import { spawn } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
-import { lstat, readFile, readdir, writeFile } from "node:fs/promises";
+import { lstat, mkdir, readFile, readdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import type { Config } from "../config";
+import {
+  assetCacheDir,
+  cliRuntimeManifest,
+  ensureRuntime,
+  localElements,
+  sharedAssetsBase,
+} from "./runtimes";
 
 /*
  * Runs `hyperbook build` on a checked-out book in a sandboxed child process.
  * Books are written by teachers, so the build is treated as untrusted:
  *
- * - Node's permission model limits it to reading the CLI, its asset cache and
- *   the job directory, and writing the job directory. No child processes,
- *   workers or native addons.
+ * - Node's permission model limits it to reading the CLI, its runtime
+ *   archives, the shared asset cache and the job directory, and writing the
+ *   asset cache and the job directory. No child processes, workers or native
+ *   addons — so no book content can make the build write anything but what
+ *   Hyperbook itself writes into those two places.
  * - It gets an empty environment, so no secret of the server reaches it.
  * - Heap and wall-clock time are capped.
  *
@@ -28,7 +37,61 @@ export type Runner = (job: {
   srcDir: string;
   log: BuildLog;
   signal: AbortSignal;
+  /** Elements whose runtimes the admin loads from their public CDN, not this instance. */
+  cdnElements: string[];
 }) => Promise<BuildOutcome>;
+
+/**
+ * The flags of Node's permission model every CLI child process runs under,
+ * builds and page renderers alike: the CLI and its runtime archives and the
+ * job directory to read, the job directory and the shared asset cache to
+ * write. The cache outlives a single job, so runtimes already unpacked for
+ * one build are reused by the next (the sandbox runs --offline; without this
+ * it would unpack the archives again for every job).
+ */
+export function cliPermissions(config: Config, jobDir: string): string[] {
+  const cliDir = path.dirname(config.build.cli);
+  return [
+    "--permission",
+    `--allow-fs-read=${cliDir}`,
+    `--allow-fs-read=${path.join(cliDir, "..", ".cache")}`,
+    `--allow-fs-read=${jobDir}`,
+    `--allow-fs-write=${jobDir}`,
+    `--allow-fs-read=${assetCacheDir(config)}`,
+    `--allow-fs-write=${assetCacheDir(config)}`,
+  ];
+}
+
+/**
+ * The environment of a CLI child process: empty of the server's secrets, but
+ * pointing at the shared asset cache — and, when the instance serves element
+ * runtimes itself (hosting/runtimes.ts), at the address it serves them from,
+ * so builds copy only the small integration scripts into books instead of
+ * ~500 MB of runtimes. Books that ask for a custom CDN (elements.*.cdn) or a
+ * local copy (cdn: false) are not affected; elements the admin set to their
+ * public CDN (instance settings) load from there instead of the instance.
+ */
+export async function cliChildEnv(
+  config: Config,
+  jobDir: string,
+  cdn: readonly string[] = [],
+): Promise<Record<string, string>> {
+  // The permission flags need the cache to exist.
+  await mkdir(assetCacheDir(config), { recursive: true });
+  const local = localElements(config, cdn);
+  return {
+    PATH: process.env.PATH ?? "/usr/bin:/bin",
+    HOME: jobDir,
+    NODE_ENV: "production",
+    NO_COLOR: "1",
+    HYPERBOOK_ASSET_CACHE: assetCacheDir(config),
+    // The admin's choice, even when nothing is served locally: it replaces
+    // the built-in default (PyIDE on a CDN, the rest local) for books that
+    // do not decide in their hyperbook.json.
+    ...(cdn.length > 0 ? { HYPERBOOK_CDN_ELEMENTS: cdn.join(",") } : {}),
+    ...(local ? { HYPERBOOK_SHARED_ASSETS_BASE: sharedAssetsBase(cliRuntimeManifest(config)!.version) } : {}),
+  };
+}
 
 const LOG_LIMIT = 256 * 1024;
 
@@ -164,7 +227,7 @@ export async function adaptConfig(srcDir: string, log: BuildLog) {
 }
 
 /** Total size of a build's files. Refuses links: output must be plain files. */
-async function outputSize(dir: string): Promise<number> {
+async function outputSize(dir: string, elements = new Set<string>()): Promise<number> {
   let total = 0;
   for (const entry of await readdir(dir, { withFileTypes: true })) {
     const full = path.join(dir, entry.name);
@@ -172,12 +235,20 @@ async function outputSize(dir: string): Promise<number> {
     if (stat.isSymbolicLink()) {
       throw new Error(`The build produced a link (${path.relative(dir, full)}), which is not allowed`);
     }
-    total += stat.isDirectory() ? await outputSize(full) : stat.size;
+    if (stat.isDirectory()) {
+      // A book with a shared runtime keeps its small integration files in
+      // __hyperbook_assets/directive-<element>/; that is which elements it uses.
+      if (path.basename(dir) === "__hyperbook_assets" && /^directive-[a-z0-9-]+$/.test(entry.name))
+        elements.add(entry.name.slice("directive-".length));
+      total += await outputSize(full, elements);
+    } else {
+      total += stat.size;
+    }
   }
   return total;
 }
 
-export const sandboxedRunner: Runner = async ({ config, jobDir, srcDir, log, signal }) => {
+export const sandboxedRunner: Runner = async ({ config, jobDir, srcDir, log, signal, cdnElements }) => {
   if (signal.aborted) return { ok: false, error: "The build was canceled" };
   const cli = config.build.cli;
   if (!existsSync(cli)) {
@@ -188,17 +259,19 @@ export const sandboxedRunner: Runner = async ({ config, jobDir, srcDir, log, sig
   }
   await adaptConfig(srcDir, log);
 
-  const cliDir = path.dirname(cli);
   // Element runtimes the CLI's own build packs into .cache/asset-bundles;
-  // offline builds unpack them into the job directory. See
-  // packages/hyperbook/helpers/assets.ts.
-  const assetCache = path.join(cliDir, "..", ".cache");
+  // offline builds unpack them from there. See
+  // packages/hyperbook/helpers/assets.ts and hosting/runtimes.ts.
+  const local = localElements(config, cdnElements);
+  if (local)
+    log.note(
+      `Element runtimes are served by this instance at ${sharedAssetsBase(
+        cliRuntimeManifest(config)!.version,
+      )} unless the book, or this instance's settings, choose otherwise.`,
+    );
+  const env = await cliChildEnv(config, jobDir, cdnElements);
   const args = [
-    "--permission",
-    `--allow-fs-read=${cliDir}`,
-    `--allow-fs-read=${assetCache}`,
-    `--allow-fs-read=${jobDir}`,
-    `--allow-fs-write=${jobDir}`,
+    ...cliPermissions(config, jobDir),
     `--max-old-space-size=${config.build.memoryMb}`,
     cli,
     "build",
@@ -207,7 +280,7 @@ export const sandboxedRunner: Runner = async ({ config, jobDir, srcDir, log, sig
 
   const child = spawn(process.execPath, args, {
     cwd: srcDir,
-    env: { PATH: process.env.PATH ?? "/usr/bin:/bin", HOME: jobDir, NODE_ENV: "production", NO_COLOR: "1" },
+    env,
     stdio: ["ignore", "pipe", "pipe"],
   });
   log.redact(srcDir, "<book>");
@@ -248,9 +321,10 @@ export const sandboxedRunner: Runner = async ({ config, jobDir, srcDir, log, sig
 
   const outDir = path.join(srcDir, ".hyperbook", "out");
   if (!existsSync(outDir)) return { ok: false, error: "The build produced no output" };
+  const elements = new Set<string>();
   let sizeBytes: number;
   try {
-    sizeBytes = await outputSize(outDir);
+    sizeBytes = await outputSize(outDir, elements);
   } catch (error) {
     return { ok: false, error: (error as Error).message };
   }
@@ -259,6 +333,14 @@ export const sandboxedRunner: Runner = async ({ config, jobDir, srcDir, log, sig
       ok: false,
       error: `The built book is larger than ${Math.floor(config.bookMaxBytes / 1024 / 1024)} MB`,
     };
+  }
+  // The book links to the shared runtimes of the elements it uses; extract
+  // them now, in the background, so the first reader does not wait for it.
+  // One extraction per Hyperbook version serves every book (hosting/runtimes.ts).
+  if (local) {
+    const version = cliRuntimeManifest(config)!.version;
+    const used = [...elements].filter((element) => local.includes(element));
+    void Promise.all(used.map((element) => ensureRuntime(config, version, element)));
   }
   return { ok: true, outDir, sizeBytes };
 };

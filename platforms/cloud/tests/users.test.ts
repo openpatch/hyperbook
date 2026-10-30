@@ -118,6 +118,24 @@ describe("user management", () => {
     expect((await admin.c.delete(`/api/users/${teacher.user.id}`)).status).toBe(200);
     expect((await admin.c.get(`/api/users/${teacher.user.id}`)).status).toBe(404);
   });
+
+  it("stores where each element's runtime loads from", async () => {
+    const { teacher } = await adminAndTeacher();
+    expect((await teacher.c.get("/api/instance")).status).toBe(403);
+
+    const { admin } = await adminAndTeacher();
+    // Unknown elements are rejected.
+    const bad = await admin.c.put("/api/instance", { elementRuntimes: { pyide: "cdn", nosuch: "cdn" } });
+    expect(bad.status).toBe(400);
+
+    const saved = await admin.c.put("/api/instance", { elementRuntimes: { pyide: "cdn", typst: "local" } });
+    expect(saved.status).toBe(200);
+    expect(saved.body.elementRuntimes).toEqual({ pyide: "cdn", typst: "local" });
+    expect((await admin.c.get("/api/instance")).body.elementRuntimes).toEqual({
+      pyide: "cdn",
+      typst: "local",
+    });
+  });
 });
 
 describe("entitlements", () => {

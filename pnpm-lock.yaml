@@ -710,6 +710,9 @@ importers:
       tailwind-merge:
         specifier: ^3.7.0
         version: 3.7.0
+      tar:
+        specifier: 7.5.22
+        version: 7.5.22
       typo-js:
         specifier: ^1.4.0
         version: 1.4.0
@@ -4678,6 +4681,7 @@ packages:
     cpu: [x64]
     os: [linux]
     libc: [glibc]
+    deprecated: yuku-codegen is pure JavaScript since 0.14
 
   '@yuku-codegen/binding-linux-x64-musl@0.8.4':
     resolution: {integrity: sha512-QH60PE4eZecmgNGa1/T1cKPhrfxt6ANtu4lrQ1FZ50F9b0GS9WjGmIjrfdSUeQa+f2Iqk3oEFSJdgVHBg1KPNg==}
@@ -4755,6 +4759,7 @@ packages:
     cpu: [x64]
     os: [linux]
     libc: [glibc]
+    deprecated: yuku-parser runs on yuku-core since 0.14
 
   '@yuku-parser/binding-linux-x64-musl@0.8.4':
     resolution: {integrity: sha512-9RsEw2xYHqU/pjSRBTOupWN3sF8uz9stjJdARfz6o0llvF+yfrj5QHmTiocGGBeAI80fvKmDtr2RIQClUzAPcA==}
@@ -11705,7 +11710,7 @@ snapshots:
       react: 19.3.1
       react-dom: 19.3.1(react@19.3.1)
       throttle-debounce: 5.0.2
-      zundo: 2.3.0(zustand@5.0.14(@types/react@19.3.0)(react@19.3.1)(use-sync-external-store@1.6.0(react@19.3.1)))
+      zundo: 2.3.0(zustand@5.0.14(@types/react@19.3.0)(react@19.3.1))
       zustand: 5.0.14(@types/react@19.3.0)(react@19.3.1)(use-sync-external-store@1.6.0(react@19.3.1))
     transitivePeerDependencies:
       - '@types/react'
@@ -11774,7 +11779,7 @@ snapshots:
       react-dom: 19.3.1(react@19.3.1)
       throttle-debounce: 5.0.2
       tslib: 2.8.1
-      zundo: 2.3.0(zustand@5.0.14(@types/react@19.3.0)(react@19.3.1)(use-sync-external-store@1.6.0(react@19.3.1)))
+      zundo: 2.3.0(zustand@5.0.14(@types/react@19.3.0)(react@19.3.1))
       zustand: 5.0.14(@types/react@19.3.0)(react@19.3.1)(use-sync-external-store@1.6.0(react@19.3.1))
     transitivePeerDependencies:
       - '@types/react'
@@ -21058,7 +21063,7 @@ snapshots:
 
   zod@4.6.7: {}
 
-  zundo@2.3.0(zustand@5.0.14(@types/react@19.3.0)(react@19.3.1)(use-sync-external-store@1.6.0(react@19.3.1))):
+  zundo@2.3.0(zustand@5.0.14(@types/react@19.3.0)(react@19.3.1)):
     dependencies:
       zustand: 5.0.14(@types/react@19.3.0)(react@19.3.1)(use-sync-external-store@1.6.0(react@19.3.1))
 

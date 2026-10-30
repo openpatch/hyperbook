@@ -1,5 +1,5 @@
 import { spawn } from "node:child_process";
-import { existsSync, mkdtempSync } from "node:fs";
+import { existsSync, mkdtempSync, rmSync } from "node:fs";
 import { createServer } from "node:net";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -27,6 +27,11 @@ export async function startServer(extraEnv: Record<string, string> = {}) {
   if (!existsSync(entry)) throw new Error("Run `pnpm build` before the e2e tests");
   const port = await freePort();
   const origin = `http://localhost:${port}`;
+  // The server extracts the element runtimes (about 1 GB) into its data dir,
+  // so a suite's data dir is removed when its server stops — and when it
+  // never came up — to keep the temporary volume from filling up.
+  const dataDir = mkdtempSync(path.join(tmpdir(), "hyperbook-cloud-e2e-"));
+  const removeDataDir = () => rmSync(dataDir, { recursive: true, force: true });
   const child = spawn(process.execPath, [entry], {
     cwd: root,
     env: {
@@ -36,7 +41,7 @@ export async function startServer(extraEnv: Record<string, string> = {}) {
       ADMIN_ORIGIN: origin,
       BOOKS_DOMAIN: `books.localhost:${port}`,
       CREDENTIALS_KEY: Buffer.alloc(32, 3).toString("base64"),
-      DATA_DIR: mkdtempSync(path.join(tmpdir(), "hyperbook-cloud-e2e-")),
+      DATA_DIR: dataDir,
       ADMIN_EMAIL: ADMIN.email,
       ADMIN_PASSWORD: ADMIN.password,
       ...extraEnv,
@@ -55,6 +60,7 @@ export async function startServer(extraEnv: Record<string, string> = {}) {
       // not up yet
     }
     if (i > 100 || child.exitCode !== null) {
+      removeDataDir();
       throw new Error(`Server did not start:\n${output}`);
     }
     await new Promise((r) => setTimeout(r, 100));
@@ -64,7 +70,19 @@ export async function startServer(extraEnv: Record<string, string> = {}) {
     origin,
     port,
     output: () => output,
-    stop: () => child.kill("SIGTERM"),
+    /** Stops the server and removes its data dir; await it, so the test
+     * worker does not exit before the dir is gone. */
+    stop: async () => {
+      child.kill("SIGTERM");
+      // After the server has flushed and exited; after five seconds at the
+      // latest, so a wedged process does not keep its data dir either.
+      await new Promise<void>((resolve) => {
+        child.once("exit", resolve);
+        const timer = setTimeout(resolve, 5_000);
+        timer.unref?.();
+      });
+      removeDataDir();
+    },
   };
 }
 

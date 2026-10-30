@@ -5,6 +5,7 @@ import { and, asc, desc, eq, inArray, isNotNull, lt, ne, notInArray, sql } from 
 import { audit } from "../audit";
 import type { Config } from "../config";
 import type { Db } from "../db/client";
+import { cdnElements, getInstanceSettings } from "../domain/instance";
 import { books, builds } from "../db/schema";
 import { checkout, markProjectRoot } from "./git";
 import { BuildLog, type Runner, hyperbookVersion, sandboxedRunner } from "./runner";
@@ -291,7 +292,9 @@ export class BuildQueue {
         return;
       }
 
-      const outcome = await this.runner({ config: this.config, jobDir, srcDir, log, signal: abort.signal });
+      // Read per build, so the admin's choice applies without a restart.
+      const cdn = cdnElements(getInstanceSettings(this.db));
+      const outcome = await this.runner({ config: this.config, jobDir, srcDir, log, signal: abort.signal, cdnElements: cdn });
       if (!outcome.ok) {
         log.note(outcome.error);
         this.finish(build, abort.signal.aborted ? "canceled" : "failed", log, { error: outcome.error });

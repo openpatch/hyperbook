@@ -2,6 +2,7 @@ import {
   DownloadableElement,
   HyperbookContext,
   elementCdn,
+  hostedRuntime,
 } from "@hyperbook/types";
 import excalidrawPackageJson from "../../web-component-excalidraw/package.json";
 import runtimeAssets from "../runtime-assets.json";
@@ -17,7 +18,8 @@ export function elementAssetUrl(
   element: DownloadableElement,
   file: string,
 ): string {
-  const cdn = elementCdn(ctx.config, element);
+  const hosted = hostedRuntime(ctx, element);
+  const cdn = elementCdn(ctx.config, element, hosted);
   if (!cdn)
     return (
       ctx.makeUrl(
@@ -27,6 +29,15 @@ export function elementAssetUrl(
         { versioned: false },
       ) + (file.endsWith("/") ? "/" : "")
     );
+  // The host serves the runtimes itself (Hyperbook Cloud), with the same
+  // layout as a local build, at an address that only changes with the
+  // Hyperbook version. Elements keep their integration scripts locally.
+  if (cdn === true && hosted && hosted !== "cdn") {
+    const url = `${hosted.endsWith("/") ? hosted : `${hosted}/`}directive-${element}/${file}`;
+    // Like the local branch: a directory keeps its trailing slash, a base
+    // ("" as the file) does not get one.
+    return file === "" ? url.replace(/\/+$/, "") : url;
+  }
   if (typeof cdn === "string") {
     // Pyodide's public indexURL points directly at its distribution directory.
     return new URL(

@@ -78,6 +78,27 @@ export const entitlementOverridesInput = z
   })
   .partial();
 
+/**
+ * The elements with a downloadable runtime, and whose runtime an admin may
+ * load from the instance or from the element's public CDN. Mirrors the
+ * manifest of the Hyperbook CLI (elementCoreFiles).
+ */
+export const ELEMENT_RUNTIMES = [
+  "blockflow",
+  "onlineide",
+  "sqlide",
+  "excalidraw",
+  "openscad",
+  "geogebra",
+  "pyide",
+  "typst",
+] as const;
+
+export type ElementRuntime = (typeof ELEMENT_RUNTIMES)[number];
+
+/** Where an element's runtime loads from, for books that do not decide in hyperbook.json. */
+export const elementRuntimeChoice = z.enum(["local", "cdn"]);
+
 export const instanceSettingsInput = z
   .object({
     name: z.string().trim().min(1, "Enter a name").max(100),
@@ -99,6 +120,7 @@ export const instanceSettingsInput = z
       .max(200),
     slugSuffix: z.boolean(),
     landingPage: z.boolean(),
+    elementRuntimes: z.partialRecord(z.enum(ELEMENT_RUNTIMES), elementRuntimeChoice),
   })
   .partial();
 

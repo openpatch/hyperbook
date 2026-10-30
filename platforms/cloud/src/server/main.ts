@@ -8,10 +8,16 @@ import { deleteExpired } from "./auth/sessions";
 import { deleteExpiredPreviewSessions } from "./auth/preview-sessions";
 import { deleteExpiredStudentSessions } from "./auth/student-sessions";
 import { ConfigError, loadConfig } from "./config";
+import { cdnElements, getInstanceSettings } from "./domain/instance";
 import { migrateDb, openDb } from "./db/client";
 import { ensureFirstAdmin } from "./db/seed";
 import { BuildQueue } from "./hosting/builds";
 import { Renderers } from "./hosting/renders";
+import {
+  pruneAssetCache,
+  pruneSharedRuntimes,
+  sharedAssetsBaseFor,
+} from "./hosting/runtimes";
 import { clearTmp, repoDir } from "./hosting/storage";
 import { fillMissingSourceBytes } from "./domain/storage";
 import { headCommit, listTree } from "./hosting/git";
@@ -85,6 +91,20 @@ async function start() {
       : undefined;
 
   clearTmp(config);
+
+  // Element runtimes are extracted once per Hyperbook version and served to
+  // every book; builds copy only the small integration scripts. A build
+  // extracts the runtimes of the elements its book uses (see runner.ts), a
+  // reader's first request extracts anything else. Admins may load single
+  // elements from their public CDN instead (Settings → Element runtimes).
+  // Drop versions and download cache entries nothing uses anymore.
+  const settings = () => getInstanceSettings(db);
+  const sharedAssets = sharedAssetsBaseFor(config, cdnElements(settings()));
+  if (sharedAssets)
+    console.log(`Element runtimes: one copy for all books, served at ${sharedAssets}`);
+  pruneSharedRuntimes(db, config);
+  await pruneAssetCache(config);
+
   await fillMissingSourceBytes(db, async (bookId) => {
     const repo = repoDir(config, bookId);
     const commit = await headCommit(repo).catch(() => null);
@@ -95,7 +115,7 @@ async function start() {
   const rebuilding = builds.enqueueRebuilds({ upgrades: config.build.rebuildOnUpgrade });
   if (rebuilding > 0) console.log(`Rebuilding ${rebuilding} book(s) with Hyperbook ${hyperbookVersion(config)}`);
 
-  const renders = new Renderers(config);
+  const renders = new Renderers(config, undefined, () => cdnElements(settings()));
   const app = createApp({ config, db, mailer: createMailer(config), builds, renders, dns: createDns() }, { webRoot });
   const server = serve({ fetch: app.fetch, port: config.port }, (info) => {
     console.log(`Hyperbook Cloud listening on port ${info.port}`);

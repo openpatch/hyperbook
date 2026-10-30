@@ -2,6 +2,7 @@ import { z } from "zod";
 import type { Db } from "../db/client";
 import { instanceSettings } from "../db/schema";
 import { parseJson } from "../json";
+import { ELEMENT_RUNTIMES, elementRuntimeChoice } from "../../shared/schemas";
 
 /**
  * Instance-wide settings, edited by admins. Stored one row per key, so adding
@@ -46,6 +47,13 @@ export const instanceSettingsSchema = z.object({
    * straight to the login screen.
    */
   landingPage: z.boolean(),
+  /**
+   * For each element with a downloadable runtime, where books load it from
+   * that do not decide in their hyperbook.json: "local" (default) from this
+   * instance, "cdn" from the element's public CDN. Unlisted elements are
+   * local.
+   */
+  elementRuntimes: z.partialRecord(z.enum(ELEMENT_RUNTIMES), elementRuntimeChoice),
 });
 
 export type InstanceSettings = z.infer<typeof instanceSettingsSchema>;
@@ -62,7 +70,15 @@ export const DEFAULT_INSTANCE_SETTINGS: InstanceSettings = {
   signupDomains: [],
   slugSuffix: false,
   landingPage: true,
+  elementRuntimes: {},
 };
+
+/** The elements whose runtimes load from their public CDN instead of this instance. */
+export function cdnElements(settings: InstanceSettings): string[] {
+  return Object.entries(settings.elementRuntimes)
+    .filter(([, choice]) => choice === "cdn")
+    .map(([element]) => element);
+}
 
 /** Where a legal page is: its URL, the platform's own page, or nowhere (""). */
 export function legalHref(settings: InstanceSettings, page: "imprint" | "privacy") {

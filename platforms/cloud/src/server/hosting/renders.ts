@@ -4,7 +4,7 @@ import { mkdir, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import type { Config } from "../config";
 import { checkout, headCommit, markProjectRoot } from "./git";
-import { BuildLog, adaptConfig } from "./runner";
+import { BuildLog, adaptConfig, cliChildEnv, cliPermissions } from "./runner";
 import { makeJobDir, repoDir } from "./storage";
 
 /*
@@ -28,7 +28,10 @@ export type RenderProcess = {
   close(): void;
 };
 
-export type RenderSpawner = (job: { config: Config; srcDir: string }) => Promise<RenderProcess>;
+/** Elements whose runtimes the admin loads from their public CDN, not this instance. */
+export type CdnElements = () => string[];
+
+export type RenderSpawner = (job: { config: Config; srcDir: string; cdnElements: string[] }) => Promise<RenderProcess>;
 
 const REPLY = "@hyperbook-render ";
 /** How long a book's renderer stays without being used. */
@@ -37,21 +40,16 @@ const IDLE_MS = 10 * 60 * 1000;
 const MAX_RENDERERS = 8;
 
 /** Runs the CLI's render mode with the build's sandbox. */
-export const sandboxedRender: RenderSpawner = async ({ config, srcDir }) => {
+export const sandboxedRender: RenderSpawner = async ({ config, srcDir, cdnElements }) => {
   const cli = config.build.cli;
   if (!existsSync(cli)) {
     throw new Error(`The Hyperbook CLI is missing at ${cli}. Build it with: pnpm --filter hyperbook build`);
   }
   const jobDir = path.dirname(srcDir);
-  const cliDir = path.dirname(cli);
   const child = spawn(
     process.execPath,
     [
-      "--permission",
-      `--allow-fs-read=${cliDir}`,
-      `--allow-fs-read=${path.join(cliDir, "..", ".cache")}`,
-      `--allow-fs-read=${jobDir}`,
-      `--allow-fs-write=${jobDir}`,
+      ...cliPermissions(config, jobDir),
       `--max-old-space-size=${config.build.memoryMb}`,
       cli,
       "render",
@@ -59,7 +57,7 @@ export const sandboxedRender: RenderSpawner = async ({ config, srcDir }) => {
     ],
     {
       cwd: srcDir,
-      env: { PATH: process.env.PATH ?? "/usr/bin:/bin", HOME: jobDir, NODE_ENV: "production", NO_COLOR: "1" },
+      env: await cliChildEnv(config, jobDir, cdnElements),
       stdio: ["pipe", "pipe", "pipe"],
     },
   ) as ChildProcessWithoutNullStreams;
@@ -167,6 +165,8 @@ export class Renderers {
   constructor(
     private readonly config: Config,
     private readonly spawner: RenderSpawner = sandboxedRender,
+    /** Read per renderer, so the admin's choice applies without a restart. */
+    private readonly cdnElements: CdnElements = () => [],
   ) {
     this.sweeper = setInterval(() => this.sweep(), 60 * 1000);
     this.sweeper.unref();
@@ -201,7 +201,7 @@ export class Renderers {
         jobDir,
         srcDir,
         commit,
-        process: this.spawner({ config: this.config, srcDir }),
+        process: this.spawner({ config: this.config, srcDir, cdnElements: this.cdnElements() }),
         settings: await readFile(path.join(srcDir, "hyperbook.json"), "utf8").catch(() => ""),
         override: null,
         fresh: new Map(),
@@ -235,7 +235,7 @@ export class Renderers {
         r.settings = settings;
         void r.process.then((p) => p.close(), () => {});
         await rm(path.join(r.srcDir, ".hyperbook"), { recursive: true, force: true });
-        r.process = this.spawner({ config: this.config, srcDir: r.srcDir });
+        r.process = this.spawner({ config: this.config, srcDir: r.srcDir, cdnElements: this.cdnElements() });
         r.process.catch(() => this.close(r.bookId));
       }
     });

@@ -2,7 +2,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
-import { instanceSettingsInput } from "../../shared/schemas";
+import { instanceSettingsInput, type ElementRuntime } from "../../shared/schemas";
 import { EntitlementsEditor, type Entitlements } from "@/components/entitlements-editor";
 import { PageHeader, Section } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
@@ -168,6 +168,17 @@ function InstanceForms({
           await queryClient.invalidateQueries({ queryKey: ["instance", "public"] });
         }}
       />
+      <RuntimesSection
+        key={JSON.stringify(settings.elementRuntimes)}
+        runtimes={settings.elementRuntimes}
+        onSave={async (elementRuntimes) => {
+          try {
+            await save({ elementRuntimes });
+          } catch (error) {
+            toast.error(error instanceof Error ? error.message : "Saving failed");
+          }
+        }}
+      />
       <Section
         title="Default entitlements"
         description="What teachers may do unless their own account says otherwise."
@@ -263,6 +274,82 @@ function SignupSection({
                   signupMode: mode,
                   signupDomains: domains.split(/[\s,]+/).map((d) => d.trim()).filter(Boolean),
                 });
+              } catch (error) {
+                toast.error(error instanceof Error ? error.message : "Saving failed");
+              } finally {
+                setBusy(false);
+              }
+            }}
+          >
+            Save
+          </Button>
+        </div>
+      </div>
+    </Section>
+  );
+}
+
+type RuntimeChoice = "local" | "cdn";
+
+/** Mirrors the elements with a downloadable runtime (shared/schemas.ts). */
+const RUNTIME_ELEMENTS: { element: ElementRuntime; label: string }[] = [
+  { element: "blockflow", label: "Blockflow" },
+  { element: "excalidraw", label: "Excalidraw" },
+  { element: "geogebra", label: "GeoGebra" },
+  { element: "onlineide", label: "Online IDE" },
+  { element: "openscad", label: "OpenSCAD" },
+  { element: "pyide", label: "Python (PyIDE)" },
+  { element: "sqlide", label: "SQL IDE" },
+  { element: "typst", label: "Typst" },
+];
+
+/**
+ * Where books load the big element runtimes from: one copy extracted on this
+ * instance, or each element's public CDN. Applies to books that do not decide
+ * in their own hyperbook.json (elements.*.cdn), and to builds made from now
+ * on.
+ */
+function RuntimesSection({
+  runtimes,
+  onSave,
+}: {
+  runtimes: Partial<Record<ElementRuntime, RuntimeChoice>>;
+  onSave: (elementRuntimes: Partial<Record<ElementRuntime, RuntimeChoice>>) => Promise<void>;
+}) {
+  const [choices, setChoices] = useState(runtimes);
+  const [busy, setBusy] = useState(false);
+  return (
+    <Section
+      title="Element runtimes"
+      description="Element runtimes (Python, Excalidraw, GeoGebra, …) are several hundred MB. This instance extracts them once and serves them to every book — faster builds, no third-party CDN for readers. Or load single elements from their public CDN. Applies to books that do not choose in their own hyperbook.json, and to builds made from now on."
+    >
+      <div className="grid max-w-xl gap-3">
+        {RUNTIME_ELEMENTS.map(({ element, label }) => (
+          <div key={element} className="grid grid-cols-[1fr_minmax(10rem,auto)] items-center gap-4">
+            <Label htmlFor={`runtime-${element}`}>{label}</Label>
+            <Select
+              value={choices[element] ?? "local"}
+              onValueChange={(v) =>
+                setChoices((current) => ({ ...current, [element]: v as RuntimeChoice }))
+              }
+            >
+              <SelectTrigger id={`runtime-${element}`} className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="local">This instance</SelectItem>
+                <SelectItem value="cdn">Public CDN</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        ))}
+        <div>
+          <Button
+            disabled={busy}
+            onClick={async () => {
+              setBusy(true);
+              try {
+                await onSave(choices);
               } catch (error) {
                 toast.error(error instanceof Error ? error.message : "Saving failed");
               } finally {

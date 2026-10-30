@@ -4,6 +4,8 @@ import path from "node:path";
 import { Readable } from "node:stream";
 import type { Context } from "hono";
 import { getMimeType } from "hono/utils/mime";
+import type { Config } from "../config";
+import { SAFE_VERSION, ensureRuntime, sharedRuntimesDir } from "../hosting/runtimes";
 
 /*
  * Serving a finished build: the book's address and its preview host.
@@ -93,6 +95,39 @@ export async function serveBuild(
     if (!found) return page(c, 404, "Page not found", "This page does not exist in the book.");
   }
   return send(c, found, status, options);
+}
+
+/**
+ * The element runtimes the platform extracted once per Hyperbook version, at
+ * /_hyperbook/assets/<version>/directive-<element>/… on every book host. They are the
+ * same public bytes a CDN would serve, so no login protects them; the version
+ * in the address makes them immutable. The current version extracts a missing
+ * element on first use; older versions serve what they still have.
+ */
+export async function serveSharedAssets(c: Context, config: Config, pathname: string) {
+  const segments = pathSegments(pathname);
+  const version = segments?.[2];
+  const directive = segments?.[3];
+  if (
+    !segments ||
+    segments.length < 4 ||
+    segments[0] !== "_hyperbook" ||
+    segments[1] !== "assets" ||
+    !version ||
+    !SAFE_VERSION.test(version) ||
+    !directive ||
+    !/^directive-[a-z0-9-]+$/.test(directive)
+  )
+    return c.text("Not found", 404);
+  await ensureRuntime(config, version, directive.slice("directive-".length));
+  const found = await serveFile(c, {
+    root: sharedRuntimesDir(config, version),
+    pathname,
+    segments: segments.slice(3),
+    etag: `shared-assets-${version}`,
+    cacheControl: "public, max-age=31536000, immutable",
+  });
+  return found ?? c.text("Not found", 404);
 }
 
 /** A file at exactly `segments` in `root`, or null if there is none. */

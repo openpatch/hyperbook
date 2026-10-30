@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { DownloadableElement, elementCdn } from "@hyperbook/types";
+import {
+  DownloadableElement,
+  elementCdn,
+  hostedRuntime,
+} from "@hyperbook/types";
 import { process as processMarkdown } from "../src/process";
 import { elementAssetUrl } from "../src/elementAssets";
 import ideReleases from "../ide-releases.json";
@@ -186,3 +190,116 @@ it.each([
     );
   },
 );
+
+describe("shared assets of a host (Hyperbook Cloud)", () => {
+  const base = "/_hyperbook/assets/0.117.0/";
+  const shared = { ...ctx, sharedAssetsBase: base };
+
+  it("takes the place of the default CDN for elements without a cdn setting", () => {
+    expect(elementCdn(shared.config, "pyide", base)).toBe(true);
+    // Unset defaults to local without a host; the host makes it shared.
+    expect(elementCdn(shared.config, "typst")).toBe(false);
+    expect(elementCdn(shared.config, "typst", base)).toBe(true);
+    // Explicit choices keep their meaning.
+    expect(
+      elementCdn(
+        { ...shared.config, elements: { typst: { cdn: false } } },
+        "typst",
+        base,
+      ),
+    ).toBe(false);
+    expect(
+      elementCdn(
+        {
+          ...shared.config,
+          elements: { typst: { cdn: "https://example.com/t/" } },
+        },
+        "typst",
+        base,
+      ),
+    ).toBe("https://example.com/t/");
+  });
+
+  it("resolves files with the layout of a local build", () => {
+    expect(elementAssetUrl(shared, "pyide", "pyodide/pyodide.js")).toBe(
+      `${base}directive-pyide/pyodide/pyodide.js`,
+    );
+    expect(elementAssetUrl(shared, "typst", "fonts/")).toBe(
+      `${base}directive-typst/fonts/`,
+    );
+    expect(elementAssetUrl(shared, "openscad", "")).toBe(
+      `${base}directive-openscad`,
+    );
+    expect(
+      elementAssetUrl(shared, "onlineide", "include/online-ide-embedded.js"),
+    ).toBe(`${base}directive-onlineide/include/online-ide-embedded.js`);
+  });
+
+  it("falls back to the public CDN for elements the host does not serve", () => {
+    // A host (an admin of a Hyperbook Cloud instance) may serve only some
+    // elements itself and load the rest from their public CDNs.
+    const excluded = {
+      ...ctx,
+      sharedAssetsBase: base,
+      cdnElements: ["pyide"],
+    };
+    expect(hostedRuntime(excluded, "typst")).toBe(base);
+    expect(hostedRuntime(excluded, "pyide")).toBe("cdn");
+    // The excluded element follows its public CDN, whatever the built-in
+    // default would be; the served one keeps the shared base.
+    expect(elementAssetUrl(excluded, "pyide", "pyodide/pyodide.js")).toBe(
+      `https://cdn.jsdelivr.net/pyodide/v314.0.7/full/pyodide.js`,
+    );
+    expect(elementAssetUrl(excluded, "typst", "typst-bundle.js")).toBe(
+      `${base}directive-typst/typst-bundle.js`,
+    );
+  });
+
+  it("serves an element from the public CDN even without a shared base", () => {
+    // An instance whose admin set every element to its public CDN passes no
+    // base at all; the choice still replaces the built-in default (which
+    // keeps a runtime local for all but PyIDE).
+    const cdnOnly = { ...ctx, cdnElements: ["typst"] };
+    expect(hostedRuntime(cdnOnly, "typst")).toBe("cdn");
+    expect(
+      elementCdn(cdnOnly.config, "typst", hostedRuntime(cdnOnly, "typst")),
+    ).toBe(true);
+    const url = elementAssetUrl(cdnOnly, "typst", "typst-bundle.js");
+    expect(url).toContain("https://cdn.jsdelivr.net/npm/@myriaddreamin/");
+    expect(url).not.toContain("/assets/");
+  });
+
+  it("keeps explicit local assets and custom CDNs as they are", async () => {
+    const local = {
+      ...shared,
+      config: { ...ctx.config, elements: { typst: { cdn: false } } },
+    };
+    expect(elementAssetUrl(local, "typst", "typst-bundle.js")).toBe(
+      "/assets/directive-typst/typst-bundle.js",
+    );
+
+    const custom = {
+      ...shared,
+      config: {
+        ...ctx.config,
+        elements: { typst: { cdn: "https://example.com/t/" } },
+      },
+    };
+    expect(elementAssetUrl(custom, "typst", "typst-bundle.js")).toBe(
+      "https://example.com/t/typst-bundle.js",
+    );
+  });
+
+  it("renders every element against the shared base instead of a public CDN", async () => {
+    for (const [element, markdown] of elements) {
+      const result = await processMarkdown(markdown, shared);
+      const output =
+        String(result.value) + JSON.stringify(result.data.directives);
+      expect(output).toContain(base);
+      expect(output).not.toContain("https://cdn.");
+      expect(output).not.toContain("https://www.geogebra.org");
+      expect(output).not.toContain("https://blockflow.openpatch.org");
+      expect(output).not.toContain("https://unpkg.com/");
+    }
+  });
+});

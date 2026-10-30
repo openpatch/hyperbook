@@ -44,7 +44,7 @@ import {
 } from "@hyperbook/markdown";
 import packageJson from "./package.json";
 import { AssetManager } from "./helpers/assets";
-import { elementCdn } from "@hyperbook/types";
+import { HostedRuntime, elementCdn } from "@hyperbook/types";
 
 export const ASSETS_FOLDER = "__hyperbook_assets";
 
@@ -522,7 +522,14 @@ export function makeBaseCtx(
   rootProject: Hyperproject,
 ): Pick<
   HyperbookContext,
-  "config" | "makeUrl" | "project" | "root" | "version" | "passwords"
+  | "config"
+  | "makeUrl"
+  | "project"
+  | "root"
+  | "version"
+  | "passwords"
+  | "sharedAssetsBase"
+  | "cdnElements"
 > {
   const resolveRelativePath = (p: string, page: HyperbookPage): string => {
     if (p.startsWith("/")) {
@@ -541,6 +548,8 @@ export function makeBaseCtx(
     root,
     config: hyperbookJson,
     version: packageJson.version,
+    sharedAssetsBase: sharedAssetsBase(),
+    cdnElements: hostCdnElements(),
     makeUrl: (p, base, page, options = { versioned: true }) => {
       if (typeof p === "string") {
         if (isExternalUrl(p)) {
@@ -592,6 +601,46 @@ export function makeBaseCtx(
     },
     project: rootProject,
   };
+}
+
+/**
+ * Where a host serves Hyperbook's element runtimes itself, as a root-relative
+ * base ("/…/"). Hyperbook Cloud sets HYPERBOOK_SHARED_ASSETS_BASE; without
+ * it (a normal build) element runtimes come from the book's own assets folder
+ * or the public CDNs.
+ */
+export function sharedAssetsBase(): string | undefined {
+  const value = process.env.HYPERBOOK_SHARED_ASSETS_BASE?.trim();
+  if (!value || !value.startsWith("/")) return undefined;
+  return value.endsWith("/") ? value : `${value}/`;
+}
+
+/**
+ * The elements a host loads from their public CDNs instead of serving them
+ * itself (HYPERBOOK_CDN_ELEMENTS, comma-separated): an admin's choice, the
+ * default for books that do not decide in their hyperbook.json.
+ */
+let cachedCdnElements: readonly string[] | undefined;
+function hostCdnElements(): readonly string[] {
+  if (cachedCdnElements === undefined) {
+    const value = process.env.HYPERBOOK_CDN_ELEMENTS?.trim();
+    cachedCdnElements = value
+      ? value
+          .split(",")
+          .map((element) => element.trim())
+          .filter((element) => /^[a-z0-9-]+$/.test(element))
+      : [];
+  }
+  return cachedCdnElements;
+}
+
+/**
+ * Where a host serves this element's runtime from: its shared base, the
+ * element's public CDN ("cdn"), or nothing (no host).
+ */
+export function hostedRuntimeFor(element: string): HostedRuntime {
+  if (hostCdnElements().includes(element)) return "cdn";
+  return sharedAssetsBase();
 }
 
 /**
@@ -979,7 +1028,11 @@ async function runBuild(
       `${chalk.blue(`[${prefix}]`)} Copying directive assets: [${i++}/${directives.size}]`,
     );
     try {
-      await assets.copyDirective(directive, assetsOut, !!elementCdn(hyperbookJson, directive));
+      await assets.copyDirective(
+        directive,
+        assetsOut,
+        !!elementCdn(hyperbookJson, directive, hostedRuntimeFor(directive)),
+      );
     } catch (e) {
       // Close the progress line so the failure is not appended to it.
       breakProgressLine();

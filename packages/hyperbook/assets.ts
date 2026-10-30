@@ -2,7 +2,7 @@ import { hyperbook, vfile, getPasswords } from "@hyperbook/fs";
 import { process as processMarkdown } from "@hyperbook/markdown";
 import { Hyperproject, elementCdn } from "@hyperbook/types";
 import { VFile } from "vfile";
-import { makeBaseCtx } from "./build";
+import { makeBaseCtx, hostedRuntimeFor } from "./build";
 import { AssetManager } from "./helpers/assets";
 
 /** Render expanded pages so snippets, templates and directive dependencies count. */
@@ -58,7 +58,8 @@ export async function projectDirectives(
       { ...base, navigation },
     );
     for (const directive of Object.keys(result.data.directives || {}))
-      if (!elementCdn(config, directive)) directives.add(directive);
+      if (!elementCdn(config, directive, hostedRuntimeFor(directive)))
+        directives.add(directive);
   }
   return directives;
 }

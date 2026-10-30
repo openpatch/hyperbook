@@ -1,7 +1,7 @@
 // Register directive nodes in mdast:
 /// <reference types="mdast-util-directive" />
 //
-import { HyperbookContext, elementCdn } from "@hyperbook/types";
+import { HyperbookContext, elementCdn, hostedRuntime } from "@hyperbook/types";
 import { elementAssetUrl } from "./elementAssets";
 import { Root } from "mdast";
 import { visit } from "unist-util-visit";
@@ -23,7 +23,9 @@ export default (ctx: HyperbookContext) => () => {
 
         expectLeafDirective(node, file, name);
         registerDirective(file, name, ["client.js"], ["style.css"], []);
-        if (!elementCdn(ctx.config, "blockflow"))
+        if (
+          !elementCdn(ctx.config, "blockflow", hostedRuntime(ctx, "blockflow"))
+        )
           registerDirective(file, "blockflow");
 
         const {

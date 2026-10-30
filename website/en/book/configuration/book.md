@@ -139,6 +139,11 @@ This option is available for `pyide`, `typst`, `geogebra`, `openscad`,
 applies to both the player and editor. Kiri:Moto continues to use its external
 service.
 
+On Hyperbook Cloud, the platform itself serves the element runtimes, one copy
+for the whole instance, unless a book sets `cdn` to `false` or to its own URL
+— or the instance's admin chose the element's public CDN under Settings →
+Element runtimes; see [Caching](/hosting/caching).
+
 The default CDNs are jsDelivr for Pyodide and Typst, GeoGebra's server for
 GeoGebra, the hosted Blockflow app at `blockflow.openpatch.org` for Blockflow,
 Excalidraw's own packages on UNPKG for Excalidraw, and `cdn.openpatch.org` for

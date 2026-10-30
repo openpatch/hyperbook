@@ -18,6 +18,7 @@ import {
   buildSingleGlossaryPage,
   copyMainAssets,
   makeBaseCtx,
+  hostedRuntimeFor,
   writeI18n,
 } from "./build";
 
@@ -157,7 +158,7 @@ export class PageRenderer {
           this.assets.copyDirective(
             directive,
             this.assetsOut,
-            !!elementCdn(json, directive),
+            !!elementCdn(json, directive, hostedRuntimeFor(directive)),
           ),
         ),
       ),

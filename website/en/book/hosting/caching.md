@@ -54,6 +54,29 @@ default. For an offline book, set `elements.pyide.cdn` to `false`, run
 `npx hyperbook build --offline`. The `--offline` flag controls the build's
 downloads; it does not make a book with CDN URLs usable offline.
 
+## Serve the runtimes from your own host
+
+A host that serves many books — Hyperbook Cloud, or a server of your own —
+can serve the element runtimes itself, one copy for all books, instead of
+copying them into every build or sending readers to the public CDNs. Set
+`HYPERBOOK_SHARED_ASSETS_BASE` to a root-relative address (it starts with
+`/` and ends with `/`) under which the `directive-<element>/` directories of
+a local build are reachable, like in `__hyperbook_assets/`:
+
+```bash
+HYPERBOOK_SHARED_ASSETS_BASE=/assets/1.2.0/ hyperbook build
+```
+
+Elements whose `cdn` is not set or set to `true` load their runtimes from
+there; `false` and custom URLs keep their meaning. To serve only some
+elements yourself, list the others in `HYPERBOOK_CDN_ELEMENTS` (comma-
+separated): they keep their public CDN, also when the built-in default would
+keep their runtime local. Put the Hyperbook version in the address and serve
+the files with `Cache-Control: public, max-age=31536000, immutable`, so
+readers fetch a runtime once and reuse it for every book. Hyperbook Cloud
+does this automatically, at `/_hyperbook/assets/<version>/`; its admin
+chooses per element under Settings → Element runtimes.
+
 ## Cache files for readers
 
 If your host lets you configure response headers, use the following policies

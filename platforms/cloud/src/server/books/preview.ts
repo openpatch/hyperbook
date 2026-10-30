@@ -17,7 +17,7 @@ import type { BookRow } from "../domain/books";
 import { RenderError } from "../hosting/renders";
 import type { BookBindings } from "./env";
 import { previewPage } from "./pages";
-import { escapeHtml, page, pathSegments, serveFile } from "./serve";
+import { escapeHtml, page, pathSegments, serveFile, serveSharedAssets } from "./serve";
 
 /** <slug>--preview.<BOOKS_DOMAIN> */
 export const PREVIEW_SUFFIX = "--preview";
@@ -172,6 +172,13 @@ export function createPreviewApp(deps: Deps) {
   // Lets the hand-off page find out whether the browser kept the cookie.
   app.get("/_hyperbook/api/preview", (c) =>
     c.get("allowed") ? c.json({ ok: true as const }) : c.json({ error: "Not logged in" }, 401),
+  );
+
+  // The element runtimes of the platform's shared assets, like on book hosts
+  // (see hosting/runtimes.ts): preview pages load them from the same address
+  // published ones do.
+  app.on(["GET", "HEAD"], "/_hyperbook/assets/*", (c) =>
+    serveSharedAssets(c, config, new URL(c.req.url).pathname),
   );
 
   app.all("/_hyperbook/*", (c) => c.json({ error: "Not found" }, 404));

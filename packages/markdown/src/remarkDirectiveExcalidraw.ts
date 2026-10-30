@@ -1,7 +1,7 @@
 // Register directive nodes in mdast:
 /// <reference types="mdast-util-directive" />
 //
-import { HyperbookContext, elementCdn } from "@hyperbook/types";
+import { HyperbookContext, elementCdn, hostedRuntime } from "@hyperbook/types";
 import { elementAssetUrl } from "./elementAssets";
 import { Root } from "mdast";
 import { visit } from "unist-util-visit";
@@ -14,7 +14,7 @@ import {
 
 export default (ctx: HyperbookContext) => () => {
   const name = "excalidraw";
-  const cdn = elementCdn(ctx.config, name);
+  const cdn = elementCdn(ctx.config, name, hostedRuntime(ctx, name));
   return (tree: Root, file: VFile) => {
     visit(tree, function (node) {
       if (isDirective(node)) {
