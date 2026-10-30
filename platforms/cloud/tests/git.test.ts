@@ -12,6 +12,7 @@ import {
   initRepo,
   listTree,
   markProjectRoot,
+  parseRefUpdates,
   readBlob,
 } from "../src/server/hosting/git";
 
@@ -188,5 +189,23 @@ describe("changing files", () => {
     const before = await headCommit(repo);
     const res = await commitChanges(repo, [{ op: "write", path: "a.md", content: buf("1"), baseOid: oid("a.md") }], opts);
     expect(res).toEqual({ commit: before, changed: false });
+  });
+});
+
+describe("parseRefUpdates", () => {
+  it("reads the ref-update pkt-lines and ignores the pack data", () => {
+    const line1 = "1111111111111111111111111111111111111111 2222222222222222222222222222222222222222 refs/heads/main\0capabilities";
+    const line2 = "0000000000000000000000000000000000000000 3333333333333333333333333333333333333333 refs/tags/v1";
+    const pkt = (s: string) => (s.length + 4).toString(16).padStart(4, "0") + s;
+    const body = Buffer.concat([
+      Buffer.from(pkt(line1) + pkt(line2) + "0000"),
+      Buffer.from([0x50, 0x41, 0x43, 0x4b, 0x00, 0x01]), // pack data follows
+    ]);
+    expect(parseRefUpdates(body)).toEqual([
+      { old: "1".repeat(40), new: "2".repeat(40), ref: "refs/heads/main" },
+      { old: "0".repeat(40), new: "3".repeat(40), ref: "refs/tags/v1" },
+    ]);
+    expect(parseRefUpdates(Buffer.from("0000"))).toEqual([]);
+    expect(parseRefUpdates(Buffer.alloc(0))).toEqual([]);
   });
 });

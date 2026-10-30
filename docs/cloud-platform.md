@@ -1278,3 +1278,109 @@ suffix is accepted as well. Audit: `book.slug.request`, `.withdraw`,
 - The admin who granted an address is kept (`slug_granted_by`, set null when
   that account is deleted); drizzle-kit left `ON DELETE` out of the added
   column, so migration 0007 was edited by hand.
+
+# M6: Local git workflow
+
+## Goal
+
+Teachers (owners and editors) can `git clone` a book from the platform, work
+locally, and `git push` to `main`. Publishing is recorded as tags; the live
+site can be rolled back to a tag. Pushes never trigger a publish build, so
+many small commits cannot overwhelm the build queue.
+
+## Decisions
+
+- Repo is main-only. Pushes of other refs, deletes, non-fast-forwards and
+  client-created tags are rejected (pre-receive hook + `receive.deny*`).
+- A push triggers no publish build — only the quota check, a `book.push`
+  audit entry and the `books.commit_count` bump. The instance setting
+  `gitPushUpdatesPreview` (default off) additionally enqueues a preview-only
+  build (`trigger: "push"`, `publish: false`).
+- Publish history = tags: `v1`, `v2`, … plus a moving `published` tag; only
+  the last two `v<N>` tags (and the builds they point at) are kept. `N` is the
+  highest existing tag number + 1, so republishing a commit never rewrites a
+  tag. Rollback to a tag is instant when its build is still kept, otherwise
+  the tag's commit is rebuilt (`trigger: "rollback"`, goes live on success,
+  does not move the preview). `main` is never rewritten.
+- Git smart HTTP on the admin origin: `GET/POST /api/books/:id/git/…`,
+  mounted outside the `/api` sub-app so `originCheck` does not apply (the git
+  content types are not CORS-safelisted, so cross-site POSTs fail their
+  preflight and no CORS headers are ever sent). Clone URL:
+  `https://git@<ADMIN_ORIGIN>/api/books/<id>/git`.
+- Auth: per book+user API tokens (`git_tokens`, hash-only, revocable,
+  `lastUsedAt`, max 10 active per user+book), Basic auth with the token as
+  password (username `git`), membership re-checked per request, failure and
+  per-book op rate limits. Session cookies are not accepted on git routes.
+- Push request bodies are capped (`uploadMaxBytes`, streaming counter +
+  `receive.maxInputSize`); the unpacked tree size is enforced by the
+  pre-receive hook (`HB_MAX_BYTES` env = the book's quota).
+- Editor-save CAS semantics are unchanged: a save against a pre-push baseOid
+  fails with 409; a push after an editor commit is non-FF and rejected.
+- Staleness: `books.commit_count` (bumped on push by the rev-list count and
+  by 1 on editor commits/uploads) minus a build's `commitCount` snapshot.
+- SSH keys as a second transport were considered and rejected for now (second
+  exposed port, host keys, new protocol surface; the HTTPS token path covers
+  clone/push with tighter per-book scoping).
+
+## Data model (Drizzle, migration 0010)
+
+- `books.commit_count` integer, default 0.
+- `builds.commit_count` integer (snapshot at enqueue), `builds.note` text;
+  `builds.trigger` gains `push` and `rollback` (text enum).
+- `git_tokens`: `id_hash` PK (sha256 of the token), `book_id`, `user_id`,
+  `label`, `last_used_at`, `revoked_at`, `created_at`.
+
+## API (admin host)
+
+```
+GET    /books/:id/git/info/refs?service=git-{upload,receive}-pack   Basic token
+POST   /books/:id/git/git-upload-pack                               Basic token
+POST   /books/:id/git/git-receive-pack                              Basic token
+GET    /books/:id/git/tokens                  session; list (no secrets)
+POST   /books/:id/git/tokens                  session { label? } → token shown once
+DELETE /books/:id/git/tokens/:tokenId          session; owner or the token's own user
+POST   /books/:id/publish                     session { note? ≤200 chars }
+POST   /books/:id/rollback                    session { tag: "v<N>" }
+```
+
+`GET /books/:id/builds` rows carry `tags` (tag names at the build's commit),
+`note` and `commitCount`; books carry `commitCount`. Audit:
+`book.push`, `book.git.token.create`, `book.git.token.revoke`, `book.publish`,
+`book.rollback`.
+
+## Instance setting
+
+`gitPushUpdatesPreview` (boolean, default false) in the admin settings; also
+returned by `GET /instance/public` so the book page can explain the behavior.
+
+## Web
+
+Publishing section of the book page: "Work locally (git)" block — clone
+command with copy button (`https://git@<host>/api/books/<id>/git`), token
+create (shown once in a dialog) / list / revoke, explainer (main-only, pull
+before push, `git checkout published` = live site, `git log main ^published` =
+unpublished changes, reload the editor after pull/push, no submodules/LFS,
+`http.postBuffer` for large pushes), credential-helper hint. Publish button
+with optional note; builds table shows tags, notes and a "Roll back"
+confirmation on tagged succeeded builds; staleness hint ("main is N commits
+ahead of the live site/preview"); "Download source (zip)".
+
+## Tests
+
+`tests/git-http.test.ts`: real `git` binary against the app on an ephemeral
+port (Host header override) — clone/push with bookkeeping, token auth
+(wrong/revoked/cross-book/limit), ref rules (tag/branch/delete/non-FF),
+quota refusal, publish tags, instant vs. rebuild rollback, editor-save vs.
+push CAS both directions, `gitPushUpdatesPreview` on/off.
+`tests/git.test.ts`: `parseRefUpdates`. `tests/builds.test.ts`: tag-aligned
+pruning. Layout under `platforms/cloud/tests`.
+
+## Work order
+
+1. *(done)* Schema + migration 0010, git.ts helpers (pre-receive hook, tags,
+   rev-list, `parseRefUpdates`, exported `spawnGit`).
+2. *(done)* Git smart HTTP routes + token routes; mounted in admin/app.ts.
+3. *(done)* Push bookkeeping, pre-receive quota/ref rules, no publish build.
+4. *(done)* Tags on publish/rollback, tag-aligned pruning, rollback route.
+5. *(done)* Instance setting, staleness counters, web UI.
+6. *(done)* Tests; this doc.

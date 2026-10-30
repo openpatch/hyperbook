@@ -1,9 +1,10 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { DownloadIcon, UploadIcon } from "lucide-react";
+import { CopyIcon, DownloadIcon, KeyRoundIcon, UploadIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { ConfirmButton } from "@/components/confirm-button";
 import { Section } from "@/components/page-header";
+import { SecretDialog } from "@/components/secret-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,9 +14,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ApiError, api, unwrap } from "@/lib/api";
 import type { Book } from "@/lib/books";
+import { useInstance } from "@/lib/session";
 import { cn } from "@/lib/utils";
 
 type Build = Awaited<ReturnType<typeof fetchBuilds>>[number];
@@ -34,11 +37,20 @@ const TRIGGER: Record<Build["trigger"], string> = {
   upload: "upload",
   rebuild: "rebuild",
   edit: "save (preview)",
+  push: "git push (preview)",
   publish: "publish",
+  rollback: "rollback",
   upgrade: "Hyperbook update",
 };
 
 const active = (b: Build) => b.status === "queued" || b.status === "running";
+
+/** The version tag of a build that a rollback can go back to. */
+const versionTag = (b: Build) => b.tags?.find((t) => /^v\d+$/.test(t));
+
+/** How many commits main has on top of a build. */
+const aheadOf = (book: Book, b: Build | undefined) =>
+  b ? Math.max(0, book.commitCount - b.commitCount) : null;
 
 function duration(b: Build): string {
   if (!b.startedAt) return "";
@@ -99,11 +111,16 @@ export function PublishingSection({ book }: { book: Book }) {
   };
 
   const hasSource = (builds?.length ?? 0) > 0;
+  const published = builds?.find((b) => b.published);
+  const preview = builds?.find((b) => b.preview);
+  const aheadPublished = aheadOf(book, published);
+  const aheadPreview = aheadOf(book, preview);
+  const [note, setNote] = useState("");
 
   return (
     <Section
       title="Publishing"
-      description="Edit the book in the browser and publish it when it is ready, or upload it as a zip, which is built and published right away."
+      description="Edit the book in the browser and publish it when it is ready, or upload it as a zip, which is built and published right away. You can also work on the book locally with git."
     >
       <p className="mb-4">
         {book.publishedAt ? (
@@ -118,9 +135,18 @@ export function PublishingSection({ book }: { book: Book }) {
         )}
       </p>
 
+      {(aheadPublished !== null && aheadPublished > 0 || (aheadPreview !== null && aheadPreview > 0)) && (
+        <p className="mb-4 text-sm text-muted-foreground">
+          {aheadPublished !== null && aheadPublished > 0 && (
+            <>main is {aheadPublished} commit{aheadPublished === 1 ? "" : "s"} ahead of the live site. </>
+          )}
+          {aheadPreview !== null && aheadPreview > 0 && <>main is {aheadPreview} ahead of the preview.</>}
+        </p>
+      )}
+
       <UploadZone bookId={id} onUploaded={refresh} onLog={setLogFor} />
 
-      <div className="my-4 flex flex-wrap gap-2">
+      <div className="my-4 flex flex-wrap items-center gap-2">
         <Button
           variant="outline"
           disabled={!hasSource}
@@ -128,8 +154,29 @@ export function PublishingSection({ book }: { book: Book }) {
         >
           Rebuild
         </Button>
+        <Button
+          variant="outline"
+          disabled={!hasSource}
+          onClick={() =>
+            run(async () => {
+              await unwrap(api.books[":id"].publish.$post({ param: { id }, json: { note: note.trim() } }));
+              setNote("");
+              await queryClient.invalidateQueries({ queryKey: ["books", id], exact: true });
+            })
+          }
+        >
+          Publish
+        </Button>
+        <Input
+          className="w-56"
+          placeholder="Note for this version (optional)"
+          maxLength={200}
+          value={note}
+          onChange={(e) => setNote(e.target.value)}
+          aria-label="Note for this version (optional)"
+        />
         <Button variant="outline" disabled={!hasSource} asChild={hasSource}>
-          {hasSource ? <a href={`/api/books/${id}/source.zip`}>Download source</a> : <span>Download source</span>}
+          {hasSource ? <a href={`/api/books/${id}/source.zip`}>Download source (zip)</a> : <span>Download source (zip)</span>}
         </Button>
         {book.publishedAt && (
           <ConfirmButton
@@ -146,6 +193,8 @@ export function PublishingSection({ book }: { book: Book }) {
           </ConfirmButton>
         )}
       </div>
+
+      <WorkLocally book={book} />
 
       {hasSource && (
         <Table>
@@ -165,7 +214,15 @@ export function PublishingSection({ book }: { book: Book }) {
             {builds!.map((b) => (
               <TableRow key={b.id}>
                 <TableCell>
-                  #{b.id} {TRIGGER[b.trigger]}
+                  <div className="flex flex-wrap items-center gap-1">
+                    #{b.id} {TRIGGER[b.trigger]}
+                    {b.tags?.map((t) => (
+                      <Badge key={t} variant="outline">
+                        {t}
+                      </Badge>
+                    ))}
+                  </div>
+                  {b.note && <p className="mt-1 max-w-sm text-sm whitespace-normal text-muted-foreground">{b.note}</p>}
                 </TableCell>
                 <TableCell>
                   <div className="flex items-center gap-2">
@@ -193,6 +250,24 @@ export function PublishingSection({ book }: { book: Book }) {
                   <Button variant="ghost" size="sm" onClick={() => setLogFor(b.id)}>
                     Log
                   </Button>
+                  {b.status === "succeeded" && versionTag(b) && !b.published && (
+                    <ConfirmButton
+                      size="sm"
+                      variant="outline"
+                      title={`Roll back to ${versionTag(b)}?`}
+                      description="The live site switches to this version. The current main is not changed; publish it again to go forward."
+                      confirmLabel="Roll back"
+                      onConfirm={async () => {
+                        await unwrap(
+                          api.books[":id"].rollback.$post({ param: { id }, json: { tag: versionTag(b)! } }),
+                        );
+                        await queryClient.invalidateQueries({ queryKey: ["books", id], exact: true });
+                        await refresh();
+                      }}
+                    >
+                      Roll back
+                    </ConfirmButton>
+                  )}
                   {active(b) && (
                     <Button
                       variant="ghost"
@@ -213,6 +288,162 @@ export function PublishingSection({ book }: { book: Book }) {
 
       <LogDialog buildId={logFor} onClose={() => setLogFor(null)} />
     </Section>
+  );
+}
+
+/**
+ * "Work locally": the clone command and the per-book git tokens. A push to
+ * main never triggers a publish build — only a preview build when the
+ * instance setting says so.
+ */
+function WorkLocally({ book }: { book: Book }) {
+  const id = String(book.id);
+  const { data: instance } = useInstance();
+  const queryClient = useQueryClient();
+  const cloneUrl = (() => {
+    const url = new URL(window.location.origin);
+    url.username = "git";
+    return `${url.origin}/api/books/${id}/git`;
+  })();
+  const { data: tokens } = useQuery({
+    queryKey: ["books", id, "git", "tokens"],
+    queryFn: () => unwrap(api.books[":id"].git.tokens.$get({ param: { id } })),
+  });
+  const [label, setLabel] = useState("");
+  const [secret, setSecret] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  const refresh = () => queryClient.invalidateQueries({ queryKey: ["books", id, "git", "tokens"] });
+
+  const create = async () => {
+    setBusy(true);
+    try {
+      const res = await unwrap(api.books[":id"].git.tokens.$post({ param: { id }, json: { label: label.trim() } }));
+      setSecret(res.token);
+      setLabel("");
+      await refresh();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not create a token");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const revoke = async (tokenId: string) => {
+    try {
+      await unwrap(api.books[":id"].git.tokens[":tokenId"].$delete({ param: { id, tokenId } }));
+      await refresh();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not revoke the token");
+    }
+  };
+
+  return (
+    <div className="my-4 max-w-xl">
+      <h3 className="mb-1 font-medium">Work locally (git)</h3>
+      <p className="mb-2 text-sm text-muted-foreground">
+        Clone the book, edit it locally, and push to <code>main</code>. Pull before you push.
+      </p>
+      <div className="flex items-center gap-2">
+        <code className="min-w-0 flex-1 truncate rounded-md bg-muted px-2 py-1.5 text-xs select-all">
+          git clone {cloneUrl}
+        </code>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => navigator.clipboard?.writeText(`git clone ${cloneUrl}`)}
+          aria-label="Copy the clone command"
+        >
+          <CopyIcon aria-hidden /> Copy
+        </Button>
+      </div>
+      <p className="mt-2 text-sm text-muted-foreground">
+        Git asks for a username and password: use <code>git</code> and one of your tokens below. To save typing,
+        run once: <code>git config --global credential.helper store</code>
+      </p>
+
+      <div className="mt-3 flex items-center gap-2">
+        <Input
+          className="w-56"
+          placeholder="Token label (optional)"
+          maxLength={100}
+          value={label}
+          onChange={(e) => setLabel(e.target.value)}
+          aria-label="Token label (optional)"
+        />
+        <Button variant="outline" size="sm" disabled={busy} onClick={() => void create()}>
+          <KeyRoundIcon aria-hidden /> Create token
+        </Button>
+      </div>
+
+      {tokens && tokens.length > 0 && (
+        <Table className="mt-2">
+          <TableHeader>
+            <TableRow>
+              <TableHead>Token</TableHead>
+              <TableHead>Created by</TableHead>
+              <TableHead>Last used</TableHead>
+              <TableHead>
+                <span className="sr-only">Actions</span>
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {tokens.map((t) => (
+              <TableRow key={t.id}>
+                <TableCell>
+                  {t.label || <span className="text-muted-foreground">—</span>}
+                  {t.revokedAt !== null && <Badge variant="outline">revoked</Badge>}
+                </TableCell>
+                <TableCell>{t.user}</TableCell>
+                <TableCell>{t.lastUsedAt ? new Date(t.lastUsedAt).toLocaleString() : "never"}</TableCell>
+                <TableCell className="text-right">
+                  {t.revokedAt === null && (
+                    <ConfirmButton
+                      size="sm"
+                      title="Revoke this token?"
+                      description="It stops working at once. The token itself cannot be shown again — create a new one if you need it."
+                      confirmLabel="Revoke"
+                      onConfirm={() => revoke(t.id)}
+                    >
+                      Revoke
+                    </ConfirmButton>
+                  )}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      )}
+
+      <details className="mt-2 text-sm text-muted-foreground">
+        <summary className="cursor-pointer">How git works here</summary>
+        <ul className="mt-2 list-disc space-y-1 pl-5">
+          <li>One branch only: <code>main</code>. Force-pushes, other branches, deletes and tags are refused.</li>
+          <li>A push never publishes. Publishing creates a version tag (v1, v2, …); <code>git checkout published</code> is what the live site shows, and <code>git log main ^published</code> lists unpublished changes.</li>
+          <li>
+            {instance?.gitPushUpdatesPreview
+              ? "On this instance a push also builds the preview, so the preview follows main."
+              : "A push does not build anything; the preview moves when you save in the editor or publish."}
+          </li>
+          <li>After a pull or push, reload the editor before saving — a save made against an older version is refused, so nothing is overwritten silently.</li>
+          <li>No submodules, no Git LFS; symlinks are stored as plain files.</li>
+          <li>Large pushes may need <code>git config http.postBuffer 10485760</code> once.</li>
+        </ul>
+      </details>
+
+      <SecretDialog
+        secret={secret}
+        title="Your git token"
+        description={
+          <>
+            Use it as the password with username <code>git</code>. It works only for this book, and it is shown only
+            now — store it somewhere safe.
+          </>
+        }
+        onClose={() => setSecret(null)}
+      />
+    </div>
   );
 }
 

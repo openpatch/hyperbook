@@ -71,6 +71,13 @@
       "when": 1793353688583,
       "tag": "0009_lonely_harrier",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "6",
+      "when": 1793365303168,
+      "tag": "0010_normal_night_nurse",
+      "breakpoints": true
     }
   ]
 }

@@ -60,6 +60,12 @@ export const instanceSettingsSchema = z.object({
    * local.
    */
   elementRuntimes: z.partialRecord(z.enum(ELEMENT_RUNTIMES), elementRuntimeChoice),
+  /**
+   * Whether a git push to a book's main also builds the preview (a preview
+   * build only — publishing stays explicit). Off by default: pushes never
+   * trigger builds, so many small commits cannot overwhelm the build queue.
+   */
+  gitPushUpdatesPreview: z.boolean(),
 });
 
 export type InstanceSettings = z.infer<typeof instanceSettingsSchema>;
@@ -78,6 +84,7 @@ export const DEFAULT_INSTANCE_SETTINGS: InstanceSettings = {
   landingPage: true,
   defaultLocale: null,
   elementRuntimes: {},
+  gitPushUpdatesPreview: false,
 };
 
 /** The elements whose runtimes load from their public CDN instead of this instance. */

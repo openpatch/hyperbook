@@ -120,6 +120,8 @@ export const books = sqliteTable("books", {
   previewBuildId: integer("preview_build_id"),
   /** Size of the current source (the git tree); counts toward its owners' storage. */
   sourceBytes: integer("source_bytes").notNull().default(0),
+  /** Commits on refs/heads/main; the staleness hint is this minus a build's snapshot. */
+  commitCount: integer("commit_count").notNull().default(0),
   /**
    * A custom domain (lowercase host). It serves the book once a CNAME to the
    * book was found (domain_verified_at); until then other books may claim it too.
@@ -258,7 +260,7 @@ export const builds = sqliteTable(
       enum: ["queued", "running", "succeeded", "failed", "canceled"],
     }).notNull(),
     trigger: text("trigger", {
-      enum: ["upload", "rebuild", "edit", "publish", "upgrade"],
+      enum: ["upload", "rebuild", "edit", "publish", "upgrade", "push", "rollback"],
     }).notNull(),
     /**
      * An upgrade build rebuilds a published build with a newer Hyperbook; it
@@ -270,6 +272,10 @@ export const builds = sqliteTable(
     requestedBy: integer("requested_by").references(() => users.id, {
       onDelete: "set null",
     }),
+    /** The book's commit count when this build was queued, for the staleness hint. */
+    commitCount: integer("commit_count").notNull().default(0),
+    /** A short note from whoever triggered the build (e.g. a publish note). */
+    note: text("note"),
     hyperbookVersion: text("hyperbook_version"),
     log: text("log").notNull().default(""),
     error: text("error"),
@@ -398,6 +404,30 @@ export const previewSessions = sqliteTable(
     expiresAt: integer("expires_at", { mode: "timestamp_ms" }).notNull(),
   },
   (t) => [index("preview_sessions_book_idx").on(t.bookId)],
+);
+
+/**
+ * An API token for git over HTTPS, scoped to one book and one user: a leaked
+ * token grants only that book. Only the token's hash is stored; the token is
+ * shown once when it is created. Revoked rows keep their audit trail.
+ */
+export const gitTokens = sqliteTable(
+  "git_tokens",
+  {
+    /** sha256 of the opaque token; the token itself is never stored. */
+    idHash: text("id_hash").primaryKey(),
+    bookId: integer("book_id")
+      .notNull()
+      .references(() => books.id, { onDelete: "cascade" }),
+    userId: integer("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    label: text("label").notNull().default(""),
+    lastUsedAt: integer("last_used_at", { mode: "timestamp_ms" }),
+    revokedAt: integer("revoked_at", { mode: "timestamp_ms" }),
+    createdAt: createdAt(),
+  },
+  (t) => [index("git_tokens_book_user_idx").on(t.bookId, t.userId)],
 );
 
 /**

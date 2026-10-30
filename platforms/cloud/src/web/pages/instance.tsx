@@ -33,6 +33,7 @@ const generalSchema = instanceSettingsInput
     privacyMarkdown: true,
     slugSuffix: true,
     landingPage: true,
+    gitPushUpdatesPreview: true,
     defaultLocale: true,
   })
   .required()
@@ -64,6 +65,7 @@ function InstanceForms({
       reservedSlugs: settings.reservedSlugs.join("\n"),
       slugSuffix: settings.slugSuffix,
       landingPage: settings.landingPage,
+      gitPushUpdatesPreview: settings.gitPushUpdatesPreview,
       defaultLocale: settings.defaultLocale ?? null,
     },
   });
@@ -155,6 +157,22 @@ function InstanceForms({
             <p id="landing-page-hint" className="text-sm text-muted-foreground">
               The landing page introduces Hyperbook and links the ways to run it. Without it, the front address
               shows only the login screen.
+            </p>
+          </div>
+          <div className="grid gap-1.5">
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="git-push-preview"
+                checked={form.watch("gitPushUpdatesPreview")}
+                onCheckedChange={(v) => form.setValue("gitPushUpdatesPreview", v === true, { shouldDirty: true })}
+                aria-describedby="git-push-preview-hint"
+              />
+              <Label htmlFor="git-push-preview">A git push also builds the preview</Label>
+            </div>
+            <p id="git-push-preview-hint" className="text-sm text-muted-foreground">
+              When a teacher pushes to a book's main branch with git, its preview is rebuilt (never published
+              automatically). Off by default: pushes then only update the source, so many small commits cannot
+              overwhelm the build queue.
             </p>
           </div>
           <div className="grid gap-1.5">

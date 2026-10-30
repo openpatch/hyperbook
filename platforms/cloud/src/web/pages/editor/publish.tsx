@@ -72,7 +72,7 @@ export function PublishButton({
 
   const publish = async () => {
     try {
-      const res = await unwrap(api.books[":id"].publish.$post({ param: { id: bookId } }));
+      const res = await unwrap(api.books[":id"].publish.$post({ param: { id: bookId }, json: {} }));
       if (res.published) toast.success("Published.");
       else followed.current = res.build.id;
       await Promise.all([

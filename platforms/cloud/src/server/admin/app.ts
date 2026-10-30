@@ -14,6 +14,7 @@ import { authRoutes } from "./routes/auth";
 import { bookRoutes } from "./routes/books";
 import { bookDictionaryRoutes } from "./routes/dictionary";
 import { bookFileRoutes } from "./routes/files";
+import { gitHttpRoutes, gitTokenRoutes } from "./routes/git";
 import { bookGroupRoutes, groupRoutes, studentRoutes } from "./routes/groups";
 import { instanceRoutes, publicInstanceRoutes } from "./routes/instance";
 import { meRoutes } from "./routes/me";
@@ -34,6 +35,7 @@ export function createAdminApi(deps: Deps) {
     .route("/me", meRoutes(deps))
     .route("/users", userRoutes(deps))
     .route("/books", bookRoutes(deps))
+    .route("/books", gitTokenRoutes(deps))
     .route("/books", bookGroupRoutes(deps))
     .route("/books", bookPublishingRoutes(deps))
     .route("/books", bookFileRoutes(deps))
@@ -105,6 +107,9 @@ export function createAdminApp(deps: Deps, options: { webRoot?: string } = {}) {
     return c.json({ error: createT(requestLocale(c))("errors.generic") }, 500);
   });
 
+  // Git smart HTTP lives outside the /api sub-app, so originCheck (which
+  // demands JSON) does not apply to it; it has its own token auth instead.
+  app.route("/api/books/:id/git", gitHttpRoutes(deps));
   app.route("/api", createAdminApi(deps));
   // A mounted app's notFound handler is not used, so unknown API paths are
   // answered here — otherwise they would fall through to the app shell below.

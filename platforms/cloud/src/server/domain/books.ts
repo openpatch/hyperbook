@@ -1,4 +1,4 @@
-import { and, count, eq } from "drizzle-orm";
+import { and, count, eq, sql } from "drizzle-orm";
 import { HTTPException } from "hono/http-exception";
 import type { SessionUser } from "../auth/sessions";
 import type { Config } from "../config";
@@ -39,6 +39,15 @@ export function bookAccess(
     throw new HTTPException(403, { message: "Only owners of this book may do this" });
   }
   return { book, role };
+}
+
+/** Adds `n` to the book's commit count (editor saves count one commit, pushes their rev-list count). */
+export function addCommits(db: Db, bookId: number, n: number) {
+  if (n <= 0) return;
+  db.update(books)
+    .set({ commitCount: sql`${books.commitCount} + ${n}` })
+    .where(eq(books.id, bookId))
+    .run();
 }
 
 export function ownerCount(db: Db, bookId: number): number {
@@ -115,6 +124,8 @@ export function publicBook(config: Config, book: BookRow, role: BookRole) {
     publishedBuildId: book.publishedBuildId,
     publishedAt: book.publishedAt?.getTime() ?? null,
     previewBuildId: book.previewBuildId,
+    /** Commits on main; minus a build's commitCount gives the staleness hint. */
+    commitCount: book.commitCount,
     createdAt: book.createdAt.getTime(),
     updatedAt: book.updatedAt.getTime(),
   };

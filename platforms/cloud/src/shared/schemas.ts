@@ -133,7 +133,23 @@ export const instanceSettingsInput = z
     /** Null: follow the browser's language. */
     defaultLocale: locale.nullish(),
     elementRuntimes: z.partialRecord(z.enum(ELEMENT_RUNTIMES), elementRuntimeChoice),
+    gitPushUpdatesPreview: z.boolean(),
   })
+  .partial();
+
+/** An optional note on a publish, stored on the build row (shown in the builds table). */
+export const publishInput = z
+  .object({ note: z.string().trim().max(200, "At most 200 characters").default("") })
+  .partial();
+
+/** A rollback target: one of the book's version tags. */
+export const rollbackInput = z.object({
+  tag: z.string().regex(/^v\d+$/, "Choose a version tag like v3"),
+});
+
+/** A label for a new git API token, so it can be told apart later. */
+export const gitTokenInput = z
+  .object({ label: z.string().trim().max(100, "At most 100 characters").default("") })
   .partial();
 
 export const slug = z

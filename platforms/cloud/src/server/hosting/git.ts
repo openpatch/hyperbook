@@ -1,8 +1,8 @@
-import { spawn } from "node:child_process";
-import { mkdirSync, rmSync } from "node:fs";
+import { spawn, type ChildProcessByStdio } from "node:child_process";
+import { chmodSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { mkdir } from "node:fs/promises";
 import path from "node:path";
-import type { Readable } from "node:stream";
+import type { Readable, Writable } from "node:stream";
 
 /*
  * Each book's source is a bare repository driven by the git CLI. No working
@@ -66,7 +66,11 @@ const SAFE_CONFIG = [
   "-c", "protocol.allow=never",
 ];
 
-function spawnGit(args: string[], options: RunOptions) {
+/** Runs git; also used by the smart-HTTP routes, which pipe request bodies in. */
+export function spawnGit(
+  args: string[],
+  options: RunOptions,
+): ChildProcessByStdio<Writable, Readable, Readable> {
   const child = spawn("git", [...SAFE_CONFIG, ...args], {
     env: gitEnv(options),
     cwd: options.cwd,
@@ -100,13 +104,56 @@ async function git(args: string[], options: RunOptions & { input?: Buffer | stri
   return (await gitBytes(args, options)).toString("utf8").trim();
 }
 
-/** Creates the bare repository unless it exists. */
+/**
+ * The pre-receive hook every book repository gets (initRepo). It is the only
+ * hook, and receive-pack is the only command that runs it: the platform's own
+ * git calls keep core.hooksPath=/dev/null. It allows only refs/heads/main,
+ * rejects deletes and every other ref (tags included), rejects trees with
+ * .git paths or submodule entries, and enforces the source-size limit the
+ * server passes as HB_MAX_BYTES (the summed size of the new tree, computed
+ * here because the hook is the last moment the push can still be refused).
+ */
+const PRE_RECEIVE = `#!/bin/sh
+zero=0000000000000000000000000000000000000000
+while read -r old new ref; do
+  if [ "$ref" != "refs/heads/main" ]; then
+    echo "Only the main branch may be pushed to this book (got $ref)." >&2
+    exit 1
+  fi
+  if [ "$new" = "$zero" ]; then
+    echo "Deleting main is not allowed. Push a new commit on top instead." >&2
+    exit 1
+  fi
+  if git ls-tree -r "$new" | grep -q '^160000 '; then
+    echo "Submodules are not supported in a book." >&2
+    exit 1
+  fi
+  if git ls-tree -r --name-only -z "$new" | tr '\\0' '\\n' | grep -qiE '(^|/)\\.git(/|$)'; then
+    echo "A book must not contain .git files or folders." >&2
+    exit 1
+  fi
+  if [ -n "$HB_MAX_BYTES" ]; then
+    size=$(git ls-tree -r -l "$new" | awk '{ s += $4 } END { print s+0 }')
+    if [ "$size" -gt "$HB_MAX_BYTES" ]; then
+      echo "The book would be larger than $((HB_MAX_BYTES / 1024 / 1024)) MB. Delete files you no longer need, or ask an admin for more space." >&2
+      exit 1
+    fi
+  fi
+done
+exit 0
+`;
+
+/** Creates the bare repository unless it exists, and (re)writes its hook. */
 export async function initRepo(repo: string) {
   mkdirSync(repo, { recursive: true });
   // An empty template: no sample hooks, no info/exclude.
   await git(["init", "--bare", "--quiet", "--template=", "--initial-branch=main"], {
     gitDir: repo,
   });
+  const hooks = path.join(repo, "hooks");
+  mkdirSync(hooks, { recursive: true });
+  writeFileSync(path.join(hooks, "pre-receive"), PRE_RECEIVE);
+  chmodSync(path.join(hooks, "pre-receive"), 0o755);
 }
 
 export async function headCommit(repo: string): Promise<string | null> {
@@ -349,4 +396,89 @@ async function commitChangesOnce(
   } finally {
     rmSync(index, { force: true });
   }
+}
+
+/*
+ * Publish history lives in tags: v1, v2, … plus the moving "published" tag
+ * (what the live site shows). Clients may fetch them but never create them
+ * (the pre-receive hook rejects refs other than refs/heads/main).
+ */
+
+const VERSION_TAG = /^v\d+$/;
+const PUBLISHED_TAG = "published";
+
+/** Whether `name` is a tag this platform may write. */
+export function isWritableTag(name: string): boolean {
+  return name === PUBLISHED_TAG || VERSION_TAG.test(name);
+}
+
+/** All tags of the repo as name → commit (lightweight tags point at commits). */
+export async function listTags(repo: string): Promise<{ name: string; commit: string }[]> {
+  const out = await git(["for-each-ref", "--format=%(refname:short) %(objectname)", "refs/tags/"], {
+    gitDir: repo,
+  });
+  if (!out) return [];
+  return out.split("\n").map((line) => {
+    const [name, commit] = line.split(" ");
+    return { name: name!, commit: commit! };
+  });
+}
+
+/** The commit a tag points at, or null when the tag does not exist. */
+export async function resolveTagCommit(repo: string, name: string): Promise<string | null> {
+  if (!isWritableTag(name)) return null;
+  try {
+    return await git(["rev-parse", "--verify", "--quiet", `refs/tags/${name}^{commit}`], {
+      gitDir: repo,
+    });
+  } catch (error) {
+    if (error instanceof GitError && error.code === 1) return null;
+    throw error;
+  }
+}
+
+/** Points a tag at a commit (lightweight tag). */
+export async function setTag(repo: string, name: string, commit: string) {
+  if (!isWritableTag(name)) throw new Error(`Not a writable tag: ${name}`);
+  await git(["update-ref", `refs/tags/${name}`, commit], { gitDir: repo });
+}
+
+export async function deleteTag(repo: string, name: string) {
+  if (!isWritableTag(name)) throw new Error(`Not a writable tag: ${name}`);
+  await git(["update-ref", "-d", `refs/tags/${name}`], { gitDir: repo }).catch((error) => {
+    // Deleting a tag that does not exist is fine.
+    if (!(error instanceof GitError && error.code === 1)) throw error;
+  });
+}
+
+/** The numbers of the existing v<N> tags. */
+export async function versionTagNumbers(repo: string): Promise<number[]> {
+  const tags = await listTags(repo).catch(() => [] as { name: string; commit: string }[]);
+  return tags.filter((t) => VERSION_TAG.test(t.name)).map((t) => Number(t.name.slice(1)));
+}
+
+/** How many commits `to` has that `from` (null: no history) does not. */
+export async function revListCount(repo: string, from: string | null, to: string): Promise<number> {
+  const range = from ? `${from}..${to}` : to;
+  return Number(await git(["rev-list", "--count", range], { gitDir: repo }));
+}
+
+/**
+ * Parses the ref-update commands at the start of a receive-pack request
+ * (pkt-lines "<old> <new> <ref>\0<capabilities>" up to the flush packet),
+ * ignoring the pack data that follows.
+ */
+export function parseRefUpdates(body: Buffer): { old: string; new: string; ref: string }[] {
+  const updates: { old: string; new: string; ref: string }[] = [];
+  let pos = 0;
+  while (pos + 4 <= body.length) {
+    const len = Number.parseInt(body.toString("ascii", pos, pos + 4), 16);
+    if (!Number.isInteger(len) || len < 4) break;
+    if (len === 0) break; // flush packet
+    const line = body.toString("utf8", pos + 4, pos + len).replace(/\0[\s\S]*$/, "").trim();
+    const [old, newRef, ref] = line.split(" ");
+    if (old && newRef && ref) updates.push({ old, new: newRef, ref });
+    pos += len;
+  }
+  return updates;
 }

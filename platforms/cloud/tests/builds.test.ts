@@ -6,7 +6,7 @@ import { describe, expect, it } from "vitest";
 import { books, builds } from "../src/server/db/schema";
 import { updateInstanceSettings } from "../src/server/domain/instance";
 import { sharedAssetsBaseFor } from "../src/server/hosting/runtimes";
-import { commitTree, initRepo } from "../src/server/hosting/git";
+import { commitTree, initRepo, listTags } from "../src/server/hosting/git";
 import { BuildLog, type Runner, hyperbookVersion, sandboxedRunner } from "../src/server/hosting/runner";
 import { buildDir, makeJobDir, repoDir } from "../src/server/hosting/storage";
 import { type Instance, copyRunner, setup } from "./helpers";
@@ -183,16 +183,32 @@ describe("build queue", () => {
     expect(bookRow(instance, book.id).publishedBuildId).toBeNull();
   });
 
-  it("deletes old build output but keeps the published and two previous builds", async () => {
+  it("deletes old build output but keeps the preview and two previous builds when there are no tags", async () => {
     const instance = setup();
     const { book, commit } = await bookWithSource(instance, { "hyperbook.json": "{}" });
     const ids: number[] = [];
     for (let i = 0; i < 5; i++) {
-      ids.push(instance.builds.enqueue(book.id, commit, "rebuild", null).id);
+      ids.push(instance.builds.enqueue(book.id, commit, "edit", null).id);
       await instance.builds.idle();
     }
     const kept = ids.filter((id) => existsSync(buildDir(instance.config, book.id, id)));
     expect(kept).toEqual(ids.slice(2));
+  });
+
+  it("keeps the builds of the kept version tags (published + last two v-tags)", async () => {
+    const instance = setup();
+    const { book } = await bookWithSource(instance, { "hyperbook.json": "{}" });
+    const ids: number[] = [];
+    for (let i = 1; i <= 4; i++) {
+      const commit = await commitFiles(instance, book.id, { "hyperbook.json": "{}", "index.html": `v${i}` });
+      ids.push(instance.builds.enqueue(book.id, commit, "publish", null).id);
+      await instance.builds.idle();
+    }
+    // Tags v1..v4 were created and pruned to v3, v4; their builds stay.
+    const tags = await listTags(repoDir(instance.config, book.id));
+    expect(tags.map((t) => t.name).sort()).toEqual(["published", "v3", "v4"]);
+    const kept = ids.filter((id) => existsSync(buildDir(instance.config, book.id, id)));
+    expect(kept).toEqual([ids[2]!, ids[3]!]);
   });
 
   it("keeps the preview build as well", async () => {
@@ -205,8 +221,9 @@ describe("build queue", () => {
       ids.push(instance.builds.enqueue(book.id, commit, "edit", null).id);
       await instance.builds.idle();
     }
+    // The upload's tag points at the same commit; its newest build is kept, and so are the published and preview builds.
     const kept = [live, ...ids].filter((id) => existsSync(buildDir(instance.config, book.id, id)));
-    expect(kept).toEqual([live, ...ids.slice(1)]);
+    expect(kept).toEqual([live, ids[3]!]);
   });
 
   it("marks builds interrupted by a restart as failed", async () => {

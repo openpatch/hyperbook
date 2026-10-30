@@ -6,7 +6,7 @@ import { bookPath, commitFilesInput, initFilesInput, renderPageInput } from "../
 import { type ScannedPage, findReferences, isScannedPage } from "../../../shared/references";
 import type { SessionUser } from "../../auth/sessions";
 import type { Deps } from "../../deps";
-import { type BookRow, bookAccess } from "../../domain/books";
+import { type BookRow, addCommits, bookAccess } from "../../domain/books";
 import { quotaForBook, quotaMessage, setSourceBytes } from "../../domain/storage";
 import { bookTemplate } from "../../domain/templates";
 import {
@@ -99,6 +99,7 @@ export function bookFileRoutes({ db, config, renders }: Deps) {
     }
     const now = await listing(book);
     setSourceBytes(db, book.id, now.files.reduce((sum, f) => sum + f.size, 0));
+    if (result.changed) addCommits(db, book.id, 1);
     return { changed: result.changed, ...now };
   }
 
