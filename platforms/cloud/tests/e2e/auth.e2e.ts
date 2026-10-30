@@ -36,7 +36,7 @@ describe("login", () => {
 
   it("saves the display name", async () => {
     await page.getByLabel("Name").fill("Head Admin");
-    await page.getByRole("button", { name: "Save" }).click();
+    await page.locator("section", { hasText: "Shown to other" }).getByRole("button", { name: "Save" }).click();
     await page.getByText("Saved").waitFor();
     await page.reload();
     expect(await page.getByLabel("Name").inputValue()).toBe("Head Admin");
@@ -44,7 +44,8 @@ describe("login", () => {
   });
 
   it("logs out", async () => {
-    await page.getByRole("button", { name: "Log out" }).click();
+    await page.getByRole("banner").getByRole("button", { name: /Head Admin|admin/i }).click();
+    await page.getByRole("menuitem", { name: "Log out" }).click();
     await page.waitForURL(/\/login/);
     // The front page is public: it shows the landing with a way to log in.
     await page.goto(`${server.origin}/`);
@@ -61,7 +62,8 @@ describe("login", () => {
     await general.getByRole("button", { name: "Save", exact: true }).click();
     await page.getByText("Saved").waitFor();
 
-    await page.getByRole("button", { name: "Log out" }).click();
+    await page.getByRole("banner").getByRole("button", { name: /Head Admin|admin/i }).click();
+    await page.getByRole("menuitem", { name: "Log out" }).click();
     await page.waitForURL(/\/login/);
     await page.goto(`${server.origin}/`);
     await page.waitForURL(/\/login/);
