@@ -2,6 +2,7 @@ import { z } from "zod";
 import type { Db } from "../db/client";
 import { instanceSettings } from "../db/schema";
 import { parseJson } from "../json";
+import { LOCALES } from "../../shared/i18n";
 import { ELEMENT_RUNTIMES, elementRuntimeChoice } from "../../shared/schemas";
 
 /**
@@ -48,6 +49,11 @@ export const instanceSettingsSchema = z.object({
    */
   landingPage: z.boolean(),
   /**
+   * The language of pages, API errors and emails for users who have not
+   * chosen one themselves. Null: follow the browser's Accept-Language.
+   */
+  defaultLocale: z.enum(LOCALES).nullable(),
+  /**
    * For each element with a downloadable runtime, where books load it from
    * that do not decide in their hyperbook.json: "local" (default) from this
    * instance, "cdn" from the element's public CDN. Unlisted elements are
@@ -70,6 +76,7 @@ export const DEFAULT_INSTANCE_SETTINGS: InstanceSettings = {
   signupDomains: [],
   slugSuffix: false,
   landingPage: true,
+  defaultLocale: null,
   elementRuntimes: {},
 };
 

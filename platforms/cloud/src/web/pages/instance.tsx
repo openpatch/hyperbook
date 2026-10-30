@@ -1,7 +1,9 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { z } from "zod";
+import { LOCALES, type Locale, type MessageKey } from "../../shared/i18n";
 import { instanceSettingsInput, type ElementRuntime } from "../../shared/schemas";
 import { EntitlementsEditor, type Entitlements } from "@/components/entitlements-editor";
 import { PageHeader, Section } from "@/components/page-header";
@@ -31,6 +33,7 @@ const generalSchema = instanceSettingsInput
     privacyMarkdown: true,
     slugSuffix: true,
     landingPage: true,
+    defaultLocale: true,
   })
   .required()
   .extend({ reservedSlugs: z.string() });
@@ -49,6 +52,7 @@ function InstanceForms({
 }: {
   settings: Awaited<ReturnType<typeof loadSettings>>;
 }) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const form = useZodForm(generalSchema, {
     defaultValues: {
@@ -60,6 +64,7 @@ function InstanceForms({
       reservedSlugs: settings.reservedSlugs.join("\n"),
       slugSuffix: settings.slugSuffix,
       landingPage: settings.landingPage,
+      defaultLocale: settings.defaultLocale ?? null,
     },
   });
 
@@ -151,6 +156,28 @@ function InstanceForms({
               The landing page introduces Hyperbook and links the ways to run it. Without it, the front address
               shows only the login screen.
             </p>
+          </div>
+          <div className="grid gap-1.5">
+            <Label htmlFor="default-locale">{t("instance.language")}</Label>
+            <Select
+              value={form.watch("defaultLocale") ?? ""}
+              onValueChange={(v) =>
+                form.setValue("defaultLocale", v === "" ? null : (v as Locale), { shouldDirty: true })
+              }
+            >
+              <SelectTrigger id="default-locale" className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">{t("common.automatic")}</SelectItem>
+                {LOCALES.map((l) => (
+                  <SelectItem key={l} value={l}>
+                    {t(`common.languages.${l}` as MessageKey)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-sm text-muted-foreground">{t("instance.languageHint")}</p>
           </div>
           <FormError form={form} />
           <div>

@@ -1,22 +1,27 @@
 import { useState } from "react";
 import { Controller } from "react-hook-form";
+import { Trans, useTranslation } from "react-i18next";
 import { Link, Navigate } from "react-router";
 import { z } from "zod";
 import { signupInput } from "../../shared/schemas";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { useMessage } from "@/i18n";
 import { api, unwrap } from "@/lib/api";
 import { FormError, TextField, applyServerError, useZodForm } from "@/lib/form";
 import { useInstance } from "@/lib/session";
 import { privacyHref } from "./legal";
 
+// Refinement messages are catalog keys; lib/form.tsx translates them.
 const schema = signupInput
   .extend({ confirm: z.string(), acceptPrivacy: z.boolean() })
-  .refine((v) => v.password === v.confirm, { path: ["confirm"], message: "The passwords do not match" })
-  .refine((v) => v.acceptPrivacy, { path: ["acceptPrivacy"], message: "Accept the privacy policy to sign up" });
+  .refine((v) => v.password === v.confirm, { path: ["confirm"], message: "validation.passwordsMismatch" })
+  .refine((v) => v.acceptPrivacy, { path: ["acceptPrivacy"], message: "validation.acceptPrivacy" });
 
 export function SignupPage() {
+  const { t } = useTranslation();
+  const say = useMessage();
   const { data: instance } = useInstance();
   const [sent, setSent] = useState<{ email: string; approval: boolean } | null>(null);
   const form = useZodForm(schema, {
@@ -37,13 +42,17 @@ export function SignupPage() {
   if (sent) {
     return (
       <div className="grid gap-4">
-        <h1 className="text-2xl">Check your email</h1>
+        <h1 className="text-2xl">{t("auth.signup.sentTitle")}</h1>
         <p>
-          We sent a link to <strong>{sent.email}</strong>. Open it within 24 hours to confirm your address.
+          <Trans
+            i18nKey="auth.signup.sentBody"
+            values={{ email: sent.email }}
+            components={{ strong: <strong /> }}
+          />
         </p>
-        {sent.approval && <p>After that, an admin approves your account; you get an email when it is ready.</p>}
+        {sent.approval && <p>{t("auth.signup.sentApproval")}</p>}
         <Link to="/login" className="text-sm text-primary hover:underline">
-          Back to log in
+          {t("auth.signup.backToLogin")}
         </Link>
       </div>
     );
@@ -52,23 +61,29 @@ export function SignupPage() {
   const error = form.formState.errors.acceptPrivacy?.message;
   return (
     <form onSubmit={onSubmit} className="grid gap-4" noValidate>
-      <h1 className="text-2xl">Sign up</h1>
+      <h1 className="text-2xl">{t("auth.signup.title")}</h1>
       {instance?.signupMode === "domains" && (
         <p className="text-sm text-muted-foreground">
-          For addresses at {instance.signupDomains.join(", ")}.
+          {t("auth.signup.domainsHint", { domains: instance.signupDomains.join(", ") })}
         </p>
       )}
-      <TextField form={form} name="displayName" label="Your name" autoComplete="name" autoFocus />
-      <TextField form={form} name="email" label="Email" type="email" autoComplete="email" />
+      <TextField form={form} name="displayName" label={t("auth.signup.name")} autoComplete="name" autoFocus />
+      <TextField form={form} name="email" label={t("auth.signup.email")} type="email" autoComplete="email" />
       <TextField
         form={form}
         name="password"
-        label="Password"
+        label={t("auth.signup.password")}
         type="password"
         autoComplete="new-password"
-        hint="At least 10 characters."
+        hint={t("auth.signup.passwordHint")}
       />
-      <TextField form={form} name="confirm" label="Repeat the password" type="password" autoComplete="new-password" />
+      <TextField
+        form={form}
+        name="confirm"
+        label={t("auth.signup.confirm")}
+        type="password"
+        autoComplete="new-password"
+      />
       <div className="grid gap-1">
         <div className="flex items-start gap-2">
           <Controller
@@ -84,23 +99,29 @@ export function SignupPage() {
             )}
           />
           <Label htmlFor="accept-privacy" className="font-normal leading-snug">
-            <span>
-              I accept the{" "}
-              <a href={privacyHref(instance)} target="_blank" rel="noreferrer" className="text-primary hover:underline">
-                privacy policy
-              </a>
-              .
-            </span>
+            <Trans
+              i18nKey="auth.signup.acceptPrivacy"
+              components={{
+                a: (
+                  <a
+                    href={privacyHref(instance)}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-primary hover:underline"
+                  />
+                ),
+              }}
+            />
           </Label>
         </div>
-        {error && <p className="text-sm text-destructive">{error}</p>}
+        {error && <p className="text-sm text-destructive">{say(String(error))}</p>}
       </div>
       <FormError form={form} />
       <Button type="submit" disabled={form.formState.isSubmitting}>
-        Sign up
+        {t("auth.signup.submit")}
       </Button>
       <Link to="/login" className="text-sm text-primary hover:underline">
-        I have an account
+        {t("auth.signup.haveAccount")}
       </Link>
     </form>
   );

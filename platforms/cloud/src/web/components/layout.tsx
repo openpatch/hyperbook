@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { NavLink, Outlet, useLocation } from "react-router";
 import { Button } from "@/components/ui/button";
 import { useInstance, useLogout, useUser } from "@/lib/session";
 import { cn } from "@/lib/utils";
 import { LegalLinks } from "./auth-layout";
+import { LanguageSelect } from "./language-select";
 import { ThemeToggle } from "./theme-toggle";
 
 /**
@@ -13,6 +15,7 @@ import { ThemeToggle } from "./theme-toggle";
  * Narrow screens get the sidebar as a drawer behind a burger, as books do.
  */
 export function Layout() {
+  const { t } = useTranslation();
   const user = useUser();
   const { data: instance } = useInstance();
   const logout = useLogout();
@@ -25,7 +28,7 @@ export function Layout() {
         <button
           type="button"
           className="ml-4 flex size-10 cursor-pointer flex-col items-center justify-center gap-1.5 lg:hidden"
-          aria-label={navOpen ? "Close navigation" : "Open navigation"}
+          aria-label={navOpen ? t("nav.close") : t("nav.open")}
           aria-expanded={navOpen}
           aria-controls="main-nav"
           onClick={() => setNavOpen((open) => !open)}
@@ -40,6 +43,7 @@ export function Layout() {
         <span className="hidden truncate text-sm sm:inline">
           {user.displayName || user.email}
         </span>
+        <LanguageSelect className="text-header-foreground hover:bg-white/15" />
         <ThemeToggle className="hover:bg-white/15" />
         <Button
           variant="ghost"
@@ -47,7 +51,7 @@ export function Layout() {
           className="text-header-foreground hover:bg-white/15 hover:text-header-foreground"
           onClick={logout}
         >
-          Log out
+          {t("nav.logOut")}
         </Button>
       </header>
       <div className="relative flex min-h-0 flex-1">
@@ -62,18 +66,18 @@ export function Layout() {
             !navOpen && "-translate-x-full",
           )}
         >
-          <nav aria-label="Main" className="flex-1 p-4">
+          <nav aria-label={t("nav.main")} className="flex-1 p-4">
             <ul>
-              <NavItem to="/books">Books</NavItem>
+              <NavItem to="/books">{t("nav.books")}</NavItem>
               {user.role === "admin" && (
                 <>
-                  <NavItem to="/users">Users</NavItem>
-                  {instance?.slugSuffix && <NavItem to="/addresses">Addresses</NavItem>}
-                  <NavItem to="/instance">Settings</NavItem>
-                  <NavItem to="/audit">Activity</NavItem>
+                  <NavItem to="/users">{t("nav.users")}</NavItem>
+                  {instance?.slugSuffix && <NavItem to="/addresses">{t("nav.addresses")}</NavItem>}
+                  <NavItem to="/instance">{t("nav.settings")}</NavItem>
+                  <NavItem to="/audit">{t("nav.activity")}</NavItem>
                 </>
               )}
-              <NavItem to="/account">Your account</NavItem>
+              <NavItem to="/account">{t("nav.account")}</NavItem>
             </ul>
           </nav>
           <PoweredBy />

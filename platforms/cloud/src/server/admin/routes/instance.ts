@@ -26,6 +26,8 @@ export function publicInstanceRoutes({ db, config, mailer }: Deps) {
       signupDomains: settings.signupDomains,
       slugSuffix: settings.slugSuffix,
       landingPage: settings.landingPage,
+      /** Null: follow the browser's language. */
+      defaultLocale: settings.defaultLocale,
     });
     })
 

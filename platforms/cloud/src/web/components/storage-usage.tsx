@@ -1,18 +1,30 @@
-/** "12.3 MB of 100 MB" with a bar; just the amount when there is no limit. */
+import { useTranslation } from "react-i18next";
+
+/**
+ * "12.3 MB of 100 MB" with a bar; just the amount when there is no limit.
+ * Numbers are formatted for the active language (12,3 MB in German).
+ */
 export function StorageUsage({ usedBytes, limitBytes }: { usedBytes: number; limitBytes: number | null }) {
-  const mb = (bytes: number) => `${(bytes / 1024 / 1024).toFixed(bytes < 10 * 1024 * 1024 ? 1 : 0)} MB`;
+  const { t, i18n } = useTranslation();
+  const mb = (bytes: number) =>
+    new Intl.NumberFormat(i18n.language, {
+      style: "unit",
+      unit: "megabyte",
+      maximumFractionDigits: bytes < 10 * 1024 * 1024 ? 1 : 0,
+    }).format(bytes / 1024 / 1024);
   const share = limitBytes ? Math.min(1, usedBytes / limitBytes) : 0;
   return (
     <div className="grid max-w-sm gap-1.5">
       <p>
-        {mb(usedBytes)}
-        {limitBytes !== null ? ` of ${mb(limitBytes)}` : " (no limit)"}
+        {limitBytes !== null
+          ? t("storage.usedOf", { used: mb(usedBytes), limit: mb(limitBytes) })
+          : t("storage.noLimit", { used: mb(usedBytes) })}
       </p>
       {limitBytes !== null && (
         <div
           className="h-2 overflow-hidden rounded-full bg-secondary"
           role="meter"
-          aria-label="Storage used"
+          aria-label={t("storage.meter")}
           aria-valuemin={0}
           aria-valuemax={limitBytes}
           aria-valuenow={usedBytes}
@@ -23,7 +35,7 @@ export function StorageUsage({ usedBytes, limitBytes }: { usedBytes: number; lim
           />
         </div>
       )}
-      <p className="text-sm text-muted-foreground">Counts the files of all books owned; built websites do not count.</p>
+      <p className="text-sm text-muted-foreground">{t("storage.hint")}</p>
     </div>
   );
 }

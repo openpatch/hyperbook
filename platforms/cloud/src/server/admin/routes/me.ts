@@ -2,6 +2,7 @@ import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { changePasswordInput, updateMeInput } from "../../../shared/schemas";
+import type { Locale } from "../../../shared/i18n";
 import { audit } from "../../audit";
 import { hashPassword, verifyPassword } from "../../auth/password";
 import { deleteUserSessions } from "../../auth/sessions";
@@ -9,6 +10,7 @@ import { users } from "../../db/schema";
 import type { Deps } from "../../deps";
 import { getEntitlements } from "../../domain/entitlements";
 import { storageOf } from "../../domain/storage";
+import { createT, requestLocale } from "../../i18n";
 import type { AuthedEnv } from "../env";
 import { requireUser } from "../middleware";
 import { validate } from "../validate";
@@ -23,8 +25,14 @@ export function meRoutes({ db }: Deps) {
 
     .patch("/", validate("json", updateMeInput), (c) => {
       const user = c.get("user");
-      const { displayName } = c.req.valid("json");
-      db.update(users).set({ displayName }).where(eq(users.id, user.id)).run();
+      const { displayName, locale } = c.req.valid("json");
+      const patch: { displayName?: string; locale?: Locale | null } = {};
+      if (displayName !== undefined) patch.displayName = displayName;
+      // Null is a real value here: it clears the choice.
+      if (locale !== undefined) patch.locale = locale;
+      if (Object.keys(patch).length > 0) {
+        db.update(users).set(patch).where(eq(users.id, user.id)).run();
+      }
       return c.json({ ok: true as const });
     })
 
@@ -33,7 +41,7 @@ export function meRoutes({ db }: Deps) {
       const { currentPassword, newPassword } = c.req.valid("json");
       const row = db.select().from(users).where(eq(users.id, user.id)).get();
       if (!row || !(await verifyPassword(currentPassword, row.passwordHash))) {
-        throw new HTTPException(400, { message: "The current password is wrong" });
+        throw new HTTPException(400, { message: createT(requestLocale(c))("errors.me.wrongCurrentPassword") });
       }
       db.update(users)
         .set({ passwordHash: await hashPassword(newPassword) })

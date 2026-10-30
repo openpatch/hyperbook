@@ -7,6 +7,7 @@ import {
   text,
   uniqueIndex,
 } from "drizzle-orm/sqlite-core";
+import { LOCALES } from "../../shared/i18n";
 
 /*
  * Teachers/admins (users) and students are separate tables: they log in on
@@ -32,6 +33,8 @@ export const users = sqliteTable("users", {
   approvedAt: integer("approved_at", { mode: "timestamp_ms" }),
   /** When the user accepted the privacy policy at sign-up. */
   privacyAcceptedAt: integer("privacy_accepted_at", { mode: "timestamp_ms" }),
+  /** The UI and email language they chose; null: follow the instance, then the browser. */
+  locale: text("locale", { enum: LOCALES }),
   createdAt: createdAt(),
 });
 

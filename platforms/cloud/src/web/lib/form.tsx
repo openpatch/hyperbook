@@ -11,6 +11,7 @@ import type { z } from "zod";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useMessage } from "@/i18n";
 import { cn } from "@/lib/utils";
 import { ApiError } from "./api";
 
@@ -45,11 +46,12 @@ export function applyServerError<T extends FieldValues>(
 }
 
 export function FormError({ form }: { form: UseFormReturn<any, any, any> }) {
+  const say = useMessage();
   const message = form.formState.errors.root?.message;
   if (!message) return null;
   return (
     <p role="alert" className="text-sm text-destructive">
-      {String(message)}
+      {say(String(message))}
     </p>
   );
 }
@@ -74,6 +76,7 @@ export function TextField<T extends FieldValues>({
   ...props
 }: FieldProps<T>) {
   const id = useId();
+  const say = useMessage();
   const error = form.formState.errors[name]?.message;
   const registered = form.register(
     name,
@@ -99,7 +102,7 @@ export function TextField<T extends FieldValues>({
           id={`${id}-help`}
           className={cn("text-sm", error ? "text-destructive" : "text-muted-foreground")}
         >
-          {error ? String(error) : hint}
+          {error ? say(String(error)) : hint}
         </p>
       )}
     </div>
@@ -114,6 +117,7 @@ export function TextAreaField<T extends FieldValues>({
   className,
 }: Pick<FieldProps<T>, "form" | "name" | "label" | "hint" | "className">) {
   const id = useId();
+  const say = useMessage();
   const error = form.formState.errors[name]?.message;
   return (
     <div className={cn("grid gap-1.5", className)}>
@@ -129,7 +133,7 @@ export function TextAreaField<T extends FieldValues>({
           id={`${id}-help`}
           className={cn("text-sm", error ? "text-destructive" : "text-muted-foreground")}
         >
-          {error ? String(error) : hint}
+          {error ? say(String(error)) : hint}
         </p>
       )}
     </div>

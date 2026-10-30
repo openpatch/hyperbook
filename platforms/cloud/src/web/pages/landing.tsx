@@ -1,6 +1,8 @@
 import { ArrowUpRight, Cloud, Container, LogIn, Rocket } from "lucide-react";
+import { Trans, useTranslation } from "react-i18next";
 import { Link, Navigate } from "react-router";
 import { LegalLinks } from "@/components/auth-layout";
+import { LanguageSelect } from "@/components/language-select";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import {
@@ -26,6 +28,7 @@ const HOSTING_DOCS = `${DOCS}/hosting/`;
  * books.
  */
 export function LandingPage() {
+  const { t } = useTranslation();
   const { data: me } = useMe();
   const { data: instance, isPending } = useInstance();
 
@@ -44,6 +47,7 @@ export function LandingPage() {
         <span className="min-w-0 flex-1 truncate p-4 font-heading text-[1.1rem] font-bold">
           {instance?.name ?? "Hyperbook Cloud"}
         </span>
+        <LanguageSelect className="text-header-foreground hover:bg-white/15" />
         <ThemeToggle className="hover:bg-white/15" />
         {instance && instance.signupMode !== "closed" && (
           <Button
@@ -52,7 +56,7 @@ export function LandingPage() {
             size="sm"
             className="text-header-foreground hover:bg-white/15 hover:text-header-foreground"
           >
-            <Link to="/signup">Sign up</Link>
+            <Link to="/signup">{t("landing.signUp")}</Link>
           </Button>
         )}
         <Button
@@ -62,7 +66,7 @@ export function LandingPage() {
           className="text-header-foreground hover:bg-white/15 hover:text-header-foreground"
         >
           <Link to="/login">
-            <LogIn /> Log in
+            <LogIn /> {t("landing.logIn")}
           </Link>
         </Button>
       </header>
@@ -70,37 +74,32 @@ export function LandingPage() {
       <main className="flex flex-1 flex-col items-center px-4 py-12 md:py-20">
         <div className="w-full max-w-3xl text-center">
           <h1 className="font-heading text-4xl font-bold md:text-5xl">
-            Power your Hyperbook
+            {t("landing.title")}
           </h1>
           <p className="mx-auto mt-4 max-w-xl text-lg text-muted-foreground">
-            Hyperbook is a quick and easy way to build interactive workbooks
-            that support modern standards and run superfast. Write Markdown, get
-            a static site with interactive elements — no coding experience
-            needed.
+            {t("landing.intro")}
           </p>
         </div>
 
         <section
-          aria-label="Ways to run Hyperbook"
+          aria-label={t("landing.waysToRun")}
           className="mt-12 grid w-full max-w-5xl gap-4 md:grid-cols-3"
         >
           <OptionCard
             icon={<Cloud className="size-6" />}
-            title="Hosted by OpenPatch"
+            title={t("landing.hostedTitle")}
             description={
-              canSignup
-                ? "No server of your own needed: on this instance — hyperbook.cloud, run by OpenPatch — you create an account and write, publish and share your books right in the browser."
-                : "No server of your own needed: on hyperbook.cloud, our public instance, you get an account and write, publish and share your books right in the browser."
+              canSignup ? t("landing.hostedDescriptionSignup") : t("landing.hostedDescription")
             }
             action={
               canSignup ? (
                 <Button asChild className="w-full">
-                  <Link to="/signup">Create an account</Link>
+                  <Link to="/signup">{t("landing.createAccount")}</Link>
                 </Button>
               ) : (
                 <Button asChild className="w-full">
                   <a href={HOSTED} target="_blank" rel="noreferrer">
-                    Open hyperbook.cloud <ArrowUpRight />
+                    {t("landing.openHosted")} <ArrowUpRight />
                   </a>
                 </Button>
               )
@@ -108,26 +107,26 @@ export function LandingPage() {
           />
           <OptionCard
             icon={<Container className="size-6" />}
-            title="Self-hosted with Docker"
-            description="Run your own instance in one container — SQLite plus one data volume, published per release as ghcr.io/openpatch/hyperbook-cloud."
+            title={t("landing.selfHostedTitle")}
+            description={t("landing.selfHostedDescription")}
             snippet="docker compose up -d"
             action={
               <Button asChild variant="outline" className="w-full">
                 <a href={SELF_HOST} target="_blank" rel="noreferrer">
-                  Self-hosting guide <ArrowUpRight />
+                  {t("landing.selfHostingGuide")} <ArrowUpRight />
                 </a>
               </Button>
             }
           />
           <OptionCard
             icon={<Rocket className="size-6" />}
-            title="Deploy anywhere with the CLI"
-            description="Build a static site with the Hyperbook CLI and upload the .hyperbook/out folder to any host — GitHub Pages, Vercel, your own web server."
+            title={t("landing.cliTitle")}
+            description={t("landing.cliDescription")}
             snippet="npx hyperbook build"
             action={
               <Button asChild variant="outline" className="w-full">
                 <a href={HOSTING_DOCS} target="_blank" rel="noreferrer">
-                  Hosting docs <ArrowUpRight />
+                  {t("landing.hostingDocs")} <ArrowUpRight />
                 </a>
               </Button>
             }
@@ -138,15 +137,12 @@ export function LandingPage() {
       <LegalLinks />
       <footer className="flex flex-col items-center gap-1 p-4 text-center text-sm text-muted-foreground">
         <p>
-          Built with ❤️ by{" "}
-          <a
-            href="https://openpatch.org"
-            target="_blank"
-            rel="noreferrer"
-            className="hover:text-primary"
-          >
-            OpenPatch
-          </a>
+          <Trans
+            i18nKey="landing.builtWith"
+            components={{
+              a: <a href="https://openpatch.org" target="_blank" rel="noreferrer" className="hover:text-primary" />,
+            }}
+          />
         </p>
         <p>
           <a
@@ -155,7 +151,7 @@ export function LandingPage() {
             rel="noreferrer"
             className="hover:text-primary"
           >
-            Documentation
+            {t("landing.documentation")}
           </a>{" "}
           •{" "}
           <a

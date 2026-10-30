@@ -9,6 +9,7 @@ import { type BookRow, assertSlugAvailable, bookAccess, renameSlug } from "../..
 import { publicOrigin } from "../../domain/custom-domains";
 import { getInstanceSettings } from "../../domain/instance";
 import { newSlugSuffix, withSuffix } from "../../domain/slug-names";
+import { createT, userLocale } from "../../i18n";
 import type { AuthedEnv } from "../env";
 import { requireAdmin, requireUser } from "../middleware";
 import { idParam } from "../params";
@@ -43,52 +44,85 @@ function useMail({ db, config, mailer }: Deps) {
       console.error(`Sending "${subject}" failed:`, error);
     }
   };
+  // Each recipient gets the mail in their own language.
   const ownersOf = (bookId: number) =>
     db
-      .select({ email: users.email })
+      .select({ email: users.email, locale: users.locale })
       .from(bookMembers)
       .innerJoin(users, eq(users.id, bookMembers.userId))
       .where(and(eq(bookMembers.bookId, bookId), eq(bookMembers.role, "owner")))
       .all();
-  const admins = () => db.select({ email: users.email }).from(users).where(eq(users.role, "admin")).all();
+  const admins = () =>
+    db.select({ email: users.email, locale: users.locale }).from(users).where(eq(users.role, "admin")).all();
   const name = () => getInstanceSettings(db).name;
-  const noteText = (note: string) => (note ? `\n\nNote from the admin:\n${note}` : "");
   const bookPage = (bookId: number) => `${config.adminOrigin}/books/${bookId}`;
 
   return {
     async requested(book: BookRow, request: RequestRow, by: string) {
       for (const admin of admins()) {
+        const t = createT(userLocale(db, admin.locale));
         await send(
           admin.email,
-          `${request.slug}: address requested for “${book.title}”`,
-          `${by} asks for the address ${request.slug} for “${book.title}” at ${name()}, now at ${publicOrigin(config, book)}.\n\n${request.description}\n\nDecide at ${config.adminOrigin}/addresses`,
+          t("mail.slugRequest.requested.subject", { slug: request.slug, title: book.title }),
+          t("mail.slugRequest.requested.body", {
+            by,
+            slug: request.slug,
+            title: book.title,
+            name: name(),
+            origin: publicOrigin(config, book),
+            description: request.description,
+            addressesUrl: `${config.adminOrigin}/addresses`,
+          }),
         );
       }
     },
     async approved(book: BookRow, request: RequestRow) {
       for (const owner of ownersOf(book.id)) {
+        const t = createT(userLocale(db, owner.locale));
         await send(
           owner.email,
-          `“${book.title}” is now at ${request.slug}`,
-          `An admin at ${name()} gave “${book.title}” the address you asked for: ${publicOrigin(config, book)}\n\nThe old address redirects there.${noteText(request.note)}`,
+          t("mail.slugRequest.approved.subject", { title: book.title, slug: request.slug }),
+          t("mail.slugRequest.approved.body", {
+            name: name(),
+            title: book.title,
+            slug: request.slug,
+            origin: publicOrigin(config, book),
+            note: request.note ? t("mail.slugRequest.note", { note: request.note }) : "",
+          }),
         );
       }
     },
     async declined(book: BookRow, request: RequestRow) {
       for (const owner of ownersOf(book.id)) {
+        const t = createT(userLocale(db, owner.locale));
         await send(
           owner.email,
-          `Address ${request.slug} for “${book.title}”`,
-          `An admin at ${name()} did not give “${book.title}” the address ${request.slug}. The book stays at ${publicOrigin(config, book)}.${noteText(request.note)}\n\n${bookPage(book.id)}`,
+          t("mail.slugRequest.declined.subject", { slug: request.slug, title: book.title }),
+          t("mail.slugRequest.declined.body", {
+            name: name(),
+            title: book.title,
+            slug: request.slug,
+            origin: publicOrigin(config, book),
+            note: request.note ? t("mail.slugRequest.note", { note: request.note }) : "",
+            bookUrl: bookPage(book.id),
+          }),
         );
       }
     },
     async revoked(book: BookRow, oldSlug: string, note: string) {
       for (const owner of ownersOf(book.id)) {
+        const t = createT(userLocale(db, owner.locale));
         await send(
           owner.email,
-          `“${book.title}” moved to ${book.slug}`,
-          `An admin at ${name()} took back the address ${oldSlug} from “${book.title}”. The book is now at ${publicOrigin(config, book)}; the old address redirects there until it is given to another book.${noteText(note)}`,
+          t("mail.slugRequest.revoked.subject", { title: book.title, slug: book.slug }),
+          t("mail.slugRequest.revoked.body", {
+            name: name(),
+            title: book.title,
+            oldSlug,
+            slug: book.slug,
+            origin: publicOrigin(config, book),
+            note: note ? t("mail.slugRequest.note", { note }) : "",
+          }),
         );
       }
     },

@@ -4,6 +4,9 @@ import { HTTPException } from "hono/http-exception";
 import type { Context } from "hono";
 import { readSession, SESSION_LIFETIME_MS } from "../auth/sessions";
 import type { Deps } from "../deps";
+import { getInstanceSettings } from "../domain/instance";
+import { createT } from "../i18n";
+import { parseAcceptLanguage } from "../../shared/i18n";
 import type { AdminEnv, AuthedEnv } from "./env";
 
 /*
@@ -37,18 +40,36 @@ export function sessionMiddleware({ db }: Deps) {
 }
 
 export const requireUser = createMiddleware<AuthedEnv>(async (c, next) => {
-  if (!c.get("user")) throw new HTTPException(401, { message: "Not logged in" });
+  if (!c.get("user")) throw new HTTPException(401, { message: createT(c.get("locale"))("errors.notLoggedIn") });
   await next();
 });
 
 export const requireAdmin = createMiddleware<AuthedEnv>(async (c, next) => {
   const user = c.get("user");
-  if (!user) throw new HTTPException(401, { message: "Not logged in" });
+  const t = createT(c.get("locale"));
+  if (!user) throw new HTTPException(401, { message: t("errors.notLoggedIn") });
   if (user.role !== "admin") {
-    throw new HTTPException(403, { message: "Only admins may do this" });
+    throw new HTTPException(403, { message: t("errors.adminOnly") });
   }
   await next();
 });
+
+/**
+ * Resolves the request's locale once, for error messages and validation:
+ * the user's choice, else the instance default, else the Accept-Language
+ * header, else English. (Emails have no header; they use userLocale.)
+ */
+export function localeMiddleware({ db }: Deps) {
+  return createMiddleware<AdminEnv>(async (c, next) => {
+    const user = c.get("user");
+    const settings = getInstanceSettings(db);
+    c.set(
+      "locale",
+      user?.locale ?? settings.defaultLocale ?? parseAcceptLanguage(c.req.header("accept-language")) ?? "en",
+    );
+    await next();
+  });
+}
 
 const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 

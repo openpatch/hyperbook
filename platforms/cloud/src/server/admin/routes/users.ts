@@ -7,6 +7,7 @@ import {
   setPasswordInput,
   updateUserInput,
 } from "../../../shared/schemas";
+import type { Locale } from "../../../shared/i18n";
 import { audit } from "../../audit";
 import { hashPassword } from "../../auth/password";
 import { deleteUserSessions } from "../../auth/sessions";
@@ -17,6 +18,7 @@ import { bookMembers, users } from "../../db/schema";
 import type { Deps } from "../../deps";
 import { getInstanceSettings } from "../../domain/instance";
 import { storageOf } from "../../domain/storage";
+import { createT, requestLocale, userLocale } from "../../i18n";
 import {
   getEntitlements,
   getUserEntitlementOverrides,
@@ -35,6 +37,7 @@ const userColumns = {
   disabledAt: users.disabledAt,
   emailVerifiedAt: users.emailVerifiedAt,
   approvedAt: users.approvedAt,
+  locale: users.locale,
   createdAt: users.createdAt,
 };
 
@@ -46,6 +49,7 @@ function publicUser(row: {
   disabledAt: Date | null;
   emailVerifiedAt: Date | null;
   approvedAt: Date | null;
+  locale: Locale | null;
   createdAt: Date;
 }) {
   return {
@@ -58,13 +62,14 @@ function publicUser(row: {
     unverified: row.emailVerifiedAt === null,
     /** A sign-up waiting for an admin. */
     pending: row.approvedAt === null,
+    locale: row.locale,
     createdAt: row.createdAt.getTime(),
   };
 }
 
-function findUser(db: Db, id: number) {
+function findUser(db: Db, id: number, locale: Locale = "en") {
   const row = db.select(userColumns).from(users).where(eq(users.id, id)).get();
-  if (!row) throw new HTTPException(404, { message: "User not found" });
+  if (!row) throw new HTTPException(404, { message: createT(locale)("errors.users.notFound") });
   return row;
 }
 
@@ -94,16 +99,23 @@ export function userRoutes({ db, config, mailer }: Deps) {
     }
   };
 
-  /** A link to choose a password; following it confirms the address. */
-  const invite = (user: { id: number; email: string; displayName: string }, by: string) => {
+  /** A link to choose a password, in the invited user's language; following it confirms the address. */
+  const invite = (user: { id: number; email: string; displayName: string; locale: Locale | null }, by: string) => {
+    const t = createT(userLocale(db, user.locale));
     const token = createAccountToken(db, user.id, "invite");
     const name = getInstanceSettings(db).name;
     const link = `${config.adminOrigin}/reset-password?token=${encodeURIComponent(token)}&invite=1`;
     return send(
       user.email,
-      `You are invited to ${name}`,
-      `Hello${user.displayName ? " " + user.displayName : ""},\n\n${by} added you to ${name}, where you can write and publish hyperbooks.\n\n` +
-        `Choose your password within 7 days with this link:\n\n${link}\n\nAfterwards you log in at ${config.adminOrigin}/login with ${user.email}.`,
+      t("mail.invite.subject", { name }),
+      t("mail.invite.body", {
+        name: user.displayName ? ` ${user.displayName}` : "",
+        by,
+        instance: name,
+        link,
+        loginUrl: `${config.adminOrigin}/login`,
+        email: user.email,
+      }),
     );
   };
 
@@ -118,7 +130,9 @@ export function userRoutes({ db, config, mailer }: Deps) {
     .post("/", validate("json", createUserInput), async (c) => {
       const input = c.req.valid("json");
       const exists = db.select({ id: users.id }).from(users).where(eq(users.email, input.email)).get();
-      if (exists) throw new HTTPException(409, { message: "An account with this email exists already" });
+      if (exists) {
+        throw new HTTPException(409, { message: createT(requestLocale(c))("errors.users.emailExists") });
+      }
       // Without a password and with email, the new user is invited to choose
       // one; otherwise a password is set (and a generated one shown once).
       const invited = !input.password && mailer.enabled;
@@ -157,23 +171,26 @@ export function userRoutes({ db, config, mailer }: Deps) {
     // A sign-up waiting for an admin (sign-up mode "approval").
     .post("/:id/approve", idParam, async (c) => {
       const id = c.req.valid("param").id;
-      const user = findUser(db, id);
+      const user = findUser(db, id, requestLocale(c));
       if (user.approvedAt) throw new HTTPException(409, { message: "This account is approved already" });
       db.update(users).set({ approvedAt: new Date() }).where(eq(users.id, id)).run();
       audit(db, { actorUserId: c.get("user").id, action: "user.approve", targetType: "user", targetId: id });
       const name = getInstanceSettings(db).name;
+      const t = createT(userLocale(db, user.locale));
       await send(
         user.email,
-        `Your account at ${name} is ready`,
-        `An admin approved your account at ${name}. Log in at ${config.adminOrigin}/login with ${user.email}.`,
+        t("mail.approved.subject", { name }),
+        t("mail.approved.body", { name, loginUrl: `${config.adminOrigin}/login`, email: user.email }),
       );
-      return c.json(publicUser(findUser(db, id)));
+      return c.json(publicUser(findUser(db, id, requestLocale(c))));
     })
 
     // Sends a new invitation to someone who has not chosen a password yet.
     .post("/:id/invite", idParam, async (c) => {
-      if (!mailer.enabled) throw new HTTPException(501, { message: "This instance cannot send email." });
-      const user = findUser(db, c.req.valid("param").id);
+      if (!mailer.enabled) {
+        throw new HTTPException(501, { message: createT(requestLocale(c))("errors.auth.noMailShort") });
+      }
+      const user = findUser(db, c.req.valid("param").id, requestLocale(c));
       if (user.emailVerifiedAt) throw new HTTPException(409, { message: "This user has set up the account already" });
       if (!(await invite(user, c.get("user").displayName || c.get("user").email))) {
         throw new HTTPException(502, { message: "The invitation could not be sent" });
@@ -183,7 +200,7 @@ export function userRoutes({ db, config, mailer }: Deps) {
     })
 
     .get("/:id", idParam, (c) => {
-      const row = findUser(db, c.req.valid("param").id);
+      const row = findUser(db, c.req.valid("param").id, requestLocale(c));
       return c.json({
         ...publicUser(row),
         entitlementOverrides: getUserEntitlementOverrides(db, row.id),
@@ -196,7 +213,7 @@ export function userRoutes({ db, config, mailer }: Deps) {
       const { id } = c.req.valid("param");
       const changes = c.req.valid("json");
       const me = c.get("user");
-      const row = findUser(db, id);
+      const row = findUser(db, id, requestLocale(c));
 
       if (id === me.id && (changes.disabled || changes.role === "teacher")) {
         throw new HTTPException(400, {
@@ -232,13 +249,13 @@ export function userRoutes({ db, config, mailer }: Deps) {
         targetId: id,
         data: changes,
       });
-      return c.json(publicUser(findUser(db, id)));
+      return c.json(publicUser(findUser(db, id, requestLocale(c))));
     })
 
     .put("/:id/password", idParam, validate("json", setPasswordInput), async (c) => {
       const { id } = c.req.valid("param");
       const input = c.req.valid("json");
-      findUser(db, id);
+      findUser(db, id, requestLocale(c));
       const password = input.password ?? generatedPassword();
       db.update(users)
         .set({ passwordHash: await hashPassword(password) })
@@ -257,7 +274,7 @@ export function userRoutes({ db, config, mailer }: Deps) {
     .put("/:id/entitlements", idParam, validate("json", entitlementOverridesInput), (c) => {
       const { id } = c.req.valid("param");
       const overrides = c.req.valid("json");
-      const row = findUser(db, id);
+      const row = findUser(db, id, requestLocale(c));
       setUserEntitlementOverrides(db, id, overrides);
       audit(db, {
         actorUserId: c.get("user").id,
@@ -276,7 +293,7 @@ export function userRoutes({ db, config, mailer }: Deps) {
       const { id } = c.req.valid("param");
       const me = c.get("user");
       if (id === me.id) throw new HTTPException(400, { message: "You cannot delete your own account" });
-      const row = findUser(db, id);
+      const row = findUser(db, id, requestLocale(c));
       if (row.role === "admin" && otherActiveAdmins(db, id) === 0) {
         throw new HTTPException(400, { message: "The last admin cannot be deleted" });
       }

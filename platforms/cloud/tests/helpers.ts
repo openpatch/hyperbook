@@ -116,8 +116,8 @@ export async function createUser(
 export function client({ app }: Instance) {
   let cookie = "";
 
-  async function request(method: string, path: string, body?: unknown) {
-    const headers: Record<string, string> = { host: ADMIN_HOST };
+  async function request(method: string, path: string, body?: unknown, extraHeaders: Record<string, string> = {}) {
+    const headers: Record<string, string> = { host: ADMIN_HOST, ...extraHeaders };
     if (method !== "GET") headers.origin = ADMIN_ORIGIN;
     if (body !== undefined) headers["content-type"] = "application/json";
     if (cookie) headers.cookie = cookie;

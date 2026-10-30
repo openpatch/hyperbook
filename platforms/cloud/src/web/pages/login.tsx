@@ -1,5 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link, Navigate, useNavigate, useSearchParams } from "react-router";
 import { loginInput } from "../../shared/schemas";
 import { Button } from "@/components/ui/button";
@@ -13,6 +14,7 @@ function safeNext(next: string | null): string {
 }
 
 export function LoginPage() {
+  const { t } = useTranslation();
   const [params] = useSearchParams();
   const next = safeNext(params.get("next"));
   const { data: me } = useMe();
@@ -40,12 +42,12 @@ export function LoginPage() {
 
   return (
     <form onSubmit={onSubmit} className="grid gap-4" noValidate>
-      <h1 className="text-2xl">Log in</h1>
-      <TextField form={form} name="email" label="Email" type="email" autoComplete="username" autoFocus />
+      <h1 className="text-2xl">{t("auth.login.title")}</h1>
+      <TextField form={form} name="email" label={t("auth.login.email")} type="email" autoComplete="username" autoFocus />
       <TextField
         form={form}
         name="password"
-        label="Password"
+        label={t("auth.login.password")}
         type="password"
         autoComplete="current-password"
       />
@@ -60,18 +62,18 @@ export function LoginPage() {
             setResent(true);
           }}
         >
-          {resent ? "Sent. Check your email." : "Send the link again"}
+          {resent ? t("auth.login.resent") : t("auth.login.resend")}
         </Button>
       )}
       <Button type="submit" disabled={form.formState.isSubmitting}>
-        Log in
+        {t("auth.login.submit")}
       </Button>
       <Link to="/forgot-password" className="text-sm text-primary hover:underline">
-        Forgot your password?
+        {t("auth.login.forgot")}
       </Link>
       {instance && instance.signupMode !== "closed" && (
         <Link to="/signup" className="text-sm text-primary hover:underline">
-          No account yet? Sign up
+          {t("auth.login.noAccount")}
         </Link>
       )}
     </form>

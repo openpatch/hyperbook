@@ -39,6 +39,19 @@ Student passwords and QR keys are stored twice: hashed, to check logins, and
 encrypted with `CREDENTIALS_KEY`, so lists can be printed again. Every view of
 them is recorded in the activity log.
 
+## Languages
+
+The platform speaks English and German (`src/shared/i18n`, one catalog per
+language; a test fails when the German one misses a key). The language of the
+pages, API errors and emails is the signed-in user's choice (account page,
+`users.locale`), else the instance default (admin settings, `defaultLocale`;
+"automatic" follows the browser), else the browser's `Accept-Language`, else
+English. Visitors' choice is kept in `localStorage`, and `<html lang>` is set
+before the first paint. New strings go into `src/shared/i18n/locales/en.ts`
+first; `de.ts` is typed against it. Pages are migrated to `t()` area by area —
+auth pages, shell and account page are done, the editor and the admin pages
+follow.
+
 ## How it is served
 
 One process answers these hosts, told apart by the `Host` header:

@@ -1,12 +1,14 @@
 import { MoonIcon, SunIcon } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { setTheme, useTheme } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 
 /** A book's dark mode toggle: the moon in light mode, the sun in dark mode. */
 export function ThemeToggle({ className }: { className?: string }) {
+  const { t } = useTranslation();
   const theme = useTheme();
   const Icon = theme === "dark" ? SunIcon : MoonIcon;
-  const label = theme === "dark" ? "Switch to light mode" : "Switch to dark mode";
+  const label = theme === "dark" ? t("theme.toLight") : t("theme.toDark");
   return (
     <button
       type="button"

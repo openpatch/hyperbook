@@ -8,6 +8,7 @@ import {
   signupInput,
   verifyEmailInput,
 } from "../../../shared/schemas";
+import type { Locale } from "../../../shared/i18n";
 import { createAccountToken, findAccountToken, useAccountToken } from "../../auth/account-tokens";
 import { effectiveSignupMode, emailInDomains, getInstanceSettings } from "../../domain/instance";
 import { audit } from "../../audit";
@@ -16,6 +17,7 @@ import { FailureLimiter } from "../../auth/rate-limit";
 import { createSession, deleteSession, deleteUserSessions } from "../../auth/sessions";
 import { users } from "../../db/schema";
 import type { Deps } from "../../deps";
+import { createT, requestLocale, userLocale } from "../../i18n";
 import type { AdminEnv } from "../env";
 import { clearSessionCookie, setSessionCookie } from "../middleware";
 import { validate } from "../validate";
@@ -40,23 +42,25 @@ export function authRoutes(deps: Deps) {
   };
   const instanceName = () => getInstanceSettings(db).name;
 
-  const sendVerification = (user: { id: number; email: string }) => {
+  /** The verification link, in the language of the address it goes to. */
+  const sendVerification = (user: { id: number; email: string; locale: Locale | null }) => {
+    const t = createT(userLocale(db, user.locale));
     const token = createAccountToken(db, user.id, "verify");
     const link = `${config.adminOrigin}/verify?token=${encodeURIComponent(token)}`;
     return send(
       user.email,
-      `Confirm your email address for ${instanceName()}`,
-      `Welcome to ${instanceName()}!\n\nTo confirm your address and finish signing up, open this link within 24 hours:\n\n${link}\n\n` +
-        "If you did not sign up, ignore this email; no account is made without the confirmation.",
+      t("mail.verify.subject", { name: instanceName() }),
+      t("mail.verify.body", { name: instanceName(), link }),
     );
   };
 
   return new Hono<AdminEnv>()
     .post("/login", validate("json", loginInput), async (c) => {
+      const t = createT(requestLocale(c));
       const { email, password } = c.req.valid("json");
       if (limiter.isBlocked(email)) {
         throw new HTTPException(429, {
-          message: "Too many failed attempts. Try again in 15 minutes.",
+          message: t("errors.auth.tooManyAttempts"),
         });
       }
       const user = db.select().from(users).where(eq(users.email, email)).get();
@@ -67,14 +71,14 @@ export function authRoutes(deps: Deps) {
       );
       if (!user || !ok || user.disabledAt) {
         limiter.fail(email);
-        throw new HTTPException(401, { message: "Email or password is wrong" });
+        throw new HTTPException(401, { message: t("errors.auth.wrongCredentials") });
       }
       limiter.succeed(email);
       // Only after the right password, so this reveals nothing to others.
       if (!user.emailVerifiedAt) {
         throw new HTTPException(403, {
           res: Response.json(
-            { error: "Confirm your email address first: follow the link we sent you.", reason: "unverified" },
+            { error: t("errors.auth.unverified"), reason: "unverified" },
             { status: 403 },
           ),
         });
@@ -82,7 +86,7 @@ export function authRoutes(deps: Deps) {
       if (!user.approvedAt) {
         throw new HTTPException(403, {
           res: Response.json(
-            { error: "Your account waits for an admin's approval. You get an email when it is approved.", reason: "pending" },
+            { error: t("errors.auth.pending"), reason: "pending" },
             { status: 403 },
           ),
         });
@@ -101,9 +105,10 @@ export function authRoutes(deps: Deps) {
     })
 
     .post("/forgot", validate("json", forgotPasswordInput), async (c) => {
+      const t = createT(requestLocale(c));
       if (!mailer.enabled) {
         throw new HTTPException(501, {
-          message: "This instance cannot send email. Ask an admin to reset your password.",
+          message: t("errors.auth.noMail"),
         });
       }
       const { email } = c.req.valid("json");
@@ -113,12 +118,11 @@ export function authRoutes(deps: Deps) {
         resetMails.fail(email);
         const token = createAccountToken(db, user.id, "reset");
         const link = `${config.adminOrigin}/reset-password?token=${encodeURIComponent(token)}`;
+        const mt = createT(userLocale(db, user.locale));
         await send(
           user.email,
-          "Reset your password",
-          `Someone asked to reset the password of your account (${user.email}).\n\n` +
-            `To choose a new password, open this link within one hour:\n\n${link}\n\n` +
-            "If this was not you, ignore this email; your password stays the same.",
+          mt("mail.reset.subject"),
+          mt("mail.reset.body", { email: user.email, link }),
         );
       }
       return c.json({ ok: true as const });
@@ -130,7 +134,7 @@ export function authRoutes(deps: Deps) {
       const reset = findAccountToken(db, token, ["reset", "invite"]);
       if (!reset) {
         throw new HTTPException(400, {
-          message: "This link has expired or was already used. Ask for a new one.",
+          message: createT(requestLocale(c))("errors.auth.linkExpired"),
         });
       }
       const passwordHash = await hashPassword(password);
@@ -154,19 +158,20 @@ export function authRoutes(deps: Deps) {
     })
 
     .post("/signup", validate("json", signupInput), async (c) => {
+      const t = createT(requestLocale(c));
       const settings = getInstanceSettings(db);
       const mode = effectiveSignupMode(settings, mailer.enabled);
       if (mode === "closed") {
-        throw new HTTPException(403, { message: "This instance does not take sign-ups. Ask an admin for an account." });
+        throw new HTTPException(403, { message: t("errors.auth.signupClosed") });
       }
       const input = c.req.valid("json");
       if (mode === "domains" && !emailInDomains(input.email, settings.signupDomains)) {
         throw new HTTPException(403, {
-          message: `Sign-up is open to addresses at ${settings.signupDomains.join(", ")} only.`,
+          message: t("errors.auth.signupDomains", { domains: settings.signupDomains.join(", ") }),
         });
       }
       if (signups.isBlocked(ALL) || signupMails.isBlocked(input.email)) {
-        throw new HTTPException(429, { message: "Too many sign-ups right now. Try again in an hour." });
+        throw new HTTPException(429, { message: t("errors.auth.tooManySignups") });
       }
       signups.fail(ALL);
       signupMails.fail(input.email);
@@ -175,12 +180,15 @@ export function authRoutes(deps: Deps) {
       if (existing) {
         // Same answer as for a new address, so sign-up does not reveal who
         // has an account; the owner hears about it instead.
+        const mt = createT(userLocale(db, existing.locale));
         await send(
           existing.email,
-          `Sign-up at ${instanceName()}`,
-          `Someone tried to sign up at ${instanceName()} with your address, which has an account already.\n\n` +
-            `Log in at ${config.adminOrigin}/login, or choose a new password at ${config.adminOrigin}/forgot-password.\n\n` +
-            "If this was not you, ignore this email.",
+          mt("mail.signupExists.subject", { name: instanceName() }),
+          mt("mail.signupExists.body", {
+            name: instanceName(),
+            loginUrl: `${config.adminOrigin}/login`,
+            forgotUrl: `${config.adminOrigin}/forgot-password`,
+          }),
         );
         return c.json({ ok: true as const, approval: mode === "approval" });
       }
@@ -208,7 +216,7 @@ export function authRoutes(deps: Deps) {
       const found = findAccountToken(db, c.req.valid("json").token, ["verify"]);
       if (!found) {
         throw new HTTPException(400, {
-          message: "This link has expired or was already used. Log in to get a new one.",
+          message: createT(requestLocale(c))("errors.auth.linkExpiredLogin"),
         });
       }
       db.transaction((tx) => {
@@ -219,12 +227,23 @@ export function authRoutes(deps: Deps) {
       audit(db, { actorUserId: user.id, action: "user.verify", targetType: "user", targetId: user.id });
       if (!user.approvedAt) {
         // Admins hear about sign-ups waiting for them once the address is real.
-        const admins = db.select({ email: users.email }).from(users).where(eq(users.role, "admin")).all();
+        const admins = db
+          .select({ email: users.email, locale: users.locale })
+          .from(users)
+          .where(eq(users.role, "admin"))
+          .all();
         for (const admin of admins) {
+          const t = createT(userLocale(db, admin.locale));
+          const name = user.displayName || user.email;
           await send(
             admin.email,
-            `${user.displayName || user.email} waits for approval`,
-            `${user.displayName} (${user.email}) signed up at ${instanceName()} and waits for your approval:\n\n${config.adminOrigin}/users`,
+            t("mail.approval.subject", { displayName: name }),
+            t("mail.approval.body", {
+              displayName: user.displayName,
+              email: user.email,
+              name: instanceName(),
+              usersUrl: `${config.adminOrigin}/users`,
+            }),
           );
         }
       }
@@ -233,7 +252,9 @@ export function authRoutes(deps: Deps) {
 
     // Asked for from the login page when an address is not confirmed yet.
     .post("/verify/resend", validate("json", forgotPasswordInput), async (c) => {
-      if (!mailer.enabled) throw new HTTPException(501, { message: "This instance cannot send email." });
+      if (!mailer.enabled) {
+        throw new HTTPException(501, { message: createT(requestLocale(c))("errors.auth.noMailShort") });
+      }
       const { email } = c.req.valid("json");
       const user = db.select().from(users).where(eq(users.email, email)).get();
       if (user && !user.emailVerifiedAt && !user.disabledAt && !signupMails.isBlocked(email)) {

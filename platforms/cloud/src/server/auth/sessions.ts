@@ -1,4 +1,5 @@
 import { and, eq, gt, lt, ne } from "drizzle-orm";
+import type { Locale } from "../../shared/i18n";
 import type { Db } from "../db/client";
 import { passwordResets, sessions, users } from "../db/schema";
 import { randomToken, sha256 } from "../crypto/tokens";
@@ -13,6 +14,8 @@ export type SessionUser = {
   email: string;
   role: "admin" | "teacher";
   displayName: string;
+  /** The language they chose; null: follow the instance, then the browser. */
+  locale: Locale | null;
 };
 
 /** Returns the token for the cookie; only its hash is stored. */
@@ -49,6 +52,7 @@ export function readSession(
       email: users.email,
       role: users.role,
       displayName: users.displayName,
+      locale: users.locale,
       disabledAt: users.disabledAt,
     })
     .from(sessions)
@@ -74,6 +78,7 @@ export function readSession(
       email: row.email,
       role: row.role,
       displayName: row.displayName,
+      locale: row.locale,
     },
   };
 }

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link, useSearchParams } from "react-router";
 import { z } from "zod";
 import { newPassword } from "../../shared/schemas";
@@ -6,14 +7,16 @@ import { Button } from "@/components/ui/button";
 import { api, unwrap } from "@/lib/api";
 import { FormError, TextField, applyServerError, useZodForm } from "@/lib/form";
 
+// The refinement message is a catalog key; lib/form.tsx translates it.
 const schema = z
   .object({ password: newPassword, confirm: z.string() })
   .refine((v) => v.password === v.confirm, {
     path: ["confirm"],
-    message: "The passwords do not match",
+    message: "validation.passwordsMismatch",
   });
 
 export function ResetPasswordPage() {
+  const { t } = useTranslation();
   const [params] = useSearchParams();
   const token = params.get("token") ?? "";
   // The same page sets the first password of an invited user.
@@ -33,10 +36,10 @@ export function ResetPasswordPage() {
   if (done) {
     return (
       <div className="grid gap-4">
-        <h1 className="text-2xl">{invite ? "Your account is ready" : "Password changed"}</h1>
-        <p>You can now log in with {invite ? "your" : "your new"} password.</p>
+        <h1 className="text-2xl">{invite ? t("auth.reset.inviteDoneTitle") : t("auth.reset.doneTitle")}</h1>
+        <p>{invite ? t("auth.reset.inviteDoneBody") : t("auth.reset.doneBody")}</p>
         <Link to="/login" className="text-sm text-primary hover:underline">
-          Log in
+          {t("auth.reset.login")}
         </Link>
       </div>
     );
@@ -44,26 +47,26 @@ export function ResetPasswordPage() {
 
   return (
     <form onSubmit={onSubmit} className="grid gap-4" noValidate>
-      <h1 className="text-2xl">{invite ? "Choose your password" : "Choose a new password"}</h1>
+      <h1 className="text-2xl">{invite ? t("auth.reset.inviteTitle") : t("auth.reset.title")}</h1>
       <TextField
         form={form}
         name="password"
-        label="New password"
+        label={t("auth.reset.password")}
         type="password"
         autoComplete="new-password"
-        hint="At least 10 characters."
+        hint={t("auth.reset.passwordHint")}
         autoFocus
       />
       <TextField
         form={form}
         name="confirm"
-        label="Repeat the new password"
+        label={t("auth.reset.confirm")}
         type="password"
         autoComplete="new-password"
       />
       <FormError form={form} />
       <Button type="submit" disabled={form.formState.isSubmitting}>
-        {invite ? "Set password" : "Change password"}
+        {invite ? t("auth.reset.inviteSubmit") : t("auth.reset.submit")}
       </Button>
     </form>
   );

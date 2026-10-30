@@ -1,30 +1,38 @@
 import { z } from "zod";
+import { LOCALES } from "./i18n";
 
 /*
  * Input schemas shared by the API (validation) and the web app (forms), so
  * both enforce the same rules.
+ *
+ * Validation messages are catalog keys ("validation.email", not English):
+ * the server translates them with the request's locale (admin/validate.ts)
+ * and the web app with the active one (lib/form.tsx).
  */
 
-export const email = z.string().trim().toLowerCase().pipe(z.email("Enter a valid email address"));
+/** The languages the platform speaks; see shared/i18n. */
+export const locale = z.enum(LOCALES);
+
+export const email = z.string().trim().toLowerCase().pipe(z.email("validation.email"));
 
 /** For teacher and admin accounts. Students get generated passwords. */
 export const newPassword = z
   .string()
-  .min(10, "Use at least 10 characters")
-  .max(200, "Use at most 200 characters");
+  .min(10, "validation.passwordMin")
+  .max(200, "validation.passwordMax");
 
 export const loginInput = z.object({
   email,
-  password: z.string().min(1, "Enter your password").max(200),
+  password: z.string().min(1, "validation.passwordRequired").max(200),
 });
 
 export const forgotPasswordInput = z.object({ email });
 
 export const signupInput = z.object({
   email,
-  displayName: z.string().trim().min(1, "Enter your name").max(100),
+  displayName: z.string().trim().min(1, "validation.nameRequired").max(100),
   password: newPassword,
-  acceptPrivacy: z.literal(true, "Accept the privacy policy to sign up"),
+  acceptPrivacy: z.literal(true, "validation.acceptPrivacy"),
 });
 
 export const verifyEmailInput = z.object({ token: z.string().min(1).max(200) });
@@ -35,11 +43,13 @@ export const resetPasswordInput = z.object({
 });
 
 export const updateMeInput = z.object({
-  displayName: z.string().trim().max(100),
+  displayName: z.string().trim().max(100, "validation.nameMax").optional(),
+  /** Null clears the choice: the instance default and browser apply again. */
+  locale: locale.nullish(),
 });
 
 export const changePasswordInput = z.object({
-  currentPassword: z.string().min(1, "Enter your current password").max(200),
+  currentPassword: z.string().min(1, "validation.currentPasswordRequired").max(200),
   newPassword,
 });
 
@@ -120,6 +130,8 @@ export const instanceSettingsInput = z
       .max(200),
     slugSuffix: z.boolean(),
     landingPage: z.boolean(),
+    /** Null: follow the browser's language. */
+    defaultLocale: locale.nullish(),
     elementRuntimes: z.partialRecord(z.enum(ELEMENT_RUNTIMES), elementRuntimeChoice),
   })
   .partial();

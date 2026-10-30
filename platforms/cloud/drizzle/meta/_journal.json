@@ -64,6 +64,13 @@
       "when": 1793297268703,
       "tag": "0008_book_dictionary",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1793353688583,
+      "tag": "0009_lonely_harrier",
+      "breakpoints": true
     }
   ]
 }
