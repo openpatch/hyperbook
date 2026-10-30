@@ -44,8 +44,9 @@ export function LandingPage() {
   return (
     <div className="flex min-h-dvh flex-col">
       <header className="flex h-15 shrink-0 items-center gap-2 bg-header pr-4 text-header-foreground shadow-md">
-        <span className="min-w-0 flex-1 truncate p-4 font-heading text-[1.1rem] font-bold">
-          {instance?.name ?? "Hyperbook Cloud"}
+        <span className="flex min-w-0 flex-1 items-center gap-3 p-4 font-heading text-[1.1rem] font-bold">
+          <img src="/logo.svg" alt="" className="size-8 shrink-0" />
+          <span className="truncate">{instance?.name ?? "Hyperbook Cloud"}</span>
         </span>
         <LanguageSelect className="text-header-foreground hover:bg-white/15" />
         <ThemeToggle className="hover:bg-white/15" />

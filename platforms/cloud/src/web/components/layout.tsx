@@ -37,8 +37,12 @@ export function Layout() {
           <span className={cn("h-1 w-7.5 bg-current transition-opacity", navOpen && "opacity-0")} />
           <span className={cn("h-1 w-7.5 bg-current transition-transform", navOpen && "-translate-y-2.5 rotate-45")} />
         </button>
-        <NavLink to="/books" className="min-w-0 flex-1 truncate p-4 font-heading text-[1.1rem] font-bold">
-          {instance?.name ?? "Hyperbook Cloud"}
+        <NavLink
+          to="/books"
+          className="flex min-w-0 flex-1 items-center gap-3 p-4 font-heading text-[1.1rem] font-bold"
+        >
+          <img src="/logo.svg" alt="" className="size-8 shrink-0" />
+          <span className="truncate">{instance?.name ?? "Hyperbook Cloud"}</span>
         </NavLink>
         <span className="hidden truncate text-sm sm:inline">
           {user.displayName || user.email}
