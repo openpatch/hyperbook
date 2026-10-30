@@ -20,6 +20,10 @@ export const entitlementsSchema = z.object({
   max_storage_mb: z.number().int().min(0).nullable(),
   /** May attach a custom domain to a book. Used from M5. */
   custom_domain: z.boolean(),
+  /** May use the editor's AI writing assistant (needs AI_* configured). */
+  ai: z.boolean(),
+  /** AI requests per UTC day; null is unlimited. The per-minute rate limit applies either way. */
+  ai_requests_per_day: z.number().int().min(0).nullable(),
 });
 
 export type Entitlements = z.infer<typeof entitlementsSchema>;
@@ -34,6 +38,8 @@ export const BUILTIN_ENTITLEMENTS: Entitlements = {
   max_books: null,
   max_storage_mb: null,
   custom_domain: false,
+  ai: true,
+  ai_requests_per_day: null,
 };
 
 const UNLIMITED: Entitlements = {
@@ -41,6 +47,8 @@ const UNLIMITED: Entitlements = {
   max_books: null,
   max_storage_mb: null,
   custom_domain: true,
+  ai: true,
+  ai_requests_per_day: null,
 };
 
 /** Only the keys set on the user itself, without defaults. */

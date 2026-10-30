@@ -229,6 +229,13 @@ export function useWorkspace(bookId: string, listing: Listing) {
 
   const dirty = useMemo(() => new Set(tabs.filter(isDirty).map((t) => t.path)), [tabs]);
   const oidOf = useCallback((path: string) => listing.files.find((f) => f.path === path)?.oid ?? null, [listing]);
+  const dirtyOf = useCallback(
+    (path: string) => {
+      const tab = currentTabs().find((candidate) => candidate.path === path);
+      return tab ? isDirty(tab) : false;
+    },
+    [currentTabs],
+  );
 
   return {
     tabs,
@@ -246,6 +253,7 @@ export function useWorkspace(bookId: string, listing: Listing) {
     commit,
     renameTabs,
     dirty,
+    dirtyOf,
     oidOf,
   };
 }

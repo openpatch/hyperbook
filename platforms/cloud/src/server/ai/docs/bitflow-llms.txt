@@ -1,0 +1,1291 @@
+# bitflow
+
+> bitflow is a format and a set of web components for assessments. A `.bitflow`
+> file is a JSON document describing a graph of steps — a start screen, tasks,
+> explanations, an end screen — wired together by edges that may carry
+> conditions. Everything is graded in the browser; there is no server. This
+> file tells you how to write one of those documents by hand.
+
+Written for coding agents. Human documentation lives in the README of
+`@bitflow/web-component`. Everything below is normative unless marked as
+advice.
+
+- Source: https://github.com/openpatch/bitflow
+- Live demos: /index.html — take one (/flow.html), author one (/editor.html),
+  one worked example of every task type with its JSON printed underneath
+  (/bits.html)
+- Sample documents you can read in full: /minimal.bitflow (four steps),
+  /adaptive.bitflow (consent, a section, a remediation loop, branch on
+  confidence, a shuffled pool), /all-initial-bits.bitflow
+
+## The two packages
+
+- `@bitflow/core` — schema, flow engine, scoring. Pure TypeScript, runs in
+  Node, depends only on zod. Use `parseFlow(json)` and `validateFlow(doc)` to
+  check a document you generated.
+- `@bitflow/web-component` — every custom element and all 31 bits, bundled. One
+  `<script type="module">` on a page, no install, no separate stylesheet.
+
+```html
+<script type="module" src="./node_modules/@bitflow/web-component/dist/flow.js"></script>
+<bitflow-flow src="./assessment.bitflow" locale="en"></bitflow-flow>
+```
+
+Four entry points: the package root defines every element,
+`@bitflow/web-component/flow` only `<bitflow-flow>`, `/editor` only
+`<bitflow-flow-editor>`, `/report` the two report elements. There is no
+stylesheet to link — each package carries its own CSS and adds it on import.
+Objects go in as JavaScript properties (`el.flow = doc`), not as JSON in
+attributes; attributes are for scalars (`src`, `locale`, `readonly`).
+
+## The envelope
+
+A `.bitflow` file is JSON. The top level is four required keys and an
+optional fifth:
+
+```json
+{
+  "version": 1,
+  "meta": { "id": "...", "title": "..." },
+  "nodes": [],
+  "edges": [],
+  "viewport": { "x": 0, "y": 0, "zoom": 1 }
+}
+```
+
+- `version` — must be the literal number `1`. Not a string, not `"1.0"`.
+- `meta` — settings for the whole assessment. See below.
+- `nodes` — the steps.
+- `edges` — how a learner gets from one step to the next.
+- `viewport` — the editor's camera. Presentation only; omit it.
+
+There is no separate answer-key file. A task carries its own correct answer
+inside `node.data`, which is why a `.bitflow` file must not be handed to the
+learner's browser in a high-stakes setting.
+
+## meta
+
+| field | type | default | notes |
+| --- | --- | --- | --- |
+| `id` | string, non-empty | — | **Required.** Stable identity. An attempt snapshot records it, so a saved attempt cannot be restored into a different flow. |
+| `title` | string | `""` | |
+| `description` | string | absent | |
+| `locale` | `en` `de` `fr` `nl` `es` `it` `pt` `tr` | `"en"` | Chrome and built-in messages. Your own text is whatever you write. |
+| `askConfidence` | boolean | `false` | Ask after every task how sure the learner was, 0–1. Required if any condition reads `confidence`. |
+| `askReasoning` | boolean | `false` | Ask the learner to explain their reasoning after every task. |
+| `navigation` | `linear` `back` `free` | `"back"` | `linear` forwards only; `back` may step back through what they have seen; `free` may jump to any visited step from a list, which doubles as a check-your-work screen. |
+| `allowSkip` | boolean | `true` | Whether a task may be passed on without answering. A task can override it. |
+| `timeLimit` | positive integer | absent | Seconds for the whole assessment, counted as time *spent* — the clock pauses when the tab is closed. Required if any condition reads `timeRemaining`. |
+| `sections` | array | `[]` | See below. |
+| `pools` | array | `[]` | See below. |
+
+### Sections
+
+A named run of steps that share something — a passage, a code listing, a data
+table — rendered above every step in the section, and usable as a scope for
+conditions. Without sections you would paste the passage into all five
+questions about it.
+
+```json
+"sections": [
+  {
+    "id": "passage",
+    "label": "The passage",
+    "markdown": "Ada Lovelace wrote what is often called the first computer program…"
+  }
+]
+```
+
+A node joins a section with `"section": "passage"`. `label` and `markdown`
+default to `""`.
+
+Rules: section ids must be unique; every declared section must have at least
+one member; a node may not name a section the document does not declare; a
+`start` or `end` bit may not be in a section.
+
+### Pools
+
+A group of interchangeable steps, of which each learner gets a random few.
+Members stay ordinary nodes wired into the graph; the draw only decides which
+of them a given attempt walks through, and the rest are stepped over.
+
+```json
+"pools": [
+  { "id": "bank", "label": "Closing questions", "draw": 2, "shuffle": true }
+]
+```
+
+| field | type | default |
+| --- | --- | --- |
+| `id` | string, non-empty | — |
+| `label` | string | `""` (author-facing only) |
+| `draw` | positive integer | — how many members each learner gets |
+| `shuffle` | boolean | `false` — show the drawn members in random order rather than wired order |
+
+A node joins a pool with `"pool": "bank"`.
+
+Rules: pool ids unique; a pool must have members; `draw` must not exceed the
+member count; drawing all members without `shuffle` varies nothing and is
+reported. **A shuffled pool navigates by its drawn order, not by its internal
+wiring, so it must have exactly one step with an edge leading out of the pool.**
+The way in needs no rule — any edge into a shuffled pool lands on whichever
+member the draw put first. A `start` or `end` bit may not be in a pool.
+
+## nodes
+
+```json
+{
+  "id": "question",
+  "type": "task-choice",
+  "position": { "x": 0, "y": 240 },
+  "data": { },
+  "section": "passage",
+  "pool": "bank"
+}
+```
+
+| field | type | notes |
+| --- | --- | --- |
+| `id` | string, non-empty | **Required**, unique across the document. Referenced by edges, conditions and answers. |
+| `type` | string, non-empty | **Required.** One of the bit types listed below. |
+| `position` | `{ x: number, y: number }` | **Required.** Editor canvas pixels. Lay a linear flow out as x 0, y 0/120/240/… and put branches to the side; nothing at runtime reads it. |
+| `data` | object | The bit's own content. Defaults to `{}`, but every bit has required content — see the reference. |
+| `section` | string | Optional section id. |
+| `pool` | string | Optional pool id. |
+
+`parseFlow` deliberately does **not** check `data` — a host without a bit
+package loaded must still be able to open and re-save a file that uses it. The
+per-bit schema is checked by `validateFlow` (for bits that are registered) and
+by the runtime before rendering. So a file that parses is not necessarily a
+file that works: run `validateFlow`.
+
+## edges
+
+```json
+{
+  "id": "e-year-wrong",
+  "source": "q-year",
+  "target": "why-year",
+  "label": "wrong",
+  "condition": { },
+  "resetTarget": "result"
+}
+```
+
+| field | type | notes |
+| --- | --- | --- |
+| `id` | string, non-empty | **Required**, unique. |
+| `source` | string | **Required.** An existing node id. |
+| `target` | string | **Required.** An existing node id. |
+| `label` | string | Shown on the editor canvas. Label both sides of a branch. |
+| `condition` | Condition | Absent means "always follow". |
+| `resetTarget` | `"result"` `"answer"` | What arriving over this edge clears on the step it lands on. |
+| `sourceHandle`, `targetHandle` | string | Editor use; only a tie-breaker at runtime. |
+
+### How the next step is chosen
+
+Outgoing edges are considered in a fixed order that does **not** depend on
+array order in the file:
+
+1. Edges **with** a condition come first, so an unconditional edge is the
+   "otherwise" branch however you wrote them.
+2. Then by `sourceHandle`, then by edge `id`, both lexicographically.
+
+The first edge whose condition holds wins. Give every branching node exactly
+one unconditional outgoing edge as the fallback, and make the conditional ones
+mutually exclusive or ordered by id on purpose.
+
+### resetTarget
+
+A loop back to a task the learner already answered is drawable without this and
+does nothing: they arrive at a step that already has a result, see their old
+answer marked, and cannot change it.
+
+- `"result"` — clears the grading, keeps what they wrote. The Try-again
+  bargain. Right for an ordinary question.
+- `"answer"` — clears both. Right for a task that *measures* (a timed run, a
+  typing speed): its recorded figure has to be taken again, not edited.
+- absent — leaves the step as it was. Right for an edge that goes back so the
+  learner can *read* something again.
+
+The try count is never cleared.
+
+## Conditions
+
+A condition reads one value out of the running attempt and compares it.
+Everything readable is gathered once before any comparison runs, so replaying a
+context always picks the same path.
+
+```json
+{ "type": "always" }
+{ "type": "compare", "left": ValueRef, "op": CompareOp, "right": value }
+{ "type": "and", "conditions": [ ... ] }
+{ "type": "or", "conditions": [ ... ] }
+{ "type": "not", "condition": { ... } }
+```
+
+### Operators
+
+`eq` `ne` `gt` `gte` `lt` `lte` `in` `notIn` `isTrue`
+
+- `in` and `notIn` need `right` to be a non-empty array.
+- `isTrue` takes no `right`.
+- Every other operator needs a `right`.
+- The ordering operators need a numeric `right`.
+
+### What `left` can read
+
+| `kind` | extra fields | value |
+| --- | --- | --- |
+| `answer` | `nodeId`, `path?` | The learner's answer for that step. `path` is a dot path into it, e.g. `"selected.0"`. See "Answer shapes" below. |
+| `result` | `nodeId`, `path?` | The grading. `"path": "state"` gives `"correct"`, `"wrong"` or `"unknown"`. |
+| `tries` | `nodeId` | How many times that task has been graded. |
+| `visits` | `nodeId` | How many times the learner has been *shown* that step. This is what gives a loop a way out — a content step is never graded, so `tries` cannot count it. |
+| `confidence` | `nodeId` | 0–1, how sure they said they were. Needs `meta.askConfidence`. |
+| `timeSpent` | `nodeId?` | Seconds on one step, or on the whole attempt when `nodeId` is omitted. |
+| `timeRemaining` | — | Seconds left on `meta.timeLimit`. Needs that limit to be set. |
+| `score` | `scope?` | Points earned so far. |
+| `scoreRatio` | `scope?` | Earned/possible, 0–1. `0` when nothing is scorable yet. |
+| `resultCount` | `state`, `scope?` | How many *tasks* so far ended in that outcome. Counts tasks, not points: a partly-credited answer counts once. `state` defaults to `"correct"`. |
+
+### Scopes
+
+`score`, `scoreRatio` and `resultCount` may be scoped. Absent means the whole
+attempt.
+
+```json
+{ "kind": "section", "id": "passage" }
+{ "kind": "nodes", "nodeIds": ["q1", "q2"] }
+{ "kind": "last", "count": 3 }
+```
+
+`last` counts the most recently answered steps, newest first, off the attempt's
+own history; a step answered twice counts once.
+
+### Absent is not zero
+
+`confidence` for a step nobody was asked about, and `timeRemaining` with no
+limit set, resolve to `undefined`, and **every ordering comparison against
+`undefined` is false**. That is deliberate: it keeps "less than half sure" from
+firing for every learner the question skipped. Do not paper over it with a
+default value.
+
+### Examples
+
+Wrong answer, go to the explanation:
+
+```json
+{
+  "type": "compare",
+  "left": { "kind": "result", "nodeId": "q-year", "path": "state" },
+  "op": "eq",
+  "right": "wrong"
+}
+```
+
+Confident and wrong — a misconception, not a gap:
+
+```json
+{
+  "type": "and",
+  "conditions": [
+    { "type": "compare", "left": { "kind": "result", "nodeId": "q", "path": "state" }, "op": "eq", "right": "wrong" },
+    { "type": "compare", "left": { "kind": "confidence", "nodeId": "q" }, "op": "gte", "right": 0.8 }
+  ]
+}
+```
+
+Round the loop at most twice:
+
+```json
+{ "type": "compare", "left": { "kind": "visits", "nodeId": "q-year" }, "op": "lte", "right": 2 }
+```
+
+Full marks in one section:
+
+```json
+{
+  "type": "compare",
+  "left": { "kind": "scoreRatio", "scope": { "kind": "section", "id": "passage" } },
+  "op": "gte",
+  "right": 1
+}
+```
+
+## Rules a valid flow must satisfy
+
+`validateFlow(doc)` reports all of these. A flow that breaks one still *runs* —
+which is exactly why it is worth checking, because the teacher would otherwise
+never find out.
+
+1. Node ids unique; edge ids unique.
+2. Every edge's `source` and `target` name existing nodes; every `nodeId` in a
+   condition names an existing node.
+3. `type` names a bit this build knows.
+4. `data` satisfies that bit's schema.
+5. **Exactly one node has no incoming edge.** Zero starting points, or more than
+   one, is an error.
+6. Every node is reachable from that start.
+7. Every node that is not an `end` bit has at least one outgoing edge.
+8. Section and pool rules, above.
+9. A condition must be able to fire: pointing `result` at a step that is not a
+   task, or at a step the learner cannot have reached by that point in the
+   flow, is an error. So is comparing a result state against a word that is not
+   `correct`, `wrong` or `unknown`, a confidence outside 0–1, a `scoreRatio`
+   outside 0–1, or a `resultCount` larger than the number of tasks that can
+   precede the edge.
+
+## Evaluation settings
+
+Every `task-*` bit's `data` carries an `evaluation` object. Same four questions
+in every task, so learn it once:
+
+```json
+"evaluation": {
+  "mode": "auto",
+  "enableRetry": false,
+  "showFeedback": true,
+  "weight": 1,
+  "timeLimit": 120,
+  "allowSkip": false
+}
+```
+
+| field | type | default | notes |
+| --- | --- | --- | --- |
+| `mode` | `auto` `skip` | `"auto"` | `auto` grades in the browser; `skip` shows the task but never grades or scores it. Most per-bit content rules only apply under `auto`. |
+| `enableRetry` | boolean | `false` | Retry clears the result and keeps the answer. |
+| `showFeedback` | boolean | `true` | |
+| `weight` | number ≥ 0 | `1` | Multiplies the bit's own score. |
+| `timeLimit` | positive integer | absent | Seconds on this task, from arrival. |
+| `allowSkip` | boolean | absent | Overrides `meta.allowSkip` for this one task. |
+
+Scoring: a result is `correct`, `wrong` or `unknown`. `unknown` scores
+`{ earned: 0, possible: 0 }` — that is how "not applicable" and an opt-out are
+expressed. There is no separate not-applicable state, and nothing is ever
+"awaiting a teacher": bitflow grades in the browser and has no server.
+
+## Feedback messages
+
+Wherever a field is named `feedback`, `missFeedback` or similar and takes an
+object, the shape is:
+
+```json
+{ "message": "Two divisors, not one.", "severity": "warning" }
+```
+
+`severity` is `error` | `warning` | `info` | `success`.
+
+## Images
+
+Pictures are carried **inside** the document as `data:` URIs, not linked:
+
+```json
+"background": { "src": "data:image/svg+xml,%3Csvg…", "alt": "A cell, in cross-section" }
+```
+
+`.bitflow` files get mailed between teachers, dropped into a VLE and opened
+offline, and a linked image breaks on every one of those journeys, usually in
+front of a class. A plain URL still parses, so old documents keep working, but
+do not generate one. `alt` is required wherever the picture carries meaning.
+
+## Coordinates
+
+Positions inside a task — hotspots, drop zones, annotation regions, graph
+nodes, click targets — are **fractions of the picture, 0 to 1, never pixels**.
+The picture is drawn at whatever size the page gives it. `size.width` and
+`size.height` describe the background's aspect ratio, not its display size.
+
+Grid coordinates (crossword, word search) are **zero-based from the top-left**,
+as `row` and `column`.
+
+`node.position`, by contrast, *is* pixels — it is the editor canvas, not
+anything a learner sees.
+
+## Bit reference
+
+31 bits. `kind` is one of `start` (opens a run), `content` (shown and clicked
+past), `task` (accepts an answer and is graded), `end` (terminal — an `end` bit
+needs no outgoing edge, and is the only kind that may have none).
+
+Every field below is optional with the default shown unless marked
+**required**. Fields named `markdown` or `instruction` take Markdown, with
+maths in TeX: `$x^2$` inline, `$$\frac{a}{b}$$` displayed (KaTeX; `\$` for a
+literal dollar). Every `task-*` bit also takes `evaluation` (above), omitted
+from each table.
+
+Every flow finishes at one or more `end` bits — with every other node needing
+an outgoing edge, there is nowhere else for it to stop. A fresh attempt begins
+at the first `start` bit, falling back to the node nothing points at. Worked examples of every task type, with their JSON, are at
+/bits.html.
+
+---
+
+### start-simple — "Start"
+
+The screen before the assessment begins.
+
+| field | type | default |
+| --- | --- | --- |
+| `title` | string | `""` |
+| `markdown` | string | `""` |
+| `showOutline` | boolean | `false` — list what is coming |
+
+### start-consent — "Consent"
+
+Says what the assessment records and asks the learner to agree before it
+starts. The learner cannot walk past it: its answer is a plain boolean, so
+branch on `{ "kind": "answer", "nodeId": "consent" }` with `"op": "eq",
+"right": false` to route a refusal to an end bit.
+
+| field | type | default |
+| --- | --- | --- |
+| `title` | string | `""` |
+| `markdown` | string | `""` — say exactly what is recorded |
+| `agreeLabel` | string | `""` (built-in wording) |
+| `requiredHint` | string | `""` |
+| `allowDecline` | boolean | `true` |
+| `declineLabel` | string | `""` |
+
+### start-identify — "Who you are"
+
+Asks for a name or a class. Answer is `Record<fieldId, string>`. The first
+field that gets an answer is what `end-certificate` prints.
+
+| field | type | default |
+| --- | --- | --- |
+| `title` | string | `""` |
+| `markdown` | string | `""` |
+| `fields` | array of `{ id (required), label, hint, required, kind: "text"\|"select", options: string[] }` | `[]` |
+
+### title-simple — "Explanation" (content)
+
+| field | type | default |
+| --- | --- | --- |
+| `title` | string | `""` |
+| `markdown` | string | `""` |
+
+### input-markdown — "Text" (content)
+
+A block of Markdown, no heading. What a remediation loop points at.
+
+| field | type | default |
+| --- | --- | --- |
+| `markdown` | string | `""` |
+
+### end-tries — "End"
+
+| field | type | default |
+| --- | --- | --- |
+| `title`, `markdown` | string | `""` |
+| `showBreakdown` | boolean | `true` |
+| `showScore` | boolean | `true` |
+| `allowReview` | boolean | `false` — let them look back over their answers |
+
+### end-certificate — "Certificate"
+
+A printable closing sheet.
+
+| field | type | default |
+| --- | --- | --- |
+| `title`, `markdown`, `issuer`, `printLabel` | string | `""` |
+| `showName`, `showScore`, `showDate` | boolean | `true` |
+
+### end-download — "Finish and save"
+
+Hands the learner their attempt as a JSON file.
+
+| field | type | default |
+| --- | --- | --- |
+| `title`, `markdown`, `buttonLabel` | string | `""` |
+| `filename` | string | `"attempt"` |
+| `includeAnswers` | boolean | `true` |
+
+### end-handoff — "Finish and hand back"
+
+Returns the finished attempt to the page around it.
+
+| field | type | default |
+| --- | --- | --- |
+| `title`, `markdown`, `continueUrl`, `continueLabel`, `messageOrigin` | string | `""` |
+| `postMessage` | boolean | `false` — set `messageOrigin` too; never `"*"` |
+
+---
+
+### task-choice — "Choice"
+
+Pick one or several from a list.
+
+| field | type | default |
+| --- | --- | --- |
+| `instruction` | string | `""` |
+| `variant` | `single` \| `multiple` | `"single"` — radios vs checkboxes |
+| `choices` | array | **required, at least 2** |
+| `shuffle` | boolean | `false` |
+| `partialCredit` | boolean | `false` — only meaningful for `multiple` |
+| `patternFeedback` | array of `{ choiceIds: string[], feedback }` | `[]` — feedback for one exact combination |
+
+A choice is `{ id (required, unique), markdown, correct, feedbackWhenChecked?,
+feedbackWhenNotChecked? }`. Ids must be unique and stable across edits. Under
+`mode: "auto"` at least one choice must be correct, and `single` may not have
+two correct choices — a question nobody can answer right, which the author would
+only discover by taking it.
+
+```json
+{
+  "instruction": "Which of these numbers are prime?",
+  "variant": "multiple",
+  "choices": [
+    { "id": "c-2", "markdown": "2", "correct": true },
+    { "id": "c-4", "markdown": "4", "correct": false },
+    { "id": "c-7", "markdown": "7", "correct": true },
+    { "id": "c-9", "markdown": "9", "correct": false }
+  ],
+  "shuffle": false,
+  "partialCredit": false,
+  "evaluation": { "mode": "auto", "enableRetry": true, "showFeedback": true }
+}
+```
+
+### task-yes-no — "Yes / No"
+
+Answer is `{ yes: boolean }`.
+
+| field | type | default |
+| --- | --- | --- |
+| `question` | string | `""` |
+| `correctAnswer` | boolean | `true` |
+| `feedbackWhenYes`, `feedbackWhenNo` | feedback message | absent |
+
+### task-input — "Short answer"
+
+A short typed answer. Answer is `{ input: string }`.
+
+| field | type | default |
+| --- | --- | --- |
+| `instruction` | string | `""` |
+| `matchMode` | `exact` \| `contains` \| `regex` | `"exact"` |
+| `expected` | string[] | `[]` — any one of them counts (ignored under `regex`) |
+| `pattern` | string | `""` — the regex, under `matchMode: "regex"` |
+| `caseSensitive` | boolean | `false` |
+| `trim` | boolean | `true` |
+| `multiline` | boolean | `false` |
+| `patternFeedback` | array of `{ pattern, feedback }` | `[]` |
+
+### task-numeric — "Number"
+
+A number or a short calculation. Answer is `{ input: string }` — exactly what
+was typed; the number it comes to is derived, never stored twice.
+
+| field | type | default |
+| --- | --- | --- |
+| `instruction` | string | `""` |
+| `expected` | string | `""` — the value, as text |
+| `tolerance` | `exact` \| `absolute` \| `percent` \| `decimals` \| `significant` | `"exact"` |
+| `toleranceValue` | number | `0` |
+| `digits` | integer | `2` — for `decimals`/`significant` |
+| `unitMode` | `none` \| `shown` \| `required` | `"none"` |
+| `unit` | string | `""` |
+| `unitAlternatives` | string[] | `[]` |
+| `scoring` | `value` \| `valueAndUnit` | `"value"` |
+| `decimalSeparator` | `point` \| `comma` \| `both` | `"both"` |
+| `allowExpression` | boolean | `true` — accept `3*7` as 21 |
+| `valueFeedback` | array of `{ value, feedback }` | `[]` |
+
+### task-math — "Maths"
+
+An answer written as maths and compared as maths, in a MathLive field. Answer
+is `{ prompts: Record<blankName, latex> }`.
+
+| field | type | default |
+| --- | --- | --- |
+| `instruction` | string | `""` |
+| `latex` | string | `""` — the formula |
+| `blanks` | `Record<name, { expected: string, accepted: string[] }>` | `{}` |
+| `compare` | `symbolic` \| `equivalent` \| `value` | `"symbolic"` |
+| `tolerance` | number ≥ 0 | `0` — for `compare: "value"` |
+| `partialCredit` | boolean | `true` |
+| `virtualKeyboard` | boolean | `true` — how it is answerable on a phone |
+| `blankFeedback` | array of `{ blank, latex, feedback }` | `[]` |
+
+Two shapes, one bit. With no `\placeholder` in `latex`, the whole field is
+editable and there is one blank under the reserved name `answer`. With one or
+more `\placeholder[name]{}`, the formula is read-only apart from those blanks
+and each is marked on its own. Every blank named in `latex` needs an `expected`
+under `compare` modes that grade.
+
+`symbolic` means the same expression however written (`2x` = `x\cdot 2`), so
+"factorise it" grades correctly. `equivalent` means mathematically equal, which
+would accept the question back unchanged for "factorise it". `value` compares
+what it comes to as a number.
+
+```json
+{
+  "instruction": "Factorise.",
+  "latex": "2x^2+x-1=\\placeholder[factors]{}",
+  "blanks": { "factors": { "expected": "(2x-1)(x+1)", "accepted": [] } },
+  "compare": "symbolic"
+}
+```
+
+### task-fill-in-the-blank — "Fill in the blank"
+
+Prose with gaps, matched as text. Answer is `{ blanks: Record<id, string> }`.
+
+| field | type | default |
+| --- | --- | --- |
+| `instruction` | string | `""` |
+| `text` | string | `""` — plain text with `[[1]]`, `[[2]]`… where the gaps go |
+| `blanks` | `Record<blankId, string[]>` | `{}` — the answers that count as right |
+| `caseSensitive` | boolean | `false` |
+| `trim` | boolean | `true` |
+| `partialCredit` | boolean | `true` |
+
+The markers live in the text rather than in a parallel list, so the two cannot
+drift apart. Under `auto` there must be at least one gap and every gap needs at
+least one accepted answer.
+
+```json
+{
+  "text": "Water boils at [[1]] °C and freezes at [[2]] °C.",
+  "blanks": { "1": ["100"], "2": ["0", "zero"] }
+}
+```
+
+### task-free-text — "Written answer"
+
+A few sentences, kept for a person to read. Answer is `{ text: string }`.
+
+| field | type | default |
+| --- | --- | --- |
+| `instruction`, `placeholder`, `modelAnswer` | string | `""` |
+| `marking` | `person` \| `keywords` | `"person"` |
+| `minimumLength`, `maximumLength` | integer | `0` (no limit) |
+| `criteria` | array of `{ id, label, keywords: string[], points }` | `[]` — for `keywords` marking |
+| `caseSensitive` | boolean | `false` |
+
+Under `marking: "person"` the answer is stored and scored `unknown`. Nothing
+here pretends a browser understood the prose.
+
+### task-ordering — "Put in order"
+
+Answer is `{ order: string[] }` — item ids, in the learner's order.
+
+| field | type | default |
+| --- | --- | --- |
+| `instruction` | string | `""` |
+| `items` | array of `{ id (required), kind: "text"\|"image", label, image: { src, alt } }` | `[]` |
+
+The authored order *is* the correct order.
+
+### task-matching — "Match up"
+
+Two columns to pair off. Answer is `{ matches: [...] }`.
+
+| field | type | default |
+| --- | --- | --- |
+| `instruction` | string | `""` |
+| `pairs` | array of `{ id (required), left: Side, right: Side }` | `[]` |
+
+A `Side` is `{ kind: "text"|"image", label, image: { src, alt } }`. The
+authored pairing is the key; the columns are shuffled for the learner.
+
+### task-parsons — "Parsons puzzle"
+
+Shuffled code lines to arrange. Answer is `{ lines: [...] }`.
+
+| field | type | default |
+| --- | --- | --- |
+| `instruction`, `language` | string | `""` (`language` labels the listing; it selects no parser) |
+| `lines` | array of `{ id (required), text, indent: integer, distractor: boolean }` | `[]` |
+| `indentationMatters` | boolean | `false` |
+| `penaliseDistractors` | boolean | `false` |
+| `display` | `code` \| `structogram` | `"code"` — `structogram` draws the program as a Nassi–Shneiderman diagram; same lines, same answer |
+
+### task-code-trace — "Code trace"
+
+A program shown as text and a trace table to fill in. **The code is never run**
+— not by `eval`, not by `Function`, not anywhere else. What makes it gradable
+is that you write the states down as well as the code. Answer is
+`{ cells: Record<checkpointId, Record<columnId, string>> }`.
+
+| field | type | default |
+| --- | --- | --- |
+| `instruction`, `language` | string | `""` |
+| `code` | string | `""` — required under `auto` |
+| `showLineNumbers` | boolean | `true` |
+| `columns` | array of `{ id (required, unique), name, kind: "value"\|"output"\|"line" }` | `[]` — at least one under `auto` |
+| `checkpoints` | array of `{ id (required, unique), label, line?, expected: Record<columnId, string> }` | `[]` |
+| `caseSensitive` | boolean | `false` — `True` and `true` are the same prediction |
+| `partialCredit` | boolean | `true` |
+
+`value` watches a variable, `output` is what has been printed *so far*
+(cumulative down the table), `line` is which line runs next, picked from the
+listing rather than typed. `checkpoint.line` is 1-based and only a signpost.
+An empty expected string means "blank".
+
+### task-boolean-logic — "Truth table"
+
+An expression and its truth table, row by row. Nothing is executed; the
+expression is held as a tree and walked. Answer is
+`{ cells: Record<rowKey, Record<columnId, boolean|null>> }`.
+
+| field | type | default |
+| --- | --- | --- |
+| `instruction` | string | `""` |
+| `variables` | string[] | `[]` — the input columns, names unique |
+| `columns` | array of `{ id (required), label, expression, given: boolean }` | `[]` |
+| `rowOrder` | `standard` \| `reversed` | `"standard"` |
+| `partialCredit` | boolean | `true` |
+
+An expression is a tree, never source text:
+
+```json
+{ "kind": "variable", "name": "A" }
+{ "kind": "constant", "value": true }
+{ "kind": "not", "value": Expression }
+{ "kind": "and",     "left": Expression, "right": Expression }
+{ "kind": "or",      "left": Expression, "right": Expression }
+{ "kind": "xor",     "left": Expression, "right": Expression }
+{ "kind": "implies", "left": Expression, "right": Expression }
+{ "kind": "iff",     "left": Expression, "right": Expression }
+```
+
+An empty `label` lets the column print the expression itself, which keeps the
+heading from disagreeing with what it computes. `given: true` fills a column in
+as a worked step rather than asking it.
+
+### task-graph-path — "Graph path"
+
+A graph, and a route, traversal order, spanning tree or cut to pick out of it.
+Answer is `{ nodeIds: string[], edgeIds: string[] }`.
+
+| field | type | default |
+| --- | --- | --- |
+| `instruction` | string | `""` |
+| `directed`, `weighted` | boolean | `false` |
+| `nodes` | array of `{ id (required), label, x, y }` | `[]` — `x`/`y` are fractions 0–1, default 0.5 |
+| `edges` | array of `{ id (required), source, target, weight }` | `[]` |
+| `goal` | `path` \| `shortestPath` \| `traversal` \| `spanningTree` \| `cut` | `"shortestPath"` |
+| `sourceId`, `targetId` | string | `""` |
+| `traversal` | `bfs` \| `dfs` | `"bfs"` |
+| `neighbourOrder` | `label` \| `authored` | `"label"` — which order ties are broken in |
+| `partialCredit` | boolean | `true` |
+
+The answer key is computed from the graph, not stored, so it cannot disagree
+with the picture.
+
+### task-number-representation — "Number representation"
+
+A value to write again in another base. Answer is `{ raw: string }`.
+
+| field | type | default |
+| --- | --- | --- |
+| `instruction` | string | `""` |
+| `sourceRepresentation` | `decimal` \| `binary` \| `octal` \| `hex` \| `text` | `"decimal"` |
+| `sourceValue` | string | `""` |
+| `targetRepresentation` | same enum | `"binary"` |
+| `bitWidth` | integer | `8` |
+| `signed` | boolean | `false` — two's complement |
+| `allowPrefix` | boolean | `true` — accept `0b`/`0x` |
+| `allowSeparators` | boolean | `true` — accept `1010 1010` |
+| `requireFullWidth` | boolean | `true` — leading zeros to `bitWidth` |
+| `scoring` | `answer` \| `digits` | `"answer"` |
+
+### task-crossword — "Crossword"
+
+Answer is `{ letters: Record<"row,column", string> }`.
+
+| field | type | default |
+| --- | --- | --- |
+| `instruction` | string | `""` |
+| `words` | array of `{ id (required), clue, answer, row, column, orientation: "across"\|"down" }` | `[]` |
+| `scoring` | `words` \| `letters` | `"words"` |
+| `penaliseWrong` | boolean | `false` |
+
+`row`/`column` are zero-based from the top-left and give the first letter. The
+grid is derived from the words; crossing letters must agree.
+
+### task-word-search — "Find the words"
+
+Answer is `{ found: [...] }`.
+
+| field | type | default |
+| --- | --- | --- |
+| `instruction` | string | `""` |
+| `rows`, `columns` | integer 2–30 | `10` |
+| `letters` | string | `""` — the whole grid, row by row, as one string |
+| `words` | array of `{ id (required), text, row, column, direction }` | `[]` |
+| `directions` | array of directions | all eight — which the learner may drag in |
+| `showWords` | boolean | `true` — list the words to find |
+
+Directions: `east` `west` `south` `north` `southEast` `southWest` `northEast`
+`northWest`. `row`/`column` are zero-based and give the first letter. The grid
+is *stored*, not generated: the filler letters are part of the puzzle, and a
+regenerated puzzle is a different puzzle. `letters` must be exactly
+`rows × columns` characters, and each word must spell itself out of the grid
+from its start cell.
+
+### task-highlighting — "Highlighting"
+
+A text the learner marks up. Answer is `{ highlights: (Color|null)[] }` — one
+entry per character of `text`.
+
+| field | type | default |
+| --- | --- | --- |
+| `instruction` | string | `""` |
+| `text` | string | `""` |
+| `colors` | `Record<Color, { enabled: boolean, label: string }>` | `{}` — at least one must be enabled under `auto` |
+| `reference` | `(Color\|null)[]` | `[]` — your own marking, character by character |
+| `cutoffs` | `Record<Color, number 0–1>` | `{}` — 0.6 is a sensible starting point |
+
+Colours: `maroon` `orange` `blue` `lavender` `yellow` — chosen to stay
+distinguishable for the commonest colour vision deficiencies. `label` is what
+the colour *means* here ("cause", "effect"), so colour is never the only
+channel. `cutoffs` is the Cohen's kappa a learner must reach for that colour to
+count — kappa, not raw overlap, because agreeing by accident on a mostly
+unhighlighted text is easy. **`reference`, if non-empty, must be exactly as
+long as `text`**; re-mark after editing the text.
+
+### task-find-hotspots — "Find the spot"
+
+A picture with a place to find. Answer is
+`{ selection?: { x, y, hotspotId? } }`.
+
+| field | type | default |
+| --- | --- | --- |
+| `instruction` | string | `""` |
+| `background` | `{ src, alt }` | `{ "src": "", "alt": "" }` |
+| `size` | `{ width, height }` | `{ "width": 620, "height": 310 }` |
+| `hotspots` | array (below) | `[]` |
+| `missFeedback` | string | absent — for a click that hits nothing |
+
+A hotspot is `{ id (required), shape: "rect"|"ellipse", x, y, width, height,
+correct, feedback, label }`, all four numbers fractions 0–1. One hotspot wins;
+the rest exist to be wrong in a useful way, each able to say why.
+
+### task-drag-drop — "Drag and drop"
+
+Elements dragged to where they belong on a picture. Answer is
+`{ placements: [...] }`.
+
+| field | type | default |
+| --- | --- | --- |
+| `instruction` | string | `""` |
+| `background` | `{ src, alt }` | `{ "src": "", "alt": "" }` |
+| `size` | `{ width, height }` | `{ "width": 620, "height": 310 }` |
+| `elements` | array (below) | `[]` |
+| `dropZones` | array (below) | `[]` |
+| `singlePoint` | boolean | `false` — one mark for the lot |
+| `applyPenalties` | boolean | `true` |
+
+An element is `{ id (required), kind: "text"|"image", label, src, x, y, width,
+height, multiple, backgroundOpacity }`. A drop zone is `{ id (required), label,
+x, y, width, height, tolerance: "touch"|"centre"|"fit", correctElementIds:
+string[], tip, feedbackOnCorrect, feedbackOnIncorrect, backgroundOpacity }`.
+All coordinates are fractions 0–1.
+
+### task-image-annotation — "Mark the picture"
+
+The learner places their own marks. Answer is `{ annotations: [...] }`.
+
+| field | type | default |
+| --- | --- | --- |
+| `instruction` | string | `""` |
+| `background` | `{ src, alt }` | `{ "src": "", "alt": "" }` |
+| `size` | `{ width, height }` | `{ "width": 620, "height": 310 }` |
+| `annotationKind` | `point` \| `rect` | `"point"` |
+| `maximumCount` | integer | `1` |
+| `requireLabel` | boolean | `false` |
+| `regions` | array of `{ id (required), kind: "circle"\|"rect", x, y, radius, width, height, label, acceptedLabels: string[] }` | `[]` |
+| `overlap` | number 0–1 | `0.5` — how much of a rect must land inside |
+| `penaliseExtras` | boolean | `false` |
+| `caseSensitive` | boolean | `false` |
+
+### task-array-steps — "Algorithm steps"
+
+An array and the steps of an algorithm over it — sorting passes, stack or
+queue operations. The learner writes the array as it stands after each step.
+Answer is `{ rows: string[][] }`, one row per step; a step not yet touched
+counts as the row before it, carried forward.
+
+| field | type | default |
+| --- | --- | --- |
+| `instruction` | string | `""` |
+| `initial` | string[] | `[]` — the starting array |
+| `steps` | array of `{ id (required), label, expected: string[] }` | `[]` |
+| `mode` | `rearrange` \| `write` | `"rearrange"` — `rearrange` swaps boxes, so every `expected` must be a reordering of `initial`; `write` types into boxes, blanks allowed |
+| `slots` | integer, optional | `write` only: boxes per row; omitted means the widest row |
+| `showIndices` | boolean | `true` |
+| `caseSensitive` | boolean | `false` |
+| `partialCredit` | boolean | `true` — a point per step |
+
+### task-binary-tree — "Binary tree"
+
+A binary tree walked in a traversal order, searched, or grown by inserting
+keys. The right answer is computed from the tree, never authored. Answer is
+`{ sequence: nodeId[], notFound?: boolean, placements: { key, parent:
+nodeId|null, side: "left"|"right"|"root" }[] }`; a key inserted as the n-th
+placement gets the node id `insert-<n>`.
+
+| field | type | default |
+| --- | --- | --- |
+| `instruction` | string | `""` |
+| `mode` | `traversal` \| `search` \| `insert` | `"traversal"` |
+| `traversal` | `preorder` \| `inorder` \| `postorder` \| `levelorder` | `"inorder"` |
+| `tree` | `{ root?: nodeId, nodes: { id (required), label, left?: nodeId, right?: nodeId }[] }` | `{ "nodes": [] }` — at most 31 nodes, one root, no shared children |
+| `searchKey` | string | `""` — `search` only; may be absent from the tree |
+| `insertKeys` | string[] | `[]` — `insert` only, inserted in order, no duplicates |
+| `partialCredit` | boolean | `true` |
+
+In `search` and `insert` the tree must be a binary search tree. Keys compare
+as numbers when every key is a number, otherwise as text.
+
+### task-pixel-grid — "Pixel grid"
+
+A grid the learner paints from a palette, marked cell by cell. Answer is
+`{ cells: paletteId[][] }`, rows by columns.
+
+| field | type | default |
+| --- | --- | --- |
+| `instruction` | string | `""` — a PBM listing reads well in a code block |
+| `rows`, `columns` | integer 1–32 | `5`, `5` |
+| `palette` | array of `{ id (required), color: "#rrggbb", label }` | white `"0"` and black `"1"` |
+| `target` | paletteId[][] | `[]` — must be `rows` × `columns` |
+| `given` | boolean[][] | `[]` — locked, pre-filled cells; `[]` locks nothing |
+| `startColor` | paletteId | `"white"` |
+| `showCoordinates` | boolean | `true` |
+| `firstIndex` | `0` or `1` | `1` — what the first row and column are numbered, on the edges and in cell names; `0` when the grid sits beside code indexing an array |
+| `showLabels` | boolean | `false` — draw each colour's label in its cells |
+| `partialCredit` | boolean | `true` — a point per free cell |
+
+### task-table — "Fill in the table"
+
+A table with given and blank cells: a predicted query result, a value table,
+a copied spreadsheet formula. Answer is `{ cells: Record<"rowId:columnId",
+string> }`.
+
+| field | type | default |
+| --- | --- | --- |
+| `instruction` | string | `""` |
+| `caption` | string | `""` |
+| `columns` | array of `{ id (required), header, kind: "text"\|"number"\|"formula" }` | `[]` |
+| `rows` | array of `{ id (required), header?, cells: Record<columnId, { given: string } \| { accepted: string[] }> }` | `[]` — every row needs a cell under every column |
+| `rowHeaders` | boolean | `false` |
+| `rowOrder` | `fixed` \| `any` | `"fixed"` — `any` matches each learner row to the answer row it fits best (a query without ORDER BY) |
+| `caseSensitive` | boolean | `false` |
+| `ignoreWhitespace` | boolean | `true` |
+| `numberTolerance` | number ≥ 0 | `0` — for `number` cells; comma or point both work |
+| `partialCredit` | boolean | `true` — a point per blank cell |
+
+A `formula` cell ignores case and spaces but not `$`.
+
+### task-point-plot — "Classify points"
+
+A scatter plot whose open points the learner assigns to classes — a k-nearest
+neighbours prediction, or a k-means assignment step when centroids are
+present. Answer is `{ assignments: Record<pointId, classId> }`.
+
+| field | type | default |
+| --- | --- | --- |
+| `instruction` | string | `""` |
+| `axes` | `{ x: { label, min, max }, y: { label, min, max } }` | both `0`–`10` |
+| `classes` | array of `{ id (required), label, color: "#rrggbb", shape: "circle"\|"square"\|"triangle"\|"diamond" }` | `[]` |
+| `points` | array of `{ id (required), x, y, label?, class?, expected?, centroid }` | `[]` |
+| `showGrid` | boolean | `true` |
+| `partialCredit` | boolean | `true` — a point per open point |
+
+A point with `class` is known and drawn filled; one with `expected` is open
+and never shows its answer; `centroid: true` with a `class` marks a cluster
+centre. A point is never both known and open. Coordinates are in axis units.
+
+### task-call-stack — "Call stack"
+
+A program shown as text and the call stack at a few moments of its run. The
+learner pushes and pops frames. Answer is `{ stacks: Record<checkpointId,
+Frame[]> }`, each stack top first; a moment not yet touched counts as the one
+before it.
+
+| field | type | default |
+| --- | --- | --- |
+| `instruction` | string | `""` |
+| `language` | string | `""` — a label only; nothing runs the code |
+| `code` | string | `""` |
+| `showLineNumbers` | boolean | `true` |
+| `showLocals` | boolean | `false` — also ask for each frame's local variables |
+| `checkpoints` | array of `{ id (required), label, line?, expected: { call, locals }[] }` | `[]` — `expected` top first |
+| `caseSensitive` | boolean | `false` |
+| `partialCredit` | boolean | `true` — a point per moment |
+
+Spaces never matter when a call or its locals are compared.
+
+### task-cardinality — "Cardinalities"
+
+Entities and relationships drawn by the author; the learner labels each
+relationship end. Answer is `{ ends: Record<"relationshipId:from"|"relationshipId:to", label> }`.
+
+| field | type | default |
+| --- | --- | --- |
+| `instruction` | string | `""` |
+| `notation` | `chen` \| `minmax` \| `uml` | `"chen"` — labels `1 n m`, `(0,1) (1,1) (0,*) (1,*)`, or `0..1 1 * 1..*` |
+| `entities` | array of `{ id (required), name, x, y }` | `[]` — x, y are fractions 0–1 |
+| `relationships` | array of `{ id (required), name, from, to, expectedFrom, expectedTo }` | `[]` — `from` and `to` are two different entity ids |
+| `partialCredit` | boolean | `true` — a point per end |
+
+In `chen`, `n` and `m` both mean "many" and are marked as the same answer.
+
+### task-number-line — "Number line"
+
+Values the learner places on a number line. Answer is `{ positions:
+Record<itemId, number> }`.
+
+| field | type | default |
+| --- | --- | --- |
+| `instruction` | string | `""` |
+| `min`, `max` | number | `min < max` |
+| `tickStep` | number > 0 | at most 40 major ticks across the line |
+| `minorTicks` | integer 0–10 | `0` — subdivisions between major ticks |
+| `labelTicks` | boolean | `true` |
+| `items` | array of `{ id (required), label, value, tolerance? }` | at least one; `value` inside `[min, max]` |
+| `tolerance` | number ≥ 0, optional | `tickStep / 4` — how far off still counts |
+| `snap` | `none` \| `minor` \| `major` | `"minor"` |
+| `partialCredit` | boolean | `true` — a point per item |
+
+### task-function-plot — "Sketch the graph"
+
+A coordinate system in which the learner sets a function's value at fixed x
+positions. Answer is `{ values: Record<string, number> }`, keyed by the handle's
+x written as `String(x)`.
+
+| field | type | default |
+| --- | --- | --- |
+| `instruction` | string | `""` |
+| `axes` | `{ x: { label, min, max, step }, y: { label, min, max, step } }` | `step` is the grid spacing |
+| `target` | string | the function of `x` to sketch, e.g. `"0.5x^2 - 2"` — must be finite and inside the y axis at every handle |
+| `shown` | array of `{ expression, label }` | `[]` — functions drawn as given, e.g. f when the task is f′ |
+| `handles` | number[] | five evenly spaced x positions when empty; at most 15, distinct, inside the x axis |
+| `tolerance` | number, optional | `axes.y.step / 2` |
+| `snap` | `none` \| `grid` \| `half` | `"half"` |
+| `partialCredit` | boolean | `true` — a point per handle |
+
+Functions are written in a small arithmetic grammar: `+ - * / ^`, brackets,
+`sqrt sin cos tan exp ln log abs`, `pi`, `e`, and `3x` for `3*x`. Nothing is
+ever run as code.
+
+### task-mouse-accuracy — "Pointing accuracy"
+
+Timed clicks on a sequence of targets, for lessons about pointing (Fitts's law,
+accessibility). Answer is `{ rounds: [...], optedOut: boolean }`.
+
+| field | type | default |
+| --- | --- | --- |
+| `instruction` | string | `""` |
+| `targets` | array of `{ id (required), x, y, radius }` | `[]` — fractions 0–1 |
+| `aspectRatio` | number | `0.6` |
+| `scoring` | `hits` \| `hitsAndSpeed` | `"hits"` |
+| `allowanceMs` | integer | `2000` |
+| `allowOptOut` | boolean | `true` |
+
+**Privacy constraint, asserted by tests over the exact key set of a stored
+answer: the answer holds task-scoped round results only.** Never raw pointer
+telemetry, never anything identifying a device. Do not widen it.
+
+Use `resetTarget: "answer"` on any edge that loops back here — a recorded run
+must be taken again, not edited.
+
+### task-keyboard-speed — "Typing"
+
+Typing an author's text back, measured for accuracy and speed. Answer is
+`{ typed: string, elapsedMs: number, optedOut: boolean }`.
+
+| field | type | default |
+| --- | --- | --- |
+| `instruction` | string | `""` |
+| `text` | string | `""` — what they type back |
+| `scoring` | `accuracy` \| `accuracyAndSpeed` | `"accuracy"` |
+| `requiredAccuracy` | number 0–1 | `0.95` |
+| `targetWpm` | integer | `25` |
+| `timed` | boolean | `true` |
+| `allowOptOut` | boolean | `true` |
+
+**Privacy constraint, asserted by tests: never captures keys outside its own
+focused input, and never stores a key-by-key log.** Text is read from the
+input's `value` on change. Do not widen it. Loop back with
+`resetTarget: "answer"`.
+
+## Answer shapes
+
+What `{ "kind": "answer", "nodeId": "…" }` resolves to, for writing `path`:
+
+| bit | answer |
+| --- | --- |
+| `start-consent` | `boolean` (no path) |
+| `start-identify` | `Record<fieldId, string>` |
+| `task-choice` | `{ selected: string[] }` |
+| `task-yes-no` | `{ yes: boolean }` |
+| `task-input`, `task-numeric` | `{ input: string }` |
+| `task-free-text` | `{ text: string }` |
+| `task-number-representation` | `{ raw: string }` |
+| `task-fill-in-the-blank` | `{ blanks: Record<blankId, string> }` |
+| `task-math` | `{ prompts: Record<blankName, latex> }` |
+| `task-crossword` | `{ letters: Record<"row,column", string> }` |
+| `task-code-trace` | `{ cells: Record<checkpointId, Record<columnId, string>> }` |
+| `task-boolean-logic` | `{ cells: Record<rowKey, Record<columnId, boolean\|null>> }` |
+| `task-ordering` | `{ order: string[] }` |
+| `task-matching` | `{ matches: Match[] }` |
+| `task-parsons` | `{ lines: PlacedLine[] }` |
+| `task-graph-path` | `{ nodeIds: string[], edgeIds: string[] }` |
+| `task-highlighting` | `{ highlights: (Color\|null)[] }` |
+| `task-word-search` | `{ found: Selection[] }` |
+| `task-find-hotspots` | `{ selection?: { x, y, hotspotId? } }` |
+| `task-drag-drop` | `{ placements: Placement[] }` |
+| `task-image-annotation` | `{ annotations: Annotation[] }` |
+| `task-array-steps` | `{ rows: string[][] }` |
+| `task-binary-tree` | `{ sequence: string[], notFound?: boolean, placements: Placement[] }` |
+| `task-pixel-grid` | `{ cells: string[][] }` |
+| `task-table` | `{ cells: Record<"rowId:columnId", string> }` |
+| `task-point-plot` | `{ assignments: Record<pointId, classId> }` |
+| `task-call-stack` | `{ stacks: Record<checkpointId, { call, locals }[]> }` |
+| `task-cardinality` | `{ ends: Record<"relationshipId:from"\|"relationshipId:to", string> }` |
+| `task-number-line` | `{ positions: Record<itemId, number> }` |
+| `task-function-plot` | `{ values: Record<string, number> }` |
+| `task-mouse-accuracy` | `{ rounds: Round[], optedOut: boolean }` |
+| `task-keyboard-speed` | `{ typed: string, elapsedMs: number, optedOut: boolean }` |
+
+Branching on a result state is almost always clearer than branching on an
+answer. Reach for `answer` when the value itself is the branch — a consent
+refusal, a chosen route through the material.
+
+## A complete, valid document
+
+```json
+{
+  "version": 1,
+  "meta": {
+    "id": "minimal",
+    "title": "A very short quiz",
+    "description": "Start, an explanation, one question, end.",
+    "locale": "en",
+    "askConfidence": false,
+    "askReasoning": false
+  },
+  "nodes": [
+    {
+      "id": "start",
+      "type": "start-simple",
+      "position": { "x": 0, "y": 0 },
+      "data": {
+        "title": "A very short quiz",
+        "markdown": "One question about prime numbers. There is no time limit."
+      }
+    },
+    {
+      "id": "explanation",
+      "type": "title-simple",
+      "position": { "x": 0, "y": 120 },
+      "data": {
+        "title": "Prime numbers",
+        "markdown": "A **prime number** has exactly two divisors: 1 and itself."
+      }
+    },
+    {
+      "id": "question",
+      "type": "task-choice",
+      "position": { "x": 0, "y": 240 },
+      "data": {
+        "instruction": "Which of these numbers are prime?",
+        "variant": "multiple",
+        "choices": [
+          { "id": "c-2", "markdown": "2", "correct": true },
+          { "id": "c-4", "markdown": "4", "correct": false },
+          { "id": "c-7", "markdown": "7", "correct": true },
+          { "id": "c-9", "markdown": "9", "correct": false }
+        ],
+        "shuffle": false,
+        "partialCredit": false,
+        "evaluation": { "mode": "auto", "enableRetry": true, "showFeedback": true },
+        "patternFeedback": []
+      }
+    },
+    {
+      "id": "end",
+      "type": "end-tries",
+      "position": { "x": 0, "y": 360 },
+      "data": {
+        "title": "Finished",
+        "markdown": "Thank you for taking part.",
+        "showBreakdown": true,
+        "showScore": true,
+        "allowReview": true
+      }
+    }
+  ],
+  "edges": [
+    { "id": "e-start-explanation", "source": "start", "target": "explanation" },
+    { "id": "e-explanation-question", "source": "explanation", "target": "question" },
+    { "id": "e-question-end", "source": "question", "target": "end" }
+  ]
+}
+```
+
+## Checking what you generated
+
+Do not ship a generated document without validating it.
+
+`@bitflow/core` runs in Node and depends only on zod:
+
+```js
+import { parseFlow, validateFlow } from "@bitflow/core";
+
+const parsed = parseFlow(JSON.parse(source));
+if (!parsed.ok) throw new Error(parsed.error.message); // .error.diagnostics
+const { valid, diagnostics } = validateFlow(parsed.value);
+```
+
+`parseFlow` checks the envelope. `validateFlow` checks the graph shape,
+sections, pools and conditions, and returns `{ path, message }` diagnostics
+where `path` is a dot path into the document (`nodes.2.data.choices`).
+
+**With no bits registered, `validateFlow` skips every check that needs to know
+what a bit is** — the per-bit `data` schemas, unknown types, and the "a start
+cannot be in a section" kind of rule. That is deliberate: an empty registry
+means nothing has been loaded yet, not that every type is wrong. So core alone
+will not catch a malformed `data` object.
+
+To get the `data` checks too, the bits have to be registered, and that needs a
+DOM: `@bitflow/web-component` defines custom elements at module scope and
+throws on `HTMLElement` in bare Node. Either run it in a browser or under
+jsdom:
+
+```js
+import { loadAllBits } from "@bitflow/web-component";
+import { parseFlow, validateFlow } from "@bitflow/core";
+
+await loadAllBits();               // registers all 31
+const doc = parseFlow(json).value;
+const { valid, diagnostics } = validateFlow(doc);
+```
+
+Failing either, drop the file on /editor.html, which validates as you type and
+shows each message beside the field that caused it, or /flow.html, which runs
+it.
+
+## Advice for generating a flow
+
+- Write the graph first, then fill in the content. Most broken documents are a
+  graph problem: two starting points, an unreachable node, a task with no way
+  out.
+- One unconditional outgoing edge per branching node, always. It is the
+  otherwise branch, and without it a learner whose answer matches nothing is
+  stuck.
+- A remediation loop is: task → explanation → (condition on `visits`) → back to
+  the task with `resetTarget: "result"`, plus an unconditional edge onward so
+  the loop terminates.
+- Prefer `result`/`scoreRatio`/`resultCount` conditions over `answer` ones.
+- Ids: use readable slugs (`q-year`, `e-year-wrong`), not UUIDs. They appear in
+  conditions and diagnostics, and a human will read them.
+- Set `evaluation.mode` to `"skip"` for a task you want shown but not scored;
+  most per-bit content rules relax under it.
+- Keep images small: they are base64 inside the JSON, and the string length is
+  the file-size cost. Inline SVG data URIs are usually the right answer for a
+  diagram.

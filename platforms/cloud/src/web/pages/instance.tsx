@@ -22,6 +22,8 @@ export const BUILTIN_ENTITLEMENTS: Entitlements = {
   max_books: null,
   max_storage_mb: null,
   custom_domain: false,
+  ai: true,
+  ai_requests_per_day: null,
 };
 
 const generalSchema = instanceSettingsInput

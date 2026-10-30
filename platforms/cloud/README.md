@@ -39,6 +39,47 @@ Student passwords and QR keys are stored twice: hashed, to check logins, and
 encrypted with `CREDENTIALS_KEY`, so lists can be printed again. Every view of
 them is recorded in the activity log.
 
+## AI writing assistant
+
+The editor has an optional writing assistant that knows the hyperbook
+format, looks through the whole book, and answers while the teacher writes;
+it may also propose new files, edits and deletions — always as a git diff the
+teacher accepts or denies before anything is applied. See
+[the assistant plan](../../docs/cloud-ai-assistant.md).
+
+It speaks the OpenAI chat-completions protocol, so any provider works.
+**Mistral** and **local hosting** are the recommended setups:
+
+```bash
+# Mistral
+AI_BASE_URL=https://api.mistral.ai/v1
+AI_API_KEY=…                     # console.mistral.ai
+AI_MODEL=mistral-medium-latest
+
+# Ollama on the same machine: no cost, and no book content leaves the school
+AI_BASE_URL=http://localhost:11434/v1
+AI_API_KEY=ollama
+AI_MODEL=qwen2.5:14b              # `ollama pull …` first; in Docker use
+                                 # http://host.docker.internal:11434/v1
+
+# OpenAI, OpenRouter and Anthropic (via its OpenAI compatibility layer) work
+# the same way:
+#   https://api.openai.com/v1        https://openrouter.ai/api/v1
+#   https://api.anthropic.com/v1
+```
+
+Set the three `AI_*` variables together — or none of them, and the assistant
+stays hidden. Two entitlements control it per teacher, like everything else:
+_AI assistant_ (on/off) and _AI requests per day_ (a quota that refills each
+UTC day); admins are never limited. Everything a teacher does goes through
+the server, which keeps the provider's key, rate limits, audits requests
+(metadata only) and stores no conversations.
+
+**Privacy:** the provider sees the book content of the requests it is asked
+about. Choosing the provider — and mentioning it in the instance's privacy
+policy — is the admin's decision; a local Ollama keeps everything on the
+school's machine.
+
 ## Languages
 
 The platform speaks English and German (`src/shared/i18n`, one catalog per

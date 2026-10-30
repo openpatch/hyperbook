@@ -148,6 +148,8 @@ describe("entitlements", () => {
       max_books: null,
       max_storage_mb: null,
       custom_domain: false,
+      ai: true,
+      ai_requests_per_day: null,
     });
 
     await admin.c.put("/api/instance", { defaultEntitlements: { max_books: 5 } });

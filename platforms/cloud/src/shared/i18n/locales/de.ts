@@ -56,7 +56,8 @@ export const de: Messages = {
     },
     forgot: {
       title: "Passwort vergessen?",
-      noMail: "Diese Instanz kann keine E-Mails senden. Bitten Sie einen Admin, Ihr Passwort neu zu setzen.",
+      noMail:
+        "Diese Instanz kann keine E-Mails senden. Bitten Sie einen Admin, Ihr Passwort neu zu setzen.",
       hint: "Geben Sie Ihre E-Mail-Adresse ein und wir schicken Ihnen einen Link, um ein neues Passwort zu wählen.",
       email: "E-Mail",
       submit: "Link senden",
@@ -84,7 +85,8 @@ export const de: Messages = {
       failedTitle: "Dieser Link funktioniert nicht",
       login: "Anmelden",
       title: "Adresse bestätigt",
-      pendingBody: "Ein Admin genehmigt Ihr Konto als Nächstes. Sie bekommen eine E-Mail, sobald es so weit ist.",
+      pendingBody:
+        "Ein Admin genehmigt Ihr Konto als Nächstes. Sie bekommen eine E-Mail, sobald es so weit ist.",
       readyBody: "Ihr Konto ist bereit.",
     },
   },
@@ -92,7 +94,8 @@ export const de: Messages = {
     title: "Ihr Konto",
     profile: "Profil",
     name: "Name",
-    nameHint: "Wird anderen Lehrkräften angezeigt, mit denen Sie Bücher teilen.",
+    nameHint:
+      "Wird anderen Lehrkräften angezeigt, mit denen Sie Bücher teilen.",
     saved: "Gespeichert",
     storage: "Speicherplatz",
     password: "Passwort",
@@ -103,11 +106,13 @@ export const de: Messages = {
     changePassword: "Passwort ändern",
     passwordChanged: "Passwort geändert. Andere Geräte wurden abgemeldet.",
     language: "Sprache",
-    languageHint: "Die Sprache der Seiten und E-Mails. „Automatisch“ folgt der Instanz und Ihrem Browser.",
+    languageHint:
+      "Die Sprache der Seiten und E-Mails. „Automatisch“ folgt der Instanz und Ihrem Browser.",
   },
   instance: {
     language: "Sprache",
-    languageHint: "Vorgabe für Benutzer, die keine gewählt haben. „Automatisch“ folgt dem Browser.",
+    languageHint:
+      "Vorgabe für Benutzer, die keine gewählt haben. „Automatisch“ folgt dem Browser.",
   },
   landing: {
     title: "Power your Hyperbook",
@@ -194,6 +199,48 @@ export const de: Messages = {
       },
     },
   },
+  editor: {
+    ai: {
+      title: "KI-Assistent",
+      hint: "Hilft beim Schreiben dieser Seite. Antworten sind Vorschläge zum Kopieren; Dateiänderungen erscheinen als Diff, den Sie prüfen.",
+      model: "Modell: {{model}}",
+      modelLabel: "Modell",
+      requests: "{{used}} von {{limit}} Anfragen heute",
+      requestsTitle: "Heute verwendete Anfragen",
+      requestsUnlimited: "{{used}} Anfragen heute",
+      promptPlaceholder: "Fragen Sie zu dieser Seite — oder markieren Sie zuerst Text…",
+      ask: "Fragen",
+      stop: "Stopp",
+      reviewProposal: "Vorgeschlagene Änderungen anzeigen",
+      retry: "Fehlgeschlagene Anfrage wiederholen",
+      openFileFirst: "Öffnen Sie zuerst eine Textdatei.",
+      working: "Arbeitet…",
+      reading: "{{name}}…",
+      copy: "Kopieren",
+      copied: "Kopiert.",
+      length: "Die Antwort erreichte das Längenlimit. Fragen Sie nach mehr.",
+      stopped: "Gestoppt.",
+      proposalTitle: "Vorgeschlagene Änderungen prüfen",
+      proposalHint:
+        "Die Assistenz möchte diese Dateien ändern. Nehmen Sie an, was Sie möchten — oder lehnen Sie alles ab; nichts wird angewendet, bevor Sie entschieden haben.",
+      include: "{{path}} einschließen",
+      deleted: "gelöscht",
+      newFile: "neue Datei",
+      edited: "bearbeitet",
+      openPage: "(die offene Seite)",
+      referencedBy: "Referenziert von: {{files}}",
+      accept: "{{count}} Änderung annehmen",
+      accept_other: "{{count}} Änderungen annehmen",
+      deny: "Alles ablehnen",
+      applied:
+        "Angewendet. Dateiänderungen sind ein Speichervorgang; die offene Seite wird hier bearbeitet.",
+      denied: "Es wurde nichts geändert.",
+      conflict:
+        "Das Buch wurde inzwischen geändert, daher wurde nichts angewendet. Fragen Sie erneut.",
+      pageChanged:
+        "{{files}} wurde seit der Antwort geändert — es wurde nichts angewendet. Fragen Sie erneut.",
+    },
+  },
   errors: {
     generic: "Auf dem Server ist etwas schiefgegangen",
     notFound: "Nicht gefunden",
@@ -201,18 +248,26 @@ export const de: Messages = {
     adminOnly: "Nur Admins dürfen das",
     invalidInput: "Ungültige Eingabe",
     auth: {
-      tooManyAttempts: "Zu viele fehlgeschlagene Versuche. Versuchen Sie es in 15 Minuten erneut.",
+      tooManyAttempts:
+        "Zu viele fehlgeschlagene Versuche. Versuchen Sie es in 15 Minuten erneut.",
       wrongCredentials: "E-Mail oder Passwort ist falsch",
-      unverified: "Bestätigen Sie zuerst Ihre E-Mail-Adresse: folgen Sie dem Link, den wir geschickt haben.",
+      unverified:
+        "Bestätigen Sie zuerst Ihre E-Mail-Adresse: folgen Sie dem Link, den wir geschickt haben.",
       pending:
         "Ihr Konto wartet auf die Genehmigung durch einen Admin. Sie bekommen eine E-Mail, sobald es so weit ist.",
-      noMail: "Diese Instanz kann keine E-Mails senden. Bitten Sie einen Admin, Ihr Passwort neu zu setzen.",
+      noMail:
+        "Diese Instanz kann keine E-Mails senden. Bitten Sie einen Admin, Ihr Passwort neu zu setzen.",
       noMailShort: "Diese Instanz kann keine E-Mails senden.",
-      linkExpired: "Dieser Link ist abgelaufen oder wurde bereits benutzt. Fordern Sie einen neuen an.",
-      linkExpiredLogin: "Dieser Link ist abgelaufen oder wurde bereits benutzt. Melden Sie sich an, um einen neuen zu bekommen.",
-      signupClosed: "Diese Instanz nimmt keine Registrierungen entgegen. Bitten Sie einen Admin um ein Konto.",
-      signupDomains: "Die Registrierung ist nur für Adressen bei {{domains}} offen.",
-      tooManySignups: "Gerade gibt es zu viele Registrierungen. Versuchen Sie es in einer Stunde erneut.",
+      linkExpired:
+        "Dieser Link ist abgelaufen oder wurde bereits benutzt. Fordern Sie einen neuen an.",
+      linkExpiredLogin:
+        "Dieser Link ist abgelaufen oder wurde bereits benutzt. Melden Sie sich an, um einen neuen zu bekommen.",
+      signupClosed:
+        "Diese Instanz nimmt keine Registrierungen entgegen. Bitten Sie einen Admin um ein Konto.",
+      signupDomains:
+        "Die Registrierung ist nur für Adressen bei {{domains}} offen.",
+      tooManySignups:
+        "Gerade gibt es zu viele Registrierungen. Versuchen Sie es in einer Stunde erneut.",
     },
     me: {
       wrongCurrentPassword: "Das aktuelle Passwort ist falsch",
@@ -221,16 +276,30 @@ export const de: Messages = {
       notFound: "Benutzer nicht gefunden",
       emailExists: "Ein Konto mit dieser E-Mail-Adresse existiert bereits",
     },
+    ai: {
+      notConfigured:
+        "Die KI-Unterstützung ist auf dieser Instanz nicht eingerichtet. Bitten Sie eine Admin darum.",
+      disabled:
+        "Eine Admin hat die KI-Unterstützung für Ihr Konto deaktiviert.",
+      quota:
+        "Ihre KI-Anfragen für heute sind aufgebraucht. Morgen stehen wieder neue zur Verfügung.",
+      rateLimited:
+        "Gerade zu viele KI-Anfragen. Versuchen Sie es in einer Minute erneut.",
+      provider:
+        "Der KI-Anbieter hat nicht geantwortet. Versuchen Sie es erneut.",
+    },
   },
   validation: {
     email: "Geben Sie eine gültige E-Mail-Adresse ein",
     passwordMin: "Verwenden Sie mindestens 10 Zeichen",
     passwordMax: "Verwenden Sie höchstens 200 Zeichen",
     passwordRequired: "Geben Sie Ihr Passwort ein",
+    aiPromptRequired: "Schreiben Sie, was die Assistenz tun soll",
     currentPasswordRequired: "Geben Sie Ihr aktuelles Passwort ein",
     nameRequired: "Geben Sie Ihren Namen ein",
     nameMax: "Verwenden Sie höchstens 100 Zeichen",
-    acceptPrivacy: "Akzeptieren Sie die Datenschutzerklärung, um sich zu registrieren",
+    acceptPrivacy:
+      "Akzeptieren Sie die Datenschutzerklärung, um sich zu registrieren",
     passwordsMismatch: "Die Passwörter stimmen nicht überein",
   },
 };

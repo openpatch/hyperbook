@@ -9,6 +9,7 @@ import { BLOCKFLOW_CSP, serveBlockflow } from "./blockflow";
 import type { AdminEnv } from "./env";
 import { requestLocale, createT } from "../i18n";
 import { localeMiddleware, originCheck, sessionMiddleware } from "./middleware";
+import { aiRoutes, bookAiRoutes } from "./routes/ai";
 import { auditRoutes } from "./routes/audit";
 import { authRoutes } from "./routes/auth";
 import { bookRoutes } from "./routes/books";
@@ -40,6 +41,8 @@ export function createAdminApi(deps: Deps) {
     .route("/books", bookPublishingRoutes(deps))
     .route("/books", bookFileRoutes(deps))
     .route("/books", bookDictionaryRoutes(deps))
+    .route("/books", bookAiRoutes(deps))
+    .route("/ai", aiRoutes(deps))
     .route("/books", bookSlugRequestRoutes(deps))
     .route("/slug-requests", slugRequestRoutes(deps))
     .route("/builds", buildRoutes(deps))

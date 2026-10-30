@@ -13,7 +13,11 @@ import { LOCALES } from "./i18n";
 /** The languages the platform speaks; see shared/i18n. */
 export const locale = z.enum(LOCALES);
 
-export const email = z.string().trim().toLowerCase().pipe(z.email("validation.email"));
+export const email = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .pipe(z.email("validation.email"));
 
 /** For teacher and admin accounts. Students get generated passwords. */
 export const newPassword = z
@@ -49,7 +53,10 @@ export const updateMeInput = z.object({
 });
 
 export const changePasswordInput = z.object({
-  currentPassword: z.string().min(1, "validation.currentPasswordRequired").max(200),
+  currentPassword: z
+    .string()
+    .min(1, "validation.currentPasswordRequired")
+    .max(200),
   newPassword,
 });
 
@@ -85,6 +92,8 @@ export const entitlementOverridesInput = z
     max_books: limit,
     max_storage_mb: limit,
     custom_domain: z.boolean(),
+    ai: z.boolean(),
+    ai_requests_per_day: limit,
   })
   .partial();
 
@@ -113,9 +122,17 @@ export const instanceSettingsInput = z
   .object({
     name: z.string().trim().min(1, "Enter a name").max(100),
     defaultEntitlements: entitlementOverridesInput,
-    reservedSlugs: z.array(z.string().trim().toLowerCase().min(1).max(63)).max(500),
-    imprintUrl: z.union([z.url("Enter a full URL, starting with https://"), z.literal("")]),
-    privacyUrl: z.union([z.url("Enter a full URL, starting with https://"), z.literal("")]),
+    reservedSlugs: z
+      .array(z.string().trim().toLowerCase().min(1).max(63))
+      .max(500),
+    imprintUrl: z.union([
+      z.url("Enter a full URL, starting with https://"),
+      z.literal(""),
+    ]),
+    privacyUrl: z.union([
+      z.url("Enter a full URL, starting with https://"),
+      z.literal(""),
+    ]),
     imprintMarkdown: z.string().max(100_000, "At most 100 000 characters"),
     privacyMarkdown: z.string().max(100_000, "At most 100 000 characters"),
     signupMode: z.enum(["closed", "open", "domains", "approval"]),
@@ -125,21 +142,29 @@ export const instanceSettingsInput = z
           .string()
           .trim()
           .toLowerCase()
-          .regex(/^(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z]{2,}$/, "Enter domains like schule.de"),
+          .regex(
+            /^(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z]{2,}$/,
+            "Enter domains like schule.de",
+          ),
       )
       .max(200),
     slugSuffix: z.boolean(),
     landingPage: z.boolean(),
     /** Null: follow the browser's language. */
     defaultLocale: locale.nullish(),
-    elementRuntimes: z.partialRecord(z.enum(ELEMENT_RUNTIMES), elementRuntimeChoice),
+    elementRuntimes: z.partialRecord(
+      z.enum(ELEMENT_RUNTIMES),
+      elementRuntimeChoice,
+    ),
     gitPushUpdatesPreview: z.boolean(),
   })
   .partial();
 
 /** An optional note on a publish, stored on the build row (shown in the builds table). */
 export const publishInput = z
-  .object({ note: z.string().trim().max(200, "At most 200 characters").default("") })
+  .object({
+    note: z.string().trim().max(200, "At most 200 characters").default(""),
+  })
   .partial();
 
 /** A rollback target: one of the book's version tags. */
@@ -149,7 +174,9 @@ export const rollbackInput = z.object({
 
 /** A label for a new git API token, so it can be told apart later. */
 export const gitTokenInput = z
-  .object({ label: z.string().trim().max(100, "At most 100 characters").default("") })
+  .object({
+    label: z.string().trim().max(100, "At most 100 characters").default(""),
+  })
   .partial();
 
 export const slug = z
@@ -177,7 +204,10 @@ export const updateBookInput = z
     description: z.string().trim().max(2000),
     visibility: z.enum(["public", "private"]),
     /** A book hosted elsewhere (e.g. GitHub Pages); null to host it here. */
-    externalUrl: z.union([z.url("Enter a full URL, starting with https://"), z.null()]),
+    externalUrl: z.union([
+      z.url("Enter a full URL, starting with https://"),
+      z.null(),
+    ]),
   })
   .partial();
 
@@ -188,7 +218,9 @@ export const bookDomainInput = z.object({
     .trim()
     .toLowerCase()
     .transform((d) => d.replace(/\.$/, ""))
-    .pipe(z.string().min(1, "Enter a domain").max(253, "The domain is too long")),
+    .pipe(
+      z.string().min(1, "Enter a domain").max(253, "The domain is too long"),
+    ),
 });
 
 export const slugRequestInput = z.object({
@@ -223,7 +255,10 @@ export const username = z
   .toLowerCase()
   .min(1, "Enter a username")
   .max(40, "Use at most 40 characters")
-  .regex(/^[a-z0-9][a-z0-9._-]*$/, "Use lowercase letters, digits, dots, hyphens and underscores");
+  .regex(
+    /^[a-z0-9][a-z0-9._-]*$/,
+    "Use lowercase letters, digits, dots, hyphens and underscores",
+  );
 
 export const createStudentInput = z.object({
   username,
@@ -238,7 +273,10 @@ export const generateStudentsInput = z.object({
     .trim()
     .toLowerCase()
     .max(20, "Use at most 20 characters")
-    .regex(/^[a-z][a-z0-9-]*$|^$/, "Start with a letter; then letters, digits and hyphens")
+    .regex(
+      /^[a-z][a-z0-9-]*$|^$/,
+      "Start with a letter; then letters, digits and hyphens",
+    )
     .default("student"),
   passwordLength: z.number().int().min(4).max(20).default(6),
 });
@@ -266,12 +304,17 @@ const NOT_IN_BOOKS = new Set([".git", ".hyperbook", "node_modules"]);
 export function bookPathProblem(path: string): string | null {
   if (path.length === 0) return "Enter a name";
   if (path.length > 1024) return "The path is too long";
-  if (/[\0\\]/.test(path)) return "Use / between folders, and no special characters";
-  if (path.startsWith("/") || path.endsWith("/")) return "Do not start or end with /";
+  if (/[\0\\]/.test(path))
+    return "Use / between folders, and no special characters";
+  if (path.startsWith("/") || path.endsWith("/"))
+    return "Do not start or end with /";
   for (const segment of path.split("/")) {
-    if (segment === "" || segment === "." || segment === "..") return "Use folder and file names, not // . or ..";
-    if (NOT_IN_BOOKS.has(segment.toLowerCase())) return `“${segment}” is reserved`;
-    if (new TextEncoder().encode(segment).length > 255) return "A name is too long";
+    if (segment === "" || segment === "." || segment === "..")
+      return "Use folder and file names, not // . or ..";
+    if (NOT_IN_BOOKS.has(segment.toLowerCase()))
+      return `“${segment}” is reserved`;
+    if (new TextEncoder().encode(segment).length > 255)
+      return "A name is too long";
   }
   return null;
 }
@@ -292,7 +335,10 @@ export const dictionaryWord = z
   .string()
   .trim()
   .toLowerCase()
-  .regex(/^[\p{L}\p{M}][\p{L}\p{M}'’-]*$/u, "Enter a single word (letters only)")
+  .regex(
+    /^[\p{L}\p{M}][\p{L}\p{M}'’-]*$/u,
+    "Enter a single word (letters only)",
+  )
   .max(64);
 
 export const addDictionaryWordInput = z.object({ word: dictionaryWord });
@@ -310,7 +356,12 @@ export const fileChange = z.discriminatedUnion("op", [
     baseOid: oid.nullable(),
   }),
   z.object({ op: z.literal("delete"), path: bookPath, baseOid: oid }),
-  z.object({ op: z.literal("move"), from: bookPath, to: bookPath, baseOid: oid }),
+  z.object({
+    op: z.literal("move"),
+    from: bookPath,
+    to: bookPath,
+    baseOid: oid,
+  }),
 ]);
 
 export type FileChange = z.input<typeof fileChange>;
@@ -323,3 +374,59 @@ export const commitFilesInput = z.object({
 export const initFilesInput = z.object({
   template: z.enum(["default", "empty"]),
 });
+
+/** A request to the editor's AI writing assistant (docs/cloud-ai-assistant.md). */
+export const aiAssistInput = z
+  .object({
+    action: z.enum(["free", "continue", "improve"]),
+    /** What the assistant should do; required for "free". */
+    prompt: z.string().trim().max(4000).optional(),
+    /** The model the teacher picked; the route allows only the instance's list. */
+    model: z.string().trim().max(100).optional(),
+    /** The page the teacher is editing. */
+    pagePath: bookPath,
+    /** The text the teacher selected, if any. */
+    selection: z.string().max(16000).optional(),
+    /** Lines around the cursor or selection, as the editor assembles them. */
+    context: z.string().max(16000).optional(),
+    /** The open file's full text, as the editor has it now — with unsaved changes. Capped at what the editor sends (128 KiB), so the prompt stays bounded. */
+    pageText: z
+      .string()
+      .max(128 * 1024)
+      .optional(),
+  })
+  .superRefine((input, ctx) => {
+    if (input.action === "free" && !input.prompt) {
+      ctx.addIssue({
+        code: "custom",
+        message: "validation.aiPromptRequired",
+        path: ["prompt"],
+      });
+    }
+  });
+
+export type AiAssistInput = z.input<typeof aiAssistInput>;
+
+/** One file change of an AI proposal, with the diff the teacher reviews. */
+export const aiProposedChange = z.discriminatedUnion("op", [
+  z.object({
+    op: z.literal("write"),
+    path: bookPath,
+    /** What the book (or an earlier write in the same request) had before. */
+    oldText: z.string().nullable(),
+    newText: z.string(),
+    /** The committed file's blob id the change is based on; null: new file. */
+    baseOid: oid.nullable(),
+    /** A unified diff, computed server-side with git. */
+    diff: z.string(),
+  }),
+  z.object({
+    op: z.literal("delete"),
+    path: bookPath,
+    oldText: z.string(),
+    baseOid: oid,
+    diff: z.string(),
+  }),
+]);
+
+export type AiProposedChange = z.infer<typeof aiProposedChange>;

@@ -90,6 +90,62 @@ describe("loadConfig", () => {
     );
   });
 
+  it("configures AI all or nothing", () => {
+    // Nothing set: the feature is simply off.
+    expect(loadConfig(production).ai).toBeNull();
+    // A complete configuration, its trailing slash dropped (a /v1 path stays).
+    const config = loadConfig({
+      ...production,
+      AI_BASE_URL: "https://api.mistral.ai/v1/",
+      AI_API_KEY: "key",
+      AI_MODEL: "mistral-medium-latest",
+      AI_REQUESTS_PER_MINUTE: "3",
+    });
+    expect(config.ai).toEqual({
+      baseUrl: "https://api.mistral.ai/v1",
+      apiKey: "key",
+      model: "mistral-medium-latest",
+      models: ["mistral-medium-latest"],
+      timeoutMs: 120_000,
+      maxOutputTokens: 2048,
+      maxSteps: 8,
+      requestsPerMinute: 3,
+    });
+  });
+
+  it("parses AI_MODELS into the selectable list, default first, without duplicates", () => {
+    const config = loadConfig({
+      ...production,
+      AI_BASE_URL: "https://api.mistral.ai/v1",
+      AI_API_KEY: "key",
+      AI_MODEL: "mistral-medium-latest",
+      AI_MODELS: "mistral-small-latest, mistral-medium-latest ,open-mistral-nemo,",
+    });
+    expect(config.ai?.model).toBe("mistral-medium-latest");
+    expect(config.ai?.models).toEqual([
+      "mistral-medium-latest",
+      "mistral-small-latest",
+      "open-mistral-nemo",
+    ]);
+  });
+
+  it("rejects half an AI configuration and bad URLs", () => {
+    expect(problems({ ...production, AI_BASE_URL: "https://api.mistral.ai/v1" })[0]).toMatch(
+      /AI is partly configured; also set AI_API_KEY, AI_MODEL/,
+    );
+    expect(
+      problems({ ...production, AI_BASE_URL: "api.mistral.ai/v1", AI_API_KEY: "k", AI_MODEL: "m" }),
+    ).toEqual(["AI_BASE_URL is not a valid URL: api.mistral.ai/v1"]);
+    expect(
+      problems({
+        ...production,
+        AI_BASE_URL: "ftp://api.mistral.ai",
+        AI_API_KEY: "k",
+        AI_MODEL: "m",
+      })[0],
+    ).toMatch(/must start with http/);
+  });
+
   it("requires the first admin's email and password together", () => {
     expect(problems({ ...production, ADMIN_EMAIL: "a@example.org" })).toEqual([
       "ADMIN_EMAIL and ADMIN_PASSWORD must be set together",

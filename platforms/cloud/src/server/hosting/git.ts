@@ -1,6 +1,13 @@
 import { spawn, type ChildProcessByStdio } from "node:child_process";
-import { chmodSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
-import { mkdir } from "node:fs/promises";
+import {
+  chmodSync,
+  mkdtempSync,
+  mkdirSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
+import { mkdir, writeFile } from "node:fs/promises";
+import os from "node:os";
 import path from "node:path";
 import type { Readable, Writable } from "node:stream";
 
@@ -270,6 +277,94 @@ export async function listTree(repo: string, commit: string): Promise<TreeEntry[
 
 export async function readBlob(repo: string, oid: string): Promise<Buffer> {
   return gitBytes(["cat-file", "blob", oid], { gitDir: repo });
+}
+
+/** A change to diff outside any repository, as the AI review dialog shows it. */
+export type DiffChange =
+  | { op: "write"; path: string; oldText: string | null; newText: string }
+  | { op: "delete"; path: string; oldText: string };
+
+/**
+ * A unified diff of one proposed file change, from git itself: the two
+ * versions live in a temporary `x/`/`y/` pair, so the diff's paths are the
+ * book's. No repository is touched, no object is written — a denied
+ * proposal leaves nothing behind but this function's own temp directory,
+ * which is removed right away.
+ */
+export async function diffChange(change: DiffChange): Promise<string> {
+  const dir = mkdtempSync(path.join(os.tmpdir(), "cloud-ai-diff-"));
+  try {
+    const sides: [string | null, string] =
+      change.op === "delete"
+        ? [change.oldText, ""]
+        : [change.oldText, change.newText];
+    // Both sides exist even when a text is null (a new file, a deleted
+    // file): an empty side is how git knows the file is added or gone.
+    for (const side of ["x", "y"] as const) {
+      await mkdir(path.join(dir, side), { recursive: true });
+    }
+    for (const [side, text] of [
+      ["x", sides[0]],
+      ["y", sides[1]],
+    ] as const) {
+      if (text === null) continue;
+      const file = path.join(dir, side, change.path);
+      await mkdir(path.dirname(file), { recursive: true });
+      await writeFile(file, text);
+    }
+    // git exits 1 when there are differences — that is the answer, not a
+    // failure; anything else is.
+    const out = await gitBytesOk(
+      ["diff", "--no-index", "--", "x", "y"],
+      { gitDir: dir, cwd: dir },
+      [0, 1],
+    );
+    // The temporary pair's names appear in the headers; the book's paths
+    // are what the teacher should see. Only the header prefixes are
+    // rewritten — a path that itself contains "a/x/" is left alone, and
+    // content lines are left as written. git's own spellings for added and
+    // deleted files are a/y/… and b/x/…, so [xy] covers both.
+    return out
+      .toString("utf8")
+      .split("\n")
+      .map((line) =>
+        line.startsWith("diff --git ")
+          ? line
+              .replace(/^diff --git a\/[xy]\//, "diff --git a/")
+              .replace(/ b\/[xy]\//, " b/")
+          : line.startsWith("--- ")
+            ? line.replace(/^--- a\/[xy]\//, "--- a/")
+            : line.startsWith("+++ ")
+              ? line.replace(/^\+\+\+ b\/[xy]\//, "+++ b/")
+              : line,
+      )
+      .join("\n")
+      .trim();
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+}
+
+/** gitBytes for commands whose non-zero exit codes are answers. */
+async function gitBytesOk(
+  args: string[],
+  options: RunOptions,
+  ok: number[],
+): Promise<Buffer> {
+  const child = spawnGit(args, options);
+  const out: Buffer[] = [];
+  const err: Buffer[] = [];
+  child.stdout.on("data", (d: Buffer) => out.push(d));
+  child.stderr.on("data", (d: Buffer) => err.push(d));
+  child.stdin.end();
+  const code = await new Promise<number | null>((resolve, reject) => {
+    child.on("error", reject);
+    child.on("close", resolve);
+  });
+  if (code === null || !ok.includes(code)) {
+    throw new GitError(args, code, Buffer.concat(err).toString("utf8"));
+  }
+  return Buffer.concat(out);
 }
 
 export type Change =

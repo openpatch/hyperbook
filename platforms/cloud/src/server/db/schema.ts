@@ -94,6 +94,24 @@ export const instanceSettings = sqliteTable("instance_settings", {
   value: text("value").notNull(),
 });
 
+/*
+ * The AI assistant's daily quota counter, one row per user per UTC day
+ * (see domain/ai-usage.ts). Kept apart from the audit log on purpose:
+ * a quota is enforced state, an activity log is history.
+ */
+export const aiUsage = sqliteTable(
+  "ai_usage",
+  {
+    userId: integer("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    /** UTC day, "YYYY-MM-DD". */
+    day: text("day").notNull(),
+    requests: integer("requests").notNull().default(0),
+  },
+  (t) => [primaryKey({ columns: [t.userId, t.day] })],
+);
+
 export const books = sqliteTable("books", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   slug: text("slug").notNull().unique(),

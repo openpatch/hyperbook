@@ -15,6 +15,8 @@ export type Entitlements = {
   max_books: number | null;
   max_storage_mb: number | null;
   custom_domain: boolean;
+  ai: boolean;
+  ai_requests_per_day: number | null;
 };
 export type Overrides = Partial<Entitlements>;
 
@@ -29,6 +31,11 @@ const FLAGS = [
     label: "Custom domains",
     hint: "May serve a book on its own domain (not available yet).",
   },
+  {
+    key: "ai",
+    label: "AI assistant",
+    hint: "May use the AI writing assistant in the editor (needs the instance to be configured for it).",
+  },
 ] as const;
 
 const LIMITS = [
@@ -38,6 +45,12 @@ const LIMITS = [
     label: "Storage",
     unit: "MB",
     hint: "Space for all owned books (enforced once books are hosted).",
+  },
+  {
+    key: "ai_requests_per_day",
+    label: "AI requests",
+    unit: "/ day",
+    hint: "How many AI requests the user may make per day.",
   },
 ] as const;
 

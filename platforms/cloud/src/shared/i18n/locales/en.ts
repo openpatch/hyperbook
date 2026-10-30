@@ -52,13 +52,16 @@ export const en = {
       submit: "Sign up",
       haveAccount: "I have an account",
       sentTitle: "Check your email",
-      sentBody: "We sent a link to <strong>{{email}}</strong>. Open it within 24 hours to confirm your address.",
-      sentApproval: "After that, an admin approves your account; you get an email when it is ready.",
+      sentBody:
+        "We sent a link to <strong>{{email}}</strong>. Open it within 24 hours to confirm your address.",
+      sentApproval:
+        "After that, an admin approves your account; you get an email when it is ready.",
       backToLogin: "Back to log in",
     },
     forgot: {
       title: "Forgot your password?",
-      noMail: "This instance cannot send email. Ask an admin to set a new password for you.",
+      noMail:
+        "This instance cannot send email. Ask an admin to set a new password for you.",
       hint: "Enter your email address and we will send you a link to choose a new one.",
       email: "Email",
       submit: "Send link",
@@ -86,7 +89,8 @@ export const en = {
       failedTitle: "This link does not work",
       login: "Log in",
       title: "Address confirmed",
-      pendingBody: "An admin approves your account next. You get an email when it is ready.",
+      pendingBody:
+        "An admin approves your account next. You get an email when it is ready.",
       readyBody: "Your account is ready.",
     },
   },
@@ -105,11 +109,13 @@ export const en = {
     changePassword: "Change password",
     passwordChanged: "Password changed. Other devices have been logged out.",
     language: "Language",
-    languageHint: "The language of the pages and emails. “Automatic” follows the instance and your browser.",
+    languageHint:
+      "The language of the pages and emails. “Automatic” follows the instance and your browser.",
   },
   instance: {
     language: "Language",
-    languageHint: "Default for users who have not chosen one. “Automatic” follows the browser.",
+    languageHint:
+      "Default for users who have not chosen one. “Automatic” follows the browser.",
   },
   landing: {
     title: "Power your Hyperbook",
@@ -196,6 +202,48 @@ export const en = {
       },
     },
   },
+  editor: {
+    ai: {
+      title: "AI assistant",
+      hint: "Helps you write this page. Answers are suggestions to copy; file changes arrive as a diff you review.",
+      model: "Model: {{model}}",
+      modelLabel: "Model",
+      requests: "{{used}} of {{limit}} requests today",
+      requestsTitle: "Requests used today",
+      requestsUnlimited: "{{used}} requests today",
+      promptPlaceholder: "Ask about this page — or select text first…",
+      ask: "Ask",
+      stop: "Stop",
+      reviewProposal: "Show the proposed changes",
+      retry: "Retry the failed request",
+      openFileFirst: "Open a text file first.",
+      working: "Working…",
+      reading: "{{name}}…",
+      copy: "Copy",
+      copied: "Copied.",
+      length: "The answer hit the length limit. Ask again for more.",
+      stopped: "Stopped.",
+      proposalTitle: "Review the proposed changes",
+      proposalHint:
+        "The assistant wants to change these files. Accept what you want — or deny everything; nothing is applied until you do.",
+      include: "Include {{path}}",
+      deleted: "deleted",
+      newFile: "new file",
+      edited: "edited",
+      openPage: "(the open page)",
+      referencedBy: "Referenced by: {{files}}",
+      accept: "Accept {{count}} change",
+      accept_other: "Accept {{count}} changes",
+      deny: "Deny all",
+      applied:
+        "Applied. File changes are one save; the open page is edited here.",
+      denied: "Nothing was changed.",
+      conflict:
+        "The book changed in the meantime, so nothing was applied. Ask again.",
+      pageChanged:
+        "{{files}} changed since the answer — nothing was applied to them. Ask again.",
+    },
+  },
   errors: {
     generic: "Something went wrong on the server",
     notFound: "Not found",
@@ -205,13 +253,19 @@ export const en = {
     auth: {
       tooManyAttempts: "Too many failed attempts. Try again in 15 minutes.",
       wrongCredentials: "Email or password is wrong",
-      unverified: "Confirm your email address first: follow the link we sent you.",
-      pending: "Your account waits for an admin's approval. You get an email when it is approved.",
-      noMail: "This instance cannot send email. Ask an admin to reset your password.",
+      unverified:
+        "Confirm your email address first: follow the link we sent you.",
+      pending:
+        "Your account waits for an admin's approval. You get an email when it is approved.",
+      noMail:
+        "This instance cannot send email. Ask an admin to reset your password.",
       noMailShort: "This instance cannot send email.",
-      linkExpired: "This link has expired or was already used. Ask for a new one.",
-      linkExpiredLogin: "This link has expired or was already used. Log in to get a new one.",
-      signupClosed: "This instance does not take sign-ups. Ask an admin for an account.",
+      linkExpired:
+        "This link has expired or was already used. Ask for a new one.",
+      linkExpiredLogin:
+        "This link has expired or was already used. Log in to get a new one.",
+      signupClosed:
+        "This instance does not take sign-ups. Ask an admin for an account.",
       signupDomains: "Sign-up is open to addresses at {{domains}} only.",
       tooManySignups: "Too many sign-ups right now. Try again in an hour.",
     },
@@ -222,12 +276,21 @@ export const en = {
       notFound: "User not found",
       emailExists: "An account with this email exists already",
     },
+    ai: {
+      notConfigured:
+        "AI assistance is not configured on this instance. Ask an admin to set it up.",
+      disabled: "An admin has disabled AI assistance for your account.",
+      quota: "Your AI requests for today are used up. They refill tomorrow.",
+      rateLimited: "Too many AI requests right now. Try again in a minute.",
+      provider: "The AI provider did not answer. Try again.",
+    },
   },
   validation: {
     email: "Enter a valid email address",
     passwordMin: "Use at least 10 characters",
     passwordMax: "Use at most 200 characters",
     passwordRequired: "Enter your password",
+    aiPromptRequired: "Write what the assistant should do",
     currentPasswordRequired: "Enter your current password",
     nameRequired: "Enter your name",
     nameMax: "Use at most 100 characters",

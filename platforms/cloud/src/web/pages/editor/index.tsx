@@ -7,6 +7,7 @@ import {
   FolderPlusIcon,
   PanelRightIcon,
   SearchIcon,
+  SparklesIcon,
   UploadIcon,
   XIcon,
 } from "lucide-react";
@@ -22,6 +23,7 @@ import { Input } from "@/components/ui/input";
 import { api, unwrap } from "@/lib/api";
 import { type Book, useBook } from "@/lib/books";
 import { useEditorSettings, type EditorSettings } from "@/lib/editor-settings";
+import { useAiStatus } from "@/lib/ai";
 import { cn } from "@/lib/utils";
 import { LogDialog } from "../publishing";
 import { CodeEditor, type SpellOptions } from "./code-editor";
@@ -62,6 +64,7 @@ import {
 } from "./dictionary";
 import { QuickOpen } from "./quick-open";
 import { SettingsMenu, WordsDialog } from "./settings-menu";
+import { AiPanel } from "./ai-panel";
 import { Splitter, usePaneWidth } from "./splitter";
 import {
   ConflictError,
@@ -206,6 +209,7 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
   const [refactor, setRefactor] = useState<RefactorRequest | null>(null);
   const [logFor, setLogFor] = useState<number | null>(null);
   const [showPreview, setShowPreview] = useState(true);
+  const [showAi, setShowAi] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [blockEdit, setBlockEdit] = useState<{
     block: InlineBlock;
@@ -228,6 +232,14 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
   );
   const sidebarRef = useRef<HTMLElement>(null);
   const previewRef = useRef<HTMLElement>(null);
+  const aiRef = useRef<HTMLElement>(null);
+  const [aiWidth, setAiWidth] = usePaneWidth("editor-ai-width", 280);
+  // The open files' editors, by path: the AI panel reads the active one's
+  // selection at action time, and inserts its answer through it.
+  const views = useRef(new Map<string, EditorView>()).current;
+  const aiStatus = useAiStatus();
+  const aiAvailable =
+    (aiStatus.data?.enabled ?? false) && (aiStatus.data?.allowed ?? false);
 
   // The book's own spell-check words (see routes/dictionary.ts).
   const { data: dictionary } = useQuery({
@@ -351,6 +363,28 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
         return;
       e.preventDefault();
       setQuickOpen((open) => !open);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  // Ctrl/Cmd+Alt+A toggles the AI assistant's pane, when this teacher may
+  // use it. The latest answer is read at keypress time, not on every render.
+  const toggleAi = useRef(() => {});
+  toggleAi.current = () => {
+    if (aiAvailable) setShowAi((open) => !open);
+  };
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (
+        e.key.toLowerCase() !== "a" ||
+        !(e.ctrlKey || e.metaKey) ||
+        !e.altKey ||
+        e.shiftKey
+      )
+        return;
+      e.preventDefault();
+      toggleAi.current();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -896,6 +930,20 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
           onPublish={onPublish}
           onShowLog={setLogFor}
         />
+        {aiAvailable && (
+          <Button
+            size="icon"
+            variant="ghost"
+            className="size-8"
+            aria-label={
+              showAi ? "Hide the AI assistant" : "Show the AI assistant"
+            }
+            aria-pressed={showAi}
+            onClick={() => setShowAi((v) => !v)}
+          >
+            <SparklesIcon className="size-4" />
+          </Button>
+        )}
         <Button
           size="icon"
           variant="ghost"
@@ -1075,6 +1123,10 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
                   files={listing.files.map((f) => f.path)}
                   settings={settings}
                   spell={spell}
+                  onView={(path, view) => {
+                    if (view) views.set(path, view);
+                    else views.delete(path);
+                  }}
                   onEditBlock={(block, view) =>
                     editBlock(tab.path, block, view)
                   }
@@ -1096,6 +1148,37 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
             )}
           </div>
         </main>
+
+        {showAi && aiAvailable && (
+          <>
+            <Splitter
+              label="Resize the AI assistant"
+              pane={aiRef}
+              direction={-1}
+              onResize={setAiWidth}
+              onReset={() => setAiWidth(null)}
+            />
+            <section
+              ref={aiRef}
+              className="w-[360px] shrink-0 border-l border-border bg-sidebar"
+              style={aiWidth === null ? undefined : { width: aiWidth }}
+              aria-label="AI assistant"
+            >
+              <AiPanel
+                bookId={book.id}
+                activePath={activeTab?.path ?? null}
+                getViewOf={(path) => views.get(path) ?? null}
+                isTabOpen={(path) =>
+                  ws.currentTabs().some((tab) => tab.path === path)
+                }
+                isTabDirty={ws.dirtyOf}
+                closeTab={ws.close}
+                reloadTab={ws.reload}
+                commit={ws.commit}
+              />
+            </section>
+          </>
+        )}
 
         {showPreview && (
           <>
@@ -1263,6 +1346,7 @@ function TabContent({
   settings,
   spell,
   onEditBlock,
+  onView,
   onChange,
   onSave,
   onReplace,
@@ -1274,6 +1358,8 @@ function TabContent({
   settings: EditorSettings;
   spell: SpellOptions;
   onEditBlock: (block: Block, view: EditorView) => void;
+  /** Reports the tab's editor while it lives, for the AI panel. */
+  onView: (path: string, view: EditorView | null) => void;
   onChange: (text: string) => void;
   onSave: () => void;
   onReplace: () => void;
@@ -1311,7 +1397,10 @@ function TabContent({
         files={files}
         settings={settings}
         spell={spell}
-        onReady={(view) => (viewRef.current = view)}
+        onReady={(view) => {
+          viewRef.current = view;
+          onView(tab.path, view);
+        }}
       />
     );
     if (pageOf(tab.path)) {

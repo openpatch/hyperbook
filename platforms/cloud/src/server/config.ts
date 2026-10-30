@@ -51,6 +51,22 @@ export type Config = {
   } | null;
   /** Development and tests: emails are written here as files instead of sent. */
   mailOutboxDir: string | null;
+  /** The editor's AI writing assistant; null: the feature is off. */
+  ai: {
+    /** Any OpenAI-compatible API, e.g. https://api.mistral.ai/v1 or http://localhost:11434/v1 (Ollama). */
+    baseUrl: string;
+    apiKey: string;
+    /** The default model; always the first of `models`. */
+    model: string;
+    /** Models the teacher may pick in the editor; always includes `model`. */
+    models: string[];
+    /** Whole request, provider call and streaming included. */
+    timeoutMs: number;
+    maxOutputTokens: number;
+    /** Steps of the agent loop (books tools), once tools are added. */
+    maxSteps: number;
+    requestsPerMinute: number;
+  } | null;
 };
 
 export class ConfigError extends Error {
@@ -115,6 +131,18 @@ const schema = z.object({
   SMTP_PASS: optional,
   SMTP_FROM: optional,
   MAIL_OUTBOX_DIR: optional,
+  // The AI writing assistant speaks the OpenAI chat-completions protocol,
+  // so any provider works: Mistral, OpenAI, Anthropic's compatibility layer,
+  // or a local Ollama. All three or none, like SMTP above.
+  AI_BASE_URL: optional,
+  AI_API_KEY: optional,
+  AI_MODEL: optional,
+  /** Comma-separated extra models the editor offers; AI_MODEL stays the default. */
+  AI_MODELS: optional,
+  AI_TIMEOUT_SECONDS: z.coerce.number().int().min(10).default(120),
+  AI_MAX_OUTPUT_TOKENS: z.coerce.number().int().min(64).default(2048),
+  AI_MAX_STEPS: z.coerce.number().int().min(1).max(32).default(8),
+  AI_REQUESTS_PER_MINUTE: z.coerce.number().int().min(1).default(6),
 });
 
 const HOST_RE =
@@ -263,6 +291,58 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
 
   if (smtp && e.MAIL_OUTBOX_DIR) problems.push("Set either SMTP_* or MAIL_OUTBOX_DIR, not both");
 
+  // --- AI assistant: all or nothing ---------------------------------------
+  // Half a configuration silently answers nothing, so it is rejected.
+  let ai: Config["ai"] = null;
+  const aiFields = {
+    AI_BASE_URL: e.AI_BASE_URL,
+    AI_API_KEY: e.AI_API_KEY,
+    AI_MODEL: e.AI_MODEL,
+  };
+  const aiSet = Object.entries(aiFields).filter(([, v]) => v !== undefined);
+  if (aiSet.length > 0) {
+    const missing = Object.entries(aiFields)
+      .filter(([, v]) => v === undefined)
+      .map(([k]) => k);
+    if (missing.length > 0) {
+      problems.push(
+        `AI is partly configured; also set ${missing.join(", ")} or unset all AI_* variables`,
+      );
+    } else {
+      try {
+        const url = new URL(e.AI_BASE_URL!);
+        if (url.protocol !== "http:" && url.protocol !== "https:") {
+          problems.push("AI_BASE_URL must start with http:// or https://");
+        } else if (url.search || url.hash) {
+          problems.push("AI_BASE_URL must not carry a query or fragment");
+        } else {
+          // Anthropic's and Mistral's compatibility layers live below a path
+          // (/v1), so a path is allowed; a trailing slash is not kept.
+          const base = `${url.protocol}//${url.host}${url.pathname.replace(/\/+$/, "")}`;
+          const models = [
+            ...new Set(
+              [e.AI_MODEL!, ...(e.AI_MODELS ?? "").split(",")]
+                .map((m) => m.trim())
+                .filter(Boolean),
+            ),
+          ];
+          ai = {
+            baseUrl: base,
+            apiKey: e.AI_API_KEY!,
+            model: e.AI_MODEL!,
+            models,
+            timeoutMs: e.AI_TIMEOUT_SECONDS * 1000,
+            maxOutputTokens: e.AI_MAX_OUTPUT_TOKENS,
+            maxSteps: e.AI_MAX_STEPS,
+            requestsPerMinute: e.AI_REQUESTS_PER_MINUTE,
+          };
+        }
+      } catch {
+        problems.push(`AI_BASE_URL is not a valid URL: ${e.AI_BASE_URL}`);
+      }
+    }
+  }
+
   if (problems.length > 0) throw new ConfigError(problems);
 
   return {
@@ -290,6 +370,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     firstAdmin,
     smtp,
     mailOutboxDir: e.MAIL_OUTBOX_DIR ? path.resolve(e.MAIL_OUTBOX_DIR) : null,
+    ai,
   };
 }
 

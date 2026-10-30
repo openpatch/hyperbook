@@ -1,0 +1,550 @@
+# Java Memory Playground
+
+> A drawing tool for the Java stack and heap. You build the picture of what a
+> program has in memory — frames, objects, references — and share it as a link
+> or a file. Nothing runs your code: the diagram is authored, not traced, which
+> is what makes it a thinking tool rather than a debugger.
+
+This file is for language models. It documents the diagram format precisely
+enough that you can write a diagram for a teacher or a student from a piece of
+Java code, and hand back a file or a link that opens in the playground.
+
+The app is at <https://jmp.openpatch.org>. The human-facing documentation is at
+<https://jmp.openpatch.org/documentation.html>. Source and issues:
+<https://github.com/openpatch/java-memory-playground>.
+
+## What you can be asked to do
+
+- **Write a diagram** — a `.jmp` file (JSON, see below) illustrating some code.
+- **Write a trace** — the same file with several `steps`, one per line of code,
+  so a reader can step through what happens.
+- **Write an exercise** — a trace where one step is marked `"exercise": true`.
+  The student is handed the step before it, builds this one, and presses
+  **Check**; the playground compares their diagram with yours.
+- **Set an ordering exercise** — give a step `statements` and let the reader
+  fire the assignments in an order they choose, see [Statements](#statements).
+- **Hand back a link** — the whole diagram encoded into a URL, see
+  [Share links](#share-links). No account, no server, no storage.
+- **Explain a diagram** — read the JSON and say what the program's memory looks
+  like at that moment, or what changed between two steps.
+
+## What the playground does not do
+
+- It does not compile or run Java. There is a class parser (see
+  [Classes from Java source](#classes-from-java-source)), which reads structure
+  only: class names, field names, field types. And a step's `statements` are
+  executed (see [Statements](#statements)), but only assignments between
+  references — no arithmetic, no calls, no control flow.
+- It does not check your diagram against the Java language. A field of a type
+  that does not exist, an object of an unknown class, a reference to a missing
+  object — all of these draw something. Correctness is yours.
+- It has no backend. A diagram lives in a file, in a URL, or in the host page.
+
+## URLs
+
+| URL | What you get |
+| --- | --- |
+| `https://jmp.openpatch.org` | The student's playground: the whole diagram, every edit, the steps to walk through. |
+| `https://jmp.openpatch.org/?edit` | The teacher's: the same, plus class configuration and step authoring. |
+| `https://jmp.openpatch.org/#pako:...` | A shared diagram. Works with or without `?edit`. |
+| `https://jmp.openpatch.org/documentation.html` | The human documentation. |
+
+Give students the plain URL and teachers the `?edit` one. The diagram lives in
+the fragment, so the two are the same picture with different tools around it.
+
+## The diagram format
+
+A diagram is one JSON object. A `.jmp` file is exactly this JSON, and so is the
+`memory` attribute of the embedded component, and so is what a share link
+decodes to. Write it with 2-space indentation; it is meant to be read, diffed
+and reviewed like the code it illustrates.
+
+```json
+{
+  "viewport": { "x": 0, "y": 0, "zoom": 1 },
+  "options": { "hideDeclareGlobalVariable": true },
+  "klasses": {
+    "Node": { "attributes": { "value": "int", "next": "Node" } }
+  },
+  "steps": [
+    {
+      "label": "Node head = new Node(1);",
+      "objects": {
+        "@a1": {
+          "klass": "Node",
+          "attributes": {
+            "value": { "dataType": "int", "value": 1 },
+            "next": { "dataType": "Node" }
+          },
+          "position": { "x": 320, "y": 60 }
+        }
+      },
+      "variables": {},
+      "methodCalls": {
+        "@f1": {
+          "name": "App.main",
+          "index": 0,
+          "localVariables": { "head": { "dataType": "Node", "value": "@a1" } },
+          "position": { "x": 20, "y": 40 }
+        }
+      }
+    }
+  ]
+}
+```
+
+### Top level
+
+| Key | Type | Meaning |
+| --- | --- | --- |
+| `klasses` | object | The classes of this diagram, keyed by class name. Each appears in the palette as *new ClassName*. |
+| `steps` | array | The moments of the diagram, in order. A one-step diagram may omit this and put `objects` / `variables` / `methodCalls` at the top level instead — both shapes are read, and a one-step diagram is written back in the short one. |
+| `options` | object | See [Options](#options). Options travel with the diagram, so a link carries the lesson's settings. |
+| `viewport` | object | `{x, y, zoom}` — where the canvas was looking. Optional; `{ "x": 0, "y": 0, "zoom": 1 }` is a fine default. |
+
+Every section is optional and defaults to empty, so a partial diagram still
+opens. Anything you leave out, the playground fills in.
+
+### A class
+
+```json
+"klasses": {
+  "Message": {
+    "attributes": { "username": "String", "text": "String", "isRead": "boolean" }
+  }
+}
+```
+
+An attribute maps a field name to a type name: one of the primitives, `String`,
+or another class in `klasses`. Field order is kept, so declare fields in the
+order the Java source has them.
+
+### A step
+
+| Key | Type | Meaning |
+| --- | --- | --- |
+| `objects` | object | The heap: objects keyed by address. |
+| `variables` | object | Variables belonging to no frame. Java has no globals; this is scaffolding for lessons that come before methods. Hidden from the palette by default. |
+| `methodCalls` | object | The call stack: frames keyed by id. |
+| `label` | string | Shown in the step bar and in the caption of an exported PNG. Use the line of Java this step performs — `head = head.next;`. |
+| `note` | string | A hint for this step. The reader presses **Hint** to see it; it is not on screen until they do. |
+| `exercise` | boolean | This step is the solution to an exercise the student builds. See [Exercises](#exercises). |
+| `statements` | string[] | Assignments the reader can run against this step, in an order they choose. See [Statements](#statements). |
+
+### An object
+
+```json
+"@a1": {
+  "klass": "Node",
+  "attributes": {
+    "value": { "dataType": "int", "value": 1 },
+    "next": { "dataType": "Node", "value": "@a2" }
+  },
+  "position": { "x": 320, "y": 60 }
+}
+```
+
+- The key is the address. It is drawn nowhere, but it is what references point
+  at, so keep it short and stable: `@a1`, `@33`, `@head`.
+- `klass` is the class name, drawn as `:Node`. It should be a key of `klasses`.
+- `attributes` mirrors the class's fields: one entry per field, in the class's
+  order. A **primitive** field carries its value inline. A **reference** field
+  carries the address of the object it points at, and the arrow is drawn from
+  that field's handle to that object.
+- `position` is the canvas position, in pixels, y growing downwards.
+- `arrayElementType` and `literal` appear on arrays and Strings, below.
+
+### A variable (no frame)
+
+```json
+"@v1": {
+  "name": "head",
+  "dataType": "Node",
+  "value": "@a1",
+  "position": { "x": 40, "y": 60 }
+}
+```
+
+`value` is an address, or `null` for a null reference. Only used for lessons
+before methods appear; otherwise put the variable in a frame.
+
+### A stack frame
+
+```json
+"@f2": {
+  "name": "List.insert",
+  "index": 1,
+  "localVariables": {
+    "value": { "dataType": "int", "value": 7 },
+    "node": { "dataType": "Node", "value": "@a3" }
+  },
+  "position": { "x": 20, "y": 260 }
+}
+```
+
+- `name` is the method, written `Class.method`. It is drawn with `()` after it.
+- `index` is the depth in the stack: `0` for `main`, `1` for what `main` calls,
+  and so on. The frame with the highest index is on top, and it is the only one
+  whose **return** button is enabled — a call in the middle of the stack cannot
+  finish before the ones above it, and the disabled button is the lesson.
+- `localVariables` has the same shape as an object's `attributes`: primitives
+  inline, references as an address.
+- Declare the frame's locals as soon as the frame exists, with no value, if you
+  want a later step to fill them in. A local that appears out of nowhere reads
+  as a new variable; a local that changes from empty to a reference reads as an
+  assignment, which is usually what the code did.
+
+### Values and null
+
+| `dataType` | `value` |
+| --- | --- |
+| `int`, `long`, `short`, `byte`, `float`, `double`, `char` | a number (`char` too) |
+| `boolean` | `true` or `false` |
+| a class name, `String`, `Array` | an address such as `"@a1"` |
+
+Leave `value` out entirely for null. `{ "dataType": "Node" }` is a null
+reference and draws an empty handle; `{ "dataType": "int" }` draws `0`.
+An uninitialised primitive is best written with Java's default — `0` or
+`false` — since that is what the field actually holds.
+
+### Strings
+
+A String is a reference type, so a String value is a heap object like any
+other:
+
+```json
+"@s1": { "klass": "String", "literal": "mike", "attributes": {}, "position": { "x": 640, "y": 60 } }
+```
+
+`literal` holds the characters without quotes; the quotes are drawn. A field
+referring to it is an ordinary reference: `{ "dataType": "String", "value": "@s1" }`.
+
+By default (`inlineStrings`) the playground draws the String inside the field
+that references it rather than as its own box, because a diagram about a linked
+list should not sprout a box per name. Set `"inlineStrings": false` when the
+String *is* the lesson — `==` against `.equals()`, the string pool, two
+references to one String object. The file is identical either way; only the
+drawing changes.
+
+### Arrays
+
+An array is an object whose class is the literal string `Array`:
+
+```json
+"@arr": {
+  "klass": "Array",
+  "arrayElementType": "int",
+  "attributes": {
+    "length": { "dataType": "int", "value": 3 },
+    "[0]": { "dataType": "int", "value": 4 },
+    "[1]": { "dataType": "int", "value": 8 },
+    "[2]": { "dataType": "int", "value": 15 }
+  },
+  "position": { "x": 320, "y": 200 }
+}
+```
+
+- `length` first, then `[0]` … `[n-1]`, in order. `length` is drawn as fixed
+  text rather than as a field, the way Java fixes it when the array is made,
+  so write it to match the number of elements you list.
+- It is drawn as `:int[]`, from `arrayElementType`.
+- An array of references has `arrayElementType` set to the class name and each
+  element holding an address or nothing — an array of nulls is `n` empty
+  handles, which is the picture behind `new Node[3]`.
+
+### Rules that keep a diagram valid
+
+1. **Ids are unique within a step, across all three sections.** Objects,
+   variables and frames share one id space.
+2. **Ids are stable across steps.** The same object keeps the same address in
+   every step it exists in. This is what lets the playground mark what a step
+   changed — a new id reads as "a new object was created", so reuse ids for
+   the same object and mint a new one only for a genuine `new`.
+3. **Positions are stable across steps too.** Layout belongs to the diagram,
+   not to a moment in it: dragging a node in the app moves it in every step.
+   Give a node the same `position` in every step, or the picture jumps while
+   scrubbing.
+4. **Every address referenced exists in that step.** A reference to an object
+   that is not in `objects` draws no arrow.
+5. **An object's `attributes` match its class's `attributes`** — same names,
+   same types, same order. The teacher's playground reconciles them when
+   classes are applied; a hand-written file should not need reconciling.
+6. **Never point a primitive field at an address.** The type decides how a
+   field is drawn: primitives get an editable value, references get a handle.
+
+### Layout
+
+Coordinates are pixels on an infinite canvas, y downwards. There is no
+auto-layout, so the positions you write are the diagram a reader sees. What
+works:
+
+- **Stack on the left, heap on the right.** Frames around `x: 20`, objects from
+  `x: 300` outwards.
+- **One column per level of indirection.** A `List` at `x: 300`, its `Node`s at
+  `x: 520`, the `Message` each Node holds at `x: 740`. Following an arrow then
+  always means moving right, and a linked list looks like a list.
+- **Frames stacked downwards in call order**, `main` at the top, each call
+  about 200px below the one before it. (The frames' vertical order on the
+  canvas is yours; `index` is what actually decides which is on top.)
+- Leave roughly 220px horizontally and 140px vertically between boxes. Objects
+  grow with their field count — allow ~30px per field.
+- Put a String object to the right of the object that references it.
+
+## Steps and traces
+
+A trace is a sequence of steps, and it is the format's most useful feature for
+teaching: a stack that only ever exists in one picture never gets to do the
+thing that makes it a stack.
+
+- **One step per line of Java.** The `label` is that line.
+- **Change one thing per step.** What changed since the previous step is marked
+  automatically — a green outline for what appeared, a dashed amber one for
+  what changed, an amber arrow for a reference that moved — so a step that
+  changes six things marks six things and teaches none of them.
+- **Start from a step that is worth reading on its own**: the frame exists, its
+  locals are declared and null, the heap is empty.
+- **A `new` is one step, the assignment of its reference is often the next.**
+  The moment where an object exists but nothing points at it yet is exactly the
+  moment a reader needs to see to understand what a reference is.
+- **A return pops the frame and everything it held.** Drop the frame from the
+  step, and drop the arrows that left it — which is frequently what turns an
+  object into garbage.
+
+`hideSteps` hides the step bar for a diagram that is one picture;
+`hideStepChanges` turns off the marking.
+
+## Exercises
+
+Mark a step `"exercise": true` and it becomes the student's work. Their
+playground shows them the step before it and asks them to build this one;
+**Check** compares what they made with what you authored, and **Show solution**
+reveals it.
+
+The comparison is by **shape reachable from the named roots** — each global
+variable, and each local of each frame — not by addresses, which the student
+never types and which would never match. For each root, the playground writes
+out what it points at, following references and folding cycles into back
+references, and compares that string. So:
+
+- Name roots exactly as the student will: the check reports *which* root is
+  wrong, by name, and a local named `tmp` in your solution and `temp` in theirs
+  counts as one missing and one invented.
+- Objects the student can reach are compared; objects nothing points at are not
+  part of any root's shape.
+- Primitive locals are compared by value, so an exercise can be "what is `i`
+  after the loop?" as much as "draw the list".
+- Frames take part through `index` and `name`, so an exercise about recursion
+  compares each frame's locals separately.
+
+Give an exercise step a `label` that says what to build — `insert(7) at the
+front` — since that label is the whole instruction the student gets.
+
+A `note` on the step is the hint behind the **Hint** button, and it is the rung
+between trying again and **Show solution**: the student who is stuck gets a
+nudge instead of the answer. It is hidden until they ask, so write it as the
+one sentence you would say over their shoulder — *the new node's `next` has to
+point at the old front, not the other way round* — and not as the solution in
+prose. The hint travels with the step the student is given, so it is there
+whether the diagram arrived as a file, a link or an embedded playground. A note
+on an ordinary step works too, for an aside that would clutter the label.
+
+## Statements
+
+A step can carry lines the reader runs by pressing them:
+
+```json
+"statements": ["neu.next = current.next", "current.next = neu"]
+```
+
+Each is evaluated against the diagram as it stands when it is pressed. That is
+the point of them. Dragging an edge says where a reference should end up; a
+line says what it means *at the moment it runs*, so the two lines above build
+the list in one order and make the new node point at itself in the other. The
+reader sees the broken picture rather than a verdict, and the rest of the list
+greys out behind it because nothing reaches it any more.
+
+The grammar is deliberately small:
+
+- `name` — a global variable, or a local of a frame.
+- `name.attribute`, to any depth — the attribute of whatever that path points
+  at right now.
+- `null`, on the right-hand side only.
+
+Anything else is refused with a reason and the diagram is left alone: an
+unknown name, a path through a null reference, an attribute the class does not
+have, or a primitive field, which holds a value rather than an arrow.
+
+A numbered log keeps the order the reader chose, and **Start over** returns the
+step to how the first line found it. Statements belong to the instruction, so
+they travel with the label and the note — onto the student's working step, and
+through a file, a link or an embedded playground. They do not replace dragging
+and they do not change how an exercise is checked; they are a second way to
+build the step.
+
+## Options
+
+Options live in the diagram and travel with the link.
+
+| Option | Default | Effect |
+| --- | --- | --- |
+| `hideSidebar` | off | Hide the palette, for a diagram meant to be read rather than built. |
+| `hideCallMethod` | off | Drop *Call Method* from the palette. |
+| `hideDeclareGlobalVariable` | **on** | Drop *Declare Global Variable*. On by default, because Java has no globals. |
+| `hideNewArray` | off | Drop *new Array*. |
+| `disableGarbageCollector` | off | No collector button, and no tinting of unreachable objects. |
+| `gcPrediction` | off | Make the student commit: mark what they think is unreachable, then *Check and collect* scores it. |
+| `createNewOnEdgeDrop` | off | Dropping an arrow on empty canvas creates the object it points at. |
+| `inlineStrings` | **on** | Draw a String inside its holder instead of as its own heap box. |
+| `hideSteps` | off | Hide the step bar. |
+| `hideStepChanges` | off | Stop marking what a step changed. |
+
+Three presets match the usual stages of a course — pick the one that matches
+where the class is, then adjust:
+
+- **references** — objects and the names that point at them. No stack, no
+  arrays, no collector, one picture.
+- **stack** — method calls arrive, and with them steps.
+- **everything** — arrays, the garbage collector, and Strings as the heap
+  objects they are (`inlineStrings` off).
+
+```json
+"options": {
+  "hideCallMethod": true, "hideDeclareGlobalVariable": false,
+  "hideNewArray": true, "disableGarbageCollector": true,
+  "createNewOnEdgeDrop": true, "inlineStrings": true, "hideSteps": true
+}
+```
+
+## The garbage collector
+
+*Run Garbage Collector*, under the palette, removes every object not reachable
+from a variable or a stack frame; unreachable objects are tinted before you
+press it. This makes
+reachability something a student can see rather than be told, so a diagram
+about garbage should be a trace: the object with two references, then one, then
+none.
+
+With `gcPrediction` on the student marks what they believe is unreachable
+first, and the check scores what they found, what they missed, and what they
+marked that was still reachable.
+
+## Classes from Java source
+
+In the teacher's playground, classes can be pasted as Java instead of typed
+field by field:
+
+```java
+class Node {
+    int value;
+    Node next;
+}
+```
+
+Only structure is read — class names, field names, field types. Method bodies
+are skipped, records work and their components are read as fields, and nothing
+is executed. When writing a `klasses` object yourself, this is the shape you
+are producing; the two are interchangeable.
+
+## Share links
+
+A share link is the whole diagram, compressed into the fragment. Building one
+by hand is not practical — it is deflate plus base64 — but it is a few lines of
+JavaScript, and the result is a URL you can hand over directly:
+
+```js
+// npm i pako js-base64
+import { deflate } from "pako";
+import { fromUint8Array } from "js-base64";
+
+const link = (memory) => {
+  const stored = JSON.stringify({ state: { memory }, version: 0 });
+  const bytes = deflate(new TextEncoder().encode(JSON.stringify(stored)), { level: 9 });
+  return "https://jmp.openpatch.org/#pako:" + fromUint8Array(bytes, true);
+};
+```
+
+The two `JSON.stringify` calls are both needed: the inner one is the stored
+state, the outer one is how it is written into the URL. Base64 must be
+URL-safe (the `true` argument). Add `?edit` before the `#` for a teacher's
+link. To read a link back, base64-decode, inflate, and `JSON.parse` twice.
+
+Links are long — a ten-step trace is a few kilobytes of URL. That is fine for a
+worksheet or an LMS, less so for a printed slide; for those, prefer a `.jmp`
+file or an embedded playground.
+
+## Embedding
+
+As a web component, in any page — a CMS, an LMS, a static site:
+
+```html
+<link rel="stylesheet" href="index.css" />
+<script src="index.umd.js"></script>
+
+<java-memory-playground id="p"></java-memory-playground>
+<script>
+  const p = document.getElementById("p");
+  p.setAttribute("memory", JSON.stringify(diagram));
+  p.setAttribute("options", '{"hideSidebar":true}');
+  p.addEventListener("change", (e) => save(e.detail));   // on Save
+  p.addEventListener("edit", (e) => autosave(e.detail)); // on every edit
+  p.addEventListener("stepchange", (e) => highlight(e.detail));
+</script>
+```
+
+- `<java-memory-playground>` is the student's, `<java-memory-playground-editor>`
+  the teacher's. Same attributes, same events.
+- Attributes: `memory`, `options`, `language` (`en` | `de` | `auto`), `step`,
+  `persistence`, `key-bindings`.
+- The element has no intrinsic size — give it a `height`.
+- An embedded playground never touches the host page's URL, and several can
+  share one page. Set the `step` attribute to drive the diagram from your prose.
+- In React: `<MemoryPlayground memory={diagram} onChange={...} />` from
+  `@java-memory-playground/java-memory-playground`, or `MemoryPlaygroundEditor`
+  for the teacher's.
+- In VS Code: the *Java Memory Playground* extension opens `.jmp` files as the
+  diagram. A `.jmp` file next to the `.java` file it illustrates diffs and
+  reviews like code.
+
+## Writing for the two audiences
+
+**For students**, the diagram is the exercise. Hide what the lesson does not
+need (`hideCallMethod` before methods, `hideNewArray` before arrays), give
+every step a label that is the line of code, and put the work in an `exercise`
+step rather than in prose. Keep one idea per diagram.
+
+**For teachers**, the diagram is the slide. Hand over the `?edit` link so they
+can change the classes and add steps, keep the class definitions faithful to
+the source they are teaching from, and leave `hideSidebar` off so they can
+build on what you gave them. A trace they can step through beats a picture they
+have to talk over.
+
+The interface is English and German and follows the browser; labels and notes
+you write are shown as you wrote them, so write them in the language of the
+class.
+
+## Diagrams worth knowing how to write
+
+- **Reference versus value** — an `int` copied into a second variable, an
+  object "copied" into a second variable. Two steps, one arrow, no classes.
+- **Aliasing** — two locals pointing at one object, a field changed through
+  one, read through the other.
+- **null** — a declared-but-unassigned reference, then assigned. The empty
+  handle is what `NullPointerException` means.
+- **The call stack** — `main` calls a method that calls another; a frame per
+  step, then returns popping them. Recursion is the same picture with the same
+  method name at several indexes.
+- **Parameter passing** — the caller's local and the callee's parameter
+  pointing at the same object. The arrow that does not change is the point.
+- **Linked list** — insert at the front, insert at the end, delete in the
+  middle. Reuse node ids so the moved reference is the only thing marked.
+- **Garbage** — the last reference to an object going away, then the collector.
+- **`==` versus `.equals()`** — two `String` objects with the same `literal`
+  against two references to one object, with `inlineStrings` off.
+- **Arrays** — `new Node[3]` as three empty handles; then filling them.
+
+## Links
+
+- [The playground](https://jmp.openpatch.org) — the student's.
+- [The teacher's playground](https://jmp.openpatch.org/?edit) — adds class configuration and step authoring.
+- [Documentation](https://jmp.openpatch.org/documentation.html) — the human version of this file.
+- [Source](https://github.com/openpatch/java-memory-playground) — issues, the React and web-component packages, the VS Code extension.
