@@ -83,7 +83,7 @@ export function EntitlementsEditor({
   defaultLabel?: string;
   onSave: (overrides: Overrides) => Promise<void>;
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [draft, setDraft] = useState<Overrides>(value);
   const [saving, setSaving] = useState(false);
   const set = (key: keyof Entitlements, v: Entitlements[keyof Entitlements] | undefined) =>
@@ -151,12 +151,13 @@ export function EntitlementsEditor({
             {mode === "limit" && (
               <div className="flex items-center gap-2">
                 <Input
-                  type="number"
-                  min={0}
-                  className="w-28"
+                  type="text"
+                  inputMode="numeric"
+                  className="w-36"
                   aria-label={t("entitlements.limitAria", { label: t(label) })}
-                  value={current ?? 0}
-                  onChange={(e) => set(key, Math.max(0, Number(e.target.value) || 0))}
+                  value={(current ?? 0).toLocaleString(i18n.language)}
+                  // Dots, commas and spaces are only for reading: 1.000.000 is 1000000.
+                  onChange={(e) => set(key, Number(e.target.value.replace(/\D/g, "")) || 0)}
                 />
                 <span className="text-sm text-muted-foreground">{t(unit)}</span>
               </div>

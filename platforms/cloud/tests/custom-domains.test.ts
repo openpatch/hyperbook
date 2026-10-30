@@ -18,6 +18,8 @@ async function world() {
     zipSync({ "hyperbook.json": text("{}"), "index.html": text("<h1>Home</h1>") }),
   );
   await instance.builds.idle();
+  await owner.c.post(`/api/books/${book.id}/publish`, {});
+  await instance.builds.idle();
   return { instance, admin, owner, book };
 }
 

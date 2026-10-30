@@ -215,6 +215,8 @@ describe("private books", () => {
       zipSync({ "hyperbook.json": new TextEncoder().encode("{}"), "index.html": new TextEncoder().encode("<h1>Secret</h1>") }),
     );
     await instance.builds.idle();
+    await owner.c.post(`/api/books/${book.id}/publish`, {});
+    await instance.builds.idle();
 
     const b = bookClient(instance, HOST);
     expect((await b.get("/")).status).toBe(302);

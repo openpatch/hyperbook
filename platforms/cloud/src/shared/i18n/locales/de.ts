@@ -3,11 +3,13 @@ import type { Messages } from "./en";
 /** The German catalog; tests/i18n.test.ts checks that it has every key of en. */
 export const de: Messages = {
   common: {
+    typeToConfirm: "Geben Sie „{{text}}“ zur Bestätigung ein.",
     save: "Speichern",
     loading: "Laden…",
     language: "Sprache",
     cancel: "Abbrechen",
     delete: "Löschen",
+    copied: "Kopiert",
     copy: "Kopieren",
     done: "Fertig",
     download: "Herunterladen",
@@ -28,9 +30,9 @@ export const de: Messages = {
     addresses: "Adressen",
     settings: "Einstellungen",
     activity: "Aktivität",
+    aiMonitor: "KI-Nutzung",
     account: "Ihr Konto",
     logOut: "Abmelden",
-    aiMonitor: "KI-Nutzung",
   },
   theme: {
     toLight: "Zum hellen Modus wechseln",
@@ -108,7 +110,11 @@ export const de: Messages = {
     nameHint:
       "Wird anderen Lehrkräften angezeigt, mit denen Sie Bücher teilen.",
     saved: "Gespeichert",
+    email: "E-Mail-Adresse",
+    emailHint: "Damit melden Sie sich an und erhalten dort E-Mails. Bestätigen Sie mit Ihrem Passwort; andere Geräte werden abgemeldet.",
+    emailChanged: "E-Mail-Adresse geändert.",
     storage: "Speicherplatz",
+    aiUsage: "KI-Nutzung",
     password: "Passwort",
     currentPassword: "Aktuelles Passwort",
     newPassword: "Neues Passwort",
@@ -384,11 +390,6 @@ export const de: Messages = {
         "Ihre Änderungen an dieser Datei sind nicht gespeichert.",
       closeWithoutSaving: "Ohne Speichern schließen",
       saveAndClose: "Speichern und schließen",
-      publishUnsavedTitle: "Mit ungespeicherten Änderungen veröffentlichen?",
-      publishUnsavedDescription:
-        "Nur gespeicherte Änderungen werden veröffentlicht.",
-      publishSavedVersion: "Gespeicherte Version veröffentlichen",
-      saveAllAndPublish: "Alle speichern und veröffentlichen",
       settingsSavedToast: "Einstellungen gespeichert.",
       settingsConflict:
         "Jemand anderes hat die Einstellungen geändert; öffnen Sie sie erneut.",
@@ -403,25 +404,6 @@ export const de: Messages = {
       redo: "Wiederholen",
       selectAll: "Alles auswählen",
       editVisually: "Visuell bearbeiten",
-    },
-    publish: {
-      waitingToBuild: "Wartet auf den Build…",
-      building: "Baut…",
-      progressPages: "{{done}} / {{total}} Seiten",
-      progressGlossary: "{{done}} / {{total}} Glossar-Einträge",
-      publishedToast: "Veröffentlicht. Schüler sehen die neue Version.",
-      failedToast:
-        "Veröffentlichen fehlgeschlagen: Der Build war nicht erfolgreich.",
-      showLog: "Log anzeigen",
-      publishedShort: "Veröffentlicht.",
-      published: "Veröffentlicht",
-      publish: "Veröffentlichen",
-      publishingLabel: "Wird veröffentlicht…",
-      publishingTitle:
-        "Das Buch geht live, wenn dieser Build fertig ist. Klicken Sie, um sein Log zu sehen.",
-      upToDateTitle: "Schüler sehen die neueste gespeicherte Version",
-      behindTitle: "Schüler sehen eine ältere Version",
-      couldNotPublish: "Veröffentlichen fehlgeschlagen",
     },
     settingsMenu: {
       aria: "Editor-Einstellungen",
@@ -682,6 +664,24 @@ export const de: Messages = {
     entitlements: "Berechtigungen",
     entitlementsDescription:
       "Was diese Lehrkraft über die Grundausstattung hinaus darf. Admins sind nie eingeschränkt.",
+    access: "Zugang",
+    setNewPassword: "Neues Passwort setzen",
+    setNewPasswordTitle: "Ein neues Passwort setzen?",
+    setNewPasswordDescription:
+      "Ein neues Passwort wird erzeugt und nur einmal angezeigt. Der Benutzer wird überall abgemeldet.",
+    enable: "Konto aktivieren",
+    disable: "Konto deaktivieren",
+    disableTitle: "Dieses Konto deaktivieren?",
+    disableDescription:
+      "Der Benutzer wird abgemeldet und kann sich nicht anmelden, bis das Konto wieder aktiviert ist. Die Bücher bleiben.",
+    deleteTitle: "Dieses Konto löschen?",
+    deleteDescription:
+      "Das kann nicht rückgängig gemacht werden. Bücher, die diese Person allein besitzt, müssen zuerst einen anderen Besitzer bekommen.",
+    delete: "Konto löschen",
+    newDialogTitle: "Neues Passwort",
+    newDialogDescription:
+      "Das neue Passwort für {{email}} wird nur jetzt angezeigt.",
+  },
   aiMonitor: {
     title: "KI-Nutzung",
     description: "Was der KI-Assistent im ganzen System gefragt wurde. Klicken Sie auf eine Person, um nur deren Nutzung zu sehen.",
@@ -704,24 +704,6 @@ export const de: Messages = {
     failed: "Fehlgeschlagen",
     steps: "Tool-Aufrufe",
     finish: "Ende",
-  },
-    access: "Zugang",
-    setNewPassword: "Neues Passwort setzen",
-    setNewPasswordTitle: "Ein neues Passwort setzen?",
-    setNewPasswordDescription:
-      "Ein neues Passwort wird erzeugt und nur einmal angezeigt. Der Benutzer wird überall abgemeldet.",
-    enable: "Konto aktivieren",
-    disable: "Konto deaktivieren",
-    disableTitle: "Dieses Konto deaktivieren?",
-    disableDescription:
-      "Der Benutzer wird abgemeldet und kann sich nicht anmelden, bis das Konto wieder aktiviert ist. Die Bücher bleiben.",
-    deleteTitle: "Dieses Konto löschen?",
-    deleteDescription:
-      "Das kann nicht rückgängig gemacht werden. Bücher, die diese Person allein besitzt, müssen zuerst einen anderen Besitzer bekommen.",
-    delete: "Konto löschen",
-    newDialogTitle: "Neues Passwort",
-    newDialogDescription:
-      "Das neue Passwort für {{email}} wird nur jetzt angezeigt.",
   },
   audit: {
     title: "Aktivität",
@@ -817,6 +799,8 @@ export const de: Messages = {
     private: "Privat",
     edit: "Buch bearbeiten",
     settings: "Einstellungen",
+    settingsHint:
+      "Diese Einstellungen gelten nur für Hyperbook Cloud. Der öffentliche Name und die Beschreibung des Hyperbooks selbst werden in der hyperbook.json festgelegt.",
     titleField: "Titel",
     descriptionField: "Beschreibung",
     address: "Adresse",
@@ -984,13 +968,35 @@ export const de: Messages = {
   publishing: {
     title: "Veröffentlichen",
     description:
-      "Bearbeiten Sie das Buch im Browser und veröffentlichen Sie es, wenn es fertig ist, oder laden Sie es als Zip hoch, die sofort gebaut und veröffentlicht wird. Sie können auch lokal mit git am Buch arbeiten.",
-    publishedAt: "Veröffentlicht {{when}} unter",
+      "Bearbeiten Sie das Buch im Browser oder laden Sie es als Zip hoch; jede Speicherung wird als Vorschau gebaut. Veröffentlichen Sie die Vorschau, um sie als neue Live-Version freizugeben. Sie können auch lokal mit git am Buch arbeiten.",
     notPublishedYet: "Noch nicht veröffentlicht.",
-    aheadPublished_one: "main liegt {{count}} Commit vor der Live-Seite. ",
-    aheadPublished_other: "main liegt {{count}} Commits vor der Live-Seite. ",
     aheadPreview_one: "main liegt {{count}} Commit vor der Vorschau.",
     aheadPreview_other: "main liegt {{count}} Commits vor der Vorschau.",
+    since: "Live seit {{when}}",
+    preview: "Vorschau",
+    previewIsLive: "Entspricht der Live-Version",
+    previewNewer: "Neuer als die Live-Version",
+    savedAt: "Gespeichert {{when}}",
+    noPreview: "Noch nichts gebaut.",
+    buildPreview: "Vorschau bauen",
+    buildingPreview: "Vorschau wird gebaut…",
+    isLive: "Aktuell",
+    moreActions: "Verwalten",
+    uploadZip: "Zip hochladen",
+    uploadDescription: "Ersetzt die Dateien des Buchs und baut eine neue Vorschau.",
+    publishTitle: "Vorschau veröffentlichen",
+    publishDescription:
+      "Die Vorschau wird zu einer neuen Version und geht live. Frühere Versionen bleiben für ein Zurücksetzen erhalten.",
+    versions: {
+      title: "Versionen",
+      version: "Version",
+      empty: "Noch nichts veröffentlicht.",
+    },
+    history: "Build-Verlauf",
+    showAll: "Alle anzeigen ({{count}})",
+    showLess: "Weniger anzeigen",
+    rollBackRebuildDescription:
+      "Die Live-Seite wechselt zu dieser Version. Ihr Build ist nicht mehr gespeichert und wird zuerst neu gebaut. Das aktuelle main bleibt unverändert.",
     rebuild: "Neu bauen",
     publish: "Veröffentlichen",
     notePlaceholder: "Notiz zu dieser Version (optional)",
@@ -1033,6 +1039,7 @@ export const de: Messages = {
       hint: "Klonen Sie das Buch, bearbeiten Sie es lokal und pushen Sie auf",
       hint2: ". Pullen Sie, bevor Sie pushen.",
       copy: "Kopieren",
+      copied: "Kopiert",
       copyAria: "Den Clone-Befehl kopieren",
       authHint1: "Git fragt nach Benutzername und Passwort: Verwenden Sie",
       authHint2:
@@ -1155,13 +1162,6 @@ export const de: Messages = {
     landingPageHint:
       "Die Landing-Page stellt Hyperbook vor und verlinkt die Wege, es zu betreiben. Ohne sie zeigt die vordere Adresse nur den Anmeldebildschirm.",
     gitPushLabel: "Ein git push baut auch die Vorschau",
-    gitPushHint:
-      "Wenn eine Lehrkraft mit git auf den main-Branch eines Buchs pusht, wird seine Vorschau neu gebaut (nie automatisch veröffentlicht). Standardmäßig aus: Pushes aktualisieren dann nur die Quelle, damit viele kleine Commits die Build-Warteschlange nicht überlasten.",
-    signup: "Registrierung",
-    signupDescriptionEmail:
-      "Wer ein Konto anlegen darf. Neue Konten bestätigen zuerst ihre E-Mail-Adresse.",
-    signupDescriptionNoEmail:
-      "Die Registrierung braucht E-Mail, um Adressen zu bestätigen. Richten Sie SMTP ein, um sie zu öffnen.",
     aiModels: "KI-Modelle",
     aiModelsDescription:
       "Die Modelle, aus denen Lehrkräfte im KI-Assistenten des Editors wählen können. Anbieter und Schlüssel werden in der Umgebung des Servers festgelegt.",
@@ -1172,6 +1172,13 @@ export const de: Messages = {
     aiModelAdd: "Modell hinzufügen",
     aiModelsHint:
       "Geben Sie einem Modell einen Namen wie Schnell oder Gründlich, dann sehen Lehrkräfte diesen statt der Modell-ID. Ein Credit ist ein Token (Eingabe und Ausgabe gleich) mal dem Gewicht des Modells. Geben Sie dem Vergleichsmodell das Gewicht 1 und einem Modell, das pro Token doppelt so viel kostet, das Gewicht 2.",
+    gitPushHint:
+      "Wenn eine Lehrkraft mit git auf den main-Branch eines Buchs pusht, wird seine Vorschau neu gebaut (nie automatisch veröffentlicht). Standardmäßig aus: Pushes aktualisieren dann nur die Quelle, damit viele kleine Commits die Build-Warteschlange nicht überlasten.",
+    signup: "Registrierung",
+    signupDescriptionEmail:
+      "Wer ein Konto anlegen darf. Neue Konten bestätigen zuerst ihre E-Mail-Adresse.",
+    signupDescriptionNoEmail:
+      "Die Registrierung braucht E-Mail, um Adressen zu bestätigen. Richten Sie SMTP ein, um sie zu öffnen.",
     whoMay: "Wer sich registrieren darf",
     modeClosed: "Geschlossen",
     modeClosedHint:

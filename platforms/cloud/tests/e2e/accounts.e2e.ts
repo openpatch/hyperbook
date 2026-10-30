@@ -142,7 +142,7 @@ describe("accounts", () => {
 
     await page.goto(`${server.origin}/account`);
     await page.getByRole("heading", { name: "Storage" }).waitFor();
-    await page.getByText(/ of 1\.0 MB/).waitFor();
+    await page.getByText(/ of 1 MB/).waitFor();
   }, 60_000);
 });
 

@@ -26,7 +26,6 @@ import { type Book, useBook } from "@/lib/books";
 import { useEditorSettings, type EditorSettings } from "@/lib/editor-settings";
 import { useAiStatus } from "@/lib/ai";
 import { cn } from "@/lib/utils";
-import { LogDialog } from "../publishing";
 import { CodeEditor, type SpellOptions } from "./code-editor";
 import {
   ChoiceDialog,
@@ -52,7 +51,6 @@ import {
 import { RefactorDialog, type RefactorRequest } from "./references-dialog";
 import { PreviewPane } from "./preview";
 import { VisualFrame, visualKind, visualProblem } from "./visual-frame";
-import { PublishButton, useBuilds } from "./publish";
 import { type Block, type InlineBlock, resolveSrc } from "./blocks";
 import { BlockDialog } from "./block-dialog";
 import { SettingsDialog } from "./settings-dialog";
@@ -182,7 +180,6 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
   const { t } = useTranslation();
   const bookId = String(book.id);
   const ws = useWorkspace(bookId, listing);
-  const { data: builds } = useBuilds(bookId);
   // The book's language: struktolab's keywords depend on it.
   const { data: bookLanguage = "en" } = useQuery({
     queryKey: [
@@ -208,7 +205,6 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
   const [choice, setChoice] = useState<ChoiceRequest | null>(null);
   /** What a rename, move or delete is about to do to the file's references. */
   const [refactor, setRefactor] = useState<RefactorRequest | null>(null);
-  const [logFor, setLogFor] = useState<number | null>(null);
   const [showPreview, setShowPreview] = useState(true);
   const [showAi, setShowAi] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -897,28 +893,6 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
     });
   };
 
-  const onPublish = (publish: () => Promise<void>) => {
-    if (!hasUnsaved) return void publish();
-    setChoice({
-      title: t("editor.actions.publishUnsavedTitle"),
-      description: t("editor.actions.publishUnsavedDescription"),
-      choices: [
-        {
-          label: t("editor.actions.publishSavedVersion"),
-          variant: "outline",
-          run: publish,
-        },
-        {
-          label: t("editor.actions.saveAllAndPublish"),
-          run: async () => {
-            await save([...ws.dirty]);
-            await publish();
-          },
-        },
-      ],
-    });
-  };
-
   const activeTab = ws.tabs.find((t) => t.path === ws.active);
 
   return (
@@ -944,14 +918,6 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
         >
           {t("editor.toolbar.saveAll")}
         </Button>
-        <PublishButton
-          bookId={bookId}
-          commit={listing.commit}
-          builds={builds}
-          hasUnsaved={hasUnsaved}
-          onPublish={onPublish}
-          onShowLog={setLogFor}
-        />
         {aiAvailable && (
           <Button
             size="icon"
@@ -1123,6 +1089,7 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
                   type="button"
                   className="mr-1 rounded p-0.5 opacity-60 hover:bg-accent hover:opacity-100"
                   aria-label={t("editor.tabs.close", { path: tab.path })}
+                  title={t("editor.tabs.close", { path: tab.path })}
                   onClick={() => closeTab(tab)}
                 >
                   <XIcon className="size-3.5" />
@@ -1278,7 +1245,6 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
         }}
       />
       <RefactorDialog request={refactor} onClose={() => setRefactor(null)} />
-      <LogDialog buildId={logFor} onClose={() => setLogFor(null)} />
       <QuickOpen
         open={quickOpen}
         files={listing.files.map((f) => f.path)}

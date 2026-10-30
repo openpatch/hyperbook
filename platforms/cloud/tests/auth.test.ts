@@ -111,6 +111,25 @@ describe("request forgery protection", () => {
 });
 
 describe("account", () => {
+  it("changes the email with the password, not onto a taken one", async () => {
+    const instance = setup();
+    await createUser(instance, { email: "taken@example.org" });
+    const { c } = await loggedIn(instance, { email: "t@example.org" });
+    const wrong = await c.put("/api/me/email", { email: "n@example.org", currentPassword: "nope" });
+    expect(wrong.status).toBe(400);
+    const taken = await c.put("/api/me/email", {
+      email: "Taken@Example.org",
+      currentPassword: "correct horse battery",
+    });
+    expect(taken.status).toBe(409);
+    const ok = await c.put("/api/me/email", {
+      email: " N@Example.org ",
+      currentPassword: "correct horse battery",
+    });
+    expect(ok.status).toBe(200);
+    expect((await c.get("/api/me")).body.email).toBe("n@example.org");
+  });
+
   it("changes the password and logs out other sessions", async () => {
     const instance = setup();
     const { c } = await loggedIn(instance, { email: "t@example.org" });

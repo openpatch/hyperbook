@@ -79,7 +79,8 @@ export class BuildQueue {
     userId: number | null,
     note?: string,
   ): BuildRow {
-    const publish = trigger !== "edit" && trigger !== "push";
+    // Only a publish or a rollback goes live; saves, uploads and rebuilds are previews.
+    const publish = trigger === "publish" || trigger === "rollback";
     const build = this.db.transaction((tx) => {
       tx.update(builds)
         .set({ status: "canceled", error: "Replaced by a newer build", finishedAt: new Date() })

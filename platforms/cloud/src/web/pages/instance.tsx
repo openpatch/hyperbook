@@ -1,4 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { PlusIcon, Trash2Icon } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -9,6 +10,7 @@ import { EntitlementsEditor, type Entitlements } from "@/components/entitlements
 import { PageHeader, Section } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
@@ -230,8 +232,6 @@ function InstanceForms({
           }
         }}
       />
-      <Section
-        title={t("instanceSettings.entitlements")}
       {settings.ai.configured && (
         <AiModelsSection
           key={JSON.stringify(settings.ai)}
@@ -246,6 +246,8 @@ function InstanceForms({
           }}
         />
       )}
+      <Section
+        title={t("instanceSettings.entitlements")}
         description={t("instanceSettings.entitlementsDescription")}
       >
         <EntitlementsEditor
@@ -265,8 +267,6 @@ function InstanceForms({
     </>
   );
 }
-
-const loadSettings = () => unwrap(api.instance.$get());
 
 /** The assistant's models: the default, and what each costs the token quota. */
 function AiModelsSection({
@@ -368,6 +368,8 @@ function AiModelsSection({
     </Section>
   );
 }
+
+const loadSettings = () => unwrap(api.instance.$get());
 
 type SignupMode = "closed" | "open" | "domains" | "approval";
 

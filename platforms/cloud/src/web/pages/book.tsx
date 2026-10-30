@@ -154,7 +154,7 @@ function SettingsSection({ book }: { book: Book }) {
   });
 
   return (
-    <Section title={t("book.settings")}>
+    <Section title={t("book.settings")} description={t("book.settingsHint")}>
       <form onSubmit={onSubmit} className="grid max-w-xl gap-4" noValidate>
         <TextField form={form} name="title" label={t("book.titleField")} />
         <TextAreaField form={form} name="description" label={t("book.descriptionField")} />
@@ -385,6 +385,7 @@ function DeleteSection({ book }: { book: Book }) {
         title={t("book.deleteTitle", { title: book.title })}
         description={t("book.deleteDescription")}
         confirmLabel={t("book.delete")}
+        confirmText={book.title}
         onConfirm={async () => {
           await unwrap(api.books[":id"].$delete({ param: { id: String(book.id) } }));
           await queryClient.invalidateQueries({ queryKey: ["books"] });

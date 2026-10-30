@@ -2,7 +2,6 @@ import type { Config } from "../config";
 import type { Db } from "../db/client";
 import { repoDir } from "./storage";
 import {
-  deleteTag,
   listTags,
   resolveTagCommit,
   setTag,
@@ -13,12 +12,12 @@ import {
  * Publish history as git tags, written only by the server: on every publish a
  * new v<N> tag is created (N = highest existing number + 1, so republishing a
  * commit that already has a build never collides with an existing tag) and
- * the "published" tag is moved to it. Only the last KEEP_TAGS v<N> tags are
- * kept. All of it is serialized per book, so a publish racing a rollback or a
+ * the "published" tag is moved to it. Every v<N> tag is kept; only the builds of the
+ * last KEEP_TAGS are. All of it is serialized per book, so a publish racing a rollback or a
  * push cannot interleave.
  */
 
-/** Only the last KEEP_TAGS v<N> tags (and their builds) are kept. */
+/** All v<N> tags stay; only the builds of the last KEEP_TAGS of them are kept. */
 export const KEEP_TAGS = 2;
 
 const locks = new Map<number, Promise<unknown>>();
@@ -39,8 +38,7 @@ export function withBookLock<T>(
 
 /**
  * Records a publish: creates v<N> for `commit` (unless `published` already
- * points at it), moves `published`, and prunes all but the last KEEP_TAGS
- * v-tags. Called when a build becomes the published one and on instant
+ * points at it), and moves `published`. Tags are never pruned. Called when a build becomes the published one and on instant
  * publishes that reuse a kept build.
  */
 export async function markPublished(
@@ -61,10 +59,6 @@ export async function markPublished(
       await setTag(repo, `v${next}`, commit);
     }
     await setTag(repo, "published", commit);
-    const vTags = (await listTags(repo))
-      .filter((t) => /^v\d+$/.test(t.name))
-      .sort((a, b) => Number(b.name.slice(1)) - Number(a.name.slice(1)));
-    for (const tag of vTags.slice(KEEP_TAGS)) await deleteTag(repo, tag.name);
   });
 }
 

@@ -40,12 +40,12 @@ export function Section({
 }) {
   return (
     <section className={cn("mb-6 rounded-lg border bg-card p-5 shadow-xs", className)}>
-      <div className="mb-4 flex flex-wrap items-end justify-between gap-2">
-        <div>
+      <div className="mb-4 flex items-end justify-between gap-4">
+        <div className="min-w-0 flex-1">
           <h2 className="text-lg">{title}</h2>
           {description && <p className="text-sm text-muted-foreground">{description}</p>}
         </div>
-        {actions}
+        {actions && <div className="shrink-0">{actions}</div>}
       </div>
       {children}
     </section>

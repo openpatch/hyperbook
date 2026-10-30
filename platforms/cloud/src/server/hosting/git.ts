@@ -556,6 +556,28 @@ export async function listTags(repo: string): Promise<{ name: string; commit: st
   });
 }
 
+/** The version tags (v<N>) with the commit date of what they point at, newest first. */
+export async function listVersionTags(
+  repo: string,
+): Promise<{ name: string; number: number; commit: string; committedAt: number }[]> {
+  const out = await git(
+    ["for-each-ref", "--format=%(refname:short) %(objectname) %(creatordate:unix)", "refs/tags/"],
+    { gitDir: repo },
+  );
+  if (!out) return [];
+  return out
+    .split("\n")
+    .map((line) => line.split(" "))
+    .filter(([name]) => /^v\d+$/.test(name!))
+    .map(([name, commit, date]) => ({
+      name: name!,
+      number: Number(name!.slice(1)),
+      commit: commit!,
+      committedAt: Number(date) * 1000,
+    }))
+    .sort((a, b) => b.number - a.number);
+}
+
 /** The commit a tag points at, or null when the tag does not exist. */
 export async function resolveTagCommit(repo: string, name: string): Promise<string | null> {
   if (!isWritableTag(name)) return null;

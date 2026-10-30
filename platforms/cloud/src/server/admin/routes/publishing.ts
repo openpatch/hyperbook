@@ -22,6 +22,8 @@ import {
   headCommit,
   initRepo,
   listTree,
+  listVersionTags,
+  listTags,
   resolveTagCommit,
 } from "../../hosting/git";
 import { markPublished, movePublishedTag, tagMap } from "../../hosting/publish-tags";
@@ -91,6 +93,8 @@ export function bookPublishingRoutes({ db, config, builds: queue }: Deps) {
 
   async function buildsOf(book: BookRow) {
     const tags = await tagMap(config, book.id);
+    // A version tag belongs to a commit; only its newest build shows it.
+    const tagged = new Set<string>();
     return db
       .select({ build: builds, requestedBy: users.email })
       .from(builds)
@@ -99,9 +103,12 @@ export function bookPublishingRoutes({ db, config, builds: queue }: Deps) {
       .orderBy(desc(builds.id))
       .limit(20)
       .all()
-      .map(({ build, requestedBy }) =>
-        publicBuild(build, book, requestedBy, queue.progress(build.id), tags.get(build.commit) ?? []),
-      );
+      .map(({ build, requestedBy }) => {
+        const first = !tagged.has(build.commit);
+        tagged.add(build.commit);
+        const versionTags = first ? (tags.get(build.commit) ?? []).filter((t) => /^v\d+$/.test(t)) : [];
+        return publicBuild(build, book, requestedBy, queue.progress(build.id), versionTags);
+      });
   }
 
   return new Hono<AuthedEnv>()
@@ -197,6 +204,40 @@ export function bookPublishingRoutes({ db, config, builds: queue }: Deps) {
       c.header("content-type", "application/zip");
       c.header("content-disposition", `attachment; filename="${book.slug}.zip"`);
       return c.body(Readable.toWeb(archiveZip(repo, commit)) as ReadableStream);
+    })
+
+    // The published versions (v<N> tags): all of them stay, their builds only
+    // while kept. The live one is the newest tag on the commit "published" is at.
+    .get("/:id/versions", idParam, async (c) => {
+      const { book } = bookAccess(db, c.get("user"), c.req.valid("param").id);
+      const repo = repoDir(config, book.id);
+      const [versions, tags] = await Promise.all([
+        listVersionTags(repo).catch(() => []),
+        listTags(repo).catch(() => []),
+      ]);
+      const liveCommit = tags.find((t) => t.name === "published")?.commit;
+      const rows = db
+        .select({ id: builds.id, commit: builds.commit, note: builds.note, hyperbookVersion: builds.hyperbookVersion })
+        .from(builds)
+        .where(and(eq(builds.bookId, book.id), eq(builds.status, "succeeded")))
+        .orderBy(desc(builds.id))
+        .all();
+      const liveTag = versions.find((v) => v.commit === liveCommit)?.name;
+      return c.json(
+        versions.map((v) => {
+          const own = rows.filter((r) => r.commit === v.commit);
+          const kept = own.find((r) => existsSync(buildDir(config, book.id, r.id)));
+          return {
+            tag: v.name,
+            commit: v.commit,
+            committedAt: v.committedAt,
+            note: own.find((r) => r.note)?.note ?? null,
+            live: v.name === liveTag,
+            buildId: kept?.id ?? null,
+            hyperbookVersion: (kept ?? own[0])?.hyperbookVersion ?? null,
+          };
+        }),
+      );
     })
 
     .get("/:id/builds", idParam, async (c) => {

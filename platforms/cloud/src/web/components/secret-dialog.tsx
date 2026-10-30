@@ -1,3 +1,5 @@
+import { CheckIcon, CopyIcon } from "lucide-react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,6 +24,7 @@ export function SecretDialog({
   onClose: () => void;
 }) {
   const { t } = useTranslation();
+  const [copied, setCopied] = useState(false);
   return (
     <Dialog open={secret !== null} onOpenChange={(open) => !open && onClose()}>
       <DialogContent>
@@ -30,7 +33,7 @@ export function SecretDialog({
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
         <p
-          className="rounded-md bg-muted p-3 text-center font-mono text-lg select-all"
+          className="rounded-md bg-muted p-3 text-center min-w-0 font-mono text-lg break-all select-all"
           data-testid="secret"
         >
           {secret}
@@ -38,9 +41,15 @@ export function SecretDialog({
         <DialogFooter>
           <Button
             variant="outline"
-            onClick={() => secret && navigator.clipboard?.writeText(secret)}
+            onClick={() => {
+              if (!secret) return;
+              void navigator.clipboard?.writeText(secret);
+              setCopied(true);
+              window.setTimeout(() => setCopied(false), 1500);
+            }}
           >
-            {t("common.copy")}
+            {copied ? <CheckIcon aria-hidden /> : <CopyIcon aria-hidden />}{" "}
+            {copied ? t("common.copied") : t("common.copy")}
           </Button>
           <Button onClick={onClose}>{t("common.done")}</Button>
         </DialogFooter>

@@ -6,11 +6,13 @@
  */
 export const en = {
   common: {
+    typeToConfirm: "Type “{{text}}” to confirm.",
     save: "Save",
     loading: "Loading…",
     language: "Language",
     cancel: "Cancel",
     delete: "Delete",
+    copied: "Copied",
     copy: "Copy",
     done: "Done",
     download: "Download",
@@ -32,9 +34,9 @@ export const en = {
     addresses: "Addresses",
     settings: "Settings",
     activity: "Activity",
+    aiMonitor: "AI usage",
     account: "Your account",
     logOut: "Log out",
-    aiMonitor: "AI usage",
   },
   theme: {
     toLight: "Switch to light mode",
@@ -111,7 +113,11 @@ export const en = {
     name: "Name",
     nameHint: "Shown to other teachers you share books with.",
     saved: "Saved",
+    email: "Email address",
+    emailHint: "You log in with it and get emails there. Confirm with your password; other devices are logged out.",
+    emailChanged: "Email address changed.",
     storage: "Storage",
+    aiUsage: "AI usage",
     password: "Password",
     currentPassword: "Current password",
     newPassword: "New password",
@@ -377,10 +383,6 @@ export const en = {
       closeDescription: "Your changes to this file are not saved.",
       closeWithoutSaving: "Close without saving",
       saveAndClose: "Save and close",
-      publishUnsavedTitle: "Publish with unsaved changes?",
-      publishUnsavedDescription: "Only saved changes are published.",
-      publishSavedVersion: "Publish saved version",
-      saveAllAndPublish: "Save all and publish",
       settingsSavedToast: "Settings saved.",
       settingsConflict: "Someone else changed the settings; open them again.",
       settingsCommit: "Change the book's settings",
@@ -392,24 +394,6 @@ export const en = {
       redo: "Redo",
       selectAll: "Select all",
       editVisually: "Edit visually",
-    },
-    publish: {
-      waitingToBuild: "Waiting to build…",
-      building: "Building…",
-      progressPages: "{{done}} / {{total}} pages",
-      progressGlossary: "{{done}} / {{total}} glossary entries",
-      publishedToast: "Published. Students see the new version.",
-      failedToast: "Publishing failed: the build did not succeed.",
-      showLog: "Show log",
-      publishedShort: "Published.",
-      published: "Published",
-      publish: "Publish",
-      publishingLabel: "Publishing…",
-      publishingTitle:
-        "The book goes live when this build is done. Click to see its log.",
-      upToDateTitle: "Students see the newest saved version",
-      behindTitle: "Students see an older version",
-      couldNotPublish: "Could not publish",
     },
     settingsMenu: {
       aria: "Editor settings",
@@ -662,6 +646,22 @@ export const en = {
     entitlementsDescription:
       "What this teacher may do beyond the basics. Admins are never limited.",
     access: "Access",
+    setNewPassword: "Set new password",
+    setNewPasswordTitle: "Set a new password?",
+    setNewPasswordDescription:
+      "A new password is generated and shown once. The user is logged out everywhere.",
+    enable: "Enable account",
+    disable: "Disable account",
+    disableTitle: "Disable this account?",
+    disableDescription:
+      "The user is logged out and cannot log in until the account is enabled again. Their books stay.",
+    deleteTitle: "Delete this account?",
+    deleteDescription:
+      "This cannot be undone. Books the user owns alone must get another owner first.",
+    delete: "Delete account",
+    newDialogTitle: "New password",
+    newDialogDescription: "The new password for {{email}} is shown only now.",
+  },
   aiMonitor: {
     title: "AI usage",
     description: "What the AI assistant was asked, for the whole system. Click a user to see only their use.",
@@ -684,22 +684,6 @@ export const en = {
     failed: "Failed",
     steps: "Tool calls",
     finish: "Ended",
-  },
-    setNewPassword: "Set new password",
-    setNewPasswordTitle: "Set a new password?",
-    setNewPasswordDescription:
-      "A new password is generated and shown once. The user is logged out everywhere.",
-    enable: "Enable account",
-    disable: "Disable account",
-    disableTitle: "Disable this account?",
-    disableDescription:
-      "The user is logged out and cannot log in until the account is enabled again. Their books stay.",
-    deleteTitle: "Delete this account?",
-    deleteDescription:
-      "This cannot be undone. Books the user owns alone must get another owner first.",
-    delete: "Delete account",
-    newDialogTitle: "New password",
-    newDialogDescription: "The new password for {{email}} is shown only now.",
   },
   audit: {
     title: "Activity",
@@ -791,6 +775,8 @@ export const en = {
     private: "Private",
     edit: "Edit book",
     settings: "Settings",
+    settingsHint:
+      "These settings only apply to Hyperbook Cloud. The public name and description of the hyperbook itself are set in hyperbook.json.",
     titleField: "Title",
     descriptionField: "Description",
     address: "Address",
@@ -957,13 +943,35 @@ export const en = {
   publishing: {
     title: "Publishing",
     description:
-      "Edit the book in the browser and publish it when it is ready, or upload it as a zip, which is built and published right away. You can also work on the book locally with git.",
-    publishedAt: "Published {{when}} at",
+      "Edit the book in the browser or upload it as a zip; every save is built as a preview. Publish the preview to make it a new live version. You can also work on the book locally with git.",
     notPublishedYet: "Not published yet.",
-    aheadPublished_one: "main is {{count}} commit ahead of the live site. ",
-    aheadPublished_other: "main is {{count}} commits ahead of the live site. ",
     aheadPreview_one: "main is {{count}} commit ahead of the preview.",
     aheadPreview_other: "main is {{count}} commits ahead of the preview.",
+    since: "Live since {{when}}",
+    preview: "Preview",
+    previewIsLive: "Same as the live version",
+    previewNewer: "Newer than the live version",
+    savedAt: "Saved {{when}}",
+    noPreview: "Nothing built yet.",
+    buildPreview: "Build preview",
+    buildingPreview: "Building preview…",
+    isLive: "Up to date",
+    moreActions: "Manage",
+    uploadZip: "Upload a zip",
+    uploadDescription: "Replaces the book's files and builds a new preview.",
+    publishTitle: "Publish the preview",
+    publishDescription:
+      "The preview becomes a new version and goes live. Earlier versions stay available for a roll back.",
+    versions: {
+      title: "Versions",
+      version: "Version",
+      empty: "Nothing published yet.",
+    },
+    history: "Build history",
+    showAll: "Show all ({{count}})",
+    showLess: "Show less",
+    rollBackRebuildDescription:
+      "The live site switches to this version. Its build is not kept anymore, so it is built again first. The current main is not changed.",
     rebuild: "Rebuild",
     publish: "Publish",
     notePlaceholder: "Note for this version (optional)",
@@ -1006,6 +1014,7 @@ export const en = {
       hint: "Clone the book, edit it locally, and push to",
       hint2: ". Pull before you push.",
       copy: "Copy",
+      copied: "Copied",
       copyAria: "Copy the clone command",
       authHint1: "Git asks for a username and password: use",
       authHint2: "and one of your tokens below. To save typing, run once:",
@@ -1123,15 +1132,6 @@ export const en = {
     landingPageHint:
       "The landing page introduces Hyperbook and links the ways to run it. Without it, the front address shows only the login screen.",
     gitPushLabel: "A git push also builds the preview",
-    gitPushHint:
-      "When a teacher pushes to a book's main branch with git, its preview is rebuilt (never published automatically). Off by default: pushes then only update the source, so many small commits cannot overwhelm the build queue.",
-    signup: "Sign-up",
-    signupDescriptionEmail:
-      "Who may make an account. New accounts confirm their email address first.",
-    signupDescriptionNoEmail:
-      "Sign-up needs email, to confirm addresses. Configure SMTP to open it.",
-    whoMay: "Who may sign up",
-    modeClosed: "Closed",
     aiModels: "AI models",
     aiModelsDescription:
       "The models teachers can choose in the editor's AI assistant. The provider and its key are set in the server's environment.",
@@ -1142,6 +1142,15 @@ export const en = {
     aiModelAdd: "Add a model",
     aiModelsHint:
       "Give a model a name such as Fast or Thorough and teachers see that instead of the model id. A credit is a token (input and output alike) times the model's weight. Give the model you compare against weight 1 and a model that costs twice as much per token weight 2.",
+    gitPushHint:
+      "When a teacher pushes to a book's main branch with git, its preview is rebuilt (never published automatically). Off by default: pushes then only update the source, so many small commits cannot overwhelm the build queue.",
+    signup: "Sign-up",
+    signupDescriptionEmail:
+      "Who may make an account. New accounts confirm their email address first.",
+    signupDescriptionNoEmail:
+      "Sign-up needs email, to confirm addresses. Configure SMTP to open it.",
+    whoMay: "Who may sign up",
+    modeClosed: "Closed",
     modeClosedHint:
       "Only admins add teachers (they get an invitation by email).",
     modeOpen: "Open",

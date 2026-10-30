@@ -1,12 +1,23 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { NavLink, Outlet, useLocation } from "react-router";
-import { Button } from "@/components/ui/button";
+import { Link, NavLink, Outlet, useLocation } from "react-router";
+import { ChevronDownIcon, LogOutIcon, MoonIcon, SunIcon, UserIcon } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { LOCALES, type Locale, type MessageKey } from "../../shared/i18n";
+import { useLocale, useSetLocale } from "@/i18n";
+import { setTheme, useTheme } from "@/lib/theme";
 import { useInstance, useLogout, useUser } from "@/lib/session";
 import { cn } from "@/lib/utils";
 import { LegalLinks } from "./auth-layout";
-import { LanguageSelect } from "./language-select";
-import { ThemeToggle } from "./theme-toggle";
 
 /**
  * Laid out like a hyperbook: brand-colored header, navigation on the left
@@ -18,7 +29,6 @@ export function Layout() {
   const { t } = useTranslation();
   const user = useUser();
   const { data: instance } = useInstance();
-  const logout = useLogout();
   const { pathname } = useLocation();
   const [navOpen, setNavOpen] = useState(false);
   useEffect(() => setNavOpen(false), [pathname]);
@@ -44,19 +54,7 @@ export function Layout() {
           <img src="/logo.svg" alt="" className="size-8 shrink-0" />
           <span className="truncate">{instance?.name ?? "Hyperbook Cloud"}</span>
         </NavLink>
-        <span className="hidden truncate text-sm sm:inline">
-          {user.displayName || user.email}
-        </span>
-        <LanguageSelect className="text-header-foreground hover:bg-white/15" />
-        <ThemeToggle className="hover:bg-white/15" />
-        <Button
-          variant="ghost"
-          size="sm"
-          className="text-header-foreground hover:bg-white/15 hover:text-header-foreground"
-          onClick={logout}
-        >
-          {t("nav.logOut")}
-        </Button>
+        <UserMenu />
       </header>
       <div className="relative flex min-h-0 flex-1">
         {navOpen && (
@@ -76,9 +74,9 @@ export function Layout() {
               {user.role === "admin" && (
                 <>
                   <NavItem to="/users">{t("nav.users")}</NavItem>
-                  <NavItem to="/ai-monitor">{t("nav.aiMonitor")}</NavItem>
                   {instance?.slugSuffix && <NavItem to="/addresses">{t("nav.addresses")}</NavItem>}
                   <NavItem to="/instance">{t("nav.settings")}</NavItem>
+                  <NavItem to="/ai-monitor">{t("nav.aiMonitor")}</NavItem>
                   <NavItem to="/audit">{t("nav.activity")}</NavItem>
                 </>
               )}
@@ -87,7 +85,7 @@ export function Layout() {
           </nav>
           <PoweredBy />
         </aside>
-        <main className="min-w-0 flex-1 overflow-y-auto">
+        <main className="relative min-w-0 flex-1 overflow-y-auto">
           <div className="mx-auto w-full max-w-280 p-4 md:p-8">
             <Outlet />
           </div>
@@ -95,6 +93,67 @@ export function Layout() {
         </main>
       </div>
     </div>
+  );
+}
+
+/** Everything that belongs to the signed-in person, behind one menu named after them. */
+function UserMenu() {
+  const { t } = useTranslation();
+  const user = useUser();
+  const logout = useLogout();
+  const locale = useLocale();
+  const setLocale = useSetLocale();
+  const theme = useTheme();
+  const name = user.displayName || user.email;
+  const ThemeIcon = theme === "dark" ? SunIcon : MoonIcon;
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          type="button"
+          className="flex h-10 min-w-0 max-w-64 cursor-pointer items-center gap-2 rounded-md px-2 text-sm hover:bg-white/15 data-[state=open]:bg-white/15"
+        >
+          <span
+            aria-hidden
+            className="flex size-8 shrink-0 items-center justify-center rounded-full bg-white/25 text-sm font-bold uppercase"
+          >
+            {name.trim().charAt(0)}
+          </span>
+          <span className="hidden truncate sm:inline">{name}</span>
+          <ChevronDownIcon className="size-4 shrink-0" aria-hidden />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-56">
+        <DropdownMenuLabel className="truncate font-normal text-muted-foreground">{user.email}</DropdownMenuLabel>
+        <DropdownMenuItem asChild className="cursor-pointer">
+          <Link to="/account">
+            <UserIcon /> {t("nav.account")}
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          className="cursor-pointer"
+          onSelect={(e) => {
+            e.preventDefault();
+            setTheme(theme === "dark" ? "light" : "dark");
+          }}
+        >
+          <ThemeIcon /> {theme === "dark" ? t("theme.toLight") : t("theme.toDark")}
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuLabel>{t("common.language")}</DropdownMenuLabel>
+        <DropdownMenuRadioGroup value={locale} onValueChange={(v) => void setLocale(v as Locale)}>
+          {LOCALES.map((l) => (
+            <DropdownMenuRadioItem key={l} value={l} className="cursor-pointer">
+              {t(`common.languages.${l}` as MessageKey)}
+            </DropdownMenuRadioItem>
+          ))}
+        </DropdownMenuRadioGroup>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem className="cursor-pointer" onSelect={logout}>
+          <LogOutIcon /> {t("nav.logOut")}
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
 

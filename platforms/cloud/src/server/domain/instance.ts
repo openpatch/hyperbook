@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { Config } from "../config";
 import type { Db } from "../db/client";
 import { instanceSettings } from "../db/schema";
 import { parseJson } from "../json";
@@ -69,7 +70,6 @@ export const instanceSettingsSchema = z.object({
    * trigger builds, so many small commits cannot overwhelm the build queue.
    */
   gitPushUpdatesPreview: z.boolean(),
-});
   /**
    * The AI assistant's models and what each costs the token quota (its
    * weight). Empty: the AI_MODEL, AI_MODELS and AI_MODEL_WEIGHTS of the
@@ -87,6 +87,7 @@ export const instanceSettingsSchema = z.object({
     .max(50),
   /** One of `aiModels`; null: the first. */
   aiDefaultModel: z.string().nullable(),
+});
 
 export type InstanceSettings = z.infer<typeof instanceSettingsSchema>;
 
@@ -105,9 +106,9 @@ export const DEFAULT_INSTANCE_SETTINGS: InstanceSettings = {
   defaultLocale: null,
   elementRuntimes: {},
   gitPushUpdatesPreview: false,
-};
   aiModels: [],
   aiDefaultModel: null,
+};
 
 /** The elements whose runtimes load from their public CDN instead of this instance. */
 export function cdnElements(settings: InstanceSettings): string[] {
@@ -134,7 +135,6 @@ export function emailInDomains(email: string, domains: string[]) {
   return domains.some((d) => host === d || host.endsWith("." + d));
 }
 
-export function getInstanceSettings(db: Db): InstanceSettings {
 /**
  * The AI configuration in effect: the environment's provider, with the
  * models, default and weights an admin chose in the settings when there are
@@ -154,6 +154,7 @@ export function effectiveAi(config: Config, settings: InstanceSettings): Config[
   };
 }
 
+export function getInstanceSettings(db: Db): InstanceSettings {
   const rows = db.select().from(instanceSettings).all();
   const settings: Record<string, unknown> = { ...DEFAULT_INSTANCE_SETTINGS };
   for (const row of rows) {

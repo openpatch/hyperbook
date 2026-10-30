@@ -47,7 +47,7 @@ describe("build queue", () => {
   it("builds a commit and publishes it", async () => {
     const instance = setup();
     const { book, commit } = await bookWithSource(instance, { "hyperbook.json": "{}", "index.html": "hi" });
-    const build = instance.builds.enqueue(book.id, commit, "upload", null);
+    const build = instance.builds.enqueue(book.id, commit, "publish", null);
     await instance.builds.idle();
 
     expect(buildRow(instance, build.id)).toMatchObject({ status: "succeeded", error: null });
@@ -64,11 +64,11 @@ describe("build queue", () => {
     const runner: Runner = async (job) => (fail ? { ok: false, error: "broken" } : copyRunner(job));
     const instance = setup({}, { runner });
     const { book, commit } = await bookWithSource(instance, { "hyperbook.json": "{}" });
-    const good = instance.builds.enqueue(book.id, commit, "upload", null);
+    const good = instance.builds.enqueue(book.id, commit, "publish", null);
     await instance.builds.idle();
 
     fail = true;
-    const bad = instance.builds.enqueue(book.id, commit, "rebuild", null);
+    const bad = instance.builds.enqueue(book.id, commit, "publish", null);
     await instance.builds.idle();
     expect(buildRow(instance, bad.id)).toMatchObject({ status: "failed", error: "broken" });
     expect(buildRow(instance, bad.id).log).toContain("broken");
@@ -140,9 +140,9 @@ describe("build queue", () => {
     };
     const instance = setup({}, { runner });
     const { book, commit } = await bookWithSource(instance, { "hyperbook.json": "{}" });
-    const first = instance.builds.enqueue(book.id, commit, "upload", null); // starts running
-    const second = instance.builds.enqueue(book.id, commit, "rebuild", null); // waits
-    const third = instance.builds.enqueue(book.id, commit, "rebuild", null); // replaces second
+    const first = instance.builds.enqueue(book.id, commit, "publish", null); // starts running
+    const second = instance.builds.enqueue(book.id, commit, "publish", null); // waits
+    const third = instance.builds.enqueue(book.id, commit, "publish", null); // replaces second
     release();
     await instance.builds.idle();
     expect(buildRow(instance, first.id).status).toBe("succeeded");
@@ -154,7 +154,7 @@ describe("build queue", () => {
   it("builds after a save only update the preview", async () => {
     const instance = setup();
     const { book, commit } = await bookWithSource(instance, { "hyperbook.json": "{}" });
-    const live = instance.builds.enqueue(book.id, commit, "upload", null);
+    const live = instance.builds.enqueue(book.id, commit, "publish", null);
     await instance.builds.idle();
     const edit = instance.builds.enqueue(book.id, commit, "edit", null);
     await instance.builds.idle();
@@ -215,7 +215,7 @@ describe("build queue", () => {
     };
     const instance = setup({}, { runner });
     const { book, commit } = await bookWithSource(instance, { "hyperbook.json": "{}" });
-    const build = instance.builds.enqueue(book.id, commit, "upload", null);
+    const build = instance.builds.enqueue(book.id, commit, "publish", null);
     expect(instance.builds.progress(build.id)).toBeNull();
     await running;
     expect(instance.builds.progress(build.id)).toEqual({ step: "book", done: 3, total: 10 });
@@ -231,7 +231,7 @@ describe("build queue", () => {
       );
     const instance = setup({}, { runner });
     const { book, commit } = await bookWithSource(instance, { "hyperbook.json": "{}" });
-    const build = instance.builds.enqueue(book.id, commit, "upload", null);
+    const build = instance.builds.enqueue(book.id, commit, "publish", null);
     // Right away, while the source is still being checked out.
     expect(instance.builds.cancel(build.id)).toBe(true);
     await instance.builds.idle();
@@ -260,9 +260,9 @@ describe("build queue", () => {
       ids.push(instance.builds.enqueue(book.id, commit, "publish", null).id);
       await instance.builds.idle();
     }
-    // Tags v1..v4 were created and pruned to v3, v4; their builds stay.
+    // All tags stay; only the builds of v3 and v4 do.
     const tags = await listTags(repoDir(instance.config, book.id));
-    expect(tags.map((t) => t.name).sort()).toEqual(["published", "v3", "v4"]);
+    expect(tags.map((t) => t.name).sort()).toEqual(["published", "v1", "v2", "v3", "v4"]);
     const kept = ids.filter((id) => existsSync(buildDir(instance.config, book.id, id)));
     expect(kept).toEqual([ids[2]!, ids[3]!]);
   });
@@ -270,7 +270,7 @@ describe("build queue", () => {
   it("keeps the preview build as well", async () => {
     const instance = setup();
     const { book, commit } = await bookWithSource(instance, { "hyperbook.json": "{}" });
-    const live = instance.builds.enqueue(book.id, commit, "upload", null).id;
+    const live = instance.builds.enqueue(book.id, commit, "publish", null).id;
     await instance.builds.idle();
     const ids: number[] = [];
     for (let i = 0; i < 4; i++) {
@@ -299,7 +299,7 @@ describe.skipIf(!hyperbookVersion(setup().config))("rebuilds after an update of 
   /** A book published with an older Hyperbook. */
   async function oldBook(instance: Instance) {
     const { book, commit } = await bookWithSource(instance, { "hyperbook.json": "{}" });
-    const old = instance.builds.enqueue(book.id, commit, "upload", null);
+    const old = instance.builds.enqueue(book.id, commit, "publish", null);
     await instance.builds.idle();
     instance.db.update(builds).set({ hyperbookVersion: "0.0.1" }).where(eq(builds.id, old.id)).run();
     return { book, old };
@@ -321,7 +321,7 @@ describe.skipIf(!hyperbookVersion(setup().config))("rebuilds after an update of 
   it("rebuilds books whose build is gone, as after restoring a backup", async () => {
     const instance = setup();
     const { book, commit } = await bookWithSource(instance, { "hyperbook.json": "{}", "index.html": "hi" });
-    const live = instance.builds.enqueue(book.id, commit, "upload", null);
+    const live = instance.builds.enqueue(book.id, commit, "publish", null);
     await instance.builds.idle();
     const { rmSync } = await import("node:fs");
     rmSync(buildDir(instance.config, book.id, live.id), { recursive: true });
@@ -385,7 +385,7 @@ describe.skipIf(!cliBuilt)("sandboxed hyperbook build", () => {
       "hyperbook.json": JSON.stringify({ name: "Sandbox", basePath: "/sub" }),
       "book/index.md": "# Hello from the sandbox\n",
     });
-    const build = instance.builds.enqueue(book.id, commit, "upload", null);
+    const build = instance.builds.enqueue(book.id, commit, "publish", null);
     await instance.builds.idle();
     const row = buildRow(instance, build.id);
     expect(row.error).toBeNull();
@@ -410,7 +410,7 @@ describe.skipIf(!cliBuilt)("sandboxed hyperbook build", () => {
       "book/index.md": '# Drawing\n\n::excalidraw{src="/drawing.excalidraw"}\n',
       "public/drawing.excalidraw": JSON.stringify({ type: "excalidraw", version: 2, elements: [] }),
     });
-    const build = instance.builds.enqueue(book.id, commit, "upload", null);
+    const build = instance.builds.enqueue(book.id, commit, "publish", null);
     await instance.builds.idle();
     const row = buildRow(instance, build.id);
     expect(row.error, row.log).toBeNull();
@@ -442,7 +442,7 @@ describe.skipIf(!cliBuilt)("sandboxed hyperbook build", () => {
       "book/index.md": '# Drawing\n\n::excalidraw{src="/drawing.excalidraw"}\n',
       "public/drawing.excalidraw": JSON.stringify({ type: "excalidraw", version: 2, elements: [] }),
     });
-    const build = instance.builds.enqueue(book.id, commit, "upload", null);
+    const build = instance.builds.enqueue(book.id, commit, "publish", null);
     await instance.builds.idle();
     const row = buildRow(instance, build.id);
     expect(row.error, row.log).toBeNull();
@@ -462,7 +462,7 @@ describe.skipIf(!cliBuilt)("sandboxed hyperbook build", () => {
       "book/index.md": '# Drawing\n\n::excalidraw{src="/drawing.excalidraw"}\n',
       "public/drawing.excalidraw": JSON.stringify({ type: "excalidraw", version: 2, elements: [] }),
     });
-    const build = instance.builds.enqueue(book.id, commit, "upload", null);
+    const build = instance.builds.enqueue(book.id, commit, "publish", null);
     await instance.builds.idle();
     const row = buildRow(instance, build.id);
     expect(row.error, row.log).toBeNull();
@@ -479,7 +479,7 @@ describe.skipIf(!cliBuilt)("sandboxed hyperbook build", () => {
       "hyperbook.json": JSON.stringify({ name: "Evil", search: true, language: "../../../../../../etc/passwd#" }),
       "book/index.md": "# Hi\n",
     });
-    const build = instance.builds.enqueue(book.id, commit, "upload", null);
+    const build = instance.builds.enqueue(book.id, commit, "publish", null);
     await instance.builds.idle();
     const row = buildRow(instance, build.id);
     expect(row.log).not.toMatch(/root:x:0:0/);

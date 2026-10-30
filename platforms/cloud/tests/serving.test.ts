@@ -19,6 +19,8 @@ async function published() {
   });
   await owner.c.upload(`/api/books/${book.id}/source`, zip);
   await instance.builds.idle();
+  await owner.c.post(`/api/books/${book.id}/publish`, {});
+  await instance.builds.idle();
   const get = (path: string, headers: Record<string, string> = {}, host = "physics.books.test") =>
     instance.app.request(path, { headers: { host, ...headers } });
   return { instance, owner, book, get };
@@ -99,7 +101,7 @@ describe("serving books", () => {
     expect((await get("/")).status).toBe(404);
     expect(await (await get("/")).text()).toContain("not published yet");
 
-    await owner.c.post(`/api/books/${book.id}/builds`);
+    await owner.c.post(`/api/books/${book.id}/publish`, {});
     await instance.builds.idle();
     expect((await get("/")).status).toBe(200);
 

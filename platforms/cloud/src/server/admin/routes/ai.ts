@@ -22,6 +22,7 @@ import { aiAssistInput } from "../../../shared/schemas";
 import type { AuthedEnv } from "../env";
 import { requireUser } from "../middleware";
 import { idParam } from "../params";
+import { effectiveAi, getInstanceSettings } from "../../domain/instance";
 import { hostedOnly } from "./publishing";
 import { validate } from "../validate";
 
@@ -61,7 +62,7 @@ function rateLimiter(maxPerMinute: number) {
 export function aiRoutes({ config, db }: Deps) {
   return new Hono<AuthedEnv>().use(requireUser).get("/", (c) => {
     const user = c.get("user");
-    const { ai, ai_requests_per_day, ai_tokens_per_week } = getEntitlements(
+    const { ai: aiAllowed, ai_requests_per_day, ai_tokens_per_week } = getEntitlements(
       db,
       user,
     );
@@ -75,7 +76,7 @@ export function aiRoutes({ config, db }: Deps) {
       modelWeights: Object.fromEntries(
         (ai?.models ?? []).map((m) => [m, modelWeight(weights, m)]),
       ),
-      allowed: ai,
+      allowed: aiAllowed,
       usedToday: usedToday(db, user.id),
       quota: ai_requests_per_day,
       tokensUsedThisWeek: usedThisWeek(db, user.id),
@@ -110,7 +111,7 @@ export function bookAiRoutes({ db, config }: Deps) {
       // so before anything is counted or streamed.
       hostedOnly(book);
       const t = createT(c.get("locale"));
-      const ai = config.ai;
+      const ai = effectiveAi(config, getInstanceSettings(db));
       if (!ai) {
         throw new HTTPException(503, { message: t("errors.ai.notConfigured") });
       }

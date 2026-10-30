@@ -5,12 +5,16 @@ import { ADMIN, launchBrowser, startServer } from "./server";
 
 let server: Awaited<ReturnType<typeof startServer>>;
 let browser: Browser;
+let context: Awaited<ReturnType<Browser["newContext"]>>;
 let page: Page;
 
 beforeAll(async () => {
   server = await startServer();
   browser = await launchBrowser();
-  page = await browser.newPage({ locale: "en-US" });
+  // An explicit context, so tests can open further pages that share the
+  // login session via page.context().newPage().
+  context = await browser.newContext({ locale: "en-US" });
+  page = await context.newPage();
   await logIn(page, server.origin, ADMIN.email, ADMIN.password);
 });
 
@@ -20,7 +24,7 @@ afterAll(async () => {
 });
 
 describe("editor", () => {
-  it("starts a book from a template, previews a save and publishes it", async () => {
+  it("starts a book from a template, previews a save and is published from the book page", async () => {
     await page.getByRole("button", { name: "New book" }).click();
     const dialog = page.getByRole("dialog");
     await dialog.getByLabel("Title").fill("Waves");
@@ -31,7 +35,7 @@ describe("editor", () => {
     // The start page opens; the preview shows it once the first build is done.
     const editor = page.locator(".cm-content");
     await editor.getByText("# Waves").waitFor();
-    const preview = page.frameLocator('iframe[title="Preview"]');
+    const preview = page.frameLocator('iframe[title="Preview"][aria-hidden="false"]');
     await preview.getByRole("heading", { name: "Waves" }).waitFor({ timeout: 60_000 });
 
     // Edit the heading and save with the keyboard.
@@ -48,8 +52,21 @@ describe("editor", () => {
     await live.goto(`http://waves.books.localhost:${server.port}/`);
     await live.getByText("This book is not published yet.").waitFor();
 
-    await page.getByRole("button", { name: "Publish" }).click();
-    await page.getByText("Published.").waitFor();
+    // Publishing is done on the book's page, not in the editor. A save only
+    // commits — builds wait for publishing — so the first preview build is
+    // triggered here.
+    expect(await page.getByRole("button", { name: "Publish" }).count()).toBe(0);
+    await page.evaluate(async () => {
+      const id = location.pathname.split("/")[2];
+      await fetch(`/api/books/${id}/builds`, { method: "POST" });
+    });
+    const bookPage = await page.context().newPage();
+    await bookPage.goto(page.url().replace(/\/edit.*$/, ""));
+    await bookPage.getByText("Built", { exact: true }).waitFor({ timeout: 60_000 });
+    await bookPage.getByRole("button", { name: "Publish", exact: true }).click();
+    await bookPage.getByRole("dialog").getByRole("button", { name: "Publish", exact: true }).click();
+    await bookPage.getByRole("cell", { name: /^v1/ }).waitFor({ timeout: 60_000 });
+    await bookPage.close();
     await live.reload();
     await live.getByRole("heading", { name: "Waves and sound" }).waitFor();
     await live.close();
@@ -61,7 +78,7 @@ describe("editor", () => {
     await dialog.getByLabel("Path").fill("book/echo.md");
     await dialog.getByRole("button", { name: "Create" }).click();
     await page.getByRole("tab", { name: "echo.md" }).waitFor();
-    const preview = page.frameLocator('iframe[title="Preview"]');
+    const preview = page.frameLocator('iframe[title="Preview"][aria-hidden="false"]');
     await preview.getByRole("heading", { name: "Echo" }).waitFor({ timeout: 60_000 });
   }, 90_000);
 

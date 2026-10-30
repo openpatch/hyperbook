@@ -45,11 +45,17 @@ describe("publishing", () => {
         "optics-main/book/lenses.md": text("# Lenses\n"),
       }),
     );
+    await page.getByRole("button", { name: "Manage" }).click();
+    await page.getByRole("menuitem", { name: "Upload a zip" }).click();
     await page.getByLabel("Upload a zip of your book").setInputFiles(zip);
     await page.getByText(/Uploaded 3 files/).waitFor();
     await page.getByText("Built", { exact: true }).waitFor({ timeout: 60_000 });
-    await page.getByText("Live", { exact: true }).waitFor();
-    await page.getByText(/^Published /).waitFor();
+
+    // The upload is only a preview until it is published as a version.
+    await page.getByRole("button", { name: "Publish", exact: true }).click();
+    await page.getByRole("dialog").getByRole("button", { name: "Publish", exact: true }).click();
+    await page.getByRole("cell", { name: /^v1/ }).waitFor({ timeout: 60_000 });
+    await page.getByText(/^Live since /).waitFor();
 
     await page.getByRole("button", { name: "Log", exact: true }).click();
     await page.getByRole("dialog").getByText(/Ignoring "basePath"/).waitFor();
@@ -72,6 +78,8 @@ describe("publishing", () => {
   it("shows why an upload was refused", async () => {
     const zip = path.join(mkdtempSync(path.join(tmpdir(), "cloud-e2e-zip-")), "notes.zip");
     writeFileSync(zip, zipSync({ "notes.md": text("# Notes\n") }));
+    await page.getByRole("button", { name: "Manage" }).click();
+    await page.getByRole("menuitem", { name: "Upload a zip" }).click();
     await page.getByLabel("Upload a zip of your book").setInputFiles(zip);
     await page.getByText("The zip contains no hyperbook.json or hyperlibrary.json").waitFor();
   });

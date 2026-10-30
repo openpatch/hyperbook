@@ -595,6 +595,8 @@ describe("git smart HTTP", () => {
     }
     expect((await listTags(repo)).map((t) => t.name).sort()).toEqual([
       "published",
+      "v1",
+      "v2",
       "v3",
       "v4",
     ]);
@@ -604,11 +606,20 @@ describe("git smart HTTP", () => {
       false,
     );
 
-    // Rollback to v1 is impossible now (tag gone); to v3 it is instant again.
-    expect(
-      (await owner.c.post(`/api/books/${book.id}/rollback`, { tag: "v1" }))
-        .status,
-    ).toBe(404);
+    const versions = (await owner.c.get(`/api/books/${book.id}/versions`)).body as {
+      tag: string;
+      live: boolean;
+      buildId: number | null;
+    }[];
+    expect(versions.map((v) => v.tag)).toEqual(["v4", "v3", "v2", "v1"]);
+    expect(versions.filter((v) => v.live).map((v) => v.tag)).toEqual(["v4"]);
+    expect(versions.find((v) => v.tag === "v1")!.buildId).toBeNull();
+
+    // v1 has no build anymore, so rolling back to it rebuilds; v3 is instant.
+    const toV1 = await owner.c.post(`/api/books/${book.id}/rollback`, { tag: "v1" });
+    expect(toV1.status).toBe(200);
+    expect(toV1.body.published).toBe(false);
+    await instance.builds.idle();
     expect(
       (await owner.c.post(`/api/books/${book.id}/rollback`, { tag: "v3" })).body
         .published,
@@ -637,7 +648,8 @@ describe("git smart HTTP", () => {
       .from(builds)
       .where(eq(builds.bookId, book.id))
       .all()
-      .find((b) => b.trigger === "rollback")!;
+      .filter((b) => b.trigger === "rollback")
+      .pop()!;
     expect(rebuilt.status).toBe("succeeded");
     // The rollback build went live, but the preview stayed where it was.
     expect(bookRow(instance, book.id).publishedBuildId).toBe(rebuilt.id);
@@ -649,7 +661,7 @@ describe("git smart HTTP", () => {
         .from(auditLog)
         .where(eq(auditLog.action, "book.rollback"))
         .all(),
-    ).toHaveLength(3);
+    ).toHaveLength(4);
 
     // Bad input: not a version tag.
     expect(

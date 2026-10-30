@@ -70,8 +70,18 @@ beforeAll(async () => {
       "book/index.md": text("# Light travels\n"),
     }),
   );
+  await admin.getByRole("button", { name: "Manage" }).click();
+  await admin.getByRole("menuitem", { name: "Upload a zip" }).click();
   await admin.getByLabel("Upload a zip of your book").setInputFiles(zip);
   await admin.getByText("Built", { exact: true }).waitFor({ timeout: 60_000 });
+
+  // A private book only asks for a login once it is published; an
+  // unpublished one answers 404 instead.
+  await api(admin, "POST", `/api/books/${book.id}/publish`, {});
+  await waitFor(
+    async () => (await api(admin, "GET", `/api/books/${book.id}`)).publishedAt !== null,
+    Boolean,
+  );
 }, 90_000);
 
 afterAll(async () => {

@@ -19,7 +19,7 @@ async function world(env: Record<string, string> = {}) {
 }
 
 describe("publishing", () => {
-  it("uploads, builds and publishes a book", async () => {
+  it("uploads and builds a preview, which publishing then makes live", async () => {
     const { instance, owner, book } = await world();
     const res = await owner.c.upload(`/api/books/${book.id}/source`, bookZip());
     expect(res.status).toBe(200);
@@ -28,9 +28,17 @@ describe("publishing", () => {
 
     const builds = (await owner.c.get(`/api/books/${book.id}/builds`)).body;
     expect(builds).toHaveLength(1);
-    expect(builds[0]).toMatchObject({ status: "succeeded", published: true, requestedBy: "o@example.org" });
+    expect(builds[0]).toMatchObject({
+      status: "succeeded",
+      published: false,
+      preview: true,
+      requestedBy: "o@example.org",
+    });
     const detail = (await owner.c.get(`/api/builds/${builds[0].id}`)).body;
     expect(detail.log).toContain("Checking out");
+    expect((await owner.c.get(`/api/books/${book.id}`)).body.publishedBuildId).toBeNull();
+
+    await owner.c.post(`/api/books/${book.id}/publish`, {});
     expect((await owner.c.get(`/api/books/${book.id}`)).body.publishedBuildId).toBe(builds[0].id);
   });
 
@@ -78,7 +86,9 @@ describe("publishing", () => {
     const rebuild = await owner.c.post(`/api/books/${book.id}/builds`);
     expect(rebuild.body).toMatchObject({ trigger: "rebuild" });
     await instance.builds.idle();
-    expect((await owner.c.get(`/api/books/${book.id}`)).body.publishedBuildId).toBe(rebuild.body.id);
+    const row = (await owner.c.get(`/api/books/${book.id}`)).body;
+    expect(row.previewBuildId).toBe(rebuild.body.id);
+    expect(row.publishedBuildId).toBeNull();
   });
 
   it("accepts uploads only with the admin origin attached", async () => {

@@ -82,7 +82,10 @@ describe("books", () => {
 
   it("deletes the book", async () => {
     await page.getByRole("button", { name: "Delete book" }).click();
-    await page.getByRole("dialog").getByRole("button", { name: "Delete book" }).click();
+    const confirm = page.getByRole("dialog").getByRole("button", { name: "Delete book" });
+    expect(await confirm.isDisabled()).toBe(true);
+    await page.getByRole("dialog").getByLabel(/Type .* to confirm/).fill("Physik 7ä");
+    await confirm.click();
     await page.waitForURL(`${server.origin}/books`);
     await page.getByText("No books yet").waitFor();
   });

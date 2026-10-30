@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import i18next from "i18next";
-import { CopyIcon, DownloadIcon, KeyRoundIcon, UploadIcon } from "lucide-react";
+import { CheckIcon, CopyIcon, DownloadIcon, KeyRoundIcon, UploadIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { ConfirmButton } from "@/components/confirm-button";
@@ -13,9 +13,17 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ApiError, api, unwrap } from "@/lib/api";
@@ -91,27 +99,50 @@ function uploadZip(bookId: string, file: File, onProgress: (fraction: number) =>
   });
 }
 
+type Version = Awaited<ReturnType<typeof fetchVersions>>[number];
+
+const fetchVersions = (id: string) => unwrap(api.books[":id"].versions.$get({ param: { id } }));
+
+const HISTORY_ROWS = 5;
+
+/**
+ * Live is the newest published version (a v<N> tag) and only changes by
+ * publishing or rolling back; the preview is the last saved state of the book.
+ */
 export function PublishingSection({ book }: { book: Book }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const id = String(book.id);
   const key = ["books", id, "builds"];
+  const versionsKey = ["books", id, "versions"];
   const { data: builds } = useQuery({
     queryKey: key,
     queryFn: () => fetchBuilds(id),
     // Follow builds while one is waiting or running.
     refetchInterval: (query) => (query.state.data?.some(active) ? 1500 : false),
   });
+  const { data: versions } = useQuery({ queryKey: versionsKey, queryFn: () => fetchVersions(id) });
   const [logFor, setLogFor] = useState<number | null>(null);
+  const [dialog, setDialog] = useState<"publish" | "upload" | "git" | "unpublish" | null>(null);
+  const [showAll, setShowAll] = useState(false);
+  const [note, setNote] = useState("");
 
   // A finished build may have changed what is published.
   const latest = builds?.[0];
   const latestState = latest ? `${latest.id}:${latest.status}` : "";
   useEffect(() => {
-    if (latest && !active(latest)) void queryClient.invalidateQueries({ queryKey: ["books", id], exact: true });
+    if (latest && !active(latest)) {
+      void queryClient.invalidateQueries({ queryKey: ["books", id], exact: true });
+      void queryClient.invalidateQueries({ queryKey: versionsKey });
+    }
   }, [latestState]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const refresh = () => queryClient.invalidateQueries({ queryKey: key });
+  const refresh = () =>
+    Promise.all([
+      queryClient.invalidateQueries({ queryKey: key }),
+      queryClient.invalidateQueries({ queryKey: versionsKey }),
+      queryClient.invalidateQueries({ queryKey: ["books", id], exact: true }),
+    ]);
   const run = async (action: () => Promise<unknown>) => {
     try {
       await action();
@@ -122,189 +153,369 @@ export function PublishingSection({ book }: { book: Book }) {
   };
 
   const hasSource = (builds?.length ?? 0) > 0;
-  const published = builds?.find((b) => b.published);
   const preview = builds?.find((b) => b.preview);
-  const aheadPublished = aheadOf(book, published);
+  const liveVersion = versions?.find((v) => v.live);
   const aheadPreview = aheadOf(book, preview);
-  const [note, setNote] = useState("");
+  const pending = builds?.find((b) => active(b));
+  // The preview is behind when main has commits no preview build has.
+  const previewBehind = !preview || (aheadPreview ?? 0) > 0 || !!pending;
+  const previewIsLive = !!preview && !!liveVersion && preview.commit === liveVersion.commit;
+  // Nothing to publish while main is what the live version was made from.
+  const upToDate = previewIsLive && !previewBehind;
+  const rows = showAll ? (builds ?? []) : (builds ?? []).slice(0, HISTORY_ROWS);
+
+  const openPreview = () => {
+    // Opened first, so the popup blocker sees a click.
+    const tab = window.open("about:blank", "_blank");
+    void unwrap(api.books[":id"]["preview-code"].$post({ param: { id } }))
+      .then(({ url }) => {
+        if (tab) tab.location.href = `${url}&next=${encodeURIComponent("/")}`;
+      })
+      .catch((error) => {
+        tab?.close();
+        toast.error(error instanceof Error ? error.message : t("common.somethingWrong"));
+      });
+  };
+
+  const publish = () =>
+    run(async () => {
+      await unwrap(api.books[":id"].publish.$post({ param: { id }, json: { note: note.trim() } }));
+      setNote("");
+      setDialog(null);
+    });
 
   return (
     <Section
       title={t("publishing.title")}
       description={t("publishing.description")}
+      actions={
+        <div className="self-start">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline">{t("publishing.moreActions")}</Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onSelect={() => setDialog("upload")}>{t("publishing.uploadZip")}</DropdownMenuItem>
+                <DropdownMenuItem disabled={!hasSource} asChild={hasSource}>
+                  {hasSource ? (
+                    <a href={`/api/books/${id}/source.zip`}>{t("publishing.downloadSource")}</a>
+                  ) : (
+                    <span>{t("publishing.downloadSource")}</span>
+                  )}
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setDialog("git")}>{t("publishing.git.title")}</DropdownMenuItem>
+                {book.publishedAt && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem variant="destructive" onSelect={() => setDialog("unpublish")}>
+                      {t("publishing.unpublish")}
+                    </DropdownMenuItem>
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+        </div>
+      }
     >
-      <p className="mb-4">
-        {book.publishedAt ? (
-          <>
-            {t("publishing.publishedAt", {
-              when: new Date(book.publishedAt).toLocaleString(),
-            })}{" "}
-            <a href={book.url} target="_blank" rel="noreferrer" className="text-primary hover:underline">
-              {book.url.replace(/^https?:\/\//, "")}
-            </a>
-          </>
-        ) : (
-          <span className="text-muted-foreground">{t("publishing.notPublishedYet")}</span>
-        )}
-      </p>
-
-      {(aheadPublished !== null && aheadPublished > 0 || (aheadPreview !== null && aheadPreview > 0)) && (
-        <p className="mb-4 text-sm text-muted-foreground">
-          {aheadPublished !== null && aheadPublished > 0 &&
-            t("publishing.aheadPublished", { count: aheadPublished })}
-          {aheadPreview !== null && aheadPreview > 0 &&
-            t("publishing.aheadPreview", { count: aheadPreview })}
-        </p>
-      )}
-
-      <UploadZone bookId={id} onUploaded={refresh} onLog={setLogFor} />
-
-      <div className="my-4 flex flex-wrap items-center gap-2">
-        <Button
-          variant="outline"
-          disabled={!hasSource}
-          onClick={() => run(() => unwrap(api.books[":id"].builds.$post({ param: { id } })))}
-        >
-          {t("publishing.rebuild")}
-        </Button>
-        <Button
-          variant="outline"
-          disabled={!hasSource}
-          onClick={() =>
-            run(async () => {
-              await unwrap(api.books[":id"].publish.$post({ param: { id }, json: { note: note.trim() } }));
-              setNote("");
-              await queryClient.invalidateQueries({ queryKey: ["books", id], exact: true });
-            })
-          }
-        >
-          {t("publishing.publish")}
-        </Button>
-        <Input
-          className="w-56"
-          placeholder={t("publishing.notePlaceholder")}
-          maxLength={200}
-          value={note}
-          onChange={(e) => setNote(e.target.value)}
-          aria-label={t("publishing.notePlaceholder")}
-        />
-        <Button variant="outline" disabled={!hasSource} asChild={hasSource}>
-          {hasSource ? (
-            <a href={`/api/books/${id}/source.zip`}>{t("publishing.downloadSource")}</a>
+      <div className="mb-4 grid gap-4 sm:grid-cols-2">
+        <div className="rounded-lg border p-4">
+          <div className="mb-2 flex h-8 items-center justify-between gap-2">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              {t("publishing.live")}
+              {liveVersion && <Badge>{liveVersion.tag}</Badge>}
+            </div>
+            {upToDate ? (
+              <Badge variant="outline">{t("publishing.isLive")}</Badge>
+            ) : (
+              <Button size="sm" disabled={!hasSource} onClick={() => setDialog("publish")}>
+                {t("publishing.publish")}
+              </Button>
+            )}
+          </div>
+          {book.publishedAt ? (
+            <>
+              <a href={book.url} target="_blank" rel="noreferrer" className="font-medium text-primary hover:underline">
+                {book.url.replace(/^https?:\/\//, "")}
+              </a>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {t("publishing.since", { when: new Date(book.publishedAt).toLocaleString() })}
+              </p>
+              {liveVersion?.note && <p className="mt-1 text-sm">{liveVersion.note}</p>}
+            </>
           ) : (
-            <span>{t("publishing.downloadSource")}</span>
+            <p className="text-muted-foreground">{t("publishing.notPublishedYet")}</p>
           )}
-        </Button>
-        {book.publishedAt && (
-          <ConfirmButton
-            title={t("publishing.unpublishTitle", { title: book.title })}
-            description={t("publishing.unpublishDescription")}
-            confirmLabel={t("publishing.unpublish")}
-            onConfirm={async () => {
-              await unwrap(api.books[":id"].unpublish.$post({ param: { id } }));
-              await queryClient.invalidateQueries({ queryKey: ["books", id], exact: true });
-              await refresh();
-            }}
-          >
-            {t("publishing.unpublish")}
-          </ConfirmButton>
-        )}
+        </div>
+        <div className="rounded-lg border p-4">
+          <div className="mb-2 flex h-8 items-center justify-between gap-2">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              {t("publishing.preview")}
+              {pending && <Badge variant="secondary">{t(STATUS[pending.status].label)}</Badge>}
+            </div>
+            {previewBehind ? (
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={!hasSource || !!pending}
+                onClick={() => void run(() => unwrap(api.books[":id"].builds.$post({ param: { id } })))}
+              >
+                {pending ? t("publishing.buildingPreview") : t("publishing.buildPreview")}
+              </Button>
+            ) : (
+              <Badge variant="outline">{t("publishing.isLive")}</Badge>
+            )}
+          </div>
+          {preview ? (
+            <>
+              <a
+                href={book.previewUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="font-medium text-primary hover:underline"
+                onClick={(e) => {
+                  e.preventDefault();
+                  openPreview();
+                }}
+              >
+                {book.previewUrl.replace(/^https?:\/\//, "")}
+              </a>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {t("publishing.savedAt", { when: new Date(preview.createdAt).toLocaleString() })}
+              </p>
+              <p className="mt-1 text-sm">
+                {previewIsLive ? t("publishing.previewIsLive") : t("publishing.previewNewer")}
+                {aheadPreview !== null && aheadPreview > 0 && ` · ${t("publishing.aheadPreview", { count: aheadPreview })}`}
+              </p>
+            </>
+          ) : (
+            <p className="text-muted-foreground">{t("publishing.noPreview")}</p>
+          )}
+        </div>
       </div>
 
-      <WorkLocally book={book} />
+      <Dialog open={dialog === "publish"} onOpenChange={(open) => !open && setDialog(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("publishing.publishTitle")}</DialogTitle>
+            <DialogDescription>{t("publishing.publishDescription")}</DialogDescription>
+          </DialogHeader>
+          <Input
+            placeholder={t("publishing.notePlaceholder")}
+            maxLength={200}
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            aria-label={t("publishing.notePlaceholder")}
+          />
+          <DialogFooter>
+            <Button onClick={() => void publish()}>{t("publishing.publish")}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
-      {hasSource && (
+      <Dialog open={dialog === "upload"} onOpenChange={(open) => !open && setDialog(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("publishing.uploadZip")}</DialogTitle>
+            <DialogDescription>{t("publishing.uploadDescription")}</DialogDescription>
+          </DialogHeader>
+          <UploadZone
+            bookId={id}
+            onUploaded={() => {
+              setDialog(null);
+              void refresh();
+            }}
+            onLog={setLogFor}
+          />
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={dialog === "git"} onOpenChange={(open) => !open && setDialog(null)}>
+        <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>{t("publishing.git.title")}</DialogTitle>
+            <DialogDescription>{t("publishing.git.hint")} main{t("publishing.git.hint2")}</DialogDescription>
+          </DialogHeader>
+          <WorkLocally book={book} />
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={dialog === "unpublish"} onOpenChange={(open) => !open && setDialog(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("publishing.unpublishTitle", { title: book.title })}</DialogTitle>
+            <DialogDescription>{t("publishing.unpublishDescription")}</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="destructive"
+              onClick={() =>
+                void run(async () => {
+                  await unwrap(api.books[":id"].unpublish.$post({ param: { id } }));
+                  setDialog(null);
+                })
+              }
+            >
+              {t("publishing.unpublish")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <h3 className="mt-6 mb-2 font-medium">{t("publishing.versions.title")}</h3>
+      {versions && versions.length > 0 ? (
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>{t("publishing.build")}</TableHead>
-              <TableHead>{t("publishing.status")}</TableHead>
-              <TableHead>{t("publishing.startedBy")}</TableHead>
+              <TableHead>{t("publishing.versions.version")}</TableHead>
               <TableHead>{t("publishing.when")}</TableHead>
-              <TableHead>{t("publishing.took")}</TableHead>
               <TableHead>
                 <span className="sr-only">{t("common.actions")}</span>
               </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {builds!.map((b) => (
-              <TableRow key={b.id}>
-                <TableCell>
-                  <div className="flex flex-wrap items-center gap-1">
-                    #{b.id} {t(TRIGGER[b.trigger] as never)}
-                    {b.tags?.map((t) => (
-                      <Badge key={t} variant="outline">
-                        {t}
-                      </Badge>
-                    ))}
-                  </div>
-                  {b.note && <p className="mt-1 max-w-sm text-sm whitespace-normal text-muted-foreground">{b.note}</p>}
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-2">
-                    <Badge variant={STATUS[b.status].variant}>
-                      {t(STATUS[b.status].label)}
-                      {b.progress && ` ${b.progress.done}/${b.progress.total}`}
-                    </Badge>
-                    {b.published && <Badge variant="outline">{t("publishing.live")}</Badge>}
-                    {b.status === "succeeded" && (
-                      <a
-                        href={`/api/books/${id}/builds/${b.id}/site.zip`}
-                        className="text-sm text-primary hover:underline"
-                        title={t("publishing.downloadSiteTitle")}
-                      >
-                        {t("publishing.downloadSite")}
-                      </a>
-                    )}
-                  </div>
-                  {b.error && <p className="mt-1 max-w-sm text-sm whitespace-normal text-destructive">{b.error}</p>}
-                </TableCell>
-                <TableCell>{b.requestedBy ?? ""}</TableCell>
-                <TableCell>{new Date(b.createdAt).toLocaleString()}</TableCell>
-                <TableCell>{duration(b, t)}</TableCell>
-                <TableCell className="text-right whitespace-nowrap">
-                  <Button variant="ghost" size="sm" onClick={() => setLogFor(b.id)}>
-                    {t("publishing.log")}
-                  </Button>
-                  {b.status === "succeeded" && versionTag(b) && !b.published && (
-                    <ConfirmButton
-                      size="sm"
-                      variant="outline"
-                      title={t("publishing.rollBackTitle", { tag: versionTag(b) })}
-                      description={t("publishing.rollBackDescription")}
-                      confirmLabel={t("publishing.rollBack")}
-                      onConfirm={async () => {
-                        await unwrap(
-                          api.books[":id"].rollback.$post({ param: { id }, json: { tag: versionTag(b)! } }),
-                        );
-                        await queryClient.invalidateQueries({ queryKey: ["books", id], exact: true });
-                        await refresh();
-                      }}
-                    >
-                      {t("publishing.rollBack")}
-                    </ConfirmButton>
-                  )}
-                  {active(b) && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() =>
-                        run(() => unwrap(api.builds[":id"].cancel.$post({ param: { id: String(b.id) } })))
-                      }
-                    >
-                      {t("publishing.cancel")}
-                    </Button>
-                  )}
-                </TableCell>
-              </TableRow>
+            {versions.map((v) => (
+              <VersionRow key={v.tag} version={v} bookId={id} onChanged={refresh} />
             ))}
           </TableBody>
         </Table>
+      ) : (
+        <p className="text-sm text-muted-foreground">{t("publishing.versions.empty")}</p>
+      )}
+
+      {hasSource && (
+        <>
+          <h3 className="mt-6 mb-2 font-medium">{t("publishing.history")}</h3>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>{t("publishing.build")}</TableHead>
+                <TableHead>{t("publishing.status")}</TableHead>
+                <TableHead>{t("publishing.when")}</TableHead>
+                <TableHead>
+                  <span className="sr-only">{t("common.actions")}</span>
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {rows.map((b) => (
+                <TableRow key={b.id}>
+                  <TableCell>
+                    <div className="flex flex-wrap items-center gap-1">
+                      #{b.id} {t(TRIGGER[b.trigger] as never)}
+                      {b.tags?.map((tag) => (
+                        <Badge key={tag} variant="outline">
+                          {tag}
+                        </Badge>
+                      ))}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <Badge variant={STATUS[b.status].variant}>
+                        {t(STATUS[b.status].label)}
+                        {b.progress && ` ${b.progress.done}/${b.progress.total}`}
+                      </Badge>
+                      {b.published && <Badge variant="outline">{t("publishing.live")}</Badge>}
+                      {b.preview && <Badge variant="outline">{t("publishing.preview")}</Badge>}
+                      <span className="text-sm text-muted-foreground">{duration(b, t)}</span>
+                    </div>
+                    {b.error && <p className="mt-1 max-w-sm text-sm whitespace-normal text-destructive">{b.error}</p>}
+                  </TableCell>
+                  <TableCell>
+                    {new Date(b.createdAt).toLocaleString()}
+                    {b.requestedBy && <span className="block text-xs text-muted-foreground">{b.requestedBy}</span>}
+                  </TableCell>
+                  <TableCell className="text-right whitespace-nowrap">
+                    <Button variant="ghost" size="sm" onClick={() => setLogFor(b.id)}>
+                      {t("publishing.log")}
+                    </Button>
+                    {active(b) && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() =>
+                          run(() => unwrap(api.builds[":id"].cancel.$post({ param: { id: String(b.id) } })))
+                        }
+                      >
+                        {t("publishing.cancel")}
+                      </Button>
+                    )}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+          {(builds?.length ?? 0) > HISTORY_ROWS && (
+            <Button variant="ghost" size="sm" className="mt-1" onClick={() => setShowAll((v) => !v)}>
+              {showAll ? t("publishing.showLess") : t("publishing.showAll", { count: builds!.length })}
+            </Button>
+          )}
+        </>
       )}
 
       <LogDialog buildId={logFor} onClose={() => setLogFor(null)} />
     </Section>
+  );
+}
+
+/** A published version: its date and note, a download while its build is kept, and a roll back unless it is live. */
+function VersionRow({
+  version: v,
+  bookId,
+  onChanged,
+}: {
+  version: Version;
+  bookId: string;
+  onChanged: () => unknown;
+}) {
+  const { t } = useTranslation();
+  return (
+    <TableRow>
+      <TableCell>
+        <div className="flex items-center gap-2">
+          <Badge variant={v.live ? "default" : "outline"}>{v.tag}</Badge>
+          {v.live && <span className="text-sm">{t("publishing.live")}</span>}
+        </div>
+        {v.note && <p className="mt-1 max-w-sm text-sm whitespace-normal text-muted-foreground">{v.note}</p>}
+      </TableCell>
+      <TableCell>{new Date(v.committedAt).toLocaleString()}</TableCell>
+      <TableCell>
+        <div className="flex items-center justify-end gap-1">
+          <span className="flex w-28 justify-end">
+            {v.buildId !== null && (
+              <Button variant="ghost" size="sm" asChild>
+                <a
+                  href={`/api/books/${bookId}/builds/${v.buildId}/site.zip`}
+                  title={t("publishing.downloadSiteTitle")}
+                >
+                  {t("publishing.downloadSite")}
+                </a>
+              </Button>
+            )}
+          </span>
+          <span className="flex w-28 justify-end">
+            {!v.live && (
+              <ConfirmButton
+                size="sm"
+                variant="outline"
+                title={t("publishing.rollBackTitle", { tag: v.tag })}
+                description={
+                  v.buildId !== null ? t("publishing.rollBackDescription") : t("publishing.rollBackRebuildDescription")
+                }
+                confirmLabel={t("publishing.rollBack")}
+                onConfirm={async () => {
+                  await unwrap(api.books[":id"].rollback.$post({ param: { id: bookId }, json: { tag: v.tag } }));
+                  await onChanged();
+                }}
+              >
+                {t("publishing.rollBack")}
+              </ConfirmButton>
+            )}
+          </span>
+        </div>
+      </TableCell>
+    </TableRow>
   );
 }
 
@@ -323,6 +534,8 @@ function WorkLocally({ book }: { book: Book }) {
     url.username = "git";
     return `${url.origin}/api/books/${id}/git`;
   })();
+  // Without a folder name, git would clone into "git", the last part of the address.
+  const cloneCommand = `git clone ${cloneUrl} ${book.slug}`;
   const { data: tokens } = useQuery({
     queryKey: ["books", id, "git", "tokens"],
     queryFn: () => unwrap(api.books[":id"].git.tokens.$get({ param: { id } })),
@@ -330,6 +543,7 @@ function WorkLocally({ book }: { book: Book }) {
   const [label, setLabel] = useState("");
   const [secret, setSecret] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const refresh = () => queryClient.invalidateQueries({ queryKey: ["books", id, "git", "tokens"] });
 
@@ -359,23 +573,23 @@ function WorkLocally({ book }: { book: Book }) {
   };
 
   return (
-    <div className="my-4 max-w-xl">
-      <h3 className="mb-1 font-medium">{t("publishing.git.title")}</h3>
-      <p className="mb-2 text-sm text-muted-foreground">
-        {t("publishing.git.hint")} <code>main</code>
-        {t("publishing.git.hint2")}
-      </p>
+    <div>
       <div className="flex items-center gap-2">
         <code className="min-w-0 flex-1 truncate rounded-md bg-muted px-2 py-1.5 text-xs select-all">
-          git clone {cloneUrl}
+          {cloneCommand}
         </code>
         <Button
           variant="outline"
           size="sm"
-          onClick={() => navigator.clipboard?.writeText(`git clone ${cloneUrl}`)}
+          onClick={() => {
+            void navigator.clipboard?.writeText(cloneCommand);
+            setCopied(true);
+            window.setTimeout(() => setCopied(false), 1500);
+          }}
           aria-label={t("publishing.git.copyAria")}
         >
-          <CopyIcon aria-hidden /> {t("publishing.git.copy")}
+          {copied ? <CheckIcon aria-hidden /> : <CopyIcon aria-hidden />}{" "}
+          {copied ? t("publishing.git.copied") : t("publishing.git.copy")}
         </Button>
       </div>
       <p className="mt-2 text-sm text-muted-foreground">

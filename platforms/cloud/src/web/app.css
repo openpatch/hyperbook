@@ -157,6 +157,11 @@
   * {
     @apply border-border outline-ring/50;
   }
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  [role="tab"] {
+    cursor: pointer;
+  }
   body {
     @apply bg-background text-foreground font-sans;
     line-height: 1.5;

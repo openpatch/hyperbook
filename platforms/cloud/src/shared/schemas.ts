@@ -60,6 +60,11 @@ export const changePasswordInput = z.object({
   newPassword,
 });
 
+export const changeEmailInput = z.object({
+  email,
+  currentPassword: z.string().min(1, "validation.currentPasswordRequired").max(200),
+});
+
 export const role = z.enum(["admin", "teacher"]);
 
 export const createUserInput = z.object({
@@ -158,11 +163,6 @@ export const instanceSettingsInput = z
       elementRuntimeChoice,
     ),
     gitPushUpdatesPreview: z.boolean(),
-  })
-  .partial();
-
-/** An optional note on a publish, stored on the build row (shown in the builds table). */
-export const publishInput = z
     aiModels: z
       .array(
         z.object({
@@ -174,6 +174,11 @@ export const publishInput = z
       .max(50)
       .refine((models) => new Set(models.map((m) => m.id)).size === models.length, "Each model may be listed once"),
     aiDefaultModel: z.string().nullable(),
+  })
+  .partial();
+
+/** An optional note on a publish, stored on the build row (shown in the builds table). */
+export const publishInput = z
   .object({
     note: z.string().trim().max(200, "At most 200 characters").default(""),
   })

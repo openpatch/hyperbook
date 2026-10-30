@@ -66,7 +66,7 @@ export function instanceRoutes(deps: Deps) {
   const { db, mailer } = deps;
   return new Hono<AuthedEnv>()
     .use(requireAdmin)
-    .get("/", (c) => c.json(getInstanceSettings(db)))
+    .get("/", (c) => c.json(settingsView(deps)))
     .put("/", validate("json", instanceSettingsInput), (c) => {
       const changes = c.req.valid("json");
       if (changes.signupMode && changes.signupMode !== "closed" && !mailer.enabled) {
@@ -90,6 +90,6 @@ export function instanceRoutes(deps: Deps) {
         targetType: "instance",
         data: { keys: Object.keys(changes) },
       });
-      return c.json(getInstanceSettings(db));
+      return c.json(settingsView(deps));
     });
 }

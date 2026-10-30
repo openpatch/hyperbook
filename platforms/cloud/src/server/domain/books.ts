@@ -1,7 +1,7 @@
 import { and, count, eq, sql } from "drizzle-orm";
 import { HTTPException } from "hono/http-exception";
 import type { SessionUser } from "../auth/sessions";
-import type { Config } from "../config";
+import { type Config, previewOrigin } from "../config";
 import type { Db } from "../db/client";
 import { bookMembers, bookSlugs, books } from "../db/schema";
 import { publicDomain, publicOrigin } from "./custom-domains";
@@ -115,6 +115,8 @@ export function publicBook(config: Config, book: BookRow, role: BookRole) {
     source: book.source,
     externalUrl: book.externalUrl,
     url: book.externalUrl ?? publicOrigin(config, book),
+    /** Where the newest saved state is shown, to owners and editors only. */
+    previewUrl: previewOrigin(config, book.slug),
     domain: publicDomain(config, book),
     /** Suffix mode: the ending the teacher's chosen names get. */
     slugSuffix: book.slugSuffix,

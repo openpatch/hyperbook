@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
-import { changePasswordInput, updateMeInput } from "../../../shared/schemas";
+import { changeEmailInput, changePasswordInput, updateMeInput } from "../../../shared/schemas";
 import type { Locale } from "../../../shared/i18n";
 import { audit } from "../../audit";
 import { hashPassword, verifyPassword } from "../../auth/password";
@@ -32,6 +32,31 @@ export function meRoutes({ db }: Deps) {
       if (locale !== undefined) patch.locale = locale;
       if (Object.keys(patch).length > 0) {
         db.update(users).set(patch).where(eq(users.id, user.id)).run();
+      }
+      return c.json({ ok: true as const });
+    })
+
+    .put("/email", validate("json", changeEmailInput), async (c) => {
+      const user = c.get("user");
+      const { email, currentPassword } = c.req.valid("json");
+      const t = createT(requestLocale(c));
+      const row = db.select().from(users).where(eq(users.id, user.id)).get();
+      if (!row || !(await verifyPassword(currentPassword, row.passwordHash))) {
+        throw new HTTPException(400, { message: t("errors.me.wrongCurrentPassword") });
+      }
+      if (email !== row.email) {
+        const taken = db.select({ id: users.id }).from(users).where(eq(users.email, email)).get();
+        if (taken) throw new HTTPException(409, { message: t("errors.users.emailExists") });
+        db.update(users).set({ email }).where(eq(users.id, user.id)).run();
+        // Other devices are logged out; this one stays.
+        deleteUserSessions(db, user.id, c.get("sessionIdHash"));
+        audit(db, {
+          actorUserId: user.id,
+          action: "email.change",
+          targetType: "user",
+          targetId: user.id,
+          data: { from: row.email, to: email },
+        });
       }
       return c.json({ ok: true as const });
     })
