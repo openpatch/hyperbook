@@ -1,6 +1,21 @@
 const path = require("path");
 const fs = require("fs");
+const webpack = require("webpack");
 const CopyPlugin = require("copy-webpack-plugin");
+
+// build.ts loads the lunr language plugins with require("./lunr-languages/...").
+// The CLI's postbuild copies them next to dist/ for the published package, but
+// from the workspace source that directory does not exist at the package root,
+// so webpack would warn "Can't resolve './lunr-languages'". Redirect both the
+// static and the dynamic (context) request to the files inside the
+// lunr-languages package so webpack bundles them.
+const hyperbookDir = path.dirname(require.resolve("hyperbook/package.json"));
+const lunrLanguagesMin = path.join(
+  hyperbookDir,
+  "node_modules",
+  "lunr-languages",
+  "min",
+);
 
 module.exports = (_env, argv) => {
   // Remove previous build output, which may still contain bundled runtimes.
@@ -31,6 +46,26 @@ module.exports = (_env, argv) => {
       "@aws-sdk/client-s3": "commonjs @aws-sdk/client-s3",
     },
     plugins: [
+      new webpack.NormalModuleReplacementPlugin(
+        /^\.\/lunr-languages[\\/]/,
+        (resource) => {
+          if (!resource.context.startsWith(hyperbookDir)) return;
+          resource.request = path.join(
+            lunrLanguagesMin,
+            resource.request.slice("./lunr-languages/".length),
+          );
+        },
+      ),
+      // The dynamic require(`./lunr-languages/lunr.${lang}.min.js`) becomes a
+      // context module; point its directory at the real one. lunr.jp.min.js is
+      // an upstream alias stub that requires a non-existent ./lunr.ja — the
+      // CLI falls back to English for it, so leave it out of the context too.
+      new webpack.ContextReplacementPlugin(
+        /^\.\/lunr-languages$/,
+        lunrLanguagesMin,
+        false,
+        /^\.\/lunr\.(?!jp\.).*\.min\.js$/,
+      ),
       new CopyPlugin({
         patterns: [
           {
