@@ -233,6 +233,8 @@ export const en = {
         "AI credits this week: tokens times the model's weight. They refill on {{date}}.",
       creditsUsed: "{{used}} credits used this week",
       modelWeight: "{{model}} (×{{weight}})",
+      answerUsage: "Cost of this answer: {{credits}} credits.",
+      clearHistory: "Clear the conversation",
       promptPlaceholder: "Ask about this page — or select text first…",
       ask: "Ask",
       stop: "Stop",
@@ -1145,6 +1147,10 @@ export const en = {
     aiModelAdd: "Add a model",
     aiModelsHint:
       "Give a model a name such as Fast or Thorough and teachers see that instead of the model id. A credit is a token times the model's weight for its kind: input, cached input (prefix-cache hits bill less at the provider), and output. Give the model you compare against weight 1 in all three columns, and a model that costs twice as much per token weight 2.",
+    aiModelList:
+      "The model fields suggest the provider's models; any other id can be typed in.",
+    aiModelListFailed:
+      "The provider's model list could not be loaded — model ids can be typed in all the same.",
     gitPushHint:
       "When a teacher pushes to a book's main branch with git, its preview is rebuilt (never published automatically). Off by default: pushes then only update the source, so many small commits cannot overwhelm the build queue.",
     signup: "Sign-up",

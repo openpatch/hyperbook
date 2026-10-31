@@ -59,8 +59,8 @@ export type Config = {
     /** Any OpenAI-compatible API, e.g. https://api.mistral.ai/v1 or http://localhost:11434/v1 (Ollama). */
     baseUrl: string;
     apiKey: string;
-    /** The default model; always the first of `models`. */
-    model: string;
+    /** The default model; always the first of `models`. Null until one is picked. */
+    model: string | null;
     /** Models the teacher may pick in the editor; always includes `model`. */
     models: string[];
     /** Whole request, provider call and streaming included. */
@@ -144,11 +144,15 @@ const schema = z.object({
   MAIL_OUTBOX_DIR: optional,
   // The AI writing assistant speaks the OpenAI chat-completions protocol,
   // so any provider works: Mistral, OpenAI, Anthropic's compatibility layer,
-  // or a local Ollama. All three or none, like SMTP above.
+  // or a local Ollama. The endpoint and key are a pair, like SMTP above; which
+  // models to offer — with their weights, names and the default — is picked in
+  // the admin settings, from the provider's live model list. The three
+  // variables below are an optional shorthand that predates that.
   AI_BASE_URL: optional,
   AI_API_KEY: optional,
+  /** The default model; optional — the admin settings are the usual place. */
   AI_MODEL: optional,
-  /** Comma-separated extra models the editor offers; AI_MODEL stays the default. */
+  /** Comma-separated extra models the editor offers; same, optional shorthand. */
   AI_MODELS: optional,
   /**
    * "model=in/cached/out,…": how much a model's input, cached-input and
@@ -157,7 +161,9 @@ const schema = z.object({
    */
   AI_MODEL_WEIGHTS: optional,
   AI_TIMEOUT_SECONDS: z.coerce.number().int().min(10).default(120),
-  AI_MAX_OUTPUT_TOKENS: z.coerce.number().int().min(64).default(2048),
+  // The cap counts reasoning tokens too, so a reasoning model (Mistral
+  // Large 4, GLM-5.3) needs room to think before it writes its answer.
+  AI_MAX_OUTPUT_TOKENS: z.coerce.number().int().min(64).default(8192),
   AI_MAX_STEPS: z.coerce.number().int().min(1).max(32).default(6),
   AI_REQUESTS_PER_MINUTE: z.coerce.number().int().min(1).default(6),
 });
@@ -308,13 +314,14 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
 
   if (smtp && e.MAIL_OUTBOX_DIR) problems.push("Set either SMTP_* or MAIL_OUTBOX_DIR, not both");
 
-  // --- AI assistant: all or nothing ---------------------------------------
-  // Half a configuration silently answers nothing, so it is rejected.
+  // --- AI assistant: the provider or nothing -------------------------------
+  // The endpoint and key are the pair; the models are picked in the admin
+  // settings. Half a provider configuration silently answers nothing, so it
+  // is rejected.
   let ai: Config["ai"] = null;
   const aiFields = {
     AI_BASE_URL: e.AI_BASE_URL,
     AI_API_KEY: e.AI_API_KEY,
-    AI_MODEL: e.AI_MODEL,
   };
   const aiSet = Object.entries(aiFields).filter(([, v]) => v !== undefined);
   if (aiSet.length > 0) {
@@ -338,8 +345,8 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
           const base = `${url.protocol}//${url.host}${url.pathname.replace(/\/+$/, "")}`;
           const models = [
             ...new Set(
-              [e.AI_MODEL!, ...(e.AI_MODELS ?? "").split(",")]
-                .map((m) => m.trim())
+              [e.AI_MODEL, ...(e.AI_MODELS ?? "").split(",")]
+                .map((m) => m?.trim() ?? "")
                 .filter(Boolean),
             ),
           ];
@@ -377,7 +384,9 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
           ai = {
             baseUrl: base,
             apiKey: e.AI_API_KEY!,
-            model: e.AI_MODEL!,
+            // AI_MODEL is the shorthand's default; without any, the settings
+            // pick the models and the assistant stays off until they do.
+            model: e.AI_MODEL ?? models[0] ?? null,
             models,
             timeoutMs: e.AI_TIMEOUT_SECONDS * 1000,
             maxOutputTokens: e.AI_MAX_OUTPUT_TOKENS,

@@ -93,6 +93,25 @@ export function modelWeights(
 }
 
 /**
+ * What one provider call's tokens cost the weekly quota, in credits. Cached
+ * tokens are a subset of the prompt tokens, billed at their own (lower)
+ * rate — so only the uncached remainder counts at the input weight.
+ */
+export function weightedTokens(
+  tokensIn: number,
+  tokensCached: number,
+  tokensOut: number,
+  weights: ModelWeights,
+): number {
+  const cached = Math.min(Math.max(tokensCached, 0), tokensIn);
+  return Math.ceil(
+    (tokensIn - cached) * weights.in +
+      cached * weights.cached +
+      tokensOut * weights.out,
+  );
+}
+
+/**
  * Adds what one provider call used to today's row and answers the week's
  * new weighted total. Each token kind counts at its own weight — cached
  * prompt tokens (a subset of the input tokens) at the cached weight, so a
@@ -108,14 +127,7 @@ export function addTokens(
   tokensOut: number,
   weights: ModelWeights,
 ): number {
-  // Cached tokens are a subset of the prompt tokens, billed at their own
-  // (lower) rate — so only the uncached remainder counts at the input weight.
-  const cached = Math.min(Math.max(tokensCached, 0), tokensIn);
-  const weighted = Math.ceil(
-    (tokensIn - cached) * weights.in +
-      cached * weights.cached +
-      tokensOut * weights.out,
-  );
+  const weighted = weightedTokens(tokensIn, tokensCached, tokensOut, weights);
   db.insert(aiUsage)
     .values({
       userId,

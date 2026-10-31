@@ -2,7 +2,7 @@
  * A client for the OpenAI chat-completions protocol — the one API the
  * assistant needs, because every provider speaks it: Mistral, OpenAI,
  * Anthropic through its compatibility layer, OpenRouter, and a local
- * Ollama or vLLM. See docs/cloud-ai-assistant.md.
+ * Ollama or vLLM. See platforms/cloud/docs/cloud-ai-assistant.md.
  */
 
 /** One message of the conversation, in the provider's terms. */
@@ -72,6 +72,25 @@ function deltaText(content: unknown): string {
     if (typeof part.content === "string") return part.content;
   }
   return "";
+}
+
+/**
+ * The thinking text of one streamed delta. Mistral's reasoning models
+ * (Large 4, Medium 3.5, Small 4) think inside `content` — chunks of
+ * { type: "thinking", thinking: [{ type: "text", text }] } — not in a
+ * reasoning field, and their thinking counts against max_tokens.
+ */
+function thinkingText(content: unknown): string {
+  let text = "";
+  for (const chunk of Array.isArray(content) ? content : [content]) {
+    const thinking = (chunk as { thinking?: unknown } | null)?.thinking;
+    if (!Array.isArray(thinking)) continue;
+    for (const part of thinking) {
+      const partText = (part as { text?: unknown } | null)?.text;
+      if (typeof partText === "string") text += partText;
+    }
+  }
+  return text;
 }
 
 /**
@@ -236,6 +255,9 @@ export async function* streamChat(options: {
         hasContent = true;
         pending.push({ type: "delta", text });
       }
+      // Mistral's reasoning models think in content chunks, not a
+      // reasoning field, so their thinking is gathered separately.
+      reasoning += thinkingText(choice?.delta?.content);
       reasoning += deltaText(choice?.delta?.reasoning_content);
       reasoning += deltaText(choice?.delta?.reasoning);
       for (const call of choice?.delta?.tool_calls ?? []) {
@@ -297,9 +319,10 @@ function* complete(
   const complete = [...calls.values()].filter((call) => call.id && call.name);
   if (complete.length > 0) yield { type: "tool_calls", calls: complete };
   else if (!hasContent) {
-    // Reasoning models (z.ai's GLM-5.x, for one) sometimes put the whole
-    // visible answer into reasoning_content and leave content empty — use
-    // that rather than failing the request with "empty".
+    // Reasoning models sometimes put the whole visible answer where the
+    // content never arrives — GLM-5.x in reasoning_content, Mistral's Large 4
+    // and Small 4 in thinking chunks — use that rather than failing with
+    // "empty", which is what a max_tokens cap inside the thinking reads as.
     if (reasoning.trim()) yield { type: "delta", text: reasoning };
     else throw new ProviderError("The AI provider returned an empty answer", "empty");
   }

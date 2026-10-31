@@ -14,4 +14,4 @@ OpenAI, Anthropic's compatibility layer, OpenRouter, LM Studio and vLLM work
 the same way. Configure `AI_BASE_URL`, `AI_API_KEY` and `AI_MODEL` together
 (or not at all), and the assistant appears in the editor; admins can switch
 it off per teacher and set a per-day quota, like every other entitlement.
-See `docs/cloud-ai-assistant.md`.
+See `platforms/cloud/docs/cloud-ai-assistant.md`.

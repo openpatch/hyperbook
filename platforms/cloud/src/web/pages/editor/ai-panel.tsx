@@ -1,5 +1,5 @@
 import type { EditorView } from "@codemirror/view";
-import { CopyIcon, RotateCwIcon, SparklesIcon, StopCircleIcon } from "lucide-react";
+import { CopyIcon, EraserIcon, RotateCwIcon, SparklesIcon, StopCircleIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -12,7 +12,7 @@ import { ConflictError } from "./workspace";
 import {
   assist,
   contextOf,
-  formatWeights,
+  formatWeight,
   selectionOf,
   useAiStatus,
   type AiStatus,
@@ -29,10 +29,11 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { AiDiffDialog } from "./ai-diff-dialog";
+import { Markdown } from "@/components/markdown";
 import { cn } from "@/lib/utils";
 
 /*
- * The AI assistant's pane in the editor (docs/cloud-ai-assistant.md), laid
+ * The AI assistant's pane in the editor (platforms/cloud/docs/cloud-ai-assistant.md), laid
  * out like a chat: the teacher's requests on the right, the assistant's
  * answers on the left, each with a copy button. The selected text and the
  * open page go along with every request. File changes arrive as a proposal
@@ -43,7 +44,12 @@ import { cn } from "@/lib/utils";
 type Phase = "idle" | "streaming" | "result";
 
 /** One request and its answer; the answer grows while it streams. */
-type Exchange = { prompt: string; answer: string };
+type Exchange = {
+  prompt: string;
+  answer: string;
+  /** What the answer cost the weekly quota, told by the done event. */
+  credits?: number;
+};
 
 export function AiPanel({
   bookId,
@@ -186,6 +192,21 @@ export function AiPanel({
       // The whole page, so the assistant may rewrite it — only when it fits;
       // a truncated page must never reach a write_file, or content would go.
       pageText: document.length <= 128 * 1024 ? document : undefined,
+      // The turns before this one, so follow-ups know what came before;
+      // the last few exchanges, answers truncated to what the schema takes.
+      history: exchanges
+        .filter((exchange) => exchange.answer)
+        .slice(-3)
+        .flatMap((exchange) => [
+          { role: "user" as const, content: exchange.prompt },
+          {
+            role: "assistant" as const,
+            content:
+              exchange.answer.length > 4000
+                ? exchange.answer.slice(0, 3999) + "…"
+                : exchange.answer,
+          },
+        ]),
     };
 
     stop.current?.abort();
@@ -234,6 +255,15 @@ export function AiPanel({
               break;
             case "done":
               ended.finish = event.finish;
+              if (event.usage) {
+                setExchanges((all) =>
+                  all.map((exchange, index) =>
+                    index === all.length - 1
+                      ? { ...exchange, credits: event.usage!.credits }
+                      : exchange,
+                  ),
+                );
+              }
               break;
             case "error":
               ended.finish = "error";
@@ -398,14 +428,21 @@ export function AiPanel({
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {status.data.models.map((name) => (
+              {[...status.data.models]
+                // By the name teachers see — the label an admin gave, else the id.
+                .sort((a, b) =>
+                  (status.data?.modelLabels[a] || a).localeCompare(
+                    status.data?.modelLabels[b] || b,
+                  ),
+                )
+                .map((name) => (
                 <SelectItem key={name} value={name}>
                   {t("editor.ai.modelWeight", {
                     model: status.data?.modelLabels[name] || name,
-                    weight: formatWeights(status.data?.modelWeights[name]),
+                    weight: formatWeight(status.data?.modelWeights[name]),
                   })}
                 </SelectItem>
-              ))}
+                ))}
             </SelectContent>
           </Select>
           ) : (
@@ -414,6 +451,27 @@ export function AiPanel({
                 {t("editor.ai.model", { model: status.data.modelLabels[status.data.model] || status.data.model })}
               </span>
             )
+          )}
+          {exchanges.length > 0 && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-6"
+              aria-label={t("editor.ai.clearHistory")}
+              title={t("editor.ai.clearHistory")}
+              disabled={phase === "streaming"}
+              onClick={() => {
+                // The next conversation starts from scratch: no history goes
+                // along with its requests, and no proposal stays open.
+                setExchanges([]);
+                setFailed(null);
+                setProposal(null);
+                setReviewOpen(false);
+                setPhase("idle");
+              }}
+            >
+              <EraserIcon className="size-4" aria-hidden />
+            </Button>
           )}
         </div>
       </div>
@@ -439,18 +497,28 @@ export function AiPanel({
                 <div className="flex justify-start">
                   <div
                     className={cn(
-                      "max-w-[85%] whitespace-pre-wrap break-words rounded-lg rounded-bl-sm bg-muted px-3 py-2",
+                      "max-w-[85%] rounded-lg rounded-bl-sm bg-muted px-3 py-2",
                       index === exchanges.length - 1 &&
                         phase === "streaming" &&
                         "opacity-80",
                     )}
                   >
-                    {exchange.answer}
+                    <Markdown
+                      text={exchange.answer}
+                      className="ai-markdown break-words"
+                    />
                   </div>
                 </div>
                 <div className="flex justify-start">
                   <CopyButton text={exchange.answer} />
                 </div>
+                {exchange.credits !== undefined && (
+                  <p className="text-xs text-muted-foreground">
+                    {t("editor.ai.answerUsage", {
+                      credits: exchange.credits.toLocaleString(),
+                    })}
+                  </p>
+                )}
               </>
             )}
           </div>

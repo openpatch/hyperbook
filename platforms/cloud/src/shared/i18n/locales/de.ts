@@ -230,6 +230,8 @@ export const de: Messages = {
         "KI-Credits diese Woche: Tokens mal Gewicht des Modells. Sie werden am {{date}} erneuert.",
       creditsUsed: "{{used}} Credits diese Woche verbraucht",
       modelWeight: "{{model}} (×{{weight}})",
+      answerUsage: "Kosten dieser Antwort: {{credits}} Credits.",
+      clearHistory: "Verlauf löschen",
       promptPlaceholder:
         "Fragen Sie zu dieser Seite — oder markieren Sie zuerst Text…",
       ask: "Fragen",
@@ -1175,6 +1177,10 @@ export const de: Messages = {
     aiModelAdd: "Modell hinzufügen",
     aiModelsHint:
       "Geben Sie einem Modell einen Namen wie Schnell oder Gründlich, dann sehen Lehrkräfte diesen statt der Modell-ID. Ein Credit ist ein Token mal dem Gewicht des Modells für seine Art: Eingabe, gecachte Eingabe (Prefix-Cache-Treffer kosten beim Anbieter weniger) und Ausgabe. Geben Sie dem Vergleichsmodell in allen drei Spalten das Gewicht 1 und einem Modell, das pro Token doppelt so viel kostet, das Gewicht 2.",
+    aiModelList:
+      "Die Modellfelder schlagen die Modelle des Anbieters vor; andere IDs lassen sich eintippen.",
+    aiModelListFailed:
+      "Die Modellliste des Anbieters konnte nicht geladen werden — Modell-IDs lassen sich trotzdem eintippen.",
     gitPushHint:
       "Wenn eine Lehrkraft mit git auf den main-Branch eines Buchs pusht, wird seine Vorschau neu gebaut (nie automatisch veröffentlicht). Standardmäßig aus: Pushes aktualisieren dann nur die Quelle, damit viele kleine Commits die Build-Warteschlange nicht überlasten.",
     signup: "Registrierung",

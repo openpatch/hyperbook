@@ -8,7 +8,7 @@ import { loggedIn, setup } from "./helpers";
 /*
  * A fake OpenAI-compatible provider: a chat-completions endpoint on an
  * ephemeral port that streams scripted deltas and records what it was
- * asked. The real providers all speak this protocol (docs/cloud-ai-assistant.md).
+ * asked. The real providers all speak this protocol (platforms/cloud/docs/cloud-ai-assistant.md).
  */
 
 type Asked = {
@@ -266,14 +266,18 @@ describe("AI assist", () => {
       "done",
     ]);
     expect(seen[0]!.data).toEqual({ text: "Hello" });
-    expect(seen[4]!.data).toEqual({ finish: "stop" });
+    // The done event also tells what the answer cost the weekly quota.
+    expect(seen[4]!.data).toEqual({
+      finish: "stop",
+      usage: { tokensIn: 100, tokensCached: 40, tokensOut: 20, credits: 120 },
+    });
 
     // The provider saw the key and the model, and a message pair that
     // knows the book: system prompt, hyperbook conventions, the page.
     expect(provider.asked).toHaveLength(1);
     const [asked] = provider.asked;
     expect(asked!.model).toBe("mistral-test");
-    expect(asked!.maxTokens).toBe(2048);
+    expect(asked!.maxTokens).toBe(8192);
     expect(asked!.messages).toHaveLength(2);
     expect(asked!.messages[0]!.role).toBe("system");
     expect(String(asked!.messages[0]!.content)).toMatch(/hyperbook/i);
@@ -281,6 +285,60 @@ describe("AI assist", () => {
     expect(String(asked!.messages[1]!.content)).toContain("book/index.md");
     expect(String(asked!.messages[1]!.content)).toContain("# Physics");
     expect(String(asked!.messages[1]!.content)).toContain("Say hi");
+  });
+
+  it("sends the conversation's earlier turns along, oldest first", async () => {
+    const { owner, provider, assist } = await world();
+    const res = await owner.c.post(assist, {
+      action: "free",
+      prompt: "Write about a related animal",
+      pagePath: "book/index.md",
+      history: [
+        { role: "user", content: "Write me a page about an arctic fox" },
+        {
+          role: "assistant",
+          content: "I wrote book/arctic-fox.md about the arctic fox.",
+        },
+      ],
+    });
+    expect(res.status).toBe(200);
+    // The pair from before, between the system prompt and this request.
+    const [asked] = provider.asked;
+    expect(asked!.messages.map((m) => m.role)).toEqual([
+      "system",
+      "user",
+      "assistant",
+      "user",
+    ]);
+    expect(String(asked!.messages[1]!.content)).toContain("arctic fox");
+    expect(String(asked!.messages[2]!.content)).toContain("arctic-fox.md");
+    expect(String(asked!.messages[3]!.content)).toContain(
+      "Write about a related animal",
+    );
+  });
+
+  it("truncates an over-long history entry instead of failing the request", async () => {
+    const { owner, provider, assist } = await world();
+    const res = await owner.c.post(assist, {
+      action: "free",
+      prompt: "And now a related animal",
+      pagePath: "book/index.md",
+      history: [
+        { role: "user", content: "Write me a page about an arctic fox" },
+        // One character over the cap: a model that answered at length in the
+        // chat must not make every following request fail validation.
+        { role: "assistant", content: "f".repeat(4001) },
+      ],
+    });
+    expect(res.status).toBe(200);
+    const [asked] = provider.asked;
+    const history = asked!.messages.find(
+      (m) => m.role === "assistant" && m.content,
+    );
+    expect(String((history as { content: string }).content)).toHaveLength(4000);
+    expect(String(asked!.messages.at(-1)!.content)).toContain(
+      "And now a related animal",
+    );
   });
 
   it("sends a prompt cache key that is stable while the book's head commit is", async () => {
@@ -676,7 +734,13 @@ describe("AI assist", () => {
       pagePath: "book/index.md",
     });
     const seen = events(res.body);
-    expect(seen.at(-1)).toEqual({ event: "done", data: { finish: "length" } });
+    expect(seen.at(-1)).toEqual({
+      event: "done",
+      data: {
+        finish: "length",
+        usage: { tokensIn: 100, tokensCached: 40, tokensOut: 20, credits: 120 },
+      },
+    });
   });
 });
 

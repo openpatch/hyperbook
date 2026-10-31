@@ -44,6 +44,43 @@ export function publicInstanceRoutes({ db, config, mailer }: Deps) {
     });
 }
 
+/**
+ * The provider's model list for the settings' pick fields, so an admin picks
+ * ids instead of typing them. Cached briefly — it is a hint for the settings
+ * page, not a live dependency.
+ */
+const PROVIDER_MODELS_TTL_MS = 60_000;
+let providerModels: { baseUrl: string; at: number; models: string[] } | null = null;
+
+async function listProviderModels(ai: NonNullable<Deps["config"]["ai"]>): Promise<string[]> {
+  if (
+    providerModels &&
+    providerModels.baseUrl === ai.baseUrl &&
+    Date.now() - providerModels.at < PROVIDER_MODELS_TTL_MS
+  ) {
+    return providerModels.models;
+  }
+  const response = await fetch(`${ai.baseUrl}/models`, {
+    headers: { authorization: `Bearer ${ai.apiKey}` },
+    signal: AbortSignal.timeout(10_000),
+  });
+  if (!response.ok) throw new Error(`status ${response.status}`);
+  // The OpenAI shape ({ data: [{ id }] }); some providers use `models` instead.
+  const json = (await response.json()) as {
+    data?: { id?: unknown }[];
+    models?: { id?: unknown }[];
+  };
+  const models = [
+    ...new Set(
+      (json.data ?? json.models ?? [])
+        .map((m) => (typeof m?.id === "string" ? m.id.trim() : ""))
+        .filter(Boolean),
+    ),
+  ].sort();
+  providerModels = { baseUrl: ai.baseUrl, at: Date.now(), models };
+  return models;
+}
+
 /** The settings, plus the AI models in effect (the environment's when none are saved). */
 function settingsView(deps: Deps) {
   const settings = getInstanceSettings(deps.db);
@@ -51,7 +88,8 @@ function settingsView(deps: Deps) {
   return {
     ...settings,
     ai: {
-      configured: ai !== null,
+      /** The provider is set up — this is where the models get picked. */
+      configured: deps.config.ai !== null,
       defaultModel: ai?.model ?? null,
       models: (ai?.models ?? []).map((id) => ({
         id,
@@ -63,10 +101,23 @@ function settingsView(deps: Deps) {
 }
 
 export function instanceRoutes(deps: Deps) {
-  const { db, mailer } = deps;
+  const { db, mailer, config } = deps;
   return new Hono<AuthedEnv>()
     .use(requireAdmin)
     .get("/", (c) => c.json(settingsView(deps)))
+    // What the provider offers, for the settings' model pick fields. A
+    // provider that does not answer (or is not configured) must not block
+    // the settings: the fields accept typed ids all the same.
+    .get("/ai/models", async (c) => {
+      if (!config.ai) {
+        throw new HTTPException(503, { message: "The AI provider is not configured" });
+      }
+      try {
+        return c.json({ models: await listProviderModels(config.ai) });
+      } catch {
+        throw new HTTPException(502, { message: "The provider did not list its models" });
+      }
+    })
     .put("/", validate("json", instanceSettingsInput), (c) => {
       const changes = c.req.valid("json");
       if (changes.signupMode && changes.signupMode !== "closed" && !mailer.enabled) {

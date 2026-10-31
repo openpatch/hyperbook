@@ -15,6 +15,7 @@ import {
   modelWeights,
   usedThisWeek,
   usedToday,
+  weightedTokens,
 } from "../../domain/ai-usage";
 import { repoDir } from "../../hosting/storage";
 import { createT } from "../../i18n";
@@ -27,7 +28,7 @@ import { hostedOnly } from "./publishing";
 import { validate } from "../validate";
 
 /*
- * The editor's AI writing assistant (docs/cloud-ai-assistant.md). The
+ * The editor's AI writing assistant (platforms/cloud/docs/cloud-ai-assistant.md). The
  * provider's key lives in the server's env only; the editor talks to these
  * routes, never to the provider. Answering happens as Server-Sent Events,
  * because the assistant's text streams while it is written.
@@ -153,6 +154,7 @@ export function bookAiRoutes({ db, config }: Deps) {
         let tokensIn = 0;
         let tokensCached = 0;
         let tokensOut = 0;
+        let credits = 0;
         const weights = modelWeights(ai.modelWeights, model);
         try {
           for await (const event of runAssistant(
@@ -169,6 +171,12 @@ export function bookAiRoutes({ db, config }: Deps) {
               tokensIn += event.promptTokens;
               tokensCached += event.cachedPromptTokens;
               tokensOut += event.completionTokens;
+              credits += weightedTokens(
+                event.promptTokens,
+                event.cachedPromptTokens,
+                event.completionTokens,
+                weights,
+              );
               // Written as it happens, so an abort or failure later on
               // still costs what the provider already spent.
               const week = addTokens(
@@ -190,7 +198,11 @@ export function bookAiRoutes({ db, config }: Deps) {
               finish = event.finish;
             }
           }
-          await send("done", { finish });
+          // What the answer cost, so the editor can show it next to it.
+          await send("done", {
+            finish,
+            usage: { tokensIn, tokensCached, tokensOut, credits },
+          });
         } catch (error) {
           if (c.req.raw.signal.aborted) {
             // The teacher stopped the request; there is no reader left to

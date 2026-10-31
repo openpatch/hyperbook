@@ -279,6 +279,13 @@ function AiModelsSection({
   onSave: (models: { id: string; weights: ModelWeights; label?: string }[], defaultModel: string) => Promise<void>;
 }) {
   const { t } = useTranslation();
+  // The provider's model list, as suggestions for the id fields: picking is
+  // the point, but typed ids stay allowed (a provider may not list its models).
+  const suggestions = useQuery({
+    queryKey: ["instance", "ai-models"],
+    queryFn: () => unwrap(api.instance.ai.models.$get()),
+    retry: false,
+  });
   const [rows, setRows] = useState(
     saved.map((m) => ({
       id: m.id,
@@ -315,10 +322,16 @@ function AiModelsSection({
           <span>{t("instanceSettings.aiModelDefault")}</span>
           <span />
         </div>
+        <datalist id="ai-model-suggestions">
+          {(suggestions.data?.models ?? []).map((id) => (
+            <option key={id} value={id} />
+          ))}
+        </datalist>
         {rows.map((row, index) => (
           <div key={index} className="grid grid-cols-[1fr_1fr_5rem_5rem_5rem_5rem_2.25rem] items-center gap-2">
             <Input
               value={row.id}
+              list="ai-model-suggestions"
               aria-label={t("instanceSettings.aiModelName")}
               onChange={(e) => {
                 if (defaultModel === row.id) setDefaultModel(e.target.value.trim());
@@ -389,6 +402,11 @@ function AiModelsSection({
           </Button>
         </div>
         <p className="text-sm text-muted-foreground">{t("instanceSettings.aiModelsHint")}</p>
+        <p className="text-sm text-muted-foreground">
+          {suggestions.isError
+            ? t("instanceSettings.aiModelListFailed")
+            : t("instanceSettings.aiModelList")}
+        </p>
         <div>
           <Button
             disabled={busy || invalid}

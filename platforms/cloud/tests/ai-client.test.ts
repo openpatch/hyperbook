@@ -3,7 +3,7 @@ import { assist } from "../src/web/lib/ai";
 
 /*
  * The streaming client's SSE parsing: the same wire format the route sends
- * (docs/cloud-ai-assistant.md), answered by a stubbed fetch. Only the
+ * (platforms/cloud/docs/cloud-ai-assistant.md), answered by a stubbed fetch. Only the
  * parsing is tested here; the route has its own tests against a fake
  * provider, and the panel's flow is covered by an e2e run.
  */
@@ -102,6 +102,30 @@ describe("assist", () => {
     expect(seen).toEqual([
       { event: "delta", text: "Hello" },
       { event: "done", finish: "stop" },
+    ]);
+  });
+
+  it("parses the answer's usage from the done event", async () => {
+    stubFetch(() =>
+      sseResponse([
+        'event: delta\ndata: {"text":"Hello"}\n\n',
+        'event: done\ndata: {"finish":"stop","usage":{"tokensIn":100,"tokensCached":40,"tokensOut":20,"credits":120}}\n\n',
+      ]),
+    );
+    const seen: unknown[] = [];
+    await assist(
+      1,
+      { action: "continue", pagePath: "book/index.md" },
+      (event) => seen.push(event),
+      new AbortController().signal,
+    );
+    expect(seen).toEqual([
+      { event: "delta", text: "Hello" },
+      {
+        event: "done",
+        finish: "stop",
+        usage: { tokensIn: 100, tokensCached: 40, tokensOut: 20, credits: 120 },
+      },
     ]);
   });
 

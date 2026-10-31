@@ -90,10 +90,29 @@ describe("loadConfig", () => {
     );
   });
 
-  it("configures AI all or nothing", () => {
+  it("configures AI from the provider pair alone", () => {
     // Nothing set: the feature is simply off.
     expect(loadConfig(production).ai).toBeNull();
-    // A complete configuration, its trailing slash dropped (a /v1 path stays).
+    // The provider pair is enough: the admin settings pick the models. Without
+    // any — shorthand or settings — there is no model, so no assistant.
+    const pair = loadConfig({
+      ...production,
+      AI_BASE_URL: "https://api.mistral.ai/v1/",
+      AI_API_KEY: "key",
+      AI_REQUESTS_PER_MINUTE: "3",
+    });
+    expect(pair.ai).toEqual({
+      baseUrl: "https://api.mistral.ai/v1",
+      apiKey: "key",
+      model: null,
+      models: [],
+      timeoutMs: 120_000,
+      maxOutputTokens: 8192,
+      maxSteps: 6,
+      requestsPerMinute: 3,
+      modelWeights: {},
+    });
+    // The shorthand still names the models; AI_MODEL stays the default.
     const config = loadConfig({
       ...production,
       AI_BASE_URL: "https://api.mistral.ai/v1/",
@@ -102,15 +121,9 @@ describe("loadConfig", () => {
       AI_REQUESTS_PER_MINUTE: "3",
     });
     expect(config.ai).toEqual({
-      baseUrl: "https://api.mistral.ai/v1",
-      apiKey: "key",
+      ...pair.ai,
       model: "mistral-medium-latest",
       models: ["mistral-medium-latest"],
-      timeoutMs: 120_000,
-      maxOutputTokens: 2048,
-      maxSteps: 6,
-      requestsPerMinute: 3,
-      modelWeights: {},
     });
   });
 
@@ -159,7 +172,7 @@ describe("loadConfig", () => {
 
   it("rejects half an AI configuration and bad URLs", () => {
     expect(problems({ ...production, AI_BASE_URL: "https://api.mistral.ai/v1" })[0]).toMatch(
-      /AI is partly configured; also set AI_API_KEY, AI_MODEL/,
+      /AI is partly configured; also set AI_API_KEY/,
     );
     expect(
       problems({ ...production, AI_BASE_URL: "api.mistral.ai/v1", AI_API_KEY: "k", AI_MODEL: "m" }),

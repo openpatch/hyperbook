@@ -193,6 +193,39 @@ describe("streamChat", () => {
     ]);
   });
 
+  it("parses Mistral's thinking chunks, keeping them out of the answer", async () => {
+    // Mistral's reasoning models think inside `content`, as chunks of
+    // { type: "thinking", thinking: [{ type: "text", text }] }; only the
+    // text chunks are the answer.
+    const stub = stubChunks([
+      'data: {"choices":[{"delta":{"content":[{"type":"thinking","thinking":[{"type":"text","text":"Let me "}]}]}}]}\n\n',
+      'data: {"choices":[{"delta":{"content":[{"type":"thinking","thinking":[{"type":"text","text":"decide…"}]},{"type":"text","text":"Hello"}]}}]}\n\n',
+      'data: {"choices":[{"delta":{"content":" world"}}]}\n\n',
+      'data: {"choices":[{"delta":{},"finish_reason":"stop"}]}\n\n',
+      "data: [DONE]\n\n",
+    ]);
+    expect(await collect(stub)).toEqual([
+      { type: "delta", text: "Hello" },
+      { type: "delta", text: " world" },
+      { type: "finish", finish: "stop" },
+    ]);
+  });
+
+  it("falls back to thinking chunks when content never arrives (Mistral reasoning models)", async () => {
+    // A max_tokens cap inside the thinking reads as an empty answer — the
+    // thinking must surface instead, not an "empty" error.
+    const stub = stubChunks([
+      'data: {"choices":[{"delta":{"content":[{"type":"thinking","thinking":[{"type":"text","text":"The lemming "}]}]}}]}\n\n',
+      'data: {"choices":[{"delta":{"content":[{"type":"thinking","thinking":[{"type":"text","text":"lives in the Arctic."}]}]}}]}\n\n',
+      'data: {"choices":[{"delta":{},"finish_reason":"length"}]}\n\n',
+      "data: [DONE]\n\n",
+    ]);
+    expect(await collect(stub)).toEqual([
+      { type: "delta", text: "The lemming lives in the Arctic." },
+      { type: "finish", finish: "length" },
+    ]);
+  });
+
   it("reports usage with the cached prompt tokens Mistral puts in prompt_tokens_details", async () => {
     const stub = stubChunks([
       'data: {"choices":[{"delta":{"content":"Hi"}}]}\n\n',

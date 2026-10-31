@@ -3,7 +3,7 @@
  * how the model may look through the whole book (read tools), and how it
  * may propose file changes (changing tools, onto an in-memory overlay —
  * the teacher reviews the proposal, the repository is never touched).
- * See docs/cloud-ai-assistant.md.
+ * See platforms/cloud/docs/cloud-ai-assistant.md.
  */
 
 import {
@@ -11,7 +11,7 @@ import {
   type AiAssistInput,
   type AiProposedChange,
 } from "../../shared/schemas";
-import type { Config } from "../config";
+import type { EffectiveAi } from "../domain/instance";
 import {
   diffChange,
   headCommit,
@@ -685,6 +685,13 @@ function buildMessages(book: Book, input: AiAssistInput): ChatMessage[] {
 
   return [
     { role: "system", content: system.join("\n\n") },
+    // The turns before this request, so follow-ups know what came before;
+    // they change while the system prefix stays, so prefix caching still
+    // applies to the part every request shares.
+    ...(input.history ?? []).map((m) => ({
+      role: m.role,
+      content: m.content,
+    })),
     { role: "user", content: [...page, "", task].join("\n") },
   ];
 }
@@ -696,7 +703,7 @@ function buildMessages(book: Book, input: AiAssistInput): ChatMessage[] {
  * never written — file changes end as a proposal the teacher reviews.
  */
 export async function* runAssistant(
-  options: { ai: NonNullable<Config["ai"]>; repo: string },
+  options: { ai: EffectiveAi; repo: string },
   input: AiAssistInput,
   signal?: AbortSignal,
 ): AsyncGenerator<AssistantEvent> {

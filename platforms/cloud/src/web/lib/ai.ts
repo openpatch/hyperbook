@@ -4,7 +4,7 @@ import { api, unwrap } from "./api";
 import type { AiAssistInput, AiProposedChange, ModelWeights } from "../../shared/schemas";
 
 /*
- * The editor's side of the AI writing assistant (docs/cloud-ai-assistant.md):
+ * The editor's side of the AI writing assistant (platforms/cloud/docs/cloud-ai-assistant.md):
  * a typed status query, and a streaming request that reads the route's
  * Server-Sent Events — the shared `hc` client cannot stream, so this is a
  * plain fetch whose body is parsed event by event, the same way the server
@@ -30,10 +30,16 @@ export type AiStatus = {
   tokensResetOn: string;
 };
 
-/** The quota weights of a model as the editor shows them: "4.67" when all match, else "in/cached/out". */
-export function formatWeights(w: ModelWeights | undefined): string {
-  if (!w) return "1";
-  return w.in === w.cached && w.cached === w.out ? `${w.in}` : `${w.in}/${w.cached}/${w.out}`;
+/**
+ * A model's cost hint for the picker: the rounded average of its three
+ * weights — one number a teacher can compare, not "in/cached/out" jargon.
+ */
+export function formatWeight(w: ModelWeights | undefined): string {
+  return String(
+    Math.round(
+      (((w?.in ?? 1) + (w?.cached ?? 1) + (w?.out ?? 1)) / 3) * 10,
+    ) / 10,
+  );
 }
 
 export function useAiStatus() {
@@ -51,7 +57,12 @@ export type AssistEvent =
   | { event: "tool"; name: string; args: Record<string, unknown> }
   | { event: "usage"; tokensUsedThisWeek: number; tokenQuota: number | null }
   | { event: "proposal"; changes: AiProposedChange[] }
-  | { event: "done"; finish: "stop" | "length" | "error" }
+  | {
+      event: "done";
+      finish: "stop" | "length" | "error";
+      /** What the answer cost; absent from streams of older servers. */
+      usage?: { tokensIn: number; tokensCached: number; tokensOut: number; credits: number };
+    }
   | { event: "error"; message: string; code: string };
 
 /**
@@ -128,6 +139,18 @@ export async function assist(
               parsed.finish === "length" || parsed.finish === "error"
                 ? parsed.finish
                 : "stop",
+            usage:
+              parsed.usage && typeof parsed.usage === "object"
+                ? (() => {
+                    const usage = parsed.usage as Record<string, unknown>;
+                    return {
+                      tokensIn: Number(usage.tokensIn) || 0,
+                      tokensCached: Number(usage.tokensCached) || 0,
+                      tokensOut: Number(usage.tokensOut) || 0,
+                      credits: Number(usage.credits) || 0,
+                    };
+                  })()
+                : undefined,
           });
           break;
         case "error":

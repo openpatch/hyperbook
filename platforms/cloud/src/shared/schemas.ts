@@ -405,7 +405,7 @@ export const initFilesInput = z.object({
   template: z.enum(["default", "empty"]),
 });
 
-/** A request to the editor's AI writing assistant (docs/cloud-ai-assistant.md). */
+/** A request to the editor's AI writing assistant (platforms/cloud/docs/cloud-ai-assistant.md). */
 export const aiAssistInput = z
   .object({
     action: z.enum(["free", "continue", "improve"]),
@@ -423,6 +423,25 @@ export const aiAssistInput = z
     pageText: z
       .string()
       .max(128 * 1024)
+      .optional(),
+    /**
+     * The conversation so far, oldest first — the turns before this request,
+     * so "a related animal" knows what came before. The editor sends the
+     * last few, its answers truncated; the model never sees old tool calls.
+     */
+    history: z
+      .array(
+        z.object({
+          role: z.enum(["user", "assistant"]),
+          // Truncated, not rejected: history is context, and one long answer
+          // must not make every following request fail validation.
+          content: z
+            .string()
+            .max(20_000)
+            .transform((text) => text.slice(0, 4000)),
+        }),
+      )
+      .max(6)
       .optional(),
   })
   .superRefine((input, ctx) => {

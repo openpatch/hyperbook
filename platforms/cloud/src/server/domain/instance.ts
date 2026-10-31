@@ -137,13 +137,20 @@ export function emailInDomains(email: string, domains: string[]) {
 }
 
 /**
- * The AI configuration in effect: the environment's provider, with the
- * models, default and weights an admin chose in the settings when there are
- * any. Null when AI is not configured at all.
+ * The AI configuration in effect — always with a model picked, which is why
+ * this is non-null only when there is one: the environment's provider with
+ * the models, default and weights an admin chose in the settings when there
+ * are any, else the environment's shorthand. Null when AI is not configured
+ * at all, or the provider is but no model was picked anywhere.
  */
-export function effectiveAi(config: Config, settings: InstanceSettings): Config["ai"] {
+export type EffectiveAi = NonNullable<Config["ai"]> & { model: string };
+
+export function effectiveAi(config: Config, settings: InstanceSettings): EffectiveAi | null {
   const ai = config.ai;
-  if (!ai || settings.aiModels.length === 0) return ai;
+  if (!ai) return null;
+  if (settings.aiModels.length === 0) {
+    return ai.model ? { ...ai, model: ai.model } : null;
+  }
   const models = settings.aiModels.map((m) => m.id);
   const model = settings.aiDefaultModel && models.includes(settings.aiDefaultModel) ? settings.aiDefaultModel : models[0]!;
   return {
