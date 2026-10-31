@@ -1,5 +1,13 @@
 import { type ComponentType, StrictMode, Suspense, lazy, useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
+// The frame follows the app's theme, not only at load (theme.js, injected by
+// the theme() plugin, sets .dark before the first paint) but when the toggle
+// in the editor around it changes it: lib/theme keeps the class in step with
+// the parent's choice, which reaches the frame as a storage event. The class
+// is what theme.css and the dark tokens key on, so every editor — whatever
+// its mechanism, tokens or a theme prop like Excalidraw's — follows along.
+import "@/lib/theme";
+import "./theme.css";
 import type { FromFrame, ToFrame, VisualEditorProps, VisualKind } from "./protocol";
 
 /** Each editor is its own chunk, loaded only when a file of its kind is opened. */

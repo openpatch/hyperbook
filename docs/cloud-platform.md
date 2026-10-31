@@ -887,6 +887,14 @@ component means bumping both together.
   editor (same origin, `postMessage` protocol in `src/web/visual/protocol.ts`).
   The components bring global CSS (e.g. `button{width:100%}`), which the
   frame keeps away from the admin app; the document travels as text.
+- The frame is the editors' host page, as a book page is of the elements: it
+  loads Hyperbook's light tokens and declares a `color-scheme` per theme
+  (`src/web/visual/theme.css`), which is what the themable editors (bitflow's
+  whole `light-dark()` palette) resolve against. The `theme()` plugin of
+  vite.config.ts adds the `.dark` class and the dark tokens to every page,
+  the frame included, and `src/web/lib/theme.ts` (imported by the frame's
+  entry point) keeps the class in step with the app's toggle, which reaches
+  the frame as a storage event — so editors follow a theme change live.
 - Each editor is a separate, lazily loaded chunk (Excalidraw alone is large),
   fetched only when a teacher opens such a file.
 - The editors are platform code from our own bundle; the file content is
@@ -939,6 +947,11 @@ Rough edges found on the way, fixed upstream and released:
   now follow it. Its Save/Load buttons were no upstream
   issue: the platform now sets `embedded` and downloads image exports
   itself.
+- bitflow 0.4.1: React Flow's own chrome — zoom buttons, minimap, dotted
+  background, edges — stayed light whatever the host, since bitflow never
+  passed a `colorMode`. The editor now derives it from the container's used
+  `color-scheme`, the same one its `light-dark()` palette resolves against,
+  and follows the host's theme changes.
 
 - `value` in (the document), one change event out (the new document), and
   an explicit "dirty"/"saved" acknowledgement where the component tracks one

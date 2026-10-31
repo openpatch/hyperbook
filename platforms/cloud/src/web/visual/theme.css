@@ -1,0 +1,39 @@
+/*
+ * The frame is the element editors' host page, the way a book page is the
+ * host of the elements themselves. The themable ones (bitflow first) read
+ * Hyperbook's tokens and resolve their light-dark() colours against the
+ * color-scheme of the document they run in. The theme() plugin in
+ * vite.config.ts gives every page of the app — this frame included — the
+ * script that sets `.dark` and the dark tokens, scoped to `:root.dark`. What
+ * only a book page gave the elements so far comes from here:
+ *
+ * - the light tokens, which the dark ones build on: `--color-brand` of the
+ *   dark theme is `--color-brand-dark`, a light-theme token. Without this
+ *   file the brand resolves to nothing inside the frame, and bitflow falls
+ *   back to its own green instead of Hyperbook's.
+ * - a `color-scheme` per theme. It is the switch every `light-dark()` pair
+ *   resolves against, and nothing inside an editor picks a scheme by
+ *   itself. Without it the palette stayed light whatever the theme: on the
+ *   dark background of the dark tokens, bitflow rendered white cards with
+ *   light text on white — a black-and-white editor.
+ * - the page's own font and colours, which an editor that inherits them (and
+ *   the moment before one loads) reads with, so the frame is part of the app
+ *   around it and not a box of its own.
+ */
+@import "@hyperbook-tokens/tokens-light.css";
+
+/* The theme is the reader's choice in the app, not the system's, so the
+ * frame says outright which scheme each theme is. */
+:root {
+  color-scheme: light;
+}
+
+:root.dark {
+  color-scheme: dark;
+}
+
+body {
+  font-family: hyperbook-body, sans-serif;
+  background-color: var(--color-background);
+  color: var(--color-text);
+}

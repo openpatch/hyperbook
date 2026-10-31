@@ -55,7 +55,9 @@ export function VisualFrame({
         ref={frame}
         src={`/visual.html?kind=${kind}`}
         title={`${kind} editor`}
-        className="h-full w-full border-0 bg-white"
+        // The frame's own theme (visual/theme.css) paints the document; this is only
+        // the backdrop while it loads, so it follows the theme too.
+        className="h-full w-full border-0 bg-background"
       />
       {error && (
         <p className="absolute right-2 bottom-2 left-2 rounded-md bg-destructive/10 p-2 text-sm text-destructive">
