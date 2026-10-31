@@ -5,6 +5,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { chromium, type Browser } from "playwright-core";
+import { installBlockflowV020 } from "./blockflow-runtime";
 
 const root = fileURLToPath(new URL("../..", import.meta.url));
 
@@ -32,6 +33,9 @@ export async function startServer(extraEnv: Record<string, string> = {}) {
   // never came up — to keep the temporary volume from filling up.
   const dataDir = mkdtempSync(path.join(tmpdir(), "hyperbook-cloud-e2e-"));
   const removeDataDir = () => rmSync(dataDir, { recursive: true, force: true });
+  // The blockflow v0.2.0 runtime (embed entries) for the visual-editor tests,
+  // in case the read-only CLI cache still holds the older bundle.
+  await installBlockflowV020(dataDir);
   const child = spawn(process.execPath, [entry], {
     cwd: root,
     env: {
@@ -86,9 +90,35 @@ export async function startServer(extraEnv: Record<string, string> = {}) {
   };
 }
 
-/** System Chromium (CHROMIUM_PATH, or /usr/bin/chromium). */
-export function launchBrowser(): Promise<Browser> {
-  return chromium.launch({
+/** Forces navigator.onLine to true before any page script runs. System
+ *  Chromium in environments without a network notifier (containers) reports
+ *  offline, which would park the student app's store sync in its offline
+ *  queue. Passed as a string: a function would be transpiled by Playwright
+ *  and break on the injected __name helper. */
+const FORCE_ONLINE =
+  "Object.defineProperty(Navigator.prototype, 'onLine', { configurable: true, get: () => true });";
+
+/** System Chromium (CHROMIUM_PATH, or /usr/bin/chromium). The browser runs
+ *  with an English locale, so the UI under test renders in English no matter
+ *  what language the host system is set to (the app follows the browser's
+ *  Accept-Language / navigator.languages). */
+export async function launchBrowser(): Promise<Browser> {
+  const browser = await chromium.launch({
     executablePath: process.env.CHROMIUM_PATH ?? "/usr/bin/chromium",
+    env: { ...process.env, LANG: "en_US.UTF-8", LANGUAGE: "en_US:en", LC_ALL: "en_US.UTF-8" },
   });
+  // Patch newPage/newContext, so every page in every test gets the script.
+  const newPage = browser.newPage.bind(browser);
+  browser.newPage = (async (options?: Parameters<Browser["newPage"]>[0]) => {
+    const page = await newPage(options);
+    await page.addInitScript(FORCE_ONLINE);
+    return page;
+  }) as typeof browser.newPage;
+  const newContext = browser.newContext.bind(browser);
+  browser.newContext = (async (options?: Parameters<Browser["newContext"]>[0]) => {
+    const context = await newContext(options);
+    await context.addInitScript(FORCE_ONLINE);
+    return context;
+  }) as typeof browser.newContext;
+  return browser;
 }
