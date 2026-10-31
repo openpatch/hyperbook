@@ -817,6 +817,92 @@ describe("AI agent tools", () => {
     ]);
   });
 
+  it("searches all text files with a regex and reports path, line and text", async () => {
+    const s = script([
+      { toolCalls: [{ name: "search_files", args: { pattern: "TODO" } }] },
+      { deltas: ["Found them"] },
+    ]);
+    const { owner, provider, assist } = await world({}, (asked) => s.next(asked), {
+      "book/index.md": "# Physics\nTODO: add quiz",
+      "book/glossary.md": "No todos here.",
+      "book/todo.md": "TODO and todo",
+      "book/image.png": "TODO",
+    });
+    const res = await owner.c.post(assist, {
+      action: "free",
+      prompt: "find the TODOs",
+      pagePath: "book/index.md",
+    });
+    expect(res.status).toBe(200);
+    const toolMessage = provider.asked[1]!.messages.find((m) => m.role === "tool")!;
+    const content = String(toolMessage.content);
+    expect(content).toContain("book/index.md:2: TODO: add quiz");
+    expect(content).toContain("book/todo.md:1: TODO and todo");
+    // Case-sensitive, and binary files are not searched.
+    expect(content).not.toContain("book/glossary.md");
+    expect(content).not.toContain("book/image.png");
+  });
+
+  it("renames a file as one proposal — old deleted, new created — and the repo stays untouched", async () => {
+    const s = script([
+      {
+        toolCalls: [
+          { name: "rename_file", args: { path: "book/old.md", newPath: "book/new.md" } },
+        ],
+      },
+      { deltas: ["Renamed"] },
+    ]);
+    const { owner, book, assist } = await world({}, (asked) => s.next(asked), {
+      "book/old.md": "# Old\n\nContent.",
+      "book/index.md": "# Physics",
+    });
+    const res = await owner.c.post(assist, {
+      action: "free",
+      prompt: "rename old.md to new.md",
+      pagePath: "book/index.md",
+    });
+    expect(res.status).toBe(200);
+    const proposal = events(res.body).find((e) => e.event === "proposal")!;
+    expect(proposal.data.changes).toHaveLength(2);
+    const del = proposal.data.changes.find((c: { op: string }) => c.op === "delete");
+    const write = proposal.data.changes.find((c: { op: string }) => c.op === "write");
+    expect(del.path).toBe("book/old.md");
+    expect(write.path).toBe("book/new.md");
+    expect(write.baseOid).toBeNull();
+    expect(write.newText).toBe("# Old\n\nContent.");
+
+    // Nothing was renamed in the book without the teacher's acceptance.
+    const listing = (await owner.c.get(`/api/books/${book.id}/files`)).body;
+    expect(listing.files.map((f: { path: string }) => f.path).sort()).toEqual([
+      "book/index.md",
+      "book/old.md",
+    ]);
+  });
+
+  it("refuses to rename onto an existing path", async () => {
+    const s = script([
+      {
+        toolCalls: [
+          { name: "rename_file", args: { path: "book/a.md", newPath: "book/b.md" } },
+        ],
+      },
+      { deltas: ["Done"] },
+    ]);
+    const { owner, provider, assist } = await world({}, (asked) => s.next(asked), {
+      "book/a.md": "A",
+      "book/b.md": "B",
+    });
+    const res = await owner.c.post(assist, {
+      action: "free",
+      prompt: "rename a onto b",
+      pagePath: "book/index.md",
+    });
+    expect(res.status).toBe(200);
+    expect(events(res.body).some((e) => e.event === "proposal")).toBe(false);
+    const toolMessage = provider.asked[1]!.messages.find((m) => m.role === "tool")!;
+    expect(String(toolMessage.content)).toMatch(/already a file/);
+  });
+
   it("answers from the overlay: a written file reads back changed", async () => {
     const answers = [
       {
