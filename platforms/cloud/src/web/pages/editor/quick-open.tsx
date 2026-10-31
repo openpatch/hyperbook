@@ -11,6 +11,7 @@ import { useTranslation } from "react-i18next";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { fuzzyMatch, fuzzyScore } from "./quick-open-fuzzy";
 
 /**
  * Wraps the characters the query matched in <mark>, so people can see *why*
@@ -18,26 +19,39 @@ import { cn } from "@/lib/utils";
  * text keeps its color, and dim text stays dim (unreadably so in dark mode) —
  * so matched characters always get the full-contrast foreground color on
  * top of the row's own state colors.
+ *
+ * `marks` are the matched indices into `text`, ascending; adjacent marks
+ * merge into one <mark>.
  */
-function highlight(text: string, query: string): ReactNode {
-  const needle = query.trim().toLowerCase();
-  if (!needle) return text;
+function highlight(text: string, marks: number[]): ReactNode {
+  if (marks.length === 0) return text;
   const parts: ReactNode[] = [];
-  let from = 0;
-  for (;;) {
-    const at = text.toLowerCase().indexOf(needle, from);
-    if (at === -1) {
-      if (from < text.length) parts.push(text.slice(from));
-      return parts;
+  let runStart = -1;
+  let plainFrom = 0;
+  let m = 0;
+  for (let i = 0; i < text.length; i++) {
+    if (m < marks.length && marks[m] === i) {
+      if (runStart === -1) {
+        if (i > plainFrom) parts.push(text.slice(plainFrom, i));
+        runStart = i;
+      }
+      m++;
+    } else if (runStart !== -1) {
+      parts.push(marked(text.slice(runStart, i), runStart));
+      runStart = -1;
+      plainFrom = i;
     }
-    if (at > from) parts.push(text.slice(from, at));
-    parts.push(
-      <mark key={at} className="bg-transparent font-semibold text-foreground">
-        {text.slice(at, at + needle.length)}
-      </mark>,
-    );
-    from = at + needle.length;
   }
+  if (runStart !== -1) parts.push(marked(text.slice(runStart), runStart));
+  return parts;
+}
+
+function marked(text: string, key: number): ReactNode {
+  return (
+    <mark key={key} className="bg-transparent font-semibold text-foreground">
+      {text}
+    </mark>
+  );
 }
 
 /**
@@ -51,7 +65,7 @@ function highlight(text: string, query: string): ReactNode {
  */
 const QuickOpenRow = memo(function QuickOpenRow({
   path,
-  query,
+  positions,
   index,
   isSelected,
   isOpen,
@@ -60,7 +74,8 @@ const QuickOpenRow = memo(function QuickOpenRow({
   onChoose,
 }: {
   path: string;
-  query: string;
+  /** Where in `path` the query matched, ascending. */
+  positions: number[];
   index: number;
   isSelected: boolean;
   isOpen: boolean;
@@ -72,6 +87,12 @@ const QuickOpenRow = memo(function QuickOpenRow({
   const slash = path.lastIndexOf("/");
   const dir = slash === -1 ? "" : path.slice(0, slash);
   const name = path.slice(slash + 1);
+  // Where the query matched, as indices into the dir and name parts. A
+  // match on the slash itself is the separator and stays unmarked.
+  const dirMarks = positions.filter((at) => at < slash);
+  const nameMarks = positions
+    .filter((at) => at > slash)
+    .map((at) => at - slash - 1);
   return (
     <li
       role="option"
@@ -89,12 +110,14 @@ const QuickOpenRow = memo(function QuickOpenRow({
             {/* RTL clips the overflow from the left, keeping the folders
                 closest to the file; the text itself stays in reading order. */}
             <span dir="rtl" className="min-w-0 truncate text-muted-foreground">
-              {highlight(dir, query)}
+              {highlight(dir, dirMarks)}
             </span>
             <span className="shrink-0 text-muted-foreground">/</span>
           </>
         )}
-        <span className="shrink-0 font-semibold">{highlight(name, query)}</span>
+        <span className="shrink-0 font-semibold">
+          {highlight(name, nameMarks)}
+        </span>
       </span>
       {isOpen && (
         <span className="ml-auto shrink-0 rounded-sm bg-secondary px-1 font-sans text-xs text-muted-foreground">
@@ -106,8 +129,9 @@ const QuickOpenRow = memo(function QuickOpenRow({
 });
 
 /**
- * The "open a file" popup (Ctrl/Cmd+P): type to filter the book's files,
- * arrows to choose, Enter to open. Files that are open already come first.
+ * The "open a file" popup (Ctrl/Cmd+P): type to fuzzily filter the book's
+ * files, arrows to choose, Enter to open. Files that are open already come
+ * first; the rest follow how well they match (see quick-open-fuzzy.ts).
  */
 export function QuickOpen({
   open,
@@ -141,20 +165,20 @@ export function QuickOpen({
 
   const matches = useMemo(() => {
     const needle = query.trim().toLowerCase();
-    return files
-      .map((path) => ({
-        path,
-        at: needle === "" ? 0 : path.toLowerCase().indexOf(needle),
-      }))
-      .filter(({ at }) => at >= 0)
+    const scored: { path: string; positions: number[]; score: number }[] = [];
+    for (const path of files) {
+      const positions = fuzzyMatch(needle, path.toLowerCase());
+      if (positions)
+        scored.push({ path, positions, score: fuzzyScore(positions, path) });
+    }
+    return scored
       .sort(
         (a, b) =>
           Number(openTabs.has(b.path)) - Number(openTabs.has(a.path)) ||
-          a.at - b.at ||
+          b.score - a.score ||
           a.path.localeCompare(b.path),
       )
-      .slice(0, 100)
-      .map((match) => match.path);
+      .slice(0, 100);
   }, [files, openTabs, query]);
 
   // The selection follows the matches; the chosen item scrolls into view.
@@ -208,7 +232,7 @@ export function QuickOpen({
               );
             } else if (e.key === "Enter") {
               e.preventDefault();
-              if (matches[selected]) choose(matches[selected]);
+              if (matches[selected]) choose(matches[selected].path);
             } else if (e.key === "Home" || e.key === "End") {
               e.preventDefault();
               setSelected(e.key === "Home" ? 0 : matches.length - 1);
@@ -222,11 +246,11 @@ export function QuickOpen({
           aria-label={t("editor.quickOpen.files")}
           className="max-h-80 overflow-auto p-1"
         >
-          {matches.map((path, i) => (
+          {matches.map(({ path, positions }, i) => (
             <QuickOpenRow
               key={path}
               path={path}
-              query={query}
+              positions={positions}
               index={i}
               isSelected={i === selected}
               isOpen={openTabs.has(path)}
