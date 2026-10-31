@@ -1,4 +1,5 @@
 import { eq, and, gte, lte, sql } from "drizzle-orm";
+import type { ModelWeights } from "../../shared/schemas";
 import type { Db } from "../db/client";
 import { aiUsage } from "../db/schema";
 
@@ -80,33 +81,48 @@ export function usedThisWeek(db: Db, userId: number): number {
   );
 }
 
-/** A model's weight for the token quota; a model without one weighs 1. */
-export function modelWeight(
-  weights: Record<string, number>,
+/**
+ * A model's weights for the token quota, one per token kind; a model
+ * without an entry weighs 1 for all three.
+ */
+export function modelWeights(
+  weights: Record<string, ModelWeights>,
   model: string,
-): number {
-  return weights[model] ?? 1;
+): ModelWeights {
+  return weights[model] ?? { in: 1, cached: 1, out: 1 };
 }
 
 /**
  * Adds what one provider call used to today's row and answers the week's
- * new weighted total. Weighted tokens are stored next to the raw counts, so
- * changing a weight later does not rewrite what was already spent.
+ * new weighted total. Each token kind counts at its own weight — cached
+ * prompt tokens (a subset of the input tokens) at the cached weight, so a
+ * prefix-cache hit costs less than a fresh input token. Weighted tokens are
+ * stored next to the raw counts, so changing a weight later does not
+ * rewrite what was already spent.
  */
 export function addTokens(
   db: Db,
   userId: number,
   tokensIn: number,
+  tokensCached: number,
   tokensOut: number,
-  weight: number,
+  weights: ModelWeights,
 ): number {
-  const weighted = Math.ceil((tokensIn + tokensOut) * weight);
+  // Cached tokens are a subset of the prompt tokens, billed at their own
+  // (lower) rate — so only the uncached remainder counts at the input weight.
+  const cached = Math.min(Math.max(tokensCached, 0), tokensIn);
+  const weighted = Math.ceil(
+    (tokensIn - cached) * weights.in +
+      cached * weights.cached +
+      tokensOut * weights.out,
+  );
   db.insert(aiUsage)
     .values({
       userId,
       day: today(),
       requests: 0,
       tokensIn,
+      tokensCached,
       tokensOut,
       weightedTokens: weighted,
     })
@@ -114,6 +130,7 @@ export function addTokens(
       target: [aiUsage.userId, aiUsage.day],
       set: {
         tokensIn: sql`${aiUsage.tokensIn} + ${tokensIn}`,
+        tokensCached: sql`${aiUsage.tokensCached} + ${tokensCached}`,
         tokensOut: sql`${aiUsage.tokensOut} + ${tokensOut}`,
         weightedTokens: sql`${aiUsage.weightedTokens} + ${weighted}`,
       },

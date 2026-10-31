@@ -125,8 +125,17 @@ describe("loadConfig", () => {
     expect(
       loadConfig({ ...base, AI_MODEL_WEIGHTS: "big=3, small=0.5" }).ai
         ?.modelWeights,
-    ).toEqual({ big: 3, small: 0.5 });
+    ).toEqual({
+      big: { in: 3, cached: 3, out: 3 },
+      small: { in: 0.5, cached: 0.5, out: 0.5 },
+    });
+    // Per-kind weights: model=in/cached/out.
+    expect(
+      loadConfig({ ...base, AI_MODEL_WEIGHTS: "big=4.67/4.67/3.5" }).ai
+        ?.modelWeights,
+    ).toEqual({ big: { in: 4.67, cached: 4.67, out: 3.5 } });
     expect(() => loadConfig({ ...base, AI_MODEL_WEIGHTS: "big=0" })).toThrow();
+    expect(() => loadConfig({ ...base, AI_MODEL_WEIGHTS: "big=1/2" })).toThrow();
     expect(() =>
       loadConfig({ ...base, AI_MODEL_WEIGHTS: "unknown=2" }),
     ).toThrow();

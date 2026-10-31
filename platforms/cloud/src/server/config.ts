@@ -1,6 +1,7 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { z } from "zod";
+import type { ModelWeights } from "../shared/schemas";
 
 /**
  * Configuration comes from the environment only. In production the server
@@ -68,8 +69,11 @@ export type Config = {
     /** Steps of the agent loop (books tools), once tools are added. */
     maxSteps: number;
     requestsPerMinute: number;
-    /** Cost weight per model for the token quota; a model not listed weighs 1. */
-    modelWeights: Record<string, number>;
+    /**
+     * Cost weights per model for the token quota, one per token kind
+     * (input, cached input, output); a model not listed weighs 1 for all.
+     */
+    modelWeights: Record<string, ModelWeights>;
     /** Display names an admin gave models ("Fast"); a model not listed shows its id. */
     modelLabels?: Record<string, string>;
   } | null;
@@ -146,7 +150,11 @@ const schema = z.object({
   AI_MODEL: optional,
   /** Comma-separated extra models the editor offers; AI_MODEL stays the default. */
   AI_MODELS: optional,
-  /** "model=weight,…": how much a model's tokens count against the weekly quota. */
+  /**
+   * "model=in/cached/out,…": how much a model's input, cached-input and
+   * output tokens count against the weekly quota. "model=weight" sets all
+   * three to the same weight.
+   */
   AI_MODEL_WEIGHTS: optional,
   AI_TIMEOUT_SECONDS: z.coerce.number().int().min(10).default(120),
   AI_MAX_OUTPUT_TOKENS: z.coerce.number().int().min(64).default(2048),
@@ -335,22 +343,35 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
                 .filter(Boolean),
             ),
           ];
-          const modelWeights: Record<string, number> = {};
+          const modelWeights: Record<string, ModelWeights> = {};
           for (const entry of (e.AI_MODEL_WEIGHTS ?? "").split(",")) {
             if (!entry.trim()) continue;
             const at = entry.lastIndexOf("=");
             const name = entry.slice(0, at).trim();
-            const weight = Number(entry.slice(at + 1));
-            if (at === -1 || !name || !(weight > 0) || !Number.isFinite(weight)) {
+            // "model=in/cached/out", or "model=weight" for all three.
+            const parts = entry.slice(at + 1).split("/").map(Number);
+            const weights: ModelWeights =
+              parts.length === 1
+                ? { in: parts[0]!, cached: parts[0]!, out: parts[0]! }
+                : { in: parts[0]!, cached: parts[1]!, out: parts[2]! };
+            if (
+              at === -1 ||
+              !name ||
+              parts.length === 0 ||
+              parts.length > 3 ||
+              ![weights.in, weights.cached, weights.out].every(
+                (w) => w > 0 && Number.isFinite(w),
+              )
+            ) {
               problems.push(
-                `AI_MODEL_WEIGHTS entries must look like model=weight with a weight above 0 (got "${entry.trim()}")`,
+                `AI_MODEL_WEIGHTS entries must look like model=in/cached/out (or model=weight) with weights above 0 (got "${entry.trim()}")`,
               );
             } else if (!models.includes(name)) {
               problems.push(
                 `AI_MODEL_WEIGHTS names "${name}", which is neither AI_MODEL nor in AI_MODELS`,
               );
             } else {
-              modelWeights[name] = weight;
+              modelWeights[name] = weights;
             }
           }
           ai = {

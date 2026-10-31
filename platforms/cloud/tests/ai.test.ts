@@ -16,6 +16,7 @@ type Asked = {
   messages: { role: string; content: unknown }[];
   maxTokens: number;
   tools?: unknown;
+  cacheKey?: string;
 };
 
 type Answer =
@@ -55,6 +56,7 @@ function fakeProvider(script: (asked: Asked) => Answer) {
       messages: body.messages,
       maxTokens: body.max_tokens,
       tools: body.tools,
+      cacheKey: body.prompt_cache_key,
     };
     asked.push(request);
     const answer = script(request);
@@ -87,10 +89,15 @@ function fakeProvider(script: (asked: Asked) => Answer) {
           const done = JSON.stringify({
             choices: [{ delta: {}, finish_reason: "tool_calls" }],
           });
-          // Providers that honour include_usage end with a usage chunk.
+          // Providers that honour include_usage end with a usage chunk;
+          // Mistral reports prefix-cache hits in prompt_tokens_details.
           const usage = JSON.stringify({
             choices: [],
-            usage: { prompt_tokens: 100, completion_tokens: 20 },
+            usage: {
+              prompt_tokens: 100,
+              completion_tokens: 20,
+              prompt_tokens_details: { cached_tokens: 40 },
+            },
           });
           controller.enqueue(
             encoder.encode(`data: ${done}\n\ndata: ${usage}\n\ndata: [DONE]\n\n`),
@@ -105,10 +112,15 @@ function fakeProvider(script: (asked: Asked) => Answer) {
           const done = JSON.stringify({
             choices: [{ delta: {}, finish_reason: answer.finish ?? "stop" }],
           });
-          // Providers that honour include_usage end with a usage chunk.
+          // Providers that honour include_usage end with a usage chunk;
+          // Mistral reports prefix-cache hits in prompt_tokens_details.
           const usage = JSON.stringify({
             choices: [],
-            usage: { prompt_tokens: 100, completion_tokens: 20 },
+            usage: {
+              prompt_tokens: 100,
+              completion_tokens: 20,
+              prompt_tokens_details: { cached_tokens: 40 },
+            },
           });
           controller.enqueue(
             encoder.encode(`data: ${done}\n\ndata: ${usage}\n\ndata: [DONE]\n\n`),
@@ -216,7 +228,7 @@ describe("AI status", () => {
       model: "mistral-test",
       models: ["mistral-test"],
       modelLabels: {},
-      modelWeights: { "mistral-test": 1 },
+      modelWeights: { "mistral-test": { in: 1, cached: 1, out: 1 } },
       allowed: true,
       usedToday: 0,
       quota: null,
@@ -269,6 +281,26 @@ describe("AI assist", () => {
     expect(String(asked!.messages[1]!.content)).toContain("book/index.md");
     expect(String(asked!.messages[1]!.content)).toContain("# Physics");
     expect(String(asked!.messages[1]!.content)).toContain("Say hi");
+  });
+
+  it("sends a prompt cache key that is stable while the book's head commit is", async () => {
+    const { owner, provider, assist } = await world({}, undefined, {
+      "book/index.md": "# Physics\n",
+    });
+    const post = () =>
+      owner.c.post(assist, {
+        action: "free",
+        prompt: "Say hi",
+        pagePath: "book/index.md",
+      });
+    await post();
+    await post();
+    expect(provider.asked).toHaveLength(2);
+    // Keyed on the head commit, so providers with prompt caching (Mistral)
+    // reuse the shared system-prompt prefix across requests to this book.
+    const key = provider.asked[0]!.cacheKey;
+    expect(key).toMatch(/^hyperbook:[0-9a-f]{7,40}$/);
+    expect(provider.asked[1]!.cacheKey).toBe(key);
   });
 
   it("calls the model the teacher picked when the instance allows it, else the default", async () => {
@@ -458,7 +490,7 @@ describe("AI assist", () => {
   it("meters weighted tokens per week and blocks once they are used up", async () => {
     const { owner, instance, assist } = await world({
       AI_MODELS: "mistral-big",
-      AI_MODEL_WEIGHTS: "mistral-big=3",
+      AI_MODEL_WEIGHTS: "mistral-big=4/2/1",
     });
     const admin = await loggedIn(instance, {
       email: "admin@example.org",
@@ -472,15 +504,19 @@ describe("AI assist", () => {
       pagePath: "book/index.md",
       model: "mistral-big",
     };
-    // 120 tokens (100 in, 20 out) at weight 3 = 360 credits.
+    // 100 prompt tokens of which 40 were cache hits, 20 out, at weights
+    // in/cached/out = 4/2/1: (100−40)×4 + 40×2 + 20×1 = 340 credits.
     const res = await owner.c.post(assist, body);
     expect(events(res.body).find((e) => e.event === "usage")!.data).toEqual({
-      tokensUsedThisWeek: 360,
+      tokensUsedThisWeek: 340,
       tokenQuota: 500,
     });
     expect((await owner.c.get("/api/ai")).body).toMatchObject({
-      modelWeights: { "mistral-test": 1, "mistral-big": 3 },
-      tokensUsedThisWeek: 360,
+      modelWeights: {
+        "mistral-test": { in: 1, cached: 1, out: 1 },
+        "mistral-big": { in: 4, cached: 2, out: 1 },
+      },
+      tokensUsedThisWeek: 340,
       tokenQuota: 500,
     });
     // Under the quota, a request may overshoot it; the next one is refused.
@@ -501,21 +537,21 @@ describe("AI assist", () => {
       configured: true,
       defaultModel: "mistral-test",
       models: [
-        { id: "mistral-test", weight: 1, label: "" },
-        { id: "mistral-big", weight: 1, label: "" },
+        { id: "mistral-test", weights: { in: 1, cached: 1, out: 1 }, label: "" },
+        { id: "mistral-big", weights: { in: 1, cached: 1, out: 1 }, label: "" },
       ],
     });
 
     const bad = await admin.c.put("/api/instance", {
-      aiModels: [{ id: "a", weight: 1 }],
+      aiModels: [{ id: "a", weights: { in: 1, cached: 1, out: 1 } }],
       aiDefaultModel: "b",
     });
     expect(bad.status).toBe(400);
 
     const ok = await admin.c.put("/api/instance", {
       aiModels: [
-        { id: "mistral-large-4", weight: 1 },
-        { id: "zai-glm-5-3-flash", weight: 0.22 },
+        { id: "mistral-large-4", weights: { in: 4.67, cached: 4.67, out: 3.5 } },
+        { id: "zai-glm-5-3-flash", weights: { in: 1, cached: 2, out: 0.83 } },
       ],
       aiDefaultModel: "zai-glm-5-3-flash",
     });
@@ -524,7 +560,10 @@ describe("AI assist", () => {
       body: {
         model: "zai-glm-5-3-flash",
         models: ["zai-glm-5-3-flash", "mistral-large-4"],
-        modelWeights: { "mistral-large-4": 1, "zai-glm-5-3-flash": 0.22 },
+        modelWeights: {
+          "mistral-large-4": { in: 4.67, cached: 4.67, out: 3.5 },
+          "zai-glm-5-3-flash": { in: 1, cached: 2, out: 0.83 },
+        },
       },
     });
   });
@@ -535,13 +574,13 @@ describe("AI assist", () => {
     expect(
       (
         await admin.c.put("/api/instance", {
-          aiModels: [{ id: "mistral-test", weight: 1, label: "Fast" }],
+          aiModels: [{ id: "mistral-test", weights: { in: 1, cached: 1, out: 1 }, label: "Fast" }],
         })
       ).status,
     ).toBe(200);
     expect((await owner.c.get("/api/ai")).body.modelLabels).toEqual({ "mistral-test": "Fast" });
     expect((await admin.c.get("/api/instance")).body.ai.models).toEqual([
-      { id: "mistral-test", weight: 1, label: "Fast" },
+      { id: "mistral-test", weights: { in: 1, cached: 1, out: 1 }, label: "Fast" },
     ]);
 
     await owner.c.post(assist, { action: "free", prompt: "hi", pagePath: "book/index.md" });

@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import type { EditorView } from "@codemirror/view";
 import { api, unwrap } from "./api";
-import type { AiAssistInput, AiProposedChange } from "../../shared/schemas";
+import type { AiAssistInput, AiProposedChange, ModelWeights } from "../../shared/schemas";
 
 /*
  * The editor's side of the AI writing assistant (docs/cloud-ai-assistant.md):
@@ -19,8 +19,8 @@ export type AiStatus = {
   allowed: boolean;
   /** Names an admin gave models ("Fast"); a model without one shows its id. */
   modelLabels: Record<string, string>;
-  /** Each model's cost weight for the token quota. */
-  modelWeights: Record<string, number>;
+  /** Each model's cost weights for the token quota, per token kind. */
+  modelWeights: Record<string, ModelWeights>;
   usedToday: number;
   quota: number | null;
   /** Weighted tokens ("credits") used in the current UTC week. */
@@ -29,6 +29,12 @@ export type AiStatus = {
   /** The Monday the weekly credits refill, "YYYY-MM-DD". */
   tokensResetOn: string;
 };
+
+/** The quota weights of a model as the editor shows them: "4.67" when all match, else "in/cached/out". */
+export function formatWeights(w: ModelWeights | undefined): string {
+  if (!w) return "1";
+  return w.in === w.cached && w.cached === w.out ? `${w.in}` : `${w.in}/${w.cached}/${w.out}`;
+}
 
 export function useAiStatus() {
   return useQuery({

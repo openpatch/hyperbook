@@ -9,13 +9,22 @@ import { api, unwrap } from "@/lib/api";
 const RANGES = [7, 30, 90];
 const fmt = (n: number) => n.toLocaleString();
 
-type Totals = { requests: number; tokensIn: number; tokensOut: number; credits: number; steps: number; failed: number };
+type Totals = {
+  requests: number;
+  tokensIn: number;
+  tokensCached: number;
+  tokensOut: number;
+  credits: number;
+  steps: number;
+  failed: number;
+};
 
 function TotalsCells({ row }: { row: Totals }) {
   return (
     <>
       <TableCell className="text-right">{fmt(row.requests)}</TableCell>
       <TableCell className="text-right">{fmt(row.tokensIn)}</TableCell>
+      <TableCell className="text-right">{fmt(row.tokensCached)}</TableCell>
       <TableCell className="text-right">{fmt(row.tokensOut)}</TableCell>
       <TableCell className="text-right">{fmt(row.credits)}</TableCell>
       <TableCell className="text-right">{fmt(row.failed)}</TableCell>
@@ -31,6 +40,7 @@ function TotalsHead({ first }: { first: string }) {
         <TableHead>{first}</TableHead>
         <TableHead className="text-right">{t("aiMonitor.requests")}</TableHead>
         <TableHead className="text-right">{t("aiMonitor.tokensIn")}</TableHead>
+        <TableHead className="text-right">{t("aiMonitor.tokensCached")}</TableHead>
         <TableHead className="text-right">{t("aiMonitor.tokensOut")}</TableHead>
         <TableHead className="text-right">{t("aiMonitor.credits")}</TableHead>
         <TableHead className="text-right">{t("aiMonitor.failed")}</TableHead>
@@ -161,6 +171,7 @@ export function AiMonitorPage() {
                   <TableHead>{t("aiMonitor.user")}</TableHead>
                   <TableHead>{t("aiMonitor.model")}</TableHead>
                   <TableHead className="text-right">{t("aiMonitor.tokensIn")}</TableHead>
+                  <TableHead className="text-right">{t("aiMonitor.tokensCached")}</TableHead>
                   <TableHead className="text-right">{t("aiMonitor.tokensOut")}</TableHead>
                   <TableHead className="text-right">{t("aiMonitor.steps")}</TableHead>
                   <TableHead>{t("aiMonitor.finish")}</TableHead>
@@ -175,6 +186,7 @@ export function AiMonitorPage() {
                     <TableCell>{row.email ?? t("audit.deletedUser")}</TableCell>
                     <TableCell>{row.model}</TableCell>
                     <TableCell className="text-right">{fmt(row.tokensIn)}</TableCell>
+                    <TableCell className="text-right">{fmt(row.tokensCached)}</TableCell>
                     <TableCell className="text-right">{fmt(row.tokensOut)}</TableCell>
                     <TableCell className="text-right">{row.steps}</TableCell>
                     <TableCell>{row.finish}</TableCell>

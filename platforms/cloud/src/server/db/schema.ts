@@ -109,8 +109,10 @@ export const aiUsage = sqliteTable(
     day: text("day").notNull(),
     requests: integer("requests").notNull().default(0),
     tokensIn: integer("tokens_in").notNull().default(0),
+    /** Prompt tokens the provider served from its prefix cache. */
+    tokensCached: integer("tokens_cached").notNull().default(0),
     tokensOut: integer("tokens_out").notNull().default(0),
-    /** Tokens times the model's weight: what the weekly quota counts. */
+    /** Tokens times the model's per-kind weight: what the weekly quota counts. */
     weightedTokens: integer("weighted_tokens").notNull().default(0),
   },
   (t) => [primaryKey({ columns: [t.userId, t.day] })],

@@ -12,7 +12,7 @@ import {
   addTokens,
   countRequest,
   currentWeek,
-  modelWeight,
+  modelWeights,
   usedThisWeek,
   usedToday,
 } from "../../domain/ai-usage";
@@ -74,7 +74,7 @@ export function aiRoutes({ config, db }: Deps) {
       models: ai?.models ?? [],
       modelLabels: ai?.modelLabels ?? {},
       modelWeights: Object.fromEntries(
-        (ai?.models ?? []).map((m) => [m, modelWeight(weights, m)]),
+        (ai?.models ?? []).map((m) => [m, modelWeights(weights, m)]),
       ),
       allowed: aiAllowed,
       usedToday: usedToday(db, user.id),
@@ -151,8 +151,9 @@ export function bookAiRoutes({ db, config }: Deps) {
         let steps = 0;
         let proposedChanges = 0;
         let tokensIn = 0;
+        let tokensCached = 0;
         let tokensOut = 0;
-        const weight = modelWeight(ai.modelWeights, model);
+        const weights = modelWeights(ai.modelWeights, model);
         try {
           for await (const event of runAssistant(
             { ai: { ...ai, model }, repo },
@@ -166,6 +167,7 @@ export function bookAiRoutes({ db, config }: Deps) {
               await send("tool", { name: event.name, args: event.args });
             } else if (event.type === "usage") {
               tokensIn += event.promptTokens;
+              tokensCached += event.cachedPromptTokens;
               tokensOut += event.completionTokens;
               // Written as it happens, so an abort or failure later on
               // still costs what the provider already spent.
@@ -173,8 +175,9 @@ export function bookAiRoutes({ db, config }: Deps) {
                 db,
                 user.id,
                 event.promptTokens,
+                event.cachedPromptTokens,
                 event.completionTokens,
-                weight,
+                weights,
               );
               await send("usage", {
                 tokensUsedThisWeek: week,
@@ -218,8 +221,9 @@ export function bookAiRoutes({ db, config }: Deps) {
               page: input.pagePath,
               model,
               tokensIn,
+              tokensCached,
               tokensOut,
-              weight,
+              weights,
               steps,
               proposedChanges,
               finish,

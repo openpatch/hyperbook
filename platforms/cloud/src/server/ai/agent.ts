@@ -32,7 +32,13 @@ import {
 export type AssistantEvent =
   | { type: "delta"; text: string }
   | { type: "tool"; name: string; args: Record<string, unknown> }
-  | { type: "usage"; promptTokens: number; completionTokens: number }
+  | {
+      type: "usage";
+      promptTokens: number;
+      /** Prompt tokens the provider served from its prefix cache. */
+      cachedPromptTokens: number;
+      completionTokens: number;
+    }
   | { type: "proposal"; changes: AiProposedChange[] }
   | { type: "done"; finish: "stop" | "length" };
 
@@ -555,6 +561,12 @@ export async function* runAssistant(
   const book = await loadBook(options.repo);
   const tools = new Tools(options.repo, book, input);
   const messages = buildMessages(book, input);
+  // The system prompt — static text plus the book's file listing — is the
+  // shared prefix of every request and every step, and the listing changes
+  // only when the book's head commit does. Keying the prompt cache on that
+  // commit makes providers with prefix caching (Mistral bills a cached
+  // prefix at 10% of the input price) reuse it across requests.
+  const cacheKey = `hyperbook:${book.commit ?? "no-commit"}`;
 
   let withTools = true;
   let retriedWithoutTools = false;
@@ -574,6 +586,7 @@ export async function* runAssistant(
         baseUrl: options.ai.baseUrl,
         apiKey: options.ai.apiKey,
         model: options.ai.model,
+        cacheKey,
         messages,
         maxOutputTokens: options.ai.maxOutputTokens,
         timeoutMs: options.ai.timeoutMs,
@@ -615,6 +628,8 @@ export async function* runAssistant(
       yield {
         type: "usage",
         promptTokens: Math.ceil(JSON.stringify(messages).length / 4),
+        // An estimate cannot know which prefix the provider cached.
+        cachedPromptTokens: 0,
         completionTokens: Math.ceil(produced / 4),
       };
     }

@@ -3,7 +3,7 @@ import { instanceSettingsInput } from "../../../shared/schemas";
 import { audit } from "../../audit";
 import type { Deps } from "../../deps";
 import { HTTPException } from "hono/http-exception";
-import { modelWeight } from "../../domain/ai-usage";
+import { modelWeights } from "../../domain/ai-usage";
 import { effectiveAi, effectiveSignupMode, getInstanceSettings, legalHref, updateInstanceSettings } from "../../domain/instance";
 import { renderLegalMarkdown } from "../../domain/legal";
 import type { AdminEnv, AuthedEnv } from "../env";
@@ -55,7 +55,7 @@ function settingsView(deps: Deps) {
       defaultModel: ai?.model ?? null,
       models: (ai?.models ?? []).map((id) => ({
         id,
-        weight: modelWeight(ai?.modelWeights ?? {}, id),
+        weights: modelWeights(ai?.modelWeights ?? {}, id),
         label: ai?.modelLabels?.[id] ?? "",
       })),
     },

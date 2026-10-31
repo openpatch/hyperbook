@@ -10,7 +10,7 @@ import { ProviderError, streamChat } from "../src/server/ai/provider";
  * abort, not as "the provider could not be reached".
  */
 
-type Stub = { url: string; close: () => Promise<void> };
+type Stub = { url: string; lastBody?: unknown; close: () => Promise<void> };
 const stubs: Stub[] = [];
 afterEach(async () => {
   for (const stub of stubs.splice(0)) await stub.close();
@@ -19,8 +19,14 @@ afterEach(async () => {
 /** A chat-completions endpoint answering with the given raw SSE chunks. */
 function stubChunks(chunks: string[], crlf = false): Stub {
   const nl = crlf ? "\r\n" : "\n";
+  const stub: Stub = {
+    url: "",
+    lastBody: undefined,
+    close: () => Promise.reject(new Error("not listening yet")),
+  };
   const app = new Hono();
-  app.post("/v1/chat/completions", () => {
+  app.post("/v1/chat/completions", async (c) => {
+    stub.lastBody = await c.req.json();
     const body = new ReadableStream<Uint8Array>({
       start(controller) {
         for (const chunk of chunks)
@@ -36,14 +42,12 @@ function stubChunks(chunks: string[], crlf = false): Stub {
   });
   const server = serve({ fetch: app.fetch, port: 0 });
   const address = server.address();
-  const url =
+  stub.url =
     typeof address === "object" && address
       ? `http://localhost:${address.port}/v1`
       : "";
-  const stub = {
-    url,
-    close: () => new Promise<void>((resolve) => server.close(() => resolve())),
-  };
+  stub.close = () =>
+    new Promise<void>((resolve) => server.close(() => resolve()));
   stubs.push(stub);
   return stub;
 }
@@ -79,6 +83,30 @@ const TOOL_STREAM = [
 ];
 
 describe("streamChat", () => {
+  it("sends prompt_cache_key when a cache key is given, and omits it otherwise", async () => {
+    const keyed = stubChunks(TEXT_STREAM);
+    for await (const event of streamChat({
+      baseUrl: keyed.url,
+      apiKey: "key",
+      model: "m",
+      messages: [{ role: "user", content: "hi" }],
+      maxOutputTokens: 64,
+      timeoutMs: 10_000,
+      cacheKey: "hyperbook:abc123",
+    })) {
+      void event;
+    }
+    expect((keyed.lastBody as { prompt_cache_key?: string }).prompt_cache_key).toBe(
+      "hyperbook:abc123",
+    );
+
+    const plain = stubChunks(TEXT_STREAM);
+    await collect(plain);
+    expect(
+      (plain.lastBody as { prompt_cache_key?: string }).prompt_cache_key,
+    ).toBeUndefined();
+  });
+
   it("parses LF-separated deltas and the finish", async () => {
     const stub = stubChunks(TEXT_STREAM);
     expect(await collect(stub)).toEqual([
@@ -163,6 +191,49 @@ describe("streamChat", () => {
       { type: "delta", text: "Let me think… the answer." },
       { type: "finish", finish: "stop" },
     ]);
+  });
+
+  it("reports usage with the cached prompt tokens Mistral puts in prompt_tokens_details", async () => {
+    const stub = stubChunks([
+      'data: {"choices":[{"delta":{"content":"Hi"}}]}\n\n',
+      'data: {"choices":[{"delta":{},"finish_reason":"stop"}]}\n\n',
+      'data: {"choices":[],"usage":{"prompt_tokens":100,"completion_tokens":20,"prompt_tokens_details":{"cached_tokens":40}}}\n\n',
+      "data: [DONE]\n\n",
+    ]);
+    expect(await collect(stub)).toEqual([
+      { type: "delta", text: "Hi" },
+      { type: "usage", promptTokens: 100, cachedPromptTokens: 40, completionTokens: 20 },
+      { type: "finish", finish: "stop" },
+    ]);
+  });
+
+  it("accepts a top-level cached-token field and defaults it to 0", async () => {
+    const stub = stubChunks([
+      'data: {"choices":[{"delta":{"content":"Hi"}}]}\n\n',
+      'data: {"choices":[{"delta":{},"finish_reason":"stop"}]}\n\n',
+      'data: {"choices":[],"usage":{"prompt_tokens":100,"completion_tokens":20,"prompt_tokens_cached":40}}\n\n',
+      "data: [DONE]\n\n",
+    ]);
+    const events = await collect(stub);
+    expect(events[1]).toEqual({
+      type: "usage",
+      promptTokens: 100,
+      cachedPromptTokens: 40,
+      completionTokens: 20,
+    });
+
+    const plain = stubChunks([
+      'data: {"choices":[{"delta":{"content":"Hi"}}]}\n\n',
+      'data: {"choices":[{"delta":{},"finish_reason":"stop"}]}\n\n',
+      'data: {"choices":[],"usage":{"prompt_tokens":100,"completion_tokens":20}}\n\n',
+      "data: [DONE]\n\n",
+    ]);
+    expect((await collect(plain))[1]).toEqual({
+      type: "usage",
+      promptTokens: 100,
+      cachedPromptTokens: 0,
+      completionTokens: 20,
+    });
   });
 
   it("rejects a successful stream with no text or tool calls", async () => {

@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { z } from "zod";
 import { LOCALES, type Locale, type MessageKey } from "../../shared/i18n";
-import { instanceSettingsInput, type ElementRuntime } from "../../shared/schemas";
+import { instanceSettingsInput, type ElementRuntime, type ModelWeights } from "../../shared/schemas";
 import { EntitlementsEditor, type Entitlements } from "@/components/entitlements-editor";
 import { PageHeader, Section } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
@@ -274,33 +274,49 @@ function AiModelsSection({
   defaultModel: savedDefault,
   onSave,
 }: {
-  models: { id: string; weight: number; label?: string }[];
+  models: { id: string; weights: ModelWeights; label?: string }[];
   defaultModel: string;
-  onSave: (models: { id: string; weight: number; label?: string }[], defaultModel: string) => Promise<void>;
+  onSave: (models: { id: string; weights: ModelWeights; label?: string }[], defaultModel: string) => Promise<void>;
 }) {
   const { t } = useTranslation();
-  const [rows, setRows] = useState(saved.map((m) => ({ id: m.id, label: m.label ?? "", weight: String(m.weight) })));
+  const [rows, setRows] = useState(
+    saved.map((m) => ({
+      id: m.id,
+      label: m.label ?? "",
+      weightIn: String(m.weights.in),
+      weightCached: String(m.weights.cached),
+      weightOut: String(m.weights.out),
+    })),
+  );
   const [defaultModel, setDefaultModel] = useState(savedDefault);
   const [busy, setBusy] = useState(false);
-  const update = (index: number, change: Partial<{ id: string; label: string; weight: string }>) =>
-    setRows((current) => current.map((row, i) => (i === index ? { ...row, ...change } : row)));
-  const models = rows.map((r) => ({ id: r.id.trim(), weight: Number(r.weight), label: r.label.trim() }));
+  const update = (
+    index: number,
+    change: Partial<{ id: string; label: string; weightIn: string; weightCached: string; weightOut: string }>,
+  ) => setRows((current) => current.map((row, i) => (i === index ? { ...row, ...change } : row)));
+  const models = rows.map((r) => ({
+    id: r.id.trim(),
+    weights: { in: Number(r.weightIn), cached: Number(r.weightCached), out: Number(r.weightOut) },
+    label: r.label.trim(),
+  }));
   const invalid =
     models.length === 0 ||
-    models.some((m) => !m.id || !(m.weight > 0)) ||
+    models.some((m) => !m.id || !(m.weights.in > 0) || !(m.weights.cached > 0) || !(m.weights.out > 0)) ||
     new Set(models.map((m) => m.id)).size !== models.length;
   return (
     <Section title={t("instanceSettings.aiModels")} description={t("instanceSettings.aiModelsDescription")}>
       <div className="grid max-w-2xl gap-3">
-        <div className="grid grid-cols-[1fr_1fr_6rem_5rem_2.25rem] items-center gap-2 text-sm text-muted-foreground">
+        <div className="grid grid-cols-[1fr_1fr_5rem_5rem_5rem_5rem_2.25rem] items-center gap-2 text-sm text-muted-foreground">
           <span>{t("instanceSettings.aiModelName")}</span>
           <span>{t("instanceSettings.aiModelLabel")}</span>
-          <span>{t("instanceSettings.aiModelWeight")}</span>
+          <span>{t("instanceSettings.aiModelWeightIn")}</span>
+          <span>{t("instanceSettings.aiModelWeightCached")}</span>
+          <span>{t("instanceSettings.aiModelWeightOut")}</span>
           <span>{t("instanceSettings.aiModelDefault")}</span>
           <span />
         </div>
         {rows.map((row, index) => (
-          <div key={index} className="grid grid-cols-[1fr_1fr_6rem_5rem_2.25rem] items-center gap-2">
+          <div key={index} className="grid grid-cols-[1fr_1fr_5rem_5rem_5rem_5rem_2.25rem] items-center gap-2">
             <Input
               value={row.id}
               aria-label={t("instanceSettings.aiModelName")}
@@ -320,9 +336,25 @@ function AiModelsSection({
               type="number"
               min="0"
               step="any"
-              value={row.weight}
-              aria-label={t("instanceSettings.aiModelWeight")}
-              onChange={(e) => update(index, { weight: e.target.value })}
+              value={row.weightIn}
+              aria-label={t("instanceSettings.aiModelWeightIn")}
+              onChange={(e) => update(index, { weightIn: e.target.value })}
+            />
+            <Input
+              type="number"
+              min="0"
+              step="any"
+              value={row.weightCached}
+              aria-label={t("instanceSettings.aiModelWeightCached")}
+              onChange={(e) => update(index, { weightCached: e.target.value })}
+            />
+            <Input
+              type="number"
+              min="0"
+              step="any"
+              value={row.weightOut}
+              aria-label={t("instanceSettings.aiModelWeightOut")}
+              onChange={(e) => update(index, { weightOut: e.target.value })}
             />
             <input
               type="radio"
@@ -344,7 +376,15 @@ function AiModelsSection({
           </div>
         ))}
         <div className="flex flex-wrap gap-2">
-          <Button variant="outline" onClick={() => setRows((current) => [...current, { id: "", label: "", weight: "1" }])}>
+          <Button
+            variant="outline"
+            onClick={() =>
+              setRows((current) => [
+                ...current,
+                { id: "", label: "", weightIn: "1", weightCached: "1", weightOut: "1" },
+              ])
+            }
+          >
             <PlusIcon /> {t("instanceSettings.aiModelAdd")}
           </Button>
         </div>

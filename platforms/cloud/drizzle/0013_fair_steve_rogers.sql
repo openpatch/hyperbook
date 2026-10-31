@@ -1,0 +1,1 @@
+ALTER TABLE `ai_usage` ADD `tokens_cached` integer DEFAULT 0 NOT NULL;

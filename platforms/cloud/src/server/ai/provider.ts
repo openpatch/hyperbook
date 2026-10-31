@@ -47,7 +47,13 @@ export class ProviderError extends Error {
 export type ProviderEvent =
   | { type: "delta"; text: string }
   | { type: "tool_calls"; calls: ProviderToolCall[] }
-  | { type: "usage"; promptTokens: number; completionTokens: number }
+  | {
+      type: "usage";
+      promptTokens: number;
+      /** Prompt tokens served from the prefix cache; 0 when unreported. */
+      cachedPromptTokens: number;
+      completionTokens: number;
+    }
   | { type: "finish"; finish: "stop" | "length" | "tool_calls" };
 
 /**
@@ -84,6 +90,14 @@ export async function* streamChat(options: {
   timeoutMs: number;
   /** OpenAI-style tool definitions; omitted: a plain text answer. */
   tools?: ToolDefinition[];
+  /**
+   * A key for providers with prompt caching (Mistral's `prompt_cache_key`):
+   * requests that share a prompt prefix carry the same key, and the cached
+   * prefix bills at a fraction of the input price (10% on Mistral). The key
+   * only raises the chance of a hit; it does not guarantee one. Omitted: no
+   * key is sent, for providers that reject unknown fields.
+   */
+  cacheKey?: string;
   signal?: AbortSignal;
 }): AsyncGenerator<ProviderEvent> {
   const response = await fetch(`${options.baseUrl}/chat/completions`, {
@@ -95,6 +109,7 @@ export async function* streamChat(options: {
     },
     body: JSON.stringify({
       model: options.model,
+      ...(options.cacheKey ? { prompt_cache_key: options.cacheKey } : {}),
       messages: options.messages,
       max_tokens: options.maxOutputTokens,
       stream: true,
@@ -149,7 +164,11 @@ export async function* streamChat(options: {
   let reasoning = "";
   let finish: "stop" | "length" | "tool_calls" | null = null;
   let done = false;
-  let usage: { promptTokens: number; completionTokens: number } | null = null;
+  let usage: {
+    promptTokens: number;
+    cachedPromptTokens: number;
+    completionTokens: number;
+  } | null = null;
   /** Events one SSE block produces, drained by the loop below. */
   const pending: ProviderEvent[] = [];
 
@@ -176,7 +195,15 @@ export async function* streamChat(options: {
           };
           finish_reason?: string | null;
         }[];
-        usage?: { prompt_tokens?: unknown; completion_tokens?: unknown } | null;
+        usage?: {
+          prompt_tokens?: unknown;
+          completion_tokens?: unknown;
+          // Mistral reports prefix-cache hits here; other providers use a
+          // top-level field, so accept the common spellings.
+          prompt_tokens_details?: { cached_tokens?: unknown };
+          prompt_tokens_cached?: unknown;
+          cached_tokens?: unknown;
+        } | null;
       };
       try {
         chunk = JSON.parse(data);
@@ -186,9 +213,19 @@ export async function* streamChat(options: {
       if (chunk.usage) {
         const prompt = Number(chunk.usage.prompt_tokens);
         const completion = Number(chunk.usage.completion_tokens);
-        if (Number.isFinite(prompt) || Number.isFinite(completion)) {
+        const cached = Number(
+          chunk.usage.prompt_tokens_details?.cached_tokens ??
+            chunk.usage.prompt_tokens_cached ??
+            chunk.usage.cached_tokens,
+        );
+        if (
+          Number.isFinite(prompt) ||
+          Number.isFinite(completion) ||
+          Number.isFinite(cached)
+        ) {
           usage = {
             promptTokens: Number.isFinite(prompt) ? prompt : 0,
+            cachedPromptTokens: Number.isFinite(cached) ? cached : 0,
             completionTokens: Number.isFinite(completion) ? completion : 0,
           };
         }
@@ -250,7 +287,11 @@ function* complete(
   finish: "stop" | "length" | "tool_calls" | null,
   hasContent: boolean,
   reasoning: string,
-  usage: { promptTokens: number; completionTokens: number } | null,
+  usage: {
+    promptTokens: number;
+    cachedPromptTokens: number;
+    completionTokens: number;
+  } | null,
 ): Generator<ProviderEvent> {
   if (usage) yield { type: "usage", ...usage };
   const complete = [...calls.values()].filter((call) => call.id && call.name);

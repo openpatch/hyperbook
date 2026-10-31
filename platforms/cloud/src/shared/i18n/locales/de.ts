@@ -699,6 +699,7 @@ export const de: Messages = {
     day: "Tag",
     requests: "Anfragen",
     tokensIn: "Tokens ein",
+    tokensCached: "Tokens gecacht",
     tokensOut: "Tokens aus",
     credits: "Credits",
     failed: "Fehlgeschlagen",
@@ -1167,11 +1168,13 @@ export const de: Messages = {
       "Die Modelle, aus denen Lehrkräfte im KI-Assistenten des Editors wählen können. Anbieter und Schlüssel werden in der Umgebung des Servers festgelegt.",
     aiModelName: "Modell",
     aiModelLabel: "Name im Editor",
-    aiModelWeight: "Gewicht",
+    aiModelWeightIn: "Gewicht ein",
+    aiModelWeightCached: "Gewicht gecacht",
+    aiModelWeightOut: "Gewicht aus",
     aiModelDefault: "Standard",
     aiModelAdd: "Modell hinzufügen",
     aiModelsHint:
-      "Geben Sie einem Modell einen Namen wie Schnell oder Gründlich, dann sehen Lehrkräfte diesen statt der Modell-ID. Ein Credit ist ein Token (Eingabe und Ausgabe gleich) mal dem Gewicht des Modells. Geben Sie dem Vergleichsmodell das Gewicht 1 und einem Modell, das pro Token doppelt so viel kostet, das Gewicht 2.",
+      "Geben Sie einem Modell einen Namen wie Schnell oder Gründlich, dann sehen Lehrkräfte diesen statt der Modell-ID. Ein Credit ist ein Token mal dem Gewicht des Modells für seine Art: Eingabe, gecachte Eingabe (Prefix-Cache-Treffer kosten beim Anbieter weniger) und Ausgabe. Geben Sie dem Vergleichsmodell in allen drei Spalten das Gewicht 1 und einem Modell, das pro Token doppelt so viel kostet, das Gewicht 2.",
     gitPushHint:
       "Wenn eine Lehrkraft mit git auf den main-Branch eines Buchs pusht, wird seine Vorschau neu gebaut (nie automatisch veröffentlicht). Standardmäßig aus: Pushes aktualisieren dann nur die Quelle, damit viele kleine Commits die Build-Warteschlange nicht überlasten.",
     signup: "Registrierung",

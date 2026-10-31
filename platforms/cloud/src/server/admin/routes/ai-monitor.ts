@@ -22,23 +22,49 @@ const monitorQuery = z.object({
 type Totals = {
   requests: number;
   tokensIn: number;
+  tokensCached: number;
   tokensOut: number;
   credits: number;
   steps: number;
   failed: number;
 };
 
-const empty = (): Totals => ({ requests: 0, tokensIn: 0, tokensOut: 0, credits: 0, steps: 0, failed: 0 });
+const empty = (): Totals => ({
+  requests: 0,
+  tokensIn: 0,
+  tokensCached: 0,
+  tokensOut: 0,
+  credits: 0,
+  steps: 0,
+  failed: 0,
+});
 
 const num = (value: unknown) => (typeof value === "number" && Number.isFinite(value) ? value : 0);
 
+/** The per-kind weights an audit entry recorded; all 1 for older entries. */
+function weightsOf(data: Record<string, unknown>): { in: number; cached: number; out: number } {
+  const w = data.weights as Record<string, unknown> | undefined;
+  return {
+    in: num(w?.in) || 1,
+    cached: num(w?.cached) || 1,
+    out: num(w?.out) || 1,
+  };
+}
+
 function add(totals: Totals, data: Record<string, unknown>) {
   const tokensIn = num(data.tokensIn);
+  const tokensCached = num(data.tokensCached);
   const tokensOut = num(data.tokensOut);
+  const weights = weightsOf(data);
   totals.requests += 1;
   totals.tokensIn += tokensIn;
+  totals.tokensCached += tokensCached;
   totals.tokensOut += tokensOut;
-  totals.credits += Math.ceil((tokensIn + tokensOut) * (num(data.weight) || 1));
+  // Cached tokens are a subset of the input tokens, counted at their own weight.
+  const cached = Math.min(tokensCached, tokensIn);
+  totals.credits += Math.ceil(
+    (tokensIn - cached) * weights.in + cached * weights.cached + tokensOut * weights.out,
+  );
   totals.steps += num(data.steps);
   if (data.finish === "error") totals.failed += 1;
 }
@@ -103,6 +129,7 @@ export function aiMonitorRoutes({ db }: Deps) {
             email: row.email,
             model: typeof data.model === "string" ? data.model : "?",
             tokensIn: num(data.tokensIn),
+            tokensCached: num(data.tokensCached),
             tokensOut: num(data.tokensOut),
             steps: num(data.steps),
             finish: typeof data.finish === "string" ? data.finish : "?",

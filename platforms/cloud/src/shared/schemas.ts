@@ -124,6 +124,19 @@ export type ElementRuntime = (typeof ELEMENT_RUNTIMES)[number];
 /** Where an element's runtime loads from, for books that do not decide in hyperbook.json. */
 export const elementRuntimeChoice = z.enum(["local", "cdn"]);
 
+/**
+ * What one token of a model costs the weekly quota, per token kind: input,
+ * cached input (prompt-cache hits bill less at the provider), and output.
+ * Weights are relative — a model's tokens count as weight × tokens.
+ */
+export const modelWeightsSchema = z.object({
+  in: z.number("Enter a number").positive("The weight must be above 0").max(1000),
+  cached: z.number("Enter a number").positive("The weight must be above 0").max(1000),
+  out: z.number("Enter a number").positive("The weight must be above 0").max(1000),
+});
+
+export type ModelWeights = z.infer<typeof modelWeightsSchema>;
+
 export const instanceSettingsInput = z
   .object({
     name: z.string().trim().min(1, "Enter a name").max(100),
@@ -167,7 +180,7 @@ export const instanceSettingsInput = z
       .array(
         z.object({
           id: z.string().trim().min(1, "Enter a model name").max(200),
-          weight: z.number("Enter a number").positive("The weight must be above 0").max(1000),
+          weights: modelWeightsSchema,
           label: z.string().trim().max(60).optional(),
         }),
       )

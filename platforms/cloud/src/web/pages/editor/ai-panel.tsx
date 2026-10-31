@@ -12,6 +12,7 @@ import { ConflictError } from "./workspace";
 import {
   assist,
   contextOf,
+  formatWeights,
   selectionOf,
   useAiStatus,
   type AiStatus,
@@ -401,7 +402,7 @@ export function AiPanel({
                 <SelectItem key={name} value={name}>
                   {t("editor.ai.modelWeight", {
                     model: status.data?.modelLabels[name] || name,
-                    weight: status.data?.modelWeights[name] ?? 1,
+                    weight: formatWeights(status.data?.modelWeights[name]),
                   })}
                 </SelectItem>
               ))}

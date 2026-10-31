@@ -679,6 +679,7 @@ export const en = {
     day: "Day",
     requests: "Requests",
     tokensIn: "Tokens in",
+    tokensCached: "Tokens cached",
     tokensOut: "Tokens out",
     credits: "Credits",
     failed: "Failed",
@@ -1137,11 +1138,13 @@ export const en = {
       "The models teachers can choose in the editor's AI assistant. The provider and its key are set in the server's environment.",
     aiModelName: "Model",
     aiModelLabel: "Name in the editor",
-    aiModelWeight: "Weight",
+    aiModelWeightIn: "In weight",
+    aiModelWeightCached: "Cached weight",
+    aiModelWeightOut: "Out weight",
     aiModelDefault: "Default",
     aiModelAdd: "Add a model",
     aiModelsHint:
-      "Give a model a name such as Fast or Thorough and teachers see that instead of the model id. A credit is a token (input and output alike) times the model's weight. Give the model you compare against weight 1 and a model that costs twice as much per token weight 2.",
+      "Give a model a name such as Fast or Thorough and teachers see that instead of the model id. A credit is a token times the model's weight for its kind: input, cached input (prefix-cache hits bill less at the provider), and output. Give the model you compare against weight 1 in all three columns, and a model that costs twice as much per token weight 2.",
     gitPushHint:
       "When a teacher pushes to a book's main branch with git, its preview is rebuilt (never published automatically). Off by default: pushes then only update the source, so many small commits cannot overwhelm the build queue.",
     signup: "Sign-up",
