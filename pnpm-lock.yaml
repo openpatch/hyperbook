@@ -363,8 +363,8 @@ importers:
         version: 6.1.0
     devDependencies:
       '@bitflow/web-component':
-        specifier: ^0.4.0
-        version: 0.4.0
+        specifier: ^0.4.1
+        version: 0.4.1
       '@codemirror/commands':
         specifier: ^6.11.1
         version: 6.11.1
@@ -567,8 +567,8 @@ importers:
   platforms/cloud:
     dependencies:
       '@bitflow/web-component':
-        specifier: 0.4.0
-        version: 0.4.0
+        specifier: 0.4.1
+        version: 0.4.1
       '@codemirror/autocomplete':
         specifier: ^6.20.4
         version: 6.20.4
@@ -941,8 +941,8 @@ packages:
     resolution: {integrity: sha512-NpugTzbKgGrNe45Ui32cN8vCFFMxVtP/9rtfwv0nP5FRDAjvYBxJcLVpYA9mr1jxP6cnIT7x9LUzuDTbWYYNRA==}
     engines: {node: '>=6.9.0'}
 
-  '@bitflow/web-component@0.4.0':
-    resolution: {integrity: sha512-1d+ymSJY2WOB8VUf15WRLARkcLBphfBCcpK6yLgRfboRfYLjucXo3v4cLIGeRx8zH6a02eAHvHd8eArn2FHXCA==}
+  '@bitflow/web-component@0.4.1':
+    resolution: {integrity: sha512-B22GxOTFnju9R+pyx+1aiXSHsfkSACWpZYWHx81dHX6DhlUJFYdmmHjDcn0OFkYjzGmYMXAegkCjLpBer1bPXQ==}
 
   '@braintree/sanitize-url@6.0.2':
     resolution: {integrity: sha512-Tbsj02wXCbqGmzdnXNk0SOF19ChhRU70BsroIi4Pm6Ehp56in6vch94mfbdQ17DozxkL3BAVjbZ4Qc1a0HFRAg==}
@@ -9956,7 +9956,7 @@ snapshots:
 
   '@babel/runtime@7.29.10': {}
 
-  '@bitflow/web-component@0.4.0': {}
+  '@bitflow/web-component@0.4.1': {}
 
   '@braintree/sanitize-url@6.0.2': {}
 
