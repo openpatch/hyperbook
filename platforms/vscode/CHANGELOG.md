@@ -1,5 +1,34 @@
 # @hyperbook/vscode-extension
 
+## 0.58.13
+
+### Patch Changes
+
+- [`1378921`](https://github.com/openpatch/hyperbook/commit/1378921d7d71c32ac8b892c958ee9cb68357d16d) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - The VS Code preview now renders pages through the same single-page builders as `hyperbook render` (the command Hyperbook Cloud's editor preview runs), instead of calling the markdown pipeline with its own hand-rolled context. The preview therefore shows exactly what a build produces — same shell, navigation, version footer and diagnostics — while keeping its webview-friendly URLs (assets as webview URIs, page links opening the file in the editor). `SinglePageResult` additionally exposes the raw pipeline messages (`rawMessages`) so the preview can map them onto editor squiggles.
+
+- [`1cb7980`](https://github.com/openpatch/hyperbook/commit/1cb7980d32073d4840c783b0dc58d78db003a152) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Update dependencies across the workspace to their latest versions
+  (`pnpm update -r --latest`), including @types/node 26.6.6, webpack 5.112.2,
+  vite ^8.3.5, react ^19.3.1, mermaid 12.2.0, chokidar 6.0.0, sass 1.107.0,
+  shiki ^4.5.0, struktolab 0.6.3, and many more.
+
+  Three upgrades were intentionally kept back:
+
+  - TypeScript stays on 6.0.3 (7 is the native port without the JS API the
+    code uses); @hyperbook/cloud keeps its existing ^7.0.2.
+  - @types/vscode stays pinned at 1.125.0 (disabled in renovate.json, and
+    @vscode/vsce rejects newer types against engines.vscode ^1.125.0).
+  - vitest stays on ^4.1.10 outside @hyperbook/cloud (vitest 5 drops `.not`
+    from the Assertion type and breaks `tsc --noEmit` on existing tests).
+
+  The p5 completions in @hyperbook/markdown were regenerated with
+  `pnpm p5:completions` for p5 2.3.4. Nothing changes in what a hyperbook
+  renders.
+
+- Updated dependencies [[`a67cf2b`](https://github.com/openpatch/hyperbook/commit/a67cf2b06b81f6e529f3b278d44965d5d270df47), [`b61fdb4`](https://github.com/openpatch/hyperbook/commit/b61fdb4792c69f3c89154fdb90e30f2a8fb71b2d), [`be511a3`](https://github.com/openpatch/hyperbook/commit/be511a3555376747c42d726397f0dc32e41e09d0), [`8b12f4d`](https://github.com/openpatch/hyperbook/commit/8b12f4d95be2333ac7af6e5eb03ee035454e8df3), [`2985e75`](https://github.com/openpatch/hyperbook/commit/2985e75ed0569aa02e428854e13253036d40e064), [`cad2b9d`](https://github.com/openpatch/hyperbook/commit/cad2b9d4ebfbe3a2d396430f848a4a87c3969b6c), [`0a4ac64`](https://github.com/openpatch/hyperbook/commit/0a4ac646fd0c38f9e2d7e9d876837fd5fee222e0), [`1cb7980`](https://github.com/openpatch/hyperbook/commit/1cb7980d32073d4840c783b0dc58d78db003a152)]:
+  - @hyperbook/markdown@0.91.0
+  - create-hyperbook@0.4.7
+  - @hyperbook/fs@0.30.2
+
 ## 0.58.12
 
 ### Patch Changes
