@@ -1,15 +1,57 @@
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { useTranslation } from "react-i18next";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
 /**
+ * Wraps the characters the query matched in <mark>, so people can see *why*
+ * a file is in the list. Bolding alone is not enough of a highlight — bold
+ * text keeps its color, and dim text stays dim (unreadably so in dark mode) —
+ * so matched characters always get the full-contrast foreground color on
+ * top of the row's own state colors.
+ */
+function highlight(text: string, query: string): ReactNode {
+  const needle = query.trim().toLowerCase();
+  if (!needle) return text;
+  const parts: ReactNode[] = [];
+  let from = 0;
+  for (;;) {
+    const at = text.toLowerCase().indexOf(needle, from);
+    if (at === -1) {
+      if (from < text.length) parts.push(text.slice(from));
+      return parts;
+    }
+    if (at > from) parts.push(text.slice(from, at));
+    parts.push(
+      <mark key={at} className="bg-transparent font-semibold text-foreground">
+        {text.slice(at, at + needle.length)}
+      </mark>,
+    );
+    from = at + needle.length;
+  }
+}
+
+/**
  * One file in the list, memoized on primitives: choosing or hovering changes
  * the selected rows only, not the whole list.
+ *
+ * Paths can be long, so each row leads with the file name, followed by the
+ * directory in a dimmer color. When space runs out, the directory is the part
+ * that gives way — from the left, because the deepest folders, the ones next
+ * to the file, tell people the most about where a file lives.
  */
 const QuickOpenRow = memo(function QuickOpenRow({
   path,
+  query,
   index,
   isSelected,
   isOpen,
@@ -18,6 +60,7 @@ const QuickOpenRow = memo(function QuickOpenRow({
   onChoose,
 }: {
   path: string;
+  query: string;
   index: number;
   isSelected: boolean;
   isOpen: boolean;
@@ -26,20 +69,35 @@ const QuickOpenRow = memo(function QuickOpenRow({
   onHover: (index: number) => void;
   onChoose: (path: string) => void;
 }) {
+  const slash = path.lastIndexOf("/");
+  const dir = slash === -1 ? "" : path.slice(0, slash);
+  const name = path.slice(slash + 1);
   return (
     <li
       role="option"
       aria-selected={isSelected}
       className={cn(
-        "cursor-pointer truncate rounded-sm px-2 py-1.5 font-mono text-sm",
+        "flex cursor-pointer items-baseline gap-2 overflow-hidden rounded-sm px-2 py-1.5 font-mono text-sm",
         isSelected ? "bg-accent font-medium text-primary" : "hover:bg-accent",
       )}
       onMouseMove={() => onHover(index)}
       onClick={() => onChoose(path)}
     >
-      {path}
+      <span className="flex min-w-0 grow items-baseline">
+        {dir !== "" && (
+          <>
+            {/* RTL clips the overflow from the left, keeping the folders
+                closest to the file; the text itself stays in reading order. */}
+            <span dir="rtl" className="min-w-0 truncate text-muted-foreground">
+              {highlight(dir, query)}
+            </span>
+            <span className="shrink-0 text-muted-foreground">/</span>
+          </>
+        )}
+        <span className="shrink-0 font-semibold">{highlight(name, query)}</span>
+      </span>
       {isOpen && (
-        <span className="ml-2 rounded-sm bg-secondary px-1 font-sans text-xs text-muted-foreground">
+        <span className="ml-auto shrink-0 rounded-sm bg-secondary px-1 font-sans text-xs text-muted-foreground">
           {openLabel}
         </span>
       )}
@@ -123,7 +181,7 @@ export function QuickOpen({
   return (
     <Dialog open={open} onOpenChange={(value) => !value && onClose()}>
       <DialogContent
-        className="top-[10vh] max-w-md translate-y-0 gap-0 overflow-hidden p-0"
+        className="top-[10vh] max-w-[calc(100vw-2rem)] translate-y-0 gap-0 overflow-hidden p-0 sm:max-w-3xl"
         showCloseButton={false}
         aria-describedby={undefined}
       >
@@ -168,6 +226,7 @@ export function QuickOpen({
             <QuickOpenRow
               key={path}
               path={path}
+              query={query}
               index={i}
               isSelected={i === selected}
               isOpen={openTabs.has(path)}
