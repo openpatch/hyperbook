@@ -1,5 +1,193 @@
 # @hyperbook/cloud
 
+## 0.4.0
+
+### Minor Changes
+
+- [`6401d09`](https://github.com/openpatch/hyperbook/commit/6401d09975371af9aef8a8f8678d50d5c33f44e4) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - The AI assistant's editor panel is now a chat: requests on the right, answers on
+  the left, each with a copy button, auto-scrolling to the newest message, a retry
+  button when a request fails, and a proposal's diff view stays re-openable until
+  the next message is sent. Answers are suggestions to copy; any request that
+  changes text or files must come back as a `write_file`/`delete_file` proposal
+  the teacher accepts as a diff.
+
+  The instance can offer a model picker (`AI_MODELS`, comma-separated; `AI_MODEL`
+  stays the default and first choice). A new `read_docs` tool serves local,
+  vendored documentation per directive and file format (hyperbook's official
+  llms.txt, bitflow/JMP llms.txt, p5, pyide, webide, onlineide, sqlide, multievent,
+  struktolab pseudocode, and more) — the server never fetches docs at runtime.
+
+  The provider parser tolerates the shapes seen in the wild (string, part-list and
+  single-part `delta.content`, reasoning-only answers from z.ai's GLM), and the
+  system prompt documents code-fence language tags, IDE multi-file syntax, src file
+  resolution and per-language file naming (e.g. Java's `Equals.java`). `pnpm dev`
+  now loads `platforms/cloud/.env` when present.
+
+- [`6401d09`](https://github.com/openpatch/hyperbook/commit/6401d09975371af9aef8a8f8678d50d5c33f44e4) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - The editor of Hyperbook Cloud has an AI writing assistant. It knows the
+  hyperbook format (pages, frontmatter, directives), looks through the whole
+  book through tools (`read_file`, `list_files`) and may propose new files,
+  edits and deletions — every proposal is a git diff the teacher accepts or
+  denies, file by file, before anything is applied; text answers are inserted
+  only on purpose. Any OpenAI-compatible provider works: Mistral
+  (`AI_BASE_URL=https://api.mistral.ai/v1`) and a local Ollama
+  (`http://localhost:11434/v1`, nothing leaves the school) are documented,
+  OpenAI, Anthropic's compatibility layer, OpenRouter, LM Studio and vLLM work
+  the same way. Configure `AI_BASE_URL`, `AI_API_KEY` and `AI_MODEL` together
+  (or not at all), and the assistant appears in the editor; admins can switch
+  it off per teacher and set a per-day quota, like every other entitlement.
+  See `platforms/cloud/docs/cloud-ai-assistant.md`.
+
+- [`1c1cee1`](https://github.com/openpatch/hyperbook/commit/1c1cee14dffaab8c7c86595821c8967cdd1688bb) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - The AI assistant now uses provider prompt caching and meters tokens per
+  kind. Every request sends `prompt_cache_key` (keyed on the book's head
+  commit), so providers with prefix caching — Mistral bills a cached prefix
+  at 10% of the input price — reuse the shared system prompt across requests
+  and agent steps. The provider stream's `usage.prompt_tokens_details.cached_tokens`
+  is parsed into a separate cached-input count, stored in the new
+  `ai_usage.tokens_cached` column (migration `0013_fair_steve_rogers.sql`),
+  and shown in the admin AI monitor. Model weights are now per token kind:
+  `AI_MODEL_WEIGHTS="model=in/cached/out,…"` (a bare `model=weight` sets all
+  three), the admin settings offer an in/cached/out weight column per model,
+  and a credit is `(tokensIn − tokensCached) × in + tokensCached × cached +
+tokensOut × out` — cached tokens are a subset of the prompt tokens and
+  count at their own, lower weight.
+
+  Also: `scripts/ai-probe.sh` calls Mistral twice with one cache key and
+  prints the usage chunks, to verify cache hits from the terminal.
+
+- [`1fbafea`](https://github.com/openpatch/hyperbook/commit/1fbafea296cb0757f8bbbf327af97db905f629b3) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - The AI assistant gained two tools. `search_files` searches all the book's
+  text files (pending proposals included) with a regular expression and
+  reports matching lines as `path:line: text`, capped per request and per
+  search; binary and oversized files are skipped and reported. `rename_file`
+  moves a text file to a new path as one proposal change — the old path
+  deleted, the new one created with the same content — instead of a delete
+  plus a write. The system prompt now tells the model to search before
+  changing and to update links to a renamed file's old path in the same
+  request.
+
+- [`8f8ba2c`](https://github.com/openpatch/hyperbook/commit/8f8ba2c6cb1bb6c3c0ac0e2a6eda842675985b9d) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - The AI assistant now meters usage in tokens and enforces a weekly credit
+  quota. The provider stream is requested with `include_usage`, and each agent
+  step's token counts are summed (providers that report none are estimated at
+  about 4 characters per token). `AI_MODEL_WEIGHTS="model=weight,…"` sets a
+  cost weight per model (default 1); credits are tokens × weight. The new
+  entitlement `ai_tokens_per_week` caps credits per UTC week (Monday–Sunday,
+  null is unlimited) alongside the existing `ai_requests_per_day`; once the
+  week's credits are used up the route answers 429, while a request that starts
+  under the cap may overshoot it. Per-day rows in `ai_usage` keep the raw and
+  weighted token counts (migration `0012_square_sentry.sql`), the audit entry
+  records the model used, its weight and the token counts, and the editor shows
+  a credits bar with the refill date and live updates plus each model's weight
+  in the picker.
+
+  The agent loop is more token-efficient, too: a new `read_files` tool reads up
+  to 8 files in one call, a file or doc already read in the request is not sent
+  again, and the static system prompt now precedes the per-book text so
+  provider-side prefix caching can apply.
+
+- [`2985e75`](https://github.com/openpatch/hyperbook/commit/2985e75ed0569aa02e428854e13253036d40e064) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Blockflow projects get visual editors in Hyperbook Cloud, on the blockflow v0.2.0 runtime. A `.sb3` file opens in blockflow's embed editor (`embed-editor.html`) and a `.blockflow` project file in the embed generator (`embed-generator.html`); both are served on the admin origin at `/blockflow/*` from the runtime bundle extracted per Hyperbook version (the same bytes the books render with), under their own Content-Security-Policy, and the editor frame talks blockflow's embed protocol (`ready`/`load`/`change`/`save`/`saved`/`error`) instead of touching the editor's VM. "Edit visually" in a page now also works on `::blockflow-player{src=…}` and `::::blockflow-editor{src=…}`/`{project=…}`. A `.sb3` travels base64-encoded and saves with `encoding: "base64"`, a `.blockflow` is plain JSON; both validate before saving, and "New file" offers starters for them. `@hyperbook/markdown` pins `blockflow-v0.2.0`, whose bundle adds the embed entries and a `manifest.json` (version, commit, entries) that a test asserts.
+
+- [`b13dbe1`](https://github.com/openpatch/hyperbook/commit/b13dbe1f3e15d84f34710df1c86c7188f4f1f295) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Hyperbook Cloud now speaks English and German. The language of the pages, API errors and emails is the signed-in user's choice (Your account → Language), else the instance default (Settings → General → Language, "Automatic" follows the browser), else the browser's `Accept-Language`; visitors' choice is kept in the browser, and `<html lang>` is set before the first paint. All emails — address verification, password reset, invitations, sign-up notifications, address decisions — go out in the recipient's language, and form validation messages translate with the UI. The catalogs live in `src/shared/i18n/locales/` (shared by web, API and emails, with typed keys and a test that keeps `de` complete); the auth pages, app shell, landing page and account page are translated, the editor and the remaining admin pages follow area by area.
+
+- [`86ed9dc`](https://github.com/openpatch/hyperbook/commit/86ed9dca6e272f9198a74bd91b5397035b52ec81) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Books can now be worked on locally with git: `git clone https://git@<admin host>/api/books/<id>/git`, edit, and `git push` to `main`. The push is served by git smart HTTP on the admin origin with per-book API tokens (hash-only, revocable, shown once; Basic auth, username `git`), enforced to a single `main` branch by a pre-receive hook that also applies the storage quota to the pushed tree; deletes, other refs, tags and non-fast-forwards are rejected. A push never triggers a publish build — it only updates the source size, the audit log (`book.push`) and the new `commit_count`; the instance setting "a git push also builds the preview" (default off) additionally queues a preview-only build. Publishing is recorded as version tags (`v1`, `v2`, … plus a moving `published` tag; only the last two are kept, an optional note is stored on the build) and the live site can be rolled back to a tag — instantly when its build is still kept, otherwise by rebuilding it. The book page gained a "Work locally (git)" block with the clone command and token management, a publish note, rollback buttons on tagged builds, and a staleness hint ("main is N commits ahead of the live site"). Editor saves keep their CAS semantics against pushes: a save based on a pre-push version is refused with a conflict, a push after an editor commit is non-fast-forward.
+
+- [`022f42c`](https://github.com/openpatch/hyperbook/commit/022f42cd4c8392a59a37769da24f791545e09218) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - The AI models are now picked in the admin settings instead of the
+  environment. `AI_BASE_URL` and `AI_API_KEY` alone enable the assistant
+  (they remain a pair: both or neither), and the admin settings — Admin →
+  Settings → AI models — offer the models to teachers: the id fields
+  suggest the provider's own model list, fetched live through the server
+  (new admin route `GET /api/instance/ai/models`, briefly cached), and any
+  id can be typed when the provider does not offer a list. Weights, display
+  names and the default model live there, as before. The `AI_MODEL`,
+  `AI_MODELS` and `AI_MODEL_WEIGHTS` variables remain as an optional
+  shorthand (the settings win); until a model is picked anywhere — settings
+  or shorthand — the assistant stays off.
+
+  The editor's model picker now lists its models sorted by the name teachers
+  see — the label an admin gave, else the model id — instead of default-first,
+  and shows each model's cost as one rounded number (the average of its
+  three weights) instead of the raw `in/cached/out` weights. After each
+  answer the editor shows what it cost in credits: the route's `done` event
+  carries the request's token counts and their weighted total.
+
+  The assistant now knows the conversation: the editor sends the last few
+  turns along with each request, so follow-ups like "write about a related
+  animal" know what came before. A clear-conversation button starts fresh
+  without that history. The assistant's answers render as Markdown
+  (headings, lists, code, tables), through the same safe pipeline as the
+  legal pages: raw HTML stays text, links keep to safe protocols.
+
+- [`0a4ac64`](https://github.com/openpatch/hyperbook/commit/0a4ac646fd0c38f9e2d7e9d876837fd5fee222e0) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Hyperbook Cloud no longer copies the element runtimes (Pyodide, Excalidraw, GeoGebra, ... — about 500 MB together) into every build of every book. It extracts them once per Hyperbook version and serves them to every book at `/_hyperbook/assets/<version>/`, with a year of immutable caching. Books whose `elements.*.cdn` is unset or `true` link there instead of a public CDN; `false` (a local copy) and custom URLs keep their meaning. Under Settings → Element runtimes, admins choose per element whether books load its runtime from the instance or from the element's public CDN. Hosts other than Hyperbook Cloud get the same mechanism through `HYPERBOOK_SHARED_ASSETS_BASE` and `HYPERBOOK_CDN_ELEMENTS`; builds without them are unchanged. The build sandbox also keeps an asset cache between builds now, so books that ask for local runtimes are not unpacked again for every build.
+
+### Patch Changes
+
+- [`b61fdb4`](https://github.com/openpatch/hyperbook/commit/b61fdb4792c69f3c89154fdb90e30f2a8fb71b2d) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Update `@bitflow/web-component` to 0.4.0 (from 0.3.1), which builds on
+  `@bitflow/core` 0.9.0. The public element surface is unchanged —
+  `<bitflow-flow>`, `<bitflow-flow-editor>`, `<bitflow-report>`,
+  `<bitflow-group-report>` and the `bitflow-*` events — so the bundled
+  `directive-bitflow` assets are refreshed with the new chunks and no
+  integration code changes were needed.
+
+- [`be511a3`](https://github.com/openpatch/hyperbook/commit/be511a3555376747c42d726397f0dc32e41e09d0) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Update `@bitflow/web-component` to 0.4.1 (from 0.4.0). The editor's graph chrome — React Flow's zoom buttons, minimap, dotted background and edges — now derives its `colorMode` from the container's used `color-scheme`, the same one bitflow's own `light-dark()` palette resolves against, and follows the host's theme changes. Before, the chrome stayed light whatever the host, so a dark page or a dark editor frame had light zoom buttons and a white minimap on the dark canvas. The element and event surface is unchanged, so no integration code changes were needed.
+
+- [`022f42c`](https://github.com/openpatch/hyperbook/commit/022f42cd4c8392a59a37769da24f791545e09218) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - The AI assistant no longer fails with an "empty provider answer" on
+  Mistral's reasoning models. mistral-large-4, mistral-medium-3-5 and
+  mistral-small-2603 stream their thinking inside `delta.content` as typed
+  chunks (`{ type: "thinking", thinking: [{ type: "text", text }] }`),
+  which the provider stream parser did not recognize — and since thinking
+  counts against `max_tokens`, a model that hit the cap mid-thought looked
+  like a provider that answered nothing. The parser now gathers those
+  chunks as reasoning, so a run whose visible text never arrives shows the
+  thinking instead of failing, and the default `AI_MAX_OUTPUT_TOKENS`
+  rises from 2048 to 8192, enough headroom for reasoning models to think
+  and still write (set your own value to override).
+
+- [`dfa0db1`](https://github.com/openpatch/hyperbook/commit/dfa0db129f76b7d7c49efee11cbcb361f2e4aa3c) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Code files in the editor (Java, Python, SQL, …) now use the theme's `--hl-*` syntax colors, which switch with light and dark mode. Before, they fell back to CodeMirror's light-only default highlight style, so e.g. Java source was hard to read in dark mode.
+
+- [`87d95f5`](https://github.com/openpatch/hyperbook/commit/87d95f50bdd5792935d6f839655ce45419eeb5b0) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Further hardening of the git smart HTTP endpoints and storage accounting.
+  Git child processes (upload-pack/receive-pack and the post-push `git gc`) are
+  killed after `GIT_OP_TIMEOUT_SECONDS` (default 300) and answered with 504, so
+  a stuck operation cannot hold a process forever. Per-book git traffic that
+  exceeds the operation limit now gets a 429 with `Retry-After` instead of a
+  401, and anonymous auth probes — every git client sends one to get the
+  challenge — no longer count as failed logins; the failure limiter is also
+  bounded (10k keys, expired entries swept, oldest evicted) since its keys are
+  attacker-chosen. The pre-receive hook now also rejects pushes whose whole
+  repository — including the quarantined pack of the push itself — exceeds the
+  book's storage quota, and a `git gc --prune=now` after each successful push
+  reclaims objects of deleted files. Reusing an already-publishing build with a
+  new note keeps that note, and the publish-note plumbing no longer drops it.
+
+- [`9dbaa4f`](https://github.com/openpatch/hyperbook/commit/9dbaa4f09efa28c64501d989952274fba17e97a2) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Hardened the git smart HTTP endpoints and build bookkeeping. Gzip-encoded
+  request bodies are now accepted for clone/fetch (upload-pack) and push
+  (receive-pack); other content encodings are rejected with 415. Oversized
+  pushes are cut off mid-stream with a 413 and no longer crash the git service.
+  Concurrent pushes to the same book are serialized with the book lock, and
+  post-push accounting (source bytes, commit count, audit log, optional preview
+  build) now verifies the pushed commit is reachable from `main` instead of
+  comparing it to the branch head. The pre-receive hook is only rewritten when
+  it actually changed (atomic temp-file rename), and a failed git tag update or
+  build cleanup after a successful publish no longer marks the build as failed —
+  the problem is recorded as a warning in the build log instead.
+
+- [`840da81`](https://github.com/openpatch/hyperbook/commit/840da81cc9849ac14172c3745beff75da462ce1d) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - The visual editors' frame follows the theme again, and keeps following it when it changes. It now declares a `color-scheme` per theme and loads the light design tokens, which the dark ones build on — without them bitflow resolved its whole `light-dark()` palette light whatever the theme, so in dark mode its editor came out as white cards with near-invisible text on the dark canvas. The frame also gets the app's page font and colours, and the iframe behind it is no longer hardcoded white while an editor loads. Toggling the theme now reaches the frame live (through the same `storage` event that keeps tabs in step) instead of only when it first opens.
+
+- [`1cb7980`](https://github.com/openpatch/hyperbook/commit/1cb7980d32073d4840c783b0dc58d78db003a152) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Update dependencies across the workspace to their latest versions
+  (`pnpm update -r --latest`), including @types/node 26.6.6, webpack 5.112.2,
+  vite ^8.3.5, react ^19.3.1, mermaid 12.2.0, chokidar 6.0.0, sass 1.107.0,
+  shiki ^4.5.0, struktolab 0.6.3, and many more.
+
+  Three upgrades were intentionally kept back:
+
+  - TypeScript stays on 6.0.3 (7 is the native port without the JS API the
+    code uses); @hyperbook/cloud keeps its existing ^7.0.2.
+  - @types/vscode stays pinned at 1.125.0 (disabled in renovate.json, and
+    @vscode/vsce rejects newer types against engines.vscode ^1.125.0).
+  - vitest stays on ^4.1.10 outside @hyperbook/cloud (vitest 5 drops `.not`
+    from the Assertion type and breaks `tsc --noEmit` on existing tests).
+
+  The p5 completions in @hyperbook/markdown were regenerated with
+  `pnpm p5:completions` for p5 2.3.4. Nothing changes in what a hyperbook
+  renders.
+
 ## 0.3.0
 
 ### Minor Changes

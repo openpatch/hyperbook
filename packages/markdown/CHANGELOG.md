@@ -1,5 +1,51 @@
 # @hyperbook/markdown
 
+## 0.91.0
+
+### Minor Changes
+
+- [`a67cf2b`](https://github.com/openpatch/hyperbook/commit/a67cf2b06b81f6e529f3b278d44965d5d270df47) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - The `archive` directive gained an `include` attribute for pulling extra files or folders into a zipped archive at build time, without symbolic links: `:::archive[Projekt: Spielwerkstatt]{name="spielwerkstatt" include="/book/projekte/spielwerkstatt/assets=assets"}` zips `archives/spielwerkstatt/` plus the folder `book/projekte/spielwerkstatt/assets` as `assets` inside the zip. Sources are book-root-relative paths (files or folders, folders recursively including dotfiles), destinations are relative paths inside the zip; both may be given as a comma-separated list. Missing sources, sources outside the book root and destinations that collide with existing archive entries fail the build with an error naming the declaring page. Hyperbook Cloud strips symlink entries from zip uploads, so `include=` is the portable way to share a folder between the book and an archive.
+
+- [`2985e75`](https://github.com/openpatch/hyperbook/commit/2985e75ed0569aa02e428854e13253036d40e064) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Blockflow projects get visual editors in Hyperbook Cloud, on the blockflow v0.2.0 runtime. A `.sb3` file opens in blockflow's embed editor (`embed-editor.html`) and a `.blockflow` project file in the embed generator (`embed-generator.html`); both are served on the admin origin at `/blockflow/*` from the runtime bundle extracted per Hyperbook version (the same bytes the books render with), under their own Content-Security-Policy, and the editor frame talks blockflow's embed protocol (`ready`/`load`/`change`/`save`/`saved`/`error`) instead of touching the editor's VM. "Edit visually" in a page now also works on `::blockflow-player{src=…}` and `::::blockflow-editor{src=…}`/`{project=…}`. A `.sb3` travels base64-encoded and saves with `encoding: "base64"`, a `.blockflow` is plain JSON; both validate before saving, and "New file" offers starters for them. `@hyperbook/markdown` pins `blockflow-v0.2.0`, whose bundle adds the embed entries and a `manifest.json` (version, commit, entries) that a test asserts.
+
+- [`0a4ac64`](https://github.com/openpatch/hyperbook/commit/0a4ac646fd0c38f9e2d7e9d876837fd5fee222e0) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Hyperbook Cloud no longer copies the element runtimes (Pyodide, Excalidraw, GeoGebra, ... — about 500 MB together) into every build of every book. It extracts them once per Hyperbook version and serves them to every book at `/_hyperbook/assets/<version>/`, with a year of immutable caching. Books whose `elements.*.cdn` is unset or `true` link there instead of a public CDN; `false` (a local copy) and custom URLs keep their meaning. Under Settings → Element runtimes, admins choose per element whether books load its runtime from the instance or from the element's public CDN. Hosts other than Hyperbook Cloud get the same mechanism through `HYPERBOOK_SHARED_ASSETS_BASE` and `HYPERBOOK_CDN_ELEMENTS`; builds without them are unchanged. The build sandbox also keeps an asset cache between builds now, so books that ask for local runtimes are not unpacked again for every build.
+
+### Patch Changes
+
+- [`b61fdb4`](https://github.com/openpatch/hyperbook/commit/b61fdb4792c69f3c89154fdb90e30f2a8fb71b2d) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Update `@bitflow/web-component` to 0.4.0 (from 0.3.1), which builds on
+  `@bitflow/core` 0.9.0. The public element surface is unchanged —
+  `<bitflow-flow>`, `<bitflow-flow-editor>`, `<bitflow-report>`,
+  `<bitflow-group-report>` and the `bitflow-*` events — so the bundled
+  `directive-bitflow` assets are refreshed with the new chunks and no
+  integration code changes were needed.
+
+- [`be511a3`](https://github.com/openpatch/hyperbook/commit/be511a3555376747c42d726397f0dc32e41e09d0) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Update `@bitflow/web-component` to 0.4.1 (from 0.4.0). The editor's graph chrome — React Flow's zoom buttons, minimap, dotted background and edges — now derives its `colorMode` from the container's used `color-scheme`, the same one bitflow's own `light-dark()` palette resolves against, and follows the host's theme changes. Before, the chrome stayed light whatever the host, so a dark page or a dark editor frame had light zoom buttons and a white minimap on the dark canvas. The element and event surface is unchanged, so no integration code changes were needed.
+
+- [`8b12f4d`](https://github.com/openpatch/hyperbook/commit/8b12f4d95be2333ac7af6e5eb03ee035454e8df3) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Bitflow: use the book's body font instead of the browser default, and drop the
+  colour mappings that `@bitflow/web-component` now covers by reading
+  `--color-brand`, `--color-background`, `--color-text` and
+  `--color-text-deactivated` itself.
+
+- [`cad2b9d`](https://github.com/openpatch/hyperbook/commit/cad2b9d4ebfbe3a2d396430f848a4a87c3969b6c) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fixed the Online IDE runtime download in `postbuild.mjs` pinning a stale release (`v2.2.1-hyperbook.12`) instead of the version declared in `ide-releases.json`. Builds now download `dist-embedded.zip` from the pinned `ideReleases.onlineide` release, matching the `sqlide` flow, so `scripts/verify-default-cdns.mjs` compares the published CDN manifest against the same runtime the CDN was published from.
+
+- [`1cb7980`](https://github.com/openpatch/hyperbook/commit/1cb7980d32073d4840c783b0dc58d78db003a152) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Update dependencies across the workspace to their latest versions
+  (`pnpm update -r --latest`), including @types/node 26.6.6, webpack 5.112.2,
+  vite ^8.3.5, react ^19.3.1, mermaid 12.2.0, chokidar 6.0.0, sass 1.107.0,
+  shiki ^4.5.0, struktolab 0.6.3, and many more.
+
+  Three upgrades were intentionally kept back:
+
+  - TypeScript stays on 6.0.3 (7 is the native port without the JS API the
+    code uses); @hyperbook/cloud keeps its existing ^7.0.2.
+  - @types/vscode stays pinned at 1.125.0 (disabled in renovate.json, and
+    @vscode/vsce rejects newer types against engines.vscode ^1.125.0).
+  - vitest stays on ^4.1.10 outside @hyperbook/cloud (vitest 5 drops `.not`
+    from the Assertion type and breaks `tsc --noEmit` on existing tests).
+
+  The p5 completions in @hyperbook/markdown were regenerated with
+  `pnpm p5:completions` for p5 2.3.4. Nothing changes in what a hyperbook
+  renders.
+
 ## 0.90.0
 
 ### Minor Changes
