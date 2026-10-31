@@ -1,5 +1,7 @@
 import { zipSync } from "fflate";
+import { eq } from "drizzle-orm";
 import { describe, expect, it } from "vitest";
+import { books } from "../src/server/db/schema";
 import { domainNameProblem } from "../src/server/domain/custom-domains";
 import { bookClient } from "./book-client";
 import { type Instance, loggedIn, setup } from "./helpers";
@@ -183,6 +185,37 @@ describe("custom domains", () => {
     const credentials = (await owner.c.get(`/api/groups/${group.id}/credentials`)).body;
     expect(credentials.loginAddress).toBe(`http://${DOMAIN}`);
     expect(credentials.students[0].loginUrl).toMatch(new RegExp(`^http://${DOMAIN}/_hyperbook/login#k=`));
+  });
+
+  it("checks HTTPS on an active domain, statelessly", async () => {
+    const { instance, owner, book } = await world();
+    const httpsCheck = () => owner.c.post(`/api/books/${book.id}/domain/https-check`);
+    const healthUrl = `https://${DOMAIN}/api/health`;
+
+    // Not active yet: refused.
+    await owner.c.put(`/api/books/${book.id}/domain`, { domain: DOMAIN });
+    expect((await httpsCheck()).status).toBe(409);
+    configureDns(instance, (await owner.c.get(`/api/books/${book.id}`)).body.domain);
+    await owner.c.post(`/api/books/${book.id}/domain/check`);
+
+    // The fetch went through the proxy and got the certificate.
+    instance.fetchUrl.responses.set(healthUrl, 200);
+    expect((await httpsCheck()).body).toEqual({ problem: null });
+
+    // Nothing was stored: a second check sees the fresh answer, not a status.
+    instance.fetchUrl.responses.set(healthUrl, 503);
+    expect((await httpsCheck()).body.problem).toMatch(/answered 503/);
+
+    // DNS gone, or the certificate failed: the teacher is told why.
+    instance.fetchUrl.responses.delete(healthUrl);
+    expect((await httpsCheck()).body.problem).toMatch(/no longer points/);
+    instance.fetchUrl.responses.set(
+      healthUrl,
+      new TypeError("fetch failed", { cause: { code: "ERR_TLS_CERT_ALTNAME_INVALID" } }),
+    );
+    expect((await httpsCheck()).body.problem).toMatch(/certificate/);
+    const stored = instance.db.select({ problem: books.domainProblem }).from(books).where(eq(books.id, book.id)).get();
+    expect(stored?.problem).toBeNull();
   });
 
   it("gets certificates for active domains only", async () => {

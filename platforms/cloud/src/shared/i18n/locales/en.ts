@@ -861,6 +861,8 @@ export const en = {
         "Use a subdomain such as buch.schule.de: a domain on its own (like schule.de) cannot have a CNAME record.",
       checking: "Checking…",
       checkAgain: "Check again",
+      checkHttps: "Check HTTPS",
+      httpsWorks: "HTTPS works",
       removeTitle: "Remove {{domain}}?",
       removeDescription:
         "The book is served at {{slug}} on this platform again. Printed login links that use {{domain}} stop working.",

@@ -13,6 +13,7 @@ import { BuildQueue } from "../src/server/hosting/builds";
 import { type RenderSpawner, Renderers } from "../src/server/hosting/renders";
 import type { Runner } from "../src/server/hosting/runner";
 import { createMemoryDns } from "../src/server/dns";
+import { createMemoryUrlFetcher } from "../src/server/https";
 import { createMemoryMailer } from "../src/server/mail";
 
 const migrationsFolder = fileURLToPath(new URL("../drizzle", import.meta.url));
@@ -78,10 +79,11 @@ export function setup(env: Record<string, string> = {}, options: { runner?: Runn
   const builds = new BuildQueue(db, config, options.runner ?? copyRunner);
   builds.start();
   const dns = createMemoryDns();
+  const fetchUrl = createMemoryUrlFetcher();
   const renders = new Renderers(config, textRender);
-  const deps: Deps = { config, db, mailer, builds, renders, dns };
+  const deps: Deps = { config, db, mailer, builds, renders, dns, fetchUrl };
   const app = createApp(deps);
-  return { config, db, sqlite, mailer, builds, renders, dns, deps, app };
+  return { config, db, sqlite, mailer, builds, renders, dns, fetchUrl, deps, app };
 }
 
 export type Instance = ReturnType<typeof setup>;

@@ -19,6 +19,9 @@ export function DomainSection({ book }: { book: Book }) {
   const id = String(book.id);
   const domain = book.domain;
   const [checking, setChecking] = useState(false);
+  const [httpsChecking, setHttpsChecking] = useState(false);
+  // The HTTPS check is stateless on the server; the result lives here.
+  const [httpsProblem, setHttpsProblem] = useState<string | null | undefined>();
   const form = useZodForm(bookDomainInput, { defaultValues: { domain: domain?.name ?? "" } });
 
   const show = (updated: Book) => {
@@ -47,6 +50,19 @@ export function DomainSection({ book }: { book: Book }) {
       toast.error(error instanceof Error ? error.message : t("common.somethingWrong"));
     } finally {
       setChecking(false);
+    }
+  };
+
+  const checkHttps = async () => {
+    setHttpsChecking(true);
+    try {
+      const { problem } = await unwrap(api.books[":id"].domain["https-check"].$post({ param: { id } }));
+      setHttpsProblem(problem);
+      if (problem === null) toast.success(t("book.domain.httpsWorks"));
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : t("common.somethingWrong"));
+    } finally {
+      setHttpsChecking(false);
     }
   };
 
@@ -90,7 +106,15 @@ export function DomainSection({ book }: { book: Book }) {
             )}
           </p>
           {domain.active ? (
-            <p className="text-sm text-muted-foreground">{t("book.domain.activeHint")}</p>
+            <>
+              <p className="text-sm text-muted-foreground">{t("book.domain.activeHint")}</p>
+              {httpsProblem !== undefined &&
+                (httpsProblem === null ? (
+                  <Badge>{t("book.domain.httpsWorks")}</Badge>
+                ) : (
+                  <p className="text-sm text-destructive">{httpsProblem}</p>
+                ))}
+            </>
           ) : (
             <>
               <p className="text-sm">{t("book.domain.recordHint")}</p>
@@ -118,6 +142,11 @@ export function DomainSection({ book }: { book: Book }) {
             {!domain.active && (
               <Button onClick={check} disabled={checking}>
                 {checking ? t("book.domain.checking") : t("book.domain.checkAgain")}
+              </Button>
+            )}
+            {domain.active && (
+              <Button variant="outline" onClick={checkHttps} disabled={httpsChecking}>
+                {httpsChecking ? t("book.domain.checking") : t("book.domain.checkHttps")}
               </Button>
             )}
             <ConfirmButton

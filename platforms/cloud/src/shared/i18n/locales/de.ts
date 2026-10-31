@@ -885,6 +885,8 @@ export const de: Messages = {
         "Verwenden Sie eine Subdomain wie buch.schule.de: eine Domain für sich (wie schule.de) kann keinen CNAME-Eintrag haben.",
       checking: "Prüfen…",
       checkAgain: "Erneut prüfen",
+      checkHttps: "HTTPS prüfen",
+      httpsWorks: "HTTPS funktioniert",
       removeTitle: "{{domain}} entfernen?",
       removeDescription:
         "Das Buch wird wieder unter {{slug}} auf dieser Plattform ausgeliefert. Gedruckte Anmelde-Links, die {{domain}} verwenden, funktionieren nicht mehr.",

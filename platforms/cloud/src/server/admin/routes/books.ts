@@ -21,7 +21,7 @@ import {
   publicBook,
   renameSlug,
 } from "../../domain/books";
-import { checkDomain, domainNameProblem } from "../../domain/custom-domains";
+import { checkDomain, checkDomainHttps, domainNameProblem } from "../../domain/custom-domains";
 import { getEntitlements } from "../../domain/entitlements";
 import { newSlugSuffix, suffixApplies, withSuffix } from "../../domain/slug-names";
 import { removeBookFiles } from "../../hosting/storage";
@@ -38,7 +38,7 @@ const memberParam = validate(
   }),
 );
 
-export function bookRoutes({ db, config, builds, dns }: Deps) {
+export function bookRoutes({ db, config, builds, dns, fetchUrl }: Deps) {
   function members(bookId: number) {
     return db
       .select({
@@ -291,6 +291,16 @@ export function bookRoutes({ db, config, builds, dns }: Deps) {
       if (!book.domain) throw new HTTPException(404, { message: "This book has no custom domain" });
       await check(book, user.id);
       return c.json(publicBook(config, reload(book.id), role));
+    })
+
+    // Stateless: fetches https://<domain> once, through the proxy, which
+    // obtains the certificate on demand; nothing is stored.
+    .post("/:id/domain/https-check", idParam, async (c) => {
+      const user = c.get("user");
+      const { book } = bookAccess(db, user, c.req.valid("param").id, "owner");
+      if (!book.domain) throw new HTTPException(404, { message: "This book has no custom domain" });
+      if (!book.domainVerifiedAt) throw new HTTPException(409, { message: "The domain is not active yet" });
+      return c.json(await checkDomainHttps(book.domain, fetchUrl));
     })
 
     .delete("/:id/domain", idParam, (c) => {

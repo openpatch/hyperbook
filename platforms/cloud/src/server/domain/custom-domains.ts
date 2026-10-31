@@ -3,6 +3,7 @@ import type { Config } from "../config";
 import type { Db } from "../db/client";
 import { bookSlugs, books } from "../db/schema";
 import type { Dns } from "../dns";
+import type { UrlFetcher } from "../https";
 import type { BookRow } from "./books";
 
 /*
@@ -93,6 +94,26 @@ export async function checkDomain(
     .get();
   if (taken) return { problem: "Another book uses this domain already." };
   return { problem: null };
+}
+
+/**
+ * Whether HTTPS works on an active custom domain: fetches /api/health there
+ * once. The request goes through the TLS proxy, which obtains the certificate
+ * on demand now that /api/tls-check allows the domain, so a success also warms
+ * the certificate for the first real visitor. Stateless: nothing is stored.
+ */
+export async function checkDomainHttps(domain: string, fetchUrl: UrlFetcher): Promise<{ problem: string | null }> {
+  try {
+    const res = await fetchUrl(`https://${domain}/api/health`);
+    return res.ok ? { problem: null } : { problem: `HTTPS works, but /api/health answered ${res.status}.` };
+  } catch (error) {
+    const code = (error as { cause?: { code?: string } }).cause?.code ?? "";
+    if (code === "ENOTFOUND" || code === "EAI_AGAIN" || code === "ENODATA")
+      return { problem: "The domain no longer points at this platform. Check the DNS record." };
+    if (/CERT|SSL|TLS/i.test(code))
+      return { problem: "The certificate could not be obtained. Check that the domain points at this platform." };
+    return { problem: "HTTPS is not reachable yet. Try again in a moment." };
+  }
 }
 
 /** The book's domain as the admin API shows it. */

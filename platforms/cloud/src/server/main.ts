@@ -23,6 +23,7 @@ import { fillMissingSourceBytes } from "./domain/storage";
 import { headCommit, listTree } from "./hosting/git";
 import { hyperbookVersion } from "./hosting/runner";
 import { createDns } from "./dns";
+import { createUrlFetcher } from "./https";
 import { createMailer } from "./mail";
 
 async function start() {
@@ -116,7 +117,10 @@ async function start() {
   if (rebuilding > 0) console.log(`Rebuilding ${rebuilding} book(s) with Hyperbook ${hyperbookVersion(config)}`);
 
   const renders = new Renderers(config, undefined, () => cdnElements(settings()));
-  const app = createApp({ config, db, mailer: createMailer(config), builds, renders, dns: createDns() }, { webRoot });
+  const app = createApp(
+    { config, db, mailer: createMailer(config), builds, renders, dns: createDns(), fetchUrl: createUrlFetcher() },
+    { webRoot },
+  );
   const server = serve({ fetch: app.fetch, port: config.port }, (info) => {
     console.log(`Hyperbook Cloud listening on port ${info.port}`);
     console.log(`  admin  ${config.adminOrigin}`);
