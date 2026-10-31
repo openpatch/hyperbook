@@ -7,7 +7,7 @@ import { DIRECTIVES } from "../src/web/pages/editor/directives";
 
 /*
  * The system prompt's directive vocabulary is the editor's: the assistant
- * must neither invent elements nor miss any (docs/cloud-ai-assistant.md).
+ * must neither invent elements nor miss any (platforms/cloud/docs/cloud-ai-assistant.md).
  */
 
 function promptDirectives(): Set<string> {

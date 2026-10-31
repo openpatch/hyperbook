@@ -7,7 +7,7 @@ import { ADMIN, launchBrowser, startServer } from "./server";
 
 /*
  * The AI assistant in the editor, against the built server and a fake
- * OpenAI-compatible provider (docs/cloud-ai-assistant.md). The provider
+ * OpenAI-compatible provider (platforms/cloud/docs/cloud-ai-assistant.md). The provider
  * streams a scripted answer; the test checks the editor's whole flow: ask,
  * stream, insert, save.
  */

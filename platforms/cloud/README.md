@@ -3,7 +3,7 @@
 A self-hosted platform for [Hyperbook](https://github.com/openpatch/hyperbook):
 teachers publish their books and manage anonymous student accounts in the
 browser.
-See [the plan](../../docs/cloud-platform.md) for where this is going.
+See [the plan](docs/cloud-platform.md) for where this is going.
 
 > **Status:** milestones M0 (accounts, books, groups, students, printable
 > login cards), M1 (upload, build and host books) and M2 (student login,
@@ -45,7 +45,7 @@ The editor has an optional writing assistant that knows the hyperbook
 format, looks through the whole book, and answers while the teacher writes;
 it may also propose new files, edits and deletions — always as a git diff the
 teacher accepts or denies before anything is applied. See
-[the assistant plan](../../docs/cloud-ai-assistant.md).
+[the assistant plan](docs/cloud-ai-assistant.md).
 
 It speaks the OpenAI chat-completions protocol, so any provider works.
 **Mistral** and **local hosting** are the recommended setups:

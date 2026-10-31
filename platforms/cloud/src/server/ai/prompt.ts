@@ -1,6 +1,6 @@
 /*
  * The system prompt that makes the assistant write hyperbook, not generic
- * Markdown (docs/cloud-ai-assistant.md). The directive list is the editor's
+ * Markdown (platforms/cloud/docs/cloud-ai-assistant.md). The directive list is the editor's
  * (src/web/pages/editor/directives.ts); a test keeps the two in step.
  * Curated by hand: documentation prose is not prompt material.
  */
