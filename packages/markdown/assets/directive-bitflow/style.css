@@ -1,17 +1,9 @@
-/* The flow in the book's colours. bitflow's elements render into the light
-   DOM and take every colour from a `--bitflow-*` property, so re-declaring
-   them on the container re-themes the flow without touching its styles.
-
-   The whole primary family is set, not just the primary: bitflow's derived
-   tokens are resolved on `:root`, where they were computed from its own green,
-   so setting only `--bitflow-color-primary` would pair the book's buttons with
-   bitflow's hover and focus ring. `--color-brand-text` is what the book already
-   paints on its brand colour, so a light brand keeps readable button labels.
-
-   dark.css repeats the derived half for the dark scheme, where the brand is the
-   light `--color-brand-dark` and the mixes run the other way. */
+/* bitflow reads the book's `--color-brand`, `--color-background`, `--color-text`
+   and `--color-text-deactivated` itself. Its derived tokens are resolved on
+   `:root` from its own green, though, so the rest of the primary family is
+   re-declared here from the book's brand; dark.css repeats the half that runs
+   the other way. */
 .directive-bitflow {
-  --bitflow-color-primary: var(--color-brand);
   --bitflow-color-primary-dark: color-mix(in srgb, var(--color-brand), black 30%);
   --bitflow-color-primary-light: color-mix(in srgb, var(--color-brand) 30%, white);
   --bitflow-color-on-primary: var(--color-brand-text);
@@ -21,7 +13,9 @@
      stylesheet draws in the bottom right corner, so Next never sits under
      it. 32px of button plus the 8px it sits off the edge. */
   --bitflow-controls-inset-end: 40px;
-
+  /* Same stack as `.hyperbook-markdown`, so the flow matches the page. */
+  --bitflow-font-family: hyperbook-body, sans-serif;
+  font-family: hyperbook-body, sans-serif;
   position: relative;
   border: 1px solid var(--color-nav-border);
   border-radius: 8px;
@@ -51,6 +45,14 @@
      alike; bitflow stretches its shell down the element the same way. */
   display: flex;
   flex-direction: column;
+}
+
+/* Native controls do not inherit the font unless told to. */
+.directive-bitflow button,
+.directive-bitflow input,
+.directive-bitflow select,
+.directive-bitflow textarea {
+  font-family: inherit;
 }
 
 .directive-bitflow bitflow-flow {
