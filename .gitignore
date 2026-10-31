@@ -1,3 +1,4 @@
+.pi
 .claude
 vdirectory.book.json
 vdirectory.snippets.json
@@ -46,6 +47,7 @@ yarn-error.log*
 lerna-debug.log*
 
 # local env files
+.env
 .env.local
 .env.development.local
 .env.test.local
