@@ -134,6 +134,12 @@ export interface SinglePageResult {
   dependencies: string[];
   /** Non-fatal diagnostics this page produced, already printed. */
   messages: MessageCounts;
+  /**
+   * The raw diagnostics behind `messages`, for hosts that surface them in
+   * their own UI — the VS Code preview maps them onto squiggles in the
+   * editor. Positions are relative to the processed markdown.
+   */
+  rawMessages: unknown[];
   /** Archive includes this page's archive directives declared, by archive name. */
   archiveIncludes: Record<string, ArchiveInclude[]>;
 }
@@ -238,6 +244,7 @@ export async function buildSingleBookPage(
     emojis,
     dependencies: [...dependencies],
     messages,
+    rawMessages: [...(result.messages || [])],
     archiveIncludes:
       (result.data.archiveIncludes as Record<string, ArchiveInclude[]>) || {},
   };
@@ -341,6 +348,7 @@ export async function buildSingleGlossaryPage(
     emojis,
     dependencies: [...dependencies],
     messages,
+    rawMessages: [...(result.messages || [])],
     archiveIncludes:
       (result.data.archiveIncludes as Record<string, ArchiveInclude[]>) || {},
   };

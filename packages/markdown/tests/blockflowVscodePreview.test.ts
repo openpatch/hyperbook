@@ -93,7 +93,10 @@ async function renderPreview({
   const vscode = {
     languages: { createDiagnosticCollection: () => ({}) },
     commands: { executeCommand: () => {} },
-    workspace: { getConfiguration: () => ({}) },
+    workspace: {
+      getConfiguration: () => ({}),
+      getWorkspaceFolder: () => undefined,
+    },
     window: {
       showInformationMessage: async (message: string) => {
         messages.push(message);
@@ -133,6 +136,8 @@ async function renderPreview({
   const modules: Record<string, unknown> = {
     vscode,
     path: path.posix,
+    fs: { existsSync: () => false },
+    "fs/promises": { readFile: async () => "<html></html>" },
     "./RuntimeAssets": {
       runtimeElements: elements,
       runtimeLabels: Object.fromEntries(elements.map((e) => [e, `<${e}>`])),
@@ -142,10 +147,29 @@ async function renderPreview({
       elementCdn,
       isExternalUrl: (p: string) => /^https?:\/\//.test(p),
     },
-    "@hyperbook/markdown": {
-      process: async (_content: string, context: HyperbookContext) => {
-        ctx = context;
-        return { data: { directives } };
+    // The preview renders through the CLI's single-page builders (the code
+    // behind `hyperbook render`); capture the context they receive.
+    "hyperbook/build": {
+      ASSETS_FOLDER: "__hyperbook_assets",
+      makeBaseCtx: (
+        root: string,
+        config: HyperbookJson,
+        _basePath: string | undefined,
+        project: unknown,
+      ) => ({ root, config, project, version: "0.0.0-test" }),
+      buildSingleBookPage: async (
+        _file: unknown,
+        baseCtx: HyperbookContext,
+      ) => {
+        ctx = baseCtx;
+        return { directives: Object.keys(directives), rawMessages: [] };
+      },
+      buildSingleGlossaryPage: async (
+        _file: unknown,
+        baseCtx: HyperbookContext,
+      ) => {
+        ctx = baseCtx;
+        return { directives: Object.keys(directives), rawMessages: [] };
       },
     },
   };

@@ -23,6 +23,12 @@ module.exports = (_env, argv) => {
     devtool: "source-map",
     externals: {
       vscode: "commonjs vscode", // the vscode-module is created on-the-fly and must be excluded. Add other modules that cannot be webpack'ed, 📖 -> https://webpack.js.org/configuration/externals/
+      // Only a full build generates favicons; the preview renders single pages
+      // through the CLI's build.ts, which imports this lazily. Not shipped.
+      favicons: "commonjs favicons",
+      sharp: "commonjs sharp",
+      // unzipper (archive directive) requires this lazily for S3 sources only.
+      "@aws-sdk/client-s3": "commonjs @aws-sdk/client-s3",
     },
     plugins: [
       new CopyPlugin({
@@ -82,7 +88,17 @@ module.exports = (_env, argv) => {
               loader: "ts-loader",
               options: {
                 compilerOptions: {
-                  module: "es6", // override `tsconfig.json` so that TypeScript emits native JavaScript modules.
+                  // override `tsconfig.json` so that TypeScript emits native
+                  // JavaScript modules (es2022 also allows the CLI's dynamic
+                  // imports, e.g. the favicon generator).
+                  module: "es2022",
+                  // The preview renders through the CLI's build.ts ("hyperbook
+                  // build"/"hyperbook render"), which lives outside this
+                  // package and imports JSON (package.json, asset-bundles).
+                  rootDir: path.resolve(__dirname, "../.."),
+                  resolveJsonModule: true,
+                  target: "es2022",
+                  lib: ["es2023", "dom"],
                 },
               },
             },

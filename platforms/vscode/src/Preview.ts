@@ -8,15 +8,23 @@ import {
   VFileGlossary,
   getPasswords,
 } from "@hyperbook/fs";
-import { process } from "@hyperbook/markdown";
+// The same single-page builders behind `hyperbook render`, which Hyperbook
+// Cloud's editor preview runs — the preview renders through them, too.
+import {
+  ASSETS_FOLDER,
+  buildSingleBookPage,
+  buildSingleGlossaryPage,
+  makeBaseCtx,
+} from "hyperbook/build";
 import { disposeAll } from "./utils/dispose";
+import fs from "fs/promises";
+import { existsSync } from "fs";
 import path, { posix } from "path";
 import {
   DownloadableElement,
-  HyperbookContext,
   HyperbookJson,
   HyperbookPage,
-  Navigation,
+  Hyperproject,
   elementCdn,
   isExternalUrl,
 } from "@hyperbook/types";
@@ -103,15 +111,12 @@ export default class Preview {
         );
       const rootPath = vscode.workspace.getWorkspaceFolder(this._resource);
       if (rootPath) {
-        const projectPath = this.hyperbookViewerConfig.get("root");
-        const project = await hyperproject.get(
-          path.join(rootPath.uri.fsPath, projectPath),
-        );
+        const project = await this.getRootProject();
         const links = [];
         if (config.links) {
           links.push(...config.links);
         }
-        if (project.type === "library") {
+        if (project && project.type === "library") {
           const link = await hyperproject.getLink(project, config.language, {
             href: {
               useSrc: true,
@@ -135,6 +140,19 @@ export default class Preview {
         name: "Hyperbook",
       };
     }
+  }
+
+  /** The workspace's hyperproject (book or library), if there is one. */
+  private async getRootProject(): Promise<Hyperproject | undefined> {
+    if (!this._resource) {
+      return undefined;
+    }
+    const rootPath = vscode.workspace.getWorkspaceFolder(this._resource);
+    if (!rootPath) {
+      return undefined;
+    }
+    const projectPath = this.hyperbookViewerConfig.get("root");
+    return hyperproject.get(path.join(rootPath.uri.fsPath, projectPath));
   }
 
   /**
@@ -229,32 +247,6 @@ export default class Preview {
         pagesAndSections.sections,
         pagesAndSections.pages,
       );
-      const fileNav = await hyperbook.getNavigationForFile(
-        pageList,
-        this._vfile,
-      );
-      const navigation: Navigation = {
-        ...pagesAndSections,
-        ...fileNav,
-      };
-      
-      // If current is null (glossary page not in pageList), create it from file frontmatter
-      if (!navigation.current && this._vfile.markdown.data) {
-        navigation.current = {
-          name: this._vfile.markdown.data.name || this._vfile.name,
-          href: this._vfile.path.href || undefined,
-          path: this._vfile.path,
-          scripts: this._vfile.markdown.data.scripts,
-          styles: this._vfile.markdown.data.styles,
-          description: this._vfile.markdown.data.description,
-          keywords: this._vfile.markdown.data.keywords,
-          lang: this._vfile.markdown.data.lang,
-          qrcode: this._vfile.markdown.data.qrcode,
-          toc: this._vfile.markdown.data.toc,
-          layout: this._vfile.markdown.data.layout,
-        };
-      }
-      
       const files = await vfile.list(this._vfile.root);
       const publicFiles = await vfile.listForFolder(this._vfile.root, "public");
       const publicBookFiles = await vfile.listForFolder(
@@ -278,12 +270,19 @@ export default class Preview {
         reload: true,
       });
 
-      const ctx: HyperbookContext = {
-        root: this._vfile.root,
-        config,
-        navigation,
-        passwords,
-        makeUrl: (path, base, page) => {
+      // Where the shared page builders write the rendered page, like
+      // `hyperbook render` does.
+      const rootOut = path.join(this._vfile.root, ".hyperbook", "out");
+      const assetsOut = path.join(rootOut, ASSETS_FOLDER);
+
+      // The preview's makeUrl: like a build's, but URLs work inside a
+      // webview — assets and public files become webview URIs, page links
+      // open the file in the editor.
+      const makeUrl = (
+        path: string | string[],
+        base: "public" | "book" | "archive" | "glossary" | "assets",
+        page?: HyperbookPage,
+      ) => {
           if (typeof path === "string") {
             // Handle absolute URLs
             if (isExternalUrl(path)) {
@@ -333,20 +332,25 @@ export default class Preview {
           }
 
           switch (base) {
-            case "assets":
-              const vsExtensionPath =
-                this.panel?.webview
-                  .asWebviewUri(
-                    vscode.Uri.joinPath(
-                      this.context.extensionUri,
-                      "assets",
-                      "hyperbook",
-                      ...path,
-                    ),
-                  )
-                  .toString() || "";
-
-              return vsExtensionPath;
+            case "assets": {
+              // Files a directive generates while rendering (directive src=
+              // payloads) live in the render output; everything else comes
+              // from the extension's bundled assets.
+              const generated = vscode.Uri.joinPath(
+                vscode.Uri.file(assetsOut),
+                ...path,
+              );
+              const bundled = vscode.Uri.joinPath(
+                this.context.extensionUri,
+                "assets",
+                "hyperbook",
+                ...path,
+              );
+              const target = existsSync(generated.fsPath) ? generated : bundled;
+              return (
+                this.panel?.webview.asWebviewUri(target).toString() || ""
+              );
+            }
 
             case "public":
               const otherFile = otherFiles.find(
@@ -421,22 +425,64 @@ export default class Preview {
               }
               return "#";
           }
-        },
       };
-      const result = await process(this._vfile.markdown.content, ctx);
 
-      this.publishDiagnostics(result);
+      // Render through the same single-page builders as `hyperbook render`
+      // (Hyperbook Cloud's editor preview), so the preview shows exactly what
+      // a build produces. Only makeUrl differs, mapping URLs into the webview.
+      const project =
+        (await this.getRootProject()) ??
+        ({
+          name: config.name,
+          src: this._vfile.root,
+          type: "book",
+        } as Hyperproject);
+      const baseCtx = {
+        ...makeBaseCtx(this._vfile.root, config, config.basePath, project),
+        passwords,
+        makeUrl,
+      };
+      const result =
+        this._vfile.folder === "glossary"
+          ? await buildSingleGlossaryPage(
+              this._vfile as VFileGlossary,
+              baseCtx,
+              pageList,
+              pagesAndSections,
+              rootOut,
+              assetsOut,
+              config,
+            )
+          : await buildSingleBookPage(
+              this._vfile as VFileBook,
+              baseCtx,
+              pageList,
+              pagesAndSections,
+              rootOut,
+              assetsOut,
+              config,
+            );
+
+      this.publishDiagnostics(result.rawMessages);
       // Blockflow registers as blockflow-player and blockflow-editor.
-      const directives = Object.keys((result.data as any)?.directives || {});
       this.usedElements = runtimeElements.filter((element) =>
-        directives.some(
+        result.directives.some(
           (name) => name === element || name.startsWith(`${element}-`),
         ),
       );
       this.offerDownloads(this.usedElements);
 
-
-      this.panel.webview.html = String(result);
+      const href =
+        this._vfile.path.href ||
+        (this._vfile.folder === "glossary" ? "/glossary" : "/");
+      const outFile =
+        this._vfile.name === "index" || config.trailingSlash
+          ? posix.join(href, "index.html")
+          : `${href}.html`;
+      this.panel.webview.html = await fs.readFile(
+        path.join(rootOut, outFile),
+        "utf8",
+      );
     }
   }
 
@@ -449,11 +495,10 @@ export default class Preview {
    * the content no longer matches the source the diagnostics are dropped rather
    * than pointed at the wrong lines.
    */
-  private publishDiagnostics(result: { messages?: unknown[] }): void {
+  private publishDiagnostics(messages: unknown[]): void {
     if (!this._resource || !this._vfile) return;
 
     const uri = this._resource;
-    const messages = result.messages || [];
     if (messages.length === 0) {
       Preview.diagnostics.delete(uri);
       return;
