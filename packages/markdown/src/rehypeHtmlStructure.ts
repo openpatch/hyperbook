@@ -6,6 +6,16 @@ import { ElementContent, Root } from "hast";
 import { VFile } from "vfile";
 import { darkModeStylesheetsLoader } from "./darkModeStylesheetsLoader";
 
+/**
+ * Sources a directive has already resolved to an address of their own:
+ * external URLs (https://…) and the root-relative runtimes a host serves
+ * itself (Hyperbook Cloud's /_hyperbook/assets/<version>/…, see
+ * elementAssets.ts). Both go into the page as they are; makeUrl would bury
+ * them under the directive's assets folder.
+ */
+const isResolvedSrc = (src: string): boolean =>
+  src.includes("://") || src.startsWith("/");
+
 function parseFont(font: string): [string, string] {
   const parts = font.split(":");
   if (parts.length == 2) {
@@ -683,7 +693,7 @@ console.log(
                       tagName: "link",
                       properties: {
                         rel: ["stylesheet"],
-                        href: style.includes("://")
+                        href: isResolvedSrc(style)
                           ? style
                           : makeUrl(
                               ["directive-" + directive, style],
@@ -706,7 +716,7 @@ console.log(
                       if (typeof script === "object") {
                         const { position, versioned, src, ...properties } =
                           script;
-                        let scriptSrc = script.src.includes("://")
+                        let scriptSrc = isResolvedSrc(script.src)
                           ? script.src
                           : makeUrl(
                               ["directive-" + directive, script.src],
@@ -780,7 +790,7 @@ console.log(
                       if (typeof script === "object") {
                         const { position, versioned, src, ...properties } =
                           script;
-                        let scriptSrc = script.src.includes("://")
+                        let scriptSrc = isResolvedSrc(script.src)
                           ? script.src
                           : makeUrl(
                               ["directive-" + directive, script.src],
@@ -804,7 +814,7 @@ console.log(
                         type: "element",
                         tagName: "script",
                         properties: {
-                          src: script.includes("://")
+                          src: isResolvedSrc(script)
                             ? script
                             : makeUrl(
                                 ["directive-" + directive, script],

@@ -302,4 +302,28 @@ describe("shared assets of a host (Hyperbook Cloud)", () => {
       expect(output).not.toContain("https://unpkg.com/");
     }
   });
+
+  it("uses the shared base's root-relative addresses as they are", async () => {
+    // The host's addresses are root-relative, not external, so the page must
+    // not bury them under the directive's assets folder: a script src or a
+    // stylesheet href like /assets/directive-onlineide/_hyperbook/assets/…
+    // 404s, and a module that 404s with an HTML error page is refused by the
+    // browser for its MIME type.
+    for (const [element, markdown] of [
+      ["onlineide", elements.find(([name]) => name === "onlineide")![1]],
+      ["sqlide", elements.find(([name]) => name === "sqlide")![1]],
+    ] as [DownloadableElement, string][]) {
+      const file =
+        element === "onlineide" ? "online-ide-embedded" : "sql-ide-embedded";
+      const result = await processMarkdown(markdown, shared);
+      const html = String(result.value);
+      expect(html).toContain(
+        `src="${base}directive-${element}/include/${file}.js"`,
+      );
+      expect(html).toContain(
+        `href="${base}directive-${element}/include/${file}.css"`,
+      );
+      expect(html).not.toContain(`directive-${element}/${base}`);
+    }
+  });
 });
