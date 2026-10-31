@@ -546,13 +546,20 @@ describe("AI assist", () => {
   });
 
   it("meters weighted tokens per week and blocks once they are used up", async () => {
-    const { owner, instance, assist } = await world({
-      AI_MODELS: "mistral-big",
-      AI_MODEL_WEIGHTS: "mistral-big=4/2/1",
-    });
+    const { owner, instance, assist } = await world({ AI_MODELS: "mistral-big" });
     const admin = await loggedIn(instance, {
       email: "admin@example.org",
       role: "admin",
+    });
+    // Weights come from the instance settings, not the environment. With
+    // 1 credit = 1 µ€ and no buffer, a price of 4 €/M weighs 4.
+    await admin.c.put("/api/instance", {
+      aiModels: [
+        { id: "mistral-test", prices: { in: 1, cached: 1, out: 1 } },
+        { id: "mistral-big", prices: { in: 4, cached: 2, out: 1 } },
+      ],
+      aiCreditValueEur: 0.000001,
+      aiCostBuffer: 1,
     });
     await admin.c.put(`/api/users/${owner.user.id}/entitlements`, {
       ai_tokens_per_week: 500,
@@ -590,28 +597,32 @@ describe("AI assist", () => {
   it("lets an admin choose the models, default and weights in the settings", async () => {
     const { owner, instance } = await world({ AI_MODELS: "mistral-big" });
     const admin = await loggedIn(instance, { email: "admin@example.org", role: "admin" });
-    // Until something is saved, the environment's models show.
+    // Until something is saved, the environment's models show (no prices yet).
     expect((await admin.c.get("/api/instance")).body.ai).toEqual({
       configured: true,
       defaultModel: "mistral-test",
+      creditValueEur: 0.01,
+      costBuffer: 1.3,
       models: [
-        { id: "mistral-test", weights: { in: 1, cached: 1, out: 1 }, label: "" },
-        { id: "mistral-big", weights: { in: 1, cached: 1, out: 1 }, label: "" },
+        { id: "mistral-test", prices: null, label: "" },
+        { id: "mistral-big", prices: null, label: "" },
       ],
     });
 
     const bad = await admin.c.put("/api/instance", {
-      aiModels: [{ id: "a", weights: { in: 1, cached: 1, out: 1 } }],
+      aiModels: [{ id: "a", prices: { in: 1, cached: 1, out: 1 } }],
       aiDefaultModel: "b",
     });
     expect(bad.status).toBe(400);
 
     const ok = await admin.c.put("/api/instance", {
       aiModels: [
-        { id: "mistral-large-4", weights: { in: 4.67, cached: 4.67, out: 3.5 } },
-        { id: "zai-glm-5-3-flash", weights: { in: 1, cached: 2, out: 0.83 } },
+        { id: "mistral-large-4", prices: { in: 4.67, cached: 4.67, out: 3.5 } },
+        { id: "zai-glm-5-3-flash", prices: { in: 1, cached: 2, out: 0.83 } },
       ],
       aiDefaultModel: "zai-glm-5-3-flash",
+      aiCreditValueEur: 0.000001,
+      aiCostBuffer: 1,
     });
     expect(ok.status).toBe(200);
     expect(await owner.c.get("/api/ai")).toMatchObject({
@@ -632,13 +643,13 @@ describe("AI assist", () => {
     expect(
       (
         await admin.c.put("/api/instance", {
-          aiModels: [{ id: "mistral-test", weights: { in: 1, cached: 1, out: 1 }, label: "Fast" }],
+          aiModels: [{ id: "mistral-test", prices: { in: 1, cached: 1, out: 1 }, label: "Fast" }],
         })
       ).status,
     ).toBe(200);
     expect((await owner.c.get("/api/ai")).body.modelLabels).toEqual({ "mistral-test": "Fast" });
     expect((await admin.c.get("/api/instance")).body.ai.models).toEqual([
-      { id: "mistral-test", weights: { in: 1, cached: 1, out: 1 }, label: "Fast" },
+      { id: "mistral-test", prices: { in: 1, cached: 1, out: 1 }, label: "Fast" },
     ]);
 
     await owner.c.post(assist, { action: "free", prompt: "hi", pagePath: "book/index.md" });

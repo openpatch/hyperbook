@@ -31,15 +31,21 @@ export type AiStatus = {
 };
 
 /**
- * A model's cost hint for the picker: the rounded average of its three
- * weights — one number a teacher can compare, not "in/cached/out" jargon.
+ * A model's cost as one number: the average of its three weights — the
+ * token multiplier models are compared and sorted by.
+ */
+export function weightValue(w: ModelWeights | undefined): number {
+  return ((w?.in ?? 1) + (w?.cached ?? 1) + (w?.out ?? 1)) / 3;
+}
+
+/**
+ * A model's cost hint for the picker: the average of its three weights as
+ * one number a teacher can compare, not "in/cached/out" jargon. Two
+ * significant digits, so price-calibrated weights (e.g. 0.000017) stay
+ * distinguishable instead of all rounding to 0.0.
  */
 export function formatWeight(w: ModelWeights | undefined): string {
-  return String(
-    Math.round(
-      (((w?.in ?? 1) + (w?.cached ?? 1) + (w?.out ?? 1)) / 3) * 10,
-    ) / 10,
-  );
+  return weightValue(w).toPrecision(2);
 }
 
 export function useAiStatus() {

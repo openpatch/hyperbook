@@ -19,6 +19,11 @@ afterEach(async () => {
 
 /** A provider answering GET /v1/models with the given ids. */
 function stubModels(ids: string[]): Stub {
+  return stubModelsRaw(ids.map((id) => ({ id })));
+}
+
+/** A provider answering GET /v1/models with full entries (id, pricing, …). */
+function stubModelsRaw(entries: Record<string, unknown>[]): Stub {
   const stub: Stub = {
     url: "",
     requests: 0,
@@ -27,7 +32,7 @@ function stubModels(ids: string[]): Stub {
   const app = new Hono();
   app.get("/v1/models", (c) => {
     stub.requests += 1;
-    return c.json({ data: ids.map((id) => ({ id })) });
+    return c.json({ data: entries });
   });
   const server = serve({ fetch: app.fetch, port: 0 });
   const address = server.address();
@@ -38,6 +43,34 @@ function stubModels(ids: string[]): Stub {
   stub.close = () =>
     new Promise<void>((resolve) => server.close(() => resolve()));
   stubs.push(stub);
+  return stub;
+}
+
+/**
+ * A models.dev-style catalog (api.json shape). Pass null and close it at once
+ * for a URL that refuses connections.
+ */
+function stubCatalog(body: Record<string, unknown> | null): Stub {
+  const stub: Stub = {
+    url: "",
+    requests: 0,
+    close: () => Promise.reject(new Error("not listening yet")),
+  };
+  const app = new Hono();
+  app.get("/api.json", (c) => {
+    stub.requests += 1;
+    return c.json(body ?? {});
+  });
+  const server = serve({ fetch: app.fetch, port: 0 });
+  const address = server.address();
+  stub.url =
+    typeof address === "object" && address
+      ? `http://localhost:${address.port}/api.json`
+      : "";
+  stub.close = () =>
+    new Promise<void>((resolve) => server.close(() => resolve()));
+  stubs.push(stub);
+  if (body === null) void stub.close();
   return stub;
 }
 
@@ -84,6 +117,59 @@ describe("the settings' model pick list", () => {
     expect(res.status).toBe(503);
   });
 
+  it("fetches prices from the provider's /models pricing (USD per token → €/M)", async () => {
+    const stub = stubModelsRaw([
+      {
+        id: "mistral-small-2603",
+        pricing: { prompt: "0.00000015", completion: "0.0000006", input_cache_read: "0.000000015" },
+      },
+      { id: "no-pricing-model" },
+    ]);
+    const instance = setup({ AI_BASE_URL: stub.url, AI_API_KEY: "key" });
+    const c = await adminClient(instance);
+    const res = await c.get("/api/instance/ai/prices");
+    expect(res.status).toBe(200);
+    // 0.15/0.015/0.60 USD per M × 0.92 EUR/USD.
+    expect(res.body.prices).toEqual({
+      "mistral-small-2603": { in: 0.138, cached: 0.0138, out: 0.552 },
+    });
+  });
+
+  it("falls back to a models.dev-style catalog when the provider lists no prices", async () => {
+    const stub = stubModels(["mistral-small-2603"]);
+    const catalog = stubCatalog({
+      mistral: {
+        models: {
+          "mistral-small-2603": { cost: { input: 0.15, output: 0.6, cache_read: 0.015 } },
+        },
+      },
+    });
+    const instance = setup({
+      AI_BASE_URL: stub.url,
+      AI_API_KEY: "key",
+      AI_PRICES_URL: catalog.url,
+    });
+    const c = await adminClient(instance);
+    const res = await c.get("/api/instance/ai/prices");
+    expect(res.status).toBe(200);
+    expect(res.body.prices).toEqual({
+      "mistral-small-2603": { in: 0.138, cached: 0.0138, out: 0.552 },
+    });
+    expect(catalog.requests).toBe(1);
+  });
+
+  it("answers 502 when no price source answers", async () => {
+    const stub = stubModels(["mistral-small-2603"]);
+    const dead = stubCatalog(null); // closes immediately: connection refused
+    const instance = setup({
+      AI_BASE_URL: stub.url,
+      AI_API_KEY: "key",
+      AI_PRICES_URL: dead.url,
+    });
+    const c = await adminClient(instance);
+    expect((await c.get("/api/instance/ai/prices")).status).toBe(502);
+  });
+
   it("keeps the assistant off until the settings pick models", async () => {
     const stub = stubModels(["mistral-small-2603", "zai-glm-5-3"]);
     const instance = setup({ AI_BASE_URL: stub.url, AI_API_KEY: "key" });
@@ -99,17 +185,20 @@ describe("the settings' model pick list", () => {
     expect(settings.body.ai.configured).toBe(true);
     expect(settings.body.ai.models).toEqual([]);
 
-    // The settings pick the models, weights, names and the default.
+    // The settings pick the models, prices, names and the default. With
+    // 1 credit = 1 µ€ and no buffer, a price of 9.33 €/M weighs 9.33.
     const put = await c.put("/api/instance", {
       aiModels: [
-        { id: "mistral-small-2603", weights: { in: 1, cached: 1, out: 1 } },
+        { id: "mistral-small-2603", prices: { in: 1, cached: 1, out: 1 } },
         {
           id: "zai-glm-5-3",
-          weights: { in: 9.33, cached: 9.33, out: 7.33 },
+          prices: { in: 9.33, cached: 9.33, out: 7.33 },
           label: "Gründlich",
         },
       ],
       aiDefaultModel: "zai-glm-5-3",
+      aiCreditValueEur: 0.000001,
+      aiCostBuffer: 1,
     });
     expect(put.status).toBe(200);
 

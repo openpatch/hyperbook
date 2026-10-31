@@ -15,6 +15,7 @@ import {
   formatWeight,
   selectionOf,
   useAiStatus,
+  weightValue,
   type AiStatus,
 } from "@/lib/ai";
 import { useQueryClient } from "@tanstack/react-query";
@@ -429,12 +430,18 @@ export function AiPanel({
             </SelectTrigger>
             <SelectContent>
               {[...status.data.models]
-                // By the name teachers see — the label an admin gave, else the id.
-                .sort((a, b) =>
-                  (status.data?.modelLabels[a] || a).localeCompare(
-                    status.data?.modelLabels[b] || b,
-                  ),
-                )
+                // Cheapest first: by the token multiplier (the weight shown),
+                // ties by the name teachers see — the label, else the id.
+                .sort((a, b) => {
+                  const byCost =
+                    weightValue(status.data?.modelWeights[a]) -
+                    weightValue(status.data?.modelWeights[b]);
+                  return byCost !== 0
+                    ? byCost
+                    : (status.data?.modelLabels[a] || a).localeCompare(
+                        status.data?.modelLabels[b] || b,
+                      );
+                })
                 .map((name) => (
                 <SelectItem key={name} value={name}>
                   {t("editor.ai.modelWeight", {

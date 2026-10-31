@@ -1,5 +1,7 @@
 import { useId, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
+import { api, unwrap } from "../lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -84,6 +86,13 @@ export function EntitlementsEditor({
   onSave: (overrides: Overrides) => Promise<void>;
 }) {
   const { t, i18n } = useTranslation();
+  // The AI-credit hint names the configured value of one credit.
+  const { data: instanceSettings } = useQuery({
+    queryKey: ["instance", "settings"],
+    queryFn: () => unwrap(api.instance.$get()),
+    retry: false,
+  });
+  const creditValueEur = instanceSettings?.ai?.creditValueEur;
   const [draft, setDraft] = useState<Overrides>(value);
   const [saving, setSaving] = useState(false);
   const set = (key: keyof Entitlements, v: Entitlements[keyof Entitlements] | undefined) =>
@@ -130,16 +139,30 @@ export function EntitlementsEditor({
         const current = draft[key];
         const mode = current === undefined ? "default" : current === null ? "unlimited" : "limit";
         const fallback = defaults[key];
+        // The AI-credit limit shows its approximate euro cost next to the unit.
+        const effective = mode === "limit" ? (current ?? 0) : fallback;
+        const euroHint =
+          key === "ai_tokens_per_week" && creditValueEur !== undefined && effective !== null
+            ? ` (${t("entitlements.approxEuro", {
+                amount: (effective * creditValueEur).toLocaleString(i18n.language, {
+                  maximumFractionDigits: 2,
+                }),
+              })})`
+            : "";
         return (
           <ChoiceRow
             key={key}
             label={t(label)}
-            hint={t(hint)}
+            hint={
+              key === "ai_tokens_per_week" && creditValueEur !== undefined
+                ? t(hint, { value: creditValueEur })
+                : t(hint)
+            }
             value={mode}
             options={[
               {
                 value: "default",
-                label: `${fallbackLabel} (${fallback === null ? t("entitlements.unlimited") : `${fallback} ${t(unit)}`})`,
+                label: `${fallbackLabel} (${fallback === null ? t("entitlements.unlimited") : `${fallback} ${t(unit)}${euroHint}`})`,
               },
               { value: "unlimited", label: t("entitlements.unlimitedChoice") },
               { value: "limit", label: t("entitlements.limitedTo") },
@@ -149,17 +172,20 @@ export function EntitlementsEditor({
             }
           >
             {mode === "limit" && (
-              <div className="flex items-center gap-2">
+              <div className="flex flex-nowrap items-center gap-2">
                 <Input
                   type="text"
                   inputMode="numeric"
-                  className="w-36"
+                  className="w-36 shrink-0"
                   aria-label={t("entitlements.limitAria", { label: t(label) })}
                   value={(current ?? 0).toLocaleString(i18n.language)}
                   // Dots, commas and spaces are only for reading: 1.000.000 is 1000000.
                   onChange={(e) => set(key, Number(e.target.value.replace(/\D/g, "")) || 0)}
                 />
-                <span className="text-sm text-muted-foreground">{t(unit)}</span>
+                <span className="whitespace-nowrap text-sm text-muted-foreground">
+                  {t(unit)}
+                  {euroHint}
+                </span>
               </div>
             )}
           </ChoiceRow>

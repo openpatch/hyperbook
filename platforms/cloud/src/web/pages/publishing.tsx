@@ -152,7 +152,11 @@ export function PublishingSection({ book }: { book: Book }) {
     }
   };
 
-  const hasSource = (builds?.length ?? 0) > 0;
+  // The book has source when main has commits — the server 409s a build
+  // only then — not when a build exists yet. A freshly created book gets
+  // its first commit from the editor, so its preview can be built at once.
+  const hasSource = book.commitCount > 0;
+  const hasBuilds = (builds?.length ?? 0) > 0;
   const preview = builds?.find((b) => b.preview);
   const liveVersion = versions?.find((v) => v.live);
   const aheadPreview = aheadOf(book, preview);
@@ -383,7 +387,7 @@ export function PublishingSection({ book }: { book: Book }) {
         <p className="text-sm text-muted-foreground">{t("publishing.versions.empty")}</p>
       )}
 
-      {hasSource && (
+      {hasBuilds && (
         <>
           <h3 className="mt-6 mb-2 font-medium">{t("publishing.history")}</h3>
           <Table>

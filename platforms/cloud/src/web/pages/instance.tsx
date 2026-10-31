@@ -1,11 +1,11 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { PlusIcon, Trash2Icon } from "lucide-react";
+import { DownloadIcon, PlusIcon, Trash2Icon } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { z } from "zod";
 import { LOCALES, type Locale, type MessageKey } from "../../shared/i18n";
-import { instanceSettingsInput, type ElementRuntime, type ModelWeights } from "../../shared/schemas";
+import { instanceSettingsInput, type ElementRuntime, type ModelPrices } from "../../shared/schemas";
 import { EntitlementsEditor, type Entitlements } from "@/components/entitlements-editor";
 import { PageHeader, Section } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
@@ -237,9 +237,11 @@ function InstanceForms({
           key={JSON.stringify(settings.ai)}
           models={settings.ai.models}
           defaultModel={settings.ai.defaultModel ?? ""}
-          onSave={async (aiModels, aiDefaultModel) => {
+          creditValueEur={settings.ai.creditValueEur}
+          costBuffer={settings.ai.costBuffer}
+          onSave={async (aiModels, aiDefaultModel, aiCreditValueEur, aiCostBuffer) => {
             try {
-              await save({ aiModels, aiDefaultModel });
+              await save({ aiModels, aiDefaultModel, aiCreditValueEur, aiCostBuffer });
             } catch (error) {
               toast.error(error instanceof Error ? error.message : t("common.savingFailed"));
             }
@@ -272,13 +274,22 @@ function InstanceForms({
 function AiModelsSection({
   models: saved,
   defaultModel: savedDefault,
+  creditValueEur: savedCreditValue,
+  costBuffer: savedBuffer,
   onSave,
 }: {
-  models: { id: string; weights: ModelWeights; label?: string }[];
+  models: { id: string; prices: ModelPrices | null; label?: string }[];
   defaultModel: string;
-  onSave: (models: { id: string; weights: ModelWeights; label?: string }[], defaultModel: string) => Promise<void>;
+  creditValueEur: number;
+  costBuffer: number;
+  onSave: (
+    models: { id: string; prices: ModelPrices; label?: string }[],
+    defaultModel: string,
+    creditValueEur: number,
+    costBuffer: number,
+  ) => Promise<void>;
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   // The provider's model list, as suggestions for the id fields: picking is
   // the point, but typed ids stay allowed (a provider may not list its models).
   const suggestions = useQuery({
@@ -290,116 +301,208 @@ function AiModelsSection({
     saved.map((m) => ({
       id: m.id,
       label: m.label ?? "",
-      weightIn: String(m.weights.in),
-      weightCached: String(m.weights.cached),
-      weightOut: String(m.weights.out),
+      priceIn: m.prices ? String(m.prices.in) : "",
+      priceCached: m.prices ? String(m.prices.cached) : "",
+      priceOut: m.prices ? String(m.prices.out) : "",
     })),
   );
   const [defaultModel, setDefaultModel] = useState(savedDefault);
+  const [creditValueEur, setCreditValueEur] = useState(String(savedCreditValue));
+  const [costBuffer, setCostBuffer] = useState(String(savedBuffer));
   const [busy, setBusy] = useState(false);
+  const [fetchingPrices, setFetchingPrices] = useState(false);
+  // One-time fetch: fills the €/M fields of the listed models; they stay
+  // editable by hand, and the button can be pressed again to refresh.
+  const fetchPrices = async () => {
+    setFetchingPrices(true);
+    try {
+      const { prices } = await unwrap(api.instance.ai.prices.$get());
+      let filled = 0;
+      setRows((current) =>
+        current.map((row) => {
+          const p = prices[row.id.trim()];
+          if (!p) return row;
+          filled += 1;
+          return {
+            ...row,
+            priceIn: String(p.in),
+            priceCached: String(p.cached),
+            priceOut: String(p.out),
+          };
+        }),
+      );
+      toast.success(t("instanceSettings.aiFetchPricesDone", { count: filled }));
+    } catch {
+      toast.error(t("instanceSettings.aiFetchPricesFailed"));
+    } finally {
+      setFetchingPrices(false);
+    }
+  };
   const update = (
     index: number,
-    change: Partial<{ id: string; label: string; weightIn: string; weightCached: string; weightOut: string }>,
+    change: Partial<{ id: string; label: string; priceIn: string; priceCached: string; priceOut: string }>,
   ) => setRows((current) => current.map((row, i) => (i === index ? { ...row, ...change } : row)));
   const models = rows.map((r) => ({
     id: r.id.trim(),
-    weights: { in: Number(r.weightIn), cached: Number(r.weightCached), out: Number(r.weightOut) },
+    prices: { in: Number(r.priceIn), cached: Number(r.priceCached), out: Number(r.priceOut) },
     label: r.label.trim(),
   }));
   const invalid =
     models.length === 0 ||
-    models.some((m) => !m.id || !(m.weights.in > 0) || !(m.weights.cached > 0) || !(m.weights.out > 0)) ||
-    new Set(models.map((m) => m.id)).size !== models.length;
+    models.some((m) => !m.id || !(m.prices.in > 0) || !(m.prices.cached > 0) || !(m.prices.out > 0)) ||
+    new Set(models.map((m) => m.id)).size !== models.length ||
+    !(Number(creditValueEur) > 0) ||
+    !(Number(costBuffer) > 0);
+  const buffer = Number(costBuffer);
+  const creditValue = Number(creditValueEur);
+  // Credits one million tokens of a kind cost: price/M × buffer ÷ credit value.
+  const creditsPerM = (pricePerM: number) =>
+    creditValue > 0 && buffer > 0 && pricePerM > 0
+      ? Math.round((pricePerM * buffer) / creditValue)
+      : null;
+  const fmt = (n: number) => n.toLocaleString(i18n.language, { maximumFractionDigits: 0 });
   return (
     <Section title={t("instanceSettings.aiModels")} description={t("instanceSettings.aiModelsDescription")}>
       <div className="grid max-w-2xl gap-3">
-        <div className="grid grid-cols-[1fr_1fr_5rem_5rem_5rem_5rem_2.25rem] items-center gap-2 text-sm text-muted-foreground">
-          <span>{t("instanceSettings.aiModelName")}</span>
-          <span>{t("instanceSettings.aiModelLabel")}</span>
-          <span>{t("instanceSettings.aiModelWeightIn")}</span>
-          <span>{t("instanceSettings.aiModelWeightCached")}</span>
-          <span>{t("instanceSettings.aiModelWeightOut")}</span>
-          <span>{t("instanceSettings.aiModelDefault")}</span>
-          <span />
-        </div>
         <datalist id="ai-model-suggestions">
           {(suggestions.data?.models ?? []).map((id) => (
             <option key={id} value={id} />
           ))}
         </datalist>
-        {rows.map((row, index) => (
-          <div key={index} className="grid grid-cols-[1fr_1fr_5rem_5rem_5rem_5rem_2.25rem] items-center gap-2">
-            <Input
-              value={row.id}
-              list="ai-model-suggestions"
-              aria-label={t("instanceSettings.aiModelName")}
-              onChange={(e) => {
-                if (defaultModel === row.id) setDefaultModel(e.target.value.trim());
-                update(index, { id: e.target.value });
-              }}
-            />
-            <Input
-              value={row.label}
-              maxLength={60}
-              placeholder={row.id.trim()}
-              aria-label={t("instanceSettings.aiModelLabel")}
-              onChange={(e) => update(index, { label: e.target.value })}
-            />
-            <Input
-              type="number"
-              min="0"
-              step="any"
-              value={row.weightIn}
-              aria-label={t("instanceSettings.aiModelWeightIn")}
-              onChange={(e) => update(index, { weightIn: e.target.value })}
-            />
-            <Input
-              type="number"
-              min="0"
-              step="any"
-              value={row.weightCached}
-              aria-label={t("instanceSettings.aiModelWeightCached")}
-              onChange={(e) => update(index, { weightCached: e.target.value })}
-            />
-            <Input
-              type="number"
-              min="0"
-              step="any"
-              value={row.weightOut}
-              aria-label={t("instanceSettings.aiModelWeightOut")}
-              onChange={(e) => update(index, { weightOut: e.target.value })}
-            />
-            <input
-              type="radio"
-              name="ai-default-model"
-              className="size-4 justify-self-start"
-              checked={defaultModel === row.id.trim()}
-              aria-label={t("instanceSettings.aiModelDefault")}
-              onChange={() => setDefaultModel(row.id.trim())}
-            />
-            <Button
-              variant="ghost"
-              size="icon"
-              aria-label={t("common.delete")}
-              disabled={rows.length === 1}
-              onClick={() => setRows((current) => current.filter((_, i) => i !== index))}
-            >
-              <Trash2Icon />
-            </Button>
-          </div>
-        ))}
+        {rows.map((row, index) => {
+          const perM = {
+            in: creditsPerM(Number(row.priceIn)),
+            cached: creditsPerM(Number(row.priceCached)),
+            out: creditsPerM(Number(row.priceOut)),
+          };
+          return (
+            <div key={index} className="rounded-md border border-border p-3">
+              <div className="flex flex-wrap items-center gap-2">
+                <Input
+                  value={row.id}
+                  list="ai-model-suggestions"
+                  placeholder={t("instanceSettings.aiModelName")}
+                  className="min-w-44 flex-1"
+                  aria-label={t("instanceSettings.aiModelName")}
+                  onChange={(e) => {
+                    if (defaultModel === row.id) setDefaultModel(e.target.value.trim());
+                    update(index, { id: e.target.value });
+                  }}
+                />
+                <Input
+                  value={row.label}
+                  maxLength={60}
+                  placeholder={t("instanceSettings.aiModelLabel")}
+                  className="min-w-32 flex-1"
+                  aria-label={t("instanceSettings.aiModelLabel")}
+                  onChange={(e) => update(index, { label: e.target.value })}
+                />
+                <label className="flex items-center gap-1 text-xs text-muted-foreground">
+                  <input
+                    type="radio"
+                    name="ai-default-model"
+                    className="size-4"
+                    checked={defaultModel === row.id.trim()}
+                    aria-label={t("instanceSettings.aiModelDefault")}
+                    onChange={() => setDefaultModel(row.id.trim())}
+                  />
+                  {t("instanceSettings.aiModelDefault")}
+                </label>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label={t("common.delete")}
+                  disabled={rows.length === 1}
+                  onClick={() => setRows((current) => current.filter((_, i) => i !== index))}
+                >
+                  <Trash2Icon />
+                </Button>
+              </div>
+              <p className="mt-2 text-xs font-medium text-muted-foreground">
+                {t("instanceSettings.aiModelPricesGroup")}
+              </p>
+              <div className="mt-1 flex flex-wrap gap-2">
+                {(
+                  [
+                    { field: "priceIn", value: row.priceIn, key: "aiModelPriceIn" },
+                    { field: "priceCached", value: row.priceCached, key: "aiModelPriceCached" },
+                    { field: "priceOut", value: row.priceOut, key: "aiModelPriceOut" },
+                  ] as const
+                ).map(({ field, value, key }) => (
+                  <div key={field} className="flex flex-nowrap items-center gap-1">
+                    <Input
+                      type="number"
+                      min="0"
+                      step="any"
+                      value={value}
+                      className="w-28 shrink-0"
+                      aria-label={t(`instanceSettings.${key}`)}
+                      onChange={(e) => update(index, { [field]: e.target.value })}
+                    />
+                    <span className="whitespace-nowrap text-xs text-muted-foreground">
+                      {t("instanceSettings.aiModelEurPerM")}
+                    </span>
+                  </div>
+                ))}
+              </div>
+              {perM.in !== null && perM.cached !== null && perM.out !== null && (
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {t("instanceSettings.aiModelCreditsPerM", {
+                    in: fmt(perM.in),
+                    cached: fmt(perM.cached),
+                    out: fmt(perM.out),
+                  })}
+                </p>
+              )}
+            </div>
+          );
+        })}
         <div className="flex flex-wrap gap-2">
           <Button
             variant="outline"
             onClick={() =>
               setRows((current) => [
                 ...current,
-                { id: "", label: "", weightIn: "1", weightCached: "1", weightOut: "1" },
+                { id: "", label: "", priceIn: "", priceCached: "", priceOut: "" },
               ])
             }
           >
             <PlusIcon /> {t("instanceSettings.aiModelAdd")}
           </Button>
+          <Button variant="outline" disabled={fetchingPrices} onClick={() => void fetchPrices()}>
+            <DownloadIcon /> {t("instanceSettings.aiFetchPrices")}
+          </Button>
+        </div>
+        <div className="rounded-md border border-border p-3">
+          <p className="text-xs font-medium text-muted-foreground">{t("instanceSettings.aiCalcTitle")}</p>
+          <div className="mt-2 flex flex-wrap items-center gap-2 text-sm">
+            <label className="text-muted-foreground" htmlFor="ai-credit-value">
+              {t("instanceSettings.aiCreditValue")}
+            </label>
+            <Input
+              id="ai-credit-value"
+              type="number"
+              min="0"
+              step="any"
+              className="w-28"
+              value={creditValueEur}
+              aria-label={t("instanceSettings.aiCreditValue")}
+              onChange={(e) => setCreditValueEur(e.target.value)}
+            />
+            <label className="text-muted-foreground" htmlFor="ai-cost-buffer">
+              {t("instanceSettings.aiCostBuffer")}
+            </label>
+            <Input
+              id="ai-cost-buffer"
+              type="number"
+              min="0"
+              step="any"
+              className="w-24"
+              value={costBuffer}
+              aria-label={t("instanceSettings.aiCostBuffer")}
+              onChange={(e) => setCostBuffer(e.target.value)}
+            />
+          </div>
         </div>
         <p className="text-sm text-muted-foreground">{t("instanceSettings.aiModelsHint")}</p>
         <p className="text-sm text-muted-foreground">
@@ -413,7 +516,12 @@ function AiModelsSection({
             onClick={async () => {
               setBusy(true);
               try {
-                await onSave(models, models.some((m) => m.id === defaultModel) ? defaultModel : models[0]!.id);
+                await onSave(
+                  models,
+                  models.some((m) => m.id === defaultModel) ? defaultModel : models[0]!.id,
+                  Number(creditValueEur),
+                  Number(costBuffer),
+                );
               } finally {
                 setBusy(false);
               }

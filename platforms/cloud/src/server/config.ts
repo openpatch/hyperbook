@@ -74,6 +74,8 @@ export type Config = {
      * (input, cached input, output); a model not listed weighs 1 for all.
      */
     modelWeights: Record<string, ModelWeights>;
+    /** models.dev-compatible catalog URL for the settings' price autofill. */
+    pricesUrl: string;
     /** Display names an admin gave models ("Fast"); a model not listed shows its id. */
     modelLabels?: Record<string, string>;
   } | null;
@@ -155,11 +157,10 @@ const schema = z.object({
   /** Comma-separated extra models the editor offers; same, optional shorthand. */
   AI_MODELS: optional,
   /**
-   * "model=in/cached/out,…": how much a model's input, cached-input and
-   * output tokens count against the weekly quota. "model=weight" sets all
-   * three to the same weight.
+   * A models.dev-compatible catalog (api.json shape) used to prefill model
+   * prices in the settings when the provider's /models has no pricing.
    */
-  AI_MODEL_WEIGHTS: optional,
+  AI_PRICES_URL: optional,
   AI_TIMEOUT_SECONDS: z.coerce.number().int().min(10).default(120),
   // The cap counts reasoning tokens too, so a reasoning model (Mistral
   // Large 4, GLM-5.3) needs room to think before it writes its answer.
@@ -350,37 +351,9 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
                 .filter(Boolean),
             ),
           ];
+          // Weights come from the admin settings only; a model the
+          // environment lists without settings weighs 1 for all kinds.
           const modelWeights: Record<string, ModelWeights> = {};
-          for (const entry of (e.AI_MODEL_WEIGHTS ?? "").split(",")) {
-            if (!entry.trim()) continue;
-            const at = entry.lastIndexOf("=");
-            const name = entry.slice(0, at).trim();
-            // "model=in/cached/out", or "model=weight" for all three.
-            const parts = entry.slice(at + 1).split("/").map(Number);
-            const weights: ModelWeights =
-              parts.length === 1
-                ? { in: parts[0]!, cached: parts[0]!, out: parts[0]! }
-                : { in: parts[0]!, cached: parts[1]!, out: parts[2]! };
-            if (
-              at === -1 ||
-              !name ||
-              parts.length === 0 ||
-              parts.length > 3 ||
-              ![weights.in, weights.cached, weights.out].every(
-                (w) => w > 0 && Number.isFinite(w),
-              )
-            ) {
-              problems.push(
-                `AI_MODEL_WEIGHTS entries must look like model=in/cached/out (or model=weight) with weights above 0 (got "${entry.trim()}")`,
-              );
-            } else if (!models.includes(name)) {
-              problems.push(
-                `AI_MODEL_WEIGHTS names "${name}", which is neither AI_MODEL nor in AI_MODELS`,
-              );
-            } else {
-              modelWeights[name] = weights;
-            }
-          }
           ai = {
             baseUrl: base,
             apiKey: e.AI_API_KEY!,
@@ -393,6 +366,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
             maxSteps: e.AI_MAX_STEPS,
             requestsPerMinute: e.AI_REQUESTS_PER_MINUTE,
             modelWeights,
+            pricesUrl: e.AI_PRICES_URL ?? "https://models.dev/api.json",
           };
         }
       } catch {

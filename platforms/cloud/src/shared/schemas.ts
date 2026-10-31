@@ -137,6 +137,20 @@ export const modelWeightsSchema = z.object({
 
 export type ModelWeights = z.infer<typeof modelWeightsSchema>;
 
+/**
+ * What a model costs at the provider, per token kind, in € per million
+ * tokens: input, cached input (prompt-cache hits bill less), output. The
+ * admin enters these friendly numbers; the quota weights are derived from
+ * them (see weightsFromPrices in server/domain/instance.ts).
+ */
+export const modelPricesSchema = z.object({
+  in: z.number("Enter a number").positive("The price must be above 0").max(1_000_000),
+  cached: z.number("Enter a number").positive("The price must be above 0").max(1_000_000),
+  out: z.number("Enter a number").positive("The price must be above 0").max(1_000_000),
+});
+
+export type ModelPrices = z.infer<typeof modelPricesSchema>;
+
 export const instanceSettingsInput = z
   .object({
     name: z.string().trim().min(1, "Enter a name").max(100),
@@ -180,13 +194,17 @@ export const instanceSettingsInput = z
       .array(
         z.object({
           id: z.string().trim().min(1, "Enter a model name").max(200),
-          weights: modelWeightsSchema,
+          prices: modelPricesSchema,
           label: z.string().trim().max(60).optional(),
         }),
       )
       .max(50)
       .refine((models) => new Set(models.map((m) => m.id)).size === models.length, "Each model may be listed once"),
     aiDefaultModel: z.string().nullable(),
+    /** What one AI credit is worth in € of provider cost; weights derive from it. */
+    aiCreditValueEur: z.number("Enter a number").positive("Must be above 0").max(1000),
+    /** Markup on provider prices (failed requests, running costs): 1.3 = 30% buffer. */
+    aiCostBuffer: z.number("Enter a number").positive("Must be above 0").max(100),
   })
   .partial();
 

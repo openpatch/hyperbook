@@ -4,7 +4,7 @@ import type { Db } from "../db/client";
 import { instanceSettings } from "../db/schema";
 import { parseJson } from "../json";
 import { LOCALES } from "../../shared/i18n";
-import { ELEMENT_RUNTIMES, elementRuntimeChoice, modelWeightsSchema } from "../../shared/schemas";
+import { ELEMENT_RUNTIMES, elementRuntimeChoice, modelPricesSchema, type ModelPrices, type ModelWeights } from "../../shared/schemas";
 
 /**
  * Instance-wide settings, edited by admins. Stored one row per key, so adding
@@ -71,16 +71,16 @@ export const instanceSettingsSchema = z.object({
    */
   gitPushUpdatesPreview: z.boolean(),
   /**
-   * The AI assistant's models and what each costs the token quota (its
-   * weights per token kind). Empty: the AI_MODEL, AI_MODELS and
-   * AI_MODEL_WEIGHTS of the environment apply. The provider and its key
-   * stay in the environment.
+   * The AI assistant's models and what each costs at the provider, per token
+   * kind, in € per million tokens. The quota weights derive from these prices
+   * (weightsFromPrices). Empty: the AI_MODEL and AI_MODELS of the environment
+   * apply, weighing 1 per kind. The provider and its key stay in the environment.
    */
   aiModels: z
     .array(
       z.object({
         id: z.string().trim().min(1).max(200),
-        weights: modelWeightsSchema,
+        prices: modelPricesSchema,
         /** The name teachers see in the editor (e.g. "Fast"); empty: the model id. */
         label: z.string().trim().max(60).optional(),
       }),
@@ -88,6 +88,10 @@ export const instanceSettingsSchema = z.object({
     .max(50),
   /** One of `aiModels`; null: the first. */
   aiDefaultModel: z.string().nullable(),
+  /** What one AI credit is worth in € of provider cost; weights derive from it. */
+  aiCreditValueEur: z.number().positive().max(1000),
+  /** Markup on provider prices (failed requests, running costs): 1.3 = 30% buffer. */
+  aiCostBuffer: z.number().positive().max(100),
 });
 
 export type InstanceSettings = z.infer<typeof instanceSettingsSchema>;
@@ -109,7 +113,20 @@ export const DEFAULT_INSTANCE_SETTINGS: InstanceSettings = {
   gitPushUpdatesPreview: false,
   aiModels: [],
   aiDefaultModel: null,
+  aiCreditValueEur: 0.01,
+  aiCostBuffer: 1.3,
 };
+
+/**
+ * The quota weights from a model's provider prices (€/M tokens): a token
+ * costs price/1e6 € at the provider, and one credit is worth `creditValueEur`
+ * €, so weight = (price/1e6 × buffer) / creditValueEur. With the defaults
+ * (0.01 €, ×1.3), a model at 0.595 €/M input weighs 0.595 × 1.3 / 10000.
+ */
+export function weightsFromPrices(prices: ModelPrices, buffer: number, creditValueEur: number): ModelWeights {
+  const factor = (buffer / (1_000_000 * creditValueEur));
+  return { in: prices.in * factor, cached: prices.cached * factor, out: prices.out * factor };
+}
 
 /** The elements whose runtimes load from their public CDN instead of this instance. */
 export function cdnElements(settings: InstanceSettings): string[] {
@@ -140,8 +157,9 @@ export function emailInDomains(email: string, domains: string[]) {
  * The AI configuration in effect — always with a model picked, which is why
  * this is non-null only when there is one: the environment's provider with
  * the models, default and weights an admin chose in the settings when there
- * are any, else the environment's shorthand. Null when AI is not configured
- * at all, or the provider is but no model was picked anywhere.
+ * are any, else the environment's shorthand (whose models weigh 1 per kind).
+ * Null when AI is not configured at all, or the provider is but no model was
+ * picked anywhere.
  */
 export type EffectiveAi = NonNullable<Config["ai"]> & { model: string };
 
@@ -157,7 +175,9 @@ export function effectiveAi(config: Config, settings: InstanceSettings): Effecti
     ...ai,
     model,
     models: [model, ...models.filter((m) => m !== model)],
-    modelWeights: Object.fromEntries(settings.aiModels.map((m) => [m.id, m.weights])),
+    modelWeights: Object.fromEntries(
+      settings.aiModels.map((m) => [m.id, weightsFromPrices(m.prices, settings.aiCostBuffer, settings.aiCreditValueEur)]),
+    ),
     modelLabels: Object.fromEntries(settings.aiModels.filter((m) => m.label).map((m) => [m.id, m.label!])),
   };
 }

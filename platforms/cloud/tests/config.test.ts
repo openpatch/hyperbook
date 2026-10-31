@@ -111,6 +111,7 @@ describe("loadConfig", () => {
       maxSteps: 6,
       requestsPerMinute: 3,
       modelWeights: {},
+      pricesUrl: "https://models.dev/api.json",
     });
     // The shorthand still names the models; AI_MODEL stays the default.
     const config = loadConfig({
@@ -127,31 +128,15 @@ describe("loadConfig", () => {
     });
   });
 
-  it("parses AI_MODEL_WEIGHTS and rejects bad ones", () => {
-    const base = {
+  it("weighs environment models 1 per kind — weights live in the settings", () => {
+    const config = loadConfig({
       ...production,
       AI_BASE_URL: "https://api.mistral.ai/v1",
       AI_API_KEY: "key",
       AI_MODEL: "small",
       AI_MODELS: "big",
-    };
-    expect(
-      loadConfig({ ...base, AI_MODEL_WEIGHTS: "big=3, small=0.5" }).ai
-        ?.modelWeights,
-    ).toEqual({
-      big: { in: 3, cached: 3, out: 3 },
-      small: { in: 0.5, cached: 0.5, out: 0.5 },
     });
-    // Per-kind weights: model=in/cached/out.
-    expect(
-      loadConfig({ ...base, AI_MODEL_WEIGHTS: "big=4.67/4.67/3.5" }).ai
-        ?.modelWeights,
-    ).toEqual({ big: { in: 4.67, cached: 4.67, out: 3.5 } });
-    expect(() => loadConfig({ ...base, AI_MODEL_WEIGHTS: "big=0" })).toThrow();
-    expect(() => loadConfig({ ...base, AI_MODEL_WEIGHTS: "big=1/2" })).toThrow();
-    expect(() =>
-      loadConfig({ ...base, AI_MODEL_WEIGHTS: "unknown=2" }),
-    ).toThrow();
+    expect(config.ai?.modelWeights).toEqual({});
   });
 
   it("parses AI_MODELS into the selectable list, default first, without duplicates", () => {

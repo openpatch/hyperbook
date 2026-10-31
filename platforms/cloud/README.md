@@ -73,8 +73,8 @@ stays hidden. Which models teachers may pick, with their names, credit
 weights and the default, is chosen in the admin settings (Settings → AI
 models): the model fields suggest the provider's own model list, fetched
 live through the server, and accept typed ids when the provider does not
-offer one. The `AI_MODEL`, `AI_MODELS` and `AI_MODEL_WEIGHTS` variables
-remain as an optional shorthand; the settings win. Two entitlements control it per teacher, like everything else:
+offer one. The `AI_MODEL` and `AI_MODELS` variables remain as an optional
+shorthand for the models (weights come from the settings); the settings win. Two entitlements control it per teacher, like everything else:
 _AI assistant_ (on/off) and _AI requests per day_ (a quota that refills each
 UTC day); admins are never limited. Everything a teacher does goes through
 the server, which keeps the provider's key, rate limits, audits requests
