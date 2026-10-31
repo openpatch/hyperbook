@@ -41,6 +41,7 @@
     "@learningmap/learningmap": "0.7.1",
     "@lezer/highlight": "^1.2.5",
     "@tanstack/react-query": "^5.105.0",
+    "@tanstack/react-virtual": "^3.14.24",
     "@types/typo-js": "^1.2.2",
     "better-sqlite3": "^13.0.3",
     "class-variance-authority": "^0.7.1",

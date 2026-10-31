@@ -1,8 +1,51 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+
+/**
+ * One file in the list, memoized on primitives: choosing or hovering changes
+ * the selected rows only, not the whole list.
+ */
+const QuickOpenRow = memo(function QuickOpenRow({
+  path,
+  index,
+  isSelected,
+  isOpen,
+  openLabel,
+  onHover,
+  onChoose,
+}: {
+  path: string;
+  index: number;
+  isSelected: boolean;
+  isOpen: boolean;
+  /** What the "open already" badge says, so rows need no translator. */
+  openLabel: string;
+  onHover: (index: number) => void;
+  onChoose: (path: string) => void;
+}) {
+  return (
+    <li
+      role="option"
+      aria-selected={isSelected}
+      className={cn(
+        "cursor-pointer truncate rounded-sm px-2 py-1.5 font-mono text-sm",
+        isSelected ? "bg-accent font-medium text-primary" : "hover:bg-accent",
+      )}
+      onMouseMove={() => onHover(index)}
+      onClick={() => onChoose(path)}
+    >
+      {path}
+      {isOpen && (
+        <span className="ml-2 rounded-sm bg-secondary px-1 font-sans text-xs text-muted-foreground">
+          {openLabel}
+        </span>
+      )}
+    </li>
+  );
+});
 
 /**
  * The "open a file" popup (Ctrl/Cmd+P): type to filter the book's files,
@@ -36,9 +79,10 @@ export function QuickOpen({
     }
   }, [open]);
 
+  const openTabs = useMemo(() => new Set(tabs), [tabs]);
+
   const matches = useMemo(() => {
     const needle = query.trim().toLowerCase();
-    const open = new Set(tabs);
     return files
       .map((path) => ({
         path,
@@ -47,13 +91,13 @@ export function QuickOpen({
       .filter(({ at }) => at >= 0)
       .sort(
         (a, b) =>
-          Number(open.has(b.path)) - Number(open.has(a.path)) ||
+          Number(openTabs.has(b.path)) - Number(openTabs.has(a.path)) ||
           a.at - b.at ||
           a.path.localeCompare(b.path),
       )
       .slice(0, 100)
       .map((match) => match.path);
-  }, [files, tabs, query]);
+  }, [files, openTabs, query]);
 
   // The selection follows the matches; the chosen item scrolls into view.
   useEffect(() => setSelected(0), [query]);
@@ -63,10 +107,18 @@ export function QuickOpen({
       ?.scrollIntoView({ block: "nearest" });
   }, [selected, matches]);
 
-  const choose = (path: string) => {
-    onOpen(path);
-    onClose();
-  };
+  // Stable, so the memoized rows re-render only when their own props change.
+  const onOpenRef = useRef(onOpen);
+  onOpenRef.current = onOpen;
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+  const choose = useCallback((path: string) => {
+    onOpenRef.current(path);
+    onCloseRef.current();
+  }, []);
+  const hover = useCallback((index: number) => setSelected(index), []);
+
+  const openLabel = t("editor.quickOpen.open");
 
   return (
     <Dialog open={open} onOpenChange={(value) => !value && onClose()}>
@@ -75,7 +127,9 @@ export function QuickOpen({
         showCloseButton={false}
         aria-describedby={undefined}
       >
-        <DialogTitle className="sr-only">{t("editor.quickOpen.title")}</DialogTitle>
+        <DialogTitle className="sr-only">
+          {t("editor.quickOpen.title")}
+        </DialogTitle>
         <Input
           autoFocus
           value={query}
@@ -111,26 +165,16 @@ export function QuickOpen({
           className="max-h-80 overflow-auto p-1"
         >
           {matches.map((path, i) => (
-            <li
+            <QuickOpenRow
               key={path}
-              role="option"
-              aria-selected={i === selected}
-              className={cn(
-                "cursor-pointer truncate rounded-sm px-2 py-1.5 font-mono text-sm",
-                i === selected
-                  ? "bg-accent font-medium text-primary"
-                  : "hover:bg-accent",
-              )}
-              onMouseMove={() => setSelected(i)}
-              onClick={() => choose(path)}
-            >
-              {path}
-              {tabs.includes(path) && (
-                <span className="ml-2 rounded-sm bg-secondary px-1 font-sans text-xs text-muted-foreground">
-                  {t("editor.quickOpen.open")}
-                </span>
-              )}
-            </li>
+              path={path}
+              index={i}
+              isSelected={i === selected}
+              isOpen={openTabs.has(path)}
+              openLabel={openLabel}
+              onHover={hover}
+              onChoose={choose}
+            />
           ))}
           {matches.length === 0 && (
             <li className="px-2 py-6 text-center text-sm text-muted-foreground">

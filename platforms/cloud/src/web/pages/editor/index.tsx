@@ -12,7 +12,7 @@ import {
   XIcon,
 } from "lucide-react";
 import type { EditorView } from "@codemirror/view";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useBlocker, useParams } from "react-router";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -33,7 +33,7 @@ import {
   PathDialog,
   type PathRequest,
 } from "./dialogs";
-import { FileTree, type TreeClipboard } from "./file-tree";
+import { FileTree, type TreeActions, type TreeClipboard } from "./file-tree";
 import {
   type Listing,
   copyName,
@@ -176,6 +176,117 @@ const foldersOf = (path: string) =>
     .slice(0, -1)
     .map((_, i, all) => all.slice(0, i + 1).join("/"));
 
+/**
+ * The editor's file sidebar: its header buttons, its filter and the tree.
+ * It owns the tree's collapsed folders and its filter, so typing in the
+ * filter or toggling a folder re-renders the sidebar only, not the whole
+ * editor. Folders start collapsed, so a big book opens fast and stays
+ * clear until unfolded.
+ */
+const FileSidebar = memo(function FileSidebar({
+  files,
+  active,
+  dirty,
+  actions,
+  clipboard,
+}: {
+  files: Listing["files"];
+  active: string | null;
+  dirty: Set<string>;
+  actions: TreeActions;
+  clipboard: TreeClipboard | null;
+}) {
+  const { t } = useTranslation();
+  const [collapsed, setCollapsed] = useState<Set<string>>(
+    () => new Set(files.flatMap((f) => foldersOf(f.path))),
+  );
+  const [filter, setFilter] = useState("");
+  const folder = active ? parentOf(active) : "book";
+  return (
+    <>
+      <div className="flex items-center gap-1 border-b border-sidebar-border px-2 py-1">
+        <span className="flex-1 text-sm font-medium">
+          {t("editor.files.title")}
+        </span>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="size-7"
+          aria-label={t("editor.files.expandAll")}
+          disabled={filter.trim() !== ""}
+          onClick={() => setCollapsed(new Set())}
+        >
+          <ChevronsDownUpIcon className="size-4" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="size-7"
+          aria-label={t("editor.files.collapseAll")}
+          disabled={filter.trim() !== ""}
+          onClick={() =>
+            setCollapsed(new Set(files.flatMap((f) => foldersOf(f.path))))
+          }
+        >
+          <ChevronsUpDownIcon className="size-4" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="size-7"
+          aria-label={t("editor.files.newFile")}
+          onClick={() => actions.newFile(folder)}
+        >
+          <FilePlusIcon className="size-4" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="size-7"
+          aria-label={t("editor.files.newFolder")}
+          onClick={() => actions.newFolder(folder)}
+        >
+          <FolderPlusIcon className="size-4" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="size-7"
+          aria-label={t("editor.files.uploadFiles")}
+          onClick={() => actions.pickUpload(folder)}
+        >
+          <UploadIcon className="size-4" />
+        </Button>
+      </div>
+      <div className="border-b border-sidebar-border p-2">
+        <div className="relative">
+          <SearchIcon
+            className="absolute top-1/2 left-2 size-3.5 -translate-y-1/2 text-muted-foreground"
+            aria-hidden
+          />
+          <Input
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+            placeholder={t("editor.files.filter")}
+            aria-label={t("editor.files.filter")}
+            className="h-7 pl-7 text-sm"
+          />
+        </div>
+      </div>
+      <FileTree
+        files={files}
+        active={active}
+        dirty={dirty}
+        actions={actions}
+        clipboard={clipboard}
+        collapsed={collapsed}
+        setCollapsed={setCollapsed}
+        filter={filter}
+      />
+    </>
+  );
+});
+
 function Editor({ book, listing }: { book: Book; listing: Listing }) {
   const { t } = useTranslation();
   const bookId = String(book.id);
@@ -213,10 +324,11 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
     view: EditorView;
   } | null>(null);
   const [quickOpen, setQuickOpen] = useState(false);
+  // Quick open's props, stable so its memoized rows skip editor re-renders.
+  const filePaths = useMemo(() => listing.files.map((f) => f.path), [listing]);
+  const tabPaths = useMemo(() => ws.tabs.map((t) => t.path), [ws.tabs]);
+  const closeQuickOpen = useCallback(() => setQuickOpen(false), []);
   const [showWords, setShowWords] = useState(false);
-  // The file tree's state, for the sidebar's header buttons.
-  const [treeCollapsed, setTreeCollapsed] = useState<Set<string>>(new Set());
-  const [treeFilter, setTreeFilter] = useState("");
   const [settings, updateSettings] = useEditorSettings();
   // The panes' widths, remembered from the last session; null means the default.
   const [sidebarWidth, setSidebarWidth] = usePaneWidth(
@@ -871,6 +983,30 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
     },
   };
 
+  // The file tree's actions: `actions` is rebuilt every render with new
+  // closures, but the tree memoizes on its props, so it gets stable ones
+  // that forward to whatever `actions` currently is.
+  const latestActions = useRef(actions);
+  latestActions.current = actions;
+  const treeActions = useMemo<TreeActions>(
+    () => ({
+      open: (path) => latestActions.current.open(path),
+      newFile: (folder) => latestActions.current.newFile(folder),
+      newFolder: (folder) => latestActions.current.newFolder(folder),
+      upload: (folder, files) => latestActions.current.upload(folder, files),
+      pickUpload: (folder) => latestActions.current.pickUpload(folder),
+      rename: (path, isFolder) => latestActions.current.rename(path, isFolder),
+      remove: (path, isFolder) => latestActions.current.remove(path, isFolder),
+      download: (path) => latestActions.current.download(path),
+      move: (from, to, isFolder) =>
+        latestActions.current.move(from, to, isFolder),
+      copy: (path, isFolder) => latestActions.current.copy(path, isFolder),
+      cut: (path, isFolder) => latestActions.current.cut(path, isFolder),
+      paste: (folder) => latestActions.current.paste(folder),
+    }),
+    [],
+  );
+
   const closeTab = (tab: Tab) => {
     if (!isDirty(tab)) return ws.close(tab.path);
     setChoice({
@@ -957,93 +1093,13 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
           className="flex w-64 shrink-0 flex-col bg-sidebar"
           style={sidebarWidth === null ? undefined : { width: sidebarWidth }}
         >
-          <div className="flex items-center gap-1 border-b border-sidebar-border px-2 py-1">
-            <span className="flex-1 text-sm font-medium">{t("editor.files.title")}</span>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-7"
-              aria-label={t("editor.files.expandAll")}
-              disabled={treeFilter.trim() !== ""}
-              onClick={() => setTreeCollapsed(new Set())}
-            >
-              <ChevronsDownUpIcon className="size-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-7"
-              aria-label={t("editor.files.collapseAll")}
-              disabled={treeFilter.trim() !== ""}
-              onClick={() =>
-                setTreeCollapsed(
-                  new Set(listing.files.flatMap((f) => foldersOf(f.path))),
-                )
-              }
-            >
-              <ChevronsUpDownIcon className="size-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-7"
-              aria-label={t("editor.files.newFile")}
-              onClick={() =>
-                actions.newFile(ws.active ? parentOf(ws.active) : "book")
-              }
-            >
-              <FilePlusIcon className="size-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-7"
-              aria-label={t("editor.files.newFolder")}
-              onClick={() =>
-                actions.newFolder(ws.active ? parentOf(ws.active) : "book")
-              }
-            >
-              <FolderPlusIcon className="size-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-7"
-              aria-label={t("editor.files.uploadFiles")}
-              onClick={() =>
-                actions.pickUpload(ws.active ? parentOf(ws.active) : "book")
-              }
-            >
-              <UploadIcon className="size-4" />
-            </Button>
-          </div>
-          <div className="border-b border-sidebar-border p-2">
-            <div className="relative">
-              <SearchIcon
-                className="absolute top-1/2 left-2 size-3.5 -translate-y-1/2 text-muted-foreground"
-                aria-hidden
-              />
-              <Input
-                value={treeFilter}
-                onChange={(e) => setTreeFilter(e.target.value)}
-                placeholder={t("editor.files.filter")}
-                aria-label={t("editor.files.filter")}
-                className="h-7 pl-7 text-sm"
-              />
-            </div>
-          </div>
-          <div className="min-h-0 flex-1 overflow-auto p-1">
-            <FileTree
-              files={listing.files}
-              active={ws.active}
-              dirty={ws.dirty}
-              actions={actions}
-              clipboard={treeClipboard}
-              collapsed={treeCollapsed}
-              setCollapsed={setTreeCollapsed}
-              filter={treeFilter}
-            />
-          </div>
+          <FileSidebar
+            files={listing.files}
+            active={ws.active}
+            dirty={ws.dirty}
+            actions={treeActions}
+            clipboard={treeClipboard}
+          />
         </aside>
         <Splitter
           label={t("editor.toolbar.resizeFiles")}
@@ -1247,9 +1303,9 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
       <RefactorDialog request={refactor} onClose={() => setRefactor(null)} />
       <QuickOpen
         open={quickOpen}
-        files={listing.files.map((f) => f.path)}
-        tabs={ws.tabs.map((t) => t.path)}
-        onClose={() => setQuickOpen(false)}
+        files={filePaths}
+        tabs={tabPaths}
+        onClose={closeQuickOpen}
         onOpen={ws.open}
       />
       <WordsDialog
