@@ -28,11 +28,12 @@
     "version": "pnpm build",
     "lint": "tsc --noEmit",
     "test": "vitest",
-    "dev": "ncc build ./index.ts -w -o dist/ --external favicons --external sharp",
-    "build": "rimraf dist && ncc build ./index.ts -o ./dist/ --no-cache --no-source-map-register --external favicons --external sharp && node postbuild.mjs"
+    "dev": "ncc build ./index.ts -w -o dist/",
+    "build": "rimraf dist && ncc build ./index.ts -o ./dist/ --no-cache --no-source-map-register && node postbuild.mjs"
   },
   "dependencies": {
-    "favicons": "^7.3.1"
+    "@resvg/resvg-wasm": "^2.6.2",
+    "jimp": "^1.0.0"
   },
   "devDependencies": {
     "@hyperbook/fs": "workspace:*",

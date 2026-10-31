@@ -365,8 +365,10 @@ operators who want that guarantee restrict egress at the container level.
 Two changes to the CLI make this possible: copying files without
 `fs.cp` (which stats every parent directory up to `/`), and accepting only
 a language code for `language` (it is used in a `require` path).
-Favicons are not generated from the logo in the sandbox, since `sharp` is a
-native addon; a book can ship its own `favicon.ico`.
+Favicons are generated from the logo inside the sandbox as well: the CLI
+rasterizes them in pure JavaScript (Jimp) and WebAssembly (resvg, shipped
+beside the bundled CLI) — no native addon — and a book can still ship its
+own `favicon.ico` to keep generation from running.
 
 ## Serving books
 

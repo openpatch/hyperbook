@@ -20,11 +20,22 @@ it("starts the bundled CLI with its bundled Markdown renderer", () => {
   expect(help).toContain("assets");
 });
 
+it("ships the SVG rasterizer of favicon generation beside the CLI", async () => {
+  // WebAssembly is no native addon, so it runs inside the build sandbox of
+  // Hyperbook Cloud; the sandbox reads the CLI's directory, and dist is all
+  // the npm package ships (helpers/generate-favicons loads it from there).
+  const wasm = path.join(dist, "resvg.wasm");
+  expect((await fs.stat(wasm)).isFile()).toBe(true);
+  expect((await fs.stat(wasm)).size).toBeGreaterThan(100_000);
+});
+
 it("ships integration files and a download manifest without large runtimes", async () => {
   const manifest = JSON.parse(
     await fs.readFile(path.join(dist, "asset-manifest.json"), "utf8"),
   );
-  for (const element of Object.keys(elementCoreFiles) as DownloadableElement[]) {
+  for (const element of Object.keys(
+    elementCoreFiles,
+  ) as DownloadableElement[]) {
     expect(manifest.bundles).toHaveProperty(element);
     const directory = path.join(dist, "assets", `directive-${element}`);
     for (const file of elementCoreFiles[element])

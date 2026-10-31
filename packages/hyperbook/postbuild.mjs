@@ -114,5 +114,24 @@ async function postbuild() {
     ...["./node_modules", "lunr-languages", "min"],
   );
   await cp(lunrLanguages, distLunrLanguages, { recursive: true });
+
+  // The SVG rasterizer of favicon generation (helpers/generate-favicons)
+  // loads this beside the bundled CLI: WebAssembly is no native addon, so
+  // it runs inside the build sandbox of Hyperbook Cloud, which reads the
+  // CLI's directory — and dist is all the npm package ships.
+  let resvgWasm;
+  const findWasm = async (dir) => {
+    for (const entry of await readdir(dir, { withFileTypes: true })) {
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) await findWasm(full);
+      else if (!resvgWasm && entry.name.endsWith(".wasm")) resvgWasm = full;
+    }
+  };
+  await findWasm(path.join(...["./node_modules", "@resvg", "resvg-wasm"]));
+  if (!resvgWasm)
+    throw new Error(
+      "Could not find the resvg WebAssembly binary to ship beside the CLI.",
+    );
+  await cp(resvgWasm, path.join(...["./dist", "resvg.wasm"]));
 }
 postbuild();
