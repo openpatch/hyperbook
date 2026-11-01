@@ -1,6 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeftIcon,
+  ChevronDownIcon,
   ChevronsDownUpIcon,
   ChevronsUpDownIcon,
   FilePlusIcon,
@@ -21,6 +22,14 @@ import type { FileChange } from "../../../shared/schemas";
 import { type Reference, rewriteText } from "../../../shared/references";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { api, unwrap } from "@/lib/api";
 import { type Book, useBook } from "@/lib/books";
@@ -34,6 +43,7 @@ import {
   PathDialog,
   type PathRequest,
 } from "./dialogs";
+import { item, openMenu, separator } from "./context-menu";
 import { FileTree, type TreeActions, type TreeClipboard } from "./file-tree";
 import {
   type Listing,
@@ -1056,25 +1066,73 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
     [],
   );
 
-  const closeTab = (tab: Tab) => {
-    if (!isDirty(tab)) return ws.close(tab.path);
+  /**
+   * Closes `paths`; when any of them has unsaved changes, asks first whether
+   * to save them or to close without saving.
+   */
+  const closeTabs = (paths: string[]) => {
+    const closing = ws.currentTabs().filter((t) => paths.includes(t.path));
+    const dirty = closing.filter(isDirty);
+    const doClose = () => paths.forEach((path) => ws.close(path));
+    if (dirty.length === 0) return doClose();
     setChoice({
-      title: t("editor.actions.closeTitle", { path: tab.path }),
-      description: t("editor.actions.closeDescription"),
+      title:
+        paths.length === 1
+          ? t("editor.actions.closeTitle", { path: paths[0] })
+          : t("editor.actions.closeManyTitle"),
+      description:
+        paths.length === 1 ? (
+          t("editor.actions.closeDescription")
+        ) : (
+          <>
+            <p>
+              {t("editor.actions.closeManyDescription", { count: dirty.length })}
+            </p>
+            <ul className="my-2 list-disc pl-5 font-mono text-sm">
+              {dirty.map((tab) => (
+                <li key={tab.path}>{tab.path}</li>
+              ))}
+            </ul>
+          </>
+        ),
       choices: [
         {
           label: t("editor.actions.closeWithoutSaving"),
           variant: "destructive",
-          run: () => ws.close(tab.path),
+          run: doClose,
         },
         {
           label: t("editor.actions.saveAndClose"),
           run: async () => {
-            await save([tab.path]);
-            ws.close(tab.path);
+            await save(dirty.map((t) => t.path));
+            doClose();
           },
         },
       ],
+    });
+  };
+
+  const closeTab = (tab: Tab) => closeTabs([tab.path]);
+
+  /** The tab's context menu: close it, the others, or all of them. */
+  const tabMenu = (event: React.MouseEvent, tab: Tab) => {
+    event.preventDefault();
+    event.stopPropagation();
+    ws.setActive(tab.path);
+    const others = ws.tabs
+      .filter((t) => t.path !== tab.path)
+      .map((t) => t.path);
+    openMenu(event.clientX, event.clientY, (box) => {
+      item(box, t("editor.tabs.close", { path: tab.path }), () =>
+        closeTabs([tab.path]),
+      );
+      item(box, t("editor.tabs.closeOthers"), () => closeTabs(others), {
+        disabled: others.length === 0,
+      });
+      separator(box);
+      item(box, t("editor.tabs.closeAll"), () =>
+        closeTabs(ws.tabs.map((t) => t.path)),
+      );
     });
   };
 
@@ -1095,14 +1153,36 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
         >
           {t("editor.toolbar.bookSettings")}
         </Button>
-        <Button
-          size="sm"
-          variant="outline"
-          disabled={!hasUnsaved}
-          onClick={() => void save([...ws.dirty])}
-        >
-          {t("editor.toolbar.saveAll")}
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button size="sm" variant="outline" disabled={!hasUnsaved}>
+              {t("editor.toolbar.saveAll")}
+              <ChevronDownIcon className="size-3.5" aria-hidden />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-72">
+            <DropdownMenuLabel>
+              {t("editor.toolbar.unsavedFiles")}
+            </DropdownMenuLabel>
+            {[...ws.dirty].map((path) => (
+              <DropdownMenuItem
+                key={path}
+                className="gap-2"
+                onSelect={() => ws.setActive(path)}
+              >
+                <span
+                  className="size-2 shrink-0 rounded-full bg-primary"
+                  aria-hidden
+                />
+                <span className="truncate font-mono text-xs">{path}</span>
+              </DropdownMenuItem>
+            ))}
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onSelect={() => void save([...ws.dirty])}>
+              {t("editor.toolbar.saveAll")}
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
         {aiAvailable && (
           <Button
             size="icon"
@@ -1191,6 +1271,7 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
                     ? "bg-background font-medium text-primary"
                     : "bg-sidebar text-muted-foreground",
                 )}
+                onContextMenu={(event) => tabMenu(event, tab)}
               >
                 <button
                   type="button"

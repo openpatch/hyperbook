@@ -312,6 +312,7 @@ export const en = {
     toolbar: {
       bookSettings: "Book settings",
       saveAll: "Save all",
+      unsavedFiles: "Unsaved changes",
       hideAi: "Hide the AI assistant",
       showAi: "Show the AI assistant",
       hidePreview: "Hide preview",
@@ -347,6 +348,8 @@ export const en = {
     },
     tabs: {
       close: "Close {{path}}",
+      closeOthers: "Close others",
+      closeAll: "Close all",
       noFileOpen: "Open a file from the list on the left, or press Ctrl+P.",
       h5p: "H5P content is made in an H5P editor (e.g. Lumi or ZUM Apps) and replaced here. It plays in the preview of the pages that show it.",
       cannotEdit: "This file cannot be edited here.",
@@ -420,6 +423,11 @@ export const en = {
       uploadedToast_other: "Uploaded {{count}} files",
       closeTitle: "Close {{path}}?",
       closeDescription: "Your changes to this file are not saved.",
+      closeManyTitle: "Close the files with unsaved changes?",
+      closeManyDescription_one:
+        "{{count}} of the files you close has changes that are not saved.",
+      closeManyDescription_other:
+        "{{count}} of the files you close have changes that are not saved.",
       closeWithoutSaving: "Close without saving",
       saveAndClose: "Save and close",
       settingsSavedToast: "Settings saved.",

@@ -311,6 +311,7 @@ export const de: Messages = {
     toolbar: {
       bookSettings: "Buch-Einstellungen",
       saveAll: "Alle speichern",
+      unsavedFiles: "Ungespeicherte Änderungen",
       hideAi: "KI-Assistent ausblenden",
       showAi: "KI-Assistent einblenden",
       hidePreview: "Vorschau ausblenden",
@@ -346,6 +347,8 @@ export const de: Messages = {
     },
     tabs: {
       close: "{{path}} schließen",
+      closeOthers: "Andere schließen",
+      closeAll: "Alle schließen",
       noFileOpen:
         "Öffnen Sie eine Datei aus der Liste links oder drücken Sie Strg+P.",
       h5p: "H5P-Inhalte werden in einem H5P-Editor erstellt (z. B. Lumi oder ZUM Apps) und hier ersetzt. Sie laufen in der Vorschau der Seiten, die sie zeigen.",
@@ -427,6 +430,11 @@ export const de: Messages = {
       closeTitle: "{{path}} schließen?",
       closeDescription:
         "Ihre Änderungen an dieser Datei sind nicht gespeichert.",
+      closeManyTitle: "Dateien mit ungespeicherten Änderungen schließen?",
+      closeManyDescription_one:
+        "{{count}} der Dateien, die Sie schließen, hat ungespeicherte Änderungen.",
+      closeManyDescription_other:
+        "{{count}} der Dateien, die Sie schließen, haben ungespeicherte Änderungen.",
       closeWithoutSaving: "Ohne Speichern schließen",
       saveAndClose: "Speichern und schließen",
       settingsSavedToast: "Einstellungen gespeichert.",
