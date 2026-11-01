@@ -126,6 +126,24 @@ export const de: Messages = {
     language: "Sprache",
     languageHint:
       "Die Sprache der Seiten und E-Mails. „Automatisch“ folgt der Instanz und Ihrem Browser.",
+    git: {
+      title: "Git-Tokens (alle Bücher)",
+      hint: "Ein persönliches Token funktioniert für jedes Buch, das Sie bearbeiten dürfen: Benutzername git und das Token als Passwort, wenn git fragt — praktisch für Automatisierung. Buchspezifische Tokens finden Sie im Veröffentlichungsdialog jedes Buchs.",
+      tokenLabel: "Token-Bezeichnung (optional)",
+      createToken: "Token erstellen",
+      createTokenFailed: "Token konnte nicht erstellt werden",
+      revokeFailed: "Token konnte nicht widerrufen werden",
+      token: "Token",
+      lastUsed: "Zuletzt verwendet",
+      revoked: "widerrufen",
+      revoke: "Widerrufen",
+      revokeTitle: "Dieses Token widerrufen?",
+      revokeDescription:
+        "Es funktioniert sofort für kein Buch mehr. Das Token selbst kann nicht noch einmal angezeigt werden — erstellen Sie ein neues, wenn Sie es brauchen.",
+      tokenTitle: "Ihr persönliches Git-Token",
+      tokenDescription:
+        "Verwenden Sie es als Passwort mit dem Benutzernamen git für alle Ihre Bücher. Es wird nur jetzt angezeigt — bewahren Sie es sicher auf.",
+    },
   },
   instance: {
     language: "Sprache",
@@ -1070,7 +1088,7 @@ export const de: Messages = {
       copyAria: "Den Clone-Befehl kopieren",
       authHint1: "Git fragt nach Benutzername und Passwort: Verwenden Sie",
       authHint2:
-        "und eines Ihrer Tokens unten. Um Tipparbeit zu sparen, einmal ausführen:",
+        "und ein Git-Token — eines Ihrer untenstehenden oder ein persönliches unter „Ihr Konto“. Um Tipparbeit zu sparen, einmal ausführen:",
       tokenLabel: "Token-Bezeichnung (optional)",
       createToken: "Token erstellen",
       createTokenFailed: "Token konnte nicht erstellt werden",

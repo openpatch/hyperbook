@@ -16,7 +16,11 @@ import { authRoutes } from "./routes/auth";
 import { bookRoutes } from "./routes/books";
 import { bookDictionaryRoutes } from "./routes/dictionary";
 import { bookFileRoutes } from "./routes/files";
-import { gitHttpRoutes, gitTokenRoutes } from "./routes/git";
+import {
+  gitHttpRoutes,
+  gitTokenRoutes,
+  userGitTokenRoutes,
+} from "./routes/git";
 import { bookGroupRoutes, groupRoutes, studentRoutes } from "./routes/groups";
 import { bookHistoryRoutes } from "./routes/history";
 import { instanceRoutes, publicInstanceRoutes } from "./routes/instance";
@@ -40,6 +44,7 @@ export function createAdminApi(deps: Deps) {
       .route("/instance/public", publicInstanceRoutes(deps))
       .route("/instance", instanceRoutes(deps))
       .route("/me", meRoutes(deps))
+      .route("/me", userGitTokenRoutes(deps))
       .route("/users", userRoutes(deps))
       .route("/books", bookRoutes(deps))
       .route("/books", gitTokenRoutes(deps))

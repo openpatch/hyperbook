@@ -123,6 +123,15 @@ async function world() {
 const url = (port: number, token: string, bookId: number) =>
   `http://git:${encodeURIComponent(token)}@127.0.0.1:${port}/api/books/${bookId}/git`;
 
+/** Any Basic credential (account login instead of a token, e.g.). */
+const urlAs = (
+  port: number,
+  username: string,
+  password: string,
+  bookId: number,
+) =>
+  `http://${encodeURIComponent(username)}:${encodeURIComponent(password)}@127.0.0.1:${port}/api/books/${bookId}/git`;
+
 /** A local clone with one commit on main. */
 async function localBook(
   port: number,
@@ -282,6 +291,111 @@ describe("git smart HTTP", () => {
     ).toBe(409);
   });
 
+  it("rejects the account email and password — only tokens are git credentials", async () => {
+    const { instance, book, port } = await world();
+    const password = "correct horse battery";
+    const info = (username: string, pw: string) =>
+      instance.app.request(
+        `/api/books/${book.id}/git/info/refs?service=git-upload-pack`,
+        {
+          headers: {
+            host: "admin.test",
+            authorization: `Basic ${Buffer.from(`${username}:${pw}`).toString("base64")}`,
+          },
+        },
+      );
+    // Even the correct password of a book owner is refused: git clients tend
+    // to store credentials on disk, and the password opens the whole account.
+    expect((await info("o@example.org", password)).status).toBe(401);
+    expect((await info("O@Example.ORG", password)).status).toBe(401);
+    expect((await info("o@example.org", "wrong")).status).toBe(401);
+    // A real git clone with email + password fails as well.
+    const dir = await localBook(port, "", book.id, FILES);
+    await git(
+      port,
+      [
+        "remote",
+        "set-url",
+        "origin",
+        urlAs(port, "o@example.org", password, book.id),
+      ],
+      dir,
+    );
+    expect((await git(port, ["push", "origin", "main"], dir)).code).not.toBe(0);
+    expect(
+      instance.db
+        .select()
+        .from(auditLog)
+        .where(eq(auditLog.action, "book.push"))
+        .all(),
+    ).toHaveLength(0);
+  });
+
+  it("accepts a personal git token for every book the user may edit", async () => {
+    const { instance, owner, book, port } = await world();
+    // A personal token is created on the account, not on a book.
+    const created = (await owner.c.post("/api/me/git-tokens", { label: "ci" }))
+      .body;
+    expect(created.token).toHaveLength(43);
+    const personal = created.token as string;
+    const info = (t: string, bookId = book.id) =>
+      instance.app.request(
+        `/api/books/${bookId}/git/info/refs?service=git-upload-pack`,
+        {
+          headers: {
+            host: "admin.test",
+            authorization: `Basic ${Buffer.from(`git:${t}`).toString("base64")}`,
+          },
+        },
+      );
+    expect((await info(personal)).status).toBe(200);
+
+    // It works for another book of the same user, too…
+    const book2 = (
+      await owner.c.post("/api/books", { title: "Math", slug: "math" })
+    ).body;
+    expect((await info(personal, book2.id)).status).toBe(200);
+    // …but not for a book the user is not a member of.
+    const stranger = await loggedIn(instance, { email: "s@example.org" });
+    const foreign = (
+      await stranger.c.post("/api/books", { title: "Secret", slug: "secret" })
+    ).body;
+    expect((await info(personal, foreign.id)).status).toBe(401);
+
+    // Push with the personal token; the audit records the method.
+    const dir = await localBook(port, personal, book.id, FILES);
+    expect((await git(port, ["push", "origin", "main"], dir)).code).toBe(0);
+    const pushes = instance.db
+      .select()
+      .from(auditLog)
+      .where(eq(auditLog.action, "book.push"))
+      .all();
+    expect(pushes[0]).toMatchObject({
+      actorUserId: owner.user.id,
+      data: expect.objectContaining({ via: "user-token" }),
+    });
+
+    // Revoked: refused at once; listed with revokedAt; only one's own tokens.
+    const list = (await owner.c.get("/api/me/git-tokens")).body;
+    expect(list).toHaveLength(1);
+    expect(list[0].label).toBe("ci");
+    expect(
+      (await owner.c.delete(`/api/me/git-tokens/${list[0].id}`)).status,
+    ).toBe(200);
+    expect((await info(personal)).status).toBe(401);
+    expect((await info(personal, book2.id)).status).toBe(401);
+    // Another user cannot see or revoke it.
+    expect((await stranger.c.get("/api/me/git-tokens")).body).toHaveLength(0);
+    expect(
+      (await stranger.c.delete(`/api/me/git-tokens/${list[0].id}`)).status,
+    ).toBe(404);
+    // At most 10 active personal tokens.
+    for (let i = 0; i < 10; i++) {
+      expect((await owner.c.post("/api/me/git-tokens", {})).status).toBe(200);
+    }
+    expect((await owner.c.post("/api/me/git-tokens", {})).status).toBe(409);
+  });
+
   it("refuses tags, other branches, deletes and non-fast-forward pushes", async () => {
     const { book, token, port } = await world();
     const dir = await localBook(port, token, book.id, FILES);
@@ -381,10 +495,18 @@ describe("git smart HTTP", () => {
     expect((await git(port, ["push", "origin", "main"], initial)).code).toBe(0);
     const left = await tmp();
     const right = await tmp();
-    expect((await git(port, ["clone", url(port, token, book.id), left], left)).code).toBe(0);
-    expect((await git(port, ["clone", url(port, token, book.id), right], right)).code).toBe(0);
+    expect(
+      (await git(port, ["clone", url(port, token, book.id), left], left)).code,
+    ).toBe(0);
+    expect(
+      (await git(port, ["clone", url(port, token, book.id), right], right))
+        .code,
+    ).toBe(0);
 
-    for (const [dir, name] of [[left, "left"], [right, "right"]] as const) {
+    for (const [dir, name] of [
+      [left, "left"],
+      [right, "right"],
+    ] as const) {
       await writeFile(path.join(dir, `${name}.txt`), name);
       await git(port, ["add", `${name}.txt`], dir);
       await git(
@@ -401,7 +523,11 @@ describe("git smart HTTP", () => {
     expect(pushes.filter((push) => push.code === 0)).toHaveLength(1);
     expect(bookRow(instance, book.id).commitCount).toBe(2);
     expect(
-      instance.db.select().from(auditLog).where(eq(auditLog.action, "book.push")).all(),
+      instance.db
+        .select()
+        .from(auditLog)
+        .where(eq(auditLog.action, "book.push"))
+        .all(),
     ).toHaveLength(2);
   });
 
@@ -414,9 +540,7 @@ describe("git smart HTTP", () => {
     expect(
       (await git(port, ["clone", url(port, token, book.id), "."], client)).code,
     ).toBe(0);
-    const base = (
-      await git(port, ["rev-parse", "HEAD"], client)
-    ).stdout.trim();
+    const base = (await git(port, ["rev-parse", "HEAD"], client)).stdout.trim();
     const commits = Array.from({ length: 160 }, (_, index) => {
       const mark = index + 1;
       const parent = index === 0 ? `from ${base}\n` : `from :${mark - 1}\n`;
@@ -430,13 +554,24 @@ describe("git smart HTTP", () => {
         "",
       ].join("\n");
     }).join("\n");
-    const imported = await run("git", ["fast-import"], { cwd: client, input: commits });
+    const imported = await run("git", ["fast-import"], {
+      cwd: client,
+      input: commits,
+    });
     expect(imported.code).toBe(0);
 
     await writeFile(path.join(source, "index.html"), "<h1>Updated</h1>");
     await git(
       port,
-      ["-c", "user.email=a@b.c", "-c", "user.name=A", "commit", "-am", "updated"],
+      [
+        "-c",
+        "user.email=a@b.c",
+        "-c",
+        "user.name=A",
+        "commit",
+        "-am",
+        "updated",
+      ],
       source,
     );
     expect((await git(port, ["push", "origin", "main"], source)).code).toBe(0);
@@ -460,14 +595,19 @@ describe("git smart HTTP", () => {
       gitHttpRoutes(instance.deps, { authFailures, opLimit }),
     );
     const info = (t?: string) =>
-      app.request(`/api/books/${book.id}/git/info/refs?service=git-upload-pack`, {
-        headers: {
-          host: "admin.test",
-          ...(t === undefined
-            ? {}
-            : { authorization: `Basic ${Buffer.from(`git:${t}`).toString("base64")}` }),
+      app.request(
+        `/api/books/${book.id}/git/info/refs?service=git-upload-pack`,
+        {
+          headers: {
+            host: "admin.test",
+            ...(t === undefined
+              ? {}
+              : {
+                  authorization: `Basic ${Buffer.from(`git:${t}`).toString("base64")}`,
+                }),
+          },
         },
-      });
+      );
     // Every git client sends an anonymous probe first: 401, but not a failure.
     expect((await info()).status).toBe(401);
     expect((await info()).status).toBe(401);
@@ -512,7 +652,9 @@ describe("git smart HTTP", () => {
     expect(push.stderr).toMatch(/git history/i);
     // The push was refused: main did not move.
     const head = await headCommit(repoDir(instance.config, book.id));
-    expect(head).not.toBe((await git(port, ["rev-parse", "HEAD"], dir)).stdout.trim());
+    expect(head).not.toBe(
+      (await git(port, ["rev-parse", "HEAD"], dir)).stdout.trim(),
+    );
   });
 
   it("publish creates version tags; rollback to a kept build is instant, to a pruned one a rebuild", async () => {
@@ -606,7 +748,8 @@ describe("git smart HTTP", () => {
       false,
     );
 
-    const versions = (await owner.c.get(`/api/books/${book.id}/versions`)).body as {
+    const versions = (await owner.c.get(`/api/books/${book.id}/versions`))
+      .body as {
       tag: string;
       live: boolean;
       buildId: number | null;
@@ -616,7 +759,9 @@ describe("git smart HTTP", () => {
     expect(versions.find((v) => v.tag === "v1")!.buildId).toBeNull();
 
     // v1 has no build anymore, so rolling back to it rebuilds; v3 is instant.
-    const toV1 = await owner.c.post(`/api/books/${book.id}/rollback`, { tag: "v1" });
+    const toV1 = await owner.c.post(`/api/books/${book.id}/rollback`, {
+      tag: "v1",
+    });
     expect(toV1.status).toBe(200);
     expect(toV1.body.published).toBe(false);
     await instance.builds.idle();

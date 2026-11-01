@@ -17,7 +17,13 @@ import type { Deps } from "../../deps";
 import { type BookRow, addCommits, bookAccess } from "../../domain/books";
 import { getInstanceSettings } from "../../domain/instance";
 import { quotaForBook, setSourceBytes } from "../../domain/storage";
-import { bookMembers, books, gitTokens, users } from "../../db/schema";
+import {
+  bookMembers,
+  books,
+  gitTokens,
+  userGitTokens,
+  users,
+} from "../../db/schema";
 import {
   gcRepo,
   initRepo,
@@ -46,9 +52,10 @@ import { hostedOnly } from "./publishing";
  * routes are mounted outside the /api sub-app (admin/app.ts), so originCheck
  * does not apply: the git content types are not CORS-safelisted, which makes
  * cross-site POSTs fail their preflight, and cross-site reads are blocked
- * because no CORS headers are ever sent. Authentication is a per-book API
- * token as the Basic password (username "git"); the session cookie is not
- * accepted here. A push never triggers a publish build — only the quota
+ * because no CORS headers are ever sent. Authentication is Basic auth with a
+ * git token (username "git", password = per-book or personal token); the
+ * account password and the session cookie are not accepted here. A push
+ * never triggers a publish build — only the quota
  * check, an audit entry and the commit count (plus a preview build when the
  * instance setting gitPushUpdatesPreview is on).
  */
@@ -65,8 +72,19 @@ function requestIsGzip(c: Context): boolean {
   throw new HTTPException(415, { message: "Unsupported content encoding" });
 }
 
+/** How a git request authenticated; `idHash` is set when it was a token. */
+type GitAuth = {
+  user: typeof users.$inferSelect;
+  via: "book-token" | "user-token";
+  idHash?: string;
+};
+
 type GitEnv = {
-  Variables: { gitBook: BookRow; gitUserId: number };
+  Variables: {
+    gitBook: BookRow;
+    gitUserId: number;
+    gitVia: GitAuth["via"];
+  };
 };
 
 type Basic = { username: string; password: string };
@@ -88,30 +106,59 @@ function parseBasic(header: string | undefined): Basic | null {
   };
 }
 
-/** The token row when `password` is a live token of book `bookId` whose user may edit it. */
-function authenticate(db: Deps["db"], bookId: number, password: string) {
+/** Admins may touch every book; everyone else needs a membership row. */
+function canAccessBook(
+  db: Deps["db"],
+  user: typeof users.$inferSelect,
+  bookId: number,
+) {
+  if (user.role === "admin") return true;
+  return !!db
+    .select({ role: bookMembers.role })
+    .from(bookMembers)
+    .where(and(eq(bookMembers.bookId, bookId), eq(bookMembers.userId, user.id)))
+    .get();
+}
+
+/**
+ * Authenticates a Basic credential against book `bookId`: username "git" with
+ * a live token as the password — a per-book token or a personal (all-books)
+ * one. The account password is deliberately not accepted here: git clients
+ * tend to store credentials on disk, and the password opens the whole
+ * account, while a token is scoped to git and revocable on its own. Returns
+ * the user and how they authenticated, or null.
+ */
+function authenticate(
+  db: Deps["db"],
+  bookId: number,
+  password: string,
+): GitAuth | null {
   if (!password) return null;
+  const idHash = sha256(password);
   const row = db
     .select()
     .from(gitTokens)
+    .where(and(eq(gitTokens.idHash, idHash), isNull(gitTokens.revokedAt)))
+    .get();
+  if (row && row.bookId === bookId) {
+    const user = db.select().from(users).where(eq(users.id, row.userId)).get();
+    if (user && !user.disabledAt && canAccessBook(db, user, bookId))
+      return { user, via: "book-token", idHash };
+  }
+  // A personal token works for every book the user may edit.
+  const urow = db
+    .select()
+    .from(userGitTokens)
     .where(
-      and(eq(gitTokens.idHash, sha256(password)), isNull(gitTokens.revokedAt)),
+      and(eq(userGitTokens.idHash, idHash), isNull(userGitTokens.revokedAt)),
     )
     .get();
-  if (!row || row.bookId !== bookId) return null;
-  const user = db.select().from(users).where(eq(users.id, row.userId)).get();
-  if (!user || user.disabledAt) return null;
-  if (user.role !== "admin") {
-    const member = db
-      .select({ role: bookMembers.role })
-      .from(bookMembers)
-      .where(
-        and(eq(bookMembers.bookId, bookId), eq(bookMembers.userId, user.id)),
-      )
-      .get();
-    if (!member) return null;
+  if (urow) {
+    const user = db.select().from(users).where(eq(users.id, urow.userId)).get();
+    if (user && !user.disabledAt && canAccessBook(db, user, bookId))
+      return { user, via: "user-token", idHash };
   }
-  return { row, user };
+  return null;
 }
 
 /** Only allow a well-formed Git-Protocol header through to git (protocol v2). */
@@ -176,7 +223,8 @@ export function gitHttpRoutes(
       if (countFailure) authFailures.fail(failKey);
       c.header("WWW-Authenticate", 'Basic realm="Hyperbook Cloud git"');
       throw new HTTPException(401, {
-        message: "A git token is required (username: git)",
+        message:
+          "A git token is required (username: git, password: a per-book or personal token)",
       });
     };
     if (opLimit.isBlocked(`book:${id}`)) {
@@ -187,19 +235,31 @@ export function gitHttpRoutes(
       });
     }
     if (!book || authFailures.isBlocked(failKey)) deny(false);
+    // Only tokens; the account password is not a git credential.
     const authed = creds ? authenticate(db, id, creds.password) : null;
     if (!authed) deny(!!creds);
     opLimit.hit(`book:${id}`);
-    // Note the use, but not more often than once a minute per token.
-    const row = authed!.row;
-    if (!row.lastUsedAt || Date.now() - row.lastUsedAt.getTime() > 60_000) {
-      db.update(gitTokens)
-        .set({ lastUsedAt: new Date() })
-        .where(eq(gitTokens.idHash, row.idHash))
-        .run();
+    // Note the use of a token, but not more often than once a minute per token.
+    if (authed!.idHash) {
+      const table = authed!.via === "user-token" ? userGitTokens : gitTokens;
+      const row = db
+        .select({ lastUsedAt: table.lastUsedAt })
+        .from(table)
+        .where(eq(table.idHash, authed!.idHash))
+        .get();
+      if (
+        row &&
+        (!row.lastUsedAt || Date.now() - row.lastUsedAt.getTime() > 60_000)
+      ) {
+        db.update(table)
+          .set({ lastUsedAt: new Date() })
+          .where(eq(table.idHash, authed!.idHash))
+          .run();
+      }
     }
     c.set("gitBook", book!);
     c.set("gitUserId", authed!.user.id);
+    c.set("gitVia", authed!.via);
     await next();
   });
 
@@ -210,6 +270,7 @@ export function gitHttpRoutes(
   async function postPush(
     book: BookRow,
     userId: number,
+    via: GitAuth["via"],
     repo: string,
     requestBody: Buffer,
     exitedCleanly: boolean,
@@ -222,7 +283,10 @@ export function gitHttpRoutes(
     try {
       reachable = await isMainAncestor(repo, update.new);
     } catch (error) {
-      console.error(`Could not verify pushed commit for book ${book.id}`, error);
+      console.error(
+        `Could not verify pushed commit for book ${book.id}`,
+        error,
+      );
       return;
     }
     if (!reachable) return;
@@ -244,7 +308,7 @@ export function gitHttpRoutes(
       action: "book.push",
       targetType: "book",
       targetId: book.id,
-      data: { commit: update.new, added, bytes },
+      data: { commit: update.new, added, bytes, via },
     });
     if (getInstanceSettings(db).gitPushUpdatesPreview) {
       builds.enqueue(book.id, update.new, "push", userId);
@@ -290,9 +354,14 @@ export function gitHttpRoutes(
           env: gitProtocolEnv(c),
         },
       );
-      const timedOut = killOnTimeout(child, config.gitOpTimeoutMs, `git ${serviceName} for book ${book.id}`);
+      const timedOut = killOnTimeout(
+        child,
+        config.gitOpTimeoutMs,
+        `git ${serviceName} for book ${book.id}`,
+      );
       const { code, stdout, stderr } = await closeWith(child);
-      if (timedOut()) throw new HTTPException(504, { message: "git timed out" });
+      if (timedOut())
+        throw new HTTPException(504, { message: "git timed out" });
       if (code !== 0) throw new HTTPException(500, { message: stderr.trim() });
       // Smart HTTP expects the "# service=…" pkt-line + flush before the
       // advertisement (git http-backend adds it; receive-pack/upload-pack
@@ -321,7 +390,11 @@ export function gitHttpRoutes(
         });
         // The response streams as it is produced, so a timeout can only end
         // it early (the client sees a truncated stream); the kill matters.
-        killOnTimeout(child, config.gitOpTimeoutMs, `git upload-pack for book ${book.id}`);
+        killOnTimeout(
+          child,
+          config.gitOpTimeoutMs,
+          `git upload-pack for book ${book.id}`,
+        );
         const body = c.req.raw.body;
         if (body) {
           const source = Readable.fromWeb(body as never);
@@ -341,7 +414,10 @@ export function gitHttpRoutes(
             : pipeline(source, cap, child.stdin!);
           void input.catch((error) => {
             child.kill();
-            console.error(`git upload-pack request failed for book ${book.id}`, error);
+            console.error(
+              `git upload-pack request failed for book ${book.id}`,
+              error,
+            );
           });
         } else child.stdin!.end();
         child.stderr!.resume();
@@ -393,7 +469,11 @@ export function gitHttpRoutes(
           ],
           { gitDir: repo, env: { HB_MAX_BYTES: String(maxBytes) } },
         );
-        const timedOut = killOnTimeout(child, config.gitOpTimeoutMs, `git receive-pack for book ${book.id}`);
+        const timedOut = killOnTimeout(
+          child,
+          config.gitOpTimeoutMs,
+          `git receive-pack for book ${book.id}`,
+        );
         const body = c.req.raw.body;
         if (!body) {
           child.kill();
@@ -414,9 +494,13 @@ export function gitHttpRoutes(
             let offset = 0;
             while (!headerComplete && offset < chunk.length) {
               const targetLength = packetLength || 4;
-              const take = Math.min(targetLength - pending.length, chunk.length - offset);
+              const take = Math.min(
+                targetLength - pending.length,
+                chunk.length - offset,
+              );
               const part = chunk.subarray(offset, offset + take);
-              pending = pending.length === 0 ? part : Buffer.concat([pending, part]);
+              pending =
+                pending.length === 0 ? part : Buffer.concat([pending, part]);
               offset += take;
               if (pending.length < targetLength) break;
               if (packetLength === 0) {
@@ -454,7 +538,9 @@ export function gitHttpRoutes(
         const { code, stdout, stderr } = await closeWith(child);
         await piping;
         if (timedOut()) {
-          throw new HTTPException(504, { message: "git receive-pack timed out" });
+          throw new HTTPException(504, {
+            message: "git receive-pack timed out",
+          });
         }
         if (inputError instanceof GitRequestTooLargeError) {
           throw new HTTPException(413, {
@@ -481,6 +567,7 @@ export function gitHttpRoutes(
         await postPush(
           book,
           c.get("gitUserId"),
+          c.get("gitVia"),
           repo,
           Buffer.concat(refPackets),
           code === 0,
@@ -599,6 +686,105 @@ export function gitTokenRoutes({ db }: Deps) {
         action: "book.git.token.revoke",
         targetType: "book",
         targetId: book.id,
+        data: { label: row.label },
+      });
+      return c.json({ ok: true as const });
+    });
+}
+
+/**
+ * /api/me/git-tokens — the personal git tokens of the logged-in user (session
+ * auth). Unlike the per-book tokens above, these work for every book the user
+ * may edit, which is what automation across many books wants.
+ */
+export function userGitTokenRoutes({ db }: Deps) {
+  const tokenParam = validate(
+    "param",
+    z.object({ tokenId: z.string().length(64) }),
+  );
+
+  return new Hono<AuthedEnv>()
+    .use(requireUser)
+
+    .get("/git-tokens", (c) => {
+      const user = c.get("user");
+      const rows = db
+        .select()
+        .from(userGitTokens)
+        .where(eq(userGitTokens.userId, user.id))
+        .orderBy(desc(userGitTokens.createdAt))
+        .all();
+      return c.json(
+        rows.map((r) => ({
+          id: r.idHash,
+          label: r.label,
+          createdAt: r.createdAt.getTime(),
+          lastUsedAt: r.lastUsedAt?.getTime() ?? null,
+          revokedAt: r.revokedAt?.getTime() ?? null,
+        })),
+      );
+    })
+
+    .post("/git-tokens", validate("json", gitTokenInput), (c) => {
+      const user = c.get("user");
+      const { label } = c.req.valid("json");
+      const active = db
+        .select({ n: sql<number>`count(*)` })
+        .from(userGitTokens)
+        .where(
+          and(
+            eq(userGitTokens.userId, user.id),
+            isNull(userGitTokens.revokedAt),
+          ),
+        )
+        .get();
+      if ((active?.n ?? 0) >= MAX_TOKENS_PER_USER) {
+        throw new HTTPException(409, {
+          message: `You already have ${MAX_TOKENS_PER_USER} personal tokens. Revoke one first.`,
+        });
+      }
+      const token = randomToken();
+      const idHash = sha256(token);
+      db.insert(userGitTokens).values({ idHash, userId: user.id, label }).run();
+      audit(db, {
+        actorUserId: user.id,
+        action: "user.git.token.create",
+        targetType: "user",
+        targetId: user.id,
+        data: { label },
+      });
+      // The token is shown once; only its hash is stored.
+      return c.json({ token, id: idHash, label, createdAt: Date.now() });
+    })
+
+    .delete("/git-tokens/:tokenId", tokenParam, (c) => {
+      const user = c.get("user");
+      const { tokenId } = c.req.valid("param");
+      const row = db
+        .select()
+        .from(userGitTokens)
+        .where(
+          and(
+            eq(userGitTokens.idHash, tokenId),
+            eq(userGitTokens.userId, user.id),
+          ),
+        )
+        .get();
+      if (!row) throw new HTTPException(404, { message: "Token not found" });
+      db.update(userGitTokens)
+        .set({ revokedAt: new Date() })
+        .where(
+          and(
+            eq(userGitTokens.idHash, tokenId),
+            isNull(userGitTokens.revokedAt),
+          ),
+        )
+        .run();
+      audit(db, {
+        actorUserId: user.id,
+        action: "user.git.token.revoke",
+        targetType: "user",
+        targetId: user.id,
         data: { label: row.label },
       });
       return c.json({ ok: true as const });

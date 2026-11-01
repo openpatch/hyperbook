@@ -118,58 +118,66 @@ export const aiUsage = sqliteTable(
   (t) => [primaryKey({ columns: [t.userId, t.day] })],
 );
 
-export const books = sqliteTable("books", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  slug: text("slug").notNull().unique(),
-  title: text("title").notNull(),
-  description: text("description").notNull().default(""),
-  visibility: text("visibility", { enum: ["public", "private"] })
-    .notNull()
-    .default("public"),
-  source: text("source", { enum: ["hosted", "external"] })
-    .notNull()
-    .default("hosted"),
-  externalUrl: text("external_url"),
-  createdBy: integer("created_by").references(() => users.id, {
-    onDelete: "set null",
-  }),
-  /**
-   * The build served at the book's address; null when nothing is published.
-   * Not a foreign key: builds reference books, and SQLite cannot add a
-   * cycle's second edge without rebuilding the table.
-   */
-  publishedBuildId: integer("published_build_id"),
-  publishedAt: integer("published_at", { mode: "timestamp_ms" }),
-  /** The newest successful build of any kind, served on the preview host. */
-  previewBuildId: integer("preview_build_id"),
-  /** Size of the current source (the git tree); counts toward its owners' storage. */
-  sourceBytes: integer("source_bytes").notNull().default(0),
-  /** Commits on refs/heads/main; the staleness hint is this minus a build's snapshot. */
-  commitCount: integer("commit_count").notNull().default(0),
-  /**
-   * A custom domain (lowercase host). It serves the book once a CNAME to the
-   * book was found (domain_verified_at); until then other books may claim it too.
-   */
-  domain: text("domain"),
-  domainVerifiedAt: integer("domain_verified_at", { mode: "timestamp_ms" }),
-  domainCheckedAt: integer("domain_checked_at", { mode: "timestamp_ms" }),
-  /** Why the last check failed, for the teacher; null when it passed. */
-  domainProblem: text("domain_problem"),
-  /**
-   * In suffix mode the book's address ends in -<slug_suffix>; it stays the
-   * same when the teacher renames the book. Null: the book never had one.
-   */
-  slugSuffix: text("slug_suffix"),
-  /** Set while the book has an address without suffix that an admin granted. */
-  slugGrantedAt: integer("slug_granted_at", { mode: "timestamp_ms" }),
-  slugGrantedBy: integer("slug_granted_by").references(() => users.id, { onDelete: "set null" }),
-  createdAt: createdAt(),
-  updatedAt: integer("updated_at", { mode: "timestamp_ms" })
-    .notNull()
-    .default(sql`(unixepoch('subsec') * 1000)`),
-}, (t) => [
-  uniqueIndex("books_active_domain_idx").on(t.domain).where(sql`${t.domainVerifiedAt} is not null`),
-]);
+export const books = sqliteTable(
+  "books",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    slug: text("slug").notNull().unique(),
+    title: text("title").notNull(),
+    description: text("description").notNull().default(""),
+    visibility: text("visibility", { enum: ["public", "private"] })
+      .notNull()
+      .default("public"),
+    source: text("source", { enum: ["hosted", "external"] })
+      .notNull()
+      .default("hosted"),
+    externalUrl: text("external_url"),
+    createdBy: integer("created_by").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    /**
+     * The build served at the book's address; null when nothing is published.
+     * Not a foreign key: builds reference books, and SQLite cannot add a
+     * cycle's second edge without rebuilding the table.
+     */
+    publishedBuildId: integer("published_build_id"),
+    publishedAt: integer("published_at", { mode: "timestamp_ms" }),
+    /** The newest successful build of any kind, served on the preview host. */
+    previewBuildId: integer("preview_build_id"),
+    /** Size of the current source (the git tree); counts toward its owners' storage. */
+    sourceBytes: integer("source_bytes").notNull().default(0),
+    /** Commits on refs/heads/main; the staleness hint is this minus a build's snapshot. */
+    commitCount: integer("commit_count").notNull().default(0),
+    /**
+     * A custom domain (lowercase host). It serves the book once a CNAME to the
+     * book was found (domain_verified_at); until then other books may claim it too.
+     */
+    domain: text("domain"),
+    domainVerifiedAt: integer("domain_verified_at", { mode: "timestamp_ms" }),
+    domainCheckedAt: integer("domain_checked_at", { mode: "timestamp_ms" }),
+    /** Why the last check failed, for the teacher; null when it passed. */
+    domainProblem: text("domain_problem"),
+    /**
+     * In suffix mode the book's address ends in -<slug_suffix>; it stays the
+     * same when the teacher renames the book. Null: the book never had one.
+     */
+    slugSuffix: text("slug_suffix"),
+    /** Set while the book has an address without suffix that an admin granted. */
+    slugGrantedAt: integer("slug_granted_at", { mode: "timestamp_ms" }),
+    slugGrantedBy: integer("slug_granted_by").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    createdAt: createdAt(),
+    updatedAt: integer("updated_at", { mode: "timestamp_ms" })
+      .notNull()
+      .default(sql`(unixepoch('subsec') * 1000)`),
+  },
+  (t) => [
+    uniqueIndex("books_active_domain_idx")
+      .on(t.domain)
+      .where(sql`${t.domainVerifiedAt} is not null`),
+  ],
+);
 
 /**
  * A teacher asking for an address without suffix (suffix mode). Kept after
@@ -185,17 +193,26 @@ export const slugRequests = sqliteTable(
     slug: text("slug").notNull(),
     /** What the book is, in the teacher's words. */
     description: text("description").notNull(),
-    status: text("status", { enum: ["pending", "approved", "declined", "withdrawn"] })
+    status: text("status", {
+      enum: ["pending", "approved", "declined", "withdrawn"],
+    })
       .notNull()
       .default("pending"),
-    requestedBy: integer("requested_by").references(() => users.id, { onDelete: "set null" }),
-    decidedBy: integer("decided_by").references(() => users.id, { onDelete: "set null" }),
+    requestedBy: integer("requested_by").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    decidedBy: integer("decided_by").references(() => users.id, {
+      onDelete: "set null",
+    }),
     decidedAt: integer("decided_at", { mode: "timestamp_ms" }),
     /** The admin's note to the teacher. */
     note: text("note").notNull().default(""),
     createdAt: createdAt(),
   },
-  (t) => [index("slug_requests_book_idx").on(t.bookId), index("slug_requests_status_idx").on(t.status)],
+  (t) => [
+    index("slug_requests_book_idx").on(t.bookId),
+    index("slug_requests_status_idx").on(t.status),
+  ],
 );
 
 /** Old slugs of renamed books, so their addresses can redirect. */
@@ -284,7 +301,15 @@ export const builds = sqliteTable(
       enum: ["queued", "running", "succeeded", "failed", "canceled"],
     }).notNull(),
     trigger: text("trigger", {
-      enum: ["upload", "rebuild", "edit", "publish", "upgrade", "push", "rollback"],
+      enum: [
+        "upload",
+        "rebuild",
+        "edit",
+        "publish",
+        "upgrade",
+        "push",
+        "rollback",
+      ],
     }).notNull(),
     /**
      * An upgrade build rebuilds a published build with a newer Hyperbook; it
@@ -332,7 +357,9 @@ export const studentSessions = sqliteTable(
       onDelete: "cascade",
     }),
     /** False for "shared device" logins: shorter, never extended. */
-    persistent: integer("persistent", { mode: "boolean" }).notNull().default(true),
+    persistent: integer("persistent", { mode: "boolean" })
+      .notNull()
+      .default(true),
     expiresAt: integer("expires_at", { mode: "timestamp_ms" }).notNull(),
     lastSeenAt: integer("last_seen_at", { mode: "timestamp_ms" }).notNull(),
     createdAt: createdAt(),
@@ -378,7 +405,9 @@ export const storeEvents = sqliteTable(
     revision: integer("revision").notNull(),
     tableName: text("table_name").notNull(),
     tableSchema: text("table_schema"),
-    operation: text("operation", { enum: ["create", "update", "delete"] }).notNull(),
+    operation: text("operation", {
+      enum: ["create", "update", "delete"],
+    }).notNull(),
     primKey: text("prim_key").notNull(),
     data: text("data"),
     createdAt: createdAt(),
@@ -452,6 +481,26 @@ export const gitTokens = sqliteTable(
     createdAt: createdAt(),
   },
   (t) => [index("git_tokens_book_user_idx").on(t.bookId, t.userId)],
+);
+
+/**
+ * Personal git tokens: like git_tokens, but not tied to one book — they work
+ * for every book the user may edit. For automation that touches many books.
+ */
+export const userGitTokens = sqliteTable(
+  "user_git_tokens",
+  {
+    /** sha256 of the opaque token; the token itself is never stored. */
+    idHash: text("id_hash").primaryKey(),
+    userId: integer("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    label: text("label").notNull().default(""),
+    lastUsedAt: integer("last_used_at", { mode: "timestamp_ms" }),
+    revokedAt: integer("revoked_at", { mode: "timestamp_ms" }),
+    createdAt: createdAt(),
+  },
+  (t) => [index("user_git_tokens_user_idx").on(t.userId)],
 );
 
 /**

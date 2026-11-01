@@ -129,6 +129,24 @@ export const en = {
     language: "Language",
     languageHint:
       "The language of the pages and emails. “Automatic” follows the instance and your browser.",
+    git: {
+      title: "Git tokens (all books)",
+      hint: "A personal token works for every book you may edit: use username git and the token as the password when git asks — handy for automation. Per-book tokens live in each book's publishing dialog.",
+      tokenLabel: "Token label (optional)",
+      createToken: "Create token",
+      createTokenFailed: "Could not create a token",
+      revokeFailed: "Could not revoke the token",
+      token: "Token",
+      lastUsed: "Last used",
+      revoked: "revoked",
+      revoke: "Revoke",
+      revokeTitle: "Revoke this token?",
+      revokeDescription:
+        "It stops working at once for every book. The token itself cannot be shown again — create a new one if you need it.",
+      tokenTitle: "Your personal git token",
+      tokenDescription:
+        "Use it as the password with username git for any of your books. It is shown only now — store it somewhere safe.",
+    },
   },
   instance: {
     language: "Language",
@@ -1043,7 +1061,8 @@ export const en = {
       copied: "Copied",
       copyAria: "Copy the clone command",
       authHint1: "Git asks for a username and password: use",
-      authHint2: "and one of your tokens below. To save typing, run once:",
+      authHint2:
+        "and a git token — one of yours below, or a personal one from “Your account”. To save typing, run once:",
       tokenLabel: "Token label (optional)",
       createToken: "Create token",
       createTokenFailed: "Could not create a token",

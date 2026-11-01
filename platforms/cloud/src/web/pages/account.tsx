@@ -1,12 +1,30 @@
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
+import { KeyRoundIcon } from "lucide-react";
+import { useState } from "react";
 import { z } from "zod";
-import { changeEmailInput, changePasswordInput, updateMeInput } from "../../shared/schemas";
+import {
+  changeEmailInput,
+  changePasswordInput,
+  updateMeInput,
+} from "../../shared/schemas";
+import { ConfirmButton } from "@/components/confirm-button";
 import { LanguageSelect } from "@/components/language-select";
 import { PageHeader, Section } from "@/components/page-header";
+import { SecretDialog } from "@/components/secret-dialog";
 import { StorageUsage } from "@/components/storage-usage";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { api, unwrap } from "@/lib/api";
 import { FormError, TextField, applyServerError, useZodForm } from "@/lib/form";
 import { useAiStatus, type AiStatus } from "@/lib/ai";
@@ -57,15 +75,19 @@ export function AccountPage() {
     }
   });
 
-  const changePassword = password.handleSubmit(async ({ currentPassword, newPassword }) => {
-    try {
-      await unwrap(api.me.password.$put({ json: { currentPassword, newPassword } }));
-      password.reset();
-      toast.success(t("account.passwordChanged"));
-    } catch (error) {
-      applyServerError(password, error);
-    }
-  });
+  const changePassword = password.handleSubmit(
+    async ({ currentPassword, newPassword }) => {
+      try {
+        await unwrap(
+          api.me.password.$put({ json: { currentPassword, newPassword } }),
+        );
+        password.reset();
+        toast.success(t("account.passwordChanged"));
+      } catch (error) {
+        applyServerError(password, error);
+      }
+    },
+  );
 
   return (
     <>
@@ -90,7 +112,12 @@ export function AccountPage() {
 
       <Section title={t("account.email")} description={t("account.emailHint")}>
         <form onSubmit={changeEmail} className="grid max-w-md gap-4" noValidate>
-          <TextField form={emailForm} name="email" label={t("account.email")} type="email" />
+          <TextField
+            form={emailForm}
+            name="email"
+            label={t("account.email")}
+            type="email"
+          />
           <TextField
             form={emailForm}
             name="currentPassword"
@@ -106,8 +133,18 @@ export function AccountPage() {
         </form>
       </Section>
 
-      <Section title={t("account.language")} description={t("account.languageHint")}>
+      <Section
+        title={t("account.language")}
+        description={t("account.languageHint")}
+      >
         <LanguageSelect automatic />
+      </Section>
+
+      <Section
+        title={t("account.git.title")}
+        description={t("account.git.hint")}
+      >
+        <GitTokens />
       </Section>
 
       <div className="grid gap-x-6 md:grid-cols-2 [&_section]:mb-6">
@@ -121,7 +158,11 @@ export function AccountPage() {
         )}
       </div>
       <Section title={t("account.password")}>
-        <form onSubmit={changePassword} className="grid max-w-md gap-4" noValidate>
+        <form
+          onSubmit={changePassword}
+          className="grid max-w-md gap-4"
+          noValidate
+        >
           <TextField
             form={password}
             name="currentPassword"
@@ -156,6 +197,131 @@ export function AccountPage() {
   );
 }
 
+/** Personal git tokens: username git + token works for every book one may edit. */
+function GitTokens() {
+  const { t } = useTranslation();
+  const queryClient = useQueryClient();
+  const { data: tokens } = useQuery({
+    queryKey: ["me", "git-tokens"],
+    queryFn: () => unwrap(api.me["git-tokens"].$get()),
+  });
+  const [label, setLabel] = useState("");
+  const [secret, setSecret] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  const refresh = () =>
+    queryClient.invalidateQueries({ queryKey: ["me", "git-tokens"] });
+
+  const create = async () => {
+    setBusy(true);
+    try {
+      const res = await unwrap(
+        api.me["git-tokens"].$post({ json: { label: label.trim() } }),
+      );
+      setSecret(res.token);
+      setLabel("");
+      await refresh();
+    } catch (error) {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : t("account.git.createTokenFailed"),
+      );
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const revoke = async (tokenId: string) => {
+    try {
+      await unwrap(
+        api.me["git-tokens"][":tokenId"].$delete({ param: { tokenId } }),
+      );
+      await refresh();
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : t("account.git.revokeFailed"),
+      );
+    }
+  };
+
+  return (
+    <div>
+      <div className="flex items-center gap-2">
+        <Input
+          className="w-56"
+          placeholder={t("account.git.tokenLabel")}
+          maxLength={100}
+          value={label}
+          onChange={(e) => setLabel(e.target.value)}
+          aria-label={t("account.git.tokenLabel")}
+        />
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={busy}
+          onClick={() => void create()}
+        >
+          <KeyRoundIcon aria-hidden /> {t("account.git.createToken")}
+        </Button>
+      </div>
+
+      {tokens && tokens.length > 0 && (
+        <Table className="mt-2">
+          <TableHeader>
+            <TableRow>
+              <TableHead>{t("account.git.token")}</TableHead>
+              <TableHead>{t("account.git.lastUsed")}</TableHead>
+              <TableHead>
+                <span className="sr-only">{t("common.actions")}</span>
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {tokens.map((token) => (
+              <TableRow key={token.id}>
+                <TableCell>
+                  {token.label || (
+                    <span className="text-muted-foreground">—</span>
+                  )}
+                  {token.revokedAt !== null && (
+                    <Badge variant="outline">{t("account.git.revoked")}</Badge>
+                  )}
+                </TableCell>
+                <TableCell>
+                  {token.lastUsedAt
+                    ? new Date(token.lastUsedAt).toLocaleString()
+                    : t("common.never")}
+                </TableCell>
+                <TableCell className="text-right">
+                  {token.revokedAt === null && (
+                    <ConfirmButton
+                      size="sm"
+                      title={t("account.git.revokeTitle")}
+                      description={t("account.git.revokeDescription")}
+                      confirmLabel={t("account.git.revoke")}
+                      onConfirm={() => revoke(token.id)}
+                    >
+                      {t("account.git.revoke")}
+                    </ConfirmButton>
+                  )}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      )}
+
+      <SecretDialog
+        secret={secret}
+        title={t("account.git.tokenTitle")}
+        description={t("account.git.tokenDescription")}
+        onClose={() => setSecret(null)}
+      />
+    </div>
+  );
+}
+
 /** This week's credits and today's requests, in the same shape as the storage meter. */
 function AiUsage({ status }: { status: AiStatus }) {
   const { t } = useTranslation();
@@ -180,15 +346,25 @@ function AiUsage({ status }: { status: AiStatus }) {
           aria-valuemax={limit}
           aria-valuenow={used}
         >
-          <div className={share > 0.9 ? "h-full bg-destructive" : "h-full bg-primary"} style={{ width: `${share * 100}%` }} />
+          <div
+            className={
+              share > 0.9 ? "h-full bg-destructive" : "h-full bg-primary"
+            }
+            style={{ width: `${share * 100}%` }}
+          />
         </div>
       )}
       <p className="text-sm text-muted-foreground">
         {status.quota === null
           ? t("editor.ai.requestsUnlimited", { used: status.usedToday })
-          : t("editor.ai.requests", { used: status.usedToday, limit: status.quota })}
+          : t("editor.ai.requests", {
+              used: status.usedToday,
+              limit: status.quota,
+            })}
       </p>
-      <p className="text-sm text-muted-foreground">{t("editor.ai.creditsTitle", { date: status.tokensResetOn })}</p>
+      <p className="text-sm text-muted-foreground">
+        {t("editor.ai.creditsTitle", { date: status.tokensResetOn })}
+      </p>
     </div>
   );
 }
