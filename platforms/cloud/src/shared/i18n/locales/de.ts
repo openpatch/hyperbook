@@ -248,7 +248,7 @@ export const de: Messages = {
       creditsTitle:
         "KI-Credits diese Woche: Tokens mal Gewicht des Modells. Sie werden am {{date}} erneuert.",
       creditsUsed: "{{used}} Credits diese Woche verbraucht",
-      modelWeight: "{{model}} (×{{weight}})",
+      modelCost: "{{model}} (×{{cost}})",
       answerUsage: "Kosten dieser Antwort: {{credits}} Credits.",
       clearHistory: "Verlauf löschen",
       promptPlaceholder:

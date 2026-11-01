@@ -251,7 +251,7 @@ export const en = {
       creditsTitle:
         "AI credits this week: tokens times the model's weight. They refill on {{date}}.",
       creditsUsed: "{{used}} credits used this week",
-      modelWeight: "{{model}} (×{{weight}})",
+      modelCost: "{{model}} (×{{cost}})",
       answerUsage: "Cost of this answer: {{credits}} credits.",
       clearHistory: "Clear the conversation",
       promptPlaceholder: "Ask about this page — or select text first…",

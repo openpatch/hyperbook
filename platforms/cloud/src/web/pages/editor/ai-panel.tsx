@@ -12,7 +12,7 @@ import { ConflictError } from "./workspace";
 import {
   assist,
   contextOf,
-  formatWeight,
+  formatRelativeCost,
   selectionOf,
   useAiStatus,
   weightValue,
@@ -124,6 +124,14 @@ export function AiPanel({
     status.data && status.data.enabled && status.data.allowed
       ? status.data
       : null;
+  /** The cheapest model's cost — the ×1 the other models are shown against. */
+  const cheapestModelCost = status.data
+    ? Math.min(
+        ...status.data.models.map((m) =>
+          weightValue(status.data?.modelWeights[m]),
+        ),
+      )
+    : 1;
   const creditsBar =
     credits && credits.tokenQuota !== null && credits.tokenQuota > 0 ? (
       <div
@@ -430,8 +438,8 @@ export function AiPanel({
             </SelectTrigger>
             <SelectContent>
               {[...status.data.models]
-                // Cheapest first: by the token multiplier (the weight shown),
-                // ties by the name teachers see — the label, else the id.
+                // Cheapest first: by cost, ties by the name teachers see —
+                // the label, else the id.
                 .sort((a, b) => {
                   const byCost =
                     weightValue(status.data?.modelWeights[a]) -
@@ -444,9 +452,12 @@ export function AiPanel({
                 })
                 .map((name) => (
                 <SelectItem key={name} value={name}>
-                  {t("editor.ai.modelWeight", {
+                  {t("editor.ai.modelCost", {
                     model: status.data?.modelLabels[name] || name,
-                    weight: formatWeight(status.data?.modelWeights[name]),
+                    cost: formatRelativeCost(
+                      status.data?.modelWeights[name],
+                      cheapestModelCost,
+                    ),
                   })}
                 </SelectItem>
                 ))}

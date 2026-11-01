@@ -39,13 +39,17 @@ export function weightValue(w: ModelWeights | undefined): number {
 }
 
 /**
- * A model's cost hint for the picker: the average of its three weights as
- * one number a teacher can compare, not "in/cached/out" jargon. Two
- * significant digits, so price-calibrated weights (e.g. 0.000017) stay
- * distinguishable instead of all rounding to 0.0.
+ * A model's cost hint for the picker, relative to the cheapest model: the
+ * cheapest is ×1, the others scale up from it — one number a teacher can
+ * compare, without the tiny price-calibrated weights (e.g. 0.000017).
+ * Two significant digits, so small differences stay distinguishable.
  */
-export function formatWeight(w: ModelWeights | undefined): string {
-  return weightValue(w).toPrecision(2);
+export function formatRelativeCost(
+  w: ModelWeights | undefined,
+  cheapest: number,
+): string {
+  const factor = weightValue(w) / (cheapest > 0 ? cheapest : 1);
+  return factor === 1 ? "1" : factor.toPrecision(2);
 }
 
 export function useAiStatus() {
