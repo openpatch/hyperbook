@@ -11,7 +11,7 @@ import { useTranslation } from "react-i18next";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { fuzzyMatch } from "./quick-open-fuzzy";
+import { fuzzyMatch, markRuns } from "./quick-open-fuzzy";
 
 /**
  * Wraps the characters the query matched in <mark>, so people can see *why*
@@ -21,28 +21,21 @@ import { fuzzyMatch } from "./quick-open-fuzzy";
  * top of the row's own state colors.
  *
  * `marks` are the matched indices into `text`, ascending; adjacent marks
- * merge into one <mark>.
+ * merge into one <mark>. Everything around the marks is still the path —
+ * dropping the part after the last mark would show "book/fi" for
+ * book/first-steps.md, a file that is not there.
  */
 function highlight(text: string, marks: number[]): ReactNode {
-  if (marks.length === 0) return text;
+  const runs = markRuns(marks);
+  if (runs.length === 0) return text;
   const parts: ReactNode[] = [];
-  let runStart = -1;
-  let plainFrom = 0;
-  let m = 0;
-  for (let i = 0; i < text.length; i++) {
-    if (m < marks.length && marks[m] === i) {
-      if (runStart === -1) {
-        if (i > plainFrom) parts.push(text.slice(plainFrom, i));
-        runStart = i;
-      }
-      m++;
-    } else if (runStart !== -1) {
-      parts.push(marked(text.slice(runStart, i), runStart));
-      runStart = -1;
-      plainFrom = i;
-    }
+  let from = 0;
+  for (const [start, end] of runs) {
+    if (start > from) parts.push(text.slice(from, start));
+    parts.push(marked(text.slice(start, end), start));
+    from = end;
   }
-  if (runStart !== -1) parts.push(marked(text.slice(runStart), runStart));
+  if (from < text.length) parts.push(text.slice(from));
   return parts;
 }
 
@@ -163,6 +156,15 @@ export function QuickOpen({
 
   const openTabs = useMemo(() => new Set(tabs), [tabs]);
 
+  // The listing is the search space, plus any open tab it does not know
+  // yet: a file just created and opened can be searched even if the
+  // listing query has not refreshed.
+  const searchable = useMemo(() => {
+    const known = new Set(files);
+    const extra = tabs.filter((path) => !known.has(path));
+    return extra.length === 0 ? files : [...files, ...extra];
+  }, [files, tabs]);
+
   const matches = useMemo(() => {
     const needle = query.trim().toLowerCase();
     const scored: {
@@ -174,7 +176,7 @@ export function QuickOpen({
       length: number;
       begin: number;
     }[] = [];
-    for (const path of files) {
+    for (const path of searchable) {
       const match = fuzzyMatch(needle, path);
       if (!match) continue;
       const nameStart = path.lastIndexOf("/") + 1;
@@ -202,7 +204,7 @@ export function QuickOpen({
           a.path.localeCompare(b.path),
       )
       .slice(0, 100);
-  }, [files, openTabs, query]);
+  }, [searchable, openTabs, query]);
 
   // The selection follows the matches; the chosen item scrolls into view.
   useEffect(() => setSelected(0), [query]);

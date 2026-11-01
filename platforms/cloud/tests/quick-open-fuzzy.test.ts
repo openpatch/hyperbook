@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { fuzzyMatch } from "../src/web/pages/editor/quick-open-fuzzy";
+import { fuzzyMatch, markRuns } from "../src/web/pages/editor/quick-open-fuzzy";
 
 /** Query and path the way the dialog passes them: query lower-cased. */
 function match(query: string, path: string) {
@@ -75,5 +75,24 @@ describe("fuzzyMatch (fzf V2)", () => {
     const inFolder = match("fir", "book/unterricht/firefox/readme.md")!;
     expect(inName.score).toBe(inFolder.score);
     expect(inName.positions).toEqual([16, 17, 18]);
+  });
+});
+
+describe("markRuns", () => {
+  it("groups adjacent marks into one run, as [start, end)", () => {
+    expect(markRuns([16, 17, 18])).toEqual([[16, 19]]);
+    expect(markRuns([0, 2, 4, 5])).toEqual([
+      [0, 1],
+      [2, 3],
+      [4, 6],
+    ]);
+  });
+
+  it("returns no runs for no marks", () => {
+    expect(markRuns([])).toEqual([]);
+  });
+
+  it("covers a mark at the very end", () => {
+    expect(markRuns([4])).toEqual([[4, 5]]);
   });
 });

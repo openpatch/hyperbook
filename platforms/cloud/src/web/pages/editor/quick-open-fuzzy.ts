@@ -69,6 +69,21 @@ function bonusFor(prevClass: CharClass, class_: CharClass): number {
   return 0;
 }
 
+/**
+ * Groups matched indices into the runs of adjacent characters they form,
+ * as [start, end) pairs — one <mark> each for the dialog to render.
+ * `marks` must be ascending, as fuzzyMatch returns them.
+ */
+export function markRuns(marks: number[]): [number, number][] {
+  const runs: [number, number][] = [];
+  for (const at of marks) {
+    const last = runs[runs.length - 1];
+    if (last !== undefined && at === last[1]) last[1] = at + 1;
+    else runs.push([at, at + 1]);
+  }
+  return runs;
+}
+
 /** Where in `text` the case-folded `ch` is, at or after `from`. */
 function indexOfFolded(text: string, ch: string, from: number): number {
   for (let i = from; i < text.length; i++) {
