@@ -92,3 +92,22 @@ code[data-theme*=" "] span {
   );
   --bitflow-color-on-primary: var(--color-background);
 }
+
+/* The playground's tokens are light-dark() pairs and follow the book's colour
+   tokens (`--jmp-surface`/`--jmp-text`/`--jmp-accent` read `--color-background`/
+   `--color-text`/`--color-brand` themselves); `color-scheme` is the switch
+   that gives the rest of them, and the playground's native controls, the dark
+   values. */
+.directive-jmp {
+  color-scheme: dark;
+
+  /* Raised surfaces — the toolbar buttons, the step log, the floating panels —
+     are the book's author surface rather than the page background, the same
+     mapping bitflow gets above. */
+  --jmp-surface-sunken: var(--color-author-background);
+  --jmp-panel: color-mix(
+    in srgb,
+    var(--color-author-background) 92%,
+    transparent
+  );
+}

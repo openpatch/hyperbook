@@ -115,7 +115,7 @@
     "@hyperbook/fs": "workspace:*",
     "@hyperbook/types": "workspace:*",
     "@hyperbook/web-component-excalidraw": "workspace:*",
-    "@java-memory-playground/web-component": "^0.3.4",
+    "@java-memory-playground/web-component": "^0.3.5",
     "@learningmap/web-component": "^0.3.10",
     "@raspberrypifoundation/python-friendly-error-messages": "^0.8.0",
     "@shikijs/types": "^4.5.0",

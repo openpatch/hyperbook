@@ -24,11 +24,11 @@
   z-index: 5;
 }
 
-/* The playground's canvas is always light, whatever theme the book is read in,
-   so this button is coloured like the playground's own panels rather than like
-   the page around it — in a dark book the book's colours would be invisible
-   here. The values are the playground's `--jmp-*` tokens, which are scoped to
-   the element and so cannot be referred to from outside it. */
+/* The buttons sit outside the playground element, so they cannot read its
+   `--jmp-*` tokens (those are scoped to the element); they wear the book's own
+   tokens instead, which flip with the theme — the same pattern learningmap
+   uses — so in a dark book they match the playground's dark panels rather than
+   staying light. */
 .directive-jmp .buttons button {
   display: flex;
   align-items: center;
@@ -38,14 +38,14 @@
   padding: 0;
   border: 0;
   border-radius: 6px;
-  background-color: #f5f5f5;
-  color: #3c3c3c;
+  background-color: var(--color-author-background, #f5f5f5);
+  color: var(--color-author-color, #3c3c3c);
   box-shadow: 0 1px 3px rgb(0 0 0 / 8%);
   cursor: pointer;
 }
 
 .directive-jmp .buttons button:hover {
-  background-color: #d6d6d6;
+  background-color: var(--color-spacer, #d6d6d6);
 }
 
 .directive-jmp .buttons button .icon {
@@ -54,14 +54,16 @@
   display: block;
 }
 
-/* A toggle reads as on by being filled in, matching the playground's own. */
+/* A toggle reads as on by being filled in, matching the playground's own:
+   the page's ink on its background. */
 .directive-jmp .buttons button.active {
-  background-color: #242428;
-  color: #f5f5f5;
+  background-color: var(--color-text, #242428);
+  color: var(--color-background, #ffffff);
 }
 
 .directive-jmp .buttons button.active:hover {
-  background-color: #3c3c3c;
+  background-color: var(--color-text-deactivated, #3c3c3c);
+  color: var(--color-background, #ffffff);
 }
 
 /* The figure is sized by an inline `height` from the directive, which has to
@@ -71,12 +73,13 @@
   height: 100dvh !important;
   border: none;
   border-radius: 0;
-  background-color: #ffffff;
+  /* The playground's canvas follows the book's theme (`--jmp-surface` reads
+     `--color-background`), so the fullscreen backdrop does too — a light
+     backdrop would show as a frame around a dark canvas while the browser
+     animates into fullscreen. */
+  background-color: var(--color-background, #ffffff);
 }
 
-/* The playground's canvas is white whatever the book's theme, so the backdrop
-   behind it is too — a dark backdrop would show as a frame around it while the
-   browser animates into fullscreen. */
 .directive-jmp:fullscreen::backdrop {
-  background-color: #ffffff;
+  background-color: var(--color-background, #ffffff);
 }
