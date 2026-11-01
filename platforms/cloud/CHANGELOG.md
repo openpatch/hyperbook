@@ -1,5 +1,21 @@
 # @hyperbook/cloud
 
+## 0.5.1
+
+### Patch Changes
+
+- [`d7e75a6`](https://github.com/openpatch/hyperbook/commit/d7e75a674aefb0d492110012519cce4bef28ccb6) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Editor: a History pane shows the book's commits — every save, upload and push is one — with its author, date, message and line counts (+/−, binary files aside). The list is paged from the server (a book can have many commits) and can be narrowed to the changes of the open file. Clicking a commit shows its diff in a dialog; commits never change, so each diff is fetched once and carries its sha as the ETag. The pane joins the editor next to the AI assistant and the preview, resizable like they are, in English and German.
+
+- [`e025c5f`](https://github.com/openpatch/hyperbook/commit/e025c5f00f3403e911c82a82d3565fe3fc22bd91) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Editor: the file sidebar's filter is fuzzy now, like quick open (Ctrl/Cmd+P): typing finds files whose characters appear in the path in order, ranked by fzf's scoring — matches at word boundaries and in the file name first — and the matched characters are highlighted in the results, readable in dark mode too.
+
+- [`b1bdc30`](https://github.com/openpatch/hyperbook/commit/b1bdc30d6d39d45614cb80bb56f62f6d78c2de26) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Editor: the quick open dialog's search (Ctrl/Cmd+P) is now fuzzy, powered by a port of fzf's V2 algorithm (fzf's "path" scheme): a query matches a path when all its characters appear in it in order, so "sovh" finds "sortierverfahren.md" without typing the whole word. Results are ranked with fzf's scoring — matches at word boundaries, consecutive characters, and camelCase humps score best, with fzf's default tiebreaks — plus one file-picker rule: matches in the file name outrank matches in a folder. The matched characters are highlighted wherever they sit, in the file name or in a folder, readable in dark mode too.
+
+- [`5fd7344`](https://github.com/openpatch/hyperbook/commit/5fd7344d6a8c2fac9c6b776e03a26d71a14b2988) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Editor: the quick open dialog (Ctrl/Cmd+P) is now usable on books with long file paths, like hyperbook-informatik. The dialog grew from 28rem to up to 48rem wide, each row leads with the file name in bold followed by the directory in a dimmer color, and when a path still does not fit, the directory is clipped from the left so the folders next to the file stay visible. The characters the query matched are highlighted — readable in dark mode too — and the "open" badge no longer gets cut off.
+
+- [`9809715`](https://github.com/openpatch/hyperbook/commit/980971526ed7edfb4c96a2f6589c4e75c3ff12c3) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Editor: the file tree no longer slows the editor down on large books. Toggling a folder or typing in the filter re-renders only the sidebar instead of the whole editor, tree rows are memoized, and the tree is built without repeated sibling scans. The tree is now virtualized, so only the rows near the viewport are in the DOM however big the book is, and the filter renders from a deferred value so typing stays responsive even with thousands of matches. Quick open's list is memoized the same way. Folders now start collapsed, so a large book opens quickly and stays clear until unfolded.
+
+- [`aed7a3c`](https://github.com/openpatch/hyperbook/commit/aed7a3cf741df232d2f7ee6a98d4efaf70e349ce) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Preview rendering is no longer slow on large books. A page render of the editor's preview re-read and re-parsed every page of the book (three times over, plus a regex scan of every page per glossary term); pages and hyperbook.json are now cached by their modification times, the glossary's references are collected in one scan per page, and the directory walks stat only what they must. A save no longer re-checks out every file of the book: the preview's checkout is brought to the new commit by writing only what changed, which also keeps the caches warm. For a 4,000-file book, a preview render drops from ~4 s to ~0.3 s, and the checkout behind a save from rewriting every file to writing the one that changed.
+
 ## 0.5.0
 
 ### Minor Changes
