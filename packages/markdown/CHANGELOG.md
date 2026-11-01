@@ -1,5 +1,11 @@
 # @hyperbook/markdown
 
+## 0.91.1
+
+### Patch Changes
+
+- [`30c5d56`](https://github.com/openpatch/hyperbook/commit/30c5d5655fda2927b402bc51846f7c27f2297a1b) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fixed element runtimes a host serves itself (Hyperbook Cloud's shared assets under `/_hyperbook/assets/<version>/`) failing to load on preview and published pages. Their root-relative addresses were buried under the directive's assets folder — a page asked for `/__hyperbook_assets/directive-onlineide/_hyperbook/assets/…/online-ide-embedded.js`, which 404s; browsers refuse the HTML error page as a module ("disallowed MIME type") and the IDE never appears. Directive scripts and styles whose address is already resolved (external or root-relative) now go into the page unchanged.
+
 ## 0.91.0
 
 ### Minor Changes
