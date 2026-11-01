@@ -104,9 +104,12 @@ export function createAdminApp(deps: Deps, options: { webRoot?: string } = {}) {
         // from anywhere on the web.
         imgSrc: ["'self'", "data:", "blob:", "https:"],
         connectSrc: ["'self'"],
-        // The editor frames the preview host of the book and visual.html.
+        // The editor frames the preview host of the book and visual.html,
+        // and a book's PDF files through blob: (their raw bytes come as an
+        // attachment, so the client re-blobs them with the right type).
         frameSrc: [
           "'self'",
+          "blob:",
           `${deps.config.booksProtocol}//*.${deps.config.booksDomain}`,
         ],
         objectSrc: ["'none'"],

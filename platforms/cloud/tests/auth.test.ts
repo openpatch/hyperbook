@@ -223,7 +223,7 @@ describe("security headers", () => {
     const res = await client(instance).get("/api/instance/public");
     const csp = res.headers.get("content-security-policy")!;
     expect(csp).toContain("frame-ancestors 'self'");
-    expect(csp).toContain("frame-src 'self' http://*.books.test");
+    expect(csp).toContain("frame-src 'self' blob: http://*.books.test");
     expect(res.headers.get("x-frame-options")).toBe("SAMEORIGIN");
   });
 });
