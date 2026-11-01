@@ -1,5 +1,34 @@
 # @hyperbook/cloud
 
+## 0.5.2
+
+### Patch Changes
+
+- [`e41a6a9`](https://github.com/openpatch/hyperbook/commit/e41a6a9082e2e54459c7c23bbac33ad776aee5c6) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - The AI model chooser in the editor now shows each model's cost relative to the cheapest one (×1, ×2.3, …) instead of the raw per-token weight, which was a tiny price-calibrated number (e.g. ×0.000077) teachers couldn't compare. Models are still sorted cheapest first. In English and German.
+  ---
+
+- [`de46043`](https://github.com/openpatch/hyperbook/commit/de460436bac637e0055decfec9e5a4a794efe47d) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - The code editor's dark theme is more readable: comments, quotes and directive punctuation now use a stronger muted tone (about 6:1 contrast on the dark background instead of 5:1), and the search panel's input and buttons follow the theme instead of the browser's light defaults. In English and German.
+
+- [`a48a8cd`](https://github.com/openpatch/hyperbook/commit/a48a8cdb28bac0c1eb6e6e9df32cbb296fd0a9e9) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Markdown lists in the editor were highlighted in the same grey italic as comments, which also swallowed the link color of links inside list items; lists now use the normal text color again and links keep their own color. Container directives (`:::p5 … :::`) are now foldable: the fold gutter and the fold keymap fold a directive from its opening line through its closing line, with nested directives folding independently.
+
+- [`3dfedc5`](https://github.com/openpatch/hyperbook/commit/3dfedc5d58ddb5520435e14a045a1e84a3597a79) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - The editor's github-light/dark themes now contribute only their syntax colors: the packages' own editor background, gutters, active line, selection and tooltips are reset to the app's design tokens, so the editor blends into Hyperbook Cloud instead of showing GitHub's `#0d1117` surface. In English and German.
+
+- [`50e4de6`](https://github.com/openpatch/hyperbook/commit/50e4de6694e1cd6db11772714ce2624ff7198614) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Code files in the editor (Java, Python, SQL, .scad, …) now use GitHub's own light/dark themes (`github-light`/`github-dark`) instead of the hand-picked `--hl-*` palette, switched live with the app's theme toggle. Markdown pages keep their theme-aware style. In English and German.
+
+- [`4894621`](https://github.com/openpatch/hyperbook/commit/4894621917e876eacae8d473a19c6e24df77a759) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - The editor now uses Hyperbook's own `hyperbook-light`/`hyperbook-dark` syntax themes (`pages/editor/syntax-theme.ts`) instead of the third-party github theme packages, which brought their own editor background along. The rolled-own palette fits Hyperbook's brand (teal/mint accents), works for code files and Markdown pages alike, carries no chrome of its own, and every color is at least 4.5:1 on its background (guarded by a test). The `--hl-*` directive colors in app.css match the new palette. In English and German.
+
+- [`fb3998f`](https://github.com/openpatch/hyperbook/commit/fb3998fb14d0c2d070768bd5e7648268a365658c) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - `:::multievent` blocks in the editor now get real syntax highlighting instead of one flat background: the event command (`r1`, `R`, `z`, `X`, …) is colored like a directive name, braces and the `|`/`~~` separators as punctuation, a leading `!` as the correct-term marker, and the terms as values — in the light and dark themes alike, with nested braces (e.g. in `$\sqrt{2}$`) handled. In English and German.
+
+- [`0c73dee`](https://github.com/openpatch/hyperbook/commit/0c73dee41a9b138c45d099817108f288185af246) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - PDF files opened in the editor now show a preview in the browser's built-in PDF viewer instead of the "cannot be edited here" notice. The raw file endpoint serves bytes as an attachment, so the client re-blobs them with the `application/pdf` type, the same way images are shown; a PDF is never classified as editable text. The admin app's CSP now allows `blob:` in `frame-src` for that frame. The tab still offers Download and Replace.
+
+- [`50e4de6`](https://github.com/openpatch/hyperbook/commit/50e4de6694e1cd6db11772714ce2624ff7198614) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - `.scad` files (OpenSCAD) now get syntax highlighting in the editor, highlighted as C++ like the `openscad` directive's own preview does, with the same light/dark-aware colors as every other code file. In English and German.
+
+- [`6adb788`](https://github.com/openpatch/hyperbook/commit/6adb78843998a3d5f08956b172ea07685e3ad485) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - The editor's file tabs now have a right-click context menu with Close, Close others and Close all; closing tabs with unsaved changes asks first and lists the unsaved files, and the "Save all" toolbar button now opens a list of the files with unsaved changes. In English and German.
+
+- [`6524c71`](https://github.com/openpatch/hyperbook/commit/6524c712431a615006afafe0770581abd4c95985) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Git over HTTPS now also accepts a personal git token, not just a per-book one: create it under Your account → "Git tokens (all books)", then use username `git` and the token as the password for every book you may edit — handy for automation across many books, without giving each book its own token. Personal tokens are revocable at once and the push audit log records whether a per-book or a personal token was used. Per-book tokens stay as they are; the account password is deliberately not accepted for git. In English and German.
+
+- [`f632484`](https://github.com/openpatch/hyperbook/commit/f6324847d97180b8431d9c8840df799c7dac2f4e) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - The java-memory-playground directive now follows the book's dark theme instead of staying light: `dark.css` sets `color-scheme: dark` on `.directive-jmp` and maps the playground's raised surfaces (`--jmp-surface-sunken`, `--jmp-panel`) to the book's author background, the same mapping bitflow gets, and the fullscreen/reset buttons and fullscreen backdrop in `directive-jmp/style.css` use the book's colour tokens with the old light values as fallbacks, so they stay visible in dark books. The floor for `@java-memory-playground/web-component` is raised to `^0.3.5`, whose own tokens provide the dark values; the cloud editor's pin of `@java-memory-playground/java-memory-playground` follows to `0.2.6`, the core version books render with.
+
 ## 0.5.1
 
 ### Patch Changes
