@@ -89,9 +89,11 @@
   --hl-function: #6639ba;
   --hl-property: #0550ae;
   --hl-error: var(--color-sync-error);
+  /* Comments, quotes and punctuation: 65% text keeps them readable on
+     both backgrounds (about 7:1 light, 6:1 dark) while staying dim. */
   --hl-muted: color-mix(
     in srgb,
-    var(--color-text) 55%,
+    var(--color-text) 65%,
     var(--color-background)
   );
 }

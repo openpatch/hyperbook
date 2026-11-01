@@ -122,6 +122,18 @@ const theme = EditorView.theme({
     color: "var(--color-text)",
     backgroundColor: "var(--color-nav)",
   },
+  // The search panel's controls: the browser's light defaults would sit
+  // unreadably on the dark panel.
+  ".cm-textfield, .cm-panels input": {
+    color: "var(--color-text)",
+    backgroundColor: "var(--color-background)",
+    border: "1px solid var(--color-nav-border)",
+  },
+  ".cm-button, .cm-panels button": {
+    color: "var(--color-text)",
+    backgroundColor: "var(--color-nav)",
+    border: "1px solid var(--color-nav-border)",
+  },
   ".cm-edit-visually": {
     marginLeft: "12px",
     padding: "0 8px",
