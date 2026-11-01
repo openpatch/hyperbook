@@ -1,5 +1,13 @@
 # @hyperbook/markdown
 
+## 0.91.2
+
+### Patch Changes
+
+- [`f632484`](https://github.com/openpatch/hyperbook/commit/f6324847d97180b8431d9c8840df799c7dac2f4e) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - The java-memory-playground directive now follows the book's dark theme instead of staying light: `dark.css` sets `color-scheme: dark` on `.directive-jmp` and maps the playground's raised surfaces (`--jmp-surface-sunken`, `--jmp-panel`) to the book's author background, the same mapping bitflow gets, and the fullscreen/reset buttons and fullscreen backdrop in `directive-jmp/style.css` use the book's colour tokens with the old light values as fallbacks, so they stay visible in dark books. The floor for `@java-memory-playground/web-component` is raised to `^0.3.5`, whose own tokens provide the dark values; the cloud editor's pin of `@java-memory-playground/java-memory-playground` follows to `0.2.6`, the core version books render with.
+
+- [`a4d18fb`](https://github.com/openpatch/hyperbook/commit/a4d18fb2c503770c1c0b611ec86b71e2a4db5b60) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Fixed the OpenSCAD runtime failing to load on Hyperbook Cloud previews and published books with the error `error loading dynamically imported module: /_hyperbook/assets/<version>/openscad.js`. The element's runtime base (`data-runtime-base`/`data-asset-base`, requested with an empty file) was emitted without a trailing slash, so the client's `new URL("openscad.js", base)` dropped the `directive-openscad` segment and asked the host for a path it does not serve. A base now keeps its trailing slash, and the worker loads `…/directive-openscad/openscad.js` as on a local build.
+
 ## 0.91.1
 
 ### Patch Changes

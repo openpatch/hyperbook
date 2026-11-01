@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.118.2
+
+### Patch Changes
+
+- [#1230](https://github.com/openpatch/hyperbook/pull/1230) [`75a1c23`](https://github.com/openpatch/hyperbook/commit/75a1c23d4065230839359d038ca5d70c751da4bb) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - `hyperbook dev` now enables the on-disk vfile cache (`HYPERBOOK_CACHE`) by default, so a restarted dev server reuses the persisted directory listings (`vdirectory.*.json`, `vfiles.json`) instead of re-walking and re-reading the whole book on the initial build. The new `vfile.isCacheFresh` check rejects persisted listings when anything in the book or `hyperbook.json` changed while the server was not running; `vfile.clean` still deletes them on every change during a session, and the watcher ignores them, so the cache files never trigger a rebuild. Setting `HYPERBOOK_CACHE` to an empty value opts out. The GitHub Pages workflow examples in the documentation now also cache the downloaded element runtimes between runs with `actions/cache` and `HYPERBOOK_ASSET_CACHE`, matching the guidance on the Caching page.
+
 ## 0.118.1
 
 ### Patch Changes
