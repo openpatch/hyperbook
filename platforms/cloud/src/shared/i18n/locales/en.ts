@@ -114,7 +114,8 @@ export const en = {
     nameHint: "Shown to other teachers you share books with.",
     saved: "Saved",
     email: "Email address",
-    emailHint: "You log in with it and get emails there. Confirm with your password; other devices are logged out.",
+    emailHint:
+      "You log in with it and get emails there. Confirm with your password; other devices are logged out.",
     emailChanged: "Email address changed.",
     storage: "Storage",
     aiUsage: "AI usage",
@@ -267,6 +268,20 @@ export const en = {
       pageChanged:
         "{{files}} changed since the answer — nothing was applied to them. Ask again.",
     },
+    history: {
+      title: "History",
+      scope: "Whose changes",
+      book: "All changes",
+      file: "This file",
+      empty: "No changes yet.",
+      emptyFile: "This file has not been changed yet.",
+      loadMore: "Load more",
+      loading: "Loading…",
+      showDiff: "Show the changes",
+      by: "by {{name}}, {{date}}",
+      loadingDiff: "Loading the changes…",
+      truncated: "The changes are longer than shown.",
+    },
     start: {
       external: "This book is hosted elsewhere, so it is not edited here.",
       noFiles: "{{title}} has no files yet",
@@ -285,9 +300,13 @@ export const en = {
       showPreview: "Show preview",
       resizeFiles: "Resize the file list",
       resizeAi: "Resize the AI assistant",
+      resizeHistory: "Resize the history",
       resizePreview: "Resize the preview",
       preview: "Preview",
       ai: "AI assistant",
+      hideHistory: "Hide the history",
+      showHistory: "Show the history",
+      history: "History",
     },
     files: {
       title: "Files",
@@ -602,6 +621,7 @@ export const en = {
     nameWithoutSlash: "Enter a name without /",
     fullUrl: "Enter a full URL, starting with https://",
     singleWord: "Enter a single word (letters only)",
+    sha: "A commit id is 40 hex digits",
     passwordMin: "Use at least 10 characters",
     passwordMax: "Use at most 200 characters",
     passwordRequired: "Enter your password",
@@ -666,7 +686,8 @@ export const en = {
   },
   aiMonitor: {
     title: "AI usage",
-    description: "What the AI assistant was asked, for the whole system. Click a user to see only their use.",
+    description:
+      "What the AI assistant was asked, for the whole system. Click a user to see only their use.",
     userDescription: "The AI assistant's use by {{email}}.",
     lastDays_one: "Last day",
     lastDays_other: "Last {{count}} days",
@@ -1145,7 +1166,8 @@ export const en = {
     aiModelLabel: "Name in the editor",
     aiModelPricesGroup: "Prices per 1M tokens",
     aiModelEurPerM: "€/M",
-    aiModelCreditsPerM: "≈ {{in}} / {{cached}} / {{out}} credits per M tokens (in / cached / out)",
+    aiModelCreditsPerM:
+      "≈ {{in}} / {{cached}} / {{out}} credits per M tokens (in / cached / out)",
     aiCalcTitle: "Credit calculation",
     aiModelPriceIn: "Input €/M",
     aiModelPriceCached: "Cached €/M",
@@ -1153,7 +1175,8 @@ export const en = {
     aiModelDefault: "Default",
     aiModelAdd: "Add a model",
     aiFetchPrices: "Fetch prices",
-    aiFetchPricesDone: "Prices filled for {{count}} model(s) — still editable by hand.",
+    aiFetchPricesDone:
+      "Prices filled for {{count}} model(s) — still editable by hand.",
     aiFetchPricesFailed: "The prices could not be fetched. Enter them by hand.",
     aiCreditValue: "1 credit = € of AI cost",
     aiCostBuffer: "Buffer (e.g. 1.3)",

@@ -62,7 +62,10 @@ export const changePasswordInput = z.object({
 
 export const changeEmailInput = z.object({
   email,
-  currentPassword: z.string().min(1, "validation.currentPasswordRequired").max(200),
+  currentPassword: z
+    .string()
+    .min(1, "validation.currentPasswordRequired")
+    .max(200),
 });
 
 export const role = z.enum(["admin", "teacher"]);
@@ -130,9 +133,18 @@ export const elementRuntimeChoice = z.enum(["local", "cdn"]);
  * Weights are relative — a model's tokens count as weight × tokens.
  */
 export const modelWeightsSchema = z.object({
-  in: z.number("Enter a number").positive("The weight must be above 0").max(1000),
-  cached: z.number("Enter a number").positive("The weight must be above 0").max(1000),
-  out: z.number("Enter a number").positive("The weight must be above 0").max(1000),
+  in: z
+    .number("Enter a number")
+    .positive("The weight must be above 0")
+    .max(1000),
+  cached: z
+    .number("Enter a number")
+    .positive("The weight must be above 0")
+    .max(1000),
+  out: z
+    .number("Enter a number")
+    .positive("The weight must be above 0")
+    .max(1000),
 });
 
 export type ModelWeights = z.infer<typeof modelWeightsSchema>;
@@ -144,9 +156,18 @@ export type ModelWeights = z.infer<typeof modelWeightsSchema>;
  * them (see weightsFromPrices in server/domain/instance.ts).
  */
 export const modelPricesSchema = z.object({
-  in: z.number("Enter a number").positive("The price must be above 0").max(1_000_000),
-  cached: z.number("Enter a number").positive("The price must be above 0").max(1_000_000),
-  out: z.number("Enter a number").positive("The price must be above 0").max(1_000_000),
+  in: z
+    .number("Enter a number")
+    .positive("The price must be above 0")
+    .max(1_000_000),
+  cached: z
+    .number("Enter a number")
+    .positive("The price must be above 0")
+    .max(1_000_000),
+  out: z
+    .number("Enter a number")
+    .positive("The price must be above 0")
+    .max(1_000_000),
 });
 
 export type ModelPrices = z.infer<typeof modelPricesSchema>;
@@ -199,12 +220,21 @@ export const instanceSettingsInput = z
         }),
       )
       .max(50)
-      .refine((models) => new Set(models.map((m) => m.id)).size === models.length, "Each model may be listed once"),
+      .refine(
+        (models) => new Set(models.map((m) => m.id)).size === models.length,
+        "Each model may be listed once",
+      ),
     aiDefaultModel: z.string().nullable(),
     /** What one AI credit is worth in € of provider cost; weights derive from it. */
-    aiCreditValueEur: z.number("Enter a number").positive("Must be above 0").max(1000),
+    aiCreditValueEur: z
+      .number("Enter a number")
+      .positive("Must be above 0")
+      .max(1000),
     /** Markup on provider prices (failed requests, running costs): 1.3 = 30% buffer. */
-    aiCostBuffer: z.number("Enter a number").positive("Must be above 0").max(100),
+    aiCostBuffer: z
+      .number("Enter a number")
+      .positive("Must be above 0")
+      .max(100),
   })
   .partial();
 
@@ -352,10 +382,8 @@ const NOT_IN_BOOKS = new Set([".git", ".hyperbook", "node_modules"]);
 export function bookPathProblem(path: string): string | null {
   if (path.length === 0) return "validation.pathName";
   if (path.length > 1024) return "validation.pathTooLong";
-  if (/[\0\\]/.test(path))
-    return "validation.pathCharacters";
-  if (path.startsWith("/") || path.endsWith("/"))
-    return "validation.pathEnds";
+  if (/[\0\\]/.test(path)) return "validation.pathCharacters";
+  if (path.startsWith("/") || path.endsWith("/")) return "validation.pathEnds";
   for (const segment of path.split("/")) {
     if (segment === "" || segment === "." || segment === "..")
       return "validation.pathSegments";
@@ -383,10 +411,7 @@ export const dictionaryWord = z
   .string()
   .trim()
   .toLowerCase()
-  .regex(
-    /^[\p{L}\p{M}][\p{L}\p{M}'’-]*$/u,
-    "validation.singleWord",
-  )
+  .regex(/^[\p{L}\p{M}][\p{L}\p{M}'’-]*$/u, "validation.singleWord")
   .max(64);
 
 export const addDictionaryWordInput = z.object({ word: dictionaryWord });
@@ -421,6 +446,16 @@ export const commitFilesInput = z.object({
 
 export const initFilesInput = z.object({
   template: z.enum(["default", "empty"]),
+});
+
+/** One page of a book's commit history, as the editor's History pane asks for it. */
+export const historyInput = z.object({
+  /** The last commit of the page before (the keyset cursor); null: the newest. */
+  after: oid.nullish(),
+  /** The page size; a book can have many commits, so the pane pages through them. */
+  limit: z.coerce.number().int().min(1).max(100).default(50),
+  /** Only the commits that touched this file. */
+  path: bookPath.optional(),
 });
 
 /** A request to the editor's AI writing assistant (platforms/cloud/docs/cloud-ai-assistant.md). */

@@ -688,6 +688,34 @@ retried after checking the base blobs again.
   (`packages/create/templates/default`, bundled into the image) or an
   empty book (`hyperbook.json` and `book/index.md`), or a zip upload.
 
+## History API (admin host)
+
+The editor's History pane: pages of the book's commits and, per commit,
+its diff. Both read the book's repository (`hosting/git.ts`); there is no
+mirror of the history in SQLite, because the repository is the record
+already — the author, message and date are what the saves wrote.
+
+```
+GET  /books/:id/history?after=…&limit=…&path=…
+   → { commits: [{ sha, name, email, date, message, additions, deletions }],
+       next }                      next: the cursor of the next page, null at the end
+GET  /books/:id/history/:sha/diff
+   → { diff, truncated }          a unified diff, at most 1 MiB
+```
+
+- The commits are newest first, paged keyset-style: `after` is the last
+  commit of the page before, and the answer's `next` is the cursor of the
+  page after. `limit` is at most 100 (default 50) — a book can have many
+  commits, every save being one. `path` keeps only the commits that
+  touched that file, with that file's counts.
+- `additions`/`deletions` are summed from git's numstat; binary files
+  count nothing. A merge commit lists nothing (diff-tree picks no side of
+  a merge); its diff is against its first parent.
+- Commits are immutable, so the diff carries the sha as its `ETag` and a
+  private cache header: a second click costs nothing.
+- A cursor or sha that is not one of the book's commits (say, history a
+  push rewrote) answers an empty page / 404, not an error.
+
 ## Preview host
 
 `<slug>--preview.<BOOKS_DOMAIN>` shows the book's newest save to its

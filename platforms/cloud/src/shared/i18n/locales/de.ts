@@ -111,7 +111,8 @@ export const de: Messages = {
       "Wird anderen Lehrkräften angezeigt, mit denen Sie Bücher teilen.",
     saved: "Gespeichert",
     email: "E-Mail-Adresse",
-    emailHint: "Damit melden Sie sich an und erhalten dort E-Mails. Bestätigen Sie mit Ihrem Passwort; andere Geräte werden abgemeldet.",
+    emailHint:
+      "Damit melden Sie sich an und erhalten dort E-Mails. Bestätigen Sie mit Ihrem Passwort; andere Geräte werden abgemeldet.",
     emailChanged: "E-Mail-Adresse geändert.",
     storage: "Speicherplatz",
     aiUsage: "KI-Nutzung",
@@ -265,6 +266,20 @@ export const de: Messages = {
       pageChanged:
         "{{files}} wurde seit der Antwort geändert — es wurde nichts angewendet. Fragen Sie erneut.",
     },
+    history: {
+      title: "Verlauf",
+      scope: "Wessen Änderungen",
+      book: "Alle Änderungen",
+      file: "Diese Datei",
+      empty: "Noch keine Änderungen.",
+      emptyFile: "Diese Datei wurde noch nicht geändert.",
+      loadMore: "Mehr laden",
+      loading: "Lädt…",
+      showDiff: "Änderungen anzeigen",
+      by: "von {{name}}, {{date}}",
+      loadingDiff: "Änderungen werden geladen…",
+      truncated: "Die Änderungen sind länger als angezeigt.",
+    },
     start: {
       external:
         "Dieses Buch wird woanders gehostet und wird deshalb hier nicht bearbeitet.",
@@ -284,9 +299,13 @@ export const de: Messages = {
       showPreview: "Vorschau einblenden",
       resizeFiles: "Dateiliste in der Größe ändern",
       resizeAi: "KI-Assistent in der Größe ändern",
+      resizeHistory: "Verlauf in der Größe ändern",
       resizePreview: "Vorschau in der Größe ändern",
       preview: "Vorschau",
       ai: "KI-Assistent",
+      hideHistory: "Verlauf ausblenden",
+      showHistory: "Verlauf einblenden",
+      history: "Verlauf",
     },
     files: {
       title: "Dateien",
@@ -620,6 +639,7 @@ export const de: Messages = {
     nameWithoutSlash: "Geben Sie einen Namen ohne / ein",
     fullUrl: "Geben Sie eine vollständige URL ein, beginnend mit https://",
     singleWord: "Geben Sie ein einzelnes Wort ein (nur Buchstaben)",
+    sha: "Ein Commit ist 40 Hex-Ziffern",
     passwordMin: "Verwenden Sie mindestens 10 Zeichen",
     passwordMax: "Verwenden Sie höchstens 200 Zeichen",
     passwordRequired: "Geben Sie Ihr Passwort ein",
@@ -686,7 +706,8 @@ export const de: Messages = {
   },
   aiMonitor: {
     title: "KI-Nutzung",
-    description: "Was der KI-Assistent im ganzen System gefragt wurde. Klicken Sie auf eine Person, um nur deren Nutzung zu sehen.",
+    description:
+      "Was der KI-Assistent im ganzen System gefragt wurde. Klicken Sie auf eine Person, um nur deren Nutzung zu sehen.",
     userDescription: "Nutzung des KI-Assistenten durch {{email}}.",
     lastDays_one: "Letzter Tag",
     lastDays_other: "Letzte {{count}} Tage",
@@ -988,7 +1009,8 @@ export const de: Messages = {
     isLive: "Aktuell",
     moreActions: "Verwalten",
     uploadZip: "Zip hochladen",
-    uploadDescription: "Ersetzt die Dateien des Buchs und baut eine neue Vorschau.",
+    uploadDescription:
+      "Ersetzt die Dateien des Buchs und baut eine neue Vorschau.",
     publishTitle: "Vorschau veröffentlichen",
     publishDescription:
       "Die Vorschau wird zu einer neuen Version und geht live. Frühere Versionen bleiben für ein Zurücksetzen erhalten.",
@@ -1175,7 +1197,8 @@ export const de: Messages = {
     aiModelLabel: "Name im Editor",
     aiModelPricesGroup: "Preise pro 1 Mio. Tokens",
     aiModelEurPerM: "€/Mio.",
-    aiModelCreditsPerM: "≈ {{in}} / {{cached}} / {{out}} Credits pro Mio. Tokens (ein / gecacht / aus)",
+    aiModelCreditsPerM:
+      "≈ {{in}} / {{cached}} / {{out}} Credits pro Mio. Tokens (ein / gecacht / aus)",
     aiCalcTitle: "Credit-Kalkulation",
     aiModelPriceIn: "Eingabe €/Mio.",
     aiModelPriceCached: "Gecacht €/Mio.",
@@ -1183,8 +1206,10 @@ export const de: Messages = {
     aiModelDefault: "Standard",
     aiModelAdd: "Modell hinzufügen",
     aiFetchPrices: "Preise abrufen",
-    aiFetchPricesDone: "Preise für {{count}} Modell(e) eingetragen — weiterhin von Hand änderbar.",
-    aiFetchPricesFailed: "Die Preise konnten nicht abgerufen werden. Bitte von Hand eintragen.",
+    aiFetchPricesDone:
+      "Preise für {{count}} Modell(e) eingetragen — weiterhin von Hand änderbar.",
+    aiFetchPricesFailed:
+      "Die Preise konnten nicht abgerufen werden. Bitte von Hand eintragen.",
     aiCreditValue: "1 Credit = € AI-Kosten",
     aiCostBuffer: "Puffer (z. B. 1,3)",
     aiModelsHint:

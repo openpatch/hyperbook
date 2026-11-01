@@ -5,6 +5,7 @@ import {
   ChevronsUpDownIcon,
   FilePlusIcon,
   FolderPlusIcon,
+  HistoryIcon,
   PanelRightIcon,
   SearchIcon,
   SparklesIcon,
@@ -64,6 +65,7 @@ import {
 import { QuickOpen } from "./quick-open";
 import { SettingsMenu, WordsDialog } from "./settings-menu";
 import { AiPanel } from "./ai-panel";
+import { HistoryPanel } from "./history-panel";
 import { Splitter, usePaneWidth } from "./splitter";
 import {
   ConflictError,
@@ -133,13 +135,17 @@ function StartBook({ book }: { book: Book }) {
         files: res.files,
       });
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : t("common.somethingWrong"));
+      toast.error(
+        error instanceof Error ? error.message : t("common.somethingWrong"),
+      );
       setBusy(false);
     }
   };
   return (
     <Centered>
-      <h1 className="text-2xl">{t("editor.start.noFiles", { title: book.title })}</h1>
+      <h1 className="text-2xl">
+        {t("editor.start.noFiles", { title: book.title })}
+      </h1>
       <p className="text-muted-foreground">{t("editor.start.hint")}</p>
       <div className="flex justify-center gap-2">
         <Button disabled={busy} onClick={() => void start("default")}>
@@ -157,7 +163,12 @@ function StartBook({ book }: { book: Book }) {
         <Trans
           i18nKey="editor.start.haveBook"
           components={{
-            a: <Link to={`/books/${book.id}`} className="text-primary hover:underline" />,
+            a: (
+              <Link
+                to={`/books/${book.id}`}
+                className="text-primary hover:underline"
+              />
+            ),
           }}
         />
       </p>
@@ -318,6 +329,7 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
   const [refactor, setRefactor] = useState<RefactorRequest | null>(null);
   const [showPreview, setShowPreview] = useState(true);
   const [showAi, setShowAi] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [blockEdit, setBlockEdit] = useState<{
     block: InlineBlock;
@@ -343,6 +355,11 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
   const previewRef = useRef<HTMLElement>(null);
   const aiRef = useRef<HTMLElement>(null);
   const [aiWidth, setAiWidth] = usePaneWidth("editor-ai-width", 280);
+  const historyRef = useRef<HTMLElement>(null);
+  const [historyWidth, setHistoryWidth] = usePaneWidth(
+    "editor-history-width",
+    240,
+  );
   // The open files' editors, by path: the AI panel reads the active one's
   // selection at action time, and inserts its answer through it.
   const views = useRef(new Map<string, EditorView>()).current;
@@ -418,7 +435,9 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
     if (blocker.state !== "blocked") return;
     setChoice({
       title: t("editor.actions.leaveTitle"),
-      description: t("editor.actions.leaveDescription", { count: ws.dirty.size }),
+      description: t("editor.actions.leaveDescription", {
+        count: ws.dirty.size,
+      }),
       choices: [
         {
           label: t("editor.actions.leave"),
@@ -503,7 +522,9 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
   }, []);
 
   const fail = (error: unknown) =>
-    toast.error(error instanceof Error ? error.message : t("common.somethingWrong"));
+    toast.error(
+      error instanceof Error ? error.message : t("common.somethingWrong"),
+    );
 
   /** Adds a word to the book's dictionary; the pages re-check. */
   const addWord = useCallback(
@@ -544,7 +565,9 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
       const problem = kind && visualProblem(kind, tab.text!);
       if (problem)
         return fail(
-          new Error(t("editor.actions.savedProblem", { path: tab.path, problem })),
+          new Error(
+            t("editor.actions.savedProblem", { path: tab.path, problem }),
+          ),
         );
     }
     try {
@@ -637,9 +660,7 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
   const commitAndOpen = async (changes: FileChange[], open?: string) => {
     await ws.commit(changes).catch((error: unknown) => {
       throw error instanceof ConflictError
-        ? new Error(
-            t("editor.actions.existsAlready", { path: error.paths[0] }),
-          )
+        ? new Error(t("editor.actions.existsAlready", { path: error.paths[0] }))
         : error;
     });
     if (open) ws.open(open);
@@ -668,7 +689,11 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
     };
 
   /** Commits a move of every file in `moves`; the open tabs follow their files. */
-  const commitMoves = async (moves: Map<string, string>, writes: FileChange[] = [], message?: string) => {
+  const commitMoves = async (
+    moves: Map<string, string>,
+    writes: FileChange[] = [],
+    message?: string,
+  ) => {
     const moves2: FileChange[] = [...moves].map(([from, to]) => ({
       op: "move" as const,
       from,
@@ -694,7 +719,12 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
     for (const [file, refs] of byFile) {
       const info = scanned.files.find((f) => f.path === file)!;
       const { text } = rewriteText(info.text, refs, move);
-      writes.push({ op: "write", path: file, content: text, baseOid: info.oid });
+      writes.push({
+        op: "write",
+        path: file,
+        content: text,
+        baseOid: info.oid,
+      });
     }
     return writes;
   };
@@ -705,7 +735,9 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
     moves: Map<string, string>,
     kind: "rename" | "move",
   ) => {
-    const label = t(kind === "rename" ? "editor.files.rename" : "editor.files.move");
+    const label = t(
+      kind === "rename" ? "editor.files.rename" : "editor.files.move",
+    );
     let scanned: ReferencesResult;
     try {
       scanned = await fetchReferences(bookId, from);
@@ -715,14 +747,18 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
     if (scanned.references.length === 0)
       return commitMoves(moves).catch(failCommit);
     // Unsaved changes in a referencing page cannot be rewritten safely.
-    const dirty = scanned.files.filter((f) => ws.dirty.has(f.path)).map((f) => f.path);
+    const dirty = scanned.files
+      .filter((f) => ws.dirty.has(f.path))
+      .map((f) => f.path);
     if (dirty.length > 0) {
       toast.error(
         t("editor.actions.saveFirstReferencing", { path: dirty[0], from }),
       );
       return;
     }
-    const texts = Object.fromEntries(scanned.files.map((f) => [f.path, f.text]));
+    const texts = Object.fromEntries(
+      scanned.files.map((f) => [f.path, f.text]),
+    );
     const count = scanned.references.length;
     const lead =
       count === 1 && scanned.files.length === 1
@@ -750,7 +786,8 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
             try {
               await commitMoves(moves, writes, `${label} ${from}`);
               for (const w of writes)
-                if (ws.tabs.some((t) => t.path === w.path)) void ws.reload(w.path);
+                if (ws.tabs.some((t) => t.path === w.path))
+                  void ws.reload(w.path);
               toast.success(
                 kind === "rename"
                   ? t("editor.actions.renamedToast", { path: from, count })
@@ -811,7 +848,15 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
         submitLabel: t("editor.actions.create"),
         onSubmit: (path) =>
           commitAndOpen(
-            [{ op: "write", path, content: starter(path), encoding: starterEncoding(path), baseOid: null }],
+            [
+              {
+                op: "write",
+                path,
+                content: starter(path),
+                encoding: starterEncoding(path),
+                baseOid: null,
+              },
+            ],
             path,
           ),
       }),
@@ -888,7 +933,9 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
           return fail(error);
         }
         const base = isFolder
-          ? t("editor.actions.deleteFolderDescription", { count: affected.length })
+          ? t("editor.actions.deleteFolderDescription", {
+              count: affected.length,
+            })
           : t("editor.actions.deleteFileDescription");
         if (scanned.references.length === 0)
           return setChoice({
@@ -912,11 +959,13 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
               });
         setRefactor({
           title: t("editor.actions.deleteTitle", { path }),
-          lead: <p>{base} {lead}</p>,
-          references: scanned.references,
-          texts: Object.fromEntries(
-            scanned.files.map((f) => [f.path, f.text]),
+          lead: (
+            <p>
+              {base} {lead}
+            </p>
           ),
+          references: scanned.references,
+          texts: Object.fromEntries(scanned.files.map((f) => [f.path, f.text])),
           choices: [
             {
               label: t("editor.actions.deleteAnyway", { count }),
@@ -1072,7 +1121,25 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
           size="icon"
           variant="ghost"
           className="size-8"
-          aria-label={showPreview ? t("editor.toolbar.hidePreview") : t("editor.toolbar.showPreview")}
+          aria-label={
+            showHistory
+              ? t("editor.toolbar.hideHistory")
+              : t("editor.toolbar.showHistory")
+          }
+          aria-pressed={showHistory}
+          onClick={() => setShowHistory((v) => !v)}
+        >
+          <HistoryIcon className="size-4" />
+        </Button>
+        <Button
+          size="icon"
+          variant="ghost"
+          className="size-8"
+          aria-label={
+            showPreview
+              ? t("editor.toolbar.hidePreview")
+              : t("editor.toolbar.showPreview")
+          }
           aria-pressed={showPreview}
           onClick={() => setShowPreview((v) => !v)}
         >
@@ -1193,6 +1260,32 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
             )}
           </div>
         </main>
+
+        {showHistory && (
+          <>
+            <Splitter
+              label={t("editor.toolbar.resizeHistory")}
+              pane={historyRef}
+              direction={-1}
+              onResize={setHistoryWidth}
+              onReset={() => setHistoryWidth(null)}
+            />
+            <section
+              ref={historyRef}
+              className="w-72 shrink-0 border-l border-border bg-sidebar"
+              style={
+                historyWidth === null ? undefined : { width: historyWidth }
+              }
+              aria-label={t("editor.toolbar.history")}
+            >
+              <HistoryPanel
+                bookId={bookId}
+                activePath={activeTab?.path ?? null}
+                commit={listing.commit}
+              />
+            </section>
+          </>
+        )}
 
         {showAi && aiAvailable && (
           <>
@@ -1499,7 +1592,9 @@ function TabContent({
         />
       ) : (
         <p className="max-w-md text-center text-muted-foreground">
-          {extension(tab.path) === "h5p" ? t("editor.tabs.h5p") : t("editor.tabs.cannotEdit")}
+          {extension(tab.path) === "h5p"
+            ? t("editor.tabs.h5p")
+            : t("editor.tabs.cannotEdit")}
         </p>
       )}
       <p className="text-sm text-muted-foreground">

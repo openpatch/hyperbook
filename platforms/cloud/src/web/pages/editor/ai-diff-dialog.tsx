@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { AiProposedChange } from "../../../shared/schemas";
 import { api, unwrap } from "@/lib/api";
-import { cn } from "@/lib/utils";
+import { DiffView } from "./diff-view";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -48,10 +48,7 @@ export function AiDiffDialog({
   const chosen = (changes ?? []).filter(isOn);
 
   return (
-    <Dialog
-      open={changes !== null}
-      onOpenChange={(open) => !open && onClose()}
-    >
+    <Dialog open={changes !== null} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="flex max-h-[85dvh] w-full sm:max-w-5xl flex-col gap-4">
         <DialogHeader>
           <DialogTitle>{t("editor.ai.proposalTitle")}</DialogTitle>
@@ -143,24 +140,7 @@ function ProposedFile({
           {t("editor.ai.referencedBy", { files: references.join(", ") })}
         </p>
       )}
-      <pre className="overflow-auto rounded-md border border-border bg-background p-2 text-xs leading-5">
-        {change.diff.split("\n").map((line, index) => (
-          <div
-            key={index}
-            className={cn(
-              line.startsWith("+") &&
-                !line.startsWith("+++") &&
-                "bg-green-500/10",
-              line.startsWith("-") &&
-                !line.startsWith("---") &&
-                "bg-red-500/10",
-              line.startsWith("@@") && "text-muted-foreground",
-            )}
-          >
-            {line || " "}
-          </div>
-        ))}
-      </pre>
+      <DiffView diff={change.diff} />
     </div>
   );
 }

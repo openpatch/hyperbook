@@ -18,39 +18,46 @@ import { bookDictionaryRoutes } from "./routes/dictionary";
 import { bookFileRoutes } from "./routes/files";
 import { gitHttpRoutes, gitTokenRoutes } from "./routes/git";
 import { bookGroupRoutes, groupRoutes, studentRoutes } from "./routes/groups";
+import { bookHistoryRoutes } from "./routes/history";
 import { instanceRoutes, publicInstanceRoutes } from "./routes/instance";
 import { meRoutes } from "./routes/me";
 import { bookPublishingRoutes, buildRoutes } from "./routes/publishing";
-import { bookSlugRequestRoutes, slugRequestRoutes } from "./routes/slug-requests";
+import {
+  bookSlugRequestRoutes,
+  slugRequestRoutes,
+} from "./routes/slug-requests";
 import { userRoutes } from "./routes/users";
 
 /** The JSON API. Its type drives the web app's typed client. */
 export function createAdminApi(deps: Deps) {
-  return new Hono<AdminEnv>()
-    .use(originCheck(deps))
-    .use(sessionMiddleware(deps))
-    .use(localeMiddleware(deps))
-    .route("/auth", authRoutes(deps))
-    // Before /instance, whose admin-only middleware would otherwise run first.
-    .route("/instance/public", publicInstanceRoutes(deps))
-    .route("/instance", instanceRoutes(deps))
-    .route("/me", meRoutes(deps))
-    .route("/users", userRoutes(deps))
-    .route("/books", bookRoutes(deps))
-    .route("/books", gitTokenRoutes(deps))
-    .route("/books", bookGroupRoutes(deps))
-    .route("/books", bookPublishingRoutes(deps))
-    .route("/books", bookFileRoutes(deps))
-    .route("/books", bookDictionaryRoutes(deps))
-    .route("/books", bookAiRoutes(deps))
-    .route("/ai-monitor", aiMonitorRoutes(deps))
-    .route("/ai", aiRoutes(deps))
-    .route("/books", bookSlugRequestRoutes(deps))
-    .route("/slug-requests", slugRequestRoutes(deps))
-    .route("/builds", buildRoutes(deps))
-    .route("/groups", groupRoutes(deps))
-    .route("/students", studentRoutes(deps))
-    .route("/audit", auditRoutes(deps));
+  return (
+    new Hono<AdminEnv>()
+      .use(originCheck(deps))
+      .use(sessionMiddleware(deps))
+      .use(localeMiddleware(deps))
+      .route("/auth", authRoutes(deps))
+      // Before /instance, whose admin-only middleware would otherwise run first.
+      .route("/instance/public", publicInstanceRoutes(deps))
+      .route("/instance", instanceRoutes(deps))
+      .route("/me", meRoutes(deps))
+      .route("/users", userRoutes(deps))
+      .route("/books", bookRoutes(deps))
+      .route("/books", gitTokenRoutes(deps))
+      .route("/books", bookGroupRoutes(deps))
+      .route("/books", bookPublishingRoutes(deps))
+      .route("/books", bookFileRoutes(deps))
+      .route("/books", bookHistoryRoutes(deps))
+      .route("/books", bookDictionaryRoutes(deps))
+      .route("/books", bookAiRoutes(deps))
+      .route("/ai-monitor", aiMonitorRoutes(deps))
+      .route("/ai", aiRoutes(deps))
+      .route("/books", bookSlugRequestRoutes(deps))
+      .route("/slug-requests", slugRequestRoutes(deps))
+      .route("/builds", buildRoutes(deps))
+      .route("/groups", groupRoutes(deps))
+      .route("/students", studentRoutes(deps))
+      .route("/audit", auditRoutes(deps))
+  );
 }
 
 export type AdminApi = ReturnType<typeof createAdminApi>;
@@ -93,7 +100,10 @@ export function createAdminApp(deps: Deps, options: { webRoot?: string } = {}) {
         imgSrc: ["'self'", "data:", "blob:", "https:"],
         connectSrc: ["'self'"],
         // The editor frames the preview host of the book and visual.html.
-        frameSrc: ["'self'", `${deps.config.booksProtocol}//*.${deps.config.booksDomain}`],
+        frameSrc: [
+          "'self'",
+          `${deps.config.booksProtocol}//*.${deps.config.booksDomain}`,
+        ],
         objectSrc: ["'none'"],
         baseUri: ["'self'"],
         formAction: ["'self'"],
@@ -118,12 +128,16 @@ export function createAdminApp(deps: Deps, options: { webRoot?: string } = {}) {
   app.route("/api", createAdminApi(deps));
   // A mounted app's notFound handler is not used, so unknown API paths are
   // answered here — otherwise they would fall through to the app shell below.
-  app.all("/api/*", (c) => c.json({ error: createT(requestLocale(c))("errors.notFound") }, 404));
+  app.all("/api/*", (c) =>
+    c.json({ error: createT(requestLocale(c))("errors.notFound") }, 404),
+  );
 
   // The blockflow editor bundle, framed by visual.html (same origin). Public
   // bytes, like on the book hosts; the version in the runtime makes them
   // immutable.
-  app.on(["GET", "HEAD"], "/blockflow/*", (c) => serveBlockflow(c, deps.config));
+  app.on(["GET", "HEAD"], "/blockflow/*", (c) =>
+    serveBlockflow(c, deps.config),
+  );
 
   const { webRoot } = options;
   if (webRoot) {
