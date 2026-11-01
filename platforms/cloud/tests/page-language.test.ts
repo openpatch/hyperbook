@@ -10,7 +10,7 @@ import { basicSetup } from "codemirror";
 import { describe, expect, it } from "vitest";
 import { DIRECTIVES, directive } from "../src/web/pages/editor/directives";
 import { findFrontmatter, toPageForm, withPageForm } from "../src/web/pages/editor/frontmatter";
-import { blockDirective, decorateMultievent, inlineDirectives, linkBase, outline, relativeTo } from "../src/web/pages/editor/page-language";
+import { blockDirective, decorateMultievent, directiveFold, inlineDirectives, linkBase, outline, pageLanguage, relativeTo } from "../src/web/pages/editor/page-language";
 import { hyperbookDark, hyperbookLight, hyperbookSyntax } from "../src/web/pages/editor/syntax-theme";
 
 const repo = path.resolve(import.meta.dirname, "../../..");
@@ -57,6 +57,17 @@ describe("reading directives", () => {
   it("leaves emoji and colons in prose alone", () => {
     expect(inlineDirectives("Great :smile: see: here, at 10:30")).toEqual([]);
     expect(inlineDirectives('Get :download[it]{src="/a.zip"} and :t[OOP]{#oop}').map((t) => t.name)).toEqual(["download", "t"]);
+  });
+
+  it("folds containers from their opening to their closing line", () => {
+    const doc = [":::p5{src=\"/sketch\"}", "code here", ":::", ":::alert", "never closed"].join("\n");
+    const state = EditorState.create({ doc, extensions: pageLanguage({ files: () => [], path: () => "book/index.md" }) });
+    const at = (n: number) => doc.split("\n").slice(0, n - 1).join("\n").length + (n > 1 ? 1 : 0);
+    // The opening line folds up to and including the closing `:::`.
+    expect(directiveFold(state, at(1))).toEqual({ from: at(2) - 1, to: at(4) - 1 });
+    // Unclosed containers stay unfolded, and other lines fold nothing.
+    expect(directiveFold(state, at(4))).toBeNull();
+    expect(directiveFold(state, at(2))).toBeNull();
   });
 
   it("outlines nested containers and skips code and frontmatter", () => {

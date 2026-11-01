@@ -7,7 +7,7 @@ import {
 } from "@codemirror/autocomplete";
 import { markdown } from "@codemirror/lang-markdown";
 import { yamlFrontmatter } from "@codemirror/lang-yaml";
-import { LanguageDescription } from "@codemirror/language";
+import { LanguageDescription, foldService } from "@codemirror/language";
 import { languages } from "@codemirror/language-data";
 import { type Action, type Diagnostic, linter } from "@codemirror/lint";
 import { type EditorState, type Extension, RangeSetBuilder, StateEffect, StateField, type Text } from "@codemirror/state";
@@ -196,6 +196,20 @@ const outlineField = StateField.define<Outline>({
 function around(state: EditorState, n: number): Container[] {
   return state.field(outlineField).containers.filter((c) => c.open < n && (c.close === null || c.close > n));
 }
+
+/**
+ * Foldable container directives (`:::p5 … :::`): a fold from the end of the
+ * opening line to the end of the closing line. Unclosed containers stay
+ * unfolded (the linter flags them). Works with the fold gutter and the fold
+ * keymap, both part of basicSetup.
+ */
+export const directiveFold = (state: EditorState, from: number): { from: number; to: number } | null => {
+  const open = state.doc.lineAt(from).number;
+  const close = state.field(outlineField, false)?.containers.find((c) => c.open === open)?.close;
+  if (close === null || close === undefined) return null;
+  return { from: state.doc.line(open).to, to: state.doc.line(close).to };
+};
+const directiveFolds = foldService.of(directiveFold);
 
 // ---- Help ------------------------------------------------------------------
 
@@ -774,6 +788,7 @@ export function pageLanguage({
   return [
     yamlFrontmatter({ content: markdown({ codeLanguages: [...languages, typst] }) }),
     outlineField,
+    directiveFolds,
     directiveHighlight,
     autocompletion({ override: [pageCompletion(files, path)], icons: false }),
     hoverHelp,
