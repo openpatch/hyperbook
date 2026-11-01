@@ -1590,6 +1590,12 @@ function TabContent({
           alt={tab.path}
           className="max-h-[60vh] max-w-full rounded-md border border-border object-contain"
         />
+      ) : loaded.kind === "pdf" ? (
+        <iframe
+          src={loaded.url}
+          title={tab.path}
+          className="h-[70vh] w-full max-w-5xl rounded-md border border-border bg-white"
+        />
       ) : (
         <p className="max-w-md text-center text-muted-foreground">
           {extension(tab.path) === "h5p"

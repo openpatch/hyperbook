@@ -46,6 +46,7 @@ export type Loaded =
   | { kind: "text"; oid: string; text: string; /** Set when the text is base64 of binary bytes (a .sb3). */
       encoding?: "base64" }
   | { kind: "image"; oid: string; url: string; size: number }
+  | { kind: "pdf"; oid: string; url: string; size: number }
   | { kind: "binary"; oid: string; size: number };
 
 /** Fetches a file and decides how the editor shows it. */
@@ -58,6 +59,13 @@ export async function loadFile(bookId: string, path: string): Promise<Loaded> {
   if (imageType) {
     // Shown through <img>, where SVG scripts never run.
     return { kind: "image", oid, url: URL.createObjectURL(new Blob([bytes], { type: imageType })), size: bytes.length };
+  }
+  if (extension(path) === "pdf") {
+    // Shown in the browser's PDF viewer. The raw endpoint serves the bytes
+    // as an attachment, never rendered, so they are re-blobbed with the
+    // right type here — a PDF must not be classed as text even when its
+    // bytes happen to hold no NUL.
+    return { kind: "pdf", oid, url: URL.createObjectURL(new Blob([bytes], { type: "application/pdf" })), size: bytes.length };
   }
   if (bytes.length <= MAX_TEXT_BYTES && !bytes.includes(0)) {
     try {
