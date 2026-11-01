@@ -504,6 +504,7 @@ export async function runBuildProject(
   filter?: string,
   onPage?: PageResultSink,
   assets = new AssetManager(),
+  reuseCache = false,
 ): Promise<void> {
   const name = hyperproject.getName(project);
   if (project.type === "book") {
@@ -517,6 +518,7 @@ export async function runBuildProject(
       filter,
       onPage,
       assets,
+      reuseCache,
     );
   } else {
     console.log(`${chalk.cyan(`[${name}]`)} Building Library.`);
@@ -525,7 +527,15 @@ export async function runBuildProject(
     }
     await rimraf(path.join(out, ".hyperbook", "out"));
     for (const p of project.projects) {
-      await runBuildProject(p, rootProject, out, filter, onPage, assets);
+      await runBuildProject(
+        p,
+        rootProject,
+        out,
+        filter,
+        onPage,
+        assets,
+        reuseCache,
+      );
     }
   }
 }
@@ -737,6 +747,7 @@ async function runBuild(
   filter?: string,
   onPage?: PageResultSink,
   assets = new AssetManager(),
+  reuseCache = false,
 ): Promise<void> {
   console.log(`${chalk.blue(`[${prefix}]`)} Reading hyperbook.json.`);
   const hyperbookJson = await hyperbook.getJson(root);
@@ -755,7 +766,9 @@ async function runBuild(
 
   hyperbookJson.basePath = basePath;
 
-  vfile.clean(root);
+  if (!(reuseCache && (await vfile.isCacheFresh(root)))) {
+    vfile.clean(root);
+  }
 
   let link: Link | undefined = undefined;
   if (rootProject.type === "library") {

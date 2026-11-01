@@ -7,7 +7,10 @@ lang: de
 
 Der Build-Cache von Hyperbook speichert heruntergeladene Laufzeitumgebungen auf
 dem Rechner der CLI. HTTP-Caches speichern Dateien, die Leser von deinem Host
-oder einem CDN abrufen.
+oder einem CDN abrufen. Der Entwicklungsserver legt außerdem seine Dateilisten
+(`vdirectory.*.json`, `vfiles.json`) im Projektverzeichnis ab, damit ein Neustart
+dort weitermacht, wo die letzte Sitzung aufgehört hat; beim Ändern einer Datei
+löscht er sie wieder.
 
 ## Downloads zwischen Builds aufbewahren
 

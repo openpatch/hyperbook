@@ -128,7 +128,7 @@ export class IncrementalBuilder {
 
   async initialize(): Promise<void> {
     console.log(`${chalk.yellow("[Incremental]")} Full initial build...`);
-    await this.fullRebuild();
+    await this.fullRebuild(!!process.env.HYPERBOOK_CACHE);
 
     // Populate caches after full build
     await this.refreshCaches();
@@ -142,7 +142,7 @@ export class IncrementalBuilder {
    * Full rebuild that also repopulates the dependency graph and the cached
    * search documents, so incremental updates afterwards start from the truth.
    */
-  private async fullRebuild(): Promise<void> {
+  private async fullRebuild(reuseCache = false): Promise<void> {
     this.dependents.clear();
     this.searchDocuments.clear();
     this.archiveIncludes.clear();
@@ -158,6 +158,7 @@ export class IncrementalBuilder {
         this.recordPageResult(href, result);
       },
       this.assets,
+      reuseCache,
     );
   }
 
