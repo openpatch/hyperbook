@@ -152,15 +152,41 @@ const theme = EditorView.theme({
 });
 
 /**
- * Code files (Java, Python, .scad, …) get GitHub's light/dark themes, switched
- * with the app's theme. Pages keep their own --hl-* style (pageLanguage adds it
- * later, so it wins there). A non-fallback style like these also disables
- * basicSetup's defaultHighlightStyle, whose colors are light-only and
- * unreadable in dark mode.
+ * GitHub's light/dark themes, switched with the app's theme, are the syntax
+ * base for every file: code files (Java, Python, .scad, …) and Markdown pages
+ * alike (pages add only the Hyperbook directive decorations on top). A
+ * non-fallback style like these also disables basicSetup's
+ * defaultHighlightStyle, whose colors are light-only and unreadable in dark
+ * mode.
  */
 const codeTheme = new Compartment();
 const isDark = () => document.documentElement.classList.contains("dark");
-const githubTheme = () => (isDark() ? githubDark : githubLight);
+/**
+ * GitHub's syntax colors only: the packages bundle a full editor theme whose
+ * background (#0d1117 dark), gutters and selection would sit next to the
+ * app's own surfaces, so those are reset to the app's tokens right here.
+ */
+const githubTheme = (): Extension => [
+  isDark() ? githubDark : githubLight,
+  EditorView.theme({
+    "&": { color: "var(--color-text)", backgroundColor: "var(--color-background)" },
+    ".cm-gutters": {
+      color: "var(--muted-foreground)",
+      backgroundColor: "var(--color-nav)",
+      borderRight: "1px solid var(--color-nav-border)",
+    },
+    ".cm-activeLine": { backgroundColor: "color-mix(in srgb, var(--color-brand) 6%, transparent)" },
+    ".cm-activeLineGutter": { backgroundColor: "color-mix(in srgb, var(--color-brand) 12%, transparent)" },
+    "&.cm-focused .cm-selectionBackground, .cm-selectionBackground, ::selection": {
+      backgroundColor: "color-mix(in srgb, var(--color-brand) 25%, transparent) !important",
+    },
+    ".cm-tooltip": {
+      color: "var(--color-text)",
+      backgroundColor: "var(--color-background)",
+      border: "1px solid var(--color-nav-border)",
+    },
+  }),
+];
 
 /** basicSetup always shows line numbers; without them, the whole gutter goes. */
 const noGutters = EditorView.theme({ ".cm-gutters": { display: "none" } });

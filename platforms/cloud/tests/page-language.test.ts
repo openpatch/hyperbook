@@ -11,7 +11,7 @@ import { basicSetup } from "codemirror";
 import { describe, expect, it } from "vitest";
 import { DIRECTIVES, directive } from "../src/web/pages/editor/directives";
 import { findFrontmatter, toPageForm, withPageForm } from "../src/web/pages/editor/frontmatter";
-import { blockDirective, highlightStyle, inlineDirectives, linkBase, outline, relativeTo } from "../src/web/pages/editor/page-language";
+import { blockDirective, inlineDirectives, linkBase, outline, relativeTo } from "../src/web/pages/editor/page-language";
 
 const repo = path.resolve(import.meta.dirname, "../../..");
 
@@ -202,21 +202,22 @@ describe("page settings", () => {
 });
 
 describe("syntax highlighting", () => {
-  it("colors come from app.css's --hl-* tokens, which switch with light and dark mode", () => {
-    const colors = highlightStyle.specs.flatMap((s) => (s.color ? [s.color] : []));
-    expect(colors.length).toBeGreaterThan(5);
-    for (const color of colors) expect(color, color).toMatch(/^var\(--(hl-|color-)/);
-  });
-
-  it("pages keep the --hl-* style, code files get github-light/dark", () => {
+  it("pages and code files share github-light/dark; hyperbook syntax stays its own layer", () => {
     const editor = readFileSync(path.join(repo, "platforms/cloud/src/web/pages/editor/code-editor.tsx"), "utf8");
-    // Code files: GitHub's themes, switched with the app's light/dark toggle.
+    // GitHub's themes, switched with the app's light/dark toggle, are the base
+    // for every file the editor opens.
     expect(editor).toContain("githubDark");
     expect(editor).toContain("githubLight");
     expect(editor).toContain("codeTheme.of(githubTheme())");
-    // Pages: pageLanguage still adds the shared, mode-aware --hl-* style.
+    // The github packages' own editor background is reset to the app's, so
+    // only their syntax colors show.
+    expect(editor).toMatch(/githubTheme[\s\S]*?backgroundColor: "var\(--color-background\)"/);
+    // Pages add no style of their own, so they get the github base too; the
+    // Hyperbook layer on top is the directive decorations (.cm-hb-*), which
+    // keep the mode-aware --hl-* colors.
     const pages = readFileSync(path.join(repo, "platforms/cloud/src/web/pages/editor/page-language.ts"), "utf8");
-    expect(pages).toContain("syntaxHighlighting(highlightStyle)");
+    expect(pages).not.toContain("syntaxHighlighting(");
+    expect(pages).toMatch(/\.cm-hb-name.*--hl-/);
   });
 
   it("github's style is no fallback, so basicSetup's light-only default stays off", () => {
