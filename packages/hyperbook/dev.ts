@@ -136,6 +136,15 @@ export async function runDev({
   port: number;
   offline?: boolean;
 }): Promise<void> {
+  // Persist the vfile directory caches on disk (vdirectory.*.json, vfiles.json)
+  // so a restarted dev server does not re-walk and re-read the whole book.
+  // vfile.clean removes them on every change, and the watcher below ignores
+  // dot-prefixed paths, so the cache files never trigger a rebuild. An
+  // explicit HYPERBOOK_CACHE in the environment wins.
+  if (!process.env.HYPERBOOK_CACHE) {
+    process.env.HYPERBOOK_CACHE = "1";
+  }
+
   // Check if the port is available
   const portAvailable = await isPortAvailable(port);
   

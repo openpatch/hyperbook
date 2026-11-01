@@ -32,7 +32,17 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Hyperbook-Laufzeitumgebungen zwischenspeichern
+        uses: actions/cache@v4
+        with:
+          path: .cache/hyperbook-assets
+          key: ${{ runner.os }}-hyperbook-assets-${{ hashFiles('package-lock.json', 'pnpm-lock.yaml', 'hyperbook.json') }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-hyperbook-assets-
+
       - name: Build
+        env:
+          HYPERBOOK_ASSET_CACHE: .cache/hyperbook-assets
         run: |
           npx hyperbook build
 
