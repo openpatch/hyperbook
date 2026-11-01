@@ -1,3 +1,4 @@
+import { cpp } from "@codemirror/lang-cpp";
 import { css } from "@codemirror/lang-css";
 import { html } from "@codemirror/lang-html";
 import { java } from "@codemirror/lang-java";
@@ -7,7 +8,8 @@ import { python } from "@codemirror/lang-python";
 import { SQLite, sql } from "@codemirror/lang-sql";
 import { yaml } from "@codemirror/lang-yaml";
 import { typst_lezer } from "codemirror-lang-typst/lezer";
-import { syntaxHighlighting } from "@codemirror/language";
+import { githubDark } from "@fsegurai/codemirror-theme-github-dark";
+import { githubLight } from "@fsegurai/codemirror-theme-github-light";
 import { Compartment, type Extension, EditorState } from "@codemirror/state";
 import { EditorView, keymap } from "@codemirror/view";
 import { basicSetup } from "codemirror";
@@ -16,7 +18,7 @@ import { fontOf, type EditorSettings } from "@/lib/editor-settings";
 import { type Block, editVisuallyButtons } from "./blocks";
 import { contextMenu } from "./context-menu";
 import { extension, isMarkdownPage } from "./files";
-import { highlightStyle, pageLanguage } from "./page-language";
+import { pageLanguage } from "./page-language";
 import { type SpellConfig, spellCheck } from "./spellcheck";
 
 function language(path: string): Extension {
@@ -55,6 +57,9 @@ function language(path: string): Extension {
       return python();
     case "java":
       return java();
+    case "scad":
+      // OpenSCAD: the openscad directive's preview highlights it as C++ too.
+      return cpp();
     case "sql":
       // The sqlide element runs SQLite, so its keywords highlight too.
       return sql({ dialect: SQLite });
@@ -145,6 +150,17 @@ const theme = EditorView.theme({
     cursor: "pointer",
   },
 });
+
+/**
+ * Code files (Java, Python, .scad, …) get GitHub's light/dark themes, switched
+ * with the app's theme. Pages keep their own --hl-* style (pageLanguage adds it
+ * later, so it wins there). A non-fallback style like these also disables
+ * basicSetup's defaultHighlightStyle, whose colors are light-only and
+ * unreadable in dark mode.
+ */
+const codeTheme = new Compartment();
+const isDark = () => document.documentElement.classList.contains("dark");
+const githubTheme = () => (isDark() ? githubDark : githubLight);
 
 /** basicSetup always shows line numbers; without them, the whole gutter goes. */
 const noGutters = EditorView.theme({ ".cm-gutters": { display: "none" } });
@@ -256,9 +272,7 @@ export function CodeEditor({
             },
           ]),
           basicSetup,
-          // A non-fallback style disables basicSetup's defaultHighlightStyle
-          // (light-only colors, unreadable in dark mode); ours follows the mode.
-          syntaxHighlighting(highlightStyle),
+          codeTheme.of(githubTheme()),
           numbersCompartment.of(settings.lineNumbers ? [] : noGutters),
           heightCompartment.of(lineHeightTheme(settings.lineHeight)),
           fontCompartment.of(fontTheme(fontOf(settings.font).stack)),
@@ -294,7 +308,13 @@ export function CodeEditor({
     });
     view.current = v;
     onReady?.(v);
+    // The light/dark toggle moves the .dark class on <html>; follow it.
+    const observer = new MutationObserver(() => {
+      v.dispatch({ effects: codeTheme.reconfigure(githubTheme()) });
+    });
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
     return () => {
+      observer.disconnect();
       onReady?.(null);
       v.destroy();
     };

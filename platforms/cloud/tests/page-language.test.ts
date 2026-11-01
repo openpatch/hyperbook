@@ -1,8 +1,10 @@
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { snippet } from "@codemirror/autocomplete";
+import { cpp } from "@codemirror/lang-cpp";
 import { java } from "@codemirror/lang-java";
-import { highlightingFor, syntaxHighlighting } from "@codemirror/language";
+import { githubDark } from "@fsegurai/codemirror-theme-github-dark";
+import { highlightingFor } from "@codemirror/language";
 import { EditorState, Text } from "@codemirror/state";
 import { tags as t } from "@lezer/highlight";
 import { basicSetup } from "codemirror";
@@ -200,37 +202,47 @@ describe("page settings", () => {
 });
 
 describe("syntax highlighting", () => {
-  // The extension set of code-editor.tsx for a code file like Main.java:
-  // basicSetup plus the shared, mode-aware highlight style.
-  const javaFile = (doc: string) =>
-    EditorState.create({
-      doc,
-      extensions: [basicSetup, syntaxHighlighting(highlightStyle), java()],
-    });
-
   it("colors come from app.css's --hl-* tokens, which switch with light and dark mode", () => {
     const colors = highlightStyle.specs.flatMap((s) => (s.color ? [s.color] : []));
     expect(colors.length).toBeGreaterThan(5);
     for (const color of colors) expect(color, color).toMatch(/^var\(--(hl-|color-)/);
   });
 
-  it("is used for code files, not basicSetup's light-only fallback", () => {
-    const state = javaFile("class Main { int answer = 42; }");
-    // Our style decides the keyword's class ...
-    expect(highlightingFor(state, [t.keyword])).toBe(highlightStyle.style([t.keyword]));
-    // ... and the fallback is off entirely: a tag our style does not color
-    // gets no class (so the mode-aware text color), not the default's
-    // dark-on-dark one. Without our style, basicSetup would color it.
-    expect(highlightingFor(state, [t.inserted])).toBeNull();
-    const fallbackOnly = EditorState.create({ doc: "int x = 1;", extensions: [basicSetup, java()] });
-    expect(highlightingFor(fallbackOnly, [t.inserted])).toBeTruthy();
-    // Variable definitions stay the readable text color in dark mode.
-    expect(highlightingFor(state, [t.definition(t.variableName)])).toBeTruthy();
+  it("pages keep the --hl-* style, code files get github-light/dark", () => {
+    const editor = readFileSync(path.join(repo, "platforms/cloud/src/web/pages/editor/code-editor.tsx"), "utf8");
+    // Code files: GitHub's themes, switched with the app's light/dark toggle.
+    expect(editor).toContain("githubDark");
+    expect(editor).toContain("githubLight");
+    expect(editor).toContain("codeTheme.of(githubTheme())");
+    // Pages: pageLanguage still adds the shared, mode-aware --hl-* style.
+    const pages = readFileSync(path.join(repo, "platforms/cloud/src/web/pages/editor/page-language.ts"), "utf8");
+    expect(pages).toContain("syntaxHighlighting(highlightStyle)");
   });
 
-  it("is registered in the code editor, not only for pages", () => {
+  it("github's style is no fallback, so basicSetup's light-only default stays off", () => {
+    const state = EditorState.create({
+      doc: "class Main { int answer = 42; }",
+      extensions: [basicSetup, githubDark, java()],
+    });
+    // github-dark decides the keyword's class (same class as without
+    // basicSetup), not the light-only default highlight style ...
+    const only = EditorState.create({ doc: "class Main { int answer = 42; }", extensions: [githubDark, java()] });
+    expect(highlightingFor(state, [t.keyword])).toBe(highlightingFor(only, [t.keyword]));
+    const fallbackOnly = EditorState.create({ doc: "int x = 1;", extensions: [basicSetup, java()] });
+    expect(highlightingFor(fallbackOnly, [t.keyword])).not.toBe(highlightingFor(state, [t.keyword]));
+  });
+
+  it("highlights .scad files as C++ (like the openscad directive's preview)", () => {
     const source = readFileSync(path.join(repo, "platforms/cloud/src/web/pages/editor/code-editor.tsx"), "utf8");
-    expect(source).toContain("syntaxHighlighting(highlightStyle)");
+    expect(source).toMatch(/case "scad":[\s\S]*?return cpp\(\)/);
+    // The C++ grammar's tags get github's colors, readable in dark mode too.
+    const scad = EditorState.create({
+      doc: "module part() { cube(10); } // a comment",
+      extensions: [githubDark, cpp()],
+    });
+    expect(highlightingFor(scad, [t.moduleKeyword])).toBeTruthy();
+    expect(highlightingFor(scad, [t.function(t.variableName)])).toBeTruthy();
+    expect(highlightingFor(scad, [t.comment])).toBeTruthy();
   });
 });
 
