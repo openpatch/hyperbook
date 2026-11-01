@@ -1,6 +1,7 @@
 import matter from "gray-matter";
 import fs from "fs/promises";
 import fsD from "fs";
+import type { Dirent } from "fs";
 import path from "path";
 import {
   Glossary,
@@ -11,11 +12,26 @@ import yaml from "yaml";
 import { handlebars, registerHelpers } from "./handlebars";
 import { FrontmatterParseError } from "./errors";
 
+/** hyperbook.json's source, by its path with the stat that read it. */
+const jsonSources = new Map<
+  string,
+  { mtimeMs: number; source: string }
+>();
+
 export const getJson = async (root: string): Promise<HyperbookJson> => {
-  return fs
-    .readFile(path.join(root, "hyperbook.json"))
-    .then((f) => f.toString())
-    .then(JSON.parse);
+  const file = path.join(root, "hyperbook.json");
+  const { mtimeMs } = await fs.stat(file);
+  let cached = jsonSources.get(file);
+  if (cached?.mtimeMs !== mtimeMs) {
+    cached = {
+      mtimeMs,
+      source: await fs.readFile(file).then((f) => f.toString()),
+    };
+    jsonSources.set(file, cached);
+  }
+  // Parsed per call, like an uncached read: what callers do to the object
+  // stays their own.
+  return JSON.parse(cached.source);
 };
 
 export type VFileBase = {
@@ -202,12 +218,18 @@ async function getDirectoryArchives(root: string): Promise<VDirectoryArchive> {
 
 async function getDirectoryBook(root: string): Promise<VDirectoryBook> {
   async function getTree(directory: VDirectoryBook): Promise<VDirectoryBook> {
+    // Dirents tell directories from files without a stat of every entry;
+    // only a symlink needs one, to see what it points at.
     const files = await fs
-      .readdir(path.join(directory.path.absolute))
-      .catch(() => []);
-    for (const file of files) {
-      const stat = await fs.stat(path.join(directory.path.absolute, file));
-      if (stat.isDirectory()) {
+      .readdir(path.join(directory.path.absolute), { withFileTypes: true })
+      .catch(() => [] as Dirent[]);
+    for (const entry of files) {
+      const file = entry.name;
+      const stat =
+        entry.isDirectory() || !entry.isSymbolicLink()
+          ? null
+          : await fs.stat(path.join(directory.path.absolute, file));
+      if (entry.isDirectory() || stat?.isDirectory()) {
         const { name } = path.parse(file);
         const d: VDirectoryBook = {
           name,
@@ -298,12 +320,18 @@ async function getDirectoryGlossary(root: string): Promise<VDirectoryGlossary> {
   async function getTree(
     directory: VDirectoryGlossary,
   ): Promise<VDirectoryGlossary> {
+    // Dirents tell directories from files without a stat of every entry;
+    // only a symlink needs one, to see what it points at.
     const files = await fs
-      .readdir(path.join(directory.path.absolute))
-      .catch(() => []);
-    for (const file of files) {
-      const stat = await fs.stat(path.join(directory.path.absolute, file));
-      if (stat.isDirectory()) {
+      .readdir(path.join(directory.path.absolute), { withFileTypes: true })
+      .catch(() => [] as Dirent[]);
+    for (const entry of files) {
+      const file = entry.name;
+      const stat =
+        entry.isDirectory() || !entry.isSymbolicLink()
+          ? null
+          : await fs.stat(path.join(directory.path.absolute, file));
+      if (entry.isDirectory() || stat?.isDirectory()) {
         const { name } = path.parse(file);
         const d: VDirectoryGlossary = {
           name,
@@ -339,23 +367,12 @@ async function getDirectoryGlossary(root: string): Promise<VDirectoryGlossary> {
           root,
           extension: ext,
         };
-        const references: VFileBook[] = [];
-        for (const bookFile of bookFiles) {
-          const content = bookFile.markdown.content;
-          const r = new RegExp(
-            `:t\\[.*\\]\\{#${name}(\..*)?\\}|:t\\[${name}\\]`,
-          );
-          const m = content.match(r);
-          if (m && !bookFile.markdown.data.hide) {
-            references.push(bookFile);
-          }
-        }
         let vfile: VFileGlossary = {
           ...vfilebase,
           folder: "glossary",
           extension: ext as (typeof pageExtensions)[number],
           markdown: await getMarkdown(vfilebase),
-          references,
+          references: [],
         };
         let href = "/glossary";
         if (vfile.path.directory) {
@@ -370,7 +387,7 @@ async function getDirectoryGlossary(root: string): Promise<VDirectoryGlossary> {
     }
     return directory;
   }
-  return getTree({
+  const directory = await getTree({
     root,
     path: {
       relative: "",
@@ -381,6 +398,41 @@ async function getDirectoryGlossary(root: string): Promise<VDirectoryGlossary> {
     directories: [],
     files: [],
   });
+
+  // Which book pages reference which term, with every page scanned once
+  // instead of once per term and page: the terms are many, the pages more.
+  // Bracketed text counts for the term it is, an anchor for the term it is,
+  // or the one whose dot-separated sub-page it names - like the term's own
+  // match before, where a usage like :t[b]{#c} counts for both b and c.
+  const glossaryFiles = (await flatDirectory(directory)) as VFileGlossary[];
+  const usages = /:t\[(.*?)\](?:\{#([^}]*)\})?/g;
+  const pagesByTerm = new Map<string, VFileBook[]>();
+  for (const bookFile of bookFiles) {
+    if (bookFile.markdown.data.hide) continue;
+    const found = new Set<string>();
+    for (const usage of bookFile.markdown.content.matchAll(usages)) {
+      const text = usage[1]!;
+      const anchor = usage[2];
+      for (const term of glossaryFiles) {
+        const name = term.name;
+        if (found.has(name)) continue;
+        if (
+          text === name ||
+          (anchor !== undefined &&
+            (anchor === name || anchor.startsWith(name + ".")))
+        ) {
+          found.add(name);
+          (pagesByTerm.get(name) ?? pagesByTerm.set(name, []).get(name)!).push(
+            bookFile,
+          );
+        }
+      }
+    }
+  }
+  for (const term of glossaryFiles) {
+    term.references = pagesByTerm.get(term.name) ?? [];
+  }
+  return directory;
 }
 
 async function getDirectoryGlossaryPublic(
@@ -903,6 +955,36 @@ const parseFrontmatter = (markdown: string, file: string, located: boolean) => {
   }
 };
 
+/** A page's markdown, with the stats that made it current: what `getMarkdown`
+ * read, by the page's absolute path. Rendering a page of a big book walks
+ * every page of the book (see getDirectoryBook); a cache hit re-reads none
+ * of them, only stats the page and the templates and snippets its content
+ * was built from. */
+type MarkdownCacheEntry = {
+  mtimeMs: number;
+  size: number;
+  dependencies: { path: string; mtimeMs: number; size: number }[];
+  markdown: NonNullable<VFileBook["markdown"]>;
+};
+const markdownCache = new Map<string, MarkdownCacheEntry>();
+
+/** Whether every dependency is still what it was statted as; a missing one counts as changed. */
+const dependenciesUnchanged = async (
+  dependencies: MarkdownCacheEntry["dependencies"],
+) => {
+  for (const dependency of dependencies) {
+    const stat = await fs.stat(dependency.path).catch(() => null);
+    if (
+      !stat ||
+      stat.mtimeMs !== dependency.mtimeMs ||
+      stat.size !== dependency.size
+    ) {
+      return false;
+    }
+  }
+  return true;
+};
+
 export const getMarkdown = async (
   file: VFileBase,
 ): Promise<VFileBook["markdown"]> => {
@@ -913,6 +995,23 @@ export const getMarkdown = async (
   }
 
   registerHelpers(handlebars, { file });
+
+  // The page, statted: an unchanged page with unchanged dependencies is not
+  // read again. Like a fresh parse, the caller gets its own copy.
+  const stat = await fs.stat(file.path.absolute);
+  const cached = markdownCache.get(file.path.absolute);
+  if (
+    cached &&
+    cached.mtimeMs === stat.mtimeMs &&
+    cached.size === stat.size &&
+    (await dependenciesUnchanged(cached.dependencies))
+  ) {
+    return {
+      content: cached.markdown.content,
+      data: { ...cached.markdown.data },
+      dependencies: [...(cached.markdown.dependencies ?? [])],
+    };
+  }
 
   // Everything inlined into this page, so the dev server knows which pages to
   // rebuild when one of these files changes. Kept relative to the book root so
@@ -1036,9 +1135,35 @@ export const getMarkdown = async (
     }
   }
 
-  return {
+  // The page's dependencies, statted: what the content was built from.
+  const dependencyStats: MarkdownCacheEntry["dependencies"] = [];
+  for (const dependency of new Set(
+    dependencies.map((relative) => path.resolve(file.root, relative)),
+  )) {
+    const depStat = await fs.stat(dependency).catch(() => null);
+    if (depStat) {
+      dependencyStats.push({
+        path: dependency,
+        mtimeMs: depStat.mtimeMs,
+        size: depStat.size,
+      });
+    }
+  }
+
+  const parsed = {
     content,
     dependencies,
     data: { ...data } as HyperbookFrontmatter,
+  };
+  markdownCache.set(file.path.absolute, {
+    mtimeMs: stat.mtimeMs,
+    size: stat.size,
+    dependencies: dependencyStats,
+    markdown: parsed,
+  });
+  return {
+    content,
+    dependencies: [...dependencies],
+    data: { ...parsed.data },
   };
 };

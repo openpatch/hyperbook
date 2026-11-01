@@ -1,9 +1,14 @@
 import { type ChildProcessWithoutNullStreams, spawn } from "node:child_process";
 import { existsSync } from "node:fs";
-import { mkdir, readFile, readdir, rm, writeFile } from "node:fs/promises";
+import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import type { Config } from "../config";
-import { checkout, headCommit, markProjectRoot } from "./git";
+import {
+  checkout,
+  headCommit,
+  markProjectRoot,
+  updateCheckout,
+} from "./git";
 import { BuildLog, adaptConfig, cliChildEnv, cliPermissions } from "./runner";
 import { makeJobDir, repoDir } from "./storage";
 
@@ -221,10 +226,15 @@ export class Renderers {
   private async update(r: Renderer, commit: string) {
     await this.exclusive(r, async () => {
       if (r.commit === commit) return;
-      for (const entry of await readdir(r.srcDir)) {
-        if (entry !== ".hyperbook") await rm(path.join(r.srcDir, entry), { recursive: true, force: true });
-      }
-      await checkout(repoDir(this.config, r.bookId), commit, r.srcDir);
+      // The unsaved text of a page does not survive a save: put the saved
+      // text back, so the update below cannot mistake it for the page's.
+      await this.restore(r);
+      await updateCheckout(
+        repoDir(this.config, r.bookId),
+        r.commit,
+        commit,
+        r.srcDir,
+      );
       await markProjectRoot(r.srcDir);
       await adaptConfig(r.srcDir, new BuildLog());
       r.commit = commit;

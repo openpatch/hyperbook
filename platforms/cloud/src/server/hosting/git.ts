@@ -4,12 +4,13 @@ import {
   chmodSync,
   mkdtempSync,
   mkdirSync,
+  readdirSync,
   readFileSync,
   renameSync,
   rmSync,
   writeFileSync,
 } from "node:fs";
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import type { Readable, Writable } from "node:stream";
@@ -263,7 +264,73 @@ export async function checkout(repo: string, commit: string, dest: string) {
   const env = { GIT_WORK_TREE: dest, GIT_INDEX_FILE: index };
   try {
     await git(["read-tree", commit], { gitDir: repo, env });
-    await git(["checkout-index", "--all", "--force"], { gitDir: repo, cwd: dest, env });
+    await git(["checkout-index", "--all", "--force"], {
+      gitDir: repo,
+      cwd: dest,
+      env,
+    });
+  } finally {
+    rmSync(index, { force: true });
+  }
+}
+
+/**
+ * Brings a checkout of `from` to `to`, writing only what the commits differ
+ * in. The unchanged files keep their modification times, so what caches by
+ * them (see @hyperbook/fs) stays warm across a save; a full checkout would
+ * make every file new and every cache cold.
+ */
+export async function updateCheckout(
+  repo: string,
+  from: string,
+  to: string,
+  dest: string,
+) {
+  const index = path.join(path.dirname(dest), `index-${path.basename(dest)}`);
+  const env = { GIT_WORK_TREE: dest, GIT_INDEX_FILE: index };
+  try {
+    // The index holds `to`, so the changed files are written from it.
+    await git(["read-tree", to], { gitDir: repo, env });
+    const diff = await git(
+      ["diff-tree", "-r", "--no-renames", "--name-status", "-z", from, to],
+      { gitDir: repo, env },
+    );
+    const changed: string[] = [];
+    const deleted: string[] = [];
+    const parts = diff.split("\0");
+    for (let i = 0; i + 1 < parts.length; i += 2) {
+      const status = parts[i]!;
+      const file = parts[i + 1]!;
+      if (status.startsWith("D")) deleted.push(file);
+      else changed.push(file);
+    }
+    if (changed.length > 0) {
+      await git(["checkout-index", "--force", "--", ...changed], {
+        gitDir: repo,
+        cwd: dest,
+        env,
+      });
+    }
+    for (const file of deleted) {
+      await rm(path.join(dest, file), { force: true });
+    }
+    // A folder whose last file was deleted goes with it, like a fresh
+    // checkout would not have it; an empty one would show in the editor's
+    // tree and the book's navigation.
+    for (const file of deleted) {
+      let dir = path.dirname(path.join(dest, file));
+      while (dir.startsWith(dest + path.sep)) {
+        let empty: boolean;
+        try {
+          empty = readdirSync(dir).length === 0;
+        } catch {
+          break;
+        }
+        if (!empty) break;
+        rmSync(dir, { force: true });
+        dir = path.dirname(dir);
+      }
+    }
   } finally {
     rmSync(index, { force: true });
   }
@@ -314,6 +381,117 @@ export async function listTree(repo: string, commit: string): Promise<TreeEntry[
 
 export async function readBlob(repo: string, oid: string): Promise<Buffer> {
   return gitBytes(["cat-file", "blob", oid], { gitDir: repo });
+}
+
+export type CommitSummary = {
+  sha: string;
+  /** The author git recorded; the editor's saves name the teacher. */
+  name: string;
+  email: string;
+  /** The author date as ISO 8601, as %aI writes it. */
+  date: string;
+  /** The subject line; the platform's commits have no body. */
+  message: string;
+  /** Summed over the commit's files; binary files count nothing. */
+  additions: number;
+  deletions: number;
+};
+
+/** One numstat line "<added>\t<deleted>\t<path>" into the commit's sums. */
+function countLines(commit: CommitSummary, line: string) {
+  const [additions, deletions] = line.split("\t");
+  const add = Number(additions);
+  const del = Number(deletions);
+  // Binary files are "-\t-\t<path>"; Number("-") is NaN, so they count 0.
+  if (Number.isFinite(add)) commit.additions += add;
+  if (Number.isFinite(del)) commit.deletions += del;
+}
+
+/**
+ * The branch's commits, newest first, as keyset pages: `after` is the last
+ * commit of the page before (null: the newest commits), and the walk starts
+ * at it — its own record is fetched too, then dropped, so the page holds
+ * only what is older. A book can have many commits (every save is one), so
+ * callers pass the page size as `limit`. `path` keeps only the commits that
+ * touched that file — and the counts are then that file's, not the whole
+ * commit's. Commits a push merged in are listed like any other, but a merge
+ * itself counts nothing: its numstat is empty unless git is asked to pick
+ * a parent.
+ */
+export async function logCommits(
+  repo: string,
+  options: { limit: number; after: string | null; path?: string },
+): Promise<CommitSummary[]> {
+  // -z makes git write numstat lines and commit records NUL-terminated:
+  // a path with a newline cannot sneak into the parsing. The format's
+  // fields are joined with \x1f and closed with \x1e, which no subject of
+  // this platform contains; the record is followed by its numstat lines.
+  // The cursor itself is one record more than the page asked for.
+  const count = options.limit + (options.after ? 1 : 0);
+  const out = await gitBytes(
+    [
+      "log",
+      "-z",
+      `--max-count=${count}`,
+      "--format=format:%H%x1f%an%x1f%ae%x1f%aI%x1f%s%x1e",
+      "--numstat",
+      options.after ?? BRANCH,
+      ...(options.path ? ["--", options.path] : []),
+    ],
+    { gitDir: repo },
+  );
+  const commits: CommitSummary[] = [];
+  let current: CommitSummary | undefined;
+  for (const token of out.toString("utf8").split("\0")) {
+    // The NULs both end the numstat lines and separate the commit records,
+    // which shows up as empty tokens between two records.
+    if (token === "") continue;
+    const end = token.indexOf("\x1e");
+    if (end !== -1) {
+      const [sha, name, email, date, message] = token
+        .slice(0, end)
+        .split("\x1f");
+      current = {
+        sha: sha!,
+        name: name!,
+        email: email!,
+        date: date!,
+        message: message!,
+        additions: 0,
+        deletions: 0,
+      };
+      commits.push(current);
+      // The first numstat line shares this token: "<format>\n<numstat>".
+      const rest = token.slice(end + 1);
+      const line = rest.startsWith("\n") ? rest.slice(1) : rest;
+      if (line) countLines(current, line);
+    } else if (current) {
+      countLines(current, token);
+    }
+  }
+  // The walk started at the cursor: its record is the first, not part of
+  // the page.
+  if (options.after) commits.shift();
+  return commits.slice(0, options.limit);
+}
+
+/**
+ * One commit's unified diff, as the editor's History pane shows it. The
+ * first commit is diffed against the empty tree (--root); a merge against
+ * its first parent, which is what it brought in — anything else would show
+ * nothing, as diff-tree refuses to pick a side of a merge.
+ */
+export async function commitDiff(repo: string, sha: string): Promise<string> {
+  const parents = (
+    await git(["show", "-s", "--format=%P", sha], { gitDir: repo })
+  )
+    .split(" ")
+    .filter(Boolean);
+  const args =
+    parents.length >= 2
+      ? ["diff-tree", "-p", "-M", "--no-color", parents[0]!, sha]
+      : ["diff-tree", "-p", "-M", "--root", "--no-color", sha];
+  return (await gitBytes(args, { gitDir: repo })).toString("utf8").trim();
 }
 
 /** A change to diff outside any repository, as the AI review dialog shows it. */
