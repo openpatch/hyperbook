@@ -13,6 +13,338 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 
 :::
 
+## v0.118.1
+
+::::tabs
+
+:::tab{title="New :rocket:" id="new"}
+
+**cloud**: The editor gets a History pane next to the AI assistant and the preview: every save, upload and push is one commit with its author, date, message and line counts. Clicking a commit shows its diff in a dialog — commits never change, so each diff is fetched once and cached by its sha.
+
+:::
+
+:::tab{title="Improved :+1:" id="improved"}
+
+**cloud**: Quick open (Ctrl/Cmd+P) and the file sidebar's filter search fuzzily, powered by fzf's V2 algorithm — "sovh" finds `sortierverfahren.md` — with the matched characters highlighted. Quick open also works on books with long file paths: the dialog is wider, each row leads with the file name, and directories are clipped from the left when needed.
+
+**cloud**: The file tree no longer slows the editor down on large books. It is virtualized, its rows are memoized, and folders start collapsed, so a book with thousands of files opens quickly. Preview rendering is fast again on large books, too — a page render of a 4,000-file book drops from ~4 s to ~0.3 s, and a save writes only the files that changed instead of the whole book.
+
+**hyperbook**: Favicon generation from the book's logo no longer needs the native `sharp` addon, which the build sandbox of Hyperbook Cloud forbids. Raster logos are scaled with Jimp (pure JavaScript) and SVGs are rasterized with resvg compiled to WebAssembly, so books on Hyperbook Cloud get their favicons from their logo now.
+
+:::
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+**markdown**: Element runtimes a host serves itself (Hyperbook Cloud's shared assets under `/_hyperbook/assets/<version>/`) load again on preview and published pages. Their root-relative addresses were buried under the directive's assets folder and 404'd.
+
+:::
+
+::::
+
+## v0.118.0
+
+::::tabs
+
+:::tab{title="New :rocket:" id="new"}
+
+**archive**: The `archive` directive gained an `include` attribute for pulling extra files or folders into the zipped archive at build time, without symbolic links: `:::archive[Projekt: Spielwerkstatt]{name="spielwerkstatt" include="/book/projekte/spielwerkstatt/assets=assets"}`. Sources are book-root-relative, destinations are relative paths inside the zip, and both accept comma-separated lists. Missing sources or colliding destinations fail the build with an error naming the declaring page.
+
+**cloud**: The editor has an AI writing assistant. It knows the hyperbook format, looks through the whole book with tools (`read_file`, `list_files`, `search_files`, `rename_file`, `read_docs` with local, vendored documentation), and proposes new files, edits and deletions — every proposal is a git diff the teacher accepts or denies, file by file. The panel is a chat with a model picker, conversation history, and answers rendered as Markdown. Any OpenAI-compatible provider works (Mistral, Ollama, OpenAI, Anthropic, OpenRouter, LM Studio, vLLM); admins can switch the assistant off per teacher and set quotas.
+
+**cloud**: The AI assistant meters usage in tokens and enforces a weekly credit quota (`ai_tokens_per_week`, alongside the per-day request quota). Model costs are entered as provider prices (€/M tokens) in the instance settings with a configurable credit value and a "Fetch prices" button; prompt caching is used and cached tokens count at their own, lower weight. The editor's model picker sorts by cost and shows a credits bar with the refill date.
+
+**cloud**: Books can be worked on locally with git: `git clone https://git@<admin host>/api/books/<id>/git`, edit, `git push` to `main`. Pushes are served by git smart HTTP with per-book tokens, restricted to a single `main` branch and the storage quota by a pre-receive hook. Publishing is recorded as version tags (`v1`, `v2`, … plus a moving `published` tag) and the live site can be rolled back to a tag. Editor saves keep their conflict semantics against pushes.
+
+**cloud**: Blockflow projects get visual editors: a `.sb3` file opens in blockflow's embed editor and a `.blockflow` file in the embed generator (blockflow v0.2.0 runtime, served under `/blockflow/*`), and "Edit visually" now also works on `::blockflow-player` and `::::blockflow-editor`.
+
+**cloud**: The front address of an instance shows a landing page introducing the three ways to run Hyperbook — hosted on hyperbook.cloud, self-hosted with Docker, or as a static site — and admins can turn it off (`landingPage`). Hyperbook Cloud now speaks English and German, following the user's choice, the instance default or the browser.
+
+**hyperbook**: Hyperbook Cloud no longer copies the element runtimes (Pyodide, Excalidraw, GeoGebra, … — about 500 MB together) into every build of every book. They are extracted once per Hyperbook version and served at `/_hyperbook/assets/<version>/` with a year of immutable caching; admins choose per element whether books load its runtime from the instance or the public CDN. Other hosts get the same mechanism through `HYPERBOOK_SHARED_ASSETS_BASE`.
+
+**online-ide, sqlide**: Both IDEs now read `::file{path="…" src="…"}` like the other IDEs. The Online IDE links the source so images and other files its Java code opens work as before; the SQL IDE reads the source at build time and shows an `.sql` file as another editor tab and a Markdown file as a hint.
+
+:::
+
+:::tab{title="Improved :+1:" id="improved"}
+
+**bitflow**: Update to 0.4.1 (from 0.3.1). The editor's zoom buttons, minimap and edges follow the host's light/dark theme, and bitflow uses the book's body font and brand colours.
+
+**markdown**: Relative paths now work in every directive's file attributes, resolved from the page's folder like links: `::kirimoto{model}`, `::embed{src}`, tile icons, learning map videos and the inlined files of `::learningmap`, `::bitflow`, `::jmp` and the IDEs' `::file` all resolve `./` and `../` from the page's folder — and never from outside the book.
+
+**cloud**: The editor highlights more file types (Java, Python, SQL, Typst, `jsx`/`tsx`/`cjs`, `htm`/`xhtml`, and Typst code blocks inside pages), and code files use the theme's syntax colours in dark mode too. Builds mark the checkout as the book's project root, so the `rfile`/`rbase64` helpers find the book's root files in the cloud.
+
+:::
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+**markdown**: The Online IDE runtime download no longer pins a stale release; builds download the version declared in `ide-releases.json`. The VS Code preview now renders pages through the same single-page builders as `hyperbook render`, so it shows exactly what a build produces.
+
+:::
+
+::::
+
+## v0.117.1
+
+::::tabs
+
+:::tab{title="New :rocket:" id="new"}
+
+**cloud**: The editor gets a quick-open popup (Ctrl/Cmd+P) to search the book's files, and a file tree that filters, unfolds the open file and moves files by dragging them into folders. A right-click menu offers new file, new folder, upload, download, cut, copy, paste, rename and delete.
+
+**cloud**: The editor's settings menu offers font size, line numbers, spell check, a font choice (system monospace or GitHub's Monaspace Neon, Argon, Xenon, Radon, Krypton) and a line height (S/M/L); the choices are kept in the browser. Spell check uses Hunspell via Typo.js with a per-book dictionary, is aware of code, frontmatter and directive syntax, and offers corrections on right-click. A right-click in the editor opens its own context menu instead of the browser's.
+
+**cloud**: The editor's panes — file list, editor, preview — are resizable by dragging their borders or with the arrow keys; double-click restores the default. The chosen widths are remembered per browser.
+
+**cloud**: The page settings and book settings popups are structured into groups in two columns, the frontmatter bar sits flush with the editor, and page settings can remove a page's jumps (`prev: null` / `next: null`). The branding section has an upload button that puts an image into the public folder and selects it as the logo.
+
+:::
+
+:::tab{title="Improved :+1:" id="improved"}
+
+**cloud**: Every part of a book's page is a card of its own, arranged in a grid; the navigation is slimmer and the delete card is tinted as the danger it is. The sidebar fills the window height with "Power your Hyperbook" and the version at its foot, narrow screens get it as a drawer, and a toggle switches between light and dark mode. The editor keeps up with typing on long pages and its preview updates without flickering.
+
+**cloud**: The editor's preview pane shows the whole page — header, navigation and footer — like readers will see it, through the new `standalone=false` URL parameter. Renaming or moving a file now updates the links to it, including relative ones, without doubling `#fragment`s. Uploading a book as a zip shows a progress bar, and links an upload leaves out (symlinks) are listed in the build's log, which can be downloaded.
+
+**markdown**: Relative paths work in every directive's file attributes, resolved from the page's folder like links.
+
+:::
+
+::::
+
+## v0.117.0
+
+::::tabs
+
+:::tab{title="New :rocket:" id="new"}
+
+**hyperbook**: `hyperbook render` renders single pages on request (JSON lines on stdin) without a full build, for editors that preview a page while it is written. Hyperbook Cloud uses it: the editor's preview shows the open page with its unsaved text as you type, and saving no longer builds the book. The editor also completes elements and their attributes, highlights them, links to their documentation, checks them, and edits a page's frontmatter as a form.
+
+:::
+
+:::tab{title="Improved :+1:" id="improved"}
+
+**cloud**: The sidebar shows which version of Hyperbook Cloud runs — its version, the build number and the commit it was built from. The build's "Website" link is now "Download" and names the archive `<slug>.zip`. The light/dark choice applies from the first paint even under a Content-Security-Policy, and the editor's preview follows the chosen theme.
+
+:::
+
+::::
+
+## v0.116.0
+
+::::tabs
+
+:::tab{title="New :rocket:" id="new"}
+
+**cloud**: Books connect to the new Hyperbook Cloud. A book the platform hosts gets `"cloud": { "sameOrigin": true }` and logs students in with a cookie on its own address; a book hosted elsewhere sets `cloud.url` to its address on the platform and uses a token. The login form has a "shared device" option, a scanned QR code logs a student in directly, and a teacher's read-only view of a student's work is recognized from the platform's session. A refused save (403) no longer logs the student out.
+
+:::
+
+:::tab{title="Breaking :warning:" id="breaking"}
+
+**cloud**: The API of the previous, retired cloud server is no longer supported.
+
+:::
+
+:::tab{title="Improved :+1:" id="improved"}
+
+**hyperbook**: `hyperbook build` runs under Node's permission model with access to just the book and the CLI, and the `language` setting only loads a search stemmer when it is a bare language code such as `de`.
+
+**markdown**: Update learningmap (0.7.1) and struktolab (0.6.2). Struktolab keeps the indented lines under a line it does not recognise instead of dropping them, and translates its editor's menus.
+
+:::
+
+::::
+
+## v0.115.2
+
+::::tabs
+
+:::tab{title="Improved :+1:" id="improved"}
+
+**online-ide**: Update the Online IDE runtime to build 41: Scratch for Java code blocks run on the Scratch for Java 7.1.0 runtime (`TiledMap.spawn` takes the sprite classes to make, `File`'s XML methods are gone), the catalogs are synchronized with 7.1.0, and "Open in Scratch for Java Studio" saves a project as a `.scratch4j` file that Studio opens with a double-click.
+
+:::
+
+::::
+
+## v0.115.1
+
+::::tabs
+
+:::tab{title="Improved :+1:" id="improved"}
+
+**online-ide**: Update the Online IDE runtime to build 39: Scratch for Java code blocks run on the Scratch for Java 7.0 runtime (graphics aligned with the new renderer, the 7.0 shader format, stage transitions that build their stage lazily), and the catalogs are synchronized with 7.0.0.
+
+:::
+
+::::
+
+## v0.118.1
+
+::::tabs
+
+:::tab{title="New :rocket:" id="new"}
+
+**cloud**: The editor gets a History pane next to the AI assistant and the preview: every save, upload and push is one commit with its author, date, message and line counts. Clicking a commit shows its diff in a dialog — commits never change, so each diff is fetched once and cached by its sha.
+
+:::
+
+:::tab{title="Improved :+1:" id="improved"}
+
+**cloud**: Quick open (Ctrl/Cmd+P) and the file sidebar's filter search fuzzily, powered by fzf's V2 algorithm — "sovh" finds `sortierverfahren.md` — with the matched characters highlighted. Quick open also works on books with long file paths: the dialog is wider, each row leads with the file name, and directories are clipped from the left when needed.
+
+**cloud**: The file tree no longer slows the editor down on large books. It is virtualized, its rows are memoized, and folders start collapsed, so a book with thousands of files opens quickly. Preview rendering is fast again on large books, too — a page render of a 4,000-file book drops from ~4 s to ~0.3 s, and a save writes only the files that changed instead of the whole book.
+
+**hyperbook**: Favicon generation from the book's logo no longer needs the native `sharp` addon, which the build sandbox of Hyperbook Cloud forbids. Raster logos are scaled with Jimp (pure JavaScript) and SVGs are rasterized with resvg compiled to WebAssembly, so books on Hyperbook Cloud get their favicons from their logo now.
+
+:::
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+**markdown**: Element runtimes a host serves itself (Hyperbook Cloud's shared assets under `/_hyperbook/assets/<version>/`) load again on preview and published pages. Their root-relative addresses were buried under the directive's assets folder and 404'd.
+
+:::
+
+::::
+
+## v0.118.0
+
+::::tabs
+
+:::tab{title="New :rocket:" id="new"}
+
+**archive**: The `archive` directive gained an `include` attribute for pulling extra files or folders into the zipped archive at build time, without symbolic links: `:::archive[Projekt: Spielwerkstatt]{name="spielwerkstatt" include="/book/projekte/spielwerkstatt/assets=assets"}`. Sources are book-root-relative, destinations are relative paths inside the zip, and both accept comma-separated lists. Missing sources or colliding destinations fail the build with an error naming the declaring page.
+
+**cloud**: The editor has an AI writing assistant. It knows the hyperbook format, looks through the whole book with tools (`read_file`, `list_files`, `search_files`, `rename_file`, `read_docs` with local, vendored documentation), and proposes new files, edits and deletions — every proposal is a git diff the teacher accepts or denies, file by file. The panel is a chat with a model picker, conversation history, and answers rendered as Markdown. Any OpenAI-compatible provider works (Mistral, Ollama, OpenAI, Anthropic, OpenRouter, LM Studio, vLLM); admins can switch the assistant off per teacher and set quotas.
+
+**cloud**: The AI assistant meters usage in tokens and enforces a weekly credit quota (`ai_tokens_per_week`, alongside the per-day request quota). Model costs are entered as provider prices (€/M tokens) in the instance settings with a configurable credit value and a "Fetch prices" button; prompt caching is used and cached tokens count at their own, lower weight. The editor's model picker sorts by cost and shows a credits bar with the refill date.
+
+**cloud**: Books can be worked on locally with git: `git clone https://git@<admin host>/api/books/<id>/git`, edit, `git push` to `main`. Pushes are served by git smart HTTP with per-book tokens, restricted to a single `main` branch and the storage quota by a pre-receive hook. Publishing is recorded as version tags (`v1`, `v2`, … plus a moving `published` tag) and the live site can be rolled back to a tag. Editor saves keep their conflict semantics against pushes.
+
+**cloud**: Blockflow projects get visual editors: a `.sb3` file opens in blockflow's embed editor and a `.blockflow` file in the embed generator (blockflow v0.2.0 runtime, served under `/blockflow/*`), and "Edit visually" now also works on `::blockflow-player` and `::::blockflow-editor`.
+
+**cloud**: The front address of an instance shows a landing page introducing the three ways to run Hyperbook — hosted on hyperbook.cloud, self-hosted with Docker, or as a static site — and admins can turn it off (`landingPage`). Hyperbook Cloud now speaks English and German, following the user's choice, the instance default or the browser.
+
+**hyperbook**: Hyperbook Cloud no longer copies the element runtimes (Pyodide, Excalidraw, GeoGebra, … — about 500 MB together) into every build of every book. They are extracted once per Hyperbook version and served at `/_hyperbook/assets/<version>/` with a year of immutable caching; admins choose per element whether books load its runtime from the instance or the public CDN. Other hosts get the same mechanism through `HYPERBOOK_SHARED_ASSETS_BASE`.
+
+**online-ide, sqlide**: Both IDEs now read `::file{path="…" src="…"}` like the other IDEs. The Online IDE links the source so images and other files its Java code opens work as before; the SQL IDE reads the source at build time and shows an `.sql` file as another editor tab and a Markdown file as a hint.
+
+:::
+
+:::tab{title="Improved :+1:" id="improved"}
+
+**bitflow**: Update to 0.4.1 (from 0.3.1). The editor's zoom buttons, minimap and edges follow the host's light/dark theme, and bitflow uses the book's body font and brand colours.
+
+**markdown**: Relative paths now work in every directive's file attributes, resolved from the page's folder like links: `::kirimoto{model}`, `::embed{src}`, tile icons, learning map videos and the inlined files of `::learningmap`, `::bitflow`, `::jmp` and the IDEs' `::file` all resolve `./` and `../` from the page's folder — and never from outside the book.
+
+**cloud**: The editor highlights more file types (Java, Python, SQL, Typst, `jsx`/`tsx`/`cjs`, `htm`/`xhtml`, and Typst code blocks inside pages), and code files use the theme's syntax colours in dark mode too. Builds mark the checkout as the book's project root, so the `rfile`/`rbase64` helpers find the book's root files in the cloud.
+
+:::
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+**markdown**: The Online IDE runtime download no longer pins a stale release; builds download the version declared in `ide-releases.json`. The VS Code preview now renders pages through the same single-page builders as `hyperbook render`, so it shows exactly what a build produces.
+
+:::
+
+::::
+
+## v0.117.1
+
+::::tabs
+
+:::tab{title="New :rocket:" id="new"}
+
+**cloud**: The editor gets a quick-open popup (Ctrl/Cmd+P) to search the book's files, and a file tree that filters, unfolds the open file and moves files by dragging them into folders. A right-click menu offers new file, new folder, upload, download, cut, copy, paste, rename and delete.
+
+**cloud**: The editor's settings menu offers font size, line numbers, spell check, a font choice (system monospace or GitHub's Monaspace Neon, Argon, Xenon, Radon, Krypton) and a line height (S/M/L); the choices are kept in the browser. Spell check uses Hunspell via Typo.js with a per-book dictionary, is aware of code, frontmatter and directive syntax, and offers corrections on right-click. A right-click in the editor opens its own context menu instead of the browser's.
+
+**cloud**: The editor's panes — file list, editor, preview — are resizable by dragging their borders or with the arrow keys; double-click restores the default. The chosen widths are remembered per browser.
+
+**cloud**: The page settings and book settings popups are structured into groups in two columns, the frontmatter bar sits flush with the editor, and page settings can remove a page's jumps (`prev: null` / `next: null`). The branding section has an upload button that puts an image into the public folder and selects it as the logo.
+
+:::
+
+:::tab{title="Improved :+1:" id="improved"}
+
+**cloud**: Every part of a book's page is a card of its own, arranged in a grid; the navigation is slimmer and the delete card is tinted as the danger it is. The sidebar fills the window height with "Power your Hyperbook" and the version at its foot, narrow screens get it as a drawer, and a toggle switches between light and dark mode. The editor keeps up with typing on long pages and its preview updates without flickering.
+
+**cloud**: The editor's preview pane shows the whole page — header, navigation and footer — like readers will see it, through the new `standalone=false` URL parameter. Renaming or moving a file now updates the links to it, including relative ones, without doubling `#fragment`s. Uploading a book as a zip shows a progress bar, and links an upload leaves out (symlinks) are listed in the build's log, which can be downloaded.
+
+**markdown**: Relative paths work in every directive's file attributes, resolved from the page's folder like links.
+
+:::
+
+::::
+
+## v0.117.0
+
+::::tabs
+
+:::tab{title="New :rocket:" id="new"}
+
+**hyperbook**: `hyperbook render` renders single pages on request (JSON lines on stdin) without a full build, for editors that preview a page while it is written. Hyperbook Cloud uses it: the editor's preview shows the open page with its unsaved text as you type, and saving no longer builds the book. The editor also completes elements and their attributes, highlights them, links to their documentation, checks them, and edits a page's frontmatter as a form.
+
+:::
+
+:::tab{title="Improved :+1:" id="improved"}
+
+**cloud**: The sidebar shows which version of Hyperbook Cloud runs — its version, the build number and the commit it was built from. The build's "Website" link is now "Download" and names the archive `<slug>.zip`. The light/dark choice applies from the first paint even under a Content-Security-Policy, and the editor's preview follows the chosen theme.
+
+:::
+
+::::
+
+## v0.116.0
+
+::::tabs
+
+:::tab{title="New :rocket:" id="new"}
+
+**cloud**: Books connect to the new Hyperbook Cloud. A book the platform hosts gets `"cloud": { "sameOrigin": true }` and logs students in with a cookie on its own address; a book hosted elsewhere sets `cloud.url` to its address on the platform and uses a token. The login form has a "shared device" option, a scanned QR code logs a student in directly, and a teacher's read-only view of a student's work is recognized from the platform's session. A refused save (403) no longer logs the student out.
+
+:::
+
+:::tab{title="Breaking :warning:" id="breaking"}
+
+**cloud**: The API of the previous, retired cloud server is no longer supported.
+
+:::
+
+:::tab{title="Improved :+1:" id="improved"}
+
+**hyperbook**: `hyperbook build` runs under Node's permission model with access to just the book and the CLI, and the `language` setting only loads a search stemmer when it is a bare language code such as `de`.
+
+**markdown**: Update learningmap (0.7.1) and struktolab (0.6.2). Struktolab keeps the indented lines under a line it does not recognise instead of dropping them, and translates its editor's menus.
+
+:::
+
+::::
+
+## v0.115.2
+
+::::tabs
+
+:::tab{title="Improved :+1:" id="improved"}
+
+**online-ide**: Update the Online IDE runtime to build 41: Scratch for Java code blocks run on the Scratch for Java 7.1.0 runtime (`TiledMap.spawn` takes the sprite classes to make, `File`'s XML methods are gone), the catalogs are synchronized with 7.1.0, and "Open in Scratch for Java Studio" saves a project as a `.scratch4j` file that Studio opens with a double-click.
+
+:::
+
+::::
+
+## v0.115.1
+
+::::tabs
+
+:::tab{title="Improved :+1:" id="improved"}
+
+**online-ide**: Update the Online IDE runtime to build 39: Scratch for Java code blocks run on the Scratch for Java 7.0 runtime (graphics aligned with the new renderer, the 7.0 shader format, stage transitions that build their stage lazily), and the catalogs are synchronized with 7.0.0.
+
+:::
+
+::::
+
 ## v0.115.0
 
 ::::tabs
