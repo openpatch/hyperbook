@@ -140,8 +140,8 @@ export async function runDev({
   // so a restarted dev server does not re-walk and re-read the whole book.
   // vfile.clean removes them on every change, and the watcher below ignores
   // dot-prefixed paths, so the cache files never trigger a rebuild. An
-  // explicit HYPERBOOK_CACHE in the environment wins.
-  if (!process.env.HYPERBOOK_CACHE) {
+  // explicit HYPERBOOK_CACHE in the environment wins, and an empty value opts out.
+  if (process.env.HYPERBOOK_CACHE === undefined) {
     process.env.HYPERBOOK_CACHE = "1";
   }
 
