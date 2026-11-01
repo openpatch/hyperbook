@@ -11,7 +11,7 @@ import { useTranslation } from "react-i18next";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { fuzzyMatch, fuzzyScore } from "./quick-open-fuzzy";
+import { fuzzyMatch } from "./quick-open-fuzzy";
 
 /**
  * Wraps the characters the query matched in <mark>, so people can see *why*
@@ -131,7 +131,7 @@ const QuickOpenRow = memo(function QuickOpenRow({
 /**
  * The "open a file" popup (Ctrl/Cmd+P): type to fuzzily filter the book's
  * files, arrows to choose, Enter to open. Files that are open already come
- * first; the rest follow how well they match (see quick-open-fuzzy.ts).
+ * first; the rest follow fzf's ranking (see quick-open-fuzzy.ts).
  */
 export function QuickOpen({
   open,
@@ -165,17 +165,40 @@ export function QuickOpen({
 
   const matches = useMemo(() => {
     const needle = query.trim().toLowerCase();
-    const scored: { path: string; positions: number[]; score: number }[] = [];
+    const scored: {
+      path: string;
+      positions: number[];
+      score: number;
+      // fzf's tiebreaks, plus the one this file picker adds.
+      nameMatches: number;
+      length: number;
+      begin: number;
+    }[] = [];
     for (const path of files) {
-      const positions = fuzzyMatch(needle, path.toLowerCase());
-      if (positions)
-        scored.push({ path, positions, score: fuzzyScore(positions, path) });
+      const match = fuzzyMatch(needle, path);
+      if (!match) continue;
+      const nameStart = path.lastIndexOf("/") + 1;
+      scored.push({
+        path,
+        positions: match.positions,
+        score: match.score,
+        nameMatches: match.positions.filter((at) => at >= nameStart).length,
+        length: match.end - match.start,
+        begin: match.start,
+      });
     }
     return scored
       .sort(
         (a, b) =>
+          // Open tabs first, then fzf's score.
           Number(openTabs.has(b.path)) - Number(openTabs.has(a.path)) ||
           b.score - a.score ||
+          // Deviating from fzf for this file picker: the more of the query
+          // matches in the file name rather than a folder, the better.
+          b.nameMatches - a.nameMatches ||
+          // fzf's default tiebreaks: shorter matched range, then earlier.
+          a.length - b.length ||
+          a.begin - b.begin ||
           a.path.localeCompare(b.path),
       )
       .slice(0, 100);

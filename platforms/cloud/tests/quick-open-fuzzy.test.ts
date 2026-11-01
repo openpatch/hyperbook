@@ -1,37 +1,60 @@
 import { describe, expect, it } from "vitest";
-import {
-  fuzzyMatch,
-  fuzzyScore,
-} from "../src/web/pages/editor/quick-open-fuzzy";
+import { fuzzyMatch } from "../src/web/pages/editor/quick-open-fuzzy";
 
-/** Query and path ready for fuzzyMatch: lower-cased, like the dialog does. */
+/** Query and path the way the dialog passes them: query lower-cased. */
 function match(query: string, path: string) {
-  return fuzzyMatch(query.toLowerCase(), path.toLowerCase());
+  return fuzzyMatch(query.toLowerCase(), path);
 }
 
-describe("fuzzyMatch", () => {
-  it("matches a plain substring", () => {
-    expect(match("sortier", "content/sortierverfahren.md")).toEqual([
-      8, 9, 10, 11, 12, 13, 14,
-    ]);
+describe("fuzzyMatch (fzf V2)", () => {
+  it("matches a plain substring, at a word boundary", () => {
+    const path = "content/sortierverfahren.md";
+    const m = match("sortier", path)!;
+    expect(m).not.toBeNull();
+    expect(m.positions).toEqual([8, 9, 10, 11, 12, 13, 14]);
+    expect(path.slice(m.start, m.end)).toBe("sortier");
   });
 
   it("matches characters spread over the path", () => {
-    // s-o-...-v-...-h: like typing "sovh" for sortierverfahren.
-    expect(match("sovh", "content/sortierverfahren.md")).not.toBeNull();
-    expect(match("sv", "content/sortierverfahren.md")).toEqual([
-      "content/sortierverfahren.md".indexOf("s", 1),
-      "content/sortierverfahren.md".indexOf("v"),
-    ]);
+    const path = "content/sortierverfahren.md";
+    const m = match("sovh", path)!;
+    expect(m).not.toBeNull();
+    expect(m.positions).toEqual(m.positions.slice().sort((a, b) => a - b));
+    // every matched character is one the query asked for
+    expect(m.positions.map((at) => path[at])).toEqual(["s", "o", "v", "h"]);
   });
 
-  it("finds the tightest alignment, like fzf", () => {
-    // "abc" on "a-b-a-b-c": the trailing "ab" plus the "c", not "a-b".
-    expect(fuzzyMatch("abc", "a-b-a-b-c")).toEqual([4, 6, 8]);
+  it("finds the best alignment, not just the first (V2, unlike V1)", () => {
+    // "abc" on "a-b-a-b-c": the trailing "ab" plus the "c" scores higher
+    // than "a-b" because of the consecutive bonus.
+    expect(fuzzyMatch("abc", "a-b-a-b-c")!.positions).toEqual([4, 6, 8]);
   });
 
-  it("returns the empty list for the empty query", () => {
-    expect(fuzzyMatch("", "anything.md")).toEqual([]);
+  it("prefers boundaries: fuzzy-finder beats fuzzyfinder on ff", () => {
+    // fzf's own example: the "f" after the boundary is worth more, even
+    // though the whole match is one character longer.
+    const withBoundary = fuzzyMatch("ff", "fuzzy-finder")!;
+    const buried = fuzzyMatch("ff", "fuzzyfinder")!;
+    expect(withBoundary.score).toBeGreaterThan(buried.score);
+  });
+
+  it("scores fzf-style: foobar beats foo-bar on foob", () => {
+    // fzf's fix for the boundary anomaly: consecutive chunks get a bonus,
+    // so the gapless "foobar" still wins.
+    const foobar = fuzzyMatch("foob", "foobar")!;
+    const fooBar = fuzzyMatch("foob", "foo-bar")!;
+    expect(foobar).not.toBeNull();
+    expect(fooBar).not.toBeNull();
+    expect(foobar.score).toBeGreaterThan(fooBar.score);
+  });
+
+  it("returns the empty match for the empty query", () => {
+    expect(fuzzyMatch("", "anything.md")).toEqual({
+      positions: [],
+      start: 0,
+      end: 0,
+      score: 0,
+    });
   });
 
   it("returns null when a character is missing or out of order", () => {
@@ -42,42 +65,15 @@ describe("fuzzyMatch", () => {
 
   it("lets one path character match only one query character", () => {
     expect(match("lll", "hallo.md")).toBeNull(); // only two "l" in there
-    expect(match("ll", "hallo.md")).toEqual([2, 3]);
-  });
-});
-
-describe("fuzzyScore", () => {
-  it("ranks a word start in the file name above the same letters buried in folders", () => {
-    const path = "content/informatik/algorithmen/sortierverfahren.md";
-    const wordStart = match("sort", path)!;
-    const buried = match(
-      "sort",
-      "content/sortierdaten/algorithmen/vererbung.md",
-    )!;
-    // the match really is the file name's first word
-    expect(path.slice(wordStart[0]!, wordStart[0]! + 4)).toBe("sort");
-    expect(fuzzyScore(wordStart, path)).toBeGreaterThan(
-      fuzzyScore(buried, "content/sortierdaten/algorithmen/vererbung.md"),
-    );
+    expect(match("ll", "hallo.md")!.positions).toEqual([2, 3]);
   });
 
-  it("rewards typed-together matches over spread-out ones", () => {
-    const together = match("srt", "content/sortieren.md")!;
-    const spread = match("srt", "content/s-ra-t.md")!;
-    expect(fuzzyScore(together, "content/sortieren.md")).toBeGreaterThan(
-      fuzzyScore(spread, "content/s-ra-t.md"),
-    );
-  });
-
-  it("rewards matches in the file name over matches in folders", () => {
-    const inName = match("md", "content/vorlesung/folien.md")!;
-    const inDir = match("md", "content/moodle/folien.txt")!;
-    expect(fuzzyScore(inName, "content/vorlesung/folien.md")).toBeGreaterThan(
-      fuzzyScore(inDir, "content/moodle/folien.txt"),
-    );
-  });
-
-  it("gives every path the same score for the empty query", () => {
-    expect(fuzzyScore([], "a.md")).toBe(fuzzyScore([], "some/long/b.md"));
+  it("scores a match in the file name the same as the same match in a folder", () => {
+    // fzf gives both the same score — both are "fir" at a boundary after
+    // "/". The dialog breaks such ties by preferring the file name.
+    const inName = match("fir", "book/unterricht/first-steps.md")!;
+    const inFolder = match("fir", "book/unterricht/firefox/readme.md")!;
+    expect(inName.score).toBe(inFolder.score);
+    expect(inName.positions).toEqual([16, 17, 18]);
   });
 });
