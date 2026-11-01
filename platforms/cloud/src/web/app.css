@@ -81,13 +81,14 @@
   /* Syntax colors of the code editor. */
   --hl-heading: var(--color-brand);
   --hl-link: var(--color-brand);
-  --hl-directive: #8250df;
-  --hl-keyword: #cf222e;
-  --hl-string: #0a3069;
-  --hl-number: #0550ae;
+  /* Same palette as hyperbookLight in pages/editor/syntax-theme.ts. */
+  --hl-directive: #0a3069;
+  --hl-keyword: #007864;
+  --hl-string: #22863a;
+  --hl-number: #b45309;
   --hl-type: #953800;
-  --hl-function: #6639ba;
-  --hl-property: #0550ae;
+  --hl-function: #005cc5;
+  --hl-property: #9a6700;
   --hl-error: var(--color-sync-error);
   /* Comments, quotes and punctuation: 65% text keeps them readable on
      both backgrounds (about 7:1 light, 6:1 dark) while staying dim. */
@@ -105,13 +106,14 @@
   /* As in books' dark.css: a dark header with the brand as text. */
   --header: var(--color-nav);
   --header-foreground: var(--color-brand);
-  --hl-directive: #d2a8ff;
-  --hl-keyword: #ff7b72;
-  --hl-string: #a5d6ff;
-  --hl-number: #79c0ff;
-  --hl-type: #ffa657;
-  --hl-function: #d2a8ff;
-  --hl-property: #79c0ff;
+  /* Same palette as hyperbookDark in pages/editor/syntax-theme.ts. */
+  --hl-directive: #b5e3d8;
+  --hl-keyword: #ffcb6b;
+  --hl-string: #c3e88d;
+  --hl-number: #f78c6c;
+  --hl-type: #82aaff;
+  --hl-function: #89ddff;
+  --hl-property: #addb67;
 }
 
 @theme inline {

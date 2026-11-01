@@ -20,8 +20,6 @@
     "@codemirror/autocomplete": "^6.20.4",
     "@codemirror/commands": "^6.11.1",
     "@codemirror/lang-cpp": "^6.0.3",
-    "@fsegurai/codemirror-theme-github-dark": "^6.2.7",
-    "@fsegurai/codemirror-theme-github-light": "^6.2.7",
     "@codemirror/lang-css": "^6.3.1",
     "@codemirror/lang-html": "^6.4.12",
     "@codemirror/lang-java": "^6.0.2",

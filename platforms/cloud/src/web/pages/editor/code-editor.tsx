@@ -8,8 +8,6 @@ import { python } from "@codemirror/lang-python";
 import { SQLite, sql } from "@codemirror/lang-sql";
 import { yaml } from "@codemirror/lang-yaml";
 import { typst_lezer } from "codemirror-lang-typst/lezer";
-import { githubDark } from "@fsegurai/codemirror-theme-github-dark";
-import { githubLight } from "@fsegurai/codemirror-theme-github-light";
 import { Compartment, type Extension, EditorState } from "@codemirror/state";
 import { EditorView, keymap } from "@codemirror/view";
 import { basicSetup } from "codemirror";
@@ -20,6 +18,7 @@ import { contextMenu } from "./context-menu";
 import { extension, isMarkdownPage } from "./files";
 import { pageLanguage } from "./page-language";
 import { type SpellConfig, spellCheck } from "./spellcheck";
+import { hyperbookSyntax } from "./syntax-theme";
 
 function language(path: string): Extension {
   switch (extension(path)) {
@@ -152,41 +151,17 @@ const theme = EditorView.theme({
 });
 
 /**
- * GitHub's light/dark themes, switched with the app's theme, are the syntax
- * base for every file: code files (Java, Python, .scad, …) and Markdown pages
- * alike (pages add only the Hyperbook directive decorations on top). A
- * non-fallback style like these also disables basicSetup's
- * defaultHighlightStyle, whose colors are light-only and unreadable in dark
- * mode.
+ * Hyperbook's own light/dark syntax themes (syntax-theme.ts), switched with
+ * the app's theme, are the syntax base for every file: code files (Java,
+ * Python, .scad, …) and Markdown pages alike (pages add only the Hyperbook
+ * directive decorations on top). Being non-fallback styles, they also disable
+ * basicSetup's defaultHighlightStyle, whose colors are light-only and
+ * unreadable in dark mode. They carry no editor chrome, so the app's own
+ * surfaces stay in charge.
  */
 const codeTheme = new Compartment();
 const isDark = () => document.documentElement.classList.contains("dark");
-/**
- * GitHub's syntax colors only: the packages bundle a full editor theme whose
- * background (#0d1117 dark), gutters and selection would sit next to the
- * app's own surfaces, so those are reset to the app's tokens right here.
- */
-const githubTheme = (): Extension => [
-  isDark() ? githubDark : githubLight,
-  EditorView.theme({
-    "&": { color: "var(--color-text)", backgroundColor: "var(--color-background)" },
-    ".cm-gutters": {
-      color: "var(--muted-foreground)",
-      backgroundColor: "var(--color-nav)",
-      borderRight: "1px solid var(--color-nav-border)",
-    },
-    ".cm-activeLine": { backgroundColor: "color-mix(in srgb, var(--color-brand) 6%, transparent)" },
-    ".cm-activeLineGutter": { backgroundColor: "color-mix(in srgb, var(--color-brand) 12%, transparent)" },
-    "&.cm-focused .cm-selectionBackground, .cm-selectionBackground, ::selection": {
-      backgroundColor: "color-mix(in srgb, var(--color-brand) 25%, transparent) !important",
-    },
-    ".cm-tooltip": {
-      color: "var(--color-text)",
-      backgroundColor: "var(--color-background)",
-      border: "1px solid var(--color-nav-border)",
-    },
-  }),
-];
+const hyperbookTheme = () => hyperbookSyntax(isDark());
 
 /** basicSetup always shows line numbers; without them, the whole gutter goes. */
 const noGutters = EditorView.theme({ ".cm-gutters": { display: "none" } });
@@ -298,7 +273,7 @@ export function CodeEditor({
             },
           ]),
           basicSetup,
-          codeTheme.of(githubTheme()),
+          codeTheme.of(hyperbookTheme()),
           numbersCompartment.of(settings.lineNumbers ? [] : noGutters),
           heightCompartment.of(lineHeightTheme(settings.lineHeight)),
           fontCompartment.of(fontTheme(fontOf(settings.font).stack)),
@@ -336,7 +311,7 @@ export function CodeEditor({
     onReady?.(v);
     // The light/dark toggle moves the .dark class on <html>; follow it.
     const observer = new MutationObserver(() => {
-      v.dispatch({ effects: codeTheme.reconfigure(githubTheme()) });
+      v.dispatch({ effects: codeTheme.reconfigure(hyperbookTheme()) });
     });
     observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
     return () => {

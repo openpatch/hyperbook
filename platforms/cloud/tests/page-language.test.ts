@@ -3,7 +3,6 @@ import path from "node:path";
 import { snippet } from "@codemirror/autocomplete";
 import { cpp } from "@codemirror/lang-cpp";
 import { java } from "@codemirror/lang-java";
-import { githubDark } from "@fsegurai/codemirror-theme-github-dark";
 import { highlightingFor } from "@codemirror/language";
 import { EditorState, Text } from "@codemirror/state";
 import { tags as t } from "@lezer/highlight";
@@ -12,6 +11,7 @@ import { describe, expect, it } from "vitest";
 import { DIRECTIVES, directive } from "../src/web/pages/editor/directives";
 import { findFrontmatter, toPageForm, withPageForm } from "../src/web/pages/editor/frontmatter";
 import { blockDirective, inlineDirectives, linkBase, outline, relativeTo } from "../src/web/pages/editor/page-language";
+import { hyperbookDark, hyperbookLight, hyperbookSyntax } from "../src/web/pages/editor/syntax-theme";
 
 const repo = path.resolve(import.meta.dirname, "../../..");
 
@@ -202,17 +202,14 @@ describe("page settings", () => {
 });
 
 describe("syntax highlighting", () => {
-  it("pages and code files share github-light/dark; hyperbook syntax stays its own layer", () => {
+  it("pages and code files share hyperbook-light/dark; hyperbook syntax stays its own layer", () => {
     const editor = readFileSync(path.join(repo, "platforms/cloud/src/web/pages/editor/code-editor.tsx"), "utf8");
-    // GitHub's themes, switched with the app's light/dark toggle, are the base
-    // for every file the editor opens.
-    expect(editor).toContain("githubDark");
-    expect(editor).toContain("githubLight");
-    expect(editor).toContain("codeTheme.of(githubTheme())");
-    // The github packages' own editor background is reset to the app's, so
-    // only their syntax colors show.
-    expect(editor).toMatch(/githubTheme[\s\S]*?backgroundColor: "var\(--color-background\)"/);
-    // Pages add no style of their own, so they get the github base too; the
+    // Our own themes, switched with the app's light/dark toggle, are the base
+    // for every file the editor opens — no third-party theme package.
+    expect(editor).not.toContain("fsegurai");
+    expect(editor).toContain("codeTheme.of(hyperbookTheme())");
+    expect(editor).toContain("hyperbookSyntax(isDark())");
+    // Pages add no style of their own, so they get the same base; the
     // Hyperbook layer on top is the directive decorations (.cm-hb-*), which
     // keep the mode-aware --hl-* colors.
     const pages = readFileSync(path.join(repo, "platforms/cloud/src/web/pages/editor/page-language.ts"), "utf8");
@@ -220,14 +217,41 @@ describe("syntax highlighting", () => {
     expect(pages).toMatch(/\.cm-hb-name.*--hl-/);
   });
 
-  it("github's style is no fallback, so basicSetup's light-only default stays off", () => {
+  it("every theme color is readable (>= 4.5:1) on its background", () => {
+    const luminance = (hex: string) => {
+      const f = (v: number) => {
+        v /= 255;
+        return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+      };
+      const c = hex.replace("#", "");
+      const [r, g, b] = [0, 2, 4].map((i) => f(parseInt(c.slice(i, i + 2), 16))!);
+      return 0.2126 * r! + 0.7152 * g! + 0.0722 * b!;
+    };
+    const contrast = (a: string, b: string) => {
+      const [l1, l2] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+      return (l1! + 0.05) / (l2! + 0.05);
+    };
+    for (const [style, bg] of [
+      [hyperbookDark, "#1e1e1e"],
+      [hyperbookLight, "#ffffff"],
+    ] as const) {
+      const colors = style.specs.flatMap((s) => (s.color ? [s.color] : []));
+      expect(colors.length).toBeGreaterThan(5);
+      for (const color of colors) {
+        expect(color).toMatch(/^#[0-9a-f]{6}$/);
+        expect(contrast(color, bg), `${color} on ${bg}`).toBeGreaterThanOrEqual(4.5);
+      }
+    }
+  });
+
+  it("hyperbook's style is no fallback, so basicSetup's light-only default stays off", () => {
     const state = EditorState.create({
       doc: "class Main { int answer = 42; }",
-      extensions: [basicSetup, githubDark, java()],
+      extensions: [basicSetup, hyperbookSyntax(true), java()],
     });
-    // github-dark decides the keyword's class (same class as without
+    // Our dark style decides the keyword's class (same class as without
     // basicSetup), not the light-only default highlight style ...
-    const only = EditorState.create({ doc: "class Main { int answer = 42; }", extensions: [githubDark, java()] });
+    const only = EditorState.create({ doc: "class Main { int answer = 42; }", extensions: [hyperbookSyntax(true), java()] });
     expect(highlightingFor(state, [t.keyword])).toBe(highlightingFor(only, [t.keyword]));
     const fallbackOnly = EditorState.create({ doc: "int x = 1;", extensions: [basicSetup, java()] });
     expect(highlightingFor(fallbackOnly, [t.keyword])).not.toBe(highlightingFor(state, [t.keyword]));
@@ -236,10 +260,10 @@ describe("syntax highlighting", () => {
   it("highlights .scad files as C++ (like the openscad directive's preview)", () => {
     const source = readFileSync(path.join(repo, "platforms/cloud/src/web/pages/editor/code-editor.tsx"), "utf8");
     expect(source).toMatch(/case "scad":[\s\S]*?return cpp\(\)/);
-    // The C++ grammar's tags get github's colors, readable in dark mode too.
+    // The C++ grammar's tags get the theme's colors, readable in dark mode too.
     const scad = EditorState.create({
       doc: "module part() { cube(10); } // a comment",
-      extensions: [githubDark, cpp()],
+      extensions: [hyperbookSyntax(true), cpp()],
     });
     expect(highlightingFor(scad, [t.moduleKeyword])).toBeTruthy();
     expect(highlightingFor(scad, [t.function(t.variableName)])).toBeTruthy();
