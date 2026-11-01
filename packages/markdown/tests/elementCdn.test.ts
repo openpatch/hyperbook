@@ -227,9 +227,17 @@ describe("shared assets of a host (Hyperbook Cloud)", () => {
     expect(elementAssetUrl(shared, "typst", "fonts/")).toBe(
       `${base}directive-typst/fonts/`,
     );
+    // A base keeps its trailing slash: clients resolve files against it
+    // with new URL(file, base), which drops the last segment without one.
     expect(elementAssetUrl(shared, "openscad", "")).toBe(
-      `${base}directive-openscad`,
+      `${base}directive-openscad/`,
     );
+    expect(
+      new URL(
+        "openscad.js",
+        `https://preview.example${elementAssetUrl(shared, "openscad", "")}`,
+      ).href,
+    ).toBe(`https://preview.example${base}directive-openscad/openscad.js`);
     expect(
       elementAssetUrl(shared, "onlineide", "include/online-ide-embedded.js"),
     ).toBe(`${base}directive-onlineide/include/online-ide-embedded.js`);

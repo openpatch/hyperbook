@@ -27,16 +27,16 @@ export function elementAssetUrl(
         "assets",
         undefined,
         { versioned: false },
-      ) + (file.endsWith("/") ? "/" : "")
+      ) + (file === "" || file.endsWith("/") ? "/" : "")
     );
   // The host serves the runtimes itself (Hyperbook Cloud), with the same
   // layout as a local build, at an address that only changes with the
   // Hyperbook version. Elements keep their integration scripts locally.
   if (cdn === true && hosted && hosted !== "cdn") {
-    const url = `${hosted.endsWith("/") ? hosted : `${hosted}/`}directive-${element}/${file}`;
-    // Like the local branch: a directory keeps its trailing slash, a base
-    // ("" as the file) does not get one.
-    return file === "" ? url.replace(/\/+$/, "") : url;
+    // A directory keeps its trailing slash; so does a base ("" as the
+    // file), because clients resolve their files against it with
+    // new URL(file, base), which drops the last segment without one.
+    return `${hosted.endsWith("/") ? hosted : `${hosted}/`}directive-${element}/${file}`;
   }
   if (typeof cdn === "string") {
     // Pyodide's public indexURL points directly at its distribution directory.
