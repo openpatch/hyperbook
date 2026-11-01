@@ -225,3 +225,25 @@ public class SpriteGetCurrentCostumeIndex {
     expect(result).toEqual(extracted);
   });
 });
+
+describe("isCacheFresh", () => {
+  it("detects edits made after the cache was written", async () => {
+    const fsp = await import("fs/promises");
+    const os = await import("os");
+    const root = await fsp.mkdtemp(path.join(os.tmpdir(), "hb-cache-"));
+    await fsp.mkdir(path.join(root, "book"));
+    await fsp.writeFile(path.join(root, "book", "a.md"), "# a");
+    const past = new Date(Date.now() - 10000);
+    await fsp.utimes(path.join(root, "book", "a.md"), past, past);
+    await fsp.utimes(path.join(root, "book"), past, past);
+    expect(await vfile.isCacheFresh(root)).toBe(false);
+
+    await fsp.writeFile(path.join(root, "vfiles.json"), "[]");
+    expect(await vfile.isCacheFresh(root)).toBe(true);
+
+    const future = new Date(Date.now() + 10000);
+    await fsp.utimes(path.join(root, "book", "a.md"), future, future);
+    expect(await vfile.isCacheFresh(root)).toBe(false);
+    await fsp.rm(root, { recursive: true });
+  });
+});

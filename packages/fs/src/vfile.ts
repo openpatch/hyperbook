@@ -837,6 +837,46 @@ export const clean = async (root: string): Promise<void> => {
   });
 };
 
+/**
+ * Whether the persisted listings under `root` can still be trusted: they must
+ * exist and nothing in the book may have been modified after the oldest of
+ * them was written. Only stats files and directories (a directory's mtime
+ * moves when entries are added, removed or renamed), so it is far cheaper than
+ * rebuilding the listings. Catches edits made while no watcher was running.
+ */
+export const isCacheFresh = async (root: string): Promise<boolean> => {
+  const cacheFiles = [
+    path.join(root, "vfiles.json"),
+    ...folders.map((folder) => path.join(root, `vdirectory.${folder}.json`)),
+  ].filter((file) => fsD.existsSync(file));
+  if (!cacheFiles.includes(path.join(root, "vfiles.json"))) return false;
+
+  let cachedAt = Infinity;
+  for (const file of cacheFiles) {
+    cachedAt = Math.min(cachedAt, (await fs.stat(file)).mtimeMs);
+  }
+
+  const isNewer = async (target: string): Promise<boolean> => {
+    let stat;
+    try {
+      stat = await fs.stat(target);
+    } catch {
+      return false;
+    }
+    if (stat.mtimeMs >= cachedAt) return true;
+    if (!stat.isDirectory()) return false;
+    for (const entry of await fs.readdir(target)) {
+      if (await isNewer(path.join(target, entry))) return true;
+    }
+    return false;
+  };
+
+  for (const entry of [...folders, "hyperbook.json", "hyperbook.yml"]) {
+    if (await isNewer(path.join(root, entry))) return false;
+  }
+  return true;
+};
+
 export const extractLines = (
   content: string,
   lines?: string,

@@ -6,6 +6,9 @@ name: Caching
 
 Hyperbook's build cache stores downloaded runtimes on the machine running the
 CLI. HTTP caches store the files readers request from your host or a CDN.
+The development server also keeps its file listings (`vdirectory.*.json`,
+`vfiles.json`) in the project directory, so a restart picks up where the last
+session left off; it deletes them whenever a file changes.
 
 ## Cache runtime downloads between builds
 
