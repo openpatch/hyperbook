@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { fuzzyMatch, markRuns } from "../src/web/pages/editor/quick-open-fuzzy";
+import {
+  fuzzyMatch,
+  markRuns,
+  rankMatches,
+} from "../src/web/pages/editor/quick-open-fuzzy";
 
 /** Query and path the way the dialog passes them: query lower-cased. */
 function match(query: string, path: string) {
@@ -94,5 +98,34 @@ describe("markRuns", () => {
 
   it("covers a mark at the very end", () => {
     expect(markRuns([4])).toEqual([[4, 5]]);
+  });
+});
+
+describe("rankMatches", () => {
+  const paths = [
+    "book/unterricht/firefox/readme.md",
+    "book/unterricht/first-steps.md",
+    "content/first-things/overview.md",
+  ];
+
+  it("ranks by fzf score, then prefers matches in the file name", () => {
+    // Both "fir"-at-a-boundary matches tie on score; the one in the file
+    // name wins over the one in a folder.
+    expect(rankMatches("fir", paths).map((m) => m.path)).toEqual([
+      "book/unterricht/first-steps.md",
+      "content/first-things/overview.md",
+      "book/unterricht/firefox/readme.md",
+    ]);
+  });
+
+  it("drops paths that do not match", () => {
+    expect(rankMatches("xyz", paths)).toEqual([]);
+  });
+
+  it("keeps every path for the empty query, alphabetical", () => {
+    expect(rankMatches("", ["b.md", "a.md"]).map((m) => m.path)).toEqual([
+      "a.md",
+      "b.md",
+    ]);
   });
 });

@@ -18,6 +18,8 @@ import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import { item, openMenu, separator } from "./context-menu";
 import type { FileEntry } from "./files";
+import { highlight } from "./match-highlight";
+import { rankMatches, type RankedMatch } from "./quick-open-fuzzy";
 
 type TreeNode = { name: string; path: string; children: TreeNode[] | null };
 
@@ -224,6 +226,7 @@ const TreeRow = memo(function TreeRow({
 /** A file the filter matched, shown with its whole path; memoized as the rows. */
 const FilterRow = memo(function FilterRow({
   path,
+  positions,
   isActive,
   isCut,
   isDirty,
@@ -234,6 +237,8 @@ const FilterRow = memo(function FilterRow({
   onMenu,
 }: {
   path: string;
+  /** Where in `path` the filter query matched, for the highlight. */
+  positions: number[];
   isActive: boolean;
   isCut: boolean;
   isDirty: boolean;
@@ -271,7 +276,9 @@ const FilterRow = memo(function FilterRow({
             className="size-4 shrink-0 text-muted-foreground"
             aria-hidden
           />
-          <span className="truncate font-mono">{path}</span>
+          <span className="truncate font-mono">
+            {highlight(path, positions)}
+          </span>
           {isDirty && (
             <span
               className="ml-1 size-2 shrink-0 rounded-full bg-primary"
@@ -473,16 +480,21 @@ export const FileTree = memo(function FileTree({
     return out;
   }, [tree, collapsed]);
 
-  // While filtering, the tree turns into the matching files, with their paths.
+  // While filtering, the tree turns into the matching files, with their
+  // paths — found and ranked the way quick open does it (see
+  // quick-open-fuzzy.ts), with the matched characters highlighted.
   const needle = deferredFilter.trim().toLowerCase();
   const matching = useMemo(
     () =>
       needle
-        ? files.filter((f) => f.path.toLowerCase().includes(needle))
+        ? rankMatches(
+            needle,
+            files.map((f) => f.path),
+          )
         : null,
     [files, needle],
   );
-  const list: (Row | FileEntry)[] = matching ?? rows;
+  const list: (Row | FileEntry | RankedMatch)[] = matching ?? rows;
 
   // Only the rows near the viewport are in the DOM, however big the book is.
   const virtualizer = useVirtualizer({
@@ -512,6 +524,7 @@ export const FileTree = memo(function FileTree({
               <FilterRow
                 key={row.path}
                 path={row.path}
+                positions={(row as RankedMatch).positions}
                 isActive={row.path === active}
                 isCut={isCut(row.path)}
                 isDirty={dirty.has(row.path)}

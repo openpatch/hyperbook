@@ -1,51 +1,10 @@
-import {
-  memo,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ReactNode,
-} from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { fuzzyMatch, markRuns } from "./quick-open-fuzzy";
-
-/**
- * Wraps the characters the query matched in <mark>, so people can see *why*
- * a file is in the list. Bolding alone is not enough of a highlight — bold
- * text keeps its color, and dim text stays dim (unreadably so in dark mode) —
- * so matched characters always get the full-contrast foreground color on
- * top of the row's own state colors.
- *
- * `marks` are the matched indices into `text`, ascending; adjacent marks
- * merge into one <mark>. Everything around the marks is still the path —
- * dropping the part after the last mark would show "book/fi" for
- * book/first-steps.md, a file that is not there.
- */
-function highlight(text: string, marks: number[]): ReactNode {
-  const runs = markRuns(marks);
-  if (runs.length === 0) return text;
-  const parts: ReactNode[] = [];
-  let from = 0;
-  for (const [start, end] of runs) {
-    if (start > from) parts.push(text.slice(from, start));
-    parts.push(marked(text.slice(start, end), start));
-    from = end;
-  }
-  if (from < text.length) parts.push(text.slice(from));
-  return parts;
-}
-
-function marked(text: string, key: number): ReactNode {
-  return (
-    <mark key={key} className="bg-transparent font-semibold text-foreground">
-      {text}
-    </mark>
-  );
-}
+import { highlight } from "./match-highlight";
+import { rankMatches } from "./quick-open-fuzzy";
 
 /**
  * One file in the list, memoized on primitives: choosing or hovering changes
@@ -166,43 +125,11 @@ export function QuickOpen({
   }, [files, tabs]);
 
   const matches = useMemo(() => {
-    const needle = query.trim().toLowerCase();
-    const scored: {
-      path: string;
-      positions: number[];
-      score: number;
-      // fzf's tiebreaks, plus the one this file picker adds.
-      nameMatches: number;
-      length: number;
-      begin: number;
-    }[] = [];
-    for (const path of searchable) {
-      const match = fuzzyMatch(needle, path);
-      if (!match) continue;
-      const nameStart = path.lastIndexOf("/") + 1;
-      scored.push({
-        path,
-        positions: match.positions,
-        score: match.score,
-        nameMatches: match.positions.filter((at) => at >= nameStart).length,
-        length: match.end - match.start,
-        begin: match.start,
-      });
-    }
-    return scored
-      .sort(
-        (a, b) =>
-          // Open tabs first, then fzf's score.
-          Number(openTabs.has(b.path)) - Number(openTabs.has(a.path)) ||
-          b.score - a.score ||
-          // Deviating from fzf for this file picker: the more of the query
-          // matches in the file name rather than a folder, the better.
-          b.nameMatches - a.nameMatches ||
-          // fzf's default tiebreaks: shorter matched range, then earlier.
-          a.length - b.length ||
-          a.begin - b.begin ||
-          a.path.localeCompare(b.path),
-      )
+    const ranked = rankMatches(query.trim().toLowerCase(), searchable);
+    // Open tabs come first; the stable sort keeps fzf's order within groups.
+    const isOpen = (path: string) => openTabs.has(path);
+    return ranked
+      .sort((a, b) => Number(isOpen(b.path)) - Number(isOpen(a.path)))
       .slice(0, 100);
   }, [searchable, openTabs, query]);
 

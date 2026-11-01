@@ -84,6 +84,55 @@ export function markRuns(marks: number[]): [number, number][] {
   return runs;
 }
 
+/**
+ * What a query against one path produced, ready for the dialog to sort
+ * and render: where it matched, fzf's score, and the tiebreak fields.
+ */
+export interface RankedMatch {
+  path: string;
+  /** Where in the path each query character matched, ascending. */
+  positions: number[];
+  /** fzf's score, higher is better. */
+  score: number;
+  /** How many of the matches sit in the file name rather than a folder. */
+  nameMatches: number;
+  /** Length of the whole matched range (fzf's length tiebreak). */
+  length: number;
+  /** Start of the whole matched range (fzf's begin tiebreak). */
+  begin: number;
+}
+
+/**
+ * Fuzzy-matches every path and ranks the matches as fzf would: by score,
+ * then — the one rule this file picker adds — by how much of the query
+ * matched in the file name rather than a folder, then fzf's default
+ * tiebreaks (shorter matched range, earlier match), then by path.
+ */
+export function rankMatches(needle: string, paths: string[]): RankedMatch[] {
+  const scored: RankedMatch[] = [];
+  for (const path of paths) {
+    const match = fuzzyMatch(needle, path);
+    if (!match) continue;
+    const nameStart = path.lastIndexOf("/") + 1;
+    scored.push({
+      path,
+      positions: match.positions,
+      score: match.score,
+      nameMatches: match.positions.filter((at) => at >= nameStart).length,
+      length: match.end - match.start,
+      begin: match.start,
+    });
+  }
+  return scored.sort(
+    (a, b) =>
+      b.score - a.score ||
+      b.nameMatches - a.nameMatches ||
+      a.length - b.length ||
+      a.begin - b.begin ||
+      a.path.localeCompare(b.path),
+  );
+}
+
 /** Where in `text` the case-folded `ch` is, at or after `from`. */
 function indexOfFolded(text: string, ch: string, from: number): number {
   for (let i = from; i < text.length; i++) {
