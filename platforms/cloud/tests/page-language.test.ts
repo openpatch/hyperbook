@@ -10,7 +10,7 @@ import { basicSetup } from "codemirror";
 import { describe, expect, it } from "vitest";
 import { DIRECTIVES, directive } from "../src/web/pages/editor/directives";
 import { findFrontmatter, toPageForm, withPageForm } from "../src/web/pages/editor/frontmatter";
-import { blockDirective, inlineDirectives, linkBase, outline, relativeTo } from "../src/web/pages/editor/page-language";
+import { blockDirective, decorateMultievent, inlineDirectives, linkBase, outline, relativeTo } from "../src/web/pages/editor/page-language";
 import { hyperbookDark, hyperbookLight, hyperbookSyntax } from "../src/web/pages/editor/syntax-theme";
 
 const repo = path.resolve(import.meta.dirname, "../../..");
@@ -268,6 +268,42 @@ describe("syntax highlighting", () => {
     expect(highlightingFor(scad, [t.moduleKeyword])).toBeTruthy();
     expect(highlightingFor(scad, [t.function(t.variableName)])).toBeTruthy();
     expect(highlightingFor(scad, [t.comment])).toBeTruthy();
+  });
+});
+
+describe("multievent syntax", () => {
+  const marksOf = (text: string) => {
+    const marks: [number, number, string][] = [];
+    decorateMultievent(text, 0, (a, b, d) => marks.push([a, b, (d as { spec: { class: string } }).spec.class]));
+    return marks;
+  };
+
+  it("marks command, braces, correct-marker, separators and content", () => {
+    // {r1{!Cheetah}}
+    expect(marksOf("{r1{!Cheetah}}")).toEqual([
+      [0, 1, "cm-hb-punct"],
+      [1, 3, "cm-hb-name"],
+      [3, 4, "cm-hb-punct"],
+      [4, 5, "cm-hb-attr"],
+      [5, 12, "cm-hb-value"],
+      [12, 14, "cm-hb-punct"],
+    ]);
+    // {z{1|3|5|7|9}} — separators are punctuation, numbers are values
+    const z = marksOf("{z{1|3|5|7|9}}");
+    expect(z).toContainEqual([3, 4, "cm-hb-value"]);
+    expect(z).toContainEqual([4, 5, "cm-hb-punct"]);
+    expect(z[1]).toEqual([1, 2, "cm-hb-name"]);
+    // {w{ a|M~~H|A }} — ~~ is a separator too
+    expect(marksOf("{w{a|M~~H}}")).toContainEqual([6, 8, "cm-hb-punct"]);
+  });
+
+  it("handles nested braces in math and ignores plain text", () => {
+    // $\sqrt{2}$ nests a brace pair; the event still closes at the final }}
+    const m = marksOf("{c{!$\\sqrt{2}$}}");
+    expect(m.at(-1)).toEqual([m.at(-1)![0], m.at(-1)![0] + 2, "cm-hb-punct"]);
+    expect(m.some(([, , c]) => c === "cm-hb-value")).toBe(true);
+    // No command + second brace: not an event, nothing marked.
+    expect(marksOf("just {text} here")).toEqual([]);
   });
 });
 

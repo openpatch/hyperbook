@@ -7,7 +7,7 @@ import {
 } from "@codemirror/autocomplete";
 import { markdown } from "@codemirror/lang-markdown";
 import { yamlFrontmatter } from "@codemirror/lang-yaml";
-import { HighlightStyle, LanguageDescription, syntaxHighlighting } from "@codemirror/language";
+import { LanguageDescription } from "@codemirror/language";
 import { languages } from "@codemirror/language-data";
 import { type Action, type Diagnostic, linter } from "@codemirror/lint";
 import { type EditorState, type Extension, RangeSetBuilder, StateEffect, StateField, type Text } from "@codemirror/state";
@@ -20,7 +20,6 @@ import {
   WidgetType,
   hoverTooltip,
 } from "@codemirror/view";
-import { tags as t } from "@lezer/highlight";
 import { parse as parseYaml } from "yaml";
 import { type Attribute, DIRECTIVES, type Directive, PAGE_DOCS, directive, docsUrl } from "./directives";
 import { pageOf } from "./files";
@@ -513,7 +512,6 @@ const mark = {
   punct: Decoration.mark({ class: "cm-hb-punct" }),
   attr: Decoration.mark({ class: "cm-hb-attr" }),
   value: Decoration.mark({ class: "cm-hb-value" }),
-  gap: Decoration.mark({ class: "cm-hb-gap" }),
   inside: Decoration.line({ class: "cm-hb-inside" }),
 };
 
@@ -532,7 +530,50 @@ function highlightToken(add: (from: number, to: number, d: Decoration) => void, 
   }
 }
 
-const MULTIEVENT_GAP = /\{[A-Za-z]?\{[^}\n]*\}\}/g;
+/**
+ * One multievent event on a line: {CMD{content}} — CMD is letters/digits
+ * (r1, R, c, a, z, X, w, …), content holds the term(s), with ! marking the
+ * correct one and | / ~~ as separators (docs: /elements/multievent).
+ */
+export function decorateMultievent(text: string, base: number, add: (a: number, b: number, d: Decoration) => void) {
+  for (let i = 0; i < text.length; i++) {
+    if (text[i] !== "{") continue;
+    let j = i + 1;
+    while (j < text.length && /[A-Za-z0-9]/.test(text[j]!)) j++;
+    // An event needs a command and a second brace: {r1{…}}
+    if (j === i + 1 || j >= text.length || text[j] !== "{") continue;
+    add(base + i, base + i + 1, mark.punct);
+    add(base + i + 1, base + j, mark.name);
+    add(base + j, base + j + 1, mark.punct);
+    // Content up to the matching }} (braces may nest, e.g. in $\sqrt{2}$).
+    let depth = 1;
+    let k = j + 1;
+    for (; k < text.length; k++) {
+      if (text[k] === "{") depth++;
+      else if (text[k] === "}") {
+        depth--;
+        if (depth === 0) break;
+      }
+    }
+    if (depth !== 0 || k + 1 >= text.length || text[k + 1] !== "}") continue;
+    const content = text.slice(j + 1, k);
+    let pos = j + 1;
+    for (const part of content.split(/(\|+|~~)/)) {
+      if (!part) continue;
+      const from = base + pos;
+      pos += part.length;
+      if (/^\|+$|^~~$/.test(part)) add(from, from + part.length, mark.punct);
+      else {
+        // A leading ! marks the correct term.
+        const bang = part.startsWith("!") ? 1 : 0;
+        if (bang) add(from, from + bang, mark.attr);
+        add(from + bang, from + part.length, mark.value);
+      }
+    }
+    add(base + k, base + k + 2, mark.punct);
+    i = k + 1;
+  }
+}
 
 function decorate(view: EditorView): DecorationSet {
   const { state } = view;
@@ -554,7 +595,7 @@ function decorate(view: EditorView): DecorationSet {
         }
         for (const token of inlineDirectives(line.text, line.from)) highlightToken(add, token);
         if (multievent.some((c) => c.open < line.number && (c.close ?? Infinity) > line.number)) {
-          for (const m of line.text.matchAll(MULTIEVENT_GAP)) add(line.from + m.index, line.from + m.index + m[0].length, mark.gap);
+          decorateMultievent(line.text, line.from, add);
         }
       }
       marks.sort((a, b) => a[0] - b[0] || a[1] - b[1]);
@@ -584,45 +625,17 @@ const directiveHighlight = ViewPlugin.fromClass(
 );
 
 /**
- * Colors from app.css, which switch with light and dark mode. Shared with the
- * code editor (code-editor.tsx): without a non-fallback style there, code files
- * fall back to basicSetup's defaultHighlightStyle, whose colors are light-only
- * and unreadable on a dark background.
+ * The Hyperbook layer on top of the editor's hyperbook-light/dark syntax
+ * themes (the codeTheme compartment in code-editor.tsx colors all Markdown
+ * tokens). What stays here are the directive and multievent decorations, in
+ * the mode-aware --hl-* colors of app.css.
  */
-export const highlightStyle = HighlightStyle.define([
-  { tag: t.heading, color: "var(--hl-heading)", fontWeight: "bold" },
-  { tag: t.heading1, fontSize: "1.25em" },
-  { tag: t.heading2, fontSize: "1.12em" },
-  { tag: t.emphasis, fontStyle: "italic" },
-  { tag: t.strong, fontWeight: "bold" },
-  { tag: t.strikethrough, textDecoration: "line-through" },
-  { tag: [t.link, t.url], color: "var(--hl-link)" },
-  { tag: t.link, textDecoration: "underline" },
-  { tag: t.monospace, color: "var(--hl-string)" },
-  { tag: t.quote, color: "var(--hl-muted)", fontStyle: "italic" },
-  { tag: [t.processingInstruction, t.contentSeparator, t.list], color: "var(--hl-muted)" },
-  { tag: [t.keyword, t.operatorKeyword, t.controlKeyword, t.moduleKeyword, t.definitionKeyword], color: "var(--hl-keyword)" },
-  { tag: [t.string, t.special(t.string), t.regexp], color: "var(--hl-string)" },
-  { tag: [t.number, t.bool, t.atom, t.null, t.literal, t.labelName], color: "var(--hl-number)" },
-  // Tags the default style paints near-black or dark blue; here they stay the
-  // mode-aware text color, so code is readable in dark mode too.
-  { tag: [t.variableName, t.definition(t.variableName), t.local(t.variableName), t.special(t.variableName)], color: "var(--color-text)" },
-  { tag: [t.comment, t.lineComment, t.blockComment, t.docComment], color: "var(--hl-muted)", fontStyle: "italic" },
-  { tag: [t.typeName, t.className, t.namespace], color: "var(--hl-type)" },
-  { tag: [t.function(t.variableName), t.function(t.propertyName), t.definition(t.function(t.variableName)), t.macroName], color: "var(--hl-function)" },
-  { tag: [t.propertyName, t.attributeName, t.definition(t.propertyName)], color: "var(--hl-property)" },
-  { tag: [t.tagName, t.angleBracket], color: "var(--hl-keyword)" },
-  { tag: [t.meta, t.documentMeta, t.annotation], color: "var(--hl-muted)" },
-  { tag: t.invalid, color: "var(--hl-error)" },
-]);
-
 const pageTheme = EditorView.baseTheme({
   ".cm-hb-colons, .cm-hb-punct": { color: "var(--hl-muted)", fontWeight: "bold" },
   ".cm-hb-name": { color: "var(--hl-directive)", fontWeight: "bold" },
   ".cm-hb-label": { color: "var(--hl-heading)" },
   ".cm-hb-attr": { color: "var(--hl-property)" },
   ".cm-hb-value": { color: "var(--hl-string)" },
-  ".cm-hb-gap": { backgroundColor: "color-mix(in srgb, var(--hl-directive) 14%, transparent)", borderRadius: "3px" },
   ".cm-hb-inside": { boxShadow: "inset 3px 0 0 color-mix(in srgb, var(--hl-directive) 35%, transparent)" },
   ".cm-hb-help": { maxWidth: "420px", padding: "6px 10px", fontFamily: "var(--font-body, sans-serif)", fontSize: "13px", lineHeight: "1.4" },
   ".cm-hb-help p": { margin: "4px 0" },
@@ -761,7 +774,6 @@ export function pageLanguage({
   return [
     yamlFrontmatter({ content: markdown({ codeLanguages: [...languages, typst] }) }),
     outlineField,
-    syntaxHighlighting(highlightStyle),
     directiveHighlight,
     autocompletion({ override: [pageCompletion(files, path)], icons: false }),
     hoverHelp,
