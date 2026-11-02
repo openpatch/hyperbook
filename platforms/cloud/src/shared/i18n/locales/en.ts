@@ -848,7 +848,7 @@ export const en = {
       "For example on GitHub Pages. Student accounts work there too.",
     people: "People",
     peopleDescription:
-      "Owners manage everything. Editors work on the book and its students.",
+      "Owners manage everything, and only they publish. Editors work on the book, its preview and its students.",
     owner: "Owner",
     editor: "Editor",
     roleOf: "Role of {{email}}",
@@ -1029,6 +1029,7 @@ export const en = {
     notePlaceholder: "Note for this version (optional)",
     downloadSource: "Download source (zip)",
     unpublish: "Unpublish",
+    ownersPublish: "Only the book's owners can publish it.",
     unpublishTitle: "Unpublish “{{title}}”?",
     unpublishDescription:
       "The address shows “not published” until the next build. Nothing is deleted.",

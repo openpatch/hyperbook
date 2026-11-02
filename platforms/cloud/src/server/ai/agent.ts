@@ -888,7 +888,7 @@ async function answer(
       return await tools.readMany(args.paths);
     case "read_docs": {
       const name = args.name;
-      if (typeof name !== "string" || !(name in DOCUMENTATION))
+      if (typeof name !== "string" || !Object.hasOwn(DOCUMENTATION, name))
         return `read_docs needs a \`name\` of: ${Object.keys(DOCUMENTATION).join(", ")}.`;
       if (!tools.firstTime(`docs:${name}`))
         return "Already fetched earlier in this conversation; see that result above.";

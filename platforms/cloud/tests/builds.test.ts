@@ -202,6 +202,55 @@ describe("build queue", () => {
     expect(bookRow(instance, book.id)).toMatchObject({ publishedBuildId: edit.id, previewBuildId: edit.id });
   });
 
+  it("does not let an older publish build that finishes later replace a newer publish", async () => {
+    let release!: () => void;
+    let gate: Promise<void> = Promise.resolve();
+    const runner: Runner = async (job) => {
+      await gate;
+      return copyRunner(job);
+    };
+    const instance = setup({}, { runner });
+    const { book, commit: first } = await bookWithSource(instance, { "hyperbook.json": "{}" });
+    const second = await commitFiles(instance, book.id, { "hyperbook.json": '{"name":"x"}' });
+    const preview = instance.builds.enqueue(book.id, second, "edit", null);
+    await instance.builds.idle();
+
+    // An older commit is to go live, but is still building …
+    gate = new Promise<void>((r) => (release = r));
+    const old = instance.builds.enqueue(book.id, first, "publish", null);
+    // … when the newer one is published directly, as the publish route does.
+    instance.db.update(books).set({ publishedBuildId: preview.id }).where(eq(books.id, book.id)).run();
+    instance.builds.supersedePublishing(book.id);
+    release();
+    await instance.builds.idle();
+
+    expect(buildRow(instance, old.id)).toMatchObject({ status: "succeeded", publish: false });
+    expect(bookRow(instance, book.id).publishedBuildId).toBe(preview.id);
+  });
+
+  it("does not let a superseded rollback move the preview back", async () => {
+    let release!: () => void;
+    let gate: Promise<void> = Promise.resolve();
+    const runner: Runner = async (job) => {
+      await gate;
+      return copyRunner(job);
+    };
+    const instance = setup({}, { runner });
+    const { book, commit: first } = await bookWithSource(instance, { "hyperbook.json": "{}" });
+    const second = await commitFiles(instance, book.id, { "hyperbook.json": '{"name":"x"}' });
+    const preview = instance.builds.enqueue(book.id, second, "edit", null);
+    await instance.builds.idle();
+
+    gate = new Promise<void>((r) => (release = r));
+    const rollback = instance.builds.enqueue(book.id, first, "rollback", null);
+    instance.builds.supersedePublishing(book.id);
+    release();
+    await instance.builds.idle();
+
+    expect(buildRow(instance, rollback.id)).toMatchObject({ status: "succeeded", publish: false });
+    expect(bookRow(instance, book.id)).toMatchObject({ publishedBuildId: null, previewBuildId: preview.id });
+  });
+
   it("reports how far a running build is", async () => {
     let release!: () => void;
     const gate = new Promise<void>((r) => (release = r));

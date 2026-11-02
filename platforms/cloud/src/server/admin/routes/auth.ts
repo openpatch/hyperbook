@@ -119,7 +119,8 @@ export function authRoutes(deps: Deps) {
         const token = createAccountToken(db, user.id, "reset");
         const link = `${config.adminOrigin}/reset-password?token=${encodeURIComponent(token)}`;
         const mt = createT(userLocale(db, user.locale));
-        await send(
+        // Not awaited: how long the mail takes must not tell who has an account.
+        void send(
           user.email,
           mt("mail.reset.subject"),
           mt("mail.reset.body", { email: user.email, link }),
@@ -179,9 +180,11 @@ export function authRoutes(deps: Deps) {
       const existing = db.select().from(users).where(eq(users.email, input.email)).get();
       if (existing) {
         // Same answer as for a new address, so sign-up does not reveal who
-        // has an account; the owner hears about it instead.
+        // has an account; the owner hears about it instead. That includes the
+        // time it takes: hash as a new account would, and do not wait for mail.
+        await hashPassword(input.password);
         const mt = createT(userLocale(db, existing.locale));
-        await send(
+        void send(
           existing.email,
           mt("mail.signupExists.subject", { name: instanceName() }),
           mt("mail.signupExists.body", {
@@ -208,7 +211,7 @@ export function authRoutes(deps: Deps) {
         .returning()
         .get();
       audit(db, { actorUserId: user.id, action: "user.signup", targetType: "user", targetId: user.id, data: { mode } });
-      await sendVerification(user);
+      void sendVerification(user);
       return c.json({ ok: true as const, approval: mode === "approval" });
     })
 
@@ -259,7 +262,7 @@ export function authRoutes(deps: Deps) {
       const user = db.select().from(users).where(eq(users.email, email)).get();
       if (user && !user.emailVerifiedAt && !user.disabledAt && !signupMails.isBlocked(email)) {
         signupMails.fail(email);
-        await sendVerification(user);
+        void sendVerification(user);
       }
       return c.json({ ok: true as const });
     });

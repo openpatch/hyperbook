@@ -53,11 +53,14 @@ describe("storage quota", () => {
   });
 
   it("checks zip uploads, and admins are not limited", async () => {
-    const { admin, teacher, book } = await world();
+    const { instance, admin, teacher, book } = await world();
     const zip = zipSync({ "hyperbook.json": new TextEncoder().encode("{}"), "big.bin": new Uint8Array(1.2 * MB) });
     expect((await teacher.c.upload(`/api/books/${book.id}/source`, zip)).status).toBe(413);
     const own = (await admin.c.post("/api/books", { title: "Admin", slug: "admin-book" })).body;
     expect((await admin.c.upload(`/api/books/${own.id}/source`, zip)).status).toBe(200);
     expect((await admin.c.get("/api/me")).body.storage.limitBytes).toBeNull();
+    // The upload queued a build; it must not write into the data dir while
+    // the teardown removes it.
+    await instance.builds.idle();
   });
 });

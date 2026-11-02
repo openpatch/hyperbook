@@ -92,6 +92,8 @@ export class BuildQueue {
           ),
         )
         .run();
+      // A running build that was to go live would overtake this one.
+      if (publish) this.supersedePublishing(bookId, tx as unknown as Db);
       // The book's commit count now, for the staleness hint on this build.
       const commitCount = tx.select({ n: books.commitCount }).from(books).where(eq(books.id, bookId)).get()?.n ?? 0;
       return tx
@@ -183,6 +185,7 @@ export class BuildQueue {
       .limit(1)
       .get();
     if (!pending) return null;
+    this.supersedePublishing(bookId, this.db, pending.id);
     if (pending.publish) {
       // Reusing an already-publishing build keeps the note the publish came with.
       if (!note) return pending;
@@ -199,6 +202,26 @@ export class BuildQueue {
       .where(eq(builds.id, pending.id))
       .returning()
       .get();
+  }
+
+  /**
+   * Keeps the book's waiting and running builds from going live, except
+   * `exceptId`: something newer was published, rolled back to or unpublished,
+   * and an older build finishing later must not replace it. They still
+   * finish, as previews (a rollback's not even that, see finish).
+   */
+  supersedePublishing(bookId: number, db: Db = this.db, exceptId?: number) {
+    db.update(builds)
+      .set({ publish: false })
+      .where(
+        and(
+          eq(builds.bookId, bookId),
+          eq(builds.publish, true),
+          inArray(builds.status, ["queued", "running"]),
+          exceptId === undefined ? undefined : ne(builds.id, exceptId),
+        ),
+      )
+      .run();
   }
 
   /** How far a running build is, from the counters in its log. */
@@ -403,8 +426,9 @@ export class BuildQueue {
         if (book?.preview === build.replacesBuildId) {
           tx.update(books).set({ previewBuildId: build.id }).where(eq(books.id, build.bookId)).run();
         }
-      } else if (status === "succeeded") {
-        // A rollback goes live without dragging the preview back with it.
+      } else if (status === "succeeded" && !(build.trigger === "rollback" && !build.publish)) {
+        // A rollback goes live without dragging the preview back with it; one
+        // superseded before it finished changes nothing.
         const rollback = build.trigger === "rollback";
         tx.update(books)
           .set(

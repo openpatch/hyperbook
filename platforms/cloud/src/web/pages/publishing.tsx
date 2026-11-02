@@ -156,6 +156,8 @@ export function PublishingSection({ book }: { book: Book }) {
   // only then — not when a build exists yet. A freshly created book gets
   // its first commit from the editor, so its preview can be built at once.
   const hasSource = book.commitCount > 0;
+  // Publishing, rolling back and unpublishing are the owners' (the server checks too).
+  const canPublish = book.role === "owner";
   const hasBuilds = (builds?.length ?? 0) > 0;
   const preview = builds?.find((b) => b.preview);
   const liveVersion = versions?.find((v) => v.live);
@@ -208,7 +210,7 @@ export function PublishingSection({ book }: { book: Book }) {
                   )}
                 </DropdownMenuItem>
                 <DropdownMenuItem onSelect={() => setDialog("git")}>{t("publishing.git.title")}</DropdownMenuItem>
-                {book.publishedAt && (
+                {book.publishedAt && canPublish && (
                   <>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem variant="destructive" onSelect={() => setDialog("unpublish")}>
@@ -231,9 +233,11 @@ export function PublishingSection({ book }: { book: Book }) {
             {upToDate ? (
               <Badge variant="outline">{t("publishing.isLive")}</Badge>
             ) : (
-              <Button size="sm" disabled={!hasSource} onClick={() => setDialog("publish")}>
-                {t("publishing.publish")}
-              </Button>
+              canPublish && (
+                <Button size="sm" disabled={!hasSource} onClick={() => setDialog("publish")}>
+                  {t("publishing.publish")}
+                </Button>
+              )
             )}
           </div>
           {book.publishedAt ? (
@@ -248,6 +252,9 @@ export function PublishingSection({ book }: { book: Book }) {
             </>
           ) : (
             <p className="text-muted-foreground">{t("publishing.notPublishedYet")}</p>
+          )}
+          {!canPublish && !upToDate && (
+            <p className="mt-1 text-sm text-muted-foreground">{t("publishing.ownersPublish")}</p>
           )}
         </div>
         <div className="rounded-lg border p-4">
@@ -379,7 +386,7 @@ export function PublishingSection({ book }: { book: Book }) {
           </TableHeader>
           <TableBody>
             {versions.map((v) => (
-              <VersionRow key={v.tag} version={v} bookId={id} onChanged={refresh} />
+              <VersionRow key={v.tag} version={v} bookId={id} canRollBack={canPublish} onChanged={refresh} />
             ))}
           </TableBody>
         </Table>
@@ -467,10 +474,13 @@ export function PublishingSection({ book }: { book: Book }) {
 function VersionRow({
   version: v,
   bookId,
+  canRollBack,
   onChanged,
 }: {
   version: Version;
   bookId: string;
+  /** Rolling back changes the live site, which only owners do. */
+  canRollBack: boolean;
   onChanged: () => unknown;
 }) {
   const { t } = useTranslation();
@@ -499,7 +509,7 @@ function VersionRow({
             )}
           </span>
           <span className="flex w-28 justify-end">
-            {!v.live && (
+            {!v.live && canRollBack && (
               <ConfirmButton
                 size="sm"
                 variant="outline"

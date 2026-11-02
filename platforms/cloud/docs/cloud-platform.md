@@ -409,8 +409,10 @@ GET    /builds/:id             with log
 POST   /builds/:id/cancel      queued or running
 ```
 
-Owners and editors may do all of these. Upload, rebuild, cancel, unpublish
-and publish are written to the audit log.
+Owners and editors may do all of these, except that only owners publish,
+roll back and unpublish: what goes live is the owners' call (changed
+2026-11-02). Upload, rebuild, cancel, unpublish and publish are written to
+the audit log.
 
 ## Admin UI
 

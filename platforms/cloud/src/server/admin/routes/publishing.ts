@@ -285,7 +285,8 @@ export function bookPublishingRoutes({ db, config, builds: queue }: Deps) {
     // tag; an optional note is stored on the build.
     .post("/:id/publish", idParam, validate("json", publishInput), async (c) => {
       const user = c.get("user");
-      const { book } = bookAccess(db, user, c.req.valid("param").id);
+      // What goes live is the owners' call; editors work on the preview.
+      const { book } = bookAccess(db, user, c.req.valid("param").id, "owner");
       hostedOnly(book);
       const note = c.req.valid("json").note || null;
       const commit = await headCommit(repoDir(config, book.id)).catch(() => null);
@@ -300,6 +301,7 @@ export function bookPublishingRoutes({ db, config, builds: queue }: Deps) {
       if (built && existsSync(buildDir(config, book.id, built.id))) {
         const now = new Date();
         db.update(books).set({ publishedBuildId: built.id, publishedAt: now }).where(eq(books.id, book.id)).run();
+        queue.supersedePublishing(book.id);
         if (note) db.update(builds).set({ note }).where(eq(builds.id, built.id)).run();
         await markPublished(db, config, book.id, commit);
         audit(db, {
@@ -324,7 +326,7 @@ export function bookPublishingRoutes({ db, config, builds: queue }: Deps) {
     // goes live on success. main is never rewritten.
     .post("/:id/rollback", idParam, validate("json", rollbackInput), async (c) => {
       const user = c.get("user");
-      const { book } = bookAccess(db, user, c.req.valid("param").id);
+      const { book } = bookAccess(db, user, c.req.valid("param").id, "owner");
       hostedOnly(book);
       const { tag } = c.req.valid("json");
       const repo = repoDir(config, book.id);
@@ -340,6 +342,7 @@ export function bookPublishingRoutes({ db, config, builds: queue }: Deps) {
       if (kept && existsSync(buildDir(config, book.id, kept.id))) {
         const now = new Date();
         db.update(books).set({ publishedBuildId: kept.id, publishedAt: now }).where(eq(books.id, book.id)).run();
+        queue.supersedePublishing(book.id);
         await movePublishedTag(config, book.id, commit);
         audit(db, {
           actorUserId: user.id,
@@ -361,11 +364,12 @@ export function bookPublishingRoutes({ db, config, builds: queue }: Deps) {
 
     .post("/:id/unpublish", idParam, (c) => {
       const user = c.get("user");
-      const { book } = bookAccess(db, user, c.req.valid("param").id);
+      const { book } = bookAccess(db, user, c.req.valid("param").id, "owner");
       db.update(books)
         .set({ publishedBuildId: null, publishedAt: null })
         .where(eq(books.id, book.id))
         .run();
+      queue.supersedePublishing(book.id);
       audit(db, {
         actorUserId: user.id,
         action: "book.unpublish",

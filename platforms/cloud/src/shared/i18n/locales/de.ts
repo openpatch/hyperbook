@@ -872,7 +872,7 @@ export const de: Messages = {
       "Zum Beispiel auf GitHub Pages. Schülerkonten funktionieren dort auch.",
     people: "Personen",
     peopleDescription:
-      "Eigentümer verwalten alles. Bearbeiter arbeiten am Buch und an dessen Schülern.",
+      "Eigentümer verwalten alles und veröffentlichen als Einzige. Bearbeiter arbeiten am Buch, an dessen Vorschau und an dessen Schülern.",
     owner: "Eigentümer",
     editor: "Bearbeiter",
     roleOf: "Rolle von {{email}}",
@@ -1055,6 +1055,7 @@ export const de: Messages = {
     notePlaceholder: "Notiz zu dieser Version (optional)",
     downloadSource: "Quelle herunterladen (Zip)",
     unpublish: "Veröffentlichung zurückziehen",
+    ownersPublish: "Nur die Eigentümer des Buchs können es veröffentlichen.",
     unpublishTitle: "Veröffentlichung von „{{title}}“ zurückziehen?",
     unpublishDescription:
       "Die Adresse zeigt „nicht veröffentlicht“, bis der nächste Build fertig ist. Nichts wird gelöscht.",

@@ -131,6 +131,20 @@ describe("publishing", () => {
     expect((await other.c.post(`/api/books/${book.id}/unpublish`)).status).toBe(404);
   });
 
+  it("lets only owners publish, roll back and unpublish", async () => {
+    const { instance, owner, other, book } = await world();
+    await owner.c.post(`/api/books/${book.id}/members`, { email: "x@example.org", role: "editor" });
+    await owner.c.upload(`/api/books/${book.id}/source`, bookZip());
+    await instance.builds.idle();
+    expect((await other.c.post(`/api/books/${book.id}/publish`, {})).status).toBe(403);
+    expect((await owner.c.post(`/api/books/${book.id}/publish`, {})).status).toBe(200);
+    expect((await other.c.post(`/api/books/${book.id}/rollback`, { tag: "v1" })).status).toBe(403);
+    expect((await other.c.post(`/api/books/${book.id}/unpublish`)).status).toBe(403);
+    expect((await owner.c.get(`/api/books/${book.id}`)).body.publishedBuildId).not.toBeNull();
+    // Editors still build previews.
+    expect((await other.c.post(`/api/books/${book.id}/builds`)).status).toBe(200);
+  });
+
   it("unpublishes", async () => {
     const { instance, owner, book } = await world();
     await owner.c.upload(`/api/books/${book.id}/source`, bookZip());
