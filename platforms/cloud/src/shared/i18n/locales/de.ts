@@ -308,6 +308,7 @@ export const de: Messages = {
       haveBook:
         "Haben Sie schon ein Buch? Laden Sie es als Zip auf der <a>Buchseite</a> hoch.",
     },
+    title: "{{title}} bearbeiten",
     toolbar: {
       bookSettings: "Buch-Einstellungen",
       saveAll: "Alle speichern",
@@ -325,6 +326,10 @@ export const de: Messages = {
       hideHistory: "Verlauf ausblenden",
       showHistory: "Verlauf einblenden",
       history: "Verlauf",
+      showFiles: "Dateien anzeigen",
+      hideFiles: "Dateien ausblenden",
+      more: "Mehr",
+      findFile: "Datei suchen",
     },
     files: {
       title: "Dateien",
@@ -344,8 +349,10 @@ export const de: Messages = {
       notSaved: "Nicht gespeichert",
       noMatches: "Keine Datei passt.",
       chooseFiles: "Dateien zum Hochladen wählen",
+      actions: "Aktionen für {{name}}",
     },
     tabs: {
+      contents: "Inhalt von {{path}}",
       close: "{{path}} schließen",
       closeOthers: "Andere schließen",
       closeAll: "Alle schließen",

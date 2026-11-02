@@ -128,10 +128,10 @@ export function HistoryPanel({
             </div>
             <div className="mt-0.5 flex items-center gap-2 text-xs text-muted-foreground">
               <span className="min-w-0 flex-1 truncate">{c.name}</span>
-              <span className="text-green-600 dark:text-green-400">
+              <span className="text-green-700 dark:text-green-400">
                 +{c.additions}
               </span>
-              <span className="text-red-600 dark:text-red-400">
+              <span className="text-red-700 dark:text-red-400">
                 −{c.deletions}
               </span>
             </div>

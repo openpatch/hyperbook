@@ -32,6 +32,15 @@ export function Layout() {
   const { pathname } = useLocation();
   const [navOpen, setNavOpen] = useState(false);
   useEffect(() => setNavOpen(false), [pathname]);
+  // Escape closes the drawer, as it does dialogs.
+  useEffect(() => {
+    if (!navOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setNavOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [navOpen]);
   return (
     <div className="flex h-dvh flex-col">
       <header className="z-50 flex h-15 shrink-0 items-center gap-2 bg-header pr-4 text-header-foreground shadow-md">
@@ -63,9 +72,10 @@ export function Layout() {
         <aside
           id="main-nav"
           className={cn(
-            "fixed top-15 bottom-0 left-0 z-40 flex w-75 max-w-[85vw] flex-col overflow-y-auto border-r border-sidebar-border bg-sidebar text-[0.9rem] [scrollbar-width:thin] transition-transform",
+            "fixed top-15 bottom-0 left-0 z-40 flex w-75 max-w-[85vw] flex-col overflow-y-auto border-r border-sidebar-border bg-sidebar text-[0.9rem] [scrollbar-width:thin] transition-[translate,visibility]",
             "lg:static lg:w-[max(15rem,16%)] lg:max-w-none lg:translate-x-0 lg:transition-none",
-            !navOpen && "-translate-x-full",
+            // Closed, it is out of the tab order too, not just out of sight.
+            !navOpen && "-translate-x-full max-lg:invisible",
           )}
         >
           <nav aria-label={t("nav.main")} className="flex-1 p-4">
@@ -119,7 +129,7 @@ function UserMenu() {
           >
             {name.trim().charAt(0)}
           </span>
-          <span className="hidden truncate sm:inline">{name}</span>
+          <span className="truncate max-sm:sr-only">{name}</span>
           <ChevronDownIcon className="size-4 shrink-0" aria-hidden />
         </button>
       </DropdownMenuTrigger>
@@ -165,7 +175,7 @@ function PoweredBy() {
       <a href="https://hyperbook.openpatch.org" target="_blank" rel="noreferrer" className="hover:text-primary">
         Power your <b>Hyperbook</b>
       </a>
-      <span className="block text-[0.7rem] opacity-60">
+      <span className="block text-[0.7rem] opacity-80">
         v{version}
         {run && ` · build ${run}`}
         {commit && (

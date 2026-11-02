@@ -33,7 +33,7 @@ export function PrintPage() {
 
   return (
     <div className="print-sheet min-h-dvh bg-white text-black">
-      <div className="flex flex-wrap items-center gap-2 border-b bg-muted p-3 print:hidden">
+      <nav className="flex flex-wrap items-center gap-2 border-b bg-muted p-3 print:hidden">
         <Button asChild variant="ghost">
           <Link to={`/groups/${id}`}>{t("print.back")}</Link>
         </Button>
@@ -55,8 +55,13 @@ export function PrintPage() {
           </Button>
         </div>
         <Button onClick={() => window.print()}>{t("print.print")}</Button>
-      </div>
-      <div className="mx-auto max-w-[210mm] p-6 print:max-w-none print:p-0">
+      </nav>
+      <main className="mx-auto max-w-[210mm] p-6 print:max-w-none print:p-0">
+        {(layout === "cards" || data.students.length === 0) && (
+          <h1 className="sr-only">
+            {data.book.title} – {data.group.name}
+          </h1>
+        )}
         {data.students.length === 0 ? (
           <p>{t("print.noStudents")}</p>
         ) : layout === "list" ? (
@@ -64,7 +69,7 @@ export function PrintPage() {
         ) : (
           <Cards data={data} />
         )}
-      </div>
+      </main>
     </div>
   );
 }

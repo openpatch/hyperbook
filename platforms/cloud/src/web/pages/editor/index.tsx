@@ -1,15 +1,21 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeftIcon,
+  BookIcon,
   ChevronDownIcon,
   ChevronsDownUpIcon,
   ChevronsUpDownIcon,
+  EllipsisVerticalIcon,
   FilePlusIcon,
   FolderPlusIcon,
+  FolderTreeIcon,
   HistoryIcon,
+  MoonIcon,
   PanelRightIcon,
+  SaveIcon,
   SearchIcon,
   SparklesIcon,
+  SunIcon,
   UploadIcon,
   XIcon,
 } from "lucide-react";
@@ -35,6 +41,8 @@ import { api, unwrap } from "@/lib/api";
 import { type Book, useBook } from "@/lib/books";
 import { useEditorSettings, type EditorSettings } from "@/lib/editor-settings";
 import { useAiStatus } from "@/lib/ai";
+import { COMPACT, NARROW, useMediaQuery } from "@/lib/media-query";
+import { setTheme, useTheme } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 import { CodeEditor, type SpellOptions } from "./code-editor";
 import {
@@ -116,13 +124,17 @@ function Centered({ children }: { children: React.ReactNode }) {
   );
 }
 
-function BackLink({ book }: { book: Book }) {
+function BackLink({ book, className }: { book: Book; className?: string }) {
   return (
     <Link
       to={`/books/${book.id}`}
-      className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
+      className={cn(
+        "inline-flex items-center gap-1 text-sm text-primary hover:underline",
+        className,
+      )}
     >
-      <ArrowLeftIcon className="size-4" /> {book.title}
+      <ArrowLeftIcon className="size-4 shrink-0" />
+      <span className="truncate">{book.title}</span>
     </Link>
   );
 }
@@ -233,7 +245,7 @@ const FileSidebar = memo(function FileSidebar({
         <Button
           variant="ghost"
           size="icon"
-          className="size-7"
+          className="size-7 pointer-coarse:size-9"
           aria-label={t("editor.files.expandAll")}
           disabled={filter.trim() !== ""}
           onClick={() => setCollapsed(new Set())}
@@ -243,7 +255,7 @@ const FileSidebar = memo(function FileSidebar({
         <Button
           variant="ghost"
           size="icon"
-          className="size-7"
+          className="size-7 pointer-coarse:size-9"
           aria-label={t("editor.files.collapseAll")}
           disabled={filter.trim() !== ""}
           onClick={() =>
@@ -255,7 +267,7 @@ const FileSidebar = memo(function FileSidebar({
         <Button
           variant="ghost"
           size="icon"
-          className="size-7"
+          className="size-7 pointer-coarse:size-9"
           aria-label={t("editor.files.newFile")}
           onClick={() => actions.newFile(folder)}
         >
@@ -264,7 +276,7 @@ const FileSidebar = memo(function FileSidebar({
         <Button
           variant="ghost"
           size="icon"
-          className="size-7"
+          className="size-7 pointer-coarse:size-9"
           aria-label={t("editor.files.newFolder")}
           onClick={() => actions.newFolder(folder)}
         >
@@ -273,7 +285,7 @@ const FileSidebar = memo(function FileSidebar({
         <Button
           variant="ghost"
           size="icon"
-          className="size-7"
+          className="size-7 pointer-coarse:size-9"
           aria-label={t("editor.files.uploadFiles")}
           onClick={() => actions.pickUpload(folder)}
         >
@@ -291,7 +303,7 @@ const FileSidebar = memo(function FileSidebar({
             onChange={(e) => setFilter(e.target.value)}
             placeholder={t("editor.files.filter")}
             aria-label={t("editor.files.filter")}
-            className="h-7 pl-7 text-sm"
+            className="h-7 pl-7 text-sm pointer-coarse:h-9"
           />
         </div>
       </div>
@@ -338,9 +350,26 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
   const [choice, setChoice] = useState<ChoiceRequest | null>(null);
   /** What a rename, move or delete is about to do to the file's references. */
   const [refactor, setRefactor] = useState<RefactorRequest | null>(null);
-  const [showPreview, setShowPreview] = useState(true);
+  // A phone gets the file list as a drawer; a phone or tablet gets the side
+  // panes over the editor, one at a time, the preview closed at first.
+  const narrow = useMediaQuery(NARROW);
+  const compact = useMediaQuery(COMPACT);
+  const [showFiles, setShowFiles] = useState(false);
+  const [showPreview, setShowPreview] = useState(
+    () => !matchMedia(COMPACT).matches,
+  );
   const [showAi, setShowAi] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
+  const panes = { preview: setShowPreview, ai: setShowAi, history: setShowHistory };
+  /** Shows or hides a side pane; showing one on a compact screen hides the others. */
+  const togglePane = (pane: keyof typeof panes) => {
+    const shown = { preview: showPreview, ai: showAi, history: showHistory };
+    if (!shown[pane] && compact)
+      for (const other of Object.keys(panes) as (keyof typeof panes)[])
+        if (other !== pane) panes[other](false);
+    panes[pane](!shown[pane]);
+  };
+  const theme = useTheme();
   const [showSettings, setShowSettings] = useState(false);
   const [blockEdit, setBlockEdit] = useState<{
     block: InlineBlock;
@@ -439,6 +468,17 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
     if (first) ws.open(first);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // The file drawer makes way for the file it opened.
+  useEffect(() => setShowFiles(false), [ws.active]);
+  useEffect(() => {
+    if (!showFiles) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setShowFiles(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [showFiles]);
+
   // Ask before leaving with unsaved changes.
   const hasUnsaved = ws.dirty.size > 0;
   const blocker = useBlocker(hasUnsaved);
@@ -514,7 +554,7 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
   // use it. The latest answer is read at keypress time, not on every render.
   const toggleAi = useRef(() => {});
   toggleAi.current = () => {
-    if (aiAvailable) setShowAi((open) => !open);
+    if (aiAvailable) togglePane("ai");
   };
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -1136,27 +1176,92 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
     }, { focusFirst: fromKeyboard(event.nativeEvent) });
   };
 
+  /**
+   * The tabs from the keyboard, as tab lists go: the arrows, Home and End
+   * move between them, Delete closes one.
+   */
+  const tabKeys = (event: React.KeyboardEvent<HTMLElement>, index: number) => {
+    const paths = ws.tabs.map((tab) => tab.path);
+    let next: number;
+    switch (event.key) {
+      case "ArrowRight":
+        next = (index + 1) % paths.length;
+        break;
+      case "ArrowLeft":
+        next = (index - 1 + paths.length) % paths.length;
+        break;
+      case "Home":
+        next = 0;
+        break;
+      case "End":
+        next = paths.length - 1;
+        break;
+      case "Delete":
+        event.preventDefault();
+        closeTabs([paths[index]!]);
+        return;
+      default:
+        return;
+    }
+    event.preventDefault();
+    ws.setActive(paths[next]!);
+    document.getElementById(`editor-tab-${next}`)?.focus();
+  };
+
   const activeTab = ws.tabs.find((t) => t.path === ws.active);
+  const openBookSettings = () => {
+    if (!busyFiles(["hyperbook.json"])) setShowSettings(true);
+  };
+  /** A side pane on a compact screen: over the editor, from the right. */
+  const overlay =
+    "absolute inset-y-0 right-0 z-20 w-full border-l border-border shadow-lg sm:w-[min(100%,36rem)]";
 
   return (
     <div className="flex h-dvh flex-col">
-      <header className="flex shrink-0 items-center gap-2 border-b border-border bg-sidebar px-3 py-2">
-        <BackLink book={book} />
+      <header className="flex shrink-0 items-center gap-1 border-b border-border bg-sidebar px-2 py-2 sm:gap-2 sm:px-3">
+        {narrow && (
+          <Button
+            size="icon"
+            variant="ghost"
+            className="size-8"
+            aria-label={
+              showFiles
+                ? t("editor.toolbar.hideFiles")
+                : t("editor.toolbar.showFiles")
+            }
+            aria-expanded={showFiles}
+            aria-controls="editor-files"
+            onClick={() => setShowFiles((v) => !v)}
+          >
+            <FolderTreeIcon className="size-4" />
+          </Button>
+        )}
+        <h1 className="sr-only">
+          {t("editor.title", { title: book.title })}
+        </h1>
+        <BackLink book={book} className="min-w-0" />
         <span className="flex-1" />
         <Button
           size="sm"
           variant="ghost"
+          className="hidden sm:inline-flex"
           disabled={!exists("hyperbook.json")}
-          onClick={() => {
-            if (!busyFiles(["hyperbook.json"])) setShowSettings(true);
-          }}
+          onClick={openBookSettings}
         >
           {t("editor.toolbar.bookSettings")}
         </Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button size="sm" variant="outline" disabled={!hasUnsaved}>
-              {t("editor.toolbar.saveAll")}
+            <Button
+              size="sm"
+              variant="outline"
+              className="max-sm:px-2"
+              disabled={!hasUnsaved}
+            >
+              <SaveIcon className="size-3.5 sm:hidden" aria-hidden />
+              <span className="max-sm:sr-only">
+                {t("editor.toolbar.saveAll")}
+              </span>
               <ChevronDownIcon className="size-3.5" aria-hidden />
             </Button>
           </DropdownMenuTrigger>
@@ -1192,7 +1297,7 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
               showAi ? t("editor.toolbar.hideAi") : t("editor.toolbar.showAi")
             }
             aria-pressed={showAi}
-            onClick={() => setShowAi((v) => !v)}
+            onClick={() => togglePane("ai")}
           >
             <SparklesIcon className="size-4" />
           </Button>
@@ -1207,7 +1312,7 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
               : t("editor.toolbar.showHistory")
           }
           aria-pressed={showHistory}
-          onClick={() => setShowHistory((v) => !v)}
+          onClick={() => togglePane("history")}
         >
           <HistoryIcon className="size-4" />
         </Button>
@@ -1221,7 +1326,7 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
               : t("editor.toolbar.showPreview")
           }
           aria-pressed={showPreview}
-          onClick={() => setShowPreview((v) => !v)}
+          onClick={() => togglePane("preview")}
         >
           <PanelRightIcon className="size-4" />
         </Button>
@@ -1231,14 +1336,66 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
           canSpellCheck={canSpellCheck}
           onOpenWords={() => setShowWords(true)}
         />
-        <ThemeToggle className="hover:bg-accent [&_svg]:size-4" />
+        <ThemeToggle className="hidden hover:bg-accent sm:flex [&_svg]:size-4" />
+        {/* What a phone's header has no room for, and quick open without Ctrl+P. */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              size="icon"
+              variant="ghost"
+              className="size-8 sm:hidden"
+              aria-label={t("editor.toolbar.more")}
+            >
+              <EllipsisVerticalIcon className="size-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent
+            align="end"
+            className="w-56"
+            // The dialogs opened from here keep the focus.
+            onCloseAutoFocus={(e) => e.preventDefault()}
+          >
+            <DropdownMenuItem onSelect={() => setQuickOpen(true)}>
+              <SearchIcon /> {t("editor.toolbar.findFile")}
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              disabled={!exists("hyperbook.json")}
+              onSelect={openBookSettings}
+            >
+              <BookIcon /> {t("editor.toolbar.bookSettings")}
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onSelect={(e) => {
+                e.preventDefault();
+                setTheme(theme === "dark" ? "light" : "dark");
+              }}
+            >
+              {theme === "dark" ? <SunIcon /> : <MoonIcon />}
+              {theme === "dark" ? t("theme.toLight") : t("theme.toDark")}
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </header>
 
-      <div className="flex min-h-0 flex-1">
+      <div className="relative flex min-h-0 flex-1">
+        {narrow && showFiles && (
+          <div
+            className="absolute inset-0 z-30 bg-black/40"
+            onClick={() => setShowFiles(false)}
+          />
+        )}
         <aside
           ref={sidebarRef}
-          className="flex w-64 shrink-0 flex-col bg-sidebar"
-          style={sidebarWidth === null ? undefined : { width: sidebarWidth }}
+          id="editor-files"
+          className={cn(
+            "flex w-64 shrink-0 flex-col bg-sidebar",
+            narrow &&
+              "absolute inset-y-0 left-0 z-40 w-72 max-w-[85vw] shadow-lg transition-[translate,visibility]",
+            narrow && !showFiles && "invisible -translate-x-full",
+          )}
+          style={
+            sidebarWidth === null || narrow ? undefined : { width: sidebarWidth }
+          }
         >
           <FileSidebar
             files={listing.files}
@@ -1248,21 +1405,45 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
             clipboard={treeClipboard}
           />
         </aside>
-        <Splitter
-          label={t("editor.toolbar.resizeFiles")}
-          pane={sidebarRef}
-          direction={1}
-          onResize={setSidebarWidth}
-          onReset={() => setSidebarWidth(null)}
-          className="bg-sidebar-border"
-        />
+        {!narrow && (
+          <Splitter
+            label={t("editor.toolbar.resizeFiles")}
+            pane={sidebarRef}
+            direction={1}
+            onResize={setSidebarWidth}
+            onReset={() => setSidebarWidth(null)}
+            className="bg-sidebar-border"
+          />
+        )}
 
         <main className="flex min-w-0 flex-1 flex-col">
+          <input
+            ref={uploadInput}
+            type="file"
+            multiple
+            className="sr-only"
+            aria-label={t("editor.files.chooseFiles")}
+            onChange={(e) => {
+              const files = [...(e.target.files ?? [])];
+              e.target.value = "";
+              if (files.length === 0) return;
+              const target = replaceTarget.current;
+              if (target) {
+                // Replacing a file keeps its name.
+                const renamed = new File([files[0]!], target.split("/").pop()!, {
+                  type: files[0]!.type,
+                });
+                void upload(parentOf(target), [renamed]);
+              } else {
+                void upload(uploadFolder.current, files);
+              }
+            }}
+          />
           <div
             role="tablist"
             className="flex shrink-0 overflow-x-auto border-b border-border"
           >
-            {ws.tabs.map((tab) => (
+            {ws.tabs.map((tab, index) => (
               <div
                 key={tab.path}
                 className={cn(
@@ -1276,22 +1457,31 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
                 <button
                   type="button"
                   role="tab"
+                  id={`editor-tab-${index}`}
+                  aria-controls={`editor-panel-${index}`}
                   aria-selected={tab.path === ws.active}
+                  tabIndex={tab.path === ws.active ? 0 : -1}
                   title={tab.path}
-                  className="py-1.5 pr-1 pl-3"
+                  className="py-1.5 pr-1 pl-3 pointer-coarse:py-2.5"
                   onClick={() => ws.setActive(tab.path)}
+                  onKeyDown={(event) => tabKeys(event, index)}
                 >
                   {tab.path.split("/").pop()}
                   {isDirty(tab) && (
                     <span
                       className="ml-1.5 inline-block size-2 rounded-full bg-primary"
                       title={t("editor.files.notSaved")}
-                    />
+                    >
+                      <span className="sr-only">{t("editor.files.notSaved")}</span>
+                    </span>
                   )}
                 </button>
+                {/* For the mouse; the keyboard closes the tab with Delete or its menu. */}
                 <button
                   type="button"
-                  className="mr-1 rounded p-0.5 opacity-60 hover:bg-accent hover:opacity-100"
+                  tabIndex={-1}
+                  aria-hidden
+                  className="mr-1 rounded p-0.5 opacity-60 hover:bg-accent hover:opacity-100 pointer-coarse:p-1.5"
                   aria-label={t("editor.tabs.close", { path: tab.path })}
                   title={t("editor.tabs.close", { path: tab.path })}
                   onClick={() => closeTabs([tab.path])}
@@ -1302,9 +1492,12 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
             ))}
           </div>
           <div className="relative min-h-0 flex-1">
-            {ws.tabs.map((tab) => (
+            {ws.tabs.map((tab, index) => (
               <div
                 key={tab.path}
+                role="tabpanel"
+                id={`editor-panel-${index}`}
+                aria-labelledby={`editor-tab-${index}`}
                 className={cn(
                   "absolute inset-0",
                   tab.path !== ws.active && "hidden",
@@ -1344,18 +1537,25 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
 
         {showHistory && (
           <>
-            <Splitter
-              label={t("editor.toolbar.resizeHistory")}
-              pane={historyRef}
-              direction={-1}
-              onResize={setHistoryWidth}
-              onReset={() => setHistoryWidth(null)}
-            />
+            {!compact && (
+              <Splitter
+                label={t("editor.toolbar.resizeHistory")}
+                pane={historyRef}
+                direction={-1}
+                onResize={setHistoryWidth}
+                onReset={() => setHistoryWidth(null)}
+              />
+            )}
             <section
               ref={historyRef}
-              className="w-72 shrink-0 border-l border-border bg-sidebar"
+              className={cn(
+                compact ? overlay : "w-72 shrink-0 border-l border-border",
+                "bg-sidebar",
+              )}
               style={
-                historyWidth === null ? undefined : { width: historyWidth }
+                historyWidth === null || compact
+                  ? undefined
+                  : { width: historyWidth }
               }
               aria-label={t("editor.toolbar.history")}
             >
@@ -1370,17 +1570,24 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
 
         {showAi && aiAvailable && (
           <>
-            <Splitter
-              label={t("editor.toolbar.resizeAi")}
-              pane={aiRef}
-              direction={-1}
-              onResize={setAiWidth}
-              onReset={() => setAiWidth(null)}
-            />
+            {!compact && (
+              <Splitter
+                label={t("editor.toolbar.resizeAi")}
+                pane={aiRef}
+                direction={-1}
+                onResize={setAiWidth}
+                onReset={() => setAiWidth(null)}
+              />
+            )}
             <section
               ref={aiRef}
-              className="w-[360px] shrink-0 border-l border-border bg-sidebar"
-              style={aiWidth === null ? undefined : { width: aiWidth }}
+              className={cn(
+                compact ? overlay : "w-[360px] shrink-0 border-l border-border",
+                "bg-sidebar",
+              )}
+              style={
+                aiWidth === null || compact ? undefined : { width: aiWidth }
+              }
               aria-label={t("editor.toolbar.ai")}
             >
               <AiPanel
@@ -1401,19 +1608,23 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
 
         {showPreview && (
           <>
-            <Splitter
-              label={t("editor.toolbar.resizePreview")}
-              pane={previewRef}
-              direction={-1}
-              onResize={setPreviewWidth}
-              onReset={() => setPreviewWidth(null)}
-              className="hidden lg:block"
-            />
+            {!compact && (
+              <Splitter
+                label={t("editor.toolbar.resizePreview")}
+                pane={previewRef}
+                direction={-1}
+                onResize={setPreviewWidth}
+                onReset={() => setPreviewWidth(null)}
+              />
+            )}
             <section
               ref={previewRef}
-              className="hidden w-[45%] max-w-3xl shrink-0 lg:block"
+              className={cn(
+                compact ? overlay : "w-[45%] max-w-3xl shrink-0",
+                "bg-background",
+              )}
               style={
-                previewWidth === null
+                previewWidth === null || compact
                   ? undefined
                   : { width: previewWidth, maxWidth: "none" }
               }
@@ -1444,28 +1655,6 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
         )}
       </div>
 
-      <input
-        ref={uploadInput}
-        type="file"
-        multiple
-        className="sr-only"
-        aria-label={t("editor.files.chooseFiles")}
-        onChange={(e) => {
-          const files = [...(e.target.files ?? [])];
-          e.target.value = "";
-          if (files.length === 0) return;
-          const target = replaceTarget.current;
-          if (target) {
-            // Replacing a file keeps its name.
-            const renamed = new File([files[0]!], target.split("/").pop()!, {
-              type: files[0]!.type,
-            });
-            void upload(parentOf(target), [renamed]);
-          } else {
-            void upload(uploadFolder.current, files);
-          }
-        }}
-      />
       <PathDialog request={pathRequest} onClose={() => setPathRequest(null)} />
       <ChoiceDialog
         request={choice}

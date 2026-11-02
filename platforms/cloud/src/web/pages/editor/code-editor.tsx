@@ -9,6 +9,7 @@ import { SQLite, sql } from "@codemirror/lang-sql";
 import { yaml } from "@codemirror/lang-yaml";
 import { typst_lezer } from "codemirror-lang-typst/lezer";
 import { Compartment, type Extension, EditorState } from "@codemirror/state";
+import i18next from "i18next";
 import { EditorView, keymap } from "@codemirror/view";
 import { basicSetup } from "codemirror";
 import { useEffect, useRef } from "react";
@@ -282,6 +283,10 @@ export function CodeEditor({
           spellCompartment.of(spellConfig() ? spellCheck(spellConfig()!) : []),
           contextMenu(),
           EditorView.lineWrapping,
+          // Its name for screen readers: which file is being edited.
+          EditorView.contentAttributes.of({
+            "aria-label": i18next.t("editor.tabs.contents", { path }),
+          }),
           // Pages and snippets: Markdown with Hyperbook's directives. A
           // .md.hbs page works as a template, but is written as Markdown too.
           isMarkdownPage(path) || extension(path) === "hbs"

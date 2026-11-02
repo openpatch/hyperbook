@@ -2,6 +2,7 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import {
   ChevronDownIcon,
   ChevronRightIcon,
+  EllipsisIcon,
   FileIcon,
   FolderIcon,
 } from "lucide-react";
@@ -106,6 +107,27 @@ type PlaceProps = {
 /** The height a row is assumed to have before it is measured. */
 const ROW_HEIGHT = 28;
 
+/** A row's context menu on a touch screen, which may have no long press for it. */
+function RowActions({
+  name,
+  onClick,
+}: {
+  name: string;
+  onClick: (event: React.MouseEvent) => void;
+}) {
+  const { t } = useTranslation();
+  return (
+    <button
+      type="button"
+      className="hidden shrink-0 rounded p-1.5 text-muted-foreground hover:bg-background pointer-coarse:block"
+      aria-label={t("editor.files.actions", { name })}
+      onClick={onClick}
+    >
+      <EllipsisIcon className="size-4" />
+    </button>
+  );
+}
+
 /**
  * The tree's rows, memoized on primitives only: a re-render — a toggle, a
  * drag, another file opened — touches the rows whose data changed, not all.
@@ -188,7 +210,7 @@ const TreeRow = memo(function TreeRow({
       >
         <button
           type="button"
-          className="flex min-w-0 flex-1 items-center gap-1 py-1 text-left"
+          className="flex min-w-0 flex-1 items-center gap-1 py-1 text-left pointer-coarse:py-2"
           onClick={() => (isFolder ? onToggle(path) : onOpen(path))}
           aria-expanded={isFolder ? open : undefined}
         >
@@ -218,6 +240,10 @@ const TreeRow = memo(function TreeRow({
             />
           )}
         </button>
+        <RowActions
+          name={name}
+          onClick={(e) => onMenu(e, { path, isFolder })}
+        />
       </div>
     </li>
   );
@@ -269,7 +295,7 @@ const FilterRow = memo(function FilterRow({
       >
         <button
           type="button"
-          className="flex min-w-0 flex-1 items-center gap-1 py-1 pl-2 text-left"
+          className="flex min-w-0 flex-1 items-center gap-1 py-1 pl-2 text-left pointer-coarse:py-2"
           onClick={() => onOpen(path)}
         >
           <FileIcon
@@ -286,6 +312,10 @@ const FilterRow = memo(function FilterRow({
             />
           )}
         </button>
+        <RowActions
+          name={path}
+          onClick={(e) => onMenu(e, { path, isFolder: false })}
+        />
       </div>
     </li>
   );

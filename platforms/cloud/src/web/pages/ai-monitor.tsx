@@ -96,7 +96,7 @@ export function AiMonitorPage() {
         }
       />
       {data && (
-        <div className="grid gap-8">
+        <div className="grid grid-cols-1 gap-8">
           <Table>
             <TotalsHead first={t("aiMonitor.total")} />
             <TableBody>

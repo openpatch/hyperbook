@@ -254,6 +254,19 @@
 .cm-context-menu .cm-context-shortcut {
   color: var(--muted-foreground);
 }
+/* Touch screens: entries a finger can hit, and no shortcuts it cannot press. */
+@media (pointer: coarse) {
+  .cm-context-menu {
+    max-height: 70dvh;
+    font-size: 15px;
+  }
+  .cm-context-menu button {
+    padding: 10px 12px;
+  }
+  .cm-context-menu .cm-context-shortcut {
+    display: none;
+  }
+}
 
 /*
  * The AI assistant's answers, rendered from Markdown (components/markdown.tsx).

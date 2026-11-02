@@ -237,13 +237,17 @@ export function PreviewPane({
           <span className="text-xs text-muted-foreground">{t("editor.preview.updating")}</span>
         )}
         {rendered && !rendered.ok && (
-          <Badge variant="destructive" className="cursor-pointer" onClick={() => setShowLog(true)}>
-            {t("editor.preview.couldNotShow")}
+          <Badge variant="destructive" className="cursor-pointer" asChild>
+            <button type="button" onClick={() => setShowLog(true)}>
+              {t("editor.preview.couldNotShow")}
+            </button>
           </Badge>
         )}
         {rendered?.ok && log && (
-          <Badge variant="secondary" className="cursor-pointer" onClick={() => setShowLog((s) => !s)}>
-            {t("editor.preview.notes")}
+          <Badge variant="secondary" className="cursor-pointer" asChild>
+            <button type="button" aria-expanded={showLog} onClick={() => setShowLog((s) => !s)}>
+              {t("editor.preview.notes")}
+            </button>
           </Badge>
         )}
         <span className="flex-1" />

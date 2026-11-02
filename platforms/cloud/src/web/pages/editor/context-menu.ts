@@ -95,8 +95,8 @@ export function openMenu(
   build(box);
   menu = box;
   document.body.append(box);
-  // A mousedown anywhere else, Escape or Tab closes the menu again.
-  const onDown = (event: MouseEvent) => {
+  // A press anywhere else, mouse or touch, Escape or Tab closes the menu again.
+  const onDown = (event: PointerEvent) => {
     if (!box.contains(event.target as Node)) closeMenu();
   };
   const onKey = (event: KeyboardEvent) => {
@@ -130,10 +130,10 @@ export function openMenu(
     event.stopPropagation();
     next?.focus();
   };
-  document.addEventListener("mousedown", onDown, true);
+  document.addEventListener("pointerdown", onDown, true);
   document.addEventListener("keydown", onKey, true);
   menuCloser = () => {
-    document.removeEventListener("mousedown", onDown, true);
+    document.removeEventListener("pointerdown", onDown, true);
     document.removeEventListener("keydown", onKey, true);
   };
   // At the click, but never outside the window.

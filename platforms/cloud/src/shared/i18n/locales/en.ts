@@ -309,6 +309,7 @@ export const en = {
       haveBook:
         "Have a book already? Upload it as a zip on the <a>book's page</a>.",
     },
+    title: "Editing {{title}}",
     toolbar: {
       bookSettings: "Book settings",
       saveAll: "Save all",
@@ -326,6 +327,10 @@ export const en = {
       hideHistory: "Hide the history",
       showHistory: "Show the history",
       history: "History",
+      showFiles: "Show the files",
+      hideFiles: "Hide the files",
+      more: "More",
+      findFile: "Find a file",
     },
     files: {
       title: "Files",
@@ -345,8 +350,10 @@ export const en = {
       notSaved: "Not saved",
       noMatches: "No file matches.",
       chooseFiles: "Choose files to upload",
+      actions: "Actions for {{name}}",
     },
     tabs: {
+      contents: "Contents of {{path}}",
       close: "Close {{path}}",
       closeOthers: "Close others",
       closeAll: "Close all",

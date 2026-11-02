@@ -5,7 +5,10 @@ function Table({ className, ...props }: React.ComponentProps<"table">) {
   return (
     <div
       data-slot="table-container"
-      className="relative w-full overflow-x-auto"
+      // Reachable from the keyboard, so a wide table can be scrolled with
+      // the arrow keys; min-w-0 lets it scroll inside a grid or flex row.
+      tabIndex={0}
+      className="relative w-full min-w-0 overflow-x-auto rounded-sm outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
     >
       <table
         data-slot="table"

@@ -43,8 +43,8 @@ export function LandingPage() {
 
   return (
     <div className="flex min-h-dvh flex-col">
-      <header className="flex h-15 shrink-0 items-center gap-2 bg-header pr-4 text-header-foreground shadow-md">
-        <span className="flex min-w-0 flex-1 items-center gap-3 p-4 font-heading text-[1.1rem] font-bold">
+      <header className="flex h-15 shrink-0 items-center gap-1 bg-header pr-2 sm:gap-2 sm:pr-4 text-header-foreground shadow-md">
+        <span className="flex min-w-0 flex-1 items-center gap-2 py-4 pr-1 pl-3 font-heading sm:gap-3 sm:p-4 text-[1.1rem] font-bold">
           <img src="/logo.svg" alt="" className="size-8 shrink-0" />
           <span className="truncate">{instance?.name ?? "Hyperbook Cloud"}</span>
         </span>

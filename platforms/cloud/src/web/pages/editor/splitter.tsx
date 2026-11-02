@@ -73,6 +73,17 @@ export function Splitter({
   className?: string;
 }) {
   const start = useRef({ pointer: 0, width: 0 });
+  // The pane's width, which a separator one can focus announces as its value.
+  const [width, setWidth] = useState(0);
+  useEffect(() => {
+    const element = pane.current;
+    if (!element) return;
+    const observer = new ResizeObserver(() =>
+      setWidth(Math.round(element.getBoundingClientRect().width)),
+    );
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [pane]);
 
   const dragBy = (delta: number) =>
     onResize(start.current.width + direction * delta);
@@ -117,6 +128,9 @@ export function Splitter({
       role="separator"
       aria-orientation="vertical"
       aria-label={label}
+      aria-valuenow={width}
+      aria-valuemin={0}
+      aria-valuemax={Math.round(window.innerWidth)}
       tabIndex={0}
       title={label}
       onPointerDown={onPointerDown}
