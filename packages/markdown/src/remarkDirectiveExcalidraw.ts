@@ -11,6 +11,8 @@ import {
   isDirective,
   registerDirective,
 } from "./remarkHelper";
+import { resolveDirectiveId } from "./directiveId";
+import { i18n } from "./i18n";
 
 export default (ctx: HyperbookContext) => () => {
   const name = "excalidraw";
@@ -41,13 +43,15 @@ export default (ctx: HyperbookContext) => () => {
           [],
         );
 
+        const attributes = node.attributes || {};
+        const id = attributes.id || resolveDirectiveId(file, node);
         const {
           aspectRatio = "16/9",
           autoZoom,
           edit,
           src = "",
           onlinkopen,
-        } = node.attributes || {};
+        } = attributes;
 
         data.hName = "div";
         data.hProperties = {
@@ -61,6 +65,8 @@ export default (ctx: HyperbookContext) => () => {
             type: "element",
             tagName: "hyperbook-excalidraw",
             properties: {
+              id,
+              lang: ctx.config.language || "en",
               "auto-zoom": autoZoom,
               edit,
               src: ctx.makeUrl(
@@ -69,6 +75,8 @@ export default (ctx: HyperbookContext) => () => {
                 ctx.navigation.current || undefined,
               ),
               onlinkopen,
+              "reset-label": i18n.get("excalidraw-reset"),
+              "reset-prompt": i18n.get("excalidraw-reset-prompt"),
             },
             children: [],
           },

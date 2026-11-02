@@ -134,6 +134,8 @@
     "bitflow-reset-prompt": "Are you sure you want to start this assessment over? Your answers will be lost.",
     "jmp-reset": "Reset",
     "jmp-reset-prompt": "Are you sure you want to reset the diagram? Your changes will be lost.",
+    "excalidraw-reset": "Reset to template",
+    "excalidraw-reset-prompt": "Are you sure you want to reset the drawing to its template? Your changes will be lost.",
     "typst-code": "Typst",
     "typst-download-pdf": "Download PDF",
     "typst-pdf-error": "Error exporting PDF",

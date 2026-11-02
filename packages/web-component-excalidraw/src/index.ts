@@ -12,6 +12,8 @@ customElements.define(
       edit: "boolean",
       src: "string",
       onlinkopen: "function",
+      resetLabel: "string",
+      resetPrompt: "string",
       onChange: "function",
       value: "json"
     },

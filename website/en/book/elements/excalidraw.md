@@ -24,6 +24,11 @@ hit save. The Excalidraw will be saved at the place which you have defined.
 | `aspectRatio` | Aspect ratio, for example `16/9`, `4/3`, or `1/1` | `16/9` |
 | `autoZoom` | Automatically zoom the drawing to fit smaller screens | `true` |
 | `edit` | Enable editing mode | `false` |
+| `id` | Key under which a reader's drawing is saved; set it when two drawings on a page share the same `src` | generated |
+
+With `edit=true`, a reader's drawing is saved in the browser. If the element
+has a `src`, the Excalidraw menu offers **Reset to template**, which throws the
+reader's changes away and loads the file from `src` again.
 
 
 :::alert{info}
