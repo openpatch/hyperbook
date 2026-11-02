@@ -2,13 +2,14 @@ import { afterEach, describe, expect, it } from "vitest";
 import {
   clearDocumentationCache,
   DOCUMENTATION,
+  documentationKey,
   readDocumentation,
 } from "../src/server/ai/docs";
 
 /*
  * The documentation layer: one local markdown file per directive / file
- * format (hyperbook.md is the vendored https://hyperbook.openpatch.org/llms.txt),
- * read from disk and cached. The server never fetches documentation at runtime.
+ * format, read from disk and cached; hyperbook.md (the vendored
+ * https://hyperbook.openpatch.org/llms.txt) is served by section. The server never fetches documentation at runtime.
  */
 
 afterEach(() => clearDocumentationCache());
@@ -22,9 +23,26 @@ describe("readDocumentation", () => {
     }
   });
 
-  it("serves the vendored hyperbook llms.txt", () => {
-    const text = readDocumentation("hyperbook");
-    expect(text).toContain("Hyperbook Documentation");
+  it("serves a topic's sections of the vendored llms.txt, not the whole file", () => {
+    const text = readDocumentation("alert")!;
+    expect(text).toMatch(/^# Alert/);
+    expect(text).not.toContain("# Changelog");
+    expect(text).not.toContain("# Audio");
+    expect(text.length).toBeLessThan(5_000);
+  });
+
+  it("puts a curated file before the official reference", () => {
+    const text = readDocumentation("pyide")!;
+    expect(text.indexOf("# pyide (Python IDE)")).toBe(0);
+    expect(text).toContain("Official reference:");
+    expect(text).toMatch(/^# Pyide/m);
+  });
+
+  it("answers directive names documented under another topic", () => {
+    expect(documentationKey("tab")).toBe("tabs");
+    expect(documentationKey("blockflow-player")).toBe("blockflow");
+    expect(documentationKey("P5")).toBe("p5");
+    expect(documentationKey("nonsense")).toBeNull();
   });
 
   it("caches reads", () => {

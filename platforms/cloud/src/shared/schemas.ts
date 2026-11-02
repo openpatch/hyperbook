@@ -459,11 +459,13 @@ export const historyInput = z.object({
 });
 
 /** A request to the editor's AI writing assistant (platforms/cloud/docs/cloud-ai-assistant.md). */
-export const aiAssistInput = z
-  .object({
-    action: z.enum(["free", "continue", "improve"]),
-    /** What the assistant should do; required for "free". */
-    prompt: z.string().trim().max(4000).optional(),
+export const aiAssistInput = z.object({
+    /** What the assistant should do. */
+    prompt: z
+      .string("validation.aiPromptRequired")
+      .trim()
+      .min(1, "validation.aiPromptRequired")
+      .max(4000),
     /** The model the teacher picked; the route allows only the instance's list. */
     model: z.string().trim().max(100).optional(),
     /** The page the teacher is editing. */
@@ -496,16 +498,7 @@ export const aiAssistInput = z
       )
       .max(6)
       .optional(),
-  })
-  .superRefine((input, ctx) => {
-    if (input.action === "free" && !input.prompt) {
-      ctx.addIssue({
-        code: "custom",
-        message: "validation.aiPromptRequired",
-        path: ["prompt"],
-      });
-    }
-  });
+});
 
 export type AiAssistInput = z.input<typeof aiAssistInput>;
 

@@ -251,7 +251,6 @@ describe("AI assist", () => {
   it("streams deltas and done, and asks the provider in the book's terms", async () => {
     const { owner, provider, assist } = await world();
     const res = await owner.c.post(assist, {
-      action: "free",
       prompt: "Say hi",
       pagePath: "book/index.md",
       context: "# Physics\n\nWelcome.",
@@ -290,7 +289,6 @@ describe("AI assist", () => {
   it("sends the conversation's earlier turns along, oldest first", async () => {
     const { owner, provider, assist } = await world();
     const res = await owner.c.post(assist, {
-      action: "free",
       prompt: "Write about a related animal",
       pagePath: "book/index.md",
       history: [
@@ -320,7 +318,6 @@ describe("AI assist", () => {
   it("truncates an over-long history entry instead of failing the request", async () => {
     const { owner, provider, assist } = await world();
     const res = await owner.c.post(assist, {
-      action: "free",
       prompt: "And now a related animal",
       pagePath: "book/index.md",
       history: [
@@ -347,7 +344,6 @@ describe("AI assist", () => {
     });
     const post = () =>
       owner.c.post(assist, {
-        action: "free",
         prompt: "Say hi",
         pagePath: "book/index.md",
       });
@@ -373,7 +369,6 @@ describe("AI assist", () => {
     ]);
     const post = (model?: string) =>
       owner.c.post(assist, {
-        action: "free",
         prompt: "Say hi",
         pagePath: "book/index.md",
         ...(model ? { model } : {}),
@@ -403,7 +398,6 @@ describe("AI assist", () => {
         : { toolCalls: [{ name: "read_docs", args: { name: "bitflow" } }] },
     );
     const res = await owner.c.post(assist, {
-      action: "free",
       prompt: "How do I write a quiz?",
       pagePath: "book/index.md",
     });
@@ -417,14 +411,14 @@ describe("AI assist", () => {
   it("passes the selection and the page's context only", async () => {
     const { owner, provider, assist } = await world();
     const res = await owner.c.post(assist, {
-      action: "improve",
+      prompt: "Improve the passage",
       pagePath: "book/lists.md",
       selection: "A linked list is …",
     });
     expect(res.status).toBe(200);
     const user = provider.asked[0]!.messages[1]!;
     expect(String(user.content)).toContain("A linked list is …");
-    expect(String(user.content)).toMatch(/improve the selected passage/i);
+    expect(String(user.content)).toContain("Improve the passage");
   });
 
   it("answers 503 when AI is off", async () => {
@@ -433,7 +427,7 @@ describe("AI assist", () => {
     const book = (await owner.c.post("/api/books", { title: "P", slug: "p" }))
       .body;
     const res = await owner.c.post(`/api/books/${book.id}/ai/assist`, {
-      action: "continue",
+      prompt: "Continue the page",
       pagePath: "book/index.md",
     });
     expect(res.status).toBe(503);
@@ -443,22 +437,21 @@ describe("AI assist", () => {
   it("hides books the teacher does not edit", async () => {
     const { other, assist } = await world();
     const res = await other.c.post(assist, {
-      action: "continue",
+      prompt: "Continue the page",
       pagePath: "book/index.md",
     });
     expect(res.status).toBe(404);
   });
 
-  it("rejects a free request without a prompt, and bad paths", async () => {
+  it("rejects a request without a prompt, and bad paths", async () => {
     const { owner, assist } = await world();
     const noPrompt = await owner.c.post(assist, {
-      action: "free",
       pagePath: "book/index.md",
     });
     expect(noPrompt.status).toBe(400);
     expect(noPrompt.body.issues[0].path).toBe("prompt");
     const badPath = await owner.c.post(assist, {
-      action: "continue",
+      prompt: "Continue the page",
       pagePath: "../outside.md",
     });
     expect(badPath.status).toBe(400);
@@ -468,7 +461,7 @@ describe("AI assist", () => {
     const { owner, other, assist } = await world({
       AI_REQUESTS_PER_MINUTE: "2",
     });
-    const body = { action: "continue", pagePath: "book/index.md" };
+    const body = { prompt: "Continue the page", pagePath: "book/index.md" };
     expect((await owner.c.post(assist, body)).status).toBe(200);
     expect((await owner.c.post(assist, body)).status).toBe(200);
     expect((await owner.c.post(assist, body)).status).toBe(429);
@@ -500,7 +493,7 @@ describe("AI assist", () => {
     expect(status.allowed).toBe(false);
 
     const res = await owner.c.post(assist, {
-      action: "continue",
+      prompt: "Continue the page",
       pagePath: "book/index.md",
     });
     expect(res.status).toBe(403);
@@ -512,7 +505,7 @@ describe("AI assist", () => {
     expect(
       (
         await admin.c.post(`/api/books/${adminBook.id}/ai/assist`, {
-          action: "continue",
+          prompt: "Continue the page",
           pagePath: "book/index.md",
         })
       ).status,
@@ -528,7 +521,7 @@ describe("AI assist", () => {
     await admin.c.put(`/api/users/${owner.user.id}/entitlements`, {
       ai_requests_per_day: 2,
     });
-    const body = { action: "continue", pagePath: "book/index.md" };
+    const body = { prompt: "Continue the page", pagePath: "book/index.md" };
 
     expect((await owner.c.post(assist, body)).status).toBe(200);
     expect((await owner.c.post(assist, body)).status).toBe(200);
@@ -565,7 +558,7 @@ describe("AI assist", () => {
       ai_tokens_per_week: 500,
     });
     const body = {
-      action: "continue",
+      prompt: "Continue the page",
       pagePath: "book/index.md",
       model: "mistral-big",
     };
@@ -652,7 +645,7 @@ describe("AI assist", () => {
       { id: "mistral-test", prices: { in: 1, cached: 1, out: 1 }, label: "Fast" },
     ]);
 
-    await owner.c.post(assist, { action: "free", prompt: "hi", pagePath: "book/index.md" });
+    await owner.c.post(assist, { prompt: "hi", pagePath: "book/index.md" });
     const monitor = (await admin.c.get("/api/ai-monitor?days=7")).body;
     expect(monitor.total.requests).toBe(1);
     expect(monitor.byModel).toMatchObject([{ model: "mistral-test", requests: 1 }]);
@@ -672,7 +665,7 @@ describe("AI assist", () => {
     await admin.c.put(`/api/users/${owner.user.id}/entitlements`, {
       ai_requests_per_day: 1,
     });
-    const body = { action: "continue", pagePath: "book/index.md" };
+    const body = { prompt: "Continue the page", pagePath: "book/index.md" };
     expect((await owner.c.post(assist, body)).status).toBe(200);
     expect((await owner.c.post(assist, body)).status).toBe(429);
 
@@ -686,7 +679,6 @@ describe("AI assist", () => {
       error: 500,
     }));
     const res = await owner.c.post(assist, {
-      action: "free",
       prompt: "hi",
       pagePath: "book/index.md",
     });
@@ -706,7 +698,6 @@ describe("AI assist", () => {
     const entry = entries[0]!;
     expect(entry.action).toBe("ai.assist");
     expect(entry.data as Record<string, unknown>).toMatchObject({
-      action: "free",
       page: "book/index.md",
       model: "mistral-test",
       finish: "error",
@@ -716,7 +707,7 @@ describe("AI assist", () => {
   it("audits a successful request without its content", async () => {
     const { owner, instance, assist } = await world();
     await owner.c.post(assist, {
-      action: "continue",
+      prompt: "Continue the page",
       pagePath: "book/index.md",
       context: "secret page text",
     });
@@ -728,7 +719,6 @@ describe("AI assist", () => {
     expect(entries).toHaveLength(1);
     const data = entries[0]!.data as Record<string, unknown>;
     expect(data).toMatchObject({
-      action: "continue",
       page: "book/index.md",
       finish: "stop",
     });
@@ -741,7 +731,7 @@ describe("AI assist", () => {
       finish: "length",
     }));
     const res = await owner.c.post(assist, {
-      action: "continue",
+      prompt: "Continue the page",
       pagePath: "book/index.md",
     });
     const seen = events(res.body);
@@ -770,7 +760,7 @@ describe("AI agent tools", () => {
       "book/c.md": big,
       "book/d.md": big,
     });
-    await owner.c.post(assist, { action: "free", prompt: "read all", pagePath: "book/index.md" });
+    await owner.c.post(assist, { prompt: "read all", pagePath: "book/index.md" });
     const last = provider.asked.at(-1)!.messages.filter((m) => m.role === "tool").map((m) => String(m.content));
     expect(last).toHaveLength(4);
     expect(last[0]).toContain("dropped to save tokens");
@@ -794,7 +784,6 @@ describe("AI agent tools", () => {
       },
     );
     const res = await owner.c.post(assist, {
-      action: "free",
       prompt: "What is the first heading?",
       pagePath: "book/index.md",
     });
@@ -838,7 +827,6 @@ describe("AI agent tools", () => {
       { "book/a.md": "Alpha text", "book/b.md": "Bravo text" },
     );
     const res = await owner.c.post(assist, {
-      action: "free",
       prompt: "Compare a and b",
       pagePath: "book/index.md",
     });
@@ -871,7 +859,6 @@ describe("AI agent tools", () => {
       "book/index.md": "# Physics",
     });
     const res = await owner.c.post(assist, {
-      action: "free",
       prompt: "Add a quiz",
       pagePath: "book/index.md",
     });
@@ -904,7 +891,6 @@ describe("AI agent tools", () => {
       "book/image.png": "TODO",
     });
     const res = await owner.c.post(assist, {
-      action: "free",
       prompt: "find the TODOs",
       pagePath: "book/index.md",
     });
@@ -932,7 +918,6 @@ describe("AI agent tools", () => {
       "book/index.md": "# Physics",
     });
     const res = await owner.c.post(assist, {
-      action: "free",
       prompt: "rename old.md to new.md",
       pagePath: "book/index.md",
     });
@@ -968,7 +953,6 @@ describe("AI agent tools", () => {
       "book/b.md": "B",
     });
     const res = await owner.c.post(assist, {
-      action: "free",
       prompt: "rename a onto b",
       pagePath: "book/index.md",
     });
@@ -1000,7 +984,6 @@ describe("AI agent tools", () => {
       },
     );
     await owner.c.post(assist, {
-      action: "free",
       prompt: "Rewrite and check",
       pagePath: "book/index.md",
     });
@@ -1019,7 +1002,7 @@ describe("AI agent tools", () => {
       s.next(asked),
     );
     const res = await owner.c.post(assist, {
-      action: "continue",
+      prompt: "Continue the page",
       pagePath: "book/index.md",
     });
     const seen = events(res.body);
@@ -1053,7 +1036,6 @@ describe("AI agent tools", () => {
     );
     // pageText omitted: the assistant must not write the page.
     await owner.c.post(assist, {
-      action: "free",
       prompt: "Rewrite the page",
       pagePath: "book/index.md",
       context: "# Physics\n\nA long pa…",
@@ -1081,7 +1063,6 @@ describe("AI agent tools", () => {
       "book/index.md": "# Physics",
     });
     const res = await owner.c.post(assist, {
-      action: "free",
       prompt: "Improve the whole page",
       pagePath: "book/index.md",
       pageText: "# Physics, unsaved edit",
@@ -1092,6 +1073,122 @@ describe("AI agent tools", () => {
     expect(change.baseOid).toMatch(/^[0-9a-f]{40}$/);
     expect(change.diff).toContain("-# Physics, unsaved edit");
     expect(change.diff).toContain("+# Physics, improved");
+  });
+
+  it("edits passages of a file and of the unsaved open page", async () => {
+    const answers = [
+      {
+        toolCalls: [
+          {
+            name: "edit_file",
+            args: {
+              path: "book/index.md",
+              edits: [
+                { old_text: "unsaved", new_text: "improved" },
+                { old_text: "", new_text: "## Next" },
+              ],
+            },
+          },
+          {
+            name: "edit_file",
+            args: {
+              path: "book/notes.md",
+              edits: [{ old_text: "B", new_text: "b" }],
+            },
+          },
+        ],
+      },
+      { deltas: ["Proposed."] },
+    ];
+    const s = new Script(answers);
+    const { owner, assist } = await world({}, (asked) => s.next(asked), {
+      "book/index.md": "# Physics",
+      "book/notes.md": "A\nB\nC\n",
+    });
+    const res = await owner.c.post(assist, {
+      prompt: "Improve and continue",
+      pagePath: "book/index.md",
+      pageText: "# Physics, unsaved edit\n",
+    });
+    const proposal = events(res.body).find((e) => e.event === "proposal")!;
+    const byPath = Object.fromEntries(
+      proposal.data.changes.map((c: { path: string }) => [c.path, c]),
+    );
+    expect(byPath["book/index.md"].oldText).toBe("# Physics, unsaved edit\n");
+    expect(byPath["book/index.md"].newText).toBe(
+      "# Physics, improved edit\n\n## Next\n",
+    );
+    expect(byPath["book/notes.md"].newText).toBe("A\nb\nC\n");
+  });
+
+  it("applies no edit when one passage is missing or ambiguous", async () => {
+    const answers = [
+      {
+        toolCalls: [
+          {
+            name: "edit_file",
+            args: {
+              path: "book/notes.md",
+              edits: [
+                { old_text: "A", new_text: "a" },
+                { old_text: "nowhere", new_text: "x" },
+              ],
+            },
+          },
+          {
+            name: "edit_file",
+            args: {
+              path: "book/notes.md",
+              edits: [{ old_text: "B", new_text: "b" }],
+            },
+          },
+        ],
+      },
+      { deltas: ["Could not."] },
+    ];
+    const s = new Script(answers);
+    const { owner, provider, assist } = await world(
+      {},
+      (asked) => s.next(asked),
+      { "book/notes.md": "A\nB\nB\n" },
+    );
+    const res = await owner.c.post(assist, {
+      prompt: "Edit",
+      pagePath: "book/index.md",
+    });
+    const results = provider.asked[1]!.messages
+      .filter((m) => m.role === "tool")
+      .map((m) => String(m.content));
+    expect(results[0]).toMatch(/Edit 2: old_text is not in book\/notes.md/);
+    expect(results[1]).toMatch(/more than once/);
+    expect(events(res.body).some((e) => e.event === "proposal")).toBe(false);
+  });
+
+  it("names similar paths instead of listing the whole book for a wrong path", async () => {
+    const answers = [
+      { toolCalls: [{ name: "read_files", args: { paths: ["book/lists.md"] } }] },
+      { deltas: ["Found it."] },
+    ];
+    const s = new Script(answers);
+    const { owner, provider, assist } = await world(
+      {},
+      (asked) => s.next(asked),
+      {
+        "book/data/lists.md": "# Lists",
+        "book/index.md": "# Physics",
+        "public/a.png": "png",
+      },
+    );
+    await owner.c.post(assist, {
+      prompt: "Read the lists page",
+      pagePath: "book/index.md",
+    });
+    const result = String(
+      provider.asked[1]!.messages.find((m) => m.role === "tool")!.content,
+    );
+    expect(result).toContain("No file with that path");
+    expect(result).toContain("book/data/lists.md");
+    expect(result).not.toContain("public/a.png");
   });
 
   it("records a deletion only for files that exist", async () => {
@@ -1108,7 +1205,6 @@ describe("AI agent tools", () => {
       },
     );
     const res = await owner.c.post(assist, {
-      action: "free",
       prompt: "Delete the ghost page",
       pagePath: "book/index.md",
     });
@@ -1125,7 +1221,6 @@ describe("AI hardening", () => {
   it("rejects an oversized request body before parsing it (413)", async () => {
     const { owner, assist } = await world();
     const res = await owner.c.post(assist, {
-      action: "free",
       prompt: "x".repeat(700_000),
       pagePath: "book/index.md",
     });
@@ -1139,7 +1234,7 @@ describe("AI hardening", () => {
     });
     expect(res.status).toBe(200);
     const denied = await owner.c.post(assist, {
-      action: "continue",
+      prompt: "Continue the page",
       pagePath: "book/index.md",
     });
     expect(denied.status).toBe(409);
@@ -1149,7 +1244,7 @@ describe("AI hardening", () => {
   it("does not retry without tools when the provider answers 401", async () => {
     const { owner, provider, assist } = await world({}, () => ({ error: 401 }));
     const res = await owner.c.post(assist, {
-      action: "continue",
+      prompt: "Continue the page",
       pagePath: "book/index.md",
     });
     expect(res.status).toBe(200); // the stream started; the failure is an event
@@ -1180,7 +1275,6 @@ describe("AI hardening", () => {
       { "book/big.md": "x".repeat(200_000) },
     );
     const res = await owner.c.post(assist, {
-      action: "free",
       prompt: "Shrink it",
       pagePath: "book/index.md",
     });
@@ -1206,7 +1300,6 @@ describe("AI hardening", () => {
       "book/notes.md": "A\n",
     });
     const res = await owner.c.post(assist, {
-      action: "free",
       prompt: "Rewrite twice",
       pagePath: "book/index.md",
     });
@@ -1232,7 +1325,6 @@ describe("AI hardening", () => {
       "book/index.md": "# Physics",
     });
     const res = await owner.c.post(assist, {
-      action: "free",
       prompt: "Remove the big file",
       pagePath: "book/index.md",
     });

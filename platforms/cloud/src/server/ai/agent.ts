@@ -19,7 +19,7 @@ import {
   readBlob,
   type TreeEntry,
 } from "../hosting/git";
-import { DOCUMENTATION, readDocumentation, type DocumentationKey } from "./docs";
+import { DOCUMENTATION, documentationKey, readDocumentation } from "./docs";
 import { SYSTEM_PROMPT } from "./prompt";
 import {
   type ChatMessage,
@@ -127,119 +127,114 @@ function isText(path: string): boolean {
   return TEXT_EXTENSIONS.has(extension(path));
 }
 
-/** The tools, in the order the system prompt talks about them. */
+/*
+ * The tools, in the order the system prompt talks about them. The prompt
+ * says when to use which; the descriptions say only what each one does —
+ * every step resends them. `read_file` is still answered (as a one-path
+ * read_files) for models that guess it, but not offered.
+ */
 const TOOLS: ToolDefinition[] = [
   {
-    name: "list_files",
-    description:
-      "The book's files, with what a pending change would look like. Call this before guessing a path.",
-    parameters: { type: "object", properties: {} },
-  },
-  {
-    name: "read_file",
-    description:
-      "One file of the book, by its path (list_files shows the paths). Text files only. The open page is the editor's current version, unsaved changes included.",
-    parameters: {
-      type: "object",
-      properties: {
-        path: { type: "string", description: "The file's path in the book." },
-      },
-      required: ["path"],
-    },
-  },
-  {
     name: "read_files",
-    description:
-      "Several files of the book at once, by their paths — one call instead of many read_file calls. Prefer it whenever you need more than one file.",
+    description: `Read text files of the book, at most ${READ_FILES_MAX} per call. The open page is the editor's version, unsaved changes included.`,
     parameters: {
       type: "object",
       properties: {
-        paths: {
-          type: "array",
-          items: { type: "string" },
-          description: `The files' paths in the book (at most ${READ_FILES_MAX}).`,
-        },
+        paths: { type: "array", items: { type: "string" } },
       },
       required: ["paths"],
     },
   },
   {
-    name: "read_docs",
-    description:
-      "External documentation: the hyperbook format and the element/file formats (.bitflow, .jmp, .struktolab, …). Call this before writing such an element or file instead of guessing its syntax.",
-    parameters: {
-      type: "object",
-      properties: {
-        name: {
-          type: "string",
-          enum: Object.keys(DOCUMENTATION),
-          description: "Which documentation to fetch.",
-        },
-      },
-      required: ["name"],
-    },
-  },
-  {
     name: "search_files",
     description:
-      "Search all the book's text files at once with a regular expression, matched per line: the matching lines with their file and line number. Use it to find where something is used or defined before changing it.",
+      "Search the book's text files with a regular expression, per line; answers path:line: text.",
     parameters: {
       type: "object",
       properties: {
         pattern: {
           type: "string",
-          description:
-            'A JavaScript regular expression, e.g. "TODO|FIXME" or "\\:\\:\\:quiz".',
+          description: 'A JavaScript regular expression, e.g. "::bitflow|::jmp".',
         },
         pathPrefix: {
           type: "string",
-          description: 'Optional: only search files whose path starts with this, e.g. "book/".',
+          description: 'Only files whose path starts with this, e.g. "book/".',
         },
       },
       required: ["pattern"],
     },
   },
   {
-    name: "rename_file",
+    name: "list_files",
     description:
-      "Move a file to a new path, keeping its content — one recorded change (the old path deleted, the new one created) instead of delete plus write. Text files only.",
+      "All the book's files with their sizes, pending changes included. The prompt lists the first ones.",
+    parameters: { type: "object", properties: {} },
+  },
+  {
+    name: "read_docs",
+    description:
+      "Documentation of one hyperbook element or file format (attributes, syntax, examples), or of the format itself (markdown, page-config, book-config).",
     parameters: {
       type: "object",
       properties: {
-        path: { type: "string", description: "The file's current path." },
-        newPath: {
-          type: "string",
-          description: "The path to move it to; must not exist yet.",
+        name: { type: "string", enum: Object.keys(DOCUMENTATION) },
+      },
+      required: ["name"],
+    },
+  },
+  {
+    name: "edit_file",
+    description:
+      "Change an existing file by replacing passages: each old_text must occur exactly once in the file's current text (copy it exactly, with enough lines to be unique). An empty old_text appends new_text to the end of the file. All edits apply, or none.",
+    parameters: {
+      type: "object",
+      properties: {
+        path: { type: "string" },
+        edits: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              old_text: { type: "string" },
+              new_text: { type: "string" },
+            },
+            required: ["old_text", "new_text"],
+          },
         },
       },
-      required: ["path", "newPath"],
+      required: ["path", "edits"],
     },
   },
   {
     name: "write_file",
-    description:
-      "Records a file change for the teacher to review as a diff: the file's complete new content. Nothing is applied until the teacher accepts the proposal.",
+    description: "Create a file, or replace a file's whole content.",
     parameters: {
       type: "object",
       properties: {
-        path: { type: "string", description: "The file's path in the book." },
-        content: {
-          type: "string",
-          description: "The file's complete new text.",
-        },
+        path: { type: "string" },
+        content: { type: "string", description: "The complete new text." },
       },
       required: ["path", "content"],
     },
   },
   {
-    name: "delete_file",
-    description:
-      "Records a file deletion for the teacher to review as a diff. Nothing is deleted until the teacher accepts the proposal.",
+    name: "rename_file",
+    description: "Move a text file to a new, unused path, keeping its content.",
     parameters: {
       type: "object",
       properties: {
-        path: { type: "string", description: "The file's path in the book." },
+        path: { type: "string" },
+        newPath: { type: "string" },
       },
+      required: ["path", "newPath"],
+    },
+  },
+  {
+    name: "delete_file",
+    description: "Delete a file.",
+    parameters: {
+      type: "object",
+      properties: { path: { type: "string" } },
       required: ["path"],
     },
   },
@@ -342,6 +337,27 @@ class Tools {
     return lines.length > 0 ? lines.join("\n") : "(the book has no files yet)";
   }
 
+  /**
+   * The answer for a path that does not exist: files with the same name or
+   * in the same folder, not the whole listing — that is in the prompt.
+   */
+  missing(path: string): string {
+    const name = path.slice(path.lastIndexOf("/") + 1);
+    const folder = path.slice(0, path.lastIndexOf("/") + 1);
+    const paths = [...this.book.tree.keys(), ...this.overlay.keys()].filter(
+      (p) => !this.deletes.has(p),
+    );
+    const near = [
+      ...new Set([
+        ...paths.filter((p) => p.endsWith(`/${name}`) || p === name),
+        ...paths.filter((p) => folder && p.startsWith(folder)),
+      ]),
+    ].slice(0, 10);
+    return near.length > 0
+      ? `No file with that path. Similar: ${near.join(", ")}`
+      : "No file with that path; call list_files for the paths.";
+  }
+
   /** Lets a file or doc whose result left the history be read again. */
   forget(key: string): void {
     this.seen.delete(key);
@@ -356,7 +372,7 @@ class Tools {
 
   async readMany(paths: unknown): Promise<string> {
     if (!Array.isArray(paths) || paths.length === 0) {
-      return "read_files needs `paths`, a list of valid file paths; call list_files first.";
+      return "read_files needs `paths`, a list of file paths.";
     }
     const valid = paths.filter(
       (p): p is string => typeof p === "string" && !bookPathProblem(p),
@@ -402,7 +418,7 @@ class Tools {
       return `${body}\n\n(The editor's current version, unsaved changes included.)`;
     }
     const entry = this.book.tree.get(path);
-    if (!entry) return `No file with that path. ${this.listing()}`;
+    if (!entry) return this.missing(path);
     if (!isText(path))
       return "That file is not a text file; the assistant reads text only.";
     if (entry.size > this.readBudget) {
@@ -485,7 +501,7 @@ class Tools {
     const overlayEntry = this.overlay.get(path);
     const treeEntry = this.book.tree.get(path);
     if (!overlayEntry && !treeEntry)
-      return `No file with that path. ${this.listing()}`;
+      return this.missing(path);
     if (
       this.overlay.has(newPath) ||
       this.book.tree.has(newPath) ||
@@ -511,10 +527,16 @@ class Tools {
     const baseOid = overlayEntry?.baseOid ?? treeEntry?.oid ?? null;
     if (baseOid !== null) this.deletes.add(path);
     this.overlay.set(newPath, { baseOid: null, oldText: null, newText: content });
-    return `Recorded: ${path} is renamed to ${newPath}, content kept, when the teacher accepts the proposal. Check links that point to ${path}.`;
+    return `Recorded: ${path} renamed to ${newPath}. Fix links that point to it.`;
   }
 
-  async write(path: string, content: unknown): Promise<string> {
+  async write(
+    path: string,
+    content: unknown,
+    // An edit sends only its passages: a long file it changes is not output
+    // the model wrote, so neither the per-file cap nor the full size count.
+    { max = WRITE_MAX, cost }: { max?: number; cost?: number } = {},
+  ): Promise<string> {
     if (typeof content !== "string" || content.length === 0) {
       return "write_file needs the file's complete new text as `content`.";
     }
@@ -531,10 +553,10 @@ class Tools {
     if (committed && committed.size > 4 * READ_MAX) {
       return `That file is too large for a proposed change (${committed.size} bytes); the teacher edits it in the editor instead.`;
     }
-    if (content.length > WRITE_MAX) {
-      return `Too large: at most ${WRITE_MAX} bytes per file (got ${content.length}).`;
+    if (content.length > max) {
+      return `Too large: at most ${max} bytes per file (got ${content.length}).`;
     }
-    if (content.length > this.writeBudget) {
+    if ((cost ?? content.length) > this.writeBudget) {
       return "The request's write budget is used up; summarize what else to change instead.";
     }
     if (
@@ -544,7 +566,7 @@ class Tools {
     ) {
       return `Too many changes for one proposal (at most ${CHANGE_LIMIT} files).`;
     }
-    this.writeBudget -= content.length;
+    this.writeBudget -= cost ?? content.length;
     const existing = this.overlay.get(path);
     const baseOid = existing?.baseOid ?? this.book.tree.get(path)?.oid ?? null;
     this.overlay.set(path, {
@@ -556,7 +578,57 @@ class Tools {
       newText: content,
     });
     this.deletes.delete(path);
-    return `Recorded: ${path} is ${baseOid === null ? "created" : "edited"} when the teacher accepts the proposal. The teacher reviews every change as a diff.`;
+    return `Recorded: ${path} ${baseOid === null ? "created" : "changed"}.`;
+  }
+
+  /**
+   * Replaces passages of a file's current text (pending writes included)
+   * and records the result like write(). Each old text must occur once, so
+   * an edit cannot land in the wrong place; an empty one appends.
+   */
+  async edit(path: string, edits: unknown): Promise<string> {
+    if (!Array.isArray(edits) || edits.length === 0) {
+      return "edit_file needs `edits`, a list of { old_text, new_text }.";
+    }
+    if (this.deletes.has(path)) return "That file is deleted in this request.";
+    const isPage = path === this.input.pagePath;
+    if (!this.overlay.has(path) && !this.book.tree.has(path) && !isPage) {
+      return this.missing(path);
+    }
+    if (!isText(path)) return "Only text files can be edited.";
+    if (isPage && this.input.pageText === undefined) {
+      return "The open page was sent only as an excerpt, so editing it could lose content. Give the teacher the new text as your answer instead; they insert it where they want it.";
+    }
+    let text = this.overlay.get(path)?.newText ?? (await this.oldTextOf(path));
+    if (text === null) {
+      return "That file is too large for a proposed change; the teacher edits it in the editor instead.";
+    }
+    let cost = 0;
+    for (const [i, edit] of edits.entries()) {
+      const { old_text: oldText, new_text: newText } = (edit ?? {}) as {
+        old_text?: unknown;
+        new_text?: unknown;
+      };
+      const which = edits.length > 1 ? `Edit ${i + 1}: ` : "";
+      if (typeof oldText !== "string" || typeof newText !== "string") {
+        return `${which}needs old_text and new_text, both strings. Nothing was changed.`;
+      }
+      cost += newText.length;
+      if (oldText === "") {
+        text = `${text.replace(/\n*$/, "")}\n\n${newText}`;
+        continue;
+      }
+      const at = text.indexOf(oldText);
+      if (at === -1) {
+        return `${which}old_text is not in ${path}${i > 0 ? " (after the edits before it)" : ""}; copy it exactly from the file's current text. Nothing was changed.`;
+      }
+      if (text.indexOf(oldText, at + 1) !== -1) {
+        return `${which}old_text occurs more than once in ${path}; include more surrounding lines. Nothing was changed.`;
+      }
+      text = text.slice(0, at) + newText + text.slice(at + oldText.length);
+    }
+    if (!text.endsWith("\n")) text += "\n";
+    return await this.write(path, text, { max: 4 * READ_MAX, cost });
   }
 
   async remove(path: string): Promise<string> {
@@ -564,17 +636,17 @@ class Tools {
     if (recorded) {
       this.overlay.delete(path);
       if (recorded.baseOid !== null) this.deletes.add(path);
-      return `Recorded: ${path} is deleted when the teacher accepts the proposal.`;
+      return `Recorded: ${path} deleted.`;
     }
     if (this.deletes.has(path))
       return "That file is already deleted in this request.";
     if (!this.book.tree.has(path))
-      return `No file with that path. ${this.listing()}`;
+      return this.missing(path);
     if (this.overlay.size + this.deletes.size >= CHANGE_LIMIT) {
       return `Too many changes for one proposal (at most ${CHANGE_LIMIT} files).`;
     }
     this.deletes.add(path);
-    return `Recorded: ${path} is deleted when the teacher accepts the proposal. The teacher reviews every change as a diff.`;
+    return `Recorded: ${path} deleted.`;
   }
 
   /** The proposal: overlay and deletes as reviewable, diffed changes. */
@@ -618,23 +690,21 @@ class Tools {
 
 /** The message pair of a request: who the assistant is, which book, what to do. */
 function buildMessages(book: Book, input: AiAssistInput): ChatMessage[] {
-  const files = [...book.tree.values()].slice(0, TREE_LIMIT);
+  // Pages and configuration first: in a book with many images the first
+  // TREE_LIMIT entries should still be the ones the model writes about.
+  const files = [...book.tree.values()]
+    .sort((a, b) => listingRank(a.path) - listingRank(b.path))
+    .slice(0, TREE_LIMIT)
+    .sort((a, b) => a.path.localeCompare(b.path));
   // Static text first, per-book text after it: providers that cache a
   // request's prefix then reuse the biggest part across requests.
   const system: string[] = [SYSTEM_PROMPT];
   system.push(
     [
-      "## Tools",
-      "",
-      "Look through the book with `read_files` (several files in one call; `read_file` for one, `list_files` for the paths) before you write, ask for all the files you need in a single call, and search all its files at once with `search_files` (a regular expression; it reports matching lines with file and line number) when you need to find where something is used. For the hyperbook format and any element or file format, call `read_docs` with its name (hyperbook, p5, pyide, webide, onlineide, sqlide, multievent, bitflow, blockflow, struktolab, jmp, excalidraw, …) instead of guessing the syntax. Any request that changes text or files — \"improve the highlighted text\", \"continue this page\", \"write me a page about X\", \"add a quiz\" — must be recorded with `write_file` (the complete new content), `delete_file` and `rename_file`, linked from an existing page in the same request: the teacher reviews every change as a diff and nothing is applied before they accept it. Never answer a change request with bare Markdown in the chat. Answer in text only for questions and explanations. If the request includes a selected passage, it is about that passage unless the request says otherwise. Name new source files by the language's conventions — a Java public class `Equals` belongs in `Equals.java` (some runtimes require the file name to match the type), Python modules use snake_case — because a mismatched name breaks the build. When you rename a file, search for links to its old path and update them in the same request.",
-    ].join("\n"),
-  );
-  system.push(
-    [
       "## The book you are working on",
       "",
       `- Name: ${book.name || "(unnamed)"}`,
-      `- Language: ${book.language}. Write in this language without being asked.`,
+      `- Language: ${book.language}`,
       "",
       "## Its files",
       "",
@@ -656,7 +726,7 @@ function buildMessages(book: Book, input: AiAssistInput): ChatMessage[] {
     // A big page is not resent with every step; the model reads it on demand.
     page.push(
       "",
-      `The page is ${input.pageText.length} bytes, too long to include here. Call \`read_file\` with its path when you need the full text.`,
+      `The page is ${input.pageText.length} bytes, too long to include here. Read it with \`read_files\` when you need the full text.`,
     );
     if (input.context)
       page.push("", "### Its text around the cursor", "", input.context);
@@ -673,15 +743,7 @@ function buildMessages(book: Book, input: AiAssistInput): ChatMessage[] {
   if (input.selection)
     page.push("", "### The selected passage", "", input.selection);
 
-  // "continue" and "improve" change the page, so they must record it with
-  // write_file — the teacher then reviews the proposal as a diff. A bare
-  // text answer could no longer be applied anywhere.
-  const task =
-    input.action === "free"
-      ? `## The request\n\n${input.prompt}`
-      : input.action === "continue"
-        ? "## The task\n\nContinue writing the page from where its text ends, in the page's language and style. Record the complete new page with `write_file` — the teacher reviews it as a diff before anything is applied. Do not answer with bare text."
-        : "## The task\n\nImprove the selected passage — clearer, tighter, better teaching — keeping its meaning, its language and the directives it uses. Record the complete new page with `write_file`, the passage replaced. The teacher reviews it as a diff; do not answer with bare text.";
+  const task = `## The request\n\n${input.prompt}`;
 
   return [
     { role: "system", content: system.join("\n\n") },
@@ -823,6 +885,12 @@ export async function* runAssistant(
   yield { type: "done", finish };
 }
 
+/** Where a path goes in the prompt's listing: pages and config first. */
+function listingRank(path: string): number {
+  if (path.endsWith(".md") || !path.includes("/")) return 0;
+  return isText(path) ? 1 : 2;
+}
+
 type PrunableRead = { index: number; id: string; name: string; keys: string[] };
 
 /** The files or docs a read call hands over, as `Tools` remembers them. */
@@ -833,8 +901,10 @@ function readKeys(name: string, args: Record<string, unknown>): string[] {
     return args.paths
       .filter((p): p is string => typeof p === "string")
       .map((p) => `file:${p}`);
-  if (name === "read_docs" && typeof args.name === "string")
-    return [`docs:${args.name}`];
+  if (name === "read_docs" && typeof args.name === "string") {
+    const key = documentationKey(args.name);
+    return key ? [`docs:${key}`] : [];
+  }
   if (
     name === "rename_file" &&
     typeof args.path === "string" &&
@@ -883,33 +953,40 @@ async function answer(
     case "read_file":
       return path
         ? await tools.readOnce(path)
-        : "read_file needs a valid `path`; call list_files first.";
+        : "read_file needs a valid `path`.";
     case "read_files":
       return await tools.readMany(args.paths);
     case "read_docs": {
-      const name = args.name;
-      if (typeof name !== "string" || !Object.hasOwn(DOCUMENTATION, name))
+      const key =
+        typeof args.name === "string" ? documentationKey(args.name) : null;
+      if (!key)
         return `read_docs needs a \`name\` of: ${Object.keys(DOCUMENTATION).join(", ")}.`;
-      if (!tools.firstTime(`docs:${name}`))
+      if (!tools.firstTime(`docs:${key}`))
         return "Already fetched earlier in this conversation; see that result above.";
-      const text = await readDocumentation(name as DocumentationKey);
-      return text ?? `The ${name} documentation could not be fetched right now.`;
+      return (
+        readDocumentation(key) ??
+        `The ${key} documentation could not be fetched right now.`
+      );
     }
+    case "edit_file":
+      return path
+        ? await tools.edit(path, args.edits)
+        : "edit_file needs a valid `path`.";
     case "write_file":
       return path
         ? await tools.write(path, args.content)
-        : "write_file needs a valid `path`; call list_files first.";
+        : "write_file needs a valid `path`.";
     case "delete_file":
       return path
         ? await tools.remove(path)
-        : "delete_file needs a valid `path`; call list_files first.";
+        : "delete_file needs a valid `path`.";
     case "search_files":
       return await tools.search(args.pattern, args.pathPrefix);
     case "rename_file":
       return path && typeof args.newPath === "string" && !bookPathProblem(args.newPath)
         ? await tools.rename(path, args.newPath)
-        : "rename_file needs a valid `path` and `newPath`; call list_files first.";
+        : "rename_file needs a valid `path` and `newPath`.";
     default:
-      return `There is no tool "${call.name}". Use list_files, search_files, read_file, read_files, read_docs, write_file, rename_file or delete_file.`;
+      return `There is no tool "${call.name}". Use ${TOOLS.map((tool) => tool.name).join(", ")}.`;
   }
 }

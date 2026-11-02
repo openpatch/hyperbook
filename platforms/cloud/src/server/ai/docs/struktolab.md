@@ -37,7 +37,7 @@ ausgabe("Ergebnis")      // output("result")
 ### Branching (if / else)
 
 ```
-fails x > 0:             // if x > 0:
+falls x > 0:             // if x > 0:
     ausgabe("positiv")   //     output("positive")
 sonst:                   // else:
     ausgabe("negativ")   //     output("not positive")

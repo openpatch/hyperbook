@@ -192,7 +192,6 @@ export function AiPanel({
       head: selected.head,
     });
     const input: AiAssistInput = {
-      action: "free",
       prompt: freePrompt,
       model: model ?? undefined,
       pagePath: activePath,

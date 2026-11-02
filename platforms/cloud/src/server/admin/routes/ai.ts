@@ -229,7 +229,6 @@ export function bookAiRoutes({ db, config }: Deps) {
             targetType: "book",
             targetId: book.id,
             data: {
-              action: input.action,
               page: input.pagePath,
               model,
               tokensIn,

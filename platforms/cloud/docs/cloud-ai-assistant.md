@@ -29,7 +29,7 @@ everything below lives in `platforms/cloud`.
 | State            | Stateless. Requests carry their own context; nothing about a conversation is stored. No AI output is persisted by the platform — the teacher applies or discards it, then saves like any other edit (a git commit).                                                                                                                                                                                                                             |
 | Safety           | Per-user rate limit, caps on input and output, caps on tool reads, audit entry with metadata only (never content), provider errors mapped to i18n messages.                                                                                                                                                                                                                                                                                     |
 | Credits          | Besides requests, usage is metered in **tokens** (the provider's reported `usage`, estimated at ~4 characters per token when it reports none). A model's tokens are multiplied by its weight (from the instance settings, default 1) into _credits_; the entitlement `ai_tokens_per_week` caps credits per UTC week (Monday–Sunday, null is unlimited). A request that starts under the cap may overshoot it; the next is refused (429). The editor shows a bar with the credits left and the refill date. Per-day rows in `ai_usage` keep raw and weighted tokens. |
-| Efficiency       | The agent loop resends its history each step, so the model is told to read all files in one `read_files` call; a file or doc already read is not sent again, and the static system prompt comes before per-book text so provider-side prefix caching applies. |
+| Efficiency       | The agent loop resends its history each step, so the model is told to read all files in one `read_files` call; a file or doc already read is not sent again, and the static system prompt (tool guidance included) comes before per-book text so provider-side prefix caching applies. Changes to existing files go through `edit_file` (exact passages replaced, or appended), so improving a paragraph does not resend the whole page. `read_docs` serves one topic: a curated file plus that element's sections of the vendored llms.txt, never the whole 350 KB file. |
 | Per-user control | Two entitlements, like everything else a teacher may do (see the platform plan): `ai` (on/off per user) and `ai_requests_per_day` (a daily quota; null is unlimited). Instance defaults come from the admin settings; admins are never limited. The quota counts accepted requests, one row per user per UTC day in its own table, not the audit log.                                                                                           |
 | Language         | The system prompt tells the model to answer in the book's language (`hyperbook.json`), falling back to the teacher's UI locale.                                                                                                                                                                                                                                                                                                                 |
 
@@ -100,8 +100,9 @@ editors, exactly like `routes/files.ts`. Input, validated by a schema in
 
 ```ts
 export const aiAssistInput = z.object({
-  action: z.enum(["free", "continue", "improve"]),
-  prompt: z.string().max(4000).optional(), // required for "free"
+  // What the assistant should do. There are no fixed actions: "continue
+  // the page" or "improve this" with a selection are ordinary prompts.
+  prompt: z.string().trim().min(1).max(4000),
   pagePath: bookPath, // the page being edited
   selection: z.string().max(16000).optional(), // what the teacher selected
   // The lines around the cursor when nothing is selected; the client
@@ -152,7 +153,11 @@ request carries OpenAI-style `tools`:
   extensions the build knows; never binaries).
 
 **3. Changing tools — collected, not applied.** `write_file(path, content)`
-records a create-or-edit; `delete_file(path)` records a deletion. Both work
+records a create-or-edit; `edit_file(path, edits)` replaces passages of a
+file's current text (each `old_text` must occur exactly once; an empty one
+appends; all edits apply or none) and records the result like `write_file`;
+`rename_file(path, newPath)` moves a file; `delete_file(path)` records a
+deletion. Both work
 onto an **in-memory overlay** the request owns: later `read_file` and
 `list_files` answers see the overlay, so the agent can write a quiz file,
 re-read the page, and fix the link to it in the same request. Nothing
@@ -295,7 +300,7 @@ streaming client:
 - **Nothing is stored**: no conversations, no outputs, no prompt logging
   beyond the audit entry.
 - **Audit** (`src/server/audit.ts`): one `ai.assist` entry per request —
-  actor, book, `{ action, page, model, steps, finish, proposedChanges: n }`
+  actor, book, `{ page, model, steps, finish, proposedChanges: n }`
   (the count only; applying is an ordinary file commit with its own audit
   trail). Content is never recorded, matching the "never store
   secrets/content" rule.

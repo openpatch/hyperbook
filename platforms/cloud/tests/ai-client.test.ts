@@ -47,7 +47,7 @@ describe("assist", () => {
     const seen: unknown[] = [];
     await assist(
       1,
-      { action: "continue", pagePath: "book/index.md" },
+      { prompt: "Continue the page", pagePath: "book/index.md" },
       (event) => seen.push(event),
       new AbortController().signal,
     );
@@ -59,7 +59,7 @@ describe("assist", () => {
     // The request carries the input as JSON to the right route.
     expect(fetches[0]!.url).toBe("/api/books/1/ai/assist");
     expect(fetches[0]!.body).toEqual({
-      action: "continue",
+      prompt: "Continue the page",
       pagePath: "book/index.md",
     });
   });
@@ -75,7 +75,7 @@ describe("assist", () => {
     const seen: unknown[] = [];
     await assist(
       1,
-      { action: "free", prompt: "hi", pagePath: "book/index.md" },
+      { prompt: "hi", pagePath: "book/index.md" },
       (event) => seen.push(event),
       new AbortController().signal,
     );
@@ -95,7 +95,7 @@ describe("assist", () => {
     const seen: unknown[] = [];
     await assist(
       1,
-      { action: "continue", pagePath: "book/index.md" },
+      { prompt: "Continue the page", pagePath: "book/index.md" },
       (event) => seen.push(event),
       new AbortController().signal,
     );
@@ -115,7 +115,7 @@ describe("assist", () => {
     const seen: unknown[] = [];
     await assist(
       1,
-      { action: "continue", pagePath: "book/index.md" },
+      { prompt: "Continue the page", pagePath: "book/index.md" },
       (event) => seen.push(event),
       new AbortController().signal,
     );
@@ -134,7 +134,7 @@ describe("assist", () => {
     const seen: unknown[] = [];
     await assist(
       1,
-      { action: "continue", pagePath: "book/index.md" },
+      { prompt: "Continue the page", pagePath: "book/index.md" },
       (event) => seen.push(event),
       new AbortController().signal,
     );
@@ -155,7 +155,7 @@ describe("assist", () => {
     await expect(
       assist(
         1,
-        { action: "continue", pagePath: "book/index.md" },
+        { prompt: "Continue the page", pagePath: "book/index.md" },
         () => {},
         new AbortController().signal,
       ),
