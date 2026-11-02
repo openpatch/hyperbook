@@ -14,6 +14,7 @@ export const DOCUMENTATION = {
   hyperbook: { file: "hyperbook.md" },
   p5: { file: "p5.md" },
   pyide: { file: "pyide.md" },
+  javaide: { file: "javaide.md" },
   webide: { file: "webide.md" },
   onlineide: { file: "onlineide.md" },
   sqlide: { file: "sqlide.md" },

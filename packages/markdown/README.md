@@ -49,6 +49,7 @@ their integration scripts and styles:
 | Element | Default CDN |
 | --- | --- |
 | `pyide` | Pyodide on jsDelivr |
+| `javaide` | CheerpJ 5.0 on `cjrtnc.leaningtech.com` |
 | `typst` | Typst packages and fonts on jsDelivr |
 | `geogebra` | GeoGebra's server |
 | `blockflow` | `blockflow.openpatch.org` |
@@ -57,7 +58,7 @@ their integration scripts and styles:
 | `sqlide` | Runtime from `@hyperbook/markdown@0.85.0` on UNPKG |
 | `openscad` | Runtime from `@hyperbook/markdown@0.85.0` on UNPKG |
 
-All eight large runtimes are excluded from the npm package. The OpenSCAD,
+All nine large runtimes are excluded from the npm package. The OpenSCAD,
 Online IDE, and SQL IDE default CDNs are pinned to the last published Markdown
 release containing them, independently of the current renderer version.
 Workspace builds still prepare the full asset tree for publishing CLI bundles.

@@ -2,7 +2,7 @@
  * CodeMirror 6 browser bundle for Hyperbook IDEs.
  * Exposes window.HyperbookCM = { create } for use in directive client.js files.
  *
- * Languages bundled: cpp (clike/OpenSCAD), javascript, python, html, css.
+ * Languages bundled: cpp (clike/OpenSCAD), javascript, java, python, html, css.
  * Any unrecognised lang falls back to plain-text mode.
  * Dark theme (oneDark) is applied automatically based on the dark-mode-toggle element,
  * and updates on the `colorschemechange` event (same pattern as the mermaid directive).
@@ -15,6 +15,7 @@ import { syntaxTree } from "@codemirror/language";
 import { githubDark } from "@fsegurai/codemirror-theme-github-dark";
 import { githubLight } from "@fsegurai/codemirror-theme-github-light";
 import { javascript } from "@codemirror/lang-javascript";
+import { java } from "@codemirror/lang-java";
 import { python } from "@codemirror/lang-python";
 import { cpp } from "@codemirror/lang-cpp";
 import { html } from "@codemirror/lang-html";
@@ -23,6 +24,7 @@ import { indentGuides } from "./indent-guides.js";
 
 const langExtMap = {
   javascript,
+  java,
   python,
   cpp,
   clike: cpp,

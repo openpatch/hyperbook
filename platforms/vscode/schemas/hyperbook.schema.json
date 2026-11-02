@@ -14,7 +14,7 @@
                 {
                     "properties": {
                         "cdn": {
-                            "description": "Use the default CDN (true), a custom HTTP(S) asset base URL, or local assets (false). Defaults to true for PyIDE and false for other elements.",
+                            "description": "Use the default CDN (true), a custom HTTP(S) asset base URL, or local assets (false). Defaults to true for PyIDE and JavaIDE and false for other elements.",
                             "type": [
                                 "string",
                                 "boolean"
@@ -284,7 +284,7 @@
                         {
                             "properties": {
                                 "cdn": {
-                                    "description": "Use the default CDN (true), a custom HTTP(S) asset base URL, or local assets (false). Defaults to true for PyIDE and false for other elements.",
+                                    "description": "Use the default CDN (true), a custom HTTP(S) asset base URL, or local assets (false). Defaults to true for PyIDE and JavaIDE and false for other elements.",
                                     "type": [
                                         "string",
                                         "boolean"
@@ -313,6 +313,9 @@
                     ]
                 },
                 "geogebra": {
+                    "$ref": "#/definitions/ElementAssetConfig"
+                },
+                "javaide": {
                     "$ref": "#/definitions/ElementAssetConfig"
                 },
                 "kirimoto": {
@@ -351,7 +354,7 @@
                         {
                             "properties": {
                                 "cdn": {
-                                    "description": "Use the default CDN (true), a custom HTTP(S) asset base URL, or local assets (false). Defaults to true for PyIDE and false for other elements.",
+                                    "description": "Use the default CDN (true), a custom HTTP(S) asset base URL, or local assets (false). Defaults to true for PyIDE and JavaIDE and false for other elements.",
                                     "type": [
                                         "string",
                                         "boolean"
@@ -395,7 +398,7 @@
                         {
                             "properties": {
                                 "cdn": {
-                                    "description": "Use the default CDN (true), a custom HTTP(S) asset base URL, or local assets (false). Defaults to true for PyIDE and false for other elements.",
+                                    "description": "Use the default CDN (true), a custom HTTP(S) asset base URL, or local assets (false). Defaults to true for PyIDE and JavaIDE and false for other elements.",
                                     "type": [
                                         "string",
                                         "boolean"

@@ -35,6 +35,10 @@
     "dist/assets/directive-pyide/client.js",
     "dist/assets/directive-pyide/python-friendly-error-messages.js",
     "dist/assets/directive-pyide/style.css",
+    "!dist/assets/directive-javaide/**",
+    "dist/assets/directive-javaide/client.js",
+    "dist/assets/directive-javaide/worker.js",
+    "dist/assets/directive-javaide/style.css",
     "!dist/assets/directive-typst/**",
     "dist/assets/directive-typst/client.js",
     "dist/assets/directive-typst/style.css"
@@ -104,6 +108,7 @@
     "@codemirror/lang-cpp": "^6.0.3",
     "@codemirror/lang-css": "^6.3.1",
     "@codemirror/lang-html": "^6.4.12",
+    "@codemirror/lang-java": "^6.0.2",
     "@codemirror/lang-javascript": "^6.2.5",
     "@codemirror/lang-python": "^6.2.1",
     "@codemirror/language": "^6.13.1",

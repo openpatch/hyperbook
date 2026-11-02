@@ -127,6 +127,9 @@
       "include": "#directive-pyide"
     },
     {
+      "include": "#directive-javaide"
+    },
+    {
       "include": "#directive-term"
     },
     {
@@ -1522,6 +1525,55 @@
               "captures": {
                 "1": {
                   "name": "keyword.parameter.directive.pyide.hyperbook"
+                },
+                "2": {
+                  "name": "constant.numeric"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "endCaptures": {
+        "2": {
+          "name": "punctuation.definition.directive.level.hyperbook"
+        }
+      },
+      "patterns": [
+        {
+          "include": "text.html.markdown"
+        }
+      ]
+    },
+    "directive-javaide": {
+      "name": "meta.directive.javaide.hyperbook",
+      "begin": "(^|\\G)(:{3,})(javaide)({.*})?\\s*$",
+      "end": "(^|\\G)(\\2|:{3,})\\s*$",
+      "beginCaptures": {
+        "2": {
+          "name": "punctuation.definition.directive.level.hyperbook"
+        },
+        "3": {
+          "name": "entity.name.function.directive.javaide.hyperbook"
+        },
+        "4": {
+          "patterns": [
+            {
+              "match": "(main|id|files|accept)=\"([^\"]*)\"",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.javaide.hyperbook"
+                },
+                "2": {
+                  "name": "string.quoted.double.untitled"
+                }
+              }
+            },
+            {
+              "match": "(height)=([0-9]+)",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.javaide.hyperbook"
                 },
                 "2": {
                   "name": "constant.numeric"

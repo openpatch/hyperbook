@@ -1,0 +1,207 @@
+.directive-javaide code-input {
+  margin: 0;
+}
+
+/* Not a card itself: its header and the output below it are, together. */
+.directive-javaide .container {
+  border: none;
+  border-radius: 0;
+  background: none;
+}
+
+.directive-javaide .container > .ide-panel-header {
+  border: 1px solid var(--color-spacer);
+  border-radius: 8px 8px 0 0;
+}
+
+.directive-javaide .output {
+  flex: 1 1 0;
+  min-height: 0;
+  border: 1px solid var(--color-spacer);
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  white-space: pre;
+  overflow: auto;
+  padding: 16px;
+  margin: 0;
+  font-family: hyperbook-monospace, monospace;
+}
+
+.directive-javaide .output .error-line {
+  color: #b42318;
+}
+
+.directive-javaide .hidden {
+  display: none;
+}
+
+.directive-javaide .editor.running {
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.directive-javaide.locked-by-other {
+  outline: 2px solid #f59e0b;
+  outline-offset: 2px;
+}
+
+.directive-javaide.locked-by-other .buttons {
+  border-color: #f59e0b;
+}
+
+.directive-javaide button.running {
+  pointer-events: none;
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.directive-javaide button.stopping {
+  pointer-events: auto;
+  cursor: progress;
+  opacity: 0.75;
+}
+
+.directive-javaide button.locked {
+  color: #b45309;
+  font-weight: 600;
+}
+
+.directive-javaide button.stop {
+  flex: 0 0 auto;
+  min-width: 96px;
+  color: #b42318;
+}
+
+.directive-javaide button.stop:disabled {
+  color: var(--color-text);
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* The report of a test run, in place of the output. */
+.directive-javaide .javaide-tests {
+  --javaide-test-passed: #16a34a;
+  --javaide-test-failed: #dc2626;
+  --javaide-test-error: #d97706;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  /* The output panel keeps text as printed; the report is not text. */
+  white-space: normal;
+  font-family: hyperbook-body, sans-serif;
+}
+
+.directive-javaide .javaide-tests-summary {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  font-weight: 600;
+}
+
+.directive-javaide .javaide-tests-title {
+  flex: 1;
+  min-width: 0;
+}
+
+.directive-javaide .javaide-tests[data-status="passed"] .javaide-tests-title {
+  color: var(--javaide-test-passed);
+}
+
+.directive-javaide .javaide-tests[data-status="failed"] .javaide-tests-title {
+  color: var(--javaide-test-failed);
+}
+
+.directive-javaide .javaide-tests-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.directive-javaide .javaide-test {
+  overflow: hidden;
+  border: 1px solid var(--color-spacer);
+  border-left: 4px solid var(--color-spacer);
+  border-radius: 6px;
+}
+
+.directive-javaide .javaide-test[data-status="passed"] {
+  border-left-color: var(--javaide-test-passed);
+}
+
+.directive-javaide .javaide-test[data-status="failed"] {
+  border-left-color: var(--javaide-test-failed);
+}
+
+.directive-javaide .javaide-test-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+}
+
+/* ✓, ✗ in a coloured circle. */
+.directive-javaide .javaide-test-icon {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  box-sizing: border-box;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 11px;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.directive-javaide .javaide-test[data-status="passed"] .javaide-test-icon {
+  background-color: var(--javaide-test-passed);
+}
+
+.directive-javaide .javaide-test[data-status="passed"] .javaide-test-icon::before {
+  content: "✓";
+}
+
+.directive-javaide .javaide-test[data-status="failed"] .javaide-test-icon {
+  background-color: var(--javaide-test-failed);
+}
+
+.directive-javaide .javaide-test[data-status="failed"] .javaide-test-icon::before {
+  content: "✗";
+}
+
+.directive-javaide .javaide-test-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: hyperbook-code, monospace;
+  font-size: 0.9em;
+}
+
+.directive-javaide .javaide-test-status {
+  flex: 0 0 auto;
+  font-size: 0.85em;
+  opacity: 0.8;
+}
+
+.directive-javaide .javaide-test[data-status="failed"] .javaide-test-status {
+  color: var(--javaide-test-failed);
+  opacity: 1;
+}
+
+/* What the test printed, as printed. */
+.directive-javaide .javaide-test-output {
+  padding: 8px 10px;
+  border-top: 1px solid var(--color-spacer);
+  background-color: var(--color-nav);
+  font-family: hyperbook-monospace, monospace;
+  font-size: 0.85em;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}

@@ -1,0 +1,69 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`remarkDirectiveJavaide > should transform basic javaide 1`] = `
+"
+<div class="directive-javaide ide" data-runtime-url="https://cjrtnc.leaningtech.com/5.0/" id="4abc19a9e074f71e1ae193e7bb1b124c2d17d9838c81a21308c17a79922ae83f" data-workspace="eyJtYWluIjoiTWFpbi5qYXZhIiwiZmlsZXMiOlt7InBhdGgiOiJNYWluLmphdmEiLCJjb250ZW50IjoicHVibGljIGNsYXNzIE1haW4ge1xuICBwdWJsaWMgc3RhdGljIHZvaWQgbWFpbihTdHJpbmdbXSBhcmdzKSB7XG4gICAgU3lzdGVtLm91dC5wcmludGxuKFwiSGVsbG8gV29ybGRcIik7XG4gIH1cbn0ifV19" data-accept=".java">
+  <div class="container">
+    <div class="ide-panel-header"><span class="ide-panel-title">javaide-output</span></div>
+    <pre class="output"></pre>
+  </div>
+  <div class="splitter" role="separator" aria-label="Resize panels"></div>
+  <div class="editor-container">
+    <div class="buttons"><button class="run">javaide-run</button><button class="stop" disabled>javaide-stop</button></div>
+    <div class="editor" data-lang="java">public class Main {
+  public static void main(String[] args) {
+    System.out.println(&quot;Hello World&quot;);
+  }
+}</div>
+    <div class="buttons bottom"><button class="reset" title="ide-reset" aria-label="ide-reset"><svg class="icon icon-reset" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+          <path d="M1 4v6h6"></path>
+          <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+        </svg></button><button class="copy" title="ide-copy" aria-label="ide-copy"><svg class="icon icon-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+          <path d="M9 9h11a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-9a2 2 0 0 1-2-2V9z"></path>
+          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+        </svg></button><button class="download" title="ide-download" aria-label="ide-download"><svg class="icon icon-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <path d="M7 10l5 5 5-5"></path>
+          <path d="M12 15V3"></path>
+        </svg></button><button class="fullscreen" title="ide-fullscreen-enter" aria-label="ide-fullscreen-enter"><svg class="icon icon-fullscreen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+          <path d="M8 3H5a2 2 0 0 0-2 2v3"></path>
+          <path d="M21 8V5a2 2 0 0 0-2-2h-3"></path>
+          <path d="M16 21h3a2 2 0 0 0 2-2v-3"></path>
+          <path d="M3 16v3a2 2 0 0 0 2 2h3"></path>
+        </svg></button></div>
+  </div>
+</div>
+"
+`;
+
+exports[`remarkDirectiveJavaide > should transform javaide with a test file 1`] = `
+"
+<div class="directive-javaide ide" data-runtime-url="https://cjrtnc.leaningtech.com/5.0/" id="e1be6cfb8e15170be82b2ef009126db02dd266add29ed60e3b832d97013f29c5" data-workspace="eyJtYWluIjoiTWFpbi5qYXZhIiwiZmlsZXMiOlt7InBhdGgiOiJNYWluLmphdmEiLCJjb250ZW50IjoiU3lzdGVtLm91dC5wcmludGxuKFwiSGVsbG9cIikifSx7InBhdGgiOiJUZXN0TWFpbi5qYXZhIiwiY29udGVudCI6ImlmICgxICsgMSAhPSAyKSB0aHJvdyBuZXcgQXNzZXJ0aW9uRXJyb3IoKTsiLCJoaWRkZW4iOnRydWUsInJvbGUiOiJ0ZXN0In1dfQ==" data-accept=".java">
+  <div class="container">
+    <div class="ide-panel-header"><span class="ide-panel-title">javaide-output</span></div>
+    <pre class="output"></pre>
+  </div>
+  <div class="splitter" role="separator" aria-label="Resize panels"></div>
+  <div class="editor-container">
+    <div class="buttons"><button class="run">javaide-run</button><button class="test">javaide-test</button><button class="stop" disabled>javaide-stop</button></div>
+    <div class="editor" data-lang="java">System.out.println(&quot;Hello&quot;)</div>
+    <div class="buttons bottom"><button class="reset" title="ide-reset" aria-label="ide-reset"><svg class="icon icon-reset" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+          <path d="M1 4v6h6"></path>
+          <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+        </svg></button><button class="copy" title="ide-copy" aria-label="ide-copy"><svg class="icon icon-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+          <path d="M9 9h11a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-9a2 2 0 0 1-2-2V9z"></path>
+          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+        </svg></button><button class="download" title="ide-download" aria-label="ide-download"><svg class="icon icon-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <path d="M7 10l5 5 5-5"></path>
+          <path d="M12 15V3"></path>
+        </svg></button><button class="fullscreen" title="ide-fullscreen-enter" aria-label="ide-fullscreen-enter"><svg class="icon icon-fullscreen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+          <path d="M8 3H5a2 2 0 0 0-2 2v3"></path>
+          <path d="M21 8V5a2 2 0 0 0-2-2h-3"></path>
+          <path d="M16 21h3a2 2 0 0 0 2-2v-3"></path>
+          <path d="M3 16v3a2 2 0 0 0 2 2h3"></path>
+        </svg></button></div>
+  </div>
+</div>
+"
+`;

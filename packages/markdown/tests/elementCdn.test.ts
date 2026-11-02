@@ -13,6 +13,7 @@ import { ctx } from "./mock";
 
 const elements: [DownloadableElement, string][] = [
   ["pyide", "::pyide"],
+  ["javaide", ":::javaide\n```java\nclass Main {}\n```\n:::"],
   ["typst", "::typst"],
   ["geogebra", "::geogebra"],
   ["openscad", "::openscad"],
@@ -25,7 +26,7 @@ const elements: [DownloadableElement, string][] = [
 describe.each(elements)(
   "%s CDN configuration",
   (element: DownloadableElement, markdown: string) => {
-    it("defaults to CDN for PyIDE and local assets for other elements", async () => {
+    it("defaults to CDN for PyIDE and JavaIDE and local assets for other elements", async () => {
       const defaults = await processMarkdown(markdown, ctx);
       const configured = await processMarkdown(markdown, {
         ...ctx,
@@ -35,7 +36,7 @@ describe.each(elements)(
             ...ctx.config.elements,
             [element]: {
               ...ctx.config.elements?.[element],
-              cdn: element === "pyide",
+              cdn: element === "pyide" || element === "javaide",
             },
           },
         },
@@ -75,6 +76,7 @@ describe.each(elements)(
           cdn === true
             ? {
                 pyide: "https://cdn.jsdelivr.net/pyodide/v314.0.7/full/",
+                javaide: "https://cjrtnc.leaningtech.com/5.0/",
                 typst: "https://cdn.jsdelivr.net/npm/@myriaddreamin/",
                 geogebra: "https://www.geogebra.org/apps/",
                 blockflow: "https://blockflow.openpatch.org/",
@@ -300,6 +302,9 @@ describe("shared assets of a host (Hyperbook Cloud)", () => {
 
   it("renders every element against the shared base instead of a public CDN", async () => {
     for (const [element, markdown] of elements) {
+      // CheerpJ is not mirrored to the shared base; JavaIDE always loads it
+      // from the versioned public CDN (asserted separately below).
+      if (element === "javaide") continue;
       const result = await processMarkdown(markdown, shared);
       const output =
         String(result.value) + JSON.stringify(result.data.directives);
@@ -309,6 +314,15 @@ describe("shared assets of a host (Hyperbook Cloud)", () => {
       expect(output).not.toContain("https://blockflow.openpatch.org");
       expect(output).not.toContain("https://unpkg.com/");
     }
+  });
+
+  it("renders javaide against the public CheerpJ CDN even on a host", async () => {
+    const markdown = elements.find(([element]) => element === "javaide")![1];
+    const result = await processMarkdown(markdown, shared);
+    const output =
+      String(result.value) + JSON.stringify(result.data.directives);
+    expect(output).toContain("https://cjrtnc.leaningtech.com/5.0/");
+    expect(output).not.toContain(base);
   });
 
   it("uses the shared base's root-relative addresses as they are", async () => {

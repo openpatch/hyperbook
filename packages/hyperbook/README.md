@@ -122,16 +122,18 @@ Set `cdn` per element in `hyperbook.json` to load its large runtime from a CDN:
 Omitting `cdn` or setting it to `false` keeps local assets. `true` selects the
 default CDN: jsDelivr for Pyodide and Typst, GeoGebra's server for GeoGebra,
 `blockflow.openpatch.org` for Blockflow, Excalidraw's own packages on UNPKG for
-Excalidraw, and versioned `@hyperbook/markdown` assets on UNPKG for OpenSCAD,
-the Online IDE, and the SQL IDE. The option supports
-`pyide`, `typst`, `geogebra`, `openscad`, `excalidraw`, `onlineide`, `sqlide`, and
-`blockflow` (both player and editor).
+Excalidraw, versioned `@hyperbook/markdown` assets on UNPKG for OpenSCAD,
+the Online IDE, and the SQL IDE, and `cjrtnc.leaningtech.com` for CheerpJ. The
+option supports
+`pyide`, `javaide`, `typst`, `geogebra`, `openscad`, `excalidraw`, `onlineide`,
+`sqlide`, and `blockflow` (both player and editor).
 
 A custom HTTP(S) URL points to the contents of the element's
 `__hyperbook_assets/directive-<element>/` directory from a local build. Keep its
 subdirectories. For `pyide`, point directly to
 the Pyodide distribution directory containing `pyodide.js` and
-`pyodide-lock.json`.
+`pyodide-lock.json`. For `javaide`, point directly to the CheerpJ 5.0
+directory containing `loader.js`.
 
 If a custom CDN URL has a different origin from the book (domain, port, or
 protocol), enable CORS on that asset server. Locally bundled assets and custom

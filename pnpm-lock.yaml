@@ -380,6 +380,9 @@ importers:
       '@codemirror/lang-html':
         specifier: ^6.4.12
         version: 6.4.12
+      '@codemirror/lang-java':
+        specifier: ^6.0.2
+        version: 6.0.2
       '@codemirror/lang-javascript':
         specifier: ^6.2.5
         version: 6.2.5

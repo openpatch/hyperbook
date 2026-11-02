@@ -140,6 +140,11 @@
  */
 
 /**
+ * @typedef {Object} HyperbookJavaide
+ * @property {(root: HTMLElement) => void} init - Initialize Java IDE elements.
+ */
+
+/**
  * @typedef {Object} HyperbookJmp
  * @property {(root: HTMLElement) => void} init - Initialize Java Memory Playground elements.
  */
@@ -232,6 +237,7 @@
  *   geogebra?: HyperbookGeogebra,
  *   h5p?: HyperbookH5p,
  *   bitflow?: HyperbookBitflow,
+ *   javaide?: HyperbookJavaide,
  *   jmp?: HyperbookJmp,
  *   learningmap?: HyperbookLearningmap,
  *   mermaid?: HyperbookMermaid,

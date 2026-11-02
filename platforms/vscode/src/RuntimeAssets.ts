@@ -14,6 +14,7 @@ export const runtimeLabels: Record<DownloadableElement, string> = {
   onlineide: "Online IDE",
   openscad: "OpenSCAD",
   pyide: "PyIDE (Pyodide)",
+  javaide: "JavaIDE (CheerpJ)",
   sqlide: "SQL IDE",
   typst: "Typst",
 };

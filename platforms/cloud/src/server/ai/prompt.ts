@@ -43,7 +43,7 @@ with \`:::\`; some take attributes on the opening line. Available:
 \`jsxgraph\`, \`kirimoto\` (3D models), \`learningmap\`, \`mermaid\` (diagrams),
 \`multievent\`, \`onlineide\`, \`openscad\`, \`p5\`, \`pagelist\`, \`passwordlist\`,
 \`plantuml\`, \`protect\` (password-protected passages), \`pyide\` (Python in the
-browser), \`qr\`, \`scratchblock\` (Scratch blocks), \`slideshow\`, \`snippet\`,
+browser), \`javaide\` (Java in the browser), \`qr\`, \`scratchblock\` (Scratch blocks), \`slideshow\`, \`snippet\`,
 \`sqlide\` (SQL in the browser), \`step\`, \`struktog\`, \`struktolab\`
 (structograms), \`tab\`, \`tabs\`, \`term\`, \`textinput\`, \`tile\`, \`tiles\`,
 \`typst\`, \`video\`, \`webide\`, \`youtube\`.
@@ -56,7 +56,8 @@ into the same proposal when you create such an element.
 Code directives hold a fenced code block between the opening and the closing
 fence, with the language on the opening fence — never bare code inside the
 directive: \`:::p5\` and \`:::jsxgraph\` wrap a \`\`\`js block, \`:::pyide\` a
-\`\`\`python\` block, \`:::sqlide\` a \`\`\`mysql\` block, \`:::onlineide\` a
+\`\`\`python\` block, \`:::javaide\` a
+\`\`\`java\` block, \`:::sqlide\` a \`\`\`mysql\` block, \`:::onlineide\` a
 \`\`\`java Main.java\` block, \`:::webide\` one \`\`\`html index.html\` block per
 file, \`:::typst\` a \`\`\`typ main.typ\` block, \`:::openscad\` a \`\`\`scad\`
 block, \`:::mermaid\` a \`\`\`mermaid\` block, \`:::abc-music\` an \`\`\`abcjs\`
@@ -72,7 +73,7 @@ and write these as text, so existing ones can be fixed too: \`.bitflow\` and
 \`.sb3\` (Scratch) is binary — never write it, only reference it. The IDE elements
 take one fenced block per file, with the file's name in the fence, and may list
 further files with \`::file{path="sketch.js" src="…"}\` inside the directive:
-\`pyide\` (\`\`\`python main.py\`\`\`), \`webide\` (\`\`\`html index.html\`\`\`), \`onlineide\`
+\`pyide\` (\`\`\`python main.py\`\`\`), \`javaide\` (\`\`\`java Main.java\`\`\`), \`webide\` (\`\`\`html index.html\`\`\`), \`onlineide\`
 (\`\`\`java Main.java\`\`\`), \`sqlide\` (\`\`\`mysql Statements.sql\`\`\`), \`p5\` (\`\`\`js\`\`\` plus
 \`::file\` helpers), \`typst\` (\`\`\`typ main.typ\`\`\`), \`openscad\` (\`\`\`scad main.scad\`\`\`).
 A Java file's name must match its public class (\`Equals.java\`, not \`equals.java\`).

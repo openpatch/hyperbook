@@ -467,6 +467,30 @@ async function postbuild() {
       // Python modules (e.g. the pyide's turtle.py) are bundled as source text.
       loader: { ".py": "text" },
     });
+    // A directive may also ship a Web Worker (javaide runs CheerpJ in one).
+    const workerEntry = path.join(assetsDir, directive, "src", "worker.js");
+    let hasWorker = true;
+    try {
+      await access(workerEntry);
+    } catch {
+      hasWorker = false;
+    }
+    if (hasWorker) {
+      const workerOutfile = path.join(
+        "./dist",
+        "assets",
+        directive,
+        "worker.js",
+      );
+      await esbuild({
+        entryPoints: [workerEntry],
+        bundle: true,
+        format: "iife",
+        outfile: workerOutfile,
+        minify: false,
+      });
+      console.log(`Built ${directive} worker bundle -> ${workerOutfile}`);
+    }
     console.log(`Built ${directive} client bundle → ${outfile}`);
     // Remove the copied src/ directory — source files are not needed in dist.
     await rm(path.join("./dist", "assets", directive, "src"), {

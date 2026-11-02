@@ -3,7 +3,7 @@ type ElementConfig = {
 };
 
 export type ElementAssetConfig = ElementConfig & {
-  /** Use the default CDN (true), a custom HTTP(S) asset base URL, or local assets (false). Defaults to true for PyIDE and false for other elements. */
+  /** Use the default CDN (true), a custom HTTP(S) asset base URL, or local assets (false). Defaults to true for PyIDE and JavaIDE and false for other elements. */
   cdn?: boolean | string;
 };
 
@@ -16,6 +16,7 @@ export const elementCoreFiles = {
   openscad: ["client.js", "worker.js", "style.css"],
   geogebra: ["client.js", "geogebra-web-component.js", "style.css"],
   pyide: ["client.js", "python-friendly-error-messages.js", "style.css"],
+  javaide: ["client.js", "worker.js", "style.css"],
   typst: ["client.js", "style.css"],
 } satisfies Record<string, string[]>;
 
@@ -29,6 +30,7 @@ export const elementRuntimeFiles: Record<DownloadableElement, string[]> = {
   excalidraw: ["hyperbook-excalidraw.umd.js"],
   geogebra: ["GeoGebra/deployggb.js"],
   pyide: ["pyodide/pyodide.js", "pyodide/pyodide-lock.json"],
+  javaide: ["cheerpj/loader.js"],
   typst: [
     "typst-bundle.js",
     "typst-compiler.wasm",
@@ -79,8 +81,10 @@ export function elementCdn(
     return false;
   const value = config.elements?.[element as DownloadableElement]?.cdn;
   // Unset follows the host's choice — shared base or public CDN — and only
-  // without a host falls back to the built-in default: PyIDE on a CDN.
-  if (value === undefined) return hosted ? true : element === "pyide";
+  // without a host falls back to the built-in default: PyIDE and JavaIDE on a
+  // CDN, because their runtimes are too large to ship with the CLI.
+  if (value === undefined)
+    return hosted ? true : element === "pyide" || element === "javaide";
   if (value === false) return false;
   if (value === true) return true;
   if (typeof value === "string") {
@@ -380,6 +384,7 @@ export type HyperbookJson = {
     geogebra?: ElementAssetConfig;
     openscad?: ElementAssetConfig;
     pyide?: ElementAssetConfig;
+    javaide?: ElementAssetConfig;
     typst?: ElementAssetConfig;
     excalidraw?: ElementAssetConfig & {
       autoZoom?: boolean;

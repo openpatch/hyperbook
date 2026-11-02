@@ -55,6 +55,9 @@
     "geogebra": {
       "cdn": true
     },
+    "javaide": {
+      "cdn": true
+    },
     "onlineide": {
       "cdn": true
     },

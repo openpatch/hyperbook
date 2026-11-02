@@ -420,6 +420,20 @@ export const DIRECTIVES: readonly Directive[] = [
     snippet: "pyide\n```python\n${print(\"Hello\")}\n```\n:::",
   },
   {
+    name: "javaide",
+    label: "Java IDE",
+    description: "Java that readers edit, compile and run in the browser (CheerpJ).",
+    kind: "container",
+    docs: "/elements/javaide",
+    attributes: [
+      { name: "main", description: "The file that runs (default `Main.java`)" },
+      id(),
+      files("none"),
+      accept(".java"),
+    ],
+    snippet: "javaide\n```java Main.java\npublic class Main {\n  public static void main(String[] args) {\n    System.out.println(\"Hello\");\n  }\n}\n```\n:::",
+  },
+  {
     name: "webide",
     label: "Web IDE",
     description: "HTML, CSS and JavaScript that readers edit with a live preview.",
@@ -508,10 +522,10 @@ export const DIRECTIVES: readonly Directive[] = [
   {
     name: "file",
     label: "File",
-    description: "A file of the book handed to an IDE (pyide, webide, p5, typst, openscad).",
+    description: "A file of the book handed to an IDE (pyide, javaide, webide, p5, typst, openscad).",
     kind: "leaf",
     docs: "/elements/pyide",
-    parents: ["pyide", "webide", "p5", "typst", "openscad"],
+    parents: ["pyide", "javaide", "webide", "p5", "typst", "openscad"],
     attributes: [
       { name: "src", description: "The file in the book", file: true },
       { name: "dest", description: "Its name inside the IDE" },

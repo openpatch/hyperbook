@@ -29,6 +29,11 @@ export function elementAssetUrl(
         { versioned: false },
       ) + (file === "" || file.endsWith("/") ? "/" : "")
     );
+  if (element === "javaide" && cdn === true) {
+    // CheerpJ's runtime is not mirrored to the host's shared assets; every
+    // host loads the versioned public CDN unless a custom URL is configured.
+    return `https://cjrtnc.leaningtech.com/5.0/${file.replace(/^cheerpj\//, "")}`;
+  }
   // The host serves the runtimes itself (Hyperbook Cloud), with the same
   // layout as a local build, at an address that only changes with the
   // Hyperbook version. Elements keep their integration scripts locally.
@@ -39,9 +44,16 @@ export function elementAssetUrl(
     return `${hosted.endsWith("/") ? hosted : `${hosted}/`}directive-${element}/${file}`;
   }
   if (typeof cdn === "string") {
-    // Pyodide's public indexURL points directly at its distribution directory.
+    // Pyodide's public indexURL points directly at its distribution directory,
+    // and a self-hosted CheerpJ runtime at the directory holding loader.js.
+    const prefix =
+      element === "pyide"
+        ? "pyodide/"
+        : element === "javaide"
+          ? "cheerpj/"
+          : "";
     return new URL(
-      element === "pyide" ? file.replace(/^pyodide\//, "") : file,
+      prefix && file.startsWith(prefix) ? file.slice(prefix.length) : file,
       cdn,
     ).href;
   }
