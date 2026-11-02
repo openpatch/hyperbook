@@ -1,5 +1,25 @@
 # @hyperbook/cloud
 
+## 0.5.3
+
+### Patch Changes
+
+- [`a081dd9`](https://github.com/openpatch/hyperbook/commit/a081dd9d4c5627b76b6b8afc42a39d7641f8a88b) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Accessibility and small-screen fixes across the cloud: the account menu has a name on phones, the closed navigation drawer leaves the tab order and Escape closes it, the version line and the history's line counts have enough contrast, wide tables scroll inside their page (the AI usage page fits a phone) and can be scrolled from the keyboard, the print page has a main landmark and a heading, and the landing page's header leaves room for the instance's name. In the editor, the text area is named after its file, the open files work as a tab list from the keyboard (arrow keys, Home, End, Delete closes), unsaved tabs say so to screen readers, the resize handles announce their width, and the preview's "Could not show" and "Notes" badges are buttons.
+
+- [`2b6f351`](https://github.com/openpatch/hyperbook/commit/2b6f35175b1f566f54146e6e8dfb8fc456804a1a) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - AI assistant: more accurate, fewer tokens. Element documentation is served per element instead of the 350 KB hyperbook llms.txt (whose changelog crowded out most elements); a new `edit_file` tool changes passages instead of resending whole pages; the unused "continue" and "improve" request actions are gone (every request is a prompt); the system prompt no longer contradicts itself on answer format, fences or leaf directives (`::bitflow{src=…}`), and carries the tool guidance once; tool definitions and results are shorter, and a wrong path names similar files instead of listing the whole book.
+
+- [`17c6bcb`](https://github.com/openpatch/hyperbook/commit/17c6bcbf09ede64a1e655b5eb2157f7b83b18f15) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - The editor's context menus (the text editor, spell checker, file tree and file tabs) work from the keyboard: the menu key or Shift+F10 opens them at the focused element or the caret, the arrow keys, Home and End move between the entries, Enter or Space chooses one, and Escape or Tab closes the menu and gives the focus back.
+
+- [`a081dd9`](https://github.com/openpatch/hyperbook/commit/a081dd9d4c5627b76b6b8afc42a39d7641f8a88b) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - The editor works on phones and tablets: the file list opens as a drawer, the preview, history and AI assistant slide over the editor one at a time, the header moves what does not fit into a "More" menu (with "Find a file"), and touch screens get bigger targets and a "⋯" button for each file's menu.
+
+- [`17c6bcb`](https://github.com/openpatch/hyperbook/commit/17c6bcbf09ede64a1e655b5eb2157f7b83b18f15) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - "Save and close" in the editor no longer closes tabs whose save failed or ran into a conflict, so their unsaved changes are kept, and the conflict dialog it can lead to stays open instead of vanishing. "Close others" and "Close all" now close the tabs open when they are clicked, including one opened while the menu was showing. An unclosed container directive inside another one no longer folds over the closing `:::` of the outer one.
+
+- [`359cdd3`](https://github.com/openpatch/hyperbook/commit/359cdd34c34d72d060430b8b0fc221b7f6e4b64f) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Only a book's owners can publish it, roll it back to an earlier version and unpublish it; editors keep working on the book and its preview, and the publishing page tells them who publishes.
+
+- [`359cdd3`](https://github.com/openpatch/hyperbook/commit/359cdd34c34d72d060430b8b0fc221b7f6e4b64f) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - A publish or rollback build that was still running no longer goes live after a newer version was published, rolled back to or unpublished in the meantime; it finishes as a preview instead. Password-reset, sign-up and verification requests now answer without waiting for their email, so how long they take no longer reveals whether an address has an account.
+
+- [`891bdfb`](https://github.com/openpatch/hyperbook/commit/891bdfb3b117584f024f79e6daef18fb0eeb556a) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - The server refuses to start when `SMTP_FROM` contains no sender address (such as `SMTP_FROM=noreply`). Before, mail went out with an empty envelope sender and mail servers rejected it with "MAIL FROM <> does not match header From <MAILER-DAEMON>".
+
 ## 0.5.2
 
 ### Patch Changes
