@@ -1,5 +1,6 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import addressparser from "nodemailer/lib/addressparser";
 import { z } from "zod";
 import type { ModelWeights } from "../shared/schemas";
 
@@ -302,6 +303,10 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
       );
     } else if (!Number.isInteger(port) || port < 1 || port > 65535) {
       problems.push("SMTP_PORT must be a port number");
+    } else if (!hasSenderAddress(e.SMTP_FROM!)) {
+      // nodemailer takes the envelope sender from the first address it can
+      // parse; without one it sends MAIL FROM:<> and servers reject the mail.
+      problems.push('SMTP_FROM must contain a sender address, e.g. "Hyperbook <noreply@example.org>"');
     } else {
       smtp = {
         host: e.SMTP_HOST!,
@@ -415,4 +420,10 @@ export function bookOrigin(config: Config, slug: string): string {
 /** Where a book's owners and editors see its newest build. */
 export function previewOrigin(config: Config, slug: string): string {
   return bookOrigin(config, `${slug}--preview`);
+}
+
+/** Whether nodemailer finds a sender address in a From value. */
+function hasSenderAddress(from: string): boolean {
+  const first = addressparser(from, { flatten: true })[0];
+  return !!first && /^[^@\s]+@[^@\s]+$/.test(first.address);
 }

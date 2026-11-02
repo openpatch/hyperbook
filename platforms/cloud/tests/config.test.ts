@@ -90,6 +90,23 @@ describe("loadConfig", () => {
     );
   });
 
+  it("rejects an SMTP_FROM without a sender address", () => {
+    const smtp = {
+      SMTP_HOST: "mail.example.org",
+      SMTP_PORT: "587",
+      SMTP_USER: "u",
+      SMTP_PASS: "p",
+    };
+    for (const from of ["noreply", "Hyperbook"]) {
+      expect(problems({ ...production, ...smtp, SMTP_FROM: from })[0]).toMatch(
+        /SMTP_FROM must contain a sender address/,
+      );
+    }
+    for (const from of ["noreply@example.org", "Hyperbook <noreply@example.org>"]) {
+      expect(loadConfig({ ...production, ...smtp, SMTP_FROM: from }).smtp?.from).toBe(from);
+    }
+  });
+
   it("configures AI from the provider pair alone", () => {
     // Nothing set: the feature is simply off.
     expect(loadConfig(production).ai).toBeNull();
