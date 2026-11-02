@@ -112,12 +112,30 @@ export type ChoiceRequest = {
   choices: { label: string; variant?: React.ComponentProps<typeof Button>["variant"]; run: () => Promise<void> | void }[];
 };
 
+/** Files a dialog is about, one per line. */
+export function PathList({ paths }: { paths: string[] }) {
+  return (
+    <ul className="my-2 list-disc pl-5 font-mono text-sm">
+      {paths.map((path) => (
+        <li key={path}>{path}</li>
+      ))}
+    </ul>
+  );
+}
+
 /** A question with a few answers: discard changes, resolve a conflict, … */
-export function ChoiceDialog({ request, onClose }: { request: ChoiceRequest | null; onClose: () => void }) {
+export function ChoiceDialog({
+  request,
+  onClose,
+}: {
+  request: ChoiceRequest | null;
+  /** Closes `closed`, the request the dialog was showing. */
+  onClose: (closed: ChoiceRequest | null) => void;
+}) {
   const { t } = useTranslation();
   const [busy, setBusy] = useState(false);
   return (
-    <Dialog open={request !== null} onOpenChange={(open) => !open && !busy && onClose()}>
+    <Dialog open={request !== null} onOpenChange={(open) => !open && !busy && onClose(request)}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{request?.title}</DialogTitle>
@@ -126,7 +144,7 @@ export function ChoiceDialog({ request, onClose }: { request: ChoiceRequest | nu
           </DialogDescription>
         </DialogHeader>
         <DialogFooter className="flex-wrap">
-          <Button variant="outline" onClick={onClose} disabled={busy}>
+          <Button variant="outline" onClick={() => onClose(request)} disabled={busy}>
             {t("common.cancel")}
           </Button>
           {request?.choices.map((choice) => (
@@ -140,7 +158,7 @@ export function ChoiceDialog({ request, onClose }: { request: ChoiceRequest | nu
                   await choice.run();
                 } finally {
                   setBusy(false);
-                  onClose();
+                  onClose(request);
                 }
               }}
             >

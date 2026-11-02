@@ -39,11 +39,12 @@ import { cn } from "@/lib/utils";
 import { CodeEditor, type SpellOptions } from "./code-editor";
 import {
   ChoiceDialog,
+  PathList,
   type ChoiceRequest,
   PathDialog,
   type PathRequest,
 } from "./dialogs";
-import { item, openMenu, separator } from "./context-menu";
+import { fromKeyboard, item, menuPoint, openMenu, separator } from "./context-menu";
 import { FileTree, type TreeActions, type TreeClipboard } from "./file-tree";
 import {
   type Listing,
@@ -567,23 +568,30 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
   };
 
   /** Saves files; a conflict asks what to do. */
-  const save = async (paths: string[]) => {
+  /** Saves `paths`; false when anything kept them from being saved. */
+  const save = async (paths: string[]): Promise<boolean> => {
     for (const tab of ws
       .currentTabs()
       .filter((t) => paths.includes(t.path) && isDirty(t))) {
       const kind = visualKind(tab.path);
       const problem = kind && visualProblem(kind, tab.text!);
-      if (problem)
-        return fail(
+      if (problem) {
+        fail(
           new Error(
             t("editor.actions.savedProblem", { path: tab.path, problem }),
           ),
         );
+        return false;
+      }
     }
     try {
       await ws.save(paths);
+      return true;
     } catch (error) {
-      if (!(error instanceof ConflictError)) return fail(error);
+      if (!(error instanceof ConflictError)) {
+        fail(error);
+        return false;
+      }
       const conflicts = error.paths;
       const current = await fetchListing(bookId);
       const oid = (p: string) =>
@@ -593,11 +601,7 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
         description: (
           <>
             <p>{t("editor.actions.conflictIntro")}</p>
-            <ul className="my-2 list-disc pl-5 font-mono text-sm">
-              {conflicts.map((p) => (
-                <li key={p}>{p}</li>
-              ))}
-            </ul>
+            <PathList paths={conflicts} />
             <p>{t("editor.actions.conflictOutro")}</p>
           </>
         ),
@@ -650,6 +654,7 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
           },
         ],
       });
+      return false;
     }
   };
 
@@ -1088,11 +1093,7 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
             <p>
               {t("editor.actions.closeManyDescription", { count: dirty.length })}
             </p>
-            <ul className="my-2 list-disc pl-5 font-mono text-sm">
-              {dirty.map((tab) => (
-                <li key={tab.path}>{tab.path}</li>
-              ))}
-            </ul>
+            <PathList paths={dirty.map((tab) => tab.path)} />
           </>
         ),
       choices: [
@@ -1104,36 +1105,35 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
         {
           label: t("editor.actions.saveAndClose"),
           run: async () => {
-            await save(dirty.map((t) => t.path));
-            doClose();
+            // A failed save or a conflict keeps the tabs and their edits.
+            if (await save(dirty.map((t) => t.path))) doClose();
           },
         },
       ],
     });
   };
 
-  const closeTab = (tab: Tab) => closeTabs([tab.path]);
-
   /** The tab's context menu: close it, the others, or all of them. */
   const tabMenu = (event: React.MouseEvent, tab: Tab) => {
     event.preventDefault();
     event.stopPropagation();
     ws.setActive(tab.path);
-    const others = ws.tabs
-      .filter((t) => t.path !== tab.path)
-      .map((t) => t.path);
-    openMenu(event.clientX, event.clientY, (box) => {
+    // The tabs as they are on click: one may open while the menu is up.
+    const all = () => ws.currentTabs().map((t) => t.path);
+    const { x, y } = menuPoint(event.nativeEvent);
+    openMenu(x, y, (box) => {
       item(box, t("editor.tabs.close", { path: tab.path }), () =>
         closeTabs([tab.path]),
       );
-      item(box, t("editor.tabs.closeOthers"), () => closeTabs(others), {
-        disabled: others.length === 0,
-      });
-      separator(box);
-      item(box, t("editor.tabs.closeAll"), () =>
-        closeTabs(ws.tabs.map((t) => t.path)),
+      item(
+        box,
+        t("editor.tabs.closeOthers"),
+        () => closeTabs(all().filter((path) => path !== tab.path)),
+        { disabled: ws.tabs.length <= 1 },
       );
-    });
+      separator(box);
+      item(box, t("editor.tabs.closeAll"), () => closeTabs(all()));
+    }, { focusFirst: fromKeyboard(event.nativeEvent) });
   };
 
   const activeTab = ws.tabs.find((t) => t.path === ws.active);
@@ -1294,7 +1294,7 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
                   className="mr-1 rounded p-0.5 opacity-60 hover:bg-accent hover:opacity-100"
                   aria-label={t("editor.tabs.close", { path: tab.path })}
                   title={t("editor.tabs.close", { path: tab.path })}
-                  onClick={() => closeTab(tab)}
+                  onClick={() => closeTabs([tab.path])}
                 >
                   <XIcon className="size-3.5" />
                 </button>
@@ -1469,8 +1469,9 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
       <PathDialog request={pathRequest} onClose={() => setPathRequest(null)} />
       <ChoiceDialog
         request={choice}
-        onClose={() => {
-          setChoice(null);
+        onClose={(closed) => {
+          // A choice may have asked a follow-up question; keep that one open.
+          setChoice((current) => (current === closed ? null : current));
           if (blocker.state === "blocked") blocker.reset();
         }}
       />

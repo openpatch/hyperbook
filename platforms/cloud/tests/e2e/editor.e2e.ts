@@ -18,6 +18,12 @@ beforeAll(async () => {
   await logIn(page, server.origin, ADMIN.email, ADMIN.password);
 });
 
+/** "Save all" opens the list of unsaved files; its last entry saves them. */
+async function saveAll(page: Page) {
+  await page.getByRole("button", { name: "Save all" }).click();
+  await page.getByRole("menuitem", { name: "Save all" }).click();
+}
+
 afterAll(async () => {
   await browser?.close();
   await server?.stop();
@@ -82,6 +88,35 @@ describe("editor", () => {
     await preview.getByRole("heading", { name: "Echo" }).waitFor({ timeout: 60_000 });
   }, 90_000);
 
+  it("opens a tab's menu from the keyboard and closes the tab with it", async () => {
+    await page.getByRole("button", { name: "New file" }).click();
+    const dialog = page.getByRole("dialog");
+    await dialog.getByLabel("Path").fill("book/keys.md");
+    await dialog.getByRole("button", { name: "Create" }).click();
+    const tab = page.getByRole("tab", { name: "keys.md" });
+    await tab.waitFor();
+
+    // Shift+F10 opens the menu with its first entry focused; the arrows wrap.
+    await tab.focus();
+    await page.keyboard.press("Shift+F10");
+    const menu = page.getByRole("menu");
+    await expect.poll(() => menu.getByRole("menuitem", { name: "Close book/keys.md" }).evaluate((el) => el === document.activeElement)).toBe(true);
+    await page.keyboard.press("ArrowUp");
+    await expect.poll(() => menu.getByRole("menuitem", { name: "Close all" }).evaluate((el) => el === document.activeElement)).toBe(true);
+
+    // Escape closes it and gives the focus back to the tab.
+    await page.keyboard.press("Escape");
+    await menu.waitFor({ state: "detached" });
+    expect(await tab.evaluate((el) => el === document.activeElement)).toBe(true);
+
+    // Enter chooses the focused entry.
+    await page.keyboard.press("Shift+F10");
+    await menu.waitFor();
+    await page.keyboard.press("Enter");
+    await tab.waitFor({ state: "detached" });
+  }, 60_000);
+
+
   it("edits a learning map in its own editor and saves it as a file", async () => {
     await page.getByRole("button", { name: "New file" }).click();
     const dialog = page.getByRole("dialog");
@@ -137,7 +172,7 @@ describe("editor", () => {
     await page.keyboard.type("Hello");
     await page.keyboard.press("Escape");
     await page.getByTitle("Not saved").first().waitFor();
-    await page.getByRole("button", { name: "Save all" }).click();
+    await saveAll(page);
     await page.getByTitle("Not saved").first().waitFor({ state: "detached" });
 
     const saved = await page.evaluate(async () => {
@@ -274,7 +309,7 @@ describe("editor", () => {
     // "change" message and marks the file unsaved; saving writes a zip again.
     await embedFrame!.evaluate(() => (window as unknown as { vm: { emit: (e: string) => void } }).vm.emit("PROJECT_CHANGED"));
     await page.getByTitle("Not saved").first().waitFor({ timeout: 60_000 });
-    await page.getByRole("button", { name: "Save all" }).click();
+    await saveAll(page);
     await page.getByTitle("Not saved").first().waitFor({ state: "detached", timeout: 60_000 });
 
     const saved = await page.evaluate(async () => {
@@ -333,7 +368,7 @@ describe("editor", () => {
     expect(title).toBeTruthy();
     await title!.fill("My tutorial");
     await page.getByTitle("Not saved").first().waitFor({ timeout: 60_000 });
-    await page.getByRole("button", { name: "Save all" }).click();
+    await saveAll(page);
     await page.getByTitle("Not saved").first().waitFor({ state: "detached", timeout: 60_000 });
 
     const saved = await page.evaluate(async () => {
@@ -432,7 +467,7 @@ describe("editor", () => {
     expect(await frame.getByRole("button", { name: /save|load/i }).count()).toBe(0);
     await page.keyboard.type('output("Lift off")');
     await tab.getByTitle("Not saved").waitFor();
-    await page.getByRole("button", { name: "Save all" }).click();
+    await saveAll(page);
     await page.getByTitle("Not saved").first().waitFor({ state: "detached" });
 
     const saved = await page.evaluate(async () => {

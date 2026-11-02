@@ -70,6 +70,14 @@ describe("reading directives", () => {
     expect(directiveFold(state, at(2))).toBeNull();
   });
 
+  it("does not fold an unclosed container over the closing line of the one around it", () => {
+    const doc = ["::::tabs", ":::tab{title=A}", "never closed", "::::", "after"].join("\n");
+    const state = EditorState.create({ doc, extensions: pageLanguage({ files: () => [], path: () => "book/index.md" }) });
+    const at = (n: number) => doc.split("\n").slice(0, n - 1).join("\n").length + (n > 1 ? 1 : 0);
+    expect(directiveFold(state, at(2))).toBeNull();
+    expect(directiveFold(state, at(1))).toEqual({ from: at(2) - 1, to: at(5) - 1 });
+  });
+
   it("outlines nested containers and skips code and frontmatter", () => {
     const doc = Text.of([
       "---",

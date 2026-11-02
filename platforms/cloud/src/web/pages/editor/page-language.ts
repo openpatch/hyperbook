@@ -135,6 +135,8 @@ export type Outline = {
   verbatim: boolean[];
   /** Per line: how many containers it is in, counting its opening and closing line. */
   depth: number[];
+  /** Opening line → closing line, for containers closed by a `:::` of their own. */
+  folds: Map<number, number>;
 };
 
 /** Where the containers of a page open and close, skipping code and frontmatter. */
@@ -143,6 +145,7 @@ export function outline(doc: Text): Outline {
   const verbatim: boolean[] = [false];
   const depth: number[] = [0];
   const stack: Container[] = [];
+  const folds = new Map<number, number>();
   const fm = findFrontmatter(doc.toString());
   const fmEnd = fm ? doc.lineAt(fm.to).number : 0;
   let fence: string | null = null;
@@ -172,6 +175,8 @@ export function outline(doc: Text): Outline {
       const at = stack.findLastIndex((c) => c.token.colons === close[1]!.length);
       depth.push(stack.length);
       if (at >= 0) {
+        // Unclosed containers inside end here too, but the `:::` is not theirs.
+        folds.set(stack[at]!.open, n);
         for (const c of stack.splice(at)) c.close = n;
       }
       continue;
@@ -184,7 +189,7 @@ export function outline(doc: Text): Outline {
     }
     depth.push(stack.length);
   }
-  return { containers, verbatim, depth };
+  return { containers, verbatim, depth, folds };
 }
 
 const outlineField = StateField.define<Outline>({
@@ -200,13 +205,13 @@ function around(state: EditorState, n: number): Container[] {
 /**
  * Foldable container directives (`:::p5 … :::`): a fold from the end of the
  * opening line to the end of the closing line. Unclosed containers stay
- * unfolded (the linter flags them). Works with the fold gutter and the fold
+ * unfolded (the linter flags them), also those an outer `:::` ends. Works with the fold gutter and the fold
  * keymap, both part of basicSetup.
  */
 export const directiveFold = (state: EditorState, from: number): { from: number; to: number } | null => {
   const open = state.doc.lineAt(from).number;
-  const close = state.field(outlineField, false)?.containers.find((c) => c.open === open)?.close;
-  if (close === null || close === undefined) return null;
+  const close = state.field(outlineField, false)?.folds.get(open);
+  if (close === undefined) return null;
   return { from: state.doc.line(open).to, to: state.doc.line(close).to };
 };
 const directiveFolds = foldService.of(directiveFold);

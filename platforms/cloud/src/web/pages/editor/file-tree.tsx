@@ -16,7 +16,7 @@ import {
 } from "react";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
-import { item, openMenu, separator } from "./context-menu";
+import { fromKeyboard, item, menuPoint, openMenu, separator } from "./context-menu";
 import type { FileEntry } from "./files";
 import { highlight } from "./match-highlight";
 import { rankMatches, type RankedMatch } from "./quick-open-fuzzy";
@@ -363,7 +363,8 @@ export const FileTree = memo(function FileTree({
           : node.isFolder
             ? node.path
             : node.path.slice(0, Math.max(0, node.path.lastIndexOf("/")));
-      openMenu(event.clientX, event.clientY, (box) => {
+      const { x, y } = menuPoint(event.nativeEvent);
+      openMenu(x, y, (box) => {
         if (node === null || node.isFolder) {
           item(box, t("editor.files.newFile"), () => actions.newFile(folder));
           item(box, t("editor.files.newFolder"), () =>
@@ -403,7 +404,7 @@ export const FileTree = memo(function FileTree({
             { destructive: true },
           );
         }
-      });
+      }, { focusFirst: fromKeyboard(event.nativeEvent) });
     },
     [t, actions, clipboard],
   );

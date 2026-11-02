@@ -48,16 +48,16 @@ describe("context menu", () => {
 
     // Without a selection, Cut and Copy are there but disabled.
     await hello.click({ button: "right" });
-    await menu.getByRole("button", { name: "Cut" }).waitFor();
+    await menu.getByRole("menuitem", { name: "Cut" }).waitFor();
     // Styled, so it floats at the click instead of trailing the page.
     expect(await menu.evaluate((box) => getComputedStyle(box).position)).toBe(
       "fixed",
     );
     await expect
-      .poll(() => menu.getByRole("button", { name: "Cut" }).isDisabled())
+      .poll(() => menu.getByRole("menuitem", { name: "Cut" }).isDisabled())
       .toBe(true);
     await expect
-      .poll(() => menu.getByRole("button", { name: "Copy" }).isDisabled())
+      .poll(() => menu.getByRole("menuitem", { name: "Copy" }).isDisabled())
       .toBe(true);
     await page.keyboard.press("Escape");
     await menu.waitFor({ state: "detached" });
@@ -65,21 +65,21 @@ describe("context menu", () => {
     // A double-click selects a word; the menu copies it.
     await hello.dblclick();
     await hello.click({ button: "right" });
-    await menu.getByRole("button", { name: "Copy" }).click();
+    await menu.getByRole("menuitem", { name: "Copy" }).click();
     expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(
       "Hello",
     );
 
     // Select all through the menu, then cut the whole page with it.
     await hello.click({ button: "right" });
-    await menu.getByRole("button", { name: "Select all" }).click();
+    await menu.getByRole("menuitem", { name: "Select all" }).click();
     await hello.click({ button: "right" });
-    await menu.getByRole("button", { name: "Cut" }).click();
+    await menu.getByRole("menuitem", { name: "Cut" }).click();
     await expect.poll(text).not.toContain("Hello world");
 
     // A paste puts it back at the caret.
     await editor.click({ button: "right" });
-    await menu.getByRole("button", { name: "Paste" }).click();
+    await menu.getByRole("menuitem", { name: "Paste" }).click();
     await expect.poll(text).toContain("Hello");
     await expect.poll(text).toContain("world");
   }, 120_000);
@@ -93,11 +93,11 @@ describe("context menu", () => {
     await page.keyboard.press("End");
     await page.keyboard.type(" and more");
     await editor.getByText("and more").click({ button: "right" });
-    await menu.getByRole("button", { name: "Undo" }).click();
+    await menu.getByRole("menuitem", { name: "Undo" }).click();
     await expect.poll(text).not.toContain("and more");
 
     await editor.getByText("Hello").click({ button: "right" });
-    await menu.getByRole("button", { name: "Redo" }).click();
+    await menu.getByRole("menuitem", { name: "Redo" }).click();
     await expect.poll(text).toContain("and more");
   }, 120_000);
 
@@ -107,7 +107,7 @@ describe("context menu", () => {
     const entry = (name: string) =>
       tree.getByRole("button", { name, exact: true });
     const pick = (label: string) =>
-      menu.getByRole("button", { name: label }).click();
+      menu.getByRole("menuitem", { name: label }).click();
     // Unsaved files are not copied; the earlier tests changed the page.
     await page.keyboard.press("Control+s");
     await expect
@@ -117,7 +117,7 @@ describe("context menu", () => {
     // Before anything is copied, there is nothing to paste.
     await entry("index.md").click({ button: "right" });
     await expect
-      .poll(() => menu.getByRole("button", { name: "Paste" }).isDisabled())
+      .poll(() => menu.getByRole("menuitem", { name: "Paste" }).isDisabled())
       .toBe(true);
     expect(await menu.evaluate((box) => getComputedStyle(box).position)).toBe(
       "fixed",
@@ -125,8 +125,8 @@ describe("context menu", () => {
 
     // Files download; only folders get new files, in place of the old
     // "…" menu of every row.
-    await menu.getByRole("button", { name: "Download" }).waitFor();
-    expect(await menu.getByRole("button", { name: "New file" }).count()).toBe(
+    await menu.getByRole("menuitem", { name: "Download" }).waitFor();
+    expect(await menu.getByRole("menuitem", { name: "New file" }).count()).toBe(
       0,
     );
     expect(
@@ -136,8 +136,8 @@ describe("context menu", () => {
     // A copy pasted next to the original gets a copy's name.
     await pick("Copy");
     await entry("book").click({ button: "right" });
-    await menu.getByRole("button", { name: "New file" }).waitFor();
-    expect(await menu.getByRole("button", { name: "Download" }).count()).toBe(
+    await menu.getByRole("menuitem", { name: "New file" }).waitFor();
+    expect(await menu.getByRole("menuitem", { name: "Download" }).count()).toBe(
       0,
     );
     await pick("Paste");

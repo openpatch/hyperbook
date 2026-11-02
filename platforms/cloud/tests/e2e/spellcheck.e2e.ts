@@ -53,7 +53,7 @@ describe("spell check", () => {
       .locator("span.cm-spell-error")
       .filter({ hasText: "awfull" })
       .click({ button: "right" });
-    await menu.getByRole("button", { name: "awful", exact: true }).click();
+    await menu.getByRole("menuitem", { name: "awful", exact: true }).click();
     await editor.getByText("What an awful jb.").waitFor();
 
     // Right-click the other one: the book's dictionary accepts it.
@@ -61,7 +61,7 @@ describe("spell check", () => {
       .locator("span.cm-spell-error")
       .filter({ hasText: "jb" })
       .click({ button: "right" });
-    await menu.getByRole("button", { name: /dictionary/ }).click();
+    await menu.getByRole("menuitem", { name: /dictionary/ }).click();
     await expect
       .poll(() => editor.locator(".cm-spell-error").count(), {
         timeout: 30_000,

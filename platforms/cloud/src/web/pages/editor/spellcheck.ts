@@ -13,7 +13,7 @@ import {
 } from "@codemirror/view";
 import Typo from "typo-js";
 import i18next from "i18next";
-import { closeMenu, item, openMenu, separator } from "./context-menu";
+import { closeMenu, cursorPoint, fromKeyboard, item, openMenu, separator } from "./context-menu";
 import { findFrontmatter } from "./frontmatter";
 
 /**
@@ -199,10 +199,13 @@ function spellMenu(
   config: SpellConfig,
   x: number,
   y: number,
+  focusFirst: boolean,
 ) {
   const word = view.state.doc.sliceString(range.from, range.to);
   const typo = typoes.get(config.language);
   const suggestions = typo ? typo.suggest(word, 5) : [];
+  // Before the menu opens, which then takes the focus (and gives it back).
+  view.focus();
   openMenu(x, y, (box) => {
     const head = document.createElement("p");
     head.textContent = word;
@@ -217,8 +220,7 @@ function spellMenu(
     item(box, i18next.t("editor.actions.addToDictionary", { word }), () =>
       config.onAddWord(word),
     );
-  });
-  view.focus();
+  }, { focusFirst });
 }
 
 const spellTheme = EditorView.theme({
@@ -258,7 +260,9 @@ export function spellCheck(config: SpellConfig): Extension {
       mousedown: () => closeMenu(),
       scroll: () => closeMenu(),
       contextmenu(event, view) {
-        const pos = view.posAtCoords({ x: event.clientX, y: event.clientY });
+        // From the keyboard: the misspelled word at the caret, if any.
+        const keyboard = fromKeyboard(event);
+        const pos = keyboard ? view.state.selection.main.head : view.posAtCoords({ x: event.clientX, y: event.clientY });
         const range =
           pos === null ? null : underlinedAt(view.state.field(field), pos);
         if (!range) {
@@ -268,7 +272,8 @@ export function spellCheck(config: SpellConfig): Extension {
           return false;
         }
         event.preventDefault();
-        spellMenu(view, range, config, event.clientX, event.clientY);
+        const { x, y } = keyboard ? cursorPoint(view) : { x: event.clientX, y: event.clientY };
+        spellMenu(view, range, config, x, y, keyboard);
         return true;
       },
     }),

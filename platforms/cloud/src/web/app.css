@@ -234,7 +234,14 @@
   color: var(--color-text);
   font: inherit;
 }
-.cm-context-menu button:hover:not(:disabled) {
+.cm-context-menu:focus {
+  outline: none;
+}
+.cm-context-menu button:focus {
+  outline: none;
+}
+.cm-context-menu button:hover:not(:disabled),
+.cm-context-menu button:focus-visible {
   background-color: color-mix(in srgb, var(--color-brand) 12%, transparent);
 }
 .cm-context-menu button:disabled {
