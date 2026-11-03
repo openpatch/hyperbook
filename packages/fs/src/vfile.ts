@@ -983,6 +983,12 @@ const parseFrontmatter = (markdown: string, file: string, located: boolean) => {
   try {
     return matter(markdown);
   } catch (e) {
+    // gray-matter caches a text's result before parsing it, so a failed
+    // parse would stay behind and the next read of the same text would
+    // pass as a page without frontmatter.
+    delete (matter as unknown as { cache: Record<string, unknown> }).cache[
+      markdown
+    ];
     const { reason, mark } = (e ?? {}) as YamlException;
     if (!reason) throw e;
     const position =

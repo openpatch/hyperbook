@@ -355,9 +355,155 @@ export async function buildSingleGlossaryPage(
 }
 
 /**
+ * Unpacks an .h5p file to `fileOut`, the address the player reads it from,
+ * with its libraries moved into the shared H5P assets.
+ */
+export async function extractH5p(
+  source: string,
+  fileOut: string,
+  assetsOut: string,
+): Promise<void> {
+  await unzipper.Open.file(source).then((zip) =>
+    zip.extract({ path: fileOut }),
+  );
+
+  // Read and modify h5p.json to ensure MathDisplay dependency is present
+  const h5pJsonPath = path.join(fileOut, "h5p.json");
+  const h5pJson = JSON.parse(await fs.readFile(h5pJsonPath, "utf8"));
+
+  // Check if H5P.MathDisplay dependency already exists
+  const hasMathDisplay = h5pJson.preloadedDependencies?.some(
+    (dep: any) => dep.machineName === "H5P.MathDisplay",
+  );
+
+  // Add MathDisplay dependency if not present
+  if (!hasMathDisplay) {
+    const mathDisplayDependency = {
+      machineName: "H5P.MathDisplay",
+      majorVersion: 1,
+      minorVersion: 0,
+    };
+
+    // Initialize preloadedDependencies array if it doesn't exist
+    if (!h5pJson.preloadedDependencies) {
+      h5pJson.preloadedDependencies = [];
+    }
+
+    h5pJson.preloadedDependencies.push(mathDisplayDependency);
+
+    // Write the modified h5p.json back to file
+    await fs.writeFile(h5pJsonPath, JSON.stringify(h5pJson, null, 2));
+  }
+
+  const h5pLibraries = path.join(assetsOut, "directive-h5p", "libraries");
+  await makeDir(h5pLibraries, { recursive: true });
+
+  const files = await fs.readdir(fileOut);
+  const libraryFolders = files.filter(
+    (file) => !["content", "h5p.json"].includes(file),
+  );
+  for (const libraryFolder of libraryFolders) {
+    await copy(
+      path.join(fileOut, libraryFolder),
+      path.join(h5pLibraries, libraryFolder),
+      {
+        // copy() replaces existing files, like force: true did.
+      },
+    );
+    await rimraf(path.join(fileOut, libraryFolder));
+  }
+
+  // The player reads the extracted directory at the original `.h5p` URL.
+  // Keep the source archive inside it as well so an opt-in H5P export
+  // button has a real file to download rather than pointing at a folder.
+  await copy(source, path.join(fileOut, path.basename(source)));
+}
+
+/** Generates the favicons from the book's logo, when it is a local file. */
+export async function generateFaviconsFromLogo(
+  root: string,
+  rootOut: string,
+  hyperbookJson: HyperbookJson,
+  prefix = "Hyperbook",
+): Promise<void> {
+  if (!hyperbookJson.logo) return;
+  console.log(`${chalk.blue(`[${prefix}]`)} Generating favicons from logo.`);
+
+  // Only generate if logo is a local file (not a URL)
+  if (!hyperbookJson.logo.includes("://")) {
+    let logoPath: string | null = null;
+
+    // Resolve logo path by checking multiple locations
+    if (hyperbookJson.logo.startsWith("/")) {
+      // Absolute path starting with / - check book folder, then public folder
+      const bookPath = path.join(root, "book", hyperbookJson.logo);
+      const publicPath = path.join(root, "public", hyperbookJson.logo);
+
+      try {
+        await fs.access(bookPath);
+        logoPath = bookPath;
+      } catch (e) {
+        try {
+          await fs.access(publicPath);
+          logoPath = publicPath;
+        } catch (e2) {
+          // Not found in either location
+        }
+      }
+    } else {
+      // Relative path - check root folder, then book folder, then public folder
+      const rootPath = path.join(root, hyperbookJson.logo);
+      const bookPath = path.join(root, "book", hyperbookJson.logo);
+      const publicPath = path.join(root, "public", hyperbookJson.logo);
+
+      try {
+        await fs.access(rootPath);
+        logoPath = rootPath;
+      } catch (e) {
+        try {
+          await fs.access(bookPath);
+          logoPath = bookPath;
+        } catch (e2) {
+          try {
+            await fs.access(publicPath);
+            logoPath = publicPath;
+          } catch (e3) {
+            // Not found in any location
+          }
+        }
+      }
+    }
+
+    if (logoPath) {
+      try {
+        const { generateFavicons } =
+          await import("./helpers/generate-favicons");
+        await generateFavicons(
+          logoPath,
+          rootOut,
+          hyperbookJson,
+          ASSETS_FOLDER,
+        );
+        console.log(
+          `${chalk.green(`[${prefix}]`)} Favicons generated successfully.`,
+        );
+      } catch (e) {
+        console.log(
+          `${chalk.yellow(`[${prefix}]`)} Warning: Could not generate favicons. Error: ${e instanceof Error ? e.message : String(e)}`,
+        );
+      }
+    } else {
+      console.log(
+        `${chalk.yellow(`[${prefix}]`)} Warning: Could not generate favicons. Logo file not found: ${hyperbookJson.logo}`,
+      );
+    }
+  }
+}
+
+/**
  * Generates an llms.txt file by combining all markdown files in order
  */
-async function generateLlmsTxt(
+export async function generateLlmsTxt(
   root: string,
   rootOut: string,
   hyperbookJson: HyperbookJson,
@@ -916,63 +1062,10 @@ async function runBuild(
       const fileOut = path.join(rootOut, file.path.href);
       await copy(file.path.absolute, fileOut);
     } else if (file.path.href && file.extension === ".h5p") {
-      const fileOut = path.join(rootOut, file.path.href);
-      await unzipper.Open.file(file.path.absolute).then((zip) =>
-        zip.extract({ path: fileOut }),
-      );
-
-      // Read and modify h5p.json to ensure MathDisplay dependency is present
-      const h5pJsonPath = path.join(fileOut, "h5p.json");
-      const h5pJson = JSON.parse(await fs.readFile(h5pJsonPath, "utf8"));
-
-      // Check if H5P.MathDisplay dependency already exists
-      const hasMathDisplay = h5pJson.preloadedDependencies?.some(
-        (dep: any) => dep.machineName === "H5P.MathDisplay",
-      );
-
-      // Add MathDisplay dependency if not present
-      if (!hasMathDisplay) {
-        const mathDisplayDependency = {
-          machineName: "H5P.MathDisplay",
-          majorVersion: 1,
-          minorVersion: 0,
-        };
-
-        // Initialize preloadedDependencies array if it doesn't exist
-        if (!h5pJson.preloadedDependencies) {
-          h5pJson.preloadedDependencies = [];
-        }
-
-        h5pJson.preloadedDependencies.push(mathDisplayDependency);
-
-        // Write the modified h5p.json back to file
-        await fs.writeFile(h5pJsonPath, JSON.stringify(h5pJson, null, 2));
-      }
-
-      const h5pLibraries = path.join(assetsOut, "directive-h5p", "libraries");
-      await makeDir(h5pLibraries, { recursive: true });
-
-      const files = await fs.readdir(fileOut);
-      const libraryFolders = files.filter(
-        (file) => !["content", "h5p.json"].includes(file),
-      );
-      for (const libraryFolder of libraryFolders) {
-        await copy(
-          path.join(fileOut, libraryFolder),
-          path.join(h5pLibraries, libraryFolder),
-          {
-            // copy() replaces existing files, like force: true did.
-          },
-        );
-        await rimraf(path.join(fileOut, libraryFolder));
-      }
-
-      // The player reads the extracted directory at the original `.h5p` URL.
-      // Keep the source archive inside it as well so an opt-in H5P export
-      // button has a real file to download rather than pointing at a folder.
-      await copy(
+      await extractH5p(
         file.path.absolute,
-        path.join(fileOut, path.basename(file.path.href)),
+        path.join(rootOut, file.path.href),
+        assetsOut,
       );
     }
     writeProgress(
@@ -992,77 +1085,7 @@ async function runBuild(
   }
 
   if (!faviconExists && hyperbookJson.logo) {
-    console.log(`${chalk.blue(`[${prefix}]`)} Generating favicons from logo.`);
-
-    // Only generate if logo is a local file (not a URL)
-    if (!hyperbookJson.logo.includes("://")) {
-      let logoPath: string | null = null;
-
-      // Resolve logo path by checking multiple locations
-      if (hyperbookJson.logo.startsWith("/")) {
-        // Absolute path starting with / - check book folder, then public folder
-        const bookPath = path.join(root, "book", hyperbookJson.logo);
-        const publicPath = path.join(root, "public", hyperbookJson.logo);
-
-        try {
-          await fs.access(bookPath);
-          logoPath = bookPath;
-        } catch (e) {
-          try {
-            await fs.access(publicPath);
-            logoPath = publicPath;
-          } catch (e2) {
-            // Not found in either location
-          }
-        }
-      } else {
-        // Relative path - check root folder, then book folder, then public folder
-        const rootPath = path.join(root, hyperbookJson.logo);
-        const bookPath = path.join(root, "book", hyperbookJson.logo);
-        const publicPath = path.join(root, "public", hyperbookJson.logo);
-
-        try {
-          await fs.access(rootPath);
-          logoPath = rootPath;
-        } catch (e) {
-          try {
-            await fs.access(bookPath);
-            logoPath = bookPath;
-          } catch (e2) {
-            try {
-              await fs.access(publicPath);
-              logoPath = publicPath;
-            } catch (e3) {
-              // Not found in any location
-            }
-          }
-        }
-      }
-
-      if (logoPath) {
-        try {
-          const { generateFavicons } =
-            await import("./helpers/generate-favicons");
-          await generateFavicons(
-            logoPath,
-            rootOut,
-            hyperbookJson,
-            ASSETS_FOLDER,
-          );
-          console.log(
-            `${chalk.green(`[${prefix}]`)} Favicons generated successfully.`,
-          );
-        } catch (e) {
-          console.log(
-            `${chalk.yellow(`[${prefix}]`)} Warning: Could not generate favicons. Error: ${e instanceof Error ? e.message : String(e)}`,
-          );
-        }
-      } else {
-        console.log(
-          `${chalk.yellow(`[${prefix}]`)} Warning: Could not generate favicons. Logo file not found: ${hyperbookJson.logo}`,
-        );
-      }
-    }
+    await generateFaviconsFromLogo(root, rootOut, hyperbookJson, prefix);
   }
 
   i = 1;

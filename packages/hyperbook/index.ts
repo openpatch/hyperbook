@@ -114,6 +114,7 @@ program
     "render single pages on request, read as JSON lines from stdin (for editors)",
   )
   .option("--offline", "use cached assets without downloading")
+  .option("--index", "index pages for hyperbook dev instead of rendering them")
   .action(async (options) => {
     const rootProject = await withProject();
     if (rootProject.type !== "book") {
@@ -124,6 +125,7 @@ program
       rootProject.src,
       rootProject,
       new AssetManager({ offline: options.offline }),
+      { index: !!options.index },
     ).catch((e) => {
       reportError(e);
       process.exit(1);

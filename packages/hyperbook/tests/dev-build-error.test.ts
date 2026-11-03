@@ -53,12 +53,12 @@ afterAll(async () => {
   await fs.rm(root, { recursive: true, force: true });
 });
 
-test("keeps listening when the initial build fails", async () => {
+test("serves the failure in place of the page", async () => {
   const res = await fetch(`http://localhost:${port}/`);
   expect(res.status).toBe(500);
 
   const body = await res.text();
-  expect(body).toContain("Build failed");
+  expect(body).toContain("could not be rendered");
   expect(body).toContain("index.md");
   expect(body).toContain("mapping");
   // The page has to reconnect on its own, or the author reloads by hand.
@@ -68,20 +68,8 @@ test("keeps listening when the initial build fails", async () => {
 test("still 404s an asset rather than handing it a page", async () => {
   const res = await fetch(`http://localhost:${port}/fehlt.css`);
   expect(res.status).toBe(404);
-  expect(await res.text()).not.toContain("Build failed");
+  expect(await res.text()).not.toContain("could not be rendered");
 });
-
-test("tells a client that connects while the build is broken", async () => {
-  const ws = new WebSocket(`ws://localhost:${port}`);
-  const message = new Promise<any>((resolve) => {
-    ws.on("message", (data) => resolve(JSON.parse(data.toString())));
-  });
-
-  const msg = await waitFor(message, "rebuild-error");
-  expect(msg.type).toBe("rebuild-error");
-  expect(msg.message).toContain("index.md");
-  ws.close();
-}, 30_000);
 
 test("recovers once the file is fixed", async () => {
   const ws = new WebSocket(`ws://localhost:${port}`);

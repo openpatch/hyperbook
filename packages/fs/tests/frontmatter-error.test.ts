@@ -56,6 +56,16 @@ describe("broken frontmatter", () => {
     );
   });
 
+  it("fails again when the same broken text is read again", async () => {
+    const text = "---\ntitle: Noch einmal: kaputt\n---\n\n# Hi\n";
+    const first = await write("again.md", text).catch((e) => e);
+    expect(first).toBeInstanceOf(FrontmatterParseError);
+    // A new mtime, so the page cache cannot answer for it.
+    await fs.rm(path.join(root, "book", "again.md"));
+    const second = await write("again.md", text).catch((e) => e);
+    expect(second).toBeInstanceOf(FrontmatterParseError);
+  });
+
   it("points at the line that failed, not at the first one", async () => {
     const error = await write(
       "duplicate.md",
