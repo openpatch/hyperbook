@@ -30,6 +30,8 @@ With `edit=true`, a reader's drawing is saved in the browser. If the element
 has a `src`, the Excalidraw menu offers **Reset to template**, which throws the
 reader's changes away and loads the file from `src` again.
 
+The button in the top-right corner shows the drawing in fullscreen.
+
 
 :::alert{info}
 autoZoom does not seems to work, when using a file from excalidraw.com, since the file does not come with its original dimensions.

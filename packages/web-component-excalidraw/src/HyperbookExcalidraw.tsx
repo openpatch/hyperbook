@@ -21,6 +21,8 @@ type HyperbookExcalidrawProps = {
   onlinkopen: (link: string) => void;
   resetLabel?: string;
   resetPrompt?: string;
+  fullscreenLabel?: string;
+  fullscreenExitLabel?: string;
   // Registered as custom-element props in index.ts but handled internally.
   onChange?: EDP["onChange"];
   value?: unknown;
@@ -35,12 +37,16 @@ export const HyperbookExcalidraw: FC<HyperbookExcalidrawProps> = ({
   onlinkopen = () => {},
   resetLabel = "Reset to template",
   resetPrompt = "Are you sure you want to reset the drawing to its template? Your changes will be lost.",
+  fullscreenLabel = "Fullscreen",
+  fullscreenExitLabel = "Exit fullscreen",
 }) => {
   const [api, setApi] = useState<ExcalidrawImperativeAPI>();
   // Bumped by a reset: remounts the canvas, which then loads the template
   // again since the saved drawing is gone.
   const [generation, setGeneration] = useState(0);
   const saveTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const hostRef = useRef<HTMLDivElement>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   if (!id) id = src;
   // Before ids were passed through, drawings were saved under `src`.
@@ -110,6 +116,89 @@ export const HyperbookExcalidraw: FC<HyperbookExcalidrawProps> = ({
       document.removeEventListener("colorschemechange", updateTheme);
     };
   }, [api]);
+
+  // Excalidraw maps pointer positions to the canvas with an offset it measures
+  // once and then only on scrolls of one container. Content above the drawing
+  // that changes height (a late image, a collapsible) moves the canvas without
+  // a scroll, and the stale offset puts strokes, text and images in the wrong
+  // place; a text box opened above the viewport scrolls the page up when it
+  // takes focus. Measuring again before every interaction keeps it right.
+  useEffect(() => {
+    const host = hostRef.current;
+    if (!api || !host) return;
+
+    let frame = 0;
+    const refreshNow = () => api.refresh();
+    const refreshSoon = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(refreshNow);
+    };
+
+    host.addEventListener("pointerdown", refreshNow, true);
+    host.addEventListener("pointerenter", refreshNow, true);
+    host.addEventListener("dragenter", refreshNow, true);
+    document.addEventListener("scroll", refreshSoon, true);
+    window.addEventListener("resize", refreshSoon);
+    const observer = new ResizeObserver(refreshSoon);
+    observer.observe(document.body);
+
+    return () => {
+      cancelAnimationFrame(frame);
+      host.removeEventListener("pointerdown", refreshNow, true);
+      host.removeEventListener("pointerenter", refreshNow, true);
+      host.removeEventListener("dragenter", refreshNow, true);
+      document.removeEventListener("scroll", refreshSoon, true);
+      window.removeEventListener("resize", refreshSoon);
+      observer.disconnect();
+    };
+  }, [api]);
+
+  // The bordered box the directive renders goes fullscreen, not just the
+  // canvas, so it keeps its frame; the custom element is the fallback outside
+  // a book.
+  const fullscreenTarget = () => {
+    const host = hostRef.current;
+    return (host?.closest(".directive-excalidraw") ||
+      host?.parentElement) as HTMLElement | null;
+  };
+
+  useEffect(() => {
+    // Escape and F11 leave fullscreen without the button, so the state is read
+    // back from the browser rather than tracked.
+    const sync = () =>
+      setIsFullscreen(
+        !!document.fullscreenElement &&
+          document.fullscreenElement === fullscreenTarget(),
+      );
+    document.addEventListener("fullscreenchange", sync);
+    return () => document.removeEventListener("fullscreenchange", sync);
+  }, []);
+
+  const toggleFullscreen = async () => {
+    const target = fullscreenTarget();
+    if (!target) return;
+    if (document.fullscreenElement === target) {
+      await document.exitFullscreen();
+    } else {
+      await target.requestFullscreen();
+    }
+  };
+
+  const renderTopRightUI = () => {
+    const label = isFullscreen ? fullscreenExitLabel : fullscreenLabel;
+    return (
+      <button
+        type="button"
+        className="sidebar-trigger hyperbook-excalidraw-fullscreen"
+        title={label}
+        aria-label={label}
+        aria-pressed={isFullscreen}
+        onClick={toggleFullscreen}
+      >
+        {isFullscreen ? exitFullscreenIcon : fullscreenIcon}
+      </button>
+    );
+  };
 
   useEffect(() => {
     if (autoZoom) {
@@ -208,6 +297,9 @@ export const HyperbookExcalidraw: FC<HyperbookExcalidrawProps> = ({
   };
 
   return (
+    // `display: contents` keeps the layout as before; the div only gives the
+    // offset refresh above an element to listen on.
+    <div ref={hostRef} style={{ display: "contents" }}>
     <Excalidraw
       key={generation}
       excalidrawAPI={(api) => setApi(api)}
@@ -216,6 +308,9 @@ export const HyperbookExcalidraw: FC<HyperbookExcalidrawProps> = ({
       initialData={initialData}
       viewModeEnabled={!edit}
       onChange={handleChange}
+      renderTopRightUI={
+        document.fullscreenEnabled ? renderTopRightUI : undefined
+      }
     >
       {edit && src && (
         <MainMenu>
@@ -235,6 +330,7 @@ export const HyperbookExcalidraw: FC<HyperbookExcalidrawProps> = ({
         </MainMenu>
       )}
     </Excalidraw>
+    </div>
   );
 };
 
@@ -253,5 +349,35 @@ const resetIcon = (
   >
     <path d="M3 12a9 9 0 1 0 3-6.7L3 8" />
     <path d="M3 3v5h5" />
+  </svg>
+);
+
+const fullscreenIcon = (
+  <svg
+    aria-hidden="true"
+    focusable="false"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" />
+  </svg>
+);
+
+const exitFullscreenIcon = (
+  <svg
+    aria-hidden="true"
+    focusable="false"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5" />
   </svg>
 );

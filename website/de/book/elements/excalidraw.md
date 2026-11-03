@@ -27,6 +27,8 @@ Mit `edit=true` wird die Zeichnung der Lesenden im Browser gespeichert. Hat das
 Element eine `src`, bietet das Excalidraw-Menü **Auf Vorlage zurücksetzen** an:
 Die Änderungen werden verworfen und die Datei aus `src` neu geladen.
 
+Der Button oben rechts zeigt die Zeichnung im Vollbild.
+
 :::alert{info}
 autoZoom funktioniert nicht, wenn du deine Datei von excalidraw.com heruntergeladen hat, da diese Datei nicht die originalen Dimensionen enthält.
 :::

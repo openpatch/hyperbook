@@ -7,3 +7,18 @@
   position: relative;
   overflow: hidden;
 }
+
+/* The inline aspect ratio gives way to the screen, and the frame goes: the
+   drawing owns the whole screen. */
+.directive-excalidraw:fullscreen {
+  aspect-ratio: auto !important;
+  border: none;
+  border-radius: 0;
+  background-color: var(--color-background, #ffffff);
+}
+
+/* Excalidraw's library button, but square: it carries only an icon. */
+.directive-excalidraw .excalidraw .sidebar-trigger.hyperbook-excalidraw-fullscreen {
+  width: var(--lg-button-size);
+  padding: 0;
+}

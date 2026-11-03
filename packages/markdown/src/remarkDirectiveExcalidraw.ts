@@ -77,6 +77,8 @@ export default (ctx: HyperbookContext) => () => {
               onlinkopen,
               "reset-label": i18n.get("excalidraw-reset"),
               "reset-prompt": i18n.get("excalidraw-reset-prompt"),
+              "fullscreen-label": i18n.get("ide-fullscreen-enter"),
+              "fullscreen-exit-label": i18n.get("ide-fullscreen-exit"),
             },
             children: [],
           },

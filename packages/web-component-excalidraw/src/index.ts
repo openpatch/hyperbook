@@ -14,6 +14,8 @@ customElements.define(
       onlinkopen: "function",
       resetLabel: "string",
       resetPrompt: "string",
+      fullscreenLabel: "string",
+      fullscreenExitLabel: "string",
       onChange: "function",
       value: "json"
     },
