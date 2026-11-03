@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.120.0
+
+### Minor Changes
+
+- [`5cb00c8`](https://github.com/openpatch/hyperbook/commit/5cb00c8e850c35d716f38a89e287dd6e72feb0f2) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Excalidraw: strokes, text and images land where the reader clicks, and double-clicking no longer scrolls the page up. Excalidraw measured the canvas position only on scrolls, so when content above a drawing changed height (an image loading late, a collapsible opening) it mapped clicks with an outdated offset; a text box then opened above the visible area and its focus scrolled the page. The position is now measured again before each interaction and when the page changes size or scrolls. Every drawing also gets a fullscreen button in the top-right corner, editable or not.
+
 ## 0.119.0
 
 ### Minor Changes
