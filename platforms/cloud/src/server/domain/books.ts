@@ -125,8 +125,7 @@ export function publicBook(config: Config, book: BookRow, role: BookRole) {
     role,
     publishedBuildId: book.publishedBuildId,
     publishedAt: book.publishedAt?.getTime() ?? null,
-    previewBuildId: book.previewBuildId,
-    /** Commits on main; minus a build's commitCount gives the staleness hint. */
+    /** Commits on main (zero: nothing saved yet). */
     commitCount: book.commitCount,
     createdAt: book.createdAt.getTime(),
     updatedAt: book.updatedAt.getTime(),

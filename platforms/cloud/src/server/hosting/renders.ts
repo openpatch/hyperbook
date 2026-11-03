@@ -1,6 +1,6 @@
 import { type ChildProcessWithoutNullStreams, spawn } from "node:child_process";
 import { existsSync } from "node:fs";
-import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdir, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import type { Config } from "../config";
 import {
@@ -312,6 +312,41 @@ export class Renderers {
     });
   }
 
+  /**
+   * Renders every page of the newest save, one after the other, for a check
+   * of the whole book: the editor's unsaved text is put back first, since
+   * only saved text gets published. Pages go through the lock one by one,
+   * so the preview keeps answering in between. Stops (returning "changed")
+   * when a save moves the checkout on; `signal` stops it, too.
+   */
+  async checkPages(
+    bookId: number,
+    onPage: (progress: { done: number; total: number; commit: string }, problem: { file: string; error: string } | null) => void,
+    signal?: AbortSignal,
+  ): Promise<"done" | "changed" | "aborted"> {
+    const r = await this.renderer(bookId);
+    const commit = r.commit;
+    const files = await this.exclusive(r, () => pageFiles(r.srcDir));
+    onPage({ done: 0, total: files.length, commit }, null);
+    for (const [i, file] of files.entries()) {
+      if (signal?.aborted) return "aborted";
+      const latest = await headCommit(repoDir(this.config, bookId)).catch(() => null);
+      if (latest !== commit || r.commit !== commit || this.renderers.get(bookId) !== r) return "changed";
+      const result = await this.exclusive(r, async () => {
+        if (r.commit !== commit) return null;
+        if (r.override) {
+          await this.restore(r);
+          r.fresh.clear();
+        }
+        r.lastUsed = Date.now();
+        return this.run(r, { file });
+      });
+      if (!result) return "changed";
+      onPage({ done: i + 1, total: files.length, commit }, result.ok ? null : { file, error: result.error });
+    }
+    return "done";
+  }
+
   /** Folders a file of the preview may come from, in order. */
   async roots(bookId: number): Promise<string[]> {
     const r = await this.renderer(bookId);
@@ -347,6 +382,22 @@ export class Renderers {
     const oldest = [...this.renderers.values()].sort((a, b) => a.lastUsed - b.lastUsed)[0];
     if (oldest) this.close(oldest.bookId);
   }
+}
+
+/** The pages (book/, glossary/) of a checkout, sorted, relative to it. */
+async function pageFiles(srcDir: string): Promise<string[]> {
+  const files: string[] = [];
+  const walk = async (dir: string) => {
+    const entries = await readdir(path.join(srcDir, dir), { withFileTypes: true }).catch(() => []);
+    for (const e of entries) {
+      const rel = `${dir}/${e.name}`;
+      if (e.isDirectory()) await walk(rel);
+      else if (e.isFile() && PAGE.test(rel)) files.push(rel);
+    }
+  };
+  await walk("book");
+  await walk("glossary");
+  return files.sort();
 }
 
 /** Like the CLI's normalizeHref: "/a/", "/a.html", "/a/index.html" → "/a". */

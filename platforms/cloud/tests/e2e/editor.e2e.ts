@@ -30,7 +30,7 @@ afterAll(async () => {
 });
 
 describe("editor", () => {
-  it("starts a book from a template, previews a save and is published from the book page", async () => {
+  it("starts a book from a template, previews a save and is published from the editor", async () => {
     await page.getByRole("button", { name: "New book" }).click();
     const dialog = page.getByRole("dialog");
     await dialog.getByLabel("Title").fill("Waves");
@@ -58,24 +58,30 @@ describe("editor", () => {
     await live.goto(`http://waves.books.localhost:${server.port}/`);
     await live.getByText("This book is not published yet.").waitFor();
 
-    // Publishing is done on the book's page, not in the editor. A save only
-    // commits — builds wait for publishing — so the first preview build is
-    // triggered here.
-    expect(await page.getByRole("button", { name: "Publish" }).count()).toBe(0);
-    await page.evaluate(async () => {
-      const id = location.pathname.split("/")[2];
-      await fetch(`/api/books/${id}/builds`, { method: "POST" });
-    });
-    const bookPage = await page.context().newPage();
-    await bookPage.goto(page.url().replace(/\/edit.*$/, ""));
-    await bookPage.getByText("Built", { exact: true }).waitFor({ timeout: 60_000 });
-    await bookPage.getByRole("button", { name: "Publish", exact: true }).click();
-    await bookPage.getByRole("dialog").getByRole("button", { name: "Publish", exact: true }).click();
-    await bookPage.getByRole("cell", { name: /^v1/ }).waitFor({ timeout: 60_000 });
-    await bookPage.close();
+    // Owners publish from the editor, too: the dialog lists the saves that
+    // go live, and the save is built when it is published.
+    await page.getByRole("button", { name: /^Publish/ }).click();
+    const publish = page.getByRole("dialog");
+    await publish.getByText(/saved changes? go(es)? live/).waitFor();
+    await publish.getByRole("button", { name: "Show all changes" }).click();
+    await page.getByRole("dialog", { name: "Changes since the live version" }).getByText("Waves and sound").first().waitFor();
+    await page.keyboard.press("Escape");
+    await publish.getByRole("button", { name: "Publish", exact: true }).click();
+    await page.getByText(/^Publish(ed|ing)\./).first().waitFor();
+    // "Publishing…" while it builds; live once the build is done, and the
+    // button has nothing left to publish.
+    await page
+      .getByRole("button", { name: "Publish", exact: true })
+      .and(page.locator("[disabled]"))
+      .waitFor({ timeout: 60_000 });
     await live.reload();
     await live.getByRole("heading", { name: "Waves and sound" }).waitFor();
     await live.close();
+
+    // The History pane marks the live save.
+    await page.getByRole("button", { name: "Show the history" }).click();
+    await page.getByRole("region", { name: "History" }).getByText("Live", { exact: true }).waitFor();
+    await page.getByRole("button", { name: "Hide the history" }).click();
   }, 120_000);
 
   it("adds a page that the preview follows", async () => {

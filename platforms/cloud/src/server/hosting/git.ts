@@ -420,7 +420,8 @@ function countLines(commit: CommitSummary, line: string) {
  */
 export async function logCommits(
   repo: string,
-  options: { limit: number; after: string | null; path?: string },
+  /** `exclude`: leave out the commits reachable from it (git log main ^exclude). */
+  options: { limit: number; after: string | null; path?: string; exclude?: string | null },
 ): Promise<CommitSummary[]> {
   // -z makes git write numstat lines and commit records NUL-terminated:
   // a path with a newline cannot sneak into the parsing. The format's
@@ -436,6 +437,7 @@ export async function logCommits(
       "--format=format:%H%x1f%an%x1f%ae%x1f%aI%x1f%s%x1e",
       "--numstat",
       options.after ?? BRANCH,
+      ...(options.exclude ? [`^${options.exclude}`] : []),
       ...(options.path ? ["--", options.path] : []),
     ],
     { gitDir: repo },
@@ -491,6 +493,18 @@ export async function commitDiff(repo: string, sha: string): Promise<string> {
     parents.length >= 2
       ? ["diff-tree", "-p", "-M", "--no-color", parents[0]!, sha]
       : ["diff-tree", "-p", "-M", "--root", "--no-color", sha];
+  return (await gitBytes(args, { gitDir: repo })).toString("utf8").trim();
+}
+
+/**
+ * What changed from `from` (null: nothing) to `to`, optionally for one
+ * path only: e.g. the live version against the latest save.
+ */
+export async function rangeDiff(repo: string, from: string | null, to: string, path?: string): Promise<string> {
+  const args = from
+    ? ["diff-tree", "-r", "-p", "-M", "--no-color", from, to]
+    : ["diff-tree", "-r", "-p", "-M", "--root", "--no-color", to];
+  if (path) args.push("--", path);
   return (await gitBytes(args, { gitDir: repo })).toString("utf8").trim();
 }
 

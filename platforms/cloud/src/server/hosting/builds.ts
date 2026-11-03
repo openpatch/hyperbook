@@ -14,7 +14,7 @@ import { buildDir, makeJobDir, repoDir } from "./storage";
 
 export type BuildRow = typeof builds.$inferSelect;
 
-/** Successful builds kept on disk besides the published and the preview one, for rollbacks. */
+/** Successful builds kept on disk besides the published and the newest one, for rollbacks. */
 const KEEP_PREVIOUS = 2;
 /** Build records (with logs) kept per book. */
 const KEEP_RECORDS = 50;
@@ -62,11 +62,11 @@ export class BuildQueue {
   }
 
   /**
-   * Queues a build of `commit`. Builds after a save (`edit`) or a git push
-   * (`push`) only update the preview; all others go live when they succeed. A
-   * queued (not yet running) build of the same book is replaced, since only
-   * the newest one matters, except that a preview build never replaces one
-   * that is to go live.
+   * Queues a build of `commit`. A publish or a rollback goes live when it
+   * succeeds; other builds (and the edit/push/upload/rebuild triggers of
+   * older records) only build. A queued (not yet running) build of the same
+   * book is replaced, since only the newest one matters, except that a build
+   * that does not go live never replaces one that does.
    *
    * `note` is stored on the build row and becomes the head of its log, e.g.
    * what an upload left out or a publish note, so that it can be traced back
@@ -79,7 +79,7 @@ export class BuildQueue {
     userId: number | null,
     note?: string,
   ): BuildRow {
-    // Only a publish or a rollback goes live; saves, uploads and rebuilds are previews.
+    // Only a publish or a rollback goes live.
     const publish = trigger === "publish" || trigger === "rollback";
     const build = this.db.transaction((tx) => {
       tx.update(builds)
@@ -132,21 +132,16 @@ export class BuildQueue {
         buildId: builds.id,
         commit: builds.commit,
         builtWith: builds.hyperbookVersion,
-        previewBuildId: books.previewBuildId,
       })
       .from(books)
       .innerJoin(builds, eq(builds.id, books.publishedBuildId))
       .where(and(eq(books.source, "hosted"), isNotNull(books.publishedBuildId)))
       .all();
     let queued = 0;
-    for (const { bookId, buildId, commit, builtWith, previewBuildId } of published) {
+    for (const { bookId, buildId, commit, builtWith } of published) {
       const missing = !existsSync(buildDir(this.config, bookId, buildId));
       const outdated = upgrades && version !== null && builtWith !== version;
       if (!missing && !outdated) continue;
-      // A preview whose build is gone, too, shows the published book again.
-      if (previewBuildId !== null && previewBuildId !== buildId && !existsSync(buildDir(this.config, bookId, previewBuildId))) {
-        this.db.update(books).set({ previewBuildId: buildId }).where(eq(books.id, bookId)).run();
-      }
       // A book with builds waiting or running gets a fresh build anyway.
       const busy = this.db
         .select({ id: builds.id })
@@ -208,7 +203,7 @@ export class BuildQueue {
    * Keeps the book's waiting and running builds from going live, except
    * `exceptId`: something newer was published, rolled back to or unpublished,
    * and an older build finishing later must not replace it. They still
-   * finish, as previews (a rollback's not even that, see finish).
+   * finish, but change nothing.
    */
   supersedePublishing(bookId: number, db: Db = this.db, exceptId?: number) {
     db.update(builds)
@@ -355,7 +350,7 @@ export class BuildQueue {
           ? `Built with Hyperbook ${hyperbookVersion(this.config)} (${size})`
           : current.publish
             ? `Published (${size})`
-            : `Ready for the preview (${size})`,
+            : `Built (${size})`,
       );
       this.finish(current, "succeeded", log, { sizeBytes: outcome.sizeBytes });
       // A publish is recorded as a v<N> tag plus the moving "published" tag;
@@ -414,55 +409,44 @@ export class BuildQueue {
         .where(eq(builds.id, build.id))
         .run();
       if (status === "succeeded" && build.trigger === "upgrade") {
-        // Takes the place of the build it rebuilt, wherever that one still is.
+        // Takes the place of the build it rebuilt, if that one is still live.
         const book = tx
-          .select({ published: books.publishedBuildId, preview: books.previewBuildId })
+          .select({ published: books.publishedBuildId })
           .from(books)
           .where(eq(books.id, build.bookId))
           .get();
         if (book?.published === build.replacesBuildId) {
           tx.update(books).set({ publishedBuildId: build.id }).where(eq(books.id, build.bookId)).run();
         }
-        if (book?.preview === build.replacesBuildId) {
-          tx.update(books).set({ previewBuildId: build.id }).where(eq(books.id, build.bookId)).run();
-        }
-      } else if (status === "succeeded" && !(build.trigger === "rollback" && !build.publish)) {
-        // A rollback goes live without dragging the preview back with it; one
-        // superseded before it finished changes nothing.
+      } else if (status === "succeeded" && build.publish) {
+        // One superseded before it finished (publish: false) changes nothing.
         const rollback = build.trigger === "rollback";
         tx.update(books)
-          .set(
-            build.publish
-              ? rollback
-                ? { publishedBuildId: build.id, publishedAt: now }
-                : { previewBuildId: build.id, publishedBuildId: build.id, publishedAt: now }
-              : { previewBuildId: build.id },
-          )
+          .set({ publishedBuildId: build.id, publishedAt: now })
           .where(eq(books.id, build.bookId))
           .run();
-        if (build.publish) {
-          audit(tx as unknown as Db, {
-            actorUserId: build.requestedBy,
-            action: rollback ? "book.rollback" : "book.publish",
-            targetType: "book",
-            targetId: build.bookId,
-            data: { buildId: build.id, commit: build.commit },
-          });
-        }
+        audit(tx as unknown as Db, {
+          actorUserId: build.requestedBy,
+          action: rollback ? "book.rollback" : "book.publish",
+          targetType: "book",
+          targetId: build.bookId,
+          data: { buildId: build.id, commit: build.commit },
+        });
       }
     });
   }
 
   /**
    * Deletes old build output and old build records of a book. Besides the
-   * published and the preview build, the builds of the kept version tags
+   * published and the newest successful build (so publishing the commit it
+   * was made of stays instant), the builds of the kept version tags
    * (the last KEEP_TAGS v<N> plus "published") stay, so a rollback to them is
    * instant; without any tags (books from before git), the last KEEP_PREVIOUS
    * succeeded builds are kept instead.
    */
   private async prune(bookId: number) {
     const book = this.db
-      .select({ published: books.publishedBuildId, preview: books.previewBuildId })
+      .select({ published: books.publishedBuildId })
       .from(books)
       .where(eq(books.id, bookId))
       .get();
@@ -480,7 +464,7 @@ export class BuildQueue {
       .slice(0, KEEP_TAGS);
     const publishedTag = tags.find((t) => t.name === "published");
     const taggedCommits = new Set([...vTags, ...(publishedTag ? [publishedTag] : [])].map((t) => t.commit));
-    const current = [book?.published, book?.preview];
+    const current = [book?.published, succeeded[0]?.id];
     const keep = new Set<number>(current.filter((id): id is number => id != null));
     if (taggedCommits.size > 0) {
       // Newest succeeded build per tagged commit (succeeded is ordered by id desc).

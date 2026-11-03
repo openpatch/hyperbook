@@ -1,17 +1,19 @@
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { z } from "zod";
-import { historyInput } from "../../../shared/schemas";
+import { historyInput, liveDiffInput } from "../../../shared/schemas";
 import type { Deps } from "../../deps";
 import { bookAccess } from "../../domain/books";
 import {
-  type CommitSummary,
   GitError,
   commitDiff,
   headCommit,
   isMainAncestor,
+  listTags,
   logCommits,
+  rangeDiff,
 } from "../../hosting/git";
+import { tagMap } from "../../hosting/publish-tags";
 import { repoDir } from "../../hosting/storage";
 import type { AuthedEnv } from "../env";
 import { requireUser } from "../middleware";
@@ -82,18 +84,45 @@ export function bookHistoryRoutes({ db, config }: Deps) {
             return c.json({ commits: [], next: null });
           }
           // One commit more than asked for: its presence is the next page.
-          const commits = await logCommits(repo, {
-            limit: limit + 1,
-            after: after ?? null,
-            path,
-          });
+          const [found, tags] = await Promise.all([
+            logCommits(repo, { limit: limit + 1, after: after ?? null, path }),
+            tagMap(config, book.id),
+          ]);
+          // The live commit ("published") and the published versions (v<N>),
+          // so the pane can show which saves are live.
+          const commits = found.map((commit) => ({ ...commit, tags: tags.get(commit.sha) ?? [] }));
           if (commits.length > limit) {
-            const page = commits.slice(0, limit) as CommitSummary[];
+            const page = commits.slice(0, limit);
             return c.json({ commits: page, next: page[page.length - 1]!.sha });
           }
           return c.json({ commits, next: null });
         },
       )
+
+      // The changes from the live version (the "published" tag) to the
+      // latest save, of the whole book or of `path`: what a publish would
+      // change. Before anything is published, everything is new.
+      .get("/:id/history/live-diff", idParam, validate("query", liveDiffInput), async (c) => {
+        const user = c.get("user");
+        const { book } = bookAccess(db, user, c.req.valid("param").id);
+        hostedOnly(book);
+        const { path } = c.req.valid("query");
+        const repo = repoDir(config, book.id);
+        const head = await headCommit(repo).catch(() => null);
+        if (!head) return c.json({ live: null, head: null, diff: "", truncated: false });
+        const live =
+          book.publishedBuildId !== null
+            ? ((await listTags(repo).catch(() => [])).find((t) => t.name === "published")?.commit ?? null)
+            : null;
+        const diff = live === head ? "" : await rangeDiff(repo, live, head, path);
+        const truncated = Buffer.byteLength(diff, "utf8") > MAX_DIFF_BYTES;
+        return c.json({
+          live,
+          head,
+          diff: truncated ? Buffer.from(diff, "utf8").slice(0, MAX_DIFF_BYTES).toString("utf8") : diff,
+          truncated,
+        });
+      })
 
       .get("/:id/history/:sha/diff", shaParam, async (c) => {
         const user = c.get("user");

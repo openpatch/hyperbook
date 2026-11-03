@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { api, unwrap } from "@/lib/api";
 import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -19,6 +20,7 @@ import { DiffView } from "./diff-view";
  * the server (a book can have many), each with its author, message and line
  * counts. Clicking a commit opens its diff. A book's source is a git
  * repository, so this is what the editor's saves, uploads and pushes wrote.
+ * The live commit is marked, so everything above it is not published yet.
  */
 
 export type HistoryCommit = {
@@ -29,6 +31,8 @@ export type HistoryCommit = {
   message: string;
   additions: number;
   deletions: number;
+  /** "published" on the live commit, v<N> on published versions. */
+  tags?: string[];
 };
 
 type HistoryPage = { commits: HistoryCommit[]; next: string | null };
@@ -56,6 +60,7 @@ export function HistoryPanel({
   // The whole history, or only the commits of the open file.
   const [scope, setScope] = useState<"book" | "file">("book");
   const [chosen, setChosen] = useState<HistoryCommit | null>(null);
+  const [comparing, setComparing] = useState(false);
   const path = scope === "file" ? (activePath ?? undefined) : undefined;
 
   // Keyed by the current head commit: the workspace invalidates the listing
@@ -106,6 +111,19 @@ export function HistoryPanel({
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto">
+        {/* The open file as saved against the live version: what publishing changes in it. */}
+        {scope === "file" && activePath && (
+          <div className="border-b border-border px-3 py-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full"
+              onClick={() => setComparing(true)}
+            >
+              {t("editor.history.compareLive")}
+            </Button>
+          </div>
+        )}
         {commits.map((c) => (
           <button
             key={c.sha}
@@ -118,6 +136,22 @@ export function HistoryPanel({
               <span className="min-w-0 flex-1 truncate text-sm font-medium">
                 {c.message}
               </span>
+              {c.tags?.includes("published") && (
+                <Badge className="shrink-0 px-1.5 py-0 text-[0.7rem]">
+                  {t("editor.history.live")}
+                </Badge>
+              )}
+              {c.tags
+                ?.filter((tag) => /^v\d+$/.test(tag))
+                .map((tag) => (
+                  <Badge
+                    key={tag}
+                    variant="outline"
+                    className="shrink-0 px-1.5 py-0 text-[0.7rem]"
+                  >
+                    {tag}
+                  </Badge>
+                ))}
               <time
                 dateTime={c.date}
                 title={new Date(c.date).toLocaleString()}
@@ -164,12 +198,92 @@ export function HistoryPanel({
         commit={chosen}
         onClose={() => setChosen(null)}
       />
+      <LiveDiffDialog
+        bookId={bookId}
+        path={comparing ? (activePath ?? undefined) : undefined}
+        open={comparing}
+        commit={commit}
+        onClose={() => setComparing(false)}
+      />
     </div>
   );
 }
 
+/**
+ * The changes from the live version to the latest save: of one file (the
+ * History pane's "Compare with live") or of the whole book (the publish
+ * dialog). Unsaved text is not part of it; only saved changes get published.
+ */
+export function LiveDiffDialog({
+  bookId,
+  path,
+  open,
+  commit,
+  onClose,
+}: {
+  bookId: string;
+  /** One file of the book; none: the whole book. */
+  path?: string;
+  open: boolean;
+  /** The latest save as the caller knows it; a new save fetches anew. */
+  commit?: string | null;
+  onClose: () => void;
+}) {
+  const { t } = useTranslation();
+  const { data, isPending } = useQuery({
+    enabled: open,
+    queryKey: ["books", bookId, "live-diff", path ?? null, commit ?? null],
+    queryFn: () =>
+      unwrap(
+        api.books[":id"].history["live-diff"].$get({
+          param: { id: bookId },
+          query: path ? { path } : {},
+        }),
+      ),
+  });
+
+  return (
+    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="flex max-h-[85dvh] w-full sm:max-w-5xl flex-col gap-4">
+        <DialogHeader>
+          <DialogTitle className="truncate pr-6">
+            {path
+              ? t("editor.history.liveDiffFile", { path })
+              : t("editor.history.liveDiffBook")}
+          </DialogTitle>
+          <DialogDescription>
+            {data && data.live === null
+              ? t("editor.history.liveDiffNothingLive")
+              : t("editor.history.liveDiffHint")}
+          </DialogDescription>
+        </DialogHeader>
+        <div className="min-h-0 flex-1 overflow-auto pr-1">
+          {isPending ? (
+            <p className="p-2 text-sm text-muted-foreground">
+              {t("editor.history.loadingDiff")}
+            </p>
+          ) : data && data.diff === "" ? (
+            <p className="p-2 text-sm text-muted-foreground">
+              {path
+                ? t("editor.history.liveDiffSameFile")
+                : t("editor.history.liveDiffSameBook")}
+            </p>
+          ) : (
+            data && <DiffView diff={data.diff} />
+          )}
+          {data?.truncated && (
+            <p className="mt-2 text-xs text-muted-foreground">
+              {t("editor.history.truncated")}
+            </p>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 /** One commit's diff, fetched once: a commit never changes. */
-function CommitDiffDialog({
+export function CommitDiffDialog({
   bookId,
   commit,
   onClose,

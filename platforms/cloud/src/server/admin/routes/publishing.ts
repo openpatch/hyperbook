@@ -8,12 +8,14 @@ import { Hono } from "hono";
 import { bodyLimit } from "hono/body-limit";
 import { HTTPException } from "hono/http-exception";
 import { z } from "zod";
-import { publishInput, rollbackInput } from "../../../shared/schemas";
+import { publishInput, publishRequestInput, rollbackInput } from "../../../shared/schemas";
 import { audit } from "../../audit";
 import type { SessionUser } from "../../auth/sessions";
-import { books, builds, users } from "../../db/schema";
+import { bookMembers, books, builds, users } from "../../db/schema";
 import type { Deps } from "../../deps";
 import { type BookRow, addCommits, bookAccess } from "../../domain/books";
+import { getInstanceSettings } from "../../domain/instance";
+import { createT, userLocale } from "../../i18n";
 import type { BuildProgress, BuildRow } from "../../hosting/builds";
 import {
   ConcurrentChangeError,
@@ -24,7 +26,9 @@ import {
   listTree,
   listVersionTags,
   listTags,
+  logCommits,
   resolveTagCommit,
+  revListCount,
 } from "../../hosting/git";
 import { markPublished, movePublishedTag, tagMap } from "../../hosting/publish-tags";
 import { buildDir, makeJobDir, repoDir } from "../../hosting/storage";
@@ -45,7 +49,7 @@ const buildParam = validate(
 
 function publicBuild(
   build: BuildRow,
-  book: Pick<BookRow, "publishedBuildId" | "previewBuildId">,
+  book: Pick<BookRow, "publishedBuildId">,
   requestedBy: string | null,
   progress: BuildProgress | null = null,
   tags: string[] = [],
@@ -64,7 +68,6 @@ function publicBuild(
     sizeBytes: build.sizeBytes,
     publish: build.publish,
     published: book.publishedBuildId === build.id,
-    preview: book.previewBuildId === build.id,
     createdAt: build.createdAt.getTime(),
     startedAt: build.startedAt?.getTime() ?? null,
     finishedAt: build.finishedAt?.getTime() ?? null,
@@ -80,8 +83,11 @@ export function hostedOnly(book: BookRow) {
   }
 }
 
-/** /api/books/:id/source, /builds, /unpublish */
-export function bookPublishingRoutes({ db, config, builds: queue }: Deps) {
+/** Saves of main listed with the head, newest first; the count says how many there are. */
+const MAX_CHANGES = 30;
+
+/** /api/books/:id/source, /head, /builds, /publish, /check, /unpublish */
+export function bookPublishingRoutes({ db, config, mailer, builds: queue, checks }: Deps) {
   const committer = {
     name: "Hyperbook Cloud",
     email: `noreply@${config.adminHost.replace(/:\d+$/, "")}`,
@@ -89,6 +95,62 @@ export function bookPublishingRoutes({ db, config, builds: queue }: Deps) {
 
   function author(user: SessionUser) {
     return { name: user.displayName || user.email.split("@")[0]!, email: user.email };
+  }
+
+  function publishRequest(book: BookRow) {
+    if (!book.publishRequestedAt) return null;
+    const by = book.publishRequestedBy
+      ? db
+          .select({ id: users.id, email: users.email, displayName: users.displayName })
+          .from(users)
+          .where(eq(users.id, book.publishRequestedBy))
+          .get()
+      : undefined;
+    return {
+      byId: by?.id ?? null,
+      by: by ? by.displayName || by.email : null,
+      at: book.publishRequestedAt.getTime(),
+      note: book.publishRequestNote,
+    };
+  }
+
+  function clearPublishRequest(bookId: number) {
+    db.update(books)
+      .set({ publishRequestedBy: null, publishRequestedAt: null, publishRequestNote: null })
+      .where(eq(books.id, bookId))
+      .run();
+  }
+
+  /** Each owner but the one asking gets the request, in their own language. */
+  async function mailOwners(book: BookRow, by: SessionUser, note: string | null) {
+    if (!mailer.enabled) return;
+    const owners = db
+      .select({ id: users.id, email: users.email, locale: users.locale })
+      .from(bookMembers)
+      .innerJoin(users, eq(users.id, bookMembers.userId))
+      .where(and(eq(bookMembers.bookId, book.id), eq(bookMembers.role, "owner")))
+      .all()
+      .filter((o) => o.id !== by.id);
+    const name = getInstanceSettings(db).name;
+    for (const owner of owners) {
+      const t = createT(userLocale(db, owner.locale));
+      const subject = t("mail.publishRequest.subject", { title: book.title });
+      try {
+        await mailer.send({
+          to: owner.email,
+          subject,
+          text: t("mail.publishRequest.body", {
+            by: by.displayName || by.email,
+            title: book.title,
+            name,
+            note: note ? t("mail.publishRequest.note", { note }) : "",
+            bookUrl: `${config.adminOrigin}/books/${book.id}`,
+          }),
+        });
+      } catch (error) {
+        console.error(`Sending "${subject}" failed:`, error);
+      }
+    }
   }
 
   async function buildsOf(book: BookRow) {
@@ -170,25 +232,21 @@ export function bookPublishingRoutes({ db, config, builds: queue }: Deps) {
           });
           setSourceBytes(db, book.id, (await listTree(repo, commit)).reduce((sum, e) => sum + e.size, 0));
           if (changed) addCommits(db, book.id, 1);
-          // The whole list goes into the build's log; the toast can only show a few.
-          const skippedNote =
-            unpacked.skipped.length > 0
-              ? `The upload left out ${unpacked.skipped.length} link(s), which are not carried over:\n${unpacked.skipped.map((entry) => `  ${entry}`).join("\n")}`
-              : undefined;
-          const build = queue.enqueue(book.id, commit, "upload", user.id, skippedNote);
+          // No build: the preview shows the upload at once, and publishing
+          // builds it. A check of all pages says early whether it renders.
+          if (changed) checks.start(book.id);
           audit(db, {
             actorUserId: user.id,
             action: "book.upload",
             targetType: "book",
             targetId: book.id,
-            data: { commit, changed, files: unpacked.files, bytes: unpacked.bytes, buildId: build.id },
+            data: { commit, changed, files: unpacked.files, bytes: unpacked.bytes, skipped: unpacked.skipped },
           });
           return c.json({
             commit,
             changed,
             files: unpacked.files,
             skipped: unpacked.skipped,
-            build: publicBuild(build, book, user.email),
           });
         } finally {
           await rm(jobDir, { recursive: true, force: true });
@@ -240,6 +298,81 @@ export function bookPublishingRoutes({ db, config, builds: queue }: Deps) {
       );
     })
 
+    // The newest save of main, which the preview shows and a publish makes
+    // live; the saves it has that the live site does not (newest first, at
+    // most MAX_CHANGES, `unpublished` counts them all); and an editor's
+    // open request to publish.
+    .get("/:id/head", idParam, async (c) => {
+      const { book } = bookAccess(db, c.get("user"), c.req.valid("param").id);
+      const repo = repoDir(config, book.id);
+      const request = publishRequest(book);
+      const commit = await headCommit(repo).catch(() => null);
+      if (!commit) return c.json({ commit: null, savedAt: null, unpublished: 0, changes: [], request });
+      const live = book.publishedBuildId !== null
+        ? (await listTags(repo).catch(() => [])).find((t) => t.name === "published")?.commit ?? null
+        : null;
+      const [changes, [last]] = await Promise.all([
+        logCommits(repo, { limit: MAX_CHANGES, after: null, exclude: live }),
+        logCommits(repo, { limit: 1, after: null }),
+      ]);
+      return c.json({
+        commit,
+        savedAt: last ? Date.parse(last.date) : null,
+        unpublished: changes.length < MAX_CHANGES ? changes.length : await revListCount(repo, live, commit),
+        changes,
+        request,
+      });
+    })
+
+    // An editor asks the owners to publish the latest save; they get an
+    // email (when the instance sends any) and see it on the book page.
+    .post("/:id/publish-request", idParam, validate("json", publishRequestInput), async (c) => {
+      const user = c.get("user");
+      const { book } = bookAccess(db, user, c.req.valid("param").id);
+      hostedOnly(book);
+      const note = c.req.valid("json").note || null;
+      const now = new Date();
+      db.update(books)
+        .set({ publishRequestedBy: user.id, publishRequestedAt: now, publishRequestNote: note })
+        .where(eq(books.id, book.id))
+        .run();
+      audit(db, {
+        actorUserId: user.id,
+        action: "book.publishRequest",
+        targetType: "book",
+        targetId: book.id,
+        data: { note },
+      });
+      await mailOwners(book, user, note);
+      return c.json(publishRequest({ ...book, publishRequestedBy: user.id, publishRequestedAt: now, publishRequestNote: note }));
+    })
+
+    // Dismissed by an owner, or taken back by whoever asked.
+    .delete("/:id/publish-request", idParam, (c) => {
+      const user = c.get("user");
+      const { book, role } = bookAccess(db, user, c.req.valid("param").id);
+      if (role !== "owner" && book.publishRequestedBy !== user.id) {
+        throw new HTTPException(403, { message: "Only the owners or whoever asked can dismiss this" });
+      }
+      clearPublishRequest(book.id);
+      return c.json({ ok: true as const });
+    })
+
+    // "Check all pages": renders every page of the latest save in the
+    // background; the book page polls the state.
+    .get("/:id/check", idParam, (c) => {
+      const { book } = bookAccess(db, c.get("user"), c.req.valid("param").id);
+      return c.json(checks.get(book.id));
+    })
+    .post("/:id/check", idParam, async (c) => {
+      const { book } = bookAccess(db, c.get("user"), c.req.valid("param").id);
+      hostedOnly(book);
+      if (!(await headCommit(repoDir(config, book.id)).catch(() => null))) {
+        throw new HTTPException(409, { message: "The book has no files yet" });
+      }
+      return c.json(checks.start(book.id));
+    })
+
     .get("/:id/builds", idParam, async (c) => {
       const { book } = bookAccess(db, c.get("user"), c.req.valid("param").id);
       return c.json(await buildsOf(book));
@@ -261,23 +394,6 @@ export function bookPublishingRoutes({ db, config, builds: queue }: Deps) {
       return c.body(Readable.toWeb(zipDirectory(dir)) as ReadableStream);
     })
 
-    .post("/:id/builds", idParam, async (c) => {
-      const user = c.get("user");
-      const { book } = bookAccess(db, user, c.req.valid("param").id);
-      hostedOnly(book);
-      const commit = await headCommit(repoDir(config, book.id)).catch(() => null);
-      if (!commit) throw new HTTPException(409, { message: "Upload the book first" });
-      const build = queue.enqueue(book.id, commit, "rebuild", user.id);
-      audit(db, {
-        actorUserId: user.id,
-        action: "book.rebuild",
-        targetType: "book",
-        targetId: book.id,
-        data: { commit, buildId: build.id },
-      });
-      return c.json(publicBuild(build, book, user.email));
-    })
-
     // Makes the current commit live: its newest successful build if there is
     // one (a build does not depend on the host serving it), otherwise the one
     // waiting or running for it, or else a new build, which go live when they
@@ -291,6 +407,8 @@ export function bookPublishingRoutes({ db, config, builds: queue }: Deps) {
       const note = c.req.valid("json").note || null;
       const commit = await headCommit(repoDir(config, book.id)).catch(() => null);
       if (!commit) throw new HTTPException(409, { message: "The book has no files yet" });
+      // An owner acted on the latest save: an editor's request is answered.
+      clearPublishRequest(book.id);
       const built = db
         .select()
         .from(builds)

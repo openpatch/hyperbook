@@ -151,7 +151,7 @@ describe("build queue", () => {
     expect(bookRow(instance, book.id).publishedBuildId).toBe(third.id);
   });
 
-  it("builds after a save only update the preview", async () => {
+  it("builds that do not go live change nothing", async () => {
     const instance = setup();
     const { book, commit } = await bookWithSource(instance, { "hyperbook.json": "{}" });
     const live = instance.builds.enqueue(book.id, commit, "publish", null);
@@ -159,10 +159,12 @@ describe("build queue", () => {
     const edit = instance.builds.enqueue(book.id, commit, "edit", null);
     await instance.builds.idle();
     expect(buildRow(instance, edit.id)).toMatchObject({ status: "succeeded", publish: false });
-    expect(bookRow(instance, book.id)).toMatchObject({ publishedBuildId: live.id, previewBuildId: edit.id });
+    expect(bookRow(instance, book.id)).toMatchObject({ publishedBuildId: live.id });
+    // It is kept as the newest build, so publishing its commit is instant.
+    expect(existsSync(buildDir(instance.config, book.id, edit.id))).toBe(true);
   });
 
-  it("never lets a preview build replace one that is to go live", async () => {
+  it("never lets a build that does not go live replace one that does", async () => {
     let release!: () => void;
     const gate = new Promise<void>((r) => (release = r));
     const runner: Runner = async (job) => {
@@ -179,10 +181,11 @@ describe("build queue", () => {
     await instance.builds.idle();
     expect(buildRow(instance, publish.id).status).toBe("succeeded");
     expect(buildRow(instance, edit1.id).status).toBe("canceled");
-    expect(bookRow(instance, book.id)).toMatchObject({ publishedBuildId: publish.id, previewBuildId: edit2.id });
+    expect(buildRow(instance, edit2.id).status).toBe("succeeded");
+    expect(bookRow(instance, book.id)).toMatchObject({ publishedBuildId: publish.id });
   });
 
-  it("lets a running preview build of the same commit go live instead of building it again", async () => {
+  it("lets a running build of the same commit go live instead of building it again", async () => {
     let release!: () => void;
     const gate = new Promise<void>((r) => (release = r));
     const runner: Runner = async (job) => {
@@ -199,7 +202,7 @@ describe("build queue", () => {
     await instance.builds.idle();
     expect(buildRow(instance, edit.id)).toMatchObject({ status: "succeeded", publish: true });
     expect(buildRow(instance, edit.id).log).toContain("Published");
-    expect(bookRow(instance, book.id)).toMatchObject({ publishedBuildId: edit.id, previewBuildId: edit.id });
+    expect(bookRow(instance, book.id)).toMatchObject({ publishedBuildId: edit.id });
   });
 
   it("does not let an older publish build that finishes later replace a newer publish", async () => {
@@ -228,7 +231,7 @@ describe("build queue", () => {
     expect(bookRow(instance, book.id).publishedBuildId).toBe(preview.id);
   });
 
-  it("does not let a superseded rollback move the preview back", async () => {
+  it("does not let a superseded rollback go live", async () => {
     let release!: () => void;
     let gate: Promise<void> = Promise.resolve();
     const runner: Runner = async (job) => {
@@ -238,7 +241,7 @@ describe("build queue", () => {
     const instance = setup({}, { runner });
     const { book, commit: first } = await bookWithSource(instance, { "hyperbook.json": "{}" });
     const second = await commitFiles(instance, book.id, { "hyperbook.json": '{"name":"x"}' });
-    const preview = instance.builds.enqueue(book.id, second, "edit", null);
+    instance.builds.enqueue(book.id, second, "edit", null);
     await instance.builds.idle();
 
     gate = new Promise<void>((r) => (release = r));
@@ -248,7 +251,7 @@ describe("build queue", () => {
     await instance.builds.idle();
 
     expect(buildRow(instance, rollback.id)).toMatchObject({ status: "succeeded", publish: false });
-    expect(bookRow(instance, book.id)).toMatchObject({ publishedBuildId: null, previewBuildId: preview.id });
+    expect(bookRow(instance, book.id)).toMatchObject({ publishedBuildId: null });
   });
 
   it("reports how far a running build is", async () => {
@@ -362,7 +365,6 @@ describe.skipIf(!hyperbookVersion(setup().config))("rebuilds after an update of 
     const now = bookRow(instance, book.id);
     expect(now.publishedBuildId).not.toBe(old.id);
     expect(buildRow(instance, now.publishedBuildId!)).toMatchObject({ trigger: "upgrade", replacesBuildId: old.id });
-    expect(now.previewBuildId).toBe(now.publishedBuildId);
     // Up to date now.
     expect(instance.builds.enqueueRebuilds({ upgrades: true })).toBe(0);
   });
@@ -399,10 +401,10 @@ describe.skipIf(!hyperbookVersion(setup().config))("rebuilds after an update of 
       .values({ bookId: book.id, commit: old.commit, trigger: "rebuild", status: "succeeded" })
       .returning()
       .get();
-    instance.db.update(books).set({ publishedBuildId: other.id, previewBuildId: other.id }).where(eq(books.id, book.id)).run();
+    instance.db.update(books).set({ publishedBuildId: other.id }).where(eq(books.id, book.id)).run();
     release();
     await instance.builds.idle();
-    expect(bookRow(instance, book.id)).toMatchObject({ publishedBuildId: other.id, previewBuildId: other.id });
+    expect(bookRow(instance, book.id)).toMatchObject({ publishedBuildId: other.id });
   });
 });
 

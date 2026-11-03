@@ -142,8 +142,15 @@ export const books = sqliteTable(
      */
     publishedBuildId: integer("published_build_id"),
     publishedAt: integer("published_at", { mode: "timestamp_ms" }),
-    /** The newest successful build of any kind, served on the preview host. */
-    previewBuildId: integer("preview_build_id"),
+    /**
+     * An editor asked the owners to publish the latest save: who, when, and
+     * an optional note. Cleared when an owner publishes or dismisses it.
+     */
+    publishRequestedBy: integer("publish_requested_by").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    publishRequestedAt: integer("publish_requested_at", { mode: "timestamp_ms" }),
+    publishRequestNote: text("publish_request_note"),
     /** Size of the current source (the git tree); counts toward its owners' storage. */
     sourceBytes: integer("source_bytes").notNull().default(0),
     /** Commits on refs/heads/main; the staleness hint is this minus a build's snapshot. */

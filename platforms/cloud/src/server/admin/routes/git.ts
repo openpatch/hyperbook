@@ -15,7 +15,6 @@ import { FailureLimiter, OpLimiter } from "../../auth/rate-limit";
 import { randomToken, sha256 } from "../../crypto/tokens";
 import type { Deps } from "../../deps";
 import { type BookRow, addCommits, bookAccess } from "../../domain/books";
-import { getInstanceSettings } from "../../domain/instance";
 import { quotaForBook, setSourceBytes } from "../../domain/storage";
 import {
   bookMembers,
@@ -55,9 +54,9 @@ import { hostedOnly } from "./publishing";
  * because no CORS headers are ever sent. Authentication is Basic auth with a
  * git token (username "git", password = per-book or personal token); the
  * account password and the session cookie are not accepted here. A push
- * never triggers a publish build — only the quota
- * check, an audit entry and the commit count (plus a preview build when the
- * instance setting gitPushUpdatesPreview is on).
+ * never triggers a build — only the quota check, an audit entry and the
+ * commit count. The preview renders main as it is visited, so it follows a
+ * push at once; publishing builds what it makes live.
  */
 
 const ZERO = "0".repeat(40);
@@ -204,7 +203,7 @@ async function closeWith(child: ChildProcess) {
 
 /** /api/books/:id/git/… — smart HTTP, token auth. Mounted before the /api sub-app. */
 export function gitHttpRoutes(
-  { db, config, builds }: Deps,
+  { db, config }: Deps,
   limits: { authFailures?: FailureLimiter; opLimit?: OpLimiter } = {},
 ) {
   const authFailures = limits.authFailures ?? new FailureLimiter();
@@ -310,9 +309,6 @@ export function gitHttpRoutes(
       targetId: book.id,
       data: { commit: update.new, added, bytes, via },
     });
-    if (getInstanceSettings(db).gitPushUpdatesPreview) {
-      builds.enqueue(book.id, update.new, "push", userId);
-    }
   }
 
   // Mounted at /api/books/:id/git; the auth middleware is bound to the exact

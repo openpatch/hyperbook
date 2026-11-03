@@ -39,6 +39,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { api, unwrap } from "@/lib/api";
 import { type Book, useBook } from "@/lib/books";
+import { EditorPublishButton } from "../publish-flow";
 import { useEditorSettings, type EditorSettings } from "@/lib/editor-settings";
 import { useAiStatus } from "@/lib/ai";
 import { COMPACT, NARROW, useMediaQuery } from "@/lib/media-query";
@@ -1288,6 +1289,11 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+        <EditorPublishButton
+          book={book}
+          commit={listing.commit}
+          unsaved={hasUnsaved}
+        />
         {aiAvailable && (
           <Button
             size="icon"

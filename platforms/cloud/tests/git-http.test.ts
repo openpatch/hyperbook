@@ -16,13 +16,11 @@ import {
   entitlements,
   gitTokens,
 } from "../src/server/db/schema";
-import { updateInstanceSettings } from "../src/server/domain/instance";
 import {
   headCommit,
   listTags,
   resolveTagCommit,
 } from "../src/server/hosting/git";
-import type { Runner } from "../src/server/hosting/runner";
 import { buildDir, repoDir } from "../src/server/hosting/storage";
 import { type Instance, loggedIn, setup } from "./helpers";
 
@@ -782,7 +780,6 @@ describe("git smart HTTP", () => {
       recursive: true,
       force: true,
     });
-    const previewBefore = bookRow(instance, book.id).previewBuildId;
     const rb2 = await owner.c.post(`/api/books/${book.id}/rollback`, {
       tag: "v3",
     });
@@ -796,9 +793,8 @@ describe("git smart HTTP", () => {
       .filter((b) => b.trigger === "rollback")
       .pop()!;
     expect(rebuilt.status).toBe("succeeded");
-    // The rollback build went live, but the preview stayed where it was.
+    // The rollback build went live.
     expect(bookRow(instance, book.id).publishedBuildId).toBe(rebuilt.id);
-    expect(bookRow(instance, book.id).previewBuildId).toBe(previewBefore);
     expect(await resolveTagCommit(repo, "published")).toBe(v3);
     expect(
       instance.db
@@ -896,16 +892,8 @@ describe("git smart HTTP", () => {
     expect((await git(port, ["push", "origin", "main"], dir)).code).toBe(0);
   });
 
-  it("a push enqueues a preview build only when the instance setting is on", async () => {
-    let gate!: () => void;
-    const gatePromise = new Promise<void>((r) => (gate = r));
-    let started = false;
-    const runner: Runner = async (job) => {
-      started = true;
-      await gatePromise;
-      return (await import("./helpers")).copyRunner(job);
-    };
-    const instance = setup({}, { runner });
+  it("a push never enqueues a build", async () => {
+    const instance = setup();
     const owner = await loggedIn(instance, { email: "o@example.org" });
     const book = (
       await owner.c.post("/api/books", { title: "Physics", slug: "physics" })
@@ -916,10 +904,6 @@ describe("git smart HTTP", () => {
 
     const dir = await localBook(port, token, book.id, FILES);
     expect((await git(port, ["push", "origin", "main"], dir)).code).toBe(0);
-    // Off by default: no build.
-    expect(instance.db.select().from(builds).all()).toHaveLength(0);
-
-    updateInstanceSettings(instance.db, { gitPushUpdatesPreview: true });
     await writeFile(path.join(dir, "index.html"), "<h1>Two</h1>");
     await git(
       port,
@@ -927,19 +911,8 @@ describe("git smart HTTP", () => {
       dir,
     );
     expect((await git(port, ["push", "origin", "main"], dir)).code).toBe(0);
-    // A preview-only build was queued and picked up (waiting at the gate).
-    const queued = instance.db.select().from(builds).all();
-    expect(queued).toHaveLength(1);
-    expect(queued[0]).toMatchObject({
-      trigger: "push",
-      publish: false,
-      status: "running",
-    });
-    void started;
-    gate();
-    await instance.builds.idle();
-    const row = bookRow(instance, book.id);
-    expect(row.previewBuildId).toBe(queued[0]!.id);
-    expect(row.publishedBuildId).toBeNull();
+    // The preview renders main as it is visited; nothing is built.
+    expect(instance.db.select().from(builds).all()).toHaveLength(0);
+    expect(bookRow(instance, book.id)).toMatchObject({ commitCount: 2, publishedBuildId: null });
   });
 });

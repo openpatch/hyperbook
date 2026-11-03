@@ -400,10 +400,16 @@ is a current or old slug, otherwise 404.
 ## API (admin host)
 
 ```
-POST   /books/:id/source       zip upload → commit, queued build
+POST   /books/:id/source       zip upload → commit (no build; starts a page check)
 GET    /books/:id/source.zip   current source (git archive)
+GET    /books/:id/head         latest save, saves not live yet (≤30 + count), open publish request
 GET    /books/:id/builds       latest 20, without logs
-POST   /books/:id/builds       rebuild the current commit
+POST   /books/:id/publish      { note? } latest save goes live (instantly or after its build)
+POST   /books/:id/publish-request   { note? } ask the owners (email + notice)
+DELETE /books/:id/publish-request   owners, or whoever asked
+GET    /books/:id/check        state of "Check all pages" (in memory)
+POST   /books/:id/check        render every page of the latest save
+GET    /books/:id/history/live-diff?path=…   live version → latest save
 POST   /books/:id/unpublish
 GET    /builds/:id             with log
 POST   /builds/:id/cancel      queued or running
@@ -411,8 +417,9 @@ POST   /builds/:id/cancel      queued or running
 
 Owners and editors may do all of these, except that only owners publish,
 roll back and unpublish: what goes live is the owners' call (changed
-2026-11-02). Upload, rebuild, cancel, unpublish and publish are written to
-the audit log.
+2026-11-02); editors ask them to (publish request). Upload, cancel,
+unpublish, publish and publish requests are written to the audit log. The
+rebuild endpoint is gone (2026-11-03): nothing needs a build but publishing.
 
 ## Admin UI
 
@@ -634,22 +641,31 @@ that follows every save, a form for `hyperbook.json`, an explicit
 
 ## Saving and publishing are separate
 
-A save is a commit on `main` and is built for the preview right away. The
-book's address changes only when a teacher publishes, so students never see
-a page half-way through an edit.
+A save is a commit on `main`. The preview host renders it page by page as
+pages are visited (no build); the book's address changes only when an owner
+publishes, so students never see a page half-way through an edit.
 
-- `builds.publish` (boolean) says whether a successful build goes live.
-  Uploads and rebuilds publish, as in M1; builds after a save (`edit`) do
-  not; "Publish" (`publish`) does.
-- `books.preview_build_id` is the newest successful build of any kind;
-  `published_build_id` the one students see.
+- Only publishing (and rollbacks, and the platform's upgrade rebuilds)
+  builds. Saves, uploads and pushes do not (2026-11-03); the `edit`,
+  `upload`, `push` and `rebuild` triggers remain for old records.
+- `builds.publish` (boolean) says whether a successful build goes live;
+  `books.published_build_id` is the one students see. The old
+  `preview_build_id` was dropped (migration 0016).
 - **Publish** takes the newest successful build of the current commit and
   makes it live without building again (a build does not depend on the
   host it is served from). If there is none yet, it queues a publishing
-  build of the current commit.
-- A new build replaces queued builds of the same book, except that a
-  preview build never replaces a queued publishing build.
-- Pruning keeps the published build, the preview build and the latest 2.
+  build of the current commit. The book page and the editor show a failed
+  publish; the version before stays live.
+- A new build replaces queued builds of the same book, except that one that
+  does not go live never replaces a queued publishing build.
+- Pruning keeps the published build, the newest successful one, and the
+  builds of the kept version tags.
+- **Check all pages** renders every page of the latest save with the
+  preview's renderer (saved text only) and lists the pages that fail; an
+  upload starts one. Kept in memory per book; a save during it ends it as
+  "changed".
+- **Publish requests**: an editor asks the owners (`books.publish_requested_*`,
+  an email to each owner); publishing or dismissing clears it.
 
 ## Files API (admin host)
 
@@ -1337,10 +1353,12 @@ many small commits cannot overwhelm the build queue.
 
 - Repo is main-only. Pushes of other refs, deletes, non-fast-forwards and
   client-created tags are rejected (pre-receive hook + `receive.deny*`).
-- A push triggers no publish build — only the quota check, a `book.push`
-  audit entry and the `books.commit_count` bump. The instance setting
-  `gitPushUpdatesPreview` (default off) additionally enqueues a preview-only
-  build (`trigger: "push"`, `publish: false`).
+- A push triggers no build — only the quota check, a `book.push` audit entry
+  and the `books.commit_count` bump. The preview host renders main page by
+  page as it is visited, so it follows a push at once; publishing builds the
+  commit it makes live. (An earlier instance setting `gitPushUpdatesPreview`
+  queued a preview build per push; it was removed once the preview stopped
+  depending on builds. Stored values are ignored.)
 - Publish history = tags: `v1`, `v2`, … plus a moving `published` tag; only
   the last two `v<N>` tags (and the builds they point at) are kept. `N` is the
   highest existing tag number + 1, so republishing a commit never rewrites a
@@ -1393,11 +1411,6 @@ POST   /books/:id/rollback                    session { tag: "v<N>" }
 `book.push`, `book.git.token.create`, `book.git.token.revoke`, `book.publish`,
 `book.rollback`.
 
-## Instance setting
-
-`gitPushUpdatesPreview` (boolean, default false) in the admin settings; also
-returned by `GET /instance/public` so the book page can explain the behavior.
-
 ## Web
 
 Publishing section of the book page: "Work locally (git)" block — clone
@@ -1407,8 +1420,9 @@ before push, `git checkout published` = live site, `git log main ^published` =
 unpublished changes, reload the editor after pull/push, no submodules/LFS,
 `http.postBuffer` for large pushes), credential-helper hint. Publish button
 with optional note; builds table shows tags, notes and a "Roll back"
-confirmation on tagged succeeded builds; staleness hint ("main is N commits
-ahead of the live site/preview"); "Download source (zip)".
+confirmation on tagged succeeded builds; the Live card counts the saves not
+live yet (`GET /books/:id/head`, commits on main beyond the `published` tag);
+"Download source (zip)".
 
 ## Tests
 
@@ -1416,7 +1430,7 @@ ahead of the live site/preview"); "Download source (zip)".
 port (Host header override) — clone/push with bookkeeping, token auth
 (wrong/revoked/cross-book/limit), ref rules (tag/branch/delete/non-FF),
 quota refusal, publish tags, instant vs. rebuild rollback, editor-save vs.
-push CAS both directions, `gitPushUpdatesPreview` on/off.
+push CAS both directions, a push queues no build.
 `tests/git.test.ts`: `parseRefUpdates`. `tests/builds.test.ts`: tag-aligned
 pruning. Layout under `platforms/cloud/tests`.
 

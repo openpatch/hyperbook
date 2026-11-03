@@ -1,0 +1,1 @@
+ALTER TABLE `books` DROP COLUMN `preview_build_id`;

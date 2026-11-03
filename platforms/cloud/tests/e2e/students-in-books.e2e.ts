@@ -73,7 +73,7 @@ beforeAll(async () => {
   await admin.getByRole("button", { name: "Manage" }).click();
   await admin.getByRole("menuitem", { name: "Upload a zip" }).click();
   await admin.getByLabel("Upload a zip of your book").setInputFiles(zip);
-  await admin.getByText("Built", { exact: true }).waitFor({ timeout: 60_000 });
+  await admin.getByText(/^Uploaded 2 files/).waitFor();
 
   // A private book only asks for a login once it is published; an
   // unpublished one answers 404 instead.

@@ -218,6 +218,11 @@ export const en = {
       subject: "You are invited to {{name}}",
       body: "Hello{{name}},\n\n{{by}} added you to {{instance}}, where you can write and publish hyperbooks.\n\nChoose your password within 7 days with this link:\n\n{{link}}\n\nAfterwards you log in at {{loginUrl}} with {{email}}.",
     },
+    publishRequest: {
+      subject: "Please publish “{{title}}”",
+      body: "{{by}} asks you to publish “{{title}}” at {{name}}: the latest save, as the preview shows it, is not live yet.{{note}}\n\nLook at the changes and publish at {{bookUrl}}",
+      note: "\n\nTheir note:\n{{note}}",
+    },
     slugRequest: {
       note: "\n\nNote from the admin:\n{{note}}",
       requested: {
@@ -299,6 +304,14 @@ export const en = {
       by: "by {{name}}, {{date}}",
       loadingDiff: "Loading the changes…",
       truncated: "The changes are longer than shown.",
+      live: "Live",
+      compareLive: "Compare with the live version",
+      liveDiffFile: "{{path}}: changes since the live version",
+      liveDiffBook: "Changes since the live version",
+      liveDiffHint: "The live version against the latest save. Unsaved changes are not included.",
+      liveDiffNothingLive: "Nothing is published yet, so all of it is new.",
+      liveDiffSameFile: "This file is the same as in the live version.",
+      liveDiffSameBook: "The latest save is the live version.",
     },
     start: {
       external: "This book is hosted elsewhere, so it is not edited here.",
@@ -313,6 +326,9 @@ export const en = {
     toolbar: {
       bookSettings: "Book settings",
       saveAll: "Save all",
+      publish: "Publish",
+      askToPublish: "Ask to publish",
+      asked: "Publishing asked for",
       unsavedFiles: "Unsaved changes",
       hideAi: "Hide the AI assistant",
       showAi: "Show the AI assistant",
@@ -643,6 +659,7 @@ export const en = {
     },
   },
   validation: {
+    max500: "Use at most 500 characters",
     email: "Enter a valid email address",
     pathName: "Enter a name",
     pathTooLong: "The path is too long",
@@ -770,6 +787,7 @@ export const en = {
       bookUpload: "uploaded a book",
       bookRebuild: "rebuilt a book",
       bookPublish: "published a book",
+      bookPublishRequest: "asked for a book to be published",
       bookUnpublish: "unpublished a book",
       bookBuildCancel: "canceled a build",
       groupCreate: "added a group",
@@ -1002,25 +1020,62 @@ export const en = {
   publishing: {
     title: "Publishing",
     description:
-      "Edit the book in the browser or upload it as a zip; every save is built as a preview. Publish the preview to make it a new live version. You can also work on the book locally with git.",
+      "Edit the book in the browser or upload it as a zip; the preview always shows the latest save. Publish to make the latest save a new live version. You can also work on the book locally with git.",
     notPublishedYet: "Not published yet.",
-    aheadPreview_one: "main is {{count}} commit ahead of the preview.",
-    aheadPreview_other: "main is {{count}} commits ahead of the preview.",
     since: "Live since {{when}}",
     preview: "Preview",
     previewIsLive: "Same as the live version",
-    previewNewer: "Newer than the live version",
-    savedAt: "Saved {{when}}",
-    noPreview: "Nothing built yet.",
-    buildPreview: "Build preview",
-    buildingPreview: "Building preview…",
+    unpublishedChanges_one: "{{count}} saved change is not live yet",
+    unpublishedChanges_other: "{{count}} saved changes are not live yet",
+    lastSaved: "Last saved {{when}}",
+    noPreview: "Nothing saved yet.",
+    publishingNow: "Publishing…",
     isLive: "Up to date",
     moreActions: "Manage",
     uploadZip: "Upload a zip",
-    uploadDescription: "Replaces the book's files and builds a new preview.",
-    publishTitle: "Publish the preview",
+    uploadDescription: "Replaces the book's files. The preview shows them at once; publish to make them live.",
+    unsavedLeftOut: "You have unsaved changes. Only saved changes are published; save first to include them.",
+    publishedToast: "Published. The new version is live.",
+    publishingToast: "Publishing. The new version goes live once it is built.",
+    failed: {
+      title: "Publishing failed",
+      hint: "The book could not be built, so the version before stays live.",
+      showLog: "Show the log",
+    },
+    changes: {
+      title_one: "{{count}} saved change goes live",
+      title_other: "{{count}} saved changes go live",
+      more_one: "and {{count}} older one",
+      more_other: "and {{count}} older ones",
+      none: "Nothing changed since the live version.",
+      showAll: "Show all changes",
+    },
+    check: {
+      start: "Check all pages",
+      again: "Check again",
+      running: "Checking pages… {{done}}/{{total}}",
+      ok_one: "The {{count}} page renders.",
+      ok_other: "All {{count}} pages render.",
+      problems_one: "{{count}} page could not be rendered:",
+      problems_other: "{{count}} pages could not be rendered:",
+      changed: "The book changed while it was checked.",
+      failed: "The check could not run: {{error}}",
+    },
+    request: {
+      send: "Ask to publish",
+      title: "Ask the owners to publish",
+      description: "The owners see your request on the book page and get an email. They publish the latest save, as the preview shows it.",
+      notePlaceholder: "A note for the owners (optional)",
+      sentToast: "The owners were asked to publish.",
+      asked: "{{by}} asked to publish the latest save · {{when}}",
+      youAsked: "You asked the owners to publish · {{when}}",
+      someone: "Someone",
+      dismiss: "Dismiss",
+      withdraw: "Take back",
+    },
+    publishTitle: "Publish the latest save",
     publishDescription:
-      "The preview becomes a new version and goes live. Earlier versions stay available for a roll back.",
+      "The book as last saved, as the preview shows it, becomes a new version and goes live. If it has not been built yet, it is built first and goes live once the build succeeds. Earlier versions stay available for a roll back.",
     versions: {
       title: "Versions",
       version: "Version",
@@ -1097,10 +1152,7 @@ export const en = {
         "A push never publishes. Publishing creates a version tag (v1, v2, …);",
       rule2b: "is what the live site shows, and",
       rule2c: "lists unpublished changes.",
-      pushPreviewOn:
-        "On this instance a push also builds the preview, so the preview follows main.",
-      pushPreviewOff:
-        "A push does not build anything; the preview moves when you save in the editor or publish.",
+      pushPreview: "A push updates the preview right away; publishing makes it live.",
       rule3:
         "After a pull or push, reload the editor before saving — a save made against an older version is refused, so nothing is overwritten silently.",
       rule4: "No submodules, no Git LFS; symlinks are stored as plain files.",
@@ -1112,12 +1164,10 @@ export const en = {
     },
     upload: {
       chooseZip: "Choose a .zip file",
-      uploadedToast: "Uploaded {{files}} files. The book is being built.",
-      unchangedToast:
-        "Nothing changed since the last upload. The book is being built again.",
-      skippedToast_one: "Left out {{count}} link: {{shown}}",
-      skippedToast_other: "Left out {{count}} links: {{shown}}",
-      viewLog: "View log",
+      uploadedToast: "Uploaded {{files}} files. The preview shows them now; all pages are being checked.",
+      unchangedToast: "Nothing changed since the last upload.",
+      skippedTitle_one: "Left out {{count}} link, which is not carried over:",
+      skippedTitle_other: "Left out {{count}} links, which are not carried over:",
       uploadFailed: "Upload failed",
       dropHere: "Drop a zip of your book here, or click to choose one",
       uploading: "Uploading… {{percent}}%",
@@ -1193,7 +1243,6 @@ export const en = {
     landingPageLabel: "Show a landing page at the front address",
     landingPageHint:
       "The landing page introduces Hyperbook and links the ways to run it. Without it, the front address shows only the login screen.",
-    gitPushLabel: "A git push also builds the preview",
     aiModels: "AI models",
     aiModelsDescription:
       "The models teachers can choose in the editor's AI assistant. The provider and its key are set in the server's environment.",
@@ -1221,8 +1270,6 @@ export const en = {
       "The model fields suggest the provider's models; any other id can be typed in.",
     aiModelListFailed:
       "The provider's model list could not be loaded — model ids can be typed in all the same.",
-    gitPushHint:
-      "When a teacher pushes to a book's main branch with git, its preview is rebuilt (never published automatically). Off by default: pushes then only update the source, so many small commits cannot overwhelm the build queue.",
     signup: "Sign-up",
     signupDescriptionEmail:
       "Who may make an account. New accounts confirm their email address first.",

@@ -12,6 +12,7 @@ import { cdnElements, getInstanceSettings } from "./domain/instance";
 import { migrateDb, openDb } from "./db/client";
 import { ensureFirstAdmin } from "./db/seed";
 import { BuildQueue } from "./hosting/builds";
+import { BookChecks } from "./hosting/checks";
 import { Renderers } from "./hosting/renders";
 import {
   pruneAssetCache,
@@ -117,8 +118,9 @@ async function start() {
   if (rebuilding > 0) console.log(`Rebuilding ${rebuilding} book(s) with Hyperbook ${hyperbookVersion(config)}`);
 
   const renders = new Renderers(config, undefined, () => cdnElements(settings()));
+  const checks = new BookChecks(renders);
   const app = createApp(
-    { config, db, mailer: createMailer(config), builds, renders, dns: createDns(), fetchUrl: createUrlFetcher() },
+    { config, db, mailer: createMailer(config), builds, renders, checks, dns: createDns(), fetchUrl: createUrlFetcher() },
     { webRoot },
   );
   const server = serve({ fetch: app.fetch, port: config.port }, (info) => {
@@ -129,6 +131,7 @@ async function start() {
 
   const shutdown = () => {
     server.close(async () => {
+      checks.stopAll();
       renders.closeAll();
       await builds.stop();
       sqlite.close();

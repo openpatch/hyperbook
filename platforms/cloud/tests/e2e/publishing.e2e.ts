@@ -49,13 +49,19 @@ describe("publishing", () => {
     await page.getByRole("menuitem", { name: "Upload a zip" }).click();
     await page.getByLabel("Upload a zip of your book").setInputFiles(zip);
     await page.getByText(/Uploaded 3 files/).waitFor();
-    await page.getByText("Built", { exact: true }).waitFor({ timeout: 60_000 });
+    // No build: the upload is in the preview at once, and all its pages are checked.
+    await page.keyboard.press("Escape");
+    await page.getByText("All 2 pages render.").waitFor({ timeout: 60_000 });
 
-    // The upload is only a preview until it is published as a version.
+    // Publishing shows what goes live, then builds it.
     await page.getByRole("button", { name: "Publish", exact: true }).click();
-    await page.getByRole("dialog").getByRole("button", { name: "Publish", exact: true }).click();
+    const publish = page.getByRole("dialog");
+    await publish.getByText("1 saved change goes live").waitFor();
+    await publish.getByText("Upload optics.zip").waitFor();
+    await publish.getByRole("button", { name: "Publish", exact: true }).click();
     await page.getByRole("cell", { name: /^v1/ }).waitFor({ timeout: 60_000 });
     await page.getByText(/^Live since /).waitFor();
+    await page.getByText("Same as the live version").waitFor();
 
     await page.getByRole("button", { name: "Log", exact: true }).click();
     await page.getByRole("dialog").getByText(/Ignoring "basePath"/).waitFor();

@@ -38,7 +38,6 @@ const generalSchema = instanceSettingsInput
     privacyMarkdown: true,
     slugSuffix: true,
     landingPage: true,
-    gitPushUpdatesPreview: true,
     defaultLocale: true,
   })
   .required()
@@ -70,7 +69,6 @@ function InstanceForms({
       reservedSlugs: settings.reservedSlugs.join("\n"),
       slugSuffix: settings.slugSuffix,
       landingPage: settings.landingPage,
-      gitPushUpdatesPreview: settings.gitPushUpdatesPreview,
       defaultLocale: settings.defaultLocale ?? null,
     },
   });
@@ -167,20 +165,6 @@ function InstanceForms({
             </div>
             <p id="landing-page-hint" className="text-sm text-muted-foreground">
               {t("instanceSettings.landingPageHint")}
-            </p>
-          </div>
-          <div className="grid gap-1.5">
-            <div className="flex items-center gap-2">
-              <Checkbox
-                id="git-push-preview"
-                checked={form.watch("gitPushUpdatesPreview")}
-                onCheckedChange={(v) => form.setValue("gitPushUpdatesPreview", v === true, { shouldDirty: true })}
-                aria-describedby="git-push-preview-hint"
-              />
-              <Label htmlFor="git-push-preview">{t("instanceSettings.gitPushLabel")}</Label>
-            </div>
-            <p id="git-push-preview-hint" className="text-sm text-muted-foreground">
-              {t("instanceSettings.gitPushHint")}
             </p>
           </div>
           <div className="grid gap-1.5">

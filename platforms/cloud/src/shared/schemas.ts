@@ -210,7 +210,6 @@ export const instanceSettingsInput = z
       z.enum(ELEMENT_RUNTIMES),
       elementRuntimeChoice,
     ),
-    gitPushUpdatesPreview: z.boolean(),
     aiModels: z
       .array(
         z.object({
@@ -246,6 +245,13 @@ export const publishInput = z
   .partial();
 
 /** A rollback target: one of the book's version tags. */
+/** An editor's request that the owners publish the latest save. */
+export const publishRequestInput = z
+  .object({
+    note: z.string().trim().max(500, "validation.max500").default(""),
+  })
+  .partial();
+
 export const rollbackInput = z.object({
   tag: z.string().regex(/^v\d+$/, "Choose a version tag like v3"),
 });
@@ -455,6 +461,11 @@ export const historyInput = z.object({
   /** The page size; a book can have many commits, so the pane pages through them. */
   limit: z.coerce.number().int().min(1).max(100).default(50),
   /** Only the commits that touched this file. */
+  path: bookPath.optional(),
+});
+
+/** The changes since the live version, of the whole book or one file. */
+export const liveDiffInput = z.object({
   path: bookPath.optional(),
 });
 

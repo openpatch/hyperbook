@@ -215,6 +215,11 @@ export const de: Messages = {
       subject: "Sie sind zu {{name}} eingeladen",
       body: "Hallo{{name}},\n\n{{by}} hat Sie zu {{instance}} hinzugefügt, wo Sie Hyperbooks schreiben und veröffentlichen können.\n\nWählen Sie innerhalb von 7 Tagen mit diesem Link Ihr Passwort:\n\n{{link}}\n\nDanach melden Sie sich unter {{loginUrl}} mit {{email}} an.",
     },
+    publishRequest: {
+      subject: "Bitte „{{title}}“ veröffentlichen",
+      body: "{{by}} bittet Sie, „{{title}}“ bei {{name}} zu veröffentlichen: Der zuletzt gespeicherte Stand, wie ihn die Vorschau zeigt, ist noch nicht live.{{note}}\n\nÄnderungen ansehen und veröffentlichen unter {{bookUrl}}",
+      note: "\n\nDie Notiz dazu:\n{{note}}",
+    },
     slugRequest: {
       note: "\n\nNotiz des Admins:\n{{note}}",
       requested: {
@@ -297,6 +302,14 @@ export const de: Messages = {
       by: "von {{name}}, {{date}}",
       loadingDiff: "Änderungen werden geladen…",
       truncated: "Die Änderungen sind länger als angezeigt.",
+      live: "Live",
+      compareLive: "Mit der Live-Version vergleichen",
+      liveDiffFile: "{{path}}: Änderungen seit der Live-Version",
+      liveDiffBook: "Änderungen seit der Live-Version",
+      liveDiffHint: "Die Live-Version im Vergleich zum zuletzt gespeicherten Stand. Ungespeicherte Änderungen sind nicht enthalten.",
+      liveDiffNothingLive: "Noch ist nichts veröffentlicht, daher ist alles neu.",
+      liveDiffSameFile: "Diese Datei ist dieselbe wie in der Live-Version.",
+      liveDiffSameBook: "Der zuletzt gespeicherte Stand ist die Live-Version.",
     },
     start: {
       external:
@@ -312,6 +325,9 @@ export const de: Messages = {
     toolbar: {
       bookSettings: "Buch-Einstellungen",
       saveAll: "Alle speichern",
+      publish: "Veröffentlichen",
+      askToPublish: "Um Veröffentlichung bitten",
+      asked: "Veröffentlichung erbeten",
       unsavedFiles: "Ungespeicherte Änderungen",
       hideAi: "KI-Assistent ausblenden",
       showAi: "KI-Assistent einblenden",
@@ -661,6 +677,7 @@ export const de: Messages = {
     },
   },
   validation: {
+    max500: "Verwenden Sie höchstens 500 Zeichen",
     email: "Geben Sie eine gültige E-Mail-Adresse ein",
     pathName: "Geben Sie einen Namen ein",
     pathTooLong: "Der Pfad ist zu lang",
@@ -791,6 +808,7 @@ export const de: Messages = {
       bookUpload: "lud ein Buch hoch",
       bookRebuild: "baute ein Buch neu",
       bookPublish: "veröffentlichte ein Buch",
+      bookPublishRequest: "bat um die Veröffentlichung eines Buchs",
       bookUnpublish: "zog die Veröffentlichung eines Buchs zurück",
       bookBuildCancel: "brach einen Build ab",
       groupCreate: "fügte eine Gruppe hinzu",
@@ -1027,26 +1045,63 @@ export const de: Messages = {
   publishing: {
     title: "Veröffentlichen",
     description:
-      "Bearbeiten Sie das Buch im Browser oder laden Sie es als Zip hoch; jede Speicherung wird als Vorschau gebaut. Veröffentlichen Sie die Vorschau, um sie als neue Live-Version freizugeben. Sie können auch lokal mit git am Buch arbeiten.",
+      "Bearbeiten Sie das Buch im Browser oder laden Sie es als Zip hoch; die Vorschau zeigt immer den zuletzt gespeicherten Stand. Veröffentlichen Sie, um diesen Stand als neue Live-Version freizugeben. Sie können auch lokal mit git am Buch arbeiten.",
     notPublishedYet: "Noch nicht veröffentlicht.",
-    aheadPreview_one: "main liegt {{count}} Commit vor der Vorschau.",
-    aheadPreview_other: "main liegt {{count}} Commits vor der Vorschau.",
     since: "Live seit {{when}}",
     preview: "Vorschau",
     previewIsLive: "Entspricht der Live-Version",
-    previewNewer: "Neuer als die Live-Version",
-    savedAt: "Gespeichert {{when}}",
-    noPreview: "Noch nichts gebaut.",
-    buildPreview: "Vorschau bauen",
-    buildingPreview: "Vorschau wird gebaut…",
+    unpublishedChanges_one: "{{count}} gespeicherte Änderung ist noch nicht live",
+    unpublishedChanges_other: "{{count}} gespeicherte Änderungen sind noch nicht live",
+    lastSaved: "Zuletzt gespeichert {{when}}",
+    noPreview: "Noch nichts gespeichert.",
+    publishingNow: "Wird veröffentlicht…",
     isLive: "Aktuell",
     moreActions: "Verwalten",
     uploadZip: "Zip hochladen",
     uploadDescription:
-      "Ersetzt die Dateien des Buchs und baut eine neue Vorschau.",
-    publishTitle: "Vorschau veröffentlichen",
+      "Ersetzt die Dateien des Buchs. Die Vorschau zeigt sie sofort; veröffentlichen Sie, um sie live zu schalten.",
+    unsavedLeftOut: "Sie haben ungespeicherte Änderungen. Veröffentlicht wird nur Gespeichertes; speichern Sie zuerst, um sie einzuschließen.",
+    publishedToast: "Veröffentlicht. Die neue Version ist live.",
+    publishingToast: "Wird veröffentlicht. Die neue Version geht live, sobald sie gebaut ist.",
+    failed: {
+      title: "Veröffentlichen fehlgeschlagen",
+      hint: "Das Buch ließ sich nicht bauen, daher bleibt die vorige Version live.",
+      showLog: "Log anzeigen",
+    },
+    changes: {
+      title_one: "{{count}} gespeicherte Änderung geht live",
+      title_other: "{{count}} gespeicherte Änderungen gehen live",
+      more_one: "und {{count}} ältere",
+      more_other: "und {{count}} ältere",
+      none: "Seit der Live-Version hat sich nichts geändert.",
+      showAll: "Alle Änderungen anzeigen",
+    },
+    check: {
+      start: "Alle Seiten prüfen",
+      again: "Erneut prüfen",
+      running: "Seiten werden geprüft… {{done}}/{{total}}",
+      ok_one: "Die {{count}} Seite lässt sich darstellen.",
+      ok_other: "Alle {{count}} Seiten lassen sich darstellen.",
+      problems_one: "{{count}} Seite ließ sich nicht darstellen:",
+      problems_other: "{{count}} Seiten ließen sich nicht darstellen:",
+      changed: "Das Buch hat sich während der Prüfung geändert.",
+      failed: "Die Prüfung konnte nicht laufen: {{error}}",
+    },
+    request: {
+      send: "Um Veröffentlichung bitten",
+      title: "Die Eigentümer um Veröffentlichung bitten",
+      description: "Die Eigentümer sehen Ihre Bitte auf der Seite des Buchs und bekommen eine E-Mail. Sie veröffentlichen den zuletzt gespeicherten Stand, wie ihn die Vorschau zeigt.",
+      notePlaceholder: "Eine Notiz für die Eigentümer (optional)",
+      sentToast: "Die Eigentümer wurden um Veröffentlichung gebeten.",
+      asked: "{{by}} bittet, den zuletzt gespeicherten Stand zu veröffentlichen · {{when}}",
+      youAsked: "Sie haben die Eigentümer um Veröffentlichung gebeten · {{when}}",
+      someone: "Jemand",
+      dismiss: "Verwerfen",
+      withdraw: "Zurücknehmen",
+    },
+    publishTitle: "Zuletzt gespeicherten Stand veröffentlichen",
     publishDescription:
-      "Die Vorschau wird zu einer neuen Version und geht live. Frühere Versionen bleiben für ein Zurücksetzen erhalten.",
+      "Das Buch, wie es zuletzt gespeichert wurde und wie die Vorschau es zeigt, wird zu einer neuen Version und geht live. Ist dieser Stand noch nicht gebaut, wird er zuerst gebaut und geht live, sobald der Bau gelingt. Frühere Versionen bleiben für ein Zurücksetzen erhalten.",
     versions: {
       title: "Versionen",
       version: "Version",
@@ -1123,10 +1178,7 @@ export const de: Messages = {
         "Ein Push veröffentlicht nie. Das Veröffentlichen erzeugt einen Versions-Tag (v1, v2, …);",
       rule2b: "zeigt, was die Live-Seite zeigt, und",
       rule2c: "listet unveröffentlichte Änderungen auf.",
-      pushPreviewOn:
-        "Auf dieser Instanz baut ein Push auch die Vorschau, sodass die Vorschau main folgt.",
-      pushPreviewOff:
-        "Ein Push baut nichts; die Vorschau zieht weiter, wenn Sie im Editor speichern oder veröffentlichen.",
+      pushPreview: "Ein Push aktualisiert die Vorschau sofort; erst das Veröffentlichen macht ihn live.",
       rule3:
         "Laden Sie den Editor nach einem Pull oder Push neu, bevor Sie speichern — ein Speichern gegen eine ältere Version wird verweigert, sodass nichts stillschweigend überschrieben wird.",
       rule4:
@@ -1139,12 +1191,10 @@ export const de: Messages = {
     },
     upload: {
       chooseZip: "Wählen Sie eine .zip-Datei",
-      uploadedToast: "{{files}} Dateien hochgeladen. Das Buch wird gebaut.",
-      unchangedToast:
-        "Nichts hat sich seit dem letzten Upload geändert. Das Buch wird erneut gebaut.",
-      skippedToast_one: "{{count}} Verweis ausgelassen: {{shown}}",
-      skippedToast_other: "{{count}} Verweise ausgelassen: {{shown}}",
-      viewLog: "Log ansehen",
+      uploadedToast: "{{files}} Dateien hochgeladen. Die Vorschau zeigt sie jetzt; alle Seiten werden geprüft.",
+      unchangedToast: "Nichts hat sich seit dem letzten Upload geändert.",
+      skippedTitle_one: "{{count}} Verweis ausgelassen, er wird nicht übernommen:",
+      skippedTitle_other: "{{count}} Verweise ausgelassen, sie werden nicht übernommen:",
       uploadFailed: "Upload fehlgeschlagen",
       dropHere:
         "Ziehen Sie eine Zip Ihres Buchs hierher oder klicken Sie, um eine zu wählen",
@@ -1223,7 +1273,6 @@ export const de: Messages = {
     landingPageLabel: "Eine Landing-Page an der vorderen Adresse zeigen",
     landingPageHint:
       "Die Landing-Page stellt Hyperbook vor und verlinkt die Wege, es zu betreiben. Ohne sie zeigt die vordere Adresse nur den Anmeldebildschirm.",
-    gitPushLabel: "Ein git push baut auch die Vorschau",
     aiModels: "KI-Modelle",
     aiModelsDescription:
       "Die Modelle, aus denen Lehrkräfte im KI-Assistenten des Editors wählen können. Anbieter und Schlüssel werden in der Umgebung des Servers festgelegt.",
@@ -1252,8 +1301,6 @@ export const de: Messages = {
       "Die Modellfelder schlagen die Modelle des Anbieters vor; andere IDs lassen sich eintippen.",
     aiModelListFailed:
       "Die Modellliste des Anbieters konnte nicht geladen werden — Modell-IDs lassen sich trotzdem eintippen.",
-    gitPushHint:
-      "Wenn eine Lehrkraft mit git auf den main-Branch eines Buchs pusht, wird seine Vorschau neu gebaut (nie automatisch veröffentlicht). Standardmäßig aus: Pushes aktualisieren dann nur die Quelle, damit viele kleine Commits die Build-Warteschlange nicht überlasten.",
     signup: "Registrierung",
     signupDescriptionEmail:
       "Wer ein Konto anlegen darf. Neue Konten bestätigen zuerst ihre E-Mail-Adresse.",

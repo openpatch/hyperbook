@@ -10,6 +10,7 @@ import { migrateDb, openDb } from "../src/server/db/client";
 import { users } from "../src/server/db/schema";
 import type { Deps } from "../src/server/deps";
 import { BuildQueue } from "../src/server/hosting/builds";
+import { BookChecks } from "../src/server/hosting/checks";
 import { type RenderSpawner, Renderers } from "../src/server/hosting/renders";
 import type { Runner } from "../src/server/hosting/runner";
 import { createMemoryDns } from "../src/server/dns";
@@ -81,9 +82,10 @@ export function setup(env: Record<string, string> = {}, options: { runner?: Runn
   const dns = createMemoryDns();
   const fetchUrl = createMemoryUrlFetcher();
   const renders = new Renderers(config, textRender);
-  const deps: Deps = { config, db, mailer, builds, renders, dns, fetchUrl };
+  const checks = new BookChecks(renders);
+  const deps: Deps = { config, db, mailer, builds, renders, checks, dns, fetchUrl };
   const app = createApp(deps);
-  return { config, db, sqlite, mailer, builds, renders, dns, fetchUrl, deps, app };
+  return { config, db, sqlite, mailer, builds, renders, checks, dns, fetchUrl, deps, app };
 }
 
 export type Instance = ReturnType<typeof setup>;

@@ -55,6 +55,43 @@ async function write(
 }
 
 describe("history", () => {
+  it("diffs the latest save against the live version, for the book or one file", async () => {
+    const { instance, owner, book, files, history } = await world();
+    let listing = (await owner.c.post(files("/init"), { template: "empty" })).body as Listing;
+    const liveDiff = async (path?: string) =>
+      (await owner.c.get(history(`/live-diff${path ? `?path=${encodeURIComponent(path)}` : ""}`))).body;
+    // Nothing live yet: everything is new.
+    expect((await liveDiff()).live).toBeNull();
+    expect((await liveDiff()).diff).toContain("hyperbook.json");
+
+    await owner.c.post(`/api/books/${book.id}/publish`, {});
+    await instance.builds.idle();
+    expect(await liveDiff()).toMatchObject({ diff: "", head: listing.commit, live: listing.commit });
+
+    listing = await write(owner.c.post, files(), "book/index.md", "# Changed", "Change", listing);
+    listing = await write(owner.c.post, files(), "book/other.md", "# Other", "Other", listing);
+    const book1 = await liveDiff();
+    expect(book1.diff).toContain("+# Changed");
+    expect(book1.diff).toContain("book/other.md");
+    const page = await liveDiff("book/index.md");
+    expect(page.diff).toContain("+# Changed");
+    expect(page.diff).not.toContain("book/other.md");
+    expect((await liveDiff("hyperbook.json")).diff).toBe("");
+  });
+
+  it("marks the live commit and the published versions", async () => {
+    const { instance, owner, book, files, history } = await world();
+    let listing = (await owner.c.post(files("/init"), { template: "empty" })).body as Listing;
+    await owner.c.post(`/api/books/${book.id}/publish`, {});
+    await instance.builds.idle();
+    listing = await write(owner.c.post, files(), "book/index.md", "# Two", "Second", listing);
+    const { commits } = (await owner.c.get(history())).body as {
+      commits: { sha: string; tags: string[] }[];
+    };
+    expect(commits[0]).toMatchObject({ sha: listing.commit, tags: [] });
+    expect(commits[1]!.tags.sort()).toEqual(["published", "v1"]);
+  });
+
   it("lists commits with author, message and line counts", async () => {
     const { owner, files, history } = await world();
     let listing = (await owner.c.post(files("/init"), { template: "empty" }))

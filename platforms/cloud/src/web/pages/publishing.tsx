@@ -28,8 +28,16 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ApiError, api, unwrap } from "@/lib/api";
 import type { Book } from "@/lib/books";
-import { useInstance } from "@/lib/session";
 import { cn } from "@/lib/utils";
+import {
+  CheckLine,
+  PublishDialog,
+  PublishRequestNotice,
+  RequestPublishDialog,
+  checkKey,
+  headKey,
+  useHead,
+} from "./publish-flow";
 
 type Build = Awaited<ReturnType<typeof fetchBuilds>>[number];
 
@@ -61,10 +69,6 @@ const active = (b: Build) => b.status === "queued" || b.status === "running";
 /** The version tag of a build that a rollback can go back to. */
 const versionTag = (b: Build) => b.tags?.find((t) => /^v\d+$/.test(t));
 
-/** How many commits main has on top of a build. */
-const aheadOf = (book: Book, b: Build | undefined) =>
-  b ? Math.max(0, book.commitCount - b.commitCount) : null;
-
 function duration(b: Build, t: ReturnType<typeof useTranslation>["t"]): string {
   if (!b.startedAt) return "";
   const ms = (b.finishedAt ?? Date.now()) - b.startedAt;
@@ -76,7 +80,7 @@ function duration(b: Build, t: ReturnType<typeof useTranslation>["t"]): string {
       });
 }
 
-type UploadResult = { files: number; changed: boolean; skipped: string[]; build: Build };
+type UploadResult = { files: number; changed: boolean; skipped: string[] };
 
 /** The upload goes as multipart, which the typed client does not model. */
 function uploadZip(bookId: string, file: File, onProgress: (fraction: number) => void) {
@@ -107,7 +111,9 @@ const HISTORY_ROWS = 5;
 
 /**
  * Live is the newest published version (a v<N> tag) and only changes by
- * publishing or rolling back; the preview is the last saved state of the book.
+ * publishing or rolling back; the preview is the latest save of the book,
+ * rendered page by page as it is visited, so it needs no build. Publishing
+ * makes the latest save live, building it first when no build of it is kept.
  */
 export function PublishingSection({ book }: { book: Book }) {
   const { t } = useTranslation();
@@ -122,10 +128,10 @@ export function PublishingSection({ book }: { book: Book }) {
     refetchInterval: (query) => (query.state.data?.some(active) ? 1500 : false),
   });
   const { data: versions } = useQuery({ queryKey: versionsKey, queryFn: () => fetchVersions(id) });
+  const { data: head } = useHead(id);
   const [logFor, setLogFor] = useState<number | null>(null);
-  const [dialog, setDialog] = useState<"publish" | "upload" | "git" | "unpublish" | null>(null);
+  const [dialog, setDialog] = useState<"publish" | "request" | "upload" | "git" | "unpublish" | null>(null);
   const [showAll, setShowAll] = useState(false);
-  const [note, setNote] = useState("");
 
   // A finished build may have changed what is published.
   const latest = builds?.[0];
@@ -134,6 +140,7 @@ export function PublishingSection({ book }: { book: Book }) {
     if (latest && !active(latest)) {
       void queryClient.invalidateQueries({ queryKey: ["books", id], exact: true });
       void queryClient.invalidateQueries({ queryKey: versionsKey });
+      void queryClient.invalidateQueries({ queryKey: headKey(id) });
     }
   }, [latestState]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -141,6 +148,7 @@ export function PublishingSection({ book }: { book: Book }) {
     Promise.all([
       queryClient.invalidateQueries({ queryKey: key }),
       queryClient.invalidateQueries({ queryKey: versionsKey }),
+      queryClient.invalidateQueries({ queryKey: headKey(id) }),
       queryClient.invalidateQueries({ queryKey: ["books", id], exact: true }),
     ]);
   const run = async (action: () => Promise<unknown>) => {
@@ -154,20 +162,25 @@ export function PublishingSection({ book }: { book: Book }) {
 
   // The book has source when main has commits — the server 409s a build
   // only then — not when a build exists yet. A freshly created book gets
-  // its first commit from the editor, so its preview can be built at once.
+  // its first commit from the editor, so it can be previewed at once.
   const hasSource = book.commitCount > 0;
   // Publishing, rolling back and unpublishing are the owners' (the server checks too).
   const canPublish = book.role === "owner";
   const hasBuilds = (builds?.length ?? 0) > 0;
-  const preview = builds?.find((b) => b.preview);
   const liveVersion = versions?.find((v) => v.live);
-  const aheadPreview = aheadOf(book, preview);
-  const pending = builds?.find((b) => active(b));
-  // The preview is behind when main has commits no preview build has.
-  const previewBehind = !preview || (aheadPreview ?? 0) > 0 || !!pending;
-  const previewIsLive = !!preview && !!liveVersion && preview.commit === liveVersion.commit;
-  // Nothing to publish while main is what the live version was made from.
-  const upToDate = previewIsLive && !previewBehind;
+  // A publish whose build is still waiting or running goes live when it succeeds.
+  const publishing = builds?.find((b) => active(b) && b.publish);
+  const unpublished = head?.unpublished ?? 0;
+  // Nothing to publish while the live site is the latest save.
+  const upToDate = !!book.publishedAt && unpublished === 0 && !publishing;
+  // The newest attempt to go live, when it failed after the live version
+  // went live: the old version stays, and the teacher should know why.
+  const lastAttempt = builds?.find((b) => b.publish && !active(b));
+  const failedPublish =
+    lastAttempt?.status === "failed" && (!book.publishedAt || (lastAttempt.finishedAt ?? 0) > book.publishedAt)
+      ? lastAttempt
+      : null;
+  const request = head?.request ?? null;
   const rows = showAll ? (builds ?? []) : (builds ?? []).slice(0, HISTORY_ROWS);
 
   const openPreview = () => {
@@ -182,13 +195,6 @@ export function PublishingSection({ book }: { book: Book }) {
         toast.error(error instanceof Error ? error.message : t("common.somethingWrong"));
       });
   };
-
-  const publish = () =>
-    run(async () => {
-      await unwrap(api.books[":id"].publish.$post({ param: { id }, json: { note: note.trim() } }));
-      setNote("");
-      setDialog(null);
-    });
 
   return (
     <Section
@@ -230,7 +236,9 @@ export function PublishingSection({ book }: { book: Book }) {
               {t("publishing.live")}
               {liveVersion && <Badge>{liveVersion.tag}</Badge>}
             </div>
-            {upToDate ? (
+            {publishing ? (
+              <Badge variant="secondary">{t("publishing.publishingNow")}</Badge>
+            ) : upToDate ? (
               <Badge variant="outline">{t("publishing.isLive")}</Badge>
             ) : (
               canPublish && (
@@ -253,30 +261,33 @@ export function PublishingSection({ book }: { book: Book }) {
           ) : (
             <p className="text-muted-foreground">{t("publishing.notPublishedYet")}</p>
           )}
-          {!canPublish && !upToDate && (
-            <p className="mt-1 text-sm text-muted-foreground">{t("publishing.ownersPublish")}</p>
+          {failedPublish && (
+            <div className="mt-3 rounded-md border border-destructive/40 bg-destructive/5 p-3 text-sm" role="alert">
+              <p className="font-medium text-destructive">{t("publishing.failed.title")}</p>
+              <p className="mt-1 text-muted-foreground">{t("publishing.failed.hint")}</p>
+              {failedPublish.error && (
+                <p className="mt-1 whitespace-pre-wrap text-destructive">{failedPublish.error}</p>
+              )}
+              <Button size="sm" variant="outline" className="mt-2" onClick={() => setLogFor(failedPublish.id)}>
+                {t("publishing.failed.showLog")}
+              </Button>
+            </div>
+          )}
+          {request && <PublishRequestNotice book={book} request={request} />}
+          {!canPublish && !upToDate && hasSource && !request && (
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              <p className="text-sm text-muted-foreground">{t("publishing.ownersPublish")}</p>
+              <Button size="sm" variant="outline" onClick={() => setDialog("request")}>
+                {t("publishing.request.send")}
+              </Button>
+            </div>
           )}
         </div>
         <div className="rounded-lg border p-4">
-          <div className="mb-2 flex h-8 items-center justify-between gap-2">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              {t("publishing.preview")}
-              {pending && <Badge variant="secondary">{t(STATUS[pending.status].label)}</Badge>}
-            </div>
-            {previewBehind ? (
-              <Button
-                size="sm"
-                variant="outline"
-                disabled={!hasSource || !!pending}
-                onClick={() => void run(() => unwrap(api.books[":id"].builds.$post({ param: { id } })))}
-              >
-                {pending ? t("publishing.buildingPreview") : t("publishing.buildPreview")}
-              </Button>
-            ) : (
-              <Badge variant="outline">{t("publishing.isLive")}</Badge>
-            )}
+          <div className="mb-2 flex h-8 items-center gap-2 text-sm text-muted-foreground">
+            {t("publishing.preview")}
           </div>
-          {preview ? (
+          {hasSource ? (
             <>
               <a
                 href={book.previewUrl}
@@ -290,38 +301,32 @@ export function PublishingSection({ book }: { book: Book }) {
               >
                 {book.previewUrl.replace(/^https?:\/\//, "")}
               </a>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {t("publishing.savedAt", { when: new Date(preview.createdAt).toLocaleString() })}
-              </p>
-              <p className="mt-1 text-sm">
-                {previewIsLive ? t("publishing.previewIsLive") : t("publishing.previewNewer")}
-                {aheadPreview !== null && aheadPreview > 0 && ` · ${t("publishing.aheadPreview", { count: aheadPreview })}`}
-              </p>
+              {head?.savedAt && (
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {t("publishing.lastSaved", { when: new Date(head.savedAt).toLocaleString() })}
+                </p>
+              )}
+              {book.publishedAt && head && (
+                <p className="mt-1 text-sm">
+                  {unpublished > 0
+                    ? t("publishing.unpublishedChanges", { count: unpublished })
+                    : t("publishing.previewIsLive")}
+                </p>
+              )}
             </>
           ) : (
             <p className="text-muted-foreground">{t("publishing.noPreview")}</p>
           )}
+          {hasSource && (
+            <div className="mt-3">
+              <CheckLine book={book} head={head} />
+            </div>
+          )}
         </div>
       </div>
 
-      <Dialog open={dialog === "publish"} onOpenChange={(open) => !open && setDialog(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{t("publishing.publishTitle")}</DialogTitle>
-            <DialogDescription>{t("publishing.publishDescription")}</DialogDescription>
-          </DialogHeader>
-          <Input
-            placeholder={t("publishing.notePlaceholder")}
-            maxLength={200}
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
-            aria-label={t("publishing.notePlaceholder")}
-          />
-          <DialogFooter>
-            <Button onClick={() => void publish()}>{t("publishing.publish")}</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <PublishDialog book={book} open={dialog === "publish"} onOpenChange={(open) => setDialog(open ? "publish" : null)} />
+      <RequestPublishDialog book={book} open={dialog === "request"} onOpenChange={(open) => setDialog(open ? "request" : null)} />
 
       <Dialog open={dialog === "upload"} onOpenChange={(open) => !open && setDialog(null)}>
         <DialogContent>
@@ -331,11 +336,12 @@ export function PublishingSection({ book }: { book: Book }) {
           </DialogHeader>
           <UploadZone
             bookId={id}
-            onUploaded={() => {
-              setDialog(null);
+            onUploaded={(closes) => {
+              if (closes) setDialog(null);
               void refresh();
+              // The upload starts a check of all pages.
+              void queryClient.invalidateQueries({ queryKey: checkKey(id) });
             }}
-            onLog={setLogFor}
           />
         </DialogContent>
       </Dialog>
@@ -428,7 +434,6 @@ export function PublishingSection({ book }: { book: Book }) {
                         {b.progress && ` ${b.progress.done}/${b.progress.total}`}
                       </Badge>
                       {b.published && <Badge variant="outline">{t("publishing.live")}</Badge>}
-                      {b.preview && <Badge variant="outline">{t("publishing.preview")}</Badge>}
                       <span className="text-sm text-muted-foreground">{duration(b, t)}</span>
                     </div>
                     {b.error && <p className="mt-1 max-w-sm text-sm whitespace-normal text-destructive">{b.error}</p>}
@@ -535,13 +540,11 @@ function VersionRow({
 
 /**
  * "Work locally": the clone command and the per-book git tokens. A push to
- * main never triggers a publish build — only a preview build when the
- * instance setting says so.
+ * main never triggers a build; the preview shows it at once.
  */
 function WorkLocally({ book }: { book: Book }) {
   const { t } = useTranslation();
   const id = String(book.id);
-  const { data: instance } = useInstance();
   const queryClient = useQueryClient();
   const cloneUrl = (() => {
     const url = new URL(window.location.origin);
@@ -683,11 +686,7 @@ function WorkLocally({ book }: { book: Book }) {
             {t("publishing.git.rule2b")} <code>git log main ^published</code>{" "}
             {t("publishing.git.rule2c")}
           </li>
-          <li>
-            {instance?.gitPushUpdatesPreview
-              ? t("publishing.git.pushPreviewOn")
-              : t("publishing.git.pushPreviewOff")}
-          </li>
+          <li>{t("publishing.git.pushPreview")}</li>
           <li>{t("publishing.git.rule3")}</li>
           <li>{t("publishing.git.rule4")}</li>
           <li>
@@ -710,11 +709,10 @@ function WorkLocally({ book }: { book: Book }) {
 function UploadZone({
   bookId,
   onUploaded,
-  onLog,
 }: {
   bookId: string;
-  onUploaded: () => void;
-  onLog: (buildId: number) => void;
+  /** `closes`: nothing left to show here (no links were left out). */
+  onUploaded: (closes: boolean) => void;
 }) {
   const { t } = useTranslation();
   const input = useRef<HTMLInputElement>(null);
@@ -722,6 +720,8 @@ function UploadZone({
   const [busy, setBusy] = useState(false);
   // How much of the zip was sent; 1 means the server is now unpacking it.
   const [progress, setProgress] = useState(0);
+  // What the last upload left out, listed in full below the zone.
+  const [skipped, setSkipped] = useState<string[]>([]);
 
   const upload = async (file: File | undefined) => {
     if (!file) return;
@@ -731,6 +731,7 @@ function UploadZone({
     }
     setBusy(true);
     setProgress(0);
+    setSkipped([]);
     try {
       const result = await uploadZip(bookId, file, setProgress);
       toast.success(
@@ -738,23 +739,8 @@ function UploadZone({
           ? t("publishing.upload.uploadedToast", { files: result.files })
           : t("publishing.upload.unchangedToast"),
       );
-      if (result.skipped.length > 0) {
-        const shown = result.skipped.slice(0, 3).join(", ");
-        toast.warning(
-          t("publishing.upload.skippedToast", {
-            count: result.skipped.length,
-            shown: `${shown}${result.skipped.length > 3 ? ", …" : ""}`,
-          }),
-          {
-            // The whole list is in the build's log.
-            action: {
-              label: t("publishing.upload.viewLog"),
-              onClick: () => onLog(result.build.id),
-            },
-          },
-        );
-      }
-      onUploaded();
+      setSkipped(result.skipped);
+      onUploaded(result.skipped.length === 0);
     } catch (error) {
       toast.error(
         error instanceof ApiError || error instanceof Error
@@ -768,6 +754,7 @@ function UploadZone({
   };
 
   return (
+    <>
     <label
       className={cn(
         "flex max-w-xl cursor-pointer flex-col items-center gap-2 rounded-lg border-2 border-dashed border-border p-6 text-center transition-colors",
@@ -818,6 +805,17 @@ function UploadZone({
         onChange={(e) => void upload(e.target.files?.[0])}
       />
     </label>
+    {skipped.length > 0 && (
+      <div className="max-w-xl text-sm" role="status">
+        <p className="font-medium">{t("publishing.upload.skippedTitle", { count: skipped.length })}</p>
+        <ul className="mt-1 max-h-40 overflow-y-auto rounded-md border px-3 py-1 font-mono text-xs">
+          {skipped.map((entry) => (
+            <li key={entry}>{entry}</li>
+          ))}
+        </ul>
+      </div>
+    )}
+    </>
   );
 }
 

@@ -38,7 +38,7 @@ const memberParam = validate(
   }),
 );
 
-export function bookRoutes({ db, config, builds, dns, fetchUrl }: Deps) {
+export function bookRoutes({ db, config, builds, checks, dns, fetchUrl }: Deps) {
   function members(bookId: number) {
     return db
       .select({
@@ -238,6 +238,7 @@ export function bookRoutes({ db, config, builds, dns, fetchUrl }: Deps) {
       const user = c.get("user");
       const { book } = bookAccess(db, user, c.req.valid("param").id, "owner");
       builds.cancelBook(book.id);
+      checks.forget(book.id);
       db.delete(books).where(eq(books.id, book.id)).run();
       await removeBookFiles(config, book.id);
       audit(db, {
