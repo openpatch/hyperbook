@@ -1,4 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { HandIcon, LoaderCircleIcon, RocketIcon } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -371,13 +372,21 @@ export function EditorPublishButton({
       <Button
         size="sm"
         variant={owner ? "default" : "outline"}
+        className="max-sm:gap-1 max-sm:px-2"
         disabled={upToDate || building !== null || (!owner && !!head.request)}
         title={upToDate ? t("publishing.isLive") : t("publishing.unpublishedChanges", { count })}
         onClick={() => setOpen(true)}
       >
-        {building !== null ? t("publishing.publishingNow") : label}
+        {building !== null ? (
+          <LoaderCircleIcon className="size-3.5 animate-spin sm:hidden" aria-hidden />
+        ) : owner ? (
+          <RocketIcon className="size-3.5 sm:hidden" aria-hidden />
+        ) : (
+          <HandIcon className="size-3.5 sm:hidden" aria-hidden />
+        )}
+        <span className="max-sm:sr-only">{building !== null ? t("publishing.publishingNow") : label}</span>
         {count > 0 && building === null && (
-          <span className="ml-1 rounded-full bg-background/20 px-1.5 text-xs tabular-nums" aria-hidden>
+          <span className="rounded-full bg-background/20 px-1.5 text-xs tabular-nums sm:ml-1" aria-hidden>
             {count}
           </span>
         )}
