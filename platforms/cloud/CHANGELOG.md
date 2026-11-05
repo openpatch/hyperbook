@@ -1,5 +1,11 @@
 # @hyperbook/cloud
 
+## 0.5.7
+
+### Patch Changes
+
+- [`4f4a43b`](https://github.com/openpatch/hyperbook/commit/4f4a43be6d0cf941f6e170a35c405993f1a9c844) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - The java-memory-playground directive now uses `@java-memory-playground/web-component` 0.4.0. Exercises are checked by walking the reader's diagram and the solution from each variable, so extra temporary variables no longer count as wrong, shared references have to really be shared, and the feedback says where the answer goes wrong. The interface is more consistent, with an undo/redo + ☰ toolbar, and it has a compact layout for phones and small embeds. In that compact layout the step bar is lifted clear of the directive's reset and fullscreen buttons. The new toolbar options are available as directive attributes: `hide-undo-redo`, `hide-download-png`, `hide-download-all-png`, `hide-print-mode`, `hide-help` and `hide-save`. The cloud editor's pin of `@java-memory-playground/java-memory-playground` moves to 0.3.0, the core version books render with.
+
 ## 0.5.6
 
 ### Patch Changes
