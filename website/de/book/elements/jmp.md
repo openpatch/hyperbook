@@ -48,6 +48,12 @@ sie auszuschalten.
 | `hide-steps` | Die Schrittleiste ausblenden, für eine Seite, auf der es um ein einziges Bild geht |
 | `hide-step-changes` | Nicht mehr markieren, was ein Schritt gegenüber dem vorherigen verändert hat |
 | `gc-prediction` | Vor dem Aufräumen fragen, welche Objekte unerreichbar sind |
+| `hide-undo-redo` | Die Knöpfe Rückgängig und Wiederholen in der Werkzeugleiste ausblenden |
+| `hide-download-png` | "PNG herunterladen" im Menü der Werkzeugleiste ausblenden |
+| `hide-download-all-png` | "Alle Schritte als PNG herunterladen" im Menü der Werkzeugleiste ausblenden |
+| `hide-print-mode` | Den Schalter für den Druckmodus im Menü der Werkzeugleiste ausblenden |
+| `hide-help` | Die Hilfe im Menü der Werkzeugleiste ausblenden |
+| `hide-save` | Speichern im Menü der Werkzeugleiste ausblenden. Was Lesende bauen, bleibt trotzdem erhalten |
 
 Für eine Abbildung, die nur betrachtet werden soll:
 

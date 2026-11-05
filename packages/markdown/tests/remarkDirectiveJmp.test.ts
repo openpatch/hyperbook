@@ -78,6 +78,18 @@ describe("remarkDirectiveJmp", () => {
     );
   });
 
+  it("should turn toolbar attributes into toolbar options", async () => {
+    const html = String(
+      toHtml(
+        `\n::jmp{#list src="memory.jmp" hide-undo-redo hide-save}\n`,
+        ctx,
+      ).value,
+    );
+    expect(html).toContain(
+      `options="{&#x22;hideUndoRedo&#x22;:true,&#x22;hideSave&#x22;:true}"`,
+    );
+  });
+
   it("should not set options when none are given", async () => {
     expect(
       String(toHtml(`\n::jmp{#list src="memory.jmp"}\n`, ctx).value),

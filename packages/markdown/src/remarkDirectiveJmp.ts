@@ -33,6 +33,12 @@ const OPTIONS: Record<string, string> = {
   "hide-steps": "hideSteps",
   "hide-step-changes": "hideStepChanges",
   "gc-prediction": "gcPrediction",
+  "hide-undo-redo": "hideUndoRedo",
+  "hide-download-png": "hideDownloadPng",
+  "hide-download-all-png": "hideDownloadAllPng",
+  "hide-print-mode": "hidePrintMode",
+  "hide-help": "hideHelp",
+  "hide-save": "hideSave",
 };
 
 export default (ctx: HyperbookContext) => () => {

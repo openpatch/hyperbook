@@ -13,7 +13,7 @@
 }
 
 /* Bottom right is the one corner the playground leaves alone: the sidebar sits
-   top left, undo/save top right, the zoom controls bottom left and the step bar
+   top left, the toolbar top right, the zoom controls bottom left and the step bar
    bottom centre. */
 .directive-jmp .buttons {
   position: absolute;
@@ -22,6 +22,18 @@
   display: flex;
   gap: 4px;
   z-index: 5;
+}
+
+/* In the playground's compact layout (below 1024×640, measured on the
+   playground itself) the step bar spans the width of the bottom edge and would
+   run under these buttons, so it is lifted clear of them: 8px gap + 32px button
+   + 8px gap. The extra `.directive-jmp` outranks the playground's own
+   `margin: 8px auto` on that panel. */
+.directive-jmp
+  .java-memory-playground
+  .jmp-compact
+  .react-flow__panel.bottom.center {
+  margin-bottom: 48px;
 }
 
 /* The buttons sit outside the playground element, so they cannot read its

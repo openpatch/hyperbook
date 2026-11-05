@@ -47,6 +47,12 @@ switch an option on, or `="false"` to switch it off.
 | `hide-steps` | Hide the step bar, for a page that is about one picture |
 | `hide-step-changes` | Stop marking what a step changed compared with the one before it |
 | `gc-prediction` | Ask which objects are unreachable before collecting them |
+| `hide-undo-redo` | Hide the undo and redo buttons in the toolbar |
+| `hide-download-png` | Hide "Download PNG" in the toolbar menu |
+| `hide-download-all-png` | Hide "Download all steps as PNG" in the toolbar menu |
+| `hide-print-mode` | Hide the print mode switch in the toolbar menu |
+| `hide-help` | Hide the help entry in the toolbar menu |
+| `hide-save` | Hide Save in the toolbar menu. What a reader builds is still kept |
 
 For a figure the reader is only meant to look at:
 
