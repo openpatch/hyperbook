@@ -13,7 +13,7 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 
 :::
 
-## v0.122.0
+## v0.123.0
 
 ::::tabs
 
@@ -39,8 +39,6 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 
 **markdown**: `:::typst` compiles with Typst 0.15.1 (typst.ts 0.8.0-rc4, up from Typst 0.14.2).
 
-**markdown**: The java-memory-playground element uses `@java-memory-playground/web-component` 0.4.0. Answers are checked by walking the diagram from each variable, the feedback says where an answer goes wrong, and new attributes hide toolbar buttons.
-
 **cloud**: The editor shows PDFs — the Typst preview and opened `.pdf` files — on its own surface in light and dark mode instead of the browser's dark PDF viewer. The preview keeps its scroll position and no longer flashes while it updates.
 
 **cloud**: `.typ` files use Hyperbook's light and dark syntax colors, and the borders of the file tree, gutter, tooltips and menus are no longer near-black in light mode.
@@ -54,6 +52,20 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 **hyperbook**: `.typ` files are no longer copied into the site. A page that offers one with `:download[…]{src="file.typ"}` still gets it; a plain Markdown link to a `.typ` file now breaks, and `hyperbook check` reports it.
 
 **markdown**: `:::typst` documents that use something Typst 0.15 removed or changed may need an update.
+
+:::
+
+::::
+
+## v0.122.0
+
+::::tabs
+
+:::tab{title="Improved :+1:" id="improved"}
+
+**markdown**: The [Java memory playground](/elements/jmp) uses `@java-memory-playground/web-component` 0.4.0. Exercises are checked by walking the reader's diagram and the solution from each variable, so extra temporary variables no longer count as wrong, shared references have to really be shared, and the feedback says where the answer goes wrong. The interface is more consistent, with an undo/redo + ☰ toolbar, and it has a compact layout for phones and small embeds, where the step bar is lifted clear of the reset and fullscreen buttons. New attributes hide toolbar buttons: `hide-undo-redo`, `hide-download-png`, `hide-download-all-png`, `hide-print-mode`, `hide-help` and `hide-save`.
+
+**cloud**: The editor's Java memory playground moves to `@java-memory-playground/java-memory-playground` 0.3.0, the core version books render with.
 
 :::
 
