@@ -1,4 +1,12 @@
+import { createWriteStream } from "node:fs";
+import { rm } from "node:fs/promises";
+import path from "node:path";
+import { Readable } from "node:stream";
+import { pipeline } from "node:stream/promises";
 import { Hono } from "hono";
+import { bodyLimit } from "hono/body-limit";
+import { makeJobDir } from "../../hosting/storage";
+import { PackageError, addPackage, listPackages, removePackage } from "../../hosting/typst-library";
 import { instanceSettingsInput, type ModelPrices } from "../../../shared/schemas";
 import { audit } from "../../audit";
 import type { Deps } from "../../deps";
@@ -177,6 +185,58 @@ export function instanceRoutes(deps: Deps) {
   return new Hono<AuthedEnv>()
     .use(requireAdmin)
     .get("/", (c) => c.json(settingsView(deps)))
+
+    // The shared Typst packages every book can import (hosting/typst-library.ts).
+    .get("/typst-packages", async (c) => c.json({ packages: await listPackages(config) }))
+    .post(
+      "/typst-packages",
+      bodyLimit({
+        maxSize: config.uploadMaxBytes + 64 * 1024,
+        onError: () => {
+          throw new HTTPException(413, { message: "typstLibrary.tooLarge" });
+        },
+      }),
+      async (c) => {
+        const body = await c.req.parseBody();
+        const file = body.file;
+        if (!(file instanceof File)) throw new HTTPException(400, { message: "typstLibrary.chooseZip" });
+        const namespace = typeof body.namespace === "string" && body.namespace ? body.namespace : "local";
+        const jobDir = await makeJobDir(config, "typst-package");
+        try {
+          const zipFile = path.join(jobDir, "package.zip");
+          await pipeline(Readable.fromWeb(file.stream() as never), createWriteStream(zipFile));
+          let added;
+          try {
+            added = await addPackage(config, zipFile, namespace, { maxBytes: config.uploadMaxBytes, maxEntries: 10_000 });
+          } catch (error) {
+            if (error instanceof PackageError) {
+              throw new HTTPException(error.message === "typstLibrary.exists" ? 409 : 400, { message: error.message });
+            }
+            throw error;
+          }
+          audit(db, {
+            actorUserId: c.get("user").id,
+            action: "instance.typstPackageAdd",
+            targetType: "instance",
+            data: { namespace: added.namespace, name: added.name, version: added.version },
+          });
+          return c.json(added);
+        } finally {
+          await rm(jobDir, { recursive: true, force: true });
+        }
+      },
+    )
+    .delete("/typst-packages/:namespace/:name/:version", async (c) => {
+      const pkg = { namespace: c.req.param("namespace"), name: c.req.param("name"), version: c.req.param("version") };
+      if (!(await removePackage(config, pkg))) throw new HTTPException(404, { message: "typstLibrary.notFound" });
+      audit(db, {
+        actorUserId: c.get("user").id,
+        action: "instance.typstPackageRemove",
+        targetType: "instance",
+        data: pkg,
+      });
+      return c.json({ ok: true as const });
+    })
     // What the provider offers, for the settings' model pick fields. A
     // provider that does not answer (or is not configured) must not block
     // the settings: the fields accept typed ids all the same.

@@ -1,6 +1,7 @@
 import { HighlightStyle, syntaxHighlighting } from "@codemirror/language";
 import { tags as t } from "@lezer/highlight";
 import type { Extension } from "@codemirror/state";
+import { typstTags } from "codemirror-lang-typst/lezer";
 
 /**
  * Hyperbook's own syntax themes for the editor, rolled here instead of pulled
@@ -29,6 +30,13 @@ export const hyperbookDark = HighlightStyle.define([
   { tag: [t.propertyName, t.attributeName, t.definition(t.propertyName)], color: "#addb67" },
   { tag: [t.meta, t.documentMeta, t.annotation], color: "#8b949e" },
   { tag: t.invalid, color: "#f87171" },
+  // Typst: `#` belongs to what follows (`#import` reads as one keyword),
+  // markers like the heading's, math delimiters like strings.
+  { tag: typstTags.interpolated, color: "#ffcb6b" },
+  { tag: typstTags.listMarker, color: "#ffcb6b", fontWeight: "bold" },
+  { tag: typstTags.mathDelimiter, color: "#c3e88d" },
+  { tag: t.escape, color: "#89ddff" },
+  { tag: [t.operator, t.punctuation], color: "#c9d1d9" },
 ]);
 
 /** Light: brand teal for keywords, the same accents darkened for white. */
@@ -50,6 +58,11 @@ export const hyperbookLight = HighlightStyle.define([
   { tag: [t.propertyName, t.attributeName, t.definition(t.propertyName)], color: "#9a6700" },
   { tag: [t.meta, t.documentMeta, t.annotation], color: "#6a737d" },
   { tag: t.invalid, color: "#b91c1c" },
+  { tag: typstTags.interpolated, color: "#007864" },
+  { tag: typstTags.listMarker, color: "#007864", fontWeight: "bold" },
+  { tag: typstTags.mathDelimiter, color: "#22863a" },
+  { tag: t.escape, color: "#005cc5" },
+  { tag: [t.operator, t.punctuation], color: "#24292f" },
 ]);
 
 /**

@@ -17,20 +17,20 @@
     "exclude": ["-tests.tar", ".map"]
   },
   {
-    "url": "https://cdn.jsdelivr.net/npm/@myriaddreamin/typst.ts@0.7.0/dist/esm/contrib/all-in-one-lite.bundle.js",
-    "sha256": "9999a19a74f27810e8d951849f208a9b556fa36b5c0a726c052f1e5bb8ba9200",
+    "url": "https://cdn.jsdelivr.net/npm/@myriaddreamin/typst.ts@0.8.0-rc4/dist/esm/contrib/all-in-one-lite.bundle.js",
+    "sha256": "3682c3a8f460fdd4331c119b8358285ab2cdc92ce0271f14c613beaca70da641",
     "format": "file",
     "target": "directive-typst/typst-bundle.js"
   },
   {
-    "url": "https://cdn.jsdelivr.net/npm/@myriaddreamin/typst-ts-web-compiler@0.7.0/pkg/typst_ts_web_compiler_bg.wasm",
-    "sha256": "1fc968438a672366dfec39c96c842c26ed29caff4eb1bcaab19a6c60867de5fd",
+    "url": "https://cdn.jsdelivr.net/npm/@myriaddreamin/typst-ts-web-compiler@0.8.0-rc4/pkg/typst_ts_web_compiler_bg.wasm",
+    "sha256": "4a502451683cfde21bd002c925cde0eeafc4d110ede25cd2189ad4b2368c0330",
     "format": "file",
     "target": "directive-typst/typst-compiler.wasm"
   },
   {
-    "url": "https://cdn.jsdelivr.net/npm/@myriaddreamin/typst-ts-renderer@0.7.0/pkg/typst_ts_renderer_bg.wasm",
-    "sha256": "5a93d7a8b3b7b43b0e679f3dafed966f74fc1653cc7ed6623f04a8a6550da725",
+    "url": "https://cdn.jsdelivr.net/npm/@myriaddreamin/typst-ts-renderer@0.8.0-rc4/pkg/typst_ts_renderer_bg.wasm",
+    "sha256": "5adc3495447c54614235ee074570fb2da04429949b9e32a149d4d346292ea9d0",
     "format": "file",
     "target": "directive-typst/typst-renderer.wasm"
   },
@@ -92,5 +92,69 @@
     "bytes": 4359153,
     "format": "file",
     "target": "directive-openscad/libraries/fonts.zip"
+  },
+  {
+    "url": "https://registry.npmjs.org/pdfjs-dist/-/pdfjs-dist-6.4.299.tgz",
+    "version": "6.4.299",
+    "sha256": "86269b40170eb41740ea05ad2102d71d33de4f122b34eb2f478be0ea7779c415",
+    "format": "tar.gz",
+    "target": "directive-pdf",
+    "prefix": "package/legacy/build/pdf.min.mjs",
+    "strip": 3
+  },
+  {
+    "url": "https://registry.npmjs.org/pdfjs-dist/-/pdfjs-dist-6.4.299.tgz",
+    "version": "6.4.299",
+    "sha256": "86269b40170eb41740ea05ad2102d71d33de4f122b34eb2f478be0ea7779c415",
+    "format": "tar.gz",
+    "target": "directive-pdf",
+    "prefix": "package/legacy/build/pdf.worker.min.mjs",
+    "strip": 3
+  },
+  {
+    "url": "https://registry.npmjs.org/pdfjs-dist/-/pdfjs-dist-6.4.299.tgz",
+    "version": "6.4.299",
+    "sha256": "86269b40170eb41740ea05ad2102d71d33de4f122b34eb2f478be0ea7779c415",
+    "format": "tar.gz",
+    "target": "directive-pdf",
+    "prefix": "package/cmaps/",
+    "strip": 1
+  },
+  {
+    "url": "https://registry.npmjs.org/pdfjs-dist/-/pdfjs-dist-6.4.299.tgz",
+    "version": "6.4.299",
+    "sha256": "86269b40170eb41740ea05ad2102d71d33de4f122b34eb2f478be0ea7779c415",
+    "format": "tar.gz",
+    "target": "directive-pdf",
+    "prefix": "package/standard_fonts/",
+    "strip": 1
+  },
+  {
+    "url": "https://registry.npmjs.org/pdfjs-dist/-/pdfjs-dist-6.4.299.tgz",
+    "version": "6.4.299",
+    "sha256": "86269b40170eb41740ea05ad2102d71d33de4f122b34eb2f478be0ea7779c415",
+    "format": "tar.gz",
+    "target": "directive-pdf",
+    "prefix": "package/wasm/",
+    "strip": 1,
+    "exclude": ["quickjs-eval.js", "quickjs-eval.wasm"]
+  },
+  {
+    "url": "https://registry.npmjs.org/pdfjs-dist/-/pdfjs-dist-6.4.299.tgz",
+    "version": "6.4.299",
+    "sha256": "86269b40170eb41740ea05ad2102d71d33de4f122b34eb2f478be0ea7779c415",
+    "format": "tar.gz",
+    "target": "directive-pdf",
+    "prefix": "package/iccs/",
+    "strip": 1
+  },
+  {
+    "url": "https://registry.npmjs.org/pdfjs-dist/-/pdfjs-dist-6.4.299.tgz",
+    "version": "6.4.299",
+    "sha256": "86269b40170eb41740ea05ad2102d71d33de4f122b34eb2f478be0ea7779c415",
+    "format": "tar.gz",
+    "target": "directive-pdf",
+    "prefix": "package/LICENSE",
+    "strip": 1
   }
 ]

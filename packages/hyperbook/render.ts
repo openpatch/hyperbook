@@ -346,9 +346,20 @@ export async function runRender(
           ...result,
           searchDocuments: page?.searchDocuments,
           archiveIncludes: page?.archiveIncludes,
+          typstJobs: page?.typstJobs,
+          typstDownloads: page?.typstDownloads,
         });
       } else {
-        reply({ id: request.id, ...(await renderer.render(target)) });
+        // A host serving the page builds its Typst documents (Hyperbook
+        // Cloud's preview) and keeps undownloaded `.typ` sources private.
+        const { result, page } = await renderer.renderPage(target);
+        reply({
+          id: request.id,
+          ...result,
+          ...(result.ok
+            ? { typstJobs: page?.typstJobs ?? [], typstDownloads: page?.typstDownloads ?? [] }
+            : {}),
+        });
       }
     } catch (e) {
       reply({

@@ -125,6 +125,8 @@ export function publicBook(config: Config, book: BookRow, role: BookRole) {
     role,
     publishedBuildId: book.publishedBuildId,
     publishedAt: book.publishedAt?.getTime() ?? null,
+    /** The publishing lock: nothing of this book goes live while it is set. */
+    publishingDisabled: book.publishingDisabled,
     /** Commits on main (zero: nothing saved yet). */
     commitCount: book.commitCount,
     createdAt: book.createdAt.getTime(),

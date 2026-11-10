@@ -6,5 +6,6 @@
   "openscad",
   "geogebra",
   "pyide",
-  "typst"
+  "typst",
+  "pdf"
 ]

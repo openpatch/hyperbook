@@ -20,6 +20,7 @@ const elements: [DownloadableElement, string][] = [
   ["onlineide", ":::onlineide\n```java\nprintln(1);\n```\n:::"],
   ["sqlide", ":::sqlide\n```sql\nselect 1;\n```\n:::"],
   ["blockflow", '::blockflow-player{src="/game.sb3"}'],
+  ["pdf", '::pdf[Script]{src="/script.pdf"}'],
 ];
 
 describe.each(elements)(
@@ -83,6 +84,7 @@ describe.each(elements)(
                 onlineide: `https://cdn.openpatch.org/onlineide/${ideReleases.onlineide}/`,
                 sqlide: `https://cdn.openpatch.org/sqlide/${ideReleases.sqlide}/`,
                 openscad: `https://cdn.openpatch.org/openscad/${openscadConfig.wasmBuild.cdnVersion}/`,
+                pdf: "https://cdn.jsdelivr.net/npm/pdfjs-dist@",
               }[element]
             : "http://assets.example.com/runtime/",
         );

@@ -151,6 +151,15 @@ export const books = sqliteTable(
     }),
     publishRequestedAt: integer("publish_requested_at", { mode: "timestamp_ms" }),
     publishRequestNote: text("publish_request_note"),
+    /**
+     * The publishing lock: while set, nothing of this book goes live — no
+     * publish, no rollback, no upgrade build. For books that hold exams.
+     * Owners (and admins) set it; it is not in hyperbook.json, which every
+     * editor can change.
+     */
+    publishingDisabled: integer("publishing_disabled", { mode: "boolean" })
+      .notNull()
+      .default(false),
     /** Size of the current source (the git tree); counts toward its owners' storage. */
     sourceBytes: integer("source_bytes").notNull().default(0),
     /** Commits on refs/heads/main; the staleness hint is this minus a build's snapshot. */

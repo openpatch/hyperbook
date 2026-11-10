@@ -120,6 +120,7 @@ export const ELEMENT_RUNTIMES = [
   "geogebra",
   "pyide",
   "typst",
+  "pdf",
 ] as const;
 
 export type ElementRuntime = (typeof ELEMENT_RUNTIMES)[number];
@@ -294,6 +295,9 @@ export const updateBookInput = z
     ]),
   })
   .partial();
+
+/** The publishing lock of a book: while disabled, nothing of it goes live. */
+export const publishingLockInput = z.object({ disabled: z.boolean() });
 
 /** A custom domain for a book (M5); the server checks the rest. */
 export const bookDomainInput = z.object({

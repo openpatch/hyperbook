@@ -43,6 +43,7 @@ export const FILE_DIRECTIVE_ATTRIBUTES: Readonly<Record<string, readonly string[
   video: ["src", "poster"],
   audio: ["src", "thumbnail"],
   download: ["src"],
+  pdf: ["src"],
   excalidraw: ["src"],
   learningmap: ["src"],
   bitflow: ["src"],

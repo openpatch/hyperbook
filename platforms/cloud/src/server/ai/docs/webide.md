@@ -1,20 +1,20 @@
 # webide (Web IDE)
 
 `:::webide` is a small web IDE (HTML/CSS/JS) for readers. One fenced block per
-file, with the file name in the fence — the first one is usually
-`html index.html`.
+file: the page without a name (`html`, it becomes `index.html`), every other
+file named with `file="…"` on the fence.
 
     :::webide
 
-    ```html index.html
+    ```html
     <h1>Hello</h1>
     ```
 
-    ```css style.css
+    ```css file="style.css"
     h1 { color: teal; }
     ```
 
-    ```js script.js
+    ```js file="script.js"
     console.log("hi");
     ```
 
@@ -27,7 +27,7 @@ a given page as exactly as possible and are scored while they type.
 
     :::webide{compare pass=95}
 
-    ```html index.html
+    ```html
     <!DOCTYPE html>
     <html><head><link rel="stylesheet" href="style.css" /></head>
     <body><div class="box"></div></body></html>

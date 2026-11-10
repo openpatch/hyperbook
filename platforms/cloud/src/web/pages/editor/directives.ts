@@ -229,6 +229,26 @@ export const DIRECTIVES: readonly Directive[] = [
     snippet: 'download[${Download}]{src="${/file.pdf}"}',
   },
   {
+    name: "pdf",
+    label: "PDF",
+    description: "A PDF document on the page; a .typ source is built into one.",
+    kind: "leaf",
+    docs: "/elements/pdf",
+    attributes: [
+      { name: "src", description: "The PDF or Typst document (.pdf, .typ)", file: true },
+      {
+        name: "view",
+        description: "How it is shown (default `pages`)",
+        values: ["pages", "slides", "thumb", "embed", "button"],
+      },
+      { name: "pages", description: "Pages shown, e.g. `1-2` or `3,5-6`" },
+      { name: "download", description: "Show the download button (default `true`)", values: BOOL },
+      height("aspect of page 1"),
+      { name: "inputs", description: "Values for a Typst document, e.g. `solution=true`" },
+    ],
+    snippet: 'pdf[${Title}]{src="${document.pdf}"}',
+  },
+  {
     name: "archive",
     label: "Archive",
     description: "A download of a folder in archives/ as a zip.",

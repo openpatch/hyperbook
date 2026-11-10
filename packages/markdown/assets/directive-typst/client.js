@@ -94,6 +94,77 @@ hyperbook.typst = (function () {
   // ============================================================================
 
   // ============================================================================
+  // PACKAGES
+  // ============================================================================
+
+  /**
+   * The archives of the packages the page's blocks import, by
+   * `@namespace/name:version`: packed into the site by the build from the
+   * book's own packages and the shared ones (see typstPackages.ts). Read on
+   * each import, so blocks added to the page later count too.
+   */
+  const bookPackages = () => {
+    const packages = new Map();
+    for (const el of document.querySelectorAll(".directive-typst[data-packages]")) {
+      try {
+        for (const [spec, url] of Object.entries(JSON.parse(el.getAttribute("data-packages")))) {
+          packages.set(spec, new URL(url, document.baseURI).href);
+        }
+      } catch {
+        // A broken attribute: those packages are not offered.
+      }
+    }
+    return packages;
+  };
+
+  /**
+   * typst.ts's registry fetches `@preview` packages from Typst Universe and
+   * refuses every other namespace. This one serves the book's packages (any
+   * namespace, `@local` included) from the site and leaves the rest of
+   * `@preview` to Universe.
+   */
+  const usePackageRegistry = () => {
+    const { MemoryAccessModel, FetchPackageRegistry } = window.TypstCompileModule || {};
+    const snippet = window.TypstSnippet;
+    // An older typst.ts: its own default registry (Typst Universe) stays.
+    if (!MemoryAccessModel || !FetchPackageRegistry || !snippet?.withAccessModel || !snippet?.withPackageRegistry) return;
+    const key = (spec) => `@${spec.namespace}/${spec.name}:${spec.version}`;
+
+    class BookPackageRegistry extends FetchPackageRegistry {
+      resolvePath(spec) {
+        return bookPackages().get(key(spec)) || super.resolvePath(spec);
+      }
+
+      resolve(spec, context) {
+        if (!bookPackages().has(key(spec))) {
+          return spec.namespace === "preview" ? super.resolve(spec, context) : undefined;
+        }
+        const url = this.resolvePath(spec);
+        if (this.cache.has(url)) return this.cache.get(url)();
+        const data = this.pullPackageData(spec);
+        if (!data) return undefined;
+        const root = `/@memory/fetch/packages/${spec.namespace}/${spec.name}/${spec.version}`;
+        const files = [];
+        context.untar(data, (path, content, mtime) => {
+          files.push([`${root}/${path}`, content, new Date(mtime)]);
+        });
+        const load = () => {
+          for (const [path, content, mtime] of files) this.am.insertFile(path, content, mtime);
+          return root;
+        };
+        this.cache.set(url, load);
+        return load();
+      }
+    }
+
+    const accessModel = new MemoryAccessModel();
+    window.$typst.use(
+      snippet.withAccessModel(accessModel),
+      snippet.withPackageRegistry(new BookPackageRegistry(accessModel)),
+    );
+  };
+
+  // ============================================================================
   // TYPST LOADER
   // ============================================================================
 
@@ -178,6 +249,10 @@ hyperbook.typst = (function () {
         },
       );
 
+      // Registered with use(), not beforeBuild: $typst adds its own default
+      // registry unless one was registered this way, and two access models
+      // refuse each other.
+      usePackageRegistry();
       window.$typst.setCompilerInitOptions({
         beforeBuild: [fonts],
         getModule: () => CONFIG.TYPST_COMPILER_URL,

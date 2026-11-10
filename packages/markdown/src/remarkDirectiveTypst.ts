@@ -14,6 +14,12 @@ import {
 } from "./remarkHelper";
 import { resolveDirectiveId } from "./directiveId";
 import { i18n } from "./i18n";
+import {
+  findTypstImports,
+  registerTypstPackages,
+  resolveTypstPackages,
+  specKey,
+} from "./typstPackages";
 import { Element } from "hast";
 import {
   collectWorkspace,
@@ -62,6 +68,22 @@ export default (ctx: HyperbookContext) => () => {
         });
         const mainFile = workspace.files.find((f) => f.path === workspace.main);
 
+        // The packages the block imports (and `packages` names, for blocks
+        // whose readers write the import themselves) that the book or the
+        // shared folder holds: packed into the site by the build.
+        const { packages: extraPackages = "" } = node.attributes || {};
+        const specs = findTypstImports(
+          [
+            ...workspace.files.map((f) => f.content ?? ""),
+            String(extraPackages)
+              .split(/[\s,]+/)
+              .filter(Boolean)
+              .join("\n"),
+          ].join("\n"),
+        );
+        const packages = resolveTypstPackages(ctx, specs);
+        registerTypstPackages(file, packages);
+
         data.hName = "div";
         data.hProperties = {
           class: isEditMode
@@ -79,6 +101,15 @@ export default (ctx: HyperbookContext) => () => {
               }
             : {}),
           "data-workspace": encodeWorkspace(workspace),
+          ...(packages.length > 0
+            ? {
+                "data-packages": JSON.stringify(
+                  Object.fromEntries(
+                    packages.map((pkg) => [specKey(pkg), ctx.makeUrl(pkg.href, "public")]),
+                  ),
+                ),
+              }
+            : {}),
           ...fileActionAttributes(node, file, {
             name,
             defaults: ["create", "upload"],

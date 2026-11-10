@@ -109,6 +109,10 @@ async function postbuild() {
   const distSchemas = path.join(...["./dist", "schemas"]);
   await cp(schemas, distSchemas, { recursive: true });
 
+  // The Typst versions this CLI supports, for hosts that run Typst
+  // themselves (Hyperbook Cloud reads it beside the CLI).
+  await cp("typst-versions.json", path.join("dist", "typst-versions.json"));
+
   const distLunrLanguages = path.join(...["./dist", "lunr-languages"]);
   const lunrLanguages = path.join(
     ...["./node_modules", "lunr-languages", "min"],

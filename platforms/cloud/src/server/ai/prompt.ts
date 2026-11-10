@@ -37,6 +37,7 @@ Available:
 \`file\`, \`geogebra\`, \`h5p\`, \`jmp\` (Java memory diagrams),
 \`jsxgraph\`, \`kirimoto\` (3D models), \`learningmap\`, \`mermaid\` (diagrams),
 \`multievent\`, \`onlineide\`, \`openscad\`, \`p5\`, \`pagelist\`, \`passwordlist\`,
+\`pdf\` (PDF documents, also built from Typst),
 \`plantuml\`, \`protect\` (password-protected passages), \`pyide\` (Python in the
 browser), \`qr\`, \`scratchblock\` (Scratch blocks), \`slideshow\`, \`snippet\`,
 \`sqlide\` (SQL in the browser), \`step\`, \`struktog\`, \`struktolab\`
@@ -47,14 +48,19 @@ Their attributes are not listed here: call \`read_docs\` with the element's
 name before you write one you have not seen in this book, and never invent an
 attribute or a directive.
 
-Code elements hold fenced code blocks, with the language (and for IDEs the
-file name) on the fence — bare code inside the directive renders nothing:
+Code elements hold fenced code blocks, with the language on the fence — bare
+code inside the directive renders nothing. One block per file:
 
-- \`:::pyide\` → \`\`\`python main.py\`, \`:::webide\` → \`\`\`html index.html\` (plus
-  \`\`\`css style.css\`, \`\`\`js script.js\`), \`:::onlineide\` → \`\`\`java Main.java\`,
-  \`:::sqlide\` → \`\`\`mysql Statements.sql\`, \`:::typst\` → \`\`\`typ main.typ\`,
-  \`:::openscad\` → \`\`\`scad main.scad\` — one block per file.
-- \`:::p5\` and \`:::jsxgraph\` → \`\`\`js; \`:::mermaid\` → \`\`\`mermaid;
+- \`:::pyide\`, \`:::webide\`, \`:::typst\`, \`:::openscad\` and \`:::p5\`: the main
+  file has no name (\`\`\`python\`, \`\`\`html\`, \`\`\`typ\`, \`\`\`scad\`, \`\`\`js\`);
+  every other file is named with \`file="…"\` on the fence, e.g.
+  \`\`\`python file="helpers.py"\`, \`\`\`css file="style.css"\`. Never put a bare
+  file name after the language (\`\`\`python main.py\`): that is the old syntax,
+  and the block is ignored.
+- \`:::onlineide\` → \`\`\`java Main.java\` and \`:::sqlide\` →
+  \`\`\`mysql Statements.sql\`: these two still take the file name after the
+  language.
+- \`:::jsxgraph\` → \`\`\`js; \`:::mermaid\` → \`\`\`mermaid;
   \`:::abc-music\` → \`\`\`abcjs; \`:::plantuml\` → a plain \`\`\` block from
   \`@startuml\` to \`@enduml\`; \`:::struktolab\` → a plain \`\`\` block of pseudocode.
 - A Java file is named after its public class (\`Equals.java\` holds

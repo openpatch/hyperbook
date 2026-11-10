@@ -45,6 +45,19 @@ export type Config = {
     /** Rebuild published books made with another Hyperbook version at startup. */
     rebuildOnUpgrade: boolean;
   };
+  /** Typst documents (`::pdf` with a `.typ` source), compiled outside the build's sandbox. */
+  typst: {
+    /** Longest one document may take. */
+    timeoutMs: number;
+    /** Most documents one build may compile. */
+    maxJobs: number;
+    /** Address space of one compile. */
+    memoryMb: number;
+    /** Most preview compiles at once on the instance. */
+    previewConcurrency: number;
+    /** A typst binary to use instead of the downloaded ones (any version). */
+    binary: string | null;
+  };
   firstAdmin: { email: string; password: string } | null;
   smtp: {
     host: string;
@@ -134,6 +147,11 @@ const schema = z.object({
   BUILD_TIMEOUT_SECONDS: z.coerce.number().int().min(10).default(300),
   BUILD_MEMORY_MB: z.coerce.number().int().min(128).default(1024),
   REBUILD_ON_UPGRADE: z.enum(["true", "false"]).default("true"),
+  TYPST_TIMEOUT_SECONDS: z.coerce.number().int().min(1).default(60),
+  TYPST_MAX_JOBS: z.coerce.number().int().min(1).default(200),
+  TYPST_MEMORY_MB: z.coerce.number().int().min(64).default(2048),
+  TYPST_PREVIEW_CONCURRENCY: z.coerce.number().int().min(1).max(32).default(2),
+  TYPST_BINARY: optional,
   HYPERBOOK_CLI: optional,
   STORE_MAX_MB: z.coerce.number().int().min(1).default(10),
   STORE_COMPACT_EVENTS: z.coerce.number().int().min(1).default(100),
@@ -404,6 +422,13 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
       memoryMb: e.BUILD_MEMORY_MB,
       cli,
       rebuildOnUpgrade: e.REBUILD_ON_UPGRADE === "true",
+    },
+    typst: {
+      timeoutMs: e.TYPST_TIMEOUT_SECONDS * 1000,
+      maxJobs: e.TYPST_MAX_JOBS,
+      memoryMb: e.TYPST_MEMORY_MB,
+      previewConcurrency: e.TYPST_PREVIEW_CONCURRENCY,
+      binary: e.TYPST_BINARY ? path.resolve(e.TYPST_BINARY) : null,
     },
     firstAdmin,
     smtp,

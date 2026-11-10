@@ -38,6 +38,8 @@ can and part wise must set (indicated by a \*).
 | qrcode             | Shows an icon, which opens a qr code to the current page.                                                                                                       |
 | toc         | Show or hide a table of content for the page. This is on for pages and off for glossary entries by default                          |
 | llms               | When set to true, generates an llms.txt file that combines all markdown files in order. The file includes the book name and version in a header format.         |
+| exclude            | Globs for files that must not be part of the built site, for example `["intern/**", "**/*.draft.*"]`. They are matched against the address a file would have in the site, without the leading slash, and apply to the files in `public/` and to everything in `book/` and `glossary/` that is not a page. Supported are `*`, `**`, `?` and `{a,b}`. |
+| typst              | Settings for Typst documents shown with [`::pdf`](/elements/pdf): `version`, `packagePath`, `fontPath`. |
 | trailingSlash      | Outputs all files into ther own folders and produces only index.html files.                                                                                     |
 | importExport       | Allows to import and export the state of the Hyperbook as a file. Buttons for importing and exporting will be at the bottom of the page.                        |
 | cloud.url          | URL of your [Hyperbook Cloud](/configuration/cloud) server. Enables student login and cloud sync.                                                               |

@@ -18,6 +18,7 @@ Die Typst-Direktive ermöglicht es dir, [Typst](https://typst.app/)-Dokumente di
 | `height` | Höhe des Vorschau-Containers | `auto` |
 | `main` | Die Datei, die kompiliert wird | `main.typ` |
 | `files` | Was Leserinnen und Leser mit Dateien tun dürfen: `create`, `upload`, `rename`, `delete`, durch Kommas getrennt, oder `open` für alles | `create,upload` |
+| `packages` | Pakete, die angeboten werden, auch wenn noch keine Datei sie importiert, z. B. `@local/vorlage:1.0.0`, mit Komma getrennt — für den Bearbeitungsmodus, in dem Leserinnen und Leser den Import schreiben | — |
 | `accept` | Dateiendungen für Dateien, die Leserinnen und Leser anlegen oder umbenennen, durch Kommas getrennt | `.typ` |
 
 ## Wichtige Hinweise
@@ -234,6 +235,29 @@ Dieser Inhalt befindet sich in einer separaten Datei.
 ```
 :::
 ````
+
+## Pakete
+
+Blöcke werden mit Typst 0.15 übersetzt und können Pakete importieren:
+
+- **Aus Typst Universe:** `#import "@preview/cetz:0.4.2": canvas` lädt das
+  Paket aus [Typst Universe](https://typst.app/universe), wenn die Seite den
+  Block zeigt.
+- **Aus dem Buch:** Pakete im `typst.packagePath` des Buchs (siehe
+  [PDF](/elements/pdf#typst-dokumente)) im Aufbau
+  `<namespace>/<name>/<version>/`, z. B. `typst-pakete/local/vorlage/1.0.0/`
+  für `#import "@local/vorlage:1.0.0": *`. Ein Universe-Paket, das das Buch in
+  `preview/` mitbringt, wird aus dem Buch genommen.
+- **Gemeinsame:** Pakete im Ordner von `HYPERBOOK_TYPST_PACKAGE_PATH`, und in
+  der Hyperbook Cloud die, die ein Admin unter Einstellungen → Typst-Pakete
+  hinzugefügt hat.
+
+Der Build packt jedes Paket, das ein Block importiert — und die Pakete, die
+diese importieren — in die Seite. Die Browser der Leserinnen und Leser
+übersetzen den Block, **sie bekommen also die Quelltexte der Pakete**: Halte
+Lösungen und alles Vertrauliche aus Paketen heraus, die Blöcke importieren. Ein
+Paket, das das [`exclude`](/configuration/book) des Buchs erfasst, lässt den
+Build scheitern, statt veröffentlicht zu werden.
 
 ## Beispiele
 

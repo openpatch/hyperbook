@@ -73,6 +73,7 @@ export const DOCUMENTATION = {
   onlineide: { file: "onlineide.md", sections: ["Online IDE"] },
   openscad: { file: "openscad.md", sections: ["OpenSCAD"] },
   p5: { file: "p5.md", sections: ["P5"] },
+  pdf: { file: "pdf.md", sections: ["PDF"] },
   pagelist: { sections: ["Pagelist"] },
   passwordlist: { sections: ["Passwordlist"] },
   plantuml: { file: "plantuml.md", sections: ["PlantUML"] },

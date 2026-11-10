@@ -38,3 +38,6 @@ assets/hyperbook/directive-pyide/**
 assets/hyperbook/directive-typst/**
 !assets/hyperbook/directive-typst/client.js
 !assets/hyperbook/directive-typst/style.css
+assets/hyperbook/directive-pdf/**
+!assets/hyperbook/directive-pdf/client.js
+!assets/hyperbook/directive-pdf/style.css

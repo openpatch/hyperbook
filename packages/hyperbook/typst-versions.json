@@ -1,0 +1,100 @@
+{
+  "format": 1,
+  "default": "0.15.1",
+  "versions": {
+    "0.15.0": {
+      "x86_64-unknown-linux-musl": {
+        "url": "https://github.com/typst/typst/releases/download/v0.15.0/typst-x86_64-unknown-linux-musl.tar.xz",
+        "sha256": "59b207df01be2dab9f13e80f73d04d7ff8273ffd46b3dd1b9eef5c60f3eeabea",
+        "bytes": 17461256,
+        "format": "tar.xz",
+        "binary": "typst-x86_64-unknown-linux-musl/typst",
+        "binarySha256": "79b0bc3d6e965ad67c6aa9aea0fb7c45a386d43b03b2680c07bf9b5c4e31db23",
+        "binaryBytes": 55735392
+      },
+      "aarch64-unknown-linux-musl": {
+        "url": "https://github.com/typst/typst/releases/download/v0.15.0/typst-aarch64-unknown-linux-musl.tar.xz",
+        "sha256": "cdf50ffc7b8ba759ed02200632eda3d78eb8b99aacb6611f4f75684990647620",
+        "bytes": 16214248,
+        "format": "tar.xz",
+        "binary": "typst-aarch64-unknown-linux-musl/typst",
+        "binarySha256": "db8d716a137db9e9771f2d60339c3a46995cc3141fffb10ae4cca5b807c55b11",
+        "binaryBytes": 48647744
+      },
+      "x86_64-apple-darwin": {
+        "url": "https://github.com/typst/typst/releases/download/v0.15.0/typst-x86_64-apple-darwin.tar.xz",
+        "sha256": "30210c7c539c7954db94c063cd98b43fd0a0cad285d656dbbce2a40aee2e79be",
+        "bytes": 15619352,
+        "format": "tar.xz",
+        "binary": "typst-x86_64-apple-darwin/typst",
+        "binarySha256": "472955622cf3cd10dd89dcf7c3cd9a6c0d2c100ab2f6ea9804a0f1256ad08705",
+        "binaryBytes": 47549056
+      },
+      "aarch64-apple-darwin": {
+        "url": "https://github.com/typst/typst/releases/download/v0.15.0/typst-aarch64-apple-darwin.tar.xz",
+        "sha256": "fe53838737abf93a774495952a1a797b4686e9c4a21c2d99b9fdf77f46cc3572",
+        "bytes": 14434976,
+        "format": "tar.xz",
+        "binary": "typst-aarch64-apple-darwin/typst",
+        "binarySha256": "3719b5ca1324cfc38e57d45c2379dfee14f3c6a6117a173b91a22a9e9cf90e2f",
+        "binaryBytes": 45012832
+      },
+      "x86_64-pc-windows-msvc": {
+        "url": "https://github.com/typst/typst/releases/download/v0.15.0/typst-x86_64-pc-windows-msvc.zip",
+        "sha256": "66ae7f0907b4b9afed5c7d6cb9b21e07f0f3c3d4e293ba3e0026a54d88202fe9",
+        "bytes": 22465201,
+        "format": "zip",
+        "binary": "typst-x86_64-pc-windows-msvc/typst.exe",
+        "binarySha256": "b561e8bbcccb0caaa665831d9fe08136eb47761b8ea5c2d8209ad64e76db5963",
+        "binaryBytes": 52485632
+      }
+    },
+    "0.15.1": {
+      "x86_64-unknown-linux-musl": {
+        "url": "https://github.com/typst/typst/releases/download/v0.15.1/typst-x86_64-unknown-linux-musl.tar.xz",
+        "sha256": "a6d077d0a95eed5a2eba715b2dae06be954f624ccbf85758a03f389ded33118c",
+        "bytes": 17462992,
+        "format": "tar.xz",
+        "binary": "typst-x86_64-unknown-linux-musl/typst",
+        "binarySha256": "29273eaa04f6d00edd0c2bec578f565fc9c65be856bfbffc894567c68ed0b237",
+        "binaryBytes": 55739488
+      },
+      "aarch64-unknown-linux-musl": {
+        "url": "https://github.com/typst/typst/releases/download/v0.15.1/typst-aarch64-unknown-linux-musl.tar.xz",
+        "sha256": "5aa8d74a3d906e60ea12a66ac2f37f8eef1b14cbad7182a745e393a10c23dcee",
+        "bytes": 16216812,
+        "format": "tar.xz",
+        "binary": "typst-aarch64-unknown-linux-musl/typst",
+        "binarySha256": "3088dd985a891d804a98c69db24dfca77a35878e45d40e38c79cf36d72bcd4c1",
+        "binaryBytes": 48655936
+      },
+      "x86_64-apple-darwin": {
+        "url": "https://github.com/typst/typst/releases/download/v0.15.1/typst-x86_64-apple-darwin.tar.xz",
+        "sha256": "7f9fdd9584866245de9a79e0add8f9236fae6f40a8a45e2c4771ccc14db4e0fa",
+        "bytes": 15635600,
+        "format": "tar.xz",
+        "binary": "typst-x86_64-apple-darwin/typst",
+        "binarySha256": "a6fb5786e71f6f95d8323b326353770734c1e4624e7c108783ea578723916b46",
+        "binaryBytes": 47572336
+      },
+      "aarch64-apple-darwin": {
+        "url": "https://github.com/typst/typst/releases/download/v0.15.1/typst-aarch64-apple-darwin.tar.xz",
+        "sha256": "48f62ed034aa3a7978309579ac6ca00045e2ef0da73114e8af27cfd8e74dc05a",
+        "bytes": 14438168,
+        "format": "tar.xz",
+        "binary": "typst-aarch64-apple-darwin/typst",
+        "binarySha256": "7c4a136b377f3689400afe37b4f0fe3528d50faaa55cbb1106ac8a128f86ba1a",
+        "binaryBytes": 45029488
+      },
+      "x86_64-pc-windows-msvc": {
+        "url": "https://github.com/typst/typst/releases/download/v0.15.1/typst-x86_64-pc-windows-msvc.zip",
+        "sha256": "19ce3551153c2fe7ee9fa2f95208310c8f4d3209fedb699e0333faf8913f6736",
+        "bytes": 22463684,
+        "format": "zip",
+        "binary": "typst-x86_64-pc-windows-msvc/typst.exe",
+        "binarySha256": "081217a463adb006f8894b44227fe4b9c9e91fc85f5463d5948e8370db9bb31e",
+        "binaryBytes": 52487680
+      }
+    }
+  }
+}

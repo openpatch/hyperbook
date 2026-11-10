@@ -26,6 +26,7 @@ const BOOK = [
   "glossary/logo.png",
   "archives/project/report.pdf",
   "book/maps/map.learningmap",
+  "book/section/blatt.typ",
 ];
 
 /** Scans one page against the book above. */
@@ -112,6 +113,16 @@ describe("finding references", () => {
   it("ignores links inside code", () => {
     const refs = inPage("```\n[code](/section/page)\n```\nInline `[code](/section/page)` too.\nBut [real](/section/page) works.");
     expect(refs).toHaveLength(1);
+  });
+
+  it("finds the source of a ::pdf, also a Typst document next to the page", () => {
+    const refs = findReferences(
+      [{ path: "book/section/page.md", text: '::pdf[Blatt]{src="blatt.typ" view="slides"}' }],
+      BOOK,
+      "book/section/blatt.typ",
+    );
+    expect(refs).toHaveLength(1);
+    expect(refs[0]).toMatchObject({ kind: "directive", directive: { name: "pdf", attribute: "src" }, pointsAt: "book/section/blatt.typ" });
   });
 
   it("finds directive attributes that name the file", () => {

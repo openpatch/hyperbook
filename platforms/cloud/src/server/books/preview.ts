@@ -210,6 +210,24 @@ export function createPreviewApp(deps: Deps) {
           return c.html(end < 0 ? html + script : html.slice(0, end) + script + html.slice(end));
         }
       }
+      // A Typst document a page shows: compiled from the checkout as it is,
+      // the editor's unsaved text included (hosting/renders.ts).
+      const address = "/" + segments.join("/");
+      const document = await renders.typstDocument(book.id, address);
+      if (document) {
+        if (!document.ok) {
+          // The ::pdf element shows that it failed; the text says why.
+          return c.text(document.diagnostics || document.error, 422, { "cache-control": "private, no-store" });
+        }
+        return c.body(await readFile(document.file), 200, {
+          "content-type": "application/pdf",
+          "cache-control": "private, no-store",
+        });
+      }
+      // A `.typ` source is part of the site only when a page offers it.
+      if (!(await renders.servesFile(book.id, address))) {
+        return page(c, 404, "Page not found", "This page does not exist in the book.");
+      }
       const roots = await renders.roots(book.id);
       for (const root of roots) {
         const found = await serveFile(c, { root, pathname, segments, etag: "preview", cacheControl: "private, no-store" });

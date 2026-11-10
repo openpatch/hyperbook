@@ -50,4 +50,6 @@ export function clearTmp(config: Config) {
 
 export async function removeBookFiles(config: Config, bookId: number) {
   await rm(bookDir(config, bookId), { recursive: true, force: true });
+  // The book's Typst cache (hosting/typst.ts).
+  await rm(path.join(config.dataDir, "typst", "cache", String(bookId)), { recursive: true, force: true });
 }

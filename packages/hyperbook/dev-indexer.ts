@@ -2,13 +2,16 @@ import path from "path";
 import fs from "fs";
 import readline from "readline";
 import { spawn, type ChildProcessWithoutNullStreams } from "child_process";
-import type { ArchiveInclude } from "@hyperbook/markdown";
+import type { ArchiveInclude, TypstJob } from "@hyperbook/markdown";
 import { PageRenderer, RENDER_REPLY } from "./render";
 
 /** What a page puts in the search index and the archives. */
 export type PageIndex = {
   searchDocuments: any[];
   archiveIncludes: Record<string, ArchiveInclude[]>;
+  /** Typst documents the page shows, and `.typ` sources it offers. */
+  typstJobs?: TypstJob[];
+  typstDownloads?: string[];
 };
 
 /**
@@ -107,6 +110,8 @@ export class ProcessIndexer implements Indexer {
       searchDocuments: (reply.searchDocuments as any[]) || [],
       archiveIncludes:
         (reply.archiveIncludes as Record<string, ArchiveInclude[]>) || {},
+      typstJobs: (reply.typstJobs as TypstJob[]) || [],
+      typstDownloads: (reply.typstDownloads as string[]) || [],
     };
   }
 
@@ -141,6 +146,8 @@ export class InProcessIndexer implements Indexer {
           ? {
               searchDocuments: page.searchDocuments,
               archiveIncludes: page.archiveIncludes,
+              typstJobs: page.typstJobs,
+              typstDownloads: page.typstDownloads,
             }
           : null;
       } catch {

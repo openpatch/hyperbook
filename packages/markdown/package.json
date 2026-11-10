@@ -37,7 +37,10 @@
     "dist/assets/directive-pyide/style.css",
     "!dist/assets/directive-typst/**",
     "dist/assets/directive-typst/client.js",
-    "dist/assets/directive-typst/style.css"
+    "dist/assets/directive-typst/style.css",
+    "!dist/assets/directive-pdf/**",
+    "dist/assets/directive-pdf/client.js",
+    "dist/assets/directive-pdf/style.css"
   ],
   "publishConfig": {
     "access": "public"

@@ -1,0 +1,303 @@
+.directive-pdf {
+  border: 1px solid var(--color-spacer);
+  border-radius: 4px;
+  margin: 1em 0;
+  overflow: hidden;
+}
+
+.directive-pdf .pdf-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  background: var(--color-nav);
+  border-bottom: 1px solid var(--color-spacer);
+}
+
+.directive-pdf .pdf-title {
+  flex: 1;
+  min-width: 0;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.directive-pdf .pdf-download {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--color-spacer);
+  border-radius: 4px;
+  color: inherit;
+}
+
+.directive-pdf .pdf-download:hover {
+  background: var(--color-background);
+}
+
+.directive-pdf .pdf-download .icon {
+  display: block;
+  width: 20px;
+  height: 20px;
+}
+
+/* A desk for the sheets: they stay white, also in dark mode. */
+.directive-pdf .pdf-viewer {
+  padding: 12px;
+  background: color-mix(in srgb, var(--color-spacer) 45%, transparent);
+}
+
+.directive-pdf .pdf-viewer:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: -2px;
+}
+
+.directive-pdf .pdf-fallback,
+.directive-pdf .pdf-loading,
+.directive-pdf .pdf-error {
+  display: block;
+  margin: 0;
+  padding: 8px 4px;
+}
+
+.directive-pdf.pdf-ready .pdf-loading {
+  display: none;
+}
+
+.directive-pdf .pdf-error {
+  color: var(--color-error, #b00020);
+}
+
+.directive-pdf .pdf-page {
+  position: relative;
+  width: 100%;
+  margin: 0 auto 12px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 1px 4px rgb(0 0 0 / 0.25);
+  color-scheme: only light;
+  /* pdf.js rounds its layers to whole pixels with these. */
+  --scale-round-x: 1px;
+  --scale-round-y: 1px;
+}
+
+.directive-pdf .pdf-page:last-child {
+  margin-bottom: 0;
+}
+
+.directive-pdf .pdf-page canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* embed: the browser's own viewer */
+.directive-pdf .pdf-embed {
+  display: block;
+  width: 100%;
+  height: var(--pdf-height, 80dvh);
+  border: 0;
+}
+
+/* thumb: the first page beside the title */
+.directive-pdf.pdf-view-thumb {
+  display: flex;
+  align-items: stretch;
+}
+
+.directive-pdf.pdf-view-thumb .pdf-header {
+  flex: 1;
+  min-width: 0;
+  border-bottom: 0;
+}
+
+.directive-pdf.pdf-view-thumb .pdf-viewer {
+  order: -1;
+  flex: none;
+  width: 120px;
+  padding: 8px;
+  border-right: 1px solid var(--color-spacer);
+}
+
+.directive-pdf.pdf-view-thumb .pdf-thumb {
+  display: block;
+}
+
+.directive-pdf.pdf-view-thumb .pdf-fallback,
+.directive-pdf.pdf-view-thumb .pdf-loading {
+  font-size: 0.75em;
+}
+
+/* The thumb is a picture, not text to select. */
+.directive-pdf.pdf-view-thumb .textLayer {
+  display: none;
+}
+
+/* slides: one page, as large as it fits */
+.directive-pdf.pdf-view-slides .pdf-viewer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.directive-pdf .pdf-stage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: var(--pdf-height, auto);
+  aspect-ratio: var(--pdf-ratio, 4 / 3);
+  min-height: 0;
+}
+
+.directive-pdf[style*="--pdf-height"] .pdf-stage {
+  aspect-ratio: auto;
+}
+
+.directive-pdf .pdf-stage .pdf-page {
+  flex: none;
+  margin: 0;
+}
+
+.directive-pdf .pdf-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.directive-pdf .pdf-controls button {
+  min-width: 40px;
+  height: 40px;
+  border: 1px solid var(--color-spacer);
+  border-radius: 4px;
+  background: var(--color-nav);
+  color: inherit;
+  font: inherit;
+  font-size: 1.25em;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.directive-pdf .pdf-controls button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.directive-pdf .pdf-controls .pdf-fullscreen {
+  margin-left: auto;
+}
+
+.directive-pdf .pdf-counter {
+  min-width: 5em;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.directive-pdf:fullscreen {
+  display: flex;
+  flex-direction: column;
+  border: 0;
+  border-radius: 0;
+  background: var(--color-background);
+}
+
+.directive-pdf:fullscreen .pdf-viewer {
+  flex: 1;
+  min-height: 0;
+}
+
+.directive-pdf:fullscreen .pdf-stage {
+  flex: 1;
+  height: auto;
+  aspect-ratio: auto;
+}
+
+/*
+ * pdf.js's text layer: transparent text above the picture of the page, for
+ * selecting, searching and reading aloud. From pdf.js's pdf_viewer.css
+ * (Apache License 2.0), without CSS nesting for older browsers.
+ */
+.directive-pdf .textLayer {
+  position: absolute;
+  inset: 0;
+  overflow: clip;
+  opacity: 1;
+  line-height: 1;
+  letter-spacing: normal;
+  word-spacing: normal;
+  text-align: initial;
+  -webkit-text-size-adjust: none;
+  -moz-text-size-adjust: none;
+  text-size-adjust: none;
+  forced-color-adjust: none;
+  transform-origin: 0 0;
+  caret-color: CanvasText;
+  z-index: 0;
+  --min-font-size: 1;
+  --text-scale-factor: calc(var(--total-scale-factor) * var(--min-font-size));
+  --min-font-size-inv: calc(1 / var(--min-font-size));
+}
+
+.directive-pdf .textLayer span,
+.directive-pdf .textLayer br {
+  color: transparent;
+  position: absolute;
+  white-space: pre;
+  cursor: text;
+  transform-origin: 0% 0%;
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  user-select: text;
+}
+
+.directive-pdf .textLayer > :not(.markedContent),
+.directive-pdf .textLayer .markedContent span:not(.markedContent) {
+  z-index: 1;
+  --font-height: 0;
+  font-size: calc(var(--text-scale-factor) * var(--font-height));
+  --scale-x: 1;
+  --rotate: 0deg;
+  transform: rotate(var(--rotate)) scaleX(var(--scale-x))
+    scale(var(--min-font-size-inv));
+}
+
+.directive-pdf .textLayer .markedContent {
+  display: contents;
+}
+
+.directive-pdf .textLayer span[role="img"] {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+  cursor: default;
+}
+
+.directive-pdf .textLayer ::selection {
+  background: rgb(0 0 255 / 0.25);
+  color: transparent;
+}
+
+.directive-pdf .textLayer br::selection {
+  background: transparent;
+}
+
+.directive-pdf .textLayer .endOfContent {
+  display: block;
+  position: absolute;
+  inset: 100% 0 0;
+  z-index: 0;
+  cursor: default;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+}
+
+@media print {
+  .directive-pdf .pdf-controls,
+  .directive-pdf .pdf-download {
+    display: none;
+  }
+}

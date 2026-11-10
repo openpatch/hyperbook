@@ -1,0 +1,1 @@
+ALTER TABLE `books` ADD `publishing_disabled` integer DEFAULT false NOT NULL;

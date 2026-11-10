@@ -18,6 +18,8 @@ export { registerBasicHelpers } from "./handlebars";
 
 export { readJsonFile, JsonParseError } from "./json";
 export { copy } from "./copy";
+export { excludeMatcher, excludeMatcherFor, globToRegExp } from "./exclude";
+export type { ExcludeMatcher } from "./exclude";
 export type { CopyOptions } from "./copy";
 export { UserError, FrontmatterParseError } from "./errors";
 

@@ -201,6 +201,13 @@ export async function headCommit(repo: string): Promise<string | null> {
 }
 
 /** Whether `commit` is reachable from the book's current main branch. */
+/** A commit's time in seconds since the epoch, or null. */
+export async function commitTime(repo: string, commit: string): Promise<number | null> {
+  const out = await git(["log", "-1", "--format=%ct", commit], { gitDir: repo }).catch(() => "");
+  const seconds = Number(out);
+  return Number.isFinite(seconds) && seconds > 0 ? seconds : null;
+}
+
 export async function isMainAncestor(repo: string, commit: string): Promise<boolean> {
   if (!/^[0-9a-f]{40}$/i.test(commit)) return false;
   try {

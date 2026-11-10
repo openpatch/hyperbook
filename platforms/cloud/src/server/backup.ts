@@ -5,16 +5,20 @@ import type { Config } from "./config";
 import { hyperbookVersion } from "./hosting/runner";
 import { repoDir } from "./hosting/storage";
 
+import { typstLibrary } from "./hosting/typst";
+
 /*
  * `node dist/server/main.js backup <dir>`: a consistent copy of an instance
  * while it runs.
  *
  *   <dir>/database.sqlite        SQLite's online backup of the database
  *   <dir>/books/<id>/repo.git/   every book's repository (its source)
+ *   <dir>/typst/library/         the shared Typst packages admins uploaded
  *   <dir>/backup.json            when, and with which version
  *
  * Builds are left out: after a restore the platform rebuilds published books
- * whose build is missing. CREDENTIALS_KEY is not in the data and has to be
+ * whose build is missing. So are Typst's binaries, its package cache and the
+ * compile caches (DATA_DIR/typst), which come back on first use. CREDENTIALS_KEY is not in the data and has to be
  * kept separately.
  */
 
@@ -45,6 +49,10 @@ export async function backup(config: Config, target: string) {
     }
     books++;
   }
+
+  // Uploaded, not downloaded: it cannot come back on its own.
+  const library = typstLibrary(config);
+  if (existsSync(library)) cpSync(library, path.join(dest, "typst", "library"), { recursive: true });
 
   writeFileSync(
     path.join(dest, "backup.json"),

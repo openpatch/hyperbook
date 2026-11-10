@@ -379,6 +379,9 @@
                 "openscad": {
                     "$ref": "#/definitions/ElementAssetConfig"
                 },
+                "pdf": {
+                    "$ref": "#/definitions/ElementAssetConfig"
+                },
                 "pyide": {
                     "$ref": "#/definitions/ElementAssetConfig"
                 },
@@ -425,6 +428,13 @@
                 }
             },
             "type": "object"
+        },
+        "exclude": {
+            "description": "Globs for files that must not reach the built site, matched against a\nfile's address in the site without the leading slash, for example\n`[\"intern/**\", \"*.draft.pdf\"]`. Applies to the files a build copies: `public/` and the\nnon-page files of `book/` and `glossary/`. Supports `*`, `**`, `?` and\n`{a,b}`.",
+            "items": {
+                "type": "string"
+            },
+            "type": "array"
         },
         "font": {
             "type": "string"
@@ -530,6 +540,24 @@
         },
         "trailingSlash": {
             "type": "boolean"
+        },
+        "typst": {
+            "description": "Typst documents (`.typ`) built into PDFs, for `::pdf`.",
+            "properties": {
+                "fontPath": {
+                    "description": "A folder in the book with fonts for its Typst documents.",
+                    "type": "string"
+                },
+                "packagePath": {
+                    "description": "A folder in the book with Typst packages, laid out as\n`<namespace>/<name>/<version>/` (`local/…` for `@local` imports, and\n`preview/…` for Typst Universe packages the book carries).",
+                    "type": "string"
+                },
+                "version": {
+                    "description": "The Typst version the book is built with, one of those this Hyperbook\nsupports (0.15.0 and newer). Without it the newest supported version is\nused, with a warning.",
+                    "type": "string"
+                }
+            },
+            "type": "object"
         },
         "version": {
             "description": "Controls how the Hyperbook version is displayed.\n- \"text\": Shows version below the \"Powered by Hyperbook\" label.\n- \"tooltip\": Shows version on hover of the \"Powered by Hyperbook\" label.\n- \"console\": Outputs version as ASCII art in the browser console (default).",

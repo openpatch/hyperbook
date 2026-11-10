@@ -47,7 +47,8 @@ describe("books", () => {
     await page.getByRole("combobox", { name: "Visibility" }).click();
     await page.getByRole("option", { name: /Private/ }).click();
     await page.getByRole("button", { name: "Save" }).click();
-    await page.getByText("Saved").waitFor();
+    // Exact: "Nothing saved yet." may be on the page too.
+    await page.getByText("Saved", { exact: true }).waitFor();
     await page.getByRole("link", { name: `physik-8a.books.localhost:${server.port}` }).waitFor();
     await page.getByText("Private", { exact: true }).first().waitFor();
   });

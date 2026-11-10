@@ -1,3 +1,4 @@
+import { readFile } from "node:fs/promises";
 import { Hono } from "hono";
 import { bodyLimit } from "hono/body-limit";
 import { HTTPException } from "hono/http-exception";
@@ -20,6 +21,8 @@ import {
   readBlob,
 } from "../../hosting/git";
 import { RenderError } from "../../hosting/renders";
+import { parseTypstDiagnostics } from "../../../shared/typst-diagnostics";
+import { listPackages } from "../../hosting/typst-library";
 import { repoDir } from "../../hosting/storage";
 import { createPreviewCode } from "../../auth/preview-sessions";
 import { previewOrigin } from "../../config";
@@ -234,6 +237,46 @@ export function bookFileRoutes({ db, config, renders }: Deps) {
         }
       },
     )
+
+    // The editor's preview of a `.typ` file with its unsaved text: the PDF,
+    // or Typst's diagnostics for the lint gutter (see hosting/renders.ts).
+    .post(
+      "/:id/files/typst-preview",
+      idParam,
+      bodyLimit({
+        maxSize: 3 * 1024 * 1024,
+        onError: () => {
+          throw new HTTPException(413, { message: "The document is too long to preview" });
+        },
+      }),
+      validate("json", renderPageInput),
+      async (c) => {
+        const { book } = bookAccess(db, c.get("user"), c.req.valid("param").id);
+        hostedOnly(book);
+        const { path, text } = c.req.valid("json");
+        let result;
+        try {
+          result = await renders.typstText(book.id, path, text);
+        } catch (error) {
+          if (error instanceof RenderError) throw new HTTPException(400, { message: error.message });
+          throw error;
+        }
+        if (!result.ok) {
+          return c.json({ error: result.error, diagnostics: parseTypstDiagnostics(result.diagnostics) }, 422);
+        }
+        return c.body(await readFile(result.file), 200, {
+          "content-type": "application/pdf",
+          "cache-control": "private, no-store",
+        });
+      },
+    )
+
+    // The instance's shared Typst packages, for completing `#import "@…"`.
+    .get("/:id/typst-packages", idParam, async (c) => {
+      bookAccess(db, c.get("user"), c.req.valid("param").id);
+      const packages = await listPackages(config);
+      return c.json({ imports: packages.map((p) => `@${p.namespace}/${p.name}:${p.version}`) });
+    })
 
     // A one-time hand-off into the book's preview host (see books/preview.ts).
     .post("/:id/preview-code", idParam, (c) => {

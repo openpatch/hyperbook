@@ -11,6 +11,8 @@ import {
 } from "./git";
 import { BuildLog, adaptConfig, cliChildEnv, cliPermissions } from "./runner";
 import { makeJobDir, repoDir } from "./storage";
+import { createHash } from "node:crypto";
+import { type TypstJob, isPlainRelative, typstServiceFor, typstSettingsOf, typstVersions } from "./typst";
 
 /*
  * Single pages rendered for the editor's preview, without a build. Each book
@@ -24,7 +26,16 @@ import { makeJobDir, repoDir } from "./storage";
 export type RenderTarget = { file: string } | { href: string };
 
 export type PageRender =
-  | { ok: true; href: string; file: string; out: string; log: string }
+  | {
+      ok: true;
+      href: string;
+      file: string;
+      out: string;
+      log: string;
+      /** Typst documents the page shows, and `.typ` sources it offers (see hosting/typst.ts). */
+      typstJobs?: TypstJob[];
+      typstDownloads?: string[];
+    }
   | { ok: false; error: string; log: string };
 
 /** One `hyperbook render` (or a stand-in in tests) working on `srcDir`. */
@@ -126,7 +137,15 @@ function renderProcess(child: ChildProcessWithoutNullStreams, timeoutMs: number,
         const r = await reply;
         const output = log.toString().slice(before).trim();
         return r.ok
-          ? { ok: true, href: String(r.href), file: String(r.file), out: String(r.out), log: output }
+          ? {
+              ok: true,
+              href: String(r.href),
+              file: String(r.file),
+              out: String(r.out),
+              log: output,
+              typstJobs: Array.isArray(r.typstJobs) ? (r.typstJobs as TypstJob[]) : [],
+              typstDownloads: Array.isArray(r.typstDownloads) ? (r.typstDownloads as string[]) : [],
+            }
           : { ok: false, error: String(r.error ?? "Rendering failed"), log: output };
       });
       queue = run.catch(() => {});
@@ -152,12 +171,22 @@ type Renderer = {
   override: { file: string; saved: string | null; text: string } | null;
   /** Pages rendered since the last change, by address. */
   fresh: Map<string, string>;
+  /** Typst documents the rendered pages show, by address; `.typ` sources they offer. */
+  typstJobs: Map<string, TypstJob>;
+  typstDownloads: Set<string>;
+  /** Preview PDFs, by address, with the checkout's state they were made from. */
+  typstPdfs: Map<string, { generation: number; file: Promise<TypstPreview> }>;
+  /** Counts changes to the checkout: a preview PDF of an older one is stale. */
+  generation: number;
   lastUsed: number;
   /** Changes to the checkout, one after the other. */
   lock: Promise<unknown>;
 };
 
 export class RenderError extends Error {}
+
+/** A preview PDF, or why there is none. */
+export type TypstPreview = { ok: true; file: string } | { ok: false; error: string; diagnostics: string };
 
 const PAGE = /^(book|glossary)\/.+\.(md|md\.hbs|md\.json|md\.yml)$/;
 
@@ -210,6 +239,10 @@ export class Renderers {
         settings: await readFile(path.join(srcDir, "hyperbook.json"), "utf8").catch(() => ""),
         override: null,
         fresh: new Map(),
+        typstJobs: new Map(),
+        typstDownloads: new Set(),
+        typstPdfs: new Map(),
+        generation: 0,
         lastUsed: Date.now(),
         lock: Promise.resolve(),
       };
@@ -240,6 +273,7 @@ export class Renderers {
       r.commit = commit;
       r.override = null;
       r.fresh.clear();
+      r.generation++;
       const settings = await readFile(path.join(r.srcDir, "hyperbook.json"), "utf8").catch(() => "");
       if (settings !== r.settings) {
         r.settings = settings;
@@ -276,6 +310,7 @@ export class Renderers {
       await mkdir(path.dirname(full), { recursive: true });
       await writeFile(full, text);
       r.fresh.clear();
+      r.generation++;
       return this.run(r, { file });
     });
   }
@@ -291,8 +326,92 @@ export class Renderers {
 
   private async run(r: Renderer, target: RenderTarget): Promise<PageRender> {
     const result = await (await r.process).render(target);
-    if (result.ok) r.fresh.set(normalize(result.href), result.out);
+    if (result.ok) {
+      r.fresh.set(normalize(result.href), result.out);
+      for (const job of result.typstJobs ?? []) r.typstJobs.set(job.out, job);
+      for (const href of result.typstDownloads ?? []) r.typstDownloads.add(href);
+    }
     return result;
+  }
+
+  /**
+   * Whether the preview host may serve the file at `pathname`: a `.typ`
+   * source only when a rendered page offers it for download, like a build.
+   */
+  async servesFile(bookId: number, pathname: string): Promise<boolean> {
+    if (!/\.typ$/i.test(pathname)) return true;
+    const r = await this.renderer(bookId);
+    return r.typstDownloads.has(pathname);
+  }
+
+  /**
+   * The PDF of a Typst document a rendered page shows, compiled from the
+   * checkout as it is (the editor's unsaved text included) and kept until
+   * the checkout changes. Null when no page shows a document at `pathname`.
+   */
+  async typstDocument(bookId: number, pathname: string): Promise<TypstPreview | null> {
+    const r = await this.renderer(bookId);
+    const job = r.typstJobs.get(pathname);
+    if (!job) return null;
+    // Under the checkout's lock: a save or a check must not change the
+    // files while Typst reads them.
+    return this.exclusive(r, () => this.compileTypst(r, job));
+  }
+
+  /**
+   * The editor's preview of a `.typ` file: compiled with `text`, which stays
+   * in the checkout like a page's unsaved text until the next save.
+   */
+  async typstText(bookId: number, file: string, text: string): Promise<TypstPreview> {
+    if (!/\.typ$/i.test(file) || !isPlainRelative(file)) {
+      throw new RenderError("Only .typ files of the book can be previewed");
+    }
+    const r = await this.renderer(bookId);
+    // Written and compiled under the checkout's lock: "check all pages" puts
+    // the saved text back (also under it), and must not do so in between.
+    return this.exclusive(r, async () => {
+      const full = path.join(r.srcDir, file);
+      if (r.override && r.override.file !== file) await this.restore(r);
+      if (!r.override) {
+        r.override = { file, saved: await readFile(full, "utf8").catch(() => null), text };
+      }
+      if (r.override.text !== text || (await readFile(full, "utf8").catch(() => null)) !== text) {
+        r.override.text = text;
+        await mkdir(path.dirname(full), { recursive: true });
+        await writeFile(full, text);
+        r.fresh.clear();
+        r.generation++;
+      }
+      return this.compileTypst(r, { src: file, out: `/__typst/${file}.pdf`, inputs: {} });
+    });
+  }
+
+  private compileTypst(r: Renderer, job: TypstJob): Promise<TypstPreview> {
+    const known = r.typstPdfs.get(job.out);
+    if (known && known.generation === r.generation) return known.file;
+    const generation = r.generation;
+    const file = (async (): Promise<TypstPreview> => {
+      const settings = typstSettingsOf(r.settings, typstVersions(this.config));
+      if ("error" in settings) return { ok: false, error: settings.error, diagnostics: "" };
+      const dir = path.join(r.jobDir, "typst-preview");
+      await mkdir(dir, { recursive: true });
+      const out = path.join(dir, `${createHash("sha256").update(job.out).digest("hex").slice(0, 32)}-${generation}.pdf`);
+      const outcome = await typstServiceFor(this.config).preview({
+        bookId: r.bookId,
+        jobDir: r.jobDir,
+        srcDir: r.srcDir,
+        job,
+        ...settings,
+        out,
+      });
+      return outcome.ok ? { ok: true, file: out } : { ok: false, error: outcome.error, diagnostics: outcome.diagnostics };
+    })();
+    r.typstPdfs.set(job.out, { generation, file });
+    // A failed run is not kept: the next request tries again.
+    void file.then((result) => {
+      if (!result.ok && r.typstPdfs.get(job.out)?.file === file) r.typstPdfs.delete(job.out);
+    });
+    return file;
   }
 
   /**

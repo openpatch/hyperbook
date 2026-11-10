@@ -71,6 +71,10 @@ import {
 } from "./files";
 import { RefactorDialog, type RefactorRequest } from "./references-dialog";
 import { PreviewPane } from "./preview";
+import { TypstPreviewPane, showTypstDiagnostics } from "./typst-preview";
+import { PdfView } from "./pdf-view";
+import { setBookFilesForTypstImports, setSharedTypstImports } from "./typst-imports";
+import type { TypstDiagnostic } from "../../../shared/typst-diagnostics";
 import { VisualFrame, visualKind, visualProblem } from "./visual-frame";
 import { type Block, type InlineBlock, resolveSrc } from "./blocks";
 import { BlockDialog } from "./block-dialog";
@@ -326,6 +330,14 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
   const { t } = useTranslation();
   const bookId = String(book.id);
   const ws = useWorkspace(bookId, listing);
+  // What `#import "@…"` completes in .typ files (typst-imports.ts).
+  const { data: typstImports } = useQuery({
+    queryKey: ["books", bookId, "typst-packages"],
+    queryFn: () => unwrap(api.books[":id"]["typst-packages"].$get({ param: { id: bookId } })),
+    staleTime: 5 * 60 * 1000,
+  });
+  useEffect(() => setSharedTypstImports(typstImports?.imports ?? []), [typstImports]);
+  useEffect(() => setBookFilesForTypstImports(listing.files.map((f) => f.path)), [listing.files]);
   // The book's language: struktolab's keywords depend on it.
   const { data: bookLanguage = "en" } = useQuery({
     queryKey: [
@@ -1646,6 +1658,19 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
                     ? activeTab.path
                     : null
                 }
+                typstFile={
+                  // Also while the tab reloads (after an upload or a
+                  // conflict): the pane stays, with its last PDF.
+                  activeTab &&
+                  extension(activeTab.path) === "typ" &&
+                  activeTab.status !== "error"
+                    ? activeTab.path
+                    : null
+                }
+                onTypstDiagnostics={(path, diagnostics) => {
+                  const view = views.get(path);
+                  if (view) showTypstDiagnostics(view, path, diagnostics);
+                }}
                 commit={listing.commit}
                 onNavigate={(href) => {
                   const target = fileAt(
@@ -1735,15 +1760,30 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
 function LivePreview({
   ws,
   file,
+  typstFile,
+  onTypstDiagnostics,
   ...props
 }: {
   ws: Workspace;
   bookId: string;
   file: string | null;
+  /** An open `.typ` file: shown as the PDF it compiles to instead. */
+  typstFile: string | null;
+  onTypstDiagnostics: (path: string, diagnostics: TypstDiagnostic[]) => void;
   commit: string | null;
   onNavigate: (href: string) => boolean;
 }) {
-  const text = useLiveText(ws, file);
+  const text = useLiveText(ws, typstFile ?? file);
+  if (typstFile !== null) {
+    return (
+      <TypstPreviewPane
+        bookId={props.bookId}
+        file={typstFile}
+        text={text ?? null}
+        onDiagnostics={onTypstDiagnostics}
+      />
+    );
+  }
   return (
     <PreviewPane
       {...props}
@@ -1868,11 +1908,9 @@ function TabContent({
           className="max-h-[60vh] max-w-full rounded-md border border-border object-contain"
         />
       ) : loaded.kind === "pdf" ? (
-        <iframe
-          src={loaded.url}
-          title={tab.path}
-          className="h-[70vh] w-full max-w-5xl rounded-md border border-border bg-white"
-        />
+        <div className="flex h-[70vh] w-full max-w-5xl flex-col overflow-hidden rounded-md border border-border">
+          <PdfView data={loaded.data} className="flex-1" />
+        </div>
       ) : (
         <p className="max-w-md text-center text-muted-foreground">
           {extension(tab.path) === "h5p"

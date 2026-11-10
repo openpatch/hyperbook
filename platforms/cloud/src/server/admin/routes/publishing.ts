@@ -8,12 +8,12 @@ import { Hono } from "hono";
 import { bodyLimit } from "hono/body-limit";
 import { HTTPException } from "hono/http-exception";
 import { z } from "zod";
-import { publishInput, publishRequestInput, rollbackInput } from "../../../shared/schemas";
+import { publishInput, publishingLockInput, publishRequestInput, rollbackInput } from "../../../shared/schemas";
 import { audit } from "../../audit";
 import type { SessionUser } from "../../auth/sessions";
 import { bookMembers, books, builds, users } from "../../db/schema";
 import type { Deps } from "../../deps";
-import { type BookRow, addCommits, bookAccess } from "../../domain/books";
+import { type BookRow, addCommits, bookAccess, publicBook } from "../../domain/books";
 import { getInstanceSettings } from "../../domain/instance";
 import { createT, userLocale } from "../../i18n";
 import type { BuildProgress, BuildRow } from "../../hosting/builds";
@@ -80,6 +80,22 @@ export function hostedOnly(book: BookRow) {
     throw new HTTPException(409, {
       message: "This book is hosted elsewhere. Remove its external address to host it here.",
     });
+  }
+}
+
+/**
+ * Refuses while the book's publishing lock is set. Reads the row anew: the
+ * routes below await between their first check and the moment a build goes
+ * live, and the lock may have been set in between.
+ */
+export function assertPublishingAllowed(db: Deps["db"], bookId: number) {
+  const row = db
+    .select({ disabled: books.publishingDisabled })
+    .from(books)
+    .where(eq(books.id, bookId))
+    .get();
+  if (row?.disabled) {
+    throw new HTTPException(403, { message: "publishing.lock.refused" });
   }
 }
 
@@ -330,6 +346,7 @@ export function bookPublishingRoutes({ db, config, mailer, builds: queue, checks
       const user = c.get("user");
       const { book } = bookAccess(db, user, c.req.valid("param").id);
       hostedOnly(book);
+      assertPublishingAllowed(db, book.id);
       const note = c.req.valid("json").note || null;
       const now = new Date();
       db.update(books)
@@ -404,6 +421,7 @@ export function bookPublishingRoutes({ db, config, mailer, builds: queue, checks
       // What goes live is the owners' call; editors work on the preview.
       const { book } = bookAccess(db, user, c.req.valid("param").id, "owner");
       hostedOnly(book);
+      assertPublishingAllowed(db, book.id);
       const note = c.req.valid("json").note || null;
       const commit = await headCommit(repoDir(config, book.id)).catch(() => null);
       if (!commit) throw new HTTPException(409, { message: "The book has no files yet" });
@@ -418,6 +436,8 @@ export function bookPublishingRoutes({ db, config, mailer, builds: queue, checks
         .get();
       if (built && existsSync(buildDir(config, book.id, built.id))) {
         const now = new Date();
+        // Again, with nothing awaited before the update: see the function.
+        assertPublishingAllowed(db, book.id);
         db.update(books).set({ publishedBuildId: built.id, publishedAt: now }).where(eq(books.id, book.id)).run();
         queue.supersedePublishing(book.id);
         if (note) db.update(builds).set({ note }).where(eq(builds.id, built.id)).run();
@@ -435,6 +455,7 @@ export function bookPublishingRoutes({ db, config, mailer, builds: queue, checks
           build: publicBuild({ ...built, note: note ?? built.note }, { ...book, publishedBuildId: built.id }, null, null, tags.get(commit) ?? []),
         });
       }
+      assertPublishingAllowed(db, book.id);
       const build = queue.publishPending(book.id, commit, user.id, note) ?? queue.enqueue(book.id, commit, "publish", user.id, note ?? undefined);
       return c.json({ published: false, build: publicBuild(build, book, user.email, queue.progress(build.id)) });
     })
@@ -446,6 +467,7 @@ export function bookPublishingRoutes({ db, config, mailer, builds: queue, checks
       const user = c.get("user");
       const { book } = bookAccess(db, user, c.req.valid("param").id, "owner");
       hostedOnly(book);
+      assertPublishingAllowed(db, book.id);
       const { tag } = c.req.valid("json");
       const repo = repoDir(config, book.id);
       const commit = await resolveTagCommit(repo, tag);
@@ -459,6 +481,7 @@ export function bookPublishingRoutes({ db, config, mailer, builds: queue, checks
         .get();
       if (kept && existsSync(buildDir(config, book.id, kept.id))) {
         const now = new Date();
+        assertPublishingAllowed(db, book.id);
         db.update(books).set({ publishedBuildId: kept.id, publishedAt: now }).where(eq(books.id, book.id)).run();
         queue.supersedePublishing(book.id);
         await movePublishedTag(config, book.id, commit);
@@ -476,8 +499,46 @@ export function bookPublishingRoutes({ db, config, mailer, builds: queue, checks
         });
       }
       // The rebuild audits when it goes live (finish), like a publish build.
+      assertPublishingAllowed(db, book.id);
       const build = queue.enqueue(book.id, commit, "rollback", user.id);
       return c.json({ published: false, build: publicBuild(build, book, user.email, queue.progress(build.id)) });
+    })
+
+    // The publishing lock, for books that must never be public (exams).
+    // Turning it on takes the book offline, drops an open request to publish
+    // and keeps builds that are waiting or running from going live — in one
+    // transaction, so nothing slips through between the steps.
+    .post("/:id/publishing-lock", idParam, validate("json", publishingLockInput), (c) => {
+      const user = c.get("user");
+      const { book } = bookAccess(db, user, c.req.valid("param").id, "owner");
+      hostedOnly(book);
+      const { disabled } = c.req.valid("json");
+      db.transaction((tx) => {
+        tx.update(books)
+          .set({
+            publishingDisabled: disabled,
+            ...(disabled && {
+              publishedBuildId: null,
+              publishedAt: null,
+              publishRequestedBy: null,
+              publishRequestedAt: null,
+              publishRequestNote: null,
+            }),
+            updatedAt: new Date(),
+          })
+          .where(eq(books.id, book.id))
+          .run();
+        if (disabled) queue.supersedePublishing(book.id, tx as unknown as Deps["db"]);
+        audit(tx as unknown as Deps["db"], {
+          actorUserId: user.id,
+          action: disabled ? "book.publishingLock" : "book.publishingUnlock",
+          targetType: "book",
+          targetId: book.id,
+          data: disabled ? { unpublishedBuildId: book.publishedBuildId } : {},
+        });
+      });
+      const updated = db.select().from(books).where(eq(books.id, book.id)).get()!;
+      return c.json(publicBook(config, updated, "owner"));
     })
 
     .post("/:id/unpublish", idParam, (c) => {

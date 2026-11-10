@@ -17,6 +17,7 @@ export const elementCoreFiles = {
   geogebra: ["client.js", "geogebra-web-component.js", "style.css"],
   pyide: ["client.js", "python-friendly-error-messages.js", "style.css"],
   typst: ["client.js", "style.css"],
+  pdf: ["client.js", "style.css"],
 } satisfies Record<string, string[]>;
 
 export type DownloadableElement = keyof typeof elementCoreFiles;
@@ -39,6 +40,7 @@ export const elementRuntimeFiles: Record<DownloadableElement, string[]> = {
     "libraries/BOSL2.zip",
     "fonts/Roboto-Regular.ttf",
   ],
+  pdf: ["pdf.min.mjs", "pdf.worker.min.mjs"],
 };
 
 /**
@@ -287,6 +289,23 @@ export type ProtectReference =
       description?: string;
     };
 
+export type TypstConfig = {
+  /**
+   * The Typst version the book is built with, one of those this Hyperbook
+   * supports (0.15.0 and newer). Without it the newest supported version is
+   * used, with a warning.
+   */
+  version?: string;
+  /**
+   * A folder in the book with Typst packages, laid out as
+   * `<namespace>/<name>/<version>/` (`local/…` for `@local` imports, and
+   * `preview/…` for Typst Universe packages the book carries).
+   */
+  packagePath?: string;
+  /** A folder in the book with fonts for its Typst documents. */
+  fontPath?: string;
+};
+
 export type HyperbookJson = {
   name: string;
   description?: string;
@@ -298,6 +317,18 @@ export type HyperbookJson = {
   qrcode?: boolean;
   toc?: boolean;
   llms?: boolean;
+  /**
+   * Globs for files that must not reach the built site, matched against a
+   * file's address in the site without the leading slash, for example
+   * `["intern/**", "*.draft.pdf"]`. Applies to the files a build copies: `public/` and the
+   * non-page files of `book/` and `glossary/`. Supports `*`, `**`, `?` and
+   * `{a,b}`.
+   */
+  exclude?: string[];
+  /**
+   * Typst documents (`.typ`) built into PDFs, for `::pdf`.
+   */
+  typst?: TypstConfig;
   /**
    * Password protection behaviour. Passwords themselves live in a separate
    * registry file so this one can stay committed.
@@ -381,6 +412,7 @@ export type HyperbookJson = {
     openscad?: ElementAssetConfig;
     pyide?: ElementAssetConfig;
     typst?: ElementAssetConfig;
+    pdf?: ElementAssetConfig;
     excalidraw?: ElementAssetConfig & {
       autoZoom?: boolean;
       center?: boolean;

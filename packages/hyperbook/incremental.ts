@@ -10,6 +10,7 @@ import {
   VFileBook,
   VFileGlossary,
   getPasswords,
+  excludeMatcherFor,
 } from "@hyperbook/fs";
 import {
   clearCollectedPasswords,
@@ -621,6 +622,22 @@ export class IncrementalBuilder {
       if (!absPath.startsWith(dir + path.sep)) continue;
       const relativePath = path.relative(dir, absPath);
       const destPath = path.join(this.rootOut, relativePath);
+      // A Typst source is part of the site only when a page offers it for
+      // download; the full build copied those, so only they are updated.
+      if (
+        absPath.toLowerCase().endsWith(".typ") &&
+        !(await fs.stat(destPath).catch(() => null))
+      ) {
+        return;
+      }
+      // `exclude` in hyperbook.json: such a file is not part of the site.
+      const excluded = excludeMatcherFor(
+        await vfile.getJson(this.root).catch(() => null),
+      );
+      if (excluded(relativePath)) {
+        await fs.rm(destPath, { force: true });
+        return;
+      }
       try {
         await fs.mkdir(path.dirname(destPath), { recursive: true });
         await cp(absPath, destPath);

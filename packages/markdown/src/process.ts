@@ -32,6 +32,7 @@ import remarkDirectiveAudio from "./remarkDirectiveAudio";
 import remarkDirectiveCollapsible from "./remarkDirectiveCollapsible";
 import remarkDirectiveArchive from "./remarkDirectiveArchive";
 import remarkDirectiveDownload from "./remarkDirectiveDownload";
+import remarkDirectivePdf from "./remarkDirectivePdf";
 import remarkDirectiveEmbed from "./remarkDirectiveEmbed";
 import remarkDirectiveProtect from "./remarkDirectiveProtect";
 import rehypeProtect from "./rehypeProtect";
@@ -112,6 +113,7 @@ export const remark = (
     remarkDirectiveArchive(ctx),
     remarkDirectiveQr(ctx),
     remarkDirectiveDownload(ctx),
+    remarkDirectivePdf(ctx),
     remarkDirectiveAudio(ctx),
     remarkDirectiveAlert(ctx),
     remarkDirectiveBookmarks(ctx),

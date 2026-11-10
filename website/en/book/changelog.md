@@ -13,6 +13,52 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 
 :::
 
+## v0.122.0
+
+::::tabs
+
+:::tab{title="New :rocket:" id="new"}
+
+**markdown**: New [`::pdf`](/elements/pdf) element. `::pdf[Script]{src="script.pdf"}` shows a PDF on the page, drawn in the browser with pdf.js, so it also works on tablets and phones and its text can be selected, searched and read aloud. `view` picks `pages` (all pages below each other, the default), `slides` (one page, previous/next, arrow keys, swipe, fullscreen), `thumb` (the first page beside the title), `embed` (the browser's own viewer) or `button` (only a download button). `pages="1-2"` limits the pages shown, `download="false"` hides the download button, `height` sizes `slides` and `embed`.
+
+**hyperbook**: `::pdf` builds Typst documents. `::pdf[Worksheet]{src="worksheet.typ"}` compiles the document into a PDF during the build; `inputs="solution=true"` passes values to it, and each set of inputs is its own PDF. The official Typst compiler is downloaded and checked on first use. `typst.version` in `hyperbook.json` pins it (0.15.0 and newer), `typst.packagePath` names a folder of the book's own packages (`@local/…`), `typst.fontPath` a folder of fonts, and `HYPERBOOK_TYPST_PACKAGE_PATH` adds packages shared by several books. Unchanged documents are not compiled again, a document with errors fails the build with Typst's message, and the dev server compiles documents as pages show them.
+
+**markdown**: [`:::typst`](/elements/typst) blocks can import packages: the book's own, the shared ones and, on Hyperbook Cloud, the instance's. The build packs each package a block imports into the site. A new `packages` attribute offers packages that no file imports yet, for edit mode.
+
+**hyperbook**: New `exclude` setting in `hyperbook.json`: globs for files that must not be part of the built site, e.g. `["intern/**", "**/*.draft.*"]`. The dev server does not serve them either, and `hyperbook check` reports links to them.
+
+**cloud**: Typst documents work in Hyperbook Cloud. Builds compile them outside the build's sandbox, with a timeout, memory and file-size limits and a compile cache per book. The page preview shows them with the editor's unsaved text, and an open `.typ` file gets a PDF preview next to the editor, with Typst's errors in the editor's gutter and `#import "@…"` completion.
+
+**cloud**: Admins add Typst packages every book can import, e.g. `@local/assessio:0.1.0`, under Settings → Typst packages. Versions are added or removed, never replaced.
+
+**cloud**: A publishing lock for exams and other material that must never be public. An owner disables publishing on the book's page: the book can then be neither published nor rolled back, an open request to publish is dropped, and a live book goes offline at once. Builds already queued do not go live either.
+
+:::
+
+:::tab{title="Improved :+1:" id="improved"}
+
+**markdown**: `:::typst` compiles with Typst 0.15.1 (typst.ts 0.8.0-rc4, up from Typst 0.14.2).
+
+**markdown**: The java-memory-playground element uses `@java-memory-playground/web-component` 0.4.0. Answers are checked by walking the diagram from each variable, the feedback says where an answer goes wrong, and new attributes hide toolbar buttons.
+
+**cloud**: The editor shows PDFs — the Typst preview and opened `.pdf` files — on its own surface in light and dark mode instead of the browser's dark PDF viewer. The preview keeps its scroll position and no longer flashes while it updates.
+
+**cloud**: `.typ` files use Hyperbook's light and dark syntax colors, and the borders of the file tree, gutter, tooltips and menus are no longer near-black in light mode.
+
+**cloud**: The AI assistant knows `::pdf` and writes code blocks of `:::pyide`, `:::webide`, `:::typst`, `:::openscad` and `:::p5` in the current `file="…"` syntax.
+
+:::
+
+:::tab{title="Changed :warning:" id="changed"}
+
+**hyperbook**: `.typ` files are no longer copied into the site. A page that offers one with `:download[…]{src="file.typ"}` still gets it; a plain Markdown link to a `.typ` file now breaks, and `hyperbook check` reports it.
+
+**markdown**: `:::typst` documents that use something Typst 0.15 removed or changed may need an update.
+
+:::
+
+::::
+
 ## v0.118.1
 
 ::::tabs

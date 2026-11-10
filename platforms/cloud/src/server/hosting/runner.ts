@@ -10,6 +10,7 @@ import {
   localElements,
   sharedAssetsBase,
 } from "./runtimes";
+import { typstLibrary, typstServiceFor } from "./typst";
 
 /*
  * Runs `hyperbook build` on a checked-out book in a sandboxed child process.
@@ -39,6 +40,10 @@ export type Runner = (job: {
   signal: AbortSignal;
   /** Elements whose runtimes the admin loads from their public CDN, not this instance. */
   cdnElements: string[];
+  /** The book, for its Typst cache. */
+  bookId?: number;
+  /** The commit's time (seconds), so its Typst documents come out the same each time. */
+  creationTimestamp?: number | null;
 }) => Promise<BuildOutcome>;
 
 /**
@@ -59,6 +64,10 @@ export function cliPermissions(config: Config, jobDir: string): string[] {
     `--allow-fs-write=${jobDir}`,
     `--allow-fs-read=${assetCacheDir(config)}`,
     `--allow-fs-write=${assetCacheDir(config)}`,
+    // The shared Typst packages, read only: :::typst blocks that import one
+    // get it packed into the site. Nothing else of DATA_DIR/typst is
+    // readable — the binaries and caches stay out of the sandbox's reach.
+    `--allow-fs-read=${typstLibrary(config)}`,
   ];
 }
 
@@ -76,8 +85,9 @@ export async function cliChildEnv(
   jobDir: string,
   cdn: readonly string[] = [],
 ): Promise<Record<string, string>> {
-  // The permission flags need the cache to exist.
+  // The permission flags need the cache and the library to exist.
   await mkdir(assetCacheDir(config), { recursive: true });
+  await mkdir(typstLibrary(config), { recursive: true });
   const local = localElements(config, cdn);
   return {
     PATH: process.env.PATH ?? "/usr/bin:/bin",
@@ -85,6 +95,10 @@ export async function cliChildEnv(
     NODE_ENV: "production",
     NO_COLOR: "1",
     HYPERBOOK_ASSET_CACHE: assetCacheDir(config),
+    // The sandbox may not start processes: the CLI lists the Typst
+    // documents and the server builds them (hosting/typst.ts).
+    HYPERBOOK_TYPST: "manifest",
+    HYPERBOOK_TYPST_PACKAGE_PATH: typstLibrary(config),
     // The admin's choice, even when nothing is served locally: it replaces
     // the built-in default (PyIDE on a CDN, the rest local) for books that
     // do not decide in their hyperbook.json.
@@ -248,8 +262,9 @@ async function outputSize(dir: string, elements = new Set<string>()): Promise<nu
   return total;
 }
 
-export const sandboxedRunner: Runner = async ({ config, jobDir, srcDir, log, signal, cdnElements }) => {
+export const sandboxedRunner: Runner = async ({ config, jobDir, srcDir, log, signal, cdnElements, bookId, creationTimestamp }) => {
   if (signal.aborted) return { ok: false, error: "The build was canceled" };
+  const deadline = Date.now() + config.build.timeoutMs;
   const cli = config.build.cli;
   if (!existsSync(cli)) {
     return {
@@ -333,6 +348,28 @@ export const sandboxedRunner: Runner = async ({ config, jobDir, srcDir, log, sig
       ok: false,
       error: `The built book is larger than ${Math.floor(config.bookMaxBytes / 1024 / 1024)} MB`,
     };
+  }
+  // The Typst documents the CLI listed, built outside the sandbox.
+  if (bookId !== undefined) {
+    const typst = await typstServiceFor(config).build({
+      bookId,
+      jobDir,
+      srcDir,
+      outDir,
+      log,
+      signal,
+      deadline,
+      budgetBytes: config.bookMaxBytes - sizeBytes,
+      creationTimestamp: creationTimestamp ?? null,
+    });
+    if (!typst.ok) return { ok: false, error: typst.error };
+    sizeBytes += typst.bytes;
+    if (sizeBytes > config.bookMaxBytes) {
+      return {
+        ok: false,
+        error: `The built book is larger than ${Math.floor(config.bookMaxBytes / 1024 / 1024)} MB`,
+      };
+    }
   }
   // The book links to the shared runtimes of the elements it uses; extract
   // them now, in the background, so the first reader does not wait for it.

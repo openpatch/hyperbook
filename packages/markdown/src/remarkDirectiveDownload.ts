@@ -13,6 +13,8 @@ import {
   registerDirective,
 } from "./remarkHelper";
 import { toHast } from "mdast-util-to-hast";
+import { resolveFile } from "./helper";
+import { registerTypstDownload } from "./typstJobs";
 
 export default (ctx: HyperbookContext) => () => {
   const name = "download";
@@ -27,6 +29,12 @@ export default (ctx: HyperbookContext) => () => {
         registerDirective(file, name, ["client.js"], ["style.css"], []);
 
         const { src = "" } = node.attributes || {};
+        // Typst sources are not part of the site unless a download names
+        // them: then the source itself is offered, as it is.
+        if (/\.typ$/i.test(String(src).split(/[?#]/)[0]!)) {
+          const source = resolveFile(String(src), ctx);
+          if (source) registerTypstDownload(file, source.href);
+        }
         data.hName = "a";
         data.hProperties = {
           class: "directive-download",

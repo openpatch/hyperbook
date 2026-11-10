@@ -7,7 +7,15 @@ import { json } from "@codemirror/lang-json";
 import { python } from "@codemirror/lang-python";
 import { SQLite, sql } from "@codemirror/lang-sql";
 import { yaml } from "@codemirror/lang-yaml";
-import { typst_lezer } from "codemirror-lang-typst/lezer";
+import {
+  typst_lezer,
+  typstLezerFoldService,
+  typstLezerIndentService,
+  typstLezerListKeymap,
+} from "codemirror-lang-typst/lezer";
+import { LanguageSupport } from "@codemirror/language";
+import { typstImportCompletion } from "./typst-imports";
+import { typstLint } from "./typst-preview";
 import { Compartment, type Extension, EditorState } from "@codemirror/state";
 import i18next from "i18next";
 import { EditorView, keymap } from "@codemirror/view";
@@ -64,10 +72,26 @@ function language(path: string): Extension {
       // The sqlide element runs SQLite, so its keywords highlight too.
       return sql({ dialect: SQLite });
     case "typ":
-      return typst_lezer();
+      return typstLanguage();
     default:
       return [];
   }
+}
+
+/**
+ * Typst without the package's own colors: `typst_lezer()` brings the Typst
+ * web app's light-theme style and CodeMirror's default one (underlined
+ * headings, light-only colors), which would win over Hyperbook's syntax
+ * theme, also in dark mode. Its parser, indentation, folding, list keys and
+ * syntax checks are kept; the colors come from syntax-theme.ts.
+ */
+export function typstLanguage() {
+  return new LanguageSupport(typst_lezer().language, [
+    typstLezerIndentService,
+    typstLezerListKeymap,
+    typstLezerFoldService,
+    // Its syntax checks run in typstLint, with the compiler's diagnostics.
+  ]);
 }
 
 /** Colors from Hyperbook's tokens, so the editor follows light and dark mode. */
@@ -88,7 +112,7 @@ const theme = EditorView.theme({
   ".cm-gutters": {
     backgroundColor: "var(--color-nav)",
     color: "var(--muted-foreground)",
-    borderRight: "1px solid var(--color-nav-border)",
+    borderRight: "1px solid var(--color-border)",
   },
   ".cm-activeLine": {
     backgroundColor: "color-mix(in srgb, var(--color-brand) 6%, transparent)",
@@ -105,7 +129,7 @@ const theme = EditorView.theme({
   ".cm-tooltip": {
     color: "var(--color-text)",
     backgroundColor: "var(--color-background)",
-    border: "1px solid var(--color-nav-border)",
+    border: "1px solid var(--color-border)",
     borderRadius: "6px",
     boxShadow: "0 4px 12px rgb(0 0 0 / 0.2)",
   },
@@ -132,12 +156,12 @@ const theme = EditorView.theme({
   ".cm-textfield, .cm-panels input": {
     color: "var(--color-text)",
     backgroundColor: "var(--color-background)",
-    border: "1px solid var(--color-nav-border)",
+    border: "1px solid var(--color-border)",
   },
   ".cm-button, .cm-panels button": {
     color: "var(--color-text)",
     backgroundColor: "var(--color-nav)",
-    border: "1px solid var(--color-nav-border)",
+    border: "1px solid var(--color-border)",
   },
   ".cm-edit-visually": {
     marginLeft: "12px",
@@ -283,6 +307,8 @@ export function CodeEditor({
           spellCompartment.of(spellConfig() ? spellCheck(spellConfig()!) : []),
           contextMenu(),
           EditorView.lineWrapping,
+          // Typst's errors from the PDF preview (typst-preview.tsx).
+          extension(path) === "typ" ? [typstLint, typstImportCompletion] : [],
           // Its name for screen readers: which file is being edited.
           EditorView.contentAttributes.of({
             "aria-label": i18next.t("editor.tabs.contents", { path }),

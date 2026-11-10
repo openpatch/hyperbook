@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { z } from "zod";
-import { LOCALES, type Locale, type MessageKey } from "../../shared/i18n";
+import { LOCALES, type Locale, type MessageKey, isMessageKey } from "../../shared/i18n";
 import { instanceSettingsInput, type ElementRuntime, type ModelPrices } from "../../shared/schemas";
 import { EntitlementsEditor, type Entitlements } from "@/components/entitlements-editor";
 import { PageHeader, Section } from "@/components/page-header";
@@ -17,6 +17,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { useInstance } from "@/lib/session";
 import { api, unwrap } from "@/lib/api";
 import { FormError, TextAreaField, TextField, applyServerError, useZodForm } from "@/lib/form";
+import { ConfirmButton } from "@/components/confirm-button";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 /** Mirrors BUILTIN_ENTITLEMENTS on the server. */
 export const BUILTIN_ENTITLEMENTS: Entitlements = {
@@ -216,6 +218,7 @@ function InstanceForms({
           }
         }}
       />
+      <TypstPackagesSection />
       {settings.ai.configured && (
         <AiModelsSection
           key={JSON.stringify(settings.ai)}
@@ -620,6 +623,7 @@ const RUNTIME_ELEMENTS: { element: ElementRuntime; label: string }[] = [
   { element: "pyide", label: "Python (PyIDE)" },
   { element: "sqlide", label: "SQL IDE" },
   { element: "typst", label: "Typst" },
+  { element: "pdf", label: "PDF (pdf.js)" },
 ];
 
 /**
@@ -680,6 +684,124 @@ function RuntimesSection({
             {t("common.save")}
           </Button>
         </div>
+      </div>
+    </Section>
+  );
+}
+
+/**
+ * The instance's shared Typst packages (hosting/typst-library.ts): every book
+ * can import them in its Typst documents. Versions are added or removed,
+ * never replaced.
+ */
+function TypstPackagesSection() {
+  const { t } = useTranslation();
+  const queryClient = useQueryClient();
+  const { data } = useQuery({
+    queryKey: ["instance", "typst-packages"],
+    queryFn: () => unwrap(api.instance["typst-packages"].$get()),
+  });
+  const [namespace, setNamespace] = useState("local");
+  const [file, setFile] = useState<File | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [inputKey, setInputKey] = useState(0);
+  const message = (error: unknown) => {
+    const text = error instanceof Error ? error.message : "";
+    return text ? (isMessageKey(text) ? t(text) : text) : t("common.savingFailed");
+  };
+  const refresh = () => queryClient.invalidateQueries({ queryKey: ["instance", "typst-packages"] });
+
+  const upload = async () => {
+    if (!file) {
+      toast.error(t("typstLibrary.chooseZip"));
+      return;
+    }
+    setBusy(true);
+    try {
+      const added = await unwrap(api.instance["typst-packages"].$post({ form: { file, namespace } }));
+      toast.success(t("typstLibrary.added", { name: `@${added.namespace}/${added.name}`, version: added.version }));
+      setFile(null);
+      setInputKey((k) => k + 1);
+      await refresh();
+    } catch (error) {
+      toast.error(message(error));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <Section title={t("typstLibrary.title")} description={t("typstLibrary.description")}>
+      <div className="grid max-w-3xl gap-4">
+        {data && data.packages.length > 0 ? (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>{t("typstLibrary.import")}</TableHead>
+                <TableHead className="text-right">{t("typstLibrary.size")}</TableHead>
+                <TableHead />
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {data.packages.map((pkg) => (
+                <TableRow key={`${pkg.namespace}/${pkg.name}/${pkg.version}`}>
+                  <TableCell className="font-mono text-sm break-all">
+                    @{pkg.namespace}/{pkg.name}:{pkg.version}
+                  </TableCell>
+                  <TableCell className="text-right text-sm text-muted-foreground">
+                    {Math.max(1, Math.round(pkg.bytes / 1024))} KB
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <ConfirmButton
+                      size="sm"
+                      title={t("typstLibrary.removeTitle", { name: `@${pkg.namespace}/${pkg.name}`, version: pkg.version })}
+                      description={t("typstLibrary.removeDescription")}
+                      confirmLabel={t("typstLibrary.remove")}
+                      onConfirm={async () => {
+                        try {
+                          await unwrap(
+                            api.instance["typst-packages"][":namespace"][":name"][":version"].$delete({
+                              param: { namespace: pkg.namespace, name: pkg.name, version: pkg.version },
+                            }),
+                          );
+                          await refresh();
+                        } catch (error) {
+                          toast.error(message(error));
+                        }
+                      }}
+                    >
+                      <Trash2Icon className="size-4" />
+                      <span className="sr-only">{t("typstLibrary.remove")}</span>
+                    </ConfirmButton>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        ) : (
+          <p className="text-sm text-muted-foreground">{t("typstLibrary.empty")}</p>
+        )}
+        <div className="grid gap-3 sm:grid-cols-[minmax(8rem,12rem)_1fr_auto] sm:items-end">
+          <div className="grid gap-1.5">
+            <Label htmlFor="typst-namespace">{t("typstLibrary.namespace")}</Label>
+            <Input id="typst-namespace" value={namespace} onChange={(e) => setNamespace(e.target.value.trim())} />
+          </div>
+          <div className="grid gap-1.5">
+            <Label htmlFor="typst-package">{t("typstLibrary.file")}</Label>
+            <Input
+              key={inputKey}
+              id="typst-package"
+              type="file"
+              accept=".zip,application/zip"
+              onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+            />
+          </div>
+          <Button disabled={busy} onClick={() => void upload()}>
+            <PlusIcon className="size-4" />
+            {t("typstLibrary.upload")}
+          </Button>
+        </div>
+        <p className="text-sm text-muted-foreground">{t("typstLibrary.namespaceHint")}</p>
       </div>
     </Section>
   );

@@ -1,12 +1,13 @@
 # pyide (Python IDE)
 
 `:::pyide` lets readers edit and run Python in the browser. One `python` fenced
-block per file, named in the fence; the `main` attribute says which file runs
-(default `main.py`).
+block per file. The file runs from the block without a name (it becomes
+`main.py`); every other file is named with `file="…"` on the fence. The `main`
+attribute says which file runs (default `main.py`).
 
     :::pyide{packages="numpy"}
 
-    ```python main.py
+    ```python
     print("Hello")
     ```
 
@@ -24,7 +25,7 @@ the drawing.
 
     :::pyide{canvas compare pass=95}
 
-    ```python main.py
+    ```python
     import turtle
     t = turtle.Turtle()
     ```

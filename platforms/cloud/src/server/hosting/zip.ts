@@ -66,7 +66,7 @@ export function entrySegments(name: string): string[] {
 
 type Item = { entry: yauzl.Entry; segments: string[]; directory: boolean };
 
-function isSymlink(entry: yauzl.Entry): boolean {
+export function isSymlink(entry: yauzl.Entry): boolean {
   // Unix mode bits live in the upper half of the external attributes.
   return ((entry.externalFileAttributes >>> 16) & 0o170000) === 0o120000;
 }

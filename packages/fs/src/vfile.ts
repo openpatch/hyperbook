@@ -11,6 +11,7 @@ import {
 import yaml from "yaml";
 import { handlebars, registerHelpers } from "./handlebars";
 import { FrontmatterParseError } from "./errors";
+import { excludeMatcherFor } from "./exclude";
 
 /** hyperbook.json's source, by its path with the stat that read it. */
 const jsonSources = new Map<
@@ -807,8 +808,20 @@ export async function listForFolder(
   folder: VDirectory["folder"],
 ): Promise<VFile[]> {
   const directory = await getDirectory(root, folder as any);
-  return flatDirectory(directory);
+  const files = await flatDirectory(directory);
+  if (!COPIED_FOLDERS.has(folder)) return files;
+  // `exclude` in hyperbook.json keeps copied files out of the site. A book
+  // whose config cannot be read excludes nothing; the build reports it.
+  const excluded = excludeMatcherFor(await getJson(root).catch(() => null));
+  return files.filter((file) => !file.path.href || !excluded(file.path.href));
 }
+
+/** The folders whose files a build copies as they are. */
+const COPIED_FOLDERS: ReadonlySet<string> = new Set([
+  "public",
+  "book-public",
+  "glossary-public",
+]);
 
 export const list = async (root: string): Promise<VFile[]> => {
   const cache = path.join(root, "vfiles.json");

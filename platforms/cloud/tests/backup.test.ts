@@ -35,6 +35,12 @@ describe("backup", () => {
     (await import("node:fs")).mkdirSync(build, { recursive: true });
     writeFileSync(path.join(build, "index.html"), "built");
 
+    // The shared Typst packages are kept; Typst's caches are not.
+    const library = path.join(dataDir, "typst", "library", "local", "assessio", "0.1.0");
+    (await import("node:fs")).mkdirSync(library, { recursive: true });
+    writeFileSync(path.join(library, "typst.toml"), "[package]");
+    (await import("node:fs")).mkdirSync(path.join(dataDir, "typst", "cache", "1"), { recursive: true });
+
     const target = path.join(mkdtempSync(path.join(os.tmpdir(), "cloud-backup-to-")), "copy");
     const result = await backup(config, target);
     expect(result.books).toBe(1);
@@ -45,6 +51,8 @@ describe("backup", () => {
     expect(await headCommit(path.join(target, "books", String(book.id), "repo.git"))).toBe(commit);
     expect(existsSync(path.join(target, "books", String(book.id), "builds"))).toBe(false);
     expect(JSON.parse(readFileSync(path.join(target, "backup.json"), "utf8")).books).toBe(1);
+    expect(existsSync(path.join(target, "typst", "library", "local", "assessio", "0.1.0", "typst.toml"))).toBe(true);
+    expect(existsSync(path.join(target, "typst", "cache"))).toBe(false);
 
     // Never into a folder that holds something.
     await expect(backup(config, target)).rejects.toThrow(/not empty/);

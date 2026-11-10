@@ -191,7 +191,31 @@ export async function checkBook(project: Hyperproject): Promise<Finding[]> {
   for (const file of [...bookFiles, ...glossaryFiles]) {
     if (file.path.href) known.add(normalize(file.path.href));
   }
+  // A Typst source is published only when a page offers it with
+  // `:download`; a plain link to any other one would 404.
+  const offeredTypst = new Set<string>();
+  for (const file of [...bookFiles, ...glossaryFiles]) {
+    const content = file.markdown?.content;
+    if (typeof content !== "string") continue;
+    for (const match of content.matchAll(/:download\[[^\]]*\]\{[^}]*\bsrc="([^"]+\.typ)"/gi)) {
+      const src = match[1]!;
+      offeredTypst.add(
+        src.startsWith("/")
+          ? normalize(src)
+          : normalize(path.posix.resolve(linkBaseDirectory(file), src)),
+      );
+    }
+  }
+  const unpublishedTypst = new Set<string>();
   for (const file of publicFiles) {
+    if (
+      file.path.href &&
+      file.extension.toLowerCase() === ".typ" &&
+      !offeredTypst.has(normalize(file.path.href))
+    ) {
+      unpublishedTypst.add(normalize(file.path.href));
+      continue;
+    }
     if (file.path.href) known.add(normalize(file.path.href));
   }
   // The book root is always addressable even though no file is named "/".
@@ -252,7 +276,9 @@ export async function checkBook(project: Hyperproject): Promise<Finding[]> {
             ? target.line + offset
             : undefined,
         column: offset !== null ? target.column : undefined,
-        reason: `${target.kind} target does not exist: ${target.url}`,
+        reason: unpublishedTypst.has(resolved)
+          ? `${target.kind} target is a Typst source, which is not published: ${target.url}. Show the document with ::pdf[…]{src="…"}, or offer the source with :download[…]{src="…"}.`
+          : `${target.kind} target does not exist: ${target.url}`,
         severity: "error",
       });
     }

@@ -76,6 +76,17 @@ export function elementAssetUrl(
       return `https://cdn.jsdelivr.net/gh/typst/typst-assets@${tag}/files/fonts/`;
     }
   }
+  if (element === "pdf") {
+    // pdf.js's npm package keeps the legacy build in its own folder; the
+    // local runtime flattens it next to the cmaps, fonts and decoders.
+    const version = runtimeAssets.find(
+      (asset) => asset.target === "directive-pdf",
+    )!.version;
+    const inPackage = /^pdf\.(worker\.)?min\.mjs$/.test(file)
+      ? `legacy/build/${file}`
+      : file;
+    return `https://cdn.jsdelivr.net/npm/pdfjs-dist@${version}/${inPackage}`;
+  }
   if (element === "geogebra") {
     const version = runtimeAssets.find(
       (asset) => asset.target === "directive-geogebra",

@@ -2,12 +2,14 @@ import path from "path";
 import fs from "fs/promises";
 import chalk from "chalk";
 import mime from "mime";
-import type { ArchiveInclude } from "@hyperbook/markdown";
+import type { ArchiveInclude, TypstJob } from "@hyperbook/markdown";
 import { Hyperproject } from "@hyperbook/types";
+import { excludeMatcherFor, vfile } from "@hyperbook/fs";
 import { AssetManager } from "./helpers/assets";
 import { reportError } from "./helpers/report-error";
 import { PageRenderer, normalizeHref } from "./render";
 import { runArchive, type ArchiveIncludes } from "./archive";
+import { runTypst } from "./typst";
 import {
   ASSETS_FOLDER,
   extractH5p,
@@ -57,6 +59,9 @@ export class BookBackend implements DevBackend {
   /** What the pages put in the search index and the archives, by page file. */
   private searchDocuments = new Map<string, any[]>();
   private archiveIncludes = new Map<string, Record<string, ArchiveInclude[]>>();
+  /** Typst documents and offered `.typ` sources, by page file. */
+  private typstJobs = new Map<string, TypstJob[]>();
+  private typstDownloads = new Map<string, string[]>();
   private searchStale = true;
   private archivesStale = true;
   private llmsStale = true;
@@ -126,6 +131,10 @@ export class BookBackend implements DevBackend {
       if (pathname.startsWith("archives/")) await this.writeArchives();
       if (pathname === "llms.txt") await this.writeLlms();
       await this.unpackH5p(segments);
+      // A Typst document a page shows: built now, or taken from the cache
+      // when nothing it is made of changed since.
+      const job = this.typstJob("/" + pathname);
+      if (job) await this.buildTypst(job);
     } catch (e) {
       reportError(e);
       return {
@@ -142,6 +151,29 @@ export class BookBackend implements DevBackend {
       type: mime.getType(file) || "application/octet-stream",
       file,
     };
+  }
+
+  private typstJob(href: string): TypstJob | undefined {
+    for (const jobs of this.typstJobs.values()) {
+      const job = jobs.find((j) => j.out === href);
+      if (job) return job;
+    }
+    return undefined;
+  }
+
+  private buildTypst(job: TypstJob): Promise<void> {
+    return this.exclusive(async () => {
+      const { json } = await this.renderer.book();
+      await runTypst({
+        root: this.root,
+        rootOut: this.rootOut,
+        config: json,
+        jobs: [job],
+        // A collision is the build's to report; here the document wins.
+        copied: new Map(),
+        prefix: "Typst",
+      });
+    });
   }
 
   /** The page at `href`, rendered unless it is fresh; null if no page is there. */
@@ -188,6 +220,8 @@ export class BookBackend implements DevBackend {
   private record(file: string, page: PageIndex | SinglePageResult) {
     this.searchDocuments.set(file, page.searchDocuments);
     this.archiveIncludes.set(file, page.archiveIncludes);
+    this.typstJobs.set(file, page.typstJobs ?? []);
+    this.typstDownloads.set(file, page.typstDownloads ?? []);
     this.searchStale = true;
     this.archivesStale = true;
   }
@@ -218,6 +252,8 @@ export class BookBackend implements DevBackend {
           if (!known.has(file)) {
             this.searchDocuments.delete(file);
             this.archiveIncludes.delete(file);
+            this.typstJobs.delete(file);
+            this.typstDownloads.delete(file);
             this.searchStale = this.archivesStale = true;
           }
         }
@@ -284,6 +320,8 @@ export class BookBackend implements DevBackend {
       this.fresh.clear();
       this.searchDocuments.clear();
       this.archiveIncludes.clear();
+      this.typstJobs.clear();
+      this.typstDownloads.clear();
       this.h5p.clear();
       this.archivesStale = this.llmsStale = true;
       await fs.rm(this.rootOut, { recursive: true, force: true });
@@ -380,6 +418,17 @@ export class BookBackend implements DevBackend {
       if (pathname.startsWith("glossary/")) {
         candidates.push(path.join(this.root, pathname));
       }
+    }
+    // `exclude` in hyperbook.json: a build would not have copied the file.
+    const excluded = excludeMatcherFor(
+      await vfile.getJson(this.root).catch(() => null),
+    );
+    if (excluded(pathname)) return null;
+    // Nor a Typst source, unless a page offers it for download.
+    if (/\.typ$/i.test(pathname)) {
+      const href = "/" + pathname;
+      const offered = [...this.typstDownloads.values()].some((hrefs) => hrefs.includes(href));
+      if (!offered) return null;
     }
     for (const candidate of candidates) {
       if (!candidate.startsWith(this.root + path.sep)) continue;

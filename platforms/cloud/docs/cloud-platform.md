@@ -437,6 +437,11 @@ log dialog that follows a running build.
 | `BUILD_CONCURRENCY` | 1 | parallel builds |
 | `BUILD_TIMEOUT_SECONDS` | 300 | build is killed after this |
 | `BUILD_MEMORY_MB` | 1024 | heap limit of a build |
+| `TYPST_TIMEOUT_SECONDS` | 60 | a Typst document is stopped after this (and within the build's timeout) |
+| `TYPST_MAX_JOBS` | 200 | most Typst documents one build compiles |
+| `TYPST_MEMORY_MB` | 2048 | address space of one Typst compile |
+| `TYPST_PREVIEW_CONCURRENCY` | 2 | preview compiles at once on the instance |
+| `TYPST_BINARY` | — | a `typst` binary to use instead of the downloaded ones (any version) |
 | `HYPERBOOK_CLI` | `packages/hyperbook/dist/index.js` in the repository | for development only |
 
 ## Deployment

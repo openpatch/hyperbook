@@ -47,7 +47,10 @@ export function HomePage() {
             >
               <div className="flex items-start justify-between gap-2">
                 <h2 className="text-lg font-semibold break-words">{book.title}</h2>
-                {book.visibility === "private" && <Badge variant="secondary">{t("books.private")}</Badge>}
+                <span className="flex shrink-0 flex-wrap justify-end gap-1">
+                  {book.visibility === "private" && <Badge variant="secondary">{t("books.private")}</Badge>}
+                  {book.publishingDisabled && <Badge variant="outline">{t("publishing.lock.badge")}</Badge>}
+                </span>
               </div>
               <p className="truncate text-sm text-muted-foreground">
                 {book.url.replace(/^https?:\/\//, "")}

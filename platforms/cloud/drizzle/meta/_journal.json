@@ -120,6 +120,13 @@
       "when": 1793731001340,
       "tag": "0016_drop_preview_build",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "6",
+      "when": 1794346058282,
+      "tag": "0017_publishing_lock",
+      "breakpoints": true
     }
   ]
 }

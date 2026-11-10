@@ -1,0 +1,22 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`remarkDirectivePdf > offers only a download button with view=button 1`] = `
+"<a class="directive-download directive-pdf-button" target="_blank" rel="noopener noreferrer" href="/public/blatt.pdf"><span class="icon"><svg class="icon icon-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+      <path d="M7 10l5 5 5-5"></path>
+      <path d="M12 15V3"></path>
+    </svg></span><span class="label">Arbeitsblatt (PDF)</span></a>"
+`;
+
+exports[`remarkDirectivePdf > shows all pages by default, with title, download and a plain link 1`] = `
+"
+<div class="directive-pdf pdf-view-pages" data-view="pages" data-src="/public/skript.pdf">
+  <div class="pdf-header"><span class="pdf-title">Skript <strong>Mathe</strong></span><a class="pdf-download" href="/public/skript.pdf" download title="pdf-download" aria-label="pdf-download"><svg class="icon icon-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+        <path d="M7 10l5 5 5-5"></path>
+        <path d="M12 15V3"></path>
+      </svg></a></div>
+  <div class="pdf-viewer"><a class="pdf-fallback" href="/public/skript.pdf" target="_blank" rel="noopener noreferrer">Skript <strong>Mathe</strong></a></div>
+</div>
+"
+`;

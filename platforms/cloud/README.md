@@ -195,6 +195,19 @@ logo in the sandbox; a book can include its own `favicon.ico`.
 Limits are set in `.env`: `UPLOAD_MAX_MB`, `BOOK_MAX_MB`, `BUILD_CONCURRENCY`,
 `BUILD_TIMEOUT_SECONDS`, `BUILD_MEMORY_MB` (see `.env.example`).
 
+Typst documents (`::pdf` with a `.typ` source) are compiled outside the
+sandbox, which may not start processes: the CLI lists them and the server
+runs the official `typst` binary on them, with an empty environment, no
+system fonts, `ulimit` limits and a timeout per document. The server
+downloads the binary on first use and checks it against the CLI's list of
+supported versions; it keeps it, Typst's package cache, a compile cache per
+book and the instance's shared packages (Settings → Typst packages) in
+`DATA_DIR/typst`, where builds can neither read nor write. The first use of a
+Typst version and `@preview` packages need network access; on an instance
+without it, set `TYPST_BINARY`. Unpacking the release needs `tar` with xz
+support. Limits: `TYPST_TIMEOUT_SECONDS`, `TYPST_MAX_JOBS`, `TYPST_MEMORY_MB`,
+`TYPST_PREVIEW_CONCURRENCY`.
+
 ## Production
 
 ```bash
@@ -353,8 +366,9 @@ and refuses a folder that is not empty. Copy it off the server, e.g. with
   but their passwords and QR codes cannot be shown or printed again; a
   teacher would have to reset them.
 
-To restore: stop the platform, put `database.sqlite` and `books/` of a
-backup into an empty `/data` volume, start it with the same `.env`. Published
+To restore: stop the platform, put `database.sqlite`, `books/` and `typst/`
+(the shared Typst packages) of a backup into an empty `/data` volume, start
+it with the same `.env`. Published
 books are rebuilt on start (their builds were not in the backup); until
 then they show "not published yet".
 

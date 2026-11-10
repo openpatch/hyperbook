@@ -24,6 +24,7 @@ import {
   writeProgress,
 } from "./helpers/terminal";
 import { runArchive } from "./archive";
+import { runTypst, writeTypstPackages } from "./typst";
 import { makeDir } from "./helpers/make-dir";
 import { rimraf } from "rimraf";
 import unzipper from "unzipper";
@@ -42,6 +43,8 @@ import {
   process as hyperbookProcess,
   stripProtectBlocks,
   type ArchiveInclude,
+  type TypstJob,
+  type TypstPackage,
 } from "@hyperbook/markdown";
 import packageJson from "./package.json";
 import { AssetManager } from "./helpers/assets";
@@ -142,6 +145,10 @@ export interface SinglePageResult {
   rawMessages: unknown[];
   /** Archive includes this page's archive directives declared, by archive name. */
   archiveIncludes: Record<string, ArchiveInclude[]>;
+  /** Typst documents this page shows (`::pdf` with a `.typ` source). */
+  typstJobs: TypstJob[];
+  /** `.typ` sources this page hands out as they are (`:download`). */
+  typstDownloads: string[];
 }
 
 export async function buildSingleBookPage(
@@ -237,6 +244,12 @@ export async function buildSingleBookPage(
     await fs.writeFile(permaFileOut, redirectHtml);
   }
   await fs.writeFile(fileOut, result.value);
+  await writeTypstPackages(
+    baseCtx.root,
+    rootOut,
+    hyperbookJson,
+    (result.data.typstPackages as TypstPackage[]) || [],
+  );
 
   return {
     searchDocuments,
@@ -247,6 +260,8 @@ export async function buildSingleBookPage(
     rawMessages: [...(result.messages || [])],
     archiveIncludes:
       (result.data.archiveIncludes as Record<string, ArchiveInclude[]>) || {},
+    typstJobs: (result.data.typstJobs as TypstJob[]) || [],
+    typstDownloads: (result.data.typstDownloads as string[]) || [],
   };
 }
 
@@ -341,6 +356,12 @@ export async function buildSingleGlossaryPage(
     await makeDir(glossaryOut, { recursive: true });
   }
   await fs.writeFile(fileOut, result.value);
+  await writeTypstPackages(
+    baseCtx.root,
+    rootOut,
+    hyperbookJson,
+    (result.data.typstPackages as TypstPackage[]) || [],
+  );
 
   return {
     searchDocuments,
@@ -351,6 +372,8 @@ export async function buildSingleGlossaryPage(
     rawMessages: [...(result.messages || [])],
     archiveIncludes:
       (result.data.archiveIncludes as Record<string, ArchiveInclude[]>) || {},
+    typstJobs: (result.data.typstJobs as TypstJob[]) || [],
+    typstDownloads: (result.data.typstDownloads as string[]) || [],
   };
 }
 
@@ -944,6 +967,10 @@ async function runBuild(
   // zips are written after the pages have been processed (see the runArchive
   // call below the page loops).
   const archiveIncludes: Record<string, ArchiveInclude[]> = {};
+  // Typst documents are built after the pages too, and `.typ` sources are
+  // copied only when a download names them.
+  const typstJobs: TypstJob[] = [];
+  const typstDownloads = new Set<string>();
 
   // Passwords are attached to the build context rather than to config: the
   // config object is serialized into pages in several places.
@@ -985,6 +1012,8 @@ async function runBuild(
     )) {
       (archiveIncludes[archiveName] ||= []).push(...includes);
     }
+    typstJobs.push(...pageResult.typstJobs);
+    for (const href of pageResult.typstDownloads) typstDownloads.add(href);
     for (let directive of pageResult.directives) {
       directives.add(directive);
     }
@@ -1025,6 +1054,8 @@ async function runBuild(
     )) {
       (archiveIncludes[archiveName] ||= []).push(...includes);
     }
+    typstJobs.push(...pageResult.typstJobs);
+    for (const href of pageResult.typstDownloads) typstDownloads.add(href);
     for (let directive of pageResult.directives) {
       directives.add(directive);
     }
@@ -1053,7 +1084,20 @@ async function runBuild(
   let bookOtherFiles = await vfile.listForFolder(root, "book-public");
   let glossaryOtherFiles = await vfile.listForFolder(root, "glossary-public");
   i = 1;
+  // Where each copied file comes from, by address: a Typst document must
+  // not be built over one of them.
+  const copied = new Map<string, string>();
   for (let file of [...otherFiles, ...bookOtherFiles, ...glossaryOtherFiles]) {
+    if (
+      file.extension.toLowerCase() === ".typ" &&
+      !typstDownloads.has(file.path.href || "")
+    ) {
+      // A source stays private unless a page offers it for download.
+      continue;
+    }
+    if (file.path.href) {
+      copied.set(file.path.href, path.relative(root, file.path.absolute).split(path.sep).join("/"));
+    }
     const directoryOut = path.join(rootOut, file.path.directory);
     await makeDir(directoryOut, {
       recursive: true,
@@ -1073,6 +1117,20 @@ async function runBuild(
     );
   }
   endProgress();
+
+  try {
+    await runTypst({
+      root,
+      rootOut,
+      config: hyperbookJson,
+      jobs: typstJobs,
+      copied,
+      prefix,
+    });
+  } catch (e) {
+    breakProgressLine();
+    throw e;
+  }
 
   // Generate favicons if logo exists and no favicon.ico is present
   const faviconPath = path.join(rootOut, "favicon.ico");

@@ -49,12 +49,20 @@ beforeAll(async () => {
   root = await fs.mkdtemp(path.join(os.tmpdir(), "hyperbook-dev-book-"));
   await write(
     "hyperbook.json",
-    JSON.stringify({ name: "Book", search: true, llms: true }),
+    JSON.stringify({
+      name: "Book",
+      search: true,
+      llms: true,
+      exclude: ["intern/**"],
+    }),
   );
   await write("book/index.md", "---\nname: Start\n---\n\n# Welcome\n");
   await write("book/loops.md", "---\nname: Loops\n---\n\nAbout loops.\n");
   await write("book/picture.svg", "<svg xmlns='http://www.w3.org/2000/svg'/>");
   await write("public/data.txt", "from public");
+  // Matched by `exclude`: a build would not copy these.
+  await write("public/intern/key.txt", "secret");
+  await write("book/intern/exam.txt", "secret");
   await write("glossary/oop.md", "---\nname: OOP\n---\n\n# Objects\n\nAbout objects.\n");
   // Left over from an earlier build: must not be served.
   await write(".hyperbook/out/gone.html", "<html><body>stale</body></html>");
@@ -86,6 +94,11 @@ test("serves the book's files from where they are, but not its pages' text", asy
   expect(svg.status).toBe(200);
   expect(svg.headers.get("content-type")).toContain("svg");
   expect((await get("/loops.md")).status).toBe(404);
+});
+
+test("does not serve files matched by exclude", async () => {
+  expect((await get("/intern/key.txt")).status).toBe(404);
+  expect((await get("/intern/exam.txt")).status).toBe(404);
 });
 
 test("does not serve what an earlier build left behind", async () => {

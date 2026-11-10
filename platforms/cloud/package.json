@@ -58,6 +58,7 @@
     "lucide-react": "^1.64.0",
     "marked": "18.1.2",
     "nodemailer": "^10.3.0",
+    "pdfjs-dist": "6.4.299",
     "qrcode-svg": "^1.1.0",
     "radix-ui": "^1.8.1",
     "react": "^19.3.1",

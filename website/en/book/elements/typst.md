@@ -19,6 +19,7 @@ The Typst directive allows you to render [Typst](https://typst.app/) documents d
 | `main` | The file that is compiled | `main.typ` |
 | `files` | What readers may do with files: `create`, `upload`, `rename`, `delete`, comma-separated, or `open` for all | `create,upload` |
 | `accept` | Extensions of files readers create or rename, comma-separated | `.typ` |
+| `packages` | Packages to offer although no file imports them yet, e.g. `@local/template:1.0.0`, comma-separated — for edit mode, where readers write the import | — |
 
 ## Important Notes
 
@@ -240,6 +241,27 @@ This content is in a separate file.
 ```
 :::
 ````
+
+## Packages
+
+Blocks compile with Typst 0.15 and can import packages:
+
+- **From Typst Universe:** `#import "@preview/cetz:0.4.2": canvas` loads the
+  package from [Typst Universe](https://typst.app/universe) when the page
+  shows the block.
+- **From the book:** packages in the book's `typst.packagePath` (see
+  [PDF](/elements/pdf#typst-documents)), laid out as
+  `<namespace>/<name>/<version>/`, e.g. `typst-packages/local/template/1.0.0/`
+  for `#import "@local/template:1.0.0": *`. A Universe package the book
+  carries in `preview/` is taken from the book.
+- **Shared ones:** packages in the folder of `HYPERBOOK_TYPST_PACKAGE_PATH`,
+  and on Hyperbook Cloud those an admin added under Settings → Typst packages.
+
+The build packs every package a block imports — and the packages those import
+— into the site. Readers' browsers compile the block, so **they get the
+packages' sources**: keep solutions and anything private out of packages that
+blocks import. A package matched by the book's [`exclude`](/configuration/book)
+stops the build instead of being published.
 
 ## Examples
 

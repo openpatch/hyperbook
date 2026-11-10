@@ -65,4 +65,20 @@ describe("AI system prompt", () => {
     );
     expect(source).toContain("SYSTEM_PROMPT");
   });
+
+  it("teaches the current code block syntax: file=\"…\", not a bare file name", () => {
+    // The fence languages of the elements that name files with file="…"
+    // (ideWorkspace.ts in @hyperbook/markdown); onlineide and sqlide still
+    // take a bare name and are not checked.
+    const old = /```(python|html|css|js|javascript|typ|typst|scad|openscad)[ \t]+(?!file=|role=|readonly|hidden)[\w./-]+\.[a-z]+/g;
+    const docs = path.join(path.dirname(fileURLToPath(import.meta.url)), "../src/server/ai/docs");
+    const texts: [string, string][] = [
+      // The prompt names the old form once, as what not to write.
+      ["prompt", SYSTEM_PROMPT.replace("after the language (```python main.py`)", "")],
+      ...["pyide", "webide", "typst", "openscad", "p5"].map(
+        (name) => [name, readFileSync(path.join(docs, `${name}.md`), "utf8")] as [string, string],
+      ),
+    ];
+    for (const [name, text] of texts) expect([name, text.match(old)]).toEqual([name, null]);
+  });
 });

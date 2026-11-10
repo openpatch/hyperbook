@@ -1,12 +1,13 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import i18next from "i18next";
-import { CheckIcon, CopyIcon, DownloadIcon, KeyRoundIcon, UploadIcon } from "lucide-react";
+import { CheckIcon, CopyIcon, DownloadIcon, KeyRoundIcon, LockIcon, UploadIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { ConfirmButton } from "@/components/confirm-button";
 import { Section } from "@/components/page-header";
 import { SecretDialog } from "@/components/secret-dialog";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,6 +30,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { ApiError, api, unwrap } from "@/lib/api";
 import type { Book } from "@/lib/books";
 import { cn } from "@/lib/utils";
+import { isMessageKey } from "../../shared/i18n";
 import {
   CheckLine,
   PublishDialog,
@@ -130,7 +132,7 @@ export function PublishingSection({ book }: { book: Book }) {
   const { data: versions } = useQuery({ queryKey: versionsKey, queryFn: () => fetchVersions(id) });
   const { data: head } = useHead(id);
   const [logFor, setLogFor] = useState<number | null>(null);
-  const [dialog, setDialog] = useState<"publish" | "request" | "upload" | "git" | "unpublish" | null>(null);
+  const [dialog, setDialog] = useState<"publish" | "request" | "upload" | "git" | "unpublish" | "lock" | null>(null);
   const [showAll, setShowAll] = useState(false);
 
   // A finished build may have changed what is published.
@@ -156,16 +158,26 @@ export function PublishingSection({ book }: { book: Book }) {
       await action();
       await refresh();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : t("common.somethingWrong"));
+      // The server names some refusals by their catalog key (the publishing lock).
+      const message = error instanceof Error ? error.message : "";
+      toast.error(message ? (isMessageKey(message) ? t(message) : message) : t("common.somethingWrong"));
     }
   };
+  // The publishing lock: nothing of the book goes live while it is set.
+  const locked = book.publishingDisabled;
+  const setLock = (disabled: boolean) =>
+    run(async () => {
+      await unwrap(api.books[":id"]["publishing-lock"].$post({ param: { id }, json: { disabled } }));
+      setDialog(null);
+    });
 
   // The book has source when main has commits — the server 409s a build
   // only then — not when a build exists yet. A freshly created book gets
   // its first commit from the editor, so it can be previewed at once.
   const hasSource = book.commitCount > 0;
   // Publishing, rolling back and unpublishing are the owners' (the server checks too).
-  const canPublish = book.role === "owner";
+  const isOwner = book.role === "owner";
+  const canPublish = isOwner && !locked;
   const hasBuilds = (builds?.length ?? 0) > 0;
   const liveVersion = versions?.find((v) => v.live);
   // A publish whose build is still waiting or running goes live when it succeeds.
@@ -216,12 +228,19 @@ export function PublishingSection({ book }: { book: Book }) {
                   )}
                 </DropdownMenuItem>
                 <DropdownMenuItem onSelect={() => setDialog("git")}>{t("publishing.git.title")}</DropdownMenuItem>
-                {book.publishedAt && canPublish && (
+                {isOwner && (book.publishedAt || !locked) && (
                   <>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem variant="destructive" onSelect={() => setDialog("unpublish")}>
-                      {t("publishing.unpublish")}
-                    </DropdownMenuItem>
+                    {book.publishedAt && (
+                      <DropdownMenuItem variant="destructive" onSelect={() => setDialog("unpublish")}>
+                        {t("publishing.unpublish")}
+                      </DropdownMenuItem>
+                    )}
+                    {!locked && (
+                      <DropdownMenuItem variant="destructive" onSelect={() => setDialog("lock")}>
+                        {t("publishing.lock.disable")}
+                      </DropdownMenuItem>
+                    )}
                   </>
                 )}
               </DropdownMenuContent>
@@ -229,6 +248,23 @@ export function PublishingSection({ book }: { book: Book }) {
         </div>
       }
     >
+      {locked && (
+        <Alert className="mb-4">
+          <LockIcon />
+          <AlertTitle>{t("publishing.lock.title")}</AlertTitle>
+          <AlertDescription>
+            <p>{t("publishing.lock.description")}</p>
+            {isOwner ? (
+              // Allowing publishes nothing by itself, so it needs no confirmation.
+              <Button variant="outline" size="sm" className="mt-2" onClick={() => void setLock(false)}>
+                {t("publishing.lock.allow")}
+              </Button>
+            ) : (
+              <p>{t("publishing.lock.ownersAllow")}</p>
+            )}
+          </AlertDescription>
+        </Alert>
+      )}
       <div className="mb-4 grid gap-4 sm:grid-cols-2">
         <div className="rounded-lg border p-4">
           <div className="mb-2 flex h-8 items-center justify-between gap-2">
@@ -353,6 +389,23 @@ export function PublishingSection({ book }: { book: Book }) {
             <DialogDescription>{t("publishing.git.hint")} main{t("publishing.git.hint2")}</DialogDescription>
           </DialogHeader>
           <WorkLocally book={book} />
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={dialog === "lock"} onOpenChange={(open) => !open && setDialog(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("publishing.lock.disableTitle", { title: book.title })}</DialogTitle>
+            <DialogDescription>
+              {t("publishing.lock.disableDescription")}
+              {book.publishedAt && <> {t("publishing.lock.disableUnpublishes")}</>}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="destructive" onClick={() => void setLock(true)}>
+              {t("publishing.lock.confirm")}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 

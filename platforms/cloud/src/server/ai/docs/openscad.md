@@ -1,11 +1,12 @@
 # openscad
 
-`:::openscad` renders OpenSCAD (3D CAD) models. One `scad`-fenced block per file
-(convention: `scad main.scad`), or a `.scad` file via `src`.
+`:::openscad` renders OpenSCAD (3D CAD) models. One `scad`-fenced block per file:
+the main model without a name (it becomes `main.scad`), further files with
+`file="parts.scad"` on the fence; or a `.scad` file via `src`.
 
     :::openscad
 
-    ```scad main.scad
+    ```scad
     cube(10);
     ```
 

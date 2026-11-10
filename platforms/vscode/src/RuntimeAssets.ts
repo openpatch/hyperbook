@@ -13,6 +13,7 @@ export const runtimeLabels: Record<DownloadableElement, string> = {
   geogebra: "GeoGebra",
   onlineide: "Online IDE",
   openscad: "OpenSCAD",
+  pdf: "PDF (pdf.js)",
   pyide: "PyIDE (Pyodide)",
   sqlide: "SQL IDE",
   typst: "Typst",

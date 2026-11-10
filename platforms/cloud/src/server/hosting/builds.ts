@@ -7,7 +7,7 @@ import type { Config } from "../config";
 import type { Db } from "../db/client";
 import { cdnElements, getInstanceSettings } from "../domain/instance";
 import { books, builds } from "../db/schema";
-import { checkout, listTags, markProjectRoot } from "./git";
+import { checkout, commitTime, listTags, markProjectRoot } from "./git";
 import { BuildLog, type Runner, hyperbookVersion, sandboxedRunner } from "./runner";
 import { KEEP_TAGS, markPublished, movePublishedTag } from "./publish-tags";
 import { buildDir, makeJobDir, repoDir } from "./storage";
@@ -329,7 +329,17 @@ export class BuildQueue {
 
       // Read per build, so the admin's choice applies without a restart.
       const cdn = cdnElements(getInstanceSettings(this.db));
-      const outcome = await this.runner({ config: this.config, jobDir, srcDir, log, signal: abort.signal, cdnElements: cdn });
+      const creationTimestamp = await commitTime(repoDir(this.config, build.bookId), build.commit);
+      const outcome = await this.runner({
+        config: this.config,
+        jobDir,
+        srcDir,
+        log,
+        signal: abort.signal,
+        cdnElements: cdn,
+        bookId: build.bookId,
+        creationTimestamp,
+      });
       if (!outcome.ok) {
         log.note(outcome.error);
         this.finish(build, abort.signal.aborted ? "canceled" : "failed", log, { error: outcome.error });
@@ -345,17 +355,25 @@ export class BuildQueue {
       // Publishing while it ran may have made it a build that goes live.
       const current = this.db.select().from(builds).where(eq(builds.id, build.id)).get() ?? build;
       const size = `${(outcome.sizeBytes / 1024 / 1024).toFixed(1)} MB`;
+      // The publishing lock is checked again where the build goes live
+      // (finish); this only words the log.
+      const locked = !!this.db
+        .select({ locked: books.publishingDisabled })
+        .from(books)
+        .where(eq(books.id, build.bookId))
+        .get()?.locked;
       log.note(
         current.trigger === "upgrade"
           ? `Built with Hyperbook ${hyperbookVersion(this.config)} (${size})`
-          : current.publish
+          : current.publish && !locked
             ? `Published (${size})`
             : `Built (${size})`,
       );
-      this.finish(current, "succeeded", log, { sizeBytes: outcome.sizeBytes });
+      const { wentLive } = this.finish(current, "succeeded", log, { sizeBytes: outcome.sizeBytes });
       // A publish is recorded as a v<N> tag plus the moving "published" tag;
-      // a rollback only moves "published" to the tag's commit.
-      if (current.publish && current.trigger !== "upgrade") {
+      // a rollback only moves "published" to the tag's commit. Not when the
+      // publishing lock kept the build from going live.
+      if (current.publish && current.trigger !== "upgrade" && wentLive) {
         try {
           if (current.trigger === "rollback") await movePublishedTag(this.config, current.bookId, current.commit);
           else await markPublished(this.db, this.config, current.bookId, current.commit);
@@ -401,20 +419,27 @@ export class BuildQueue {
     status: "succeeded" | "failed" | "canceled",
     log: BuildLog,
     extra: { error?: string; sizeBytes?: number },
-  ) {
+  ): { wentLive: boolean } {
     const now = new Date();
-    this.db.transaction((tx) => {
+    return this.db.transaction((tx) => {
+      const book = tx
+        .select({ published: books.publishedBuildId, locked: books.publishingDisabled })
+        .from(books)
+        .where(eq(books.id, build.bookId))
+        .get();
+      // The publishing lock is enforced here, where a build becomes the
+      // live one, and not only in the routes: a build queued a moment
+      // before the lock was set must not publish the book after all.
+      const goesLive = status === "succeeded" && (build.trigger === "upgrade" || build.publish);
+      const locked = goesLive && !!book?.locked;
+      if (locked) log.note("Publishing is disabled for this book; the build was not made live.");
       tx.update(builds)
         .set({ status, log: log.toString(), error: extra.error ?? null, sizeBytes: extra.sizeBytes ?? null, finishedAt: now })
         .where(eq(builds.id, build.id))
         .run();
+      if (locked) return { wentLive: false };
       if (status === "succeeded" && build.trigger === "upgrade") {
         // Takes the place of the build it rebuilt, if that one is still live.
-        const book = tx
-          .select({ published: books.publishedBuildId })
-          .from(books)
-          .where(eq(books.id, build.bookId))
-          .get();
         if (book?.published === build.replacesBuildId) {
           tx.update(books).set({ publishedBuildId: build.id }).where(eq(books.id, build.bookId)).run();
         }
@@ -432,7 +457,9 @@ export class BuildQueue {
           targetId: build.bookId,
           data: { buildId: build.id, commit: build.commit },
         });
+        return { wentLive: true };
       }
+      return { wentLive: false };
     });
   }
 
