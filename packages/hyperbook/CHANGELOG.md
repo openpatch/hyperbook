@@ -1,5 +1,21 @@
 # hyperbook
 
+## 0.123.0
+
+### Minor Changes
+
+- [`f7957e5`](https://github.com/openpatch/hyperbook/commit/f7957e5b753d10f41d7dd2c035363741d364d8fe) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - `hyperbook.json` has a new `exclude` setting: globs for files that must not be part of the built site, for example `["intern/**", "**/*.draft.*"]`. They are matched against the address a file would have in the site and apply to the files in `public/` and to everything in `book/` and `glossary/` that is not a page. The dev server does not serve such files either, and `hyperbook check` reports links that point at them.
+
+- [`f7957e5`](https://github.com/openpatch/hyperbook/commit/f7957e5b753d10f41d7dd2c035363741d364d8fe) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - New `::pdf[Title]{src="file.pdf"}` element: shows a PDF document on a page. pdf.js draws the pages in the browser, so documents also work on tablets and phones, and their text can be selected, searched and read aloud. `view` chooses between `pages` (all pages below each other, the default), `slides` (one page with previous/next, arrow keys, swipe and fullscreen), `thumb` (the first page beside title and download button), `embed` (the browser's own viewer) and `button` (only a download button). `pages="1-2"` limits the pages shown, `download="false"` hides the download button, `height` sets the height of `slides` and `embed`. The viewer is a downloadable element runtime like Typst or GeoGebra (`elements.pdf.cdn`), and Hyperbook Cloud can serve it for all books.
+
+- [`f7957e5`](https://github.com/openpatch/hyperbook/commit/f7957e5b753d10f41d7dd2c035363741d364d8fe) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - `::pdf` builds Typst documents: `::pdf[Worksheet]{src="worksheet.typ"}` compiles the document into a PDF during the build and shows it like any other. `inputs="solution=true"` passes values to the document (each set of inputs is its own PDF). Documents are compiled with the official Typst compiler, which Hyperbook downloads and checks on first use; `typst.version` in `hyperbook.json` pins it (0.15.0 and newer are supported), `typst.packagePath` names a folder of the book's own packages (`@local/…`), and `typst.fontPath` a folder of fonts. `HYPERBOOK_TYPST_PACKAGE_PATH` adds packages shared by several books. The book's root is Typst's root, so imports and images work from anywhere in the book and nothing outside it is read. An unchanged document is not compiled again, a document with errors fails the build with Typst's message, and the dev server compiles documents as pages show them.
+
+  **Behaviour change:** `.typ` files are no longer copied into the site. A page that offers one for download with `:download[…]{src="file.typ"}` still gets it; a plain Markdown link to a `.typ` file now breaks, and `hyperbook check` reports it. `:::typst` blocks are not affected.
+
+- [`f7957e5`](https://github.com/openpatch/hyperbook/commit/f7957e5b753d10f41d7dd2c035363741d364d8fe) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - `:::typst` blocks compile with Typst 0.15.1 (typst.ts 0.8.0-rc4, up from 0.7.0 with Typst 0.14.2), and they can import packages: from Typst Universe as before, and now also the book's own packages (`typst.packagePath`, e.g. `#import "@local/template:1.0.0": *`), shared ones from `HYPERBOOK_TYPST_PACKAGE_PATH`, and on Hyperbook Cloud the instance's packages under Settings → Typst packages. The build packs every package a block imports, and the packages those import, into the site at `/__hyperbook_typst/`; readers' browsers load them from there. A new `packages` attribute offers packages that no file imports yet, for edit mode. A package the book's `exclude` matches stops the build instead of being published.
+
+  **Note:** a document that uses something Typst 0.15 removed or changed may need an update. typst.ts 0.8.0 is still a release candidate; it is pinned by checksum.
+
 ## 0.122.0
 
 ### Minor Changes
