@@ -1,5 +1,11 @@
 # @hyperbook/fs
 
+## 0.31.0
+
+### Minor Changes
+
+- [`f7957e5`](https://github.com/openpatch/hyperbook/commit/f7957e5b753d10f41d7dd2c035363741d364d8fe) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - `hyperbook.json` has a new `exclude` setting: globs for files that must not be part of the built site, for example `["intern/**", "**/*.draft.*"]`. They are matched against the address a file would have in the site and apply to the files in `public/` and to everything in `book/` and `glossary/` that is not a page. The dev server does not serve such files either, and `hyperbook check` reports links that point at them.
+
 ## 0.30.5
 
 ### Patch Changes

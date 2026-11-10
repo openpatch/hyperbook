@@ -1,7 +1,0 @@
----
-"@hyperbook/cloud": minor
----
-
-Typst documents in Hyperbook Cloud. Books build `::pdf[…]{src="x.typ"}` like a local build: the sandboxed CLI lists the documents and the server compiles them with the official Typst compiler, which it downloads and checks itself, with an empty environment, no system fonts, memory and file-size limits, a timeout per document inside the build's own and a compile cache per book. The page preview shows Typst documents with the editor's unsaved text, and an open `.typ` file gets a PDF preview pane next to the editor, with Typst's errors in the editor's gutter; `#import "@…"` completes the available packages. Admins add Typst packages every book can import (e.g. `@local/assessio:0.1.0`) under Settings → Typst packages; versions are added or removed, never replaced. New settings: `TYPST_TIMEOUT_SECONDS`, `TYPST_MAX_JOBS`, `TYPST_MEMORY_MB`, `TYPST_PREVIEW_CONCURRENCY`, `TYPST_BINARY`. The `::pdf` element's runtime (pdf.js) can be served by the instance like the other element runtimes.
-
-The editor's `.typ` files use Hyperbook's light and dark syntax colors instead of the Typst grammar's own light-only ones, the PDF preview (and an opened PDF file) is drawn on the editor's own surface in light and dark mode instead of the browser's dark PDF viewer, keeps its scroll position and no longer flashes while it updates, Typst's errors and the syntax checks share the gutter, and the borders of the file tree, the editor's gutter, its tooltips and menus no longer appear near-black in light mode.
