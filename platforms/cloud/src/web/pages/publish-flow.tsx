@@ -363,6 +363,8 @@ export function EditorPublishButton({
     refetchInterval: 1500,
   });
   if (book.source !== "hosted" || !head) return null;
+  // The publishing lock (exams): nothing to publish or ask for here.
+  if (book.publishingDisabled) return null;
   const count = head.unpublished;
   const upToDate = !!book.publishedAt && count === 0;
   const owner = book.role === "owner";
