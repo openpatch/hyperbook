@@ -36,6 +36,9 @@ import { hostedOnly } from "./publishing";
 /** Root files every build reads; a broken one fails every build. */
 const ROOT_CONFIGS = new Set(["hyperbook.json", "hyperlibrary.json"]);
 
+/** Larger files are left out of the book search (generated data, minified code). */
+const MAX_SEARCHED_BYTES = 1024 * 1024;
+
 function checkRootConfig(path: string, content: Buffer) {
   if (!ROOT_CONFIGS.has(path)) return;
   let value: unknown;
@@ -169,6 +172,30 @@ export function bookFileRoutes({ db, config, renders }: Deps) {
         return c.json({ references, files });
       },
     )
+
+    // The text of every text file, for searching the whole book in the
+    // editor. Searching happens there, so a teacher's regular expression
+    // never runs on the server, and unsaved changes are searched as well.
+    .get("/:id/files/texts", idParam, async (c) => {
+      const { book } = visitorAccess(db, c.get("user"), c.get("link"), c.req.valid("param").id, "commenter");
+      const repo = repoDir(config, book.id);
+      const commit = await headCommit(repo).catch(() => null);
+      const tree = commit ? await listTree(repo, commit) : [];
+      const decoder = new TextDecoder("utf-8", { fatal: true });
+      const files: { path: string; oid: string; text: string }[] = [];
+      for (const entry of tree) {
+        if (entry.size > MAX_SEARCHED_BYTES) continue;
+        const bytes = await readBlob(repo, entry.oid);
+        if (bytes.includes(0)) continue;
+        try {
+          files.push({ path: entry.path, oid: entry.oid, text: decoder.decode(bytes) });
+        } catch {
+          // Not UTF-8: a binary file.
+        }
+      }
+      c.header("cache-control", "private, no-cache");
+      return c.json({ commit, files });
+    })
 
     // The bytes of one file. Never rendered on this origin: teacher-written
     // HTML or SVG must not run next to the admin session.

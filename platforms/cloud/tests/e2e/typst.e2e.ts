@@ -73,6 +73,34 @@ describe.skipIf(!typst)("the editor's Typst preview", () => {
     expect(await pane.getByRole("img", { name: "Page 1" }).count()).toBe(1);
   }, 180_000);
 
+  it("zooms the PDF with its toolbar and Ctrl and the wheel, and fits it to the pane again", async () => {
+    const pane = page.getByRole("region", { name: "Preview" });
+    const canvas = pane.getByRole("img", { name: "Page 1" });
+    await canvas.waitFor({ timeout: 60_000 });
+    const width = async () => (await canvas.boundingBox())!.width;
+    const fitted = await width();
+    const fitButton = pane.getByRole("button", { name: "Fit to width" });
+    expect(await fitButton.getAttribute("aria-pressed")).toBe("true");
+
+    await pane.getByRole("button", { name: "Zoom in" }).click();
+    await pane.getByRole("button", { name: "Zoom in" }).click();
+    await expect.poll(width).toBeGreaterThan(fitted * 1.1);
+    expect(await fitButton.getAttribute("aria-pressed")).toBe("false");
+    const zoomed = await width();
+
+    // Ctrl and the wheel, over the pages.
+    const box = (await pane.boundingBox())!;
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await page.keyboard.down("Control");
+    await page.mouse.wheel(0, 200);
+    await page.keyboard.up("Control");
+    await expect.poll(width).toBeLessThan(zoomed);
+
+    await fitButton.click();
+    await expect.poll(width).toBeCloseTo(fitted, -1);
+    expect(await fitButton.getAttribute("aria-pressed")).toBe("true");
+  }, 120_000);
+
   it("downloads the PDF, and a double-click on a line finds it in the source", async () => {
     const dialog = page.getByRole("dialog");
     await page.getByRole("button", { name: "New file" }).click();

@@ -60,6 +60,8 @@ export type EditorSettings = {
   lineNumbers: boolean;
   /** Whether pages are spell checked. */
   spellCheck: boolean;
+  /** Vim key bindings (normal, insert and visual mode, `:w` saves). */
+  vim: boolean;
 };
 
 const STORAGE_KEY = "editor-settings";
@@ -71,6 +73,7 @@ const DEFAULTS: EditorSettings = {
   lineHeight: 1.6,
   lineNumbers: true,
   spellCheck: true,
+  vim: false,
 };
 
 function stored(): EditorSettings {
@@ -90,6 +93,7 @@ function stored(): EditorSettings {
         : DEFAULTS.lineHeight,
       lineNumbers: value?.lineNumbers ?? DEFAULTS.lineNumbers,
       spellCheck: value?.spellCheck ?? DEFAULTS.spellCheck,
+      vim: value?.vim === true,
     };
   } catch {
     return DEFAULTS;

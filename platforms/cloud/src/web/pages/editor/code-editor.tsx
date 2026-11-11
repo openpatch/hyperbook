@@ -30,6 +30,8 @@ import { pageLanguage } from "./page-language";
 import { type SpellConfig, spellCheck } from "./spellcheck";
 import { hangingIndent } from "./hanging-indent";
 import { hyperbookSyntax } from "./syntax-theme";
+import { vimMode } from "./vim";
+import { watchView } from "./outline";
 
 function language(path: string): Extension {
   switch (extension(path)) {
@@ -207,6 +209,7 @@ const numbersCompartment = new Compartment();
 const heightCompartment = new Compartment();
 const fontCompartment = new Compartment();
 const spellCompartment = new Compartment();
+const vimCompartment = new Compartment();
 
 export type SpellOptions = {
   enabled: boolean;
@@ -290,12 +293,24 @@ export function CodeEditor({
     };
   };
 
+  /**
+   * Vim, when chosen and the text can change. One instance per editor: the
+   * same extension keeps Vim's mode and registers when another setting changes.
+   */
+  const vimExtension = useRef<Extension | null>(null);
+  const vimFor = (on: boolean): Extension =>
+    on && !readOnly
+      ? (vimExtension.current ??= vimMode(() => callbacks.current.onSave()))
+      : [];
+
   useEffect(() => {
     const v = new EditorView({
       parent: host.current!,
       state: EditorState.create({
         doc: initial,
         extensions: [
+          // Before every keymap, so Vim sees the keys first.
+          vimCompartment.of(vimFor(settings.vim)),
           keymap.of([
             // basicSetup binds no Tab key; without this, Tab moves the focus
             // out of the editor instead of indenting.
@@ -347,6 +362,8 @@ export function CodeEditor({
             : [],
           theme,
           extensions,
+          // The outline follows the text and the cursor.
+          watchView,
           EditorView.updateListener.of((update) => {
             if (update.docChanged)
               callbacks.current.onChange(update.state.doc.toString());
@@ -370,7 +387,7 @@ export function CodeEditor({
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // The settings apply while editing, without rebuilding the editor.
-  const { lineNumbers, lineHeight, font } = settings;
+  const { lineNumbers, lineHeight, font, vim } = settings;
   const { enabled, language: spellLanguage, words } = spell ?? {};
   useEffect(() => {
     const config = spellConfig();
@@ -380,11 +397,12 @@ export function CodeEditor({
         heightCompartment.reconfigure(lineHeightTheme(lineHeight)),
         fontCompartment.reconfigure(fontTheme(fontOf(font).stack)),
         spellCompartment.reconfigure(config ? spellCheck(config) : []),
+        vimCompartment.reconfigure(vimFor(vim)),
       ],
     });
     // Another font means other character widths, so the editor re-measures.
     view.current?.requestMeasure();
-  }, [lineNumbers, lineHeight, font, enabled, spellLanguage, words, path]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [lineNumbers, lineHeight, font, vim, enabled, spellLanguage, words, path]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div

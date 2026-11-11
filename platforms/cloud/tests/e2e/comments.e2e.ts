@@ -71,7 +71,7 @@ describe("review", () => {
 
     // The owner sees the thread in the editor and resolves it with a reply.
     await page.goto(`${bookUrl}/edit`);
-    await page.getByRole("button", { name: "Show comments" }).click();
+    await page.getByRole("tab", { name: "Comments" }).click();
     const ownerPane = page.getByRole("region", { name: "Comments" });
     await ownerPane.getByText("Light and optics").waitFor();
     await ownerPane.getByLabel("Reply…").fill("Good idea");
@@ -134,7 +134,7 @@ describe("review", () => {
     await page.locator(".cm-comment").getByText("# Lenses").waitFor();
 
     // Applying the suggestion edits the text and resolves the thread.
-    await page.getByRole("button", { name: "Show comments" }).click();
+    await page.getByRole("tab", { name: "Comments" }).click();
     await page.getByRole("region", { name: "Comments" }).getByRole("button", { name: "Apply" }).click();
     await editor.getByText("# Lens", { exact: true }).waitFor();
     await page.getByRole("region", { name: "Comments" }).getByRole("button", { name: "Resolved (1)" }).waitFor();

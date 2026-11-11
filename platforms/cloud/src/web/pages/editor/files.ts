@@ -248,3 +248,7 @@ function emptySb3(): Uint8Array {
     "cd21514d0531fdffb22204e0ec5ed84a.svg": encode(backdrop),
   });
 }
+
+/** The text of every text file in the book, for the book-wide search. */
+export const fetchTexts = (bookId: string) =>
+  unwrap(api.books[":id"].files.texts.$get({ param: { id: bookId } }));

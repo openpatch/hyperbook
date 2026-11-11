@@ -22,6 +22,7 @@ const COMMENTER_ROUTES = new Set([
   "GET /books/:id/files/language",
   "GET /books/:id/files/references",
   "GET /books/:id/files/raw",
+  "GET /books/:id/files/texts",
   "POST /books/:id/files/render",
   "POST /books/:id/files/typst-preview",
   "GET /books/:id/typst-packages",

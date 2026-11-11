@@ -8,6 +8,8 @@ import {
   EllipsisVerticalIcon,
   FilePlusIcon,
   FolderPlusIcon,
+  FilesIcon,
+  ListTreeIcon,
   FolderTreeIcon,
   HistoryIcon,
   LogOutIcon,
@@ -89,6 +91,17 @@ import {
   removeDictionaryWord,
 } from "./dictionary";
 import { QuickOpen } from "./quick-open";
+import { SearchPanel, useBookTexts } from "./search-panel";
+import { OutlinePanel } from "./outline-panel";
+import {
+  type SearchMatch,
+  type SearchQuery,
+  type SearchResult,
+  compileQuery,
+  findMatches,
+  replaceAll,
+  replacements,
+} from "../../../shared/search";
 import { SettingsMenu, WordsDialog } from "./settings-menu";
 import { AiPanel } from "./ai-panel";
 import { HistoryPanel } from "./history-panel";
@@ -440,6 +453,25 @@ const FileSidebar = memo(function FileSidebar({
   );
 });
 
+/** The views of the editor's sidebar, in the order of its activity bar. */
+const SIDEBAR_VIEWS = [
+  "files",
+  "search",
+  "outline",
+  "comments",
+  "history",
+  "ai",
+] as const;
+type SidebarView = (typeof SIDEBAR_VIEWS)[number];
+const sidebarItems = {
+  files: { label: "editor.files.title", Icon: FilesIcon },
+  search: { label: "editor.search.title", Icon: SearchIcon },
+  outline: { label: "editor.outline.title", Icon: ListTreeIcon },
+  comments: { label: "editor.toolbar.comments", Icon: MessageSquareIcon },
+  history: { label: "editor.toolbar.history", Icon: HistoryIcon },
+  ai: { label: "editor.toolbar.ai", Icon: SparklesIcon },
+} as const;
+
 function Editor({ book, listing }: { book: Book; listing: Listing }) {
   const { t } = useTranslation();
   const bookId = String(book.id);
@@ -489,31 +521,8 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
   const [showPreview, setShowPreview] = useState(
     () => !matchMedia(COMPACT).matches,
   );
-  const [showAi, setShowAi] = useState(false);
-  const [showHistory, setShowHistory] = useState(false);
-  // Commenters come to comment: their pane starts open.
-  const [showComments, setShowComments] = useState(
-    () => book.role === "commenter" && !matchMedia(COMPACT).matches,
-  );
-  const panes = {
-    preview: setShowPreview,
-    ai: setShowAi,
-    history: setShowHistory,
-    comments: setShowComments,
-  };
-  /** Shows or hides a side pane; showing one on a compact screen hides the others. */
-  const togglePane = (pane: keyof typeof panes) => {
-    const shown = {
-      preview: showPreview,
-      ai: showAi,
-      history: showHistory,
-      comments: showComments,
-    };
-    if (!shown[pane] && compact)
-      for (const other of Object.keys(panes) as (keyof typeof panes)[])
-        if (other !== pane) panes[other](false);
-    panes[pane](!shown[pane]);
-  };
+  /** Shows or hides the preview pane. */
+  const togglePane = (_pane: "preview") => setShowPreview((shown) => !shown);
   const theme = useTheme();
   const [showSettings, setShowSettings] = useState(false);
   const [blockEdit, setBlockEdit] = useState<{
@@ -521,6 +530,54 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
     view: EditorView;
   } | null>(null);
   const [quickOpen, setQuickOpen] = useState(false);
+  // The sidebar's view, chosen in its activity bar. Commenters come to
+  // comment: theirs starts with the comments.
+  const [sidebarView, setSidebarView] = useState<SidebarView>(() =>
+    book.role === "commenter" ? "comments" : "files",
+  );
+  // The sidebar folded down to its activity bar, as it was left last time.
+  const [sidebarFolded, setSidebarFoldedState] = useState(() => {
+    try {
+      return localStorage.getItem("editor-sidebar-folded") === "true";
+    } catch {
+      return false;
+    }
+  });
+  const setSidebarFolded = useCallback((folded: boolean) => {
+    setSidebarFoldedState(folded);
+    try {
+      localStorage.setItem("editor-sidebar-folded", String(folded));
+    } catch {
+      // Remembered for this page only.
+    }
+  }, []);
+  /** Whether the sidebar shows its view: unfolded, or a phone's drawer open. */
+  const sidebarOpen = narrow ? showFiles : !sidebarFolded;
+  /** Shows a view in the sidebar, unfolding it (or opening a phone's drawer). */
+  const showView = useCallback(
+    (view: SidebarView) => {
+      setSidebarView(view);
+      setSidebarFolded(false);
+      if (narrow) setShowFiles(true);
+      // A compact screen's preview lies over the editor; the view comes first.
+      else if (compact && view !== "files") setShowPreview(false);
+    },
+    [narrow, compact, setSidebarFolded],
+  );
+  /** The activity bar: shows a view, or folds the sidebar if it is shown. */
+  const toggleView = (view: SidebarView) => {
+    if (sidebarView === view && sidebarOpen) {
+      if (narrow) setShowFiles(false);
+      else setSidebarFolded(true);
+    } else showView(view);
+  };
+  const [searchFocus, setSearchFocus] = useState({ count: 0, text: "" });
+  /** A search result to select once its file's editor is there. */
+  const [reveal, setReveal] = useState<{
+    path: string;
+    match: SearchMatch;
+    query: SearchQuery;
+  } | null>(null);
   // Quick open's props, stable so its memoized rows skip editor re-renders.
   const filePaths = useMemo(() => listing.files.map((f) => f.path), [listing]);
   const tabPaths = useMemo(() => ws.tabs.map((t) => t.path), [ws.tabs]);
@@ -530,7 +587,8 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
   // The panes' widths, remembered from the last session; null means the default.
   const [sidebarWidth, setSidebarWidth] = usePaneWidth(
     "editor-sidebar-width",
-    180,
+    // The activity bar (44px) and a usable file tree.
+    224,
   );
   const [previewWidth, setPreviewWidth] = usePaneWidth(
     "editor-preview-width",
@@ -538,23 +596,11 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
   );
   const sidebarRef = useRef<HTMLElement>(null);
   const previewRef = useRef<HTMLElement>(null);
-  const aiRef = useRef<HTMLElement>(null);
-  const [aiWidth, setAiWidth] = usePaneWidth("editor-ai-width", 280);
-  const historyRef = useRef<HTMLElement>(null);
-  const [historyWidth, setHistoryWidth] = usePaneWidth(
-    "editor-history-width",
-    240,
-  );
   // The open files' editors, by path: the AI panel reads the active one's
   // selection at action time, and inserts its answer through it.
   const views = useRef(new Map<string, EditorView>()).current;
   /** Changes when an editor comes or goes, for the effects that use `views`. */
   const [viewsVersion, setViewsVersion] = useState(0);
-  const commentsRef = useRef<HTMLElement>(null);
-  const [commentsWidth, setCommentsWidth] = usePaneWidth(
-    "editor-comments-width",
-    300,
-  );
 
   // Comments (comments.ts, comments-panel.tsx): the book's threads, the
   // one shown in the pane, and a new one being written.
@@ -586,10 +632,10 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
   const selectThread = useCallback(
     (thread: Pick<Thread, "id" | "path">) => {
       setActiveThread(thread.id);
-      setShowComments(true);
+      showView("comments");
       ws.open(thread.path);
     },
-    [ws.open], // eslint-disable-line react-hooks/exhaustive-deps
+    [ws.open, showView], // eslint-disable-line react-hooks/exhaustive-deps
   );
   // Once the thread's file has its editor, the thread is scrolled to.
   useEffect(() => {
@@ -628,10 +674,7 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
       ),
     });
     setActiveThread(null);
-    if (compact)
-      for (const other of Object.keys(panes) as (keyof typeof panes)[])
-        if (other !== "comments") panes[other](false);
-    setShowComments(true);
+    showView("comments");
   };
   /** The editors' comment callbacks, stable for their lifetime. */
   const latestStartDraft = useRef(startDraft);
@@ -801,11 +844,76 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
+  // Ctrl/Cmd+Shift+F searches the whole book, starting from the selection.
+  const openSearch = useRef(() => {});
+  openSearch.current = () => {
+    const view = ws.active ? views.get(ws.active) : undefined;
+    const selection = view?.state.selection.main;
+    setSidebarView("search");
+    setSidebarFolded(false);
+    if (narrow) setShowFiles(true);
+    setSearchFocus((request) => ({
+      count: request.count + 1,
+      text:
+        view && selection && !selection.empty
+          ? view.state.sliceDoc(selection.from, selection.to)
+          : "",
+    }));
+  };
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (
+        e.key.toLowerCase() !== "f" ||
+        !(e.ctrlKey || e.metaKey) ||
+        e.altKey ||
+        !e.shiftKey
+      )
+        return;
+      e.preventDefault();
+      openSearch.current();
+    };
+    // Before the editors, which would read it as their own search.
+    window.addEventListener("keydown", onKey, true);
+    return () => window.removeEventListener("keydown", onKey, true);
+  }, []);
+
+  // A chosen search result: its file opens, and once its editor is there,
+  // the match is selected. Typing since the search may have moved it, so the
+  // match nearest to where it was is taken.
+  useEffect(() => {
+    if (!reveal) return;
+    if (ws.active !== reveal.path) return;
+    const view = views.get(reveal.path);
+    if (!view) return;
+    setReveal(null);
+    const re = compileQuery(reveal.query);
+    if (!re) return;
+    const { matches } = findMatches(view.state.doc.toString(), re);
+    const nearest = matches.reduce<SearchMatch | null>(
+      (best, m) =>
+        best === null ||
+        Math.abs(m.from - reveal.match.from) <
+          Math.abs(best.from - reveal.match.from)
+          ? m
+          : best,
+      null,
+    );
+    if (!nearest) {
+      toast.info(t("editor.search.changedMeanwhile"));
+      return;
+    }
+    view.dispatch({
+      selection: { anchor: nearest.from, head: nearest.to },
+      effects: EditorView.scrollIntoView(nearest.from, { y: "center" }),
+    });
+    view.focus();
+  }, [reveal, viewsVersion, ws.active]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // Ctrl/Cmd+Alt+A toggles the AI assistant's pane, when this teacher may
   // use it. The latest answer is read at keypress time, not on every render.
   const toggleAi = useRef(() => {});
   toggleAi.current = () => {
-    if (aiAvailable) togglePane("ai");
+    if (aiAvailable) toggleView("ai");
   };
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -827,6 +935,125 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
     toast.error(
       error instanceof Error ? error.message : t("common.somethingWrong"),
     );
+
+  // The book-wide search (search-panel.tsx).
+  const searchTexts = useBookTexts(
+    bookId,
+    listing.commit,
+    sidebarView === "search",
+  );
+  /** The open tabs' current texts; an element file's base64 is no text to search. */
+  const openTexts = useCallback(
+    () =>
+      ws
+        .currentTabs()
+        .filter(
+          (tab) =>
+            tab.status === "ready" &&
+            tab.loaded?.kind === "text" &&
+            !tab.loaded.encoding &&
+            tab.text !== undefined,
+        )
+        .map((tab) => ({ path: tab.path, text: tab.text! })),
+    [ws.currentTabs], // eslint-disable-line react-hooks/exhaustive-deps
+  );
+  const revealMatch = useCallback(
+    (path: string, match: SearchMatch, query: SearchQuery) => {
+      ws.open(path);
+      setReveal({ path, match, query });
+    },
+    [ws.open], // eslint-disable-line react-hooks/exhaustive-deps
+  );
+  /**
+   * Replaces every match in the book. A file open in a code editor changes
+   * there, unsaved and undoable; the others are saved in one commit.
+   */
+  const replaceInBook = async (query: SearchQuery, replacement: string) => {
+    try {
+      const saved = searchTexts.data ?? (await searchTexts.refetch()).data;
+      if (!saved) throw new Error(t("editor.search.loadFailed"));
+      let count = 0;
+      /** Open files: changed in their editor, or left out. */
+      const handled = new Set<string>();
+      const reloads: string[] = [];
+      for (const tab of ws.currentTabs()) {
+        if (
+          tab.status !== "ready" ||
+          tab.loaded?.kind !== "text" ||
+          tab.loaded.encoding ||
+          tab.text === undefined
+        )
+          continue;
+        const view = views.get(tab.path);
+        if (view) {
+          handled.add(tab.path);
+          const changes = replacements(
+            view.state.doc.toString(),
+            query,
+            replacement,
+          );
+          if (changes.length === 0) continue;
+          view.dispatch({ changes, userEvent: "input.replace" });
+          count += changes.length;
+        } else if (isDirty(tab)) {
+          // A visual editor's unsaved changes: not overwritten.
+          handled.add(tab.path);
+          if (replacements(tab.text, query, replacement).length > 0)
+            toast.warning(t("editor.search.replaceSkipped", { path: tab.path }));
+        } else {
+          reloads.push(tab.path);
+        }
+      }
+      const writes: Extract<FileChange, { op: "write" }>[] = [];
+      for (const file of saved.files) {
+        if (handled.has(file.path)) continue;
+        const next = replaceAll(file.text, query, replacement);
+        if (next.count === 0) continue;
+        count += next.count;
+        writes.push({
+          op: "write",
+          path: file.path,
+          content: next.text,
+          baseOid: file.oid,
+        });
+      }
+      if (writes.length > 0) {
+        await ws.commit(
+          writes,
+          t("editor.search.commitMessage", {
+            pattern: query.pattern,
+            replacement,
+          }),
+        );
+        const written = new Set(writes.map((w) => w.path));
+        for (const path of reloads) if (written.has(path)) void ws.reload(path);
+      }
+      toast.success(t("editor.search.replaced", { count }));
+    } catch (error) {
+      failCommit(error);
+    }
+  };
+  const confirmReplace = useCallback(
+    (query: SearchQuery, replacement: string, result: SearchResult) =>
+      setChoice({
+        title: t("editor.search.replaceTitle"),
+        description: `${t("editor.search.replaceDescription", {
+          count: result.total,
+          files: result.files.length,
+          pattern: query.pattern,
+          replacement,
+        })} ${t("editor.search.replaceHow")}`,
+        choices: [
+          {
+            label: t("editor.search.replaceAll"),
+            run: () => void replaceInBookRef.current(query, replacement),
+          },
+        ],
+      }),
+    [t],
+  );
+  const replaceInBookRef = useRef(replaceInBook);
+  replaceInBookRef.current = replaceInBook;
 
   /** Adds a word to the book's dictionary; the pages re-check. */
   const addWord = useCallback(
@@ -1568,54 +1795,6 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
           />
           </>
         )}
-        {aiAvailable && (
-          <Button
-            size="icon"
-            variant="ghost"
-            className="size-8"
-            aria-label={
-              showAi ? t("editor.toolbar.hideAi") : t("editor.toolbar.showAi")
-            }
-            aria-pressed={showAi}
-            onClick={() => togglePane("ai")}
-          >
-            <SparklesIcon className="size-4" />
-          </Button>
-        )}
-        <Button
-          size="icon"
-          variant="ghost"
-          className="relative size-8"
-          aria-label={
-            showComments
-              ? t("editor.toolbar.hideComments")
-              : t("editor.toolbar.showComments")
-          }
-          aria-pressed={showComments}
-          onClick={() => togglePane("comments")}
-        >
-          <MessageSquareIcon className="size-4" />
-          {commentCounts.size > 0 && (
-            <span
-              className="absolute top-1 right-1 size-1.5 rounded-full bg-amber-500"
-              aria-hidden
-            />
-          )}
-        </Button>
-        <Button
-          size="icon"
-          variant="ghost"
-          className="size-8"
-          aria-label={
-            showHistory
-              ? t("editor.toolbar.hideHistory")
-              : t("editor.toolbar.showHistory")
-          }
-          aria-pressed={showHistory}
-          onClick={() => togglePane("history")}
-        >
-          <HistoryIcon className="size-4" />
-        </Button>
         <Button
           size="icon"
           variant="ghost"
@@ -1630,13 +1809,6 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
         >
           <PanelRightIcon className="size-4" />
         </Button>
-        <SettingsMenu
-          settings={settings}
-          update={updateSettings}
-          canSpellCheck={canSpellCheck && !readOnly}
-          onOpenWords={() => setShowWords(true)}
-        />
-        <ThemeToggle className="hidden hover:bg-accent sm:flex [&_svg]:size-4" />
         {/* What a phone's header has no room for, and quick open without Ctrl+P. */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -1657,6 +1829,9 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
           >
             <DropdownMenuItem onSelect={() => setQuickOpen(true)}>
               <SearchIcon /> {t("editor.toolbar.findFile")}
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => openSearch.current()}>
+              <SearchIcon /> {t("editor.toolbar.searchBook")}
             </DropdownMenuItem>
             {!readOnly && (
               <DropdownMenuItem
@@ -1691,26 +1866,193 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
           ref={sidebarRef}
           id="editor-files"
           className={cn(
-            "flex w-64 shrink-0 flex-col bg-sidebar",
+            "flex w-72 shrink-0 bg-sidebar",
+            sidebarFolded && !narrow && "w-auto",
             narrow &&
-              "absolute inset-y-0 left-0 z-40 w-72 max-w-[85vw] shadow-lg transition-[translate,visibility]",
+              "absolute inset-y-0 left-0 z-40 w-80 max-w-[85vw] shadow-lg transition-[translate,visibility]",
             narrow && !showFiles && "invisible -translate-x-full",
           )}
           style={
-            sidebarWidth === null || narrow ? undefined : { width: sidebarWidth }
+            sidebarWidth === null || narrow || sidebarFolded
+              ? undefined
+              : { width: sidebarWidth }
           }
         >
-          <FileSidebar
-            files={listing.files}
-            active={ws.active}
-            dirty={ws.dirty}
-            actions={treeActions}
-            clipboard={treeClipboard}
-            readOnly={readOnly}
-            comments={commentCounts}
-          />
+          {/* The activity bar: which view the sidebar shows. Choosing the
+              shown one again folds the sidebar down to the bar. */}
+          <div
+            role="tablist"
+            aria-label={t("editor.toolbar.sidebar")}
+            aria-orientation="vertical"
+            className="flex w-11 shrink-0 flex-col items-center gap-1 border-r border-sidebar-border py-2 pointer-coarse:w-13"
+          >
+            {SIDEBAR_VIEWS.filter((view) => view !== "ai" || aiAvailable).map(
+              (view) => {
+                const { label, Icon } = sidebarItems[view];
+                const shown = sidebarView === view && sidebarOpen;
+                return (
+                  <button
+                    key={view}
+                    type="button"
+                    role="tab"
+                    aria-label={t(label)}
+                    title={
+                      view === "search"
+                        ? `${t(label)} (${t("editor.search.shortcut")})`
+                        : t(label)
+                    }
+                    aria-selected={shown}
+                    aria-controls="editor-sidebar-panel"
+                    className={cn(
+                      "relative flex size-9 shrink-0 items-center justify-center rounded-md pointer-coarse:size-11",
+                      shown
+                        ? "bg-accent text-primary before:absolute before:inset-y-1.5 before:-left-1 before:w-0.5 before:rounded-full before:bg-primary"
+                        : "text-muted-foreground hover:bg-accent hover:text-foreground",
+                    )}
+                    onClick={() =>
+                      view === "search" && !shown
+                        ? openSearch.current()
+                        : toggleView(view)
+                    }
+                  >
+                    <Icon className="size-5" aria-hidden />
+                    {view === "comments" && commentCounts.size > 0 && (
+                      <span
+                        className="absolute top-1.5 right-1.5 size-1.5 rounded-full bg-amber-500"
+                        aria-hidden
+                      />
+                    )}
+                  </button>
+                );
+              },
+            )}
+            <span className="flex-1" />
+            <SettingsMenu
+              settings={settings}
+              update={updateSettings}
+              canSpellCheck={canSpellCheck && !readOnly}
+              onOpenWords={() => setShowWords(true)}
+              side="right"
+              triggerClassName="size-9 text-muted-foreground pointer-coarse:size-11"
+            />
+            <ThemeToggle className="size-9 text-muted-foreground hover:bg-accent hover:text-foreground pointer-coarse:size-11 [&_svg]:size-5" />
+          </div>
+          <div
+            id="editor-sidebar-panel"
+            className={cn(
+              "flex min-w-0 flex-1 flex-col",
+              sidebarFolded && !narrow && "hidden",
+            )}
+          >
+          <div
+            className={cn(
+              "flex min-h-0 flex-1 flex-col",
+              sidebarView !== "files" && "hidden",
+            )}
+          >
+            <FileSidebar
+              files={listing.files}
+              active={ws.active}
+              dirty={ws.dirty}
+              actions={treeActions}
+              clipboard={treeClipboard}
+              readOnly={readOnly}
+              comments={commentCounts}
+            />
+          </div>
+          {/* Kept once opened, so switching back finds the same search. */}
+          {(sidebarView === "search" || searchFocus.count > 0) && (
+            <div
+              className={cn(
+                "flex min-h-0 flex-1 flex-col",
+                sidebarView !== "search" && "hidden",
+              )}
+            >
+              <SearchPanel
+                texts={searchTexts}
+                openTexts={openTexts}
+                changeKey={ws.dirty}
+                readOnly={readOnly}
+                focusRequest={searchFocus}
+                onReveal={revealMatch}
+                onReplaceAll={confirmReplace}
+              />
+            </div>
+          )}
+          {sidebarView === "comments" && (
+            <section
+              className="flex min-h-0 flex-1 flex-col"
+              aria-label={t("editor.toolbar.comments")}
+            >
+              <CommentsPanel
+                bookId={bookId}
+                threads={threads ?? []}
+                activePath={activeTab?.path ?? null}
+                activeThread={activeThread}
+                canEdit={canEdit}
+                draft={draft}
+                onDraftDone={(threadId) => {
+                  setDraft(null);
+                  if (threadId !== null) setActiveThread(threadId);
+                }}
+                onSelect={selectThread}
+                onApply={(thread, comment) => {
+                  const view = views.get(thread.path);
+                  return (
+                    !!view &&
+                    applySuggestion(
+                      view,
+                      thread.id,
+                      thread.quote,
+                      comment.suggestion ?? "",
+                    )
+                  );
+                }}
+              />
+            </section>
+          )}
+          {sidebarView === "history" && (
+            <section
+              className="flex min-h-0 flex-1 flex-col"
+              aria-label={t("editor.toolbar.history")}
+            >
+              <HistoryPanel
+                bookId={bookId}
+                activePath={activeTab?.path ?? null}
+                commit={listing.commit}
+              />
+            </section>
+          )}
+          {sidebarView === "ai" && aiAvailable && (
+            <section
+              className="flex min-h-0 flex-1 flex-col"
+              aria-label={t("editor.toolbar.ai")}
+            >
+              <AiPanel
+                bookId={book.id}
+                activePath={activeTab?.path ?? null}
+                getViewOf={(path) => views.get(path) ?? null}
+                isTabOpen={(path) =>
+                  ws.currentTabs().some((tab) => tab.path === path)
+                }
+                isTabDirty={ws.dirtyOf}
+                closeTab={ws.close}
+                reloadTab={ws.reload}
+                commit={ws.commit}
+              />
+            </section>
+          )}
+          {sidebarView === "outline" && (
+            <OutlinePanel
+              path={ws.active}
+              view={ws.active ? views.get(ws.active) : undefined}
+              active={!sidebarFolded && (!narrow || showFiles)}
+              onChosen={() => setShowFiles(false)}
+            />
+          )}
+          </div>
         </aside>
-        {!narrow && (
+        {!narrow && !sidebarFolded && (
           <Splitter
             label={t("editor.toolbar.resizeFiles")}
             pane={sidebarRef}
@@ -1844,130 +2186,6 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
             )}
           </div>
         </main>
-
-        {showComments && (
-          <>
-            {!compact && (
-              <Splitter
-                label={t("editor.toolbar.resizeComments")}
-                pane={commentsRef}
-                direction={-1}
-                onResize={setCommentsWidth}
-                onReset={() => setCommentsWidth(null)}
-              />
-            )}
-            <section
-              ref={commentsRef}
-              className={cn(
-                compact ? overlay : "w-80 shrink-0 border-l border-border",
-                "bg-sidebar",
-              )}
-              style={
-                commentsWidth === null || compact
-                  ? undefined
-                  : { width: commentsWidth }
-              }
-              aria-label={t("editor.toolbar.comments")}
-            >
-              <CommentsPanel
-                bookId={bookId}
-                threads={threads ?? []}
-                activePath={activeTab?.path ?? null}
-                activeThread={activeThread}
-                canEdit={canEdit}
-                draft={draft}
-                onDraftDone={(threadId) => {
-                  setDraft(null);
-                  if (threadId !== null) setActiveThread(threadId);
-                }}
-                onSelect={selectThread}
-                onApply={(thread, comment) => {
-                  const view = views.get(thread.path);
-                  return (
-                    !!view &&
-                    applySuggestion(
-                      view,
-                      thread.id,
-                      thread.quote,
-                      comment.suggestion ?? "",
-                    )
-                  );
-                }}
-              />
-            </section>
-          </>
-        )}
-
-        {showHistory && (
-          <>
-            {!compact && (
-              <Splitter
-                label={t("editor.toolbar.resizeHistory")}
-                pane={historyRef}
-                direction={-1}
-                onResize={setHistoryWidth}
-                onReset={() => setHistoryWidth(null)}
-              />
-            )}
-            <section
-              ref={historyRef}
-              className={cn(
-                compact ? overlay : "w-72 shrink-0 border-l border-border",
-                "bg-sidebar",
-              )}
-              style={
-                historyWidth === null || compact
-                  ? undefined
-                  : { width: historyWidth }
-              }
-              aria-label={t("editor.toolbar.history")}
-            >
-              <HistoryPanel
-                bookId={bookId}
-                activePath={activeTab?.path ?? null}
-                commit={listing.commit}
-              />
-            </section>
-          </>
-        )}
-
-        {showAi && aiAvailable && (
-          <>
-            {!compact && (
-              <Splitter
-                label={t("editor.toolbar.resizeAi")}
-                pane={aiRef}
-                direction={-1}
-                onResize={setAiWidth}
-                onReset={() => setAiWidth(null)}
-              />
-            )}
-            <section
-              ref={aiRef}
-              className={cn(
-                compact ? overlay : "w-[360px] shrink-0 border-l border-border",
-                "bg-sidebar",
-              )}
-              style={
-                aiWidth === null || compact ? undefined : { width: aiWidth }
-              }
-              aria-label={t("editor.toolbar.ai")}
-            >
-              <AiPanel
-                bookId={book.id}
-                activePath={activeTab?.path ?? null}
-                getViewOf={(path) => views.get(path) ?? null}
-                isTabOpen={(path) =>
-                  ws.currentTabs().some((tab) => tab.path === path)
-                }
-                isTabDirty={ws.dirtyOf}
-                closeTab={ws.close}
-                reloadTab={ws.reload}
-                commit={ws.commit}
-              />
-            </section>
-          </>
-        )}
 
         {showPreview && (
           <>

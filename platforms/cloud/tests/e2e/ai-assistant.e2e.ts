@@ -139,7 +139,7 @@ describe("AI assistant", () => {
     await page.getByRole("button", { name: "Example pages" }).click();
 
     // The assistant's pane opens with the model and the day's requests.
-    await page.getByRole("button", { name: "Show the AI assistant" }).click();
+    await page.getByRole("tab", { name: "AI assistant" }).click();
     const panel = page.getByRole("region", { name: "AI assistant" });
     await panel.getByText("Model: mistral-test").waitFor();
     await panel.getByText("0 requests today").waitFor();
@@ -188,7 +188,7 @@ describe("AI assistant", () => {
     await dialog.getByRole("button", { name: "Create book" }).click();
     await page.getByRole("link", { name: "Edit book" }).click();
     await page.getByRole("button", { name: "Example pages" }).click();
-    await page.getByRole("button", { name: "Show the AI assistant" }).click();
+    await page.getByRole("tab", { name: "AI assistant" }).click();
     const panel = page.getByRole("region", { name: "AI assistant" });
 
     // The model records a write_file; the answer streams and the proposal
@@ -204,7 +204,9 @@ describe("AI assistant", () => {
 
     // Accept: the file is committed (one ordinary save), the tree follows.
     await review.getByRole("button", { name: "Accept 1 change" }).click();
-    // The tree follows the commit; folders are open by default.
+    // The tree follows the commit; folders are open by default. The AI
+    // shares the sidebar with the files, so the Files view comes back.
+    await page.getByRole("tab", { name: "Files", exact: true }).click();
     await page.getByRole("button", { name: "hello.json" }).click();
     await page.getByRole("tab", { name: "hello.json" }).waitFor();
     // The quiz opens in its own tab; its editor shows the proposed content.
@@ -223,7 +225,7 @@ describe("AI assistant", () => {
     await dialog.getByRole("button", { name: "Create book" }).click();
     await page.getByRole("link", { name: "Edit book" }).click();
     await page.getByRole("button", { name: "Example pages" }).click();
-    await page.getByRole("button", { name: "Show the AI assistant" }).click();
+    await page.getByRole("tab", { name: "AI assistant" }).click();
     const panel = page.getByRole("region", { name: "AI assistant" });
 
     // The assistant proposes to rewrite the open page — and the request

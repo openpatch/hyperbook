@@ -109,6 +109,28 @@ describe("files", () => {
     expect((await owner.c.get(files("/references?path=../etc"))).status).toBe(400);
   });
 
+  it("hands the editor the text files to search, and only to those with access", async () => {
+    const { owner, other, files } = await world();
+    const listing = (await owner.c.post(files("/init"), { template: "empty" })).body;
+    await owner.c.post(files("/commit"), {
+      changes: [
+        { op: "write", path: "book/page.md", content: "Grüße", baseOid: null },
+        { op: "write", path: "public/logo.png", content: Buffer.from([137, 80, 0, 71]).toString("base64"), encoding: "base64", baseOid: null },
+        { op: "write", path: "public/latin1.txt", content: Buffer.from([0xe4, 0x20, 0x41]).toString("base64"), encoding: "base64", baseOid: null },
+      ],
+    });
+    const res = await owner.c.get(files("/texts"));
+    expect(res.status).toBe(200);
+    const paths = res.body.files.map((f: { path: string }) => f.path);
+    expect(paths).toContain("book/page.md");
+    expect(paths).toContain("book/index.md");
+    expect(paths).not.toContain("public/logo.png");
+    expect(paths).not.toContain("public/latin1.txt");
+    expect(res.body.files.find((f: { path: string }) => f.path === "book/page.md")).toMatchObject({ text: "Grüße" });
+    expect(res.body.commit).not.toBe(listing.commit);
+    expect((await other.c.get(files("/texts"))).status).toBe(404);
+  });
+
   it("tells which files someone else changed in the meantime", async () => {
     const { owner, files } = await world();
     const listing = (await owner.c.post(files("/init"), { template: "empty" })).body;

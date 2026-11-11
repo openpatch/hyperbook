@@ -47,11 +47,16 @@ export function SettingsMenu({
   /** Whether the book's language has a dictionary. */
   canSpellCheck,
   onOpenWords,
+  side = "bottom",
+  triggerClassName,
 }: {
   settings: EditorSettings;
   update: (patch: Partial<EditorSettings>) => void;
   canSpellCheck: boolean;
   onOpenWords: () => void;
+  /** Where the menu opens: under its button, or beside it (the activity bar). */
+  side?: "bottom" | "right";
+  triggerClassName?: string;
 }) {
   const { t } = useTranslation();
   const size = FONT_SIZES.indexOf(settings.fontSize);
@@ -61,13 +66,24 @@ export function SettingsMenu({
         <Button
           size="icon"
           variant="ghost"
-          className="size-8"
+          className={triggerClassName ?? "size-8"}
           aria-label={t("editor.settingsMenu.aria")}
+          title={t("editor.settingsMenu.aria")}
         >
-          <Settings2Icon className="size-4" />
+          <Settings2Icon className={side === "right" ? "size-5" : "size-4"} />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56">
+      <DropdownMenuContent
+        side={side}
+        align="end"
+        className="w-56"
+        // Closing gives the focus back to the button, unless it is in an
+        // editor by then: the menu can finish closing late (on the next
+        // render, e.g. a keystroke), and must not take the focus from typing.
+        onCloseAutoFocus={(e) => {
+          if (document.activeElement?.closest(".cm-editor")) e.preventDefault();
+        }}
+      >
         <DropdownMenuLabel>{t("editor.settingsMenu.label")}</DropdownMenuLabel>
         <div className="flex items-center justify-between px-2 py-1 text-sm">
           <span aria-hidden>{t("editor.settingsMenu.fontSize")}</span>
@@ -161,6 +177,13 @@ export function SettingsMenu({
           onSelect={(e) => e.preventDefault()}
         >
           {t("editor.settingsMenu.lineNumbers")}
+        </DropdownMenuCheckboxItem>
+        <DropdownMenuCheckboxItem
+          checked={settings.vim}
+          onCheckedChange={(checked) => update({ vim: checked === true })}
+          onSelect={(e) => e.preventDefault()}
+        >
+          {t("editor.settingsMenu.vim")}
         </DropdownMenuCheckboxItem>
         <DropdownMenuCheckboxItem
           checked={settings.spellCheck && canSpellCheck}

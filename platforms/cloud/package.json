@@ -41,6 +41,7 @@
     "@java-memory-playground/java-memory-playground": "0.3.0",
     "@learningmap/learningmap": "0.7.1",
     "@lezer/highlight": "^1.2.5",
+    "@replit/codemirror-vim": "^6.4.0",
     "@tanstack/react-query": "^5.105.0",
     "@tanstack/react-virtual": "^3.14.24",
     "@types/typo-js": "^1.2.2",

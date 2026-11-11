@@ -51,6 +51,18 @@ i18next.use(initReactI18next).init({
   interpolation: { escapeValue: false }, // React escapes values itself.
 });
 
+// In development, an edited catalog reaches i18next without a page reload:
+// it reads its resources once, so a new key would otherwise show as itself.
+if (import.meta.hot) {
+  import.meta.hot.accept("../shared/i18n", (next) => {
+    if (!next) return;
+    const updated = (next as unknown as { catalogs: typeof catalogs }).catalogs;
+    for (const locale of LOCALES)
+      i18next.addResourceBundle(locale, "translation", updated[locale], true, true);
+    void i18next.changeLanguage(i18next.language);
+  });
+}
+
 i18next.on("languageChanged", (lng) => {
   document.documentElement.lang = lng;
 });

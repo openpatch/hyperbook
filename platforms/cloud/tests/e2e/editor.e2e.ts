@@ -79,9 +79,9 @@ describe("editor", () => {
     await live.close();
 
     // The History pane marks the live save.
-    await page.getByRole("button", { name: "Show the history" }).click();
+    await page.getByRole("tab", { name: "History" }).click();
     await page.getByRole("region", { name: "History" }).getByText("Live", { exact: true }).waitFor();
-    await page.getByRole("button", { name: "Hide the history" }).click();
+    await page.getByRole("tab", { name: "Files", exact: true }).click();
   }, 120_000);
 
   it("adds a page that the preview follows", async () => {
@@ -120,6 +120,139 @@ describe("editor", () => {
     await menu.waitFor();
     await page.keyboard.press("Enter");
     await tab.waitFor({ state: "detached" });
+  }, 60_000);
+
+  it("searches the whole book, unsaved text included, and replaces in it", async () => {
+    // Unsaved text in an open file is found, too.
+    await page.getByRole("tab", { name: "echo.md" }).click();
+    const editor = page.locator('[role="tabpanel"]:not(.hidden) .cm-content');
+    await editor.getByText("# Echo").click();
+    await page.keyboard.press("End");
+    await page.keyboard.type(" quokka");
+
+    await page.keyboard.press("Control+Shift+f");
+    const search = page.getByRole("textbox", { name: "Search the book" });
+    await expect.poll(() => search.evaluate((el) => el === document.activeElement)).toBe(true);
+    await search.fill("Quokka");
+    const results = page.locator("#editor-files");
+    await results.getByText("1 result").waitFor();
+    await results.getByRole("button", { name: /echo\.md/ }).waitFor();
+
+    // A closed file is found, and a result opens its file with the match selected.
+    await search.fill("Keys");
+    await results.getByRole("button", { name: /keys\.md/ }).waitFor();
+    await results.getByRole("button", { name: /^\d+\s*# Keys/ }).first().click();
+    await page.getByRole("tab", { name: "keys.md" }).waitFor();
+    await expect
+      .poll(() => page.evaluate(() => window.getSelection()?.toString()))
+      .toBe("Keys");
+    await page.getByRole("tab", { name: "keys.md" }).focus();
+    await page.keyboard.press("Shift+F10");
+    await page.getByRole("menuitem", { name: "Close book/keys.md" }).click();
+
+    // Replace: the open file changes in its editor, the closed one is saved.
+    await search.fill("quokka");
+    await results.getByText("1 result").waitFor();
+    await page.getByRole("button", { name: "Toggle replace" }).click();
+    await page.getByRole("textbox", { name: "Replace" }).fill("wombat");
+    await page.getByRole("button", { name: "Replace all" }).click();
+    await page.getByRole("dialog").getByRole("button", { name: "Replace all" }).click();
+    await page.getByText("Replaced 1 match.").waitFor();
+    await page.getByRole("tab", { name: "echo.md" }).click();
+    await editor.getByText("# Echo wombat").click();
+    // One undo takes the whole replacement back.
+    await page.keyboard.press("Control+z");
+    await editor.getByText("# Echo quokka").waitFor();
+    await page.keyboard.press("Control+y");
+    await editor.getByText("# Echo wombat").waitFor();
+    await page.keyboard.press("Control+s");
+    await page.getByTitle("Not saved").first().waitFor({ state: "detached" });
+
+    await search.fill("Keys");
+    await page.getByRole("textbox", { name: "Replace" }).fill("Locks");
+    await results.getByRole("button", { name: /keys\.md/ }).waitFor();
+    await page.getByRole("button", { name: "Replace all" }).click();
+    await page.getByRole("dialog").getByRole("button", { name: "Replace all" }).click();
+    await page.getByText(/^Replaced \d+ match/).last().waitFor();
+    await results.getByText("No results.").waitFor();
+    await search.fill("Locks");
+    await results.getByRole("button", { name: /keys\.md/ }).waitFor();
+
+    await page.getByRole("tab", { name: "Files", exact: true }).click();
+  }, 90_000);
+
+  it("shows the open page's outline, following the cursor", async () => {
+    await page.getByRole("tab", { name: "echo.md" }).click();
+    const editor = page.locator('[role="tabpanel"]:not(.hidden) .cm-content');
+    await editor.getByText("# Echo wombat").click();
+    await page.keyboard.press("Control+End");
+    await page.keyboard.type("\n\nText.\n\n## Second part\n");
+
+    // Its own view in the activity bar.
+    await page.getByRole("tab", { name: "Outline", exact: true }).click();
+    const outline = page.getByRole("list", { name: "Outline" });
+    const first = outline.getByRole("button", { name: "Echo wombat" });
+    const second = outline.getByRole("button", { name: "Second part" });
+    await expect.poll(() => second.getAttribute("aria-current")).toBe("location");
+
+    await first.click();
+    await expect.poll(() => first.getAttribute("aria-current")).toBe("location");
+    expect(await second.getAttribute("aria-current")).toBeNull();
+
+    // A file without headings says so.
+    await page.keyboard.press("Control+p");
+    await page.keyboard.type("hyperbook.json");
+    await page.keyboard.press("Enter");
+    await page.getByRole("tab", { name: "hyperbook.json" }).waitFor();
+    await page.locator("#editor-files").getByText("This file has no outline.", { exact: false }).waitFor();
+    await page.getByRole("tab", { name: "echo.md" }).click();
+    await page.keyboard.press("Control+s");
+    await page.getByTitle("Not saved").first().waitFor({ state: "detached" });
+
+    // Choosing the shown view again folds the sidebar down to its bar, and
+    // the choice is kept.
+    const tab = page.getByRole("tab", { name: "Outline", exact: true });
+    await tab.click();
+    await outline.waitFor({ state: "detached" });
+    expect(await tab.getAttribute("aria-selected")).toBe("false");
+    await page.reload();
+    await page.getByRole("tab", { name: "Files", exact: true }).waitFor();
+    expect(await page.locator("#editor-sidebar-panel").isHidden()).toBe(true);
+    await page.getByRole("tab", { name: "Files", exact: true }).click();
+    await page.locator("#editor-files").getByText("echo.md", { exact: true }).waitFor();
+  }, 60_000);
+
+  it("edits with Vim key bindings, and :w saves", async () => {
+    await page.getByRole("button", { name: "Editor settings" }).click();
+    await page.getByRole("menuitemcheckbox", { name: "Vim key bindings" }).click();
+    await page.keyboard.press("Escape");
+
+    await page.locator("#editor-files").getByText("echo.md", { exact: true }).click();
+    const editor = page.locator('[role="tabpanel"]:not(.hidden) .cm-content');
+    await editor.getByText("# Echo wombat").click();
+    // Normal mode: G to the last line, o opens one below in insert mode.
+    const text = () => editor.evaluate((el) => (el as HTMLElement).innerText);
+    await page.keyboard.press("Escape");
+    await page.keyboard.type("GoFrom vim");
+    await page.keyboard.press("Escape");
+    await expect.poll(text).toMatch(/From vim\s*$/);
+    await page.getByTitle("Not saved").first().waitFor();
+    // Back in normal mode before the command.
+    await page.locator('[role="tabpanel"]:not(.hidden) .cm-vim-panel').getByText("--NORMAL--").waitFor();
+    await page.keyboard.type(":w");
+    await page.keyboard.press("Enter");
+    await page.getByTitle("Not saved").first().waitFor({ state: "detached" });
+
+    // dd deletes the line again; switching Vim off gives the plain editor back.
+    await page.keyboard.type("Gdd");
+    await expect.poll(text).not.toContain("From vim");
+    await page.keyboard.type(":w");
+    await page.keyboard.press("Enter");
+    await page.getByTitle("Not saved").first().waitFor({ state: "detached" });
+    await page.getByRole("button", { name: "Editor settings" }).click();
+    await page.getByRole("menuitemcheckbox", { name: "Vim key bindings" }).click();
+    await page.keyboard.press("Escape");
+    await page.locator(".cm-vim-panel").waitFor({ state: "detached" });
   }, 60_000);
 
 
