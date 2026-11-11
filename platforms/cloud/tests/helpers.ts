@@ -118,22 +118,26 @@ export async function createUser(
  * bodies, and it keeps the session cookie between requests.
  */
 export function client({ app }: Instance) {
-  let cookie = "";
+  /** The cookies by name: the account's session and an access link's. */
+  const jar = new Map<string, string>();
+  const cookieHeader = () => [...jar].map(([name, value]) => `${name}=${value}`).join("; ");
 
   async function request(method: string, path: string, body?: unknown, extraHeaders: Record<string, string> = {}) {
     const headers: Record<string, string> = { host: ADMIN_HOST, ...extraHeaders };
     if (method !== "GET") headers.origin = ADMIN_ORIGIN;
     if (body !== undefined) headers["content-type"] = "application/json";
-    if (cookie) headers.cookie = cookie;
+    if (jar.size) headers.cookie = cookieHeader();
     const res = await app.request(path, {
       method,
       headers,
       body: body === undefined ? undefined : JSON.stringify(body),
     });
-    const setCookie = res.headers.get("set-cookie");
-    if (setCookie) {
+    for (const setCookie of res.headers.getSetCookie()) {
       const pair = setCookie.split(";")[0]!;
-      cookie = pair.endsWith("=") ? "" : pair;
+      const eq = pair.indexOf("=");
+      const [name, value] = [pair.slice(0, eq), pair.slice(eq + 1)];
+      if (value === "" || /max-age=0/i.test(setCookie)) jar.delete(name);
+      else jar.set(name, value);
     }
     const text = await res.text();
     let json: any = undefined;
@@ -150,7 +154,7 @@ export function client({ app }: Instance) {
     const form = new FormData();
     form.append("file", new File([zip as BlobPart], name, { type: "application/zip" }));
     const headers: Record<string, string> = { host: ADMIN_HOST, origin: ADMIN_ORIGIN };
-    if (cookie) headers.cookie = cookie;
+    if (jar.size) headers.cookie = cookieHeader();
     const res = await app.request(path, { method: "POST", headers, body: form });
     const text = await res.text();
     let json: any;
@@ -170,8 +174,14 @@ export function client({ app }: Instance) {
     patch: (path: string, body?: unknown) => request("PATCH", path, body ?? {}),
     delete: (path: string) => request("DELETE", path),
     raw: request,
+    /** The account session's cookie, as "name=value" ("" without one). */
     get cookie() {
-      return cookie;
+      const value = jar.get("__Host-hb_session");
+      return value === undefined ? "" : `__Host-hb_session=${value}`;
+    },
+    /** Every cookie, as the Cookie header sends them. */
+    get cookies() {
+      return cookieHeader();
     },
   };
 }

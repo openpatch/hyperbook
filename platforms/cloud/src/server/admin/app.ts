@@ -13,7 +13,9 @@ import { aiRoutes, bookAiRoutes } from "./routes/ai";
 import { aiMonitorRoutes } from "./routes/ai-monitor";
 import { auditRoutes } from "./routes/audit";
 import { authRoutes } from "./routes/auth";
-import { bookRoutes } from "./routes/books";
+import { bookRoutes, bookVisitorRoutes } from "./routes/books";
+import { bookCommentRoutes } from "./routes/comments";
+import { bookLinkRoutes, linkRoutes } from "./routes/links";
 import { bookDictionaryRoutes } from "./routes/dictionary";
 import { bookFileRoutes } from "./routes/files";
 import {
@@ -34,6 +36,7 @@ import { userRoutes } from "./routes/users";
 
 /** The JSON API. Its type drives the web app's typed client. */
 export function createAdminApi(deps: Deps) {
+  const publishing = bookPublishingRoutes(deps);
   return (
     new Hono<AdminEnv>()
       .use(originCheck(deps))
@@ -46,13 +49,21 @@ export function createAdminApi(deps: Deps) {
       .route("/me", meRoutes(deps))
       .route("/me", userGitTokenRoutes(deps))
       .route("/users", userRoutes(deps))
-      .route("/books", bookRoutes(deps))
-      .route("/books", gitTokenRoutes(deps))
-      .route("/books", bookGroupRoutes(deps))
-      .route("/books", bookPublishingRoutes(deps))
+      // Routers that link visitors use come first: a router's middleware
+      // runs for every route under its prefix (requireUser of the ones
+      // below would otherwise turn link visitors away).
+      .route("/books", bookVisitorRoutes(deps))
       .route("/books", bookFileRoutes(deps))
       .route("/books", bookHistoryRoutes(deps))
       .route("/books", bookDictionaryRoutes(deps))
+      .route("/books", publishing.visitor)
+      .route("/books", bookCommentRoutes(deps))
+      .route("/links", linkRoutes(deps))
+      .route("/books", bookLinkRoutes(deps))
+      .route("/books", bookRoutes(deps))
+      .route("/books", gitTokenRoutes(deps))
+      .route("/books", bookGroupRoutes(deps))
+      .route("/books", publishing.account)
       .route("/books", bookAiRoutes(deps))
       .route("/ai-monitor", aiMonitorRoutes(deps))
       .route("/ai", aiRoutes(deps))

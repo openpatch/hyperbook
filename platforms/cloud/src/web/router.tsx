@@ -1,7 +1,7 @@
 import { createBrowserRouter } from "react-router";
 import { AuthLayout } from "./components/auth-layout";
 import { Layout } from "./components/layout";
-import { RequireAdmin, RequireAuth } from "./lib/session";
+import { RequireAdmin, RequireAuth, RequireAuthOrLink } from "./lib/session";
 import { AccountPage } from "./pages/account";
 import { AddressesPage } from "./pages/addresses";
 import { AiMonitorPage } from "./pages/ai-monitor";
@@ -11,6 +11,7 @@ import { ForgotPasswordPage } from "./pages/forgot-password";
 import { GroupPage } from "./pages/group";
 import { HomePage } from "./pages/home";
 import { InstancePage } from "./pages/instance";
+import { JoinPage } from "./pages/join";
 import { LandingPage } from "./pages/landing";
 import { LegalPage } from "./pages/legal";
 import { LoginPage } from "./pages/login";
@@ -35,6 +36,15 @@ export const router = createBrowserRouter([
       { path: "verify", element: <VerifyPage /> },
       { path: "imprint", element: <LegalPage page="imprint" /> },
       { path: "privacy", element: <LegalPage page="privacy" /> },
+      { path: "join", element: <JoinPage /> },
+    ],
+  },
+  {
+    // Teachers and visitors who came through an access link.
+    element: <RequireAuthOrLink />,
+    children: [
+      // Uses the whole window; loaded on demand (CodeMirror is large).
+      { path: "books/:id/edit", lazy: () => import("./pages/editor") },
     ],
   },
   {
@@ -42,8 +52,6 @@ export const router = createBrowserRouter([
     children: [
       // Without the app layout, so only the sheet is printed.
       { path: "groups/:id/print", element: <PrintPage /> },
-      // Uses the whole window; loaded on demand (CodeMirror is large).
-      { path: "books/:id/edit", lazy: () => import("./pages/editor") },
       {
         element: <Layout />,
         children: [

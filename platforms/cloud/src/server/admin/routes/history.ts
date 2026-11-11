@@ -3,7 +3,7 @@ import { HTTPException } from "hono/http-exception";
 import { z } from "zod";
 import { historyInput, liveDiffInput } from "../../../shared/schemas";
 import type { Deps } from "../../deps";
-import { bookAccess } from "../../domain/books";
+import { visitorAccess } from "../../domain/actors";
 import {
   GitError,
   commitDiff,
@@ -15,8 +15,8 @@ import {
 } from "../../hosting/git";
 import { tagMap } from "../../hosting/publish-tags";
 import { repoDir } from "../../hosting/storage";
-import type { AuthedEnv } from "../env";
-import { requireUser } from "../middleware";
+import type { AdminEnv } from "../env";
+import { requireVisitor } from "../middleware";
 import { idParam } from "../params";
 import { validate } from "../validate";
 import { hostedOnly } from "./publishing";
@@ -59,8 +59,8 @@ async function reachable(repo: string, sha: string): Promise<boolean> {
 /** /api/books/:id/history */
 export function bookHistoryRoutes({ db, config }: Deps) {
   return (
-    new Hono<AuthedEnv>()
-      .use(requireUser)
+    new Hono<AdminEnv>()
+      .use(requireVisitor)
 
       // One page of the book's commits, newest first. `after` is the last
       // commit of the page before it; `next` in the answer is the cursor of
@@ -70,8 +70,7 @@ export function bookHistoryRoutes({ db, config }: Deps) {
         idParam,
         validate("query", historyInput),
         async (c) => {
-          const user = c.get("user");
-          const { book } = bookAccess(db, user, c.req.valid("param").id);
+          const { book } = visitorAccess(db, c.get("user"), c.get("link"), c.req.valid("param").id, "commenter");
           hostedOnly(book);
           const { after, limit, path } = c.req.valid("query");
           const repo = repoDir(config, book.id);
@@ -103,8 +102,7 @@ export function bookHistoryRoutes({ db, config }: Deps) {
       // latest save, of the whole book or of `path`: what a publish would
       // change. Before anything is published, everything is new.
       .get("/:id/history/live-diff", idParam, validate("query", liveDiffInput), async (c) => {
-        const user = c.get("user");
-        const { book } = bookAccess(db, user, c.req.valid("param").id);
+        const { book } = visitorAccess(db, c.get("user"), c.get("link"), c.req.valid("param").id, "commenter");
         hostedOnly(book);
         const { path } = c.req.valid("query");
         const repo = repoDir(config, book.id);
@@ -125,8 +123,7 @@ export function bookHistoryRoutes({ db, config }: Deps) {
       })
 
       .get("/:id/history/:sha/diff", shaParam, async (c) => {
-        const user = c.get("user");
-        const { book } = bookAccess(db, user, c.req.valid("param").id);
+        const { book } = visitorAccess(db, c.get("user"), c.get("link"), c.req.valid("param").id, "commenter");
         hostedOnly(book);
         const sha = c.req.valid("param").sha;
         const repo = repoDir(config, book.id);

@@ -5,7 +5,7 @@ import {
   undo,
   undoDepth,
 } from "@codemirror/commands";
-import { EditorSelection, type Extension } from "@codemirror/state";
+import { EditorSelection, type Extension, Facet } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
 import i18next from "i18next";
 import { toast } from "sonner";
@@ -223,11 +223,16 @@ async function copy(text: string): Promise<boolean> {
   }
 }
 
+/** More entries at the top of an editor's menu, e.g. "Comment" (see comments.ts). */
+export type MenuExtra = (box: HTMLElement, view: EditorView) => void;
+export const menuExtras = Facet.define<MenuExtra>();
+
 /**
  * The editor's context menu (see the module comment): Cut, Copy and Paste for
- * the selection, Select All, and Undo and Redo.
+ * the selection, Select All, and Undo and Redo. Read-only editors keep Copy
+ * and Select All.
  */
-export function contextMenu(): Extension {
+export function contextMenu({ readOnly = false }: { readOnly?: boolean } = {}): Extension {
   return EditorView.domEventHandlers({
     mousedown: () => closeMenu(),
     scroll: () => closeMenu(),
@@ -250,6 +255,28 @@ export function contextMenu(): Extension {
       view.focus();
       const { x, y } = keyboard ? cursorPoint(view) : { x: event.clientX, y: event.clientY };
       openMenu(x, y, (box) => {
+        for (const extra of view.state.facet(menuExtras)) extra(box, view);
+        if (readOnly) {
+          item(
+            box,
+            i18next.t("editor.files.copy"),
+            () => {
+              view.focus();
+              void copy(text());
+            },
+            { shortcut: mod("C"), disabled: !selected },
+          );
+          item(
+            box,
+            i18next.t("editor.actions.selectAll"),
+            () => {
+              view.focus();
+              selectAll(view);
+            },
+            { shortcut: mod("A") },
+          );
+          return;
+        }
         item(
           box,
           i18next.t("editor.actions.undo"),

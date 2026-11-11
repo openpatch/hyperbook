@@ -64,7 +64,7 @@ describe("books", () => {
     await nav(page, "Books");
     await page.getByRole("link", { name: /Physik 7ä/ }).click();
     await page.getByLabel("Add a teacher by email").fill("colleague@example.org");
-    await page.getByRole("button", { name: "Add as editor" }).click();
+    await page.getByRole("button", { name: "Add", exact: true }).click();
     await page.getByRole("cell", { name: "colleague@example.org" }).waitFor();
   });
 

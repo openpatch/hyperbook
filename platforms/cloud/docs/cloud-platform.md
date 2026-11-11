@@ -32,6 +32,7 @@ migrated and no old API is kept.
 - **M3 Editor** *(done, see [M3](#m3-editor))*: git-backed files, CodeMirror, uploads, preview on `<slug>--preview.<BOOKS_DOMAIN>`, settings forms, export, and visual editors for element files (struktolab, bitflow, learningmap, excalidraw, jmp, blockflow `.sb3`/`.blockflow`, and H5P upload only; see [M3: Visual editors](#m3-visual-editors-for-element-files)).
 - **M4 Instance operations** *(done except the launch itself, see [M4](#m4-instance-operations))*: signup modes, quotas, legal pages, email verification, backup docs. Launch of the OpenPatch instance.
 - **M5 Later**: OIDC, local runtime-asset mirror, custom domains (*done*, see [M5](#m5-custom-domains)), address suffixes and requests (*done*, see [M5](#m5-address-suffixes-and-name-requests)), sharing and forking.
+- **M7 Review** *(done except preview comments, see [M7](#m7-review--comments-commenters-and-access-links))*: comments on the source, commenter role, named access links without accounts.
 
 ---
 
@@ -1448,3 +1449,242 @@ pruning. Layout under `platforms/cloud/tests`.
 4. *(done)* Tags on publish/rollback, tag-aligned pruning, rollback route.
 5. *(done)* Instance setting, staleness counters, web UI.
 6. *(done)* Tests; this doc.
+
+---
+
+# M7: Review — comments, commenters and access links
+
+Goal: colleagues review a book in the editor. They comment on the Markdown
+source, discuss in threads and propose changes; editors resolve the threads
+and apply the proposals. Reviewers don't need an account: an owner sends
+them a named link.
+
+Planned 2026-11-11. Overleaf's review panel served as a model for ideas
+only. Overleaf is AGPL-3.0 and Hyperbook is MIT, so none of its code is
+copied.
+
+## Decisions
+
+| Topic | Decision |
+|---|---|
+| Where comments go | On the source in the editor (a range of a file). Comments on the rendered preview come later. |
+| Storage | SQLite (`comment_threads`, `comments`), never in the book's git repository. |
+| Anchor | Offsets, plus the commented text with 32 characters of context on each side (the idea behind the W3C TextQuoteSelector), plus the blob oid they refer to. |
+| New role | `commenter`, below `editor`: `commenter < editor < owner`. Admins act as owners. |
+| Who adds commenters | Owners only (members and links alike). |
+| Access links | One named link per person (commenter or editor). Owners create and delete them in the book's settings. No account is needed. |
+| AI | Never for link visitors, whatever their role. |
+| Link editors | Content only: no groups, students or credentials, no git, no settings, no members, no publishing (they can only ask for it). |
+
+## Roles
+
+`bookAccess(db, user, bookId, needed)` takes `"commenter" | "editor" |
+"owner"` and still defaults to `"editor"`. Every existing route therefore
+refuses commenters. Only the routes that read are lowered to `"commenter"`:
+
+- the book itself (`GET /books/:id`);
+- the file list, file contents, raw files, references, language, Typst
+  packages;
+- `files/render` and `files/typst-preview` (the visitor's text is never
+  saved);
+- `preview-code`;
+- history and its diffs;
+- the dictionary (read only);
+- comments.
+
+Git HTTP (`canAccessBook`) needs editor or above, so commenters get no
+tokens and cannot clone or push. The preview host lets every member of a
+book in, commenters included.
+
+## Access links
+
+```
+book_links: id, book_id → books (cascade), name, role (commenter|editor),
+            token_hash (unique), token_sealed, created_by → users (set null),
+            created_at, expires_at?, last_used_at?, revoked_at?
+link_sessions: id_hash (pk), link_id → book_links (cascade), expires_at, last_seen_at
+```
+
+- **The link** is `<ADMIN_ORIGIN>/join#t=<token>`. The token is in the
+  fragment, so it reaches neither server logs nor `Referer` headers. It is
+  sealed with `CREDENTIALS_KEY` so the owner can copy the link again.
+- **Redeeming it**: `/join` posts the token to `POST /api/links/redeem`
+  (rate limited per IP). The server sets the `__Host-hb_link` cookie (a
+  sliding 30 days, valid for that one book only) and answers with the book
+  id. The page then replaces its URL with `/books/:id/edit`, so the token
+  leaves the address bar and the browser history.
+- **Every request** checks the session against the link: deleted (revoked),
+  expired or book gone → the session is dead at once. A deleted link shows
+  "This link no longer works", without the book's title.
+- **Deleting a link** sets `revoked_at` and drops its sessions. The row
+  stays so that comments and commits still carry the name. The owner's list
+  shows only live links.
+- **Who is acting** (`actor`): a book route that link visitors may use
+  takes the account if it is a member of the book (or an admin), else a
+  live link session of that book, else 404. An account member who opens a
+  link therefore keeps working as themselves. All other routes see no
+  `user` for a link visitor and answer 401: `/me`, the book list, groups,
+  students, git tokens, AI, settings, publishing.
+- **Link editors** save like editors: the commit's author is
+  `<name> (link)` with an address on the instance's own host, and the audit
+  log records `{ linkId, name }` with a null actor user. They may ask for
+  publishing (an email to the owners) and add words to the book's
+  dictionary.
+- **The preview host**: preview codes and sessions carry either a user or a
+  link (`user_id` nullable, `link_id` added) and are checked on every
+  request, so deleting the link ends the preview session too.
+
+API (owners only, on the admin host):
+`GET/POST /api/books/:id/links`, `GET /api/books/:id/links/:linkId/url`
+(the link again), `DELETE /api/books/:id/links/:linkId`. For the visitor:
+`POST /api/links/redeem`, `GET /api/links/session` (book, name, role),
+`POST /api/links/leave`.
+
+## Comments
+
+```
+comment_threads: id, book_id → books (cascade), path,
+                 anchor_from, anchor_to, anchor_exact, anchor_prefix, anchor_suffix, anchor_oid,
+                 detached_at?, status (open|resolved),
+                 created_by_user_id?, created_by_link_id?, created_by_name,
+                 created_at, resolved_by_name?, resolved_at?
+comments: id, thread_id → comment_threads (cascade),
+          author_user_id?, author_link_id?, author_name,
+          body (Markdown, max 10 000 characters), suggestion?, applied_at?,
+          created_at, edited_at?, deleted_at?
+```
+
+- **Anchoring.** A thread refers to the text of `path` at `anchor_oid`.
+  - When it is read and the file's blob has changed (a push, the AI, a
+    save without the editor's mapping), the server looks for
+    `anchor_exact`. Of several matches it takes the one whose prefix and
+    suffix fit best, then the one nearest the old offset, and stores the
+    new position.
+  - If the text is gone, or the file was deleted, the thread is
+    **outdated**: still listed with its quote, but no longer marked in the
+    code. A move in a save moves the threads with the file.
+- **In the editor**, threads are a CodeMirror range set. It is mapped
+  through every edit and through the changes not yet saved, so marks follow
+  typing.
+  - After a save, the editor sends the new positions
+    (`POST /comments/anchors`, with the saved oid). This keeps a thread
+    attached even when the commented text itself was edited.
+  - Text cut with its comment and pasted elsewhere takes the comment along.
+    Undoing a deletion brings the comment back (Overleaf's "detached
+    comments" idea). A thread whose text was deleted and saved is
+    `detached`, which makes it outdated.
+- **Suggestions.** A comment may carry `suggestion`, replacement text for
+  the thread's range. An editor applies it with one click: the range is
+  replaced in the open file, the comment gets `applied_at` and the thread is
+  resolved. The editor then saves as usual.
+- **Permissions.**
+  - Everyone with access (commenter and up) may start threads, reply and
+    suggest.
+  - Authors edit and delete their own comments. A deleted comment shows as
+    "deleted" and keeps its place in the thread.
+  - Resolving and reopening: editors and owners any thread, commenters only
+    threads they started.
+  - Only editors and up apply suggestions and send new positions.
+  - Links are identified by link id, accounts by user id.
+- **API** (`/api/books/:id/comments`, commenter and up):
+
+| Route | Purpose |
+|---|---|
+| `GET ?path=` | Threads with their comments; without `path`, every thread. |
+| `POST` | New thread. |
+| `POST /:threadId/replies` | Reply. |
+| `PATCH /c/:commentId`, `DELETE /c/:commentId` | Author only. |
+| `POST /:threadId/resolve`, `POST /:threadId/reopen` | See permissions. |
+| `POST /c/:commentId/applied` | Editor and up. |
+| `POST /anchors` | Editor and up. |
+
+## Editor UI
+
+- **Selecting text** shows a small "Comment" tooltip. The context menu has
+  "Comment" too.
+- **In the code**, open threads are highlighted. A gutter marker opens the
+  thread.
+- **A Comments panel** sits in the right-hand slot next to History and AI:
+  - tabs *This file* and *All files*;
+  - resolved threads in their own menu, where they can be reopened;
+  - outdated threads in their own group;
+  - reply, edit, delete, resolve, suggest and apply.
+- **File-tree badges** count the open threads per file.
+- **Updates**: the panel polls every 20 s while visible, and again when the
+  window gets focus.
+- **Deep link**: `/books/:id/edit?thread=<id>` opens the file and the
+  thread.
+- **Link visitors** get the editor without the admin shell. The top bar
+  shows the book title, "Commenting as Anna" / "Editing as Anna" and
+  *Leave*. The first visit shows a hint once. There is no AI panel, no
+  settings, no publish button (link editors: "Ask for publishing"), no git,
+  and no link back to the book page.
+- **Commenters** (accounts or links) get a read-only editor: no save, no
+  uploads, no changes in the file tree.
+
+## Book page
+
+- The member role select and the add-member form offer *Commenter*.
+- A commenter sees the book page with only *Open* (into the editor).
+- An *Access links* section, for owners only:
+  - create: name, role, optional expiry; the link is shown with a copy
+    button;
+  - list: name, role, created, last used, expires;
+  - copy the link again, delete with a confirmation.
+
+## Notifications
+
+- **Who gets mail**: new threads go to the book's owners and editors (with
+  accounts); replies go to the accounts that took part in the thread. The
+  author is left out, and link visitors have no email.
+- **Digest**: queued in `comment_mail_queue`, sent at most once per user
+  and book every 15 minutes, with deep links to the threads.
+- **Opting out**: per book, through `book_members.comment_mail` (default
+  on), on the book page.
+- **Without SMTP**, nothing is queued.
+
+## Work order
+
+1. *(done)* Commenter role: enum, ranked `bookAccess`, lowered read routes,
+   git check, member UI, read-only editor, route-access table test
+   (`tests/roles.test.ts`).
+2. *(done)* Access links: tables, redeem/session/leave, actor resolution on
+   the shared routes, preview host for links, owner UI, `/join`, editor
+   shell for link visitors, no AI (`tests/links.test.ts`).
+3. *(done)* Comments on the server: tables, API, anchoring and
+   re-anchoring, moves (`tests/comments.test.ts`).
+4. *(done)* Comments in the editor: range set, tooltip, panel, badges, deep
+   links, cut/paste/undo (`tests/e2e/comments.e2e.ts`).
+5. *(done)* Suggestions.
+6. *(done)* Email digests (`domain/comment-mail.ts`, sent every minute from
+   `main.ts`).
+7. *(Later)* Comments on the rendered preview: a `postMessage` bridge from
+   the preview frame, mapping rendered text back to source ranges.
+
+## Notes from building M7
+
+- **Mount order matters.** Middleware of a Hono router mounted on a
+  prefix runs for every route under that prefix, including routes of
+  routers mounted later. So the routers link visitors use (`requireVisitor`)
+  are mounted before the account-only ones (`requireUser`) in
+  `admin/app.ts`, and `GET /books/:id`, the head and the publish request
+  moved into visitor routers of their own.
+- **Who acts:** `domain/actors.ts`. Commits by link editors are authored
+  `<name> (link)` / `link-<id>@<host>`; publish requests by links use
+  `books.publish_requested_by_link`.
+- **Preview sessions** carry a user or a link; migration 0018 rebuilds
+  `preview_codes`/`preview_sessions` and drops their short-lived rows.
+- **Anchors** are matched by `src/shared/comment-anchor.ts` on both sides.
+  Offsets count the text with `\n` line breaks and without a BOM, as
+  CodeMirror does.
+
+## Editor additions (2026-11-11)
+
+- Wrapped lines keep their indentation (`editor/hanging-indent.ts`): a
+  hanging indent as wide as the leading whitespace, plus list and quote
+  markers in Markdown.
+- The Typst preview has a *Download PDF* button. Double-clicking a line of
+  the PDF finds it in the source (`editor/pdf-sync.ts`). Typst writes no
+  SyncTeX, so the line's words are matched against the source lines, and
+  the clicked word is selected.
+

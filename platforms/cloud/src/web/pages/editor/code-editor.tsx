@@ -28,6 +28,7 @@ import { contextMenu } from "./context-menu";
 import { extension, isMarkdownPage } from "./files";
 import { pageLanguage } from "./page-language";
 import { type SpellConfig, spellCheck } from "./spellcheck";
+import { hangingIndent } from "./hanging-indent";
 import { hyperbookSyntax } from "./syntax-theme";
 
 function language(path: string): Extension {
@@ -229,6 +230,8 @@ export function CodeEditor({
   onReady,
   settings,
   spell,
+  readOnly = false,
+  extensions = [],
 }: {
   path: string;
   initial: string;
@@ -246,6 +249,10 @@ export function CodeEditor({
   settings: EditorSettings;
   /** Spell check for pages; `words` must stay one Set until it changes. */
   spell?: SpellOptions;
+  /** Commenters: the text can be read, selected and copied, not changed. */
+  readOnly?: boolean;
+  /** More extensions (comments), fixed for the editor's life. */
+  extensions?: Extension;
 }) {
   const host = useRef<HTMLDivElement>(null);
   const view = useRef<EditorView | null>(null);
@@ -273,6 +280,7 @@ export function CodeEditor({
   /** Spell check for this file, with a dictionary we have; null switches it off. */
   const spellConfig = (): SpellConfig | null => {
     const current = callbacks.current.spell;
+    if (readOnly) return null;
     if (!current?.enabled || !isMarkdownPage(path)) return null;
     if (current.language !== "en" && current.language !== "de") return null;
     return {
@@ -309,8 +317,11 @@ export function CodeEditor({
           // The spell check's menu comes first: a right-click on a misspelled
           // word shows its corrections, everywhere else the editor's menu.
           spellCompartment.of(spellConfig() ? spellCheck(spellConfig()!) : []),
-          contextMenu(),
+          contextMenu({ readOnly }),
+          readOnly ? [EditorState.readOnly.of(true)] : [],
           EditorView.lineWrapping,
+          // Wrapped lines continue under their own indentation.
+          hangingIndent({ markdown: isMarkdownPage(path) || extension(path) === "hbs" }),
           // Typst's errors from the PDF preview (typst-preview.tsx).
           extension(path) === "typ" ? [typstLint, typstImportCompletion] : [],
           // Its name for screen readers: which file is being edited.
@@ -324,17 +335,18 @@ export function CodeEditor({
                 files: () => callbacks.current.files,
                 path: () => pathRef.current,
                 onPageSettings:
-                  isMarkdownPage(path) && onPageSettings
+                  isMarkdownPage(path) && onPageSettings && !readOnly
                     ? (v) => callbacks.current.onPageSettings?.(v)
                     : undefined,
               })
             : language(path),
-          isMarkdownPage(path)
+          isMarkdownPage(path) && !readOnly
             ? editVisuallyButtons((block, v) =>
                 callbacks.current.onEditBlock?.(block, v),
               )
             : [],
           theme,
+          extensions,
           EditorView.updateListener.of((update) => {
             if (update.docChanged)
               callbacks.current.onChange(update.state.doc.toString());

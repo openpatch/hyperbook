@@ -34,6 +34,31 @@ export function useInstance() {
   });
 }
 
+/** The access link this browser opened (see JoinPage), or null. */
+export function useLinkSession() {
+  return useQuery({
+    queryKey: ["link-session"],
+    queryFn: () => unwrap(api.links.session.$get()),
+    staleTime: 60_000,
+  });
+}
+
+/**
+ * The editor's guard: a logged-in user, or someone who came through an
+ * access link. The editor itself asks the book who they are.
+ */
+export function RequireAuthOrLink() {
+  const me = useMe();
+  const link = useLinkSession();
+  const location = useLocation();
+  if (me.isPending || link.isPending) return null;
+  if (!me.data && !link.data) {
+    const next = location.pathname + location.search;
+    return <Navigate to={`/login?next=${encodeURIComponent(next)}`} replace />;
+  }
+  return <Outlet />;
+}
+
 /** Renders its routes only for logged-in users; others go to the login page. */
 export function RequireAuth() {
   const { data, isPending } = useMe();

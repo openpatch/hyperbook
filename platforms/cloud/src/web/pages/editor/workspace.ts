@@ -191,7 +191,7 @@ export function useWorkspace(bookId: string, listing: Listing) {
   const save = useCallback(
     async (paths: string[], baseOids: Record<string, string | null> = {}) => {
       const toSave = currentTabs().filter((t) => paths.includes(t.path) && isDirty(t));
-      if (toSave.length === 0) return;
+      if (toSave.length === 0) return null;
       const res = await commit(
         toSave.map((t) => ({
           op: "write" as const,
@@ -211,6 +211,8 @@ export function useWorkspace(bookId: string, listing: Listing) {
           return { ...t, text: live.get(t.path) ?? t.text, loaded: { ...t.loaded, oid: oids.get(t.path)!, text: saved.text! } };
         }),
       );
+      /** What was saved, as the blob it became. */
+      return { saved: toSave.map((t) => ({ path: t.path, oid: oids.get(t.path)! })) };
     },
     [commit, currentTabs, live],
   );

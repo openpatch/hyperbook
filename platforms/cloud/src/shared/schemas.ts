@@ -324,13 +324,15 @@ export const slugDecisionInput = z.object({
   note: z.string().trim().max(2000, "Use at most 2000 characters").default(""),
 });
 
+export const bookRole = z.enum(["owner", "editor", "commenter"]);
+
 export const addMemberInput = z.object({
   email,
-  role: z.enum(["owner", "editor"]).default("editor"),
+  role: bookRole.default("editor"),
 });
 
 export const updateMemberInput = z.object({
-  role: z.enum(["owner", "editor"]),
+  role: bookRole,
 });
 
 export const groupInput = z.object({
@@ -540,3 +542,70 @@ export const aiProposedChange = z.discriminatedUnion("op", [
 ]);
 
 export type AiProposedChange = z.infer<typeof aiProposedChange>;
+
+// --- Review: access links and comments (docs/cloud-platform.md, M7) --------
+
+export const linkRole = z.enum(["commenter", "editor"]);
+
+export const createLinkInput = z.object({
+  name: z.string().trim().min(1, "validation.linkName").max(80, "validation.nameMax"),
+  role: linkRole.default("commenter"),
+  /** Unix milliseconds; null: until deleted. */
+  expiresAt: z.number().int().positive().nullable().default(null),
+});
+
+export const redeemLinkInput = z.object({
+  token: z.string().min(16).max(200),
+});
+
+/** Long enough for any comment, short enough to keep threads readable. */
+export const COMMENT_MAX = 10_000;
+
+const commentBody = z
+  .string()
+  .trim()
+  .min(1, "validation.commentRequired")
+  .max(COMMENT_MAX, "validation.commentMax");
+
+/** Where a thread sits: offsets into the file's blob `oid`. */
+export const commentAnchor = z
+  .object({
+    path: bookPath,
+    oid,
+    from: z.number().int().min(0),
+    to: z.number().int().min(0),
+  })
+  .refine((a) => a.to > a.from, { message: "validation.commentRange", path: ["to"] });
+
+export const createThreadInput = z.object({
+  anchor: commentAnchor,
+  body: commentBody,
+  suggestion: z.string().max(COMMENT_MAX, "validation.commentMax").nullable().default(null),
+});
+
+export const replyInput = z.object({
+  body: commentBody,
+  suggestion: z.string().max(COMMENT_MAX, "validation.commentMax").nullable().default(null),
+});
+
+export const editCommentInput = z.object({ body: commentBody });
+
+/** The editor's mapped positions after a save (see domain/comments.ts). */
+export const anchorsInput = z.object({
+  path: bookPath,
+  oid,
+  anchors: z
+    .array(
+      z.object({
+        threadId: z.number().int().positive(),
+        /** null: its text was deleted. */
+        from: z.number().int().min(0).nullable(),
+        to: z.number().int().min(0).nullable(),
+      }),
+    )
+    .max(1000),
+});
+
+export const commentsQuery = z.object({ path: bookPath.optional() });
+
+export const commentMailInput = z.object({ commentMail: z.boolean() });

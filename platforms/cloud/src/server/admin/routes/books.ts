@@ -4,6 +4,7 @@ import { HTTPException } from "hono/http-exception";
 import { z } from "zod";
 import {
   addMemberInput,
+  commentMailInput,
   bookDomainInput,
   createBookInput,
   updateBookInput,
@@ -21,12 +22,13 @@ import {
   publicBook,
   renameSlug,
 } from "../../domain/books";
+import { visitorAccess } from "../../domain/actors";
 import { checkDomain, checkDomainHttps, domainNameProblem } from "../../domain/custom-domains";
 import { getEntitlements } from "../../domain/entitlements";
 import { newSlugSuffix, suffixApplies, withSuffix } from "../../domain/slug-names";
 import { removeBookFiles } from "../../hosting/storage";
-import type { AuthedEnv } from "../env";
-import { requireUser } from "../middleware";
+import type { AdminEnv, AuthedEnv } from "../env";
+import { requireUser, requireVisitor } from "../middleware";
 import { idParam } from "../params";
 import { validate } from "../validate";
 
@@ -37,6 +39,30 @@ const memberParam = validate(
     userId: z.coerce.number().int().positive(),
   }),
 );
+
+/**
+ * /api/books/:id for anyone who may open the book, link visitors included:
+ * the book, their role, and who they are (see domain/actors.ts).
+ */
+export function bookVisitorRoutes({ db, config }: Deps) {
+  return new Hono<AdminEnv>().use(requireVisitor).get("/:id", idParam, (c) => {
+    const { book, role, actor } = visitorAccess(db, c.get("user"), c.get("link"), c.req.valid("param").id, "commenter");
+    const member =
+      actor.userId === null
+        ? undefined
+        : db
+            .select({ commentMail: bookMembers.commentMail })
+            .from(bookMembers)
+            .where(and(eq(bookMembers.bookId, book.id), eq(bookMembers.userId, actor.userId)))
+            .get();
+    return c.json({
+      ...publicBook(config, book, role),
+      viewer: { kind: actor.kind, name: actor.name, userId: actor.userId, linkId: actor.linkId },
+      /** Whether this member gets comment emails; null for admins and link visitors. */
+      commentMail: member?.commentMail ?? null,
+    });
+  });
+}
 
 export function bookRoutes({ db, config, builds, checks, dns, fetchUrl }: Deps) {
   function members(bookId: number) {
@@ -161,11 +187,6 @@ export function bookRoutes({ db, config, builds, checks, dns, fetchUrl }: Deps) 
         data: { slug: book.slug, title: book.title },
       });
       return c.json(publicBook(config, book, "owner"));
-    })
-
-    .get("/:id", idParam, (c) => {
-      const { book, role } = bookAccess(db, c.get("user"), c.req.valid("param").id);
-      return c.json(publicBook(config, book, role));
     })
 
     .patch("/:id", idParam, validate("json", updateBookInput), (c) => {
@@ -329,6 +350,20 @@ export function bookRoutes({ db, config, builds, checks, dns, fetchUrl }: Deps) 
       return c.json(publicBook(config, reload(book.id), role));
     })
 
+    // A member switches comment emails for this book on or off.
+    .put("/:id/comment-mail", idParam, validate("json", commentMailInput), (c) => {
+      const user = c.get("user");
+      const { book } = bookAccess(db, user, c.req.valid("param").id, "commenter");
+      const updated = db
+        .update(bookMembers)
+        .set({ commentMail: c.req.valid("json").commentMail })
+        .where(and(eq(bookMembers.bookId, book.id), eq(bookMembers.userId, user.id)))
+        .returning()
+        .get();
+      if (!updated) throw new HTTPException(404, { message: "You are not a member of this book" });
+      return c.json({ commentMail: updated.commentMail });
+    })
+
     .get("/:id/members", idParam, (c) => {
       const { book } = bookAccess(db, c.get("user"), c.req.valid("param").id);
       return c.json(members(book.id));
@@ -393,7 +428,7 @@ export function bookRoutes({ db, config, builds, checks, dns, fetchUrl }: Deps) 
       const user = c.get("user");
       const { id, userId } = c.req.valid("param");
       // Anyone may leave a book; removing others is for owners.
-      const { book } = bookAccess(db, user, id, userId === user.id ? "editor" : "owner");
+      const { book } = bookAccess(db, user, id, userId === user.id ? "commenter" : "owner");
       const current = db
         .select()
         .from(bookMembers)

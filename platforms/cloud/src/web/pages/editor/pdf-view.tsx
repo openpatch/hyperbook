@@ -31,6 +31,37 @@ function loadPdfJs(): Promise<PdfJs> {
   return pdfjs;
 }
 
+/** A piece of a page's text, in CSS pixels of its canvas; `y` is the baseline. */
+type TextBox = { str: string; x: number; y: number; width: number; height: number };
+/** The text of each drawn page, for double-clicks (see textAt). */
+const pageTexts = new WeakMap<HTMLCanvasElement, TextBox[]>();
+
+/**
+ * The line of text at (x, y) of a page, and the word under the point; null
+ * on empty space.
+ */
+function textAt(boxes: TextBox[], x: number, y: number): { line: string; word: string } | null {
+  const hit =
+    boxes.find((b) => x >= b.x && x <= b.x + b.width && y >= b.y - b.height && y <= b.y + b.height * 0.25) ??
+    // Between two words of a line: the nearest piece on that line.
+    boxes
+      .filter((b) => y >= b.y - b.height && y <= b.y + b.height * 0.25)
+      .sort((a, b) => Math.abs(a.x - x) - Math.abs(b.x - x))[0];
+  if (!hit) return null;
+  const line = boxes
+    .filter((b) => Math.abs(b.y - hit.y) < hit.height * 0.5)
+    .sort((a, b) => a.x - b.x)
+    .map((b) => b.str)
+    .join(" ")
+    .replace(/\s+/g, " ")
+    .trim();
+  // The word under the point, by its share of the piece's width.
+  const at = Math.min(hit.str.length - 1, Math.max(0, Math.floor(((x - hit.x) / (hit.width || 1)) * hit.str.length)));
+  const before = hit.str.slice(0, at + 1).match(/[\p{L}\p{N}]*$/u)?.[0] ?? "";
+  const after = hit.str.slice(at + 1).match(/^[\p{L}\p{N}]*/u)?.[0] ?? "";
+  return { line, word: before + after };
+}
+
 /** Canvases larger than this are scaled down: browsers refuse huge ones. */
 const MAX_CANVAS_PIXELS = 16 * 1024 * 1024;
 
@@ -63,6 +94,20 @@ async function drawPages(lib: PdfJs, data: ArrayBuffer, width: number, label: (p
         viewport,
         transform: ratio !== 1 ? [ratio, 0, 0, ratio, 0, 0] : undefined,
       }).promise;
+      const content = await page.getTextContent();
+      const boxes: TextBox[] = [];
+      for (const item of content.items) {
+        if (!("str" in item) || !item.str.trim()) continue;
+        const tx = lib.Util.transform(viewport.transform, item.transform);
+        boxes.push({
+          str: item.str,
+          x: tx[4],
+          y: tx[5],
+          width: item.width * scale,
+          height: Math.hypot(tx[2], tx[3]) || item.height * scale,
+        });
+      }
+      pageTexts.set(canvas, boxes);
       pages.push(canvas);
     }
     return pages;
@@ -75,7 +120,16 @@ async function drawPages(lib: PdfJs, data: ArrayBuffer, width: number, label: (p
  * The pages of `data`, as wide as the view. `data` changing draws the new
  * version off screen first and then swaps it in, keeping the scroll position.
  */
-export function PdfView({ data, className }: { data: ArrayBuffer | null; className?: string }) {
+export function PdfView({
+  data,
+  className,
+  onTextDoubleClick,
+}: {
+  data: ArrayBuffer | null;
+  className?: string;
+  /** A double-click on a line of text: the line and the word under the pointer. */
+  onTextDoubleClick?: (text: { line: string; word: string }) => void;
+}) {
   const { t } = useTranslation();
   const scroller = useRef<HTMLDivElement>(null);
   const pagesRef = useRef<HTMLDivElement>(null);
@@ -129,7 +183,23 @@ export function PdfView({ data, className }: { data: ArrayBuffer | null; classNa
   return (
     <div ref={scroller} className={cn("min-h-0 overflow-auto bg-muted", className)}>
       {failed && <p className="p-4 text-sm text-destructive">{t("editor.pdfView.failed")}</p>}
-      <div ref={pagesRef} className="flex flex-col items-center gap-4 p-4" />
+      <div
+        ref={pagesRef}
+        className="flex flex-col items-center gap-4 p-4"
+        title={onTextDoubleClick ? t("editor.pdfView.jumpHint") : undefined}
+        onDoubleClick={(event) => {
+          if (!onTextDoubleClick || !(event.target instanceof HTMLCanvasElement)) return;
+          const boxes = pageTexts.get(event.target);
+          if (!boxes) return;
+          const rect = event.target.getBoundingClientRect();
+          const text = textAt(boxes, event.clientX - rect.left, event.clientY - rect.top);
+          if (text) {
+            event.preventDefault();
+            window.getSelection()?.removeAllRanges();
+            onTextDoubleClick(text);
+          }
+        }}
+      />
     </div>
   );
 }

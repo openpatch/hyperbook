@@ -52,8 +52,10 @@ export function formatRelativeCost(
   return factor === 1 ? "1" : factor.toPrecision(2);
 }
 
-export function useAiStatus() {
+/** `enabled` false: never asks (link visitors have no AI). */
+export function useAiStatus(enabled = true) {
   return useQuery({
+    enabled,
     queryKey: ["ai-status"],
     queryFn: () => unwrap(api.ai.$get()) as Promise<AiStatus>,
     // Counters change on the server; pick fresh ones up quickly.

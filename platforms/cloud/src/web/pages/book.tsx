@@ -5,6 +5,8 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { z } from "zod";
 import { addMemberInput, updateBookInput } from "../../shared/schemas";
+
+type BookRole = "owner" | "editor" | "commenter";
 import { ConfirmButton } from "@/components/confirm-button";
 import { PageHeader, Section } from "@/components/page-header";
 import { Badge } from "@/components/ui/badge";
@@ -26,6 +28,7 @@ import { useInstance, useUser } from "@/lib/session";
 import { AddressSection } from "./address";
 import { DomainSection } from "./domain";
 import { GroupsSection } from "./groups";
+import { CommentMailSwitch, LinksSection } from "./links";
 import { PublishingSection } from "./publishing";
 
 /**
@@ -39,6 +42,7 @@ export function BookPage() {
   const { data: book } = useBook(id);
   const user = useUser();
   if (!book) return null;
+  if (book.role === "commenter") return <CommenterBookPage book={book} />;
   const isOwner = book.role === "owner";
   const mayUseDomain = user.entitlements.custom_domain || book.domain !== null;
   return (
@@ -84,6 +88,11 @@ export function BookPage() {
         <div className="lg:col-span-2">
           <MembersSection book={book} />
         </div>
+        {isOwner && book.source === "hosted" && (
+          <div className="lg:col-span-2">
+            <LinksSection book={book} />
+          </div>
+        )}
         {isOwner && (
           <div className="lg:col-span-2">
             <DeleteSection book={book} />
@@ -288,7 +297,7 @@ function MembersSection({ book }: { book: Book }) {
                         unwrap(
                           api.books[":id"].members[":userId"].$patch({
                             param: { id, userId: String(m.userId) },
-                            json: { role: role as "owner" | "editor" },
+                            json: { role: role as BookRole },
                           }),
                         ),
                       )
@@ -300,12 +309,11 @@ function MembersSection({ book }: { book: Book }) {
                     <SelectContent>
                       <SelectItem value="owner">{t("book.owner")}</SelectItem>
                       <SelectItem value="editor">{t("book.editor")}</SelectItem>
+                      <SelectItem value="commenter">{t("book.commenter")}</SelectItem>
                     </SelectContent>
                   </Select>
-                ) : m.role === "owner" ? (
-                  t("book.owner")
                 ) : (
-                  t("book.editor")
+                  t(`book.${m.role}`)
                 )}
               </TableCell>
               <TableCell className="text-right">
@@ -336,6 +344,9 @@ function MembersSection({ book }: { book: Book }) {
         </TableBody>
       </Table>
       {isOwner && <AddMemberForm bookId={id} onAdded={() => queryClient.invalidateQueries({ queryKey: key })} />}
+      <div className="mt-4">
+        <CommentMailSwitch book={book} />
+      </div>
     </Section>
   );
 }
@@ -361,13 +372,74 @@ function AddMemberForm({ bookId, onAdded }: { bookId: string; onAdded: () => voi
         type="email"
         className="min-w-60 flex-1"
       />
+      <div className="grid gap-2">
+        <Label htmlFor="add-member-role">{t("book.addRole")}</Label>
+        <Select
+          value={form.watch("role")}
+          onValueChange={(role) => form.setValue("role", role as BookRole)}
+        >
+          <SelectTrigger id="add-member-role" className="w-40">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="editor">{t("book.editor")}</SelectItem>
+            <SelectItem value="commenter">{t("book.commenter")}</SelectItem>
+            <SelectItem value="owner">{t("book.owner")}</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
       <Button type="submit" variant="outline" disabled={form.formState.isSubmitting}>
-        {t("book.addAsEditor")}
+        {t("book.add")}
       </Button>
       <div className="basis-full">
         <FormError form={form} />
       </div>
     </form>
+  );
+}
+
+/** What a commenter sees: the way into the editor, and a way out of the book. */
+function CommenterBookPage({ book }: { book: Book }) {
+  const { t } = useTranslation();
+  const user = useUser();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  return (
+    <>
+      <PageHeader
+        title={book.title}
+        actions={
+          book.source === "hosted" && (
+            <Button asChild>
+              <Link to={`/books/${book.id}/edit`}>{t("book.review")}</Link>
+            </Button>
+          )
+        }
+      />
+      <Section title={t("book.commenterTitle")} description={t("book.commenterDescription")}>
+        <div className="mb-4">
+          <CommentMailSwitch book={book} />
+        </div>
+        <Button
+          variant="outline"
+          onClick={async () => {
+            try {
+              await unwrap(
+                api.books[":id"].members[":userId"].$delete({
+                  param: { id: String(book.id), userId: String(user.id) },
+                }),
+              );
+              await queryClient.invalidateQueries({ queryKey: ["books"] });
+              navigate("/books");
+            } catch (error) {
+              toast.error(error instanceof Error ? error.message : t("common.somethingWrong"));
+            }
+          }}
+        >
+          {t("book.leave")}
+        </Button>
+      </Section>
+    </>
   );
 }
 

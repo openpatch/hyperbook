@@ -5,6 +5,8 @@ import type { EditorView } from "@codemirror/view";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { TypstDiagnostic } from "../../../shared/typst-diagnostics";
+import { DownloadIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { PdfView } from "./pdf-view";
 
 /** How long typing pauses before the document compiles again. */
@@ -91,12 +93,15 @@ export function TypstPreviewPane({
   file,
   text,
   onDiagnostics,
+  onJump,
 }: {
   bookId: string;
   file: string;
   /** Null while the file is loading: nothing is compiled then. */
   text: string | null;
   onDiagnostics: (path: string, diagnostics: TypstDiagnostic[]) => void;
+  /** A double-clicked line of the PDF, to find in the source (see pdf-sync.ts). */
+  onJump?: (path: string, text: { line: string; word: string }) => void;
 }) {
   const { t } = useTranslation();
   const [pdf, setPdf] = useState(() => lastPdf.get(file) ?? null);
@@ -171,6 +176,25 @@ export function TypstPreviewPane({
     <div className="flex h-full flex-col">
       <div className="flex min-h-9 shrink-0 items-center gap-2 border-b border-border px-3 py-1 text-sm" aria-live="polite">
         <span className="font-medium">{t("editor.typstPreview.title")}</span>
+        {pdf && (
+          <Button
+            size="icon"
+            variant="ghost"
+            className="order-last ml-auto size-7"
+            aria-label={t("editor.typstPreview.download")}
+            title={t("editor.typstPreview.download")}
+            onClick={() => {
+              const url = URL.createObjectURL(new Blob([pdf.data], { type: "application/pdf" }));
+              const a = document.createElement("a");
+              a.href = url;
+              a.download = `${file.split("/").pop()!.replace(/\.typ$/, "")}.pdf`;
+              a.click();
+              setTimeout(() => URL.revokeObjectURL(url), 10_000);
+            }}
+          >
+            <DownloadIcon className="size-4" />
+          </Button>
+        )}
         {status.kind === "compiling" && <span className="text-muted-foreground">{t("editor.typstPreview.compiling")}</span>}
         {status.kind === "failed" && (
           <span className="text-destructive">
@@ -190,7 +214,11 @@ export function TypstPreviewPane({
         </ul>
       )}
       {pdf ? (
-        <PdfView data={pdf.data} className="flex-1" />
+        <PdfView
+          data={pdf.data}
+          className="flex-1"
+          onTextDoubleClick={onJump && ((text) => onJump(file, text))}
+        />
       ) : (
         <p className="p-4 text-sm text-muted-foreground">
           {status.kind === "failed" ? t("editor.typstPreview.failed") : t("editor.typstPreview.compiling")}

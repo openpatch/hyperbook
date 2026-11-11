@@ -9,12 +9,20 @@ import { getInstanceSettings } from "./instance";
 import { RESERVED_SLUGS, checkSlug } from "./slug";
 
 export type BookRow = typeof books.$inferSelect;
-/** Admins act as owners of every book. */
-export type BookRole = "owner" | "editor";
+/** Admins act as owners of every book. Ranked: commenter < editor < owner. */
+export type BookRole = "owner" | "editor" | "commenter";
+
+const RANK: Record<BookRole, number> = { commenter: 0, editor: 1, owner: 2 };
+
+/** Whether `role` may do what needs `needed`. */
+export function hasRole(role: BookRole, needed: BookRole): boolean {
+  return RANK[role] >= RANK[needed];
+}
 
 /**
  * The book and the user's role in it. Books the user has no part in answer
- * 404, so their existence is not revealed.
+ * 404, so their existence is not revealed. `needed` defaults to "editor", so
+ * a route lets commenters in only when it says so.
  */
 export function bookAccess(
   db: Db,
@@ -35,8 +43,11 @@ export function bookAccess(
       .get()?.role;
   }
   if (!role) throw new HTTPException(404, { message: "Book not found" });
-  if (needed === "owner" && role !== "owner") {
-    throw new HTTPException(403, { message: "Only owners of this book may do this" });
+  if (!hasRole(role, needed)) {
+    throw new HTTPException(403, {
+      message:
+        needed === "owner" ? "Only owners of this book may do this" : "Commenters may not change this book",
+    });
   }
   return { book, role };
 }

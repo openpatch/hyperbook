@@ -6,6 +6,8 @@ import { createApp } from "./app";
 import { backup as backupInstance } from "./backup";
 import { deleteExpired } from "./auth/sessions";
 import { deleteExpiredPreviewSessions } from "./auth/preview-sessions";
+import { sendCommentDigests } from "./domain/comment-mail";
+import { deleteExpiredLinkSessions } from "./domain/links";
 import { deleteExpiredStudentSessions } from "./auth/student-sessions";
 import { ConfigError, loadConfig } from "./config";
 import { cdnElements, getInstanceSettings } from "./domain/instance";
@@ -82,6 +84,7 @@ async function start() {
     deleteExpired(db);
     deleteExpiredStudentSessions(db);
     deleteExpiredPreviewSessions(db);
+    deleteExpiredLinkSessions(db);
   };
   removeExpired();
   const cleanup = setInterval(removeExpired, 60 * 60 * 1000);
@@ -119,10 +122,19 @@ async function start() {
 
   const renders = new Renderers(config, undefined, () => cdnElements(settings()));
   const checks = new BookChecks(renders);
+  const mailer = createMailer(config);
   const app = createApp(
-    { config, db, mailer: createMailer(config), builds, renders, checks, dns: createDns(), fetchUrl: createUrlFetcher() },
+    { config, db, mailer, builds, renders, checks, dns: createDns(), fetchUrl: createUrlFetcher() },
     { webRoot },
   );
+
+  // Comment emails go out as digests (domain/comment-mail.ts).
+  const digests = setInterval(() => {
+    sendCommentDigests(db, config, mailer).catch((error: unknown) =>
+      console.error("Sending comment digests failed:", error),
+    );
+  }, 60 * 1000);
+  digests.unref();
   const server = serve({ fetch: app.fetch, port: config.port }, (info) => {
     console.log(`Hyperbook Cloud listening on port ${info.port}`);
     console.log(`  admin  ${config.adminOrigin}`);

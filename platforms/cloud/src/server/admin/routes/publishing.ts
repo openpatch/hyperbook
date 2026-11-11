@@ -11,9 +11,10 @@ import { z } from "zod";
 import { publishInput, publishingLockInput, publishRequestInput, rollbackInput } from "../../../shared/schemas";
 import { audit } from "../../audit";
 import type { SessionUser } from "../../auth/sessions";
-import { bookMembers, books, builds, users } from "../../db/schema";
+import { bookLinks, bookMembers, books, builds, users } from "../../db/schema";
 import type { Deps } from "../../deps";
 import { type BookRow, addCommits, bookAccess, publicBook } from "../../domain/books";
+import { type Actor, visitorAccess } from "../../domain/actors";
 import { getInstanceSettings } from "../../domain/instance";
 import { createT, userLocale } from "../../i18n";
 import type { BuildProgress, BuildRow } from "../../hosting/builds";
@@ -35,8 +36,8 @@ import { buildDir, makeJobDir, repoDir } from "../../hosting/storage";
 import { quotaForBook, quotaMessage, setSourceBytes } from "../../domain/storage";
 import { zipDirectory } from "../../hosting/site-zip";
 import { ZipError, extractBook } from "../../hosting/zip";
-import type { AuthedEnv } from "../env";
-import { requireUser } from "../middleware";
+import type { AdminEnv, AuthedEnv } from "../env";
+import { requireUser, requireVisitor } from "../middleware";
 import { idParam } from "../params";
 import { validate } from "../validate";
 
@@ -122,9 +123,14 @@ export function bookPublishingRoutes({ db, config, mailer, builds: queue, checks
           .where(eq(users.id, book.publishRequestedBy))
           .get()
       : undefined;
+    const link = book.publishRequestedByLink
+      ? db.select({ name: bookLinks.name }).from(bookLinks).where(eq(bookLinks.id, book.publishRequestedByLink)).get()
+      : undefined;
     return {
       byId: by?.id ?? null,
-      by: by ? by.displayName || by.email : null,
+      /** The access link whose visitor asked (see domain/links.ts). */
+      byLinkId: book.publishRequestedByLink,
+      by: by ? by.displayName || by.email : (link?.name ?? null),
       at: book.publishRequestedAt.getTime(),
       note: book.publishRequestNote,
     };
@@ -132,13 +138,13 @@ export function bookPublishingRoutes({ db, config, mailer, builds: queue, checks
 
   function clearPublishRequest(bookId: number) {
     db.update(books)
-      .set({ publishRequestedBy: null, publishRequestedAt: null, publishRequestNote: null })
+      .set({ publishRequestedBy: null, publishRequestedByLink: null, publishRequestedAt: null, publishRequestNote: null })
       .where(eq(books.id, bookId))
       .run();
   }
 
   /** Each owner but the one asking gets the request, in their own language. */
-  async function mailOwners(book: BookRow, by: SessionUser, note: string | null) {
+  async function mailOwners(book: BookRow, by: Actor, note: string | null) {
     if (!mailer.enabled) return;
     const owners = db
       .select({ id: users.id, email: users.email, locale: users.locale })
@@ -146,7 +152,7 @@ export function bookPublishingRoutes({ db, config, mailer, builds: queue, checks
       .innerJoin(users, eq(users.id, bookMembers.userId))
       .where(and(eq(bookMembers.bookId, book.id), eq(bookMembers.role, "owner")))
       .all()
-      .filter((o) => o.id !== by.id);
+      .filter((o) => o.id !== by.userId);
     const name = getInstanceSettings(db).name;
     for (const owner of owners) {
       const t = createT(userLocale(db, owner.locale));
@@ -156,7 +162,7 @@ export function bookPublishingRoutes({ db, config, mailer, builds: queue, checks
           to: owner.email,
           subject,
           text: t("mail.publishRequest.body", {
-            by: by.displayName || by.email,
+            by: by.kind === "user" ? by.user.displayName || by.user.email : by.name,
             title: book.title,
             name,
             note: note ? t("mail.publishRequest.note", { note }) : "",
@@ -189,7 +195,74 @@ export function bookPublishingRoutes({ db, config, mailer, builds: queue, checks
       });
   }
 
-  return new Hono<AuthedEnv>()
+  // What link editors use too (see domain/actors.ts): the head, and asking
+  // the owners to publish. Mounted before the account-only routers.
+  const visitor = new Hono<AdminEnv>()
+    .use(requireVisitor)
+
+    // The newest save of main, which the preview shows and a publish makes
+    // live; the saves it has that the live site does not (newest first, at
+    // most MAX_CHANGES, `unpublished` counts them all); and an editor's
+    // open request to publish.
+    .get("/:id/head", idParam, async (c) => {
+      const { book } = visitorAccess(db, c.get("user"), c.get("link"), c.req.valid("param").id);
+      const repo = repoDir(config, book.id);
+      const request = publishRequest(book);
+      const commit = await headCommit(repo).catch(() => null);
+      if (!commit) return c.json({ commit: null, savedAt: null, unpublished: 0, changes: [], request });
+      const live = book.publishedBuildId !== null
+        ? (await listTags(repo).catch(() => [])).find((t) => t.name === "published")?.commit ?? null
+        : null;
+      const [changes, [last]] = await Promise.all([
+        logCommits(repo, { limit: MAX_CHANGES, after: null, exclude: live }),
+        logCommits(repo, { limit: 1, after: null }),
+      ]);
+      return c.json({
+        commit,
+        savedAt: last ? Date.parse(last.date) : null,
+        unpublished: changes.length < MAX_CHANGES ? changes.length : await revListCount(repo, live, commit),
+        changes,
+        request,
+      });
+    })
+
+    // An editor asks the owners to publish the latest save; they get an
+    // email (when the instance sends any) and see it on the book page.
+    .post("/:id/publish-request", idParam, validate("json", publishRequestInput), async (c) => {
+      const { book, actor } = visitorAccess(db, c.get("user"), c.get("link"), c.req.valid("param").id);
+      hostedOnly(book);
+      assertPublishingAllowed(db, book.id);
+      const note = c.req.valid("json").note || null;
+      const now = new Date();
+      const by = { publishRequestedBy: actor.userId, publishRequestedByLink: actor.linkId };
+      db.update(books)
+        .set({ ...by, publishRequestedAt: now, publishRequestNote: note })
+        .where(eq(books.id, book.id))
+        .run();
+      audit(db, {
+        actorUserId: actor.userId,
+        action: "book.publishRequest",
+        targetType: "book",
+        targetId: book.id,
+        data: actor.kind === "link" ? { note, linkId: actor.linkId, name: actor.name } : { note },
+      });
+      await mailOwners(book, actor, note);
+      return c.json(publishRequest({ ...book, ...by, publishRequestedAt: now, publishRequestNote: note }));
+    })
+
+    // Dismissed by an owner, or taken back by whoever asked.
+    .delete("/:id/publish-request", idParam, (c) => {
+      const { book, role, actor } = visitorAccess(db, c.get("user"), c.get("link"), c.req.valid("param").id);
+      const mine =
+        actor.kind === "user" ? book.publishRequestedBy === actor.userId : book.publishRequestedByLink === actor.linkId;
+      if (role !== "owner" && !mine) {
+        throw new HTTPException(403, { message: "Only the owners or whoever asked can dismiss this" });
+      }
+      clearPublishRequest(book.id);
+      return c.json({ ok: true as const });
+    });
+
+  const account = new Hono<AuthedEnv>()
     .use(requireUser)
 
     .post(
@@ -312,67 +385,6 @@ export function bookPublishingRoutes({ db, config, mailer, builds: queue, checks
           };
         }),
       );
-    })
-
-    // The newest save of main, which the preview shows and a publish makes
-    // live; the saves it has that the live site does not (newest first, at
-    // most MAX_CHANGES, `unpublished` counts them all); and an editor's
-    // open request to publish.
-    .get("/:id/head", idParam, async (c) => {
-      const { book } = bookAccess(db, c.get("user"), c.req.valid("param").id);
-      const repo = repoDir(config, book.id);
-      const request = publishRequest(book);
-      const commit = await headCommit(repo).catch(() => null);
-      if (!commit) return c.json({ commit: null, savedAt: null, unpublished: 0, changes: [], request });
-      const live = book.publishedBuildId !== null
-        ? (await listTags(repo).catch(() => [])).find((t) => t.name === "published")?.commit ?? null
-        : null;
-      const [changes, [last]] = await Promise.all([
-        logCommits(repo, { limit: MAX_CHANGES, after: null, exclude: live }),
-        logCommits(repo, { limit: 1, after: null }),
-      ]);
-      return c.json({
-        commit,
-        savedAt: last ? Date.parse(last.date) : null,
-        unpublished: changes.length < MAX_CHANGES ? changes.length : await revListCount(repo, live, commit),
-        changes,
-        request,
-      });
-    })
-
-    // An editor asks the owners to publish the latest save; they get an
-    // email (when the instance sends any) and see it on the book page.
-    .post("/:id/publish-request", idParam, validate("json", publishRequestInput), async (c) => {
-      const user = c.get("user");
-      const { book } = bookAccess(db, user, c.req.valid("param").id);
-      hostedOnly(book);
-      assertPublishingAllowed(db, book.id);
-      const note = c.req.valid("json").note || null;
-      const now = new Date();
-      db.update(books)
-        .set({ publishRequestedBy: user.id, publishRequestedAt: now, publishRequestNote: note })
-        .where(eq(books.id, book.id))
-        .run();
-      audit(db, {
-        actorUserId: user.id,
-        action: "book.publishRequest",
-        targetType: "book",
-        targetId: book.id,
-        data: { note },
-      });
-      await mailOwners(book, user, note);
-      return c.json(publishRequest({ ...book, publishRequestedBy: user.id, publishRequestedAt: now, publishRequestNote: note }));
-    })
-
-    // Dismissed by an owner, or taken back by whoever asked.
-    .delete("/:id/publish-request", idParam, (c) => {
-      const user = c.get("user");
-      const { book, role } = bookAccess(db, user, c.req.valid("param").id);
-      if (role !== "owner" && book.publishRequestedBy !== user.id) {
-        throw new HTTPException(403, { message: "Only the owners or whoever asked can dismiss this" });
-      }
-      clearPublishRequest(book.id);
-      return c.json({ ok: true as const });
     })
 
     // "Check all pages": renders every page of the latest save in the
@@ -558,6 +570,8 @@ export function bookPublishingRoutes({ db, config, mailer, builds: queue, checks
       });
       return c.json({ ok: true as const });
     });
+
+  return { visitor, account };
 }
 
 /** /api/builds/:id */

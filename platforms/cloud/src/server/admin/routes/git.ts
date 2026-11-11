@@ -14,7 +14,7 @@ import { audit } from "../../audit";
 import { FailureLimiter, OpLimiter } from "../../auth/rate-limit";
 import { randomToken, sha256 } from "../../crypto/tokens";
 import type { Deps } from "../../deps";
-import { type BookRow, addCommits, bookAccess } from "../../domain/books";
+import { type BookRow, addCommits, bookAccess, hasRole } from "../../domain/books";
 import { quotaForBook, setSourceBytes } from "../../domain/storage";
 import {
   bookMembers,
@@ -105,18 +105,19 @@ function parseBasic(header: string | undefined): Basic | null {
   };
 }
 
-/** Admins may touch every book; everyone else needs a membership row. */
+/** Admins may touch every book; everyone else needs to be an owner or editor (not a commenter). */
 function canAccessBook(
   db: Deps["db"],
   user: typeof users.$inferSelect,
   bookId: number,
 ) {
   if (user.role === "admin") return true;
-  return !!db
+  const role = db
     .select({ role: bookMembers.role })
     .from(bookMembers)
     .where(and(eq(bookMembers.bookId, bookId), eq(bookMembers.userId, user.id)))
-    .get();
+    .get()?.role;
+  return role !== undefined && hasRole(role, "editor");
 }
 
 /**

@@ -5,9 +5,10 @@ import { HTTPException } from "hono/http-exception";
 import { z } from "zod";
 import { bookPath, commitFilesInput, initFilesInput, renderPageInput } from "../../../shared/schemas";
 import { type ScannedPage, findReferences, isScannedPage } from "../../../shared/references";
-import type { SessionUser } from "../../auth/sessions";
 import type { Deps } from "../../deps";
-import { type BookRow, addCommits, bookAccess } from "../../domain/books";
+import { type BookRow, addCommits } from "../../domain/books";
+import { type Actor, visitorAccess } from "../../domain/actors";
+import { moveThreads } from "../../domain/comments";
 import { quotaForBook, quotaMessage, setSourceBytes } from "../../domain/storage";
 import { bookTemplate } from "../../domain/templates";
 import {
@@ -26,8 +27,8 @@ import { listPackages } from "../../hosting/typst-library";
 import { repoDir } from "../../hosting/storage";
 import { createPreviewCode } from "../../auth/preview-sessions";
 import { previewOrigin } from "../../config";
-import type { AuthedEnv } from "../env";
-import { requireUser } from "../middleware";
+import type { AdminEnv } from "../env";
+import { requireVisitor } from "../middleware";
 import { idParam } from "../params";
 import { validate } from "../validate";
 import { hostedOnly } from "./publishing";
@@ -63,10 +64,12 @@ export function bookFileRoutes({ db, config, renders }: Deps) {
     name: "Hyperbook Cloud",
     email: `noreply@${config.adminHost.replace(/:\d+$/, "")}`,
   };
-  const author = (user: SessionUser) => ({
-    name: user.displayName || user.email.split("@")[0]!,
-    email: user.email,
-  });
+  const host = config.adminHost.replace(/:\d+$/, "");
+  /** A link visitor has no address: theirs is made up on the instance's own host. */
+  const author = (actor: Actor) =>
+    actor.kind === "user"
+      ? { name: actor.name, email: actor.user.email }
+      : { name: `${actor.name} (link)`, email: `link-${actor.linkId}@${host}` };
 
   async function listing(book: BookRow) {
     const repo = repoDir(config, book.id);
@@ -76,7 +79,7 @@ export function bookFileRoutes({ db, config, renders }: Deps) {
   }
 
   /** Commits `changes` and answers with the new listing. Builds wait for publishing. */
-  async function save(book: BookRow, user: SessionUser, changes: Change[], message?: string) {
+  async function save(book: BookRow, actor: Actor, changes: Change[], message?: string) {
     const repo = repoDir(config, book.id);
     await initRepo(repo);
     const quota = quotaForBook(db, book.id);
@@ -85,7 +88,7 @@ export function bookFileRoutes({ db, config, renders }: Deps) {
     try {
       result = await commitChanges(repo, changes, {
         message: message || describe(changes),
-        author: author(user),
+        author: author(actor),
         committer,
         maxBytes: byQuota ? quota.maxBytes : config.bookMaxBytes,
       });
@@ -96,7 +99,7 @@ export function bookFileRoutes({ db, config, renders }: Deps) {
         });
       }
       if (error instanceof BookTooLargeError) {
-        throw new HTTPException(413, { message: byQuota ? quotaMessage(quota.owner, user.email) : error.message });
+        throw new HTTPException(413, { message: byQuota ? quotaMessage(quota.owner, actor.kind === "user" ? actor.user.email : "") : error.message });
       }
       throw error;
     }
@@ -106,18 +109,19 @@ export function bookFileRoutes({ db, config, renders }: Deps) {
     return { changed: result.changed, ...now };
   }
 
-  return new Hono<AuthedEnv>()
-    .use(requireUser)
+  // Link visitors use these routes too (see domain/actors.ts).
+  return new Hono<AdminEnv>()
+    .use(requireVisitor)
 
     .get("/:id/files", idParam, async (c) => {
-      const { book } = bookAccess(db, c.get("user"), c.req.valid("param").id);
+      const { book } = visitorAccess(db, c.get("user"), c.get("link"), c.req.valid("param").id, "commenter");
       return c.json(await listing(book));
     })
 
     // The book's language, for elements whose content depends on it
     // (struktolab's keywords).
     .get("/:id/files/language", idParam, async (c) => {
-      const { book } = bookAccess(db, c.get("user"), c.req.valid("param").id);
+      const { book } = visitorAccess(db, c.get("user"), c.get("link"), c.req.valid("param").id, "commenter");
       const repo = repoDir(config, book.id);
       const commit = await headCommit(repo).catch(() => null);
       const settings = commit ? (await listTree(repo, commit)).find((e) => e.path === "hyperbook.json") : undefined;
@@ -139,7 +143,7 @@ export function bookFileRoutes({ db, config, renders }: Deps) {
       idParam,
       validate("query", z.object({ path: bookPath })),
       async (c) => {
-        const { book } = bookAccess(db, c.get("user"), c.req.valid("param").id);
+        const { book } = visitorAccess(db, c.get("user"), c.get("link"), c.req.valid("param").id, "commenter");
         const repo = repoDir(config, book.id);
         const commit = await headCommit(repo).catch(() => null);
         const tree = commit ? await listTree(repo, commit) : [];
@@ -169,7 +173,7 @@ export function bookFileRoutes({ db, config, renders }: Deps) {
     // The bytes of one file. Never rendered on this origin: teacher-written
     // HTML or SVG must not run next to the admin session.
     .get("/:id/files/raw", idParam, validate("query", z.object({ path: bookPath })), async (c) => {
-      const { book } = bookAccess(db, c.get("user"), c.req.valid("param").id);
+      const { book } = visitorAccess(db, c.get("user"), c.get("link"), c.req.valid("param").id, "commenter");
       const repo = repoDir(config, book.id);
       const commit = await headCommit(repo).catch(() => null);
       const entry = commit
@@ -199,8 +203,7 @@ export function bookFileRoutes({ db, config, renders }: Deps) {
       }),
       validate("json", commitFilesInput),
       async (c) => {
-        const user = c.get("user");
-        const { book } = bookAccess(db, user, c.req.valid("param").id);
+        const { book, actor } = visitorAccess(db, c.get("user"), c.get("link"), c.req.valid("param").id);
         hostedOnly(book);
         const input = c.req.valid("json");
         const changes: Change[] = input.changes.map((ch) => {
@@ -209,7 +212,16 @@ export function bookFileRoutes({ db, config, renders }: Deps) {
           checkRootConfig(ch.path, content);
           return { op: "write", path: ch.path, content, baseOid: ch.baseOid };
         });
-        return c.json(await save(book, user, changes, input.message));
+        const result = await save(book, actor, changes, input.message);
+        // Comment threads follow their files.
+        if (result.changed) {
+          moveThreads(
+            db,
+            book.id,
+            changes.flatMap((ch) => (ch.op === "move" ? [{ from: ch.from, to: ch.to }] : [])),
+          );
+        }
+        return c.json(result);
       },
     )
 
@@ -226,7 +238,7 @@ export function bookFileRoutes({ db, config, renders }: Deps) {
       }),
       validate("json", renderPageInput),
       async (c) => {
-        const { book } = bookAccess(db, c.get("user"), c.req.valid("param").id);
+        const { book } = visitorAccess(db, c.get("user"), c.get("link"), c.req.valid("param").id, "commenter");
         hostedOnly(book);
         const { path, text } = c.req.valid("json");
         try {
@@ -251,7 +263,7 @@ export function bookFileRoutes({ db, config, renders }: Deps) {
       }),
       validate("json", renderPageInput),
       async (c) => {
-        const { book } = bookAccess(db, c.get("user"), c.req.valid("param").id);
+        const { book } = visitorAccess(db, c.get("user"), c.get("link"), c.req.valid("param").id, "commenter");
         hostedOnly(book);
         const { path, text } = c.req.valid("json");
         let result;
@@ -273,17 +285,20 @@ export function bookFileRoutes({ db, config, renders }: Deps) {
 
     // The instance's shared Typst packages, for completing `#import "@…"`.
     .get("/:id/typst-packages", idParam, async (c) => {
-      bookAccess(db, c.get("user"), c.req.valid("param").id);
+      visitorAccess(db, c.get("user"), c.get("link"), c.req.valid("param").id, "commenter");
       const packages = await listPackages(config);
       return c.json({ imports: packages.map((p) => `@${p.namespace}/${p.name}:${p.version}`) });
     })
 
     // A one-time hand-off into the book's preview host (see books/preview.ts).
     .post("/:id/preview-code", idParam, (c) => {
-      const user = c.get("user");
-      const { book } = bookAccess(db, user, c.req.valid("param").id);
+      const { book, actor } = visitorAccess(db, c.get("user"), c.get("link"), c.req.valid("param").id, "commenter");
       hostedOnly(book);
-      const code = createPreviewCode(db, user.id, book.id);
+      const code = createPreviewCode(
+        db,
+        actor.kind === "user" ? { userId: actor.userId } : { linkId: actor.linkId },
+        book.id,
+      );
       return c.json({
         origin: previewOrigin(config, book.slug),
         url: `${previewOrigin(config, book.slug)}/_hyperbook/preview#c=${code}`,
@@ -291,8 +306,7 @@ export function bookFileRoutes({ db, config, renders }: Deps) {
     })
 
     .post("/:id/files/init", idParam, validate("json", initFilesInput), async (c) => {
-      const user = c.get("user");
-      const { book } = bookAccess(db, user, c.req.valid("param").id);
+      const { book, actor } = visitorAccess(db, c.get("user"), c.get("link"), c.req.valid("param").id);
       hostedOnly(book);
       if (await headCommit(repoDir(config, book.id)).catch(() => null)) {
         throw new HTTPException(409, { message: "The book has files already" });
@@ -304,6 +318,6 @@ export function bookFileRoutes({ db, config, renders }: Deps) {
         content: Buffer.from(content),
         baseOid: null,
       }));
-      return c.json(await save(book, user, changes, "Start the book"));
+      return c.json(await save(book, actor, changes, "Start the book"));
     });
 }

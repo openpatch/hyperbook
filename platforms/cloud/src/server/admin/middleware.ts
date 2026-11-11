@@ -3,6 +3,7 @@ import { createMiddleware } from "hono/factory";
 import { HTTPException } from "hono/http-exception";
 import type { Context } from "hono";
 import { readSession, SESSION_LIFETIME_MS } from "../auth/sessions";
+import { LINK_SESSION_LIFETIME_MS, readLinkSession } from "../domain/links";
 import type { Deps } from "../deps";
 import { getInstanceSettings } from "../domain/instance";
 import { createT } from "../i18n";
@@ -29,15 +30,45 @@ export function clearSessionCookie(c: Context) {
   deleteCookie(c, COOKIE, { prefix: "host" });
 }
 
+/** An access link's session (see domain/links.ts), like the account's cookie. */
+const LINK_COOKIE = "hb_link";
+
+export function setLinkCookie(c: Context, token: string) {
+  setCookie(c, LINK_COOKIE, token, {
+    prefix: "host",
+    httpOnly: true,
+    sameSite: "Lax",
+    maxAge: Math.floor(LINK_SESSION_LIFETIME_MS / 1000),
+  });
+}
+
+export function clearLinkCookie(c: Context) {
+  deleteCookie(c, LINK_COOKIE, { prefix: "host" });
+}
+
 export function sessionMiddleware({ db }: Deps) {
   return createMiddleware<AdminEnv>(async (c, next) => {
     const token = getCookie(c, COOKIE, "host");
     const session = token ? readSession(db, token) : null;
     c.set("user", session?.user ?? null);
     c.set("sessionIdHash", session?.idHash ?? null);
+    const linkToken = getCookie(c, LINK_COOKIE, "host");
+    c.set("link", linkToken ? readLinkSession(db, linkToken) : null);
     await next();
   });
 }
+
+/**
+ * An account or a link visitor; the route still checks the book with
+ * visitorAccess. Routes mounted on a prefix share their middleware with
+ * every route under it (Hono), so routers with this one go before the
+ * account-only routers of the same prefix.
+ */
+export const requireVisitor = createMiddleware<AdminEnv>(async (c, next) => {
+  if (!c.get("user") && !c.get("link"))
+    throw new HTTPException(401, { message: createT(c.get("locale"))("errors.notLoggedIn") });
+  await next();
+});
 
 export const requireUser = createMiddleware<AuthedEnv>(async (c, next) => {
   if (!c.get("user")) throw new HTTPException(401, { message: createT(c.get("locale"))("errors.notLoggedIn") });

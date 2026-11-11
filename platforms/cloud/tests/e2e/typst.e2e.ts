@@ -72,4 +72,28 @@ describe.skipIf(!typst)("the editor's Typst preview", () => {
     await page.locator(".cm-lint-marker-error").first().waitFor();
     expect(await pane.getByRole("img", { name: "Page 1" }).count()).toBe(1);
   }, 180_000);
+
+  it("downloads the PDF, and a double-click on a line finds it in the source", async () => {
+    const dialog = page.getByRole("dialog");
+    await page.getByRole("button", { name: "New file" }).click();
+    await dialog.getByLabel("Path").fill("book/jump.typ");
+    await dialog.getByRole("button", { name: "Create" }).click();
+    await page.getByRole("tab", { name: "jump.typ" }).waitFor();
+    await page.locator('.cm-content[aria-label*="jump.typ"]').click();
+    // Big text from the top left corner, so the first line is easy to hit.
+    await page.keyboard.type("#set page(margin: 0pt, width: 20cm, height: 10cm)\n#set text(size: 40pt)\nHallo Welt Optik\n");
+    const pane = page.getByRole("region", { name: "Preview" });
+    const canvas = pane.getByRole("img", { name: "Page 1" });
+    await canvas.waitFor({ timeout: 60_000 });
+    await expect.poll(() => pane.getByText("Compiling").count(), { timeout: 60_000 }).toBe(0);
+
+    const download = page.waitForEvent("download");
+    await pane.getByRole("button", { name: "Download PDF" }).click();
+    expect((await download).suggestedFilename()).toBe("jump.pdf");
+
+    // "Hallo" sits at the left of the first line.
+    const box = (await canvas.boundingBox())!;
+    await page.mouse.dblclick(box.x + box.width * 0.08, box.y + box.height * 0.07);
+    await expect.poll(() => page.evaluate(() => window.getSelection()?.toString())).toBe("Hallo");
+  }, 180_000);
 });

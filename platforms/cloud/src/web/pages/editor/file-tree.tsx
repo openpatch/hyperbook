@@ -5,6 +5,7 @@ import {
   EllipsisIcon,
   FileIcon,
   FolderIcon,
+  MessageSquareIcon,
 } from "lucide-react";
 import {
   memo,
@@ -143,6 +144,8 @@ const TreeRow = memo(function TreeRow({
   isCut,
   isDirty,
   isDropTarget,
+  comments,
+  readOnly,
   top,
   index,
   measure,
@@ -163,6 +166,9 @@ const TreeRow = memo(function TreeRow({
   isCut: boolean;
   isDirty: boolean;
   isDropTarget: boolean;
+  /** Open comment threads on the file. */
+  comments: number;
+  readOnly: boolean;
 } & PlaceProps & {
     onToggle: (path: string) => void;
     onOpen: (path: string) => void;
@@ -197,11 +203,12 @@ const TreeRow = memo(function TreeRow({
         : {})}
     >
       <div
-        draggable
+        draggable={!readOnly}
         onDragStart={(e) => onDragStart(e, path, isFolder)}
         onContextMenu={(e) => onMenu(e, { path, isFolder })}
         className={cn(
-          "group flex cursor-grab items-center rounded-md pr-1 text-sm hover:bg-accent",
+          "group flex items-center rounded-md pr-1 text-sm hover:bg-accent",
+          readOnly ? "cursor-pointer" : "cursor-grab",
           isActive && "bg-accent font-semibold text-primary",
           isCut && "opacity-50",
           isFolder && isDropTarget && "bg-secondary ring-2 ring-primary",
@@ -233,6 +240,9 @@ const TreeRow = memo(function TreeRow({
             />
           )}
           <span className="truncate">{name}</span>
+          {comments > 0 && (
+            <CommentBadge count={comments} />
+          )}
           {isDirty && (
             <span
               className="ml-1 size-2 shrink-0 rounded-full bg-primary"
@@ -256,6 +266,7 @@ const FilterRow = memo(function FilterRow({
   isActive,
   isCut,
   isDirty,
+  comments,
   top,
   index,
   measure,
@@ -268,6 +279,7 @@ const FilterRow = memo(function FilterRow({
   isActive: boolean;
   isCut: boolean;
   isDirty: boolean;
+  comments: number;
 } & PlaceProps & {
     onOpen: (path: string) => void;
     onMenu: (event: React.MouseEvent, node: MenuNode) => void;
@@ -305,6 +317,9 @@ const FilterRow = memo(function FilterRow({
           <span className="truncate font-mono">
             {highlight(path, positions)}
           </span>
+          {comments > 0 && (
+            <CommentBadge count={comments} />
+          )}
           {isDirty && (
             <span
               className="ml-1 size-2 shrink-0 rounded-full bg-primary"
@@ -321,6 +336,21 @@ const FilterRow = memo(function FilterRow({
   );
 });
 
+/** The number of open comment threads on a file. */
+function CommentBadge({ count }: { count: number }) {
+  const { t } = useTranslation();
+  return (
+    <span
+      className="ml-1 inline-flex shrink-0 items-center gap-0.5 rounded-full bg-secondary px-1.5 text-xs text-secondary-foreground"
+      title={t("comments.badge", { count })}
+    >
+      <MessageSquareIcon className="size-3" aria-hidden />
+      {count}
+      <span className="sr-only">{t("comments.badge", { count })}</span>
+    </span>
+  );
+}
+
 /** Only files whose path matches are shown, as a flat list. */
 export const FileTree = memo(function FileTree({
   files,
@@ -331,6 +361,8 @@ export const FileTree = memo(function FileTree({
   collapsed,
   setCollapsed,
   filter,
+  readOnly = false,
+  comments,
 }: {
   files: FileEntry[];
   active: string | null;
@@ -341,6 +373,10 @@ export const FileTree = memo(function FileTree({
   collapsed: Set<string>;
   setCollapsed: React.Dispatch<React.SetStateAction<Set<string>>>;
   filter: string;
+  /** Commenters: no new files, uploads, moves, renames or deletes. */
+  readOnly?: boolean;
+  /** Open comment threads by file, for the badges. */
+  comments?: ReadonlyMap<string, number>;
 }) {
   const { t } = useTranslation();
   const tree = useMemo(() => buildTree(files), [files]);
@@ -394,6 +430,13 @@ export const FileTree = memo(function FileTree({
             ? node.path
             : node.path.slice(0, Math.max(0, node.path.lastIndexOf("/")));
       const { x, y } = menuPoint(event.nativeEvent);
+      if (readOnly) {
+        if (!node || node.isFolder) return;
+        openMenu(x, y, (box) => {
+          item(box, t("editor.files.download"), () => actions.download(node.path));
+        }, { focusFirst: fromKeyboard(event.nativeEvent) });
+        return;
+      }
       openMenu(x, y, (box) => {
         if (node === null || node.isFolder) {
           item(box, t("editor.files.newFile"), () => actions.newFile(folder));
@@ -436,7 +479,7 @@ export const FileTree = memo(function FileTree({
         }
       }, { focusFirst: fromKeyboard(event.nativeEvent) });
     },
-    [t, actions, clipboard],
+    [t, actions, clipboard, readOnly],
   );
 
   const dragStart = useCallback(
@@ -449,13 +492,14 @@ export const FileTree = memo(function FileTree({
   );
 
   const dragOver = useCallback((event: React.DragEvent, folder: string) => {
+    if (readOnly) return;
     const upload = event.dataTransfer.types.includes("Files");
     if (!upload && !event.dataTransfer.types.includes(DRAG_TYPE)) return;
     event.preventDefault();
     event.stopPropagation();
     event.dataTransfer.dropEffect = upload ? "copy" : "move";
     setDropTarget(folder);
-  }, []);
+  }, [readOnly]);
 
   const dragLeave = useCallback((event: React.DragEvent, folder: string) => {
     event.stopPropagation();
@@ -559,6 +603,7 @@ export const FileTree = memo(function FileTree({
                 isActive={row.path === active}
                 isCut={isCut(row.path)}
                 isDirty={dirty.has(row.path)}
+                comments={comments?.get(row.path) ?? 0}
                 top={item.start}
                 index={item.index}
                 measure={virtualizer.measureElement}
@@ -577,6 +622,8 @@ export const FileTree = memo(function FileTree({
                 isCut={isCut(row.path)}
                 isDirty={dirty.has(row.path)}
                 isDropTarget={dropTarget === row.path}
+                comments={(row as Row).isFolder ? 0 : (comments?.get(row.path) ?? 0)}
+                readOnly={readOnly}
                 top={item.start}
                 index={item.index}
                 measure={virtualizer.measureElement}

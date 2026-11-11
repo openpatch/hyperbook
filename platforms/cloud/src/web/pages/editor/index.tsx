@@ -10,6 +10,8 @@ import {
   FolderPlusIcon,
   FolderTreeIcon,
   HistoryIcon,
+  LogOutIcon,
+  MessageSquareIcon,
   MoonIcon,
   PanelRightIcon,
   SaveIcon,
@@ -19,9 +21,9 @@ import {
   UploadIcon,
   XIcon,
 } from "lucide-react";
-import type { EditorView } from "@codemirror/view";
+import { EditorView } from "@codemirror/view";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Link, useBlocker, useParams } from "react-router";
+import { Link, useBlocker, useParams, useSearchParams } from "react-router";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import type { FileChange } from "../../../shared/schemas";
@@ -90,6 +92,28 @@ import { QuickOpen } from "./quick-open";
 import { SettingsMenu, WordsDialog } from "./settings-menu";
 import { AiPanel } from "./ai-panel";
 import { HistoryPanel } from "./history-panel";
+import {
+  CommentsPanel,
+  type Draft,
+  type Thread,
+  openCounts,
+  threadsKey,
+  useThreads,
+} from "./comments-panel";
+import {
+  type CommentConfig,
+  type EditorThread,
+  applySuggestion,
+  commentsExtension,
+  currentAnchors,
+  focusThread,
+  rebaseComments,
+  selectionAnchor,
+  syncThreads,
+} from "./comments";
+import { normalizeText } from "../../../shared/comment-anchor";
+import { hasEditRole } from "./roles";
+import { findInSource } from "./pdf-sync";
 import { Splitter, usePaneWidth } from "./splitter";
 import {
   ConflictError,
@@ -117,8 +141,85 @@ export function Component() {
       </Centered>
     );
   }
-  if (listing.commit === null) return <StartBook book={book} />;
+  if (listing.commit === null) {
+    if (book.role === "commenter")
+      return (
+        <Centered>
+          <p>{t("editor.start.nothingYet", { title: book.title })}</p>
+          <BackLink book={book} />
+        </Centered>
+      );
+    return <StartBook book={book} />;
+  }
   return <Editor book={book} listing={listing} />;
+}
+
+/** "Commenting as Anna", and the way out, for visitors through an access link. */
+function LinkVisitorBadge({ book }: { book: Book }) {
+  const { t } = useTranslation();
+  const queryClient = useQueryClient();
+  const name = book.viewer?.name ?? "";
+  const leave = async () => {
+    try {
+      await unwrap(api.links.leave.$post());
+    } finally {
+      queryClient.clear();
+      window.location.assign("/join?left");
+    }
+  };
+  return (
+    <span className="flex min-w-0 items-center gap-1">
+      <span className="hidden truncate rounded-full bg-secondary px-2 py-0.5 text-xs text-secondary-foreground sm:inline">
+        {book.role === "commenter"
+          ? t("editor.toolbar.commentingAs", { name })
+          : t("editor.toolbar.editingAs", { name })}
+      </span>
+      <Button size="sm" variant="ghost" className="h-7 px-2" onClick={() => void leave()}>
+        <LogOutIcon className="size-3.5" aria-hidden />
+        <span className="max-sm:sr-only">{t("editor.toolbar.leave")}</span>
+      </Button>
+    </span>
+  );
+}
+
+/**
+ * A link visitor's first visit: what they can do here. Remembered per link
+ * in this browser only.
+ */
+function LinkWelcome({ book }: { book: Book }) {
+  const { t } = useTranslation();
+  const key = `hb-link-welcome-${book.viewer?.linkId}`;
+  const [seen, setSeen] = useState(() => {
+    try {
+      return localStorage.getItem(key) !== null;
+    } catch {
+      return false;
+    }
+  });
+  if (book.viewer?.kind !== "link" || seen) return null;
+  return (
+    <div className="flex shrink-0 items-center gap-3 border-b border-border bg-primary/5 px-3 py-2 text-sm" role="status">
+      <MessageSquareIcon className="size-4 shrink-0 text-primary" aria-hidden />
+      <p className="flex-1">
+        {book.role === "commenter" ? t("comments.welcomeCommenter") : t("comments.welcomeEditor")}
+      </p>
+      <Button
+        size="sm"
+        variant="outline"
+        className="h-7"
+        onClick={() => {
+          try {
+            localStorage.setItem(key, "1");
+          } catch {
+            // Private mode: shown again next time.
+          }
+          setSeen(true);
+        }}
+      >
+        {t("comments.gotIt")}
+      </Button>
+    </div>
+  );
 }
 
 function Centered({ children }: { children: React.ReactNode }) {
@@ -130,6 +231,9 @@ function Centered({ children }: { children: React.ReactNode }) {
 }
 
 function BackLink({ book, className }: { book: Book; className?: string }) {
+  // Link visitors have no book page to go back to.
+  if (book.viewer?.kind === "link")
+    return <span className={cn("truncate text-sm font-medium", className)}>{book.title}</span>;
   return (
     <Link
       to={`/books/${book.id}`}
@@ -228,12 +332,16 @@ const FileSidebar = memo(function FileSidebar({
   dirty,
   actions,
   clipboard,
+  readOnly,
+  comments,
 }: {
   files: Listing["files"];
   active: string | null;
   dirty: Set<string>;
   actions: TreeActions;
   clipboard: TreeClipboard | null;
+  readOnly: boolean;
+  comments?: ReadonlyMap<string, number>;
 }) {
   const { t } = useTranslation();
   const [collapsed, setCollapsed] = useState<Set<string>>(
@@ -269,33 +377,37 @@ const FileSidebar = memo(function FileSidebar({
         >
           <ChevronsUpDownIcon className="size-4" />
         </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="size-7 pointer-coarse:size-9"
-          aria-label={t("editor.files.newFile")}
-          onClick={() => actions.newFile(folder)}
-        >
-          <FilePlusIcon className="size-4" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="size-7 pointer-coarse:size-9"
-          aria-label={t("editor.files.newFolder")}
-          onClick={() => actions.newFolder(folder)}
-        >
-          <FolderPlusIcon className="size-4" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="size-7 pointer-coarse:size-9"
-          aria-label={t("editor.files.uploadFiles")}
-          onClick={() => actions.pickUpload(folder)}
-        >
-          <UploadIcon className="size-4" />
-        </Button>
+        {!readOnly && (
+          <>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-7 pointer-coarse:size-9"
+            aria-label={t("editor.files.newFile")}
+            onClick={() => actions.newFile(folder)}
+          >
+            <FilePlusIcon className="size-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-7 pointer-coarse:size-9"
+            aria-label={t("editor.files.newFolder")}
+            onClick={() => actions.newFolder(folder)}
+          >
+            <FolderPlusIcon className="size-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-7 pointer-coarse:size-9"
+            aria-label={t("editor.files.uploadFiles")}
+            onClick={() => actions.pickUpload(folder)}
+          >
+            <UploadIcon className="size-4" />
+          </Button>
+          </>
+        )}
       </div>
       <div className="border-b border-sidebar-border p-2">
         <div className="relative">
@@ -321,6 +433,8 @@ const FileSidebar = memo(function FileSidebar({
         collapsed={collapsed}
         setCollapsed={setCollapsed}
         filter={filter}
+        readOnly={readOnly}
+        comments={comments}
       />
     </>
   );
@@ -330,6 +444,10 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
   const { t } = useTranslation();
   const bookId = String(book.id);
   const ws = useWorkspace(bookId, listing);
+  /** Commenters read, select and comment; nothing they do changes the book. */
+  const readOnly = book.role === "commenter";
+  /** Came through an access link: no account, no AI, no way to the book page. */
+  const viaLink = book.viewer?.kind === "link";
   // What `#import "@…"` completes in .typ files (typst-imports.ts).
   const { data: typstImports } = useQuery({
     queryKey: ["books", bookId, "typst-packages"],
@@ -373,10 +491,24 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
   );
   const [showAi, setShowAi] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
-  const panes = { preview: setShowPreview, ai: setShowAi, history: setShowHistory };
+  // Commenters come to comment: their pane starts open.
+  const [showComments, setShowComments] = useState(
+    () => book.role === "commenter" && !matchMedia(COMPACT).matches,
+  );
+  const panes = {
+    preview: setShowPreview,
+    ai: setShowAi,
+    history: setShowHistory,
+    comments: setShowComments,
+  };
   /** Shows or hides a side pane; showing one on a compact screen hides the others. */
   const togglePane = (pane: keyof typeof panes) => {
-    const shown = { preview: showPreview, ai: showAi, history: showHistory };
+    const shown = {
+      preview: showPreview,
+      ai: showAi,
+      history: showHistory,
+      comments: showComments,
+    };
     if (!shown[pane] && compact)
       for (const other of Object.keys(panes) as (keyof typeof panes)[])
         if (other !== pane) panes[other](false);
@@ -416,9 +548,115 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
   // The open files' editors, by path: the AI panel reads the active one's
   // selection at action time, and inserts its answer through it.
   const views = useRef(new Map<string, EditorView>()).current;
-  const aiStatus = useAiStatus();
+  /** Changes when an editor comes or goes, for the effects that use `views`. */
+  const [viewsVersion, setViewsVersion] = useState(0);
+  const commentsRef = useRef<HTMLElement>(null);
+  const [commentsWidth, setCommentsWidth] = usePaneWidth(
+    "editor-comments-width",
+    300,
+  );
+
+  // Comments (comments.ts, comments-panel.tsx): the book's threads, the
+  // one shown in the pane, and a new one being written.
+  const { data: threads } = useThreads(bookId);
+  const commentCounts = useMemo(() => openCounts(threads), [threads]);
+  const [activeThread, setActiveThread] = useState<number | null>(null);
+  const [draft, setDraft] = useState<Draft | null>(null);
+  const canEdit = hasEditRole(book.role);
+  /** The open threads of `path` that are still in their file, for its editor. */
+  const editorThreads = (path: string): EditorThread[] =>
+    (threads ?? [])
+      .filter((th) => th.path === path && th.status === "open" && !th.outdated)
+      .map((th) => ({
+        id: th.id,
+        oid: th.oid,
+        from: th.from,
+        to: th.to,
+        quote: th.quote,
+        prefix: th.prefix,
+        suffix: th.suffix,
+      }));
+  const latestEditorThreads = useRef(editorThreads);
+  latestEditorThreads.current = editorThreads;
+  useEffect(() => {
+    for (const [path, view] of views) syncThreads(view, editorThreads(path));
+  }, [threads, viewsVersion]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  /** Shows a thread: its file, its place in the text, and the pane. */
+  const selectThread = useCallback(
+    (thread: Pick<Thread, "id" | "path">) => {
+      setActiveThread(thread.id);
+      setShowComments(true);
+      ws.open(thread.path);
+    },
+    [ws.open], // eslint-disable-line react-hooks/exhaustive-deps
+  );
+  // Once the thread's file has its editor, the thread is scrolled to.
+  useEffect(() => {
+    const thread = threads?.find((th) => th.id === activeThread);
+    const view = thread && views.get(thread.path);
+    for (const [path, other] of views)
+      if (path !== thread?.path) focusThread(other, null);
+    if (view) focusThread(view, activeThread);
+  }, [activeThread, viewsVersion, threads]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // A deep link (?thread=<id>, from a comment email) opens its thread.
+  const [searchParams, setSearchParams] = useSearchParams();
+  useEffect(() => {
+    const wanted = Number(searchParams.get("thread"));
+    const thread = wanted ? threads?.find((th) => th.id === wanted) : undefined;
+    if (!thread) return;
+    selectThread(thread);
+    setSearchParams({}, { replace: true });
+  }, [threads]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  /** "Comment" in a file's editor: a new thread on its selection. */
+  const startDraft = (path: string, view: EditorView) => {
+    const anchor = selectionAnchor(view);
+    if (!anchor.ok) {
+      if (anchor.reason === "unsaved") toast.error(t("comments.needsSave"));
+      return;
+    }
+    setDraft({
+      path,
+      oid: anchor.oid,
+      from: anchor.from,
+      to: anchor.to,
+      quote: view.state.sliceDoc(
+        view.state.selection.main.from,
+        view.state.selection.main.to,
+      ),
+    });
+    setActiveThread(null);
+    if (compact)
+      for (const other of Object.keys(panes) as (keyof typeof panes)[])
+        if (other !== "comments") panes[other](false);
+    setShowComments(true);
+  };
+  /** The editors' comment callbacks, stable for their lifetime. */
+  const latestStartDraft = useRef(startDraft);
+  latestStartDraft.current = startDraft;
+  const latestSelect = useRef((id: number) => {
+    const thread = threads?.find((th) => th.id === id);
+    if (thread) selectThread(thread);
+  });
+  latestSelect.current = (id: number) => {
+    const thread = threads?.find((th) => th.id === id);
+    if (thread) selectThread(thread);
+  };
+  const commentConfigFor = useCallback(
+    (path: string): CommentConfig => ({
+      onComment: (view) => latestStartDraft.current(path, view),
+      onSelect: (id) => latestSelect.current(id),
+    }),
+    [],
+  );
+  const aiStatus = useAiStatus(!viaLink);
   const aiAvailable =
-    (aiStatus.data?.enabled ?? false) && (aiStatus.data?.allowed ?? false);
+    !readOnly &&
+    !viaLink &&
+    (aiStatus.data?.enabled ?? false) &&
+    (aiStatus.data?.allowed ?? false);
 
   // The book's own spell-check words (see routes/dictionary.ts).
   const { data: dictionary } = useQuery({
@@ -522,7 +760,7 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
   // editor, instead of the browser saving the page.
   const saveActive = useRef(() => {});
   saveActive.current = () => {
-    if (ws.active) void save([ws.active]);
+    if (ws.active && !readOnly) void save([ws.active]);
   };
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -638,7 +876,26 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
       }
     }
     try {
-      await ws.save(paths);
+      const result = await ws.save(paths);
+      for (const { path, oid } of result?.saved ?? []) {
+        const view = views.get(path);
+        if (!view) continue;
+        const anchors = currentAnchors(view);
+        rebaseComments(view, oid);
+        // Where the threads went while typing: the server cannot tell
+        // when their own text was edited.
+        if (anchors.length > 0 && canEdit)
+          void unwrap(
+            api.books[":id"].comments.anchors.$post({
+              param: { id: bookId },
+              json: { path, oid, anchors },
+            }),
+          )
+            .then(() =>
+              queryClient.invalidateQueries({ queryKey: threadsKey(bookId) }),
+            )
+            .catch(() => {});
+      }
       return true;
     } catch (error) {
       if (!(error instanceof ConflictError)) {
@@ -1253,59 +1510,64 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
           {t("editor.title", { title: book.title })}
         </h1>
         <BackLink book={book} className="min-w-0" />
+        {viaLink && <LinkVisitorBadge book={book} />}
         <span className="flex-1" />
-        <Button
-          size="sm"
-          variant="ghost"
-          className="hidden sm:inline-flex"
-          disabled={!exists("hyperbook.json")}
-          onClick={openBookSettings}
-        >
-          {t("editor.toolbar.bookSettings")}
-        </Button>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              size="sm"
-              variant="outline"
-              className="max-sm:px-2"
-              disabled={!hasUnsaved}
-            >
-              <SaveIcon className="size-3.5 sm:hidden" aria-hidden />
-              <span className="max-sm:sr-only">
-                {t("editor.toolbar.saveAll")}
-              </span>
-              <ChevronDownIcon className="size-3.5" aria-hidden />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-72">
-            <DropdownMenuLabel>
-              {t("editor.toolbar.unsavedFiles")}
-            </DropdownMenuLabel>
-            {[...ws.dirty].map((path) => (
-              <DropdownMenuItem
-                key={path}
-                className="gap-2"
-                onSelect={() => ws.setActive(path)}
+        {!readOnly && (
+          <>
+          <Button
+            size="sm"
+            variant="ghost"
+            className="hidden sm:inline-flex"
+            disabled={!exists("hyperbook.json")}
+            onClick={openBookSettings}
+          >
+            {t("editor.toolbar.bookSettings")}
+          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                size="sm"
+                variant="outline"
+                className="max-sm:px-2"
+                disabled={!hasUnsaved}
               >
-                <span
-                  className="size-2 shrink-0 rounded-full bg-primary"
-                  aria-hidden
-                />
-                <span className="truncate font-mono text-xs">{path}</span>
+                <SaveIcon className="size-3.5 sm:hidden" aria-hidden />
+                <span className="max-sm:sr-only">
+                  {t("editor.toolbar.saveAll")}
+                </span>
+                <ChevronDownIcon className="size-3.5" aria-hidden />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-72">
+              <DropdownMenuLabel>
+                {t("editor.toolbar.unsavedFiles")}
+              </DropdownMenuLabel>
+              {[...ws.dirty].map((path) => (
+                <DropdownMenuItem
+                  key={path}
+                  className="gap-2"
+                  onSelect={() => ws.setActive(path)}
+                >
+                  <span
+                    className="size-2 shrink-0 rounded-full bg-primary"
+                    aria-hidden
+                  />
+                  <span className="truncate font-mono text-xs">{path}</span>
+                </DropdownMenuItem>
+              ))}
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onSelect={() => void save([...ws.dirty])}>
+                {t("editor.toolbar.saveAll")}
               </DropdownMenuItem>
-            ))}
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onSelect={() => void save([...ws.dirty])}>
-              {t("editor.toolbar.saveAll")}
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-        <EditorPublishButton
-          book={book}
-          commit={listing.commit}
-          unsaved={hasUnsaved}
-        />
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <EditorPublishButton
+            book={book}
+            commit={listing.commit}
+            unsaved={hasUnsaved}
+          />
+          </>
+        )}
         {aiAvailable && (
           <Button
             size="icon"
@@ -1320,6 +1582,26 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
             <SparklesIcon className="size-4" />
           </Button>
         )}
+        <Button
+          size="icon"
+          variant="ghost"
+          className="relative size-8"
+          aria-label={
+            showComments
+              ? t("editor.toolbar.hideComments")
+              : t("editor.toolbar.showComments")
+          }
+          aria-pressed={showComments}
+          onClick={() => togglePane("comments")}
+        >
+          <MessageSquareIcon className="size-4" />
+          {commentCounts.size > 0 && (
+            <span
+              className="absolute top-1 right-1 size-1.5 rounded-full bg-amber-500"
+              aria-hidden
+            />
+          )}
+        </Button>
         <Button
           size="icon"
           variant="ghost"
@@ -1351,7 +1633,7 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
         <SettingsMenu
           settings={settings}
           update={updateSettings}
-          canSpellCheck={canSpellCheck}
+          canSpellCheck={canSpellCheck && !readOnly}
           onOpenWords={() => setShowWords(true)}
         />
         <ThemeToggle className="hidden hover:bg-accent sm:flex [&_svg]:size-4" />
@@ -1376,12 +1658,14 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
             <DropdownMenuItem onSelect={() => setQuickOpen(true)}>
               <SearchIcon /> {t("editor.toolbar.findFile")}
             </DropdownMenuItem>
-            <DropdownMenuItem
-              disabled={!exists("hyperbook.json")}
-              onSelect={openBookSettings}
-            >
-              <BookIcon /> {t("editor.toolbar.bookSettings")}
-            </DropdownMenuItem>
+            {!readOnly && (
+              <DropdownMenuItem
+                disabled={!exists("hyperbook.json")}
+                onSelect={openBookSettings}
+              >
+                <BookIcon /> {t("editor.toolbar.bookSettings")}
+              </DropdownMenuItem>
+            )}
             <DropdownMenuItem
               onSelect={(e) => {
                 e.preventDefault();
@@ -1394,6 +1678,7 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
           </DropdownMenuContent>
         </DropdownMenu>
       </header>
+      <LinkWelcome book={book} />
 
       <div className="relative flex min-h-0 flex-1">
         {narrow && showFiles && (
@@ -1421,6 +1706,8 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
             dirty={ws.dirty}
             actions={treeActions}
             clipboard={treeClipboard}
+            readOnly={readOnly}
+            comments={commentCounts}
           />
         </aside>
         {!narrow && (
@@ -1524,12 +1811,17 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
                 <TabContent
                   ws={ws}
                   tab={tab}
+                  readOnly={readOnly}
                   files={listing.files.map((f) => f.path)}
                   settings={settings}
                   spell={spell}
+                  commentConfig={commentConfigFor(tab.path)}
                   onView={(path, view) => {
-                    if (view) views.set(path, view);
-                    else views.delete(path);
+                    if (view) {
+                      views.set(path, view);
+                      syncThreads(view, latestEditorThreads.current(path));
+                    } else views.delete(path);
+                    setViewsVersion((v) => v + 1);
                   }}
                   onEditBlock={(block, view) =>
                     editBlock(tab.path, block, view)
@@ -1552,6 +1844,59 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
             )}
           </div>
         </main>
+
+        {showComments && (
+          <>
+            {!compact && (
+              <Splitter
+                label={t("editor.toolbar.resizeComments")}
+                pane={commentsRef}
+                direction={-1}
+                onResize={setCommentsWidth}
+                onReset={() => setCommentsWidth(null)}
+              />
+            )}
+            <section
+              ref={commentsRef}
+              className={cn(
+                compact ? overlay : "w-80 shrink-0 border-l border-border",
+                "bg-sidebar",
+              )}
+              style={
+                commentsWidth === null || compact
+                  ? undefined
+                  : { width: commentsWidth }
+              }
+              aria-label={t("editor.toolbar.comments")}
+            >
+              <CommentsPanel
+                bookId={bookId}
+                threads={threads ?? []}
+                activePath={activeTab?.path ?? null}
+                activeThread={activeThread}
+                canEdit={canEdit}
+                draft={draft}
+                onDraftDone={(threadId) => {
+                  setDraft(null);
+                  if (threadId !== null) setActiveThread(threadId);
+                }}
+                onSelect={selectThread}
+                onApply={(thread, comment) => {
+                  const view = views.get(thread.path);
+                  return (
+                    !!view &&
+                    applySuggestion(
+                      view,
+                      thread.id,
+                      thread.quote,
+                      comment.suggestion ?? "",
+                    )
+                  );
+                }}
+              />
+            </section>
+          </>
+        )}
 
         {showHistory && (
           <>
@@ -1671,6 +2016,20 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
                   const view = views.get(path);
                   if (view) showTypstDiagnostics(view, path, diagnostics);
                 }}
+                onTypstJump={(path, { line, word }) => {
+                  const view = views.get(path);
+                  if (!view) return;
+                  const at = findInSource(view.state.doc.toString(), line, word);
+                  if (at === null)
+                    return void toast.error(
+                      t("editor.typstPreview.notFound", { path }),
+                    );
+                  view.dispatch({
+                    selection: { anchor: at, head: at + word.length },
+                    effects: EditorView.scrollIntoView(at, { y: "center" }),
+                  });
+                  view.focus();
+                }}
                 commit={listing.commit}
                 onNavigate={(href) => {
                   const target = fileAt(
@@ -1762,6 +2121,7 @@ function LivePreview({
   file,
   typstFile,
   onTypstDiagnostics,
+  onTypstJump,
   ...props
 }: {
   ws: Workspace;
@@ -1770,6 +2130,7 @@ function LivePreview({
   /** An open `.typ` file: shown as the PDF it compiles to instead. */
   typstFile: string | null;
   onTypstDiagnostics: (path: string, diagnostics: TypstDiagnostic[]) => void;
+  onTypstJump: (path: string, text: { line: string; word: string }) => void;
   commit: string | null;
   onNavigate: (href: string) => boolean;
 }) {
@@ -1781,6 +2142,7 @@ function LivePreview({
         file={typstFile}
         text={text ?? null}
         onDiagnostics={onTypstDiagnostics}
+        onJump={onTypstJump}
       />
     );
   }
@@ -1796,6 +2158,8 @@ function LivePreview({
 function TabContent({
   ws,
   tab,
+  readOnly,
+  commentConfig,
   files,
   settings,
   spell,
@@ -1808,6 +2172,9 @@ function TabContent({
 }: {
   ws: Workspace;
   tab: Tab;
+  readOnly: boolean;
+  /** The file's comment threads in its editor (see comments.ts). */
+  commentConfig: CommentConfig;
   files: string[];
   settings: EditorSettings;
   spell: SpellOptions;
@@ -1833,12 +2200,21 @@ function TabContent({
   const loaded = tab.loaded!;
   if (loaded.kind === "text") {
     const kind = visualKind(tab.path);
+    const initial = ws.textOf(tab.path)!;
+    // The server's thread positions refer to the saved text; an editor that
+    // starts from unsaved text finds its threads by their text instead.
+    const baseOid =
+      normalizeText(initial) === normalizeText(loaded.text) ? loaded.oid : null;
     // Both views start from the current text, so switching keeps unsaved changes.
     const source = (
       <CodeEditor
         key={`${tab.path}:${tab.version}`}
         path={tab.path}
-        initial={ws.textOf(tab.path)!}
+        initial={initial}
+        extensions={
+          // Base64 of a binary file (a .sb3) has nothing to comment on.
+          loaded.encoding ? [] : commentsExtension(commentConfig, baseOid)
+        }
         onChange={onChange}
         onSave={onSave}
         onEditBlock={onEditBlock}
@@ -1852,6 +2228,7 @@ function TabContent({
         files={files}
         settings={settings}
         spell={spell}
+        readOnly={readOnly}
         onReady={(view) => {
           viewRef.current = view;
           onView(tab.path, view);
@@ -1886,7 +2263,8 @@ function TabContent({
         </div>
       );
     }
-    if (!kind) return source;
+    // The visual editors change what they show; commenters get the source.
+    if (!kind || readOnly) return source;
     return (
       <VisualOrSource
         ws={ws}
@@ -1925,9 +2303,11 @@ function TabContent({
         <Button variant="outline" size="sm" onClick={onDownload}>
           {t("editor.tabs.download")}
         </Button>
-        <Button variant="outline" size="sm" onClick={onReplace}>
-          {t("editor.tabs.replace")}
-        </Button>
+        {!readOnly && (
+          <Button variant="outline" size="sm" onClick={onReplace}>
+            {t("editor.tabs.replace")}
+          </Button>
+        )}
       </div>
     </div>
   );

@@ -7,9 +7,9 @@ import {
 } from "../../../shared/schemas";
 import { bookDictionary } from "../../db/schema";
 import type { Deps } from "../../deps";
-import { bookAccess } from "../../domain/books";
-import type { AuthedEnv } from "../env";
-import { requireUser } from "../middleware";
+import { visitorAccess } from "../../domain/actors";
+import type { AdminEnv } from "../env";
+import { requireVisitor } from "../middleware";
 import { idParam } from "../params";
 import { validate } from "../validate";
 
@@ -25,11 +25,12 @@ function wordsOf(db: Deps["db"], bookId: number) {
 
 /** /api/books/:id/dictionary — words the book's teachers accepted. */
 export function bookDictionaryRoutes({ db }: Deps) {
-  return new Hono<AuthedEnv>()
-    .use(requireUser)
+  // Link visitors use these routes too (see domain/actors.ts).
+  return new Hono<AdminEnv>()
+    .use(requireVisitor)
 
     .get("/:id/dictionary", idParam, (c) => {
-      const { book } = bookAccess(db, c.get("user"), c.req.valid("param").id);
+      const { book } = visitorAccess(db, c.get("user"), c.get("link"), c.req.valid("param").id, "commenter");
       return c.json({ words: wordsOf(db, book.id) });
     })
 
@@ -38,13 +39,12 @@ export function bookDictionaryRoutes({ db }: Deps) {
       idParam,
       validate("json", addDictionaryWordInput),
       (c) => {
-        const user = c.get("user");
-        const { book } = bookAccess(db, user, c.req.valid("param").id);
+        const { book, actor } = visitorAccess(db, c.get("user"), c.get("link"), c.req.valid("param").id);
         db.insert(bookDictionary)
           .values({
             bookId: book.id,
             word: c.req.valid("json").word,
-            addedBy: user.id,
+            addedBy: actor.userId,
           })
           .onConflictDoNothing()
           .run();
@@ -62,7 +62,7 @@ export function bookDictionaryRoutes({ db }: Deps) {
         }),
       ),
       (c) => {
-        const { book } = bookAccess(db, c.get("user"), c.req.valid("param").id);
+        const { book } = visitorAccess(db, c.get("user"), c.get("link"), c.req.valid("param").id);
         db.delete(bookDictionary)
           .where(
             and(

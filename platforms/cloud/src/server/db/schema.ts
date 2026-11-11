@@ -149,6 +149,8 @@ export const books = sqliteTable(
     publishRequestedBy: integer("publish_requested_by").references(() => users.id, {
       onDelete: "set null",
     }),
+    /** Or the access link (see bookLinks) whose visitor asked. */
+    publishRequestedByLink: integer("publish_requested_by_link"),
     publishRequestedAt: integer("publish_requested_at", { mode: "timestamp_ms" }),
     publishRequestNote: text("publish_request_note"),
     /**
@@ -248,7 +250,10 @@ export const bookMembers = sqliteTable(
     userId: integer("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
-    role: text("role", { enum: ["owner", "editor"] }).notNull(),
+    role: text("role", { enum: ["owner", "editor", "commenter"] }).notNull(),
+    /** Emails about new comments and replies (a digest, see domain/comment-mail.ts). */
+    commentMail: integer("comment_mail", { mode: "boolean" }).notNull().default(true),
+    commentMailSentAt: integer("comment_mail_sent_at", { mode: "timestamp_ms" }),
   },
   (t) => [
     primaryKey({ columns: [t.bookId, t.userId] }),
@@ -450,9 +455,9 @@ export const auditLog = sqliteTable(
 /** One-time codes that hand a teacher's editor over to a book's preview host. */
 export const previewCodes = sqliteTable("preview_codes", {
   codeHash: text("code_hash").primaryKey(),
-  userId: integer("user_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
+  /** A teacher's code, or (linkId) one of a link visitor. */
+  userId: integer("user_id").references(() => users.id, { onDelete: "cascade" }),
+  linkId: integer("link_id").references(() => bookLinks.id, { onDelete: "cascade" }),
   bookId: integer("book_id")
     .notNull()
     .references(() => books.id, { onDelete: "cascade" }),
@@ -464,9 +469,8 @@ export const previewSessions = sqliteTable(
   "preview_sessions",
   {
     idHash: text("id_hash").primaryKey(),
-    userId: integer("user_id")
-      .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
+    userId: integer("user_id").references(() => users.id, { onDelete: "cascade" }),
+    linkId: integer("link_id").references(() => bookLinks.id, { onDelete: "cascade" }),
     bookId: integer("book_id")
       .notNull()
       .references(() => books.id, { onDelete: "cascade" }),
@@ -536,4 +540,117 @@ export const bookDictionary = sqliteTable(
     createdAt: createdAt(),
   },
   (t) => [primaryKey({ columns: [t.bookId, t.word] })],
+);
+
+/**
+ * A named link into one book's editor, for someone without an account (see
+ * domain/links.ts). The token is stored hashed, to check a visit, and sealed
+ * with CREDENTIALS_KEY, so the owner can copy the link again. A deleted link
+ * keeps its row (revokedAt) so comments and commits still carry its name.
+ */
+export const bookLinks = sqliteTable(
+  "book_links",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    bookId: integer("book_id")
+      .notNull()
+      .references(() => books.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    role: text("role", { enum: ["commenter", "editor"] }).notNull(),
+    tokenHash: text("token_hash").notNull().unique(),
+    tokenSealed: text("token_sealed").notNull(),
+    createdBy: integer("created_by").references(() => users.id, { onDelete: "set null" }),
+    createdAt: createdAt(),
+    expiresAt: integer("expires_at", { mode: "timestamp_ms" }),
+    lastUsedAt: integer("last_used_at", { mode: "timestamp_ms" }),
+    revokedAt: integer("revoked_at", { mode: "timestamp_ms" }),
+  },
+  (t) => [index("book_links_book_idx").on(t.bookId)],
+);
+
+/** A browser that opened a link: the __Host-hb_link cookie. Only the token's hash is stored. */
+export const linkSessions = sqliteTable(
+  "link_sessions",
+  {
+    idHash: text("id_hash").primaryKey(),
+    linkId: integer("link_id")
+      .notNull()
+      .references(() => bookLinks.id, { onDelete: "cascade" }),
+    expiresAt: integer("expires_at", { mode: "timestamp_ms" }).notNull(),
+    lastSeenAt: integer("last_seen_at", { mode: "timestamp_ms" }).notNull(),
+  },
+  (t) => [index("link_sessions_link_idx").on(t.linkId)],
+);
+
+/**
+ * A discussion about a range of a file's source (see domain/comments.ts).
+ * The range is offsets into the file's blob `anchorOid`, plus the text it
+ * covered with some context, to find it again after the file changed.
+ * Authors are an account or a link; their name is kept with the row.
+ */
+export const commentThreads = sqliteTable(
+  "comment_threads",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    bookId: integer("book_id")
+      .notNull()
+      .references(() => books.id, { onDelete: "cascade" }),
+    path: text("path").notNull(),
+    anchorFrom: integer("anchor_from").notNull(),
+    anchorTo: integer("anchor_to").notNull(),
+    anchorExact: text("anchor_exact").notNull(),
+    anchorPrefix: text("anchor_prefix").notNull().default(""),
+    anchorSuffix: text("anchor_suffix").notNull().default(""),
+    anchorOid: text("anchor_oid").notNull(),
+    /** Its text was deleted (and saved): the thread is outdated for good. */
+    detachedAt: integer("detached_at", { mode: "timestamp_ms" }),
+    status: text("status", { enum: ["open", "resolved"] }).notNull().default("open"),
+    createdByUserId: integer("created_by_user_id").references(() => users.id, { onDelete: "set null" }),
+    createdByLinkId: integer("created_by_link_id").references(() => bookLinks.id, { onDelete: "set null" }),
+    createdByName: text("created_by_name").notNull(),
+    createdAt: createdAt(),
+    resolvedByName: text("resolved_by_name"),
+    resolvedAt: integer("resolved_at", { mode: "timestamp_ms" }),
+  },
+  (t) => [index("comment_threads_book_path_idx").on(t.bookId, t.path)],
+);
+
+export const comments = sqliteTable(
+  "comments",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    threadId: integer("thread_id")
+      .notNull()
+      .references(() => commentThreads.id, { onDelete: "cascade" }),
+    authorUserId: integer("author_user_id").references(() => users.id, { onDelete: "set null" }),
+    authorLinkId: integer("author_link_id").references(() => bookLinks.id, { onDelete: "set null" }),
+    authorName: text("author_name").notNull(),
+    body: text("body").notNull(),
+    /** Replacement text for the thread's range, proposed by the author. */
+    suggestion: text("suggestion"),
+    appliedAt: integer("applied_at", { mode: "timestamp_ms" }),
+    createdAt: createdAt(),
+    editedAt: integer("edited_at", { mode: "timestamp_ms" }),
+    deletedAt: integer("deleted_at", { mode: "timestamp_ms" }),
+  },
+  (t) => [index("comments_thread_idx").on(t.threadId)],
+);
+
+/** Comments waiting to go out in a user's next digest email for a book. */
+export const commentMailQueue = sqliteTable(
+  "comment_mail_queue",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    userId: integer("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    bookId: integer("book_id")
+      .notNull()
+      .references(() => books.id, { onDelete: "cascade" }),
+    commentId: integer("comment_id")
+      .notNull()
+      .references(() => comments.id, { onDelete: "cascade" }),
+    createdAt: createdAt(),
+  },
+  (t) => [index("comment_mail_queue_user_book_idx").on(t.userId, t.bookId)],
 );
