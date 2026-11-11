@@ -55,6 +55,8 @@ export function PreviewPane({
   text,
   commit,
   onNavigate,
+  missingConfig = false,
+  onCreateConfig,
 }: {
   bookId: string;
   /** The page open in the editor, with its current text; null for other files. */
@@ -64,6 +66,10 @@ export function PreviewPane({
   commit: string | null;
   /** A link in the frame was clicked: opens its file, if there is one. */
   onNavigate?: (href: string) => boolean;
+  /** The book has no hyperbook.json (or hyperlibrary.json): nothing renders. */
+  missingConfig?: boolean;
+  /** Creates hyperbook.json; absent for those who cannot edit the book. */
+  onCreateConfig?: () => Promise<void>;
 }) {
   const onNavigateRef = useRef(onNavigate);
   onNavigateRef.current = onNavigate;
@@ -98,6 +104,7 @@ export function PreviewPane({
   const [rendered, setRendered] = useState<Rendered | null>(null);
   const [rendering, setRendering] = useState(false);
   const [showLog, setShowLog] = useState(false);
+  const [creating, setCreating] = useState(false);
   const { t } = useTranslation();
   const shown = useRef<string | null>(null);
   // Until the hand-off page has logged the frame in, its address must not
@@ -181,7 +188,7 @@ export function PreviewPane({
   const latest = useRef(0);
   const running = useRef<Promise<void> | null>(null);
   useEffect(() => {
-    if (file === null || text === null) return;
+    if (missingConfig || file === null || text === null) return;
     const ticket = ++latest.current;
     const timer = setTimeout(async () => {
       while (running.current) await running.current;
@@ -210,17 +217,30 @@ export function PreviewPane({
       if (ticket === latest.current) setRendering(false);
     }, DEBOUNCE_MS);
     return () => clearTimeout(timer);
-  }, [bookId, file, text, commit, show]);
+  }, [bookId, file, text, commit, show, missingConfig]);
 
   // Another file is open: a save may still change what the frame shows.
   useEffect(() => {
     if (file === null && origin.current && ready.current) show(shown.current ?? "/");
   }, [commit]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Nothing open yet: start on the book's first page.
+  // Nothing open yet: start on the book's first page (once there is a book).
   useEffect(() => {
+    if (missingConfig) return setRendered(null);
     if (!origin.current && file === null) void handOff("/");
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [missingConfig]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const createConfig = async () => {
+    if (!onCreateConfig) return;
+    setCreating(true);
+    try {
+      await onCreateConfig();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : t("editor.preview.couldNotCreateConfig"));
+    } finally {
+      setCreating(false);
+    }
+  };
 
   const openInTab = async () => {
     const url = await previewUrl(bookId, withTheme(shown.current ?? "/", themeRef.current));
@@ -277,7 +297,20 @@ export function PreviewPane({
           {log && <pre className="whitespace-pre-wrap font-mono">{log}</pre>}
         </div>
       )}
-      <div className="relative min-h-0 flex-1">
+      {missingConfig && (
+        <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-3 p-6 text-center text-sm">
+          <p className="font-medium">{t("editor.preview.missingConfigTitle")}</p>
+          <p className="max-w-sm text-muted-foreground">
+            {t(onCreateConfig ? "editor.preview.missingConfigHint" : "editor.preview.missingConfigReadOnly")}
+          </p>
+          {onCreateConfig && (
+            <Button size="sm" disabled={creating} onClick={() => void createConfig()}>
+              {t("editor.preview.createConfig")}
+            </Button>
+          )}
+        </div>
+      )}
+      <div className={cn("relative min-h-0 flex-1", missingConfig && "hidden")}>
         {frames.map((frame) => {
           // Until one has been shown, the first frame is on view as it loads.
           const onView = frame.id === (shownFrame ?? frames[0]?.id);

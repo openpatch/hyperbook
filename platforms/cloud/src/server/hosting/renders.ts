@@ -6,6 +6,7 @@ import type { Config } from "../config";
 import {
   checkout,
   headCommit,
+  listTree,
   markProjectRoot,
   updateCheckout,
 } from "./git";
@@ -185,6 +186,15 @@ type Renderer = {
 
 export class RenderError extends Error {}
 
+/** The book has no hyperbook.json (or hyperlibrary.json): nothing can render. */
+export class MissingConfigError extends RenderError {
+  constructor() {
+    super("The book has no hyperbook.json yet. Create one to see the preview.");
+  }
+}
+
+const CONFIGS = new Set(["hyperbook.json", "hyperlibrary.json"]);
+
 /** A preview PDF, or why there is none. */
 export type TypstPreview = { ok: true; file: string } | { ok: false; error: string; diagnostics: string };
 
@@ -221,6 +231,14 @@ export class Renderers {
     const commit = await headCommit(repo).catch(() => null);
     if (!commit) throw new RenderError("The book has no files yet");
     let r = this.renderers.get(bookId);
+    if (!r || r.commit !== commit) {
+      // The CLI would only stop at once, for every page asked for.
+      const tree = await listTree(repo, commit);
+      if (!tree.some((e) => CONFIGS.has(e.path))) {
+        if (r) this.close(bookId);
+        throw new MissingConfigError();
+      }
+    }
     if (!r) {
       this.evict();
       const jobDir = await makeJobDir(this.config, `render-${bookId}`);

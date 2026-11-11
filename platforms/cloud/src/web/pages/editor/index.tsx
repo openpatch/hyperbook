@@ -473,7 +473,7 @@ const sidebarItems = {
 } as const;
 
 function Editor({ book, listing }: { book: Book; listing: Listing }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const bookId = String(book.id);
   const ws = useWorkspace(bookId, listing);
   /** Commenters read, select and comment; nothing they do changes the book. */
@@ -1216,6 +1216,22 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
         : error;
     });
     if (open) ws.open(open);
+  };
+
+  /** A hyperbook.json for a book without one, so it can render; then its settings. */
+  const createConfig = async () => {
+    const language = i18n.language.split("-")[0] || "en";
+    await commitAndOpen([
+      {
+        op: "write",
+        path: "hyperbook.json",
+        content: JSON.stringify({ name: book.title, language }, null, 2) + "\n",
+        encoding: "utf8",
+        baseOid: null,
+      },
+    ]);
+    toast.success(t("editor.preview.configCreated"));
+    setShowSettings(true);
   };
 
   const failCommit = (error: unknown) => {
@@ -2214,6 +2230,8 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
               <LivePreview
                 ws={ws}
                 bookId={bookId}
+                missingConfig={!exists("hyperbook.json") && !exists("hyperlibrary.json")}
+                onCreateConfig={readOnly ? undefined : createConfig}
                 file={
                   activeTab &&
                   pageOf(activeTab.path) &&
@@ -2354,6 +2372,8 @@ function LivePreview({
   onTypstJump: (path: string, click: PdfClick) => void;
   commit: string | null;
   onNavigate: (href: string) => boolean;
+  missingConfig: boolean;
+  onCreateConfig?: () => Promise<void>;
 }) {
   const text = useLiveText(ws, typstFile ?? file);
   if (typstFile !== null) {

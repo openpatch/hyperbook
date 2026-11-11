@@ -102,6 +102,30 @@ describe("preview host", () => {
     expect((await stranger.c.post(`/api/books/${book.id}/files/render`, { path: "book/index.md", text: "" })).status).toBe(404);
   });
 
+  it("starts no renderer for a book without hyperbook.json", async () => {
+    const { instance, owner, book } = await world();
+    const { browser } = await openPreview(instance, (await owner.c.post(`/api/books/${book.id}/preview-code`)).body.url);
+    expect((await browser.get("/")).status).toBe(200);
+
+    const listing = (await owner.c.get(`/api/books/${book.id}/files`)).body;
+    const oid = listing.files.find((f: { path: string }) => f.path === "hyperbook.json").oid;
+    await owner.c.post(`/api/books/${book.id}/files/commit`, {
+      changes: [{ op: "delete", path: "hyperbook.json", baseOid: oid }],
+    });
+    const render = await owner.c.post(`/api/books/${book.id}/files/render`, { path: "book/index.md", text: "# Hi" });
+    expect(render.status).toBe(400);
+    expect(render.body.error ?? render.body.message ?? JSON.stringify(render.body)).toContain("hyperbook.json");
+    const page = await browser.get("/");
+    expect(page.status).toBe(404);
+    expect(page.body).toContain("hyperbook.json");
+
+    // Once it is back, the preview works again.
+    await owner.c.post(`/api/books/${book.id}/files/commit`, {
+      changes: [{ op: "write", path: "hyperbook.json", content: '{"name":"Physics"}', baseOid: null }],
+    });
+    expect((await browser.get("/")).status).toBe(200);
+  });
+
   it("refuses hand-offs from elsewhere and teachers of other books", async () => {
     const { instance, owner, other, book } = await world();
     expect((await other.c.post(`/api/books/${book.id}/preview-code`)).status).toBe(404);

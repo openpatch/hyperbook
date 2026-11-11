@@ -675,6 +675,12 @@ export const en = {
       close: "Close",
       couldNotOpen: "Could not open the preview",
       couldNotRender: "Could not render the page",
+      couldNotCreateConfig: "Could not create hyperbook.json",
+      missingConfigTitle: "This book has no hyperbook.json",
+      missingConfigHint: "Hyperbook needs a hyperbook.json at the top of the book to show its pages. Create one with the book's name; you can change its settings afterwards.",
+      missingConfigReadOnly: "Hyperbook needs a hyperbook.json at the top of the book to show its pages. Someone who edits the book has to create it.",
+      createConfig: "Create hyperbook.json",
+      configCreated: "hyperbook.json created",
     },
     blockDialog: {
       title: "Edit structogram",

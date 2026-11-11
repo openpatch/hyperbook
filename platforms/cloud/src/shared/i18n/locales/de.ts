@@ -686,6 +686,12 @@ export const de: Messages = {
       close: "Schließen",
       couldNotOpen: "Die Vorschau konnte nicht geöffnet werden",
       couldNotRender: "Die Seite konnte nicht gerendert werden",
+      couldNotCreateConfig: "hyperbook.json konnte nicht angelegt werden",
+      missingConfigTitle: "Dieses Buch hat keine hyperbook.json",
+      missingConfigHint: "Hyperbook braucht eine hyperbook.json oben im Buch, um seine Seiten anzuzeigen. Legen Sie eine mit dem Namen des Buchs an; die Einstellungen können Sie danach ändern.",
+      missingConfigReadOnly: "Hyperbook braucht eine hyperbook.json oben im Buch, um seine Seiten anzuzeigen. Jemand, der das Buch bearbeitet, muss sie anlegen.",
+      createConfig: "hyperbook.json anlegen",
+      configCreated: "hyperbook.json angelegt",
     },
     blockDialog: {
       title: "Struktogramm bearbeiten",
