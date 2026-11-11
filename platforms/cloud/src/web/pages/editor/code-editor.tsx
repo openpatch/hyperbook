@@ -16,6 +16,7 @@ import {
 import { LanguageSupport } from "@codemirror/language";
 import { typstImportCompletion } from "./typst-imports";
 import { typstLint } from "./typst-preview";
+import { indentWithTab } from "@codemirror/commands";
 import { Compartment, type Extension, EditorState } from "@codemirror/state";
 import i18next from "i18next";
 import { EditorView, keymap } from "@codemirror/view";
@@ -288,6 +289,9 @@ export function CodeEditor({
         doc: initial,
         extensions: [
           keymap.of([
+            // basicSetup binds no Tab key; without this, Tab moves the focus
+            // out of the editor instead of indenting.
+            indentWithTab,
             {
               key: "Mod-s",
               preventDefault: true,
