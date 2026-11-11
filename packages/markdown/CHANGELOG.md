@@ -1,5 +1,11 @@
 # @hyperbook/markdown
 
+## 0.93.1
+
+### Patch Changes
+
+- [`44379a9`](https://github.com/openpatch/hyperbook/commit/44379a9b47cfbc95831633c3338b251ecbf6e6e2) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Update the Online IDE runtime to build 43: the catalogs are synchronized with Scratch for Java 7.1.1, and clearing the pen removes it from the screen.
+
 ## 0.93.0
 
 ### Minor Changes
