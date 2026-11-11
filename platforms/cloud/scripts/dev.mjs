@@ -17,6 +17,10 @@ if (existsSync(envFile)) {
   }
 }
 
+// Emails (password resets, invitations, comment digests) go to files in
+// ./outbox instead of out, unless .env or the shell set up SMTP.
+if (!process.env.SMTP_HOST && !process.env.MAIL_OUTBOX_DIR) process.env.MAIL_OUTBOX_DIR = "./outbox";
+
 const children = [
   spawn("tsx", ["watch", "--clear-screen=false", "src/server/main.ts"], {
     stdio: "inherit",

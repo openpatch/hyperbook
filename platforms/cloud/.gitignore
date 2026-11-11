@@ -66,6 +66,8 @@ typings/
 
 # Development data (DATA_DIR) and SQLite's write-ahead files
 data/
+# Emails of the dev server (MAIL_OUTBOX_DIR, see scripts/dev.mjs)
+outbox/
 data-test/
 *.sqlite-wal
 *.sqlite-shm
