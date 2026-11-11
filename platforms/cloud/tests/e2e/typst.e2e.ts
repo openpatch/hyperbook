@@ -81,7 +81,10 @@ describe.skipIf(!typst)("the editor's Typst preview", () => {
     await page.getByRole("tab", { name: "jump.typ" }).waitFor();
     await page.locator('.cm-content[aria-label*="jump.typ"]').click();
     // Big text from the top left corner, so the first line is easy to hit.
-    await page.keyboard.type("#set page(margin: 0pt, width: 20cm, height: 10cm)\n#set text(size: 40pt)\nHallo Welt Optik\n");
+    // "Hallo" twice, a page each: the second must not find the first.
+    await page.keyboard.type(
+      "#set page(margin: 0pt, width: 20cm, height: 10cm)\n#set text(size: 40pt)\nHallo Welt Optik\n\n#pagebreak()\nHallo Licht\n",
+    );
     const pane = page.getByRole("region", { name: "Preview" });
     const canvas = pane.getByRole("img", { name: "Page 1" });
     await canvas.waitFor({ timeout: 60_000 });
@@ -94,6 +97,13 @@ describe.skipIf(!typst)("the editor's Typst preview", () => {
     // "Hallo" sits at the left of the first line.
     const box = (await canvas.boundingBox())!;
     await page.mouse.dblclick(box.x + box.width * 0.08, box.y + box.height * 0.07);
-    await expect.poll(() => page.evaluate(() => window.getSelection()?.toString())).toBe("Hallo");
+    // The cursor goes to the line in the open file's editor, its word selected.
+    const cursorLine = () => page.locator('.cm-content[aria-label*="jump.typ"] .cm-activeLine').textContent();
+    await expect.poll(async () => (await cursorLine())?.trim()).toBe("Hallo Welt Optik");
+    await page.locator('.cm-editor:has(.cm-content[aria-label*="jump.typ"]) .cm-selectionBackground').first().waitFor();
+
+    const second = (await pane.getByRole("img", { name: "Page 2" }).boundingBox())!;
+    await page.mouse.dblclick(second.x + second.width * 0.08, second.y + second.height * 0.07);
+    await expect.poll(async () => (await cursorLine())?.trim()).toBe("Hallo Licht");
   }, 180_000);
 });

@@ -8,6 +8,7 @@ import type { TypstDiagnostic } from "../../../shared/typst-diagnostics";
 import { DownloadIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PdfView } from "./pdf-view";
+import type { PdfClick } from "./pdf-sync";
 
 /** How long typing pauses before the document compiles again. */
 const DEBOUNCE_MS = 600;
@@ -101,7 +102,7 @@ export function TypstPreviewPane({
   text: string | null;
   onDiagnostics: (path: string, diagnostics: TypstDiagnostic[]) => void;
   /** A double-clicked line of the PDF, to find in the source (see pdf-sync.ts). */
-  onJump?: (path: string, text: { line: string; word: string }) => void;
+  onJump?: (path: string, click: PdfClick) => void;
 }) {
   const { t } = useTranslation();
   const [pdf, setPdf] = useState(() => lastPdf.get(file) ?? null);

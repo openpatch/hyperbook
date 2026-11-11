@@ -113,7 +113,7 @@ import {
 } from "./comments";
 import { normalizeText } from "../../../shared/comment-anchor";
 import { hasEditRole } from "./roles";
-import { findInSource } from "./pdf-sync";
+import { type PdfClick, findInSource } from "./pdf-sync";
 import { Splitter, usePaneWidth } from "./splitter";
 import {
   ConflictError,
@@ -2016,14 +2016,17 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
                   const view = views.get(path);
                   if (view) showTypstDiagnostics(view, path, diagnostics);
                 }}
-                onTypstJump={(path, { line, word }) => {
+                onTypstJump={(path, click) => {
                   const view = views.get(path);
                   if (!view) return;
-                  const at = findInSource(view.state.doc.toString(), line, word);
+                  const at = findInSource(view.state.doc.toString(), click);
                   if (at === null)
                     return void toast.error(
                       t("editor.typstPreview.notFound", { path }),
                     );
+                  // The word found, selected.
+                  const word =
+                    /^[\p{L}\p{N}]+/u.exec(view.state.sliceDoc(at, at + 200))?.[0] ?? "";
                   view.dispatch({
                     selection: { anchor: at, head: at + word.length },
                     effects: EditorView.scrollIntoView(at, { y: "center" }),
@@ -2130,7 +2133,7 @@ function LivePreview({
   /** An open `.typ` file: shown as the PDF it compiles to instead. */
   typstFile: string | null;
   onTypstDiagnostics: (path: string, diagnostics: TypstDiagnostic[]) => void;
-  onTypstJump: (path: string, text: { line: string; word: string }) => void;
+  onTypstJump: (path: string, click: PdfClick) => void;
   commit: string | null;
   onNavigate: (href: string) => boolean;
 }) {

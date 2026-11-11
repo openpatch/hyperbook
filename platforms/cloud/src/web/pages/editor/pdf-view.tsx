@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
+import type { PdfClick } from "./pdf-sync";
 
 /*
  * A PDF drawn with pdf.js inside the editor, instead of the browser's own
@@ -36,30 +37,45 @@ type TextBox = { str: string; x: number; y: number; width: number; height: numbe
 /** The text of each drawn page, for double-clicks (see textAt). */
 const pageTexts = new WeakMap<HTMLCanvasElement, TextBox[]>();
 
+/** The pieces of a page's text, grouped into lines, top to bottom. */
+function linesOf(boxes: TextBox[]): TextBox[][] {
+  const lines: TextBox[][] = [];
+  for (const box of [...boxes].sort((a, b) => a.y - b.y || a.x - b.x)) {
+    const line = lines.at(-1);
+    if (line && Math.abs(line[0]!.y - box.y) < Math.min(line[0]!.height, box.height) * 0.5) line.push(box);
+    else lines.push([box]);
+  }
+  for (const line of lines) line.sort((a, b) => a.x - b.x);
+  return lines;
+}
+
+const textOfLine = (line: TextBox[] | undefined) =>
+  (line ?? []).map((b) => b.str).join(" ").replace(/\s+/g, " ").trim();
+const countWords = (text: string) => text.match(/[\p{L}\p{N}]+/gu)?.length ?? 0;
+
 /**
- * The line of text at (x, y) of a page, and the word under the point; null
- * on empty space.
+ * The line of text at (x, y) of a page: its text, which of its words is
+ * under the point, and the lines around it; null on empty space.
  */
-function textAt(boxes: TextBox[], x: number, y: number): { line: string; word: string } | null {
+function textAt(boxes: TextBox[], x: number, y: number): Omit<PdfClick, "fraction"> | null {
+  const lines = linesOf(boxes);
+  const index = lines.findIndex((line) => line.some((b) => y >= b.y - b.height && y <= b.y + b.height * 0.25));
+  if (index < 0) return null;
+  const line = lines[index]!;
+  // The piece under the point, or the nearest one on its line.
   const hit =
-    boxes.find((b) => x >= b.x && x <= b.x + b.width && y >= b.y - b.height && y <= b.y + b.height * 0.25) ??
-    // Between two words of a line: the nearest piece on that line.
-    boxes
-      .filter((b) => y >= b.y - b.height && y <= b.y + b.height * 0.25)
-      .sort((a, b) => Math.abs(a.x - x) - Math.abs(b.x - x))[0];
-  if (!hit) return null;
-  const line = boxes
-    .filter((b) => Math.abs(b.y - hit.y) < hit.height * 0.5)
-    .sort((a, b) => a.x - b.x)
-    .map((b) => b.str)
-    .join(" ")
-    .replace(/\s+/g, " ")
-    .trim();
-  // The word under the point, by its share of the piece's width.
-  const at = Math.min(hit.str.length - 1, Math.max(0, Math.floor(((x - hit.x) / (hit.width || 1)) * hit.str.length)));
-  const before = hit.str.slice(0, at + 1).match(/[\p{L}\p{N}]*$/u)?.[0] ?? "";
-  const after = hit.str.slice(at + 1).match(/^[\p{L}\p{N}]*/u)?.[0] ?? "";
-  return { line, word: before + after };
+    line.find((b) => x >= b.x && x <= b.x + b.width) ??
+    [...line].sort((a, b) => Math.abs(a.x - x) - Math.abs(b.x - x))[0]!;
+  // Words of the pieces before it, plus those of the piece before the point.
+  const at = Math.min(hit.str.length, Math.max(0, Math.floor(((x - hit.x) / (hit.width || 1)) * hit.str.length)));
+  const head = hit.str.slice(0, at).replace(/[\p{L}\p{N}]+$/u, "");
+  const wordIndex = line.slice(0, line.indexOf(hit)).reduce((n, b) => n + countWords(b.str), 0) + countWords(head);
+  return {
+    line: textOfLine(line),
+    wordIndex,
+    before: textOfLine(lines[index - 1]),
+    after: textOfLine(lines[index + 1]),
+  };
 }
 
 /** Canvases larger than this are scaled down: browsers refuse huge ones. */
@@ -127,8 +143,8 @@ export function PdfView({
 }: {
   data: ArrayBuffer | null;
   className?: string;
-  /** A double-click on a line of text: the line and the word under the pointer. */
-  onTextDoubleClick?: (text: { line: string; word: string }) => void;
+  /** A double-click on a line of text (see pdf-sync.ts). */
+  onTextDoubleClick?: (click: PdfClick) => void;
 }) {
   const { t } = useTranslation();
   const scroller = useRef<HTMLDivElement>(null);
@@ -192,12 +208,15 @@ export function PdfView({
           const boxes = pageTexts.get(event.target);
           if (!boxes) return;
           const rect = event.target.getBoundingClientRect();
-          const text = textAt(boxes, event.clientX - rect.left, event.clientY - rect.top);
-          if (text) {
-            event.preventDefault();
-            window.getSelection()?.removeAllRanges();
-            onTextDoubleClick(text);
-          }
+          const y = event.clientY - rect.top;
+          const text = textAt(boxes, event.clientX - rect.left, y);
+          if (!text) return;
+          event.preventDefault();
+          window.getSelection()?.removeAllRanges();
+          // How far down the document: pages before, plus the part of this one.
+          const pages = [...event.currentTarget.children];
+          const fraction = (pages.indexOf(event.target) + y / rect.height) / pages.length;
+          onTextDoubleClick({ ...text, fraction });
         }}
       />
     </div>
