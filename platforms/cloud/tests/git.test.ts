@@ -16,6 +16,7 @@ import {
   markProjectRoot,
   parseRefUpdates,
   readBlob,
+  updateCheckout,
 } from "../src/server/hosting/git";
 
 const dirs: string[] = [];
@@ -69,6 +70,20 @@ describe("book repositories", () => {
     await mkdir(old);
     await checkout(repo, first.commit, old);
     expect(await readFile(path.join(old, "sub", "b.md"), "utf8")).toBe("2");
+  });
+
+  it("updates a checkout when a folder is moved, removing the emptied folder", async () => {
+    const repo = path.join(await tmp(), "repo.git");
+    await initRepo(repo);
+    const first = await commitTree(repo, await tree({ "a.md": "1", "old/deep/b.md": "2" }), options);
+    const second = await commitTree(repo, await tree({ "a.md": "1", "new/deep/b.md": "2" }), options);
+
+    const out = path.join(await tmp(), "out");
+    await mkdir(out);
+    await checkout(repo, first.commit, out);
+    await updateCheckout(repo, first.commit, second.commit, out);
+    expect((await readdir(out)).sort()).toEqual(["a.md", "new"]);
+    expect(await readFile(path.join(out, "new", "deep", "b.md"), "utf8")).toBe("2");
   });
 
   it("honours the book's .gitignore", async () => {

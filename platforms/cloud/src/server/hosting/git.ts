@@ -7,6 +7,7 @@ import {
   readdirSync,
   readFileSync,
   renameSync,
+  rmdirSync,
   rmSync,
   writeFileSync,
 } from "node:fs";
@@ -327,14 +328,14 @@ export async function updateCheckout(
     for (const file of deleted) {
       let dir = path.dirname(path.join(dest, file));
       while (dir.startsWith(dest + path.sep)) {
-        let empty: boolean;
         try {
-          empty = readdirSync(dir).length === 0;
+          if (readdirSync(dir).length > 0) break;
+          // rmSync refuses a directory without `recursive` (EISDIR), and
+          // recursive would be wrong here: only an empty folder goes.
+          rmdirSync(dir);
         } catch {
           break;
         }
-        if (!empty) break;
-        rmSync(dir, { force: true });
         dir = path.dirname(dir);
       }
     }
