@@ -1,5 +1,15 @@
 # @hyperbook/cloud
 
+## 0.7.0
+
+### Minor Changes
+
+- [`41c1925`](https://github.com/openpatch/hyperbook/commit/41c1925dac21996775acefee0a04cc7a04e7c243) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Admins add fonts every book's Typst documents can use under Settings → Typst fonts. Typst ignores the fonts installed on the server, so a document asking for `("Arial", "Liberation Sans")` fell back to Libertinus Serif; upload Liberation Sans there and it is used. The list shows each font's family name, files are added or removed (never replaced), changing them recompiles the documents, and they are part of backups.
+
+### Patch Changes
+
+- [`d195d9c`](https://github.com/openpatch/hyperbook/commit/d195d9c708e7e416fe436efd995f07dbafce84bb) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - The cloud editor indents with Tab and dedents with Shift+Tab again. CodeMirror's basicSetup binds no Tab key, so Tab moved the focus out of the editor instead of indenting.
+
 ## 0.6.0
 
 ### Minor Changes
