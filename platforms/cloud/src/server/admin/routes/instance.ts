@@ -7,6 +7,7 @@ import { Hono } from "hono";
 import { bodyLimit } from "hono/body-limit";
 import { makeJobDir } from "../../hosting/storage";
 import { PackageError, addPackage, listPackages, removePackage } from "../../hosting/typst-library";
+import { FontError, addFont, listFonts, removeFont } from "../../hosting/typst-fonts";
 import { instanceSettingsInput, type ModelPrices } from "../../../shared/schemas";
 import { audit } from "../../audit";
 import type { Deps } from "../../deps";
@@ -234,6 +235,50 @@ export function instanceRoutes(deps: Deps) {
         action: "instance.typstPackageRemove",
         targetType: "instance",
         data: pkg,
+      });
+      return c.json({ ok: true as const });
+    })
+
+    // The shared Typst fonts every book's documents can use (hosting/typst-fonts.ts).
+    .get("/typst-fonts", async (c) => c.json({ fonts: await listFonts(config) }))
+    .post(
+      "/typst-fonts",
+      bodyLimit({
+        maxSize: config.uploadMaxBytes + 64 * 1024,
+        onError: () => {
+          throw new HTTPException(413, { message: "typstFonts.tooLarge" });
+        },
+      }),
+      async (c) => {
+        const body = await c.req.parseBody();
+        const file = body.file;
+        if (!(file instanceof File)) throw new HTTPException(400, { message: "typstFonts.chooseFile" });
+        let added;
+        try {
+          added = await addFont(config, file.name, Buffer.from(await file.arrayBuffer()), config.uploadMaxBytes);
+        } catch (error) {
+          if (error instanceof FontError) {
+            throw new HTTPException(error.message === "typstFonts.exists" ? 409 : 400, { message: error.message });
+          }
+          throw error;
+        }
+        audit(db, {
+          actorUserId: c.get("user").id,
+          action: "instance.typstFontAdd",
+          targetType: "instance",
+          data: { file: added.file, family: added.family },
+        });
+        return c.json(added);
+      },
+    )
+    .delete("/typst-fonts/:file", async (c) => {
+      const file = c.req.param("file");
+      if (!(await removeFont(config, file))) throw new HTTPException(404, { message: "typstFonts.notFound" });
+      audit(db, {
+        actorUserId: c.get("user").id,
+        action: "instance.typstFontRemove",
+        targetType: "instance",
+        data: { file },
       });
       return c.json({ ok: true as const });
     })

@@ -1,10 +1,11 @@
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { zipSync } from "fflate";
 import { describe, expect, it } from "vitest";
 import { auditLog } from "../src/server/db/schema";
 import { packageManifest } from "../src/server/hosting/typst-library";
-import { typstLibrary } from "../src/server/hosting/typst";
+import { typstFonts, typstLibrary } from "../src/server/hosting/typst";
+import { fontNames } from "../src/server/hosting/typst-fonts";
 import { ADMIN_HOST, ADMIN_ORIGIN, loggedIn, setup } from "./helpers";
 
 const text = (s: string) => new TextEncoder().encode(s);
@@ -136,5 +137,78 @@ describe("completing #import in the editor", () => {
     expect(result.from).toBe(9);
     expect(result.options.map((o: { label: string }) => o.label)).toEqual(["@local/assessio:0.1.0", "@local/vorlage:1.0.0"]);
     expect(complete("#let x = 1")).toBeNull();
+  });
+});
+
+describe("the instance's Typst fonts", () => {
+  const sans = readFileSync(path.join(__dirname, "../../../packages/markdown/assets/math/fonts/KaTeX_SansSerif-Regular.ttf"));
+
+  async function fonts() {
+    const { instance, admin, teacher } = await world();
+    const add = async (bytes: Uint8Array, name = "KaTeX_SansSerif-Regular.ttf", as = admin) => {
+      const form = new FormData();
+      form.append("file", new File([bytes as BlobPart], name, { type: "font/ttf" }));
+      const res = await instance.app.request("/api/instance/typst-fonts", {
+        method: "POST",
+        headers: { host: ADMIN_HOST, origin: ADMIN_ORIGIN, cookie: as.c.cookie },
+        body: form,
+      });
+      return { status: res.status, body: await res.json() };
+    };
+    return { instance, admin, teacher, add };
+  }
+
+  it("reads the family a document names", () => {
+    expect(fontNames(sans)).toEqual({ family: "KaTeX_SansSerif", style: "Regular" });
+    expect(fontNames(Buffer.from("nonsense"))).toEqual({ family: null, style: null });
+  });
+
+  it("are added by admins and listed with their family", async () => {
+    const { instance, admin, add } = await fonts();
+    expect(await add(sans)).toMatchObject({ status: 200, body: { file: "KaTeX_SansSerif-Regular.ttf", family: "KaTeX_SansSerif" } });
+    expect(existsSync(path.join(typstFonts(instance.config), "KaTeX_SansSerif-Regular.ttf"))).toBe(true);
+    expect((await admin.c.get("/api/instance/typst-fonts")).body.fonts).toEqual([
+      { file: "KaTeX_SansSerif-Regular.ttf", family: "KaTeX_SansSerif", style: "Regular", bytes: sans.length },
+    ]);
+    const actions = instance.db.select().from(auditLog).all().map((e) => e.action);
+    expect(actions).toContain("instance.typstFontAdd");
+  });
+
+  it("never replaces a file", async () => {
+    const { add } = await fonts();
+    await add(sans);
+    expect(await add(sans, "katex_sansserif-regular.TTF")).toMatchObject({ status: 409, body: { error: "typstFonts.exists" } });
+  });
+
+  it.each([
+    ["no font", text("not a font at all"), "x.ttf", "typstFonts.notFont"],
+    ["another extension", sans, "x.woff2", "typstFonts.invalidName"],
+    ["a hidden name", sans, ".x.ttf", "typstFonts.invalidName"],
+  ])("refuses %s", async (_, bytes, name, error) => {
+    const { instance, add } = await fonts();
+    expect(await add(bytes, name)).toMatchObject({ status: 400, body: { error } });
+    expect(existsSync(path.join(typstFonts(instance.config), name))).toBe(false);
+  });
+
+  it("keeps a path in the file name out of the folder's way", async () => {
+    const { instance, add } = await fonts();
+    expect(await add(sans, "../../evil.ttf")).toMatchObject({ status: 200, body: { file: "evil.ttf" } });
+    expect(existsSync(path.join(typstFonts(instance.config), "evil.ttf"))).toBe(true);
+  });
+
+  it("are removed by admins", async () => {
+    const { admin, add } = await fonts();
+    await add(sans);
+    expect((await admin.c.raw("DELETE", "/api/instance/typst-fonts/KaTeX_SansSerif-Regular.ttf")).status).toBe(200);
+    expect((await admin.c.get("/api/instance/typst-fonts")).body.fonts).toEqual([]);
+    expect((await admin.c.raw("DELETE", "/api/instance/typst-fonts/KaTeX_SansSerif-Regular.ttf")).status).toBe(404);
+    expect((await admin.c.raw("DELETE", "/api/instance/typst-fonts/..%2Fx.ttf")).status).toBe(404);
+  });
+
+  it("are not for teachers to change or list", async () => {
+    const { teacher, add } = await fonts();
+    expect((await add(sans, "x.ttf", teacher)).status).toBe(403);
+    expect((await teacher.c.get("/api/instance/typst-fonts")).status).toBe(403);
+    expect((await teacher.c.raw("DELETE", "/api/instance/typst-fonts/x.ttf")).status).toBe(403);
   });
 });

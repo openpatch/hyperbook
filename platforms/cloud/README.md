@@ -201,8 +201,9 @@ runs the official `typst` binary on them, with an empty environment, no
 system fonts, `ulimit` limits and a timeout per document. The server
 downloads the binary on first use and checks it against the CLI's list of
 supported versions; it keeps it, Typst's package cache, a compile cache per
-book and the instance's shared packages (Settings → Typst packages) in
-`DATA_DIR/typst`, where builds can neither read nor write. The first use of a
+book, the instance's shared packages (Settings → Typst packages) and fonts
+(Settings → Typst fonts, passed as an extra `--font-path` after the book's
+own) in `DATA_DIR/typst`, where builds can neither read nor write. The first use of a
 Typst version and `@preview` packages need network access; on an instance
 without it, set `TYPST_BINARY`. Unpacking the release needs `tar` with xz
 support. Limits: `TYPST_TIMEOUT_SECONDS`, `TYPST_MAX_JOBS`, `TYPST_MEMORY_MB`,
@@ -367,7 +368,7 @@ and refuses a folder that is not empty. Copy it off the server, e.g. with
   teacher would have to reset them.
 
 To restore: stop the platform, put `database.sqlite`, `books/` and `typst/`
-(the shared Typst packages) of a backup into an empty `/data` volume, start
+(the shared Typst packages and fonts) of a backup into an empty `/data` volume, start
 it with the same `.env`. Published
 books are rebuilt on start (their builds were not in the backup); until
 then they show "not published yet".

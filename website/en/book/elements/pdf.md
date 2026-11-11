@@ -126,7 +126,7 @@ set in `hyperbook.json`:
 |---|---|
 | `version` | The Typst version, one of those Hyperbook supports (0.15.0 and newer). Hyperbook downloads it on first use. Without it the newest is used, with a warning: pin it, so the book builds the same way later. |
 | `packagePath` | A folder in the book with Typst packages, laid out as `<namespace>/<name>/<version>/`. `@local/<name>:<version>` imports come from `local/`; Typst Universe packages the book carries go in `preview/`. Other `@preview` packages are downloaded by Typst. |
-| `fontPath` | A folder in the book with fonts. Fonts installed on the computer are not used, so the book looks the same everywhere. |
+| `fontPath` | A folder in the book with fonts. Fonts installed on the computer are not used, so the book looks the same everywhere. On Hyperbook Cloud, the fonts an admin added under Settings → Typst fonts can be used too. |
 
 Packages shared by several books can live in one folder outside them: set the
 environment variable `HYPERBOOK_TYPST_PACKAGE_PATH` to it. A package in the

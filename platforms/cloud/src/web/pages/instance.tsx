@@ -219,6 +219,7 @@ function InstanceForms({
         }}
       />
       <TypstPackagesSection />
+      <TypstFontsSection />
       {settings.ai.configured && (
         <AiModelsSection
           key={JSON.stringify(settings.ai)}
@@ -802,6 +803,125 @@ function TypstPackagesSection() {
           </Button>
         </div>
         <p className="text-sm text-muted-foreground">{t("typstLibrary.namespaceHint")}</p>
+      </div>
+    </Section>
+  );
+}
+
+/**
+ * The instance's shared Typst fonts (hosting/typst-fonts.ts): Typst ignores
+ * the server's fonts, so these are the ones every book's documents can name
+ * besides Typst's own. Files are added or removed, never replaced.
+ */
+function TypstFontsSection() {
+  const { t } = useTranslation();
+  const queryClient = useQueryClient();
+  const { data } = useQuery({
+    queryKey: ["instance", "typst-fonts"],
+    queryFn: () => unwrap(api.instance["typst-fonts"].$get()),
+  });
+  const [files, setFiles] = useState<File[]>([]);
+  const [busy, setBusy] = useState(false);
+  const [inputKey, setInputKey] = useState(0);
+  const message = (error: unknown) => {
+    const text = error instanceof Error ? error.message : "";
+    return text ? (isMessageKey(text) ? t(text) : text) : t("common.savingFailed");
+  };
+  const refresh = () => queryClient.invalidateQueries({ queryKey: ["instance", "typst-fonts"] });
+
+  const upload = async () => {
+    if (files.length === 0) {
+      toast.error(t("typstFonts.chooseFile"));
+      return;
+    }
+    setBusy(true);
+    let added = 0;
+    try {
+      for (const file of files) {
+        try {
+          await unwrap(api.instance["typst-fonts"].$post({ form: { file } }));
+          added++;
+        } catch (error) {
+          toast.error(`${file.name}: ${message(error)}`);
+        }
+      }
+      if (added > 0) toast.success(t("typstFonts.added", { count: added }));
+      setFiles([]);
+      setInputKey((k) => k + 1);
+      await refresh();
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <Section title={t("typstFonts.title")} description={t("typstFonts.description")}>
+      <div className="grid max-w-3xl gap-4">
+        {data && data.fonts.length > 0 ? (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>{t("typstFonts.family")}</TableHead>
+                <TableHead>{t("typstFonts.file")}</TableHead>
+                <TableHead className="text-right">{t("typstFonts.size")}</TableHead>
+                <TableHead />
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {data.fonts.map((font) => (
+                <TableRow key={font.file}>
+                  <TableCell className="text-sm">
+                    {font.family ? <span className="font-mono">"{font.family}"</span> : "—"}
+                    {font.style ? <span className="text-muted-foreground"> {font.style}</span> : null}
+                  </TableCell>
+                  <TableCell className="font-mono text-sm break-all text-muted-foreground">{font.file}</TableCell>
+                  <TableCell className="text-right text-sm text-muted-foreground">
+                    {Math.max(1, Math.round(font.bytes / 1024))} KB
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <ConfirmButton
+                      size="sm"
+                      title={t("typstFonts.removeTitle", { file: font.file })}
+                      description={t("typstFonts.removeDescription")}
+                      confirmLabel={t("typstFonts.remove")}
+                      onConfirm={async () => {
+                        try {
+                          await unwrap(api.instance["typst-fonts"][":file"].$delete({ param: { file: font.file } }));
+                          await refresh();
+                        } catch (error) {
+                          toast.error(message(error));
+                        }
+                      }}
+                    >
+                      <Trash2Icon className="size-4" />
+                      <span className="sr-only">{t("typstFonts.remove")}</span>
+                    </ConfirmButton>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        ) : (
+          <p className="text-sm text-muted-foreground">{t("typstFonts.empty")}</p>
+        )}
+        <div className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
+          <div className="grid gap-1.5">
+            <Label htmlFor="typst-font">{t("typstFonts.files")}</Label>
+            <Input
+              key={inputKey}
+              id="typst-font"
+              type="file"
+              multiple
+              accept=".ttf,.otf,.ttc,.otc,font/ttf,font/otf,font/collection"
+              onChange={(e) => setFiles(Array.from(e.target.files ?? []))}
+            />
+          </div>
+          <Button disabled={busy} onClick={() => void upload()}>
+            <PlusIcon className="size-4" />
+            {t("typstFonts.upload")}
+          </Button>
+        </div>
+        <p className="text-sm text-muted-foreground">{t("typstFonts.hint")}</p>
       </div>
     </Section>
   );

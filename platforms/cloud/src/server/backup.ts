@@ -5,7 +5,7 @@ import type { Config } from "./config";
 import { hyperbookVersion } from "./hosting/runner";
 import { repoDir } from "./hosting/storage";
 
-import { typstLibrary } from "./hosting/typst";
+import { typstFonts, typstLibrary } from "./hosting/typst";
 
 /*
  * `node dist/server/main.js backup <dir>`: a consistent copy of an instance
@@ -14,6 +14,7 @@ import { typstLibrary } from "./hosting/typst";
  *   <dir>/database.sqlite        SQLite's online backup of the database
  *   <dir>/books/<id>/repo.git/   every book's repository (its source)
  *   <dir>/typst/library/         the shared Typst packages admins uploaded
+ *   <dir>/typst/fonts/           the shared Typst fonts admins uploaded
  *   <dir>/backup.json            when, and with which version
  *
  * Builds are left out: after a restore the platform rebuilds published books
@@ -53,6 +54,8 @@ export async function backup(config: Config, target: string) {
   // Uploaded, not downloaded: it cannot come back on its own.
   const library = typstLibrary(config);
   if (existsSync(library)) cpSync(library, path.join(dest, "typst", "library"), { recursive: true });
+  const fonts = typstFonts(config);
+  if (existsSync(fonts)) cpSync(fonts, path.join(dest, "typst", "fonts"), { recursive: true });
 
   writeFileSync(
     path.join(dest, "backup.json"),

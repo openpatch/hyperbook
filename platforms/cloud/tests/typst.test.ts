@@ -13,6 +13,7 @@ import {
   parseTypstManifest,
   typstCacheDir,
   typstDir,
+  typstFonts,
   typstLibrary,
 } from "../src/server/hosting/typst";
 import { dataDirs, setup } from "./helpers";
@@ -110,6 +111,9 @@ async function checkout(jobs: unknown[], files: Record<string, string>, extra: R
   return { jobDir, srcDir, outDir };
 }
 
+/** A small font with a license that allows shipping it (MIT), tracked in the repository. */
+const KATEX_SANS = path.join(__dirname, "../../../packages/markdown/assets/math/fonts/KaTeX_SansSerif-Regular.ttf");
+
 const BLATT = {
   "templates/kopf.typ": "#let kopf(t) = heading(t)\n",
   "book/blatt.typ": '#import "/templates/kopf.typ": kopf\n#kopf[Blatt]\n#sys.inputs.at("loesung", default: "")\n',
@@ -143,6 +147,20 @@ describe.skipIf(!typst)("building Typst documents", () => {
     const second = await checkout([job, { ...job, out: "/blatt.v.pdf", inputs: { loesung: "ja" } }], BLATT);
     expect((await build(config, second)).outcome).toMatchObject({ ok: true, built: 0, cached: 2 });
     expect(await readFile(path.join(second.outDir, "blatt.pdf"))).toEqual(await readFile(path.join(first.outDir, "blatt.pdf")));
+  });
+
+  it("uses the instance's shared fonts, and compiles again when they change", async () => {
+    const config = typstConfig();
+    const doc = { "book/blatt.typ": '#set text(font: "KaTeX_SansSerif")\nBlatt\n' };
+    const before = await checkout([job], doc);
+    expect((await build(config, before)).outcome).toMatchObject({ ok: true, built: 1 });
+    expect((await readFile(path.join(before.outDir, "blatt.pdf"))).toString("latin1")).not.toContain("KaTeX_SansSerif");
+
+    await mkdir(typstFonts(config), { recursive: true });
+    await writeFile(path.join(typstFonts(config), "KaTeX_SansSerif-Regular.ttf"), await readFile(KATEX_SANS));
+    const after = await checkout([job], doc);
+    expect((await build(config, after)).outcome).toMatchObject({ ok: true, built: 1, cached: 0 });
+    expect((await readFile(path.join(after.outDir, "blatt.pdf"))).toString("latin1")).toContain("KaTeX_SansSerif");
   });
 
   it("compiles again when an imported file changed, and keeps only what the build used", async () => {

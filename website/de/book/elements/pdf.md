@@ -126,7 +126,7 @@ steht in der `hyperbook.json`:
 |---|---|
 | `version` | Die Typst-Version, eine der von Hyperbook unterstützten (0.15.0 und neuer). Hyperbook lädt sie beim ersten Gebrauch herunter. Ohne Angabe wird die neueste genommen, mit einer Warnung: Lege sie fest, damit das Buch später genauso gebaut wird. |
 | `packagePath` | Ein Ordner im Buch mit Typst-Paketen im Aufbau `<namespace>/<name>/<version>/`. Importe `@local/<name>:<version>` kommen aus `local/`; Pakete aus Typst Universe, die das Buch mitbringt, liegen in `preview/`. Andere `@preview`-Pakete lädt Typst herunter. |
-| `fontPath` | Ein Ordner im Buch mit Schriften. Auf dem Rechner installierte Schriften werden nicht benutzt, damit das Buch überall gleich aussieht. |
+| `fontPath` | Ein Ordner im Buch mit Schriften. Auf dem Rechner installierte Schriften werden nicht benutzt, damit das Buch überall gleich aussieht. In Hyperbook Cloud können zusätzlich die Schriften benutzt werden, die ein Admin unter Einstellungen → Typst-Schriften hinzugefügt hat. |
 
 Pakete für mehrere Bücher können in einem gemeinsamen Ordner außerhalb liegen:
 Setze die Umgebungsvariable `HYPERBOOK_TYPST_PACKAGE_PATH` auf ihn. Ein Paket im

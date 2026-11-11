@@ -118,6 +118,9 @@ a word.
   [Where Typst lives](#where-typst-lives)).
 - `fontPath`: a folder in the book, passed as `--font-path`. The build runs
   with `--ignore-system-fonts`, so a book compiles the same on every machine.
+  In the Cloud, the instance's shared fonts (`DATA_DIR/typst/fonts/`,
+  Settings → Typst fonts) follow as a second `--font-path`; a hash over that
+  folder is part of every compile cache key, like the book's font folder.
 - `exclude`: globs matched against a file's address in the site, without
   the leading slash (`intern/**` covers `public/intern/…` and
   `book/intern/…` alike), applied to `public/` and the non-page files under
@@ -437,6 +440,12 @@ own, `DATA_DIR/typst/`, which is in none of the CLI's permission flags:
   is the one part of `DATA_DIR/typst/` the sandboxed CLI may **read**; it
   may write none of it. Unlike the rest it belongs in backups: it is
   uploaded, not downloaded.
+- `DATA_DIR/typst/fonts/` — the instance's shared fonts, one flat folder of
+  `.ttf`/`.otf`/`.ttc`/`.otc` files. Only the admin page writes it (files
+  are checked for a font header, never replaced, every change audited);
+  only the server's Typst compiles read it, not the sandboxed CLI, so
+  `:::typst` blocks in the browser do not get them. In backups, like the
+  library.
 - If the download fails (no network, wrong hash), the build fails with a
   message that says so and names the folder. An operator of an instance
   without egress puts the binary there by hand; the same hash check

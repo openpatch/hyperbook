@@ -20,7 +20,7 @@ import type { BuildLog } from "./runner";
  * - The manifest is untrusted input: every path is checked, the checkout may
  *   hold no links, the output goes only into the build's output.
  * - Typst runs with an empty environment, `--root` at the checkout and no
- *   system fonts, under `ulimit` (address space, file size, no core files),
+ *   system fonts (only its own, the book's and the instance's shared ones), under `ulimit` (address space, file size, no core files),
  *   with a timeout per document inside the build's own deadline.
  * - Its binary is fetched by the server, checked against the CLI's list of
  *   supported versions, and kept where the sandboxed CLI can neither read nor
@@ -38,6 +38,8 @@ const binDir = (config: Config) => path.join(typstDir(config), "bin");
 export const typstPackageCache = (config: Config) => path.join(typstDir(config), "packages");
 /** The instance's shared packages, written only by the admin page. */
 export const typstLibrary = (config: Config) => path.join(typstDir(config), "library");
+/** The instance's shared fonts, written only by the admin page (hosting/typst-fonts.ts). */
+export const typstFonts = (config: Config) => path.join(typstDir(config), "fonts");
 export const typstCacheDir = (config: Config, bookId: number) =>
   path.join(typstDir(config), "cache", String(bookId));
 
@@ -256,6 +258,8 @@ export type CompileRequest = {
   packagePath: string | null;
   packageCachePath: string;
   fontPath: string | null;
+  /** The instance's shared fonts, after the book's own. */
+  sharedFontPath: string | null;
   creationTimestamp: number | null;
   timeoutMs: number;
   memoryMb: number;
@@ -290,6 +294,7 @@ export async function compileTypst(request: CompileRequest): Promise<CompileOutc
     request.packageCachePath,
     ...(request.packagePath ? ["--package-path", request.packagePath] : []),
     ...(request.fontPath ? ["--font-path", path.join(request.root, request.fontPath)] : []),
+    ...(request.sharedFontPath ? ["--font-path", request.sharedFontPath] : []),
     ...(request.creationTimestamp !== null ? ["--creation-timestamp", String(request.creationTimestamp)] : []),
     ...Object.entries(job.inputs).flatMap(([key, value]) => ["--input", `${key}=${value}`]),
     job.src,
@@ -414,9 +419,8 @@ async function hashDeps(deps: string[], places: Places): Promise<Record<string, 
   return hashes;
 }
 
-async function fontsHash(root: string, fontPath: string | null): Promise<string> {
-  if (!fontPath) return "";
-  const dir = path.join(root, fontPath);
+async function fontsHash(dir: string | null): Promise<string> {
+  if (!dir) return "";
   const lines: string[] = [];
   const walk = async (current: string) => {
     const entries = await readdir(current, { withFileTypes: true }).catch(() => []);
@@ -594,6 +598,13 @@ export class TypstService {
     return into;
   }
 
+  /** The `--font-path` of the instance's shared fonts; null while there are none. */
+  async sharedFontPath(): Promise<string | null> {
+    const dir = typstFonts(this.config);
+    const entries = await readdir(dir).catch(() => [] as string[]);
+    return entries.length > 0 ? dir : null;
+  }
+
   /**
    * Builds the Typst documents of a build whose CLI step wrote a manifest.
    * No manifest: nothing to do.
@@ -632,7 +643,9 @@ export class TypstService {
       packages: path.join(request.jobDir, "typst-packages"),
       cache: packageCachePath,
     };
-    const fonts = await fontsHash(srcDir, manifest.fontPath);
+    const sharedFontPath = await this.sharedFontPath();
+    const fonts = await fontsHash(manifest.fontPath ? path.join(srcDir, manifest.fontPath) : null);
+    const sharedFonts = await fontsHash(sharedFontPath);
     const cacheDir = typstCacheDir(this.config, request.bookId);
     await mkdir(cacheDir, { recursive: true });
     const used = new Set<string>();
@@ -664,6 +677,7 @@ export class TypstService {
         manifest.packagePath,
         manifest.fontPath,
         fonts,
+        sharedFonts,
         request.creationTimestamp,
       ]);
       const name = createHash("sha256").update(JSON.stringify([job.src, job.inputs])).digest("hex").slice(0, 32);
@@ -686,6 +700,7 @@ export class TypstService {
         packagePath,
         packageCachePath,
         fontPath: manifest.fontPath,
+        sharedFontPath,
         creationTimestamp: request.creationTimestamp,
         timeoutMs: Math.min(this.config.typst.timeoutMs, left),
         memoryMb: this.config.typst.memoryMb,
@@ -789,6 +804,7 @@ export class TypstService {
           packagePath,
           packageCachePath,
           fontPath: request.fontPath,
+          sharedFontPath: await this.sharedFontPath(),
           // Fixed, so the same text gives the same bytes and the editor's
           // pane can tell that nothing changed (no reload, no flash).
           creationTimestamp: 0,
