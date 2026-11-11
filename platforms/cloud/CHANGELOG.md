@@ -1,5 +1,19 @@
 # @hyperbook/cloud
 
+## 0.8.0
+
+### Minor Changes
+
+- [`d89c140`](https://github.com/openpatch/hyperbook/commit/d89c140fbe26e5d277e5e8d7d7ca3356b38dab5a) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Review in the editor: comments on the source with threads, replies, suggestions and email digests; a commenter role; and named access links that let people without an account comment on or edit a book. Wrapped lines keep their indentation, and the Typst preview downloads its PDF and jumps to the source on a double-click.
+
+### Patch Changes
+
+- [`8bc1057`](https://github.com/openpatch/hyperbook/commit/8bc10571841062bc57487d1bc4f363a58855a9be) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - The editor hides its Publish button while publishing is disabled for the book.
+
+- [`7387ae9`](https://github.com/openpatch/hyperbook/commit/7387ae9d4d227d555853342f65fead7a1b9b9416) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Disabling and allowing publishing ask for the book's title, the lock takes the live card's place on the book page, and no version shows as live while the book is offline.
+
+- [`0756048`](https://github.com/openpatch/hyperbook/commit/07560486e33eb9cc9140336ebd5280608ba236dd) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - A double-click on the Typst preview's PDF finds the clicked line, not the first place its words occur: the words must follow one another, the lines around it and the click's place in the document tell repeated phrases apart, and the clicked word is selected.
+
 ## 0.7.0
 
 ### Minor Changes
