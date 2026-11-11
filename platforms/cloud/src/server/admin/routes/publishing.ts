@@ -362,7 +362,10 @@ export function bookPublishingRoutes({ db, config, mailer, builds: queue, checks
         listVersionTags(repo).catch(() => []),
         listTags(repo).catch(() => []),
       ]);
-      const liveCommit = tags.find((t) => t.name === "published")?.commit;
+      // The "published" tag stays when a book goes offline (unpublished, or
+      // its publishing locked); then no version is live.
+      const liveCommit =
+        book.publishedBuildId === null ? undefined : tags.find((t) => t.name === "published")?.commit;
       const rows = db
         .select({ id: builds.id, commit: builds.commit, note: builds.note, hyperbookVersion: builds.hyperbookVersion })
         .from(builds)

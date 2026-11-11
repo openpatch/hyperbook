@@ -89,4 +89,33 @@ describe("publishing", () => {
     await page.getByLabel("Upload a zip of your book").setInputFiles(zip);
     await page.getByText("The zip contains no hyperbook.json or hyperlibrary.json").waitFor();
   });
+
+  it("locks and unlocks publishing only after the book's title is typed", async () => {
+    await page.goto(`${server.origin}/books`);
+    await page.getByRole("button", { name: "New book" }).click();
+    const dialog = page.getByRole("dialog");
+    await dialog.getByLabel("Title").fill("Exams 10b");
+    await dialog.getByRole("button", { name: "Create book" }).click();
+    await page.getByText("Not published yet.").waitFor();
+
+    await page.getByRole("button", { name: "Manage" }).click();
+    await page.getByRole("menuitem", { name: "Disable publishing…" }).click();
+    const lock = page.getByRole("button", { name: "Disable publishing", exact: true });
+    expect(await lock.isDisabled()).toBe(true);
+    await dialog.getByLabel(/to confirm/).fill("Exams");
+    expect(await lock.isDisabled()).toBe(true);
+    await dialog.getByLabel(/to confirm/).fill("Exams 10b");
+    await lock.click();
+    // The lock takes the live card's place.
+    await page.getByText("Publishing is disabled for this book").waitFor();
+    await page.getByText("Not published yet.").waitFor({ state: "detached" });
+
+    await page.getByRole("button", { name: "Allow publishing" }).click();
+    const allow = dialog.getByRole("button", { name: "Allow publishing" });
+    expect(await allow.isDisabled()).toBe(true);
+    await dialog.getByLabel(/to confirm/).fill("Exams 10b");
+    await allow.click();
+    await page.getByText("Not published yet.").waitFor();
+  });
 });
+

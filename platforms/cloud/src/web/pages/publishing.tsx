@@ -7,7 +7,6 @@ import { toast } from "sonner";
 import { ConfirmButton } from "@/components/confirm-button";
 import { Section } from "@/components/page-header";
 import { SecretDialog } from "@/components/secret-dialog";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -26,6 +25,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ApiError, api, unwrap } from "@/lib/api";
 import type { Book } from "@/lib/books";
@@ -132,7 +132,7 @@ export function PublishingSection({ book }: { book: Book }) {
   const { data: versions } = useQuery({ queryKey: versionsKey, queryFn: () => fetchVersions(id) });
   const { data: head } = useHead(id);
   const [logFor, setLogFor] = useState<number | null>(null);
-  const [dialog, setDialog] = useState<"publish" | "request" | "upload" | "git" | "unpublish" | "lock" | null>(null);
+  const [dialog, setDialog] = useState<"publish" | "request" | "upload" | "git" | "unpublish" | "lock" | "unlock" | null>(null);
   const [showAll, setShowAll] = useState(false);
 
   // A finished build may have changed what is published.
@@ -248,77 +248,79 @@ export function PublishingSection({ book }: { book: Book }) {
         </div>
       }
     >
-      {locked && (
-        <Alert className="mb-4">
-          <LockIcon />
-          <AlertTitle>{t("publishing.lock.title")}</AlertTitle>
-          <AlertDescription>
-            <p>{t("publishing.lock.description")}</p>
+      <div className="mb-4 grid gap-4 sm:grid-cols-2">
+        {locked ? (
+          // Locked books are offline: the lock takes the live card's place.
+          <div className="rounded-lg border p-4" role="status">
+            <div className="mb-2 flex h-8 items-center gap-2 text-sm text-muted-foreground">
+              <LockIcon className="size-4" aria-hidden />
+              {t("publishing.lock.badge")}
+            </div>
+            <p className="font-medium">{t("publishing.lock.title")}</p>
+            <p className="mt-1 text-sm text-muted-foreground">{t("publishing.lock.description")}</p>
             {isOwner ? (
-              // Allowing publishes nothing by itself, so it needs no confirmation.
-              <Button variant="outline" size="sm" className="mt-2" onClick={() => void setLock(false)}>
+              <Button variant="outline" size="sm" className="mt-3" onClick={() => setDialog("unlock")}>
                 {t("publishing.lock.allow")}
               </Button>
             ) : (
-              <p>{t("publishing.lock.ownersAllow")}</p>
-            )}
-          </AlertDescription>
-        </Alert>
-      )}
-      <div className="mb-4 grid gap-4 sm:grid-cols-2">
-        <div className="rounded-lg border p-4">
-          <div className="mb-2 flex h-8 items-center justify-between gap-2">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              {t("publishing.live")}
-              {liveVersion && <Badge>{liveVersion.tag}</Badge>}
-            </div>
-            {publishing ? (
-              <Badge variant="secondary">{t("publishing.publishingNow")}</Badge>
-            ) : upToDate ? (
-              <Badge variant="outline">{t("publishing.isLive")}</Badge>
-            ) : (
-              canPublish && (
-                <Button size="sm" disabled={!hasSource} onClick={() => setDialog("publish")}>
-                  {t("publishing.publish")}
-                </Button>
-              )
+              <p className="mt-1 text-sm text-muted-foreground">{t("publishing.lock.ownersAllow")}</p>
             )}
           </div>
-          {book.publishedAt ? (
-            <>
-              <a href={book.url} target="_blank" rel="noreferrer" className="font-medium text-primary hover:underline">
-                {book.url.replace(/^https?:\/\//, "")}
-              </a>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {t("publishing.since", { when: new Date(book.publishedAt).toLocaleString() })}
-              </p>
-              {liveVersion?.note && <p className="mt-1 text-sm">{liveVersion.note}</p>}
-            </>
-          ) : (
-            <p className="text-muted-foreground">{t("publishing.notPublishedYet")}</p>
-          )}
-          {failedPublish && (
-            <div className="mt-3 rounded-md border border-destructive/40 bg-destructive/5 p-3 text-sm" role="alert">
-              <p className="font-medium text-destructive">{t("publishing.failed.title")}</p>
-              <p className="mt-1 text-muted-foreground">{t("publishing.failed.hint")}</p>
-              {failedPublish.error && (
-                <p className="mt-1 whitespace-pre-wrap text-destructive">{failedPublish.error}</p>
+        ) : (
+          <div className="rounded-lg border p-4">
+            <div className="mb-2 flex h-8 items-center justify-between gap-2">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                {t("publishing.live")}
+                {liveVersion && <Badge>{liveVersion.tag}</Badge>}
+              </div>
+              {publishing ? (
+                <Badge variant="secondary">{t("publishing.publishingNow")}</Badge>
+              ) : upToDate ? (
+                <Badge variant="outline">{t("publishing.isLive")}</Badge>
+              ) : (
+                canPublish && (
+                  <Button size="sm" disabled={!hasSource} onClick={() => setDialog("publish")}>
+                    {t("publishing.publish")}
+                  </Button>
+                )
               )}
-              <Button size="sm" variant="outline" className="mt-2" onClick={() => setLogFor(failedPublish.id)}>
-                {t("publishing.failed.showLog")}
-              </Button>
             </div>
-          )}
-          {request && <PublishRequestNotice book={book} request={request} />}
-          {!canPublish && !upToDate && hasSource && !request && (
-            <div className="mt-2 flex flex-wrap items-center gap-2">
-              <p className="text-sm text-muted-foreground">{t("publishing.ownersPublish")}</p>
-              <Button size="sm" variant="outline" onClick={() => setDialog("request")}>
-                {t("publishing.request.send")}
-              </Button>
-            </div>
-          )}
-        </div>
+            {book.publishedAt ? (
+              <>
+                <a href={book.url} target="_blank" rel="noreferrer" className="font-medium text-primary hover:underline">
+                  {book.url.replace(/^https?:\/\//, "")}
+                </a>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {t("publishing.since", { when: new Date(book.publishedAt).toLocaleString() })}
+                </p>
+                {liveVersion?.note && <p className="mt-1 text-sm">{liveVersion.note}</p>}
+              </>
+            ) : (
+              <p className="text-muted-foreground">{t("publishing.notPublishedYet")}</p>
+            )}
+            {failedPublish && (
+              <div className="mt-3 rounded-md border border-destructive/40 bg-destructive/5 p-3 text-sm" role="alert">
+                <p className="font-medium text-destructive">{t("publishing.failed.title")}</p>
+                <p className="mt-1 text-muted-foreground">{t("publishing.failed.hint")}</p>
+                {failedPublish.error && (
+                  <p className="mt-1 whitespace-pre-wrap text-destructive">{failedPublish.error}</p>
+                )}
+                <Button size="sm" variant="outline" className="mt-2" onClick={() => setLogFor(failedPublish.id)}>
+                  {t("publishing.failed.showLog")}
+                </Button>
+              </div>
+            )}
+            {request && <PublishRequestNotice book={book} request={request} />}
+            {!canPublish && !upToDate && hasSource && !request && (
+              <div className="mt-2 flex flex-wrap items-center gap-2">
+                <p className="text-sm text-muted-foreground">{t("publishing.ownersPublish")}</p>
+                <Button size="sm" variant="outline" onClick={() => setDialog("request")}>
+                  {t("publishing.request.send")}
+                </Button>
+              </div>
+            )}
+          </div>
+        )}
         <div className="rounded-lg border p-4">
           <div className="mb-2 flex h-8 items-center gap-2 text-sm text-muted-foreground">
             {t("publishing.preview")}
@@ -392,22 +394,31 @@ export function PublishingSection({ book }: { book: Book }) {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={dialog === "lock"} onOpenChange={(open) => !open && setDialog(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{t("publishing.lock.disableTitle", { title: book.title })}</DialogTitle>
-            <DialogDescription>
-              {t("publishing.lock.disableDescription")}
-              {book.publishedAt && <> {t("publishing.lock.disableUnpublishes")}</>}
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="destructive" onClick={() => void setLock(true)}>
-              {t("publishing.lock.confirm")}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* Both ways ask for the book's title: an exam book must not go public by a stray click. */}
+      <TitleConfirmDialog
+        open={dialog === "lock"}
+        onClose={() => setDialog(null)}
+        title={t("publishing.lock.disableTitle", { title: book.title })}
+        description={
+          <>
+            {t("publishing.lock.disableDescription")}
+            {book.publishedAt && <> {t("publishing.lock.disableUnpublishes")}</>}
+          </>
+        }
+        confirmText={book.title}
+        confirmLabel={t("publishing.lock.confirm")}
+        variant="destructive"
+        onConfirm={() => setLock(true)}
+      />
+      <TitleConfirmDialog
+        open={dialog === "unlock"}
+        onClose={() => setDialog(null)}
+        title={t("publishing.lock.allowTitle", { title: book.title })}
+        description={t("publishing.lock.allowDescription")}
+        confirmText={book.title}
+        confirmLabel={t("publishing.lock.allow")}
+        onConfirm={() => setLock(false)}
+      />
 
       <Dialog open={dialog === "unpublish"} onOpenChange={(open) => !open && setDialog(null)}>
         <DialogContent>
@@ -930,6 +941,71 @@ export function LogDialog({ buildId, onClose }: { buildId: number | null; onClos
             <DownloadIcon aria-hidden /> {t("publishing.downloadLog")}
           </Button>
         </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+/** A dialog whose button stays disabled until `confirmText` (the book's title) is typed. */
+function TitleConfirmDialog({
+  open,
+  onClose,
+  title,
+  description,
+  confirmText,
+  confirmLabel,
+  variant = "default",
+  onConfirm,
+}: {
+  open: boolean;
+  onClose: () => void;
+  title: string;
+  description: React.ReactNode;
+  confirmText: string;
+  confirmLabel: string;
+  variant?: "default" | "destructive";
+  onConfirm: () => Promise<unknown>;
+}) {
+  const { t } = useTranslation();
+  const [typed, setTyped] = useState("");
+  const [busy, setBusy] = useState(false);
+  return (
+    <Dialog
+      open={open}
+      onOpenChange={(next) => {
+        setTyped("");
+        if (!next) onClose();
+      }}
+    >
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{title}</DialogTitle>
+          <DialogDescription>{description}</DialogDescription>
+        </DialogHeader>
+        <div className="space-y-2">
+          <Label htmlFor="title-confirm">{t("common.typeToConfirm", { text: confirmText })}</Label>
+          <Input id="title-confirm" autoComplete="off" value={typed} onChange={(e) => setTyped(e.target.value)} />
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>
+            {t("common.cancel")}
+          </Button>
+          <Button
+            variant={variant}
+            disabled={busy || typed.trim() !== confirmText.trim()}
+            onClick={async () => {
+              setBusy(true);
+              try {
+                await onConfirm();
+                setTyped("");
+              } finally {
+                setBusy(false);
+              }
+            }}
+          >
+            {confirmLabel}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

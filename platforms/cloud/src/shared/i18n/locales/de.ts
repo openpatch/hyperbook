@@ -1165,6 +1165,9 @@ export const de: Messages = {
     unpublishDescription:
       "Die Adresse zeigt „nicht veröffentlicht“, bis der nächste Build fertig ist. Nichts wird gelöscht.",
     lock: {
+      allowTitle: "Veröffentlichen für „{{title}}“ erlauben?",
+      allowDescription:
+        "Eigentümer können das Buch dann wieder veröffentlichen und zurücksetzen. Das Erlauben veröffentlicht nichts; das Buch bleibt offline, bis es jemand veröffentlicht.",
       badge: "Veröffentlichung gesperrt",
       title: "Die Veröffentlichung dieses Buchs ist gesperrt",
       description:

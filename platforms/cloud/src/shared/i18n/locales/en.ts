@@ -1139,6 +1139,9 @@ export const en = {
     unpublishDescription:
       "The address shows “not published” until the next build. Nothing is deleted.",
     lock: {
+      allowTitle: "Allow publishing for “{{title}}”?",
+      allowDescription:
+        "Owners can then publish the book and roll it back again. Allowing publishes nothing by itself; the book stays offline until someone publishes it.",
       badge: "Publishing disabled",
       title: "Publishing is disabled for this book",
       description:

@@ -60,6 +60,17 @@ describe("publishing lock", () => {
     expect((await owner.c.get(`/api/books/${book.id}/head`)).body.request).toBeNull();
   });
 
+  it("leaves no version marked live once it took the book offline", async () => {
+    const { instance, owner, book, lock } = await world();
+    await owner.c.post(`/api/books/${book.id}/publish`, {});
+    await instance.builds.idle();
+    const versions = () => owner.c.get(`/api/books/${book.id}/versions`).then((r) => r.body);
+    expect(await versions()).toMatchObject([{ tag: "v1", live: true }]);
+    await lock(true);
+    // The version stays listed, but nothing is live.
+    expect(await versions()).toMatchObject([{ tag: "v1", live: false }]);
+  });
+
   it("keeps a publish build that is still running from going live", async () => {
     const { instance, owner, book, get, lock } = await world();
     const publish = await owner.c.post(`/api/books/${book.id}/publish`, {});
