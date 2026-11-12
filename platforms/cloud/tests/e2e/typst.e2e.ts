@@ -40,8 +40,10 @@ describe.skipIf(!typst)("the editor's Typst preview", () => {
     await page.getByRole("button", { name: "Empty book" }).click();
 
     await page.getByRole("button", { name: "New file" }).click();
-    await dialog.getByLabel("Path").fill("book/blatt.typ");
-    await dialog.getByRole("button", { name: "Create" }).click();
+
+    await page.getByLabel("Name of the new file").fill("blatt.typ");
+
+    await page.keyboard.press("Enter");
     await page.getByRole("tab", { name: "blatt.typ" }).waitFor();
     await page.locator('.cm-content[aria-label*="blatt.typ"]').click();
     await page.keyboard.type("= Test\n\nDas ist ein super Test.\n");
@@ -104,8 +106,8 @@ describe.skipIf(!typst)("the editor's Typst preview", () => {
   it("downloads the PDF, and a double-click on a line finds it in the source", async () => {
     const dialog = page.getByRole("dialog");
     await page.getByRole("button", { name: "New file" }).click();
-    await dialog.getByLabel("Path").fill("book/jump.typ");
-    await dialog.getByRole("button", { name: "Create" }).click();
+    await page.getByLabel("Name of the new file").fill("jump.typ");
+    await page.keyboard.press("Enter");
     await page.getByRole("tab", { name: "jump.typ" }).waitFor();
     await page.locator('.cm-content[aria-label*="jump.typ"]').click();
     // Big text from the top left corner, so the first line is easy to hit.

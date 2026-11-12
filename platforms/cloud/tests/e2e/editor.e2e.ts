@@ -86,9 +86,8 @@ describe("editor", () => {
 
   it("adds a page that the preview follows", async () => {
     await page.getByRole("button", { name: "New file" }).click();
-    const dialog = page.getByRole("dialog");
-    await dialog.getByLabel("Path").fill("book/echo.md");
-    await dialog.getByRole("button", { name: "Create" }).click();
+    await page.getByLabel("Name of the new file").fill("echo.md");
+    await page.keyboard.press("Enter");
     await page.getByRole("tab", { name: "echo.md" }).waitFor();
     const preview = page.frameLocator('iframe[title="Preview"][aria-hidden="false"]');
     await preview.getByRole("heading", { name: "Echo" }).waitFor({ timeout: 60_000 });
@@ -96,9 +95,8 @@ describe("editor", () => {
 
   it("opens a tab's menu from the keyboard and closes the tab with it", async () => {
     await page.getByRole("button", { name: "New file" }).click();
-    const dialog = page.getByRole("dialog");
-    await dialog.getByLabel("Path").fill("book/keys.md");
-    await dialog.getByRole("button", { name: "Create" }).click();
+    await page.getByLabel("Name of the new file").fill("keys.md");
+    await page.keyboard.press("Enter");
     const tab = page.getByRole("tab", { name: "keys.md" });
     await tab.waitFor();
 
@@ -258,9 +256,8 @@ describe("editor", () => {
 
   it("edits a learning map in its own editor and saves it as a file", async () => {
     await page.getByRole("button", { name: "New file" }).click();
-    const dialog = page.getByRole("dialog");
-    await dialog.getByLabel("Path").fill("book/map.learningmap");
-    await dialog.getByRole("button", { name: "Create" }).click();
+    await page.getByLabel("Name of the new file").fill("map.learningmap");
+    await page.keyboard.press("Enter");
     await page.getByRole("tab", { name: "map.learningmap" }).waitFor();
 
     const map = page.frameLocator('iframe[title="learningmap editor"]');
@@ -298,9 +295,8 @@ describe("editor", () => {
     const requests: string[] = [];
     page.on("requestfinished", (req) => requests.push(req.url()));
     await page.getByRole("button", { name: "New file" }).click();
-    const dialog = page.getByRole("dialog");
-    await dialog.getByLabel("Path").fill("book/sketch.excalidraw");
-    await dialog.getByRole("button", { name: "Create" }).click();
+    await page.getByLabel("Name of the new file").fill("sketch.excalidraw");
+    await page.keyboard.press("Enter");
     await page.getByRole("tab", { name: "sketch.excalidraw" }).waitFor();
 
     const frame = page.frameLocator('iframe[title="excalidraw editor"]');
@@ -326,9 +322,8 @@ describe("editor", () => {
 
   it("saves a Java memory diagram with the playground's own save button", async () => {
     await page.getByRole("button", { name: "New file" }).click();
-    const dialog = page.getByRole("dialog");
-    await dialog.getByLabel("Path").fill("book/memory.jmp");
-    await dialog.getByRole("button", { name: "Create" }).click();
+    await page.getByLabel("Name of the new file").fill("memory.jmp");
+    await page.keyboard.press("Enter");
     await page.getByRole("tab", { name: "memory.jmp" }).waitFor();
 
     // An empty file starts with the playground's example diagram, unsaved.

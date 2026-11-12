@@ -169,10 +169,18 @@ export function copyName(path: string, taken: (p: string) => boolean): string {
 
 /** A starter for a new file, by its extension. */
 export function starter(path: string, language = "en"): string {
-  const name = path.split("/").pop()!;
+  const segments = path.split("/");
+  const name = segments.pop()!;
   if (name.endsWith(".md")) {
-    const title = name.replace(/\.md$/, "").replace(/[-_]+/g, " ");
-    const heading = title === "index" ? "New page" : title.charAt(0).toUpperCase() + title.slice(1);
+    let title = name.replace(/\.md$/, "");
+    // A folder's index page is named after the folder ("first-steps/index.md"
+    // → "First steps"); the book's own index is not named "Book".
+    if (title === "index") {
+      const folder = segments.length > 1 ? segments[segments.length - 1]! : "";
+      title = folder;
+    }
+    title = title.replace(/[-_]+/g, " ").trim();
+    const heading = title ? title.charAt(0).toUpperCase() + title.slice(1) : "New page";
     return `---\nname: ${heading}\n---\n\n# ${heading}\n`;
   }
   if (name.endsWith(".json")) return "{}\n";

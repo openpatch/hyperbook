@@ -504,6 +504,12 @@ export async function commitDiff(repo: string, sha: string): Promise<string> {
   return (await gitBytes(args, { gitDir: repo })).toString("utf8").trim();
 }
 
+/** A commit's first parent; null for the first commit of the history. */
+export async function firstParent(repo: string, sha: string): Promise<string | null> {
+  const parents = (await git(["show", "-s", "--format=%P", sha], { gitDir: repo })).split(" ").filter(Boolean);
+  return parents[0] ?? null;
+}
+
 /**
  * What changed from `from` (null: nothing) to `to`, optionally for one
  * path only: e.g. the live version against the latest save.

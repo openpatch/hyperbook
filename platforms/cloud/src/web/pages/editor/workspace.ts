@@ -2,6 +2,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import type { FileChange } from "../../../shared/schemas";
 import { ApiError } from "@/lib/api";
+import { MAX_DRAFT_LENGTH, deleteDraft, draftPaths, getDraft, putDraft } from "./drafts";
 import { type Listing, type Loaded, commitFiles, loadFile } from "./files";
 
 /** An open file. `version` changes when the file is loaded again, which remounts its editor. */
@@ -71,7 +72,19 @@ export function useLiveText(ws: Workspace, path: string | null): string | undefi
  * The editor's state: the book's files, the open tabs and their unsaved
  * text. Every save is one commit; the server answers with the new listing.
  */
-export function useWorkspace(bookId: string, listing: Listing) {
+export function useWorkspace(
+  bookId: string,
+  listing: Listing,
+  {
+    onRestored,
+  }: {
+    /**
+     * A file opened with unsaved text from a draft (see drafts.ts); `stale`
+     * when the file was saved by someone since, so saving asks first.
+     */
+    onRestored?: (path: string, stale: boolean) => void;
+  } = {},
+) {
   const queryClient = useQueryClient();
   const [tabs, setTabs] = useState<Tab[]>([]);
   const [active, setActive] = useState<string | null>(null);
@@ -84,6 +97,45 @@ export function useWorkspace(bookId: string, listing: Listing) {
     [live],
   );
 
+  const restored = useRef(onRestored);
+  restored.current = onRestored;
+
+  // Drafts are written a moment after typing stops, not on every key.
+  const draftTimers = useRef(new Map<string, ReturnType<typeof setTimeout>>()).current;
+  /** Keeps the file's unsaved text as a draft, or drops the draft when it is saved. */
+  const keepDraft = useCallback(
+    (path: string, delay = 500) => {
+      clearTimeout(draftTimers.get(path));
+      draftTimers.set(
+        path,
+        setTimeout(() => {
+          draftTimers.delete(path);
+          const tab = tabsRef.current.find((t) => t.path === path);
+          const text = live.get(path);
+          if (
+            !tab ||
+            tab.loaded?.kind !== "text" ||
+            tab.loaded.encoding ||
+            text === undefined ||
+            text === tab.loaded.text ||
+            text.length > MAX_DRAFT_LENGTH
+          )
+            return void deleteDraft(bookId, path);
+          void putDraft(bookId, path, { text, baseOid: tab.loaded.oid, savedAt: Date.now() });
+        }, delay),
+      );
+    },
+    [bookId, draftTimers, live],
+  );
+  const dropDraft = useCallback(
+    (path: string) => {
+      clearTimeout(draftTimers.get(path));
+      draftTimers.delete(path);
+      return deleteDraft(bookId, path);
+    },
+    [bookId, draftTimers],
+  );
+
   const patchTab = useCallback((path: string, patch: Partial<Tab> | ((tab: Tab) => Partial<Tab>)) => {
     setTabs((all) => all.map((t) => (t.path === path ? { ...t, ...(typeof patch === "function" ? patch(t) : patch) } : t)));
   }, []);
@@ -91,13 +143,27 @@ export function useWorkspace(bookId: string, listing: Listing) {
   const load = useCallback(
     async (path: string) => {
       try {
-        const loaded = await loadFile(bookId, path);
-        if (loaded.kind === "text") live.set(path, loaded.text);
+        let loaded = await loadFile(bookId, path);
+        let text = loaded.kind === "text" ? loaded.text : undefined;
+        // Unsaved text from before (a closed tab, a crash) comes back. Typed
+        // on an older version, it keeps that version as its base, so saving
+        // it meets the newer one as a conflict instead of overwriting it.
+        if (loaded.kind === "text" && !loaded.encoding) {
+          const draft = await getDraft(bookId, path);
+          if (draft && draft.text !== loaded.text) {
+            const stale = draft.baseOid !== loaded.oid;
+            text = draft.text;
+            if (stale) loaded = { ...loaded, oid: draft.baseOid };
+            restored.current?.(path, stale);
+          } else if (draft) void deleteDraft(bookId, path);
+        }
+        if (text !== undefined) live.set(path, text);
         else live.delete(path);
+        const final = loaded;
         patchTab(path, (t) => ({
           status: "ready",
-          loaded,
-          text: loaded.kind === "text" ? loaded.text : undefined,
+          loaded: final,
+          text,
           version: t.version + 1,
         }));
       } catch (error) {
@@ -122,14 +188,35 @@ export function useWorkspace(bookId: string, listing: Listing) {
 
   /** Loads a file again from the server, dropping unsaved changes. */
   const reload = useCallback(
-    (path: string) => {
+    async (path: string) => {
       patchTab(path, { status: "loading" });
+      await dropDraft(path);
       return load(path);
     },
-    [load, patchTab],
+    [dropDraft, load, patchTab],
   );
 
+  /** Opens the files that have drafts, so their unsaved text is back; resolves to them. */
+  const restoreDrafts = useCallback(async () => {
+    const existing = new Set(listing.files.map((f) => f.path));
+    const paths = await draftPaths(bookId);
+    for (const path of paths) {
+      if (existing.has(path)) open(path);
+      // The file is gone (deleted or moved elsewhere): its draft has no place.
+      else void deleteDraft(bookId, path);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [bookId, open]);
+
+  /** Drops every draft of the open files: their unsaved text was given up. */
+  const discardDrafts = useCallback(
+    () => Promise.all(tabsRef.current.map((t) => dropDraft(t.path))),
+    [dropDraft],
+  );
+
+  /** Closes a tab; its unsaved text, if any, is dropped. */
   const close = useCallback((path: string) => {
+    void dropDraft(path);
     live.delete(path);
     setTabs((all) => {
       const i = all.findIndex((t) => t.path === path);
@@ -137,7 +224,7 @@ export function useWorkspace(bookId: string, listing: Listing) {
       setActive((a) => (a === path ? (next[Math.min(i, next.length - 1)]?.path ?? null) : a));
       return next;
     });
-  }, [live]);
+  }, [dropDraft, live]);
 
   const setText = useCallback(
     (path: string, text: string) => {
@@ -148,8 +235,9 @@ export function useWorkspace(bookId: string, listing: Listing) {
       live.set(path, text);
       // React only hears of it when the file turns unsaved, or saved again.
       if (tab && isDirty({ ...tab, text }) !== wasDirty) patchTab(path, { text });
+      keepDraft(path);
     },
-    [live, patchTab],
+    [keepDraft, live, patchTab],
   );
 
   const textOf = useCallback(
@@ -211,10 +299,12 @@ export function useWorkspace(bookId: string, listing: Listing) {
           return { ...t, text: live.get(t.path) ?? t.text, loaded: { ...t.loaded, oid: oids.get(t.path)!, text: saved.text! } };
         }),
       );
+      // Saved: the draft goes, or follows what was typed since.
+      for (const t of toSave) keepDraft(t.path, 0);
       /** What was saved, as the blob it became. */
       return { saved: toSave.map((t) => ({ path: t.path, oid: oids.get(t.path)! })) };
     },
-    [commit, currentTabs, live],
+    [commit, currentTabs, keepDraft, live],
   );
 
   /** After a move, open tabs follow their files. */
@@ -224,10 +314,11 @@ export function useWorkspace(bookId: string, listing: Listing) {
       if (text === undefined) continue;
       live.delete(from);
       live.set(to, text);
+      void dropDraft(from);
     }
     setTabs((all) => all.map((t) => (moves.has(t.path) ? { ...t, path: moves.get(t.path)! } : t)));
     setActive((a) => (a && moves.has(a) ? moves.get(a)! : a));
-  }, [live]);
+  }, [dropDraft, live]);
 
   const dirty = useMemo(() => new Set(tabs.filter(isDirty).map((t) => t.path)), [tabs]);
   const oidOf = useCallback((path: string) => listing.files.find((f) => f.path === path)?.oid ?? null, [listing]);
@@ -249,6 +340,8 @@ export function useWorkspace(bookId: string, listing: Listing) {
     setActive,
     open,
     reload,
+    restoreDrafts,
+    discardDrafts,
     close,
     setText,
     save,

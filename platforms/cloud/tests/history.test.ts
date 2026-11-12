@@ -323,6 +323,34 @@ describe("history", () => {
     expect((await owner.c.get(`${history()}/xyz/diff`)).status).toBe(400);
   });
 
+  it("diffs a run of commits as one, for the book or one file", async () => {
+    const { owner, stranger, files, history } = await world();
+    let listing = (await owner.c.post(files("/init"), { template: "empty" })).body as Listing;
+    listing = await write(owner.c.post, files(), "a.txt", "one\n", "First", listing);
+    listing = await write(owner.c.post, files(), "a.txt", "one\ntwo\n", "Second", listing);
+    listing = await write(owner.c.post, files(), "b.txt", "bee\n", "Third", listing);
+
+    const [third, second, first] = (await owner.c.get(history())).body.commits;
+    const range = (oldest: string, newest: string, path?: string) =>
+      `${history()}/range-diff?oldest=${oldest}&newest=${newest}${path ? `&path=${path}` : ""}`;
+    const res = await owner.c.raw("GET", range(first.sha, third.sha));
+    expect(res.status).toBe(200);
+    expect(res.headers.get("cache-control")).toContain("immutable");
+    // From before the oldest: the first save's line counts as new, too.
+    expect(res.body.diff).toContain("+one");
+    expect(res.body.diff).toContain("+two");
+    expect(res.body.diff).toContain("+bee");
+
+    const one = (await owner.c.get(range(second.sha, third.sha, "a.txt"))).body;
+    expect(one.diff).toContain("+two");
+    expect(one.diff).not.toContain("+one");
+    expect(one.diff).not.toContain("bee");
+
+    expect((await owner.c.get(range("0".repeat(40), third.sha))).status).toBe(404);
+    expect((await owner.c.get(range("xyz", third.sha))).status).toBe(400);
+    expect((await stranger.c.get(range(first.sha, third.sha))).status).toBe(404);
+  });
+
   it("is only for members of the book", async () => {
     const { owner, stranger, files, history } = await world();
     await owner.c.post(files("/init"), { template: "empty" });

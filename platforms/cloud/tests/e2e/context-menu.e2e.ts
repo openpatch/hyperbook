@@ -143,17 +143,29 @@ describe("context menu", () => {
     await pick("Paste");
     await entry("index (copy).md").waitFor();
 
-    // Rename asks for the name only, and keeps the file in its folder.
+    // A new file's name dropped with Escape leaves no gap in the tree.
+    const top = async () => (await entry("index.md").boundingBox())!.y;
+    const before = await top();
+    await page.getByRole("button", { name: "New file" }).click();
+    const draft = tree.getByLabel("Name of the new file");
+    await draft.waitFor();
+    expect(await top()).toBeGreaterThan(before);
+    await draft.press("Escape");
+    await draft.waitFor({ state: "detached" });
+    await expect.poll(top).toBe(before);
+
+    // Rename asks for the name only, in place, and keeps the file in its folder.
     await entry("index (copy).md").click({ button: "right" });
     await pick("Rename");
-    const dialog = page.getByRole("dialog");
-    const name = dialog.getByLabel("Name");
+    const name = tree.getByLabel("New name for index (copy).md");
     expect(await name.inputValue()).toBe("index (copy).md");
-    await name.fill("other/copy.md");
-    await dialog.getByRole("button", { name: "Rename" }).click();
-    await dialog.getByText("Enter a name without /").waitFor();
+    // The stem is selected, so typing replaces it and keeps the extension.
+    await page.keyboard.type("other/copy");
+    await tree.getByText("Enter a name without /").waitFor();
+    await name.fill("index.md");
+    await tree.getByText("book/index.md exists already").waitFor();
     await name.fill("copy.md");
-    await dialog.getByRole("button", { name: "Rename" }).click();
+    await name.press("Enter");
     await entry("copy.md").waitFor();
     expect(
       await entry("copy.md").evaluate(

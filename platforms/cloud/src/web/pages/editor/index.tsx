@@ -23,6 +23,7 @@ import {
   UploadIcon,
   XIcon,
 } from "lucide-react";
+import type { Extension } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useBlocker, useParams, useSearchParams } from "react-router";
@@ -54,11 +55,19 @@ import {
   ChoiceDialog,
   PathList,
   type ChoiceRequest,
-  PathDialog,
-  type PathRequest,
 } from "./dialogs";
 import { fromKeyboard, item, menuPoint, openMenu, separator } from "./context-menu";
-import { FileTree, type TreeActions, type TreeClipboard } from "./file-tree";
+import { type DropHandler, dropPath, fileDrop, linkTo } from "./file-drop";
+import {
+  editFolder,
+  FileTree,
+  type NodeRef,
+  outermost,
+  parentOf,
+  type TreeActions,
+  type TreeClipboard,
+  type TreeEdit,
+} from "./file-tree";
 import {
   type Listing,
   copyName,
@@ -67,6 +76,7 @@ import {
   fileAt,
   type ReferencesResult,
   fetchReferences,
+  isMarkdownPage,
   pageOf,
   rawUrl,
   starter,
@@ -321,8 +331,6 @@ function StartBook({ book }: { book: Book }) {
   );
 }
 
-const parentOf = (path: string) =>
-  path.includes("/") ? path.slice(0, path.lastIndexOf("/")) : "";
 const join = (folder: string, name: string) =>
   folder ? `${folder}/${name}` : name;
 /** Every folder a path is in, e.g. "book/a/b.md" → ["book", "book/a"]. */
@@ -361,7 +369,34 @@ const FileSidebar = memo(function FileSidebar({
     () => new Set(files.flatMap((f) => foldersOf(f.path))),
   );
   const [filter, setFilter] = useState("");
-  const folder = active ? parentOf(active) : "book";
+  const [edit, setEdit] = useState<TreeEdit | null>(null);
+  // Where you are: the folder last clicked in the tree, or the folder of the
+  // file last clicked or opened. New files and uploads go there.
+  const [here, setHere] = useState<string | null>(null);
+  useEffect(() => setHere(null), [active]);
+  const folder = here ?? (active ? parentOf(active) : "book");
+  const select = useCallback(
+    (path: string, isFolder: boolean) =>
+      setHere(isFolder ? path : parentOf(path)),
+    [],
+  );
+  /** Types a name in place: its folder unfolds and the filter clears. */
+  const startEdit = useCallback((next: TreeEdit | null) => {
+    if (next) {
+      const target = editFolder(next);
+      if (target) {
+        const open = [...foldersOf(target), target];
+        setCollapsed((prev) =>
+          open.some((f) => prev.has(f))
+            ? new Set([...prev].filter((f) => !open.includes(f)))
+            : prev,
+        );
+      }
+      setFilter("");
+      if (next.kind !== "rename") setHere(next.folder);
+    }
+    setEdit(next);
+  }, []);
   return (
     <>
       <div className="flex items-center gap-1 border-b border-sidebar-border px-2 py-1">
@@ -397,7 +432,7 @@ const FileSidebar = memo(function FileSidebar({
             size="icon"
             className="size-7 pointer-coarse:size-9"
             aria-label={t("editor.files.newFile")}
-            onClick={() => actions.newFile(folder)}
+            onClick={() => startEdit({ kind: "file", folder })}
           >
             <FilePlusIcon className="size-4" />
           </Button>
@@ -406,7 +441,7 @@ const FileSidebar = memo(function FileSidebar({
             size="icon"
             className="size-7 pointer-coarse:size-9"
             aria-label={t("editor.files.newFolder")}
-            onClick={() => actions.newFolder(folder)}
+            onClick={() => startEdit({ kind: "folder", folder })}
           >
             <FolderPlusIcon className="size-4" />
           </Button>
@@ -448,6 +483,9 @@ const FileSidebar = memo(function FileSidebar({
         filter={filter}
         readOnly={readOnly}
         comments={comments}
+        edit={edit}
+        onEdit={startEdit}
+        onSelect={select}
       />
     </>
   );
@@ -472,10 +510,21 @@ const sidebarItems = {
   ai: { label: "editor.toolbar.ai", Icon: SparklesIcon },
 } as const;
 
+/** How long typing pauses before auto-save saves. */
+const AUTO_SAVE_DELAY = 30_000;
+
 function Editor({ book, listing }: { book: Book; listing: Listing }) {
   const { t, i18n } = useTranslation();
   const bookId = String(book.id);
-  const ws = useWorkspace(bookId, listing);
+  const ws = useWorkspace(bookId, listing, {
+    onRestored: (path, stale) =>
+      toast.info(
+        stale
+          ? t("editor.drafts.restoredStale", { path })
+          : t("editor.drafts.restored", { path }),
+        { id: `draft:${path}`, duration: stale ? 12_000 : 6_000 },
+      ),
+  });
   /** Commenters read, select and comment; nothing they do changes the book. */
   const readOnly = book.role === "commenter";
   /** Came through an access link: no account, no AI, no way to the book page. */
@@ -505,7 +554,6 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
     placeholderData: (previous) => previous,
   });
   const queryClient = useQueryClient();
-  const [pathRequest, setPathRequest] = useState<PathRequest | null>(null);
   /** What the file tree's Copy or Cut picked, for its Paste. */
   const [treeClipboard, setTreeClipboard] = useState<TreeClipboard | null>(
     null,
@@ -787,7 +835,11 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
         {
           label: t("editor.actions.leave"),
           variant: "destructive",
-          run: () => blocker.proceed(),
+          run: async () => {
+            // Given up: no draft brings the text back next time.
+            await ws.discardDrafts();
+            blocker.proceed();
+          },
         },
       ],
     });
@@ -799,11 +851,75 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
     return () => window.removeEventListener("beforeunload", warn);
   }, [hasUnsaved]);
 
+  // Unsaved text from before (see drafts.ts) opens again.
+  useEffect(() => {
+    if (!readOnly) void ws.restoreDrafts();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Auto-save: a pause in typing, or leaving the browser tab, saves the
+  // open files in one commit, so a writing session makes a few commits
+  // rather than one per keystroke. A file whose visual editor holds
+  // something invalid waits to be fixed. A save that failed (a conflict
+  // asks what to do) pauses auto-save until the next save by hand.
+  const autoSavePaused = useRef(false);
+  const autoSaveTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const autoSaving = useRef(false);
+  const runAutoSave = useRef(async () => {});
+  runAutoSave.current = async () => {
+    clearTimeout(autoSaveTimer.current);
+    if (readOnly || !settings.autoSave || autoSavePaused.current) return;
+    // A question is open (a conflict, a rename): later.
+    if (autoSaving.current || choice || refactor) return scheduleAutoSave();
+    const paths = ws
+      .currentTabs()
+      .filter((tab) => {
+        if (!isDirty(tab)) return false;
+        const kind = visualKind(tab.path);
+        return !(kind && visualProblem(kind, tab.text!));
+      })
+      .map((tab) => tab.path);
+    if (paths.length === 0) return;
+    autoSaving.current = true;
+    try {
+      if (!(await save(paths))) autoSavePaused.current = true;
+    } finally {
+      autoSaving.current = false;
+    }
+  };
+  const scheduleAutoSave = () => {
+    clearTimeout(autoSaveTimer.current);
+    autoSaveTimer.current = setTimeout(
+      () => void runAutoSave.current(),
+      AUTO_SAVE_DELAY,
+    );
+  };
+  useEffect(() => {
+    const leave = () => {
+      if (document.visibilityState === "hidden") void runAutoSave.current();
+    };
+    document.addEventListener("visibilitychange", leave);
+    return () => {
+      document.removeEventListener("visibilitychange", leave);
+      clearTimeout(autoSaveTimer.current);
+    };
+  }, []);
+  /** Typed: the file's draft is kept and auto-save waits for a pause. */
+  const changeText = (path: string, text: string) => {
+    ws.setText(path, text);
+    if (settings.autoSave) scheduleAutoSave();
+  };
+  /** Saved by hand: auto-save goes on, if a failure paused it. */
+  const saveByHand = async (paths: string[]) => {
+    const ok = await save(paths);
+    if (ok) autoSavePaused.current = false;
+    return ok;
+  };
+
   // Ctrl/Cmd+S saves the open file wherever the focus is, not just in its
   // editor, instead of the browser saving the page.
   const saveActive = useRef(() => {});
   saveActive.current = () => {
-    if (ws.active && !readOnly) void save([ws.active]);
+    if (ws.active && !readOnly) void saveByHand([ws.active]);
   };
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -1299,16 +1415,17 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
 
   /** Moves the files in `moves`, asking first when something references them. */
   const moveWithReferences = async (
-    from: string,
+    froms: string[],
     moves: Map<string, string>,
     kind: "rename" | "move",
   ) => {
     const label = t(
       kind === "rename" ? "editor.files.rename" : "editor.files.move",
     );
+    const from = nameOf(froms);
     let scanned: ReferencesResult;
     try {
-      scanned = await fetchReferences(bookId, from);
+      scanned = await scanReferences(froms);
     } catch (error) {
       return fail(error);
     }
@@ -1370,6 +1487,22 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
     });
   };
 
+  /** What a list of files and folders is called in a question: its path, or "3 items". */
+  const nameOf = (paths: string[]) =>
+    paths.length === 1 ? paths[0]! : t("editor.files.items", { count: paths.length });
+
+  /** Where any of `paths` is referenced from, in one result. */
+  const scanReferences = async (paths: string[]): Promise<ReferencesResult> => {
+    const scans = await Promise.all(paths.map((p) => fetchReferences(bookId, p)));
+    const files = new Map<string, ReferencesResult["files"][number]>();
+    for (const scan of scans) for (const f of scan.files) files.set(f.path, f);
+    return { references: scans.flatMap((scan) => scan.references), files: [...files.values()] };
+  };
+
+  /** Every file of the book that `nodes` are or hold. */
+  const filesOf = (nodes: NodeRef[]) =>
+    nodes.flatMap((n) => (n.isFolder ? filesIn(n.path) : [n.path]));
+
   /** Uploads files into `folder`; resolves to whether it worked. */
   const upload = async (folder: string, files: File[]): Promise<boolean> => {
     try {
@@ -1399,6 +1532,66 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
     }
   };
 
+  /** Files dropped or pasted into a page: uploaded next to it and linked; files from the tree linked. */
+  const dropInto = (page: string): DropHandler => ({
+    files: (view, dropped, from, to) => {
+      const planned = new Set<string>();
+      const taken = (p: string) =>
+        planned.has(p) || listing.files.some((f) => f.path === p);
+      const picks = dropped.map((file) => {
+        const path = dropPath(page, file.name, taken);
+        planned.add(path);
+        return { file, path };
+      });
+      const text = picks
+        .map(({ path }) => linkTo(page, path) ?? path)
+        .join("\n");
+      // The link goes in at once; the picture follows when uploaded.
+      view.dispatch({
+        changes: { from, to, insert: text },
+        selection: { anchor: from + text.length },
+        userEvent: "input.paste",
+      });
+      view.focus();
+      void (async () => {
+        try {
+          const changes: FileChange[] = await Promise.all(
+            picks.map(async ({ file, path }) => ({
+              op: "write" as const,
+              path,
+              encoding: "base64" as const,
+              content: toBase64(new Uint8Array(await file.arrayBuffer())),
+              baseOid: null,
+            })),
+          );
+          await ws.commit(changes);
+          toast.success(
+            picks.length === 1
+              ? t("editor.actions.uploadedToast_one", { name: picks[0]!.path.split("/").pop() })
+              : t("editor.actions.uploadedToast_other", { count: picks.length }),
+          );
+        } catch (error) {
+          fail(error);
+        }
+      })();
+    },
+    nodes: (view, nodes, from, to) => {
+      const text = nodes
+        .filter((n) => !n.isFolder)
+        .flatMap((n) => linkTo(page, n.path) ?? [])
+        .join("\n");
+      if (!text) return;
+      view.dispatch({
+        changes: { from, to, insert: text },
+        selection: { anchor: from + text.length },
+        userEvent: "input.drop",
+      });
+      view.focus();
+    },
+  });
+  const latestDrop = useRef(dropInto);
+  latestDrop.current = dropInto;
+
   const actions = {
     open: ws.open,
     download: (path: string) => {
@@ -1407,78 +1600,44 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
       a.download = path.split("/").pop()!;
       a.click();
     },
-    newFile: (folder: string) =>
-      setPathRequest({
-        title: t("editor.actions.newFileTitle"),
-        description: t("editor.actions.newFileDescription"),
-        label: t("editor.actions.pathLabel"),
-        initial: join(folder, "new-page.md"),
-        submitLabel: t("editor.actions.create"),
-        onSubmit: (path) =>
-          commitAndOpen(
-            [
-              {
-                op: "write",
-                path,
-                content: starter(path),
-                encoding: starterEncoding(path),
-                baseOid: null,
-              },
-            ],
-            path,
-          ),
-      }),
-    newFolder: (folder: string) =>
-      setPathRequest({
-        title: t("editor.actions.newFolderTitle"),
-        description: t("editor.actions.newFolderDescription"),
-        label: t("editor.actions.folderLabel"),
-        initial: join(folder, "chapter"),
-        submitLabel: t("editor.actions.create"),
-        onSubmit: (path) => {
-          const index = `${path}/index.md`;
-          return commitAndOpen(
-            [
-              {
-                op: "write",
-                path: index,
-                content: starter(index),
-                baseOid: null,
-              },
-            ],
-            index,
-          );
-        },
-      }),
+    create: async (path: string, isFolder: boolean) => {
+      // A folder exists through its files, so it starts with its index page.
+      const file = isFolder ? `${path}/index.md` : path;
+      await commitAndOpen(
+        [
+          {
+            op: "write",
+            path: file,
+            content: starter(file, bookLanguage),
+            encoding: starterEncoding(file),
+            baseOid: null,
+          },
+        ],
+        file,
+      );
+    },
     pickUpload: (folder: string) => {
       uploadFolder.current = folder;
       replaceTarget.current = null;
       uploadInput.current?.click();
     },
     upload: (folder: string, files: File[]) => void upload(folder, files),
-    rename: (path: string, isFolder: boolean) => {
-      const affected = isFolder ? filesIn(path) : [path];
-      if (busyFiles(affected)) return;
-      // Only the name: moving is dragging, or Cut and Paste.
-      setPathRequest({
-        title: isFolder
-          ? t("editor.actions.renameFolderTitle")
-          : t("editor.actions.renameFileTitle"),
-        label: t("editor.actions.nameLabel"),
-        initial: path.split("/").pop()!,
-        folder: parentOf(path),
-        submitLabel: t("editor.actions.rename"),
-        onSubmit: async (to) => {
-          if (to === path) return;
-          const moves = new Map(
-            affected.map((p) => [p, to + p.slice(path.length)]),
-          );
-          await moveWithReferences(path, moves, "rename");
-        },
-      });
+    canRename: (path: string, isFolder: boolean) =>
+      !busyFiles(isFolder ? filesIn(path) : [path]),
+    // Only the name: moving is dragging, or Cut and Paste.
+    rename: (from: string, to: string, isFolder: boolean) => {
+      const affected = isFolder ? filesIn(from) : [from];
+      if (from === to || busyFiles(affected)) return;
+      const moves = new Map(
+        affected.map((p) => [p, to + p.slice(from.length)]),
+      );
+      void moveWithReferences([from], moves, "rename");
     },
-    remove: (path: string, isFolder: boolean) => {
-      const affected = isFolder ? filesIn(path) : [path];
+    remove: (picked: NodeRef[]) => {
+      const nodes = outermost(picked);
+      if (nodes.length === 0) return;
+      const affected = filesOf(nodes);
+      const name = nameOf(nodes.map((n) => n.path));
       const deleteThem = async () => {
         try {
           await ws.commit(
@@ -1496,19 +1655,25 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
       void (async () => {
         let scanned: ReferencesResult;
         try {
-          scanned = await fetchReferences(bookId, path);
+          scanned = await scanReferences(nodes.map((n) => n.path));
         } catch (error) {
           return fail(error);
         }
-        const base = isFolder
-          ? t("editor.actions.deleteFolderDescription", {
-              count: affected.length,
-            })
-          : t("editor.actions.deleteFileDescription");
+        const base =
+          nodes.length === 1 && !nodes[0]!.isFolder
+            ? t("editor.actions.deleteFileDescription")
+            : t("editor.actions.deleteFolderDescription", {
+                count: affected.length,
+              });
         if (scanned.references.length === 0)
           return setChoice({
-            title: t("editor.actions.deleteTitle", { path }),
-            description: base,
+            title: t("editor.actions.deleteTitle", { path: name }),
+            description: (
+              <>
+                {nodes.length > 1 && <PathList paths={nodes.map((n) => n.path)} />}
+                <p>{base}</p>
+              </>
+            ),
             choices: [
               {
                 label: t("common.delete"),
@@ -1526,7 +1691,7 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
                 pages: scanned.files.length,
               });
         setRefactor({
-          title: t("editor.actions.deleteTitle", { path }),
+          title: t("editor.actions.deleteTitle", { path: name }),
           lead: (
             <p>
               {base} {lead}
@@ -1544,56 +1709,75 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
         });
       })();
     },
-    move: (from: string, to: string, isFolder: boolean) => {
-      const name = from.split("/").pop()!;
-      const dest = to ? `${to}/${name}` : name;
-      if (dest === from) return; // Dropped where it already is.
-      if (isFolder && (to === from || to.startsWith(from + "/")))
+    move: (picked: NodeRef[], to: string) => {
+      const nodes = outermost(picked).filter((n) => {
+        const name = n.path.split("/").pop()!;
+        return join(to, name) !== n.path; // Dropped where it already is.
+      });
+      if (nodes.length === 0) return;
+      if (nodes.some((n) => n.isFolder && (to === n.path || to.startsWith(n.path + "/"))))
         return toast.error(t("editor.actions.folderIntoItself"));
-      const affected = isFolder ? filesIn(from) : [from];
-      if (affected.length === 0 || busyFiles(affected)) return;
-      const moves = new Map(
-        affected.map((p) => [p, dest + p.slice(from.length)]),
-      );
-      void moveWithReferences(from, moves, "move");
+      const moves = new Map<string, string>();
+      for (const n of nodes) {
+        const dest = join(to, n.path.split("/").pop()!);
+        for (const p of n.isFolder ? filesIn(n.path) : [n.path])
+          moves.set(p, dest + p.slice(n.path.length));
+      }
+      if (moves.size === 0 || busyFiles([...moves.keys()])) return;
+      void moveWithReferences(nodes.map((n) => n.path), moves, "move");
     },
-    copy: (path: string, isFolder: boolean) =>
-      setTreeClipboard({ path, isFolder, cut: false }),
-    cut: (path: string, isFolder: boolean) =>
-      setTreeClipboard({ path, isFolder, cut: true }),
+    copy: (nodes: NodeRef[]) =>
+      setTreeClipboard({ nodes: outermost(nodes), cut: false }),
+    cut: (nodes: NodeRef[]) =>
+      setTreeClipboard({ nodes: outermost(nodes), cut: true }),
     paste: async (folder: string) => {
       const clip = treeClipboard;
       if (!clip) return;
       if (clip.cut) {
         // Cut once, pasted once: the files are gone from where they were.
         setTreeClipboard(null);
-        return actions.move(clip.path, folder, clip.isFolder);
+        return actions.move(clip.nodes, folder);
       }
-      const affected = clip.isFolder ? filesIn(clip.path) : [clip.path];
+      const affected = filesOf(clip.nodes);
       if (affected.length === 0)
-        return toast.error(t("editor.actions.gone", { path: clip.path }));
+        return toast.error(t("editor.actions.gone", { path: nameOf(clip.nodes.map((n) => n.path)) }));
       if (busyFiles(affected)) return;
       // Next to the original, or anywhere its name is taken, a copy's name.
+      const planned = new Set<string>();
       const taken = (p: string) =>
+        planned.has(p) ||
         listing.files.some((f) => f.path === p || f.path.startsWith(p + "/"));
-      let dest = join(folder, clip.path.split("/").pop()!);
-      if (taken(dest)) dest = copyName(dest, taken);
+      const dests = clip.nodes.map((n) => {
+        let dest = join(folder, n.path.split("/").pop()!);
+        if (taken(dest)) dest = copyName(dest, taken);
+        planned.add(dest);
+        return dest;
+      });
       try {
-        const changes = await Promise.all(
-          affected.map(async (from): Promise<FileChange> => {
-            const res = await fetch(rawUrl(bookId, from));
-            if (!res.ok)
-              throw new Error(t("editor.actions.couldNotCopy", { path: from }));
-            return {
-              op: "write",
-              path: dest + from.slice(clip.path.length),
-              encoding: "base64",
-              content: toBase64(new Uint8Array(await res.arrayBuffer())),
-              baseOid: null,
-            };
-          }),
-        );
-        await commitAndOpen(changes, clip.isFolder ? undefined : dest);
+        const changes = (
+          await Promise.all(
+            clip.nodes.map((n, i) =>
+              Promise.all(
+                (n.isFolder ? filesIn(n.path) : [n.path]).map(
+                  async (from): Promise<FileChange> => {
+                    const res = await fetch(rawUrl(bookId, from));
+                    if (!res.ok)
+                      throw new Error(t("editor.actions.couldNotCopy", { path: from }));
+                    return {
+                      op: "write",
+                      path: dests[i]! + from.slice(n.path.length),
+                      encoding: "base64",
+                      content: toBase64(new Uint8Array(await res.arrayBuffer())),
+                      baseOid: null,
+                    };
+                  },
+                ),
+              ),
+            ),
+          )
+        ).flat();
+        const single = clip.nodes.length === 1 && !clip.nodes[0]!.isFolder;
+        await commitAndOpen(changes, single ? dests[0] : undefined);
       } catch (error) {
         fail(error);
       }
@@ -1608,17 +1792,18 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
   const treeActions = useMemo<TreeActions>(
     () => ({
       open: (path) => latestActions.current.open(path),
-      newFile: (folder) => latestActions.current.newFile(folder),
-      newFolder: (folder) => latestActions.current.newFolder(folder),
+      create: (path, isFolder) => latestActions.current.create(path, isFolder),
       upload: (folder, files) => latestActions.current.upload(folder, files),
       pickUpload: (folder) => latestActions.current.pickUpload(folder),
-      rename: (path, isFolder) => latestActions.current.rename(path, isFolder),
-      remove: (path, isFolder) => latestActions.current.remove(path, isFolder),
+      canRename: (path, isFolder) =>
+        latestActions.current.canRename(path, isFolder),
+      rename: (from, to, isFolder) =>
+        latestActions.current.rename(from, to, isFolder),
+      remove: (nodes) => latestActions.current.remove(nodes),
       download: (path) => latestActions.current.download(path),
-      move: (from, to, isFolder) =>
-        latestActions.current.move(from, to, isFolder),
-      copy: (path, isFolder) => latestActions.current.copy(path, isFolder),
-      cut: (path, isFolder) => latestActions.current.cut(path, isFolder),
+      move: (nodes, to) => latestActions.current.move(nodes, to),
+      copy: (nodes) => latestActions.current.copy(nodes),
+      cut: (nodes) => latestActions.current.cut(nodes),
       paste: (folder) => latestActions.current.paste(folder),
     }),
     [],
@@ -1799,7 +1984,7 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
                 </DropdownMenuItem>
               ))}
               <DropdownMenuSeparator />
-              <DropdownMenuItem onSelect={() => void save([...ws.dirty])}>
+              <DropdownMenuItem onSelect={() => void saveByHand([...ws.dirty])}>
                 {t("editor.toolbar.saveAll")}
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -2174,6 +2359,11 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
                   settings={settings}
                   spell={spell}
                   commentConfig={commentConfigFor(tab.path)}
+                  drop={
+                    !readOnly && isMarkdownPage(tab.path)
+                      ? fileDrop(() => latestDrop.current(tab.path))
+                      : []
+                  }
                   onView={(path, view) => {
                     if (view) {
                       views.set(path, view);
@@ -2184,8 +2374,8 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
                   onEditBlock={(block, view) =>
                     editBlock(tab.path, block, view)
                   }
-                  onChange={(text) => ws.setText(tab.path, text)}
-                  onSave={() => void save([tab.path])}
+                  onChange={(text) => changeText(tab.path, text)}
+                  onSave={() => void saveByHand([tab.path])}
                   onReplace={() => {
                     uploadFolder.current = parentOf(tab.path);
                     replaceTarget.current = tab.path;
@@ -2284,7 +2474,6 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
         )}
       </div>
 
-      <PathDialog request={pathRequest} onClose={() => setPathRequest(null)} />
       <ChoiceDialog
         request={choice}
         onClose={(closed) => {
@@ -2401,6 +2590,7 @@ function TabContent({
   tab,
   readOnly,
   commentConfig,
+  drop,
   files,
   settings,
   spell,
@@ -2416,6 +2606,8 @@ function TabContent({
   readOnly: boolean;
   /** The file's comment threads in its editor (see comments.ts). */
   commentConfig: CommentConfig;
+  /** Files dropped or pasted into the editor (see file-drop.ts). */
+  drop: Extension;
   files: string[];
   settings: EditorSettings;
   spell: SpellOptions;
@@ -2454,7 +2646,9 @@ function TabContent({
         initial={initial}
         extensions={
           // Base64 of a binary file (a .sb3) has nothing to comment on.
-          loaded.encoding ? [] : commentsExtension(commentConfig, baseOid)
+          loaded.encoding
+            ? []
+            : [commentsExtension(commentConfig, baseOid), drop]
         }
         onChange={onChange}
         onSave={onSave}

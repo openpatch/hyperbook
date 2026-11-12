@@ -62,6 +62,8 @@ export type EditorSettings = {
   spellCheck: boolean;
   /** Vim key bindings (normal, insert and visual mode, `:w` saves). */
   vim: boolean;
+  /** Saves open files by itself after a pause in typing, and when leaving the tab. */
+  autoSave: boolean;
 };
 
 const STORAGE_KEY = "editor-settings";
@@ -74,6 +76,7 @@ const DEFAULTS: EditorSettings = {
   lineNumbers: true,
   spellCheck: true,
   vim: false,
+  autoSave: true,
 };
 
 function stored(): EditorSettings {
@@ -94,6 +97,7 @@ function stored(): EditorSettings {
       lineNumbers: value?.lineNumbers ?? DEFAULTS.lineNumbers,
       spellCheck: value?.spellCheck ?? DEFAULTS.spellCheck,
       vim: value?.vim === true,
+      autoSave: value?.autoSave ?? DEFAULTS.autoSave,
     };
   } catch {
     return DEFAULTS;

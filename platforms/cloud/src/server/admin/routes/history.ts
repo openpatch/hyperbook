@@ -1,12 +1,13 @@
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { z } from "zod";
-import { historyInput, liveDiffInput } from "../../../shared/schemas";
+import { bookPath, historyInput, liveDiffInput } from "../../../shared/schemas";
 import type { Deps } from "../../deps";
 import { visitorAccess } from "../../domain/actors";
 import {
   GitError,
   commitDiff,
+  firstParent,
   headCommit,
   isMainAncestor,
   listTags,
@@ -55,6 +56,9 @@ async function reachable(repo: string, sha: string): Promise<boolean> {
     throw error;
   }
 }
+
+const sha40 = z.string().regex(/^[0-9a-f]{40}$/, "validation.sha");
+const rangeDiffInput = z.object({ oldest: sha40, newest: sha40, path: bookPath.optional() });
 
 /** /api/books/:id/history */
 export function bookHistoryRoutes({ db, config }: Deps) {
@@ -117,6 +121,29 @@ export function bookHistoryRoutes({ db, config }: Deps) {
         return c.json({
           live,
           head,
+          diff: truncated ? Buffer.from(diff, "utf8").slice(0, MAX_DIFF_BYTES).toString("utf8") : diff,
+          truncated,
+        });
+      })
+
+      // The changes of several commits in a row, as one: from before
+      // `oldest` to `newest`, of the book or of `path`. The History pane
+      // shows a run of saves (one person, minutes apart) as one entry.
+      .get("/:id/history/range-diff", idParam, validate("query", rangeDiffInput), async (c) => {
+        const { book } = visitorAccess(db, c.get("user"), c.get("link"), c.req.valid("param").id, "commenter");
+        hostedOnly(book);
+        const { oldest, newest, path } = c.req.valid("query");
+        const repo = repoDir(config, book.id);
+        if (!(await reachable(repo, oldest)) || !(await reachable(repo, newest))) {
+          throw new HTTPException(404, { message: "No such commit" });
+        }
+        const parent = await firstParent(repo, oldest);
+        const diff = await rangeDiff(repo, parent, newest, path);
+        const truncated = Buffer.byteLength(diff, "utf8") > MAX_DIFF_BYTES;
+        // Two commits never change, so neither does what lies between them.
+        c.header("etag", `${oldest}..${newest}:${path ?? ""}`);
+        c.header("cache-control", "private, max-age=86400, immutable");
+        return c.json({
           diff: truncated ? Buffer.from(diff, "utf8").slice(0, MAX_DIFF_BYTES).toString("utf8") : diff,
           truncated,
         });

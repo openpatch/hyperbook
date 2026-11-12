@@ -259,7 +259,7 @@ function help(d: Directive, attr?: Attribute): HTMLElement {
 // ---- Completion ------------------------------------------------------------
 
 /** Paths the book's files are addressed by from a page. */
-function publicPath(file: string): string | null {
+export function publicPath(file: string): string | null {
   if (file.startsWith("public/")) return "/" + file.slice("public/".length);
   if (file.startsWith("book/") && !file.endsWith(".md")) return "/" + file.slice("book/".length);
   return null;
@@ -284,7 +284,7 @@ export function relativeTo(base: string[], to: string): string {
   return common < base.length ? "../".repeat(base.length - common) + rest : `./${rest}`;
 }
 
-const IMAGE = /\.(png|jpe?g|gif|webp|svg|avif)$/i;
+export const IMAGE = /\.(png|jpe?g|gif|webp|svg|avif)$/i;
 
 function directiveOptions(state: EditorState, line: number, colons: number | null): Completion[] {
   const parents = around(state, line).map((c) => c.token.name);
@@ -411,6 +411,22 @@ function pageCompletion(files: () => string[], path: () => string) {
       const base = linkBase(path());
       const options: Completion[] = targets.flatMap(({ href, detail, type }) => withRelative(href, base, { detail, type }));
       return { from: pos - link[2]!.length, options, validFor: /^[^)\s]*$/ };
+    }
+
+    // An HTML tag's src or href: <img src="…">, <a href="…">, <video poster="…">.
+    const attr = /<[A-Za-z][\w-]*\b[^<>]*\s(src|href|poster)=["']([^"'\s]*)$/.exec(before);
+    if (attr) {
+      const all = files();
+      const targets = all.flatMap((f) => {
+        const href = attr[1] === "href" ? pageOf(f) : null;
+        if (href) return [{ href, detail: "page", type: "text" }];
+        const p = publicPath(f);
+        if (!p) return [];
+        return [{ href: p, detail: IMAGE.test(p) ? "image" : "file", type: "variable" }];
+      });
+      const base = linkBase(path());
+      const options: Completion[] = targets.flatMap(({ href, detail, type }) => withRelative(href, base, { detail, type }));
+      return { from: pos - attr[2]!.length, options, validFor: /^[^"'\s]*$/ };
     }
     return null;
   };

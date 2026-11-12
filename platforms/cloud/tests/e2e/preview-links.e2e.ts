@@ -29,8 +29,10 @@ describe("preview links", () => {
     await page.getByRole("button", { name: "Empty book" }).click();
 
     await page.getByRole("button", { name: "New file" }).click();
-    await dialog.getByLabel("Path").fill("book/next.md");
-    await dialog.getByRole("button", { name: "Create" }).click();
+
+    await page.getByLabel("Name of the new file").fill("next.md");
+
+    await page.keyboard.press("Enter");
     await page.getByRole("tab", { name: "next.md" }).waitFor();
 
     // A relative link on the first page, shown unsaved in the preview.

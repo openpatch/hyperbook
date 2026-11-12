@@ -1,5 +1,5 @@
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
-import { HistoryIcon } from "lucide-react";
+import { ChevronDownIcon, ChevronRightIcon, HistoryIcon } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { api, unwrap } from "@/lib/api";
@@ -37,6 +37,34 @@ export type HistoryCommit = {
 
 type HistoryPage = { commits: HistoryCommit[]; next: string | null };
 
+/** Saves further apart than this are separate entries of the History pane. */
+export const RUN_GAP = 30 * 60_000;
+
+/**
+ * Commits (newest first) in runs: one person's saves, each within `gap` of
+ * the next, shown as one entry — a writing session rather than a commit per
+ * pause in typing. Only the pane groups them; the book's git history stays
+ * as it is. A published commit (live, or a version) starts a run of its
+ * own, so the pane can mark it.
+ */
+export function commitRuns(commits: HistoryCommit[], gap = RUN_GAP): HistoryCommit[][] {
+  const runs: HistoryCommit[][] = [];
+  for (const commit of commits) {
+    const run = runs[runs.length - 1];
+    const oldest = run?.[run.length - 1];
+    if (
+      run &&
+      oldest &&
+      oldest.email === commit.email &&
+      Date.parse(oldest.date) - Date.parse(commit.date) <= gap &&
+      !commit.tags?.length
+    )
+      run.push(commit);
+    else runs.push([commit]);
+  }
+  return runs;
+}
+
 const fetchHistory = (bookId: string, after: string | null, path?: string) =>
   unwrap(
     api.books[":id"].history.$get({
@@ -59,7 +87,10 @@ export function HistoryPanel({
   const { t } = useTranslation();
   // The whole history, or only the commits of the open file.
   const [scope, setScope] = useState<"book" | "file">("book");
-  const [chosen, setChosen] = useState<HistoryCommit | null>(null);
+  /** The entry whose changes are shown: one commit, or a run of them. */
+  const [chosen, setChosen] = useState<HistoryCommit[] | null>(null);
+  /** The runs unfolded into their single saves, by their newest commit. */
+  const [unfolded, setUnfolded] = useState<Set<string>>(new Set());
   const [comparing, setComparing] = useState(false);
   const path = scope === "file" ? (activePath ?? undefined) : undefined;
 
@@ -73,6 +104,7 @@ export function HistoryPanel({
     getNextPageParam: (last) => last.next,
   });
   const commits = pages.data?.pages.flatMap((page) => page.commits) ?? [];
+  const runs = commitRuns(commits);
 
   return (
     <div className="flex h-full min-h-0 flex-col">
@@ -124,53 +156,33 @@ export function HistoryPanel({
             </Button>
           </div>
         )}
-        {commits.map((c) => (
-          <button
-            key={c.sha}
-            type="button"
-            title={t("editor.history.showDiff")}
-            onClick={() => setChosen(c)}
-            className="block w-full border-b border-border px-3 py-2 text-left hover:bg-accent"
-          >
-            <div className="flex items-baseline gap-2">
-              <span className="min-w-0 flex-1 truncate text-sm font-medium">
-                {c.message}
-              </span>
-              {c.tags?.includes("published") && (
-                <Badge className="shrink-0 px-1.5 py-0 text-[0.7rem]">
-                  {t("editor.history.live")}
-                </Badge>
-              )}
-              {c.tags
-                ?.filter((tag) => /^v\d+$/.test(tag))
-                .map((tag) => (
-                  <Badge
-                    key={tag}
-                    variant="outline"
-                    className="shrink-0 px-1.5 py-0 text-[0.7rem]"
-                  >
-                    {tag}
-                  </Badge>
+        {runs.map((run) => {
+          const head = run[0]!;
+          if (run.length === 1)
+            return <CommitRow key={head.sha} commits={run} onShow={setChosen} />;
+          const open = unfolded.has(head.sha);
+          return (
+            <div key={head.sha}>
+              <CommitRow
+                commits={run}
+                onShow={setChosen}
+                open={open}
+                onToggle={() =>
+                  setUnfolded((prev) => {
+                    const next = new Set(prev);
+                    if (next.has(head.sha)) next.delete(head.sha);
+                    else next.add(head.sha);
+                    return next;
+                  })
+                }
+              />
+              {open &&
+                run.map((c) => (
+                  <CommitRow key={c.sha} commits={[c]} onShow={setChosen} nested />
                 ))}
-              <time
-                dateTime={c.date}
-                title={new Date(c.date).toLocaleString()}
-                className="shrink-0 text-xs text-muted-foreground"
-              >
-                {new Date(c.date).toLocaleDateString()}
-              </time>
             </div>
-            <div className="mt-0.5 flex items-center gap-2 text-xs text-muted-foreground">
-              <span className="min-w-0 flex-1 truncate">{c.name}</span>
-              <span className="text-green-700 dark:text-green-400">
-                +{c.additions}
-              </span>
-              <span className="text-red-700 dark:text-red-400">
-                −{c.deletions}
-              </span>
-            </div>
-          </button>
-        ))}
+          );
+        })}
         {commits.length === 0 && !pages.isPending && (
           <p className="p-4 text-center text-sm text-muted-foreground">
             {scope === "file" && activePath
@@ -195,7 +207,9 @@ export function HistoryPanel({
 
       <CommitDiffDialog
         bookId={bookId}
-        commit={chosen}
+        commit={chosen?.[0] ?? null}
+        run={chosen ?? undefined}
+        path={path}
         onClose={() => setChosen(null)}
       />
       <LiveDiffDialog
@@ -205,6 +219,107 @@ export function HistoryPanel({
         commit={commit}
         onClose={() => setComparing(false)}
       />
+    </div>
+  );
+}
+
+/**
+ * An entry of the History pane: one commit, or a run of one person's saves
+ * (newest first), with the newest's message and the run's line counts. A
+ * run unfolds into its single saves.
+ */
+function CommitRow({
+  commits,
+  onShow,
+  open,
+  onToggle,
+  nested = false,
+}: {
+  commits: HistoryCommit[];
+  onShow: (commits: HistoryCommit[]) => void;
+  open?: boolean;
+  onToggle?: () => void;
+  nested?: boolean;
+}) {
+  const { t } = useTranslation();
+  const c = commits[0]!;
+  const oldest = commits[commits.length - 1]!;
+  const additions = commits.reduce((sum, x) => sum + x.additions, 0);
+  const deletions = commits.reduce((sum, x) => sum + x.deletions, 0);
+  const when = (date: string) =>
+    new Date(date).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  return (
+    <div className={cn("flex border-b border-border", nested && "bg-muted/40")}>
+      <button
+        type="button"
+        title={t("editor.history.showDiff")}
+        onClick={() => onShow(commits)}
+        className={cn(
+          "block min-w-0 flex-1 py-2 pr-1 text-left hover:bg-accent",
+          nested ? "pl-7" : "pl-3",
+        )}
+      >
+        <div className="flex items-baseline gap-2">
+          <span className="min-w-0 flex-1 truncate text-sm font-medium">
+            {c.message}
+          </span>
+          {c.tags?.includes("published") && (
+            <Badge className="shrink-0 px-1.5 py-0 text-[0.7rem]">
+              {t("editor.history.live")}
+            </Badge>
+          )}
+          {c.tags
+            ?.filter((tag) => /^v\d+$/.test(tag))
+            .map((tag) => (
+              <Badge
+                key={tag}
+                variant="outline"
+                className="shrink-0 px-1.5 py-0 text-[0.7rem]"
+              >
+                {tag}
+              </Badge>
+            ))}
+          <time
+            dateTime={c.date}
+            title={new Date(c.date).toLocaleString()}
+            className="shrink-0 text-xs text-muted-foreground"
+          >
+            {nested ? when(c.date) : new Date(c.date).toLocaleDateString()}
+          </time>
+        </div>
+        <div className="mt-0.5 flex items-center gap-2 text-xs text-muted-foreground">
+          <span className="min-w-0 flex-1 truncate">
+            {commits.length > 1
+              ? t("editor.history.run", {
+                  name: c.name,
+                  count: commits.length,
+                  from: when(oldest.date),
+                  to: when(c.date),
+                })
+              : c.name}
+          </span>
+          <span className="text-green-700 dark:text-green-400">
+            +{additions}
+          </span>
+          <span className="text-red-700 dark:text-red-400">−{deletions}</span>
+        </div>
+      </button>
+      {onToggle && (
+        <button
+          type="button"
+          aria-expanded={open}
+          aria-label={t("editor.history.showSaves", { count: commits.length })}
+          title={t("editor.history.showSaves", { count: commits.length })}
+          onClick={onToggle}
+          className="shrink-0 px-2 text-muted-foreground hover:bg-accent"
+        >
+          {open ? (
+            <ChevronDownIcon className="size-4" />
+          ) : (
+            <ChevronRightIcon className="size-4" />
+          )}
+        </button>
+      )}
     </div>
   );
 }
@@ -286,22 +401,37 @@ export function LiveDiffDialog({
 export function CommitDiffDialog({
   bookId,
   commit,
+  run,
+  path,
   onClose,
 }: {
   bookId: string;
+  /** The commit, or the newest of `run`. */
   commit: HistoryCommit | null;
+  /** Several commits in a row (newest first), shown as one change. */
+  run?: HistoryCommit[];
+  /** A run's changes to this file only. */
+  path?: string;
   onClose: () => void;
 }) {
   const { t } = useTranslation();
+  const oldest = run && run.length > 1 ? run[run.length - 1]! : null;
   const { data, isPending } = useQuery({
     enabled: commit !== null,
-    queryKey: ["books", bookId, "history-diff", commit?.sha],
+    queryKey: ["books", bookId, "history-diff", commit?.sha, oldest?.sha ?? null, oldest ? (path ?? null) : null],
     queryFn: () =>
-      unwrap(
-        api.books[":id"].history[":sha"].diff.$get({
-          param: { id: bookId, sha: commit!.sha },
-        }),
-      ),
+      oldest
+        ? unwrap(
+            api.books[":id"].history["range-diff"].$get({
+              param: { id: bookId },
+              query: { oldest: oldest.sha, newest: commit!.sha, ...(path ? { path } : {}) },
+            }),
+          )
+        : unwrap(
+            api.books[":id"].history[":sha"].diff.$get({
+              param: { id: bookId, sha: commit!.sha },
+            }),
+          ),
     staleTime: Infinity,
     gcTime: Infinity,
   });
@@ -311,14 +441,22 @@ export function CommitDiffDialog({
       <DialogContent className="flex max-h-[85dvh] w-full sm:max-w-5xl flex-col gap-4">
         <DialogHeader>
           <DialogTitle className="truncate pr-6">
-            {commit?.message ?? ""}
+            {oldest
+              ? t("editor.history.runTitle", { count: run!.length })
+              : (commit?.message ?? "")}
           </DialogTitle>
           <DialogDescription>
             {commit &&
-              t("editor.history.by", {
-                name: commit.name,
-                date: new Date(commit.date).toLocaleString(),
-              })}
+              (oldest
+                ? t("editor.history.runBy", {
+                    name: commit.name,
+                    from: new Date(oldest.date).toLocaleString(),
+                    to: new Date(commit.date).toLocaleString(),
+                  })
+                : t("editor.history.by", {
+                    name: commit.name,
+                    date: new Date(commit.date).toLocaleString(),
+                  }))}
           </DialogDescription>
         </DialogHeader>
         <div className="min-h-0 flex-1 overflow-auto pr-1">

@@ -179,6 +179,13 @@ export function SettingsMenu({
           {t("editor.settingsMenu.lineNumbers")}
         </DropdownMenuCheckboxItem>
         <DropdownMenuCheckboxItem
+          checked={settings.autoSave}
+          onCheckedChange={(checked) => update({ autoSave: checked === true })}
+          onSelect={(e) => e.preventDefault()}
+        >
+          {t("editor.settingsMenu.autoSave")}
+        </DropdownMenuCheckboxItem>
+        <DropdownMenuCheckboxItem
           checked={settings.vim}
           onCheckedChange={(checked) => update({ vim: checked === true })}
           onSelect={(e) => e.preventDefault()}
