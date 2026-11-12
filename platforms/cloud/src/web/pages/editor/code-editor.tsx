@@ -83,6 +83,25 @@ function language(path: string): Extension {
 }
 
 /**
+ * Prose wraps at the window's edge: pages, snippets and templates in
+ * Markdown, Typst and plain text. Code (Java, Python, HTML, CSS, …) keeps
+ * its long lines, as in a code editor.
+ */
+function wrapsLines(path: string): boolean {
+  if (isMarkdownPage(path)) return true;
+  switch (extension(path)) {
+    case "md":
+    case "markdown":
+    case "hbs":
+    case "typ":
+    case "txt":
+      return true;
+    default:
+      return false;
+  }
+}
+
+/**
  * Typst without the package's own colors: `typst_lezer()` brings the Typst
  * web app's light-theme style and CodeMirror's default one (underlined
  * headings, light-only colors), which would win over Hyperbook's syntax
@@ -334,9 +353,13 @@ export function CodeEditor({
           spellCompartment.of(spellConfig() ? spellCheck(spellConfig()!) : []),
           contextMenu({ readOnly }),
           readOnly ? [EditorState.readOnly.of(true)] : [],
-          EditorView.lineWrapping,
           // Wrapped lines continue under their own indentation.
-          hangingIndent({ markdown: isMarkdownPage(path) || extension(path) === "hbs" }),
+          wrapsLines(path)
+            ? [
+                EditorView.lineWrapping,
+                hangingIndent({ markdown: isMarkdownPage(path) || extension(path) === "hbs" }),
+              ]
+            : [],
           // Typst's errors from the PDF preview (typst-preview.tsx).
           extension(path) === "typ" ? [typstLint, typstImportCompletion] : [],
           // Its name for screen readers: which file is being edited.
