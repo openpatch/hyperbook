@@ -68,7 +68,7 @@
     "react-i18next": "^17.1.9",
     "react-router": "^8.5.1",
     "sonner": "^2.0.8",
-    "struktolab": "0.6.3",
+    "struktolab": "0.7.0",
     "tailwind-merge": "^3.7.0",
     "tar": "7.5.22",
     "typo-js": "^1.4.0",

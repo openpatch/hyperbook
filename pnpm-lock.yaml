@@ -507,8 +507,8 @@ importers:
         specifier: ^3.7.1
         version: 3.7.1
       struktolab:
-        specifier: ^0.6.3
-        version: 0.6.3
+        specifier: ^0.7.0
+        version: 0.7.0
       tar:
         specifier: 7.5.22
         version: 7.5.22
@@ -726,8 +726,8 @@ importers:
         specifier: ^2.0.8
         version: 2.0.8(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       struktolab:
-        specifier: 0.6.3
-        version: 0.6.3
+        specifier: 0.7.0
+        version: 0.7.0
       tailwind-merge:
         specifier: ^3.7.0
         version: 3.7.0
@@ -9063,8 +9063,8 @@ packages:
   structured-source@4.0.0:
     resolution: {integrity: sha512-qGzRFNJDjFieQkl/sVOI2dUjHKRyL9dAJi2gCPGJLbJHBIkyOHxjuocpIEfbLioX+qSJpvbYdT49/YCdMznKxA==}
 
-  struktolab@0.6.3:
-    resolution: {integrity: sha512-LPc+ld4yM+bruvQkXGXOOD50nRev47G5y7Vne5jr6YDewCMMFdqaFLjZ5i8KTKsJNCRa1gaOsl8pOyvCckemFw==}
+  struktolab@0.7.0:
+    resolution: {integrity: sha512-HEXwUuAJJhKSPITGZVwq8RkixDc1tBE07PZdTD0qpLcD4DVaxtUHG8bWrGukki29TBwy7tBc9g9x0EaVVWEFVQ==}
 
   style-loader@4.0.0:
     resolution: {integrity: sha512-1V4WqhhZZgjVAVJyt7TdDPZoPBPNHbekX4fWnCJL1yQukhCeZhJySUL+gL9y6sNdN95uEOS83Y55SqHcP7MzLA==}
@@ -11076,7 +11076,7 @@ snapshots:
       react: 19.3.1
       react-dom: 19.3.1(react@19.3.1)
       throttle-debounce: 5.0.2
-      zundo: 2.3.0(zustand@5.0.16(@types/react@19.3.0)(react@19.3.1))
+      zundo: 2.3.0(zustand@5.0.16(@types/react@19.3.0)(react@19.3.1)(use-sync-external-store@1.7.0(react@19.3.1)))
       zustand: 5.0.16(@types/react@19.3.0)(react@19.3.1)(use-sync-external-store@1.7.0(react@19.3.1))
     transitivePeerDependencies:
       - '@types/react'
@@ -11372,7 +11372,7 @@ snapshots:
       react-dom: 19.3.1(react@19.3.1)
       throttle-debounce: 5.0.2
       tslib: 2.8.1
-      zundo: 2.3.0(zustand@5.0.16(@types/react@19.3.0)(react@19.3.1))
+      zundo: 2.3.0(zustand@5.0.16(@types/react@19.3.0)(react@19.3.1)(use-sync-external-store@1.7.0(react@19.3.1)))
       zustand: 5.0.16(@types/react@19.3.0)(react@19.3.1)(use-sync-external-store@1.7.0(react@19.3.1))
     transitivePeerDependencies:
       - '@types/react'
@@ -18877,7 +18877,7 @@ snapshots:
     dependencies:
       boundary: 2.0.0
 
-  struktolab@0.6.3: {}
+  struktolab@0.7.0: {}
 
   style-loader@4.0.0(webpack@5.112.2):
     dependencies:
@@ -19816,7 +19816,7 @@ snapshots:
 
   zod@4.6.7: {}
 
-  zundo@2.3.0(zustand@5.0.16(@types/react@19.3.0)(react@19.3.1)):
+  zundo@2.3.0(zustand@5.0.16(@types/react@19.3.0)(react@19.3.1)(use-sync-external-store@1.7.0(react@19.3.1))):
     dependencies:
       zustand: 5.0.16(@types/react@19.3.0)(react@19.3.1)(use-sync-external-store@1.7.0(react@19.3.1))
 
