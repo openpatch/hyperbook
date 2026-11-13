@@ -332,7 +332,15 @@ describe("editor", () => {
     // An empty file starts with the playground's example diagram, unsaved.
     await page.getByTitle("Not saved").first().waitFor();
     const frame = page.frameLocator('iframe[title="jmp editor"]');
-    await frame.getByRole("button", { name: "Save", exact: true }).click();
+    // In a narrow pane the playground folds its toolbar behind the burger
+    // menu; the toolbar's Save button is a menu item there.
+    const save = frame.getByRole("button", { name: "Save", exact: true });
+    if (!(await save.count())) {
+      await frame.getByRole("button", { name: "Menu" }).click();
+      await frame.getByRole("menuitem", { name: "Save", exact: true }).click();
+    } else {
+      await save.click();
+    }
     await page.getByTitle("Not saved").first().waitFor({ state: "detached" });
 
     const saved = await page.evaluate(async () => {
