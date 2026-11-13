@@ -7,6 +7,7 @@ import { Code, Root, Text } from "mdast";
 import path from "path";
 import { visit } from "unist-util-visit";
 import { VFile } from "vfile";
+import { scriptFlagsAttribute, splitScriptFlags } from "./ideWorkspace";
 import {
   expectContainerDirective,
   isCode,
@@ -78,8 +79,11 @@ export default (ctx: HyperbookContext) => () => {
           : "";
 
         // Collect the files the program works with: ::file directives, and
-        // the @file lines the directive read before ::file existed.
+        // the @file lines the directive read before ::file existed. A ::file
+        // may be hidden, or readOnly, for readers to run but not to see (the
+        // tests a solution has to pass, say).
         const binaryFiles: { dest: string; url: string }[] = [];
+        const fileFlags: { hidden: boolean; readOnly: boolean }[] = [];
         for (const child of node.children) {
           if (
             child.type === "leafDirective" &&
@@ -103,6 +107,10 @@ export default (ctx: HyperbookContext) => () => {
                 "public",
                 ctx.navigation.current || undefined,
               ),
+            });
+            fileFlags.push({
+              hidden: "hidden" in fileAttributes,
+              readOnly: "readonly" in fileAttributes,
             });
             continue;
           }
@@ -135,6 +143,7 @@ export default (ctx: HyperbookContext) => () => {
               ctx.navigation.current || undefined,
             );
             binaryFiles.push({ dest, url });
+            fileFlags.push({ hidden: false, readOnly: false });
           }
         }
 
@@ -165,26 +174,30 @@ export default (ctx: HyperbookContext) => () => {
 
         const codes: ElementContent[] = node.children
           ?.filter(isCode)
-          .map((n) => ({
-            type: "element",
-            tagName: "script",
-            properties: {
-              type: "text/plain",
-              title: n.meta ?? undefined,
-              "data-type":
-                n.lang === "md" || n.lang === "markdown" ? "hint" : "java",
-            },
-            children: [
-              {
-                type: "text",
-                value: n.value,
+          .map((n) => {
+            const { title, hidden, readOnly } = splitScriptFlags(n.meta);
+            return {
+              type: "element",
+              tagName: "script",
+              properties: {
+                type: "text/plain",
+                title,
+                "data-type":
+                  n.lang === "md" || n.lang === "markdown" ? "hint" : "java",
+                "data-online-ide": scriptFlagsAttribute({ hidden, readOnly }),
               },
-            ],
-          }));
+              children: [
+                {
+                  type: "text",
+                  value: n.value,
+                },
+              ],
+            };
+          });
 
         // Add the ::file and @file entries as workspace files with a
         // data-type matching the kind of file, as the embedded IDE expects it.
-        const fileElements: ElementContent[] = binaryFiles.map((file) => ({
+        const fileElements: ElementContent[] = binaryFiles.map((file, i) => ({
           type: "element",
           tagName: "script",
           properties: {
@@ -192,6 +205,7 @@ export default (ctx: HyperbookContext) => () => {
             title: file.dest,
             "data-type": workspaceFileDataType(file.dest),
             src: file.url,
+            "data-online-ide": scriptFlagsAttribute(fileFlags[i] || {}),
           },
           children: [],
         }));

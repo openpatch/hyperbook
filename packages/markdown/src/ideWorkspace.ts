@@ -256,6 +256,45 @@ export const collectWorkspace = (
   return { main, files };
 };
 
+/**
+ * The flags every IDE understands on a file: `hidden` keeps the file out of
+ * sight — it stays in the workspace, so the program and its tests still run
+ * against it — and `readonly` opens it for reading only. On a code block
+ * they stand behind the file name in the meta line, on a `::file` they are
+ * plain attributes.
+ */
+const SCRIPT_FLAGS = ["hidden", "readonly"];
+
+/**
+ * Splits a code block's meta line into its file name and the flags after it.
+ * A name may keep its spaces ("A Hint"); only the bare flag words count.
+ */
+export const splitScriptFlags = (meta: string | null | undefined) => {
+  const words = (meta ?? "").split(/\s+/).filter(Boolean);
+  return {
+    title:
+      words.filter((word) => !SCRIPT_FLAGS.includes(word)).join(" ") ||
+      undefined,
+    hidden: words.includes("hidden"),
+    readOnly: words.includes("readonly"),
+  };
+};
+
+/**
+ * The `data-online-ide` attribute the embedded IDEs (Online-IDE, SQL-IDE)
+ * read their per-file options from: JSON with single quotes instead of
+ * double, since the values live inside an HTML attribute.
+ */
+export const scriptFlagsAttribute = (flags: {
+  hidden?: boolean;
+  readOnly?: boolean;
+}): string | undefined => {
+  const entries: string[] = [];
+  if (flags.hidden) entries.push("'hidden': true");
+  if (flags.readOnly) entries.push("'readOnly': true");
+  return entries.length > 0 ? `{${entries.join(", ")}}` : undefined;
+};
+
 /** The `data-workspace` attribute: base64 of the UTF-8 JSON. */
 export const encodeWorkspace = (workspace: Workspace) =>
   Buffer.from(JSON.stringify(workspace)).toString("base64");

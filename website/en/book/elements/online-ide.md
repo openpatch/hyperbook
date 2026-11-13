@@ -58,6 +58,40 @@ The `::file` directive takes two parameters:
 
 You can include multiple `::file` directives to reference multiple files.
 
+## Hidden and read-only files
+
+Files a reader should run but not see — the tests a solution has to pass, for
+instance — can be hidden, and files a reader should only read can be locked
+with `readonly`.
+
+A hidden file stays part of the workspace: it still compiles, so the program
+and its tests run against it. But it never shows in the file list, so readers
+cannot open, edit or delete it. A file marked `readonly` shows in the file
+list, but the IDE opens it for reading only.
+
+Both work the same way on a `::file` and on a code block, as a flag:
+
+````markdown
+:::onlineide
+
+::file{path="PunkteregelTest.java" src="tests/PunkteregelTest.java" hidden}
+::file{path="Vorlage.java" src="files/Vorlage.java" readonly}
+
+```java Beispiel.java
+void main() {}
+```
+
+```java BeispielTest.java hidden
+@Test class BeispielTest {}
+```
+
+:::
+````
+
+On a code block the flag stands after the file name, since the meta line of
+the block is its name. A name may still contain spaces, as before — only the
+bare words `hidden` and `readonly` are read as flags.
+
 :::onlineide
 
 ````markdown A Hint

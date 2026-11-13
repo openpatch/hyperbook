@@ -240,4 +240,55 @@ new Stage();
     ).value as string;
     expect(html).toMatch(/'assetBaseUrl': '[^']*\/'/);
   });
+
+  it("should hide and lock files marked in the code block's meta", async () => {
+    const html = toHtml(
+      `:::onlineide
+
+\`\`\`java Beispiel.java hidden
+void main() {}
+\`\`\`
+
+\`\`\`java Tests.java readonly
+class Tests {}
+\`\`\`
+
+:::
+`,
+      ctx,
+    ).value as string;
+    expect(html).toContain(
+      '<script type="text/plain" title="Beispiel.java" data-type="java" data-online-ide="{\'hidden\': true}">',
+    );
+    expect(html).toContain(
+      '<script type="text/plain" title="Tests.java" data-type="java" data-online-ide="{\'readOnly\': true}">',
+    );
+  });
+
+  it("should hide and lock files marked in a ::file", async () => {
+    const html = toHtml(
+      `:::onlineide
+
+::file{path="PunkteregelTest.java" src="tests/PunkteregelTest.java" hidden}
+::file{path="loesung.sql" src="db/loesung.sql" readonly}
+::file{path="sky.jpg" src="images/sky.jpg"}
+
+\`\`\`java
+new Stage();
+\`\`\`
+
+:::
+`,
+      ctx,
+    ).value as string;
+    expect(html).toContain(
+      '<script type="text/plain" title="PunkteregelTest.java" data-type="java" src="/public/tests/PunkteregelTest.java" data-online-ide="{\'hidden\': true}"></script>',
+    );
+    expect(html).toContain(
+      '<script type="text/plain" title="loesung.sql" data-type="java" src="/public/db/loesung.sql" data-online-ide="{\'readOnly\': true}"></script>',
+    );
+    expect(html).toContain(
+      '<script type="text/plain" title="sky.jpg" data-type="image" src="/public/images/sky.jpg"></script>',
+    );
+  });
 });

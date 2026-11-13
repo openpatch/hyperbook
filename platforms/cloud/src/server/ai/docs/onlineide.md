@@ -15,3 +15,10 @@ is `Main` — name the file after the class (`Equals.java`), or the build fails.
 
 Attributes: `fileList` (show the file list, default `true`), plus the usual `id`,
 `files`, `accept` (default `.java`).
+
+Files beyond the code blocks: `::file{path="…" src="…"}` adds a file from the
+book. A trailing flag works on a fence (```java Beispiel.java hidden`) and on
+a `::file` (`::file{path="BeispielTest.java" src="…" hidden}`). `hidden` keeps
+the file out of the file list — readers cannot open, edit or delete it, while
+it still compiles, so tests against a solution keep running; `readonly` shows
+the file but opens it for reading only.

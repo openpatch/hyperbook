@@ -111,4 +111,51 @@ SELECT 1;
       '::file in the sqlide directive: "missing.sql" was not found.',
     );
   });
+
+  it("should hide and lock files marked in the code block's meta", async () => {
+    const html = toHtml(
+      `:::sqlide
+
+\`\`\`mysql Statements.sql hidden
+SELECT 1;
+\`\`\`
+
+\`\`\`mysql vorlage.sql readonly
+SELECT 2;
+\`\`\`
+
+:::
+`,
+      ctx,
+    ).value as string;
+    expect(html).toContain(
+      '<script type="text/plain" title="Statements.sql" data-type="sql" data-online-ide="{\'hidden\': true}">',
+    );
+    expect(html).toContain(
+      '<script type="text/plain" title="vorlage.sql" data-type="sql" data-online-ide="{\'readOnly\': true}">',
+    );
+  });
+
+  it("should hide and lock files marked in a ::file", async () => {
+    const html = toHtml(
+      `:::sqlide
+
+\`\`\`mysql
+SELECT 1;
+\`\`\`
+
+::file{path="loesung.sql" src="sqlide-setup.sql" hidden}
+::file{path="tip.md" src="sqlide-tip.md" readonly}
+
+:::
+`,
+      ctx,
+    ).value as string;
+    expect(html).toContain(
+      '<script type="text/plain" title="loesung.sql" data-type="sql" data-online-ide="{\'hidden\': true}">',
+    );
+    expect(html).toContain(
+      '<script type="text/plain" title="tip.md" data-type="hint" data-online-ide="{\'readOnly\': true}">',
+    );
+  });
 });

@@ -56,6 +56,41 @@ Die `::file`-Direktive nimmt zwei Parameter:
 
 Sie können mehrere `::file`-Direktiven einfügen, um auf mehrere Dateien zuzugreifen.
 
+## Versteckte und schreibgeschützte Dateien
+
+Dateien, die Lesende ausführen, aber nicht sehen sollen – etwa die Tests, die
+eine Lösung bestehen muss –, lassen sich mit `hidden` verstecken; Dateien,
+die nur gelesen werden sollen, mit `readonly` sperren.
+
+Eine versteckte Datei bleibt Teil des Workspaces: Sie wird weiter kompiliert,
+das Programm und seine Tests laufen also weiter gegen sie. In der Dateiliste
+erscheint sie aber nie, sodass sie niemand öffnen, bearbeiten oder löschen
+kann. Eine mit `readonly` markierte Datei erscheint in der Dateiliste, die IDE
+öffnet sie aber nur zum Lesen.
+
+Beides funktioniert bei `::file` und bei einem Codeblock gleich, als Flag:
+
+````markdown
+:::onlineide
+
+::file{path="PunkteregelTest.java" src="tests/PunkteregelTest.java" hidden}
+::file{path="Vorlage.java" src="files/Vorlage.java" readonly}
+
+```java Beispiel.java
+void main() {}
+```
+
+```java BeispielTest.java hidden
+@Test class BeispielTest {}
+```
+
+:::
+````
+
+Bei einem Codeblock steht das Flag hinter dem Dateinamen, denn die Metazeile
+des Blocks ist sein Name. Ein Name darf wie bisher Leerzeichen enthalten – nur
+die Wörter `hidden` und `readonly` allein werden als Flag gelesen.
+
 :::onlineide
 
 ````markdown Ein Hinweis

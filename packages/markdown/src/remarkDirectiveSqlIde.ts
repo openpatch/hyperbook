@@ -15,6 +15,7 @@ import {
   registerDirective,
   requestJS,
 } from "./remarkHelper";
+import { scriptFlagsAttribute, splitScriptFlags } from "./ideWorkspace";
 import { ElementContent } from "hast";
 import { resolveDirectiveId } from "./directiveId";
 
@@ -76,6 +77,7 @@ export default (ctx: HyperbookContext) => () => {
           title: string | undefined,
           dataType: string,
           value: string,
+          flags?: { hidden?: boolean; readOnly?: boolean },
         ): ElementContent => ({
           type: "element",
           tagName: "script",
@@ -83,6 +85,7 @@ export default (ctx: HyperbookContext) => () => {
             type: "text/plain",
             title,
             "data-type": dataType,
+            "data-online-ide": scriptFlagsAttribute(flags || {}),
           },
           children: [
             {
@@ -94,13 +97,15 @@ export default (ctx: HyperbookContext) => () => {
 
         const codes: ElementContent[] = node.children
           ?.filter(isCode)
-          .map((n) =>
-            scriptElement(
-              n.meta ?? undefined,
+          .map((n) => {
+            const { title, hidden, readOnly } = splitScriptFlags(n.meta);
+            return scriptElement(
+              title,
               n.lang === "md" || n.lang === "markdown" ? "hint" : "sql",
               n.value,
-            ),
-          );
+              { hidden, readOnly },
+            );
+          });
 
         // ::file{path="…" src="…"} adds a file from the book. The embedded
         // SQL IDE reads only what is on the page, so the source is read here
@@ -138,6 +143,10 @@ export default (ctx: HyperbookContext) => () => {
               filePath,
               /\.(md|markdown)$/i.test(filePath) ? "hint" : "sql",
               content,
+              {
+                hidden: "hidden" in fileAttributes,
+                readOnly: "readonly" in fileAttributes,
+              },
             ),
           );
         }
