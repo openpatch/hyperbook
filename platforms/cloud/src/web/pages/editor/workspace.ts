@@ -1,9 +1,10 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { useCallback, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import type { FileChange } from "../../../shared/schemas";
 import { ApiError } from "@/lib/api";
 import { MAX_DRAFT_LENGTH, deleteDraft, draftPaths, getDraft, putDraft } from "./drafts";
 import { type Listing, type Loaded, commitFiles, loadFile } from "./files";
+import { loadTabs, saveTabs } from "./session";
 
 /** An open file. `version` changes when the file is loaded again, which remounts its editor. */
 export type Tab = {
@@ -173,9 +174,14 @@ export function useWorkspace(
     [bookId, live, patchTab],
   );
 
+  /**
+   * Opens `path` in a tab and shows it; `{ show: false }` only shows it when
+   * no tab is shown yet (a draft brought back next to the remembered tabs).
+   */
   const open = useCallback(
-    (path: string) => {
-      setActive(path);
+    (path: string, { show = true }: { show?: boolean } = {}) => {
+      if (show) setActive(path);
+      else setActive((a) => a ?? path);
       if (tabsRef.current.some((t) => t.path === path)) return;
       const tab: Tab = { path, version: 0, status: "loading" };
       // Right away, so a second call before the next render sees it.
@@ -201,12 +207,32 @@ export function useWorkspace(
     const existing = new Set(listing.files.map((f) => f.path));
     const paths = await draftPaths(bookId);
     for (const path of paths) {
-      if (existing.has(path)) open(path);
+      if (existing.has(path)) open(path, { show: false });
       // The file is gone (deleted or moved elsewhere): its draft has no place.
       else void deleteDraft(bookId, path);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bookId, open]);
+
+  /**
+   * Opens the tabs of last time (see session.ts) that still exist, showing
+   * the one shown then; false when there are none, so the start page opens.
+   * From then on the tabs are remembered.
+   */
+  const remembering = useRef(false);
+  const restoreTabs = useCallback(() => {
+    remembering.current = true;
+    const kept = loadTabs(bookId);
+    const existing = new Set(listing.files.map((f) => f.path));
+    const paths = kept?.paths.filter((p) => existing.has(p)) ?? [];
+    for (const path of paths) open(path, { show: false });
+    if (kept?.active && paths.includes(kept.active)) setActive(kept.active);
+    return paths.length > 0;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [bookId, open]);
+  useEffect(() => {
+    if (remembering.current) saveTabs(bookId, { paths: tabs.map((t) => t.path), active });
+  }, [bookId, tabs, active]);
 
   /** Drops every draft of the open files: their unsaved text was given up. */
   const discardDrafts = useCallback(
@@ -341,6 +367,7 @@ export function useWorkspace(
     open,
     reload,
     restoreDrafts,
+    restoreTabs,
     discardDrafts,
     close,
     setText,

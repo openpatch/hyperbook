@@ -224,6 +224,9 @@ describe("editor", () => {
     await page.getByRole("button", { name: "Editor settings" }).click();
     await page.getByRole("menuitemcheckbox", { name: "Vim key bindings" }).click();
     await page.keyboard.press("Escape");
+    // The menu closes in its own time; the scripted keys after it must not
+    // race its dismissal, or the still-open layer swallows the next Escape.
+    await page.getByRole("menu").waitFor({ state: "detached" });
 
     await page.locator("#editor-files").getByText("echo.md", { exact: true }).click();
     const editor = page.locator('[role="tabpanel"]:not(.hidden) .cm-content');
@@ -614,5 +617,30 @@ describe("editor", () => {
     await page.getByRole("tab", { name: "loops.md" }).click();
     await editor.getByText('::struktolab{src="countdown.struktolab"}').waitFor();
   }, 60_000);
-});
 
+  it("keeps the tabs, the shown tab and the unfolded folders for the next visit", async () => {
+    await page.getByRole("tab", { name: "loops.md" }).click();
+    const book = page.getByRole("list", { name: "Files" }).getByRole("button", { name: "book", exact: true });
+    if ((await book.getAttribute("aria-expanded")) !== "true") await book.click();
+    await page.getByRole("list", { name: "Files" }).getByRole("button", { name: "book", expanded: true }).waitFor();
+    const state = (p: Page) =>
+      p.evaluate(() => ({
+        tabs: [...document.querySelectorAll('[id^="editor-tab-"]')].map((el) => el.getAttribute("title")),
+        shown: document.querySelector('[id^="editor-tab-"][aria-selected="true"]')?.getAttribute("title"),
+        open: [...document.querySelectorAll('ul[aria-label="Files"] [aria-expanded="true"]')].map((el) =>
+          el.textContent?.trim(),
+        ),
+      }));
+    const before = await state(page);
+    expect(before.tabs.length).toBeGreaterThan(1);
+    expect(before.shown).toMatch(/loops\.md$/);
+    expect(before.open.length).toBeGreaterThan(0);
+
+    // The same book in another browser tab: a refresh, or coming back later.
+    const again = await context.newPage();
+    await again.goto(page.url());
+    await again.getByRole("tab", { name: "loops.md", selected: true }).waitFor();
+    expect(await state(again)).toEqual(before);
+    await again.close();
+  }, 60_000);
+});

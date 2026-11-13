@@ -146,6 +146,7 @@ import {
   useLiveText,
   useWorkspace,
 } from "./workspace";
+import { loadOpenFolders, saveOpenFolders } from "./session";
 
 export function Component() {
   const { t } = useTranslation();
@@ -345,9 +346,10 @@ const foldersOf = (path: string) =>
  * It owns the tree's collapsed folders and its filter, so typing in the
  * filter or toggling a folder re-renders the sidebar only, not the whole
  * editor. Folders start collapsed, so a big book opens fast and stays
- * clear until unfolded.
+ * clear until unfolded; the ones unfolded last time open again (session.ts).
  */
 const FileSidebar = memo(function FileSidebar({
+  bookId,
   files,
   active,
   dirty,
@@ -356,6 +358,7 @@ const FileSidebar = memo(function FileSidebar({
   readOnly,
   comments,
 }: {
+  bookId: string;
   files: Listing["files"];
   active: string | null;
   dirty: Set<string>;
@@ -365,9 +368,15 @@ const FileSidebar = memo(function FileSidebar({
   comments?: ReadonlyMap<string, number>;
 }) {
   const { t } = useTranslation();
-  const [collapsed, setCollapsed] = useState<Set<string>>(
-    () => new Set(files.flatMap((f) => foldersOf(f.path))),
-  );
+  const [collapsed, setCollapsed] = useState<Set<string>>(() => {
+    const open = new Set(loadOpenFolders(bookId) ?? []);
+    return new Set(files.flatMap((f) => foldersOf(f.path)).filter((f) => !open.has(f)));
+  });
+  // Kept as the unfolded folders: one added since starts folded.
+  useEffect(() => {
+    const all = new Set(files.flatMap((f) => foldersOf(f.path)));
+    saveOpenFolders(bookId, [...all].filter((f) => !collapsed.has(f)));
+  }, [bookId, files, collapsed]);
   const [filter, setFilter] = useState("");
   const [edit, setEdit] = useState<TreeEdit | null>(null);
   // Where you are: the folder last clicked in the tree, or the folder of the
@@ -804,8 +813,9 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
   const replaceTarget = useRef<string | null>(null);
   const exists = (path: string) => listing.files.some((f) => f.path === path);
 
-  // Open the start page once.
+  // The tabs of last time open again; without them, the start page.
   useEffect(() => {
+    if (ws.restoreTabs()) return;
     const first = ["book/index.md", "README.md", "hyperbook.json"].find(exists);
     if (first) ws.open(first);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -2152,6 +2162,7 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
             )}
           >
             <FileSidebar
+              bookId={bookId}
               files={listing.files}
               active={ws.active}
               dirty={ws.dirty}
