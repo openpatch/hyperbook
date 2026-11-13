@@ -146,8 +146,26 @@ export function bookAiRoutes({ db, config }: Deps) {
         input.model && ai.models.includes(input.model) ? input.model : ai.model;
 
       return streamSSE(c, async (stream) => {
-        const send = (event: string, data: unknown) =>
-          stream.writeSSE({ event, data: JSON.stringify(data) });
+        // One writer at a time: a heartbeat ping must never land between
+        // the lines of one event, or the editor would read it as two
+        // events. Every write goes through this queue.
+        let writing: Promise<unknown> = Promise.resolve();
+        const send = (event: string, data: unknown) => {
+          const write = writing.then(() =>
+            stream.writeSSE({ event, data: JSON.stringify(data) }),
+          );
+          writing = write.catch(() => {});
+          return write;
+        };
+        // A heartbeat while the model works: a reasoning model can think
+        // for minutes before its first word, and many proxies cut an
+        // idle connection long before that — a comment line keeps the
+        // editor's connection open without producing an event.
+        const ping = setInterval(() => {
+          writing = writing
+            .then(() => stream.write(": ping\n\n"))
+            .catch(() => clearInterval(ping));
+        }, 15_000);
         let finish = "error";
         let steps = 0;
         let proposedChanges = 0;
@@ -211,7 +229,10 @@ export function bookAiRoutes({ db, config }: Deps) {
           } else if (error instanceof ProviderError) {
             finish = "error";
             await send("error", {
-              message: t("errors.ai.provider"),
+              message:
+                error.code === "timeout"
+                  ? t("errors.ai.timeout")
+                  : t("errors.ai.provider"),
               code: error.code,
             });
           } else {
@@ -222,6 +243,7 @@ export function bookAiRoutes({ db, config }: Deps) {
             });
           }
         } finally {
+          clearInterval(ping);
           // Metadata only: never the request's or the answer's content.
           audit(db, {
             actorUserId: user.id,

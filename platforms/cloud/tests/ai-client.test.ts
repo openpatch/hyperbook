@@ -1,5 +1,7 @@
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, beforeAll, describe, expect, it } from "vitest";
+import i18next from "i18next";
 import { assist } from "../src/web/lib/ai";
+import { catalogs } from "../src/shared/i18n";
 
 /*
  * The streaming client's SSE parsing: the same wire format the route sends
@@ -9,6 +11,19 @@ import { assist } from "../src/web/lib/ai";
  */
 
 const encoder = new TextEncoder();
+
+// The editor initializes i18next before this module can translate; the drop
+// report uses the shared catalogs, so the test initializes them too.
+beforeAll(async () => {
+  if (!i18next.isInitialized)
+    await i18next.init({
+      lng: "en",
+      resources: { en: { translation: catalogs.en } },
+    });
+});
+
+const DROPPED =
+  "The connection to the assistant was interrupted; the answer may be incomplete.";
 
 function sseResponse(chunks: string[]): Response {
   const body = new ReadableStream<Uint8Array>({
@@ -138,7 +153,54 @@ describe("assist", () => {
       (event) => seen.push(event),
       new AbortController().signal,
     );
-    expect(seen).toEqual([{ event: "delta", text: "tail" }]);
+    expect(seen).toEqual([
+      { event: "delta", text: "tail" },
+      { event: "error", message: DROPPED, code: "dropped" },
+    ]);
+  });
+
+  it("reports a stream that is cut without a done or error event", async () => {
+    // The connection dies mid-answer: no done, no error — the teacher
+    // must see a failure, not an answer that quietly stops mid-sentence.
+    stubFetch(() =>
+      sseResponse([
+        'event: delta\ndata: {"text":"Half an an"}\n\n',
+        'event: delta\ndata: {"text":"swer"}\n\n',
+      ]),
+    );
+    const seen: unknown[] = [];
+    await assist(
+      1,
+      { prompt: "Continue the page", pagePath: "book/index.md" },
+      (event) => seen.push(event),
+      new AbortController().signal,
+    );
+    expect(seen).toEqual([
+      { event: "delta", text: "Half an an" },
+      { event: "delta", text: "swer" },
+      { event: "error", message: DROPPED, code: "dropped" },
+    ]);
+  });
+
+  it("joins an event whose data spans several data: lines, as SSE says", async () => {
+    stubFetch(() =>
+      sseResponse([
+        'event: delta\ndata: {"text":\ndata: "Hello"}\n\nevent: done\ndata: {"finish":"stop"}\n\n',
+      ]),
+    );
+    const seen: unknown[] = [];
+    await assist(
+      1,
+      { prompt: "Continue the page", pagePath: "book/index.md" },
+      (event) => seen.push(event),
+      new AbortController().signal,
+    );
+    // Both data lines are the one payload: the newline they join with is
+    // JSON whitespace, and the delta's text is "Hello".
+    expect(seen).toEqual([
+      { event: "delta", text: "Hello" },
+      { event: "done", finish: "stop" },
+    ]);
   });
 
   it("reports the route's translated errors", async () => {

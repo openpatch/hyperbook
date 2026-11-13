@@ -180,10 +180,12 @@ const schema = z.object({
    * prices in the settings when the provider's /models has no pricing.
    */
   AI_PRICES_URL: optional,
-  AI_TIMEOUT_SECONDS: z.coerce.number().int().min(10).default(120),
+  // How long one provider call may take, thinking and streaming included —
+  // a reasoning model thinks for minutes before its first word.
+  AI_TIMEOUT_SECONDS: z.coerce.number().int().min(10).default(300),
   // The cap counts reasoning tokens too, so a reasoning model (Mistral
   // Large 4, GLM-5.3) needs room to think before it writes its answer.
-  AI_MAX_OUTPUT_TOKENS: z.coerce.number().int().min(64).default(8192),
+  AI_MAX_OUTPUT_TOKENS: z.coerce.number().int().min(64).default(16384),
   AI_MAX_STEPS: z.coerce.number().int().min(1).max(32).default(6),
   AI_REQUESTS_PER_MINUTE: z.coerce.number().int().min(1).default(6),
 });

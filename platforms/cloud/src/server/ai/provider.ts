@@ -35,7 +35,7 @@ export type ProviderToolCall = { id: string; name: string; args: string };
 export class ProviderError extends Error {
   constructor(
     message: string,
-    readonly code: "unreachable" | "status" | "empty",
+    readonly code: "unreachable" | "status" | "empty" | "timeout",
     readonly status: number | null = null,
   ) {
     super(message);
@@ -93,14 +93,8 @@ function thinkingText(content: unknown): string {
   return text;
 }
 
-/**
- * Calls `{baseUrl}/chat/completions` with `stream: true` and yields what
- * happens: the assistant's text as it arrives, the tool calls it made once
- * complete, then how the call ended. `signal` (a disconnecting reader)
- * aborts the provider call; the timeout covers the whole request, streaming
- * included.
- */
-export async function* streamChat(options: {
+/** Everything the provider call needs. */
+type StreamOptions = {
   baseUrl: string;
   apiKey: string;
   model: string;
@@ -118,7 +112,95 @@ export async function* streamChat(options: {
    */
   cacheKey?: string;
   signal?: AbortSignal;
-}): AsyncGenerator<ProviderEvent> {
+};
+
+/**
+ * A failure while the answer was on its way: the timeout signal firing
+ * (again, not the teacher stopping the request — the callers check that
+ * first) reads as `timeout`; anything else is a connection cut short.
+ * Both must arrive as ProviderErrors the editor can phrase, so a flaky
+ * line does not surface as an internal error.
+ */
+function cutOff(error: unknown, deadline: AbortSignal): ProviderError {
+  if (
+    (error as { name?: string } | null)?.name === "TimeoutError" ||
+    error === deadline.reason
+  )
+    return new ProviderError("The AI provider timed out", "timeout");
+  return new ProviderError(
+    "The AI provider could not be reached",
+    "unreachable",
+  );
+}
+
+/**
+ * Calls `{baseUrl}/chat/completions` with `stream: true` and yields what
+ * happens: the assistant's text as it arrives, the tool calls it made once
+ * complete, then how the call ended. `signal` (a disconnecting reader)
+ * aborts the provider call; the timeout covers the whole request, streaming
+ * included.
+ *
+ * A transient failure while nothing was streamed yet — the provider
+ * unreachable, a 429, a 5xx — is retried twice with a short pause; a
+ * stream that already delivered anything is never repeated, for that
+ * would show its text twice. Nothing else is retried: a 401 would fail
+ * the same way again, and a timeout usually means the model needed longer
+ * than configured, not that the line was bad.
+ */
+export async function* streamChat(
+  options: StreamOptions,
+): AsyncGenerator<ProviderEvent> {
+  for (let attempt = 0; ; attempt++) {
+    let streamed = false;
+    try {
+      for await (const event of streamOnce(options)) {
+        streamed = true;
+        yield event;
+      }
+      return;
+    } catch (error) {
+      if (
+        streamed ||
+        attempt >= 2 ||
+        options.signal?.aborted ||
+        !transient(error)
+      ) {
+        throw error;
+      }
+      await pause(attempt === 0 ? 400 : 1200, options.signal);
+    }
+  }
+}
+
+/** A retry's pause, ended early when the teacher stops the request. */
+function pause(ms: number, signal?: AbortSignal): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => resolve(), ms);
+    signal?.addEventListener(
+      "abort",
+      () => {
+        clearTimeout(timer);
+        reject(signal.reason);
+      },
+      { once: true },
+    );
+  });
+}
+
+/** Whether a failure is worth another attempt, before anything streamed. */
+function transient(error: unknown): boolean {
+  if (!(error instanceof ProviderError)) return false;
+  if (error.code === "unreachable") return true;
+  return error.status !== null && (error.status === 429 || error.status >= 500);
+}
+
+/**
+ * One provider call, as `streamChat` runs it. See there for the options.
+ */
+async function* streamOnce(
+  options: StreamOptions,
+): AsyncGenerator<ProviderEvent> {
+  const deadline = AbortSignal.timeout(options.timeoutMs);
   const response = await fetch(`${options.baseUrl}/chat/completions`, {
     method: "POST",
     headers: {
@@ -148,18 +230,15 @@ export async function* streamChat(options: {
         : {}),
     }),
     signal: AbortSignal.any([
-      AbortSignal.timeout(options.timeoutMs),
+      deadline,
       ...(options.signal ? [options.signal] : []),
     ]),
   }).catch((error: unknown) => {
     // The caller's signal fired (the editor disconnected): that is not a
     // provider answer, so the abort travels on and the route can tell the
-    // two apart. Only a failed call becomes "unreachable".
+    // two apart. Everything else failed on the way to the provider.
     if (options.signal?.aborted) throw error;
-    throw new ProviderError(
-      "The AI provider could not be reached",
-      "unreachable",
-    );
+    throw cutOff(error, deadline);
   });
 
   if (!response.ok || !response.body) {
@@ -193,92 +272,108 @@ export async function* streamChat(options: {
 
   /** Parses one SSE event block into `pending`; sets `done` on [DONE]. */
   const handleEvent = (event: string): void => {
+    // SSE allows an event's payload as several `data:` lines, meant to be
+    // joined by newlines — a provider or proxy may split one chunk across
+    // them. Parsing each line on its own would drop such a chunk silently;
+    // the payload only exists once the event block ends.
+    let data: string | null = null;
     for (const line of event.split("\n")) {
       if (!line.startsWith("data:")) continue;
-      const data = line.slice("data:".length).trim();
-      if (data === "[DONE]") {
-        done = true;
-        return;
-      }
-      let chunk: {
-        choices?: {
-          delta?: {
-            content?: unknown;
-            reasoning_content?: unknown;
-            reasoning?: unknown;
-            tool_calls?: {
-              index: number;
-              id?: string;
-              function?: { name?: string; arguments?: string };
-            }[];
-          };
-          finish_reason?: string | null;
-        }[];
-        usage?: {
-          prompt_tokens?: unknown;
-          completion_tokens?: unknown;
-          // Mistral reports prefix-cache hits here; other providers use a
-          // top-level field, so accept the common spellings.
-          prompt_tokens_details?: { cached_tokens?: unknown };
-          prompt_tokens_cached?: unknown;
-          cached_tokens?: unknown;
-        } | null;
-      };
-      try {
-        chunk = JSON.parse(data);
-      } catch {
-        continue; // A line that is not JSON — ignore it, keep streaming.
-      }
-      if (chunk.usage) {
-        const prompt = Number(chunk.usage.prompt_tokens);
-        const completion = Number(chunk.usage.completion_tokens);
-        const cached = Number(
-          chunk.usage.prompt_tokens_details?.cached_tokens ??
-            chunk.usage.prompt_tokens_cached ??
-            chunk.usage.cached_tokens,
-        );
-        if (
-          Number.isFinite(prompt) ||
-          Number.isFinite(completion) ||
-          Number.isFinite(cached)
-        ) {
-          usage = {
-            promptTokens: Number.isFinite(prompt) ? prompt : 0,
-            cachedPromptTokens: Number.isFinite(cached) ? cached : 0,
-            completionTokens: Number.isFinite(completion) ? completion : 0,
-          };
-        }
-      }
-      const choice = chunk.choices?.[0];
-      const text = deltaText(choice?.delta?.content);
-      if (text) {
-        hasContent = true;
-        pending.push({ type: "delta", text });
-      }
-      // Mistral's reasoning models think in content chunks, not a
-      // reasoning field, so their thinking is gathered separately.
-      reasoning += thinkingText(choice?.delta?.content);
-      reasoning += deltaText(choice?.delta?.reasoning_content);
-      reasoning += deltaText(choice?.delta?.reasoning);
-      for (const call of choice?.delta?.tool_calls ?? []) {
-        const current = calls.get(call.index) ?? {
-          id: "",
-          name: "",
-          args: "",
-        };
-        if (call.id) current.id = call.id;
-        if (call.function?.name) current.name += call.function.name;
-        if (call.function?.arguments) current.args += call.function.arguments;
-        calls.set(call.index, current);
-      }
-      if (choice?.finish_reason === "stop") finish = "stop";
-      if (choice?.finish_reason === "length") finish = "length";
-      if (choice?.finish_reason === "tool_calls") finish = "tool_calls";
+      const part = line.slice("data:".length).trim();
+      data = data === null ? part : `${data}\n${part}`;
     }
+    if (data === null) return;
+    if (data === "[DONE]") {
+      done = true;
+      return;
+    }
+    let chunk: {
+      choices?: {
+        delta?: {
+          content?: unknown;
+          reasoning_content?: unknown;
+          reasoning?: unknown;
+          tool_calls?: {
+            index: number;
+            id?: string;
+            function?: { name?: string; arguments?: string };
+          }[];
+        };
+        finish_reason?: string | null;
+      }[];
+      usage?: {
+        prompt_tokens?: unknown;
+        completion_tokens?: unknown;
+        // Mistral reports prefix-cache hits here; other providers use a
+        // top-level field, so accept the common spellings.
+        prompt_tokens_details?: { cached_tokens?: unknown };
+        prompt_tokens_cached?: unknown;
+        cached_tokens?: unknown;
+      } | null;
+    };
+    try {
+      chunk = JSON.parse(data);
+    } catch {
+      return; // A line that is not JSON — ignore it, keep streaming.
+    }
+    if (chunk.usage) {
+      const prompt = Number(chunk.usage.prompt_tokens);
+      const completion = Number(chunk.usage.completion_tokens);
+      const cached = Number(
+        chunk.usage.prompt_tokens_details?.cached_tokens ??
+          chunk.usage.prompt_tokens_cached ??
+          chunk.usage.cached_tokens,
+      );
+      if (
+        Number.isFinite(prompt) ||
+        Number.isFinite(completion) ||
+        Number.isFinite(cached)
+      ) {
+        usage = {
+          promptTokens: Number.isFinite(prompt) ? prompt : 0,
+          cachedPromptTokens: Number.isFinite(cached) ? cached : 0,
+          completionTokens: Number.isFinite(completion) ? completion : 0,
+        };
+      }
+    }
+    const choice = chunk.choices?.[0];
+    const text = deltaText(choice?.delta?.content);
+    if (text) {
+      hasContent = true;
+      pending.push({ type: "delta", text });
+    }
+    // Mistral's reasoning models think in content chunks, not a
+    // reasoning field, so their thinking is gathered separately.
+    reasoning += thinkingText(choice?.delta?.content);
+    reasoning += deltaText(choice?.delta?.reasoning_content);
+    reasoning += deltaText(choice?.delta?.reasoning);
+    for (const call of choice?.delta?.tool_calls ?? []) {
+      const current = calls.get(call.index) ?? {
+        id: "",
+        name: "",
+        args: "",
+      };
+      if (call.id) current.id = call.id;
+      if (call.function?.name) current.name += call.function.name;
+      if (call.function?.arguments) current.args += call.function.arguments;
+      calls.set(call.index, current);
+    }
+    if (choice?.finish_reason === "stop") finish = "stop";
+    if (choice?.finish_reason === "length") finish = "length";
+    if (choice?.finish_reason === "tool_calls") finish = "tool_calls";
   };
 
   while (true) {
-    const { done: streamDone, value } = await reader.read();
+    let read: ReadableStreamReadResult<Uint8Array>;
+    try {
+      read = await reader.read();
+    } catch (error) {
+      // The stream died while reading. The teacher stopping the request
+      // travels on as an abort; anything else is the provider's side.
+      if (options.signal?.aborted) throw error;
+      throw cutOff(error, deadline);
+    }
+    const { done: streamDone, value } = read;
     buffer += decoder.decode(value, { stream: true });
     // SSE allows \n, \r\n and \r as line endings; normalize before splitting.
     buffer = buffer.replace(/\r\n?/g, "\n");
@@ -324,7 +419,11 @@ function* complete(
     // and Small 4 in thinking chunks — use that rather than failing with
     // "empty", which is what a max_tokens cap inside the thinking reads as.
     if (reasoning.trim()) yield { type: "delta", text: reasoning };
-    else throw new ProviderError("The AI provider returned an empty answer", "empty");
+    else
+      throw new ProviderError(
+        "The AI provider returned an empty answer",
+        "empty",
+      );
   }
   yield {
     type: "finish",

@@ -10,23 +10,32 @@ import { ProviderError, streamChat } from "../src/server/ai/provider";
  * abort, not as "the provider could not be reached".
  */
 
-type Stub = { url: string; lastBody?: unknown; close: () => Promise<void> };
+type Stub = {
+  url: string;
+  lastBody?: unknown;
+  /** How many POSTs the stub has answered. */
+  posts: number;
+  close: () => Promise<void>;
+};
 const stubs: Stub[] = [];
 afterEach(async () => {
   for (const stub of stubs.splice(0)) await stub.close();
 });
 
 /** A chat-completions endpoint answering with the given raw SSE chunks. */
-function stubChunks(chunks: string[], crlf = false): Stub {
+function stubChunks(chunks: string[], crlf = false, failFirst = 0): Stub {
   const nl = crlf ? "\r\n" : "\n";
   const stub: Stub = {
     url: "",
     lastBody: undefined,
+    posts: 0,
     close: () => Promise.reject(new Error("not listening yet")),
   };
   const app = new Hono();
   app.post("/v1/chat/completions", async (c) => {
+    stub.posts += 1;
     stub.lastBody = await c.req.json();
+    if (stub.posts <= failFirst) return c.text("overloaded", 503);
     const body = new ReadableStream<Uint8Array>({
       start(controller) {
         for (const chunk of chunks)
@@ -96,9 +105,9 @@ describe("streamChat", () => {
     })) {
       void event;
     }
-    expect((keyed.lastBody as { prompt_cache_key?: string }).prompt_cache_key).toBe(
-      "hyperbook:abc123",
-    );
+    expect(
+      (keyed.lastBody as { prompt_cache_key?: string }).prompt_cache_key,
+    ).toBe("hyperbook:abc123");
 
     const plain = stubChunks(TEXT_STREAM);
     await collect(plain);
@@ -235,7 +244,12 @@ describe("streamChat", () => {
     ]);
     expect(await collect(stub)).toEqual([
       { type: "delta", text: "Hi" },
-      { type: "usage", promptTokens: 100, cachedPromptTokens: 40, completionTokens: 20 },
+      {
+        type: "usage",
+        promptTokens: 100,
+        cachedPromptTokens: 40,
+        completionTokens: 20,
+      },
       { type: "finish", finish: "stop" },
     ]);
   });
@@ -274,19 +288,141 @@ describe("streamChat", () => {
     await expect(collect(stub)).rejects.toMatchObject({ code: "empty" });
   });
 
+  it("joins an event whose data spans several data: lines, as the SSE spec says", async () => {
+    // A provider or proxy may split one chunk's JSON at a token boundary;
+    // the lines are one payload, joined by a newline — not two events, and
+    // neither line parsed alone is valid JSON.
+    const stub = stubChunks([
+      'data: {"choices":[{"delta":{"content":\ndata: "Hello"}}]}\n\n',
+      'data: {"choices":[{"delta":{},"finish_reason":"stop"}]}\n\n',
+      "data: [DONE]\n\n",
+    ]);
+    expect(await collect(stub)).toEqual([
+      { type: "delta", text: "Hello" },
+      { type: "finish", finish: "stop" },
+    ]);
+  });
+
+  it("retries a 5xx that arrives before anything streamed, and succeeds", async () => {
+    const stub = stubChunks(TEXT_STREAM, false, 1);
+    expect(await collect(stub)).toEqual([
+      { type: "delta", text: "Hello" },
+      { type: "delta", text: " world" },
+      { type: "finish", finish: "stop" },
+    ]);
+    expect(stub.posts).toBe(2);
+  });
+
+  it("gives up after two retries of a provider that fails without streaming", async () => {
+    const stub = stubChunks(TEXT_STREAM, false, 3);
+    await expect(collect(stub)).rejects.toMatchObject({
+      code: "status",
+      status: 503,
+    });
+    expect(stub.posts).toBe(3);
+  });
+
+  it("does not retry a stream that already delivered text", async () => {
+    // The stream yields one delta, then the connection dies mid-read.
+    // Retrying would show the model's text twice, so the failure surfaces.
+    const stub: Stub = {
+      url: "",
+      posts: 0,
+      close: () => Promise.resolve(),
+    };
+    const app = new Hono();
+    app.post("/v1/chat/completions", (c) => {
+      stub.posts += 1;
+      void c.req.json();
+      const body = new ReadableStream<Uint8Array>({
+        start(controller) {
+          controller.enqueue(
+            new TextEncoder().encode(
+              'data: {"choices":[{"delta":{"content":"Hel"}}]}\n\n',
+            ),
+          );
+          // Only after the delta was read: a stream that errors at once
+          // may drop what was enqueued with it.
+          setTimeout(() => controller.error(new Error("connection reset")), 50);
+        },
+      });
+      return new Response(body, {
+        headers: { "content-type": "text/event-stream" },
+      });
+    });
+    const server = serve({ fetch: app.fetch, port: 0 });
+    const address = server.address();
+    stub.url =
+      typeof address === "object" && address
+        ? `http://localhost:${address.port}/v1`
+        : "";
+    stub.close = () =>
+      new Promise<void>((resolve) => server.close(() => resolve()));
+    stubs.push(stub);
+
+    const events: unknown[] = [];
+    await expect(
+      (async () => {
+        for await (const event of streamChat({
+          baseUrl: stub.url,
+          apiKey: "key",
+          model: "m",
+          messages: [{ role: "user", content: "hi" }],
+          maxOutputTokens: 64,
+          timeoutMs: 10_000,
+        })) {
+          events.push(event);
+        }
+      })(),
+    ).rejects.toMatchObject({ code: "unreachable" });
+    expect(events).toEqual([{ type: "delta", text: "Hel" }]);
+    expect(stub.posts).toBe(1);
+  });
+
+  it("reports a provider that never answers before the timeout as a timeout", async () => {
+    const app = new Hono();
+    app.post("/v1/chat/completions", () => new Promise<Response>(() => {}));
+    const server = serve({ fetch: app.fetch, port: 0 });
+    const address = server.address();
+    const url =
+      typeof address === "object" && address
+        ? `http://localhost:${address.port}/v1`
+        : "";
+    stubs.push({
+      url,
+      posts: 0,
+      close: () =>
+        new Promise<void>((resolve) => server.close(() => resolve())),
+    });
+    const events: unknown[] = [];
+    await expect(
+      (async () => {
+        for await (const event of streamChat({
+          baseUrl: url,
+          apiKey: "key",
+          model: "m",
+          messages: [{ role: "user", content: "hi" }],
+          maxOutputTokens: 64,
+          timeoutMs: 100,
+        })) {
+          events.push(event);
+        }
+      })(),
+    ).rejects.toMatchObject({ code: "timeout" });
+    expect(events).toEqual([]);
+  });
+
   it("reports an unreachable provider as such", async () => {
     const stub = stubChunks([]);
     const url = stub.url;
     await stub.close(); // nothing listens there anymore
     stubs.pop();
     await expect(
-      collect({ url, close: async () => {} }),
+      collect({ url, posts: 0, close: async () => {} }),
     ).rejects.toBeInstanceOf(ProviderError);
-    await expect(collect({ url, close: async () => {} })).rejects.toMatchObject(
-      {
-        code: "unreachable",
-      },
-    );
+    await expect(
+      collect({ url, posts: 0, close: async () => {} }),
+    ).rejects.toMatchObject({ code: "unreachable" });
   });
 
   it("lets a caller abort through instead of calling it unreachable", async () => {
@@ -314,7 +450,7 @@ describe("streamChat", () => {
         : "";
     const close = () =>
       new Promise<void>((resolve) => server.close(() => resolve()));
-    stubs.push({ url, close });
+    stubs.push({ url, posts: 0, close });
 
     const controller = new AbortController();
     const events: unknown[] = [];

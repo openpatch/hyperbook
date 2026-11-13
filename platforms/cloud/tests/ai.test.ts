@@ -276,7 +276,7 @@ describe("AI assist", () => {
     expect(provider.asked).toHaveLength(1);
     const [asked] = provider.asked;
     expect(asked!.model).toBe("mistral-test");
-    expect(asked!.maxTokens).toBe(8192);
+    expect(asked!.maxTokens).toBe(16384);
     expect(asked!.messages).toHaveLength(2);
     expect(asked!.messages[0]!.role).toBe("system");
     expect(String(asked!.messages[0]!.content)).toMatch(/hyperbook/i);

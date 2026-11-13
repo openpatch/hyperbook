@@ -277,6 +277,8 @@ export const en = {
       copy: "Copy",
       copied: "Copied.",
       length: "The answer hit the length limit. Ask again for more.",
+      dropped:
+        "The connection to the assistant was interrupted; the answer may be incomplete.",
       stopped: "Stopped.",
       proposalTitle: "Review the proposed changes",
       proposalHint:
@@ -739,6 +741,7 @@ export const en = {
         "Your AI credits for this week are used up. They refill on Monday.",
       rateLimited: "Too many AI requests right now. Try again in a minute.",
       provider: "The AI provider did not answer. Try again.",
+      timeout: "The AI provider took too long. Try again.",
     },
   },
   validation: {

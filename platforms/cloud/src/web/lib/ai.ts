@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import type { EditorView } from "@codemirror/view";
+import i18next from "i18next";
 import { api, unwrap } from "./api";
 import type { AiAssistInput, AiProposedChange, ModelWeights } from "../../shared/schemas";
 
@@ -108,13 +109,19 @@ export async function assist(
   const reader = response.body.getReader();
   const decoder = new TextDecoder();
   let buffer = "";
+  /** Whether the stream reached its end or failed with an error event. */
+  let ended = false;
   /** Parses one SSE event block and reports it. */
   const handleEvent = (raw: string) => {
     let event: string | null = null;
     let data = "";
     for (const line of raw.split("\n")) {
       if (line.startsWith("event:")) event = line.slice(6).trim();
-      else if (line.startsWith("data:")) data += line.slice(5).trim();
+      else if (line.startsWith("data:"))
+        // SSE joins an event's data lines with newlines; the route writes
+        // one line, but parsing them the way the spec joins them stays
+        // correct for any peer that splits a payload.
+        data += data ? `\n${line.slice(5).trim()}` : line.slice(5).trim();
     }
     if (!event) return;
     try {
@@ -145,6 +152,7 @@ export async function assist(
           });
           break;
         case "done":
+          ended = true;
           onEvent({
             event: "done",
             finish:
@@ -166,6 +174,7 @@ export async function assist(
           });
           break;
         case "error":
+          ended = true;
           onEvent({
             event: "error",
             message: String(parsed.message),
@@ -191,6 +200,16 @@ export async function assist(
   }
   // A last event without a trailing blank line still counts.
   if (buffer.trim()) handleEvent(buffer);
+  // The stream ended without `done` or `error`: the connection was cut
+  // between the editor and the platform (a proxy timeout, a server
+  // restart) and what arrived is incomplete. A report beats an answer
+  // that quietly stops mid-sentence.
+  if (!ended)
+    onEvent({
+      event: "error",
+      message: i18next.t("editor.ai.dropped"),
+      code: "dropped",
+    });
 }
 
 /* Building the request from the editor's own state. */

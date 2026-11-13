@@ -275,6 +275,8 @@ export const de: Messages = {
       copy: "Kopieren",
       copied: "Kopiert.",
       length: "Die Antwort erreichte das Längenlimit. Fragen Sie nach mehr.",
+      dropped:
+        "Die Verbindung zur Assistenz wurde unterbrochen; die Antwort ist womöglich unvollständig.",
       stopped: "Gestoppt.",
       proposalTitle: "Vorgeschlagene Änderungen prüfen",
       proposalHint:
@@ -757,6 +759,8 @@ export const de: Messages = {
         "Gerade zu viele KI-Anfragen. Versuchen Sie es in einer Minute erneut.",
       provider:
         "Der KI-Anbieter hat nicht geantwortet. Versuchen Sie es erneut.",
+      timeout:
+        "Der KI-Anbieter hat zu lange gebraucht. Versuchen Sie es erneut.",
     },
   },
   validation: {
