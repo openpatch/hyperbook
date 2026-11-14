@@ -1,5 +1,13 @@
 # hyperbook
 
+## 0.123.2
+
+### Patch Changes
+
+- [`87e7061`](https://github.com/openpatch/hyperbook/commit/87e7061ab55fa954942be3563fb8467313f413c2) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Update the Online IDE runtime to build 44 and the SQL IDE to build 5: a file marked `hidden` now stays out of the IDE's file explorer, also after cached reader edits come back, so readers cannot open, edit or delete it. It stays in the workspace, so tests against a hidden solution keep running.
+
+- [`18f5e28`](https://github.com/openpatch/hyperbook/commit/18f5e2895379936702e4226a27480aa5952e3394) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Update struktolab to 0.7.0: the editor reworks how nodes are added. A block palette under the toolbar offers every block; a picked or dragged block shows a "+" gap at exactly the places it can go, also with pen, touch and keyboard. Empty branches, cases and loop bodies keep a "+" at all times, a new node opens its text editor right away, and every node gets a "+" to insert after it.
+
 ## 0.123.1
 
 ### Patch Changes

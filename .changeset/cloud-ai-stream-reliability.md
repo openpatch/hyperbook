@@ -1,5 +1,0 @@
----
-"@hyperbook/cloud": patch
----
-
-The editor's AI assistant answers more reliably. The provider call retries a transient failure — an unreachable provider, a 429, a 5xx — twice with a short pause while nothing was streamed yet, so one hiccup no longer costs the answer; a stream that already delivered text is never repeated. A provider that is silent past the configured timeout reports a timeout ("The AI provider took too long") instead of an internal error, and a connection cut mid-answer is reported as a provider failure, too. SSE events whose data spans several `data:` lines are joined as the spec says, so no chunk is silently dropped. While the model thinks, the route sends a heartbeat comment every 15 seconds, so proxies do not cut an idle connection before the first word arrives; and when the editor's connection to the platform is cut, the panel says so instead of passing a half answer off as complete. The default timeout grows to 300 seconds and the default output cap to 16384 tokens (reasoning tokens included), so reasoning models are no longer cut off mid-answer on an instance that changes nothing.
