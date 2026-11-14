@@ -1,5 +1,17 @@
 # @hyperbook/cloud
 
+## 0.11.0
+
+### Minor Changes
+
+- [`612de63`](https://github.com/openpatch/hyperbook/commit/612de635c386c45dd19efc2796af2a4044f76c03) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - The cloud editor remembers where you left off in a book: after a refresh or when you come back, the tabs that were open open again, the file that was shown is shown, and the folders that were unfolded in the file tree are unfolded. This is kept in the browser, per book.
+
+### Patch Changes
+
+- [`8d70e93`](https://github.com/openpatch/hyperbook/commit/8d70e933b34bc316addd7a7134eba7a3bd1383a4) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - The editor's AI assistant answers more reliably. The provider call retries a transient failure — an unreachable provider, a 429, a 5xx — twice with a short pause while nothing was streamed yet, so one hiccup no longer costs the answer; a stream that already delivered text is never repeated. A provider that is silent past the configured timeout reports a timeout ("The AI provider took too long") instead of an internal error, and a connection cut mid-answer is reported as a provider failure, too. SSE events whose data spans several `data:` lines are joined as the spec says, so no chunk is silently dropped. While the model thinks, the route sends a heartbeat comment every 15 seconds, so proxies do not cut an idle connection before the first word arrives; and when the editor's connection to the platform is cut, the panel says so instead of passing a half answer off as complete. The default timeout grows to 300 seconds and the default output cap to 16384 tokens (reasoning tokens included), so reasoning models are no longer cut off mid-answer on an instance that changes nothing.
+
+- [`18f5e28`](https://github.com/openpatch/hyperbook/commit/18f5e2895379936702e4226a27480aa5952e3394) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Update struktolab to 0.7.0: the editor reworks how nodes are added. A block palette under the toolbar offers every block; a picked or dragged block shows a "+" gap at exactly the places it can go, also with pen, touch and keyboard. Empty branches, cases and loop bodies keep a "+" at all times, a new node opens its text editor right away, and every node gets a "+" to insert after it.
+
 ## 0.10.0
 
 ### Minor Changes
