@@ -507,8 +507,8 @@ importers:
         specifier: ^3.7.1
         version: 3.7.1
       struktolab:
-        specifier: ^0.8.0
-        version: 0.8.0
+        specifier: ^0.8.1
+        version: 0.8.1
       tar:
         specifier: 7.5.22
         version: 7.5.22
@@ -726,8 +726,8 @@ importers:
         specifier: ^2.0.8
         version: 2.0.8(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       struktolab:
-        specifier: 0.8.0
-        version: 0.8.0
+        specifier: 0.8.1
+        version: 0.8.1
       tailwind-merge:
         specifier: ^3.7.0
         version: 3.7.0
@@ -9063,8 +9063,8 @@ packages:
   structured-source@4.0.0:
     resolution: {integrity: sha512-qGzRFNJDjFieQkl/sVOI2dUjHKRyL9dAJi2gCPGJLbJHBIkyOHxjuocpIEfbLioX+qSJpvbYdT49/YCdMznKxA==}
 
-  struktolab@0.8.0:
-    resolution: {integrity: sha512-3X1BXDLkb0HqV0/hPwCkXsRPDQkvFk7CbCIBfBTMYZKRiafuffRdvd5McBq0nP/4xZSf2cT2JPBgMdlVCmZzJw==}
+  struktolab@0.8.1:
+    resolution: {integrity: sha512-9nYpFgK4ZbJZvod4sdXF7rpSFjiJkXLYOhpRDByoRD2gPKpxqmwHQ50OHNIWmkOQc1kkLpE2KlxurvHrmJ9uuw==}
 
   style-loader@4.0.0:
     resolution: {integrity: sha512-1V4WqhhZZgjVAVJyt7TdDPZoPBPNHbekX4fWnCJL1yQukhCeZhJySUL+gL9y6sNdN95uEOS83Y55SqHcP7MzLA==}
@@ -18877,7 +18877,7 @@ snapshots:
     dependencies:
       boundary: 2.0.0
 
-  struktolab@0.8.0: {}
+  struktolab@0.8.1: {}
 
   style-loader@4.0.0(webpack@5.112.2):
     dependencies:
