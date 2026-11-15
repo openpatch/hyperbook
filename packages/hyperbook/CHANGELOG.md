@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.123.4
+
+### Patch Changes
+
+- [`7e1f6db`](https://github.com/openpatch/hyperbook/commit/7e1f6db25968503bb828037df4bfc61738546cc6) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Updates struktolab to 0.8.1: resized branch and case columns in a structogram written in Java, Python or JavaScript stay resized when the code is edited.
+
 ## 0.123.3
 
 ### Patch Changes
