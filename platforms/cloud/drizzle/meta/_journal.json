@@ -141,6 +141,13 @@
       "when": 1794778161238,
       "tag": "0019_ai_conversations",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "6",
+      "when": 1794779980023,
+      "tag": "0020_ai_message_parts",
+      "breakpoints": true
     }
   ]
 }

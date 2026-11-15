@@ -703,6 +703,8 @@ export const aiMessages = sqliteTable(
     reasoning: text("reasoning"),
     /** JSON: the tools the assistant used, in order. */
     tools: text("tools"),
+    /** JSON: thinking, tool steps and text in the order they happened. */
+    parts: text("parts"),
     /** JSON: the proposed file changes. */
     proposal: text("proposal"),
     proposalStatus: text("proposal_status", {

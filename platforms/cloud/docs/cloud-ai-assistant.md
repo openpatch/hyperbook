@@ -277,8 +277,9 @@ streaming client:
 > **Since the conversation rework** the pane is a chat like ChatGPT's:
 > a conversation list (history button) and *New chat* in its header, the
 > title renamed by double-click; the teacher's messages with *Edit* (resend
-> from there); answers with a folding *Thinking…/Thought for 12 s* block,
-> their tool steps (with live size while a file is written), the Markdown
+> from there); answers in the order they happened — each stretch of thinking its own
+> folding *Thinking…/Thought for 12 s* block, between the tool steps
+> (stored as the message's `parts`, `src/shared/ai-parts.ts`) (with live size while a file is written), the Markdown
 > answer, *Copy*, *Regenerate* (or *Retry* after a failure), cost and time,
 > *Continue* after `length`/`steps`, and their proposal (*Review n
 > proposed changes*, or whether it was accepted, denied or carried into a

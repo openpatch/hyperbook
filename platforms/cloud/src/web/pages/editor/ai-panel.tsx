@@ -32,6 +32,7 @@ import {
   type AiProposedChange,
   type FileChange,
 } from "../../../shared/schemas";
+import { addPart, closeParts, type AiAnswerPart } from "../../../shared/ai-parts";
 import { ConflictError } from "./workspace";
 import {
   assist,
@@ -94,8 +95,8 @@ type Turn = {
   role: "user" | "assistant";
   content: string;
   attachments: AiMessageView["attachments"];
-  reasoning: string;
-  tools: { name: string; detail: string | null }[];
+  /** Thinking, tool steps and text, in the order they happened. */
+  parts: AiAnswerPart[];
   /** A tool call whose arguments are streaming in right now. */
   writing: { name: string; path: string | null; chars: number } | null;
   proposal: AiProposedChange[] | null;
@@ -105,9 +106,6 @@ type Turn = {
   credits: number | null;
   durationMs: number | null;
   streaming: boolean;
-  /** When the thinking started and ended, for "thought for 12 s". */
-  thinkingFrom: number | null;
-  thinkingTo: number | null;
 };
 
 let keys = 0;
@@ -120,8 +118,7 @@ function fromView(message: AiMessageView): Turn {
     role: message.role,
     content: message.content,
     attachments: message.attachments,
-    reasoning: message.reasoning ?? "",
-    tools: message.tools,
+    parts: message.parts,
     writing: null,
     proposal: message.proposal,
     proposalStatus: message.proposalStatus,
@@ -130,8 +127,6 @@ function fromView(message: AiMessageView): Turn {
     credits: message.credits,
     durationMs: message.durationMs,
     streaming: false,
-    thinkingFrom: null,
-    thinkingTo: null,
   };
 }
 
@@ -142,8 +137,7 @@ function blankAnswer(): Turn {
     role: "assistant",
     content: "",
     attachments: [],
-    reasoning: "",
-    tools: [],
+    parts: [],
     writing: null,
     proposal: null,
     proposalStatus: null,
@@ -152,8 +146,6 @@ function blankAnswer(): Turn {
     credits: null,
     durationMs: null,
     streaming: true,
-    thinkingFrom: null,
-    thinkingTo: null,
   };
 }
 
@@ -248,8 +240,17 @@ export function AiPanel({
     );
   }
 
+  /**
+   * Leaving a conversation stops its running answer, like switching chats
+   * does elsewhere; the server keeps what was written so far.
+   */
+  function leave() {
+    stop.current?.abort();
+  }
+
   async function open(id: number, { quiet = false } = {}) {
-    if (streaming) return;
+    if (id === conversationId && turns.length > 0) return;
+    leave();
     try {
       const conversation = await loadConversation(bookId, id);
       setConversationId(conversation.id);
@@ -266,7 +267,7 @@ export function AiPanel({
   }
 
   function newChat() {
-    if (streaming) return;
+    leave();
     setConversationId(null);
     setTitle(null);
     setTurns([]);
@@ -377,9 +378,8 @@ export function AiPanel({
     setStreaming(true);
     following.current = true;
     const started = Date.now();
-    // Thinking ends with the first visible word or tool.
-    const endThinking = (turn: Turn) =>
-      turn.thinkingFrom !== null && turn.thinkingTo === null ? { thinkingTo: Date.now() } : {};
+    // Thinking ends with the next part — or a tool call starting to stream.
+    const endThinking = (turn: Turn) => ({ parts: closeParts(turn.parts) });
     let ended = false;
     try {
       await assist(
@@ -396,15 +396,14 @@ export function AiPanel({
               break;
             case "reasoning":
               patch(answer.key, (turn) => ({
-                reasoning: turn.reasoning + event.text,
-                thinkingFrom: turn.thinkingFrom ?? Date.now(),
+                parts: addPart(turn.parts, { kind: "thinking", text: event.text }),
               }));
               break;
             case "delta":
               patch(answer.key, (turn) => ({
                 content: turn.content + event.text,
+                parts: addPart(turn.parts, { kind: "text", text: event.text }),
                 writing: null,
-                ...endThinking(turn),
               }));
               break;
             case "toolProgress":
@@ -415,9 +414,12 @@ export function AiPanel({
               break;
             case "tool":
               patch(answer.key, (turn) => ({
-                tools: [...turn.tools, { name: event.name, detail: event.detail }],
+                parts: addPart(turn.parts, {
+                  kind: "tool",
+                  name: event.name,
+                  detail: event.detail,
+                }),
                 writing: null,
-                ...endThinking(turn),
               }));
               break;
             case "usage":
@@ -716,7 +718,7 @@ export function AiPanel({
                 className="size-6"
                 aria-label={t("editor.ai.conversations")}
                 title={t("editor.ai.conversations")}
-                disabled={streaming}
+                
               >
                 <HistoryIcon className="size-4" aria-hidden />
               </Button>
@@ -763,7 +765,6 @@ export function AiPanel({
             className="size-6"
             aria-label={t("editor.ai.newChat")}
             title={t("editor.ai.newChat")}
-            disabled={streaming || turns.length === 0}
             onClick={newChat}
           >
             <PlusIcon className="size-4" aria-hidden />
@@ -885,7 +886,7 @@ export function AiPanel({
               }
             }}
           />
-          <div className="flex items-center gap-1 p-1.5 pt-0">
+          <div className="flex items-center gap-1 px-1.5 pt-1 pb-1.5">
             <input
               ref={fileRef}
               type="file"
@@ -903,7 +904,7 @@ export function AiPanel({
               className="size-7"
               aria-label={t("editor.ai.attach")}
               title={t("editor.ai.attach")}
-              disabled={streaming || attaching}
+              disabled={attaching}
               onClick={() => fileRef.current?.click()}
             >
               <PaperclipIcon className="size-4" aria-hidden />
@@ -911,7 +912,7 @@ export function AiPanel({
             <Select value={effort} onValueChange={(v) => setEffort(v as Effort)}>
               <SelectTrigger
                 size="sm"
-                className="h-7 w-auto border-0 px-2 text-xs shadow-none"
+                className="h-7 w-auto cursor-pointer border-0 px-2 text-xs shadow-none hover:bg-accent dark:bg-transparent"
                 aria-label={t("editor.ai.effortLabel")}
                 title={t("editor.ai.effortHint")}
               >
@@ -1061,48 +1062,68 @@ function AssistantMessage({
   onReview: () => void;
 }) {
   const { t } = useTranslation();
-  const thinking = turn.streaming && turn.thinkingTo === null && turn.reasoning !== "";
-  const idle =
-    turn.streaming && !turn.content && !turn.reasoning && !turn.writing && turn.tools.length === 0;
+  const idle = turn.streaming && turn.parts.length === 0 && !turn.writing;
+  // Tool steps that follow each other form one list; thinking and text
+  // break it, so the answer reads in the order it happened.
+  type ToolPart = Extract<AiAnswerPart, { kind: "tool" }>;
+  const groups: (Exclude<AiAnswerPart, ToolPart> | { kind: "tools"; tools: ToolPart[] })[] = [];
+  for (const part of turn.parts) {
+    const last = groups.at(-1);
+    if (part.kind === "tool" && last?.kind === "tools") last.tools.push(part);
+    else if (part.kind === "tool") groups.push({ kind: "tools", tools: [part] });
+    else groups.push(part);
+  }
+  const lastPart = turn.parts.at(-1);
   return (
     <div className="space-y-1.5">
-      {turn.reasoning && <Thinking turn={turn} active={thinking} />}
-      {(turn.tools.length > 0 || turn.writing) && (
-        <ul className="space-y-0.5 text-xs text-muted-foreground">
-          {turn.tools.map((tool, i) => (
-            <li key={i} className="flex min-w-0 items-center gap-1.5">
-              <ToolIcon name={tool.name} />
-              <span className="truncate" title={tool.detail ?? undefined}>
-                {toolLabel(t, tool.name, tool.detail)}
-              </span>
-            </li>
-          ))}
-          {turn.writing && (
-            <li className="flex min-w-0 items-center gap-1.5 text-foreground">
-              <Loader2Icon className="size-3.5 shrink-0 animate-spin" aria-hidden />
-              <span className="truncate" title={turn.writing.path ?? undefined}>
-                {t("editor.ai.writingProgress", {
-                  what: toolLabel(t, turn.writing.name, turn.writing.path),
-                  size: formatSize(turn.writing.chars),
-                })}
-              </span>
-            </li>
-          )}
-        </ul>
+      {groups.map((group, i) => {
+        const isLastGroup = i === groups.length - 1;
+        if (group.kind === "thinking")
+          return (
+            <Thinking
+              key={i}
+              part={group}
+              active={turn.streaming && isLastGroup && group.ms === null}
+            />
+          );
+        if (group.kind === "text")
+          return (
+            <div key={i} className="rounded-lg rounded-bl-sm bg-muted px-3 py-2">
+              <Markdown text={group.text} className="ai-markdown break-words" />
+              {turn.streaming && isLastGroup && !turn.writing && (
+                <span className="ml-0.5 inline-block h-3.5 w-1.5 animate-pulse bg-foreground/60 align-middle" aria-hidden />
+              )}
+            </div>
+          );
+        return (
+          <ul key={i} className="space-y-0.5 text-xs text-muted-foreground">
+            {group.tools.map((tool, j) => (
+              <li key={j} className="flex min-w-0 items-center gap-1.5">
+                <ToolIcon name={tool.name} />
+                <span className="truncate" title={tool.detail ?? undefined}>
+                  {toolLabel(t, tool.name, tool.detail)}
+                </span>
+              </li>
+            ))}
+          </ul>
+        );
+      })}
+      {turn.writing && (
+        <p className="flex min-w-0 items-center gap-1.5 text-xs">
+          <Loader2Icon className="size-3.5 shrink-0 animate-spin" aria-hidden />
+          <span className="truncate" title={turn.writing.path ?? undefined}>
+            {t("editor.ai.writingProgress", {
+              what: toolLabel(t, turn.writing.name, turn.writing.path),
+              size: formatSize(turn.writing.chars),
+            })}
+          </span>
+        </p>
       )}
-      {idle && (
+      {(idle || (turn.streaming && !turn.writing && lastPart?.kind === "tool")) && (
         <p className="flex items-center gap-2 text-muted-foreground">
           <span className="inline-block size-2 animate-pulse rounded-full bg-primary" aria-hidden />
           {t("editor.ai.working")}
         </p>
-      )}
-      {turn.content && (
-        <div className="rounded-lg rounded-bl-sm bg-muted px-3 py-2">
-          <Markdown text={turn.content} className="ai-markdown break-words" />
-          {turn.streaming && !turn.writing && (
-            <span className="ml-0.5 inline-block h-3.5 w-1.5 animate-pulse bg-foreground/60 align-middle" aria-hidden />
-          )}
-        </div>
       )}
       {turn.error && (
         <p className="rounded-md border border-destructive/40 bg-destructive/5 px-3 py-2 text-destructive">
@@ -1156,8 +1177,14 @@ function AssistantMessage({
   );
 }
 
-/** The model's thinking: open while it thinks, folded once it answers. */
-function Thinking({ turn, active }: { turn: Turn; active: boolean }) {
+/** One stretch of the model's thinking: open while it thinks, folded after. */
+function Thinking({
+  part,
+  active,
+}: {
+  part: Extract<AiAnswerPart, { kind: "thinking" }>;
+  active: boolean;
+}) {
   const { t } = useTranslation();
   const [open, setOpen] = useState<boolean | null>(null);
   const [now, setNow] = useState(Date.now());
@@ -1170,12 +1197,10 @@ function Thinking({ turn, active }: { turn: Turn; active: boolean }) {
   useEffect(() => {
     const el = boxRef.current;
     if (el && active) el.scrollTop = el.scrollHeight;
-  }, [turn.reasoning, active]);
+  }, [part.text, active]);
   const expanded = open ?? active;
-  const seconds =
-    turn.thinkingFrom !== null
-      ? Math.max(1, Math.round(((turn.thinkingTo ?? now) - turn.thinkingFrom) / 1000))
-      : null;
+  const ms = part.ms ?? (part.startedAt !== null ? now - part.startedAt : null);
+  const seconds = ms !== null ? Math.max(1, Math.round(ms / 1000)) : null;
   const label = active
     ? t("editor.ai.thinking", { seconds: seconds ?? 0 })
     : seconds !== null
@@ -1197,7 +1222,7 @@ function Thinking({ turn, active }: { turn: Turn; active: boolean }) {
           ref={boxRef}
           className="mt-1 max-h-60 overflow-auto whitespace-pre-wrap border-l-2 pl-2 text-muted-foreground"
         >
-          {turn.reasoning}
+          {part.text}
         </div>
       )}
     </div>

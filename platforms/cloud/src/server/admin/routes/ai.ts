@@ -20,6 +20,7 @@ import {
 import { repoDir } from "../../hosting/storage";
 import { createT } from "../../i18n";
 import { z } from "zod";
+import { addPart, closeParts, type AiAnswerPart } from "../../../shared/ai-parts";
 import {
   aiAssistInput,
   aiConversationRenameInput,
@@ -297,6 +298,7 @@ export function bookAiRoutes({ db, config }: Deps) {
         let answer = "";
         let reasoning = "";
         const toolUses: AiToolUse[] = [];
+        let parts: AiAnswerPart[] = [];
         let proposal: AiProposedChange[] | null = null;
         let steps = 0;
         let tokensIn = 0;
@@ -318,9 +320,11 @@ export function bookAiRoutes({ db, config }: Deps) {
           )) {
             if (event.type === "delta") {
               answer += event.text;
+              parts = addPart(parts, { kind: "text", text: event.text });
               await send("delta", { text: event.text });
             } else if (event.type === "reasoning") {
               reasoning += event.text;
+              parts = addPart(parts, { kind: "thinking", text: event.text });
               await send("reasoning", { text: event.text });
             } else if (event.type === "tool_progress") {
               await send("toolProgress", {
@@ -331,6 +335,11 @@ export function bookAiRoutes({ db, config }: Deps) {
             } else if (event.type === "tool") {
               steps += 1;
               toolUses.push({ name: event.name, detail: event.detail });
+              parts = addPart(parts, {
+                kind: "tool",
+                name: event.name,
+                detail: event.detail,
+              });
               await send("tool", { name: event.name, detail: event.detail });
             } else if (event.type === "usage") {
               tokensIn += event.promptTokens;
@@ -389,6 +398,7 @@ export function bookAiRoutes({ db, config }: Deps) {
             content: answer,
             reasoning,
             tools: toolUses,
+            parts: closeParts(parts),
             proposal,
             finish,
             error: errorMessage,

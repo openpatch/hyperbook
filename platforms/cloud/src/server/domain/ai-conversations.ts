@@ -8,6 +8,7 @@ import type {
   AiProposedChange,
   AiToolUse,
 } from "../../shared/schemas";
+import { legacyParts, type AiAnswerPart } from "../../shared/ai-parts";
 import type { ChatMessage, UserContentPart } from "../ai/provider";
 import type { Db } from "../db/client";
 import { aiConversations, aiMessages } from "../db/schema";
@@ -181,6 +182,7 @@ export type AssistantRecord = {
   content: string;
   reasoning: string;
   tools: AiToolUse[];
+  parts: AiAnswerPart[];
   proposal: AiProposedChange[] | null;
   finish: string;
   error: string | null;
@@ -221,6 +223,7 @@ export function addAssistantMessage(
         content: record.content,
         reasoning: record.reasoning || null,
         tools: record.tools.length > 0 ? JSON.stringify(record.tools) : null,
+        parts: record.parts.length > 0 ? JSON.stringify(record.parts) : null,
         proposal: proposing ? JSON.stringify(record.proposal) : null,
         proposalStatus: proposing ? "pending" : null,
         finish: record.finish,
@@ -290,6 +293,11 @@ export function toView(row: MessageRow): AiMessageView {
     ),
     reasoning: row.reasoning,
     tools: toolsOf(row),
+    parts: row.parts
+      ? (parseJson(row.parts) as AiAnswerPart[])
+      : row.role === "assistant"
+        ? legacyParts(row.reasoning, toolsOf(row), row.content)
+        : [],
     proposal: row.proposal
       ? (parseJson(row.proposal) as AiProposedChange[])
       : null,

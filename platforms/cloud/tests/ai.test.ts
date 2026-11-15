@@ -21,7 +21,11 @@ type Asked = {
 
 type Answer =
   | { deltas: string[]; reasoning?: string[]; finish?: "stop" | "length" }
-  | { toolCalls: { name: string; args: unknown }[]; finish?: "length" }
+  | {
+      toolCalls: { name: string; args: unknown }[];
+      reasoning?: string[];
+      finish?: "length";
+    }
   | { error: number };
 
 /** A queue of answers, one per provider call; the last repeats. */
@@ -64,6 +68,12 @@ function fakeProvider(script: (asked: Asked) => Answer) {
     const stream = new ReadableStream<Uint8Array>({
       start(controller) {
         if ("toolCalls" in answer) {
+          for (const text of answer.reasoning ?? []) {
+            const chunk = JSON.stringify({
+              choices: [{ delta: { reasoning_content: text } }],
+            });
+            controller.enqueue(encoder.encode(`data: ${chunk}\n\n`));
+          }
           answer.toolCalls.forEach((call, index) => {
             const chunk = JSON.stringify({
               choices: [
@@ -842,6 +852,30 @@ describe("AI assist", () => {
       content: "Here it is.",
       reasoning: "Let me plan the quiz…",
     });
+  });
+
+  it("keeps each stretch of thinking apart, in order with the tools and the text", async () => {
+    const answers: Answer[] = [
+      { reasoning: ["I should read the exam."], toolCalls: [{ name: "list_files", args: {} }] },
+      { deltas: ["Here are tasks."], reasoning: ["Now I know the format."] },
+    ];
+    const s = new Script(answers);
+    const { owner, assist, book } = await world({}, (asked) => s.next(asked));
+    const res = await owner.c.post(assist, { prompt: "More tasks", pagePath: "book/index.md" });
+    const id = events(res.body)[0]!.data.id;
+    const loaded = await owner.c.get(`/api/books/${book.id}/ai/conversations/${id}`);
+    expect(
+      loaded.body.messages[1].parts.map((p: { kind: string; text?: string; name?: string }) => [
+        p.kind,
+        p.text ?? p.name,
+      ]),
+    ).toEqual([
+      ["thinking", "I should read the exam."],
+      ["tool", "list_files"],
+      ["thinking", "Now I know the format."],
+      ["text", "Here are tasks."],
+    ]);
+    expect(loaded.body.messages[1].parts[0].ms).toEqual(expect.any(Number));
   });
 
   it("sends attached images as image parts and documents as text", async () => {

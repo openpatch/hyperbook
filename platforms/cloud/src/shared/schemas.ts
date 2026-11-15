@@ -636,6 +636,8 @@ export const commentsQuery = z.object({ path: bookPath.optional() });
 
 export const commentMailInput = z.object({ commentMail: z.boolean() });
 
+import type { AiAnswerPart } from "./ai-parts";
+
 /** A tool the assistant used, as the chat shows it: "read_files" + "a.md, b.md". */
 export type AiToolUse = { name: string; detail: string | null };
 
@@ -651,6 +653,8 @@ export type AiMessageView = {
   attachments: { kind: "image" | "text"; name: string; data?: string }[];
   reasoning: string | null;
   tools: AiToolUse[];
+  /** Thinking, tool steps and text in the order they happened. */
+  parts: AiAnswerPart[];
   proposal: AiProposedChange[] | null;
   proposalStatus: AiProposalStatus | null;
   finish: string | null;
