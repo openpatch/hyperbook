@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.123.3
+
+### Patch Changes
+
+- [`044e3d9`](https://github.com/openpatch/hyperbook/commit/044e3d9cdf0605b4b70a3f0f11ab8418e41ee373) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Struktolab structograms can be written in Java, Python or JavaScript. Give the code block its language (` ```java `, ` ```python `, ` ```js `) or set `code="java"` on the directive; the structogram is built from the code, and in edit mode students write their algorithm in the code box under the diagram. `code="none"` hides that box. Students' code is now saved with their structogram, so it comes back as they wrote it. Updates struktolab to 0.8.0, which also makes dragging blocks calmer: the diagram stays still and one line shows where a block lands. In the cloud editor, "Edit visually" is offered for pseudocode blocks only.
+
 ## 0.123.2
 
 ### Patch Changes
