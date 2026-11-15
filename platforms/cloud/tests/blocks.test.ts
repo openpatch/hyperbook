@@ -30,6 +30,29 @@ describe("element blocks in pages", () => {
     expect(page.slice(0, blocks[0]!.lineEnd).endsWith("lang=en}")).toBe(true);
   });
 
+  it("leaves structograms written in Java, Python or JavaScript to the text editor", () => {
+    const page = [
+      ":::struktolab",
+      "```java",
+      "void main() {}",
+      "```",
+      ":::",
+      "",
+      ':::struktolab{code="python"}',
+      "```",
+      "print(1)",
+      "```",
+      ":::",
+      "",
+      ':::struktolab{code="none"}',
+      "```",
+      "ausgabe(1)",
+      "```",
+      ":::",
+    ].join("\n");
+    expect((findBlocks(page) as InlineBlock[]).map((b) => b.code)).toEqual(["ausgabe(1)"]);
+  });
+
   it("takes a struktolab leaf with src for a file, not a block", () => {
     expect(findBlocks('::struktolab{src="a.struktolab"}\n\n```\nx\n```').map((b) => b.type)).toEqual(["file"]);
   });

@@ -19,6 +19,69 @@ For more information on how to use Struktolab, see the [Struktolab documentation
 | `lang` | UI language: `de` or `en` | hyperbook language |
 | `colorMode` | Color mode: `color`, `greyscale`, or `bw` | `color` |
 | `src` | A structogram file (`.struktolab`, its tree as JSON) instead of a code block, e.g. `::struktolab{src="/loop.struktolab"}` | - |
+| `code` | The language the structogram is written in: `pseudocode`, `java`, `python` or `javascript`. In edit mode, `none` hides the code under the diagram. A code block's language (` ```java `) sets it too. | `pseudocode` |
+
+## Java, Python and JavaScript
+
+Instead of pseudocode, write the algorithm in Java, Python or JavaScript and give the code block its language. The structogram is built from the code; nothing is translated between languages. Imports, the class, `main` and I/O setup are left out of the diagram. For Java, `IO.readln` and `IO.println` (Java 25) are input and output, as are `Scanner` and `System.out.println`.
+
+:::struktolab
+
+```java
+void main() {
+    int n = Integer.parseInt(IO.readln("n: "));
+    int f = 1;
+    for (int i = 2; i <= n; i++) {
+        f = f * i;
+    }
+    IO.println(f);
+}
+```
+
+:::
+
+````md
+:::struktolab
+```java
+void main() {
+    int n = Integer.parseInt(IO.readln("n: "));
+    int f = 1;
+    for (int i = 2; i <= n; i++) {
+        f = f * i;
+    }
+    IO.println(f);
+}
+```
+:::
+````
+
+In edit mode, students write their algorithm in the code box under the diagram and get the structogram as they type. Their code is saved in the browser with the structogram, comments and all.
+
+:::struktolab{mode="edit"}
+
+```python
+n = int(input("n: "))
+summe = 0
+for i in range(1, n + 1):
+    summe += i
+print(summe)
+```
+
+:::
+
+````md
+:::struktolab{mode="edit"}
+```python
+n = int(input("n: "))
+summe = 0
+for i in range(1, n + 1):
+    summe += i
+print(summe)
+```
+:::
+````
+
+An empty structogram for students to write in Java: `::struktolab{mode="edit" code="java"}`.
 
 ## View
 

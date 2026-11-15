@@ -62,7 +62,8 @@ code inside the directive renders nothing. One block per file:
   language.
 - \`:::jsxgraph\` → \`\`\`js; \`:::mermaid\` → \`\`\`mermaid;
   \`:::abc-music\` → \`\`\`abcjs; \`:::plantuml\` → a plain \`\`\` block from
-  \`@startuml\` to \`@enduml\`; \`:::struktolab\` → a plain \`\`\` block of pseudocode.
+  \`@startuml\` to \`@enduml\`; \`:::struktolab\` → a plain \`\`\` block of
+  pseudocode, or \`\`\`java / \`\`\`python / \`\`\`js for a structogram of code.
 - A Java file is named after its public class (\`Equals.java\` holds
   \`public class Equals\`); Python modules use snake_case.
 

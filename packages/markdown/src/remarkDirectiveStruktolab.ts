@@ -14,6 +14,18 @@ import {
 import { ElementContent } from "hast";
 import { resolveDirectiveId } from "./directiveId";
 
+/** The languages a structogram can be written in, by the code fence's language. */
+const CODE_LANGUAGES: Record<string, "java" | "python" | "javascript"> = {
+  java: "java",
+  python: "python",
+  py: "python",
+  javascript: "javascript",
+  js: "javascript",
+};
+
+/** What `code` may say: these, or "none" to hide the code under the editor. */
+const CODE_MODES = ["none", "pseudocode", "java", "python", "javascript"];
+
 export default (ctx: HyperbookContext) => () => {
   const name = "struktolab";
   return (tree: Root, file: VFile) => {
@@ -31,6 +43,9 @@ export default (ctx: HyperbookContext) => () => {
           scale = 1,
           src,
           mode = "preview", // "preview" or "edit"
+          // The language the structogram is written in. A fence's language
+          // (```java) says it too; this wins when both are there.
+          code,
         } = node.attributes || {};
 
         expectDirective(node, file, "struktolab", ["leaf", "container"]);
@@ -48,21 +63,32 @@ export default (ctx: HyperbookContext) => () => {
           webcomponent = "struktolab-editor";
         }
 
+        const codeMode =
+          typeof code === "string" && CODE_MODES.includes(code) ? code : undefined;
+
+        let fenceMode: string | undefined;
         const codes: ElementContent[] = node.children
           ?.filter(isCode)
-          .map((n) => ({
-            type: "element",
-            tagName: "script",
-            properties: {
-              type: "text/pseudocode",
-            },
-            children: [
-              {
-                type: "text",
-                value: n.value,
-              },
-            ],
-          }));
+          .map((n) => {
+            // ```java, ```python, ```js — or the directive's `code` for a bare fence.
+            const language =
+              CODE_LANGUAGES[(n.lang || "").toLowerCase()] ??
+              (codeMode && codeMode in CODE_LANGUAGES ? CODE_LANGUAGES[codeMode] : undefined);
+            fenceMode ??= language;
+            return {
+              type: "element",
+              tagName: "script",
+              properties: language
+                ? { type: "text/plain", dataCode: language }
+                : { type: "text/pseudocode" },
+              children: [
+                {
+                  type: "text",
+                  value: n.value,
+                },
+              ],
+            };
+          });
 
         data.hName = "div";
         data.hProperties = {
@@ -78,6 +104,7 @@ export default (ctx: HyperbookContext) => () => {
               "color-mode": colorMode,
               "font-size": fontSize,
               "scale": scale == null ? undefined : String(scale),
+              "code-mode": codeMode ?? fenceMode,
               "data-id": id,
               src: src
                 ? ctx.makeUrl(

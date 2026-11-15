@@ -12,9 +12,24 @@ hyperbook.struktolab = (function () {
     allStruktolabEditors.forEach((editor) => {
       const editorId = editor.getAttribute("data-id");
 
+      // struktolab 0.8 saves the whole document: the tree, the code
+      // language and the code the student typed. Older versions only had
+      // the tree.
+      const withDocuments = typeof editor.toDocument === "function";
+
       // Load saved content for this editor
       hyperbook.store.db.struktolab.get(editorId).then((result) => {
-        if (result) {
+        if (!result) return;
+        if (result.document && withDocuments) {
+          const doc = JSON.parse(result.document);
+          // The student's structogram and code — but the page's view
+          // settings (font size, colours, scale), which the author may have
+          // changed since.
+          editor.fromDocument({
+            ...doc,
+            settings: { codeMode: doc.settings && doc.settings.codeMode },
+          });
+        } else if (result.tree) {
           editor.loadJSON(JSON.parse(result.tree));
         }
       });
@@ -24,6 +39,9 @@ hyperbook.struktolab = (function () {
         hyperbook.store.db.struktolab.put({
           id: editorId,
           tree: JSON.stringify(e.detail.tree),
+          ...(withDocuments
+            ? { document: JSON.stringify(editor.toDocument()) }
+            : {}),
         });
       });
     });

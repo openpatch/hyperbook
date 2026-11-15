@@ -38,8 +38,15 @@ export type InlineBlock = {
   lineEnd: number;
 };
 
-const BLOCK = /^:{3,}struktolab(\{[^}\n]*\})?[ \t]*\n(`{3,}|~{3,})[^\n]*\n([\s\S]*?)^\2[ \t]*$/gm;
+const BLOCK = /^:{3,}struktolab(\{[^}\n]*\})?[ \t]*\n(`{3,}|~{3,})([^\n]*)\n([\s\S]*?)^\2[ \t]*$/gm;
 const LANG = /(?:^|[\s{])lang=["']?([A-Za-z-]+)/;
+/**
+ * A structogram written in Java, Python or JavaScript — by the fence
+ * (```java) or the directive's `code` — is code the author types; the visual
+ * editor reads and writes pseudocode only.
+ */
+const CODE_FENCE = /^\s*(java|python|py|javascript|js)\b/i;
+const CODE_ATTRIBUTE = /(?:^|[\s{])code=["']?(java|python|javascript)\b/;
 
 // Two colons or more: `::bitflow-player{src=…}` and the container
 // `::::blockflow-editor{src=…}` alike.
@@ -73,10 +80,11 @@ export function findBlocks(text: string): Block[] {
     if (value) blocks.push({ type: "file", kind, src: value, lineEnd: m.index + m[0].length });
   }
   for (const m of text.matchAll(BLOCK)) {
+    if (CODE_FENCE.test(m[3]!) || CODE_ATTRIBUTE.test(m[1] ?? "")) continue;
     const lineEnd = m.index + m[0].indexOf("\n");
     const from = m.index + m[0].indexOf("\n", lineEnd - m.index + 1) + 1;
     // The code without the newline before the closing fence.
-    const code = m[3]!.replace(/\n$/, "");
+    const code = m[4]!.replace(/\n$/, "");
     blocks.push({ type: "inline", kind: "struktolab", from, to: from + code.length, code, lang: LANG.exec(m[1] ?? "")?.[1] ?? null, lineEnd });
   }
   return blocks;
