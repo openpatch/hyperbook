@@ -96,8 +96,36 @@ describe("assist", () => {
     );
     expect(seen).toEqual([
       { event: "delta", text: "partial" },
-      { event: "tool", name: "read_file", args: {} },
+      { event: "tool", name: "read_file", detail: null },
       { event: "done", finish: "length" },
+    ]);
+  });
+
+  it("maps the conversation, thinking, tool progress and saved events", async () => {
+    stubFetch(() =>
+      sseResponse([
+        'event: conversation\ndata: {"id":7,"title":"Quiz","userMessageId":11}\n\n',
+        'event: reasoning\ndata: {"text":"Let me see"}\n\n',
+        'event: toolProgress\ndata: {"name":"write_file","path":"a.md","chars":2048}\n\n',
+        'event: tool\ndata: {"name":"write_file","detail":"a.md"}\n\n',
+        'event: error\ndata: {"message":"no","code":"status"}\n\n',
+        'event: saved\ndata: {"messageId":12}\n\n',
+      ]),
+    );
+    const seen: unknown[] = [];
+    await assist(
+      1,
+      { prompt: "hi", pagePath: "book/index.md" },
+      (event) => seen.push(event),
+      new AbortController().signal,
+    );
+    expect(seen).toEqual([
+      { event: "conversation", id: 7, title: "Quiz", userMessageId: 11 },
+      { event: "reasoning", text: "Let me see" },
+      { event: "toolProgress", name: "write_file", path: "a.md", chars: 2048 },
+      { event: "tool", name: "write_file", detail: "a.md" },
+      { event: "error", message: "no", code: "status" },
+      { event: "saved", messageId: 12 },
     ]);
   });
 

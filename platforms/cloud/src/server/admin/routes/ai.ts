@@ -19,7 +19,31 @@ import {
 } from "../../domain/ai-usage";
 import { repoDir } from "../../hosting/storage";
 import { createT } from "../../i18n";
-import { aiAssistInput } from "../../../shared/schemas";
+import { z } from "zod";
+import {
+  aiAssistInput,
+  aiConversationRenameInput,
+  aiProposalStatusInput,
+  type AiProposedChange,
+  type AiToolUse,
+} from "../../../shared/schemas";
+import {
+  addAssistantMessage,
+  addUserMessage,
+  createConversation,
+  deleteConversation,
+  getConversation,
+  historyOf,
+  listConversations,
+  messagesOf,
+  pendingProposal,
+  renameConversation,
+  setProposalStatus,
+  titleOf,
+  toView,
+  touchConversation,
+  truncateFrom,
+} from "../../domain/ai-conversations";
 import type { AuthedEnv } from "../env";
 import { requireUser } from "../middleware";
 import { idParam } from "../params";
@@ -87,17 +111,88 @@ export function aiRoutes({ config, db }: Deps) {
   });
 }
 
-/** /api/books/:id/ai/assist — one streamed request. */
+const conversationParams = validate(
+  "param",
+  z.object({
+    id: z.coerce.number().int().positive(),
+    cid: z.coerce.number().int().positive(),
+  }),
+);
+const messageParams = validate(
+  "param",
+  z.object({
+    id: z.coerce.number().int().positive(),
+    cid: z.coerce.number().int().positive(),
+    mid: z.coerce.number().int().positive(),
+  }),
+);
+
+/**
+ * /api/books/:id/ai/… — one streamed request (assist), and the teacher's
+ * conversations in this book.
+ */
 export function bookAiRoutes({ db, config }: Deps) {
   const allow = rateLimiter(config.ai?.requestsPerMinute ?? 6);
-  return new Hono<AuthedEnv>().use(requireUser).post(
+  return new Hono<AuthedEnv>()
+    .use(requireUser)
+    .get("/:id/ai/conversations", idParam, (c) => {
+      const user = c.get("user");
+      const { book } = bookAccess(db, user, c.req.valid("param").id);
+      return c.json({ conversations: listConversations(db, user.id, book.id) });
+    })
+    .get("/:id/ai/conversations/:cid", conversationParams, (c) => {
+      const user = c.get("user");
+      const { id, cid } = c.req.valid("param");
+      const { book } = bookAccess(db, user, id);
+      const conversation = getConversation(db, user.id, book.id, cid);
+      return c.json({
+        id: conversation.id,
+        title: conversation.title,
+        messages: messagesOf(db, conversation.id).map(toView),
+      });
+    })
+    .patch(
+      "/:id/ai/conversations/:cid",
+      conversationParams,
+      validate("json", aiConversationRenameInput),
+      (c) => {
+        const user = c.get("user");
+        const { id, cid } = c.req.valid("param");
+        const { book } = bookAccess(db, user, id);
+        const conversation = getConversation(db, user.id, book.id, cid);
+        renameConversation(db, conversation.id, c.req.valid("json").title);
+        return c.json({ ok: true });
+      },
+    )
+    .delete("/:id/ai/conversations/:cid", conversationParams, (c) => {
+      const user = c.get("user");
+      const { id, cid } = c.req.valid("param");
+      const { book } = bookAccess(db, user, id);
+      const conversation = getConversation(db, user.id, book.id, cid);
+      deleteConversation(db, conversation.id);
+      return c.json({ ok: true });
+    })
+    .post(
+      "/:id/ai/conversations/:cid/messages/:mid/proposal",
+      messageParams,
+      validate("json", aiProposalStatusInput),
+      (c) => {
+        const user = c.get("user");
+        const { id, cid, mid } = c.req.valid("param");
+        const { book } = bookAccess(db, user, id);
+        const conversation = getConversation(db, user.id, book.id, cid);
+        setProposalStatus(db, conversation.id, mid, c.req.valid("json").status);
+        return c.json({ ok: true });
+      },
+    )
+    .post(
     "/:id/ai/assist",
     idParam,
-    // The schema caps a valid request at well under 640 KiB (prompt,
-    // selection, context, page); the body limit stops anything larger
+    // The schema caps a valid request: prompt, selection, context, page and
+    // up to four scaled-down images; the body limit stops anything larger
     // before it is read, like the files routes do.
     bodyLimit({
-      maxSize: 640 * 1024,
+      maxSize: 20 * 1024 * 1024,
       onError: () => {
         throw new HTTPException(413, {
           message: "The AI request is too large",
@@ -116,6 +211,13 @@ export function bookAiRoutes({ db, config }: Deps) {
       if (!ai) {
         throw new HTTPException(503, { message: t("errors.ai.notConfigured") });
       }
+      const request = c.req.valid("json");
+      // A conversation that is not the teacher's own fails before anything
+      // is counted.
+      const existing =
+        request.conversationId !== undefined
+          ? getConversation(db, user.id, book.id, request.conversationId)
+          : null;
       // The entitlements decide whether this teacher may use the assistant
       // at all, and how many requests a UTC day buys them.
       const {
@@ -135,15 +237,38 @@ export function bookAiRoutes({ db, config }: Deps) {
       if (!allow(user.id)) {
         throw new HTTPException(429, { message: t("errors.ai.rateLimited") });
       }
+      // Edit and resend (or regenerate): the edited message and what
+      // followed it go; its attachments stay unless new ones came along.
+      let input = request;
+      if (existing && request.replaceFrom !== undefined) {
+        const replaced = truncateFrom(db, existing.id, request.replaceFrom);
+        if (request.attachments === undefined)
+          input = { ...request, attachments: replaced.attachments };
+      }
       // Counted once the request is accepted — a provider that then fails
       // has been asked all the same.
       countRequest(db, user.id);
-      const input = c.req.valid("json");
       const repo = repoDir(config, book.id);
       // The teacher may pick any of the instance's models; anything else
       // falls back to the default rather than calling an unvetted name.
       const model =
         input.model && ai.models.includes(input.model) ? input.model : ai.model;
+
+      // The conversation as it was before this message: the model's
+      // history, and the changes still waiting for the teacher.
+      const conversation =
+        existing ?? createConversation(db, user.id, book.id, titleOf(input.prompt));
+      const before = messagesOf(db, conversation.id);
+      const context = {
+        history: historyOf(before),
+        pending: pendingProposal(before),
+      };
+      const userMessageId = addUserMessage(db, conversation.id, {
+        content: input.prompt,
+        pagePath: input.pagePath,
+        attachments: input.attachments ?? [],
+      });
+      touchConversation(db, conversation.id);
 
       return streamSSE(c, async (stream) => {
         // One writer at a time: a heartbeat ping must never land between
@@ -166,25 +291,47 @@ export function bookAiRoutes({ db, config }: Deps) {
             .then(() => stream.write(": ping\n\n"))
             .catch(() => clearInterval(ping));
         }, 15_000);
+        const started = Date.now();
         let finish = "error";
+        let errorMessage: string | null = null;
+        let answer = "";
+        let reasoning = "";
+        const toolUses: AiToolUse[] = [];
+        let proposal: AiProposedChange[] | null = null;
         let steps = 0;
-        let proposedChanges = 0;
         let tokensIn = 0;
         let tokensCached = 0;
         let tokensOut = 0;
         let credits = 0;
         const weights = modelWeights(ai.modelWeights, model);
+        await send("conversation", {
+          id: conversation.id,
+          title: conversation.title,
+          userMessageId,
+        });
         try {
           for await (const event of runAssistant(
             { ai: { ...ai, model }, repo },
             input,
+            context,
             c.req.raw.signal,
           )) {
             if (event.type === "delta") {
+              answer += event.text;
               await send("delta", { text: event.text });
+            } else if (event.type === "reasoning") {
+              reasoning += event.text;
+              await send("reasoning", { text: event.text });
+            } else if (event.type === "tool_progress") {
+              await send("toolProgress", {
+                name: event.name,
+                path: event.path,
+                chars: event.chars,
+              });
             } else if (event.type === "tool") {
               steps += 1;
-              await send("tool", { name: event.name, args: event.args });
+              toolUses.push({ name: event.name, detail: event.detail });
+              await send("tool", { name: event.name, detail: event.detail });
             } else if (event.type === "usage") {
               tokensIn += event.promptTokens;
               tokensCached += event.cachedPromptTokens;
@@ -210,17 +357,12 @@ export function bookAiRoutes({ db, config }: Deps) {
                 tokenQuota,
               });
             } else if (event.type === "proposal") {
-              proposedChanges = event.changes.length;
+              proposal = event.changes;
               await send("proposal", { changes: event.changes });
             } else {
               finish = event.finish;
             }
           }
-          // What the answer cost, so the editor can show it next to it.
-          await send("done", {
-            finish,
-            usage: { tokensIn, tokensCached, tokensOut, credits },
-          });
         } catch (error) {
           if (c.req.raw.signal.aborted) {
             // The teacher stopped the request; there is no reader left to
@@ -228,22 +370,48 @@ export function bookAiRoutes({ db, config }: Deps) {
             finish = "aborted";
           } else if (error instanceof ProviderError) {
             finish = "error";
-            await send("error", {
-              message:
-                error.code === "timeout"
-                  ? t("errors.ai.timeout")
-                  : t("errors.ai.provider"),
-              code: error.code,
-            });
+            errorMessage =
+              error.code === "timeout"
+                ? t("errors.ai.timeout")
+                : t("errors.ai.provider");
+            await send("error", { message: errorMessage, code: error.code });
           } else {
             finish = "error";
-            await send("error", {
-              message: t("errors.generic"),
-              code: "internal",
-            });
+            errorMessage = t("errors.generic");
+            await send("error", { message: errorMessage, code: "internal" });
           }
         } finally {
           clearInterval(ping);
+          // The answer is kept as far as it got — a stopped or failed one
+          // too, like a chat keeps what it showed.
+          const durationMs = Date.now() - started;
+          const messageId = addAssistantMessage(db, conversation.id, {
+            content: answer,
+            reasoning,
+            tools: toolUses,
+            proposal,
+            finish,
+            error: errorMessage,
+            model,
+            tokensIn,
+            tokensOut,
+            credits,
+            durationMs,
+          });
+          touchConversation(db, conversation.id);
+          if (finish !== "error" && finish !== "aborted") {
+            // What the answer cost, so the editor can show it next to it.
+            await send("done", {
+              finish,
+              messageId,
+              durationMs,
+              usage: { tokensIn, tokensCached, tokensOut, credits },
+            });
+          } else if (finish === "error") {
+            // The failed answer is part of the conversation too; the
+            // editor needs its id to offer a retry in place.
+            await send("saved", { messageId });
+          }
           // Metadata only: never the request's or the answer's content.
           audit(db, {
             actorUserId: user.id,
@@ -258,7 +426,7 @@ export function bookAiRoutes({ db, config }: Deps) {
               tokensOut,
               weights,
               steps,
-              proposedChanges,
+              proposedChanges: proposal?.length ?? 0,
               finish,
             },
           });

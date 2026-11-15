@@ -7,7 +7,9 @@
 
 /** One message of the conversation, in the provider's terms. */
 export type ChatMessage =
-  | { role: "system" | "user"; content: string }
+  | { role: "system"; content: string }
+  /** A teacher's turn; with images, a list of parts (OpenAI's vision format). */
+  | { role: "user"; content: string | UserContentPart[] }
   /** An assistant turn that asked for tools; `content` is null then. */
   | {
       role: "assistant";
@@ -19,6 +21,11 @@ export type ChatMessage =
       }[];
     }
   | { role: "tool"; tool_call_id: string; content: string };
+
+/** One part of a user message: text, or an image as a data URL. */
+export type UserContentPart =
+  | { type: "text"; text: string }
+  | { type: "image_url"; image_url: { url: string } };
 
 /** A tool the model may call, in the provider's wire format. */
 export type ToolDefinition = {
@@ -46,6 +53,20 @@ export class ProviderError extends Error {
 /** What one provider call yields while it runs. */
 export type ProviderEvent =
   | { type: "delta"; text: string }
+  /** The model's thinking, as it streams (reasoning models only). */
+  | { type: "reasoning"; text: string }
+  /**
+   * A tool call while its arguments stream in: which tool, the path once
+   * it is known, and how many characters arrived — a long write_file takes
+   * minutes and shows nothing else.
+   */
+  | {
+      type: "tool_progress";
+      index: number;
+      name: string;
+      path: string | null;
+      chars: number;
+    }
   | { type: "tool_calls"; calls: ProviderToolCall[] }
   | {
       type: "usage";
@@ -111,6 +132,11 @@ type StreamOptions = {
    * key is sent, for providers that reject unknown fields.
    */
   cacheKey?: string;
+  /**
+   * How hard a reasoning model thinks (`reasoning_effort`, OpenAI's and
+   * Mistral's spelling). Omitted: not sent, the model's default applies.
+   */
+  reasoningEffort?: "low" | "medium" | "high";
   signal?: AbortSignal;
 };
 
@@ -137,8 +163,8 @@ function cutOff(error: unknown, deadline: AbortSignal): ProviderError {
  * Calls `{baseUrl}/chat/completions` with `stream: true` and yields what
  * happens: the assistant's text as it arrives, the tool calls it made once
  * complete, then how the call ended. `signal` (a disconnecting reader)
- * aborts the provider call; the timeout covers the whole request, streaming
- * included.
+ * aborts the provider call; the timeout is an idle one — it fires when the
+ * provider sends nothing for that long, before the first byte or mid-stream.
  *
  * A transient failure while nothing was streamed yet — the provider
  * unreachable, a 429, a 5xx — is retried twice with a short pause; a
@@ -200,7 +226,38 @@ function transient(error: unknown): boolean {
 async function* streamOnce(
   options: StreamOptions,
 ): AsyncGenerator<ProviderEvent> {
-  const deadline = AbortSignal.timeout(options.timeoutMs);
+  // An idle deadline, not a total one: it restarts whenever the provider
+  // sends anything. A model writing a long tool call (a whole new page of
+  // exercises) streams for minutes without a visible word — that is work,
+  // not a hang, and max_tokens bounds it anyway. Only silence for
+  // `timeoutMs` — before the first byte or between two chunks — times out.
+  const idle = new AbortController();
+  const deadline = idle.signal;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const restart = (): void => {
+    clearTimeout(timer);
+    timer = setTimeout(
+      () =>
+        idle.abort(
+          new DOMException("The AI provider went silent", "TimeoutError"),
+        ),
+      options.timeoutMs,
+    );
+  };
+  restart();
+  try {
+    yield* readStream(options, deadline, restart);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/** The request and stream of `streamOnce`, under its idle `deadline`. */
+async function* readStream(
+  options: StreamOptions,
+  deadline: AbortSignal,
+  restart: () => void,
+): AsyncGenerator<ProviderEvent> {
   const response = await fetch(`${options.baseUrl}/chat/completions`, {
     method: "POST",
     headers: {
@@ -211,6 +268,9 @@ async function* streamOnce(
     body: JSON.stringify({
       model: options.model,
       ...(options.cacheKey ? { prompt_cache_key: options.cacheKey } : {}),
+      ...(options.reasoningEffort
+        ? { reasoning_effort: options.reasoningEffort }
+        : {}),
       messages: options.messages,
       max_tokens: options.maxOutputTokens,
       stream: true,
@@ -254,6 +314,8 @@ async function* streamOnce(
   // Tool calls arrive as deltas too — an id and a name once, the arguments
   // piece by piece — and are only complete when the call is.
   const calls = new Map<number, { id: string; name: string; args: string }>();
+  /** Per tool call: the argument length and path last reported. */
+  const reported = new Map<number, { chars: number; path: string | null }>();
   const reader = response.body.getReader();
   const decoder = new TextDecoder();
   let buffer = "";
@@ -344,9 +406,14 @@ async function* streamOnce(
     }
     // Mistral's reasoning models think in content chunks, not a
     // reasoning field, so their thinking is gathered separately.
-    reasoning += thinkingText(choice?.delta?.content);
-    reasoning += deltaText(choice?.delta?.reasoning_content);
-    reasoning += deltaText(choice?.delta?.reasoning);
+    const thought =
+      thinkingText(choice?.delta?.content) +
+      deltaText(choice?.delta?.reasoning_content) +
+      deltaText(choice?.delta?.reasoning);
+    if (thought) {
+      reasoning += thought;
+      pending.push({ type: "reasoning", text: thought });
+    }
     for (const call of choice?.delta?.tool_calls ?? []) {
       const current = calls.get(call.index) ?? {
         id: "",
@@ -357,6 +424,25 @@ async function* streamOnce(
       if (call.function?.name) current.name += call.function.name;
       if (call.function?.arguments) current.args += call.function.arguments;
       calls.set(call.index, current);
+      // Reported when the call starts, when its path shows up, and then
+      // every couple of KB — often enough to look alive, not per token.
+      if (!current.name) continue;
+      const last = reported.get(call.index);
+      const path = last?.path ?? argumentPath(current.args);
+      if (
+        !last ||
+        (path !== null && last.path === null) ||
+        current.args.length - last.chars >= PROGRESS_STEP
+      ) {
+        reported.set(call.index, { chars: current.args.length, path });
+        pending.push({
+          type: "tool_progress",
+          index: call.index,
+          name: current.name,
+          path,
+          chars: current.args.length,
+        });
+      }
     }
     if (choice?.finish_reason === "stop") finish = "stop";
     if (choice?.finish_reason === "length") finish = "length";
@@ -373,6 +459,7 @@ async function* streamOnce(
       if (options.signal?.aborted) throw error;
       throw cutOff(error, deadline);
     }
+    restart();
     const { done: streamDone, value } = read;
     buffer += decoder.decode(value, { stream: true });
     // SSE allows \n, \r\n and \r as line endings; normalize before splitting.
@@ -398,6 +485,23 @@ async function* streamOnce(
   yield* complete(calls, finish, hasContent, reasoning, usage);
 }
 
+/** Arguments that arrive between two tool progress reports. */
+const PROGRESS_STEP = 2048;
+
+/**
+ * The `path` of a tool call's arguments while they are still streaming —
+ * the JSON is incomplete, so it is looked for, not parsed.
+ */
+function argumentPath(args: string): string | null {
+  const match = /"(?:path|newPath)"\s*:\s*"((?:[^"\\]|\\.)*)"/.exec(args);
+  if (!match) return null;
+  try {
+    return JSON.parse(`"${match[1]}"`) as string;
+  } catch {
+    return null;
+  }
+}
+
 /** What a finished stream yields at its end. */
 function* complete(
   calls: Map<number, { id: string; name: string; args: string }>,
@@ -411,13 +515,19 @@ function* complete(
   } | null,
 ): Generator<ProviderEvent> {
   if (usage) yield { type: "usage", ...usage };
+  if (finish === "length") {
+    // Cut off by max_tokens: a tool call still being written has half its
+    // arguments and must not run, and thinking cut short is not an answer.
+    // The caller decides how to go on.
+    yield { type: "finish", finish: "length" };
+    return;
+  }
   const complete = [...calls.values()].filter((call) => call.id && call.name);
   if (complete.length > 0) yield { type: "tool_calls", calls: complete };
   else if (!hasContent) {
-    // Reasoning models sometimes put the whole visible answer where the
-    // content never arrives — GLM-5.x in reasoning_content, Mistral's Large 4
-    // and Small 4 in thinking chunks — use that rather than failing with
-    // "empty", which is what a max_tokens cap inside the thinking reads as.
+    // Some relays put the whole visible answer where the content never
+    // arrives — GLM-5.x in reasoning_content, for one. A call that ended
+    // normally with only reasoning is answered with it rather than failing.
     if (reasoning.trim()) yield { type: "delta", text: reasoning };
     else
       throw new ProviderError(

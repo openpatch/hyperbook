@@ -26,7 +26,7 @@ everything below lives in `platforms/cloud`.
 | Book access      | The assistant may **query the whole book**: a server-side agent loop gives the model bounded tools (`list_files`, `read_file`) that read the book's git repository — the same source of truth the editor saves into.                                                                                                                                                                                                                            |
 | File changes     | The agent may also propose creating, editing and deleting files — through tools, onto an in-memory overlay only. The request ends with a **proposal**: a diff the teacher reviews and accepts or denies (all of it, or per file). Accepting applies through the editor's normal save path (`commitFilesInput`, one git commit, the teacher as author, `baseOid` conflict checks); denying changes nothing. The server never commits on its own. |
 | Transport        | Server-Sent Events from the route to the editor (`hono/streaming`'s `streamSSE`); the provider's own stream is forwarded event by event. A transient provider failure (unreachable, 429, 5xx) is retried twice while nothing was streamed yet; the route sends a heartbeat comment every 15 s while the model works (proxies cut idle connections); a stream that reaches the editor without `done` or `error` is reported as an error, so a cut connection never looks like a complete answer.                                                                                                                                                                                                                                                                                                        |
-| State            | Stateless. Requests carry their own context; nothing about a conversation is stored. No AI output is persisted by the platform — the teacher applies or discards it, then saves like any other edit (a git commit).                                                                                                                                                                                                                             |
+| State            | **Conversations are kept**, per teacher and book (`ai_conversations`, `ai_messages`; `src/server/domain/ai-conversations.ts`): prompts, attachments, answers with their thinking, the tools used, proposals and what each answer cost. Only the teacher who had a conversation can list, open, rename or delete it; it goes with the book or the account (`ON DELETE CASCADE`). Each request continues one (`conversationId`) or starts one; the model gets the conversation as history (newest first within ~60k characters, earlier answers with a summary of their tools and proposals, attachments only from the last few messages). A proposal the teacher has not decided on yet carries over: the next request's overlay starts from it, so "make task 5 harder" changes the pending draft, and the new proposal holds all pending changes (the old one is `superseded`). Accepting or denying is reported back (`…/messages/:mid/proposal`), which stops the carry-over. Nothing reaches the book without the teacher's acceptance — a commit like any other edit. |
 | Safety           | Per-user rate limit, caps on input and output, caps on tool reads, audit entry with metadata only (never content), provider errors mapped to i18n messages.                                                                                                                                                                                                                                                                                     |
 | Credits          | Besides requests, usage is metered in **tokens** (the provider's reported `usage`, estimated at ~4 characters per token when it reports none). A model's tokens are multiplied by its weight (from the instance settings, default 1) into _credits_; the entitlement `ai_tokens_per_week` caps credits per UTC week (Monday–Sunday, null is unlimited). A request that starts under the cap may overshoot it; the next is refused (429). The editor shows a bar with the credits left and the refill date. Per-day rows in `ai_usage` keep raw and weighted tokens. |
 | Efficiency       | The agent loop resends its history each step, so the model is told to read all files in one `read_files` call; a file or doc already read is not sent again, and the static system prompt (tool guidance included) comes before per-book text so provider-side prefix caching applies. Changes to existing files go through `edit_file` (exact passages replaced, or appended), so improving a paragraph does not resend the whole page. `read_docs` serves one topic: a curated file plus that element's sections of the vendored llms.txt, never the whole 350 KB file. |
@@ -67,9 +67,9 @@ ai: {
   baseUrl: string;        // AI_BASE_URL, validated as http(s) URL; a path (e.g. /v1) is kept, a trailing slash dropped
   apiKey: string;         // AI_API_KEY
   model: string;         // AI_MODEL
-  timeoutMs: number;     // AI_TIMEOUT_SECONDS, default 300; the cap covers thinking and streaming
-  maxOutputTokens: number; // AI_MAX_OUTPUT_TOKENS, counting reasoning tokens, default 16384
-  maxSteps: number;      // AI_MAX_STEPS (agent loop), default 6
+  timeoutMs: number;     // AI_TIMEOUT_SECONDS, default 300; an idle timeout, reset by every chunk
+  maxOutputTokens: number; // AI_MAX_OUTPUT_TOKENS, counting reasoning tokens, default 65536
+  maxSteps: number;      // AI_MAX_STEPS (agent loop), default 12
   requestsPerMinute: number; // AI_REQUESTS_PER_MINUTE, default 6
   modelWeights: Record<string, ModelWeights>; // from the instance settings; models without an entry weigh 1 per kind
 } | null
@@ -118,11 +118,27 @@ The response is an SSE stream of JSON events:
 
 | Event      | Data                                        | Meaning                                                                                                                                                |
 | ---------- | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `conversation` | `{ id, title, userMessageId }`          | First event: the conversation this request belongs to (a new one is named after the prompt) and the stored id of the teacher's message. |
+| `reasoning` | `{ text }`                                 | A chunk of the model's thinking (reasoning models), shown live in a collapsible "Thinking…" block that folds once the answer starts. Never part of the answer. |
 | `delta`    | `{ text }`                                  | A chunk of the assistant's Markdown — appended live.                                                                                                   |
-| `tool`     | `{ name, args }`                            | The agent is looking through the book or recording a change (`read_file book/lists.md`, `write_file quiz/… .json`) — shown as a progress line.         |
-| `proposal` | `{ changes }`                               | The file changes the agent collected, for review (shape below). Sent once, right before `done`, when there are any.                                    |
-| `done`     | `{ finish: "stop" \| "length" \| "error" }` | The stream ends; `length` means the token cap hit. (What happens to a proposal is the teacher's decision after the stream — the server never applies.) |
-| `error`    | `{ message, code }`                         | Mapped, i18n-able failure: `unreachable` or `status` from the provider call, `internal` otherwise. (Pre-stream failures — validation, permissions, not configured, quota, rate limit — are ordinary JSON errors.) |
+| `toolProgress` | `{ name, path, chars }`                 | A tool call while its arguments stream in — a long `write_file` takes minutes and would otherwise look frozen. Sent when it starts, when its path is known, then every 2 KB. |
+| `tool`     | `{ name, detail }`                          | A tool call ran (`read_files` + "a.md, b.md", `write_file` + path) — shown as a step in the answer.         |
+| `proposal` | `{ changes }`                               | All pending file changes (shape below), including ones an earlier answer proposed and the teacher has not decided on. Sent once, right before `done`. |
+| `done`     | `{ finish, messageId, durationMs, usage }`  | `finish`: `stop`; `length` when the output cap still cut the answer off after going on three times; `steps` when the step limit ended work that was not finished — the editor offers *Continue*. |
+| `error`    | `{ message, code }`                         | Mapped, i18n-able failure: `timeout`, `unreachable` or `status` from the provider call, `internal` otherwise. Followed by `saved` `{ messageId }`: the failed answer is part of the conversation and can be retried. (Pre-stream failures — validation, permissions, not configured, quota, rate limit — are ordinary JSON errors.) |
+
+Besides `assist`, the conversation routes (all `requireUser` +
+`bookAccess`, and the conversation must be the caller's own):
+`GET /api/books/:id/ai/conversations` (newest first),
+`GET …/conversations/:cid` (with its messages), `PATCH …/:cid` `{ title }`,
+`DELETE …/:cid`, and `POST …/:cid/messages/:mid/proposal`
+`{ status: "applied" | "denied" }`. `assist` takes `conversationId`,
+`replaceFrom` (edit and resend, or regenerate: that teacher message and
+everything after it are replaced; its attachments stay unless new ones
+come along), `attachments` (up to four: images as data URLs the editor
+scaled to 1600 px JPEG, documents — PDFs read with pdf.js in the browser,
+text files — as their text) and `reasoningEffort` (`low`/`medium`/`high`,
+sent as `reasoning_effort` only when picked).
 
 Errors before the stream starts (validation, permissions, not configured)
 are ordinary JSON errors like every other route's, so `unwrap()` and the
@@ -191,13 +207,29 @@ type AiProposedChange =
 editor's unsaved page text, before the change); `baseOid` is the commit's
 file oid the change is based on — it is what makes accepting conflict-safe.
 
-The loop runs at most `config.ai.maxSteps` provider calls per request. Each
-call streams: content deltas become `delta` events, `tool_calls` become one
-`tool` event each, the tool's result goes into the next call. If the
-provider rejects the `tools` field outright (small local models), the agent
-retries the request once **without tools** — the assistant then works with
-the baseline context only, degraded but functional (and without the changing
-tools: no proposals, text-only answers).
+The loop runs at most `config.ai.maxSteps` provider calls per request
+(default 12). Each call streams: thinking becomes `reasoning` events,
+content deltas `delta` events, tool calls `toolProgress` while they are
+written and one `tool` event each once they ran; the tool's result goes
+into the next call. The last step is told to stop calling tools and say
+what it did and what is left; if work remains, the request ends with
+`finish: "steps"` and the conversation continues where it stopped.
+
+A call the output cap (`AI_MAX_OUTPUT_TOKENS`, default 65536 — reasoning
+counts against it, but only what is written is billed) cuts off is not the
+end: text cut mid-answer is continued ("continue exactly where it
+stopped"); a tool call cut off while its arguments streamed is dropped
+unrun and the model is told to split it into smaller calls; thinking that
+used up the cap is told to act now. At most three times per request, then
+`finish: "length"`. A provider that answers 400 is asked again without the
+reasoning effort, then with a 16k output cap (some reject bigger ones),
+then **without tools** (small local models) — the assistant then works with
+the baseline context only, degraded but functional (and without the
+changing tools: no proposals, text-only answers).
+
+`AI_TIMEOUT_SECONDS` is an idle timeout: it fires only when the provider
+sends nothing for that long, so a model that streams for ten minutes is
+fine, a silent one is not.
 
 A later slice adds a `search_book(query)` tool for large books: `git grep`
 against the head commit — the repository layer gives it for free — with
@@ -241,6 +273,20 @@ built (docs prose is not prompt material).
 _(in place since slice 2: a toolbar button and Ctrl/Cmd+Alt+A toggle it, the
 width is remembered like the preview's)_, plus `src/web/lib/ai.ts` for the
 streaming client:
+
+> **Since the conversation rework** the pane is a chat like ChatGPT's:
+> a conversation list (history button) and *New chat* in its header, the
+> title renamed by double-click; the teacher's messages with *Edit* (resend
+> from there); answers with a folding *Thinking…/Thought for 12 s* block,
+> their tool steps (with live size while a file is written), the Markdown
+> answer, *Copy*, *Regenerate* (or *Retry* after a failure), cost and time,
+> *Continue* after `length`/`steps`, and their proposal (*Review n
+> proposed changes*, or whether it was accepted, denied or carried into a
+> later one). The composer takes attachments (button, paste, drop: images,
+> PDFs, text files), a thinking-effort picker, and a send button that turns
+> into stop while an answer streams. The conversation last open in a book
+> is reopened after a reload (remembered in `localStorage`). The list
+> below describes the original pane; where it differs, this note wins.
 
 - The panel shows the model name, the day's requests (`usedToday` of
   `quota`, from the status route) and a single prompt field with an _Ask_

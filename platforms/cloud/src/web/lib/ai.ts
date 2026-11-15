@@ -2,7 +2,16 @@ import { useQuery } from "@tanstack/react-query";
 import type { EditorView } from "@codemirror/view";
 import i18next from "i18next";
 import { api, unwrap } from "./api";
-import type { AiAssistInput, AiProposedChange, ModelWeights } from "../../shared/schemas";
+import {
+  AI_ATTACHMENT_TEXT_MAX,
+  AI_IMAGE_MAX,
+  type AiAssistInput,
+  type AiAttachment,
+  type AiConversationSummary,
+  type AiMessageView,
+  type AiProposedChange,
+  type ModelWeights,
+} from "../../shared/schemas";
 
 /*
  * The editor's side of the AI writing assistant (platforms/cloud/docs/cloud-ai-assistant.md):
@@ -66,13 +75,19 @@ export function useAiStatus(enabled = true) {
 
 /** One event of the route's stream; see the plan for the shapes. */
 export type AssistEvent =
+  | { event: "conversation"; id: number; title: string; userMessageId: number }
   | { event: "delta"; text: string }
-  | { event: "tool"; name: string; args: Record<string, unknown> }
+  | { event: "reasoning"; text: string }
+  | { event: "toolProgress"; name: string; path: string | null; chars: number }
+  | { event: "tool"; name: string; detail: string | null }
+  | { event: "saved"; messageId: number }
   | { event: "usage"; tokensUsedThisWeek: number; tokenQuota: number | null }
   | { event: "proposal"; changes: AiProposedChange[] }
   | {
       event: "done";
-      finish: "stop" | "length" | "error";
+      finish: "stop" | "length" | "steps";
+      messageId?: number;
+      durationMs?: number;
       /** What the answer cost; absent from streams of older servers. */
       usage?: { tokensIn: number; tokensCached: number; tokensOut: number; credits: number };
     }
@@ -127,15 +142,37 @@ export async function assist(
     try {
       const parsed = JSON.parse(data) as Record<string, unknown>;
       switch (event) {
+        case "conversation":
+          onEvent({
+            event: "conversation",
+            id: Number(parsed.id),
+            title: String(parsed.title),
+            userMessageId: Number(parsed.userMessageId),
+          });
+          break;
         case "delta":
           onEvent({ event: "delta", text: String(parsed.text) });
+          break;
+        case "reasoning":
+          onEvent({ event: "reasoning", text: String(parsed.text) });
+          break;
+        case "toolProgress":
+          onEvent({
+            event: "toolProgress",
+            name: String(parsed.name),
+            path: typeof parsed.path === "string" ? parsed.path : null,
+            chars: Number(parsed.chars) || 0,
+          });
           break;
         case "tool":
           onEvent({
             event: "tool",
             name: String(parsed.name),
-            args: (parsed.args as Record<string, unknown>) ?? {},
+            detail: typeof parsed.detail === "string" ? parsed.detail : null,
           });
+          break;
+        case "saved":
+          onEvent({ event: "saved", messageId: Number(parsed.messageId) });
           break;
         case "proposal":
           onEvent({
@@ -156,9 +193,13 @@ export async function assist(
           onEvent({
             event: "done",
             finish:
-              parsed.finish === "length" || parsed.finish === "error"
+              parsed.finish === "length" || parsed.finish === "steps"
                 ? parsed.finish
                 : "stop",
+            messageId:
+              typeof parsed.messageId === "number" ? parsed.messageId : undefined,
+            durationMs:
+              typeof parsed.durationMs === "number" ? parsed.durationMs : undefined,
             usage:
               parsed.usage && typeof parsed.usage === "object"
                 ? (() => {
@@ -242,4 +283,134 @@ export function contextOf(view: EditorView): string {
   return view.state
     .sliceDoc(doc.line(from).from, doc.line(to).to)
     .slice(0, 16_000);
+}
+
+/* Conversations, kept by the server per teacher and book. */
+
+async function json<T>(response: Promise<Response>): Promise<T> {
+  return (await unwrap(response as Promise<Response>)) as T;
+}
+
+export function listConversations(bookId: number) {
+  return json<{ conversations: AiConversationSummary[] }>(
+    fetch(`/api/books/${bookId}/ai/conversations`),
+  ).then((r) => r.conversations);
+}
+
+export function loadConversation(bookId: number, id: number) {
+  return json<{ id: number; title: string; messages: AiMessageView[] }>(
+    fetch(`/api/books/${bookId}/ai/conversations/${id}`),
+  );
+}
+
+export function renameConversation(bookId: number, id: number, title: string) {
+  return json(
+    fetch(`/api/books/${bookId}/ai/conversations/${id}`, {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ title }),
+    }),
+  );
+}
+
+export function deleteConversation(bookId: number, id: number) {
+  return json(
+    fetch(`/api/books/${bookId}/ai/conversations/${id}`, { method: "DELETE" }),
+  );
+}
+
+/** Tells the server the teacher decided on a proposal, so it stops carrying over. */
+export function decideProposal(
+  bookId: number,
+  conversationId: number,
+  messageId: number,
+  status: "applied" | "denied",
+) {
+  return json(
+    fetch(
+      `/api/books/${bookId}/ai/conversations/${conversationId}/messages/${messageId}/proposal`,
+      {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ status }),
+      },
+    ),
+  );
+}
+
+/* Attachments: images scaled down in the browser, documents as their text. */
+
+/** The longest side an attached image is scaled to. */
+const IMAGE_SIDE = 1600;
+const TEXT_TYPES = /^(text\/|application\/(json|xml|x-yaml|yaml))/;
+const TEXT_EXTENSIONS =
+  /\.(md|txt|typ|csv|tsv|json|ya?ml|xml|html?|css|js|ts|tsx|jsx|py|java|sql|tex|c|cpp|h)$/i;
+
+/** Whether the editor can turn this file into an attachment. */
+export function attachable(file: File): boolean {
+  return (
+    file.type.startsWith("image/") ||
+    file.type === "application/pdf" ||
+    TEXT_TYPES.test(file.type) ||
+    TEXT_EXTENSIONS.test(file.name)
+  );
+}
+
+/**
+ * A file as an attachment: an image as a JPEG data URL no larger than
+ * IMAGE_SIDE (a photo of a worksheet reads fine at that size and costs a
+ * fraction), a PDF as its text, a text file as itself.
+ */
+export async function toAttachment(file: File): Promise<AiAttachment> {
+  if (file.type.startsWith("image/")) {
+    const data = await scaledImage(file);
+    if (data.length > AI_IMAGE_MAX) throw new Error(i18next.t("editor.ai.attachTooLarge", { name: file.name }));
+    return { kind: "image", name: file.name, data };
+  }
+  const text =
+    file.type === "application/pdf" ? await pdfText(file) : await file.text();
+  if (!text.trim()) throw new Error(i18next.t("editor.ai.attachEmpty", { name: file.name }));
+  return {
+    kind: "text",
+    name: file.name,
+    text: text.slice(0, AI_ATTACHMENT_TEXT_MAX),
+  };
+}
+
+async function scaledImage(file: File): Promise<string> {
+  const bitmap = await createImageBitmap(file);
+  const scale = Math.min(1, IMAGE_SIDE / Math.max(bitmap.width, bitmap.height));
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+  canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+  const context = canvas.getContext("2d")!;
+  // A transparent PNG becomes JPEG: white, not black, behind it.
+  context.fillStyle = "#fff";
+  context.fillRect(0, 0, canvas.width, canvas.height);
+  context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+  bitmap.close();
+  return canvas.toDataURL("image/jpeg", 0.85);
+}
+
+/** A PDF's text, page by page, read with the pdf.js the PDF view loads. */
+async function pdfText(file: File): Promise<string> {
+  const [lib, worker] = await Promise.all([
+    import("pdfjs-dist/legacy/build/pdf.mjs"),
+    import("pdfjs-dist/legacy/build/pdf.worker.min.mjs?url"),
+  ]);
+  lib.GlobalWorkerOptions.workerSrc = worker.default;
+  const pdf = await lib.getDocument({ data: new Uint8Array(await file.arrayBuffer()) }).promise;
+  const pages: string[] = [];
+  for (let n = 1; n <= pdf.numPages; n++) {
+    const page = await pdf.getPage(n);
+    const content = await page.getTextContent();
+    pages.push(
+      content.items
+        .map((item) => ("str" in item ? item.str + (item.hasEOL ? "\n" : "") : ""))
+        .join(""),
+    );
+    if (pages.join("").length > AI_ATTACHMENT_TEXT_MAX) break;
+  }
+  await pdf.cleanup();
+  return pages.map((text, i) => `--- Page ${i + 1} ---\n${text}`).join("\n\n");
 }

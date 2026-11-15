@@ -25,13 +25,23 @@ import {
   type ChatMessage,
   type ProviderToolCall,
   type ToolDefinition,
+  type UserContentPart,
   streamChat,
 } from "./provider";
 
 /** What the editor's stream receives while the assistant runs. */
 export type AssistantEvent =
   | { type: "delta"; text: string }
-  | { type: "tool"; name: string; args: Record<string, unknown> }
+  | { type: "reasoning"; text: string }
+  /** A tool call being written; `index` tells parallel calls apart. */
+  | { type: "tool_progress"; name: string; path: string | null; chars: number }
+  | {
+      type: "tool";
+      name: string;
+      args: Record<string, unknown>;
+      /** What it works on, for the chat: paths, a pattern, a doc's name. */
+      detail: string | null;
+    }
   | {
       type: "usage";
       promptTokens: number;
@@ -40,7 +50,41 @@ export type AssistantEvent =
       completionTokens: number;
     }
   | { type: "proposal"; changes: AiProposedChange[] }
-  | { type: "done"; finish: "stop" | "length" };
+  /**
+   * stop: answered. length: cut off by the output cap even after going on.
+   * steps: the step limit ended it while there was work left — the
+   * conversation can continue where it stopped.
+   */
+  | { type: "done"; finish: "stop" | "length" | "steps" };
+
+/**
+ * What a request brings besides the teacher's input: the conversation so
+ * far as provider messages, and the file changes an earlier answer proposed
+ * that the teacher has not accepted or denied yet — this request builds on
+ * them instead of the repository.
+ */
+export type AssistantContext = {
+  history: ChatMessage[];
+  pending: AiProposedChange[] | null;
+};
+
+/** How often one request goes on after its answer was cut off. */
+const MAX_CONTINUATIONS = 3;
+/** The output cap a provider that rejected a bigger one is asked with. */
+const FALLBACK_OUTPUT_TOKENS = 16384;
+
+/** Told to the model after its text was cut off mid-answer. */
+const CONTINUE_TEXT =
+  "Your answer was cut off by the output limit. Continue exactly where it stopped — no repetition, no preamble.";
+/** Told to the model after its thinking used up the output limit. */
+const THOUGHT_CUT_TEXT =
+  "You used up your output limit while thinking, before acting. You have planned enough: act now. Call the tools to make the changes (several smaller edit_file or write_file calls rather than one huge one), or write your answer — keep further thinking short.";
+/** Told to the model after a tool call was cut off while it wrote it. */
+const toolCutText = (name: string) =>
+  `Your ${name} call was cut off by the output limit before its arguments were complete, so it did not run. Split the work into smaller calls: write a shorter file first, then add the rest with edit_file (an empty old_text appends).`;
+/** Told to the model when its step budget is nearly used up. */
+const LAST_STEP_TEXT =
+  "This is your last step in this request. Do not call any more tools: tell the teacher what you did and what is still left to do; they can ask you to continue.";
 
 /** The part of the file tree the baseline context mentions. */
 const TREE_LIMIT = 100;
@@ -302,6 +346,25 @@ class Tools {
     // A page small enough to be in the prompt is not sent a second time.
     if (input.pageText !== undefined && input.pageText.length <= PAGE_INLINE_MAX)
       this.seen.add(`file:${input.pagePath}`);
+  }
+
+  /**
+   * Starts from the changes an earlier answer proposed and the teacher has
+   * not decided on yet: reads see them, new changes add to them, and the
+   * proposal at the end holds all of them.
+   */
+  seed(changes: AiProposedChange[]): void {
+    for (const change of changes) {
+      if (change.op === "write") {
+        this.overlay.set(change.path, {
+          baseOid: change.baseOid,
+          oldText: change.oldText,
+          newText: change.newText,
+        });
+      } else if (this.book.tree.has(change.path)) {
+        this.deletes.add(change.path);
+      }
+    }
   }
 
   /** The committed text of a file, when it is small enough to diff against. */
@@ -689,7 +752,11 @@ class Tools {
 }
 
 /** The message pair of a request: who the assistant is, which book, what to do. */
-function buildMessages(book: Book, input: AiAssistInput): ChatMessage[] {
+function buildMessages(
+  book: Book,
+  input: AiAssistInput,
+  context: AssistantContext,
+): ChatMessage[] {
   // Pages and configuration first: in a book with many images the first
   // TREE_LIMIT entries should still be the ones the model writes about.
   const files = [...book.tree.values()]
@@ -742,20 +809,69 @@ function buildMessages(book: Book, input: AiAssistInput): ChatMessage[] {
   }
   if (input.selection)
     page.push("", "### The selected passage", "", input.selection);
+  const pending = context.pending ?? [];
+  if (pending.length > 0) {
+    page.push(
+      "",
+      "### Changes you proposed earlier, still waiting for the teacher",
+      "",
+      "Your tools see these files as changed; what you change now adds to them, and the teacher reviews all of it together:",
+      "",
+      ...pending.map((c) => `- ${c.path} (${c.op === "delete" ? "deleted" : c.baseOid === null ? "new" : "changed"})`),
+    );
+  }
 
-  const task = `## The request\n\n${input.prompt}`;
+  const attachments = input.attachments ?? [];
+  const documents = attachments.filter((a) => a.kind === "text");
+  const task = [
+    `## The request\n\n${input.prompt}`,
+    ...documents.map(
+      (a) => `### Attached document: ${a.name}\n\n\`\`\`\`\n${a.text}\n\`\`\`\``,
+    ),
+  ].join("\n\n");
+  const text = [...page, "", task].join("\n");
+  const images = attachments.filter((a) => a.kind === "image");
+  const content: string | UserContentPart[] =
+    images.length === 0
+      ? text
+      : [
+          { type: "text", text },
+          ...images.map((a) => ({
+            type: "image_url" as const,
+            image_url: { url: a.data },
+          })),
+        ];
 
   return [
     { role: "system", content: system.join("\n\n") },
     // The turns before this request, so follow-ups know what came before;
     // they change while the system prefix stays, so prefix caching still
     // applies to the part every request shares.
-    ...(input.history ?? []).map((m) => ({
-      role: m.role,
-      content: m.content,
-    })),
-    { role: "user", content: [...page, "", task].join("\n") },
+    ...context.history,
+    { role: "user", content },
   ];
+}
+
+/** What a tool call works on, as the chat shows it. */
+export function toolDetail(
+  name: string,
+  args: Record<string, unknown>,
+): string | null {
+  const str = (v: unknown) => (typeof v === "string" && v ? v : null);
+  switch (name) {
+    case "read_files":
+      return Array.isArray(args.paths)
+        ? args.paths.filter((p) => typeof p === "string").join(", ") || null
+        : null;
+    case "search_files":
+      return str(args.pattern);
+    case "read_docs":
+      return str(args.name);
+    case "rename_file":
+      return args.path && args.newPath ? `${args.path} → ${args.newPath}` : str(args.path);
+    default:
+      return str(args.path);
+  }
 }
 
 /**
@@ -767,11 +883,13 @@ function buildMessages(book: Book, input: AiAssistInput): ChatMessage[] {
 export async function* runAssistant(
   options: { ai: EffectiveAi; repo: string },
   input: AiAssistInput,
+  context: AssistantContext = { history: [], pending: null },
   signal?: AbortSignal,
 ): AsyncGenerator<AssistantEvent> {
   const book = await loadBook(options.repo);
   const tools = new Tools(options.repo, book, input);
-  const messages = buildMessages(book, input);
+  if (context.pending) tools.seed(context.pending);
+  const messages = buildMessages(book, input, context);
   // The system prompt — static text plus the book's file listing — is the
   // shared prefix of every request and every step, and the listing changes
   // only when the book's head commit does. Keying the prompt cache on that
@@ -779,34 +897,63 @@ export async function* runAssistant(
   // prefix at 10% of the input price) reuse it across requests.
   const cacheKey = `hyperbook:${book.commit ?? "no-commit"}`;
 
+  // What a provider that rejects the request (400) is asked without, in
+  // this order: the reasoning effort, the big output cap, then the tools
+  // (small local models do not understand them; the assistant is then
+  // degraded but works).
+  let reasoningEffort = input.reasoningEffort;
+  let maxOutputTokens = options.ai.maxOutputTokens;
   let withTools = true;
-  let retriedWithoutTools = false;
   let step = 0;
-  let finish: "stop" | "length" = "stop";
+  let continuations = 0;
+  let finish: "stop" | "length" | "steps" = "stop";
 
   // Big read results of earlier rounds, which pruneReads() may drop.
   const rounds: PrunableRead[][] = [];
 
   while (step < options.ai.maxSteps) {
     pruneReads(messages, rounds, tools);
+    const lastStep = step === options.ai.maxSteps - 1 && step > 0;
     let pending: ProviderToolCall[] = [];
     let reported = false;
     let produced = 0;
+    let text = "";
+    /** The tool whose arguments were streaming when the call ended. */
+    let writing: string | null = null;
+    let stepFinish: "stop" | "length" | "tool_calls" = "stop";
+    // The last step is told to wrap up, so a request never ends silently
+    // in the middle of its work.
+    const asked: ChatMessage[] = lastStep
+      ? [...messages, { role: "user", content: LAST_STEP_TEXT }]
+      : messages;
     try {
       for await (const event of streamChat({
         baseUrl: options.ai.baseUrl,
         apiKey: options.ai.apiKey,
         model: options.ai.model,
         cacheKey,
-        messages,
-        maxOutputTokens: options.ai.maxOutputTokens,
+        messages: asked,
+        maxOutputTokens,
         timeoutMs: options.ai.timeoutMs,
         tools: withTools ? TOOLS : undefined,
+        reasoningEffort,
         signal,
       })) {
         if (event.type === "delta") {
           produced += event.text.length;
+          text += event.text;
           yield { type: "delta", text: event.text };
+        } else if (event.type === "reasoning") {
+          produced += event.text.length;
+          yield { type: "reasoning", text: event.text };
+        } else if (event.type === "tool_progress") {
+          writing = event.name;
+          yield {
+            type: "tool_progress",
+            name: event.name,
+            path: event.path,
+            chars: event.chars,
+          };
         } else if (event.type === "usage") {
           reported = true;
           yield event;
@@ -816,20 +963,25 @@ export async function* runAssistant(
             (n, call) => n + call.args.length + call.name.length,
             0,
           );
-        } else if (event.finish === "length") {
-          finish = "length";
+        } else {
+          stepFinish = event.finish;
         }
       }
     } catch (error) {
-      // A provider that does not understand tools (small local models) gets
-      // one retry without them; the assistant is then degraded but works.
-      // Only a 400 says "your request is malformed" — a 401/403 (bad key)
-      // would fail the same way again, so it is reported right away.
       const status = (error as { status?: number }).status;
-      if (withTools && !retriedWithoutTools && status === 400) {
-        withTools = false;
-        retriedWithoutTools = true;
-        continue;
+      if (status === 400 && text === "") {
+        if (reasoningEffort) {
+          reasoningEffort = undefined;
+          continue;
+        }
+        if (maxOutputTokens > FALLBACK_OUTPUT_TOKENS) {
+          maxOutputTokens = FALLBACK_OUTPUT_TOKENS;
+          continue;
+        }
+        if (withTools) {
+          withTools = false;
+          continue;
+        }
       }
       throw error;
     }
@@ -838,18 +990,41 @@ export async function* runAssistant(
     if (!reported) {
       yield {
         type: "usage",
-        promptTokens: Math.ceil(JSON.stringify(messages).length / 4),
+        promptTokens: Math.ceil(JSON.stringify(asked).length / 4),
         // An estimate cannot know which prefix the provider cached.
         cachedPromptTokens: 0,
         completionTokens: Math.ceil(produced / 4),
       };
     }
     step++;
-    if (pending.length === 0 || finish === "length") break;
+
+    if (stepFinish === "length") {
+      // Cut off by the output cap: go on rather than leave the teacher
+      // with half an answer, as long as steps and continuations are left.
+      if (continuations >= MAX_CONTINUATIONS || step >= options.ai.maxSteps) {
+        finish = "length";
+        break;
+      }
+      continuations++;
+      if (text) {
+        messages.push({ role: "assistant", content: text });
+        messages.push({ role: "user", content: CONTINUE_TEXT });
+      } else if (writing) {
+        messages.push({ role: "user", content: toolCutText(writing) });
+      } else {
+        messages.push({ role: "user", content: THOUGHT_CUT_TEXT });
+      }
+      continue;
+    }
+    if (pending.length === 0) {
+      finish = "stop";
+      break;
+    }
 
     messages.push({
       role: "assistant",
-      content: null,
+      // Text the model wrote before its tool calls belongs to the turn.
+      content: text || null,
       tool_calls: pending.map((call) => ({
         id: call.id,
         type: "function" as const,
@@ -865,7 +1040,7 @@ export async function* runAssistant(
       } catch {
         // A call without JSON arguments: the tool reports what it needs.
       }
-      yield { type: "tool", name: call.name, args };
+      yield { type: "tool", name: call.name, args, detail: toolDetail(call.name, args) };
       const content = await answer(tools, call, args);
       const keys = readKeys(call.name, args);
       if (keys.length > 0 && content.length > PRUNE_MIN) {
@@ -878,6 +1053,8 @@ export async function* runAssistant(
       }
       messages.push({ role: "tool", tool_call_id: call.id, content });
     }
+    // The tools ran but the step budget is gone: the work is unfinished.
+    if (step >= options.ai.maxSteps) finish = "steps";
   }
 
   const changes = await tools.proposal();

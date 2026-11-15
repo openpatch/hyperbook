@@ -475,6 +475,36 @@ export const liveDiffInput = z.object({
   path: bookPath.optional(),
 });
 
+/** At most this many attachments per message. */
+export const AI_ATTACHMENTS_MAX = 4;
+/** An image attachment's data URL, after the editor scaled it down. */
+export const AI_IMAGE_MAX = 4 * 1024 * 1024;
+/** A document's text (a PDF's or a text file's), per attachment. */
+export const AI_ATTACHMENT_TEXT_MAX = 200_000;
+
+/**
+ * A file the teacher attached to a message: an image as a data URL (the
+ * model looks at it), or a document as its text (a PDF's, read in the
+ * editor) — the model reads it like a pasted text.
+ */
+export const aiAttachment = z.discriminatedUnion("kind", [
+  z.object({
+    kind: z.literal("image"),
+    name: z.string().trim().min(1).max(200),
+    data: z
+      .string()
+      .max(AI_IMAGE_MAX)
+      .regex(/^data:image\/(png|jpeg|webp|gif);base64,[A-Za-z0-9+/=]+$/),
+  }),
+  z.object({
+    kind: z.literal("text"),
+    name: z.string().trim().min(1).max(200),
+    text: z.string().max(AI_ATTACHMENT_TEXT_MAX),
+  }),
+]);
+
+export type AiAttachment = z.infer<typeof aiAttachment>;
+
 /** A request to the editor's AI writing assistant (platforms/cloud/docs/cloud-ai-assistant.md). */
 export const aiAssistInput = z.object({
     /** What the assistant should do. */
@@ -497,24 +527,20 @@ export const aiAssistInput = z.object({
       .max(128 * 1024)
       .optional(),
     /**
-     * The conversation so far, oldest first — the turns before this request,
-     * so "a related animal" knows what came before. The editor sends the
-     * last few, its answers truncated; the model never sees old tool calls.
+     * The conversation this request continues; omitted: a new one. The
+     * server keeps the conversation, so follow-ups see what came before.
      */
-    history: z
-      .array(
-        z.object({
-          role: z.enum(["user", "assistant"]),
-          // Truncated, not rejected: history is context, and one long answer
-          // must not make every following request fail validation.
-          content: z
-            .string()
-            .max(20_000)
-            .transform((text) => text.slice(0, 4000)),
-        }),
-      )
-      .max(6)
-      .optional(),
+    conversationId: z.number().int().positive().optional(),
+    /**
+     * Edit and resend: the id of one of the conversation's own messages
+     * (the teacher's). It and everything after it are replaced by this
+     * request — also how an answer is regenerated.
+     */
+    replaceFrom: z.number().int().positive().optional(),
+    /** Images and documents the teacher attached to this message. */
+    attachments: z.array(aiAttachment).max(AI_ATTACHMENTS_MAX).optional(),
+    /** How hard a reasoning model thinks; omitted: the model's default. */
+    reasoningEffort: z.enum(["low", "medium", "high"]).optional(),
 });
 
 export type AiAssistInput = z.input<typeof aiAssistInput>;
@@ -609,3 +635,41 @@ export const anchorsInput = z.object({
 export const commentsQuery = z.object({ path: bookPath.optional() });
 
 export const commentMailInput = z.object({ commentMail: z.boolean() });
+
+/** A tool the assistant used, as the chat shows it: "read_files" + "a.md, b.md". */
+export type AiToolUse = { name: string; detail: string | null };
+
+export type AiProposalStatus = "pending" | "applied" | "denied" | "superseded";
+
+/** One stored message of an assistant conversation, as the editor shows it. */
+export type AiMessageView = {
+  id: number;
+  role: "user" | "assistant";
+  content: string;
+  pagePath: string | null;
+  /** Images keep their data; a document only its name. */
+  attachments: { kind: "image" | "text"; name: string; data?: string }[];
+  reasoning: string | null;
+  tools: AiToolUse[];
+  proposal: AiProposedChange[] | null;
+  proposalStatus: AiProposalStatus | null;
+  finish: string | null;
+  error: string | null;
+  model: string | null;
+  tokensIn: number | null;
+  tokensOut: number | null;
+  credits: number | null;
+  durationMs: number | null;
+  createdAt: number;
+};
+
+export type AiConversationSummary = { id: number; title: string; updatedAt: number };
+
+/** The teacher accepted (some of) a proposal, or denied it. */
+export const aiProposalStatusInput = z.object({
+  status: z.enum(["applied", "denied"]),
+});
+
+export const aiConversationRenameInput = z.object({
+  title: z.string().trim().min(1).max(120),
+});

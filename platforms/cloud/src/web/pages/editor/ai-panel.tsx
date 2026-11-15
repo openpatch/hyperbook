@@ -1,26 +1,66 @@
 import type { EditorView } from "@codemirror/view";
-import { CopyIcon, EraserIcon, RotateCwIcon, SparklesIcon, StopCircleIcon } from "lucide-react";
+import {
+  ArrowUpIcon,
+  BookOpenIcon,
+  ChevronRightIcon,
+  CopyIcon,
+  FileIcon,
+  FilePenIcon,
+  FolderTreeIcon,
+  HistoryIcon,
+  ImageIcon,
+  Loader2Icon,
+  PaperclipIcon,
+  PencilIcon,
+  PlusIcon,
+  RotateCwIcon,
+  SearchIcon,
+  SparklesIcon,
+  SquareIcon,
+  Trash2Icon,
+  XIcon,
+} from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import type {
-  AiAssistInput,
-  AiProposedChange,
-  FileChange,
+import {
+  AI_ATTACHMENTS_MAX,
+  type AiAssistInput,
+  type AiAttachment,
+  type AiMessageView,
+  type AiProposalStatus,
+  type AiProposedChange,
+  type FileChange,
 } from "../../../shared/schemas";
 import { ConflictError } from "./workspace";
 import {
   assist,
+  attachable,
   contextOf,
+  decideProposal,
+  deleteConversation,
   formatRelativeCost,
+  listConversations,
+  loadConversation,
+  renameConversation,
   selectionOf,
+  toAttachment,
   useAiStatus,
   weightValue,
   type AiStatus,
 } from "@/lib/ai";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -34,23 +74,108 @@ import { Markdown } from "@/components/markdown";
 import { cn } from "@/lib/utils";
 
 /*
- * The AI assistant's pane in the editor (platforms/cloud/docs/cloud-ai-assistant.md), laid
- * out like a chat: the teacher's requests on the right, the assistant's
- * answers on the left, each with a copy button. The selected text and the
- * open page go along with every request. File changes arrive as a proposal
- * whose diff the teacher reviews and accepts; a dismissed proposal stays
- * re-openable until the next message is sent.
+ * The AI assistant's pane in the editor (platforms/cloud/docs/cloud-ai-assistant.md),
+ * a chat like the big ones: conversations the server keeps, the model's
+ * thinking as it streams (folded away once it answers), the tools it uses
+ * with live progress while it writes a file, edit-and-resend, regenerate,
+ * continue after a cut-off answer, and images or documents to attach.
+ * File changes arrive as a proposal the teacher reviews; until they decide,
+ * follow-ups build on it.
  */
 
-type Phase = "idle" | "streaming" | "result";
+type Effort = "auto" | "low" | "medium" | "high";
 
-/** One request and its answer; the answer grows while it streams. */
-type Exchange = {
-  prompt: string;
-  answer: string;
-  /** What the answer cost the weekly quota, told by the done event. */
-  credits?: number;
+/** A message in the chat; an answer grows while it streams. */
+type Turn = {
+  /** Stable across the server id arriving. */
+  key: string;
+  /** The server's id; null until the stream reports it. */
+  id: number | null;
+  role: "user" | "assistant";
+  content: string;
+  attachments: AiMessageView["attachments"];
+  reasoning: string;
+  tools: { name: string; detail: string | null }[];
+  /** A tool call whose arguments are streaming in right now. */
+  writing: { name: string; path: string | null; chars: number } | null;
+  proposal: AiProposedChange[] | null;
+  proposalStatus: AiProposalStatus | null;
+  finish: string | null;
+  error: string | null;
+  credits: number | null;
+  durationMs: number | null;
+  streaming: boolean;
+  /** When the thinking started and ended, for "thought for 12 s". */
+  thinkingFrom: number | null;
+  thinkingTo: number | null;
 };
+
+let keys = 0;
+const nextKey = () => `turn-${++keys}`;
+
+function fromView(message: AiMessageView): Turn {
+  return {
+    key: nextKey(),
+    id: message.id,
+    role: message.role,
+    content: message.content,
+    attachments: message.attachments,
+    reasoning: message.reasoning ?? "",
+    tools: message.tools,
+    writing: null,
+    proposal: message.proposal,
+    proposalStatus: message.proposalStatus,
+    finish: message.finish,
+    error: message.error,
+    credits: message.credits,
+    durationMs: message.durationMs,
+    streaming: false,
+    thinkingFrom: null,
+    thinkingTo: null,
+  };
+}
+
+function blankAnswer(): Turn {
+  return {
+    key: nextKey(),
+    id: null,
+    role: "assistant",
+    content: "",
+    attachments: [],
+    reasoning: "",
+    tools: [],
+    writing: null,
+    proposal: null,
+    proposalStatus: null,
+    finish: null,
+    error: null,
+    credits: null,
+    durationMs: null,
+    streaming: true,
+    thinkingFrom: null,
+    thinkingTo: null,
+  };
+}
+
+/** The conversation last open in a book, per browser — a convenience only. */
+function rememberedConversation(bookId: number): number | null {
+  try {
+    const value = Number(localStorage.getItem(`hyperbook.ai.conversation.${bookId}`));
+    return Number.isInteger(value) && value > 0 ? value : null;
+  } catch {
+    return null;
+  }
+}
+
+function remember(bookId: number, id: number | null) {
+  try {
+    const key = `hyperbook.ai.conversation.${bookId}`;
+    if (id === null) localStorage.removeItem(key);
+    else localStorage.setItem(key, String(id));
+  } catch {
+    // Storage blocked: the panel simply opens a new chat next time.
+  }
+}
 
 export function AiPanel({
   bookId,
@@ -76,123 +201,143 @@ export function AiPanel({
   const { t } = useTranslation();
   const status = useAiStatus();
   const queryClient = useQueryClient();
-  const [phase, setPhase] = useState<Phase>("idle");
-  const [exchanges, setExchanges] = useState<Exchange[]>([]);
-  const [working, setWorking] = useState<string | null>(null);
+  const conversations = useQuery({
+    queryKey: ["ai-conversations", bookId],
+    queryFn: () => listConversations(bookId),
+  });
+  const [conversationId, setConversationId] = useState<number | null>(null);
+  const [title, setTitle] = useState<string | null>(null);
+  const [renaming, setRenaming] = useState<string | null>(null);
+  const [turns, setTurns] = useState<Turn[]>([]);
+  const [streaming, setStreaming] = useState(false);
   const [prompt, setPrompt] = useState("");
+  const [attachments, setAttachments] = useState<AiAttachment[]>([]);
+  const [attaching, setAttaching] = useState(false);
   /** The model the teacher picked; null: the instance's default. */
   const [model, setModel] = useState<string | null>(null);
-  /** The latest proposal; kept after the dialog is dismissed, until the next message. */
-  const [proposal, setProposal] = useState<AiProposedChange[] | null>(null);
-  /** Whether the proposal's diff dialog is open. */
-  const [reviewOpen, setReviewOpen] = useState(false);
-  /** The last request that failed, so it can be retried. */
-  const [failed, setFailed] = useState<string | null>(null);
-  const [target, setTarget] = useState<{
-    path: string;
-    document: string;
-    from: number;
-    to: number;
-    head: number;
-  } | null>(null);
+  const [effort, setEffort] = useState<Effort>("auto");
+  /** The turn whose proposal's diff dialog is open. */
+  const [reviewing, setReviewing] = useState<string | null>(null);
+  /** The user turn being edited, and its new text. */
+  const [editing, setEditing] = useState<{ key: string; text: string } | null>(null);
+  const [target, setTarget] = useState<string | null>(null);
   const stop = useRef<AbortController | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+  /** Whether the list follows new text: only while the teacher is at the bottom. */
+  const following = useRef(true);
+  const turnsRef = useRef(turns);
+  turnsRef.current = turns;
 
-  // Keep the newest message in view, also while the answer streams in.
+  // The conversation last open in this book comes back after a reload.
+  useEffect(() => {
+    const remembered = rememberedConversation(bookId);
+    if (remembered !== null) void open(remembered, { quiet: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [bookId]);
+
   useEffect(() => {
     const el = listRef.current;
-    if (el) el.scrollTop = el.scrollHeight;
-  }, [exchanges, working, phase]);
+    if (el && following.current) el.scrollTop = el.scrollHeight;
+  }, [turns]);
 
-  const quotaBadge =
-    status.data && status.data.enabled && status.data.allowed ? (
-      <Badge
-        variant="secondary"
-        className="text-xs font-normal text-muted-foreground"
-        title={t("editor.ai.requestsTitle")}
-      >
-        {status.data.quota === null
-          ? t("editor.ai.requestsUnlimited", { used: status.data.usedToday })
-          : t("editor.ai.requests", {
-              used: status.data.usedToday,
-              limit: status.data.quota,
-            })}
-      </Badge>
-    ) : null;
+  /** Updates one turn by key. */
+  function patch(key: string, change: (turn: Turn) => Partial<Turn>) {
+    setTurns((all) =>
+      all.map((turn) => (turn.key === key ? { ...turn, ...change(turn) } : turn)),
+    );
+  }
 
-  const credits =
-    status.data && status.data.enabled && status.data.allowed
-      ? status.data
-      : null;
-  /** The cheapest model's cost — the ×1 the other models are shown against. */
-  const cheapestModelCost = status.data
-    ? Math.min(
-        ...status.data.models.map((m) =>
-          weightValue(status.data?.modelWeights[m]),
-        ),
-      )
-    : 1;
-  const creditsBar =
-    credits && credits.tokenQuota !== null && credits.tokenQuota > 0 ? (
-      <div
-        className="w-full space-y-1"
-        title={t("editor.ai.creditsTitle", { date: credits.tokensResetOn })}
-      >
-        <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
-          <div
-            className={
-              "h-full rounded-full " +
-              (credits.tokensUsedThisWeek / credits.tokenQuota >= 0.9
-                ? "bg-destructive"
-                : credits.tokensUsedThisWeek / credits.tokenQuota >= 0.75
-                  ? "bg-amber-500"
-                  : "bg-primary")
-            }
-            style={{
-              width: `${Math.min(100, (credits.tokensUsedThisWeek / credits.tokenQuota) * 100)}%`,
-            }}
-          />
-        </div>
-        <div className="text-xs text-muted-foreground">
-          {t("editor.ai.credits", {
-            left: Math.max(
-              0,
-              credits.tokenQuota - credits.tokensUsedThisWeek,
-            ).toLocaleString(),
-            limit: credits.tokenQuota.toLocaleString(),
-          })}
-        </div>
-      </div>
-    ) : credits ? (
-      <div
-        className="text-xs text-muted-foreground"
-        title={t("editor.ai.creditsTitle", { date: credits.tokensResetOn })}
-      >
-        {t("editor.ai.creditsUsed", {
-          used: credits.tokensUsedThisWeek.toLocaleString(),
-        })}
-      </div>
-    ) : null;
+  async function open(id: number, { quiet = false } = {}) {
+    if (streaming) return;
+    try {
+      const conversation = await loadConversation(bookId, id);
+      setConversationId(conversation.id);
+      setTitle(conversation.title);
+      setTurns(conversation.messages.map(fromView));
+      setReviewing(null);
+      setEditing(null);
+      following.current = true;
+      remember(bookId, conversation.id);
+    } catch {
+      remember(bookId, null);
+      if (!quiet) toast.error(t("editor.ai.loadFailed"));
+    }
+  }
 
-  /** Sends the teacher's request; the selection and the open page go along. */
-  async function run(freePrompt: string) {
+  function newChat() {
+    if (streaming) return;
+    setConversationId(null);
+    setTitle(null);
+    setTurns([]);
+    setReviewing(null);
+    setEditing(null);
+    remember(bookId, null);
+  }
+
+  async function removeConversation(id: number) {
+    await deleteConversation(bookId, id);
+    if (id === conversationId) newChat();
+    void queryClient.invalidateQueries({ queryKey: ["ai-conversations", bookId] });
+    toast.success(t("editor.ai.conversationDeleted"));
+  }
+
+  async function saveTitle() {
+    const next = renaming?.trim();
+    setRenaming(null);
+    if (!next || conversationId === null || next === title) return;
+    setTitle(next);
+    await renameConversation(bookId, conversationId, next);
+    void queryClient.invalidateQueries({ queryKey: ["ai-conversations", bookId] });
+  }
+
+  async function attach(files: Iterable<File>) {
+    const list = [...files];
+    if (list.length === 0) return;
+    setAttaching(true);
+    try {
+      const added: AiAttachment[] = [];
+      for (const file of list) {
+        if (attachments.length + added.length >= AI_ATTACHMENTS_MAX) {
+          toast.error(t("editor.ai.attachLimit", { count: AI_ATTACHMENTS_MAX }));
+          break;
+        }
+        if (!attachable(file)) {
+          toast.error(t("editor.ai.attachUnsupported", { name: file.name }));
+          continue;
+        }
+        try {
+          added.push(await toAttachment(file));
+        } catch (error) {
+          toast.error(error instanceof Error ? error.message : String(error));
+        }
+      }
+      setAttachments((all) => [...all, ...added]);
+    } finally {
+      setAttaching(false);
+    }
+  }
+
+  /**
+   * Sends a message; the selection and the open page go along. With
+   * `replaceFrom`, that user message and everything after it are replaced
+   * (edit and resend, regenerate).
+   */
+  async function run(
+    text: string,
+    { replaceFrom, files }: { replaceFrom?: Turn; files?: AiAttachment[] } = {},
+  ) {
     const view = activePath ? getViewOf(activePath) : null;
     if (!view || !activePath) {
       toast.error(t("editor.ai.openFileFirst"));
       return;
     }
+    if (streaming) return;
     const selection = selectionOf(view);
     const document = view.state.doc.toString();
-    const selected = view.state.selection.main;
-    setTarget({
-      path: activePath,
-      document,
-      from: selected.from,
-      to: selected.to,
-      head: selected.head,
-    });
+    setTarget(activePath);
     const input: AiAssistInput = {
-      prompt: freePrompt,
+      prompt: text,
       model: model ?? undefined,
       pagePath: activePath,
       selection: selection?.text || undefined,
@@ -200,106 +345,164 @@ export function AiPanel({
       // The whole page, so the assistant may rewrite it — only when it fits;
       // a truncated page must never reach a write_file, or content would go.
       pageText: document.length <= 128 * 1024 ? document : undefined,
-      // The turns before this one, so follow-ups know what came before;
-      // the last few exchanges, answers truncated to what the schema takes.
-      history: exchanges
-        .filter((exchange) => exchange.answer)
-        .slice(-3)
-        .flatMap((exchange) => [
-          { role: "user" as const, content: exchange.prompt },
-          {
-            role: "assistant" as const,
-            content:
-              exchange.answer.length > 4000
-                ? exchange.answer.slice(0, 3999) + "…"
-                : exchange.answer,
-          },
-        ]),
+      conversationId: conversationId ?? undefined,
+      replaceFrom: replaceFrom?.id ?? undefined,
+      // Omitted on a resend without new files: the server keeps the old ones.
+      attachments: files,
+      reasoningEffort: effort === "auto" ? undefined : effort,
     };
 
-    stop.current?.abort();
     const controller = new AbortController();
     stop.current = controller;
-    setExchanges((all) => [...all, { prompt: freePrompt, answer: "" }]);
-    // A new message retires the previous proposal and clears the input.
-    setProposal(null);
-    setReviewOpen(false);
+    const question: Turn = {
+      ...blankAnswer(),
+      role: "user",
+      content: text,
+      streaming: false,
+      attachments: (files ?? replaceFrom?.attachments ?? []).map((a) =>
+        a.kind === "image"
+          ? { kind: "image" as const, name: a.name, data: a.data }
+          : { kind: "text" as const, name: a.name },
+      ),
+    };
+    const answer = blankAnswer();
+    setTurns((all) => {
+      const cut = replaceFrom ? all.findIndex((x) => x.key === replaceFrom.key) : -1;
+      return [...(cut === -1 ? all : all.slice(0, cut)), question, answer];
+    });
     setPrompt("");
-    setWorking(t("editor.ai.working"));
-    setPhase("streaming");
-    // An object, not a `let`: the stream's callbacks write it, and TypeScript
-    // would otherwise narrow what the outer code may read from it.
-    const ended = { finish: "stop" as "stop" | "length" | "error" };
+    setAttachments([]);
+    setEditing(null);
+    setReviewing(null);
+    setStreaming(true);
+    following.current = true;
+    const started = Date.now();
+    // Thinking ends with the first visible word or tool.
+    const endThinking = (turn: Turn) =>
+      turn.thinkingFrom !== null && turn.thinkingTo === null ? { thinkingTo: Date.now() } : {};
+    let ended = false;
     try {
       await assist(
         bookId,
         input,
         (event) => {
           switch (event.event) {
+            case "conversation":
+              setConversationId(event.id);
+              setTitle(event.title);
+              remember(bookId, event.id);
+              patch(question.key, () => ({ id: event.userMessageId }));
+              void queryClient.invalidateQueries({ queryKey: ["ai-conversations", bookId] });
+              break;
+            case "reasoning":
+              patch(answer.key, (turn) => ({
+                reasoning: turn.reasoning + event.text,
+                thinkingFrom: turn.thinkingFrom ?? Date.now(),
+              }));
+              break;
             case "delta":
-              setExchanges((all) =>
-                all.map((exchange, index) =>
-                  index === all.length - 1
-                    ? { ...exchange, answer: exchange.answer + event.text }
-                    : exchange,
-                ),
-              );
-              setWorking(null);
+              patch(answer.key, (turn) => ({
+                content: turn.content + event.text,
+                writing: null,
+                ...endThinking(turn),
+              }));
               break;
-            case "tool": {
-              // Show what the tool works on, not just its name:
-              // "read_file book/lemmings.md", "write_file quiz/a.json".
-              const path =
-                typeof event.args.path === "string" ? ` ${event.args.path}` : "";
-              setWorking(t("editor.ai.reading", { name: `${event.name}${path}` }));
+            case "toolProgress":
+              patch(answer.key, (turn) => ({
+                writing: { name: event.name, path: event.path, chars: event.chars },
+                ...endThinking(turn),
+              }));
               break;
-            }
+            case "tool":
+              patch(answer.key, (turn) => ({
+                tools: [...turn.tools, { name: event.name, detail: event.detail }],
+                writing: null,
+                ...endThinking(turn),
+              }));
+              break;
             case "usage":
               queryClient.setQueryData<AiStatus>(["ai-status"], (old) =>
-                old
-                  ? { ...old, tokensUsedThisWeek: event.tokensUsedThisWeek }
-                  : old,
+                old ? { ...old, tokensUsedThisWeek: event.tokensUsedThisWeek } : old,
               );
               break;
+            case "proposal":
+              // It holds every change still pending; earlier ones are in it.
+              setTurns((all) =>
+                all.map((turn) =>
+                  turn.key === answer.key
+                    ? { ...turn, proposal: event.changes, proposalStatus: "pending" }
+                    : turn.proposalStatus === "pending"
+                      ? { ...turn, proposalStatus: "superseded" }
+                      : turn,
+                ),
+              );
+              setReviewing(answer.key);
+              break;
             case "done":
-              ended.finish = event.finish;
-              if (event.usage) {
-                setExchanges((all) =>
-                  all.map((exchange, index) =>
-                    index === all.length - 1
-                      ? { ...exchange, credits: event.usage!.credits }
-                      : exchange,
-                  ),
-                );
-              }
+              ended = true;
+              patch(answer.key, (turn) => ({
+                id: event.messageId ?? turn.id,
+                finish: event.finish,
+                credits: event.usage?.credits ?? null,
+                durationMs: event.durationMs ?? Date.now() - started,
+                streaming: false,
+                writing: null,
+                ...endThinking(turn),
+              }));
+              break;
+            case "saved":
+              patch(answer.key, () => ({ id: event.messageId }));
               break;
             case "error":
-              ended.finish = "error";
-              toast.error(event.message);
-              break;
-            case "proposal":
-              setProposal(event.changes);
-              setReviewOpen(true);
+              ended = true;
+              patch(answer.key, (turn) => ({
+                finish: "error",
+                error: event.message,
+                streaming: false,
+                writing: null,
+                durationMs: Date.now() - started,
+                ...endThinking(turn),
+              }));
               break;
           }
         },
         controller.signal,
       );
     } catch (error) {
-      if (!(error instanceof DOMException && error.name === "AbortError")) {
-        toast.error(error instanceof Error ? error.message : String(error));
-        ended.finish = "error";
-      }
+      ended = true;
+      const aborted = error instanceof DOMException && error.name === "AbortError";
+      patch(answer.key, (turn) => ({
+        finish: aborted ? "aborted" : "error",
+        error: aborted ? null : error instanceof Error ? error.message : String(error),
+        streaming: false,
+        writing: null,
+        durationMs: Date.now() - started,
+        ...endThinking(turn),
+      }));
     } finally {
+      if (!ended) patch(answer.key, () => ({ streaming: false, writing: null }));
       stop.current = null;
-      setWorking(null);
-      setPhase("result");
-      // A failed request stays retryable until the next one succeeds.
-      setFailed(ended.finish === "error" ? freePrompt : null);
-      if (ended.finish === "length") toast.warning(t("editor.ai.length"));
+      setStreaming(false);
       // The day's counter changed; the quota line follows.
       void queryClient.invalidateQueries({ queryKey: ["ai-status"] });
+      void queryClient.invalidateQueries({ queryKey: ["ai-conversations", bookId] });
     }
+  }
+
+  /** The teacher's message an answer replies to. */
+  function questionOf(answer: Turn): Turn | null {
+    const index = turnsRef.current.findIndex((turn) => turn.key === answer.key);
+    for (let i = index - 1; i >= 0; i--) {
+      const turn = turnsRef.current[i]!;
+      if (turn.role === "user") return turn;
+    }
+    return null;
+  }
+
+  function regenerate(answer: Turn) {
+    const question = questionOf(answer);
+    if (!question || question.id === null) return;
+    void run(question.content, { replaceFrom: question });
   }
 
   /**
@@ -311,10 +514,15 @@ export function AiPanel({
    * the editor saves with — so quotas, the hyperbook.json check and
    * conflict detection apply, and a 409 changes nothing.
    */
-  async function applyProposal(accepted: AiProposedChange[]) {
-    setProposal(null);
-    setReviewOpen(false);
+  async function applyProposal(turn: Turn, accepted: AiProposedChange[]) {
+    setReviewing(null);
+    const decide = (status: "applied" | "denied") => {
+      patch(turn.key, () => ({ proposalStatus: status }));
+      if (conversationId !== null && turn.id !== null)
+        void decideProposal(bookId, conversationId, turn.id, status).catch(() => {});
+    };
     if (accepted.length === 0) {
+      decide("denied");
       toast.info(t("editor.ai.denied"));
       return;
     }
@@ -377,21 +585,14 @@ export function AiPanel({
           continue;
         }
         view.dispatch({
-          changes: {
-            from: 0,
-            to: view.state.doc.length,
-            insert: change.newText,
-          },
+          changes: { from: 0, to: view.state.doc.length, insert: change.newText },
         });
       }
       for (const change of asCommit) {
         if (!isTabOpen(change.path)) continue;
         if (change.op === "delete") {
-          if (isTabDirty(change.path)) {
-            changedDuringCommit.push(change.path);
-          } else {
-            closeTab(change.path);
-          }
+          if (isTabDirty(change.path)) changedDuringCommit.push(change.path);
+          else closeTab(change.path);
         } else if (isTabDirty(change.path)) {
           changedDuringCommit.push(change.path);
         } else {
@@ -400,12 +601,11 @@ export function AiPanel({
       }
       if (changedDuringCommit.length > 0) {
         toast.error(
-          t("editor.ai.pageChanged", {
-            files: [...new Set(changedDuringCommit)].join(", "),
-          }),
+          t("editor.ai.pageChanged", { files: [...new Set(changedDuringCommit)].join(", ") }),
         );
       }
       if (applied.length > 0) {
+        decide("applied");
         toast.success(t("editor.ai.applied"));
       }
     } catch (error) {
@@ -417,22 +617,164 @@ export function AiPanel({
     }
   }
 
+  const quotaBadge =
+    status.data && status.data.enabled && status.data.allowed ? (
+      <Badge
+        variant="secondary"
+        className="text-xs font-normal text-muted-foreground"
+        title={t("editor.ai.requestsTitle")}
+      >
+        {status.data.quota === null
+          ? t("editor.ai.requestsUnlimited", { used: status.data.usedToday })
+          : t("editor.ai.requests", { used: status.data.usedToday, limit: status.data.quota })}
+      </Badge>
+    ) : null;
+
+  const credits = status.data && status.data.enabled && status.data.allowed ? status.data : null;
+  /** The cheapest model's cost — the ×1 the other models are shown against. */
+  const cheapestModelCost = status.data
+    ? Math.min(...status.data.models.map((m) => weightValue(status.data?.modelWeights[m])))
+    : 1;
+  const creditsBar =
+    credits && credits.tokenQuota !== null && credits.tokenQuota > 0 ? (
+      <div className="w-full space-y-1" title={t("editor.ai.creditsTitle", { date: credits.tokensResetOn })}>
+        <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+          <div
+            className={
+              "h-full rounded-full " +
+              (credits.tokensUsedThisWeek / credits.tokenQuota >= 0.9
+                ? "bg-destructive"
+                : credits.tokensUsedThisWeek / credits.tokenQuota >= 0.75
+                  ? "bg-amber-500"
+                  : "bg-primary")
+            }
+            style={{
+              width: `${Math.min(100, (credits.tokensUsedThisWeek / credits.tokenQuota) * 100)}%`,
+            }}
+          />
+        </div>
+        <div className="text-xs text-muted-foreground">
+          {t("editor.ai.credits", {
+            left: Math.max(0, credits.tokenQuota - credits.tokensUsedThisWeek).toLocaleString(),
+            limit: credits.tokenQuota.toLocaleString(),
+          })}
+        </div>
+      </div>
+    ) : credits ? (
+      <div className="text-xs text-muted-foreground" title={t("editor.ai.creditsTitle", { date: credits.tokensResetOn })}>
+        {t("editor.ai.creditsUsed", { used: credits.tokensUsedThisWeek.toLocaleString() })}
+      </div>
+    ) : null;
+
+  const lastAnswer = [...turns].reverse().find((turn) => turn.role === "assistant");
+  const reviewTurn = turns.find((turn) => turn.key === reviewing) ?? null;
+
   return (
-    <div className="flex h-full flex-col gap-2 p-3 text-sm">
-      <div className="flex items-center gap-2">
-        <SparklesIcon className="size-4 text-muted-foreground" aria-hidden />
-        <span className="font-medium">{t("editor.ai.title")}</span>
-        <div className="ml-auto flex items-center gap-2">
-          {status.data && status.data.models.length > 1 ? (
-          <Select
-            value={model ?? status.data.model ?? undefined}
-            onValueChange={setModel}
+    <div
+      className="flex h-full flex-col gap-2 p-3 text-sm"
+      onDragOver={(e) => {
+        if (e.dataTransfer.types.includes("Files")) e.preventDefault();
+      }}
+      onDrop={(e) => {
+        if (e.dataTransfer.files.length === 0) return;
+        e.preventDefault();
+        void attach(e.dataTransfer.files);
+      }}
+    >
+      <div className="flex items-center gap-1">
+        <SparklesIcon className="size-4 shrink-0 text-muted-foreground" aria-hidden />
+        {renaming !== null ? (
+          <Input
+            autoFocus
+            value={renaming}
+            aria-label={t("editor.ai.renameConversation")}
+            className="h-6 min-w-0 flex-1 px-1 text-sm"
+            onChange={(e) => setRenaming(e.target.value)}
+            onBlur={() => void saveTitle()}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") void saveTitle();
+              if (e.key === "Escape") setRenaming(null);
+            }}
+          />
+        ) : (
+          <button
+            type="button"
+            className="min-w-0 truncate text-left font-medium"
+            title={title ? t("editor.ai.renameConversation") : undefined}
+            disabled={title === null}
+            onDoubleClick={() => title && setRenaming(title)}
           >
-            <SelectTrigger
-              size="sm"
-              className="h-6 w-auto px-2 text-xs"
-              aria-label={t("editor.ai.modelLabel")}
-            >
+            {title ?? t("editor.ai.title")}
+          </button>
+        )}
+        <div className="ml-auto flex shrink-0 items-center gap-1">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-6"
+                aria-label={t("editor.ai.conversations")}
+                title={t("editor.ai.conversations")}
+                disabled={streaming}
+              >
+                <HistoryIcon className="size-4" aria-hidden />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="max-h-96 w-72 overflow-auto">
+              <DropdownMenuLabel>{t("editor.ai.conversations")}</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {(conversations.data ?? []).length === 0 ? (
+                <p className="px-2 py-1.5 text-xs text-muted-foreground">
+                  {t("editor.ai.noConversations")}
+                </p>
+              ) : (
+                (conversations.data ?? []).map((c) => (
+                  <DropdownMenuItem
+                    key={c.id}
+                    className={cn("group gap-2", c.id === conversationId && "bg-accent")}
+                    onSelect={() => void open(c.id)}
+                  >
+                    <span className="min-w-0 flex-1 truncate">{c.title}</span>
+                    <span className="shrink-0 text-xs text-muted-foreground">
+                      {new Date(c.updatedAt).toLocaleDateString()}
+                    </span>
+                    <button
+                      type="button"
+                      className="shrink-0 rounded p-0.5 text-muted-foreground opacity-0 hover:text-destructive group-hover:opacity-100 focus:opacity-100"
+                      aria-label={t("editor.ai.deleteConversation")}
+                      title={t("editor.ai.deleteConversation")}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        void removeConversation(c.id);
+                      }}
+                    >
+                      <Trash2Icon className="size-3.5" aria-hidden />
+                    </button>
+                  </DropdownMenuItem>
+                ))
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-6"
+            aria-label={t("editor.ai.newChat")}
+            title={t("editor.ai.newChat")}
+            disabled={streaming || turns.length === 0}
+            onClick={newChat}
+          >
+            <PlusIcon className="size-4" aria-hidden />
+          </Button>
+        </div>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2">
+        {status.data && status.data.models.length > 1 ? (
+          <Select value={model ?? status.data.model ?? undefined} onValueChange={setModel}>
+            <SelectTrigger size="sm" className="h-6 w-auto px-2 text-xs" aria-label={t("editor.ai.modelLabel")}>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -441,195 +783,538 @@ export function AiPanel({
                 // the label, else the id.
                 .sort((a, b) => {
                   const byCost =
-                    weightValue(status.data?.modelWeights[a]) -
-                    weightValue(status.data?.modelWeights[b]);
+                    weightValue(status.data?.modelWeights[a]) - weightValue(status.data?.modelWeights[b]);
                   return byCost !== 0
                     ? byCost
-                    : (status.data?.modelLabels[a] || a).localeCompare(
-                        status.data?.modelLabels[b] || b,
-                      );
+                    : (status.data?.modelLabels[a] || a).localeCompare(status.data?.modelLabels[b] || b);
                 })
                 .map((name) => (
-                <SelectItem key={name} value={name}>
-                  {t("editor.ai.modelCost", {
-                    model: status.data?.modelLabels[name] || name,
-                    cost: formatRelativeCost(
-                      status.data?.modelWeights[name],
-                      cheapestModelCost,
-                    ),
-                  })}
-                </SelectItem>
+                  <SelectItem key={name} value={name}>
+                    {t("editor.ai.modelCost", {
+                      model: status.data?.modelLabels[name] || name,
+                      cost: formatRelativeCost(status.data?.modelWeights[name], cheapestModelCost),
+                    })}
+                  </SelectItem>
                 ))}
             </SelectContent>
           </Select>
-          ) : (
-            status.data?.model && (
-              <span className="truncate text-xs text-muted-foreground">
-                {t("editor.ai.model", { model: status.data.modelLabels[status.data.model] || status.data.model })}
-              </span>
-            )
-          )}
-          {exchanges.length > 0 && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-6"
-              aria-label={t("editor.ai.clearHistory")}
-              title={t("editor.ai.clearHistory")}
-              disabled={phase === "streaming"}
-              onClick={() => {
-                // The next conversation starts from scratch: no history goes
-                // along with its requests, and no proposal stays open.
-                setExchanges([]);
-                setFailed(null);
-                setProposal(null);
-                setReviewOpen(false);
-                setPhase("idle");
-              }}
-            >
-              <EraserIcon className="size-4" aria-hidden />
-            </Button>
-          )}
-        </div>
+        ) : (
+          status.data?.model && (
+            <span className="truncate text-xs text-muted-foreground">
+              {t("editor.ai.model", { model: status.data.modelLabels[status.data.model] || status.data.model })}
+            </span>
+          )
+        )}
+        {quotaBadge}
       </div>
-
-      {quotaBadge && <div className="-mt-0.5 flex items-center">{quotaBadge}</div>}
       {creditsBar}
 
-      <p className="text-xs text-muted-foreground">{t("editor.ai.hint")}</p>
-
-      <div ref={listRef} className="min-h-0 flex-1 space-y-4 overflow-auto pr-1">
-        {exchanges.map((exchange, index) => (
-          <div key={index} className="space-y-1">
-            <div className="flex justify-end">
-              <div className="max-w-[85%] whitespace-pre-wrap break-words rounded-lg rounded-br-sm bg-primary px-3 py-2 text-primary-foreground">
-                {exchange.prompt}
-              </div>
-            </div>
-            <div className="flex justify-end">
-              <CopyButton text={exchange.prompt} />
-            </div>
-            {exchange.answer && (
-              <>
-                <div className="flex justify-start">
-                  <div
-                    className={cn(
-                      "max-w-[85%] rounded-lg rounded-bl-sm bg-muted px-3 py-2",
-                      index === exchanges.length - 1 &&
-                        phase === "streaming" &&
-                        "opacity-80",
-                    )}
-                  >
-                    <Markdown
-                      text={exchange.answer}
-                      className="ai-markdown break-words"
-                    />
-                  </div>
-                </div>
-                <div className="flex justify-start">
-                  <CopyButton text={exchange.answer} />
-                </div>
-                {exchange.credits !== undefined && (
-                  <p className="text-xs text-muted-foreground">
-                    {t("editor.ai.answerUsage", {
-                      credits: exchange.credits.toLocaleString(),
-                    })}
-                  </p>
-                )}
-              </>
-            )}
-          </div>
-        ))}
-        {phase === "streaming" && (
-          <p className="flex items-center gap-2 text-muted-foreground">
-            <span
-              className="inline-block size-2 animate-pulse rounded-full bg-primary"
-              aria-hidden
+      <div
+        ref={listRef}
+        className="min-h-0 flex-1 space-y-4 overflow-auto pr-1"
+        onScroll={(e) => {
+          const el = e.currentTarget;
+          following.current = el.scrollHeight - el.scrollTop - el.clientHeight < 48;
+        }}
+      >
+        {turns.length === 0 && <p className="text-xs text-muted-foreground">{t("editor.ai.hint")}</p>}
+        {turns.map((turn) =>
+          turn.role === "user" ? (
+            <UserMessage
+              key={turn.key}
+              turn={turn}
+              editing={editing?.key === turn.key ? editing.text : null}
+              canEdit={!streaming && turn.id !== null && conversationId !== null}
+              onEdit={() => setEditing({ key: turn.key, text: turn.content })}
+              onChange={(text) => setEditing({ key: turn.key, text })}
+              onCancel={() => setEditing(null)}
+              onSend={() => {
+                const text = editing?.text.trim();
+                if (text) void run(text, { replaceFrom: turn });
+              }}
             />
-            {working ?? t("editor.ai.working")}
-          </p>
+          ) : (
+            <AssistantMessage
+              key={turn.key}
+              turn={turn}
+              isLast={turn.key === lastAnswer?.key}
+              busy={streaming}
+              onRegenerate={() => regenerate(turn)}
+              onContinue={() => void run(t("editor.ai.continuePrompt"))}
+              onReview={() => setReviewing(turn.key)}
+            />
+          ),
         )}
       </div>
 
-      {proposal && !reviewOpen && (
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={() => setReviewOpen(true)}
-        >
-          {t("editor.ai.reviewProposal")}
-        </Button>
-      )}
-
-      {failed && (
-        <Button
-          size="sm"
-          variant="outline"
-          disabled={phase === "streaming"}
-          onClick={() => void run(failed)}
-        >
-          <RotateCwIcon className="size-4" aria-hidden />
-          {t("editor.ai.retry")}
-        </Button>
-      )}
-
       {activePath && (
-        <>
+        <div
+          className="rounded-lg border bg-background focus-within:ring-1 focus-within:ring-ring"
+        >
+          {(attachments.length > 0 || attaching) && (
+            <div className="flex flex-wrap gap-1 border-b p-1.5">
+              {attachments.map((a, i) => (
+                <AttachmentChip
+                  key={`${a.name}-${i}`}
+                  attachment={a.kind === "image" ? a : { kind: "text", name: a.name }}
+                  onRemove={() => setAttachments((all) => all.filter((_, j) => j !== i))}
+                />
+              ))}
+              {attaching && <Loader2Icon className="m-1 size-4 animate-spin text-muted-foreground" aria-hidden />}
+            </div>
+          )}
           <Textarea
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             placeholder={t("editor.ai.promptPlaceholder")}
             aria-label={t("editor.ai.title")}
-            rows={3}
-            className="min-h-0 resize-none text-sm"
+            rows={2}
+            className="max-h-48 min-h-0 resize-none border-0 text-sm shadow-none focus-visible:ring-0 field-sizing-content"
+            onPaste={(e) => {
+              const files = [...e.clipboardData.files];
+              if (files.length > 0) {
+                e.preventDefault();
+                void attach(files);
+              }
+            }}
             onKeyDown={(e) => {
               // isComposing: an IME candidate confirmation is not a send.
-              if (
-                e.key === "Enter" &&
-                !e.shiftKey &&
-                !e.nativeEvent.isComposing &&
-                prompt.trim()
-              ) {
+              if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing && prompt.trim()) {
                 e.preventDefault();
-                void run(prompt.trim());
+                if (!streaming && !attaching) void run(prompt.trim(), { files: attachments });
               }
             }}
           />
-          <Button
-            size="sm"
-            disabled={phase === "streaming" || !prompt.trim()}
-            onClick={() => void run(prompt.trim())}
-          >
-            {t("editor.ai.ask")}
-          </Button>
-        </>
-      )}
-
-      {phase === "streaming" && (
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={() => {
-            stop.current?.abort();
-            setPhase("result");
-            setWorking(null);
-            toast.info(t("editor.ai.stopped"));
-          }}
-        >
-          <StopCircleIcon className="size-4" aria-hidden />
-          {t("editor.ai.stop")}
-        </Button>
+          <div className="flex items-center gap-1 p-1.5 pt-0">
+            <input
+              ref={fileRef}
+              type="file"
+              multiple
+              hidden
+              accept="image/*,application/pdf,.md,.txt,.typ,.csv,.json,.yaml,.yml,.html,.py,.java,.sql"
+              onChange={(e) => {
+                if (e.target.files) void attach(e.target.files);
+                e.target.value = "";
+              }}
+            />
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-7"
+              aria-label={t("editor.ai.attach")}
+              title={t("editor.ai.attach")}
+              disabled={streaming || attaching}
+              onClick={() => fileRef.current?.click()}
+            >
+              <PaperclipIcon className="size-4" aria-hidden />
+            </Button>
+            <Select value={effort} onValueChange={(v) => setEffort(v as Effort)}>
+              <SelectTrigger
+                size="sm"
+                className="h-7 w-auto border-0 px-2 text-xs shadow-none"
+                aria-label={t("editor.ai.effortLabel")}
+                title={t("editor.ai.effortHint")}
+              >
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="auto">{t("editor.ai.effortAuto")}</SelectItem>
+                <SelectItem value="low">{t("editor.ai.effortLow")}</SelectItem>
+                <SelectItem value="medium">{t("editor.ai.effortMedium")}</SelectItem>
+                <SelectItem value="high">{t("editor.ai.effortHigh")}</SelectItem>
+              </SelectContent>
+            </Select>
+            {streaming ? (
+              <Button
+                size="icon"
+                variant="outline"
+                className="ml-auto size-7 rounded-full"
+                aria-label={t("editor.ai.stop")}
+                title={t("editor.ai.stop")}
+                onClick={() => {
+                  stop.current?.abort();
+                  toast.info(t("editor.ai.stopped"));
+                }}
+              >
+                <SquareIcon className="size-3 fill-current" aria-hidden />
+              </Button>
+            ) : (
+              <Button
+                size="icon"
+                className="ml-auto size-7 rounded-full"
+                aria-label={t("editor.ai.ask")}
+                title={t("editor.ai.ask")}
+                disabled={!prompt.trim() || attaching}
+                onClick={() => void run(prompt.trim(), { files: attachments })}
+              >
+                <ArrowUpIcon className="size-4" aria-hidden />
+              </Button>
+            )}
+          </div>
+        </div>
       )}
 
       <AiDiffDialog
         bookId={bookId}
-        changes={reviewOpen ? proposal : null}
-        activePath={target?.path ?? activePath}
-        onClose={() => setReviewOpen(false)}
-        onDone={(accepted) => void applyProposal(accepted)}
+        changes={reviewTurn?.proposal ?? null}
+        activePath={target ?? activePath}
+        onClose={() => setReviewing(null)}
+        onDone={(accepted) => reviewTurn && void applyProposal(reviewTurn, accepted)}
       />
     </div>
   );
+}
+
+/** The teacher's message, editable and resendable like in a chat. */
+function UserMessage({
+  turn,
+  editing,
+  canEdit,
+  onEdit,
+  onChange,
+  onCancel,
+  onSend,
+}: {
+  turn: Turn;
+  editing: string | null;
+  canEdit: boolean;
+  onEdit: () => void;
+  onChange: (text: string) => void;
+  onCancel: () => void;
+  onSend: () => void;
+}) {
+  const { t } = useTranslation();
+  if (editing !== null) {
+    return (
+      <div className="space-y-1 rounded-lg border p-2">
+        <Textarea
+          autoFocus
+          value={editing}
+          aria-label={t("editor.ai.edit")}
+          className="max-h-60 min-h-0 resize-none text-sm field-sizing-content"
+          onChange={(e) => onChange(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
+              e.preventDefault();
+              onSend();
+            }
+            if (e.key === "Escape") onCancel();
+          }}
+        />
+        <div className="flex justify-end gap-1">
+          <Button size="sm" variant="ghost" onClick={onCancel}>
+            {t("editor.ai.cancel")}
+          </Button>
+          <Button size="sm" disabled={!editing.trim()} onClick={onSend}>
+            {t("editor.ai.send")}
+          </Button>
+        </div>
+      </div>
+    );
+  }
+  return (
+    <div className="group space-y-1">
+      {turn.attachments.length > 0 && (
+        <div className="flex flex-wrap justify-end gap-1">
+          {turn.attachments.map((a, i) => (
+            <AttachmentChip key={`${a.name}-${i}`} attachment={a} />
+          ))}
+        </div>
+      )}
+      <div className="flex justify-end">
+        <div className="max-w-[85%] whitespace-pre-wrap break-words rounded-lg rounded-br-sm bg-primary px-3 py-2 text-primary-foreground">
+          {turn.content}
+        </div>
+      </div>
+      <div className="flex justify-end gap-0.5 opacity-60 transition-opacity group-hover:opacity-100">
+        <CopyButton text={turn.content} />
+        {canEdit && (
+          <Button
+            size="icon-xs"
+            variant="ghost"
+            title={t("editor.ai.edit")}
+            aria-label={t("editor.ai.edit")}
+            onClick={onEdit}
+          >
+            <PencilIcon aria-hidden />
+          </Button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/** An answer: thinking, tool steps, text, and what can be done with it. */
+function AssistantMessage({
+  turn,
+  isLast,
+  busy,
+  onRegenerate,
+  onContinue,
+  onReview,
+}: {
+  turn: Turn;
+  isLast: boolean;
+  busy: boolean;
+  onRegenerate: () => void;
+  onContinue: () => void;
+  onReview: () => void;
+}) {
+  const { t } = useTranslation();
+  const thinking = turn.streaming && turn.thinkingTo === null && turn.reasoning !== "";
+  const idle =
+    turn.streaming && !turn.content && !turn.reasoning && !turn.writing && turn.tools.length === 0;
+  return (
+    <div className="space-y-1.5">
+      {turn.reasoning && <Thinking turn={turn} active={thinking} />}
+      {(turn.tools.length > 0 || turn.writing) && (
+        <ul className="space-y-0.5 text-xs text-muted-foreground">
+          {turn.tools.map((tool, i) => (
+            <li key={i} className="flex min-w-0 items-center gap-1.5">
+              <ToolIcon name={tool.name} />
+              <span className="truncate" title={tool.detail ?? undefined}>
+                {toolLabel(t, tool.name, tool.detail)}
+              </span>
+            </li>
+          ))}
+          {turn.writing && (
+            <li className="flex min-w-0 items-center gap-1.5 text-foreground">
+              <Loader2Icon className="size-3.5 shrink-0 animate-spin" aria-hidden />
+              <span className="truncate" title={turn.writing.path ?? undefined}>
+                {t("editor.ai.writingProgress", {
+                  what: toolLabel(t, turn.writing.name, turn.writing.path),
+                  size: formatSize(turn.writing.chars),
+                })}
+              </span>
+            </li>
+          )}
+        </ul>
+      )}
+      {idle && (
+        <p className="flex items-center gap-2 text-muted-foreground">
+          <span className="inline-block size-2 animate-pulse rounded-full bg-primary" aria-hidden />
+          {t("editor.ai.working")}
+        </p>
+      )}
+      {turn.content && (
+        <div className="rounded-lg rounded-bl-sm bg-muted px-3 py-2">
+          <Markdown text={turn.content} className="ai-markdown break-words" />
+          {turn.streaming && !turn.writing && (
+            <span className="ml-0.5 inline-block h-3.5 w-1.5 animate-pulse bg-foreground/60 align-middle" aria-hidden />
+          )}
+        </div>
+      )}
+      {turn.error && (
+        <p className="rounded-md border border-destructive/40 bg-destructive/5 px-3 py-2 text-destructive">
+          {turn.error}
+        </p>
+      )}
+      {!turn.streaming && turn.finish === "aborted" && (
+        <p className="text-xs text-muted-foreground">{t("editor.ai.stopped")}</p>
+      )}
+      {!turn.streaming && (turn.finish === "length" || turn.finish === "steps") && (
+        <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+          <span>{t(turn.finish === "length" ? "editor.ai.finishLength" : "editor.ai.finishSteps")}</span>
+          {isLast && (
+            <Button size="sm" variant="outline" className="h-6" disabled={busy} onClick={onContinue}>
+              {t("editor.ai.continue")}
+            </Button>
+          )}
+        </div>
+      )}
+      {turn.proposal && turn.proposal.length > 0 && (
+        <ProposalLine turn={turn} onReview={onReview} />
+      )}
+      {!turn.streaming && (
+        <div className="flex items-center gap-0.5 text-xs text-muted-foreground">
+          {turn.content && <CopyButton text={turn.content} />}
+          {isLast && (
+            <Button
+              size="icon-xs"
+              variant="ghost"
+              title={turn.finish === "error" ? t("editor.ai.retry") : t("editor.ai.regenerate")}
+              aria-label={turn.finish === "error" ? t("editor.ai.retry") : t("editor.ai.regenerate")}
+              disabled={busy || turn.id === null}
+              onClick={onRegenerate}
+            >
+              <RotateCwIcon aria-hidden />
+            </Button>
+          )}
+          {(turn.credits !== null || turn.durationMs !== null) && (
+            <span className="ml-1">
+              {[
+                turn.credits !== null ? t("editor.ai.answerCredits", { credits: turn.credits.toLocaleString() }) : null,
+                turn.durationMs !== null ? t("editor.ai.answerSeconds", { seconds: Math.max(1, Math.round(turn.durationMs / 1000)) }) : null,
+              ]
+                .filter(Boolean)
+                .join(" · ")}
+            </span>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** The model's thinking: open while it thinks, folded once it answers. */
+function Thinking({ turn, active }: { turn: Turn; active: boolean }) {
+  const { t } = useTranslation();
+  const [open, setOpen] = useState<boolean | null>(null);
+  const [now, setNow] = useState(Date.now());
+  useEffect(() => {
+    if (!active) return;
+    const timer = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(timer);
+  }, [active]);
+  const boxRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = boxRef.current;
+    if (el && active) el.scrollTop = el.scrollHeight;
+  }, [turn.reasoning, active]);
+  const expanded = open ?? active;
+  const seconds =
+    turn.thinkingFrom !== null
+      ? Math.max(1, Math.round(((turn.thinkingTo ?? now) - turn.thinkingFrom) / 1000))
+      : null;
+  const label = active
+    ? t("editor.ai.thinking", { seconds: seconds ?? 0 })
+    : seconds !== null
+      ? t("editor.ai.thought", { seconds })
+      : t("editor.ai.thoughts");
+  return (
+    <div className="text-xs">
+      <button
+        type="button"
+        className="flex items-center gap-1 text-muted-foreground hover:text-foreground"
+        aria-expanded={expanded}
+        onClick={() => setOpen(!expanded)}
+      >
+        <ChevronRightIcon className={cn("size-3.5 transition-transform", expanded && "rotate-90")} aria-hidden />
+        <span className={cn(active && "animate-pulse")}>{label}</span>
+      </button>
+      {expanded && (
+        <div
+          ref={boxRef}
+          className="mt-1 max-h-60 overflow-auto whitespace-pre-wrap border-l-2 pl-2 text-muted-foreground"
+        >
+          {turn.reasoning}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ProposalLine({ turn, onReview }: { turn: Turn; onReview: () => void }) {
+  const { t } = useTranslation();
+  const count = turn.proposal?.length ?? 0;
+  if (turn.proposalStatus === "pending") {
+    return (
+      <Button size="sm" variant="outline" className="h-7" onClick={onReview}>
+        <FilePenIcon className="size-3.5" aria-hidden />
+        {t("editor.ai.reviewChanges", { count })}
+      </Button>
+    );
+  }
+  const label =
+    turn.proposalStatus === "applied"
+      ? t("editor.ai.proposalApplied", { count })
+      : turn.proposalStatus === "denied"
+        ? t("editor.ai.proposalDenied", { count })
+        : t("editor.ai.proposalSuperseded", { count });
+  return (
+    <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+      <FilePenIcon className="size-3.5" aria-hidden />
+      {label}
+    </p>
+  );
+}
+
+function AttachmentChip({
+  attachment,
+  onRemove,
+}: {
+  attachment: { kind: "image" | "text"; name: string; data?: string };
+  onRemove?: () => void;
+}) {
+  const { t } = useTranslation();
+  return (
+    <span className="inline-flex max-w-full items-center gap-1 rounded-md border bg-muted/50 py-0.5 pr-1 pl-0.5 text-xs">
+      {attachment.kind === "image" && attachment.data ? (
+        <img src={attachment.data} alt="" className="size-6 rounded object-cover" />
+      ) : attachment.kind === "image" ? (
+        <ImageIcon className="size-4 text-muted-foreground" aria-hidden />
+      ) : (
+        <FileIcon className="size-4 text-muted-foreground" aria-hidden />
+      )}
+      <span className="max-w-40 truncate" title={attachment.name}>
+        {attachment.name}
+      </span>
+      {onRemove && (
+        <button
+          type="button"
+          className="rounded text-muted-foreground hover:text-foreground"
+          aria-label={t("editor.ai.removeAttachment", { name: attachment.name })}
+          onClick={onRemove}
+        >
+          <XIcon className="size-3.5" aria-hidden />
+        </button>
+      )}
+    </span>
+  );
+}
+
+function ToolIcon({ name }: { name: string }) {
+  const className = "size-3.5 shrink-0";
+  switch (name) {
+    case "search_files":
+      return <SearchIcon className={className} aria-hidden />;
+    case "list_files":
+      return <FolderTreeIcon className={className} aria-hidden />;
+    case "read_docs":
+      return <BookOpenIcon className={className} aria-hidden />;
+    case "edit_file":
+    case "write_file":
+    case "rename_file":
+    case "delete_file":
+      return <FilePenIcon className={className} aria-hidden />;
+    default:
+      return <FileIcon className={className} aria-hidden />;
+  }
+}
+
+const TOOL_LABELS = new Set([
+  "read_files",
+  "read_file",
+  "search_files",
+  "list_files",
+  "read_docs",
+  "edit_file",
+  "write_file",
+  "rename_file",
+  "delete_file",
+]);
+
+/** "Reads book/a.md", "Searches “KQ1”" — a tool step in the teacher's words. */
+function toolLabel(
+  t: ReturnType<typeof useTranslation>["t"],
+  name: string,
+  detail: string | null,
+): string {
+  const key = name === "read_file" ? "read_files" : name;
+  if (!TOOL_LABELS.has(key)) return detail ? `${name} ${detail}` : name;
+  // File names, not paths: the narrow pane would cut off the rest of the
+  // line. The full detail is the line's tooltip.
+  const short =
+    detail && key !== "search_files" && key !== "read_docs"
+      ? detail.replace(/[^\s,→]*\//g, "")
+      : detail;
+  return t(`editor.ai.tools.${key}` as "editor.ai.tools.read_files", {
+    detail: short ?? "…",
+  });
+}
+
+function formatSize(chars: number): string {
+  return chars < 1024 ? `${chars} B` : `${(chars / 1024).toFixed(1)} KB`;
 }
 
 /** A small copy button under a chat message. */
@@ -642,9 +1327,7 @@ function CopyButton({ text }: { text: string }) {
       title={t("editor.ai.copy")}
       aria-label={t("editor.ai.copy")}
       onClick={() =>
-        void navigator.clipboard
-          .writeText(text)
-          .then(() => toast.success(t("editor.ai.copied")))
+        void navigator.clipboard.writeText(text).then(() => toast.success(t("editor.ai.copied")))
       }
     >
       <CopyIcon aria-hidden />

@@ -654,3 +654,70 @@ export const commentMailQueue = sqliteTable(
   },
   (t) => [index("comment_mail_queue_user_book_idx").on(t.userId, t.bookId)],
 );
+
+/*
+ * The AI assistant's conversations (docs/cloud-ai-assistant.md), one
+ * teacher's chat about one book. Kept so a conversation survives a reload
+ * and follow-ups see what came before; only the teacher who had it can read
+ * it, and it goes with the book or the account.
+ */
+export const aiConversations = sqliteTable(
+  "ai_conversations",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    userId: integer("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    bookId: integer("book_id")
+      .notNull()
+      .references(() => books.id, { onDelete: "cascade" }),
+    title: text("title").notNull(),
+    createdAt: createdAt(),
+    updatedAt: integer("updated_at", { mode: "timestamp_ms" })
+      .notNull()
+      .default(sql`(unixepoch('subsec') * 1000)`),
+  },
+  (t) => [index("ai_conversations_user_book_idx").on(t.userId, t.bookId)],
+);
+
+/**
+ * One message of a conversation. A teacher's message carries the prompt and
+ * attachments; an assistant's the answer with its thinking, the tools it
+ * used, the file changes it proposed (until accepted or denied) and what it
+ * cost. JSON columns hold the lists.
+ */
+export const aiMessages = sqliteTable(
+  "ai_messages",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    conversationId: integer("conversation_id")
+      .notNull()
+      .references(() => aiConversations.id, { onDelete: "cascade" }),
+    role: text("role", { enum: ["user", "assistant"] }).notNull(),
+    content: text("content").notNull().default(""),
+    /** The page the request was made on (user messages). */
+    pagePath: text("page_path"),
+    /** JSON: the attachments of a user message. */
+    attachments: text("attachments"),
+    /** The model's thinking, when the provider streams it. */
+    reasoning: text("reasoning"),
+    /** JSON: the tools the assistant used, in order. */
+    tools: text("tools"),
+    /** JSON: the proposed file changes. */
+    proposal: text("proposal"),
+    proposalStatus: text("proposal_status", {
+      enum: ["pending", "applied", "denied", "superseded"],
+    }),
+    /** stop, length, steps, error or aborted. */
+    finish: text("finish"),
+    /** A failed answer's message, as the teacher saw it. */
+    error: text("error"),
+    model: text("model"),
+    tokensIn: integer("tokens_in"),
+    tokensOut: integer("tokens_out"),
+    credits: integer("credits"),
+    durationMs: integer("duration_ms"),
+    createdAt: createdAt(),
+  },
+  (t) => [index("ai_messages_conversation_idx").on(t.conversationId)],
+);

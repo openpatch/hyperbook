@@ -20,8 +20,8 @@ type Asked = {
 };
 
 type Answer =
-  | { deltas: string[]; finish?: "stop" | "length" }
-  | { toolCalls: { name: string; args: unknown }[] }
+  | { deltas: string[]; reasoning?: string[]; finish?: "stop" | "length" }
+  | { toolCalls: { name: string; args: unknown }[]; finish?: "length" }
   | { error: number };
 
 /** A queue of answers, one per provider call; the last repeats. */
@@ -29,13 +29,12 @@ class Script {
   constructor(readonly answers: Answer[]) {}
   private index = 0;
   next(asked: Asked): Answer {
-    // A provider that rejects tools outright, like a small local model.
-    if ("error" in this.peek()) {
-      const answer = this.peek() as { error: number };
-      if (asked.tools !== undefined && answer.error === 400) {
-        this.index = Math.min(this.index + 1, this.answers.length - 1);
-        return { error: 400 };
-      }
+    // A provider that rejects tools outright, like a small local model:
+    // every request with tools fails, the first one without goes on.
+    const peeked = this.peek();
+    if ("error" in peeked && peeked.error === 400) {
+      if (asked.tools !== undefined) return { error: 400 };
+      this.index += 1;
     }
     const answer = this.answers[Math.min(this.index, this.answers.length - 1)]!;
     this.index += 1;
@@ -87,7 +86,7 @@ function fakeProvider(script: (asked: Asked) => Answer) {
             controller.enqueue(encoder.encode(`data: ${chunk}\n\n`));
           });
           const done = JSON.stringify({
-            choices: [{ delta: {}, finish_reason: "tool_calls" }],
+            choices: [{ delta: {}, finish_reason: answer.finish ?? "tool_calls" }],
           });
           // Providers that honour include_usage end with a usage chunk;
           // Mistral reports prefix-cache hits in prompt_tokens_details.
@@ -103,6 +102,12 @@ function fakeProvider(script: (asked: Asked) => Answer) {
             encoder.encode(`data: ${done}\n\ndata: ${usage}\n\ndata: [DONE]\n\n`),
           );
         } else {
+          for (const text of answer.reasoning ?? []) {
+            const chunk = JSON.stringify({
+              choices: [{ delta: { reasoning_content: text } }],
+            });
+            controller.enqueue(encoder.encode(`data: ${chunk}\n\n`));
+          }
           for (const text of answer.deltas) {
             const chunk = JSON.stringify({
               choices: [{ delta: { content: text } }],
@@ -258,16 +263,21 @@ describe("AI assist", () => {
     expect(res.status).toBe(200);
     const seen = events(res.body);
     expect(seen.map((e) => e.event)).toEqual([
+      "conversation",
       "delta",
       "delta",
       "delta",
       "usage",
       "done",
     ]);
-    expect(seen[0]!.data).toEqual({ text: "Hello" });
+    // A new conversation, named after the request.
+    expect(seen[0]!.data).toMatchObject({ title: "Say hi" });
+    expect(seen[1]!.data).toEqual({ text: "Hello" });
     // The done event also tells what the answer cost the weekly quota.
-    expect(seen[4]!.data).toEqual({
+    expect(seen[5]!.data).toMatchObject({
       finish: "stop",
+      messageId: expect.any(Number),
+      durationMs: expect.any(Number),
       usage: { tokensIn: 100, tokensCached: 40, tokensOut: 20, credits: 120 },
     });
 
@@ -276,7 +286,7 @@ describe("AI assist", () => {
     expect(provider.asked).toHaveLength(1);
     const [asked] = provider.asked;
     expect(asked!.model).toBe("mistral-test");
-    expect(asked!.maxTokens).toBe(16384);
+    expect(asked!.maxTokens).toBe(65536);
     expect(asked!.messages).toHaveLength(2);
     expect(asked!.messages[0]!.role).toBe("system");
     expect(String(asked!.messages[0]!.content)).toMatch(/hyperbook/i);
@@ -286,56 +296,113 @@ describe("AI assist", () => {
     expect(String(asked!.messages[1]!.content)).toContain("Say hi");
   });
 
-  it("sends the conversation's earlier turns along, oldest first", async () => {
-    const { owner, provider, assist } = await world();
+  it("keeps the conversation and sends its earlier turns along, oldest first", async () => {
+    let call = 0;
+    const { owner, provider, assist, book } = await world({}, () => ({
+      deltas: [call++ === 0 ? "I wrote book/arctic-fox.md about the arctic fox." : "Done."],
+    }));
+    const first = await owner.c.post(assist, {
+      prompt: "Write me a page about an arctic fox",
+      pagePath: "book/index.md",
+    });
+    const conversation = events(first.body)[0]!.data;
     const res = await owner.c.post(assist, {
       prompt: "Write about a related animal",
       pagePath: "book/index.md",
-      history: [
-        { role: "user", content: "Write me a page about an arctic fox" },
-        {
-          role: "assistant",
-          content: "I wrote book/arctic-fox.md about the arctic fox.",
-        },
-      ],
+      conversationId: conversation.id,
     });
     expect(res.status).toBe(200);
     // The pair from before, between the system prompt and this request.
-    const [asked] = provider.asked;
-    expect(asked!.messages.map((m) => m.role)).toEqual([
+    const asked = provider.asked[1]!;
+    expect(asked.messages.map((m) => m.role)).toEqual([
       "system",
       "user",
       "assistant",
       "user",
     ]);
-    expect(String(asked!.messages[1]!.content)).toContain("arctic fox");
-    expect(String(asked!.messages[2]!.content)).toContain("arctic-fox.md");
-    expect(String(asked!.messages[3]!.content)).toContain(
+    expect(String(asked.messages[1]!.content)).toContain("arctic fox");
+    expect(String(asked.messages[2]!.content)).toContain("arctic-fox.md");
+    expect(String(asked.messages[3]!.content)).toContain(
       "Write about a related animal",
     );
+
+    // The editor lists it, and loads all four messages back.
+    const list = await owner.c.get(`/api/books/${book.id}/ai/conversations`);
+    expect(list.body.conversations).toEqual([
+      expect.objectContaining({ id: conversation.id, title: "Write me a page about an arctic fox" }),
+    ]);
+    const loaded = await owner.c.get(
+      `/api/books/${book.id}/ai/conversations/${conversation.id}`,
+    );
+    expect(loaded.body.messages.map((m: { role: string; content: string }) => [m.role, m.content])).toEqual([
+      ["user", "Write me a page about an arctic fox"],
+      ["assistant", "I wrote book/arctic-fox.md about the arctic fox."],
+      ["user", "Write about a related animal"],
+      ["assistant", "Done."],
+    ]);
+    expect(loaded.body.messages[1]).toMatchObject({ finish: "stop", model: "mistral-test", credits: 120 });
   });
 
-  it("truncates an over-long history entry instead of failing the request", async () => {
-    const { owner, provider, assist } = await world();
-    const res = await owner.c.post(assist, {
+  it("shortens a long earlier answer in the history instead of resending it whole", async () => {
+    let call = 0;
+    const { owner, provider, assist } = await world({}, () => ({
+      deltas: [call++ === 0 ? "f".repeat(13_000) : "ok"],
+    }));
+    const first = await owner.c.post(assist, { prompt: "Write a lot", pagePath: "book/index.md" });
+    await owner.c.post(assist, {
       prompt: "And now a related animal",
       pagePath: "book/index.md",
-      history: [
-        { role: "user", content: "Write me a page about an arctic fox" },
-        // One character over the cap: a model that answered at length in the
-        // chat must not make every following request fail validation.
-        { role: "assistant", content: "f".repeat(4001) },
-      ],
+      conversationId: events(first.body)[0]!.data.id,
     });
-    expect(res.status).toBe(200);
-    const [asked] = provider.asked;
-    const history = asked!.messages.find(
-      (m) => m.role === "assistant" && m.content,
-    );
-    expect(String((history as { content: string }).content)).toHaveLength(4000);
-    expect(String(asked!.messages.at(-1)!.content)).toContain(
-      "And now a related animal",
-    );
+    const earlier = provider.asked[1]!.messages.find((m) => m.role === "assistant")!;
+    expect(String(earlier.content).length).toBeLessThan(12_100);
+    expect(String(earlier.content)).toContain("(shortened)");
+  });
+
+  it("keeps conversations to the teacher who had them", async () => {
+    const { owner, other, book, assist } = await world();
+    const first = await owner.c.post(assist, { prompt: "Hi", pagePath: "book/index.md" });
+    const id = events(first.body)[0]!.data.id;
+    // Another editor of the book sees neither the conversation nor its list entry.
+    await owner.c.post(`/api/books/${book.id}/members`, { email: "x@example.org", role: "editor" });
+    expect((await other.c.get(`/api/books/${book.id}/ai/conversations`)).body.conversations ?? []).toEqual([]);
+    expect((await other.c.get(`/api/books/${book.id}/ai/conversations/${id}`)).status).toBe(404);
+    const foreign = await other.c.post(assist, {
+      prompt: "Hi",
+      pagePath: "book/index.md",
+      conversationId: id,
+    });
+    expect(foreign.status).toBe(404);
+
+    // Its owner renames and deletes it.
+    expect((await owner.c.patch(`/api/books/${book.id}/ai/conversations/${id}`, { title: "Greeting" })).status).toBe(200);
+    expect((await owner.c.get(`/api/books/${book.id}/ai/conversations`)).body.conversations[0].title).toBe("Greeting");
+    expect((await owner.c.delete(`/api/books/${book.id}/ai/conversations/${id}`)).status).toBe(200);
+    expect((await owner.c.get(`/api/books/${book.id}/ai/conversations`)).body.conversations).toEqual([]);
+  });
+
+  it("replaces an edited message and everything after it", async () => {
+    let call = 0;
+    const { owner, provider, assist, book } = await world({}, () => ({
+      deltas: [`answer ${++call}`],
+    }));
+    const first = await owner.c.post(assist, { prompt: "Write about foxes", pagePath: "book/index.md" });
+    const { id, userMessageId } = events(first.body)[0]!.data;
+    await owner.c.post(assist, { prompt: "More", pagePath: "book/index.md", conversationId: id });
+    // Edit the first message: both exchanges go, the edited one replaces them.
+    const edited = await owner.c.post(assist, {
+      prompt: "Write about wolves",
+      pagePath: "book/index.md",
+      conversationId: id,
+      replaceFrom: userMessageId,
+    });
+    expect(edited.status).toBe(200);
+    expect(provider.asked[2]!.messages.map((m) => m.role)).toEqual(["system", "user"]);
+    const loaded = await owner.c.get(`/api/books/${book.id}/ai/conversations/${id}`);
+    expect(loaded.body.messages.map((m: { content: string }) => m.content)).toEqual([
+      "Write about wolves",
+      "answer 3",
+    ]);
   });
 
   it("sends a prompt cache key that is stable while the book's head commit is", async () => {
@@ -684,10 +751,10 @@ describe("AI assist", () => {
     });
     expect(res.status).toBe(200); // The stream started; the failure is an event.
     const seen = events(res.body);
-    expect(seen).toHaveLength(1);
-    expect(seen[0]!.event).toBe("error");
-    expect(seen[0]!.data.code).toBe("status");
-    expect(seen[0]!.data.message).toMatch(/did not answer/i);
+    // The failed answer is kept in the conversation, so it can be retried.
+    expect(seen.map((e) => e.event)).toEqual(["conversation", "error", "saved"]);
+    expect(seen[1]!.data.code).toBe("status");
+    expect(seen[1]!.data.message).toMatch(/did not answer/i);
 
     const entries = instance.db
       .select()
@@ -725,8 +792,8 @@ describe("AI assist", () => {
     expect(JSON.stringify(data)).not.toContain("secret page text");
   });
 
-  it("streams the token cap as finish: length", async () => {
-    const { owner, assist } = await world({}, () => ({
+  it("goes on after the token cap, and reports length only when that keeps happening", async () => {
+    const { owner, provider, assist } = await world({}, () => ({
       deltas: ["partial"],
       finish: "length",
     }));
@@ -735,13 +802,81 @@ describe("AI assist", () => {
       pagePath: "book/index.md",
     });
     const seen = events(res.body);
-    expect(seen.at(-1)).toEqual({
+    // The first call and three continuations, each told to go on where
+    // its text stopped.
+    expect(provider.asked).toHaveLength(4);
+    const last = provider.asked[3]!.messages;
+    expect(last.at(-2)).toEqual({ role: "assistant", content: "partial" });
+    expect(String(last.at(-1)!.content)).toMatch(/Continue exactly where it stopped/);
+    expect(seen.filter((e) => e.event === "delta")).toHaveLength(4);
+    expect(seen.at(-1)).toMatchObject({
       event: "done",
       data: {
         finish: "length",
-        usage: { tokensIn: 100, tokensCached: 40, tokensOut: 20, credits: 120 },
+        usage: { tokensIn: 400, tokensCached: 160, tokensOut: 80, credits: 480 },
       },
     });
+  });
+
+  it("streams the thinking, and nudges a model whose thinking used up the cap", async () => {
+    const answers: Answer[] = [
+      { deltas: [], reasoning: ["Let me plan ", "the quiz…"], finish: "length" },
+      { deltas: ["Here it is."] },
+    ];
+    const s = new Script(answers);
+    const { owner, provider, assist, book } = await world({}, (asked) => s.next(asked));
+    const res = await owner.c.post(assist, { prompt: "Make a quiz", pagePath: "book/index.md" });
+    const seen = events(res.body);
+    expect(seen.filter((e) => e.event === "reasoning").map((e) => e.data.text)).toEqual([
+      "Let me plan ",
+      "the quiz…",
+    ]);
+    // The thinking never becomes the answer.
+    expect(seen.filter((e) => e.event === "delta").map((e) => e.data.text)).toEqual(["Here it is."]);
+    expect(seen.at(-1)).toMatchObject({ event: "done", data: { finish: "stop" } });
+    expect(String(provider.asked[1]!.messages.at(-1)!.content)).toMatch(/used up your output limit while thinking/);
+    // The thinking is kept with the answer.
+    const id = seen[0]!.data.id;
+    const loaded = await owner.c.get(`/api/books/${book.id}/ai/conversations/${id}`);
+    expect(loaded.body.messages[1]).toMatchObject({
+      content: "Here it is.",
+      reasoning: "Let me plan the quiz…",
+    });
+  });
+
+  it("sends attached images as image parts and documents as text", async () => {
+    const { owner, provider, assist } = await world();
+    const res = await owner.c.post(assist, {
+      prompt: "Make exercises like these",
+      pagePath: "book/index.md",
+      attachments: [
+        { kind: "image", name: "exam.jpg", data: "data:image/jpeg;base64,AAAA" },
+        { kind: "text", name: "exam.pdf", text: "Aufgabe 1: Steckbrief" },
+      ],
+    });
+    expect(res.status).toBe(200);
+    const content = provider.asked[0]!.messages.at(-1)!.content as {
+      type: string;
+      text?: string;
+      image_url?: { url: string };
+    }[];
+    expect(content[0]!.type).toBe("text");
+    expect(content[0]!.text).toContain("Attached document: exam.pdf");
+    expect(content[0]!.text).toContain("Aufgabe 1: Steckbrief");
+    expect(content[1]).toEqual({
+      type: "image_url",
+      image_url: { url: "data:image/jpeg;base64,AAAA" },
+    });
+  });
+
+  it("rejects an attachment that is not an image data URL", async () => {
+    const { owner, assist } = await world();
+    const res = await owner.c.post(assist, {
+      prompt: "Look",
+      pagePath: "book/index.md",
+      attachments: [{ kind: "image", name: "x", data: "https://example.org/x.png" }],
+    });
+    expect(res.status).toBe(400);
   });
 });
 
@@ -789,11 +924,18 @@ describe("AI agent tools", () => {
     });
     expect(res.status).toBe(200);
     const seen = events(res.body);
-    expect(seen.map((e) => e.event)).toEqual(["usage", "tool", "delta", "usage", "done"]);
-    expect(seen[1]!.data).toEqual({
-      name: "read_file",
-      args: { path: "book/index.md" },
-    });
+    expect(seen.map((e) => e.event)).toEqual([
+      "conversation",
+      "toolProgress",
+      "usage",
+      "tool",
+      "delta",
+      "usage",
+      "done",
+    ]);
+    // While the call streamed in, and once it ran.
+    expect(seen[1]!.data).toEqual({ name: "read_file", path: "book/index.md", chars: 24 });
+    expect(seen[3]!.data).toEqual({ name: "read_file", detail: "book/index.md" });
 
     // Two provider calls: the second carries the tool's result, and the
     // first knew the book — its language and its files.
@@ -1006,12 +1148,15 @@ describe("AI agent tools", () => {
       pagePath: "book/index.md",
     });
     const seen = events(res.body);
-    expect(seen.map((e) => e.event)).toEqual(["delta", "usage", "done"]);
-    expect(seen[0]!.data).toEqual({ text: "fallback" });
-    // The retry asked without tools.
-    expect(provider.asked).toHaveLength(2);
-    expect(provider.asked[0]!.tools).toBeDefined();
-    expect(provider.asked[1]!.tools).toBeUndefined();
+    expect(seen.map((e) => e.event)).toEqual(["conversation", "delta", "usage", "done"]);
+    expect(seen[1]!.data).toEqual({ text: "fallback" });
+    // First asked again with the smaller output cap (a provider may reject
+    // a big one), then without tools.
+    expect(provider.asked).toHaveLength(3);
+    expect(provider.asked[0]!).toMatchObject({ maxTokens: 65536 });
+    expect(provider.asked[1]!).toMatchObject({ maxTokens: 16384 });
+    expect(provider.asked[1]!.tools).toBeDefined();
+    expect(provider.asked[2]!.tools).toBeUndefined();
   });
 
   it("refuses to rewrite a page it only saw as an excerpt", async () => {
@@ -1217,11 +1362,89 @@ describe("AI agent tools", () => {
   });
 });
 
+describe("AI agent: long work", () => {
+  it("tells the last step to wrap up, and ends with finish: steps when work is left", async () => {
+    const { owner, provider, assist } = await world(
+      { AI_MAX_STEPS: "2" },
+      () => ({ toolCalls: [{ name: "list_files", args: {} }] }),
+    );
+    const res = await owner.c.post(assist, { prompt: "Reorganize the book", pagePath: "book/index.md" });
+    const seen = events(res.body);
+    expect(provider.asked).toHaveLength(2);
+    expect(String(provider.asked[1]!.messages.at(-1)!.content)).toMatch(/last step/);
+    // The wrap-up note is not kept in the history of later steps.
+    expect(String(provider.asked[0]!.messages.at(-1)!.content)).not.toMatch(/last step/);
+    expect(seen.at(-1)).toMatchObject({ event: "done", data: { finish: "steps" } });
+  });
+
+  it("does not run a tool call the cap cut off, and asks for smaller calls", async () => {
+    const answers: Answer[] = [
+      { toolCalls: [{ name: "write_file", args: { path: "book/a.md", content: "half" } }], finish: "length" },
+      { toolCalls: [{ name: "write_file", args: { path: "book/a.md", content: "# A\n" } }] },
+      { deltas: ["Wrote it."] },
+    ];
+    const s = new Script(answers);
+    const { owner, provider, assist } = await world({}, (asked) => s.next(asked));
+    const res = await owner.c.post(assist, { prompt: "Write page A", pagePath: "book/index.md" });
+    const seen = events(res.body);
+    expect(String(provider.asked[1]!.messages.at(-1)!.content)).toMatch(/write_file call was cut off/);
+    // Only the complete call ran.
+    expect(seen.filter((e) => e.event === "tool")).toHaveLength(1);
+    const proposal = seen.find((e) => e.event === "proposal")!.data.changes;
+    expect(proposal).toEqual([expect.objectContaining({ path: "book/a.md", newText: "# A\n" })]);
+  });
+
+  it("builds on a proposal the teacher has not decided on, until they do", async () => {
+    const answers: Answer[] = [
+      { toolCalls: [{ name: "write_file", args: { path: "book/quiz.md", content: "# Quiz\n" } }] },
+      { deltas: ["Proposed a quiz."] },
+      { toolCalls: [{ name: "read_files", args: { paths: ["book/quiz.md"] } }] },
+      { toolCalls: [{ name: "write_file", args: { path: "book/more.md", content: "# More\n" } }] },
+      { deltas: ["Added more."] },
+      { deltas: ["Nothing pending."] },
+    ];
+    const s = new Script(answers);
+    const { owner, provider, assist, book } = await world({}, (asked) => s.next(asked));
+    const first = await owner.c.post(assist, { prompt: "Make a quiz", pagePath: "book/index.md" });
+    const { id } = events(first.body)[0]!.data;
+    const second = await owner.c.post(assist, {
+      prompt: "And another page",
+      pagePath: "book/index.md",
+      conversationId: id,
+    });
+    const seen = events(second.body);
+    // The model is told what is pending, and reads the pending text back.
+    expect(String(provider.asked[2]!.messages.at(-1)!.content)).toMatch(/book\/quiz\.md \(new\)/);
+    const read = provider.asked[3]!.messages.find((m) => m.role === "tool")!;
+    expect(String(read.content)).toContain("# Quiz");
+    // The new proposal holds both pages; the first one is superseded.
+    const changes = seen.find((e) => e.event === "proposal")!.data.changes;
+    expect(changes.map((c: { path: string }) => c.path).sort()).toEqual(["book/more.md", "book/quiz.md"]);
+    const loaded = await owner.c.get(`/api/books/${book.id}/ai/conversations/${id}`);
+    const answersOf = loaded.body.messages.filter((m: { role: string }) => m.role === "assistant");
+    expect(answersOf.map((m: { proposalStatus: string }) => m.proposalStatus)).toEqual(["superseded", "pending"]);
+
+    // Denied: the next request starts from the repository again.
+    const decided = await owner.c.post(
+      `/api/books/${book.id}/ai/conversations/${id}/messages/${answersOf[1].id}/proposal`,
+      { status: "denied" },
+    );
+    expect(decided.status).toBe(200);
+    const third = await owner.c.post(assist, {
+      prompt: "Anything pending?",
+      pagePath: "book/index.md",
+      conversationId: id,
+    });
+    expect(events(third.body).some((e) => e.event === "proposal")).toBe(false);
+    expect(String(provider.asked.at(-1)!.messages.at(-1)!.content)).not.toMatch(/still waiting/);
+  });
+});
+
 describe("AI hardening", () => {
   it("rejects an oversized request body before parsing it (413)", async () => {
     const { owner, assist } = await world();
     const res = await owner.c.post(assist, {
-      prompt: "x".repeat(700_000),
+      prompt: "x".repeat(21 * 1024 * 1024),
       pagePath: "book/index.md",
     });
     expect(res.status).toBe(413);
@@ -1249,9 +1472,8 @@ describe("AI hardening", () => {
     });
     expect(res.status).toBe(200); // the stream started; the failure is an event
     const seen = events(res.body);
-    expect(seen).toHaveLength(1);
-    expect(seen[0]!.event).toBe("error");
-    expect(seen[0]!.data.code).toBe("status");
+    expect(seen.map((e) => e.event)).toEqual(["conversation", "error", "saved"]);
+    expect(seen[1]!.data.code).toBe("status");
     // No second, doomed call.
     expect(provider.asked).toHaveLength(1);
   });

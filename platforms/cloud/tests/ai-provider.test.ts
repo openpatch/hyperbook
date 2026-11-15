@@ -135,6 +135,15 @@ describe("streamChat", () => {
 
     const tools = stubChunks(TOOL_STREAM, true);
     expect(await collect(tools)).toEqual([
+      // The call is reported while its arguments stream in.
+      { type: "tool_progress", index: 0, name: "read_file", path: null, chars: 8 },
+      {
+        type: "tool_progress",
+        index: 0,
+        name: "read_file",
+        path: "book/index.md",
+        chars: 24,
+      },
       {
         type: "tool_calls",
         calls: [
@@ -147,7 +156,8 @@ describe("streamChat", () => {
 
   it("parses deltas whose content is an array of parts, ignoring the rest", async () => {
     // z.ai's GLM sends content as [{type:"text",text:"…"}] parts, and may
-    // add reasoning_content; only the text parts are the answer.
+    // add reasoning_content; only the text parts are the answer, the
+    // reasoning streams as thinking.
     const stub = stubChunks([
       'data: {"choices":[{"delta":{"content":[{"type":"text","text":"Hello"}]}}]}\n\n',
       'data: {"choices":[{"delta":{"content":[{"type":"text","text":" "},{"type":"reasoning","reasoning":"hmm"},{"type":"text","text":"world"}]}}]}\n\n',
@@ -158,6 +168,7 @@ describe("streamChat", () => {
     expect(await collect(stub)).toEqual([
       { type: "delta", text: "Hello" },
       { type: "delta", text: " world" },
+      { type: "reasoning", text: "thinking" },
       { type: "finish", finish: "stop" },
     ]);
   });
@@ -197,6 +208,8 @@ describe("streamChat", () => {
       "data: [DONE]\n\n",
     ]);
     expect(await collect(stub)).toEqual([
+      { type: "reasoning", text: "Let me think… " },
+      { type: "reasoning", text: "the answer." },
       { type: "delta", text: "Let me think… the answer." },
       { type: "finish", finish: "stop" },
     ]);
@@ -214,15 +227,18 @@ describe("streamChat", () => {
       "data: [DONE]\n\n",
     ]);
     expect(await collect(stub)).toEqual([
+      { type: "reasoning", text: "Let me " },
       { type: "delta", text: "Hello" },
+      { type: "reasoning", text: "decide…" },
       { type: "delta", text: " world" },
       { type: "finish", finish: "stop" },
     ]);
   });
 
-  it("falls back to thinking chunks when content never arrives (Mistral reasoning models)", async () => {
-    // A max_tokens cap inside the thinking reads as an empty answer — the
-    // thinking must surface instead, not an "empty" error.
+  it("streams thinking cut off by the token cap as thinking, never as the answer", async () => {
+    // A max_tokens cap inside the thinking: the thinking was shown as it
+    // streamed; it is not an answer, and not an "empty" error either — the
+    // agent goes on from there.
     const stub = stubChunks([
       'data: {"choices":[{"delta":{"content":[{"type":"thinking","thinking":[{"type":"text","text":"The lemming "}]}]}}]}\n\n',
       'data: {"choices":[{"delta":{"content":[{"type":"thinking","thinking":[{"type":"text","text":"lives in the Arctic."}]}]}}]}\n\n',
@@ -230,9 +246,40 @@ describe("streamChat", () => {
       "data: [DONE]\n\n",
     ]);
     expect(await collect(stub)).toEqual([
-      { type: "delta", text: "The lemming lives in the Arctic." },
+      { type: "reasoning", text: "The lemming " },
+      { type: "reasoning", text: "lives in the Arctic." },
       { type: "finish", finish: "length" },
     ]);
+  });
+
+  it("drops a tool call the token cap cut off, and reports the finish as length", async () => {
+    const stub = stubChunks([
+      'data: {"choices":[{"delta":{"tool_calls":[{"index":0,"id":"c1","function":{"name":"write_file","arguments":"{\\"path\\":\\"a.md\\",\\"content\\":\\"lo"}}]}}]}\n\n',
+      'data: {"choices":[{"delta":{},"finish_reason":"length"}]}\n\n',
+      "data: [DONE]\n\n",
+    ]);
+    expect(await collect(stub)).toEqual([
+      { type: "tool_progress", index: 0, name: "write_file", path: "a.md", chars: 28 },
+      { type: "finish", finish: "length" },
+    ]);
+  });
+
+  it("sends reasoning_effort only when one is asked for", async () => {
+    const plain = stubChunks(TEXT_STREAM);
+    await collect(plain);
+    expect((plain.lastBody as Record<string, unknown>).reasoning_effort).toBeUndefined();
+    const effort = stubChunks(TEXT_STREAM);
+    for await (const event of streamChat({
+      baseUrl: effort.url,
+      apiKey: "key",
+      model: "m",
+      messages: [{ role: "user", content: "hi" }],
+      maxOutputTokens: 64,
+      timeoutMs: 10_000,
+      reasoningEffort: "high",
+    }))
+      void event;
+    expect((effort.lastBody as Record<string, unknown>).reasoning_effort).toBe("high");
   });
 
   it("reports usage with the cached prompt tokens Mistral puts in prompt_tokens_details", async () => {
@@ -410,6 +457,88 @@ describe("streamChat", () => {
       })(),
     ).rejects.toMatchObject({ code: "timeout" });
     expect(events).toEqual([]);
+  });
+
+  it("lets a stream that keeps sending outlast the timeout", async () => {
+    // A long tool call: argument pieces arriving for longer than the
+    // timeout, none of them visible text. Only silence may time out.
+    const pieces = ['{"path":"a.md",', '"content":"', "x".repeat(10), '"}'];
+    const app = new Hono();
+    app.post("/v1/chat/completions", () => {
+      const body = new ReadableStream<Uint8Array>({
+        async start(controller) {
+          const send = (data: string) =>
+            controller.enqueue(new TextEncoder().encode(`data: ${data}\n\n`));
+          send(
+            JSON.stringify({
+              choices: [
+                {
+                  delta: {
+                    tool_calls: [
+                      { index: 0, id: "c1", function: { name: "write_file" } },
+                    ],
+                  },
+                },
+              ],
+            }),
+          );
+          for (const piece of pieces) {
+            await new Promise((resolve) => setTimeout(resolve, 60));
+            send(
+              JSON.stringify({
+                choices: [
+                  {
+                    delta: {
+                      tool_calls: [
+                        { index: 0, function: { arguments: piece } },
+                      ],
+                    },
+                  },
+                ],
+              }),
+            );
+          }
+          send(
+            JSON.stringify({
+              choices: [{ delta: {}, finish_reason: "tool_calls" }],
+            }),
+          );
+          send("[DONE]");
+          controller.close();
+        },
+      });
+      return new Response(body, {
+        headers: { "content-type": "text/event-stream" },
+      });
+    });
+    const server = serve({ fetch: app.fetch, port: 0 });
+    const address = server.address();
+    const url =
+      typeof address === "object" && address
+        ? `http://localhost:${address.port}/v1`
+        : "";
+    stubs.push({
+      url,
+      posts: 0,
+      close: () =>
+        new Promise<void>((resolve) => server.close(() => resolve())),
+    });
+    const events: unknown[] = [];
+    // 4 × 60 ms of streaming against a 100 ms timeout.
+    for await (const event of streamChat({
+      baseUrl: url,
+      apiKey: "key",
+      model: "m",
+      messages: [{ role: "user", content: "hi" }],
+      maxOutputTokens: 64,
+      timeoutMs: 100,
+    })) {
+      events.push(event);
+    }
+    expect(events).toContainEqual({
+      type: "tool_calls",
+      calls: [{ id: "c1", name: "write_file", args: pieces.join("") }],
+    });
   });
 
   it("reports an unreachable provider as such", async () => {

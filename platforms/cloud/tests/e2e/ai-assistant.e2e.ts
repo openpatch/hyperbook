@@ -173,10 +173,32 @@ describe("AI assistant", () => {
       .getByPlaceholder("Ask about this page — or select text first…")
       .fill("Improve the selected text");
     await panel.getByRole("button", { name: "Ask" }).click();
-    await panel.getByText("Hello world").waitFor();
+    // The chat keeps the first answer, so wait for the second one.
+    await panel.getByText("Hello world").nth(1).waitFor();
+    await panel.getByRole("button", { name: "Ask" }).waitFor();
 
     // Still only a suggestion: the page itself is unchanged.
     expect(await editor.textContent()).toContain("# Assisted");
+  }, 120_000);
+
+  it("keeps the conversation across a reload, and starts a new chat on request", async () => {
+    await page.reload();
+    await page.getByRole("tab", { name: "AI assistant" }).click();
+    const panel = page.getByRole("region", { name: "AI assistant" });
+    // Both exchanges come back, named after the first request (the title
+    // and the message itself).
+    await panel.getByRole("button", { name: "Say hello" }).waitFor();
+    await panel.getByText("Improve the selected text").waitFor();
+    await panel.getByText("Hello world").nth(1).waitFor();
+    expect(await panel.getByText("Say hello", { exact: true }).count()).toBe(2);
+    expect(await panel.getByText("Hello world").count()).toBe(2);
+
+    await panel.getByRole("button", { name: "New chat" }).click();
+    expect(await panel.getByText("Say hello").count()).toBe(0);
+    // The earlier one stays in the list.
+    await panel.getByRole("button", { name: "Conversations" }).click();
+    await page.getByRole("menuitem", { name: /Say hello/ }).click();
+    await panel.getByText("Improve the selected text").waitFor();
   }, 120_000);
 
   it("proposes a new file, reviewed as a diff and applied on acceptance", async () => {
