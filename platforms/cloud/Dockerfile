@@ -12,6 +12,8 @@ RUN corepack enable
 WORKDIR /repo
 # Manifests first, so editing source does not invalidate the dependency layers.
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+# pnpm-workspace.yaml's patchedDependencies; every install reads them.
+COPY patches/ patches/
 COPY platforms/cloud/package.json platforms/cloud/
 
 

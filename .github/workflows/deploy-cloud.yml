@@ -13,6 +13,7 @@ on:
       - packages/**
       - pnpm-lock.yaml
       - pnpm-workspace.yaml
+      - patches/**
       - .github/workflows/deploy-cloud.yml
   workflow_dispatch:
 
@@ -92,6 +93,9 @@ jobs:
         run: |
           mkdir -p stage/platforms/cloud stage/packages/hyperbook
           cp package.json pnpm-lock.yaml pnpm-workspace.yaml stage/
+          # pnpm-workspace.yaml's patchedDependencies point here; every install
+          # reads these files, even one of only the cloud's dependencies.
+          cp -r patches stage/
           cp -r platforms/cloud/package.json platforms/cloud/dist platforms/cloud/drizzle stage/platforms/cloud/
           cp -r packages/hyperbook/package.json packages/hyperbook/dist packages/hyperbook/.cache stage/packages/hyperbook/
 
@@ -137,12 +141,15 @@ jobs:
           fi
 
       # node_modules (installed on the server), data/ and .env are never touched:
-      # the --delete runs only inside the two code folders, and skips node_modules.
+      # the --delete runs only inside patches/ and the two code folders, and
+      # skips node_modules.
       - name: Upload
         run: |
           rsync -az -e "ssh $SSH_OPTS" \
             stage/package.json stage/pnpm-lock.yaml stage/pnpm-workspace.yaml \
             "$TARGET:$DEPLOY_PATH/"
+          rsync -az --delete --mkpath -e "ssh $SSH_OPTS" \
+            stage/patches/ "$TARGET:$DEPLOY_PATH/patches/"
           rsync -az --delete --mkpath --exclude node_modules -e "ssh $SSH_OPTS" \
             stage/platforms/cloud/ "$TARGET:$DEPLOY_PATH/platforms/cloud/"
           rsync -az --delete --mkpath --exclude node_modules -e "ssh $SSH_OPTS" \
