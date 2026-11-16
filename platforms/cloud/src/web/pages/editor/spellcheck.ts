@@ -11,7 +11,6 @@ import {
   EditorView,
   ViewPlugin,
 } from "@codemirror/view";
-import Typo from "typo-js";
 import i18next from "i18next";
 import { closeMenu, cursorPoint, fromKeyboard, item, openMenu, separator } from "./context-menu";
 import { findFrontmatter } from "./frontmatter";
@@ -22,8 +21,10 @@ import { findFrontmatter } from "./frontmatter";
  * links and directive headers (`::name{…}`, `{{placeholder}}`) are skipped,
  * and so are words that look like code (with digits or camelCase).
  *
- * The dictionaries are Hunspell's, through Typo.js, and load lazily from
- * /dictionaries (see vite.config.ts). Words the book's teachers accepted come
+ * The dictionaries are Hunspell's, checked by Hunspell itself (hunspell-asm,
+ * compiled to WebAssembly) so that compounds like "Fehlversuch" are known;
+ * Typo.js ignored German's compound rules. Both load lazily, the dictionaries
+ * from /dictionaries (see vite.config.ts). Words the book's teachers accepted come
  * from the book's dictionary on the server (see routes/dictionary.ts).
  *
  * A right-click on a misspelled word opens the menu with corrections and
@@ -40,11 +41,36 @@ export type SpellConfig = {
   onAddWord: (word: string) => void;
 };
 
+/** What the spell check needs of a dictionary. */
+export type Speller = {
+  check: (word: string) => boolean;
+  suggest: (word: string) => string[];
+};
+
+/** A Hunspell instance as a Speller. */
+export function hunspellSpeller(hunspell: {
+  spell: (word: string) => boolean;
+  suggest: (word: string) => string[];
+}): Speller {
+  return {
+    check: (word) => hunspell.spell(word),
+    // Hunspell also offers word parts ("Haus-"), which are no correction.
+    suggest: (word) =>
+      hunspell
+        .suggest(word)
+        .filter((s) => !s.endsWith("-"))
+        .slice(0, 5),
+  };
+}
+
 /** Re-checks the page once its dictionary has loaded. */
 const loaded = StateEffect.define<null>();
 
+/** Hunspell's WebAssembly module, loaded once for all languages. */
+let factory: ReturnType<typeof import("hunspell-asm").loadModule> | undefined;
+
 /** The loaded dictionaries, by language. */
-const typoes = new Map<string, Typo>();
+const spellers = new Map<string, Speller>();
 /** Languages whose dictionary is currently loading. */
 const loading = new Set<string>();
 /** Views waiting for a dictionary, so they can be re-checked when it arrives. */
@@ -52,7 +78,7 @@ const waiting = new Map<string, Set<EditorView>>();
 
 /** Starts loading a language's dictionary; re-checks the views that wanted it. */
 function load(language: string, view: EditorView) {
-  if (typoes.has(language)) return;
+  if (spellers.has(language)) return;
   const waiters = waiting.get(language) ?? new Set<EditorView>();
   waiting.set(language, waiters);
   waiters.add(view);
@@ -61,19 +87,30 @@ function load(language: string, view: EditorView) {
   const read = (file: string) =>
     fetch(`/dictionaries/${language}/${file}`).then((res) => {
       if (!res.ok) throw new Error(`No dictionary for ${language}`);
-      return res.text();
+      return res.arrayBuffer();
     });
-  Promise.all([read("index.aff"), read("index.dic")])
-    .then(([aff, dic]) => {
+  factory ??= import("hunspell-asm")
+    .then(({ loadModule }) => loadModule())
+    .catch((error: unknown) => {
+      factory = undefined; // Offline, say: a later page tries again.
+      throw error;
+    });
+  Promise.all([factory, read("index.aff"), read("index.dic")])
+    .then(([hunspell, aff, dic]) => {
       loading.delete(language);
-      typoes.set(language, new Typo(language, aff, dic));
+      const instance = hunspell.create(
+        hunspell.mountBuffer(new Uint8Array(aff), `${language}.aff`),
+        hunspell.mountBuffer(new Uint8Array(dic), `${language}.dic`),
+      );
+      spellers.set(language, hunspellSpeller(instance));
       const views = waiting.get(language);
       waiting.delete(language);
       for (const current of views ?? [])
         current.dispatch({ effects: loaded.of(null) });
     })
-    .catch(() => {
+    .catch((error: unknown) => {
       // No dictionary (offline, or an unsupported language): no underlines.
+      console.warn(`Spell check for "${language}" is off:`, error);
       loading.delete(language);
       waiting.delete(language);
     });
@@ -116,7 +153,7 @@ function covered(spans: [number, number][], from: number, to: number) {
 /** The misspelled words of the page, as ranges in document order. */
 export function misspellings(
   state: EditorState,
-  typo: Typo,
+  speller: Speller,
   words: ReadonlySet<string>,
   cache: Map<string, boolean>,
 ) {
@@ -156,7 +193,7 @@ export function misspellings(
       if (words.has(word.toLowerCase())) continue;
       let known = cache.get(word);
       if (known === undefined) {
-        known = typo.check(word);
+        known = speller.check(word);
         cache.set(word, known);
       }
       if (!known) wrong.push({ from, to });
@@ -172,10 +209,10 @@ function decorate(
   config: SpellConfig,
   cache: Map<string, boolean>,
 ): DecorationSet {
-  const typo = typoes.get(config.language);
-  if (!typo) return Decoration.none;
+  const speller = spellers.get(config.language);
+  if (!speller) return Decoration.none;
   return Decoration.set(
-    misspellings(state, typo, config.words, cache).map((w) =>
+    misspellings(state, speller, config.words, cache).map((w) =>
       underline.range(w.from, w.to),
     ),
   );
@@ -202,8 +239,8 @@ function spellMenu(
   focusFirst: boolean,
 ) {
   const word = view.state.doc.sliceString(range.from, range.to);
-  const typo = typoes.get(config.language);
-  const suggestions = typo ? typo.suggest(word, 5) : [];
+  const speller = spellers.get(config.language);
+  const suggestions = speller ? speller.suggest(word) : [];
   // Before the menu opens, which then takes the focus (and gives it back).
   view.focus();
   openMenu(x, y, (box) => {

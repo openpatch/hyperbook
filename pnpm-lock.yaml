@@ -9,6 +9,10 @@ overrides:
   '@codemirror/view': ^6.43.15
   '@codemirror/language': ^6.13.1
 
+patchedDependencies:
+  emscripten-wasm-loader@3.0.3: 767ee3af7168cde1341a3cc9a46d3aeb72312470ba8d080a0494986d8d885c96
+  hunspell-asm@4.0.2: d4840998ba34f9508fb6a895c70031f8696a40f418baf7cc9f5d0dfb7fe50095
+
 importers:
 
   .:
@@ -653,9 +657,6 @@ importers:
       '@tanstack/react-virtual':
         specifier: ^3.14.24
         version: 3.14.24(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
-      '@types/typo-js':
-        specifier: ^1.2.2
-        version: 1.2.2
       better-sqlite3:
         specifier: ^13.0.3
         version: 13.0.3
@@ -686,6 +687,9 @@ importers:
       hono:
         specifier: ^4.13.14
         version: 4.13.14
+      hunspell-asm:
+        specifier: 4.0.2
+        version: 4.0.2(patch_hash=d4840998ba34f9508fb6a895c70031f8696a40f418baf7cc9f5d0dfb7fe50095)
       i18next:
         specifier: ^26.5.11
         version: 26.5.11(typescript@7.0.2)
@@ -734,9 +738,6 @@ importers:
       tar:
         specifier: 7.5.22
         version: 7.5.22
-      typo-js:
-        specifier: ^1.4.0
-        version: 1.4.0
       yaml:
         specifier: ^2.9.1
         version: 2.9.1
@@ -4189,9 +4190,6 @@ packages:
   '@types/trusted-types@2.0.7':
     resolution: {integrity: sha512-ScaPdn1dQczgbl0QFTeTOmVHFULt394XJgOQNoyVhZ6r2vLnMLJfBPd53SB52T/3G36VI1/g2MZaX0cwDuXsfw==}
 
-  '@types/typo-js@1.2.2':
-    resolution: {integrity: sha512-AgN5IwO3EPXv2d+UE9VdoOcueCBa4ZcHHwUvx2/IXlfRvkW4Yt3g+eRHzJbkySfj9pyILRT6Zk7V6Vr4LD5Kvg==}
-
   '@types/unist@2.0.11':
     resolution: {integrity: sha512-CmBKiL6NNo/OqgmMn95Fk9Whlp2mtvIv+KNpQKN2F4SjvrEesubTRWGYSg+BnWZOnlCaSTU1sMpsBOzgbYhnsA==}
 
@@ -5878,6 +5876,10 @@ packages:
     resolution: {integrity: sha512-AnfC1ATldl49/cvZdLPDjBfrRNwbDO05aibiOtzQu3qtlbJtomNLhF30HEtn/7iBz50dlMECqATo3fG0LrdEgw==}
     engines: {node: '>=14'}
 
+  emscripten-wasm-loader@3.0.3:
+    resolution: {integrity: sha512-fyq2maBt5LOou27LEBlL5H6G04BxgSamXkvmMsAuIT6rd8ioH4BxNQhuyl6jVPeODh6U8Wk1BoFZxzHpg3o8wA==}
+    engines: {node: '>=10'}
+
   encodeurl@1.0.2:
     resolution: {integrity: sha512-TPJXq8JqFaVYm2CWmPvnP2Iyo4ZSM7/QKcSmuMLDObfpH5fi7RUGmd/rTDf+rut/saiDiQEeVTNgAmJEdAOx0w==}
     engines: {node: '>= 0.8'}
@@ -6309,6 +6311,10 @@ packages:
     resolution: {integrity: sha512-Ln0UQDlxH1BapMu3GPtf7CuYNwRZf2gwCuPqbyG6pB8WfmFpzqcy4xtAaAMUhnNqjMKTiCPZG2oMT3YSx8U2NA==}
     engines: {node: '>=0.10.0'}
 
+  getroot@1.0.0:
+    resolution: {integrity: sha512-W9Q31kOv921dQuZBeAbK4R/dAPbC0WkhZD3alLcdVwjSkEtS1aX8twrzG3I5yo0sQ88M/d4JOqVbRiCuI/XPNA==}
+    engines: {node: '>=4.2.4', npm: '>=3.0.0'}
+
   gifenc@1.0.3:
     resolution: {integrity: sha512-xdr6AdrfGBcfzncONUOlXMBuc5wJDtOueE3c5rdG0oNgtINLD+f2iFZltrBRZYzACRbKr+mSVU/x98zv2u3jmw==}
 
@@ -6570,6 +6576,10 @@ packages:
   human-id@4.2.2:
     resolution: {integrity: sha512-Z+8unD6em/MJwyrkWQ2M3wygRGI1+MztbutiNwk1DCuEPXOZRWGjtcMPZYP1exY9iNZMhd7ZOSMQSo9WYtiQRw==}
     hasBin: true
+
+  hunspell-asm@4.0.2:
+    resolution: {integrity: sha512-u3ZuEYKGYnLZlIs+k5S+KdY+Q57mYD46fTwZJCiSXdES+fhxcLNF5mJ0nxjqrPAgE/8Kow6XLxRdRd/HDUPQZg==}
+    engines: {node: '>=4'}
 
   husky@9.1.7:
     resolution: {integrity: sha512-5gs5ytaNjBrh5Ow3zrvdUUY+0VxIuWVL4i9irt6friV+BqdCfmV11CQTWMiBYWHbXhco+J1kHfTOUkePhCDvMA==}
@@ -7730,6 +7740,9 @@ packages:
 
   nan@2.30.0:
     resolution: {integrity: sha512-P5mokDkSvCGBz6mZDD/2l+w9QoICRXdCyZ9ONGmTePr40oihJg3Kpn0YU3twKd6PJnwSlLBWNQeOT6yWEV2c4A==}
+
+  nanoid@2.1.11:
+    resolution: {integrity: sha512-s/snB+WGm6uwi0WjsZdaVcuf3KJXlfGl2LcxgwkEwJF0D/BWzVWAZW/XY4bFaiR7s0Jk3FPvlnepg1H1b1UwlA==}
 
   nanoid@3.3.20:
     resolution: {integrity: sha512-uKdg2G3GNCKQn9byYOpxbGqrT2fGO5KRt5J/8b3pok8rT6qxGWF6hxMyJiEYtAf+FVyYuD9hRaDqX5uPFYJ4ZQ==}
@@ -9284,6 +9297,9 @@ packages:
       unrun:
         optional: true
 
+  tslib@1.14.1:
+    resolution: {integrity: sha512-Xni35NKzjgMrwevysHTCArtLDpPvye8zV/0E4EyYn43P7/7qvQwPh9BGkHewbMulVntbigmcT7rdX3BNo9wRJg==}
+
   tslib@2.8.1:
     resolution: {integrity: sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w==}
 
@@ -9358,9 +9374,6 @@ packages:
     resolution: {integrity: sha512-8FYau96o3NKOhbjKi/qNvG/W5jhzxkbdm5sj9AbZ/5T5sWqn3hJgLfGx27sRKZWTvyzCP8dLRBTf5tBTSRVUNA==}
     engines: {node: '>=16.20.0'}
     hasBin: true
-
-  typo-js@1.4.0:
-    resolution: {integrity: sha512-QP5VvwpQKk+xcKCbZmkHHtmdPt53ICuV/A4a1PXJOKeu6HdtBMgweScy7Gw1gxcHv6e2lFTUIM17PUxP7/GABg==}
 
   uglify-js@3.19.3:
     resolution: {integrity: sha512-v3Xu+yuwBXisp6QYTcH4UbH+xYJXqnq2m/LtQVWKWzYc1iehYnLixoQDN9FH6/j9/oybfd6W9Ghwkl8+UMKTKQ==}
@@ -9439,6 +9452,10 @@ packages:
 
   unix-crypt-td-js@1.1.4:
     resolution: {integrity: sha512-8rMeVYWSIyccIJscb9NdCfZKSRBKYTeVnwmiRYT2ulE3qd1RaDQ0xQDP+rI3ccIWbhu/zuo5cgN8z73belNZgw==}
+
+  unixify@1.0.0:
+    resolution: {integrity: sha512-6bc58dPYhCMHHuwxldQxO3RRNZ4eCogZ/st++0+fcC1nr0jiGUtAdBJ2qzmLQWSxbtz42pWt4QQMiZ9HvZf5cg==}
+    engines: {node: '>=0.10.0'}
 
   unpipe@1.0.0:
     resolution: {integrity: sha512-pjy2bYhSsufwWlKwPc+l3cN7+wuJlK6uz0YdJEOlQDbl6jo/YlPi4mb8agUkVC8BF7V8NuzeyPNqRksA3hztKQ==}
@@ -13376,8 +13393,6 @@ snapshots:
   '@types/trusted-types@2.0.7':
     optional: true
 
-  '@types/typo-js@1.2.2': {}
-
   '@types/unist@2.0.11': {}
 
   '@types/unist@3.0.3': {}
@@ -15052,6 +15067,12 @@ snapshots:
 
   empathic@2.1.0: {}
 
+  emscripten-wasm-loader@3.0.3(patch_hash=767ee3af7168cde1341a3cc9a46d3aeb72312470ba8d080a0494986d8d885c96):
+    dependencies:
+      getroot: 1.0.0
+      nanoid: 2.1.11
+      unixify: 1.0.0
+
   encodeurl@1.0.2: {}
 
   encodeurl@2.0.1: {}
@@ -15653,6 +15674,10 @@ snapshots:
 
   get-value@2.0.6: {}
 
+  getroot@1.0.0:
+    dependencies:
+      tslib: 1.14.1
+
   gifenc@1.0.3: {}
 
   gifwrap@0.10.1:
@@ -16019,6 +16044,11 @@ snapshots:
       - supports-color
 
   human-id@4.2.2: {}
+
+  hunspell-asm@4.0.2(patch_hash=d4840998ba34f9508fb6a895c70031f8696a40f418baf7cc9f5d0dfb7fe50095):
+    dependencies:
+      emscripten-wasm-loader: 3.0.3(patch_hash=767ee3af7168cde1341a3cc9a46d3aeb72312470ba8d080a0494986d8d885c96)
+      nanoid: 2.1.11
 
   husky@9.1.7: {}
 
@@ -17327,6 +17357,8 @@ snapshots:
 
   nan@2.30.0:
     optional: true
+
+  nanoid@2.1.11: {}
 
   nanoid@3.3.20: {}
 
@@ -19103,6 +19135,8 @@ snapshots:
       - oxc-resolver
       - vue-tsc
 
+  tslib@1.14.1: {}
+
   tslib@2.8.1: {}
 
   tsx@4.23.15:
@@ -19216,8 +19250,6 @@ snapshots:
       '@typescript/typescript-win32-arm64': 7.0.2
       '@typescript/typescript-win32-x64': 7.0.2
 
-  typo-js@1.4.0: {}
-
   uglify-js@3.19.3:
     optional: true
 
@@ -19309,6 +19341,10 @@ snapshots:
   universalify@2.0.1: {}
 
   unix-crypt-td-js@1.1.4: {}
+
+  unixify@1.0.0:
+    dependencies:
+      normalize-path: 2.1.1
 
   unpipe@1.0.0: {}
 

@@ -1,0 +1,22 @@
+diff --git a/dist/esm/hunspellLoader.js b/dist/esm/hunspellLoader.js
+--- a/dist/esm/hunspellLoader.js
++++ b/dist/esm/hunspellLoader.js
+@@ -1,5 +1,5 @@
+ import { mountBuffer, unmount } from 'emscripten-wasm-loader';
+-import * as nanoid from 'nanoid';
++import nanoid from 'nanoid';
+ import { log } from './util/logger';
+ import { wrapHunspellInterface } from './wrapHunspellInterface';
+ /**
+diff --git a/dist/esm/loadModule.js b/dist/esm/loadModule.js
+--- a/dist/esm/loadModule.js
++++ b/dist/esm/loadModule.js
+@@ -2,7 +2,7 @@
+ import { hunspellLoader } from './hunspellLoader';
+ import { log } from './util/logger';
+ //imports MODULARIZED emscripten preamble
+-import * as runtime from './lib/node/hunspell';
++import runtime from './lib/node/hunspell';
+ /**
+  * Load, initialize wasm binary to use actual hunspell wasm instances.
+  *
