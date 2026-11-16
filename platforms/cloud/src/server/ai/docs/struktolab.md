@@ -16,7 +16,10 @@ wiederhole für i = 1 bis 10:
 ```
 
 Attributes: `mode` (`preview` default, `edit`), `scale`, `fontSize` (default 14),
-`lang` (`de`/`en`, UI language), `colorMode` (`color`, `greyscale`, `bw`), `src`.
+`lang` (`de`/`en`, UI language), `colorMode` (`color`, `greyscale`, `bw`), `src`,
+`code` (the language it is written in: `pseudocode` default, `java`, `python`,
+`javascript`; a fence's language, ```java, says it too) and `hideCode` (a flag:
+in edit mode the diagram alone, without the code under it; the language stays).
 
 ## Pseudocode syntax
 

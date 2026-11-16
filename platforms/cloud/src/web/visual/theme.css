@@ -37,13 +37,3 @@ body {
   background-color: var(--color-background);
   color: var(--color-text);
 }
-
-/* struktolab's editor is drawn light only, but takes its text colour from
- * the page, and lets it show through: on the dark theme, light text on its
- * white buttons and code. It stays light here, readable, until struktolab
- * pins its own colours (fixed upstream after 0.8.1). */
-struktolab-editor {
-  color-scheme: light;
-  color: #242428;
-  background: #fff;
-}

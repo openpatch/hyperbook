@@ -46,7 +46,11 @@ export default (ctx: HyperbookContext) => () => {
           // The language the structogram is written in. A fence's language
           // (```java) says it too; this wins when both are there.
           code,
+          // The diagram alone, without the code under it (edit mode); the
+          // language stays. A flag ({hideCode}) or "true"/"false".
+          hideCode,
         } = node.attributes || {};
+        const hidden = hideCode != null && hideCode !== "false";
 
         expectDirective(node, file, "struktolab", ["leaf", "container"]);
 
@@ -105,6 +109,7 @@ export default (ctx: HyperbookContext) => () => {
               "font-size": fontSize,
               "scale": scale == null ? undefined : String(scale),
               "code-mode": codeMode ?? fenceMode,
+              "hide-code": hidden ? "" : undefined,
               "data-id": id,
               src: src
                 ? ctx.makeUrl(

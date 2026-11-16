@@ -57,6 +57,26 @@ describe("remarkDirectiveStruktolab", () => {
     expect(html).toContain('<script type="text/pseudocode">');
   });
 
+  it("hides the code and keeps its language", () => {
+    const html = String(
+      toHtml(':::struktolab{mode="edit" hideCode}\n```java\nvoid main() {\n}\n```\n:::', ctx).value,
+    );
+    expect(html).toContain('code-mode="java"');
+    expect(html).toContain("hide-code");
+    expect(html).toContain('data-code="java"');
+  });
+
+  it("hides the code of an empty structogram in a language", () => {
+    const html = String(toHtml('::struktolab{mode="edit" code="python" hideCode="true"}', ctx).value);
+    expect(html).toContain('code-mode="python"');
+    expect(html).toContain("hide-code");
+  });
+
+  it("shows the code with hideCode=false", () => {
+    const html = String(toHtml(':::struktolab{mode="edit" hideCode="false"}\n```\nausgabe(1)\n```\n:::', ctx).value);
+    expect(html).not.toContain("hide-code");
+  });
+
   it("ignores a code language it does not know", () => {
     const html = String(toHtml(':::struktolab{code="cobol"}\n```\nausgabe(1)\n```\n:::', ctx).value);
     expect(html).not.toContain("code-mode");

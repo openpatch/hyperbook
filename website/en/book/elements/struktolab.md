@@ -19,7 +19,8 @@ For more information on how to use Struktolab, see the [Struktolab documentation
 | `lang` | UI language: `de` or `en` | hyperbook language |
 | `colorMode` | Color mode: `color`, `greyscale`, or `bw` | `color` |
 | `src` | A structogram file (`.struktolab`, its tree as JSON) instead of a code block, e.g. `::struktolab{src="/loop.struktolab"}` | - |
-| `code` | The language the structogram is written in: `pseudocode`, `java`, `python` or `javascript`. In edit mode, `none` hides the code under the diagram. A code block's language (` ```java `) sets it too. | `pseudocode` |
+| `code` | The language the structogram is written in: `pseudocode`, `java`, `python` or `javascript`. A code block's language (` ```java `) sets it too. (`none` hides the code, the older way of saying `hideCode`.) | `pseudocode` |
+| `hideCode` | In edit mode, the diagram alone, without the code under it; the language stays. A flag (`{hideCode}`), or `true`/`false`. | off |
 
 ## Java, Python and JavaScript
 
@@ -131,6 +132,30 @@ if x > 0:
 else:
     output("not positiv")
 
+```
+:::
+````
+
+### Without the code
+
+`hideCode` shows the diagram alone in edit mode. The language stays: Java's function headers read like Java, and *Show code* in the editor's View brings the code back in that language.
+
+:::struktolab{mode="edit" hideCode}
+
+```java
+int twice(int x) {
+    return x * 2;
+}
+```
+
+:::
+
+````md
+:::struktolab{mode="edit" hideCode}
+```java
+int twice(int x) {
+    return x * 2;
+}
 ```
 :::
 ````
