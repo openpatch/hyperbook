@@ -11,6 +11,7 @@ import { createGunzip } from "node:zlib";
 import { z } from "zod";
 import { gitTokenInput } from "../../../shared/schemas";
 import { audit } from "../../audit";
+import { bookChanged } from "../../domain/book-events";
 import { FailureLimiter, OpLimiter } from "../../auth/rate-limit";
 import { randomToken, sha256 } from "../../crypto/tokens";
 import type { Deps } from "../../deps";
@@ -303,6 +304,8 @@ export function gitHttpRoutes(
       setSourceBytes(tx as unknown as Deps["db"], book.id, bytes);
       addCommits(tx as unknown as Deps["db"], book.id, added);
     });
+    const pusher = db.select({ name: users.displayName, email: users.email }).from(users).where(eq(users.id, userId)).get();
+    bookChanged(book.id, { commit: update.new, by: pusher ? pusher.name || pusher.email : null, via: "push" });
     audit(db, {
       actorUserId: userId,
       action: "book.push",

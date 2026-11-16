@@ -1688,3 +1688,45 @@ comments: id, thread_id → comment_threads (cascade),
   SyncTeX, so the line's words are matched against the source lines, and
   the clicked word is selected.
 
+
+## Editor sync: changes made elsewhere (2026-11-16)
+
+An open editor follows changes to `main` made somewhere else: an editor save
+in another browser, a `git push`, a zip upload.
+
+- **Server.** Every save, push and upload calls `bookChanged()`
+  (`domain/book-events.ts`, an in-process emitter: the platform is one
+  process). `GET /api/books/:id/events` (commenters and up) is an SSE
+  stream. It sends `head` (main's commit) first, so a reconnect catches up,
+  then a `change` event `{commit, by, via}` for each save, push or upload.
+  It pings every 25 s and ends after 10 minutes; the browser reconnects,
+  which checks access again (a revoked link stops there).
+- **Merge.** `POST /api/books/:id/files/merge {path, baseOid, text}`
+  (editors) runs `git merge-file` on the base, the unsaved text and the
+  version saved since, in a temp dir. It answers with their diff, the
+  merged text and the number of conflicts (marked as `<<<<<<< your version`
+  / `>>>>>>> their version`), or `deleted` when the file is gone. Nothing
+  is saved.
+- **Editor** (`editor/sync.tsx`). On an event, and when the browser tab
+  comes back into view, the editor fetches the file list and compares the
+  open tabs:
+  - A tab without unsaved text takes the new version in place: a minimal
+    replace outside the undo history, so cursor and scroll stay. A tab
+    whose file was deleted closes. Visual editors reload.
+  - A tab with unsaved text keeps it and gets a bar: *Show changes and
+    merge*, *Keep mine* (save over theirs), *Drop mine*. For a deleted
+    file: *Save mine again* or *Close*. Auto-save skips the file until the
+    teacher decides. The 409 dialog of a save also offers *Merge*.
+  - A merge makes their version the tab's base and puts the merged text in
+    the editor as unsaved, undoable text. Auto-save skips a file that
+    still has conflict markers. Saving it by hand asks first: a page about
+    git may contain markers on purpose.
+  - A check waits while this editor's own commits are running, plus 500 ms
+    for their follow-up, so its own saves never look like someone else's.
+- Restored drafts typed on an older version now get the same bar.
+- Tests: `tests/sync.test.ts`, the push event in `tests/git-http.test.ts`,
+  `tests/e2e/sync.e2e.ts`.
+- Limits: a second server process would need a shared bus instead of the
+  emitter. Over HTTP/1.1, each open editor holds one of the browser's six
+  connections per host. Production runs HTTP/2 behind Caddy, so this
+  matters only for the Vite dev proxy.

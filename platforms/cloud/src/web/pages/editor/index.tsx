@@ -147,6 +147,14 @@ import {
   useWorkspace,
 } from "./workspace";
 import { loadOpenFolders, saveOpenFolders } from "./session";
+import {
+  MergeDialog,
+  type MergeRequest,
+  RemoteChangeBar,
+  hasConflictMarkers,
+  replaceDoc,
+  useBookSync,
+} from "./sync";
 
 export function Component() {
   const { t } = useTranslation();
@@ -656,6 +664,10 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
   // The open files' editors, by path: the AI panel reads the active one's
   // selection at action time, and inserts its answer through it.
   const views = useRef(new Map<string, EditorView>()).current;
+  /** A text file's code editor, which can take someone else's version in place. */
+  const editorOf = (path: string) => (visualKind(path) ? null : (views.get(path) ?? null));
+  useBookSync({ bookId, ws, editorOf });
+  const [mergeRequest, setMergeRequest] = useState<MergeRequest | null>(null);
   /** Changes when an editor comes or goes, for the effects that use `views`. */
   const [viewsVersion, setViewsVersion] = useState(0);
 
@@ -884,6 +896,10 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
       .currentTabs()
       .filter((tab) => {
         if (!isDirty(tab)) return false;
+        // Changed by someone else meanwhile, or merged with conflicts left:
+        // the teacher decides first.
+        if (ws.remoteOf(tab.path)) return false;
+        if (tab.text !== undefined && hasConflictMarkers(tab.text)) return false;
         const kind = visualKind(tab.path);
         return !(kind && visualProblem(kind, tab.text!));
       })
@@ -1213,7 +1229,7 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
 
   /** Saves files; a conflict asks what to do. */
   /** Saves `paths`; false when anything kept them from being saved. */
-  const save = async (paths: string[]): Promise<boolean> => {
+  const save = async (paths: string[], force = false): Promise<boolean> => {
     for (const tab of ws
       .currentTabs()
       .filter((t) => paths.includes(t.path) && isDirty(t))) {
@@ -1227,6 +1243,27 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
         );
         return false;
       }
+    }
+    const marked = ws
+      .currentTabs()
+      .filter((t) => paths.includes(t.path) && isDirty(t) && t.text !== undefined && hasConflictMarkers(t.text))
+      .map((t) => t.path);
+    if (marked.length > 0 && !force) {
+      // A page about git may show markers on purpose: saving stays possible.
+      setChoice({
+        title: t("editor.sync.resolveMarkers", { path: marked.join(", ") }),
+        description: null,
+        choices: [
+          {
+            label: t("editor.sync.saveAnyway"),
+            variant: "destructive",
+            run: async () => {
+              if (await save(paths, true)) autoSavePaused.current = false;
+            },
+          },
+        ],
+      });
+      return false;
     }
     try {
       const result = await ws.save(paths);
@@ -1259,6 +1296,10 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
       const current = await fetchListing(bookId);
       const oid = (p: string) =>
         current.files.find((f) => f.path === p)?.oid ?? null;
+      const mergeable = conflicts.every((p) => {
+        const tab = ws.currentTabs().find((candidate) => candidate.path === p);
+        return editorOf(p) !== null && oid(p) !== null && tab?.loaded?.kind === "text" && !tab.loaded.encoding;
+      });
       setChoice({
         title: t("editor.actions.conflictTitle"),
         description: (
@@ -1269,6 +1310,19 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
           </>
         ),
         choices: [
+          ...(mergeable
+            ? [
+                {
+                  label: t("editor.actions.merge"),
+                  variant: "outline" as const,
+                  run: () => {
+                    // Each file gets its bar; the first one's merge opens now.
+                    for (const p of conflicts) ws.markRemote(p, { oid: oid(p), by: null });
+                    startMerge(conflicts[0]!);
+                  },
+                },
+              ]
+            : []),
           {
             label: t("editor.actions.dropMine"),
             variant: "outline",
@@ -1318,6 +1372,25 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
         ],
       });
       return false;
+    }
+  };
+
+  /** Opens the merge of `path`'s unsaved text with the version saved since. */
+  const startMerge = (path: string) => {
+    const tab = ws.currentTabs().find((candidate) => candidate.path === path);
+    if (!tab || tab.loaded?.kind !== "text" || tab.text === undefined) return;
+    setMergeRequest({ path, baseOid: tab.loaded.oid, text: tab.text });
+  };
+
+  /** Someone else changed or deleted the file: the teacher's version wins. */
+  const keepMine = async (path: string) => {
+    const change = ws.remoteOf(path);
+    if (!change) return;
+    try {
+      await ws.save([path], { [path]: change.oid });
+      autoSavePaused.current = false;
+    } catch (error) {
+      fail(error instanceof ConflictError ? new Error(t("editor.actions.changedElsewhere")) : error);
     }
   };
 
@@ -2358,42 +2431,62 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
                 id={`editor-panel-${index}`}
                 aria-labelledby={`editor-tab-${index}`}
                 className={cn(
-                  "absolute inset-0",
+                  "absolute inset-0 flex flex-col",
                   tab.path !== ws.active && "hidden",
                 )}
               >
-                <TabContent
-                  ws={ws}
-                  tab={tab}
-                  readOnly={readOnly}
-                  files={listing.files.map((f) => f.path)}
-                  settings={settings}
-                  spell={spell}
-                  commentConfig={commentConfigFor(tab.path)}
-                  drop={
-                    !readOnly && isMarkdownPage(tab.path)
-                      ? fileDrop(() => latestDrop.current(tab.path))
-                      : []
-                  }
-                  onView={(path, view) => {
-                    if (view) {
-                      views.set(path, view);
-                      syncThreads(view, latestEditorThreads.current(path));
-                    } else views.delete(path);
-                    setViewsVersion((v) => v + 1);
-                  }}
-                  onEditBlock={(block, view) =>
-                    editBlock(tab.path, block, view)
-                  }
-                  onChange={(text) => changeText(tab.path, text)}
-                  onSave={() => void saveByHand([tab.path])}
-                  onReplace={() => {
-                    uploadFolder.current = parentOf(tab.path);
-                    replaceTarget.current = tab.path;
-                    uploadInput.current?.click();
-                  }}
-                  onDownload={() => actions.download(tab.path)}
-                />
+                {ws.remote.get(tab.path) && (
+                  <RemoteChangeBar
+                    change={ws.remote.get(tab.path)!}
+                    mergeable={
+                      !readOnly &&
+                      tab.loaded?.kind === "text" &&
+                      !tab.loaded.encoding &&
+                      editorOf(tab.path) !== null
+                    }
+                    onMerge={() => startMerge(tab.path)}
+                    onDrop={() => void ws.reload(tab.path)}
+                    onKeep={() => void keepMine(tab.path)}
+                    onClose={() => ws.close(tab.path)}
+                  />
+                )}
+                {/* Below the bar, the same box the tab had without it. */}
+                <div className="relative min-h-0 flex-1">
+                  <div className="absolute inset-0">
+                    <TabContent
+                      ws={ws}
+                      tab={tab}
+                      readOnly={readOnly}
+                      files={listing.files.map((f) => f.path)}
+                      settings={settings}
+                      spell={spell}
+                      commentConfig={commentConfigFor(tab.path)}
+                      drop={
+                        !readOnly && isMarkdownPage(tab.path)
+                          ? fileDrop(() => latestDrop.current(tab.path))
+                          : []
+                      }
+                      onView={(path, view) => {
+                        if (view) {
+                          views.set(path, view);
+                          syncThreads(view, latestEditorThreads.current(path));
+                        } else views.delete(path);
+                        setViewsVersion((v) => v + 1);
+                      }}
+                      onEditBlock={(block, view) =>
+                        editBlock(tab.path, block, view)
+                      }
+                      onChange={(text) => changeText(tab.path, text)}
+                      onSave={() => void saveByHand([tab.path])}
+                      onReplace={() => {
+                        uploadFolder.current = parentOf(tab.path);
+                        replaceTarget.current = tab.path;
+                        uploadInput.current?.click();
+                      }}
+                      onDownload={() => actions.download(tab.path)}
+                    />
+                  </div>
+                </div>
               </div>
             ))}
             {!activeTab && (
@@ -2485,6 +2578,28 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
         )}
       </div>
 
+      <MergeDialog
+        bookId={bookId}
+        request={mergeRequest}
+        onClose={() => setMergeRequest(null)}
+        onApply={(result) => {
+          setMergeRequest(null);
+          const view = editorOf(result.path);
+          if (!view) return;
+          // Theirs is the new base; the editor holds both changes, unsaved
+          // (and undoable), and saves them as usual.
+          ws.adopt(result.path, { oid: result.oid, text: result.theirs }, result.merged);
+          replaceDoc(view, result.merged, true);
+          ws.markRemote(result.path, null);
+          autoSavePaused.current = false;
+          void queryClient.invalidateQueries({ queryKey: threadsKey(bookId) });
+          if (result.conflicts > 0) toast.warning(t("editor.sync.mergedConflicts", { path: result.path }));
+          else {
+            toast.success(t("editor.sync.merged"));
+            scheduleAutoSave();
+          }
+        }}
+      />
       <ChoiceDialog
         request={choice}
         onClose={(closed) => {

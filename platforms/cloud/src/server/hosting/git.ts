@@ -588,6 +588,48 @@ export async function diffChange(change: DiffChange): Promise<string> {
   }
 }
 
+/**
+ * A three-way merge of one text file with `git merge-file`: what `mine` and
+ * `theirs` each changed since `base`, together. Overlapping changes come
+ * back between conflict markers labelled `labels`; `conflicts` counts them.
+ * Like diffChange, it works in its own temp directory and touches no
+ * repository.
+ */
+export async function mergeTexts(
+  base: string,
+  mine: string,
+  theirs: string,
+  labels: { mine: string; base: string; theirs: string },
+): Promise<{ text: string; conflicts: number }> {
+  const dir = mkdtempSync(path.join(os.tmpdir(), "cloud-merge-"));
+  try {
+    await writeFile(path.join(dir, "mine"), mine);
+    await writeFile(path.join(dir, "base"), base);
+    await writeFile(path.join(dir, "theirs"), theirs);
+    // The exit code is the number of conflicts (capped at 127); a negative
+    // one, which the shell sees as 128 and above, is a failure.
+    const child = spawnGit(
+      ["merge-file", "-p", "-L", labels.mine, "-L", labels.base, "-L", labels.theirs, "mine", "base", "theirs"],
+      { gitDir: dir, cwd: dir },
+    );
+    const out: Buffer[] = [];
+    const err: Buffer[] = [];
+    child.stdout.on("data", (d: Buffer) => out.push(d));
+    child.stderr.on("data", (d: Buffer) => err.push(d));
+    child.stdin.end();
+    const code = await new Promise<number | null>((resolve, reject) => {
+      child.on("error", reject);
+      child.on("close", resolve);
+    });
+    if (code === null || code > 127) {
+      throw new GitError(["merge-file"], code, Buffer.concat(err).toString("utf8"));
+    }
+    return { text: Buffer.concat(out).toString("utf8"), conflicts: code };
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+}
+
 /** gitBytes for commands whose non-zero exit codes are answers. */
 async function gitBytesOk(
   args: string[],

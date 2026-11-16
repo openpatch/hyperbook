@@ -34,7 +34,8 @@ const COMMENTER_ROUTES = new Set([
 ]);
 
 /** Routes whose own checks are tested elsewhere (comments, links). */
-const SEPARATE = /^\/books\/:id\/(comments|links)\b/;
+// The event stream never ends; sync.test.ts covers who may open it.
+const SEPARATE = /^\/books\/:id\/(comments|links|events)\b/;
 
 describe("commenter role", () => {
   it("is refused on every book route but the reading ones", async () => {

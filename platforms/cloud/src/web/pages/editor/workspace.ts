@@ -24,6 +24,13 @@ export type Tab = {
 export const isDirty = (tab: Tab) =>
   tab.status === "ready" && tab.loaded?.kind === "text" && tab.text !== tab.loaded.text;
 
+/**
+ * A newer version of an open file with unsaved text, saved by someone else
+ * (see sync.tsx): `oid` null when it was deleted. Auto-save leaves the file
+ * alone until the teacher decides.
+ */
+export type RemoteChange = { oid: string | null; by: string | null };
+
 /** Thrown by save() when files were changed by someone else in the meantime. */
 export class ConflictError extends Error {
   constructor(readonly paths: string[]) {
@@ -89,6 +96,11 @@ export function useWorkspace(
   const queryClient = useQueryClient();
   const [tabs, setTabs] = useState<Tab[]>([]);
   const [active, setActive] = useState<string | null>(null);
+  const [remote, setRemote] = useState<ReadonlyMap<string, RemoteChange>>(new Map());
+  const remoteRef = useRef(remote);
+  remoteRef.current = remote;
+  /** Commits on their way: the listing they answer with is not someone else's change. */
+  const pending = useRef(0);
   const tabsRef = useRef(tabs);
   tabsRef.current = tabs;
   const live = useRef(new LiveTexts()).current;
@@ -139,6 +151,17 @@ export function useWorkspace(
 
   const patchTab = useCallback((path: string, patch: Partial<Tab> | ((tab: Tab) => Partial<Tab>)) => {
     setTabs((all) => all.map((t) => (t.path === path ? { ...t, ...(typeof patch === "function" ? patch(t) : patch) } : t)));
+  }, []);
+
+  const markRemote = useCallback((path: string, change: RemoteChange | null) => {
+    setRemote((all) => {
+      if (!change && !all.has(path)) return all;
+      const next = new Map(all);
+      if (change) next.set(path, change);
+      else next.delete(path);
+      remoteRef.current = next;
+      return next;
+    });
   }, []);
 
   const load = useCallback(
@@ -195,11 +218,12 @@ export function useWorkspace(
   /** Loads a file again from the server, dropping unsaved changes. */
   const reload = useCallback(
     async (path: string) => {
+      markRemote(path, null);
       patchTab(path, { status: "loading" });
       await dropDraft(path);
       return load(path);
     },
-    [dropDraft, load, patchTab],
+    [dropDraft, load, markRemote, patchTab],
   );
 
   /** Opens the files that have drafts, so their unsaved text is back; resolves to them. */
@@ -243,6 +267,7 @@ export function useWorkspace(
   /** Closes a tab; its unsaved text, if any, is dropped. */
   const close = useCallback((path: string) => {
     void dropDraft(path);
+    markRemote(path, null);
     live.delete(path);
     setTabs((all) => {
       const i = all.findIndex((t) => t.path === path);
@@ -250,7 +275,7 @@ export function useWorkspace(
       setActive((a) => (a === path ? (next[Math.min(i, next.length - 1)]?.path ?? null) : a));
       return next;
     });
-  }, [dropDraft, live]);
+  }, [dropDraft, live, markRemote]);
 
   const setText = useCallback(
     (path: string, text: string) => {
@@ -282,6 +307,7 @@ export function useWorkspace(
   /** Commits `changes`; on a conflict throws ConflictError with the paths. */
   const commit = useCallback(
     async (changes: FileChange[], message?: string) => {
+      pending.current++;
       try {
         const res = await commitFiles(bookId, changes, message);
         applyListing(res);
@@ -293,6 +319,10 @@ export function useWorkspace(
           throw new ConflictError(error.body.conflicts as string[]);
         }
         throw error;
+      } finally {
+        // A moment later: the caller's own follow-up (the saved text as the
+        // new base, tabs following a move) has to reach the tabs first.
+        setTimeout(() => pending.current--, 500);
       }
     },
     [applyListing, bookId, queryClient],
@@ -327,10 +357,31 @@ export function useWorkspace(
       );
       // Saved: the draft goes, or follows what was typed since.
       for (const t of toSave) keepDraft(t.path, 0);
+      // Saved over someone else's version (or theirs merged in): settled.
+      for (const t of toSave) markRemote(t.path, null);
       /** What was saved, as the blob it became. */
       return { saved: toSave.map((t) => ({ path: t.path, oid: oids.get(t.path)! })) };
     },
-    [commit, currentTabs, keepDraft, live],
+    [commit, currentTabs, keepDraft, live, markRemote],
+  );
+
+  /**
+   * Makes `loaded` the version a text tab is based on, without loading it
+   * again (its editor and cursor stay): someone else's save of a file with
+   * no unsaved text, or the other side of a merge. `text` is what the tab
+   * holds now, which the caller puts into its editor.
+   */
+  const adopt = useCallback(
+    (path: string, loaded: { oid: string; text: string }, text: string) => {
+      const update = (t: Tab): Tab =>
+        t.path === path && t.loaded?.kind === "text" ? { ...t, text, loaded: { ...t.loaded, ...loaded } } : t;
+      // Right away, so the editor's change that follows sees the new base.
+      tabsRef.current = tabsRef.current.map(update);
+      setTabs((all) => all.map(update));
+      live.set(path, text);
+      keepDraft(path, 0);
+    },
+    [keepDraft, live],
   );
 
   /** After a move, open tabs follow their files. */
@@ -343,6 +394,11 @@ export function useWorkspace(
       void dropDraft(from);
     }
     setTabs((all) => all.map((t) => (moves.has(t.path) ? { ...t, path: moves.get(t.path)! } : t)));
+    setRemote((all) => {
+      const next = new Map([...all].map(([p, change]) => [moves.get(p) ?? p, change] as const));
+      remoteRef.current = next;
+      return next;
+    });
     setActive((a) => (a && moves.has(a) ? moves.get(a)! : a));
   }, [dropDraft, live]);
 
@@ -374,6 +430,13 @@ export function useWorkspace(
     save,
     commit,
     renameTabs,
+    adopt,
+    /** Open files with unsaved text that someone else changed or deleted since. */
+    remote,
+    remoteOf: (path: string) => remoteRef.current.get(path),
+    markRemote,
+    /** Whether a commit of this editor is on its way. */
+    isBusy: () => pending.current > 0,
     dirty,
     dirtyOf,
     oidOf,

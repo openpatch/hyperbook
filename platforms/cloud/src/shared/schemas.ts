@@ -456,6 +456,13 @@ export const commitFilesInput = z.object({
   changes: z.array(fileChange).min(1).max(1000),
 });
 
+/** The editor's unsaved text of `path`, typed on `baseOid`, to merge with the file as it is now. */
+export const mergeFileInput = z.object({
+  path: bookPath,
+  baseOid: oid,
+  text: z.string().max(4 * 1024 * 1024),
+});
+
 export const initFilesInput = z.object({
   template: z.enum(["default", "empty"]),
 });

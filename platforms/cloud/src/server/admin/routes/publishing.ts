@@ -10,6 +10,7 @@ import { HTTPException } from "hono/http-exception";
 import { z } from "zod";
 import { publishInput, publishingLockInput, publishRequestInput, rollbackInput } from "../../../shared/schemas";
 import { audit } from "../../audit";
+import { bookChanged } from "../../domain/book-events";
 import type { SessionUser } from "../../auth/sessions";
 import { bookLinks, bookMembers, books, builds, users } from "../../db/schema";
 import type { Deps } from "../../deps";
@@ -320,7 +321,10 @@ export function bookPublishingRoutes({ db, config, mailer, builds: queue, checks
             throw error;
           });
           setSourceBytes(db, book.id, (await listTree(repo, commit)).reduce((sum, e) => sum + e.size, 0));
-          if (changed) addCommits(db, book.id, 1);
+          if (changed) {
+            addCommits(db, book.id, 1);
+            bookChanged(book.id, { commit, by: author(user).name, via: "upload" });
+          }
           // No build: the preview shows the upload at once, and publishing
           // builds it. A check of all pages says early whether it renders.
           if (changed) checks.start(book.id);
