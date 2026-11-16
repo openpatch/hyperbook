@@ -33,6 +33,9 @@ import { hangingIndent } from "./hanging-indent";
 import { hyperbookSyntax } from "./syntax-theme";
 import { vimMode } from "./vim";
 import { watchView } from "./outline";
+import { type ExplainRequest, explainWithAi } from "./ai-explain";
+import { formatCompletions } from "./format";
+import { type InsertHost, insertHost, slashCompletion } from "./insert";
 
 function language(path: string): Extension {
   switch (extension(path)) {
@@ -312,6 +315,7 @@ const heightCompartment = new Compartment();
 const fontCompartment = new Compartment();
 const spellCompartment = new Compartment();
 const vimCompartment = new Compartment();
+const explainCompartment = new Compartment();
 
 export type SpellOptions = {
   enabled: boolean;
@@ -337,6 +341,8 @@ export function CodeEditor({
   spell,
   readOnly = false,
   extensions = [],
+  onExplain,
+  insert,
 }: {
   path: string;
   initial: string;
@@ -358,6 +364,10 @@ export function CodeEditor({
   readOnly?: boolean;
   /** More extensions (comments), fixed for the editor's life. */
   extensions?: Extension;
+  /** "Explain with AI" on errors; without it, errors have no such button. */
+  onExplain?: (request: ExplainRequest) => void;
+  /** Pages and Typst files: what inserting elements and images needs (see insert.ts). */
+  insert?: InsertHost;
 }) {
   const host = useRef<HTMLDivElement>(null);
   const view = useRef<EditorView | null>(null);
@@ -372,6 +382,8 @@ export function CodeEditor({
     onPageSettings,
     files,
     spell,
+    onExplain,
+    insert,
   });
   callbacks.current = {
     onChange,
@@ -380,7 +392,14 @@ export function CodeEditor({
     onPageSettings,
     files,
     spell,
+    onExplain,
+    insert,
   };
+  /** The errors' "Explain with AI", while someone answers it. */
+  const explainFor = (on: boolean): Extension =>
+    on && !readOnly
+      ? explainWithAi.of((request) => callbacks.current.onExplain?.(request))
+      : [];
 
   /** Spell check for this file, with a dictionary we have; null switches it off. */
   const spellConfig = (): SpellConfig | null => {
@@ -436,6 +455,15 @@ export function CodeEditor({
           // word shows its corrections, everywhere else the editor's menu.
           spellCompartment.of(spellConfig() ? spellCheck(spellConfig()!) : []),
           contextMenu({ readOnly }),
+          explainCompartment.of(explainFor(!!onExplain)),
+          // The "/" menu and the toolbar's elements and images, for writers.
+          insert && !readOnly
+            ? insertHost.of({
+                uploadImage: (...args) => callbacks.current.insert?.uploadImage(...args),
+                createFile: (...args) => callbacks.current.insert?.createFile(...args) ?? null,
+                editBlock: (...args) => callbacks.current.insert?.editBlock(...args),
+              })
+            : [],
           readOnly ? [EditorState.readOnly.of(true)] : [],
           // Wrapped lines continue under their own indentation.
           wrapsLines(path)
@@ -449,6 +477,11 @@ export function CodeEditor({
             ? [
                 typstLint,
                 typstImportCompletion,
+                readOnly
+                  ? []
+                  : EditorState.languageData.of(() => [
+                      { autocomplete: slashCompletion({ elements: false, extra: () => formatCompletions("typst") }) },
+                    ]),
                 // From the cursor to its line in the PDF preview.
                 keymap.of([
                   {
@@ -472,6 +505,10 @@ export function CodeEditor({
             ? pageLanguage({
                 files: () => callbacks.current.files,
                 path: () => pathRef.current,
+                slash:
+                  isMarkdownPage(path) && !readOnly
+                    ? slashCompletion({ elements: true, extra: () => formatCompletions("markdown") })
+                    : undefined,
                 onPageSettings:
                   isMarkdownPage(path) && onPageSettings && !readOnly
                     ? (v) => callbacks.current.onPageSettings?.(v)
@@ -515,6 +552,7 @@ export function CodeEditor({
   // The settings apply while editing, without rebuilding the editor.
   const { lineNumbers, lineHeight, font, vim } = settings;
   const { enabled, language: spellLanguage, words } = spell ?? {};
+  const explains = !!onExplain;
   useEffect(() => {
     const config = spellConfig();
     view.current?.dispatch({
@@ -524,11 +562,12 @@ export function CodeEditor({
         fontCompartment.reconfigure(fontTheme(fontOf(font).stack)),
         spellCompartment.reconfigure(config ? spellCheck(config) : []),
         vimCompartment.reconfigure(vimFor(vim)),
+        explainCompartment.reconfigure(explainFor(explains)),
       ],
     });
     // Another font means other character widths, so the editor re-measures.
     view.current?.requestMeasure();
-  }, [lineNumbers, lineHeight, font, vim, enabled, spellLanguage, words, path]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [lineNumbers, lineHeight, font, vim, enabled, spellLanguage, words, path, explains]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div

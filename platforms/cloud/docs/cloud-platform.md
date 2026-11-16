@@ -757,7 +757,8 @@ books there run as if logged out.
   written into the checkout (one page at a time, until the next save) and
   rendered, and the frame reloads in place, keeping its scroll position.
 - Visiting a page on the preview host renders it unless it is fresh; other
-  files come from the checkout (`public/`, `book/`, `glossary/`).
+  files come from the checkout: `public/` and `book/` at the root,
+  `glossary/` under `/glossary/`, as the build copies them.
 
 - The editor asks the admin API for a one-time code (60 s) and frames
   `https://<slug>--preview.<BOOKS_DOMAIN>/_hyperbook/preview#c=<code>&next=<path>`.
@@ -792,6 +793,15 @@ preview_sessions  id_hash, user_id, book_id, expires_at
   asks first.
 - **Conflicts** (409): reload the file (drop mine), overwrite, or save mine
   as a copy.
+- **Writing help** for pages and `.typ` files: a formatting toolbar
+  (heading, bold, italic, lists, link, image, table, code) that writes the
+  file's own syntax and shows it in each tooltip; on pages *Element* and the
+  `/` menu (see "Creating" below). Images pasted, dropped or picked are
+  uploaded next to the file and linked relatively (`![x](./x.png)`,
+  `#image("x.png")`).
+- **Explain with AI**: every error and warning (the page checks, Typst's
+  syntax and compiler) offers it while the AI is available; it opens the
+  assistant with a new chat asking about the message and the lines around it.
 - **Preview pane** beside the editor, showing the page of the open file
   (`book/a/b.md` → `/a/b`, `book/a/index.md` → `/a`, `glossary/x.md` →
   `/glossary/x`), reloaded when the build of the newest save succeeds; the
@@ -892,10 +902,12 @@ touching its VM.
    `::::blockflow-editor{project=…}`, `:::struktolab`, …) gets an "Edit
    visually" action. For a `src`/`project` element it opens that file; for
    inline struktolab it edits the code block and writes it back into the page.
-3. **Creating**: "Insert" above a page offers learning map, drawing, Java
-   memory diagram, flow and structogram. Each creates a starter file in
-   `public/` (which every element's `src` lookup checks first) and inserts
-   the directive with `src="/<name>.<ext>"` at the cursor. A new `.jmp` starts empty and gets
+3. **Creating**: *Element* in the page's toolbar (or `/` at the start of a
+   line) lists the elements by what they do (`editor/insert.ts`). Learning
+   map, drawing, Java memory diagram, task flow and Scratch project create a
+   starter file next to the page, insert the directive with
+   `src="./<name>.<ext>"` and open the file in its editor; a structogram is
+   written into the page and opens in its visual editor. A new `.jmp` starts empty and gets
    the playground's example diagram (unsaved) when it opens.
 
 Which files belong to which element comes from the file's extension:

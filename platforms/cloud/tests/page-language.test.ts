@@ -333,6 +333,8 @@ describe("relative links", () => {
     expect(linkBase("book/a/index.md")).toEqual(["a"]);
     expect(linkBase("snippets/x.md.hbs")).toBeNull();
     expect(linkBase("book/a/img.png")).toBeNull();
+    expect(linkBase("glossary/term.md")).toEqual(["glossary"]);
+    expect(linkBase("glossary/sub/term.md")).toEqual(["glossary", "sub"]);
   });
 
   it("lead where the link from the root leads", () => {

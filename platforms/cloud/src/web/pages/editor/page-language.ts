@@ -3,6 +3,7 @@ import {
   type Completion,
   type CompletionContext,
   type CompletionResult,
+  type CompletionSource,
   autocompletion,
   snippetCompletion,
 } from "@codemirror/autocomplete";
@@ -23,6 +24,7 @@ import {
 } from "@codemirror/view";
 import { parse as parseYaml } from "yaml";
 import { type Attribute, DIRECTIVES, type Directive, PAGE_DOCS, directive, docsUrl } from "./directives";
+import { explainChanged, withExplain } from "./ai-explain";
 import { pageOf } from "./files";
 import { findFrontmatter } from "./frontmatter";
 
@@ -259,21 +261,28 @@ function help(d: Directive, attr?: Attribute): HTMLElement {
 
 // ---- Completion ------------------------------------------------------------
 
-/** Paths the book's files are addressed by from a page. */
+/**
+ * Paths the book's files are addressed by from a page: public/ and book/
+ * from the root, glossary/ under /glossary (pages excepted).
+ */
 export function publicPath(file: string): string | null {
   if (file.startsWith("public/")) return "/" + file.slice("public/".length);
   if (file.startsWith("book/") && !file.endsWith(".md")) return "/" + file.slice("book/".length);
+  if (file.startsWith("glossary/") && !pageOf(file)) return "/" + file;
   return null;
 }
 
 /**
  * The folder relative links on a page resolve against, as Hyperbook resolves
- * them: the page file's folder ("book/a/b.md" and "book/a/index.md": "/a").
- * Null for other files, like snippets, which resolve on the page they go in.
+ * them: the page file's folder ("book/a/b.md" and "book/a/index.md": "/a";
+ * "glossary/t.md": "/glossary"). Null for other files, like snippets, which
+ * resolve on the page they go in.
  */
 export function linkBase(file: string): string[] | null {
-  if (!file.startsWith("book/") || !pageOf(file)) return null;
-  return file.split("/").slice(1, -1);
+  if (!pageOf(file)) return null;
+  if (file.startsWith("book/")) return file.split("/").slice(1, -1);
+  if (file.startsWith("glossary/")) return file.split("/").slice(0, -1);
+  return null;
 }
 
 /** The book's address `to` as a relative link from the folder `base`. */
@@ -536,8 +545,8 @@ const check = linter((view) => {
       });
     }
   }
-  return out;
-});
+  return withExplain(view, out);
+}, { needsRefresh: explainChanged });
 
 // ---- Highlighting ----------------------------------------------------------
 
@@ -803,7 +812,10 @@ export function pageLanguage({
   files,
   path,
   onPageSettings,
+  slash,
 }: {
+  /** The "/" menu at the start of a line (see insert.ts). */
+  slash?: CompletionSource;
   /** The book's files, for links and `src`. */
   files: () => string[];
   /** The file being edited, for relative links; it changes when renamed. */
@@ -816,7 +828,7 @@ export function pageLanguage({
     outlineField,
     directiveFolds,
     directiveHighlight,
-    autocompletion({ override: [pageCompletion(files, path)], icons: false }),
+    autocompletion({ override: [pageCompletion(files, path), ...(slash ? [slash] : [])], icons: false }),
     hoverHelp,
     check,
     pageTheme,

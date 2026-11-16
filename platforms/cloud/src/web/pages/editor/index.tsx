@@ -58,6 +58,10 @@ import {
 } from "./dialogs";
 import { fromKeyboard, item, menuPoint, openMenu, separator } from "./context-menu";
 import { type DropHandler, dropPath, fileDrop, linkTo } from "./file-drop";
+import type { ExplainRequest } from "./ai-explain";
+import { FormatToolbar } from "./format-toolbar";
+import { type InsertHost, type InsertItem, insertItem } from "./insert";
+import { InsertDialog } from "./insert-dialog";
 import {
   editFolder,
   FileTree,
@@ -769,6 +773,23 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
     !viaLink &&
     (aiStatus.data?.enabled ?? false) &&
     (aiStatus.data?.allowed ?? false);
+  /** A question for the AI panel, like "Explain with AI" on an error. */
+  const [aiRequest, setAiRequest] = useState<{ id: number; text: string } | null>(null);
+  /** "Explain with AI" on an error of `path`: asked in the AI panel, shown. */
+  const explain = (path: string, request: ExplainRequest) => {
+    setAiRequest({
+      id: Date.now(),
+      text: t("editor.explain.prompt", {
+        message: request.message,
+        path,
+        line: request.line,
+        excerpt: request.excerpt,
+      }),
+    });
+    showView("ai");
+  };
+  const latestExplain = useRef(explain);
+  latestExplain.current = explain;
 
   // The book's own spell-check words (see routes/dictionary.ts).
   const { data: dictionary } = useQuery({
@@ -1675,6 +1696,46 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
   const latestDrop = useRef(dropInto);
   latestDrop.current = dropInto;
 
+  /** Where the picture asked for by Image goes, once picked. */
+  const imageTarget = useRef<{ page: string; view: EditorView; from: number; to: number } | null>(null);
+  const imageInput = useRef<HTMLInputElement>(null);
+  /** Images and elements inserted into `page` (see insert.ts). */
+  const insertInto = (page: string): InsertHost => ({
+    uploadImage: (view, from, to) => {
+      imageTarget.current = { page, view, from, to };
+      imageInput.current?.click();
+    },
+    createFile: (_view, item: InsertItem) => {
+      if (!item.file) return null;
+      const path = dropPath(page, item.file.name, exists);
+      void commitAndOpen(
+        [
+          {
+            op: "write",
+            path,
+            content: starter(path, bookLanguage),
+            encoding: starterEncoding(path),
+            baseOid: null,
+          },
+        ],
+        path,
+      ).catch(fail);
+      return `./${path.split("/").pop()}`;
+    },
+    editBlock: (block, view) => editBlock(page, block, view),
+  });
+  const latestInsert = useRef(insertInto);
+  latestInsert.current = insertInto;
+  /** The same for each tab, so it can be handed out once. */
+  const insertHostFor = useCallback(
+    (path: string): InsertHost => ({
+      uploadImage: (...args) => latestInsert.current(path).uploadImage(...args),
+      createFile: (...args) => latestInsert.current(path).createFile(...args),
+      editBlock: (...args) => latestInsert.current(path).editBlock(...args),
+    }),
+    [],
+  );
+
   const actions = {
     open: ws.open,
     download: (path: string) => {
@@ -2324,6 +2385,8 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
                 closeTab={ws.close}
                 reloadTab={ws.reload}
                 commit={ws.commit}
+                request={aiRequest}
+                onRequestTaken={() => setAiRequest(null)}
               />
             </section>
           )}
@@ -2349,6 +2412,24 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
         )}
 
         <main className="flex min-w-0 flex-1 flex-col">
+          <input
+            ref={imageInput}
+            type="file"
+            accept="image/*"
+            multiple
+            className="sr-only"
+            tabIndex={-1}
+            aria-label={t("editor.format.chooseImage")}
+            onChange={(e) => {
+              const files = [...(e.target.files ?? [])];
+              e.target.value = "";
+              const target = imageTarget.current;
+              imageTarget.current = null;
+              if (!target || files.length === 0) return;
+              // Uploaded next to the file and linked, like a dropped picture.
+              latestDrop.current(target.page).files(target.view, files, target.from, target.to);
+            }}
+          />
           <input
             ref={uploadInput}
             type="file"
@@ -2462,7 +2543,9 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
                       spell={spell}
                       commentConfig={commentConfigFor(tab.path)}
                       drop={
-                        !readOnly && isMarkdownPage(tab.path)
+                        !readOnly &&
+                        (isMarkdownPage(tab.path) ||
+                          extension(tab.path) === "typ")
                           ? fileDrop(() => latestDrop.current(tab.path))
                           : []
                       }
@@ -2475,6 +2558,19 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
                       }}
                       onEditBlock={(block, view) =>
                         editBlock(tab.path, block, view)
+                      }
+                      insert={
+                        !readOnly &&
+                        (isMarkdownPage(tab.path) ||
+                          extension(tab.path) === "typ")
+                          ? insertHostFor(tab.path)
+                          : undefined
+                      }
+                      onExplain={
+                        aiAvailable
+                          ? (request) =>
+                              latestExplain.current(tab.path, request)
+                          : undefined
                       }
                       onChange={(text) => changeText(tab.path, text)}
                       onSave={() => void saveByHand([tab.path])}
@@ -2730,6 +2826,8 @@ function TabContent({
   settings,
   spell,
   onEditBlock,
+  onExplain,
+  insert,
   onView,
   onChange,
   onSave,
@@ -2747,6 +2845,10 @@ function TabContent({
   settings: EditorSettings;
   spell: SpellOptions;
   onEditBlock: (block: Block, view: EditorView) => void;
+  /** "Explain with AI" on the file's errors, while the AI is available. */
+  onExplain?: (request: ExplainRequest) => void;
+  /** Pages and Typst files: inserting images and elements (see insert.ts). */
+  insert?: InsertHost;
   /** Reports the tab's editor while it lives, for the AI panel. */
   onView: (path: string, view: EditorView | null) => void;
   onChange: (text: string) => void;
@@ -2761,6 +2863,8 @@ function TabContent({
     text: string;
     path: string;
   } | null>(null);
+  /** The Insert element dialog is open. */
+  const [inserting, setInserting] = useState(false);
   if (tab.status === "loading")
     return <p className="p-4 text-muted-foreground">{t("common.loading")}</p>;
   if (tab.status === "error")
@@ -2788,6 +2892,8 @@ function TabContent({
         onChange={onChange}
         onSave={onSave}
         onEditBlock={onEditBlock}
+        onExplain={onExplain}
+        insert={insert}
         onPageSettings={(view) =>
           setPageSettings({
             view,
@@ -2805,10 +2911,41 @@ function TabContent({
         }}
       />
     );
-    if (pageOf(tab.path)) {
+    const writable = !readOnly && !loaded.encoding;
+    if (extension(tab.path) === "typ" && writable) {
       return (
         <div className="flex h-full flex-col">
+          <FormatToolbar syntax="typst" view={() => viewRef.current} />
           <div className="min-h-0 flex-1">{source}</div>
+        </div>
+      );
+    }
+    if (pageOf(tab.path)) {
+      const formats = writable && isMarkdownPage(tab.path);
+      return (
+        <div className="flex h-full flex-col">
+          {formats && (
+            <FormatToolbar
+              syntax="markdown"
+              view={() => viewRef.current}
+              onInsertElement={() => setInserting(true)}
+            />
+          )}
+          <div className="min-h-0 flex-1">{source}</div>
+          {formats && (
+            <InsertDialog
+              open={inserting}
+              onClose={() => setInserting(false)}
+              onPick={(item) => {
+                setInserting(false);
+                const view = viewRef.current;
+                if (!view) return;
+                const { from, to } = view.state.selection.main;
+                // After the dialog has given the focus back to the editor.
+                requestAnimationFrame(() => insertItem(view, item, from, to));
+              }}
+            />
+          )}
           <PageSettingsDialog
             text={pageSettings?.text ?? null}
             path={pageSettings?.path ?? null}

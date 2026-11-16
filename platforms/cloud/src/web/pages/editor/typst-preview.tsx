@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { type PdfHandle, PdfView } from "./pdf-view";
 import type { PdfClick } from "./pdf-sync";
+import { explainChanged, withExplain } from "./ai-explain";
 
 /** How long typing pauses before the document compiles again. */
 const DEBOUNCE_MS = 600;
@@ -53,12 +54,16 @@ export const typstLint: Extension = [
   linter(
     async (view) => {
       const own = view.state.field(compileDiagnostics);
-      return [...(await typstLezerLintSource(view)), ...asLintMarks(view.state.doc, own.path, own.diagnostics)];
+      return withExplain(view, [
+        ...(await typstLezerLintSource(view)),
+        ...asLintMarks(view.state.doc, own.path, own.diagnostics),
+      ]);
     },
     {
       delay: 300,
       // Also when the compiler's diagnostics came in, not only on edits.
       needsRefresh: (update) =>
+        explainChanged(update) ||
         update.transactions.some((tr) => tr.effects.some((effect) => effect.is(setCompileDiagnostics))),
     },
   ),

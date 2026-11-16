@@ -58,9 +58,11 @@ describe("what the tree picked", () => {
 describe("files dropped into a page", () => {
   const none = () => false;
 
-  it("go next to a page in book/, and to public/ otherwise", () => {
+  it("go next to the page or Typst file", () => {
     expect(dropPath("book/a/page.md", "photo.JPG", none)).toBe("book/a/photo.jpg");
-    expect(dropPath("glossary/term.md", "photo.png", none)).toBe("public/photo.png");
+    expect(dropPath("glossary/term.md", "photo.png", none)).toBe("glossary/photo.png");
+    expect(dropPath("docs/sheet.typ", "photo.png", none)).toBe("docs/photo.png");
+    expect(dropPath("sheet.typ", "image.png", none)).toBe("sheet.png");
   });
 
   it("name a pasted screenshot after the page, or its folder for an index", () => {
@@ -77,7 +79,16 @@ describe("files dropped into a page", () => {
     expect(linkTo("book/a/page.md", "book/a/photo.png")).toBe("![photo](./photo.png)");
     expect(linkTo("book/a/page.md", "public/doc.pdf")).toBe("[doc](../doc.pdf)");
     expect(linkTo("book/a/page.md", "book/b/other.md")).toBe("[other](../b/other)");
-    expect(linkTo("glossary/term.md", "public/x y.png")).toBe("![x y](/x%20y.png)");
+    expect(linkTo("glossary/term.md", "public/x y.png")).toBe("![x y](../x%20y.png)");
+    expect(linkTo("glossary/term.md", "glossary/photo.png")).toBe("![photo](./photo.png)");
+    expect(linkTo("glossary/sub/term.md", "glossary/photo.png")).toBe("![photo](../photo.png)");
     expect(linkTo("book/page.md", "snippets/s.md.hbs")).toBeNull();
+  });
+
+  it("are embedded relative to a Typst file", () => {
+    expect(linkTo("docs/sheet.typ", "docs/photo.png")).toBe('#image("photo.png")');
+    expect(linkTo("docs/sheet.typ", "public/logo.svg")).toBe('#image("../public/logo.svg")');
+    expect(linkTo("sheet.typ", "docs/part.typ")).toBe('#include "docs/part.typ"');
+    expect(linkTo("docs/a/sheet.typ", "docs/data.csv")).toBe('"../data.csv"');
   });
 });
