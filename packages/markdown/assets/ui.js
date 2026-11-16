@@ -105,9 +105,31 @@ hyperbook.ui = (function () {
   }
 
   /**
-   * Toggle the navigation drawer.
+   * ☰: on wide screens, where the menu is docked beside the article, slide it
+   * out to the left and back (remembered across pages); below that, and in
+   * the wide layout, open the navigation drawer.
    */
   function navToggle() {
+    const grid = document.querySelector(".main-grid");
+    const docked =
+      window.matchMedia("(min-width: 1281px)").matches &&
+      grid &&
+      !grid.classList.contains("layout-wide") &&
+      !grid.classList.contains("layout-standalone");
+    if (docked) {
+      const root = document.documentElement;
+      const folded = !root.classList.contains("nav-folded");
+      root.classList.add("nav-fold-animate");
+      root.classList.toggle("nav-folded", folded);
+      try {
+        if (folded) localStorage.setItem("hyperbook-nav-folded", "1");
+        else localStorage.removeItem("hyperbook-nav-folded");
+      } catch (e) {}
+      // Editors and drawings size themselves on window resize; the article
+      // just changed width without one.
+      setTimeout(() => window.dispatchEvent(new Event("resize")), 300);
+      return;
+    }
     const navDrawerEl = document.getElementById("nav-drawer");
     navDrawerEl.open = !navDrawerEl.open;
   }

@@ -358,7 +358,12 @@ export default (ctx: HyperbookContext) => () => {
                     type: "raw",
                     value: `
 // Remove no-js class as soon as JavaScript is available
-document.documentElement.classList.remove('no-js');`,
+document.documentElement.classList.remove('no-js');
+// A menu the reader folded away stays folded, without sliding in first.
+try {
+  if (localStorage.getItem('hyperbook-nav-folded') === '1')
+    document.documentElement.classList.add('nav-folded');
+} catch (e) {}`,
                   },
                 ],
               },

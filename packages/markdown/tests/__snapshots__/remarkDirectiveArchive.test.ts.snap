@@ -41,7 +41,12 @@ body {
 }
 </style><noscript id="dark-mode-toggle-stylesheets"><link rel="stylesheet" href="/assets/light.css" media="(prefers-color-scheme: light)"><link rel="stylesheet" href="/assets/dark.css" media="(prefers-color-scheme: dark)"></noscript><script>
 // Remove no-js class as soon as JavaScript is available
-document.documentElement.classList.remove('no-js');</script><script>
+document.documentElement.classList.remove('no-js');
+// A menu the reader folded away stays folded, without sliding in first.
+try {
+  if (localStorage.getItem('hyperbook-nav-folded') === '1')
+    document.documentElement.classList.add('nav-folded');
+} catch (e) {}</script><script>
 // @license © 2024 Google LLC. Licensed under the Apache License, Version 2.0.
 (() => {
   const ELEMENT_ID = 'dark-mode-toggle-stylesheets';
@@ -80,9 +85,8 @@ window.Prism = window.Prism || {};
 window.Prism.manual = true;</script><script src="/assets/prism/prism.js" defer></script><script src="/assets/prism/prism-typst.js" defer></script><link rel="stylesheet" href="/assets/prism/prism.css"><link rel="stylesheet" href="/assets/prism/prism-theme-github-dark.css" media="(prefers-color-scheme: dark)"><link rel="stylesheet" href="/assets/prism/prism-theme-github-light.css" media="(prefers-color-scheme: light)"><link rel="stylesheet" href="/assets/math/katex.min.css"><link rel="stylesheet" href="/assets/shell.css"><link rel="stylesheet" href="/assets/content.css"><link rel="stylesheet" media="print" href="/assets/print.css"><link rel="stylesheet" href="/assets/code.css"><script>
 HYPERBOOK_ASSETS = "/assets/"
 
-</script><script type="module" src="/assets/side-drawer.js" async></script><script src="/assets/qrcode.js" async></script><link rel="stylesheet" href="/assets/directive-archive/style.css"></head><body><div class="main-grid"><header><div class="mobile-nav"><button aria-label="Nav Toggle" class="toggle" onclick="hyperbook.ui.navToggle()"><div class="bar1"></div><div class="bar2"></div><div class="bar3"></div></button><side-drawer id="nav-drawer"><div class="nav-drawer-content"><nav></nav><a class="author" href="https://hyperbook.openpatch.org">Powered by <b>Hyperbook</b></a></div></side-drawer></div><a class="branding" href="/book/"><div class="name">My Hyperbook</div></a><button id="share-button" class="icon-button" title="Share" onclick="hyperbook.share.open()"><div class="share-icon"></div></button><dark-mode-toggle id="dark-mode-toggle" appearence="switch" title="Toggle between Dark and Light Mode" permanent></dark-mode-toggle></header><div class="sidebar"><nav></nav><a class="author" href="https://hyperbook.openpatch.org">Powered by <b>Hyperbook</b></a></div><main><article>
+</script><script type="module" src="/assets/side-drawer.js" async></script><script src="/assets/qrcode.js" async></script><link rel="stylesheet" href="/assets/directive-archive/style.css"></head><body><div class="main-grid"><header><div class="mobile-nav"><button aria-label="Nav Toggle" class="toggle" onclick="hyperbook.ui.navToggle()"><div class="bar1"></div><div class="bar2"></div><div class="bar3"></div></button><side-drawer id="nav-drawer"><div class="nav-drawer-content"><nav></nav><a class="author" href="https://hyperbook.openpatch.org">Powered by <b>Hyperbook</b></a></div></side-drawer></div><a class="branding" href="/book/"><div class="name">My Hyperbook</div></a><button id="toc-toggle" class="icon-button" onclick="hyperbook.ui.tocToggle()" title="Table of Contents" aria-label="Table of Contents"><div class="toc-icon"></div></button><button id="share-button" class="icon-button" title="Share" onclick="hyperbook.share.open()"><div class="share-icon"></div></button><dark-mode-toggle id="dark-mode-toggle" appearence="switch" title="Toggle between Dark and Light Mode" permanent></dark-mode-toggle></header><div class="sidebar"><nav></nav><a class="author" href="https://hyperbook.openpatch.org">Powered by <b>Hyperbook</b></a></div><main><article>
 <div class="hyperbook-markdown">
-  <div class="floating-buttons-container" id="floating-buttons-container"><button id="toc-toggle" onclick="hyperbook.ui.tocToggle()" title="Table of Contents"><div class="bar1"></div><div class="bar2"></div><div class="bar3"></div><div class="bar4"></div></button></div>
   <side-drawer id="toc-drawer" right>
     <div class="toc-drawer-content">
       <nav class="toc">

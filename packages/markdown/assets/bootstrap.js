@@ -286,8 +286,7 @@ hyperbook.bootstrap = (function () {
     const markdownDiv = document.querySelector('main article .hyperbook-markdown');
     if (markdownDiv) {
       Array.from(markdownDiv.children).forEach(element => {
-        const isUIElement = element.id === 'floating-buttons-container' || 
-                           element.tagName === 'SIDE-DRAWER';
+        const isUIElement = element.tagName === 'SIDE-DRAWER';
         
         if (!visibleElements.has(element) && !isUIElement) {
           element.style.display = 'none';

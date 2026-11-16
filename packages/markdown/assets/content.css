@@ -430,20 +430,6 @@ img.emoji {
   list-style-type: none;
 }
 
-.hyperbook-markdown #toc-toggle>.bar1,
-.hyperbook-markdown #toc-toggle>.bar2,
-.hyperbook-markdown #toc-toggle>.bar3,
-.hyperbook-markdown #toc-toggle>.bar4 {
-  background-color: var(--color-text);
-}
-
-.hyperbook-markdown #toc-toggle,
-.hyperbook-markdown #qrcode-open {
-  background: var(--color-background);
-  border-color: var(--color-nav-border);
-  cursor: pointer;
-}
-
 #search-toggle {
   background-color: var(--color-brand-text);
   width: 24px;
@@ -645,56 +631,19 @@ img.emoji {
   mask-image: url('data:image/svg+xml,<svg width="32px" height="32px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M5.29289 5.29289C5.68342 4.90237 6.31658 4.90237 6.70711 5.29289L12 10.5858L17.2929 5.29289C17.6834 4.90237 18.3166 4.90237 18.7071 5.29289C19.0976 5.68342 19.0976 6.31658 18.7071 6.70711L13.4142 12L18.7071 17.2929C19.0976 17.6834 19.0976 18.3166 18.7071 18.7071C18.3166 19.0976 17.6834 19.0976 17.2929 18.7071L12 13.4142L6.70711 18.7071C6.31658 19.0976 5.68342 19.0976 5.29289 18.7071C4.90237 18.3166 4.90237 17.6834 5.29289 17.2929L10.5858 12L5.29289 6.70711C4.90237 6.31658 4.90237 5.68342 5.29289 5.29289Z" fill="%230F1729"/></svg>');
 }
 
-.hyperbook-markdown .qrcode-icon {
-  background-color: var(--color-text);
-  width: 32px;
-  height: 32px;
+.qrcode-icon {
+  background-color: var(--color-brand-text);
+  width: 24px;
+  height: 24px;
   mask-image: url('data:image/svg+xml,<svg width="32px" height="32px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 9h6V3H3zm1-5h4v4H4zm1 1h2v2H5zm10 4h6V3h-6zm1-5h4v4h-4zm1 1h2v2h-2zM3 21h6v-6H3zm1-5h4v4H4zm1 1h2v2H5zm15 2h1v2h-2v-3h1zm0-3h1v1h-1zm0-1v1h-1v-1zm-10 2h1v4h-1v-4zm-4-7v2H4v-1H3v-1h3zm4-3h1v1h-1zm3-3v2h-1V3h2v1zm-3 0h1v1h-1zm10 8h1v2h-2v-1h1zm-1-2v1h-2v2h-2v-1h1v-2h3zm-7 4h-1v-1h-1v-1h2v2zm6 2h1v1h-1zm2-5v1h-1v-1zm-9 3v1h-1v-1zm6 5h1v2h-2v-2zm-3 0h1v1h-1v1h-2v-1h1v-1zm0-1v-1h2v1zm0-5h1v3h-1v1h-1v1h-1v-2h-1v-1h3v-1h-1v-1zm-9 0v1H4v-1zm12 4h-1v-1h1zm1-2h-2v-1h2zM8 10h1v1H8v1h1v2H8v-1H7v1H6v-2h1v-2zm3 0V8h3v3h-2v-1h1V9h-1v1zm0-4h1v1h-1zm-1 4h1v1h-1zm3-3V6h1v1z"/><path fill="none" d="M0 0h24v24H0z"/></svg>');
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
 }
 
-.floating-buttons-container {
-  position: fixed;
-  top: 90px;
-  right: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  z-index: 1000;
-}
-
+/* Header buttons: the page's table of contents and QR code, and sharing. */
 #toc-toggle,
-#qrcode-open {
-  padding: 4px;
-  border-radius: 50%;
-  height: 40px;
-  width: 40px;
-  border-style: solid;
-  border-width: 1px;
-  opacity: 0.7;
-}
-
-.hyperbook-markdown #toc-toggle:hover,
-.hyperbook-markdown #qrcode-open:hover {
-  opacity: 1;
-}
-
-.hyperbook-markdown #toc-toggle>.bar1,
-.hyperbook-markdown #toc-toggle>.bar3 {
-  width: 20px;
-  height: 2px;
-  margin: 2px 3px;
-  transition: 0.4s;
-}
-
-.hyperbook-markdown #toc-toggle>.bar2,
-.hyperbook-markdown #toc-toggle>.bar4 {
-  width: 25px;
-  height: 2px;
-  margin: 2px 3px;
-  transition: 0.4s;
-}
-
-/* Share button and dialog styles */
+#qrcode-open,
 #share-button {
   background: none;
   border: none;
@@ -707,8 +656,20 @@ img.emoji {
   justify-content: center;
 }
 
+#toc-toggle:hover,
+#qrcode-open:hover,
 #share-button:hover {
   opacity: 0.8;
+}
+
+.toc-icon {
+  background-color: var(--color-brand-text);
+  width: 24px;
+  height: 24px;
+  mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="9" y1="6" x2="20" y2="6"/><line x1="9" y1="12" x2="20" y2="12"/><line x1="9" y1="18" x2="20" y2="18"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/></svg>');
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
 }
 
 .share-icon {
@@ -721,8 +682,44 @@ img.emoji {
   mask-position: center;
 }
 
+header.inverted .toc-icon,
+header.inverted .qrcode-icon,
 header.inverted .share-icon {
   background-color: var(--color-brand);
+}
+
+/* Phones: the header carries ☰, the title and up to five icons. Tighter
+   spacing, and a long title gives way with an ellipsis instead of pushing
+   the icons off the screen. */
+@media screen and (max-width: 600px) {
+  header .branding {
+    min-width: 0;
+    padding: 0.5rem;
+  }
+
+  header .branding > .name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  #search-toggle {
+    flex-shrink: 0;
+    margin: 0 6px;
+  }
+
+  #toc-toggle,
+  #qrcode-open,
+  #share-button {
+    flex-shrink: 0;
+    margin-right: 0;
+    padding: 8px 6px;
+  }
+
+  #dark-mode-toggle {
+    flex-shrink: 0;
+    margin-right: 8px;
+  }
 }
 
 #share-dialog {
