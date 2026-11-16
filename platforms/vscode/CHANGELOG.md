@@ -1,5 +1,16 @@
 # @hyperbook/vscode-extension
 
+## 0.59.5
+
+### Patch Changes
+
+- [`3da8ce6`](https://github.com/openpatch/hyperbook/commit/3da8ce66373c70a1713fd7c92697615b4c325fc0) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Snippets for every element: new ones for `struktolab` (`:struktolab`, and `:struktolab-code` for Java, Python or JavaScript with `hideCode`), `pyide`, `typst`, `openscad`, `pdf`, `bitflow`, `tile`, `file`, `passwordlist`, `scratchblock`, `blockflow-player`, `blockflow-editor`, `step` and `kirimoto`. Fixed snippets: `:sqlide` inserted an online IDE; `:onlineide`, `:sqlide` and `:webide` start with their code fence (`java Main.java, `mysql Statements.sql, ```html); `:qr` offers its sizes again; `:embed` no longer puts a `#` before the address; `:excalidraw` drops `center`, which the element does not have.
+
+  Every element's attributes are highlighted, whatever their name — before, only a few listed ones per element were, and some of those (`url` on the IDEs) no longer exist — including flags like `hideCode` or `readonly`, numbers with units and unquoted values.
+
+- Updated dependencies [[`6a640c1`](https://github.com/openpatch/hyperbook/commit/6a640c18eef0c10930cb4cf0a6eb868c3623d7d1)]:
+  - @hyperbook/markdown@0.95.0
+
 ## 0.59.4
 
 ### Patch Changes

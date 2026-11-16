@@ -1,5 +1,19 @@
 # @hyperbook/cloud
 
+## 0.13.0
+
+### Minor Changes
+
+- [`5307dda`](https://github.com/openpatch/hyperbook/commit/5307dda3a01482a80d9c52919a9dc45cfb0417be) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Help for teachers new to Markdown and Typst in the editor. A formatting toolbar above pages and Typst files writes headings, bold, italic, lists, links, images, tables and code in the file's own syntax; each button's tooltip shows what it writes. On pages, _Element_ opens a searchable list of elements by what they do ("Quiz", "Hint or solution", "Python", "Drawing"), grouped and described in English and German, and typing `/` at the start of a line offers the same list (and the formats, also in Typst files). An element kept in a file of its own (drawing, learning map, task flow, memory diagram, Scratch project) is made next to the page, linked with `./…` and opened in its editor; a structogram opens in its visual editor right away. Images pasted, dropped or picked with the toolbar are uploaded next to the page or Typst file, also on glossary pages, and linked relatively (`![photo](./photo.png)`, `#image("photo.png")`). Every error and warning in the editor offers _Explain with AI_, which asks the assistant in a new chat with the message and the lines around it. The preview serves files kept next to glossary pages under `/glossary/…`.
+
+### Patch Changes
+
+- [`5d05933`](https://github.com/openpatch/hyperbook/commit/5d059339d9570f4deacf12a1dd0544793b75a768) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Sheet music is a ```abcjs code fence, not a directive: completion no longer offers `:::abc-music` (which wrapped the fence in a directive that does nothing), _Insert element → Sheet music_ inserts the fence alone, and the AI assistant writes it that way. Completion for `mermaid` and `scratchblock` inserts their example as text instead of leaving `${…}` in it.
+
+- [`8826b54`](https://github.com/openpatch/hyperbook/commit/8826b54cd3534f8a7d682fe072b615780745b74a) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - The structogram editor is readable in the dark theme: it is drawn light, with its own dark text, instead of light text on its white buttons and code. Completion in pages offers struktolab's `code` attribute (`pseudocode`, `java`, `python`, `javascript`, `none`) and `id`. The editor's Comment button on a selection, and its other pop-ups, no longer float over an open dialog. Its View menu opens into the editor instead of being cut off at the left.
+
+- [`6a640c1`](https://github.com/openpatch/hyperbook/commit/6a640c18eef0c10930cb4cf0a6eb868c3623d7d1) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Updates struktolab to 0.9.0. `struktolab` takes `hideCode`: in edit mode the diagram alone, without the code under it, while `code` (or the fence's language) keeps saying which language it is written in, so Java's function headers stay Java's and the editor's _Show code_ brings the code back in that language. `code="none"` still hides the code. The structogram editor draws its own colours, so it is readable on a dark page, and its View menu opens into the editor instead of being cut off. The Cloud editor completes `hideCode`.
+
 ## 0.12.0
 
 ### Minor Changes
