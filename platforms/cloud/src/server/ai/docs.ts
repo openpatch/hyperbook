@@ -57,6 +57,8 @@ export const DOCUMENTATION = {
   blockflow: { file: "blockflow.md", sections: ["Blockflow"] },
   bookmarks: { sections: ["Bookmarks"] },
   collapsible: { sections: ["Collapsible"] },
+  /** An attribute of the elements readers work in, not a directive. */
+  dock: { file: "dock.md" },
   download: { sections: ["Download"] },
   embed: { sections: ["Embed"] },
   excalidraw: { file: "excalidraw.md", sections: ["Excalidraw"] },

@@ -49,3 +49,7 @@ a given page as exactly as possible and are scored while they type.
   colours) + **Outline** 30% (edges) + **Area** 20% (coverage). One pixel off still
   matches fully. Solved when the total *and each part* reach `pass` (default 98),
   so a wrong-coloured shape does not pass on outline alone. Hover the score for parts.
+
+`dock` (flag, or `dock="Label"`): readers can move the element into the dock
+beside the text, to keep it in view while working through the tasks after it.
+See the `dock` topic.

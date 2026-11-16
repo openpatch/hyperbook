@@ -22,3 +22,7 @@ a `::file` (`::file{path="BeispielTest.java" src="…" hidden}`). `hidden` keeps
 the file out of the file list — readers cannot open, edit or delete it, while
 it still compiles, so tests against a solution keep running; `readonly` shows
 the file but opens it for reading only.
+
+`dock` (flag, or `dock="Label"`): readers can move the element into the dock
+beside the text, to keep it in view while working through the tasks after it.
+See the `dock` topic.

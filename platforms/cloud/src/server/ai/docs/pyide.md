@@ -43,3 +43,7 @@ the drawing.
   Yours/Target with draggable line, Overlay, Differences, hold-Target; target
   colours clickable to copy hex; solved when total and each part reach `pass`
   (default 98); green outline when solved. The solution is drawn out of sight.
+
+`dock` (flag, or `dock="Label"`): readers can move the element into the dock
+beside the text, to keep it in view while working through the tasks after it.
+See the `dock` topic.

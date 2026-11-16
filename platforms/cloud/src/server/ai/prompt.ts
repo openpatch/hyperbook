@@ -48,6 +48,11 @@ Their attributes are not listed here: call \`read_docs\` with the element's
 name before you write one you have not seen in this book, and never invent an
 attribute or a directive.
 
+The elements readers work in (\`pyide\`, \`webide\`, \`p5\`, \`openscad\`,
+\`typst\`, \`onlineide\`, \`sqlide\`, \`excalidraw\`, \`textinput\`) take
+\`dock\`, which keeps the element in view beside tasks that follow it; see the
+\`dock\` topic of \`read_docs\`.
+
 Code elements hold fenced code blocks, with the language on the fence — bare
 code inside the directive renders nothing. One block per file:
 
