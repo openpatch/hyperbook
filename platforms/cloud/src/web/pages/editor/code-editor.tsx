@@ -15,7 +15,8 @@ import {
 } from "codemirror-lang-typst/lezer";
 import { LanguageSupport } from "@codemirror/language";
 import { typstImportCompletion } from "./typst-imports";
-import { typstLint } from "./typst-preview";
+import { revealInPdf, typstLint } from "./typst-preview";
+import { editorPhrases } from "./codemirror-phrases";
 import { indentWithTab } from "@codemirror/commands";
 import { Compartment, type Extension, EditorState } from "@codemirror/state";
 import i18next from "i18next";
@@ -170,21 +171,99 @@ const theme = EditorView.theme({
     fontWeight: "bold",
   },
   ".cm-diagnostic": { color: "var(--color-text)" },
-  ".cm-panels": {
+  // The panels (search and replace) in the app's own look. CodeMirror's
+  // defaults come scoped to its light or dark mode, which outranks a plain
+  // `.cm-panels …` here: hence `&.cm-editor` in front of these.
+  "&.cm-editor .cm-panels": {
     color: "var(--color-text)",
     backgroundColor: "var(--color-nav)",
+    font: "13px var(--font-body, sans-serif)",
   },
-  // The search panel's controls: the browser's light defaults would sit
-  // unreadably on the dark panel.
-  ".cm-textfield, .cm-panels input": {
+  "&.cm-editor .cm-panels-top": { borderBottom: "1px solid var(--color-border)" },
+  "&.cm-editor .cm-panels-bottom": { borderTop: "1px solid var(--color-border)" },
+  // Its own rows (find, options, replace) stay; the controls only get room.
+  "&.cm-editor .cm-panel.cm-search": { padding: "4px 32px 4px 8px" },
+  "&.cm-editor .cm-panel.cm-search input, &.cm-editor .cm-panel.cm-search button, &.cm-editor .cm-panel.cm-search label":
+    { margin: "3px 6px 3px 0", verticalAlign: "middle" },
+  "&.cm-editor .cm-panels .cm-textfield": {
+    font: "inherit",
+    fontSize: "13px",
+    height: "28px",
+    padding: "0 8px",
     color: "var(--color-text)",
     backgroundColor: "var(--color-background)",
     border: "1px solid var(--color-border)",
+    borderRadius: "6px",
+    outline: "none",
   },
-  ".cm-button, .cm-panels button": {
+  "&.cm-editor .cm-panels .cm-textfield:focus-visible": {
+    borderColor: "var(--color-brand)",
+    boxShadow: "0 0 0 2px color-mix(in srgb, var(--color-brand) 35%, transparent)",
+  },
+  "&.cm-editor .cm-panels .cm-textfield::placeholder": { color: "var(--muted-foreground)" },
+  "&.cm-editor .cm-panels .cm-button": {
+    font: "inherit",
+    fontSize: "12px",
+    height: "28px",
+    padding: "0 10px",
     color: "var(--color-text)",
-    backgroundColor: "var(--color-nav)",
+    backgroundColor: "var(--color-background)",
+    backgroundImage: "none",
     border: "1px solid var(--color-border)",
+    borderRadius: "6px",
+    cursor: "pointer",
+  },
+  "&.cm-editor .cm-panels .cm-button:hover": {
+    backgroundColor: "color-mix(in srgb, var(--color-brand) 12%, var(--color-background))",
+  },
+  "&.cm-editor .cm-panels .cm-button:active": {
+    backgroundImage: "none",
+    backgroundColor: "color-mix(in srgb, var(--color-brand) 22%, var(--color-background))",
+  },
+  "&.cm-editor .cm-panels .cm-button:focus-visible, &.cm-editor .cm-panels [name=close]:focus-visible": {
+    outline: "2px solid var(--color-brand)",
+    outlineOffset: "1px",
+  },
+  "&.cm-editor .cm-panel.cm-search label": {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "4px",
+    fontSize: "12px",
+    color: "var(--muted-foreground)",
+    cursor: "pointer",
+  },
+  "&.cm-editor .cm-panel.cm-search input[type=checkbox]": {
+    margin: 0,
+    accentColor: "var(--color-brand)",
+  },
+  "&.cm-editor .cm-panel.cm-search [name=close]": {
+    top: "6px",
+    right: "6px",
+    width: "22px",
+    height: "22px",
+    fontSize: "18px",
+    lineHeight: "1",
+    color: "var(--muted-foreground)",
+    borderRadius: "4px",
+    cursor: "pointer",
+  },
+  "&.cm-editor .cm-panel.cm-search [name=close]:hover": {
+    color: "var(--color-text)",
+    backgroundColor: "color-mix(in srgb, var(--color-text) 10%, transparent)",
+  },
+  // Matches of the search, the current one stronger; other occurrences of
+  // the selected word fainter, in both modes.
+  "&.cm-editor .cm-searchMatch": {
+    backgroundColor: "color-mix(in srgb, #f59e0b 30%, transparent)",
+    outline: "1px solid color-mix(in srgb, #f59e0b 55%, transparent)",
+    borderRadius: "2px",
+  },
+  "&.cm-editor .cm-searchMatch.cm-searchMatch-selected": {
+    backgroundColor: "color-mix(in srgb, #f59e0b 60%, transparent)",
+    outline: "1px solid #f59e0b",
+  },
+  "&.cm-editor .cm-selectionMatch": {
+    backgroundColor: "color-mix(in srgb, var(--color-brand) 18%, transparent)",
   },
   ".cm-edit-visually": {
     marginLeft: "12px",
@@ -208,8 +287,12 @@ const theme = EditorView.theme({
  * surfaces stay in charge.
  */
 const codeTheme = new Compartment();
+/** CodeMirror's own words in the app's language (see codemirror-phrases.ts). */
+const phrasesCompartment = new Compartment();
 const isDark = () => document.documentElement.classList.contains("dark");
-const hyperbookTheme = () => hyperbookSyntax(isDark());
+// darkTheme tells CodeMirror's own defaults (panels, buttons, fields,
+// matches) which of their light or dark variants apply.
+const hyperbookTheme = () => [hyperbookSyntax(isDark()), EditorView.darkTheme.of(isDark())];
 
 /** basicSetup always shows line numbers; without them, the whole gutter goes. */
 const noGutters = EditorView.theme({ ".cm-gutters": { display: "none" } });
@@ -345,6 +428,7 @@ export function CodeEditor({
           ]),
           basicSetup,
           codeTheme.of(hyperbookTheme()),
+          phrasesCompartment.of(editorPhrases()),
           numbersCompartment.of(settings.lineNumbers ? [] : noGutters),
           heightCompartment.of(lineHeightTheme(settings.lineHeight)),
           fontCompartment.of(fontTheme(fontOf(settings.font).stack)),
@@ -361,7 +445,23 @@ export function CodeEditor({
               ]
             : [],
           // Typst's errors from the PDF preview (typst-preview.tsx).
-          extension(path) === "typ" ? [typstLint, typstImportCompletion] : [],
+          extension(path) === "typ"
+            ? [
+                typstLint,
+                typstImportCompletion,
+                // From the cursor to its line in the PDF preview.
+                keymap.of([
+                  {
+                    key: "Alt-Enter",
+                    preventDefault: true,
+                    run: (v) => {
+                      void revealInPdf(pathRef.current, v.state.doc.toString(), v.state.selection.main.head);
+                      return true;
+                    },
+                  },
+                ]),
+              ]
+            : [],
           // Its name for screen readers: which file is being edited.
           EditorView.contentAttributes.of({
             "aria-label": i18next.t("editor.tabs.contents", { path }),
@@ -396,11 +496,14 @@ export function CodeEditor({
     });
     view.current = v;
     onReady?.(v);
-    // The light/dark toggle moves the .dark class on <html>; follow it.
+    // The light/dark toggle moves the .dark class on <html>, a new language
+    // its lang attribute (see i18n.tsx); follow both.
     const observer = new MutationObserver(() => {
-      v.dispatch({ effects: codeTheme.reconfigure(hyperbookTheme()) });
+      v.dispatch({
+        effects: [codeTheme.reconfigure(hyperbookTheme()), phrasesCompartment.reconfigure(editorPhrases())],
+      });
     });
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class", "lang"] });
     return () => {
       observer.disconnect();
       onReady?.(null);

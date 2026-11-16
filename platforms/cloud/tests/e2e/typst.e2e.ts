@@ -89,6 +89,10 @@ describe.skipIf(!typst)("the editor's Typst preview", () => {
     await expect.poll(width).toBeGreaterThan(fitted * 1.1);
     expect(await fitButton.getAttribute("aria-pressed")).toBe("false");
     const zoomed = await width();
+    // Stretched at once, then drawn again sharp at the new size.
+    const sharp = () =>
+      canvas.evaluate((c: HTMLCanvasElement) => Math.abs(c.width - c.getBoundingClientRect().width * devicePixelRatio) <= 2);
+    await expect.poll(sharp).toBe(true);
 
     // Ctrl and the wheel, over the pages.
     const box = (await pane.boundingBox())!;
@@ -136,4 +140,26 @@ describe.skipIf(!typst)("the editor's Typst preview", () => {
     await page.mouse.dblclick(second.x + second.width * 0.08, second.y + second.height * 0.07);
     await expect.poll(async () => (await cursorLine())?.trim()).toBe("Hallo Licht");
   }, 180_000);
+
+  it("shows the cursor's line in the PDF with Alt+Enter and the pane's button", async () => {
+    const pane = page.getByRole("region", { name: "Preview" });
+    const mark = pane.locator("[data-pdf-mark]");
+    const inside = async (pageName: string) => {
+      const box = await mark.boundingBox();
+      if (!box) return false;
+      const pdfPage = (await pane.getByRole("img", { name: pageName }).boundingBox())!;
+      return box.y >= pdfPage.y && box.y + box.height <= pdfPage.y + pdfPage.height;
+    };
+
+    // The cursor on "Welt", at the top: Alt+Enter marks the line on page 1.
+    const editor = page.locator('.cm-content[aria-label*="jump.typ"]');
+    await editor.getByText("Hallo Welt Optik").click();
+    await page.keyboard.press("Alt+Enter");
+    await expect.poll(() => inside("Page 1")).toBe(true);
+
+    // The button finds "Hallo Licht" on page 2.
+    await editor.getByText("Hallo Licht").click();
+    await pane.getByRole("button", { name: /Show the cursor's line in the PDF/ }).click();
+    await expect.poll(() => inside("Page 2")).toBe(true);
+  }, 60_000);
 });

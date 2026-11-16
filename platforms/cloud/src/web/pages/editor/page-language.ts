@@ -1,3 +1,4 @@
+import i18next from "i18next";
 import {
   type Completion,
   type CompletionContext,
@@ -218,7 +219,7 @@ const directiveFolds = foldService.of(directiveFold);
 
 // ---- Help ------------------------------------------------------------------
 
-function docsLink(href: string, text = "Documentation") {
+function docsLink(href: string, text = i18next.t("editor.pageWidget.documentation")) {
   const a = document.createElement("a");
   a.href = href;
   a.target = "_blank";
@@ -238,7 +239,7 @@ function help(d: Directive, attr?: Attribute): HTMLElement {
   box.append(title, text);
   if (attr?.values) {
     const values = document.createElement("p");
-    values.textContent = `Values: ${attr.values.join(", ")}`;
+    values.textContent = i18next.t("editor.pageWidget.values", { values: attr.values.join(", ") });
     box.append(values);
   }
   if (!attr && d.attributes.length > 0) {
@@ -733,9 +734,11 @@ class FrontmatterWidget extends WidgetType {
     };
     box.append(
       text,
-      button("Edit", () => this.onEdit(view)),
-      button(this.folded ? "Show YAML" : "Hide YAML", () => view.dispatch({ effects: toggleYaml.of(!this.folded) })),
-      docsLink(PAGE_DOCS, "Help"),
+      button(i18next.t("editor.pageWidget.edit"), () => this.onEdit(view)),
+      button(i18next.t(this.folded ? "editor.pageWidget.showYaml" : "editor.pageWidget.hideYaml"), () =>
+        view.dispatch({ effects: toggleYaml.of(!this.folded) }),
+      ),
+      docsLink(PAGE_DOCS, i18next.t("editor.pageWidget.help")),
     );
     return box;
   }
@@ -749,9 +752,11 @@ function summary(yaml: string): string {
     const data = parseYaml(yaml) as Record<string, unknown> | null;
     const name = data?.name ?? data?.title;
     const rest = Object.keys(data ?? {}).filter((k) => k !== "name" && k !== "title");
-    return `Page settings${typeof name === "string" ? `: ${name}` : ""}${rest.length ? ` · ${rest.join(", ")}` : ""}`;
+    const title =
+      typeof name === "string" ? i18next.t("editor.pageWidget.settingsOf", { name }) : i18next.t("editor.pageWidget.settings");
+    return `${title}${rest.length ? ` · ${rest.join(", ")}` : ""}`;
   } catch {
-    return "Page settings (the YAML has an error)";
+    return i18next.t("editor.pageWidget.settingsBroken");
   }
 }
 

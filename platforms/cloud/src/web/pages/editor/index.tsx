@@ -2563,6 +2563,12 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
                   });
                   view.focus();
                 }}
+                typstCursor={(path) => {
+                  const view = views.get(path);
+                  return view
+                    ? { source: view.state.doc.toString(), offset: view.state.selection.main.head }
+                    : null;
+                }}
                 commit={listing.commit}
                 onNavigate={(href) => {
                   const target = fileAt(
@@ -2676,6 +2682,7 @@ function LivePreview({
   typstFile,
   onTypstDiagnostics,
   onTypstJump,
+  typstCursor,
   ...props
 }: {
   ws: Workspace;
@@ -2685,6 +2692,7 @@ function LivePreview({
   typstFile: string | null;
   onTypstDiagnostics: (path: string, diagnostics: TypstDiagnostic[]) => void;
   onTypstJump: (path: string, click: PdfClick) => void;
+  typstCursor: (path: string) => { source: string; offset: number } | null;
   commit: string | null;
   onNavigate: (href: string) => boolean;
   missingConfig: boolean;
@@ -2699,6 +2707,7 @@ function LivePreview({
         text={text ?? null}
         onDiagnostics={onTypstDiagnostics}
         onJump={onTypstJump}
+        cursor={typstCursor}
       />
     );
   }
