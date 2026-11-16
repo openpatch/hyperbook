@@ -1,13 +1,10 @@
 # abc-music (sheet music)
 
-`:::abc-music` renders ABC notation as sheet music in an `abcjs` fenced block.
-
-    :::abc-music
+Sheet music is an `abcjs` fenced block on its own, in ABC notation — no
+directive around it. `abcjs editor` lets readers edit the tune.
 
     ```abcjs
     X:1
     K:C
     CDEF GABc|
     ```
-
-    :::

@@ -31,7 +31,7 @@ nest one inside another by giving the outer one more colons (\`::::tabs\`
 around \`:::tab\`). Leaf directives are one line: \`::name{attributes}\`.
 Available:
 
-\`abc-music\` (sheet music), \`alert\`, \`audio\`, \`archive\` (files to browse),
+\`alert\`, \`audio\`, \`archive\` (files to browse),
 \`bitflow\` (assessments), \`blockflow-editor\`, \`blockflow-player\` (Scratch-like),
 \`bookmarks\`, \`collapsible\`, \`download\`, \`embed\`, \`excalidraw\` (drawings),
 \`file\`, \`geogebra\`, \`h5p\`, \`jmp\` (Java memory diagrams),
@@ -61,9 +61,11 @@ code inside the directive renders nothing. One block per file:
   \`\`\`mysql Statements.sql\`: these two still take the file name after the
   language.
 - \`:::jsxgraph\` → \`\`\`js; \`:::mermaid\` → \`\`\`mermaid;
-  \`:::abc-music\` → \`\`\`abcjs; \`:::plantuml\` → a plain \`\`\` block from
+  \`:::plantuml\` → a plain \`\`\` block from
   \`@startuml\` to \`@enduml\`; \`:::struktolab\` → a plain \`\`\` block of
   pseudocode, or \`\`\`java / \`\`\`python / \`\`\`js for a structogram of code.
+- Sheet music is a \`\`\`abcjs fenced block of its own, with no directive
+  around it (\`\`\`abcjs editor\` lets readers edit it).
 - A Java file is named after its public class (\`Equals.java\` holds
   \`public class Equals\`); Python modules use snake_case.
 

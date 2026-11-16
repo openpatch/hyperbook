@@ -22,7 +22,9 @@ describe("the directive catalog", () => {
       .filter((f) => f.startsWith("remarkDirective"))
       .flatMap((f) => [...readFileSync(path.join(dir, f), "utf8").matchAll(/const name = "([\w-]+)"/g)].map((m) => m[1]!));
     expect(names.length).toBeGreaterThan(30);
-    expect(names.filter((n) => !directive(n))).toEqual([]);
+    // abc-music turns ```abcjs fences into sheet music; it is no directive.
+    const fences = new Set(["abc-music"]);
+    expect(names.filter((n) => !fences.has(n) && !directive(n))).toEqual([]);
   });
 
   it("links to documentation pages that exist", () => {
@@ -33,6 +35,11 @@ describe("the directive catalog", () => {
 
   it("has snippets CodeMirror can read", () => {
     for (const d of DIRECTIVES) expect(() => snippet(d.snippet), d.name).not.toThrow();
+  });
+
+  it("keeps each snippet field on one line, as CodeMirror reads them", () => {
+    // A field over several lines is not read as one: it stays in the text as ${…}.
+    for (const d of DIRECTIVES) expect(d.snippet, d.name).not.toMatch(/\$\{[^}]*\n/);
   });
 });
 

@@ -585,7 +585,7 @@ export const DIRECTIVES: readonly Directive[] = [
     kind: "container",
     docs: "/elements/mermaid",
     attributes: [],
-    snippet: "mermaid\n```mermaid\n${graph LR\n  A --> B}\n```\n:::",
+    snippet: "mermaid\n```mermaid\n${graph LR}\n  A --> B\n```\n:::",
   },
   {
     name: "plantuml",
@@ -606,16 +606,7 @@ export const DIRECTIVES: readonly Directive[] = [
     kind: "container",
     docs: "/elements/scratchblock",
     attributes: [{ name: "language", description: "Language of the blocks, e.g. `de`" }],
-    snippet: "scratchblock\n${when green flag clicked\nmove (10) steps}\n:::",
-  },
-  {
-    name: "abc-music",
-    label: "Music (ABC)",
-    description: "Sheet music written in ABC notation.",
-    kind: "container",
-    docs: "/elements/abc-music",
-    attributes: [],
-    snippet: "abc-music\n```abcjs\n${X:1\nK:C\nCDEF GABc|}\n```\n:::",
+    snippet: "scratchblock\n${when green flag clicked}\nmove (10) steps\n:::",
   },
   {
     name: "h5p",

@@ -21,6 +21,11 @@ export type InsertItem = {
   /** The element it inserts. */
   directive: string;
   /**
+   * Text that is no element: a code fence the build turns into one, like
+   * sheet music's ```abcjs. In CodeMirror snippet syntax, on lines of its own.
+   */
+  fence?: () => string;
+  /**
    * What goes after the colons instead of the element's own snippet, in
    * CodeMirror snippet syntax; a function to put the reader's language in.
    */
@@ -101,7 +106,8 @@ export const INSERT_ITEMS: readonly InsertItem[] = [
   { id: "uml", group: "diagrams", directive: "plantuml" },
   { id: "memory", group: "diagrams", directive: "jmp", file: { name: "memory.jmp", attributes: ' height="600px"' } },
   { id: "geogebra", group: "diagrams", directive: "geogebra" },
-  { id: "music", group: "diagrams", directive: "abc-music" },
+  // Sheet music is a code fence of its own, ```abcjs, not a directive.
+  { id: "music", group: "diagrams", directive: "abcjs", fence: () => "```abcjs\n${X:1}\nK:C\nCDEF GABc|\n```" },
   { id: "scratchBlocks", group: "diagrams", directive: "scratchblock" },
   // Navigation
   { id: "tiles", group: "navigation", directive: "tiles" },
@@ -115,10 +121,11 @@ export const groupLabel = (group: InsertGroup) => i18next.t(`editor.insert.group
 const directiveOf = (item: InsertItem): Directive => DIRECTIVES.find((d) => d.name === item.directive)!;
 
 /** Whether the item goes within a line (`:t[…]`), not on lines of its own. */
-export const isInline = (item: InsertItem) => directiveOf(item).kind === "text";
+export const isInline = (item: InsertItem) => !item.fence && directiveOf(item).kind === "text";
 
 /** The item's text in CodeMirror snippet syntax, colons included; `src` names its file. */
 export function itemSnippet(item: InsertItem, src?: string): string {
+  if (item.fence) return item.fence();
   const d = directiveOf(item);
   if (item.file && src) return `::${d.name}{src="${src}"${item.file.attributes ?? ""}}`;
   const body = item.snippet?.() ?? d.snippet;

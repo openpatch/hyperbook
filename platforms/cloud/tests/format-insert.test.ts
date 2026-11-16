@@ -107,7 +107,13 @@ describe("inserting elements", () => {
 
   it("names only elements that exist", () => {
     const names = new Set(DIRECTIVES.map((d) => d.name));
-    for (const i of INSERT_ITEMS) expect(names.has(i.directive), i.id).toBe(true);
+    for (const i of INSERT_ITEMS) if (!i.fence) expect(names.has(i.directive), i.id).toBe(true);
+  });
+
+  it("writes sheet music as its fence alone, no directive around it", () => {
+    const view = fakeView("|");
+    insertItem(view, item("music"), 0, 0);
+    expect(view.state.doc.toString()).toBe("```abcjs\nX:1\nK:C\nCDEF GABc|\n```");
   });
 
   it("has a name and a description for each, in every group", () => {
