@@ -13,8 +13,6 @@ import {
 } from "./remarkHelper";
 import { ElementContent } from "hast";
 import { resolveDirectiveId } from "./directiveId";
-import { i18n } from "./i18n";
-import { icon } from "./icons";
 
 /** The languages a structogram can be written in, by the code fence's language. */
 const CODE_LANGUAGES: Record<string, "java" | "python" | "javascript"> = {
@@ -112,6 +110,9 @@ export default (ctx: HyperbookContext) => () => {
               "scale": scale == null ? undefined : String(scale),
               "code-mode": codeMode ?? fenceMode,
               "hide-code": hidden ? "" : undefined,
+              // Reset beside Undo/Redo: back to the page's structogram
+              // (client.js drops the saved copy on its "reset" event).
+              resettable: mode === "edit" ? "" : undefined,
               "data-id": id,
               src: src
                 ? ctx.makeUrl(
@@ -123,32 +124,6 @@ export default (ctx: HyperbookContext) => () => {
             },
             children: [...codes],
           },
-          // In edit mode, a way back to the structogram the page started
-          // with, as the IDEs have (client.js).
-          ...(mode === "edit"
-            ? [
-                {
-                  type: "element",
-                  tagName: "div",
-                  properties: { class: "struktolab-buttons" },
-                  children: [
-                    {
-                      type: "element",
-                      tagName: "button",
-                      properties: {
-                        type: "button",
-                        class: "struktolab-reset",
-                        title: i18n.get("struktolab-reset-title"),
-                      },
-                      children: [
-                        icon("reset"),
-                        { type: "text", value: i18n.get("struktolab-reset") },
-                      ],
-                    },
-                  ],
-                } as ElementContent,
-              ]
-            : []),
         ];
       }
     });

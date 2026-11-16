@@ -240,8 +240,5 @@
     "dock-move-aside-title": "Move into the dock",
     "dock-label-struktolab": "Structogram",
     "dock-label-blockflow-editor": "Blockflow",
-    "dock-label-jmp": "Memory",
-    "struktolab-reset": "Reset",
-    "struktolab-reset-title": "Back to the original structogram",
-    "struktolab-reset-prompt": "Reset this structogram to the original? Your changes will be lost."
+    "dock-label-jmp": "Memory"
 }

@@ -10,4 +10,4 @@ The page's table of contents and QR code buttons sit in the header next to searc
 
 On wide screens ☰ shows in the header as on phones and folds the menu away to the left and back; the menu starts out shown, and a folded menu stays folded on the next page. Below 1280px the window's scrollbar uses the book's colours instead of the browser's light default.
 
-`struktolab` in edit mode has a **Reset** button under the editor, as the IDEs have: after asking, it throws the student's changes away and loads the structogram the page started with (its code block, else its `src` file).
+`struktolab` in edit mode has a **Reset** button beside Undo/Redo, as the IDEs have: after asking, it throws the student's changes away and loads the structogram the page started with (its code block, else its `src` file). Updates struktolab to 0.10.0, whose editor brings the button.

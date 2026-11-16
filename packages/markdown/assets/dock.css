@@ -297,7 +297,7 @@
 }
 
 /* A structogram is as tall as its content: in the dock it scrolls inside the
-   box instead, and its reset button stays below it. */
+   box instead. */
 .hb-docked.directive-struktolab {
   display: flex;
   flex-direction: column;

@@ -15,14 +15,10 @@ hyperbook.struktolab = (function () {
       editor.dataset.hyperbookInit = "1";
       const editorId = editor.getAttribute("data-id");
 
-      const reset = editor
-        .closest(".directive-struktolab")
-        ?.querySelector(".struktolab-reset");
-      reset?.addEventListener("click", async () => {
-        if (!window.confirm(hyperbook.i18n.get("struktolab-reset-prompt")))
-          return;
-        await hyperbook.store.db.struktolab.delete(editorId);
-        await restoreOriginal(editor);
+      // The editor's own Reset (the `resettable` attribute) goes back to
+      // the page's structogram; the saved copy goes with it.
+      editor.addEventListener("reset", () => {
+        hyperbook.store.db.struktolab.delete(editorId);
       });
 
       // struktolab 0.8 saves the whole document: the tree, the code
@@ -58,33 +54,6 @@ hyperbook.struktolab = (function () {
         });
       });
     });
-  };
-
-  /**
-   * The structogram the page started with: the code block the author wrote
-   * (it stays in the editor as a <script>), else the `src` file, else an
-   * empty one.
-   * @param {HTMLElement & Record<string, any>} editor
-   */
-  const restoreOriginal = async (editor) => {
-    const script = editor.querySelector(":scope > script");
-    if (script) {
-      const language = script.dataset.code || "pseudocode";
-      editor.loadCode(script.textContent || "", language);
-      return;
-    }
-    const src = editor.getAttribute("src");
-    if (src) {
-      try {
-        const doc = await fetch(src).then((r) => r.json());
-        if (typeof editor.fromDocument === "function") editor.fromDocument(doc);
-        else editor.loadJSON(doc);
-        return;
-      } catch (e) {
-        console.error("Failed to load the structogram's src:", e);
-      }
-    }
-    editor.loadCode("", editor.codeMode || "pseudocode");
   };
 
   // Initialize existing elements on document load
