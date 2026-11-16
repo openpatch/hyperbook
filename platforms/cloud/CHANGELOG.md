@@ -1,5 +1,19 @@
 # @hyperbook/cloud
 
+## 0.13.1
+
+### Patch Changes
+
+- [`281201e`](https://github.com/openpatch/hyperbook/commit/281201e8d964cfca9bd9fb241c2e247d6bfbd6c3) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - The editors know the new `dock` attribute. In the Cloud editor, completion and hover help offer `dock` on `pyide`, `webide`, `p5`, `openscad`, `typst`, `onlineide`, `sqlide`, `excalidraw`, `textinput`, `struktolab`, `blockflow-editor` and `jmp`, and the AI assistant knows it too: a `dock` topic in its documentation and a line in each of these elements' docs tell it when to use it. The VS Code extension has a docked variant of each of their snippets: `:pyide-dock`, `:webide-dock`, `:p5-dock`, `:openscad-dock`, `:typst-dock`, `:onlineide-dock`, `:sqlide-dock`, `:excalidraw-dock`, `:textinput-dock`, `:struktolab-dock`, `:blockflow-editor-dock` and `:jmp-dock`.
+
+- [`91b7241`](https://github.com/openpatch/hyperbook/commit/91b72413b86c90561e16f9777a0bbd74e610cce4) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - New dock: a working element can be kept in view while reading the tasks around it. Add `dock` to a `pyide`, `webide`, `p5`, `openscad`, `typst`, `onlineide`, `sqlide`, `excalidraw`, `textinput`, `struktolab`, `blockflow-editor` or `jmp` (`dock="Label"` names its tab; without `dock` nothing changes) and readers get a **Dock** tab under the element. It moves the element into the dock at the right edge of the screen, on phones at the bottom, and the text makes room for it. Several docked elements share the dock as tabs, each with × to send it back. A rail on the dock's edge slides it in and out, dragging the rail resizes it, and where an element was, a line shows it in the dock when clicked, ↩ brings it back. Elements keep their state while docked: they are never re-created, only placed on screen differently. What is docked is remembered per page.
+
+  The page's table of contents and QR code buttons sit in the header next to search instead of floating over the content, where they covered text on phones. On phones the header icons move closer together and a long book title ends with "…".
+
+  On wide screens ☰ shows in the header as on phones and folds the menu away to the left and back; the menu starts out shown, and a folded menu stays folded on the next page. Below 1280px the window's scrollbar uses the book's colours instead of the browser's light default.
+
+  `struktolab` in edit mode has a **Reset** button beside Undo/Redo, as the IDEs have: after asking, it throws the student's changes away and loads the structogram the page started with (its code block, else its `src` file). Updates struktolab to 0.10.0, whose editor brings the button.
+
 ## 0.13.0
 
 ### Minor Changes
