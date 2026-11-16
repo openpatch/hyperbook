@@ -214,13 +214,60 @@
         "4": {
           "patterns": [
             {
-              "match": "(name)=\"([^\"]*)\"",
+              "match": "([a-zA-Z][\\w-]*)=\"([^\"]*)\"",
               "captures": {
                 "1": {
                   "name": "keyword.parameter.directive.archive.hyperbook"
                 },
                 "2": {
                   "name": "string.quoted.double.untitled"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=(?:(false)|(true))(?![\\w-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.archive.hyperbook"
+                },
+                "2": {
+                  "name": "constant.language.boolean.false"
+                },
+                "3": {
+                  "name": "constant.language.boolean.true"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=([0-9][0-9.]*)(px|%|em|rem|vh|dvh|vw)?(?![\\w-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.archive.hyperbook"
+                },
+                "2": {
+                  "name": "constant.numeric"
+                },
+                "3": {
+                  "name": "keyword.other.unit"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=([^\\s\"}]+)",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.archive.hyperbook"
+                },
+                "2": {
+                  "name": "string.unquoted"
+                }
+              }
+            },
+            {
+              "match": "(?<![\\w=\"#.:/-])([a-zA-Z][\\w-]*)(?![\\w=-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.archive.hyperbook"
                 }
               }
             }
@@ -246,13 +293,60 @@
         "4": {
           "patterns": [
             {
-              "match": "(title|id)=\"([^\"]*)\"",
+              "match": "([a-zA-Z][\\w-]*)=\"([^\"]*)\"",
               "captures": {
                 "1": {
-                  "name": "keyword.parameter.directive.archive.hyperbook"
+                  "name": "keyword.parameter.directive.collapsible.hyperbook"
                 },
                 "2": {
                   "name": "string.quoted.double.untitled"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=(?:(false)|(true))(?![\\w-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.collapsible.hyperbook"
+                },
+                "2": {
+                  "name": "constant.language.boolean.false"
+                },
+                "3": {
+                  "name": "constant.language.boolean.true"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=([0-9][0-9.]*)(px|%|em|rem|vh|dvh|vw)?(?![\\w-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.collapsible.hyperbook"
+                },
+                "2": {
+                  "name": "constant.numeric"
+                },
+                "3": {
+                  "name": "keyword.other.unit"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=([^\\s\"}]+)",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.collapsible.hyperbook"
+                },
+                "2": {
+                  "name": "string.unquoted"
+                }
+              }
+            },
+            {
+              "match": "(?<![\\w=\"#.:/-])([a-zA-Z][\\w-]*)(?![\\w=-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.collapsible.hyperbook"
                 }
               }
             }
@@ -286,13 +380,60 @@
         "4": {
           "patterns": [
             {
-              "match": "(src)=\"([^\"]*)\"",
+              "match": "([a-zA-Z][\\w-]*)=\"([^\"]*)\"",
               "captures": {
                 "1": {
                   "name": "keyword.parameter.directive.download.hyperbook"
                 },
                 "2": {
                   "name": "string.quoted.double.untitled"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=(?:(false)|(true))(?![\\w-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.download.hyperbook"
+                },
+                "2": {
+                  "name": "constant.language.boolean.false"
+                },
+                "3": {
+                  "name": "constant.language.boolean.true"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=([0-9][0-9.]*)(px|%|em|rem|vh|dvh|vw)?(?![\\w-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.download.hyperbook"
+                },
+                "2": {
+                  "name": "constant.numeric"
+                },
+                "3": {
+                  "name": "keyword.other.unit"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=([^\\s\"}]+)",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.download.hyperbook"
+                },
+                "2": {
+                  "name": "string.unquoted"
+                }
+              }
+            },
+            {
+              "match": "(?<![\\w=\"#.:/-])([a-zA-Z][\\w-]*)(?![\\w=-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.download.hyperbook"
                 }
               }
             }
@@ -313,13 +454,60 @@
         "4": {
           "patterns": [
             {
-              "match": "(src)=\"([^\"]*)\"",
+              "match": "([a-zA-Z][\\w-]*)=\"([^\"]*)\"",
               "captures": {
                 "1": {
                   "name": "keyword.parameter.directive.h5p.hyperbook"
                 },
                 "2": {
                   "name": "string.quoted.double.untitled"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=(?:(false)|(true))(?![\\w-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.h5p.hyperbook"
+                },
+                "2": {
+                  "name": "constant.language.boolean.false"
+                },
+                "3": {
+                  "name": "constant.language.boolean.true"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=([0-9][0-9.]*)(px|%|em|rem|vh|dvh|vw)?(?![\\w-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.h5p.hyperbook"
+                },
+                "2": {
+                  "name": "constant.numeric"
+                },
+                "3": {
+                  "name": "keyword.other.unit"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=([^\\s\"}]+)",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.h5p.hyperbook"
+                },
+                "2": {
+                  "name": "string.unquoted"
+                }
+              }
+            },
+            {
+              "match": "(?<![\\w=\"#.:/-])([a-zA-Z][\\w-]*)(?![\\w=-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.h5p.hyperbook"
                 }
               }
             }
@@ -355,10 +543,10 @@
         "4": {
           "patterns": [
             {
-              "match": "(src|aspectRatio|file)=\"([^\"]*)\"",
+              "match": "([a-zA-Z][\\w-]*)=\"([^\"]*)\"",
               "captures": {
                 "1": {
-                  "name": "keyword.parameter.directive.download.hyperbook"
+                  "name": "keyword.parameter.directive.excalidraw.hyperbook"
                 },
                 "2": {
                   "name": "string.quoted.double.untitled"
@@ -366,16 +554,49 @@
               }
             },
             {
-              "match": "(autoZoom|center|edit)=(?:(false)|(true))",
+              "match": "([a-zA-Z][\\w-]*)=(?:(false)|(true))(?![\\w-])",
               "captures": {
                 "1": {
-                  "name": "keyword.parameter.directive.download.hyperbook"
+                  "name": "keyword.parameter.directive.excalidraw.hyperbook"
                 },
                 "2": {
                   "name": "constant.language.boolean.false"
                 },
                 "3": {
                   "name": "constant.language.boolean.true"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=([0-9][0-9.]*)(px|%|em|rem|vh|dvh|vw)?(?![\\w-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.excalidraw.hyperbook"
+                },
+                "2": {
+                  "name": "constant.numeric"
+                },
+                "3": {
+                  "name": "keyword.other.unit"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=([^\\s\"}]+)",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.excalidraw.hyperbook"
+                },
+                "2": {
+                  "name": "string.unquoted"
+                }
+              }
+            },
+            {
+              "match": "(?<![\\w=\"#.:/-])([a-zA-Z][\\w-]*)(?![\\w=-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.excalidraw.hyperbook"
                 }
               }
             }
@@ -397,13 +618,60 @@
         "4": {
           "patterns": [
             {
-              "match": "(password|description)=\"([^\"]*)\"",
+              "match": "([a-zA-Z][\\w-]*)=\"([^\"]*)\"",
               "captures": {
                 "1": {
                   "name": "keyword.parameter.directive.protect.hyperbook"
                 },
                 "2": {
                   "name": "string.quoted.double.untitled"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=(?:(false)|(true))(?![\\w-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.protect.hyperbook"
+                },
+                "2": {
+                  "name": "constant.language.boolean.false"
+                },
+                "3": {
+                  "name": "constant.language.boolean.true"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=([0-9][0-9.]*)(px|%|em|rem|vh|dvh|vw)?(?![\\w-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.protect.hyperbook"
+                },
+                "2": {
+                  "name": "constant.numeric"
+                },
+                "3": {
+                  "name": "keyword.other.unit"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=([^\\s\"}]+)",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.protect.hyperbook"
+                },
+                "2": {
+                  "name": "string.unquoted"
+                }
+              }
+            },
+            {
+              "match": "(?<![\\w=\"#.:/-])([a-zA-Z][\\w-]*)(?![\\w=-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.protect.hyperbook"
                 }
               }
             }
@@ -434,13 +702,60 @@
         "4": {
           "patterns": [
             {
-              "match": "(value|size|label)=\"([^\"]*)\"",
+              "match": "([a-zA-Z][\\w-]*)=\"([^\"]*)\"",
               "captures": {
                 "1": {
                   "name": "keyword.parameter.directive.qr.hyperbook"
                 },
                 "2": {
                   "name": "string.quoted.double.untitled"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=(?:(false)|(true))(?![\\w-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.qr.hyperbook"
+                },
+                "2": {
+                  "name": "constant.language.boolean.false"
+                },
+                "3": {
+                  "name": "constant.language.boolean.true"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=([0-9][0-9.]*)(px|%|em|rem|vh|dvh|vw)?(?![\\w-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.qr.hyperbook"
+                },
+                "2": {
+                  "name": "constant.numeric"
+                },
+                "3": {
+                  "name": "keyword.other.unit"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=([^\\s\"}]+)",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.qr.hyperbook"
+                },
+                "2": {
+                  "name": "string.unquoted"
+                }
+              }
+            },
+            {
+              "match": "(?<![\\w=\"#.:/-])([a-zA-Z][\\w-]*)(?![\\w=-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.qr.hyperbook"
                 }
               }
             }
@@ -461,7 +776,7 @@
         "4": {
           "patterns": [
             {
-              "match": "(src)=\"([^\"]*)\"",
+              "match": "([a-zA-Z][\\w-]*)=\"([^\"]*)\"",
               "captures": {
                 "1": {
                   "name": "keyword.parameter.directive.bitflow.hyperbook"
@@ -472,29 +787,46 @@
               }
             },
             {
-              "match": "(height)=\"([0-9]+)(px|%)\"",
+              "match": "([a-zA-Z][\\w-]*)=(?:(false)|(true))(?![\\w-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.bitflow.hyperbook"
+                },
+                "2": {
+                  "name": "constant.language.boolean.false"
+                },
+                "3": {
+                  "name": "constant.language.boolean.true"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=([0-9][0-9.]*)(px|%|em|rem|vh|dvh|vw)?(?![\\w-])",
               "captures": {
                 "1": {
                   "name": "keyword.parameter.directive.bitflow.hyperbook"
                 },
                 "2": {
                   "name": "constant.numeric"
+                },
+                "3": {
+                  "name": "keyword.other.unit"
                 }
               }
             },
             {
-              "match": "(id|locale)=\"([^\"]*)\"",
+              "match": "([a-zA-Z][\\w-]*)=([^\\s\"}]+)",
               "captures": {
                 "1": {
                   "name": "keyword.parameter.directive.bitflow.hyperbook"
                 },
                 "2": {
-                  "name": "string.quoted.double.untitled"
+                  "name": "string.unquoted"
                 }
               }
             },
             {
-              "match": "\\b(readonly)\\b",
+              "match": "(?<![\\w=\"#.:/-])([a-zA-Z][\\w-]*)(?![\\w=-])",
               "captures": {
                 "1": {
                   "name": "keyword.parameter.directive.bitflow.hyperbook"
@@ -518,13 +850,60 @@
         "4": {
           "patterns": [
             {
-              "match": "(data)=\"([^\"]*)\"",
+              "match": "([a-zA-Z][\\w-]*)=\"([^\"]*)\"",
               "captures": {
                 "1": {
                   "name": "keyword.parameter.directive.struktog.hyperbook"
                 },
                 "2": {
                   "name": "string.quoted.double.untitled"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=(?:(false)|(true))(?![\\w-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.struktog.hyperbook"
+                },
+                "2": {
+                  "name": "constant.language.boolean.false"
+                },
+                "3": {
+                  "name": "constant.language.boolean.true"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=([0-9][0-9.]*)(px|%|em|rem|vh|dvh|vw)?(?![\\w-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.struktog.hyperbook"
+                },
+                "2": {
+                  "name": "constant.numeric"
+                },
+                "3": {
+                  "name": "keyword.other.unit"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=([^\\s\"}]+)",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.struktog.hyperbook"
+                },
+                "2": {
+                  "name": "string.unquoted"
+                }
+              }
+            },
+            {
+              "match": "(?<![\\w=\"#.:/-])([a-zA-Z][\\w-]*)(?![\\w=-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.struktog.hyperbook"
                 }
               }
             }
@@ -564,13 +943,60 @@
         "4": {
           "patterns": [
             {
-              "match": "(id)=\"([a-zA-z0-9-.]+)\"",
+              "match": "([a-zA-Z][\\w-]*)=\"([^\"]*)\"",
               "captures": {
                 "1": {
                   "name": "keyword.parameter.directive.tabs.hyperbook"
                 },
                 "2": {
                   "name": "string.quoted.double.untitled"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=(?:(false)|(true))(?![\\w-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.tabs.hyperbook"
+                },
+                "2": {
+                  "name": "constant.language.boolean.false"
+                },
+                "3": {
+                  "name": "constant.language.boolean.true"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=([0-9][0-9.]*)(px|%|em|rem|vh|dvh|vw)?(?![\\w-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.tabs.hyperbook"
+                },
+                "2": {
+                  "name": "constant.numeric"
+                },
+                "3": {
+                  "name": "keyword.other.unit"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=([^\\s\"}]+)",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.tabs.hyperbook"
+                },
+                "2": {
+                  "name": "string.unquoted"
+                }
+              }
+            },
+            {
+              "match": "(?<![\\w=\"#.:/-])([a-zA-Z][\\w-]*)(?![\\w=-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.tabs.hyperbook"
                 }
               }
             }
@@ -602,13 +1028,60 @@
         "4": {
           "patterns": [
             {
-              "match": "(id|title)=\"([^\"]*)\"",
+              "match": "([a-zA-Z][\\w-]*)=\"([^\"]*)\"",
               "captures": {
                 "1": {
                   "name": "keyword.parameter.directive.tab.hyperbook"
                 },
                 "2": {
                   "name": "string.quoted.double.untitled"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=(?:(false)|(true))(?![\\w-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.tab.hyperbook"
+                },
+                "2": {
+                  "name": "constant.language.boolean.false"
+                },
+                "3": {
+                  "name": "constant.language.boolean.true"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=([0-9][0-9.]*)(px|%|em|rem|vh|dvh|vw)?(?![\\w-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.tab.hyperbook"
+                },
+                "2": {
+                  "name": "constant.numeric"
+                },
+                "3": {
+                  "name": "keyword.other.unit"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=([^\\s\"}]+)",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.tab.hyperbook"
+                },
+                "2": {
+                  "name": "string.unquoted"
+                }
+              }
+            },
+            {
+              "match": "(?<![\\w=\"#.:/-])([a-zA-Z][\\w-]*)(?![\\w=-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.tab.hyperbook"
                 }
               }
             }
@@ -640,13 +1113,60 @@
         "4": {
           "patterns": [
             {
-              "match": "(language)=\"([^\"]*)\"",
+              "match": "([a-zA-Z][\\w-]*)=\"([^\"]*)\"",
               "captures": {
                 "1": {
                   "name": "keyword.parameter.directive.scratchblock.hyperbook"
                 },
                 "2": {
                   "name": "string.quoted.double.untitled"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=(?:(false)|(true))(?![\\w-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.scratchblock.hyperbook"
+                },
+                "2": {
+                  "name": "constant.language.boolean.false"
+                },
+                "3": {
+                  "name": "constant.language.boolean.true"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=([0-9][0-9.]*)(px|%|em|rem|vh|dvh|vw)?(?![\\w-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.scratchblock.hyperbook"
+                },
+                "2": {
+                  "name": "constant.numeric"
+                },
+                "3": {
+                  "name": "keyword.other.unit"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=([^\\s\"}]+)",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.scratchblock.hyperbook"
+                },
+                "2": {
+                  "name": "string.unquoted"
+                }
+              }
+            },
+            {
+              "match": "(?<![\\w=\"#.:/-])([a-zA-Z][\\w-]*)(?![\\w=-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.scratchblock.hyperbook"
                 }
               }
             }
@@ -678,7 +1198,7 @@
         "4": {
           "patterns": [
             {
-              "match": "(url|id)=\"([^\"]*)\"",
+              "match": "([a-zA-Z][\\w-]*)=\"([^\"]*)\"",
               "captures": {
                 "1": {
                   "name": "keyword.parameter.directive.onlineide.hyperbook"
@@ -689,29 +1209,7 @@
               }
             },
             {
-              "match": "(height)=\"([0-9]+)(px|%)\"",
-              "captures": {
-                "1": {
-                  "name": "keyword.parameter.directive.onlineide.hyperbook"
-                },
-                "2": {
-                  "name": "string.quoted.double.untitled"
-                }
-              }
-            },
-            {
-              "match": "(height)=([0-9]+)",
-              "captures": {
-                "1": {
-                  "name": "keyword.parameter.directive.onlineide.hyperbook"
-                },
-                "2": {
-                  "name": "constant.numeric"
-                }
-              }
-            },
-            {
-              "match": "(fileList|console|pCode|errorList|bottomPanel)=(?:(false)|(true))",
+              "match": "([a-zA-Z][\\w-]*)=(?:(false)|(true))(?![\\w-])",
               "captures": {
                 "1": {
                   "name": "keyword.parameter.directive.onlineide.hyperbook"
@@ -721,6 +1219,39 @@
                 },
                 "3": {
                   "name": "constant.language.boolean.true"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=([0-9][0-9.]*)(px|%|em|rem|vh|dvh|vw)?(?![\\w-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.onlineide.hyperbook"
+                },
+                "2": {
+                  "name": "constant.numeric"
+                },
+                "3": {
+                  "name": "keyword.other.unit"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=([^\\s\"}]+)",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.onlineide.hyperbook"
+                },
+                "2": {
+                  "name": "string.unquoted"
+                }
+              }
+            },
+            {
+              "match": "(?<![\\w=\"#.:/-])([a-zA-Z][\\w-]*)(?![\\w=-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.onlineide.hyperbook"
                 }
               }
             }
@@ -752,10 +1283,10 @@
         "4": {
           "patterns": [
             {
-              "match": "(url|id|db)=\"([^\"]*)\"",
+              "match": "([a-zA-Z][\\w-]*)=\"([^\"]*)\"",
               "captures": {
                 "1": {
-                  "name": "keyword.parameter.directive.onlineide.hyperbook"
+                  "name": "keyword.parameter.directive.sqlide.hyperbook"
                 },
                 "2": {
                   "name": "string.quoted.double.untitled"
@@ -763,24 +1294,49 @@
               }
             },
             {
-              "match": "(height)=\"([0-9]+)(px|%)\"",
+              "match": "([a-zA-Z][\\w-]*)=(?:(false)|(true))(?![\\w-])",
               "captures": {
                 "1": {
-                  "name": "keyword.parameter.directive.onlineide.hyperbook"
+                  "name": "keyword.parameter.directive.sqlide.hyperbook"
                 },
                 "2": {
-                  "name": "constant.numeric"
+                  "name": "constant.language.boolean.false"
+                },
+                "3": {
+                  "name": "constant.language.boolean.true"
                 }
               }
             },
             {
-              "match": "(height)=([0-9]+)",
+              "match": "([a-zA-Z][\\w-]*)=([0-9][0-9.]*)(px|%|em|rem|vh|dvh|vw)?(?![\\w-])",
               "captures": {
                 "1": {
-                  "name": "keyword.parameter.directive.onlineide.hyperbook"
+                  "name": "keyword.parameter.directive.sqlide.hyperbook"
                 },
                 "2": {
                   "name": "constant.numeric"
+                },
+                "3": {
+                  "name": "keyword.other.unit"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=([^\\s\"}]+)",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.sqlide.hyperbook"
+                },
+                "2": {
+                  "name": "string.unquoted"
+                }
+              }
+            },
+            {
+              "match": "(?<![\\w=\"#.:/-])([a-zA-Z][\\w-]*)(?![\\w=-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.sqlide.hyperbook"
                 }
               }
             }
@@ -814,7 +1370,7 @@
         "5": {
           "patterns": [
             {
-              "match": "(src|title|aspectRatio)=\"([^\"]*)\"",
+              "match": "([a-zA-Z][\\w-]*)=\"([^\"]*)\"",
               "captures": {
                 "1": {
                   "name": "keyword.parameter.directive.embed.hyperbook"
@@ -825,29 +1381,7 @@
               }
             },
             {
-              "match": "(height|width)=\"([0-9]+)(px|%)\"",
-              "captures": {
-                "1": {
-                  "name": "keyword.parameter.directive.embed.hyperbook"
-                },
-                "2": {
-                  "name": "string.quoted.double.untitled"
-                }
-              }
-            },
-            {
-              "match": "(height|width)=([0-9]+)",
-              "captures": {
-                "1": {
-                  "name": "keyword.parameter.directive.embed.hyperbook"
-                },
-                "2": {
-                  "name": "constant.numeric"
-                }
-              }
-            },
-            {
-              "match": "(allowFullscreen)=(?:(false)|(true))",
+              "match": "([a-zA-Z][\\w-]*)=(?:(false)|(true))(?![\\w-])",
               "captures": {
                 "1": {
                   "name": "keyword.parameter.directive.embed.hyperbook"
@@ -857,6 +1391,39 @@
                 },
                 "3": {
                   "name": "constant.language.boolean.true"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=([0-9][0-9.]*)(px|%|em|rem|vh|dvh|vw)?(?![\\w-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.embed.hyperbook"
+                },
+                "2": {
+                  "name": "constant.numeric"
+                },
+                "3": {
+                  "name": "keyword.other.unit"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=([^\\s\"}]+)",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.embed.hyperbook"
+                },
+                "2": {
+                  "name": "string.unquoted"
+                }
+              }
+            },
+            {
+              "match": "(?<![\\w=\"#.:/-])([a-zA-Z][\\w-]*)(?![\\w=-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.embed.hyperbook"
                 }
               }
             }
@@ -878,7 +1445,7 @@
         "4": {
           "patterns": [
             {
-              "match": "(alt)=\"([^\"]*)\"",
+              "match": "([a-zA-Z][\\w-]*)=\"([^\"]*)\"",
               "captures": {
                 "1": {
                   "name": "keyword.parameter.directive.plantuml.hyperbook"
@@ -889,13 +1456,49 @@
               }
             },
             {
-              "match": "(width)=\"([0-9]+)(px|%)\"",
+              "match": "([a-zA-Z][\\w-]*)=(?:(false)|(true))(?![\\w-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.plantuml.hyperbook"
+                },
+                "2": {
+                  "name": "constant.language.boolean.false"
+                },
+                "3": {
+                  "name": "constant.language.boolean.true"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=([0-9][0-9.]*)(px|%|em|rem|vh|dvh|vw)?(?![\\w-])",
               "captures": {
                 "1": {
                   "name": "keyword.parameter.directive.plantuml.hyperbook"
                 },
                 "2": {
                   "name": "constant.numeric"
+                },
+                "3": {
+                  "name": "keyword.other.unit"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=([^\\s\"}]+)",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.plantuml.hyperbook"
+                },
+                "2": {
+                  "name": "string.unquoted"
+                }
+              }
+            },
+            {
+              "match": "(?<![\\w=\"#.:/-])([a-zA-Z][\\w-]*)(?![\\w=-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.plantuml.hyperbook"
                 }
               }
             }
@@ -927,13 +1530,60 @@
         "4": {
           "patterns": [
             {
-              "match": "(height)=([0-9]+)",
+              "match": "([a-zA-Z][\\w-]*)=\"([^\"]*)\"",
               "captures": {
                 "1": {
                   "name": "keyword.parameter.directive.slideshow.hyperbook"
                 },
                 "2": {
                   "name": "string.quoted.double.untitled"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=(?:(false)|(true))(?![\\w-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.slideshow.hyperbook"
+                },
+                "2": {
+                  "name": "constant.language.boolean.false"
+                },
+                "3": {
+                  "name": "constant.language.boolean.true"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=([0-9][0-9.]*)(px|%|em|rem|vh|dvh|vw)?(?![\\w-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.slideshow.hyperbook"
+                },
+                "2": {
+                  "name": "constant.numeric"
+                },
+                "3": {
+                  "name": "keyword.other.unit"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=([^\\s\"}]+)",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.slideshow.hyperbook"
+                },
+                "2": {
+                  "name": "string.unquoted"
+                }
+              }
+            },
+            {
+              "match": "(?<![\\w=\"#.:/-])([a-zA-Z][\\w-]*)(?![\\w=-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.slideshow.hyperbook"
                 }
               }
             }
@@ -964,7 +1614,7 @@
         "4": {
           "patterns": [
             {
-              "match": "(src|thumbnail|title|author)=\"([^\"]*)\"",
+              "match": "([a-zA-Z][\\w-]*)=\"([^\"]*)\"",
               "captures": {
                 "1": {
                   "name": "keyword.parameter.directive.audio.hyperbook"
@@ -975,13 +1625,49 @@
               }
             },
             {
-              "match": "(position)=\"(left|right)\"",
+              "match": "([a-zA-Z][\\w-]*)=(?:(false)|(true))(?![\\w-])",
               "captures": {
                 "1": {
                   "name": "keyword.parameter.directive.audio.hyperbook"
                 },
                 "2": {
-                  "name": "string.quoted.double.untitled"
+                  "name": "constant.language.boolean.false"
+                },
+                "3": {
+                  "name": "constant.language.boolean.true"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=([0-9][0-9.]*)(px|%|em|rem|vh|dvh|vw)?(?![\\w-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.audio.hyperbook"
+                },
+                "2": {
+                  "name": "constant.numeric"
+                },
+                "3": {
+                  "name": "keyword.other.unit"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=([^\\s\"}]+)",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.audio.hyperbook"
+                },
+                "2": {
+                  "name": "string.unquoted"
+                }
+              }
+            },
+            {
+              "match": "(?<![\\w=\"#.:/-])([a-zA-Z][\\w-]*)(?![\\w=-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.audio.hyperbook"
                 }
               }
             }
@@ -1025,13 +1711,60 @@
         "4": {
           "patterns": [
             {
-              "match": "(title|href|size|icon)=\"([^\"]*)\"",
+              "match": "([a-zA-Z][\\w-]*)=\"([^\"]*)\"",
               "captures": {
                 "1": {
                   "name": "keyword.parameter.directive.tile.hyperbook"
                 },
                 "2": {
                   "name": "string.quoted.double.untitled"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=(?:(false)|(true))(?![\\w-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.tile.hyperbook"
+                },
+                "2": {
+                  "name": "constant.language.boolean.false"
+                },
+                "3": {
+                  "name": "constant.language.boolean.true"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=([0-9][0-9.]*)(px|%|em|rem|vh|dvh|vw)?(?![\\w-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.tile.hyperbook"
+                },
+                "2": {
+                  "name": "constant.numeric"
+                },
+                "3": {
+                  "name": "keyword.other.unit"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=([^\\s\"}]+)",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.tile.hyperbook"
+                },
+                "2": {
+                  "name": "string.unquoted"
+                }
+              }
+            },
+            {
+              "match": "(?<![\\w=\"#.:/-])([a-zA-Z][\\w-]*)(?![\\w=-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.tile.hyperbook"
                 }
               }
             }
@@ -1052,13 +1785,60 @@
         "4": {
           "patterns": [
             {
-              "match": "(src|poster|title|author)=\"([^\"]*)\"",
+              "match": "([a-zA-Z][\\w-]*)=\"([^\"]*)\"",
               "captures": {
                 "1": {
                   "name": "keyword.parameter.directive.video.hyperbook"
                 },
                 "2": {
                   "name": "string.quoted.double.untitled"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=(?:(false)|(true))(?![\\w-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.video.hyperbook"
+                },
+                "2": {
+                  "name": "constant.language.boolean.false"
+                },
+                "3": {
+                  "name": "constant.language.boolean.true"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=([0-9][0-9.]*)(px|%|em|rem|vh|dvh|vw)?(?![\\w-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.video.hyperbook"
+                },
+                "2": {
+                  "name": "constant.numeric"
+                },
+                "3": {
+                  "name": "keyword.other.unit"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=([^\\s\"}]+)",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.video.hyperbook"
+                },
+                "2": {
+                  "name": "string.unquoted"
+                }
+              }
+            },
+            {
+              "match": "(?<![\\w=\"#.:/-])([a-zA-Z][\\w-]*)(?![\\w=-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.video.hyperbook"
                 }
               }
             }
@@ -1079,13 +1859,60 @@
         "4": {
           "patterns": [
             {
-              "match": "(source|orderBy|format)=\"([^\"]*)\"",
+              "match": "([a-zA-Z][\\w-]*)=\"([^\"]*)\"",
               "captures": {
                 "1": {
                   "name": "keyword.parameter.directive.pagelist.hyperbook"
                 },
                 "2": {
                   "name": "string.quoted.double.untitled"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=(?:(false)|(true))(?![\\w-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.pagelist.hyperbook"
+                },
+                "2": {
+                  "name": "constant.language.boolean.false"
+                },
+                "3": {
+                  "name": "constant.language.boolean.true"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=([0-9][0-9.]*)(px|%|em|rem|vh|dvh|vw)?(?![\\w-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.pagelist.hyperbook"
+                },
+                "2": {
+                  "name": "constant.numeric"
+                },
+                "3": {
+                  "name": "keyword.other.unit"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=([^\\s\"}]+)",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.pagelist.hyperbook"
+                },
+                "2": {
+                  "name": "string.unquoted"
+                }
+              }
+            },
+            {
+              "match": "(?<![\\w=\"#.:/-])([a-zA-Z][\\w-]*)(?![\\w=-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.pagelist.hyperbook"
                 }
               }
             }
@@ -1106,10 +1933,10 @@
         "4": {
           "patterns": [
             {
-              "match": "(src)=\"([^\"]*)\"",
+              "match": "([a-zA-Z][\\w-]*)=\"([^\"]*)\"",
               "captures": {
                 "1": {
-                  "name": "keyword.parameter.directive.p5.hyperbook"
+                  "name": "keyword.parameter.directive.p5-inline.hyperbook"
                 },
                 "2": {
                   "name": "string.quoted.double.untitled"
@@ -1117,27 +1944,49 @@
               }
             },
             {
-              "match": "(height)=([0-9]+)",
+              "match": "([a-zA-Z][\\w-]*)=(?:(false)|(true))(?![\\w-])",
               "captures": {
                 "1": {
-                  "name": "keyword.parameter.directive.p5.hyperbook"
-                },
-                "2": {
-                  "name": "constant.numeric"
-                }
-              }
-            },
-            {
-              "match": "(editor)=(?:(false)|(true))",
-              "captures": {
-                "1": {
-                  "name": "keyword.parameter.directive.p5.hyperbook"
+                  "name": "keyword.parameter.directive.p5-inline.hyperbook"
                 },
                 "2": {
                   "name": "constant.language.boolean.false"
                 },
                 "3": {
                   "name": "constant.language.boolean.true"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=([0-9][0-9.]*)(px|%|em|rem|vh|dvh|vw)?(?![\\w-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.p5-inline.hyperbook"
+                },
+                "2": {
+                  "name": "constant.numeric"
+                },
+                "3": {
+                  "name": "keyword.other.unit"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=([^\\s\"}]+)",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.p5-inline.hyperbook"
+                },
+                "2": {
+                  "name": "string.unquoted"
+                }
+              }
+            },
+            {
+              "match": "(?<![\\w=\"#.:/-])([a-zA-Z][\\w-]*)(?![\\w=-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.p5-inline.hyperbook"
                 }
               }
             }
@@ -1159,7 +2008,7 @@
         "4": {
           "patterns": [
             {
-              "match": "(src)=\"([^\"]*)\"",
+              "match": "([a-zA-Z][\\w-]*)=\"([^\"]*)\"",
               "captures": {
                 "1": {
                   "name": "keyword.parameter.directive.p5.hyperbook"
@@ -1170,18 +2019,7 @@
               }
             },
             {
-              "match": "(height)=([0-9]+)",
-              "captures": {
-                "1": {
-                  "name": "keyword.parameter.directive.p5.hyperbook"
-                },
-                "2": {
-                  "name": "constant.numeric"
-                }
-              }
-            },
-            {
-              "match": "(editor)=(?:(false)|(true))",
+              "match": "([a-zA-Z][\\w-]*)=(?:(false)|(true))(?![\\w-])",
               "captures": {
                 "1": {
                   "name": "keyword.parameter.directive.p5.hyperbook"
@@ -1191,6 +2029,39 @@
                 },
                 "3": {
                   "name": "constant.language.boolean.true"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=([0-9][0-9.]*)(px|%|em|rem|vh|dvh|vw)?(?![\\w-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.p5.hyperbook"
+                },
+                "2": {
+                  "name": "constant.numeric"
+                },
+                "3": {
+                  "name": "keyword.other.unit"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=([^\\s\"}]+)",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.p5.hyperbook"
+                },
+                "2": {
+                  "name": "string.unquoted"
+                }
+              }
+            },
+            {
+              "match": "(?<![\\w=\"#.:/-])([a-zA-Z][\\w-]*)(?![\\w=-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.p5.hyperbook"
                 }
               }
             }
@@ -1234,7 +2105,15 @@
         "4": {
           "patterns": [
             {
-              "match": "(src|perspective|coordsystem|axislabels|xaxislabel|yaxislabel|zaxislabel|algebraInputPosition)=\"([^\"]*)\"",
+              "match": "(showToolBar|showAlgebraInput|enableUndoRedo|showMenuBar|enableFileFeatures|showZoomButtons|showFullscreenButton|showResetIcon|hidecursorwhendragging|repaintingactive|errordialogsactive)",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.geogebra.hyperbook"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=\"([^\"]*)\"",
               "captures": {
                 "1": {
                   "name": "keyword.parameter.directive.geogebra.hyperbook"
@@ -1245,18 +2124,46 @@
               }
             },
             {
-              "match": "(height|width)=([0-9]+)",
+              "match": "([a-zA-Z][\\w-]*)=(?:(false)|(true))(?![\\w-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.geogebra.hyperbook"
+                },
+                "2": {
+                  "name": "constant.language.boolean.false"
+                },
+                "3": {
+                  "name": "constant.language.boolean.true"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=([0-9][0-9.]*)(px|%|em|rem|vh|dvh|vw)?(?![\\w-])",
               "captures": {
                 "1": {
                   "name": "keyword.parameter.directive.geogebra.hyperbook"
                 },
                 "2": {
                   "name": "constant.numeric"
+                },
+                "3": {
+                  "name": "keyword.other.unit"
                 }
               }
             },
             {
-              "match": "(showToolBar|showAlgebraInput|enableUndoRedo|showMenuBar|enableFileFeatures|showZoomButtons|showFullscreenButton|showResetIcon|hidecursorwhendragging|repaintingactive|errordialogsactive)",
+              "match": "([a-zA-Z][\\w-]*)=([^\\s\"}]+)",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.geogebra.hyperbook"
+                },
+                "2": {
+                  "name": "string.unquoted"
+                }
+              }
+            },
+            {
+              "match": "(?<![\\w=\"#.:/-])([a-zA-Z][\\w-]*)(?![\\w=-])",
               "captures": {
                 "1": {
                   "name": "keyword.parameter.directive.geogebra.hyperbook"
@@ -1291,7 +2198,7 @@
         "4": {
           "patterns": [
             {
-              "match": "(id|boundingbox)=\"([^\"]*)\"",
+              "match": "([a-zA-Z][\\w-]*)=\"([^\"]*)\"",
               "captures": {
                 "1": {
                   "name": "keyword.parameter.directive.jsxgraph.hyperbook"
@@ -1302,18 +2209,7 @@
               }
             },
             {
-              "match": "(height|width)=([0-9]+)",
-              "captures": {
-                "1": {
-                  "name": "keyword.parameter.directive.jsxgraph.hyperbook"
-                },
-                "2": {
-                  "name": "constant.numeric"
-                }
-              }
-            },
-            {
-              "match": "(axis|grid|showNavigation|zoom|pan|keyboard|keepaspetcratio)=(?:(false)|(true))",
+              "match": "([a-zA-Z][\\w-]*)=(?:(false)|(true))(?![\\w-])",
               "captures": {
                 "1": {
                   "name": "keyword.parameter.directive.jsxgraph.hyperbook"
@@ -1323,6 +2219,39 @@
                 },
                 "3": {
                   "name": "constant.language.boolean.true"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=([0-9][0-9.]*)(px|%|em|rem|vh|dvh|vw)?(?![\\w-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.jsxgraph.hyperbook"
+                },
+                "2": {
+                  "name": "constant.numeric"
+                },
+                "3": {
+                  "name": "keyword.other.unit"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=([^\\s\"}]+)",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.jsxgraph.hyperbook"
+                },
+                "2": {
+                  "name": "string.unquoted"
+                }
+              }
+            },
+            {
+              "match": "(?<![\\w=\"#.:/-])([a-zA-Z][\\w-]*)(?![\\w=-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.jsxgraph.hyperbook"
                 }
               }
             }
@@ -1353,13 +2282,60 @@
         "4": {
           "patterns": [
             {
-              "match": "(src|id|height|step|language)=\"([^\"]*)\"",
+              "match": "([a-zA-Z][\\w-]*)=\"([^\"]*)\"",
               "captures": {
                 "1": {
                   "name": "keyword.parameter.directive.jmp.hyperbook"
                 },
                 "2": {
                   "name": "string.quoted.double.untitled"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=(?:(false)|(true))(?![\\w-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.jmp.hyperbook"
+                },
+                "2": {
+                  "name": "constant.language.boolean.false"
+                },
+                "3": {
+                  "name": "constant.language.boolean.true"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=([0-9][0-9.]*)(px|%|em|rem|vh|dvh|vw)?(?![\\w-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.jmp.hyperbook"
+                },
+                "2": {
+                  "name": "constant.numeric"
+                },
+                "3": {
+                  "name": "keyword.other.unit"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=([^\\s\"}]+)",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.jmp.hyperbook"
+                },
+                "2": {
+                  "name": "string.unquoted"
+                }
+              }
+            },
+            {
+              "match": "(?<![\\w=\"#.:/-])([a-zA-Z][\\w-]*)(?![\\w=-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.jmp.hyperbook"
                 }
               }
             }
@@ -1380,13 +2356,60 @@
         "4": {
           "patterns": [
             {
-              "match": "(src|id|height)=\"([^\"]*)\"",
+              "match": "([a-zA-Z][\\w-]*)=\"([^\"]*)\"",
               "captures": {
                 "1": {
                   "name": "keyword.parameter.directive.learningmap.hyperbook"
                 },
                 "2": {
                   "name": "string.quoted.double.untitled"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=(?:(false)|(true))(?![\\w-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.learningmap.hyperbook"
+                },
+                "2": {
+                  "name": "constant.language.boolean.false"
+                },
+                "3": {
+                  "name": "constant.language.boolean.true"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=([0-9][0-9.]*)(px|%|em|rem|vh|dvh|vw)?(?![\\w-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.learningmap.hyperbook"
+                },
+                "2": {
+                  "name": "constant.numeric"
+                },
+                "3": {
+                  "name": "keyword.other.unit"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=([^\\s\"}]+)",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.learningmap.hyperbook"
+                },
+                "2": {
+                  "name": "string.unquoted"
+                }
+              }
+            },
+            {
+              "match": "(?<![\\w=\"#.:/-])([a-zA-Z][\\w-]*)(?![\\w=-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.learningmap.hyperbook"
                 }
               }
             }
@@ -1407,13 +2430,60 @@
         "4": {
           "patterns": [
             {
-              "match": "(placeholder|id|height)=\"([^\"]*)\"",
+              "match": "([a-zA-Z][\\w-]*)=\"([^\"]*)\"",
               "captures": {
                 "1": {
                   "name": "keyword.parameter.directive.textinput.hyperbook"
                 },
                 "2": {
                   "name": "string.quoted.double.untitled"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=(?:(false)|(true))(?![\\w-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.textinput.hyperbook"
+                },
+                "2": {
+                  "name": "constant.language.boolean.false"
+                },
+                "3": {
+                  "name": "constant.language.boolean.true"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=([0-9][0-9.]*)(px|%|em|rem|vh|dvh|vw)?(?![\\w-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.textinput.hyperbook"
+                },
+                "2": {
+                  "name": "constant.numeric"
+                },
+                "3": {
+                  "name": "keyword.other.unit"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=([^\\s\"}]+)",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.textinput.hyperbook"
+                },
+                "2": {
+                  "name": "string.unquoted"
+                }
+              }
+            },
+            {
+              "match": "(?<![\\w=\"#.:/-])([a-zA-Z][\\w-]*)(?![\\w=-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.textinput.hyperbook"
                 }
               }
             }
@@ -1435,7 +2505,7 @@
         "4": {
           "patterns": [
             {
-              "match": "(url|id)=\"([^\"]*)\"",
+              "match": "([a-zA-Z][\\w-]*)=\"([^\"]*)\"",
               "captures": {
                 "1": {
                   "name": "keyword.parameter.directive.webide.hyperbook"
@@ -1446,13 +2516,49 @@
               }
             },
             {
-              "match": "(height)=([0-9]+)",
+              "match": "([a-zA-Z][\\w-]*)=(?:(false)|(true))(?![\\w-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.webide.hyperbook"
+                },
+                "2": {
+                  "name": "constant.language.boolean.false"
+                },
+                "3": {
+                  "name": "constant.language.boolean.true"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=([0-9][0-9.]*)(px|%|em|rem|vh|dvh|vw)?(?![\\w-])",
               "captures": {
                 "1": {
                   "name": "keyword.parameter.directive.webide.hyperbook"
                 },
                 "2": {
                   "name": "constant.numeric"
+                },
+                "3": {
+                  "name": "keyword.other.unit"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=([^\\s\"}]+)",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.webide.hyperbook"
+                },
+                "2": {
+                  "name": "string.unquoted"
+                }
+              }
+            },
+            {
+              "match": "(?<![\\w=\"#.:/-])([a-zA-Z][\\w-]*)(?![\\w=-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.webide.hyperbook"
                 }
               }
             }
@@ -1507,7 +2613,7 @@
         "4": {
           "patterns": [
             {
-              "match": "(url|id)=\"([^\"]*)\"",
+              "match": "([a-zA-Z][\\w-]*)=\"([^\"]*)\"",
               "captures": {
                 "1": {
                   "name": "keyword.parameter.directive.pyide.hyperbook"
@@ -1518,13 +2624,49 @@
               }
             },
             {
-              "match": "(height)=([0-9]+)",
+              "match": "([a-zA-Z][\\w-]*)=(?:(false)|(true))(?![\\w-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.pyide.hyperbook"
+                },
+                "2": {
+                  "name": "constant.language.boolean.false"
+                },
+                "3": {
+                  "name": "constant.language.boolean.true"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=([0-9][0-9.]*)(px|%|em|rem|vh|dvh|vw)?(?![\\w-])",
               "captures": {
                 "1": {
                   "name": "keyword.parameter.directive.pyide.hyperbook"
                 },
                 "2": {
                   "name": "constant.numeric"
+                },
+                "3": {
+                  "name": "keyword.other.unit"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=([^\\s\"}]+)",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.pyide.hyperbook"
+                },
+                "2": {
+                  "name": "string.unquoted"
+                }
+              }
+            },
+            {
+              "match": "(?<![\\w=\"#.:/-])([a-zA-Z][\\w-]*)(?![\\w=-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.pyide.hyperbook"
                 }
               }
             }
@@ -1577,13 +2719,60 @@
         "4": {
           "patterns": [
             {
-              "match": "(height|id|mode)=\"([^\"]*)\"",
+              "match": "([a-zA-Z][\\w-]*)=\"([^\"]*)\"",
               "captures": {
                 "1": {
                   "name": "keyword.parameter.directive.typst.hyperbook"
                 },
                 "2": {
                   "name": "string.quoted.double.untitled"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=(?:(false)|(true))(?![\\w-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.typst.hyperbook"
+                },
+                "2": {
+                  "name": "constant.language.boolean.false"
+                },
+                "3": {
+                  "name": "constant.language.boolean.true"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=([0-9][0-9.]*)(px|%|em|rem|vh|dvh|vw)?(?![\\w-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.typst.hyperbook"
+                },
+                "2": {
+                  "name": "constant.numeric"
+                },
+                "3": {
+                  "name": "keyword.other.unit"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=([^\\s\"}]+)",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.typst.hyperbook"
+                },
+                "2": {
+                  "name": "string.unquoted"
+                }
+              }
+            },
+            {
+              "match": "(?<![\\w=\"#.:/-])([a-zA-Z][\\w-]*)(?![\\w=-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.typst.hyperbook"
                 }
               }
             }
@@ -1622,10 +2811,10 @@
               }
             },
             {
-              "match": "([a-zA-Z][a-zA-Z0-9]*)=\"([^\"]*)\"",
+              "match": "([a-zA-Z][\\w-]*)=\"([^\"]*)\"",
               "captures": {
                 "1": {
-                  "name": "keyword.parameter.directive.snippet.hyperbook"
+                  "name": "keyword.parameter.directive.snippets-inline.hyperbook"
                 },
                 "2": {
                   "name": "string.quoted.double.untitled"
@@ -1633,10 +2822,10 @@
               }
             },
             {
-              "match": "([a-zA-Z][a-zA-Z0-9]*)=(?:(false)|(true))",
+              "match": "([a-zA-Z][\\w-]*)=(?:(false)|(true))(?![\\w-])",
               "captures": {
                 "1": {
-                  "name": "keyword.parameter.directive.snippet.hyperbook"
+                  "name": "keyword.parameter.directive.snippets-inline.hyperbook"
                 },
                 "2": {
                   "name": "constant.language.boolean.false"
@@ -1647,13 +2836,35 @@
               }
             },
             {
-              "match": "([a-zA-Z][a-zA-Z0-9]*)=([^\\s}\"]+)",
+              "match": "([a-zA-Z][\\w-]*)=([0-9][0-9.]*)(px|%|em|rem|vh|dvh|vw)?(?![\\w-])",
               "captures": {
                 "1": {
-                  "name": "keyword.parameter.directive.snippet.hyperbook"
+                  "name": "keyword.parameter.directive.snippets-inline.hyperbook"
                 },
                 "2": {
                   "name": "constant.numeric"
+                },
+                "3": {
+                  "name": "keyword.other.unit"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=([^\\s\"}]+)",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.snippets-inline.hyperbook"
+                },
+                "2": {
+                  "name": "string.unquoted"
+                }
+              }
+            },
+            {
+              "match": "(?<![\\w=\"#.:/-])([a-zA-Z][\\w-]*)(?![\\w=-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.snippets-inline.hyperbook"
                 }
               }
             }
@@ -1683,10 +2894,10 @@
               }
             },
             {
-              "match": "([a-zA-Z][a-zA-Z0-9]*)=\"([^\"]*)\"",
+              "match": "([a-zA-Z][\\w-]*)=\"([^\"]*)\"",
               "captures": {
                 "1": {
-                  "name": "keyword.parameter.directive.snippet.hyperbook"
+                  "name": "keyword.parameter.directive.snippets-block.hyperbook"
                 },
                 "2": {
                   "name": "string.quoted.double.untitled"
@@ -1694,10 +2905,10 @@
               }
             },
             {
-              "match": "([a-zA-Z][a-zA-Z0-9]*)=(?:(false)|(true))",
+              "match": "([a-zA-Z][\\w-]*)=(?:(false)|(true))(?![\\w-])",
               "captures": {
                 "1": {
-                  "name": "keyword.parameter.directive.snippet.hyperbook"
+                  "name": "keyword.parameter.directive.snippets-block.hyperbook"
                 },
                 "2": {
                   "name": "constant.language.boolean.false"
@@ -1708,13 +2919,35 @@
               }
             },
             {
-              "match": "([a-zA-Z][a-zA-Z0-9]*)=([^\\s}\"]+)",
+              "match": "([a-zA-Z][\\w-]*)=([0-9][0-9.]*)(px|%|em|rem|vh|dvh|vw)?(?![\\w-])",
               "captures": {
                 "1": {
-                  "name": "keyword.parameter.directive.snippet.hyperbook"
+                  "name": "keyword.parameter.directive.snippets-block.hyperbook"
                 },
                 "2": {
                   "name": "constant.numeric"
+                },
+                "3": {
+                  "name": "keyword.other.unit"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=([^\\s\"}]+)",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.snippets-block.hyperbook"
+                },
+                "2": {
+                  "name": "string.unquoted"
+                }
+              }
+            },
+            {
+              "match": "(?<![\\w=\"#.:/-])([a-zA-Z][\\w-]*)(?![\\w=-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.snippets-block.hyperbook"
                 }
               }
             }
@@ -1746,7 +2979,7 @@
         "4": {
           "patterns": [
             {
-              "match": "([a-zA-Z][a-zA-Z0-9-]*)=\"([^\"]*)\"",
+              "match": "([a-zA-Z][\\w-]*)=\"([^\"]*)\"",
               "captures": {
                 "1": {
                   "name": "keyword.parameter.directive.blockflow-editor.hyperbook"
@@ -1757,7 +2990,7 @@
               }
             },
             {
-              "match": "([a-zA-Z][a-zA-Z0-9-]*)=(?:(false)|(true))",
+              "match": "([a-zA-Z][\\w-]*)=(?:(false)|(true))(?![\\w-])",
               "captures": {
                 "1": {
                   "name": "keyword.parameter.directive.blockflow-editor.hyperbook"
@@ -1767,6 +3000,39 @@
                 },
                 "3": {
                   "name": "constant.language.boolean.true"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=([0-9][0-9.]*)(px|%|em|rem|vh|dvh|vw)?(?![\\w-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.blockflow-editor.hyperbook"
+                },
+                "2": {
+                  "name": "constant.numeric"
+                },
+                "3": {
+                  "name": "keyword.other.unit"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=([^\\s\"}]+)",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.blockflow-editor.hyperbook"
+                },
+                "2": {
+                  "name": "string.unquoted"
+                }
+              }
+            },
+            {
+              "match": "(?<![\\w=\"#.:/-])([a-zA-Z][\\w-]*)(?![\\w=-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.blockflow-editor.hyperbook"
                 }
               }
             }
@@ -1797,13 +3063,60 @@
         "4": {
           "patterns": [
             {
-              "match": "([a-zA-Z][a-zA-Z0-9]*)=\"([^\"]*)\"",
+              "match": "([a-zA-Z][\\w-]*)=\"([^\"]*)\"",
               "captures": {
                 "1": {
                   "name": "keyword.parameter.directive.blockflow-player.hyperbook"
                 },
                 "2": {
                   "name": "string.quoted.double.untitled"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=(?:(false)|(true))(?![\\w-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.blockflow-player.hyperbook"
+                },
+                "2": {
+                  "name": "constant.language.boolean.false"
+                },
+                "3": {
+                  "name": "constant.language.boolean.true"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=([0-9][0-9.]*)(px|%|em|rem|vh|dvh|vw)?(?![\\w-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.blockflow-player.hyperbook"
+                },
+                "2": {
+                  "name": "constant.numeric"
+                },
+                "3": {
+                  "name": "keyword.other.unit"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=([^\\s\"}]+)",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.blockflow-player.hyperbook"
+                },
+                "2": {
+                  "name": "string.unquoted"
+                }
+              }
+            },
+            {
+              "match": "(?<![\\w=\"#.:/-])([a-zA-Z][\\w-]*)(?![\\w=-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.blockflow-player.hyperbook"
                 }
               }
             }
@@ -1824,7 +3137,15 @@
         "4": {
           "patterns": [
             {
-              "match": "([a-zA-Z][a-zA-Z0-9]*)=\"([^\"]*)\"",
+              "match": "(?<![\\w=\"])([a-zA-Z][a-zA-Z0-9]*)(?![\\w=])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.struktolab.hyperbook"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=\"([^\"]*)\"",
               "captures": {
                 "1": {
                   "name": "keyword.parameter.directive.struktolab.hyperbook"
@@ -1835,18 +3156,46 @@
               }
             },
             {
-              "match": "([a-zA-Z][a-zA-Z0-9]*)=([^\\s\"}]+)",
+              "match": "([a-zA-Z][\\w-]*)=(?:(false)|(true))(?![\\w-])",
               "captures": {
                 "1": {
                   "name": "keyword.parameter.directive.struktolab.hyperbook"
                 },
                 "2": {
-                  "name": "string.unquoted.untitled"
+                  "name": "constant.language.boolean.false"
+                },
+                "3": {
+                  "name": "constant.language.boolean.true"
                 }
               }
             },
             {
-              "match": "(?<![\\w=\"])([a-zA-Z][a-zA-Z0-9]*)(?![\\w=])",
+              "match": "([a-zA-Z][\\w-]*)=([0-9][0-9.]*)(px|%|em|rem|vh|dvh|vw)?(?![\\w-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.struktolab.hyperbook"
+                },
+                "2": {
+                  "name": "constant.numeric"
+                },
+                "3": {
+                  "name": "keyword.other.unit"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=([^\\s\"}]+)",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.struktolab.hyperbook"
+                },
+                "2": {
+                  "name": "string.unquoted"
+                }
+              }
+            },
+            {
+              "match": "(?<![\\w=\"#.:/-])([a-zA-Z][\\w-]*)(?![\\w=-])",
               "captures": {
                 "1": {
                   "name": "keyword.parameter.directive.struktolab.hyperbook"
@@ -1869,7 +3218,67 @@
           "name": "entity.name.function.directive.unpack.hyperbook"
         },
         "4": {
-          "name": "meta.directive.unpack.attributes.hyperbook"
+          "name": "meta.directive.unpack.attributes.hyperbook",
+          "patterns": [
+            {
+              "match": "([a-zA-Z][\\w-]*)=\"([^\"]*)\"",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.unpack.hyperbook"
+                },
+                "2": {
+                  "name": "string.quoted.double.untitled"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=(?:(false)|(true))(?![\\w-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.unpack.hyperbook"
+                },
+                "2": {
+                  "name": "constant.language.boolean.false"
+                },
+                "3": {
+                  "name": "constant.language.boolean.true"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=([0-9][0-9.]*)(px|%|em|rem|vh|dvh|vw)?(?![\\w-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.unpack.hyperbook"
+                },
+                "2": {
+                  "name": "constant.numeric"
+                },
+                "3": {
+                  "name": "keyword.other.unit"
+                }
+              }
+            },
+            {
+              "match": "([a-zA-Z][\\w-]*)=([^\\s\"}]+)",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.unpack.hyperbook"
+                },
+                "2": {
+                  "name": "string.unquoted"
+                }
+              }
+            },
+            {
+              "match": "(?<![\\w=\"#.:/-])([a-zA-Z][\\w-]*)(?![\\w=-])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.unpack.hyperbook"
+                }
+              }
+            }
+          ]
         }
       },
       "endCaptures": {

@@ -38,7 +38,7 @@
   "Element Excalidraw": {
     "prefix": [":excalidraw"],
     "body": [
-      "::excalidraw{src=\"$1\" aspectRatio=\"${2:16/9}\" autoZoom=${3:true} center=${4:true} edit=${5:false}}",
+      "::excalidraw{src=\"$1\" aspectRatio=\"${2:16/9}\" autoZoom=${3:true} edit=${4:false}}",
       "",
       "$0"
     ]
@@ -64,7 +64,7 @@
   "Element QR": {
     "prefix": [":qr"],
     "body": [
-      "::qr{value=\"$CLIPBOARD\" size=\"${2|S,M,L,XL}\" label=\"$3\"}",
+      "::qr{value=\"$CLIPBOARD\" size=\"${2|S,M,L,XL|}\" label=\"$3\"}",
       "$0"
     ]
   },
@@ -140,24 +140,30 @@
   },
   "Element Embed": {
     "prefix": [":embed"],
-    "body": ["::embed{src=\"#$CLIPBOARD\"}", "$0"]
+    "body": ["::embed{src=\"$CLIPBOARD\"}", "$0"]
   },
   "Element Online-IDE": {
     "prefix": [":onlineide"],
+    "description": "Java programs that readers edit and run",
     "body": [
-      ":::onlineide{id=\"$RANDOM\"}",
+      ":::onlineide{height=\"${1:500px}\"}",
       "",
-      "$TM_SELECTED_TEXT$0",
+      "```java Main.java",
+      "${TM_SELECTED_TEXT:${2:System.out.println(\"Hello\");}}$0",
+      "```",
       "",
       ":::"
     ]
   },
   "Element SQL-IDE": {
     "prefix": [":sqlide"],
+    "description": "SQL queries that readers run against a database",
     "body": [
-      ":::onlineide{id=\"$RANDOM\"}",
+      ":::sqlide{db=\"${1:/database.sqlite}\"}",
       "",
-      "$TM_SELECTED_TEXT$0",
+      "```mysql Statements.sql",
+      "${TM_SELECTED_TEXT:${2:SELECT * FROM table;}}$0",
+      "```",
       "",
       ":::"
     ]
@@ -281,7 +287,9 @@
     "body": [
       ":::webide{height=${1:500}}",
       "",
-      "$TM_SELECTED_TEXT$0",
+      "```html",
+      "${TM_SELECTED_TEXT:${2:<h1>Hello</h1>}}$0",
+      "```",
       "",
       ":::"
     ]
@@ -301,5 +309,108 @@
     "body": [
       ":Snippet{#${1:snippet-name}}"
     ]
+  },
+  "Element Tile": {
+    "prefix": [":tile"],
+    "description": "One tile inside :::tiles",
+    "body": ["::tile{title=\"${1:Title}\" href=\"${2:/page}\"}"]
+  },
+  "Element PDF": {
+    "prefix": [":pdf"],
+    "description": "A PDF document on the page; a .typ source is built into one",
+    "body": ["::pdf[${1:Title}]{src=\"${2:document.pdf}\"}"]
+  },
+  "Element Password List": {
+    "prefix": [":passwordlist"],
+    "description": "The passwords of the book, for the teacher's page",
+    "body": ["::passwordlist"]
+  },
+  "Element Bitflow": {
+    "prefix": [":bitflow"],
+    "description": "A flow of tasks readers work through, marked as they go",
+    "body": ["::bitflow{src=\"${1:quiz.bitflow}\" height=\"${2:600px}\"}"]
+  },
+  "Element Python IDE": {
+    "prefix": [":pyide"],
+    "description": "Python that readers edit and run in the browser",
+    "body": [
+      ":::pyide",
+      "",
+      "```python",
+      "${TM_SELECTED_TEXT:${1:print(\"Hello\")}}$0",
+      "```",
+      "",
+      ":::"
+    ]
+  },
+  "Element Typst": {
+    "prefix": [":typst"],
+    "description": "A Typst document, previewed or edited by readers",
+    "body": [
+      ":::typst{mode=\"${1|edit,preview|}\"}",
+      "",
+      "```typ",
+      "${TM_SELECTED_TEXT:${2:= Hello}}$0",
+      "```",
+      "",
+      ":::"
+    ]
+  },
+  "Element OpenSCAD": {
+    "prefix": [":openscad"],
+    "description": "A 3D model in OpenSCAD that readers edit and render",
+    "body": [
+      ":::openscad",
+      "",
+      "```scad",
+      "${TM_SELECTED_TEXT:${1:cube(10);}}$0",
+      "```",
+      "",
+      ":::"
+    ]
+  },
+  "Element File": {
+    "prefix": [":file"],
+    "description": "A file of the book handed to an IDE (pyide, webide, p5, typst, openscad)",
+    "body": ["::file{src=\"${1:/data.csv}\" dest=\"${2:data.csv}\"}"]
+  },
+  "Element Scratch Blocks": {
+    "prefix": [":scratchblock"],
+    "description": "Scratch code drawn as blocks",
+    "body": [
+      ":::scratchblock",
+      "${TM_SELECTED_TEXT:${1:when green flag clicked}}$0",
+      ":::"
+    ]
+  },
+  "Element Blockflow Player": {
+    "prefix": [":blockflow-player"],
+    "description": "Plays a Scratch project",
+    "body": ["::blockflow-player{src=\"${1:/project.sb3}\"}"]
+  },
+  "Element Blockflow Editor": {
+    "prefix": [":blockflow-editor"],
+    "description": "A Scratch editor with a tutorial of :::step blocks",
+    "body": [
+      "::::blockflow-editor{title=\"${1:Tutorial}\"}",
+      ":::step{title=\"${2:Welcome}\"}",
+      "${3:First step}",
+      ":::",
+      "::::"
+    ]
+  },
+  "Element Blockflow Step": {
+    "prefix": [":step"],
+    "description": "One step inside ::::blockflow-editor",
+    "body": [
+      ":::step{title=\"${1:Title}\"}",
+      "${2:Text}",
+      ":::"
+    ]
+  },
+  "Element Kiri:Moto": {
+    "prefix": [":kirimoto"],
+    "description": "A slicer for 3D printing, laser cutting and CNC",
+    "body": ["::kirimoto{mode=\"${1|FDM,SLA,CAM,LASER|}\"}"]
   }
 }
