@@ -1833,6 +1833,25 @@
                   "name": "string.quoted.double.untitled"
                 }
               }
+            },
+            {
+              "match": "([a-zA-Z][a-zA-Z0-9]*)=([^\\s\"}]+)",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.struktolab.hyperbook"
+                },
+                "2": {
+                  "name": "string.unquoted.untitled"
+                }
+              }
+            },
+            {
+              "match": "(?<![\\w=\"])([a-zA-Z][a-zA-Z0-9]*)(?![\\w=])",
+              "captures": {
+                "1": {
+                  "name": "keyword.parameter.directive.struktolab.hyperbook"
+                }
+              }
             }
           ]
         }

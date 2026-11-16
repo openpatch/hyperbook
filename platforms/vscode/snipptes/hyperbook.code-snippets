@@ -72,6 +72,32 @@
     "prefix": [":struktog"],
     "body": ["::struktog{data=\"$CLIPBOARD\"}", "$0"]
   },
+  "Element Struktolab": {
+    "prefix": [":struktolab"],
+    "description": "A structogram from pseudocode",
+    "body": [
+      ":::struktolab{mode=\"${1|preview,edit|}\"}",
+      "",
+      "```",
+      "$TM_SELECTED_TEXT$0",
+      "```",
+      "",
+      ":::"
+    ]
+  },
+  "Element Struktolab Code": {
+    "prefix": [":struktolab-code"],
+    "description": "A structogram from Java, Python or JavaScript; hideCode shows the diagram alone in edit mode",
+    "body": [
+      ":::struktolab{mode=\"${1|edit,preview|}\"${2: hideCode}}",
+      "",
+      "```${3|java,python,javascript|}",
+      "$TM_SELECTED_TEXT$0",
+      "```",
+      "",
+      ":::"
+    ]
+  },
   "Element Tabs": {
     "prefix": [":tabs"],
     "body": [
