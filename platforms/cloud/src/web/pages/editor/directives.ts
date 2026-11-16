@@ -411,6 +411,13 @@ export const DIRECTIVES: readonly Directive[] = [
       { name: "lang", description: "Interface language", values: ["de", "en"] },
       { name: "colorMode", description: "Colors (default `color`)", values: ["color", "greyscale", "bw"] },
       { name: "src", description: "A .struktolab file instead of code", file: true },
+      {
+        name: "code",
+        description:
+          "The language it is written in (default `pseudocode`); a fence's language (```java) says it too. In `edit` mode, `none` hides the code under the diagram",
+        values: ["pseudocode", "java", "python", "javascript", "none"],
+      },
+      id(),
     ],
     snippet: "struktolab\n```\n${x = 0}\n```\n:::",
   },
