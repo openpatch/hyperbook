@@ -13,6 +13,152 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 
 :::
 
+## v0.124.0
+
+::::tabs
+
+:::tab{title="New :rocket:" id="new"}
+
+**markdown**: New [dock](/advanced/dock) for working elements. Add `dock` to a `pyide`, `webide`, `p5`, `openscad`, `typst`, `onlineide`, `sqlide`, `excalidraw` or `textinput` and readers get a **Dock** tab under it. It moves the element into the dock at the right edge of the screen (on phones: at the bottom), so it stays in view while they scroll through the tasks; the text makes room for it. Several docked elements share the dock as tabs, a rail on its edge slides it in and out and resizes it, and where an element was, a line shows it in the dock or brings it back (↩). Elements keep their state while docked. `dock="Label"` names the tab; without `dock` nothing changes.
+
+**markdown**: On wide screens ☰ shows in the header as on phones and folds the menu away to the left and back. The menu starts out shown; a folded menu stays folded on the next page.
+
+:::
+
+:::tab{title="Changed :warning:" id="changed"}
+
+**markdown**: The table of contents and QR code buttons sit in the header next to search instead of floating over the content, where they covered text on phones. Custom styles for `.floating-buttons-container` no longer apply.
+
+:::
+
+:::tab{title="Improved :+1:" id="improved"}
+
+**markdown**: On phones the header icons move closer together and a long book title ends with "…" instead of pushing the icons off the screen. Below 1280px the window's scrollbar uses the book's colours instead of the browser's light default.
+
+:::
+
+::::
+
+## v0.123.5
+
+::::tabs
+
+:::tab{title="New :rocket:" id="new"}
+
+**markdown**: [`struktolab`](/elements/struktolab) takes `hideCode`: in edit mode the diagram alone, without the code under it, while `code` (or the fence's language) keeps the language it is written in. Updates struktolab to 0.9.0, whose editor is readable on a dark page.
+
+**cloud**: Help for teachers new to Markdown and Typst. A formatting toolbar above pages and Typst files writes headings, bold, italic, lists, links, images, tables and code in the file's own syntax. On pages, _Element_ opens a searchable list of elements by what they do ("Quiz", "Hint or solution", "Python", "Drawing"), and typing `/` at the start of a line offers the same list. Elements kept in a file of their own are made next to the page and opened in their editor, pasted images are uploaded next to the page and linked relatively, and every error or warning offers _Explain with AI_.
+
+**vscode**: Snippets for every element, among them `struktolab` (with `:struktolab-code` for Java, Python or JavaScript), `pyide`, `typst`, `openscad`, `pdf` and `bitflow`. Every element's attributes are highlighted, whatever their name.
+
+:::
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+**hyperbook**: Relative links on glossary pages resolve against the glossary page's folder, and the dev server copies a changed image in `book/` or `glossary/` to the site again.
+
+**cloud**: Sheet music is inserted as an `abcjs` code fence instead of a `:::abc-music` directive that does nothing, and completion for `mermaid` and `scratchblock` no longer leaves `${…}` in the text. The structogram editor is readable in the dark theme.
+
+**vscode**: `:sqlide` inserted an online IDE; the IDE snippets now start with their code fence.
+
+:::
+
+::::
+
+## v0.123.4
+
+::::tabs
+
+:::tab{title="New :rocket:" id="new"}
+
+**cloud**: The editor's AI assistant works like a full chat. Conversations are kept per teacher and book, listed in the pane's history, can be renamed and deleted, and a follow-up sees the whole conversation. A reasoning model's thinking streams into folding blocks in the order it happened, tool calls show their progress, and an answer cut off by the output cap goes on by itself. Messages can be edited and resent, answers regenerated, and images, PDFs and text files attached.
+
+:::
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+**markdown**: Updates struktolab to 0.8.1: resized branch and case columns in a structogram written in Java, Python or JavaScript stay resized when the code is edited.
+
+:::
+
+::::
+
+## v0.123.3
+
+::::tabs
+
+:::tab{title="New :rocket:" id="new"}
+
+**markdown**: [Struktolab](/elements/struktolab) structograms can be written in Java, Python or JavaScript. Give the code block its language or set `code="java"`; the structogram is built from the code, and in edit mode students write their algorithm in the code box under the diagram. `code="none"` hides that box. Students' code is saved with their structogram.
+
+:::
+
+:::tab{title="Improved :+1:" id="improved"}
+
+**markdown**: Updates struktolab to 0.8.0: dragging blocks is calmer, the diagram stays still and one line shows where a block lands.
+
+:::
+
+::::
+
+## v0.123.2
+
+::::tabs
+
+:::tab{title="New :rocket:" id="new"}
+
+**cloud**: The editor remembers where you left off in a book: the open tabs, the shown file and the unfolded folders come back after a refresh.
+
+:::
+
+:::tab{title="Improved :+1:" id="improved"}
+
+**markdown**: Updates struktolab to 0.7.0: a block palette under the toolbar offers every block, a picked or dragged block shows a "+" where it can go (also with pen, touch and keyboard), and a new node opens its text editor right away.
+
+**cloud**: The AI assistant answers more reliably: transient provider failures are retried, a silent provider reports a timeout, and a heartbeat keeps proxies from cutting the connection while the model thinks.
+
+:::
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+**markdown**: Updates the Online IDE to build 44 and the SQL IDE to build 5: a file marked `hidden` stays out of the IDE's file explorer, also after cached edits come back. Tests against a hidden solution keep running.
+
+:::
+
+::::
+
+## v0.123.1
+
+::::tabs
+
+:::tab{title="New :rocket:" id="new"}
+
+**cloud**: Review in the editor: comments on the source with threads, replies, suggestions and email digests, a commenter role, and named access links that let people without an account comment on or edit a book.
+
+**cloud**: The editor searches the whole book (Ctrl/Cmd+Shift+F), with match case, whole word and regular expressions, and replaces every match in one step. An activity bar down the left edge opens Files, Search, Outline, Comments, History and the AI assistant. Outline lists the open file's headings. The editor settings have Vim key bindings, and PDFs can be zoomed from 25% to 400%.
+
+**cloud**: The file tree names files in place, knows the folder you are in, and selects several files to move, copy or delete together, also from the keyboard. Pictures dropped or pasted into a page are uploaded next to it and linked. Unsaved text is kept as a draft in the browser, and the editor saves by itself after a pause in typing.
+
+**cloud**: Admins add fonts every book's Typst documents can use under Settings → Typst fonts.
+
+:::
+
+:::tab{title="Improved :+1:" id="improved"}
+
+**markdown**: Updates the Online IDE to build 43: the catalogs are synchronized with Scratch for Java 7.1.1, and clearing the pen removes it from the screen.
+
+**cloud**: Long lines wrap only in prose (pages, templates, Typst, plain text); code files keep their lines and scroll sideways. The History pane groups one person's saves in a row into one entry.
+
+:::
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+**cloud**: Tab indents and Shift+Tab dedents in the editor again. A double-click on the Typst preview finds the clicked line, not the first place its words occur.
+
+:::
+
+::::
+
 ## v0.123.0
 
 ::::tabs
@@ -71,167 +217,95 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 
 ::::
 
-## v0.118.1
+## v0.121.0
 
 ::::tabs
 
-:::tab{title="New :rocket:" id="new"}
-
-**cloud**: The editor gets a History pane next to the AI assistant and the preview: every save, upload and push is one commit with its author, date, message and line counts. Clicking a commit shows its diff in a dialog — commits never change, so each diff is fetched once and cached by its sha.
-
-:::
-
 :::tab{title="Improved :+1:" id="improved"}
 
-**cloud**: Quick open (Ctrl/Cmd+P) and the file sidebar's filter search fuzzily, powered by fzf's V2 algorithm — "sovh" finds `sortierverfahren.md` — with the matched characters highlighted. Quick open also works on books with long file paths: the dialog is wider, each row leads with the file name, and directories are clipped from the left when needed.
+**hyperbook**: `hyperbook dev` renders a book page by page as you visit it instead of building the whole book first. A large book is served in under a second, and a save shows in a fraction of a second, also for a new page, a snippet or `hyperbook.json`. After a change the open page reloads and keeps its scroll position, and a broken page shows its error in place of itself instead of taking the book down. Search, archives and `llms.txt` are made when first asked for.
 
-**cloud**: The file tree no longer slows the editor down on large books. It is virtualized, its rows are memoized, and folders start collapsed, so a book with thousands of files opens quickly. Preview rendering is fast again on large books, too — a page render of a 4,000-file book drops from ~4 s to ~0.3 s, and a save writes only the files that changed instead of the whole book.
-
-**hyperbook**: Favicon generation from the book's logo no longer needs the native `sharp` addon, which the build sandbox of Hyperbook Cloud forbids. Raster logos are scaled with Jimp (pure JavaScript) and SVGs are rasterized with resvg compiled to WebAssembly, so books on Hyperbook Cloud get their favicons from their logo now.
+**cloud**: The publishing card no longer asks to build a preview: the preview always shows the latest save. The publish dialog lists the saves that go live with their diffs, owners can publish from the editor's toolbar, editors ask the owners there, and "Check all pages" renders every page before anything is published. Only publishing builds now; saves, uploads and git pushes do not.
 
 :::
 
 :::tab{title="Fixed :bug:" id="fixed"}
 
-**markdown**: Element runtimes a host serves itself (Hyperbook Cloud's shared assets under `/_hyperbook/assets/<version>/`) load again on preview and published pages. Their root-relative addresses were buried under the directive's assets folder and 404'd.
+**hyperbook**: A page whose frontmatter fails to parse fails again when it is read a second time, instead of passing as a page without frontmatter.
 
 :::
 
 ::::
 
-## v0.118.0
+## v0.120.0
 
 ::::tabs
 
 :::tab{title="New :rocket:" id="new"}
 
-**archive**: The `archive` directive gained an `include` attribute for pulling extra files or folders into the zipped archive at build time, without symbolic links: `:::archive[Projekt: Spielwerkstatt]{name="spielwerkstatt" include="/book/projekte/spielwerkstatt/assets=assets"}`. Sources are book-root-relative, destinations are relative paths inside the zip, and both accept comma-separated lists. Missing sources or colliding destinations fail the build with an error naming the declaring page.
-
-**cloud**: The editor has an AI writing assistant. It knows the hyperbook format, looks through the whole book with tools (`read_file`, `list_files`, `search_files`, `rename_file`, `read_docs` with local, vendored documentation), and proposes new files, edits and deletions — every proposal is a git diff the teacher accepts or denies, file by file. The panel is a chat with a model picker, conversation history, and answers rendered as Markdown. Any OpenAI-compatible provider works (Mistral, Ollama, OpenAI, Anthropic, OpenRouter, LM Studio, vLLM); admins can switch the assistant off per teacher and set quotas.
-
-**cloud**: The AI assistant meters usage in tokens and enforces a weekly credit quota (`ai_tokens_per_week`, alongside the per-day request quota). Model costs are entered as provider prices (€/M tokens) in the instance settings with a configurable credit value and a "Fetch prices" button; prompt caching is used and cached tokens count at their own, lower weight. The editor's model picker sorts by cost and shows a credits bar with the refill date.
-
-**cloud**: Books can be worked on locally with git: `git clone https://git@<admin host>/api/books/<id>/git`, edit, `git push` to `main`. Pushes are served by git smart HTTP with per-book tokens, restricted to a single `main` branch and the storage quota by a pre-receive hook. Publishing is recorded as version tags (`v1`, `v2`, … plus a moving `published` tag) and the live site can be rolled back to a tag. Editor saves keep their conflict semantics against pushes.
-
-**cloud**: Blockflow projects get visual editors: a `.sb3` file opens in blockflow's embed editor and a `.blockflow` file in the embed generator (blockflow v0.2.0 runtime, served under `/blockflow/*`), and "Edit visually" now also works on `::blockflow-player` and `::::blockflow-editor`.
-
-**cloud**: The front address of an instance shows a landing page introducing the three ways to run Hyperbook — hosted on hyperbook.cloud, self-hosted with Docker, or as a static site — and admins can turn it off (`landingPage`). Hyperbook Cloud now speaks English and German, following the user's choice, the instance default or the browser.
-
-**hyperbook**: Hyperbook Cloud no longer copies the element runtimes (Pyodide, Excalidraw, GeoGebra, … — about 500 MB together) into every build of every book. They are extracted once per Hyperbook version and served at `/_hyperbook/assets/<version>/` with a year of immutable caching; admins choose per element whether books load its runtime from the instance or the public CDN. Other hosts get the same mechanism through `HYPERBOOK_SHARED_ASSETS_BASE`.
-
-**online-ide, sqlide**: Both IDEs now read `::file{path="…" src="…"}` like the other IDEs. The Online IDE links the source so images and other files its Java code opens work as before; the SQL IDE reads the source at build time and shows an `.sql` file as another editor tab and a Markdown file as a hint.
-
-:::
-
-:::tab{title="Improved :+1:" id="improved"}
-
-**bitflow**: Update to 0.4.1 (from 0.3.1). The editor's zoom buttons, minimap and edges follow the host's light/dark theme, and bitflow uses the book's body font and brand colours.
-
-**markdown**: Relative paths now work in every directive's file attributes, resolved from the page's folder like links: `::kirimoto{model}`, `::embed{src}`, tile icons, learning map videos and the inlined files of `::learningmap`, `::bitflow`, `::jmp` and the IDEs' `::file` all resolve `./` and `../` from the page's folder — and never from outside the book.
-
-**cloud**: The editor highlights more file types (Java, Python, SQL, Typst, `jsx`/`tsx`/`cjs`, `htm`/`xhtml`, and Typst code blocks inside pages), and code files use the theme's syntax colours in dark mode too. Builds mark the checkout as the book's project root, so the `rfile`/`rbase64` helpers find the book's root files in the cloud.
+**markdown**: Every [Excalidraw](/elements/excalidraw) drawing gets a fullscreen button in the top-right corner, editable or not.
 
 :::
 
 :::tab{title="Fixed :bug:" id="fixed"}
 
-**markdown**: The Online IDE runtime download no longer pins a stale release; builds download the version declared in `ide-releases.json`. The VS Code preview now renders pages through the same single-page builders as `hyperbook render`, so it shows exactly what a build produces.
+**markdown**: Excalidraw: strokes, text and images land where the reader clicks, and double-clicking no longer scrolls the page up, also when content above the drawing changed height.
 
 :::
 
 ::::
 
-## v0.117.1
+## v0.119.0
 
 ::::tabs
 
 :::tab{title="New :rocket:" id="new"}
 
-**cloud**: The editor gets a quick-open popup (Ctrl/Cmd+P) to search the book's files, and a file tree that filters, unfolds the open file and moves files by dragging them into folders. A right-click menu offers new file, new folder, upload, download, cut, copy, paste, rename and delete.
-
-**cloud**: The editor's settings menu offers font size, line numbers, spell check, a font choice (system monospace or GitHub's Monaspace Neon, Argon, Xenon, Radon, Krypton) and a line height (S/M/L); the choices are kept in the browser. Spell check uses Hunspell via Typo.js with a per-book dictionary, is aware of code, frontmatter and directive syntax, and offers corrections on right-click. A right-click in the editor opens its own context menu instead of the browser's.
-
-**cloud**: The editor's panes — file list, editor, preview — are resizable by dragging their borders or with the arrow keys; double-click restores the default. The chosen widths are remembered per browser.
-
-**cloud**: The page settings and book settings popups are structured into groups in two columns, the frontmatter bar sits flush with the editor, and page settings can remove a page's jumps (`prev: null` / `next: null`). The branding section has an upload button that puts an image into the public folder and selects it as the logo.
+**markdown**: Editable [Excalidraw](/elements/excalidraw) drawings with a `src` get **Reset to template** in the Excalidraw menu, which discards the reader's changes and loads the template again.
 
 :::
 
-:::tab{title="Improved :+1:" id="improved"}
+:::tab{title="Fixed :bug:" id="fixed"}
 
-**cloud**: Every part of a book's page is a card of its own, arranged in a grid; the navigation is slimmer and the delete card is tinted as the danger it is. The sidebar fills the window height with "Power your Hyperbook" and the version at its foot, narrow screens get it as a drawer, and a toggle switches between light and dark mode. The editor keeps up with typing on long pages and its preview updates without flickering.
-
-**cloud**: The editor's preview pane shows the whole page — header, navigation and footer — like readers will see it, through the new `standalone=false` URL parameter. Renaming or moving a file now updates the links to it, including relative ones, without doubling `#fragment`s. Uploading a book as a zip shows a progress bar, and links an upload leaves out (symlinks) are listed in the build's log, which can be downloaded.
-
-**markdown**: Relative paths work in every directive's file attributes, resolved from the page's folder like links.
+**markdown**: Excalidraw: an editable drawing keeps its view settings after a reload, and two drawings with the same `src` no longer share one saved copy. Drawings saved by older versions still load. Excalidraw uses the book's language instead of always English.
 
 :::
 
 ::::
 
-## v0.117.0
+## v0.118.2
 
 ::::tabs
 
 :::tab{title="New :rocket:" id="new"}
 
-**hyperbook**: `hyperbook render` renders single pages on request (JSON lines on stdin) without a full build, for editors that preview a page while it is written. Hyperbook Cloud uses it: the editor's preview shows the open page with its unsaved text as you type, and saving no longer builds the book. The editor also completes elements and their attributes, highlights them, links to their documentation, checks them, and edits a page's frontmatter as a form.
+**cloud**: The editor works on phones and tablets: the file list opens as a drawer, the preview, history and AI assistant slide over the editor one at a time, and touch screens get bigger targets.
+
+**cloud**: Git over HTTPS accepts a personal git token for every book you may edit, created under Your account → "Git tokens (all books)". The editor's file tabs have a context menu (Close, Close others, Close all), and PDF files open in a preview.
 
 :::
 
 :::tab{title="Improved :+1:" id="improved"}
 
-**cloud**: The sidebar shows which version of Hyperbook Cloud runs — its version, the build number and the commit it was built from. The build's "Website" link is now "Download" and names the archive `<slug>.zip`. The light/dark choice applies from the first paint even under a Content-Security-Policy, and the editor's preview follows the chosen theme.
+**hyperbook**: `hyperbook dev` reuses its on-disk cache of the book's files after a restart, as long as nothing changed while it was stopped. `HYPERBOOK_CACHE=` opts out.
+
+**cloud**: The editor uses Hyperbook's own light and dark syntax themes, with better contrast in the dark one; `.scad` files and `:::multievent` blocks are highlighted. The AI model chooser shows each model's cost relative to the cheapest one, and the AI assistant reads the documentation of single elements and edits passages instead of resending whole pages, which saves tokens.
+
+**cloud**: Accessibility across the cloud: context menus and the open files work from the keyboard, controls have names for screen readers, contrast is higher, and wide tables scroll inside their page.
+
+**markdown**: The Java memory playground follows the book's dark theme.
 
 :::
 
-::::
+:::tab{title="Changed :warning:" id="changed"}
 
-## v0.116.0
-
-::::tabs
-
-:::tab{title="New :rocket:" id="new"}
-
-**cloud**: Books connect to the new Hyperbook Cloud. A book the platform hosts gets `"cloud": { "sameOrigin": true }` and logs students in with a cookie on its own address; a book hosted elsewhere sets `cloud.url` to its address on the platform and uses a token. The login form has a "shared device" option, a scanned QR code logs a student in directly, and a teacher's read-only view of a student's work is recognized from the platform's session. A refused save (403) no longer logs the student out.
+**cloud**: Only a book's owners can publish it, roll it back and unpublish it; editors keep working on the book and its preview. The server refuses to start when `SMTP_FROM` has no sender address.
 
 :::
 
-:::tab{title="Breaking :warning:" id="breaking"}
+:::tab{title="Fixed :bug:" id="fixed"}
 
-**cloud**: The API of the previous, retired cloud server is no longer supported.
-
-:::
-
-:::tab{title="Improved :+1:" id="improved"}
-
-**hyperbook**: `hyperbook build` runs under Node's permission model with access to just the book and the CLI, and the `language` setting only loads a search stemmer when it is a bare language code such as `de`.
-
-**markdown**: Update learningmap (0.7.1) and struktolab (0.6.2). Struktolab keeps the indented lines under a line it does not recognise instead of dropping them, and translates its editor's menus.
-
-:::
-
-::::
-
-## v0.115.2
-
-::::tabs
-
-:::tab{title="Improved :+1:" id="improved"}
-
-**online-ide**: Update the Online IDE runtime to build 41: Scratch for Java code blocks run on the Scratch for Java 7.1.0 runtime (`TiledMap.spawn` takes the sprite classes to make, `File`'s XML methods are gone), the catalogs are synchronized with 7.1.0, and "Open in Scratch for Java Studio" saves a project as a `.scratch4j` file that Studio opens with a double-click.
-
-:::
-
-::::
-
-## v0.115.1
-
-::::tabs
-
-:::tab{title="Improved :+1:" id="improved"}
-
-**online-ide**: Update the Online IDE runtime to build 39: Scratch for Java code blocks run on the Scratch for Java 7.0 runtime (graphics aligned with the new renderer, the 7.0 shader format, stage transitions that build their stage lazily), and the catalogs are synchronized with 7.0.0.
+**cloud**: A publish or rollback build that was still running no longer goes live after a newer version was published in the meantime. "Save and close" no longer closes tabs whose save failed. Password-reset and sign-up requests no longer reveal by their timing whether an address has an account.
 
 :::
 
