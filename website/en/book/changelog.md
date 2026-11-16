@@ -23,6 +23,10 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 
 **markdown**: On wide screens ☰ shows in the header as on phones and folds the menu away to the left and back. The menu starts out shown; a folded menu stays folded on the next page.
 
+**cloud**: Completion and hover help offer `dock` on the elements that can be docked.
+
+**vscode**: Docked variants of the snippets: `:pyide-dock`, `:webide-dock`, `:p5-dock`, `:openscad-dock`, `:typst-dock`, `:onlineide-dock`, `:sqlide-dock`, `:excalidraw-dock` and `:textinput-dock`.
+
 :::
 
 :::tab{title="Changed :warning:" id="changed"}

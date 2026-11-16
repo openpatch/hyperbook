@@ -48,6 +48,12 @@ const files = (fallback: string): Attribute => ({
   values: ["open", "create", "upload", "create,upload", "create,upload,rename,delete"],
 });
 const accept = (fallback: string): Attribute => ({ name: "accept", description: `Extensions of files readers create or rename (default \`${fallback}\`)` });
+/** Readers may move the element into the dock beside the text; `dock="Notes"` names its tab. */
+const dock: Attribute = {
+  name: "dock",
+  description: 'Readers can move it into the dock beside the text, to keep it in view while reading; `dock="Notes"` names its tab',
+  flag: true,
+};
 const BOOL = ["true", "false"] as const;
 const SIZES = ["S", "M", "L"] as const;
 
@@ -154,6 +160,7 @@ export const DIRECTIVES: readonly Directive[] = [
       id("Where the answer is saved"),
       { name: "placeholder", description: "Text shown while the field is empty" },
       height("200px"),
+      dock,
     ],
     snippet: 'textinput{placeholder="${Your answer}"}',
   },
@@ -352,6 +359,7 @@ export const DIRECTIVES: readonly Directive[] = [
       { name: "aspectRatio", description: "e.g. `16/9`", values: ["16/9", "4/3", "1/1"] },
       { name: "autoZoom", description: "Zoom to fit small screens (default `true`)", values: BOOL },
       { name: "edit", description: "Readers may draw (default `false`)", values: BOOL },
+      dock,
     ],
     snippet: 'excalidraw{src="${drawing.excalidraw}"}',
   },
@@ -443,6 +451,7 @@ export const DIRECTIVES: readonly Directive[] = [
       id(),
       files("none"),
       accept(".py"),
+      dock,
     ],
     snippet: "pyide\n```python\n${print(\"Hello\")}\n```\n:::",
   },
@@ -452,7 +461,7 @@ export const DIRECTIVES: readonly Directive[] = [
     description: "HTML, CSS and JavaScript that readers edit with a live preview.",
     kind: "container",
     docs: "/elements/webide",
-    attributes: [height("calc(100dvh - 80px)"), { name: "main", description: "The page shown (default `index.html`)" }, id(), files("none"), accept(".html,.css,.js")],
+    attributes: [height("calc(100dvh - 80px)"), { name: "main", description: "The page shown (default `index.html`)" }, id(), files("none"), accept(".html,.css,.js"), dock],
     snippet: "webide\n```html index.html\n${<h1>Hello</h1>}\n```\n:::",
   },
   {
@@ -470,6 +479,7 @@ export const DIRECTIVES: readonly Directive[] = [
       { name: "compare", description: "Compare with the solution's canvas" },
       { name: "pass", description: "Match in percent that counts as solved (default 98)" },
       { name: "frame", description: "Frame of an animation that is compared (default 1)" },
+      dock,
     ],
     snippet: 'p5{mode="editor"}\n```js\nfunction setup() {\n  createCanvas(400, 400);\n}\n\nfunction draw() {\n  ${background(220);}\n}\n```\n:::',
   },
@@ -486,6 +496,7 @@ export const DIRECTIVES: readonly Directive[] = [
       { name: "main", description: "The file compiled (default `main.typ`)" },
       files("`create,upload`"),
       accept(".typ"),
+      dock,
     ],
     snippet: 'typst{mode="edit"}\n```typ main.typ\n${= Hello}\n```\n:::',
   },
@@ -502,6 +513,7 @@ export const DIRECTIVES: readonly Directive[] = [
       { name: "library", description: "Libraries to load, comma-separated" },
       files("`upload`"),
       accept(".scad"),
+      dock,
     ],
     snippet: "openscad\n```scad main.scad\n${cube(10);}\n```\n:::",
   },
@@ -520,6 +532,7 @@ export const DIRECTIVES: readonly Directive[] = [
       { name: "speed", description: "Execution speed (default 1000)" },
       { name: "libraries", description: "Libraries to preload", values: ["nrw", "gng", "niedersachsen", "scratch", "zeichnen"] },
       { name: "outputWidth", description: "Width of the output panel, e.g. `60%`" },
+      dock,
     ],
     snippet: 'onlineide\n```java Main.java\n${System.out.println("Hello");}\n```\n:::',
   },
@@ -529,7 +542,7 @@ export const DIRECTIVES: readonly Directive[] = [
     description: "SQL queries that readers run against a database.",
     kind: "container",
     docs: "/elements/sql-ide",
-    attributes: [{ name: "db", description: "The SQLite database file", file: true }, height("calc(100dvh - 80px)")],
+    attributes: [{ name: "db", description: "The SQLite database file", file: true }, height("calc(100dvh - 80px)"), dock],
     snippet: "sqlide\n```mysql Statements.sql\n${SELECT * FROM table;}\n```\n:::",
   },
   {

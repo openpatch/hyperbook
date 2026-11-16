@@ -43,6 +43,15 @@
       "$0"
     ]
   },
+  "Element Excalidraw (dock)": {
+    "prefix": [":excalidraw-dock"],
+    "description": "Readers can move it into the dock beside the text; dock=\"Label\" names its tab",
+    "body": [
+      "::excalidraw{src=\"$1\" aspectRatio=\"${2:16/9}\" autoZoom=${3:true} edit=${4:false} dock}",
+      "",
+      "$0"
+    ]
+  },
   "Element Glossary": {
     "prefix": [":t", ":term"],
     "body": [":t[$2]{#${1:id}}$0"]
@@ -155,11 +164,37 @@
       ":::"
     ]
   },
+  "Element Online-IDE (dock)": {
+    "prefix": [":onlineide-dock"],
+    "description": "Readers can move it into the dock beside the text; dock=\"Label\" names its tab",
+    "body": [
+      ":::onlineide{height=\"${1:500px}\" dock}",
+      "",
+      "```java Main.java",
+      "${TM_SELECTED_TEXT:${2:System.out.println(\"Hello\");}}$0",
+      "```",
+      "",
+      ":::"
+    ]
+  },
   "Element SQL-IDE": {
     "prefix": [":sqlide"],
     "description": "SQL queries that readers run against a database",
     "body": [
       ":::sqlide{db=\"${1:/database.sqlite}\"}",
+      "",
+      "```mysql Statements.sql",
+      "${TM_SELECTED_TEXT:${2:SELECT * FROM table;}}$0",
+      "```",
+      "",
+      ":::"
+    ]
+  },
+  "Element SQL-IDE (dock)": {
+    "prefix": [":sqlide-dock"],
+    "description": "Readers can move it into the dock beside the text; dock=\"Label\" names its tab",
+    "body": [
+      ":::sqlide{db=\"${1:/database.sqlite}\" dock}",
       "",
       "```mysql Statements.sql",
       "${TM_SELECTED_TEXT:${2:SELECT * FROM table;}}$0",
@@ -192,6 +227,19 @@
     "prefix": [":p5"],
     "body": [
       ":::p5{height=400}",
+      "",
+      "```javascript",
+      "$TM_SELECTED_TEXT$0",
+      "```",
+      "",
+      ":::"
+    ]
+  },
+  "Element P5 (dock)": {
+    "prefix": [":p5-dock"],
+    "description": "Readers can move it into the dock beside the text; dock=\"Label\" names its tab",
+    "body": [
+      ":::p5{height=400 dock}",
       "",
       "```javascript",
       "$TM_SELECTED_TEXT$0",
@@ -282,10 +330,30 @@
       "::textinput{placeholder=\"${1:Enter text here}\" height=\"${2:200px}\" id=\"${3:$RANDOM}\"}"
     ]
   },
+  "Element Textinput (dock)": {
+    "prefix": [":textinput-dock"],
+    "description": "Readers can move it into the dock beside the text; dock=\"Label\" names its tab",
+    "body": [
+      "::textinput{placeholder=\"${1:Enter text here}\" height=\"${2:200px}\" id=\"${3:$RANDOM}\" dock}"
+    ]
+  },
   "Element Webide": {
     "prefix": [":webide"],
     "body": [
       ":::webide{height=${1:500}}",
+      "",
+      "```html",
+      "${TM_SELECTED_TEXT:${2:<h1>Hello</h1>}}$0",
+      "```",
+      "",
+      ":::"
+    ]
+  },
+  "Element Webide (dock)": {
+    "prefix": [":webide-dock"],
+    "description": "Readers can move it into the dock beside the text; dock=\"Label\" names its tab",
+    "body": [
+      ":::webide{height=${1:500} dock}",
       "",
       "```html",
       "${TM_SELECTED_TEXT:${2:<h1>Hello</h1>}}$0",
@@ -343,6 +411,19 @@
       ":::"
     ]
   },
+  "Element Python IDE (dock)": {
+    "prefix": [":pyide-dock"],
+    "description": "Readers can move it into the dock beside the text; dock=\"Label\" names its tab",
+    "body": [
+      ":::pyide{dock}",
+      "",
+      "```python",
+      "${TM_SELECTED_TEXT:${1:print(\"Hello\")}}$0",
+      "```",
+      "",
+      ":::"
+    ]
+  },
   "Element Typst": {
     "prefix": [":typst"],
     "description": "A Typst document, previewed or edited by readers",
@@ -356,11 +437,37 @@
       ":::"
     ]
   },
+  "Element Typst (dock)": {
+    "prefix": [":typst-dock"],
+    "description": "Readers can move it into the dock beside the text; dock=\"Label\" names its tab",
+    "body": [
+      ":::typst{mode=\"${1|edit,preview|}\" dock}",
+      "",
+      "```typ",
+      "${TM_SELECTED_TEXT:${2:= Hello}}$0",
+      "```",
+      "",
+      ":::"
+    ]
+  },
   "Element OpenSCAD": {
     "prefix": [":openscad"],
     "description": "A 3D model in OpenSCAD that readers edit and render",
     "body": [
       ":::openscad",
+      "",
+      "```scad",
+      "${TM_SELECTED_TEXT:${1:cube(10);}}$0",
+      "```",
+      "",
+      ":::"
+    ]
+  },
+  "Element OpenSCAD (dock)": {
+    "prefix": [":openscad-dock"],
+    "description": "Readers can move it into the dock beside the text; dock=\"Label\" names its tab",
+    "body": [
+      ":::openscad{dock}",
       "",
       "```scad",
       "${TM_SELECTED_TEXT:${1:cube(10);}}$0",
