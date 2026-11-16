@@ -1,5 +1,13 @@
 # hyperbook
 
+## 0.123.5
+
+### Patch Changes
+
+- [`b11992d`](https://github.com/openpatch/hyperbook/commit/b11992db6bf23cc60d47d7b94526f2e8cce64a77) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Relative links on glossary pages resolve against the glossary page's folder (`./photo.png` on `glossary/term.md` is `/glossary/photo.png`, as the build serves it), also for pages in subfolders and `glossary/index.md`. The dev server copies a changed image (or other file) in `book/` or `glossary/` to the site again; before, only files in `public/` were updated without a full rebuild.
+
+- [`6a640c1`](https://github.com/openpatch/hyperbook/commit/6a640c18eef0c10930cb4cf0a6eb868c3623d7d1) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Updates struktolab to 0.9.0. `struktolab` takes `hideCode`: in edit mode the diagram alone, without the code under it, while `code` (or the fence's language) keeps saying which language it is written in, so Java's function headers stay Java's and the editor's _Show code_ brings the code back in that language. `code="none"` still hides the code. The structogram editor draws its own colours, so it is readable on a dark page, and its View menu opens into the editor instead of being cut off. The Cloud editor completes `hideCode`.
+
 ## 0.123.4
 
 ### Patch Changes
