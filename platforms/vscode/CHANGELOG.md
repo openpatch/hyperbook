@@ -1,5 +1,13 @@
 # @hyperbook/vscode-extension
 
+## 0.59.6
+
+### Patch Changes
+
+- [`281201e`](https://github.com/openpatch/hyperbook/commit/281201e8d964cfca9bd9fb241c2e247d6bfbd6c3) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - The editors know the new `dock` attribute. In the Cloud editor, completion and hover help offer `dock` on `pyide`, `webide`, `p5`, `openscad`, `typst`, `onlineide`, `sqlide`, `excalidraw`, `textinput`, `struktolab`, `blockflow-editor` and `jmp`, and the AI assistant knows it too: a `dock` topic in its documentation and a line in each of these elements' docs tell it when to use it. The VS Code extension has a docked variant of each of their snippets: `:pyide-dock`, `:webide-dock`, `:p5-dock`, `:openscad-dock`, `:typst-dock`, `:onlineide-dock`, `:sqlide-dock`, `:excalidraw-dock`, `:textinput-dock`, `:struktolab-dock`, `:blockflow-editor-dock` and `:jmp-dock`.
+- Updated dependencies [[`91b7241`](https://github.com/openpatch/hyperbook/commit/91b72413b86c90561e16f9777a0bbd74e610cce4)]:
+  - @hyperbook/markdown@0.96.0
+
 ## 0.59.5
 
 ### Patch Changes
