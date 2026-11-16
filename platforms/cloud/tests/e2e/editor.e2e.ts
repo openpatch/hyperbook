@@ -544,11 +544,19 @@ describe("editor", () => {
     });
     await page.reload();
     await page.getByRole("list", { name: "Files" }).getByRole("button", { name: "loops.md", exact: true }).click();
+    // A selection in the page shows its Comment button…
+    await page.locator(".cm-content:visible").getByText('output("a")').dblclick();
+    const comment = page.locator(".cm-comment-tooltip");
+    await comment.waitFor();
     await page.getByRole("button", { name: "Edit visually" }).click();
 
     const dialog = page.getByRole("dialog");
+    // …which does not float over the dialog.
+    await dialog.waitFor();
+    await comment.waitFor({ state: "hidden" });
     const frame = dialog.frameLocator('iframe[title="struktolab-pseudocode editor"]');
-    const code = frame.locator("textarea");
+    // struktolab 0.8 writes pseudocode in a CodeMirror editor.
+    const code = frame.locator(".cm-content");
     await code.click();
     await page.keyboard.press("Control+End");
     await page.keyboard.type('\noutput("b")');
@@ -607,7 +615,7 @@ describe("editor", () => {
     const tab = page.getByRole("tab", { name: "countdown.struktolab" });
     await tab.waitFor();
     const frame = page.frameLocator('iframe[title="struktolab editor"]');
-    await frame.locator("textarea").click();
+    await frame.locator(".cm-content").click();
     // The platform keeps the file: no Save/Load of struktolab's own.
     expect(await frame.getByRole("button", { name: /save|load/i }).count()).toBe(0);
     await page.keyboard.type('output("Lift off")');

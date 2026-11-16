@@ -730,7 +730,12 @@ export function makeBaseCtx(
       return p;
     }
     let currentPageDir: string;
-    if (page.path?.directory) {
+    // A glossary page's folder is relative to glossary/, and its pages and
+    // the files next to them are served under /glossary.
+    const glossaryDir = path.join(root, "glossary") + path.sep;
+    if (page.path?.absolute?.startsWith(glossaryDir)) {
+      currentPageDir = posix.join("/glossary", page.path.directory || "");
+    } else if (page.path?.directory) {
       currentPageDir = posix.join("/", page.path.directory);
     } else {
       currentPageDir = posix.dirname(page.href || "/");

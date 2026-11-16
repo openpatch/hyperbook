@@ -17,7 +17,8 @@ Für weitere Informationen zur Verwendung von Struktolab siehe die [Struktolab-D
 - `lang`: "de" | "en" uses the hyperbook language by default
 - `colorMode`: "color" | "greyscale" | "bw"
 - `src`: eine Struktogramm-Datei (`.struktolab`, der Baum als JSON) statt eines Code-Blocks, z. B. `::struktolab{src="/schleife.struktolab"}`
-- `code`: die Sprache, in der das Struktogramm geschrieben ist: `pseudocode`, `java`, `python` oder `javascript`. Im Bearbeitungsmodus blendet `none` den Code unter dem Diagramm aus. Die Sprache eines Code-Blocks (` ```java `) legt sie ebenfalls fest. Standard: `pseudocode`
+- `code`: die Sprache, in der das Struktogramm geschrieben ist: `pseudocode`, `java`, `python` oder `javascript`. Die Sprache eines Code-Blocks (` ```java `) legt sie ebenfalls fest. Standard: `pseudocode`. (`none` blendet den Code aus, die ältere Schreibweise für `hideCode`.)
+- `hideCode`: im Bearbeitungsmodus nur das Diagramm, ohne den Code darunter; die Sprache bleibt. Als Schalter (`{hideCode}`) oder `true`/`false`. Standard: aus
 
 ## Java, Python und JavaScript
 
@@ -129,6 +130,30 @@ falls x > 0:
 sonst:
     ausgabe("nicht positiv")
 
+```
+:::
+````
+
+### Ohne Code
+
+`hideCode` zeigt im Bearbeitungsmodus nur das Diagramm. Die Sprache bleibt: Funktionsköpfe in Java lesen sich wie Java, und *Code zeigen* in der Ansicht des Editors holt den Code in dieser Sprache zurück.
+
+:::struktolab{mode="edit" hideCode}
+
+```java
+int twice(int x) {
+    return x * 2;
+}
+```
+
+:::
+
+````md
+:::struktolab{mode="edit" hideCode}
+```java
+int twice(int x) {
+    return x * 2;
+}
 ```
 :::
 ````

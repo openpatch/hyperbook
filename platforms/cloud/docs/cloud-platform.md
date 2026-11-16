@@ -757,7 +757,8 @@ books there run as if logged out.
   written into the checkout (one page at a time, until the next save) and
   rendered, and the frame reloads in place, keeping its scroll position.
 - Visiting a page on the preview host renders it unless it is fresh; other
-  files come from the checkout (`public/`, `book/`, `glossary/`).
+  files come from the checkout: `public/` and `book/` at the root,
+  `glossary/` under `/glossary/`, as the build copies them.
 
 - The editor asks the admin API for a one-time code (60 s) and frames
   `https://<slug>--preview.<BOOKS_DOMAIN>/_hyperbook/preview#c=<code>&next=<path>`.
@@ -792,6 +793,15 @@ preview_sessions  id_hash, user_id, book_id, expires_at
   asks first.
 - **Conflicts** (409): reload the file (drop mine), overwrite, or save mine
   as a copy.
+- **Writing help** for pages and `.typ` files: a formatting toolbar
+  (heading, bold, italic, lists, link, image, table, code) that writes the
+  file's own syntax and shows it in each tooltip; on pages *Element* and the
+  `/` menu (see "Creating" below). Images pasted, dropped or picked are
+  uploaded next to the file and linked relatively (`![x](./x.png)`,
+  `#image("x.png")`).
+- **Explain with AI**: every error and warning (the page checks, Typst's
+  syntax and compiler) offers it while the AI is available; it opens the
+  assistant with a new chat asking about the message and the lines around it.
 - **Preview pane** beside the editor, showing the page of the open file
   (`book/a/b.md` → `/a/b`, `book/a/index.md` → `/a`, `glossary/x.md` →
   `/glossary/x`), reloaded when the build of the newest save succeeds; the
@@ -892,10 +902,12 @@ touching its VM.
    `::::blockflow-editor{project=…}`, `:::struktolab`, …) gets an "Edit
    visually" action. For a `src`/`project` element it opens that file; for
    inline struktolab it edits the code block and writes it back into the page.
-3. **Creating**: "Insert" above a page offers learning map, drawing, Java
-   memory diagram, flow and structogram. Each creates a starter file in
-   `public/` (which every element's `src` lookup checks first) and inserts
-   the directive with `src="/<name>.<ext>"` at the cursor. A new `.jmp` starts empty and gets
+3. **Creating**: *Element* in the page's toolbar (or `/` at the start of a
+   line) lists the elements by what they do (`editor/insert.ts`). Learning
+   map, drawing, Java memory diagram, task flow and Scratch project create a
+   starter file next to the page, insert the directive with
+   `src="./<name>.<ext>"` and open the file in its editor; a structogram is
+   written into the page and opens in its visual editor. A new `.jmp` starts empty and gets
    the playground's example diagram (unsaved) when it opens.
 
 Which files belong to which element comes from the file's extension:
@@ -1688,3 +1700,45 @@ comments: id, thread_id → comment_threads (cascade),
   SyncTeX, so the line's words are matched against the source lines, and
   the clicked word is selected.
 
+
+## Editor sync: changes made elsewhere (2026-11-16)
+
+An open editor follows changes to `main` made somewhere else: an editor save
+in another browser, a `git push`, a zip upload.
+
+- **Server.** Every save, push and upload calls `bookChanged()`
+  (`domain/book-events.ts`, an in-process emitter: the platform is one
+  process). `GET /api/books/:id/events` (commenters and up) is an SSE
+  stream. It sends `head` (main's commit) first, so a reconnect catches up,
+  then a `change` event `{commit, by, via}` for each save, push or upload.
+  It pings every 25 s and ends after 10 minutes; the browser reconnects,
+  which checks access again (a revoked link stops there).
+- **Merge.** `POST /api/books/:id/files/merge {path, baseOid, text}`
+  (editors) runs `git merge-file` on the base, the unsaved text and the
+  version saved since, in a temp dir. It answers with their diff, the
+  merged text and the number of conflicts (marked as `<<<<<<< your version`
+  / `>>>>>>> their version`), or `deleted` when the file is gone. Nothing
+  is saved.
+- **Editor** (`editor/sync.tsx`). On an event, and when the browser tab
+  comes back into view, the editor fetches the file list and compares the
+  open tabs:
+  - A tab without unsaved text takes the new version in place: a minimal
+    replace outside the undo history, so cursor and scroll stay. A tab
+    whose file was deleted closes. Visual editors reload.
+  - A tab with unsaved text keeps it and gets a bar: *Show changes and
+    merge*, *Keep mine* (save over theirs), *Drop mine*. For a deleted
+    file: *Save mine again* or *Close*. Auto-save skips the file until the
+    teacher decides. The 409 dialog of a save also offers *Merge*.
+  - A merge makes their version the tab's base and puts the merged text in
+    the editor as unsaved, undoable text. Auto-save skips a file that
+    still has conflict markers. Saving it by hand asks first: a page about
+    git may contain markers on purpose.
+  - A check waits while this editor's own commits are running, plus 500 ms
+    for their follow-up, so its own saves never look like someone else's.
+- Restored drafts typed on an older version now get the same bar.
+- Tests: `tests/sync.test.ts`, the push event in `tests/git-http.test.ts`,
+  `tests/e2e/sync.e2e.ts`.
+- Limits: a second server process would need a shared bus instead of the
+  emitter. Over HTTP/1.1, each open editor holds one of the browser's six
+  connections per host. Production runs HTTP/2 behind Caddy, so this
+  matters only for the Vite dev proxy.

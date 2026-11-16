@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { findInSource } from "../src/web/pages/editor/pdf-sync";
+import { findInPdf, findInSource } from "../src/web/pages/editor/pdf-sync";
 
 const SOURCE = `= Optics
 
@@ -58,5 +58,68 @@ describe("findInSource", () => {
     expect(findInSource(source, { line: "and is conser- vation", wordIndex: 1 })).toBe(source.indexOf("is conserved"));
     expect(findInSource(source, { line: "Something else entirely", wordIndex: 0 })).toBeNull();
     expect(findInSource(source, { line: "  ", wordIndex: -1 })).toBeNull();
+  });
+});
+
+describe("findInSource with hyphenation", () => {
+  it("joins a word the PDF broke at the end of the clicked line", () => {
+    const source = "Energy is conserved in every closed system.\n";
+    expect(
+      findInSource(source, { line: "Energy is con-", wordIndex: 2, after: "served in every closed system." }),
+    ).toBe(source.indexOf("conserved"));
+  });
+});
+
+describe("findInPdf", () => {
+  const SOURCE = `#set page(paper: "a5")
+
+= Optics
+
+Light travels in *straight* lines,
+until it meets a #emph[lens] or a mirror.
+
+= Waves
+
+Refraction bends light at a boundary.
+Light travels in waves, too.
+`;
+  const PAGES = [
+    ["Optics", "Light travels in straight lines, until it meets a", "lens or a mirror."],
+    ["Waves", "Refraction bends light at a boundary. Light travels", "in waves, too."],
+  ];
+  const at = (text: string, n = 0) => {
+    let i = -1;
+    for (let k = 0; k <= n; k++) i = SOURCE.indexOf(text, i + 1);
+    return i;
+  };
+
+  it("finds the line that shows the text at the cursor", () => {
+    expect(findInPdf(SOURCE, at("straight") + 2, PAGES)).toEqual({ page: 0, line: 1 });
+    expect(findInPdf(SOURCE, at("mirror"), PAGES)).toEqual({ page: 0, line: 2 });
+    expect(findInPdf(SOURCE, at("lens"), PAGES)).toEqual({ page: 0, line: 2 });
+    expect(findInPdf(SOURCE, at("Refraction"), PAGES)).toEqual({ page: 1, line: 1 });
+  });
+
+  it("finds headings, though they are a single word", () => {
+    expect(findInPdf(SOURCE, at("Optics"), PAGES)).toEqual({ page: 0, line: 0 });
+    expect(findInPdf(SOURCE, at("Waves"), PAGES)).toEqual({ page: 1, line: 0 });
+  });
+
+  it("tells a repeated phrase apart by the words around it", () => {
+    // "Light travels in" occurs twice; the second is followed by "waves".
+    expect(findInPdf(SOURCE, at("Light travels", 1), PAGES)).toEqual({ page: 1, line: 1 });
+    expect(findInPdf(SOURCE, at("waves"), PAGES)).toEqual({ page: 1, line: 2 });
+  });
+
+  it("follows a word hyphenated across lines", () => {
+    const source = "Energy is always conserved in every closed system.\n";
+    const pages = [["Energy is always con-", "served in every closed system."]];
+    expect(findInPdf(source, source.indexOf("conserved") + 5, pages)).toEqual({ page: 0, line: 0 });
+    expect(findInPdf(source, source.indexOf("closed"), pages)).toEqual({ page: 0, line: 1 });
+  });
+
+  it("gives up on text that is not in the PDF", () => {
+    expect(findInPdf("Hello world.\n", 2, [["Something else entirely"]])).toBeNull();
+    expect(findInPdf("Hello world.\n", 2, [])).toBeNull();
   });
 });

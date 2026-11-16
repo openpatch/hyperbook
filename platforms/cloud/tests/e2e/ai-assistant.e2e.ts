@@ -275,4 +275,26 @@ describe("AI assistant", () => {
     await page.getByTitle("Not saved").first().waitFor();
   }, 120_000);
 
+  it("explains an error of the page in a new chat", async () => {
+    // The same page; the files are in the sidebar, not the assistant.
+    await page.getByRole("tab", { name: "Files" }).click();
+    const editor = page.locator(".cm-content");
+    await editor.click();
+    await page.keyboard.press("Control+End");
+    await page.keyboard.insertText("\n\n::nosuchelement\n");
+
+    // The check marks the unknown element; its message offers the AI.
+    const mark = editor.locator(".cm-lintRange-error").first();
+    await mark.waitFor();
+    await mark.hover();
+    await page.locator(".cm-tooltip-lint").getByRole("button", { name: "Explain with AI" }).click();
+
+    // The assistant opens with the question: the message, and the lines around it.
+    const panel = page.getByRole("region", { name: "AI assistant" });
+    await panel.getByText(/The editor says: Hyperbook has no element "nosuchelement"/).waitFor();
+    await panel.getByText(/In book\/index\.md, line \d+/).waitFor();
+    await panel.getByText("Hello world").waitFor();
+    // A chat of its own, without the earlier request.
+    expect(await panel.getByText("Fix the page").count()).toBe(0);
+  }, 120_000);
 });

@@ -4,11 +4,14 @@ import { typstLezerLintSource } from "codemirror-lang-typst/lezer";
 import type { EditorView } from "@codemirror/view";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import i18next from "i18next";
 import type { TypstDiagnostic } from "../../../shared/typst-diagnostics";
-import { DownloadIcon } from "lucide-react";
+import { DownloadIcon, LocateFixedIcon } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { PdfView } from "./pdf-view";
+import { type PdfHandle, PdfView } from "./pdf-view";
 import type { PdfClick } from "./pdf-sync";
+import { explainChanged, withExplain } from "./ai-explain";
 
 /** How long typing pauses before the document compiles again. */
 const DEBOUNCE_MS = 600;
@@ -51,12 +54,16 @@ export const typstLint: Extension = [
   linter(
     async (view) => {
       const own = view.state.field(compileDiagnostics);
-      return [...(await typstLezerLintSource(view)), ...asLintMarks(view.state.doc, own.path, own.diagnostics)];
+      return withExplain(view, [
+        ...(await typstLezerLintSource(view)),
+        ...asLintMarks(view.state.doc, own.path, own.diagnostics),
+      ]);
     },
     {
       delay: 300,
       // Also when the compiler's diagnostics came in, not only on edits.
       needsRefresh: (update) =>
+        explainChanged(update) ||
         update.transactions.some((tr) => tr.effects.some((effect) => effect.is(setCompileDiagnostics))),
     },
   ),
@@ -66,6 +73,25 @@ export const typstLint: Extension = [
 export function showTypstDiagnostics(view: EditorView, path: string, diagnostics: TypstDiagnostic[]) {
   view.dispatch({ effects: setCompileDiagnostics.of({ path, diagnostics }) });
   forceLinting(view);
+}
+
+/** The shown PDF of each `.typ` file, for revealInPdf. */
+const shownPdfs = new Map<string, PdfHandle>();
+
+/**
+ * Shows the line of `path`'s PDF that `offset` of `source` compiles to (see
+ * pdf-sync.ts): for the editor's Alt+Enter and the pane's button. Tells
+ * when the PDF is not shown or the text is not found in it.
+ */
+export async function revealInPdf(path: string, source: string, offset: number): Promise<boolean> {
+  const pdf = shownPdfs.get(path);
+  if (!pdf) {
+    toast.info(i18next.t("editor.typstPreview.notShown"));
+    return false;
+  }
+  if (await pdf.reveal(source, offset)) return true;
+  toast.info(i18next.t("editor.typstPreview.notInPdf"));
+  return false;
 }
 
 /**
@@ -95,6 +121,7 @@ export function TypstPreviewPane({
   text,
   onDiagnostics,
   onJump,
+  cursor,
 }: {
   bookId: string;
   file: string;
@@ -103,6 +130,8 @@ export function TypstPreviewPane({
   onDiagnostics: (path: string, diagnostics: TypstDiagnostic[]) => void;
   /** A double-clicked line of the PDF, to find in the source (see pdf-sync.ts). */
   onJump?: (path: string, click: PdfClick) => void;
+  /** The file's text and where its cursor is, for the button that finds it in the PDF. */
+  cursor?: (path: string) => { source: string; offset: number } | null;
 }) {
   const { t } = useTranslation();
   const [pdf, setPdf] = useState(() => lastPdf.get(file) ?? null);
@@ -112,6 +141,18 @@ export function TypstPreviewPane({
   const onDiagnosticsRef = useRef(onDiagnostics);
   onDiagnosticsRef.current = onDiagnostics;
   const hashRef = useRef(pdf?.hash ?? null);
+
+  // The PDF on view, for revealInPdf.
+  const handle = useRef<PdfHandle | null>(null);
+  const shown = pdf !== null;
+  useEffect(() => {
+    if (!shown) return;
+    const entry: PdfHandle = { reveal: (source, offset) => handle.current?.reveal(source, offset) ?? Promise.resolve(false) };
+    shownPdfs.set(file, entry);
+    return () => {
+      if (shownPdfs.get(file) === entry) shownPdfs.delete(file);
+    };
+  }, [file, shown]);
 
   // Another file: its own last PDF, or none.
   const fileRef = useRef(file);
@@ -196,6 +237,21 @@ export function TypstPreviewPane({
             <DownloadIcon className="size-4" />
           </Button>
         )}
+        {pdf && cursor && (
+          <Button
+            size="icon"
+            variant="ghost"
+            className="order-last size-7"
+            aria-label={t("editor.typstPreview.locate")}
+            title={t("editor.typstPreview.locate")}
+            onClick={() => {
+              const at = cursor(file);
+              if (at) void revealInPdf(file, at.source, at.offset);
+            }}
+          >
+            <LocateFixedIcon className="size-4" />
+          </Button>
+        )}
         {status.kind === "compiling" && <span className="text-muted-foreground">{t("editor.typstPreview.compiling")}</span>}
         {status.kind === "failed" && (
           <span className="text-destructive">
@@ -219,6 +275,7 @@ export function TypstPreviewPane({
           data={pdf.data}
           className="flex-1"
           onTextDoubleClick={onJump && ((text) => onJump(file, text))}
+          handle={handle}
         />
       ) : (
         <p className="p-4 text-sm text-muted-foreground">

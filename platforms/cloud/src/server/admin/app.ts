@@ -107,7 +107,9 @@ export function createAdminApp(deps: Deps, options: { webRoot?: string } = {}) {
       referrerPolicy: "same-origin",
       contentSecurityPolicy: {
         defaultSrc: ["'self'"],
-        scriptSrc: ["'self'"],
+        // The editor's spell check is Hunspell as WebAssembly; this allows
+        // compiling it, not JavaScript's eval.
+        scriptSrc: ["'self'", "'wasm-unsafe-eval'"],
         // Radix positions popovers with inline styles.
         styleSrc: ["'self'", "'unsafe-inline'"],
         // QR codes are inline SVG; data: covers small built-in images, blob:

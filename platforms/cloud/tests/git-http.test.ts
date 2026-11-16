@@ -8,6 +8,7 @@ import path from "node:path";
 import { eq } from "drizzle-orm";
 import { afterAll, describe, expect, it } from "vitest";
 import { gitHttpRoutes } from "../src/server/admin/routes/git";
+import { type BookChange, onBookChange } from "../src/server/domain/book-events";
 import { FailureLimiter, OpLimiter } from "../src/server/auth/rate-limit";
 import {
   auditLog,
@@ -222,6 +223,20 @@ describe("git smart HTTP", () => {
     ).toMatchObject({
       stdout: "<h1>Hello</h1>",
     });
+  });
+
+  it("tells open editors of a push", async () => {
+    const { book, token, port } = await world();
+    const seen: BookChange[] = [];
+    const off = onBookChange(book.id, (change) => seen.push(change));
+    try {
+      const dir = await localBook(port, token, book.id, FILES);
+      expect((await git(port, ["push", "origin", "main"], dir)).code).toBe(0);
+      const local = (await git(port, ["rev-parse", "HEAD"], dir)).stdout.trim();
+      expect(seen).toEqual([{ commit: local, by: "Owner", via: "push" }]);
+    } finally {
+      off();
+    }
   });
 
   it("requires a token and rejects wrong, revoked and cross-book tokens", async () => {

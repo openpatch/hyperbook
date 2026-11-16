@@ -75,9 +75,10 @@ describe("the blockflow editor bundle on the admin origin", () => {
     const csp = editor.headers.get("content-security-policy")!;
     expect(csp).toContain("script-src 'self' 'unsafe-eval'");
     expect(csp).toContain("frame-ancestors 'self'");
-    // …while the admin app itself keeps the stricter CSP.
+    // …while the admin app itself keeps the stricter CSP: no eval, only
+    // compiling WebAssembly ('wasm-unsafe-eval', for the spell check).
     const api = await get("/api/books");
-    expect(api.headers.get("content-security-policy")).not.toContain("unsafe-eval");
+    expect(api.headers.get("content-security-policy")).not.toContain("'unsafe-eval'");
 
     expect((await get("/blockflow/player.html")).status).toBe(200);
     // The embed entries the visual editors frame, and the version manifest.

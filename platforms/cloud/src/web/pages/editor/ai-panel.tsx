@@ -178,6 +178,8 @@ export function AiPanel({
   closeTab,
   reloadTab,
   commit,
+  request = null,
+  onRequestTaken,
 }: {
   bookId: number;
   /** The open file; null when no text file is open. */
@@ -189,6 +191,10 @@ export function AiPanel({
   closeTab: (path: string) => void;
   reloadTab: (path: string) => Promise<void>;
   commit: (changes: FileChange[], message?: string) => Promise<unknown>;
+  /** A question from elsewhere ("Explain with AI" on an error), asked in a new chat. */
+  request?: { id: number; text: string } | null;
+  /** The request was asked; it must not be asked again. */
+  onRequestTaken?: () => void;
 }) {
   const { t } = useTranslation();
   const status = useAiStatus();
@@ -221,12 +227,23 @@ export function AiPanel({
   const turnsRef = useRef(turns);
   turnsRef.current = turns;
 
-  // The conversation last open in this book comes back after a reload.
+  // The conversation last open in this book comes back after a reload —
+  // unless the panel opened for a question of its own.
   useEffect(() => {
+    if (request) return;
     const remembered = rememberedConversation(bookId);
     if (remembered !== null) void open(remembered, { quiet: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bookId]);
+
+  // A question from elsewhere: asked in a new chat, once the current answer is done.
+  useEffect(() => {
+    if (!request || streaming) return;
+    onRequestTaken?.();
+    newChat();
+    void run(request.text, { fresh: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [request?.id, streaming]);
 
   useEffect(() => {
     const el = listRef.current;
@@ -326,7 +343,11 @@ export function AiPanel({
    */
   async function run(
     text: string,
-    { replaceFrom, files }: { replaceFrom?: Turn; files?: AiAttachment[] } = {},
+    {
+      replaceFrom,
+      files,
+      fresh = false,
+    }: { replaceFrom?: Turn; files?: AiAttachment[]; fresh?: boolean } = {},
   ) {
     const view = activePath ? getViewOf(activePath) : null;
     if (!view || !activePath) {
@@ -346,7 +367,8 @@ export function AiPanel({
       // The whole page, so the assistant may rewrite it — only when it fits;
       // a truncated page must never reach a write_file, or content would go.
       pageText: document.length <= 128 * 1024 ? document : undefined,
-      conversationId: conversationId ?? undefined,
+      // A new chat's first question, even before its state has settled.
+      conversationId: fresh ? undefined : (conversationId ?? undefined),
       replaceFrom: replaceFrom?.id ?? undefined,
       // Omitted on a resend without new files: the server keeps the old ones.
       attachments: files,

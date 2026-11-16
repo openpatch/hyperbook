@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { mkdtemp, mkdir, readFile, rm, writeFile } from "fs/promises";
+import os from "os";
 import path from "path";
 import { Hyperproject } from "@hyperbook/types";
 import { IncrementalBuilder } from "../incremental";
@@ -57,6 +59,13 @@ describe("IncrementalBuilder.classifyChange", () => {
     expect(builder.classifyChange(path.join("book", "loose.py"), "change")).toBe(
       "public",
     );
+  });
+
+  it("treats a picture next to a glossary page as an asset", () => {
+    const builder = makeBuilder();
+    expect(
+      builder.classifyChange(path.join("glossary", "term.png"), "change"),
+    ).toBe("public");
   });
 
   it("treats a file inlined by a page as a dependency, not an asset", () => {
@@ -127,5 +136,30 @@ describe("IncrementalBuilder dependency index", () => {
     record(builder, "/one", []);
 
     expect(dependentsOf(builder, shared)).toEqual(["/two"]);
+  });
+});
+
+describe("IncrementalBuilder copies changed assets", () => {
+  /** Copies `file` of a fresh book; what the output then has at `href`. */
+  const copied = async (file: string, href: string) => {
+    const dir = await mkdtemp(path.join(os.tmpdir(), "hyperbook-incremental-"));
+    try {
+      await mkdir(path.join(dir, path.dirname(file)), { recursive: true });
+      await writeFile(path.join(dir, file), "picture");
+      const builder = new IncrementalBuilder(dir, { name: "Test", src: dir, type: "book" });
+      (builder as any).rootOut = path.join(dir, "out");
+      await (builder as any).copyIfPublic(file);
+      return await readFile(path.join(dir, "out", href), "utf8").catch(() => null);
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  };
+
+  it("serves a file from book/ at the root", async () => {
+    expect(await copied(path.join("book", "a", "pic.png"), "a/pic.png")).toBe("picture");
+  });
+
+  it("serves a file from glossary/ under /glossary", async () => {
+    expect(await copied(path.join("glossary", "pic.png"), "glossary/pic.png")).toBe("picture");
   });
 });

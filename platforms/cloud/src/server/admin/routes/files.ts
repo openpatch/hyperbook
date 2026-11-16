@@ -1,14 +1,17 @@
 import { readFile } from "node:fs/promises";
 import { Hono } from "hono";
 import { bodyLimit } from "hono/body-limit";
+import { streamSSE } from "hono/streaming";
 import { HTTPException } from "hono/http-exception";
 import { z } from "zod";
-import { bookPath, commitFilesInput, initFilesInput, renderPageInput } from "../../../shared/schemas";
+import { bookPath, commitFilesInput, initFilesInput, mergeFileInput, renderPageInput } from "../../../shared/schemas";
 import { type ScannedPage, findReferences, isScannedPage } from "../../../shared/references";
 import type { Deps } from "../../deps";
 import { type BookRow, addCommits } from "../../domain/books";
 import { type Actor, visitorAccess } from "../../domain/actors";
+import { bookChanged, onBookChange } from "../../domain/book-events";
 import { moveThreads } from "../../domain/comments";
+import { createT } from "../../i18n";
 import { quotaForBook, quotaMessage, setSourceBytes } from "../../domain/storage";
 import { bookTemplate } from "../../domain/templates";
 import {
@@ -17,8 +20,11 @@ import {
   ChangeConflictError,
   commitChanges,
   headCommit,
+  diffChange,
   initRepo,
   listTree,
+  logCommits,
+  mergeTexts,
   readBlob,
 } from "../../hosting/git";
 import { RenderError } from "../../hosting/renders";
@@ -35,6 +41,13 @@ import { hostedOnly } from "./publishing";
 
 /** Root files every build reads; a broken one fails every build. */
 const ROOT_CONFIGS = new Set(["hyperbook.json", "hyperlibrary.json"]);
+
+/** An event stream lasts this long; the browser then opens a new one. */
+const EVENT_STREAM_MS = 10 * 60 * 1000;
+/** An idle event stream sends a comment this often. */
+const EVENT_PING_MS = 25 * 1000;
+/** Larger text files are not merged (the editor opens text up to 2 MB). */
+const MAX_MERGE_BYTES = 2 * 1024 * 1024;
 
 /** Larger files are left out of the book search (generated data, minified code). */
 const MAX_SEARCHED_BYTES = 1024 * 1024;
@@ -108,7 +121,10 @@ export function bookFileRoutes({ db, config, renders }: Deps) {
     }
     const now = await listing(book);
     setSourceBytes(db, book.id, now.files.reduce((sum, f) => sum + f.size, 0));
-    if (result.changed) addCommits(db, book.id, 1);
+    if (result.changed) {
+      addCommits(db, book.id, 1);
+      if (now.commit) bookChanged(book.id, { commit: now.commit, by: author(actor).name, via: "editor" });
+    }
     return { changed: result.changed, ...now };
   }
 
@@ -215,6 +231,118 @@ export function bookFileRoutes({ db, config, renders }: Deps) {
       c.header("x-oid", entry.oid);
       return c.body(new Uint8Array(await readBlob(repo, entry.oid)));
     })
+
+    // Tells an open editor when main moves (a save elsewhere, a git push, an
+    // upload), so it can update its tabs; see domain/book-events.ts. The
+    // first event is the commit main is at now, so a reconnect catches up
+    // on what it missed. A stream ends after a while and the browser opens
+    // a new one, which checks access again (a revoked link stops there).
+    .get("/:id/events", idParam, async (c) => {
+      const { book } = visitorAccess(db, c.get("user"), c.get("link"), c.req.valid("param").id, "commenter");
+      const repo = repoDir(config, book.id);
+      c.header("cache-control", "no-cache, no-transform");
+      // Caddy and nginx must not hold the events back.
+      c.header("x-accel-buffering", "no");
+      return streamSSE(c, async (stream) => {
+        let closed = false;
+        const queue: string[] = [];
+        let wake: (() => void) | null = null;
+        const push = (data: string) => {
+          queue.push(data);
+          wake?.();
+        };
+        const off = onBookChange(book.id, (change) => push(JSON.stringify(change)));
+        stream.onAbort(() => {
+          closed = true;
+          wake?.();
+        });
+        try {
+          const head = await headCommit(repo).catch(() => null);
+          await stream.writeSSE({ event: "head", data: JSON.stringify({ commit: head }), retry: 3000 });
+          const until = Date.now() + EVENT_STREAM_MS;
+          while (!closed && Date.now() < until) {
+            while (queue.length > 0 && !closed) {
+              await stream.writeSSE({ event: "change", data: queue.shift()! });
+            }
+            if (closed) break;
+            // A comment line now and then keeps proxies from closing an
+            // idle connection.
+            const woke = await new Promise<boolean>((resolve) => {
+              const timer = setTimeout(() => resolve(false), EVENT_PING_MS);
+              wake = () => {
+                clearTimeout(timer);
+                resolve(true);
+              };
+            });
+            wake = null;
+            if (!woke && !closed) await stream.write(": ping\n\n");
+          }
+        } finally {
+          off();
+        }
+      });
+    })
+
+    // A three-way merge of the editor's unsaved text (typed on `baseOid`)
+    // with the file as it is now: what someone else changed meanwhile, as a
+    // diff, and both changes together. Overlaps come back between conflict
+    // markers. Nothing is saved; the editor shows the result as unsaved text.
+    .post(
+      "/:id/files/merge",
+      idParam,
+      bodyLimit({
+        maxSize: 3 * MAX_MERGE_BYTES + 64 * 1024,
+        onError: () => {
+          throw new HTTPException(413, { message: "The file is too large to merge" });
+        },
+      }),
+      validate("json", mergeFileInput),
+      async (c) => {
+        const { book } = visitorAccess(db, c.get("user"), c.get("link"), c.req.valid("param").id);
+        hostedOnly(book);
+        const { path, baseOid, text } = c.req.valid("json");
+        const repo = repoDir(config, book.id);
+        const commit = await headCommit(repo).catch(() => null);
+        const entry = commit ? (await listTree(repo, commit)).find((e) => e.path === path) : undefined;
+        const [last] = commit ? await logCommits(repo, { limit: 1, after: null, path }) : [];
+        const by = last ? { name: last.name, date: last.date, message: last.message } : null;
+        // Deleted since: there is nothing to merge with.
+        if (!entry) return c.json({ deleted: true as const, by });
+        if (entry.size > MAX_MERGE_BYTES) throw new HTTPException(413, { message: "The file is too large to merge" });
+        let base: Buffer;
+        try {
+          base = await readBlob(repo, baseOid);
+        } catch {
+          throw new HTTPException(400, { message: "Unknown base version" });
+        }
+        const theirsBytes = await readBlob(repo, entry.oid);
+        const decoder = new TextDecoder("utf-8", { fatal: true });
+        let theirs: string;
+        let baseText: string;
+        try {
+          theirs = decoder.decode(theirsBytes);
+          baseText = decoder.decode(base);
+        } catch {
+          throw new HTTPException(400, { message: "Only text files can be merged" });
+        }
+        const t = createT(c.get("locale"));
+        const merged = await mergeTexts(baseText, text, theirs, {
+          mine: t("editor.sync.markerMine"),
+          base: t("editor.sync.markerBase"),
+          theirs: t("editor.sync.markerTheirs"),
+        });
+        const diff = await diffChange({ op: "write", path, oldText: baseText, newText: theirs });
+        return c.json({
+          deleted: false as const,
+          by,
+          oid: entry.oid,
+          theirs,
+          diff,
+          merged: merged.text,
+          conflicts: merged.conflicts,
+        });
+      },
+    )
 
     .post(
       "/:id/files/commit",

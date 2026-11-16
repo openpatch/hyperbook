@@ -363,3 +363,13 @@
   border-color: var(--color-border);
   margin: 0.625rem 0;
 }
+
+/* CodeMirror's tooltips (the comment button on a selection, completion,
+ * errors) stack above everything (z-index 500), dialogs included. While a
+ * dialog is open, those of the editors behind it go; an editor inside the
+ * dialog keeps its own. */
+body:has([data-slot="dialog-content"][data-state="open"])
+  .cm-editor:not([data-slot="dialog-content"] .cm-editor)
+  .cm-tooltip {
+  display: none;
+}

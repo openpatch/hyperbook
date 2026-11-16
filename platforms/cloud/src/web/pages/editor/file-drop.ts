@@ -12,8 +12,8 @@ export type DropHandler = {
 };
 
 /**
- * Files dropped onto a page or pasted into it (a screenshot, say), and files
- * dragged from the tree, become links; `handler` is asked each time, so it
+ * Files dropped onto a page or a Typst file or pasted into it (a screenshot,
+ * say), and files dragged from the tree, become links; `handler` is asked each time, so it
  * may change after the editor was made.
  */
 export function fileDrop(handler: () => DropHandler) {
@@ -49,11 +49,18 @@ export function fileDrop(handler: () => DropHandler) {
 }
 
 /**
- * Markdown that links `file` from `page`: an image as an image, a page or
- * any other file as a link; relative to the page when it is in book/.
- * Null for a file the built book does not serve (a snippet, say).
+ * What links `file` from `page`, relative to the page: in Markdown an image
+ * as an image, a page or any other file as a link; in Typst an image as
+ * `#image`, another Typst file as `#include`, anything else as its path.
+ * Null for a file a page cannot link (a snippet, say).
  */
 export function linkTo(page: string, file: string): string | null {
+  if (page.endsWith(".typ")) {
+    const target = relativeFile(page, file);
+    if (IMAGE.test(file)) return `#image(${JSON.stringify(target)})`;
+    if (file.endsWith(".typ")) return `#include ${JSON.stringify(target)}`;
+    return JSON.stringify(target);
+  }
   const href = pageOf(file) ?? publicPath(file);
   if (!href) return null;
   const base = linkBase(page);
@@ -63,16 +70,25 @@ export function linkTo(page: string, file: string): string | null {
   return IMAGE.test(file) ? `![${label}](${target})` : `[${label}](${target})`;
 }
 
+/** `file` as Typst finds it from `from`: relative to its folder ("pic.png", "../a/pic.png"). */
+export function relativeFile(from: string, file: string): string {
+  const base = from.split("/").slice(0, -1);
+  const target = file.split("/");
+  let common = 0;
+  while (common < base.length && common < target.length - 1 && base[common] === target[common]) common++;
+  return "../".repeat(base.length - common) + target.slice(common).join("/");
+}
+
 /**
- * Where a file dropped onto `page` is kept: next to the page in book/, in
- * public/ for others. A pasted screenshot ("image.png") is named after the
- * page; spaces become dashes, so the link needs no escaping; a taken name
- * gets a number ("intro-2.png").
+ * Where a file dropped onto `page` (a Markdown page or a Typst file) is kept:
+ * next to it, so the link stays short and relative. A pasted screenshot
+ * ("image.png") is named after the page; spaces become dashes, so the link
+ * needs no escaping; a taken name gets a number ("intro-2.png").
  */
 export function dropPath(page: string, fileName: string, taken: (path: string) => boolean): string {
   const segments = page.split("/");
   const pageName = segments.pop()!.replace(/\..*$/, "");
-  const folder = page.startsWith("book/") ? segments.join("/") : "public";
+  const folder = segments.length ? `${segments.join("/")}/` : "";
   const dot = fileName.lastIndexOf(".");
   const ext = dot > 0 ? fileName.slice(dot).toLowerCase() : "";
   let stem = dot > 0 ? fileName.slice(0, dot) : fileName;
@@ -80,7 +96,7 @@ export function dropPath(page: string, fileName: string, taken: (path: string) =
     stem = pageName === "index" && segments.length > 1 ? segments[segments.length - 1]! : pageName;
   stem = stem.replace(/[\s/\\]+/g, "-");
   for (let i = 1; ; i++) {
-    const path = `${folder}/${stem}${i > 1 ? `-${i}` : ""}${ext}`;
+    const path = `${folder}${stem}${i > 1 ? `-${i}` : ""}${ext}`;
     if (!taken(path)) return path;
   }
 }

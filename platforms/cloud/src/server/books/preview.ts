@@ -229,8 +229,10 @@ export function createPreviewApp(deps: Deps) {
         return page(c, 404, "Page not found", "This page does not exist in the book.");
       }
       const roots = await renders.roots(book.id);
-      for (const root of roots) {
-        const found = await serveFile(c, { root, pathname, segments, etag: "preview", cacheControl: "private, no-store" });
+      for (const { dir, under } of roots) {
+        if (under !== null && segments[0] !== under) continue;
+        const inside = under === null ? segments : segments.slice(1);
+        const found = await serveFile(c, { root: dir, pathname, segments: inside, etag: "preview", cacheControl: "private, no-store" });
         if (found) return found;
       }
       return page(c, 404, "Page not found", "This page does not exist in the book.");
