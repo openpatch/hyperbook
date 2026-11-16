@@ -348,6 +348,15 @@ export class IncrementalBuilder {
     // Content changes to glossary files
     const glossaryDir = path.join(this.root, "glossary");
     if (absPath.startsWith(glossaryDir + path.sep) || absPath === glossaryDir) {
+      // A picture next to a glossary page is an asset, like one in book/.
+      const isMarkdown =
+        filePath.endsWith(".md") ||
+        filePath.endsWith(".md.hbs") ||
+        filePath.endsWith(".md.json") ||
+        filePath.endsWith(".md.yml");
+      if (!isMarkdown && absPath !== glossaryDir) {
+        return "public";
+      }
       return "content-glossary";
     }
 
@@ -613,14 +622,17 @@ export class IncrementalBuilder {
   /** Copies a changed file to the output if it lives in a public folder. */
   private async copyIfPublic(filePath: string): Promise<void> {
     const absPath = path.resolve(this.root, filePath);
-    const publicDirs = [
-      path.join(this.root, "public"),
-      path.join(this.root, "book-public"),
-      path.join(this.root, "glossary-public"),
+    // The folders whose files are copied as they are, and where they go:
+    // book/ is served from the root, glossary/ under /glossary (see the
+    // book-public and glossary-public folders of the fs package).
+    const publicDirs: [string, string][] = [
+      [path.join(this.root, "public"), ""],
+      [path.join(this.root, "book"), ""],
+      [path.join(this.root, "glossary"), "glossary"],
     ];
-    for (const dir of publicDirs) {
+    for (const [dir, under] of publicDirs) {
       if (!absPath.startsWith(dir + path.sep)) continue;
-      const relativePath = path.relative(dir, absPath);
+      const relativePath = path.join(under, path.relative(dir, absPath));
       const destPath = path.join(this.rootOut, relativePath);
       // A Typst source is part of the site only when a page offers it for
       // download; the full build copied those, so only they are updated.

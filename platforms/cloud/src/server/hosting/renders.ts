@@ -484,14 +484,18 @@ export class Renderers {
     return "done";
   }
 
-  /** Folders a file of the preview may come from, in order. */
-  async roots(bookId: number): Promise<string[]> {
+  /**
+   * Folders a file of the preview may come from, in order, and the address
+   * each one is served under: book/ and public/ at the root, glossary/ under
+   * /glossary, as the build copies them.
+   */
+  async roots(bookId: number): Promise<{ dir: string; under: string | null }[]> {
     const r = await this.renderer(bookId);
     return [
-      path.join(r.srcDir, ".hyperbook", "out"),
-      path.join(r.srcDir, "public"),
-      path.join(r.srcDir, "book"),
-      path.join(r.srcDir, "glossary"),
+      { dir: path.join(r.srcDir, ".hyperbook", "out"), under: null },
+      { dir: path.join(r.srcDir, "public"), under: null },
+      { dir: path.join(r.srcDir, "book"), under: null },
+      { dir: path.join(r.srcDir, "glossary"), under: "glossary" },
     ];
   }
 
