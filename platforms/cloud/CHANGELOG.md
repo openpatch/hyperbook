@@ -1,5 +1,15 @@
 # @hyperbook/cloud
 
+## 0.12.0
+
+### Minor Changes
+
+- [`7032a19`](https://github.com/openpatch/hyperbook/commit/7032a197c5cccec4cdb1e878c8f9ef6c489d8e65) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - The editor's AI assistant works like a full chat now. Conversations are kept per teacher and book: they survive a reload, are listed in the pane's history, can be renamed and deleted, and a follow-up sees the whole conversation, not just the last few answers cut to 4000 characters. A reasoning model's thinking streams live into a "Thinking…" block that folds away once the answer starts, and a tool call shows its progress while it is being written ("Writes arbeitsblatt-2.typ — 6.2 KB"), so a long answer no longer looks stuck. An answer cut off by the output cap goes on by itself: cut-off text is continued, a cut-off file write is retried in smaller pieces, and thinking that used up the cap is told to act — thinking is never passed off as the answer any more. When the step limit ends unfinished work, _Continue_ picks it up. File changes the teacher has not accepted or denied yet carry over, so "make task 5 harder" changes the pending draft. Messages can be edited and resent, answers regenerated or retried, and images, PDFs and text files attached (button, paste or drop); a picker sets how hard a reasoning model thinks. The provider timeout is an idle timeout now — it fires only when the provider goes silent, never while it streams — and the defaults grow to 65536 output tokens (only what is written is billed; a provider that rejects that is asked again with 16k) and 12 steps. Needs a database migration (applied on start).
+
+### Patch Changes
+
+- [`9905d48`](https://github.com/openpatch/hyperbook/commit/9905d48d849482ce4dd7b447840b10a50e9deae3) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - The AI assistant shows an answer in the order it happened: each stretch of the model's thinking gets its own folding block between the files it read and the text it wrote, instead of one thinking block at the top that kept filling up while the model worked. The order is kept with the conversation, so it looks the same after a reload. The history and new-chat buttons show their pointer and tooltip again (they are no longer disabled — switching chats stops a running answer), and the thinking-effort picker no longer touches the input field. Needs a database migration (applied on start).
+
 ## 0.11.2
 
 ### Patch Changes
