@@ -7,6 +7,7 @@ import remarkDirective from "remark-directive";
 import remarkDirectiveRehype from "remark-directive-rehype";
 import { ctx } from "./mock";
 import remarkDirectiveTextinput from "../src/remarkDirectiveTextinput";
+import remarkDirectiveStruktolab from "../src/remarkDirectiveStruktolab";
 import remarkDock from "../src/remarkDock";
 import remarkParse from "../src/remarkParse";
 import { i18n } from "../src/i18n";
@@ -16,6 +17,7 @@ const toHtml = (md: string, ctx: HyperbookContext) => {
     remarkDirective,
     remarkDirectiveRehype,
     remarkDirectiveTextinput(ctx),
+    remarkDirectiveStruktolab(ctx),
     remarkDock(ctx),
   ];
 
@@ -52,6 +54,12 @@ describe("remarkDock", () => {
   it("treats dock=false as off", () => {
     const result = toHtml("::textinput{dock=false}", ctx);
     expect(result.value).not.toContain("data-dock");
+  });
+
+  it("marks the elements readers work in beside the text", () => {
+    const result = toHtml(":::struktolab{dock}\n```\nx = 0\n```\n:::", ctx);
+    expect(result.value).toContain('data-dock="struktolab"');
+    expect(result.value).toContain('data-dock-label="Structogram"');
   });
 
   it("ignores dock on elements that can't be docked", () => {

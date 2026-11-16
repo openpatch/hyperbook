@@ -49,7 +49,8 @@ name before you write one you have not seen in this book, and never invent an
 attribute or a directive.
 
 The elements readers work in (\`pyide\`, \`webide\`, \`p5\`, \`openscad\`,
-\`typst\`, \`onlineide\`, \`sqlide\`, \`excalidraw\`, \`textinput\`) take
+\`typst\`, \`onlineide\`, \`sqlide\`, \`excalidraw\`, \`textinput\`,
+\`struktolab\`, \`blockflow-editor\`, \`jmp\`) take
 \`dock\`, which keeps the element in view beside tasks that follow it; see the
 \`dock\` topic of \`read_docs\`.
 

@@ -492,3 +492,7 @@ When generating a JMP visualization:
 Do not generate a directive referencing a file that has not been created.
 
 **Guiding principle: Create accurate, readable, pedagogically meaningful visual representations of Java memory that integrate directly into Hyperbook.**
+
+`dock` (flag, or `dock="Label"`): readers can move the element into the dock
+beside the text, to keep it in view while working through the tasks after it.
+See the `dock` topic.

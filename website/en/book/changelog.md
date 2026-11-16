@@ -19,13 +19,15 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 
 :::tab{title="New :rocket:" id="new"}
 
-**markdown**: New [dock](/advanced/dock) for working elements. Add `dock` to a `pyide`, `webide`, `p5`, `openscad`, `typst`, `onlineide`, `sqlide`, `excalidraw` or `textinput` and readers get a **Dock** tab under it. It moves the element into the dock at the right edge of the screen (on phones: at the bottom), so it stays in view while they scroll through the tasks; the text makes room for it. Several docked elements share the dock as tabs, a rail on its edge slides it in and out and resizes it, and where an element was, a line shows it in the dock or brings it back (↩). Elements keep their state while docked. `dock="Label"` names the tab; without `dock` nothing changes.
+**markdown**: New [dock](/advanced/dock) for working elements. Add `dock` to a `pyide`, `webide`, `p5`, `openscad`, `typst`, `onlineide`, `sqlide`, `excalidraw`, `textinput`, `struktolab`, `blockflow-editor` or `jmp` and readers get a **Dock** tab under it. It moves the element into the dock at the right edge of the screen (on phones: at the bottom), so it stays in view while they scroll through the tasks; the text makes room for it. Several docked elements share the dock as tabs, a rail on its edge slides it in and out and resizes it, and where an element was, a line shows it in the dock or brings it back (↩). Elements keep their state while docked. `dock="Label"` names the tab; without `dock` nothing changes.
+
+**markdown**: [`struktolab`](/elements/struktolab) in edit mode has a **Reset** button under the editor, as the IDEs have: it throws the student's changes away and loads the structogram the page started with.
 
 **markdown**: On wide screens ☰ shows in the header as on phones and folds the menu away to the left and back. The menu starts out shown; a folded menu stays folded on the next page.
 
 **cloud**: Completion and hover help offer `dock` on the elements that can be docked, and the AI assistant knows when to use it.
 
-**vscode**: Docked variants of the snippets: `:pyide-dock`, `:webide-dock`, `:p5-dock`, `:openscad-dock`, `:typst-dock`, `:onlineide-dock`, `:sqlide-dock`, `:excalidraw-dock` and `:textinput-dock`.
+**vscode**: Docked variants of the snippets: `:pyide-dock`, `:webide-dock`, `:p5-dock`, `:openscad-dock`, `:typst-dock`, `:onlineide-dock`, `:sqlide-dock`, `:excalidraw-dock`, `:textinput-dock`, `:struktolab-dock`, `:blockflow-editor-dock` and `:jmp-dock`.
 
 :::
 

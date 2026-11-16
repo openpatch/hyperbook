@@ -237,5 +237,11 @@
     "dock-close": "Dock einklappen",
     "dock-resize": "Größe des Docks ändern",
     "dock-handle": "Dock",
-    "dock-move-aside-title": "Ins Dock verschieben"
+    "dock-move-aside-title": "Ins Dock verschieben",
+    "dock-label-struktolab": "Struktogramm",
+    "dock-label-blockflow-editor": "Blockflow",
+    "dock-label-jmp": "Speicher",
+    "struktolab-reset": "Zurücksetzen",
+    "struktolab-reset-title": "Zurück zum ursprünglichen Struktogramm",
+    "struktolab-reset-prompt": "Das Struktogramm auf das Original zurücksetzen? Deine Änderungen gehen verloren."
 }

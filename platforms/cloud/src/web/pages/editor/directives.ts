@@ -403,6 +403,7 @@ export const DIRECTIVES: readonly Directive[] = [
       ...["hide-sidebar", "hide-call-method", "hide-declare-global-variable", "hide-new-array", "disable-garbage-collector", "create-new-on-edge-drop", "hide-steps", "hide-step-changes", "gc-prediction"].map(
         (name): Attribute => ({ name, description: name.replaceAll("-", " "), flag: true }),
       ),
+      dock,
     ],
     snippet: 'jmp{src="${memory.jmp}" height="600px"}',
   },
@@ -426,6 +427,7 @@ export const DIRECTIVES: readonly Directive[] = [
       },
       { name: "hideCode", description: "In `edit` mode, the diagram alone, without the code under it; the language stays", flag: true },
       id(),
+      dock,
     ],
     snippet: "struktolab\n```\n${x = 0}\n```\n:::",
   },
@@ -665,6 +667,7 @@ export const DIRECTIVES: readonly Directive[] = [
       { name: "showCostumesTab", description: "Show the Costumes tab (default `true`)", values: BOOL },
       { name: "showSoundsTab", description: "Show the Sounds tab (default `true`)", values: BOOL },
       { name: "categories", description: "Toolbox categories, comma-separated" },
+      dock,
     ],
     snippet: ':blockflow-editor{title="${Tutorial}"}\n:::step{title="${Welcome}"}\n${First step}\n:::\n::::',
   },

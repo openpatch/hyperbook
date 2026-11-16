@@ -40,6 +40,9 @@ const DOCKABLE: Record<string, string> = {
   sqlide: "dock-label-sqlide",
   excalidraw: "dock-label-excalidraw",
   textinput: "dock-label-textinput",
+  struktolab: "dock-label-struktolab",
+  "blockflow-editor": "dock-label-blockflow-editor",
+  jmp: "dock-label-jmp",
 };
 
 /** `dock` off: absent, or written out as false. */

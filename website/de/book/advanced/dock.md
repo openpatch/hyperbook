@@ -30,7 +30,7 @@ Mit `dock` an einem Element bekommen Lesende einen Tab **Dock** darunter. Das El
 | `dock="Name"` | Es lässt sich andocken, und der Tab zeigt `Name`. |
 | `dock=false` | Es lässt sich nicht andocken. |
 
-`dock` funktioniert bei `pyide`, `webide`, `p5`, `openscad`, `typst`, `onlineide`, `sqlide`, `excalidraw` und `textinput`.
+`dock` funktioniert bei `pyide`, `webide`, `p5`, `openscad`, `typst`, `onlineide`, `sqlide`, `excalidraw`, `textinput`, `struktolab`, `blockflow-editor` und `jmp`.
 
 ## Beispiel: ein Arbeitsblatt
 
@@ -132,6 +132,39 @@ function draw() {
 :::
 
 Zeige die Liste der Zahlen aus Aufgabe 1 als HTML-Liste.
+
+### Aufgabe 8: Ein Struktogramm
+
+Zeichne die Schleife aus Aufgabe 1 als Struktogramm.
+
+:::struktolab{mode="edit" dock}
+
+```
+summe = 0
+wiederhole für i = 0 bis 7:
+    summe = summe + zahlen[i]
+ausgabe(summe)
+```
+
+:::
+
+### Aufgabe 9: Speicher
+
+Zeichne, was nach `int[] a = {1, 2}; int[] b = a;` im Speicher steht.
+
+::jmp{src="../elements/memory.jmp" dock}
+
+### Aufgabe 10: Blöcke
+
+Lass die Katze zum rechten Rand laufen und „Fertig“ sagen.
+
+::::blockflow-editor{title="Blöcke" dock}
+
+:::step{title="Laufen"}
+Benutze eine Schleife, um die Katze zu bewegen.
+:::
+
+::::
 
 ### Bonus
 

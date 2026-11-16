@@ -8,3 +8,7 @@ zip), so never write it with `write_file`; only reference an existing one with `
 
 Player attributes: `src`, `width` (default `100%`), `height` (default `600px`),
 `aspectRatio` (default `4/3`).
+
+`dock` (flag, or `dock="Label"`): readers can move the editor into the dock
+beside the text, to keep it in view while working through the tasks after it.
+See the `dock` topic.

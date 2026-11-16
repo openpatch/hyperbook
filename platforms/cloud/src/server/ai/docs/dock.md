@@ -1,7 +1,8 @@
 # dock (keep an element in view)
 
 `dock` is an attribute, not a directive. On `pyide`, `webide`, `p5`,
-`openscad`, `typst`, `onlineide`, `sqlide`, `excalidraw` and `textinput` it
+`openscad`, `typst`, `onlineide`, `sqlide`, `excalidraw`, `textinput`,
+`struktolab`, `blockflow-editor` and `jmp` it
 gives readers a **Dock** tab under the element: one click moves the element
 into the dock at the right edge of the screen (on phones: at the bottom), so
 it stays in view while they scroll through the tasks around it. Several docked

@@ -112,3 +112,7 @@ Use `\n` in the node text for a manual line break.
 | Try / catch | `versuche` / `fange` | `try` / `catch` |
 | Input / output | `eingabe` / `ausgabe` | `input` / `output` |
 | True / false label | `Wahr` / `Falsch` | `True` / `False` |
+
+`dock` (flag, or `dock="Label"`): readers can move the element into the dock
+beside the text, to keep it in view while working through the tasks after it.
+See the `dock` topic.

@@ -30,7 +30,7 @@ Add `dock` to an element and readers get a **Dock** tab under it. The element mo
 | `dock="Label"` | It can, and the tab shows `Label`. |
 | `dock=false` | It can't. |
 
-`dock` works on `pyide`, `webide`, `p5`, `openscad`, `typst`, `onlineide`, `sqlide`, `excalidraw` and `textinput`.
+`dock` works on `pyide`, `webide`, `p5`, `openscad`, `typst`, `onlineide`, `sqlide`, `excalidraw`, `textinput`, `struktolab`, `blockflow-editor` and `jmp`.
 
 ## Example: a worksheet
 
@@ -132,6 +132,39 @@ Change the sketch so the circle leaves a trail.
 :::
 
 Show the list of numbers from task 1 as an HTML list.
+
+### Task 8: A structogram
+
+Draw the loop from task 1 as a structogram.
+
+:::struktolab{mode="edit" dock}
+
+```
+sum = 0
+repeat for i = 0 to 7:
+    sum = sum + numbers[i]
+output(sum)
+```
+
+:::
+
+### Task 9: Memory
+
+Draw what is in memory after `int[] a = {1, 2}; int[] b = a;`.
+
+::jmp{src="../elements/memory.jmp" dock}
+
+### Task 10: Blocks
+
+Make the cat walk to the right edge and say "Done".
+
+::::blockflow-editor{title="Blocks" src="../elements/platformer.sb3" dock}
+
+:::step{title="Walk"}
+Use a loop to move the cat.
+:::
+
+::::
 
 ### Bonus
 

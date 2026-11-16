@@ -1,3 +1,33 @@
 .directive-struktolab {
   color: black;
 }
+
+/* Edit mode: the way back to the original structogram, under the editor. */
+.directive-struktolab .struktolab-buttons {
+  display: flex;
+  padding: 4px 0;
+}
+
+.directive-struktolab .struktolab-reset {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border: 1px solid var(--color-spacer);
+  background: var(--color-background);
+  color: var(--color-text);
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.directive-struktolab .struktolab-reset:hover,
+.directive-struktolab .struktolab-reset:focus-visible {
+  border-color: var(--color-brand);
+  color: var(--color-brand);
+}
+
+.directive-struktolab .struktolab-reset .icon {
+  width: 16px;
+  height: 16px;
+}

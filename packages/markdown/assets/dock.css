@@ -296,6 +296,20 @@
   background: var(--color-background);
 }
 
+/* A structogram is as tall as its content: in the dock it scrolls inside the
+   box instead, and its reset button stays below it. */
+.hb-docked.directive-struktolab {
+  display: flex;
+  flex-direction: column;
+  background: var(--color-background);
+}
+
+.hb-docked.directive-struktolab > :is(struktolab-editor, struktolab-renderer) {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
 /* ------------------------------------------------- wide: on the right */
 
 @media screen and (min-width: 901px) {

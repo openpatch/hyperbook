@@ -94,6 +94,19 @@
       ":::"
     ]
   },
+  "Element Struktolab (dock)": {
+    "prefix": [":struktolab-dock"],
+    "description": "Readers can move it into the dock beside the text; dock=\"Label\" names its tab",
+    "body": [
+      ":::struktolab{mode=\"${1|edit,preview|}\" dock}",
+      "",
+      "```",
+      "$TM_SELECTED_TEXT$0",
+      "```",
+      "",
+      ":::"
+    ]
+  },
   "Element Struktolab Code": {
     "prefix": [":struktolab-code"],
     "description": "A structogram from Java, Python or JavaScript; hideCode shows the diagram alone in edit mode",
@@ -318,6 +331,13 @@
       "::jmp{id=\"${1:$RANDOM}\" height=\"${2:600px}\" src=\"${3:memory.jmp}\"}"
     ]
   },
+  "Element Java Memory Playground (dock)": {
+    "prefix": [":jmp-dock"],
+    "description": "Readers can move it into the dock beside the text; dock=\"Label\" names its tab",
+    "body": [
+      "::jmp{id=\"${1:$RANDOM}\" height=\"${2:600px}\" src=\"${3:memory.jmp}\" dock}"
+    ]
+  },
   "Element Learningmap": {
     "prefix": [":learningmap"],
     "body": [
@@ -500,6 +520,17 @@
     "description": "A Scratch editor with a tutorial of :::step blocks",
     "body": [
       "::::blockflow-editor{title=\"${1:Tutorial}\"}",
+      ":::step{title=\"${2:Welcome}\"}",
+      "${3:First step}",
+      ":::",
+      "::::"
+    ]
+  },
+  "Element Blockflow Editor (dock)": {
+    "prefix": [":blockflow-editor-dock"],
+    "description": "Readers can move it into the dock beside the text; dock=\"Label\" names its tab",
+    "body": [
+      "::::blockflow-editor{title=\"${1:Tutorial}\" dock}",
       ":::step{title=\"${2:Welcome}\"}",
       "${3:First step}",
       ":::",
