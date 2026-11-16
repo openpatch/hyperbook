@@ -13,6 +13,8 @@ import { VFile } from "vfile";
 import { i18n } from "./i18n";
 import { icon } from "./icons";
 import githubEmojiMap from "./github-emojis.json";
+import { tocEnabled } from "./rehypeTableOfContents";
+import { qrcodeEnabled } from "./rehypeQrCode";
 
 // Helper to resolve emoji shortcuts like :house: to actual emoji
 const resolveEmoji = (text: string): string => {
@@ -1030,6 +1032,53 @@ const makeHeaderElements = (ctx: HyperbookContext): ElementContent[] => {
               children: [],
             },
           ],
+        },
+      ],
+    });
+  }
+
+  // The page's own tools sit in the header rather than floating over the
+  // content, where they covered text on phones and the dock on wide screens.
+  // Their drawer and dialog come from rehypeTableOfContents / rehypeQrCode.
+  if (tocEnabled(ctx)) {
+    elements.push({
+      type: "element",
+      tagName: "button",
+      properties: {
+        id: "toc-toggle",
+        class: "icon-button",
+        onclick: "hyperbook.ui.tocToggle()",
+        title: i18n.get("table-of-contents"),
+        "aria-label": i18n.get("table-of-contents"),
+      },
+      children: [
+        {
+          type: "element",
+          tagName: "div",
+          properties: { class: "toc-icon" },
+          children: [],
+        },
+      ],
+    });
+  }
+
+  if (qrcodeEnabled(ctx)) {
+    elements.push({
+      type: "element",
+      tagName: "button",
+      properties: {
+        id: "qrcode-open",
+        class: "icon-button",
+        onclick: "hyperbook.qrcode.open()",
+        title: i18n.get("qr-code"),
+        "aria-label": i18n.get("qr-code"),
+      },
+      children: [
+        {
+          type: "element",
+          tagName: "div",
+          properties: { class: "qrcode-icon" },
+          children: [],
         },
       ],
     });

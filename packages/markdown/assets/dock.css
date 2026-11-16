@@ -1,0 +1,484 @@
+/* The dock: see dock.js. */
+
+:root {
+  --hb-dock-width: min(50vw, 760px);
+  --hb-dock-height: 60dvh;
+  --hb-dock-tabs-height: 44px;
+  --hb-dock-inset: 12px;
+  --hb-dock-handle: 28px;
+  --hb-dock-speed: 0.25s;
+}
+
+.hb-dock-instant,
+.hb-dock-instant * {
+  transition: none !important;
+}
+
+.hb-dock-resizing,
+.hb-dock-resizing * {
+  user-select: none;
+  transition: none !important;
+}
+
+/* While dragging, iframes must not swallow the pointer. */
+.hb-dock-resizing iframe {
+  pointer-events: none;
+}
+
+/* ------------------------------------------------- bar after an element */
+
+/* In the page: the element sits flush on its bar, so the Dock tab hangs off
+   its bottom edge; the bar carries the spacing below instead. */
+[data-dock]:not(.hb-docked) {
+  margin-bottom: 0 !important;
+}
+
+.directive-textinput[data-dock] textarea {
+  display: block;
+}
+
+.hb-dock-bar {
+  display: flex;
+  justify-content: flex-end;
+  margin: 0 0 1rem;
+}
+
+/* The tab: square and in the menu's colour like the dock's own tabs, inset
+   from the element's rounded corner. */
+.hb-dock-aside {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: -1px 12px 0 0;
+  padding: 3px 10px 4px;
+  border: 1px solid var(--color-spacer);
+  border-top: none;
+  background: var(--color-nav, var(--color-background));
+  color: var(--color-text);
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+
+.hb-dock-aside:hover,
+.hb-dock-aside:focus-visible {
+  color: var(--color-brand);
+  border-color: var(--color-brand);
+}
+
+.hb-dock-placeholder,
+.hb-dock-bar.docked .hb-dock-aside {
+  display: none;
+}
+
+/* Docked: one line where the element was. */
+.hb-dock-bar.docked {
+  margin: 0.5rem 0 1rem;
+}
+
+.hb-dock-bar.docked .hb-dock-placeholder {
+  display: flex;
+  flex: 1;
+  align-items: stretch;
+  border: 1px solid var(--color-spacer);
+  background: var(--color-nav, var(--color-background));
+}
+
+.hb-dock-bar.showing .hb-dock-placeholder {
+  border-color: var(--color-brand);
+}
+
+.hb-dock-placeholder button {
+  font: inherit;
+  border: none;
+  background: none;
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.hb-dock-show {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+  padding: 8px 12px;
+  text-align: left;
+  font-size: 0.9rem;
+}
+
+.hb-dock-show > span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hb-dock-show-icon {
+  opacity: 0.6;
+}
+
+.hb-dock-back {
+  padding: 8px 14px;
+  border-left: 1px solid var(--color-spacer) !important;
+  font-size: 1rem;
+}
+
+.hb-dock-show:hover,
+.hb-dock-show:focus-visible,
+.hb-dock-back:hover,
+.hb-dock-back:focus-visible,
+.hb-dock-bar.showing .hb-dock-show {
+  color: var(--color-brand);
+}
+
+/* --------------------------------------------------------------- drawer */
+
+.hb-dock {
+  display: none;
+}
+
+.hb-dock-has .hb-dock {
+  display: block;
+  position: fixed;
+  z-index: 60;
+  box-sizing: border-box;
+  font-family: hyperbook-body, sans-serif;
+  background: var(--color-background);
+  box-shadow: 0 0 24px rgb(0 0 0 / 0.25);
+  transition: transform var(--hb-dock-speed) ease;
+}
+
+.hb-dock-tabs {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  height: var(--hb-dock-tabs-height);
+  box-sizing: border-box;
+  padding: 0 var(--hb-dock-inset);
+  border-bottom: 1px solid var(--color-spacer);
+  /* Many tabs scroll sideways (wheel, trackpad, swipe) without a bar; the
+     active tab's overlap of the border must not make it scroll down. */
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+}
+
+.hb-dock-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.hb-dock-tab {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  border: 1px solid var(--color-spacer);
+  border-bottom: none;
+  background: var(--color-nav, var(--color-background));
+  margin-bottom: -1px;
+}
+
+.hb-dock-tab.hover {
+  border-color: var(--color-brand);
+}
+
+.hb-dock-tab.active {
+  background: var(--color-background);
+  border-color: var(--color-brand);
+  border-bottom: 1px solid var(--color-background);
+}
+
+.hb-dock-tab button {
+  font: inherit;
+  border: none;
+  background: none;
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.hb-dock-tab-select {
+  padding: 8px 4px 8px 12px;
+  font-size: 0.9rem;
+}
+
+.hb-dock-tab.active .hb-dock-tab-select {
+  color: var(--color-brand);
+  font-weight: 600;
+}
+
+.hb-dock-tab-back {
+  padding: 8px 10px 8px 6px;
+  font-size: 1rem;
+  line-height: 1;
+  opacity: 0.6;
+}
+
+.hb-dock-tab-back:hover,
+.hb-dock-tab-back:focus-visible {
+  opacity: 1;
+  color: var(--color-brand);
+}
+
+.hb-dock-edge {
+  position: absolute;
+  touch-action: none;
+}
+
+.hb-dock-handle {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 0;
+  border: 1px solid var(--color-spacer);
+  background: var(--color-background);
+  color: var(--color-text);
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  box-shadow: 0 0 12px rgb(0 0 0 / 0.2);
+}
+
+.hb-dock-handle:hover,
+.hb-dock-handle:focus-visible {
+  color: var(--color-brand);
+  border-color: var(--color-brand);
+}
+
+.hb-dock-chevron::before {
+  display: inline-block;
+  transition: transform var(--hb-dock-speed) ease;
+}
+
+/* ------------------------------------------------------ docked elements */
+
+/* Laid over the drawer's body, not moved into it. */
+.hb-docked {
+  position: fixed !important;
+  z-index: 61;
+  margin: 0 !important;
+  box-sizing: border-box;
+  max-width: none !important;
+  max-height: none !important;
+  aspect-ratio: auto !important;
+  transition: transform var(--hb-dock-speed) ease;
+}
+
+/* Inactive tabs keep their size, so switching doesn't make editors relayout.
+   Visibility alone isn't enough: children can set it back (Excalidraw's
+   zoom controls do); opacity they can't. dock.js also makes them inert. */
+.hb-docked:not(.hb-docked-active) {
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 60;
+}
+
+/* Each kind fills the box it's given: the IDEs drop their own height (see
+   the wide layout, where top and bottom set it; the narrow one sets it), the
+   text field grows. */
+.hb-docked.directive-textinput {
+  display: flex;
+  flex-direction: column;
+}
+
+.hb-docked.directive-textinput textarea {
+  flex: 1;
+  height: auto !important;
+  resize: none;
+}
+
+.hb-docked.directive-excalidraw {
+  background: var(--color-background);
+}
+
+/* ------------------------------------------------- wide: on the right */
+
+@media screen and (min-width: 901px) {
+  .hb-dock-has .hb-dock {
+    top: var(--header-height);
+    right: 0;
+    bottom: 0;
+    width: var(--hb-dock-width);
+    box-shadow: none;
+  }
+
+  .hb-dock-has .hb-dock:not(.open) {
+    transform: translateX(100%);
+  }
+
+  /* The rail: a full-height strip on the drawer's left edge, between the
+     page's scrollbar and the drawer. Drag it to resize; the latch in its
+     middle slides the drawer in and out. Folded, it stays at the screen's
+     edge. */
+  .hb-dock-edge {
+    top: 0;
+    bottom: 0;
+    left: calc(-1 * var(--hb-dock-handle));
+    width: var(--hb-dock-handle);
+    box-sizing: border-box;
+    cursor: ew-resize;
+    background: var(--color-nav, var(--color-background));
+    border-left: 1px solid var(--color-nav-border, var(--color-spacer));
+    border-right: 1px solid var(--color-nav-border, var(--color-spacer));
+  }
+
+  .hb-dock-edge:hover,
+  .hb-dock-resizing .hb-dock-edge {
+    border-left-color: var(--color-brand);
+  }
+
+  .hb-dock-handle {
+    top: 50%;
+    left: 0;
+    right: 0;
+    padding: 12px 0;
+    transform: translateY(-50%);
+    flex-direction: column;
+    border: none;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+  }
+
+  /* Next to the rail, the page's own scrollbar: thin and in the theme's
+     colours, not the browser's light default with arrows. */
+  .hb-dock-has main {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-spacer) transparent;
+  }
+
+  .hb-dock-handle-label {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    max-height: 160px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .hb-dock-chevron::before {
+    content: "›";
+  }
+
+  .hb-dock:not(.open) .hb-dock-chevron::before {
+    transform: rotate(180deg);
+  }
+
+  .hb-docked {
+    top: calc(
+      var(--header-height) + var(--hb-dock-tabs-height) + var(--hb-dock-inset)
+    ) !important;
+    right: var(--hb-dock-inset) !important;
+    bottom: var(--hb-dock-inset) !important;
+    left: auto !important;
+    width: calc(var(--hb-dock-width) - 2 * var(--hb-dock-inset)) !important;
+    height: auto !important;
+  }
+
+  .hb-docked:not(.hb-docked-open) {
+    transform: translateX(calc(var(--hb-dock-width)));
+  }
+
+  /* The article makes room. With a margin, not padding: on wide screens
+     `main` is the scroller, and padding would leave its scrollbar under the
+     drawer. */
+  main {
+    transition: margin-right var(--hb-dock-speed) ease;
+  }
+
+  /* Plus the latch, which hangs off the drawer's edge over this gutter. */
+  .hb-dock-open main {
+    margin-right: calc(var(--hb-dock-width) + var(--hb-dock-handle));
+  }
+
+  .hb-dock-has:not(.hb-dock-open) main {
+    margin-right: var(--hb-dock-handle);
+  }
+}
+
+/* ------------------------------------------- narrow: from the bottom */
+
+/* The same drawer turned on its side: the rail runs along the sheet's top
+   edge, and folded it stays at the bottom of the screen, as it stays at the
+   right edge on wide screens. */
+@media screen and (max-width: 900px) {
+  .hb-dock-has .hb-dock {
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: var(--hb-dock-height);
+    box-shadow: none;
+  }
+
+  .hb-dock-has .hb-dock:not(.open) {
+    transform: translateY(100%);
+  }
+
+  .hb-dock-edge {
+    left: 0;
+    right: 0;
+    top: calc(-1 * var(--hb-dock-handle));
+    height: var(--hb-dock-handle);
+    box-sizing: border-box;
+    cursor: ns-resize;
+    background: var(--color-nav, var(--color-background));
+    border-top: 1px solid var(--color-nav-border, var(--color-spacer));
+    border-bottom: 1px solid var(--color-nav-border, var(--color-spacer));
+  }
+
+  .hb-dock-edge:hover,
+  .hb-dock-resizing .hb-dock-edge {
+    border-top-color: var(--color-brand);
+  }
+
+  .hb-dock-handle {
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    padding: 0 16px;
+    transform: translateX(-50%);
+    border: none;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+  }
+
+  .hb-dock-chevron::before {
+    content: "›";
+    transform: rotate(90deg);
+  }
+
+  .hb-dock:not(.open) .hb-dock-chevron::before {
+    transform: rotate(-90deg);
+  }
+
+  .hb-docked {
+    top: auto !important;
+    left: var(--hb-dock-inset) !important;
+    right: var(--hb-dock-inset) !important;
+    bottom: var(--hb-dock-inset) !important;
+    width: auto !important;
+    height: calc(
+      var(--hb-dock-height) - var(--hb-dock-tabs-height) - 2 *
+        var(--hb-dock-inset)
+    ) !important;
+  }
+
+  .hb-docked:not(.hb-docked-open) {
+    transform: translateY(calc(var(--hb-dock-height)));
+  }
+
+  /* The end of the page stays reachable above the sheet and its rail. */
+  .hb-dock-open body {
+    padding-bottom: calc(var(--hb-dock-height) + var(--hb-dock-handle));
+  }
+
+  .hb-dock-has:not(.hb-dock-open) body {
+    padding-bottom: var(--hb-dock-handle);
+  }
+}

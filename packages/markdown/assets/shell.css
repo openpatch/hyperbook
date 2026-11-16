@@ -374,6 +374,53 @@ a.jump.previous::before {
   }
 }
 
+/* Wide screens: ☰ in the header as on mobile, but it folds the docked menu
+   away to the left and back (ui.js navToggle) instead of opening the drawer.
+   The menu starts out shown. */
+@media screen and (min-width: 1281px) {
+  .main-grid:not(.layout-wide):not(.layout-standalone) {
+    .mobile-nav {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* The column shrinks to nothing while the sidebar, at its full width,
+       slides left by the same amount: its right edge stays on the column's
+       edge, so the menu moves out rather than squashing. */
+    .sidebar {
+      min-width: 0;
+      width: var(--nav-width);
+      box-sizing: border-box;
+    }
+  }
+
+  .nav-fold-animate .main-grid:not(.layout-wide):not(.layout-standalone) {
+    transition: grid-template-columns 0.25s ease;
+
+    .sidebar {
+      transition: transform 0.25s ease;
+    }
+  }
+
+  .nav-folded .main-grid:not(.layout-wide):not(.layout-standalone) {
+    grid-template-columns: 0px 1fr;
+
+    .sidebar {
+      transform: translateX(-100%);
+      visibility: hidden;
+    }
+  }
+
+  .nav-fold-animate.nav-folded
+    .main-grid:not(.layout-wide):not(.layout-standalone)
+    .sidebar {
+    transition:
+      transform 0.25s ease,
+      visibility 0s linear 0.25s;
+  }
+}
+
 main {
   padding: 1rem;
   overflow-y: auto;
@@ -941,18 +988,9 @@ nav.toc li.level-3 {
   grid-template-areas: "article";
 
   --main-width: 1800px;
-
-  #toc-toggle {
-    top: inherit;
-  }
-
-  #qrcode-open {
-    top: 90px;
-  }
 }
 
-.main-grid.layout-standalone header,
-.main-grid.layout-standalone .floating-buttons-container {
+.main-grid.layout-standalone header {
   display: none;
 }
 .main-grid.layout-standalone .sidebar {
@@ -1345,6 +1383,11 @@ img.emoji {
   html {
     /* Jumping to a heading has to clear the sticky header. */
     scroll-padding-top: var(--header-height);
+    /* The window's scrollbar, in the book's colours: the browser's light
+       default stood beside a dark page like a gap. The same thin bar the
+       article pane has on wide screens. */
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-spacer) var(--color-background);
   }
 
   body {

@@ -78,6 +78,7 @@ import remarkDirectiveBlockflowPlayer from "./remarkDirectiveBlockflowPlayer";
 import remarkDirectiveBlockflowEditor from "./remarkDirectiveBlockflowEditor";
 import remarkDirectiveKirimoto from "./remarkDirectiveKirimoto";
 import remarkDirectiveBitflow from "./remarkDirectiveBitflow";
+import remarkDock from "./remarkDock";
 import remarkChecklist from "./remarkChecklist";
 
 /**
@@ -142,6 +143,8 @@ export const remark = (
     remarkDirectiveOpenscad(ctx),
     remarkDirectiveKirimoto(ctx),
     remarkDirectiveBitflow(ctx),
+    /* marks dockable elements, so after the directives that build them */
+    remarkDock(ctx),
     remarkCode(ctx),
     remarkMath,
     remarkGithubEmoji,

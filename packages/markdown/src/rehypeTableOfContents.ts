@@ -4,58 +4,21 @@
 import { HyperbookContext } from "@hyperbook/types";
 import { ElementContent, Root } from "hast";
 import { VFile } from "vfile";
-import { i18n } from "./i18n";
 
+/** Whether the page shows its table of contents (the header's button and
+ * the drawer it opens). */
+export const tocEnabled = (ctx: HyperbookContext) =>
+  (ctx.config.toc ?? true) && (ctx.navigation.current?.toc ?? true);
+
+/**
+ * The page's table of contents: the drawer here, its button in the header
+ * (rehypeShell).
+ */
 export default (ctx: HyperbookContext) => () => {
-  const showToc =
-    (ctx.config.toc ?? true) && (ctx.navigation.current?.toc ?? true);
+  const showToc = tocEnabled(ctx);
   return (tree: Root, file: VFile) => {
     const headings = file.data.headings || [];
     const originalChildren = tree.children as ElementContent[];
-
-    const tocButton: ElementContent = {
-      type: "element",
-      tagName: "button",
-      properties: {
-        id: "toc-toggle",
-        onclick: "hyperbook.ui.tocToggle()",
-        title: i18n.get("table-of-contents"),
-      },
-      children: [
-        {
-          type: "element",
-          tagName: "div",
-          properties: {
-            class: "bar1",
-          },
-          children: [],
-        },
-        {
-          type: "element",
-          tagName: "div",
-          properties: {
-            class: "bar2",
-          },
-          children: [],
-        },
-        {
-          type: "element",
-          tagName: "div",
-          properties: {
-            class: "bar3",
-          },
-          children: [],
-        },
-        {
-          type: "element",
-          tagName: "div",
-          properties: {
-            class: "bar4",
-          },
-          children: [],
-        },
-      ],
-    };
 
     const tocDrawer: ElementContent = {
       type: "element",
@@ -113,19 +76,6 @@ export default (ctx: HyperbookContext) => () => {
       ],
     };
 
-    const tocSidebar: ElementContent[] = [
-      {
-        type: "element",
-        tagName: "div",
-        properties: {
-          class: "floating-buttons-container",
-          id: "floating-buttons-container",
-        },
-        children: [tocButton],
-      },
-      tocDrawer,
-    ];
-
     tree.children = [
       {
         type: "element",
@@ -133,7 +83,7 @@ export default (ctx: HyperbookContext) => () => {
         properties: {
           class: "hyperbook-markdown",
         },
-        children: [...(showToc ? tocSidebar : []), ...originalChildren],
+        children: [...(showToc ? [tocDrawer] : []), ...originalChildren],
       },
     ];
   };
