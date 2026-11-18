@@ -1,5 +1,11 @@
 # hyperbook
 
+## 0.124.1
+
+### Patch Changes
+
+- [`b1900bd`](https://github.com/openpatch/hyperbook/commit/b1900bd6f1024c91a5e16970a0d4b17035cde352) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - A docked element inside a `:::tab` or a closed `:::collapsible` stays in the dock when another tab is chosen or the collapsible is closed. Before, its tab in the dock stayed but showed nothing until its tab on the page was chosen again.
+
 ## 0.124.0
 
 ### Minor Changes
