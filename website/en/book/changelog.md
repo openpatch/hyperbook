@@ -23,6 +23,8 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 
 **markdown**: [`struktolab`](/elements/struktolab) in edit mode has a **Reset** button beside Undo/Redo, as the IDEs have: it throws the student's changes away and loads the structogram the page started with.
 
+**markdown**: [`struktolab`](/elements/struktolab) fits a narrow column or the dock: the toolbar shows only icons when the editor is narrow, and the structogram is drawn again when its width changes, so `fontSize` no longer shrinks with a smaller dock.
+
 **markdown**: On wide screens ☰ shows in the header as on phones and folds the menu away to the left and back. The menu starts out shown; a folded menu stays folded on the next page.
 
 **cloud**: Completion and hover help offer `dock` on the elements that can be docked, and the AI assistant knows when to use it.
