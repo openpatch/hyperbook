@@ -121,10 +121,35 @@
       else d.el.removeAttribute("inert");
     }
 
+    revealHosts();
+
     handle.setAttribute("aria-expanded", String(open));
     handle.title = open ? t("dock-close") : t("dock-open");
     handle.setAttribute("aria-label", handle.title);
     save();
+  }
+
+  /**
+   * A docked element inside an inactive tab or a closed collapsible would
+   * vanish from the dock with it: `display: none` hides fixed descendants
+   * too. Such containers are marked `hb-dock-host` instead, which keeps them
+   * rendered but collapsed and invisible (see dock.css). Only these two: a
+   * container hidden for another reason (`:::protect`) stays hidden.
+   */
+  function revealHosts() {
+    for (const host of document.querySelectorAll(".hb-dock-host"))
+      host.classList.remove("hb-dock-host");
+    for (const d of docked) {
+      for (let a = d.el.parentElement; a; a = a.parentElement) {
+        if (a.matches("details.directive-collapsible:not([open])"))
+          a.classList.add("hb-dock-host");
+        else if (
+          a.matches(".directive-tabs > .tabpanel") &&
+          getComputedStyle(a).display === "none"
+        )
+          a.classList.add("hb-dock-host");
+      }
+    }
   }
 
   function dock(d) {
@@ -353,6 +378,13 @@
       }
     });
     narrow.addEventListener("change", () => relayout(50));
+
+    // Tabs switch on a radio's change (synchronously, before the panel is
+    // painted hidden); tabs restored or synced from elsewhere announce it.
+    // Collapsibles fire toggle, which doesn't bubble.
+    document.addEventListener("change", revealHosts, true);
+    document.addEventListener("toggle", revealHosts, true);
+    window.addEventListener("hyperbook:tabs", revealHosts);
   }
 
   if (document.readyState === "loading")

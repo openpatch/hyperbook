@@ -43,6 +43,9 @@ hyperbook.tabs = (function () {
     allMatchingInputs.forEach((input) => {
       input.checked = true;
     });
+
+    // Setting `checked` fires no change event; the dock needs to know.
+    window.dispatchEvent(new Event("hyperbook:tabs"));
   }
 
   function selectTab(tabsId, tabId) {

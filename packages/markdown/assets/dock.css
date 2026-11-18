@@ -278,6 +278,26 @@
   z-index: 60;
 }
 
+/* An inactive tab panel or closed collapsible that holds a docked element:
+   rendered, so the element stays in the dock, but collapsed and invisible.
+   Overflow doesn't clip the fixed element. See revealHosts in dock.js. */
+.hb-dock-host:not(details),
+details.hb-dock-host::details-content {
+  display: block !important;
+  content-visibility: visible !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  overflow: hidden !important;
+  visibility: hidden !important;
+}
+
+.hb-dock-host .hb-docked-active {
+  visibility: visible;
+}
+
 /* Each kind fills the box it's given: the IDEs drop their own height (see
    the wide layout, where top and bottom set it; the narrow one sets it), the
    text field grows. */
