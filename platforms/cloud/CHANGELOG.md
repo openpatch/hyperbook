@@ -1,5 +1,11 @@
 # @hyperbook/cloud
 
+## 0.13.2
+
+### Patch Changes
+
+- [`1386cd2`](https://github.com/openpatch/hyperbook/commit/1386cd20dc279ddeac7462fe2663be1001af2c4d) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - `struktolab` fits a narrow column or the dock: the editor's toolbar shows only icons when the editor is narrow (the block palette keeps its labels), and the structogram is drawn again when the editor or renderer changes width, so `fontSize` stays the size it says instead of shrinking with a smaller dock. Updates struktolab to 0.10.2.
+
 ## 0.13.1
 
 ### Patch Changes
