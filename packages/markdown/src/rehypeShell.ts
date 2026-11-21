@@ -1233,6 +1233,14 @@ const makeHeaderElements = (ctx: HyperbookContext): ElementContent[] => {
                   },
                   children: [],
                 },
+                {
+                  type: "element",
+                  tagName: "p",
+                  properties: { class: "user-teacher-sees" },
+                  children: [
+                    { type: "text", value: i18n.get("user-teacher-sees") },
+                  ],
+                },
               ],
             },
             {

@@ -25,6 +25,7 @@ input[type=text],input[type=password]{width:100%;padding:.6rem .7rem;margin:0 0 
 button{width:100%;padding:.65rem;font:inherit;font-weight:500;color:#fff;background:var(--brand);border:0;border-radius:8px;cursor:pointer}
 button:disabled{opacity:.6}
 .error{color:#c62828;min-height:1.5rem;margin:.75rem 0 0}
+.note{font-size:.85rem;margin:1rem 0 0}
 [hidden]{display:none}
 footer{display:flex;justify-content:center;gap:1rem;margin:2rem 0;font-size:.85rem}
 footer a{color:var(--muted)}
@@ -45,6 +46,7 @@ const STRINGS = {
     privacy: "Privacy",
     openingPreview: "Opening the preview…",
     previewBlocked: "Your browser does not let the preview log in inside the editor. Open it with “Open in a new tab” in the editor.",
+    teacherSees: "Your work in this book is saved to your account. Your teacher can see it.",
   },
   de: {
     login: "Anmelden",
@@ -60,6 +62,7 @@ const STRINGS = {
     privacy: "Datenschutz",
     openingPreview: "Die Vorschau wird geöffnet …",
     previewBlocked: "Dein Browser lässt die Vorschau im Editor nicht zu. Öffne sie mit „In neuem Tab öffnen“ im Editor.",
+    teacherSees: "Deine Arbeit in diesem Buch wird in deinem Zugang gespeichert. Deine Lehrkraft kann sie sehen.",
   },
 };
 
@@ -103,7 +106,8 @@ export function loginPage(bookTitle: string, isPrivate: boolean, legal?: LegalLi
   <button id="submit" type="submit" data-t="login"></button>
 </form>
 <p id="busy" data-t="loggingIn" hidden></p>
-<p id="error" class="error" role="alert"></p>`;
+<p id="error" class="error" role="alert"></p>
+<p class="note" data-t="teacherSees"></p>`;
   const script = `
 const params = new URLSearchParams(location.search);
 // Only paths on this host, never another site.

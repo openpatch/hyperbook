@@ -1787,6 +1787,7 @@ the last save. Students stay anonymous on the server.
 | Real names | Only in the teacher's browser (local storage), never sent to the server. |
 | Export | CSV of the overview (usernames, not names); names are added in the browser if the teacher has them. |
 | Live view | "Online now" from `student_sessions.last_seen_at`, nothing more. |
+| Students | Told on the login page that their teacher can see their work. |
 
 ## Element index
 
@@ -1866,10 +1867,11 @@ element, so it is done one element at a time.
 6. Archive, export, reset, copy a book.
 7. Per-element states, one element at a time.
 
-## Open questions
+## Decided (2026-11-21)
 
-- Should students see that their teacher can read their answers? (A line
-  on the login page would be honest; schools may require it.)
-- Is a group-level "release" of content (solutions after the lesson) part
-  of M8 or its own milestone? It needs the book to ask the server, so it
-  touches `cloud.js` and the build.
+- **Students are told.** The login page on the book's host and the login
+  form in books hosted elsewhere say: "Your work in this book is saved to
+  your account. Your teacher can see it." *(done)*
+- **No release of content per group.** Showing solutions after the lesson
+  stays with the book's own means (e.g. `protect`); the platform does not
+  get a per-group switch.
