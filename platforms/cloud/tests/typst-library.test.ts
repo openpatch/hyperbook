@@ -6,7 +6,11 @@ import { auditLog } from "../src/server/db/schema";
 import { packageManifest } from "../src/server/hosting/typst-library";
 import { typstFonts, typstLibrary } from "../src/server/hosting/typst";
 import { fontNames } from "../src/server/hosting/typst-fonts";
+import { createT } from "../src/shared/i18n";
 import { ADMIN_HOST, ADMIN_ORIGIN, loggedIn, setup } from "./helpers";
+
+// Errors are sent in the request's language; the tests send none.
+const en = createT("en");
 
 const text = (s: string) => new TextEncoder().encode(s);
 const toml = (name: string, version: string) =>
@@ -62,21 +66,21 @@ describe("the instance's Typst packages", () => {
     const { add } = await world();
     const zip = zipSync({ "typst.toml": toml("assessio", "0.1.0"), "lib.typ": text("") });
     await add(zip);
-    expect(await add(zip)).toMatchObject({ status: 409, body: { error: "typstLibrary.exists" } });
+    expect(await add(zip)).toMatchObject({ status: 409, body: { error: en("typstLibrary.exists") } });
   });
 
   it.each([
-    ["no typst.toml", zipSync({ "lib.typ": text("") }), "typstLibrary.noManifest"],
-    ["two typst.toml", zipSync({ "a/typst.toml": toml("a", "1.0.0"), "b/typst.toml": toml("b", "1.0.0") }), "typstLibrary.noManifest"],
-    ["a bad name", zipSync({ "typst.toml": toml("Bad Name", "1.0.0") }), "typstLibrary.badManifest"],
-    ["a bad version", zipSync({ "typst.toml": toml("ok", "latest") }), "typstLibrary.badManifest"],
-    ["a path out of the zip", zipSync({ "typst.toml": toml("ok", "1.0.0"), "../evil.typ": text("") }), "typstLibrary.invalidPath"],
+    ["no typst.toml", zipSync({ "lib.typ": text("") }), en("typstLibrary.noManifest")],
+    ["two typst.toml", zipSync({ "a/typst.toml": toml("a", "1.0.0"), "b/typst.toml": toml("b", "1.0.0") }), en("typstLibrary.noManifest")],
+    ["a bad name", zipSync({ "typst.toml": toml("Bad Name", "1.0.0") }), en("typstLibrary.badManifest")],
+    ["a bad version", zipSync({ "typst.toml": toml("ok", "latest") }), en("typstLibrary.badManifest")],
+    ["a path out of the zip", zipSync({ "typst.toml": toml("ok", "1.0.0"), "../evil.typ": text("") }), en("typstLibrary.invalidPath")],
     [
       "a link",
       zipSync({ "typst.toml": toml("ok", "1.0.0"), link: [text("/etc/passwd"), { os: 3, attrs: (0o120777 << 16) >>> 0 }] }),
-      "typstLibrary.link",
+      en("typstLibrary.link"),
     ],
-    ["no zip", text("not a zip"), "typstLibrary.notZip"],
+    ["no zip", text("not a zip"), en("typstLibrary.notZip")],
   ])("refuses a package with %s", async (_, zip, error) => {
     const { instance, add } = await world();
     expect(await add(zip)).toMatchObject({ status: 400, body: { error } });
@@ -86,8 +90,8 @@ describe("the instance's Typst packages", () => {
   it("keeps Typst Universe's namespace for Typst Universe", async () => {
     const { add } = await world();
     const zip = zipSync({ "typst.toml": toml("cetz", "0.3.0") });
-    expect(await add(zip, "preview")).toMatchObject({ status: 400, body: { error: "typstLibrary.invalidNamespace" } });
-    expect(await add(zip, "../x")).toMatchObject({ status: 400, body: { error: "typstLibrary.invalidNamespace" } });
+    expect(await add(zip, "preview")).toMatchObject({ status: 400, body: { error: en("typstLibrary.invalidNamespace") } });
+    expect(await add(zip, "../x")).toMatchObject({ status: 400, body: { error: en("typstLibrary.invalidNamespace") } });
   });
 
   it("are removed by admins, version by version", async () => {
@@ -177,13 +181,13 @@ describe("the instance's Typst fonts", () => {
   it("never replaces a file", async () => {
     const { add } = await fonts();
     await add(sans);
-    expect(await add(sans, "katex_sansserif-regular.TTF")).toMatchObject({ status: 409, body: { error: "typstFonts.exists" } });
+    expect(await add(sans, "katex_sansserif-regular.TTF")).toMatchObject({ status: 409, body: { error: en("typstFonts.exists") } });
   });
 
   it.each([
-    ["no font", text("not a font at all"), "x.ttf", "typstFonts.notFont"],
-    ["another extension", sans, "x.woff2", "typstFonts.invalidName"],
-    ["a hidden name", sans, ".x.ttf", "typstFonts.invalidName"],
+    ["no font", text("not a font at all"), "x.ttf", en("typstFonts.notFont")],
+    ["another extension", sans, "x.woff2", en("typstFonts.invalidName")],
+    ["a hidden name", sans, ".x.ttf", en("typstFonts.invalidName")],
   ])("refuses %s", async (_, bytes, name, error) => {
     const { instance, add } = await fonts();
     expect(await add(bytes, name)).toMatchObject({ status: 400, body: { error } });

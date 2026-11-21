@@ -3,6 +3,7 @@ import { mkdir } from "node:fs/promises";
 import path from "node:path";
 import { pipeline } from "node:stream/promises";
 import yauzl from "yauzl";
+import { LocalizedError } from "../localized-error";
 
 /*
  * Unpacks an uploaded book. Every entry name is checked before anything is
@@ -11,11 +12,9 @@ import yauzl from "yauzl";
  * itself, so a zip can neither escape the target directory nor create links.
  */
 
-export class ZipError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = "ZipError";
-  }
+// Zip problems are the uploader's to fix, so they are worded for them.
+export class ZipError extends LocalizedError {
+  override name = "ZipError";
 }
 
 export type ZipLimits = { maxBytes: number; maxEntries: number };
@@ -44,21 +43,21 @@ function isClutter(segments: string[]): boolean {
 
 /** The entry's path segments, or a reason to refuse the whole zip. */
 export function entrySegments(name: string): string[] {
-  if (name.includes("\0")) throw new ZipError(`Invalid file name in zip: ${JSON.stringify(name)}`);
+  if (name.includes("\0")) throw new ZipError("errors.zip.invalidName", { name: JSON.stringify(name) });
   const normalized = name.replace(/\\/g, "/");
   if (normalized.startsWith("/") || /^[a-zA-Z]:/.test(normalized)) {
-    throw new ZipError(`The zip contains an absolute path: ${name}`);
+    throw new ZipError("errors.zip.absolutePath", { name });
   }
   const segments = normalized.split("/").filter((s, i, all) => s !== "" || i < all.length - 1);
   for (const s of segments) {
     if (s === "" || s === "." || s === "..") {
-      throw new ZipError(`The zip contains an invalid path: ${name}`);
+      throw new ZipError("errors.zip.invalidPath", { name });
     }
     if (s.toLowerCase() === ".git") {
-      throw new ZipError(`The zip contains a .git folder (${name}); upload the book's files without it`);
+      throw new ZipError("errors.zip.gitFolder", { name });
     }
     if (Buffer.byteLength(s) > 255) {
-      throw new ZipError(`A file name in the zip is too long: ${name}`);
+      throw new ZipError("errors.zip.nameTooLong", { name });
     }
   }
   return segments;
@@ -73,7 +72,7 @@ export function isSymlink(entry: yauzl.Entry): boolean {
 
 async function readEntries(zip: yauzl.ZipFile, limits: ZipLimits): Promise<yauzl.Entry[]> {
   if (zip.entryCount > limits.maxEntries) {
-    throw new ZipError(`The zip has more than ${limits.maxEntries} files`);
+    throw new ZipError("errors.zip.tooManyFiles", { max: limits.maxEntries });
   }
   const entries: yauzl.Entry[] = [];
   await new Promise<void>((resolve, reject) => {
@@ -98,13 +97,13 @@ function findRoot(items: Item[]): string[] {
     else if (dir.length === best[0]!.length) best.push(dir);
   }
   if (best.length === 0) {
-    throw new ZipError("The zip contains no hyperbook.json or hyperlibrary.json");
+    throw new ZipError("errors.zip.noConfig");
   }
   const distinct = new Set(best.map((d) => d.join("/")));
   if (distinct.size > 1) {
-    throw new ZipError(
-      `The zip contains several books (${[...distinct].map((d) => d || "/").join(", ")}); upload one at a time`,
-    );
+    throw new ZipError("errors.zip.severalBooks", {
+      roots: [...distinct].map((d) => d || "/").join(", "),
+    });
   }
   return best[0]!;
 }
@@ -127,7 +126,7 @@ export async function extractBook(
       strictFileNames: false,
     });
   } catch (error) {
-    throw new ZipError(`This is not a valid zip file (${(error as Error).message})`);
+    throw new ZipError("errors.zip.notZip", { detail: (error as Error).message });
   }
 
   try {
@@ -136,7 +135,7 @@ export async function extractBook(
       entries = await readEntries(zip, limits);
     } catch (error) {
       if (error instanceof ZipError) throw error;
-      throw new ZipError(`The zip file is damaged (${(error as Error).message})`);
+      throw new ZipError("errors.zip.damaged", { detail: (error as Error).message });
     }
 
     const items: Item[] = [];
@@ -157,13 +156,13 @@ export async function extractBook(
         continue;
       }
       if (item.entry.isEncrypted()) {
-        throw new ZipError("The zip is password-protected");
+        throw new ZipError("errors.zip.encrypted");
       }
       bytes += item.entry.uncompressedSize;
       if (bytes > limits.maxBytes) {
-        throw new ZipError(
-          `The unpacked book is larger than ${Math.floor(limits.maxBytes / 1024 / 1024)} MB`,
-        );
+        throw new ZipError("errors.zip.tooLarge", {
+          mb: Math.floor(limits.maxBytes / 1024 / 1024),
+        });
       }
       files.push(item);
     }
@@ -174,7 +173,7 @@ export async function extractBook(
       const key = relative.join("/");
       // Two entries with one name: the zip is ambiguous, refuse rather than
       // pick one silently.
-      if (seen.has(key)) throw new ZipError(`The zip contains ${key} twice`);
+      if (seen.has(key)) throw new ZipError("errors.zip.twice", { name: key });
       seen.add(key);
       const target = path.join(dest, ...relative);
       try {
@@ -183,7 +182,7 @@ export async function extractBook(
         // "wx": never follow or replace anything already at the target.
         await pipeline(stream, createWriteStream(target, { flags: "wx" }));
       } catch (error) {
-        throw new ZipError(`Could not unpack ${key} (${(error as Error).message})`);
+        throw new ZipError("errors.zip.unpackFailed", { name: key, detail: (error as Error).message });
       }
     }
 

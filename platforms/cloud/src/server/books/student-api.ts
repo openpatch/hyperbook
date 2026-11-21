@@ -5,6 +5,7 @@ import { bodyLimit } from "hono/body-limit";
 import { deleteCookie, setCookie } from "hono/cookie";
 import { createMiddleware } from "hono/factory";
 import { HTTPException } from "hono/http-exception";
+import { createT, requestLocale } from "../i18n";
 import { z } from "zod";
 import { dummyPasswordHash, verifyPassword } from "../auth/password";
 import { FailureLimiter } from "../auth/rate-limit";
@@ -88,24 +89,24 @@ const syncInput = z.object({
 async function storeUpload(c: Context, maxBytes: number) {
   const encoding = (c.req.header("content-encoding") ?? "identity").trim().toLowerCase();
   if (encoding === "identity") return json(c, syncInput);
-  if (encoding !== "gzip") throw new HTTPException(415, { message: "Send JSON, plain or gzip-compressed" });
+  if (encoding !== "gzip") throw new HTTPException(415, { message: "errors.request.sendJsonGzip" });
   let text: string;
   try {
     text = gunzipSync(Buffer.from(await c.req.arrayBuffer()), { maxOutputLength: maxBytes }).toString("utf8");
   } catch (error) {
     if ((error as { code?: string }).code === "ERR_BUFFER_TOO_LARGE") {
-      throw new HTTPException(413, { message: "Too much data in one request" });
+      throw new HTTPException(413, { message: "errors.request.tooLarge" });
     }
-    throw new HTTPException(400, { message: "Invalid gzip data" });
+    throw new HTTPException(400, { message: "errors.request.badGzip" });
   }
   let body: unknown;
   try {
     body = JSON.parse(text);
   } catch {
-    throw new HTTPException(400, { message: "Send JSON" });
+    throw new HTTPException(400, { message: "errors.request.sendJson" });
   }
   const parsed = syncInput.safeParse(body);
-  if (!parsed.success) throw new HTTPException(400, { message: "Invalid input" });
+  if (!parsed.success) throw new HTTPException(400, { message: "errors.invalidInput" });
   return parsed.data;
 }
 
@@ -114,10 +115,10 @@ async function json<T extends z.ZodType>(c: Context, schema: T): Promise<z.infer
   try {
     body = await c.req.json();
   } catch {
-    throw new HTTPException(400, { message: "Send JSON" });
+    throw new HTTPException(400, { message: "errors.request.sendJson" });
   }
   const parsed = schema.safeParse(body);
-  if (!parsed.success) throw new HTTPException(400, { message: "Invalid input" });
+  if (!parsed.success) throw new HTTPException(400, { message: "errors.invalidInput" });
   return parsed.data;
 }
 
@@ -154,23 +155,23 @@ export function studentApi({ db, config }: Deps) {
       // Cross-origin only without cookies: Bearer requests and token logins
       // (which carry nothing to forge).
       if (!(origin && own.includes(origin)) && !bearer && !fromExternal) {
-        throw new HTTPException(403, { message: "Cross-origin request refused" });
+        throw new HTTPException(403, { message: "errors.request.crossOrigin" });
       }
       if (!c.req.header("content-type")?.startsWith("application/json")) {
-        throw new HTTPException(415, { message: "Send JSON" });
+        throw new HTTPException(415, { message: "errors.request.sendJson" });
       }
     }
     await next();
   });
 
   const requireStudent = createMiddleware<BookEnv>(async (c, next) => {
-    if (!c.get("student")) throw new HTTPException(401, { message: "Not logged in" });
+    if (!c.get("student")) throw new HTTPException(401, { message: "errors.notLoggedIn" });
     await next();
   });
 
   const requireWritable = createMiddleware<BookEnv>(async (c, next) => {
     if (c.get("student")?.readonly) {
-      throw new HTTPException(403, { message: "This is a read-only view of a student's work" });
+      throw new HTTPException(403, { message: "errors.student.readOnly" });
     }
     await next();
   });
@@ -216,14 +217,14 @@ export function studentApi({ db, config }: Deps) {
       const input = await json(c, loginInput);
       const key = `${book.id}:${input.username}`;
       if (passwordFailures.isBlocked(key)) {
-        throw new HTTPException(429, { message: "Too many failed attempts. Try again in 15 minutes." });
+        throw new HTTPException(429, { message: "errors.auth.tooManyAttempts" });
       }
       const student = studentOf(book.id, eq(students.username, input.username));
       // Hash even for unknown names, so timing does not reveal which exist.
       const ok = await verifyPassword(input.password, student?.passwordHash ?? (await dummyPasswordHash()));
       if (!student || !ok) {
         passwordFailures.fail(key);
-        throw new HTTPException(401, { message: "Username or password is wrong" });
+        throw new HTTPException(401, { message: "errors.student.wrongCredentials" });
       }
       passwordFailures.succeed(key);
       db.update(students).set({ lastLoginAt: new Date() }).where(eq(students.id, student.id)).run();
@@ -236,12 +237,12 @@ export function studentApi({ db, config }: Deps) {
       const input = await json(c, keyInput);
       const limiterKey = String(book.id);
       if (keyFailures.isBlocked(limiterKey)) {
-        throw new HTTPException(429, { message: "Too many failed attempts. Try again in 15 minutes." });
+        throw new HTTPException(429, { message: "errors.auth.tooManyAttempts" });
       }
       const student = studentOf(book.id, eq(students.loginKeyHash, sha256(input.key)));
       if (!student) {
         keyFailures.fail(limiterKey);
-        throw new HTTPException(401, { message: "This login code is not valid (any more). Ask your teacher." });
+        throw new HTTPException(401, { message: "errors.student.badKey" });
       }
       db.update(students).set({ lastLoginAt: new Date() }).where(eq(students.id, student.id)).run();
       const token = start(c, student.id, input);
@@ -254,7 +255,7 @@ export function studentApi({ db, config }: Deps) {
       const redeemed = redeemImpersonationCode(db, input.code);
       const student = redeemed && studentOf(book.id, eq(students.id, redeemed.studentId));
       if (!redeemed || !student) {
-        throw new HTTPException(401, { message: "This link has expired. Open it again from Hyperbook Cloud." });
+        throw new HTTPException(401, { message: "errors.student.impersonateExpired" });
       }
       const token = start(c, student.id, { token: input.token, readonly: true, impersonatedBy: redeemed.userId });
       return c.json({ user: { username: student.username }, readonly: true, ...(token && { token }) });
@@ -287,7 +288,7 @@ export function studentApi({ db, config }: Deps) {
       bodyLimit({
         maxSize: config.store.maxBytes,
         onError: () => {
-          throw new HTTPException(413, { message: "Too much data in one request" });
+          throw new HTTPException(413, { message: "errors.request.tooLarge" });
         },
       }),
       async (c) => {
@@ -310,6 +311,6 @@ export function studentApi({ db, config }: Deps) {
       },
     )
 
-    .all("*", (c) => c.json({ error: "Not found" }, 404));
+    .all("*", (c) => c.json({ error: createT(requestLocale(c))("errors.notFound") }, 404));
 }
 

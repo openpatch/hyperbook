@@ -34,7 +34,8 @@ import {
 } from "../../hosting/git";
 import { markPublished, movePublishedTag, tagMap } from "../../hosting/publish-tags";
 import { buildDir, makeJobDir, repoDir } from "../../hosting/storage";
-import { quotaForBook, quotaMessage, setSourceBytes } from "../../domain/storage";
+import { quotaError, quotaForBook, setSourceBytes } from "../../domain/storage";
+import { httpError } from "../../errors";
 import { zipDirectory } from "../../hosting/site-zip";
 import { ZipError, extractBook } from "../../hosting/zip";
 import type { AdminEnv, AuthedEnv } from "../env";
@@ -80,7 +81,7 @@ function publicBuild(
 export function hostedOnly(book: BookRow) {
   if (book.source === "external") {
     throw new HTTPException(409, {
-      message: "This book is hosted elsewhere. Remove its external address to host it here.",
+      message: "errors.publishing.external",
     });
   }
 }
@@ -257,7 +258,7 @@ export function bookPublishingRoutes({ db, config, mailer, builds: queue, checks
       const mine =
         actor.kind === "user" ? book.publishRequestedBy === actor.userId : book.publishRequestedByLink === actor.linkId;
       if (role !== "owner" && !mine) {
-        throw new HTTPException(403, { message: "Only the owners or whoever asked can dismiss this" });
+        throw new HTTPException(403, { message: "errors.publishing.dismiss" });
       }
       clearPublishRequest(book.id);
       return c.json({ ok: true as const });
@@ -273,9 +274,7 @@ export function bookPublishingRoutes({ db, config, mailer, builds: queue, checks
         // Room for the multipart envelope around the zip.
         maxSize: config.uploadMaxBytes + 64 * 1024,
         onError: () => {
-          throw new HTTPException(413, {
-            message: `The zip is larger than ${config.uploadMaxBytes / 1024 / 1024} MB`,
-          });
+          throw httpError(413, "errors.zip.uploadTooLarge", { mb: config.uploadMaxBytes / 1024 / 1024 });
         },
       }),
       async (c) => {
@@ -285,7 +284,7 @@ export function bookPublishingRoutes({ db, config, mailer, builds: queue, checks
         const body = await c.req.parseBody();
         const file = body.file;
         if (!(file instanceof File)) {
-          throw new HTTPException(400, { message: "Choose a zip file to upload" });
+          throw new HTTPException(400, { message: "errors.publishing.chooseZip" });
         }
 
         const jobDir = await makeJobDir(config, `upload-${book.id}`);
@@ -300,13 +299,13 @@ export function bookPublishingRoutes({ db, config, mailer, builds: queue, checks
               maxEntries: MAX_ENTRIES,
             });
           } catch (error) {
-            if (error instanceof ZipError) throw new HTTPException(400, { message: error.message });
+            if (error instanceof ZipError) throw httpError(400, error.key, error.params);
             throw error;
           }
 
           const quota = quotaForBook(db, book.id);
           if (quota && unpacked.bytes > quota.maxBytes) {
-            throw new HTTPException(413, { message: quotaMessage(quota.owner, user.email) });
+            throw quotaError(quota.owner, user.email);
           }
           const repo = repoDir(config, book.id);
           await initRepo(repo);
@@ -351,7 +350,7 @@ export function bookPublishingRoutes({ db, config, mailer, builds: queue, checks
       const { book } = bookAccess(db, c.get("user"), c.req.valid("param").id);
       const repo = repoDir(config, book.id);
       const commit = await headCommit(repo).catch(() => null);
-      if (!commit) throw new HTTPException(404, { message: "Nothing has been uploaded yet" });
+      if (!commit) throw new HTTPException(404, { message: "errors.publishing.nothingUploaded" });
       c.header("content-type", "application/zip");
       c.header("content-disposition", `attachment; filename="${book.slug}.zip"`);
       return c.body(Readable.toWeb(archiveZip(repo, commit)) as ReadableStream);
@@ -404,7 +403,7 @@ export function bookPublishingRoutes({ db, config, mailer, builds: queue, checks
       const { book } = bookAccess(db, c.get("user"), c.req.valid("param").id);
       hostedOnly(book);
       if (!(await headCommit(repoDir(config, book.id)).catch(() => null))) {
-        throw new HTTPException(409, { message: "The book has no files yet" });
+        throw new HTTPException(409, { message: "errors.publishing.noFiles" });
       }
       return c.json(checks.start(book.id));
     })
@@ -424,7 +423,7 @@ export function bookPublishingRoutes({ db, config, mailer, builds: queue, checks
         .where(and(eq(builds.id, buildId), eq(builds.bookId, book.id), eq(builds.status, "succeeded")))
         .get();
       const dir = build && buildDir(config, book.id, build.id);
-      if (!dir || !existsSync(dir)) throw new HTTPException(404, { message: "This build is not kept anymore" });
+      if (!dir || !existsSync(dir)) throw new HTTPException(404, { message: "errors.publishing.buildGone" });
       c.header("content-type", "application/zip");
       c.header("content-disposition", `attachment; filename="${book.slug}.zip"`);
       return c.body(Readable.toWeb(zipDirectory(dir)) as ReadableStream);
@@ -443,7 +442,7 @@ export function bookPublishingRoutes({ db, config, mailer, builds: queue, checks
       assertPublishingAllowed(db, book.id);
       const note = c.req.valid("json").note || null;
       const commit = await headCommit(repoDir(config, book.id)).catch(() => null);
-      if (!commit) throw new HTTPException(409, { message: "The book has no files yet" });
+      if (!commit) throw new HTTPException(409, { message: "errors.publishing.noFiles" });
       // An owner acted on the latest save: an editor's request is answered.
       clearPublishRequest(book.id);
       const built = db
@@ -490,7 +489,7 @@ export function bookPublishingRoutes({ db, config, mailer, builds: queue, checks
       const { tag } = c.req.valid("json");
       const repo = repoDir(config, book.id);
       const commit = await resolveTagCommit(repo, tag);
-      if (!commit) throw new HTTPException(404, { message: `This book has no version ${tag}` });
+      if (!commit) throw httpError(404, "errors.publishing.noVersion", { tag });
       const kept = db
         .select()
         .from(builds)
@@ -585,7 +584,7 @@ export function bookPublishingRoutes({ db, config, mailer, builds: queue, checks
 export function buildRoutes({ db, config, builds: queue }: Deps) {
   function buildAccess(user: SessionUser, buildId: number) {
     const build = db.select().from(builds).where(eq(builds.id, buildId)).get();
-    if (!build) throw new HTTPException(404, { message: "Build not found" });
+    if (!build) throw new HTTPException(404, { message: "errors.publishing.buildNotFound" });
     const { book } = bookAccess(db, user, build.bookId);
     return { build, book };
   }
@@ -609,7 +608,7 @@ export function buildRoutes({ db, config, builds: queue }: Deps) {
       const user = c.get("user");
       const { build, book } = buildAccess(user, c.req.valid("param").id);
       if (!queue.cancel(build.id)) {
-        throw new HTTPException(409, { message: "This build has finished already" });
+        throw new HTTPException(409, { message: "errors.publishing.buildFinished" });
       }
       audit(db, {
         actorUserId: user.id,

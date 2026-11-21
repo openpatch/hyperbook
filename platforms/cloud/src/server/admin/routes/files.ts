@@ -12,7 +12,8 @@ import { type Actor, visitorAccess } from "../../domain/actors";
 import { bookChanged, onBookChange } from "../../domain/book-events";
 import { moveThreads } from "../../domain/comments";
 import { createT } from "../../i18n";
-import { quotaForBook, quotaMessage, setSourceBytes } from "../../domain/storage";
+import { quotaError, quotaForBook, setSourceBytes } from "../../domain/storage";
+import { httpError } from "../../errors";
 import { bookTemplate } from "../../domain/templates";
 import {
   BookTooLargeError,
@@ -58,10 +59,10 @@ function checkRootConfig(path: string, content: Buffer) {
   try {
     value = JSON.parse(content.toString("utf8"));
   } catch (error) {
-    throw new HTTPException(400, { message: `${path} is not valid JSON: ${(error as Error).message}` });
+    throw httpError(400, "errors.files.invalidJson", { path, detail: (error as Error).message });
   }
   if (typeof value !== "object" || value === null || Array.isArray(value)) {
-    throw new HTTPException(400, { message: `${path} must be a JSON object ({ … })` });
+    throw httpError(400, "errors.files.jsonObject", { path });
   }
 }
 
@@ -115,7 +116,9 @@ export function bookFileRoutes({ db, config, renders }: Deps) {
         });
       }
       if (error instanceof BookTooLargeError) {
-        throw new HTTPException(413, { message: byQuota ? quotaMessage(quota.owner, actor.kind === "user" ? actor.user.email : "") : error.message });
+        throw byQuota
+          ? quotaError(quota.owner, actor.kind === "user" ? actor.user.email : "")
+          : httpError(413, error.key, error.params);
       }
       throw error;
     }
@@ -222,7 +225,7 @@ export function bookFileRoutes({ db, config, renders }: Deps) {
       const entry = commit
         ? (await listTree(repo, commit)).find((e) => e.path === c.req.valid("query").path)
         : undefined;
-      if (!entry) throw new HTTPException(404, { message: "No such file" });
+      if (!entry) throw new HTTPException(404, { message: "errors.files.notFound" });
       const name = entry.path.split("/").pop()!;
       c.header("content-type", "application/octet-stream");
       c.header("content-disposition", `attachment; filename*=UTF-8''${encodeURIComponent(name)}`);
@@ -293,7 +296,7 @@ export function bookFileRoutes({ db, config, renders }: Deps) {
       bodyLimit({
         maxSize: 3 * MAX_MERGE_BYTES + 64 * 1024,
         onError: () => {
-          throw new HTTPException(413, { message: "The file is too large to merge" });
+          throw new HTTPException(413, { message: "errors.files.mergeTooLarge" });
         },
       }),
       validate("json", mergeFileInput),
@@ -308,12 +311,12 @@ export function bookFileRoutes({ db, config, renders }: Deps) {
         const by = last ? { name: last.name, date: last.date, message: last.message } : null;
         // Deleted since: there is nothing to merge with.
         if (!entry) return c.json({ deleted: true as const, by });
-        if (entry.size > MAX_MERGE_BYTES) throw new HTTPException(413, { message: "The file is too large to merge" });
+        if (entry.size > MAX_MERGE_BYTES) throw new HTTPException(413, { message: "errors.files.mergeTooLarge" });
         let base: Buffer;
         try {
           base = await readBlob(repo, baseOid);
         } catch {
-          throw new HTTPException(400, { message: "Unknown base version" });
+          throw new HTTPException(400, { message: "errors.files.unknownBase" });
         }
         const theirsBytes = await readBlob(repo, entry.oid);
         const decoder = new TextDecoder("utf-8", { fatal: true });
@@ -323,7 +326,7 @@ export function bookFileRoutes({ db, config, renders }: Deps) {
           theirs = decoder.decode(theirsBytes);
           baseText = decoder.decode(base);
         } catch {
-          throw new HTTPException(400, { message: "Only text files can be merged" });
+          throw new HTTPException(400, { message: "errors.files.mergeTextOnly" });
         }
         const t = createT(c.get("locale"));
         const merged = await mergeTexts(baseText, text, theirs, {
@@ -351,9 +354,7 @@ export function bookFileRoutes({ db, config, renders }: Deps) {
         // Base64 makes uploads a third larger.
         maxSize: Math.ceil(config.uploadMaxBytes * 1.4) + 64 * 1024,
         onError: () => {
-          throw new HTTPException(413, {
-            message: `Save at most ${config.uploadMaxBytes / 1024 / 1024} MB at once`,
-          });
+          throw httpError(413, "errors.files.uploadTooLarge", { mb: config.uploadMaxBytes / 1024 / 1024 });
         },
       }),
       validate("json", commitFilesInput),
@@ -388,7 +389,7 @@ export function bookFileRoutes({ db, config, renders }: Deps) {
       bodyLimit({
         maxSize: 3 * 1024 * 1024,
         onError: () => {
-          throw new HTTPException(413, { message: "The page is too long to preview" });
+          throw new HTTPException(413, { message: "errors.files.pageTooLong" });
         },
       }),
       validate("json", renderPageInput),
@@ -399,7 +400,7 @@ export function bookFileRoutes({ db, config, renders }: Deps) {
         try {
           return c.json(await renders.renderText(book.id, path, text));
         } catch (error) {
-          if (error instanceof RenderError) throw new HTTPException(400, { message: error.message });
+          if (error instanceof RenderError) throw httpError(400, error.key, error.params);
           throw error;
         }
       },
@@ -413,7 +414,7 @@ export function bookFileRoutes({ db, config, renders }: Deps) {
       bodyLimit({
         maxSize: 3 * 1024 * 1024,
         onError: () => {
-          throw new HTTPException(413, { message: "The document is too long to preview" });
+          throw new HTTPException(413, { message: "errors.files.documentTooLong" });
         },
       }),
       validate("json", renderPageInput),
@@ -425,7 +426,7 @@ export function bookFileRoutes({ db, config, renders }: Deps) {
         try {
           result = await renders.typstText(book.id, path, text);
         } catch (error) {
-          if (error instanceof RenderError) throw new HTTPException(400, { message: error.message });
+          if (error instanceof RenderError) throw httpError(400, error.key, error.params);
           throw error;
         }
         if (!result.ok) {
@@ -464,7 +465,7 @@ export function bookFileRoutes({ db, config, renders }: Deps) {
       const { book, actor } = visitorAccess(db, c.get("user"), c.get("link"), c.req.valid("param").id);
       hostedOnly(book);
       if (await headCommit(repoDir(config, book.id)).catch(() => null)) {
-        throw new HTTPException(409, { message: "The book has files already" });
+        throw new HTTPException(409, { message: "errors.files.notEmpty" });
       }
       const files = bookTemplate(c.req.valid("json").template, book.title);
       const changes: Change[] = Object.entries(files).map(([path, content]) => ({

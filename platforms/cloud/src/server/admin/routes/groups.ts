@@ -78,7 +78,7 @@ export function bookGroupRoutes({ db }: Deps) {
         return c.json({ id: group.id, name: group.name, createdAt: group.createdAt.getTime() });
       } catch (error) {
         if (isUniqueViolation(error)) {
-          throw new HTTPException(409, { message: "This book has a group with this name already" });
+          throw new HTTPException(409, { message: "errors.groups.nameTaken" });
         }
         throw error;
       }
@@ -107,7 +107,7 @@ export function groupRoutes({ db, config }: Deps) {
         db.update(groups).set({ name }).where(eq(groups.id, group.id)).run();
       } catch (error) {
         if (isUniqueViolation(error)) {
-          throw new HTTPException(409, { message: "This book has a group with this name already" });
+          throw new HTTPException(409, { message: "errors.groups.nameTaken" });
         }
         throw error;
       }
@@ -151,7 +151,7 @@ export function groupRoutes({ db, config }: Deps) {
       const { group } = groupAccess(db, user, c.req.valid("param").id);
       const input = c.req.valid("json");
       if (usernameTaken(db, group.bookId, input.username)) {
-        throw new HTTPException(409, { message: "This book has a student with this username already" });
+        throw new HTTPException(409, { message: "errors.students.usernameTaken" });
       }
       const row = db
         .insert(students)
@@ -283,12 +283,12 @@ export function studentRoutes({ db, config }: Deps) {
       const { student } = studentAccess(db, user, c.req.valid("param").id);
       const changes = c.req.valid("json");
       if (changes.username !== undefined && usernameTaken(db, student.bookId, changes.username, student.id)) {
-        throw new HTTPException(409, { message: "This book has a student with this username already" });
+        throw new HTTPException(409, { message: "errors.students.usernameTaken" });
       }
       if (changes.groupId !== undefined) {
         const target = db.select().from(groups).where(eq(groups.id, changes.groupId)).get();
         if (!target || target.bookId !== student.bookId) {
-          throw new HTTPException(400, { message: "Students can only move between groups of the same book" });
+          throw new HTTPException(400, { message: "errors.students.otherBook" });
         }
       }
       const row = db

@@ -1,5 +1,10 @@
+import { readdirSync, readFileSync } from "node:fs";
+import path from "node:path";
 import { eq } from "drizzle-orm";
+import { Hono } from "hono";
+import { HTTPException } from "hono/http-exception";
 import { describe, expect, it } from "vitest";
+import { errorResponse, httpError } from "../src/server/errors";
 import { users } from "../src/server/db/schema";
 import {
   catalogs,
@@ -33,6 +38,26 @@ describe("the catalogs", () => {
   it("knows which strings are catalog keys (validation messages)", () => {
     expect(isMessageKey("validation.email")).toBe(true);
     expect(isMessageKey("Enter a valid email address")).toBe(false);
+  });
+});
+
+describe("the server's error messages", () => {
+  // Errors reach teachers and students, so they are catalog keys, translated
+  // when they are sent (src/server/errors.ts), never English text.
+  it("are catalog keys", () => {
+    const dir = path.join(import.meta.dirname, "../src/server");
+    const files = readdirSync(dir, { recursive: true, encoding: "utf8" }).filter((f) => f.endsWith(".ts"));
+    const offending: string[] = [];
+    for (const file of files) {
+      const source = readFileSync(path.join(dir, file), "utf8");
+      for (const match of source.matchAll(/HTTPException\(\d+, \{\s*message:\s*(["`])([^"`]*)\1/g)) {
+        if (match[1] === "`" || !isMessageKey(match[2]!)) offending.push(`${file}: ${match[2]}`);
+      }
+      for (const match of source.matchAll(/httpError\(\d+, "([^"]*)"/g)) {
+        if (!isMessageKey(match[1]!)) offending.push(`${file}: ${match[1]}`);
+      }
+    }
+    expect(offending).toEqual([]);
   });
 });
 
@@ -112,6 +137,30 @@ describe("the request locale", () => {
     expect((await c.get("/api/me")).body.locale).toBeNull();
     const cleared = await c.raw("POST", "/api/auth/login", { email: "t@example.org", password: "wrong password" });
     expect(cleared.body.error).toBe("E-Mail oder Passwort ist falsch");
+  });
+
+  it("answers teachers' errors in their language", async () => {
+    const instance = setup();
+    const { c } = await loggedIn(instance, { email: "t@example.org" });
+    expect((await c.patch("/api/me", { locale: "de" })).status).toBe(200);
+    const book = (await c.post("/api/books", { title: "Physik", slug: "physik" })).body;
+    expect((await c.post(`/api/books/${book.id}/groups`, { name: "7a" })).status).toBe(200);
+    const again = await c.post(`/api/books/${book.id}/groups`, { name: "7a" });
+    expect(again.status).toBe(409);
+    expect(again.body.error).toBe("Dieses Buch hat schon eine Gruppe mit diesem Namen");
+    const empty = await c.post(`/api/books/${book.id}/groups`, { name: " " });
+    expect(empty.body.issues[0].message).toBe("Geben Sie einen Namen ein");
+  });
+
+  it("fills the params of a translated error", async () => {
+    const app = new Hono();
+    app.onError((error, c) => errorResponse(c, error as HTTPException));
+    app.get("/", () => {
+      throw httpError(404, "errors.publishing.noVersion", { tag: "v3" });
+    });
+    const res = await app.request("/", { headers: { "accept-language": "de" } });
+    expect(res.status).toBe(404);
+    expect(await res.json()).toEqual({ error: "Dieses Buch hat keine Version v3" });
   });
 
   it("rejects a locale the platform does not speak", async () => {

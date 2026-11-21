@@ -1,6 +1,7 @@
 import { and, count, eq, isNull, ne } from "drizzle-orm";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
+import { httpError } from "../../errors";
 import {
   createUserInput,
   entitlementOverridesInput,
@@ -172,7 +173,7 @@ export function userRoutes({ db, config, mailer }: Deps) {
     .post("/:id/approve", idParam, async (c) => {
       const id = c.req.valid("param").id;
       const user = findUser(db, id, requestLocale(c));
-      if (user.approvedAt) throw new HTTPException(409, { message: "This account is approved already" });
+      if (user.approvedAt) throw new HTTPException(409, { message: "errors.accounts.approved" });
       db.update(users).set({ approvedAt: new Date() }).where(eq(users.id, id)).run();
       audit(db, { actorUserId: c.get("user").id, action: "user.approve", targetType: "user", targetId: id });
       const name = getInstanceSettings(db).name;
@@ -191,9 +192,9 @@ export function userRoutes({ db, config, mailer }: Deps) {
         throw new HTTPException(501, { message: createT(requestLocale(c))("errors.auth.noMailShort") });
       }
       const user = findUser(db, c.req.valid("param").id, requestLocale(c));
-      if (user.emailVerifiedAt) throw new HTTPException(409, { message: "This user has set up the account already" });
+      if (user.emailVerifiedAt) throw new HTTPException(409, { message: "errors.accounts.setUp" });
       if (!(await invite(user, c.get("user").displayName || c.get("user").email))) {
-        throw new HTTPException(502, { message: "The invitation could not be sent" });
+        throw new HTTPException(502, { message: "errors.accounts.inviteFailed" });
       }
       audit(db, { actorUserId: c.get("user").id, action: "user.invite", targetType: "user", targetId: user.id });
       return c.json({ ok: true as const });
@@ -217,7 +218,7 @@ export function userRoutes({ db, config, mailer }: Deps) {
 
       if (id === me.id && (changes.disabled || changes.role === "teacher")) {
         throw new HTTPException(400, {
-          message: "You cannot disable your own account or remove your own admin role",
+          message: "errors.accounts.selfDisable",
         });
       }
       if (
@@ -225,7 +226,7 @@ export function userRoutes({ db, config, mailer }: Deps) {
         (changes.disabled || changes.role === "teacher") &&
         otherActiveAdmins(db, id) === 0
       ) {
-        throw new HTTPException(400, { message: "The last admin cannot be disabled or demoted" });
+        throw new HTTPException(400, { message: "errors.accounts.lastAdminDemote" });
       }
 
       db.update(users)
@@ -292,16 +293,14 @@ export function userRoutes({ db, config, mailer }: Deps) {
     .delete("/:id", idParam, (c) => {
       const { id } = c.req.valid("param");
       const me = c.get("user");
-      if (id === me.id) throw new HTTPException(400, { message: "You cannot delete your own account" });
+      if (id === me.id) throw new HTTPException(400, { message: "errors.accounts.deleteSelf" });
       const row = findUser(db, id, requestLocale(c));
       if (row.role === "admin" && otherActiveAdmins(db, id) === 0) {
-        throw new HTTPException(400, { message: "The last admin cannot be deleted" });
+        throw new HTTPException(400, { message: "errors.accounts.lastAdminDelete" });
       }
       const soleOwned = soleOwnedBooks(db, id);
       if (soleOwned > 0) {
-        throw new HTTPException(409, {
-          message: `This user is the only owner of ${soleOwned} book(s). Give each book another owner or delete it first.`,
-        });
+        throw httpError(409, "errors.accounts.soleOwner", { count: soleOwned });
       }
       db.delete(users).where(eq(users.id, id)).run();
       audit(db, {

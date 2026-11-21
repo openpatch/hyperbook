@@ -1,3 +1,4 @@
+import { LocalizedError } from "../localized-error";
 import { type ChildProcessWithoutNullStreams, spawn } from "node:child_process";
 import { existsSync } from "node:fs";
 import { mkdir, readFile, readdir, rm, writeFile } from "node:fs/promises";
@@ -184,12 +185,12 @@ type Renderer = {
   lock: Promise<unknown>;
 };
 
-export class RenderError extends Error {}
+export class RenderError extends LocalizedError {}
 
 /** The book has no hyperbook.json (or hyperlibrary.json): nothing can render. */
 export class MissingConfigError extends RenderError {
   constructor() {
-    super("The book has no hyperbook.json yet. Create one to see the preview.");
+    super("errors.files.noConfig");
   }
 }
 
@@ -229,7 +230,7 @@ export class Renderers {
   private async start(bookId: number): Promise<Renderer> {
     const repo = repoDir(this.config, bookId);
     const commit = await headCommit(repo).catch(() => null);
-    if (!commit) throw new RenderError("The book has no files yet");
+    if (!commit) throw new RenderError("errors.publishing.noFiles");
     let r = this.renderers.get(bookId);
     if (!r || r.commit !== commit) {
       // The CLI would only stop at once, for every page asked for.
@@ -315,7 +316,7 @@ export class Renderers {
    */
   async renderText(bookId: number, file: string, text: string): Promise<PageRender> {
     if (!PAGE.test(file) || file.split("/").some((s) => s === ".." || s === "." || s === "")) {
-      throw new RenderError("Only pages (book/ or glossary/) can be previewed");
+      throw new RenderError("errors.files.previewPagesOnly");
     }
     const r = await this.renderer(bookId);
     return this.exclusive(r, async () => {
@@ -382,7 +383,7 @@ export class Renderers {
    */
   async typstText(bookId: number, file: string, text: string): Promise<TypstPreview> {
     if (!/\.typ$/i.test(file) || !isPlainRelative(file)) {
-      throw new RenderError("Only .typ files of the book can be previewed");
+      throw new RenderError("errors.files.previewTypOnly");
     }
     const r = await this.renderer(bookId);
     // Written and compiled under the checkout's lock: "check all pages" puts

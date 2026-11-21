@@ -2,6 +2,7 @@ import { HTTPException } from "hono/http-exception";
 import type { SessionUser } from "../auth/sessions";
 import { readableSecret } from "../crypto/tokens";
 import type { Db } from "../db/client";
+import { httpError } from "../errors";
 import { getInstanceSettings } from "./instance";
 
 /*
@@ -30,9 +31,7 @@ export function withSuffix(name: string, suffix: string): string {
   const ending = `-${suffix}`;
   const base = name.endsWith(ending) ? name.slice(0, -ending.length) : name;
   if (base.length + ending.length > 63) {
-    throw new HTTPException(400, {
-      message: `Use at most ${63 - ending.length} characters; the address gets “${ending}” at the end`,
-    });
+    throw httpError(400, "validation.slugMaxWithEnding", { max: 63 - ending.length, ending });
   }
   return base + ending;
 }

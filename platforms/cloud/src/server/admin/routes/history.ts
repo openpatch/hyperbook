@@ -135,7 +135,7 @@ export function bookHistoryRoutes({ db, config }: Deps) {
         const { oldest, newest, path } = c.req.valid("query");
         const repo = repoDir(config, book.id);
         if (!(await reachable(repo, oldest)) || !(await reachable(repo, newest))) {
-          throw new HTTPException(404, { message: "No such commit" });
+          throw new HTTPException(404, { message: "errors.history.noCommit" });
         }
         const parent = await firstParent(repo, oldest);
         const diff = await rangeDiff(repo, parent, newest, path);
@@ -155,7 +155,7 @@ export function bookHistoryRoutes({ db, config }: Deps) {
         const sha = c.req.valid("param").sha;
         const repo = repoDir(config, book.id);
         if (!(await reachable(repo, sha))) {
-          throw new HTTPException(404, { message: "No such commit" });
+          throw new HTTPException(404, { message: "errors.history.noCommit" });
         }
         const diff = await commitDiff(repo, sha);
         const truncated = Buffer.byteLength(diff, "utf8") > MAX_DIFF_BYTES;

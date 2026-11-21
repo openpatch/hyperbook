@@ -3,6 +3,7 @@ import path from "node:path";
 import { serveStatic } from "@hono/node-server/serve-static";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
+import { errorResponse, genericErrorResponse } from "../errors";
 import { secureHeaders } from "hono/secure-headers";
 import type { Deps } from "../deps";
 import { BLOCKFLOW_CSP, serveBlockflow } from "./blockflow";
@@ -134,13 +135,11 @@ export function createAdminApp(deps: Deps, options: { webRoot?: string } = {}) {
   );
 
   app.onError((error, c) => {
-    if (error instanceof HTTPException) {
-      // Some errors carry a body of their own (e.g. the paths of a conflict).
-      if (error.res) return error.getResponse();
-      return c.json({ error: error.message }, error.status);
-    }
+    // Some errors carry a body of their own (e.g. the paths of a conflict);
+    // messages that are catalog keys go out in the request's language.
+    if (error instanceof HTTPException) return errorResponse(c, error);
     console.error(error);
-    return c.json({ error: createT(requestLocale(c))("errors.generic") }, 500);
+    return genericErrorResponse(c);
   });
 
   // Git smart HTTP lives outside the /api sub-app, so originCheck (which

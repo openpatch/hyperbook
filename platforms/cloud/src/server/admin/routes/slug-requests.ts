@@ -154,12 +154,12 @@ export function bookSlugRequestRoutes(deps: Deps) {
       const { book } = bookAccess(db, user, c.req.valid("param").id, "owner");
       const input = c.req.valid("json");
       if (!getInstanceSettings(db).slugSuffix) {
-        throw new HTTPException(400, { message: "Choose the address in the book's settings" });
+        throw new HTTPException(400, { message: "errors.slugs.useSettings" });
       }
       if (book.slugGrantedAt) {
-        throw new HTTPException(409, { message: "An admin gave this book its address already" });
+        throw new HTTPException(409, { message: "errors.slugs.granted" });
       }
-      if (input.slug === book.slug) throw new HTTPException(400, { message: "The book has this address already" });
+      if (input.slug === book.slug) throw new HTTPException(400, { message: "errors.slugs.same" });
       assertSlugAvailable(db, input.slug, book.id);
 
       const request = db.transaction((tx) => {
@@ -210,7 +210,7 @@ export function bookSlugRequestRoutes(deps: Deps) {
       const user = c.get("user");
       const { book } = bookAccess(db, user, c.req.valid("param").id, "owner");
       const { note } = c.req.valid("json");
-      if (!book.slugGrantedAt) throw new HTTPException(409, { message: "This book has no granted address" });
+      if (!book.slugGrantedAt) throw new HTTPException(409, { message: "errors.slugs.notGranted" });
       const suffix = book.slugSuffix ?? newSlugSuffix();
       const slug = withSuffix(book.slug, suffix);
       assertSlugAvailable(db, slug, book.id);
@@ -239,8 +239,8 @@ export function slugRequestRoutes(deps: Deps) {
 
   const pending = (id: number) => {
     const request = db.select().from(slugRequests).where(eq(slugRequests.id, id)).get();
-    if (!request) throw new HTTPException(404, { message: "Request not found" });
-    if (request.status !== "pending") throw new HTTPException(409, { message: "This request was decided already" });
+    if (!request) throw new HTTPException(404, { message: "errors.slugs.requestNotFound" });
+    if (request.status !== "pending") throw new HTTPException(409, { message: "errors.slugs.decided" });
     const book = db.select().from(books).where(eq(books.id, request.bookId)).get()!;
     return { request, book };
   };
