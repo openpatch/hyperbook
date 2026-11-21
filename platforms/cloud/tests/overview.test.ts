@@ -20,7 +20,7 @@ const INDEX = {
   ],
 };
 
-async function world({ publish = true } = {}) {
+async function world({ publish = true, index = INDEX as object } = {}) {
   const instance = setup();
   const teacher = await loggedIn(instance, { email: "t@example.org" });
   const book = (await teacher.c.post("/api/books", { title: "Physics", slug: "physics" })).body;
@@ -35,7 +35,7 @@ async function world({ publish = true } = {}) {
       .get();
     const dir = path.join(buildDir(instance.config, book.id, build.id), "_hyperbook");
     mkdirSync(dir, { recursive: true });
-    writeFileSync(path.join(dir, "elements.json"), JSON.stringify(INDEX));
+    writeFileSync(path.join(dir, "elements.json"), JSON.stringify(index));
     instance.db.update(books).set({ publishedBuildId: build.id }).where(eq(books.id, book.id)).run();
   }
   const row = (studentId: number, tableName: string, key: unknown, editedAt: number, data: string | null = "{}") =>
@@ -111,10 +111,55 @@ describe("the group overview", () => {
     const { teacher, students, row } = await world();
     row(students[0]!.id, "textinput", "q1", 1000, JSON.stringify({ id: "q1", text: "42" }));
     const id = students[0]!.id;
-    const res = await teacher.c.get(`/api/students/${id}/row?table=textinput&key=q1`);
+    const res = await teacher.c.get(`/api/students/${id}/element?table=textinput&id=q1`);
     expect(res.status).toBe(200);
-    expect(res.body).toEqual({ data: { id: "q1", text: "42" }, editedAt: 1000 });
-    expect((await teacher.c.get(`/api/students/${id}/row?table=textinput&key=nope`)).status).toBe(404);
+    expect(res.body).toEqual({
+      rows: [{ table: "textinput", key: "q1", data: { id: "q1", text: "42" }, editedAt: 1000 }],
+      editedAt: 1000,
+    });
+    expect((await teacher.c.get(`/api/students/${id}/element?table=textinput&id=nope`)).status).toBe(404);
+  });
+
+  it("finds the files of embedded IDEs by their keys' start and end", async () => {
+    const index = {
+      version: 1,
+      pages: [
+        {
+          href: "/code",
+          title: "Code",
+          elements: [
+            { id: "java", name: "onlineide", table: "onlineide", match: "prefix" },
+            { id: "java2", name: "onlineide", table: "onlineide", match: "prefix" },
+            {
+              id: "sql",
+              name: "sqlide",
+              table: "sqlideScripts",
+              match: "prefix",
+              also: [{ table: "sqlideDatabases", match: "suffix" }],
+            },
+          ],
+        },
+      ],
+    };
+    const { teacher, group, students, row } = await world({ index });
+    const ada = students[0]!.id;
+    row(ada, "onlineide", "java", 1000, JSON.stringify({ scriptId: "java", script: '["Main.java"]' }));
+    row(ada, "onlineide", "javaMain.java", 3000, JSON.stringify({ scriptId: "javaMain.java", script: "class Main {}" }));
+    // "java2…" belongs to the second IDE, not to "java".
+    row(ada, "onlineide", "java2Main.java", 2000, JSON.stringify({ scriptId: "java2Main.java", script: "x" }));
+    row(ada, "sqlideDatabases", "https://example.org/school.dbsql", 4000, JSON.stringify({ databaseId: "x", statements: "[]" }));
+
+    const overview = (await teacher.c.get(`/api/groups/${group.id}/overview`)).body;
+    expect(overview.students[0]).toMatchObject({
+      cells: { "onlineide/java": 3000, "onlineide/java2": 2000, "sqlideScripts/sql": 4000 },
+      elsewhere: 0,
+    });
+
+    const java = (await teacher.c.get(`/api/students/${ada}/element?table=onlineide&id=java`)).body;
+    expect(java.rows.map((r: { key: string }) => r.key)).toEqual(["java", "javaMain.java"]);
+    expect(java.editedAt).toBe(3000);
+    const sql = (await teacher.c.get(`/api/students/${ada}/element?table=sqlideScripts&id=sql`)).body;
+    expect(sql.rows).toEqual([expect.objectContaining({ table: "sqlideDatabases" })]);
   });
 
   it("is for the book's editors only", async () => {
@@ -122,6 +167,6 @@ describe("the group overview", () => {
     row(students[0]!.id, "textinput", "q1", 1000);
     const other = await loggedIn(instance, { email: "x@example.org" });
     expect((await other.c.get(`/api/groups/${group.id}/overview`)).status).toBe(404);
-    expect((await other.c.get(`/api/students/${students[0]!.id}/row?table=textinput&key=q1`)).status).toBe(404);
+    expect((await other.c.get(`/api/students/${students[0]!.id}/element?table=textinput&id=q1`)).status).toBe(404);
   });
 });

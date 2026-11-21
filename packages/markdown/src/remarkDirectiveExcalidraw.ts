@@ -12,6 +12,7 @@ import {
   registerDirective,
 } from "./remarkHelper";
 import { resolveDirectiveId } from "./directiveId";
+import { recordStoredElement } from "./storedElements";
 import { i18n } from "./i18n";
 
 export default (ctx: HyperbookContext) => () => {
@@ -45,6 +46,7 @@ export default (ctx: HyperbookContext) => () => {
 
         const attributes = node.attributes || {};
         const id = attributes.id || resolveDirectiveId(file, node);
+        recordStoredElement(file, name, id, node);
         const {
           aspectRatio = "16/9",
           autoZoom,

@@ -1567,6 +1567,8 @@ export const de: Messages = {
     deletedManyToast: "{{count}} Schüler gelöscht",
   },
   overview: {
+    fileList: "Dateien des Arbeitsbereichs",
+    database: "Änderungen an der Datenbank",
     tabStudents: "Schüler",
     tabOverview: "Übersicht",
     description:

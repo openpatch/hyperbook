@@ -1540,6 +1540,8 @@ export const en = {
     deletedManyToast: "{{count}} students deleted",
   },
   overview: {
+    fileList: "Files of the workspace",
+    database: "Changes to the database",
     tabStudents: "Students",
     tabOverview: "Overview",
     description:

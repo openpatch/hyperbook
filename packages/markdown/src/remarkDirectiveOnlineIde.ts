@@ -17,6 +17,7 @@ import {
 } from "./remarkHelper";
 import { ElementContent } from "hast";
 import { resolveDirectiveId } from "./directiveId";
+import { recordStoredElement } from "./storedElements";
 
 // The embedded Online-IDE distinguishes scripts by data-type: "image" and
 // "asset" are fetched as a blob and become a data URL (shader sources are
@@ -56,6 +57,7 @@ export default (ctx: HyperbookContext) => () => {
           outputWidth = ctx.config.elements?.onlineide?.outputWidth,
           id = resolveDirectiveId(file, node),
         } = attributes;
+        recordStoredElement(file, name, id, node);
 
         // Width of the output panel next to the editor, as CSS ("60%",
         // "520px"). Left out, the IDE keeps its own 300px. Quotes would end

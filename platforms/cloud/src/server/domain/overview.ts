@@ -13,13 +13,25 @@ import { buildDir } from "../hosting/storage";
  * here, only table, key and time.
  */
 
+const keyMatch = z.enum(["id", "prefix", "suffix"]);
+const element = z.object({
+  id: z.string(),
+  name: z.string(),
+  table: z.string(),
+  /** How row keys relate to the id; equal when left out. */
+  match: keyMatch.optional(),
+  /** More tables of the same element. */
+  also: z.array(z.object({ table: z.string(), match: keyMatch })).optional(),
+});
+export type IndexedElement = z.infer<typeof element>;
+
 const elementIndex = z.object({
   version: z.literal(1),
   pages: z.array(
     z.object({
       href: z.string(),
       title: z.string(),
-      elements: z.array(z.object({ id: z.string(), name: z.string(), table: z.string() })),
+      elements: z.array(element),
     }),
   ),
 });
@@ -42,6 +54,49 @@ const UI_TABLES = new Set([
 
 /** The id of a cell: an element's table and id. */
 export const cellId = (table: string, id: string) => `${table}/${id}`;
+
+const keyMatches = (key: string, id: string, match: z.infer<typeof keyMatch> = "id") =>
+  match === "prefix" ? key.startsWith(id) : match === "suffix" ? key.endsWith(id) : key === id;
+
+/** Every (table, match) under which an element keeps rows. */
+const placesOf = (e: IndexedElement) => [{ table: e.table, match: e.match ?? "id" }, ...(e.also ?? [])];
+
+/**
+ * Finds the element a saved row belongs to: an exact key first, then the
+ * longest id the key starts or ends with (embedded IDEs key their files
+ * id + file name).
+ */
+function rowMatcher(pages: ElementIndex["pages"]) {
+  const exact = new Map<string, string>();
+  const loose = new Map<string, { id: string; match: "prefix" | "suffix"; cell: string }[]>();
+  for (const page of pages) {
+    for (const e of page.elements) {
+      const cell = cellId(e.table, e.id);
+      for (const place of placesOf(e)) {
+        if (place.match === "id") exact.set(`${place.table}\0${e.id}`, cell);
+        else {
+          const list = loose.get(place.table) ?? [];
+          list.push({ id: e.id, match: place.match, cell });
+          loose.set(place.table, list);
+        }
+      }
+    }
+  }
+  for (const list of loose.values()) list.sort((a, b) => b.id.length - a.id.length);
+  return (table: string, key: string): string | null =>
+    exact.get(`${table}\0${key}`) ??
+    loose.get(table)?.find((c) => keyMatches(key, c.id, c.match))?.cell ??
+    null;
+}
+
+const parseKey = (key: string): string | null => {
+  try {
+    const parsed: unknown = JSON.parse(key);
+    return typeof parsed === "string" ? parsed : null;
+  } catch {
+    return null;
+  }
+};
 
 /**
  * The element index of the book's live version, written by the build
@@ -78,7 +133,7 @@ export function groupOverview(
   groupId: number,
 ): { indexed: boolean; pages: ElementIndex["pages"]; students: OverviewStudent[] } {
   const index = readElementIndex(config, book);
-  const known = new Set(index?.pages.flatMap((p) => p.elements.map((e) => cellId(e.table, e.id))) ?? []);
+  const cellOf = rowMatcher(index?.pages ?? []);
   const list = db
     .select({ id: students.id, username: students.username, lastLoginAt: students.lastLoginAt })
     .from(students)
@@ -108,14 +163,10 @@ export function groupOverview(
     for (const row of rows) {
       if (UI_TABLES.has(row.table)) continue;
       const student = result.get(row.studentId)!;
-      let key: unknown;
-      try {
-        key = JSON.parse(row.key);
-      } catch {
-        key = null;
-      }
-      const id = typeof key === "string" ? cellId(row.table, key) : null;
-      if (id && known.has(id)) student.cells[id] = row.editedAt;
+      const key = parseKey(row.key);
+      const cell = key === null ? null : cellOf(row.table, key);
+      // An element with several rows counts once, at its latest change.
+      if (cell) student.cells[cell] = Math.max(student.cells[cell] ?? 0, row.editedAt);
       else student.elsewhere++;
     }
     const seen = db
@@ -157,4 +208,41 @@ export function overviewCsv(
     String(s.elsewhere),
   ]);
   return [header, ...lines].map((line) => line.map(csvCell).join(",")).join("\r\n") + "\r\n";
+}
+
+/**
+ * All saved rows of one element of a student (several for an embedded IDE).
+ * A row goes to the element the overview gives it, so "java2Main.java" is
+ * the second IDE's even though it starts with "java".
+ */
+export function elementRows(
+  db: Db,
+  studentId: number,
+  e: IndexedElement,
+  pages: ElementIndex["pages"] = [],
+) {
+  const places = placesOf(e);
+  const cellOf = rowMatcher([...pages, { href: "", title: "", elements: [e] }]);
+  const cell = cellId(e.table, e.id);
+  const rows = db
+    .select({ table: storeRows.tableName, key: storeRows.key, data: storeRows.data, editedAt: storeRows.editedAt })
+    .from(storeRows)
+    .where(
+      and(
+        eq(storeRows.studentId, studentId),
+        inArray(
+          storeRows.tableName,
+          places.map((p) => p.table),
+        ),
+        isNotNull(storeRows.data),
+      ),
+    )
+    .all();
+  return rows
+    .flatMap((row) => {
+      const key = parseKey(row.key);
+      if (key === null || cellOf(row.table, key) !== cell) return [];
+      return [{ table: row.table, key, data: JSON.parse(row.data!) as unknown, editedAt: row.editedAt }];
+    })
+    .sort((a, b) => a.table.localeCompare(b.table) || a.key.localeCompare(b.key));
 }

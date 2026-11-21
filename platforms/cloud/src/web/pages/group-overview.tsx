@@ -203,9 +203,41 @@ export function GroupOverview({
   );
 }
 
-/** The saved value, readable: a text answer, files, or the raw data. */
+type ElementRow = { table: string; key: string; data: unknown; editedAt: number };
+
+/**
+ * One element's saved rows. Most elements have one; an embedded IDE has one
+ * per file (key: element id + file name), shown under the file's name.
+ */
+function Answers({ id, rows }: { id: string; rows: ElementRow[] }) {
+  const { t } = useTranslation();
+  if (rows.length === 1) return <Answer data={rows[0]!.data} />;
+  return (
+    <div className="max-h-[60vh] space-y-4 overflow-auto">
+      {rows.map((row) => {
+        const label =
+          row.key === id
+            ? t("overview.fileList")
+            : row.key.startsWith(id)
+              ? row.key.slice(id.length).replace(/^-/, "")
+              : t("overview.database");
+        return (
+          <div key={`${row.table}/${row.key}`}>
+            <div className="mb-1 font-mono text-xs text-muted-foreground">{label}</div>
+            <Answer data={row.data} />
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+/** The saved value, readable: a text answer, a script, files, or the raw data. */
 function Answer({ data }: { data: unknown }) {
   const value = (data ?? {}) as Record<string, unknown>;
+  if (typeof value.script === "string") {
+    return <pre className="max-h-80 overflow-auto rounded-md bg-muted p-3 text-xs">{value.script}</pre>;
+  }
   if (typeof value.text === "string") {
     return <p className="rounded-md bg-muted p-3 whitespace-pre-wrap">{value.text || "—"}</p>;
   }
@@ -237,13 +269,13 @@ function AnswerDialog({
 }) {
   const { t } = useTranslation();
   const query = useQuery({
-    queryKey: ["students", picked?.student.id, "row", picked?.table, picked?.key],
+    queryKey: ["students", picked?.student.id, "element", picked?.table, picked?.key],
     enabled: picked !== null,
     queryFn: () =>
       unwrap(
-        api.students[":id"].row.$get({
+        api.students[":id"].element.$get({
           param: { id: String(picked!.student.id) },
-          query: { table: picked!.table, key: picked!.key },
+          query: { table: picked!.table, id: picked!.key },
         }),
       ),
   });
@@ -258,7 +290,11 @@ function AnswerDialog({
             {query.data && new Date(query.data.editedAt).toLocaleString()}
           </DialogDescription>
         </DialogHeader>
-        {query.data ? <Answer data={query.data.data} /> : <QueryState error={query.error} retry={query.refetch} />}
+        {query.data && picked ? (
+          <Answers id={picked.key} rows={query.data.rows} />
+        ) : (
+          <QueryState error={query.error} retry={query.refetch} />
+        )}
         <DialogFooter>
           <Button variant="outline" onClick={() => picked && onViewAs(picked.student.id)}>
             {t("group.viewAs")}

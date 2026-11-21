@@ -21,7 +21,7 @@ import { open } from "../../crypto/sealed";
 import { books, groups, storeRows, students } from "../../db/schema";
 import type { Deps } from "../../deps";
 import { bookAccess } from "../../domain/books";
-import { groupOverview, overviewCsv } from "../../domain/overview";
+import { elementRows, groupOverview, overviewCsv, readElementIndex } from "../../domain/overview";
 import {
   generatedStudentPassword,
   groupAccess,
@@ -389,35 +389,28 @@ export function studentRoutes({ db, config }: Deps) {
       return c.json({ url });
     })
 
-    // One saved element of a student, for the class view (read-only).
+    // One element's saved work of a student, for the class view (read-only).
+    // How its rows are keyed comes from the live version's element index.
     .get(
-      "/:id/row",
+      "/:id/element",
       idParam,
-      validate("query", z.object({ table: z.string().min(1).max(100), key: z.string().min(1).max(500) })),
+      validate("query", z.object({ table: z.string().min(1).max(100), id: z.string().min(1).max(500) })),
       (c) => {
         const user = c.get("user");
-        const { student } = studentAccess(db, user, c.req.valid("param").id);
-        const { table, key } = c.req.valid("query");
-        const row = db
-          .select({ data: storeRows.data, editedAt: storeRows.editedAt })
-          .from(storeRows)
-          .where(
-            and(
-              eq(storeRows.studentId, student.id),
-              eq(storeRows.tableName, table),
-              eq(storeRows.key, JSON.stringify(key)),
-            ),
-          )
-          .get();
-        if (!row?.data) throw new HTTPException(404, { message: "errors.students.nothingSaved" });
+        const { student, book } = studentAccess(db, user, c.req.valid("param").id);
+        const { table, id } = c.req.valid("query");
+        const pages = readElementIndex(config, book)?.pages ?? [];
+        const indexed = pages.flatMap((p) => p.elements).find((e) => e.table === table && e.id === id);
+        const rows = elementRows(db, student.id, indexed ?? { table, id, name: table }, pages);
+        if (rows.length === 0) throw new HTTPException(404, { message: "errors.students.nothingSaved" });
         audit(db, {
           actorUserId: user.id,
           action: "student.row.view",
           targetType: "student",
           targetId: student.id,
-          data: { table, key },
+          data: { table, id },
         });
-        return c.json({ data: JSON.parse(row.data) as unknown, editedAt: row.editedAt });
+        return c.json({ rows, editedAt: Math.max(...rows.map((r) => r.editedAt)) });
       },
     )
 

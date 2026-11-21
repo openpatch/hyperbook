@@ -37,6 +37,46 @@ describe("storedElements", () => {
     ]);
   });
 
+  it("says how the IDEs' rows are keyed", async () => {
+    const result = await process(
+      [
+        `::excalidraw{id="ex"}`,
+        ``,
+        `:::webide{id="web"}`,
+        "```html",
+        "<p>Hi</p>",
+        "```",
+        `:::`,
+        ``,
+        `:::onlineide{id="java"}`,
+        "```java",
+        "System.out.println(1);",
+        "```",
+        `:::`,
+        ``,
+        `:::sqlide{id="sql"}`,
+        "```sql",
+        "SELECT 1;",
+        "```",
+        `:::`,
+        ``,
+      ].join("\n"),
+      ctx,
+    );
+    expect(storedElements(result)).toEqual([
+      { id: "ex", name: "excalidraw", table: "excalidraw" },
+      { id: "web", name: "webide", table: "ide" },
+      { id: "java", name: "onlineide", table: "onlineide", match: "prefix" },
+      {
+        id: "sql",
+        name: "sqlide",
+        table: "sqlideScripts",
+        match: "prefix",
+        also: [{ table: "sqlideDatabases", match: "suffix" }],
+      },
+    ]);
+  });
+
   it("is empty for a page without such elements", async () => {
     expect(storedElements(await process(`# Just text\n`, ctx))).toEqual([]);
   });
