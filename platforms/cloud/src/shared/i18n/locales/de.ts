@@ -11,6 +11,9 @@ export const de: Messages = {
     delete: "Löschen",
     copied: "Kopiert",
     copy: "Kopieren",
+    copyFailed: "Kopieren nicht möglich. Markieren und kopieren Sie den Text selbst.",
+    loadFailed: "Das konnte nicht geladen werden.",
+    retry: "Erneut versuchen",
     done: "Fertig",
     download: "Herunterladen",
     saved: "Gespeichert",
@@ -1342,6 +1345,38 @@ export const de: Messages = {
     deleteDescription:
       "Die Gruppe und alle ihre Schülerkonten samt allem Gespeicherten werden gelöscht. Das kann nicht rückgängig gemacht werden.",
     delete: "Gruppe löschen",
+    printCard: "Karte drucken",
+    moveTo: "In andere Gruppe verschieben…",
+    deleteStudent: "Löschen…",
+    selectAll: "Alle Schüler auswählen",
+    selectStudent: "{{username}} auswählen",
+    selected_one: "{{count}} Schüler ausgewählt",
+    selected_other: "{{count}} Schüler ausgewählt",
+    printSelected: "Karten drucken",
+    newQrSelected: "Neue QR-Codes",
+    newQrSelectedToast_one: "Neuer QR-Code erstellt. Die alte Karte funktioniert nicht mehr.",
+    newQrSelectedToast_other:
+      "{{count}} neue QR-Codes erstellt. Die alten Karten funktionieren nicht mehr.",
+    moveSelected: "Verschieben…",
+    deleteSelected: "Löschen…",
+    clearSelection: "Auswahl aufheben",
+    moveTitle_one: "{{username}} verschieben",
+    moveTitle_other: "{{count}} Schüler verschieben",
+    moveDescription:
+      "Gespeicherte Arbeit, Passwort und QR-Code bleiben gleich. Nur die Gruppe ändert sich.",
+    moveTarget: "In die Gruppe",
+    moveConfirm: "Verschieben",
+    movedToast_one: "Nach {{group}} verschoben",
+    movedToast_other: "{{count}} Schüler nach {{group}} verschoben",
+    deleteStudentTitle_one: "{{username}} löschen?",
+    deleteStudentTitle_other: "{{count}} Schüler löschen?",
+    deleteStudentDescription_one:
+      "Das Konto und alles, was dieser Schüler im Buch gespeichert hat, werden gelöscht. Das kann nicht rückgängig gemacht werden.",
+    deleteStudentDescription_other:
+      "Die Konten und alles, was diese Schüler im Buch gespeichert haben, werden gelöscht. Das kann nicht rückgängig gemacht werden.",
+    deleteStudentConfirm_one: "Schüler löschen",
+    deleteStudentConfirm_other: "Schüler löschen",
+    deletedManyToast: "{{count}} Schüler gelöscht",
   },
   print: {
     back: "← Zurück",
@@ -1361,6 +1396,12 @@ export const de: Messages = {
     user: "Benutzer",
     nameLabel: "Name:",
     qrFor: "QR-Code für {{username}}",
+    showingSome: "{{shown}} von {{total}} Schülern werden gezeigt.",
+    showAll: "Alle zeigen",
+    keyChanged_one:
+      "Für {{count}} Schüler kann kein Passwort oder QR-Code gezeigt werden: Der Zugangsschlüssel des Servers hat sich geändert, seit sie erstellt wurden. Vergeben Sie in der Gruppe ein neues Passwort oder einen neuen QR-Code und drucken Sie erneut.",
+    keyChanged_other:
+      "Für {{count}} Schüler kann kein Passwort oder QR-Code gezeigt werden: Der Zugangsschlüssel des Servers hat sich geändert, seit sie erstellt wurden. Vergeben Sie in der Gruppe ein neues Passwort oder einen neuen QR-Code und drucken Sie erneut.",
   },
   publishing: {
     title: "Veröffentlichen",

@@ -29,6 +29,7 @@ import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ApiError, api, unwrap } from "@/lib/api";
 import type { Book } from "@/lib/books";
+import { copyText } from "@/lib/clipboard";
 import { cn } from "@/lib/utils";
 import { isMessageKey } from "../../shared/i18n";
 import {
@@ -200,7 +201,10 @@ export function PublishingSection({ book }: { book: Book }) {
     const tab = window.open("about:blank", "_blank");
     void unwrap(api.books[":id"]["preview-code"].$post({ param: { id } }))
       .then(({ url }) => {
-        if (tab) tab.location.href = `${url}&next=${encodeURIComponent("/")}`;
+        const target = `${url}&next=${encodeURIComponent("/")}`;
+        // Pop-ups blocked: open the preview here rather than do nothing.
+        if (tab) tab.location.href = target;
+        else window.location.href = target;
       })
       .catch((error) => {
         tab?.close();
@@ -662,8 +666,11 @@ function WorkLocally({ book }: { book: Book }) {
         <Button
           variant="outline"
           size="sm"
-          onClick={() => {
-            void navigator.clipboard?.writeText(cloneCommand);
+          onClick={async () => {
+            if (!(await copyText(cloneCommand))) {
+              toast.error(t("common.copyFailed"));
+              return;
+            }
             setCopied(true);
             window.setTimeout(() => setCopied(false), 1500);
           }}

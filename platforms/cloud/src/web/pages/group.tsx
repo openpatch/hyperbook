@@ -9,10 +9,12 @@ import {
   generateStudentsInput,
   groupInput,
 } from "../../shared/schemas";
-import { ConfirmButton } from "@/components/confirm-button";
+import { ConfirmButton, ConfirmDialog } from "@/components/confirm-button";
 import { PageHeader, Section } from "@/components/page-header";
+import { QueryState } from "@/components/query-state";
 import { SecretDialog } from "@/components/secret-dialog";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -26,8 +28,17 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -42,7 +53,7 @@ import { FormError, TextField, applyServerError, useZodForm } from "@/lib/form";
 export function GroupPage() {
   const { t } = useTranslation();
   const id = useParams().id!;
-  const { data: group } = useQuery({
+  const groupQuery = useQuery({
     queryKey: ["groups", id],
     queryFn: () => unwrap(api.groups[":id"].$get({ param: { id } })),
   });
@@ -50,8 +61,9 @@ export function GroupPage() {
     queryKey: ["groups", id, "students"],
     queryFn: () => unwrap(api.groups[":id"].students.$get({ param: { id } })),
   });
+  const group = groupQuery.data;
 
-  if (!group) return null;
+  if (!group) return <QueryState error={groupQuery.error} retry={groupQuery.refetch} />;
 
   return (
     <>
@@ -81,7 +93,11 @@ export function GroupPage() {
         {students?.length === 0 ? (
           <p className="text-muted-foreground">{t("group.noStudents")}</p>
         ) : (
-          <StudentsTable groupId={id} students={students ?? []} />
+          <StudentsTable
+            groupId={id}
+            bookId={group.book.id}
+            students={students ?? []}
+          />
         )}
         <AddStudentForm groupId={id} />
       </Section>
@@ -131,21 +147,50 @@ async function viewAsStudent(studentId: number) {
   }
 }
 
+const printPath = (groupId: string, ids: number[]) =>
+  `/groups/${groupId}/print?students=${ids.join(",")}`;
+
+/** Which dialog is open, and for which students. */
+type Pending =
+  | { kind: "delete"; students: Student[] }
+  | { kind: "move"; students: Student[] }
+  | null;
+
 function StudentsTable({
   groupId,
+  bookId,
   students,
 }: {
   groupId: string;
+  bookId: number;
   students: Student[];
 }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const [secret, setSecret] = useState<{
     username: string;
     password: string;
   } | null>(null);
-  const refresh = () =>
-    queryClient.invalidateQueries({ queryKey: ["groups", groupId] });
+  const [selected, setSelected] = useState<Set<number>>(new Set());
+  const [pending, setPending] = useState<Pending>(null);
+  const { data: groups } = useQuery({
+    queryKey: ["books", String(bookId), "groups"],
+    queryFn: () =>
+      unwrap(api.books[":id"].groups.$get({ param: { id: String(bookId) } })),
+  });
+  const otherGroups = (groups ?? []).filter((g) => String(g.id) !== groupId);
+
+  // A selection never names students that are gone (deleted, moved away).
+  const chosen = students.filter((s) => selected.has(s.id));
+  const allChosen = students.length > 0 && chosen.length === students.length;
+
+  const refresh = async () => {
+    await queryClient.invalidateQueries({ queryKey: ["groups", groupId] });
+    await queryClient.invalidateQueries({
+      queryKey: ["books", String(bookId), "groups"],
+    });
+  };
 
   const act = async (action: () => Promise<unknown>, done?: string) => {
     try {
@@ -159,11 +204,90 @@ function StudentsTable({
     }
   };
 
+  const newQrCodes = (list: Student[]) =>
+    act(async () => {
+      for (const s of list) {
+        await unwrap(
+          api.students[":id"]["login-key"].regenerate.$post({
+            param: { id: String(s.id) },
+          }),
+        );
+      }
+      // The old cards stopped working: offer the new ones right away.
+      toast.success(
+        list.length === 1
+          ? t("group.qrToast", { username: list[0]!.username })
+          : t("group.newQrSelectedToast", { count: list.length }),
+        {
+          action: {
+            label: list.length === 1 ? t("group.printCard") : t("group.printSelected"),
+            onClick: () => navigate(printPath(groupId, list.map((s) => s.id))),
+          },
+        },
+      );
+    });
+
+  const toggle = (id: number, on: boolean) =>
+    setSelected((old) => {
+      const next = new Set(old);
+      if (on) next.add(id);
+      else next.delete(id);
+      return next;
+    });
+
   return (
     <>
+      {chosen.length > 0 && (
+        <div
+          role="toolbar"
+          aria-label={t("group.selected", { count: chosen.length })}
+          className="mb-3 flex flex-wrap items-center gap-2 rounded-md bg-muted px-3 py-2"
+        >
+          <span className="mr-auto text-sm font-medium">
+            {t("group.selected", { count: chosen.length })}
+          </span>
+          <Button asChild size="sm" variant="outline">
+            <Link to={printPath(groupId, chosen.map((s) => s.id))}>
+              {t("group.printSelected")}
+            </Link>
+          </Button>
+          <Button size="sm" variant="outline" onClick={() => newQrCodes(chosen)}>
+            {t("group.newQrSelected")}
+          </Button>
+          {otherGroups.length > 0 && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setPending({ kind: "move", students: chosen })}
+            >
+              {t("group.moveSelected")}
+            </Button>
+          )}
+          <Button
+            size="sm"
+            variant="outline"
+            className="text-destructive"
+            onClick={() => setPending({ kind: "delete", students: chosen })}
+          >
+            {t("group.deleteSelected")}
+          </Button>
+          <Button size="sm" variant="ghost" onClick={() => setSelected(new Set())}>
+            {t("group.clearSelection")}
+          </Button>
+        </div>
+      )}
       <Table className="mb-6">
         <TableHeader>
           <TableRow>
+            <TableHead className="w-8">
+              <Checkbox
+                aria-label={t("group.selectAll")}
+                checked={allChosen ? true : chosen.length > 0 ? "indeterminate" : false}
+                onCheckedChange={(on) =>
+                  setSelected(on === true ? new Set(students.map((s) => s.id)) : new Set())
+                }
+              />
+            </TableHead>
             <TableHead>{t("group.username")}</TableHead>
             <TableHead>{t("group.lastLogin")}</TableHead>
             <TableHead>{t("group.lastSaved")}</TableHead>
@@ -174,7 +298,14 @@ function StudentsTable({
         </TableHeader>
         <TableBody>
           {students.map((s) => (
-            <TableRow key={s.id}>
+            <TableRow key={s.id} data-state={selected.has(s.id) ? "selected" : undefined}>
+              <TableCell>
+                <Checkbox
+                  aria-label={t("group.selectStudent", { username: s.username })}
+                  checked={selected.has(s.id)}
+                  onCheckedChange={(on) => toggle(s.id, on === true)}
+                />
+              </TableCell>
               <TableCell className="font-mono">{s.username}</TableCell>
               <TableCell className="text-muted-foreground">
                 {s.lastLoginAt
@@ -204,10 +335,14 @@ function StudentsTable({
                       {t("group.viewAs")}
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
+                      <Link to={printPath(groupId, [s.id])}>{t("group.printCard")}</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
                       <a href={`/api/students/${s.id}/data`} download>
                         {t("group.downloadData")}
                       </a>
                     </DropdownMenuItem>
+                    <DropdownMenuSeparator />
                     <DropdownMenuItem
                       onSelect={() =>
                         act(async () => {
@@ -226,38 +361,22 @@ function StudentsTable({
                     >
                       {t("group.newPassword")}
                     </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onSelect={() =>
-                        act(
-                          () =>
-                            unwrap(
-                              api.students[":id"]["login-key"].regenerate.$post(
-                                {
-                                  param: { id: String(s.id) },
-                                },
-                              ),
-                            ),
-                          t("group.qrToast", { username: s.username }),
-                        )
-                      }
-                    >
+                    <DropdownMenuItem onSelect={() => newQrCodes([s])}>
                       {t("group.newQr")}
                     </DropdownMenuItem>
+                    {otherGroups.length > 0 && (
+                      <DropdownMenuItem
+                        onSelect={() => setPending({ kind: "move", students: [s] })}
+                      >
+                        {t("group.moveTo")}
+                      </DropdownMenuItem>
+                    )}
+                    <DropdownMenuSeparator />
                     <DropdownMenuItem
                       variant="destructive"
-                      onSelect={() =>
-                        act(
-                          () =>
-                            unwrap(
-                              api.students[":id"].$delete({
-                                param: { id: String(s.id) },
-                              }),
-                            ),
-                          t("group.deletedToast", { username: s.username }),
-                        )
-                      }
+                      onSelect={() => setPending({ kind: "delete", students: [s] })}
                     >
-                      {t("common.delete")}
+                      {t("group.deleteStudent")}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -266,6 +385,42 @@ function StudentsTable({
           ))}
         </TableBody>
       </Table>
+      <ConfirmDialog
+        open={pending?.kind === "delete"}
+        onOpenChange={(open) => !open && setPending(null)}
+        title={t("group.deleteStudentTitle", {
+          count: pending?.students.length ?? 1,
+          username: pending?.students[0]?.username ?? "",
+        })}
+        description={t("group.deleteStudentDescription", {
+          count: pending?.students.length ?? 1,
+        })}
+        confirmLabel={t("group.deleteStudentConfirm", {
+          count: pending?.students.length ?? 1,
+        })}
+        onConfirm={async () => {
+          const list = pending?.students ?? [];
+          for (const s of list) {
+            await unwrap(api.students[":id"].$delete({ param: { id: String(s.id) } }));
+          }
+          setSelected(new Set());
+          await refresh();
+          toast.success(
+            list.length === 1
+              ? t("group.deletedToast", { username: list[0]!.username })
+              : t("group.deletedManyToast", { count: list.length }),
+          );
+        }}
+      />
+      <MoveDialog
+        students={pending?.kind === "move" ? pending.students : null}
+        groups={otherGroups}
+        onClose={() => setPending(null)}
+        onMoved={async () => {
+          setSelected(new Set());
+          await refresh();
+        }}
+      />
       <SecretDialog
         secret={secret?.password ?? null}
         title={t("group.newDialogTitle")}
@@ -275,6 +430,90 @@ function StudentsTable({
         onClose={() => setSecret(null)}
       />
     </>
+  );
+}
+
+/** Moves students to another group of the same book; their work stays. */
+function MoveDialog({
+  students,
+  groups,
+  onClose,
+  onMoved,
+}: {
+  students: Student[] | null;
+  groups: { id: number; name: string }[];
+  onClose: () => void;
+  onMoved: () => Promise<unknown>;
+}) {
+  const { t } = useTranslation();
+  const [target, setTarget] = useState("");
+  const [busy, setBusy] = useState(false);
+  const count = students?.length ?? 1;
+  const move = async () => {
+    const group = groups.find((g) => String(g.id) === target);
+    if (!students || !group) return;
+    setBusy(true);
+    try {
+      for (const s of students) {
+        await unwrap(
+          api.students[":id"].$patch({
+            param: { id: String(s.id) },
+            json: { groupId: group.id },
+          }),
+        );
+      }
+      await onMoved();
+      toast.success(t("group.movedToast", { count, group: group.name }));
+      setTarget("");
+      onClose();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : t("common.somethingWrong"));
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <Dialog
+      open={students !== null}
+      onOpenChange={(open) => {
+        if (!open) {
+          setTarget("");
+          onClose();
+        }
+      }}
+    >
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>
+            {t("group.moveTitle", { count, username: students?.[0]?.username ?? "" })}
+          </DialogTitle>
+          <DialogDescription>{t("group.moveDescription")}</DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-2">
+          <Label htmlFor="move-target">{t("group.moveTarget")}</Label>
+          <Select value={target} onValueChange={setTarget}>
+            <SelectTrigger id="move-target" className="w-72">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {groups.map((g) => (
+                <SelectItem key={g.id} value={String(g.id)}>
+                  {g.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>
+            {t("common.cancel")}
+          </Button>
+          <Button disabled={!target || busy} onClick={move}>
+            {t("group.moveConfirm")}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 

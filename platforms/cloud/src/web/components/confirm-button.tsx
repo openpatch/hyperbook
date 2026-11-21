@@ -15,17 +15,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
-/** A button that asks before doing something that cannot be undone. */
-export function ConfirmButton({
-  title,
-  description,
-  confirmLabel,
-  confirmText,
-  onConfirm,
-  variant = "destructive",
-  size,
-  children,
-}: {
+type ConfirmProps = {
   title: string;
   description: React.ReactNode;
   confirmLabel: string;
@@ -33,10 +23,49 @@ export function ConfirmButton({
   confirmText?: string;
   onConfirm: () => Promise<unknown>;
   variant?: React.ComponentProps<typeof Button>["variant"];
+};
+
+/** A button that asks before doing something that cannot be undone. */
+export function ConfirmButton({
+  variant = "destructive",
+  size,
+  children,
+  ...props
+}: ConfirmProps & {
   size?: React.ComponentProps<typeof Button>["size"];
   children: React.ReactNode;
 }) {
   const [open, setOpen] = useState(false);
+  return (
+    <ConfirmDialog open={open} onOpenChange={setOpen} variant={variant} {...props}>
+      <DialogTrigger asChild>
+        <Button variant={variant === "destructive" ? "outline" : variant} size={size}>
+          {children}
+        </Button>
+      </DialogTrigger>
+    </ConfirmDialog>
+  );
+}
+
+/**
+ * The question of ConfirmButton on its own, for when something else opens it
+ * (a menu item, a toolbar). It closes once onConfirm has worked.
+ */
+export function ConfirmDialog({
+  open,
+  onOpenChange,
+  title,
+  description,
+  confirmLabel,
+  confirmText,
+  onConfirm,
+  variant = "destructive",
+  children,
+}: ConfirmProps & {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  children?: React.ReactNode;
+}) {
   const [busy, setBusy] = useState(false);
   const [typed, setTyped] = useState("");
   const { t } = useTranslation();
@@ -44,15 +73,11 @@ export function ConfirmButton({
     <Dialog
       open={open}
       onOpenChange={(next) => {
-        setOpen(next);
+        onOpenChange(next);
         setTyped("");
       }}
     >
-      <DialogTrigger asChild>
-        <Button variant={variant === "destructive" ? "outline" : variant} size={size}>
-          {children}
-        </Button>
-      </DialogTrigger>
+      {children}
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
@@ -80,7 +105,8 @@ export function ConfirmButton({
               setBusy(true);
               try {
                 await onConfirm();
-                setOpen(false);
+                onOpenChange(false);
+                setTyped("");
               } catch (error) {
                 toast.error(error instanceof Error ? error.message : t("common.somethingWrong"));
               } finally {

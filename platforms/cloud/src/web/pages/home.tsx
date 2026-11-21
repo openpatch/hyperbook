@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import { createBookInput } from "../../shared/schemas";
 import { PageHeader } from "@/components/page-header";
+import { QueryState } from "@/components/query-state";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,10 +24,11 @@ import { slugify } from "@/lib/slugify";
 export function HomePage() {
   const { t } = useTranslation();
   const user = useUser();
-  const { data: books } = useQuery({
+  const booksQuery = useQuery({
     queryKey: ["books"],
     queryFn: () => unwrap(api.books.$get()),
   });
+  const books = booksQuery.data;
 
   return (
     <>
@@ -35,6 +37,7 @@ export function HomePage() {
         description={user.role === "admin" ? t("books.descriptionAdmin") : t("books.description")}
         actions={<CreateBookButton />}
       />
+      {!books && <QueryState error={booksQuery.error} retry={booksQuery.refetch} />}
       {books?.length === 0 && (
         <p className="text-muted-foreground">{t("books.empty")}</p>
       )}
