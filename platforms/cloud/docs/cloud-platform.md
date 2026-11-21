@@ -33,7 +33,7 @@ migrated and no old API is kept.
 - **M4 Instance operations** *(done except the launch itself, see [M4](#m4-instance-operations))*: signup modes, quotas, legal pages, email verification, backup docs. Launch of the OpenPatch instance.
 - **M5 Later**: OIDC, local runtime-asset mirror, custom domains (*done*, see [M5](#m5-custom-domains)), address suffixes and requests (*done*, see [M5](#m5-address-suffixes-and-name-requests)), sharing and forking.
 - **M7 Review** *(done except preview comments, see [M7](#m7-review--comments-commenters-and-access-links))*: comments on the source, commenter role, named access links without accounts.
-- **M8 Class view** *(planned, see [M8](#m8-class-view))*: what each student worked on, per element and page; names that stay on the teacher's device; CSV export; end-of-year tools.
+- **M8 Class view** *(overview, CSV and publish warning done; names on the device and end-of-year tools open; see [M8](#m8-class-view))*: what each student worked on, per element and page; names that stay on the teacher's device; CSV export; end-of-year tools.
 
 ---
 
@@ -1773,7 +1773,7 @@ in another browser, a `git push`, a zip upload.
 
 # M8: Class view
 
-*Planned 2026-11-21.* Goal: a teacher sees what the students of a group
+*Planned and built 2026-11-21* (see the work order for what is open). Goal: a teacher sees what the students of a group
 worked on, without opening each student's book. The platform already keeps
 every row a student's book saves (`store_rows`); it only shows the time of
 the last save. Students stay anonymous on the server.
@@ -1791,55 +1791,96 @@ the last save. Students stay anonymous on the server.
 
 ## Element index
 
-- Element ids are content hashes made at build time (`resolveDirectiveId`,
-  `packages/markdown/src/directiveId.ts`); `file.data.resolvedDirectiveIds`
-  already lists them per page with their directive name.
-- The build writes `.hyperbook/out/_hyperbook/elements.json`:
-  `[{ page: "/chapter-1", title, elements: [{ id, name, line }] }]`, in
-  book order. The platform copies it next to the build; a book without it
-  (built by an older Hyperbook) shows the overview by table only.
-- Directive → store table: `STORE_OF_DIRECTIVE` in
-  `packages/markdown/src/storedElements.ts`, written into the index with
-  each element. Most elements keep one row keyed by their id (text input,
-  structogram, learning map, JMP, bitflow, GeoGebra, Excalidraw,
-  multievent, and the IDEs on the shared shell in the `ide` table). The
-  embedded Online-IDE and SQL-IDE keep one row per file, keyed id + file
-  name: their elements carry `match: "prefix"` (and the SQL-IDE's
-  database `also: sqlideDatabases`, `match: "suffix"`). A row goes to the
-  element with an equal key, else the longest id it starts or ends with.
+- Element ids come from the author's `id=` or from the directive's content
+  (`resolveDirectiveId`, `packages/markdown/src/directiveId.ts`). Each
+  directive that keeps a reader's work calls `recordStoredElement` with
+  its final id (`packages/markdown/src/storedElements.ts`).
+- Builds of books with `cloud` write `_hyperbook/elements.json` into their
+  output (`packages/hyperbook/build.ts`, `writeElementIndex`), so it lands
+  in `builds/<id>/` like the rest of the site:
+
+  ```
+  { version: 1,
+    pages: [{ href, title, sections?: [outermost, …],
+              elements: [{ id, name, table, match?: "prefix" | "suffix",
+                           also?: [{ table, match }] }] }] }
+  ```
+
+  Pages in the navigation's order, titled as in the navigation; pages
+  without tasks are left out. `hyperbook render` reports the same per page
+  (`storedElements`, `title`), for the publish warning.
+- Directive → store table: `STORE_OF_DIRECTIVE`. Most elements keep one
+  row keyed by their id (text input, structogram, learning map, JMP,
+  bitflow, GeoGebra, Excalidraw, multievent, ABC editor, and the IDEs on
+  the shared shell in the `ide` table). The embedded Online-IDE and
+  SQL-IDE keep one row per file, keyed id + file name, plus the file list
+  under the bare id (`match: "prefix"`; the SQL-IDE's database changes
+  `also: sqlideDatabases`, `match: "suffix"`). A checklist item is stored
+  under `markdown-checklist:<page path>:<item id>`; its element id is
+  `:<item id>` with `match: "suffix"`.
+- A row goes to the element with an equal key, else the longest id it
+  starts or ends with (`rowMatcher` in `domain/overview.ts`).
 - Multievent used to key its state by position and page path; it now
   saves under its directive id (`data-id`) and moves an old save to it
-  when the page loads.
-- Rows whose id is in no page of the live build are counted under
-  *Elsewhere* (an element removed or edited since).
+  when the page loads. ABC editors had no id at all (every editor of a
+  book shared one saved tune); they now have one, and the shared tune is
+  not migrated.
+- The platform parses the index leniently (`parseElementIndex`): elements
+  or pages it does not understand are left out, not the whole index. It
+  is cached per published build.
+- Rows that belong to no element of the live version, except page state
+  (`tabs`, `collapsibles`, `bookmarks`, …), count as *Other*.
 
 ## API (admin host, editors and up)
 
 ```
-GET /api/groups/:id/overview   → { pages: [...index], students: [{ id, username,
-                                   lastSeenAt, cells: { [elementId]: editedAt } }] }
-GET /api/groups/:id/overview.csv
-GET /api/students/:id/rows?table=&id=   one element's saved value (read-only, audited)
+GET /api/groups/:id/overview[?known=<buildId>]
+      → { indexed, buildId, pages (null when known is the live build),
+          students: [{ id, username, lastLoginAt, lastSeenAt,
+                       cells: { "<table>/<id>": editedAt }, elsewhere }] }
+GET /api/groups/:id/overview.csv[?section=[…]&worked=0|1]   audited
+GET /api/students/:id/element?table=&id=   one element's rows (audited)
+GET /api/students/:id/elsewhere            the "Other" rows (audited)
+GET /api/books/:id/check                   + workLeftBehind once every page rendered
 ```
 
-The overview reads only `store_rows.table_name, key, edited_at` of the
-group's students; values are fetched one element at a time.
+The overview reads `store_rows` (table, key, time; never values),
+`student_sessions` and `store_heads` of the group's students; values are
+fetched one element at a time. Answers carry `Cache-Control: private,
+no-store`; the CSV also `Vary: Accept-Language, Cookie`, and cells that
+start like a formula get a leading `'`.
+
+`lastSeenAt` is the later of a request of the student's own sessions
+(kept to the minute; impersonation excluded) and their last upload.
 
 ## UI
 
-- **Group page** gets tabs: *Students* (today's table) and *Overview*.
-- **Overview**: students in rows, pages as column groups (collapsible),
-  elements as narrow columns. A cell is empty, or filled with a tooltip
-  "changed 3 days ago". Clicking a cell opens the saved value read-only
-  (text answer, code, structogram image where an editor exists), with
-  *View as student* to see it in the book.
-- **One element across the class**: clicking a column header lists every
-  student's answer to that element side by side (text inputs and code).
-- **Names**: *Names on this device* lets the teacher type or paste names
-  next to usernames (or import the CSV of the printed class list). They
-  are kept in local storage under the group's id, shown in the tables and
-  printed on the class list, and a note says they are not uploaded.
+- **Group page** has tabs: *Students* and *Overview*.
+- **Overview**: students in rows; *Worked on* and *Other* next to the
+  names; then one column per page with how many of its tasks a student
+  worked on, opening into one column per task. A filled circle opens the
+  answer read-only (text, code and IDE files by name, a tune, ticked or
+  not; other elements as their raw saved data), with *View as student*.
+  It refreshes every 30 seconds while the tab is visible, without
+  sending the pages again.
+- **Other** opens a student's work in no task of the live version, with
+  the old ids (shown only once a version is published).
 - **Online now**: a dot next to students seen in the last two minutes.
+- *(not built)* **One element across the class**: every student's answer
+  to one task side by side.
+- *(not built)* **Names on this device**.
+- *(not built)* Images of structograms and drawings in the answer view.
+
+## Changes to a book
+
+The overview follows the published version. A task removed, or changed
+without an `id=` (its id comes from its content), leaves students' work
+without its task: it stays saved and shows under *Other*. The publish
+dialog warns first: it runs the page check of the latest save, which
+collects every page's tasks, and lists the live version's tasks with
+students' work that the save no longer has, with the old ids and the
+number of students (`workLeftBehind`). Giving a changed task its old id
+keeps the work; *Publish anyway* publishes as before.
 
 ## Big books (2026-11-21)
 
@@ -1879,12 +1920,13 @@ element, so it is done one element at a time.
 
 ## Work order
 
-1. *(done)* Element index in the build (`@hyperbook/markdown`, `hyperbook` CLI),
-   copied by the platform; tests on a sample book.
+1. *(done)* Element index in the build (`@hyperbook/markdown`, `hyperbook` CLI);
+   tests on a sample book.
 2. *(done)* Overview API and CSV; tests with seeded `store_rows`
    (`tests/overview.test.ts`).
 3. *(done)* Overview tab; value viewer for text and code
-   (`tests/e2e/class-view.e2e.ts`).
+   (`tests/e2e/class-view.e2e.ts`); big books (page columns, sections,
+   only pages with work); *Other*; the publish warning.
 4. Names on this device; class list with names.
 5. *(done with 3)* Online now.
 6. Archive, export, reset, copy a book.

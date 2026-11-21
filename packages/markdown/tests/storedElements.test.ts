@@ -77,6 +77,34 @@ describe("storedElements", () => {
     ]);
   });
 
+  it("lists checklist items and ABC editors", async () => {
+    const result = await process(
+      ["- [ ] Read the page", "- [x] Try the example", "", "```abcjs editor", "X:1", "K:C", "CDEF|", "```", ""].join("\n"),
+      ctx,
+    );
+    const html = String(result.value);
+    const items = [...html.matchAll(/data-checklist-id="([^"]+)"/g)].map((m) => m[1]);
+    const abc = html.match(/class="directive-abc-music"[^>]*data-id="([^"]+)"/)![1];
+    expect(storedElements(result)).toEqual([
+      { id: `:${items[0]}`, name: "checklist", table: "checklist", match: "suffix" },
+      { id: `:${items[1]}`, name: "checklist", table: "checklist", match: "suffix" },
+      { id: abc, name: "abc-music", table: "abcMusic" },
+    ]);
+  });
+
+  it("gives ABC editors their own ids, but not plain tunes", async () => {
+    const result = await process(
+      ["```abcjs editor", "X:1", "CDEF|", "```", "", "```abcjs editor", "X:2", "GABc|", "```", "", "```abcjs", "X:3", "C|", "```", ""].join("\n"),
+      ctx,
+    );
+    const ids = [...String(result.value).matchAll(/class="directive-abc-music"[^>]*?(?:data-id="([^"]+)")?>/g)].map((m) => m[1]);
+    expect(ids).toHaveLength(3);
+    expect(ids[0]).toBeTruthy();
+    expect(ids[1]).toBeTruthy();
+    expect(ids[0]).not.toBe(ids[1]);
+    expect(ids[2]).toBeUndefined();
+  });
+
   it("is empty for a page without such elements", async () => {
     expect(storedElements(await process(`# Just text\n`, ctx))).toEqual([]);
   });

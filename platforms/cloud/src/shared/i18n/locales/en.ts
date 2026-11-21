@@ -1540,6 +1540,8 @@ export const en = {
     deletedManyToast: "{{count}} students deleted",
   },
   overview: {
+    ticked: "✓ Ticked",
+    notTicked: "Not ticked (unticked again)",
     elsewhereFor_one: "{{username}}: {{count}} saved item in no task of the live version",
     elsewhereFor_other: "{{username}}: {{count}} saved items in no task of the live version",
     elsewhereTitle: "{{username}} · other saved work",

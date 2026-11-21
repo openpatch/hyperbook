@@ -239,6 +239,68 @@ describe("the group overview", () => {
     expect(workLeftBehind(instance.db, instance.config, bookRow, same)).toEqual([]);
   });
 
+  it("counts checklist items and ABC tunes as tasks, not as other work", async () => {
+    const index = {
+      version: 1,
+      pages: [
+        {
+          href: "/tasks",
+          title: "Tasks",
+          elements: [
+            { id: ":c1", name: "checklist", table: "checklist", match: "suffix" },
+            { id: "abc", name: "abc-music", table: "abcMusic" },
+          ],
+        },
+      ],
+    };
+    const { teacher, group, students, row } = await world({ index });
+    row(students[0]!.id, "checklist", "markdown-checklist:/tasks:c1", 1000, JSON.stringify({ checked: true }));
+    row(students[0]!.id, "abcMusic", "abc", 2000, JSON.stringify({ id: "abc", tune: "CDEF|" }));
+    const res = await teacher.c.get(`/api/groups/${group.id}/overview`);
+    expect(res.body.students[0]).toMatchObject({
+      cells: { "checklist/:c1": 1000, "abcMusic/abc": 2000 },
+      elsewhere: 0,
+    });
+  });
+
+  it("reads an index it partly does not understand, without empty pages", async () => {
+    const index = {
+      version: 2,
+      pages: [
+        { href: "/a", title: "A", elements: [{ id: "q1", name: "textinput", table: "textinput" }, { id: 7 }] },
+        { href: "/empty", title: "Empty", elements: [] },
+        { title: "No href", elements: [{ id: "x", name: "textinput", table: "textinput" }] },
+      ],
+    };
+    const { teacher, group } = await world({ index });
+    const res = await teacher.c.get(`/api/groups/${group.id}/overview`);
+    expect(res.body.indexed).toBe(true);
+    expect(res.body.pages).toEqual([{ href: "/a", title: "A", elements: [{ id: "q1", name: "textinput", table: "textinput" }] }]);
+  });
+
+  it("leaves out the pages a client already has, and is never cached", async () => {
+    const { teacher, group } = await world();
+    const first = await teacher.c.get(`/api/groups/${group.id}/overview`);
+    expect(first.headers.get("cache-control")).toBe("private, no-store");
+    expect(first.body.pages).toHaveLength(1);
+    const again = await teacher.c.get(`/api/groups/${group.id}/overview?known=${first.body.buildId}`);
+    expect(again.body.pages).toBeNull();
+    expect((await teacher.c.get(`/api/groups/${group.id}/overview?known=999`)).body.pages).toHaveLength(1);
+  });
+
+  it("keeps formulas and line breaks out of the CSV's cells, and takes worked=0", async () => {
+    const index = {
+      version: 1,
+      pages: [{ href: "/a", title: "=HYPERLINK(\"x\")\r\nB", elements: [{ id: "q1", name: "textinput", table: "textinput" }] }],
+    };
+    const { teacher, group } = await world({ index });
+    const res = await teacher.c.get(`/api/groups/${group.id}/overview.csv?worked=0`);
+    expect(res.status).toBe(200);
+    expect(res.headers.get("vary")).toContain("Accept-Language");
+    const header = String(res.body).replace(/^\uFEFF/, "").split("\r\n")[0];
+    expect(header).toContain(`"'=HYPERLINK(""x"")`);
+  });
+
   it("is for the book's editors only", async () => {
     const { instance, group, students, row } = await world();
     row(students[0]!.id, "textinput", "q1", 1000);

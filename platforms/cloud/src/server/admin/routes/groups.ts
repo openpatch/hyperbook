@@ -39,6 +39,11 @@ import { idParam } from "../params";
 import { validate } from "../validate";
 import { createT, requestLocale } from "../../i18n";
 
+/** Students' work: never kept by a cache or a shared proxy. */
+function private_(c: { header: (name: string, value: string) => void }) {
+  c.header("cache-control", "private, no-store");
+}
+
 function safeJson(text: string): unknown {
   try {
     return JSON.parse(text);
@@ -248,16 +253,21 @@ export function groupRoutes({ db, config }: Deps) {
     })
 
     // The class view: who worked on which element (times only, no values).
-    .get("/:id/overview", idParam, (c) => {
+    // ?known=<buildId>: the client has that version's pages (a big book's
+    // are hundreds of KB) and only needs the students' times again.
+    .get("/:id/overview", idParam, validate("query", z.object({ known: z.coerce.number().int().optional() })), (c) => {
       const { group, book } = groupAccess(db, c.get("user"), c.req.valid("param").id);
-      return c.json(groupOverview(db, config, book, group.id));
+      const overview = groupOverview(db, config, book, group.id);
+      private_(c);
+      const known = c.req.valid("query").known;
+      return c.json({ ...overview, pages: known !== undefined && known === overview.buildId ? null : overview.pages });
     })
 
     // The CSV follows the view: ?section=["OOP","Classes"]&worked=1.
     .get(
       "/:id/overview.csv",
       idParam,
-      validate("query", z.object({ section: z.string().max(2000).optional(), worked: z.literal("1").optional() })),
+      validate("query", z.object({ section: z.string().max(2000).optional(), worked: z.enum(["0", "1"]).optional() })),
       (c) => {
       const user = c.get("user");
       const { group, book } = groupAccess(db, user, c.req.valid("param").id);
@@ -281,6 +291,9 @@ export function groupRoutes({ db, config }: Deps) {
         targetId: group.id,
       });
       const name = `${book.slug}-${group.name}`.replace(/[^\w.-]+/g, "_");
+      private_(c);
+      // Headers in the reader's language.
+      c.header("vary", "Accept-Language, Cookie");
       c.header("content-type", "text/csv; charset=utf-8");
       c.header("content-disposition", `attachment; filename="${name}.csv"`);
       // A BOM, so spreadsheet programs read the umlauts right.
@@ -430,6 +443,7 @@ export function studentRoutes({ db, config }: Deps) {
           targetId: student.id,
           data: { table, id },
         });
+        private_(c);
         return c.json({ rows, editedAt: Math.max(...rows.map((r) => r.editedAt)) });
       },
     )
@@ -446,6 +460,7 @@ export function studentRoutes({ db, config }: Deps) {
         targetId: student.id,
         data: { elsewhere: rows.length },
       });
+      private_(c);
       return c.json({ rows });
     })
 

@@ -115,14 +115,37 @@ export function readElementIndex(config: Config, book: typeof books.$inferSelect
   let index: ElementIndex | null = null;
   try {
     const file = path.join(buildDir(config, book.id, book.publishedBuildId), "_hyperbook", "elements.json");
-    const parsed = elementIndex.safeParse(JSON.parse(readFileSync(file, "utf8")));
-    index = parsed.success ? parsed.data : null;
+    index = parseElementIndex(JSON.parse(readFileSync(file, "utf8")));
   } catch {
     index = null;
   }
   if (indexCache.size >= INDEX_CACHE_SIZE) indexCache.delete(indexCache.keys().next().value!);
   indexCache.set(cacheKey, index);
   return index;
+}
+
+/**
+ * Reads an index leniently: an element or page this platform does not
+ * understand (a newer Hyperbook, a hand-edited file) is left out instead of
+ * dropping the whole index, and pages without tasks are skipped.
+ */
+export function parseElementIndex(raw: unknown): ElementIndex | null {
+  const pages = (raw as { pages?: unknown })?.pages;
+  if (!Array.isArray(pages)) return null;
+  const page = elementIndex.shape.pages.element.omit({ elements: true });
+  return {
+    version: 1,
+    pages: pages.flatMap((p) => {
+      const head = page.safeParse(p);
+      const raw = (p as { elements?: unknown })?.elements;
+      if (!head.success || !Array.isArray(raw)) return [];
+      const elements = raw.flatMap((e) => {
+        const parsed = element.safeParse(e);
+        return parsed.success ? [parsed.data] : [];
+      });
+      return elements.length > 0 ? [{ ...head.data, elements }] : [];
+    }),
+  };
 }
 
 const INDEX_CACHE_SIZE = 50;
@@ -166,7 +189,7 @@ export function groupOverview(
   config: Config,
   book: typeof books.$inferSelect,
   groupId: number,
-): { indexed: boolean; pages: ElementIndex["pages"]; students: OverviewStudent[] } {
+): { indexed: boolean; buildId: number | null; pages: ElementIndex["pages"]; students: OverviewStudent[] } {
   const index = readElementIndex(config, book);
   const cellOf = rowMatcher(index?.pages ?? []);
   const list = db
@@ -223,10 +246,25 @@ export function groupOverview(
       .all();
     for (const u of uploads) later(result.get(u.studentId)!, ms(u.at));
   }
-  return { indexed: index !== null, pages: index?.pages ?? [], students: [...result.values()] };
+  return {
+    indexed: index !== null,
+    // The live version the pages come from: a client that has them already
+    // can ask without them (?known=<buildId>).
+    buildId: index ? book.publishedBuildId : null,
+    pages: index?.pages ?? [],
+    students: [...result.values()],
+  };
 }
 
-const csvCell = (value: string) => (/[",\n;]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value);
+/**
+ * One CSV cell: quoted when needed, and text a spreadsheet would run as a
+ * formula (=, +, -, @, tab, CR at the start; a page title, a username) gets a
+ * leading ' (OWASP's advice against CSV injection).
+ */
+const csvCell = (value: string) => {
+  const safe = /^[=+\-@\t\r]/.test(value) ? `'${value}` : value;
+  return /[",\r\n;]/.test(safe) ? `"${safe.replace(/"/g, '""')}"` : safe;
+};
 
 /**
  * The overview as CSV: one row per student, one column per element (when

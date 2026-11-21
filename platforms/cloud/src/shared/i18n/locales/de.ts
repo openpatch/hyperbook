@@ -1567,6 +1567,8 @@ export const de: Messages = {
     deletedManyToast: "{{count}} Schüler gelöscht",
   },
   overview: {
+    ticked: "✓ Abgehakt",
+    notTicked: "Nicht abgehakt (wieder entfernt)",
     elsewhereFor_one: "{{username}}: {{count}} gespeicherter Eintrag in keiner Aufgabe der Live-Version",
     elsewhereFor_other: "{{username}}: {{count}} gespeicherte Einträge in keiner Aufgabe der Live-Version",
     elsewhereTitle: "{{username}} · andere gespeicherte Arbeit",

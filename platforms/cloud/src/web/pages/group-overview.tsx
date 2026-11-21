@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { QueryState } from "@/components/query-state";
@@ -26,9 +26,20 @@ import { cn } from "@/lib/utils";
 /** Seen this recently: shown as online. */
 const ONLINE_MS = 2 * 60 * 1000;
 
-type Overview = Awaited<ReturnType<typeof loadOverview>>;
+type OverviewAnswer = Awaited<ReturnType<typeof fetchOverview>>;
+type Overview = Omit<OverviewAnswer, "pages"> & { pages: NonNullable<OverviewAnswer["pages"]> };
 type OverviewStudent = Overview["students"][number];
-const loadOverview = (id: string) => unwrap(api.groups[":id"].overview.$get({ param: { id } }));
+const fetchOverview = (id: string, known: number | null) =>
+  unwrap(api.groups[":id"].overview.$get({ param: { id }, query: known === null ? {} : { known: String(known) } }));
+
+/**
+ * The overview, without sending the live version's pages again while they
+ * have not changed (a big book's are hundreds of KB, every 30 seconds).
+ */
+async function loadOverview(id: string, previous: Overview | undefined): Promise<Overview> {
+  const answer = await fetchOverview(id, previous?.buildId ?? null);
+  return { ...answer, pages: answer.pages ?? previous?.pages ?? [] };
+}
 
 /** One cell the teacher clicked: whose answer, to which element. */
 type Picked = {
@@ -117,9 +128,11 @@ export function GroupOverview({
 }) {
   const { t } = useTranslation();
   const ago = useAgo();
+  const queryClient = useQueryClient();
+  const queryKey = ["groups", groupId, "overview"];
   const query = useQuery({
-    queryKey: ["groups", groupId, "overview"],
-    queryFn: () => loadOverview(groupId),
+    queryKey,
+    queryFn: () => loadOverview(groupId, queryClient.getQueryData<Overview>(queryKey)),
     // A lesson is going on: keep it fresh while the tab is open.
     refetchInterval: 30_000,
   });
@@ -132,7 +145,11 @@ export function GroupOverview({
   if (!overview) return <QueryState error={query.error} retry={query.refetch} />;
 
   const choices = sectionChoices(overview.pages);
-  const inSection = overview.pages.filter((p) => startsWith(p.sections, section));
+  // A remembered section the book no longer has (renamed, removed) would
+  // hide everything: the whole book is shown instead.
+  const known = section.length === 0 || choices.some((c) => JSON.stringify(c) === JSON.stringify(section));
+  const current = known ? section : [];
+  const inSection = overview.pages.filter((p) => startsWith(p.sections, current));
   const worked = (page: Page) =>
     page.elements.some((e) => overview.students.some((s) => cellOf(e) in s.cells));
   const pages = onlyWorked ? inSection.filter(worked) : inSection;
@@ -146,7 +163,7 @@ export function GroupOverview({
       return next;
     });
   const csv = new URLSearchParams();
-  if (section.length > 0) csv.set("section", JSON.stringify(section));
+  if (current.length > 0) csv.set("section", JSON.stringify(current));
   if (onlyWorked) csv.set("worked", "1");
 
   return (
@@ -157,7 +174,7 @@ export function GroupOverview({
           <div className="grid gap-1.5">
             <Label htmlFor="overview-section">{t("overview.section")}</Label>
             <Select
-              value={section.length > 0 ? JSON.stringify(section) : ALL}
+              value={current.length > 0 ? JSON.stringify(current) : ALL}
               onValueChange={(v) => {
                 setSection(v === ALL ? [] : (JSON.parse(v) as string[]));
                 setOpen(new Set());
@@ -202,6 +219,7 @@ export function GroupOverview({
           </button>
         </p>
       ) : null}
+      {overview.students.length === 0 && <p className="mb-4 text-sm">{t("group.noStudents")}</p>}
       {overview.students.length > 0 && (
         // As wide as its columns, scrolling sideways when that is wider than the page.
         <div className="inline-block max-w-full overflow-x-auto rounded-md border align-top">
@@ -214,12 +232,19 @@ export function GroupOverview({
                 <th rowSpan={2} scope="col" className="px-2 py-2 text-right font-medium">
                   {t("overview.done")}
                 </th>
+                {/* Next to the totals, not after a thousand page columns. Without a
+                    live version every saved row would land here, so it is left out. */}
+                {overview.indexed && (
+                  <th rowSpan={2} scope="col" className="px-2 py-2 font-medium" title={t("overview.elsewhereHint")}>
+                    {t("overview.elsewhere")}
+                  </th>
+                )}
                 {pages.map((page) => {
                   const isOpen = open.has(page.href);
                   return (
                     <th
                       key={page.href}
-                      colSpan={isOpen ? page.elements.length : 1}
+                      colSpan={isOpen ? Math.max(1, page.elements.length) : 1}
                       scope="colgroup"
                       className="border-l px-1 py-1 text-left align-bottom font-medium"
                     >
@@ -241,9 +266,6 @@ export function GroupOverview({
                     </th>
                   );
                 })}
-                <th rowSpan={2} scope="col" className="border-l px-2 py-2 font-medium" title={t("overview.elsewhereHint")}>
-                  {t("overview.elsewhere")}
-                </th>
               </tr>
               <tr className="border-b bg-muted">
                 {pages.flatMap((page) =>
@@ -286,6 +308,20 @@ export function GroupOverview({
                     <td className="px-2 py-1.5 text-right tabular-nums text-muted-foreground">
                       {t("overview.doneOf", { done, total })}
                     </td>
+                    {overview.indexed && (
+                      <td className="p-0 text-center tabular-nums text-muted-foreground">
+                        {s.elsewhere > 0 && (
+                          <button
+                            type="button"
+                            className="h-8 w-full px-2 hover:bg-muted hover:text-foreground"
+                            aria-label={t("overview.elsewhereFor", { username: s.username, count: s.elsewhere })}
+                            onClick={() => setElsewhereOf(s)}
+                          >
+                            {s.elsewhere}
+                          </button>
+                        )}
+                      </td>
+                    )}
                     {pages.flatMap((page) =>
                       open.has(page.href)
                         ? page.elements.map((e, i) => (
@@ -311,18 +347,6 @@ export function GroupOverview({
                             />,
                           ],
                     )}
-                    <td className="border-l p-0 text-center tabular-nums text-muted-foreground">
-                      {s.elsewhere > 0 && (
-                        <button
-                          type="button"
-                          className="h-8 w-full px-2 hover:bg-muted hover:text-foreground"
-                          aria-label={t("overview.elsewhereFor", { username: s.username, count: s.elsewhere })}
-                          onClick={() => setElsewhereOf(s)}
-                        >
-                          {s.elsewhere}
-                        </button>
-                      )}
-                    </td>
                   </tr>
                 );
               })}
@@ -443,7 +467,7 @@ function PageCell({
         className="flex h-8 w-full min-w-16 items-center gap-1.5 px-2 hover:bg-muted"
       >
         <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted-foreground/15">
-          <span className="block h-full rounded-full bg-primary" style={{ width: `${(k / n) * 100}%` }} />
+          <span className="block h-full rounded-full bg-primary" style={{ width: `${n > 0 ? (k / n) * 100 : 0}%` }} />
         </span>
         <span className={cn("w-8 text-right text-xs tabular-nums", k === 0 && "text-muted-foreground/60")}>
           {k}/{n}
@@ -461,22 +485,27 @@ type ElementRow = { table: string; key: string; data: unknown; editedAt: number 
  */
 function Answers({ id, rows }: { id: string; rows: ElementRow[] }) {
   const { t } = useTranslation();
-  if (rows.length === 1) return <Answer data={rows[0]!.data} />;
+  // A file of an embedded IDE is keyed id + file name; everything else is
+  // the answer itself (a checklist item's key only ends with its id).
+  const isFile = (row: ElementRow) => row.key !== id && row.key.startsWith(id);
+  if (rows.length === 1 && !isFile(rows[0]!)) return <Answer data={rows[0]!.data} />;
   // An embedded IDE's row under the bare id only lists its file names; the
   // files themselves follow, so the list is left out.
-  const shown = rows.some((r) => r.key !== id && r.key.startsWith(id)) ? rows.filter((r) => r.key !== id) : rows;
+  const shown = rows.some(isFile) ? rows.filter((r) => r.key !== id) : rows;
   return (
     <div className="max-h-[60vh] space-y-4 overflow-auto">
       {shown.map((row) => {
         const label =
           row.key === id
             ? t("overview.fileList")
-            : row.key.startsWith(id)
+            : isFile(row)
               ? row.key.slice(id.length).replace(/^-/, "")
-              : t("overview.database");
+              : row.table === "sqlideDatabases"
+                ? t("overview.database")
+                : null;
         return (
           <div key={`${row.table}/${row.key}`}>
-            <div className="mb-1 font-mono text-xs text-muted-foreground">{label}</div>
+            {label && <div className="mb-1 font-mono text-xs text-muted-foreground">{label}</div>}
             <Answer data={row.data} />
           </div>
         );
@@ -487,7 +516,14 @@ function Answers({ id, rows }: { id: string; rows: ElementRow[] }) {
 
 /** The saved value, readable: a text answer, a script, files, or the raw data. */
 function Answer({ data }: { data: unknown }) {
+  const { t } = useTranslation();
   const value = (data ?? {}) as Record<string, unknown>;
+  if (typeof value.checked === "boolean") {
+    return <p className="rounded-md bg-muted p-3">{value.checked ? t("overview.ticked") : t("overview.notTicked")}</p>;
+  }
+  if (typeof value.tune === "string") {
+    return <pre className="max-h-80 overflow-auto rounded-md bg-muted p-3 text-xs">{value.tune}</pre>;
+  }
   if (typeof value.script === "string") {
     return <pre className="max-h-80 overflow-auto rounded-md bg-muted p-3 text-xs">{value.script}</pre>;
   }

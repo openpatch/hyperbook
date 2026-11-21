@@ -1,6 +1,8 @@
 import { ListItem, Root } from "mdast";
 import { visit } from "unist-util-visit";
+import { VFile } from "vfile";
 import { stableHash } from "./objectHash";
+import { recordStoredElement } from "./storedElements";
 
 /**
  * Give every GFM task-list item a content-derived storage id.
@@ -11,7 +13,7 @@ import { stableHash } from "./objectHash";
  * orphan a reader's saved progress.
  */
 export default function () {
-  return function (tree: Root) {
+  return function (tree: Root, file: VFile) {
     const occurrences = new Map<string, number>();
 
     visit(tree, "listItem", (node: ListItem) => {
@@ -25,6 +27,8 @@ export default function () {
       node.data ||= {};
       node.data.hProperties ||= {};
       node.data.hProperties["data-checklist-id"] = id;
+      // The stored key ends with ":" + id (bootstrap.js).
+      recordStoredElement(file, "checklist", `:${id}`, node);
     });
   };
 }

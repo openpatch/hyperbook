@@ -47,6 +47,30 @@ Schülerinnen und Schüler melden sich mit Benutzername und Passwort von ihrer Z
 
 Lehrkräfte können die Arbeit einer Schülerin oder eines Schülers in Hyperbook Cloud mit **View as student** öffnen. Das Buch zeigt dann ein Banner mit dem Namen und speichert nichts.
 
+## Was Lehrkräfte sehen
+
+Die Anmeldeseite sagt den Schülerinnen und Schülern, dass ihre Arbeit in ihrem Zugang gespeichert wird und ihre Lehrkraft sie sehen kann.
+
+In Hyperbook Cloud zeigt der Reiter **Übersicht** einer Gruppe, was jede Schülerin und jeder Schüler in der veröffentlichten Version des Buchs bearbeitet hat:
+
+- Eine Spalte pro Seite mit der Zahl der bearbeiteten Aufgaben. Ein Klick auf eine Seite öffnet eine Spalte pro Aufgabe, ein Klick auf einen gefüllten Kreis zeigt die Antwort (Text, Code, eine Melodie, ein abgehakter Punkt einer Checkliste, …).
+- Zunächst erscheinen nur Seiten, auf denen jemand aus der Gruppe gearbeitet hat. Eine Auswahl beschränkt die Übersicht auf einen Abschnitt. Beides wird pro Gruppe gemerkt.
+- Ein Punkt markiert, wer in den letzten zwei Minuten im Buch war. Die Übersicht aktualisiert sich alle 30 Sekunden.
+- **Andere** zeigt Arbeit, die zu keiner Aufgabe der veröffentlichten Version gehört.
+- **Als CSV herunterladen** exportiert, was gerade zu sehen ist, mit Benutzernamen und Zeiten.
+
+Aufgaben sind Texteingaben, die Code-Editoren und IDEs, Struktogramme, Learningmaps, Zeichnungen, JMP, Bitflow, GeoGebra, Multievent, ABC-Editoren und Punkte von Checklisten.
+
+### Arbeit behalten, wenn eine Aufgabe geändert wird
+
+Die gespeicherte Arbeit einer Aufgabe wird über ihre id gefunden. Ohne `id` ergibt sich die id aus dem Inhalt der Aufgabe: Wird die Aufgabe geändert (auch nur ein Tippfehler), bekommt sie eine neue id. Das Buch zeigt die früheren Antworten dann nicht mehr, sie erscheinen unter **Andere**. Vor dem Veröffentlichen listet Hyperbook Cloud die betroffenen Aufgaben mit Arbeit von Schülerinnen und Schülern und ihre alten ids auf. Mit der alten id behält eine geänderte Aufgabe die Arbeit, zum Beispiel:
+
+```md
+::textinput{id="a1b2c3d4"}
+```
+
+Wichtige Aufgaben bekommen am besten von Anfang an eine `id`.
+
 ## Was gespeichert wird
 
 Nach der Anmeldung wird alles, was die interaktiven Elemente des Buchs speichern (Code-Editoren, Lesezeichen, Zeichnungen, Antworten, …), in Hyperbook Cloud gesichert:

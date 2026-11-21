@@ -46,6 +46,30 @@ Students log in with the username and password from their login card, or by scan
 
 Teachers can open a student's work with **View as student** in Hyperbook Cloud. The book then shows a banner with the student's name and saves nothing.
 
+## What teachers see
+
+The login page tells students that their work is saved to their account and that their teacher can see it.
+
+In Hyperbook Cloud, a group's **Overview** tab shows what each student worked on in the published version of the book:
+
+- One column per page with how many of its tasks a student worked on. Click a page to open one column per task, and a filled circle to read that answer (text, code, a tune, a ticked checklist item, …).
+- By default only pages someone in the group worked on are shown. A section picker narrows the overview to a chapter. Both choices are remembered per group.
+- A dot marks students who were in the book in the last two minutes. The overview refreshes every 30 seconds.
+- **Other** lists work that belongs to no task of the published version.
+- **Download as CSV** exports what is shown, with usernames and times.
+
+Tasks are text inputs, the code editors and IDEs, structograms, learning maps, drawings, JMP, bitflow, GeoGebra, multievent, ABC editors and checklist items.
+
+### Keeping students' work when you edit a task
+
+A task's saved work is found by its id. Without an `id`, the id comes from the task's content, so changing the task (even fixing a typo) gives it a new id: the book no longer shows the earlier answers, which then appear under **Other**. Before publishing, Hyperbook Cloud lists the tasks with students' work that would be affected and shows their old ids. Give a changed task its old id to keep the work, for example:
+
+```md
+::textinput{id="a1b2c3d4"}
+```
+
+Giving important tasks an `id` from the start avoids this.
+
 ## What is saved
 
 Once logged in, everything the book's interactive elements store (code editors, bookmarks, drawings, answers, …) is saved to Hyperbook Cloud:

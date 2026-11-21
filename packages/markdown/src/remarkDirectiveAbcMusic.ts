@@ -11,6 +11,8 @@ import {
   requestJS,
 } from "./remarkHelper";
 import hash from "./objectHash";
+import { resolveDirectiveId } from "./directiveId";
+import { recordStoredElement } from "./storedElements";
 import { i18n } from "./i18n";
 import { icon } from "./icons";
 
@@ -37,11 +39,17 @@ export default (ctx: HyperbookContext) => () => {
         const value = node.value || toString(node.children);
         const editor = node.meta?.includes("editor");
 
+        // An editor keeps the reader's tune under this id (client.js). It
+        // had none before, so every editor of a book shared one saved tune.
+        const id = editor ? resolveDirectiveId(file, node) : undefined;
+        if (id) recordStoredElement(file, name, id, node);
+
         data.hName = "div";
         data.hProperties = {
           class: "directive-abc-music",
           "data-tune": Buffer.from(value).toString("base64"),
           "data-editor": editor ? "true" : "false",
+          ...(id ? { "data-id": id } : {}),
         };
         data.hChildren = [
           {

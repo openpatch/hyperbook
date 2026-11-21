@@ -29,6 +29,11 @@ export const STORE_OF_DIRECTIVE: Readonly<Record<string, StoreSpec>> = {
   bitflow: { table: "bitflow" },
   geogebra: { table: "geogebra" },
   multievent: { table: "multievent" },
+  // ```abcjs editor: the tune a reader edited.
+  "abc-music": { table: "abcMusic" },
+  // A GFM task-list item ("- [ ] …"), saved by bootstrap.js under
+  // markdown-checklist:<page path>:<item id>, so matched by its end.
+  checklist: { table: "checklist", match: "suffix" },
   // packages/web-component-excalidraw: db.excalidraw.put({ id, … })
   excalidraw: { table: "excalidraw" },
   // The IDEs on the shared IDE shell (ide-bundle) share one table, one row

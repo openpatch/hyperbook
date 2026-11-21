@@ -120,6 +120,21 @@ describe("the class view", () => {
     await device.context().close();
   }, 90_000);
 
+  it("keeps the view usable: a stale section, the work toggle and the CSV link", async () => {
+    // A section remembered from before the book changed hides nothing.
+    await admin.goto(`${server.origin}/groups/${groupId}?tab=overview`);
+    await admin.evaluate((id) => localStorage.setItem(`hb-overview-section:${id}`, JSON.stringify(["Gone"])), groupId);
+    await admin.reload();
+    await admin.getByRole("row", { name: /ada/ }).waitFor();
+    await admin.getByText("1 of 1 page").waitFor();
+
+    const csv = admin.getByRole("link", { name: "Download as CSV" });
+    expect(await csv.getAttribute("href")).toContain("worked=1");
+    await admin.getByText("Only pages with work").click();
+    expect(await csv.getAttribute("href")).not.toContain("worked=1");
+    await admin.getByText("Only pages with work").click();
+  });
+
   it("warns before a publish leaves a student's work without its task", async () => {
     // The previous test: ada answered q2. Now q2 is gone from the book.
     await admin.goto(`${server.origin}/books/${bookId}`);
