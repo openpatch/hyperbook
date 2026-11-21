@@ -474,6 +474,9 @@ importers:
       esbuild:
         specifier: 0.28.2
         version: 0.28.2
+      fake-indexeddb:
+        specifier: ^6.2.8
+        version: 6.2.8
       gemoji:
         specifier: ^8.1.0
         version: 8.1.0
@@ -6088,6 +6091,10 @@ packages:
   extglob@2.0.4:
     resolution: {integrity: sha512-Nmb6QXkELsuBr24CJSkilo6UHHgbekK5UiZgfE6UHD3Eb27YC6oD+bhcT+tJ6cl8dmsgdQxnWlcry8ksBIBLpw==}
     engines: {node: '>=0.10.0'}
+
+  fake-indexeddb@6.2.8:
+    resolution: {integrity: sha512-mpVW/HLUqwKXJ6F/s0hMgdK1eQfM4ncTHDioNGHWL0WKV3VcZCoZq1NKgboBbAge07aRCO7L48yziKssL59XEQ==}
+    engines: {node: '>=18'}
 
   fast-deep-equal@3.1.3:
     resolution: {integrity: sha512-f3qQ9oQy9j2AhBe/H9VC91wLmKBCCU/gDOnKNAYG5hswO7BLKj09Hc5HYNz9cGI++xlpDCIgDaitVs03ATR84Q==}
@@ -15431,6 +15438,8 @@ snapshots:
       to-regex: 3.0.2
     transitivePeerDependencies:
       - supports-color
+
+  fake-indexeddb@6.2.8: {}
 
   fast-deep-equal@3.1.3: {}
 

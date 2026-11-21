@@ -401,39 +401,42 @@ export const impersonationCodes = sqliteTable("impersonation_codes", {
 });
 
 /**
- * A student's saved state in a book: the latest snapshot (a Dexie export) and
- * the revision the client uses as its watermark (`lastEventId`).
+ * A student's saved state in a book: the revision, which grows by one per
+ * accepted upload, and the size of all live rows, for the quota.
  */
 export const storeHeads = sqliteTable("store_heads", {
   studentId: integer("student_id")
     .primaryKey()
     .references(() => students.id, { onDelete: "cascade" }),
   revision: integer("revision").notNull().default(0),
-  snapshot: text("snapshot"),
-  snapshotRevision: integer("snapshot_revision").notNull().default(0),
   sizeBytes: integer("size_bytes").notNull().default(0),
   updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull(),
 });
 
-/** Changes since the snapshot, in the wire format of cloud.js. */
-export const storeEvents = sqliteTable(
-  "store_events",
+/**
+ * One row of a student's local store (a Dexie table row), as last uploaded.
+ * `key` is the row's primary key as JSON; `data` is null once the row was
+ * deleted, so other devices learn about the deletion. `editedAt` is when the
+ * student made the change on their device (ms), which settles which of two
+ * devices' changes to a row wins.
+ */
+export const storeRows = sqliteTable(
+  "store_rows",
   {
-    id: integer("id").primaryKey({ autoIncrement: true }),
     studentId: integer("student_id")
       .notNull()
       .references(() => students.id, { onDelete: "cascade" }),
-    revision: integer("revision").notNull(),
     tableName: text("table_name").notNull(),
-    tableSchema: text("table_schema"),
-    operation: text("operation", {
-      enum: ["create", "update", "delete"],
-    }).notNull(),
-    primKey: text("prim_key").notNull(),
+    key: text("key").notNull(),
     data: text("data"),
-    createdAt: createdAt(),
+    revision: integer("revision").notNull(),
+    editedAt: integer("edited_at").notNull(),
+    updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull(),
   },
-  (t) => [index("store_events_student_idx").on(t.studentId, t.id)],
+  (t) => [
+    primaryKey({ columns: [t.studentId, t.tableName, t.key] }),
+    index("store_rows_revision_idx").on(t.studentId, t.revision),
+  ],
 );
 
 export const auditLog = sqliteTable(

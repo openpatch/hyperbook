@@ -293,7 +293,7 @@ hyperbook.store = (function () {
 
   /**
    * Clear all store data after user confirmation.
-   * Syncs the reset to the cloud if connected.
+   * Replaces the saved state in the cloud if logged in.
    * @returns {Promise<void>}
    */
   async function hyperbookReset() {
@@ -307,15 +307,11 @@ hyperbook.store = (function () {
       return;
     }
 
-    clearTable(db);
+    await clearTable(db);
 
-    // Send empty snapshot to cloud
+    // The emptied store replaces the saved one.
     if (hyperbook.cloud) {
-      try {
-        await hyperbook.cloud.sendSnapshot();
-      } catch (e) {
-        console.error("Failed to sync reset to cloud:", e);
-      }
+      await hyperbook.cloud.replaceAll();
     }
 
     alert(hyperbook.i18n.get("store-reset-sucessful"));
@@ -324,7 +320,7 @@ hyperbook.store = (function () {
 
   /**
    * Import store data from a user-selected JSON file.
-   * Syncs the import to the cloud if connected.
+   * Replaces the saved state in the cloud if logged in.
    * @returns {Promise<void>}
    */
   async function hyperbookImport() {
@@ -367,13 +363,9 @@ hyperbook.store = (function () {
 
         await migrateImportedData();
 
-        // Send full snapshot to cloud after import
+        // The imported store replaces the saved one.
         if (hyperbook.cloud) {
-          try {
-            await hyperbook.cloud.sendSnapshot();
-          } catch (e) {
-            console.error("Failed to sync import to cloud:", e);
-          }
+          await hyperbook.cloud.replaceAll();
         }
 
         alert(hyperbook.i18n.get("store-import-sucessful"));

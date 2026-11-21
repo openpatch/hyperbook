@@ -15,7 +15,7 @@ import {
   deleteSessionsOfStudent,
 } from "../../auth/student-sessions";
 import { publicOrigin } from "../../domain/custom-domains";
-import { lastSavedAt, readState } from "../../store/store";
+import { exportState, lastSavedAt } from "../../store/store";
 import { open } from "../../crypto/sealed";
 import { books, groups, students } from "../../db/schema";
 import type { Deps } from "../../deps";
@@ -360,7 +360,7 @@ export function studentRoutes({ db, config }: Deps) {
     .get("/:id/data", idParam, (c) => {
       const user = c.get("user");
       const { student } = studentAccess(db, user, c.req.valid("param").id);
-      const state = readState(db, student.id);
+      const state = exportState(db, student.id);
       audit(db, {
         actorUserId: user.id,
         action: "student.data.download",
@@ -368,7 +368,7 @@ export function studentRoutes({ db, config }: Deps) {
         targetId: student.id,
       });
       c.header("content-disposition", `attachment; filename="${student.username}.json"`);
-      return c.json({ username: student.username, ...state });
+      return c.json({ username: student.username, revision: 0, updatedAt: null, tables: {}, ...state });
     })
 
     .post("/:id/login-key/regenerate", idParam, (c) => {

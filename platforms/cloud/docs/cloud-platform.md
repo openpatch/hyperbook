@@ -514,9 +514,8 @@ POST /_hyperbook/api/login          { username, password, sharedDevice?, token? 
 POST /_hyperbook/api/login/key      { key, sharedDevice?, token? }      (QR code)
 POST /_hyperbook/api/logout
 GET  /_hyperbook/api/session        → { user: { username }, readonly } | 401
-GET  /_hyperbook/api/store          → { snapshot, lastEventId }
-POST /_hyperbook/api/store/events   { events, afterEventId } → { lastEventId } | 409
-POST /_hyperbook/api/store/snapshot { data } → { lastEventId }
+GET  /_hyperbook/api/store?since=N  → { revision, rows }
+POST /_hyperbook/api/store          { since, rows, replace? } → { revision, rows }
 POST /_hyperbook/api/impersonate    { code } → read-only session (one-time code)
 
 GET  /_hyperbook/login              login page (password form, QR fragment)
@@ -546,25 +545,50 @@ student_sessions  id_hash (sha256 of token), student_id, kind ('cookie'|'token')
 
 ## Store
 
-The wire format of `packages/markdown/assets/cloud.js` stays: events
-`{ table, schema, op: "create"|"update"|"delete", primKey, data }`, a Dexie
-export as snapshot, `afterEventId` as the watermark. The replay logic of the
-old cloud's `lib/eventSourcing.js` is ported to TypeScript with its tests.
+*Redesigned 2026-11-20* (the first version ported the old cloud's event log;
+it asked "leave page?" after every change and could overwrite unsent work
+with an older copy on the next page load). Sync is row-based and idempotent:
 
 ```
-store_heads   student_id (PK), revision, snapshot (json), snapshot_revision,
-              size_bytes, updated_at
-store_events  id, student_id, revision, table_name, table_schema, operation,
-              prim_key (json), data (json), created_at
+store_heads  student_id (PK), revision, size_bytes, updated_at
+store_rows   student_id, table_name, key (json), data (json | null = deleted),
+             revision, edited_at (device ms), updated_at
+                                                 PK (student_id, table_name, key)
 ```
 
-- `lastEventId` is the student's `revision`: +1 per accepted batch or
-  snapshot. An events batch whose `afterEventId` differs from the current
-  revision is refused with 409, in the same transaction as the append.
-- After 100 events the state is compacted into the snapshot and the events
-  are deleted (`STORE_COMPACT_EVENTS`).
-- Limits: `STORE_MAX_MB` (default 10) per request and per student state.
-- Everything is deleted with the student (cascade).
+- A row is `{ table, key, data }`: one row of the book's Dexie store, `data`
+  null once deleted. The server keeps one value per row.
+- `POST /store` stores the rows, advances the revision by one and stamps
+  the rows with it, then answers with the rows other devices stamped after
+  `since`. Sending the same rows again is harmless: there is no 409.
+  `replace: true` stores the rows unconditionally and deletes every row the
+  upload does not name (import, reset). At most 1000 rows per request.
+- Uploaded rows carry `at` (when the student changed the row, device clock,
+  capped at server time) and `base` (the revision the device had seen when
+  the row first changed). If the stored row has a later revision than
+  `base`, the device never saw it: the change with the later `at` wins, and
+  a losing row comes back in the answer so the device takes it over. A
+  device's clock only matters in such a conflict. When every row loses, the
+  revision stays.
+- `GET /store?since=N` returns the rows stamped after N; from 0 only the live
+  rows. Deletions are kept as rows with null data, so devices learn of them.
+- `cloud.js` marks every changed row in localStorage the moment it changes
+  (Dexie hooks; the sync's own writes are recognised by their transaction),
+  one localStorage entry per row, so tabs never overwrite each other's
+  marks, and removes a mark only when the server has that value. On page
+  load it uploads what is marked, takes in newer rows from other devices —
+  never over a marked row, checked inside the IndexedDB transaction — and
+  reloads once if the page shows outdated data. The first sync of a student
+  on a device replaces the local store.
+- Tabs sync one at a time (Web Locks). Uploads go in batches of at most 500
+  rows and about 1 MB; a batch refused with 400 or 413 is split until the
+  refused row is alone, which is then set aside (marked refused) until it
+  changes or the reader retries, so it never holds up the other rows.
+- Uploads over 8 KB come gzip-compressed (`Content-Encoding: gzip`, allowed
+  through CORS); the server unpacks at most `STORE_MAX_MB` and answers 413
+  beyond. The keepalive upload on page hide stays plain.
+- Limits: `STORE_MAX_MB` (default 10) per request and per student state (the
+  live rows). Everything is deleted with the student (cascade).
 
 ## Private books
 
@@ -592,7 +616,7 @@ shown. Every impersonation is in the audit log.
 ## Teachers' view
 
 The group page shows each student's last save, and offers "View as
-student" and "Download data" (the reconstructed state as JSON, audited).
+student" and "Download data" (the saved rows by table as JSON, audited).
 
 ## Changes to books (`@hyperbook/markdown`, `@hyperbook/types`)
 
@@ -630,8 +654,8 @@ Editing in the browser (M3), signup and quotas (M4), single sign-on (M5).
   sessions (a lost card should stop working at once).
 - The platform's pages on book hosts pick English or German from the
   browser's language.
-- `GET /_hyperbook/api/store` always answers with the watermark, also before
-  anything was saved, and `cloud.js` adopts it; the old cloud answered 404.
+- `GET /_hyperbook/api/store` always answers with the revision, also before
+  anything was saved; the old cloud answered 404.
 - Only the root `hyperbook.json` gets `cloud.sameOrigin`; the books of a
   library (`hyperlibrary.json`) do not log in yet.
 

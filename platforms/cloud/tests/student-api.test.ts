@@ -1,4 +1,5 @@
 import { zipSync } from "fflate";
+import { gzipSync } from "node:zlib";
 import { describe, expect, it } from "vitest";
 import { bookClient } from "./book-client";
 import { loggedIn, setup } from "./helpers";
@@ -16,13 +17,7 @@ async function world() {
   return { instance, owner, book, group, student };
 }
 
-const bookmark = (path: string) => ({
-  table: "bookmarks",
-  schema: "path,label",
-  op: "create",
-  primKey: path,
-  data: { path, label: path },
-});
+const bookmark = (path: string) => ({ table: "bookmarks", key: path, data: { path, label: path } });
 
 describe("student login", () => {
   it("logs in with a password and keeps a cookie session", async () => {
@@ -113,45 +108,88 @@ describe("student store", () => {
     return { ...w, b };
   }
 
-  it("saves events and returns the rebuilt state", async () => {
+  it("saves rows and returns them to another device", async () => {
     const { b } = await loggedInStudent();
-    expect((await b.get("/_hyperbook/api/store")).body).toMatchObject({ snapshot: null, lastEventId: 0 });
-    const saved = await b.post("/_hyperbook/api/store/events", { events: [bookmark("/a")], afterEventId: 0 });
-    expect(saved.body).toEqual({ success: true, lastEventId: 1 });
-    const state = (await b.get("/_hyperbook/api/store")).body;
-    expect(state.lastEventId).toBe(1);
-    const rows = state.snapshot.data.hyperbook.data.data.find((d: any) => d.tableName === "bookmarks").rows;
-    expect(rows).toEqual([{ path: "/a", label: "/a" }]);
+    expect((await b.get("/_hyperbook/api/store")).body).toEqual({ revision: 0, rows: [] });
+    const saved = await b.post("/_hyperbook/api/store", { since: 0, rows: [bookmark("/a")] });
+    expect(saved.body).toEqual({ revision: 1, rows: [] });
+    expect((await b.get("/_hyperbook/api/store")).body).toEqual({ revision: 1, rows: [bookmark("/a")] });
+    expect((await b.get("/_hyperbook/api/store?since=1")).body).toEqual({ revision: 1, rows: [] });
   });
 
-  it("answers a stale watermark with 409", async () => {
+  it("accepts the same rows twice, and answers with what others saved", async () => {
     const { b } = await loggedInStudent();
-    await b.post("/_hyperbook/api/store/events", { events: [bookmark("/a")], afterEventId: 0 });
-    const res = await b.post("/_hyperbook/api/store/events", { events: [bookmark("/b")], afterEventId: 0 });
-    expect(res.status).toBe(409);
-    expect(res.body.serverLastEventId).toBe(1);
+    await b.post("/_hyperbook/api/store", { since: 0, rows: [bookmark("/a")] });
+    // A device that has not seen revision 1 resends and catches up at once.
+    const res = await b.post("/_hyperbook/api/store", { since: 0, rows: [bookmark("/b")] });
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({ revision: 2, rows: [bookmark("/a")] });
   });
 
-  it("refuses malformed batches with 400", async () => {
+  it("refuses malformed rows with 400", async () => {
     const { b } = await loggedInStudent();
-    expect((await b.post("/_hyperbook/api/store/events", { events: [] })).status).toBe(400);
-    const bad = await b.post("/_hyperbook/api/store/events", { events: [{ table: "t", op: "drop", primKey: 1 }] });
+    expect((await b.post("/_hyperbook/api/store", { rows: [] })).status).toBe(400);
+    const bad = await b.post("/_hyperbook/api/store", { since: 0, rows: [{ table: "a b", key: 1, data: null }] });
     expect(bad.status).toBe(400);
-    expect(bad.body.error).toMatch(/invalid operation/);
+    expect(bad.body.error).toMatch(/table name/);
   });
 
-  it("replaces the state with a snapshot", async () => {
+  it("replaces the whole state", async () => {
     const { b } = await loggedInStudent();
-    const data = { version: 1, data: { hyperbook: { formatName: "dexie", data: { tables: [], data: [] } } } };
-    expect((await b.post("/_hyperbook/api/store/snapshot", { data })).body).toEqual({ success: true, lastEventId: 1 });
-    expect((await b.post("/_hyperbook/api/store/snapshot", { data: "nope" })).status).toBe(400);
+    await b.post("/_hyperbook/api/store", { since: 0, rows: [bookmark("/a")] });
+    expect((await b.post("/_hyperbook/api/store", { since: 1, rows: [], replace: true })).body).toEqual({
+      revision: 2,
+      rows: [],
+    });
+    expect((await b.get("/_hyperbook/api/store")).body).toEqual({ revision: 2, rows: [] });
+  });
+
+  describe("gzip-compressed uploads", () => {
+    async function send(w: Awaited<ReturnType<typeof loggedInStudent>>, body: Buffer | string, encoding?: string) {
+      const res = await w.instance.app.request("/_hyperbook/api/store", {
+        method: "POST",
+        headers: {
+          host: HOST,
+          origin: `http://${HOST}`,
+          cookie: w.b.cookie,
+          "content-type": "application/json",
+          ...(encoding && { "content-encoding": encoding }),
+        },
+        body: typeof body === "string" ? body : new Uint8Array(body),
+      });
+      return { status: res.status, body: await res.json() };
+    }
+
+    it("unpacks them", async () => {
+      const w = await loggedInStudent();
+      const rows = [{ table: "ide", key: "p1", data: { id: "p1", code: "print('hi')\n".repeat(2000) } }];
+      const packed = gzipSync(JSON.stringify({ since: 0, rows }));
+      expect(await send(w, packed, "gzip")).toEqual({ status: 200, body: { revision: 1, rows: [] } });
+      expect((await w.b.get("/_hyperbook/api/store")).body.rows).toEqual(rows);
+    });
+
+    it("refuses one that unpacks to more than the limit", async () => {
+      const w = await loggedInStudent();
+      // About 10 KB packed, 20 MB unpacked.
+      const bomb = gzipSync(JSON.stringify({ since: 0, rows: [{ table: "t", key: 1, data: { x: "a".repeat(20 * 1024 * 1024) } }] }));
+      expect(bomb.length).toBeLessThan(100 * 1024);
+      expect((await send(w, bomb, "gzip")).status).toBe(413);
+      expect((await w.b.get("/_hyperbook/api/store")).body).toEqual({ revision: 0, rows: [] });
+    });
+
+    it("refuses broken data and unknown encodings", async () => {
+      const w = await loggedInStudent();
+      expect((await send(w, "not gzip", "gzip")).status).toBe(400);
+      expect((await send(w, gzipSync("not json"), "gzip")).status).toBe(400);
+      expect((await send(w, Buffer.from("x"), "br")).status).toBe(415);
+    });
   });
 
   it("needs a session", async () => {
     const { instance } = await world();
     const b = bookClient(instance, HOST);
     expect((await b.get("/_hyperbook/api/store")).status).toBe(401);
-    expect((await b.post("/_hyperbook/api/store/events", { events: [bookmark("/a")] })).status).toBe(401);
+    expect((await b.post("/_hyperbook/api/store", { since: 0, rows: [bookmark("/a")] })).status).toBe(401);
   });
 });
 
@@ -168,13 +206,14 @@ describe("books hosted elsewhere", () => {
     const { instance } = await external();
     const site = bookClient(instance, HOST, { origin: EXTERNAL });
 
-    const preflight = await instance.app.request("/_hyperbook/api/store/events", {
+    const preflight = await instance.app.request("/_hyperbook/api/store", {
       method: "OPTIONS",
       headers: { host: HOST, origin: EXTERNAL, "access-control-request-method": "POST" },
     });
     expect(preflight.status).toBe(204);
     expect(preflight.headers.get("access-control-allow-origin")).toBe(EXTERNAL);
     expect(preflight.headers.get("access-control-allow-headers")).toContain("Authorization");
+    expect(preflight.headers.get("access-control-allow-headers")).toContain("Content-Encoding");
     expect(preflight.headers.get("access-control-allow-credentials")).toBeNull();
 
     const login = await site.post("/_hyperbook/api/login", { username: "ada", password: "secret-pass", token: true });
@@ -183,8 +222,8 @@ describe("books hosted elsewhere", () => {
     expect(login.headers.get("access-control-allow-origin")).toBe(EXTERNAL);
     const auth = { authorization: `Bearer ${login.body.token}` };
 
-    const saved = await site.post("/_hyperbook/api/store/events", { events: [bookmark("/a")], afterEventId: 0 }, auth);
-    expect(saved.body.lastEventId).toBe(1);
+    const saved = await site.post("/_hyperbook/api/store", { since: 0, rows: [bookmark("/a")] }, auth);
+    expect(saved.body.revision).toBe(1);
     expect((await site.get("/_hyperbook/api/session", auth)).body.user.username).toBe("ada");
 
     // Another site gets no CORS headers, so its page cannot read anything.

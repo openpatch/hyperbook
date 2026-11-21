@@ -1,3 +1,4 @@
+import { gunzipSync } from "node:zlib";
 import { and, eq } from "drizzle-orm";
 import { type Context, Hono } from "hono";
 import { bodyLimit } from "hono/body-limit";
@@ -20,8 +21,7 @@ import { sha256 } from "../crypto/tokens";
 import { students } from "../db/schema";
 import type { Deps } from "../deps";
 import type { BookRow } from "../domain/books";
-import { type Snapshot, type WireEvent, validateEvents } from "../store/replay";
-import { StoreTooLargeError, appendEvents, readState, replaceSnapshot } from "../store/store";
+import { StoreTooLargeError, type SyncRow, readChanges, validateRows, writeRows } from "../store/store";
 import type { BookEnv } from "./env";
 
 /*
@@ -74,14 +74,40 @@ const keyInput = z.object({
 
 const impersonateInput = z.object({ code: z.string().min(1).max(200), token: z.boolean().optional() });
 
-const eventsInput = z.object({
-  events: z.array(z.unknown()),
-  afterEventId: z.number().int().nullable().optional(),
+const syncInput = z.object({
+  since: z.number().int().min(0),
+  rows: z.array(z.unknown()),
+  replace: z.boolean().optional(),
 });
 
-const snapshotInput = z.object({
-  data: z.looseObject({ data: z.record(z.string(), z.unknown()) }),
-});
+/**
+ * The store upload's JSON, gzip-compressed or not: cloud.js compresses large
+ * uploads. Unpacking stops at `maxBytes`, so a small request cannot expand
+ * into an unbounded one.
+ */
+async function storeUpload(c: Context, maxBytes: number) {
+  const encoding = (c.req.header("content-encoding") ?? "identity").trim().toLowerCase();
+  if (encoding === "identity") return json(c, syncInput);
+  if (encoding !== "gzip") throw new HTTPException(415, { message: "Send JSON, plain or gzip-compressed" });
+  let text: string;
+  try {
+    text = gunzipSync(Buffer.from(await c.req.arrayBuffer()), { maxOutputLength: maxBytes }).toString("utf8");
+  } catch (error) {
+    if ((error as { code?: string }).code === "ERR_BUFFER_TOO_LARGE") {
+      throw new HTTPException(413, { message: "Too much data in one request" });
+    }
+    throw new HTTPException(400, { message: "Invalid gzip data" });
+  }
+  let body: unknown;
+  try {
+    body = JSON.parse(text);
+  } catch {
+    throw new HTTPException(400, { message: "Send JSON" });
+  }
+  const parsed = syncInput.safeParse(body);
+  if (!parsed.success) throw new HTTPException(400, { message: "Invalid input" });
+  return parsed.data;
+}
 
 async function json<T extends z.ZodType>(c: Context, schema: T): Promise<z.infer<T>> {
   let body: unknown;
@@ -99,7 +125,7 @@ export function studentApi({ db, config }: Deps) {
   const passwordFailures = new FailureLimiter();
   // Keys are 192 random bits, so this only keeps a broken scanner quiet.
   const keyFailures = new FailureLimiter(100);
-  const storeLimits = { maxBytes: config.store.maxBytes, compactAfter: config.store.compactAfter };
+  const storeLimits = { maxBytes: config.store.maxBytes };
 
   const cors = createMiddleware<BookEnv>(async (c, next) => {
     const origin = c.req.header("origin");
@@ -109,7 +135,7 @@ export function studentApi({ db, config }: Deps) {
       c.header("vary", "Origin");
       if (c.req.method === "OPTIONS") {
         c.header("access-control-allow-methods", "GET, POST");
-        c.header("access-control-allow-headers", "Authorization, Content-Type");
+        c.header("access-control-allow-headers", "Authorization, Content-Type, Content-Encoding");
         c.header("access-control-max-age", "600");
         return c.body(null, 204);
       }
@@ -246,13 +272,16 @@ export function studentApi({ db, config }: Deps) {
       return c.json({ user: { username: student.username }, readonly: student.readonly });
     })
 
+    // The rows saved after revision `since` (0: everything), and the revision.
     .get("/store", requireStudent, (c) => {
-      const state = readState(db, c.get("student")!.studentId);
-      return c.json(state);
+      const since = Number.parseInt(c.req.query("since") ?? "0", 10);
+      return c.json(readChanges(db, c.get("student")!.studentId, Number.isFinite(since) && since > 0 ? since : 0));
     })
 
+    // Saves rows and answers with what other devices saved after `since`.
+    // The body may be gzip-compressed (Content-Encoding: gzip).
     .post(
-      "/store/events",
+      "/store",
       requireStudent,
       requireWritable,
       bodyLimit({
@@ -262,46 +291,18 @@ export function studentApi({ db, config }: Deps) {
         },
       }),
       async (c) => {
-        const input = await json(c, eventsInput);
-        const problem = validateEvents(input.events);
+        const input = await storeUpload(c, config.store.maxBytes);
+        const problem = validateRows(input.rows);
         if (problem) throw new HTTPException(400, { message: problem });
         try {
-          const result = appendEvents(
-            db,
-            c.get("student")!.studentId,
-            input.events as WireEvent[],
-            input.afterEventId,
-            storeLimits,
+          return c.json(
+            writeRows(
+              db,
+              c.get("student")!.studentId,
+              { since: input.since, rows: input.rows as SyncRow[], replace: input.replace },
+              storeLimits,
+            ),
           );
-          if (result.conflict) {
-            return c.json(
-              { error: "Stale state — re-fetch required", serverLastEventId: result.serverLastEventId },
-              409,
-            );
-          }
-          return c.json({ success: true, lastEventId: result.lastEventId });
-        } catch (error) {
-          if (error instanceof StoreTooLargeError) throw new HTTPException(413, { message: error.message });
-          throw error;
-        }
-      },
-    )
-
-    .post(
-      "/store/snapshot",
-      requireStudent,
-      requireWritable,
-      bodyLimit({
-        maxSize: config.store.maxBytes,
-        onError: () => {
-          throw new HTTPException(413, { message: "Too much data in one request" });
-        },
-      }),
-      async (c) => {
-        const input = await json(c, snapshotInput);
-        try {
-          const result = replaceSnapshot(db, c.get("student")!.studentId, input.data as unknown as Snapshot, storeLimits);
-          return c.json({ success: true, lastEventId: result.lastEventId });
         } catch (error) {
           if (error instanceof StoreTooLargeError) throw new HTTPException(413, { message: error.message });
           throw error;

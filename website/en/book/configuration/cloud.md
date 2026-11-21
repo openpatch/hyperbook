@@ -53,7 +53,7 @@ Once logged in, everything the book's interactive elements store (code editors, 
 - **Cross-device access**: students continue where they left off on any device.
 - **Offline support**: changes made offline are kept and saved when the connection returns.
 - **Save indicator**: an icon in the toolbar shows whether everything is saved. Each state has its own badge shape, so it does not rely on color alone, and the button's label reads out the state for screen readers.
-- **Sync notices**: states you can act on (a failed save, being offline, a merge with another session) appear in a notice at the bottom of the page, with a retry button where one applies. Successful saves stay silent.
+- **Sync notices**: states you can act on (a failed save, being offline, work arriving from another device) appear in a notice at the bottom of the page, with a retry or reload button where one applies. Successful saves stay silent.
 
 When logged in, the local export, import and reset buttons are hidden, so they cannot conflict with the saved state.
 
@@ -61,30 +61,29 @@ Ephemeral interface state (cursor position, scroll offset, window size) is not s
 
 ## How saving works
 
-Hyperbook Cloud saves changes, not the whole store:
+The book's local database is the truth; Hyperbook Cloud keeps a copy of it, row by row.
 
-1. **Changes are recorded** as they happen: every create, update and delete in the book's local database, and for updates only the changed fields.
-2. **They are sent in batches** after 2 seconds without changes (or at most every 10 seconds).
-3. **The server folds them together** into one snapshot after 100 changes.
-4. **Loading rebuilds the state** from the snapshot and the changes after it.
+1. **Every change is marked at once**, on the device, as "not uploaded yet". The mark survives leaving the page, closing the tab and losing the connection.
+2. **Marked rows are uploaded** after 1 second without changes (or at most every 5 seconds), when the tab is hidden, and when the next page loads. An upload sends the current value of each marked row; the mark is removed once the server has it. A large backlog goes up in several requests. A row the server refuses (for example because it is too large) is set aside and shown as a save error; the other rows are still uploaded, and the row is tried again when it changes or the student clicks **Retry**.
+3. **Each upload advances the student's revision.** A device remembers the last revision it has seen and, on every page load and upload, takes in only the rows other devices uploaded after it.
 
-A batch larger than 512 KB (large drawings, for example) is sent as a full snapshot instead.
+Uploads over 8 KB are gzip-compressed, which typically makes code, drawings and other element state 3 to 10 times smaller.
 
-### Two devices at once
+Sending a row twice does no harm, so there is nothing to resolve: leaving a page never asks whether to leave, and no save is ever refused as out of date.
 
-Each save names the last state the device knew. If another device saved in between, the server refuses the save, and the device:
+### Several devices
 
-1. loads the current state,
-2. applies its own unsaved changes on top of it, locally and on the server,
-3. explains the merge in a notice and reloads the page, so the elements show the merged state. The notice offers a **Reload now** button.
+If two devices change the same row (the same answer, the same drawing), the change made later wins, going by the clock of each device, however late the other device uploads its change. A school computer that kept a change for a week does not overwrite what the student did at home since; it takes over the newer work instead. A device never overwrites a row it has not uploaded yet with one from another device.
 
-Nothing is lost in a merge. The server checks and saves in one step, so two devices saving at the same moment cannot both pass.
+Several tabs of the book on one device share their marks, and take turns uploading.
+
+Work from another device that arrives while a page is open is written to the local database at once. The elements show it after a reload: right away if the student has not changed anything on the page yet, otherwise a notice offers **Reload now**.
+
+The first time a student logs in on a device, and whenever another student logs in on it, the device's local data is replaced by the student's saved work. Logging out uploads what is left and empties the device; if something could not be uploaded, the book asks first.
 
 ### Offline and leaving the page
 
-Changes made offline wait in a queue and are sent in order when the connection returns; if another device saved in the meantime, they are merged as above. The queue holds at most 100 batches; beyond that it is sent as one snapshot.
-
-When the page is closed while changes are still waiting, they are sent with a request that outlives the page. Batches over 60 KB cannot be sent this way; the browser's "unsaved changes" prompt is then the cue to wait.
+Changes made offline stay marked and are uploaded when the connection returns, also if pages were changed or the browser was closed in between. When a page is hidden, marked rows are also sent with a request that outlives the page (up to 60 KB); the marks stay until a later upload confirms them.
 
 ## Running Hyperbook Cloud
 
