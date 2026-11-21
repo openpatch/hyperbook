@@ -1841,6 +1841,24 @@ group's students; values are fetched one element at a time.
   printed on the class list, and a note says they are not uploaded.
 - **Online now**: a dot next to students seen in the last two minutes.
 
+## Big books (2026-11-21)
+
+Tried on hyperbook-informatik: 394 pages with 1,338 tasks, a 220 KB
+index; the platform build took about a minute, the overview answers in
+under 10 ms with about 270 KB for 24 students.
+
+- **A column per page**, showing how many of its tasks a student worked
+  on; a page opens into its task columns.
+- **Only pages with work** by default (a class works through one
+  chapter), and a **section** picker from the navigation: the index names
+  each page's sections (`sections`) and takes its title from the
+  navigation (`name` or `title`). Both choices are kept per group in the
+  browser; the CSV follows them (`?section=[…]&worked=1`).
+- The index of a published build is read once and cached in memory.
+- Identical tasks on two pages share one id (it comes from the content),
+  so the book stores one answer for both, and the overview shows it on
+  both pages.
+
 ## Later, per element
 
 Elements that know about success can report it in their row (e.g. bitflow

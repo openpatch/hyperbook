@@ -21,7 +21,7 @@ import { open } from "../../crypto/sealed";
 import { books, groups, storeRows, students } from "../../db/schema";
 import type { Deps } from "../../deps";
 import { bookAccess } from "../../domain/books";
-import { elementRows, groupOverview, overviewCsv, readElementIndex } from "../../domain/overview";
+import { elementRows, groupOverview, overviewCsv, readElementIndex, viewOf } from "../../domain/overview";
 import {
   generatedStudentPassword,
   groupAccess,
@@ -38,6 +38,14 @@ import { requireUser } from "../middleware";
 import { idParam } from "../params";
 import { validate } from "../validate";
 import { createT, requestLocale } from "../../i18n";
+
+function safeJson(text: string): unknown {
+  try {
+    return JSON.parse(text);
+  } catch {
+    return null;
+  }
+}
 
 function isUniqueViolation(error: unknown) {
   return error instanceof Error && /UNIQUE constraint failed/.test(error.message);
@@ -245,11 +253,22 @@ export function groupRoutes({ db, config }: Deps) {
       return c.json(groupOverview(db, config, book, group.id));
     })
 
-    .get("/:id/overview.csv", idParam, (c) => {
+    // The CSV follows the view: ?section=["OOP","Classes"]&worked=1.
+    .get(
+      "/:id/overview.csv",
+      idParam,
+      validate("query", z.object({ section: z.string().max(2000).optional(), worked: z.literal("1").optional() })),
+      (c) => {
       const user = c.get("user");
       const { group, book } = groupAccess(db, user, c.req.valid("param").id);
       const t = createT(requestLocale(c));
-      const csv = overviewCsv(groupOverview(db, config, book, group.id), {
+      const query = c.req.valid("query");
+      const section = z.array(z.string()).safeParse(query.section ? safeJson(query.section) : []);
+      const overview = viewOf(groupOverview(db, config, book, group.id), {
+        section: section.success ? section.data : [],
+        worked: query.worked === "1",
+      });
+      const csv = overviewCsv(overview, {
         username: t("overview.csv.username"),
         lastLogin: t("overview.csv.lastLogin"),
         lastSeen: t("overview.csv.lastSeen"),
@@ -266,7 +285,8 @@ export function groupRoutes({ db, config }: Deps) {
       c.header("content-disposition", `attachment; filename="${name}.csv"`);
       // A BOM, so spreadsheet programs read the umlauts right.
       return c.body(`\uFEFF${csv}`);
-    })
+      },
+    )
 
     .get("/:id/credentials", idParam, (c) => {
       const user = c.get("user");

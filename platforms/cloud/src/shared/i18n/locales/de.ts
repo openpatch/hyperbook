@@ -1567,12 +1567,22 @@ export const de: Messages = {
     deletedManyToast: "{{count}} Schüler gelöscht",
   },
   overview: {
+    section: "Abschnitt",
+    wholeBook: "Ganzes Buch",
+    onlyWorked: "Nur Seiten mit Arbeit",
+    pagesShown_one: "{{count}} von {{all}} Seite",
+    pagesShown_other: "{{count}} von {{all}} Seiten",
+    nothingWorked: "In dieser Gruppe hat hier noch niemand eine Aufgabe bearbeitet.",
+    showAllPages: "Alle Seiten zeigen",
+    tasks_one: "{{count}} Aufgabe",
+    tasks_other: "{{count}} Aufgaben",
+    pageCellLabel: "{{username}}, {{page}}: {{done}} von {{total}} Aufgaben",
     fileList: "Dateien des Arbeitsbereichs",
     database: "Änderungen an der Datenbank",
     tabStudents: "Schüler",
     tabOverview: "Übersicht",
     description:
-      "Wann jeder Schüler jede Aufgabe der Live-Version zuletzt geändert hat. Klicken Sie auf einen gefüllten Kreis, um die Antwort zu sehen.",
+      "Wie viele Aufgaben jeder Seite jeder Schüler bearbeitet hat. Öffnen Sie eine Seite, um ihre Aufgaben zu sehen; ein Klick auf einen gefüllten Kreis zeigt die Antwort.",
     notIndexed:
       "Veröffentlichen Sie das Buch, um seine Aufgaben hier zu sehen. Eine Version, die vor der Übersicht veröffentlicht wurde, muss neu veröffentlicht werden.",
     noTasks: "Die Live-Version hat keine Aufgaben, die die Arbeit der Schüler speichern.",

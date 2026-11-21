@@ -1540,12 +1540,22 @@ export const en = {
     deletedManyToast: "{{count}} students deleted",
   },
   overview: {
+    section: "Section",
+    wholeBook: "Whole book",
+    onlyWorked: "Only pages with work",
+    pagesShown_one: "{{count}} of {{all}} page",
+    pagesShown_other: "{{count}} of {{all}} pages",
+    nothingWorked: "No one in this group has worked on a task here yet.",
+    showAllPages: "Show all pages",
+    tasks_one: "{{count}} task",
+    tasks_other: "{{count}} tasks",
+    pageCellLabel: "{{username}}, {{page}}: {{done}} of {{total}} tasks",
     fileList: "Files of the workspace",
     database: "Changes to the database",
     tabStudents: "Students",
     tabOverview: "Overview",
     description:
-      "When each student last changed each task of the live version. Click a filled circle to see the answer.",
+      "How many tasks of each page every student has worked on. Open a page to see its tasks; click a filled circle to see the answer.",
     notIndexed:
       "Publish the book to see its tasks here. A version published before the overview existed needs publishing again.",
     noTasks: "The live version has no tasks that save students' work.",

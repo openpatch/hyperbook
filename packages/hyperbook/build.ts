@@ -131,7 +131,25 @@ export const SEARCH_DOCUMENTS = ${JSON.stringify(documents)};
 export interface ElementPage {
   href: string;
   title: string;
+  /** The names of the sections the page is in, outermost first. */
+  sections?: string[];
   elements: StoredElement[];
+}
+
+/** href → the names of the sections around it, from the navigation. */
+function sectionPaths(
+  sections: { name?: string; href?: string; pages: { href?: string }[]; sections: any[] }[],
+  outer: string[] = [],
+  paths = new Map<string, string[]>(),
+): Map<string, string[]> {
+  for (const section of sections) {
+    const path = section.name ? [...outer, section.name] : outer;
+    for (const page of section.pages) {
+      if (page.href) paths.set(page.href, path);
+    }
+    sectionPaths(section.sections, path, paths);
+  }
+  return paths;
 }
 
 /**
@@ -143,10 +161,20 @@ export interface ElementPage {
 export async function writeElementIndex(
   rootOut: string,
   pages: ElementPage[],
-  pageList: { href?: string }[],
+  pageList: { href?: string; name?: string }[],
+  sections: Parameters<typeof sectionPaths>[0] = [],
 ): Promise<void> {
   const order = new Map(pageList.map((p, i) => [p.href || "/", i]));
-  const sorted = [...pages].sort(
+  // The name the navigation shows (front matter `name` or `title`), so the
+  // teacher sees the same titles as in the book.
+  const names = new Map(pageList.map((p) => [p.href || "/", p.name]));
+  const paths = sectionPaths(sections);
+  const withSections = pages.map((page) => {
+    const path = paths.get(page.href);
+    const title = names.get(page.href) || page.title;
+    return path && path.length > 0 ? { ...page, title, sections: path } : { ...page, title };
+  });
+  const sorted = [...withSections].sort(
     (a, b) =>
       (order.get(a.href) ?? Infinity) - (order.get(b.href) ?? Infinity) ||
       a.href.localeCompare(b.href),
@@ -1054,7 +1082,7 @@ async function runBuild(
     if (pageResult.storedElements.length > 0) {
       elementPages.push({
         href: file.path.href || "/",
-        title: file.markdown.data.name || file.name,
+        title: file.markdown.data.name || (file.markdown.data as { title?: string }).title || file.name,
         elements: pageResult.storedElements,
       });
     }
@@ -1259,7 +1287,7 @@ async function runBuild(
   await writeI18n(assetsOut, hyperbookJson);
 
   if (hyperbookJson.cloud) {
-    await writeElementIndex(rootOut, elementPages, pageList);
+    await writeElementIndex(rootOut, elementPages, pageList, pagesAndSections.sections);
   }
 
   // Generate llms.txt if enabled

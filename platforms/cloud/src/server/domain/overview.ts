@@ -31,6 +31,8 @@ const elementIndex = z.object({
     z.object({
       href: z.string(),
       title: z.string(),
+      /** The sections the page is in, outermost first (newer builds). */
+      sections: z.array(z.string()).optional(),
       elements: z.array(element),
     }),
   ),
@@ -105,13 +107,43 @@ const parseKey = (key: string): string | null => {
  */
 export function readElementIndex(config: Config, book: typeof books.$inferSelect): ElementIndex | null {
   if (!book.publishedBuildId) return null;
+  // A build never changes once finished, so its index is read once. A big
+  // book's index (hundreds of pages) would otherwise be parsed on every
+  // refresh of every open overview.
+  const cacheKey = `${config.dataDir}\0${book.id}\0${book.publishedBuildId}`;
+  if (indexCache.has(cacheKey)) return indexCache.get(cacheKey)!;
+  let index: ElementIndex | null = null;
   try {
     const file = path.join(buildDir(config, book.id, book.publishedBuildId), "_hyperbook", "elements.json");
     const parsed = elementIndex.safeParse(JSON.parse(readFileSync(file, "utf8")));
-    return parsed.success ? parsed.data : null;
+    index = parsed.success ? parsed.data : null;
   } catch {
-    return null;
+    index = null;
   }
+  if (indexCache.size >= INDEX_CACHE_SIZE) indexCache.delete(indexCache.keys().next().value!);
+  indexCache.set(cacheKey, index);
+  return index;
+}
+
+const INDEX_CACHE_SIZE = 50;
+const indexCache = new Map<string, ElementIndex | null>();
+
+/** What the teacher chose to look at: a section, and only pages with work. */
+export type OverviewView = { section?: string[]; worked?: boolean };
+
+/**
+ * The overview narrowed to a section (pages whose sections start with
+ * `section`) and, with `worked`, to pages at least one student worked on.
+ */
+export function viewOf(overview: ReturnType<typeof groupOverview>, view: OverviewView) {
+  const section = view.section ?? [];
+  const pages = overview.pages.filter((page) => {
+    const sections = page.sections ?? [];
+    if (!section.every((name, i) => sections[i] === name)) return false;
+    if (!view.worked) return true;
+    return page.elements.some((e) => overview.students.some((s) => cellId(e.table, e.id) in s.cells));
+  });
+  return { ...overview, pages };
 }
 
 export type OverviewStudent = {

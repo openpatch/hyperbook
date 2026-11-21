@@ -101,9 +101,11 @@ describe("the class view", () => {
     // ada is online and worked on task 2; bo has not started.
     const ada = admin.getByRole("row", { name: /ada/ });
     await ada.getByRole("img", { name: "online now" }).waitFor();
-    await ada.getByText("1/2").waitFor();
-    await admin.getByRole("row", { name: /bo/ }).getByText("0/2").waitFor();
+    await ada.getByText("1/2").first().waitFor();
+    await admin.getByRole("row", { name: /bo/ }).getByText("0/2").first().waitFor();
 
+    // The page shows how many of its tasks each student did; opened, each task.
+    await ada.getByRole("button", { name: "ada, Waves: 1 of 2 tasks" }).click();
     await ada.getByRole("button", { name: /ada, Waves task 2: changed/ }).click();
     const dialog = admin.getByRole("dialog");
     await dialog.getByText("ada · Waves, task 2").waitFor();

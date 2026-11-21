@@ -52,6 +52,24 @@ it("lists each page's elements in the book's order for books with cloud", async 
   });
 });
 
+it("names the sections each page is in", async () => {
+  await write("hyperbook.json", JSON.stringify({ name: "Tasks", cloud: { sameOrigin: true } }));
+  await write("book/oop/index.md", "---\nname: OOP\n---\n\n# OOP\n");
+  await write("book/oop/classes/index.md", "---\nname: Classes\n---\n\n::textinput{id=\"c0\"}\n");
+  // Titled with `title:`, as many books do, instead of `name:`.
+  await write("book/oop/classes/fields.md", "---\ntitle: Fields\n---\n\n::textinput{id=\"c1\"}\n");
+  await runBuildProject(project, project);
+  const pages = (await index()).pages as { href: string; sections?: string[] }[];
+  const sections = Object.fromEntries(pages.map((p) => [p.href, p.sections]));
+  expect(pages.find((p) => p.href === "/oop/classes/fields")).toMatchObject({ title: "Fields" });
+  expect(sections).toEqual({
+    "/a-first": undefined,
+    "/b-later": undefined,
+    "/oop/classes": ["OOP", "Classes"],
+    "/oop/classes/fields": ["OOP", "Classes"],
+  });
+});
+
 it("writes no index for books without cloud", async () => {
   await write("hyperbook.json", JSON.stringify({ name: "Tasks" }));
   await runBuildProject(project, project);

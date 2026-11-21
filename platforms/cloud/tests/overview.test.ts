@@ -162,6 +162,30 @@ describe("the group overview", () => {
     expect(sql.rows).toEqual([expect.objectContaining({ table: "sqlideDatabases" })]);
   });
 
+  it("narrows the CSV to a section and to pages with work", async () => {
+    const index = {
+      version: 1,
+      pages: [
+        { href: "/a", title: "A", sections: ["OOP", "Classes"], elements: [{ id: "a1", name: "textinput", table: "textinput" }] },
+        { href: "/b", title: "B", sections: ["OOP", "Lists"], elements: [{ id: "b1", name: "textinput", table: "textinput" }] },
+        { href: "/c", title: "C", sections: ["OOP", "Classes"], elements: [{ id: "c1", name: "textinput", table: "textinput" }] },
+      ],
+    };
+    const { teacher, group, students, row } = await world({ index });
+    row(students[0]!.id, "textinput", "a1", 1000);
+    row(students[0]!.id, "textinput", "b1", 1000);
+    const header = async (query: string) =>
+      String((await teacher.c.get(`/api/groups/${group.id}/overview.csv${query}`)).body)
+        .replace(/^\uFEFF/, "")
+        .split("\r\n")[0];
+    const section = encodeURIComponent(JSON.stringify(["OOP", "Classes"]));
+    expect(await header("")).toContain("A 1 (textinput),B 1 (textinput),C 1 (textinput)");
+    expect(await header(`?section=${section}`)).toContain("A 1 (textinput),C 1 (textinput),");
+    expect(await header(`?section=${section}&worked=1`)).toBe(
+      "Username,Last login,Last seen,A 1 (textinput),Other saved work",
+    );
+  });
+
   it("is for the book's editors only", async () => {
     const { instance, group, students, row } = await world();
     row(students[0]!.id, "textinput", "q1", 1000);
