@@ -73,12 +73,18 @@ function useAgo() {
 
 type Page = Overview["pages"][number];
 
-/** A choice of the teacher, kept per group in this browser. */
-function useStored<T>(key: string, initial: T) {
+/**
+ * A choice of the teacher, kept per group in this browser. What comes back
+ * is checked with `valid`: local storage can hold anything (an older
+ * version, another tab, a hand edit), and a wrong type must not break the tab.
+ */
+function useStored<T>(key: string, initial: T, valid: (value: unknown) => value is T) {
   const [value, setValue] = useState<T>(() => {
     try {
       const raw = localStorage.getItem(key);
-      return raw === null ? initial : (JSON.parse(raw) as T);
+      if (raw === null) return initial;
+      const parsed: unknown = JSON.parse(raw);
+      return valid(parsed) ? parsed : initial;
     } catch {
       return initial;
     }
@@ -112,6 +118,8 @@ function sectionChoices(pages: Page[]): string[][] {
 }
 
 const ALL = "__all";
+const isStringList = (v: unknown): v is string[] => Array.isArray(v) && v.every((x) => typeof x === "string");
+const isBoolean = (v: unknown): v is boolean => typeof v === "boolean";
 
 /**
  * The class view: students in rows, pages in columns, how many of a page's
@@ -136,8 +144,8 @@ export function GroupOverview({
     // A lesson is going on: keep it fresh while the tab is open.
     refetchInterval: 30_000,
   });
-  const [section, setSection] = useStored<string[]>(`hb-overview-section:${groupId}`, []);
-  const [onlyWorked, setOnlyWorked] = useStored(`hb-overview-worked:${groupId}`, true);
+  const [section, setSection] = useStored<string[]>(`hb-overview-section:${groupId}`, [], isStringList);
+  const [onlyWorked, setOnlyWorked] = useStored(`hb-overview-worked:${groupId}`, true, isBoolean);
   const [open, setOpen] = useState<Set<string>>(new Set());
   const [picked, setPicked] = useState<Picked | null>(null);
   const [elsewhereOf, setElsewhereOf] = useState<OverviewStudent | null>(null);

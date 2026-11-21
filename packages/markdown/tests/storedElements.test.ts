@@ -105,6 +105,11 @@ describe("storedElements", () => {
     expect(ids[2]).toBeUndefined();
   });
 
+  it("lists H5P content, saved under its id", async () => {
+    const result = await process(`::h5p{src="/quiz.h5p" id="quiz"}\n`, ctx);
+    expect(storedElements(result)).toEqual([{ id: "quiz", name: "h5p", table: "h5p" }]);
+  });
+
   it("is empty for a page without such elements", async () => {
     expect(storedElements(await process(`# Just text\n`, ctx))).toEqual([]);
   });

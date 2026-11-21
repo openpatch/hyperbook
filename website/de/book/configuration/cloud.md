@@ -59,7 +59,7 @@ In Hyperbook Cloud zeigt der Reiter **Übersicht** einer Gruppe, was jede Schül
 - **Andere** zeigt Arbeit, die zu keiner Aufgabe der veröffentlichten Version gehört.
 - **Als CSV herunterladen** exportiert, was gerade zu sehen ist, mit Benutzernamen und Zeiten.
 
-Aufgaben sind Texteingaben, die Code-Editoren und IDEs, Struktogramme, Learningmaps, Zeichnungen, JMP, Bitflow, GeoGebra, Multievent, ABC-Editoren und Punkte von Checklisten.
+Aufgaben sind Texteingaben, die Code-Editoren und IDEs, Struktogramme, Learningmaps, Zeichnungen, JMP, Bitflow, GeoGebra, H5P, Multievent, ABC-Editoren und Punkte von Checklisten.
 
 ### Arbeit behalten, wenn eine Aufgabe geändert wird
 

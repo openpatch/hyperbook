@@ -126,6 +126,13 @@ describe("the class view", () => {
     await admin.evaluate((id) => localStorage.setItem(`hb-overview-section:${id}`, JSON.stringify(["Gone"])), groupId);
     await admin.reload();
     await admin.getByRole("row", { name: /ada/ }).waitFor();
+    // Nor does a value of the wrong type.
+    await admin.evaluate((id) => {
+      localStorage.setItem(`hb-overview-section:${id}`, "null");
+      localStorage.setItem(`hb-overview-worked:${id}`, '"x"');
+    }, groupId);
+    await admin.reload();
+    await admin.getByRole("row", { name: /ada/ }).waitFor();
     await admin.getByText("1 of 1 page").waitFor();
 
     const csv = admin.getByRole("link", { name: "Download as CSV" });

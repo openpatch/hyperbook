@@ -34,6 +34,8 @@ export const STORE_OF_DIRECTIVE: Readonly<Record<string, StoreSpec>> = {
   // A GFM task-list item ("- [ ] …"), saved by bootstrap.js under
   // markdown-checklist:<page path>:<item id>, so matched by its end.
   checklist: { table: "checklist", match: "suffix" },
+  // directive-h5p/client.js: db.h5p.put({ id, userData }) under data-id.
+  h5p: { table: "h5p" },
   // packages/web-component-excalidraw: db.excalidraw.put({ id, … })
   excalidraw: { table: "excalidraw" },
   // The IDEs on the shared IDE shell (ide-bundle) share one table, one row

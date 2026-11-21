@@ -58,7 +58,7 @@ In Hyperbook Cloud, a group's **Overview** tab shows what each student worked on
 - **Other** lists work that belongs to no task of the published version.
 - **Download as CSV** exports what is shown, with usernames and times.
 
-Tasks are text inputs, the code editors and IDEs, structograms, learning maps, drawings, JMP, bitflow, GeoGebra, multievent, ABC editors and checklist items.
+Tasks are text inputs, the code editors and IDEs, structograms, learning maps, drawings, JMP, bitflow, GeoGebra, H5P, multievent, ABC editors and checklist items.
 
 ### Keeping students' work when you edit a task
 
