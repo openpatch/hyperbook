@@ -93,10 +93,11 @@ export function GroupOverview({
       ) : total === 0 ? (
         <p className="mb-4 text-sm">{t("overview.noTasks")}</p>
       ) : null}
-      <div className="overflow-x-auto rounded-md border">
-        <table className="w-full border-collapse text-sm">
+      {/* As wide as its columns, scrolling sideways when that is wider than the page. */}
+      <div className="inline-block max-w-full overflow-x-auto rounded-md border align-top">
+        <table className="w-max border-collapse text-sm">
           <thead>
-            <tr className="border-b bg-muted/50">
+            <tr className="border-b bg-muted">
               <th rowSpan={2} scope="col" className="sticky left-0 bg-muted px-3 py-2 text-left font-medium">
                 {t("overview.student")}
               </th>
@@ -121,7 +122,7 @@ export function GroupOverview({
                 {t("overview.elsewhere")}
               </th>
             </tr>
-            <tr className="border-b bg-muted/50">
+            <tr className="border-b bg-muted">
               {overview.pages.flatMap((page) =>
                 page.elements.map((e, i) => (
                   <th
@@ -212,9 +213,12 @@ type ElementRow = { table: string; key: string; data: unknown; editedAt: number 
 function Answers({ id, rows }: { id: string; rows: ElementRow[] }) {
   const { t } = useTranslation();
   if (rows.length === 1) return <Answer data={rows[0]!.data} />;
+  // An embedded IDE's row under the bare id only lists its file names; the
+  // files themselves follow, so the list is left out.
+  const shown = rows.some((r) => r.key !== id && r.key.startsWith(id)) ? rows.filter((r) => r.key !== id) : rows;
   return (
     <div className="max-h-[60vh] space-y-4 overflow-auto">
-      {rows.map((row) => {
+      {shown.map((row) => {
         const label =
           row.key === id
             ? t("overview.fileList")
