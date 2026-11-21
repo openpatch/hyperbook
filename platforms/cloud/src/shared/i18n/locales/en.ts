@@ -1294,6 +1294,7 @@ export const en = {
       studentCredentialsView: "viewed or printed student passwords",
       studentImpersonate: "viewed a student's work",
       studentDataDownload: "downloaded a student's saved data",
+      studentOverviewExport: "exported a group's overview",
     },
   },
   addresses: {
@@ -1535,6 +1536,14 @@ export const en = {
     deleteStudentConfirm_one: "Delete student",
     deleteStudentConfirm_other: "Delete students",
     deletedManyToast: "{{count}} students deleted",
+  },
+  overview: {
+    csv: {
+      username: "Username",
+      lastLogin: "Last login",
+      lastSeen: "Last seen",
+      elsewhere: "Other saved work",
+    },
   },
   print: {
     back: "← Back",

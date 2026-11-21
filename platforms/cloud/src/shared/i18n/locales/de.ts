@@ -1318,6 +1318,7 @@ export const de: Messages = {
       studentImpersonate: "sah die Arbeit eines Schülers an",
       studentDataDownload:
         "lud die gespeicherten Daten eines Schülers herunter",
+      studentOverviewExport: "exportierte die Übersicht einer Gruppe",
     },
   },
   addresses: {
@@ -1562,6 +1563,14 @@ export const de: Messages = {
     deleteStudentConfirm_one: "Schüler löschen",
     deleteStudentConfirm_other: "Schüler löschen",
     deletedManyToast: "{{count}} Schüler gelöscht",
+  },
+  overview: {
+    csv: {
+      username: "Benutzername",
+      lastLogin: "Letzte Anmeldung",
+      lastSeen: "Zuletzt online",
+      elsewhere: "Andere gespeicherte Arbeit",
+    },
   },
   print: {
     back: "← Zurück",

@@ -20,6 +20,7 @@ import { open } from "../../crypto/sealed";
 import { books, groups, students } from "../../db/schema";
 import type { Deps } from "../../deps";
 import { bookAccess } from "../../domain/books";
+import { groupOverview, overviewCsv } from "../../domain/overview";
 import {
   generatedStudentPassword,
   groupAccess,
@@ -35,6 +36,7 @@ import type { AuthedEnv } from "../env";
 import { requireUser } from "../middleware";
 import { idParam } from "../params";
 import { validate } from "../validate";
+import { createT, requestLocale } from "../../i18n";
 
 function isUniqueViolation(error: unknown) {
   return error instanceof Error && /UNIQUE constraint failed/.test(error.message);
@@ -234,6 +236,35 @@ export function groupRoutes({ db, config }: Deps) {
         data: { count: ids.length },
       });
       return c.json({ count: ids.length });
+    })
+
+    // The class view: who worked on which element (times only, no values).
+    .get("/:id/overview", idParam, (c) => {
+      const { group, book } = groupAccess(db, c.get("user"), c.req.valid("param").id);
+      return c.json(groupOverview(db, config, book, group.id));
+    })
+
+    .get("/:id/overview.csv", idParam, (c) => {
+      const user = c.get("user");
+      const { group, book } = groupAccess(db, user, c.req.valid("param").id);
+      const t = createT(requestLocale(c));
+      const csv = overviewCsv(groupOverview(db, config, book, group.id), {
+        username: t("overview.csv.username"),
+        lastLogin: t("overview.csv.lastLogin"),
+        lastSeen: t("overview.csv.lastSeen"),
+        elsewhere: t("overview.csv.elsewhere"),
+      });
+      audit(db, {
+        actorUserId: user.id,
+        action: "student.overview.export",
+        targetType: "group",
+        targetId: group.id,
+      });
+      const name = `${book.slug}-${group.name}`.replace(/[^\w.-]+/g, "_");
+      c.header("content-type", "text/csv; charset=utf-8");
+      c.header("content-disposition", `attachment; filename="${name}.csv"`);
+      // A BOM, so spreadsheet programs read the umlauts right.
+      return c.body(`\uFEFF${csv}`);
     })
 
     .get("/:id/credentials", idParam, (c) => {
