@@ -1024,6 +1024,7 @@ export const de: Messages = {
       notFound: "Gruppe nicht gefunden",
     },
     students: {
+      nothingSaved: "Für dieses Element ist nichts gespeichert.",
       usernameTaken: "Dieses Buch hat schon einen Schüler mit diesem Benutzernamen",
       otherBook: "Schüler können nur zwischen Gruppen desselben Buchs wechseln",
       notFound: "Schüler nicht gefunden",
@@ -1318,6 +1319,7 @@ export const de: Messages = {
       studentImpersonate: "sah die Arbeit eines Schülers an",
       studentDataDownload:
         "lud die gespeicherten Daten eines Schülers herunter",
+      studentRowView: "sah eine Antwort eines Schülers an",
       studentOverviewExport: "exportierte die Übersicht einer Gruppe",
     },
   },
@@ -1565,6 +1567,25 @@ export const de: Messages = {
     deletedManyToast: "{{count}} Schüler gelöscht",
   },
   overview: {
+    tabStudents: "Schüler",
+    tabOverview: "Übersicht",
+    description:
+      "Wann jeder Schüler jede Aufgabe der Live-Version zuletzt geändert hat. Klicken Sie auf einen gefüllten Kreis, um die Antwort zu sehen.",
+    notIndexed:
+      "Veröffentlichen Sie das Buch, um seine Aufgaben hier zu sehen. Eine Version, die vor der Übersicht veröffentlicht wurde, muss neu veröffentlicht werden.",
+    noTasks: "Die Live-Version hat keine Aufgaben, die die Arbeit der Schüler speichern.",
+    downloadCsv: "Als CSV herunterladen",
+    student: "Schüler",
+    done: "Bearbeitet",
+    doneOf: "{{done}}/{{total}}",
+    online: "gerade online",
+    changed: "geändert {{when}}",
+    notYet: "noch nicht",
+    elsewhere: "Andere",
+    elsewhereHint:
+      "Gespeicherte Arbeit in Aufgaben, die nicht in der Live-Version sind (entfernt oder seitdem geändert).",
+    cellLabel: "{{username}}, {{page}} Aufgabe {{n}}: {{state}}",
+    answerTitle: "{{username}} · {{page}}, Aufgabe {{n}}",
     csv: {
       username: "Benutzername",
       lastLogin: "Letzte Anmeldung",

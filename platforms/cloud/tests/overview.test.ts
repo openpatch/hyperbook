@@ -107,9 +107,21 @@ describe("the group overview", () => {
     expect(lines).toHaveLength(3);
   });
 
+  it("opens one saved answer read-only", async () => {
+    const { teacher, students, row } = await world();
+    row(students[0]!.id, "textinput", "q1", 1000, JSON.stringify({ id: "q1", text: "42" }));
+    const id = students[0]!.id;
+    const res = await teacher.c.get(`/api/students/${id}/row?table=textinput&key=q1`);
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({ data: { id: "q1", text: "42" }, editedAt: 1000 });
+    expect((await teacher.c.get(`/api/students/${id}/row?table=textinput&key=nope`)).status).toBe(404);
+  });
+
   it("is for the book's editors only", async () => {
-    const { instance, group } = await world();
+    const { instance, group, students, row } = await world();
+    row(students[0]!.id, "textinput", "q1", 1000);
     const other = await loggedIn(instance, { email: "x@example.org" });
     expect((await other.c.get(`/api/groups/${group.id}/overview`)).status).toBe(404);
+    expect((await other.c.get(`/api/students/${students[0]!.id}/row?table=textinput&key=q1`)).status).toBe(404);
   });
 });

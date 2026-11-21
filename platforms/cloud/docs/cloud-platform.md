@@ -1858,12 +1858,14 @@ element, so it is done one element at a time.
 
 ## Work order
 
-1. Element index in the build (`@hyperbook/markdown`, `hyperbook` CLI),
+1. *(done)* Element index in the build (`@hyperbook/markdown`, `hyperbook` CLI),
    copied by the platform; tests on a sample book.
-2. Overview API and CSV; tests with seeded `store_rows`.
-3. Overview tab; value viewer for text and code.
+2. *(done)* Overview API and CSV; tests with seeded `store_rows`
+   (`tests/overview.test.ts`).
+3. *(done)* Overview tab; value viewer for text and code
+   (`tests/e2e/class-view.e2e.ts`).
 4. Names on this device; class list with names.
-5. Online now.
+5. *(done with 3)* Online now.
 6. Archive, export, reset, copy a book.
 7. Per-element states, one element at a time.
 

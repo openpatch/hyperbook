@@ -1,4 +1,5 @@
-import { asc, count, eq } from "drizzle-orm";
+import { and, asc, count, eq } from "drizzle-orm";
+import { z } from "zod";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import {
@@ -17,7 +18,7 @@ import {
 import { publicOrigin } from "../../domain/custom-domains";
 import { exportState, lastSavedAt } from "../../store/store";
 import { open } from "../../crypto/sealed";
-import { books, groups, students } from "../../db/schema";
+import { books, groups, storeRows, students } from "../../db/schema";
 import type { Deps } from "../../deps";
 import { bookAccess } from "../../domain/books";
 import { groupOverview, overviewCsv } from "../../domain/overview";
@@ -387,6 +388,38 @@ export function studentRoutes({ db, config }: Deps) {
       });
       return c.json({ url });
     })
+
+    // One saved element of a student, for the class view (read-only).
+    .get(
+      "/:id/row",
+      idParam,
+      validate("query", z.object({ table: z.string().min(1).max(100), key: z.string().min(1).max(500) })),
+      (c) => {
+        const user = c.get("user");
+        const { student } = studentAccess(db, user, c.req.valid("param").id);
+        const { table, key } = c.req.valid("query");
+        const row = db
+          .select({ data: storeRows.data, editedAt: storeRows.editedAt })
+          .from(storeRows)
+          .where(
+            and(
+              eq(storeRows.studentId, student.id),
+              eq(storeRows.tableName, table),
+              eq(storeRows.key, JSON.stringify(key)),
+            ),
+          )
+          .get();
+        if (!row?.data) throw new HTTPException(404, { message: "errors.students.nothingSaved" });
+        audit(db, {
+          actorUserId: user.id,
+          action: "student.row.view",
+          targetType: "student",
+          targetId: student.id,
+          data: { table, key },
+        });
+        return c.json({ data: JSON.parse(row.data) as unknown, editedAt: row.editedAt });
+      },
+    )
 
     .get("/:id/data", idParam, (c) => {
       const user = c.get("user");

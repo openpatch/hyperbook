@@ -1013,6 +1013,7 @@ export const en = {
       notFound: "Group not found",
     },
     students: {
+      nothingSaved: "Nothing is saved for this element.",
       usernameTaken: "This book has a student with this username already",
       otherBook: "Students can only move between groups of the same book",
       notFound: "Student not found",
@@ -1294,6 +1295,7 @@ export const en = {
       studentCredentialsView: "viewed or printed student passwords",
       studentImpersonate: "viewed a student's work",
       studentDataDownload: "downloaded a student's saved data",
+      studentRowView: "looked at a student's answer",
       studentOverviewExport: "exported a group's overview",
     },
   },
@@ -1538,6 +1540,25 @@ export const en = {
     deletedManyToast: "{{count}} students deleted",
   },
   overview: {
+    tabStudents: "Students",
+    tabOverview: "Overview",
+    description:
+      "When each student last changed each task of the live version. Click a filled circle to see the answer.",
+    notIndexed:
+      "Publish the book to see its tasks here. A version published before the overview existed needs publishing again.",
+    noTasks: "The live version has no tasks that save students' work.",
+    downloadCsv: "Download as CSV",
+    student: "Student",
+    done: "Worked on",
+    doneOf: "{{done}}/{{total}}",
+    online: "online now",
+    changed: "changed {{when}}",
+    notYet: "not yet",
+    elsewhere: "Other",
+    elsewhereHint:
+      "Saved work in tasks that are not in the live version (removed or changed since).",
+    cellLabel: "{{username}}, {{page}} task {{n}}: {{state}}",
+    answerTitle: "{{username}} · {{page}}, task {{n}}",
     csv: {
       username: "Username",
       lastLogin: "Last login",

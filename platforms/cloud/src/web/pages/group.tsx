@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import i18next from "i18next";
 import { useState } from "react";
-import { Link, useNavigate, useParams } from "react-router";
+import { Link, useNavigate, useParams, useSearchParams } from "react-router";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import {
@@ -12,6 +12,7 @@ import {
 import { ConfirmButton, ConfirmDialog } from "@/components/confirm-button";
 import { PageHeader, Section } from "@/components/page-header";
 import { QueryState } from "@/components/query-state";
+import { GroupOverview } from "./group-overview";
 import { SecretDialog } from "@/components/secret-dialog";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -48,6 +49,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { api, unwrap } from "@/lib/api";
+import { cn } from "@/lib/utils";
 import { FormError, TextField, applyServerError, useZodForm } from "@/lib/form";
 
 export function GroupPage() {
@@ -62,6 +64,8 @@ export function GroupPage() {
     queryFn: () => unwrap(api.groups[":id"].students.$get({ param: { id } })),
   });
   const group = groupQuery.data;
+  const [params, setParams] = useSearchParams();
+  const tab = params.get("tab") === "overview" ? "overview" : "students";
 
   if (!group) return <QueryState error={groupQuery.error} retry={groupQuery.refetch} />;
 
@@ -86,21 +90,48 @@ export function GroupPage() {
           </>
         }
       />
-      <Section
-        title={t("group.students")}
-        description={t("group.studentsDescription")}
-      >
-        {students?.length === 0 ? (
-          <p className="text-muted-foreground">{t("group.noStudents")}</p>
-        ) : (
-          <StudentsTable
-            groupId={id}
-            bookId={group.book.id}
-            students={students ?? []}
-          />
-        )}
-        <AddStudentForm groupId={id} />
-      </Section>
+      <div role="tablist" aria-label={group.name} className="mb-4 flex gap-1 border-b">
+        {(["students", "overview"] as const).map((name) => (
+          <button
+            key={name}
+            type="button"
+            role="tab"
+            id={`group-tab-${name}`}
+            aria-selected={tab === name}
+            aria-controls={`group-panel-${name}`}
+            className={cn(
+              "-mb-px border-b-2 px-3 py-2 text-sm font-medium",
+              tab === name ? "border-primary text-foreground" : "border-transparent text-muted-foreground hover:text-foreground",
+            )}
+            onClick={() => setParams(name === "students" ? {} : { tab: name }, { replace: true })}
+          >
+            {name === "students" ? t("overview.tabStudents") : t("overview.tabOverview")}
+          </button>
+        ))}
+      </div>
+      {tab === "overview" ? (
+        <section id="group-panel-overview" role="tabpanel" aria-labelledby="group-tab-overview" className="mb-6">
+          <GroupOverview groupId={id} onViewAs={viewAsStudent} />
+        </section>
+      ) : (
+        <div id="group-panel-students" role="tabpanel" aria-labelledby="group-tab-students">
+          <Section
+            title={t("group.students")}
+            description={t("group.studentsDescription")}
+          >
+            {students?.length === 0 ? (
+              <p className="text-muted-foreground">{t("group.noStudents")}</p>
+            ) : (
+              <StudentsTable
+                groupId={id}
+                bookId={group.book.id}
+                students={students ?? []}
+              />
+            )}
+            <AddStudentForm groupId={id} />
+          </Section>
+        </div>
+      )}
       <GroupSettings
         groupId={id}
         name={group.name}
