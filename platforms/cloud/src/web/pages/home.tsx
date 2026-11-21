@@ -7,6 +7,7 @@ import { PageHeader } from "@/components/page-header";
 import { QueryState } from "@/components/query-state";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Dialog,
   DialogContent,
@@ -29,6 +30,13 @@ export function HomePage() {
     queryFn: () => unwrap(api.books.$get()),
   });
   const books = booksQuery.data;
+  const [query, setQuery] = useState("");
+  const needle = query.trim().toLowerCase();
+  const shown = needle
+    ? books?.filter((b) =>
+        [b.title, b.slug, b.description].some((s) => s.toLowerCase().includes(needle)),
+      )
+    : books;
 
   return (
     <>
@@ -41,8 +49,22 @@ export function HomePage() {
       {books?.length === 0 && (
         <p className="text-muted-foreground">{t("books.empty")}</p>
       )}
+      {/* Searching pays off once the list no longer fits at a glance. */}
+      {books && books.length > 6 && (
+        <Input
+          type="search"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder={t("books.search")}
+          aria-label={t("books.search")}
+          className="mb-4 max-w-sm"
+        />
+      )}
+      {needle && shown?.length === 0 && (
+        <p className="text-muted-foreground">{t("books.noMatch", { query: query.trim() })}</p>
+      )}
       <ul className="grid gap-3 sm:grid-cols-2">
-        {books?.map((book) => (
+        {shown?.map((book) => (
           <li key={book.id}>
             <Link
               to={`/books/${book.id}`}
@@ -53,12 +75,27 @@ export function HomePage() {
                 <span className="flex shrink-0 flex-wrap justify-end gap-1">
                   {book.visibility === "private" && <Badge variant="secondary">{t("books.private")}</Badge>}
                   {book.publishingDisabled && <Badge variant="outline">{t("publishing.lock.badge")}</Badge>}
+                  {book.source === "external" ? (
+                    <Badge variant="outline">{t("books.externalBadge")}</Badge>
+                  ) : book.publishedAt === null ? (
+                    <Badge variant="outline">{t("books.notPublished")}</Badge>
+                  ) : (
+                    !!book.unpublishedChanges && (
+                      <Badge variant="outline">{t("books.unpublished", { count: book.unpublishedChanges })}</Badge>
+                    )
+                  )}
                 </span>
               </div>
               <p className="truncate text-sm text-muted-foreground">
                 {book.url.replace(/^https?:\/\//, "")}
               </p>
               {book.description && <p className="mt-2 line-clamp-2 text-sm">{book.description}</p>}
+              {book.groupCount > 0 && (
+                <p className="mt-2 text-sm text-muted-foreground">
+                  {t("books.groups", { count: book.groupCount })} ·{" "}
+                  {t("books.students", { count: book.studentCount })}
+                </p>
+              )}
             </Link>
           </li>
         ))}

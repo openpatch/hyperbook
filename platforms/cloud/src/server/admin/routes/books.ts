@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { and, count, countDistinct, eq, inArray } from "drizzle-orm";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { z } from "zod";
@@ -12,7 +12,7 @@ import {
   updateMemberInput,
 } from "../../../shared/schemas";
 import { audit } from "../../audit";
-import { bookMembers, bookSlugs, books, users } from "../../db/schema";
+import { bookMembers, bookSlugs, books, builds as buildRows, groups, students, users } from "../../db/schema";
 import type { Deps } from "../../deps";
 import {
   type BookRow,
@@ -136,7 +136,47 @@ export function bookRoutes({ db, config, builds, checks, dns, fetchUrl }: Deps) 
               .where(eq(bookMembers.userId, user.id))
               .orderBy(books.title)
               .all();
-      return c.json(rows.map(({ book, role }) => publicBook(config, book, role)));
+      const ids = rows.map(({ book }) => book.id);
+      // What the list shows of each book's classes: one query for all books.
+      const classes = new Map(
+        (ids.length === 0
+          ? []
+          : db
+              .select({
+                bookId: groups.bookId,
+                groupCount: countDistinct(groups.id),
+                studentCount: count(students.id),
+              })
+              .from(groups)
+              .leftJoin(students, eq(students.groupId, groups.id))
+              .where(inArray(groups.bookId, ids))
+              .groupBy(groups.bookId)
+              .all()
+        ).map((r) => [r.bookId, r]),
+      );
+      // Saves since the live version (commits on main minus the live build's).
+      const liveIds = rows.flatMap(({ book }) => (book.publishedBuildId ? [book.publishedBuildId] : []));
+      const liveCommits = new Map(
+        (liveIds.length === 0
+          ? []
+          : db
+              .select({ id: buildRows.id, commitCount: buildRows.commitCount })
+              .from(buildRows)
+              .where(inArray(buildRows.id, liveIds))
+              .all()
+        ).map((b) => [b.id, b.commitCount]),
+      );
+      return c.json(
+        rows.map(({ book, role }) => {
+          const live = book.publishedBuildId ? liveCommits.get(book.publishedBuildId) : undefined;
+          return {
+            ...publicBook(config, book, role),
+            groupCount: classes.get(book.id)?.groupCount ?? 0,
+            studentCount: classes.get(book.id)?.studentCount ?? 0,
+            unpublishedChanges: live === undefined ? null : Math.max(0, book.commitCount - live),
+          };
+        }),
+      );
     })
 
     .post("/", validate("json", createBookInput), (c) => {

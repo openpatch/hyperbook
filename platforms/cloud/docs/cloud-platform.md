@@ -33,6 +33,7 @@ migrated and no old API is kept.
 - **M4 Instance operations** *(done except the launch itself, see [M4](#m4-instance-operations))*: signup modes, quotas, legal pages, email verification, backup docs. Launch of the OpenPatch instance.
 - **M5 Later**: OIDC, local runtime-asset mirror, custom domains (*done*, see [M5](#m5-custom-domains)), address suffixes and requests (*done*, see [M5](#m5-address-suffixes-and-name-requests)), sharing and forking.
 - **M7 Review** *(done except preview comments, see [M7](#m7-review--comments-commenters-and-access-links))*: comments on the source, commenter role, named access links without accounts.
+- **M8 Class view** *(planned, see [M8](#m8-class-view))*: what each student worked on, per element and page; names that stay on the teacher's device; CSV export; end-of-year tools.
 
 ---
 
@@ -1766,3 +1767,109 @@ in another browser, a `git push`, a zip upload.
   emitter. Over HTTP/1.1, each open editor holds one of the browser's six
   connections per host. Production runs HTTP/2 behind Caddy, so this
   matters only for the Vite dev proxy.
+
+
+---
+
+# M8: Class view
+
+*Planned 2026-11-21.* Goal: a teacher sees what the students of a group
+worked on, without opening each student's book. The platform already keeps
+every row a student's book saves (`store_rows`); it only shows the time of
+the last save. Students stay anonymous on the server.
+
+## Decisions
+
+| Topic | Decision |
+|---|---|
+| What is shown | *Worked on* and *last changed*, per student and element. No "done" or score, except where an element knows it (later, per element). |
+| Where elements come from | An element index the build writes; the server never parses Markdown. |
+| Real names | Only in the teacher's browser (local storage), never sent to the server. |
+| Export | CSV of the overview (usernames, not names); names are added in the browser if the teacher has them. |
+| Live view | "Online now" from `student_sessions.last_seen_at`, nothing more. |
+
+## Element index
+
+- Element ids are content hashes made at build time (`resolveDirectiveId`,
+  `packages/markdown/src/directiveId.ts`); `file.data.resolvedDirectiveIds`
+  already lists them per page with their directive name.
+- The build writes `.hyperbook/out/_hyperbook/elements.json`:
+  `[{ page: "/chapter-1", title, elements: [{ id, name, line }] }]`, in
+  book order. The platform copies it next to the build; a book without it
+  (built by an older Hyperbook) shows the overview by table only.
+- Directive name → store table: `pyide`, `p5`, `openscad` and `typst`
+  share the `ide` table (since store v11, `store-ide-migration.js`);
+  `onlineide` → `onlineide`, `sqlide` → `sqlideScripts`; `textinput`,
+  `learningmap`, `excalidraw`, `struktolab`, `jmp`, `bitflow`,
+  `multievent`, `checklist` → the table of the same name. The index
+  records the table with each element, so this mapping lives in the
+  build, next to the elements that use it. UI state
+  (`collapsibles`, `tabs`, `slideshow`, `currentState`, `consent`,
+  `bookmarks`) is never shown.
+- Rows whose id is in no page of the live build are counted under
+  *Elsewhere* (an element removed or edited since).
+
+## API (admin host, editors and up)
+
+```
+GET /api/groups/:id/overview   → { pages: [...index], students: [{ id, username,
+                                   lastSeenAt, cells: { [elementId]: editedAt } }] }
+GET /api/groups/:id/overview.csv
+GET /api/students/:id/rows?table=&id=   one element's saved value (read-only, audited)
+```
+
+The overview reads only `store_rows.table_name, key, edited_at` of the
+group's students; values are fetched one element at a time.
+
+## UI
+
+- **Group page** gets tabs: *Students* (today's table) and *Overview*.
+- **Overview**: students in rows, pages as column groups (collapsible),
+  elements as narrow columns. A cell is empty, or filled with a tooltip
+  "changed 3 days ago". Clicking a cell opens the saved value read-only
+  (text answer, code, structogram image where an editor exists), with
+  *View as student* to see it in the book.
+- **One element across the class**: clicking a column header lists every
+  student's answer to that element side by side (text inputs and code).
+- **Names**: *Names on this device* lets the teacher type or paste names
+  next to usernames (or import the CSV of the printed class list). They
+  are kept in local storage under the group's id, shown in the tables and
+  printed on the class list, and a note says they are not uploaded.
+- **Online now**: a dot next to students seen in the last two minutes.
+
+## Later, per element
+
+Elements that know about success can report it in their row (e.g. bitflow
+attempts, checklist items ticked, learningmap nodes done). The overview
+then shows a state instead of a timestamp. Each needs a change in its
+element, so it is done one element at a time.
+
+## End of the school year
+
+- **Archive a group**: hidden from the book page, students can no longer
+  log in, data kept until deleted.
+- **Export a group**: one zip with every student's rows (today's
+  per-student JSON) plus the overview CSV.
+- **Reset**: delete the saved work of selected students but keep their
+  accounts (a new class with the old cards).
+- **Copy a book** for next year or a colleague: a new book from the
+  current `main`, without groups, members or links (the "forking" of M5).
+
+## Work order
+
+1. Element index in the build (`@hyperbook/markdown`, `hyperbook` CLI),
+   copied by the platform; tests on a sample book.
+2. Overview API and CSV; tests with seeded `store_rows`.
+3. Overview tab; value viewer for text and code.
+4. Names on this device; class list with names.
+5. Online now.
+6. Archive, export, reset, copy a book.
+7. Per-element states, one element at a time.
+
+## Open questions
+
+- Should students see that their teacher can read their answers? (A line
+  on the login page would be honest; schools may require it.)
+- Is a group-level "release" of content (solutions after the lesson) part
+  of M8 or its own milestone? It needs the book to ask the server, so it
+  touches `cloud.js` and the build.
