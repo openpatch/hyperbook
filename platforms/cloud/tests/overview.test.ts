@@ -209,6 +209,19 @@ describe("the group overview", () => {
     );
   });
 
+  it("lists a student's work that belongs to no task of the live version", async () => {
+    const { teacher, students, row } = await world();
+    const id = students[0]!.id;
+    row(id, "textinput", "q1", 1000, JSON.stringify({ id: "q1", text: "kept" }));
+    row(id, "textinput", "old-q", 2000, JSON.stringify({ id: "old-q", text: "before the edit" }));
+    row(id, "tabs", "t", 3000); // how the page looked: never listed
+    const res = await teacher.c.get(`/api/students/${id}/elsewhere`);
+    expect(res.status).toBe(200);
+    expect(res.body.rows).toEqual([
+      { table: "textinput", key: "old-q", data: { id: "old-q", text: "before the edit" }, editedAt: 2000 },
+    ]);
+  });
+
   it("is for the book's editors only", async () => {
     const { instance, group, students, row } = await world();
     row(students[0]!.id, "textinput", "q1", 1000);

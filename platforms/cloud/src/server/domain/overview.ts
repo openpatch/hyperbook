@@ -287,3 +287,24 @@ export function elementRows(
     })
     .sort((a, b) => a.table.localeCompare(b.table) || a.key.localeCompare(b.key));
 }
+
+/**
+ * A student's saved work that belongs to no task of the live version: tasks
+ * removed since, or changed without an `id=` (their id came from their
+ * content). UI state is left out, as in the overview.
+ */
+export function elsewhereRows(db: Db, config: Config, book: typeof books.$inferSelect, studentId: number) {
+  const cellOf = rowMatcher(readElementIndex(config, book)?.pages ?? []);
+  return db
+    .select({ table: storeRows.tableName, key: storeRows.key, data: storeRows.data, editedAt: storeRows.editedAt })
+    .from(storeRows)
+    .where(and(eq(storeRows.studentId, studentId), isNotNull(storeRows.data)))
+    .all()
+    .flatMap((row) => {
+      if (UI_TABLES.has(row.table)) return [];
+      const key = parseKey(row.key);
+      if (key !== null && cellOf(row.table, key)) return [];
+      return [{ table: row.table, key: key ?? row.key, data: JSON.parse(row.data!) as unknown, editedAt: row.editedAt }];
+    })
+    .sort((a, b) => b.editedAt - a.editedAt);
+}

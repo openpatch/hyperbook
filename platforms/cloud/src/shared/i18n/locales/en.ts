@@ -1540,6 +1540,10 @@ export const en = {
     deletedManyToast: "{{count}} students deleted",
   },
   overview: {
+    elsewhereFor_one: "{{username}}: {{count}} saved item in no task of the live version",
+    elsewhereFor_other: "{{username}}: {{count}} saved items in no task of the live version",
+    elsewhereTitle: "{{username}} · other saved work",
+    elsewhereDescription: "Work in tasks that are not in the live version: removed, or changed without an id (a task's id then comes from its content). To link a changed task back to this work, give its directive the id shown here in the editor and publish.",
     section: "Section",
     wholeBook: "Whole book",
     onlyWorked: "Only pages with work",

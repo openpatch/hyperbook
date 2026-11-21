@@ -127,6 +127,7 @@ export function GroupOverview({
   const [onlyWorked, setOnlyWorked] = useStored(`hb-overview-worked:${groupId}`, true);
   const [open, setOpen] = useState<Set<string>>(new Set());
   const [picked, setPicked] = useState<Picked | null>(null);
+  const [elsewhereOf, setElsewhereOf] = useState<OverviewStudent | null>(null);
   const overview = query.data;
   if (!overview) return <QueryState error={query.error} retry={query.refetch} />;
 
@@ -310,8 +311,17 @@ export function GroupOverview({
                             />,
                           ],
                     )}
-                    <td className="border-l px-2 py-1.5 text-center tabular-nums text-muted-foreground">
-                      {s.elsewhere || ""}
+                    <td className="border-l p-0 text-center tabular-nums text-muted-foreground">
+                      {s.elsewhere > 0 && (
+                        <button
+                          type="button"
+                          className="h-8 w-full px-2 hover:bg-muted hover:text-foreground"
+                          aria-label={t("overview.elsewhereFor", { username: s.username, count: s.elsewhere })}
+                          onClick={() => setElsewhereOf(s)}
+                        >
+                          {s.elsewhere}
+                        </button>
+                      )}
                     </td>
                   </tr>
                 );
@@ -321,7 +331,51 @@ export function GroupOverview({
         </div>
       )}
       <AnswerDialog picked={picked} onClose={() => setPicked(null)} onViewAs={onViewAs} />
+      <ElsewhereDialog student={elsewhereOf} onClose={() => setElsewhereOf(null)} />
     </>
+  );
+}
+
+/**
+ * A student's work in tasks that are no longer in the live version: removed,
+ * or changed without an id. With the old id, an author can link a changed
+ * task back to it (`id="…"` on the directive).
+ */
+function ElsewhereDialog({ student, onClose }: { student: OverviewStudent | null; onClose: () => void }) {
+  const { t } = useTranslation();
+  const query = useQuery({
+    queryKey: ["students", student?.id, "elsewhere"],
+    enabled: student !== null,
+    queryFn: () => unwrap(api.students[":id"].elsewhere.$get({ param: { id: String(student!.id) } })),
+  });
+  return (
+    <Dialog open={student !== null} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="sm:max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>{student && t("overview.elsewhereTitle", { username: student.username })}</DialogTitle>
+          <DialogDescription>{t("overview.elsewhereDescription")}</DialogDescription>
+        </DialogHeader>
+        {query.data ? (
+          <ul className="max-h-[60vh] space-y-4 overflow-auto">
+            {query.data.rows.map((row) => (
+              <li key={`${row.table}/${row.key}`}>
+                <div className="mb-1 flex flex-wrap items-baseline gap-x-3 text-xs text-muted-foreground">
+                  <span>{row.table}</span>
+                  <code className="select-all font-mono">id=&quot;{row.key}&quot;</code>
+                  <span>{new Date(row.editedAt).toLocaleString()}</span>
+                </div>
+                <Answer data={row.data} />
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <QueryState error={query.error} retry={query.refetch} />
+        )}
+        <DialogFooter>
+          <Button onClick={onClose}>{t("common.done")}</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 

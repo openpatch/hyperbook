@@ -1567,6 +1567,10 @@ export const de: Messages = {
     deletedManyToast: "{{count}} Schüler gelöscht",
   },
   overview: {
+    elsewhereFor_one: "{{username}}: {{count}} gespeicherter Eintrag in keiner Aufgabe der Live-Version",
+    elsewhereFor_other: "{{username}}: {{count}} gespeicherte Einträge in keiner Aufgabe der Live-Version",
+    elsewhereTitle: "{{username}} · andere gespeicherte Arbeit",
+    elsewhereDescription: "Arbeit in Aufgaben, die nicht in der Live-Version sind: entfernt oder ohne id geändert (die id einer Aufgabe ergibt sich dann aus ihrem Inhalt). Um eine geänderte Aufgabe wieder mit dieser Arbeit zu verbinden, geben Sie ihrer Direktive im Editor die hier gezeigte id und veröffentlichen Sie.",
     section: "Abschnitt",
     wholeBook: "Ganzes Buch",
     onlyWorked: "Nur Seiten mit Arbeit",

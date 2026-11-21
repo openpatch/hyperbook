@@ -21,7 +21,7 @@ import { open } from "../../crypto/sealed";
 import { books, groups, storeRows, students } from "../../db/schema";
 import type { Deps } from "../../deps";
 import { bookAccess } from "../../domain/books";
-import { elementRows, groupOverview, overviewCsv, readElementIndex, viewOf } from "../../domain/overview";
+import { elementRows, elsewhereRows, groupOverview, overviewCsv, readElementIndex, viewOf } from "../../domain/overview";
 import {
   generatedStudentPassword,
   groupAccess,
@@ -433,6 +433,21 @@ export function studentRoutes({ db, config }: Deps) {
         return c.json({ rows, editedAt: Math.max(...rows.map((r) => r.editedAt)) });
       },
     )
+
+    // Saved work that belongs to no task of the live version (the overview's "Other").
+    .get("/:id/elsewhere", idParam, (c) => {
+      const user = c.get("user");
+      const { student, book } = studentAccess(db, user, c.req.valid("param").id);
+      const rows = elsewhereRows(db, config, book, student.id);
+      audit(db, {
+        actorUserId: user.id,
+        action: "student.row.view",
+        targetType: "student",
+        targetId: student.id,
+        data: { elsewhere: rows.length },
+      });
+      return c.json({ rows });
+    })
 
     .get("/:id/data", idParam, (c) => {
       const user = c.get("user");
