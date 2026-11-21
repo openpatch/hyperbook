@@ -1611,6 +1611,7 @@ export const en = {
   },
   publishing: {
     leftBehind: {
+      unchecked: "Students' work on the pages that fail to render was not checked.",
       title_one: "{{count}} task with students' work is not in this save",
       title_other: "{{count}} tasks with students' work are not in this save",
       description: "They were removed, or changed without an id: a task's id then comes from its content. After publishing, the book no longer shows the students' work in them (it stays saved, under Other in the class view). To keep it with a changed task, give the task its old id in the editor, e.g. :::onlineide{id=…}.",

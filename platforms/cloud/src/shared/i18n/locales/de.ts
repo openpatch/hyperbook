@@ -1638,6 +1638,7 @@ export const de: Messages = {
   },
   publishing: {
     leftBehind: {
+      unchecked: "Die Arbeit von Schülern auf Seiten, die sich nicht darstellen lassen, wurde nicht geprüft.",
       title_one: "{{count}} Aufgabe mit Arbeit von Schülern fehlt in diesem Stand",
       title_other: "{{count}} Aufgaben mit Arbeit von Schülern fehlen in diesem Stand",
       description: "Sie wurden entfernt oder ohne id geändert: Die id einer Aufgabe ergibt sich dann aus ihrem Inhalt. Nach dem Veröffentlichen zeigt das Buch die Arbeit der Schüler darin nicht mehr (sie bleibt gespeichert, unter Andere in der Übersicht). Um sie bei einer geänderten Aufgabe zu behalten, geben Sie der Aufgabe im Editor ihre alte id, z. B. :::onlineide{id=…}.",

@@ -1,11 +1,11 @@
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { eq } from "drizzle-orm";
 import { describe, expect, it } from "vitest";
 import { createStudentSession, readStudentSession } from "../src/server/auth/student-sessions";
 import { books, builds, storeHeads, storeRows, studentSessions } from "../src/server/db/schema";
 import { buildDir } from "../src/server/hosting/storage";
-import { workLeftBehind } from "../src/server/domain/overview";
+import { hrefOfPageFile, workLeftBehind } from "../src/server/domain/overview";
 import { loggedIn, setup } from "./helpers";
 
 const INDEX = {
@@ -111,6 +111,17 @@ describe("the group overview", () => {
     expect(seen().expiresAt.getTime()).toBe(created.expiresAt.getTime());
   });
 
+  it("extends a login in steady use", async () => {
+    const { instance, book, students } = await world();
+    const token = createStudentSession(instance.db, { studentId: students[0]!.id, kind: "cookie", persistent: true });
+    const row = () => instance.db.select().from(studentSessions).where(eq(studentSessions.studentId, students[0]!.id)).get()!;
+    const t0 = row().lastSeenAt.getTime();
+    const end = row().expiresAt.getTime();
+    // A request every minute for two hours: last-seen never lags an hour.
+    for (let m = 1; m <= 120; m++) readStudentSession(instance.db, token, "cookie", book.id, t0 + m * 60_000 + 1);
+    expect(row().expiresAt.getTime()).toBeGreaterThan(end);
+  });
+
   it("counts all work as elsewhere while nothing is published", async () => {
     const { teacher, group, students, row } = await world({ publish: false });
     row(students[0]!.id, "textinput", "q1", 1000);
@@ -125,6 +136,9 @@ describe("the group overview", () => {
     const res = await teacher.c.get(`/api/groups/${group.id}/overview.csv`);
     expect(res.status).toBe(200);
     expect(res.headers.get("content-type")).toContain("text/csv");
+    expect(res.headers.get("content-disposition")).toBe(
+      `attachment; filename="physics-7a.csv"; filename*=UTF-8''physics-7a.csv`,
+    );
     const lines = String(res.body).replace(/^\uFEFF/, "").trim().split("\r\n");
     expect(lines[0]).toBe("Username,Last login,Last seen,Tasks 1 (textinput),Tasks 2 (struktolab),Other saved work");
     expect(lines[1]).toBe("s01,,,2026-11-21T08:30:00.000Z,,0");
@@ -219,7 +233,7 @@ describe("the group overview", () => {
     const res = await teacher.c.get(`/api/students/${id}/elsewhere`);
     expect(res.status).toBe(200);
     expect(res.body.rows).toEqual([
-      { table: "textinput", key: "old-q", data: { id: "old-q", text: "before the edit" }, editedAt: 2000 },
+      { table: "textinput", key: "old-q", data: { id: "old-q", text: "before the edit" }, editedAt: 2000, task: "textinput/old-q" },
     ]);
   });
 
@@ -299,6 +313,63 @@ describe("the group overview", () => {
     expect(res.headers.get("vary")).toContain("Accept-Language");
     const header = String(res.body).replace(/^\uFEFF/, "").split("\r\n")[0];
     expect(header).toContain(`"'=HYPERLINK(""x"")`);
+  });
+
+  it("counts other work by task: an IDE's files are one task", async () => {
+    const { teacher, group, students, row } = await world();
+    const id = students[0]!.id;
+    // A removed Online-IDE: its file list, two files and its workspace.
+    row(id, "onlineide", "java", 1000);
+    row(id, "onlineide", "javaMain.java", 1000);
+    row(id, "onlineide", "javaHelper.java", 1000);
+    row(id, "onlineide", "java-workspace", 1000);
+    // A removed SQL-IDE with a changed database.
+    row(id, "sqlideScripts", "sql", 1000);
+    row(id, "sqlideScripts", "sqlAbfrage.sql", 1000);
+    row(id, "sqlideDatabases", "https://example.org/school.dbsql", 1000);
+    const res = await teacher.c.get(`/api/groups/${group.id}/overview`);
+    expect(res.body.students[0].elsewhere).toBe(2);
+    const rows = (await teacher.c.get(`/api/students/${id}/elsewhere`)).body.rows as { task: string }[];
+    expect([...new Set(rows.map((r) => r.task))]).toEqual(["onlineide/java", "sqlideScripts/sql"]);
+  });
+
+  it("tries a failed index read again instead of remembering it", async () => {
+    const { instance, teacher, group, book } = await world();
+    const live = instance.db.select().from(books).where(eq(books.id, book.id)).get()!;
+    const file = path.join(buildDir(instance.config, book.id, live.publishedBuildId!), "_hyperbook", "elements.json");
+    // Unreadable for a moment (here: a directory in its place).
+    rmSync(file);
+    mkdirSync(file);
+    expect((await teacher.c.get(`/api/groups/${group.id}/overview`)).body.indexed).toBe(false);
+    rmSync(file, { recursive: true });
+    writeFileSync(file, JSON.stringify(INDEX));
+    expect((await teacher.c.get(`/api/groups/${group.id}/overview`)).body.indexed).toBe(true);
+  });
+
+  it("does not count the tasks of a page that failed to render as gone", async () => {
+    const { instance, book, students, row } = await world();
+    row(students[0]!.id, "textinput", "q1", 1000);
+    const bookRow = instance.db.select().from(books).where(eq(books.id, book.id)).get()!;
+    // The save's check could not render /tasks, so it reports no tasks for it.
+    expect(workLeftBehind(instance.db, instance.config, bookRow, [], [])).toHaveLength(1);
+    expect(workLeftBehind(instance.db, instance.config, bookRow, [], ["/tasks"])).toEqual([]);
+  });
+
+  it("names a page file by the address the index uses", () => {
+    expect(hrefOfPageFile("book/index.md")).toBe("/");
+    expect(hrefOfPageFile("book/tasks.md")).toBe("/tasks");
+    expect(hrefOfPageFile("book/oop/index.md.hbs")).toBe("/oop");
+    expect(hrefOfPageFile("book/oop/fields.md.yml")).toBe("/oop/fields");
+    expect(hrefOfPageFile("glossary/term.md")).toBe("/glossary/term");
+  });
+
+  it("keeps umlauts in the CSV's file name", async () => {
+    const { teacher, book } = await world();
+    const group = (await teacher.c.post(`/api/books/${book.id}/groups`, { name: "Klasse 7ä" })).body;
+    const res = await teacher.c.get(`/api/groups/${group.id}/overview.csv`);
+    expect(res.headers.get("content-disposition")).toBe(
+      `attachment; filename="physics-Klasse_7_.csv"; filename*=UTF-8''${encodeURIComponent("physics-Klasse 7ä.csv")}`,
+    );
   });
 
   it("is for the book's editors only", async () => {

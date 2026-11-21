@@ -1128,6 +1128,14 @@ async function runBuild(
       hyperbookJson,
     );
     searchDocuments.push(...pageResult.searchDocuments);
+    // Glossary entries can hold tasks too; they come after the book's pages.
+    if (pageResult.storedElements.length > 0) {
+      elementPages.push({
+        href: file.path.href || "/glossary",
+        title: file.markdown.data.name || (file.markdown.data as { title?: string }).title || file.name,
+        elements: pageResult.storedElements,
+      });
+    }
     for (const [archiveName, includes] of Object.entries(
       pageResult.archiveIncludes,
     )) {

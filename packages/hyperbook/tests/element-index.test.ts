@@ -70,6 +70,14 @@ it("names the sections each page is in", async () => {
   });
 });
 
+it("lists tasks on glossary pages after the book's pages", async () => {
+  await write("hyperbook.json", JSON.stringify({ name: "Tasks", cloud: { sameOrigin: true } }));
+  await write("glossary/wave.md", "---\nname: Wave\n---\n\n::textinput{id=\"g1\"}\n");
+  await runBuildProject(project, project);
+  const pages = (await index()).pages as { href: string; title: string }[];
+  expect(pages[pages.length - 1]).toMatchObject({ href: "/glossary/wave", title: "Wave", elements: [{ id: "g1" }] });
+});
+
 it("writes no index for books without cloud", async () => {
   await write("hyperbook.json", JSON.stringify({ name: "Tasks" }));
   await runBuildProject(project, project);

@@ -11,6 +11,16 @@ The Multievent library originates from [Aufgabenfuchs](https://www.aufgabenfuchs
 
 With Multievent, 26 different interactive event formats can be implemented on a webpage. This JavaScript searches the document for areas enclosed in double curly braces {{…}}. The enclosed content is transformed into an interactive element. Characters between the opening curly braces determine the result. Below is a list of formats and the corresponding character sequences. For example, a small {r{…}} creates an evaluable radio button in front of the enclosed term (see below).
 
+## Saved progress
+
+A reader's answers are saved under the multievent's id. Without an `id`, the id comes from the multievent's content, so editing it starts the readers' saved answers over. Give a multievent an `id` to keep them when you edit it:
+
+```md
+:::multievent{id="wave-quiz"}
+…
+:::
+```
+
 ## Feedback
 
 For tasks that are evaluated, the following encodings can be added:

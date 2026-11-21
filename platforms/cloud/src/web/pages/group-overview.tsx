@@ -1,6 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 import { QueryState } from "@/components/query-state";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -118,6 +119,31 @@ function sectionChoices(pages: Page[]): string[][] {
 }
 
 const ALL = "__all";
+
+/**
+ * Downloads the CSV through fetch, so a refused request (an expired login)
+ * shows its message instead of being saved as a .csv file.
+ */
+async function downloadCsv(url: string, fallback: string) {
+  try {
+    const res = await fetch(url);
+    if (!res.ok) {
+      const body = (await res.json().catch(() => null)) as { error?: string } | null;
+      throw new Error(body?.error || fallback);
+    }
+    const disposition = res.headers.get("content-disposition") ?? "";
+    const utf8 = /filename\*=UTF-8''([^;]+)/.exec(disposition)?.[1];
+    const ascii = /filename="([^"]+)"/.exec(disposition)?.[1];
+    const name = utf8 ? decodeURIComponent(utf8) : (ascii ?? "overview.csv");
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(await res.blob());
+    link.download = name;
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(link.href), 10_000);
+  } catch (error) {
+    toast.error(error instanceof Error ? error.message : fallback);
+  }
+}
 const isStringList = (v: unknown): v is string[] => Array.isArray(v) && v.every((x) => typeof x === "string");
 const isBoolean = (v: unknown): v is boolean => typeof v === "boolean";
 
@@ -161,7 +187,9 @@ export function GroupOverview({
   const worked = (page: Page) =>
     page.elements.some((e) => overview.students.some((s) => cellOf(e) in s.cells));
   const pages = onlyWorked ? inSection.filter(worked) : inSection;
-  const total = pages.reduce((sum, p) => sum + p.elements.length, 0);
+  // Identical tasks on two pages are one task (one id, one saved answer).
+  const shownCells = new Set(pages.flatMap((p) => p.elements.map(cellOf)));
+  const total = shownCells.size;
   const now = Date.now();
   const toggle = (href: string) =>
     setOpen((old) => {
@@ -210,7 +238,14 @@ export function GroupOverview({
           {t("overview.pagesShown", { count: pages.length, all: inSection.length })}
         </span>
         <Button asChild variant="outline" size="sm" className="ml-auto">
-          <a href={`/api/groups/${groupId}/overview.csv${csv.size ? `?${csv}` : ""}`} download>
+          <a
+            href={`/api/groups/${groupId}/overview.csv${csv.size ? `?${csv}` : ""}`}
+            download
+            onClick={(event) => {
+              event.preventDefault();
+              void downloadCsv(event.currentTarget.href, t("common.somethingWrong"));
+            }}
+          >
             {t("overview.downloadCsv")}
           </a>
         </Button>
@@ -299,7 +334,7 @@ export function GroupOverview({
             <tbody>
               {overview.students.map((s) => {
                 const online = s.lastSeenAt !== null && now - s.lastSeenAt < ONLINE_MS;
-                const done = pages.reduce((sum, p) => sum + p.elements.filter((e) => cellOf(e) in s.cells).length, 0);
+                const done = [...shownCells].filter((cell) => cell in s.cells).length;
                 return (
                   <tr key={s.id} className="border-b last:border-b-0">
                     <th scope="row" className="sticky left-0 z-10 bg-card px-3 py-1.5 text-left font-mono font-normal">
@@ -368,6 +403,16 @@ export function GroupOverview({
   );
 }
 
+/** Rows grouped by the task they came from (`task` is "table/id"). */
+function tasksOf<R extends ElementRow & { task: string }>(rows: R[]) {
+  const groups = new Map<string, R[]>();
+  for (const row of rows) groups.set(row.task, [...(groups.get(row.task) ?? []), row]);
+  return [...groups].map(([task, list]) => {
+    const slash = task.indexOf("/");
+    return { task, table: task.slice(0, slash), id: task.slice(slash + 1), rows: list };
+  });
+}
+
 /**
  * A student's work in tasks that are no longer in the live version: removed,
  * or changed without an id. With the old id, an author can link a changed
@@ -389,14 +434,14 @@ function ElsewhereDialog({ student, onClose }: { student: OverviewStudent | null
         </DialogHeader>
         {query.data ? (
           <ul className="max-h-[60vh] space-y-4 overflow-auto">
-            {query.data.rows.map((row) => (
-              <li key={`${row.table}/${row.key}`}>
+            {tasksOf(query.data.rows).map(({ task, table, id, rows }) => (
+              <li key={task}>
                 <div className="mb-1 flex flex-wrap items-baseline gap-x-3 text-xs text-muted-foreground">
-                  <span>{row.table}</span>
-                  <code className="select-all font-mono">id=&quot;{row.key}&quot;</code>
-                  <span>{new Date(row.editedAt).toLocaleString()}</span>
+                  <span>{table}</span>
+                  <code className="select-all font-mono">id=&quot;{id}&quot;</code>
+                  <span>{new Date(Math.max(...rows.map((r) => r.editedAt))).toLocaleString()}</span>
                 </div>
-                <Answer data={row.data} />
+                <Answers id={id} rows={rows} />
               </li>
             ))}
           </ul>
@@ -510,7 +555,10 @@ function Answers({ id, rows }: { id: string; rows: ElementRow[] }) {
               ? row.key.slice(id.length).replace(/^-/, "")
               : row.table === "sqlideDatabases"
                 ? t("overview.database")
-                : null;
+                : row.table === "checklist"
+                  ? // The same item on two pages: name the page.
+                    (/^markdown-checklist:(.*):[^:]*$/.exec(row.key)?.[1] ?? null)
+                  : null;
         return (
           <div key={`${row.table}/${row.key}`}>
             {label && <div className="mb-1 font-mono text-xs text-muted-foreground">{label}</div>}

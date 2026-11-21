@@ -86,6 +86,7 @@ export function readStudentSession(
       persistent: studentSessions.persistent,
       impersonatedBy: studentSessions.impersonatedBy,
       lastSeenAt: studentSessions.lastSeenAt,
+      expiresAt: studentSessions.expiresAt,
       bookId: students.bookId,
       username: students.username,
     })
@@ -97,7 +98,11 @@ export function readStudentSession(
   if (!row || row.kind !== kind || row.bookId !== bookId) return null;
 
   const since = now - row.lastSeenAt.getTime();
-  if (row.persistent && since > TOUCH_INTERVAL_MS) {
+  // The end of a login slides by how much of it is used up, not by
+  // last_seen_at (kept to the minute for the class view, so a session in
+  // steady use would never move on).
+  const used = now + STUDENT_SESSION_LIFETIME_MS - row.expiresAt.getTime();
+  if (row.persistent && used > TOUCH_INTERVAL_MS) {
     db.update(studentSessions)
       .set({ lastSeenAt: new Date(now), expiresAt: new Date(now + STUDENT_SESSION_LIFETIME_MS) })
       .where(eq(studentSessions.idHash, idHash))
@@ -106,7 +111,7 @@ export function readStudentSession(
     // Shared-device sessions too, but only the time: their end never moves.
     db.update(studentSessions).set({ lastSeenAt: new Date(now) }).where(eq(studentSessions.idHash, idHash)).run();
   }
-  const { lastSeenAt: _, ...session } = row;
+  const { lastSeenAt: _, expiresAt: _expires, ...session } = row;
   return session;
 }
 

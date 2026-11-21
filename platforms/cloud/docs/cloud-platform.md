@@ -1806,8 +1806,8 @@ the last save. Students stay anonymous on the server.
                            also?: [{ table, match }] }] }] }
   ```
 
-  Pages in the navigation's order, titled as in the navigation; pages
-  without tasks are left out. `hyperbook render` reports the same per page
+  Pages in the navigation's order, titled as in the navigation, then
+  glossary entries; pages without tasks are left out. `hyperbook render` reports the same per page
   (`storedElements`, `title`), for the publish warning.
 - Directive → store table: `STORE_OF_DIRECTIVE`. Most elements keep one
   row keyed by their id (text input, structogram, learning map, JMP,
@@ -1829,7 +1829,8 @@ the last save. Students stay anonymous on the server.
   or pages it does not understand are left out, not the whole index. It
   is cached per published build.
 - Rows that belong to no element of the live version, except page state
-  (`tabs`, `collapsibles`, `bookmarks`, …), count as *Other*.
+  (`tabs`, `collapsibles`, `bookmarks`, …), count as *Other*, by task: an
+  embedded IDE's files and database count once (`orphanTasks`).
 
 ## API (admin host, editors and up)
 

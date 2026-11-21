@@ -152,6 +152,9 @@ export function CheckLine({ book, head, compact = false }: { book: Book; head: H
       {current && check.status === "done" && !!check.workLeftBehind?.length && (
         <WorkLeftBehind items={check.workLeftBehind} />
       )}
+      {current && check.status === "done" && check.problems.length > 0 && book.publishedAt && (
+        <p className="text-xs text-muted-foreground">{t("publishing.leftBehind.unchecked")}</p>
+      )}
       {current && check.status === "done" && check.problems.length > 0 && (
         <ul className="max-h-40 overflow-y-auto rounded-md border text-xs">
           {check.problems.map((p) => (

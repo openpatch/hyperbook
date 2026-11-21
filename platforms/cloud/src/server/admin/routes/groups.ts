@@ -295,7 +295,12 @@ export function groupRoutes({ db, config }: Deps) {
       // Headers in the reader's language.
       c.header("vary", "Accept-Language, Cookie");
       c.header("content-type", "text/csv; charset=utf-8");
-      c.header("content-disposition", `attachment; filename="${name}.csv"`);
+      // An ASCII name for old browsers, the real one (umlauts and all) for the rest.
+      const real = `${book.slug}-${group.name}`.replace(/[\\/:*?"<>|\u0000-\u001f]+/g, "_");
+      c.header(
+        "content-disposition",
+        `attachment; filename="${name}.csv"; filename*=UTF-8''${encodeURIComponent(`${real}.csv`)}`,
+      );
       // A BOM, so spreadsheet programs read the umlauts right.
       return c.body(`\uFEFF${csv}`);
       },

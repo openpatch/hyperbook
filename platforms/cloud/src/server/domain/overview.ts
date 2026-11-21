@@ -54,6 +54,32 @@ const UI_TABLES = new Set([
   "protect",
 ]);
 
+/**
+ * The task each row of work in no element came from, as `table/id`. An
+ * embedded IDE keeps its file list under the bare id and each file under id
+ * + file name (and the SQL-IDE its database under URL + id); those rows
+ * belong to the row under the bare id, so a removed IDE is one task, not
+ * one per file. Every other row is a task of its own.
+ */
+export function orphanTasks(rows: { table: string; key: string }[]): string[] {
+  const bare = rows.filter((r) => r.table === "onlineide" || r.table === "sqlideScripts");
+  return rows.map((row) => {
+    if (row.table === "onlineide" || row.table === "sqlideScripts") {
+      const owner = bare
+        .filter((b) => b.table === row.table && b.key !== row.key && row.key.startsWith(b.key))
+        .sort((a, b) => b.key.length - a.key.length)[0];
+      return cellId(row.table, (owner ?? row).key);
+    }
+    if (row.table === "sqlideDatabases") {
+      const owner = bare
+        .filter((b) => b.table === "sqlideScripts" && row.key.endsWith(b.key))
+        .sort((a, b) => b.key.length - a.key.length)[0];
+      if (owner) return cellId(owner.table, owner.key);
+    }
+    return cellId(row.table, row.key);
+  });
+}
+
 /** The id of a cell: an element's table and id. */
 export const cellId = (table: string, id: string) => `${table}/${id}`;
 
@@ -116,7 +142,10 @@ export function readElementIndex(config: Config, book: typeof books.$inferSelect
   try {
     const file = path.join(buildDir(config, book.id, book.publishedBuildId), "_hyperbook", "elements.json");
     index = parseElementIndex(JSON.parse(readFileSync(file, "utf8")));
-  } catch {
+  } catch (error) {
+    // Only a build without an index (older Hyperbook) is remembered as such;
+    // a passing error (too many open files, a restore) is tried again.
+    if ((error as NodeJS.ErrnoException).code !== "ENOENT") return null;
     index = null;
   }
   if (indexCache.size >= INDEX_CACHE_SIZE) indexCache.delete(indexCache.keys().next().value!);
@@ -218,6 +247,7 @@ export function groupOverview(
       .from(storeRows)
       .where(and(inArray(storeRows.studentId, ids), isNotNull(storeRows.data)))
       .all();
+    const orphans = new Map<number, { table: string; key: string }[]>();
     for (const row of rows) {
       if (UI_TABLES.has(row.table)) continue;
       const student = result.get(row.studentId)!;
@@ -225,8 +255,10 @@ export function groupOverview(
       const cell = key === null ? null : cellOf(row.table, key);
       // An element with several rows counts once, at its latest change.
       if (cell) student.cells[cell] = Math.max(student.cells[cell] ?? 0, row.editedAt);
-      else student.elsewhere++;
+      else orphans.set(row.studentId, [...(orphans.get(row.studentId) ?? []), { table: row.table, key: key ?? row.key }]);
     }
+    // Other counts tasks, like Worked on, not saved rows.
+    for (const [studentId, list] of orphans) result.get(studentId)!.elsewhere = new Set(orphanTasks(list)).size;
     const seen = db
       .select({ studentId: studentSessions.studentId, at: max(studentSessions.lastSeenAt) })
       .from(studentSessions)
@@ -333,7 +365,7 @@ export function elementRows(
  */
 export function elsewhereRows(db: Db, config: Config, book: typeof books.$inferSelect, studentId: number) {
   const cellOf = rowMatcher(readElementIndex(config, book)?.pages ?? []);
-  return db
+  const rows = db
     .select({ table: storeRows.tableName, key: storeRows.key, data: storeRows.data, editedAt: storeRows.editedAt })
     .from(storeRows)
     .where(and(eq(storeRows.studentId, studentId), isNotNull(storeRows.data)))
@@ -343,8 +375,13 @@ export function elsewhereRows(db: Db, config: Config, book: typeof books.$inferS
       const key = parseKey(row.key);
       if (key !== null && cellOf(row.table, key)) return [];
       return [{ table: row.table, key: key ?? row.key, data: JSON.parse(row.data!) as unknown, editedAt: row.editedAt }];
-    })
-    .sort((a, b) => b.editedAt - a.editedAt);
+    });
+  // Each row with the task it came from (`task`: table/id), so the dialog
+  // can show one entry, and one id to give back, per task.
+  const tasks = orphanTasks(rows);
+  return rows
+    .map((row, i) => ({ ...row, task: tasks[i]! }))
+    .sort((a, b) => a.task.localeCompare(b.task) || a.key.localeCompare(b.key));
 }
 
 /** A task of the live version that a newer save no longer has, and who worked in it. */
@@ -361,11 +398,14 @@ export function workLeftBehind(
   config: Config,
   book: typeof books.$inferSelect,
   pages: { elements: IndexedElement[] }[],
+  /** Pages that failed to render: what is on them now is unknown, so their tasks are not counted as gone. */
+  unchecked: string[] = [],
 ): LeftBehind[] {
   const live = readElementIndex(config, book);
   if (!live) return [];
   const next = new Set(pages.flatMap((p) => p.elements.map((e) => cellId(e.table, e.id))));
-  const gone = live.pages.flatMap((page) =>
+  const skip = new Set(unchecked);
+  const gone = live.pages.filter((page) => !skip.has(page.href)).flatMap((page) =>
     page.elements.filter((e) => !next.has(cellId(e.table, e.id))).map((e) => ({ page, e })),
   );
   if (gone.length === 0) return [];
@@ -386,4 +426,16 @@ export function workLeftBehind(
     const students = who.get(cellId(e.table, e.id))!.size;
     return students === 0 ? [] : [{ href: page.href, title: page.title, name: e.name, table: e.table, id: e.id, students }];
   });
+}
+
+/**
+ * The address of a page file of the check ("book/a/index.md" → "/a",
+ * "glossary/term.md" → "/glossary/term"), as the index names pages.
+ */
+export function hrefOfPageFile(file: string): string {
+  const glossary = file.startsWith("glossary/");
+  const rest = file.replace(/^(book|glossary)\//, "").replace(/\.md(\.(hbs|json|yml))?$/, "");
+  const parts = rest.split("/").filter((p, i, all) => !(i === all.length - 1 && p === "index"));
+  const href = "/" + [...(glossary ? ["glossary"] : []), ...parts].join("/");
+  return href.length > 1 ? href.replace(/\/$/, "") : "/";
 }

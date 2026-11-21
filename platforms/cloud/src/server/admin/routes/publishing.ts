@@ -34,7 +34,7 @@ import {
 } from "../../hosting/git";
 import { markPublished, movePublishedTag, tagMap } from "../../hosting/publish-tags";
 import { buildDir, makeJobDir, repoDir } from "../../hosting/storage";
-import { workLeftBehind } from "../../domain/overview";
+import { hrefOfPageFile, workLeftBehind } from "../../domain/overview";
 import { quotaError, quotaForBook, setSourceBytes } from "../../domain/storage";
 import { httpError } from "../../errors";
 import { zipDirectory } from "../../hosting/site-zip";
@@ -400,10 +400,16 @@ export function bookPublishingRoutes({ db, config, mailer, builds: queue, checks
       const { book } = bookAccess(db, c.get("user"), c.req.valid("param").id);
       const state = checks.get(book.id);
       if (!state) return c.json(null);
-      // Once every page rendered: the live version's tasks with students'
-      // work that this save no longer has (publishing would leave it behind).
-      const pages = state.problems.length === 0 ? checks.checkedPages(book.id) : null;
-      return c.json({ ...state, workLeftBehind: pages ? workLeftBehind(db, config, book, pages) : null });
+      // Once the check is done: the live version's tasks with students' work
+      // that this save no longer has (publishing would leave it behind). The
+      // tasks of pages that failed to render are not known, so they are left
+      // out rather than reported as gone; the dialog says so.
+      const pages = checks.checkedPages(book.id);
+      const unchecked = state.problems.map((p) => hrefOfPageFile(p.file));
+      return c.json({
+        ...state,
+        workLeftBehind: pages ? workLeftBehind(db, config, book, pages, unchecked) : null,
+      });
     })
     .post("/:id/check", idParam, async (c) => {
       const { book } = bookAccess(db, c.get("user"), c.req.valid("param").id);
