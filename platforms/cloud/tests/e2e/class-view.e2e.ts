@@ -12,6 +12,7 @@ let browser: Browser;
 let admin: Page;
 let bookUrl: string;
 let groupId: number;
+let bookId: number;
 
 const text = (s: string) => new TextEncoder().encode(s);
 
@@ -46,6 +47,7 @@ beforeAll(async () => {
   await logIn(admin, server.origin, ADMIN.email, ADMIN.password);
 
   const book = await api(admin, "POST", "/api/books", { title: "Waves", slug: "waves" });
+  bookId = book.id;
   const group = await api(admin, "POST", `/api/books/${book.id}/groups`, { name: "8b" });
   groupId = group.id;
   await api(admin, "POST", `/api/groups/${group.id}/students`, { username: "ada", password: "light-speed" });
@@ -117,4 +119,45 @@ describe("the class view", () => {
     expect(csv.split("\r\n")[1]).toMatch(/^ada,/);
     await device.context().close();
   }, 90_000);
+
+  it("warns before a publish leaves a student's work without its task", async () => {
+    // The previous test: ada answered q2. Now q2 is gone from the book.
+    await admin.goto(`${server.origin}/books/${bookId}`);
+    const zip = path.join(mkdtempSync(path.join(tmpdir(), "cloud-e2e-zip-")), "waves-2.zip");
+    writeFileSync(
+      zip,
+      zipSync({
+        "hyperbook.json": text(JSON.stringify({ name: "Waves" })),
+        "book/index.md": text("---\nname: Waves\n---\n\n# Waves\n\n::textinput{id=\"q1\"}\n"),
+      }),
+    );
+    await admin.getByRole("button", { name: "Manage" }).click();
+    await admin.getByRole("menuitem", { name: "Upload a zip" }).click();
+    await admin.getByLabel("Upload a zip of your book").setInputFiles(zip);
+    await admin.getByText(/^Uploaded 2 files/).waitFor();
+    await admin.keyboard.press("Escape");
+
+    await admin.getByRole("button", { name: "Publish", exact: true }).click();
+    const dialog = admin.getByRole("dialog");
+    await dialog.getByText("1 task with students' work is not in this save").waitFor({ timeout: 60_000 });
+    await dialog.getByText('id="q2"').waitFor();
+    await dialog.getByText("1 student", { exact: true }).waitFor();
+    await dialog.getByRole("button", { name: "Publish anyway" }).click();
+    await waitFor(async () => {
+      const builds = await api(admin, "GET", `/api/books/${bookId}`);
+      return builds.publishedBuildId;
+    }, (id) => id !== null && id !== undefined, 90_000);
+    await waitFor(
+      async () => (await api(admin, "GET", `/api/groups/${groupId}/overview`)).pages[0]?.elements.length,
+      (n) => n === 1,
+      90_000,
+    );
+
+    // The work is kept, under Other, with its old id.
+    await admin.goto(`${server.origin}/groups/${groupId}?tab=overview`);
+    await admin.getByRole("button", { name: /ada: 1 saved item in no task/ }).click();
+    const other = admin.getByRole("dialog");
+    await other.getByText('id="q2"').waitFor();
+    await other.getByText("A wave carries energy.").waitFor();
+  }, 180_000);
 });

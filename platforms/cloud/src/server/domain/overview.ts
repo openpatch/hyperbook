@@ -308,3 +308,44 @@ export function elsewhereRows(db: Db, config: Config, book: typeof books.$inferS
     })
     .sort((a, b) => b.editedAt - a.editedAt);
 }
+
+/** A task of the live version that a newer save no longer has, and who worked in it. */
+export type LeftBehind = { href: string; title: string; name: string; table: string; id: string; students: number };
+
+/**
+ * The tasks of the live version that `pages` (a newer save, from its check)
+ * no longer has, which students saved work in: removed, or changed without
+ * an `id` (their id came from their content). Publishing that save would
+ * leave the work without its task; giving a changed task its old id keeps it.
+ */
+export function workLeftBehind(
+  db: Db,
+  config: Config,
+  book: typeof books.$inferSelect,
+  pages: { elements: IndexedElement[] }[],
+): LeftBehind[] {
+  const live = readElementIndex(config, book);
+  if (!live) return [];
+  const next = new Set(pages.flatMap((p) => p.elements.map((e) => cellId(e.table, e.id))));
+  const gone = live.pages.flatMap((page) =>
+    page.elements.filter((e) => !next.has(cellId(e.table, e.id))).map((e) => ({ page, e })),
+  );
+  if (gone.length === 0) return [];
+  const who = new Map(gone.map(({ e }) => [cellId(e.table, e.id), new Set<number>()]));
+  const cellOf = rowMatcher(live.pages);
+  const rows = db
+    .select({ studentId: storeRows.studentId, table: storeRows.tableName, key: storeRows.key })
+    .from(storeRows)
+    .innerJoin(students, eq(students.id, storeRows.studentId))
+    .where(and(eq(students.bookId, book.id), isNotNull(storeRows.data)))
+    .all();
+  for (const row of rows) {
+    const key = parseKey(row.key);
+    const cell = key === null ? null : cellOf(row.table, key);
+    if (cell) who.get(cell)?.add(row.studentId);
+  }
+  return gone.flatMap(({ page, e }) => {
+    const students = who.get(cellId(e.table, e.id))!.size;
+    return students === 0 ? [] : [{ href: page.href, title: page.title, name: e.name, table: e.table, id: e.id, students }];
+  });
+}

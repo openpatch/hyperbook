@@ -99,6 +99,34 @@ describe("page checks", () => {
     renders.closeAll();
   });
 
+  it("collects the tasks of every page, for the warning before publishing", async () => {
+    const instance = setup();
+    const book = newBook(instance);
+    await commitFiles(instance, book.id, { "hyperbook.json": "{}", "book/index.md": "task q1", "book/b.md": "no task" });
+    const withTasks: RenderSpawner = async (job) => {
+      const inner = await textRender(job);
+      return {
+        async render(target) {
+          const result = await inner.render(target);
+          if (!result.ok || !("file" in target)) return result;
+          const text = await readFile(path.join(job.srcDir, target.file), "utf8");
+          const id = text.match(/task (\w+)/)?.[1];
+          return { ...result, title: target.file, storedElements: id ? [{ id, name: "textinput", table: "textinput" }] : [] };
+        },
+        close: () => inner.close(),
+      };
+    };
+    const renders = new Renderers(instance.config, withTasks);
+    const checks = new BookChecks(renders);
+    expect(checks.checkedPages(book.id)).toBeNull();
+    checks.start(book.id);
+    await checks.settled(book.id);
+    const pages = checks.checkedPages(book.id)!;
+    expect(pages.flatMap((p) => p.elements)).toEqual([{ id: "q1", name: "textinput", table: "textinput" }]);
+    expect(pages).toHaveLength(2);
+    renders.closeAll();
+  });
+
   it("says why a check could not run", async () => {
     const instance = setup();
     const book = newBook(instance);

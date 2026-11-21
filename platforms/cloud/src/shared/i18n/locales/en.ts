@@ -1608,6 +1608,14 @@ export const en = {
       "{{count}} students have no password or QR code to show: the server's credentials key has changed since they were made. Give them a new password or QR code in the group, then print again.",
   },
   publishing: {
+    leftBehind: {
+      title_one: "{{count}} task with students' work is not in this save",
+      title_other: "{{count}} tasks with students' work are not in this save",
+      description: "They were removed, or changed without an id: a task's id then comes from its content. After publishing, the book no longer shows the students' work in them (it stays saved, under Other in the class view). To keep it with a changed task, give the task its old id in the editor, e.g. :::onlineide{id=…}.",
+      students_one: "{{count}} student",
+      students_other: "{{count}} students",
+      publishAnyway: "Publish anyway",
+    },
     title: "Publishing",
     description:
       "Edit the book in the browser or upload it as a zip; the preview always shows the latest save. Publish to make the latest save a new live version. You can also work on the book locally with git.",

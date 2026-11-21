@@ -202,7 +202,7 @@ export function GroupOverview({
           </button>
         </p>
       ) : null}
-      {pages.length > 0 && (
+      {overview.students.length > 0 && (
         // As wide as its columns, scrolling sideways when that is wider than the page.
         <div className="inline-block max-w-full overflow-x-auto rounded-md border align-top">
           <table className="w-max border-collapse text-sm">

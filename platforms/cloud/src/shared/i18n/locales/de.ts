@@ -1635,6 +1635,14 @@ export const de: Messages = {
       "Für {{count}} Schüler kann kein Passwort oder QR-Code gezeigt werden: Der Zugangsschlüssel des Servers hat sich geändert, seit sie erstellt wurden. Vergeben Sie in der Gruppe ein neues Passwort oder einen neuen QR-Code und drucken Sie erneut.",
   },
   publishing: {
+    leftBehind: {
+      title_one: "{{count}} Aufgabe mit Arbeit von Schülern fehlt in diesem Stand",
+      title_other: "{{count}} Aufgaben mit Arbeit von Schülern fehlen in diesem Stand",
+      description: "Sie wurden entfernt oder ohne id geändert: Die id einer Aufgabe ergibt sich dann aus ihrem Inhalt. Nach dem Veröffentlichen zeigt das Buch die Arbeit der Schüler darin nicht mehr (sie bleibt gespeichert, unter Andere in der Übersicht). Um sie bei einer geänderten Aufgabe zu behalten, geben Sie der Aufgabe im Editor ihre alte id, z. B. :::onlineide{id=…}.",
+      students_one: "{{count}} Schüler",
+      students_other: "{{count}} Schüler",
+      publishAnyway: "Trotzdem veröffentlichen",
+    },
     title: "Veröffentlichen",
     description:
       "Bearbeiten Sie das Buch im Browser oder laden Sie es als Zip hoch; die Vorschau zeigt immer den zuletzt gespeicherten Stand. Veröffentlichen Sie, um diesen Stand als neue Live-Version freizugeben. Sie können auch lokal mit git am Buch arbeiten.",

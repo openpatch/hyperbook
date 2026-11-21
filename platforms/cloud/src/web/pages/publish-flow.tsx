@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { HandIcon, LoaderCircleIcon, RocketIcon } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -149,6 +149,9 @@ export function CheckLine({ book, head, compact = false }: { book: Book; head: H
           </Button>
         )}
       </div>
+      {current && check.status === "done" && !!check.workLeftBehind?.length && (
+        <WorkLeftBehind items={check.workLeftBehind} />
+      )}
       {current && check.status === "done" && check.problems.length > 0 && (
         <ul className="max-h-40 overflow-y-auto rounded-md border text-xs">
           {check.problems.map((p) => (
@@ -159,6 +162,36 @@ export function CheckLine({ book, head, compact = false }: { book: Book; head: H
           ))}
         </ul>
       )}
+    </div>
+  );
+}
+
+/**
+ * Tasks of the live version that the latest save no longer has, which
+ * students saved work in. Publishing would leave that work without its task
+ * (it stays saved, under "Other" in the class view); giving a changed task
+ * its old id in the editor keeps it.
+ */
+function WorkLeftBehind({
+  items,
+}: {
+  items: { href: string; title: string; name: string; id: string; students: number }[];
+}) {
+  const { t } = useTranslation();
+  return (
+    <div role="alert" className="rounded-md border border-destructive/40 bg-destructive/5 p-3 text-sm">
+      <p className="font-medium">{t("publishing.leftBehind.title", { count: items.length })}</p>
+      <p className="mb-2 text-muted-foreground">{t("publishing.leftBehind.description")}</p>
+      <ul className="max-h-40 space-y-1 overflow-y-auto text-xs">
+        {items.map((item) => (
+          <li key={`${item.href}/${item.id}`} className="flex flex-wrap items-baseline gap-x-2">
+            <span className="font-medium">{item.title}</span>
+            <span>{item.name}</span>
+            <code className="select-all font-mono">id=&quot;{item.id}&quot;</code>
+            <span className="text-muted-foreground">{t("publishing.leftBehind.students", { count: item.students })}</span>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
@@ -183,8 +216,21 @@ export function PublishDialog({
   const id = String(book.id);
   const queryClient = useQueryClient();
   const { data: head } = useHead(id);
+  const { data: check } = useCheck(id);
   const [note, setNote] = useState("");
   const [busy, setBusy] = useState(false);
+  // A published book is checked on opening, so the dialog can say whether
+  // this save leaves students' work without its task.
+  const checked = !!check && check.commit === head?.commit && check.status !== "failed";
+  useEffect(() => {
+    if (!open || !book.publishedAt || !head?.commit || checked || check?.status === "running") return;
+    void unwrap(api.books[":id"].check.$post({ param: { id } }))
+      .then((state) => queryClient.setQueryData(checkKey(id), state))
+      .catch(() => {
+        // The check line offers it again.
+      });
+  }, [open, book.publishedAt, head?.commit, checked, check?.status, id, queryClient]);
+  const leavesWork = !!check && check.commit === head?.commit && !!check.workLeftBehind?.length;
 
   const publish = async () => {
     setBusy(true);
@@ -220,8 +266,12 @@ export function PublishDialog({
           aria-label={t("publishing.notePlaceholder")}
         />
         <DialogFooter>
-          <Button disabled={busy} onClick={() => void publish()}>
-            {t("publishing.publish")}
+          <Button
+            variant={leavesWork ? "destructive" : "default"}
+            disabled={busy}
+            onClick={() => void publish()}
+          >
+            {leavesWork ? t("publishing.leftBehind.publishAnyway") : t("publishing.publish")}
           </Button>
         </DialogFooter>
       </DialogContent>

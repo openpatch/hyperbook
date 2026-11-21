@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 import { createStudentSession, readStudentSession } from "../src/server/auth/student-sessions";
 import { books, builds, storeHeads, storeRows, studentSessions } from "../src/server/db/schema";
 import { buildDir } from "../src/server/hosting/storage";
+import { workLeftBehind } from "../src/server/domain/overview";
 import { loggedIn, setup } from "./helpers";
 
 const INDEX = {
@@ -220,6 +221,22 @@ describe("the group overview", () => {
     expect(res.body.rows).toEqual([
       { table: "textinput", key: "old-q", data: { id: "old-q", text: "before the edit" }, editedAt: 2000 },
     ]);
+  });
+
+  it("finds the work a newer save would leave without its task", async () => {
+    const { instance, book, students, row } = await world();
+    row(students[0]!.id, "struktolab", "s1", 1000);
+    row(students[1]!.id, "struktolab", "s1", 1000);
+    row(students[1]!.id, "textinput", "q1", 1000);
+    const bookRow = instance.db.select().from(books).where(eq(books.id, book.id)).get()!;
+    // The newer save still has q1, but s1 was changed (new id) or removed.
+    const next = [{ elements: [{ id: "q1", name: "textinput", table: "textinput" }, { id: "s1-new", name: "struktolab", table: "struktolab" }] }];
+    expect(workLeftBehind(instance.db, instance.config, bookRow, next)).toEqual([
+      { href: "/tasks", title: "Tasks", name: "struktolab", table: "struktolab", id: "s1", students: 2 },
+    ]);
+    // Nothing is left behind when every task is still there.
+    const same = [{ elements: INDEX.pages[0]!.elements }];
+    expect(workLeftBehind(instance.db, instance.config, bookRow, same)).toEqual([]);
   });
 
   it("is for the book's editors only", async () => {

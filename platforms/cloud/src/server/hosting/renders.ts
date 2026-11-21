@@ -1,3 +1,4 @@
+import type { IndexedElement } from "../domain/overview";
 import { LocalizedError } from "../localized-error";
 import { type ChildProcessWithoutNullStreams, spawn } from "node:child_process";
 import { existsSync } from "node:fs";
@@ -37,6 +38,9 @@ export type PageRender =
       /** Typst documents the page shows, and `.typ` sources it offers (see hosting/typst.ts). */
       typstJobs?: TypstJob[];
       typstDownloads?: string[];
+      /** The page's title and the tasks on it that keep a reader's work. */
+      title?: string;
+      storedElements?: IndexedElement[];
     }
   | { ok: false; error: string; log: string };
 
@@ -459,7 +463,11 @@ export class Renderers {
    */
   async checkPages(
     bookId: number,
-    onPage: (progress: { done: number; total: number; commit: string }, problem: { file: string; error: string } | null) => void,
+    onPage: (
+      progress: { done: number; total: number; commit: string },
+      problem: { file: string; error: string } | null,
+      page?: { href: string; title: string; elements: IndexedElement[] },
+    ) => void,
     signal?: AbortSignal,
   ): Promise<"done" | "changed" | "aborted"> {
     const r = await this.renderer(bookId);
@@ -480,7 +488,13 @@ export class Renderers {
         return this.run(r, { file });
       });
       if (!result) return "changed";
-      onPage({ done: i + 1, total: files.length, commit }, result.ok ? null : { file, error: result.error });
+      onPage(
+        { done: i + 1, total: files.length, commit },
+        result.ok ? null : { file, error: result.error },
+        result.ok
+          ? { href: result.href, title: result.title ?? result.href, elements: result.storedElements ?? [] }
+          : undefined,
+      );
     }
     return "done";
   }

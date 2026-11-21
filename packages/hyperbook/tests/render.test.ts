@@ -41,7 +41,7 @@ describe("rendering single pages", () => {
 
   it("renders a page by file and only that page", async () => {
     const result = await renderer.render({ file: "book/chapter/loops.md" });
-    expect(result).toEqual({ ok: true, href: "/chapter/loops", file: "book/chapter/loops.md", out: "chapter/loops.html" });
+    expect(result).toEqual({ ok: true, href: "/chapter/loops", title: "Loops", file: "book/chapter/loops.md", out: "chapter/loops.html" });
     expect(await out("chapter/loops.html")).toContain("Loops");
     await expect(out("index.html")).rejects.toThrow();
   });
