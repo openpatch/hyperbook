@@ -4,7 +4,7 @@ import { and, asc, eq, inArray, isNotNull, isNull, max } from "drizzle-orm";
 import { z } from "zod";
 import type { Config } from "../config";
 import type { Db } from "../db/client";
-import { type books, storeRows, studentSessions, students } from "../db/schema";
+import { type books, storeHeads, storeRows, studentSessions, students } from "../db/schema";
 import { buildDir } from "../hosting/storage";
 
 /*
@@ -150,7 +150,10 @@ export type OverviewStudent = {
   id: number;
   username: string;
   lastLoginAt: number | null;
-  /** The last request of one of the student's own sessions. */
+  /**
+   * When the student was last in the book: a request of one of their own
+   * sessions (kept to the minute) or their last upload, whichever is later.
+   */
   lastSeenAt: number | null;
   /** cellId → when the student last changed that element (device time, ms). */
   cells: Record<string, number>;
@@ -208,11 +211,17 @@ export function groupOverview(
       .where(and(inArray(studentSessions.studentId, ids), isNull(studentSessions.impersonatedBy)))
       .groupBy(studentSessions.studentId)
       .all();
-    for (const s of seen) {
-      const at = s.at as unknown;
-      result.get(s.studentId)!.lastSeenAt =
-        at instanceof Date ? at.getTime() : typeof at === "number" ? at : null;
-    }
+    const ms = (at: unknown) => (at instanceof Date ? at.getTime() : typeof at === "number" ? at : null);
+    const later = (student: OverviewStudent, at: number | null) => {
+      if (at !== null && (student.lastSeenAt === null || at > student.lastSeenAt)) student.lastSeenAt = at;
+    };
+    for (const s of seen) later(result.get(s.studentId)!, ms(s.at));
+    const uploads = db
+      .select({ studentId: storeHeads.studentId, at: storeHeads.updatedAt })
+      .from(storeHeads)
+      .where(inArray(storeHeads.studentId, ids))
+      .all();
+    for (const u of uploads) later(result.get(u.studentId)!, ms(u.at));
   }
   return { indexed: index !== null, pages: index?.pages ?? [], students: [...result.values()] };
 }

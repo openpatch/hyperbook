@@ -2,7 +2,8 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { eq } from "drizzle-orm";
 import { describe, expect, it } from "vitest";
-import { books, builds, storeRows, studentSessions } from "../src/server/db/schema";
+import { createStudentSession, readStudentSession } from "../src/server/auth/student-sessions";
+import { books, builds, storeHeads, storeRows, studentSessions } from "../src/server/db/schema";
 import { buildDir } from "../src/server/hosting/storage";
 import { loggedIn, setup } from "./helpers";
 
@@ -85,6 +86,28 @@ describe("the group overview", () => {
     const res = await teacher.c.get(`/api/groups/${group.id}/overview`);
     expect(res.body.students[0].lastSeenAt).toBe(10_000);
     expect(res.body.students[1].lastSeenAt).toBeNull();
+  });
+
+  it("counts an upload as being in the book", async () => {
+    const { instance, teacher, group, students } = await world();
+    instance.db.insert(storeHeads).values({ studentId: students[1]!.id, revision: 3, updatedAt: new Date(50_000) }).run();
+    const res = await teacher.c.get(`/api/groups/${group.id}/overview`);
+    expect(res.body.students[1].lastSeenAt).toBe(50_000);
+  });
+
+  it("keeps a session's last-seen time to the minute, also on shared devices", async () => {
+    const { instance, book, students } = await world();
+    const token = createStudentSession(instance.db, { studentId: students[0]!.id, kind: "cookie", persistent: false });
+    const seen = () =>
+      instance.db.select().from(studentSessions).where(eq(studentSessions.studentId, students[0]!.id)).get()!;
+    const created = seen();
+    const t0 = created.lastSeenAt.getTime();
+    readStudentSession(instance.db, token, "cookie", book.id, t0 + 30_000);
+    expect(seen().lastSeenAt.getTime()).toBe(t0);
+    readStudentSession(instance.db, token, "cookie", book.id, t0 + 90_000);
+    expect(seen().lastSeenAt.getTime()).toBe(t0 + 90_000);
+    // A shared-device session still ends when it was going to.
+    expect(seen().expiresAt.getTime()).toBe(created.expiresAt.getTime());
   });
 
   it("counts all work as elsewhere while nothing is published", async () => {

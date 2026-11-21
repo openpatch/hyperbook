@@ -17,7 +17,13 @@ export const SHARED_DEVICE_LIFETIME_MS = 12 * 60 * 60 * 1000;
 export const READONLY_LIFETIME_MS = 60 * 60 * 1000;
 /** How long a "view as student" hand-off code is valid. */
 const IMPERSONATION_CODE_LIFETIME_MS = 60 * 1000;
+/** A persistent session's lifetime slides at most this often. */
 const TOUCH_INTERVAL_MS = 60 * 60 * 1000;
+/**
+ * last_seen_at is kept this fresh, so the class view can tell who is in
+ * the book right now (one write per student and minute at most).
+ */
+const SEEN_INTERVAL_MS = 60 * 1000;
 
 export type StudentSession = {
   idHash: string;
@@ -90,11 +96,15 @@ export function readStudentSession(
   // A session belongs to one book: a token of another book is no token here.
   if (!row || row.kind !== kind || row.bookId !== bookId) return null;
 
-  if (row.persistent && now - row.lastSeenAt.getTime() > TOUCH_INTERVAL_MS) {
+  const since = now - row.lastSeenAt.getTime();
+  if (row.persistent && since > TOUCH_INTERVAL_MS) {
     db.update(studentSessions)
       .set({ lastSeenAt: new Date(now), expiresAt: new Date(now + STUDENT_SESSION_LIFETIME_MS) })
       .where(eq(studentSessions.idHash, idHash))
       .run();
+  } else if (since > SEEN_INTERVAL_MS) {
+    // Shared-device sessions too, but only the time: their end never moves.
+    db.update(studentSessions).set({ lastSeenAt: new Date(now) }).where(eq(studentSessions.idHash, idHash)).run();
   }
   const { lastSeenAt: _, ...session } = row;
   return session;
