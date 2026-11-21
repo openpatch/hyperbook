@@ -13,6 +13,7 @@ import {
 } from "./remarkHelper";
 import { ElementContent } from "hast";
 import { resolveDirectiveId } from "./directiveId";
+import { recordStoredElement } from "./storedElements";
 
 /** The languages a structogram can be written in, by the code fence's language. */
 const CODE_LANGUAGES: Record<string, "java" | "python" | "javascript"> = {
@@ -50,6 +51,7 @@ export default (ctx: HyperbookContext) => () => {
           // language stays. A flag ({hideCode}) or "true"/"false".
           hideCode,
         } = node.attributes || {};
+        recordStoredElement(file, name, id, node);
         const hidden = hideCode != null && hideCode !== "false";
 
         expectDirective(node, file, "struktolab", ["leaf", "container"]);

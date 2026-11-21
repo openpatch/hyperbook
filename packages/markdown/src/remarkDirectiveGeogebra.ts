@@ -13,6 +13,7 @@ import {
 } from "./remarkHelper";
 import { toText } from "./mdastUtilToText";
 import { resolveDirectiveId } from "./directiveId";
+import { recordStoredElement } from "./storedElements";
 
 export default (ctx: HyperbookContext) => () => {
   const name = "geogebra";
@@ -32,6 +33,7 @@ export default (ctx: HyperbookContext) => () => {
           showResetIcon = true,
           ...props
         } = node.attributes || {};
+        recordStoredElement(file, name, id, node);
 
         expectDirective(node, file, "geogebra", ["leaf", "container"]);
 

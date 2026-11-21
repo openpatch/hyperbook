@@ -13,6 +13,7 @@ import {
   registerDirective,
 } from "./remarkHelper";
 import { resolveDirectiveId } from "./directiveId";
+import { recordStoredElement } from "./storedElements";
 import { i18n } from "./i18n";
 import {
   collectWorkspace,
@@ -70,6 +71,7 @@ canvas {
           mode = "preview",
           id = resolveDirectiveId(file, node),
         } = node.attributes || {};
+        recordStoredElement(file, name, id, node);
         const data = node.data || (node.data = {});
         const isEditor = mode === "editor";
         const resolvedHeight = cssHeight(height);

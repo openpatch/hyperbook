@@ -11,6 +11,7 @@ import {
   registerDirective,
 } from "./remarkHelper";
 import { resolveDirectiveId } from "./directiveId";
+import { recordStoredElement } from "./storedElements";
 import { readFile } from "./helper";
 
 export default (ctx: HyperbookContext) => () => {
@@ -36,6 +37,7 @@ export default (ctx: HyperbookContext) => () => {
           id = resolveDirectiveId(file, node),
           src = "",
         } = node.attributes || {};
+        recordStoredElement(file, name, id, node);
 
         if (!src) return SKIP;
 
