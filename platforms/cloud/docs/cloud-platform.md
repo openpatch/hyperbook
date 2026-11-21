@@ -1811,7 +1811,7 @@ the last save. Students stay anonymous on the server.
   (`storedElements`, `title`), for the publish warning.
 - Directive → store table: `STORE_OF_DIRECTIVE`. Most elements keep one
   row keyed by their id (text input, structogram, learning map, JMP,
-  bitflow, GeoGebra, Excalidraw, multievent, ABC editor, and the IDEs on
+  bitflow, GeoGebra, H5P, Excalidraw, multievent, ABC editor, and the IDEs on
   the shared shell in the `ide` table). The embedded Online-IDE and
   SQL-IDE keep one row per file, keyed id + file name, plus the file list
   under the bare id (`match: "prefix"`; the SQL-IDE's database changes
