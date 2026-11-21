@@ -1798,15 +1798,18 @@ the last save. Students stay anonymous on the server.
   `[{ page: "/chapter-1", title, elements: [{ id, name, line }] }]`, in
   book order. The platform copies it next to the build; a book without it
   (built by an older Hyperbook) shows the overview by table only.
-- Directive name → store table: `pyide`, `p5`, `openscad` and `typst`
-  share the `ide` table (since store v11, `store-ide-migration.js`);
-  `onlineide` → `onlineide`, `sqlide` → `sqlideScripts`; `textinput`,
-  `learningmap`, `excalidraw`, `struktolab`, `jmp`, `bitflow`,
-  `multievent`, `checklist` → the table of the same name. The index
-  records the table with each element, so this mapping lives in the
-  build, next to the elements that use it. UI state
-  (`collapsibles`, `tabs`, `slideshow`, `currentState`, `consent`,
-  `bookmarks`) is never shown.
+- Directive → store table: `STORE_OF_DIRECTIVE` in
+  `packages/markdown/src/storedElements.ts`, written into the index with
+  each element. Most elements keep one row keyed by their id (text input,
+  structogram, learning map, JMP, bitflow, GeoGebra, Excalidraw,
+  multievent, and the IDEs on the shared shell in the `ide` table). The
+  embedded Online-IDE and SQL-IDE keep one row per file, keyed id + file
+  name: their elements carry `match: "prefix"` (and the SQL-IDE's
+  database `also: sqlideDatabases`, `match: "suffix"`). A row goes to the
+  element with an equal key, else the longest id it starts or ends with.
+- Multievent used to key its state by position and page path; it now
+  saves under its directive id (`data-id`) and moves an old save to it
+  when the page loads.
 - Rows whose id is in no page of the live build are counted under
   *Elsewhere* (an element removed or edited since).
 
