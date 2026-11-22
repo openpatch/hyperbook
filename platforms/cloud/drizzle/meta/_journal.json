@@ -162,6 +162,13 @@
       "when": 1795274382860,
       "tag": "0022_store_rows",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "6",
+      "when": 1795368372190,
+      "tag": "0023_upgrade_build_commit_count",
+      "breakpoints": true
     }
   ]
 }

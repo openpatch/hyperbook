@@ -132,13 +132,14 @@ export class BuildQueue {
         buildId: builds.id,
         commit: builds.commit,
         builtWith: builds.hyperbookVersion,
+        commitCount: builds.commitCount,
       })
       .from(books)
       .innerJoin(builds, eq(builds.id, books.publishedBuildId))
       .where(and(eq(books.source, "hosted"), isNotNull(books.publishedBuildId)))
       .all();
     let queued = 0;
-    for (const { bookId, buildId, commit, builtWith } of published) {
+    for (const { bookId, buildId, commit, builtWith, commitCount } of published) {
       const missing = !existsSync(buildDir(this.config, bookId, buildId));
       const outdated = upgrades && version !== null && builtWith !== version;
       if (!missing && !outdated) continue;
@@ -151,7 +152,9 @@ export class BuildQueue {
       if (busy) continue;
       this.db
         .insert(builds)
-        .values({ bookId, commit, trigger: "upgrade", publish: false, replacesBuildId: buildId, status: "queued" })
+        // Same commit as the build it replaces, so the same commit count:
+        // the books list counts unpublished saves from it.
+        .values({ bookId, commit, trigger: "upgrade", publish: false, replacesBuildId: buildId, commitCount, status: "queued" })
         .run();
       queued++;
     }
