@@ -1,5 +1,11 @@
 # @hyperbook/fs
 
+## 0.31.1
+
+### Patch Changes
+
+- [`ecbc339`](https://github.com/openpatch/hyperbook/commit/ecbc3392b6fc25a69855475696a8109a205e4c46) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Snippets mentioned in code are no longer expanded. A page explaining snippets, like `` `:::snippet{#aufgabe}` `` in a sentence or a `:::snippet` example in a code block, had the mention replaced by the snippet, which swallowed the text up to the next `:::` and garbled the page. A `:::` in inline code inside a snippet's body no longer ends the snippet early either.
+
 ## 0.31.0
 
 ### Minor Changes
