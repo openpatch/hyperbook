@@ -14,6 +14,7 @@ import {
   expectDirective,
   isDirective,
   registerDirective,
+  fileWarning,
 } from "./remarkHelper";
 import { resolveDirectiveId } from "./directiveId";
 import { recordStoredElement } from "./storedElements";
@@ -42,7 +43,9 @@ const pageSize = (
     return [Number(match[1]), Number(match[2])];
   }
   if (value) {
-    file.message(
+    fileWarning(
+      file,
+      "invalid-attribute-value",
       `compare="${value}" in the webide directive should be a size like compare="400x300", or empty.`,
       node as never,
     );
@@ -60,10 +63,8 @@ export default (ctx: HyperbookContext) => () => {
   return (tree: Root, file: VFile) => {
     visit(tree, function (node) {
       if (isDirective(node) && node.name === name) {
-        const {
-          height,
-          id = resolveDirectiveId(file, node),
-        } = node.attributes || {};
+        const { height, id = resolveDirectiveId(file, node) } =
+          node.attributes || {};
         recordStoredElement(file, name, id, node);
         const data = node.data || (node.data = {});
         const resolvedHeight = cssHeight(height);
@@ -141,7 +142,9 @@ export default (ctx: HyperbookContext) => () => {
                   {
                     type: "element",
                     tagName: "span",
-                    properties: { class: "ide-panel-title container-title-text" },
+                    properties: {
+                      class: "ide-panel-title container-title-text",
+                    },
                     children: [],
                   },
                 ],

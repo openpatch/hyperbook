@@ -16,6 +16,8 @@ export interface Finding {
   column?: number;
   reason: string;
   severity: "error" | "warning";
+  /** Stable id for the kind of problem, for tools reading the output. */
+  rule?: string;
 }
 
 /** Schemes that never point at something inside the book. */
@@ -160,6 +162,7 @@ async function duplicatePermaidFindings(
           `Duplicate permaid "${permaid}", also declared by ${winner.path.relative}. ` +
           `Only one page can own /@/${permaid}; this one loses it.`,
         severity: "error",
+        rule: "duplicate-permaid",
       });
     }
   }
@@ -197,7 +200,9 @@ export async function checkBook(project: Hyperproject): Promise<Finding[]> {
   for (const file of [...bookFiles, ...glossaryFiles]) {
     const content = file.markdown?.content;
     if (typeof content !== "string") continue;
-    for (const match of content.matchAll(/:download\[[^\]]*\]\{[^}]*\bsrc="([^"]+\.typ)"/gi)) {
+    for (const match of content.matchAll(
+      /:download\[[^\]]*\]\{[^}]*\bsrc="([^"]+\.typ)"/gi,
+    )) {
       const src = match[1]!;
       offeredTypst.add(
         src.startsWith("/")
@@ -280,6 +285,7 @@ export async function checkBook(project: Hyperproject): Promise<Finding[]> {
           ? `${target.kind} target is a Typst source, which is not published: ${target.url}. Show the document with ::pdf[…]{src="…"}, or offer the source with :download[…]{src="…"}.`
           : `${target.kind} target does not exist: ${target.url}`,
         severity: "error",
+        rule: "broken-link",
       });
     }
   }
@@ -306,10 +312,7 @@ async function checkConfigKeys(project: Hyperproject): Promise<Finding[]> {
   let known: Set<string>;
   try {
     const schema = JSON.parse(
-      await fs.readFile(
-        path.join(__dirname, "schemas", schemaName),
-        "utf8",
-      ),
+      await fs.readFile(path.join(__dirname, "schemas", schemaName), "utf8"),
     );
     known = new Set(Object.keys(schema.properties || {}));
   } catch {
@@ -339,11 +342,12 @@ async function checkConfigKeys(project: Hyperproject): Promise<Finding[]> {
         .sort()
         .join(", ")}`,
       severity: "warning" as const,
+      rule: "unknown-config-key",
     }));
 }
 
 /** Walks a project tree, checking every book it contains. */
-async function checkProject(project: Hyperproject): Promise<Finding[]> {
+export async function checkProject(project: Hyperproject): Promise<Finding[]> {
   const config = await checkConfigKeys(project);
   if (project.type === "library") {
     const nested = await Promise.all(project.projects.map(checkProject));
@@ -370,7 +374,9 @@ export async function runCheck(
       .filter((part) => part !== undefined && part !== null)
       .join(":");
     const severity =
-      finding.severity === "error" ? chalk.red("error") : chalk.yellow("warning");
+      finding.severity === "error"
+        ? chalk.red("error")
+        : chalk.yellow("warning");
     console.error(`${severity} ${where}`);
     console.error(`  ${finding.reason}`);
   }

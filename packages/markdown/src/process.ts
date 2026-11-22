@@ -61,6 +61,7 @@ import remarkDirectiveH5P from "./remarkDirectiveH5P";
 import remarkDirectiveJSXGraph from "./remarkDirectiveJSXGraph";
 import remarkDirectiveMultievent from "./remarkDirectiveMultievent";
 import remarkDirectiveUnpack from "./remarkDirectiveUnpack";
+import remarkDirectiveSyntax from "./remarkDirectiveSyntax";
 import { makeTransformerCopyButton } from "./rehypePrettyCodeCopyButton";
 import { remarkGithubEmoji } from "./remarkGithubEmoji";
 import { rehypeEmoji } from "./rehypeEmoji";
@@ -94,6 +95,8 @@ export const remark = (
   const remarkPlugins: PluggableList = [
     remarkRemoveComments,
     remarkDirective,
+    /* reads the tree before any directive is transformed */
+    remarkDirectiveSyntax(ctx),
     remarkDirectiveRehype,
     remarkDirectiveTabs(ctx),
     remarkDirectiveCollapsible(ctx),
@@ -184,10 +187,7 @@ export const remark = (
  * @param md - The page source, or a VFile carrying it. Pass a VFile with a
  *   `path` so build errors name the file they came from.
  */
-export const process = (
-  md: string | VFile,
-  ctx: HyperbookContext,
-) => {
+export const process = (md: string | VFile, ctx: HyperbookContext) => {
   i18n.init(ctx.config.language || "en");
 
   const rehypePlugins: PluggableList = [
@@ -214,7 +214,9 @@ export const process = (
           dark: `github-dark`,
           light: `github-light`,
         },
-        getHighlighter: (options: Parameters<typeof getSingletonHighlighter>[0]) =>
+        getHighlighter: (
+          options: Parameters<typeof getSingletonHighlighter>[0],
+        ) =>
           getSingletonHighlighter({
             ...options,
             langs: [
@@ -236,15 +238,17 @@ export const process = (
     rehypeProtect(ctx),
   ];
 
-  return remark(ctx)
-    .use(rehypePlugins)
-    .use(rehypeShell(ctx))
-    /* needs to be after the shell, so icons from the config are covered too */
-    .use(rehypeEmoji, ctx)
-    .use(rehypeHtmlStructure(ctx))
-    .use(rehypeStringify, {
-      allowDangerousCharacters: true,
-      allowDangerousHtml: true,
-    })
-    .process(md);
+  return (
+    remark(ctx)
+      .use(rehypePlugins)
+      .use(rehypeShell(ctx))
+      /* needs to be after the shell, so icons from the config are covered too */
+      .use(rehypeEmoji, ctx)
+      .use(rehypeHtmlStructure(ctx))
+      .use(rehypeStringify, {
+        allowDangerousCharacters: true,
+        allowDangerousHtml: true,
+      })
+      .process(md)
+  );
 };

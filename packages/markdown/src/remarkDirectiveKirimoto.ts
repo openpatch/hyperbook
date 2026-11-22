@@ -10,6 +10,7 @@ import {
   isDirective,
   registerDirective,
 } from "./remarkHelper";
+import { expectFile } from "./helper";
 
 export default (ctx: HyperbookContext) => () => {
   const name = "kirimoto";
@@ -20,7 +21,8 @@ export default (ctx: HyperbookContext) => () => {
 
         const data = node.data || (node.data = {});
         const {
-          height = ctx.config.elements?.kirimoto?.height || "calc(100vh - 60px)",
+          height = ctx.config.elements?.kirimoto?.height ||
+            "calc(100vh - 60px)",
           mode,
           model,
           workspace,
@@ -45,6 +47,7 @@ export default (ctx: HyperbookContext) => () => {
         if (workspace) properties["data-workspace"] = workspace;
         if (settings) properties["data-settings"] = settings;
 
+        expectFile(file, ctx, node, "::kirimoto", "model", model);
         data.hName = "div";
         data.hProperties = properties;
         data.hChildren = [

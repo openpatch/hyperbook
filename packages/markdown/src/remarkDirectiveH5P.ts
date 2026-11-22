@@ -12,6 +12,7 @@ import {
 } from "./remarkHelper";
 import { resolveDirectiveId } from "./directiveId";
 import { recordStoredElement } from "./storedElements";
+import { expectFile } from "./helper";
 
 export default (ctx: HyperbookContext) => () => {
   const name = "h5p";
@@ -48,6 +49,7 @@ export default (ctx: HyperbookContext) => () => {
           ["style.css"],
           [],
         );
+        expectFile(file, ctx, node, "::h5p", "src", src);
         data.hName = "div";
         data.hProperties = {
           class: "directive-h5p",

@@ -81,7 +81,7 @@ describe("remarkDirectiveVideo", () => {
         `:video{poster="/clouds.jpg" title="Morgenwolken"}
 `,
         ctx,
-      ).messages.length,
+      ).messages.filter((m) => m.ruleId === "wrong-directive-form").length,
     ).toBe(1);
   });
   it("should register directives", async () => {

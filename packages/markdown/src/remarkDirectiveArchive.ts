@@ -12,6 +12,7 @@ import {
   expectDirective,
   isDirective,
   registerDirective,
+  fileFail,
 } from "./remarkHelper";
 import { toHast } from "mdast-util-to-hast";
 
@@ -46,7 +47,8 @@ export function parseArchiveIncludes(
       ? file.path
       : file.history?.[file.history.length - 1];
 
-  const fail = (reason: string): never => file.fail(reason, node);
+  const fail = (reason: string): never =>
+    fileFail(file, "invalid-archive", reason, node);
 
   return value.split(",").map((pair) => {
     const equals = pair.indexOf("=");
@@ -130,7 +132,9 @@ export default (ctx: HyperbookContext) => () => {
         // the vfile for the build to pick up.
         if (include !== undefined && include !== null) {
           if (String(include).trim() === "") {
-            file.fail(
+            fileFail(
+              file,
+              "invalid-archive",
               `The archive directive has an empty include attribute. Remove it, or list src=dest pairs, e.g. include="/book/chapter/assets=assets".`,
               node,
             );

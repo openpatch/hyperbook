@@ -14,6 +14,7 @@ import {
 import { resolveDirectiveId } from "./directiveId";
 import { recordStoredElement } from "./storedElements";
 import { i18n } from "./i18n";
+import { expectFile } from "./helper";
 
 export default (ctx: HyperbookContext) => () => {
   const name = "excalidraw";
@@ -55,6 +56,7 @@ export default (ctx: HyperbookContext) => () => {
           onlinkopen,
         } = attributes;
 
+        expectFile(file, ctx, node, "::excalidraw", "src", src);
         data.hName = "div";
         data.hProperties = {
           class: "directive-excalidraw",

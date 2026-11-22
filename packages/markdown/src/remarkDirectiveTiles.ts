@@ -11,6 +11,7 @@ import {
   expectLeafDirective,
   isDirective,
   registerDirective,
+  fileFail,
 } from "./remarkHelper";
 import { Raw } from "mdast-util-to-hast";
 import githubEmojiMap from "./github-emojis.json";
@@ -40,7 +41,9 @@ export default (ctx: HyperbookContext) => () => {
             expectLeafDirective(node, file, "tile");
 
             if (!title) {
-              file.fail(
+              fileFail(
+                file,
+                "missing-attribute",
                 `[tiles] A title is required (${ctx.navigation.current?.href})`,
                 node,
               );
@@ -52,7 +55,13 @@ export default (ctx: HyperbookContext) => () => {
                 tagName: "a",
                 properties: {
                   class: "tile-title",
-                  href: href ? ctx.makeUrl(href, "public", ctx.navigation.current || undefined) : undefined,
+                  href: href
+                    ? ctx.makeUrl(
+                        href,
+                        "public",
+                        ctx.navigation.current || undefined,
+                      )
+                    : undefined,
                 },
                 children: [
                   {

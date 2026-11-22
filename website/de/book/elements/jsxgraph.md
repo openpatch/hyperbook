@@ -7,7 +7,7 @@ permaid: jsxgraph
 
 JSXGraph ist eine JavaScript-Bibliothek für interaktive Geometrie, Funktionsdarstellung, Diagrammerstellung und andere mathematische Visualisierungen in einem Webbrowser. Sie ist kostenlos und quelloffen und kann verwendet werden, um dynamische und interaktive mathematische Inhalte zu erstellen.
 
-Sie können JSXGraph in Ihr Buch einbetten, indem Sie das `jsxgraph`-Element verwenden. Mit den Attributen `height` und `width` können Sie die Größe des JSXGraph-Boards festlegen. Das Attribut `boundingbox` wird verwendet, um den Begrenzungsrahmen des Boards zu definieren. Die Attribute `axis` und `grid` dienen dazu, die Achsen und das Raster ein- oder auszublenden.
+Sie können JSXGraph in Ihr Buch einbetten, indem Sie das `jsxgraph`-Element verwenden. Mit den Attributen `height` und `width` können Sie die Größe des JSXGraph-Boards festlegen. Das Attribut `boundingbox` wird verwendet, um den Begrenzungsrahmen des Boards zu definieren. Mit `keepaspectratio=true` sind die Einheiten beider Achsen gleich lang. Die Attribute `axis` und `grid` dienen dazu, die Achsen und das Raster ein- oder auszublenden.
 
 In Ihrem Code müssen Sie die Variable `board` verwenden, um auf das JSXGraph-Board zuzugreifen. Sie können Punkte, Linien, Kurven und andere Elemente auf dem Board mit der Methode `board.create` erstellen. Das erste Argument gibt den Typ des zu erstellenden Elements an, und das zweite Argument ist ein Array von Parametern für das Element.
 

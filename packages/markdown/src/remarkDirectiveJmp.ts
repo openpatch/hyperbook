@@ -9,6 +9,7 @@ import {
   expectLeafDirective,
   isDirective,
   registerDirective,
+  fileWarning,
 } from "./remarkHelper";
 import { resolveDirectiveId } from "./directiveId";
 import { recordStoredElement } from "./storedElements";
@@ -69,13 +70,18 @@ export default (ctx: HyperbookContext) => () => {
         const language = attributes.language || ctx.config.language || "en";
 
         if (!src) {
-          file.message(`Missing "src" attribute`, node);
+          fileWarning(
+            file,
+            "missing-attribute",
+            `Missing "src" attribute`,
+            node,
+          );
           return SKIP;
         }
 
         const srcFile = readFile(src, ctx);
         if (!srcFile) {
-          file.message(`File not found: ${src}`, node);
+          fileWarning(file, "missing-file", `File not found: ${src}`, node);
           return SKIP;
         }
 
@@ -83,7 +89,12 @@ export default (ctx: HyperbookContext) => () => {
         try {
           memory = JSON.parse(srcFile);
         } catch (e) {
-          file.message(`Could not parse ${src}: ${e}`, node);
+          fileWarning(
+            file,
+            "invalid-file",
+            `Could not parse ${src}: ${e}`,
+            node,
+          );
           return SKIP;
         }
 

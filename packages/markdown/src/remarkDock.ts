@@ -30,7 +30,7 @@ import { isDirective, requestCSS, requestJS } from "./remarkHelper";
  * never moves the element in the page, so editors and drawings keep their
  * state.
  */
-const DOCKABLE: Record<string, string> = {
+export const DOCKABLE: Record<string, string> = {
   pyide: "dock-label-pyide",
   webide: "dock-label-webide",
   p5: "dock-label-p5",

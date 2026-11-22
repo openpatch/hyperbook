@@ -1,3 +1,4 @@
+import { fileFail, fileInfo } from "./remarkHelper";
 import { HyperbookContext } from "@hyperbook/types";
 import { envVarFor } from "@hyperbook/fs";
 import { Node } from "unist";
@@ -28,7 +29,9 @@ export const resolvePassword = (
 ): string => {
   if (use) {
     if (password) {
-      file.info(
+      fileInfo(
+        file,
+        "password-conflict",
         `${where} sets both "use" and "password". Using the registry entry "${use}".`,
         node,
       );
@@ -37,7 +40,9 @@ export const resolvePassword = (
     // can supply a password without maintaining a registry file at all.
     const value = ctx.passwords?.[use]?.value || process.env[envVarFor(use)];
     if (!value) {
-      file.fail(
+      fileFail(
+        file,
+        "missing-password",
         `${where} uses the password "${use}", which is not defined.\n` +
           `  Add it to your password registry, or set ${envVarFor(use)}.\n` +
           `  Run "hyperbook passwords check" to list everything that is missing.`,
@@ -51,7 +56,9 @@ export const resolvePassword = (
     return password;
   }
 
-  file.info(
+  fileInfo(
+    file,
+    "empty-password",
     `${where} has no password. Its content will be readable by anyone who submits an empty password.`,
     node,
   );

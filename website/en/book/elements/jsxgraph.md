@@ -16,6 +16,7 @@ You can embed JSXGraph in your book using the `jsxgraph` element. You can use th
 | `height` | Height of the JSXGraph board in pixels | `600` |
 | `width` | Width of the JSXGraph board in pixels | `800` |
 | `boundingbox` | Visible board area as `[left, top, right, bottom]` | `[-5, 5, 5, -5]` |
+| `keepaspectratio` | Keep the units of both axes the same length | `false` |
 | `axis` | Show or hide the axes | `true` |
 | `grid` | Show or hide the grid | `true` |
 

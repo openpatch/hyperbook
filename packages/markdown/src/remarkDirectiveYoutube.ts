@@ -9,6 +9,7 @@ import {
   expectLeafDirective,
   isDirective,
   registerDirective,
+  fileFail,
 } from "./remarkHelper";
 import { i18n } from "./i18n";
 
@@ -26,7 +27,9 @@ export default (ctx: HyperbookContext) => () => {
         expectLeafDirective(node, file, name);
 
         if (id == null) {
-          file.fail(
+          fileFail(
+            file,
+            "missing-attribute",
             `[youtube] Missing id, use ::youtube{#iasd} (${ctx.navigation.current?.href})`,
             node,
           );
@@ -103,7 +106,10 @@ export default (ctx: HyperbookContext) => () => {
                     tagName: "button",
                     properties: { class: "consent-accept-btn" },
                     children: [
-                      { type: "text", value: i18n.get("consent-youtube-accept") },
+                      {
+                        type: "text",
+                        value: i18n.get("consent-youtube-accept"),
+                      },
                     ],
                   },
                 ],

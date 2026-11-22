@@ -31,8 +31,11 @@ const process = (md: string, context: HyperbookContext = ctx) => {
 const toHtml = (md: string, context?: HyperbookContext) =>
   String(process(md, context).value);
 
+/** What the directive reports, apart from files missing from the fixture. */
 const messages = (md: string) =>
-  process(md).messages.map((message) => message.reason);
+  process(md)
+    .messages.filter((message) => !message.reason.startsWith("::pdf src="))
+    .map((message) => message.reason);
 
 describe("parsePageRanges", () => {
   it("reads pages and ranges", () => {
@@ -66,15 +69,20 @@ describe("remarkDirectivePdf", () => {
     expect(html).toContain("<strong>Mathe</strong>");
   });
 
-  it.each(["pages", "slides", "thumb"])("renders the %s view", (view: string) => {
-    const html = toHtml(`::pdf[Folien]{src="/folien.pdf" view="${view}"}\n`);
-    expect(html).toContain(`class="directive-pdf pdf-view-${view}"`);
-    expect(html).toContain(`data-view="${view}"`);
-    expect(html).toContain('class="pdf-viewer"');
-  });
+  it.each(["pages", "slides", "thumb"])(
+    "renders the %s view",
+    (view: string) => {
+      const html = toHtml(`::pdf[Folien]{src="/folien.pdf" view="${view}"}\n`);
+      expect(html).toContain(`class="directive-pdf pdf-view-${view}"`);
+      expect(html).toContain(`data-view="${view}"`);
+      expect(html).toContain('class="pdf-viewer"');
+    },
+  );
 
   it("embeds the browser's viewer without pdf.js", () => {
-    const file = process(`::pdf[Skript]{src="/skript.pdf" view="embed" pages="3-4"}\n`);
+    const file = process(
+      `::pdf[Skript]{src="/skript.pdf" view="embed" pages="3-4"}\n`,
+    );
     const html = String(file.value);
     expect(html).toContain("<iframe");
     expect(html).toContain('src="/public/skript.pdf#page=3"');
@@ -87,7 +95,9 @@ describe("remarkDirectivePdf", () => {
   });
 
   it("offers only a download button with view=button", () => {
-    const file = process(`::pdf[Arbeitsblatt (PDF)]{src="/blatt.pdf" view="button"}\n`);
+    const file = process(
+      `::pdf[Arbeitsblatt (PDF)]{src="/blatt.pdf" view="button"}\n`,
+    );
     const html = String(file.value);
     expect(html).toMatchSnapshot();
     expect(html).toContain('class="directive-download directive-pdf-button"');
@@ -126,9 +136,9 @@ describe("remarkDirectivePdf", () => {
     expect(messages(`::pdf[Skript]{src="/a.pdf" pages="x"}\n`)).toEqual([
       expect.stringContaining('pages="x"'),
     ]);
-    expect(messages(`::pdf[Skript]{src="/a.pdf" view="button" pages="1"}\n`)).toEqual([
-      expect.stringContaining("have no effect"),
-    ]);
+    expect(
+      messages(`::pdf[Skript]{src="/a.pdf" view="button" pages="1"}\n`),
+    ).toEqual([expect.stringContaining("have no effect")]);
   });
 
   it("names the runtime when it comes from a CDN", () => {
@@ -158,7 +168,10 @@ describe("remarkDirectivePdf with Typst sources", () => {
     try {
       fs.mkdirSync(path.join(root, "book", "kapitel"), { recursive: true });
       fs.mkdirSync(path.join(root, "public"), { recursive: true });
-      fs.writeFileSync(path.join(root, "book", "kapitel", "blatt.typ"), "= Blatt");
+      fs.writeFileSync(
+        path.join(root, "book", "kapitel", "blatt.typ"),
+        "= Blatt",
+      );
       fs.writeFileSync(path.join(root, "public", "vorlage.typ"), "= Vorlage");
       run({
         ...ctx,
@@ -168,9 +181,7 @@ describe("remarkDirectivePdf with Typst sources", () => {
           current: { name: "Kapitel", path: { directory: "kapitel" } } as any,
         },
         makeUrl: (p, base) =>
-          typeof p === "string" && p.startsWith("/")
-            ? p
-            : ctx.makeUrl(p, base),
+          typeof p === "string" && p.startsWith("/") ? p : ctx.makeUrl(p, base),
       });
     } finally {
       fs.rmSync(root, { recursive: true, force: true });
@@ -184,7 +195,11 @@ describe("remarkDirectivePdf with Typst sources", () => {
     withBook((context) => {
       const file = process(`::pdf[Blatt]{src="blatt.typ"}\n`, context);
       expect(file.data.typstJobs).toEqual([
-        { src: "book/kapitel/blatt.typ", out: "/kapitel/blatt.pdf", inputs: {} },
+        {
+          src: "book/kapitel/blatt.typ",
+          out: "/kapitel/blatt.pdf",
+          inputs: {},
+        },
       ]);
       expect(String(file.value)).toContain('data-src="/kapitel/blatt.pdf"');
       expect(String(file.value)).not.toContain(".typ");
@@ -212,7 +227,9 @@ describe("remarkDirectivePdf with Typst sources", () => {
 
   it("finds sources in public/ from the book's root", () =>
     withBook((context) => {
-      expect(jobsOf(`::pdf[V]{src="/vorlage.typ" view="button"}\n`, context)).toEqual([
+      expect(
+        jobsOf(`::pdf[V]{src="/vorlage.typ" view="button"}\n`, context),
+      ).toEqual([
         { src: "public/vorlage.typ", out: "/vorlage.pdf", inputs: {} },
       ]);
     }));
@@ -220,7 +237,11 @@ describe("remarkDirectivePdf with Typst sources", () => {
   it("warns about a missing source, bad inputs, and inputs on a PDF", () =>
     withBook((context) => {
       const reasons = (md: string) =>
-        process(md, context).messages.map((message) => message.reason);
+        process(md, context)
+          .messages.filter(
+            (message) => !message.reason.startsWith("::pdf src="),
+          )
+          .map((message) => message.reason);
       expect(reasons(`::pdf[X]{src="fehlt.typ"}\n`)).toEqual([
         expect.stringContaining('cannot find the Typst document "fehlt.typ"'),
       ]);

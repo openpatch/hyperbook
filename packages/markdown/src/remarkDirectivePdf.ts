@@ -12,12 +12,18 @@ import { i18n } from "./i18n";
 import { icon } from "./icons";
 import { cssHeight } from "./ideWorkspace";
 import { resolveFile } from "./helper";
-import { parseTypstInputs, registerTypstJob, typstOutputHref } from "./typstJobs";
+import {
+  parseTypstInputs,
+  registerTypstJob,
+  typstOutputHref,
+} from "./typstJobs";
 import {
   expectDirective,
   isDirective,
   registerDirective,
+  fileWarning,
 } from "./remarkHelper";
+import { expectFile } from "./helper";
 
 /*
  * A PDF document on a page:
@@ -34,7 +40,13 @@ import {
  * file.
  */
 
-export const PDF_VIEWS = ["pages", "slides", "thumb", "embed", "button"] as const;
+export const PDF_VIEWS = [
+  "pages",
+  "slides",
+  "thumb",
+  "embed",
+  "button",
+] as const;
 export type PdfView = (typeof PDF_VIEWS)[number];
 
 /**
@@ -85,7 +97,12 @@ export default (ctx: HyperbookContext) => () => {
         label.length > 0 ? label : [{ type: "text", value: src }];
 
       if (!src) {
-        file.message(`::pdf needs a src, e.g. ::pdf[Title]{src="file.pdf"}`, node);
+        fileWarning(
+          file,
+          "missing-attribute",
+          `::pdf needs a src, e.g. ::pdf[Title]{src="file.pdf"}`,
+          node,
+        );
         data.hName = "div";
         data.hProperties = { class: "directive-pdf pdf-missing" };
         data.hChildren = title;
@@ -97,7 +114,9 @@ export default (ctx: HyperbookContext) => () => {
         if ((PDF_VIEWS as readonly string[]).includes(attributes.view)) {
           view = attributes.view as PdfView;
         } else {
-          file.message(
+          fileWarning(
+            file,
+            "invalid-attribute-value",
             `::pdf does not know view="${attributes.view}"; use one of ${PDF_VIEWS.join(", ")}`,
             node,
           );
@@ -109,23 +128,41 @@ export default (ctx: HyperbookContext) => () => {
         const ranges = parsePageRanges(attributes.pages);
         if (ranges) pages = formatPageRanges(ranges);
         else
-          file.message(
+          fileWarning(
+            file,
+            "invalid-attribute-value",
             `::pdf cannot read pages="${attributes.pages}"; write ranges like "1-2" or "3,5-6"`,
             node,
           );
       }
 
-      let href = ctx.makeUrl(src, "public", ctx.navigation.current || undefined);
+      let href = ctx.makeUrl(
+        src,
+        "public",
+        ctx.navigation.current || undefined,
+      );
 
       const isTypst = /\.typ$/i.test(src.split(/[?#]/)[0]!);
+      // A Typst source is checked below, where it is compiled.
+      if (!isTypst) expectFile(file, ctx, node, "::pdf", "src", src);
       let inputs: Record<string, string> = {};
       if (attributes.inputs !== undefined && attributes.inputs !== "") {
         if (!isTypst) {
-          file.message(`::pdf "inputs" only applies to a .typ source; "${src}" is built already`, node);
+          fileWarning(
+            file,
+            "ignored-attribute",
+            `::pdf "inputs" only applies to a .typ source; "${src}" is built already`,
+            node,
+          );
         } else {
           const parsed = parseTypstInputs(String(attributes.inputs));
           if ("error" in parsed) {
-            file.message(`::pdf cannot read inputs="${attributes.inputs}": ${parsed.error}`, node);
+            fileWarning(
+              file,
+              "invalid-attribute-value",
+              `::pdf cannot read inputs="${attributes.inputs}": ${parsed.error}`,
+              node,
+            );
           } else {
             inputs = parsed.inputs;
           }
@@ -134,7 +171,12 @@ export default (ctx: HyperbookContext) => () => {
       if (isTypst) {
         const source = resolveFile(src, ctx);
         if (!source) {
-          file.message(`::pdf cannot find the Typst document "${src}"`, node);
+          fileWarning(
+            file,
+            "missing-file",
+            `::pdf cannot find the Typst document "${src}"`,
+            node,
+          );
         } else {
           const out = typstOutputHref(source.href, inputs);
           registerTypstJob(file, { src: source.relative, out, inputs });
@@ -147,7 +189,9 @@ export default (ctx: HyperbookContext) => () => {
       // pdf.js at all.
       if (view === "button") {
         if (attributes.pages || attributes.download !== undefined)
-          file.message(
+          fileWarning(
+            file,
+            "ignored-attribute",
             `::pdf with view="button" only offers the download; "pages" and "download" have no effect`,
             node,
           );
@@ -177,7 +221,13 @@ export default (ctx: HyperbookContext) => () => {
       }
 
       const usesPdfJs = view !== "embed";
-      registerDirective(file, name, usesPdfJs ? ["client.js"] : [], ["style.css"], []);
+      registerDirective(
+        file,
+        name,
+        usesPdfJs ? ["client.js"] : [],
+        ["style.css"],
+        [],
+      );
 
       const height =
         attributes.height !== undefined && attributes.height !== ""

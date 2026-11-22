@@ -9,6 +9,7 @@ import {
   expectTextDirective,
   isDirective,
   registerDirective,
+  fileFail,
 } from "./remarkHelper";
 
 export default (ctx: HyperbookContext) => () => {
@@ -20,7 +21,9 @@ export default (ctx: HyperbookContext) => () => {
         expectTextDirective(node, file, "term");
 
         if (node.children[0]?.type !== "text") {
-          file.fail(
+          fileFail(
+            file,
+            "invalid-term",
             `[term] Only plain text is supported, use :term[my text]{#my-id} (${ctx.navigation.current?.href})`,
             node,
           );

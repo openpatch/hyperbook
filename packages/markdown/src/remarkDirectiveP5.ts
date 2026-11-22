@@ -11,6 +11,7 @@ import {
   expectDirective,
   isDirective,
   registerDirective,
+  fileWarning,
 } from "./remarkHelper";
 import { resolveDirectiveId } from "./directiveId";
 import { recordStoredElement } from "./storedElements";
@@ -81,7 +82,9 @@ canvas {
         if (isEditor) requestIdeAssets(file);
 
         if (node.attributes?.src || "editor" in (node.attributes || {})) {
-          file.message(
+          fileWarning(
+            file,
+            "deprecated-syntax",
             'p5 now takes its sketch from ::file{path="sketch.js" src="…"} and mode="editor". Run `hyperbook migrate` to convert the page.',
             node,
           );

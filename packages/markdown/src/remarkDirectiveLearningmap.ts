@@ -9,6 +9,7 @@ import {
   expectLeafDirective,
   isDirective,
   registerDirective,
+  fileWarning,
 } from "./remarkHelper";
 import { resolveDirectiveId } from "./directiveId";
 import { recordStoredElement } from "./storedElements";
@@ -43,7 +44,7 @@ export default (ctx: HyperbookContext) => () => {
 
         let srcFile = readFile(src, ctx);
         if (!srcFile) {
-          file.message(`File not found: ${src}`, node);
+          fileWarning(file, "missing-file", `File not found: ${src}`, node);
           return SKIP;
         }
 
@@ -59,7 +60,11 @@ export default (ctx: HyperbookContext) => () => {
           if (node.resources) {
             node.resources = node.resources.map((res: any) => ({
               ...res,
-              url: ctx.makeUrl(res.url, "public", ctx.navigation.current || undefined),
+              url: ctx.makeUrl(
+                res.url,
+                "public",
+                ctx.navigation.current || undefined,
+              ),
             }));
           }
         });

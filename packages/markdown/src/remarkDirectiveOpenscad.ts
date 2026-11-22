@@ -10,6 +10,7 @@ import {
   expectDirective,
   isDirective,
   registerDirective,
+  fileWarning,
 } from "./remarkHelper";
 import { resolveDirectiveId } from "./directiveId";
 import { recordStoredElement } from "./storedElements";
@@ -48,7 +49,9 @@ export default (ctx: HyperbookContext) => () => {
         requestIdeAssets(file);
 
         if (node.attributes?.src) {
-          file.message(
+          fileWarning(
+            file,
+            "deprecated-syntax",
             'openscad no longer reads src="…"; load the file with ::file{path="main.scad" src="…"} inside the directive. Run `hyperbook migrate` to convert the page.',
             node,
           );
@@ -78,9 +81,7 @@ export default (ctx: HyperbookContext) => () => {
           }),
           "data-base-path": ctx.config.basePath || "/",
           "data-page-path": ctx.navigation.current?.path?.directory || "",
-          ...(height
-            ? { style: `--ide-height: ${cssHeight(height)}` }
-            : {}),
+          ...(height ? { style: `--ide-height: ${cssHeight(height)}` } : {}),
           ...(library ? { "data-library": library } : {}),
         };
 

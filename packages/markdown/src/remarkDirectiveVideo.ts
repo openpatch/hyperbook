@@ -12,6 +12,7 @@ import {
   isDirective,
   registerDirective,
 } from "./remarkHelper";
+import { expectFile } from "./helper";
 
 export default (ctx: HyperbookContext) => () => {
   const name = "video";
@@ -74,6 +75,8 @@ export default (ctx: HyperbookContext) => () => {
           });
         }
 
+        expectFile(file, ctx, node, "::video", "src", src);
+        expectFile(file, ctx, node, "::video", "poster", poster);
         data.hName = "div";
         data.hProperties = {
           class: "directive-video",

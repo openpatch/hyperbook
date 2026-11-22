@@ -14,6 +14,7 @@ import {
 import { toText } from "./mdastUtilToText";
 import { resolveDirectiveId } from "./directiveId";
 import { recordStoredElement } from "./storedElements";
+import { expectFile } from "./helper";
 
 export default (ctx: HyperbookContext) => () => {
   const name = "geogebra";
@@ -51,6 +52,7 @@ export default (ctx: HyperbookContext) => () => {
           [],
         );
 
+        expectFile(file, ctx, node, "geogebra", "src", src);
         data.hName = "div";
 
         data.hProperties = {

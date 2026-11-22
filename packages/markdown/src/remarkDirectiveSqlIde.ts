@@ -14,6 +14,7 @@ import {
   isDirective,
   registerDirective,
   requestJS,
+  fileWarning,
 } from "./remarkHelper";
 import { scriptFlagsAttribute, splitScriptFlags } from "./ideWorkspace";
 import { ElementContent } from "hast";
@@ -125,7 +126,9 @@ export default (ctx: HyperbookContext) => () => {
             (child as { attributes?: Record<string, string> }).attributes || {};
           const src = fileAttributes.src;
           if (!src) {
-            file.message(
+            fileWarning(
+              file,
+              "missing-attribute",
               `::file in the ${name} directive needs a src="…".`,
               child as never,
             );
@@ -134,7 +137,9 @@ export default (ctx: HyperbookContext) => () => {
           const filePath = fileAttributes.path || path.posix.basename(src);
           const content = readFile(src, ctx);
           if (content === null) {
-            file.message(
+            fileWarning(
+              file,
+              "missing-file",
               `::file in the ${name} directive: "${src}" was not found.`,
               child as never,
             );

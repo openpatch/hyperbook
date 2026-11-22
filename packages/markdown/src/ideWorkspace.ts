@@ -11,7 +11,7 @@ import {
 import path from "path";
 import { VFile } from "vfile";
 import { readFile } from "./helper";
-import { requestCSS, requestJS } from "./remarkHelper";
+import { requestCSS, requestJS, fileWarning } from "./remarkHelper";
 import { Element, ElementContent } from "hast";
 import { i18n } from "./i18n";
 import { icon } from "./icons";
@@ -108,7 +108,8 @@ export const parseCodeMeta = (
 ): Record<string, string | true> => {
   const attributes: Record<string, string | true> = {};
   if (!meta) return attributes;
-  const pattern = /([A-Za-z_][\w-]*)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"']+)))?/g;
+  const pattern =
+    /([A-Za-z_][\w-]*)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"']+)))?/g;
   for (const match of meta.matchAll(pattern)) {
     const [, key, double, single, bare] = match;
     attributes[key] = double ?? single ?? bare ?? true;
@@ -147,7 +148,9 @@ export const collectWorkspace = (
   const files: WorkspaceFile[] = [];
   const add = (entry: WorkspaceFile, at: unknown) => {
     if (files.some((f) => f.path === entry.path)) {
-      file.message(
+      fileWarning(
+        file,
+        "duplicate-file",
         `The ${name} directive has two files named "${entry.path}"; the second is ignored.`,
         at as never,
       );
@@ -162,12 +165,15 @@ export const collectWorkspace = (
     if (child.type === "code") {
       const code = child as Code;
       const meta = parseCodeMeta(code.meta);
-      let filePath = typeof meta.file === "string" ? normalizePath(meta.file) : "";
+      let filePath =
+        typeof meta.file === "string" ? normalizePath(meta.file) : "";
 
       if (!filePath) {
         const unknown = Object.keys(meta).filter((k) => !KNOWN_META.has(k));
         if (unknown.length > 0 || !langs.includes(code.lang || "")) {
-          file.message(
+          fileWarning(
+            file,
+            "ignored-code-block",
             `This code block in the ${name} directive has no file="…" and is ignored.` +
               (unknown.length > 0
                 ? ` "${unknown.join(" ")}" is the old syntax; run \`hyperbook migrate\`.`
@@ -177,7 +183,9 @@ export const collectWorkspace = (
           continue;
         }
         if (unnamedMainTaken) {
-          file.message(
+          fileWarning(
+            file,
+            "ignored-code-block",
             `Only one code block in the ${name} directive can go without file="…"; this one is ignored.`,
             code as never,
           );
@@ -202,9 +210,15 @@ export const collectWorkspace = (
 
     if (isFileDirective(child)) {
       const fileAttributes = child.attributes || {};
-      const src = typeof fileAttributes.src === "string" ? fileAttributes.src : "";
+      const src =
+        typeof fileAttributes.src === "string" ? fileAttributes.src : "";
       if (!src) {
-        file.message(`::file in the ${name} directive needs a src="…".`, child as never);
+        fileWarning(
+          file,
+          "missing-attribute",
+          `::file in the ${name} directive needs a src="…".`,
+          child as never,
+        );
         continue;
       }
       const filePath = normalizePath(
@@ -215,17 +229,23 @@ export const collectWorkspace = (
       const isFont = "font" in fileAttributes;
       const flags = {
         ...("readonly" in fileAttributes ? { readonly: true } : {}),
-        ...("hidden" in fileAttributes || isFont || isSecretRole(fileAttributes.role)
+        ...("hidden" in fileAttributes ||
+        isFont ||
+        isSecretRole(fileAttributes.role)
           ? { hidden: true }
           : {}),
         ...(isFont ? { font: true } : {}),
-        ...(roleOf(fileAttributes.role) ? { role: roleOf(fileAttributes.role) } : {}),
+        ...(roleOf(fileAttributes.role)
+          ? { role: roleOf(fileAttributes.role) }
+          : {}),
       };
 
       if (isTextPath(filePath) && !isFont) {
         const content = readFile(src, ctx);
         if (content === null) {
-          file.message(
+          fileWarning(
+            file,
+            "missing-file",
             `::file in the ${name} directive: "${src}" was not found.`,
             child as never,
           );
@@ -245,7 +265,9 @@ export const collectWorkspace = (
 
   if (!files.some((f) => f.path === main)) {
     if (files.length > 0) {
-      file.message(
+      fileWarning(
+        file,
+        "missing-main-file",
         `The ${name} directive has no main file "${main}"; it starts empty.`,
         node as never,
       );
@@ -394,7 +416,10 @@ export function htmlEntities(str: string) {
  * An IDE's `height` as CSS. Directive attributes are strings, so `height=400`
  * arrives as "400", which CSS ignores without a unit.
  */
-export const cssHeight = (height: unknown, fallback = "calc(100dvh - 80px)") => {
+export const cssHeight = (
+  height: unknown,
+  fallback = "calc(100dvh - 80px)",
+) => {
   if (height === undefined || height === null || height === "") return fallback;
   const value = String(height).trim();
   return /^\d+(\.\d+)?$/.test(value) ? `${value}px` : value;
@@ -435,7 +460,9 @@ export const fileActionAttributes = (
         (word) => word !== "none" && !FILE_ACTIONS.includes(word as FileAction),
       );
       if (unknown.length > 0) {
-        file.message(
+        fileWarning(
+          file,
+          "invalid-attribute-value",
           `The ${name} directive does not know files="${unknown.join(",")}"; use create, upload, rename, delete or open.`,
           node as never,
         );
@@ -471,7 +498,9 @@ export const compareAttributes = (
   const hasSolution = workspace.files.some((f) => f.role === "solution");
   const hasTarget = workspace.files.some((f) => f.role === "target");
   if (!hasSolution && !hasTarget) {
-    file.message(
+    fileWarning(
+      file,
+      "missing-compare-target",
       `The ${name} directive has compare, but no file with role="solution" or role="target" to compare with.`,
       node as never,
     );
@@ -482,7 +511,9 @@ export const compareAttributes = (
   const frame = Number(attributes.frame ?? 1);
   return {
     "data-compare": "true",
-    "data-pass": String(Number.isFinite(pass) ? Math.min(100, Math.max(0, pass)) : 98),
+    "data-pass": String(
+      Number.isFinite(pass) ? Math.min(100, Math.max(0, pass)) : 98,
+    ),
     ...(Number.isFinite(frame) && frame >= 1
       ? { "data-frame": String(Math.round(frame)) }
       : {}),

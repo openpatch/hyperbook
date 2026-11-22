@@ -6,6 +6,7 @@ import checkForUpdate from "update-check";
 import { runBuildProject } from "./build";
 import { runRender } from "./render";
 import { runCheck } from "./check";
+import { runLint } from "./lint";
 import { runMigrate } from "./migrate";
 import { runDev } from "./dev";
 import { getPkgManager } from "./helpers/get-pkg-manager";
@@ -30,9 +31,12 @@ const program = new Command();
  * call would still be in its temporal dead zone when the hook reads it.
  */
 const offline = process.argv.includes("--offline");
-const update = offline
-  ? Promise.resolve(null)
-  : checkForUpdate(packageJson).catch(() => null);
+// The update notice goes to stdout, where it would break --json output.
+const json = process.argv.includes("--json");
+const update =
+  offline || json
+    ? Promise.resolve(null)
+    : checkForUpdate(packageJson).catch(() => null);
 
 program
   .name(packageJson.name)
@@ -153,6 +157,26 @@ program
   .option("--strict", "exit non-zero on warnings as well as errors")
   .action(async (options) => {
     const ok = await runCheck(await withProject(), options).catch((e) => {
+      reportError(e);
+      process.exit(1);
+    });
+    if (!ok) process.exit(1);
+  });
+
+program
+  .command("lint")
+  .description(
+    "find problems in the book's pages without building it: unknown or malformed elements, missing files, broken links",
+  )
+  .argument("[paths...]", "only lint these pages or folders")
+  .option("--json", "print the findings as JSON on stdout")
+  .option("--strict", "also fail on infos, not only on errors and warnings")
+  .action(async (paths: string[], options) => {
+    const ok = await runLint(await withProject(), {
+      paths,
+      json: options.json,
+      strict: options.strict,
+    }).catch((e) => {
       reportError(e);
       process.exit(1);
     });

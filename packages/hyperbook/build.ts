@@ -138,7 +138,12 @@ export interface ElementPage {
 
 /** href → the names of the sections around it, from the navigation. */
 function sectionPaths(
-  sections: { name?: string; href?: string; pages: { href?: string }[]; sections: any[] }[],
+  sections: {
+    name?: string;
+    href?: string;
+    pages: { href?: string }[];
+    sections: any[];
+  }[],
   outer: string[] = [],
   paths = new Map<string, string[]>(),
 ): Map<string, string[]> {
@@ -172,7 +177,9 @@ export async function writeElementIndex(
   const withSections = pages.map((page) => {
     const path = paths.get(page.href);
     const title = names.get(page.href) || page.title;
-    return path && path.length > 0 ? { ...page, title, sections: path } : { ...page, title };
+    return path && path.length > 0
+      ? { ...page, title, sections: path }
+      : { ...page, title };
   });
   const sorted = [...withSections].sort(
     (a, b) =>
@@ -215,23 +222,27 @@ export interface SinglePageResult {
   storedElements: StoredElement[];
 }
 
-export async function buildSingleBookPage(
-  file: VFileBook,
+/** A page run through the markdown pipeline, before anything is written. */
+export interface ProcessedPage {
+  result: VFile;
+  /** Absolute paths whose contents were inlined into this page. */
+  dependencies: Set<string>;
+  /**
+   * Lines to add to the result's positions to land on the source the author
+   * edits, or null when snippets or templates make that impossible.
+   */
+  lineOffset: number | null;
+}
+
+/** Runs a page's markdown through the pipeline with the given navigation. */
+async function processPage(
+  file: VFileBook | VFileGlossary,
   baseCtx: Pick<
     HyperbookContext,
     "config" | "makeUrl" | "project" | "root" | "version" | "passwords"
   >,
-  pageList: HyperbookPage[],
-  pagesAndSections: Pick<Navigation, "pages" | "sections" | "glossary">,
-  rootOut: string,
-  assetsOut: string,
-  hyperbookJson: HyperbookJson,
-): Promise<SinglePageResult> {
-  const n1 = await hyperbook.getNavigationForFile(pageList, file);
-  const navigation: Navigation = {
-    ...n1,
-    ...pagesAndSections,
-  };
+  navigation: Navigation,
+): Promise<ProcessedPage> {
   // Templates and snippets were inlined while the vfile was read; directive
   // `src=` files are collected as the markdown is processed.
   const dependencies = new Set<string>(
@@ -248,16 +259,56 @@ export async function buildSingleBookPage(
     new VFile({ path: file.path.absolute, value: file.markdown.content }),
     ctx,
   );
-  // Print anything the plugins flagged: wrong colon counts, missing referenced
-  // files, weak password blocks. These used to be collected and discarded.
-  // Positions are relative to the processed markdown, so shift them back onto
-  // the source the author edits.
-  const messages = reportMessages(result, {
+  return {
+    result,
+    dependencies,
+    // Positions are relative to the processed markdown, which has lost its
+    // frontmatter; shift them back onto the file.
     lineOffset: lineOffsetFor(
       await fs.readFile(file.path.absolute, "utf8").catch(() => ""),
       file.markdown.content,
     ),
-  });
+  };
+}
+
+/**
+ * Processes a book page without writing or printing anything: what a build
+ * does with it up to the HTML, for callers that only want the diagnostics.
+ */
+export async function processBookPage(
+  file: VFileBook,
+  baseCtx: Pick<
+    HyperbookContext,
+    "config" | "makeUrl" | "project" | "root" | "version" | "passwords"
+  >,
+  pageList: HyperbookPage[],
+  pagesAndSections: Pick<Navigation, "pages" | "sections" | "glossary">,
+): Promise<ProcessedPage> {
+  const n1 = await hyperbook.getNavigationForFile(pageList, file);
+  return processPage(file, baseCtx, { ...n1, ...pagesAndSections });
+}
+
+export async function buildSingleBookPage(
+  file: VFileBook,
+  baseCtx: Pick<
+    HyperbookContext,
+    "config" | "makeUrl" | "project" | "root" | "version" | "passwords"
+  >,
+  pageList: HyperbookPage[],
+  pagesAndSections: Pick<Navigation, "pages" | "sections" | "glossary">,
+  rootOut: string,
+  assetsOut: string,
+  hyperbookJson: HyperbookJson,
+): Promise<SinglePageResult> {
+  const { result, dependencies, lineOffset } = await processBookPage(
+    file,
+    baseCtx,
+    pageList,
+    pagesAndSections,
+  );
+  // Print anything the plugins flagged: wrong colon counts, missing referenced
+  // files, weak password blocks. These used to be collected and discarded.
+  const messages = reportMessages(result, { lineOffset });
   const searchDocuments = [...(result.data.searchDocuments || [])];
   const directives = Object.keys(result.data.directives || {});
   const emojis = [...(result.data.emojis || [])];
@@ -330,7 +381,8 @@ export async function buildSingleBookPage(
   };
 }
 
-export async function buildSingleGlossaryPage(
+/** Like processBookPage, for a glossary entry. */
+export async function processGlossaryPage(
   file: VFileGlossary,
   baseCtx: Pick<
     HyperbookContext,
@@ -338,10 +390,7 @@ export async function buildSingleGlossaryPage(
   >,
   pageList: HyperbookPage[],
   pagesAndSections: Pick<Navigation, "pages" | "sections" | "glossary">,
-  rootOut: string,
-  assetsOut: string,
-  hyperbookJson: HyperbookJson,
-): Promise<SinglePageResult> {
+): Promise<ProcessedPage> {
   const n1 = await hyperbook.getNavigationForFile(pageList, file);
   const navigation: Navigation = {
     ...n1,
@@ -364,32 +413,30 @@ export async function buildSingleGlossaryPage(
     };
   }
 
-  // Templates and snippets were inlined while the vfile was read; directive
-  // `src=` files are collected as the markdown is processed.
-  const dependencies = new Set<string>(
-    (file.markdown.dependencies || []).map((d) => path.resolve(file.root, d)),
-  );
-  const ctx: HyperbookContext = {
-    ...baseCtx,
-    navigation,
-    dependencies,
-  };
-  // Pass a VFile rather than a bare string so build errors name the source
-  // file instead of reporting a bare line number.
-  const result = await hyperbookProcess(
-    new VFile({ path: file.path.absolute, value: file.markdown.content }),
-    ctx,
+  return processPage(file, baseCtx, navigation);
+}
+
+export async function buildSingleGlossaryPage(
+  file: VFileGlossary,
+  baseCtx: Pick<
+    HyperbookContext,
+    "config" | "makeUrl" | "project" | "root" | "version" | "passwords"
+  >,
+  pageList: HyperbookPage[],
+  pagesAndSections: Pick<Navigation, "pages" | "sections" | "glossary">,
+  rootOut: string,
+  assetsOut: string,
+  hyperbookJson: HyperbookJson,
+): Promise<SinglePageResult> {
+  const { result, dependencies, lineOffset } = await processGlossaryPage(
+    file,
+    baseCtx,
+    pageList,
+    pagesAndSections,
   );
   // Print anything the plugins flagged: wrong colon counts, missing referenced
   // files, weak password blocks. These used to be collected and discarded.
-  // Positions are relative to the processed markdown, so shift them back onto
-  // the source the author edits.
-  const messages = reportMessages(result, {
-    lineOffset: lineOffsetFor(
-      await fs.readFile(file.path.absolute, "utf8").catch(() => ""),
-      file.markdown.content,
-    ),
-  });
+  const messages = reportMessages(result, { lineOffset });
   const searchDocuments = [...(result.data.searchDocuments || [])];
   const directives = Object.keys(result.data.directives || {});
   const emojis = [...(result.data.emojis || [])];
@@ -567,12 +614,7 @@ export async function generateFaviconsFromLogo(
       try {
         const { generateFavicons } =
           await import("./helpers/generate-favicons");
-        await generateFavicons(
-          logoPath,
-          rootOut,
-          hyperbookJson,
-          ASSETS_FOLDER,
-        );
+        await generateFavicons(logoPath, rootOut, hyperbookJson, ASSETS_FOLDER);
         console.log(
           `${chalk.green(`[${prefix}]`)} Favicons generated successfully.`,
         );
@@ -1082,7 +1124,10 @@ async function runBuild(
     if (pageResult.storedElements.length > 0) {
       elementPages.push({
         href: file.path.href || "/",
-        title: file.markdown.data.name || (file.markdown.data as { title?: string }).title || file.name,
+        title:
+          file.markdown.data.name ||
+          (file.markdown.data as { title?: string }).title ||
+          file.name,
         elements: pageResult.storedElements,
       });
     }
@@ -1132,7 +1177,10 @@ async function runBuild(
     if (pageResult.storedElements.length > 0) {
       elementPages.push({
         href: file.path.href || "/glossary",
-        title: file.markdown.data.name || (file.markdown.data as { title?: string }).title || file.name,
+        title:
+          file.markdown.data.name ||
+          (file.markdown.data as { title?: string }).title ||
+          file.name,
         elements: pageResult.storedElements,
       });
     }
@@ -1183,7 +1231,10 @@ async function runBuild(
       continue;
     }
     if (file.path.href) {
-      copied.set(file.path.href, path.relative(root, file.path.absolute).split(path.sep).join("/"));
+      copied.set(
+        file.path.href,
+        path.relative(root, file.path.absolute).split(path.sep).join("/"),
+      );
     }
     const directoryOut = path.join(rootOut, file.path.directory);
     await makeDir(directoryOut, {
@@ -1295,7 +1346,12 @@ async function runBuild(
   await writeI18n(assetsOut, hyperbookJson);
 
   if (hyperbookJson.cloud) {
-    await writeElementIndex(rootOut, elementPages, pageList, pagesAndSections.sections);
+    await writeElementIndex(
+      rootOut,
+      elementPages,
+      pageList,
+      pagesAndSections.sections,
+    );
   }
 
   // Generate llms.txt if enabled

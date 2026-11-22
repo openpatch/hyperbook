@@ -13,7 +13,7 @@ import {
   registerDirective,
 } from "./remarkHelper";
 import { toHast } from "mdast-util-to-hast";
-import { resolveFile } from "./helper";
+import { resolveFile, expectFile } from "./helper";
 import { registerTypstDownload } from "./typstJobs";
 
 export default (ctx: HyperbookContext) => () => {
@@ -35,6 +35,7 @@ export default (ctx: HyperbookContext) => () => {
           const source = resolveFile(String(src), ctx);
           if (source) registerTypstDownload(file, source.href);
         }
+        expectFile(file, ctx, node, ":download", "src", src);
         data.hName = "a";
         data.hProperties = {
           class: "directive-download",

@@ -7,6 +7,7 @@ import { visit } from "unist-util-visit";
 import { VFile } from "vfile";
 import {
   expectDirective,
+  fileWarning,
   isDirective,
   registerDirective,
   requestJS,
@@ -27,7 +28,9 @@ export default (ctx: HyperbookContext) => () => {
           height = 600,
           width = 800,
           boundingbox = [-5, 5, 5, -5],
-          keepaspetcratio = false,
+          keepaspectratio,
+          // The spelling this element used to read; still honoured.
+          keepaspetcratio,
           showNavigation = false,
           zoom = true,
           pan = true,
@@ -37,6 +40,15 @@ export default (ctx: HyperbookContext) => () => {
         } = node.attributes || {};
 
         expectDirective(node, file, "jsxgraph", ["container"]);
+        const keepAspectRatio = keepaspectratio ?? keepaspetcratio ?? false;
+        if (keepaspetcratio !== undefined) {
+          fileWarning(
+            file,
+            "deprecated-syntax",
+            'jsxgraph: "keepaspetcratio" is misspelled; write keepaspectratio instead. It still works for now.',
+            node,
+          );
+        }
 
         registerDirective(
           file,
@@ -69,7 +81,7 @@ export default (ctx: HyperbookContext) => () => {
                 {
                 const board = JXG.JSXGraph.initBoard('jsxgraph-${id}', {
                   boundingbox: ${typeof boundingbox !== "string" ? JSON.stringify(boundingbox) : boundingbox},
-                  keepaspectcratio: ${keepaspetcratio},
+                  keepaspectratio: ${keepAspectRatio},
                   axis: ${axis},
                   showCopyright: false,
                   showNavigation: ${showNavigation},

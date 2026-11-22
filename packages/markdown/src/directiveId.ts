@@ -1,3 +1,4 @@
+import { fileWarning } from "./remarkHelper";
 import { Position } from "unist";
 import { VFile } from "vfile";
 import hash, { stableHash } from "./objectHash";
@@ -38,7 +39,9 @@ export function resolveDirectiveId(file: VFile, node: unknown): string {
     const name = (node as { name?: string })?.name ?? "directive";
     // No colon prefix in the example: this fires for leaf and container
     // directives alike, and showing the wrong count would be worse than none.
-    file.message(
+    fileWarning(
+      file,
+      "duplicate-id",
       `Two identical "${name}" directives on this page have to share a generated id. ` +
         `Add an attribute like id="${name}-1" to each — otherwise editing one of ` +
         `them later can move a reader's saved work into the other.`,
@@ -49,7 +52,10 @@ export function resolveDirectiveId(file: VFile, node: unknown): string {
   // `hyperbook migrate` reads these back to pin the id a directive had
   // before its syntax is rewritten.
   const position = (node as { position?: Position })?.position;
-  if (position?.start.offset !== undefined && position.end.offset !== undefined) {
+  if (
+    position?.start.offset !== undefined &&
+    position.end.offset !== undefined
+  ) {
     (file.data.resolvedDirectiveIds ||= []).push({
       name: (node as { name?: string })?.name ?? "",
       start: position.start.offset,

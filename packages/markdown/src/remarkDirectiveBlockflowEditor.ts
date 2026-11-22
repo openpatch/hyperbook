@@ -11,6 +11,7 @@ import {
 } from "./remarkHelper";
 import { toString } from "mdast-util-to-string";
 import { deflate } from "pako";
+import { expectFile } from "./helper";
 
 interface BlockflowStep {
   title?: string;
@@ -86,6 +87,8 @@ export default (ctx: HyperbookContext) => () => {
 
             const stepAttrs = child.attributes || {};
             const text = toString(child).trim() || undefined;
+            expectFile(file, ctx, child, "::step", "image", stepAttrs.image);
+            expectFile(file, ctx, child, "::step", "video", stepAttrs.video);
 
             steps.push({
               title: stepAttrs.title || undefined,
@@ -162,6 +165,8 @@ export default (ctx: HyperbookContext) => () => {
         const editorSrc = elementAssetUrl(ctx, "blockflow", "editor.html");
         const iframeSrc = `${editorSrc}?project=${projectParam}`;
 
+        expectFile(file, ctx, node, "::blockflow-editor", "src", src);
+        expectFile(file, ctx, node, "::blockflow-editor", "project", project);
         data.hName = "div";
         data.hProperties = {
           class: "directive-blockflow-editor",

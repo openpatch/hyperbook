@@ -1,6 +1,9 @@
 import { HyperbookContext } from "@hyperbook/types";
 import path from "path";
 import fs from "fs";
+import { VFile } from "vfile";
+import { Node } from "unist";
+import { fileWarning } from "./remarkHelper";
 
 /**
  * Reads a file referenced by a directive's `src` attribute and inlines it.
@@ -53,7 +56,10 @@ export const resolveFile = (
       continue;
     }
     if (!stat.isFile()) continue;
-    const relative = path.relative(ctx.root, candidate).split(path.sep).join("/");
+    const relative = path
+      .relative(ctx.root, candidate)
+      .split(path.sep)
+      .join("/");
     // book/ and public/ are both served from the site's root.
     const href = "/" + relative.split("/").slice(1).join("/");
     return { relative, href };
@@ -75,4 +81,41 @@ export const readFile = (src: string, ctx: HyperbookContext) => {
 
   // File not found in any location
   return null;
+};
+
+/** URLs that are not the book's to look for. */
+const NOT_A_BOOK_FILE = /^([a-z][a-z0-9+.-]*:|\/\/|#)/i;
+
+/**
+ * Warns when an element's file attribute (`src`, `poster`, …) names a file
+ * that is not in the book.
+ *
+ * Elements turn these into URLs without looking, so a misspelled video or a
+ * PDF that was never copied in builds cleanly and only fails in the reader's
+ * browser. Looked for where `readFile` looks; addresses on other sites are
+ * not checked.
+ */
+export const expectFile = (
+  file: VFile,
+  ctx: HyperbookContext,
+  node: Node,
+  element: string,
+  attribute: string,
+  src: unknown,
+) => {
+  if (typeof src !== "string") return;
+  const target = src.trim().split(/[?#]/)[0]!;
+  if (!target || NOT_A_BOOK_FILE.test(src.trim())) return;
+  if (resolveFile(target, ctx)) return;
+  // The build zips archives/<name>/ into /archives/<name>.zip.
+  const archive = target.match(/^\/?archives\/([^/]+)\.zip$/);
+  if (archive && fs.existsSync(path.join(ctx.root, "archives", archive[1]!)))
+    return;
+  fileWarning(
+    file,
+    "missing-file",
+    `${element} ${attribute}="${src}" was not found. Put the file in public/ ` +
+      `or next to the page and check the spelling, or give a full https:// address.`,
+    node,
+  );
 };

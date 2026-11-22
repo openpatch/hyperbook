@@ -11,6 +11,7 @@ import {
   isDirective,
   registerDirective,
 } from "./remarkHelper";
+import { expectFile } from "./helper";
 
 export default (ctx: HyperbookContext) => () => {
   const name = "blockflow-player";
@@ -46,6 +47,7 @@ export default (ctx: HyperbookContext) => () => {
           ? `${playerSrc}?project=${encodeURIComponent(siteSrc)}`
           : undefined;
 
+        expectFile(file, ctx, node, "::blockflow-player", "src", src);
         data.hName = "div";
         data.hProperties = {
           class: "directive-blockflow-player",

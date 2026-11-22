@@ -10,6 +10,7 @@ import {
   expectDirective,
   isDirective,
   registerDirective,
+  fileWarning,
 } from "./remarkHelper";
 import {
   collectWorkspace,
@@ -72,7 +73,9 @@ export default (ctx: HyperbookContext) => () => {
           (pkg) => pkg.toLowerCase() !== "pytamaro",
         );
         if (packageList.length < requested.length) {
-          file.message(
+          fileWarning(
+            file,
+            "unsupported-package",
             'The pyide directive does not support packages="pytamaro" for now: it needs a version of pillow that Pyodide does not provide.',
             node as never,
           );
@@ -89,7 +92,9 @@ export default (ctx: HyperbookContext) => () => {
         requestIdeAssets(file);
 
         if (node.attributes?.src) {
-          file.message(
+          fileWarning(
+            file,
+            "deprecated-syntax",
             'pyide no longer reads src="…"; load the file with ::file{path="main.py" src="…"} inside the directive. Run `hyperbook migrate` to convert the page.',
             node,
           );
@@ -103,7 +108,9 @@ export default (ctx: HyperbookContext) => () => {
         const mainFile = workspace.files.find((f) => f.path === workspace.main);
         const hasTests = workspace.files.some((f) => f.role === "test");
         if ("compare" in (node.attributes || {}) && !hasCanvas) {
-          file.message(
+          fileWarning(
+            file,
+            "missing-attribute",
             "pyide compares drawings, so compare needs the canvas attribute too.",
             node,
           );

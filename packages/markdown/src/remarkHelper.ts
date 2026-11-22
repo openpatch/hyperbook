@@ -6,9 +6,63 @@ import {
   LeafDirective,
   TextDirective,
 } from "mdast-util-directive";
-import { Node } from "unist";
+import { Node, Point, Position } from "unist";
 import { VFile } from "vfile";
 import { Script } from "@hyperbook/types";
+
+/** Where a diagnostic points: a node, or a position or point taken from one. */
+type Place = Node | Position | Point | null | undefined;
+
+const placeOf = (place: Place): Position | Point | undefined => {
+  if (!place) return undefined;
+  if ("type" in place) return (place as Node).position;
+  return place as Position | Point;
+};
+
+/*
+ * Report a problem with a stable rule id, so tools reading the diagnostics
+ * (hyperbook lint --json, the editor) can tell kinds of problems apart.
+ * vfile's three levels: a warning, an info, and a fatal error that stops the
+ * page.
+ */
+export function fileWarning(
+  file: VFile,
+  ruleId: string,
+  reason: string,
+  place?: Place,
+) {
+  return file.message(reason, {
+    place: placeOf(place),
+    ruleId,
+    source: "hyperbook",
+  });
+}
+
+export function fileInfo(
+  file: VFile,
+  ruleId: string,
+  reason: string,
+  place?: Place,
+) {
+  return file.info(reason, {
+    place: placeOf(place),
+    ruleId,
+    source: "hyperbook",
+  });
+}
+
+export function fileFail(
+  file: VFile,
+  ruleId: string,
+  reason: string,
+  place?: Place,
+): never {
+  return file.fail(reason, {
+    place: placeOf(place),
+    ruleId,
+    source: "hyperbook",
+  });
+}
 
 export const findFlat = <G extends Node>(
   node: Node,
@@ -131,7 +185,9 @@ export const expectDirective = (
       ? `use ${wanted[0]}`
       : `use ${wanted.slice(0, -1).join(", ")} or ${wanted[wanted.length - 1]}`;
 
-  file.info(
+  fileInfo(
+    file,
+    "wrong-directive-form",
     `Unexpected "${COLONS[form]}${name}" ${form} directive, ${suggestion}`,
     node,
   );

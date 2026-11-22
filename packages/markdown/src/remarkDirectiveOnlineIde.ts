@@ -14,6 +14,7 @@ import {
   isDirective,
   registerDirective,
   requestJS,
+  fileWarning,
 } from "./remarkHelper";
 import { ElementContent } from "hast";
 import { resolveDirectiveId } from "./directiveId";
@@ -96,7 +97,9 @@ export default (ctx: HyperbookContext) => () => {
               {};
             const src = fileAttributes.src;
             if (!src) {
-              file.message(
+              fileWarning(
+                file,
+                "missing-attribute",
                 `::file in the ${name} directive needs a src="…".`,
                 child as never,
               );

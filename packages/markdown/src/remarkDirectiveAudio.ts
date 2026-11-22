@@ -13,6 +13,7 @@ import {
 import { ElementContent } from "hast";
 import { resolveDirectiveId } from "./directiveId";
 import { i18n } from "./i18n";
+import { expectFile } from "./helper";
 
 export default (ctx: HyperbookContext) => () => {
   const name = "audio";
@@ -41,6 +42,8 @@ export default (ctx: HyperbookContext) => () => {
         const id = resolveDirectiveId(file, node);
 
         node.attributes = {};
+        expectFile(file, ctx, node, "::audio", "src", src);
+        expectFile(file, ctx, node, "::audio", "thumbnail", thumbnail);
         data.hName = "div";
         data.hProperties = {
           class: "directive-audio",

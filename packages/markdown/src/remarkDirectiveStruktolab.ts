@@ -14,6 +14,7 @@ import {
 import { ElementContent } from "hast";
 import { resolveDirectiveId } from "./directiveId";
 import { recordStoredElement } from "./storedElements";
+import { expectFile } from "./helper";
 
 /** The languages a structogram can be written in, by the code fence's language. */
 const CODE_LANGUAGES: Record<string, "java" | "python" | "javascript"> = {
@@ -59,7 +60,11 @@ export default (ctx: HyperbookContext) => () => {
         registerDirective(
           file,
           name,
-          ["client.js", "struktolab-renderer.umd.js", "struktolab-editor.umd.js"],
+          [
+            "client.js",
+            "struktolab-renderer.umd.js",
+            "struktolab-editor.umd.js",
+          ],
           ["style.css"],
           [],
         );
@@ -70,7 +75,9 @@ export default (ctx: HyperbookContext) => () => {
         }
 
         const codeMode =
-          typeof code === "string" && CODE_MODES.includes(code) ? code : undefined;
+          typeof code === "string" && CODE_MODES.includes(code)
+            ? code
+            : undefined;
 
         let fenceMode: string | undefined;
         const codes: ElementContent[] = node.children
@@ -79,7 +86,9 @@ export default (ctx: HyperbookContext) => () => {
             // ```java, ```python, ```js — or the directive's `code` for a bare fence.
             const language =
               CODE_LANGUAGES[(n.lang || "").toLowerCase()] ??
-              (codeMode && codeMode in CODE_LANGUAGES ? CODE_LANGUAGES[codeMode] : undefined);
+              (codeMode && codeMode in CODE_LANGUAGES
+                ? CODE_LANGUAGES[codeMode]
+                : undefined);
             fenceMode ??= language;
             return {
               type: "element",
@@ -96,6 +105,7 @@ export default (ctx: HyperbookContext) => () => {
             };
           });
 
+        expectFile(file, ctx, node, "struktolab", "src", src);
         data.hName = "div";
         data.hProperties = {
           class: "directive-struktolab",
@@ -109,7 +119,7 @@ export default (ctx: HyperbookContext) => () => {
               lang: lang ?? undefined,
               "color-mode": colorMode,
               "font-size": fontSize,
-              "scale": scale == null ? undefined : String(scale),
+              scale: scale == null ? undefined : String(scale),
               "code-mode": codeMode ?? fenceMode,
               "hide-code": hidden ? "" : undefined,
               // Reset beside Undo/Redo: back to the page's structogram
