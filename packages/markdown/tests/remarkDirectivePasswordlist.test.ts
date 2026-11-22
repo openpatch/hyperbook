@@ -256,6 +256,34 @@ describe("remarkDirectivePasswordlist", () => {
     expect(out).not.toContain(">Exercises<");
   });
 
+  it("reads a changed page again, and only knows the pages as they are", async () => {
+    expect(await html("::passwordlist", await makeCtx("/"))).not.toContain("gamma");
+    // Each page's blocks are remembered by its text (see collectPasswords):
+    // a page that changed is parsed again once the report is cleared.
+    await write(
+      "book/chapter2/index.md",
+      '---\nname: Chapter 2\n---\n\n# Two\n\n## New task\n\n:::protect{password="gamma"}\n\nsecret\n\n:::\n',
+    );
+    clearCollectedPasswords(root);
+    const changed = await html("::passwordlist", await makeCtx("/"));
+    expect(changed).toContain("gamma");
+    // A page without blocks any more has none.
+    await write("book/chapter2/index.md", "---\nname: Chapter 2\n---\n\n# Two\n");
+    clearCollectedPasswords(root);
+    expect(await html("::passwordlist", await makeCtx("/"))).not.toContain("gamma");
+  });
+
+  it("puts a block at its line in the page, without the frontmatter", async () => {
+    const { collectPasswords } = await import("../src/collectPasswords");
+    const report = await collectPasswords(root, { reload: true });
+    const block = report.entries.find((e) => e.type === "block" && e.key === "ch2");
+    // "# Two" is line 2 of the content, the block starts on line 4. Only an
+    // h2 or a task gives a context, not the frontmatter's "name: Chapter 2".
+    expect(block).toMatchObject({ file: "chapter2/index.md", line: 4, context: undefined });
+    const task = report.entries.find((e) => e.type === "block" && e.key === "ch1");
+    expect(task?.context).toBe("Exercise 1: Two approaches");
+  });
+
   it("says so when nothing matches", async () => {
     const out = await html(
       '::passwordlist{source="href(/nowhere.*)"}',

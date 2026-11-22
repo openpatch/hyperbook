@@ -70,74 +70,131 @@ export type PasswordReport = {
  */
 const parser = unified().use(remarkParse).use(remarkDirective);
 
-const collectBlocks = (
-  markdown: string,
-  file: string,
-  href: string | undefined,
-  sourceMarkdown = markdown,
-): CollectedPassword[] => {
-  const found: CollectedPassword[] = [];
-  const tree = parser.parse(markdown) as Root;
-  parser.runSync(tree);
+/**
+ * Whether a page may hold a `:::protect` block. Most pages of a book do not,
+ * and parsing them is most of the time a `::passwordlist` takes on a large
+ * book. Only rules pages out: a false hit just gets parsed.
+ */
+const mayProtect = (markdown: string) => /:::[ \t]*protect/.test(markdown);
 
-  const inferContexts = (source: string): (string | undefined)[] => {
-    const sourceTree = parser.parse(source) as Root;
-    parser.runSync(sourceTree);
-    const headings: { offset: number; value: string }[] = [];
-    const tasks: { offset: number; value: string }[] = [];
-    const contexts: (string | undefined)[] = [];
-    visit(sourceTree, (node: any) => {
-      const offset = node.position?.start?.offset;
-      if (typeof offset !== "number") return;
-      if (node.type === "heading" && node.depth >= 2) {
-        headings.push({ offset, value: toString(node).trim() });
-      }
-      if (node.type === "containerDirective" && node.name === "snippet") {
-        const id = node.attributes?.id || node.attributes?.["#"];
-        if (id !== "aufgabe") return;
-        const first = node.children?.[0];
-        const strong = first?.children?.find(
-          (child: any) => child.type === "strong",
-        );
-        const value = strong ? toString(strong).trim() : "";
-        if (value) tasks.push({ offset, value });
-      }
+const FRONTMATTER = /^---[ \t]*\r?\n[\s\S]*?\r?\n---[ \t]*(?:\r?\n|$)/;
+
+/** The protect blocks of a page, without what the page's metadata adds. */
+type Block = Omit<CollectedPassword, "file" | "href">;
+
+/**
+ * The protect blocks of a page, each with the nearest heading (from h2) or
+ * task label before it as its context, unless it names itself.
+ *
+ * `source` is the file as written, frontmatter and all, which is what the
+ * contexts are read from; `markdown` the page's content. Lines count in the
+ * content. When the content is the end of the source, as for every plain
+ * page, one parse serves both.
+ */
+const collectBlocks = (markdown: string, source = markdown): Block[] => {
+  const sourceTree = parser.parse(source) as Root;
+  parser.runSync(sourceTree);
+  // Lines of the source before the content (its frontmatter).
+  const suffix = source.endsWith(markdown);
+  const lineOffset = suffix
+    ? source.slice(0, source.length - markdown.length).split("\n").length - 1
+    : 0;
+  let contentTree: Root | null = null;
+  if (!suffix) {
+    contentTree = parser.parse(markdown) as Root;
+    parser.runSync(contentTree);
+  }
+
+  // The frontmatter parses as markdown, too: "name: X" over its closing
+  // "---" is a heading, which is no context.
+  const frontmatterEnd = FRONTMATTER.exec(source)?.[0].length ?? 0;
+  const headings: { offset: number; value: string }[] = [];
+  const tasks: { offset: number; value: string }[] = [];
+  const contexts: (string | undefined)[] = [];
+  const sourceBlocks: any[] = [];
+  visit(sourceTree, (node: any) => {
+    const offset = node.position?.start?.offset;
+    if (typeof offset !== "number" || offset < frontmatterEnd) return;
+    if (node.type === "heading" && node.depth >= 2) {
+      headings.push({ offset, value: toString(node).trim() });
+    }
+    if (node.type === "containerDirective" && node.name === "snippet") {
+      const id = node.attributes?.id || node.attributes?.["#"];
+      if (id !== "aufgabe") return;
+      const first = node.children?.[0];
+      const strong = first?.children?.find(
+        (child: any) => child.type === "strong",
+      );
+      const value = strong ? toString(strong).trim() : "";
+      if (value) tasks.push({ offset, value });
+    }
+    if (node.type === "containerDirective" && node.name === "protect") {
+      sourceBlocks.push(node);
+      const heading = headings.filter((item) => item.offset < offset).at(-1);
+      const task = tasks.filter((item) => item.offset < offset).at(-1);
+      contexts.push(
+        node.attributes?.name ||
+          (task && (!heading || task.offset > heading.offset)
+            ? task.value
+            : heading?.value),
+      );
+    }
+  });
+
+  // The blocks themselves: those of the source when it holds the content,
+  // shifted to the content's lines; otherwise those of the content.
+  const blocks: { node: any; line?: number }[] = [];
+  if (contentTree) {
+    visit(contentTree, (node: any) => {
       if (node.type === "containerDirective" && node.name === "protect") {
-        const heading = headings.filter((item) => item.offset < offset).at(-1);
-        const task = tasks.filter((item) => item.offset < offset).at(-1);
-        contexts.push(
-          node.attributes?.name ||
-            (task && (!heading || task.offset > heading.offset)
-              ? task.value
-              : heading?.value),
-        );
+        blocks.push({ node, line: node.position?.start?.line });
       }
     });
-    return contexts;
-  };
-  const inferredContexts = inferContexts(sourceMarkdown);
-  let blockIndex = 0;
+  } else {
+    for (const node of sourceBlocks) {
+      const line = node.position?.start?.line;
+      blocks.push({ node, line: line === undefined ? undefined : line - lineOffset });
+    }
+  }
 
-  visit(tree, (node: any) => {
-    if (node.type !== "containerDirective" || node.name !== "protect") return;
+  return blocks.map(({ node, line }, i) => {
     const attributes = node.attributes || {};
-    const inferredContext = inferredContexts[blockIndex++];
-    found.push({
+    return {
       key: attributes.use || undefined,
       password: attributes.password || undefined,
       resolvedFrom: attributes.password ? "inline" : undefined,
       name: attributes.name || undefined,
-      context: attributes.name || inferredContext,
+      context: attributes.name || contexts[i],
       description: attributes.description || undefined,
       type: "block",
-      href,
-      file,
-      line: node.position?.start?.line,
+      line,
       id: attributes.id || undefined,
-    });
+    };
   });
+};
 
-  return found;
+/**
+ * The blocks of each file as last read, by its path: a page whose text has
+ * not changed is not parsed again. Hosts that clear the report on every
+ * render (the cloud editor's preview) then pay for the changed pages only.
+ */
+const blocksByFile = new Map<
+  string,
+  { markdown: string; source: string; blocks: Block[] }
+>();
+
+const blocksOf = (absolute: string, markdown: string, source: string): Block[] => {
+  if (!mayProtect(markdown) && !mayProtect(source)) {
+    blocksByFile.delete(absolute);
+    return [];
+  }
+  const known = blocksByFile.get(absolute);
+  if (known && known.markdown === markdown && known.source === source) {
+    return known.blocks;
+  }
+  const blocks = collectBlocks(markdown, source);
+  blocksByFile.set(absolute, { markdown, source, blocks });
+  return blocks;
 };
 
 const fromReference = (
@@ -287,14 +344,14 @@ const collect = async (root: string): Promise<PasswordReport> => {
     const source = await fs
       .readFile(file.path.absolute, "utf8")
       .catch(() => file.markdown.content);
-    entries.push(
-      ...collectBlocks(
-        file.markdown.content,
-        file.path.relative,
-        file.path.href || undefined,
-        source,
-      ),
-    );
+    // Copies: the report is filled in below, and the blocks are kept.
+    for (const block of blocksOf(file.path.absolute, file.markdown.content, source)) {
+      entries.push({
+        ...block,
+        href: file.path.href || undefined,
+        file: file.path.relative,
+      });
+    }
   }
 
   for (const entry of entries) {
