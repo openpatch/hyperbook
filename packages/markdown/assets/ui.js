@@ -63,6 +63,17 @@ hyperbook.ui = (function () {
     for (let node of labelEl ? labelEl.childNodes : []) {
       if (node.nodeName === "IMG" && node.dataset.emoji) {
         label.push({ text: node.alt || "", emoji: node.dataset.emoji });
+        continue;
+      }
+      // Math is rendered twice, as MathML for screen readers and as markup for
+      // the eye, so its text would repeat the formula. The TeX source in the
+      // annotation reads like the text the author wrote, which is what the
+      // heading's `data-label` shows for the rest of the markup.
+      const tex = node.querySelector?.(
+        "annotation[encoding='application/x-tex']"
+      );
+      if (tex) {
+        label.push({ text: tex.textContent || "" });
       } else if (node.textContent) {
         label.push({ text: node.textContent });
       }

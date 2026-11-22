@@ -43,4 +43,6 @@ If you want stable links to your headings, even if the content of the heading ch
 # Stable H1 {#stable}
 ```
 
+The id is used as written, so a link to `#stable` still works when the text of the heading changes. Whitespace is replaced by `-`, because an id cannot contain a space.
+
 # Stable H1 {#stable}

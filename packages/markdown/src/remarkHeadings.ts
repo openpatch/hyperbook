@@ -5,6 +5,7 @@ import { HyperbookContext } from "@hyperbook/types";
 import { VFile } from "vfile";
 import { toString } from "mdast-util-to-string";
 import { i18n } from "./i18n";
+import type { Element, ElementContent } from "hast";
 
 const customHeading = (node: Heading) => {
   let lastChild = node.children[node.children.length - 1];
@@ -13,15 +14,14 @@ const customHeading = (node: Heading) => {
     let matched = string.match(/ {#([^]+?)}$/);
 
     if (matched) {
-      let id = matched[1];
+      // An id cannot contain whitespace, so a heading like `{#idd id}` would
+      // link nowhere. Join it the way the generated anchors do.
+      let id = matched[1].trim().replace(/\s+/g, "-");
       if (!!id.length) {
         if (!node.data) {
           node.data = {};
         }
-        if (!node.data.hProperties) {
-          node.data.hProperties = {};
-        }
-        (node.data as any).id = node.data.hProperties.id = id;
+        (node.data as any).id = id;
 
         string = string.substring(0, matched.index);
         lastChild.value = string;
@@ -43,6 +43,51 @@ export const makeAnchor = (heading: string) => {
   return anchor;
 };
 
+/** Math nodes that `remark-math` parses into a heading (`$x$`, `$$x$$`). */
+const isMath = (node: any) =>
+  node?.type === "inlineMath" || node?.type === "math";
+
+/**
+ * The element that `rehype-katex` renders.
+ *
+ * `hChildren` replaces the children that `mdast-util-to-hast` would build, so
+ * the element for math has to be built here. `remark-math` already stores the
+ * hast mapping on the node (`hName`, `hProperties` for the `math-inline` class
+ * and `hChildren` for the TeX source), so following that data yields the same
+ * element the library builds for math outside of a heading.
+ */
+const mathElement = (node: any): Element => {
+  const data = node.data || {};
+  return {
+    type: "element",
+    tagName: data.hName || "span",
+    properties: data.hProperties || {},
+    children: data.hChildren || [{ type: "text", value: node.value }],
+  };
+};
+
+/**
+ * The content of the heading link.
+ *
+ * A heading is one link with one label, so everything else collapses to its
+ * text (bold, code and friends would otherwise change the look of the
+ * heading). Math stays an element, so that KaTeX can render it.
+ */
+const headingContent = (node: Heading, value: string): ElementContent[] => {
+  if (!node.children.some(isMath)) {
+    return [{ type: "text", value }];
+  }
+
+  return node.children.map((child) =>
+    isMath(child)
+      ? mathElement(child)
+      : {
+          type: "text",
+          value: toString(child, { includeImageAlt: false }),
+        },
+  );
+};
+
 export default ({
     config,
     makeUrl,
@@ -53,7 +98,9 @@ export default ({
       visit(tree, "heading", (node: Heading) => {
         customHeading(node);
         const value = toString(node, { includeImageAlt: false });
-        const anchor = makeAnchor(value);
+        // A `{#custom-id}` in the heading is taken as written, so the links an
+        // author pinned to it keep working when the heading text changes.
+        const anchor = (node.data as any)?.id || makeAnchor(value);
         const label = value || anchor;
 
         if (!node.data) {
@@ -82,12 +129,7 @@ export default ({
                 type: "element",
                 tagName: "span",
                 properties: {},
-                children: [
-                  {
-                    type: "text",
-                    value,
-                  },
-                ],
+                children: headingContent(node, value),
               },
             ],
           },

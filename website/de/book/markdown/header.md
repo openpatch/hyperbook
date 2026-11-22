@@ -43,4 +43,6 @@ Wenn du stabile Links zu den Überschriften haben möchtest, dann kann du eigene
 # Stabile H1 {#stabil}
 ```
 
+Die Id wird so verwendet, wie sie geschrieben wurde. Ein Link auf `#stabil` funktioniert also weiterhin, wenn sich der Text der Überschrift ändert. Leerzeichen werden durch `-` ersetzt, da eine Id kein Leerzeichen enthalten darf.
+
 # Stabile H1 {#stabil}

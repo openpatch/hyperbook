@@ -24,3 +24,18 @@ Das ist ein $ \Delta $. :smiley:
 ```
 
 Das ist ein $ \Delta $. :smiley:
+
+## Mathematik in Überschriften
+
+Mathematik funktioniert auch in Überschriften.
+
+```md
+## Die Kosten von $x^2$
+```
+
+## Die Kosten von $x^2$
+
+:::alert{info}
+Inhaltsverzeichnis, Sprungmarke und Lesezeichen können nur Text anzeigen und
+verwenden deshalb den TeX-Quelltext der Formel (`Die Kosten von x^2`).
+:::

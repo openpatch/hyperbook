@@ -24,3 +24,18 @@ This is a $ \Delta $. :smiley:
 ```
 
 This is a $ \Delta $. :smiley:
+
+## Math in Headings
+
+Math works in headings too.
+
+```md
+## The cost of $x^2$
+```
+
+## The cost of $x^2$
+
+:::alert{info}
+The table of contents, the link anchor and the bookmark label can only show
+text, so they use the TeX source of the formula (`The cost of x^2`).
+:::
