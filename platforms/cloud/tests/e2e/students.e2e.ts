@@ -25,6 +25,7 @@ afterAll(async () => {
 
 describe("students", () => {
   it("adds a group", async () => {
+    await page.getByRole("tab", { name: "Groups" }).click();
     await page.getByLabel("New group").fill("7a");
     await page.getByRole("button", { name: "Add group" }).click();
     await page.getByRole("link", { name: /7a\s*0 students/ }).click();
@@ -113,6 +114,7 @@ describe("students", () => {
 
   it("moves students to another group", async () => {
     // Moving needs a second group in the book.
+    // The way back from a group opens the book on its groups.
     await page.getByRole("link", { name: "Physics" }).click();
     await page.getByLabel("New group").fill("7b");
     await page.getByRole("button", { name: "Add group" }).click();

@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import i18next from "i18next";
 import { useState } from "react";
-import { Link, useNavigate, useParams, useSearchParams } from "react-router";
+import { Link, useNavigate, useParams } from "react-router";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import {
@@ -11,6 +11,7 @@ import {
 } from "../../shared/schemas";
 import { ConfirmButton, ConfirmDialog } from "@/components/confirm-button";
 import { PageHeader, Section } from "@/components/page-header";
+import { TabList, useTab } from "@/components/tabs";
 import { QueryState } from "@/components/query-state";
 import { GroupOverview } from "./group-overview";
 import { SecretDialog } from "@/components/secret-dialog";
@@ -49,7 +50,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { api, unwrap } from "@/lib/api";
-import { cn } from "@/lib/utils";
 import { FormError, TextField, applyServerError, useZodForm } from "@/lib/form";
 
 export function GroupPage() {
@@ -64,8 +64,7 @@ export function GroupPage() {
     queryFn: () => unwrap(api.groups[":id"].students.$get({ param: { id } })),
   });
   const group = groupQuery.data;
-  const [params, setParams] = useSearchParams();
-  const tab = params.get("tab") === "overview" ? "overview" : "students";
+  const [tab, setTab] = useTab(["students", "overview"] as const);
 
   if (!group) return <QueryState error={groupQuery.error} retry={groupQuery.refetch} />;
 
@@ -75,7 +74,7 @@ export function GroupPage() {
         title={group.name}
         description={
           <Link
-            to={`/books/${group.book.id}`}
+            to={`/books/${group.book.id}?tab=groups`}
             className="text-primary hover:underline"
           >
             {group.book.title}
@@ -90,25 +89,16 @@ export function GroupPage() {
           </>
         }
       />
-      <div role="tablist" aria-label={group.name} className="mb-4 flex gap-1 border-b">
-        {(["students", "overview"] as const).map((name) => (
-          <button
-            key={name}
-            type="button"
-            role="tab"
-            id={`group-tab-${name}`}
-            aria-selected={tab === name}
-            aria-controls={`group-panel-${name}`}
-            className={cn(
-              "-mb-px border-b-2 px-3 py-2 text-sm font-medium",
-              tab === name ? "border-primary text-foreground" : "border-transparent text-muted-foreground hover:text-foreground",
-            )}
-            onClick={() => setParams(name === "students" ? {} : { tab: name }, { replace: true })}
-          >
-            {name === "students" ? t("overview.tabStudents") : t("overview.tabOverview")}
-          </button>
-        ))}
-      </div>
+      <TabList
+        idPrefix="group"
+        label={group.name}
+        tabs={[
+          { name: "students", label: t("overview.tabStudents") },
+          { name: "overview", label: t("overview.tabOverview") },
+        ]}
+        value={tab}
+        onChange={setTab}
+      />
       {tab === "overview" ? (
         <section id="group-panel-overview" role="tabpanel" aria-labelledby="group-tab-overview" className="mb-6">
           <GroupOverview groupId={id} onViewAs={viewAsStudent} />

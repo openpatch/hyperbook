@@ -39,7 +39,7 @@ describe("review", () => {
     const bookUrl = page.url().replace(/\/edit$/, "");
 
     // The owner makes a link for Anna.
-    await page.goto(bookUrl);
+    await page.goto(`${bookUrl}?tab=people`);
     await page.getByLabel("Name", { exact: true }).fill("Anna");
     await page.getByRole("button", { name: "Create link" }).click();
     const url = (await page.getByTestId("secret").textContent())!.trim();
@@ -86,7 +86,7 @@ describe("review", () => {
     await anna.getByText("You left the book.").waitFor();
 
     // Deleted by the owner, the link opens nothing anymore.
-    await page.goto(bookUrl);
+    await page.goto(`${bookUrl}?tab=people`);
     await page.getByRole("button", { name: "Delete", exact: true }).click();
     await page.getByRole("dialog").getByRole("button", { name: "Delete" }).click();
     await page.getByText("No links yet.").waitFor();

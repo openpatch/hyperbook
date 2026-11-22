@@ -1,10 +1,11 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { keepPreviousData, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import i18next from "i18next";
 import { CheckIcon, CopyIcon, DownloadIcon, KeyRoundIcon, LockIcon, UploadIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { ConfirmButton } from "@/components/confirm-button";
+import { Pager, serverPaged, usePaged } from "@/components/pager";
 import { Section } from "@/components/page-header";
 import { SecretDialog } from "@/components/secret-dialog";
 import { Badge } from "@/components/ui/badge";
@@ -106,23 +107,34 @@ function uploadZip(bookId: string, file: File, onProgress: (fraction: number) =>
   });
 }
 
-type Version = Awaited<ReturnType<typeof fetchVersions>>[number];
+type Version = Awaited<ReturnType<typeof fetchVersions>>["versions"][number];
 
-const fetchVersions = (id: string) => unwrap(api.books[":id"].versions.$get({ param: { id } }));
+/** A page of the published versions; `limit: 0` gets only the totals and the live one. */
+const fetchVersions = (id: string, query: { offset?: number; limit: number; q?: string }) =>
+  unwrap(
+    api.books[":id"].versions.$get({
+      param: { id },
+      query: {
+        offset: String(query.offset ?? 0),
+        limit: String(query.limit),
+        ...(query.q ? { q: query.q } : {}),
+      },
+    }),
+  );
 
-const HISTORY_ROWS = 5;
+const VERSION_ROWS = 10;
+const HISTORY_ROWS = 10;
 
 /**
- * Live is the newest published version (a v<N> tag) and only changes by
- * publishing or rolling back; the preview is the latest save of the book,
- * rendered page by page as it is visited, so it needs no build. Publishing
- * makes the latest save live, building it first when no build of it is kept.
+ * What both publishing tabs read: the builds (followed while one runs), the
+ * published versions and the latest save, and how to refresh them all.
  */
-export function PublishingSection({ book }: { book: Book }) {
+function usePublishing(book: Book) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const id = String(book.id);
   const key = ["books", id, "builds"];
+  // Every page of versions sits under this key, so one invalidation reaches all.
   const versionsKey = ["books", id, "versions"];
   const { data: builds } = useQuery({
     queryKey: key,
@@ -130,11 +142,11 @@ export function PublishingSection({ book }: { book: Book }) {
     // Follow builds while one is waiting or running.
     refetchInterval: (query) => (query.state.data?.some(active) ? 1500 : false),
   });
-  const { data: versions } = useQuery({ queryKey: versionsKey, queryFn: () => fetchVersions(id) });
+  const { data: versions } = useQuery({
+    queryKey: [...versionsKey, "summary"],
+    queryFn: () => fetchVersions(id, { limit: 0 }),
+  });
   const { data: head } = useHead(id);
-  const [logFor, setLogFor] = useState<number | null>(null);
-  const [dialog, setDialog] = useState<"publish" | "request" | "upload" | "git" | "unpublish" | "lock" | "unlock" | null>(null);
-  const [showAll, setShowAll] = useState(false);
 
   // A finished build may have changed what is published.
   const latest = builds?.[0];
@@ -164,6 +176,25 @@ export function PublishingSection({ book }: { book: Book }) {
       toast.error(message ? (isMessageKey(message) ? t(message) : message) : t("common.somethingWrong"));
     }
   };
+  // Publishing, rolling back and unpublishing are the owners' (the server
+  // checks too), and nothing goes live while the publishing lock is set.
+  const canPublish = book.role === "owner" && !book.publishingDisabled;
+  return { id, builds, versions, head, refresh, run, canPublish };
+}
+
+/**
+ * Live is the newest published version (a v<N> tag) and only changes by
+ * publishing or rolling back; the preview is the latest save of the book,
+ * rendered page by page as it is visited, so it needs no build. Publishing
+ * makes the latest save live, building it first when no build of it is kept.
+ */
+export function PublishingSection({ book, onShowVersions }: { book: Book; onShowVersions?: () => void }) {
+  const { t } = useTranslation();
+  const queryClient = useQueryClient();
+  const { id, builds, versions, head, refresh, run, canPublish } = usePublishing(book);
+  const [logFor, setLogFor] = useState<number | null>(null);
+  const [dialog, setDialog] = useState<"publish" | "request" | "upload" | "git" | "unpublish" | "lock" | "unlock" | null>(null);
+
   // The publishing lock: nothing of the book goes live while it is set.
   const locked = book.publishingDisabled;
   const setLock = (disabled: boolean) =>
@@ -176,13 +207,11 @@ export function PublishingSection({ book }: { book: Book }) {
   // only then — not when a build exists yet. A freshly created book gets
   // its first commit from the editor, so it can be previewed at once.
   const hasSource = book.commitCount > 0;
-  // Publishing, rolling back and unpublishing are the owners' (the server checks too).
   const isOwner = book.role === "owner";
-  const canPublish = isOwner && !locked;
-  const hasBuilds = (builds?.length ?? 0) > 0;
-  const liveVersion = versions?.find((v) => v.live);
+  const liveVersion = versions?.live;
   // A publish whose build is still waiting or running goes live when it succeeds.
   const publishing = builds?.find((b) => active(b) && b.publish);
+  const running = builds?.find(active);
   const unpublished = head?.unpublished ?? 0;
   // Nothing to publish while the live site is the latest save.
   const upToDate = !!book.publishedAt && unpublished === 0 && !publishing;
@@ -194,7 +223,6 @@ export function PublishingSection({ book }: { book: Book }) {
       ? lastAttempt
       : null;
   const request = head?.request ?? null;
-  const rows = showAll ? (builds ?? []) : (builds ?? []).slice(0, HISTORY_ROWS);
 
   const openPreview = () => {
     // Opened first, so the popup blocker sees a click.
@@ -252,7 +280,7 @@ export function PublishingSection({ book }: { book: Book }) {
         </div>
       }
     >
-      <div className="mb-4 grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-4 sm:grid-cols-2">
         {locked ? (
           // Locked books are offline: the lock takes the live card's place.
           <div className="rounded-lg border p-4" role="status">
@@ -302,6 +330,20 @@ export function PublishingSection({ book }: { book: Book }) {
             ) : (
               <p className="text-muted-foreground">{t("publishing.notPublishedYet")}</p>
             )}
+            {running && (
+              <div className="mt-3 flex flex-wrap items-center gap-2 text-sm" role="status">
+                <Badge variant="secondary">
+                  {t(STATUS[running.status].label)}
+                  {running.progress && ` ${running.progress.done}/${running.progress.total}`}
+                </Badge>
+                <span className="text-muted-foreground">
+                  #{running.id} {t(TRIGGER[running.trigger] as never)}
+                </span>
+                <Button size="sm" variant="ghost" onClick={() => setLogFor(running.id)}>
+                  {t("publishing.log")}
+                </Button>
+              </div>
+            )}
             {failedPublish && (
               <div className="mt-3 rounded-md border border-destructive/40 bg-destructive/5 p-3 text-sm" role="alert">
                 <p className="font-medium text-destructive">{t("publishing.failed.title")}</p>
@@ -322,6 +364,11 @@ export function PublishingSection({ book }: { book: Book }) {
                   {t("publishing.request.send")}
                 </Button>
               </div>
+            )}
+            {onShowVersions && versions && versions.count > 0 && (
+              <Button variant="link" size="sm" className="mt-2 h-auto px-0" onClick={onShowVersions}>
+                {t("publishing.versions.showAll", { count: versions.count })}
+              </Button>
             )}
           </div>
         )}
@@ -446,31 +493,94 @@ export function PublishingSection({ book }: { book: Book }) {
         </DialogContent>
       </Dialog>
 
-      <h3 className="mt-6 mb-2 font-medium">{t("publishing.versions.title")}</h3>
-      {versions && versions.length > 0 ? (
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>{t("publishing.versions.version")}</TableHead>
-              <TableHead>{t("publishing.when")}</TableHead>
-              <TableHead>
-                <span className="sr-only">{t("common.actions")}</span>
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {versions.map((v) => (
-              <VersionRow key={v.tag} version={v} bookId={id} canRollBack={canPublish} onChanged={refresh} />
-            ))}
-          </TableBody>
-        </Table>
-      ) : (
-        <p className="text-sm text-muted-foreground">{t("publishing.versions.empty")}</p>
-      )}
+      <LogDialog buildId={logFor} onClose={() => setLogFor(null)} />
+    </Section>
+  );
+}
 
-      {hasBuilds && (
-        <>
-          <h3 className="mt-6 mb-2 font-medium">{t("publishing.history")}</h3>
+/**
+ * Every published version, a page at a time and filterable by tag or note,
+ * then the recent builds. Kept apart from the live/preview cards: a book that
+ * is published every week soon has more versions than fit on a screen.
+ */
+export function VersionsSection({ book }: { book: Book }) {
+  const { t } = useTranslation();
+  const { id, builds, versions: summary, refresh, run, canPublish } = usePublishing(book);
+  const [logFor, setLogFor] = useState<number | null>(null);
+  const [filter, setFilter] = useState("");
+  // The filter goes to the server once typing pauses, and starts on page one.
+  const [q, setQ] = useState("");
+  const [page, setPage] = useState(0);
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setQ(filter.trim());
+      setPage(0);
+    }, 250);
+    return () => window.clearTimeout(timer);
+  }, [filter]);
+  const { data: versions } = useQuery({
+    queryKey: ["books", id, "versions", { page, q }],
+    queryFn: () => fetchVersions(id, { offset: page * VERSION_ROWS, limit: VERSION_ROWS, q }),
+    // The old page stays while the next one loads, so the table does not jump.
+    placeholderData: keepPreviousData,
+  });
+  // A roll back or a new version can leave the page past the end.
+  const pages = Math.max(1, Math.ceil((versions?.total ?? 0) / VERSION_ROWS));
+  useEffect(() => {
+    if (versions && page >= pages) setPage(pages - 1);
+  }, [versions, page, pages]);
+  const versionPage = serverPaged(page, VERSION_ROWS, versions?.total ?? 0, setPage);
+  const buildPage = usePaged(builds ?? [], HISTORY_ROWS);
+
+  return (
+    <>
+      <Section
+        title={t("publishing.versions.title")}
+        description={t("publishing.versions.description")}
+        actions={
+          (summary?.count ?? 0) > VERSION_ROWS && (
+            <Input
+              type="search"
+              className="w-56"
+              placeholder={t("publishing.versions.filter")}
+              aria-label={t("publishing.versions.filter")}
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+            />
+          )
+        }
+      >
+        {summary && summary.count > 0 ? (
+          versions && versions.total > 0 ? (
+            <>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>{t("publishing.versions.version")}</TableHead>
+                    <TableHead>{t("publishing.when")}</TableHead>
+                    <TableHead>
+                      <span className="sr-only">{t("common.actions")}</span>
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {versions.versions.map((v) => (
+                    <VersionRow key={v.tag} version={v} bookId={id} canRollBack={canPublish} onChanged={refresh} />
+                  ))}
+                </TableBody>
+              </Table>
+              <Pager paged={versionPage} />
+            </>
+          ) : (
+            <p className="text-sm text-muted-foreground">{t("publishing.versions.noMatch")}</p>
+          )
+        ) : (
+          <p className="text-sm text-muted-foreground">{t("publishing.versions.empty")}</p>
+        )}
+      </Section>
+
+      {builds && builds.length > 0 && (
+        <Section title={t("publishing.history")} description={t("publishing.historyDescription")}>
           <Table>
             <TableHeader>
               <TableRow>
@@ -483,7 +593,7 @@ export function PublishingSection({ book }: { book: Book }) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {rows.map((b) => (
+              {buildPage.rows.map((b) => (
                 <TableRow key={b.id}>
                   <TableCell>
                     <div className="flex flex-wrap items-center gap-1">
@@ -530,16 +640,12 @@ export function PublishingSection({ book }: { book: Book }) {
               ))}
             </TableBody>
           </Table>
-          {(builds?.length ?? 0) > HISTORY_ROWS && (
-            <Button variant="ghost" size="sm" className="mt-1" onClick={() => setShowAll((v) => !v)}>
-              {showAll ? t("publishing.showLess") : t("publishing.showAll", { count: builds!.length })}
-            </Button>
-          )}
-        </>
+          <Pager paged={buildPage} />
+        </Section>
       )}
 
       <LogDialog buildId={logFor} onClose={() => setLogFor(null)} />
-    </Section>
+    </>
   );
 }
 

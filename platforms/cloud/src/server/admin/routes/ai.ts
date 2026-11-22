@@ -17,7 +17,9 @@ import {
   usedToday,
   weightedTokens,
 } from "../../domain/ai-usage";
+import { headCommit, listTags } from "../../hosting/git";
 import { repoDir } from "../../hosting/storage";
+import { suggestVersionNote } from "../../ai/version-note";
 import { createT } from "../../i18n";
 import { z } from "zod";
 import { addPart, closeParts, type AiAnswerPart } from "../../../shared/ai-parts";
@@ -186,6 +188,54 @@ export function bookAiRoutes({ db, config }: Deps) {
         return c.json({ ok: true });
       },
     )
+    // A note for the version publishing would make, from what changed since
+    // the live one. Owners publish, so only they ask; it costs a request
+    // and credits like the assistant does.
+    .post("/:id/ai/version-note", idParam, async (c) => {
+      const user = c.get("user");
+      const { book } = bookAccess(db, user, c.req.valid("param").id, "owner");
+      hostedOnly(book);
+      const t = createT(c.get("locale"));
+      const ai = effectiveAi(config, getInstanceSettings(db));
+      if (!ai) throw new HTTPException(503, { message: t("errors.ai.notConfigured") });
+      const { ai: allowed, ai_requests_per_day: quota, ai_tokens_per_week: tokenQuota } = getEntitlements(db, user);
+      if (!allowed) throw new HTTPException(403, { message: t("errors.ai.disabled") });
+      if (quota !== null && usedToday(db, user.id) >= quota) {
+        throw new HTTPException(429, { message: t("errors.ai.quota") });
+      }
+      if (tokenQuota !== null && usedThisWeek(db, user.id) >= tokenQuota) {
+        throw new HTTPException(429, { message: t("errors.ai.tokenQuota") });
+      }
+      const repo = repoDir(config, book.id);
+      const head = await headCommit(repo).catch(() => null);
+      if (!head) throw new HTTPException(409, { message: "errors.publishing.noFiles" });
+      if (!allow(user.id)) throw new HTTPException(429, { message: t("errors.ai.rateLimited") });
+      const live =
+        book.publishedBuildId === null
+          ? null
+          : ((await listTags(repo).catch(() => [])).find((tag) => tag.name === "published")?.commit ?? null);
+      countRequest(db, user.id);
+      const weights = modelWeights(ai.modelWeights, ai.model);
+      try {
+        const note = await suggestVersionNote({
+          ai,
+          repo,
+          live,
+          head,
+          locale: c.get("locale"),
+          signal: c.req.raw.signal,
+          onUsage: (u) => addTokens(db, user.id, u.promptTokens, u.cachedPromptTokens, u.completionTokens, weights),
+        });
+        return c.json({ note });
+      } catch (error) {
+        if (error instanceof ProviderError) {
+          throw new HTTPException(502, {
+            message: t(error.code === "timeout" ? "errors.ai.timeout" : "errors.ai.provider"),
+          });
+        }
+        throw error;
+      }
+    })
     .post(
     "/:id/ai/assist",
     idParam,

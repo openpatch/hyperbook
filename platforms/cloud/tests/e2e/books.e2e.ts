@@ -43,6 +43,7 @@ describe("books", () => {
 
   it("changes the address and visibility", async () => {
     await page.getByRole("link", { name: /Physik 7ä/ }).click();
+    await page.getByRole("tab", { name: "Settings" }).click();
     await page.getByLabel("Address").fill("physik-8a");
     await page.getByRole("combobox", { name: "Visibility" }).click();
     await page.getByRole("option", { name: /Private/ }).click();
@@ -63,12 +64,14 @@ describe("books", () => {
 
     await nav(page, "Books");
     await page.getByRole("link", { name: /Physik 7ä/ }).click();
+    await page.getByRole("tab", { name: "People" }).click();
     await page.getByLabel("Add a teacher by email").fill("colleague@example.org");
     await page.getByRole("button", { name: "Add", exact: true }).click();
     await page.getByRole("cell", { name: "colleague@example.org" }).waitFor();
   });
 
   it("sets a custom domain and shows the DNS record it needs", async () => {
+    await page.getByRole("tab", { name: "Settings" }).click();
     await page.getByLabel("Domain").fill("Buch.Schule.test");
     await page.getByRole("button", { name: "Set domain" }).click();
     await page.getByText("Waiting for DNS").waitFor();

@@ -59,9 +59,12 @@ describe("publishing", () => {
     await publish.getByText("1 saved change goes live").waitFor();
     await publish.getByText("Upload optics.zip").waitFor();
     await publish.getByRole("button", { name: "Publish", exact: true }).click();
-    await page.getByRole("cell", { name: /^v1/ }).waitFor({ timeout: 60_000 });
-    await page.getByText(/^Live since /).waitFor();
+    await page.getByText(/^Live since /).waitFor({ timeout: 60_000 });
     await page.getByText("Same as the live version").waitFor();
+
+    // Versions and builds have a tab of their own.
+    await page.getByRole("tab", { name: "Versions" }).click();
+    await page.getByRole("cell", { name: /^v1/ }).waitFor();
 
     await page.getByRole("button", { name: "Log", exact: true }).click();
     await page.getByRole("dialog").getByText(/Ignoring "basePath"/).waitFor();
@@ -84,6 +87,7 @@ describe("publishing", () => {
   it("shows why an upload was refused", async () => {
     const zip = path.join(mkdtempSync(path.join(tmpdir(), "cloud-e2e-zip-")), "notes.zip");
     writeFileSync(zip, zipSync({ "notes.md": text("# Notes\n") }));
+    await page.getByRole("tab", { name: "Publishing" }).click();
     await page.getByRole("button", { name: "Manage" }).click();
     await page.getByRole("menuitem", { name: "Upload a zip" }).click();
     await page.getByLabel("Upload a zip of your book").setInputFiles(zip);

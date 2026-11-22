@@ -8,7 +8,13 @@ import { Hono } from "hono";
 import { bodyLimit } from "hono/body-limit";
 import { HTTPException } from "hono/http-exception";
 import { z } from "zod";
-import { publishInput, publishingLockInput, publishRequestInput, rollbackInput } from "../../../shared/schemas";
+import {
+  publishInput,
+  publishingLockInput,
+  publishRequestInput,
+  rollbackInput,
+  versionsQuery,
+} from "../../../shared/schemas";
 import { audit } from "../../audit";
 import { bookChanged } from "../../domain/book-events";
 import type { SessionUser } from "../../auth/sessions";
@@ -357,12 +363,14 @@ export function bookPublishingRoutes({ db, config, mailer, builds: queue, checks
       return c.body(Readable.toWeb(archiveZip(repo, commit)) as ReadableStream);
     })
 
-    // The published versions (v<N> tags): all of them stay, their builds only
-    // while kept. The live one is the newest tag on the commit "published" is at.
-    .get("/:id/versions", idParam, async (c) => {
+    // The published versions (v<N> tags), a page at a time: all of them
+    // stay, their builds only while kept. The live one is the newest tag on
+    // the commit "published" is at, and comes along whatever the page.
+    .get("/:id/versions", idParam, validate("query", versionsQuery), async (c) => {
       const { book } = bookAccess(db, c.get("user"), c.req.valid("param").id);
+      const { offset, limit, q } = c.req.valid("query");
       const repo = repoDir(config, book.id);
-      const [versions, tags] = await Promise.all([
+      const [tagged, tags] = await Promise.all([
         listVersionTags(repo).catch(() => []),
         listTags(repo).catch(() => []),
       ]);
@@ -370,28 +378,39 @@ export function bookPublishingRoutes({ db, config, mailer, builds: queue, checks
       // its publishing locked); then no version is live.
       const liveCommit =
         book.publishedBuildId === null ? undefined : tags.find((t) => t.name === "published")?.commit;
+      const liveTag = tagged.find((v) => v.commit === liveCommit)?.name;
       const rows = db
         .select({ id: builds.id, commit: builds.commit, note: builds.note, hyperbookVersion: builds.hyperbookVersion })
         .from(builds)
         .where(and(eq(builds.bookId, book.id), eq(builds.status, "succeeded")))
         .orderBy(desc(builds.id))
         .all();
-      const liveTag = versions.find((v) => v.commit === liveCommit)?.name;
-      return c.json(
-        versions.map((v) => {
-          const own = rows.filter((r) => r.commit === v.commit);
-          const kept = own.find((r) => existsSync(buildDir(config, book.id, r.id)));
-          return {
-            tag: v.name,
-            commit: v.commit,
-            committedAt: v.committedAt,
-            note: own.find((r) => r.note)?.note ?? null,
-            live: v.name === liveTag,
-            buildId: kept?.id ?? null,
-            hyperbookVersion: (kept ?? own[0])?.hyperbookVersion ?? null,
-          };
-        }),
-      );
+      const noteOf = (commit: string) => rows.find((r) => r.commit === commit && r.note)?.note ?? null;
+      const describe = (v: (typeof tagged)[number]) => {
+        const own = rows.filter((r) => r.commit === v.commit);
+        const kept = own.find((r) => existsSync(buildDir(config, book.id, r.id)));
+        return {
+          tag: v.name,
+          commit: v.commit,
+          committedAt: v.committedAt,
+          note: noteOf(v.commit),
+          live: v.name === liveTag,
+          buildId: kept?.id ?? null,
+          hyperbookVersion: (kept ?? own[0])?.hyperbookVersion ?? null,
+        };
+      };
+      const needle = q?.toLowerCase();
+      const matching = needle
+        ? tagged.filter((v) => v.name.toLowerCase().includes(needle) || noteOf(v.commit)?.toLowerCase().includes(needle))
+        : tagged;
+      const live = tagged.find((v) => v.name === liveTag);
+      return c.json({
+        versions: matching.slice(offset, offset + limit).map(describe),
+        // Matching the filter; `count` is every version of the book.
+        total: matching.length,
+        count: tagged.length,
+        live: live ? describe(live) : null,
+      });
     })
 
     // "Check all pages": renders every page of the latest save in the

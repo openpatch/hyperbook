@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { HandIcon, LoaderCircleIcon, RocketIcon } from "lucide-react";
+import { HandIcon, LoaderCircleIcon, RocketIcon, SparklesIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { useAiStatus } from "@/lib/ai";
 import { api, unwrap } from "@/lib/api";
 import type { Book } from "@/lib/books";
 import { useUser } from "@/lib/session";
@@ -292,6 +293,24 @@ export function PublishDialog({
   const { data: check } = useCheck(id);
   const [note, setNote] = useState("");
   const [busy, setBusy] = useState(false);
+  // With AI set up for this teacher, it can name the version from the changes.
+  const { data: ai } = useAiStatus(open);
+  const maySuggest = !!ai?.enabled && ai.allowed && (head?.unpublished ?? 0) > 0;
+  const [suggesting, setSuggesting] = useState(false);
+  const suggest = async () => {
+    setSuggesting(true);
+    try {
+      const { note: suggested } = await unwrap(api.books[":id"].ai["version-note"].$post({ param: { id } }));
+      if (suggested) setNote(suggested);
+      else toast.info(t("publishing.suggestNoteEmpty"));
+    } catch (error) {
+      toast.error(errorMessage(error, t("common.somethingWrong")));
+    } finally {
+      setSuggesting(false);
+      // The request and its credits count against the teacher's quota.
+      void queryClient.invalidateQueries({ queryKey: ["ai-status"] });
+    }
+  };
   // A published book is checked on opening, so the dialog can say whether
   // this save leaves students' work without its task.
   const checked = !!check && check.commit === head?.commit && check.status !== "failed";
@@ -331,17 +350,32 @@ export function PublishDialog({
         {unsaved && <p className="text-sm text-destructive">{t("publishing.unsavedLeftOut")}</p>}
         {head && <Changes bookId={id} head={head} />}
         <CheckLine book={book} head={head} compact />
-        <Input
-          placeholder={t("publishing.notePlaceholder")}
-          maxLength={200}
-          value={note}
-          onChange={(e) => setNote(e.target.value)}
-          aria-label={t("publishing.notePlaceholder")}
-        />
+        <div className="flex gap-2">
+          <Input
+            placeholder={t("publishing.notePlaceholder")}
+            maxLength={200}
+            value={note}
+            disabled={suggesting}
+            onChange={(e) => setNote(e.target.value)}
+            aria-label={t("publishing.notePlaceholder")}
+          />
+          {maySuggest && (
+            <Button
+              type="button"
+              variant="outline"
+              disabled={suggesting || busy}
+              onClick={() => void suggest()}
+              title={t("publishing.suggestNoteTitle")}
+            >
+              {suggesting ? <LoaderCircleIcon className="animate-spin" aria-hidden /> : <SparklesIcon aria-hidden />}
+              {suggesting ? t("publishing.suggestingNote") : t("publishing.suggestNote")}
+            </Button>
+          )}
+        </div>
         <DialogFooter>
           <Button
             variant={leavesWork ? "destructive" : "default"}
-            disabled={busy}
+            disabled={busy || suggesting}
             onClick={() => void publish()}
           >
             {leavesWork ? t("publishing.leftBehind.publishAnyway") : t("publishing.publish")}

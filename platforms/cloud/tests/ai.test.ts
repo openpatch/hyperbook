@@ -1592,3 +1592,49 @@ describe("AI hardening", () => {
     expect(change.diff.length).toBeLessThan(200);
   });
 });
+
+describe("AI version note", () => {
+  it("suggests a note from the changes since the live version and counts it", async () => {
+    const { owner, provider, book } = await world(
+      {},
+      () => ({ deltas: ['"New chapter', ' on lenses."\n', "And more."] }),
+      { "hyperbook.json": '{"name":"Physics"}', "book/lenses.md": "# Lenses\n\nThey bend light.\n" },
+    );
+    const res = await owner.c.post(`/api/books/${book.id}/ai/version-note`, {});
+    expect(res.status).toBe(200);
+    // Only the first line, without the quotes and the period.
+    expect(res.body).toEqual({ note: "New chapter on lenses" });
+
+    // The model saw the diff, without tools, in the teacher's language.
+    expect(provider.asked).toHaveLength(1);
+    const [asked] = provider.asked;
+    expect(asked!.tools).toBeUndefined();
+    expect(String(asked!.messages[0]!.content)).toMatch(/Write it in English/);
+    expect(String(asked!.messages[1]!.content)).toContain("book/lenses.md");
+    expect(String(asked!.messages[1]!.content)).toContain("+They bend light.");
+
+    // A request like the assistant's, and its tokens.
+    const status = (await owner.c.get("/api/ai")).body;
+    expect(status.usedToday).toBe(1);
+    expect(status.tokensUsedThisWeek).toBeGreaterThan(0);
+  });
+
+  it("is for the owners, who publish", async () => {
+    const { owner, other, book } = await world({}, undefined, { "hyperbook.json": "{}" });
+    await owner.c.post(`/api/books/${book.id}/members`, { email: "x@example.org", role: "editor" });
+    expect((await other.c.post(`/api/books/${book.id}/ai/version-note`, {})).status).toBe(403);
+  });
+
+  it("needs a save to describe", async () => {
+    const { owner, provider, book } = await world();
+    expect((await owner.c.post(`/api/books/${book.id}/ai/version-note`, {})).status).toBe(409);
+    expect(provider.asked).toHaveLength(0);
+  });
+
+  it("answers 503 when AI is off", async () => {
+    const instance = setup();
+    const owner = await loggedIn(instance, { email: "o@example.org" });
+    const book = (await owner.c.post("/api/books", { title: "P", slug: "p" })).body;
+    expect((await owner.c.post(`/api/books/${book.id}/ai/version-note`, {})).status).toBe(503);
+  });
+});

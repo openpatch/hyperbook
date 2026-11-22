@@ -6,6 +6,11 @@
  */
 export const en = {
   common: {
+    pager: {
+      range: "{{from}}–{{to}} of {{total}}",
+      previous: "Previous page",
+      next: "Next page",
+    },
     typeToConfirm: "Type “{{text}}” to confirm.",
     save: "Save",
     loading: "Loading…",
@@ -1350,6 +1355,13 @@ export const en = {
     students_other: "{{count}} students",
   },
   book: {
+    tabs: {
+      publishing: "Publishing",
+      versions: "Versions",
+      groups: "Groups",
+      people: "People",
+      settings: "Settings",
+    },
     published: "Published",
     notPublished: "Not published",
     private: "Private",
@@ -1694,15 +1706,24 @@ export const en = {
       title: "Versions",
       version: "Version",
       empty: "Nothing published yet.",
+      description:
+        "Every published version stays. Roll back to make an earlier one live again; the latest save is not changed.",
+      filter: "Filter by version or note",
+      noMatch: "No version matches the filter.",
+      showAll_one: "Show the published version",
+      showAll_other: "Show all {{count}} versions",
     },
     history: "Build history",
-    showAll: "Show all ({{count}})",
-    showLess: "Show less",
+    historyDescription: "The last 20 builds of the book, with their logs.",
     rollBackRebuildDescription:
       "The live site switches to this version. Its build is not kept anymore, so it is built again first. The current main is not changed.",
     rebuild: "Rebuild",
     publish: "Publish",
     notePlaceholder: "Note for this version (optional)",
+    suggestNote: "Suggest",
+    suggestNoteTitle: "Let the AI write a note from the changes",
+    suggestingNote: "Suggesting…",
+    suggestNoteEmpty: "Nothing changed since the live version, so there is nothing to describe.",
     downloadSource: "Download source (zip)",
     unpublish: "Unpublish",
     ownersPublish: "Only the book's owners can publish it.",

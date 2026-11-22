@@ -10,6 +10,7 @@ type BookRole = "owner" | "editor" | "commenter";
 import { ConfirmButton } from "@/components/confirm-button";
 import { PageHeader, Section } from "@/components/page-header";
 import { QueryState } from "@/components/query-state";
+import { TabList, TabPanel, useTab } from "@/components/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -30,23 +31,34 @@ import { AddressSection } from "./address";
 import { DomainSection } from "./domain";
 import { GroupsSection } from "./groups";
 import { CommentMailSwitch, LinksSection } from "./links";
-import { PublishingSection } from "./publishing";
+import { PublishingSection, VersionsSection } from "./publishing";
+
+type BookTab = "publishing" | "versions" | "groups" | "people" | "settings";
 
 /**
- * The book as a grid of cards: wide ones for what needs the width (publishing,
- * people, delete), two side by side for the forms. Narrow screens keep one
- * column. The margin of every card is given back to the grid's own gaps.
+ * The book in tabs, one job each: what is live (publishing), its past
+ * (versions and builds), its classes, who works on it, and its settings.
+ * Books hosted elsewhere have nothing to publish and open on their groups.
  */
 export function BookPage() {
-  const { t } = useTranslation();
   const id = useParams().id!;
   const bookQuery = useBook(id);
   const book = bookQuery.data;
-  const user = useUser();
   if (!book) return <QueryState error={bookQuery.error} retry={bookQuery.refetch} />;
   if (book.role === "commenter") return <CommenterBookPage book={book} />;
+  return <ManagedBookPage book={book} />;
+}
+
+function ManagedBookPage({ book }: { book: Book }) {
+  const { t } = useTranslation();
+  const user = useUser();
   const isOwner = book.role === "owner";
+  const hosted = book.source === "hosted";
   const mayUseDomain = user.entitlements.custom_domain || book.domain !== null;
+  const tabs: BookTab[] = hosted
+    ? ["publishing", "versions", "groups", "people", "settings"]
+    : ["groups", "people", "settings"];
+  const [tab, setTab] = useTab(tabs);
   return (
     <>
       <PageHeader
@@ -56,7 +68,7 @@ export function BookPage() {
             <a href={book.url} className="text-primary hover:underline" target="_blank" rel="noreferrer">
               {book.url.replace(/^https?:\/\//, "")}
             </a>
-            {book.source === "hosted" &&
+            {hosted &&
               (book.publishedAt ? (
                 <Badge>{t("book.published")}</Badge>
               ) : (
@@ -69,7 +81,7 @@ export function BookPage() {
             {book.visibility === "private" && (
               <Badge variant="secondary">{t("book.private")}</Badge>
             )}
-            {book.source === "hosted" && (
+            {hosted && (
               <Button asChild>
                 <Link to={`/books/${book.id}/edit`}>{t("book.edit")}</Link>
               </Button>
@@ -77,30 +89,36 @@ export function BookPage() {
           </>
         }
       />
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 [&_section]:mb-0">
-        {book.source === "hosted" && (
-          <div className="lg:col-span-2">
-            <PublishingSection book={book} />
+      <TabList
+        idPrefix="book"
+        label={book.title}
+        tabs={tabs.map((name) => ({ name, label: t(`book.tabs.${name}`) }))}
+        value={tab}
+        onChange={setTab}
+      />
+      <TabPanel idPrefix="book" name={tab}>
+        {tab === "publishing" && <PublishingSection book={book} onShowVersions={() => setTab("versions")} />}
+        {tab === "versions" && <VersionsSection book={book} />}
+        {tab === "groups" && <GroupsSection book={book} />}
+        {tab === "people" && (
+          <>
+            <MembersSection book={book} />
+            {isOwner && hosted && <LinksSection book={book} />}
+          </>
+        )}
+        {tab === "settings" && (
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 [&_section]:mb-0">
+            <SettingsSection book={book} />
+            <AddressSection book={book} />
+            {hosted && isOwner && mayUseDomain && <DomainSection book={book} />}
+            {isOwner && (
+              <div className="lg:col-span-2">
+                <DeleteSection book={book} />
+              </div>
+            )}
           </div>
         )}
-        <GroupsSection book={book} />
-        <SettingsSection book={book} />
-        <AddressSection book={book} />
-        {book.source === "hosted" && isOwner && mayUseDomain && <DomainSection book={book} />}
-        <div className="lg:col-span-2">
-          <MembersSection book={book} />
-        </div>
-        {isOwner && book.source === "hosted" && (
-          <div className="lg:col-span-2">
-            <LinksSection book={book} />
-          </div>
-        )}
-        {isOwner && (
-          <div className="lg:col-span-2">
-            <DeleteSection book={book} />
-          </div>
-        )}
-      </div>
+      </TabPanel>
     </>
   );
 }

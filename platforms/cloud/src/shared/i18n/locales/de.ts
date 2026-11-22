@@ -3,6 +3,11 @@ import type { Messages } from "./en";
 /** The German catalog; tests/i18n.test.ts checks that it has every key of en. */
 export const de: Messages = {
   common: {
+    pager: {
+      range: "{{from}}–{{to}} von {{total}}",
+      previous: "Vorherige Seite",
+      next: "Nächste Seite",
+    },
     typeToConfirm: "Geben Sie „{{text}}“ zur Bestätigung ein.",
     save: "Speichern",
     loading: "Laden…",
@@ -1375,6 +1380,13 @@ export const de: Messages = {
     students_other: "{{count}} Schüler",
   },
   book: {
+    tabs: {
+      publishing: "Veröffentlichen",
+      versions: "Versionen",
+      groups: "Gruppen",
+      people: "Personen",
+      settings: "Einstellungen",
+    },
     published: "Veröffentlicht",
     notPublished: "Nicht veröffentlicht",
     private: "Privat",
@@ -1722,15 +1734,24 @@ export const de: Messages = {
       title: "Versionen",
       version: "Version",
       empty: "Noch nichts veröffentlicht.",
+      description:
+        "Jede veröffentlichte Version bleibt erhalten. Mit „Zurückrollen“ geht eine frühere Version wieder online; der letzte Speicherstand ändert sich dabei nicht.",
+      filter: "Nach Version oder Notiz filtern",
+      noMatch: "Keine Version passt zum Filter.",
+      showAll_one: "Veröffentlichte Version anzeigen",
+      showAll_other: "Alle {{count}} Versionen anzeigen",
     },
     history: "Build-Verlauf",
-    showAll: "Alle anzeigen ({{count}})",
-    showLess: "Weniger anzeigen",
+    historyDescription: "Die letzten 20 Builds des Buchs, mit ihren Protokollen.",
     rollBackRebuildDescription:
       "Die Live-Seite wechselt zu dieser Version. Ihr Build ist nicht mehr gespeichert und wird zuerst neu gebaut. Das aktuelle main bleibt unverändert.",
     rebuild: "Neu bauen",
     publish: "Veröffentlichen",
     notePlaceholder: "Notiz zu dieser Version (optional)",
+    suggestNote: "Vorschlagen",
+    suggestNoteTitle: "Die KI schreibt eine Notiz aus den Änderungen",
+    suggestingNote: "Wird vorgeschlagen…",
+    suggestNoteEmpty: "Seit der Live-Version hat sich nichts geändert, es gibt nichts zu beschreiben.",
     downloadSource: "Quelle herunterladen (Zip)",
     unpublish: "Veröffentlichung zurückziehen",
     ownersPublish: "Nur die Eigentümer des Buchs können es veröffentlichen.",

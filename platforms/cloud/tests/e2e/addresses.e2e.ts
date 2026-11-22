@@ -47,6 +47,7 @@ describe("addresses in suffix mode", () => {
     await dialog.getByText(`physik-····.books.localhost:${server.port}`).waitFor();
     await dialog.getByRole("button", { name: "Create book" }).click();
     await teacher.getByRole("heading", { name: "Physik" }).waitFor();
+    await teacher.getByRole("tab", { name: "Settings" }).click();
     suffixed = (await teacher.getByLabel("Address", { exact: true }).inputValue()) ?? "";
     expect(suffixed).toMatch(/^physik-[a-z2-9]{4}$/);
   });
@@ -76,6 +77,7 @@ describe("addresses in suffix mode", () => {
 
   it("is taken back by an admin", async () => {
     await admin.getByRole("table").getByRole("link", { name: "Physik", exact: true }).click();
+    await admin.getByRole("tab", { name: "Settings" }).click();
     await admin.getByLabel("Note to the owners (optional)").fill("Zurück.");
     await admin.getByRole("button", { name: "Take address back" }).click();
     await admin.getByRole("dialog").getByRole("button", { name: "Take address back" }).click();

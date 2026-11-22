@@ -65,7 +65,7 @@ describe("publishing lock", () => {
     const { instance, owner, book, lock } = await world();
     await owner.c.post(`/api/books/${book.id}/publish`, {});
     await instance.builds.idle();
-    const versions = () => owner.c.get(`/api/books/${book.id}/versions`).then((r) => r.body);
+    const versions = () => owner.c.get(`/api/books/${book.id}/versions`).then((r) => r.body.versions);
     expect(await versions()).toMatchObject([{ tag: "v1", live: true }]);
     await lock(true);
     // The version stays listed, but nothing is live.
@@ -96,7 +96,7 @@ describe("publishing lock", () => {
     // Nothing went live, so nothing was recorded as a publish: no audit
     // entry, no version tag, and the log does not say "Published".
     expect(instance.db.select().from(auditLog).where(eq(auditLog.action, "book.publish")).all()).toHaveLength(0);
-    expect((await owner.c.get(`/api/books/${book.id}/versions`)).body).toEqual([]);
+    expect((await owner.c.get(`/api/books/${book.id}/versions`)).body).toEqual({ versions: [], total: 0, count: 0, live: null });
     expect(detail.log).not.toContain("Published (");
   });
 

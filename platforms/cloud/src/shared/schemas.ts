@@ -383,6 +383,16 @@ export const resetStudentPasswordInput = z.object({
   password: z.string().min(4, "validation.min4").max(100).optional(),
 });
 
+/**
+ * A page of a book's published versions, newest first. `q` matches the tag
+ * or the note; `limit=0` asks only for the total and the live version.
+ */
+export const versionsQuery = z.object({
+  offset: z.coerce.number().int().min(0).default(0),
+  limit: z.coerce.number().int().min(0).max(100).default(20),
+  q: z.string().trim().max(200).optional(),
+});
+
 export const auditQuery = z.object({
   before: z.coerce.number().int().positive().optional(),
   limit: z.coerce.number().int().min(1).max(200).default(50),

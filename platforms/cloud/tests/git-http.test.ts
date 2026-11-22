@@ -761,15 +761,28 @@ describe("git smart HTTP", () => {
       false,
     );
 
-    const versions = (await owner.c.get(`/api/books/${book.id}/versions`))
-      .body as {
-      tag: string;
-      live: boolean;
-      buildId: number | null;
-    }[];
+    type Versions = {
+      versions: { tag: string; live: boolean; buildId: number | null }[];
+      total: number;
+      count: number;
+      live: { tag: string } | null;
+    };
+    const { versions } = (await owner.c.get(`/api/books/${book.id}/versions`)).body as Versions;
     expect(versions.map((v) => v.tag)).toEqual(["v4", "v3", "v2", "v1"]);
     expect(versions.filter((v) => v.live).map((v) => v.tag)).toEqual(["v4"]);
     expect(versions.find((v) => v.tag === "v1")!.buildId).toBeNull();
+
+    // A page of them, newest first; the live one comes along on every page.
+    const page2 = (await owner.c.get(`/api/books/${book.id}/versions?offset=2&limit=2`)).body as Versions;
+    expect(page2.versions.map((v) => v.tag)).toEqual(["v2", "v1"]);
+    expect(page2).toMatchObject({ total: 4, count: 4, live: { tag: "v4" } });
+    // Filtered by tag: the total counts the matches only.
+    const filtered = (await owner.c.get(`/api/books/${book.id}/versions?q=V3`)).body as Versions;
+    expect(filtered.versions.map((v) => v.tag)).toEqual(["v3"]);
+    expect(filtered).toMatchObject({ total: 1, count: 4 });
+    // Only the totals and the live one.
+    const summary = (await owner.c.get(`/api/books/${book.id}/versions?limit=0`)).body as Versions;
+    expect(summary).toMatchObject({ versions: [], total: 4, live: { tag: "v4" } });
 
     // v1 has no build anymore, so rolling back to it rebuilds; v3 is instant.
     const toV1 = await owner.c.post(`/api/books/${book.id}/rollback`, {
