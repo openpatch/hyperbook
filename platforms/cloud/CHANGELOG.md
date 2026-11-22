@@ -1,5 +1,17 @@
 # @hyperbook/cloud
 
+## 0.15.0
+
+### Minor Changes
+
+- [`de7110a`](https://github.com/openpatch/hyperbook/commit/de7110ad3cb5a97f721c9ba00513d4e4eef79e34) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - Hyperbook Cloud uses `hyperbook lint`. The editor marks what a build would complain about on the open page as you type: broken links and images, missing `src` files, elements written wrong. These come from the same checks as `hyperbook lint`, next to the editor's own instant checks, while the preview is open or closed. "Check all pages" now lists every error, warning and note with its file and line, each opening the editor at that line, including unknown options in `hyperbook.json` and permaids claimed twice. The check runs on a copy of its own, so the preview no longer waits behind a slow page while it runs.
+
+### Patch Changes
+
+- [`de7110a`](https://github.com/openpatch/hyperbook/commit/de7110ad3cb5a97f721c9ba00513d4e4eef79e34) Thanks [@mikebarkmin](https://github.com/mikebarkmin)! - The books page no longer shows every save of a book as "not live" after an update of the platform rebuilt its live version.
+
+  The warning before publishing that students' work would be left without its task appears again: the check of all pages lost the tasks of each page, so it never had anything to warn about.
+
 ## 0.14.1
 
 ### Patch Changes
