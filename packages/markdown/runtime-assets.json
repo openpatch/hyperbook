@@ -156,5 +156,22 @@
     "target": "directive-pdf",
     "prefix": "package/LICENSE",
     "strip": 1
+  },
+  {
+    "url": "https://cdn.jsdelivr.net/npm/mathlive@0.111.4/mathlive.min.mjs",
+    "version": "0.111.4",
+    "sha256": "d2baa5ce0b8b6f75f3dc337085d5fbe0e376671768e982134ceb52fde760aa60",
+    "format": "file",
+    "target": "directive-multievent/mathlive.min.mjs"
+  },
+  {
+    "url": "https://registry.npmjs.org/@cortex-js/compute-engine/-/compute-engine-0.198.1.tgz",
+    "version": "0.198.1",
+    "sha256": "4ac294a40d55fa49517e9a02858fe9e500d9b46cfd39b94a0529d20c5c313cf6",
+    "format": "tar.gz",
+    "prefix": "package/dist/esm-min/",
+    "strip": 3,
+    "exclude": [".map"],
+    "target": "directive-multievent/compute-engine"
   }
 ]

@@ -52,3 +52,27 @@
     padding: 0;
   }
 }
+
+/* A math field ({m{…}}) is MathLive's <math-field>; sized by multievent.js to
+   its solution, invisible as an empty box until it takes an answer. */
+.directive-multievent math-field {
+  display: inline-block;
+  vertical-align: middle;
+  min-height: 2.4em;
+  font-size: 1em;
+  border: 1px solid #999;
+  border-radius: 3px;
+  padding: 0 0.3em;
+  background-color: transparent;
+}
+
+/* A formula with blanks carries its LaTeX as text until MathLive has drawn
+   it; until then the source is not shown. Read-only, it takes no border:
+   only its blanks are fields. */
+.directive-multievent math-field:not(:defined) {
+  color: transparent;
+}
+
+.directive-multievent math-field.multiEvLuecken {
+  border-color: transparent;
+}

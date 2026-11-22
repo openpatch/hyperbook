@@ -34,6 +34,170 @@ var multievent = {
   },
   orig: [],
   /**
+   * A field for mathematical answers ({m{…}}) is a <math-field> rendered by
+   * MathLive, loaded once, from the local assets, when a multievent with
+   * math fields is built. The fonts it draws with are the KaTeX fonts
+   * Hyperbook ships anyway; sounds stay off.
+   */
+  ladeMathe: function () {
+    if (!multievent._matheFeld) {
+      multievent._matheFeld = import(
+        window.HYPERBOOK_ASSETS + "directive-multievent/mathlive.min.mjs"
+      )
+        .then(function (mathlive) {
+          mathlive.MathfieldElement.fontsDirectory =
+            window.HYPERBOOK_ASSETS + "math/fonts/";
+          mathlive.MathfieldElement.soundsDirectory = null;
+          // The decimal separator the reader's book uses, read from the page
+          // language: a comma in a German book, so `1,5` is a number. It
+          // also reads the point, so `1.5` stays one there.
+          try {
+            var teil = new Intl.NumberFormat(
+              document.documentElement.lang || undefined,
+            )
+              .formatToParts(1.5)
+              .find(function (t) {
+                return t.type == "decimal";
+              });
+            if (teil && teil.value) {
+              mathlive.MathfieldElement.decimalSeparator = teil.value;
+            }
+          } catch (e) {}
+          return true;
+        })
+        .catch(function (e) {
+          console.warn("MathLive could not be loaded:", e);
+          return false;
+        });
+    }
+    return multievent._matheFeld;
+  },
+  /**
+   * The Compute Engine decides whether an answer is the same maths as the
+   * solution. It is more than a megabyte, so it is loaded once, on the first
+   * evaluation of a math field, from the local assets.
+   */
+  matheEngine: function () {
+    if (!multievent._matheEngine) {
+      multievent._matheEngine = import(
+        window.HYPERBOOK_ASSETS +
+          "directive-multievent/compute-engine/compute-engine.js"
+      ).then(function (modul) {
+        var engine = new modul.ComputeEngine();
+        // `{,}` a reader in a comma locale writes becomes a decimal; a typed
+        // point is understood there too, and a comma stays a pair.
+        engine.latexOptions = Object.assign({}, engine.latexOptions, {
+          decimalSeparator: "{,}",
+        });
+        return engine;
+      });
+    }
+    return multievent._matheEngine;
+  },
+  /**
+   * Whether the answer is the same maths as one of the accepted solutions:
+   * equal by the Compute Engine's rules — `2x+3` is `3+2x`, `\frac{1}{2}` is
+   * `0.5` — or, where it cannot decide, the same value: `1.414…` counts for
+   * `\sqrt{2}`.
+   */
+  matheRichtig: async function (ist, akzeptiert) {
+    var engine;
+    try {
+      engine = await multievent.matheEngine();
+    } catch (e) {
+      return false;
+    }
+    for (var i = 0; i < akzeptiert.length; i++) {
+      var soll = akzeptiert[i].replace(/^\s+/, "").replace(/\s+$/, "");
+      if (soll == "") continue;
+      try {
+        var a = engine.parse(ist);
+        var b = engine.parse(soll);
+        if (!a.isValid || !b.isValid) continue;
+        if (a.isEqual(b) === true) return true;
+        var aWert = a.N().re;
+        var bWert = b.N().re;
+        if (
+          typeof aWert == "number" &&
+          typeof bWert == "number" &&
+          isFinite(aWert) &&
+          isFinite(bWert)
+        ) {
+          var masse = Math.max(Math.abs(aWert), Math.abs(bWert));
+          if (Math.abs(aWert - bWert) <= 1e-9 * Math.max(1, masse)) {
+            return true;
+          }
+        }
+      } catch (e) {}
+    }
+    return false;
+  },
+  /**
+   * The accepted answers of a math field, split on `|` — but not on one
+   * inside braces, so `\frac{1}{2}|0.5` is two answers.
+   */
+  matheAlternativen: function (wert) {
+    var teile = [];
+    var tiefe = 0;
+    var aktuell = "";
+    wert = wert || "";
+    for (var i = 0; i < wert.length; i++) {
+      var z = wert[i];
+      if (z == "\\") {
+        aktuell += z + (wert[i + 1] || "");
+        i++;
+        continue;
+      }
+      if (z == "{") tiefe++;
+      if (z == "}" && tiefe > 0) tiefe--;
+      if (z == "|" && tiefe == 0) {
+        teile.push(aktuell);
+        aktuell = "";
+        continue;
+      }
+      aktuell += z;
+    }
+    teile.push(aktuell);
+    return teile
+      .map(function (t) {
+        return t.replace(/^\s+/, "").replace(/\s+$/, "");
+      })
+      .filter(function (t) {
+        return t != "";
+      });
+  },
+  /**
+   * Judges the blanks of a fill-in-the-blank formula (`\placeholder{…}`):
+   * each blank against its own accepted answers from data-luecken. MathLive
+   * marks every blank right or wrong and locks the right ones. True when all
+   * are right; null while MathLive has not arrived, so nothing is judged.
+   */
+  lueckenRichtig: async function (feld) {
+    if (
+      typeof feld.getPromptValue != "function" ||
+      typeof feld.setPromptState != "function"
+    ) {
+      return null;
+    }
+    var luecken = {};
+    try {
+      luecken = JSON.parse(feld.getAttribute("data-luecken")) || {};
+    } catch (e) {}
+    var alleRichtig = true;
+    for (var id in luecken) {
+      // a blank without an answer is not asked for
+      if (!luecken[id] || luecken[id].length == 0) continue;
+      var ist = (feld.getPromptValue(id) || "")
+        .replace(/^\s+/, "")
+        .replace(/\s+$/, "");
+      var richtig =
+        ist != "" && (await multievent.matheRichtig(ist, luecken[id]));
+      feld.setPromptState(id, richtig ? "correct" : "incorrect", richtig);
+      if (!richtig) alleRichtig = false;
+    }
+    return alleRichtig;
+  },
+  /**
    * The key a multievent's state is saved under: its directive id (data-id),
    * like every other element, so a platform can tell whose task it is. Pages
    * built before the id existed have none and keep the old key.
@@ -178,7 +342,7 @@ var multievent = {
     }
     
     // Save hint visibility
-    var hinweisRichtig = SK.getElementsByClassName("MultieventhinweisRichtig" + clNr);
+    var hinweisRichtig = SK.querySelectorAll(".Multieventhinweis[data-typ='richtig']");
     state.hinweisRichtig = [];
     for (var i = 0; i < hinweisRichtig.length; i++) {
       state.hinweisRichtig.push({
@@ -186,7 +350,7 @@ var multievent = {
       });
     }
     
-    var hinweisFalsch = SK.getElementsByClassName("MultieventhinweisFalsch" + clNr);
+    var hinweisFalsch = SK.querySelectorAll(".Multieventhinweis[data-typ='falsch']");
     state.hinweisFalsch = [];
     for (var i = 0; i < hinweisFalsch.length; i++) {
       state.hinweisFalsch.push({
@@ -205,6 +369,9 @@ var multievent = {
     // Save select values
     var selects = SK.getElementsByTagName("select");
     state.selects = [];
+    // Save math field values
+    state.mathFields = [];
+    var mathFields = SK.getElementsByTagName("math-field");
     for (var i = 0; i < selects.length; i++) {
       state.selects.push({
         selectedIndex: selects[i].selectedIndex,
@@ -214,6 +381,19 @@ var multievent = {
           backgroundImage: selects[i].style.backgroundImage,
           backgroundSize: selects[i].style.backgroundSize,
           color: selects[i].style.color
+        }
+      });
+    }
+
+    for (var i = 0; i < mathFields.length; i++) {
+      state.mathFields.push({
+        value: mathFields[i].value,
+        readOnly: mathFields[i].readOnly,
+        style: {
+          backgroundColor: mathFields[i].style.backgroundColor,
+          backgroundImage: mathFields[i].style.backgroundImage,
+          backgroundSize: mathFields[i].style.backgroundSize,
+          color: mathFields[i].style.color
         }
       });
     }
@@ -346,6 +526,35 @@ var multievent = {
           }
         }
       }
+
+      // Restore math fields. The value lands on the field whether its
+      // element is a MathLive field yet or not; if not, it is also kept in
+      // data-PendingLatex and applied when MathLive has arrived.
+      if (state.mathFields) {
+        var mathFields = SK.getElementsByTagName("math-field");
+        for (var i = 0; i < mathFields.length && i < state.mathFields.length; i++) {
+          mathFields[i].value = state.mathFields[i].value;
+          mathFields[i].setAttribute("data-PendingLatex", state.mathFields[i].value);
+          mathFields[i].readOnly = state.mathFields[i].readOnly;
+          if (state.mathFields[i].style) {
+            if (state.mathFields[i].style.backgroundColor) mathFields[i].style.backgroundColor = state.mathFields[i].style.backgroundColor;
+            if (state.mathFields[i].style.backgroundImage) mathFields[i].style.backgroundImage = state.mathFields[i].style.backgroundImage;
+            if (state.mathFields[i].style.backgroundSize) mathFields[i].style.backgroundSize = state.mathFields[i].style.backgroundSize;
+            if (state.mathFields[i].style.color) mathFields[i].style.color = state.mathFields[i].style.color;
+          }
+        }
+        multievent.ladeMathe().then(function (geladen) {
+          if (!geladen) return;
+          var aktueller = SK.getElementsByTagName("math-field");
+          for (var j = 0; j < aktueller.length; j++) {
+            var latex = aktueller[j].getAttribute("data-PendingLatex");
+            if (latex !== null) {
+              aktueller[j].value = latex;
+              aktueller[j].removeAttribute("data-PendingLatex");
+            }
+          }
+        });
+      }
       
       // Restore word search buttons
       if (state.suchButtons) {
@@ -415,7 +624,7 @@ var multievent = {
       
       // Restore hint visibility
       if (state.hinweisRichtig) {
-        var hinweisRichtig = SK.getElementsByClassName("MultieventhinweisRichtig" + clNr);
+        var hinweisRichtig = SK.querySelectorAll(".Multieventhinweis[data-typ='richtig']");
         for (var i = 0; i < hinweisRichtig.length && i < state.hinweisRichtig.length; i++) {
           if (state.hinweisRichtig[i].display) {
             hinweisRichtig[i].style.display = state.hinweisRichtig[i].display;
@@ -424,7 +633,7 @@ var multievent = {
       }
       
       if (state.hinweisFalsch) {
-        var hinweisFalsch = SK.getElementsByClassName("MultieventhinweisFalsch" + clNr);
+        var hinweisFalsch = SK.querySelectorAll(".Multieventhinweis[data-typ='falsch']");
         for (var i = 0; i < hinweisFalsch.length && i < state.hinweisFalsch.length; i++) {
           if (state.hinweisFalsch[i].display) {
             hinweisFalsch[i].style.display = state.hinweisFalsch[i].display;
@@ -494,178 +703,12 @@ var multievent = {
     var SK = document.getElementsByClassName("multievent"); /*Suchklasse*/
     multievent.vNr[clNr]++;
     multievent.gewertet[clNr] = 0;
-    var IN = multievent.orig[clNr]
-      .replace(/\{(.)\{\s*/gms, "{$1{")
-      .replace(/\s*\}\}/gms, "}}"); /*Inhal neu*/
-    var InpCh = "<input type='checkbox' class='MECheckbox' value=";
-    IN = IN.replace(
-      /\{c(\d*?)\{!(.*?)\}\}/gms,
-      "<span><span></span>" +
-        InpCh +
-        "'1' name='checkboxc" +
-        clNr +
-        "$1' /><label class='MeChLabel'>$2</label></span>",
-    );
-    IN = IN.replace(
-      /\{c(\d*?)\{(.*?)\}\}/gms,
-      "<span><span></span>" +
-        InpCh +
-        "'0' name='checkboxc" +
-        clNr +
-        "$1' /><label class='MeChLabel'>$2</label></span>",
-    );
-    IN = IN.replace(
-      /\{C(\d*?)\{!(.*?)\}\}/gms,
-      "<span><label class='MeChLabel'>$2</label>" +
-        InpCh +
-        "'1' name='checkboxC" +
-        clNr +
-        "$1' /><span></span></span>",
-    );
-    IN = IN.replace(
-      /\{C(\d*?)\{(.*?)\}\}/gms,
-      "<span><label class='MeChLabel'>$2</label>" +
-        InpCh +
-        "'0'  name='checkboxC" +
-        clNr +
-        "$1' /><span></span></span>",
-    );
-    IN = IN.replace(
-      /\{k(\d*?)\{!(.*?)\}\}/gms,
-      "<button class='butAnAus' style='border:1px solid silver;text-align:center;border-radius:3px;font-size:1em;font-weight:bold;' onclick='multievent.butAnAus(this.id)' value='1' data-gruppe='$1a' data-typ='0' data-wertIst='$2' data-markiert='0' data-gewertet='0' />$2</button><span></span>",
-    );
-    IN = IN.replace(
-      /\{k(\d*?)\{(.*?)\}\}/gms,
-      "<button class='butAnAus' style='border:1px solid silver;border-radius:3px;text-align:center;font-size:1em;font-weight:bold;' onclick='multievent.butAnAus(this.id)' value='0' data-gruppe='$1a' data-typ='0' data-wertIst='$2' data-markiert='0' data-gewertet='0'/>$2</button><span></span>",
-    );
-    IN = IN.replace(
-      /\{K(\d*?)\{!(.*?)\}\}/gms,
-      "<button class='butAnAus' style='border:1px solid silver;border-radius:3px;text-align:center;font-size:1em;font-weight:bold;' onclick='multievent.butAnAus(this.id)' value='1' data-gruppe='$1b' data-typ='1' data-wertIst='$2' data-markiert='0' data-gewertet='0' />$2</button><span></span>",
-    );
-    IN = IN.replace(
-      /\{K(\d*?)\{(.*?)\}\}/gms,
-      "<button class='butAnAus' style='border:1px solid silver;border-radius:3px;text-align:center;font-size:1em;font-weight:bold;' onclick='multievent.butAnAus(this.id)' value='0' data-gruppe='$1b' data-typ='1' data-wertIst='$2' data-markiert='0'  data-gewertet='0'/>$2</button><span></span>",
-    );
-    var InpRa = "<input type='radio' class='MERadio' value=";
-    IN = IN.replace(
-      /\{r(\d*?)\{!(.*?)\}\}/gms,
-      "<span><span></span>" +
-        InpRa +
-        "'1' name='radio" +
-        clNr +
-        "$1'/><label class='MeRaLabel'>$2</label></span>",
-    );
-    IN = IN.replace(
-      /\{r(\d*?)\{(.*?)\}\}/gms,
-      "<span><span></span>" +
-        InpRa +
-        "'0' name='radio" +
-        clNr +
-        "$1' /><label class='MeRaLabel'>$2</label></span>",
-    );
-    IN = IN.replace(
-      /\{R(\d*?)\{!(.*?)\}\}/gms,
-      "<span><label class='MeRaLabel'>$2</label>" +
-        InpRa +
-        "'1' name='Radio" +
-        clNr +
-        "$1'/><span></span></span>",
-    );
-    IN = IN.replace(
-      /\{R(\d*?)\{(.*?)\}\}/gms,
-      "<span><label class='MeRaLabel'>$2</label>" +
-        InpRa +
-        "'0' name='Radio" +
-        clNr +
-        "$1' /><span></span></span>",
-    );
-    var InpT =
-      "<input class='multiEvInp' style='text-align:center;font-size:1em;font-weight:bold;' type='text' value='' data-Wert='$1' data-style=";
-    IN = IN.replace(/\{t\{(.*?)\}\}/gms, InpT + "'klein' />");
-    IN = IN.replace(/\{T\{(.*?)\}\}/gms, InpT + "'gross' />");
-    IN = IN.replace(
-      /\{l\{(.*?)\}\}/gms,
-      InpT +
-        "'loesungklein' onfocus='if(this.value==this.getAttribute(\"data-gemischt\")){this.value=\"\"}' onblur='multievent.inpGemEing(this.value,this.id)'   />",
-    );
-    IN = IN.replace(
-      /\{L\{(.*?)\}\}/gms,
-      InpT +
-        "'loesunggross' onfocus='if(this.value==this.getAttribute(\"data-gemischt\")){this.value=\"\"}' onblur='multievent.inpGemEing(this.value,this.id)' />",
-    );
-    IN = IN.replace(/\{z\{(.*?)\}\}/gms, InpT + "'zahl'/>");
-    var InpYZ =
-      "<input class='multiEvInpYZ' style='text-align:center;font-size:1em;font-weight:bold;' type='text' value='' data-wk='$1' data-style=";
-    IN = IN.replace(/\{Z\{(.*?)\}\}/gms, InpYZ + "'zahl'/>");
-    IN = IN.replace(/\{Y\{(.*?)\}\}/gms, InpYZ + "'gross'/>");
-    IN = IN.replace(/\{y\{(.*?)\}\}/gms, InpYZ + "'klein'/>");
-    IN = IN.replace(
-      /\{X\{(.*?)\}\}/gms,
-      "<span class='multiEvSpanY' data-wk='$1'></span>",
-    );
-    IN = IN.replace(
-      /\{b\{(.*?)\}\}/gms,
-      "<table cellpadding='0' cellspacing='0' style='border-collapse:collapse;'><tr><td class='multieventBlende' onclick='multievent.blende(this.id)' style='cursor:pointer;' valign='top'>&#128065;</td><td style='display:none;'>$1</td></tr></table>",
-    );
-    IN = IN.replace(
-      /\{B\{(.*?)\}\}/gms,
-      "<table cellpadding='0' cellspacing='0' style='border-collapse:collapse;'><tr><td class='multieventBlende' onclick='multievent.blende(this.id)' style='cursor:pointer;' valign='top'>&#128065;</td><td style='display:none;'>$1</td></tr></table>",
-    );
-    IN = IN.replace(
-      /\{n\{(.*?)\|\s*(\d+?)\s*\}\}/gms,
-      "<textarea style='width:$1px; height:$2px'></textarea>",
-    );
-    IN = IN.replace(
-      /\{n\{(.*?)\|(.*?)\|(.*?)\}\}/gms,
-      "<textarea style='width:$1px; height:$2px'>$3</textarea>",
-    );
-    IN = IN.replace(
-      /\{h\{(.*?)\}\}/gms,
-      "<span class='MultieventhinweisFalsch" +
-        clNr +
-        "' style='display:none'>$1</span>",
-    ); //Hinweis wenn Auswertung falsch
-    IN = IN.replace(
-      /\{H\{(.*?)\}\}/gms,
-      "<span class='MultieventhinweisRichtig" +
-        clNr +
-        "' style='display:none'>$1</span>",
-    ); //Hinweis wenn Auswertung richtig
-    IN = IN.replace(
-      /\{v\{(.*?)\}\}/gms,
-      "<table align='center' class='MulEvHaManTab' style='border-collapse:collapse;' border='0' cellspacing='0' cellpadding='6'><tr><td  valign='middle' align='center' style='min-width:10em;font-family:sans-serif;' class='MulEvHaManTd'><span class='MulEvHaManAusg'>$1</span></td></tr><tr><td align='center' ><span class='MulEvHaManFehl' style='text-decoration:line-through;color:#e00;font-size:smaller;font-family:sans-serif;'> </span><br /></td></tr><tr><td align='center'><input maxlength='2' onkeydown='this.value=\"\"' onkeyup='multievent.MulEvHaMan(this.id);multievent.Auswertung(\"" +
-        clNr +
-        "\")' class='MulEvHaManInp' data-MulEvHaMan='$1' data-Nummer='0' data-BuchstSind='' data-Fehler='1' data-BegriffeSind='' style='text-align:center;font-size:1em;width:2.4em;font-family:sans-serif;padding:2px;border:1px solid #999;border-radius:3px;background-color:#eee;'/></td></tr></table>",
-    );
-    IN = IN.replace(
-      /\{w\{(.*?)\}\}/gms,
-      "<table align='center' class='MultiEvSuchTable' style='border-collapse:collapse;' border='0' cellspacing='0'><tr><td  height='28' width='28' valign='middle' align='center' class='MultiEvSuchTd'>$1</td></tr></table>",
-    );
-    IN = IN.replace(
-      /\{W\{(.*?)\}\}/gms,
-      "<table align='center' class='MultiKwrTable' style='border-collapse:collapse' border='0' cellspacing='0'><tr class='MultiKwrTr'><td  height='28' width='28' valign='middle' align='center' class='MultiKwrTd'>$1</td></tr></table>",
-    );
-
-    var SelO = "";
-    IN = IN.replace(
-      /\{a\{(.+?)\|(.+?)\}\}/gms,
-      "<select class='multiEvSel' style='text-align:center;font-size:1em;font-weight:bold;'><option value='0'>$1|$2</select>",
-    );
-    IN = IN.replace(
-      /\{A\{(.+?)\|(.+?)\}\}/gms,
-      "<select class='multiEvSel' style='text-align:center;font-size:1em;font-weight:bold;'><option value='0'></option><option value='0'>$1|$2</select>",
-    );
-
-    IN = IN.replace(
-      /\{S(\d*?)\{(.*?)\}\}/gms,
-      "<select  class='multiEvSel' style='text-align:center;font-size:1em;font-weight:bold;' data-wertIst='$2' data-SelNr='" +
-        clNr +
-        "$1'><option>" +
-        clNr +
-        "$1-$2</option></select>",
-    );
+    // The interactive elements are built at page build: the compiler turned
+    // every {x{…}} marker into its input, dropdown or grid. All that is left
+    // here is to restore the pristine markup, add the evaluation bar, and run
+    // the passes that depend on this multievent's position on the page.
     SK[clNr].innerHTML =
-      IN +
+      multievent.orig[clNr] +
       "<p id='MuEvAuswButP" +
       clNr +
       "' align='center'><button id='MuEvAuswButB" +
@@ -696,6 +739,28 @@ var multievent = {
     var MuEvHaMaA = SK[clNr].getElementsByClassName("MulEvHaManAusg");
     var MuEvHaMaF = SK[clNr].getElementsByClassName("MulEvHaManFehl");
 
+    var MatheFeld = SK[clNr].getElementsByClassName("multiEvMathe");
+    if (MatheFeld.length > 0) multievent.ladeMathe();
+
+    // Group names carry this multievent's position, so groups of different
+    // multievents on a page never mix. The build wrote the static part of the
+    // name (radio, Radio, checkboxc, checkboxC) to data-name, the number of
+    // the group to data-gruppe; here both are joined to the name the
+    // evaluation expects, and the dropdowns of a {S…} group get their
+    // data-SelNr.
+    for (var j = 0; j < Inp.length; j++) {
+      var strName = Inp[j].getAttribute("data-name");
+      if (strName) {
+        Inp[j].name = strName + clNr + Inp[j].getAttribute("data-gruppe");
+      }
+    }
+    for (var j = 0; j < SelIst.length; j++) {
+      var strGruppe = SelIst[j].getAttribute("data-gruppe");
+      if (strGruppe !== null && SelIst[j].getAttribute("data-wertIst")) {
+        SelIst[j].setAttribute("data-SelNr", "" + clNr + strGruppe);
+      }
+    }
+
     for (var j = 0; j < MuEvHaMaI.length; j++) {
       var Begriffe = MuEvHaMaI[j].getAttribute("data-MulEvHaMan").split("|");
       var BegrGemischt = multievent.misch(Begriffe);
@@ -709,6 +774,16 @@ var multievent = {
       MuEvHaMaI[j].id = "MuEvHaMaI_" + clNr + "_" + j;
       MuEvHaMaA[j].id = "MuEvHaMaA_" + clNr + "_" + j;
       MuEvHaMaF[j].id = "MuEvHaMaF_" + clNr + "_" + j;
+      // Each keystroke counts as a guess in the hangman; bound here, because
+      // the listeners are rebuilt with the markup every time the multievent
+      // restarts.
+      MuEvHaMaI[j].addEventListener("keydown", function () {
+        this.value = "";
+      });
+      MuEvHaMaI[j].addEventListener("keyup", function () {
+        multievent.MulEvHaMan(this.id);
+        multievent.Auswertung(clNr);
+      });
     }
 
     for (var j = 0; j < MuSuTable.length; j++) {
@@ -812,7 +887,8 @@ var multievent = {
       Inp.length == 0 &&
       SelIst.length == 0 &&
       butAU.length == 0 &&
-      MuSuTable.length == 0
+      MuSuTable.length == 0 &&
+      MatheFeld.length == 0
     ) {
       document.getElementById("MuEvNeuButP" + clNr).style.display = "none";
       document.getElementById("MuEvAuswButP" + clNr).style.display = "none";
@@ -908,6 +984,21 @@ var multievent = {
       }
       InpZ[j].style.fontSize = "1em";
       InpZ[j].style.textAlign = "center";
+    }
+    for (var j = 0; j < MatheFeld.length; j++) {
+      MatheFeld[j].id = "MuEvMathe_" + clNr + "_" + j;
+      // A formula with blanks is as wide as the formula.
+      if (MatheFeld[j].hasAttribute("data-luecken")) continue;
+      var akzeptiert = multievent.matheAlternativen(
+        MatheFeld[j].getAttribute("data-Wert"),
+      );
+      var MB = 0;
+      for (var k = 0; k < akzeptiert.length; k++) {
+        if (MB < akzeptiert[k].length) MB = akzeptiert[k].length;
+      }
+      // MathLive sizes itself; this only keeps the empty field big enough to
+      // click into before it is (and even after it is) filled.
+      MatheFeld[j].style.minWidth = Math.max(MB, 4) * 0.75 + "em";
     }
     for (var j = 0; j < SpanY.length; j++) {
       var wk = SpanY[j].getAttribute("data-wk").split("|");
@@ -1019,6 +1110,17 @@ var multievent = {
         }
       });
     }
+
+    var allMathFields = SK[clNr].getElementsByTagName("math-field");
+    for (var j = 0; j < allMathFields.length; j++) {
+      allMathFields[j].addEventListener("input", function() {
+        var clIndex = this.closest(".multievent");
+        if (clIndex) {
+          var index = Array.from(document.getElementsByClassName("multievent")).indexOf(clIndex);
+          multievent.saveState(index);
+        }
+      });
+    }
   },
   inpGemEing: function (WertIst, GemID) {
     var vIst = WertIst.replace(/\s/g, "");
@@ -1027,7 +1129,31 @@ var multievent = {
       document.getElementById(GemID).value = wertGem;
     }
   },
+  /**
+   * Evaluates a multievent. Evaluating waits for the Compute Engine when there
+   * are math fields, so a second click could start while the first is still
+   * running and count the round twice; evaluations of one multievent
+   * therefore run one after the other, the next seeing what the last decided.
+   */
+  _laufend: [],
   Auswertung: function (classNr) {
+    var laufend = multievent._laufend[classNr];
+    var lauf = laufend
+      ? laufend.then(function () {
+          return multievent.auswerten(classNr);
+        })
+      : multievent.auswerten(classNr);
+    var merker = lauf
+      .catch(function () {})
+      .then(function () {
+        if (multievent._laufend[classNr] === merker) {
+          multievent._laufend[classNr] = null;
+        }
+      });
+    multievent._laufend[classNr] = merker;
+    return lauf;
+  },
+  auswerten: async function (classNr) {
     multievent.ErgAus();
     if (multievent.gewertet[classNr] == 0) {
       var HgF =
@@ -1319,6 +1445,48 @@ var multievent = {
         }
       }
 
+      // The math fields, answered as LaTeX and judged by the Compute Engine.
+      var MatheFeld = document
+        .getElementsByClassName("multievent")
+        [classNr].getElementsByClassName("multiEvMathe");
+      for (var i = 0; i < MatheFeld.length; i++) {
+        var matheOk;
+        if (MatheFeld[i].hasAttribute("data-luecken")) {
+          // A formula with blanks: each blank is judged on its own and
+          // marked by MathLive; a right one is locked.
+          matheOk = await multievent.lueckenRichtig(MatheFeld[i]);
+          if (matheOk === null) continue;
+        } else {
+          // Before MathLive has arrived, the field carries no value: not an
+          // empty answer, but unwritable, and never counted as wrong.
+          if (typeof MatheFeld[i].value != "string") continue;
+          var matheIst = MatheFeld[i].value
+            .replace(/^\s+/, "")
+            .replace(/\s+$/, "");
+          matheOk =
+            matheIst != "" &&
+            (await multievent.matheRichtig(
+              matheIst,
+              multievent.matheAlternativen(
+                MatheFeld[i].getAttribute("data-Wert"),
+              ),
+            ));
+        }
+        var matheStil = MatheFeld[i].style;
+        if (matheOk) {
+          MatheFeld[i].readOnly = true;
+          matheStil.backgroundColor = "#9f0";
+          matheStil.backgroundImage = "none";
+          matheStil.color = "black";
+        } else {
+          matheStil.backgroundColor = "#f90";
+          matheStil.backgroundImage = HgF;
+          matheStil.backgroundSize = "8px 8px";
+          matheStil.color = "black";
+          F++;
+        }
+      }
+
       if (ChBoFehlerGes > 0) {
         alert("Mindestens eine Checkbox dieses Bereichs ist falsch markiert.");
       }
@@ -1397,12 +1565,13 @@ var multievent = {
       multievent.gesamtwertung[classNr] = document.getElementById(
         "MultieventVersuche" + classNr,
       ).innerHTML;
-      var HinweisRichtig = document.getElementsByClassName(
-        "MultieventhinweisRichtig" + classNr,
-      );
-      var HinweisFalsch = document.getElementsByClassName(
-        "MultieventhinweisFalsch" + classNr,
-      );
+      var HinweisRichtig = document
+        .getElementsByClassName("multievent")
+        [classNr].querySelectorAll(".Multieventhinweis[data-typ='richtig']");
+      var HinweisFalsch = document
+        .getElementsByClassName("multievent")
+        [classNr].querySelectorAll(".Multieventhinweis[data-typ='falsch']");
+      
 
       if (F == 0) {
         multievent.gewertet[classNr] = 1;

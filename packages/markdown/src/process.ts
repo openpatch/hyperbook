@@ -1,4 +1,5 @@
 import rehypeKatex from "rehype-katex";
+import { rehypeMultievent } from "./rehypeMultievent";
 import rehypeStringify from "rehype-stringify";
 import rehypePrettyCode from "rehype-pretty-code";
 import rehypeUnwrapImages from "rehype-unwrap-images";
@@ -196,6 +197,9 @@ export const process = (md: string | VFile, ctx: HyperbookContext) => {
     rehypeQrCode(ctx),
     rehypeShareDialog(ctx),
     rehypeKatex,
+    /* compiles the multievent markers; after katex, so their labels may hold
+       formulas, and before the code highlighter, so code is left alone */
+    rehypeMultievent,
     [
       rehypePrettyCode,
       {

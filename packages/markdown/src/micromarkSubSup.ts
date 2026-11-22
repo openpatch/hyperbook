@@ -19,6 +19,9 @@ function isWhitespace(code: Code) {
 // --- Subscript tokenizer (_{…}) with escape ---
 function subTokenizer(effects: Effects, ok: State, nok: State): State {
   let hasContent = false;
+  // Braces inside balance: `^{{a{2|!4}}}` is the superscript `{a{2|!4}}`, a
+  // multievent marker raised as a whole, not cut at its first `}`.
+  let depth = 0;
 
   return start;
 
@@ -53,7 +56,10 @@ function subTokenizer(effects: Effects, ok: State, nok: State): State {
   }
 
   function inside(code: Code): State {
-    if (code === 125 /* } */) {
+    if (code === 123 /* { */) depth++;
+    if (code === 125 /* } */ && depth > 0) {
+      depth--;
+    } else if (code === 125 /* } */) {
       // }
       if (!hasContent) return nok(code) as State;
       effects.enter("subMarker");
@@ -77,6 +83,9 @@ function subTokenizer(effects: Effects, ok: State, nok: State): State {
 // --- Superscript tokenizer (^{…}) with escape ---
 function supTokenizer(effects: Effects, ok: State, nok: State): State {
   let hasContent = false;
+  // Braces inside balance: `^{{a{2|!4}}}` is the superscript `{a{2|!4}}`, a
+  // multievent marker raised as a whole, not cut at its first `}`.
+  let depth = 0;
   return start;
 
   function start(code: Code): State {
@@ -108,7 +117,10 @@ function supTokenizer(effects: Effects, ok: State, nok: State): State {
   }
 
   function inside(code: Code): State {
-    if (code === 125 /* } */) {
+    if (code === 123 /* { */) depth++;
+    if (code === 125 /* } */ && depth > 0) {
+      depth--;
+    } else if (code === 125 /* } */) {
       // }
       if (!hasContent) return nok(code) as State;
       effects.enter("supMarker");

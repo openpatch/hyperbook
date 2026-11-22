@@ -13,6 +13,42 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 
 :::
 
+## v0.125.1
+
+::::tabs
+
+:::tab{title="New :rocket:" id="new"}
+
+**markdown**: [Multievent](/elements/multievent) has a math field, `{m{…}}`, drawn by [MathLive](https://mathlive.io). The solution is LaTeX, several accepted answers are separated by `|`, and the Compute Engine checks the answer, so `2x+3`, `3+2x` and `2\cdot x+3` all count for `{m{2x+3}}`. The LaTeX is taken as written: braces, backslashes, `_` and `^` are not read as markdown.
+
+**markdown**: A math field with `\placeholder{answer}` in it is a fill-in-the-blank task: `{m{\frac{\placeholder{3}}{\placeholder{4}} = 0.75}}` shows the formula, and only its blanks take input. Each blank is checked on its own, marked right or wrong, and locked once it is right.
+
+**markdown**: Multievent markers work in markdown tables. The option pipes of `{a{cat|!dog}}` no longer split the cell.
+
+**markdown**: Math is rendered in headings: `## Cost of $x^2$` shows the formula instead of its TeX source.
+
+:::
+
+:::tab{title="Changed :warning:" id="changed"}
+
+**markdown**: Multievent markers are turned into their elements when the page is built, instead of by the browser. Pages look and work as before, and readers keep their saved work. Labels may hold formatted content, a checkbox answer can be a formula, and markers may sit inside one another, like `{b{Tip: {t{x}}}}`.
+
+**markdown**: Sub- and superscripts `_{…}` and `^{…}` end at their matching brace, so `2^{{a{2|3|!4|8}}}=16` raises a whole dropdown.
+
+:::
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+**markdown**: A URL as a multievent answer, like `{r1{https://example.org/page.html}}`, links to the URL instead of to the URL with `}}` appended.
+
+**markdown**: Marked code inside a multievent is shown as written instead of being turned into elements.
+
+**markdown**: Custom heading ids are applied again. `# Stable H1 {#stable}` rendered `id="stable-h1"`, so links to the documented id did not work.
+
+:::
+
+::::
+
 ## v0.125.0
 
 ::::tabs

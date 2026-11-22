@@ -9,7 +9,7 @@ permaid: multievent
 The Multievent library originates from [Aufgabenfuchs](https://www.aufgabenfuchs.de/sonstiges/multievent.shtml) and has been adapted for Hyperbook.
 :::
 
-With Multievent, 26 different interactive event formats can be implemented on a webpage. This JavaScript searches the document for areas enclosed in double curly braces {{…}}. The enclosed content is transformed into an interactive element. Characters between the opening curly braces determine the result. Below is a list of formats and the corresponding character sequences. For example, a small {r{…}} creates an evaluable radio button in front of the enclosed term (see below).
+With Multievent, 27 different interactive event formats can be implemented on a webpage. When the page is built, every area enclosed in double curly braces {{…}} is turned into an interactive element. The characters between the opening curly braces determine the result. Below is a list of formats and the corresponding character sequences. For example, a small {r{…}} creates an evaluable radio button in front of the enclosed term (see below).
 
 ## Saved progress
 
@@ -491,6 +491,68 @@ Result: Crossword puzzle (The vertical bar | separates the cells. The double til
     | | |U| ~~
     | | |B| ~~
     | | |E| }}
+:::
+
+## Task 25
+
+Type the solution as a formula, as in a CAS.
+
+Syntax: {m{ (small m)
+
+Result: Math field ([MathLive](https://mathlive.io), like in Bitflow) — the solution is checked by the Compute Engine, so `2x+3`, `3+2x` and `2\cdot x+3` are all correct answers to `{m{2x+3}}`. Solutions may hold several accepted answers, separated by `|`.
+
+The solution is LaTeX, taken exactly as written: braces, backslashes, `_` and `^` are not read as markdown, so `{m{\frac{1}{2}}}` or `{m{x_{1}+1\,5}}` work as they stand. A `|` inside braces stays part of the answer; for an absolute value, write `\lvert x\rvert`.
+
+```md
+:::multievent
+Solve: x + x + 3 = ? Answer: {m{2x+3|3+2x}}
+:::
+```
+
+:::multievent
+Solve: x + x + 3 = ? Answer: {m{2x+3|3+2x}}
+:::
+
+## Task 26
+
+Fill in the blanks of a formula.
+
+Syntax: {m{ with `\placeholder{…}`
+
+Result: The formula is shown, and only its blanks can be typed into. Each `\placeholder{answer}` is a blank; the answer between its braces is not shown, and may again hold several accepted answers separated by `|`. When evaluating, every blank is checked on its own by the Compute Engine, marked right or wrong, and locked once it is right. A blank may get a name, `\placeholder[denominator]{4}`; without one it is numbered.
+
+```md
+:::multievent
+Complete: {m{\frac{\placeholder{3}}{\placeholder{4}} = 0.75}}
+
+Expand: {m{(x+2)^2 = x^2 + \placeholder{4x} + \placeholder{4}}}
+:::
+```
+
+:::multievent
+Complete: {m{\frac{\placeholder{3}}{\placeholder{4}} = 0.75}}
+
+Expand: {m{(x+2)^2 = x^2 + \placeholder{4x} + \placeholder{4}}}
+:::
+
+## In tables
+
+The event formats can be used in markdown tables, too: the option pipes of a marker do not split its cell, so the marker stays in one piece.
+
+```md
+:::multievent
+| Animal | Legs |
+| --- | --- |
+| Cow | {z{4}} |
+| Bird | {a{2|0|!2|4|6}} |
+:::
+```
+
+:::multievent
+| Animal | Legs |
+| --- | --- |
+| Cow | {z{4}} |
+| Bird | {a{2|0|!2|4|6}} |
 :::
 
 ## Combine
