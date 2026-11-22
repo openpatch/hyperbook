@@ -124,6 +124,30 @@ describe("store", () => {
     writeRows(db, id, { since: 2, rows: [{ table: "t", key: 1, data: { text: "x".repeat(60) } }] }, tiny);
   });
 
+  it("counts the limit in bytes, not characters", () => {
+    const { db, id } = student();
+    const tiny = { maxBytes: 100 };
+    // 30 characters, 90 bytes in UTF-8: over the limit with key and quotes.
+    const wide = { table: "t", key: 1, data: { text: "€".repeat(30) } };
+    expect(() => writeRows(db, id, { since: 0, rows: [wide] }, tiny)).toThrow(StoreTooLargeError);
+  });
+
+  it("lets a state over the limit shrink or stay as large", () => {
+    const { db, id } = student();
+    writeRows(db, id, { since: 0, rows: [{ table: "t", key: 1, data: { text: "x".repeat(150) } }, bookmark("/a")] }, limits);
+    // The limit is lowered under it (an admin changed STORE_MAX_MB).
+    const tiny = { maxBytes: 100 };
+    // Deleting a row goes through, though the state is still too large.
+    expect(() => writeRows(db, id, { since: 1, rows: [gone("/a")] }, tiny)).not.toThrow();
+    // Changing a row to something no larger goes through too; growing does not.
+    expect(() =>
+      writeRows(db, id, { since: 2, rows: [{ table: "t", key: 1, data: { text: "y".repeat(150) } }] }, tiny),
+    ).not.toThrow();
+    expect(() =>
+      writeRows(db, id, { since: 3, rows: [{ table: "t", key: 1, data: { text: "y".repeat(151) } }] }, tiny),
+    ).toThrow(StoreTooLargeError);
+  });
+
   it("does not advance the revision for an empty upload", () => {
     const { db, id } = student();
     writeRows(db, id, { since: 0, rows: [bookmark("/a")] }, limits);

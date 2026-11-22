@@ -108,7 +108,9 @@ export function readChanges(db: Db, studentId: number, since: number) {
   return { revision, rows };
 }
 
-const rowSize = (key: string, data: string | null) => (data === null ? 0 : key.length + data.length);
+/** A row's share of the student's limit, in bytes (as stored, UTF-8). */
+const rowSize = (key: string, data: string | null) =>
+  data === null ? 0 : Buffer.byteLength(key) + Buffer.byteLength(data);
 const rowId = (tableName: string, key: string) => `${tableName}\u0000${key}`;
 
 /**
@@ -212,7 +214,9 @@ export function writeRows(
     }
 
     // Rolls the whole transaction back: nothing of an oversized upload stays.
-    if (size > limits.maxBytes) throw new StoreTooLargeError(limits.maxBytes);
+    // An upload that does not make the state larger always goes through, so
+    // a student over the limit can still change and delete their work.
+    if (size > limits.maxBytes && size > (h?.sizeBytes ?? 0)) throw new StoreTooLargeError(limits.maxBytes);
 
     t.insert(storeHeads)
       .values({ studentId, revision, sizeBytes: size, updatedAt: now })

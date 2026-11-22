@@ -5,6 +5,7 @@ import { bodyLimit } from "hono/body-limit";
 import { deleteCookie, setCookie } from "hono/cookie";
 import { createMiddleware } from "hono/factory";
 import { HTTPException } from "hono/http-exception";
+import { httpError } from "../errors";
 import { createT, requestLocale } from "../i18n";
 import { z } from "zod";
 import { dummyPasswordHash, verifyPassword } from "../auth/password";
@@ -305,7 +306,11 @@ export function studentApi({ db, config }: Deps) {
             ),
           );
         } catch (error) {
-          if (error instanceof StoreTooLargeError) throw new HTTPException(413, { message: error.message });
+          // Not 413: that means "this request is too large", and the client
+          // splits it. A full store is not fixed by smaller requests.
+          if (error instanceof StoreTooLargeError) {
+            throw httpError(507, "errors.student.storeFull", { mb: Math.floor(error.maxBytes / 1024 / 1024) });
+          }
           throw error;
         }
       },

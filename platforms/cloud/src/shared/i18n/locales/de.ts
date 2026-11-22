@@ -1069,6 +1069,7 @@ export const de: Messages = {
       messageNotFound: "Nachricht nicht gefunden",
     },
     student: {
+      storeFull: "Deine gespeicherte Arbeit hat ihre Grenze von {{mb}} MB erreicht. Lösche Arbeit, die du nicht mehr brauchst, oder frag deine Lehrkraft.",
       readOnly: "Dies ist eine schreibgeschützte Ansicht der Arbeit eines Schülers",
       wrongCredentials: "Benutzername oder Passwort ist falsch",
       badKey: "Dieser Anmeldecode ist nicht (mehr) gültig. Frag deine Lehrkraft.",

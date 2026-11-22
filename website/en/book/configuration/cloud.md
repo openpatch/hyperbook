@@ -103,7 +103,7 @@ Several tabs of the book on one device share their marks, and take turns uploadi
 
 Work from another device that arrives while a page is open is written to the local database at once. The elements show it after a reload: right away if the student has not changed anything on the page yet, otherwise a notice offers **Reload now**.
 
-The first time a student logs in on a device, and whenever another student logs in on it, the device's local data is replaced by the student's saved work. Logging out uploads what is left and empties the device; if something could not be uploaded, the book asks first.
+The first time a student logs in on a device, and whenever another student logs in on it, the device's local data is replaced by the student's saved work. If nothing is saved yet, what the student did on this device before logging in becomes their saved work instead. Logging out uploads what is left and empties the device; if something could not be uploaded, the book asks first.
 
 ### Offline and leaving the page
 

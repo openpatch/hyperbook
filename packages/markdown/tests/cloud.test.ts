@@ -51,6 +51,60 @@ describe("first sync on a device", () => {
     expect(page.sync).toMatchObject({ student: "ada", revision: 0 });
   });
 
+  it("uploads the work done before logging in when nothing is saved yet", async () => {
+    const cloud = new FakeCloud();
+    cloud.loggedIn = false;
+    const page = await openPage({ cloud, loggedIn: false });
+    await page.ready();
+    await page.db.table("bookmarks").put(bookmark("/before-login"));
+
+    cloud.loggedIn = true;
+    const loggedIn = await page.reopen({ loggedIn: true });
+    await loggedIn.settle();
+    expect(await loggedIn.db.table("bookmarks").toArray()).toEqual([bookmark("/before-login")]);
+    expect(cloud.saved("bookmarks")).toEqual({ '"/before-login"': bookmark("/before-login") });
+    expect(loggedIn.sync).toMatchObject({ student: "ada", replace: false, dirty: {} });
+  });
+
+  it("ends with the same uploaded work when two tabs log in at the same time", async () => {
+    const cloud = new FakeCloud();
+    cloud.loggedIn = false;
+    const before = await openPage({ cloud, loggedIn: false });
+    await before.ready();
+    await before.db.table("bookmarks").put(bookmark("/before-login"));
+    before.db.close();
+
+    cloud.loggedIn = true;
+    // Both tabs start while the server holds its answers, so their first
+    // syncs overlap.
+    cloud.hold();
+    const one = await openPage({ cloud, name: before.name, storage: before.storage, loggedIn: true });
+    const two = await openPage({ cloud, name: before.name, storage: before.storage, loggedIn: true });
+    const ready = Promise.all([one.ready(), two.ready()]);
+    for (let i = 0; i < 20; i++) {
+      await new Promise((r) => setTimeout(r, 5));
+      cloud.release();
+      cloud.hold();
+    }
+    cloud.release();
+    await ready;
+    await one.settle();
+    await two.settle();
+    expect(cloud.saved("bookmarks")).toEqual({ '"/before-login"': bookmark("/before-login") });
+    expect(await two.db.table("bookmarks").toArray()).toEqual([bookmark("/before-login")]);
+  });
+
+  it("never uploads another student's data into an empty account", async () => {
+    const { page } = await returningStudent();
+    const other = new FakeCloud();
+    other.username = "max";
+    page.storage.set("hyperbook_auth_user:cloud", JSON.stringify({ username: "max", readonly: false }));
+    page.db.close();
+    const next = await readyPage({ cloud: other, name: page.name, storage: page.storage });
+    expect(await next.db.table("bookmarks").toArray()).toEqual([]);
+    expect(uploads(other)).toEqual([]);
+  });
+
   it("starts over when another student logs in on the device", async () => {
     const { cloud, page } = await returningStudent();
     await page.db.table("bookmarks").put(bookmark("/unsent"));
@@ -344,6 +398,40 @@ describe("offline and failures", () => {
   });
 });
 
+describe("an ended session", () => {
+  it("keeps marking changes made after it ended, and uploads them after logging in again", async () => {
+    const { cloud, page } = await returningStudent();
+    cloud.loggedIn = false;
+    await page.db.table("textinput").put({ id: "q1", text: "4" });
+    await page.tick(1000);
+    // Logged out now; the student keeps working while the login drawer is open.
+    await page.db.table("textinput").put({ id: "q2", text: "after" });
+    await page.tick(60_000);
+    expect(Object.keys(page.sync.dirty)).toHaveLength(2);
+
+    cloud.loggedIn = true;
+    page.storage.set("hyperbook_auth_user:cloud", JSON.stringify({ username: "ada", readonly: false }));
+    const next = await page.reopen();
+    await next.settle();
+    expect(cloud.saved("textinput")).toMatchObject({ '"q1"': { text: "4" }, '"q2"': { text: "after" } });
+    expect(next.sync.dirty).toEqual({});
+  });
+});
+
+describe("a full store", () => {
+  it("stops retrying and says why, keeping the changes marked", async () => {
+    const cloud = new FakeCloud();
+    const page = await readyPage({ cloud });
+    cloud.failures = [507, 507, 507];
+    await page.db.table("textinput").put({ id: "q1", text: "4" });
+    await page.tick(60_000);
+    expect(uploads(cloud)).toHaveLength(1);
+    expect(page.status).toBe("error");
+    expect(page.notice.textContent).toMatch(/size limit/);
+    expect(Object.keys(page.sync.dirty)).toHaveLength(1);
+  });
+});
+
 describe("several devices", () => {
   it("brings another device's work in on the next page load, and reloads to show it", async () => {
     const { cloud, page } = await returningStudent();
@@ -596,6 +684,27 @@ describe("importing and resetting", () => {
     expect(rowsOf(last)).toEqual([{ table: "bookmarks", key: "/imported", data: bookmark("/imported") }]);
     expect(cloud.saved("bookmarks")).toEqual({ '"/imported"': bookmark("/imported") });
     expect(page.sync).toMatchObject({ dirty: {}, replace: false });
+  });
+
+  it("keeps a row the server refuses during a replace, marked as refused", async () => {
+    const { cloud, page } = await returningStudent();
+    await page.db.table("textinput").bulkPut([
+      { id: "ok", text: "1" },
+      { id: "huge", text: "too much" },
+    ]);
+    await page.settle();
+    cloud.refuse = (row) => row.key === "huge";
+    await page.api.replaceAll();
+    await page.settle();
+    expect(cloud.saved("textinput")).toEqual({ '"ok"': { id: "ok", text: "1" } });
+    expect(Object.keys(page.sync.dirty)).toEqual(['textinput\u0000"huge"']);
+    expect(page.status).toBe("error");
+
+    // Retried once it fits.
+    cloud.refuse = null;
+    page.notice.children.find((c: any) => c.tagName === "button").click();
+    await page.settle();
+    expect(cloud.saved("textinput")).toHaveProperty('"huge"');
   });
 
   it("keeps the replacement pending while offline", async () => {

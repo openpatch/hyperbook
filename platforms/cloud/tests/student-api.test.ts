@@ -6,8 +6,8 @@ import { loggedIn, setup } from "./helpers";
 
 const HOST = "physics.books.test";
 
-async function world() {
-  const instance = setup();
+async function world(env: Record<string, string> = {}) {
+  const instance = setup(env);
   const owner = await loggedIn(instance, { email: "o@example.org" });
   const book = (await owner.c.post("/api/books", { title: "Physics", slug: "physics" })).body;
   const group = (await owner.c.post(`/api/books/${book.id}/groups`, { name: "7a" })).body;
@@ -101,8 +101,8 @@ describe("student login", () => {
 });
 
 describe("student store", () => {
-  async function loggedInStudent() {
-    const w = await world();
+  async function loggedInStudent(env: Record<string, string> = {}) {
+    const w = await world(env);
     const b = bookClient(w.instance, HOST);
     await b.post("/_hyperbook/api/login", { username: "ada", password: "secret-pass" });
     return { ...w, b };
@@ -142,6 +142,15 @@ describe("student store", () => {
       rows: [],
     });
     expect((await b.get("/_hyperbook/api/store")).body).toEqual({ revision: 2, rows: [] });
+  });
+
+  it("answers a full store with 507, not 413, which would make the client split", async () => {
+    const { b } = await loggedInStudent({ STORE_MAX_MB: "1" });
+    const half = (key: number) => ({ table: "t", key, data: { text: "x".repeat(600 * 1024) } });
+    expect((await b.post("/_hyperbook/api/store", { since: 0, rows: [half(1)] })).status).toBe(200);
+    const full = await b.post("/_hyperbook/api/store", { since: 1, rows: [half(2)] });
+    expect(full.status).toBe(507);
+    expect(full.body.error).toBe("Your saved work has reached its limit of 1 MB. Delete work you no longer need, or ask your teacher.");
   });
 
   describe("gzip-compressed uploads", () => {

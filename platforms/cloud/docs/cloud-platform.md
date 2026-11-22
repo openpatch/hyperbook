@@ -580,16 +580,26 @@ store_rows   student_id, table_name, key (json), data (json | null = deleted),
   load it uploads what is marked, takes in newer rows from other devices —
   never over a marked row, checked inside the IndexedDB transaction — and
   reloads once if the page shows outdated data. The first sync of a student
-  on a device replaces the local store.
+  on a device (one tab at a time, under the lock) replaces the local store
+  with the saved state; when nothing is saved yet and the device never
+  synced this book, the device's own work (from before logging in) is
+  uploaded instead. Another student's data on the device is never uploaded.
+- After a 401 the device keeps marking changes and only pauses uploads;
+  the same student logging in again uploads them.
 - Tabs sync one at a time (Web Locks). Uploads go in batches of at most 500
   rows and about 1 MB; a batch refused with 400 or 413 is split until the
   refused row is alone, which is then set aside (marked refused) until it
-  changes or the reader retries, so it never holds up the other rows.
+  changes or the reader retries, so it never holds up the other rows. Rows
+  refused during a replace (import, reset) are marked refused too.
 - Uploads over 8 KB come gzip-compressed (`Content-Encoding: gzip`, allowed
   through CORS); the server unpacks at most `STORE_MAX_MB` and answers 413
   beyond. The keepalive upload on page hide stays plain.
 - Limits: `STORE_MAX_MB` (default 10) per request and per student state (the
-  live rows). Everything is deleted with the student (cascade).
+  live rows, counted in UTF-8 bytes). A full state answers 507 (not 413,
+  which makes the client split): the client stops retrying and says so. An
+  upload that does not make the state larger is always taken, so a student
+  over the limit can still delete work. Everything is deleted with the
+  student (cascade).
 
 ## Private books
 

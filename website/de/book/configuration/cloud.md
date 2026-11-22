@@ -104,7 +104,7 @@ Mehrere Tabs des Buchs auf einem Gerät teilen sich ihre Markierungen und laden 
 
 Arbeit von einem anderen Gerät, die ankommt, während eine Seite offen ist, landet sofort in der lokalen Datenbank. Die Elemente zeigen sie nach einem Neuladen: sofort, wenn auf der Seite noch nichts geändert wurde, sonst bietet ein Hinweis **Jetzt neu laden** an.
 
-Meldet sich jemand zum ersten Mal auf einem Gerät an, oder meldet sich jemand anderes darauf an, werden die lokalen Daten des Geräts durch die gespeicherte Arbeit ersetzt. Beim Abmelden wird hochgeladen, was noch fehlt, und das Gerät geleert; ließ sich etwas nicht hochladen, fragt das Buch vorher nach.
+Meldet sich jemand zum ersten Mal auf einem Gerät an, oder meldet sich jemand anderes darauf an, werden die lokalen Daten des Geräts durch die gespeicherte Arbeit ersetzt. Ist noch nichts gespeichert, wird stattdessen das, was auf dem Gerät vor dem Anmelden bearbeitet wurde, zur gespeicherten Arbeit. Beim Abmelden wird hochgeladen, was noch fehlt, und das Gerät geleert; ließ sich etwas nicht hochladen, fragt das Buch vorher nach.
 
 ### Offline und Verlassen der Seite
 

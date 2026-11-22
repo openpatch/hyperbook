@@ -1058,6 +1058,7 @@ export const en = {
       messageNotFound: "Message not found",
     },
     student: {
+      storeFull: "Your saved work has reached its limit of {{mb}} MB. Delete work you no longer need, or ask your teacher.",
       readOnly: "This is a read-only view of a student's work",
       wrongCredentials: "Username or password is wrong",
       badKey: "This login code is not valid (any more). Ask your teacher.",

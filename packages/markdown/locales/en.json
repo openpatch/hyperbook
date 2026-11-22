@@ -183,6 +183,7 @@
     "user-saved-minutes-ago": "{{minutes}} min ago",
     "user-saved-hours-ago": "{{hours}} h ago",
     "user-notice-error": "Could not save to the cloud. Your changes are still on this device.",
+    "user-notice-full": "Your saved work has reached its size limit. Your changes are still on this device. Delete work you no longer need, or ask your teacher.",
     "user-notice-retry": "Retry",
     "user-notice-offline": "Offline. Changes are kept on this device and sync when you reconnect.",
     "user-notice-updated": "Work from another device was loaded. Reload the page to see it.",

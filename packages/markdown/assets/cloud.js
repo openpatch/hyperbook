@@ -111,6 +111,20 @@ hyperbook.cloud = (function () {
   }
 
   const syncedStudent = () => read("student");
+  /**
+   * Makes every mark's text unique. unmark() removes a mark only while its
+   * text is still the one uploaded; without the nonce, a second change in
+   * the same millisecond (same `at` and `base`) would look like the uploaded
+   * one and lose its mark, so it would never reach the server.
+   */
+  const nonce = () => Math.random().toString(36).slice(2, 10);
+  /** A revision from the server, or null when the answer has none. */
+  const validRevision = (revision) => (Number.isSafeInteger(revision) && revision >= 0 ? revision : null);
+  /** Stores the server's revision; a malformed answer keeps the one there. */
+  function writeRevision(revision) {
+    const valid = validRevision(revision);
+    if (valid !== null) write("revision", String(valid));
+  }
   function syncedRevision() {
     const revision = Number(read("revision"));
     return Number.isSafeInteger(revision) && revision > 0 ? revision : 0;
@@ -199,7 +213,7 @@ hyperbook.cloud = (function () {
       const previous = JSON.parse(read(name));
       if (previous && typeof previous.base === "number") base = previous.base;
     } catch {}
-    const mark = { at: Date.now(), base, n: Math.random().toString(36).slice(2, 10) };
+    const mark = { at: Date.now(), base, n: nonce() };
     write(name, JSON.stringify(mark));
     changesThisPage += 1;
     latest.set(name, value);
@@ -386,7 +400,10 @@ hyperbook.cloud = (function () {
     // saving in a read-only view) and must not log anyone out.
     if (response.status === 401 && !options.allowUnauthorized) {
       clearAuth();
-      stopTracking();
+      // Keep marking: what the student does while the login drawer is open
+      // is uploaded once the same student logs in again (catchUp). Only the
+      // waiting uploads stop; sync() does nothing while logged out.
+      scheduler.clear();
       updateUserUI(null);
       showLogin();
     }
@@ -423,6 +440,9 @@ hyperbook.cloud = (function () {
   }
 
   // ===== Upload scheduling =====
+
+  /** The server answered that the student's saved work is at its limit. */
+  let storeFull = false;
 
   const scheduler = {
     debounce: null,
@@ -462,12 +482,17 @@ hyperbook.cloud = (function () {
       this.running = sync()
         .then((changed) => {
           this.retryCount = 0;
+          storeFull = false;
           return changed;
         })
         .catch((error) => {
           // Refused rows are set aside by the upload itself; what reaches
           // here is retried only when it may go through later.
-          const transient = error.status === 0 || error.status >= 500 || error.status === 429;
+          // 507: the student's saved work is at its limit. Retrying does not
+          // help; the notice says so, and the marks wait for "Retry".
+          storeFull = error.status === 507;
+          const transient =
+            error.status === 0 || (error.status >= 500 && error.status !== 507) || error.status === 429;
           if (transient && tracking) {
             const delay = Math.min(RETRY_MAX, 1000 * Math.pow(2, this.retryCount++));
             this.retry = setTimeout(() => this.flush(), delay);
@@ -535,7 +560,7 @@ hyperbook.cloud = (function () {
   /** Takes in the server's answer to a request. Returns how many rows changed locally. */
   async function takeIn(result) {
     const changed = await applyRows(result.rows || []);
-    write("revision", String(result.revision));
+    writeRevision(result.revision);
     return changed;
   }
 
@@ -552,6 +577,7 @@ hyperbook.cloud = (function () {
     let replacing = replace;
     let changed = 0;
     let refused = 0;
+    const refusedRows = [];
     while (queue.length > 0) {
       const batch = queue.shift();
       let result;
@@ -565,6 +591,7 @@ hyperbook.cloud = (function () {
           continue;
         }
         refused += 1;
+        refusedRows.push(batch[0]);
         const m = marksByName.get(markName(batch[0].table, batch[0].key));
         if (m && read(m.name) === m.raw) write(m.name, JSON.stringify({ ...m.mark, refused: true }));
         continue;
@@ -581,7 +608,7 @@ hyperbook.cloud = (function () {
     }
     // Every row was refused: the saved state still has to be replaced.
     if (replacing) changed += await takeIn(await postRows([], true));
-    return { changed, refused };
+    return { changed, refused, refusedRows };
   }
 
   /**
@@ -591,7 +618,9 @@ hyperbook.cloud = (function () {
    */
   function sync() {
     return withSyncLock(async () => {
-      if (!syncedStudent()) return 0;
+      // Logged out (the session expired): changes stay marked until the
+      // student logs in again; see the 401 handling in apiRequest.
+      if (!syncedStudent() || !identity()) return 0;
       const replace = tracking && replacePending();
       const marks = !tracking ? [] : replace ? readMarks() : pendingMarks();
       let changed = 0;
@@ -603,9 +632,15 @@ hyperbook.cloud = (function () {
           // The whole store, as it is now, covers every change marked so far.
           const at = Date.now();
           const rows = (await readAllRows()).map((row) => ({ ...row, at }));
-          ({ changed, refused } = await uploadRows(rows, new Map(), true));
+          let refusedRows;
+          ({ changed, refused, refusedRows } = await uploadRows(rows, new Map(), true));
           erase("replace");
           marks.forEach(unmark);
+          // The replace deleted the saved copies of the rows it could not
+          // store: they wait as refused marks, like any refused change.
+          for (const row of refusedRows) {
+            write(markName(row.table, row.key), JSON.stringify({ at, base: syncedRevision(), n: nonce(), refused: true }));
+          }
         } else {
           const rows = await readRows(marks);
           ({ changed, refused } = await uploadRows(rows, new Map(marks.map((m) => [m.name, m])), false));
@@ -727,15 +762,39 @@ hyperbook.cloud = (function () {
     const who = identity();
     if (!who) return false;
     if (syncedStudent() !== who) {
-      // Another student's (or nobody's) data: start from the saved state.
-      tracking = false;
-      clearSyncState();
-      const result = await apiRequest("/store");
-      const changed = await applyRows(result.rows || [], true);
-      write("revision", String(result.revision));
-      write("student", who);
-      tracking = !isReadOnlyMode();
-      return changed > 0;
+      // One tab at a time: a second tab must not clear the marks and rows of
+      // the first while it uploads them.
+      const first = await withSyncLock(async () => {
+        if (syncedStudent() === who) return null; // another tab did it meanwhile
+        // Never synced on this device: what it holds is this reader's own
+        // work from before logging in. Another student's data is not.
+        const fresh = syncedStudent() === null;
+        tracking = false;
+        clearSyncState();
+        const result = await apiRequest("/store");
+        if (
+          fresh &&
+          !isReadOnlyMode() &&
+          validRevision(result.revision) === 0 &&
+          (await readAllRows()).length > 0
+        ) {
+          // Nothing saved yet: the device's work becomes the saved state.
+          write("revision", "0");
+          write("student", who);
+          write("replace", "1");
+          tracking = true;
+          return { changed: 0, upload: true };
+        }
+        const changed = await applyRows(result.rows || [], true);
+        writeRevision(result.revision);
+        write("student", who);
+        tracking = !isReadOnlyMode();
+        return { changed, upload: false };
+      });
+      if (first !== null) {
+        if (first.upload) await scheduler.flush();
+        return first.changed > 0;
+      }
     }
     tracking = !isReadOnlyMode();
     if (!tracking) readMarks().forEach((m) => erase(m.name));
@@ -953,11 +1012,17 @@ hyperbook.cloud = (function () {
     if (status === "error") {
       return {
         tone: "error",
-        message: hyperbook.i18n.get(
-          "user-notice-error",
-          {},
-          "Could not save to the cloud. Your changes are still on this device.",
-        ),
+        message: storeFull
+          ? hyperbook.i18n.get(
+              "user-notice-full",
+              {},
+              "Your saved work has reached its size limit. Your changes are still on this device. Delete work you no longer need, or ask your teacher.",
+            )
+          : hyperbook.i18n.get(
+              "user-notice-error",
+              {},
+              "Could not save to the cloud. Your changes are still on this device.",
+            ),
         action: {
           label: hyperbook.i18n.get("user-notice-retry", {}, "Retry"),
           onClick: () => saveNow(),

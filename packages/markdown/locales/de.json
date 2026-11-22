@@ -183,6 +183,7 @@
     "user-saved-minutes-ago": "vor {{minutes}} Min.",
     "user-saved-hours-ago": "vor {{hours}} Std.",
     "user-notice-error": "Speichern in der Cloud fehlgeschlagen. Deine Änderungen sind weiterhin auf diesem Gerät.",
+    "user-notice-full": "Deine gespeicherte Arbeit hat ihre Größengrenze erreicht. Deine Änderungen sind weiterhin auf diesem Gerät. Lösche Arbeit, die du nicht mehr brauchst, oder frag deine Lehrkraft.",
     "user-notice-retry": "Erneut versuchen",
     "user-notice-offline": "Offline. Änderungen bleiben auf diesem Gerät und werden synchronisiert, sobald du wieder verbunden bist.",
     "user-notice-updated": "Arbeit von einem anderen Gerät wurde geladen. Lade die Seite neu, um sie zu sehen.",
