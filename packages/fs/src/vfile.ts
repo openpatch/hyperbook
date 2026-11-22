@@ -9,15 +9,16 @@ import {
   HyperbookJson,
 } from "@hyperbook/types";
 import yaml from "yaml";
+import { fromMarkdown } from "mdast-util-from-markdown";
+import { directive } from "micromark-extension-directive";
+import { directiveFromMarkdown } from "mdast-util-directive";
+import { visit } from "unist-util-visit";
 import { handlebars, registerHelpers } from "./handlebars";
 import { FrontmatterParseError } from "./errors";
 import { excludeMatcherFor } from "./exclude";
 
 /** hyperbook.json's source, by its path with the stat that read it. */
-const jsonSources = new Map<
-  string,
-  { mtimeMs: number; source: string }
->();
+const jsonSources = new Map<string, { mtimeMs: number; source: string }>();
 
 export const getJson = async (root: string): Promise<HyperbookJson> => {
   const file = path.join(root, "hyperbook.json");
@@ -1044,6 +1045,58 @@ const dependenciesUnchanged = async (
   return true;
 };
 
+/**
+ * Hides the code in a page — fenced and indented blocks, inline code — behind
+ * placeholders, so that snippet expansion does not touch it.
+ *
+ * Snippets are expanded on the raw text, before the page is parsed. Without
+ * this, a page explaining snippets (`` `:::snippet{#aufgabe}` ``) had the
+ * mention replaced by the snippet, which swallowed everything up to the next
+ * `:::` and left the page garbled; a `:::` inside a code block in a snippet's
+ * body likewise ended the snippet early. The positions come from the same
+ * parser the page goes through later, so what counts as code here is what
+ * renders as code.
+ */
+export function maskCode(content: string): {
+  masked: string;
+  restore: (text: string) => string;
+} {
+  // Nothing to protect from on a page without snippets.
+  if (!content.includes("snippet")) {
+    return { masked: content, restore: (text) => text };
+  }
+  const tree = fromMarkdown(content, {
+    extensions: [directive()],
+    mdastExtensions: [directiveFromMarkdown()],
+  });
+  const ranges: [number, number][] = [];
+  visit(tree, (node) => {
+    if (node.type !== "code" && node.type !== "inlineCode") return;
+    const start = node.position?.start.offset;
+    const end = node.position?.end.offset;
+    if (start !== undefined && end !== undefined) ranges.push([start, end]);
+  });
+  if (ranges.length === 0) return { masked: content, restore: (text) => text };
+
+  const hidden: string[] = [];
+  let masked = "";
+  let at = 0;
+  for (const [start, end] of ranges.sort((a, b) => a[0] - b[0])) {
+    if (start < at) continue;
+    masked += content.slice(at, start) + `\u0000hbcode${hidden.length}\u0000`;
+    hidden.push(content.slice(start, end));
+    at = end;
+  }
+  masked += content.slice(at);
+  return {
+    masked,
+    // A placeholder may have been copied into a snippet's body any number of
+    // times; each one gets its code back.
+    restore: (text) =>
+      text.replace(/\u0000hbcode(\d+)\u0000/g, (_, i) => hidden[Number(i)]!),
+  };
+}
+
 export const getMarkdown = async (
   file: VFileBase,
 ): Promise<VFileBook["markdown"]> => {
@@ -1137,7 +1190,9 @@ export const getMarkdown = async (
     file.path.absolute,
     file.extension === ".md",
   );
-  // apply Snippets
+  // apply Snippets, leaving code alone
+  const code = maskCode(content);
+  content = code.masked;
   const reg =
     /((:+)snippet{#([a-zA-Z0-9-]+)(( +([a-zA-Z]+)=(\d+|false|true|".*?"))*) *})/g;
   const varReg = /([a-zA-Z]+)=(\d+|false|true|".*")/;
@@ -1193,6 +1248,7 @@ export const getMarkdown = async (
       content = content.replace(snippet[0], () => rendered);
     }
   }
+  content = code.restore(content);
 
   // The page's dependencies, statted: what the content was built from.
   const dependencyStats: MarkdownCacheEntry["dependencies"] = [];

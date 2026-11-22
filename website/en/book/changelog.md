@@ -13,6 +13,68 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 
 :::
 
+## v0.125.0
+
+::::tabs
+
+:::tab{title="New :rocket:" id="new"}
+
+**hyperbook**: New [`hyperbook lint`](/advanced/lint) finds problems in a book's pages without building it, so authors and AI agents can check what they wrote. It reports unknown elements with a "did you mean" (`:::alret` used to drop its content from the page without a word), elements that are never closed, element lines that could not be read (like `:: youtube`), stray `:::`, attributes an element does not read (`titel=` instead of `title=`) or values it does not know, files that `src`, `poster` and the like point at but that are not in the book, broken links, and everything the elements report themselves. Every finding has a rule. `--json` prints the findings for scripts and agents, and `hyperbook lint book/page.md` checks only the pages you changed.
+
+**markdown**: `hyperbook build` and `hyperbook dev` warn about all of the above too, and every warning an element gives has a rule.
+
+**hyperbook**: Books with `cloud` get `_hyperbook/elements.json` when they are built: every page with elements that keep a reader's work, in the book's order, with each element's id. Hyperbook Cloud uses it to show teachers what their students worked on.
+
+**cloud**: A group has an **Overview** tab: students in rows, the tasks of the book's live version in columns, and a filled circle where a student has worked on a task. Clicking it shows the student's answer. It shows who is online now and how many tasks each student has worked on, refreshes on its own and downloads as CSV. Big books get one column per page that opens into its tasks, and a section picker narrows the view to a chapter. Text inputs, IDEs (also the web IDE, the Online-IDE and the SQL-IDE), structograms, Excalidraw drawings, H5P, checklists, ABC editors, multievents and learning maps count as tasks. The **Other** column opens saved work that belongs to no task of the live version, with the task's old id, so a changed task can be linked back to the work by giving it that `id`. Publish the book once more so its tasks appear.
+
+**cloud**: Publishing warns before students' work is left without its task: the publish dialog lists the tasks of the live version that the new save no longer has (removed, or changed without an `id`) and how many students saved work in each.
+
+**cloud**: Managing a class is safer and quicker. Deleting a student asks first. Students can be selected to print only their cards, get new QR codes, move to another group of the book (their work stays) or be deleted, and a student's menu has "Print card" for a lost card.
+
+**cloud**: The books page shows whether a book is published, how many saved changes are not live yet, and how many groups and students it has. With more than six books, a search field finds a book.
+
+**cloud**: Error messages come in the reader's language, like the rest of the platform.
+
+**markdown**: The student login says that the student's work is saved to their account and that their teacher can see it.
+
+:::
+
+:::tab{title="Changed :warning:" id="changed"}
+
+**markdown**: Hyperbook Cloud sync is redesigned. Every change is marked on the device the moment it happens and uploaded row by row, also after leaving the page, closing the tab or going offline. Leaving a page no longer asks about unsaved changes, a page load no longer overwrites work that was not uploaded yet, and changes from another device no longer cause a forced reload. When two devices change the same row, the later change wins. `hyperbook.cloud.sendSnapshot()` is replaced by `hyperbook.cloud.replaceAll()`.
+
+**markdown**: [Multievent](/elements/multievent) saves a reader's state under its id (from `id=` or derived from its content) instead of its position on the page, like the other elements. Adding a multievent above another no longer moves saved state to the wrong one. State saved the old way is moved the first time the page is opened.
+
+:::
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+**hyperbook**: Snippets mentioned in code are no longer expanded. A page explaining snippets, like `` `:::snippet{#aufgabe}` `` in a sentence or a `:::snippet` example in a code block, had the mention replaced by the snippet, which swallowed the text up to the next `:::`.
+
+**markdown**: `keepaspectratio` on [`jsxgraph`](/elements/jsxgraph) works. The element read a misspelled attribute and passed it on under a misspelled name, so the option never had an effect. The old spelling `keepaspetcratio` still works but warns.
+
+**markdown**: ABC editors get their own id; before, every editor of a book shared one saved tune.
+
+**markdown**: Cloud sync keeps work in more cases: work done before a student's first login is uploaded, two tabs logging in at once no longer clear each other's work, and refused rows wait to be retried instead of being lost. A full store says that the saved work has reached its limit.
+
+**cloud**: "Online now" is right during a lesson; students working for a while no longer look offline.
+
+:::
+
+::::
+
+## v0.124.1
+
+::::tabs
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+**markdown**: A [docked](/advanced/dock) element inside a `:::tab` or a closed `:::collapsible` stays in the dock when another tab is chosen or the collapsible is closed. Before, its tab in the dock showed nothing until its tab on the page was chosen again.
+
+:::
+
+::::
+
 ## v0.124.0
 
 ::::tabs
@@ -896,7 +958,7 @@ when a block needs an explicit label.
 
 ::::
 
-## v0.170.10
+## v0.107.10
 
 ::::tabs
 
@@ -908,7 +970,7 @@ when a block needs an explicit label.
 
 ::::
 
-## v0.170.8
+## v0.107.8
 
 ::::tabs
 
@@ -922,7 +984,7 @@ when a block needs an explicit label.
 
 ::::
 
-## v0.170.7
+## v0.107.7
 
 ::::tabs
 
@@ -942,21 +1004,9 @@ when a block needs an explicit label.
 
 ::::
 
-## v0.170.6
+## v0.107.6
 
-::::tabs
-
-:::tab{title="Improved :+1:" id="improved"}
-
-**jmp**: Update java memory playground to the latest version
-
-:::
-
-::::
-
-## v0.170.5
-
-::::tabs
+::::tabs{id="v0-107-6"}
 
 :::tab{title="Improved :+1:" id="improved"}
 
@@ -966,7 +1016,19 @@ when a block needs an explicit label.
 
 ::::
 
-## v0.170.4
+## v0.107.5
+
+::::tabs{id="v0-107-5"}
+
+:::tab{title="Improved :+1:" id="improved"}
+
+**jmp**: Update java memory playground to the latest version
+
+:::
+
+::::
+
+## v0.107.4
 
 ::::tabs
 
@@ -2833,7 +2895,7 @@ next:
 
 :::tab{title="New :rocket:" id="new"}
 
-- Custom alerts can now be defined. See the documentation for [alerts](@alerts).
+- Custom alerts can now be defined. See the documentation for [alerts](/@/alert).
 
 :::
 
@@ -3060,8 +3122,6 @@ This ensures the markdown parser can correctly process the content and resolve r
     - Mermaid to version 11.6.0
 :::
 
-:::
-
 ::::
 
 ## v0.52.0
@@ -3070,8 +3130,6 @@ This ensures the markdown parser can correctly process the content and resolve r
 
 :::tab{title="Improved :+1:" id="improved"}
 - A new element multievent that allows you to handle multiple events in a single interactive component. This feature is particularly useful for creating quizzes and other complex interactive scenarios where a single user's answers are evaluated directly with immediate feedback on whether they are correct or not. [Learn more](/elements/multievent)
-:::
-
 :::
 
 ::::
