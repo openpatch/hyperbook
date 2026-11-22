@@ -229,6 +229,8 @@ export function bookAiRoutes({ db, config }: Deps) {
         return c.json({ note });
       } catch (error) {
         if (error instanceof ProviderError) {
+          // Without the response body, which could quote the prompt.
+          console.warn(`AI version note failed: ${error.code}${error.status ? ` ${error.status}` : ""} (${ai.model})`);
           throw new HTTPException(502, {
             message: t(error.code === "timeout" ? "errors.ai.timeout" : "errors.ai.provider"),
           });

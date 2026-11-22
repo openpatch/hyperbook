@@ -1619,6 +1619,30 @@ describe("AI version note", () => {
     expect(status.tokensUsedThisWeek).toBeGreaterThan(0);
   });
 
+  it("asks again without the reasoning effort when the provider rejects it", async () => {
+    let call = 0;
+    const { owner, provider, book } = await world(
+      {},
+      () => (call++ === 0 ? { error: 400 } : { deltas: ["Fixes typos"] }),
+      { "hyperbook.json": "{}", "book/index.md": "# Hi\n" },
+    );
+    const res = await owner.c.post(`/api/books/${book.id}/ai/version-note`, {});
+    expect(res.body).toEqual({ note: "Fixes typos" });
+    expect(provider.asked).toHaveLength(2);
+  });
+
+  it("gives a model that thought its budget away the full budget once", async () => {
+    let call = 0;
+    const { owner, provider, book } = await world(
+      {},
+      () => (call++ === 0 ? { deltas: [], reasoning: ["Hmm…"], finish: "length" } : { deltas: ["New page"] }),
+      { "hyperbook.json": "{}", "book/index.md": "# Hi\n" },
+    );
+    const res = await owner.c.post(`/api/books/${book.id}/ai/version-note`, {});
+    expect(res.body).toEqual({ note: "New page" });
+    expect(provider.asked.map((a) => a.maxTokens)).toEqual([4000, 65536]);
+  });
+
   it("is for the owners, who publish", async () => {
     const { owner, other, book } = await world({}, undefined, { "hyperbook.json": "{}" });
     await owner.c.post(`/api/books/${book.id}/members`, { email: "x@example.org", role: "editor" });

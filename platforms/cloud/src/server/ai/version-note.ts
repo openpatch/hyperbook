@@ -1,7 +1,7 @@
 import type { Locale } from "../../shared/i18n";
 import type { EffectiveAi } from "../domain/instance";
 import { logCommits, rangeDiff } from "../hosting/git";
-import { streamChat } from "./provider";
+import { ProviderError, streamChat } from "./provider";
 
 /** The diff the model reads; a big upload is cut, its file list stays. */
 const MAX_DIFF_CHARS = 16_000;
@@ -47,34 +47,57 @@ export async function suggestVersionNote(options: {
     diff.slice(0, MAX_DIFF_CHARS),
   ].join("\n");
 
-  let text = "";
-  for await (const event of streamChat({
-    baseUrl: ai.baseUrl,
-    apiKey: ai.apiKey,
-    model: ai.model,
-    messages: [
-      {
-        role: "system",
-        content:
-          "You name versions of a school book written in Markdown (a Hyperbook) for its version list. " +
-          "Given what changed, write ONE short note for the new version: what a teacher or student would notice, " +
-          "e.g. \"New chapter on lenses, typos in the intro fixed\". At most 80 characters, no version number, " +
-          "no quotes, no trailing period, no Markdown. Leave out technical details such as file names or config, " +
-          "unless nothing else changed. " +
-          `Write it in ${LANGUAGE[options.locale]}. Answer with the note only.`,
-      },
-      { role: "user", content: user },
-    ],
-    // Reasoning models spend their thinking out of this budget too.
-    maxOutputTokens: Math.min(ai.maxOutputTokens, 2_000),
-    timeoutMs: ai.timeoutMs,
-    reasoningEffort: "low",
-    signal: options.signal,
-  })) {
-    if (event.type === "delta") text += event.text;
-    else if (event.type === "usage") options.onUsage(event);
+  const messages = [
+    {
+      role: "system" as const,
+      content:
+        "You name versions of a school book written in Markdown (a Hyperbook) for its version list. " +
+        "Given what changed, write ONE short note for the new version: what a teacher or student would notice, " +
+        'e.g. "New chapter on lenses, typos in the intro fixed". At most 80 characters, no version number, ' +
+        "no quotes, no trailing period, no Markdown. Leave out technical details such as file names or config, " +
+        "unless nothing else changed. " +
+        `Write it in ${LANGUAGE[options.locale]}. Answer with the note only.`,
+    },
+    { role: "user" as const, content: user },
+  ];
+
+  // Asked as the assistant asks: a provider that rejects the reasoning
+  // effort (400) is asked again without it, and a model that thought its
+  // whole budget away without writing the note gets the full budget once.
+  let reasoningEffort: "low" | undefined = "low";
+  let maxOutputTokens = Math.min(ai.maxOutputTokens, 4_000);
+  for (;;) {
+    let text = "";
+    let finish = "stop";
+    try {
+      for await (const event of streamChat({
+        baseUrl: ai.baseUrl,
+        apiKey: ai.apiKey,
+        model: ai.model,
+        messages,
+        maxOutputTokens,
+        timeoutMs: ai.timeoutMs,
+        reasoningEffort,
+        signal: options.signal,
+      })) {
+        if (event.type === "delta") text += event.text;
+        else if (event.type === "usage") options.onUsage(event);
+        else if (event.type === "finish") finish = event.finish;
+      }
+    } catch (error) {
+      if (error instanceof ProviderError && error.status === 400 && reasoningEffort) {
+        reasoningEffort = undefined;
+        continue;
+      }
+      throw error;
+    }
+    if (finish === "length" && !text.trim() && maxOutputTokens < ai.maxOutputTokens) {
+      maxOutputTokens = ai.maxOutputTokens;
+      reasoningEffort = undefined;
+      continue;
+    }
+    return cleanNote(text);
   }
-  return cleanNote(text);
 }
 
 /** The first line of the answer, without the quotes or label a model may add. */
