@@ -33,6 +33,7 @@ migrated and no old API is kept.
 - **M4 Instance operations** *(done except the launch itself, see [M4](#m4-instance-operations))*: signup modes, quotas, legal pages, email verification, backup docs. Launch of the OpenPatch instance.
 - **M5 Later**: OIDC, local runtime-asset mirror, custom domains (*done*, see [M5](#m5-custom-domains)), address suffixes and requests (*done*, see [M5](#m5-address-suffixes-and-name-requests)), sharing and forking.
 - **M7 Review** *(done except preview comments, see [M7](#m7-review--comments-commenters-and-access-links))*: comments on the source, commenter role, named access links without accounts.
+- **M8 Class view** *(overview, CSV and publish warning done; names on the device and end-of-year tools open; see [M8](#m8-class-view))*: what each student worked on, per element and page; names that stay on the teacher's device; CSV export; end-of-year tools.
 
 ---
 
@@ -514,9 +515,8 @@ POST /_hyperbook/api/login          { username, password, sharedDevice?, token? 
 POST /_hyperbook/api/login/key      { key, sharedDevice?, token? }      (QR code)
 POST /_hyperbook/api/logout
 GET  /_hyperbook/api/session        → { user: { username }, readonly } | 401
-GET  /_hyperbook/api/store          → { snapshot, lastEventId }
-POST /_hyperbook/api/store/events   { events, afterEventId } → { lastEventId } | 409
-POST /_hyperbook/api/store/snapshot { data } → { lastEventId }
+GET  /_hyperbook/api/store?since=N  → { revision, rows }
+POST /_hyperbook/api/store          { since, rows, replace? } → { revision, rows }
 POST /_hyperbook/api/impersonate    { code } → read-only session (one-time code)
 
 GET  /_hyperbook/login              login page (password form, QR fragment)
@@ -546,25 +546,60 @@ student_sessions  id_hash (sha256 of token), student_id, kind ('cookie'|'token')
 
 ## Store
 
-The wire format of `packages/markdown/assets/cloud.js` stays: events
-`{ table, schema, op: "create"|"update"|"delete", primKey, data }`, a Dexie
-export as snapshot, `afterEventId` as the watermark. The replay logic of the
-old cloud's `lib/eventSourcing.js` is ported to TypeScript with its tests.
+*Redesigned 2026-11-20* (the first version ported the old cloud's event log;
+it asked "leave page?" after every change and could overwrite unsent work
+with an older copy on the next page load). Sync is row-based and idempotent:
 
 ```
-store_heads   student_id (PK), revision, snapshot (json), snapshot_revision,
-              size_bytes, updated_at
-store_events  id, student_id, revision, table_name, table_schema, operation,
-              prim_key (json), data (json), created_at
+store_heads  student_id (PK), revision, size_bytes, updated_at
+store_rows   student_id, table_name, key (json), data (json | null = deleted),
+             revision, edited_at (device ms), updated_at
+                                                 PK (student_id, table_name, key)
 ```
 
-- `lastEventId` is the student's `revision`: +1 per accepted batch or
-  snapshot. An events batch whose `afterEventId` differs from the current
-  revision is refused with 409, in the same transaction as the append.
-- After 100 events the state is compacted into the snapshot and the events
-  are deleted (`STORE_COMPACT_EVENTS`).
-- Limits: `STORE_MAX_MB` (default 10) per request and per student state.
-- Everything is deleted with the student (cascade).
+- A row is `{ table, key, data }`: one row of the book's Dexie store, `data`
+  null once deleted. The server keeps one value per row.
+- `POST /store` stores the rows, advances the revision by one and stamps
+  the rows with it, then answers with the rows other devices stamped after
+  `since`. Sending the same rows again is harmless: there is no 409.
+  `replace: true` stores the rows unconditionally and deletes every row the
+  upload does not name (import, reset). At most 1000 rows per request.
+- Uploaded rows carry `at` (when the student changed the row, device clock,
+  capped at server time) and `base` (the revision the device had seen when
+  the row first changed). If the stored row has a later revision than
+  `base`, the device never saw it: the change with the later `at` wins, and
+  a losing row comes back in the answer so the device takes it over. A
+  device's clock only matters in such a conflict. When every row loses, the
+  revision stays.
+- `GET /store?since=N` returns the rows stamped after N; from 0 only the live
+  rows. Deletions are kept as rows with null data, so devices learn of them.
+- `cloud.js` marks every changed row in localStorage the moment it changes
+  (Dexie hooks; the sync's own writes are recognised by their transaction),
+  one localStorage entry per row, so tabs never overwrite each other's
+  marks, and removes a mark only when the server has that value. On page
+  load it uploads what is marked, takes in newer rows from other devices —
+  never over a marked row, checked inside the IndexedDB transaction — and
+  reloads once if the page shows outdated data. The first sync of a student
+  on a device (one tab at a time, under the lock) replaces the local store
+  with the saved state; when nothing is saved yet and the device never
+  synced this book, the device's own work (from before logging in) is
+  uploaded instead. Another student's data on the device is never uploaded.
+- After a 401 the device keeps marking changes and only pauses uploads;
+  the same student logging in again uploads them.
+- Tabs sync one at a time (Web Locks). Uploads go in batches of at most 500
+  rows and about 1 MB; a batch refused with 400 or 413 is split until the
+  refused row is alone, which is then set aside (marked refused) until it
+  changes or the reader retries, so it never holds up the other rows. Rows
+  refused during a replace (import, reset) are marked refused too.
+- Uploads over 8 KB come gzip-compressed (`Content-Encoding: gzip`, allowed
+  through CORS); the server unpacks at most `STORE_MAX_MB` and answers 413
+  beyond. The keepalive upload on page hide stays plain.
+- Limits: `STORE_MAX_MB` (default 10) per request and per student state (the
+  live rows, counted in UTF-8 bytes). A full state answers 507 (not 413,
+  which makes the client split): the client stops retrying and says so. An
+  upload that does not make the state larger is always taken, so a student
+  over the limit can still delete work. Everything is deleted with the
+  student (cascade).
 
 ## Private books
 
@@ -592,7 +627,7 @@ shown. Every impersonation is in the audit log.
 ## Teachers' view
 
 The group page shows each student's last save, and offers "View as
-student" and "Download data" (the reconstructed state as JSON, audited).
+student" and "Download data" (the saved rows by table as JSON, audited).
 
 ## Changes to books (`@hyperbook/markdown`, `@hyperbook/types`)
 
@@ -630,8 +665,8 @@ Editing in the browser (M3), signup and quotas (M4), single sign-on (M5).
   sessions (a lost card should stop working at once).
 - The platform's pages on book hosts pick English or German from the
   browser's language.
-- `GET /_hyperbook/api/store` always answers with the watermark, also before
-  anything was saved, and `cloud.js` adopts it; the old cloud answered 404.
+- `GET /_hyperbook/api/store` always answers with the revision, also before
+  anything was saved; the old cloud answered 404.
 - Only the root `hyperbook.json` gets `cloud.sameOrigin`; the books of a
   library (`hyperlibrary.json`) do not log in yet.
 
@@ -1742,3 +1777,177 @@ in another browser, a `git push`, a zip upload.
   emitter. Over HTTP/1.1, each open editor holds one of the browser's six
   connections per host. Production runs HTTP/2 behind Caddy, so this
   matters only for the Vite dev proxy.
+
+
+---
+
+# M8: Class view
+
+*Planned and built 2026-11-21* (see the work order for what is open). Goal: a teacher sees what the students of a group
+worked on, without opening each student's book. The platform already keeps
+every row a student's book saves (`store_rows`); it only shows the time of
+the last save. Students stay anonymous on the server.
+
+## Decisions
+
+| Topic | Decision |
+|---|---|
+| What is shown | *Worked on* and *last changed*, per student and element. No "done" or score, except where an element knows it (later, per element). |
+| Where elements come from | An element index the build writes; the server never parses Markdown. |
+| Real names | Only in the teacher's browser (local storage), never sent to the server. |
+| Export | CSV of the overview (usernames, not names); names are added in the browser if the teacher has them. |
+| Live view | "Online now" from `student_sessions.last_seen_at`, nothing more. |
+| Students | Told on the login page that their teacher can see their work. |
+
+## Element index
+
+- Element ids come from the author's `id=` or from the directive's content
+  (`resolveDirectiveId`, `packages/markdown/src/directiveId.ts`). Each
+  directive that keeps a reader's work calls `recordStoredElement` with
+  its final id (`packages/markdown/src/storedElements.ts`).
+- Builds of books with `cloud` write `_hyperbook/elements.json` into their
+  output (`packages/hyperbook/build.ts`, `writeElementIndex`), so it lands
+  in `builds/<id>/` like the rest of the site:
+
+  ```
+  { version: 1,
+    pages: [{ href, title, sections?: [outermost, …],
+              elements: [{ id, name, table, match?: "prefix" | "suffix",
+                           also?: [{ table, match }] }] }] }
+  ```
+
+  Pages in the navigation's order, titled as in the navigation, then
+  glossary entries; pages without tasks are left out. `hyperbook render` reports the same per page
+  (`storedElements`, `title`), for the publish warning.
+- Directive → store table: `STORE_OF_DIRECTIVE`. Most elements keep one
+  row keyed by their id (text input, structogram, learning map, JMP,
+  bitflow, GeoGebra, H5P, Excalidraw, multievent, ABC editor, and the IDEs on
+  the shared shell in the `ide` table). The embedded Online-IDE and
+  SQL-IDE keep one row per file, keyed id + file name, plus the file list
+  under the bare id (`match: "prefix"`; the SQL-IDE's database changes
+  `also: sqlideDatabases`, `match: "suffix"`). A checklist item is stored
+  under `markdown-checklist:<page path>:<item id>`; its element id is
+  `:<item id>` with `match: "suffix"`.
+- A row goes to the element with an equal key, else the longest id it
+  starts or ends with (`rowMatcher` in `domain/overview.ts`).
+- Multievent used to key its state by position and page path; it now
+  saves under its directive id (`data-id`) and moves an old save to it
+  when the page loads. ABC editors had no id at all (every editor of a
+  book shared one saved tune); they now have one, and the shared tune is
+  not migrated.
+- The platform parses the index leniently (`parseElementIndex`): elements
+  or pages it does not understand are left out, not the whole index. It
+  is cached per published build.
+- Rows that belong to no element of the live version, except page state
+  (`tabs`, `collapsibles`, `bookmarks`, …), count as *Other*, by task: an
+  embedded IDE's files and database count once (`orphanTasks`).
+
+## API (admin host, editors and up)
+
+```
+GET /api/groups/:id/overview[?known=<buildId>]
+      → { indexed, buildId, pages (null when known is the live build),
+          students: [{ id, username, lastLoginAt, lastSeenAt,
+                       cells: { "<table>/<id>": editedAt }, elsewhere }] }
+GET /api/groups/:id/overview.csv[?section=[…]&worked=0|1]   audited
+GET /api/students/:id/element?table=&id=   one element's rows (audited)
+GET /api/students/:id/elsewhere            the "Other" rows (audited)
+GET /api/books/:id/check                   + workLeftBehind once every page rendered
+```
+
+The overview reads `store_rows` (table, key, time; never values),
+`student_sessions` and `store_heads` of the group's students; values are
+fetched one element at a time. Answers carry `Cache-Control: private,
+no-store`; the CSV also `Vary: Accept-Language, Cookie`, and cells that
+start like a formula get a leading `'`.
+
+`lastSeenAt` is the later of a request of the student's own sessions
+(kept to the minute; impersonation excluded) and their last upload.
+
+## UI
+
+- **Group page** has tabs: *Students* and *Overview*.
+- **Overview**: students in rows; *Worked on* and *Other* next to the
+  names; then one column per page with how many of its tasks a student
+  worked on, opening into one column per task. A filled circle opens the
+  answer read-only (text, code and IDE files by name, a tune, ticked or
+  not; other elements as their raw saved data), with *View as student*.
+  It refreshes every 30 seconds while the tab is visible, without
+  sending the pages again.
+- **Other** opens a student's work in no task of the live version, with
+  the old ids (shown only once a version is published).
+- **Online now**: a dot next to students seen in the last two minutes.
+- *(not built)* **One element across the class**: every student's answer
+  to one task side by side.
+- *(not built)* **Names on this device**.
+- *(not built)* Images of structograms and drawings in the answer view.
+
+## Changes to a book
+
+The overview follows the published version. A task removed, or changed
+without an `id=` (its id comes from its content), leaves students' work
+without its task: it stays saved and shows under *Other*. The publish
+dialog warns first: it runs the page check of the latest save, which
+collects every page's tasks, and lists the live version's tasks with
+students' work that the save no longer has, with the old ids and the
+number of students (`workLeftBehind`). Giving a changed task its old id
+keeps the work; *Publish anyway* publishes as before.
+
+## Big books (2026-11-21)
+
+Tried on hyperbook-informatik: 394 pages with 1,338 tasks, a 220 KB
+index; the platform build took about a minute, the overview answers in
+under 10 ms with about 270 KB for 24 students.
+
+- **A column per page**, showing how many of its tasks a student worked
+  on; a page opens into its task columns.
+- **Only pages with work** by default (a class works through one
+  chapter), and a **section** picker from the navigation: the index names
+  each page's sections (`sections`) and takes its title from the
+  navigation (`name` or `title`). Both choices are kept per group in the
+  browser; the CSV follows them (`?section=[…]&worked=1`).
+- The index of a published build is read once and cached in memory.
+- Identical tasks on two pages share one id (it comes from the content),
+  so the book stores one answer for both, and the overview shows it on
+  both pages.
+
+## Later, per element
+
+Elements that know about success can report it in their row (e.g. bitflow
+attempts, checklist items ticked, learningmap nodes done). The overview
+then shows a state instead of a timestamp. Each needs a change in its
+element, so it is done one element at a time.
+
+## End of the school year
+
+- **Archive a group**: hidden from the book page, students can no longer
+  log in, data kept until deleted.
+- **Export a group**: one zip with every student's rows (today's
+  per-student JSON) plus the overview CSV.
+- **Reset**: delete the saved work of selected students but keep their
+  accounts (a new class with the old cards).
+- **Copy a book** for next year or a colleague: a new book from the
+  current `main`, without groups, members or links (the "forking" of M5).
+
+## Work order
+
+1. *(done)* Element index in the build (`@hyperbook/markdown`, `hyperbook` CLI);
+   tests on a sample book.
+2. *(done)* Overview API and CSV; tests with seeded `store_rows`
+   (`tests/overview.test.ts`).
+3. *(done)* Overview tab; value viewer for text and code
+   (`tests/e2e/class-view.e2e.ts`); big books (page columns, sections,
+   only pages with work); *Other*; the publish warning.
+4. Names on this device; class list with names.
+5. *(done with 3)* Online now.
+6. Archive, export, reset, copy a book.
+7. Per-element states, one element at a time.
+
+## Decided (2026-11-21)
+
+- **Students are told.** The login page on the book's host and the login
+  form in books hosted elsewhere say: "Your work in this book is saved to
+  your account. Your teacher can see it." *(done)*
+- **No release of content per group.** Showing solutions after the lesson
+  stays with the book's own means (e.g. `protect`); the platform does not
+  get a per-group switch.

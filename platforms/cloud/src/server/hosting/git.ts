@@ -1,3 +1,4 @@
+import { LocalizedError } from "../localized-error";
 import { spawn, type ChildProcessByStdio } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import {
@@ -668,10 +669,10 @@ export class ChangeConflictError extends Error {
   }
 }
 
-export class BookTooLargeError extends Error {
+export class BookTooLargeError extends LocalizedError {
+  override name = "BookTooLargeError";
   constructor(readonly maxBytes: number) {
-    super(`The book would be larger than ${Math.round(maxBytes / 1024 / 1024)} MB`);
-    this.name = "BookTooLargeError";
+    super("errors.files.bookTooLarge", { mb: Math.round(maxBytes / 1024 / 1024) });
   }
 }
 

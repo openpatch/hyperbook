@@ -47,6 +47,30 @@ Schülerinnen und Schüler melden sich mit Benutzername und Passwort von ihrer Z
 
 Lehrkräfte können die Arbeit einer Schülerin oder eines Schülers in Hyperbook Cloud mit **View as student** öffnen. Das Buch zeigt dann ein Banner mit dem Namen und speichert nichts.
 
+## Was Lehrkräfte sehen
+
+Die Anmeldeseite sagt den Schülerinnen und Schülern, dass ihre Arbeit in ihrem Zugang gespeichert wird und ihre Lehrkraft sie sehen kann.
+
+In Hyperbook Cloud zeigt der Reiter **Übersicht** einer Gruppe, was jede Schülerin und jeder Schüler in der veröffentlichten Version des Buchs bearbeitet hat:
+
+- Eine Spalte pro Seite mit der Zahl der bearbeiteten Aufgaben. Ein Klick auf eine Seite öffnet eine Spalte pro Aufgabe, ein Klick auf einen gefüllten Kreis zeigt die Antwort (Text, Code, eine Melodie, ein abgehakter Punkt einer Checkliste, …).
+- Zunächst erscheinen nur Seiten, auf denen jemand aus der Gruppe gearbeitet hat. Eine Auswahl beschränkt die Übersicht auf einen Abschnitt. Beides wird pro Gruppe gemerkt.
+- Ein Punkt markiert, wer in den letzten zwei Minuten im Buch war. Die Übersicht aktualisiert sich alle 30 Sekunden.
+- **Andere** zeigt Arbeit, die zu keiner Aufgabe der veröffentlichten Version gehört.
+- **Als CSV herunterladen** exportiert, was gerade zu sehen ist, mit Benutzernamen und Zeiten.
+
+Aufgaben sind Texteingaben, die Code-Editoren und IDEs, Struktogramme, Learningmaps, Zeichnungen, JMP, Bitflow, GeoGebra, H5P, Multievent, ABC-Editoren und Punkte von Checklisten.
+
+### Arbeit behalten, wenn eine Aufgabe geändert wird
+
+Die gespeicherte Arbeit einer Aufgabe wird über ihre id gefunden. Ohne `id` ergibt sich die id aus dem Inhalt der Aufgabe: Wird die Aufgabe geändert (auch nur ein Tippfehler), bekommt sie eine neue id. Das Buch zeigt die früheren Antworten dann nicht mehr, sie erscheinen unter **Andere**. Vor dem Veröffentlichen listet Hyperbook Cloud die betroffenen Aufgaben mit Arbeit von Schülerinnen und Schülern und ihre alten ids auf. Mit der alten id behält eine geänderte Aufgabe die Arbeit, zum Beispiel:
+
+```md
+::textinput{id="a1b2c3d4"}
+```
+
+Wichtige Aufgaben bekommen am besten von Anfang an eine `id`.
+
 ## Was gespeichert wird
 
 Nach der Anmeldung wird alles, was die interaktiven Elemente des Buchs speichern (Code-Editoren, Lesezeichen, Zeichnungen, Antworten, …), in Hyperbook Cloud gesichert:
@@ -54,7 +78,7 @@ Nach der Anmeldung wird alles, was die interaktiven Elemente des Buchs speichern
 - **Geräteübergreifend**: Schülerinnen und Schüler machen auf jedem Gerät dort weiter, wo sie aufgehört haben.
 - **Offline**: Änderungen ohne Verbindung bleiben erhalten und werden gespeichert, sobald die Verbindung zurück ist.
 - **Speicheranzeige**: Ein Symbol in der Werkzeugleiste zeigt, ob alles gespeichert ist. Jeder Zustand hat eine eigene Form, ist also nicht nur an der Farbe zu erkennen, und der Knopf nennt den Zustand für Screenreader.
-- **Hinweise**: Zustände, bei denen man etwas tun kann (fehlgeschlagenes Speichern, offline, Zusammenführung mit einer anderen Sitzung), erscheinen als Hinweis unten auf der Seite, wo sinnvoll mit einem Knopf zum erneuten Versuchen. Erfolgreiches Speichern bleibt still.
+- **Hinweise**: Zustände, bei denen man etwas tun kann (fehlgeschlagenes Speichern, offline, Arbeit von einem anderen Gerät), erscheinen als Hinweis unten auf der Seite, wo sinnvoll mit einem Knopf zum erneuten Versuchen oder Neuladen. Erfolgreiches Speichern bleibt still.
 
 Während man angemeldet ist, sind die Knöpfe für lokalen Export, Import und Zurücksetzen ausgeblendet, damit sie nicht mit dem gespeicherten Stand kollidieren.
 
@@ -62,30 +86,29 @@ Flüchtige Zustände der Oberfläche (Cursorposition, Scrollposition, Fenstergr�
 
 ## Wie gespeichert wird
 
-Hyperbook Cloud speichert Änderungen, nicht den ganzen Speicher:
+Maßgeblich ist die lokale Datenbank des Buchs; Hyperbook Cloud hält eine Kopie davon, Zeile für Zeile.
 
-1. **Änderungen werden festgehalten**, sobald sie passieren: jedes Anlegen, Ändern und Löschen in der lokalen Datenbank des Buchs, bei Änderungen nur die geänderten Felder.
-2. **Sie werden gebündelt gesendet**, nach 2 Sekunden ohne Änderung (oder spätestens alle 10 Sekunden).
-3. **Der Server fasst sie zusammen** zu einem Schnappschuss, nach 100 Änderungen.
-4. **Beim Laden** wird der Stand aus dem Schnappschuss und den Änderungen danach wiederhergestellt.
+1. **Jede Änderung wird sofort markiert**, auf dem Gerät, als „noch nicht hochgeladen“. Die Markierung übersteht das Verlassen der Seite, das Schließen des Tabs und den Verlust der Verbindung.
+2. **Markierte Zeilen werden hochgeladen**, nach 1 Sekunde ohne Änderung (oder spätestens alle 5 Sekunden), wenn der Tab in den Hintergrund geht und wenn die nächste Seite lädt. Ein Upload sendet den aktuellen Wert jeder markierten Zeile; die Markierung verschwindet, sobald der Server ihn hat. Viele markierte Zeilen werden in mehreren Anfragen hochgeladen. Eine Zeile, die der Server ablehnt (etwa weil sie zu groß ist), wird zurückgestellt und als Speicherfehler angezeigt; die anderen Zeilen werden trotzdem hochgeladen, und die Zeile wird erneut versucht, wenn sie sich ändert oder auf **Erneut versuchen** geklickt wird.
+3. **Jeder Upload erhöht die Revision** der Schülerin oder des Schülers. Ein Gerät merkt sich die zuletzt gesehene Revision und übernimmt bei jedem Seitenaufruf und Upload nur die Zeilen, die andere Geräte danach hochgeladen haben.
 
-Ein Bündel über 512 KB (zum Beispiel große Zeichnungen) wird stattdessen als vollständiger Schnappschuss gesendet.
+Uploads über 8 KB werden mit gzip komprimiert; Code, Zeichnungen und andere Zustände von Elementen werden dadurch meist 3- bis 10-mal kleiner.
 
-### Zwei Geräte gleichzeitig
+Eine Zeile zweimal zu senden schadet nicht, also gibt es nichts aufzulösen: Beim Verlassen einer Seite kommt nie eine Nachfrage, und kein Speichern wird als veraltet abgelehnt.
 
-Jedes Speichern nennt den letzten Stand, den das Gerät kannte. Hat ein anderes Gerät dazwischen gespeichert, lehnt der Server ab, und das Gerät
+### Mehrere Geräte
 
-1. lädt den aktuellen Stand,
-2. wendet seine eigenen ungespeicherten Änderungen darauf an, lokal und auf dem Server,
-3. erklärt die Zusammenführung in einem Hinweis und lädt die Seite neu, damit die Elemente den zusammengeführten Stand zeigen. Der Hinweis bietet **Jetzt neu laden** an.
+Ändern zwei Geräte dieselbe Zeile (dieselbe Antwort, dieselbe Zeichnung), gilt die spätere Änderung, nach der Uhr des jeweiligen Geräts, egal wie spät das andere Gerät seine Änderung hochlädt. Ein Schulrechner, der eine Änderung eine Woche lang behalten hat, überschreibt nicht, was zu Hause seitdem entstanden ist; er übernimmt stattdessen die neuere Arbeit. Ein Gerät überschreibt nie eine Zeile, die es noch nicht hochgeladen hat, mit einer von einem anderen Gerät.
 
-Bei einer Zusammenführung geht nichts verloren. Der Server prüft und speichert in einem Schritt, sodass nicht zwei Geräte im selben Moment beide durchkommen.
+Mehrere Tabs des Buchs auf einem Gerät teilen sich ihre Markierungen und laden nacheinander hoch.
+
+Arbeit von einem anderen Gerät, die ankommt, während eine Seite offen ist, landet sofort in der lokalen Datenbank. Die Elemente zeigen sie nach einem Neuladen: sofort, wenn auf der Seite noch nichts geändert wurde, sonst bietet ein Hinweis **Jetzt neu laden** an.
+
+Meldet sich jemand zum ersten Mal auf einem Gerät an, oder meldet sich jemand anderes darauf an, werden die lokalen Daten des Geräts durch die gespeicherte Arbeit ersetzt. Ist noch nichts gespeichert, wird stattdessen das, was auf dem Gerät vor dem Anmelden bearbeitet wurde, zur gespeicherten Arbeit. Beim Abmelden wird hochgeladen, was noch fehlt, und das Gerät geleert; ließ sich etwas nicht hochladen, fragt das Buch vorher nach.
 
 ### Offline und Verlassen der Seite
 
-Änderungen ohne Verbindung warten in einer Warteschlange und werden der Reihe nach gesendet, sobald die Verbindung zurück ist; hat ein anderes Gerät inzwischen gespeichert, werden sie wie oben zusammengeführt. Die Warteschlange fasst höchstens 100 Bündel; darüber hinaus wird ein Schnappschuss gesendet.
-
-Wird die Seite geschlossen, während noch Änderungen warten, werden sie mit einer Anfrage gesendet, die die Seite überdauert. Bündel über 60 KB lassen sich so nicht senden; dann ist die Nachfrage des Browsers nach ungespeicherten Änderungen das Zeichen, kurz zu warten.
+Änderungen ohne Verbindung bleiben markiert und werden hochgeladen, sobald die Verbindung zurück ist, auch wenn dazwischen Seiten gewechselt oder der Browser geschlossen wurde. Geht eine Seite in den Hintergrund, werden markierte Zeilen zusätzlich mit einer Anfrage gesendet, die die Seite überdauert (bis 60 KB); die Markierungen bleiben, bis ein späterer Upload sie bestätigt.
 
 ## Hyperbook Cloud betreiben
 

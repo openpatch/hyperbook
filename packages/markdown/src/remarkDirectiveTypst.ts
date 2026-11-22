@@ -13,6 +13,7 @@ import {
   requestJS,
 } from "./remarkHelper";
 import { resolveDirectiveId } from "./directiveId";
+import { recordStoredElement } from "./storedElements";
 import { i18n } from "./i18n";
 import {
   findTypstImports,
@@ -52,6 +53,7 @@ export default (ctx: HyperbookContext) => () => {
           id = resolveDirectiveId(file, node),
           mode = "preview",
         } = node.attributes || {};
+        recordStoredElement(file, name, id, node);
         const data = node.data || (node.data = {});
         const resolvedHeight = cssHeight(height);
         const isEditMode = mode === "edit";

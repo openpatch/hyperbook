@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { api, unwrap } from "@/lib/api";
 import type { Book } from "@/lib/books";
+import { copyText } from "@/lib/clipboard";
 
 /*
  * The book page's access links (docs/cloud-platform.md, M7): named links
@@ -65,8 +66,8 @@ export function LinksSection({ book }: { book: Book }) {
       const { url } = await unwrap(
         api.books[":id"].links[":linkId"].url.$get({ param: { id, linkId: String(linkId) } }),
       );
-      await navigator.clipboard.writeText(url);
-      toast.success(t("links.copied"));
+      if (await copyText(url)) toast.success(t("links.copied"));
+      else toast.error(t("common.copyFailed"));
     } catch (error) {
       toast.error(errorText(error, t("common.somethingWrong")));
     }

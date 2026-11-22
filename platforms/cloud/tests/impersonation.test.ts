@@ -16,9 +16,9 @@ async function world() {
   // Ada saves something.
   const ada = bookClient(instance, HOST);
   await ada.post("/_hyperbook/api/login", { username: "ada", password: "secret-pass" });
-  await ada.post("/_hyperbook/api/store/events", {
-    events: [{ table: "bookmarks", schema: "path", op: "create", primKey: "/a", data: { path: "/a" } }],
-    afterEventId: 0,
+  await ada.post("/_hyperbook/api/store", {
+    since: 0,
+    rows: [{ table: "bookmarks", key: "/a", data: { path: "/a" } }],
   });
   return { instance, owner, other, book, group, student };
 }
@@ -34,7 +34,7 @@ describe("teachers and students' work", () => {
     const { owner, other, student } = await world();
     const res = await owner.c.get(`/api/students/${student.id}/data`);
     expect(res.headers.get("content-disposition")).toContain("ada.json");
-    expect(res.body).toMatchObject({ username: "ada", lastEventId: 1 });
+    expect(res.body).toMatchObject({ username: "ada", revision: 1, tables: { bookmarks: [{ path: "/a" }] } });
     expect((await other.c.get(`/api/students/${student.id}/data`)).status).toBe(404);
   });
 
@@ -53,10 +53,10 @@ describe("teachers and students' work", () => {
     expect(res.setCookie).toMatch(/Max-Age=3600/);
 
     expect((await teacher.get("/_hyperbook/api/session")).body).toEqual({ user: { username: "ada" }, readonly: true });
-    expect((await teacher.get("/_hyperbook/api/store")).body.lastEventId).toBe(1);
-    const write = await teacher.post("/_hyperbook/api/store/events", {
-      events: [{ table: "bookmarks", op: "delete", primKey: "/a", data: null }],
-      afterEventId: 1,
+    expect((await teacher.get("/_hyperbook/api/store")).body.revision).toBe(1);
+    const write = await teacher.post("/_hyperbook/api/store", {
+      since: 1,
+      rows: [{ table: "bookmarks", key: "/a", data: null }],
     });
     expect(write.status).toBe(403);
 

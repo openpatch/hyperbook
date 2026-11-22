@@ -12,6 +12,7 @@ import {
   registerDirective,
 } from "./remarkHelper";
 import { resolveDirectiveId } from "./directiveId";
+import { recordStoredElement } from "./storedElements";
 import { i18n } from "./i18n";
 import {
   collectWorkspace,
@@ -39,6 +40,7 @@ export default (ctx: HyperbookContext) => () => {
           height,
           library,
         } = node.attributes || {};
+        recordStoredElement(file, name, id, node);
         const data = node.data || (node.data = {});
 
         expectDirective(node, file, name, ["leaf", "container"]);

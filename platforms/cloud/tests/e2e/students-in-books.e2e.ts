@@ -102,7 +102,15 @@ describe("students in their book", () => {
 
     // A change in the book's store is saved to the platform.
     await waitFor(
-      () => device.evaluate(() => (window as any).hyperbook.cloud._internal().syncManager !== null),
+      () =>
+        device
+          .evaluate(async () => {
+            const cloud = (window as any).hyperbook.cloud;
+            await cloud._internal().ready;
+            const { tracking, reloading } = cloud._internal();
+            return tracking && !reloading;
+          })
+          .catch(() => false),
       Boolean,
     );
     await device.evaluate(() =>
@@ -110,9 +118,9 @@ describe("students in their book", () => {
     );
     const state = await waitFor(
       () => device.evaluate(() => fetch("/_hyperbook/api/store").then((r) => r.json())),
-      (s: any) => s.lastEventId >= 1,
+      (s: any) => s.revision >= 1,
     );
-    expect(JSON.stringify(state.snapshot)).toContain("From device 1");
+    expect(state.rows).toContainEqual({ table: "bookmarks", key: "/e2e", data: { path: "/e2e", label: "From device 1" } });
     await device.context().close();
   }, 60_000);
 
@@ -147,6 +155,18 @@ describe("students in their book", () => {
     ]);
     await view.waitForURL(`${bookUrl}/`);
     await view.locator("#impersonation-banner").getByText("ada").waitFor();
+    // The first sync on this device loads the saved work, then reloads.
+    await waitFor(
+      () =>
+        view
+          .evaluate(async () => {
+            const cloud = (window as any).hyperbook.cloud;
+            await cloud._internal().ready;
+            return !cloud._internal().reloading;
+          })
+          .catch(() => false),
+      Boolean,
+    );
     const row = await waitFor(() => bookmark(view, "/e2e"), Boolean);
     expect(row).toMatchObject({ label: "From device 1" });
 

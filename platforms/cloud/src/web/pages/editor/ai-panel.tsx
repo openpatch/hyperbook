@@ -72,6 +72,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { AiDiffDialog } from "./ai-diff-dialog";
 import { Markdown } from "@/components/markdown";
+import { copyText } from "@/lib/clipboard";
 import { cn } from "@/lib/utils";
 
 /*
@@ -1374,7 +1375,9 @@ function CopyButton({ text }: { text: string }) {
       title={t("editor.ai.copy")}
       aria-label={t("editor.ai.copy")}
       onClick={() =>
-        void navigator.clipboard.writeText(text).then(() => toast.success(t("editor.ai.copied")))
+        void copyText(text).then((ok) =>
+          ok ? toast.success(t("editor.ai.copied")) : toast.error(t("common.copyFailed")),
+        )
       }
     >
       <CopyIcon aria-hidden />

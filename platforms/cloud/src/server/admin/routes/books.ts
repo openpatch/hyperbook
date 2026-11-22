@@ -1,7 +1,8 @@
-import { and, eq } from "drizzle-orm";
+import { and, count, countDistinct, eq, inArray } from "drizzle-orm";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { z } from "zod";
+import { httpError } from "../../errors";
 import {
   addMemberInput,
   commentMailInput,
@@ -11,7 +12,7 @@ import {
   updateMemberInput,
 } from "../../../shared/schemas";
 import { audit } from "../../audit";
-import { bookMembers, bookSlugs, books, users } from "../../db/schema";
+import { bookMembers, bookSlugs, books, builds as buildRows, groups, students, users } from "../../db/schema";
 import type { Deps } from "../../deps";
 import {
   type BookRow,
@@ -135,7 +136,47 @@ export function bookRoutes({ db, config, builds, checks, dns, fetchUrl }: Deps) 
               .where(eq(bookMembers.userId, user.id))
               .orderBy(books.title)
               .all();
-      return c.json(rows.map(({ book, role }) => publicBook(config, book, role)));
+      const ids = rows.map(({ book }) => book.id);
+      // What the list shows of each book's classes: one query for all books.
+      const classes = new Map(
+        (ids.length === 0
+          ? []
+          : db
+              .select({
+                bookId: groups.bookId,
+                groupCount: countDistinct(groups.id),
+                studentCount: count(students.id),
+              })
+              .from(groups)
+              .leftJoin(students, eq(students.groupId, groups.id))
+              .where(inArray(groups.bookId, ids))
+              .groupBy(groups.bookId)
+              .all()
+        ).map((r) => [r.bookId, r]),
+      );
+      // Saves since the live version (commits on main minus the live build's).
+      const liveIds = rows.flatMap(({ book }) => (book.publishedBuildId ? [book.publishedBuildId] : []));
+      const liveCommits = new Map(
+        (liveIds.length === 0
+          ? []
+          : db
+              .select({ id: buildRows.id, commitCount: buildRows.commitCount })
+              .from(buildRows)
+              .where(inArray(buildRows.id, liveIds))
+              .all()
+        ).map((b) => [b.id, b.commitCount]),
+      );
+      return c.json(
+        rows.map(({ book, role }) => {
+          const live = book.publishedBuildId ? liveCommits.get(book.publishedBuildId) : undefined;
+          return {
+            ...publicBook(config, book, role),
+            groupCount: classes.get(book.id)?.groupCount ?? 0,
+            studentCount: classes.get(book.id)?.studentCount ?? 0,
+            unpublishedChanges: live === undefined ? null : Math.max(0, book.commitCount - live),
+          };
+        }),
+      );
     })
 
     .post("/", validate("json", createBookInput), (c) => {
@@ -143,9 +184,7 @@ export function bookRoutes({ db, config, builds, checks, dns, fetchUrl }: Deps) 
       const input = c.req.valid("json");
       const { max_books } = getEntitlements(db, user);
       if (max_books !== null && ownedBookCount(db, user.id) >= max_books) {
-        throw new HTTPException(403, {
-          message: `You may own at most ${max_books} book(s). Delete one or ask an admin for more.`,
-        });
+        throw httpError(403, "errors.books.maxBooks", { max: max_books });
       }
       // In suffix mode, a new suffix for each try: another book may hold the address.
       let slug = input.slug;
@@ -209,7 +248,7 @@ export function bookRoutes({ db, config, builds, checks, dns, fetchUrl }: Deps) 
         !getEntitlements(db, user).private_books
       ) {
         throw new HTTPException(403, {
-          message: "Your account may not make books private. Ask an admin.",
+          message: "errors.books.privateNotAllowed",
         });
       }
 
@@ -218,7 +257,7 @@ export function bookRoutes({ db, config, builds, checks, dns, fetchUrl }: Deps) 
         if (suffixApplies(db, user)) {
           if (book.slugGrantedAt) {
             throw new HTTPException(403, {
-              message: "An admin gave this book its address. Ask an admin to change it.",
+              message: "errors.books.slugGrantedChange",
             });
           }
           const suffix = book.slugSuffix ?? newSlugSuffix();
@@ -277,10 +316,10 @@ export function bookRoutes({ db, config, builds, checks, dns, fetchUrl }: Deps) 
       const { book, role } = bookAccess(db, user, c.req.valid("param").id, "owner");
       const { domain } = c.req.valid("json");
       if (book.source !== "hosted") {
-        throw new HTTPException(400, { message: "Only books hosted here can have a custom domain" });
+        throw new HTTPException(400, { message: "errors.books.domainHostedOnly" });
       }
       if (!getEntitlements(db, user).custom_domain) {
-        throw new HTTPException(403, { message: "Your account may not use custom domains. Ask an admin." });
+        throw new HTTPException(403, { message: "errors.books.domainNotAllowed" });
       }
       const problem = domainNameProblem(config, domain);
       if (problem) throw new HTTPException(400, { message: problem });
@@ -310,7 +349,7 @@ export function bookRoutes({ db, config, builds, checks, dns, fetchUrl }: Deps) 
     .post("/:id/domain/check", idParam, async (c) => {
       const user = c.get("user");
       const { book, role } = bookAccess(db, user, c.req.valid("param").id, "owner");
-      if (!book.domain) throw new HTTPException(404, { message: "This book has no custom domain" });
+      if (!book.domain) throw new HTTPException(404, { message: "errors.books.noDomain" });
       await check(book, user.id);
       return c.json(publicBook(config, reload(book.id), role));
     })
@@ -320,8 +359,8 @@ export function bookRoutes({ db, config, builds, checks, dns, fetchUrl }: Deps) 
     .post("/:id/domain/https-check", idParam, async (c) => {
       const user = c.get("user");
       const { book } = bookAccess(db, user, c.req.valid("param").id, "owner");
-      if (!book.domain) throw new HTTPException(404, { message: "This book has no custom domain" });
-      if (!book.domainVerifiedAt) throw new HTTPException(409, { message: "The domain is not active yet" });
+      if (!book.domain) throw new HTTPException(404, { message: "errors.books.noDomain" });
+      if (!book.domainVerifiedAt) throw new HTTPException(409, { message: "errors.books.domainInactive" });
       return c.json(await checkDomainHttps(book.domain, fetchUrl));
     })
 
@@ -360,7 +399,7 @@ export function bookRoutes({ db, config, builds, checks, dns, fetchUrl }: Deps) 
         .where(and(eq(bookMembers.bookId, book.id), eq(bookMembers.userId, user.id)))
         .returning()
         .get();
-      if (!updated) throw new HTTPException(404, { message: "You are not a member of this book" });
+      if (!updated) throw new HTTPException(404, { message: "errors.members.notYou" });
       return c.json({ commentMail: updated.commentMail });
     })
 
@@ -376,7 +415,7 @@ export function bookRoutes({ db, config, builds, checks, dns, fetchUrl }: Deps) 
       const member = db.select().from(users).where(eq(users.email, input.email)).get();
       if (!member || member.disabledAt) {
         throw new HTTPException(404, {
-          message: "There is no account with this email. Ask an admin to create one.",
+          message: "errors.members.noAccount",
         });
       }
       db.insert(bookMembers)
@@ -406,9 +445,9 @@ export function bookRoutes({ db, config, builds, checks, dns, fetchUrl }: Deps) 
         .from(bookMembers)
         .where(and(eq(bookMembers.bookId, book.id), eq(bookMembers.userId, userId)))
         .get();
-      if (!current) throw new HTTPException(404, { message: "Not a member of this book" });
+      if (!current) throw new HTTPException(404, { message: "errors.members.notMember" });
       if (current.role === "owner" && role !== "owner" && ownerCount(db, book.id) === 1) {
-        throw new HTTPException(400, { message: "A book needs at least one owner" });
+        throw new HTTPException(400, { message: "errors.members.lastOwner" });
       }
       db.update(bookMembers)
         .set({ role })
@@ -434,9 +473,9 @@ export function bookRoutes({ db, config, builds, checks, dns, fetchUrl }: Deps) 
         .from(bookMembers)
         .where(and(eq(bookMembers.bookId, book.id), eq(bookMembers.userId, userId)))
         .get();
-      if (!current) throw new HTTPException(404, { message: "Not a member of this book" });
+      if (!current) throw new HTTPException(404, { message: "errors.members.notMember" });
       if (current.role === "owner" && ownerCount(db, book.id) === 1) {
-        throw new HTTPException(400, { message: "A book needs at least one owner" });
+        throw new HTTPException(400, { message: "errors.members.lastOwner" });
       }
       db.delete(bookMembers)
         .where(and(eq(bookMembers.bookId, book.id), eq(bookMembers.userId, userId)))

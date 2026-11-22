@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link, useParams, useSearchParams } from "react-router";
 import { useTranslation } from "react-i18next";
+import { QueryState } from "@/components/query-state";
 import { QrCode } from "@/components/qr-code";
 import { Button } from "@/components/ui/button";
 import { api, unwrap } from "@/lib/api";
@@ -13,14 +14,16 @@ const loadCredentials = (id: string) =>
 /**
  * Printable credentials: a class list for the teacher (with an empty column
  * for real names) or cut-out cards for the students. Outside the app layout,
- * so the printout is just the sheet.
+ * so the printout is just the sheet. `?students=1,2` prints only those
+ * students, e.g. the one whose card was lost.
  */
 export function PrintPage() {
   const { t } = useTranslation();
   const id = useParams().id!;
   const [params, setParams] = useSearchParams();
   const layout = params.get("layout") === "list" ? "list" : "cards";
-  const { data, error } = useQuery({
+  const only = params.get("students");
+  const query = useQuery({
     queryKey: ["groups", id, "credentials"],
     queryFn: () => loadCredentials(id),
     // Every view is recorded in the activity log; do not refetch silently.
@@ -28,8 +31,24 @@ export function PrintPage() {
     refetchOnMount: "always",
   });
 
-  if (error) return <p className="p-8 text-destructive">{error.message}</p>;
-  if (!data) return null;
+  if (!query.data) {
+    return <QueryState error={query.error} retry={query.refetch} className="p-8" />;
+  }
+  const wanted = only ? new Set(only.split(",").map(Number)) : null;
+  const data = wanted
+    ? { ...query.data, students: query.data.students.filter((s) => wanted.has(s.id)) }
+    : query.data;
+  const total = query.data.students.length;
+  // Sealed with an older CREDENTIALS_KEY: nothing to print until a reset.
+  const unreadable = data.students.filter((s) => s.password === null || s.loginUrl === null).length;
+  const setLayout = (next: "cards" | "list") =>
+    setParams(
+      (old) => {
+        old.set("layout", next);
+        return old;
+      },
+      { replace: true },
+    );
 
   return (
     <div className="print-sheet min-h-dvh bg-white text-black">
@@ -42,20 +61,37 @@ export function PrintPage() {
           <Button
             variant={layout === "cards" ? "default" : "outline"}
             aria-pressed={layout === "cards"}
-            onClick={() => setParams({ layout: "cards" }, { replace: true })}
+            onClick={() => setLayout("cards")}
           >
             {t("print.cards")}
           </Button>
           <Button
             variant={layout === "list" ? "default" : "outline"}
             aria-pressed={layout === "list"}
-            onClick={() => setParams({ layout: "list" }, { replace: true })}
+            onClick={() => setLayout("list")}
           >
             {t("print.list")}
           </Button>
         </div>
         <Button onClick={() => window.print()}>{t("print.print")}</Button>
       </nav>
+      {(wanted || unreadable > 0) && (
+        <div className="space-y-1 border-b bg-muted/50 p-3 text-sm print:hidden">
+          {wanted && (
+            <p>
+              {t("print.showingSome", { shown: data.students.length, total })}{" "}
+              <Link to={`/groups/${id}/print?layout=${layout}`} className="text-primary underline">
+                {t("print.showAll")}
+              </Link>
+            </p>
+          )}
+          {unreadable > 0 && (
+            <p role="alert" className="text-destructive">
+              {t("print.keyChanged", { count: unreadable })}
+            </p>
+          )}
+        </div>
+      )}
       <main className="mx-auto max-w-[210mm] p-6 print:max-w-none print:p-0">
         {(layout === "cards" || data.students.length === 0) && (
           <h1 className="sr-only">

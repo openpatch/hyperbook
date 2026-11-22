@@ -1,4 +1,5 @@
-import { asc, count, eq } from "drizzle-orm";
+import { and, asc, count, eq } from "drizzle-orm";
+import { z } from "zod";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import {
@@ -15,11 +16,12 @@ import {
   deleteSessionsOfStudent,
 } from "../../auth/student-sessions";
 import { publicOrigin } from "../../domain/custom-domains";
-import { lastSavedAt, readState } from "../../store/store";
+import { exportState, lastSavedAt } from "../../store/store";
 import { open } from "../../crypto/sealed";
-import { books, groups, students } from "../../db/schema";
+import { books, groups, storeRows, students } from "../../db/schema";
 import type { Deps } from "../../deps";
 import { bookAccess } from "../../domain/books";
+import { elementRows, elsewhereRows, groupOverview, overviewCsv, readElementIndex, viewOf } from "../../domain/overview";
 import {
   generatedStudentPassword,
   groupAccess,
@@ -35,6 +37,20 @@ import type { AuthedEnv } from "../env";
 import { requireUser } from "../middleware";
 import { idParam } from "../params";
 import { validate } from "../validate";
+import { createT, requestLocale } from "../../i18n";
+
+/** Students' work: never kept by a cache or a shared proxy. */
+function private_(c: { header: (name: string, value: string) => void }) {
+  c.header("cache-control", "private, no-store");
+}
+
+function safeJson(text: string): unknown {
+  try {
+    return JSON.parse(text);
+  } catch {
+    return null;
+  }
+}
 
 function isUniqueViolation(error: unknown) {
   return error instanceof Error && /UNIQUE constraint failed/.test(error.message);
@@ -78,7 +94,7 @@ export function bookGroupRoutes({ db }: Deps) {
         return c.json({ id: group.id, name: group.name, createdAt: group.createdAt.getTime() });
       } catch (error) {
         if (isUniqueViolation(error)) {
-          throw new HTTPException(409, { message: "This book has a group with this name already" });
+          throw new HTTPException(409, { message: "errors.groups.nameTaken" });
         }
         throw error;
       }
@@ -107,7 +123,7 @@ export function groupRoutes({ db, config }: Deps) {
         db.update(groups).set({ name }).where(eq(groups.id, group.id)).run();
       } catch (error) {
         if (isUniqueViolation(error)) {
-          throw new HTTPException(409, { message: "This book has a group with this name already" });
+          throw new HTTPException(409, { message: "errors.groups.nameTaken" });
         }
         throw error;
       }
@@ -151,7 +167,7 @@ export function groupRoutes({ db, config }: Deps) {
       const { group } = groupAccess(db, user, c.req.valid("param").id);
       const input = c.req.valid("json");
       if (usernameTaken(db, group.bookId, input.username)) {
-        throw new HTTPException(409, { message: "This book has a student with this username already" });
+        throw new HTTPException(409, { message: "errors.students.usernameTaken" });
       }
       const row = db
         .insert(students)
@@ -236,6 +252,60 @@ export function groupRoutes({ db, config }: Deps) {
       return c.json({ count: ids.length });
     })
 
+    // The class view: who worked on which element (times only, no values).
+    // ?known=<buildId>: the client has that version's pages (a big book's
+    // are hundreds of KB) and only needs the students' times again.
+    .get("/:id/overview", idParam, validate("query", z.object({ known: z.coerce.number().int().optional() })), (c) => {
+      const { group, book } = groupAccess(db, c.get("user"), c.req.valid("param").id);
+      const overview = groupOverview(db, config, book, group.id);
+      private_(c);
+      const known = c.req.valid("query").known;
+      return c.json({ ...overview, pages: known !== undefined && known === overview.buildId ? null : overview.pages });
+    })
+
+    // The CSV follows the view: ?section=["OOP","Classes"]&worked=1.
+    .get(
+      "/:id/overview.csv",
+      idParam,
+      validate("query", z.object({ section: z.string().max(2000).optional(), worked: z.enum(["0", "1"]).optional() })),
+      (c) => {
+      const user = c.get("user");
+      const { group, book } = groupAccess(db, user, c.req.valid("param").id);
+      const t = createT(requestLocale(c));
+      const query = c.req.valid("query");
+      const section = z.array(z.string()).safeParse(query.section ? safeJson(query.section) : []);
+      const overview = viewOf(groupOverview(db, config, book, group.id), {
+        section: section.success ? section.data : [],
+        worked: query.worked === "1",
+      });
+      const csv = overviewCsv(overview, {
+        username: t("overview.csv.username"),
+        lastLogin: t("overview.csv.lastLogin"),
+        lastSeen: t("overview.csv.lastSeen"),
+        elsewhere: t("overview.csv.elsewhere"),
+      });
+      audit(db, {
+        actorUserId: user.id,
+        action: "student.overview.export",
+        targetType: "group",
+        targetId: group.id,
+      });
+      const name = `${book.slug}-${group.name}`.replace(/[^\w.-]+/g, "_");
+      private_(c);
+      // Headers in the reader's language.
+      c.header("vary", "Accept-Language, Cookie");
+      c.header("content-type", "text/csv; charset=utf-8");
+      // An ASCII name for old browsers, the real one (umlauts and all) for the rest.
+      const real = `${book.slug}-${group.name}`.replace(/[\\/:*?"<>|\u0000-\u001f]+/g, "_");
+      c.header(
+        "content-disposition",
+        `attachment; filename="${name}.csv"; filename*=UTF-8''${encodeURIComponent(`${real}.csv`)}`,
+      );
+      // A BOM, so spreadsheet programs read the umlauts right.
+      return c.body(`\uFEFF${csv}`);
+      },
+    )
+
     .get("/:id/credentials", idParam, (c) => {
       const user = c.get("user");
       const { group, book } = groupAccess(db, user, c.req.valid("param").id);
@@ -283,12 +353,12 @@ export function studentRoutes({ db, config }: Deps) {
       const { student } = studentAccess(db, user, c.req.valid("param").id);
       const changes = c.req.valid("json");
       if (changes.username !== undefined && usernameTaken(db, student.bookId, changes.username, student.id)) {
-        throw new HTTPException(409, { message: "This book has a student with this username already" });
+        throw new HTTPException(409, { message: "errors.students.usernameTaken" });
       }
       if (changes.groupId !== undefined) {
         const target = db.select().from(groups).where(eq(groups.id, changes.groupId)).get();
         if (!target || target.bookId !== student.bookId) {
-          throw new HTTPException(400, { message: "Students can only move between groups of the same book" });
+          throw new HTTPException(400, { message: "errors.students.otherBook" });
         }
       }
       const row = db
@@ -357,10 +427,52 @@ export function studentRoutes({ db, config }: Deps) {
       return c.json({ url });
     })
 
+    // One element's saved work of a student, for the class view (read-only).
+    // How its rows are keyed comes from the live version's element index.
+    .get(
+      "/:id/element",
+      idParam,
+      validate("query", z.object({ table: z.string().min(1).max(100), id: z.string().min(1).max(500) })),
+      (c) => {
+        const user = c.get("user");
+        const { student, book } = studentAccess(db, user, c.req.valid("param").id);
+        const { table, id } = c.req.valid("query");
+        const pages = readElementIndex(config, book)?.pages ?? [];
+        const indexed = pages.flatMap((p) => p.elements).find((e) => e.table === table && e.id === id);
+        const rows = elementRows(db, student.id, indexed ?? { table, id, name: table }, pages);
+        if (rows.length === 0) throw new HTTPException(404, { message: "errors.students.nothingSaved" });
+        audit(db, {
+          actorUserId: user.id,
+          action: "student.row.view",
+          targetType: "student",
+          targetId: student.id,
+          data: { table, id },
+        });
+        private_(c);
+        return c.json({ rows, editedAt: Math.max(...rows.map((r) => r.editedAt)) });
+      },
+    )
+
+    // Saved work that belongs to no task of the live version (the overview's "Other").
+    .get("/:id/elsewhere", idParam, (c) => {
+      const user = c.get("user");
+      const { student, book } = studentAccess(db, user, c.req.valid("param").id);
+      const rows = elsewhereRows(db, config, book, student.id);
+      audit(db, {
+        actorUserId: user.id,
+        action: "student.row.view",
+        targetType: "student",
+        targetId: student.id,
+        data: { elsewhere: rows.length },
+      });
+      private_(c);
+      return c.json({ rows });
+    })
+
     .get("/:id/data", idParam, (c) => {
       const user = c.get("user");
       const { student } = studentAccess(db, user, c.req.valid("param").id);
-      const state = readState(db, student.id);
+      const state = exportState(db, student.id);
       audit(db, {
         actorUserId: user.id,
         action: "student.data.download",
@@ -368,7 +480,7 @@ export function studentRoutes({ db, config }: Deps) {
         targetId: student.id,
       });
       c.header("content-disposition", `attachment; filename="${student.username}.json"`);
-      return c.json({ username: student.username, ...state });
+      return c.json({ username: student.username, revision: 0, updatedAt: null, tables: {}, ...state });
     })
 
     .post("/:id/login-key/regenerate", idParam, (c) => {

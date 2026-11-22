@@ -1170,6 +1170,12 @@ nav.toc li.level-3 {
   color: var(--color-text);
 }
 
+.user-form .user-teacher-sees {
+  margin: 0;
+  font-size: 13px;
+  opacity: 0.75;
+}
+
 .user-form button,
 .user-info button {
   padding: 10px 20px;

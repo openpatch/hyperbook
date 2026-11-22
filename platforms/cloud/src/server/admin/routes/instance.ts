@@ -45,7 +45,7 @@ export function publicInstanceRoutes({ db, config, mailer }: Deps) {
       const page = c.req.param("page") as "imprint" | "privacy";
       const settings = getInstanceSettings(db);
       const markdown = page === "imprint" ? settings.imprintMarkdown : settings.privacyMarkdown;
-      if (!markdown.trim()) throw new HTTPException(404, { message: "This page is not written yet" });
+      if (!markdown.trim()) throw new HTTPException(404, { message: "errors.instance.legalMissing" });
       return c.json({ html: renderLegalMarkdown(markdown) });
     });
 }
@@ -287,41 +287,41 @@ export function instanceRoutes(deps: Deps) {
     // the settings: the fields accept typed ids all the same.
     .get("/ai/models", async (c) => {
       if (!config.ai) {
-        throw new HTTPException(503, { message: "The AI provider is not configured" });
+        throw new HTTPException(503, { message: "errors.instance.aiNotConfigured" });
       }
       try {
         return c.json({ models: await listProviderModels(config.ai) });
       } catch {
-        throw new HTTPException(502, { message: "The provider did not list its models" });
+        throw new HTTPException(502, { message: "errors.instance.noModels" });
       }
     })
     // One-time price lookup for the settings' "fetch prices" button: fills the
     // €/M fields, which stay editable by hand afterwards.
     .get("/ai/prices", async (c) => {
       if (!config.ai) {
-        throw new HTTPException(503, { message: "The AI provider is not configured" });
+        throw new HTTPException(503, { message: "errors.instance.aiNotConfigured" });
       }
       try {
         return c.json({ prices: await listProviderPrices(config.ai) });
       } catch {
-        throw new HTTPException(502, { message: "The prices could not be fetched" });
+        throw new HTTPException(502, { message: "errors.instance.noPrices" });
       }
     })
     .put("/", validate("json", instanceSettingsInput), (c) => {
       const changes = c.req.valid("json");
       if (changes.signupMode && changes.signupMode !== "closed" && !mailer.enabled) {
         throw new HTTPException(400, {
-          message: "Sign-up needs email to confirm addresses. Configure SMTP first.",
+          message: "errors.instance.signupNeedsSmtp",
         });
       }
       const after = { ...getInstanceSettings(db), ...changes };
       if (after.signupMode !== "closed" && !legalHref(after, "privacy")) {
         throw new HTTPException(400, {
-          message: "Sign-up asks people to accept the privacy policy. Add one (a link or your own text) first.",
+          message: "errors.instance.signupNeedsPrivacy",
         });
       }
       if (after.aiDefaultModel && after.aiModels.length > 0 && !after.aiModels.some((m) => m.id === after.aiDefaultModel)) {
-        throw new HTTPException(400, { message: "The default model must be one of the models" });
+        throw new HTTPException(400, { message: "errors.instance.defaultModel" });
       }
       updateInstanceSettings(db, changes);
       audit(db, {

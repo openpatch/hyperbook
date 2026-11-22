@@ -116,7 +116,7 @@ export function originCheck({ config }: Deps) {
     if (!SAFE_METHODS.has(c.req.method)) {
       const origin = c.req.header("origin");
       if (origin && origin !== config.adminOrigin) {
-        throw new HTTPException(403, { message: "Cross-origin request refused" });
+        throw new HTTPException(403, { message: "errors.request.crossOrigin" });
       }
       // Browsers always label a body; forms and text/plain are what a
       // foreign site could send without a preflight. File uploads need
@@ -125,7 +125,7 @@ export function originCheck({ config }: Deps) {
       const type = c.req.header("content-type");
       const upload = type?.startsWith("multipart/form-data") && origin === config.adminOrigin;
       if (type !== undefined && !type.startsWith("application/json") && !upload) {
-        throw new HTTPException(415, { message: "Send JSON" });
+        throw new HTTPException(415, { message: "errors.request.sendJson" });
       }
     }
     await next();

@@ -1,6 +1,7 @@
 import { CheckIcon, CopyIcon } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -10,6 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { copyText } from "@/lib/clipboard";
 
 /** Shows a generated password the one time it is available. */
 export function SecretDialog({
@@ -41,9 +43,12 @@ export function SecretDialog({
         <DialogFooter>
           <Button
             variant="outline"
-            onClick={() => {
+            onClick={async () => {
               if (!secret) return;
-              void navigator.clipboard?.writeText(secret);
+              if (!(await copyText(secret))) {
+                toast.error(t("common.copyFailed"));
+                return;
+              }
               setCopied(true);
               window.setTimeout(() => setCopied(false), 1500);
             }}

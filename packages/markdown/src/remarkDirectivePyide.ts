@@ -25,6 +25,7 @@ import {
   requestIdeAssets,
 } from "./ideWorkspace";
 import { resolveDirectiveId } from "./directiveId";
+import { recordStoredElement } from "./storedElements";
 import { ElementContent } from "hast";
 import { i18n } from "./i18n";
 
@@ -62,6 +63,7 @@ export default (ctx: HyperbookContext) => () => {
           packages,
           height,
         } = node.attributes || {};
+        recordStoredElement(file, name, id, node);
         const hasCanvas = "canvas" in (node.attributes || {});
         // pytamaro needs pillow 11.3.0, which the bundled Pyodide does not
         // have, so micropip cannot install it. Off until it can.

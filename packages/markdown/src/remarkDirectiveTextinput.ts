@@ -11,6 +11,7 @@ import {
   registerDirective,
 } from "./remarkHelper";
 import { resolveDirectiveId } from "./directiveId";
+import { recordStoredElement } from "./storedElements";
 
 export default (ctx: HyperbookContext) => () => {
   const name = "textinput";
@@ -29,6 +30,7 @@ export default (ctx: HyperbookContext) => () => {
           height = "200px",
           id = resolveDirectiveId(file, node),
         } = node.attributes || {};
+        recordStoredElement(file, name, id, node);
 
         data.hName = "div";
         data.hProperties = {

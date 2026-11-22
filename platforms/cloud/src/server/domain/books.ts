@@ -31,7 +31,7 @@ export function bookAccess(
   needed: BookRole = "editor",
 ): { book: BookRow; role: BookRole } {
   const book = db.select().from(books).where(eq(books.id, bookId)).get();
-  if (!book) throw new HTTPException(404, { message: "Book not found" });
+  if (!book) throw new HTTPException(404, { message: "errors.books.notFound" });
   let role: BookRole | undefined;
   if (user.role === "admin") {
     role = "owner";
@@ -42,11 +42,11 @@ export function bookAccess(
       .where(and(eq(bookMembers.bookId, bookId), eq(bookMembers.userId, user.id)))
       .get()?.role;
   }
-  if (!role) throw new HTTPException(404, { message: "Book not found" });
+  if (!role) throw new HTTPException(404, { message: "errors.books.notFound" });
   if (!hasRole(role, needed)) {
     throw new HTTPException(403, {
       message:
-        needed === "owner" ? "Only owners of this book may do this" : "Commenters may not change this book",
+        needed === "owner" ? "errors.members.ownersOnly" : "errors.members.commentersReadOnly",
     });
   }
   return { book, role };
@@ -91,16 +91,16 @@ export function assertSlugAvailable(db: Db, slug: string, bookId: number | null)
   switch (checkSlug(slug, reserved)) {
     case "format":
       throw new HTTPException(400, {
-        message: "Use lowercase letters, digits and hyphens; start and end with a letter or digit",
+        message: "validation.slugCharacters",
       });
     case "double-hyphen":
-      throw new HTTPException(400, { message: "Two hyphens in a row are not allowed" });
+      throw new HTTPException(400, { message: "errors.books.slugDoubleHyphen" });
     case "reserved":
-      throw new HTTPException(409, { message: "This address is reserved" });
+      throw new HTTPException(409, { message: "errors.books.slugReserved" });
   }
   const taken = db.select({ id: books.id }).from(books).where(eq(books.slug, slug)).get();
   if (taken && taken.id !== bookId) {
-    throw new HTTPException(409, { message: "Another book uses this address already" });
+    throw new HTTPException(409, { message: "errors.books.slugTaken" });
   }
 }
 

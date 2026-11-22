@@ -1,6 +1,7 @@
 import { and, eq, sum } from "drizzle-orm";
 import type { Db } from "../db/client";
 import { bookMembers, books, users } from "../db/schema";
+import { httpError } from "../errors";
 import { getEntitlements } from "./entitlements";
 
 /*
@@ -53,10 +54,10 @@ export function quotaForBook(db: Db, bookId: number): { maxBytes: number; owner:
 }
 
 /** The answer to a change that a quota (not the size limit of a book) refused. */
-export function quotaMessage(owner: string, me: string) {
+export function quotaError(owner: string, me: string) {
   return owner === me
-    ? "This would go over your storage limit. Delete files you no longer need, or ask an admin for more space."
-    : `This would go over the storage limit of ${owner}, an owner of this book.`;
+    ? httpError(413, "errors.storage.overOwn")
+    : httpError(413, "errors.storage.overOther", { owner });
 }
 
 export function setSourceBytes(db: Db, bookId: number, bytes: number) {

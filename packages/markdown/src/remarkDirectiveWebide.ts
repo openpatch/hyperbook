@@ -16,6 +16,7 @@ import {
   registerDirective,
 } from "./remarkHelper";
 import { resolveDirectiveId } from "./directiveId";
+import { recordStoredElement } from "./storedElements";
 import { i18n } from "./i18n";
 import { Element } from "hast";
 import {
@@ -63,6 +64,7 @@ export default (ctx: HyperbookContext) => () => {
           height,
           id = resolveDirectiveId(file, node),
         } = node.attributes || {};
+        recordStoredElement(file, name, id, node);
         const data = node.data || (node.data = {});
         const resolvedHeight = cssHeight(height);
 

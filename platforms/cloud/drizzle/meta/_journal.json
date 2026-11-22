@@ -148,6 +148,20 @@
       "when": 1794779980023,
       "tag": "0020_ai_message_parts",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "6",
+      "when": 1795213932190,
+      "tag": "0021_drop_store_events",
+      "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "6",
+      "when": 1795274382860,
+      "tag": "0022_store_rows",
+      "breakpoints": true
     }
   ]
 }

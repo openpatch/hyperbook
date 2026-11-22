@@ -9,6 +9,7 @@ import { pipeline } from "node:stream/promises";
 import type { ChildProcess } from "node:child_process";
 import { createGunzip } from "node:zlib";
 import { z } from "zod";
+import { httpError } from "../../errors";
 import { gitTokenInput } from "../../../shared/schemas";
 import { audit } from "../../audit";
 import { bookChanged } from "../../domain/book-events";
@@ -69,7 +70,7 @@ function requestIsGzip(c: Context): boolean {
   const encoding = c.req.header("content-encoding")?.trim().toLowerCase();
   if (!encoding || encoding === "identity") return false;
   if (encoding === "gzip") return true;
-  throw new HTTPException(415, { message: "Unsupported content encoding" });
+  throw new HTTPException(415, { message: "errors.request.encoding" });
 }
 
 /** How a git request authenticated; `idHash` is set when it was a token. */
@@ -225,14 +226,14 @@ export function gitHttpRoutes(
       c.header("WWW-Authenticate", 'Basic realm="Hyperbook Cloud git"');
       throw new HTTPException(401, {
         message:
-          "A git token is required (username: git, password: a per-book or personal token)",
+          "errors.git.tokenRequired",
       });
     };
     if (opLimit.isBlocked(`book:${id}`)) {
       // The book's git traffic is limited, not the caller's credentials.
       c.header("Retry-After", "60");
       throw new HTTPException(429, {
-        message: "Too many git requests for this book; slow down and try again",
+        message: "errors.git.tooMany",
       });
     }
     if (!book || authFailures.isBlocked(failKey)) deny(false);
@@ -331,13 +332,13 @@ export function gitHttpRoutes(
       ) {
         throw new HTTPException(400, {
           message:
-            "Smart HTTP only (service=git-upload-pack or git-receive-pack)",
+            "errors.git.smartOnly",
         });
       }
       const book = c.get("gitBook");
       if (book.source === "external")
         throw new HTTPException(409, {
-          message: "This book is hosted elsewhere.",
+          message: "errors.git.external",
         });
       const repo = repoDir(config, book.id);
       await initRepo(repo);
@@ -361,7 +362,7 @@ export function gitHttpRoutes(
       );
       const { code, stdout, stderr } = await closeWith(child);
       if (timedOut())
-        throw new HTTPException(504, { message: "git timed out" });
+        throw new HTTPException(504, { message: "errors.git.timeout" });
       if (code !== 0) throw new HTTPException(500, { message: stderr.trim() });
       // Smart HTTP expects the "# service=…" pkt-line + flush before the
       // advertisement (git http-backend adds it; receive-pack/upload-pack
@@ -379,7 +380,7 @@ export function gitHttpRoutes(
       const book = c.get("gitBook");
       if (book.source === "external")
         throw new HTTPException(409, {
-          message: "This book is hosted elsewhere.",
+          message: "errors.git.external",
         });
       const gzip = requestIsGzip(c);
       const repo = repoDir(config, book.id);
@@ -437,7 +438,7 @@ export function gitHttpRoutes(
       const book = c.get("gitBook");
       if (book.source === "external")
         throw new HTTPException(409, {
-          message: "This book is hosted elsewhere.",
+          message: "errors.git.external",
         });
       const gzip = requestIsGzip(c);
       return withBookLock(book.id, async () => {
@@ -477,7 +478,7 @@ export function gitHttpRoutes(
         const body = c.req.raw.body;
         if (!body) {
           child.kill();
-          throw new HTTPException(400, { message: "Empty request" });
+          throw new HTTPException(400, { message: "errors.request.empty" });
         }
         let received = 0;
         let headerComplete = false;
@@ -539,23 +540,17 @@ export function gitHttpRoutes(
         await piping;
         if (timedOut()) {
           throw new HTTPException(504, {
-            message: "git receive-pack timed out",
+            message: "errors.git.receiveTimeout",
           });
         }
         if (inputError instanceof GitRequestTooLargeError) {
-          throw new HTTPException(413, {
-            message: `The push is larger than ${Math.round(config.uploadMaxBytes / 1024 / 1024)} MB`,
-          });
+          throw httpError(413, "errors.git.pushTooLarge", { mb: Math.round(config.uploadMaxBytes / 1024 / 1024) });
         }
         if (inputError) {
-          throw new HTTPException(400, {
-            message: `Could not read the git push: ${(inputError as Error).message}`,
-          });
+          throw httpError(400, "errors.git.badPush", { detail: (inputError as Error).message });
         }
         if (code !== 0 && stdout.length === 0) {
-          throw new HTTPException(500, {
-            message: `git receive-pack failed: ${stderr.trim()}`,
-          });
+          throw httpError(500, "errors.git.receiveFailed", { detail: stderr.trim() });
         }
         if (code === 0) {
           // Reclaim objects of files that later commits deleted, so the
@@ -638,9 +633,7 @@ export function gitTokenRoutes({ db }: Deps) {
         )
         .get();
       if ((active?.n ?? 0) >= MAX_TOKENS_PER_USER) {
-        throw new HTTPException(409, {
-          message: `You already have ${MAX_TOKENS_PER_USER} tokens for this book. Revoke one first.`,
-        });
+        throw httpError(409, "errors.git.bookTokenLimit", { max: MAX_TOKENS_PER_USER });
       }
       const token = randomToken();
       const idHash = sha256(token);
@@ -670,11 +663,11 @@ export function gitTokenRoutes({ db }: Deps) {
           and(eq(gitTokens.idHash, tokenId), eq(gitTokens.bookId, book.id)),
         )
         .get();
-      if (!row) throw new HTTPException(404, { message: "Token not found" });
+      if (!row) throw new HTTPException(404, { message: "errors.git.tokenNotFound" });
       // Owners may revoke any token of the book; others only their own.
       if (role !== "owner" && row.userId !== user.id) {
         throw new HTTPException(403, {
-          message: "Only owners may revoke other people's tokens",
+          message: "errors.git.revokeOwnersOnly",
         });
       }
       db.update(gitTokens)
@@ -739,9 +732,7 @@ export function userGitTokenRoutes({ db }: Deps) {
         )
         .get();
       if ((active?.n ?? 0) >= MAX_TOKENS_PER_USER) {
-        throw new HTTPException(409, {
-          message: `You already have ${MAX_TOKENS_PER_USER} personal tokens. Revoke one first.`,
-        });
+        throw httpError(409, "errors.git.personalTokenLimit", { max: MAX_TOKENS_PER_USER });
       }
       const token = randomToken();
       const idHash = sha256(token);
@@ -770,7 +761,7 @@ export function userGitTokenRoutes({ db }: Deps) {
           ),
         )
         .get();
-      if (!row) throw new HTTPException(404, { message: "Token not found" });
+      if (!row) throw new HTTPException(404, { message: "errors.git.tokenNotFound" });
       db.update(userGitTokens)
         .set({ revokedAt: new Date() })
         .where(

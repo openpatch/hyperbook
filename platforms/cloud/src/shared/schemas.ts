@@ -135,16 +135,16 @@ export const elementRuntimeChoice = z.enum(["local", "cdn"]);
  */
 export const modelWeightsSchema = z.object({
   in: z
-    .number("Enter a number")
-    .positive("The weight must be above 0")
+    .number("validation.number")
+    .positive("validation.weightPositive")
     .max(1000),
   cached: z
-    .number("Enter a number")
-    .positive("The weight must be above 0")
+    .number("validation.number")
+    .positive("validation.weightPositive")
     .max(1000),
   out: z
-    .number("Enter a number")
-    .positive("The weight must be above 0")
+    .number("validation.number")
+    .positive("validation.weightPositive")
     .max(1000),
 });
 
@@ -158,16 +158,16 @@ export type ModelWeights = z.infer<typeof modelWeightsSchema>;
  */
 export const modelPricesSchema = z.object({
   in: z
-    .number("Enter a number")
-    .positive("The price must be above 0")
+    .number("validation.number")
+    .positive("validation.pricePositive")
     .max(1_000_000),
   cached: z
-    .number("Enter a number")
-    .positive("The price must be above 0")
+    .number("validation.number")
+    .positive("validation.pricePositive")
     .max(1_000_000),
   out: z
-    .number("Enter a number")
-    .positive("The price must be above 0")
+    .number("validation.number")
+    .positive("validation.pricePositive")
     .max(1_000_000),
 });
 
@@ -175,21 +175,21 @@ export type ModelPrices = z.infer<typeof modelPricesSchema>;
 
 export const instanceSettingsInput = z
   .object({
-    name: z.string().trim().min(1, "Enter a name").max(100),
+    name: z.string().trim().min(1, "validation.name").max(100),
     defaultEntitlements: entitlementOverridesInput,
     reservedSlugs: z
       .array(z.string().trim().toLowerCase().min(1).max(63))
       .max(500),
     imprintUrl: z.union([
-      z.url("Enter a full URL, starting with https://"),
+      z.url("validation.fullUrl"),
       z.literal(""),
     ]),
     privacyUrl: z.union([
-      z.url("Enter a full URL, starting with https://"),
+      z.url("validation.fullUrl"),
       z.literal(""),
     ]),
-    imprintMarkdown: z.string().max(100_000, "At most 100 000 characters"),
-    privacyMarkdown: z.string().max(100_000, "At most 100 000 characters"),
+    imprintMarkdown: z.string().max(100_000, "validation.max100k"),
+    privacyMarkdown: z.string().max(100_000, "validation.max100k"),
     signupMode: z.enum(["closed", "open", "domains", "approval"]),
     signupDomains: z
       .array(
@@ -199,7 +199,7 @@ export const instanceSettingsInput = z
           .toLowerCase()
           .regex(
             /^(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z]{2,}$/,
-            "Enter domains like schule.de",
+            "validation.domains",
           ),
       )
       .max(200),
@@ -214,7 +214,7 @@ export const instanceSettingsInput = z
     aiModels: z
       .array(
         z.object({
-          id: z.string().trim().min(1, "Enter a model name").max(200),
+          id: z.string().trim().min(1, "validation.modelName").max(200),
           prices: modelPricesSchema,
           label: z.string().trim().max(60).optional(),
         }),
@@ -222,18 +222,18 @@ export const instanceSettingsInput = z
       .max(50)
       .refine(
         (models) => new Set(models.map((m) => m.id)).size === models.length,
-        "Each model may be listed once",
+        "validation.modelOnce",
       ),
     aiDefaultModel: z.string().nullable(),
     /** What one AI credit is worth in € of provider cost; weights derive from it. */
     aiCreditValueEur: z
-      .number("Enter a number")
-      .positive("Must be above 0")
+      .number("validation.number")
+      .positive("validation.positive")
       .max(1000),
     /** Markup on provider prices (failed requests, running costs): 1.3 = 30% buffer. */
     aiCostBuffer: z
-      .number("Enter a number")
-      .positive("Must be above 0")
+      .number("validation.number")
+      .positive("validation.positive")
       .max(100),
   })
   .partial();
@@ -241,7 +241,7 @@ export const instanceSettingsInput = z
 /** An optional note on a publish, stored on the build row (shown in the builds table). */
 export const publishInput = z
   .object({
-    note: z.string().trim().max(200, "At most 200 characters").default(""),
+    note: z.string().trim().max(200, "validation.max200").default(""),
   })
   .partial();
 
@@ -254,13 +254,13 @@ export const publishRequestInput = z
   .partial();
 
 export const rollbackInput = z.object({
-  tag: z.string().regex(/^v\d+$/, "Choose a version tag like v3"),
+  tag: z.string().regex(/^v\d+$/, "validation.versionTag"),
 });
 
 /** A label for a new git API token, so it can be told apart later. */
 export const gitTokenInput = z
   .object({
-    label: z.string().trim().max(100, "At most 100 characters").default(""),
+    label: z.string().trim().max(100, "validation.max100").default(""),
   })
   .partial();
 
@@ -268,29 +268,29 @@ export const slug = z
   .string()
   .trim()
   .toLowerCase()
-  .min(1, "Enter an address")
-  .max(63, "Use at most 63 characters")
+  .min(1, "validation.slugRequired")
+  .max(63, "validation.max63")
   .regex(
     /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/,
-    "Use lowercase letters, digits and hyphens; start and end with a letter or digit",
+    "validation.slugCharacters",
   )
-  .refine((s) => !s.includes("--"), "Two hyphens in a row are not allowed");
+  .refine((s) => !s.includes("--"), "errors.books.slugDoubleHyphen");
 
 export const createBookInput = z.object({
-  title: z.string().trim().min(1, "Enter a title").max(200),
+  title: z.string().trim().min(1, "validation.title").max(200),
   slug,
   description: z.string().trim().max(2000).default(""),
 });
 
 export const updateBookInput = z
   .object({
-    title: z.string().trim().min(1, "Enter a title").max(200),
+    title: z.string().trim().min(1, "validation.title").max(200),
     slug,
     description: z.string().trim().max(2000),
     visibility: z.enum(["public", "private"]),
     /** A book hosted elsewhere (e.g. GitHub Pages); null to host it here. */
     externalUrl: z.union([
-      z.url("Enter a full URL, starting with https://"),
+      z.url("validation.fullUrl"),
       z.null(),
     ]),
   })
@@ -307,7 +307,7 @@ export const bookDomainInput = z.object({
     .toLowerCase()
     .transform((d) => d.replace(/\.$/, ""))
     .pipe(
-      z.string().min(1, "Enter a domain").max(253, "The domain is too long"),
+      z.string().min(1, "validation.domain").max(253, "validation.domainTooLong"),
     ),
 });
 
@@ -316,12 +316,12 @@ export const slugRequestInput = z.object({
   description: z
     .string()
     .trim()
-    .min(1, "Say what the book is about, for the admin who decides")
-    .max(2000, "Use at most 2000 characters"),
+    .min(1, "validation.slugReason")
+    .max(2000, "validation.max2000"),
 });
 
 export const slugDecisionInput = z.object({
-  note: z.string().trim().max(2000, "Use at most 2000 characters").default(""),
+  note: z.string().trim().max(2000, "validation.max2000").default(""),
 });
 
 export const bookRole = z.enum(["owner", "editor", "commenter"]);
@@ -336,36 +336,36 @@ export const updateMemberInput = z.object({
 });
 
 export const groupInput = z.object({
-  name: z.string().trim().min(1, "Enter a name").max(100),
+  name: z.string().trim().min(1, "validation.name").max(100),
 });
 
 export const username = z
   .string()
   .trim()
   .toLowerCase()
-  .min(1, "Enter a username")
-  .max(40, "Use at most 40 characters")
+  .min(1, "validation.username")
+  .max(40, "validation.max40")
   .regex(
     /^[a-z0-9][a-z0-9._-]*$/,
-    "Use lowercase letters, digits, dots, hyphens and underscores",
+    "validation.usernameCharacters",
   );
 
 export const createStudentInput = z.object({
   username,
   /** Left out: generated. */
-  password: z.string().min(4, "Use at least 4 characters").max(100).optional(),
+  password: z.string().min(4, "validation.min4").max(100).optional(),
 });
 
 export const generateStudentsInput = z.object({
-  count: z.number().int().min(1, "At least 1").max(200, "At most 200 at once"),
+  count: z.number().int().min(1, "validation.atLeastOne").max(200, "validation.max200AtOnce"),
   prefix: z
     .string()
     .trim()
     .toLowerCase()
-    .max(20, "Use at most 20 characters")
+    .max(20, "validation.max20")
     .regex(
       /^[a-z][a-z0-9-]*$|^$/,
-      "Start with a letter; then letters, digits and hyphens",
+      "validation.prefixCharacters",
     )
     .default("student"),
   passwordLength: z.number().int().min(4).max(20).default(6),
@@ -379,7 +379,7 @@ export const updateStudentInput = z
   .partial();
 
 export const resetStudentPasswordInput = z.object({
-  password: z.string().min(4, "Use at least 4 characters").max(100).optional(),
+  password: z.string().min(4, "validation.min4").max(100).optional(),
 });
 
 export const auditQuery = z.object({

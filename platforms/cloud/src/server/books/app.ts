@@ -3,6 +3,7 @@ import { Hono } from "hono";
 import { getCookie } from "hono/cookie";
 import { createMiddleware } from "hono/factory";
 import { HTTPException } from "hono/http-exception";
+import { errorResponse, genericErrorResponse } from "../errors";
 import { readStudentSession } from "../auth/student-sessions";
 import { activeDomain, publicOrigin } from "../domain/custom-domains";
 import { getInstanceSettings, legalHref } from "../domain/instance";
@@ -29,9 +30,9 @@ export function createBooksApp(deps: Deps) {
   const app = new Hono<BookEnv>();
 
   app.onError((error, c) => {
-    if (error instanceof HTTPException) return c.json({ error: error.message }, error.status);
+    if (error instanceof HTTPException) return errorResponse(c, error);
     console.error(error);
-    return c.json({ error: "Something went wrong on the server" }, 500);
+    return genericErrorResponse(c);
   });
 
   // Which book this host is, and who is logged in to it.

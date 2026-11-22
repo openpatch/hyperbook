@@ -33,8 +33,6 @@ export type Config = {
   store: {
     /** Largest saved state per student, and largest request. */
     maxBytes: number;
-    /** Events after which a student's events are folded into the snapshot. */
-    compactAfter: number;
   };
   build: {
     concurrency: number;
@@ -154,7 +152,6 @@ const schema = z.object({
   TYPST_BINARY: optional,
   HYPERBOOK_CLI: optional,
   STORE_MAX_MB: z.coerce.number().int().min(1).default(10),
-  STORE_COMPACT_EVENTS: z.coerce.number().int().min(1).default(100),
   ADMIN_EMAIL: optional,
   ADMIN_PASSWORD: optional,
   SMTP_HOST: optional,
@@ -422,7 +419,6 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     gitOpTimeoutMs: e.GIT_OP_TIMEOUT_SECONDS * 1000,
     store: {
       maxBytes: e.STORE_MAX_MB * 1024 * 1024,
-      compactAfter: e.STORE_COMPACT_EVENTS,
     },
     build: {
       concurrency: e.BUILD_CONCURRENCY,

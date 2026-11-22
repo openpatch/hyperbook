@@ -57,6 +57,13 @@ key in both catalogs and translate it:
 - **Non-React modules** (CodeMirror extensions, editors):
   `import i18next from "i18next"` and `i18next.t("section.key")`.
 - **Server code:** `createT(locale)` from `src/shared/i18n`.
+- **Server errors:** throw `new HTTPException(409, { message: "errors.…" })`
+  with a catalog key, or `httpError(status, key, params)` from
+  `src/server/errors.ts` when the message has `{{params}}`. The apps'
+  `onError` translates keys into the request's language. Errors thrown deep
+  in the code (zip, git, renders) extend `LocalizedError`: English `message`
+  for logs and git, `key`/`params` for the route to pass on.
+  `tests/i18n.test.ts` fails on an English literal in an `HTTPException`.
 - **Validation messages:** zod `message:` and error strings are catalog keys
   (`validation.*`); the client translates them through `useMessage`/
   `FormError`. Keys with dynamic parts use `{{param}}` interpolation, plurals

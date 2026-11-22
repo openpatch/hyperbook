@@ -22,12 +22,12 @@ export function groupAccess(
   groupId: number,
 ): { group: GroupRow; book: BookRow; role: BookRole } {
   const group = db.select().from(groups).where(eq(groups.id, groupId)).get();
-  if (!group) throw new HTTPException(404, { message: "Group not found" });
+  if (!group) throw new HTTPException(404, { message: "errors.groups.notFound" });
   try {
     return { group, ...bookAccess(db, user, group.bookId) };
   } catch (error) {
     if (error instanceof HTTPException && error.status === 404) {
-      throw new HTTPException(404, { message: "Group not found" });
+      throw new HTTPException(404, { message: "errors.groups.notFound" });
     }
     throw error;
   }
@@ -35,12 +35,12 @@ export function groupAccess(
 
 export function studentAccess(db: Db, user: SessionUser, studentId: number) {
   const student = db.select().from(students).where(eq(students.id, studentId)).get();
-  if (!student) throw new HTTPException(404, { message: "Student not found" });
+  if (!student) throw new HTTPException(404, { message: "errors.students.notFound" });
   try {
     return { student, ...bookAccess(db, user, student.bookId) };
   } catch (error) {
     if (error instanceof HTTPException && error.status === 404) {
-      throw new HTTPException(404, { message: "Student not found" });
+      throw new HTTPException(404, { message: "errors.students.notFound" });
     }
     throw error;
   }

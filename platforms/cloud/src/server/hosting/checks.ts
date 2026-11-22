@@ -1,3 +1,4 @@
+import type { IndexedElement } from "../domain/overview";
 import type { Renderers } from "./renders";
 
 /*
@@ -26,8 +27,16 @@ export type CheckState = {
 /** Problems kept per check; a book that broke everywhere needs no more. */
 const MAX_PROBLEMS = 200;
 
+/** A page of the checked save and the tasks on it that keep a reader's work. */
+export type CheckedPage = { href: string; title: string; elements: IndexedElement[] };
+
 export class BookChecks {
   private checks = new Map<number, CheckState>();
+  /**
+   * The tasks of each book's checked save, kept apart from the state: the
+   * state is polled while a check runs, and a big book has over a thousand.
+   */
+  private pages = new Map<number, CheckedPage[]>();
   private aborts = new Map<number, AbortController>();
 
   constructor(private readonly renders: Renderers) {}
@@ -51,16 +60,19 @@ export class BookChecks {
       finishedAt: null,
     };
     this.checks.set(bookId, state);
+    const pages: CheckedPage[] = [];
+    this.pages.set(bookId, pages);
     const abort = new AbortController();
     this.aborts.set(bookId, abort);
     void this.renders
       .checkPages(
         bookId,
-        ({ done, total, commit }, problem) => {
+        ({ done, total, commit }, problem, page) => {
           state.commit = commit;
           state.done = done;
           state.total = total;
           if (problem && state.problems.length < MAX_PROBLEMS) state.problems.push(problem);
+          if (page) pages.push(page);
         },
         abort.signal,
       )
@@ -80,6 +92,11 @@ export class BookChecks {
     return state;
   }
 
+  /** The tasks of the book's checked save, once its check is done. */
+  checkedPages(bookId: number): CheckedPage[] | null {
+    return this.checks.get(bookId)?.status === "done" ? (this.pages.get(bookId) ?? null) : null;
+  }
+
   /** Resolves once the book's check (if any) has finished; for tests. */
   async settled(bookId: number): Promise<CheckState | null> {
     while (this.checks.get(bookId)?.status === "running") {
@@ -93,6 +110,7 @@ export class BookChecks {
     this.aborts.get(bookId)?.abort();
     this.aborts.delete(bookId);
     this.checks.delete(bookId);
+    this.pages.delete(bookId);
   }
 
   stopAll() {

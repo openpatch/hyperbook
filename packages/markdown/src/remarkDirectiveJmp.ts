@@ -11,6 +11,7 @@ import {
   registerDirective,
 } from "./remarkHelper";
 import { resolveDirectiveId } from "./directiveId";
+import { recordStoredElement } from "./storedElements";
 import { readFile } from "./helper";
 import { i18n } from "./i18n";
 import { icon } from "./icons";
@@ -62,6 +63,7 @@ export default (ctx: HyperbookContext) => () => {
         const attributes = node.attributes || {};
         const height = attributes.height || "600px";
         const id = attributes.id || resolveDirectiveId(file, node);
+        recordStoredElement(file, name, id, node);
         const src = attributes.src;
         const step = attributes.step;
         const language = attributes.language || ctx.config.language || "en";

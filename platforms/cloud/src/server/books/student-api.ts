@@ -1,9 +1,12 @@
+import { gunzipSync } from "node:zlib";
 import { and, eq } from "drizzle-orm";
 import { type Context, Hono } from "hono";
 import { bodyLimit } from "hono/body-limit";
 import { deleteCookie, setCookie } from "hono/cookie";
 import { createMiddleware } from "hono/factory";
 import { HTTPException } from "hono/http-exception";
+import { httpError } from "../errors";
+import { createT, requestLocale } from "../i18n";
 import { z } from "zod";
 import { dummyPasswordHash, verifyPassword } from "../auth/password";
 import { FailureLimiter } from "../auth/rate-limit";
@@ -20,8 +23,7 @@ import { sha256 } from "../crypto/tokens";
 import { students } from "../db/schema";
 import type { Deps } from "../deps";
 import type { BookRow } from "../domain/books";
-import { type Snapshot, type WireEvent, validateEvents } from "../store/replay";
-import { StoreTooLargeError, appendEvents, readState, replaceSnapshot } from "../store/store";
+import { StoreTooLargeError, type SyncRow, readChanges, validateRows, writeRows } from "../store/store";
 import type { BookEnv } from "./env";
 
 /*
@@ -74,24 +76,50 @@ const keyInput = z.object({
 
 const impersonateInput = z.object({ code: z.string().min(1).max(200), token: z.boolean().optional() });
 
-const eventsInput = z.object({
-  events: z.array(z.unknown()),
-  afterEventId: z.number().int().nullable().optional(),
+const syncInput = z.object({
+  since: z.number().int().min(0),
+  rows: z.array(z.unknown()),
+  replace: z.boolean().optional(),
 });
 
-const snapshotInput = z.object({
-  data: z.looseObject({ data: z.record(z.string(), z.unknown()) }),
-});
+/**
+ * The store upload's JSON, gzip-compressed or not: cloud.js compresses large
+ * uploads. Unpacking stops at `maxBytes`, so a small request cannot expand
+ * into an unbounded one.
+ */
+async function storeUpload(c: Context, maxBytes: number) {
+  const encoding = (c.req.header("content-encoding") ?? "identity").trim().toLowerCase();
+  if (encoding === "identity") return json(c, syncInput);
+  if (encoding !== "gzip") throw new HTTPException(415, { message: "errors.request.sendJsonGzip" });
+  let text: string;
+  try {
+    text = gunzipSync(Buffer.from(await c.req.arrayBuffer()), { maxOutputLength: maxBytes }).toString("utf8");
+  } catch (error) {
+    if ((error as { code?: string }).code === "ERR_BUFFER_TOO_LARGE") {
+      throw new HTTPException(413, { message: "errors.request.tooLarge" });
+    }
+    throw new HTTPException(400, { message: "errors.request.badGzip" });
+  }
+  let body: unknown;
+  try {
+    body = JSON.parse(text);
+  } catch {
+    throw new HTTPException(400, { message: "errors.request.sendJson" });
+  }
+  const parsed = syncInput.safeParse(body);
+  if (!parsed.success) throw new HTTPException(400, { message: "errors.invalidInput" });
+  return parsed.data;
+}
 
 async function json<T extends z.ZodType>(c: Context, schema: T): Promise<z.infer<T>> {
   let body: unknown;
   try {
     body = await c.req.json();
   } catch {
-    throw new HTTPException(400, { message: "Send JSON" });
+    throw new HTTPException(400, { message: "errors.request.sendJson" });
   }
   const parsed = schema.safeParse(body);
-  if (!parsed.success) throw new HTTPException(400, { message: "Invalid input" });
+  if (!parsed.success) throw new HTTPException(400, { message: "errors.invalidInput" });
   return parsed.data;
 }
 
@@ -99,7 +127,7 @@ export function studentApi({ db, config }: Deps) {
   const passwordFailures = new FailureLimiter();
   // Keys are 192 random bits, so this only keeps a broken scanner quiet.
   const keyFailures = new FailureLimiter(100);
-  const storeLimits = { maxBytes: config.store.maxBytes, compactAfter: config.store.compactAfter };
+  const storeLimits = { maxBytes: config.store.maxBytes };
 
   const cors = createMiddleware<BookEnv>(async (c, next) => {
     const origin = c.req.header("origin");
@@ -109,7 +137,7 @@ export function studentApi({ db, config }: Deps) {
       c.header("vary", "Origin");
       if (c.req.method === "OPTIONS") {
         c.header("access-control-allow-methods", "GET, POST");
-        c.header("access-control-allow-headers", "Authorization, Content-Type");
+        c.header("access-control-allow-headers", "Authorization, Content-Type, Content-Encoding");
         c.header("access-control-max-age", "600");
         return c.body(null, 204);
       }
@@ -128,23 +156,23 @@ export function studentApi({ db, config }: Deps) {
       // Cross-origin only without cookies: Bearer requests and token logins
       // (which carry nothing to forge).
       if (!(origin && own.includes(origin)) && !bearer && !fromExternal) {
-        throw new HTTPException(403, { message: "Cross-origin request refused" });
+        throw new HTTPException(403, { message: "errors.request.crossOrigin" });
       }
       if (!c.req.header("content-type")?.startsWith("application/json")) {
-        throw new HTTPException(415, { message: "Send JSON" });
+        throw new HTTPException(415, { message: "errors.request.sendJson" });
       }
     }
     await next();
   });
 
   const requireStudent = createMiddleware<BookEnv>(async (c, next) => {
-    if (!c.get("student")) throw new HTTPException(401, { message: "Not logged in" });
+    if (!c.get("student")) throw new HTTPException(401, { message: "errors.notLoggedIn" });
     await next();
   });
 
   const requireWritable = createMiddleware<BookEnv>(async (c, next) => {
     if (c.get("student")?.readonly) {
-      throw new HTTPException(403, { message: "This is a read-only view of a student's work" });
+      throw new HTTPException(403, { message: "errors.student.readOnly" });
     }
     await next();
   });
@@ -190,14 +218,14 @@ export function studentApi({ db, config }: Deps) {
       const input = await json(c, loginInput);
       const key = `${book.id}:${input.username}`;
       if (passwordFailures.isBlocked(key)) {
-        throw new HTTPException(429, { message: "Too many failed attempts. Try again in 15 minutes." });
+        throw new HTTPException(429, { message: "errors.auth.tooManyAttempts" });
       }
       const student = studentOf(book.id, eq(students.username, input.username));
       // Hash even for unknown names, so timing does not reveal which exist.
       const ok = await verifyPassword(input.password, student?.passwordHash ?? (await dummyPasswordHash()));
       if (!student || !ok) {
         passwordFailures.fail(key);
-        throw new HTTPException(401, { message: "Username or password is wrong" });
+        throw new HTTPException(401, { message: "errors.student.wrongCredentials" });
       }
       passwordFailures.succeed(key);
       db.update(students).set({ lastLoginAt: new Date() }).where(eq(students.id, student.id)).run();
@@ -210,12 +238,12 @@ export function studentApi({ db, config }: Deps) {
       const input = await json(c, keyInput);
       const limiterKey = String(book.id);
       if (keyFailures.isBlocked(limiterKey)) {
-        throw new HTTPException(429, { message: "Too many failed attempts. Try again in 15 minutes." });
+        throw new HTTPException(429, { message: "errors.auth.tooManyAttempts" });
       }
       const student = studentOf(book.id, eq(students.loginKeyHash, sha256(input.key)));
       if (!student) {
         keyFailures.fail(limiterKey);
-        throw new HTTPException(401, { message: "This login code is not valid (any more). Ask your teacher." });
+        throw new HTTPException(401, { message: "errors.student.badKey" });
       }
       db.update(students).set({ lastLoginAt: new Date() }).where(eq(students.id, student.id)).run();
       const token = start(c, student.id, input);
@@ -228,7 +256,7 @@ export function studentApi({ db, config }: Deps) {
       const redeemed = redeemImpersonationCode(db, input.code);
       const student = redeemed && studentOf(book.id, eq(students.id, redeemed.studentId));
       if (!redeemed || !student) {
-        throw new HTTPException(401, { message: "This link has expired. Open it again from Hyperbook Cloud." });
+        throw new HTTPException(401, { message: "errors.student.impersonateExpired" });
       }
       const token = start(c, student.id, { token: input.token, readonly: true, impersonatedBy: redeemed.userId });
       return c.json({ user: { username: student.username }, readonly: true, ...(token && { token }) });
@@ -246,69 +274,48 @@ export function studentApi({ db, config }: Deps) {
       return c.json({ user: { username: student.username }, readonly: student.readonly });
     })
 
+    // The rows saved after revision `since` (0: everything), and the revision.
     .get("/store", requireStudent, (c) => {
-      const state = readState(db, c.get("student")!.studentId);
-      return c.json(state);
+      const since = Number.parseInt(c.req.query("since") ?? "0", 10);
+      return c.json(readChanges(db, c.get("student")!.studentId, Number.isFinite(since) && since > 0 ? since : 0));
     })
 
+    // Saves rows and answers with what other devices saved after `since`.
+    // The body may be gzip-compressed (Content-Encoding: gzip).
     .post(
-      "/store/events",
+      "/store",
       requireStudent,
       requireWritable,
       bodyLimit({
         maxSize: config.store.maxBytes,
         onError: () => {
-          throw new HTTPException(413, { message: "Too much data in one request" });
+          throw new HTTPException(413, { message: "errors.request.tooLarge" });
         },
       }),
       async (c) => {
-        const input = await json(c, eventsInput);
-        const problem = validateEvents(input.events);
+        const input = await storeUpload(c, config.store.maxBytes);
+        const problem = validateRows(input.rows);
         if (problem) throw new HTTPException(400, { message: problem });
         try {
-          const result = appendEvents(
-            db,
-            c.get("student")!.studentId,
-            input.events as WireEvent[],
-            input.afterEventId,
-            storeLimits,
+          return c.json(
+            writeRows(
+              db,
+              c.get("student")!.studentId,
+              { since: input.since, rows: input.rows as SyncRow[], replace: input.replace },
+              storeLimits,
+            ),
           );
-          if (result.conflict) {
-            return c.json(
-              { error: "Stale state — re-fetch required", serverLastEventId: result.serverLastEventId },
-              409,
-            );
+        } catch (error) {
+          // Not 413: that means "this request is too large", and the client
+          // splits it. A full store is not fixed by smaller requests.
+          if (error instanceof StoreTooLargeError) {
+            throw httpError(507, "errors.student.storeFull", { mb: Math.floor(error.maxBytes / 1024 / 1024) });
           }
-          return c.json({ success: true, lastEventId: result.lastEventId });
-        } catch (error) {
-          if (error instanceof StoreTooLargeError) throw new HTTPException(413, { message: error.message });
           throw error;
         }
       },
     )
 
-    .post(
-      "/store/snapshot",
-      requireStudent,
-      requireWritable,
-      bodyLimit({
-        maxSize: config.store.maxBytes,
-        onError: () => {
-          throw new HTTPException(413, { message: "Too much data in one request" });
-        },
-      }),
-      async (c) => {
-        const input = await json(c, snapshotInput);
-        try {
-          const result = replaceSnapshot(db, c.get("student")!.studentId, input.data as unknown as Snapshot, storeLimits);
-          return c.json({ success: true, lastEventId: result.lastEventId });
-        } catch (error) {
-          if (error instanceof StoreTooLargeError) throw new HTTPException(413, { message: error.message });
-          throw error;
-        }
-      },
-    )
-
-    .all("*", (c) => c.json({ error: "Not found" }, 404));
+    .all("*", (c) => c.json({ error: createT(requestLocale(c))("errors.notFound") }, 404));
 }
 

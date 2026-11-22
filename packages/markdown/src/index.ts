@@ -55,6 +55,8 @@ declare module "vfile" {
      * Every id resolved on this page with the source range of its directive,
      * for `hyperbook migrate` to pin ids before it rewrites a directive.
      */
+    /** Elements that keep a reader's work, in document order (storedElements.ts). */
+    storedElements: (import("./storedElements").StoredElement & { at: number })[];
     resolvedDirectiveIds: {
       name: string;
       start: number;
@@ -72,6 +74,8 @@ declare module "mdast" {
 
 export { process, remark };
 export { legacyP5Ids } from "./legacyIds";
+export { storedElements, STORE_TABLE_OF_DIRECTIVE } from "./storedElements";
+export type { StoredElement } from "./storedElements";
 export { collectLinkTargets } from "./collectLinks";
 export type { LinkTarget } from "./collectLinks";
 export { stripProtectBlocks } from "./stripProtect";

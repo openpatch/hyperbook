@@ -11,6 +11,7 @@ import {
   registerDirective,
 } from "./remarkHelper";
 import { resolveDirectiveId } from "./directiveId";
+import { recordStoredElement } from "./storedElements";
 
 export default (ctx: HyperbookContext) => () => {
   const name = "h5p";
@@ -21,6 +22,7 @@ export default (ctx: HyperbookContext) => () => {
         const attributes = node.attributes || {};
         const src = attributes.src;
         const id = attributes.id || resolveDirectiveId(file, node);
+        recordStoredElement(file, name, id, node);
         const allowExport =
           attributes.export !== undefined && attributes.export !== "false";
         const resolvedSrc = src

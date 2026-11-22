@@ -42,7 +42,9 @@ import lunr from "lunr";
 import {
   process as hyperbookProcess,
   stripProtectBlocks,
+  storedElements,
   type ArchiveInclude,
+  type StoredElement,
   type TypstJob,
   type TypstPackage,
 } from "@hyperbook/markdown";
@@ -125,6 +127,66 @@ export const SEARCH_DOCUMENTS = ${JSON.stringify(documents)};
   await fs.writeFile(path.join(rootOut, ASSETS_FOLDER, "search.js"), js);
 }
 
+/** A book page and the elements on it that keep a reader's work. */
+export interface ElementPage {
+  href: string;
+  title: string;
+  /** The names of the sections the page is in, outermost first. */
+  sections?: string[];
+  elements: StoredElement[];
+}
+
+/** href → the names of the sections around it, from the navigation. */
+function sectionPaths(
+  sections: { name?: string; href?: string; pages: { href?: string }[]; sections: any[] }[],
+  outer: string[] = [],
+  paths = new Map<string, string[]>(),
+): Map<string, string[]> {
+  for (const section of sections) {
+    const path = section.name ? [...outer, section.name] : outer;
+    for (const page of section.pages) {
+      if (page.href) paths.set(page.href, path);
+    }
+    sectionPaths(section.sections, path, paths);
+  }
+  return paths;
+}
+
+/**
+ * Writes `_hyperbook/elements.json`: which element (and store table) a
+ * saved row belongs to, page by page in the book's order. Hyperbook Cloud
+ * reads it to show teachers what their students worked on; only books with
+ * `cloud` get it. Pages outside the navigation (hidden ones) come last.
+ */
+export async function writeElementIndex(
+  rootOut: string,
+  pages: ElementPage[],
+  pageList: { href?: string; name?: string }[],
+  sections: Parameters<typeof sectionPaths>[0] = [],
+): Promise<void> {
+  const order = new Map(pageList.map((p, i) => [p.href || "/", i]));
+  // The name the navigation shows (front matter `name` or `title`), so the
+  // teacher sees the same titles as in the book.
+  const names = new Map(pageList.map((p) => [p.href || "/", p.name]));
+  const paths = sectionPaths(sections);
+  const withSections = pages.map((page) => {
+    const path = paths.get(page.href);
+    const title = names.get(page.href) || page.title;
+    return path && path.length > 0 ? { ...page, title, sections: path } : { ...page, title };
+  });
+  const sorted = [...withSections].sort(
+    (a, b) =>
+      (order.get(a.href) ?? Infinity) - (order.get(b.href) ?? Infinity) ||
+      a.href.localeCompare(b.href),
+  );
+  const dir = path.join(rootOut, "_hyperbook");
+  await makeDir(dir, { recursive: true });
+  await fs.writeFile(
+    path.join(dir, "elements.json"),
+    JSON.stringify({ version: 1, pages: sorted }),
+  );
+}
+
 /** Called once per built page so a caller can index what each page consumed. */
 export type PageResultSink = (href: string, result: SinglePageResult) => void;
 
@@ -149,6 +211,8 @@ export interface SinglePageResult {
   typstJobs: TypstJob[];
   /** `.typ` sources this page hands out as they are (`:download`). */
   typstDownloads: string[];
+  /** Elements that keep a reader's work, in page order (for elements.json). */
+  storedElements: StoredElement[];
 }
 
 export async function buildSingleBookPage(
@@ -262,6 +326,7 @@ export async function buildSingleBookPage(
       (result.data.archiveIncludes as Record<string, ArchiveInclude[]>) || {},
     typstJobs: (result.data.typstJobs as TypstJob[]) || [],
     typstDownloads: (result.data.typstDownloads as string[]) || [],
+    storedElements: storedElements(result),
   };
 }
 
@@ -374,6 +439,7 @@ export async function buildSingleGlossaryPage(
       (result.data.archiveIncludes as Record<string, ArchiveInclude[]>) || {},
     typstJobs: (result.data.typstJobs as TypstJob[]) || [],
     typstDownloads: (result.data.typstDownloads as string[]) || [],
+    storedElements: storedElements(result),
   };
 }
 
@@ -1000,6 +1066,7 @@ async function runBuild(
     bookFiles = bookFiles.filter((b) => b.path.absolute.endsWith(filter));
   }
 
+  const elementPages: ElementPage[] = [];
   let i = 1;
   for (let file of bookFiles) {
     const pageResult = await buildSingleBookPage(
@@ -1012,6 +1079,13 @@ async function runBuild(
       hyperbookJson,
     );
     searchDocuments.push(...pageResult.searchDocuments);
+    if (pageResult.storedElements.length > 0) {
+      elementPages.push({
+        href: file.path.href || "/",
+        title: file.markdown.data.name || (file.markdown.data as { title?: string }).title || file.name,
+        elements: pageResult.storedElements,
+      });
+    }
     for (const [archiveName, includes] of Object.entries(
       pageResult.archiveIncludes,
     )) {
@@ -1054,6 +1128,14 @@ async function runBuild(
       hyperbookJson,
     );
     searchDocuments.push(...pageResult.searchDocuments);
+    // Glossary entries can hold tasks too; they come after the book's pages.
+    if (pageResult.storedElements.length > 0) {
+      elementPages.push({
+        href: file.path.href || "/glossary",
+        title: file.markdown.data.name || (file.markdown.data as { title?: string }).title || file.name,
+        elements: pageResult.storedElements,
+      });
+    }
     for (const [archiveName, includes] of Object.entries(
       pageResult.archiveIncludes,
     )) {
@@ -1211,6 +1293,10 @@ async function runBuild(
   );
 
   await writeI18n(assetsOut, hyperbookJson);
+
+  if (hyperbookJson.cloud) {
+    await writeElementIndex(rootOut, elementPages, pageList, pagesAndSections.sections);
+  }
 
   // Generate llms.txt if enabled
   if (hyperbookJson.llms) {

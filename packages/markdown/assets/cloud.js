@@ -2,8 +2,8 @@
 window.hyperbook = window.hyperbook || {};
 
 /**
- * Cloud sync integration for hyperbook store data.
- * Handles authentication, event-based sync, and snapshot sync.
+ * Saves a logged-in student's store to Hyperbook Cloud and brings it to their
+ * other devices.
  *
  * Two modes, set by the `cloud` entry of hyperbook.json:
  *  - `{ sameOrigin: true }`: the book is hosted by Hyperbook Cloud, which sets
@@ -11,46 +11,58 @@ window.hyperbook = window.hyperbook || {};
  *    session is an HttpOnly cookie the script never sees.
  *  - `{ url, id }`: the book is hosted elsewhere and talks to its address on
  *    Hyperbook Cloud cross-origin, with a Bearer token in localStorage.
+ *
+ * How sync works:
+ *  - The local store (Dexie) is the truth. Every write an element makes marks
+ *    its row as "not uploaded yet" in localStorage, synchronously, so the mark
+ *    survives leaving the page, closing the tab and going offline. Each mark
+ *    is its own localStorage entry, so tabs never overwrite each other's.
+ *  - An upload reads the current value of each marked row (null if it was
+ *    deleted) and sends it. The server keeps one value per row; sending a row
+ *    twice is harmless, so there is nothing to warn about when leaving a page.
+ *    The mark is removed only once the server has the row, and only if the
+ *    row did not change again in the meantime. Uploads go in batches; a row
+ *    the server refuses is set aside so it does not hold up the rest.
+ *  - Another device may have saved the same row since this one last looked
+ *    (a school computer that kept a change for a week). The server keeps the
+ *    change made later and hands it back to the device whose change lost.
+ *  - Each upload advances the student's revision. A device remembers the
+ *    revision it has seen and downloads only what other devices uploaded after
+ *    it — never over a row it has not uploaded yet. Tabs take turns syncing.
+ *  - The first time a student syncs on a device (or another student logs in on
+ *    it) the local store is replaced by the saved state.
  * @type {HyperbookCloud}
  * @memberof hyperbook
  * @see hyperbook.store
  * @see hyperbook.i18n
  */
 hyperbook.cloud = (function () {
-  // ===== Cloud Integration =====
   const AUTH_TOKEN_KEY = "hyperbook_auth_token";
   const AUTH_USER_KEY = "hyperbook_auth_user";
+  const SYNC_KEY = "hyperbook_sync";
   const SAME_ORIGIN = !!(HYPERBOOK_CLOUD && HYPERBOOK_CLOUD.sameOrigin);
   const API_BASE = !HYPERBOOK_CLOUD
     ? ""
     : (SAME_ORIGIN ? "" : String(HYPERBOOK_CLOUD.url || "").replace(/\/+$/, "")) +
       "/_hyperbook/api";
-  const LAST_EVENT_ID_PREFIX = "hyperbook_last_event_id";
-  const EVENT_BATCH_MAX_SIZE = 512 * 1024; // 512KB
-  const OFFLINE_QUEUE_MAX_SIZE = 100; // cap offline queue to avoid unbounded memory growth
-  // Browsers cap the combined body size of all in-flight keepalive requests at
-  // 64KB and reject anything larger outright. Stay under it with some slack.
-  const KEEPALIVE_MAX_SIZE = 60 * 1024;
-  // Tables holding ephemeral UI state that must never be synced. Kept in one
-  // place so the event hooks and the snapshot export cannot drift apart.
+  // Tables holding ephemeral UI state (cursor, scroll) that must never sync.
   const EPHEMERAL_TABLES = ["currentState"];
-  // How long the merge notice stays up before the page reloads itself. Long
-  // enough to read a sentence, short enough that the stale DOM is not usable.
-  const MERGE_RELOAD_DELAY = 4000;
-  let isLoadingFromCloud = false;
-  let syncManager = null;
-  let mergeNoticeShown = false;
-
-  /**
-   * The event watermark is per hyperbook: two hyperbooks served from the same
-   * origin share localStorage, and a single global key made each one send the
-   * other's `afterEventId`, producing a permanent 409 conflict loop.
-   */
-  function lastEventIdKey() {
-    return HYPERBOOK_CLOUD
-      ? `${LAST_EVENT_ID_PREFIX}:${bookKey()}`
-      : LAST_EVENT_ID_PREFIX;
-  }
+  // An upload waits for a pause in typing, but not forever.
+  const PUSH_DELAY = 1000;
+  const PUSH_MAX_WAIT = 5000;
+  const RETRY_MAX = 30000;
+  // Uploads from this size on are gzip-compressed. Element state is JSON or
+  // base64 and typically shrinks 3–10 times; below this the saving is not
+  // worth the work.
+  const COMPRESS_MIN_SIZE = 8 * 1024;
+  // Browsers refuse keepalive requests over 64 KB in flight.
+  const KEEPALIVE_MAX_SIZE = 60 * 1024;
+  // Uploads go in batches, so a backlog never becomes one request the server
+  // refuses or that holds it up for long.
+  const BATCH_MAX_ROWS = 500;
+  const BATCH_MAX_SIZE = 1024 * 1024;
+  // A request that hangs must not hold up every later upload.
+  const REQUEST_TIMEOUT = 30000;
 
   /**
    * Names this book's entries in localStorage. A hosted book is alone on its
@@ -61,620 +73,255 @@ hyperbook.cloud = (function () {
     return SAME_ORIGIN ? "cloud" : HYPERBOOK_CLOUD.id;
   }
 
-  function readLastEventId() {
-    const stored = localStorage.getItem(lastEventIdKey());
-    if (stored !== null) return parseInt(stored, 10) || 0;
+  // ===== Persisted sync state =====
 
-    // Migrate from the pre-namespacing global key.
-    const legacy = localStorage.getItem(LAST_EVENT_ID_PREFIX);
-    if (legacy !== null) {
-      localStorage.setItem(lastEventIdKey(), legacy);
-      localStorage.removeItem(LAST_EVENT_ID_PREFIX);
-      return parseInt(legacy, 10) || 0;
-    }
+  /*
+   * Kept in localStorage under `hyperbook_sync:<book>:`, one entry per fact.
+   * Each entry is written whole and never merged, so tabs of the book cannot
+   * overwrite each other's marks:
+   *  - `student`: whose state the local store holds ("view:" prefix for a
+   *    teacher's read-only view), so another login starts from scratch;
+   *  - `revision`: the server revision whose rows the local store holds;
+   *  - `replace`: "1" while the whole store must be uploaded (after an import
+   *    or reset);
+   *  - `dirty:<[table, key] as JSON>`: a row changed but not uploaded yet, as
+   *    `{ at, base, n, refused? }` — when it last changed; the revision the
+   *    device had seen when it first changed (with `at`, the server settles
+   *    a change another device made meanwhile); a nonce telling two changes
+   *    apart; and whether the server refused the row, which then waits until
+   *    it changes again or the reader retries.
+   */
+  const DIRTY = "dirty:";
 
-    return 0;
+  function prefix() {
+    return `${SYNC_KEY}:${bookKey()}:`;
   }
+  const read = (name) => localStorage.getItem(prefix() + name);
+  const write = (name, value) => localStorage.setItem(prefix() + name, value);
+  const erase = (name) => localStorage.removeItem(prefix() + name);
 
-  function writeLastEventId(id) {
-    localStorage.setItem(lastEventIdKey(), String(id));
-  }
-
-  function clearLastEventIds() {
+  /** The localStorage keys starting with `start`. */
+  function keysFrom(start) {
     const keys = [];
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
-      if (key && key.startsWith(LAST_EVENT_ID_PREFIX)) keys.push(key);
+      if (key && key.startsWith(start)) keys.push(key);
     }
-    keys.forEach((key) => localStorage.removeItem(key));
+    return keys;
   }
 
-  // ===== Simple Mutex =====
-  class Mutex {
-    constructor() {
-      this._queue = [];
-      this._locked = false;
-    }
-    async runExclusive(fn) {
-      await new Promise((resolve) => {
-        if (!this._locked) {
-          this._locked = true;
-          resolve();
-        } else {
-          this._queue.push(resolve);
-        }
-      });
-      try {
-        return await fn();
-      } finally {
-        if (this._queue.length > 0) {
-          this._queue.shift()();
-        } else {
-          this._locked = false;
-        }
-      }
-    }
-  }
-
-  // ===== Smart Sync Strategy =====
-
-  class SyncManager {
-    constructor(options = {}) {
-      this.debounceDelay = options.debounceDelay || 2000;
-      this.maxWaitTime = options.maxWaitTime || 10000;
-      this.minSaveInterval = options.minSaveInterval || 1000;
-
-      this.lastSaveTime = 0;
-      this.lastChangeTime = 0;
-      this.debounceTimer = null;
-      this.maxWaitTimer = null;
-      this.saveInProgress = false;
-      this.saveMutex = new Mutex();
-      this.retryCount = 0;
-
-      this.pendingEvents = [];
-      this.lastEventId = readLastEventId();
-
-      this.offlineQueue = [];
-      this.processingQueue = false;
-      this.unloadFlushed = false;
-      this.isOnline = navigator.onLine;
-
-      this.setupEventListeners();
-    }
-
-    get isDirty() {
-      return this.pendingEvents.length > 0;
-    }
-
-    addEvent(event) {
-      if (isLoadingFromCloud || isReadOnlyMode()) return;
-      // A cancelled unload leaves the flush latched. New work needs a new
-      // chance to be flushed if the user tries to leave again.
-      this.unloadFlushed = false;
-      this.pendingEvents.push(event);
-      this.lastChangeTime = Date.now();
-      this.updateUI("unsaved");
-      this.scheduleSave();
-    }
-
-    scheduleSave() {
-      if (this.debounceTimer) {
-        clearTimeout(this.debounceTimer);
-      }
-      if (!this.maxWaitTimer) {
-        this.maxWaitTimer = setTimeout(() => {
-          this.performSave("max-wait");
-        }, this.maxWaitTime);
-      }
-      this.debounceTimer = setTimeout(() => {
-        this.performSave("debounced");
-      }, this.debounceDelay);
-    }
-
-    async performSave(reason = "manual") {
-      if (!this.isDirty || this.saveInProgress) return;
-      if (!HYPERBOOK_CLOUD || !isLoggedIn()) return;
-      if (isReadOnlyMode()) {
-        this.updateUI("readonly");
-        return;
-      }
-
-      const timeSinceLastSave = Date.now() - this.lastSaveTime;
-      if (timeSinceLastSave < this.minSaveInterval) {
-        setTimeout(
-          () => this.performSave(reason),
-          this.minSaveInterval - timeSinceLastSave,
-        );
-        return;
-      }
-
-      return this.saveMutex.runExclusive(async () => {
-        this.saveInProgress = true;
-        this.clearTimers();
-
-        // Snapshot exactly which events we're attempting to send, so that any
-        // events added during the async save are not lost. Only this prefix is
-        // ever removed from the queue.
-        const eventsToSend = this.pendingEvents.slice();
-
-        // Another save may have drained the queue while we waited on the mutex.
-        // Sending an empty batch is a 400, which would wedge the retry loop.
-        if (eventsToSend.length === 0) {
-          this.saveInProgress = false;
-          return;
-        }
-
-        this.updateUI("saving");
-
-        try {
-          const serialized = JSON.stringify(eventsToSend);
-
-          if (!this.isOnline) {
-            // Enforce the queue size cap to prevent unbounded memory growth.
-            if (this.offlineQueue.length >= OFFLINE_QUEUE_MAX_SIZE) {
-              console.warn("Offline queue full — falling back to snapshot on reconnect");
-              this.offlineQueue = [{ snapshot: true, timestamp: Date.now() }];
-            } else {
-              this.offlineQueue.push({
-                events: eventsToSend,
-                timestamp: Date.now(),
-              });
-            }
-            this.pendingEvents = this.pendingEvents.slice(eventsToSend.length);
-            this.updateUI("offline-queued");
-            return;
-          }
-
-          let result;
-
-          if (serialized.length > EVENT_BATCH_MAX_SIZE) {
-            // Large batch — fall back to full snapshot
-            result = await this.sendSnapshot();
-          } else {
-            // Normal path — send events
-            result = await this.sendEvents(eventsToSend);
-          }
-
-          if (result.conflict) {
-            await this.resolveConflict(eventsToSend);
-            return;
-          }
-
-          // Only discard the events we snapshotted, preserving any events that
-          // were added while the network request was in flight.
-          this.pendingEvents = this.pendingEvents.slice(eventsToSend.length);
-          this.lastEventId = result.lastEventId;
-          writeLastEventId(this.lastEventId);
-          this.lastSaveTime = Date.now();
-          this.retryCount = 0;
-          this.updateUI("saved");
-          console.log(`✓ Saved (${reason})`);
-        } catch (error) {
-          console.error("Save failed:", error);
-          this.updateUI("error");
-
-          // A 4xx (other than the 409 handled above) means the server will
-          // never accept this batch. Retrying forever would pin the queue and
-          // block every later change, so drop it and move on.
-          if (error.status >= 400 && error.status < 500) {
-            console.error("Dropping rejected event batch:", eventsToSend);
-            this.pendingEvents = this.pendingEvents.slice(eventsToSend.length);
-            this.retryCount = 0;
-          } else {
-            this.scheduleRetry();
-          }
-        } finally {
-          this.saveInProgress = false;
-        }
-      });
-    }
-
-    /**
-     * Recover from a 409 without losing local work.
-     *
-     * A conflict means another session advanced the server past our watermark.
-     * The previous behaviour re-fetched, dropped the pending batch and
-     * reloaded, which silently discarded everything the user had just done.
-     * Instead we pull the server state, replay our pending events on top of it
-     * both locally and remotely, and only then reload so the page reflects the
-     * merged result.
-     */
-    async resolveConflict(eventsToSend) {
-      console.log("⚠ Stale state detected, merging with cloud state...");
-
-      await loadFromCloud();
-      await applyEventsLocally(eventsToSend);
-
-      const result = await this.sendEvents(eventsToSend, {
-        afterEventId: this.lastEventId,
-      });
-
-      if (result.conflict) {
-        // Someone wrote again while we were merging. Leave the events queued
-        // and let the retry backoff have another go rather than looping here.
-        this.updateUI("error");
-        this.scheduleRetry();
-        return;
-      }
-
-      this.pendingEvents = this.pendingEvents.slice(eventsToSend.length);
-      this.lastEventId = result.lastEventId;
-      writeLastEventId(this.lastEventId);
-      this.lastSaveTime = Date.now();
-      this.retryCount = 0;
-
-      // Anything the user changed while we were merging is not in the state we
-      // just pulled, and the reload below would discard it. Flush it first.
-      if (this.pendingEvents.length > 0) {
-        const rest = this.pendingEvents.slice();
-        const restResult = await this.sendEvents(rest, {
-          afterEventId: this.lastEventId,
-        });
-
-        if (restResult.conflict) {
-          // Still racing. Leave the events queued for the retry backoff and
-          // skip the reload rather than dropping them.
-          this.updateUI("unsaved");
-          this.scheduleRetry();
-          return;
-        }
-
-        this.pendingEvents = this.pendingEvents.slice(rest.length);
-        this.lastEventId = restResult.lastEventId;
-        writeLastEventId(this.lastEventId);
-      }
-
-      // Reload so rendered components pick up the merged state. Directives read
-      // the store once at startup, so the DOM is stale until we do.
-      announceMergeAndReload();
-    }
-
-    async sendEvents(events, options = {}) {
-      const afterEventId = options.afterEventId !== undefined
-        ? options.afterEventId
-        : this.lastEventId;
-      try {
-        const data = await apiRequest(
-          "/store/events",
-          {
-            method: "POST",
-            body: JSON.stringify({
-              events: events,
-              afterEventId: afterEventId,
-            }),
-          },
-        );
-        return { lastEventId: requireEventId(data), conflict: false };
-      } catch (error) {
-        if (error.status === 409) {
-          return { conflict: true };
-        }
-        throw error;
-      }
-    }
-
-    async sendSnapshot() {
-      // Exclude ephemeral tables, matching the tables the event hooks skip.
-      // Including them here pushed local cursor/scroll state to the cloud and
-      // then pulled another session's back down on the next load.
-      const storeExport = await hyperbook.store.db.export({
-        prettyJson: false,
-        filter: (table) => EPHEMERAL_TABLES.indexOf(table) === -1,
-      });
-      const exportData = JSON.parse(await storeExport.text());
-
-      const data = await apiRequest(
-        "/store/snapshot",
-        {
-          method: "POST",
-          body: JSON.stringify({
-            data: {
-              version: 1,
-              origin: window.location.origin,
-              data: { hyperbook: exportData },
-            },
-          }),
-        },
-      );
-      return { lastEventId: requireEventId(data), conflict: false };
-    }
-
-    scheduleRetry() {
-      const retryDelay = Math.min(30000, 1000 * Math.pow(2, this.retryCount));
-      this.retryCount++;
-      setTimeout(() => {
-        if (this.isDirty) {
-          this.performSave("retry");
-        }
-      }, retryDelay);
-    }
-
-    setupEventListeners() {
-      window.addEventListener("online", () => {
-        this.isOnline = true;
-        this.processOfflineQueue();
-        if (this.isDirty) {
-          this.updateUI("unsaved");
-          this.scheduleSave();
-        } else {
-          this.updateUI("saved");
-        }
-      });
-
-      window.addEventListener("offline", () => {
-        this.isOnline = false;
-        this.updateUI("offline");
-      });
-
-      window.addEventListener("beforeunload", (e) => {
-        this.flushOnUnload();
-        if (this.isDirty) {
-          e.preventDefault();
-          e.returnValue = "";
-        }
-      });
-
-      // beforeunload does not fire on mobile Safari or when a background tab is
-      // discarded; pagehide does. Both call the same guarded flush.
-      window.addEventListener("pagehide", () => {
-        this.flushOnUnload();
-      });
-
-      document.addEventListener("visibilitychange", () => {
-        if (document.hidden && this.isDirty) {
-          this.performSave("visibility-change");
-        }
-      });
-    }
-
-    /**
-     * Last-ditch flush while the page is going away.
-     *
-     * A normal save is debounced by up to `debounceDelay`, so closing the tab
-     * mid-window silently dropped everything changed in it — the beforeunload
-     * prompt only warned, it never sent anything. `fetch(keepalive)` outlives
-     * the document teardown. `navigator.sendBeacon` cannot be used here: it has
-     * no way to set the Authorization header.
-     *
-     * Fire-and-forget by necessity, so it deliberately does not touch
-     * `pendingEvents` or the watermark. If the unload is cancelled the events
-     * are still queued and the next save resends them; the server rejects that
-     * duplicate with a 409 and `resolveConflict` merges it away.
-     */
-    flushOnUnload() {
-      if (this.unloadFlushed) return;
-      if (!this.isDirty || !this.isOnline) return;
-      if (!HYPERBOOK_CLOUD || !isLoggedIn() || isReadOnlyMode()) return;
-
-      const body = JSON.stringify({
-        events: this.pendingEvents,
-        afterEventId: this.lastEventId,
-      });
-
-      // Over the keepalive budget the request is refused rather than truncated,
-      // which would lose the batch just as surely. Leave it queued so the
-      // beforeunload prompt is the user's cue not to close the tab yet.
-      if (body.length > KEEPALIVE_MAX_SIZE) {
-        console.warn("Pending changes too large to flush on unload");
-        return;
-      }
-
-      this.unloadFlushed = true;
-      try {
-        fetch(`${API_BASE}/store/events`, {
-          method: "POST",
-          keepalive: true,
-          headers: requestHeaders(),
-          credentials: SAME_ORIGIN ? "same-origin" : "omit",
-          body: body,
-        }).catch(() => {});
-      } catch (error) {
-        // The document is being torn down; there is nothing useful left to do.
-      }
-    }
-
-    async processOfflineQueue() {
-      if (this.offlineQueue.length === 0) return;
-
-      // The "online" event can fire again while a drain is still in flight
-      // (flaky connections do this readily). Without a guard both runs send
-      // the same batch, and the second one is answered with a 409.
-      if (this.processingQueue) return;
-      this.processingQueue = true;
-
-      try {
-        await this.drainOfflineQueue();
-      } finally {
-        this.processingQueue = false;
-      }
-    }
-
-    async drainOfflineQueue() {
-      console.log(`Processing ${this.offlineQueue.length} queued saves...`);
-
-      // FIX: if the queue was compacted to a snapshot sentinel, send a full
-      // snapshot instead of trying to replay individual events
-      if (this.offlineQueue.length === 1 && this.offlineQueue[0].snapshot) {
-        this.offlineQueue = [];
-        try {
-          const result = await this.sendSnapshot();
-          this.lastEventId = result.lastEventId;
-          writeLastEventId(this.lastEventId);
-          this.lastSaveTime = Date.now();
-          console.log("✓ Offline snapshot flushed");
-        } catch (error) {
-          console.error("Failed to flush offline snapshot:", error);
-        }
-        return;
-      }
-
-      // Send queued batches in order, chaining each one onto the watermark the
-      // previous batch produced. Recording `afterEventId` at enqueue time was
-      // wrong: the watermark cannot advance while offline, so every batch after
-      // the first carried a stale id and was rejected with a 409.
-      for (let i = 0; i < this.offlineQueue.length; i++) {
-        const queued = this.offlineQueue[i];
-        try {
-          const result = await this.sendEvents(queued.events, {
-            afterEventId: this.lastEventId,
-          });
-
-          if (result.conflict) {
-            // Another session moved ahead of us. Merge instead of discarding:
-            // drop the flushed prefix, then replay what is left on top of the
-            // fetched state.
-            console.log("⚠ Offline queue conflict, merging with cloud state...");
-            const remaining = this.offlineQueue.slice(i).reduce(
-              (all, entry) => all.concat(entry.events || []),
-              [],
-            );
-            this.offlineQueue = [];
-            this.pendingEvents = remaining.concat(this.pendingEvents);
-            await this.resolveConflict(remaining);
-            return;
-          }
-
-          this.lastEventId = result.lastEventId;
-          writeLastEventId(this.lastEventId);
-        } catch (error) {
-          console.error("Failed to process offline queue:", error);
-          // Keep remaining items in queue
-          this.offlineQueue = this.offlineQueue.slice(i);
-          return;
-        }
-      }
-
-      this.offlineQueue = [];
-      this.lastSaveTime = Date.now();
-      console.log("✓ Offline queue processed");
-    }
-
-    clearTimers() {
-      if (this.debounceTimer) {
-        clearTimeout(this.debounceTimer);
-        this.debounceTimer = null;
-      }
-      if (this.maxWaitTimer) {
-        clearTimeout(this.maxWaitTimer);
-        this.maxWaitTimer = null;
-      }
-    }
-
-    updateUI(state) {
-      updateSaveStatus(state, {
-        isDirty: this.isDirty,
-        lastSaveTime: this.lastSaveTime,
-        isOnline: this.isOnline,
-        queuedSaves: this.offlineQueue.length,
-      });
-    }
-
-    // FIX: manualSave's no-pending-events path now runs inside saveMutex,
-    // preventing a concurrent performSave from racing with sendSnapshot
-    async manualSave() {
-      if (this.pendingEvents.length === 0) {
-        // No pending events — send full snapshot
-        this.clearTimers();
-        return this.saveMutex.runExclusive(async () => {
-          try {
-            this.updateUI("saving");
-            const result = await this.sendSnapshot();
-            this.lastEventId = result.lastEventId;
-            writeLastEventId(this.lastEventId);
-            this.updateUI("saved");
-          } catch (error) {
-            console.error("Manual save failed:", error);
-            this.updateUI("error");
-          }
-        });
-      }
-      this.clearTimers();
-      await this.performSave("manual");
-    }
-
-    reset() {
-      this.pendingEvents = [];
-      this.clearTimers();
-      this.offlineQueue = [];
-      this.retryCount = 0;
-    }
-  }
-
+  const syncedStudent = () => read("student");
   /**
-   * Hand-offs in the address's fragment, for books hosted elsewhere (a hosted
-   * book gets these on the platform's own pages instead):
-   *  - `#hyperbook-impersonate=<token>`: a teacher opened a read-only view of
-   *    a student's work from Hyperbook Cloud.
-   *  - `#hyperbook-key=<key>`: a student scanned the QR code on a login card.
-   * Read once and removed from the address right away.
+   * Makes every mark's text unique. unmark() removes a mark only while its
+   * text is still the one uploaded; without the nonce, a second change in
+   * the same millisecond (same `at` and `base`) would look like the uploaded
+   * one and lose its mark, so it would never reach the server.
    */
-  let pendingHandoff = null;
-  (function readHandoff() {
-    if (!HYPERBOOK_CLOUD || SAME_ORIGIN) return;
-    const match = window.location.hash.match(/^#hyperbook-(impersonate|key)=([A-Za-z0-9_-]+)$/);
-    if (!match) return;
-    pendingHandoff = { kind: match[1], value: match[2] };
-    history.replaceState(null, "", window.location.pathname + window.location.search);
-  })();
+  const nonce = () => Math.random().toString(36).slice(2, 10);
+  /** A revision from the server, or null when the answer has none. */
+  const validRevision = (revision) => (Number.isSafeInteger(revision) && revision >= 0 ? revision : null);
+  /** Stores the server's revision; a malformed answer keeps the one there. */
+  function writeRevision(revision) {
+    const valid = validRevision(revision);
+    if (valid !== null) write("revision", String(valid));
+  }
+  function syncedRevision() {
+    const revision = Number(read("revision"));
+    return Number.isSafeInteger(revision) && revision > 0 ? revision : 0;
+  }
+  const replacePending = () => read("replace") === "1";
 
-  /**
-   * Read the watermark out of an API response.
-   *
-   * `apiRequest` returns null for a 404 (the hyperbook is not registered with
-   * this cloud). Reading `.lastEventId` off it threw a TypeError that the save
-   * loop mistook for a transient failure and retried forever.
-   */
-  function requireEventId(data) {
-    if (!data || typeof data.lastEventId !== "number") {
-      const err = new Error(
-        "Cloud did not return an event id — is this hyperbook registered?",
-      );
-      err.status = 404;
-      throw err;
+  const markName = (table, key) => DIRTY + JSON.stringify([table, key]);
+  const isMarked = (table, key) => read(markName(table, key)) !== null;
+
+  /** Every marked row: `{ name, table, key, raw, mark }`. */
+  function readMarks() {
+    const start = prefix() + DIRTY;
+    const marks = [];
+    for (const storageKey of keysFrom(start)) {
+      const raw = localStorage.getItem(storageKey);
+      if (raw === null) continue;
+      try {
+        const [table, key] = JSON.parse(storageKey.slice(start.length));
+        marks.push({ name: storageKey.slice(prefix().length), table, key, raw, mark: JSON.parse(raw) });
+      } catch {
+        localStorage.removeItem(storageKey);
+      }
     }
-    return data.lastEventId;
+    return marks;
+  }
+  const pendingMarks = () => readMarks().filter((m) => !m.mark.refused);
+  /** Something is waiting to be uploaded. */
+  const isDirty = () => replacePending() || pendingMarks().length > 0;
+  /** Something is not on the server, counting rows it refused. */
+  const hasUnsent = () => replacePending() || readMarks().length > 0;
+  const hasRefused = () => readMarks().some((m) => m.mark.refused);
+
+  /** Removes a mark, unless the row changed again since it was read. */
+  function unmark(m) {
+    if (read(m.name) === m.raw) {
+      erase(m.name);
+      latest.delete(m.name);
+    }
   }
 
-  /**
-   * Replay events against the local Dexie database.
-   *
-   * Used when merging after a conflict: the server replays the same events on
-   * its snapshot, so applying them locally keeps both sides identical. Hooks
-   * are suppressed so the replay does not re-enqueue the events it applies.
-   */
-  async function applyEventsLocally(events) {
-    if (!events || events.length === 0) return;
+  /** Forgets the sync state of this book on this device. */
+  function clearSyncState() {
+    keysFrom(prefix()).forEach((key) => localStorage.removeItem(key));
+    latest.clear();
+  }
 
-    const wasLoading = isLoadingFromCloud;
-    isLoadingFromCloud = true;
+  // ===== Local store access =====
 
+  /** Transactions the sync itself opened; their writes are not changes. */
+  const ownTransactions = new WeakSet();
+  // Latest value of each row this page marked, by mark name, for the upload
+  // on page hide, which cannot wait for an IndexedDB read.
+  const latest = new Map();
+  let tracking = false;
+  let changesThisPage = 0;
+  // The start-up sync found the page outdated and reloads it.
+  let reloading = false;
+
+  const db = () => hyperbook.store.db;
+  const syncedTables = () => db().tables.filter((t) => EPHEMERAL_TABLES.indexOf(t.name) === -1);
+
+  function keyOf(table, row) {
+    const keyPath = table.schema.primKey.keyPath;
+    if (Array.isArray(keyPath)) return keyPath.map((k) => row[k]);
+    return row[keyPath];
+  }
+
+  function setPath(obj, path, value) {
+    const parts = path.split(".");
+    let target = obj;
+    for (let i = 0; i < parts.length - 1; i++) {
+      if (typeof target[parts[i]] !== "object" || target[parts[i]] === null) target[parts[i]] = {};
+      target = target[parts[i]];
+    }
+    if (value === undefined) delete target[parts[parts.length - 1]];
+    else target[parts[parts.length - 1]] = value;
+  }
+
+  function markDirty(table, key, value) {
+    if (!tracking || key === undefined) return;
+    const name = markName(table, key);
+    let base = syncedRevision();
     try {
-      for (const event of events) {
-        const table = hyperbook.store.db.table(event.table);
-        if (!table) continue;
-
-        try {
-          if (event.op === "create") {
-            await table.put(event.data);
-          } else if (event.op === "update") {
-            await table.update(event.primKey, event.data);
-          } else if (event.op === "delete") {
-            await table.delete(event.primKey);
-          }
-        } catch (error) {
-          console.error(
-            `Failed to replay ${event.op} on ${event.table}:`,
-            error,
-          );
-        }
-      }
-    } finally {
-      isLoadingFromCloud = wasLoading;
-    }
+      // Downloads leave a marked row alone, so the device has not seen other
+      // devices' changes to it since it first changed it.
+      const previous = JSON.parse(read(name));
+      if (previous && typeof previous.base === "number") base = previous.base;
+    } catch {}
+    const mark = { at: Date.now(), base, n: nonce() };
+    write(name, JSON.stringify(mark));
+    changesThisPage += 1;
+    latest.set(name, value);
+    scheduler.changed();
   }
 
-  /** The Bearer token of a book hosted elsewhere; null for hosted books. */
+  /** Watches every synced table; runs before any element touches the store. */
+  function installHooks() {
+    syncedTables().forEach((table) => {
+      table.hook("creating", function (primKey, obj, tx) {
+        if (ownTransactions.has(tx)) return;
+        markDirty(table.name, primKey !== undefined ? primKey : keyOf(table, obj), obj);
+      });
+      table.hook("updating", function (mods, primKey, obj, tx) {
+        // A put of an unchanged row reports no modifications.
+        if (ownTransactions.has(tx) || Object.keys(mods).length === 0) return;
+        const next = JSON.parse(JSON.stringify(obj));
+        Object.keys(mods).forEach((path) => setPath(next, path, mods[path]));
+        markDirty(table.name, primKey, next);
+      });
+      table.hook("deleting", function (primKey, _obj, tx) {
+        if (ownTransactions.has(tx)) return;
+        markDirty(table.name, primKey, null);
+      });
+    });
+  }
+
+  /**
+   * Writes rows from the server into the local store, leaving out rows this
+   * device has not uploaded yet. The marks are checked inside the transaction:
+   * a change made while the rows were on their way is newer than they are.
+   * With `replaceAll`, the synced tables are emptied first.
+   * Returns how many rows changed locally.
+   */
+  async function applyRows(rows, replaceAll = false) {
+    const tables = syncedTables();
+    const byName = {};
+    tables.forEach((t) => (byName[t.name] = t));
+    const wanted = rows.filter((r) => byName[r.table]);
+    if (wanted.length === 0 && !replaceAll) return 0;
+
+    let changed = 0;
+    await db().transaction("rw", tables, async (tx) => {
+      ownTransactions.add(tx);
+      if (replaceAll) {
+        for (const t of tables) changed += await t.count();
+        for (const t of tables) await t.clear();
+      } else {
+        // The callback runs as soon as the transaction is created, but it is
+        // only granted once earlier writes (an element's change) committed.
+        // A first answered request means it was: their marks exist now, and
+        // later writes wait for this transaction and land on top of it.
+        await tables[0].count();
+      }
+      for (const row of wanted) {
+        if (!replaceAll && isMarked(row.table, row.key)) continue;
+        const table = byName[row.table];
+        if (row.data === null) {
+          await table.delete(row.key);
+        } else if (table.schema.primKey.keyPath) {
+          await table.put(row.data);
+        } else {
+          await table.put(row.data, row.key);
+        }
+        changed += 1;
+      }
+    });
+    return changed;
+  }
+
+  /**
+   * The current value of each marked row (null if deleted), read in one go,
+   * with when it changed and the revision it was based on. Marks of tables
+   * this book no longer has are dropped.
+   */
+  async function readRows(marks) {
+    const rows = [];
+    const tables = syncedTables();
+    const names = tables.map((t) => t.name);
+    await db().transaction("r", tables, async () => {
+      for (const m of marks) {
+        if (names.indexOf(m.table) === -1) {
+          unmark(m);
+          continue;
+        }
+        const data = await db().table(m.table).get(m.key);
+        rows.push({
+          table: m.table,
+          key: m.key,
+          data: data === undefined ? null : data,
+          at: m.mark.at,
+          base: m.mark.base,
+        });
+      }
+    });
+    return rows;
+  }
+
+  async function readAllRows() {
+    const rows = [];
+    for (const table of syncedTables()) {
+      (await table.toArray()).forEach((data) => rows.push({ table: table.name, key: keyOf(table, data), data }));
+    }
+    return rows;
+  }
+
+  // ===== Talking to the server =====
+
   function getAuthToken() {
     if (SAME_ORIGIN) return null;
     return localStorage.getItem(`${AUTH_TOKEN_KEY}:${bookKey()}`);
@@ -690,10 +337,9 @@ hyperbook.cloud = (function () {
     localStorage.setItem(`${AUTH_USER_KEY}:${bookKey()}`, JSON.stringify(user));
   }
 
-  function clearAuthToken() {
+  function clearAuth() {
     localStorage.removeItem(`${AUTH_TOKEN_KEY}:${bookKey()}`);
     localStorage.removeItem(`${AUTH_USER_KEY}:${bookKey()}`);
-    clearLastEventIds();
   }
 
   function getAuthUser() {
@@ -716,6 +362,13 @@ hyperbook.cloud = (function () {
     return !!(user && user.readonly);
   }
 
+  /** Whose state the local store should hold, or null. */
+  function identity() {
+    const user = getAuthUser();
+    if (!user || !isLoggedIn()) return null;
+    return (user.readonly ? "view:" : "") + user.username;
+  }
+
   function requestHeaders(extra) {
     const headers = { "Content-Type": "application/json", ...extra };
     const token = getAuthToken();
@@ -723,124 +376,346 @@ hyperbook.cloud = (function () {
     return headers;
   }
 
-  /**
-   * Make API request to cloud
-   */
+  /** A JSON request to the API. Failures throw an Error with `status` (0: network). */
   async function apiRequest(endpoint, options = {}) {
-    if (!HYPERBOOK_CLOUD) return null;
-
+    let response;
+    const signal =
+      typeof AbortSignal !== "undefined" && typeof AbortSignal.timeout === "function"
+        ? AbortSignal.timeout(REQUEST_TIMEOUT)
+        : undefined;
     try {
-      const response = await fetch(`${API_BASE}${endpoint}`, {
+      response = await fetch(`${API_BASE}${endpoint}`, {
         ...options,
+        signal,
         headers: requestHeaders(options.headers),
         credentials: SAME_ORIGIN ? "same-origin" : "omit",
       });
-
-      // Only 401 means the session is gone. A 403 is a refused action (such
-      // as saving in a read-only view) and must not log anyone out.
-      if (response.status === 401 && !options.allowUnauthorized) {
-        clearAuthToken();
-        showLogin();
-        const err = new Error("Authentication required");
-        err.status = 401;
-        throw err;
-      }
-
-      if (response.status === 404) {
-        return null;
-      }
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        const err = new Error(data.error || "Request failed");
-        err.status = response.status;
-        throw err;
-      }
-
-      return data;
-    } catch (error) {
-      if (!error.status) {
-        console.error("Cloud API error:", error);
-      }
-      throw error;
-    }
-  }
-
-  /**
-   * Login to cloud
-   */
-  async function hyperbookLogin(username, password) {
-    if (!HYPERBOOK_CLOUD) {
-      throw new Error("Cloud not configured");
+    } catch (cause) {
+      const err = new Error("Network error");
+      err.status = 0;
+      throw err;
     }
 
+    // Only 401 means the session is gone. A 403 is a refused action (such as
+    // saving in a read-only view) and must not log anyone out.
+    if (response.status === 401 && !options.allowUnauthorized) {
+      clearAuth();
+      // Keep marking: what the student does while the login drawer is open
+      // is uploaded once the same student logs in again (catchUp). Only the
+      // waiting uploads stop; sync() does nothing while logged out.
+      scheduler.clear();
+      updateUserUI(null);
+      showLogin();
+    }
+
+    let data = null;
     try {
-      const sharedDevice = !!document.getElementById("user-shared-device")?.checked;
-      const data = await apiRequest("/login", {
-        method: "POST",
-        allowUnauthorized: true,
-        body: JSON.stringify({ username, password, sharedDevice, token: !SAME_ORIGIN }),
-      });
-
-      setAuthUser({ username: data.user.username, readonly: false }, data.token);
-
-      // Load store data after login
-      await loadFromCloud();
-
-      // Reload so components pick up the imported state
-      window.location.reload();
-
-      return data.user;
-    } catch (error) {
-      throw error;
+      data = await response.json();
+    } catch {}
+    if (!response.ok) {
+      const err = new Error((data && data.error) || "Request failed");
+      err.status = response.status;
+      throw err;
     }
+    return data;
   }
 
   /**
-   * Logout from cloud
+   * The body of an upload, gzip-compressed when it is large and the browser
+   * can compress. Falls back to plain JSON, which the server also accepts.
+   * @param {string} json
+   * @returns {Promise<{ body: string | ArrayBuffer, headers: Record<string, string> }>}
    */
-  function hyperbookLogout() {
-    // Ends the session on the server too; for a hosted book that is the only
-    // way to remove the HttpOnly cookie.
-    if (HYPERBOOK_CLOUD) {
-      fetch(`${API_BASE}/logout`, {
+  async function encodeUpload(json) {
+    if (json.length < COMPRESS_MIN_SIZE || typeof CompressionStream === "undefined") {
+      return { body: json, headers: {} };
+    }
+    try {
+      const stream = new Blob([json]).stream().pipeThrough(new CompressionStream("gzip"));
+      const body = await new Response(stream).arrayBuffer();
+      return { body, headers: { "Content-Encoding": "gzip" } };
+    } catch {
+      return { body: json, headers: {} };
+    }
+  }
+
+  // ===== Upload scheduling =====
+
+  /** The server answered that the student's saved work is at its limit. */
+  let storeFull = false;
+
+  const scheduler = {
+    debounce: null,
+    maxWait: null,
+    retry: null,
+    retryCount: 0,
+    /** @type {Promise<number> | null} */
+    running: null,
+    again: false,
+    lastSaveTime: 0,
+
+    changed() {
+      updateSaveStatus("unsaved");
+      clearTimeout(this.debounce);
+      this.debounce = setTimeout(() => this.flush(), PUSH_DELAY);
+      if (!this.maxWait) this.maxWait = setTimeout(() => this.flush(), PUSH_MAX_WAIT);
+    },
+
+    clear() {
+      clearTimeout(this.debounce);
+      clearTimeout(this.maxWait);
+      clearTimeout(this.retry);
+      this.debounce = this.maxWait = this.retry = null;
+    },
+
+    /**
+     * Uploads now. A call while one runs makes it run once more after.
+     * Resolves to the number of rows that changed locally; never rejects.
+     * @returns {Promise<number>}
+     */
+    flush() {
+      this.clear();
+      if (this.running) {
+        this.again = true;
+        return this.running;
+      }
+      this.running = sync()
+        .then((changed) => {
+          this.retryCount = 0;
+          storeFull = false;
+          return changed;
+        })
+        .catch((error) => {
+          // Refused rows are set aside by the upload itself; what reaches
+          // here is retried only when it may go through later.
+          // 507: the student's saved work is at its limit. Retrying does not
+          // help; the notice says so, and the marks wait for "Retry".
+          storeFull = error.status === 507;
+          const transient =
+            error.status === 0 || (error.status >= 500 && error.status !== 507) || error.status === 429;
+          if (transient && tracking) {
+            const delay = Math.min(RETRY_MAX, 1000 * Math.pow(2, this.retryCount++));
+            this.retry = setTimeout(() => this.flush(), delay);
+          }
+          if (error.status !== 401) updateSaveStatus(navigator.onLine ? "error" : "offline");
+          return 0;
+        })
+        .finally(() => {
+          this.running = null;
+          if (this.again) {
+            this.again = false;
+            if (tracking && isDirty()) this.flush();
+          }
+        });
+      return this.running;
+    },
+  };
+
+  /** "Save now" and "Retry": also tries the rows the server refused before. */
+  function saveNow() {
+    readMarks().forEach((m) => {
+      if (!m.mark.refused) return;
+      const { refused, ...mark } = m.mark;
+      write(m.name, JSON.stringify(mark));
+    });
+    return scheduler.flush();
+  }
+
+  /**
+   * Runs `fn` while no other tab of this book syncs, where the browser can
+   * tell: two tabs taking in answers at once could store an older answer
+   * over a newer one.
+   */
+  function withSyncLock(fn) {
+    const locks = typeof navigator !== "undefined" ? navigator.locks : undefined;
+    if (!locks || typeof locks.request !== "function") return fn();
+    return locks.request(`${prefix()}sync`, fn);
+  }
+
+  /** Splits an upload into requests the server takes in quickly. */
+  function batches(rows) {
+    const out = [];
+    let batch = [];
+    let size = 0;
+    for (const row of rows) {
+      const rowSize = JSON.stringify(row).length;
+      if (batch.length > 0 && (batch.length >= BATCH_MAX_ROWS || size + rowSize > BATCH_MAX_SIZE)) {
+        out.push(batch);
+        batch = [];
+        size = 0;
+      }
+      batch.push(row);
+      size += rowSize;
+    }
+    if (batch.length > 0) out.push(batch);
+    return out;
+  }
+
+  async function postRows(rows, replace) {
+    const json = JSON.stringify({ since: syncedRevision(), rows, replace });
+    const upload = await encodeUpload(json);
+    return apiRequest("/store", { method: "POST", body: upload.body, headers: upload.headers });
+  }
+
+  /** Takes in the server's answer to a request. Returns how many rows changed locally. */
+  async function takeIn(result) {
+    const changed = await applyRows(result.rows || []);
+    writeRevision(result.revision);
+    return changed;
+  }
+
+  /**
+   * Uploads rows in batches and takes in each answer. A batch the server
+   * refuses (too large, invalid) is split until each refused row is alone;
+   * that row is set aside, so it never holds up the others.
+   * With `replace`, the first request replaces the saved state and the rest
+   * follow on top of it.
+   * Returns how many rows changed locally and how many the server refused.
+   */
+  async function uploadRows(rows, marksByName, replace) {
+    const queue = batches(rows);
+    let replacing = replace;
+    let changed = 0;
+    let refused = 0;
+    const refusedRows = [];
+    while (queue.length > 0) {
+      const batch = queue.shift();
+      let result;
+      try {
+        result = await postRows(batch, replacing);
+      } catch (error) {
+        if (error.status !== 400 && error.status !== 413) throw error;
+        if (batch.length > 1) {
+          const half = Math.ceil(batch.length / 2);
+          queue.unshift(batch.slice(0, half), batch.slice(half));
+          continue;
+        }
+        refused += 1;
+        refusedRows.push(batch[0]);
+        const m = marksByName.get(markName(batch[0].table, batch[0].key));
+        if (m && read(m.name) === m.raw) write(m.name, JSON.stringify({ ...m.mark, refused: true }));
+        continue;
+      }
+      if (replacing) {
+        replacing = false;
+        queue.forEach((b) => b.forEach((row) => (row.base = result.revision)));
+      }
+      batch.forEach((row) => {
+        const m = marksByName.get(markName(row.table, row.key));
+        if (m) unmark(m);
+      });
+      changed += await takeIn(result);
+    }
+    // Every row was refused: the saved state still has to be replaced.
+    if (replacing) changed += await takeIn(await postRows([], true));
+    return { changed, refused, refusedRows };
+  }
+
+  /**
+   * One round: uploads the marked rows (if any) and takes in what other
+   * devices saved since this device last looked.
+   * Returns how many rows changed locally.
+   */
+  function sync() {
+    return withSyncLock(async () => {
+      // Logged out (the session expired): changes stay marked until the
+      // student logs in again; see the 401 handling in apiRequest.
+      if (!syncedStudent() || !identity()) return 0;
+      const replace = tracking && replacePending();
+      const marks = !tracking ? [] : replace ? readMarks() : pendingMarks();
+      let changed = 0;
+      let refused = 0;
+
+      if (replace || marks.length > 0) {
+        updateSaveStatus("saving");
+        if (replace) {
+          // The whole store, as it is now, covers every change marked so far.
+          const at = Date.now();
+          const rows = (await readAllRows()).map((row) => ({ ...row, at }));
+          let refusedRows;
+          ({ changed, refused, refusedRows } = await uploadRows(rows, new Map(), true));
+          erase("replace");
+          marks.forEach(unmark);
+          // The replace deleted the saved copies of the rows it could not
+          // store: they wait as refused marks, like any refused change.
+          for (const row of refusedRows) {
+            write(markName(row.table, row.key), JSON.stringify({ at, base: syncedRevision(), n: nonce(), refused: true }));
+          }
+        } else {
+          const rows = await readRows(marks);
+          ({ changed, refused } = await uploadRows(rows, new Map(marks.map((m) => [m.name, m])), false));
+        }
+      } else {
+        changed = await takeIn(await apiRequest(`/store?since=${syncedRevision()}`));
+      }
+
+      if (tracking) {
+        scheduler.lastSaveTime = Date.now();
+        updateSaveStatus(refused > 0 || hasRefused() ? "error" : isDirty() ? "unsaved" : "saved");
+      }
+      if (changed > 0 && changesThisPage > 0) showUpdatedNotice();
+      return changed;
+    });
+  }
+
+  /**
+   * Last chance while the page goes away: a keepalive request outlives the
+   * document. Best effort — the marks stay until a later page load confirms
+   * the upload, so nothing depends on it. Not compressed: compressing is
+   * asynchronous, and the page may be gone before it finishes.
+   */
+  function flushOnHide() {
+    if (!tracking || replacePending() || !navigator.onLine) return;
+    const marks = pendingMarks();
+    if (marks.length === 0) return;
+    const rows = [];
+    for (const m of marks) {
+      if (!latest.has(m.name)) return; // changed on an earlier page or in another tab
+      rows.push({ table: m.table, key: m.key, data: latest.get(m.name), at: m.mark.at, base: m.mark.base });
+    }
+    const body = JSON.stringify({ since: syncedRevision(), rows });
+    if (body.length > KEEPALIVE_MAX_SIZE) return;
+    try {
+      fetch(`${API_BASE}/store`, {
         method: "POST",
+        keepalive: true,
         headers: requestHeaders(),
         credentials: SAME_ORIGIN ? "same-origin" : "omit",
-        body: "{}",
+        body,
       }).catch(() => {});
-    }
-    clearAuthToken();
-    updateUserUI(null);
+    } catch {}
   }
 
-  /**
-   * Asks the server who is logged in and remembers it. Returns false when
-   * nobody is (any more).
-   */
-  async function refreshSession() {
-    try {
-      const data = await apiRequest("/session", { allowUnauthorized: true });
-      if (data && data.user) {
-        setAuthUser({ username: data.user.username, readonly: !!data.readonly });
-        return true;
-      }
-    } catch (error) {
-      // Offline or the server is down: keep what we knew.
-      if (error.status !== 401) return isLoggedIn();
-    }
-    clearAuthToken();
-    return false;
+  function stopTracking() {
+    tracking = false;
+    scheduler.clear();
   }
+
+  // ===== Start-up =====
+
+  /**
+   * Hand-offs in the address's fragment, for books hosted elsewhere (a hosted
+   * book gets these on the platform's own pages instead):
+   *  - `#hyperbook-impersonate=<token>`: a teacher opened a read-only view of
+   *    a student's work from Hyperbook Cloud.
+   *  - `#hyperbook-key=<key>`: a student scanned the QR code on a login card.
+   * Read once and removed from the address right away.
+   */
+  let pendingHandoff = null;
+  (function readHandoff() {
+    if (!HYPERBOOK_CLOUD || SAME_ORIGIN) return;
+    const match = window.location.hash.match(/^#hyperbook-(impersonate|key)=([A-Za-z0-9_-]+)$/);
+    if (!match) return;
+    pendingHandoff = { kind: match[1], value: match[2] };
+    history.replaceState(null, "", window.location.pathname + window.location.search);
+  })();
 
   /** Completes a hand-off read from the address (see readHandoff). */
   async function completeHandoff() {
-    if (!pendingHandoff) return false;
     const { kind, value } = pendingHandoff;
     pendingHandoff = null;
     if (kind === "impersonate") {
-      clearAuthToken();
+      clearAuth();
       localStorage.setItem(`${AUTH_TOKEN_KEY}:${bookKey()}`, value);
       return refreshSession();
     }
@@ -861,164 +736,130 @@ hyperbook.cloud = (function () {
   }
 
   /**
-   * Load store data from cloud
+   * Asks the server who is logged in and remembers it. Returns false when
+   * nobody is (any more).
    */
-  async function loadFromCloud() {
-    if (!HYPERBOOK_CLOUD || !isLoggedIn()) return;
-
-    isLoadingFromCloud = true;
-
+  async function refreshSession() {
     try {
-      const data = await apiRequest("/store");
-
-      if (data && data.snapshot) {
-        const storeData = data.snapshot.data || data.snapshot;
-        const { hyperbook: hb } = storeData;
-
-        if (hb) {
-          const blob = new Blob([JSON.stringify(hb)], {
-            type: "application/json",
-          });
-          // The payload is rows; the local Dexie schema is what defines the
-          // database. Without these the import throws and the load silently
-          // restores nothing:
-          //  - the server's event-only reconstruction carries a placeholder
-          //    databaseVersion, which never matches the store's version;
-          //  - a snapshot written by an older hyperbook can name a table this
-          //    build no longer has.
-          await hyperbook.store.db.import(blob, {
-            clearTablesBeforeImport: true,
-            acceptVersionDiff: true,
-            acceptMissingTables: true,
-          });
-        }
-        console.log("✓ Store loaded from cloud");
-      }
-
-      // Track the server's watermark, also when nothing was saved yet.
-      if (data && typeof data.lastEventId === "number") {
-        writeLastEventId(data.lastEventId);
-        if (syncManager) {
-          syncManager.lastEventId = data.lastEventId;
-        }
+      const data = await apiRequest("/session", { allowUnauthorized: true });
+      if (data && data.user) {
+        setAuthUser({ username: data.user.username, readonly: !!data.readonly });
+        return true;
       }
     } catch (error) {
-      if (error.message !== "No store data found") {
-        console.error("Failed to load from cloud:", error);
-      }
-    } finally {
-      isLoadingFromCloud = false;
+      // Offline or the server is down: keep what we knew.
+      if (error.status !== 401) return isLoggedIn();
     }
+    clearAuth();
+    return false;
   }
 
   /**
-   * Initialize cloud integration
+   * Brings the local store in line with the logged-in student's saved state.
+   * Returns true when the page shows outdated data and must reload.
    */
-  async function init() {
-    if (!HYPERBOOK_CLOUD) return;
-    // Nothing may be recorded as a change before we know who is logged in.
-    isLoadingFromCloud = true;
-    try {
-      await start();
-    } finally {
-      isLoadingFromCloud = false;
+  async function catchUp() {
+    const who = identity();
+    if (!who) return false;
+    if (syncedStudent() !== who) {
+      // One tab at a time: a second tab must not clear the marks and rows of
+      // the first while it uploads them.
+      const first = await withSyncLock(async () => {
+        if (syncedStudent() === who) return null; // another tab did it meanwhile
+        // Never synced on this device: what it holds is this reader's own
+        // work from before logging in. Another student's data is not.
+        const fresh = syncedStudent() === null;
+        tracking = false;
+        clearSyncState();
+        const result = await apiRequest("/store");
+        if (
+          fresh &&
+          !isReadOnlyMode() &&
+          validRevision(result.revision) === 0 &&
+          (await readAllRows()).length > 0
+        ) {
+          // Nothing saved yet: the device's work becomes the saved state.
+          write("revision", "0");
+          write("student", who);
+          write("replace", "1");
+          tracking = true;
+          return { changed: 0, upload: true };
+        }
+        const changed = await applyRows(result.rows || [], true);
+        writeRevision(result.revision);
+        write("student", who);
+        tracking = !isReadOnlyMode();
+        return { changed, upload: false };
+      });
+      if (first !== null) {
+        if (first.upload) await scheduler.flush();
+        return first.changed > 0;
+      }
     }
+    tracking = !isReadOnlyMode();
+    if (!tracking) readMarks().forEach((m) => erase(m.name));
+    const changed = await scheduler.flush();
+    // Reload only while the reader has not started working on this page;
+    // otherwise the notice offers it.
+    return changed > 0 && changesThisPage === 0;
   }
 
-  async function start() {
+  /** The promise of the start-up sync, for tests and for logging in. */
+  let ready = Promise.resolve();
 
-    // A QR code or a teacher's "view as student" brought us here: log in,
-    // load that state, and reload so the elements show it.
-    if (pendingHandoff) {
-      if (await completeHandoff()) {
-        await loadFromCloud();
-        window.location.reload();
-        return;
+  function start() {
+    if (!HYPERBOOK_CLOUD) return;
+    // Track from the first moment, before any element writes: if this is the
+    // same student as last time, those writes are their work.
+    const who = identity();
+    if (who && syncedStudent() === who && !isReadOnlyMode()) tracking = true;
+    installHooks();
+
+    window.addEventListener("online", () => {
+      if (tracking && isDirty()) scheduler.flush();
+      else if (tracking) updateSaveStatus(hasRefused() ? "error" : "saved");
+    });
+    window.addEventListener("offline", () => {
+      if (tracking) updateSaveStatus("offline");
+    });
+    window.addEventListener("pagehide", flushOnHide);
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden && tracking && isDirty()) scheduler.flush();
+    });
+
+    ready = (async () => {
+      if (pendingHandoff) {
+        await completeHandoff();
+      } else if (SAME_ORIGIN || getAuthToken()) {
+        // The cookie (hosted books) is invisible to scripts, so ask who is
+        // logged in; for a token this also notices one that expired.
+        await refreshSession();
       }
-    } else if (SAME_ORIGIN || getAuthToken()) {
-      // The cookie (hosted books) is invisible to scripts, so ask who is
-      // logged in; for a token this also notices one that expired.
-      await refreshSession();
       updateUserUI(getAuthUser());
       showImpersonationBanner();
-    }
 
-    // Load from cloud if authenticated
-    if (isLoggedIn()) {
+      if (!identity()) {
+        stopTracking();
+        return;
+      }
+      if (isReadOnlyMode()) updateSaveStatus("readonly");
       try {
-        await loadFromCloud();
-
-        // Show readonly indicator if in impersonation mode
-        if (isReadOnlyMode()) {
-          updateSaveStatus("readonly");
+        if (await catchUp()) {
+          reloading = true;
+          window.location.reload();
         }
       } catch (error) {
-        console.error("Initial cloud load failed:", error);
+        console.error("Could not sync with the cloud:", error);
       }
-    }
-
-    if (isLoggedIn() && !isReadOnlyMode()) {
-      syncManager = new SyncManager({
-        debounceDelay: 2000,
-        maxWaitTime: 10000,
-        minSaveInterval: 1000,
-      });
-
-      // Suppress events from directive initialization (e.g., restoring collapsible
-      // state triggers Dexie writes via toggle events after hooks are registered).
-      isLoadingFromCloud = true;
-
-      // Hook Dexie tables to capture granular events (skip ephemeral tables)
-      hyperbook.store.db.tables.forEach((table) => {
-        if (EPHEMERAL_TABLES.indexOf(table.name) !== -1) return;
-
-        // The primary-key source string ("id", "path", "++id", "[a+b]").
-        // Sent with every event so the server can replay onto a table it has
-        // never seen in a snapshot without having to guess the key field.
-        const schema = table.schema?.primKey?.src ?? null;
-
-        table.hook("creating", function (primKey, obj) {
-          syncManager.addEvent({
-            table: table.name,
-            schema: schema,
-            op: "create",
-            primKey: primKey,
-            data: obj,
-          });
-        });
-
-        table.hook("updating", function (modifications, primKey) {
-          syncManager.addEvent({
-            table: table.name,
-            schema: schema,
-            op: "update",
-            primKey: primKey,
-            data: modifications,
-          });
-        });
-
-        table.hook("deleting", function (primKey) {
-          syncManager.addEvent({
-            table: table.name,
-            schema: schema,
-            op: "delete",
-            primKey: primKey,
-            data: null,
-          });
-        });
-      });
-
-      // Allow directive initialization to settle before accepting sync events
-      await new Promise((r) => requestAnimationFrame(() => setTimeout(r, 0)));
-      isLoadingFromCloud = false;
-    }
+    })();
   }
 
-  // ===== Cloud UI Functions =====
-  const updateUserIconState = (state) => {
+  // ===== Interface =====
+
+  const updateUserIconState = (iconState) => {
     const icon = document.querySelector(".user-icon");
     if (!icon) return;
-    icon.setAttribute("data-state", state);
+    icon.setAttribute("data-state", iconState);
   };
 
   const updateUserUI = (user) => {
@@ -1056,11 +897,7 @@ hyperbook.cloud = (function () {
       );
     }
     const hours = Math.floor(minutes / 60);
-    return hyperbook.i18n.get(
-      "user-saved-hours-ago",
-      { hours: String(hours) },
-      `${hours} h ago`,
-    );
+    return hyperbook.i18n.get("user-saved-hours-ago", { hours: String(hours) }, `${hours} h ago`);
   };
 
   /**
@@ -1073,7 +910,7 @@ hyperbook.cloud = (function () {
   const SAVE_STATES = {
     unsaved: {
       icon: "pending",
-      text: () => hyperbook.i18n.get("user-unsaved", {}, "Unsaved changes"),
+      text: () => hyperbook.i18n.get("user-unsaved", {}, "Not uploaded yet"),
     },
     saving: {
       icon: "syncing",
@@ -1081,8 +918,8 @@ hyperbook.cloud = (function () {
     },
     saved: {
       icon: "synced",
-      text: (meta) => {
-        const age = describeAge(meta.lastSaveTime);
+      text: () => {
+        const age = describeAge(scheduler.lastSaveTime);
         const saved = hyperbook.i18n.get("user-saved", {}, "Saved");
         return age ? `${saved} (${age})` : saved;
       },
@@ -1095,66 +932,22 @@ hyperbook.cloud = (function () {
       icon: "offline",
       text: () => hyperbook.i18n.get("user-offline", {}, "Offline"),
     },
-    "offline-queued": {
-      icon: "pending",
-      // Say how much is waiting: "Saved locally" alone reads as "all done".
-      text: (meta) => {
-        const base = hyperbook.i18n.get(
-          "user-offline-queued",
-          {},
-          "Saved locally",
-        );
-        if (!meta.queuedSaves) return base;
-        return `${base} (${hyperbook.i18n.get(
-          "user-queued-count",
-          { count: String(meta.queuedSaves) },
-          `${meta.queuedSaves} waiting to sync`,
-        )})`;
-      },
-    },
     readonly: {
       icon: "readonly",
       text: () => hyperbook.i18n.get("user-readonly", {}, "Read-Only Mode"),
     },
   };
 
-  /**
-   * Explain a merge, then reload.
-   *
-   * A conflict used to reload the page the instant it resolved: the reader's
-   * content changed under them, mid-sentence, with nothing said about why.
-   * Reloading is still necessary — directives read the store once at startup,
-   * so the DOM shows pre-merge state — but it should not be a surprise.
-   */
-  const announceMergeAndReload = () => {
-    mergeNoticeShown = true;
-    const reload = () => window.location.reload();
-
-    showSyncNotice({
-      tone: "info",
-      message: hyperbook.i18n.get(
-        "user-notice-merged",
-        {},
-        "Merged with changes from another session. Reloading to show them...",
-      ),
-      action: {
-        label: hyperbook.i18n.get("user-notice-reload", {}, "Reload now"),
-        onClick: reload,
-      },
-    });
-
-    setTimeout(reload, MERGE_RELOAD_DELAY);
-  };
-
   const NOTICE_ID = "cloud-sync-notice";
+  let updatedNoticeShown = false;
 
   /**
    * An ambient notice for sync states the reader can do something about.
    *
    * The status line lives inside the user drawer, so until the reader opens it
    * the toolbar badge is the only signal that anything is wrong — easy to miss
-   * for exactly the states that matter (offline, failing, merged). This surfaces
-   * those, and only those: a toast on every successful save would be noise.
+   * for exactly the states that matter. This surfaces those, and only those: a
+   * toast on every successful save would be noise.
    *
    * @param {{tone: string, message: string, action?: {label: string, onClick: Function}}} notice
    */
@@ -1193,52 +986,71 @@ hyperbook.cloud = (function () {
     if (el && el.parentNode) el.parentNode.removeChild(el);
   };
 
+  /**
+   * Work from another device arrived while this page is open. Elements read
+   * the store when they start, so the page shows it only after a reload —
+   * which the reader triggers, since they may be in the middle of something.
+   */
+  const showUpdatedNotice = () => {
+    updatedNoticeShown = true;
+    showSyncNotice({
+      tone: "info",
+      message: hyperbook.i18n.get(
+        "user-notice-updated",
+        {},
+        "Work from another device was loaded. Reload the page to see it.",
+      ),
+      action: {
+        label: hyperbook.i18n.get("user-notice-reload", {}, "Reload now"),
+        onClick: () => window.location.reload(),
+      },
+    });
+  };
+
   /** The states worth interrupting for, and what the notice says about them. */
-  const noticeFor = (status, metadata) => {
+  const noticeFor = (status) => {
     if (status === "error") {
       return {
         tone: "error",
-        message: hyperbook.i18n.get(
-          "user-notice-error",
-          {},
-          "Could not save to the cloud. Your changes are still on this device.",
-        ),
+        message: storeFull
+          ? hyperbook.i18n.get(
+              "user-notice-full",
+              {},
+              "Your saved work has reached its size limit. Your changes are still on this device. Delete work you no longer need, or ask your teacher.",
+            )
+          : hyperbook.i18n.get(
+              "user-notice-error",
+              {},
+              "Could not save to the cloud. Your changes are still on this device.",
+            ),
         action: {
           label: hyperbook.i18n.get("user-notice-retry", {}, "Retry"),
-          onClick: () => syncManager && syncManager.manualSave(),
+          onClick: () => saveNow(),
         },
       };
     }
-
-    if (status === "offline" || status === "offline-queued") {
-      const base = hyperbook.i18n.get(
-        "user-notice-offline",
-        {},
-        "Offline. Changes are kept on this device and sync when you reconnect.",
-      );
-      const queued = metadata.queuedSaves
-        ? ` (${hyperbook.i18n.get(
-            "user-queued-count",
-            { count: String(metadata.queuedSaves) },
-            `${metadata.queuedSaves} waiting to sync`,
-          )})`
-        : "";
-      return { tone: "warning", message: base + queued };
+    if (status === "offline") {
+      return {
+        tone: "warning",
+        message: hyperbook.i18n.get(
+          "user-notice-offline",
+          {},
+          "Offline. Changes are kept on this device and sync when you reconnect.",
+        ),
+      };
     }
-
     return null;
   };
 
-  const updateSaveStatus = (status, metadata = {}) => {
-    const state = SAVE_STATES[status];
-    if (!state) return;
+  const updateSaveStatus = (status) => {
+    const saveState = SAVE_STATES[status];
+    if (!saveState) return;
 
-    const label = state.text(metadata);
+    const label = saveState.text();
 
-    // The icon is updated first and unconditionally. It used to sit behind the
-    // status-element guard below, so a shell rendered without the user drawer
-    // left the toolbar icon frozen on whatever it showed last.
-    updateUserIconState(state.icon);
+    // The icon is updated first and unconditionally, so a shell rendered
+    // without the user drawer still shows the state.
+    updateUserIconState(saveState.icon);
 
     // The icon is the only sync indicator most readers ever see, so it needs an
     // accessible name that actually tracks the state.
@@ -1248,20 +1060,15 @@ hyperbook.cloud = (function () {
       toggle.setAttribute("aria-label", label);
     }
 
-    // The merge notice owns the notice slot until it reloads; a save finishing
-    // in the meantime must not clear the explanation out from under the reader.
-    if (!mergeNoticeShown) {
-      const notice = noticeFor(status, metadata);
-      if (notice) {
-        showSyncNotice(notice);
-      } else {
-        dismissSyncNotice();
-      }
+    // The "reload to see it" notice stays until the reader acts on it.
+    if (!updatedNoticeShown) {
+      const notice = noticeFor(status);
+      if (notice) showSyncNotice(notice);
+      else dismissSyncNotice();
     }
 
     const statusEl = document.getElementById("user-save-status");
     if (!statusEl) return;
-
     statusEl.className = status;
     statusEl.textContent = label;
   };
@@ -1278,57 +1085,103 @@ hyperbook.cloud = (function () {
     const drawer = document.getElementById("user-drawer");
     if (drawer) {
       drawer.toggleAttribute("open");
-      const user = getAuthUser();
-      updateUserUI(user);
+      updateUserUI(getAuthUser());
     }
   };
 
+  /** Logs in with the drawer's form, loads the student's work and reloads. */
   const login = async () => {
     const username = document.getElementById("user-username").value;
     const password = document.getElementById("user-password").value;
     const errorEl = document.getElementById("user-login-error");
 
     if (!username || !password) {
-      errorEl.textContent = hyperbook.i18n.get(
-        "user-login-required",
-        {},
-        "Username and password required",
-      );
+      errorEl.textContent = hyperbook.i18n.get("user-login-required", {}, "Username and password required");
       return;
     }
 
     try {
-      const user = await hyperbookLogin(username, password);
-      updateUserUI(user);
+      const sharedDevice = !!document.getElementById("user-shared-device")?.checked;
+      const data = await apiRequest("/login", {
+        method: "POST",
+        allowUnauthorized: true,
+        body: JSON.stringify({ username, password, sharedDevice, token: !SAME_ORIGIN }),
+      });
+      setAuthUser({ username: data.user.username, readonly: false }, data.token);
       errorEl.textContent = "";
+      await catchUp();
+      window.location.reload();
     } catch (error) {
       errorEl.textContent =
         error.message || hyperbook.i18n.get("user-login-failed", {}, "Login failed");
     }
   };
 
-  const logout = () => {
-    if (
-      confirm(
-        hyperbook.i18n.get("user-logout-confirm", {}, "Are you sure you want to logout?"),
-      )
-    ) {
-      hyperbookLogout();
-      updateUserUI(null);
-
-      const drawer = document.getElementById("user-drawer");
-      if (drawer) {
-        drawer.removeAttribute("open");
+  /**
+   * Logs out after a last upload. The local store is emptied, so the next
+   * reader of a shared device does not see this student's work.
+   */
+  const logout = async () => {
+    if (!confirm(hyperbook.i18n.get("user-logout-confirm", {}, "Are you sure you want to logout?"))) {
+      return;
+    }
+    if (tracking && hasUnsent()) {
+      await saveNow();
+      if (
+        hasUnsent() &&
+        !confirm(
+          hyperbook.i18n.get(
+            "user-logout-unsaved",
+            {},
+            "Some of your work could not be uploaded and will be lost on this device. Log out anyway?",
+          ),
+        )
+      ) {
+        return;
       }
     }
+    await forgetLocal();
+    window.location.reload();
   };
+
+  /** Ends the session and empties the local store and the sync state. */
+  async function forgetLocal() {
+    stopTracking();
+    // The only way to remove the HttpOnly cookie of a hosted book.
+    fetch(`${API_BASE}/logout`, {
+      method: "POST",
+      headers: requestHeaders(),
+      credentials: SAME_ORIGIN ? "same-origin" : "omit",
+      body: "{}",
+    }).catch(() => {});
+    clearAuth();
+    clearSyncState();
+    try {
+      await db().transaction("rw", syncedTables(), async (tx) => {
+        ownTransactions.add(tx);
+        for (const t of syncedTables()) await t.clear();
+      });
+    } catch (error) {
+      console.error("Could not empty the local store:", error);
+    }
+  }
+
+  /**
+   * Uploads the whole store in place of the saved one: after the reader
+   * imported a file or reset everything. Kept as a mark until it went through.
+   */
+  async function replaceAll() {
+    if (!tracking || !syncedStudent()) return;
+    write("replace", "1");
+    readMarks().forEach((m) => erase(m.name));
+    latest.clear();
+    await scheduler.flush();
+  }
 
   // Initialize user UI on load
   document.addEventListener("DOMContentLoaded", () => {
     const user = getAuthUser();
-    if (user) {
-      updateUserUI(user);
-    }
+    if (user) updateUserUI(user);
 
     // Hide local export/import/reset when logged into cloud
     if (isLoggedIn()) {
@@ -1355,67 +1208,56 @@ hyperbook.cloud = (function () {
     // is whatever the account was registered with.
     const label = document.createElement("span");
     label.appendChild(
-      document.createTextNode(
-        `${hyperbook.i18n.get("user-impersonating", {}, "Impersonating")}: `,
-      ),
+      document.createTextNode(`${hyperbook.i18n.get("user-impersonating", {}, "Impersonating")}: `),
     );
     const name = document.createElement("strong");
     name.textContent = user ? user.username : "";
     label.appendChild(name);
     label.appendChild(
-      document.createTextNode(
-        ` — ${hyperbook.i18n.get("user-readonly", {}, "Read-Only Mode")}`,
-      ),
+      document.createTextNode(` — ${hyperbook.i18n.get("user-readonly", {}, "Read-Only Mode")}`),
     );
 
     const exit = document.createElement("a");
     exit.href = "#";
     exit.id = "exit-impersonation";
-    exit.textContent = hyperbook.i18n.get(
-      "user-exit-impersonation",
-      {},
-      "Exit Impersonation",
-    );
+    exit.textContent = hyperbook.i18n.get("user-exit-impersonation", {}, "Exit Impersonation");
 
     banner.appendChild(label);
     banner.appendChild(exit);
     document.body.prepend(banner);
 
-    document
-      .getElementById("exit-impersonation")
-      .addEventListener("click", (e) => {
-        e.preventDefault();
-        hyperbookLogout();
-        window.close();
-        window.location.reload();
-      });
+    exit.addEventListener("click", async (e) => {
+      e.preventDefault();
+      await forgetLocal();
+      window.close();
+      window.location.reload();
+    });
   }
 
-  init();
+  start();
 
   return {
-    save: () => syncManager?.manualSave(),
-    sendSnapshot: async () => {
-      if (!syncManager || !isLoggedIn() || isReadOnlyMode()) return;
-      syncManager.pendingEvents = [];
-      syncManager.clearTimers();
-      const result = await syncManager.sendSnapshot();
-      syncManager.lastEventId = result.lastEventId;
-      writeLastEventId(result.lastEventId);
-    },
+    save: () => saveNow(),
+    replaceAll,
     userToggle,
     login,
     logout,
     /**
-     * The live SyncManager, or null when sync is not active. This asset ships
-     * as a plain script with no module boundary, so this accessor is how the
-     * test suite reaches the queue, watermark and offline logic.
+     * Internals for the test suite: this asset ships as a plain script with
+     * no module boundary.
      */
     _internal: () => ({
-      syncManager,
-      applyEventsLocally,
-      readLastEventId,
-      isLoadingFromCloud,
+      ready,
+      sync: {
+        student: syncedStudent(),
+        revision: syncedRevision(),
+        replace: replacePending(),
+        marks: readMarks(),
+      },
+      tracking,
+      reloading,
+      scheduler,
+      isDirty,
     }),
   };
 })();

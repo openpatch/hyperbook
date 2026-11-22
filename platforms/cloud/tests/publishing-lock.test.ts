@@ -2,6 +2,7 @@ import { zipSync } from "fflate";
 import { eq } from "drizzle-orm";
 import { describe, expect, it } from "vitest";
 import { auditLog, books } from "../src/server/db/schema";
+import { createT } from "../src/shared/i18n";
 import { loggedIn, setup } from "./helpers";
 
 const text = (s: string) => new TextEncoder().encode(s);
@@ -41,7 +42,7 @@ describe("publishing lock", () => {
 
     const publish = await owner.c.post(`/api/books/${book.id}/publish`, {});
     expect(publish.status).toBe(403);
-    expect(publish.body.error).toBe("publishing.lock.refused");
+    expect(publish.body.error).toBe(createT("en")("publishing.lock.refused"));
     expect((await owner.c.post(`/api/books/${book.id}/rollback`, { tag: "v1" })).status).toBe(403);
     expect((await editor.c.post(`/api/books/${book.id}/publish-request`, {})).status).toBe(403);
     await instance.builds.idle();

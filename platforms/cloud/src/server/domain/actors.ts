@@ -47,13 +47,13 @@ export function visitorAccess(
       if (!(error instanceof HTTPException && error.status === 404) || link?.bookId !== bookId) throw error;
     }
   }
-  if (!link) throw new HTTPException(401, { message: "Not logged in" });
-  if (link.bookId !== bookId) throw new HTTPException(404, { message: "Book not found" });
+  if (!link) throw new HTTPException(401, { message: "errors.notLoggedIn" });
+  if (link.bookId !== bookId) throw new HTTPException(404, { message: "errors.books.notFound" });
   const book = db.select().from(books).where(eq(books.id, bookId)).get();
-  if (!book) throw new HTTPException(404, { message: "Book not found" });
+  if (!book) throw new HTTPException(404, { message: "errors.books.notFound" });
   if (!hasRole(link.role, needed)) {
     throw new HTTPException(403, {
-      message: needed === "owner" ? "Only owners of this book may do this" : "Commenters may not change this book",
+      message: needed === "owner" ? "errors.members.ownersOnly" : "errors.members.commentersReadOnly",
     });
   }
   return {

@@ -73,7 +73,7 @@ export function getConversation(
     )
     .get();
   if (!conversation)
-    throw new HTTPException(404, { message: "Conversation not found" });
+    throw new HTTPException(404, { message: "errors.conversations.notFound" });
   return conversation;
 }
 
@@ -145,7 +145,7 @@ export function truncateFrom(
     )
     .get();
   if (!message || message.role !== "user")
-    throw new HTTPException(404, { message: "Message not found" });
+    throw new HTTPException(404, { message: "errors.conversations.messageNotFound" });
   db.delete(aiMessages)
     .where(
       and(
@@ -258,7 +258,7 @@ export function setProposalStatus(
     )
     .run();
   if (updated.changes === 0)
-    throw new HTTPException(404, { message: "Message not found" });
+    throw new HTTPException(404, { message: "errors.conversations.messageNotFound" });
 }
 
 /** The changes still waiting for the teacher, if any. */

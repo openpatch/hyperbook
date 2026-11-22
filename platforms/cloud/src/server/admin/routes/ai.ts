@@ -196,7 +196,7 @@ export function bookAiRoutes({ db, config }: Deps) {
       maxSize: 20 * 1024 * 1024,
       onError: () => {
         throw new HTTPException(413, {
-          message: "The AI request is too large",
+          message: "errors.conversations.requestTooLarge",
         });
       },
     }),

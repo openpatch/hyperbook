@@ -1,5 +1,6 @@
+import { eq } from "drizzle-orm";
 import { describe, expect, it } from "vitest";
-import { bookSlugs } from "../src/server/db/schema";
+import { bookSlugs, books, builds } from "../src/server/db/schema";
 import { loggedIn, setup } from "./helpers";
 
 async function world() {
@@ -24,6 +25,30 @@ describe("books", () => {
       url: "http://physics-7a.books.test",
     });
     expect((await owner.c.get("/api/books")).body).toHaveLength(1);
+  });
+
+  it("lists each book's classes and the saves that are not live yet", async () => {
+    const { instance, owner, book } = await world();
+    const listed = async () => (await owner.c.get("/api/books")).body[0];
+    expect(await listed()).toMatchObject({ groupCount: 0, studentCount: 0, unpublishedChanges: null });
+
+    const a = (await owner.c.post(`/api/books/${book.id}/groups`, { name: "7a" })).body;
+    await owner.c.post(`/api/books/${book.id}/groups`, { name: "7b" });
+    await owner.c.post(`/api/groups/${a.id}/students/generate`, { count: 3, prefix: "s", passwordLength: 6 });
+    expect(await listed()).toMatchObject({ groupCount: 2, studentCount: 3 });
+
+    // Live at the 2nd commit, main at the 5th: three saves not live.
+    const build = instance.db
+      .insert(builds)
+      .values({ bookId: book.id, commit: "a".repeat(40), status: "succeeded", trigger: "publish", commitCount: 2 })
+      .returning()
+      .get();
+    instance.db
+      .update(books)
+      .set({ publishedBuildId: build.id, publishedAt: new Date(), commitCount: 5 })
+      .where(eq(books.id, book.id))
+      .run();
+    expect((await listed()).unpublishedChanges).toBe(3);
   });
 
   it("hides books from users who are not members", async () => {

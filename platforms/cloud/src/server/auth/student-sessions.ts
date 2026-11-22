@@ -17,7 +17,13 @@ export const SHARED_DEVICE_LIFETIME_MS = 12 * 60 * 60 * 1000;
 export const READONLY_LIFETIME_MS = 60 * 60 * 1000;
 /** How long a "view as student" hand-off code is valid. */
 const IMPERSONATION_CODE_LIFETIME_MS = 60 * 1000;
+/** A persistent session's lifetime slides at most this often. */
 const TOUCH_INTERVAL_MS = 60 * 60 * 1000;
+/**
+ * last_seen_at is kept this fresh, so the class view can tell who is in
+ * the book right now (one write per student and minute at most).
+ */
+const SEEN_INTERVAL_MS = 60 * 1000;
 
 export type StudentSession = {
   idHash: string;
@@ -80,6 +86,7 @@ export function readStudentSession(
       persistent: studentSessions.persistent,
       impersonatedBy: studentSessions.impersonatedBy,
       lastSeenAt: studentSessions.lastSeenAt,
+      expiresAt: studentSessions.expiresAt,
       bookId: students.bookId,
       username: students.username,
     })
@@ -90,13 +97,21 @@ export function readStudentSession(
   // A session belongs to one book: a token of another book is no token here.
   if (!row || row.kind !== kind || row.bookId !== bookId) return null;
 
-  if (row.persistent && now - row.lastSeenAt.getTime() > TOUCH_INTERVAL_MS) {
+  const since = now - row.lastSeenAt.getTime();
+  // The end of a login slides by how much of it is used up, not by
+  // last_seen_at (kept to the minute for the class view, so a session in
+  // steady use would never move on).
+  const used = now + STUDENT_SESSION_LIFETIME_MS - row.expiresAt.getTime();
+  if (row.persistent && used > TOUCH_INTERVAL_MS) {
     db.update(studentSessions)
       .set({ lastSeenAt: new Date(now), expiresAt: new Date(now + STUDENT_SESSION_LIFETIME_MS) })
       .where(eq(studentSessions.idHash, idHash))
       .run();
+  } else if (since > SEEN_INTERVAL_MS) {
+    // Shared-device sessions too, but only the time: their end never moves.
+    db.update(studentSessions).set({ lastSeenAt: new Date(now) }).where(eq(studentSessions.idHash, idHash)).run();
   }
-  const { lastSeenAt: _, ...session } = row;
+  const { lastSeenAt: _, expiresAt: _expires, ...session } = row;
   return session;
 }
 

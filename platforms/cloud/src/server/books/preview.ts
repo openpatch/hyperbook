@@ -4,6 +4,8 @@ import { eq } from "drizzle-orm";
 import { type Context, Hono } from "hono";
 import { getCookie, setCookie } from "hono/cookie";
 import { HTTPException } from "hono/http-exception";
+import { createT, requestLocale } from "../i18n";
+import { errorResponse, genericErrorResponse } from "../errors";
 import { z } from "zod";
 import {
   PREVIEW_SESSION_LIFETIME_MS,
@@ -126,9 +128,9 @@ export function createPreviewApp(deps: Deps) {
   const app = new Hono<PreviewEnv>();
 
   app.onError((error, c) => {
-    if (error instanceof HTTPException) return c.json({ error: error.message }, error.status);
+    if (error instanceof HTTPException) return errorResponse(c, error);
     console.error(error);
-    return c.json({ error: "Something went wrong on the server" }, 500);
+    return genericErrorResponse(c);
   });
 
   app.use(async (c, next) => {
@@ -152,12 +154,12 @@ export function createPreviewApp(deps: Deps) {
     const book = c.get("book");
     // Only the hand-off page on this host may log in here.
     if (c.req.header("origin") !== previewOrigin(config, book.slug)) {
-      throw new HTTPException(403, { message: "Cross-origin request refused" });
+      throw new HTTPException(403, { message: "errors.request.crossOrigin" });
     }
     const body = z.object({ code: z.string().max(200) }).safeParse(await c.req.json().catch(() => null));
     const token = body.success ? redeemPreviewCode(db, body.data.code, book.id) : null;
     if (!token) {
-      throw new HTTPException(401, { message: "This link has expired. Open the preview from the editor again." });
+      throw new HTTPException(401, { message: "errors.preview.expired" });
     }
     setCookie(c, PREVIEW_COOKIE, token, {
       prefix: "host",
@@ -171,7 +173,7 @@ export function createPreviewApp(deps: Deps) {
 
   // Lets the hand-off page find out whether the browser kept the cookie.
   app.get("/_hyperbook/api/preview", (c) =>
-    c.get("allowed") ? c.json({ ok: true as const }) : c.json({ error: "Not logged in" }, 401),
+    c.get("allowed") ? c.json({ ok: true as const }) : c.json({ error: createT(requestLocale(c))("errors.notLoggedIn") }, 401),
   );
 
   // The element runtimes of the platform's shared assets, like on book hosts
@@ -181,7 +183,7 @@ export function createPreviewApp(deps: Deps) {
     serveSharedAssets(c, config, new URL(c.req.url).pathname),
   );
 
-  app.all("/_hyperbook/*", (c) => c.json({ error: "Not found" }, 404));
+  app.all("/_hyperbook/*", (c) => c.json({ error: createT(requestLocale(c))("errors.notFound") }, 404));
 
   app.on(["GET", "HEAD"], "*", async (c: Context<PreviewEnv>) => {
     const book = c.get("book");
@@ -237,7 +239,10 @@ export function createPreviewApp(deps: Deps) {
       }
       return page(c, 404, "Page not found", "This page does not exist in the book.");
     } catch (error) {
-      if (error instanceof RenderError) return page(c, 404, escapeHtml(book.title), escapeHtml(error.message));
+      if (error instanceof RenderError) {
+        const message = createT(requestLocale(c))(error.key, error.params);
+        return page(c, 404, escapeHtml(book.title), escapeHtml(message));
+      }
       throw error;
     }
   });

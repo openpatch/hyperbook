@@ -18,6 +18,7 @@ import {
 import { scriptFlagsAttribute, splitScriptFlags } from "./ideWorkspace";
 import { ElementContent } from "hast";
 import { resolveDirectiveId } from "./directiveId";
+import { recordStoredElement } from "./storedElements";
 
 export default (ctx: HyperbookContext) => () => {
   const name = "sqlide";
@@ -34,6 +35,7 @@ export default (ctx: HyperbookContext) => () => {
           db,
           height = ctx.config.elements?.sqlide?.height || "calc(100dvh - 80px)",
         } = attributes;
+        recordStoredElement(file, name, id, node);
 
         if (!db) {
           db = ctx.config.elements?.sqlide?.db

@@ -33,6 +33,20 @@ var multievent = {
     return MischObj;
   },
   orig: [],
+  /**
+   * The key a multievent's state is saved under: its directive id (data-id),
+   * like every other element, so a platform can tell whose task it is. Pages
+   * built before the id existed have none and keep the old key.
+   */
+  storeKey: function (clNr) {
+    var SK = document.getElementsByClassName("multievent")[clNr];
+    var id = SK && SK.getAttribute("data-id");
+    return id || multievent.legacyStoreKey(clNr);
+  },
+  /** The old key: the element's position on the page and the page's path. */
+  legacyStoreKey: function (clNr) {
+    return "multievent_" + clNr + "_" + window.location.pathname;
+  },
   saveState: async function (clNr) {
     var SK = document.getElementsByClassName("multievent")[clNr];
     if (!SK) return;
@@ -205,13 +219,26 @@ var multievent = {
     }
     
     await hyperbook.store.db.multievent.put({
-      id: "multievent_" + clNr + "_" + window.location.pathname,
+      id: multievent.storeKey(clNr),
       state: JSON.stringify(state)
     });
   },
   loadState: async function (clNr) {
     try {
-      var record = await hyperbook.store.db.multievent.get("multievent_" + clNr + "_" + window.location.pathname);
+      var key = multievent.storeKey(clNr);
+      var record = await hyperbook.store.db.multievent.get(key);
+      var legacyKey = multievent.legacyStoreKey(clNr);
+      if (!record && key !== legacyKey) {
+        // Saved before multievents had ids: move it to the id, once.
+        var legacy = await hyperbook.store.db.multievent.get(legacyKey);
+        if (legacy) {
+          await hyperbook.store.db.transaction("rw", hyperbook.store.db.multievent, async function () {
+            await hyperbook.store.db.multievent.put({ id: key, state: legacy.state });
+            await hyperbook.store.db.multievent.delete(legacyKey);
+          });
+          record = { id: key, state: legacy.state };
+        }
+      }
       if (!record) return false;
       
       var state = JSON.parse(record.state);

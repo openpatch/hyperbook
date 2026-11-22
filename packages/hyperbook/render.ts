@@ -32,7 +32,7 @@ import {
  */
 
 export type RenderResult =
-  | { ok: true; href: string; file: string; out: string }
+  | { ok: true; href: string; title?: string; file: string; out: string }
   | { ok: false; error: string };
 
 /** "/a/b/", "/a/b.html", "/a/b/index.html" → "/a/b"; "/" stays. */
@@ -264,6 +264,7 @@ export class PageRenderer {
       result: {
         ok: true,
         href,
+        title: page.markdown.data.name || (page.markdown.data as { title?: string }).title || page.name,
         file: path.relative(this.root, page.path.absolute),
         out: path.relative(this.rootOut, outFile(page, json, this.rootOut)),
       },
@@ -345,6 +346,7 @@ export async function runRender(
           id: request.id,
           ...result,
           searchDocuments: page?.searchDocuments,
+          storedElements: page?.storedElements,
           archiveIncludes: page?.archiveIncludes,
           typstJobs: page?.typstJobs,
           typstDownloads: page?.typstDownloads,
@@ -357,7 +359,13 @@ export async function runRender(
           id: request.id,
           ...result,
           ...(result.ok
-            ? { typstJobs: page?.typstJobs ?? [], typstDownloads: page?.typstDownloads ?? [] }
+            ? {
+                typstJobs: page?.typstJobs ?? [],
+                typstDownloads: page?.typstDownloads ?? [],
+                // The tasks that keep a reader's work, for a host that warns
+                // before a publish leaves students' work without its task.
+                storedElements: page?.storedElements ?? [],
+              }
             : {}),
         });
       }

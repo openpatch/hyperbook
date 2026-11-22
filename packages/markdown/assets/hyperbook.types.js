@@ -66,11 +66,11 @@
 
 /**
  * @typedef {Object} HyperbookCloud
- * @property {() => Promise<void>} save - Manually trigger a save to the cloud.
- * @property {() => Promise<void>} sendSnapshot - Send a full snapshot to the cloud.
+ * @property {() => Promise<number>} save - Upload changed rows now (and take in other devices' changes).
+ * @property {() => Promise<void>} replaceAll - Upload the whole local store in place of the saved one.
  * @property {() => void} userToggle - Toggle the user login/info drawer.
  * @property {() => Promise<void>} login - Log in with username and password from the form.
- * @property {() => void} logout - Log out and clear auth state.
+ * @property {() => Promise<void>} logout - Upload, log out and empty the local store.
  */
 
 /**
