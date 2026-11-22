@@ -7,5 +7,6 @@
   "geogebra",
   "pyide",
   "typst",
-  "pdf"
+  "pdf",
+  "mathfield"
 ]

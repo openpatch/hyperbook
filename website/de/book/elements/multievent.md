@@ -506,6 +506,8 @@ Syntax: {m{ (kleines m)
 
 Ergebnis: Mathefeld ([MathLive](https://mathlive.io), wie in Bitflow) — die Lösung wird von der Compute Engine geprüft: `2x+3`, `3+2x` und `2\cdot x+3` zählen alle als richtige Antworten auf `{m{2x+3}}`. Mehrere akzeptierte Antworten werden mit `|` getrennt.
 
+MathLive und die Compute Engine werden heruntergeladen, wenn ein Buch mit Mathefeld zum ersten Mal gebaut wird; mit `elements.mathfield.cdn` in der `hyperbook.json` laden sie stattdessen von einem CDN (siehe [Lokale Dateien und CDNs](/configuration/book#lokale-dateien-und-cdns)).
+
 Die Lösung ist LaTeX und wird genau so übernommen, wie sie dasteht: Klammern, Backslashes, `_` und `^` werden nicht als Markdown gelesen, `{m{\frac{1}{2}}}` oder `{m{x_{1}+1\,5}}` funktionieren also wie geschrieben. Ein `|` innerhalb geschweifter Klammern bleibt Teil der Antwort; einen Betrag schreibt man `\lvert x\rvert`.
 
 ```md

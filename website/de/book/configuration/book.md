@@ -136,7 +136,9 @@ Verhalten ausdrücklich festlegen:
 | Eine HTTP(S)-Basis-URL | Die Laufzeitumgebung vom eigenen Server oder CDN laden. |
 
 Diese Option gibt es für `pyide`, `typst`, `geogebra`, `openscad`, `excalidraw`,
-`onlineide`, `sqlide` und `blockflow`. Die Einstellung `blockflow` gilt für den
+`onlineide`, `sqlide`, `blockflow` und `mathfield` (die Mathefelder eines
+[Multievents](/elements/multievent): MathLive und die Compute Engine, nur für
+Bücher heruntergeladen, die ein Mathefeld verwenden). Die Einstellung `blockflow` gilt für den
 Player und den Editor. Kiri:Moto verwendet weiterhin seinen externen Dienst.
 
 Auf Hyperbook Cloud liefert die Plattform die Laufzeitumgebungen selbst aus,
@@ -145,7 +147,7 @@ oder eine eigene URL setzt — und sofern der Admin der Instanz nicht unter
 Einstellungen → Element-Runtimes das öffentliche CDN des Elements gewählt
 hat; siehe [Caching](/hosting/caching).
 
-Die Standard-CDNs sind jsDelivr für Pyodide und Typst, der GeoGebra-Server für
+Die Standard-CDNs sind jsDelivr für Pyodide, Typst und die Mathefelder, der GeoGebra-Server für
 GeoGebra, die gehostete Blockflow-App unter `blockflow.openpatch.org` für
 Blockflow, die eigenen Pakete von Excalidraw auf UNPKG für Excalidraw und
 `cdn.openpatch.org` für OpenSCAD, die Online-IDE und die SQL-IDE. Diese

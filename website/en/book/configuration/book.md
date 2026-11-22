@@ -137,7 +137,9 @@ into the build. Use `cdn` in an element's configuration to choose explicitly:
 | An HTTP(S) base URL | Load the runtime from your own server or CDN. |
 
 This option is available for `pyide`, `typst`, `geogebra`, `openscad`,
-`excalidraw`, `onlineide`, `sqlide`, and `blockflow`. The `blockflow` setting
+`excalidraw`, `onlineide`, `sqlide`, `blockflow`, and `mathfield` (the math
+fields of a [multievent](/elements/multievent): MathLive and the Compute
+Engine, downloaded only for books that use a math field). The `blockflow` setting
 applies to both the player and editor. Kiri:Moto continues to use its external
 service.
 
@@ -146,7 +148,7 @@ for the whole instance, unless a book sets `cdn` to `false` or to its own URL
 — or the instance's admin chose the element's public CDN under Settings →
 Element runtimes; see [Caching](/hosting/caching).
 
-The default CDNs are jsDelivr for Pyodide and Typst, GeoGebra's server for
+The default CDNs are jsDelivr for Pyodide, Typst and the math fields, GeoGebra's server for
 GeoGebra, the hosted Blockflow app at `blockflow.openpatch.org` for Blockflow,
 Excalidraw's own packages on UNPKG for Excalidraw, and `cdn.openpatch.org` for
 OpenSCAD, the Online IDE, and the SQL IDE. Each Openpatch runtime uses a pinned

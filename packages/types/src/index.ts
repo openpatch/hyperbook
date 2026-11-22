@@ -18,6 +18,9 @@ export const elementCoreFiles = {
   pyide: ["client.js", "python-friendly-error-messages.js", "style.css"],
   typst: ["client.js", "style.css"],
   pdf: ["client.js", "style.css"],
+  // MathLive and the Compute Engine, for the math fields of a multievent;
+  // multievent.js is the integration and stays in directive-multievent.
+  mathfield: [] as string[],
 } satisfies Record<string, string[]>;
 
 export type DownloadableElement = keyof typeof elementCoreFiles;
@@ -41,6 +44,7 @@ export const elementRuntimeFiles: Record<DownloadableElement, string[]> = {
     "fonts/Roboto-Regular.ttf",
   ],
   pdf: ["pdf.min.mjs", "pdf.worker.min.mjs"],
+  mathfield: ["mathlive.min.mjs", "compute-engine/compute-engine.js"],
 };
 
 /**
@@ -413,6 +417,8 @@ export type HyperbookJson = {
     pyide?: ElementAssetConfig;
     typst?: ElementAssetConfig;
     pdf?: ElementAssetConfig;
+    /** The math fields of a multievent: MathLive and the Compute Engine. */
+    mathfield?: ElementAssetConfig;
     excalidraw?: ElementAssetConfig & {
       autoZoom?: boolean;
       center?: boolean;

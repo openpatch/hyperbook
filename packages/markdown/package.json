@@ -40,7 +40,8 @@
     "dist/assets/directive-typst/style.css",
     "!dist/assets/directive-pdf/**",
     "dist/assets/directive-pdf/client.js",
-    "dist/assets/directive-pdf/style.css"
+    "dist/assets/directive-pdf/style.css",
+    "!dist/assets/directive-mathfield/**"
   ],
   "publishConfig": {
     "access": "public"

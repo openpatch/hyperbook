@@ -252,6 +252,19 @@ describe("math fields", () => {
     );
   });
 
+  it("asks for the math runtime only on pages with math fields", async () => {
+    const plain = await process(":::multievent\n{t{x}}\n:::\n", ctx);
+    expect(String(plain.value)).not.toContain("data-mathfield");
+    expect(plain.data.directives).not.toHaveProperty("mathfield");
+
+    const math = await process(":::multievent\n{m{x}}\n:::\n", ctx);
+    expect(math.data.directives).toHaveProperty("mathfield");
+    // the client loads MathLive and the Compute Engine from the book's copy
+    expect(String(math.value)).toMatch(
+      /data-mathfield="\{&#x22;mathlive&#x22;:&#x22;[^&]*directive-mathfield\/mathlive\.min\.mjs&#x22;,&#x22;engine&#x22;:&#x22;[^&]*directive-mathfield\/compute-engine\/compute-engine\.js&#x22;\}"/,
+    );
+  });
+
   it("leaves a math marker outside a multievent as text", async () => {
     const result = await process("Text {m{x}} more\n", ctx);
     expect(String(result.value)).toContain("<p>Text {m{x}} more</p>");

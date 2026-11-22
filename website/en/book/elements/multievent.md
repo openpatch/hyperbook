@@ -501,6 +501,8 @@ Syntax: {m{ (small m)
 
 Result: Math field ([MathLive](https://mathlive.io), like in Bitflow) — the solution is checked by the Compute Engine, so `2x+3`, `3+2x` and `2\cdot x+3` are all correct answers to `{m{2x+3}}`. Solutions may hold several accepted answers, separated by `|`.
 
+MathLive and the Compute Engine are downloaded the first time a book with a math field is built; set `elements.mathfield.cdn` in `hyperbook.json` to load them from a CDN instead (see [Local assets and CDNs](/configuration/book#local-assets-and-cdns)).
+
 The solution is LaTeX, taken exactly as written: braces, backslashes, `_` and `^` are not read as markdown, so `{m{\frac{1}{2}}}` or `{m{x_{1}+1\,5}}` work as they stand. A `|` inside braces stays part of the answer; for an absolute value, write `\lvert x\rvert`.
 
 ```md

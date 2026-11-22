@@ -66,6 +66,23 @@ export async function ensureRuntimeAssetArchive(
   return archive;
 }
 
+/**
+ * Whether an archive entry is one of `asset.include`: paths below the prefix,
+ * a file or a directory ending in `/`. Without `include`, every entry is.
+ * Directories on the way to an included path count too.
+ */
+function included(asset, name) {
+  if (!asset.include) return true;
+  const relative = name.slice((asset.prefix || "").length);
+  if (relative === "") return true;
+  return asset.include.some(
+    (path) =>
+      relative === path ||
+      (path.endsWith("/") && relative.startsWith(path)) ||
+      path.startsWith(relative.endsWith("/") ? relative : `${relative}/`),
+  );
+}
+
 export async function installRuntimeAssets(
   assets,
   output = "dist/assets",
@@ -92,6 +109,7 @@ export async function installRuntimeAssets(
         return (
           (entry.type === "File" || entry.type === "Directory") &&
           (!asset.prefix || name.startsWith(asset.prefix)) &&
+          included(asset, name) &&
           !(asset.exclude || []).some((suffix) => name.endsWith(suffix))
         );
       },

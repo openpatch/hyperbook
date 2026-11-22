@@ -96,6 +96,20 @@ export function elementAssetUrl(
       .replace(/^5\.0\//, `${version}/`);
     return `https://www.geogebra.org/apps/${relative}`;
   }
+  if (element === "mathfield") {
+    // MathLive is pinned as a single file; the Compute Engine's local copy is
+    // its npm package's dist/esm-min, which jsDelivr serves as it is.
+    if (file === "mathlive.min.mjs")
+      return runtimeAssets.find(
+        (asset) => asset.target === "directive-mathfield/mathlive.min.mjs",
+      )!.url;
+    if (file.startsWith("compute-engine/")) {
+      const version = runtimeAssets.find(
+        (asset) => asset.target === "directive-mathfield/compute-engine",
+      )!.version;
+      return `https://cdn.jsdelivr.net/npm/@cortex-js/compute-engine@${version}/dist/esm-min/${file.slice("compute-engine/".length)}`;
+    }
+  }
   if (element === "blockflow") return new URL(file, blockflowCdn).href;
   if (element === "excalidraw") {
     // The npm package omits Excalidraw's fonts and bundle; use their own packages.

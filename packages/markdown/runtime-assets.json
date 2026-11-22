@@ -162,7 +162,7 @@
     "version": "0.111.4",
     "sha256": "d2baa5ce0b8b6f75f3dc337085d5fbe0e376671768e982134ceb52fde760aa60",
     "format": "file",
-    "target": "directive-multievent/mathlive.min.mjs"
+    "target": "directive-mathfield/mathlive.min.mjs"
   },
   {
     "url": "https://registry.npmjs.org/@cortex-js/compute-engine/-/compute-engine-0.198.1.tgz",
@@ -171,7 +171,8 @@
     "format": "tar.gz",
     "prefix": "package/dist/esm-min/",
     "strip": 3,
+    "include": ["compute-engine.js", "chunks/"],
     "exclude": [".map"],
-    "target": "directive-multievent/compute-engine"
+    "target": "directive-mathfield/compute-engine"
   }
 ]

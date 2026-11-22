@@ -125,3 +125,42 @@ it("extracts only the chosen font subtree and excludes unnecessary test assets",
   );
   expect(await fs.readdir(path.join(output, "fonts"))).toEqual(["font.otf"]);
 });
+
+it("extracts only the included files and directories", async () => {
+  const dist = path.join(root, "package", "dist");
+  await fs.mkdir(path.join(dist, "chunks"), { recursive: true });
+  await fs.mkdir(path.join(dist, "cli"), { recursive: true });
+  await fs.writeFile(path.join(dist, "engine.js"), "entry");
+  await fs.writeFile(path.join(dist, "engine-worker.js"), "worker");
+  await fs.writeFile(path.join(dist, "chunks", "a.js"), "chunk");
+  await fs.writeFile(path.join(dist, "cli", "tool.js"), "cli");
+  const archive = path.join(root, "engine.tar.gz");
+  await create({ file: archive, cwd: root, gzip: true }, ["package"]);
+  const bytes = await fs.readFile(archive);
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async () => new Response(bytes)),
+  );
+  await installRuntimeAssets(
+    [
+      {
+        url: "https://example.com/engine",
+        sha256: createHash("sha256").update(bytes).digest("hex"),
+        format: "tar.gz",
+        target: "engine",
+        prefix: "package/dist/",
+        strip: 2,
+        include: ["engine.js", "chunks/"],
+      },
+    ],
+    output,
+    cache,
+  );
+  expect((await fs.readdir(path.join(output, "engine"))).sort()).toEqual([
+    "chunks",
+    "engine.js",
+  ]);
+  expect(await fs.readdir(path.join(output, "engine", "chunks"))).toEqual([
+    "a.js",
+  ]);
+});

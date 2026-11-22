@@ -121,6 +121,7 @@ export const ELEMENT_RUNTIMES = [
   "pyide",
   "typst",
   "pdf",
+  "mathfield",
 ] as const;
 
 export type ElementRuntime = (typeof ELEMENT_RUNTIMES)[number];

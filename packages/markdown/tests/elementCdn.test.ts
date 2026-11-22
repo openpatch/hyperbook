@@ -21,6 +21,7 @@ const elements: [DownloadableElement, string][] = [
   ["sqlide", ":::sqlide\n```sql\nselect 1;\n```\n:::"],
   ["blockflow", '::blockflow-player{src="/game.sb3"}'],
   ["pdf", '::pdf[Script]{src="/script.pdf"}'],
+  ["mathfield", ":::multievent\nSolve: {m{2x+3}}\n:::"],
 ];
 
 describe.each(elements)(
@@ -85,6 +86,7 @@ describe.each(elements)(
                 sqlide: `https://cdn.openpatch.org/sqlide/${ideReleases.sqlide}/`,
                 openscad: `https://cdn.openpatch.org/openscad/${openscadConfig.wasmBuild.cdnVersion}/`,
                 pdf: "https://cdn.jsdelivr.net/npm/pdfjs-dist@",
+                mathfield: "https://cdn.jsdelivr.net/npm/mathlive@",
               }[element]
             : "http://assets.example.com/runtime/",
         );

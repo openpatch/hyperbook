@@ -41,3 +41,4 @@ assets/hyperbook/directive-typst/**
 assets/hyperbook/directive-pdf/**
 !assets/hyperbook/directive-pdf/client.js
 !assets/hyperbook/directive-pdf/style.css
+assets/hyperbook/directive-mathfield/**

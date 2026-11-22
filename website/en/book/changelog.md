@@ -19,7 +19,7 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 
 :::tab{title="New :rocket:" id="new"}
 
-**markdown**: [Multievent](/elements/multievent) has a math field, `{m{…}}`, drawn by [MathLive](https://mathlive.io). The solution is LaTeX, several accepted answers are separated by `|`, and the Compute Engine checks the answer, so `2x+3`, `3+2x` and `2\cdot x+3` all count for `{m{2x+3}}`. The LaTeX is taken as written: braces, backslashes, `_` and `^` are not read as markdown.
+**markdown**: [Multievent](/elements/multievent) has a math field, `{m{…}}`, drawn by [MathLive](https://mathlive.io). The solution is LaTeX, several accepted answers are separated by `|`, and the Compute Engine checks the answer, so `2x+3`, `3+2x` and `2\cdot x+3` all count for `{m{2x+3}}`. The LaTeX is taken as written: braces, backslashes, `_` and `^` are not read as markdown. MathLive and the Compute Engine are the new downloadable runtime `mathfield`: a build downloads them only for books with a math field, and [`elements.mathfield.cdn`](/configuration/book#local-assets-and-cdns) loads them from a CDN instead.
 
 **markdown**: A math field with `\placeholder{answer}` in it is a fill-in-the-blank task: `{m{\frac{\placeholder{3}}{\placeholder{4}} = 0.75}}` shows the formula, and only its blanks take input. Each blank is checked on its own, marked right or wrong, and locked once it is right.
 

@@ -34,16 +34,35 @@ var multievent = {
   },
   orig: [],
   /**
+   * Where MathLive and the Compute Engine load from. The build writes it to
+   * the multievents that hold math fields (data-mathfield): the book's own
+   * copy, a CDN or the host's. Without it, the book's local copy.
+   */
+  matheQuelle: function () {
+    var lokal = (window.HYPERBOOK_ASSETS || "/") + "directive-mathfield/";
+    var quelle = {
+      mathlive: lokal + "mathlive.min.mjs",
+      engine: lokal + "compute-engine/compute-engine.js",
+    };
+    var SK = document.querySelector(".multievent[data-mathfield]");
+    if (SK) {
+      try {
+        var gesetzt = JSON.parse(SK.getAttribute("data-mathfield"));
+        if (gesetzt.mathlive) quelle.mathlive = gesetzt.mathlive;
+        if (gesetzt.engine) quelle.engine = gesetzt.engine;
+      } catch (e) {}
+    }
+    return quelle;
+  },
+  /**
    * A field for mathematical answers ({m{…}}) is a <math-field> rendered by
-   * MathLive, loaded once, from the local assets, when a multievent with
-   * math fields is built. The fonts it draws with are the KaTeX fonts
-   * Hyperbook ships anyway; sounds stay off.
+   * MathLive, loaded once, when a multievent with math fields is built. The
+   * fonts it draws with are the KaTeX fonts Hyperbook ships anyway; sounds
+   * stay off.
    */
   ladeMathe: function () {
     if (!multievent._matheFeld) {
-      multievent._matheFeld = import(
-        window.HYPERBOOK_ASSETS + "directive-multievent/mathlive.min.mjs"
-      )
+      multievent._matheFeld = import(multievent.matheQuelle().mathlive)
         .then(function (mathlive) {
           mathlive.MathfieldElement.fontsDirectory =
             window.HYPERBOOK_ASSETS + "math/fonts/";
@@ -75,14 +94,11 @@ var multievent = {
   /**
    * The Compute Engine decides whether an answer is the same maths as the
    * solution. It is more than a megabyte, so it is loaded once, on the first
-   * evaluation of a math field, from the local assets.
+   * evaluation of a math field.
    */
   matheEngine: function () {
     if (!multievent._matheEngine) {
-      multievent._matheEngine = import(
-        window.HYPERBOOK_ASSETS +
-          "directive-multievent/compute-engine/compute-engine.js"
-      ).then(function (modul) {
+      multievent._matheEngine = import(multievent.matheQuelle().engine).then(function (modul) {
         var engine = new modul.ComputeEngine();
         // `{,}` a reader in a comma locale writes becomes a decimal; a typed
         // point is understood there too, and a comma stays a pair.

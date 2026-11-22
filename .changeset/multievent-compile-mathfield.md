@@ -33,9 +33,10 @@ Bitflow's task-math: solutions are LaTeX, taken verbatim (braces, backslashes,
 count for `{m{2x+3}}`. With `\placeholder{answer}` in it, the formula becomes
 a fill-in-the-blank task: it is shown read-only, only its blanks take input,
 and each blank is checked, marked and locked on its own. MathLive (0.111.4) and
-the Compute Engine (0.198.1) are pinned runtime assets served from the
-element's own folder; MathLive draws with the KaTeX fonts the book ships
-anyway, and its localized decimal comma follows the page's language.
+the Compute Engine (0.198.1) are a downloadable runtime of their own,
+`mathfield`, which only pages with a math field ask for; MathLive draws with
+the KaTeX fonts the book ships anyway, and its localized decimal comma
+follows the page's language.
 
 Sub- and superscripts `_{…}` and `^{…}` now end at their matching brace, so
 `2^{{a{2|3|!4|8}}}=16` raises a whole dropdown.

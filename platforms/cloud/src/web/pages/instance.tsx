@@ -625,6 +625,7 @@ const RUNTIME_ELEMENTS: { element: ElementRuntime; label: string }[] = [
   { element: "sqlide", label: "SQL IDE" },
   { element: "typst", label: "Typst" },
   { element: "pdf", label: "PDF (pdf.js)" },
+  { element: "mathfield", label: "Math fields (MathLive)" },
 ];
 
 /**
