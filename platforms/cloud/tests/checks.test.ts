@@ -68,6 +68,47 @@ describe("page checks", () => {
     renders.closeAll();
   });
 
+  it("says what lint finds on each page and in the book, errors first", async () => {
+    const instance = setup();
+    const book = newBook(instance);
+    await commitFiles(instance, book.id, {
+      "hyperbook.json": '{"seach": true}',
+      "book/index.md": "# Hi\n\n[gone](/nowhere)",
+      "book/b.md": "fine",
+      "glossary/term.md": "one /nowhere\ntwo /nowhere",
+    });
+    const renders = new Renderers(instance.config, textRender);
+    const checks = new BookChecks(renders);
+    checks.start(book.id);
+    const state = await checks.settled(book.id);
+    expect(state?.status).toBe("done");
+    expect(state?.problems).toEqual([]);
+    expect(state?.counts).toEqual({ error: 3, warning: 1, info: 0 });
+    expect(state?.findings.map((f) => [f.severity, f.file, f.line])).toEqual([
+      ["error", "book/index.md", 3],
+      ["error", "glossary/term.md", 1],
+      ["error", "glossary/term.md", 2],
+      ["warning", "hyperbook.json", undefined],
+    ]);
+    renders.closeAll();
+  });
+
+  it("lints the saved text, too, not the editor's unsaved text", async () => {
+    const instance = setup();
+    const book = newBook(instance);
+    await commitFiles(instance, book.id, { "hyperbook.json": "{}", "book/index.md": "fine" });
+    const renders = new Renderers(instance.config, textRender);
+    // The editor has a broken link typed but not saved.
+    expect(await renders.lintText(book.id, "book/index.md", "see /nowhere")).toMatchObject({
+      ok: true,
+      diagnostics: [{ file: "book/index.md", line: 1, rule: "broken-link" }],
+    });
+    const checks = new BookChecks(renders);
+    checks.start(book.id);
+    expect((await checks.settled(book.id))?.findings).toEqual([]);
+    renders.closeAll();
+  });
+
   it("checks saved text, not the editor's unsaved text", async () => {
     const instance = setup();
     const book = newBook(instance);

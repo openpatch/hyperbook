@@ -1,7 +1,13 @@
 import path from "path";
 import fs from "fs/promises";
 import chalk from "chalk";
-import { hyperproject, vfile, VFileBook } from "@hyperbook/fs";
+import {
+  hyperproject,
+  vfile,
+  VFile,
+  VFileBook,
+  VFileGlossary,
+} from "@hyperbook/fs";
 import { Hyperproject, isExternalUrl } from "@hyperbook/types";
 import { collectLinkTargets } from "@hyperbook/markdown";
 
@@ -170,25 +176,34 @@ async function duplicatePermaidFindings(
   return findings;
 }
 
-/**
- * Verifies that every internal link and image in a book resolves.
- *
- * `remarkLink` and `remarkImage` rewrite URLs without ever checking that the
- * target exists, so a mistyped page or a renamed screenshot builds cleanly and
- * only 404s once a reader clicks it.
- */
-export async function checkBook(project: Hyperproject): Promise<Finding[]> {
-  const root = project.src;
-  const findings: Finding[] = [];
+/** What a link may point at in one book: its pages, public files and permalinks. */
+export interface LinkIndex {
+  known: Set<string>;
+  /** `.typ` files in public folders that no page offers with `:download`. */
+  unpublishedTypst: Set<string>;
+  /** The book's basePath, which authors of a library may write in front of a link. */
+  basePath: string;
+}
 
-  const bookFiles = await vfile.listForFolder(root, "book");
-  const glossaryFiles = await vfile.listForFolder(root, "glossary");
-  const publicFiles = [
+/** The files of a book's public folders, which links may point at. */
+export async function listPublicFiles(root: string): Promise<VFile[]> {
+  return [
     ...(await vfile.listForFolder(root, "public")),
     ...(await vfile.listForFolder(root, "book-public")),
     ...(await vfile.listForFolder(root, "glossary-public")),
   ];
+}
 
+/**
+ * Collects everything a link in the book may point at. Cheap once the files
+ * are listed: no page is parsed, only scanned for `:download` of a `.typ`.
+ */
+export function linkIndex(
+  basePath: string | undefined,
+  bookFiles: VFileBook[],
+  glossaryFiles: VFileGlossary[],
+  publicFiles: VFile[],
+): LinkIndex {
   // Everything a link is allowed to point at.
   const known = new Set<string>();
   for (const file of [...bookFiles, ...glossaryFiles]) {
@@ -229,26 +244,49 @@ export async function checkBook(project: Hyperproject): Promise<Finding[]> {
   // Permalinks come only from book pages: `buildSingleBookPage` is the one
   // that writes `@/<permaid>.html`, so a permaid on a glossary page produces
   // no file and a link to it would 404.
+  for (const file of bookFiles) {
+    const permaid = file.markdown?.data?.permaid;
+    if (permaid) known.add(normalize(`/@/${permaid}`));
+  }
+
+  return { known, unpublishedTypst, basePath: normalize(basePath || "/") };
+}
+
+/** Pages claiming a permaid another page claims too (see duplicatePermaidFindings). */
+export async function permaidFindings(
+  bookFiles: VFileBook[],
+): Promise<Finding[]> {
   /** permaid -> the book pages declaring it, in build order. */
   const permaids = new Map<string, VFileBook[]>();
   for (const file of bookFiles) {
-    const permaid = (file as VFileBook).markdown?.data?.permaid;
+    const permaid = file.markdown?.data?.permaid;
     if (!permaid) continue;
-    known.add(normalize(`/@/${permaid}`));
     const existing = permaids.get(permaid);
-    if (existing) {
-      existing.push(file as VFileBook);
-    } else {
-      permaids.set(permaid, [file as VFileBook]);
-    }
+    if (existing) existing.push(file);
+    else permaids.set(permaid, [file]);
   }
+  return duplicatePermaidFindings(permaids);
+}
 
-  findings.push(...(await duplicatePermaidFindings(permaids)));
+/**
+ * The links and images of one page that point at nothing in `index`.
+ *
+ * `remarkLink` and `remarkImage` rewrite URLs without ever checking that the
+ * target exists, so a mistyped page or a renamed screenshot builds cleanly and
+ * only 404s once a reader clicks it.
+ */
+export async function pageLinkFindings(
+  index: LinkIndex,
+  file: VFileBook | VFileGlossary,
+): Promise<Finding[]> {
+  const content = file.markdown?.content;
+  if (typeof content !== "string") return [];
+  const findings: Finding[] = [];
 
   // Inside a library each book is served under its own basePath, and authors
   // write the deployed URL ("/de/elements/tabs"), while the hrefs collected
-  // above are book-relative ("/elements/tabs").
-  const basePath = normalize(project.basePath || "/");
+  // in the index are book-relative ("/elements/tabs").
+  const { basePath } = index;
   const stripBasePath = (href: string): string => {
     if (basePath === "/") return href;
     if (href === basePath) return "/";
@@ -256,40 +294,56 @@ export async function checkBook(project: Hyperproject): Promise<Finding[]> {
     return href;
   };
 
-  for (const file of [...bookFiles, ...glossaryFiles]) {
-    const content = file.markdown?.content;
-    if (typeof content !== "string") continue;
+  let offset: number | null | undefined;
+  for (const target of collectLinkTargets(content)) {
+    const raw = targetOf(target.url);
+    if (raw === null) continue;
 
-    const offset = await lineOffsetFor(file.path.absolute, content);
+    // Relative targets resolve against the page's own directory.
+    const resolved = raw.startsWith("/")
+      ? normalize(raw)
+      : normalize(path.posix.resolve(linkBaseDirectory(file), raw));
 
-    for (const target of collectLinkTargets(content)) {
-      const raw = targetOf(target.url);
-      if (raw === null) continue;
+    if (index.known.has(resolved)) continue;
+    if (index.known.has(stripBasePath(resolved))) continue;
 
-      // Relative targets resolve against the page's own directory.
-      const resolved = raw.startsWith("/")
-        ? normalize(raw)
-        : normalize(path.posix.resolve(linkBaseDirectory(file), raw));
-
-      if (known.has(resolved)) continue;
-      if (known.has(stripBasePath(resolved))) continue;
-
-      findings.push({
-        file: file.path.absolute,
-        line:
-          offset !== null && target.line !== undefined
-            ? target.line + offset
-            : undefined,
-        column: offset !== null ? target.column : undefined,
-        reason: unpublishedTypst.has(resolved)
-          ? `${target.kind} target is a Typst source, which is not published: ${target.url}. Show the document with ::pdf[…]{src="…"}, or offer the source with :download[…]{src="…"}.`
-          : `${target.kind} target does not exist: ${target.url}`,
-        severity: "error",
-        rule: "broken-link",
-      });
+    // Read the source only for a page that has a broken link.
+    if (offset === undefined) {
+      offset = await lineOffsetFor(file.path.absolute, content);
     }
+    findings.push({
+      file: file.path.absolute,
+      line:
+        offset !== null && target.line !== undefined
+          ? target.line + offset
+          : undefined,
+      column: offset !== null ? target.column : undefined,
+      reason: index.unpublishedTypst.has(resolved)
+        ? `${target.kind} target is a Typst source, which is not published: ${target.url}. Show the document with ::pdf[…]{src="…"}, or offer the source with :download[…]{src="…"}.`
+        : `${target.kind} target does not exist: ${target.url}`,
+      severity: "error",
+      rule: "broken-link",
+    });
   }
+  return findings;
+}
 
+/** Verifies that every internal link and image in a book resolves. */
+export async function checkBook(project: Hyperproject): Promise<Finding[]> {
+  const root = project.src;
+  const bookFiles = await vfile.listForFolder(root, "book");
+  const glossaryFiles = await vfile.listForFolder(root, "glossary");
+  const index = linkIndex(
+    project.basePath,
+    bookFiles,
+    glossaryFiles,
+    await listPublicFiles(root),
+  );
+
+  const findings = await permaidFindings(bookFiles);
+  for (const file of [...bookFiles, ...glossaryFiles]) {
+    findings.push(...(await pageLinkFindings(index, file)));
+  }
   return findings;
 }
 
@@ -301,7 +355,7 @@ export async function checkBook(project: Hyperproject): Promise<Finding[]> {
  * Only the top level is checked: that is where the schema is flat enough for
  * the answer to be unambiguous, and where the mistakes actually happen.
  */
-async function checkConfigKeys(project: Hyperproject): Promise<Finding[]> {
+export async function checkConfigKeys(project: Hyperproject): Promise<Finding[]> {
   const configName =
     project.type === "library" ? "hyperlibrary.json" : "hyperbook.json";
   const schemaName =

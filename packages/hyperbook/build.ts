@@ -212,6 +212,8 @@ export interface SinglePageResult {
    * editor. Positions are relative to the processed markdown.
    */
   rawMessages: unknown[];
+  /** Lines of the source before the processed markdown (null: no honest mapping). */
+  lineOffset: number | null;
   /** Archive includes this page's archive directives declared, by archive name. */
   archiveIncludes: Record<string, ArchiveInclude[]>;
   /** Typst documents this page shows (`::pdf` with a `.typ` source). */
@@ -373,6 +375,7 @@ export async function buildSingleBookPage(
     dependencies: [...dependencies],
     messages,
     rawMessages: [...(result.messages || [])],
+    lineOffset,
     archiveIncludes:
       (result.data.archiveIncludes as Record<string, ArchiveInclude[]>) || {},
     typstJobs: (result.data.typstJobs as TypstJob[]) || [],
@@ -482,6 +485,7 @@ export async function buildSingleGlossaryPage(
     dependencies: [...dependencies],
     messages,
     rawMessages: [...(result.messages || [])],
+    lineOffset,
     archiveIncludes:
       (result.data.archiveIncludes as Record<string, ArchiveInclude[]>) || {},
     typstJobs: (result.data.typstJobs as TypstJob[]) || [],

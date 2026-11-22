@@ -2,6 +2,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { HandIcon, LoaderCircleIcon, RocketIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,6 +19,7 @@ import { api, unwrap } from "@/lib/api";
 import type { Book } from "@/lib/books";
 import { useUser } from "@/lib/session";
 import { CommitDiffDialog, type HistoryCommit, LiveDiffDialog } from "./editor/history-panel";
+import type { PageDiagnostic } from "../../shared/page-diagnostics";
 
 /*
  * What the book page and the editor share about publishing: the latest save
@@ -128,12 +130,16 @@ export function CheckLine({ book, head, compact = false }: { book: Book; head: H
   if (check?.status === "running") {
     line = <span>{t("publishing.check.running", { done: check.done, total: check.total })}</span>;
   } else if (check && current && check.status === "done") {
-    line =
-      check.problems.length === 0 ? (
-        <span>{t("publishing.check.ok", { count: check.total })}</span>
-      ) : (
-        <span className="text-destructive">{t("publishing.check.problems", { count: check.problems.length })}</span>
-      );
+    line = (
+      <>
+        {check.problems.length === 0 ? (
+          <span>{t("publishing.check.ok", { count: check.total })}</span>
+        ) : (
+          <span className="text-destructive">{t("publishing.check.problems", { count: check.problems.length })}</span>
+        )}
+        <FindingCounts counts={check.counts} />
+      </>
+    );
   } else if (check?.status === "changed") {
     line = <span>{t("publishing.check.changed")}</span>;
   } else if (check?.status === "failed") {
@@ -155,7 +161,11 @@ export function CheckLine({ book, head, compact = false }: { book: Book; head: H
       {current && check.status === "done" && check.problems.length > 0 && book.publishedAt && (
         <p className="text-xs text-muted-foreground">{t("publishing.leftBehind.unchecked")}</p>
       )}
-      {current && check.status === "done" && check.problems.length > 0 && (
+      {current && check.status === "done" && check.findings.length > 0 && (
+        <Findings bookId={id} findings={check.findings} total={check.counts.error + check.counts.warning + check.counts.info} />
+      )}
+      {/* A renderer that says nothing about pages but that they broke. */}
+      {current && check.status === "done" && check.findings.length === 0 && check.problems.length > 0 && (
         <ul className="max-h-40 overflow-y-auto rounded-md border text-xs">
           {check.problems.map((p) => (
             <li key={p.file} className="border-b px-2 py-1 last:border-b-0">
@@ -164,6 +174,66 @@ export function CheckLine({ book, head, compact = false }: { book: Book; head: H
             </li>
           ))}
         </ul>
+      )}
+    </div>
+  );
+}
+
+/** "2 errors, 3 warnings" of the last check, or that nothing else stood out. */
+function FindingCounts({ counts }: { counts: { error: number; warning: number; info: number } }) {
+  const { t } = useTranslation();
+  const parts = [
+    counts.error > 0 && t("publishing.check.errors", { count: counts.error }),
+    counts.warning > 0 && t("publishing.check.warnings", { count: counts.warning }),
+    counts.info > 0 && t("publishing.check.infos", { count: counts.info }),
+  ].filter(Boolean);
+  if (parts.length === 0) return <span className="text-muted-foreground">{t("publishing.check.nothingElse")}</span>;
+  return <span className={counts.error > 0 ? "text-destructive" : undefined}>{parts.join(", ")}</span>;
+}
+
+const SEVERITY_CLASS: Record<PageDiagnostic["severity"], string> = {
+  error: "text-destructive",
+  warning: "text-amber-600 dark:text-amber-400",
+  info: "text-muted-foreground",
+};
+
+/**
+ * What the check found, errors first: each opens its file in the editor at
+ * its line. Lines are those of the checked save; the editor goes there even
+ * if the text has moved on since.
+ */
+function Findings({ bookId, findings, total }: { bookId: string; findings: PageDiagnostic[]; total: number }) {
+  const { t } = useTranslation();
+  return (
+    <div className="grid gap-1">
+      <p className="text-xs font-medium">{t("publishing.check.foundTitle")}</p>
+      <ul className="max-h-60 overflow-y-auto rounded-md border text-xs">
+        {findings.map((f, i) => {
+          const where = f.line === undefined ? f.file : `${f.file}:${f.line}`;
+          const params = new URLSearchParams({ file: f.file, ...(f.line === undefined ? {} : { line: String(f.line) }) });
+          return (
+            <li key={`${where}-${i}`} className="border-b px-2 py-1 last:border-b-0">
+              <span className={`mr-2 font-medium ${SEVERITY_CLASS[f.severity]}`}>
+                {t(`publishing.check.severity.${f.severity}`)}
+              </span>
+              <Link
+                to={`/books/${bookId}/edit?${params}`}
+                className="font-mono underline-offset-2 hover:underline"
+                aria-label={
+                  f.line === undefined
+                    ? t("publishing.check.open", { file: f.file })
+                    : t("publishing.check.openAt", { file: f.file, line: f.line })
+                }
+              >
+                {where}
+              </Link>
+              <span className="block whitespace-pre-wrap">{f.message}</span>
+            </li>
+          );
+        })}
+      </ul>
+      {total > findings.length && (
+        <p className="text-xs text-muted-foreground">{t("publishing.check.moreFindings", { count: total - findings.length })}</p>
       )}
     </div>
   );

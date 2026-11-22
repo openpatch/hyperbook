@@ -13,6 +13,42 @@ If you need a new feature, open an [issue](https://github.com/openpatch/hyperboo
 
 :::
 
+## v0.126.0
+
+::::tabs
+
+:::tab{title="New :rocket:" id="new"}
+
+**cloud**: The editor uses [`hyperbook lint`](/advanced/lint). While you type, it marks what a build would complain about on the open page: broken links and images, files that `src` points at but that are not in the book, and elements written wrong. The marks sit next to the editor's own instant checks and follow the text as you edit. They come with the preview's render, or on their own while the preview is closed.
+
+**cloud**: "Check all pages" lists every error, warning and note lint finds, errors first, with its file and line. Each one opens the editor at that line. It also finds options in `hyperbook.json` that Hyperbook does not know and permaids that more than one page claims.
+
+**hyperbook**: `hyperbook render` says what is wrong with a page, as `hyperbook lint` would, for hosts that show it in an editor: `"diagnostics": true` on a render request, `{"file": …, "lint": true}` without rendering, and `{"lint": "book"}` for the book as a whole.
+
+:::
+
+:::tab{title="Changed :warning:" id="changed"}
+
+**cloud**: "Check all pages" runs on its own copy of the book, so the preview no longer waits behind a slow page while a check runs. It also checks only saved text, which is what gets published.
+
+**markdown**: [Password lists](/elements/passwordlist) are much faster on large books. Pages without a `:::protect` block are skipped, and a page is only read again when it changed: on a book with 728 pages, a password list renders again in under a second instead of 9 to 13 seconds.
+
+**hyperbook**: `hyperbook lint` reads each book once instead of twice, with the same results.
+
+:::
+
+:::tab{title="Fixed :bug:" id="fixed"}
+
+**cloud**: The books page no longer counts every save of a book as "not live" after an update of the platform rebuilt its live version.
+
+**cloud**: The warning before publishing that students' work would be left without its task appears again. The check of all pages lost the tasks of each page, so it never had anything to warn about.
+
+**markdown**: A protected block without a heading or task before it no longer shows the page's frontmatter as its context in a password list.
+
+:::
+
+::::
+
 ## v0.125.1
 
 ::::tabs

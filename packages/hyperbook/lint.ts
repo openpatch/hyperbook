@@ -1,12 +1,23 @@
 import path from "path";
-import fs from "fs/promises";
 import chalk from "chalk";
-import { hyperproject, VFileBook, VFileGlossary } from "@hyperbook/fs";
+import { hyperproject } from "@hyperbook/fs";
 import { Hyperproject } from "@hyperbook/types";
-import { checkProject } from "./check";
-import { processBookPage, processGlossaryPage } from "./build";
+import {
+  checkConfigKeys,
+  linkIndex,
+  listPublicFiles,
+  permaidFindings,
+} from "./check";
 import { PageRenderer } from "./render";
-import { lineOffsetFor } from "./helpers/report-error";
+import {
+  LintFinding,
+  LintSeverity,
+  RawMessage,
+  fromCheck,
+  lintPage,
+} from "./lint-page";
+
+export type { LintFinding, LintSeverity } from "./lint-page";
 
 /*
  * `hyperbook lint`: everything that can be wrong with a book without building
@@ -16,24 +27,12 @@ import { lineOffsetFor } from "./helpers/report-error";
  * the plugins report — unknown or unclosed directives, missing `src` files,
  * the wrong number of colons — is exactly what a build would print, and
  * nothing is written. On top of that come the book-wide checks of
- * `hyperbook check` (links, permalinks, config keys).
+ * `hyperbook check` (links, permalinks, config keys). Each book is read once
+ * for both (see lint-page.ts, which `hyperbook render` shares).
  *
  * Meant for authors and for agents that write Hyperbook markdown: `--json`
  * gives one object to parse, and the exit code says whether to look at it.
  */
-
-export type LintSeverity = "error" | "warning" | "info";
-
-export interface LintFinding {
-  /** Absolute path of the file the problem is in. */
-  file: string;
-  line?: number;
-  column?: number;
-  severity: LintSeverity;
-  /** Stable id for the kind of problem, when the reporter gave one. */
-  rule?: string;
-  message: string;
-}
 
 export interface LintOptions {
   /** Only lint these files or folders (relative to `cwd` or absolute). */
@@ -42,37 +41,6 @@ export interface LintOptions {
   /** Also fail on infos, not only on errors and warnings. */
   strict?: boolean;
   cwd?: string;
-}
-
-type RawMessage = {
-  reason?: string;
-  fatal?: boolean | null;
-  line?: number | null;
-  column?: number | null;
-  ruleId?: string | null;
-  note?: string | null;
-};
-
-/** vfile's three levels: fatal is an error, false a warning, null an info. */
-function severityOf(message: RawMessage): LintSeverity {
-  if (message.fatal) return "error";
-  return message.fatal === false ? "warning" : "info";
-}
-
-function toFinding(
-  file: string,
-  message: RawMessage,
-  lineOffset: number | null,
-): LintFinding {
-  const placed = lineOffset !== null && typeof message.line === "number";
-  return {
-    file,
-    line: placed ? message.line! + lineOffset! : undefined,
-    column: placed ? (message.column ?? undefined) : undefined,
-    severity: severityOf(message),
-    rule: message.ruleId ?? undefined,
-    message: [message.reason, message.note].filter(Boolean).join(" "),
-  };
 }
 
 /** Whether `file` is one of `paths` or inside one of them. */
@@ -84,59 +52,38 @@ function selected(file: string, paths: string[] | undefined): boolean {
   );
 }
 
-/** Runs every page of one book through the pipeline, collecting diagnostics. */
-async function lintPages(
+/** Lints one book: every (selected) page, its links, and the book as a whole. */
+async function lintBook(
   book: Hyperproject,
   rootProject: Hyperproject,
   paths: string[] | undefined,
 ): Promise<{ findings: LintFinding[]; pages: string[] }> {
-  const findings: LintFinding[] = [];
   const pages: string[] = [];
   // Only read: book() loads what a render needs and writes nothing.
   const { baseCtx, pagesAndSections, pageList, bookFiles, glossaryFiles } =
     await new PageRenderer(book.src, rootProject).book();
+  const state = {
+    baseCtx,
+    pageList,
+    pagesAndSections,
+    links: linkIndex(
+      book.basePath,
+      bookFiles,
+      glossaryFiles,
+      await listPublicFiles(book.src),
+    ),
+  };
 
-  const all: (VFileBook | VFileGlossary)[] = [...bookFiles, ...glossaryFiles];
-  for (const file of all) {
-    const absolute = file.path.absolute;
-    if (!selected(absolute, paths)) continue;
-    pages.push(absolute);
-
-    try {
-      const { result, lineOffset } =
-        file.folder === "glossary"
-          ? await processGlossaryPage(
-              file as VFileGlossary,
-              baseCtx,
-              pageList,
-              pagesAndSections,
-            )
-          : await processBookPage(
-              file as VFileBook,
-              baseCtx,
-              pageList,
-              pagesAndSections,
-            );
-      for (const message of result.messages) {
-        findings.push(toFinding(absolute, message, lineOffset));
-      }
-    } catch (e) {
-      // A plugin gave up on the page (file.fail) or something threw: the
-      // build would stop here, so this is an error either way.
-      const message = e as RawMessage & { message?: string };
-      const source = await fs.readFile(absolute, "utf8").catch(() => "");
-      findings.push(
-        toFinding(
-          absolute,
-          {
-            ...message,
-            reason: message.reason ?? message.message ?? String(e),
-            fatal: true,
-          },
-          lineOffsetFor(source, file.markdown.content),
-        ),
-      );
-    }
+  const findings: LintFinding[] = [
+    ...(await checkConfigKeys(book)),
+    ...(await permaidFindings(bookFiles)),
+  ]
+    .map(fromCheck)
+    .filter((f) => selected(f.file, paths));
+  for (const page of [...bookFiles, ...glossaryFiles]) {
+    if (!selected(page.path.absolute, paths)) continue;
+    pages.push(page.path.absolute);
+    findings.push(...(await lintPage(state, page)));
   }
   return { findings, pages };
 }
@@ -148,20 +95,23 @@ async function lintProject(
   paths: string[] | undefined,
 ): Promise<{ findings: LintFinding[]; pages: string[] }> {
   if (project.type === "library") {
+    const config = (await checkConfigKeys(project))
+      .map(fromCheck)
+      .filter((f) => selected(f.file, paths));
     const nested = await Promise.all(
       project.projects.map((p) => lintProject(p, rootProject, paths)),
     );
     return {
-      findings: nested.flatMap((n) => n.findings),
+      findings: [...config, ...nested.flatMap((n) => n.findings)],
       pages: nested.flatMap((n) => n.pages),
     };
   }
   try {
-    return await lintPages(project, rootProject, paths);
+    return await lintBook(project, rootProject, paths);
   } catch (e) {
     // The book could not even be read: broken frontmatter, a bad
     // hyperbook.json. Report it where it happened and carry on.
-    const message = e as RawMessage & { file?: string; message?: string };
+    const message = e as RawMessage & { file?: string };
     return {
       findings: [
         {
@@ -190,18 +140,7 @@ export async function lint(
     : undefined;
 
   const pages = await lintProject(project, project, paths);
-  const checks = (await checkProject(project))
-    .filter((f) => selected(f.file, paths))
-    .map((f): LintFinding => ({
-      file: f.file,
-      line: f.line,
-      column: f.column,
-      severity: f.severity,
-      rule: f.rule,
-      message: f.reason,
-    }));
-
-  const findings = [...pages.findings, ...checks];
+  const findings = [...pages.findings];
 
   // A path that names no page is most likely a typo, or a file outside the
   // book's book/ and glossary/ folders, which no build will ever look at.

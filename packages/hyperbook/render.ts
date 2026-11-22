@@ -6,6 +6,7 @@ import {
   hyperbook,
   vfile,
   getPasswords,
+  VFile,
   VFileBook,
   VFileGlossary,
 } from "@hyperbook/fs";
@@ -22,6 +23,20 @@ import {
   writeI18n,
   type SinglePageResult,
 } from "./build";
+import {
+  checkConfigKeys,
+  linkIndex,
+  listPublicFiles,
+  permaidFindings,
+  type LinkIndex,
+} from "./check";
+import {
+  failureFinding,
+  fromCheck,
+  lintPage,
+  renderedPageFindings,
+  type LintFinding,
+} from "./lint-page";
 
 /*
  * Renders single pages on request, for a preview that follows an editor:
@@ -55,8 +70,17 @@ type BookState = {
   glossaryFiles: VFileGlossary[];
 };
 
+/** A finding of a page or the book, with its file relative to the book. */
+export type Diagnostic = Omit<LintFinding, "file"> & { file: string };
+
 export class PageRenderer {
   private prepared = false;
+  /**
+   * The book's public files, for checking links: they change only with the
+   * files on disk, so they are listed again only after invalidate() (a host
+   * that changes them says so; listing a large book's takes a while).
+   */
+  private publicFiles: Promise<VFile[]> | null = null;
   private copies = new Map<string, Promise<void>>();
   private state: BookState | null = null;
   readonly rootOut: string;
@@ -119,6 +143,87 @@ export class PageRenderer {
   /** The book changed on disk: the next render reads it anew. */
   invalidate(): void {
     this.state = null;
+    this.publicFiles = null;
+  }
+
+  /** Everything a link of the book may point at, as the book is now. */
+  private async links(state: BookState): Promise<LinkIndex> {
+    if (!this.publicFiles) {
+      const listing = listPublicFiles(this.root);
+      this.publicFiles = listing;
+      listing.catch(() => {
+        if (this.publicFiles === listing) this.publicFiles = null;
+      });
+    }
+    return linkIndex(
+      state.json.basePath,
+      state.bookFiles,
+      state.glossaryFiles,
+      await this.publicFiles,
+    );
+  }
+
+  /** `findings` with their files relative to the book. */
+  private relative(findings: LintFinding[]): Diagnostic[] {
+    return findings.map((f) => ({ ...f, file: path.relative(this.root, f.file) }));
+  }
+
+  /** The page a target names: its file relative to the book, or its address. */
+  private find(
+    state: BookState,
+    target: { file?: string; href?: string },
+  ): VFileBook | VFileGlossary | undefined {
+    const { bookFiles, glossaryFiles } = state;
+    if (target.file) {
+      const absolute = path.resolve(this.root, target.file);
+      return (
+        bookFiles.find((f) => f.path.absolute === absolute) ??
+        glossaryFiles.find((f) => f.path.absolute === absolute)
+      );
+    }
+    if (target.href) {
+      const href = normalizeHref(target.href);
+      return (
+        bookFiles.find((f) => normalizeHref(f.path.href || "/") === href) ??
+        glossaryFiles.find(
+          (f) => normalizeHref(f.path.href || "/glossary") === href,
+        )
+      );
+    }
+    return undefined;
+  }
+
+  /**
+   * What is wrong with one page, as `hyperbook lint` would say, without
+   * rendering it: for a host that shows diagnostics while nothing renders.
+   */
+  async lintPage(target: {
+    file?: string;
+    href?: string;
+  }): Promise<{ file: string; diagnostics: Diagnostic[] } | null> {
+    const state = await this.book();
+    const page = this.find(state, target);
+    if (!page) return null;
+    const findings = await lintPage({ ...state, links: await this.links(state) }, page);
+    return {
+      file: path.relative(this.root, page.path.absolute),
+      diagnostics: this.relative(findings),
+    };
+  }
+
+  /**
+   * What is wrong with the book as a whole rather than one page: options of
+   * hyperbook.json it does not know, pages claiming the same permaid.
+   */
+  async lintBook(): Promise<Diagnostic[]> {
+    const state = await this.book();
+    const project = { ...this.rootProject, src: this.root };
+    return this.relative(
+      [
+        ...(await checkConfigKeys(project)),
+        ...(await permaidFindings(state.bookFiles)),
+      ].map(fromCheck),
+    );
   }
 
   /** The book as the next render sees it. */
@@ -177,30 +282,58 @@ export class PageRenderer {
   }
 
   /** Like render, with everything the page produced besides its HTML. */
-  async renderPage(target: {
-    file?: string;
-    href?: string;
-  }): Promise<{ result: RenderResult; page?: SinglePageResult }> {
+  async renderPage(
+    target: { file?: string; href?: string },
+    {
+      diagnostics = false,
+    }: {
+      /** Also say what is wrong with the page, as `hyperbook lint` would. */
+      diagnostics?: boolean;
+    } = {},
+  ): Promise<{
+    result: RenderResult;
+    page?: SinglePageResult;
+    diagnostics?: Diagnostic[];
+  }> {
     if (!this.prepared && !this.options.indexOnly) await this.prepare();
-    const { json, baseCtx, pagesAndSections, pageList, bookFiles, glossaryFiles } =
-      await this.book();
-
-    let page: VFileBook | VFileGlossary | undefined;
-    if (target.file) {
-      const absolute = path.resolve(this.root, target.file);
-      page =
-        bookFiles.find((f) => f.path.absolute === absolute) ??
-        glossaryFiles.find((f) => f.path.absolute === absolute);
-    } else if (target.href) {
-      const href = normalizeHref(target.href);
-      page =
-        bookFiles.find((f) => normalizeHref(f.path.href || "/") === href) ??
-        glossaryFiles.find(
-          (f) => normalizeHref(f.path.href || "/glossary") === href,
-        );
-    }
+    const state = await this.book();
+    const page = this.find(state, target);
     if (!page) return { result: { ok: false, error: "There is no page here" } };
 
+    if (!diagnostics) return this.renderFound(state, page);
+    let rendered: { result: RenderResult; page: SinglePageResult };
+    try {
+      rendered = await this.renderFound(state, page);
+    } catch (e) {
+      // Where the page broke, for an editor to point at; its links still
+      // say what they say.
+      const findings = [await failureFinding(page, e)];
+      const links = await this.links(state).catch(() => null);
+      if (links) findings.push(...(await renderedPageFindings(page, [], null, links)));
+      return {
+        result: { ok: false, error: e instanceof Error ? e.message : String(e) },
+        diagnostics: this.relative(findings),
+      };
+    }
+    return {
+      ...rendered,
+      diagnostics: this.relative(
+        await renderedPageFindings(
+          page,
+          rendered.page.rawMessages,
+          rendered.page.lineOffset,
+          await this.links(state),
+        ),
+      ),
+    };
+  }
+
+  /** Renders a page of the book as read. */
+  private async renderFound(
+    state: BookState,
+    page: VFileBook | VFileGlossary,
+  ): Promise<{ result: RenderResult; page: SinglePageResult }> {
+    const { json, baseCtx, pagesAndSections, pageList } = state;
     const result =
       page.folder === "glossary"
         ? await buildSingleGlossaryPage(
@@ -294,6 +427,16 @@ export const RENDER_REPLY = "@hyperbook-render ";
  * ({"id": 1, "file": "book/a.md"} or {"id": 2, "href": "/a"}), renders them
  * one after the other and answers each with a line RENDER_REPLY + JSON.
  *
+ * Hosts that show what is wrong with a page (Hyperbook Cloud's editor) add
+ * "diagnostics": true to a render, and the reply carries `diagnostics`, as
+ * `hyperbook lint` would report them, with files relative to the book.
+ * {"id": 3, "file": "book/a.md", "lint": true} says the same without
+ * rendering (nothing is written); {"id": 4, "lint": "book"} says what is
+ * wrong with the book as a whole (its options, permaids claimed twice).
+ * Between pages a host can run other requests, so a check of every page does
+ * not hold up the page someone is editing. {"invalidate": true} says files
+ * changed that the renderer keeps (the book's public files, for links).
+ *
  * With `index`, it is the dev server's indexer: it renders into a scratch
  * folder, keeps the book read until {"invalidate": true}, lists the pages for
  * {"pages": true}, and answers a render with what the page put in the search
@@ -323,6 +466,8 @@ export async function runRender(
       href?: unknown;
       pages?: unknown;
       invalidate?: unknown;
+      diagnostics?: unknown;
+      lint?: unknown;
     };
     try {
       request = JSON.parse(line);
@@ -335,9 +480,18 @@ export async function runRender(
       href: typeof request.href === "string" ? request.href : undefined,
     };
     try {
-      if (index && request.invalidate) {
+      if (request.invalidate) {
         renderer.invalidate();
         reply({ id: request.id, ok: true });
+      } else if (request.lint === "book") {
+        reply({ id: request.id, ok: true, diagnostics: await renderer.lintBook() });
+      } else if (request.lint) {
+        const linted = await renderer.lintPage(target);
+        reply(
+          linted
+            ? { id: request.id, ok: true, ...linted }
+            : { id: request.id, ok: false, error: "There is no page here" },
+        );
       } else if (index && request.pages) {
         reply({ id: request.id, ok: true, pages: await renderer.pages() });
       } else if (index) {
@@ -354,10 +508,13 @@ export async function runRender(
       } else {
         // A host serving the page builds its Typst documents (Hyperbook
         // Cloud's preview) and keeps undownloaded `.typ` sources private.
-        const { result, page } = await renderer.renderPage(target);
+        const { result, page, diagnostics } = await renderer.renderPage(target, {
+          diagnostics: !!request.diagnostics,
+        });
         reply({
           id: request.id,
           ...result,
+          ...(diagnostics ? { diagnostics } : {}),
           ...(result.ok
             ? {
                 typstJobs: page?.typstJobs ?? [],

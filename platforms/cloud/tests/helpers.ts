@@ -11,7 +11,8 @@ import { users } from "../src/server/db/schema";
 import type { Deps } from "../src/server/deps";
 import { BuildQueue } from "../src/server/hosting/builds";
 import { BookChecks } from "../src/server/hosting/checks";
-import { type RenderSpawner, Renderers } from "../src/server/hosting/renders";
+import { type RenderSpawner, type RenderTarget, Renderers } from "../src/server/hosting/renders";
+import type { PageDiagnostic } from "../src/shared/page-diagnostics";
 import type { Runner } from "../src/server/hosting/runner";
 import { createMemoryDns } from "../src/server/dns";
 import { createMemoryUrlFetcher } from "../src/server/https";
@@ -35,9 +36,14 @@ export const copyRunner: Runner = async ({ jobDir, srcDir }) => {
   return { ok: true, outDir, sizeBytes: 1 };
 };
 
+/** How often a textRender process was told files changed, by its book's folder. */
+export const invalidations = new Map<string, number>();
+
 /**
  * Stands in for `hyperbook render` in tests: a page "renders" to its source
- * text, at the address Hyperbook would give it.
+ * text, at the address Hyperbook would give it. Its lint finds a broken link
+ * on every line that mentions /nowhere, and a book whose hyperbook.json says
+ * "seach" has an unknown option.
  */
 export const textRender: RenderSpawner = async ({ srcDir }) => {
   const pages = async () => {
@@ -53,14 +59,43 @@ export const textRender: RenderSpawner = async ({ srcDir }) => {
     }
     return out;
   };
+  const find = async (target: RenderTarget) =>
+    (await pages()).find((p) => ("file" in target ? p.file === target.file : p.href === target.href));
+  const lint = async (file: string): Promise<PageDiagnostic[]> =>
+    (await readFile(path.join(srcDir, file), "utf8")).split("\n").flatMap((text, i) =>
+      text.includes("/nowhere")
+        ? [{ file, line: i + 1, severity: "error" as const, rule: "broken-link", message: "Link target does not exist: /nowhere" }]
+        : [],
+    );
   return {
-    async render(target) {
-      const page = (await pages()).find((p) => ("file" in target ? p.file === target.file : p.href === target.href));
+    async render(target, options = {}) {
+      const page = await find(target);
       if (!page) return { ok: false, error: "There is no page here", log: "" };
       const out = page.href === "/" ? "index.html" : `${page.href.slice(1)}.html`;
       await mkdir(path.dirname(path.join(srcDir, ".hyperbook/out", out)), { recursive: true });
       await writeFile(path.join(srcDir, ".hyperbook/out", out), await readFile(path.join(srcDir, page.file)));
-      return { ok: true, href: page.href, file: page.file, out, log: "" };
+      return {
+        ok: true,
+        href: page.href,
+        file: page.file,
+        out,
+        log: "",
+        ...(options.diagnostics ? { diagnostics: await lint(page.file) } : {}),
+      };
+    },
+    async lint(target) {
+      const page = await find(target);
+      if (!page) return { ok: false, error: "There is no page here" };
+      return { ok: true, file: page.file, diagnostics: await lint(page.file) };
+    },
+    async lintBook() {
+      const config = await readFile(path.join(srcDir, "hyperbook.json"), "utf8").catch(() => "");
+      return config.includes('"seach"')
+        ? [{ file: "hyperbook.json", severity: "warning" as const, rule: "unknown-config-key", message: 'Unknown option "seach".' }]
+        : [];
+    },
+    async invalidate() {
+      invalidations.set(srcDir, (invalidations.get(srcDir) ?? 0) + 1);
     },
     close() {},
   };

@@ -89,6 +89,9 @@ import {
 } from "./files";
 import { RefactorDialog, type RefactorRequest } from "./references-dialog";
 import { PreviewPane } from "./preview";
+import { PageLint } from "./page-lint";
+import { showLintDiagnostics } from "./lint-diagnostics";
+import type { PageDiagnostic } from "../../../shared/page-diagnostics";
 import { TypstPreviewPane, showTypstDiagnostics } from "./typst-preview";
 import { PdfView } from "./pdf-view";
 import { setBookFilesForTypstImports, setSharedTypstImports } from "./typst-imports";
@@ -728,6 +731,29 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
     selectThread(thread);
     setSearchParams({}, { replace: true });
   }, [threads]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // A deep link (?file=<path>&line=<n>, from the check of all pages) opens
+  // the file with the cursor on that line, once its editor is there.
+  const [goTo, setGoTo] = useState<{ path: string; line: number } | null>(null);
+  useEffect(() => {
+    const path = searchParams.get("file");
+    if (!path || !listing.files.some((f) => f.path === path)) return;
+    ws.open(path);
+    setGoTo({ path, line: Math.max(1, Number(searchParams.get("line")) || 1) });
+    setSearchParams({}, { replace: true });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (!goTo || ws.active !== goTo.path) return;
+    const view = views.get(goTo.path);
+    if (!view) return;
+    setGoTo(null);
+    const line = view.state.doc.line(Math.min(goTo.line, view.state.doc.lines));
+    view.dispatch({
+      selection: { anchor: line.from },
+      effects: EditorView.scrollIntoView(line.from, { y: "center" }),
+    });
+    view.focus();
+  }, [goTo, viewsVersion, ws.active]); // eslint-disable-line react-hooks/exhaustive-deps
 
   /** "Comment" in a file's editor: a new thread on its selection. */
   const startDraft = (path: string, view: EditorView) => {
@@ -2051,6 +2077,17 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
   };
 
   const activeTab = ws.tabs.find((t) => t.path === ws.active);
+  /** The page open in the editor, for the preview and its lint marks. */
+  const openPage =
+    activeTab && pageOf(activeTab.path) && activeTab.status === "ready"
+      ? activeTab.path
+      : null;
+  const missingConfig = !exists("hyperbook.json") && !exists("hyperlibrary.json");
+  /** What lint said about a page's text, in its editor (see lint-diagnostics.ts). */
+  const showPageDiagnostics = (file: string, text: string, diagnostics: PageDiagnostic[]) => {
+    const view = views.get(file);
+    if (view) showLintDiagnostics(view, file, text, diagnostics);
+  };
   const openBookSettings = () => {
     if (!busyFiles(["hyperbook.json"])) setShowSettings(true);
   };
@@ -2593,6 +2630,16 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
           </div>
         </main>
 
+        {/* The open page's lint marks, while no preview renders it. */}
+        {!showPreview && !missingConfig && (
+          <PageLint
+            ws={ws}
+            bookId={bookId}
+            file={openPage}
+            commit={listing.commit}
+            onDiagnostics={showPageDiagnostics}
+          />
+        )}
         {showPreview && (
           <>
             {!compact && (
@@ -2620,15 +2667,10 @@ function Editor({ book, listing }: { book: Book; listing: Listing }) {
               <LivePreview
                 ws={ws}
                 bookId={bookId}
-                missingConfig={!exists("hyperbook.json") && !exists("hyperlibrary.json")}
+                missingConfig={missingConfig}
                 onCreateConfig={readOnly ? undefined : createConfig}
-                file={
-                  activeTab &&
-                  pageOf(activeTab.path) &&
-                  activeTab.status === "ready"
-                    ? activeTab.path
-                    : null
-                }
+                file={openPage}
+                onDiagnostics={showPageDiagnostics}
                 typstFile={
                   // Also while the tab reloads (after an upload or a
                   // conflict): the pane stays, with its last PDF.
@@ -2791,6 +2833,7 @@ function LivePreview({
   typstCursor: (path: string) => { source: string; offset: number } | null;
   commit: string | null;
   onNavigate: (href: string) => boolean;
+  onDiagnostics: (file: string, text: string, diagnostics: PageDiagnostic[]) => void;
   missingConfig: boolean;
   onCreateConfig?: () => Promise<void>;
 }) {

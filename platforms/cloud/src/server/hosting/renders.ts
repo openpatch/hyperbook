@@ -16,6 +16,7 @@ import { BuildLog, adaptConfig, cliChildEnv, cliPermissions } from "./runner";
 import { makeJobDir, repoDir } from "./storage";
 import { createHash } from "node:crypto";
 import { type TypstJob, isPlainRelative, typstServiceFor, typstSettingsOf, typstVersions } from "./typst";
+import { type PageDiagnostic, readDiagnostics } from "../../shared/page-diagnostics";
 
 /*
  * Single pages rendered for the editor's preview, without a build. Each book
@@ -41,13 +42,45 @@ export type PageRender =
       /** The page's title and the tasks on it that keep a reader's work. */
       title?: string;
       storedElements?: IndexedElement[];
+      /** What is wrong with the page, when asked for (see RenderOptions). */
+      diagnostics?: PageDiagnostic[];
     }
-  | { ok: false; error: string; log: string };
+  | { ok: false; error: string; log: string; diagnostics?: PageDiagnostic[] };
 
-/** One `hyperbook render` (or a stand-in in tests) working on `srcDir`. */
+export type RenderOptions = {
+  /** Also say what is wrong with the page, as `hyperbook lint` would. */
+  diagnostics?: boolean;
+};
+
+/** What is wrong with a page, said without rendering it. */
+export type PageLint =
+  | { ok: true; file: string; diagnostics: PageDiagnostic[] }
+  | { ok: false; error: string };
+
+/**
+ * One `hyperbook render` (or a stand-in in tests) working on `srcDir`. A
+ * stand-in may know nothing of lint: then there are no diagnostics.
+ */
 export type RenderProcess = {
-  render(target: RenderTarget): Promise<PageRender>;
+  render(target: RenderTarget, options?: RenderOptions): Promise<PageRender>;
+  /** The diagnostics of a page, without rendering it. */
+  lint?(target: RenderTarget): Promise<PageLint>;
+  /** What is wrong with the book as a whole (options, permaids claimed twice). */
+  lintBook?(): Promise<PageDiagnostic[]>;
+  /** Files changed that the process keeps (the public files, for links). */
+  invalidate?(): Promise<void>;
   close(): void;
+};
+
+/** A step of a check of every page (see Renderers.checkPages). */
+export type CheckStep = {
+  progress: { done: number; total: number; commit: string };
+  /** The page did not render. */
+  problem?: { file: string; error: string };
+  /** The page rendered: its title and the tasks on it that keep a reader's work. */
+  page?: { href: string; title: string; elements: IndexedElement[] };
+  /** What `hyperbook lint` says about the page, or the book as a whole. */
+  diagnostics?: PageDiagnostic[];
 };
 
 /** Elements whose runtimes the admin loads from their public CDN, not this instance. */
@@ -134,28 +167,50 @@ function renderProcess(child: ChildProcessWithoutNullStreams, timeoutMs: number,
 
   let id = 0;
   let queue: Promise<unknown> = Promise.resolve();
+  /** Sends one request once the ones before it are answered; with what it logged. */
+  const ask = (request: object) => {
+    const run = queue.then(async () => {
+      const before = log.toString().length;
+      const reply = next();
+      child.stdin.write(JSON.stringify({ id: ++id, ...request }) + "\n");
+      const r = await reply;
+      return { r, output: log.toString().slice(before).trim() };
+    });
+    queue = run.catch(() => {});
+    return run;
+  };
   const proc: RenderProcess = {
-    render(target) {
-      const run = queue.then(async (): Promise<PageRender> => {
-        const before = log.toString().length;
-        const reply = next();
-        child.stdin.write(JSON.stringify({ id: ++id, ...target }) + "\n");
-        const r = await reply;
-        const output = log.toString().slice(before).trim();
-        return r.ok
-          ? {
-              ok: true,
-              href: String(r.href),
-              file: String(r.file),
-              out: String(r.out),
-              log: output,
-              typstJobs: Array.isArray(r.typstJobs) ? (r.typstJobs as TypstJob[]) : [],
-              typstDownloads: Array.isArray(r.typstDownloads) ? (r.typstDownloads as string[]) : [],
-            }
-          : { ok: false, error: String(r.error ?? "Rendering failed"), log: output };
-      });
-      queue = run.catch(() => {});
-      return run;
+    async render(target, options = {}) {
+      const { r, output } = await ask({ ...target, ...(options.diagnostics ? { diagnostics: true } : {}) });
+      const diagnostics = options.diagnostics ? { diagnostics: readDiagnostics(r.diagnostics) } : {};
+      return r.ok
+        ? {
+            ok: true,
+            href: String(r.href),
+            file: String(r.file),
+            out: String(r.out),
+            log: output,
+            typstJobs: Array.isArray(r.typstJobs) ? (r.typstJobs as TypstJob[]) : [],
+            typstDownloads: Array.isArray(r.typstDownloads) ? (r.typstDownloads as string[]) : [],
+            title: typeof r.title === "string" ? r.title : undefined,
+            storedElements: Array.isArray(r.storedElements) ? (r.storedElements as IndexedElement[]) : [],
+            ...diagnostics,
+          }
+        : { ok: false, error: String(r.error ?? "Rendering failed"), log: output, ...diagnostics };
+    },
+    async lint(target) {
+      const { r } = await ask({ ...target, lint: true });
+      return r.ok
+        ? { ok: true, file: String(r.file), diagnostics: readDiagnostics(r.diagnostics) }
+        : { ok: false, error: String(r.error ?? "Linting failed") };
+    },
+    async lintBook() {
+      const { r } = await ask({ lint: "book" });
+      if (!r.ok) throw new Error(String(r.error ?? "Linting failed"));
+      return readDiagnostics(r.diagnostics);
+    },
+    async invalidate() {
+      await ask({ invalidate: true });
     },
     close() {
       child.kill("SIGKILL");
@@ -205,10 +260,19 @@ export type TypstPreview = { ok: true; file: string } | { ok: false; error: stri
 
 const PAGE = /^(book|glossary)\/.+\.(md|md\.hbs|md\.json|md\.yml)$/;
 
+/** Only pages of the book have unsaved text that renders. */
+function assertPage(file: string) {
+  if (!PAGE.test(file) || file.split("/").some((s) => s === ".." || s === "." || s === "")) {
+    throw new RenderError("errors.files.previewPagesOnly");
+  }
+}
+
 /** Every book being edited, with its renderer. */
 export class Renderers {
   private renderers = new Map<number, Renderer>();
   private starting = new Map<number, Promise<Renderer>>();
+  /** Stops each running check of all pages (see checkPages). */
+  private checking = new Set<() => void>();
   private sweeper: NodeJS.Timeout;
 
   constructor(
@@ -246,13 +310,7 @@ export class Renderers {
     }
     if (!r) {
       this.evict();
-      const jobDir = await makeJobDir(this.config, `render-${bookId}`);
-      const srcDir = path.join(jobDir, "src");
-      await mkdir(srcDir);
-      await checkout(repo, commit, srcDir);
-      // So the book's rfile/rbase64 helpers see the checkout as the project root.
-      await markProjectRoot(srcDir);
-      await adaptConfig(srcDir, new BuildLog());
+      const { jobDir, srcDir } = await this.checkoutFor(bookId, commit, "render");
       r = {
         bookId,
         jobDir,
@@ -276,6 +334,18 @@ export class Renderers {
     }
     r.lastUsed = Date.now();
     return r;
+  }
+
+  /** A checkout of `commit` in a job folder of its own, ready for `hyperbook render`. */
+  private async checkoutFor(bookId: number, commit: string, kind: string) {
+    const jobDir = await makeJobDir(this.config, `${kind}-${bookId}`);
+    const srcDir = path.join(jobDir, "src");
+    await mkdir(srcDir);
+    await checkout(repoDir(this.config, bookId), commit, srcDir);
+    // So the book's rfile/rbase64 helpers see the checkout as the project root.
+    await markProjectRoot(srcDir);
+    await adaptConfig(srcDir, new BuildLog());
+    return { jobDir, srcDir };
   }
 
   /** Swaps the checkout for a newer save; restarts the process if the settings changed. */
@@ -304,6 +374,9 @@ export class Renderers {
         await rm(path.join(r.srcDir, ".hyperbook"), { recursive: true, force: true });
         r.process = this.spawner({ config: this.config, srcDir: r.srcDir, cdnElements: this.cdnElements() });
         r.process.catch(() => this.close(r.bookId));
+      } else {
+        // The save may have added or removed public files that links point at.
+        await (await r.process).invalidate?.();
       }
     });
   }
@@ -316,26 +389,50 @@ export class Renderers {
 
   /**
    * Renders the page `file` with the editor's `text`, which stays in place
-   * for the pages rendered after it until the next save.
+   * for the pages rendered after it until the next save. Says what is wrong
+   * with it, too, for the editor's lint gutter.
    */
   async renderText(bookId: number, file: string, text: string): Promise<PageRender> {
-    if (!PAGE.test(file) || file.split("/").some((s) => s === ".." || s === "." || s === "")) {
-      throw new RenderError("errors.files.previewPagesOnly");
-    }
+    assertPage(file);
     const r = await this.renderer(bookId);
     return this.exclusive(r, async () => {
-      const full = path.join(r.srcDir, file);
-      if (r.override && r.override.file !== file) await this.restore(r);
-      if (!r.override) {
-        r.override = { file, saved: await readFile(full, "utf8").catch(() => null), text };
-      }
-      r.override.text = text;
-      await mkdir(path.dirname(full), { recursive: true });
-      await writeFile(full, text);
-      r.fresh.clear();
-      r.generation++;
-      return this.run(r, { file });
+      await this.override(r, file, text);
+      return this.run(r, { file }, { diagnostics: true });
     });
+  }
+
+  /**
+   * What is wrong with the page `file` with the editor's `text`, without
+   * rendering it: for the lint gutter while the preview is closed. The text
+   * stays in place like renderText's.
+   */
+  async lintText(bookId: number, file: string, text: string): Promise<PageLint> {
+    assertPage(file);
+    const r = await this.renderer(bookId);
+    return this.exclusive(r, async () => {
+      await this.override(r, file, text);
+      const process = await r.process;
+      if (!process.lint) return { ok: true, file, diagnostics: [] };
+      return process.lint({ file });
+    });
+  }
+
+  /**
+   * Puts the editor's `text` of `file` into the checkout (under the lock),
+   * in place of the one file with unsaved text before it. What was rendered
+   * goes stale only if the files changed.
+   */
+  private async override(r: Renderer, file: string, text: string) {
+    const full = path.join(r.srcDir, file);
+    if (r.override && r.override.file !== file) await this.restore(r);
+    const current = await readFile(full, "utf8").catch(() => null);
+    if (!r.override) r.override = { file, saved: current, text };
+    r.override.text = text;
+    if (current === text) return;
+    await mkdir(path.dirname(full), { recursive: true });
+    await writeFile(full, text);
+    r.fresh.clear();
+    r.generation++;
   }
 
   /** Puts the saved text of the overridden page back. */
@@ -347,8 +444,8 @@ export class Renderers {
     r.override = null;
   }
 
-  private async run(r: Renderer, target: RenderTarget): Promise<PageRender> {
-    const result = await (await r.process).render(target);
+  private async run(r: Renderer, target: RenderTarget, options?: RenderOptions): Promise<PageRender> {
+    const result = await (await r.process).render(target, options);
     if (result.ok) {
       r.fresh.set(normalize(result.href), result.out);
       for (const job of result.typstJobs ?? []) r.typstJobs.set(job.out, job);
@@ -376,8 +473,8 @@ export class Renderers {
     const r = await this.renderer(bookId);
     const job = r.typstJobs.get(pathname);
     if (!job) return null;
-    // Under the checkout's lock: a save or a check must not change the
-    // files while Typst reads them.
+    // Under the checkout's lock: a save or the editor's text must not
+    // change the files while Typst reads them.
     return this.exclusive(r, () => this.compileTypst(r, job));
   }
 
@@ -390,21 +487,11 @@ export class Renderers {
       throw new RenderError("errors.files.previewTypOnly");
     }
     const r = await this.renderer(bookId);
-    // Written and compiled under the checkout's lock: "check all pages" puts
-    // the saved text back (also under it), and must not do so in between.
+    // Written and compiled under the checkout's lock: a page's unsaved text
+    // puts this file's saved text back (also under it), and must not do so
+    // in between.
     return this.exclusive(r, async () => {
-      const full = path.join(r.srcDir, file);
-      if (r.override && r.override.file !== file) await this.restore(r);
-      if (!r.override) {
-        r.override = { file, saved: await readFile(full, "utf8").catch(() => null), text };
-      }
-      if (r.override.text !== text || (await readFile(full, "utf8").catch(() => null)) !== text) {
-        r.override.text = text;
-        await mkdir(path.dirname(full), { recursive: true });
-        await writeFile(full, text);
-        r.fresh.clear();
-        r.generation++;
-      }
+      await this.override(r, file, text);
       return this.compileTypst(r, { src: file, out: `/__typst/${file}.pdf`, inputs: {} });
     });
   }
@@ -456,47 +543,56 @@ export class Renderers {
 
   /**
    * Renders every page of the newest save, one after the other, for a check
-   * of the whole book: the editor's unsaved text is put back first, since
-   * only saved text gets published. Pages go through the lock one by one,
-   * so the preview keeps answering in between. Stops (returning "changed")
-   * when a save moves the checkout on; `signal` stops it, too.
+   * of the whole book. It runs on a checkout and a `hyperbook render` of its
+   * own, so the editor's preview never waits behind it (a page that takes
+   * long, like one that gathers the whole book, would hold it up), and it
+   * sees only saved text, which is what gets published. Each page comes with
+   * what `hyperbook lint` says about it, and at the end the book as a whole.
+   * Stops (returning "changed") when a save moves the book on; `signal`
+   * stops it, too.
    */
   async checkPages(
     bookId: number,
-    onPage: (
-      progress: { done: number; total: number; commit: string },
-      problem: { file: string; error: string } | null,
-      page?: { href: string; title: string; elements: IndexedElement[] },
-    ) => void,
+    onStep: (step: CheckStep) => void,
     signal?: AbortSignal,
   ): Promise<"done" | "changed" | "aborted"> {
-    const r = await this.renderer(bookId);
-    const commit = r.commit;
-    const files = await this.exclusive(r, () => pageFiles(r.srcDir));
-    onPage({ done: 0, total: files.length, commit }, null);
-    for (const [i, file] of files.entries()) {
+    const repo = repoDir(this.config, bookId);
+    const commit = await headCommit(repo).catch(() => null);
+    if (!commit) throw new RenderError("errors.publishing.noFiles");
+    if (!(await listTree(repo, commit)).some((e) => CONFIGS.has(e.path))) throw new MissingConfigError();
+    const { jobDir, srcDir } = await this.checkoutFor(bookId, commit, "check");
+    const process = this.spawner({ config: this.config, srcDir, cdnElements: this.cdnElements() });
+    const stop = () => {
+      void process.then((p) => p.close(), () => {});
+      void rm(jobDir, { recursive: true, force: true });
+    };
+    this.checking.add(stop);
+    try {
+      const files = await pageFiles(srcDir);
+      onStep({ progress: { done: 0, total: files.length, commit } });
+      const moved = async () => (await headCommit(repo).catch(() => null)) !== commit;
+      const p = await process;
+      for (const [i, file] of files.entries()) {
+        if (signal?.aborted) return "aborted";
+        if (await moved()) return "changed";
+        const result = await p.render({ file }, { diagnostics: true });
+        onStep({
+          progress: { done: i + 1, total: files.length, commit },
+          problem: result.ok ? undefined : { file, error: result.error },
+          page: result.ok
+            ? { href: result.href, title: result.title ?? result.href, elements: result.storedElements ?? [] }
+            : undefined,
+          diagnostics: result.diagnostics,
+        });
+      }
       if (signal?.aborted) return "aborted";
-      const latest = await headCommit(repoDir(this.config, bookId)).catch(() => null);
-      if (latest !== commit || r.commit !== commit || this.renderers.get(bookId) !== r) return "changed";
-      const result = await this.exclusive(r, async () => {
-        if (r.commit !== commit) return null;
-        if (r.override) {
-          await this.restore(r);
-          r.fresh.clear();
-        }
-        r.lastUsed = Date.now();
-        return this.run(r, { file });
-      });
-      if (!result) return "changed";
-      onPage(
-        { done: i + 1, total: files.length, commit },
-        result.ok ? null : { file, error: result.error },
-        result.ok
-          ? { href: result.href, title: result.title ?? result.href, elements: result.storedElements ?? [] }
-          : undefined,
-      );
+      if (await moved()) return "changed";
+      onStep({ progress: { done: files.length, total: files.length, commit }, diagnostics: (await p.lintBook?.()) ?? [] });
+      return "done";
+    } finally {
+      this.checking.delete(stop);
+      stop();
     }
-    return "done";
   }
 
   /**
@@ -524,6 +620,8 @@ export class Renderers {
 
   closeAll() {
     clearInterval(this.sweeper);
+    for (const stop of this.checking) stop();
+    this.checking.clear();
     for (const bookId of [...this.renderers.keys()]) this.close(bookId);
   }
 

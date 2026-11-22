@@ -25,6 +25,7 @@ import {
 import { parse as parseYaml } from "yaml";
 import { type Attribute, DIRECTIVES, type Directive, PAGE_DOCS, directive, docsUrl } from "./directives";
 import { explainChanged, withExplain } from "./ai-explain";
+import { lintMarks, lintMarksAsDiagnostics, lintMarksChanged } from "./lint-diagnostics";
 import { pageOf } from "./files";
 import { findFrontmatter } from "./frontmatter";
 
@@ -545,8 +546,10 @@ const check = linter((view) => {
       });
     }
   }
-  return withExplain(view, out);
-}, { needsRefresh: explainChanged });
+  // What `hyperbook lint` said on the server (see lint-diagnostics.ts): one
+  // linter for both, since two would each replace the other's marks.
+  return withExplain(view, [...out, ...lintMarksAsDiagnostics(view, out)]);
+}, { needsRefresh: (update) => explainChanged(update) || lintMarksChanged(update) });
 
 // ---- Highlighting ----------------------------------------------------------
 
@@ -830,6 +833,7 @@ export function pageLanguage({
     directiveHighlight,
     autocompletion({ override: [pageCompletion(files, path), ...(slash ? [slash] : [])], icons: false }),
     hoverHelp,
+    lintMarks,
     check,
     pageTheme,
     onPageSettings ? frontmatterFold(onPageSettings) : [],

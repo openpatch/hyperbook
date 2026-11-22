@@ -1,4 +1,5 @@
 import type { IndexedElement } from "../domain/overview";
+import type { PageDiagnostic } from "../../shared/page-diagnostics";
 import type { Renderers } from "./renders";
 
 /*
@@ -6,7 +7,9 @@ import type { Renderers } from "./renders";
  * preview's renderer, so a broken page shows up before publishing instead of
  * only when someone visits it (or the publish build fails on it). One check
  * per book at a time, kept in memory: it is a hint for the teacher, not a
- * record, and a restart simply forgets it.
+ * record, and a restart simply forgets it. Each page also says what
+ * `hyperbook lint` finds on it (broken links, missing files, elements written
+ * wrong), and the book as a whole at the end.
  */
 
 export type CheckProblem = { file: string; error: string };
@@ -18,6 +21,9 @@ export type CheckState = {
   done: number;
   total: number;
   problems: CheckProblem[];
+  /** What lint found, errors first (at most MAX_FINDINGS; `counts` counts them all). */
+  findings: PageDiagnostic[];
+  counts: { error: number; warning: number; info: number };
   /** Why the check itself could not run (status "failed"). */
   error: string | null;
   startedAt: number;
@@ -26,6 +32,15 @@ export type CheckState = {
 
 /** Problems kept per check; a book that broke everywhere needs no more. */
 const MAX_PROBLEMS = 200;
+/** Findings kept per check: enough to work through, small enough to poll. */
+const MAX_FINDINGS = 500;
+
+const RANK = { error: 0, warning: 1, info: 2 } as const;
+
+/** Errors first, then by file and line. */
+function byWeight(a: PageDiagnostic, b: PageDiagnostic) {
+  return RANK[a.severity] - RANK[b.severity] || a.file.localeCompare(b.file) || (a.line ?? 0) - (b.line ?? 0);
+}
 
 /** A page of the checked save and the tasks on it that keep a reader's work. */
 export type CheckedPage = { href: string; title: string; elements: IndexedElement[] };
@@ -55,6 +70,8 @@ export class BookChecks {
       done: 0,
       total: 0,
       problems: [],
+      findings: [],
+      counts: { error: 0, warning: 0, info: 0 },
       error: null,
       startedAt: Date.now(),
       finishedAt: null,
@@ -67,12 +84,21 @@ export class BookChecks {
     void this.renders
       .checkPages(
         bookId,
-        ({ done, total, commit }, problem, page) => {
-          state.commit = commit;
-          state.done = done;
-          state.total = total;
+        ({ progress, problem, page, diagnostics }) => {
+          state.commit = progress.commit;
+          state.done = progress.done;
+          state.total = progress.total;
           if (problem && state.problems.length < MAX_PROBLEMS) state.problems.push(problem);
           if (page) pages.push(page);
+          for (const d of diagnostics ?? []) {
+            state.counts[d.severity]++;
+            // Keep the weightiest: an error found late pushes out an info.
+            if (state.findings.length < MAX_FINDINGS) state.findings.push(d);
+            else if (byWeight(d, state.findings[state.findings.length - 1]!) < 0) {
+              state.findings[state.findings.length - 1] = d;
+            } else continue;
+            state.findings.sort(byWeight);
+          }
         },
         abort.signal,
       )

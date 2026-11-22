@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { bookClient } from "./book-client";
-import { loggedIn, setup } from "./helpers";
+import { invalidations, loggedIn, setup } from "./helpers";
 
 const PREVIEW = "physics--preview.books.test";
 
@@ -100,6 +100,42 @@ describe("preview host", () => {
     expect((await render("../x.md", "")).status).toBe(400);
     const stranger = await loggedIn(instance, { email: "s@example.org" });
     expect((await stranger.c.post(`/api/books/${book.id}/files/render`, { path: "book/index.md", text: "" })).status).toBe(404);
+  });
+
+  it("says what is wrong with the editor's unsaved text, rendered or not", async () => {
+    const { instance, owner, book } = await world();
+    const render = (path: string, text: string) =>
+      owner.c.post(`/api/books/${book.id}/files/render`, { path, text });
+    const lint = (path: string, text: string) =>
+      owner.c.post(`/api/books/${book.id}/files/lint`, { path, text });
+
+    expect((await render("book/index.md", "# Hi\n[x](/nowhere)")).body).toMatchObject({
+      ok: true,
+      diagnostics: [{ file: "book/index.md", line: 2, severity: "error", rule: "broken-link" }],
+    });
+    expect((await lint("book/index.md", "[x](/nowhere)")).body).toEqual({
+      ok: true,
+      file: "book/index.md",
+      diagnostics: [{ file: "book/index.md", line: 1, severity: "error", rule: "broken-link", message: "Link target does not exist: /nowhere" }],
+    });
+    expect((await lint("book/index.md", "fine")).body).toMatchObject({ ok: true, diagnostics: [] });
+    expect((await lint("hyperbook.json", "{}")).status).toBe(400);
+    const stranger = await loggedIn(instance, { email: "s@example.org" });
+    expect((await stranger.c.post(`/api/books/${book.id}/files/lint`, { path: "book/index.md", text: "" })).status).toBe(404);
+  });
+
+  it("tells the renderer when a save changed the files it keeps", async () => {
+    const { owner, book } = await world();
+    await owner.c.post(`/api/books/${book.id}/files/lint`, { path: "book/index.md", text: "x" });
+    const before = [...invalidations.values()].reduce((a, b) => a + b, 0);
+    const listing = (await owner.c.get(`/api/books/${book.id}/files`)).body;
+    const oid = listing.files.find((f: { path: string }) => f.path === "book/index.md").oid;
+    const saved = await owner.c.post(`/api/books/${book.id}/files/commit`, {
+      changes: [{ op: "write", path: "public/logo.png", content: "png", baseOid: null }, { op: "write", path: "book/index.md", content: "# Saved", baseOid: oid }],
+    });
+    expect(saved.status, JSON.stringify(saved.body)).toBe(200);
+    await owner.c.post(`/api/books/${book.id}/files/lint`, { path: "book/index.md", text: "y" });
+    expect([...invalidations.values()].reduce((a, b) => a + b, 0)).toBe(before + 1);
   });
 
   it("starts no renderer for a book without hyperbook.json", async () => {

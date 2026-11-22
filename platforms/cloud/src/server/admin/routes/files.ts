@@ -406,6 +406,32 @@ export function bookFileRoutes({ db, config, renders }: Deps) {
       },
     )
 
+    // What is wrong with a page with the editor's unsaved text, without
+    // rendering it: the lint gutter while the preview is closed (an open
+    // preview's render says the same, see hosting/renders.ts).
+    .post(
+      "/:id/files/lint",
+      idParam,
+      bodyLimit({
+        maxSize: 3 * 1024 * 1024,
+        onError: () => {
+          throw new HTTPException(413, { message: "errors.files.pageTooLong" });
+        },
+      }),
+      validate("json", renderPageInput),
+      async (c) => {
+        const { book } = visitorAccess(db, c.get("user"), c.get("link"), c.req.valid("param").id, "commenter");
+        hostedOnly(book);
+        const { path, text } = c.req.valid("json");
+        try {
+          return c.json(await renders.lintText(book.id, path, text));
+        } catch (error) {
+          if (error instanceof RenderError) throw httpError(400, error.key, error.params);
+          throw error;
+        }
+      },
+    )
+
     // The editor's preview of a `.typ` file with its unsaved text: the PDF,
     // or Typst's diagnostics for the lint gutter (see hosting/renders.ts).
     .post(

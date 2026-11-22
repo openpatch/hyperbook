@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { api, unwrap } from "@/lib/api";
 import { type Theme, useTheme } from "@/lib/theme";
 import { cn } from "@/lib/utils";
+import type { PageDiagnostic } from "../../../shared/page-diagnostics";
 
 /**
  * `href` with the editor's theme, for the preview host to show the page in
@@ -55,6 +56,7 @@ export function PreviewPane({
   text,
   commit,
   onNavigate,
+  onDiagnostics,
   missingConfig = false,
   onCreateConfig,
 }: {
@@ -66,6 +68,8 @@ export function PreviewPane({
   commit: string | null;
   /** A link in the frame was clicked: opens its file, if there is one. */
   onNavigate?: (href: string) => boolean;
+  /** What lint said about `text` of `file`, with each render (see lint-diagnostics.ts). */
+  onDiagnostics?: (file: string, text: string, diagnostics: PageDiagnostic[]) => void;
   /** The book has no hyperbook.json (or hyperlibrary.json): nothing renders. */
   missingConfig?: boolean;
   /** Creates hyperbook.json; absent for those who cannot edit the book. */
@@ -73,6 +77,8 @@ export function PreviewPane({
 }) {
   const onNavigateRef = useRef(onNavigate);
   onNavigateRef.current = onNavigate;
+  const onDiagnosticsRef = useRef(onDiagnostics);
+  onDiagnosticsRef.current = onDiagnostics;
   const theme = useTheme();
   const themeRef = useRef(theme);
   themeRef.current = theme;
@@ -199,6 +205,8 @@ export function PreviewPane({
           const res = await unwrap(
             api.books[":id"].files.render.$post({ param: { id: bookId }, json: { path: file, text } }),
           );
+          // Also when outdated: they are dropped unless the editor has this text.
+          if (res.diagnostics) onDiagnosticsRef.current?.(file, text, res.diagnostics);
           if (ticket !== latest.current) return;
           setRendered(res);
           if (res.ok) show(res.href);
