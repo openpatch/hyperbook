@@ -1,5 +1,13 @@
 # @hyperbook/vscode-extension
 
+## 0.59.8
+
+### Patch Changes
+
+- Updated dependencies [[`65c033c`](https://github.com/openpatch/hyperbook/commit/65c033c023feaa7be7a07f98cc906d77e03f892c), [`b0f37ae`](https://github.com/openpatch/hyperbook/commit/b0f37ae2c23c3484ef46d2d9e6b71b5a5abc8420), [`d4aae39`](https://github.com/openpatch/hyperbook/commit/d4aae39d303a8641ade53dc5e79bca380c60228e), [`afc2639`](https://github.com/openpatch/hyperbook/commit/afc263901d3d94ca6b4a2e42035e5b0ada5f78e2), [`3f54a6b`](https://github.com/openpatch/hyperbook/commit/3f54a6bfecfc00d968c07fe7778e0e97397f1464), [`3f54a6b`](https://github.com/openpatch/hyperbook/commit/3f54a6bfecfc00d968c07fe7778e0e97397f1464), [`c19ec9c`](https://github.com/openpatch/hyperbook/commit/c19ec9cf7226217a28eb095b4e195ba2dcc29361), [`d7775f6`](https://github.com/openpatch/hyperbook/commit/d7775f644c4060fdc78fb492195554b18f511353), [`258bdfd`](https://github.com/openpatch/hyperbook/commit/258bdfd4d485eec663a84b7515204fa65b2d5bfb), [`ecbc339`](https://github.com/openpatch/hyperbook/commit/ecbc3392b6fc25a69855475696a8109a205e4c46), [`58bc5e8`](https://github.com/openpatch/hyperbook/commit/58bc5e8cba57a69902fa93ca3103489ec6680445)]:
+  - @hyperbook/markdown@0.97.0
+  - @hyperbook/fs@0.31.1
+
 ## 0.59.7
 
 ### Patch Changes
